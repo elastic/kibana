@@ -6,12 +6,14 @@
  */
 
 import React from 'react';
+import moment from 'moment-timezone';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
-import { ApplicationsListPage, EDOT_BROWSER_DOCS_URL } from './applications_list_page';
+import { ApplicationsListPage } from './applications_list_page';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
+import { EDOT_BROWSER_DOCS_URL } from '../../utils/doc_links';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useDigitalExperienceRouter } from '../../hooks/use_digital_experience_router';
 import { digitalExperienceRouter } from '../../routes';
@@ -75,10 +77,12 @@ const app = ({
   fcp = 1200 as number | null,
   ttfb = 900 as number | null,
   httpRequests = { count: 8, failedCount: 1 },
+  sessions = null as number | null,
 }: Partial<{
   serviceName: string;
   source: ApplicationSummary['source'];
   pageLoads: number;
+  sessions: number | null;
   lcp: number | null;
   inp: number | null;
   cls: number | null;
@@ -90,6 +94,7 @@ const app = ({
   source,
   environments: [],
   pageLoads: { count: pageLoads },
+  sessions: sessions === null ? null : { count: sessions },
   webVitals: {
     lcp: { p75Ms: lcp, ...vital(lcp) },
     inp: { p75Ms: inp, ...vital(inp) },
@@ -108,17 +113,34 @@ const app = ({
 const respondWith = (
   applications: ApplicationSummary[],
   environments: string[] = [],
-  unavailableSources: Array<ApplicationSummary['source']> = []
-) => mockFetch.mockResolvedValue({ applications, environments, unavailableSources });
+  unavailableSources: Array<ApplicationSummary['source']> = [],
+  sessionsOverTime: Array<{ timestamp: number; count: number }> | null = null,
+  partiallyAvailableSources: Array<ApplicationSummary['source']> = []
+) =>
+  mockFetch.mockResolvedValue({
+    applications,
+    environments,
+    unavailableSources,
+    pageLoadsOverTime: {
+      otel: [],
+      classic: [],
+      histogram: { interval: { value: 30, unit: 's' }, start: 0, end: 15 * 60 * 1000 },
+    },
+    sessionsOverTime,
+    partiallyAvailableSources,
+  });
 
 // `isServerless` leaves out the ux plugin, as serverless does.
-const renderPage = ({ isServerless = false } = {}) => {
+const renderPage = ({
+  isServerless = false,
+  timeZoneSetting = 'UTC',
+}: { isServerless?: boolean; timeZoneSetting?: string } = {}) => {
   jest.mocked(useKibanaServices).mockReturnValue({
     application: {
       getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
     },
     http: {},
-    uiSettings: createUiSettingsMock(),
+    uiSettings: createUiSettingsMock({ 'dateFormat:tz': timeZoneSetting }),
     ux: isServerless ? undefined : {},
   } as unknown as ReturnType<typeof useKibanaServices>);
   // EUI's theme (for `EmptyCellValue`) and intl (for `FormattedRelative`), kept across rerenders.
@@ -158,8 +180,25 @@ describe('ApplicationsListPage', () => {
     ]);
     expect(mockFetch).toHaveBeenCalledWith('GET /internal/digital_experience/applications', {
       signal: expect.any(AbortSignal),
-      params: { query: { start: expect.any(String), end: expect.any(String) } },
+      params: { query: { start: expect.any(String), end: expect.any(String), timeZone: 'UTC' } },
     });
+  });
+
+  it.each([
+    ['an explicit time zone', 'America/New_York', 'America/New_York'],
+    ['the browser time zone', 'Browser', moment.tz.guess()],
+  ])('asks for buckets in %s', async (_, setting, expected) => {
+    respondWith([]);
+    renderPage({ timeZoneSetting: setting });
+
+    await waitFor(() =>
+      expect(mockFetch).toHaveBeenCalledWith('GET /internal/digital_experience/applications', {
+        signal: expect.any(AbortSignal),
+        params: {
+          query: { start: expect.any(String), end: expect.any(String), timeZone: expected },
+        },
+      })
+    );
   });
 
   it('shows a source badge, the metrics and the vitals colored by rating', async () => {
@@ -299,7 +338,12 @@ describe('ApplicationsListPage', () => {
       expect(mockFetch).toHaveBeenCalledWith('GET /internal/digital_experience/applications', {
         signal: expect.any(AbortSignal),
         params: {
-          query: { start: expect.any(String), end: expect.any(String), environment: 'production' },
+          query: {
+            start: expect.any(String),
+            end: expect.any(String),
+            environment: 'production',
+            timeZone: 'UTC',
+          },
         },
       })
     );
@@ -366,6 +410,62 @@ describe('ApplicationsListPage', () => {
     expect(screen.getByTestId('digitalExperienceSummary-applications')).toHaveTextContent('2');
   });
 
+  it('totals the sessions of the EDOT Browser applications in the summary', async () => {
+    respondWith([
+      app({ serviceName: 'shop', source: 'otel', sessions: 1200 }),
+      app({ serviceName: 'docs', source: 'otel', sessions: 34 }),
+      // Classic RUM has no sessions, and does not stop the others from adding up.
+      app({ serviceName: 'legacy', source: 'classic' }),
+    ]);
+    renderPage();
+    await screen.findAllByTestId('digitalExperienceApplicationLink');
+
+    expect(screen.getByTestId('digitalExperienceSummary-sessions')).toHaveTextContent('1,234');
+  });
+
+  it('offers the sessions in the chart when the applications were read from the sessions index', async () => {
+    respondWith(
+      [app({ serviceName: 'shop', source: 'otel', sessions: 3 })],
+      [],
+      [],
+      [{ timestamp: 0, count: 3 }]
+    );
+    renderPage();
+    await screen.findAllByTestId('digitalExperienceApplicationLink');
+
+    expect(screen.getByTestId('digitalExperienceChartMetric-sessions')).toBeEnabled();
+  });
+
+  it('disables the sessions in the chart when they were not counted', async () => {
+    respondWith([app({ serviceName: 'shop', source: 'otel', sessions: null })]);
+    renderPage();
+    await screen.findAllByTestId('digitalExperienceApplicationLink');
+
+    expect(screen.getByTestId('digitalExperienceChartMetric-sessions')).toBeDisabled();
+  });
+
+  it('disables the sessions in the chart for Classic RUM, which has none', async () => {
+    mockSourceFilter('classic');
+    respondWith(
+      [app({ serviceName: 'legacy', source: 'classic' })],
+      [],
+      [],
+      [{ timestamp: 0, count: 3 }]
+    );
+    renderPage();
+    await screen.findAllByTestId('digitalExperienceApplicationLink');
+
+    expect(screen.getByTestId('digitalExperienceChartMetric-sessions')).toBeDisabled();
+  });
+
+  it('shows no sessions total when the applications were read from the raw events', async () => {
+    respondWith([app({ serviceName: 'shop', source: 'otel', sessions: null })]);
+    renderPage();
+    await screen.findAllByTestId('digitalExperienceApplicationLink');
+
+    expect(screen.getByTestId('digitalExperienceSummary-sessions')).toHaveTextContent('—');
+  });
+
   it('ignores a source in the URL where the source filter is not shown', async () => {
     mockSourceFilter('classic');
     respondWith([app({ serviceName: 'shop', source: 'otel' })]);
@@ -392,6 +492,34 @@ describe('ApplicationsListPage', () => {
     expect(await screen.findByTestId('digitalExperienceUnavailableSources')).toHaveTextContent(
       'Classic RUM'
     );
+  });
+
+  it('warns when the user can read only some of the indices of a source', async () => {
+    respondWith([app({ source: 'otel' })], [], [], null, ['classic']);
+    renderPage();
+
+    expect(
+      await screen.findByTestId('digitalExperiencePartiallyAvailableSources')
+    ).toHaveTextContent('Classic RUM');
+    expect(screen.queryByTestId('digitalExperienceUnavailableSources')).not.toBeInTheDocument();
+  });
+
+  it('does not warn about partial access when every source is fully readable', async () => {
+    respondWith([app({ source: 'otel' })]);
+    renderPage();
+    await screen.findByTestId('digitalExperienceApplicationLink');
+
+    expect(
+      screen.queryByTestId('digitalExperiencePartiallyAvailableSources')
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows the unavailable and the partially available warnings together', async () => {
+    respondWith([app({ source: 'otel' })], [], ['classic'], null, ['otel']);
+    renderPage();
+
+    expect(await screen.findByTestId('digitalExperienceUnavailableSources')).toBeInTheDocument();
+    expect(screen.getByTestId('digitalExperiencePartiallyAvailableSources')).toBeInTheDocument();
   });
 
   it('shows FCP, TTFB, the error rate and the last seen time', async () => {

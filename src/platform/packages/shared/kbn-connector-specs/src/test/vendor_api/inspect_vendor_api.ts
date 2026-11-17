@@ -14,11 +14,16 @@ import type { OpenApiDocument, OverlayDocument } from '@kbn/connector-emulate';
 import { describeOperation, findOperation, listOperations } from './inspect_spec';
 import { isJsonObject } from './json_pointer';
 import { loadVendorSpec } from './load_vendor_spec';
-import type { ManifestSource, MarkdownSourceFormat, VendorApiManifest } from './manifest';
-import { isMarkdownFormat, parseManifest, serializeManifest } from './manifest';
+import type {
+  ManifestSource,
+  MarkdownSourceFormat,
+  ProtocolFormat,
+  VendorApiManifest,
+} from './manifest';
+import { isMarkdownFormat, isProtocolFormat, parseManifest, serializeManifest } from './manifest';
 import { parseSpecText } from './parse_spec_text';
 import type { VendorApiLog } from './load_vendor_specs';
-import { applyOverlayToSources, readOptional } from './load_vendor_specs';
+import { applyOverlayToSources, readOptional, SILENT_LOG } from './load_vendor_specs';
 
 /** Operations listed per source before the list is cut short. */
 export const LIST_LIMIT = 200;
@@ -26,8 +31,8 @@ export const LIST_LIMIT = 200;
 export interface InspectVendorApiOptions {
   /** Specs to inspect by source name; without them, the sources in the connector's manifest. */
   readonly sources: Readonly<Record<string, string>>;
-  /** Sources that are Markdown references, by name, with the template their pages follow. */
-  readonly formats?: Readonly<Record<string, MarkdownSourceFormat>>;
+  /** Sources that are Markdown references, by name; GraphQL and MCP ones are skipped. */
+  readonly formats?: Readonly<Record<string, MarkdownSourceFormat | ProtocolFormat>>;
   /** Per Markdown reference, the URL prefixes of the pages to fetch; see `ManifestSource`. */
   readonly pages?: Readonly<Record<string, readonly string[]>>;
   /**
@@ -55,7 +60,6 @@ export interface InspectVendorApiResult {
 }
 
 const MANIFEST = 'manifest.json';
-const SILENT_LOG: VendorApiLog = { info: () => {}, warning: () => {} };
 
 const titleOf = ({ info }: OpenApiDocument): string => {
   const { title, version } = isJsonObject(info) ? info : {};
@@ -108,6 +112,12 @@ export const inspectVendorApi = async ({
   for (const [name, url] of Object.entries(urls)) {
     const known = manifest?.sources[name];
     const declaredFormat = formatFlags[name] ?? known?.format;
+    if (isProtocolFormat(declaredFormat)) {
+      log.warning(
+        `Skipping ${name}: --inspect reads OpenAPI operations, and it is ${declaredFormat}`
+      );
+      continue;
+    }
     const pages = pageFlags[name] ?? known?.pages;
     if (!isMarkdownFormat(declaredFormat) && pages !== undefined) {
       throw new Error(`${name}: --pages only applies to Markdown references; pass --format`);

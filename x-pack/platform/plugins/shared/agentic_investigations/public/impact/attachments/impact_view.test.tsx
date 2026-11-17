@@ -9,7 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { ImpactEntityTarget } from '@kbn/agentic-investigations-common';
+import type { ImpactEntityTarget } from '@kbn/agentic-investigations-impact';
 import type { Impact } from '../../../common/impact/impact';
 import type { InvestigationAttachmentVariant } from '../../investigation_attachments';
 import { ImpactDetailsView, ImpactView } from './impact_view';

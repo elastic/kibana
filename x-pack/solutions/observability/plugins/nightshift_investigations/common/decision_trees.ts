@@ -5,19 +5,23 @@
  * 2.0.
  */
 
-import type { DecisionTreeDiff, LearningRecord } from '@kbn/nightshift-decision-trees';
-import type { CortexEntityType, CortexPageStatus } from './cortex';
+import type {
+  DecisionTreeCounts,
+  DecisionTreeDiff,
+  LearningRecord,
+} from '@kbn/nightshift-decision-trees';
+import type { WikiEntityType, WikiPageStatus } from './wiki';
 
 /**
- * Decision trees live alongside the rest of the Cortex wiki as runbook pages, so they are
+ * Decision trees live alongside the rest of the Wiki as runbook pages, so they are
  * searchable and browsable with everything else the investigator already reads.
  */
-export const DECISION_TREE_ENTITY_TYPE: CortexEntityType = 'runbook';
+export const DECISION_TREE_ENTITY_TYPE: WikiEntityType = 'runbook';
 
 /**
  * Marks a runbook page as a decision tree.
  *
- * Two independent writers share the Cortex index: the Cortex optimizer, which proposes free-form
+ * Two independent writers share the Wiki index: the Wiki optimizer, which proposes free-form
  * wiki edits, and the reinforcement agent, which owns decision trees. The prefix is what lets the
  * optimizer leave these pages alone instead of rewriting a Mermaid tree it does not understand.
  */
@@ -36,7 +40,7 @@ export const isLearningSlug = (slug: string): boolean =>
  * True for pages the reinforcement agent owns end to end.
  *
  * These carry validated structure (a Mermaid tree, or a one-slot learning capped at four lines),
- * so the Cortex optimizer must not rewrite them through its free-form edit path.
+ * so the Wiki optimizer must not rewrite them through its free-form edit path.
  */
 export const isReinforcementOwnedSlug = (slug: string): boolean =>
   isDecisionTreeSlug(slug) || isLearningSlug(slug);
@@ -44,8 +48,8 @@ export const isReinforcementOwnedSlug = (slug: string): boolean =>
 /**
  * Dedicated Context Engine AI index for decision trees and their learnings.
  *
- * Trees used to live in the Cortex index as runbook pages; they now own this index so the UI can
- * browse version history and per-version diffs without those documents polluting the Cortex wiki.
+ * Trees used to live in the Wiki index as runbook pages; they now own this index so the UI can
+ * browse version history and per-version diffs without those documents polluting the Wiki.
  */
 export const DECISION_TREE_AI_INDEX_ID = 'nightshift-decision-trees';
 
@@ -69,8 +73,8 @@ export const DECISION_TREE_DOC_TYPES = [
 
 export type DecisionTreeDocType = (typeof DECISION_TREE_DOC_TYPES)[number];
 
-/** Reused from Cortex so tentative/established/archived keep one meaning across Nightshift. */
-export type DecisionTreeStatus = CortexPageStatus;
+/** Reused from Wiki so tentative/established/archived keep one meaning across Nightshift. */
+export type DecisionTreeStatus = WikiPageStatus;
 
 export interface DecisionTreeSummary {
   tree_id: string;
@@ -95,6 +99,8 @@ export interface DecisionTreeDetail extends DecisionTreeSummary {
   /** `<node_id>: <description>` entries for evidence nodes, persisted with the tree. */
   evidence_gatherer_metadata: string[];
   learnings: LearningRecord[];
+  /** Visit and reinforcement counts for every node and edge of the current tree. */
+  counts: DecisionTreeCounts;
 }
 
 export interface DecisionTreeVersionSummary {
@@ -117,6 +123,8 @@ export interface DecisionTreeVersionDetail extends DecisionTreeVersionSummary {
   mermaid: string;
   evidence_gatherer_metadata: string[];
   learnings: LearningRecord[];
+  /** Counts as they stood when this version was committed. */
+  counts: DecisionTreeCounts;
   /** Against the previous version. Absent for v1, which has no predecessor. */
   diff?: DecisionTreeDiff;
 }

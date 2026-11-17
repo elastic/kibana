@@ -14,7 +14,6 @@ import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-templat
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
 import { AlertsContextProvider } from '../../../detections/components/alerts_table/alerts_context';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
-import { SecuritySolutionFlyout, TimelineFlyout } from '../../../flyout';
 import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
 import { TimelineId } from '../../../../common/types/timeline';
 import { getTimelineShowStatusByIdSelector } from '../../../timelines/store/selectors';
@@ -154,7 +153,6 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
             >
               <ExpandableFlyoutProvider urlKey={isPreview ? undefined : URL_PARAM_KEY.flyout}>
                 {children}
-                <SecuritySolutionFlyout />
               </ExpandableFlyoutProvider>
             </KibanaPageTemplate.Section>
             {isTimelineBottomBarVisible && (
@@ -162,7 +160,6 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
                 <EuiThemeProvider colorMode={globalColorMode}>
                   <ExpandableFlyoutProvider urlKey={URL_PARAM_KEY.timelineFlyout}>
                     <Timeline />
-                    <TimelineFlyout />
                   </ExpandableFlyoutProvider>
                 </EuiThemeProvider>
               </KibanaPageTemplate.BottomBar>

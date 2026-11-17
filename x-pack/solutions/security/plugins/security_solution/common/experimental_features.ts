@@ -270,6 +270,11 @@ export const allowedExperimentalValues = Object.freeze({
   splunkV2DashboardsEnabled: true,
 
   /**
+   * Enables the Tines workflows migration API (create, get, update, start, and stop).
+   */
+  tinesWorkflowsMigration: false,
+
+  /**
    * Enables Detection Engine Health UI
    */
   deHealthUIEnabled: false,
@@ -283,6 +288,9 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Automatic Troubleshooting Agent Builder skill
    */
   automaticTroubleshootingSkill: true,
+
+  /** Enables the universal Automatic Troubleshooting Agent Builder skill */
+  automaticTroubleshootingUniversalSkill: false,
 
   /**
    * Enables the PCI DSS v4.0.1 Compliance Agent Builder skill and its backing tools.
@@ -316,14 +324,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Part of the DEX AI skills family (`dexAiSkill*`).
    */
   dexAiSkillRecommendPrebuiltRules: true,
-
-  /**
-   * Disables the new flyout using the EUI flyout system. When this flag is off (the default), the
-   * "Enable new flyout" advanced setting is registered and defaults to off, so users can opt in.
-   * Turning this flag on unregisters that advanced setting, forcing the
-   * legacy flyout and effectively removing the new flyout option.
-   */
-  newFlyoutSystemDisabled: false,
 
   /**
    * Uses entity store v2 for entity analytics skill

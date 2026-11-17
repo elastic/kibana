@@ -8,7 +8,7 @@
  */
 
 import type { ResourceTimingValues } from './edot_browser_client';
-import { between } from './random';
+import { between } from '../edot_shared/random';
 
 const MIN_EXCHANGE_MS = 10;
 

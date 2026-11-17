@@ -25,7 +25,7 @@ import {
   type ResolvedDestinationIndexHealth,
   type ResolveUnitIndicesResponse,
 } from '../../../../common';
-import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import { STREAMS_V2_API_PRIVILEGES } from '../../../../common/constants';
 import { StreamsUnitService } from '../../../lib/saved_objects/streams_unit_service';
 import { getDataStreamLifecycle, getFailureStore } from '../../../lib/streams/stream_crud';
 import { processAsyncInChunks } from '../../../utils/process_async_in_chunks';
@@ -74,7 +74,7 @@ export const resolveUnitIndicesRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_V2_API_PRIVILEGES.read],
     },
   },
   params: unitPathSchema,
@@ -84,7 +84,7 @@ export const resolveUnitIndicesRoute = createServerRoute({
     getScopedClients,
     logger,
   }): Promise<ResolveUnitIndicesResponse> => {
-    const { soClient, uiSettingsClient, scopedClusterClient, streamsClient } =
+    const { unitSoClient, uiSettingsClient, scopedClusterClient, streamsClient } =
       await getScopedClients({
         request,
       });
@@ -92,7 +92,7 @@ export const resolveUnitIndicesRoute = createServerRoute({
     await assertStreamsCanvasEnabled(uiSettingsClient);
 
     const streamsUnitService = new StreamsUnitService({
-      soClient,
+      soClient: unitSoClient,
       logger,
     });
 

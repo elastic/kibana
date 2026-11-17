@@ -17,12 +17,16 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
-import type { FacetBucket, SessionListFacets } from '../../../../common/sessions';
+import {
+  SESSIONS_LIST_MAX_SEARCH_LENGTH,
+  type SessionListFacets,
+} from '../../../../common/sessions';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../../ebt_constants';
 import type { Formatters } from '../../../hooks/use_formatters';
+import { FacetFilter } from '../../../components/facet_filter';
 import { SingleSelectFilter } from '../../../components/single_select_filter';
 import type { SessionsListState } from '../hooks/use_sessions_list_query';
-import { DURATION_BUCKETS, type SessionsListUrlQuery } from '../utils/sessions_list_query';
+import { DURATION_BUCKETS, type SessionsListUrlQuery } from '../../../utils/sessions_list_query';
 
 export const SEARCH_DEBOUNCE_MS = 300;
 
@@ -75,27 +79,11 @@ const FACETS: ReadonlyArray<{
   },
 ];
 
-/** The facet's values with their session counts; a selection outside the top values stays listed. */
-export const facetOptions = (
-  buckets: FacetBucket[],
-  selected: string | undefined,
-  { formatNumber }: Pick<Formatters, 'formatNumber'>
-) => {
-  const options = buckets.map(({ key, count }) => ({
-    value: key,
-    label: `${key} (${formatNumber(count)})`,
-  }));
-  const withSelected =
-    selected && !buckets.some(({ key }) => key === selected)
-      ? [{ value: selected, label: selected }, ...options]
-      : options;
-  return [{ value: ANY_VALUE, label: ANY_LABEL }, ...withSelected];
-};
-
 export function SessionsFilters({
   state,
   facets,
-  sessionsWithErrors,
+  sessionsWithJsErrors,
+  sessionsWithFailedRequests,
   hasActiveFilters,
   isLoading,
   formatters,
@@ -105,8 +93,9 @@ export function SessionsFilters({
 }: {
   state: SessionsListState;
   facets: SessionListFacets | undefined;
-  /** Shown on the errors filter, so users see how many sessions it keeps. */
-  sessionsWithErrors: number | undefined;
+  /** Shown on the error filters, so users see how many sessions each keeps. */
+  sessionsWithJsErrors: number | undefined;
+  sessionsWithFailedRequests: number | undefined;
   hasActiveFilters: boolean;
   isLoading: boolean;
   formatters: Formatters;
@@ -150,6 +139,7 @@ export function SessionsFilters({
             defaultMessage: 'Search sessions',
           })}
           value={search}
+          maxLength={SESSIONS_LIST_MAX_SEARCH_LENGTH}
           onChange={(event) => setSearch(event.target.value)}
           // Enter searches at once, without waiting for the debounce.
           onSearch={(value) => onSearch(value)}
@@ -160,18 +150,35 @@ export function SessionsFilters({
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
           <EuiFilterButton
-            data-test-subj="digitalExperienceSessionsErrorsFilter"
+            data-test-subj="digitalExperienceSessionsJsErrorsFilter"
             {...getEbtProps({
               action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SET_FILTER,
               element: SESSIONS_EBT_ELEMENTS.ERRORS_FILTER,
             })}
             withNext
-            hasActiveFilters={state.hasErrors}
-            numFilters={sessionsWithErrors}
-            onClick={() => onChange({ hasErrors: state.hasErrors ? undefined : 'true' })}
+            hasActiveFilters={state.withJsErrors}
+            numFilters={sessionsWithJsErrors}
+            onClick={() => onChange({ withJsErrors: state.withJsErrors ? undefined : 'true' })}
           >
-            {i18n.translate('xpack.digitalExperience.sessions.filters.hasErrorsLabel', {
-              defaultMessage: 'Has errors',
+            {i18n.translate('xpack.digitalExperience.sessions.filters.withJsErrorsLabel', {
+              defaultMessage: 'JS errors',
+            })}
+          </EuiFilterButton>
+          <EuiFilterButton
+            data-test-subj="digitalExperienceSessionsFailedRequestsFilter"
+            {...getEbtProps({
+              action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SET_FILTER,
+              element: SESSIONS_EBT_ELEMENTS.FAILED_REQUESTS_FILTER,
+            })}
+            withNext
+            hasActiveFilters={state.withFailedRequests}
+            numFilters={sessionsWithFailedRequests}
+            onClick={() =>
+              onChange({ withFailedRequests: state.withFailedRequests ? undefined : 'true' })
+            }
+          >
+            {i18n.translate('xpack.digitalExperience.sessions.filters.withFailedRequestsLabel', {
+              defaultMessage: 'Failed requests',
             })}
           </EuiFilterButton>
           <SingleSelectFilter
@@ -189,16 +196,15 @@ export function SessionsFilters({
             onChange={(value) => onChange({ duration: value || undefined })}
           />
           {FACETS.map(({ param, facet, label, ebtElement }) => (
-            <SingleSelectFilter
+            <FacetFilter
               key={param}
               data-test-subj={`digitalExperienceSessionsFacet-${param}`}
               ebtElement={ebtElement}
               label={label}
-              options={facetOptions(facets?.[facet] ?? [], state[param], formatters)}
-              selected={state[param] ?? ANY_VALUE}
-              isActive={state[param] !== undefined}
-              onChange={(value) => onChange({ [param]: value || undefined })}
-              searchable
+              buckets={facets?.[facet] ?? []}
+              selected={state[param]}
+              onChange={(value) => onChange({ [param]: value })}
+              formatters={formatters}
               isLoading={isLoading && !facets}
             />
           ))}

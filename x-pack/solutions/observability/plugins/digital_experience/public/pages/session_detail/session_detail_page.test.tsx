@@ -10,6 +10,8 @@ import type { ComponentProps } from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { EuiProvider } from '@elastic/eui';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RouterProvider } from '@kbn/typed-react-router-config';
 import {
@@ -65,12 +67,16 @@ const detail = (overrides: Partial<SessionDetailResponse> = {}): SessionDetailRe
     durationMs: 60_000,
     eventCount: 12,
     pageViewCount: 2,
+    pageLoadCount: 1,
     clickCount: 3,
-    errorCount: 1,
+    jsErrorCount: 1,
+    httpRequestCount: 8,
+    failedRequestCount: 2,
     bounced: false,
     entryPage: '/',
     exitPage: '/cart',
     journey: ['/', '/cart'],
+    environment: 'production',
     user: 'jane@example.com',
     userAgent: { browser: 'Firefox', browserVersion: '131', os: 'Linux', device: null },
     geo: { countryIso: 'NL', region: 'North Holland', city: 'Amsterdam' },
@@ -113,8 +119,11 @@ const detail = (overrides: Partial<SessionDetailResponse> = {}): SessionDetailRe
 const httpError = (status: number, message: string) =>
   Object.assign(new Error(message), { response: { status } });
 
+const mockAddSuccess = jest.fn();
+
 const renderPage = () => {
   jest.mocked(useKibanaServices).mockReturnValue({
+    notifications: { toasts: { addSuccess: mockAddSuccess } },
     application: {
       getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
     },
@@ -122,7 +131,9 @@ const renderPage = () => {
     uiSettings: createUiSettingsMock(),
   } as unknown as ReturnType<typeof useKibanaServices>);
   const history = createMemoryHistory({
-    initialEntries: [`/shop/sessions/abcdef123456?${TIME_QUERY}&source=otel&hasErrors=true&page=2`],
+    initialEntries: [
+      `/shop/sessions/abcdef123456?${TIME_QUERY}&source=otel&withJsErrors=true&page=2`,
+    ],
   });
   render(
     <RouterProvider
@@ -134,14 +145,16 @@ const renderPage = () => {
     {
       wrapper: ({ children }) => (
         <I18nProvider>
-          <EuiProvider>{children}</EuiProvider>
+          <EuiProvider>
+            <MockAppHeaderProvider>{children}</MockAppHeaderProvider>
+          </EuiProvider>
         </I18nProvider>
       ),
     }
   );
 };
 
-const SESSIONS_HREF = `/app/digital_experience/shop/sessions?hasErrors=true&page=2&${TIME_QUERY}&source=otel`;
+const SESSIONS_HREF = `/app/digital_experience/shop/sessions?page=2&${TIME_QUERY}&source=otel&withJsErrors=true`;
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -164,7 +177,7 @@ describe('SessionDetailPage', () => {
       { text: 'Sessions', href: SESSIONS_HREF },
       { text: 'abcdef12' },
     ]);
-    expect(screen.getByTestId('digitalExperienceSessionBack')).toHaveAttribute(
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
       'href',
       SESSIONS_HREF
     );
@@ -177,19 +190,40 @@ describe('SessionDetailPage', () => {
     );
   });
 
+  it('copies the session ID from the header', async () => {
+    mockFetch.mockResolvedValue(detail());
+    document.execCommand = jest.fn().mockReturnValue(true);
+    renderPage();
+
+    fireEvent.click(await screen.findByTestId('digitalExperienceSessionIdCopy'));
+    expect(document.execCommand).toHaveBeenCalledWith('copy');
+    expect(mockAddSuccess).toHaveBeenCalledWith('Session ID copied');
+  });
+
   it('summarizes the session', async () => {
     mockFetch.mockResolvedValue(detail());
     renderPage();
 
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Session');
     expect(await screen.findByTestId('digitalExperienceSessionId')).toHaveTextContent(
-      'abcdef123456'
+      'Session ID abcdef123456'
     );
     expect(screen.getByTestId('digitalExperienceSessionStat-duration')).toHaveTextContent(
       '1 min 0 s'
     );
-    expect(screen.getByTestId('digitalExperienceSessionStat-errors')).toHaveTextContent('1');
+    const stat = (id: string) => within(screen.getByTestId(`digitalExperienceSessionStat-${id}`));
+    // Page views count in-app navigations too, page loads only full loads.
+    expect(stat('pages').getByText('Page views')).toBeInTheDocument();
+    expect(stat('pages').getByText('2')).toBeInTheDocument();
+    expect(stat('pageLoads').getByText('Page loads')).toBeInTheDocument();
+    expect(stat('pageLoads').getByText('1')).toBeInTheDocument();
+    expect(stat('jsErrors').getByText('JS errors')).toBeInTheDocument();
+    expect(stat('jsErrors').getByText('1')).toBeInTheDocument();
+    expect(stat('failedRequests').getByText('Failed requests of 8')).toBeInTheDocument();
+    expect(stat('failedRequests').getByText('2')).toBeInTheDocument();
     const metadata = screen.getByTestId('digitalExperienceSessionMetadata');
     expect(metadata).toHaveTextContent('jane@example.com');
+    expect(metadata).toHaveTextContent('Environmentproduction');
     expect(metadata).toHaveTextContent('Firefox 131 · Linux');
     expect(metadata).toHaveTextContent('Amsterdam, North Holland, NL');
     expect(metadata).toHaveTextContent('/ → /cart');
@@ -222,6 +256,46 @@ describe('SessionDetailPage', () => {
     expect(marker).toHaveAccessibleName('0:45 TypeError: cart is undefined');
     // At the error's offset, shifted back by the same share of its width so it stays in the bar.
     expect(marker.parentElement).toHaveStyle({ left: '75%', transform: 'translateX(-75%)' });
+  });
+
+  it('lists what happened on each page, without spans and logs', async () => {
+    mockFetch.mockResolvedValue(detail());
+    const scrollIntoView = jest.fn();
+    window.HTMLElement.prototype.scrollIntoView = scrollIntoView;
+    renderPage();
+
+    const visits = await screen.findAllByTestId('digitalExperiencePageVisit');
+    expect(visits).toHaveLength(2);
+    expect(visits[0]).toHaveTextContent('/');
+    expect(visits[0]).toHaveTextContent('50% of the session');
+    // Page views and clicks read by kind, not by their raw event names.
+    const click = within(visits[0]).getByTestId('digitalExperienceSessionEvent-click');
+    expect(click).toHaveTextContent('Click');
+    expect(click).toHaveTextContent('button#add');
+    expect(
+      within(visits[0]).getByTestId('digitalExperienceSessionEvent-page_view')
+    ).toHaveTextContent('Page view');
+    expect(visits[0]).not.toHaveTextContent('documentLoad');
+    expect(visits[0]).not.toHaveTextContent('GET /api/cart');
+    const error = within(visits[1]).getByTestId('digitalExperienceSessionEvent-error');
+    expect(error).toHaveTextContent('0:45');
+    expect(error).toHaveTextContent('TypeError');
+    expect(error).toHaveTextContent('cart is undefined');
+    expect(visits[1]).toHaveTextContent('1 error');
+    expect(within(visits[1]).getByTestId('digitalExperienceWebVital-cls')).toBeInTheDocument();
+    // A web vital event is a rated badge, like the visit's own vitals.
+    expect(
+      within(within(visits[1]).getByTestId('digitalExperienceSessionEvent-web_vital')).getByTestId(
+        'digitalExperienceWebVital-inp'
+      )
+    ).toHaveAttribute('data-rating', 'good');
+    expect(within(visits[1]).getByRole('region', { name: 'Events on /cart' })).toHaveAttribute(
+      'tabindex',
+      '0'
+    );
+
+    fireEvent.click(screen.getAllByTestId('digitalExperienceSessionWaterfallSegment')[1]);
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
   });
 
   it('says when the timeline is cut short', async () => {

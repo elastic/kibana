@@ -1,0 +1,56 @@
+env:
+  KBN_EVALS: '1'
+steps:
+  - label: '👨‍🔧 Pre-Build'
+    command: .buildkite/scripts/lifecycle/pre_build.sh
+    agents:
+      image: family/kibana-minimal-ubuntu-2604
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+
+  - wait
+
+  - label: '🧑‍🏭 Build Kibana Distribution'
+    command: .buildkite/scripts/steps/build_kibana.sh
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-8
+    key: build
+    if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
+
+  - wait
+
+  - group: 'LLM Evals (daily)'
+    key: llm-evals-daily
+    steps:
+      - label: 'Evals: Nightshift Investigations'
+        key: kbn-evals-daily-nightshift-investigations
+        command: bash .buildkite/scripts/steps/evals/run_suite.sh
+        env:
+          KBN_EVALS: '1'
+          FTR_EIS_CCM: '1'
+          EVAL_SUITE_ID: 'nightshift-investigations'
+          EVAL_FANOUT: '1'
+          EVAL_INCLUDE_EIS_MODELS: '1'
+          # Sonnet 5.5 only, the production investigation model; the weekly run compares models.
+          EVAL_MODEL_GROUPS: 'eis/anthropic-claude-5.5-sonnet'
+          EVAL_SERVER_CONFIG_SET: 'evals_nightshift_investigations'
+          # Labels the triage message "Daily LLM evals" instead of an on-demand run.
+          KBN_EVALS_DAILY: '1'
+          # Not a weekly run, so the notify step posts here instead of the suite's channel.
+          EVAL_SLACK_NOTIFICATION_CHANNEL: '#nightshift-alerts'
+        timeout_in_minutes: 60
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-8
+          preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3

@@ -9,22 +9,38 @@
 
 import fs from 'fs/promises';
 import path from 'path';
-import type { OpenApiDocument, OverlayDocument, PaginatedOperation } from '@kbn/connector-emulate';
+import type {
+  GraphQLSpec,
+  McpSpec,
+  OpenApiDocument,
+  OverlayDocument,
+  PaginatedOperation,
+} from '@kbn/connector-emulate';
 import { applyOverlay } from '@kbn/connector-emulate';
 import { loadVendorSpec } from './load_vendor_spec';
-import type { VendorApiManifest } from './manifest';
-import { parseManifest } from './manifest';
+import type { ManifestSource, VendorApiManifest } from './manifest';
+import { isNamedCall, isProtocolFormat, parseManifest } from './manifest';
 import { parseSpecText } from './parse_spec_text';
+import { loadProtocolSpec, parseProtocolSnapshot } from './protocol_sources';
 
 export const MANIFEST = 'manifest.json';
 export const FIXTURES = 'fixtures.json';
 export const OVERLAY = 'overlay.yaml';
-export const snapshotFile = (source: string) => path.join('snapshots', `${source}.openapi.json`);
+
+const SNAPSHOT_EXTENSIONS: Partial<Record<ManifestSource['format'], string>> = {
+  graphql: 'graphql',
+  mcp: 'mcp.json',
+};
+
+export const snapshotFile = (source: string, format?: ManifestSource['format']) =>
+  path.join('snapshots', `${source}.${(format && SNAPSHOT_EXTENSIONS[format]) ?? 'openapi.json'}`);
 
 export interface VendorApiLog {
   readonly info: (message: string) => void;
   readonly warning: (message: string) => void;
 }
+
+export const SILENT_LOG: VendorApiLog = { info: () => {}, warning: () => {} };
 
 /** Reads a file that may not exist yet. */
 export const readOptional = async (file: string): Promise<string | undefined> => {
@@ -38,7 +54,11 @@ export const readOptional = async (file: string): Promise<string | undefined> =>
   }
 };
 
-/** Applies the overlay to every source; an action only needs to match in one of them. */
+/**
+ * Applies the overlay to every source; an action only needs to match in one of them.
+ * Pass `SILENT_LOG` unless `raw` holds every source as fetched from the vendor: a snapshot only has
+ * the operations the connector calls, so an action matching nothing there may still be needed.
+ */
 export const applyOverlayToSources = (
   raw: Readonly<Record<string, OpenApiDocument>>,
   overlay: OverlayDocument | undefined,
@@ -67,9 +87,11 @@ export const applyOverlayToSources = (
 /** The manifest's pagination entries, once per operation, as the contract mock takes them. */
 export const toMockPagination = (manifest: VendorApiManifest): PaginatedOperation[] => {
   const byOperation = new Map<string, PaginatedOperation>();
-  for (const { source, method, path: operationPath, pagination } of Object.values(
-    manifest.operations
-  ).flat()) {
+  for (const call of Object.values(manifest.operations).flat()) {
+    if (isNamedCall(call)) {
+      continue;
+    }
+    const { source, method, path: operationPath, pagination } = call;
     if (pagination && pagination !== 'none') {
       byOperation.set(`${source} ${method} ${operationPath}`, {
         operation: { source, method, path: operationPath },
@@ -91,8 +113,8 @@ export interface LoadVendorSpecsOptions {
 
 export interface VendorSpecs {
   readonly manifest: VendorApiManifest;
-  /** Each source's spec, with the overlay applied. */
-  readonly specs: Record<string, OpenApiDocument>;
+  /** Each source's spec, with the overlay applied to the OpenAPI ones. */
+  readonly specs: Record<string, OpenApiDocument | GraphQLSpec | McpSpec>;
   readonly pagination: PaginatedOperation[];
 }
 
@@ -115,19 +137,33 @@ export const loadVendorSpecs = async ({
   const overlay = overlayText ? (parseSpecText(overlayText) as OverlayDocument) : undefined;
 
   const raw: Record<string, OpenApiDocument> = {};
+  const protocols: Record<string, GraphQLSpec | McpSpec> = {};
+  let fetchedEverySource = true;
   for (const [name, source] of Object.entries(manifest.sources)) {
-    const { url } = source;
-    const snapshot = latest ? undefined : await read(snapshotFile(name));
-    if (snapshot === undefined) {
+    const { url, format, endpoints = [] } = source;
+    const snapshot = latest ? undefined : await read(snapshotFile(name, format));
+    if (isProtocolFormat(format)) {
+      if (snapshot === undefined) {
+        log.info(`Fetching ${name} from ${url}`);
+        protocols[name] = await loadProtocolSpec(url, fetchText, format, endpoints);
+      } else {
+        protocols[name] = parseProtocolSnapshot(format, snapshot, endpoints);
+        fetchedEverySource = false;
+      }
+    } else if (snapshot === undefined) {
       log.info(`Fetching ${name} from ${url}`);
       raw[name] = (await loadVendorSpec(url, fetchText, source)).document;
     } else {
       raw[name] = JSON.parse(snapshot);
+      fetchedEverySource = false;
     }
   }
   return {
     manifest,
-    specs: applyOverlayToSources(raw, overlay, log),
+    specs: {
+      ...applyOverlayToSources(raw, overlay, fetchedEverySource ? log : SILENT_LOG),
+      ...protocols,
+    },
     pagination: toMockPagination(manifest),
   };
 };

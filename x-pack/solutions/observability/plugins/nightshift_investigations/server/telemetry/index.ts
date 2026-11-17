@@ -10,6 +10,12 @@ import { NightshiftTelemetryClient } from './client';
 import { semanticMemoryMaterializedEvent, semanticMemoryOptimizedEvent } from './events';
 import { onlineEvalScoreEvent } from './online_eval_score_event';
 import { onlineEvalsStepFailedEvent } from './online_evals_step_failed_event';
+import { investigationSkippedEvent } from './investigation_skipped_event';
+import { alertEnteredPipelineEvent } from './alert_entered_pipeline_event';
+import { investigationStartedEvent } from './investigation_started_event';
+import { investigationEndedEvent } from './investigation_ended_event';
+import { backgroundActivityEvent } from './background_activity_event';
+import { decisionTreeCausalCheckEvent } from './decision_tree_causal_check_event';
 
 export const setupNightshiftTelemetry = ({
   analytics,
@@ -22,6 +28,12 @@ export const setupNightshiftTelemetry = ({
   analytics.registerEventType(semanticMemoryOptimizedEvent);
   analytics.registerEventType(onlineEvalScoreEvent);
   analytics.registerEventType(onlineEvalsStepFailedEvent);
+  analytics.registerEventType(investigationSkippedEvent);
+  analytics.registerEventType(alertEnteredPipelineEvent);
+  analytics.registerEventType(investigationStartedEvent);
+  analytics.registerEventType(investigationEndedEvent);
+  analytics.registerEventType(backgroundActivityEvent);
+  analytics.registerEventType(decisionTreeCausalCheckEvent);
   return new NightshiftTelemetryClient(analytics, logger);
 };
 
@@ -34,18 +46,67 @@ export {
   type OnlineEvalScoreEvent,
 } from './online_eval_score_event';
 export {
+  alertIdentityOf,
+  toAlertFingerprint,
+  triggeringAlertOf,
+  type AlertIdentity,
+  type AlertSourceKind,
+} from './alert_identity';
+export {
+  ALERT_ENTERED_PIPELINE_SAMPLING_PROBABILITY,
+  NIGHTSHIFT_ALERT_ENTERED_PIPELINE_EVENT,
+  isAlertEnteredPipelineSampled,
+  reportAlertsEnteredPipeline,
+  type AlertEnteredPipelineEvent,
+} from './alert_entered_pipeline_event';
+export {
+  NIGHTSHIFT_INVESTIGATION_SKIPPED_EVENT,
+  type InvestigationSkippedEvent,
+} from './investigation_skipped_event';
+export {
+  NIGHTSHIFT_INVESTIGATION_ENDED_EVENT,
+  type InvestigationEndedEvent,
+  type InvestigationRunOutcome,
+} from './investigation_ended_event';
+export {
+  NIGHTSHIFT_BACKGROUND_ACTIVITY_EVENT,
+  type BackgroundActivityEvent,
+  type BackgroundActivityType,
+} from './background_activity_event';
+export { trackBackgroundActivity } from './track_background_activity';
+export {
   NIGHTSHIFT_ONLINE_EVALS_STEP_FAILED_EVENT,
   type OnlineEvalsStepFailedEvent,
 } from './online_evals_step_failed_event';
 export {
-  NIGHTSHIFT_CORTEX_EDIT_APPLIED_EVENT_TYPE,
-  NIGHTSHIFT_CORTEX_HYDRATED_EVENT_TYPE,
-  type CortexEditAppliedProps,
-  type CortexHydratedProps,
-} from './cortex_events';
+  NIGHTSHIFT_DECISION_TREE_CAUSAL_CHECK_EVENT,
+  decisionTreeCausalCheckEvent,
+  type CausalCheckErrorCode,
+  type CausalCheckOutcome,
+  type DecisionTreeCausalCheckEvent,
+} from './decision_tree_causal_check_event';
 export {
-  createCortexTelemetry,
-  registerCortexTelemetryEvents,
-  type AppliedCortexEdit,
-  type CortexTelemetry,
-} from './cortex_telemetry';
+  NIGHTSHIFT_WIKI_EDIT_APPLIED_EVENT_TYPE,
+  NIGHTSHIFT_WIKI_HYDRATED_EVENT_TYPE,
+  type WikiEditAppliedProps,
+  type WikiHydratedProps,
+} from './wiki_events';
+export {
+  createWikiTelemetry,
+  registerWikiTelemetryEvents,
+  type AppliedWikiEdit,
+  type WikiTelemetry,
+} from './wiki_telemetry';
+export {
+  NIGHTSHIFT_DECISION_TREES_LOADED_EVENT_TYPE,
+  NIGHTSHIFT_DECISION_TREE_WRITTEN_EVENT_TYPE,
+  type DecisionTreeSelection,
+  type DecisionTreeWriteAction,
+  type DecisionTreesLoadedProps,
+  type DecisionTreeWrittenProps,
+} from './decision_tree_events';
+export {
+  createDecisionTreeTelemetry,
+  registerDecisionTreeTelemetryEvents,
+  type DecisionTreeTelemetry,
+} from './decision_tree_telemetry';

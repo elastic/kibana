@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-//eslint-disable-next-line import/no-extraneous-dependencies
+//eslint-disable-next-line @kbn/compat/import-no-extraneous-dependencies
 const { ESLint } = require('eslint');
 const { resolve } = require('path');
-//eslint-disable-next-line import/no-extraneous-dependencies
+//eslint-disable-next-line @kbn/compat/import-no-extraneous-dependencies
 const { argv } = require('yargs');
 
 async function run() {

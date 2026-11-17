@@ -13,7 +13,6 @@ import { ALERT_REASON, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { SeverityBadge } from '../../../../../common/components/severity_badge';
-import { PreviewLink } from '../../../../../flyout/shared/components/preview_link';
 import { OpenFlyoutLink } from '../../../../shared/components/open_flyout_link';
 import { formatFlyoutTitle, ALERT_TITLE } from '../../../../shared/constants/flyout_titles';
 
@@ -23,15 +22,11 @@ export const TIMESTAMP_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
  * Returns the default columns for the correlations alerts table.
  */
 export const getColumns = ({
-  scopeId,
   dataTestSubj,
   onShowAlert,
-  useLegacyExpandableFlyout,
 }: {
-  scopeId: string;
   dataTestSubj?: string;
   onShowAlert: (id: string, indexName: string, title?: string) => void;
-  useLegacyExpandableFlyout?: boolean;
 }): Array<EuiBasicTableColumn<Record<string, unknown>>> => [
   {
     render: (row: Record<string, unknown>) => (
@@ -99,26 +94,14 @@ export const getColumns = ({
       const ruleId = row['kibana.alert.rule.uuid'] as string;
       return (
         <EuiToolTip content={ruleName}>
-          {useLegacyExpandableFlyout ? (
-            <PreviewLink
-              field={ALERT_RULE_NAME}
-              value={ruleName}
-              scopeId={scopeId}
-              ruleId={ruleId}
-              data-test-subj={`${dataTestSubj}RulePreview`}
-            >
-              <span>{ruleName}</span>
-            </PreviewLink>
-          ) : (
-            <OpenFlyoutLink
-              field={ALERT_RULE_NAME}
-              value={ruleId}
-              displayValue={ruleName}
-              data-test-subj={`${dataTestSubj}RuleLink`}
-            >
-              <span>{ruleName}</span>
-            </OpenFlyoutLink>
-          )}
+          <OpenFlyoutLink
+            field={ALERT_RULE_NAME}
+            value={ruleId}
+            displayValue={ruleName}
+            data-test-subj={`${dataTestSubj}RuleLink`}
+          >
+            <span>{ruleName}</span>
+          </OpenFlyoutLink>
         </EuiToolTip>
       );
     },

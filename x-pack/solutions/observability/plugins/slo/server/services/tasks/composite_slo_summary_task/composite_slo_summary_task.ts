@@ -19,6 +19,7 @@ import type {
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { SLOConfig, SLOPluginStartDependencies } from '../../../types';
 import { SO_SLO_COMPOSITE_TYPE } from '../../../saved_objects/slo_composite';
+import { DefaultSLODefinitionRepository } from '../../slo_definition_repository';
 import { computeAndPersistCompositeSummaries } from './compute_and_persist_composite_summaries';
 import { COMPOSITE_SLO_SUMMARY_TASK_SKIP_REASON } from './constants';
 import { isCompositeSloEnabled } from '../../../utils/is_composite_slo_enabled';
@@ -148,9 +149,12 @@ export class CompositeSloSummaryTask {
       coreStart.savedObjects.createInternalRepository([SO_SLO_COMPOSITE_TYPE])
     );
 
+    const sloRepository = new DefaultSLODefinitionRepository(internalSoClient, this.logger);
+
     await computeAndPersistCompositeSummaries({
       esClient,
       soClient: internalSoClient,
+      sloRepository,
       logger: this.logger,
       signal,
     });

@@ -38,6 +38,7 @@ import {
   DEFAULT_QUICK_ACTIONS,
   EmbeddableRendererContext,
 } from '../../embeddable_renderer_context';
+import { PanelSelectCheckbox } from './panel_select_checkbox';
 
 const getContextMenuAriaLabel = (title?: string, index?: number) => {
   if (title) {
@@ -88,6 +89,14 @@ export interface PresentationPanelHoverActionsProps {
   showBorder?: boolean;
 }
 
+/** Selection state of a panel whose parent supports panel selection, while in edit mode */
+export interface PanelSelection {
+  /** True while any panel is selected; every panel then only offers its select checkbox */
+  isSelectionMode: boolean;
+  isSelected: boolean;
+  toggle: () => void;
+}
+
 export const PresentationPanelHoverActions = ({
   api,
   index,
@@ -96,7 +105,16 @@ export const PresentationPanelHoverActions = ({
   actionPredicate,
   className,
   viewMode,
-}: PresentationPanelHoverActionsProps) => {
+  selection,
+}: PresentationPanelHoverActionsProps & {
+  /**
+   * Owned by the wrapper (which also toggles the `--selectionMode` anchor class) so that the class
+   * and the rendered actions change in the same render; separate subscriptions would commit in
+   * separate frames and briefly show every action while leaving selection mode.
+   * Undefined when the panel cannot be selected.
+   */
+  selection: PanelSelection | undefined;
+}) => {
   const [quickActions, setQuickActions] = useState<Action<EmbeddableApiContext>[]>([]);
   const [contextMenuPanels, setContextMenuPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean>(false);
@@ -342,6 +360,26 @@ export const PresentationPanelHoverActions = ({
   const showContextMenu = useMemo(() => {
     return contextMenuPanels.some(({ items }) => items?.length);
   }, [contextMenuPanels]);
+
+  if (selection?.isSelectionMode) {
+    return (
+      <>
+        {/* keep the drag handle mounted (but hidden) so its registration with the grid is preserved */}
+        <span
+          css={css`
+            display: none;
+          `}
+        >
+          {dragHandle}
+        </span>
+        <PanelSelectCheckbox
+          panelId={api.uuid}
+          isSelected={selection.isSelected}
+          onToggle={selection.toggle}
+        />
+      </>
+    );
+  }
 
   return viewMode === 'non-interactive' ? null : (
     <>

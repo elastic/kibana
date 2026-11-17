@@ -8,7 +8,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG } from '@kbn/workflows';
+import { useSelector } from 'react-redux-v7';
 import { useWorkflowYamlValidationContext } from './use_workflow_yaml_validation_context';
 import { useKibana } from '../../../hooks/use_kibana';
 
@@ -30,31 +30,33 @@ jest.mock('react-redux-v7', () => ({
 }));
 
 describe('useWorkflowYamlValidationContext', () => {
-  it('subscribes to the self-client flag with useBooleanValue', () => {
-    const useBooleanValue = jest.fn().mockReturnValue(true);
-    const getBooleanValue = jest.fn().mockReturnValue(false);
+  it('gives variable validation the outputs of the loaded workflows', () => {
+    jest.mocked(useSelector).mockReturnValue({
+      status: 'loading',
+      totalWorkflows: 1,
+      workflows: {
+        'alert-context': {
+          id: 'alert-context',
+          name: 'Alert context',
+          outputs: [{ name: 'severity', type: 'string' }],
+          returnedOutputNames: ['severity'],
+        },
+      },
+    });
     jest.mocked(useKibana).mockReturnValue({
       services: {
         application: { getUrlForApp: jest.fn(() => 'https://example.test') },
-        http: {},
-        data: {},
-        licensing: {},
         workflowsExtensions: {},
-        featureFlags: {
-          useBooleanValue,
-          getBooleanValue,
-        },
       },
     } as unknown as ReturnType<typeof useKibana>);
 
-    const { result, rerender } = renderHook(() => useWorkflowYamlValidationContext());
+    const { result } = renderHook(() => useWorkflowYamlValidationContext());
 
-    expect(getBooleanValue).not.toHaveBeenCalled();
-    expect(useBooleanValue).toHaveBeenCalledWith(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, false);
-    expect(result.current.warnIgnoredKibanaFetcher).toBe(true);
-
-    useBooleanValue.mockReturnValue(false);
-    rerender();
-    expect(result.current.warnIgnoredKibanaFetcher).toBe(false);
+    expect(result.current.registry.getCalledWorkflowOutputs?.('alert-context')).toEqual({
+      name: 'Alert context',
+      outputs: [{ name: 'severity', type: 'string' }],
+      returnedOutputNames: ['severity'],
+    });
+    expect(result.current.registry.getCalledWorkflowOutputs?.('missing')).toBeUndefined();
   });
 });

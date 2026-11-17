@@ -176,6 +176,20 @@ describe('EnterStepTimeoutZoneNodeImpl', () => {
       expect(monitoredContextMock.abortController.abort).not.toHaveBeenCalled();
     });
 
+    it('should throw and abort when duration equals the timeout limit', () => {
+      const startTime = new Date().getTime() - 30000;
+      mockParseDuration.mockReturnValue(30000);
+
+      (stepExecutionRuntimeMock as any).stepExecution = {
+        startedAt: new Date(startTime).toISOString(),
+      };
+
+      expect(() => impl.monitor(monitoredContextMock)).toThrow(
+        'Step execution exceeded the configured timeout of 30s.'
+      );
+      expect(monitoredContextMock.abortController.abort).toHaveBeenCalledTimes(1);
+    });
+
     it('should throw error and abort when timeout exceeded', () => {
       const startTime = new Date().getTime() - 40000; // 40 seconds ago (exceeds 30s timeout)
       mockParseDuration.mockReturnValue(30000); // 30 seconds
