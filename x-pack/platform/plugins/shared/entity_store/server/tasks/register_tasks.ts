@@ -36,6 +36,6 @@ export function registerTasks(
   });
   registerHistorySnapshotTask({ taskManager, logger, core });
   registerResilienceTask({ taskManager, logger, core });
-  registerStatusReportTask({ taskManager, logger, core });
+  registerStatusReportTask({ taskManager, logger, core, isServerless });
   registerLegacySecurityAssetsMigrationTask({ taskManager, logger, core });
 }
