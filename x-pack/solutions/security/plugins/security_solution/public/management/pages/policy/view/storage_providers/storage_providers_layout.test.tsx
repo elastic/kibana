@@ -253,17 +253,18 @@ describe('When rendering the StorageProvidersLayout', () => {
       expect(getSentProviders()).toEqual([added]);
     });
 
-    it('should edit a provider without letting its name change', async () => {
+    it('should edit a provider', async () => {
       const first = createProvider('azure-1');
       const second = createProvider('azure-2', { container: 'files' });
       await render([first, second]);
 
       await clickRowAction('azure-2', 'storageProvidersEditAction');
-      const nameInput = await renderResult.findByTestId('storageProviderFlyout-nameInput');
-      expect(nameInput).toHaveValue('azure-2');
-      expect(nameInput).toHaveAttribute('readonly');
+      expect(await renderResult.findByTestId('storageProviderFlyout-nameInput')).toHaveValue(
+        'azure-2'
+      );
+      expect(renderResult.getByTestId('storageProviderFlyout-typeSelect')).toBeDisabled();
       expect(renderResult.getByTestId('storageProviderFlyout')).toHaveTextContent(
-        "Can't be changed. To rename this provider, delete it and add a new one."
+        'Used in the response console as --export <name>.'
       );
       // Nothing changed yet
       expect(renderResult.getByTestId('storageProviderFlyout-saveButton')).toBeDisabled();

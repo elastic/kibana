@@ -152,8 +152,10 @@ export const StorageProvidersLayout = memo<StorageProvidersLayoutProps>(({ polic
   const handleFlyoutSave = useCallback(
     (provider: ExportProvider) => {
       if (flyoutState?.provider) {
+        // Matched by the saved id: a rename changes `id` in place, keeping the provider's position
+        const { id: savedId } = flyoutState.provider;
         saveProviders(
-          providers.map((existing) => (existing.id === provider.id ? provider : existing)),
+          providers.map((existing) => (existing.id === savedId ? provider : existing)),
           getEditSuccessMessage(provider.id),
           closeFlyout
         );

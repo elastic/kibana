@@ -22,6 +22,7 @@ import {
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
+  EuiTextColor,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -44,8 +45,8 @@ import {
   EDIT_SUBMIT_BUTTON_LABEL,
   EXPORT_PROVIDER_TYPE_LABELS,
   getFieldErrorMessage,
-  NAME_FIELD_CREATE_HELP_TEXT,
-  NAME_FIELD_EDIT_HELP_TEXT,
+  NAME_CHANGED_WARNING,
+  NAME_FIELD_HELP_TEXT,
   NAME_FIELD_LABEL,
   SAVE_ERROR_TITLE,
   SERVICE_URL_FIELD_HELP_TEXT,
@@ -101,7 +102,10 @@ export interface StorageProviderFlyoutProps {
   onClose: () => void;
 }
 
-/** Add or edit one storage provider. The name (`id`) can't be changed once the provider exists. */
+/**
+ * Add or edit one storage provider. Renaming changes the `id` in place; the type can't be changed
+ * once the provider exists.
+ */
 export const StorageProviderFlyout = memo<StorageProviderFlyoutProps>(
   ({ provider, otherIds, isSaving, errorMessage, onSave, onClose }) => {
     const isEdit = provider !== undefined;
@@ -120,6 +124,7 @@ export const StorageProviderFlyout = memo<StorageProviderFlyoutProps>(
     const isValid = Object.keys(fieldErrors).length === 0;
     const isChanged = !isEdit || !isEqual(updatedProvider, provider);
     const canSave = isValid && isChanged && !isSaving;
+    const isRenamed = isEdit && values.id !== provider.id;
 
     const getVisibleError = (field: ExportProviderFieldName): string | undefined => {
       const error = fieldErrors[field];
@@ -214,7 +219,20 @@ export const StorageProviderFlyout = memo<StorageProviderFlyoutProps>(
             </EuiFormRow>
             <EuiFormRow
               label={NAME_FIELD_LABEL}
-              helpText={isEdit ? NAME_FIELD_EDIT_HELP_TEXT : NAME_FIELD_CREATE_HELP_TEXT}
+              helpText={
+                isRenamed
+                  ? [
+                      NAME_FIELD_HELP_TEXT,
+                      <EuiTextColor
+                        key="nameChangedWarning"
+                        color="warning"
+                        data-test-subj="storageProviderFlyout-nameChangedWarning"
+                      >
+                        {NAME_CHANGED_WARNING}
+                      </EuiTextColor>,
+                    ]
+                  : NAME_FIELD_HELP_TEXT
+              }
               isInvalid={Boolean(nameError)}
               error={nameError}
               fullWidth
@@ -223,7 +241,6 @@ export const StorageProviderFlyout = memo<StorageProviderFlyoutProps>(
                 value={values.id}
                 onChange={handleTextChange('id')}
                 onBlur={handleBlur('id')}
-                readOnly={isEdit}
                 disabled={isSaving}
                 isInvalid={Boolean(nameError)}
                 fullWidth

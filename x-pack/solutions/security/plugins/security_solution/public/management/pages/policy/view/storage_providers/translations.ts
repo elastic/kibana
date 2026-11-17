@@ -160,19 +160,17 @@ export const NAME_FIELD_LABEL = i18n.translate(
   { defaultMessage: 'Name' }
 );
 
-export const NAME_FIELD_CREATE_HELP_TEXT = i18n.translate(
-  'xpack.securitySolution.endpoint.policy.storageProviders.flyout.nameCreateHelpText',
+export const NAME_FIELD_HELP_TEXT = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.storageProviders.flyout.nameHelpText',
   {
-    defaultMessage: "Used in the response console as {exportArgument}. Can't be changed later.",
+    defaultMessage: 'Used in the response console as {exportArgument}.',
     values: { exportArgument: '--export <name>' },
   }
 );
 
-export const NAME_FIELD_EDIT_HELP_TEXT = i18n.translate(
-  'xpack.securitySolution.endpoint.policy.storageProviders.flyout.nameEditHelpText',
-  {
-    defaultMessage: "Can't be changed. To rename this provider, delete it and add a new one.",
-  }
+export const NAME_CHANGED_WARNING = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.storageProviders.flyout.nameChangedWarningDescription',
+  { defaultMessage: "Exports to the old name that haven't reached a host yet will fail." }
 );
 
 export const ACCOUNT_NAME_FIELD_LABEL = i18n.translate(
