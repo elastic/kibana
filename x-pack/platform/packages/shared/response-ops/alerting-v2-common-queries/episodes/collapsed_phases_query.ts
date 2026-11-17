@@ -11,21 +11,21 @@ import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { asTypedEsqlQuery, type TypedEsqlQuery } from './typed_esql_query';
 
 /**
- * Collapses each alert's per-execution events into status *phases*: one
- * `[seg_start, seg_end]` row per contiguous `episode.status` run (≤4 per alert).
- * Scoped by the selected `episode.id`s and, when given, bounded to the display
- * window — this query supplies the segment *geometry* drawn in view. The bar's
- * true start is resolved separately by the untimed `buildAlertStartsQuery`
- * (window-independent) and overlaid via `applyAlertStarts`.
+ * Collapses each alert's events into one `[seg_start, seg_end]` row per
+ * `episode.status` (≤4 per alert), scoped by space and the selected `episode.id`s.
  *
- * Caveat — flapping: `BY episode.id, episode.status` merges non-contiguous runs of
- * the same status (active → recovering → active collapses to one active span).
+ * Non-contiguous runs of the same status are merged: a flapping alert
+ * (active → recovering → active) gets one active row spanning both active runs.
+ *
+ * The window is optional. The rule-details Gantt chart bounds the rows to its
+ * display window and resolves each bar's true start separately with the untimed
+ * `buildAlertStartsQuery`. The alert details page omits it to cover the whole alert.
  */
 
 /** The four `episode.status` values — upper bound on phase rows per alert. */
 const MAX_PHASES_PER_ALERT = 4;
 
-export interface AlertPhaseRow {
+export interface CollapsedStatusPhaseRow {
   'episode.id': string;
   'episode.status': AlertEpisodeStatus;
   group_hash: string;
@@ -35,7 +35,7 @@ export interface AlertPhaseRow {
   event_count: number;
 }
 
-export interface AlertSeverityPhaseRow {
+export interface CollapsedSeverityPhaseRow {
   'episode.id': string;
   severity: string | null;
   seg_start: string;
@@ -44,7 +44,7 @@ export interface AlertSeverityPhaseRow {
   event_count: number;
 }
 
-export interface BuildAlertPhasesQueryOptions {
+export interface BuildCollapsedPhasesQueryOptions {
   /** Omit for alerts that have no rule, such as externally ingested alerts. */
   ruleId?: string;
   /** Restricts the events to one space. Required so a query never reads every space. */
@@ -64,7 +64,7 @@ const buildAlertEventsSource = ({
   spaceId,
   alertIds,
   window,
-}: BuildAlertPhasesQueryOptions) => {
+}: BuildCollapsedPhasesQueryOptions) => {
   const alertLiterals = alertIds.map((id) => esql.str(id));
 
   // prettier-ignore
@@ -86,9 +86,9 @@ const buildAlertEventsSource = ({
 };
 
 export const buildCollapsedStatusPhasesQuery = (
-  options: BuildAlertPhasesQueryOptions
-): TypedEsqlQuery<AlertPhaseRow> =>
-  asTypedEsqlQuery<AlertPhaseRow>(
+  options: BuildCollapsedPhasesQueryOptions
+): TypedEsqlQuery<CollapsedStatusPhaseRow> =>
+  asTypedEsqlQuery<CollapsedStatusPhaseRow>(
     buildAlertEventsSource(options)
       .pipe`STATS seg_start = MIN(@timestamp), seg_end = MAX(@timestamp), event_count = COUNT(*) BY episode.id, episode.status, group_hash`
       // Explicit ceiling (≤4 phases × alerts) so the implicit result cap can't clip a phase.
@@ -101,9 +101,9 @@ export const buildCollapsedStatusPhasesQuery = (
  * per alert, with the same flapping caveat (non-contiguous runs are merged).
  */
 export const buildCollapsedSeverityPhasesQuery = (
-  options: BuildAlertPhasesQueryOptions
-): TypedEsqlQuery<AlertSeverityPhaseRow> =>
-  asTypedEsqlQuery<AlertSeverityPhaseRow>(
+  options: BuildCollapsedPhasesQueryOptions
+): TypedEsqlQuery<CollapsedSeverityPhaseRow> =>
+  asTypedEsqlQuery<CollapsedSeverityPhaseRow>(
     buildAlertEventsSource(options)
       .pipe`STATS seg_start = MIN(@timestamp), seg_end = MAX(@timestamp), event_count = COUNT(*) BY episode.id, severity`.keep(
       'episode.id',

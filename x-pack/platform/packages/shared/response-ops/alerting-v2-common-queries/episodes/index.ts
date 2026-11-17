@@ -86,9 +86,9 @@ export {
   buildCollapsedSeverityPhasesQuery,
 } from './collapsed_phases_query';
 export type {
-  AlertPhaseRow,
-  AlertSeverityPhaseRow,
-  BuildAlertPhasesQueryOptions,
+  CollapsedStatusPhaseRow,
+  CollapsedSeverityPhaseRow,
+  BuildCollapsedPhasesQueryOptions,
 } from './collapsed_phases_query';
 
 export { buildEpisodeActionsQuery } from './episode_actions_query';
