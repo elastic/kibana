@@ -7,12 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+jest.mock('./create_esql_query', () => ({
+  createESQLQuery: jest.fn(),
+}));
+
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { METRICS_GRID_SETTINGS_DEFAULTS } from '@kbn/discover-utils';
 import type { ParsedMetricItem } from '../../../types';
+import { createESQLQuery } from './create_esql_query';
 import { createExemplarsQuery } from './create_exemplars_query';
 
+const mockCreateESQLQuery = createESQLQuery as jest.MockedFunction<typeof createESQLQuery>;
+
 const mockMetric: ParsedMetricItem = {
-  // METRICS_INFO returns the `metrics.`-prefixed field name; the builder strips the prefix.
   metricName: 'metrics.http.server.request.duration',
   indexName: 'metrics-generic.otel-default',
   units: ['ms'],
@@ -23,124 +30,71 @@ const mockMetric: ParsedMetricItem = {
     { name: 'resource.attributes.service.name' },
   ],
 };
-const TEST_EXEMPLARS_INDEX = 'exemplars-generic.otel-default';
+
+const CHART_QUERY = `
+TS metrics-generic.otel-default
+  | STATS PERCENTILE(metrics.http.server.request.duration, 95) BY TBUCKET(100)
+`.trim();
+
+const CHART_QUERY_WITH_NULLIFY = `
+SET unmapped_fields = "NULLIFY";
+${CHART_QUERY}
+`.trim();
 
 describe('createExemplarsQuery', () => {
-  it('builds the exemplars query for an OTel metric', () => {
-    expect(
-      createExemplarsQuery({ exemplarsIndex: TEST_EXEMPLARS_INDEX, metricItem: mockMetric })
-    ).toBe(
+  beforeEach(() => {
+    mockCreateESQLQuery.mockReset();
+    mockCreateESQLQuery.mockReturnValue(CHART_QUERY);
+  });
+
+  it('prefixes SET exemplars onto the chart time-series query', () => {
+    expect(createExemplarsQuery({ metricItem: mockMetric })).toBe(
       `
-SET unmapped_fields = "NULLIFY";
-FROM exemplars-generic.otel-default
-  | WHERE metric_name == "http.server.request.duration"
-  | SORT @timestamp DESC
-  | LIMIT 500
+SET exemplars = TRUE;
+${CHART_QUERY}
 `.trim()
     );
   });
 
-  it('nullifies unmapped fields so an inherited WHERE on a metrics-only field cannot fail verification', () => {
-    const query = createExemplarsQuery({
-      exemplarsIndex: TEST_EXEMPLARS_INDEX,
+  it('keeps a SET command already present on the chart query', () => {
+    mockCreateESQLQuery.mockReturnValue(CHART_QUERY_WITH_NULLIFY);
+
+    expect(createExemplarsQuery({ metricItem: mockMetric })).toBe(
+      `
+SET unmapped_fields = "NULLIFY";
+SET exemplars = TRUE;
+${CHART_QUERY}
+`.trim()
+    );
+  });
+
+  it('forwards the chart query params and never passes breakdown dimensions', () => {
+    const whereStatements = ['attributes.http.route == "/orders"'];
+    const metadataFields = ['_ignored'];
+    const originalSource = 'remote:metrics-generic.otel-default';
+    const gridSettings = METRICS_GRID_SETTINGS_DEFAULTS;
+
+    createExemplarsQuery({
       metricItem: mockMetric,
+      whereStatements,
+      metadataFields,
+      originalSource,
+      gridSettings,
     });
 
-    expect(query.startsWith('SET unmapped_fields = "NULLIFY";\n')).toBe(true);
-  });
-
-  it('appends each non-empty where statement as its own WHERE pipe before SORT', () => {
-    expect(
-      createExemplarsQuery({
-        exemplarsIndex: TEST_EXEMPLARS_INDEX,
-        metricItem: mockMetric,
-        whereStatements: [
-          ' attributes.http.route == "/orders" ',
-          '',
-          'attributes.http.response.status_code >= 500',
-          '  \n\t  ',
-        ],
-      })
-    ).toBe(
-      `
-SET unmapped_fields = "NULLIFY";
-FROM exemplars-generic.otel-default
-  | WHERE metric_name == "http.server.request.duration"
-  | WHERE attributes.http.route == "/orders"
-  | WHERE attributes.http.response.status_code >= 500
-  | SORT @timestamp DESC
-  | LIMIT 500
-`.trim()
-    );
-  });
-
-  it('honours an explicit maxRows override', () => {
-    expect(
-      createExemplarsQuery({
-        exemplarsIndex: TEST_EXEMPLARS_INDEX,
-        metricItem: { ...mockMetric, dimensionFields: [] },
-        maxRows: 25,
-      })
-    ).toBe(
-      `
-SET unmapped_fields = "NULLIFY";
-FROM exemplars-generic.otel-default
-  | WHERE metric_name == "http.server.request.duration"
-  | SORT @timestamp DESC
-  | LIMIT 25
-`.trim()
-    );
-  });
-
-  it('escapes double quotes in the metric name string value', () => {
-    expect(
-      createExemplarsQuery({
-        exemplarsIndex: TEST_EXEMPLARS_INDEX,
-        metricItem: {
-          ...mockMetric,
-          metricName: 'metrics.odd"name',
-          dimensionFields: [{ name: 'attributes.odd`dimension' }],
-        },
-      })
-    ).toBe(
-      `
-SET unmapped_fields = "NULLIFY";
-FROM exemplars-generic.otel-default
-  | WHERE metric_name == "odd\\"name"
-  | SORT @timestamp DESC
-  | LIMIT 500
-`.trim()
-    );
-  });
-
-  it('escapes backslashes in the metric name string value', () => {
-    expect(
-      createExemplarsQuery({
-        exemplarsIndex: TEST_EXEMPLARS_INDEX,
-        metricItem: { ...mockMetric, metricName: 'metrics.odd\\name', dimensionFields: [] },
-      })
-    ).toContain('WHERE metric_name == "odd\\\\name"');
-  });
-
-  describe('returns an empty string so callers skip the fetch', () => {
-    it('when the metric name is missing', () => {
-      expect(
-        createExemplarsQuery({
-          exemplarsIndex: TEST_EXEMPLARS_INDEX,
-          metricItem: { ...mockMetric, metricName: '' },
-        })
-      ).toBe('');
-    });
-  });
-
-  it('never aggregates, so a grid breakdown cannot change which exemplars are fetched', () => {
-    const query = createExemplarsQuery({
-      exemplarsIndex: TEST_EXEMPLARS_INDEX,
+    expect(mockCreateESQLQuery).toHaveBeenCalledWith({
       metricItem: mockMetric,
+      splitAccessors: [],
+      whereStatements,
+      metadataFields,
+      originalSource,
+      gridSettings,
     });
+  });
 
-    expect(query).not.toContain('STATS');
-    expect(query).not.toContain(' BY ');
-    expect(query).not.toContain('TBUCKET');
+  it('returns an empty string when the chart query is empty', () => {
+    mockCreateESQLQuery.mockReturnValue('');
+
+    expect(createExemplarsQuery({ metricItem: mockMetric })).toBe('');
   });
 });

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -45,6 +45,11 @@ import {
 } from '../../../common/constants';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
+import { getExemplarsFetchFailedUserMessage } from '../../../common/utils/user_messages';
+import {
+  useExemplarsClusterSupport,
+  type ExemplarsClusterSupport,
+} from './hooks/use_exemplars_cluster_support';
 import { useFetchExemplars } from './hooks/use_fetch_exemplars';
 
 const EMPTY_APPLICABLE_DIMENSIONS: Dimension[] = [];
@@ -148,6 +153,12 @@ export const MetricsGrid = ({
   const { euiTheme } = useEuiTheme();
   const { flyoutState, onFlyoutStateChange, profileId, gridSettings, onMetricExplored } =
     useMetricsExperienceState();
+  const exemplarsClusterSupport = useExemplarsClusterSupport({
+    fetchParams,
+    services,
+    profileId,
+    isComponentVisible,
+  });
 
   const gridColumns = columns || 1;
   const gridRows = Math.ceil(metricItems.length / gridColumns);
@@ -293,6 +304,7 @@ export const MetricsGrid = ({
                   gridSettings={gridSettings}
                   onMetricExplored={onMetricExplored}
                   isComponentVisible={isComponentVisible}
+                  exemplarsClusterSupport={exemplarsClusterSupport}
                   histogramBounds={histogramBounds}
                   histogramBoundsLoading={histogramBoundsLoading}
                 />
@@ -339,6 +351,7 @@ interface ChartItemProps
   gridSettings: MetricsGridSettings;
   onMetricExplored?: (metricUniqueKey: string) => void;
   isComponentVisible: boolean;
+  exemplarsClusterSupport: ExemplarsClusterSupport;
   histogramBounds: HistogramBoundsByMetricKey;
   histogramBoundsLoading: boolean;
 }
@@ -372,6 +385,7 @@ const ChartItem = React.memo(
     gridSettings,
     onMetricExplored,
     isComponentVisible,
+    exemplarsClusterSupport,
     histogramBounds,
     histogramBoundsLoading,
   }: ChartItemProps) => {
@@ -402,17 +416,8 @@ const ChartItem = React.memo(
       metricItem.dimensionFields
     );
 
-    const exemplars = useFetchExemplars({
-      fetchParams,
-      services,
-      metricItem,
-      whereStatements,
-      originalSource: userSource,
-      profileId,
-      isComponentVisible,
-    });
-    // TODO(kibana#289722): feed `exemplars` into useChartLayers as a points layer.
-    void exemplars;
+    // `unsigned_long` has no time-series chart query, so there is no series to attach exemplars to.
+    const isSupported = firstNonNullable(metricItem.fieldTypes) !== 'unsigned_long';
 
     const { shouldRenderHistogram, boundsError, distributionQuery, heatmapConfig } =
       useHistogramHeatmap({
@@ -429,12 +434,43 @@ const ChartItem = React.memo(
         backgroundColor: euiTheme.colors.backgroundBasePlain,
       });
 
+    // Off until this chart's own intersection observer reports it. Mounted charts
+    // outside the viewport stay false, so they do not search.
+    const [isChartVisible, setIsChartVisible] = useState(false);
+    const {
+      exemplars,
+      hasError: exemplarsFetchFailed,
+      errorMessage: exemplarsErrorMessage,
+    } = useFetchExemplars({
+      fetchParams,
+      services,
+      metricItem,
+      whereStatements,
+      metadataFields,
+      originalSource: userSource,
+      gridSettings,
+      profileId,
+      // Heatmaps also have no series query, so they skip the exemplar fetch with `unsigned_long`.
+      isSupported: isSupported && !shouldRenderHistogram,
+      isComponentVisible,
+      isChartVisible,
+      clusterSupport: exemplarsClusterSupport,
+    });
+    // TODO(kibana#289722): feed `exemplars` into useChartLayers as a points layer.
+    void exemplars;
+
+    const chartUserMessages = useMemo(() => {
+      if (!exemplarsFetchFailed) {
+        return userMessages;
+      }
+      const exemplarsMessage = getExemplarsFetchFailedUserMessage(exemplarsErrorMessage);
+      return userMessages ? [...userMessages, exemplarsMessage] : [exemplarsMessage];
+    }, [exemplarsErrorMessage, exemplarsFetchFailed, userMessages]);
+
     const esqlQuery = useMemo(() => {
       if (shouldRenderHistogram) {
         return distributionQuery ?? '';
       }
-      const fieldType = firstNonNullable(metricItem.fieldTypes);
-      const isSupported = fieldType !== 'unsigned_long';
       return isSupported
         ? createESQLQuery({
             metricItem,
@@ -448,6 +484,7 @@ const ChartItem = React.memo(
     }, [
       shouldRenderHistogram,
       distributionQuery,
+      isSupported,
       metricItem,
       applicableDimensions,
       whereStatements,
@@ -539,6 +576,7 @@ const ChartItem = React.memo(
           onFilter={onFilter}
           onExploreInDiscoverTab={actions.openInNewTab}
           onViewDetails={handleViewDetailsCallback}
+          onChartVisibleChange={setIsChartVisible}
           isLoading={shouldRenderHistogram && histogramBoundsLoading}
           error={shouldRenderHistogram ? boundsError : undefined}
           syncCursor
@@ -546,7 +584,7 @@ const ChartItem = React.memo(
           titleHighlight={titleHighlight}
           extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
           quickActionIds={METRICS_QUICK_ACTION_IDS}
-          userMessages={userMessages}
+          userMessages={chartUserMessages}
           profileId={profileId}
         />
       </A11yGridCell>

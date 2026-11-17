@@ -118,6 +118,116 @@ describe('useLensProps', () => {
     discoverFetch$.complete();
   });
 
+  it('reports visible when the chart node is not mounted', () => {
+    const onChartVisibleChange = jest.fn();
+
+    renderHook(() =>
+      useLensProps({
+        chartId: 'testChartId',
+        lensConfig: defaultXyConfig,
+        services: servicesMock as UnifiedHistogramServices,
+        fetchParams,
+        discoverFetch$,
+        chartRef: createMockChartRef(),
+        profileId: 'testProfileId',
+        onChartVisibleChange,
+      })
+    );
+
+    expect(onChartVisibleChange).toHaveBeenCalledWith(true);
+  });
+
+  it('reports intersection changes through onChartVisibleChange', () => {
+    let onIntersect: IntersectionObserverCallback | undefined;
+    const observe = jest.fn();
+    window.IntersectionObserver = jest
+      .fn()
+      .mockImplementation((callback: IntersectionObserverCallback) => {
+        onIntersect = callback;
+        return {
+          observe,
+          disconnect: jest.fn(),
+          unobserve: jest.fn(),
+          takeRecords: jest.fn(() => []),
+          root: null,
+          rootMargin: '0px',
+          thresholds: [0],
+        };
+      }) as unknown as typeof IntersectionObserver;
+
+    const chartRef = {
+      current: document.createElement('div'),
+    } as React.MutableRefObject<HTMLDivElement | null>;
+    const onChartVisibleChange = jest.fn();
+
+    renderHook(() =>
+      useLensProps({
+        chartId: 'testChartId',
+        lensConfig: defaultXyConfig,
+        services: servicesMock as UnifiedHistogramServices,
+        fetchParams,
+        discoverFetch$,
+        chartRef,
+        profileId: 'testProfileId',
+        onChartVisibleChange,
+      })
+    );
+
+    expect(observe).toHaveBeenCalledWith(chartRef.current);
+    expect(onChartVisibleChange).not.toHaveBeenCalled();
+
+    act(() => {
+      onIntersect?.(
+        [{ isIntersecting: true } as IntersectionObserverEntry],
+        {} as IntersectionObserver
+      );
+    });
+    expect(onChartVisibleChange).toHaveBeenCalledWith(true);
+
+    act(() => {
+      onIntersect?.(
+        [{ isIntersecting: false } as IntersectionObserverEntry],
+        {} as IntersectionObserver
+      );
+    });
+    expect(onChartVisibleChange).toHaveBeenLastCalledWith(false);
+  });
+
+  it('disconnects the intersection observer when the chart unmounts', () => {
+    const disconnect = jest.fn();
+    window.IntersectionObserver = jest.fn().mockImplementation(() => ({
+      observe: jest.fn(),
+      disconnect,
+      unobserve: jest.fn(),
+      takeRecords: jest.fn(() => []),
+      root: null,
+      rootMargin: '0px',
+      thresholds: [0],
+    })) as unknown as typeof IntersectionObserver;
+
+    const chartRef = {
+      current: document.createElement('div'),
+    } as React.MutableRefObject<HTMLDivElement | null>;
+
+    const { unmount } = renderHook(() =>
+      useLensProps({
+        chartId: 'testChartId',
+        lensConfig: defaultXyConfig,
+        services: servicesMock as UnifiedHistogramServices,
+        fetchParams,
+        discoverFetch$,
+        chartRef,
+        profileId: 'testProfileId',
+      })
+    );
+
+    expect(disconnect).not.toHaveBeenCalled();
+
+    unmount();
+
+    expect(disconnect).toHaveBeenCalledTimes(1);
+  });
+
   it('returns undefined initially before Lens attributes are built', async () => {
     const chartRef = createMockChartRef();
 

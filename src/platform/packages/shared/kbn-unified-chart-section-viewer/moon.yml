@@ -57,6 +57,7 @@ dependsOn:
   - '@kbn/core-feature-flags-browser-mocks'
   - '@kbn/ebt-click'
   - '@kbn/data-source'
+  - '@kbn/search-errors'
 tags:
   - shared-browser
   - package

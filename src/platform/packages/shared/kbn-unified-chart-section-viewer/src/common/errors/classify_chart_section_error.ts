@@ -81,7 +81,7 @@ const toFiniteNumber = (value: unknown): number | undefined =>
  * an `instanceof` check to keep this module free of the React/EUI imports in
  * `@kbn/search-errors`.
  */
-const getSearchErrorAttributes = (error: unknown): IEsErrorAttributes | undefined =>
+export const getSearchErrorAttributes = (error: unknown): IEsErrorAttributes | undefined =>
   toRecord(toRecord(error)?.attributes) as IEsErrorAttributes | undefined;
 
 /**

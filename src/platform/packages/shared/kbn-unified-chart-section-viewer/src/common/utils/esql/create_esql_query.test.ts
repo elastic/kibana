@@ -697,6 +697,46 @@ TS edge-case-gauge-to-counter
 `.trim()
       );
     });
+
+    it('should use a concrete remote cluster source', () => {
+      const query = createESQLQuery({
+        metricItem: mockMetricForBackingIndex,
+        originalSource: 'remote:metrics-generic.otel-default',
+      });
+      expect(query).toBe(
+        `
+TS remote:metrics-generic.otel-default
+  | STATS AVG(AVG_OVER_TIME(request_duration)) BY TBUCKET(100)
+`.trim()
+      );
+    });
+
+    it('should fall back to the cluster-qualified index when the typed source is a remote or wildcard-cluster pattern', () => {
+      const cases = [
+        {
+          originalSource: 'remote:metrics-*',
+          indexName: 'remote:metrics-generic.otel-default',
+        },
+        {
+          originalSource: '*:metrics-*',
+          indexName: 'other:metrics-generic.otel-default',
+        },
+      ];
+
+      for (const { originalSource, indexName } of cases) {
+        expect(
+          createESQLQuery({
+            metricItem: { ...mockMetricForBackingIndex, indexName },
+            originalSource,
+          })
+        ).toBe(
+          `
+TS ${indexName}
+  | STATS AVG(AVG_OVER_TIME(request_duration)) BY TBUCKET(100)
+`.trim()
+        );
+      }
+    });
   });
 
   describe('gridSettings overrides', () => {
