@@ -50,6 +50,7 @@ export const SentryListIssuesInputSchema = lazySchema(() =>
       ),
     cursor: z
       .string()
+      .min(1)
       .max(MAX_CURSOR_LENGTH)
       .optional()
       .describe(
@@ -154,6 +155,7 @@ export const SentryListIssueEventsInputSchema = lazySchema(() =>
       .describe('The Sentry issue ID to list events for.'),
     cursor: z
       .string()
+      .min(1)
       .max(MAX_CURSOR_LENGTH)
       .optional()
       .describe(
@@ -220,6 +222,7 @@ export const SentryListProjectsInputSchema = lazySchema(() =>
   z.object({
     cursor: z
       .string()
+      .min(1)
       .max(MAX_CURSOR_LENGTH)
       .optional()
       .describe(
@@ -238,6 +241,7 @@ export const SentryListIssueAlertRulesInputSchema = lazySchema(() =>
       .describe('The project slug to list issue alert rules for.'),
     cursor: z
       .string()
+      .min(1)
       .max(MAX_CURSOR_LENGTH)
       .optional()
       .describe(

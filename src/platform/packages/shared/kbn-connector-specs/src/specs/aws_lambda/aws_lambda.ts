@@ -25,6 +25,11 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 
 // AWS Lambda API limits: function name/ARN (incl. qualifier) 170, qualifier 128.
+// A function name, a partial or full ARN, optionally with a version or alias, as AWS spells it.
+const FUNCTION_NAME =
+  /^(arn:(aws[a-zA-Z-]*)?:lambda:)?((eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\d{1}:)?(\d{12}:)?(function:)?([a-zA-Z0-9-_\.]+)(:(\$LATEST(\.PUBLISHED)?|[a-zA-Z0-9-_]+))?$/;
+// A version or alias: `$LATEST`, `$LATEST.PUBLISHED`, or a name.
+const QUALIFIER = /^(\$LATEST(\.PUBLISHED)?|[a-zA-Z0-9-_$]+)$/;
 const FUNCTION_NAME_MAX_LENGTH = 170;
 const QUALIFIER_MAX_LENGTH = 128;
 const MARKER_MAX_LENGTH = 2048;
@@ -158,6 +163,7 @@ export const AwsLambdaConnector: ConnectorSpec = {
             .string()
             .min(1)
             .max(FUNCTION_NAME_MAX_LENGTH)
+            .regex(FUNCTION_NAME)
             .describe('Lambda function name or ARN'),
           payload: z.unknown().optional().describe('JSON payload to send to the function'),
           invocationType: z
@@ -166,7 +172,9 @@ export const AwsLambdaConnector: ConnectorSpec = {
             .describe('Invocation type: RequestResponse (sync), Event (async), or DryRun'),
           qualifier: z
             .string()
+            .min(1)
             .max(QUALIFIER_MAX_LENGTH)
+            .regex(QUALIFIER)
             .optional()
             .describe('Function version or alias to invoke'),
         })
@@ -293,10 +301,13 @@ export const AwsLambdaConnector: ConnectorSpec = {
             .string()
             .min(1)
             .max(FUNCTION_NAME_MAX_LENGTH)
+            .regex(FUNCTION_NAME)
             .describe('Lambda function name or ARN'),
           qualifier: z
             .string()
+            .min(1)
             .max(QUALIFIER_MAX_LENGTH)
+            .regex(QUALIFIER)
             .optional()
             .describe('Function version or alias'),
         })
