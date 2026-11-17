@@ -19,7 +19,7 @@ import type { FleetStart, FleetStartDeps } from '../plugin';
 import type { IngestFlow, IngestHubStart, IngestHubStartDependencies } from './types';
 import { INGEST_HUB_ENABLED_FLAG } from '../../common/ingest_hub/core/constants';
 import { registerOnboardingApp } from './onboarding/core';
-import { LazyAddIntegrationModal } from './add_integration_modal/lazy';
+import { openAddIntegrationModal } from './add_integration_modal/open_add_integration_modal';
 
 const IngestHubApp = dynamic(() =>
   import('./application').then((mod) => ({ default: mod.IngestHubApp }))
@@ -152,6 +152,6 @@ export function createIngestHubStart({
       ingestFlows.push(flow);
     },
     navigationAvailable$: createNavigationAvailable$(core, deps, isServerless),
-    AddIntegrationModal: LazyAddIntegrationModal,
+    openAddIntegrationModal,
   };
 }

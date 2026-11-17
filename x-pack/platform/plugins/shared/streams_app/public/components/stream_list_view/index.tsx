@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingElastic } from '@elastic/eui';
 import type { AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
 import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
 import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
 import { isEmpty } from 'lodash';
-import React, { Suspense, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
@@ -127,10 +127,10 @@ export function StreamListView({ tabs }: { tabs?: AppHeaderTab[] }) {
     React.useState(false);
   const [isQueryStreamCreationFlyoutOpen, setIsQueryStreamCreationFlyoutOpen] =
     React.useState(false);
-  // POC (elastic/ingest-dev#10466): "Add data" opens the integrations catalogue in a modal,
-  // which Ingest Hub composes out of Fleet's browse page.
-  const [isAddDataModalOpen, setIsAddDataModalOpen] = useState(false);
-  const AddIntegrationModal = fleet?.ingestHub?.AddIntegrationModal;
+  // POC (elastic/ingest-dev#10466): "Add data" opens the integrations catalogue in a modal that
+  // Fleet owns. The host calls a function and never imports the modal, so none of the Integrations
+  // app is reachable from this bundle.
+  const openAddIntegrationModal = fleet?.ingestHub?.openAddIntegrationModal;
   const pageTitle = i18n.translate('xpack.streams.streamsListView.pageHeaderTitle', {
     defaultMessage: 'Streams',
   });
@@ -140,6 +140,14 @@ export function StreamListView({ tabs }: { tabs?: AppHeaderTab[] }) {
   const addDataLabel = i18n.translate('xpack.streams.streamsListView.addDataButtonLabel', {
     defaultMessage: 'Add data',
   });
+  const openAddData = useCallback(() => {
+    openAddIntegrationModal?.({
+      title: addDataLabel,
+      subtitle: i18n.translate('xpack.streams.streamsListView.addDataModalSubtitle', {
+        defaultMessage: 'Choose a technology to start collecting from',
+      }),
+    });
+  }, [openAddIntegrationModal, addDataLabel]);
   const createClassicStreamLabel = i18n.translate(
     'xpack.streams.streamsListView.createClassicStreamButtonLabel',
     { defaultMessage: 'Create classic stream' }
@@ -162,14 +170,14 @@ export function StreamListView({ tabs }: { tabs?: AppHeaderTab[] }) {
 
   const menu = useMemo<AppHeaderMenu>(() => {
     const items: NonNullable<AppHeaderMenu['items']> = [
-      ...(AddIntegrationModal
+      ...(openAddIntegrationModal
         ? [
             {
               id: 'addData',
               order: 0,
               label: addDataLabel,
               iconType: 'plusCircle',
-              run: () => setIsAddDataModalOpen(true),
+              run: openAddData,
               testId: 'streamsAppAddDataButton',
             },
           ]
@@ -226,7 +234,8 @@ export function StreamListView({ tabs }: { tabs?: AppHeaderTab[] }) {
       items,
     };
   }, [
-    AddIntegrationModal,
+    openAddIntegrationModal,
+    openAddData,
     addDataLabel,
     canCreateClassicStream,
     classicStreamMenuItemLabel,
@@ -286,17 +295,6 @@ export function StreamListView({ tabs }: { tabs?: AppHeaderTab[] }) {
           onClose={() => setIsQueryStreamCreationFlyoutOpen(false)}
           onQueryStreamCreated={streamsListFetch.refresh}
         />
-      )}
-      {isAddDataModalOpen && AddIntegrationModal && (
-        <Suspense fallback={<EuiLoadingSpinner size="l" />}>
-          <AddIntegrationModal
-            onClose={() => setIsAddDataModalOpen(false)}
-            title={addDataLabel}
-            subtitle={i18n.translate('xpack.streams.streamsListView.addDataModalSubtitle', {
-              defaultMessage: 'Choose a technology to start collecting from',
-            })}
-          />
-        </Suspense>
       )}
     </>
   );

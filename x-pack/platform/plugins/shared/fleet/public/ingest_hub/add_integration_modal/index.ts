@@ -7,3 +7,5 @@
 
 export { AddIntegrationModal } from './add_integration_modal';
 export type { AddIntegrationModalProps } from './add_integration_modal';
+export { openAddIntegrationModal } from './open_add_integration_modal';
+export type { OpenAddIntegrationModalOptions, CloseAddIntegrationModal } from './types';

@@ -51,7 +51,7 @@ export const createStartMock = (extensionsStorage: UIExtensionsStorage = {}): Mo
     ingestHub: {
       registerIngestFlow: jest.fn(),
       navigationAvailable$: of(false),
-      AddIntegrationModal: () => null,
+      openAddIntegrationModal: jest.fn().mockResolvedValue(() => {}),
     },
   };
 };

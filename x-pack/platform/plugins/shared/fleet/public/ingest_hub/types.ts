@@ -11,7 +11,10 @@ import type { IconType } from '@elastic/eui';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { FleetStart } from '../plugin';
-import type { AddIntegrationModalProps } from './add_integration_modal/add_integration_modal';
+import type {
+  CloseAddIntegrationModal,
+  OpenAddIntegrationModalOptions,
+} from './add_integration_modal/types';
 
 export interface IngestFlow {
   id: string;
@@ -35,8 +38,13 @@ export interface IngestHubStart {
   registerIngestFlow: (flow: IngestFlow) => void;
   navigationAvailable$: Observable<boolean>;
   /**
-   * The Add integration modal, for hosts that open the catalogue from their own flow
-   * (e.g. Streams). Lazy — render it inside a `<Suspense>` boundary.
+   * Opens the Add integration experience in a modal owned by Fleet.
+   *
+   * A function rather than a component on purpose: a component would make the Integrations app
+   * reachable from the consuming bundle's entry graph, which the optimizer then promotes into the
+   * shared page-load bundles. Here the experience stays in a Fleet async chunk.
    */
-  AddIntegrationModal: ComponentType<AddIntegrationModalProps>;
+  openAddIntegrationModal: (
+    options?: OpenAddIntegrationModalOptions
+  ) => Promise<CloseAddIntegrationModal>;
 }
