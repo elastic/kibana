@@ -18,6 +18,7 @@ import {
 import { isBreachMemberSignal } from '../../../lib/significant_events/events/event_members';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
 import { getSignalCollectedAt } from '../../../lib/significant_events/events/signal_collected_at';
+import { StatusError } from '../../../lib/errors/status_error';
 
 export const EVENT_SEARCH_DEFAULT_PER_PAGE = 20;
 export const EVENT_SEARCH_MAX_PER_PAGE = 50;
@@ -280,7 +281,7 @@ export async function searchEventsToolHandler<V extends EventSearchView = 'compa
 }): Promise<Extract<EventSearchResponse, { view: V }>> {
   const view = params.view ?? 'compact';
   if (view === 'full' && params.event_ids?.length !== 1) {
-    throw new Error('Full event search requires exactly one event ID');
+    throw new StatusError('Full event search requires exactly one event ID', 400);
   }
 
   const sharedParams = buildSearchParams(view, params);

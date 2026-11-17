@@ -1188,6 +1188,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       limitationsKnownIssues: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/limitations-known-issues`,
       learnMore: `${ELASTIC_DOCS}explore-analyze/ai-features/ai-chat-experiences/ai-agent-or-ai-assistant`,
       aiAssistant: `${ELASTIC_DOCS}explore-analyze/ai-features/ai-chat-experiences/ai-assistant`,
+      replaceKnowledgeBaseContent: `${ELASTIC_DOCS}explore-analyze/ai-features/ai-chat-experiences/ai-agent-or-ai-assistant#replace-knowledge-base-content`,
     },
     applicationConnections: {
       oauthClients: `${ELASTIC_DOCS}deploy-manage/app-connections/oauth-clients`,

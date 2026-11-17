@@ -23,6 +23,7 @@ import type {
   ApplicationOverview,
   ApplicationOverviewResponse,
 } from '../../../../common/types/overview';
+import type { HistogramBuckets } from '../../../../common/types/applications';
 import type { ApplicationUsageResponse } from '../../../../common/types/usage';
 import { LoadErrorPrompt } from '../../../components/load_error_prompt';
 import { APPLICATION_OVERVIEW_EBT_ELEMENTS, ERRORS_EBT_ELEMENTS } from '../../../ebt_constants';
@@ -77,12 +78,13 @@ const TOP_ERRORS_ROWS = 5;
 /** The request for the Overview narrowed by `searchParams`; a change of them is a new request. */
 const overviewRequestOf = (
   searchParams: OverviewSearchParams,
-  percentile: OverviewPercentileParam | undefined
+  percentile: OverviewPercentileParam | undefined,
+  timeZone: string
 ): ApplicationRequest<ApplicationOverviewResponse> => {
   return (apiClient, options) => {
     return apiClient.fetch(
       'GET /internal/digital_experience/applications/{serviceName}/overview',
-      withOverviewFilters(options, searchParams, { percentile })
+      withOverviewFilters(options, searchParams, { percentile, timeZone })
     );
   };
 };
@@ -103,7 +105,7 @@ const usageRequestOf = (
 const emptyOverview = (
   serviceName: string,
   percentile: OverviewPercentile
-): ApplicationOverview => ({
+): Omit<ApplicationOverview, 'trendHistogram'> => ({
   serviceName,
   percentile,
   pageLoads: { count: 0 },
@@ -117,12 +119,15 @@ const emptyOverview = (
 /** The KPIs, Core Web Vitals and trends of one Overview, empty while it loads. */
 function OverviewPanels({
   overview,
+  trendHistogram,
   percentile,
   onPercentileChange,
   isLoading,
   onTimeRangeSelect,
 }: {
-  overview: ApplicationOverview;
+  overview: Omit<ApplicationOverview, 'trendHistogram'>;
+  /** `undefined` until the first response. */
+  trendHistogram: HistogramBuckets | undefined;
   /** The percentile asked for, which the panels name before its response arrives. */
   percentile: OverviewPercentile;
   onPercentileChange: (percentile: OverviewPercentile) => void;
@@ -140,6 +145,7 @@ function OverviewPanels({
         <EuiFlexItem grow={5}>
           <OverviewTrends
             points={overview.trend}
+            histogram={trendHistogram}
             pageLoads={overview.pageLoads.count}
             loadTimePercentileMs={overview.loadTime.percentileMs}
             percentile={percentile}
@@ -251,8 +257,8 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   // Separate requests, so the KPIs never wait on the panels below and a failure replaces only its own.
   const overviewRequest = useMemo(
-    () => overviewRequestOf(searchParams, percentileParam),
-    [searchParams, percentileParam]
+    () => overviewRequestOf(searchParams, percentileParam, formatters.timeZone),
+    [searchParams, percentileParam, formatters.timeZone]
   );
   const usageRequest = useMemo(() => usageRequestOf(searchParams), [searchParams]);
   const overview = useApplicationData(serviceName, overviewRequest);
@@ -322,6 +328,7 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
       ) : (
         <OverviewPanels
           overview={overview.response?.overview ?? emptyOverview(serviceName, percentile)}
+          trendHistogram={overview.response?.overview.trendHistogram}
           percentile={percentile}
           onPercentileChange={setPercentile}
           isLoading={overview.isLoading}
