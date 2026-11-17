@@ -7,8 +7,6 @@
 
 /**
  * Top-level agent policy keys that can never be set through `overrides`.
- * - `inputs` and `output_permissions`: code execution / privilege escalation through integrations.
- * - OTel collector keys: the agent lifts them straight into the collector configuration.
  */
 export const DENIED_AGENT_POLICY_OVERRIDE_KEYS = [
   'inputs',
