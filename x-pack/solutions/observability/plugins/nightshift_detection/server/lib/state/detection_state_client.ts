@@ -153,11 +153,25 @@ export class DetectionStateClient {
       { namespace: spaceId }
     );
 
-    return new Map(
-      objects.flatMap((object, index) =>
-        'error' in object ? [] : [[strategyIds[index], object.attributes.processed_until] as const]
-      )
+    // A bulk get reports an item that failed to read as not found, so an absence is only believed
+    // after a plain get, which throws on a real failure. Otherwise a checkpoint that is unreadable
+    // for a moment would look like a strategy that never ran, and its backlog would be skipped.
+    const checkpoints = await Promise.all(
+      objects.map(async (object, index) => {
+        const strategyId = strategyIds[index];
+        const found =
+          'error' in object
+            ? await this.getObject<GeneratorStateAttributes>({
+                spaceId,
+                id: getGeneratorStateId(strategyId),
+              })
+            : object;
+
+        return found ? ([strategyId, found.attributes.processed_until] as const) : undefined;
+      })
     );
+
+    return new Map(checkpoints.filter((checkpoint) => checkpoint !== undefined));
   }
 
   /**
@@ -190,11 +204,13 @@ export class DetectionStateClient {
         await this.repository.update(DETECTION_STATE_SO_TYPE, id, attributes, {
           version: current.version,
           namespace: spaceId,
+          refresh: false,
         });
       } else {
         await this.repository.create(DETECTION_STATE_SO_TYPE, attributes, {
           id,
           namespace: spaceId,
+          refresh: false,
         });
       }
     } catch (error) {
@@ -239,10 +255,12 @@ export class DetectionStateClient {
         ? await this.repository.update(DETECTION_STATE_SO_TYPE, LEASE_ID, lease, {
             version,
             namespace: spaceId,
+            refresh: false,
           })
         : await this.repository.create(DETECTION_STATE_SO_TYPE, lease, {
             id: LEASE_ID,
             namespace: spaceId,
+            refresh: false,
           });
 
       return written.version;

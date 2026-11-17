@@ -41,7 +41,17 @@ export const detectionStateSavedObjectType: SavedObjectsType = {
       changes: [],
       schemas: {
         create: schema.object({}, { unknowns: 'allow' }),
-        forwardCompatibility: schema.object({}, { unknowns: 'ignore' }),
+        // One type holds both kinds of document, so every field is optional. Dropping them would let
+        // an older node read a newer document as empty during a rolling upgrade.
+        forwardCompatibility: schema.object(
+          {
+            owner: schema.maybe(schema.string()),
+            acquired_at: schema.maybe(schema.string()),
+            expires_at: schema.maybe(schema.string()),
+            processed_until: schema.maybe(schema.number()),
+          },
+          { unknowns: 'ignore' }
+        ),
       },
     },
   },
