@@ -55,4 +55,14 @@ describe('convertSnakeCasedKeysToCamelCase', () => {
       c: [1, null],
     });
   });
+
+  test('skipKeys values are not converted', () => {
+    const query = { language: 'lucene', query: { match_all: {} } };
+    expect(
+      convertSnakeCasedKeysToCamelCase({ fill_color: 'a', query, join: { where_query: query } }, [
+        'query',
+        'whereQuery',
+      ])
+    ).toEqual({ fillColor: 'a', query, join: { whereQuery: query } });
+  });
 });

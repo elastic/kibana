@@ -12,6 +12,9 @@ import { extractReferences } from '../migrations/references';
 import { convertSnakeCasedKeysToCamelCase } from './convert_snake_cased_keys_to_camel_case';
 import { mapStateKeys, uiStateKeys } from './stored_map_attributes';
 
+// Query state contains Elasticsearch DSL. Keys must be persisted as provided.
+const SKIP_CAMEL_CASE_KEYS = ['query', 'whereQuery'];
+
 export function transformMapAttributesIn(mapState: MapAttributes): {
   attributes: StoredMapAttributes;
   references: Reference[];
@@ -23,7 +26,7 @@ export function transformMapAttributesIn(mapState: MapAttributes): {
   if (mapState.description) storedMapAttributes.description = mapState.description;
   if (mapState.layers)
     storedMapAttributes.layerListJSON = JSON.stringify(
-      convertSnakeCasedKeysToCamelCase(mapState.layers)
+      convertSnakeCasedKeysToCamelCase(mapState.layers, SKIP_CAMEL_CASE_KEYS)
     );
 
   const mapStateJSON = getJSONString(
