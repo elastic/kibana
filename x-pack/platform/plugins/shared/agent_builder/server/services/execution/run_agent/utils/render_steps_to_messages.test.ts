@@ -157,7 +157,7 @@ describe('renderHistorySteps', () => {
     expect(ai.tool_calls![0].args).toEqual({ q: 'a' });
     expect(ai.content).toBe('');
   });
-  
+
   it('never renders model reasoning, and keeps the tool call group it belongs to whole', async () => {
     const steps: ConversationRoundStep[] = [
       createModelReasoningStep({ reasoning: 'provider thoughts', tool_call_group_id: 'g' }),
