@@ -279,6 +279,72 @@ describe('When rendering the StorageProvidersLayout', () => {
       );
     });
 
+    it('should rename a provider in place, in one update', async () => {
+      const first = createProvider('azure-1');
+      const second = createProvider('azure-2', { container: 'files' });
+      const third = createProvider('azure-3');
+      await render([first, second, third]);
+
+      await clickRowAction('azure-2', 'storageProvidersEditAction');
+      await setFieldValue('storageProviderFlyout-nameInput', 'azure-files');
+      await userEvent.click(renderResult.getByTestId('storageProviderFlyout-saveButton'));
+      await waitForUpdateRequest();
+
+      // Same position in windows, mac and linux; the old name is gone
+      expect(getSentProviders()).toEqual([first, { ...second, id: 'azure-files' }, third]);
+      expect(mockedContext.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
+        expect.objectContaining({ title: 'Updated storage provider azure-files' })
+      );
+      expect(
+        await renderResult.findByTestId('storageProvidersTableRow-azure-files')
+      ).toBeInTheDocument();
+      expect(
+        renderResult.queryByTestId('storageProvidersTableRow-azure-2')
+      ).not.toBeInTheDocument();
+    });
+
+    it("should not allow renaming a provider to another provider's name", async () => {
+      await render([createProvider('azure-1'), createProvider('azure-2')]);
+
+      await clickRowAction('azure-2', 'storageProvidersEditAction');
+      await setFieldValue('storageProviderFlyout-nameInput', 'azure-1');
+
+      expect(renderResult.getByTestId('storageProviderFlyout')).toHaveTextContent(
+        'This policy already has a storage provider with this name.'
+      );
+      expect(renderResult.getByTestId('storageProviderFlyout-saveButton')).toBeDisabled();
+    });
+
+    it('should warn about exports to the old name only while the name is changed', async () => {
+      await render([createProvider('azure-1')]);
+      const warning = "Exports to the old name that haven't reached a host yet will fail.";
+
+      await clickRowAction('azure-1', 'storageProvidersEditAction');
+      const flyout = await renderResult.findByTestId('storageProviderFlyout');
+      expect(flyout).not.toHaveTextContent(warning);
+
+      await setFieldValue('storageProviderFlyout-containerInput', 'other-dumps');
+      expect(flyout).not.toHaveTextContent(warning);
+
+      await setFieldValue('storageProviderFlyout-nameInput', 'azure-renamed');
+      expect(
+        renderResult.getByTestId('storageProviderFlyout-nameChangedWarning')
+      ).toHaveTextContent(warning);
+
+      await setFieldValue('storageProviderFlyout-nameInput', 'azure-1');
+      expect(flyout).not.toHaveTextContent(warning);
+    });
+
+    it('should not warn about an old name when adding a provider', async () => {
+      await render();
+
+      await fillAddFlyout(createProvider('azure-1'));
+
+      expect(
+        renderResult.queryByTestId('storageProviderFlyout-nameChangedWarning')
+      ).not.toBeInTheDocument();
+    });
+
     it('should drop the service URL when its field is cleared', async () => {
       await render([createProvider('azure-1', { service_url: 'https://acct1.blob.example.com' })]);
 
