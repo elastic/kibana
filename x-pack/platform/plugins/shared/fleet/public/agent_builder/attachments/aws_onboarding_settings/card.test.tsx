@@ -7,105 +7,79 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { AwsOnboardingSettingsCard } from './card';
-import { clearSettingsDraft } from './drafts';
 import { seedDraft } from './fields';
 import { settingsAttachmentData } from './fixtures';
 
 const renderCard = () =>
   render(
     <I18nProvider>
-      <AwsOnboardingSettingsCard attachmentId="att-1:v1" data={settingsAttachmentData} />
+      <AwsOnboardingSettingsCard data={settingsAttachmentData} />
     </I18nProvider>
   );
 
 describe('AwsOnboardingSettingsCard', () => {
-  beforeEach(() => {
-    clearSettingsDraft('att-1:v1');
-    clearSettingsDraft('att-1:v2');
-  });
-
-  it('renders a radio per input of a log data stream with ingestion_method labels, preselecting default_input', () => {
+  it('shows one status line per data stream with the chosen method and missing values', () => {
     renderCard();
 
-    expect(screen.getByLabelText(/S3 \+ SQS notifications — Collect logs from S3/)).toBeChecked();
+    expect(screen.getByTestId('awsOnboardingSettings-guardduty_findings-status')).toHaveTextContent(
+      'Findings: S3 + SQS notifications · 1 value missing'
+    );
+    expect(screen.getByTestId('awsOnboardingSettings-ec2_metrics-status')).toHaveTextContent(
+      'EC2 metrics: CloudWatch metrics'
+    );
+    expect(screen.getByTestId('awsOnboardingSettings-ec2_logs-status')).toHaveTextContent(
+      'EC2 logs: off'
+    );
+  });
+
+  it('shows the sentence, the badge and the opener hint, with no editable controls', () => {
+    renderCard();
+
     expect(
-      screen.getByLabelText(/GuardDuty API polling — Collect logs from the API/)
-    ).not.toBeChecked();
-    expect(screen.getByLabelText(/Don't collect Findings/)).not.toBeChecked();
-    // A one_of stream with no default starts off.
-    expect(screen.getByLabelText(/Don't collect EC2 logs/)).toBeChecked();
-  });
-
-  it('renders a toggle for a metrics data stream, on by default', () => {
-    renderCard();
-
-    expect(screen.getByTestId('awsOnboardingSettings-ec2_metrics-toggle')).toBeChecked();
-  });
-
-  it('shows the required-values badge and nests fields under the selected input only', () => {
-    renderCard();
-
+      screen.getByText(
+        'Choose how each service collects data and fill in the required values before the run continues.'
+      )
+    ).toBeInTheDocument();
     expect(screen.getByTestId('awsOnboardingSettingsBadge')).toHaveTextContent(
       '1 required value missing'
     );
-    expect(
-      screen.getByTestId('awsOnboardingSettings-guardduty_findings-field-queue_url')
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByTestId('awsOnboardingSettings-guardduty_findings-field-detector_id')
-    ).not.toBeInTheDocument();
+    expect(screen.getByText('Use Review settings above to open the form.')).toBeInTheDocument();
+    expect(screen.queryByRole('radio')).not.toBeInTheDocument();
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
   });
 
-  it('shows the README notes expander when present', () => {
-    renderCard();
-
-    expect(screen.getByText('Integration notes')).toBeInTheDocument();
-    expect(
-      screen.getByText('GuardDuty findings can be duplicated when polling the API.')
-    ).toBeInTheDocument();
-  });
-
-  it('shows a service-level problem when a service is left with nothing enabled', async () => {
-    renderCard();
-
-    await userEvent.click(screen.getByLabelText(/Don't collect Findings/));
+  it('shows a service-level problem when a service is left with nothing enabled', () => {
+    render(
+      <I18nProvider>
+        <AwsOnboardingSettingsCard
+          data={{
+            ...settingsAttachmentData,
+            answer: {
+              services: { guardduty: { data_streams: { guardduty_findings: { input: null } } } },
+            },
+          }}
+        />
+      </I18nProvider>
+    );
 
     expect(screen.getByTestId('awsOnboardingSettings-service-guardduty-problem')).toHaveTextContent(
       'Amazon GuardDuty: enable at least one data stream.'
     );
   });
 
-  it('pluralises the missing-values badge', async () => {
-    renderCard();
-    expect(screen.getByTestId('awsOnboardingSettingsBadge')).toHaveTextContent(
-      '1 required value missing'
-    );
-
-    await userEvent.click(screen.getByLabelText(/Don't collect Findings/));
-    await userEvent.click(screen.getByLabelText(/CloudWatch Logs — Collect logs from CloudWatch/));
-
-    expect(screen.getByTestId('awsOnboardingSettingsBadge')).toHaveTextContent(
-      '2 required values missing'
-    );
-  });
-
-  it('reseeds from the recorded answer when a new attachment version arrives', () => {
-    const view = renderCard();
-    expect(screen.getByLabelText(/S3 \+ SQS notifications — Collect logs from S3/)).toBeChecked();
-
-    view.rerender(
+  it('pluralises the missing-values badge', () => {
+    render(
       <I18nProvider>
         <AwsOnboardingSettingsCard
-          attachmentId="att-1:v2"
           data={{
             ...settingsAttachmentData,
             answer: {
               services: {
-                guardduty: { data_streams: { guardduty_findings: { input: 'cel' } } },
+                guardduty: { data_streams: { guardduty_findings: { input: 'aws-s3' } } },
+                ec2: { data_streams: { ec2_logs: { input: 'aws-cloudwatch' } } },
               },
             },
           }}
@@ -113,16 +87,36 @@ describe('AwsOnboardingSettingsCard', () => {
       </I18nProvider>
     );
 
-    expect(screen.getByLabelText(/GuardDuty API polling — Collect logs/)).toBeChecked();
+    expect(screen.getByTestId('awsOnboardingSettingsBadge')).toHaveTextContent(
+      '2 required values missing'
+    );
   });
 
-  it('leaves a log stream with no default and no default-on sibling unselected', () => {
+  it('reads the recorded answer when one is present', () => {
+    render(
+      <I18nProvider>
+        <AwsOnboardingSettingsCard
+          data={{
+            ...settingsAttachmentData,
+            answer: {
+              services: { guardduty: { data_streams: { guardduty_findings: { input: 'cel' } } } },
+            },
+          }}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('awsOnboardingSettings-guardduty_findings-status')).toHaveTextContent(
+      'Findings: GuardDuty API polling · 1 value missing'
+    );
+  });
+
+  it('marks a log stream with no default and no default-on sibling as not set', () => {
     const [guardduty] = settingsAttachmentData.requirement.services;
     const [findings] = guardduty.data_streams;
     render(
       <I18nProvider>
         <AwsOnboardingSettingsCard
-          attachmentId="att-1:v1"
           data={{
             ...settingsAttachmentData,
             requirement: {
@@ -136,12 +130,9 @@ describe('AwsOnboardingSettingsCard', () => {
       </I18nProvider>
     );
 
-    expect(screen.getByLabelText(/S3 \+ SQS notifications/)).not.toBeChecked();
-    expect(screen.getByLabelText(/GuardDuty API polling/)).not.toBeChecked();
-    expect(screen.getByLabelText(/Don't collect Findings/)).not.toBeChecked();
-    expect(
-      screen.getByTestId('awsOnboardingSettings-guardduty_findings-input-problem')
-    ).toHaveTextContent('choose a collection method');
+    expect(screen.getByTestId('awsOnboardingSettings-guardduty_findings-status')).toHaveTextContent(
+      'Findings: not set'
+    );
   });
 
   it('seeds a log stream with a default input off when a metrics stream of the service is on', () => {
@@ -171,10 +162,7 @@ describe('AwsOnboardingSettingsCard', () => {
   it('shows a top-level problem when no service is selected', () => {
     render(
       <I18nProvider>
-        <AwsOnboardingSettingsCard
-          attachmentId="att-1:v1"
-          data={{ ...settingsAttachmentData, answer: { services: {} } }}
-        />
+        <AwsOnboardingSettingsCard data={{ ...settingsAttachmentData, answer: { services: {} } }} />
       </I18nProvider>
     );
 

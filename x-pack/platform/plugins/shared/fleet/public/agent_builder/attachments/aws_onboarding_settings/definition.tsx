@@ -61,11 +61,7 @@ export const createAwsOnboardingSettingsAttachmentDefinition = (
   renderInlineContent: ({ attachment }) => (
     <Providers startServices={startServices}>
       <Suspense fallback={<EuiLoadingSpinner />}>
-        <LazyCard
-          key={settingsDraftKey(attachment)}
-          attachmentId={settingsDraftKey(attachment)}
-          data={attachment.data}
-        />
+        <LazyCard key={settingsDraftKey(attachment)} data={attachment.data} />
       </Suspense>
     </Providers>
   ),

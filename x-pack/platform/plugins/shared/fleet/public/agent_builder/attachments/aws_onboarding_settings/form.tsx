@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiButton, EuiForm, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiForm, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 
@@ -53,52 +53,64 @@ export const AwsOnboardingSettingsForm: React.FC<{
   );
 
   return (
-    <EuiForm component="form" onSubmit={onSubmit} data-test-subj="awsOnboardingSettingsForm">
-      {problems.length > 0 && (
-        <>
-          <KbnDangerCallout
-            announceOnMount={false}
-            data-test-subj="awsOnboardingSettingsProblems"
-            title={i18n.translate('xpack.fleet.awsOnboardingSettingsForm.problemsTitle', {
-              defaultMessage: 'These settings need attention',
-            })}
-          >
-            <ul>
-              {problems.map((problem) => (
-                <li key={`${problem.path}-${problem.message}`}>{problem.message}</li>
-              ))}
-            </ul>
-          </KbnDangerCallout>
-          <EuiSpacer size="m" />
-        </>
-      )}
-      {requestError && (
-        <>
-          <KbnDangerCallout
-            announceOnMount={false}
-            data-test-subj="awsOnboardingSettingsError"
-            title={requestError}
-          />
-          <EuiSpacer size="m" />
-        </>
-      )}
-      <SettingsSections
-        requirement={data.requirement}
-        draft={draft}
-        problems={problems}
-        onChange={setDraft}
-      />
-      <EuiButton
-        fill
-        type="submit"
-        isLoading={isSaving}
-        isDisabled={isSaving}
-        data-test-subj="awsOnboardingSettingsSave"
+    <EuiPanel paddingSize="l" hasShadow={false} hasBorder={false} color="transparent">
+      <EuiForm
+        component="form"
+        fullWidth
+        onSubmit={onSubmit}
+        data-test-subj="awsOnboardingSettingsForm"
       >
-        {i18n.translate('xpack.fleet.awsOnboardingSettingsForm.save', {
-          defaultMessage: 'Save settings',
-        })}
-      </EuiButton>
-    </EuiForm>
+        {problems.length > 0 && (
+          <>
+            <KbnDangerCallout
+              announceOnMount={false}
+              data-test-subj="awsOnboardingSettingsProblems"
+              title={i18n.translate('xpack.fleet.awsOnboardingSettingsForm.problemsTitle', {
+                defaultMessage: 'These settings need attention',
+              })}
+            >
+              <ul>
+                {problems.map((problem) => (
+                  <li key={`${problem.path}-${problem.message}`}>{problem.message}</li>
+                ))}
+              </ul>
+            </KbnDangerCallout>
+            <EuiSpacer size="m" />
+          </>
+        )}
+        {requestError && (
+          <>
+            <KbnDangerCallout
+              announceOnMount={false}
+              data-test-subj="awsOnboardingSettingsError"
+              title={requestError}
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
+        <SettingsSections
+          requirement={data.requirement}
+          draft={draft}
+          problems={problems}
+          onChange={setDraft}
+        />
+        <EuiSpacer size="l" />
+        <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              type="submit"
+              isLoading={isSaving}
+              isDisabled={isSaving}
+              data-test-subj="awsOnboardingSettingsSave"
+            >
+              {i18n.translate('xpack.fleet.awsOnboardingSettingsForm.save', {
+                defaultMessage: 'Save settings',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiForm>
+    </EuiPanel>
   );
 };

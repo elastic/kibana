@@ -116,6 +116,20 @@ const withInput = (
   };
 };
 
+const normalizeTitle = (title: string) =>
+  title
+    .trim()
+    .replace(/^collect\s+/i, '')
+    .replace(/\s+from aws$/i, '')
+    .toLowerCase();
+
+/** The input's title is help only when it says something the stream title does not. */
+const inputHelp = (stream: DataStream, input: Input): string | undefined => {
+  const help = input.title || input.description;
+  if (!help) return undefined;
+  return normalizeTitle(help) === normalizeTitle(stream.title) ? undefined : help;
+};
+
 const isSecret = (field: Field) => field.type === 'password' || field.type === 'secret';
 
 const fieldLabel = (field: Field) =>
@@ -342,13 +356,21 @@ const StreamEditor: React.FC<{
   return (
     <>
       <EuiText size="xs" color="subdued">
-        <strong style={{ textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+        <strong>
           {i18n.translate('xpack.fleet.awsOnboardingSettings.streamLabel', {
-            defaultMessage: '{title} · data stream {dataset} — choose one collection method',
+            defaultMessage: '{title} · {dataset}',
             values: { title: stream.title, dataset: stream.dataset },
           })}
         </strong>
       </EuiText>
+      <EuiSpacer size="xs" />
+      <EuiTitle size="xxs">
+        <h5>
+          {i18n.translate('xpack.fleet.awsOnboardingSettings.collectionMethod', {
+            defaultMessage: 'Collection method',
+          })}
+        </h5>
+      </EuiTitle>
       <EuiRadioGroup
         name={`${pathPrefix}-input`}
         // A stream with no answer yet has nothing checked, not "Don't collect".
@@ -358,10 +380,12 @@ const StreamEditor: React.FC<{
             id: radioId(stream.id, input.input),
             label: (
               <>
-                <strong>{`${input.ingestion_method} — ${input.title}`}</strong>
-                <EuiText size="xs" color="subdued">
-                  {input.description}
-                </EuiText>
+                <strong>{input.ingestion_method}</strong>
+                {inputHelp(stream, input) && (
+                  <EuiText size="xs" color="subdued">
+                    {inputHelp(stream, input)}
+                  </EuiText>
+                )}
               </>
             ),
             'data-test-subj': `awsOnboardingSettings-${stream.id}-input-${input.input}`,
@@ -369,8 +393,7 @@ const StreamEditor: React.FC<{
           {
             id: radioId(stream.id, OFF),
             label: i18n.translate('xpack.fleet.awsOnboardingSettings.dontCollect', {
-              defaultMessage: "Don''t collect {title}",
-              values: { title: stream.title },
+              defaultMessage: "Don''t collect",
             }),
             'data-test-subj': `awsOnboardingSettings-${stream.id}-input-off`,
           },
@@ -447,7 +470,7 @@ export const SettingsSections: React.FC<{
           ))}
           {service.data_streams.map((stream) => (
             <React.Fragment key={stream.id}>
-              <EuiSpacer size="s" />
+              <EuiSpacer size="m" />
               <StreamEditor
                 service={service}
                 stream={stream}
@@ -475,7 +498,7 @@ export const SettingsSections: React.FC<{
               </EuiAccordion>
             </>
           ) : null}
-          <EuiSpacer size="m" />
+          <EuiSpacer size="l" />
         </div>
       ))}
     </>

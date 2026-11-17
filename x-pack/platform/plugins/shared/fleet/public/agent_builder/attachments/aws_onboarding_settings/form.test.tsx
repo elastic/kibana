@@ -12,7 +12,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import { sendSubmitAwsOnboardingSettings } from '../../../hooks/use_request/aws_onboarding_settings';
 
-import { AwsOnboardingSettingsCard } from './card';
 import { clearSettingsDraft, settingsDraftKey } from './drafts';
 import { AwsOnboardingSettingsForm } from './form';
 import { settingsAttachmentData } from './fixtures';
@@ -105,7 +104,7 @@ describe('AwsOnboardingSettingsForm', () => {
       screen.getByTestId('awsOnboardingSettings-guardduty_findings-field-queue_url'),
       'https://sqs.example/queue'
     );
-    await userEvent.click(screen.getByLabelText(/GuardDuty API polling — Collect logs/));
+    await userEvent.click(screen.getByLabelText(/GuardDuty API polling/));
     await userEvent.type(
       screen.getByTestId('awsOnboardingSettings-guardduty_findings-field-detector_id'),
       'det-1'
@@ -126,7 +125,7 @@ describe('AwsOnboardingSettingsForm', () => {
       .mockResolvedValue({ data: { status: 'resumed' }, error: null } as never);
     renderForm(jest.fn());
 
-    await userEvent.click(screen.getByLabelText(/CloudWatch Logs — Collect logs from CloudWatch/));
+    await userEvent.click(screen.getByLabelText(/CloudWatch Logs/));
     await userEvent.type(
       screen.getByTestId('awsOnboardingSettings-ec2_logs-field-log_group_arn'),
       'arn:log-group'
@@ -147,27 +146,43 @@ describe('AwsOnboardingSettingsForm', () => {
     ]);
   });
 
-  it('submits a change made on the inline card', async () => {
-    jest
-      .mocked(sendSubmitAwsOnboardingSettings)
-      .mockResolvedValue({ data: { status: 'resumed' }, error: null } as never);
-    const card = render(
+  it('labels radios by ingestion method, shows the input title as help only when it differs, and offers a plain off option', () => {
+    const [guardduty] = settingsAttachmentData.requirement.services;
+    const [findings] = guardduty.data_streams;
+    const [s3, cel] = findings.inputs;
+    render(
       <I18nProvider>
-        <AwsOnboardingSettingsCard attachmentId={KEY} data={settingsAttachmentData} />
+        <AwsOnboardingSettingsForm
+          attachmentId={KEY}
+          onSubmitted={jest.fn()}
+          data={{
+            ...settingsAttachmentData,
+            requirement: {
+              ...settingsAttachmentData.requirement,
+              services: [
+                {
+                  ...guardduty,
+                  data_streams: [
+                    {
+                      ...findings,
+                      inputs: [s3, { ...cel, title: 'Collect Findings from AWS' }],
+                    },
+                  ],
+                },
+              ],
+            },
+          }}
+        />
       </I18nProvider>
     );
-    await userEvent.click(screen.getByLabelText(/GuardDuty API polling — Collect logs/));
-    card.unmount();
 
-    renderForm(jest.fn());
-    await userEvent.type(
-      screen.getByTestId('awsOnboardingSettings-guardduty_findings-field-detector_id'),
-      'det-1'
-    );
-    await userEvent.click(screen.getByTestId('awsOnboardingSettingsSave'));
-
-    await waitFor(() => expect(sendSubmitAwsOnboardingSettings).toHaveBeenCalled());
-    const answer = jest.mocked(sendSubmitAwsOnboardingSettings).mock.calls[0][1];
-    expect(answer.services.guardduty.data_streams.guardduty_findings.input).toBe('cel');
+    expect(screen.getByText('Findings · aws.guardduty')).toBeInTheDocument();
+    expect(screen.getByText('Collection method')).toBeInTheDocument();
+    expect(screen.getByText('S3 + SQS notifications')).toBeInTheDocument();
+    expect(screen.getByText('Collect logs from S3')).toBeInTheDocument();
+    expect(screen.getByText('GuardDuty API polling')).toBeInTheDocument();
+    expect(screen.queryByText('Collect Findings from AWS')).not.toBeInTheDocument();
+    expect(screen.queryByText('The agent polls the GuardDuty API.')).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Don't collect")).not.toBeChecked();
   });
 });
