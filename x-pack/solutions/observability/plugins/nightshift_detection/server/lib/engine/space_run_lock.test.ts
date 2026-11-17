@@ -57,6 +57,17 @@ describe('SpaceRunLock', () => {
     expect(callback).not.toHaveBeenCalled();
   });
 
+  it('acquires again when the holder finished between the failed attempt and the read', async () => {
+    withLockMock
+      .mockRejectedValueOnce(new LockAcquisitionError('held'))
+      .mockImplementationOnce(async (_options, callback) => callback());
+    getLockMock.mockResolvedValue(undefined);
+
+    const outcome = await createLock().run({ spaceId: 'space-a', callback: async () => 7 });
+
+    expect(outcome).toEqual({ ran: true, result: 7 });
+  });
+
   it('fails, not skips, when the lock was not taken and nobody holds it', async () => {
     withLockMock.mockRejectedValue(new LockAcquisitionError('Elasticsearch refused the write'));
     getLockMock.mockResolvedValue(undefined);
