@@ -13,8 +13,8 @@ import { expect } from '../../../../../ui';
 /** One attempt to pick options before the selection is retried. */
 const OPTION_ATTEMPT_TIMEOUT_MS = 5_000;
 
-/** One click on "Continue" before the click is repeated. */
-const CONTINUE_ATTEMPT_TIMEOUT_MS = 3_000;
+/** Path of the search requests that return the columns of an ES|QL query. */
+const ESQL_SEARCH_PATH = '/internal/search/esql';
 
 type ComboBox = ReturnType<ScoutPage['components']['comboBox']>;
 
@@ -38,6 +38,11 @@ export class EsqlRuleFormPage {
   readonly suppressPerTimePeriod: Locator;
   readonly suppressMissingFields: Locator;
   readonly doNotSuppressMissingFields: Locator;
+
+  /** Timeline of the ES|QL search requests and the clicks on "Continue", for failure messages. */
+  private readonly timeline: string[] = [];
+  private timelineStart = Date.now();
+  private isRecordingRequests = false;
 
   constructor(private readonly page: ScoutPage) {
     this.ruleTypeCard = this.page.testSubj.locator('esqlRuleType');
@@ -72,6 +77,7 @@ export class EsqlRuleFormPage {
   async gotoCreateEsqlRule(params: { kbnUrl: KibanaUrl; spaceId: string }): Promise<void> {
     const { kbnUrl, spaceId } = params;
 
+    this.recordEsqlSearchRequests();
     await this.page.addInitScript(() => {
       window.localStorage.setItem('cps:projectPicker:tourShown', 'true');
     });
@@ -86,6 +92,7 @@ export class EsqlRuleFormPage {
   /** Replaces the query of the ES|QL editor. */
   async setQuery(query: string): Promise<void> {
     await this.esqlEditor.setQuery(query);
+    this.recordEvent('query set');
   }
 
   /** Clicks "Continue" once. Use it when the Define step is expected to stay open on an error. */
@@ -94,27 +101,54 @@ export class EsqlRuleFormPage {
   }
 
   /**
-   * Clicks "Continue" until the Define step collapses. For a non-aggregating query the form
-   * requests the query columns from Elasticsearch and treats a failed request as a blocking
-   * error, so on a loaded cluster a click can leave the step open. Clicking again validates
-   * the query again. When the step never collapses, the failure carries the text of the query
-   * bar, which includes the validation message.
+   * TEMPORARY, for the flaky test runner: clicks "Continue" once and waits for the Define step to
+   * collapse, with no retry, so a failure shows the first-click problem. The failure carries the
+   * text of the query bar (which includes the validation message) and a timeline of the ES|QL
+   * search requests and clicks. Replace it with the fix, or restore a retry, once the cause of
+   * the failures of CI runs 15502 and 15505 is known.
    */
   async continueToAboutStep(): Promise<void> {
+    this.recordEvent('click Continue');
+    await this.defineContinue.click();
     try {
-      await expect(async () => {
-        if (await this.queryBar.isHidden()) {
-          return;
-        }
-        await this.defineContinue.click();
-        await expect(this.queryBar).toBeHidden({ timeout: CONTINUE_ATTEMPT_TIMEOUT_MS });
-      }).toPass({ timeout: DATA_LOAD_TIMEOUT_MS });
+      await expect(this.queryBar).toBeHidden({ timeout: DATA_LOAD_TIMEOUT_MS });
     } catch (error) {
       const queryBarText = (await this.queryBar.textContent()) ?? '';
-      throw new Error(`The Define step did not close. Query bar: ${queryBarText}`, {
-        cause: error,
-      });
+      throw new Error(
+        `The Define step did not close. Query bar: ${queryBarText}\nTimeline:\n${this.timeline.join(
+          '\n'
+        )}`,
+        { cause: error }
+      );
     }
+  }
+
+  private recordEvent(event: string): void {
+    this.timeline.push(`+${Date.now() - this.timelineStart}ms ${event}`);
+  }
+
+  private recordEsqlSearchRequests(): void {
+    if (this.isRecordingRequests) {
+      return;
+    }
+    this.isRecordingRequests = true;
+    this.timelineStart = Date.now();
+
+    this.page.on('request', (request) => {
+      if (request.url().includes(ESQL_SEARCH_PATH)) {
+        this.recordEvent('ES|QL search request sent');
+      }
+    });
+    this.page.on('response', (response) => {
+      if (response.url().includes(ESQL_SEARCH_PATH)) {
+        this.recordEvent(`ES|QL search response ${response.status()}`);
+      }
+    });
+    this.page.on('requestfailed', (request) => {
+      if (request.url().includes(ESQL_SEARCH_PATH)) {
+        this.recordEvent(`ES|QL search request failed: ${request.failure()?.errorText}`);
+      }
+    });
   }
 
   /** Picks the field that provides the rule name in the "Rule name override" control. */
