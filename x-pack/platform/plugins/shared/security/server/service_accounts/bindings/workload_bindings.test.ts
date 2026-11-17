@@ -1548,6 +1548,48 @@ describe('ServiceAccountWorkloadBindings', () => {
       });
     });
 
+    it('counts each change of a bulk update once, with its own outcome', async () => {
+      const OTHER = { workloadType: 'job', workloadId: 'job-id' };
+      store.bulkDelete.mockResolvedValue([{ ok: false, error: Boom.badRequest('nope') }]);
+
+      await bindings.bulkUpdateWorkloadBindings(PLUGIN_ID, httpServerMock.createKibanaRequest(), [
+        { op: 'bind', serviceAccountId: 'service-account-id', ...WORKLOAD },
+        { op: 'unbind', ...OTHER },
+      ]);
+
+      expect(serviceAccountsMetrics.recordOperation).toHaveBeenCalledTimes(2);
+      expect(serviceAccountsMetrics.recordOperation).toHaveBeenNthCalledWith(1, {
+        operation: 'workload_bind',
+        backend: 'uiam',
+        workload: WORKLOAD_ATTRIBUTES,
+      });
+      expect(serviceAccountsMetrics.recordOperation).toHaveBeenNthCalledWith(2, {
+        operation: 'workload_unbind',
+        backend: 'uiam',
+        workload: { pluginId: PLUGIN_ID, workloadType: 'job' },
+        errorType: '400',
+      });
+    });
+
+    it('counts every change of a bulk update that rejects as failed', async () => {
+      license.isEnabled.mockReturnValue(false);
+
+      await expect(
+        bindings.bulkUpdateWorkloadBindings(PLUGIN_ID, httpServerMock.createKibanaRequest(), [
+          { op: 'bind', serviceAccountId: 'service-account-id', ...WORKLOAD },
+          { op: 'unbind', workloadType: 'job', workloadId: 'job-id' },
+        ])
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+      expect(serviceAccountsMetrics.recordOperation).toHaveBeenCalledTimes(2);
+      expect(serviceAccountsMetrics.recordOperation).toHaveBeenCalledWith(
+        expect.objectContaining({ operation: 'workload_bind', errorType: '403' })
+      );
+      expect(serviceAccountsMetrics.recordOperation).toHaveBeenCalledWith(
+        expect.objectContaining({ operation: 'workload_unbind', errorType: '403' })
+      );
+    });
+
     it('records a successful assume before the callback runs', async () => {
       const execute = jest.fn(async () => {
         expect(assumeAttempt.succeeded).toHaveBeenCalledTimes(1);

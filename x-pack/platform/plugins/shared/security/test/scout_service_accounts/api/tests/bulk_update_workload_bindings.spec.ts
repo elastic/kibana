@@ -190,6 +190,12 @@ apiTest.describe(
         const account = await createAccount(apiClient);
         const toBind = newWorkload();
         const toUnbind = newWorkload();
+        // Bound beforehand, so the refused unbind has a binding it must leave in place.
+        const bound = await bulkUpdate(apiClient, [
+          { op: 'bind', workloadId: toUnbind, serviceAccountId: account },
+        ]);
+        expect(bound).toHaveStatusCode(200);
+        expect(bound.body.results).toMatchObject([{ op: 'bind', ok: true }]);
         const viewerHeaders = {
           ...(await samlAuth.asInteractiveUser('viewer')).cookieHeader,
           ...HEADERS,
@@ -248,6 +254,9 @@ apiTest.describe(
         expect(unbindEvent).toMatchObject({ event: { outcome: 'failure' } });
 
         expect(await runWorkload(apiClient, toBind)).toHaveStatusCode(404);
+        const stillBound = await runWorkload(apiClient, toUnbind);
+        expect(stillBound).toHaveStatusCode(200);
+        expect(stillBound.body).toMatchObject({ username: account });
       }
     );
 
