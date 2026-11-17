@@ -8,7 +8,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
-  EuiBadgeGroup,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiDragDropContext,
@@ -47,9 +46,8 @@ import { DisableRecommendedModelsModal } from './disable_recommended_models_moda
 import { EffortBadge } from './effort_badge';
 import { ADD_EFFORT_CLASS_NAME } from './add_effort_badge';
 import { ReasoningEffortPopover } from './reasoning_effort_popover';
-import { RecommendedDefaultsSwitch } from './recommended_defaults_switch';
 import { ResetDefaultsModal } from './reset_defaults_modal';
-import { SettingTitle } from './setting_title';
+import { SubFeatureCardHeader } from './sub_feature_card_header';
 import { useRecommendedDefaults } from './use_recommended_defaults';
 
 const COLLAPSED_COUNT = 5;
@@ -59,6 +57,10 @@ const endpointRowStyles = css`
   &:hover .${ADD_EFFORT_CLASS_NAME} {
     opacity: 1;
   }
+`;
+
+const columnStyles = css`
+  min-inline-size: min(20rem, 50%);
 `;
 
 interface SubFeatureCardProps {
@@ -104,7 +106,6 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
   const [listWidth, setListWidth] = useState<number | undefined>(undefined);
   const listRef = useRef<HTMLDivElement>(null);
-  const { isTechPreview, isBeta } = feature;
 
   const { regionDeniedEndpointIds, availableEndpointIds } =
     useRegionAvailableEndpoints(endpointIds);
@@ -242,60 +243,19 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
         alignItems="baseline"
         wrap
       >
-        <EuiFlexItem
-          css={css`
-            min-inline-size: min(20rem, 50%);
-          `}
-        >
-          <EuiFlexGroup responsive={false}>
-            <EuiFlexItem grow={false}>
-              <SettingTitle
-                heading="h4"
-                data-test-subj={`subFeatureCardTitle-${featureId}`}
-                isUnsaved={isFeatureDirty}
-                title={feature.featureName}
-              />
-            </EuiFlexItem>
-            {(isTechPreview || isBeta) && (
-              <EuiFlexItem grow={false}>
-                <EuiBadgeGroup>
-                  {isTechPreview && (
-                    <EuiBadge>
-                      {i18n.translate('xpack.searchInferenceEndpoints.settings.techPreview', {
-                        defaultMessage: 'Technical Preview',
-                      })}
-                    </EuiBadge>
-                  )}
-                  {isBeta && (
-                    <EuiBadge>
-                      {i18n.translate('xpack.searchInferenceEndpoints.settings.betaBadge', {
-                        defaultMessage: 'Beta',
-                      })}
-                    </EuiBadge>
-                  )}
-                </EuiBadgeGroup>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued">
-            <p>{feature.featureDescription}</p>
-          </EuiText>
-          <EuiSpacer size="s" />
-          <RecommendedDefaultsSwitch
+        <EuiFlexItem css={columnStyles}>
+          <SubFeatureCardHeader
             featureId={featureId}
-            checked={isUsingRecommendedDefaults}
+            feature={feature}
+            isFeatureDirty={isFeatureDirty}
+            isUsingRecommendedDefaults={isUsingRecommendedDefaults}
             hasAvailableRecommendedEndpoints={hasAvailableRecommendedEndpoints}
             canManage={canManage}
-            onChange={toggleRecommendedDefaults}
+            onToggleRecommendedDefaults={toggleRecommendedDefaults}
           />
         </EuiFlexItem>
 
-        <EuiFlexItem
-          css={css`
-            min-inline-size: min(20rem, 50%);
-          `}
-        >
+        <EuiFlexItem css={columnStyles}>
           <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
             <EuiText size="xs" color="subdued">
               <strong>

@@ -202,54 +202,6 @@ describe('SubFeatureCard', () => {
       </Wrapper>
     );
 
-  it('renders feature name, description, and Use recommended defaults toggle', () => {
-    renderCard(['ep-1']);
-
-    expect(screen.getByText('Test Feature')).toBeInTheDocument();
-    expect(screen.getByText('A test feature')).toBeInTheDocument();
-    expect(screen.getByTestId('useRecommendedDefaultsToggle-test_feature')).toBeInTheDocument();
-  });
-
-  it('marks the feature title as unsaved when the feature is dirty', () => {
-    renderCard(['ep-1'], undefined, undefined, undefined, { isFeatureDirty: true });
-
-    expect(
-      screen.getByTestId(`subFeatureCardTitle-${feature.featureId}-unsaved`)
-    ).toBeInTheDocument();
-  });
-
-  it('does not mark the feature title as unsaved when the feature is clean', () => {
-    renderCard(['ep-1']);
-
-    expect(
-      screen.queryByTestId(`subFeatureCardTitle-${feature.featureId}-unsaved`)
-    ).not.toBeInTheDocument();
-  });
-
-  describe('feature status badges', () => {
-    it.each([
-      {
-        scenario: 'renders beta',
-        setup: { ids: ['ep-1'], overrides: { isBeta: true } },
-        expected: ['Beta'],
-      },
-      {
-        scenario: 'renders technical preview',
-        setup: { ids: ['ep-1'], overrides: { isTechPreview: true } },
-        expected: ['Technical Preview'],
-      },
-      {
-        scenario: 'renders both beta and technical preview',
-        setup: { ids: ['ep-1'], overrides: { isBeta: true, isTechPreview: true } },
-        expected: ['Beta', 'Technical Preview'],
-      },
-    ])('$scenario', ({ setup, expected }) => {
-      const { ids, overrides } = setup;
-      renderCard(ids, overrides);
-      expected.forEach((text) => expect(screen.getByText(text)).toBeInTheDocument());
-    });
-  });
-
   describe('Use recommended defaults toggle', () => {
     it('is checked when endpointIds equals effective recommended endpoints', () => {
       render(
