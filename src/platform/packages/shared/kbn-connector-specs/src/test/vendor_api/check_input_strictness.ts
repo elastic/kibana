@@ -11,7 +11,13 @@ import type { ContractCall, OpenApiDocument } from '@kbn/connector-emulate';
 import type { StrictnessGap } from './compare_input_strictness';
 import { compareInputStrictness } from './compare_input_strictness';
 import type { JsonObject } from './json_pointer';
-import { getAtTokens, isJsonObject, localRefToPointer, resolvePathItem, toTokens } from './json_pointer';
+import {
+  getAtTokens,
+  isJsonObject,
+  localRefToPointer,
+  resolvePathItem,
+  toTokens,
+} from './json_pointer';
 
 /** An action input that accepts values the vendor rejects. */
 export interface LooseInput {
@@ -44,6 +50,8 @@ const METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'tr
 const PATH_MAPS = ['paths', 'x-ms-paths'] as const;
 /** Follows a chain of `$ref`s; deep enough for the wrappers vendors put around a scalar. */
 const REF_DEPTH = 8;
+/** How far into a request body the fields are read, enough for JSON:API's `data.attributes.x`. */
+const BODY_DEPTH = 6;
 
 const normalize = (name: string) => name.replace(/[^a-z0-9]/gi, '').toLowerCase();
 
@@ -101,6 +109,45 @@ interface VendorField {
   readonly schema: unknown;
 }
 
+/**
+ * The properties of a body schema, following nested objects and array items, so a vendor that
+ * wraps its fields (Datadog's `data.attributes.schedule.start`) is compared too.
+ */
+const bodyPropertiesOf = (
+  document: OpenApiDocument,
+  schema: unknown,
+  prefix: string,
+  depth: number
+): VendorField[] => {
+  const resolved = resolveSchema(document, schema);
+  if (!isJsonObject(resolved) || depth <= 0) {
+    return [];
+  }
+  if (isJsonObject(resolved.items)) {
+    return bodyPropertiesOf(document, resolved.items, prefix, depth - 1);
+  }
+  const combinator = ['allOf', 'anyOf', 'oneOf'].flatMap((key) => {
+    const branches = resolved[key];
+    return Array.isArray(branches)
+      ? branches.flatMap((branch) => bodyPropertiesOf(document, branch, prefix, depth - 1))
+      : [];
+  });
+  if (!isJsonObject(resolved.properties)) {
+    return combinator;
+  }
+  const own = Object.entries(resolved.properties).flatMap(([name, property]) => {
+    const path = prefix === '' ? name : `${prefix}.${name}`;
+    const field: VendorField = {
+      label: `body ${path}`,
+      name,
+      in: 'body',
+      schema: resolveSchema(document, property),
+    };
+    return [field, ...bodyPropertiesOf(document, property, path, depth - 1)];
+  });
+  return [...own, ...combinator];
+};
+
 const bodyFieldsOf = (document: OpenApiDocument, operation: JsonObject): VendorField[] => {
   const body = resolveRefs(document, operation.requestBody);
   if (!isJsonObject(body) || !isJsonObject(body.content)) {
@@ -108,16 +155,7 @@ const bodyFieldsOf = (document: OpenApiDocument, operation: JsonObject): VendorF
   }
   // Any media type will do: a connector sends one shape, and the constraints are the same.
   const [content] = Object.values(body.content).filter(isJsonObject);
-  const schema = resolveSchema(document, content?.schema);
-  if (!isJsonObject(schema) || !isJsonObject(schema.properties)) {
-    return [];
-  }
-  return Object.entries(schema.properties).map(([name, property]) => ({
-    label: `body ${name}`,
-    name,
-    in: 'body',
-    schema: resolveSchema(document, property),
-  }));
+  return bodyPropertiesOf(document, content?.schema, '', BODY_DEPTH);
 };
 
 const fieldsOf = (

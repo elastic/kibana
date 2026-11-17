@@ -95,9 +95,9 @@ describe('compareInputStrictness', () => {
 
   describe('bounds', () => {
     it('reports an input with no ceiling', () => {
-      expect(compareInputStrictness({ type: 'integer', maximum: 100 }, { type: 'integer' })).toEqual(
-        [{ keyword: 'maximum', vendor: '100', connector: 'nothing' }]
-      );
+      expect(
+        compareInputStrictness({ type: 'integer', maximum: 100 }, { type: 'integer' })
+      ).toEqual([{ keyword: 'maximum', vendor: '100', connector: 'nothing' }]);
     });
 
     it('reports a ceiling above the vendor', () => {

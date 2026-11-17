@@ -16,16 +16,18 @@ import type {
   OpenApiDocument,
   Violation,
 } from '@kbn/connector-emulate';
-import { InvalidSchemaError } from '@kbn/connector-emulate';
+import { InvalidSchemaError, isGraphQLSpec, isMcpSpec } from '@kbn/connector-emulate';
 import type { ActionDefinition, ConnectorSpec } from '../../connector_spec';
 import type { ContractContext, ContractContextOptions } from '../create_contract_context';
 import { createContractContext } from '../create_contract_context';
 import type { FieldUse } from '../field_use';
 import { createFieldUse } from '../field_use';
+import type { ActionRun, LooseInput } from './check_input_strictness';
+import { checkInputStrictness } from './check_input_strictness';
 import type { ActionFixture, QueryOperation, VendorApiFixtures } from './fixtures';
 import { toResponseFixtures } from './fixtures';
 import type { GeneratedInputs, RejectedInput } from './generate_action_inputs';
-import { generateActionInputs } from './generate_action_inputs';
+import { generateActionInputs, toInputJsonSchema } from './generate_action_inputs';
 import type { ManifestCall } from './manifest';
 import { matchesPathTemplate } from './manifest';
 import { errorMessage } from './values';
@@ -117,7 +119,9 @@ export type RecordingFinding =
       readonly action: string;
       readonly operation: string;
       readonly violations: readonly Violation[];
-    };
+    }
+  /** An input accepts values the vendor field it feeds rejects. */
+  | { readonly kind: 'loose-input'; readonly action: string; readonly loose: LooseInput };
 
 export interface ActionsRecording {
   /** Per action, the operations its runs matched, sorted by source, path and method. */
@@ -268,6 +272,12 @@ export const recordActions = async ({
   trackFields = false,
   ...contextOptions
 }: RecordActionsOptions): Promise<ActionsRecording> => {
+  // GraphQL and MCP calls have no parameters to compare with an input's rules.
+  const openApiDocuments = Object.fromEntries(
+    Object.entries(specs).flatMap(([source, spec]) =>
+      isGraphQLSpec(spec) || isMcpSpec(spec) ? [] : [[source, spec]]
+    )
+  );
   const fieldUse = new Map<string, Map<string, FieldUse>>();
   const untracked = new Set<string>();
   const fieldUseOf = (
@@ -320,6 +330,9 @@ export const recordActions = async ({
       findings.push({ kind: 'no-input', action, rejected });
     }
     const calls: ContractCall[] = [];
+    // The input of each run with the calls it made, so an input can be compared with the vendor
+    // field it feeds, including one the handler renames.
+    const runs: ActionRun[] = [];
     // Per auth type under which every run threw without sending a request, the first error.
     const unavailable: Record<string, string> = {};
     const handlerErrors: Record<string, string[]> = {};
@@ -387,6 +400,7 @@ export const recordActions = async ({
         const vendorCalls = mock.calls.filter(({ token }) => !token);
         worked ||= vendorCalls.length > 0;
         calls.push(...vendorCalls);
+        runs.push({ input, calls: vendorCalls });
         for (const { request, matched, scopeViolations: violations = [] } of vendorCalls) {
           if (violations.length > 0) {
             // Named by operation, so the runs of one action report each shortfall once.
@@ -467,6 +481,14 @@ export const recordActions = async ({
       const operation =
         'name' in query ? query.name : `${query.method.toUpperCase()} ${query.path}`;
       findings.push({ kind: 'unused-query', action, operation });
+    }
+    for (const loose of checkInputStrictness({
+      inputSchema: toInputJsonSchema(connector.actions[action]),
+      runs,
+      documents: openApiDocuments,
+      allowed: fixture.looseInputs?.inputs,
+    })) {
+      findings.push({ kind: 'loose-input', action, loose });
     }
     operations[action] = uniqueSorted(
       calls.flatMap(({ matched }): ManifestCall[] => {

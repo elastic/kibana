@@ -17,7 +17,11 @@ const call = (method: string, path: string, url: string, source = 'v1'): Contrac
   } as ContractCall);
 
 const document = (paths: Record<string, unknown>, components?: unknown): OpenApiDocument =>
-  ({ openapi: '3.0.0', paths, ...(components === undefined ? {} : { components }) } as OpenApiDocument);
+  ({
+    openapi: '3.0.0',
+    paths,
+    ...(components === undefined ? {} : { components }),
+  } as OpenApiDocument);
 
 describe('checkInputStrictness', () => {
   it('reports an input with no format where the vendor requires a uuid', () => {
@@ -109,7 +113,10 @@ describe('checkInputStrictness', () => {
     const problems = checkInputStrictness({
       inputSchema: { type: 'object', properties: { start: { type: 'string' } } },
       runs: [
-        { input: { start: '2026-11-17' }, calls: [call('post', '/downtime', 'https://x.test/downtime')] },
+        {
+          input: { start: '2026-11-17' },
+          calls: [call('post', '/downtime', 'https://x.test/downtime')],
+        },
       ],
       documents: {
         v1: document(
@@ -135,6 +142,60 @@ describe('checkInputStrictness', () => {
     });
     expect(problems).toMatchObject([
       { input: 'start', parameter: 'body start', gap: { keyword: 'format', vendor: 'date-time' } },
+    ]);
+  });
+
+  it('follows a body the vendor wraps, as Datadog wraps a downtime schedule', () => {
+    const problems = checkInputStrictness({
+      inputSchema: { type: 'object', properties: { start: { type: 'string' } } },
+      runs: [
+        {
+          input: { start: 'tomorrow' },
+          calls: [call('post', '/api/v2/downtime', 'https://x.test/api/v2/downtime')],
+        },
+      ],
+      documents: {
+        v1: document({
+          '/api/v2/downtime': {
+            post: {
+              requestBody: {
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        data: {
+                          type: 'object',
+                          properties: {
+                            attributes: {
+                              type: 'object',
+                              properties: {
+                                schedule: {
+                                  type: 'object',
+                                  properties: {
+                                    start: { type: 'string', format: 'date-time' },
+                                  },
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        }),
+      },
+    });
+    expect(problems).toMatchObject([
+      {
+        input: 'start',
+        parameter: 'body data.attributes.schedule.start',
+        gap: { keyword: 'format', vendor: 'date-time' },
+      },
     ]);
   });
 
@@ -242,9 +303,7 @@ describe('checkInputStrictness', () => {
           type: 'object',
           properties: { tags: { type: 'array', items: { type: 'string' } } },
         },
-        runs: [
-          { input: { tags: ['a'] }, calls: [call('post', '/scan', 'https://x.test/scan')] },
-        ],
+        runs: [{ input: { tags: ['a'] }, calls: [call('post', '/scan', 'https://x.test/scan')] }],
         documents: {
           v1: document({
             '/scan': {

@@ -135,6 +135,10 @@ const enumSamplingsOf = (schema: JsonSchema): Sampling[] =>
     }));
   });
 
+/** An action's `input` as JSON Schema, the reading its generated inputs are sampled from. */
+export const toInputJsonSchema = ({ input }: Pick<ActionDefinition, 'input'>): JsonSchema =>
+  z.toJSONSchema(input, { io: 'input', unrepresentable: 'any' }) as JsonSchema;
+
 const samplingsOf = (schema: JsonSchema): Sampling[] => [
   { variant: 'required', schema, options: { optional: 'required' } },
   { variant: 'all', schema, options: { optional: 'all' } },
@@ -166,7 +170,7 @@ export const generateActionInputs = async (
   { input: schema }: Pick<ActionDefinition, 'input'>,
   override?: unknown
 ): Promise<GeneratedInputs> => {
-  const jsonSchema = z.toJSONSchema(schema, { io: 'input', unrepresentable: 'any' });
+  const jsonSchema = toInputJsonSchema({ input: schema });
   const seen = new Set<string>();
   const inputs: unknown[] = [];
   const rejected: RejectedInput[] = [];
