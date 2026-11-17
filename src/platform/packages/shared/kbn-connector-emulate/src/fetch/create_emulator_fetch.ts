@@ -167,12 +167,12 @@ export interface EmulatorOptions extends PaginationOptions {
    * the defaults: the latest 100 calls keep theirs, and bodies are cut at 8 KiB.
    */
   readonly capture?: boolean | CaptureOptions;
-  /**
-   * OpenAPI operations, by source, method and path template, that win over equally specific ones
-   * of other sources, e.g. the ones a recorder found before when two specs describe one path.
-   */
   /** What to do with operations whose schemas are broken; see {@link InvalidSchemasMode}. */
   readonly invalidSchemas?: InvalidSchemasMode;
+  /**
+   * OpenAPI operations, by source, method and path template, that win over the same method and
+   * path in other sources, e.g. the ones a recorder found before when two specs describe one path.
+   */
   readonly preferredOperations?: ReadonlyArray<{
     readonly source?: string;
     readonly method: string;

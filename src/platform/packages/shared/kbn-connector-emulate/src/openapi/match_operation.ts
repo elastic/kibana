@@ -280,10 +280,14 @@ const decodePathSegment = (segment: string): string => {
   }
 };
 
+// The operation's path, with its parameters unnamed, as two specs of one API may name them apart.
+const samePath = ({ operation: { path } }: Route): string =>
+  path.replace(new RegExp(TEMPLATE_PARAMETER, 'g'), '{}');
+
 export interface OperationMatcherOptions {
   /**
-   * Breaks ties between sources: of the operations equally specific for a request, e.g. one path
-   * that two specs describe, those it returns true for win.
+   * Breaks ties between sources: of the operations several specs describe with the same method and
+   * path, those it returns true for win.
    */
   readonly isPreferred?: (operation: ContractOperation) => boolean;
 }
@@ -369,15 +373,22 @@ export const createOperationMatcher = (
     // A conflicting discriminator rules an operation out only when another is left, so a request
     // to a single operation still reaches validation, which names the wrong value.
     const consistent = onTemplate.filter(({ conflicts }) => !conflicts);
-    const [best] = (consistent.length > 0 ? consistent : onTemplate).sort(
-      (a, b) =>
-        Number(preferred.has(b.route)) - Number(preferred.has(a.route)) ||
-        fixedQueryCount(b.route, url) - fixedQueryCount(a.route, url) ||
-        missingQueryCount(a.route, url) - missingQueryCount(b.route, url) ||
-        declaredQueryCount(b.route, url) - declaredQueryCount(a.route, url) ||
-        b.matched - a.matched ||
-        a.missing - b.missing
+    const remaining = consistent.length > 0 ? consistent : onTemplate;
+    // A preferred operation only rules out the same operation as other sources describe it;
+    // operations on its template that the query tells apart still compete on their discriminators.
+    const preferredPaths = new Set(
+      remaining.filter(({ route }) => preferred.has(route)).map(({ route }) => samePath(route))
     );
+    const [best] = remaining
+      .filter(({ route }) => preferred.has(route) || !preferredPaths.has(samePath(route)))
+      .sort(
+        (a, b) =>
+          fixedQueryCount(b.route, url) - fixedQueryCount(a.route, url) ||
+          missingQueryCount(a.route, url) - missingQueryCount(b.route, url) ||
+          declaredQueryCount(b.route, url) - declaredQueryCount(a.route, url) ||
+          b.matched - a.matched ||
+          a.missing - b.missing
+      );
     if (!best) {
       const allowed = [...new Set(candidates.map(({ route }) => route.operation.method))];
       return {
