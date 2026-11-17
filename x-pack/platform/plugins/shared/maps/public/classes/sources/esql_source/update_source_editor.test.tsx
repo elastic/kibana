@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { UpdateSourceEditor } from './update_source_editor';
+import { GRID_RESOLUTION } from '@kbn/geo-precision';
 import { ESQLSource } from './esql_source';
 
 const mockGetDataViewFields = jest.fn().mockResolvedValue({
@@ -114,6 +115,101 @@ describe('UpdateSourceEditor', () => {
       await waitFor(() =>
         expect(onChange).toHaveBeenCalledWith({ propName: 'narrowByGlobalTime', value: true })
       );
+    });
+  });
+
+  describe('resolution', () => {
+    const GEOTILE_ESQL =
+      'from logs | stats count = count(*) by ST_GEOTILE(location, ?_geotile_precision)';
+
+    test('should not render resolution when query does not use ?_geotile_precision', async () => {
+      const sourceDescriptor = ESQLSource.createDescriptor({
+        esql: 'from logs | keep location | limit 10000',
+      });
+      render(
+        <UpdateSourceEditor
+          onChange={jest.fn()}
+          sourceDescriptor={sourceDescriptor}
+          getDataViewFields={mockGetDataViewFields}
+        />
+      );
+      await waitFor(() => screen.getByText('Apply global search to ES|QL statement'));
+      expect(screen.queryByRole('slider', { name: 'Resolution' })).toBeNull();
+    });
+
+    test('should render resolution when query uses ?_geohex_precision', async () => {
+      const sourceDescriptor = ESQLSource.createDescriptor({
+        esql: 'from logs | stats count = count(*) by ST_GEOHEX(location, ?_geohex_precision)',
+      });
+      render(
+        <UpdateSourceEditor
+          onChange={jest.fn()}
+          sourceDescriptor={sourceDescriptor}
+          getDataViewFields={mockGetDataViewFields}
+        />
+      );
+      expect(await screen.findByRole('slider', { name: 'Resolution' })).toBeInTheDocument();
+    });
+
+    test('should render resolution when query uses ?_geohash_precision', async () => {
+      const sourceDescriptor = ESQLSource.createDescriptor({
+        esql: 'from logs | stats count = count(*) by ST_GEOHASH(location, ?_geohash_precision)',
+      });
+      render(
+        <UpdateSourceEditor
+          onChange={jest.fn()}
+          sourceDescriptor={sourceDescriptor}
+          getDataViewFields={mockGetDataViewFields}
+        />
+      );
+      expect(await screen.findByRole('slider', { name: 'Resolution' })).toBeInTheDocument();
+    });
+
+    test('should render resolution when query uses ?_geotile_precision', async () => {
+      const sourceDescriptor = ESQLSource.createDescriptor({
+        esql: GEOTILE_ESQL,
+        resolution: GRID_RESOLUTION.FINE,
+      });
+      render(
+        <UpdateSourceEditor
+          onChange={jest.fn()}
+          sourceDescriptor={sourceDescriptor}
+          getDataViewFields={mockGetDataViewFields}
+        />
+      );
+      const slider = await screen.findByRole('slider', { name: 'Resolution' });
+      expect(slider).toHaveValue('2');
+    });
+
+    test('should default resolution to fine', async () => {
+      const sourceDescriptor = ESQLSource.createDescriptor({ esql: GEOTILE_ESQL });
+      render(
+        <UpdateSourceEditor
+          onChange={jest.fn()}
+          sourceDescriptor={sourceDescriptor}
+          getDataViewFields={mockGetDataViewFields}
+        />
+      );
+      const slider = await screen.findByRole('slider', { name: 'Resolution' });
+      expect(slider).toHaveValue('2');
+    });
+
+    test('should call onChange with resolution', async () => {
+      const onChange = jest.fn();
+      const sourceDescriptor = ESQLSource.createDescriptor({ esql: GEOTILE_ESQL });
+      render(
+        <UpdateSourceEditor
+          onChange={onChange}
+          sourceDescriptor={sourceDescriptor}
+          getDataViewFields={mockGetDataViewFields}
+        />
+      );
+      const slider = await screen.findByRole('slider', { name: 'Resolution' });
+      fireEvent.change(slider, { target: { value: '4' } });
+      expect(onChange).toHaveBeenCalledWith({
+        propName: 'resolution',
+        value: GRID_RESOLUTION.SUPER_FINE,
+      });
     });
   });
 });

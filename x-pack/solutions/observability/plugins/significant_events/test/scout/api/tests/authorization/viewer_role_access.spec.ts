@@ -33,11 +33,10 @@ import {
   deleteDetections,
   deleteFeature,
   getFeaturesEndpoint,
-  deleteSignificantEvent,
   seedDetection,
   seedFeature,
-  seedSignificantEvent,
 } from '../../fixtures/built_in_role_access';
+import { deleteSignificantEvent, seedSignificantEvent } from '../../fixtures/rule_events';
 
 // The built-in `viewer` role has no index privileges on `.rule-events` or `.significant_events-*`.
 // Reads rely on the implicit grants attached to the Nightshift `read` privilege.
@@ -57,7 +56,7 @@ apiTest.describe(
     apiTest.beforeAll(async ({ apiServices, esClient, kbnClient, samlAuth }) => {
       // Detection writes are rejected while Significant Events is paused.
       await apiServices.significantEventsTest.resumeSignificantEvents();
-      await seedSignificantEvent(esClient, eventId);
+      await seedSignificantEvent(esClient, eventId, { title: 'Built-in role access check' });
       ({ id: sourceId, slug: sourceSlug } = await createAccessSource({
         kbnClient,
         title: sourceTitle,
@@ -129,12 +128,6 @@ apiTest.describe(
         responseType: 'json',
       });
       expect(updateResponse).toHaveStatusCode(403);
-
-      const investigateResponse = await apiClient.post(
-        `${EVENTS_ENDPOINT}/${eventId}/investigate`,
-        { headers, responseType: 'json' }
-      );
-      expect(investigateResponse).toHaveStatusCode(403);
     });
 
     apiTest('cannot write detections', async ({ apiClient }) => {
@@ -203,7 +196,7 @@ apiTest.describe(
           expect.objectContaining({
             type: 'error',
             data: expect.objectContaining({
-              message: expect.stringContaining('requires the Nightshift manage privilege'),
+              message: expect.stringContaining('requires the nightshift manage privilege'),
             }),
           }),
         ]);

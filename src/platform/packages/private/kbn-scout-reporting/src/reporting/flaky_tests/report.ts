@@ -19,6 +19,7 @@ import {
   type SetupBuilds,
 } from './breakages';
 import { ESQL_ROW_LIMIT } from './esql';
+import { describeScope, scopeKey } from './judged_scope';
 import { describeFix, lastFailures, looksFixed } from './recently_fixed';
 import {
   fetchBranchCounts,
@@ -86,15 +87,19 @@ export const mayQualify = (
 ): boolean =>
   stats.builds >= thresholds.minBuilds && stats.failedBuilds >= thresholds.minFailedBuilds;
 
-/** The branches clearing every threshold on their own, highest build failure rate first. */
+/**
+ * The branches clearing every threshold on their own, highest build failure rate first. A branch
+ * of a pipeline judged on its own is checked apart from the same branch of the others.
+ */
 export const qualifyingBranches = (
-  byBranch: ReadonlyArray<Pick<BranchCountsRow, 'branch' | 'builds' | 'failedBuilds'>>,
+  byBranch: ReadonlyArray<Pick<BranchCountsRow, 'branch' | 'pipeline' | 'builds' | 'failedBuilds'>>,
   thresholds: BuildThresholds
 ): FlakyTestFlakiestBranch[] =>
   byBranch
     .filter((row) => mayQualify(row, thresholds))
     .map((row) => ({
       branch: row.branch,
+      ...(row.pipeline ? { pipeline: row.pipeline } : {}),
       builds: row.builds,
       failedBuilds: row.failedBuilds,
       buildFailRate: row.failedBuilds / row.builds,
@@ -108,7 +113,7 @@ export const qualifyingBranches = (
  * apply per branch so that a test flaky on one branch is not hidden by clean runs on another.
  */
 export const flakiestQualifyingBranch = (
-  byBranch: ReadonlyArray<Pick<BranchCountsRow, 'branch' | 'builds' | 'failedBuilds'>>,
+  byBranch: ReadonlyArray<Pick<BranchCountsRow, 'branch' | 'pipeline' | 'builds' | 'failedBuilds'>>,
   thresholds: BuildThresholds
 ): FlakyTestFlakiestBranch | undefined => qualifyingBranches(byBranch, thresholds)[0];
 
@@ -171,11 +176,12 @@ export const checkFlakyTest = (
   const breakageBuildIds = new Set(
     breakages.flatMap(({ builds }) => builds.map(({ buildId }) => buildId))
   );
-  const lastFailureByBranch = new Map(
-    lastFailures(setups).map((lastFailure) => [lastFailure.branch, lastFailure])
+  const lastFailureByScope = new Map(
+    lastFailures(setups).map((lastFailure) => [scopeKey(lastFailure), lastFailure])
   );
-  const fixes = qualifying.map(({ branch, buildFailRate }) => {
-    const lastFailure = lastFailureByBranch.get(branch);
+  const fixes = qualifying.map((branch) => {
+    const lastFailure = lastFailureByScope.get(scopeKey(branch));
+    const { buildFailRate } = branch;
     return lastFailure && looksFixed(lastFailure, buildFailRate, now)
       ? { lastFailure, missedFailures: lastFailure.cleanBuilds * buildFailRate }
       : undefined;
@@ -257,14 +263,15 @@ const toEntry = (
   lastFailedAt: stats.lastFailedAt,
 });
 
-/** Number of tests per branch they qualified on, largest count first. */
+/** Number of tests per branch they qualified on (`describeScope`), largest count first. */
 export const countByFlakiestBranch = (
-  entries: ReadonlyArray<{ flakiestBranch?: Pick<FlakyTestFlakiestBranch, 'branch'> }>
+  entries: ReadonlyArray<{ flakiestBranch?: Pick<FlakyTestFlakiestBranch, 'branch' | 'pipeline'> }>
 ): Record<string, number> => {
   const counts = new Map<string, number>();
   for (const { flakiestBranch } of entries) {
     if (!flakiestBranch) continue;
-    counts.set(flakiestBranch.branch, (counts.get(flakiestBranch.branch) ?? 0) + 1);
+    const label = describeScope(flakiestBranch);
+    counts.set(label, (counts.get(label) ?? 0) + 1);
   }
   return Object.fromEntries([...counts].sort(([, a], [, b]) => b - a));
 };
@@ -317,6 +324,7 @@ const buildReport = async (
     from,
     to,
     pipelines: options.pipelines,
+    judgedTogether: options.judgedTogether,
     branches: options.branches,
   };
 
@@ -527,6 +535,7 @@ const buildReport = async (
     window: { lookbackDays: options.lookbackDays, from, to },
     scope: {
       pipelines: options.pipelines,
+      ...(options.judgedTogether ? { judgedTogether: options.judgedTogether } : {}),
       branches: options.branches,
       frameworks,
       classifications: options.classifications,

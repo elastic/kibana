@@ -37,25 +37,25 @@ const withSafeTracing = (tracing: ScoutServerConfig): ScoutServerConfig => {
 };
 
 /**
- * The suite's knowledge switches, `NIGHTSHIFT_KNOWLEDGE` as validated by its scout hook. Unset keeps
- * every knowledge system off. Otherwise each listed system is on, and learning is off so every
- * example reads the knowledge the eval restored rather than what earlier examples wrote.
+ * The suite's knowledge switches: `NIGHTSHIFT_KNOWLEDGE` as validated by its scout hook, plus the
+ * decision trees the hook turns on for the reinforcement micro-eval (`NIGHTSHIFT_DECISION_TREES`).
+ * Every system is set explicitly, because decision trees default on and do not require Wiki.
+ * Restored knowledge freezes learning so every example reads what the eval restored rather than
+ * what earlier examples wrote. The reinforcement eval keeps learning on: its live mode waits on the
+ * post-run hook that reinforces the trees.
  */
 const knowledgeArgs = (): string[] => {
   const selected = new Set((process.env.NIGHTSHIFT_KNOWLEDGE ?? '').split(',').filter(Boolean));
-  if (selected.size === 0) {
-    return [
-      '--xpack.nightshift_investigations.wiki.enabled=false',
-      '--xpack.nightshift_investigations.memory.enabled=false',
-    ];
-  }
-  const decisionTrees = selected.has('decision-trees');
+  const reinforcement = process.env.NIGHTSHIFT_DECISION_TREES === 'true';
   return [
-    // Decision trees read the Wiki investigator context, so they need the Wiki runtime.
-    `--xpack.nightshift_investigations.wiki.enabled=${selected.has('wiki') || decisionTrees}`,
+    `--xpack.nightshift_investigations.wiki.enabled=${selected.has('wiki')}`,
     `--xpack.nightshift_investigations.memory.enabled=${selected.has('memory')}`,
-    `--xpack.nightshift_investigations.decision_trees.enabled=${decisionTrees}`,
-    '--xpack.nightshift_investigations.learning.enabled=false',
+    `--xpack.nightshift_investigations.decision_trees.enabled=${
+      selected.has('decision-trees') || reinforcement
+    }`,
+    ...(selected.size > 0 && !reinforcement
+      ? ['--xpack.nightshift_investigations.learning.enabled=false']
+      : []),
   ];
 };
 

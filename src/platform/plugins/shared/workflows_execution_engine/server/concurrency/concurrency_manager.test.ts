@@ -407,6 +407,54 @@ describe('ConcurrencyManager', () => {
       expect(mockWorkflowTaskManager.forceRunIdleTasks).toHaveBeenCalledWith('exec-2');
     });
 
+    it('keeps two slots when cancel-in-progress admissions run one after another', async () => {
+      const settings: ConcurrencySettings = {
+        key: 'server-1',
+        strategy: 'cancel-in-progress',
+        max: 2,
+      };
+      mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce(['exec-1'])
+        .mockResolvedValueOnce(['exec-1', 'exec-2']);
+
+      const first = await concurrencyManager.checkConcurrency(
+        settings,
+        'server-1',
+        'exec-1',
+        'default'
+      );
+      const second = await concurrencyManager.checkConcurrency(
+        settings,
+        'server-1',
+        'exec-2',
+        'default'
+      );
+      const third = await concurrencyManager.checkConcurrency(
+        settings,
+        'server-1',
+        'exec-3',
+        'default'
+      );
+
+      expect(first).toBe(true);
+      expect(second).toBe(true);
+      expect(third).toBe(true);
+      expect(mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions).toHaveBeenCalledTimes(1);
+      expect(mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions).toHaveBeenCalledWith([
+        {
+          id: 'exec-1',
+          status: ExecutionStatus.CANCELLED,
+          cancelRequested: true,
+          cancellationReason: 'Cancelled due to concurrency limit (max: 2)',
+          cancelledAt: expect.any(String),
+          cancelledBy: 'system',
+        },
+      ]);
+      expect(mockWorkflowTaskManager.forceRunIdleTasks).toHaveBeenCalledTimes(1);
+      expect(mockWorkflowTaskManager.forceRunIdleTasks).toHaveBeenCalledWith('exec-1');
+    });
+
     it('should use default max concurrency of 1 when not specified', async () => {
       const settings: ConcurrencySettings = {
         key: 'server-1',
@@ -475,14 +523,17 @@ describe('ConcurrencyManager', () => {
       );
 
       expect(result).toBe(false); // Execution should be dropped
-      expect(mockWorkflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith({
-        id: 'exec-3',
-        status: ExecutionStatus.SKIPPED,
-        cancelRequested: true,
-        cancellationReason: 'Dropped due to concurrency limit (max: 2)',
-        cancelledAt: expect.any(String),
-        cancelledBy: 'system',
-      });
+      expect(mockWorkflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+        {
+          id: 'exec-3',
+          status: ExecutionStatus.SKIPPED,
+          cancelRequested: true,
+          cancellationReason: 'Dropped due to concurrency limit (max: 2)',
+          cancelledAt: expect.any(String),
+          cancelledBy: 'system',
+        },
+        { refresh: true }
+      );
       expect(mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions).not.toHaveBeenCalled();
       expect(mockWorkflowTaskManager.forceRunIdleTasks).not.toHaveBeenCalled();
     });
@@ -527,14 +578,17 @@ describe('ConcurrencyManager', () => {
       );
 
       expect(result).toBe(false); // Execution should be dropped (at limit, new one exceeds)
-      expect(mockWorkflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith({
-        id: 'exec-3',
-        status: ExecutionStatus.SKIPPED,
-        cancelRequested: true,
-        cancellationReason: 'Dropped due to concurrency limit (max: 2)',
-        cancelledAt: expect.any(String),
-        cancelledBy: 'system',
-      });
+      expect(mockWorkflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+        {
+          id: 'exec-3',
+          status: ExecutionStatus.SKIPPED,
+          cancelRequested: true,
+          cancellationReason: 'Dropped due to concurrency limit (max: 2)',
+          cancelledAt: expect.any(String),
+          cancelledBy: 'system',
+        },
+        { refresh: true }
+      );
       expect(mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions).not.toHaveBeenCalled();
     });
 
@@ -641,7 +695,7 @@ describe('ConcurrencyManager', () => {
             id: 'exec-new',
             status: ExecutionStatus.QUEUED,
           },
-          { refresh: 'wait_for' }
+          { refresh: true }
         );
       });
 
@@ -664,14 +718,17 @@ describe('ConcurrencyManager', () => {
         );
 
         expect(result).toBe(false);
-        expect(mockWorkflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith({
-          id: 'exec-new',
-          status: ExecutionStatus.SKIPPED,
-          cancelRequested: true,
-          cancellationReason: 'Queue full (queue-size: 2)',
-          cancelledAt: expect.any(String),
-          cancelledBy: 'system',
-        });
+        expect(mockWorkflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+          {
+            id: 'exec-new',
+            status: ExecutionStatus.SKIPPED,
+            cancelRequested: true,
+            cancellationReason: 'Queue full (queue-size: 2)',
+            cancelledAt: expect.any(String),
+            cancelledBy: 'system',
+          },
+          { refresh: true }
+        );
       });
     });
 

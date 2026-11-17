@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { ApplicationStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { ConfigProperties, ConfigValue } from './dynamic_config/types';
@@ -14,6 +15,9 @@ interface ConfigEntry extends ConfigProperties {
 }
 
 export * from './dynamic_config/types';
+
+// Temporary: remove once the InferenceTaskType in @elastic/elasticsearch includes 'decision'.
+export type EisTaskType = InferenceTaskType | 'decision';
 
 export type Map = Record<string, string>;
 

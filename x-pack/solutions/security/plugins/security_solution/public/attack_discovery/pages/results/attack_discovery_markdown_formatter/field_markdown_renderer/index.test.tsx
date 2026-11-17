@@ -68,23 +68,25 @@ describe('FieldMarkdownRenderer', () => {
     });
   });
 
-  it('does NOT render the entity button when flyoutPanelProps is null', () => {
-    const icon = '';
-    const name = 'some.field';
-    const value = 'some.value';
+  it.each(['some.field', 'constructor', 'toString'])(
+    'does NOT render the entity button when the field (%s) is not an entity field',
+    (name) => {
+      const icon = '';
+      const value = 'some.value';
 
-    render(
-      <TestProviders>
-        <MarkdownFormatterContext.Provider value={{ disableActions: false }}>
-          <FieldMarkdownRenderer icon={icon} name={name} operator={':'} value={value} />
-        </MarkdownFormatterContext.Provider>
-      </TestProviders>
-    );
+      render(
+        <TestProviders>
+          <MarkdownFormatterContext.Provider value={{ disableActions: false }}>
+            <FieldMarkdownRenderer icon={icon} name={name} operator={':'} value={value} />
+          </MarkdownFormatterContext.Provider>
+        </TestProviders>
+      );
 
-    const entityButton = screen.queryByTestId('entityButton');
+      const entityButton = screen.queryByTestId('entityButton');
 
-    expect(entityButton).not.toBeInTheDocument();
-  });
+      expect(entityButton).not.toBeInTheDocument();
+    }
+  );
 
   it('renders disabled actions badge when disableActions is true', () => {
     const icon = 'user';
