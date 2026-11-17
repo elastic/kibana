@@ -8,7 +8,7 @@
 import { isBoom } from '@hapi/boom';
 import { getAgentFromRunContext, type RunContext } from '@kbn/agent-builder-server';
 import { normalizeAgentIdForTelemetry } from '@kbn/agent-builder-server/telemetry';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, type KibanaRequest, type Logger } from '@kbn/core/server';
 import {
   FEATURE_IDENTIFICATION_AGENT_ID,
   KI_QUERY_GENERATION_AGENT_ID,
@@ -90,7 +90,11 @@ export const classifyToolFailure = (error: unknown): ToolFailure => {
       unresolvedCount: error.details?.count,
     };
   }
-  return classifyStatusCode(getThrownStatusCode(error));
+  const failure = classifyStatusCode(getThrownStatusCode(error));
+  // Saved objects errors are Elasticsearch and storage failures surfaced as 4xx.
+  return SavedObjectsErrorHelpers.isSavedObjectsClientError(error)
+    ? { ...failure, inputRejected: false }
+    : failure;
 };
 
 /** Replaces the message of a refused call, which quotes caller-sent slugs and ids, with its code. */
@@ -125,6 +129,7 @@ export const reportToolFailure = ({
   request,
   runContext,
   itemCount,
+  inputRejected,
 }: {
   error: unknown;
   toolId: string;
@@ -135,8 +140,10 @@ export const reportToolFailure = ({
   request: KibanaRequest;
   runContext?: RunContext;
   itemCount?: number;
+  inputRejected?: boolean;
 }): ToolFailure => {
-  const failure = classifyToolFailure(error);
+  const classified = classifyToolFailure(error);
+  const failure = inputRejected === undefined ? classified : { ...classified, inputRejected };
   if (failure.inputRejected) {
     logger.debug(`${toolId} refused the call: ${failure.code}`);
   } else {

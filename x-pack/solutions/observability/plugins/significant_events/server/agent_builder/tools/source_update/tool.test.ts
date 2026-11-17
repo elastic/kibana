@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { notFound } from '@hapi/boom';
 import type { NightshiftFeaturePrivilege } from '../../utils/test_helpers';
 import {
   createMockToolContext,
@@ -219,6 +220,26 @@ describe('source_update tool', () => {
     expect(telemetry.trackAgentToolFailed).toHaveBeenCalledTimes(1);
     expect(telemetry.trackAgentToolFailed).toHaveBeenCalledWith(
       expect.objectContaining({ error_code: 'internal_error', input_rejected: false }),
+      expect.anything()
+    );
+  });
+
+  it('never treats a failed enabled change as a refused call', async () => {
+    const { tool, logger, telemetry } = createToolWithDeps({
+      update: jest.fn().mockResolvedValue({ ...checkout, title: 'Checkout v2' }),
+      setEnabled: jest.fn().mockRejectedValue(notFound('Source not found')),
+    });
+
+    await tool.handler(
+      { source: 'checkout', title: 'Checkout v2', enabled: false },
+      createMockToolContext()
+    );
+
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to update source: setting enabled failed')
+    );
+    expect(telemetry.trackAgentToolFailed).toHaveBeenCalledWith(
+      expect.objectContaining({ error_code: 'not_found', input_rejected: false }),
       expect.anything()
     );
   });

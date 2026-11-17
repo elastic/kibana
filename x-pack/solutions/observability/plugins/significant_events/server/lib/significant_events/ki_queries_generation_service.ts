@@ -74,11 +74,11 @@ export async function generateKIQueries(
 
   const attemptStartedAt = Date.now();
   let resolvedConnectorId: string | undefined;
-  const { queries, tokensUsed, connectorId, durationMs } = await (async () => {
-    const canonicalConnectorId = await resolveModel(connectorIdOverride);
-    resolvedConnectorId = canonicalConnectorId;
+  try {
+    const connectorId = await resolveModel(connectorIdOverride);
+    resolvedConnectorId = connectorId;
 
-    logger.debug(`Using connector ${canonicalConnectorId} for query generation`);
+    logger.debug(`Using connector ${connectorId} for query generation`);
 
     const { [source.id]: existingLinks } = await kiClient.getSourceToQueryLinksMap([source.id]);
     const existingQueries = existingLinks.map(({ query }) => ({
@@ -91,10 +91,10 @@ export async function generateKIQueries(
     }));
 
     const agentStartedAt = Date.now();
-    const result = await executeKIQueryGenerationAgent({
+    const { queries, tokensUsed } = await executeKIQueryGenerationAgent({
       agentBuilder,
       request,
-      connectorId: canonicalConnectorId,
+      connectorId,
       interactionId: runId,
       source,
       existingQueries,
@@ -102,12 +102,24 @@ export async function generateKIQueries(
       signal,
       logger: logger.get('significant_events_queries_generation'),
     });
-    return {
-      ...result,
-      connectorId: canonicalConnectorId,
-      durationMs: Date.now() - agentStartedAt,
-    };
-  })().catch((error: unknown) => {
+
+    telemetry.trackSignificantEventsQueriesGenerated(
+      {
+        workflow_execution_id: workflowExecutionId,
+        parent_workflow_execution_id: parentWorkflowExecutionId,
+        count: queries.length,
+        connector_id: connectorId,
+        source_id: source.id,
+        input_tokens_used: tokensUsed.prompt,
+        output_tokens_used: tokensUsed.completion,
+        cached_tokens_used: tokensUsed.cached ?? 0,
+        duration_ms: Date.now() - agentStartedAt,
+      },
+      request
+    );
+
+    return { queries, tokensUsed, connectorId };
+  } catch (error) {
     try {
       telemetry.trackSignificantEventsQueriesGenerationFailed(
         {
@@ -128,21 +140,5 @@ export async function generateKIQueries(
       );
     }
     throw error;
-  });
-  telemetry.trackSignificantEventsQueriesGenerated(
-    {
-      workflow_execution_id: workflowExecutionId,
-      parent_workflow_execution_id: parentWorkflowExecutionId,
-      count: queries.length,
-      connector_id: connectorId,
-      source_id: source.id,
-      input_tokens_used: tokensUsed.prompt,
-      output_tokens_used: tokensUsed.completion,
-      cached_tokens_used: tokensUsed.cached ?? 0,
-      duration_ms: durationMs,
-    },
-    request
-  );
-
-  return { queries, tokensUsed, connectorId };
+  }
 }

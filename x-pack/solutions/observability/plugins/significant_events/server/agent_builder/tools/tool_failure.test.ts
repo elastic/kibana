@@ -9,6 +9,7 @@ import { badRequest, conflict, forbidden, notFound } from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
 import type { RunContext } from '@kbn/agent-builder-server';
 import { toCustomHashedId } from '@kbn/agent-builder-server/telemetry';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { setWorkflowEventChainContext } from '@kbn/workflows-extensions/server';
@@ -145,6 +146,11 @@ describe('classifyToolFailure', () => {
         meta: {} as never,
       }),
       expected: { code: 'internal_error', inputRejected: false },
+    },
+    {
+      label: 'a saved objects 404 as not a refused call',
+      error: SavedObjectsErrorHelpers.createGenericNotFoundError('nightshift-source', 'abc'),
+      expected: { code: 'not_found', inputRejected: false, statusCode: 404 },
     },
   ])('classifies $label', ({ error, expected }) => {
     expect(classifyToolFailure(error)).toEqual(expected);
