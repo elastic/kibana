@@ -16,12 +16,16 @@ const settings = {
 };
 
 describe('investigation quota settings schemas', () => {
-  it('accepts a limit of null and rejects 0, a fraction and an unknown limit when creating', () => {
+  it('accepts null and 0 and rejects a negative, a fraction and an unknown limit when creating', () => {
     expect(nightshiftInvestigationQuotaSettingsAttributesSchemaV1.validate(settings)).toEqual(
       settings
     );
+    const withZero = { ...settings, limits: { ...settings.limits, manual_investigation: 0 } };
+    expect(nightshiftInvestigationQuotaSettingsAttributesSchemaV1.validate(withZero)).toEqual(
+      withZero
+    );
     for (const limits of [
-      { ...settings.limits, manual_investigation: 0 },
+      { ...settings.limits, manual_investigation: -1 },
       { ...settings.limits, manual_investigation: 1.5 },
       { ...settings.limits, future_group: 3 },
     ]) {
@@ -47,7 +51,7 @@ describe('investigation quota settings schemas', () => {
     expect(() =>
       nightshiftInvestigationQuotaSettingsForwardCompatibilitySchemaV1.validate({
         ...settings,
-        limits: { ...settings.limits, manual_investigation: 0 },
+        limits: { ...settings.limits, manual_investigation: -1 },
       })
     ).toThrow();
   });
