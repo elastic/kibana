@@ -188,7 +188,11 @@ describe('createUiamAssertionSigner', () => {
   });
 
   describe('#isOwnAssertion', () => {
-    const signer = createUiamAssertionSigner({ certificate: rsaCertificate, key: rsaKey });
+    const signer = createUiamAssertionSigner({
+      certificate: rsaCertificate,
+      key: rsaKey,
+      now: () => NOW,
+    });
 
     it('recognizes its own assertions', () => {
       expect(signer.isOwnAssertion(signer.sign(bearerCredential))).toBe(true);
@@ -198,14 +202,18 @@ describe('createUiamAssertionSigner', () => {
       const pastSigner = createUiamAssertionSigner({
         certificate: rsaCertificate,
         key: rsaKey,
-        now: () => NOW,
+        now: () => NOW - 60 * 60 * 1000,
       });
 
       expect(signer.isOwnAssertion(pastSigner.sign(bearerCredential))).toBe(true);
     });
 
     it('rejects assertions signed with another key', () => {
-      const otherSigner = createUiamAssertionSigner({ certificate: ecCertificate, key: ecKey });
+      const otherSigner = createUiamAssertionSigner({
+        certificate: ecCertificate,
+        key: ecKey,
+        now: () => NOW,
+      });
 
       expect(signer.isOwnAssertion(otherSigner.sign(bearerCredential))).toBe(false);
     });
