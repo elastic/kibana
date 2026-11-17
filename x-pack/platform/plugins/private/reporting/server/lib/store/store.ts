@@ -17,6 +17,7 @@ import type {
 import {
   REPORTING_DATA_STREAM_ALIAS,
   REPORTING_DATA_STREAM_COMPONENT_TEMPLATE,
+  REPORTING_DATA_STREAM_WILDCARD,
 } from '@kbn/reporting-server';
 import moment from 'moment';
 import type { Report } from '.';
@@ -248,6 +249,48 @@ export class ReportingStore {
     }
   }
 
+  /**
+   * Finds the report that an earlier run of the same scheduled occurrence left processing, which
+   * happens when Kibana stops before the run records an outcome.
+   */
+  public async findInterruptedScheduledReport({
+    scheduledReportId,
+    runAt,
+  }: {
+    scheduledReportId: string;
+    runAt: Date;
+  }): Promise<SavedReport | undefined> {
+    const client = await this.getClient();
+    const { hits } = await client.search<ReportSource>({
+      index: REPORTING_DATA_STREAM_WILDCARD,
+      size: 1,
+      seq_no_primary_term: true,
+      query: {
+        bool: {
+          filter: [
+            { term: { scheduled_report_id: scheduledReportId } },
+            // A scheduled report is created with the `runAt` of its task, which a rerun keeps.
+            { term: { created_at: runAt.toISOString() } },
+            { term: { status: JOB_STATUS.PROCESSING } },
+          ],
+        },
+      },
+    });
+
+    const [hit] = hits.hits;
+    if (!hit?._source) {
+      return undefined;
+    }
+
+    return new SavedReport({
+      ...hit._source,
+      _id: hit._id,
+      _index: hit._index,
+      _seq_no: hit._seq_no,
+      _primary_term: hit._primary_term,
+    });
+  }
+
   public async setReportClaimed(
     report: SavedReport,
     processingInfo: ReportProcessingFields
@@ -308,6 +351,9 @@ export class ReportingStore {
   ): Promise<UpdateResponse<ReportDocument>> {
     const doc = sourceDoc({
       ...errorInfo,
+      // Tells the next attempt that this one recorded its outcome, unlike one cut short by
+      // Kibana stopping.
+      process_expiration: null,
     });
 
     let body: UpdateResponse<ReportDocument>;

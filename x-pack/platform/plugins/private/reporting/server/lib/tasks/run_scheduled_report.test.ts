@@ -23,7 +23,8 @@ import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { ScheduleType, type ExportType, type ReportingConfigType } from '@kbn/reporting-server';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { getErrorSource, isUnrecoverableError } from '@kbn/task-manager-plugin/server/task_running';
+import { errors } from '@kbn/screenshotting-plugin/common';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
 import { EventTracker } from '../../usage';
@@ -1049,6 +1050,202 @@ describe('Run Scheduled Report Task', () => {
       error: expect.objectContaining({ name: 'Error', message: 'failure generating report' }),
     });
     jest.useRealTimers();
+  });
+
+  it('does not retry when the browser closed unexpectedly, and keeps the schedule', async () => {
+    configType = createMockConfigSchema({ capture: { maxAttempts: 3 } });
+    mockReporting = await createMockReportingCore(configType);
+    const runThisTaskFn = jest
+      .fn()
+      .mockRejectedValue(new errors.BrowserClosedUnexpectedly('Browser was closed unexpectedly!'));
+    mockReporting.getExportTypesRegistry().register({
+      id: 'test2',
+      name: 'Test2',
+      setup: jest.fn(),
+      start: jest.fn(),
+      createJob: () => new Promise(() => {}),
+      runTask: runThisTaskFn,
+      shouldNotifyUsage: () => true,
+      getFeatureUsageName: () => 'Reporting: test2 scheduled export',
+      notifyUsage: jest.fn(),
+      jobContentEncoding: 'base64',
+      jobType: 'test2',
+      validLicenses: [],
+    } as unknown as ExportType);
+    const store = await mockReporting.getStore();
+    const thisSavedReport = new SavedReport({ ...savedReportData, jobtype: 'test2' });
+    store.addReport = jest.fn().mockImplementation(async () => thisSavedReport);
+    store.setReportFailed = jest.fn().mockResolvedValue({ _id: 'test', jobtype: 'test2' });
+    store.setReportError = jest.fn();
+    const task = new RunScheduledReportTask({
+      reporting: mockReporting,
+      config: configType,
+      logger,
+    });
+    await task.init(taskManagerMock.createStart(), emailNotificationService);
+
+    const schedule = { rrule: { freq: Frequency.DAILY, interval: 2, tzid: 'UTC' } };
+    const taskRunner = task.getTaskDefinition().createTaskRunner({
+      taskInstance: {
+        id: 'report-so-id',
+        runAt: new Date('2023-10-01T00:00:00Z'),
+        schedule,
+        params: { id: 'report-so-id', jobtype: 'test2', schedule },
+      },
+      fakeRequest: fakeRawRequest,
+    } as unknown as RunContext);
+
+    const error: Error = await taskRunner.run().then(
+      () => {
+        throw new Error('Expected the task run to fail');
+      },
+      (runError: Error) => runError
+    );
+
+    expect(runThisTaskFn).toHaveBeenCalledTimes(1); // two retries were left
+    expect(store.setReportError).not.toHaveBeenCalled();
+    expect(store.setReportFailed).toHaveBeenCalledWith(
+      thisSavedReport,
+      expect.objectContaining({
+        completed_at: expect.any(String),
+        output: expect.objectContaining({
+          error_code: 'browser_unexpectedly_closed_error',
+          content: expect.stringContaining('The report was not retried'),
+        }),
+      })
+    );
+    // an unrecoverable error would delete the recurring task, and with it the schedule
+    expect(error).toBeInstanceOf(errors.BrowserClosedUnexpectedly);
+    expect(isUnrecoverableError(error)).toBe(false);
+  });
+
+  describe('when an earlier run of the same occurrence did not record an outcome', () => {
+    const RUN_AT = new Date('2023-10-01T00:00:00Z');
+    const interruptedReport = new SavedReport({
+      ...savedReportData,
+      _id: 'interrupted-report-id',
+      jobtype: 'PNGV2',
+      created_at: RUN_AT.toISOString(),
+    });
+
+    const setupRerunTask = async (jobType: string = 'PNGV2') => {
+      soClient.get = jest.fn().mockResolvedValue({
+        ...scheduledReport,
+        attributes: { ...scheduledReport.attributes, jobType },
+      });
+      // stands in for the real export type of the job type
+      jest.spyOn(mockReporting.getExportTypesRegistry(), 'getByJobType').mockReturnValue({
+        id: 'test1',
+        notifyUsage,
+        runTask: runTaskFn,
+        jobContentEncoding: 'base64',
+        jobContentExtension: 'png',
+        jobType,
+      } as unknown as ExportType);
+      const newReport = new SavedReport({ ...savedReportData, jobtype: jobType });
+      reportStore.addReport = jest.fn().mockResolvedValue(newReport);
+      reportStore.findInterruptedScheduledReport = jest.fn().mockResolvedValue(interruptedReport);
+      reportStore.setReportFailed = jest.fn().mockResolvedValue({});
+      reportStore.setReportCompleted = jest
+        .fn()
+        .mockResolvedValue({ _seq_no: 24, _primary_term: 1 });
+      const { asInternalUser: esClient } = await mockReporting.getEsClient();
+      (esClient.get as unknown as jest.Mock).mockResolvedValue({ _seq_no: 23, _primary_term: 1 });
+
+      const task = new RunScheduledReportTask({
+        reporting: mockReporting,
+        config: configType,
+        logger,
+      });
+      await task.init(taskManagerMock.createStart(), emailNotificationService);
+
+      const schedule = { rrule: { freq: Frequency.DAILY, interval: 2, tzid: 'UTC' } };
+      const taskRunner = task.getTaskDefinition().createTaskRunner({
+        taskInstance: {
+          id: 'report-so-id',
+          runAt: RUN_AT,
+          schedule,
+          params: { id: 'report-so-id', jobtype: jobType, schedule },
+        },
+        fakeRequest: fakeRawRequest,
+      } as unknown as RunContext);
+
+      const run = (): Promise<Error | undefined> =>
+        taskRunner.run().then(
+          () => undefined,
+          (runError: Error) => runError
+        );
+
+      return { run };
+    };
+
+    it('fails the report that run left processing, and waits for the next scheduled run', async () => {
+      const { run } = await setupRerunTask();
+
+      const error = await run();
+
+      expect(reportStore.findInterruptedScheduledReport).toHaveBeenCalledWith({
+        scheduledReportId: 'report-so-id',
+        runAt: RUN_AT,
+      });
+      expect(reportStore.addReport).not.toHaveBeenCalled();
+      expect(runTaskFn).not.toHaveBeenCalled();
+      expect(reportStore.setReportFailed).toHaveBeenCalledWith(
+        interruptedReport,
+        expect.objectContaining({
+          completed_at: expect.any(String),
+          output: expect.objectContaining({
+            error_code: 'kibana_stopped_unexpectedly_error',
+            content: expect.stringContaining('The report was not retried'),
+          }),
+        })
+      );
+      // an unrecoverable error would delete the recurring task, and with it the schedule
+      expect(isUnrecoverableError(error!)).toBe(false);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('most likely because Kibana stopped unexpectedly'),
+        { tags: ['interrupted-report-id'] }
+      );
+    });
+
+    it('generates the report when no earlier run left one processing', async () => {
+      const { run } = await setupRerunTask();
+      reportStore.findInterruptedScheduledReport = jest.fn().mockResolvedValue(undefined);
+
+      expect(await run()).toBeUndefined();
+
+      expect(reportStore.addReport).toHaveBeenCalledTimes(1);
+      expect(runTaskFn).toHaveBeenCalledTimes(1);
+      expect(reportStore.setReportFailed).not.toHaveBeenCalled();
+    });
+
+    it('generates a report of another type again, without looking for an earlier run', async () => {
+      const { run } = await setupRerunTask('csv_searchsource');
+
+      expect(await run()).toBeUndefined();
+
+      expect(reportStore.findInterruptedScheduledReport).not.toHaveBeenCalled();
+      expect(reportStore.addReport).toHaveBeenCalledTimes(1);
+      expect(runTaskFn).toHaveBeenCalledTimes(1);
+    });
+
+    it('generates the report when looking for an earlier run fails', async () => {
+      const { run } = await setupRerunTask();
+      reportStore.findInterruptedScheduledReport = jest
+        .fn()
+        .mockRejectedValue(new Error('search failed'));
+
+      expect(await run()).toBeUndefined();
+
+      expect(reportStore.addReport).toHaveBeenCalledTimes(1);
+      expect(runTaskFn).toHaveBeenCalledTimes(1);
+      expect(logger.error).toHaveBeenCalledWith(
+        new Error(
+          'Error in finding an interrupted run of scheduled report report-so-id: Error: search failed'
+        ),
+        expect.anything()
+      );
+    });
   });
 
   describe('timeout classification', () => {

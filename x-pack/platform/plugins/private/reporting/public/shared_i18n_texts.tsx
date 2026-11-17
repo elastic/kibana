@@ -9,8 +9,24 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
+import {
+  BrowserUnexpectedlyClosedError,
+  KibanaStoppedUnexpectedlyError,
+  PdfWorkerOutOfMemoryError,
+} from '@kbn/reporting-common/errors';
+
+const NOT_RETRIED_ERRORS = [
+  BrowserUnexpectedlyClosedError,
+  KibanaStoppedUnexpectedlyError,
+  PdfWorkerOutOfMemoryError,
+];
 
 export const sharedI18nTexts = {
+  /** The message for a failure that is not retried, which a report only stores as an error code. */
+  notRetriedError: (errorCode?: string): string | undefined => {
+    const NotRetriedError = NOT_RETRIED_ERRORS.find(({ code }) => code === errorCode);
+    return NotRetriedError ? new NotRetriedError().humanFriendlyMessage() : undefined;
+  },
   cloud: {
     insufficientMemoryError: (helpUrl: string) => (
       <FormattedMessage

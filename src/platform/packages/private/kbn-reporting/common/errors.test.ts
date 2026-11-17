@@ -32,4 +32,13 @@ describe('Reporting error', () => {
       expect(Ctor.code).toBe(new Ctor().code);
     });
   });
+  it.each([
+    ['BrowserUnexpectedlyClosedError', new errors.BrowserUnexpectedlyClosedError()],
+    ['PdfWorkerOutOfMemoryError', new errors.PdfWorkerOutOfMemoryError()],
+    ['KibanaStoppedUnexpectedlyError', new errors.KibanaStoppedUnexpectedlyError()],
+  ])('%s explains that the report was not retried', (_name, error) => {
+    expect(error.humanFriendlyMessage()).toContain(
+      'The report was not retried because it would likely fail again.'
+    );
+  });
 });

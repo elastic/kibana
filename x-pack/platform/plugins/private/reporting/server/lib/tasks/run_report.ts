@@ -18,6 +18,7 @@ import type { ReportingError } from '@kbn/reporting-common';
 import {
   CancellationToken,
   KibanaShuttingDownError,
+  KibanaStoppedUnexpectedlyError,
   MissingAuthenticationError,
   numberToDuration,
   QueueTimeoutError,
@@ -48,6 +49,7 @@ import type { ExportTypesRegistry } from '@kbn/reporting-server/export_types_reg
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { brandSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { isNumber } from 'lodash';
+import { USES_HEADLESS_JOB_TYPES } from '../../../common/constants';
 import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
 import type { ReportTaskParams, ReportingTask } from '.';
 import { FORCE_TIMEOUT_GRACE_PERIOD, ReportingTaskStatus, TIME_BETWEEN_ATTEMPTS } from '.';
@@ -61,6 +63,7 @@ import { finishedWithNoPendingCallbacks, getContentStream } from '../content_str
 import type { EmailNotificationService } from '../../services/notifications/email_notification_service';
 import type { ScheduledReportType } from '../../types';
 import { retryOnError } from '../retry_on_error';
+import { isNonRetryableError } from '../is_non_retryable_error';
 import type { RenderRetryState } from './render_retry';
 import { attemptsMade, decideRenderRetry } from './render_retry';
 import { reportingTelemetry } from './reporting_telemetry';
@@ -108,6 +111,8 @@ export interface PrepareJobResults {
   report?: SavedReport;
   task?: ReportTaskParams;
   scheduledReport?: SavedObject<ScheduledReportType>;
+  /** True when `report` is one that an earlier attempt left without an outcome, and must not run. */
+  isInterrupted?: boolean;
 }
 
 interface PerformJobResults {
@@ -243,6 +248,18 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
   protected getQueueTimeoutAsInterval() {
     // round up from ms to the nearest second
     return Math.ceil(this.getQueueTimeout().asSeconds()) + 's';
+  }
+
+  /**
+   * True for a PNG or PDF report rendered by this Kibana's own browser. If Kibana stops while
+   * generating one, the report likely caused it, so it is failed instead of generated again.
+   */
+  protected async isAbandonedWhenInterrupted(jobType: string): Promise<boolean> {
+    if (!USES_HEADLESS_JOB_TYPES.includes(jobType)) {
+      return false;
+    }
+    const { pageRenderScreenshotting } = await this.opts.reporting.getPluginStartDeps();
+    return !pageRenderScreenshotting;
   }
 
   /**
@@ -608,6 +625,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
             report: preparedReport,
             task,
             scheduledReport,
+            isInterrupted,
           } = await this.prepareJob(taskInstance);
           jobId = jId;
           report = preparedReport;
@@ -641,6 +659,14 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
           );
 
           try {
+            if (isInterrupted) {
+              // Nothing can record a failure while Kibana is stopping unexpectedly, so the next
+              // run records it, the same way as any other failure that is not retried.
+              throw new KibanaStoppedUnexpectedlyError(
+                'The previous attempt ended without recording an outcome.'
+              );
+            }
+
             const retries = maxAttempts.maxRetries;
             let atmpts: number | undefined = retries > 0 ? 0 : undefined;
             await retryOnError({
@@ -794,11 +820,16 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
             }
 
             const attemptCount = attemptsMade(renderRetryState, taskAttempts ?? 0, attempts);
-            const isLastAttempt = renderRetry
-              ? renderRetry.action === RenderRetryAction.FAIL
-              : attemptCount
-              ? attemptCount >= maxAttempts.maxTaskAttempts
-              : true;
+            // The browser, the PDF worker or Kibana died, which the same report would likely cause
+            // again.
+            const isNonRetryable = isNonRetryableError(failedToExecuteErr);
+            const isLastAttempt =
+              isNonRetryable ||
+              (renderRetry
+                ? renderRetry.action === RenderRetryAction.FAIL
+                : attemptCount
+                ? attemptCount >= maxAttempts.maxTaskAttempts
+                : true);
             eventLog.logError(failedToExecuteErr);
 
             // A prior attempt may have advanced the doc's seq_no before failing; refresh so the
@@ -807,8 +838,10 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
               await this.refreshReportSeqNo(report);
             }
 
+            let isFailureSaved = true;
             await this.saveExecutionError(report, failedToExecuteErr, isLastAttempt).catch(
               (failedToSaveError) => {
+                isFailureSaved = false;
                 errorLogger(
                   this.logger,
                   `Error in saving execution error ${jobId}`,
@@ -822,7 +855,12 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
               cancellationToken.cancel();
             }
 
-            if (isLastAttempt) {
+            if (isNonRetryable) {
+              this.logger.info(
+                `Job ${jobId} failed and will not be retried, as it would likely fail again. Error: ${failedToExecuteErr.message}.`,
+                { tags: [jobId] }
+              );
+            } else if (isLastAttempt) {
               this.logger.info(
                 `Job ${jobId} failed on its last attempt and will not be retried. Error: ${failedToExecuteErr.message}.`,
                 { tags: [jobId] }
@@ -844,13 +882,20 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
               // A reschedule may have restarted Task Manager's count: don't rerun a spent report.
               throwUnrecoverableError(failedToExecuteErr);
             }
-
             let error = failedToExecuteErr;
             if (
               failedToExecuteErr instanceof QueueTimeoutError &&
               output?.result.user_error === true
             ) {
               error = createTaskRunError(failedToExecuteErr, TaskErrorSource.USER);
+            }
+
+            // Task Manager is allowed one attempt more than a report, so a failed last attempt has
+            // to end the task as well. An unrecoverable error deletes a recurring task, so a
+            // scheduled report waits for its next run instead. If the failure was not saved, retry
+            // rather than leave the report processing with no task.
+            if (isLastAttempt && isFailureSaved && !taskInstance.schedule) {
+              throwUnrecoverableError(error);
             }
 
             throwRetryableError(error, new Date(Date.now() + TIME_BETWEEN_ATTEMPTS));
