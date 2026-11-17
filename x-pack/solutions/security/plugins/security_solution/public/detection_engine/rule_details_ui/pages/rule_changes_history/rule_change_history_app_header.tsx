@@ -13,6 +13,7 @@ import { useGetSecuritySolutionUrl } from '../../../../common/components/link_to
 import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { RuleDetailTabs } from '../rule_details/use_rule_details_tabs';
 import { useRuleDetailsMetadata } from '../rule_details/use_rule_details_metadata';
+import { useRuleAuthorDisplayNames } from '../../../rule_management/logic/use_rule_author_display_names';
 import * as i18n from './translations';
 
 interface RuleChangeHistoryAppHeaderProps {
@@ -23,11 +24,13 @@ interface RuleChangeHistoryAppHeaderProps {
 export const RuleChangeHistoryAppHeader = React.memo<RuleChangeHistoryAppHeaderProps>(
   ({ ruleId, rule }) => {
     const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
-    const metadata = useRuleDetailsMetadata({
-      rule,
+    const { createdBy, updatedBy } = useRuleAuthorDisplayNames({
       createdBy: rule?.created_by,
+      createdByProfileUid: rule?.created_by_profile_uid,
       updatedBy: rule?.updated_by ?? undefined,
+      updatedByProfileUid: rule?.updated_by_profile_uid,
     });
+    const metadata = useRuleDetailsMetadata({ rule, createdBy, updatedBy });
 
     return (
       <SecurityAppHeader

@@ -13,6 +13,7 @@ import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { TestProviders } from '../../../../common/mock';
 import { mockRule } from '../../../rule_management_ui/components/rules_table/__mocks__/mock';
 import { RuleChangeHistoryAppHeader } from './rule_change_history_app_header';
+import { useRuleAuthorDisplayNames } from '../../../rule_management/logic/use_rule_author_display_names';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/components/link_to', () => ({
@@ -26,6 +27,9 @@ jest.mock('../../../../common/components/app_header/use_ml_job_settings_menu_ite
 }));
 jest.mock('../../../../common/components/app_header/use_add_integrations_menu_item', () => ({
   useAddIntegrationsMenuItem: () => undefined,
+}));
+jest.mock('../../../rule_management/logic/use_rule_author_display_names', () => ({
+  useRuleAuthorDisplayNames: jest.fn(),
 }));
 
 const rule = {
@@ -49,6 +53,13 @@ const renderHeader = (
   );
 
 describe('RuleChangeHistoryAppHeader', () => {
+  beforeEach(() => {
+    (useRuleAuthorDisplayNames as jest.Mock).mockImplementation(({ createdBy, updatedBy }) => ({
+      createdBy,
+      updatedBy,
+    }));
+  });
+
   it('renders the rule name and links back to the rule Overview tab', () => {
     renderHeader();
 
@@ -76,5 +87,29 @@ describe('RuleChangeHistoryAppHeader', () => {
     expect(screen.getByTestId('ruleDetailsUpdatedBy')).toHaveTextContent(
       'Updated by other analyst'
     );
+  });
+
+  it('renders resolved author display names when the rule has profile UIDs', () => {
+    const ruleWithProfileUids = {
+      ...rule,
+      created_by: '1234567890',
+      created_by_profile_uid: 'created-uid',
+      updated_by: '0987654321',
+      updated_by_profile_uid: 'updated-uid',
+    };
+    (useRuleAuthorDisplayNames as jest.Mock).mockReturnValue({
+      createdBy: 'Rule Creator',
+      updatedBy: 'Rule Updater',
+    });
+    renderHeader({ rule: ruleWithProfileUids });
+
+    expect(useRuleAuthorDisplayNames).toHaveBeenCalledWith({
+      createdBy: '1234567890',
+      createdByProfileUid: 'created-uid',
+      updatedBy: '0987654321',
+      updatedByProfileUid: 'updated-uid',
+    });
+    expect(screen.getByTestId('ruleDetailsCreatedBy')).toHaveTextContent('Created by Rule Creator');
+    expect(screen.getByTestId('ruleDetailsUpdatedBy')).toHaveTextContent('Updated by Rule Updater');
   });
 });
