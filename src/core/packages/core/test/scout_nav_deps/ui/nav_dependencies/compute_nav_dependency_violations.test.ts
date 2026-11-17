@@ -16,50 +16,51 @@ import {
 
 const noDeclaredDependencies = () => [] as string[];
 
+const declaredByServerlessSearch = (pluginId: string) =>
+  pluginId === 'serverlessSearch' ? ['discover'] : [];
+
 describe('resolveAppId', () => {
-  it('returns the app id unchanged for a bare app link', () => {
+  test('returns the app id unchanged for a bare app link', () => {
     expect(resolveAppId('discover')).toBe('discover');
   });
 
-  it('returns the leading app id segment for a deep-link target', () => {
+  test('returns the leading app id segment for a deep-link target', () => {
     expect(resolveAppId('management:dataViews')).toBe('management');
     expect(resolveAppId('observability-overview:alerts:detail')).toBe('observability-overview');
   });
 });
 
 describe('computeNavDependencyViolations', () => {
-  it('flags a cross-plugin link that is not declared in the source manifest', () => {
+  test('flags a cross-plugin link that is not declared in the source manifest', () => {
     const snapshot: NavDependenciesSnapshot = {
       apps: [{ appId: 'discover', ownerPluginId: 'discover', deepLinkIds: [] }],
       navTrees: [{ ownerPluginId: 'serverlessSearch', linkTargets: ['discover'] }],
     };
 
-    expect(computeNavDependencyViolations(snapshot, noDeclaredDependencies)).toEqual([
+    expect(computeNavDependencyViolations(snapshot, noDeclaredDependencies)).toStrictEqual([
       { sourcePluginId: 'serverlessSearch', targetPluginId: 'discover', linkTarget: 'discover' },
     ]);
   });
 
-  it('does not flag a cross-plugin link that is already declared', () => {
+  test('does not flag a cross-plugin link that is already declared', () => {
     const snapshot: NavDependenciesSnapshot = {
       apps: [{ appId: 'discover', ownerPluginId: 'discover', deepLinkIds: [] }],
       navTrees: [{ ownerPluginId: 'serverlessSearch', linkTargets: ['discover'] }],
     };
 
-    const declaredBy = (pluginId: string) => (pluginId === 'serverlessSearch' ? ['discover'] : []);
-
-    expect(computeNavDependencyViolations(snapshot, declaredBy)).toEqual([]);
+    expect(computeNavDependencyViolations(snapshot, declaredByServerlessSearch)).toStrictEqual([]);
   });
 
-  it('ignores links internal to the source plugin', () => {
+  test('ignores links internal to the source plugin', () => {
     const snapshot: NavDependenciesSnapshot = {
       apps: [{ appId: 'enterpriseSearchApp', ownerPluginId: 'enterpriseSearch', deepLinkIds: [] }],
       navTrees: [{ ownerPluginId: 'enterpriseSearch', linkTargets: ['enterpriseSearchApp'] }],
     };
 
-    expect(computeNavDependencyViolations(snapshot, noDeclaredDependencies)).toEqual([]);
+    expect(computeNavDependencyViolations(snapshot, noDeclaredDependencies)).toStrictEqual([]);
   });
 
-  it('ignores link targets that cannot be attributed to an owner', () => {
+  test('ignores link targets that cannot be attributed to an owner', () => {
     const snapshot: NavDependenciesSnapshot = {
       apps: [{ appId: 'discover', ownerPluginId: null, deepLinkIds: [] }],
       navTrees: [
@@ -67,16 +68,16 @@ describe('computeNavDependencyViolations', () => {
       ],
     };
 
-    expect(computeNavDependencyViolations(snapshot, noDeclaredDependencies)).toEqual([]);
+    expect(computeNavDependencyViolations(snapshot, noDeclaredDependencies)).toStrictEqual([]);
   });
 
-  it('resolves deep-link targets to the owning app', () => {
+  test('resolves deep-link targets to the owning app', () => {
     const snapshot: NavDependenciesSnapshot = {
       apps: [{ appId: 'management', ownerPluginId: 'management', deepLinkIds: ['dataViews'] }],
       navTrees: [{ ownerPluginId: 'serverlessSearch', linkTargets: ['management:dataViews'] }],
     };
 
-    expect(computeNavDependencyViolations(snapshot, noDeclaredDependencies)).toEqual([
+    expect(computeNavDependencyViolations(snapshot, noDeclaredDependencies)).toStrictEqual([
       {
         sourcePluginId: 'serverlessSearch',
         targetPluginId: 'management',
@@ -85,7 +86,7 @@ describe('computeNavDependencyViolations', () => {
     ]);
   });
 
-  it('deduplicates multiple links between the same plugin pair', () => {
+  test('deduplicates multiple links between the same plugin pair', () => {
     const snapshot: NavDependenciesSnapshot = {
       apps: [
         { appId: 'management', ownerPluginId: 'management', deepLinkIds: ['dataViews', 'roles'] },
@@ -98,7 +99,7 @@ describe('computeNavDependencyViolations', () => {
       ],
     };
 
-    expect(computeNavDependencyViolations(snapshot, noDeclaredDependencies)).toEqual([
+    expect(computeNavDependencyViolations(snapshot, noDeclaredDependencies)).toStrictEqual([
       {
         sourcePluginId: 'serverlessSearch',
         targetPluginId: 'management',
@@ -107,7 +108,7 @@ describe('computeNavDependencyViolations', () => {
     ]);
   });
 
-  it('reports one violation per distinct target plugin', () => {
+  test('reports one violation per distinct target plugin', () => {
     const snapshot: NavDependenciesSnapshot = {
       apps: [
         { appId: 'discover', ownerPluginId: 'discover', deepLinkIds: [] },
@@ -116,7 +117,7 @@ describe('computeNavDependencyViolations', () => {
       navTrees: [{ ownerPluginId: 'serverlessSearch', linkTargets: ['discover', 'dashboards'] }],
     };
 
-    expect(computeNavDependencyViolations(snapshot, noDeclaredDependencies)).toEqual([
+    expect(computeNavDependencyViolations(snapshot, noDeclaredDependencies)).toStrictEqual([
       { sourcePluginId: 'serverlessSearch', targetPluginId: 'discover', linkTarget: 'discover' },
       { sourcePluginId: 'serverlessSearch', targetPluginId: 'dashboard', linkTarget: 'dashboards' },
     ]);
@@ -124,7 +125,7 @@ describe('computeNavDependencyViolations', () => {
 });
 
 describe('collectNavDependencyEdges', () => {
-  it('returns every cross-plugin edge and flags whether it is declared', () => {
+  test('returns every cross-plugin edge and flags whether it is declared', () => {
     const snapshot: NavDependenciesSnapshot = {
       apps: [
         { appId: 'discover', ownerPluginId: 'discover', deepLinkIds: [] },
@@ -133,9 +134,7 @@ describe('collectNavDependencyEdges', () => {
       navTrees: [{ ownerPluginId: 'serverlessSearch', linkTargets: ['discover', 'dashboards'] }],
     };
 
-    const declaredBy = (pluginId: string) => (pluginId === 'serverlessSearch' ? ['discover'] : []);
-
-    expect(collectNavDependencyEdges(snapshot, declaredBy)).toEqual([
+    expect(collectNavDependencyEdges(snapshot, declaredByServerlessSearch)).toStrictEqual([
       {
         sourcePluginId: 'serverlessSearch',
         targetPluginId: 'discover',
@@ -151,12 +150,12 @@ describe('collectNavDependencyEdges', () => {
     ]);
   });
 
-  it('excludes internal and unattributable links, matching the enforcement scope', () => {
+  test('excludes internal and unattributable links, matching the enforcement scope', () => {
     const snapshot: NavDependenciesSnapshot = {
       apps: [{ appId: 'ownApp', ownerPluginId: 'serverlessSearch', deepLinkIds: [] }],
       navTrees: [{ ownerPluginId: 'serverlessSearch', linkTargets: ['ownApp', 'someUnknownApp'] }],
     };
 
-    expect(collectNavDependencyEdges(snapshot, noDeclaredDependencies)).toEqual([]);
+    expect(collectNavDependencyEdges(snapshot, noDeclaredDependencies)).toStrictEqual([]);
   });
 });

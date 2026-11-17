@@ -111,6 +111,6 @@ test.describe('cross-plugin navigation dependencies', { tag: NAV_DEPS_DEPLOYMENT
       violations,
       `Found ${violations.length} undeclared cross-plugin navigation dependency(ies).\n` +
         `Add the missing plugin id to the source plugin's runtimePluginDependencies:\n${summary}`
-    ).toEqual([]);
+    ).toStrictEqual([]);
   });
 });
