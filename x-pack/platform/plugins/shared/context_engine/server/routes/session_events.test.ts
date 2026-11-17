@@ -33,13 +33,6 @@ interface RegisteredRoute {
   validate: { request: { body: Type<Record<string, unknown>> } };
 }
 
-const jdoe = {
-  username: 'jdoe',
-  profile_uid: 'u_jdoe_profile',
-  authentication_type: 'realm',
-  authentication_realm: { type: 'native', name: 'native1' },
-};
-
 const base = { turn_id: 'turn-1', event_at: '2026-11-16T09:58:00.000Z' };
 const userEvent = { ...base, id: 'evt-1', type: 'user', content: 'Why is checkout slow?' };
 const toolEvent = {
@@ -58,7 +51,7 @@ describe('session events routes', () => {
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let featureFlagEnabled: boolean;
   let memoryEnabled: boolean;
-  let currentUser: Record<string, unknown> | null;
+  let profileUid: string | null;
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let aiIndexService: { get: jest.Mock };
   let auditLog: jest.Mock;
@@ -70,10 +63,8 @@ describe('session events routes', () => {
         uiSettings: {
           client: { get: jest.fn().mockImplementation(async () => featureFlagEnabled) },
         },
-        security: {
-          authc: { getCurrentUser: () => currentUser, getPrincipal: () => null },
-          audit: { logger: { log: auditLog } },
-        },
+        security: { audit: { logger: { log: auditLog } } },
+        userProfile: { getCurrentProfileId: async () => profileUid },
         elasticsearch: { client: { asCurrentUser: esClient } },
       }),
     } as unknown as Parameters<RequestHandler>[0]);
@@ -99,7 +90,7 @@ describe('session events routes', () => {
   beforeEach(() => {
     featureFlagEnabled = true;
     memoryEnabled = true;
-    currentUser = jdoe;
+    profileUid = 'u_jdoe_profile';
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     aiIndexService = { get: jest.fn(async (id: string) => aiIndex(id)) };
     auditLog = jest.fn();
@@ -245,13 +236,17 @@ describe('session events routes', () => {
       expect(service.saveEvents).not.toHaveBeenCalled();
     });
 
-    it('returns 403 when the caller has no user profile', async () => {
-      currentUser = { username: 'harness', authentication_type: 'api_key' };
-      esClient.security.getApiKey.mockResolvedValueOnce({ api_keys: [] });
+    it.each([
+      ['without user_id', {}],
+      ['naming a user', { user_id: 'u_someone' }],
+    ])('returns 403 and saves nothing for a caller without a profile, %s', async (_name, body) => {
+      profileUid = null;
 
-      await callRoute({ session_id: 's1', events: [userEvent] });
+      await callRoute({ session_id: 's1', ...body, events: [userEvent] });
 
-      expect(response.forbidden).toHaveBeenCalledTimes(1);
+      expect(response.forbidden).toHaveBeenCalledWith({
+        body: { message: expect.stringContaining('The caller has no user profile') },
+      });
       expect(service.saveEvents).not.toHaveBeenCalled();
     });
   });
