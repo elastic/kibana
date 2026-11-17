@@ -8,7 +8,13 @@
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { parse } from 'yaml';
-import { FLOOR_IDLE_WAIT_MS, FLOOR_TICK_POLL_INTERVAL_MS, RUNNER_WORKFLOW_ID } from './constants';
+import {
+  FLOOR_IDLE_WAIT_MS,
+  FLOOR_TICK_CANCEL_TIMEOUT_MS,
+  FLOOR_TICK_POLL_INTERVAL_MS,
+  POLL_INTERVAL_MS,
+  RUNNER_WORKFLOW_ID,
+} from './constants';
 import { AttackDiscoveryWorkerClient, describeFloorDrift, usingClient } from './worker_client';
 
 const log = { info: jest.fn(), warning: jest.fn(), debug: jest.fn() } as unknown as ToolingLog;
@@ -97,7 +103,7 @@ steps:
       workflow-id: system-security-attack-discovery-worker
       run-as-mode: inherit
       inputs:
-        autonomy: manual
+        autonomy: "\${{ consts.manual }}"
 `;
 
 /** A Kibana that stores the floor workflow and records every call, with a review child. */
@@ -577,6 +583,25 @@ describe('AttackDiscoveryWorkerClient.runReview', () => {
     expect(kibana.calls.some(({ path }) => path.endsWith('/run'))).toBe(false);
   });
 
+  it('refuses a floor a failed restore left rewritten with the runner as target and literal inputs', async () => {
+    const leftover = FLOOR_YAML.replace(
+      /autonomy: .*/,
+      'schedule_interval: 24h\n        batch_size: 50'
+    );
+    const kibana = fakeKibana({ initialYaml: leftover });
+    const client = new AttackDiscoveryWorkerClient(kibana.fetch as unknown as HttpHandler, log);
+    await expect(
+      client.runViaFloorParent({
+        spaceId: 'default',
+        floorWorkflowId: 'floor',
+        targetWorkflowId: RUNNER_WORKFLOW_ID,
+        inputs: { batch_size: 50 },
+        maxWaitMs: 1000,
+      })
+    ).rejects.toThrow(/literal inputs of an earlier run.*interrupted/);
+    expect(kibana.calls.some(({ method }) => method === 'PUT')).toBe(false);
+  });
+
   it('refuses a floor without run_as before changing anything', async () => {
     const kibana = fakeKibana({ initialYaml: FLOOR_YAML.replace(/settings:\n.*\n/, '') });
     const client = new AttackDiscoveryWorkerClient(kibana.fetch as unknown as HttpHandler, log);
@@ -660,18 +685,32 @@ describe('describeFloorDrift', () => {
   });
 });
 
-const cancelFailing = (failing: Record<string, number>) => {
+/** `failing` maps an execution to its cancel's HTTP status; `statuses` to what a re-read returns. */
+const cancelFailing = (
+  failing: Record<string, number>,
+  statuses: Record<string, string | number> = {}
+) => {
   const cancelled: string[] = [];
+  const accepted = new Set<string>();
   const fetch = jest.fn(async (path: string) => {
-    const id = /executions\/([^/]+)\/cancel/.exec(path)?.[1] ?? '';
+    const cancel = /executions\/([^/]+)\/cancel/.exec(path);
+    if (!cancel) {
+      const id = /executions\/([^/?]+)/.exec(path)?.[1] ?? '';
+      const status = accepted.has(id) ? 'cancelled' : statuses[id] ?? 'running';
+      if (typeof status === 'number')
+        throw Object.assign(new Error(`status ${status}`), { status });
+      return { id, status };
+    }
+    const id = cancel[1];
     cancelled.push(id);
     if (failing[id])
       throw Object.assign(new Error(`status ${failing[id]}`), { status: failing[id] });
+    accepted.add(id);
     return {};
   });
   const client = new AttackDiscoveryWorkerClient(fetch as unknown as HttpHandler, log);
   ['a', 'b', 'c'].forEach((id) => client.track('s', id));
-  return { client, cancelled };
+  return { client, cancelled, fetch };
 };
 
 describe('AttackDiscoveryWorkerClient.cancelPending', () => {
@@ -680,7 +719,7 @@ describe('AttackDiscoveryWorkerClient.cancelPending', () => {
     await expect(client.cancelPending()).rejects.toThrow(
       /Could not cancel execution b \(HTTP 500\)/
     );
-    expect(cancelled.sort()).toEqual(['a', 'b', 'c']);
+    expect(cancelled.sort()).toEqual(['a', 'b', 'b', 'c']);
   });
 
   it('keeps an execution whose cancel failed pending, so the next call retries only it', async () => {
@@ -704,7 +743,7 @@ describe('AttackDiscoveryWorkerClient.cancelPending', () => {
     cancelled.length = 0;
     (log.warning as jest.Mock).mockClear();
     await expect(client.cancelPending()).rejects.toThrow(/Could not cancel execution b/);
-    expect(cancelled).toEqual(['b']);
+    expect(cancelled).toEqual(['b', 'b']);
     expect((log.warning as jest.Mock).mock.calls.map(([message]) => message)).toEqual(
       expect.arrayContaining([
         expect.stringMatching(/Giving up on cancelling execution b.*status 500/),
@@ -722,19 +761,25 @@ describe('AttackDiscoveryWorkerClient.cancelPending', () => {
     // leaving the other for the next `cancelPending`, whose failure counts afresh because
     // `forget` also cleared `failedCancels` (hence no "Giving up" warning yet).
     let cancelFails = true;
+    // run-1 reads as live around the cancels (so a failed cancel is not settled by its re-read)
+    // and as completed while `run` polls it.
+    let status = 'running';
     const fetch = jest.fn(async (path: string) => {
       if (path.includes('/workflow/')) return { workflowExecutionId: 'floor-1' };
       if (path.endsWith('/children')) return [{ workflowId: RUNNER, executionId: 'run-1' }];
       if (path.includes('/cancel')) {
         if (cancelFails) throw Object.assign(new Error('status 500'), { status: 500 });
+        status = 'cancelled';
         return {};
       }
-      return { id: 'run-1', status: 'completed', stepExecutions: [] };
+      return { id: 'run-1', status, stepExecutions: [] };
     });
     const client = new AttackDiscoveryWorkerClient(fetch as unknown as HttpHandler, log);
     client.track('s', 'run-1');
     await expect(client.cancelPending()).rejects.toThrow(/Could not cancel execution run-1/);
+    status = 'completed';
     await client.run({ spaceId: 's', floorWorkflowId: 'floor' });
+    status = 'running';
     (log.warning as jest.Mock).mockClear();
     fetch.mockClear();
     await expect(client.cancelPending()).rejects.toThrow(/Could not cancel execution run-1/);
@@ -748,9 +793,93 @@ describe('AttackDiscoveryWorkerClient.cancelPending', () => {
   });
 
   it('ignores a 404', async () => {
-    const { client, cancelled } = cancelFailing({ b: 404 });
+    const { client, cancelled } = cancelFailing({ b: 404 }, { b: 404 });
     await expect(client.cancelPending()).resolves.toBeUndefined();
     expect(cancelled.sort()).toEqual(['a', 'b', 'c']);
+  });
+
+  it('fails an accepted cancel whose execution has not ended by the settle deadline, and retries it once', async () => {
+    jest.useFakeTimers({ doNotFake: ['nextTick'] });
+    try {
+      const cancelled: string[] = [];
+      const fetch = jest.fn(async (path: string) => {
+        if (path.includes('/cancel')) {
+          cancelled.push('b');
+          return {};
+        }
+        return { id: 'b', status: 'running' };
+      });
+      const client = new AttackDiscoveryWorkerClient(fetch as unknown as HttpHandler, log);
+      client.track('s', 'b');
+      const first = client.cancelPending().then(
+        () => undefined,
+        (e: unknown) => e
+      );
+      await jest.advanceTimersByTimeAsync(FLOOR_TICK_CANCEL_TIMEOUT_MS + POLL_INTERVAL_MS);
+      expect(await first).toEqual(
+        expect.objectContaining({
+          message: expect.stringMatching(/Could not settle execution b/),
+        })
+      );
+      // Kept pending for one retry: the next call cancels it again.
+      const second = client.cancelPending().then(
+        () => undefined,
+        (e: unknown) => e
+      );
+      await jest.advanceTimersByTimeAsync(FLOOR_TICK_CANCEL_TIMEOUT_MS + POLL_INTERVAL_MS);
+      expect(await second).toEqual(
+        expect.objectContaining({
+          message: expect.stringMatching(/Could not settle execution b/),
+        })
+      );
+      expect(cancelled).toEqual(['b', 'b']);
+      expect((log.warning as jest.Mock).mock.calls.map(([message]) => message)).toEqual(
+        expect.arrayContaining([expect.stringMatching(/Giving up on cancelling execution b/)])
+      );
+      await client.cancelPending();
+      expect(cancelled).toEqual(['b', 'b']);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it.each([
+    ['has ended', 'completed'],
+    ['is gone', 404],
+  ])('counts a failed cancel as done when the execution %s', async (_, status) => {
+    const { client, cancelled } = cancelFailing({ b: 500 }, { b: status });
+    await expect(client.cancelPending()).resolves.toBeUndefined();
+    expect(cancelled.sort()).toEqual(['a', 'b', 'c']);
+    cancelled.length = 0;
+    await client.cancelPending();
+    expect(cancelled).toEqual([]);
+  });
+
+  it('retries a failed cancel of a live execution at once, and settles when the retry lands', async () => {
+    let failures = 1;
+    let accepted = false;
+    const cancelled: string[] = [];
+    const fetch = jest.fn(async (path: string) => {
+      if (!path.includes('/cancel')) {
+        return { id: 'b', status: accepted ? 'cancelled' : 'waiting_for_input' };
+      }
+      cancelled.push('b');
+      if (failures-- > 0) throw Object.assign(new Error('status 500'), { status: 500 });
+      accepted = true;
+      return {};
+    });
+    const client = new AttackDiscoveryWorkerClient(fetch as unknown as HttpHandler, log);
+    client.track('s', 'b');
+    await expect(client.cancelPending()).resolves.toBeUndefined();
+    expect(cancelled).toEqual(['b', 'b']);
+  });
+
+  it('still retries the cancel when the re-read fails', async () => {
+    const { client, cancelled } = cancelFailing({ b: 500 }, { b: 503 });
+    await expect(client.cancelPending()).rejects.toThrow(
+      /Could not cancel execution b \(HTTP 500\)/
+    );
+    expect(cancelled.filter((id) => id === 'b')).toEqual(['b', 'b']);
   });
 
   it('throws an AggregateError naming each failed execution', async () => {

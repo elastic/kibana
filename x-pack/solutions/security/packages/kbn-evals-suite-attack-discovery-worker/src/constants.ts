@@ -124,15 +124,36 @@ export const POLL_INTERVAL_MS = 5_000;
 export const ROW_OVERHEAD_MS = 5 * 60_000;
 
 /**
- * Playwright runs every row inside one test, so its timeout has to cover each row hitting its own
- * timeouts, the seeded false-positive row's extra review wait, and `FLOOR_IDLE_WAIT_MS` for each
- * floor settle and idle wait. Otherwise a slow model is killed mid-dataset with no scores, and the
- * failure reads as a generic test timeout instead of the suite's labeled one.
+ * Two rows go through `runViaFloorParent` instead of a plain run: the seeded false-positive row's
+ * review and the large-batch row's runner. Each waits for the floor to go idle before the rewrite
+ * and for its cancelled executions to settle before the restore.
  */
-export const getPlaywrightTestTimeoutMs = (rowCount: number): number =>
-  rowCount * (RUNNER_TIMEOUT_MS + REVIEW_SETTLE_TIMEOUT_MS + ROW_OVERHEAD_MS + FLOOR_IDLE_WAIT_MS) +
-  REVIEW_SETTLE_TIMEOUT_MS +
-  2 * FLOOR_IDLE_WAIT_MS;
+const FLOOR_PARENT_RUN_COUNT = 2;
+const FLOOR_PARENT_RUN_WAITS_MS = 2 * FLOOR_IDLE_WAIT_MS + FLOOR_TICK_CANCEL_TIMEOUT_MS;
+
+/**
+ * Playwright runs every row inside one test, so its timeout has to cover each row hitting its own
+ * timeouts, `FLOOR_IDLE_WAIT_MS` for each floor settle, the seeded false-positive row's extra review
+ * wait, and the waits of both floor-parent rows. The large-batch row's runner wait is already
+ * inside its row's `RUNNER_TIMEOUT_MS`. Otherwise a slow model is killed mid-dataset with no
+ * scores, and the failure reads as a generic test timeout instead of the suite's labeled one.
+ *
+ * Every repetition re-runs all rows serially inside the same test, so the budget is per pass times
+ * `repetitions`.
+ */
+export const getPlaywrightTestTimeoutMs = (rowCount: number, repetitions = 1): number =>
+  repetitions *
+  (rowCount *
+    (RUNNER_TIMEOUT_MS + REVIEW_SETTLE_TIMEOUT_MS + ROW_OVERHEAD_MS + FLOOR_IDLE_WAIT_MS) +
+    REVIEW_SETTLE_TIMEOUT_MS +
+    FLOOR_PARENT_RUN_COUNT * FLOOR_PARENT_RUN_WAITS_MS);
+
+/**
+ * The repetitions `createPlaywrightEvalsConfig` will use: it reads `EVAL_REPETITIONS` first (the
+ * CLI's `--repetitions` sets it), then the config's value, which this suite pins to 1.
+ */
+export const getEvalRepetitions = (): number =>
+  parseInt(process.env.EVAL_REPETITIONS || '', 10) || 1;
 
 export const COHORT_ENV = 'AD_WORKER_EVAL_COHORT';
 /** Comma-separated scenario ids; when set, the spec scores only those rows (a focused run). */

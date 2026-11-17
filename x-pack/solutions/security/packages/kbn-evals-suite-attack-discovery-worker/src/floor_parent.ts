@@ -79,12 +79,27 @@ export const floorDispatchTarget = (yaml: string): string | undefined => {
 };
 
 /**
- * Whether the floor still dispatches the runner, as the registry renders it. An interrupted
- * floor-parent run leaves its edit behind, and reading that as the "original" would make the next
- * run restore the leftover.
+ * Whether `yaml` still dispatches `inputs` that are the registry's own rather than a run's literal
+ * ones. The rendered floor passes Liquid-templated inputs (`parent_run_id: "{{ execution.id }}"`);
+ * a rewrite replaces them with literals, so an inputs map with no marker is a leftover even when
+ * the target is the runner.
+ */
+const hasRenderedInputs = (yaml: string): boolean => {
+  const document = parseDocument(yaml);
+  const steps = document.get('steps');
+  const [step] = isSeq(steps) ? steps.items.filter(isExecuteStep) : [];
+  const inputs = step?.getIn(['with', 'inputs']);
+  return !isMap(inputs) || hasTemplateMarker(inputs.toJSON());
+};
+
+/**
+ * Whether the floor is as the registry renders it: it dispatches the runner and still has the
+ * rendered inputs. An interrupted floor-parent run leaves its edit behind, including a rewrite that
+ * keeps the runner as target but swaps in literal inputs, and reading that as the "original" would
+ * make the next run restore the leftover.
  */
 export const isFloorClean = (yaml: string): boolean =>
-  floorDispatchTarget(yaml) === RUNNER_WORKFLOW_ID;
+  floorDispatchTarget(yaml) === RUNNER_WORKFLOW_ID && hasRenderedInputs(yaml);
 
 /** What a floor-parent run must put back exactly: the stored definition and its managed state. */
 export interface FloorWorkflowState {
@@ -123,12 +138,17 @@ export const readFloorWorkflow = async ({
   };
 };
 
-/** Throws unless the floor dispatches the runner (see `isFloorClean`). */
+/** Throws unless the floor is as the registry renders it (see `isFloorClean`). */
 export const assertFloorClean = (floorWorkflowId: string, yaml: string): void => {
   if (isFloorClean(yaml)) return;
+  const target = floorDispatchTarget(yaml);
+  const reason =
+    target === RUNNER_WORKFLOW_ID
+      ? `Floor workflow "${floorWorkflowId}" dispatches "${RUNNER_WORKFLOW_ID}" with the literal inputs of an earlier run, not the ones the registry renders`
+      : `Floor workflow "${floorWorkflowId}" does not dispatch "${RUNNER_WORKFLOW_ID}" (it dispatches "${String(
+          target
+        )}")`;
   throw new Error(
-    `Floor workflow "${floorWorkflowId}" does not dispatch "${RUNNER_WORKFLOW_ID}" (it dispatches "${String(
-      floorDispatchTarget(yaml)
-    )}"): an earlier floor-parent run was interrupted before it put the YAML back. The preflight repairs this; a run started without it must not continue.`
+    `${reason}: an earlier floor-parent run was interrupted before it put the YAML back. The preflight repairs this; a run started without it must not continue.`
   );
 };

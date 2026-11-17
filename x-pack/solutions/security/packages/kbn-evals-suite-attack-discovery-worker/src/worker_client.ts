@@ -466,17 +466,48 @@ export class AttackDiscoveryWorkerClient {
    * Cancels what is still running, including reviews parked on the analyst gate. Every execution
    * is attempted. A 404 (already gone) is ignored; any other failure is thrown after all attempts
    * finish, naming each execution id and HTTP status (an `AggregateError` when several failed),
-   * because a review that could not be cancelled stays parked. A failed execution stays pending for
-   * one retry on a later call; if that fails too it is dropped with a warning, so a review that
-   * cannot be cancelled does not fail every later row.
+   * because a review that could not be cancelled stays parked. A cancel POST only records the
+   * request, so each cancelled execution is then waited on, for a bounded time, until it ends; one
+   * that has not ended by then is a failure too, so cleanup never starts beside a still-running
+   * child. A failed or unsettled execution stays pending for one retry on a later call; if that
+   * fails too it is dropped with a warning, so a review that cannot be cancelled does not fail
+   * every later row.
    */
   async cancelPending(): Promise<void> {
-    await this.cancelEntries(this.pendingExecutions.splice(0));
+    const { cancelled, failures } = await this.cancelEntries(this.pendingExecutions.splice(0));
+    throwFailures([...failures, ...(await this.settleCancelled(cancelled))]);
+  }
+
+  /**
+   * Waits for each cancelled execution to end and returns a failure for any that has not by the
+   * deadline (re-tracked for one retry like a failed cancel). Settled ones are cleared.
+   */
+  private async settleCancelled(
+    cancelled: Array<{ spaceId: string; executionId: string }>
+  ): Promise<Error[]> {
+    const settled = await Promise.all(
+      cancelled.map(({ spaceId, executionId }) => this.waitUntilSettled(spaceId, executionId))
+    );
+    return cancelled.flatMap(({ spaceId, executionId }, index) => {
+      if (settled[index]) {
+        this.failedCancels.delete(executionId);
+        return [];
+      }
+      return [
+        this.recordFailedCancel(
+          spaceId,
+          executionId,
+          new Error(`it had not ended ${CANCEL_SETTLE_TIMEOUT_MS}ms after it was cancelled`),
+          'Could not settle'
+        ),
+      ];
+    });
   }
 
   /**
    * Cancels those of the given executions that have not ended (the route may refuse an ended one),
-   * then waits a bounded time for them to end. Failures follow `cancelPending`'s contract.
+   * then waits a bounded time for them to end. Failures, including an execution that has not ended
+   * by the deadline, follow `cancelPending`'s contract.
    */
   private async cancelExecutions(spaceId: string, executionIds: string[]): Promise<void> {
     for (const executionId of executionIds) this.forget(executionId);
@@ -491,70 +522,108 @@ export class AttackDiscoveryWorkerClient {
         })
       )
     ).flat();
-    await this.cancelEntries(live.map((executionId) => ({ spaceId, executionId })));
-    await Promise.all(live.map((executionId) => this.waitUntilSettled(spaceId, executionId)));
+    const { cancelled, failures } = await this.cancelEntries(
+      live.map((executionId) => ({ spaceId, executionId }))
+    );
+    throwFailures([...failures, ...(await this.settleCancelled(cancelled))]);
   }
 
-  /** Waits a bounded time for a cancelled execution to end; a 404 or a timeout only warns. */
-  private async waitUntilSettled(spaceId: string, executionId: string): Promise<void> {
+  /**
+   * Waits a bounded time for a cancelled execution to end (a 404 counts as ended) and returns
+   * whether it did.
+   */
+  private async waitUntilSettled(spaceId: string, executionId: string): Promise<boolean> {
     const deadline = Date.now() + CANCEL_SETTLE_TIMEOUT_MS;
     for (;;) {
       const status = await this.getExecution(spaceId, executionId).then(
         ({ status: current }) => current,
         (error) => (httpStatus(error) === 404 ? ExecutionStatus.CANCELLED : undefined)
       );
-      if (status !== undefined && isTerminal(status)) return;
+      if (status !== undefined && isTerminal(status)) return true;
       if (Date.now() >= deadline) {
-        this.log.warning(
-          `Execution ${executionId} had not ended ${CANCEL_SETTLE_TIMEOUT_MS}ms after it was cancelled`
-        );
-        return;
+        return false;
       }
       await sleep(POLL_INTERVAL_MS);
     }
   }
 
-  private async cancelEntries(
-    pending: Array<{ spaceId: string; executionId: string }>
-  ): Promise<void> {
-    const results = await Promise.allSettled(
-      pending.map(({ spaceId, executionId }) =>
-        this.fetch(this.executionPath(spaceId, executionId, '/cancel'), {
-          method: 'POST',
-          headers: apiVersion(PUBLIC_API_VERSION),
-        })
-      )
-    );
-    const failures = results.flatMap((result, index) => {
-      if (result.status !== 'rejected' || httpStatus(result.reason) === 404) {
-        this.failedCancels.delete(pending[index].executionId);
-        return [];
-      }
-      const { spaceId, executionId } = pending[index];
-      const failedCancels = (this.failedCancels.get(executionId) ?? 0) + 1;
-      if (failedCancels < MAX_CANCEL_ATTEMPTS) {
-        this.failedCancels.set(executionId, failedCancels);
-        this.track(spaceId, executionId);
-      } else {
-        this.failedCancels.delete(executionId);
-        this.log.warning(
-          `Giving up on cancelling execution ${executionId} after ${failedCancels} attempts: ${errorMessage(
-            result.reason
-          )}`
-        );
-      }
-      const message = `Could not cancel execution ${executionId} (HTTP ${
-        httpStatus(result.reason) ?? 'unknown'
-      }): ${errorMessage(result.reason)}`;
-      this.log.warning(message);
-      return [new Error(message, { cause: result.reason })];
-    });
-    if (failures.length === 1) throw failures[0];
-    if (failures.length > 1) {
-      throw new AggregateError(failures, failures.map((failure) => failure.message).join('; '));
+  /**
+   * The cancel route stores the cancel request before it wakes the execution's idle tasks, and that
+   * wake fails with 500 when a task is claimed between being read as idle and being run. So a
+   * failed cancel is re-read: an execution that has ended (or is gone) counts as cancelled, and
+   * one still live gets one immediate retry, which no longer sees the claimed task as idle.
+   */
+  private async cancelOne(spaceId: string, executionId: string): Promise<void> {
+    const post = () =>
+      this.fetch(this.executionPath(spaceId, executionId, '/cancel'), {
+        method: 'POST',
+        headers: apiVersion(PUBLIC_API_VERSION),
+      });
+    try {
+      await post();
+    } catch (error) {
+      if (httpStatus(error) === 404) throw error;
+      const status = await this.getExecution(spaceId, executionId).then(
+        ({ status: current }) => current,
+        (readError) => (httpStatus(readError) === 404 ? ExecutionStatus.CANCELLED : undefined)
+      );
+      if (status !== undefined && isTerminal(status)) return;
+      await post();
     }
   }
+
+  /** Counts a failed cancel, then keeps the execution pending for a retry or gives up on it. */
+  private recordFailedCancel(
+    spaceId: string,
+    executionId: string,
+    reason: unknown,
+    action = 'Could not cancel'
+  ): Error {
+    const failedCancels = (this.failedCancels.get(executionId) ?? 0) + 1;
+    if (failedCancels < MAX_CANCEL_ATTEMPTS) {
+      this.failedCancels.set(executionId, failedCancels);
+      this.track(spaceId, executionId);
+    } else {
+      this.failedCancels.delete(executionId);
+      this.log.warning(
+        `Giving up on cancelling execution ${executionId} after ${failedCancels} attempts: ${errorMessage(
+          reason
+        )}`
+      );
+    }
+    const message = `${action} execution ${executionId} (HTTP ${
+      httpStatus(reason) ?? 'unknown'
+    }): ${errorMessage(reason)}`;
+    this.log.warning(message);
+    return new Error(message, { cause: reason });
+  }
+
+  /** Cancels every entry; `cancelled` are those the server accepted (or no longer has). */
+  private async cancelEntries(
+    pending: Array<{ spaceId: string; executionId: string }>
+  ): Promise<{ cancelled: Array<{ spaceId: string; executionId: string }>; failures: Error[] }> {
+    const results = await Promise.allSettled(
+      pending.map(({ spaceId, executionId }) => this.cancelOne(spaceId, executionId))
+    );
+    const cancelled: Array<{ spaceId: string; executionId: string }> = [];
+    const failures = results.flatMap((result, index) => {
+      const { spaceId, executionId } = pending[index];
+      if (result.status !== 'rejected' || httpStatus(result.reason) === 404) {
+        cancelled.push(pending[index]);
+        return [];
+      }
+      return [this.recordFailedCancel(spaceId, executionId, result.reason)];
+    });
+    return { cancelled, failures };
+  }
 }
+
+const throwFailures = (failures: Error[]): void => {
+  if (failures.length === 1) throw failures[0];
+  if (failures.length > 1) {
+    throw new AggregateError(failures, failures.map((failure) => failure.message).join('; '));
+  }
+};
 
 /**
  * What about the floor read just before the restore is not what this run left, or undefined when

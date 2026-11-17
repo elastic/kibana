@@ -20,6 +20,15 @@ type HttpHandlerArgs =
 // `new Response(body, { status })` throws a TypeError when body is non-null on these statuses.
 const NULL_BODY_STATUSES = new Set([204, 205, 304]);
 
+// Parsed JSON is a plain object, array, number or boolean. Anything else (a Node stream from
+// `responseType: 'stream'`, Buffer, ReadableStream, ...) is already a body `Response` can consume.
+const isParsedJson = (data: unknown): boolean => {
+  if (typeof data !== 'object' || data === null) return true;
+  if (Array.isArray(data)) return true;
+  const prototype = Object.getPrototypeOf(data);
+  return prototype === Object.prototype || prototype === null;
+};
+
 /**
  * Creates a function that matches the HttpHandler interface from Core's
  * API, using the KbnClient from @kbn/kbn-client
@@ -133,15 +142,17 @@ export function httpHandlerFromKbnClient({
             // `kbnClient.request` already parsed the body (`response.data`), but `new Response`
             // stringifies a non-BodyInit value with `String()` — an object becomes the literal
             // text "[object Object]", so `response.json()` below throws SyntaxError. Serialize
-            // it back to JSON (strings pass through unwrapped; null-body statuses must stay
-            // bodyless or the Response constructor throws) so the Response carries the body
-            // `asResponse` consumers expect.
+            // it back to JSON (strings and non-JSON bodies such as streams pass through
+            // unwrapped; null-body statuses must stay bodyless or the Response constructor
+            // throws) so the Response carries the body `asResponse` consumers expect.
             response: new Response(
               response.data == null || NULL_BODY_STATUSES.has(response.status)
                 ? null
                 : typeof response.data === 'string'
                 ? response.data
-                : JSON.stringify(response.data),
+                : isParsedJson(response.data)
+                ? JSON.stringify(response.data)
+                : (response.data as BodyInit),
               {
                 status: response.status,
                 statusText: response.statusText,

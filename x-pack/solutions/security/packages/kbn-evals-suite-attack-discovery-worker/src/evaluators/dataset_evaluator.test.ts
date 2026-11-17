@@ -17,6 +17,7 @@ import { assertCleanSpace, cleanupSeed, seedScenario } from '../seed';
 import type { ReviewArtifact, WorkerArtifacts, WorkerExample } from '../worker_types';
 import type { AttackDiscoveryWorkerClient } from '../worker_client';
 import {
+  chainAlertIdsOf,
   createAuditEvaluators,
   createCodeEvaluators,
   createEvaluateDataset,
@@ -1167,5 +1168,27 @@ describe('createEvaluateDataset', () => {
         expect.objectContaining({ when: 'after the last row' })
       );
     });
+  });
+});
+
+describe('chainAlertIdsOf', () => {
+  const scenario = (id: string) => {
+    const found = WORKER_AUDIT_SCENARIOS.find((candidate) => candidate.id === id);
+    if (!found) throw new Error(`no scenario ${id}`);
+    return found;
+  };
+
+  it('returns the ids of the single gold recall-target group', () => {
+    const positive = scenario('positive-chain-with-noise');
+    const { requiredGroup, alertGroups } = positive.gold;
+    expect(requiredGroup).toBeDefined();
+    expect(chainAlertIdsOf(positive)).toEqual([...alertGroups[requiredGroup as string]]);
+  });
+
+  it('omits the indicator when the baseline gold accepts any of several groups', () => {
+    // Top-level gold names prod-deploy-bot, but its baseline override accepts prod or sandbox.
+    const crossAccount = scenario('same-display-name-cross-account');
+    expect(crossAccount.gold.requiredGroup).toBe('prod-deploy-bot');
+    expect(chainAlertIdsOf(crossAccount)).toBeUndefined();
   });
 });

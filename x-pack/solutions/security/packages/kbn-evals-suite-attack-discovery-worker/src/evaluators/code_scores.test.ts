@@ -128,6 +128,35 @@ describe('scoreReviewsSettled', () => {
     expect(result.explanation).toContain('analysis step errored: boom');
   });
 
+  it('fails a completed review whose analysis child failed', () => {
+    const result = scoreReviewsSettled(
+      expected,
+      artifacts({
+        reviews: [
+          review({
+            status: 'completed',
+            verdict: 'failed',
+            analysis: analysed({ status: 'failed', error: 'analyze step errored: boom' }),
+          }),
+        ],
+      })
+    );
+    expect(result.score).toBe(0);
+    expect(result.label).not.toBe(MODEL_FAULT_LABEL);
+    expect(result.explanation).toContain('analysis failed: analyze step errored: boom');
+  });
+
+  it('labels a completed review whose analysis child was refused MODEL_FAULT', () => {
+    const error = 'The model (x) refused to complete the response';
+    const result = scoreReviewsSettled(
+      expected,
+      artifacts({
+        reviews: [review({ status: 'completed', analysis: analysed({ status: 'failed', error }) })],
+      })
+    );
+    expect(result).toMatchObject({ score: 0, label: MODEL_FAULT_LABEL });
+  });
+
   it.each([
     'The model (claude-opus-5-5) refused to complete the response, so generation stopped',
     'The response was stopped by the provider content filter (finish_reason: content_filter).',
@@ -637,6 +666,36 @@ describe('scoreStageModelResolved', () => {
     );
     expect(result.score).toBe(0);
     expect(result.explanation).toContain('ran on other, planned review-model');
+  });
+
+  it('fails when the analysis child failed even though it reported the planned endpoint', () => {
+    const result = score(
+      expected,
+      withBoth({
+        reviews: [
+          review({ analysis: analysed({ status: 'failed', error: 'analyze step errored: boom' }) }),
+        ],
+      })
+    );
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('analysis failed: analyze step errored: boom');
+  });
+
+  it('does not add a problem for a refused analysis child', () => {
+    const result = score(
+      expected,
+      withBoth({
+        reviews: [
+          review({
+            analysis: analysed({
+              status: 'failed',
+              error: 'finish_reason: content_filter',
+            }),
+          }),
+        ],
+      })
+    );
+    expect(result.score).toBe(1);
   });
 
   it('fails, not passes, when the review model cannot be determined', () => {

@@ -209,15 +209,25 @@ describe('evals.suites.json requiredModelGroups (AZ tier coverage)', () => {
     }
 
     const pinned = new Set(workerSuite.requiredModelGroups ?? []);
+    const frontierGroups = new Set<string>();
     const problems = frontierEndpoints.flatMap((endpoint) => {
       const group = endpointToModelGroup(endpoint);
       if (!group) {
         return [`could not map Frontier endpoint "${endpoint}" to an eis/ model group`];
       }
+      frontierGroups.add(group);
       return pinned.has(group)
         ? []
         : [`"${group}" is Frontier but not pinned in requiredModelGroups`];
     });
+
+    // Reverse direction: a model dropped from Frontier must leave the pin too, or it keeps running
+    // in every request and fails the per-group connector assertion once EIS stops provisioning it.
+    for (const group of pinned) {
+      if (!frontierGroups.has(group)) {
+        problems.push(`"${group}" is pinned in requiredModelGroups but not a Frontier endpoint`);
+      }
+    }
 
     expect(problems).toEqual([]);
   });

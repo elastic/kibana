@@ -78,9 +78,13 @@ export interface AuditJudgeDeps {
 
 const DIRECTION = 'maximize' as const;
 
-/** The scenario's own ids of the gold recall-target group; undefined when it names none. */
-const chainAlertIdsOf = (scenario: AuditScenario): string[] | undefined => {
-  const { alertGroups, requiredGroup } = scenario.gold;
+/**
+ * The ids of the baseline gold's recall-target group, the gold the runner's alerts are scored
+ * against. Undefined when the baseline names no single target (`requiredAnyOf` accepts any of
+ * several groups), so the indicator is omitted instead of contradicting the gold.
+ */
+export const chainAlertIdsOf = (scenario: AuditScenario): string[] | undefined => {
+  const { alertGroups, requiredGroup } = getGoldForVariant(scenario.gold, 'baseline');
   return requiredGroup !== undefined && alertGroups[requiredGroup]
     ? [...alertGroups[requiredGroup]]
     : undefined;

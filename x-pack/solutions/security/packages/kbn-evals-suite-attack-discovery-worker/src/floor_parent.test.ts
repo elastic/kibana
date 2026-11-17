@@ -137,6 +137,19 @@ describe('the floor workflow as the registry renders it', () => {
       /does not dispatch "system-security-attack-discovery-worker" \(it dispatches "system-security-attack-discovery-review"\).*interrupted/
     );
   });
+
+  it('is not clean when a rewrite kept the runner as target but left literal inputs', () => {
+    const rewritten = rewriteFloorParentYaml({
+      yaml: rendered,
+      targetWorkflowId: RUNNER_WORKFLOW_ID,
+      inputs: { schedule_interval: '24h', batch_size: 50 },
+    });
+    expect(floorDispatchTarget(rewritten)).toBe(RUNNER_WORKFLOW_ID);
+    expect(isFloorClean(rewritten)).toBe(false);
+    expect(() => assertFloorClean('floor', rewritten)).toThrow(
+      /with the literal inputs of an earlier run.*interrupted/
+    );
+  });
 });
 
 describe('floorDispatchTarget', () => {

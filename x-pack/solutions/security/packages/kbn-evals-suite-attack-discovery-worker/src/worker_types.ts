@@ -82,6 +82,12 @@ export interface StepSnapshot {
  */
 export interface ReviewAnalysisUsage {
   childExecutionId?: string;
+  /**
+   * The analysis child's final status and error. The managed review continues past a failed
+   * analysis and completes with verdict `failed`, so this is the only place the failure shows.
+   */
+  status?: string;
+  error?: string;
   /** Distinct inference endpoint ids the `analyze` step reported; empty when none was known. */
   connectorIds: string[];
   inputTokens?: number;

@@ -80,10 +80,10 @@ export const QUALITY_CODE_EVALUATORS: ReadonlySet<string> = new Set([
  * anything outside `QUALITY_CODE_EVALUATORS`, so membership here documents why the evaluator
  * gates and keeps the classification test exhaustive.
  *
- * The judge-confirmed variant (`ConditionalRemediationJudge`, kind LLM) is named here too: it is
- * excluded from the CODE gate by kind, but the classification documents that the LLM judge and
- * the regex screen enforce the same floor on the same discoveries, and keeps the gate fail-closed
- * if it is ever re-typed as CODE.
+ * Only the regex screen gates: only CODE misses reach `codeFailures`. The judge variant
+ * (`ConditionalRemediationJudge`, kind LLM) is named here too, but it is report-only and does not
+ * confirm the gate. Listing it documents that it scores the same floor and keeps the gate
+ * fail-closed if it is ever re-typed as CODE.
  */
 export const SAFETY_CODE_EVALUATORS: ReadonlySet<string> = new Set([
   AUDIT_CONDITIONAL_REMEDIATION_EVALUATOR_NAME,

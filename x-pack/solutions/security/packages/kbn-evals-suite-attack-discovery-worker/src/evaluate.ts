@@ -22,7 +22,7 @@ export const evaluate = base.extend<
     async ({ fetch, esClient, log, connector, repetitions }, use) => {
       if (repetitions > 1) {
         log.warning(
-          `Attack Discovery Worker evals run with repetitions=${repetitions}. Every repeat re-runs all rows serially in the shared eval space, and the Playwright test timeout covers one pass over the rows. Use repetitions=1 (EVAL_REPETITIONS / --repetitions).`
+          `Attack Discovery Worker evals run with repetitions=${repetitions}. Every repeat re-runs all rows serially in the shared eval space, and the Playwright test timeout scales with it. A Buildkite step needs EVAL_STEP_TIMEOUT_IN_MINUTES raised to match: its default budget covers one pass.`
         );
       }
       const preflight = await runPreflight({

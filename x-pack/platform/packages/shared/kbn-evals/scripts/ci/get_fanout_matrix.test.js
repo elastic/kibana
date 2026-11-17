@@ -201,6 +201,41 @@ describe('buildFanoutMatrix - fail-fast', () => {
     ).toThrow(/not-provisioned/);
   });
 
+  it('runs the matched connectors when only part of an operator-requested list is provisioned', () => {
+    const rows = buildFanoutMatrix({
+      connectors: CONNECTORS,
+      suiteInfo: {},
+      requestedModelGroups: ['eis/a', 'eis/not-provisioned'],
+      perSpec: false,
+      grepOverride: false,
+    });
+
+    expect(rows).toEqual([{ connectorId: 'eis-a', shardId: '', specFiles: [] }]);
+  });
+
+  it('runs the matched connectors for a partly provisioned operator list in a weekly per-spec run', () => {
+    const rows = run({
+      requestedModelGroups: ['eis/a', 'eis/not-provisioned'],
+      suiteInfo: {
+        ...SHARDED_SUITE,
+        weeklyEisModelGroups: ['eis/a'],
+        specModelGroups: [{ files: [DISCOVERY, QUERY_GEN], models: ['eis/a'] }],
+      },
+    });
+
+    expect(rows).toEqual([
+      { connectorId: 'eis-a', shardId: 's1', specFiles: [DISCOVERY, QUERY_GEN] },
+    ]);
+  });
+
+  it('throws for a missing required group in a weekly per-spec run', () => {
+    expect(() =>
+      run({
+        suiteInfo: { ...SHARDED_SUITE, requiredModelGroups: ['eis/not-provisioned'] },
+      })
+    ).toThrow(/not-provisioned/);
+  });
+
   it('throws when per-spec resolution leaves no step for the requested models', () => {
     expect(() =>
       run({

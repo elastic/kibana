@@ -36,17 +36,27 @@ const noConnectorMatchError = (groups, connectors) =>
       `Available models: ${describeAvailableModels(connectors).join(',')}`
   );
 
-const assertRequestedConnectors = (connectors, requestedModelGroups) => {
-  // Fail per group, not per list: one provisioned connector must not hide a requested group that
-  // matched nothing — a required group (unioned into the request by the caller) with no connector
-  // would otherwise silently disappear from the matrix instead of failing the run.
-  for (const group of requestedModelGroups) {
+// `requiredModelGroups` fail per group: a required model with no connector would otherwise
+// silently drop out of the matrix. Operator-requested groups (EVAL_MODEL_GROUPS) keep the
+// list-level rule: partly matched requests run on the connectors that did match, and only a
+// request that matched nothing fails.
+const assertRequestedConnectors = (connectors, operatorModelGroups, requiredModelGroups) => {
+  for (const group of requiredModelGroups) {
     if (group === 'all') continue;
     if (selectConnectorIds(connectors, [group]).length === 0) {
       throw noConnectorMatchError([group], connectors);
     }
   }
-  return selectConnectorIds(connectors, requestedModelGroups);
+  if (
+    operatorModelGroups.length > 0 &&
+    !operatorModelGroups.includes('all') &&
+    selectConnectorIds(connectors, operatorModelGroups).length === 0
+  ) {
+    throw noConnectorMatchError(operatorModelGroups, connectors);
+  }
+  return selectConnectorIds(connectors, [
+    ...new Set([...operatorModelGroups, ...requiredModelGroups]),
+  ]);
 };
 
 // `specModelGroups[].files` -> `models`, for entries that set a non-empty model list.
@@ -96,8 +106,17 @@ const shardJudge = (shard) => (typeof shard?.judge === 'string' ? shard.judge.tr
 
 // Connector x shard: every requested connector runs every spec file in each shard, or the whole
 // suite (one step per connector, empty specFiles) when there are no shards.
-function buildConnectorShardMatrix({ connectors, shards, requestedModelGroups }) {
-  const connectorIds = assertRequestedConnectors(connectors, requestedModelGroups);
+function buildConnectorShardMatrix({
+  connectors,
+  shards,
+  requestedModelGroups,
+  requiredModelGroups,
+}) {
+  const connectorIds = assertRequestedConnectors(
+    connectors,
+    requestedModelGroups,
+    requiredModelGroups
+  );
   const effectiveShards = shards.length === 0 ? [{ id: '', specFiles: [] }] : shards;
   const rows = [];
   for (const shard of effectiveShards) {
@@ -133,13 +152,12 @@ function buildFanoutMatrix({
   const suiteWeeklyModelGroups = Array.isArray(suiteInfo.weeklyEisModelGroups)
     ? suiteInfo.weeklyEisModelGroups
     : [];
-  // `requiredModelGroups` is always unioned into the request (deduped), whatever the caller asked
-  // for: a suite that must always cover its AZ tier models keeps that coverage even when an
+  // `requiredModelGroups` is always unioned into the request (see assertRequestedConnectors),
+  // whatever the caller asked for: a suite that must always cover its AZ tier models keeps that coverage even when an
   // on-demand run names one specific model via EVAL_MODEL_GROUPS.
   const requiredModelGroups = Array.isArray(suiteInfo.requiredModelGroups)
     ? suiteInfo.requiredModelGroups
     : [];
-  const requested = [...new Set([...requestedModelGroups, ...requiredModelGroups])];
   const configuredShards = Array.isArray(suiteInfo.shards) ? suiteInfo.shards : [];
 
   const overrides = modelsByFileFromSpecs(specModelGroups);
@@ -147,10 +165,19 @@ function buildFanoutMatrix({
 
   if (!perSpec) {
     const shards = grepOverride ? [] : configuredShards;
-    return buildConnectorShardMatrix({ connectors, shards, requestedModelGroups: requested });
+    return buildConnectorShardMatrix({
+      connectors,
+      shards,
+      requestedModelGroups,
+      requiredModelGroups,
+    });
   }
 
-  const connectorIds = assertRequestedConnectors(connectors, requested);
+  const connectorIds = assertRequestedConnectors(
+    connectors,
+    requestedModelGroups,
+    requiredModelGroups
+  );
   const batches =
     configuredShards.length > 0
       ? configuredShards

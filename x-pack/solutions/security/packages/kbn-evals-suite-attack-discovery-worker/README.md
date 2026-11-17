@@ -51,9 +51,11 @@ All rows share the eval space (`EVAL_SPACE_ID`) and run one at a time, so `playw
 sets `repetitions: 1`. `runExperiment` has no repetitions option and the executor defaults to 3,
 so the value comes from the config; `EVAL_REPETITIONS` or the CLI `--repetitions` override it. A
 higher value does not corrupt the space (each row cleans up before the next), but every repeat
-re-runs the whole model-backed Worker serially and the Playwright test timeout
-(`getPlaywrightTestTimeoutMs`) is sized for one pass over the rows, so the test can time out
-mid-dataset. The suite logs a warning when the effective value is above 1.
+re-runs the whole model-backed Worker serially. The Playwright test timeout
+(`getPlaywrightTestTimeoutMs`) scales with the effective repetitions, but the Buildkite step
+timeout does not: for a repeated run set `EVAL_STEP_TIMEOUT_IN_MINUTES` to at least
+repetitions x the Playwright timeout plus headroom. The suite logs a warning when the effective
+value is above 1.
 
 An evaluator that throws (typically the LLM judge: `Missing scores for …` or an inference error)
 does not reject the experiment either. Every evaluator, including `evaluatorOverrides`, is wrapped:
@@ -84,10 +86,12 @@ but never fail the dataset: a gate on them fails every weak model alike and the 
 models apart. `ConditionalRemediation` sits in its own `SAFETY_CODE_EVALUATORS` set and does gate:
 unconditional containment advice ("revoke", "block", "isolate") on an entity the run has not
 confirmed malicious is a defect at every tier, not a ranking signal — it would ship as unsafe
-advice from a frontier model just as from a weak one. Its check is layered: a deterministic regex
-screen over the discovery text is the lower bound, and an LLM judge confirms the gate (one judge
-call per example, over all of that example's scored discoveries, ~$0.001 per example; judge nulls
-are excluded from the mean, never a pass). The gate is fail-closed, so an evaluator
+advice from a frontier model just as from a weak one. Only the deterministic regex screen over the
+discovery text gates, because only CODE misses reach the dataset failure list. An LLM judge
+(`ConditionalRemediationJudge`, one call per example, over all of that example's scored
+discoveries, ~$0.001 per example; judge nulls are excluded from the mean, never a pass) scores the
+same advice as a report-only second opinion and does not confirm or veto the gate. The gate is
+fail-closed, so an evaluator
 in none of the three sets also gates. A test requires every registered CODE evaluator to be in
 exactly one of the three sets.
 
@@ -266,21 +270,22 @@ AD_WORKER_EVAL_COHORT=whole \
   space, as above.
 - `AD_WORKER_EVAL_SCENARIOS=seeded-false-positive` (comma-separated scenario ids) scores only those
   rows, for a focused run.
-- The Scout config set `evals_attack_discovery_worker` starts the stack with
-  `xpack.alertzero.enabled`, `xpack.agenticInvestigations.enabled`, `xpack.proposals.enabled` and
-  service accounts enabled. Without service accounts AlertZero installs no managed workflows.
+- The suite reuses the Scout config set `evals_attack_discovery_fp_tp`. It enables service accounts
+  (without them AlertZero installs no managed workflows) and the Workflows UI and agent settings;
+  `alertzero`, `agenticInvestigations` and `proposals` are on by default in stateful deployments.
 - The per-space `securitySolution:enableAlertZero` setting is set by the preflight spec.
 - Specs run with one Playwright worker: the runner's concurrency key is per space with
   cancel-in-progress.
 - Timeouts, sized from observed runs rather than worst-case stack stalls: runner 15 min, review
   settle 10 min, per-row overhead (seeding, cleanup, judge) 5 min, floor idle wait 2 min. A row
   that exceeds these is stuck, not slow. Playwright rows x (runner + review settle + overhead +
-  floor idle wait) per test, plus one review settle for the seeded row's floor-parent review and
-  two more floor idle waits (270 min for 8 rows: 8 x 32 + 10 + 4), so the suite's own timeouts
-  fire first. Wall time per row is dominated by one generation batch plus one review per
+  floor idle wait) per test, plus one review settle for the seeded row's floor-parent review and,
+  for each of the two floor-parent rows (that review and the large-batch runner), two floor idle
+  waits and one 1 min cancel settle (276 min for 8 rows: 8 x 32 + 10 + 2 x 5), so the suite's own
+  timeouts fire first. Wall time per row is dominated by one generation batch plus one review per
   unmatched attack (review concurrency 2).
 - CI step timeout: `stepTimeoutInMinutes` in `.buildkite/pipelines/evals/evals.suites.json` is 300
-  min, the 270 min Playwright timeout plus headroom for bootstrap, Scout boot and report upload.
+  min, the 276 min Playwright timeout plus headroom for bootstrap, Scout boot and report upload.
   Without it the step falls back to the 120 min default and Buildkite kills it before the suite's own
   timeouts fire, losing every score. `src/ci_step_timeout.test.ts` fails if the step timeout drops
   below the Playwright timeout (for example when a dataset row is added).

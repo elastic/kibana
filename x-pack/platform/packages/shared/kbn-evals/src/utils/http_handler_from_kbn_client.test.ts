@@ -9,6 +9,7 @@
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under the
  * terms of the Server Side Public License, v 1.
  */
+import { Readable } from 'stream';
 import { httpHandlerFromKbnClient } from './http_handler_from_kbn_client';
 
 const log = { warning: jest.fn() } as unknown as Parameters<
@@ -84,6 +85,30 @@ describe('httpHandlerFromKbnClient', () => {
       const { response } = await fetch('/api/foo', { asResponse: true });
       if (response === undefined) throw new Error('asResponse returned no Response');
       await expect(response.text()).resolves.toBe('plain text');
+    });
+
+    it('serializes a parsed array as JSON', async () => {
+      const kbnClient = fakeKbnClient({ data: [{ a: 1 }, { a: 2 }] });
+      const fetch = httpHandlerFromKbnClient({ kbnClient: kbnClient as any, log });
+      const { response } = await fetch('/api/foo', { asResponse: true });
+      if (response === undefined) throw new Error('asResponse returned no Response');
+      await expect(response.json()).resolves.toEqual([{ a: 1 }, { a: 2 }]);
+    });
+
+    it('streams a Node Readable body (rawResponse) instead of JSON-encoding the stream object', async () => {
+      const kbnClient = fakeKbnClient({ data: Readable.from(['data: one\n\n', 'data: two\n\n']) });
+      const fetch = httpHandlerFromKbnClient({ kbnClient: kbnClient as any, log });
+      const { response } = await fetch('/api/foo', { asResponse: true, rawResponse: true });
+      if (response === undefined) throw new Error('asResponse returned no Response');
+      await expect(response.text()).resolves.toBe('data: one\n\ndata: two\n\n');
+    });
+
+    it('passes a Buffer body through unchanged', async () => {
+      const kbnClient = fakeKbnClient({ data: Buffer.from('raw bytes') });
+      const fetch = httpHandlerFromKbnClient({ kbnClient: kbnClient as any, log });
+      const { response } = await fetch('/api/foo', { asResponse: true });
+      if (response === undefined) throw new Error('asResponse returned no Response');
+      await expect(response.text()).resolves.toBe('raw bytes');
     });
 
     it('keeps a null-body status bodyless even when data is present', async () => {

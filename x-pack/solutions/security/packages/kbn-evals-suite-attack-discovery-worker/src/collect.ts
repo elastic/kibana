@@ -220,10 +220,15 @@ export const analysisUsageOf = (
       }`,
     };
   }
+  const outcome = {
+    childExecutionId,
+    status: child.status,
+    ...(child.error?.message ? { error: child.error.message } : {}),
+  };
   const entries = (child.stepUsage ?? []).filter(({ stepId }) => stepId === FP_TP_ANALYZE_STEP_ID);
   if (entries.length === 0) {
     return {
-      childExecutionId,
+      ...outcome,
       connectorIds: [],
       unresolvedReason: `analysis execution reported no usage for step ${FP_TP_ANALYZE_STEP_ID}`,
     };
@@ -242,7 +247,7 @@ export const analysisUsageOf = (
     ({ connectorId }) => !connectorId || connectorId === UNKNOWN_CONNECTOR
   );
   return {
-    childExecutionId,
+    ...outcome,
     connectorIds,
     inputTokens: sum(({ inputTokens }) => inputTokens),
     outputTokens: sum(({ outputTokens }) => outputTokens),

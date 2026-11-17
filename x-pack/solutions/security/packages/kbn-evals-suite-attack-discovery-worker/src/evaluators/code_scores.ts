@@ -138,6 +138,23 @@ export const scoreRunnerCompleted: CodeScorer = (_expected, artifacts) => {
       );
 };
 
+const isModelRefusal = (error: string | undefined): boolean =>
+  error !== undefined && MODEL_REFUSAL_PATTERN.test(error);
+
+const FAILED_ANALYSIS_STATUSES: readonly string[] = ['failed', 'cancelled', 'timed_out'];
+
+/** Set when the review's FP/TP analysis child ended without completing. */
+const analysisFailureOf = (
+  review: ReviewArtifact
+): { error: string | undefined; explanation: string } | undefined => {
+  const { analysis } = review;
+  if (!analysis?.status || !FAILED_ANALYSIS_STATUSES.includes(analysis.status)) return undefined;
+  return {
+    error: analysis.error,
+    explanation: `analysis ${analysis.status}${analysis.error ? `: ${analysis.error}` : ''}`,
+  };
+};
+
 /**
  * Every review completed or parked at the gate within the wait; one that ran out of time, failed
  * or was cancelled fails. A review that failed because the model refused (see
@@ -156,10 +173,21 @@ export const scoreReviewsSettled: CodeScorer = (_expected, artifacts) =>
         );
       }
       if (review.status !== 'failed' && review.status !== 'cancelled') {
-        return pass(`review ${review.status}`);
+        // The review completes even when its analysis child failed (verdict `failed`), so the
+        // child's own outcome is checked here.
+        const analysisFailure = analysisFailureOf(review);
+        if (!analysisFailure) return pass(`review ${review.status}`);
+        return isModelRefusal(analysisFailure.error)
+          ? {
+              score: 0,
+              label: MODEL_FAULT_LABEL,
+              explanation: analysisFailure.explanation,
+              metadata: { reviewFault: 'refused' },
+            }
+          : fail(analysisFailure.explanation);
       }
       const explanation = `review ${review.status}${review.error ? `: ${review.error}` : ''}`;
-      return review.status === 'failed' && review.error && MODEL_REFUSAL_PATTERN.test(review.error)
+      return review.status === 'failed' && isModelRefusal(review.error)
         ? {
             score: 0,
             label: MODEL_FAULT_LABEL,
@@ -565,8 +593,12 @@ export const scoreStageModelResolved =
     artifacts.reviews.forEach((review) => {
       const label = review.attackDiscoveryId ?? review.executionId;
       const { analysis } = review;
+      const analysisFailure = analysisFailureOf(review);
       if (!analysis) {
         problems.push(`review ${label} model undeterminable: it ran no analysis step`);
+      } else if (analysisFailure && !isModelRefusal(analysisFailure.error)) {
+        // Usage reported by a failed analysis says nothing about a classification being produced.
+        problems.push(`review ${label} ${analysisFailure.explanation}`);
       } else if (analysis.unresolvedReason === STEP_USAGE_TELEMETRY_GAP) {
         if (analysis.connectorIds.length === 0) {
           // Every usage row reported no connector id: nothing else in the execution doc carries

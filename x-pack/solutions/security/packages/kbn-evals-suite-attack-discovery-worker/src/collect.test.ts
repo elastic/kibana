@@ -208,6 +208,22 @@ describe('analysisUsageOf', () => {
     expect(usage.cachedTokens).toBe(4);
   });
 
+  it('retains the child status and error even when it reported usage', () => {
+    const failed = {
+      ...child([{ stepId: 'analyze', connectorId: 'review-model', inputTokens: 5 }]),
+      status: 'failed',
+      error: { message: 'analyze step errored: boom' },
+    } as unknown as WorkflowExecutionDto;
+    expect(analysisUsageOf('child-1', failed)).toMatchObject({
+      status: 'failed',
+      error: 'analyze step errored: boom',
+      connectorIds: ['review-model'],
+    });
+    expect(
+      analysisUsageOf('child-1', { ...failed, stepUsage: undefined } as WorkflowExecutionDto)
+    ).toMatchObject({ status: 'failed', error: 'analyze step errored: boom' });
+  });
+
   it('is unresolved when the engine reported the connector as unknown', () => {
     const usage = analysisUsageOf(
       'child-1',

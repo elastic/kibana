@@ -23,10 +23,19 @@ jest.mock('./kibana_api', () => ({
   }),
 }));
 
-const floorYamlDispatching = (workflowId: string) =>
-  `settings:\n  run_as: "kibana/alertzero_attack_discovery"\nsteps:\n  - name: run_attack_discovery\n    type: workflow.execute\n    with:\n      workflow-id: ${workflowId}\n`;
-const CLEAN_FLOOR_YAML = floorYamlDispatching(RUNNER_WORKFLOW_ID);
-const REWRITTEN_FLOOR_YAML = floorYamlDispatching('system-security-attack-discovery-review');
+const floorYamlDispatching = (workflowId: string, inputs: string) =>
+  `settings:\n  run_as: "kibana/alertzero_attack_discovery"\nsteps:\n  - name: run_attack_discovery\n    type: workflow.execute\n    with:\n      workflow-id: ${workflowId}\n      inputs:\n        ${inputs}\n`;
+const RENDERED_INPUTS = 'parent_run_id: "{{ execution.id }}"';
+const CLEAN_FLOOR_YAML = floorYamlDispatching(RUNNER_WORKFLOW_ID, RENDERED_INPUTS);
+const REWRITTEN_FLOOR_YAML = floorYamlDispatching(
+  'system-security-attack-discovery-review',
+  'attack_discovery_id: ad-1'
+);
+/** What `runWithBatchSize` leaves behind: the runner is still the target, only the inputs are literal. */
+const RUNNER_REWRITE_FLOOR_YAML = floorYamlDispatching(
+  RUNNER_WORKFLOW_ID,
+  'schedule_interval: 24h\n        batch_size: 50'
+);
 /** The floor workflow as the fake Kibana stores it; a test changes it to simulate a leftover. */
 let floorYaml = CLEAN_FLOOR_YAML;
 
@@ -352,6 +361,15 @@ describe('a floor left rewritten by an interrupted floor-parent run', () => {
     // The two repair writes leave the worker off; only the last one enables it.
     expect(patches(fetch).map(({ enabled: flag }) => flag)).toEqual([undefined, undefined, true]);
     expect(floorYaml).toBe(CLEAN_FLOOR_YAML);
+    expect(log.warning).toHaveBeenCalledWith(expect.stringMatching(/not dispatching the runner/));
+  });
+
+  it('repairs a floor a failed restore left rewritten with the runner as target', async () => {
+    floorYaml = RUNNER_REWRITE_FLOOR_YAML;
+    const fetch = kibana();
+    await enable(fetch);
+    expect(floorYaml).toBe(CLEAN_FLOOR_YAML);
+    expect(fetch.ticks).toEqual(['runner']);
     expect(log.warning).toHaveBeenCalledWith(expect.stringMatching(/not dispatching the runner/));
   });
 
