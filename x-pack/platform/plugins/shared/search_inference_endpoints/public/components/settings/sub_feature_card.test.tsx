@@ -18,7 +18,7 @@ import { useRegisteredFeatures } from '../../hooks/use_registered_features';
 import { useSupportedEffortLevels } from '../../hooks/use_supported_effort_levels';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
 import { NO_DEFAULT_MODEL } from '../../../common/constants';
-import { EisModelStatus, type EndpointDeprecationInfo, type EndpointEfforts } from '../../types';
+import { EisModelStatus, type EndpointDeprecationInfo } from '../../types';
 
 jest.mock('../../hooks/use_connectors');
 jest.mock('../../hooks/use_registered_features');
@@ -106,24 +106,6 @@ const mockConnectors: InferenceConnector[] = [
   {
     connectorId: 'ep-4',
     name: 'GPT-4o-mini',
-    type: InferenceConnectorType.OpenAI,
-    config: {},
-    capabilities: {},
-    isInferenceEndpoint: false,
-    isPreconfigured: false,
-  },
-  {
-    connectorId: 'ep-5',
-    name: 'GPT-3.5-turbo',
-    type: InferenceConnectorType.OpenAI,
-    config: {},
-    capabilities: {},
-    isInferenceEndpoint: false,
-    isPreconfigured: false,
-  },
-  {
-    connectorId: 'ep-6',
-    name: 'o1',
     type: InferenceConnectorType.OpenAI,
     config: {},
     capabilities: {},
@@ -376,25 +358,105 @@ describe('SubFeatureCard', () => {
     });
   });
 
-  describe('Copy to control', () => {
-    it('renders visible Copy to beside add model when other sub-features exist and the toggle is OFF', () => {
-      mockUseRegisteredFeatures.mockReturnValue({
-        features: [
-          { ...feature },
-          {
-            ...feature,
-            featureId: 'sibling',
-            featureName: 'Sibling',
-          },
-        ],
-        isLoading: false,
-      });
+  describe('editable endpoint list', () => {
+    const manyEndpointIds = ['ep-1', 'ep-2', 'ep-3', 'ep-4', 'ep-5', 'ep-6'];
 
-      renderCard(['ep-2']);
+    it('expands to show all endpoints on "Show more" click', () => {
+      renderCard(manyEndpointIds);
 
-      expect(screen.getByTestId('copy-to-test_feature')).toBeInTheDocument();
+      expect(screen.queryByTestId('endpoint-row-ep-6')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('show-more-test_feature'));
+
+      expect(screen.getByTestId('endpoint-row-ep-6')).toBeInTheDocument();
+      expect(screen.queryByTestId('show-more-test_feature')).not.toBeInTheDocument();
     });
 
+    it('keeps the list expanded after switching to recommended defaults and back', () => {
+      const cardProps = {
+        featureId: feature.featureId,
+        feature,
+        endpointIds: manyEndpointIds,
+        onEndpointsChange,
+        efforts: {},
+        effectiveRecommendedEfforts: {},
+        onEffortsChange: jest.fn(),
+        invalidEndpointIds: new Set<string>(),
+        deprecatedEndpointsMap: new Map(),
+        ...defaultGlobalRowProps,
+      };
+      const { rerender } = render(
+        <Wrapper>
+          <SubFeatureCard {...cardProps} effectiveRecommendedEndpoints={['__different__']} />
+        </Wrapper>
+      );
+
+      fireEvent.click(screen.getByTestId('show-more-test_feature'));
+
+      rerender(
+        <Wrapper>
+          <SubFeatureCard {...cardProps} effectiveRecommendedEndpoints={manyEndpointIds} />
+        </Wrapper>
+      );
+      expect(screen.getByTestId('useRecommendedDefaultsToggle-test_feature')).toBeChecked();
+
+      rerender(
+        <Wrapper>
+          <SubFeatureCard {...cardProps} effectiveRecommendedEndpoints={['__different__']} />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('endpoint-row-ep-6')).toBeInTheDocument();
+      expect(screen.queryByTestId('show-more-test_feature')).not.toBeInTheDocument();
+    });
+
+    it('shows no global default row and no empty message when the global default id is empty', () => {
+      renderCard([], undefined, new Set(), ['__different__'], {
+        hasSavedObject: false,
+        isFeatureDirty: false,
+        globalDefaultId: '',
+      });
+
+      expect(screen.queryByTestId('global-default-row-test_feature')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('no-models-available-test_feature')).not.toBeInTheDocument();
+    });
+
+    it('labels rows with the connector name and flags invalid endpoints', () => {
+      renderCard(['ep-1'], undefined, new Set(['ep-1']));
+
+      expect(screen.getByTestId('endpoint-row-ep-1')).toHaveTextContent(
+        'Inference endpoint Claude is no longer available'
+      );
+    });
+
+    it('disables editing without manage permission', () => {
+      render(
+        <Wrapper>
+          <SubFeatureCard
+            featureId={feature.featureId}
+            feature={feature}
+            endpointIds={['ep-2']}
+            effectiveRecommendedEndpoints={['ep-1']}
+            onEndpointsChange={onEndpointsChange}
+            efforts={{}}
+            effectiveRecommendedEfforts={{}}
+            onEffortsChange={jest.fn()}
+            invalidEndpointIds={new Set()}
+            deprecatedEndpointsMap={new Map()}
+            canManage={false}
+            {...defaultGlobalRowProps}
+          />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('useRecommendedDefaultsToggle-test_feature')).toBeDisabled();
+      expect(screen.getByTestId('endpoint-row-ep-2')).toBeInTheDocument();
+      expect(screen.queryByTestId('add-model-button')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('remove-endpoint-ep-2')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Copy to control', () => {
     it('does not render in the locked recommended-defaults mode', () => {
       mockUseRegisteredFeatures.mockReturnValue({
         features: [{ ...feature }, { ...feature, featureId: 'sibling', featureName: 'Sibling' }],
@@ -420,6 +482,37 @@ describe('SubFeatureCard', () => {
       );
 
       expect(screen.queryByTestId('copy-to-test_feature')).not.toBeInTheDocument();
+    });
+
+    it('copies efforts with the models to other features', () => {
+      const onEffortsChange = jest.fn();
+      mockUseRegisteredFeatures.mockReturnValue({
+        features: [feature, { ...feature, featureId: 'sibling', featureName: 'Sibling' }],
+        isLoading: false,
+      });
+      render(
+        <Wrapper>
+          <SubFeatureCard
+            featureId={feature.featureId}
+            feature={feature}
+            endpointIds={['ep-1', 'ep-2']}
+            effectiveRecommendedEndpoints={['__different__']}
+            onEndpointsChange={onEndpointsChange}
+            efforts={{ 'ep-1': 'high' }}
+            effectiveRecommendedEfforts={{}}
+            onEffortsChange={onEffortsChange}
+            invalidEndpointIds={new Set()}
+            deprecatedEndpointsMap={new Map()}
+            {...defaultGlobalRowProps}
+          />
+        </Wrapper>
+      );
+
+      fireEvent.click(screen.getByTestId('copy-to-test_feature'));
+      fireEvent.click(screen.getByTestId('copy-to-apply'));
+
+      expect(onEndpointsChange).toHaveBeenCalledWith('sibling', ['ep-1', 'ep-2']);
+      expect(onEffortsChange).toHaveBeenCalledWith('sibling', { 'ep-1': 'high' });
     });
   });
 
@@ -511,94 +604,6 @@ describe('SubFeatureCard', () => {
 
       expect(screen.getByTestId('global-default-row-test_feature')).toBeInTheDocument();
       expect(screen.getByTestId('modelDeprecatedBadge-ep-3')).toBeInTheDocument();
-    });
-  });
-
-  describe('editable mode endpoint list', () => {
-    it('renders all endpoint rows within collapsed count', () => {
-      renderCard(['ep-1', 'ep-2']);
-
-      expect(screen.getByTestId('endpoint-row-ep-1')).toBeInTheDocument();
-      expect(screen.getByTestId('endpoint-row-ep-2')).toBeInTheDocument();
-    });
-
-    it('hides endpoints beyond collapsed count', () => {
-      renderCard(['ep-1', 'ep-2', 'ep-3', 'ep-4', 'ep-5', 'ep-6']);
-
-      expect(screen.getByTestId('endpoint-row-ep-5')).toBeInTheDocument();
-      expect(screen.queryByTestId('endpoint-row-ep-6')).not.toBeInTheDocument();
-    });
-
-    it('renders all endpoint rows when expanded', () => {
-      renderCard(['ep-1', 'ep-2', 'ep-3', 'ep-4', 'ep-5', 'ep-6']);
-
-      fireEvent.click(screen.getByTestId('show-more-test_feature'));
-
-      expect(screen.getByTestId('endpoint-row-ep-1')).toBeInTheDocument();
-      expect(screen.getByTestId('endpoint-row-ep-6')).toBeInTheDocument();
-    });
-
-    it('disables remove button when only one endpoint', () => {
-      renderCard(['ep-1']);
-
-      expect(screen.getByTestId('remove-endpoint-ep-1')).toBeDisabled();
-    });
-
-    it('shows remove buttons when multiple endpoints', () => {
-      renderCard(['ep-1', 'ep-2']);
-
-      expect(screen.getByTestId('remove-endpoint-ep-1')).toBeInTheDocument();
-      expect(screen.getByTestId('remove-endpoint-ep-2')).toBeInTheDocument();
-    });
-
-    it('shows "Show N more" when endpoints exceed collapsed count', () => {
-      renderCard(['ep-1', 'ep-2', 'ep-3', 'ep-4', 'ep-5', 'ep-6']);
-
-      expect(screen.getByTestId('show-more-test_feature')).toBeInTheDocument();
-      expect(screen.queryByTestId('endpoint-row-ep-6')).not.toBeInTheDocument();
-    });
-
-    it('expands to show all endpoints on "Show more" click', () => {
-      renderCard(['ep-1', 'ep-2', 'ep-3', 'ep-4', 'ep-5', 'ep-6']);
-
-      fireEvent.click(screen.getByTestId('show-more-test_feature'));
-
-      expect(screen.getByTestId('endpoint-row-ep-6')).toBeInTheDocument();
-      expect(screen.queryByTestId('show-more-test_feature')).not.toBeInTheDocument();
-    });
-
-    it('hides add-model button when collapsed', () => {
-      renderCard(['ep-1', 'ep-2', 'ep-3', 'ep-4', 'ep-5', 'ep-6']);
-
-      expect(screen.queryByTestId('add-model-button')).not.toBeInTheDocument();
-    });
-
-    it('shows add-model button when not collapsed and under max', () => {
-      renderCard(['ep-1'], { maxNumberOfEndpoints: 3 });
-
-      expect(screen.getByTestId('add-model-button')).toBeInTheDocument();
-    });
-
-    it('hides add-model button when maxNumberOfEndpoints reached', () => {
-      renderCard(['ep-1'], { maxNumberOfEndpoints: 1 });
-
-      expect(screen.queryByTestId('add-model-button')).not.toBeInTheDocument();
-    });
-
-    it('adds endpoint via popover when add button clicked', () => {
-      renderCard(['ep-1']);
-
-      fireEvent.click(screen.getByTestId('add-model-button'));
-
-      expect(onEndpointsChange).toHaveBeenCalledWith('test_feature', ['ep-1', 'ep-2']);
-    });
-
-    it('clicking remove calls onEndpointsChange without the removed endpoint', () => {
-      renderCard(['ep-1', 'ep-2']);
-
-      fireEvent.click(screen.getByTestId('remove-endpoint-ep-1'));
-
-      expect(onEndpointsChange).toHaveBeenCalledWith('test_feature', ['ep-2']);
     });
   });
 
@@ -782,81 +787,6 @@ describe('SubFeatureCard', () => {
       );
       expect(screen.queryByTestId('endpoint-row-ep-2')).not.toBeInTheDocument();
       expect(screen.queryByTestId('endpoint-row-ep-3')).not.toBeInTheDocument();
-    });
-  });
-
-  describe('reasoning effort', () => {
-    const onEffortsChange = jest.fn();
-
-    const renderEffortCard = ({
-      endpointIds = ['ep-1', 'ep-2'],
-      effectiveRecommendedEndpoints = ['__different__'],
-      efforts = {},
-      effectiveRecommendedEfforts = {},
-      canManage = true,
-    }: Partial<{
-      endpointIds: string[];
-      effectiveRecommendedEndpoints: string[];
-      efforts: EndpointEfforts;
-      effectiveRecommendedEfforts: EndpointEfforts;
-      canManage: boolean;
-    }> = {}) =>
-      render(
-        <Wrapper>
-          <SubFeatureCard
-            featureId={feature.featureId}
-            feature={feature}
-            endpointIds={endpointIds}
-            effectiveRecommendedEndpoints={effectiveRecommendedEndpoints}
-            onEndpointsChange={onEndpointsChange}
-            efforts={efforts}
-            effectiveRecommendedEfforts={effectiveRecommendedEfforts}
-            onEffortsChange={onEffortsChange}
-            invalidEndpointIds={new Set()}
-            deprecatedEndpointsMap={new Map()}
-            canManage={canManage}
-            {...defaultGlobalRowProps}
-          />
-        </Wrapper>
-      );
-
-    beforeEach(() => {
-      mockUseSupportedEffortLevels.mockReturnValue(new Map([['ep-1', ['low', 'medium', 'high']]]));
-    });
-
-    it('sets an effort for the model', () => {
-      renderEffortCard({ efforts: { 'ep-2': 'low' } });
-
-      fireEvent.click(screen.getByTestId('add-effort-ep-1'));
-      fireEvent.click(screen.getByTestId('reasoningEffort-medium'));
-
-      expect(onEffortsChange).toHaveBeenCalledWith('test_feature', {
-        'ep-1': 'medium',
-        'ep-2': 'low',
-      });
-    });
-
-    it('removes the effort customization for the model', () => {
-      renderEffortCard({ efforts: { 'ep-1': 'high', 'ep-2': 'low' } });
-
-      fireEvent.click(screen.getByTestId('effort-badge-ep-1'));
-      fireEvent.click(screen.getByTestId('remove-effort-customization'));
-
-      expect(onEffortsChange).toHaveBeenCalledWith('test_feature', { 'ep-2': 'low' });
-    });
-
-    it('copies efforts with the models to other features', () => {
-      mockUseRegisteredFeatures.mockReturnValue({
-        features: [feature, { ...feature, featureId: 'sibling', featureName: 'Sibling' }],
-        isLoading: false,
-      });
-      renderEffortCard({ efforts: { 'ep-1': 'high' } });
-
-      fireEvent.click(screen.getByTestId('copy-to-test_feature'));
-      fireEvent.click(screen.getByTestId('copy-to-apply'));
-
-      expect(onEndpointsChange).toHaveBeenCalledWith('sibling', ['ep-1', 'ep-2']);
-      expect(onEffortsChange).toHaveBeenCalledWith('sibling', { 'ep-1': 'high' });
     });
   });
 });
