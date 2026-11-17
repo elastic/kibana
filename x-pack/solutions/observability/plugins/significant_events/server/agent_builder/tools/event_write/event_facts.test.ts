@@ -154,14 +154,17 @@ describe('computeEventFacts', () => {
     signals,
     candidateOverrides,
     stored,
+    resolvedSeverity,
   }: {
     signals: SignalEntry[];
     candidateOverrides?: Partial<EventsWriteInput>;
     stored?: SignificantEvent;
+    resolvedSeverity?: Severity;
   }) => {
     return computeEventFacts({
       candidate: makeCandidate(signals, candidateOverrides, stored),
       timestamp: TS_NOW,
+      resolvedSeverity,
     });
   };
 
@@ -272,7 +275,12 @@ describe('computeEventFacts', () => {
   it('refuses signals without a proposed severity rather than guessing one', () => {
     expect(() =>
       facts({ signals: [makeSignal()], candidateOverrides: { severity: undefined } })
-    ).toThrow('needs a proposed severity');
+    ).toThrow(
+      expect.objectContaining({
+        code: 'validation_error',
+        message: expect.stringContaining('needs a proposed severity'),
+      })
+    );
   });
 
   it('is unchanged however many topology entities the event lists', () => {
@@ -293,5 +301,19 @@ describe('computeEventFacts', () => {
     });
 
     expect(result.severity).toBe('medium');
+  });
+
+  it('keeps a resolved severity on a resolution, which would otherwise floor to low', () => {
+    const resolved: Severity = 'medium';
+    const signal = makeSignal();
+
+    expect(
+      facts({
+        signals: [signal],
+        candidateOverrides: { status: 'inactive' },
+        stored: makeStored([signal], { severity: resolved }),
+        resolvedSeverity: resolved,
+      }).severity
+    ).toBe(resolved);
   });
 });
