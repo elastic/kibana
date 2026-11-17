@@ -8,11 +8,11 @@
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { OnSetup } from '@kbn/core-di';
 import { CoreSetup, CoreStart } from '@kbn/core-di-server';
-import { DetectionStateClient } from '../lib/state';
 import {
   DETECTION_STATE_SO_TYPE,
+  DetectionStateClient,
   detectionStateSavedObjectType,
-} from '../saved_objects/detection_state_saved_object';
+} from '../lib/state';
 
 /**
  * The module's setup and start phases are the `OnSetup` hook and the `CoreStart` token: the type is

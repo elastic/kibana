@@ -14,7 +14,7 @@ import { StateConflictError } from '../../errors/state_conflict_error';
 import {
   DETECTION_STATE_SO_TYPE,
   detectionStateSavedObjectType,
-} from '../../../saved_objects/detection_state_saved_object';
+} from '../detection_state_saved_object';
 import { DetectionStateClient } from '..';
 
 // Runs against a Kibana root with its saved objects index, so it proves the conflict and namespace
