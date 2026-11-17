@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiProvider } from '@elastic/eui';
@@ -100,6 +100,125 @@ describe('PolicyAssignmentList', () => {
       data: { agentPoliciesById: mockAgentPoliciesById },
       isFetching: false,
       isError: false,
+    });
+  });
+
+  describe('shared integrations', () => {
+    const groupName = 'Select shared integration Shared hosts, 2 agent policies';
+    const sharedData = {
+      agentPoliciesById: mockAgentPoliciesById,
+      groupsByPackagePolicyId: {
+        shared: { id: 'shared', name: 'Shared hosts', policyIds: ['policy-1', 'policy-2'] },
+      },
+      groupIdByPolicyId: { 'policy-1': 'shared', 'policy-2': 'shared' },
+    };
+
+    beforeEach(() => {
+      mockUseAgentPolicies.mockReturnValue({ data: sharedData, isFetching: false, isError: false });
+    });
+
+    it('renders one named group checkbox, nested members with links, and an unchanged unshared row', async () => {
+      render(<FormWrapper />);
+      expect(screen.getAllByRole('checkbox')).toHaveLength(2);
+      expect(screen.getByRole('checkbox', { name: groupName })).not.toBeChecked();
+      const members = screen.getByRole('group', { name: 'Shared integration: Shared hosts' });
+      expect(within(members).getByText('Alpha Policy')).toBeInTheDocument();
+      expect(within(members).getByText('Beta Policy')).toBeInTheDocument();
+      expect(within(members).getAllByRole('link', { name: /View policy/ })).toHaveLength(2);
+      expect(
+        screen.getByRole('checkbox', { name: 'Select policy Gamma Policy' })
+      ).toBeInTheDocument();
+      expect(screen.getByTestId('viewPolicy-policy-3')).toHaveAttribute(
+        'href',
+        '/app/fleet/policies/policy-3'
+      );
+      fireEvent.mouseOver(screen.getByText('Shared integration: Shared hosts'));
+      expect(
+        await screen.findByText(
+          'Packs are delivered per Osquery Manager integration; every agent policy using it receives the pack'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('selects and unselects all members as a unit and counts agent policies', () => {
+      const onFormChange = jest.fn();
+      render(<FormWrapper onFormChange={onFormChange} />);
+      fireEvent.click(screen.getByRole('checkbox', { name: groupName }));
+      expect(onFormChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({ policy_ids: ['policy-1', 'policy-2'] })
+      );
+      expect(screen.getByTestId('policyAssignmentCount')).toHaveTextContent(
+        '2 of 3 selected | 15 agents enrolled'
+      );
+      fireEvent.click(screen.getByRole('checkbox', { name: groupName }));
+      expect(onFormChange).toHaveBeenLastCalledWith(expect.objectContaining({ policy_ids: [] }));
+      expect(screen.getByTestId('policyAssignmentCount')).toHaveTextContent('0 of 3 selected');
+    });
+
+    it.each(['Alpha', 'Shared hosts'])(
+      'searches by %s and keeps the entire group for bulk actions',
+      (search) => {
+        const onFormChange = jest.fn();
+        render(<FormWrapper onFormChange={onFormChange} />);
+        fireEvent.change(screen.getByTestId('policyAssignmentSearch'), {
+          target: { value: search },
+        });
+        expect(screen.getByText('Alpha Policy')).toBeInTheDocument();
+        expect(screen.getByText('Beta Policy')).toBeInTheDocument();
+        expect(screen.queryByText('Gamma Policy')).not.toBeInTheDocument();
+        fireEvent.click(screen.getByTestId('policyAssignmentSelectAll'));
+        expect(onFormChange).toHaveBeenLastCalledWith(
+          expect.objectContaining({ policy_ids: ['policy-1', 'policy-2'] })
+        );
+        expect(screen.getByTestId('policyAssignmentCount')).toHaveTextContent('2 of 2 matching');
+        fireEvent.click(screen.getByTestId('policyAssignmentUnselectAll'));
+        expect(onFormChange).toHaveBeenLastCalledWith(expect.objectContaining({ policy_ids: [] }));
+      }
+    );
+
+    it('includes groups in Select all and Un-select all', () => {
+      render(<FormWrapper />);
+      fireEvent.click(screen.getByTestId('policyAssignmentSelectAll'));
+      expect(screen.getByRole('checkbox', { name: groupName })).toBeChecked();
+      expect(screen.getByRole('checkbox', { name: 'Select policy Gamma Policy' })).toBeChecked();
+      expect(screen.getByTestId('policyAssignmentCount')).toHaveTextContent('3 of 3 selected');
+      fireEvent.click(screen.getByTestId('policyAssignmentUnselectAll'));
+      screen.getAllByRole('checkbox').forEach((checkbox) => expect(checkbox).not.toBeChecked());
+    });
+
+    it('counts a group as one pagination row and never splits its members', () => {
+      const extraPolicies = Object.fromEntries(
+        Array.from({ length: 10 }, (_, index) => [
+          `extra-${index}`,
+          { id: `extra-${index}`, name: `A policy ${index}`, agents: 1 },
+        ])
+      );
+      mockUseAgentPolicies.mockReturnValue({
+        data: { ...sharedData, agentPoliciesById: { ...mockAgentPoliciesById, ...extraPolicies } },
+        isFetching: false,
+        isError: false,
+      });
+      render(<FormWrapper />);
+      expect(screen.queryByText('Alpha Policy')).not.toBeInTheDocument();
+      expect(screen.queryByText('Beta Policy')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('pagination-button-1'));
+      expect(screen.getByText('Alpha Policy')).toBeInTheDocument();
+      expect(screen.getByText('Beta Policy')).toBeInTheDocument();
+      expect(screen.getAllByRole('checkbox')).toHaveLength(2);
+      fireEvent.click(screen.getByRole('checkbox', { name: groupName }));
+      expect(screen.getByText('Beta Policy')).toBeInTheDocument();
+    });
+
+    it('disables group selection and bulk actions in read-only mode while retaining links', () => {
+      render(<FormWrapper isReadOnly defaultValues={{ policy_ids: ['policy-1', 'policy-2'] }} />);
+      expect(screen.getByRole('checkbox', { name: groupName })).toBeChecked();
+      screen.getAllByRole('checkbox').forEach((checkbox) => expect(checkbox).toBeDisabled());
+      expect(screen.getByTestId('policyAssignmentSelectAll')).toBeDisabled();
+      expect(screen.getByTestId('policyAssignmentUnselectAll')).toBeDisabled();
+      expect(screen.getByTestId('viewPolicy-policy-1')).toHaveAttribute(
+        'href',
+        '/app/fleet/policies/policy-1'
+      );
     });
   });
 
