@@ -159,18 +159,23 @@ describe('checkNoVisitedCheckmarks', () => {
       'E3 -->|✅| X1((Upstream pod loss))',
       'D1 -->|no| X2((Gateway fault))',
     ]);
-    const graded = context({
-      prior: legacy,
-      submitted: folded,
-      submission: submit([], {
-        symptom_trees: [{ tree_id: TREE_ID, merged_nodes: [{ from: ['E2'], into: 'E3' }] }],
-        traversals: [{ tree_id: TREE_ID, visited_path: ['S1', 'E1', 'D1'] }],
-      }),
-      causalConfirmed: false,
-    });
+    // The fold maps both prior `yes` edges onto one edge, which may also be relabelled.
+    const relabelled = folded.replace('D1 -->|✅ yes| E3', 'D1 -->|✅ one upstream named| E3');
 
-    expect(checkNoVisitedCheckmarks(graded).score).toBe(1);
-    expect(checkCausalPathMarked(graded).score).toBe(1);
+    for (const submitted of [folded, relabelled]) {
+      const graded = context({
+        prior: legacy,
+        submitted,
+        submission: submit([], {
+          symptom_trees: [{ tree_id: TREE_ID, merged_nodes: [{ from: ['E2'], into: 'E3' }] }],
+          traversals: [{ tree_id: TREE_ID, visited_path: ['S1', 'E1', 'D1'] }],
+        }),
+        causalConfirmed: false,
+      });
+
+      expect(checkNoVisitedCheckmarks(graded).score).toBe(1);
+      expect(checkCausalPathMarked(graded).score).toBe(1);
+    }
   });
 
   it('fails a tree without a decision node', () => {

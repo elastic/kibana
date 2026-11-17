@@ -119,9 +119,15 @@ const mergeTargets = (submissions: SubmitArguments[]): Map<string, string> => {
 const edgePair = ({ source_node_id: source, target_node_id: target }: DecisionEdgeView): string =>
   nodePair(source, target);
 
-const countBy = <T>(items: T[], key: (item: T) => string): Map<string, number> => {
+/**
+ * How many distinct edges join each node pair. Repeated edge lines, and prior edges a merge folded
+ * onto one edge, count once.
+ */
+const edgesPerPair = (edges: DecisionEdgeView[]): Map<string, number> => {
   const counts = new Map<string, number>();
-  for (const item of items) counts.set(key(item), (counts.get(key(item)) ?? 0) + 1);
+  for (const edge of new Map(edges.map((item) => [decisionEdgeKey(item), item])).values()) {
+    counts.set(edgePair(edge), (counts.get(edgePair(edge)) ?? 0) + 1);
+  }
   return counts;
 };
 
@@ -141,9 +147,9 @@ const newCheckmarks = ({ prior, submitted, submissions }: TreeState): DecisionEd
   const priorTaken = priorEdges.filter((edge) => edge.is_taken);
   const priorTakenKeys = new Set(priorTaken.map(decisionEdgeKey));
   const priorTakenPairs = new Set(priorTaken.map(edgePair));
-  const priorPairCounts = countBy(priorEdges, edgePair);
+  const priorPairCounts = edgesPerPair(priorEdges);
   const submittedEdges = submitted?.edges ?? [];
-  const submittedPairCounts = countBy(submittedEdges, edgePair);
+  const submittedPairCounts = edgesPerPair(submittedEdges);
   const isLegacy = (edge: DecisionEdgeView): boolean => {
     const pair = edgePair(edge);
     return (
@@ -391,7 +397,7 @@ export const checkStructurePreserved = ({ output, seededTreeId }: CheckContext):
   const after = new Map(submitted.nodes.map((node) => [node.node_id, node]));
   const afterEdges = new Set(submitted.edges.map(decisionEdgeKey));
   const walkedOnTree = walkedEdges(submitted, submissions);
-  const priorPairCounts = countBy(prior.edges, edgePair);
+  const priorPairCounts = edgesPerPair(prior.edges);
   const rewrittenByWalk = (edge: DecisionEdgeView): boolean => {
     const { target_node_id: target } = edge;
     const relabelled =
