@@ -600,6 +600,13 @@ const yMetricOnAxisSchema = schema.oneOf([schema.literal('y'), schema.literal('y
       'The Y axis this metric is plotted on. Values match the root axis configuration keys (axis.y, axis.y2). If omitted, defaults to the Y axis start (leading) side.',
   },
 });
+const yMetricColorSchema = schema.oneOf([staticColorSchema, autoColorSchema], {
+  meta: {
+    description:
+      'Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.',
+  },
+});
+
 /**
  * Data layer configuration for standard (non-ES|QL) queries with breakdown and metrics
  */
@@ -629,11 +636,7 @@ const xyDataLayerSchemaNoESQL = schema.object(
       mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
         {
           axis: schema.maybe(yMetricOnAxisSchema),
-          color: schema.maybe(
-            schema.oneOf([staticColorSchema, autoColorSchema], {
-              defaultValue: AUTO_COLOR,
-            })
-          ),
+          color: schema.maybe(yMetricColorSchema),
         },
         'xyY'
       ),
@@ -671,11 +674,7 @@ const xyDataLayerSchemaESQL = schema.object(
       esqlColumnWithFormatSchema.extends(
         {
           axis: schema.maybe(yMetricOnAxisSchema),
-          color: schema.maybe(
-            schema.oneOf([staticColorSchema, autoColorSchema], {
-              defaultValue: AUTO_COLOR,
-            })
-          ),
+          color: schema.maybe(yMetricColorSchema),
         },
         { meta: { description: 'ES|QL column for Y-axis metric' } }
       ),

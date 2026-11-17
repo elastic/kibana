@@ -18,7 +18,6 @@ import {
   colorByValuePaletteSchema,
   legacyColorByValueAbsoluteSchema,
   autoColorSchema,
-  AUTO_COLOR,
 } from '../color';
 import { horizontalAlignmentSchema, verticalAlignmentSchema } from '../alignments';
 import { mergeAllMetricsWithChartDimensionSchema } from './shared';
@@ -90,8 +89,10 @@ const legacyMetricConfigMetricOptionsSchema = {
         autoColorSchema,
       ],
       {
-        meta: { description: 'Color configuration based on the metric value.' },
-        defaultValue: AUTO_COLOR,
+        meta: {
+          description:
+            'Color configuration based on the metric value. Defaults to `auto`. Ignored without `apply_color_to`.',
+        },
       }
     )
   ),
