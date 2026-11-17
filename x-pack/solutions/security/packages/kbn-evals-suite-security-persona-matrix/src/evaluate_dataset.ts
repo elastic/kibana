@@ -51,7 +51,7 @@ import {
   createPersonaMatrixOutputTokensEvaluator,
   createPersonaMatrixToolCallsEvaluator,
 } from './evaluators/trace_evaluators';
-import type { PersonaMatrixChatClient } from './chat_client';
+import type { PersonaMatrixChatClient, WorkflowAttachmentYaml } from './chat_client';
 import {
   agentProfile as envAgentProfile,
   withProfileExpectedTools,
@@ -136,6 +136,7 @@ const runPrecomputedJudges = ({
   input,
   expected,
   judgeOutput,
+  workflowAttachments,
   metadata,
   category,
 }: {
@@ -146,6 +147,7 @@ const runPrecomputedJudges = ({
   input: PersonaMatrixExampleInput;
   expected: PersonaMatrixDatasetExpected;
   judgeOutput: unknown;
+  workflowAttachments: readonly WorkflowAttachmentYaml[] | undefined;
   metadata: PersonaMatrixExample['metadata'] | undefined;
   category: string | undefined;
 }): Promise<[JudgeOutcome, JudgeOutcome, JudgeOutcome, JudgeOutcome]> => {
@@ -167,6 +169,7 @@ const runPrecomputedJudges = ({
             question: input?.question,
             attachment: input?.attachment,
             judgeOutput,
+            workflowAttachments,
             log,
           })
         )
@@ -970,6 +973,7 @@ export function createEvaluatePersonaMatrixDataset({
               input,
               expected,
               judgeOutput,
+              workflowAttachments: taskOutput.workflowAttachments,
               metadata: example.metadata,
               category: example.category,
             });

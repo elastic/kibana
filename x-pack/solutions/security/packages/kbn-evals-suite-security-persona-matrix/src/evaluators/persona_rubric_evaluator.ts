@@ -16,6 +16,7 @@ import {
   PersonaRubricPrompt,
   resolvePersonaToolsRow,
 } from './persona_rubric_prompt';
+import type { WorkflowAttachmentInput } from './persona_rubric_prompt';
 import {
   countingJudgeClient,
   describeJudgeFailure,
@@ -77,6 +78,7 @@ export const runPersonaRubricJudge = async ({
   question,
   attachment,
   judgeOutput,
+  workflowAttachments,
   log,
 }: {
   inferenceClient: BoundInferenceClient;
@@ -85,6 +87,8 @@ export const runPersonaRubricJudge = async ({
   question?: string;
   attachment?: string;
   judgeOutput: unknown;
+  /** `generate_workflow` results carry only ids, so the authored YAML comes from here. */
+  workflowAttachments?: readonly WorkflowAttachmentInput[];
   log?: ToolingLog;
 }): Promise<EvaluationResult> => {
   if (!category || !resolvePersonaToolsRow(category)) {
@@ -107,6 +111,7 @@ export const runPersonaRubricJudge = async ({
         attachment,
         answer: getAnswerText(judgeOutput),
         toolCalls,
+        workflowAttachments,
       }),
       finalToolChoice: { function: 'grade' } as ToolChoice<'grade'>,
       maxRetries: JUDGE_MAX_RETRIES,

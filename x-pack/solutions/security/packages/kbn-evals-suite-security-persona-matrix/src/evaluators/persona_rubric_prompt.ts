@@ -17,7 +17,17 @@ const MAX_TOOLS_ROW_CHARS = 4000;
 const MAX_EXPECTED_TOOLS_CHARS = 4000;
 const MAX_QUESTION_CHARS = 20_000;
 const MAX_ATTACHMENT_CHARS = 20_000;
+const MAX_PARAMS_CHARS = 2_000;
+const MAX_WORKFLOW_ATTACHMENTS = 5;
+const MAX_WORKFLOW_YAML_CHARS = 20_000;
 const TRUNCATION_MARKER = '…[truncated]';
+
+/** The workflow YAML read back from the conversation (`chat_client`'s WorkflowAttachmentYaml). */
+export interface WorkflowAttachmentInput {
+  id: string;
+  version: number;
+  yaml: string;
+}
 
 /** Hard bound on the submission text; the shared judge payload cap normally trims well before this. */
 export const PERSONA_RUBRIC_MAX_SUBMISSION_CHARS = 400_000;
@@ -30,9 +40,9 @@ export const PERSONA_RUBRIC_GROUND_TRUTH = [
   'Affected host: `srv-win-defend-01` (Windows).',
   'Core technique: `BluetoothService.exe` side-loads a malicious `log.dll` from a non-standard path, so a legitimate-looking binary loads an attacker DLL.',
   'MITRE ATT&CK: DLL side-loading, T1574.002 (sub-technique of Hijack Execution Flow). Naming the ID is best; describing DLL side-loading or search-order hijacking correctly is acceptable without it.',
-  'Loader SHA-256: `275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f`. It is a known-malicious loader. A correct verdict is "malicious", ideally with a non-trivial detection count and a family name. Reporting it as clean, benign or not found, or asserting a verdict without ever looking the hash up, is wrong.',
+  'File SHA-256 named in the prompts: `275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f`. The prompts call it the Chrysalis loader, but the seeded threat intel identifies it as the EICAR anti-malware test file (`eicar.com`, VirusTotal 65/76 malicious, label `virus.eicar/test`). The best hash verdict reports that lookup result and names it as the EICAR test file. Reporting exactly what the lookup tool returned (including no match) is also acceptable. Inventing a malware family, detection count or verdict the trace does not show, or asserting a verdict without ever looking the hash up, is wrong.',
   'Expected hunt artifacts: `BluetoothService.exe` execution, suspicious `log.dll` loads, and C2 network or DNS activity.',
-  'Disposition: this is a true positive and a real threat. "Benign" or "safe to ignore" is incorrect for alert analysis and multi-step prompts. Some multi-step prompts say not to escalate if the finding is benign; they test judgment, and because the scenario is a true positive the correct behaviour is to escalate and proceed with the remaining steps.',
+  'Disposition: grade the hash verdict and the side-loading scenario separately. The side-loading behaviour on the host (the alerts and hunt artifacts above) is a true positive; "benign" or "safe to ignore" for that behaviour is incorrect. Recognising that the hash itself is only the EICAR test file is correct and must not be penalised. Steps the prompt explicitly asks for (opening a case, creating a channel, notifying on-call), including steps conditional on a true positive, should still be carried out or attempted; side-effecting actions the prompt did not ask for are a flaw.',
 ].join('\n');
 
 const WORKFLOW_CONNECTOR_NOTE =
@@ -195,6 +205,79 @@ export const PersonaRubricPrompt = createPrompt({
   } as const)
   .get();
 
+interface PersonaRubricToolCall {
+  tool_id: string;
+  params: Record<string, unknown>;
+  results?: unknown;
+}
+
+/**
+ * Shares the budget across results so one huge result cannot crowd out later
+ * calls: short results keep their full text and pass their unused share on.
+ */
+const fitResults = (
+  results: Array<string | undefined>,
+  budget: number
+): Array<string | undefined> => {
+  const fitted = [...results];
+  const order = results
+    .map((text, index) => ({ index, length: text?.length ?? 0 }))
+    .filter(({ index }) => results[index] !== undefined)
+    .sort((a, b) => a.length - b.length);
+  let remaining = Math.max(0, budget);
+  order.forEach(({ index, length }, position) => {
+    const share = Math.floor(remaining / (order.length - position));
+    const text = results[index] ?? '';
+    fitted[index] =
+      length <= share
+        ? text
+        : share > TRUNCATION_MARKER.length
+        ? truncate(text, share)
+        : TRUNCATION_MARKER;
+    remaining -= fitted[index]?.length ?? 0;
+  });
+  return fitted;
+};
+
+/** Every call keeps its tool id and params; only the results are shortened to fit `budget`. */
+const formatTrace = (toolCalls: readonly PersonaRubricToolCall[], budget: number): string => {
+  if (!toolCalls.length) return '(no tool calls)';
+  const heads = toolCalls.map(
+    ({ tool_id: toolId, params }, index) =>
+      `${index + 1}. ${toolId}\n   params: ${truncate(JSON.stringify(params), MAX_PARAMS_CHARS)}`
+  );
+  const results = toolCalls.map(({ results: raw }) =>
+    raw === undefined ? undefined : typeof raw === 'string' ? raw : JSON.stringify(raw)
+  );
+  const resultPrefix = '\n   result: ';
+  const fixedChars =
+    heads.reduce((sum, head) => sum + head.length + 1, 0) +
+    results.filter((text) => text !== undefined).length * resultPrefix.length;
+  const fitted = fitResults(results, budget - fixedChars);
+  return heads
+    .map((head, index) => {
+      const result = fitted[index];
+      return result === undefined ? head : `${head}${resultPrefix}${result}`;
+    })
+    .join('\n');
+};
+
+const formatWorkflowAttachments = (
+  workflowAttachments: readonly WorkflowAttachmentInput[] | undefined
+): string =>
+  workflowAttachments?.length
+    ? `\n\nWorkflow YAML stored on the conversation's attachments after the run:\n${workflowAttachments
+        .slice(0, MAX_WORKFLOW_ATTACHMENTS)
+        .map(
+          ({ id, version, yaml }) =>
+            `--- attachment ${id} (version ${version}) ---\n${truncate(
+              yaml,
+              MAX_WORKFLOW_YAML_CHARS
+            )}`
+        )
+        .join('\n')}`
+    : '';
+
 /** Input for the rubric prompt: the answer and ordered tool calls the judge sees. */
 export const buildPersonaRubricInput = ({
   category,
@@ -203,13 +286,15 @@ export const buildPersonaRubricInput = ({
   attachment,
   answer,
   toolCalls,
+  workflowAttachments,
 }: {
   category: string;
   expectedTools?: readonly string[];
   question?: string;
   attachment?: string;
   answer: string;
-  toolCalls: Array<{ tool_id: string; params: Record<string, unknown>; results?: unknown }>;
+  toolCalls: readonly PersonaRubricToolCall[];
+  workflowAttachments?: readonly WorkflowAttachmentInput[];
 }): {
   category: string;
   toolsRow: string;
@@ -218,24 +303,19 @@ export const buildPersonaRubricInput = ({
   attachment: string;
   submission: string;
 } => {
-  const trace = toolCalls.length
-    ? toolCalls
-        .map(({ tool_id: toolId, params, results }, index) =>
-          [
-            `${index + 1}. ${toolId}`,
-            `   params: ${JSON.stringify(params)}`,
-            ...(results === undefined
-              ? []
-              : [`   result: ${typeof results === 'string' ? results : JSON.stringify(results)}`]),
-          ].join('\n')
-        )
-        .join('\n')
-    : '(no tool calls)';
-  // The answer is what gets graded: cut the trace to make room for it, never the other way round.
+  // The answer is what gets graded, then the delivered workflow: the trace gets what is left.
   const answerSection = `\n\nFinal answer:\n${truncate(
     answer || '(empty)',
     PERSONA_RUBRIC_MAX_SUBMISSION_CHARS / 2
   )}`;
+  const workflowSection = formatWorkflowAttachments(workflowAttachments);
+  const traceHeader = 'Tool calls, in order:\n';
+  const traceBudget =
+    PERSONA_RUBRIC_MAX_SUBMISSION_CHARS -
+    answerSection.length -
+    workflowSection.length -
+    traceHeader.length;
+  const trace = formatTrace(toolCalls, traceBudget);
   const toolsRow = formatPersonaToolsRow(category);
   if (!toolsRow) {
     throw new Error(`No persona rubric tools row for category "${category}"`);
@@ -250,9 +330,10 @@ export const buildPersonaRubricInput = ({
     attachment: attachment
       ? `Attachment supplied with the prompt:\n${truncate(attachment, MAX_ATTACHMENT_CHARS)}`
       : '',
+    // The outer truncate only bites when the call heads alone overrun the budget.
     submission: `${truncate(
-      `Tool calls, in order:\n${trace}`,
-      PERSONA_RUBRIC_MAX_SUBMISSION_CHARS - answerSection.length
-    )}${answerSection}`,
+      `${traceHeader}${trace}`,
+      PERSONA_RUBRIC_MAX_SUBMISSION_CHARS - answerSection.length - workflowSection.length
+    )}${workflowSection}${answerSection}`,
   };
 };

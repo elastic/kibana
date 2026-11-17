@@ -35,7 +35,8 @@ export const AD_AXES_ANSWER_KEY = [
   '- A model that produces **8 discoveries, each mapping cleanly to one row above with the right host + family + technique**, is the gold standard.',
   '- A model that produces fewer than 8 has **merged** distinct intrusions (e.g., lumped two hosts together) or **missed** threats — dock Coverage.',
   '- A model that produces more than 8 has likely **over-split** one intrusion into several thin chains — dock Correlation.',
-  '- A model that names the wrong malware family, wrong host, or invents indicators not in this key/alert data — dock Accuracy.',
+  '- A model that names the wrong malware family, wrong host or a technique that contradicts the row for that host — dock Accuracy.',
+  '- You do not see the 95 alerts. Hashes are abbreviated in this key (e.g. `bb444759…df36`), and the key lists only the key indicators. A hash, IP, file name or other detail that this key neither confirms nor contradicts is **unverifiable**: do not treat it as fabricated, and do not award credit for it either. A full hash that matches an abbreviated one here (same leading and trailing characters) is consistent with the key.',
 ].join('\n');
 
 /** Per-axis grading guidance with the 10 / 1-2 anchors. */
@@ -47,10 +48,11 @@ export const AD_AXES_AXIS_GUIDE = [
   '- 10 = all 8 intrusions represented and distinguishable; 1–2 = found one or none.',
   '',
   '### Axis 2 — Accuracy',
-  'How factually correct is each chain vs. the answer key and the alert evidence?',
+  'How factually correct is each chain vs. the answer key? Grade only what the key can check.',
   '- Correct **host**, correct **malware family** (Emotet/Qbot/Bumblebee/Sodinokibi/BPFDoor), correct **kill chain**, correct **MITRE techniques**.',
-  '- Penalize **fabrication** hard: invented hashes, IPs, families, or technique IDs not supported by the alerts; a confidently wrong malware family; wrong host attribution.',
-  '- 10 = attributions and techniques are correct across the board with no fabrication; low scores for confident-but-wrong narration.',
+  '- Penalize contradictions of the key hard: a confidently wrong malware family, a wrong host attribution, a kill chain or technique that does not match the row for that host, a family attached to a host whose row names none, or an IP, file or hash that differs from one the key lists for that chain.',
+  '- Details the key does not cover are unverifiable; neither reward nor penalize them.',
+  '- 10 = attributions and techniques match the key across the board with no contradiction; low scores for confident-but-wrong narration.',
   '',
   '### Axis 3 — Correlation quality',
   'Did the model group the **right alerts into the right chain**?',
@@ -77,11 +79,11 @@ export const AD_AXES_ANCHORS = [
 const SYSTEM_TEMPLATE = [
   "You are a rigorous, skeptical SOC analyst who reviews other analysts' incident write-ups.",
   'You know endpoint detection, MITRE ATT&CK, malware families and cross-host alert correlation.',
-  'You do not reward verbosity, confident narration or invented indicators (hashes, IPs, families, technique IDs).',
+  'You do not reward verbosity or confident narration, and you grade facts only against the answer key you are given.',
   'Respond by invoking the grade tool.',
 ].join(' ');
 
-const USER_TEMPLATE = `A model was given the same 95 security alerts and asked to group them into attack discoveries. The model had only the alert context and no external tools, so any family, hash, IP or technique it states must be derivable from the alerts; unsupported ones are fabrications.
+const USER_TEMPLATE = `A model was given the same 95 security alerts and asked to group them into attack discoveries. You do not see those alerts: you see only the model's discoveries and the answer key below. Judge accuracy against the key. A stated host, family or technique that contradicts the key is wrong; an indicator the key neither confirms nor contradicts is unverifiable, not a fabrication.
 
 Score the submission with an integer from ${AD_AXES_MIN_SCORE} to ${AD_AXES_MAX_SCORE} on each axis, then give an overall score. Latency is not part of the quality axes.
 

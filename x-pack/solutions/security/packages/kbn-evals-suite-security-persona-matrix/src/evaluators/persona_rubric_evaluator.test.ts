@@ -133,6 +133,70 @@ describe('PersonaRubric prompt assembly', () => {
     expect(submission).toContain('1. big.tool');
   });
 
+  it('keeps every later call when one early result alone overflows the budget', () => {
+    const { submission } = buildPersonaRubricInput({
+      category: 'alert-analysis',
+      answer: 'END_ANSWER',
+      toolCalls: [
+        { tool_id: 'huge.tool', params: { q: 'first' }, results: 'z'.repeat(1_000_000) },
+        { tool_id: 'vt.hash.lookup', params: { hash: 'abc' }, results: 'VERDICT_EICAR' },
+        { tool_id: 'on_call_lookup', params: { team: 'soc' } },
+      ],
+    });
+    expect(submission.length).toBeLessThanOrEqual(PERSONA_RUBRIC_MAX_SUBMISSION_CHARS);
+    expect(submission).toContain('1. huge.tool\n   params: {"q":"first"}');
+    expect(submission).toContain('2. vt.hash.lookup\n   params: {"hash":"abc"}');
+    expect(submission).toContain('result: VERDICT_EICAR');
+    expect(submission).toContain('3. on_call_lookup\n   params: {"team":"soc"}');
+    expect(submission).toContain('…[truncated]');
+    expect(submission.endsWith('Final answer:\nEND_ANSWER')).toBe(true);
+  });
+
+  it('splits the budget fairly between several oversized results', () => {
+    const { submission } = buildPersonaRubricInput({
+      category: 'alert-analysis',
+      answer: 'a',
+      toolCalls: [
+        { tool_id: 'one', params: {}, results: `${'x'.repeat(300_000)}` },
+        { tool_id: 'two', params: {}, results: `${'y'.repeat(300_000)}` },
+      ],
+    });
+    expect(submission.length).toBeLessThanOrEqual(PERSONA_RUBRIC_MAX_SUBMISSION_CHARS);
+    const xs = (submission.match(/x/g) ?? []).length;
+    const ys = (submission.match(/y/g) ?? []).length;
+    expect(xs).toBeGreaterThan(150_000);
+    expect(Math.abs(xs - ys)).toBeLessThan(10);
+  });
+
+  it('includes delivered workflow YAML ahead of the answer', () => {
+    const { submission } = buildPersonaRubricInput({
+      category: 'workflow-authoring',
+      answer: '<render_attachment id="wf-1" />',
+      toolCalls: [
+        { tool_id: 'platform.core.generate_workflow', params: {}, results: '{"id":"wf-1"}' },
+      ],
+      workflowAttachments: [{ id: 'wf-1', version: 2, yaml: 'name: notify\nsteps: []' }],
+    });
+    expect(submission).toContain('--- attachment wf-1 (version 2) ---\nname: notify\nsteps: []');
+    expect(submission.indexOf('name: notify')).toBeLessThan(submission.indexOf('Final answer:'));
+  });
+
+  it('omits the workflow section when there are no attachments', () => {
+    const { submission } = buildPersonaRubricInput({
+      category: 'workflow-authoring',
+      answer: 'a',
+      toolCalls: [],
+      workflowAttachments: [],
+    });
+    expect(submission).not.toContain('Workflow YAML');
+  });
+
+  it('grades the hash against the seeded EICAR intel, not as a malware loader', () => {
+    expect(PERSONA_RUBRIC_GROUND_TRUTH).toContain('EICAR');
+    expect(PERSONA_RUBRIC_GROUND_TRUTH).toContain('virus.eicar/test');
+    expect(PERSONA_RUBRIC_GROUND_TRUTH).not.toMatch(/known-malicious loader/);
+  });
+
   it('marks an empty trace explicitly and ships a non-empty ground truth', () => {
     const { submission } = buildPersonaRubricInput({
       category: 'alert-analysis',
@@ -232,6 +296,18 @@ describe('runPersonaRubricJudge', () => {
     expect(call.input.expectedTools).toContain('tool.one');
     expect(call.input.question).toContain('Why?');
     expect(call.input.attachment).toContain('body');
+  });
+
+  it('forwards workflow attachments to the judge submission', async () => {
+    executeUntilValidMock.mockResolvedValue(verdict({ score: 5, explanation: '' }));
+    await runPersonaRubricJudge({
+      inferenceClient,
+      category: 'workflow-authoring',
+      judgeOutput: withTools,
+      workflowAttachments: [{ id: 'wf-9', version: 1, yaml: 'YAML_BODY_MARKER' }],
+    });
+    const call = executeUntilValidMock.mock.calls[0][0] as { input: { submission: string } };
+    expect(call.input.submission).toContain('YAML_BODY_MARKER');
   });
 
   it('ships a long tool result to the judge untruncated end to end', async () => {

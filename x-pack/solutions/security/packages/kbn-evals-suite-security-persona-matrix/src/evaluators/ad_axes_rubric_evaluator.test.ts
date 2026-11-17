@@ -7,7 +7,11 @@
 
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeUntilValid } from '@kbn/inference-prompt-utils';
-import { AD_AXES_ANSWER_KEY, AD_AXES_MAX_SUBMISSION_CHARS } from './ad_axes_rubric_prompt';
+import {
+  AD_AXES_ANSWER_KEY,
+  AD_AXES_AXIS_GUIDE,
+  AD_AXES_MAX_SUBMISSION_CHARS,
+} from './ad_axes_rubric_prompt';
 import {
   AD_AXES_RUBRIC_EVALUATOR_NAME,
   createAdAxesRubricEvaluator,
@@ -62,6 +66,13 @@ describe('AdAxesRubric', () => {
     const { input } = executeUntilValidMock.mock.calls[0][0] as { input: { submission: string } };
     expect(input.submission).toContain('Emotet on SRVWIN03');
     expect(AD_AXES_ANSWER_KEY.match(/^\| [1-8] \|/gm)).toHaveLength(8);
+  });
+
+  it('grades accuracy only against the answer key, since the judge never sees the alerts', () => {
+    expect(AD_AXES_ANSWER_KEY).toContain('You do not see the 95 alerts');
+    expect(AD_AXES_ANSWER_KEY).toContain('**unverifiable**');
+    expect(AD_AXES_AXIS_GUIDE).not.toContain('alert evidence');
+    expect(AD_AXES_AXIS_GUIDE).not.toContain('not supported by the alerts');
   });
 
   it.each([
