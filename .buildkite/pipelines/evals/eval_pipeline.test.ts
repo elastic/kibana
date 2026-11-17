@@ -112,10 +112,29 @@ describe('eval_pipeline', () => {
       expect(getEvalTriggerStep('evals:tier-pinned')).not.toBeNull();
     });
 
+    it('does not run a requiredModelGroups-only suite through a bare `evals:all`', () => {
+      // `evals:all` without `models:*` must stay cheap: only suites with a pinned default run.
+      const steps = parseStep(getEvalPipeline('evals:all') as string).steps as Array<
+        Record<string, any>
+      >;
+
+      expect(steps.map((step) => step.key)).toEqual(['kbn-evals-smoke-tests']);
+      expect(shouldRunEvals('evals:all')).toBe(true);
+    });
+
+    it('skips `evals:all` entirely when only requiredModelGroups-only suites would run', () => {
+      readFileSync.mockReturnValue(
+        JSON.stringify({ suites: SUITES.suites.filter((suite) => suite.id === 'tier-pinned') })
+      );
+
+      expect(shouldRunEvals('evals:all')).toBe(false);
+      expect(getEvalPipeline('evals:all')).toBeNull();
+    });
+
     it('unions requiredModelGroups into an explicit `models:*` selection', () => {
-      // Negative control for the worker tier coverage: an operator requesting exactly one model
-      // must still get the suite's required tier models. `defaultModelGroups` alone would return
-      // just `eis/openai-gpt-5.4` here and silently drop the tier coverage.
+      // An operator requesting exactly one model must still get the suite's required tier
+      // models. The `models:` label supplies gpt-5.4; the fixture has no `defaultModelGroups`, so
+      // without the union the tier models would be dropped.
       const yaml = getEvalPipeline('evals:tier-pinned,models:eis/openai-gpt-5.4') as string;
       const env = parseStep(yaml).steps[0].env;
 

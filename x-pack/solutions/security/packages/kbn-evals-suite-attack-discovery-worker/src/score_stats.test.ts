@@ -19,8 +19,20 @@ describe('computeScoreStats', () => {
     expect(s.naCount).toBe(1);
     expect(s.mean).toBeCloseTo(0.625, 5);
     expect(s.std).toBeCloseTo(0.479, 2);
-    expect(s.ci95).toBeCloseTo((1.96 * s.std) / 2, 5);
+    // n=4 -> 3 degrees of freedom -> t = 3.182, not the normal 1.96.
+    expect(s.ci95).toBeCloseTo((3.182 * s.std) / 2, 5);
     expect(s.saturated).toBe(false);
+  });
+
+  it('widens the CI at small n using the t distribution', () => {
+    const small = computeScoreStats([0, 0.5, 1]);
+    expect(small.ci95).toBeCloseTo((4.303 * 0.5) / Math.sqrt(3), 3);
+  });
+
+  it('falls back to the normal multiplier past 30 degrees of freedom', () => {
+    const scores = Array.from({ length: 40 }, (_, i) => (i % 2 === 0 ? 0 : 1));
+    const s = computeScoreStats(scores);
+    expect(s.ci95).toBeCloseTo((1.96 * s.std) / Math.sqrt(40), 5);
   });
 
   it('flags an evaluator pinned at 1.0 as saturated — no discriminating signal', () => {
@@ -100,6 +112,6 @@ describe('pairedDeltas', () => {
     const r = pairedDeltas(a, b);
     expect(r.pairedIds).toEqual(['ex-1', 'ex-2']);
     expect(r.deltas).toEqual([0.5, 0]);
-    expect(r.skippedIds).toEqual(['ex-3', 'ex-4']);
+    expect(r.skippedIds).toEqual(['ex-3', 'ex-4', 'ex-5']);
   });
 });

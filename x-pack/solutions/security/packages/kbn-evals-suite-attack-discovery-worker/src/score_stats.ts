@@ -15,13 +15,26 @@ export interface ScoreStats {
   n: number;
   mean: number;
   std: number;
-  /** Half-width of the 95% CI on the mean (normal approximation). */
+  /** Half-width of the two-sided 95% CI on the mean, using Student's t for n-1 degrees of freedom. */
   ci95: number;
   /** true when every observed score is identical AND at an extreme — the
    *  evaluator contributed no discriminating signal in this run. */
   saturated: boolean;
   naCount: number;
 }
+
+// Two-sided 95% critical values of Student's t for 1..30 degrees of freedom.
+// The normal 1.96 understates the band at the small n these evals run at
+// (at n=3 the true multiplier is 4.30), which would over-report "distinguishable".
+const T_CRITICAL_95 = [
+  12.706, 4.303, 3.182, 2.776, 2.571, 2.447, 2.365, 2.306, 2.262, 2.228, 2.201, 2.179, 2.16, 2.145,
+  2.131, 2.12, 2.11, 2.101, 2.093, 2.086, 2.08, 2.074, 2.069, 2.064, 2.06, 2.056, 2.052, 2.048,
+  2.045, 2.042,
+];
+const NORMAL_CRITICAL_95 = 1.96;
+
+const tCritical95 = (degreesOfFreedom: number): number =>
+  T_CRITICAL_95[degreesOfFreedom - 1] ?? NORMAL_CRITICAL_95;
 
 export const computeScoreStats = (scores: Array<number | null>): ScoreStats => {
   const scored = scores.filter((s): s is number => s != null);
@@ -33,7 +46,7 @@ export const computeScoreStats = (scores: Array<number | null>): ScoreStats => {
   const mean = scored.reduce((a, b) => a + b, 0) / n;
   const variance = n > 1 ? scored.reduce((a, b) => a + (b - mean) ** 2, 0) / (n - 1) : 0;
   const std = Math.sqrt(variance);
-  const ci95 = n > 1 ? (1.96 * std) / Math.sqrt(n) : 0;
+  const ci95 = n > 1 ? (tCritical95(n - 1) * std) / Math.sqrt(n) : 0;
   const allSame = scored.every((s) => s === scored[0]);
   const atExtreme = scored[0] === 0 || scored[0] === 1;
   return { n, mean, std, ci95, saturated: allSame && atExtreme, naCount };
@@ -99,6 +112,10 @@ export const pairedDeltas = (
       deltas.push(aScore - bScore);
       pairedIds.push(id);
     }
+  }
+  // An example only arm b scored is just as unpaired as one only arm a scored.
+  for (const id of bByExample.keys()) {
+    if (!aByExample.has(id)) skippedIds.push(id);
   }
   return { deltas, pairedIds, skippedIds };
 };

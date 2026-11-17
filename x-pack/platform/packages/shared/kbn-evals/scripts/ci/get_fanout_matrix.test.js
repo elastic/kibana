@@ -103,6 +103,49 @@ describe('buildFanoutMatrix - weekly per-spec filter loop', () => {
     ]);
   });
 
+  it('runs a spec with no specModelGroups[] entry on a required-only connector', () => {
+    const rows = buildFanoutMatrix({
+      connectors: CONNECTORS,
+      suiteInfo: {
+        shards: [{ id: 's2', specFiles: [OTHER] }],
+        specModelGroups: [{ files: [DISCOVERY], models: ['eis/a'] }],
+        weeklyEisModelGroups: ['eis/a'],
+        requiredModelGroups: ['eis/c'],
+      },
+      requestedModelGroups: ['eis/a'],
+      perSpec: true,
+      grepOverride: false,
+    });
+
+    expect(rows).toEqual([
+      { connectorId: 'eis-a', shardId: 's2', specFiles: [OTHER] },
+      { connectorId: 'eis-c', shardId: 's2', specFiles: [OTHER] },
+    ]);
+  });
+
+  it('runs a spec with its own model list on the required connectors too, without duplicates', () => {
+    const rows = buildFanoutMatrix({
+      connectors: CONNECTORS,
+      suiteInfo: {
+        shards: [{ id: 's1', specFiles: [DISCOVERY, OTHER] }],
+        specModelGroups: [
+          { files: [DISCOVERY], models: ['eis/a'] },
+          { files: [OTHER], models: ['eis/a', 'eis/c'] },
+        ],
+        weeklyEisModelGroups: ['eis/a'],
+        requiredModelGroups: ['eis/c'],
+      },
+      requestedModelGroups: ['eis/a'],
+      perSpec: true,
+      grepOverride: false,
+    });
+
+    expect(rows).toEqual([
+      { connectorId: 'eis-a', shardId: 's1', specFiles: [DISCOVERY, OTHER] },
+      { connectorId: 'eis-c', shardId: 's1', specFiles: [DISCOVERY, OTHER] },
+    ]);
+  });
+
   it('keeps shards as batching boundaries', () => {
     const rows = buildFanoutMatrix({
       connectors: CONNECTORS,
@@ -199,6 +242,20 @@ describe('buildFanoutMatrix - fail-fast', () => {
         grepOverride: false,
       })
     ).toThrow(/not-provisioned/);
+  });
+
+  it('names requiredModelGroups and the suite when a required group has no connector', () => {
+    const build = () =>
+      buildFanoutMatrix({
+        connectors: CONNECTORS,
+        suiteInfo: { id: 'tier-suite', requiredModelGroups: ['eis/not-provisioned'] },
+        requestedModelGroups: ['eis/a'],
+        perSpec: false,
+        grepOverride: false,
+      });
+
+    expect(build).toThrow(/requiredModelGroups entry "eis\/not-provisioned" of suite "tier-suite"/);
+    expect(build).not.toThrow(/EVAL_MODEL_GROUPS/);
   });
 
   it('throws naming the operator groups when they match no connector, even though a required group matches', () => {

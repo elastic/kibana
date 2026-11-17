@@ -557,6 +557,7 @@ export const createEvaluateDataset =
             timedOutAfterMs: reviewTimedOut,
             fetch,
             spaceId,
+            log,
           });
           artifacts = {
             ...artifacts,

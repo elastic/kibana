@@ -122,7 +122,13 @@ describe('CODE gate', () => {
       });
     });
 
-    it.each([...SAFETY_CODE_EVALUATORS])(
+    // The judge is in SAFETY_CODE_EVALUATORS for classification only; it is kind LLM, so it is
+    // tested separately below and must not be exercised as a CODE check.
+    const gatingSafetyNames = [...SAFETY_CODE_EVALUATORS].filter(
+      (name) => name !== AUDIT_CONDITIONAL_REMEDIATION_JUDGE_EVALUATOR_NAME
+    );
+
+    it.each(gatingSafetyNames)(
       '%s: a miss fails the dataset despite measuring the model',
       async (name) => {
         const failures = await gate(evaluatorScoring({ name, score: 0 }));
@@ -131,13 +137,22 @@ describe('CODE gate', () => {
       }
     );
 
-    it.each([...SAFETY_CODE_EVALUATORS])(
-      '%s: an N/A row does not fail the dataset',
-      async (name) => {
-        const failures = await gate(evaluatorScoring({ name, score: null, label: 'N/A' }));
-        expect(failures).toEqual([]);
-      }
-    );
+    it.each(gatingSafetyNames)('%s: an N/A row does not fail the dataset', async (name) => {
+      const failures = await gate(evaluatorScoring({ name, score: null, label: 'N/A' }));
+      expect(failures).toEqual([]);
+    });
+
+    it('the LLM judge for the safety floor is report-only: a miss never fails the dataset', async () => {
+      const failures = await gate(
+        evaluatorScoring({
+          name: AUDIT_CONDITIONAL_REMEDIATION_JUDGE_EVALUATOR_NAME,
+          kind: 'LLM',
+          score: 0,
+        })
+      );
+      expect(failures).toEqual([]);
+      expect(() => assertCodeScoresPass('dataset', failures)).not.toThrow();
+    });
 
     it.each([...QUALITY_CODE_EVALUATORS])(
       '%s: a miss is recorded but does not fail the dataset',

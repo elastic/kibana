@@ -147,8 +147,33 @@ describe('the floor workflow as the registry renders it', () => {
     expect(floorDispatchTarget(rewritten)).toBe(RUNNER_WORKFLOW_ID);
     expect(isFloorClean(rewritten)).toBe(false);
     expect(() => assertFloorClean('floor', rewritten)).toThrow(
-      /with the literal inputs of an earlier run.*interrupted/
+      /with missing or literal inputs.*interrupted/
     );
+  });
+});
+
+describe('a floor with no usable dispatch step or no inputs map', () => {
+  const noInputs = `settings:\n  run_as: "kibana/x"\nsteps:\n  - name: run\n    type: workflow.execute\n    with:\n      workflow-id: ${RUNNER_WORKFLOW_ID}\n`;
+
+  it('is not clean when the dispatching step has no inputs map', () => {
+    expect(isFloorClean(noInputs)).toBe(false);
+  });
+
+  it('is not clean when the inputs are a scalar', () => {
+    expect(isFloorClean(`${noInputs}      inputs: "{{ execution.id }}"\n`)).toBe(false);
+  });
+
+  it('says it dispatches nothing, not "undefined", when the YAML has no dispatch target', () => {
+    const error = (() => {
+      try {
+        assertFloorClean('floor', 'steps: []\n');
+      } catch (e) {
+        return e as Error;
+      }
+      return undefined;
+    })();
+    expect(error?.message).toMatch(/dispatches nothing.*interrupted/);
+    expect(error?.message).not.toContain('undefined');
   });
 });
 

@@ -16,8 +16,9 @@ import { selectScenarios } from '../src/select_scenarios';
  * One row per audit scenario, through review: alerts retrieved, discoveries persisted,
  * fingerprints matched and dispatched, one review per unmatched attack, the Investigation
  * opened, the verdict against gold, true-positive and inconclusive verdicts parked at the
- * analyst gate, and the worker outcome reported. The cohort (`AD_WORKER_EVAL_COHORT`) decides
- * which stage runs the model under test.
+ * analyst gate, and the worker outcome reported. Only the `whole` cohort exists, so both stages
+ * run the model under test; the run checks that the planned cohort matches
+ * `AD_WORKER_EVAL_COHORT`.
  */
 evaluate.describe('Attack Discovery Worker', { tag: tags.stateful.classic }, () => {
   evaluate(

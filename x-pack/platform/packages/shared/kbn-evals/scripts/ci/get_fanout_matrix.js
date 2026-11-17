@@ -36,15 +36,27 @@ const noConnectorMatchError = (groups, connectors) =>
       `Available models: ${describeAvailableModels(connectors).join(',')}`
   );
 
+const noRequiredConnectorError = (group, connectors, suiteId) =>
+  new Error(
+    `No connectors matched requiredModelGroups entry "${group}" of suite "${
+      suiteId || 'unknown'
+    }". ` + `Available models: ${describeAvailableModels(connectors).join(',')}`
+  );
+
 // `requiredModelGroups` fail per group: a required model with no connector would otherwise
 // silently drop out of the matrix. Operator-requested groups (EVAL_MODEL_GROUPS) keep the
 // list-level rule: partly matched requests run on the connectors that did match, and only a
 // request that matched nothing fails.
-const assertRequestedConnectors = (connectors, operatorModelGroups, requiredModelGroups) => {
+const assertRequestedConnectors = (
+  connectors,
+  operatorModelGroups,
+  requiredModelGroups,
+  suiteId
+) => {
   for (const group of requiredModelGroups) {
     if (group === 'all') continue;
     if (selectConnectorIds(connectors, [group]).length === 0) {
-      throw noConnectorMatchError([group], connectors);
+      throw noRequiredConnectorError(group, connectors, suiteId);
     }
   }
   if (
@@ -76,12 +88,14 @@ const modelsByFileFromSpecs = (specModelGroups) => {
 };
 
 // Resolve every batch file's model list once: its own `specModelGroups` entry, else `fallback`
-// (the suite weekly list, or the requested universe when the suite has none).
-const resolveBatchModels = (batches, overrides, fallback) => {
+// (the suite weekly list, or the requested universe when the suite has none). The suite's required
+// groups join an override too, so a spec with its own list still runs on the tier models.
+const resolveBatchModels = (batches, overrides, fallback, requiredModelGroups) => {
   const modelsByFile = new Map();
   for (const batch of batches) {
     for (const file of Array.isArray(batch.specFiles) ? batch.specFiles : []) {
-      modelsByFile.set(file, overrides.get(file) ?? fallback);
+      const own = overrides.get(file);
+      modelsByFile.set(file, own ? [...new Set([...own, ...requiredModelGroups])] : fallback);
     }
   }
   return modelsByFile;
@@ -111,11 +125,13 @@ function buildConnectorShardMatrix({
   shards,
   requestedModelGroups,
   requiredModelGroups,
+  suiteId,
 }) {
   const connectorIds = assertRequestedConnectors(
     connectors,
     requestedModelGroups,
-    requiredModelGroups
+    requiredModelGroups,
+    suiteId
   );
   const effectiveShards = shards.length === 0 ? [{ id: '', specFiles: [] }] : shards;
   const rows = [];
@@ -170,13 +186,15 @@ function buildFanoutMatrix({
       shards,
       requestedModelGroups,
       requiredModelGroups,
+      suiteId: suiteInfo.id,
     });
   }
 
   const connectorIds = assertRequestedConnectors(
     connectors,
     requestedModelGroups,
-    requiredModelGroups
+    requiredModelGroups,
+    suiteInfo.id
   );
   const batches =
     configuredShards.length > 0
@@ -190,10 +208,19 @@ function buildFanoutMatrix({
           },
         ];
 
+  // Required groups join the fallback: their connectors are in `connectorIds`, so a spec without
+  // its own model list must still run on them.
+  const fallbackModelGroups = [
+    ...new Set([
+      ...(suiteWeeklyModelGroups.length > 0 ? suiteWeeklyModelGroups : requestedModelGroups),
+      ...requiredModelGroups,
+    ]),
+  ];
   const modelsByFile = resolveBatchModels(
     batches,
     overrides,
-    suiteWeeklyModelGroups.length > 0 ? suiteWeeklyModelGroups : requestedModelGroups
+    fallbackModelGroups,
+    requiredModelGroups
   );
   assertListedModelsHaveConnectors(connectors, [...new Set([...modelsByFile.values()].flat())]);
 

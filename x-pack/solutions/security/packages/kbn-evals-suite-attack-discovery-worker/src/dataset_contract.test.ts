@@ -47,7 +47,7 @@ describe('worker dataset contract', () => {
     (_id, row) => {
       const { goldVerdict, alsoAccepts = [] } = row.output!;
       expect(alsoAccepts).not.toContain(goldVerdict);
-      // A false-positive row must not also accept true positive: that would pass anything.
+      // A false-positive row accepts no other verdict, so a model that gets it wrong cannot pass.
       if (goldVerdict === 'false_positive') expect(alsoAccepts).toEqual([]);
     }
   );

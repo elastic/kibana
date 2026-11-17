@@ -369,6 +369,7 @@ const buildReviewArtifact = async ({
   dispatch,
   fetch,
   spaceId,
+  log,
 }: {
   client: AttackDiscoveryWorkerClient;
   review: WorkflowExecutionDto;
@@ -376,6 +377,7 @@ const buildReviewArtifact = async ({
   dispatch: WorkflowStepExecutionDto | undefined;
   fetch: HttpHandler;
   spaceId: string;
+  log: ToolingLog;
 }): Promise<ReviewArtifact> => {
   const emit = outputOf(firstStep(review, 'emit_result'));
   const analysis = outputOf(firstStep(review, 'resolve_analysis'));
@@ -383,12 +385,25 @@ const buildReviewArtifact = async ({
   const investigationId =
     asString(emit?.investigation_id) ??
     (attackDiscoveryId ? investigationIdFor(attackDiscoveryId) : undefined);
-  const conversation = investigationId
-    ? await getConversation({ fetch, spaceId, conversationId: investigationId })
-    : undefined;
+  let conversation: ConversationDto | undefined;
+  let lookupFailed = false;
+  if (investigationId) {
+    try {
+      conversation = await getConversation({ fetch, spaceId, conversationId: investigationId });
+    } catch (error) {
+      // One unreadable conversation must not discard the rest of the review's artifact.
+      lookupFailed = true;
+      log.warning(
+        `[ad-worker] could not read investigation ${investigationId} of review ${
+          review.id
+        }: ${errorMessage(error)}`
+      );
+    }
+  }
   // A 404 on the conversation lookup is authoritative: the workflow's self-reported
-  // `investigation_opened` flag only counts when there was no id to look up.
-  const conversationMissing = investigationId !== undefined && conversation === undefined;
+  // `investigation_opened` flag only counts when there was no id to look up or the lookup failed.
+  const conversationMissing =
+    investigationId !== undefined && conversation === undefined && !lookupFailed;
   const verdictAttachment = conversation?.attachments?.find(
     ({ type }) => type === VERDICT_ATTACHMENT_TYPE
   );
@@ -411,6 +426,7 @@ const buildReviewArtifact = async ({
     investigationOpened:
       conversation !== undefined ||
       (!conversationMissing && (opened === true || opened === 'true')),
+    ...(lookupFailed ? { investigationLookupFailed: true as const } : {}),
     proposalStatus: asString(emit?.proposal_status),
     proposalDecision: asString(emit?.proposal_decision),
     verdictSummary: asString(attachmentData?.summary_markdown),
@@ -431,12 +447,14 @@ export const collectReviewArtifact = async ({
   timedOutAfterMs,
   fetch,
   spaceId,
+  log,
 }: {
   client: AttackDiscoveryWorkerClient;
   review: WorkflowExecutionDto;
   timedOutAfterMs?: number;
   fetch: HttpHandler;
   spaceId: string;
+  log: ToolingLog;
 }): Promise<ReviewArtifact> =>
   buildReviewArtifact({
     client,
@@ -445,6 +463,7 @@ export const collectReviewArtifact = async ({
     dispatch: undefined,
     fetch,
     spaceId,
+    log,
   });
 
 const outcomeEvents = (run: WorkflowExecutionDto): WorkerOutcomeEvent[] =>
@@ -592,6 +611,15 @@ const persistedExecutionUuids = (
 ): string[] | undefined => {
   const uuids = distinct(docs.map((doc) => asString(readField(doc, EXECUTION_UUID_FIELD))));
   return uuids.length > 0 ? uuids : undefined;
+};
+
+/** The reported uuids when there are any; an empty or unparseable report counts as none. */
+const reportedOrPersistedUuids = (
+  reported: unknown,
+  docs: readonly Record<string, unknown>[]
+): string[] | undefined => {
+  const uuids = executionUuidList(reported);
+  return uuids && uuids.length > 0 ? uuids : persistedExecutionUuids(docs);
 };
 
 /** Every attack id `match_fingerprints` handed back, as a review or an attachment. */
@@ -817,13 +845,14 @@ export const collectWorkerArtifacts = async ({
         dispatch: step,
         fetch,
         spaceId,
+        log,
       });
     })
   );
   const indexedAttackCount = await countIndexedAttacks({
     esClient,
     spaceId,
-    executionUuids: generationUuids ?? persistedExecutionUuids(docs),
+    executionUuids: reportedOrPersistedUuids(generationUuids, docs),
     log,
   });
   const outcomes = outcomeEvents(run);

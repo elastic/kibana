@@ -120,6 +120,42 @@ describe('ensureFloorServiceAccount', () => {
   });
 });
 
+describe('ensureFloorServiceAccount with an account that never becomes usable', () => {
+  const never = (account: Record<string, unknown>) =>
+    fetchWith((path, o) => {
+      if (path.includes('/api/security/role/')) return { metadata: { _reserved: true } };
+      if (o?.method === 'POST') throw Object.assign(new Error('conflict'), { status: 409 });
+      return { serviceAccounts: [{ id: 'sa-9', name: NAME, ...account }], nextPage: null };
+    });
+
+  it('names a disabled account', async () => {
+    const promise = ensureFloorServiceAccount(
+      never({ enabled: false, assumable: true }) as unknown as HttpHandler,
+      log
+    );
+    await expect(promise).rejects.toThrow(/sa-9.*exists but is disabled/);
+  });
+
+  it('names an account the worker cannot assume', async () => {
+    const promise = ensureFloorServiceAccount(
+      never({ enabled: true, assumable: false }) as unknown as HttpHandler,
+      log
+    );
+    await expect(promise).rejects.toThrow(/sa-9.*cannot be assumed/);
+  });
+
+  it('keeps the concurrent-create message when the account never shows up', async () => {
+    const fetch = fetchWith((path, o) => {
+      if (path.includes('/api/security/role/')) return { metadata: { _reserved: true } };
+      if (o?.method === 'POST') throw Object.assign(new Error('conflict'), { status: 409 });
+      return { serviceAccounts: [], nextPage: null };
+    });
+    await expect(ensureFloorServiceAccount(fetch as unknown as HttpHandler, log)).rejects.toThrow(
+      /created concurrently but never became usable/
+    );
+  });
+});
+
 describe('enableFloorWorker', () => {
   const worker = (over: Record<string, unknown>) => ({
     id: FLOOR_WORKER_ID,
@@ -162,6 +198,62 @@ describe('enableFloorWorker', () => {
     });
     await enabled.restore();
     expect(patches(fetch)[1]).toEqual({ enabled: false });
+  });
+
+  it('puts back the settings of a worker that was disabled before the eval, after disabling it', async () => {
+    const previous = {
+      serviceAccountId: 'sa-old',
+      autonomy: 'supervised',
+      scheduleInterval: '30m',
+    };
+    const { fetch, promise } = run(
+      { enabled: false, settings: previous },
+      { enabled: true, workflowId: 'wf-1' }
+    );
+    await (await promise).restore();
+    const written = patches(fetch);
+    expect(written[1]).toEqual({ enabled: false });
+    expect(written[2]).toEqual({ settingsRevision: 3, settings: previous });
+    expect(written[2].enabled).toBeUndefined();
+  });
+
+  it('names the disabled-but-eval-settings state when the settings write keeps conflicting', async () => {
+    const previous = {
+      serviceAccountId: 'sa-old',
+      autonomy: 'supervised',
+      scheduleInterval: '30m',
+    };
+    let reads = 0;
+    const fetch = fetchWith((path, o) => {
+      if (o?.method === 'PATCH') {
+        const body = JSON.parse((o as { body: string }).body);
+        // Only the restore write carries the previous settings; the enable write has the eval's.
+        if (body.settings?.serviceAccountId === 'sa-old') {
+          throw Object.assign(new Error('conflict'), { status: 409 });
+        }
+        return {};
+      }
+      if (path.includes('/executions')) return { results: [] };
+      reads += 1;
+      return {
+        workers: [
+          reads === 1
+            ? worker({ enabled: false, settings: previous })
+            : worker({ enabled: true, workflowId: 'wf-1' }),
+        ],
+      };
+    });
+    const enabled = await enableFloorWorker({
+      fetch: fetch as unknown as HttpHandler,
+      log,
+      serviceAccountId: 'sa-1',
+    });
+    await expect(enabled.restore()).rejects.toThrow(/left disabled but its eval settings remain/);
+    const written = patches(fetch);
+    expect(written[1]).toEqual({ enabled: false });
+    expect(written.filter(({ settings }) => settings?.serviceAccountId === 'sa-old')).toHaveLength(
+      2
+    );
   });
 
   it('puts back the settings of a worker that was already enabled, without disabling it', async () => {

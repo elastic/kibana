@@ -89,7 +89,8 @@ const hasRenderedInputs = (yaml: string): boolean => {
   const steps = document.get('steps');
   const [step] = isSeq(steps) ? steps.items.filter(isExecuteStep) : [];
   const inputs = step?.getIn(['with', 'inputs']);
-  return !isMap(inputs) || hasTemplateMarker(inputs.toJSON());
+  // The rendered floor always carries an inputs map; its absence is not a clean floor.
+  return isMap(inputs) && hasTemplateMarker(inputs.toJSON());
 };
 
 /**
@@ -142,12 +143,14 @@ export const readFloorWorkflow = async ({
 export const assertFloorClean = (floorWorkflowId: string, yaml: string): void => {
   if (isFloorClean(yaml)) return;
   const target = floorDispatchTarget(yaml);
-  const reason =
-    target === RUNNER_WORKFLOW_ID
-      ? `Floor workflow "${floorWorkflowId}" dispatches "${RUNNER_WORKFLOW_ID}" with the literal inputs of an earlier run, not the ones the registry renders`
-      : `Floor workflow "${floorWorkflowId}" does not dispatch "${RUNNER_WORKFLOW_ID}" (it dispatches "${String(
-          target
-        )}")`;
+  let reason: string;
+  if (target === RUNNER_WORKFLOW_ID) {
+    reason = `Floor workflow "${floorWorkflowId}" dispatches "${RUNNER_WORKFLOW_ID}" with missing or literal inputs instead of the ones the registry renders`;
+  } else if (target === undefined) {
+    reason = `Floor workflow "${floorWorkflowId}" does not parse or has no single workflow.execute step with a workflow-id, so it dispatches nothing`;
+  } else {
+    reason = `Floor workflow "${floorWorkflowId}" does not dispatch "${RUNNER_WORKFLOW_ID}" (it dispatches "${target}")`;
+  }
   throw new Error(
     `${reason}: an earlier floor-parent run was interrupted before it put the YAML back. The preflight repairs this; a run started without it must not continue.`
   );

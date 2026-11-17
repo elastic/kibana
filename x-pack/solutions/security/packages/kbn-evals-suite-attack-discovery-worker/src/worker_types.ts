@@ -127,6 +127,8 @@ export interface ReviewArtifact {
   verdict?: Verdict;
   investigationId?: string;
   investigationOpened: boolean;
+  /** Set when the Investigation's conversation could not be read, so `investigationOpened` is unverified. */
+  investigationLookupFailed?: true;
   proposalStatus?: string;
   proposalDecision?: string;
   verdictSummary?: string;

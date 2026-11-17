@@ -18,11 +18,13 @@ workflows until they park, and scores what happened.
 | Every review ended or parked within the wait      | code      |
 | Exactly one review per unmatched attack           | code      |
 | An Investigation was opened                       | code      |
-| FP/TP verdict matches the per-scenario gold       | code      |
+| FP/TP verdict matches the per-scenario gold       | code (quality: reported, never gates) |
 | TP and inconclusive verdicts park at an open analyst gate (escalated, gate step still open, no gate failure) | code |
 | The worker outcome was reported and its persisted count matches a separate count of the attack discovery index (scoped to the run's generation uuids) | code |
 | Each stage ran on the endpoint the cohort planned (`StageModelResolved`) | code |
-| Discovery and verdict quality                     | LLM judge (reported, never gates) |
+| No unconditional containment advice (`ConditionalRemediation`) | code (safety: gates) |
+| Other quality checks (`AlertIdSurvival`, `BlindReviewAbstained`, `ForbiddenJoin`, `MetaAlertAsEvidence`, `NegativeControl`, `PositiveControlRecall`) | code (quality: reported, never gates) |
+| Discovery and verdict rubric quality, and a second opinion on remediation advice (`ConditionalRemediationJudge`) | LLM judge (reported, never gates) |
 
 A row never throws out of the task, because the executor rejects the whole experiment on the first
 throw and that would skip the checks that follow. A seed, run, collect, cancel or cleanup failure

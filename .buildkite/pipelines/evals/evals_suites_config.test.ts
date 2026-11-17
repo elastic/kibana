@@ -20,6 +20,91 @@ const suites = (
   }
 ).suites;
 
+const TIER_FEATURE_IDS = ['alertzero_efficient', 'alertzero_balanced'];
+
+/** Every list of steps nested under a step, per the kbn-workflows step schema. */
+const nestedStepLists = (step: Record<string, any>): Array<Array<Record<string, any>>> => {
+  const lists: unknown[] = [
+    step.steps,
+    step.else,
+    step.default,
+    step['on-failure']?.fallback,
+    step['iteration-on-failure']?.fallback,
+    ...(Array.isArray(step.cases) ? step.cases.map((branch: any) => branch?.steps) : []),
+    ...(Array.isArray(step.branches) ? step.branches.map((branch: any) => branch?.steps) : []),
+  ];
+  return lists.filter((list): list is Array<Record<string, any>> => Array.isArray(list));
+};
+
+/** Tier feature ids used by a step list, descending into every nested step container. */
+const findTierFeatureUses = (
+  steps: Array<Record<string, any>>
+): Array<{ stepName: string; featureId: string }> =>
+  steps.flatMap((step) => {
+    const withBlock = step.with as Record<string, any> | undefined;
+    const featureIds: string[] = Array.isArray(withBlock?.feature_id)
+      ? withBlock.feature_id
+      : typeof withBlock?.feature_id === 'string'
+      ? [withBlock.feature_id]
+      : Array.isArray(step['connector-id-by-feature'])
+      ? step['connector-id-by-feature']
+      : [];
+    return [
+      ...featureIds
+        .filter((featureId) => TIER_FEATURE_IDS.includes(featureId))
+        .map((featureId) => ({ stepName: String(step.name ?? '?'), featureId })),
+      ...nestedStepLists(step).flatMap(findTierFeatureUses),
+    ];
+  });
+
+describe('findTierFeatureUses', () => {
+  const tier = (name: string) => ({
+    name,
+    type: 'ai.agent',
+    'connector-id-by-feature': ['alertzero_balanced'],
+  });
+
+  it.each([
+    ['steps', (inner: Record<string, any>) => ({ name: 'outer', steps: [inner] })],
+    ['else', (inner: Record<string, any>) => ({ name: 'outer', else: [inner] })],
+    ['default', (inner: Record<string, any>) => ({ name: 'outer', default: [inner] })],
+    [
+      'on-failure.fallback',
+      (inner: Record<string, any>) => ({ name: 'outer', 'on-failure': { fallback: [inner] } }),
+    ],
+    [
+      'iteration-on-failure.fallback',
+      (inner: Record<string, any>) => ({
+        name: 'outer',
+        'iteration-on-failure': { fallback: [inner] },
+      }),
+    ],
+    [
+      'cases[].steps',
+      (inner: Record<string, any>) => ({ name: 'outer', cases: [{ match: 1, steps: [inner] }] }),
+    ],
+    [
+      'branches[].steps',
+      (inner: Record<string, any>) => ({
+        name: 'outer',
+        branches: [{ name: 'a', steps: [inner] }],
+      }),
+    ],
+  ])('finds a tier feature nested under %s', (_container, wrap) => {
+    expect(findTierFeatureUses([wrap(tier('inner'))])).toEqual([
+      { stepName: 'inner', featureId: 'alertzero_balanced' },
+    ]);
+  });
+
+  it('ignores the frontier feature', () => {
+    expect(
+      findTierFeatureUses([
+        { name: 'ok', 'connector-id-by-feature': ['alertzero_frontier'], steps: [] },
+      ])
+    ).toEqual([]);
+  });
+});
+
 const shardedSuites = suites.filter((suite) => (suite.shards?.length ?? 0) > 0);
 
 // `run_suite.sh` lowercases the id and rewrites every other character to `-` to build the step key,
@@ -247,29 +332,19 @@ describe('evals.suites.json requiredModelGroups (AZ tier coverage)', () => {
     for (const file of WORKER_YAMLS) {
       const parsed = parseYaml(Fs.readFileSync(Path.join(DEFINITIONS, file), 'utf-8')) as {
         steps?: Array<Record<string, any>>;
+        'on-failure'?: { fallback?: Array<Record<string, any>> };
       };
-      const walk = (steps: Array<Record<string, any>>): void => {
-        for (const step of steps) {
-          const withBlock = step.with as Record<string, any> | undefined;
-          const featureIds: string[] = Array.isArray(withBlock?.feature_id)
-            ? withBlock.feature_id
-            : typeof withBlock?.feature_id === 'string'
-            ? [withBlock.feature_id]
-            : Array.isArray(step['connector-id-by-feature'])
-            ? step['connector-id-by-feature']
-            : [];
-          for (const featureId of featureIds) {
-            if (featureId === 'alertzero_efficient' || featureId === 'alertzero_balanced') {
-              problems.push(
-                `${file}: step "${step.name ?? '?'}" uses tier feature "${featureId}", which the ` +
-                  `requiredModelGroups pin (Frontier) does not cover. Update the pin in the same PR.`
-              );
-            }
-          }
-          walk(Array.isArray(step.steps) ? step.steps : []);
-        }
-      };
-      walk(parsed.steps ?? []);
+      const onFailureFallback = parsed['on-failure']?.fallback;
+      problems.push(
+        ...findTierFeatureUses([
+          ...(parsed.steps ?? []),
+          ...(Array.isArray(onFailureFallback) ? onFailureFallback : []),
+        ]).map(
+          ({ stepName, featureId }) =>
+            `${file}: step "${stepName}" uses tier feature "${featureId}", which the ` +
+            `requiredModelGroups pin (Frontier) does not cover. Update the pin in the same PR.`
+        )
+      );
     }
 
     expect(problems).toEqual([]);

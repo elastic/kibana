@@ -121,10 +121,23 @@ export const ensureFloorServiceAccount = async (
     if (httpStatus(error) !== 409) throw error;
   }
   // A concurrent create lists the account before its credential exists, so wait for it.
+  let accounts: ServiceAccountEntry[] = [];
   for (let attempt = 0; attempt < CONFLICT_LOOKUP_ATTEMPTS; attempt++) {
     await sleep(CONFLICT_LOOKUP_DELAY_MS);
-    const found = findUsable(await listServiceAccounts(fetch), name);
+    accounts = await listServiceAccounts(fetch);
+    const found = findUsable(accounts, name);
     if (found) return found.id;
+  }
+  // Still not usable after the wait: say why, since "never became usable" would send the reader
+  // after a race when the account was simply disabled or cannot be assumed.
+  const unusable = accounts.find((account) => account.name === name);
+  if (unusable && !unusable.enabled) {
+    throw new Error(`Service account "${name}" (${unusable.id}) exists but is disabled.`);
+  }
+  if (unusable && !unusable.assumable) {
+    throw new Error(
+      `Service account "${name}" (${unusable.id}) exists but cannot be assumed by the worker.`
+    );
   }
   throw new Error(`Service account "${name}" was created concurrently but never became usable.`);
 };
@@ -539,10 +552,25 @@ export const enableFloorWorker = async ({
       // Enabling again starts a scheduled run; it must not outlive the restore.
       if (reEnable && workflowId) await settleEnableTimeRun({ fetch, log, workflowId, spaceId });
     } else {
+      // The server applies a settings write before it disables, so one combined write that fails
+      // leaves the worker enabled. Turn it off first (no revision, so it cannot conflict), then put
+      // the settings back while it is off.
       await patchFloorWorker(fetch, spaceId, { enabled: false });
-      log.info(
-        `[ad-worker] floor worker disabled again (revision ${String(current.settingsRevision)})`
-      );
+      if (!before.settings) {
+        log.info('[ad-worker] floor worker disabled again (it had no settings to restore)');
+      } else {
+        try {
+          await patchFloorSettingsWithRetry(fetch, spaceId, { settings: before.settings });
+        } catch (error) {
+          throw new Error(
+            `Could not put back the floor worker settings in "${spaceId}": the worker was left disabled but its eval settings remain (${errorMessage(
+              error
+            )}).`,
+            { cause: error }
+          );
+        }
+        log.info('[ad-worker] floor worker disabled again and its settings restored');
+      }
     }
     if (!workflowId) return;
     const { yaml } = await readFloorWorkflow({ fetch, spaceId, floorWorkflowId: workflowId });

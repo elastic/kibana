@@ -80,12 +80,14 @@ describe('isParkedAtGate', () => {
 });
 
 describe('collectReviewArtifact', () => {
+  const log = { info: jest.fn(), warning: jest.fn(), debug: jest.fn() };
   const collect = (execution: WorkflowExecutionDto, fetch: HttpHandler = jest.fn()) =>
     collectReviewArtifact({
       client: {} as AttackDiscoveryWorkerClient,
       review: execution,
       fetch,
       spaceId: 'space',
+      log: log as unknown as ToolingLog,
     });
 
   const reviewWithEmit = (output: Record<string, unknown>): WorkflowExecutionDto =>
@@ -130,6 +132,19 @@ describe('collectReviewArtifact', () => {
     expect(artifacts.investigationOpened).toBe(false);
   });
 
+  it('keeps the artifact and warns when the conversation lookup fails with a non-404 error', async () => {
+    const artifacts = await collect(
+      reviewWithEmit({ investigation_id: 'inv-1', investigation_opened: true, verdict: 'benign' }),
+      conversationFetch(Object.assign(new Error('boom'), { status: 500 }))
+    );
+    expect(artifacts).toMatchObject({
+      executionId: 'review-1',
+      investigationId: 'inv-1',
+      investigationLookupFailed: true,
+    });
+    expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('inv-1'));
+  });
+
   it('counts the self-reported flag when there was no id to look up', async () => {
     const fetch = jest.fn();
     const artifacts = await collect(
@@ -137,6 +152,7 @@ describe('collectReviewArtifact', () => {
       fetch as unknown as HttpHandler
     );
     expect(artifacts.investigationOpened).toBe(true);
+    expect(artifacts).not.toHaveProperty('investigationLookupFailed');
     expect(fetch).not.toHaveBeenCalled();
   });
 });
@@ -753,6 +769,23 @@ describe('collectWorkerArtifacts', () => {
       })
     );
   });
+
+  it.each(['', ' , '])(
+    'falls back to the persisted documents uuids when the runner reported %p',
+    async (reported) => {
+      const count = jest.fn().mockResolvedValue({ count: 1 });
+      const artifacts = await collectEvicted(
+        evictedRun([step('emit_result', 'completed', { execution_uuids: reported })]),
+        count
+      );
+      expect(artifacts.indexedAttackCount).toBe(1);
+      expect(count).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: { terms: { 'kibana.alert.rule.execution.uuid': ['u-doc'] } },
+        })
+      );
+    }
+  );
 
   const emptySearch = () =>
     jest.fn().mockResolvedValue({ hits: { hits: [] } }) as unknown as jest.Mock;

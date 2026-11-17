@@ -598,7 +598,7 @@ describe('AttackDiscoveryWorkerClient.runReview', () => {
         inputs: { batch_size: 50 },
         maxWaitMs: 1000,
       })
-    ).rejects.toThrow(/literal inputs of an earlier run.*interrupted/);
+    ).rejects.toThrow(/missing or literal inputs.*interrupted/);
     expect(kibana.calls.some(({ method }) => method === 'PUT')).toBe(false);
   });
 

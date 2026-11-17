@@ -14,6 +14,7 @@ import {
   scoreBlindReviewAbstained,
   scoreDiscoveriesPersisted,
   scoreFingerprintsDispatched,
+  scoreInvestigationOpened,
   scoreOutcomeReported,
   scoreOneReviewPerAttack,
   scoreParkedAtGate,
@@ -181,6 +182,19 @@ describe('scoreReviewsSettled', () => {
     expect(result.explanation).toContain(error);
   });
 
+  it.each(['timed_out', 'skipped', 'cancelled'])(
+    'fails a review whose execution ended %s',
+    (status) => {
+      const result = scoreReviewsSettled(
+        expected,
+        artifacts({ reviews: [review({ parked: false, status, error: 'never ran' })] })
+      );
+      expect(result.score).toBe(0);
+      expect(result.label).toBeUndefined();
+      expect(result.explanation).toContain(`review ${status}`);
+    }
+  );
+
   it('still fails a failed review whose error is not a refusal', () => {
     const result = scoreReviewsSettled(
       expected,
@@ -293,6 +307,47 @@ describe('scoreReviewsSettled', () => {
     );
     expect(result.score).toBe(0);
     expect(result.explanation).toContain('timed out after 5m');
+  });
+});
+
+describe('scoreInvestigationOpened', () => {
+  it('is N/A, not a pass, when the conversation could not be read', () => {
+    const result = scoreInvestigationOpened(
+      expected,
+      artifacts({
+        reviews: [review({ investigationOpened: true, investigationLookupFailed: true })],
+      })
+    );
+    expect(result).toEqual({
+      score: null,
+      label: 'N/A',
+      explanation: expect.stringContaining('could not be read'),
+    });
+  });
+
+  it('names the unreadable reviews when the verified ones pass', () => {
+    const result = scoreInvestigationOpened(
+      expected,
+      artifacts({
+        reviews: [
+          review({ attackDiscoveryId: 'attack-1' }),
+          review({ attackDiscoveryId: 'attack-2', investigationLookupFailed: true }),
+        ],
+      })
+    );
+    expect(result.score).toBe(1);
+    expect(result.explanation).toContain('attack-1: Investigation opened');
+    expect(result.explanation).toContain('unverified: attack-2');
+  });
+
+  it('still passes a verified Investigation and fails a missing one', () => {
+    expect(scoreInvestigationOpened(expected, artifacts({ reviews: [review()] })).score).toBe(1);
+    expect(
+      scoreInvestigationOpened(
+        expected,
+        artifacts({ reviews: [review({ investigationOpened: false })] })
+      ).score
+    ).toBe(0);
   });
 });
 

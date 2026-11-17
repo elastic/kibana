@@ -142,7 +142,7 @@ const isModelRefusal = (error: string | undefined): boolean =>
   error !== undefined && MODEL_REFUSAL_PATTERN.test(error);
 
 // `skipped` is terminal too: the engine sets it when a child never ran (concurrency drop, queue
-// full), so nothing was analysed.
+// full), so nothing was analysed. A review execution that ends in any of these never settled.
 const FAILED_ANALYSIS_STATUSES: readonly string[] = ['failed', 'cancelled', 'timed_out', 'skipped'];
 
 /** Set when the review's FP/TP analysis child ended without completing. */
@@ -158,10 +158,10 @@ const analysisFailureOf = (
 };
 
 /**
- * Every review completed or parked at the gate within the wait; one that ran out of time, failed
- * or was cancelled fails. A review that failed because the model refused (see
- * `MODEL_REFUSAL_PATTERN`) is a `MODEL_FAULT`, reported but not gating. The review snapshot is
- * read before teardown cancels a parked review.
+ * Every review completed or parked at the gate within the wait; one that ran out of time, failed,
+ * was cancelled, timed out in the engine or was skipped fails. A review that failed because the
+ * model refused (see `MODEL_REFUSAL_PATTERN`) is a `MODEL_FAULT`, reported but not gating. The
+ * review snapshot is read before teardown cancels a parked review.
  */
 export const scoreReviewsSettled: CodeScorer = (_expected, artifacts) =>
   foldReviews(
@@ -174,7 +174,7 @@ export const scoreReviewsSettled: CodeScorer = (_expected, artifacts) =>
           })`
         );
       }
-      if (review.status !== 'failed' && review.status !== 'cancelled') {
+      if (!FAILED_ANALYSIS_STATUSES.includes(review.status)) {
         // The review completes even when its analysis child failed (verdict `failed`), so the
         // child's own outcome is checked here.
         const analysisFailure = analysisFailureOf(review);
@@ -357,15 +357,30 @@ export const scoreOneReviewPerAttack: CodeScorer = (_expected, artifacts) => {
     : fail(`${unmatched} unmatched attacks but ${distinct} distinct attacks reviewed`);
 };
 
-export const scoreInvestigationOpened: CodeScorer = (_expected, artifacts) =>
-  foldReviews(
+const UNREADABLE_INVESTIGATION =
+  'the Investigation conversation could not be read, so it is unverified';
+
+export const scoreInvestigationOpened: CodeScorer = (_expected, artifacts) => {
+  const result = foldReviews(
     artifacts.reviews,
     (review) =>
-      review.investigationOpened
+      // The flag then rests on the workflow's own report, which this check exists to verify.
+      review.investigationLookupFailed
+        ? notApplicable(UNREADABLE_INVESTIGATION)
+        : review.investigationOpened
         ? pass('Investigation opened')
         : fail('no Investigation exists for this attack'),
-    'no review ran'
+    // Only an unreadable conversation makes a review N/A here, so that is why the fold came up empty.
+    artifacts.reviews.length > 0 ? UNREADABLE_INVESTIGATION : 'no review ran'
   );
+  // The fold drops N/A reviews, so a pass would not show that some were never verified.
+  const unverified = artifacts.reviews
+    .filter(({ investigationLookupFailed }) => investigationLookupFailed)
+    .map(({ attackDiscoveryId, executionId }) => attackDiscoveryId ?? executionId);
+  return result.score === 1 && unverified.length > 0
+    ? { ...result, explanation: `${result.explanation}; unverified: ${unverified.join(', ')}` }
+    : result;
+};
 
 /** Verdict against gold. A review with no verdict yet is a gap, not a wrong answer. */
 export const scoreVerdictMatchesGold: CodeScorer = (expected, artifacts) => {
@@ -556,12 +571,6 @@ export const stageUsageMetadata = (artifacts: WorkerArtifacts): Record<string, u
 };
 
 /**
- * Each stage that produced output ran on the endpoint the cohort planned. Generation is read
- * from the persisted discoveries' `api_config.connector_id`, the review from the connector id
- * in the usage of the analysis child's `analyze` step. A stage whose model cannot be read fails:
- * an unverifiable model is not the planned one. A stage with no output is N/A.
- */
-/**
  * The one `unresolvedReason` that is a telemetry gap, not a wrong or unreadable model: the step
  * ran and reported usage, but the engine never stamped its connector id. Nothing else in the
  * execution doc carries a connector id for the step, so the model is genuinely unresolvable from
@@ -569,6 +578,12 @@ export const stageUsageMetadata = (artifacts: WorkerArtifacts): Record<string, u
  */
 export const STEP_USAGE_TELEMETRY_GAP = `step ${FP_TP_ANALYZE_STEP_ID} usage carried no connector id`;
 
+/**
+ * Each stage that produced output ran on the endpoint the cohort planned. Generation is read
+ * from the persisted discoveries' `api_config.connector_id`, the review from the connector id
+ * in the usage of the analysis child's `analyze` step. A stage whose model cannot be read fails:
+ * an unverifiable model is not the planned one. A stage with no output is N/A.
+ */
 export const scoreStageModelResolved =
   ({ generationModel, reviewModel }: StageRouting): CodeScorer =>
   (_expected, artifacts) => {
@@ -590,7 +605,7 @@ export const scoreStageModelResolved =
       }
     }
 
-    /** Reviews whose model is unresolvable because the telemetry gap, not the run. */
+    /** Reviews whose model is unresolvable because of the telemetry gap, not the run. */
     const telemetryGapped: string[] = [];
     artifacts.reviews.forEach((review) => {
       const label = review.attackDiscoveryId ?? review.executionId;

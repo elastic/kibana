@@ -183,10 +183,12 @@ const runAll = async (label: string, steps: Array<() => Promise<void>>): Promise
 
 /**
  * Prepares the stack for a run and returns what to undo:
+ * - creates and prepares the eval space (settings, alerts index, anonymization fields, Entity
+ *   Store) first, since the workflow and feature reads below are space-scoped; this is idempotent and not undone;
  * - asserts the runner and review workflows are installed with the step ids this suite reads,
- *   and that no leftover routing is in place, all before anything is changed;
- * - prepares the eval space (settings, alerts index, anonymization fields, Entity Store);
- * - routes the AlertZero inference features for the cohort and restores them afterwards.
+ *   and that no leftover routing is in place, before anything destructive happens;
+ * - pauses Entity Store extraction, routes the AlertZero inference features for the cohort and
+ *   enables the floor worker, and restores all of it afterwards.
  * A failure after the stack is touched restores it before the error is rethrown, and a failed
  * restore throws rather than logs, so a run never reports success over a dirty stack.
  */

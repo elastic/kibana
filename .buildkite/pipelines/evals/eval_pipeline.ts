@@ -306,13 +306,12 @@ function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
   // Run eval suite(s) when their GH label(s) are present (see `evals.suites.json`).
   const evalSuites = readEvalsSuiteMetadata();
   const runAllEvals = parsedLabels.includes('evals:all');
+  const isSelectedByOwnLabel = (suite: EvalsSuiteMetadataEntry): boolean => {
+    const labels = suite.ciLabels?.length ? suite.ciLabels : [`evals:${suite.id}`];
+    return labels.some((label) => parsedLabels.includes(label));
+  };
   const selectedEvalSuites = (
-    runAllEvals
-      ? evalSuites
-      : evalSuites.filter((suite) => {
-          const labels = suite.ciLabels?.length ? suite.ciLabels : [`evals:${suite.id}`];
-          return labels.some((label) => parsedLabels.includes(label));
-        })
+    runAllEvals ? evalSuites : evalSuites.filter(isSelectedByOwnLabel)
   ).filter((suite) => !skippedSuiteIds.has(suite.id));
   // Model filtering (models:* labels): none => skip (explicit selection required);
   // `models:<group>` => run those groups; aliases (e.g. `models:weekly-eis-models`) expand.
@@ -370,12 +369,15 @@ function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
     return null;
   }
 
-  // Without models:* labels, skip (running all models is expensive) — except suites with
-  // `defaultModelGroups` or `requiredModelGroups`, which use their pinned defaults.
+  // Without models:* labels, skip (running all models is expensive) — except suites that pin a
+  // cheap `defaultModelGroups`. A suite with only `requiredModelGroups` pins expensive tier models,
+  // so it runs unlabelled only when its own ciLabel selected it, never through a bare `evals:all`.
   const suitesWithDefaults = selectedEvalSuites.filter(
     (suite) =>
       (suite.defaultModelGroups && suite.defaultModelGroups.length > 0) ||
-      (suite.requiredModelGroups && suite.requiredModelGroups.length > 0)
+      (suite.requiredModelGroups &&
+        suite.requiredModelGroups.length > 0 &&
+        isSelectedByOwnLabel(suite))
   );
   if (!hasGlobalModelSelection && suitesWithDefaults.length === 0) {
     return null;
