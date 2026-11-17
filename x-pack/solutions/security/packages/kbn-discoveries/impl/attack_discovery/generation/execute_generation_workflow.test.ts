@@ -1162,6 +1162,44 @@ describe('executeGenerationWorkflow', () => {
       );
     });
 
+    it('names the failed install in the fetch error when the install failed', async () => {
+      const fetchError = new Error('index_not_found_exception');
+      mockFetchAnonymizationFields.mockRejectedValue(fetchError);
+
+      const result = run({ ensureSpaceResources: jest.fn().mockResolvedValue(false) });
+
+      await expect(result).rejects.toThrow(
+        'Could not install the AI Assistant resources for this space, so its anonymization fields could not be read: index_not_found_exception'
+      );
+      await expect(result).rejects.toHaveProperty('cause', fetchError);
+    });
+
+    it('names the failed install in the fetch error when the install rejects', async () => {
+      mockFetchAnonymizationFields.mockRejectedValue(new Error('index_not_found_exception'));
+
+      await expect(
+        run({ ensureSpaceResources: jest.fn().mockRejectedValue(new Error('cluster unavailable')) })
+      ).rejects.toThrow(
+        'Could not install the AI Assistant resources for this space, so its anonymization fields could not be read: index_not_found_exception'
+      );
+    });
+
+    it('rethrows the fetch error unchanged when the install succeeded', async () => {
+      const fetchError = new Error('index_not_found_exception');
+      mockFetchAnonymizationFields.mockRejectedValue(fetchError);
+
+      await expect(run({ ensureSpaceResources: jest.fn().mockResolvedValue(true) })).rejects.toBe(
+        fetchError
+      );
+    });
+
+    it('rethrows the fetch error unchanged when elastic_assistant is not available', async () => {
+      const fetchError = new Error('index_not_found_exception');
+      mockFetchAnonymizationFields.mockRejectedValue(fetchError);
+
+      await expect(run({ pluginsStart: {} })).rejects.toBe(fetchError);
+    });
+
     it('fetches the anonymization fields when elastic_assistant is not available', async () => {
       const logger = await run({ pluginsStart: {} });
 

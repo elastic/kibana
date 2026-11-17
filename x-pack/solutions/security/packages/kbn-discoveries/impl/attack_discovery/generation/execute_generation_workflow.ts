@@ -493,7 +493,7 @@ const handleGenerationFailure = async ({
 
 /**
  * A space that never used the AI Assistant has no anonymization fields data stream yet.
- * A failed install is only logged: the anonymization fields fetch then fails with its own error.
+ * A failed install is logged and the run continues; returns `false` only when the install failed.
  */
 const ensureAssistantSpaceResources = async ({
   elasticAssistant,
@@ -503,15 +503,18 @@ const ensureAssistantSpaceResources = async ({
   elasticAssistant: ElasticAssistantStart | undefined;
   logger: Logger;
   spaceId: string;
-}): Promise<void> => {
+}): Promise<boolean> => {
   try {
     if ((await elasticAssistant?.ensureSpaceResources(spaceId)) === false) {
       logger.warn(`Could not install the AI Assistant resources for space '${spaceId}'`);
+      return false;
     }
+    return true;
   } catch (error) {
     logger.warn(
       `Could not install the AI Assistant resources for space '${spaceId}': ${error.message}`
     );
+    return false;
   }
 };
 
@@ -667,7 +670,11 @@ export async function executeGenerationWorkflow({
     const { elasticAssistant } = pluginsStart as {
       elasticAssistant?: ElasticAssistantStart;
     };
-    await ensureAssistantSpaceResources({ elasticAssistant, logger, spaceId });
+    const resourcesInstalled = await ensureAssistantSpaceResources({
+      elasticAssistant,
+      logger,
+      spaceId,
+    });
 
     // The anonymization fields index is Kibana-owned configuration, not user data.
     // It is read with the internal user, as the AI Assistant `_find` route does, so
@@ -677,6 +684,17 @@ export async function executeGenerationWorkflow({
       esClient: coreStart.elasticsearch.client.asInternalUser,
       logger,
       spaceId,
+    }).catch((error: unknown) => {
+      // This error reaches the Worker's batch errors and the run step, where the log warning is not visible.
+      if (resourcesInstalled) {
+        throw error;
+      }
+
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(
+        `Could not install the AI Assistant resources for this space, so its anonymization fields could not be read: ${message}`,
+        { cause: error }
+      );
     });
 
     const hasProvidedAlerts = alerts != null && alerts.length > 0;
