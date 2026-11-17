@@ -8,6 +8,7 @@
 import type { RegisterEntityMaintainerConfig } from '@kbn/entity-store/server';
 import type { RunMetrics } from './instrumentation/run_metrics_tracker';
 import type { BuildLookupIndexResult } from './steps/build_lookup_index';
+import type { AlertSourceCounts } from './steps/tally_alert_sources';
 
 type EntityMaintainerRunSummary = Parameters<
   Parameters<NonNullable<RegisterEntityMaintainerConfig['run']>>[0]['telemetry']['report']
@@ -88,20 +89,61 @@ export const buildRiskScorePhase0EntityMaintainerRunSummary = ({
   };
 };
 
+const MAX_ALERT_SOURCES = 30;
+const MAX_SOURCE_NAME_LENGTH = 100;
+const OTHER_SOURCE = 'other';
+
+/**
+ * One entry per source, for the top sources by alert count: `scanned` is every alert from the
+ * source and `qualified` the ones scored. The rest is added up under `other`.
+ */
+export const buildAlertSources = (
+  alertSources: Readonly<AlertSourceCounts>
+): NonNullable<EntityMaintainerRunSummary['sources']> => {
+  const ranked = Object.entries(alertSources).sort(
+    ([nameA, a], [nameB, b]) =>
+      b.scored + b.unmatched - (a.scored + a.unmatched) || nameA.localeCompare(nameB)
+  );
+  const rest = { scored: 0, unmatched: 0 };
+  const entries: Array<{ id: string; scored: number; unmatched: number }> = [];
+  ranked.forEach(([source, counts], index) => {
+    if (index < MAX_ALERT_SOURCES) {
+      entries.push({ id: source.slice(0, MAX_SOURCE_NAME_LENGTH), ...counts });
+    } else {
+      rest.scored += counts.scored;
+      rest.unmatched += counts.unmatched;
+    }
+  });
+  if (rest.scored + rest.unmatched > 0) {
+    entries.push({ id: OTHER_SOURCE, ...rest });
+  }
+  return entries.map(({ id, scored, unmatched }) => ({
+    id,
+    scanned: scored + unmatched,
+    qualified: scored,
+    outcome: scored > 0 ? 'producing' : 'empty',
+  }));
+};
+
 /** Builds an entity-type summary whose funnel covers base-scoring entity-store outcomes and keeps create failures qualified rather than skipped. */
 export const buildRiskScoreEntityMaintainerRunSummary = ({
   entityType,
   metrics,
   stages,
+  alertSources,
 }: {
   entityType: string;
   metrics: RunMetrics;
   stages: RiskScoreFrameworkStageSummary[];
+  /** Alerts per source from base scoring; leaves `sources` out when absent or empty. */
+  alertSources?: Readonly<AlertSourceCounts>;
 }): EntityMaintainerRunSummary => {
   const skipped = metrics.scoresDroppedNotInStore - metrics.entitiesCreateFailed;
   const qualifiedBase = metrics.scoresCalculatedBase - skipped;
   const appliedBase = metrics.scoresWrittenEntityStoreBase + metrics.entitiesCreated;
   const failedBase = metrics.scoresFailedBase + metrics.entitiesCreateFailed;
+
+  const sources = alertSources ? buildAlertSources(alertSources) : [];
 
   // `droppedNotInStore` is reserved for write-time 404s; lookup misses are emitted separately
   // from `metrics.scoresMissingFromStoreBase` as `phase1_base_scoring.scoresMissingFromStore`.
@@ -115,6 +157,7 @@ export const buildRiskScoreEntityMaintainerRunSummary = ({
       skipped,
       failed: failedBase,
     },
+    ...(sources.length > 0 ? { sources } : {}),
     stages,
   };
 };
