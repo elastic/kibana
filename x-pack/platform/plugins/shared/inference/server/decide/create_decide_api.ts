@@ -31,6 +31,94 @@ interface DecisionEndpointsResponse {
   endpoints?: Array<{ inference_id: string }>;
 }
 
+/** The given inference id, else the first `decision` endpoint the cluster lists. */
+const resolveInferenceId = async ({
+  esClient,
+  inferenceId,
+  abortSignal,
+}: {
+  esClient: ElasticsearchClient;
+  inferenceId?: string;
+  abortSignal?: AbortSignal;
+}): Promise<string> => {
+  if (inferenceId) {
+    return inferenceId;
+  }
+
+  const { endpoints = [] } = await esClient.transport.request<DecisionEndpointsResponse>(
+    { method: 'GET', path: '/_inference/decision/_all' },
+    { signal: abortSignal }
+  );
+  const [first] = endpoints;
+
+  if (!first) {
+    throw createInferenceRequestError('No decision inference endpoint on the cluster', 404);
+  }
+
+  return first.inference_id;
+};
+
+/** Maps Elasticsearch errors: a missing endpoint or task type is a 404 request error. */
+const toInferenceError = ({
+  error,
+  abortSignal,
+}: {
+  error: Error;
+  abortSignal?: AbortSignal;
+}): Error => {
+  if (isInferenceError(error)) {
+    return error;
+  }
+
+  if (abortSignal?.aborted || error instanceof errors.RequestAbortedError) {
+    return createInferenceRequestAbortedError();
+  }
+
+  if (error instanceof errors.ResponseError) {
+    const { statusCode, body } = error.meta;
+
+    if (statusCode === 404 || (statusCode === 400 && JSON.stringify(body).includes('task_type'))) {
+      return createInferenceRequestError(error.message, 404);
+    }
+
+    return createInferenceProviderError(error.message, { status: statusCode ?? undefined });
+  }
+
+  return createInferenceProviderError(error.message);
+};
+
+/** Sends the questions to the `decision` inference task and reads the answers back. */
+const invokeDecision = async ({
+  esClient,
+  options: { input, inferenceId: requestedInferenceId, abortSignal },
+  questions,
+}: {
+  esClient: ElasticsearchClient;
+  options: DecideOptions;
+  questions: DecisionQuestion[];
+}): Promise<DecideResponse<{ answers: DecisionAnswer[] }>> => {
+  if (abortSignal?.aborted) {
+    throw createInferenceRequestAbortedError();
+  }
+
+  const inferenceId = await resolveInferenceId({
+    esClient,
+    inferenceId: requestedInferenceId,
+    abortSignal,
+  });
+
+  const body = await esClient.transport.request(
+    {
+      method: 'POST',
+      path: `/_inference/decision/${encodeURIComponent(inferenceId)}`,
+      body: { input, task_settings: { questions: toKeyedQuestions(questions) } },
+    },
+    { signal: abortSignal }
+  );
+
+  return { inferenceId, answers: parseDecisionResponse(body, questions) };
+};
+
 /**
  * Creates the `decide` API, which calls the Elasticsearch `decision` inference task as the
  * user `esClient` is scoped to.
@@ -42,76 +130,6 @@ export const createDecideApi = ({
   esClient: ElasticsearchClient;
   logger: Logger;
 }): DecideAPI => {
-  /** The given inference id, else the first `decision` endpoint the cluster lists. */
-  const resolveInferenceId = async (
-    inferenceId: string | undefined,
-    signal?: AbortSignal
-  ): Promise<string> => {
-    if (inferenceId) {
-      return inferenceId;
-    }
-
-    const { endpoints = [] } = await esClient.transport.request<DecisionEndpointsResponse>(
-      { method: 'GET', path: '/_inference/decision/_all' },
-      { signal }
-    );
-    const [first] = endpoints;
-
-    if (!first) {
-      throw createInferenceRequestError('No decision inference endpoint on the cluster', 404);
-    }
-
-    return first.inference_id;
-  };
-
-  /** Maps Elasticsearch errors: a missing endpoint or task type is a 404 request error. */
-  const toInferenceError = (error: Error, signal?: AbortSignal): Error => {
-    if (isInferenceError(error)) {
-      return error;
-    }
-
-    if (signal?.aborted || error instanceof errors.RequestAbortedError) {
-      return createInferenceRequestAbortedError();
-    }
-
-    if (error instanceof errors.ResponseError) {
-      const { statusCode, body } = error.meta;
-
-      if (
-        statusCode === 404 ||
-        (statusCode === 400 && JSON.stringify(body).includes('task_type'))
-      ) {
-        return createInferenceRequestError(error.message, 404);
-      }
-
-      return createInferenceProviderError(error.message, { status: statusCode ?? undefined });
-    }
-
-    return createInferenceProviderError(error.message);
-  };
-
-  const ask = async (
-    { input, inferenceId: requestedInferenceId, abortSignal }: DecideOptions,
-    questions: DecisionQuestion[]
-  ): Promise<DecideResponse<{ answers: DecisionAnswer[] }>> => {
-    if (abortSignal?.aborted) {
-      throw createInferenceRequestAbortedError();
-    }
-
-    const inferenceId = await resolveInferenceId(requestedInferenceId, abortSignal);
-
-    const body = await esClient.transport.request(
-      {
-        method: 'POST',
-        path: `/_inference/decision/${encodeURIComponent(inferenceId)}`,
-        body: { input, task_settings: { questions: toKeyedQuestions(questions) } },
-      },
-      { signal: abortSignal }
-    );
-
-    return { inferenceId, answers: parseDecisionResponse(body, questions) };
-  };
-
   function decide<const Q extends DecisionQuestion>(
     options: DecideOptions,
     question: Q
@@ -137,7 +155,7 @@ export const createDecideApi = ({
         const startedAt = Date.now();
 
         try {
-          const { inferenceId, answers } = await ask(options, questions);
+          const { inferenceId, answers } = await invokeDecision({ esClient, options, questions });
 
           span?.setAttributes({ 'elastic.decision.inference_id': inferenceId });
 
@@ -152,7 +170,7 @@ export const createDecideApi = ({
             ? { inferenceId, answer: answers[0] }
             : { inferenceId, answers };
         } catch (error) {
-          const inferenceError = toInferenceError(error, options.abortSignal);
+          const inferenceError = toInferenceError({ error, abortSignal: options.abortSignal });
 
           logger.debug(
             `Decision [${questionTypes}] failed after ${Date.now() - startedAt}ms: ${
