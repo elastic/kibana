@@ -81,7 +81,7 @@ export interface OnlineEvalScoreEvent {
   explanations_included: boolean;
   explanations_dropped?: number;
   scores_dropped?: number;
-  investigation_started_at: string;
+  investigation_started_at?: string;
   investigation_ended_at?: string;
   scoring_duration_ms: number;
 }
@@ -296,7 +296,11 @@ const onlineEvalScoreSchema: RootSchema<OnlineEvalScoreEvent> = {
   },
   investigation_started_at: {
     type: 'date',
-    _meta: { description: 'When the scored investigation run started.' },
+    _meta: {
+      description:
+        'When the scored investigation run started. For a follow-up scored after its round, when the round started, if it was saved.',
+      optional: true,
+    },
   },
   investigation_ended_at: {
     type: 'date',

@@ -282,6 +282,92 @@ describe('scoreOnlineEvalsRoundStepDefinition', () => {
     });
   });
 
+  describe('a follow-up with a confirmed root cause, scored from the optimize hook', () => {
+    const FOLLOW_UP = {
+      ...ROUND,
+      id: 'round-follow-up',
+      started_at: '2026-10-29T10:30:00.000Z',
+      trace_id: 'trace-round-follow-up',
+      input: { message: 'It was the payments-db failover, not the deploy.' },
+    };
+    const FOLLOW_UP_INPUT = {
+      round_id: 'round-follow-up',
+      round_kind: 'follow_up',
+      evaluator_set: 'reference_based',
+      evaluators: [{ name: 'nightshift_alert_outcome_rca_accuracy' }],
+      confirmed_root_cause: 'The payments-db failover at 09:58 dropped every connection.',
+      investigation_started_at: undefined,
+      investigation_ended_at: undefined,
+      investigation_execution_id: undefined,
+      entry_point: undefined,
+    };
+
+    it('grades the first round against the confirmed root cause', async () => {
+      const evaluate = jest
+        .fn<ReturnType<EvaluateFn>, Parameters<EvaluateFn>>()
+        .mockResolvedValue([okResult('nightshift_alert_outcome_rca_accuracy')]);
+      const { run, reportOnlineEvalScore } = setup({ evaluate, rounds: [ROUND, FOLLOW_UP] });
+
+      await expect(run(FOLLOW_UP_INPUT)).resolves.toMatchObject({ output: { scored: true } });
+
+      expect(evaluate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          evidence: {
+            round: expect.objectContaining({
+              input: { message: 'Why did the checkout alert fire?' },
+              response: { message: 'A bad deploy of the payments service.' },
+            }),
+            reference_data: {
+              alert_outcome: 'The payments-db failover at 09:58 dropped every connection.',
+            },
+          },
+        })
+      );
+      const event = reportOnlineEvalScore.mock.calls[0][0];
+      expect(event).toMatchObject({
+        round_id: 'round-follow-up',
+        round_trace_id: 'trace-round-follow-up',
+        round_kind: 'follow_up',
+        graded_report: 'first_round',
+        evaluator_set: 'reference_based',
+        investigation_started_at: '2026-10-29T10:30:00.000Z',
+      });
+      expect(JSON.stringify(event)).not.toContain('payments-db failover');
+    });
+
+    // The post-execution hook can run before Agent Builder saves the round it follows.
+    it('scores a round that is not saved yet, on the trace the hook passed', async () => {
+      const evaluate = jest
+        .fn<ReturnType<EvaluateFn>, Parameters<EvaluateFn>>()
+        .mockResolvedValue([okResult('nightshift_alert_outcome_rca_accuracy')]);
+      const { run, reportOnlineEvalScore } = setup({ evaluate, rounds: [ROUND] });
+
+      await expect(
+        run({ ...FOLLOW_UP_INPUT, round_trace_id: 'trace-from-hook' })
+      ).resolves.toMatchObject({ output: { scored: true } });
+
+      expect(evaluate).toHaveBeenCalledTimes(1);
+      const event = reportOnlineEvalScore.mock.calls[0][0];
+      expect(event).toMatchObject({
+        round_id: 'round-follow-up',
+        round_trace_id: 'trace-from-hook',
+      });
+      expect(event).not.toHaveProperty('investigation_started_at');
+    });
+
+    it('still needs the round saved when no ground truth comes with it', async () => {
+      const { run, evaluate, reportOnlineEvalsStepFailed } = setup({ rounds: [ROUND] });
+
+      await expect(run({ ...FOLLOW_UP_INPUT, confirmed_root_cause: undefined })).resolves.toEqual({
+        output: { scored: false, skip_reason: 'scoring_failed' },
+      });
+      expect(evaluate).not.toHaveBeenCalled();
+      expect(reportOnlineEvalsStepFailed).toHaveBeenCalledWith(
+        expect.objectContaining({ step: 'score', code: 'round_not_found' })
+      );
+    });
+  });
+
   it('passes no ground truth for an initial round', async () => {
     const evaluate = jest
       .fn<ReturnType<EvaluateFn>, Parameters<EvaluateFn>>()

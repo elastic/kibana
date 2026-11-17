@@ -9,6 +9,7 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { createConversationNotFoundError } from '@kbn/agent-builder-common';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
+import { ALERT_RECOVERED_MESSAGE_PREFIX } from '../client/build_investigation_message';
 import { NO_CAUSAL_VERDICT } from '../decision_trees/causal_check';
 import { prepareReinforcementTurn } from '../decision_trees/register_decision_trees';
 import { createOptimizeModel } from '../lib/create_optimize_model';
@@ -207,6 +208,7 @@ describe('decisionTreePrepareStepDefinition', () => {
           tree_count: 1,
           turn_kind: 'feedback_reinforcement',
           skipped: false,
+          round_kind: 'follow_up',
           opened_ids: ['symptom:checkout-latency'],
         },
       });
@@ -216,7 +218,18 @@ describe('decisionTreePrepareStepDefinition', () => {
       conversationsGet.mockResolvedValue({ rounds: [savedRound('round-1')] });
       jest.mocked(prepareReinforcementTurn).mockResolvedValue({ skipped: true });
 
-      await expect(run(investigatorRound)).resolves.toEqual(skipped);
+      await expect(run(investigatorRound)).resolves.toEqual({
+        output: { ...skipped.output, round_kind: 'follow_up' },
+      });
+    });
+
+    // The optimize hook gets no run context, so the recovery message the client wrote tells it.
+    it('is an alert recovery when the client wrote the recovery message', async () => {
+      conversationsGet.mockResolvedValue({ rounds: [savedRound('round-1')] });
+
+      await expect(
+        run({ ...investigatorRound, prompt: `${ALERT_RECOVERED_MESSAGE_PREFIX} checkout-latency` })
+      ).resolves.toMatchObject({ output: { round_kind: 'alert_recovery' } });
     });
   });
 
@@ -301,6 +314,28 @@ describe('decisionTreePrepareStepDefinition', () => {
       await run(followUp);
 
       await expect(preparedWith().checkCausal!()).resolves.toEqual(NO_CAUSAL_VERDICT);
+    });
+
+    // As in Deductive, online evals grades the first round against a confirmed cause, so a
+    // follow-up with no tree to reinforce still hands its verdict on.
+    it('reports the verdict of a follow-up with no tree to build on', async () => {
+      jest.mocked(prepareReinforcementTurn).mockResolvedValue({
+        skipped: true,
+        verdict: { ...verdict, causalConfirmed: true },
+      });
+
+      await expect(run(followUp)).resolves.toEqual({
+        output: {
+          ...skipped.output,
+          round_kind: 'follow_up',
+          causal_check: {
+            is_feedback: true,
+            causal_confirmed: true,
+            causal_summary: verdict.causalSummary,
+            learning: verdict.learning,
+          },
+        },
+      });
     });
 
     it('reports the verdict with the prepared turn', async () => {
@@ -460,21 +495,28 @@ describe('decisionTreePrepareStepDefinition', () => {
         );
       });
 
-      it('reports skipped_no_trees when a follow-up has no editable trees', async () => {
-        jest.mocked(prepareReinforcementTurn).mockResolvedValue({ skipped: true });
+      it('reports the verdict of a follow-up with no editable trees, with no trees counted', async () => {
+        jest.mocked(prepareReinforcementTurn).mockImplementation(async ({ checkCausal }) => ({
+          skipped: true,
+          verdict: await checkCausal!(),
+        }));
 
-        await expect(run(followUp)).resolves.toEqual(skipped);
+        await expect(run(followUp)).resolves.toMatchObject({ output: { skipped: true } });
 
         expect(reportDecisionTreeCausalCheck).toHaveBeenCalledWith(
           expect.objectContaining({
-            outcome: 'skipped_no_trees',
+            outcome: 'unconfirmed_feedback',
+            is_feedback: true,
+            causal_confirmed: false,
             tree_count: 0,
             opened_tree_count: 0,
+            duration_ms: expect.any(Number),
           })
         );
+        expect(setAttribute).toHaveBeenCalledWith('nightshift.skipped', true);
         expect(setAttribute).toHaveBeenCalledWith(
           'nightshift.causal_check.outcome',
-          'skipped_no_trees'
+          'unconfirmed_feedback'
         );
       });
 

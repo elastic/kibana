@@ -133,6 +133,11 @@ describe('nightshift agent optimize workflow', () => {
         type: 'nightshift.decisionTreePrepare',
       }),
       expect.objectContaining({
+        name: 'score_follow_up_online_evals',
+        type: 'nightshift.onlineEvals.score',
+        'on-failure': { continue: true },
+      }),
+      expect.objectContaining({
         name: 'resolve_model',
         type: 'nightshift.resolveModel',
         if: '${{ steps.prepare_turn.output.skipped == false }}',
@@ -288,11 +293,34 @@ describe('nightshift agent optimize workflow', () => {
       'optimize_wiki',
       'optimize_memory',
       'prepare_turn',
+      'score_follow_up_online_evals',
       'resolve_model',
       'ensure_reinforcement_agent',
       'reinforce_decision_trees',
       'score_memory_online_evals',
     ]);
+  });
+
+  // As in Deductive, a follow-up's confirmed causal check is the ground truth the first round is
+  // graded against. It runs before reinforcement, so a failed reinforcement can't skip it.
+  it("grades the first round against a follow-up's confirmed root cause", () => {
+    const names = workflow.steps.map((step) => step.name);
+    const score = workflow.steps.find((step) => step.name === 'score_follow_up_online_evals');
+
+    expect(names.indexOf('score_follow_up_online_evals')).toBe(names.indexOf('prepare_turn') + 1);
+    expect(score?.if).toBe(
+      "${{ steps.prepare_turn.output.round_kind == 'follow_up' and steps.prepare_turn.output.causal_check.causal_confirmed == true and steps.prepare_turn.output.causal_check.causal_summary != '' }}"
+    );
+    expect(score?.with).toEqual({
+      investigation_id: '{{ inputs.conversation_id }}',
+      round_id: '{{ inputs.round_id }}',
+      round_kind: 'follow_up',
+      graded_report: 'first_round',
+      evaluator_set: 'reference_based',
+      evaluators: [{ name: 'nightshift_alert_outcome_rca_accuracy' }],
+      confirmed_root_cause: '${{ steps.prepare_turn.output.causal_check.causal_summary }}',
+      round_trace_id: '${{ inputs.round_trace_id }}',
+    });
   });
 
   // A swallowed failure here reports a green round that silently reinforced nothing, which is

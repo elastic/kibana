@@ -10,24 +10,18 @@ import type { EventTypeOpts, RootSchema } from '@kbn/core/server';
 export const NIGHTSHIFT_DECISION_TREE_CAUSAL_CHECK_EVENT = 'nightshift-decision-tree-causal-check';
 
 /**
- * Mutually-exclusive funnel outcome for a follow-up round entering decision-tree preparation:
+ * Mutually-exclusive funnel outcome for a follow-up round entering decision-tree preparation. A
+ * follow-up with no editable trees is checked too (`tree_count` 0), and reinforces nothing:
  * - `confirmed`: feedback stated a root cause and tool results in the transcript backed it up
- *   (reinforces the causal path with verified markers).
+ *   (reinforces the causal path with verified markers, and online evals grades the first round).
  * - `unconfirmed_feedback`: feedback stated a root cause, but tool results did not substantiate it
  *   (extends the tree without claiming causality).
  * - `not_feedback`: follow-up was a question, acknowledgement, or non-causal update
  *   (extends the tree without claiming causality).
- * - `skipped_no_trees`: follow-up belonged to an investigation with no editable decision trees
- *   (skips both the causal-check LLM call and the reinforcement agent).
  * - `failed`: causal-check model resolution, inference call, or timeout failed, or the workflow
  *   execution was cancelled mid-check (falls back to extending the tree without claiming causality).
  */
-export type CausalCheckOutcome =
-  | 'confirmed'
-  | 'unconfirmed_feedback'
-  | 'not_feedback'
-  | 'skipped_no_trees'
-  | 'failed';
+export type CausalCheckOutcome = 'confirmed' | 'unconfirmed_feedback' | 'not_feedback' | 'failed';
 
 /**
  * Coded failure reason when `outcome` is `failed`. Raw error messages are never sent. `cancelled`
@@ -84,7 +78,7 @@ const decisionTreeCausalCheckSchema: RootSchema<DecisionTreeCausalCheckEvent> = 
     type: 'keyword',
     _meta: {
       description:
-        'Funnel outcome: confirmed, unconfirmed_feedback, not_feedback, skipped_no_trees, or failed.',
+        'Funnel outcome: confirmed, unconfirmed_feedback, not_feedback, or failed. Events before follow-ups without trees were checked may also be skipped_no_trees.',
     },
   },
   is_feedback: {

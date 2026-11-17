@@ -61,7 +61,10 @@ const inputSchema = lazySchema(() =>
       .string()
       .max(100)
       .refine(isDate, 'Must be a date')
-      .describe('When the scored investigation run started.'),
+      .optional()
+      .describe(
+        'When the scored investigation run started. Defaults to when the scored round started.'
+      ),
     investigation_ended_at: z
       .string()
       .max(100)
@@ -84,6 +87,19 @@ const inputSchema = lazySchema(() =>
       .max(256)
       .optional()
       .describe('Rule type of the alert that was investigated.'),
+    confirmed_root_cause: z
+      .string()
+      .min(1)
+      .max(10_000)
+      .optional()
+      .describe(
+        "The ground truth for the reference-based judges, such as a follow-up's confirmed causal check. Without it, an alert recovery's conclusion is the ground truth. With it, the scored round need not be saved yet."
+      ),
+    round_trace_id: z
+      .string()
+      .max(128)
+      .optional()
+      .describe("Trace id of the scored round, for when it isn't saved yet."),
   })
 );
 
@@ -108,11 +124,11 @@ const getErrorMessage = (error: unknown) =>
 const getGradedRound = (
   input: ScoreInput,
   rounds: ConversationRound[],
-  round: ConversationRound
+  round: ConversationRound | undefined
 ): ConversationRound => {
   if (input.graded_report === 'first_round') {
     // A recovery that is the first round, or read before it was saved, would grade itself.
-    if (input.round_kind === 'alert_recovery' && rounds[0].id === round.id) {
+    if (input.round_kind === 'alert_recovery' && rounds[0].id === round?.id) {
       throw new OnlineEvalsStepError(
         'invalid_input',
         'Cannot grade an alert recovery against itself: it is the first round'
@@ -120,7 +136,7 @@ const getGradedRound = (
     }
     return rounds[0];
   }
-  if (input.graded_report === 'current' && input.round_kind !== 'alert_recovery') {
+  if (input.graded_report === 'current' && input.round_kind !== 'alert_recovery' && round) {
     return round;
   }
   throw new OnlineEvalsStepError(
@@ -141,7 +157,11 @@ const readRound = async ({
   input: ScoreInput;
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
   request: KibanaRequest;
-}): Promise<{ agentId: string; round: ConversationRound; gradedRound: ConversationRound }> => {
+}): Promise<{
+  agentId: string;
+  round: ConversationRound | undefined;
+  gradedRound: ConversationRound;
+}> => {
   const agentBuilder = getAgentBuilder();
   if (!agentBuilder) {
     throw new OnlineEvalsStepError(
@@ -156,7 +176,12 @@ const readRound = async ({
       throw new OnlineEvalsStepError('investigation_unavailable', getErrorMessage(error));
     });
   const round = conversation.rounds.find(({ id }) => id === input.round_id);
-  if (!round) {
+  // A post-execution hook can score a round before it is saved: the ground truth comes with it.
+  const canScoreUnsaved =
+    input.confirmed_root_cause !== undefined &&
+    input.graded_report === 'first_round' &&
+    conversation.rounds.length > 0;
+  if (!round && !canScoreUnsaved) {
     throw new OnlineEvalsStepError(
       'round_not_found',
       `Round "${input.round_id}" not found in the investigation`
@@ -286,7 +311,10 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
         });
         // A round resumed after human-in-the-loop has one trace per execution; the latest is the
         // one whose response the user sees.
-        const roundTraceId = Array.isArray(round.trace_id) ? round.trace_id.at(-1) : round.trace_id;
+        const roundTraceId =
+          (Array.isArray(round?.trace_id) ? round?.trace_id.at(-1) : round?.trace_id) ||
+          input.round_trace_id;
+        const investigationStartedAt = input.investigation_started_at ?? round?.started_at;
         const judgeConnectorId = await resolveJudge(resolveJudgeConnectorId, request);
         // Joins the round's trace so the judges show up in the conversation trace flyout.
         const { results, failedEvaluators } = await withNightshiftBackgroundSpan(
@@ -313,7 +341,8 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
               evidence: buildOnlineEvalsEvidence({
                 round: gradedRound,
                 alertOutcome:
-                  input.round_kind === 'alert_recovery' ? round.response.message : undefined,
+                  input.confirmed_root_cause ??
+                  (input.round_kind === 'alert_recovery' ? round?.response.message : undefined),
               }),
               judgeConnectorId,
               evaluate,
@@ -340,7 +369,7 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
             ...(input.entry_point ? { entry_point: input.entry_point } : {}),
             ...(input.alert_rule_type ? { alert_rule_type: input.alert_rule_type } : {}),
             judge_connector_id: judgeConnectorId,
-            investigation_started_at: input.investigation_started_at,
+            ...(investigationStartedAt ? { investigation_started_at: investigationStartedAt } : {}),
             ...(input.investigation_ended_at
               ? { investigation_ended_at: input.investigation_ended_at }
               : {}),
