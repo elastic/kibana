@@ -160,6 +160,7 @@ describe('AwsOnboardingCredentialsCard', () => {
     expect(screen.getByTestId('awsOnboardingCredentialsCardLaunchExpiry')).toHaveTextContent(
       `Link expires at ${expectedTime}`
     );
+    expect(screen.queryByTestId('awsOnboardingCredentialsCardDownload')).not.toBeInTheDocument();
   });
 
   it('renders the launch link without an expiry line when expiresAt is invalid', async () => {

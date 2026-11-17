@@ -79,7 +79,11 @@ export const createSubmitSettingsHandler =
 
 const BOOTSTRAP_STACK_NAME = 'elastic-bootstrap-onboarding';
 
-const BOOTSTRAP_FALLBACK_ERROR_CODES = ['render.unknown_workflow', 'render.unknown_blueprint'];
+// The first code is the account-render endpoint's; the second is kept in case the render endpoint's code ever reaches this route.
+const BOOTSTRAP_FALLBACK_ERROR_CODES = [
+  'account_render.unknown_workflow',
+  'render.unknown_workflow',
+];
 
 /** True when the provisioner cannot serve the blueprint at all (older deployment or unknown workflow), as opposed to failing on this request. */
 const canFallBackToTemplate = (error: unknown): boolean =>

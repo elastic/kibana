@@ -80,9 +80,9 @@ describe('getBootstrapLaunchHandler', () => {
   it('answers download when the provisioner does not know the bootstrap workflow', async () => {
     mockedRender.mockRejectedValueOnce(
       new IacProvisionerRequestError(
-        'request rejected with status 422, render.unknown_workflow: unknown workflow',
+        'request rejected with status 422, account_render.unknown_workflow: unknown workflow',
         422,
-        ['render.unknown_workflow']
+        ['account_render.unknown_workflow']
       )
     );
 

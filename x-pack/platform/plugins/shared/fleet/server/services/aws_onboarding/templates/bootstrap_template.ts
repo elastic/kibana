@@ -9,7 +9,11 @@ export const BOOTSTRAP_TEMPLATE_FILENAME = 'kibana-managed-onboarding-bootstrap.
 
 /**
  * The IaCP blueprint is the source of truth for this template. This is the fallback copy served
- * when the provisioner cannot render it, kept in sync by hand with the YAML next to it.
+ * when the provisioner cannot render it, kept in sync by hand with the YAML next to it. The IAM
+ * content of the user and both roles matches the blueprint statement for statement; the known,
+ * intentional differences are cosmetic only: the ProvisioningRoleArn output is always emitted here
+ * ("not created (partially-managed)") while the blueprint makes it conditional, and the stack,
+ * parameter and secret descriptions differ in wording.
  */
 export const BOOTSTRAP_TEMPLATE_YAML = `AWSTemplateFormatVersion: "2010-09-09"
 Description: >-
