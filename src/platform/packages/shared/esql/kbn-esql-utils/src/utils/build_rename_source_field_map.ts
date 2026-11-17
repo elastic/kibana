@@ -190,7 +190,7 @@ export function buildRenameSourceFieldMapFromCommands(
  */
 export function buildRenameSourceFieldMap(query: string): Map<string, string> {
   const { root } = parseEsqlCached(query);
-  // Resolve renames within each LET before combining it with the outer pipeline.
+  // Resolve renames within each nested pipeline before combining it with the outer pipeline.
   const summaryContext = createQuerySummaryContext(root, query, (commands, source, context) => ({
     ...getQuerySummaryFromCommands(commands, source, context),
     renamedColumnsPairs: new Set(buildRenameSourceFieldMapFromCommands(commands, source, context)),

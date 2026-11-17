@@ -10,12 +10,20 @@ import { synth } from '@elastic/esql';
 import type { ESQLCommandSummaryContext } from '../types';
 import { summary } from './summary';
 
+const getSubquerySummary = jest.fn<
+  ReturnType<ESQLCommandSummaryContext['getSubquerySummary']>,
+  Parameters<ESQLCommandSummaryContext['getSubquerySummary']>
+>();
 const context: ESQLCommandSummaryContext = {
   namedSubqueries: [],
-  getNamedSubquerySummary: () => ({ newColumns: new Set() }),
+  getSubquerySummary,
 };
 
 describe('FROM > summary', () => {
+  beforeEach(() => {
+    getSubquerySummary.mockReset();
+  });
+
   it('returns an empty list if METADATA is not present', () => {
     const result = summary(synth.cmd`FROM index`, '', context);
     expect(result).toEqual({
@@ -35,6 +43,7 @@ describe('FROM > summary', () => {
   });
 
   it('collects columns from simple subquery', () => {
+    getSubquerySummary.mockReturnValue({ newColumns: new Set(['computed']) });
     const result = summary(
       synth.cmd`FROM index1, (FROM index2 | EVAL computed = price * 2)`,
       '',
@@ -48,6 +57,9 @@ describe('FROM > summary', () => {
   });
 
   it('collects columns from multiple subqueries', () => {
+    getSubquerySummary
+      .mockReturnValueOnce({ newColumns: new Set(['a']) })
+      .mockReturnValueOnce({ newColumns: new Set(['b']) });
     const result = summary(
       synth.cmd`FROM index1, (FROM index2 | EVAL a = 1), (FROM index3 | EVAL b = 2)`,
       '',

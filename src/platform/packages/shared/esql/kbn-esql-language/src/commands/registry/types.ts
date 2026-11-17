@@ -20,7 +20,7 @@ import type {
 } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
-import type { ESQLLocation, ESQLProperNode } from '@elastic/esql/types';
+import type { ESQLAstQueryExpression, ESQLLocation, ESQLProperNode } from '@elastic/esql/types';
 import type { SupportedDataType } from '../definitions/types';
 import type { NamedSubquery } from '../definitions/utils/named_subqueries';
 import type { EditorExtensions } from './options/recommended_queries';
@@ -180,12 +180,15 @@ export interface ESQLCommandSummary {
   aggregates?: Set<FieldSummary>;
 }
 
-/** Provides the visible LETs and their summaries. */
+/** Provides the visible LETs and summaries of nested pipelines. */
 export interface ESQLCommandSummaryContext {
   /** The LETs that the sources of this pipeline can point to. */
   namedSubqueries: readonly NamedSubquery[];
-  /** Summarizes a LET using only previously declared bindings. */
-  getNamedSubquerySummary: (namedSubquery: NamedSubquery) => ESQLCommandSummary;
+  /** Summarizes a nested pipeline with the bindings visible to its sources. */
+  getSubquerySummary: (
+    subquery: ESQLAstQueryExpression,
+    namedSubqueries: readonly NamedSubquery[]
+  ) => ESQLCommandSummary;
 }
 
 export interface FieldSummary {

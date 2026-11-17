@@ -8,7 +8,6 @@
  */
 
 import type { ESQLCommand, ESQLAstForkCommand } from '@elastic/esql/types';
-import { esqlCommandRegistry } from '../../../..';
 import type { ESQLCommandSummary, ESQLCommandSummaryContext, FieldSummary } from '../types';
 
 export const summary = (
@@ -16,6 +15,7 @@ export const summary = (
   query: string,
   context: ESQLCommandSummaryContext
 ): ESQLCommandSummary => {
+  const { namedSubqueries, getSubquerySummary } = context;
   const forkCommand = command as ESQLAstForkCommand;
   const branches = forkCommand.args.map((parens) => parens.child);
 
@@ -26,32 +26,26 @@ export const summary = (
   const allGroupings = new Set<FieldSummary>();
 
   for (const branch of branches) {
-    for (const branchCommand of branch.commands) {
-      const commandDef = esqlCommandRegistry.getCommandByName(branchCommand.name);
+    const branchSummary = getSubquerySummary(branch, namedSubqueries);
 
-      if (commandDef?.methods.summary) {
-        const branchSummary = commandDef.methods.summary(branchCommand, query, context);
+    if (branchSummary.newColumns) {
+      branchSummary.newColumns.forEach((col) => allNewColumns.add(col));
+    }
 
-        if (branchSummary.newColumns) {
-          branchSummary.newColumns.forEach((col) => allNewColumns.add(col));
-        }
+    if (branchSummary.renamedColumnsPairs) {
+      branchSummary.renamedColumnsPairs.forEach((pair) => allRenamedColumnsPairs.add(pair));
+    }
 
-        if (branchSummary.renamedColumnsPairs) {
-          branchSummary.renamedColumnsPairs.forEach((pair) => allRenamedColumnsPairs.add(pair));
-        }
+    if (branchSummary.metadataColumns) {
+      branchSummary.metadataColumns.forEach((col) => allMetadataColumns.add(col));
+    }
 
-        if (branchSummary.metadataColumns) {
-          branchSummary.metadataColumns.forEach((col) => allMetadataColumns.add(col));
-        }
+    if (branchSummary.aggregates) {
+      branchSummary.aggregates.forEach((aggregate) => allAggregates.add(aggregate));
+    }
 
-        if (branchSummary.aggregates) {
-          branchSummary.aggregates.forEach((aggregate) => allAggregates.add(aggregate));
-        }
-
-        if (branchSummary.grouping) {
-          branchSummary.grouping.forEach((group) => allGroupings.add(group));
-        }
-      }
+    if (branchSummary.grouping) {
+      branchSummary.grouping.forEach((group) => allGroupings.add(group));
     }
   }
 

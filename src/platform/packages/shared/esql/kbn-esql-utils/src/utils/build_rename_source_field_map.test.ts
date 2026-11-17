@@ -165,6 +165,22 @@ describe('buildRenameSourceFieldMap', () => {
     });
   });
 
+  describe('nested pipelines', () => {
+    it.each([
+      'FROM (FROM logs | RENAME bytes AS size | RENAME size AS total)',
+      'FROM logs | FORK (RENAME bytes AS size | RENAME size AS total) (LIMIT 1)',
+    ])('resolves nested RENAME chains to the source field: %s', (query) => {
+      expect(resolve('total', query)).toBe('bytes');
+    });
+
+    it.each([
+      'FROM (FROM logs | RENAME bytes AS size | EVAL size = size * 2)',
+      'FROM logs | FORK (RENAME bytes AS size | EVAL size = size * 2) (LIMIT 1)',
+    ])('does not resolve a nested RENAME overwritten by EVAL: %s', (query) => {
+      expect(resolve('size', query)).toBe('size');
+    });
+  });
+
   describe('LET bindings', () => {
     it('resolves a RENAME inside a referenced binding to the source field', () => {
       const query = 'LET a = (FROM logs | RENAME bytes AS size); FROM a';

@@ -84,7 +84,7 @@ export interface ICommandMethods<TContext = ICommandContext> {
    * Returns useful information about the command.
    * @param command The parsed Abstract Syntax Tree.
    * @param query The ESQL query string.
-   * @param context The LETs that the command's sources can point to.
+   * @param context The visible LETs and the callback for summarizing nested pipelines.
    * @returns A summary object containing details about the command.
    */
   summary?: (

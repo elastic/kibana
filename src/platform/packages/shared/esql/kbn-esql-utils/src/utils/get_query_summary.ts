@@ -12,7 +12,6 @@ import { Parser } from '@elastic/esql';
 import {
   esqlCommandRegistry,
   getNamedSubqueries,
-  getNamedSubqueriesAvailableTo,
   type ESQLCommandSummary,
   type ESQLCommandSummaryContext,
   type FieldSummary,
@@ -95,29 +94,29 @@ export function getQuerySummaryFromCommands(
   };
 }
 
-/** Builds a context that caches each LET's summary using only previously declared bindings. */
+/** Builds a context that caches nested pipeline summaries within their visible LET scope. */
 export const createQuerySummaryContext = (
   { header }: ESQLAstQueryExpression,
   query: string,
-  summarizeBinding = getQuerySummaryFromCommands
+  summarizePipeline = getQuerySummaryFromCommands
 ): ESQLCommandSummaryContext => {
   const namedSubqueries = getNamedSubqueries(header);
-  const summaries = new Map<NamedSubquery, ESQLCommandSummary>();
+  const summaries = new Map<ESQLAstQueryExpression, ESQLCommandSummary>();
 
   const createScope = (scope: readonly NamedSubquery[]): ESQLCommandSummaryContext => ({
     namedSubqueries: scope,
-    getNamedSubquerySummary: (namedSubquery) => {
-      const cached = summaries.get(namedSubquery);
+    getSubquerySummary: (subquery, visibleNamedSubqueries) => {
+      const cached = summaries.get(subquery);
       if (cached) {
         return cached;
       }
 
-      const summary = summarizeBinding(
-        namedSubquery.query.commands,
+      const summary = summarizePipeline(
+        subquery.commands,
         query,
-        createScope(getNamedSubqueriesAvailableTo(namedSubqueries, namedSubquery))
+        createScope(visibleNamedSubqueries)
       );
-      summaries.set(namedSubquery, summary);
+      summaries.set(subquery, summary);
       return summary;
     },
   });
