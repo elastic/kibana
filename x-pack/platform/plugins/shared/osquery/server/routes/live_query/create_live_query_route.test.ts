@@ -169,7 +169,11 @@ describe('createLiveQueryRoute', () => {
       createOsqueryContext({ coreStart: start, racGet, getActiveSpace, workflowsExtensionsEnabled })
     );
 
-    const mockRequest = httpServerMock.createKibanaRequest({ body, headers });
+    const mockRequest = httpServerMock.createKibanaRequest({
+      body,
+      // repeated headers arrive as string[] at runtime; the mock type only models string
+      headers: headers as Record<string, string> | undefined,
+    });
     const mockResponse = httpServerMock.createResponseFactory();
 
     await getRouteHandler(mockRouter)({} as never, mockRequest, mockResponse);
