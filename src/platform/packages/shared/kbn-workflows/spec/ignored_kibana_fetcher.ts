@@ -129,7 +129,7 @@ const collectIgnoredKibanaFetcherOccurrencesFromContainers = (
   }
 };
 
-/** Structural `WorkflowDiagnostic.path` values plus step type for ignored kibana `with.fetcher` settings. */
+/** Structural `WorkflowDiagnostic.path` values for ignored kibana `with.fetcher` settings. */
 export const collectIgnoredKibanaFetcherOccurrences = (
   steps: WorkflowYaml['steps'] | undefined
 ): IgnoredKibanaFetcherOccurrence[] => {
