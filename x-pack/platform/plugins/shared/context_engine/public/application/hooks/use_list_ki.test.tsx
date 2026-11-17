@@ -45,7 +45,7 @@ describe('useListKi', () => {
       expect(core.notifications.toasts.addError).toHaveBeenCalledWith(
         requestError,
         expect.objectContaining({
-          title: 'Unable to load Knowledge Indicators',
+          title: 'Unable to load Knowledge documents',
           toastMessage: 'Request timed out',
         })
       );

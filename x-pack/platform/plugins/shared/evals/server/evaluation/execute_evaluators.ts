@@ -21,6 +21,7 @@ import { awaitTraceReady, TraceReadinessError } from '../evaluators/trace_readin
 import type { EvidenceRound } from '../evaluators/evidence/types';
 import type { EvaluatorDefinition, TraceAccessor } from '../evaluators/types';
 import { resolveConnectorModel } from '../lib/resolve_connector_model';
+import { withEvalsJudgeChildSpan } from '../task_providers/tracing';
 import { EvaluationExecutionError } from './evaluation_execution_error';
 import { createModelUsageTally, MAX_ERROR_MESSAGE_LENGTH } from './model_usage_tally';
 
@@ -254,14 +255,18 @@ export const executeEvaluators = async (
         definition.kind === 'llm' && connectorId
           ? await getInferenceClient(connectorId, usageTally.callbacks)
           : undefined;
-      const result = await withEvaluatorNameBaggage(definition.name, () =>
+      const evaluate = () =>
         definition.evaluate({
           trace: traceAccessor,
           round,
           referenceData: parsedReferenceData.get(definition),
           inferenceClient,
           log: logger,
-        })
+        });
+      // Only LLM judges make model calls; naming their span keeps the `chat <model>` rows
+      // under each judge identifiable in the trace.
+      const result = await withEvaluatorNameBaggage(definition.name, () =>
+        definition.kind === 'llm' ? withEvalsJudgeChildSpan(definition.name, evaluate) : evaluate()
       );
 
       if (result.notApplicable) {
