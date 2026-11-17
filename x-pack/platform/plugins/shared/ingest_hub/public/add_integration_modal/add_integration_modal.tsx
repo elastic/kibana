@@ -7,53 +7,44 @@
 
 import React, { Suspense, useMemo } from 'react';
 import {
+  EuiLoadingSpinner,
   EuiModal,
   EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiLoadingSpinner,
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { MemoryRouter, Route, Routes } from '@kbn/shared-ux-router';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import {
-  FleetStatusProvider,
-  FlyoutContextProvider,
-  KibanaVersionContext,
-  LazyBrowseIntegrationsPage,
-} from '@kbn/fleet-plugin/public';
-import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
-import { getStartServices } from '../services/start_services';
+import { createMemoryHistory } from 'history';
+import { LazyEmbeddedIntegrationsProvider, LazyIntegrationsRoutes } from '@kbn/fleet-plugin/public';
 
 export interface AddIntegrationModalProps {
   onClose: () => void;
-  /** Called when an integration card is clicked, instead of navigating to Fleet. */
-  onIntegrationSelected?: (card: IntegrationCardItem) => void;
   /** "Add data" in Streams, "Add integration" elsewhere. */
   title?: string;
   subtitle?: string;
-  prereleaseIntegrationsEnabled?: boolean;
+  /** The catalogue opens here; e.g. `/detail/nginx/overview` to deep-link a package. */
+  initialPath?: string;
 }
 
-// The catalogue drives its filter state through the URL (path category, query params). A memory
-// router absorbs every push/replace so the filters keep working without touching the host's URL.
-const CATALOGUE_ROUTE = '/browse/:category?/:subcategory?';
 const CATALOGUE_ENTRY = '/browse';
 
 export function AddIntegrationModal({
   onClose,
-  onIntegrationSelected,
   title,
   subtitle,
-  prereleaseIntegrationsEnabled = false,
+  initialPath = CATALOGUE_ENTRY,
 }: AddIntegrationModalProps) {
-  const { core, deps, kibanaVersion } = getStartServices();
   const titleId = useGeneratedHtmlId({ prefix: 'ingestHubAddIntegrationModalTitle' });
-  const queryClient = useMemo(() => new QueryClient(), []);
+
+  // The Integrations pages drive their state through the URL. A memory history keeps all of that
+  // navigation — filters, package detail, the add-integration page — inside the modal, so the
+  // host's URL never changes and no Fleet routing code has to be made injectable.
+  const history = useMemo(
+    () => createMemoryHistory({ initialEntries: [initialPath] }),
+    [initialPath]
+  );
 
   return (
     <EuiModal
@@ -79,39 +70,11 @@ export function AddIntegrationModal({
         </div>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiThemeProvider>
-          <KibanaContextProvider
-            services={{
-              ...core,
-              cloud: deps.cloud,
-              fleet: deps.fleet,
-              spaces: deps.spaces,
-              authz: deps.fleet.authz,
-            }}
-          >
-            <QueryClientProvider client={queryClient}>
-              <FleetStatusProvider>
-                <FlyoutContextProvider>
-                  <KibanaVersionContext.Provider value={kibanaVersion}>
-                    <MemoryRouter initialEntries={[CATALOGUE_ENTRY]}>
-                      <Routes>
-                        <Route path={CATALOGUE_ROUTE}>
-                          <Suspense fallback={<EuiLoadingSpinner size="l" />}>
-                            <LazyBrowseIntegrationsPage
-                              prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled}
-                              embedded
-                              onIntegrationSelected={onIntegrationSelected}
-                            />
-                          </Suspense>
-                        </Route>
-                      </Routes>
-                    </MemoryRouter>
-                  </KibanaVersionContext.Provider>
-                </FlyoutContextProvider>
-              </FleetStatusProvider>
-            </QueryClientProvider>
-          </KibanaContextProvider>
-        </EuiThemeProvider>
+        <Suspense fallback={<EuiLoadingSpinner size="l" />}>
+          <LazyEmbeddedIntegrationsProvider history={history} onClose={onClose}>
+            <LazyIntegrationsRoutes />
+          </LazyEmbeddedIntegrationsProvider>
+        </Suspense>
       </EuiModalBody>
     </EuiModal>
   );

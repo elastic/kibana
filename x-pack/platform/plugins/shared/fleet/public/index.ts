@@ -140,6 +140,24 @@ export const LazyBrowseIntegrationsPage = lazy(() =>
 );
 export type { BrowseIntegrationsPageProps } from './applications/integrations/sections/epm/screens/browse_integrations';
 
+// Everything an embedded host needs to render the Integrations experience — catalogue, package
+// detail and the add-integration page — inside its own surface. The provider assembles Fleet's own
+// contexts, which a host cannot build itself: `FleetStartServices` is core plus every one of
+// Fleet's start dependencies.
+export const LazyEmbeddedIntegrationsProvider = lazy(() =>
+  import('./applications/integrations/embedded_app').then((module) => ({
+    default: module.EmbeddedIntegrationsProvider,
+  }))
+);
+export type { EmbeddedIntegrationsProviderProps } from './applications/integrations/embedded_app';
+
+// The Integrations routes themselves: /browse, /detail/:pkgkey, /detail/:pkgkey/add-integration.
+export const LazyIntegrationsRoutes = lazy(() =>
+  import('./applications/integrations/sections/epm').then((module) => ({
+    default: module.EPMApp,
+  }))
+);
+
 export { useGetDataStreams } from './hooks/use_request/data_stream';
 export {
   useGetPackagesQuery,

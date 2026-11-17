@@ -98,6 +98,7 @@ import type {
 } from './types';
 import { LazyCustomLogsAssetsExtension } from './lazy_custom_logs_assets_extension';
 import { setCustomIntegrations, setCustomIntegrationsStart } from './services/custom_integrations';
+import { setFleetAppServices } from './services/start_services';
 import { getFleetDeepLinks } from './deep_links';
 
 export type { FleetConfigType } from '../common/types';
@@ -169,6 +170,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
   private extensions: UIExtensionsStorage = {};
   private experimentalFeatures: ExperimentalFeatures;
   private storage = new Storage(localStorage);
+  private cloudSetup?: CloudSetup;
   private appUpdater$ = new Subject<AppUpdater>();
   private logger: Logger;
 
@@ -186,6 +188,8 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     const config = this.config;
     const kibanaVersion = this.kibanaVersion;
     const extensions = this.extensions;
+
+    this.cloudSetup = deps.cloud;
 
     // registerEventType is on AnalyticsServiceSetup (setup), not AnalyticsServiceStart (start).
     registerAwsOnboardingEvents(core.analytics);
@@ -395,6 +399,22 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
 
     // Set the custom integrations language clients
     setCustomIntegrationsStart(deps.customIntegrations);
+
+    // Integrations UI rendered inside another app (the Add integration modal) needs Fleet's own
+    // start services, which a host plugin cannot assemble; hold them for the embedded provider.
+    const cloud = this.cloudSetup && deps.cloud ? { ...this.cloudSetup, ...deps.cloud } : undefined;
+    setFleetAppServices({
+      startServices: {
+        ...core,
+        ...deps,
+        storage: this.storage,
+        cloud,
+        authz,
+      },
+      config: this.config,
+      kibanaVersion: this.kibanaVersion,
+      extensions: this.extensions,
+    });
 
     //  capabilities.fleetv2 returns fleet privileges and capabilities.fleet returns integrations privileges
     return {
