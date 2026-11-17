@@ -9,47 +9,51 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { RegisteredEntityDefinition } from '@kbn/entity-store/server';
 import { InventoryTypeDefinitionError } from '../inventory/errors/inventory_type_definition_error';
 import { probeSources } from '../inventory/executor';
-import type { SourceError } from '../inventory/executor';
+import type { ProbeResult, SourceError } from '../inventory/executor';
 import { getDynamicBlock, planSources } from '../inventory/generator';
 import type { QueryPlan } from '../inventory/generator';
 
+export interface SourceProbes {
+  /** The probe of each distinct source pattern, in source order. */
+  results: Map<string, ProbeResult>;
+  /** One entry per source whose probe failed. */
+  errors: SourceError[];
+  /** The patterns whose probe failed. */
+  failedPatterns: ReadonlySet<string>;
+}
+
 /**
  * Probes every source pattern, then plans one `FROM` query per source and a `TS` query before it
- * where the probe found a time-series index. A source whose probe failed is reported in
- * `probeErrors` and its pattern is in `failedPatterns`. Throws `InventoryDefinitionError` when
- * the definition cannot be planned.
+ * where the probe found a time-series index. Throws `InventoryDefinitionError` when the
+ * definition cannot be planned.
  */
 export const probeAndPlanSources = async (
   esClient: ElasticsearchClient,
   definition: RegisteredEntityDefinition,
   signal: AbortSignal | undefined
-): Promise<{
-  allPlans: QueryPlan[];
-  probeErrors: SourceError[];
-  failedPatterns: ReadonlySet<string>;
-}> => {
+): Promise<{ probes: SourceProbes; allPlans: QueryPlan[] }> => {
   const { sources } = getDynamicBlock(definition);
-  const probes = await probeSources(
+  const results = await probeSources(
     esClient,
     sources.map(({ indexPattern }) => indexPattern),
     { signal }
   );
-  const probeErrors: SourceError[] = [];
-  probes.forEach((probe, indexPattern) => {
+  const errors: SourceError[] = [];
+  results.forEach((probe, indexPattern) => {
     if (probe.failed) {
-      probeErrors.push({ indexPattern, status: probe.status, reason: probe.reason });
+      errors.push({ indexPattern, status: probe.status, reason: probe.reason });
     }
   });
-  const failedPatterns = new Set(probeErrors.map(({ indexPattern }) => indexPattern));
+  const failedPatterns = new Set(errors.map(({ indexPattern }) => indexPattern));
 
   const allPlans = planSources(
     definition,
     sources.map(({ indexPattern }) => {
-      const probe = probes.get(indexPattern);
+      const probe = results.get(indexPattern);
       return { hasTimeSeries: probe !== undefined && !probe.failed && probe.hasTimeSeries };
     })
   );
-  return { allPlans, probeErrors, failedPatterns };
+  return { probes: { results, errors, failedPatterns }, allPlans };
 };
 
 /**

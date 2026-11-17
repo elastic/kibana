@@ -45,26 +45,25 @@ describe('probeAndPlanSources', () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     answerProbes(esClient);
 
-    const { allPlans, probeErrors, failedPatterns } = await probeAndPlanSources(
-      esClient,
-      definition,
-      undefined
-    );
+    const { probes, allPlans } = await probeAndPlanSources(esClient, definition, undefined);
 
+    expect([...probes.results.keys()]).toEqual([KUBELET, STATE]);
     expect(allPlans.map(({ indexPattern, engine }) => ({ indexPattern, engine }))).toEqual([
       { indexPattern: KUBELET, engine: 'FROM' },
       { indexPattern: STATE, engine: 'FROM' },
     ]);
-    expect(probeErrors).toEqual([]);
-    expect(failedPatterns.size).toBe(0);
+    expect(probes.errors).toEqual([]);
+    expect(probes.failedPatterns.size).toBe(0);
   });
 
   it('plans a TS query before the FROM query of a pattern with a time-series index', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     answerProbes(esClient, { timeSeries: [KUBELET] });
 
-    const { allPlans } = await probeAndPlanSources(esClient, definition, undefined);
+    const { probes, allPlans } = await probeAndPlanSources(esClient, definition, undefined);
 
+    expect(probes.results.get(KUBELET)).toEqual(expect.objectContaining({ hasTimeSeries: true }));
+    expect(probes.results.get(STATE)).toEqual(expect.objectContaining({ hasTimeSeries: false }));
     expect(allPlans.map(({ indexPattern, engine }) => ({ indexPattern, engine }))).toEqual([
       { indexPattern: KUBELET, engine: 'TS' },
       { indexPattern: KUBELET, engine: 'FROM' },
@@ -76,14 +75,12 @@ describe('probeAndPlanSources', () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     answerProbes(esClient, { fails: [STATE] });
 
-    const { allPlans, probeErrors, failedPatterns } = await probeAndPlanSources(
-      esClient,
-      definition,
-      undefined
-    );
+    const { probes, allPlans } = await probeAndPlanSources(esClient, definition, undefined);
 
-    expect(probeErrors).toEqual([expect.objectContaining({ indexPattern: STATE })]);
-    expect([...failedPatterns]).toEqual([STATE]);
+    expect(probes.results.get(KUBELET)).toEqual(expect.objectContaining({ failed: false }));
+    expect(probes.results.get(STATE)).toEqual(expect.objectContaining({ failed: true }));
+    expect(probes.errors).toEqual([expect.objectContaining({ indexPattern: STATE })]);
+    expect([...probes.failedPatterns]).toEqual([STATE]);
     // The columns of a failed source are still derived, so its plan is kept for the caller to drop.
     expect(allPlans.map(({ indexPattern }) => indexPattern)).toEqual([KUBELET, STATE]);
   });

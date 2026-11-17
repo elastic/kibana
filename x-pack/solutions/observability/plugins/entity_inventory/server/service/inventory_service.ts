@@ -283,24 +283,20 @@ export class InventoryService {
     signal: AbortSignal | undefined
   ): Promise<ListPlan> => {
     try {
-      const { probes, allPlans, probeErrors, failedPatterns } = await probeAndPlanSources(
-        this.esClient,
-        definition,
-        signal
-      );
+      const { probes, allPlans } = await probeAndPlanSources(this.esClient, definition, signal);
       const identity = resolveIdentityPlan(definition);
       const columns = buildColumns(definition, allPlans, identity);
       const allQueries = generateListQueries(definition, allPlans, window, planRowLimit(limit));
       const runnable = allPlans.flatMap((plan, position) =>
-        failedPatterns.has(plan.indexPattern) ? [] : [{ plan, query: allQueries[position] }]
+        probes.failedPatterns.has(plan.indexPattern) ? [] : [{ plan, query: allQueries[position] }]
       );
       return {
-        probes,
+        probes: probes.results,
         plans: runnable.map(({ plan }) => plan),
         identity,
         columns,
         queries: runnable.map(({ query }) => query),
-        probeErrors,
+        probeErrors: probes.errors,
       };
     } catch (error) {
       throw toTypeDefinitionError(this.logger, definition, error);

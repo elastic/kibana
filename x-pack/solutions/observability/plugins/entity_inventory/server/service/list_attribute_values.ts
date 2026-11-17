@@ -18,7 +18,7 @@ import {
 import type { GeneratedQuery, QueryPlan } from '../inventory/generator';
 import { noReadableIndexReason, partialValuesReason } from '../inventory/reasons';
 import type { ListAttributeValuesRequest } from '../inventory/types';
-import type { AttributeValuesResponse } from '../routes/types';
+import type { AttributeValuesResponse } from '../../common';
 import { probeAndPlanSources, toTypeDefinitionError } from './planning';
 
 /** What listing the values of an attribute reads from the plugin. */
@@ -69,11 +69,7 @@ const planAttributeValues = async (
   return Promise.all(
     suggesting.map(async (definition): Promise<AttributeValuesPlan> => {
       try {
-        const { allPlans, probeErrors, failedPatterns } = await probeAndPlanSources(
-          esClient,
-          definition,
-          signal
-        );
+        const { probes, allPlans } = await probeAndPlanSources(esClient, definition, signal);
         const allQueries = generateAttributeValuesQueries(definition, allPlans, {
           attribute,
           selections,
@@ -82,7 +78,7 @@ const planAttributeValues = async (
         });
         const runnable = allPlans.flatMap((plan, position) => {
           const query = allQueries[position];
-          return query === undefined || failedPatterns.has(plan.indexPattern)
+          return query === undefined || probes.failedPatterns.has(plan.indexPattern)
             ? []
             : [{ plan, query }];
         });
@@ -90,7 +86,7 @@ const planAttributeValues = async (
           type: definition.type,
           plans: runnable.map(({ plan }) => plan),
           queries: runnable.map(({ query }) => query),
-          probeErrors,
+          probeErrors: probes.errors,
         };
       } catch (error) {
         throw toTypeDefinitionError(logger, definition, error);

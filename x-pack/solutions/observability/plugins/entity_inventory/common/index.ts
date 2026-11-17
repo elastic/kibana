@@ -135,3 +135,14 @@ export interface PlanResponse {
   /** One entry per source whose probe failed. */
   errors: SourceError[];
 }
+
+/** The values a dropdown can offer, merged across the sources of the types in scope. */
+export interface AttributeValuesResponse {
+  /** The distinct values as the list shows them, sorted, at most the limit. */
+  values: string[];
+  /** The selected values that are not among the values offered. */
+  invalidSelections: string[];
+  /** True only when the limit left values out; a failed source is reported in `errors`. */
+  truncated: boolean;
+  errors: SourceError[];
+}
