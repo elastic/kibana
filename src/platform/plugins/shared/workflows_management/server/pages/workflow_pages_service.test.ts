@@ -19,9 +19,8 @@ import {
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
-import { pageRef } from './fake_page_store.mock';
+import { createPageAuditMock, pageRef } from './fake_page_store.mock';
 import { WORKFLOW_PAGE_SAVED_OBJECT_TYPE } from './page_saved_object';
-import type { WorkflowPageAuditLog } from './types';
 import { WorkflowPagePrivilegesError } from './workflow_page_privileges_error';
 import { WorkflowPagesService } from './workflow_pages_service';
 import { WorkflowPagesUnavailableError } from './workflow_pages_unavailable_error';
@@ -64,12 +63,7 @@ const setup = ({ authz }: { authz?: SecurityPluginStart['authz'] } = {}) => {
     authz,
     getSpaceId,
     assertWorkflowAccess,
-    audit: {
-      logPageLinkRead: jest.fn(),
-      logPageSecretRotated: jest.fn(),
-      logPageAccessChanged: jest.fn(),
-      logPageEnabledChanged: jest.fn(),
-    } as jest.Mocked<WorkflowPageAuditLog>,
+    audit: createPageAuditMock(),
     logger: loggingSystemMock.createLogger(),
   });
   return { service, start, core, savedObjects, assertWorkflowAccess, getSpaceId };

@@ -497,6 +497,8 @@ describe('WorkflowManagementAuditLog', () => {
         WorkflowManagementAuditActions.PAGE_ENABLED_CHANGE,
         { enabled: false },
       ],
+      ['logPageCreated', WorkflowManagementAuditActions.PAGE_CREATE, {}],
+      ['logPageRetired', WorkflowManagementAuditActions.PAGE_RETIRE, { reason: 'trigger_removed' }],
     ] as const)('%s records the page saved object', async (method, action, extra) => {
       const { audit, request, log } = await createAuditHarness();
       audit[method](request, { ...ref, ...extra } as never);
@@ -506,6 +508,23 @@ describe('WorkflowManagementAuditLog', () => {
           kibana: { saved_object: savedObject },
         })
       );
+    });
+
+    it('records the lifecycle as a creation and a deletion, with the retire reason', async () => {
+      const { audit, request, log } = await createAuditHarness();
+      audit.logPageCreated(request, ref);
+      audit.logPageRetired(request, { ...ref, reason: 'workflow_moved' });
+
+      expect(log.mock.calls[0][0].event.type).toEqual(['creation']);
+      expect(log.mock.calls[1][0].event.type).toEqual(['deletion']);
+      expect(log.mock.calls[1][0].message).toContain('[reason=workflow_moved]');
+    });
+
+    it('logs the system as the actor of a lifecycle event without a request', async () => {
+      const { audit, systemLog } = await createAuditHarness();
+      audit.logPageRetired(undefined, { ...ref, reason: 'workflow_deleted' });
+
+      expect(systemLog.mock.calls[0][0].message).toContain('System retired workflow page');
     });
 
     it('records the page saved object on a failure', async () => {

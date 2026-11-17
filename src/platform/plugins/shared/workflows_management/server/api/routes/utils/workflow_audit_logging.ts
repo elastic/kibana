@@ -15,7 +15,11 @@ import {
   getWorkflowPageSavedObjectId,
   WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
 } from '../../../pages/page_saved_object';
-import type { WorkflowPageAuditLog, WorkflowPageAuditParams } from '../../../pages/types';
+import type {
+  WorkflowPageAuditLog,
+  WorkflowPageAuditParams,
+  WorkflowPageRetireReason,
+} from '../../../pages/types';
 import type { WorkflowsService } from '../../workflows_management_service';
 
 /**
@@ -45,6 +49,8 @@ export const WorkflowManagementAuditActions = {
   PAGE_SECRET_ROTATE: 'workflow_page_secret_rotate',
   PAGE_ACCESS_CHANGE: 'workflow_page_access_change',
   PAGE_ENABLED_CHANGE: 'workflow_page_enabled_change',
+  PAGE_CREATE: 'workflow_page_create',
+  PAGE_RETIRE: 'workflow_page_retire',
 } as const;
 
 type WorkflowAuditEventType = 'access' | 'change' | 'creation' | 'deletion';
@@ -589,8 +595,26 @@ export class WorkflowManagementAuditLog implements WorkflowPageAuditLog {
     });
   }
 
+  logPageCreated(request: KibanaRequest | undefined, params: WorkflowPageAuditParams): void {
+    this.logPageEvent(request, WorkflowManagementAuditActions.PAGE_CREATE, 'creation', {
+      ...params,
+      verb: 'created',
+    });
+  }
+
+  logPageRetired(
+    request: KibanaRequest | undefined,
+    params: WorkflowPageAuditParams & { reason: WorkflowPageRetireReason }
+  ): void {
+    this.logPageEvent(request, WorkflowManagementAuditActions.PAGE_RETIRE, 'deletion', {
+      ...params,
+      verb: 'retired',
+      detail: `reason=${params.reason}`,
+    });
+  }
+
   private logPageEvent(
-    request: KibanaRequest,
+    request: KibanaRequest | undefined,
     action: string,
     eventType: WorkflowAuditEventType,
     params: WorkflowPageAuditParams & { verb: string; detail?: string }
@@ -599,10 +623,11 @@ export class WorkflowManagementAuditLog implements WorkflowPageAuditLog {
     const fields = `[workflowId=${workflowId}] [pageId=${pageId}] [space=${spaceId}]${
       detail ? ` [${detail}]` : ''
     }`;
+    const actor = this.getActor(request);
     const message =
       error !== undefined
-        ? `User failed to run "${verb}" on workflow page ${fields}`
-        : `User ${verb} workflow page ${fields}`;
+        ? `${actor} failed to run "${verb}" on workflow page ${fields}`
+        : `${actor} ${verb} workflow page ${fields}`;
     this.log(request, {
       ...createEvent(action, eventType, message, error),
       kibana: {

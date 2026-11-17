@@ -299,7 +299,7 @@ export class WorkflowCrudService {
           })
         : null);
     const write = async () => {
-      await this.retireDroppedPages(id, previous, document);
+      await this.retireDroppedPages(id, previous, document, options?.request);
       const response = await this.deps.workflowStorage.getClient().index({
         id,
         document,
@@ -746,7 +746,8 @@ export class WorkflowCrudService {
 
     await this.syncWorkflowPages(
       [{ id, definition: workflowData.definition }],
-      workflowData.spaceId
+      workflowData.spaceId,
+      request
     );
 
     return transformStorageDocumentToWorkflowDto(id, workflowData);
@@ -956,7 +957,8 @@ export class WorkflowCrudService {
         id,
         definition: workflowData.definition,
       })),
-      spaceId
+      spaceId,
+      request
     );
 
     return { created, failed };
@@ -1076,7 +1078,11 @@ export class WorkflowCrudService {
       shouldUpdateScheduler,
     });
 
-    await this.syncWorkflowPages([{ id, definition: finalData.definition }], finalData.spaceId);
+    await this.syncWorkflowPages(
+      [{ id, definition: finalData.definition }],
+      finalData.spaceId,
+      request
+    );
 
     return {
       response: {
@@ -1180,7 +1186,7 @@ export class WorkflowCrudService {
       (await isEntityAccessControlAdmin(this.deps.getCoreStart(), request, this.deps.authz));
     const deletionOptions = { ...options, profileId, request, isAdmin };
     const result = await this.deleteWorkflowsWithBindings(ids, spaceId, deletionOptions);
-    await this.retireWorkflowPages(result.successfulIds ?? [], spaceId);
+    await this.retireWorkflowPages(result.successfulIds ?? [], spaceId, request);
     return result;
   }
 
@@ -1346,7 +1352,8 @@ export class WorkflowCrudService {
    */
   private async syncWorkflowPages(
     written: Array<{ id: string; definition: WorkflowProperties['definition'] }>,
-    spaceId: string
+    spaceId: string,
+    request: KibanaRequest | undefined
   ): Promise<void> {
     const { pagesSystemClient } = this.deps;
     const ids = written.filter(({ definition }) => hasPageTrigger(definition)).map(({ id }) => id);
@@ -1371,6 +1378,7 @@ export class WorkflowCrudService {
             spaceId,
             definition,
             valid,
+            request,
           });
         } catch (error) {
           this.deps.logger.error(`Failed to sync the pages of workflow [${id}]`, { error });
@@ -1387,13 +1395,19 @@ export class WorkflowCrudService {
   private async retireDroppedPages(
     id: string,
     previous: WorkflowProperties | null | undefined,
-    next: WorkflowProperties
+    next: WorkflowProperties,
+    request: KibanaRequest | undefined
   ): Promise<void> {
     const { pagesSystemClient } = this.deps;
     if (!pagesSystemClient || !previous) return;
     // A move or a revive starts without the old pages.
     if (previous.deleted_at || previous.spaceId !== next.spaceId) {
-      await pagesSystemClient.retireWorkflowPages({ workflowIds: [id], spaceId: previous.spaceId });
+      await pagesSystemClient.retireWorkflowPages({
+        workflowIds: [id],
+        spaceId: previous.spaceId,
+        reason: previous.deleted_at ? 'workflow_revived' : 'workflow_moved',
+        request,
+      });
       return;
     }
     if (!next.valid) return; // An invalid save keeps its pages.
@@ -1410,14 +1424,24 @@ export class WorkflowCrudService {
       workflowId: id,
       spaceId: next.spaceId,
       definition: next.definition,
+      request,
     });
   }
 
-  private async retireWorkflowPages(workflowIds: string[], spaceId: string): Promise<void> {
+  private async retireWorkflowPages(
+    workflowIds: string[],
+    spaceId: string,
+    request: KibanaRequest | undefined
+  ): Promise<void> {
     const { pagesSystemClient } = this.deps;
     if (!pagesSystemClient || workflowIds.length === 0) return;
     try {
-      await pagesSystemClient.retireWorkflowPages({ workflowIds, spaceId });
+      await pagesSystemClient.retireWorkflowPages({
+        workflowIds,
+        spaceId,
+        reason: 'workflow_deleted',
+        request,
+      });
     } catch (error) {
       this.deps.logger.error(
         `Failed to retire the pages of deleted workflows [${workflowIds.join(', ')}]`,

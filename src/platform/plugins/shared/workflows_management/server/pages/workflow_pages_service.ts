@@ -74,6 +74,7 @@ export class WorkflowPagesService {
       logger,
       canEncrypt: this.canEncrypt,
       savedObjectsClient: internalClient,
+      audit,
     });
 
     const resolvePrivileges = async (

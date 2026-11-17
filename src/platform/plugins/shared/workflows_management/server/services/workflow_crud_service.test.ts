@@ -4767,6 +4767,7 @@ describe('workflow page lifecycle', () => {
         triggers: [expect.objectContaining({ type: 'page' })],
       }),
       valid: true,
+      request,
     });
   });
 
@@ -4918,6 +4919,7 @@ describe('workflow page lifecycle', () => {
         workflowId: 'wf-1',
         spaceId: 'default',
         definition: expect.objectContaining({ triggers: [{ type: 'manual' }] }),
+        request,
       });
       expect(pagesService.retireRemovedPages.mock.invocationCallOrder[0]).toBeLessThan(
         client.index.mock.invocationCallOrder[0]
@@ -5062,6 +5064,8 @@ describe('workflow page lifecycle', () => {
       expect(pagesService.retireWorkflowPages).toHaveBeenCalledWith({
         workflowIds: ['wf-1'],
         spaceId: 'space-a',
+        reason: 'workflow_moved',
+        request,
       });
       expect(pagesService.retireWorkflowPages.mock.invocationCallOrder[0]).toBeLessThan(
         client.index.mock.invocationCallOrder[0]
@@ -5079,6 +5083,8 @@ describe('workflow page lifecycle', () => {
       expect(pagesService.retireWorkflowPages).toHaveBeenCalledWith({
         workflowIds: ['wf-1'],
         spaceId: 'default',
+        reason: 'workflow_revived',
+        request,
       });
       expect(pagesService.retireWorkflowPages.mock.invocationCallOrder[0]).toBeLessThan(
         client.index.mock.invocationCallOrder[0]
@@ -5113,6 +5119,8 @@ describe('workflow page lifecycle', () => {
     expect(pagesService.retireWorkflowPages).toHaveBeenCalledWith({
       workflowIds: ['gone'],
       spaceId: 'default',
+      reason: 'workflow_deleted',
+      request,
     });
   });
 

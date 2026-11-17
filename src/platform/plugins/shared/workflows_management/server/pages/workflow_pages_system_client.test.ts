@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { KibanaRequest } from '@kbn/core/server';
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { WorkflowYaml } from '@kbn/workflows';
 import {
   createFakeStore,
+  createPageAuditMock,
   getStoredPage,
   noPageDefinition,
   pageDefinition,
@@ -26,14 +28,16 @@ const setup = ({ canEncrypt = true } = {}) => {
   const store = createFakeStore();
   const savedObjectsClient = store.createClient();
   const logger = loggingSystemMock.createLogger();
+  const audit = createPageAuditMock();
   const client = new WorkflowPagesSystemClientImpl({
     logger,
     canEncrypt,
     savedObjectsClient,
+    audit,
   });
   const sync = (
     definition: WorkflowYaml | null,
-    overrides: Partial<typeof ref> & { workflowCreatedAt?: string } = {}
+    overrides: Partial<typeof ref> & { workflowCreatedAt?: string; request?: KibanaRequest } = {}
   ) =>
     client.syncWorkflowPages({
       workflowId: overrides.workflowId ?? ref.workflowId,
@@ -41,6 +45,7 @@ const setup = ({ canEncrypt = true } = {}) => {
       spaceId: overrides.spaceId ?? ref.spaceId,
       definition,
       valid: true,
+      request: overrides.request,
     });
   const storedPage = (pageRef = ref) => getStoredPage(store, pageRef);
   /** Puts a page online with a known secret, the way the request client would. */
@@ -55,7 +60,7 @@ const setup = ({ canEncrypt = true } = {}) => {
       enabled: true,
     };
   };
-  return { client, store, savedObjectsClient, logger, sync, storedPage, putOnline };
+  return { client, store, savedObjectsClient, logger, audit, sync, storedPage, putOnline };
 };
 
 describe('WorkflowPagesSystemClient', () => {
@@ -196,6 +201,68 @@ describe('WorkflowPagesSystemClient', () => {
     });
   });
 
+  describe('audit', () => {
+    const request = httpServerMock.createKibanaRequest();
+
+    it('audits a created page with the request that caused it', async () => {
+      const { audit, sync } = setup();
+      await sync(pageDefinition(), { request });
+      expect(audit.logPageCreated).toHaveBeenCalledWith(request, ref);
+    });
+
+    it.each([
+      ['trigger_removed', () => noPageDefinition, {}],
+      ['stale_workflow', () => pageDefinition(), { workflowCreatedAt: '2026-02-01T00:00:00.000Z' }],
+    ] as const)('audits a retire with %s', async (reason, definition, overrides) => {
+      const { audit, sync } = setup();
+      await sync(pageDefinition());
+
+      await sync(definition(), { ...overrides, request });
+
+      expect(audit.logPageRetired).toHaveBeenCalledWith(request, { ...ref, reason });
+    });
+
+    it('audits a failed retire as a failure, and throws', async () => {
+      const { audit, client, savedObjectsClient, sync } = setup();
+      await sync(pageDefinition());
+      jest.mocked(savedObjectsClient.bulkDelete).mockResolvedValueOnce({
+        statuses: [
+          {
+            id: getWorkflowPageSavedObjectId(ref),
+            type: 'workflow-page',
+            success: false,
+            error: { error: 'Internal Server Error', message: 'boom', statusCode: 500 },
+          },
+        ],
+      });
+
+      await expect(
+        client.retireWorkflowPages({
+          workflowIds: [ref.workflowId],
+          spaceId: ref.spaceId,
+          reason: 'workflow_deleted',
+          request,
+        })
+      ).rejects.toThrow('Failed to retire workflow pages');
+      expect(audit.logPageRetired).toHaveBeenCalledWith(request, {
+        ...ref,
+        reason: 'workflow_deleted',
+        error: new Error('boom'),
+      });
+    });
+
+    it('audits a failed create as a failure', async () => {
+      const { audit, savedObjectsClient, sync } = setup();
+      jest.mocked(savedObjectsClient.create).mockRejectedValueOnce(new Error('boom'));
+
+      await expect(sync(pageDefinition(), { request })).rejects.toThrow('boom');
+      expect(audit.logPageCreated).toHaveBeenCalledWith(request, {
+        ...ref,
+        error: new Error('boom'),
+      });
+    });
+  });
+
   describe('retireRemovedPages', () => {
     it('retires only the pages whose trigger the definition dropped', async () => {
       const { client, sync, store } = setup();
@@ -244,7 +311,11 @@ describe('WorkflowPagesSystemClient', () => {
       const { client, savedObjectsClient } = setup();
       const workflowIds = Array.from({ length: 2_001 }, (_, index) => `workflow-${index}`);
 
-      await client.retireWorkflowPages({ workflowIds, spaceId: 'default' });
+      await client.retireWorkflowPages({
+        workflowIds,
+        spaceId: 'default',
+        reason: 'workflow_deleted',
+      });
 
       expect(savedObjectsClient.find).toHaveBeenCalledTimes(3);
     });
@@ -257,6 +328,7 @@ describe('WorkflowPagesSystemClient', () => {
       await client.retireWorkflowPages({
         workflowIds: ['workflow-1', 'workflow-2'],
         spaceId: 'default',
+        reason: 'workflow_deleted',
       });
 
       expect(storedPage()).toBeUndefined();
@@ -265,7 +337,11 @@ describe('WorkflowPagesSystemClient', () => {
 
     it('does nothing for an empty list', async () => {
       const { client, savedObjectsClient } = setup();
-      await client.retireWorkflowPages({ workflowIds: [], spaceId: 'default' });
+      await client.retireWorkflowPages({
+        workflowIds: [],
+        spaceId: 'default',
+        reason: 'workflow_deleted',
+      });
       expect(savedObjectsClient.find).not.toHaveBeenCalled();
     });
   });

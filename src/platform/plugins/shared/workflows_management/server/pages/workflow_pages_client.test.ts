@@ -11,13 +11,14 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   createFakeStore,
+  createPageAuditMock,
   getStoredPage,
   pageDefinition,
   pageRef,
   WORKFLOW_CREATED_AT,
 } from './fake_page_store.mock';
 import { getWorkflowPageSavedObjectId, WORKFLOW_PAGE_SAVED_OBJECT_TYPE } from './page_saved_object';
-import type { WorkflowPageAuditLog, WorkflowPageKey, WorkflowPageOperation } from './types';
+import type { WorkflowPageKey, WorkflowPageOperation } from './types';
 import { WorkflowPageNotFoundError } from './workflow_page_not_found_error';
 import { WorkflowPagePrivilegesError } from './workflow_page_privileges_error';
 import type { WorkflowPagesClient } from './workflow_pages_client';
@@ -39,10 +40,12 @@ const setup = async ({
   const store = createFakeStore();
   const internalClient = store.createClient();
   const scopedClient = store.createClient('profile-alice', deniedScoped, spaceId);
+  const audit = createPageAuditMock();
   const systemClient = new WorkflowPagesSystemClientImpl({
     logger: loggingSystemMock.createLogger(),
     canEncrypt: true,
     savedObjectsClient: internalClient,
+    audit,
   });
   if (withPage) {
     await systemClient.syncWorkflowPages({
@@ -53,12 +56,7 @@ const setup = async ({
       valid: true,
     });
   }
-  const audit: jest.Mocked<WorkflowPageAuditLog> = {
-    logPageLinkRead: jest.fn(),
-    logPageSecretRotated: jest.fn(),
-    logPageAccessChanged: jest.fn(),
-    logPageEnabledChanged: jest.fn(),
-  };
+
   const assertWorkflowAccess = jest.fn(async () => {});
   const assertCanPublish = jest.fn(async () => {});
   const request: KibanaRequest = httpServerMock.createKibanaRequest();

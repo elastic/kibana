@@ -8,7 +8,12 @@
  */
 
 import { chunk, groupBy } from 'lodash';
-import type { Logger, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  KibanaRequest,
+  Logger,
+  SavedObject,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { nodeBuilder } from '@kbn/es-query';
@@ -19,7 +24,11 @@ import { getWorkflowPageSavedObjectId, WORKFLOW_PAGE_SAVED_OBJECT_TYPE } from '.
 import type { WorkflowPageAttributes } from './page_saved_object';
 import { computePageSecretHash, generatePageSecret, isPageSecretValid } from './page_secret';
 import type { WorkflowPageRef } from './page_secret';
-import type { WorkflowPageMissReason } from './types';
+import type {
+  WorkflowPageAuditLog,
+  WorkflowPageMissReason,
+  WorkflowPageRetireReason,
+} from './types';
 import { getPageOrUndefined, isPageOnline, namespaceOf } from './utils';
 import { WorkflowPagesUnavailableError } from './workflow_pages_unavailable_error';
 
@@ -58,15 +67,22 @@ export interface WorkflowPagesSystemClient {
     spaceId: string;
     definition: WorkflowYaml | null | undefined;
     valid: boolean;
+    request?: KibanaRequest;
   }): Promise<void>;
   /** Deletes the pages whose trigger the definition no longer has. Throws when a delete fails. */
   retireRemovedPages(params: {
     workflowId: string;
     spaceId: string;
     definition: WorkflowYaml | null | undefined;
+    request?: KibanaRequest;
   }): Promise<void>;
-  /** Deletes every page of the given workflows. Workflow deletes call it. */
-  retireWorkflowPages(params: { workflowIds: string[]; spaceId: string }): Promise<void>;
+  /** Deletes every page of the given workflows in the space. Throws when a delete fails. */
+  retireWorkflowPages(params: {
+    workflowIds: string[];
+    spaceId: string;
+    reason: WorkflowPageRetireReason;
+    request?: KibanaRequest;
+  }): Promise<void>;
   /**
    * Checks a secret from a page URL against the page alone, so a visitor without the secret never
    * reaches the workflow. Returns the `created_at` of the page's workflow, or why it failed.
@@ -81,6 +97,8 @@ export interface WorkflowPagesSystemClientDeps {
   canEncrypt: boolean;
   /** Internal client with the page type. */
   savedObjectsClient: SavedObjectsClientContract;
+  /** The internal client has no security extension, so the page lifecycle audits itself. */
+  audit: Pick<WorkflowPageAuditLog, 'logPageCreated' | 'logPageRetired'>;
 }
 
 export class WorkflowPagesSystemClientImpl implements WorkflowPagesSystemClient {
@@ -92,6 +110,7 @@ export class WorkflowPagesSystemClientImpl implements WorkflowPagesSystemClient 
     spaceId,
     definition,
     valid,
+    request,
   }: Parameters<WorkflowPagesSystemClient['syncWorkflowPages']>[0]): Promise<void> {
     if (!valid) {
       return;
@@ -101,14 +120,24 @@ export class WorkflowPagesSystemClientImpl implements WorkflowPagesSystemClient 
     // left from a move into this space, such as a bulk overwrite, and must go.
     const existing = await this.findWorkflowPages([workflowId], ALL_NAMESPACES_STRING);
 
-    const isCurrent = ({ attributes, namespaces }: SavedObject<WorkflowPageAttributes>) =>
-      namespaces?.[0] === spaceId &&
-      wanted.has(attributes.pageId) &&
-      attributes.workflowCreatedAt === workflowCreatedAt;
-    await this.deletePages(existing.filter((page) => !isCurrent(page)));
+    const retireReason = ({
+      attributes,
+      namespaces,
+    }: SavedObject<WorkflowPageAttributes>): WorkflowPageRetireReason | undefined => {
+      if (namespaces?.[0] !== spaceId) return 'workflow_moved';
+      if (attributes.workflowCreatedAt !== workflowCreatedAt) return 'stale_workflow';
+      if (!wanted.has(attributes.pageId)) return 'trigger_removed';
+    };
+    await this.deletePages(
+      existing.flatMap((page) => {
+        const reason = retireReason(page);
+        return reason ? [{ page, reason }] : [];
+      }),
+      request
+    );
 
     const existingIds = new Set(
-      existing.filter(isCurrent).map(({ attributes }) => attributes.pageId)
+      existing.filter((page) => !retireReason(page)).map(({ attributes }) => attributes.pageId)
     );
     const toCreate = [...wanted].filter((pageId) => !existingIds.has(pageId));
     if (toCreate.length === 0) {
@@ -118,7 +147,9 @@ export class WorkflowPagesSystemClientImpl implements WorkflowPagesSystemClient 
       throw new WorkflowPagesUnavailableError();
     }
     await Promise.all(
-      toCreate.map((pageId) => this.createPage({ workflowId, spaceId, pageId }, workflowCreatedAt))
+      toCreate.map((pageId) =>
+        this.createPage({ workflowId, spaceId, pageId }, workflowCreatedAt, request)
+      )
     );
   }
 
@@ -126,23 +157,32 @@ export class WorkflowPagesSystemClientImpl implements WorkflowPagesSystemClient 
     workflowId,
     spaceId,
     definition,
+    request,
   }: Parameters<WorkflowPagesSystemClient['retireRemovedPages']>[0]): Promise<void> {
     const wanted = getWantedPageIds(spaceId, definition);
     const pages = await this.findWorkflowPages([workflowId], spaceId);
-    await this.deletePages(pages.filter(({ attributes }) => !wanted.has(attributes.pageId)));
+    await this.deletePages(
+      pages
+        .filter(({ attributes }) => !wanted.has(attributes.pageId))
+        .map((page) => ({ page, reason: 'trigger_removed' as const })),
+      request
+    );
   }
 
   async retireWorkflowPages({
     workflowIds,
     spaceId,
-  }: {
-    workflowIds: string[];
-    spaceId: string;
-  }): Promise<void> {
+    reason,
+    request,
+  }: Parameters<WorkflowPagesSystemClient['retireWorkflowPages']>[0]): Promise<void> {
     if (workflowIds.length === 0) {
       return;
     }
-    await this.deletePages(await this.findWorkflowPages(workflowIds, spaceId));
+    const pages = await this.findWorkflowPages(workflowIds, spaceId);
+    await this.deletePages(
+      pages.map((page) => ({ page, reason })),
+      request
+    );
   }
 
   async verifyPageSecret(ref: WorkflowPageRef, secret: string): Promise<VerifyPageSecretResult> {
@@ -162,7 +202,11 @@ export class WorkflowPagesSystemClientImpl implements WorkflowPagesSystemClient 
     return { workflowCreatedAt: page.attributes.workflowCreatedAt };
   }
 
-  private async createPage(ref: WorkflowPageRef, workflowCreatedAt: string): Promise<void> {
+  private async createPage(
+    ref: WorkflowPageRef,
+    workflowCreatedAt: string,
+    request: KibanaRequest | undefined
+  ): Promise<void> {
     const secret = generatePageSecret();
     try {
       await this.deps.savedObjectsClient.create<WorkflowPageAttributes>(
@@ -183,9 +227,11 @@ export class WorkflowPagesSystemClientImpl implements WorkflowPagesSystemClient 
           refresh: 'wait_for',
         }
       );
+      this.deps.audit.logPageCreated(request, ref);
     } catch (error) {
-      // A concurrent save already made the page. Keep its secret.
+      // A concurrent save already made the page, and audited it. Keep its secret.
       if (!SavedObjectsErrorHelpers.isConflictError(error)) {
+        this.deps.audit.logPageCreated(request, { ...ref, error });
         throw error;
       }
     }
@@ -214,19 +260,38 @@ export class WorkflowPagesSystemClientImpl implements WorkflowPagesSystemClient 
     return pages;
   }
 
-  /** Deletes pages in their own spaces. A found page always has exactly one space. */
-  private async deletePages(pages: Array<SavedObject<WorkflowPageAttributes>>): Promise<void> {
+  /**
+   * Deletes pages in their own spaces, and audits each one. A found page always has exactly one
+   * space. A page that is already gone was retired, and audited, by someone else.
+   */
+  private async deletePages(
+    pages: Array<{ page: SavedObject<WorkflowPageAttributes>; reason: WorkflowPageRetireReason }>,
+    request: KibanaRequest | undefined
+  ): Promise<void> {
     const results = await Promise.all(
-      Object.entries(groupBy(pages, ({ namespaces }) => namespaces?.[0])).map(([spaceId, group]) =>
-        this.deps.savedObjectsClient.bulkDelete(
-          group.map(({ id }) => ({ type: WORKFLOW_PAGE_SAVED_OBJECT_TYPE, id })),
-          { namespace: namespaceOf(spaceId), refresh: 'wait_for' }
-        )
+      Object.entries(groupBy(pages, ({ page }) => page.namespaces?.[0])).map(
+        async ([spaceId, group]) => {
+          const { statuses } = await this.deps.savedObjectsClient.bulkDelete(
+            group.map(({ page }) => ({ type: WORKFLOW_PAGE_SAVED_OBJECT_TYPE, id: page.id })),
+            { namespace: namespaceOf(spaceId), refresh: 'wait_for' }
+          );
+          // Statuses come back in request order.
+          return statuses.map((status, index) => ({ ...status, ...group[index], spaceId }));
+        }
       )
     );
-    const failed = results
-      .flatMap(({ statuses }) => statuses)
-      .filter(({ success, error }) => !success && error?.statusCode !== 404);
+    const deleted = results.flat().filter(({ error }) => error?.statusCode !== 404);
+    for (const { page, reason, spaceId, success, error } of deleted) {
+      const { workflowId, pageId } = page.attributes;
+      this.deps.audit.logPageRetired(request, {
+        workflowId,
+        pageId,
+        spaceId,
+        reason,
+        ...(success ? {} : { error: new Error(error?.message ?? 'unknown error') }),
+      });
+    }
+    const failed = deleted.filter(({ success }) => !success);
     if (failed.length > 0) {
       throw new Error(
         `Failed to retire workflow pages: ${failed

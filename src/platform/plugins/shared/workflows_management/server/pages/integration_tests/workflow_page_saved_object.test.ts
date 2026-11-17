@@ -13,6 +13,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { WorkflowYaml } from '@kbn/workflows';
+import { createPageAuditMock } from '../fake_page_store.mock';
 import {
   getWorkflowPageSavedObjectId,
   partiallyUpdateWorkflowPage,
@@ -112,6 +113,7 @@ describe('workflow-page saved object', () => {
       logger: loggingSystemMock.createLogger(),
       canEncrypt: true,
       savedObjectsClient: internalClient,
+      audit: createPageAuditMock(),
     });
   });
 
@@ -178,7 +180,11 @@ describe('workflow-page saved object', () => {
   it('retires the pages of deleted workflows', async () => {
     await sync('workflow-delete');
 
-    await systemClient.retireWorkflowPages({ workflowIds: ['workflow-delete'], spaceId: 'team' });
+    await systemClient.retireWorkflowPages({
+      workflowIds: ['workflow-delete'],
+      spaceId: 'team',
+      reason: 'workflow_deleted',
+    });
 
     await expect(getPage(ref('workflow-delete'))).rejects.toHaveProperty('output.statusCode', 404);
   });

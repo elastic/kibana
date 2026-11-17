@@ -14,6 +14,7 @@ import type { WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowPageAttributes } from './page_saved_object';
 import { getWorkflowPageSavedObjectId, WORKFLOW_PAGE_SAVED_OBJECT_TYPE } from './page_saved_object';
 import type { WorkflowPageRef } from './page_secret';
+import type { WorkflowPageAuditLog } from './types';
 
 type StoredPage = SavedObject<WorkflowPageAttributes> & { namespace?: string };
 
@@ -189,3 +190,12 @@ export const getStoredPage = (
   store: ReturnType<typeof createFakeStore>,
   ref: WorkflowPageRef = pageRef
 ) => store.docs.get(store.key(getWorkflowPageSavedObjectId(ref), undefined));
+
+export const createPageAuditMock = (): jest.Mocked<WorkflowPageAuditLog> => ({
+  logPageLinkRead: jest.fn(),
+  logPageSecretRotated: jest.fn(),
+  logPageAccessChanged: jest.fn(),
+  logPageEnabledChanged: jest.fn(),
+  logPageCreated: jest.fn(),
+  logPageRetired: jest.fn(),
+});

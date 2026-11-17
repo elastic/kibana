@@ -51,8 +51,24 @@ export type WorkflowPageOperation = 'readPage' | 'managePage';
 
 export type WorkflowPageAuditParams = WorkflowPageRef & { error?: unknown };
 
-/** The audit events of page operations. Workflow saves and deletes audit the lifecycle. */
+/** Why a page was retired. */
+export type WorkflowPageRetireReason =
+  | 'trigger_removed'
+  | 'workflow_deleted'
+  | 'workflow_moved'
+  | 'workflow_revived'
+  | 'stale_workflow';
+
+/**
+ * The audit events of pages. The lifecycle events take no request when a write runs without one,
+ * and the actor is then the system.
+ */
 export interface WorkflowPageAuditLog {
+  logPageCreated(request: KibanaRequest | undefined, params: WorkflowPageAuditParams): void;
+  logPageRetired(
+    request: KibanaRequest | undefined,
+    params: WorkflowPageAuditParams & { reason: WorkflowPageRetireReason }
+  ): void;
   logPageLinkRead(request: KibanaRequest, params: WorkflowPageAuditParams): void;
   logPageSecretRotated(request: KibanaRequest, params: WorkflowPageAuditParams): void;
   logPageAccessChanged(
