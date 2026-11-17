@@ -234,7 +234,7 @@ describe('EditableEndpointsList', () => {
     expect(onEndpointsChange).toHaveBeenCalledWith('test_feature', ['ep-2', 'ep-1', 'ep-3']);
   });
 
-  it('renders visible Copy to beside add model when other sub-features exist', () => {
+  it('renders visible Copy to beside add model when other sub-features exist and the toggle is OFF', () => {
     renderList({ endpointIds: ['ep-2'], hasOtherSubFeatures: true });
 
     expect(screen.getByTestId('copy-to-test_feature')).toBeInTheDocument();

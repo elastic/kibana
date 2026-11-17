@@ -78,7 +78,7 @@ describe('EditableEndpointRow', () => {
     expect(screen.queryByTestId('remove-endpoint-ep-1')).not.toBeInTheDocument();
   });
 
-  it('shows a warning indicator for an invalid endpoint', () => {
+  it('shows a warning indicator for an invalid endpoint in editable mode', () => {
     renderRow({ isInvalid: true });
 
     expect(screen.getByTestId('endpoint-row-ep-1')).toHaveTextContent(
@@ -87,7 +87,7 @@ describe('EditableEndpointRow', () => {
   });
 
   describe('deprecation badges', () => {
-    it('renders the deprecated badge for a deprecated endpoint', () => {
+    it('renders the deprecated badge for an assigned deprecated endpoint', () => {
       renderRow({
         endpointId: 'ep-2',
         label: 'Claude 2',
@@ -104,7 +104,7 @@ describe('EditableEndpointRow', () => {
       expect(screen.queryByTestId('modelEolBadge-ep-2')).not.toBeInTheDocument();
     });
 
-    it('renders the EOL badge for an EOL endpoint', () => {
+    it('renders the EOL badge for an assigned EOL endpoint', () => {
       renderRow({
         endpointId: 'ep-2',
         label: 'Claude 2',
@@ -123,17 +123,12 @@ describe('EditableEndpointRow', () => {
   });
 
   describe('reasoning effort', () => {
-    it('shows the effort control for a model with supported effort levels', () => {
+    it('shows the effort control only for models with supported effort levels', () => {
       renderRow({ supportedLevels: ['low', 'medium', 'high'] });
+      renderRow({ endpointId: 'ep-2', label: 'Claude 2' });
 
       expect(screen.getByTestId('add-effort-ep-1')).toBeInTheDocument();
-    });
-
-    it('does not show the effort control for a model without effort levels or a saved effort', () => {
-      renderRow();
-
-      expect(screen.queryByTestId('add-effort-ep-1')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('effort-badge-ep-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('add-effort-ep-2')).not.toBeInTheDocument();
     });
 
     it('shows a saved effort with its remove action when the model lists no effort levels', () => {

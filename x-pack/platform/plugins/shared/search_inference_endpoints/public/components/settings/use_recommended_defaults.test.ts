@@ -61,7 +61,7 @@ describe('useRecommendedDefaults', () => {
     expect(result.current.isUsingRecommendedDefaults).toBe(false);
   });
 
-  it('does not use recommended defaults when the effort differs from the recommended one', () => {
+  it('turns the recommended defaults toggle off when the effort differs from the recommended one', () => {
     const { result } = renderRecommendedDefaults({
       efforts: { 'ep-1': 'high' },
       effectiveRecommendedEfforts: { 'ep-1': 'low' },
@@ -120,7 +120,7 @@ describe('useRecommendedDefaults', () => {
     expect(result.current.isUsingRecommendedDefaults).toBe(false);
   });
 
-  it('resets models and efforts to the recommended ones', () => {
+  it('resets efforts to the recommended ones with the recommended endpoints', () => {
     const { result } = renderRecommendedDefaults({
       efforts: { 'ep-1': 'high' },
       effectiveRecommendedEfforts: { 'ep-1': 'low' },

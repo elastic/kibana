@@ -54,7 +54,7 @@ describe('RecommendedEndpointsList', () => {
     expect(screen.queryByTestId('remove-endpoint-ep-1')).not.toBeInTheDocument();
   });
 
-  it('shows a focusable warning indicator for an invalid endpoint', () => {
+  it('shows a focusable warning indicator for an invalid endpoint in the read-only recommended-defaults list', () => {
     renderList({ invalidEndpointIds: new Set(['ep-1']) });
 
     const row = screen.getByTestId('endpoint-row-ep-1');
@@ -63,7 +63,7 @@ describe('RecommendedEndpointsList', () => {
     expect(row.querySelector('[tabindex="0"]')).not.toBeNull();
   });
 
-  it('shows the recommended effort as read-only', () => {
+  it('shows the recommended effort as read-only when using recommended defaults', () => {
     renderList({ efforts: { 'ep-1': 'low' } });
 
     expect(screen.getByTestId('effort-badge-ep-1')).toHaveTextContent('low');
