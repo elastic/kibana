@@ -104,6 +104,8 @@ The failures are grouped by error type (A to G). Each group lists the error mess
 - **Possible fix (rule change)**: a change to the rule definition you can propose with the rule tools.
 - **Possible fix (not a rule change)**: an action for the user, the index owner, or an administrator. Do not modify the rule for these.
 
+When a **Confirm** step or a **Possible fix** includes an action you cannot execute yourself, give the user the details they need to investigate and remediate.
+
 The causes, checks, and fixes are common cases, not a complete list. If the evidence points to a different cause or a better fix, suggest that instead and explain the evidence. Do not force the failure into one of the listed causes.
 
 #### A. Field or index not found
@@ -123,9 +125,9 @@ Possible root causes:
    - Confirm: ${platformCoreTools.listIndices} returns no index for the pattern. Apply the access caveats under Debugging tools: the index may exist but be hidden from this user.
    - Possible fix (rule change): if the pattern is misspelled or names a concrete backing index, correct the \`FROM\` pattern (prefer the data stream or alias over a backing index).
    - Possible fix (not a rule change): if the data has not been ingested yet or was deleted, have the data owner restore ingestion; for a cross-cluster pattern, have an administrator configure the remote cluster.
-4. **Missing privileges: the rule owner cannot read the index.** The rule's API key carries the owner's privileges as they were when the key was created, so a role changed later does not apply until the rule is re-saved by a user who now has access.
-   - Confirm: the index and the field are visible to the user in ${platformCoreTools.listIndices} and ${platformCoreTools.getIndexMapping}, yet the rule still fails, and cause 5 does not apply. Check the role of the user who last saved the rule for \`read\` and \`view_index_metadata\` on the pattern.
-   - Possible fix (not a rule change): grant the missing privileges, then re-save the rule as a user with access to refresh its API key. Do not rewrite the query for a privileges problem.
+4. **Missing privileges: the rule owner cannot read the index.** The rule's API key carries the owner's privileges as they were when the key was created, so a role changed later does not apply until its API key is refreshed by a user who now has access.
+   - Confirm: the index and the field are visible to the user in ${platformCoreTools.listIndices} and ${platformCoreTools.getIndexMapping}, yet the rule still fails, and cause 5 does not apply. Check the role of the user who last updated the rule's API key for \`read\` and \`view_index_metadata\` on the pattern.
+   - Possible fix (not a rule change): grant the missing privileges, then have a user with access refresh the rule's API key with the **Update API key** action (the bulk update API key endpoint); re-saving the rule does not refresh it, and you have no tool for it. Do not rewrite the query for a privileges problem.
 5. **The column was removed earlier in the query.** ES|QL resolves each command against the columns produced by the previous one, so after \`STATS\`, \`KEEP\`, \`DROP\`, or \`RENAME\`, a source field that is still mapped no longer exists. This often happens when \`query.breach.segment\`, a \`condition\` recovery segment, or a later command in \`query.base\` uses a field the base query already aggregated away (for example \`STATS c = COUNT(*) BY host.name | WHERE http.response.status_code >= 500\`).
    - Confirm: the field is mapped (so causes 1 to 4 do not fit), and an earlier command in the composed query does not output it: a \`STATS\` that neither groups by nor computes it, a \`KEEP\` that omits it, a \`DROP\` that removes it, or a \`RENAME\` that changes its name. The position in the error (\`line:column\`) points at the reference after that command.
    - Possible fix (rule change): move the filter or reference before the command that removes the column (for example \`WHERE\` before \`STATS\`), add the field to the \`STATS ... BY\` or \`KEEP\` list, or use the renamed column name.
@@ -158,13 +160,13 @@ None of these causes is a query problem. Do not modify the rule for them.
 Possible root causes:
 1. **The rule owner's role lacks privileges the query needs** (\`read\` on an index, or access to a data stream or cross-cluster pattern), including a role that was changed after the rule was last saved (see A.4).
    - Confirm: the error usually names the user, the action, and the indices it was refused on (for example "action [...] is unauthorized for user [...] on indices [...]"). Compare those indices with the rule's \`FROM\` pattern.
-   - Possible fix (not a rule change): grant the missing privilege to the rule owner's role, then re-save the rule as a user with the right access to refresh its API key.
+   - Possible fix (not a rule change): grant the missing privilege to the rule owner's role, then have a user with the right access refresh the rule's API key with the **Update API key** action (re-saving the rule does not refresh it).
 2. **The rule's API key is invalid, expired, or revoked.**
    - Confirm: the error is an authentication failure (HTTP 401 or "unable to authenticate") rather than a missing privilege on an index. You cannot check the key's state from here; an administrator can check it in Stack Management under API keys.
-   - Possible fix (not a rule change): re-save the rule as a user with the right access, which creates a new API key.
+   - Possible fix (not a rule change): have a user with the right access run the **Update API key** action on the rule, which creates a new API key (re-saving the rule does not).
 3. **The user who owns the rule was deleted or disabled.**
    - Confirm: also an authentication failure. You cannot check the user's state from here; an administrator can check it in Stack Management under Users.
-   - Possible fix (not a rule change): re-save the rule as an active user with the right access, so the rule runs with that user's API key.
+   - Possible fix (not a rule change): have an active user with the right access run the **Update API key** action on the rule, so it runs with that user's API key (re-saving the rule does not).
 
 #### D. Recovery and no-data query failures
 The message points at the recovery or no-data query (or the failing line sits in that query's text). These are separate ES|QL queries that can target a different index than the base query.
