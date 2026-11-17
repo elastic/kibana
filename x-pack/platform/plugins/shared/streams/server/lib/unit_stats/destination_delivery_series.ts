@@ -11,6 +11,7 @@ import { getElasticsearchDeliverySeries } from './elasticsearch_delivery_series'
 import type { EsqlRow } from './mappers/esql_rows';
 import type { StatsQueryBaseParams } from './query_builders/filters';
 import type { DestinationQueryRef } from './query_refs';
+import { getS3DeliverySeries } from './s3_delivery_series';
 
 type GetDeliverySeries = (args: {
   runQuery: (query: ComposerQuery) => Promise<EsqlRow[]>;
@@ -41,6 +42,7 @@ export interface DestinationDeliverySeries {
 const DELIVERY_SERIES_BY_TYPE: ReadonlyMap<string, GetDeliverySeries> = new Map([
   ['elasticsearch', getElasticsearchDeliverySeries],
   ['remote_elasticsearch', getElasticsearchDeliverySeries],
+  ['s3', getS3DeliverySeries],
 ]);
 
 /**

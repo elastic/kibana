@@ -82,13 +82,71 @@ describe('getDestinationDeliverySeries', () => {
     const { series, failedGroups } = await getDestinationDeliverySeries({
       runQuery,
       baseParams,
-      destinations: [destination('s3-test', 's3'), destination('dbg', 'debug')],
+      destinations: [destination('dbg', 'debug'), destination('other', 'otlp')],
       bucketMs,
     });
 
     expect(series).toEqual({});
     expect(failedGroups).toEqual([]);
     expect(runQuery).not.toHaveBeenCalled();
+  });
+
+  it('asks its own query for the S3 destinations, apart from the Elasticsearch one, and counts upload attempts', async () => {
+    const runQuery = jest.fn(async (query: ComposerQuery) =>
+      query.print('basic').includes('metrics.streams.destination.duration')
+        ? [
+            {
+              id: 's3-test',
+              bucket: '2026-10-20T10:00:00.000Z',
+              total_items: 12,
+              failed_items: 12,
+              authentication_items: 12,
+              authorization_items: 0,
+            },
+          ]
+        : rows
+    );
+
+    const { series, failedGroups } = await getDestinationDeliverySeries({
+      runQuery,
+      baseParams,
+      destinations: [destination('es-dev', 'elasticsearch'), destination('s3-test', 's3')],
+      bucketMs,
+    });
+
+    expect(runQuery).toHaveBeenCalledTimes(2);
+    expect(failedGroups).toEqual([]);
+    expect(series['es-dev'].unit).toBe('{item}');
+    expect(series['s3-test']).toEqual({
+      bucket_ms: bucketMs,
+      unit: '{request}',
+      points: [
+        {
+          start: '2026-10-20T10:00:00.000Z',
+          total: 12,
+          failed: 12,
+          authentication: 12,
+          authorization: 0,
+        },
+      ],
+    });
+  });
+
+  it('keeps the series of a type that works when the other type fails', async () => {
+    const error = new Error('s3 series query failed');
+
+    const { series, failedGroups } = await getDestinationDeliverySeries({
+      runQuery: async (query) => {
+        if (query.print('basic').includes('metrics.streams.destination.duration')) throw error;
+        return rows;
+      },
+      baseParams,
+      destinations: [destination('es-dev', 'elasticsearch'), destination('s3-test', 's3')],
+      bucketMs,
+    });
+
+    expect(Object.keys(series)).toEqual(['es-dev']);
+    expect(failedGroups).toEqual([{ types: ['s3'], ids: ['s3-test'], error }]);
   });
 
   it('puts a group whose provider throws in failedGroups, with its ids and types', async () => {

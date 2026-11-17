@@ -983,6 +983,41 @@ describe('UnitStatsClient.getStats', () => {
       });
     });
 
+    it('adds a series of upload attempts, in requests, to an S3 destination that asks for one', async () => {
+      const esql = s3Esql({
+        destinationDeliverySeries: () => ({
+          columns: responses.destinationDeliverySeries.columns,
+          values: [[12, 12, 12, 0, 's3-test', '2026-10-19T11:46:00.000Z']],
+        }),
+      });
+
+      const response = await run(
+        esql,
+        {
+          components: [{ kind: 'destination', id: 's3-test', include: { delivery_series: true } }],
+        },
+        s3Unit
+      );
+
+      expect(response.components.destinations['s3-test'].events.delivery?.series).toEqual({
+        bucket_ms: expect.any(Number),
+        unit: '{request}',
+        points: [
+          {
+            start: '2026-10-19T11:46:00.000Z',
+            total: 12,
+            failed: 12,
+            authentication: 12,
+            authorization: 0,
+          },
+        ],
+      });
+      const seriesQueries = statsQueries(esql).filter((query) => query.includes('total_items'));
+      expect(seriesQueries).toHaveLength(1);
+      expect(seriesQueries[0]).toContain('COUNT(metrics.streams.destination.duration)');
+      expect(streamsUnitStatsResponseSchema.safeParse(response).success).toBe(true);
+    });
+
     it('keeps the latency of an S3 destination that has no items in the window', async () => {
       const response = await run(
         s3Esql({
