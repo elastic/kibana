@@ -110,6 +110,7 @@ import {
   WORKFLOW_SERVICE_ACCOUNT_TYPE,
 } from './service_account_execution';
 import { resolveWorkflowWorkloads } from './service_account_workload_resolver';
+import { publishFinishedWorkflowExecution } from './topics/publish_finished_workflow_execution';
 import { setWorkflowExecutionFinishedPublisher } from './topics/publish_workflow_execution_finished';
 import { workflowExecutionFinishedTopic } from './topics/workflow_execution_finished';
 import { initializeTriggerEventsDataStream, TriggerEventHandler } from './trigger_events';
@@ -1250,6 +1251,7 @@ export class WorkflowsExecutionEnginePlugin
                     await workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
                       refresh: 'wait_for',
                     });
+                    await publishFinishedWorkflowExecution(workflowExecution);
                     await ensureBoundExecutionAdmitted(
                       workflowExecution,
                       workflowRepository,
@@ -1639,6 +1641,7 @@ export class WorkflowsExecutionEnginePlugin
               ? options.refresh
               : false,
           });
+          await publishFinishedWorkflowExecution(workflowExecution);
 
           await ensureBoundExecutionAdmitted(
             workflowExecution,
@@ -2066,6 +2069,7 @@ export class WorkflowsExecutionEnginePlugin
                     item.workflowExecution,
                     { refresh: 'wait_for' }
                   );
+                  await publishFinishedWorkflowExecution(item.workflowExecution);
                   persisted = true;
                   await ensureBoundExecutionAdmitted(
                     item.workflowExecution,
@@ -2205,6 +2209,7 @@ export class WorkflowsExecutionEnginePlugin
       workflowExecution.stepId = stepId;
 
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
+      await publishFinishedWorkflowExecution(workflowExecution);
 
       if (workflowExecution.status === ExecutionStatus.FAILED) {
         return {
@@ -2498,7 +2503,8 @@ export class WorkflowsExecutionEnginePlugin
         workflowExecution.workflowDefinition.settings.concurrency,
         workflowExecution.concurrencyGroupKey,
         workflowExecution.id,
-        workflowExecution.spaceId
+        workflowExecution.spaceId,
+        workflowExecution
       );
 
       if (!canProceed) {

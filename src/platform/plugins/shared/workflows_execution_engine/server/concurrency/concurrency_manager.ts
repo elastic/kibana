@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConcurrencySettings, LiquidSettings, WorkflowContext } from '@kbn/workflows';
+import type {
+  ConcurrencySettings,
+  EsWorkflowExecution,
+  LiquidSettings,
+  WorkflowContext,
+} from '@kbn/workflows';
 import {
   ConcurrencySlotOccupyingExecutionStatuses,
   DEFAULT_CONCURRENCY_QUEUE_SIZE,
@@ -15,6 +20,7 @@ import {
 } from '@kbn/workflows';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { WorkflowTemplatingEngine } from '../templating_engine';
+import { publishFinishedWorkflowExecution } from '../topics/publish_finished_workflow_execution';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 /**
@@ -97,7 +103,8 @@ export class ConcurrencyManager {
     concurrencySettings: ConcurrencySettings | undefined,
     concurrencyGroupKey: string | null,
     currentExecutionId: string,
-    spaceId: string
+    spaceId: string,
+    currentExecution?: Partial<EsWorkflowExecution>
   ): Promise<boolean> {
     // If no concurrency settings or key, allow execution to proceed
     if (!concurrencySettings || !concurrencyGroupKey) {
@@ -131,17 +138,27 @@ export class ConcurrencyManager {
 
       if (queuedCount >= queueMax) {
         const skipTimestamp = new Date().toISOString();
+        const cancellationReason = `Queue full (queue-size: ${queueMax})`;
         await this.workflowExecutionRepository.updateWorkflowExecution(
           {
             id: currentExecutionId,
             status: ExecutionStatus.SKIPPED,
             cancelRequested: true,
-            cancellationReason: `Queue full (queue-size: ${queueMax})`,
+            cancellationReason,
             cancelledAt: skipTimestamp,
             cancelledBy: 'system',
           },
           { refresh: true }
         );
+        await publishFinishedWorkflowExecution(currentExecution, {
+          id: currentExecutionId,
+          spaceId,
+          status: ExecutionStatus.SKIPPED,
+          cancelRequested: true,
+          cancellationReason,
+          cancelledAt: skipTimestamp,
+          cancelledBy: 'system',
+        });
         return false;
       }
 
@@ -173,17 +190,27 @@ export class ConcurrencyManager {
     // Handle 'drop' strategy: mark new execution as SKIPPED if limit is exceeded
     if (strategy === 'drop') {
       const skipTimestamp = new Date().toISOString();
+      const cancellationReason = `Dropped due to concurrency limit (max: ${maxConcurrency})`;
       await this.workflowExecutionRepository.updateWorkflowExecution(
         {
           id: currentExecutionId,
           status: ExecutionStatus.SKIPPED,
           cancelRequested: true,
-          cancellationReason: `Dropped due to concurrency limit (max: ${maxConcurrency})`,
+          cancellationReason,
           cancelledAt: skipTimestamp,
           cancelledBy: 'system',
         },
         { refresh: true }
       );
+      await publishFinishedWorkflowExecution(currentExecution, {
+        id: currentExecutionId,
+        spaceId,
+        status: ExecutionStatus.SKIPPED,
+        cancelRequested: true,
+        cancellationReason,
+        cancelledAt: skipTimestamp,
+        cancelledBy: 'system',
+      });
       return false; // Drop the new execution
     }
 
@@ -206,6 +233,21 @@ export class ConcurrencyManager {
           cancelledAt: cancellationTimestamp,
           cancelledBy: 'system',
         }))
+      );
+      await Promise.all(
+        executionIdsToCancel.map(async (id) => {
+          try {
+            const execution = await this.workflowExecutionRepository.getWorkflowExecutionById(
+              id,
+              spaceId
+            );
+            if (execution) {
+              await publishFinishedWorkflowExecution(execution);
+            }
+          } catch {
+            // The cancellation is already stored. A failed read must not skip waking the task.
+          }
+        })
       );
 
       // Propagate cancellation to running tasks (can be done in parallel)

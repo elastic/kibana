@@ -11,7 +11,12 @@ import type { ConcurrencySettings, WorkflowContext } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { ConcurrencyManager } from './concurrency_manager';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { publishFinishedWorkflowExecution } from '../topics/publish_finished_workflow_execution';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
+
+jest.mock('../topics/publish_finished_workflow_execution', () => ({
+  publishFinishedWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+}));
 
 describe('ConcurrencyManager', () => {
   let concurrencyManager: ConcurrencyManager;
@@ -25,8 +30,10 @@ describe('ConcurrencyManager', () => {
       scheduleResumeTask: jest.fn(),
     } as unknown as jest.Mocked<WorkflowTaskManager>;
 
+    jest.mocked(publishFinishedWorkflowExecution).mockClear();
     mockWorkflowExecutionRepository = {
       getRunningExecutionsByConcurrencyGroup: jest.fn(),
+      getWorkflowExecutionById: jest.fn().mockResolvedValue(null),
       countExecutionsByConcurrencyGroupAndStatuses: jest.fn(),
       bulkUpdateWorkflowExecutions: jest.fn().mockResolvedValue(undefined),
       updateWorkflowExecution: jest.fn(),
@@ -361,6 +368,40 @@ describe('ConcurrencyManager', () => {
         },
       ]);
       expect(mockWorkflowTaskManager.forceRunIdleTasks).toHaveBeenCalledWith('exec-1');
+    });
+
+    it('publishes one finished event per cancelled execution after the bulk write', async () => {
+      const settings: ConcurrencySettings = {
+        key: 'server-1',
+        strategy: 'cancel-in-progress',
+        max: 1,
+      };
+      mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockResolvedValue([
+        'exec-1',
+        'exec-2',
+      ]);
+      mockWorkflowExecutionRepository.getWorkflowExecutionById.mockImplementation(
+        async (id: string) =>
+          ({
+            id,
+            workflowId: 'wf-1',
+            spaceId: 'default',
+            status: ExecutionStatus.CANCELLED,
+            isTestRun: false,
+            cancelledAt: '2026-01-01T00:00:00.000Z',
+            triggeredBy: 'manual',
+          } as never)
+      );
+
+      await concurrencyManager.checkConcurrency(settings, 'server-1', 'exec-3', 'default');
+
+      expect(publishFinishedWorkflowExecution).toHaveBeenCalledTimes(2);
+      expect(publishFinishedWorkflowExecution).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'exec-1', status: ExecutionStatus.CANCELLED })
+      );
+      expect(publishFinishedWorkflowExecution).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'exec-2', status: ExecutionStatus.CANCELLED })
+      );
     });
 
     it('should cancel multiple oldest executions when needed', async () => {
@@ -782,6 +823,7 @@ describe('ConcurrencyManager', () => {
         );
         // forceRunIdleTasks should not be called if bulk update fails
         expect(mockWorkflowTaskManager.forceRunIdleTasks).not.toHaveBeenCalled();
+        expect(publishFinishedWorkflowExecution).not.toHaveBeenCalled();
       });
 
       it('should throw error when forceRunIdleTasks fails for some executions', async () => {
