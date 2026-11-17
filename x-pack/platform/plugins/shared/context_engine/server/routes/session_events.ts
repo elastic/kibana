@@ -6,7 +6,6 @@
  */
 
 import path from 'node:path';
-import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import type { IRouter, KibanaRequest } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
@@ -26,6 +25,7 @@ import {
   SESSION_EVENTS_SAVE_PATH,
 } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
+import { validateIsoDate } from '../../common/validation';
 import { assertAiIndicesWritable } from '../ai_indices/assert_ai_indices_writable';
 import { AiIndexNotFoundError, AiIndexNotWritableError } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
@@ -48,15 +48,6 @@ const UNKNOWN_CALLER_MESSAGE =
 const forbidden = (message: string): Error =>
   Object.assign(new Error(message), { name: 'Forbidden' });
 
-// The calendar date forms of Elasticsearch's default `strict_date_optional_time` format. Moment's
-// ISO 8601 parser also takes week dates, ordinal dates and a space separator, which Elasticsearch
-// rejects.
-const EVENT_AT_PATTERN =
-  /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2}(\.\d{1,9})?)?(Z|[+-]\d{2}:?\d{2})?)?$/;
-
-const isEventAt = (value: string): boolean =>
-  EVENT_AT_PATTERN.test(value) && moment(value, moment.ISO_8601, true).isValid();
-
 const idSchema = (description: string) =>
   schema.string({ minLength: 1, maxLength: MAX_SESSION_EVENT_ID_LENGTH, meta: { description } });
 
@@ -77,7 +68,7 @@ const baseEventProps = {
   turn_id: idSchema('The turn the event belongs to. Events are grouped into turns by this id.'),
   event_at: schema.string({
     maxLength: MAX_SESSION_EVENT_TIMESTAMP_LENGTH,
-    validate: (value) => (isEventAt(value) ? undefined : 'must be an ISO 8601 date and time'),
+    validate: validateIsoDate,
     meta: {
       description:
         'When the agent created the event, as an ISO 8601 date and time such as `2026-11-16T09:58:00.000Z`.',
