@@ -47,11 +47,7 @@ export const setGraphCounterAttributes = (
   });
 };
 
-/**
- * Wraps a graph node in a span named `attack_discovery.<nodeName>`. The counters are
- * recorded from the input state up front, so a node that throws still reports them,
- * then again from the returned state.
- */
+/** Wraps a graph node in an `attack_discovery.<nodeName>` span that records the retry counters. */
 export const withGraphNodeSpan =
   <S extends TracedGraphState>(nodeName: string, node: (state: S) => Promise<S>) =>
   (state: S): Promise<S> =>

@@ -103,13 +103,14 @@ describe('with_graph_node_span', () => {
     });
 
     it('still reports the input counters and rethrows when the node throws', async () => {
+      const error = new Error('boom');
       const failing = withGraphNodeSpan('refine', async (): Promise<TracedGraphState> => {
-        throw new Error('boom');
+        throw error;
       });
 
       await expect(
         failing({ ...baseState, generationAttempts: 4, refinements: ['r1', 'r2'] })
-      ).rejects.toThrow('boom');
+      ).rejects.toBe(error);
 
       expect(mockSetAttributes).toHaveBeenCalledTimes(1);
       expect(mockSetAttributes).toHaveBeenCalledWith(

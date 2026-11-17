@@ -600,6 +600,53 @@ describe('invokeAttackDiscoveryGraphWithAlerts', () => {
         })
       ).rejects.toThrow('Maximum generation attempts (10) reached.');
     });
+
+    it('throws inside the root span callback, after the counters are recorded, so the span ends in error', async () => {
+      mockSpan = { setAttributes: mockSetAttributes };
+      const limitError = new Error('Maximum generation attempts (10) reached.');
+      mockGraphInvoke.mockResolvedValue({
+        anonymizedDocuments: mockAlerts,
+        errors: [],
+        generationAttempts: 10,
+        generations: [],
+        hallucinationFailures: 0,
+        insights: [],
+        maxGenerationAttempts: 10,
+        maxHallucinationFailures: 5,
+        refinements: [],
+        replacements: {},
+      });
+      (throwIfErrorCountsExceeded as jest.Mock).mockImplementationOnce(() => {
+        throw limitError;
+      });
+      let callbackOutcome: Promise<unknown> | undefined;
+      (withActiveInferenceSpan as jest.Mock).mockImplementationOnce(
+        (_name: string, _opts: unknown, cb: (span: unknown) => Promise<unknown>) => {
+          callbackOutcome = cb(mockSpan);
+          return callbackOutcome;
+        }
+      );
+
+      await expect(
+        invokeAttackDiscoveryGraphWithAlerts({
+          actionsClient: mockActionsClient,
+          alerts: mockAlerts,
+          apiConfig: {
+            action_type_id: '.gen-ai',
+            connector_id: 'test-connector',
+          },
+          connectorTimeout: 60000,
+          esClient: mockEsClient,
+          logger: mockLogger,
+          prompts: mockPrompts,
+        })
+      ).rejects.toBe(limitError);
+
+      await expect(callbackOutcome).rejects.toBe(limitError);
+      expect(mockSetAttributes).toHaveBeenCalledWith(
+        expect.objectContaining({ 'attack_discovery.generation_attempts': 10 })
+      );
+    });
   });
 
   describe('additionalContext', () => {

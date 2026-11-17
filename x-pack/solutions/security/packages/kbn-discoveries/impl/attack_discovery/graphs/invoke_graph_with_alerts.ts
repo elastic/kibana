@@ -186,7 +186,7 @@ export const invokeAttackDiscoveryGraphWithAlerts = async ({
       ? `${prompts.default}\n\nAdditional context:\n${additionalContext}`
       : undefined;
 
-  const result: AttackDiscoveryGraphState = await withActiveInferenceSpan(
+  return withActiveInferenceSpan(
     'attack_discovery.graph',
     { attributes: { [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN' } },
     async (span) => {
@@ -210,34 +210,35 @@ export const invokeAttackDiscoveryGraphWithAlerts = async ({
         }
       );
       setGraphCounterAttributes(span, graphResult);
-      return graphResult;
+
+      logger.debug(
+        () => `Graph execution completed: ${graphResult.insights?.length ?? 0} discoveries`
+      );
+
+      const {
+        errors,
+        generationAttempts,
+        hallucinationFailures,
+        maxGenerationAttempts,
+        maxHallucinationFailures,
+      } = graphResult;
+
+      throwIfErrorCountsExceeded({
+        errors,
+        generationAttempts,
+        hallucinationFailures,
+        logger,
+        maxGenerationAttempts,
+        maxHallucinationFailures,
+      });
+
+      return {
+        alertsContextCount: graphResult.anonymizedDocuments.length,
+        discoveries: graphResult.insights,
+        generationAttempts,
+        hallucinationFailures,
+        replacements: graphResult.replacements,
+      };
     }
   );
-
-  logger.debug(() => `Graph execution completed: ${result.insights?.length ?? 0} discoveries`);
-
-  const {
-    errors,
-    generationAttempts,
-    hallucinationFailures,
-    maxGenerationAttempts,
-    maxHallucinationFailures,
-  } = result;
-
-  throwIfErrorCountsExceeded({
-    errors,
-    generationAttempts,
-    hallucinationFailures,
-    logger,
-    maxGenerationAttempts,
-    maxHallucinationFailures,
-  });
-
-  return {
-    alertsContextCount: result.anonymizedDocuments.length,
-    discoveries: result.insights,
-    generationAttempts,
-    hallucinationFailures,
-    replacements: result.replacements,
-  };
 };
