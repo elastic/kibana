@@ -9,18 +9,21 @@
 
 /** @type {import('./types').Transform} */
 const yamlTransform = (path, source, cache) => {
-  const key = cache.getKey(path, source);
-
-  const cached = cache.getCode(key);
-  if (cached) {
-    return cached;
+  const key = cache?.getKey(path, source);
+  if (cache && key) {
+    const cached = cache.getCode(key);
+    if (cached !== undefined) {
+      return cached;
+    }
   }
 
   const code = `module.exports = ${JSON.stringify(source)};\n`;
 
-  cache.update(key, {
-    code,
-  });
+  if (cache && key) {
+    cache.update(key, {
+      code,
+    });
+  }
 
   return code;
 };

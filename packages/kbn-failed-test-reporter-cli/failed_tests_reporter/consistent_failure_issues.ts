@@ -17,6 +17,13 @@ import {
   type TestSetup,
 } from '@kbn/scout-reporting';
 import type { ToolingLog } from '@kbn/tooling-log';
+import {
+  distinctIssues,
+  closeReplacedIssues,
+  replacedIssuesByTest,
+  listReplacedIssues,
+  withPreviouslyTracked,
+} from '../flaky_test_issues/replace_per_test_issues';
 import { FLAKY_TEST_SUITE_METADATA_PREFIX } from '../flaky_test_issues/issue_body';
 import { plural } from '../flaky_test_issues/markdown';
 import {
@@ -77,6 +84,12 @@ export interface ConsistentFailureIssuesOptions {
   /** `owner/name` of that repository; team labels are only added in `elastic/kibana`. */
   repo: string;
   build: CurrentBuild;
+  /**
+   * Replace the open per-test issues of the broken tests with the suite's issue, for a pipeline
+   * that no longer opens or updates them: they don't keep the suite from getting an issue, and are
+   * closed as its duplicates. Issues labelled `skipped-test` are left open.
+   */
+  replacePerTestIssues: boolean;
   dryRun: boolean;
   now?: Date;
 }
@@ -93,11 +106,14 @@ export interface ConsistentFailureIssuesSummary {
   commented: Array<SuiteIssueRef & { reopened: boolean }>;
   /**
    * Suites an issue is already about without a comment: per-test issues, which get their own
-   * failure comments, or a suite issue the break was posted on less than a day ago.
+   * failure comments unless replaced, or a suite issue the break was posted on less than a day
+   * ago.
    */
   tracked: SuiteIssueRef[];
   /** Files of the suites over the cap. */
   skipped: string[];
+  /** Per-test issues closed as duplicates of the suite's issue (`replacePerTestIssues`). */
+  replaced: string[];
 }
 
 interface Candidate {
@@ -201,13 +217,18 @@ const isOpen = ({ issue }: MatchedIssue): boolean => issue.state === 'open';
 
 /**
  * The issue already tracking the suite: one about the suite or its whole file, an open one before
- * a recently closed one, or, failing that, the open per-test issue of one of its tests when every
- * test has one. A single test without an issue gets the suite its issue.
+ * a recently closed one, or, failing that and unless they are replaced, the open per-test issue
+ * of one of its tests when every test has one. A single test without an issue gets the suite its
+ * issue.
  */
-const trackingIssue = (suite: FailingSuite, index: IssueIndex): MatchedIssue | undefined => {
+const trackingIssue = (
+  suite: FailingSuite,
+  index: IssueIndex,
+  replacing: boolean
+): MatchedIssue | undefined => {
   const matches = findMatchingIssues(suite, candidateIssues(suite, index));
   const aboutSuite = matches.find(({ match }) => match === 'suite');
-  if (aboutSuite) {
+  if (aboutSuite || replacing) {
     return aboutSuite;
   }
   const perTest = suite.tests.map((test) => {
@@ -243,7 +264,8 @@ const describeSuite = ({ filePath, framework }: FailingSuite): string =>
  * the latest builds of the pipeline and branch after passing before, by the test events of those
  * builds. A file an issue is already about gets none: a suite issue, open or recently closed,
  * gets a comment instead, at most once a day per pipeline and branch, and is reopened; per-test
- * issues get their own failure comments. Nor do files beyond `MAX_NEW_ISSUES_PER_JOB` get one, so
+ * issues get their own failure comments, unless `replacePerTestIssues` closes them as duplicates
+ * of the suite's issue, filed regardless. Nor do files beyond `MAX_NEW_ISSUES_PER_JOB` get one, so
  * a job that breaks everything files a few issues, not dozens. The same break is found again by
  * the next builds while it lasts, so a check that could not run does not lose it, and the issue
  * it filed then keeps it from being filed twice.
@@ -251,12 +273,23 @@ const describeSuite = ({ filePath, framework }: FailingSuite): string =>
 export const reportConsistentFailureIssues = async (
   options: ConsistentFailureIssuesOptions
 ): Promise<ConsistentFailureIssuesSummary> => {
-  const { log, failures, es, github, repo, build, dryRun, now = new Date() } = options;
+  const {
+    log,
+    failures,
+    es,
+    github,
+    repo,
+    build,
+    replacePerTestIssues,
+    dryRun,
+    now = new Date(),
+  } = options;
   const summary: ConsistentFailureIssuesSummary = {
     created: [],
     commented: [],
     tracked: [],
     skipped: [],
+    replaced: [],
   };
 
   const candidates = candidatesOf(failures);
@@ -309,15 +342,26 @@ export const reportConsistentFailureIssues = async (
    * this pipeline and branch while it is open, and reopens it, with the post, if closed. The time
    * of the last post is read from GitHub as it is now, as other jobs of the build find the same
    * break, and recorded once the comment is posted: a comment that failed isn't taken as posted,
-   * and the next build posts it.
+   * and the next build posts it. The per-test issues `replacing` join the body's "Previously
+   * tracked in" line, and the post names them, even within `POST_INTERVAL_MS`: they are closed
+   * after it, so one still open was never named.
    */
-  const postBreak = async (suite: FailingSuite, issue: GithubIssue) => {
+  const postBreak = async (
+    suite: FailingSuite,
+    issue: GithubIssue,
+    replacing: readonly number[]
+  ) => {
     const ref = { filePath: suite.filePath, url: issue.html_url };
     const body = (await github.getIssue(issue.number))?.body ?? issue.body;
     const postedAt = failingPostedAt(body);
     const last = postedAt[key];
     const reopen = issue.state === 'closed';
-    if (!reopen && last && now.getTime() - new Date(last).getTime() < POST_INTERVAL_MS) {
+    if (
+      !reopen &&
+      replacing.length === 0 &&
+      last &&
+      now.getTime() - new Date(last).getTime() < POST_INTERVAL_MS
+    ) {
       log.info(
         `Skip, the break on ${key} was posted on #${issue.number} at ${last}: ${describeSuite(
           suite
@@ -327,11 +371,14 @@ export const reportConsistentFailureIssues = async (
       return;
     }
     const newBody = updateIssueMetadata(
-      body,
+      listReplacedIssues(body, replacing),
       { 'failing.postedAt': { ...postedAt, [key]: now.toISOString() } },
       FLAKY_TEST_SUITE_METADATA_PREFIX
     );
-    await github.addIssueComment(issue.number, renderFailingSuiteComment(suite, build));
+    await github.addIssueComment(
+      issue.number,
+      withPreviouslyTracked(renderFailingSuiteComment(suite, build), replacing)
+    );
     await github.editIssue(issue.number, { body: newBody, ...(reopen ? { state: 'open' } : {}) });
     log.info(
       `${dryRun ? 'Would post' : 'Posted'} the break on #${issue.number}` +
@@ -340,10 +387,35 @@ export const reportConsistentFailureIssues = async (
     summary.commented.push({ ...ref, reopened: reopen });
   };
 
+  /** The open per-test issues of the broken tests, by test, when replacing them. */
+  const perTestIssuesOf = (suite: FailingSuite): Map<string, GithubIssue[]> =>
+    replacePerTestIssues ? replacedIssuesByTest(suite, index) : new Map();
+
+  const closeReplaced = async (
+    suiteIssue: { number: number; id: number },
+    perTestIssues: readonly GithubIssue[]
+  ) => {
+    const replaced = await closeReplacedIssues({
+      github,
+      log,
+      dryRun,
+      issues: perTestIssues,
+      suiteIssue,
+    });
+    summary.replaced.push(...replaced.map(({ html_url: url }) => url));
+  };
+
   for (const suite of groupIntoSuites(breaks)) {
-    const tracked = trackingIssue(suite, index);
+    const perTest = perTestIssuesOf(suite);
+    const replacing = distinctIssues([...perTest.values()].flat());
+    const tracked = trackingIssue(suite, index, replacePerTestIssues);
     if (tracked?.match === 'suite') {
-      await postBreak(suite, tracked.issue);
+      await postBreak(
+        suite,
+        tracked.issue,
+        replacing.map(({ number }) => number)
+      );
+      await closeReplaced(tracked.issue, replacing);
       continue;
     }
     if (tracked) {
@@ -360,13 +432,18 @@ export const reportConsistentFailureIssues = async (
       summary.skipped.push(suite.filePath);
       continue;
     }
+    const superseded = replacing.map(({ number }) => number);
     const related = findMatchingIssues(suite, candidateIssues(suite, index))
       .filter(isOpen)
-      .map(({ issue }) => issue.number);
+      .map(({ issue }) => issue.number)
+      .filter((number) => !superseded.includes(number));
     const title = failingSuiteIssueTitle(suite);
     const body = renderFailingSuiteIssueBody(suite, {
       ...build,
       relatedIssues: related,
+      previousIssues: new Map(
+        [...perTest].map(([testId, testIssues]) => [testId, testIssues.map(({ number }) => number)])
+      ),
       postedAt: now,
     });
     const created = await github.createIssue(title, body, issueLabels(suite, repo));
@@ -375,6 +452,7 @@ export const reportConsistentFailureIssues = async (
         `${plural(suite.tests.length, 'test')} in ${describeSuite(suite)}`
     );
     summary.created.push({ filePath: suite.filePath, url: created.html_url });
+    await closeReplaced(created, replacing);
   }
   return summary;
 };
