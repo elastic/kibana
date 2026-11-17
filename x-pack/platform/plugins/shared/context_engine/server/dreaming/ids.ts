@@ -38,6 +38,10 @@ export const slugify = (name: string): string => {
 export const entityId = (type: string, name: string, audience?: string): string =>
   `entity-${slugify(type)}--${slugify(name)}${audience ? `--${audience}` : ''}`;
 
+/** The KI id of a wiki page, from its title and audience. */
+export const wikiPageId = (title: string, audience?: string): string =>
+  `wiki-${slugify(title)}${audience ? `--${audience}` : ''}`;
+
 /** The KI id of a new fact, from the run, the batch of memories and the model's key. */
 export const factId = (executionId: string, batchKey: string, ref: string): string =>
   `fact-${shortHash(executionId, batchKey, ref)}`;

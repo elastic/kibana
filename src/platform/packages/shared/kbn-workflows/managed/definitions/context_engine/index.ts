@@ -8,8 +8,10 @@
  */
 
 import DREAMING_YAML from './dreaming.yaml';
+import ENRICHMENT_YAML from './dreaming_enrichment.yaml';
 import TRACE_DREAMING_YAML from './dreaming_traces.yaml';
 import TRACE_DREAMING_BATCH_YAML from './dreaming_traces_batch.yaml';
+import WIKI_YAML from './dreaming_wiki.yaml';
 import FEEDBACK_ANALYSIS_YAML from './feedback_analysis.yaml';
 import RELATIONSHIPS_YAML from './relationships.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../types';
@@ -188,3 +190,125 @@ export const CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW = {
     }),
   management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition<ContextEngineRelationshipsWorkflowTemplateValues>;
+
+export const CONTEXT_ENGINE_ENRICHMENT_WORKFLOW_ID = 'system-context-engine-enrichment';
+
+// Mirrors Context Engine's DEFAULT_ENRICHMENT_MAX_DOCUMENTS, which this package cannot import.
+const DEFAULT_ENRICHMENT_MAX_DOCUMENTS = 10;
+
+/** The enrichment part of an AI index dreaming config. */
+export interface ContextEngineEnrichmentTemplateConfig {
+  /** Which knowledge items are worth improving. */
+  selection: string;
+  /** What to improve them in. */
+  improvement: string;
+  /** At most how many knowledge items one run improves. */
+  maxDocuments: number;
+}
+
+/** The dreaming config, with what enrichment improves. */
+export interface ContextEngineEnrichmentWorkflowTemplateValues
+  extends ContextEngineDreamingWorkflowTemplateValues {
+  enrichment: ContextEngineEnrichmentTemplateConfig;
+}
+
+/**
+ * Improves the knowledge items of one AI index with what its sources say: picks the items worth
+ * improving, researches each in the sources, and rewrites it citing what it found.
+ */
+export const CONTEXT_ENGINE_ENRICHMENT_WORKFLOW = {
+  id: CONTEXT_ENGINE_ENRICHMENT_WORKFLOW_ID,
+  pluginId: 'contextEngine',
+  version: 1,
+  billable: false,
+  yamlTemplate: (values) => {
+    const {
+      selection = '',
+      improvement = '',
+      maxDocuments = DEFAULT_ENRICHMENT_MAX_DOCUMENTS,
+    } = values.enrichment ?? {};
+    return renderJsonTemplate(ENRICHMENT_YAML, {
+      __NAME__: `Enrichment: ${values.aiIndexId}`,
+      __AI_INDEX_ID__: values.aiIndexId,
+      __CONCURRENCY_KEY__: `context-engine-enrichment-${values.instanceKey}`,
+      __INTERVAL_MINUTES__: values.intervalMinutes,
+      __CONNECTOR_ID__: values.connectorId,
+      __INSTRUCTIONS__: values.instructions,
+      __SELECTION__: selection,
+      __IMPROVEMENT__: improvement,
+      __MAX_DOCUMENTS__: maxDocuments,
+    });
+  },
+  management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
+} as const satisfies ManagedWorkflowDefinition<ContextEngineEnrichmentWorkflowTemplateValues>;
+
+export const CONTEXT_ENGINE_WIKI_WORKFLOW_ID = 'system-context-engine-wiki';
+
+/** The wiki part of an AI index dreaming config. */
+export interface ContextEngineWikiTemplateConfig {
+  /** Which pages to build and how to write them. */
+  instructions: string;
+  /** The KI types pages are built from: exact types, or prefixes such as `fact.*`. */
+  kiTypes: string[];
+  /** At most how many pages one run creates or updates. */
+  maxPages: number;
+  /** Whether pages also draw on the sources of the AI index. */
+  research: boolean;
+}
+
+/** The dreaming config, with what wiki pages are built from. */
+export interface ContextEngineWikiWorkflowTemplateValues
+  extends ContextEngineDreamingWorkflowTemplateValues {
+  wiki: ContextEngineWikiTemplateConfig;
+}
+
+// Mirror Context Engine's constants, which this package cannot import.
+const WIKI_PAGE_KI_TYPE = 'wiki.page';
+const RELATIONSHIP_KI_TYPE = 'memory.relationship';
+const DEFAULT_WIKI_KI_TYPES = ['fact.*', 'entity.*'];
+const DEFAULT_WIKI_MAX_PAGES = 5;
+
+/** The ES query for the knowledge items wiki pages are built from. */
+export const wikiMemberTypeQuery = (kiTypes: readonly string[]) => ({
+  bool: {
+    should: kiTypes.map((filter) =>
+      filter.endsWith('.*') ? { prefix: { type: filter.slice(0, -1) } } : { term: { type: filter } }
+    ),
+    minimum_should_match: 1,
+    must_not: [{ terms: { type: [WIKI_PAGE_KI_TYPE, RELATIONSHIP_KI_TYPE] } }],
+  },
+});
+
+/**
+ * Builds wiki-style overview pages for one AI index: plans which pages the knowledge items that
+ * changed belong in, gathers each page's members, researches its topic in the sources, and writes
+ * the page.
+ */
+export const CONTEXT_ENGINE_WIKI_WORKFLOW = {
+  id: CONTEXT_ENGINE_WIKI_WORKFLOW_ID,
+  pluginId: 'contextEngine',
+  version: 1,
+  billable: false,
+  yamlTemplate: (values) => {
+    const {
+      instructions = '',
+      kiTypes = DEFAULT_WIKI_KI_TYPES,
+      maxPages = DEFAULT_WIKI_MAX_PAGES,
+      research = true,
+    } = values.wiki ?? {};
+    return renderJsonTemplate(WIKI_YAML, {
+      __NAME__: `Wiki pages: ${values.aiIndexId}`,
+      __AI_INDEX_ID__: values.aiIndexId,
+      __CONCURRENCY_KEY__: `context-engine-wiki-${values.instanceKey}`,
+      __MEMORIES_INDEX__: values.memoriesIndex,
+      __INTERVAL_MINUTES__: values.intervalMinutes,
+      __CONNECTOR_ID__: values.connectorId,
+      __INSTRUCTIONS__: values.instructions,
+      __WIKI_INSTRUCTIONS__: instructions,
+      __MAX_PAGES__: maxPages,
+      __RESEARCH__: research,
+      __MEMBER_TYPE_QUERY__: wikiMemberTypeQuery(kiTypes),
+    });
+  },
+  management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
+} as const satisfies ManagedWorkflowDefinition<ContextEngineWikiWorkflowTemplateValues>;

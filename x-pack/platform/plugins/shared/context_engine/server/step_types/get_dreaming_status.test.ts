@@ -24,7 +24,7 @@ describe('getDreamingStatusStepDefinition', () => {
     memoryEnabled?: boolean;
     canRead?: boolean;
     get?: jest.Mock;
-    source?: 'memories' | 'traces' | 'relationships';
+    source?: 'memories' | 'traces' | 'relationships' | 'enrichment' | 'wiki';
   } = {}) =>
     getDreamingStatusStepDefinition({
       getAiIndexService: () => ({ get } as unknown as AiIndexService),
@@ -137,6 +137,52 @@ describe('getDreamingStatusStepDefinition', () => {
       run({ source: 'relationships', get: get({ ...withTypes, enabled: false }) })
     ).resolves.toEqual({
       output: { dream: false, reason: "Dreaming is not turned on for AI index 'support'." },
+    });
+  });
+
+  it('enriches with enrichment on and a source, whether or not dreaming builds types', async () => {
+    const get = (aiIndex: Record<string, unknown>) =>
+      jest.fn().mockResolvedValue({ id: 'support', traces: [], sources: [], ...aiIndex });
+    const enrichOnly = { enabled: true, enrichment: { enabled: true } };
+    const sources = [{ type: 'esql', value: 'FROM cases' }];
+
+    await expect(
+      run({ source: 'enrichment', get: get({ dreaming: enrichOnly, sources }) })
+    ).resolves.toEqual({ output: { dream: true } });
+    await expect(
+      run({ source: 'enrichment', get: get({ dreaming: enrichOnly }) })
+    ).resolves.toEqual({
+      output: { dream: false, reason: "AI index 'support' has no sources to enrich from." },
+    });
+    await expect(run({ source: 'enrichment', get: get({ dreaming, sources }) })).resolves.toEqual({
+      output: { dream: false, reason: "Enrichment is not turned on for AI index 'support'." },
+    });
+    await expect(
+      run({
+        source: 'enrichment',
+        get: get({ dreaming: { ...enrichOnly, enabled: false }, sources }),
+      })
+    ).resolves.toEqual({
+      output: { dream: false, reason: "Enrichment is not turned on for AI index 'support'." },
+    });
+  });
+
+  it('builds wiki pages with wiki pages on, whether or not dreaming builds types', async () => {
+    const get = (wikiDreaming: Record<string, unknown>) =>
+      jest
+        .fn()
+        .mockResolvedValue({ id: 'support', traces: [], sources: [], dreaming: wikiDreaming });
+
+    await expect(
+      run({ source: 'wiki', get: get({ enabled: true, wiki: { enabled: true } }) })
+    ).resolves.toEqual({ output: { dream: true } });
+    await expect(run({ source: 'wiki', get: get(dreaming) })).resolves.toEqual({
+      output: { dream: false, reason: "Wiki pages are not turned on for AI index 'support'." },
+    });
+    await expect(
+      run({ source: 'wiki', get: get({ enabled: false, wiki: { enabled: true } }) })
+    ).resolves.toEqual({
+      output: { dream: false, reason: "Wiki pages are not turned on for AI index 'support'." },
     });
   });
 

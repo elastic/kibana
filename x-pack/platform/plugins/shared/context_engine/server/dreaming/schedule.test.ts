@@ -10,9 +10,11 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
+  CONTEXT_ENGINE_ENRICHMENT_WORKFLOW_ID,
   CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
   CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
   CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
+  CONTEXT_ENGINE_WIKI_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { AiIndexItem } from '../../common/http_api/ai_indices';
@@ -21,10 +23,12 @@ import type { DreamingWorkflowsApi } from './schedule';
 import {
   createDreamingScheduleService,
   dreamingWorkflowIdFor,
+  enrichmentWorkflowIdFor,
   relationshipsWorkflowIdFor,
   shouldDream,
   traceDreamingBatchWorkflowIdFor,
   traceDreamingWorkflowIdFor,
+  wikiWorkflowIdFor,
 } from './schedule';
 
 const SPACE = 'marketing';
@@ -120,6 +124,8 @@ describe('createDreamingScheduleService', () => {
         factTypes: dreaming.facts,
         entityTypes: dreaming.entities.nodes,
         relationshipTypes: dreaming.relationships,
+        enrichment: { selection: '', improvement: '', maxDocuments: 10 },
+        wiki: { instructions: '', kiTypes: ['fact.*', 'entity.*'], maxPages: 5, research: true },
       },
     });
   });
@@ -308,6 +314,133 @@ describe('createDreamingScheduleService', () => {
     });
   });
 
+  describe('enrichment and wiki pages', () => {
+    const enrichmentId = `${CONTEXT_ENGINE_ENRICHMENT_WORKFLOW_ID}-${suffix}`;
+    const wikiId = `${CONTEXT_ENGINE_WIKI_WORKFLOW_ID}-${suffix}`;
+    const installed = () => client.install.mock.calls.map(([definitionId]) => definitionId);
+    const uninstalled = () => client.uninstall.mock.calls.map(([definitionId]) => definitionId);
+
+    it('names their workflows per AI index and space', () => {
+      expect(enrichmentWorkflowIdFor('support', SPACE)).toBe(enrichmentId);
+      expect(wikiWorkflowIdFor('support', SPACE)).toBe(wikiId);
+    });
+
+    it('removes their workflows while they are off, and installs the rest', async () => {
+      await createService(workflowsManagement).reconcile({
+        aiIndex: aiIndex(),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(installed()).not.toContain(CONTEXT_ENGINE_ENRICHMENT_WORKFLOW_ID);
+      expect(uninstalled()).toEqual([
+        CONTEXT_ENGINE_ENRICHMENT_WORKFLOW_ID,
+        CONTEXT_ENGINE_WIKI_WORKFLOW_ID,
+      ]);
+      expect(aiIndexService.removeAutomation).toHaveBeenCalledWith('support', SPACE, {
+        type: 'workflow',
+        value: enrichmentId,
+      });
+    });
+
+    it('installs, enables and attaches each one that is on, with its config as values', async () => {
+      await createService(workflowsManagement).reconcile({
+        aiIndex: aiIndex({
+          dreaming: {
+            ...dreaming,
+            enrichment: {
+              enabled: true,
+              selection: 'Thin customers.',
+              improvement: 'Tiers.',
+              max_documents: 3,
+            },
+            wiki: {
+              enabled: true,
+              instructions: 'One per customer.',
+              ki_types: ['entity.*'],
+              research: false,
+            },
+          },
+        }),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(installed()).toEqual([
+        CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
+        CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
+        CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
+        CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
+        CONTEXT_ENGINE_ENRICHMENT_WORKFLOW_ID,
+        CONTEXT_ENGINE_WIKI_WORKFLOW_ID,
+      ]);
+      expect(client.uninstall).not.toHaveBeenCalled();
+      expect(client.install.mock.calls[4][1].values).toEqual(
+        expect.objectContaining({
+          enrichment: { selection: 'Thin customers.', improvement: 'Tiers.', maxDocuments: 3 },
+          wiki: {
+            instructions: 'One per customer.',
+            kiTypes: ['entity.*'],
+            maxPages: 5,
+            research: false,
+          },
+        })
+      );
+      for (const workflowId of [enrichmentId, wikiId]) {
+        expect(workflowsManagement.updateWorkflow).toHaveBeenCalledWith(
+          workflowId,
+          { enabled: true },
+          SPACE,
+          request
+        );
+        expect(aiIndexService.addAutomation).toHaveBeenCalledWith('support', SPACE, {
+          type: 'workflow',
+          value: workflowId,
+        });
+      }
+    });
+
+    it('runs enrichment alone, without the memory workflows, when dreaming builds no types', async () => {
+      await createService(workflowsManagement).reconcile({
+        aiIndex: aiIndex({ dreaming: { enabled: true, enrichment: { enabled: true } } }),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(installed()).toEqual([CONTEXT_ENGINE_ENRICHMENT_WORKFLOW_ID]);
+      expect(uninstalled()).toEqual([
+        CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
+        CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
+        CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
+        CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
+        CONTEXT_ENGINE_WIKI_WORKFLOW_ID,
+      ]);
+    });
+
+    it('removes them with dreaming, even when they are on', async () => {
+      await createService(workflowsManagement).reconcile({
+        aiIndex: aiIndex({
+          dreaming: {
+            ...dreaming,
+            enabled: false,
+            enrichment: { enabled: true },
+            wiki: { enabled: true },
+          },
+        }),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(client.install).not.toHaveBeenCalled();
+      expect(uninstalled()).toEqual(
+        expect.arrayContaining([
+          CONTEXT_ENGINE_ENRICHMENT_WORKFLOW_ID,
+          CONTEXT_ENGINE_WIKI_WORKFLOW_ID,
+        ])
+      );
+    });
+  });
+
   it('refuses to install a workflow it could not enable', async () => {
     await expect(
       createService(undefined).reconcile({ aiIndex: aiIndex(), spaceId: SPACE, request })
@@ -350,7 +483,7 @@ describe('createDreamingScheduleService', () => {
       SPACE,
       request
     );
-    expect(client.uninstall).toHaveBeenCalledTimes(6);
+    expect(client.uninstall).toHaveBeenCalledTimes(8);
   });
 
   it('does not cancel runs when the uninstall fails for another reason', async () => {

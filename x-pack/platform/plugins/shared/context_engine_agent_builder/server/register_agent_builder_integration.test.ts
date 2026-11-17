@@ -10,6 +10,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AgentBuilderPluginSetup, AiIndexResolver } from '@kbn/agent-builder-server';
 import { registerContextEngineAgentBuilderIntegration } from './register_agent_builder_integration';
 import { CONTEXT_ENGINE_SETUP_AGENT_ID } from './agent/context_engine_agent';
+import { CONTEXT_ENGINE_DREAMING_RESEARCH_AGENT_ID } from './agent/dreaming_research_agent';
 import { chatAgentTypeId } from '@kbn/agent-builder-common';
 import {
   ANALYZE_AND_IMPROVE_SKILL_ID,
@@ -54,6 +55,7 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
 
     const list = jest.fn().mockResolvedValue(aiIndices);
     const getAiIndexDataReadService = jest.fn().mockReturnValue({ list });
+    const getReadOnlyConnectorIds = jest.fn().mockResolvedValue(['notion-read']);
     const asCurrentUser = {};
     const asScoped = jest.fn().mockReturnValue({ asCurrentUser });
     const coreSetup = {
@@ -63,7 +65,7 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
           savedObjects: { getScopedClient: jest.fn() },
         },
         {
-          contextEngine: { getAiIndexDataReadService },
+          contextEngine: { getAiIndexDataReadService, getReadOnlyConnectorIds },
           security,
         },
         {},
@@ -97,6 +99,7 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     return {
       resolver,
       register,
+      getReadOnlyConnectorIds,
       list,
       getAiIndexDataReadService,
       asScoped,
@@ -112,7 +115,9 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
 
     const [{ getContextEngineStart }] = registerAgentBuilderTools.mock.calls.at(-1);
 
-    await expect(getContextEngineStart()).resolves.toEqual({ getAiIndexDataReadService });
+    await expect(getContextEngineStart()).resolves.toEqual(
+      expect.objectContaining({ getAiIndexDataReadService })
+    );
   });
 
   it('reads readable AI Indices as the requesting user through the data read service', async () => {
@@ -223,10 +228,23 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     expect(list).not.toHaveBeenCalled();
   });
 
+  it('registers the dreaming research agent with the read-only connectors Context Engine resolves', async () => {
+    const { register, getReadOnlyConnectorIds } = setup({ aiIndices: [] });
+    const research = register.mock.calls
+      .map(([definition]) => definition)
+      .find(({ id }) => id === CONTEXT_ENGINE_DREAMING_RESEARCH_AGENT_ID);
+    const runRequest = {} as KibanaRequest;
+
+    const configuration = await research.configuration({ request: runRequest, spaceId: 'default' });
+
+    expect(getReadOnlyConnectorIds).toHaveBeenCalledWith(runRequest);
+    expect(configuration.connector_ids).toEqual(['notion-read']);
+  });
+
   it('registers the Context Engine Setup agent as a built-in during setup', () => {
     const { register } = setup({ aiIndices: [] });
 
-    expect(register).toHaveBeenCalledTimes(1);
+    expect(register).toHaveBeenCalledTimes(2);
     expect(register).toHaveBeenCalledWith(
       expect.objectContaining({
         id: CONTEXT_ENGINE_SETUP_AGENT_ID,

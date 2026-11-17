@@ -135,7 +135,8 @@ const activeSource = (revision: KiRevision | undefined): DreamedKi | undefined =
   return source && !isKiDeleted(source) ? source : undefined;
 };
 
-const storedDocument = (
+/** A KI as stored: the document stamped with its id, time and provenance, and active. */
+export const storedDocument = (
   document: Omit<DreamedKi, 'governance'>,
   kiId: string,
   current: DreamedKi | undefined,

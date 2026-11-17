@@ -7,16 +7,26 @@
 
 import {
   CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
+  CONTEXT_ENGINE_ENRICHMENT_WORKFLOW_ID,
   CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
   CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
   CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
+  CONTEXT_ENGINE_WIKI_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import {
+  DREAMING_KI_TYPE_FILTER_PATTERN,
   dreamingBuildsAnything,
   dreamingTypesOf,
+  dreamsAtAll,
+  dreamsEnrichment,
+  dreamsOnMemories,
+  dreamsWiki,
   isDreamedKiType,
   isDreamingAutomation,
   isDreamingConfigured,
+  kiTypeFiltersOf,
+  matchesKiTypeFilters,
+  validateDreamingConfig,
   validateDreamingTypes,
 } from './dreaming';
 
@@ -93,6 +103,8 @@ describe('isDreamingAutomation', () => {
     expect(isDreamingAutomation(workflow(CONTEXT_ENGINE_DREAMING_WORKFLOW_ID))).toBe(true);
     expect(isDreamingAutomation(workflow(CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID))).toBe(true);
     expect(isDreamingAutomation(workflow(CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID))).toBe(true);
+    expect(isDreamingAutomation(workflow(CONTEXT_ENGINE_ENRICHMENT_WORKFLOW_ID))).toBe(true);
+    expect(isDreamingAutomation(workflow(CONTEXT_ENGINE_WIKI_WORKFLOW_ID))).toBe(true);
   });
 
   it('does not match other workflows', () => {
@@ -109,9 +121,92 @@ describe('isDreamingConfigured', () => {
     expect(isDreamingConfigured({ enabled: false, facts: [{ type: 'preference' }] })).toBe(true);
   });
 
+  it('is set up when paused with enrichment or wiki pages on', () => {
+    expect(isDreamingConfigured({ enabled: false, enrichment: { enabled: true } })).toBe(true);
+    expect(isDreamingConfigured({ enabled: false, wiki: { enabled: true } })).toBe(true);
+  });
+
   it('is not set up without a config, or switched off with nothing to build', () => {
     expect(isDreamingConfigured(undefined)).toBe(false);
     expect(isDreamingConfigured({ enabled: false })).toBe(false);
+    expect(
+      isDreamingConfigured({ enabled: false, enrichment: { enabled: false }, wiki: null })
+    ).toBe(false);
+  });
+});
+
+describe('what dreaming runs', () => {
+  const facts = [{ type: 'preference' }];
+
+  it('dreams on memories only when on and building facts or entities', () => {
+    expect(dreamsOnMemories({ enabled: true, facts })).toBe(true);
+    expect(dreamsOnMemories({ enabled: true, enrichment: { enabled: true } })).toBe(false);
+    expect(dreamsOnMemories({ enabled: false, facts })).toBe(false);
+    expect(dreamsOnMemories(undefined)).toBe(false);
+  });
+
+  it('enriches and builds wiki pages only when on, whatever it builds from memories', () => {
+    expect(dreamsEnrichment({ enabled: true, enrichment: { enabled: true } })).toBe(true);
+    expect(dreamsEnrichment({ enabled: false, enrichment: { enabled: true } })).toBe(false);
+    expect(dreamsEnrichment({ enabled: true, facts, enrichment: null })).toBe(false);
+    expect(dreamsWiki({ enabled: true, wiki: { enabled: true } })).toBe(true);
+    expect(dreamsWiki({ enabled: true, wiki: { enabled: false } })).toBe(false);
+  });
+
+  it('runs at all when any of them runs', () => {
+    expect(dreamsAtAll({ enabled: true, facts })).toBe(true);
+    expect(dreamsAtAll({ enabled: true, wiki: { enabled: true } })).toBe(true);
+    expect(dreamsAtAll({ enabled: true })).toBe(false);
+    expect(dreamsAtAll({ enabled: false, facts, wiki: { enabled: true } })).toBe(false);
+  });
+});
+
+describe('KI type filters', () => {
+  it('defaults to every fact and entity', () => {
+    expect(kiTypeFiltersOf(undefined)).toEqual(['fact.*', 'entity.*']);
+    expect(kiTypeFiltersOf({ ki_types: [] })).toEqual(['fact.*', 'entity.*']);
+    expect(kiTypeFiltersOf({ ki_types: ['document'] })).toEqual(['document']);
+  });
+
+  it('matches exact types and prefixes, never relationships', () => {
+    expect(matchesKiTypeFilters('fact.preference', ['fact.*'])).toBe(true);
+    expect(matchesKiTypeFilters('factual', ['fact.*'])).toBe(false);
+    expect(matchesKiTypeFilters('entity.customer', ['entity.customer'])).toBe(true);
+    expect(matchesKiTypeFilters('entity.city', ['entity.customer'])).toBe(false);
+    expect(matchesKiTypeFilters('memory.relationship', ['memory.*'])).toBe(false);
+  });
+
+  it('takes exact types and prefixes as filters', () => {
+    expect(
+      ['fact.*', 'entity.customer', 'document', 'memory.session_fact'].every((filter) =>
+        DREAMING_KI_TYPE_FILTER_PATTERN.test(filter)
+      )
+    ).toBe(true);
+    expect(
+      ['*', 'fact*', 'Fact.x', 'fact..x', 'fact.*.x', ''].some((filter) =>
+        DREAMING_KI_TYPE_FILTER_PATTERN.test(filter)
+      )
+    ).toBe(false);
+  });
+});
+
+describe('validateDreamingConfig', () => {
+  it('checks the types, and KI type filters listed twice', () => {
+    expect(validateDreamingConfig({ facts: [{ type: 'a' }, { type: 'a' }] })).toBe(
+      "Fact type 'a' is listed twice."
+    );
+    expect(
+      validateDreamingConfig({ enrichment: { enabled: true, ki_types: ['fact.*', 'fact.*'] } })
+    ).toBe("Enrichment lists KI type 'fact.*' twice.");
+    expect(validateDreamingConfig({ wiki: { enabled: true, ki_types: ['x', 'x'] } })).toBe(
+      "Wiki lists KI type 'x' twice."
+    );
+    expect(
+      validateDreamingConfig({
+        enrichment: { enabled: true, ki_types: ['fact.*'] },
+        wiki: { enabled: true, ki_types: ['fact.*'] },
+      })
+    ).toBeUndefined();
   });
 });
 

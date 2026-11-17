@@ -11,7 +11,7 @@ import {
   getDreamingStatusStepCommonDefinition,
   type GetDreamingStatusOutput,
 } from '../../common/step_types/get_dreaming_status';
-import { dreamingTypesOf } from '../../common/dreaming';
+import { dreamingTypesOf, dreamsEnrichment, dreamsWiki } from '../../common/dreaming';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
 import { shouldDream } from '../dreaming/schedule';
 import type { DreamingStepDependencies } from './helpers';
@@ -45,6 +45,20 @@ export const getDreamingStatusStepDefinition = ({
       }
       try {
         const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
+        if (source === 'enrichment') {
+          if (!dreamsEnrichment(aiIndex.dreaming)) {
+            return skip(`Enrichment is not turned on for AI index '${aiIndexId}'.`);
+          }
+          if (aiIndex.sources.length === 0) {
+            return skip(`AI index '${aiIndexId}' has no sources to enrich from.`);
+          }
+          return { output: { dream: true } };
+        }
+        if (source === 'wiki') {
+          return dreamsWiki(aiIndex.dreaming)
+            ? { output: { dream: true } }
+            : skip(`Wiki pages are not turned on for AI index '${aiIndexId}'.`);
+        }
         if (!shouldDream(aiIndex)) {
           return skip(`Dreaming is not turned on for AI index '${aiIndexId}'.`);
         }

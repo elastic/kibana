@@ -42,6 +42,7 @@ import { createFeedbackAnalysisChangeHandler } from './feedback_analysis/change_
 import { createDreamingChangeHandler } from './dreaming/change_handler';
 import type { DreamingScheduleService, DreamingWorkflowsApi } from './dreaming/schedule';
 import { createDreamingScheduleService } from './dreaming/schedule';
+import { readOnlyConnectorIds } from './dreaming/research';
 import { AiIndexChangeNotifier } from './ai_indices/changes';
 import { AiIndexDataReadService } from './ai_indices/data_read_service';
 import { AiIndexService } from './ai_indices/service';
@@ -337,6 +338,17 @@ export class ContextEnginePlugin
         isMemoryEnabled: () => this.isGlobalMemoryEnabled(),
         checkReadPrivilege: checkContextEnginePrivilege(apiPrivileges.readContextEngine),
       },
+      research: {
+        getAiIndexService,
+        isDreamingAvailable,
+        checkReadPrivilege: checkContextEnginePrivilege(apiPrivileges.readContextEngine),
+        checkWritePrivilege,
+        getActions: async () => {
+          const [, startDeps] = await coreSetup.getStartServices();
+          return startDeps.actions;
+        },
+        logger: this.logger.get('dreaming_research'),
+      },
     });
 
     // Read-only Signals routes (reads run as the current user, scoped to the active space).
@@ -493,6 +505,8 @@ export class ContextEnginePlugin
       getAiIndexDataReadService: (params) => createAiIndexDataReadService(params),
       getSignalsService: () => signalsService,
       getImprovementsService: (esClient, spaceId) => createImprovementsService(esClient, spaceId),
+      getReadOnlyConnectorIds: async (request) =>
+        readOnlyConnectorIds(await startDeps.actions.getActionsClientWithRequest(request)),
     };
   }
 

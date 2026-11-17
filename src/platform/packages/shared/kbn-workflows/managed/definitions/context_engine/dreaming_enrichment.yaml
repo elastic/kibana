@@ -1,0 +1,398 @@
+version: '1'
+name: __NAME__
+description: 'Improves the knowledge items of a Context Engine AI index with what its sources say, as the AI index dreaming config describes: picks the items worth improving, researches each in the sources, and rewrites it citing what it found.'
+enabled: false
+tags:
+  - context-engine
+  - memory
+  - dreaming
+  - enrichment
+  - scheduled
+settings:
+  timeout: '60m'
+  concurrency:
+    key: __CONCURRENCY_KEY__
+    strategy: drop
+    max: 1
+consts:
+  ai_index_id: __AI_INDEX_ID__
+  connector_id: __CONNECTOR_ID__
+  instructions: __INSTRUCTIONS__
+  selection: __SELECTION__
+  improvement: __IMPROVEMENT__
+  max_documents: __MAX_DOCUMENTS__
+  # LiquidJS has no array literal, so `| default: []` does not produce an empty array.
+  no_items: []
+outputs:
+  - name: candidates
+    type: number
+  - name: selected
+    type: number
+  - name: improved
+    type: number
+  - name: unchanged
+    type: number
+  - name: skipped
+    type: number
+triggers:
+  - type: scheduled
+    with:
+      every: '__INTERVAL_MINUTES__m'
+  - type: manual
+    inputs:
+      additionalProperties: false
+      properties:
+        dry_run:
+          type: boolean
+          default: false
+          description: Research and report what enrichment would write, and write nothing. The run ends cancelled, so the next run picks the same items.
+steps:
+  - name: status
+    type: context-engine.getDreamingStatus
+    with:
+      ai_index_id: '{{ consts.ai_index_id }}'
+      source: enrichment
+
+  - name: paused
+    type: if
+    condition: '${{ steps.status.output.dream != true }}'
+    steps:
+      - name: skip
+        type: workflow.output
+        status: cancelled
+        with:
+          improved: 0
+          reason: '{{ steps.status.output.reason }}'
+
+  - name: sources
+    type: context-engine.listResearchSources
+    with:
+      ai_index_id: '{{ consts.ai_index_id }}'
+
+  - name: unsearchable
+    type: if
+    condition: '${{ steps.sources.output.usable == 0 }}'
+    steps:
+      - name: skip_unsearchable
+        type: workflow.output
+        status: cancelled
+        with:
+          improved: 0
+          reason: 'None of the sources of the AI index can be searched. Connector sources must be read-only: only their read sub-actions enabled.'
+
+  - name: candidates
+    type: context-engine.selectEnrichmentCandidates
+    with:
+      ai_index_id: '{{ consts.ai_index_id }}'
+      limit: 100
+
+  - name: counts
+    type: data.set
+    with:
+      selected: 0
+      improved: 0
+      unchanged: 0
+      skipped: 0
+      would_write: []
+
+  - name: enrich
+    type: if
+    condition: '${{ steps.candidates.output.candidates.size > 0 }}'
+    steps:
+      - name: select
+        type: ai.prompt
+        connector-id: '{{ consts.connector_id }}'
+        connector-id-by-feature: '{% if consts.connector_id == blank %}context_engine_prompt{% endif %}'
+        on-failure:
+          retry:
+            max-attempts: 2
+            delay: '30s'
+        with:
+          prompt: |
+            You choose which knowledge items of an AI index to improve with information from its sources.
+
+            ABOUT THE AI INDEX:
+
+            {{ consts.instructions | default: "Not described." }}
+
+            WHICH ITEMS TO IMPROVE:
+
+            {{ consts.selection | default: "Items that are thin, vague, or missing details its sources are likely to hold." }}
+
+            WHAT TO IMPROVE THEM IN:
+
+            {{ consts.improvement | default: "Missing facts, exact values, current status, and context that make the item more useful on its own." }}
+
+            SOURCES:
+            {%- for source in steps.sources.output.sources %}
+            {%- unless source.error %}
+            - {{ source.name }} ({{ source.type }}): {{ source.description }}
+            {%- endunless %}
+            {%- endfor %}
+
+            Choose at most {{ consts.max_documents }} of the CANDIDATES most worth improving, best first: the ones WHICH ITEMS TO IMPROVE describes, that the SOURCES are likely to know more about. Skip items that are already complete or that the sources cannot add to.
+
+            Each candidate has a reason it is due: never_enriched, changed since it was last improved, or stale because it was improved long ago.
+
+            For each item you choose, give its id exactly as shown and a goal: what to look for in the sources about this item, specific to it, such as "the current contract tier and renewal date of Acme Corp".
+
+            An empty list is a valid answer.
+
+            CANDIDATES (one per line):
+            {%- for candidate in steps.candidates.output.candidates %}
+            {{ candidate | json }}
+            {%- endfor %}
+          schema:
+            type: object
+            properties:
+              selected:
+                type: array
+                description: The items to improve, best first.
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: The id of a candidate, exactly as shown.
+                    goal:
+                      type: string
+                      description: What to look for in the sources about this item.
+                  required:
+                    - id
+                    - goal
+            required:
+              - selected
+
+      - name: targets
+        type: context-engine.readKis
+        with:
+          ai_index_id: '{{ consts.ai_index_id }}'
+          ids: '${{ steps.select.output.content.selected | map: "id" | uniq | slice: 0, consts.max_documents }}'
+
+      - name: improve
+        type: foreach
+        foreach: >-
+          {%- assign candidate_ids = steps.candidates.output.candidates | map: "id" -%}
+          {%- assign targets = steps.targets.output.kis | where_exp: "ki", "candidate_ids contains ki.id" -%}
+          {{ targets | json }}
+        steps:
+          - name: start
+            type: data.set
+            with:
+              selected: '${{ variables.selected | plus: 1 }}'
+
+          - name: research
+            type: ai.agent
+            agent-id: platform.context_engine.dreaming_research
+            connector-id: '{{ consts.connector_id }}'
+            connector-id-by-feature: '{% if consts.connector_id == blank %}context_engine_prompt{% endif %}'
+            plugin-id: context_engine_dreaming
+            aggregate-by: context_engine
+            ephemeral: true
+            timeout: '10m'
+            on-failure:
+              retry:
+                max-attempts: 2
+                delay: '30s'
+            with:
+              message: |
+                Research the sources of an AI index for information that would improve one of its knowledge items.
+
+                {%- assign pick = steps.select.output.content.selected | where: "id", foreach.item.id | first %}
+
+                GOAL: {{ pick.goal }}
+
+                WHAT THE INFORMATION IS FOR:
+
+                {{ consts.improvement | default: "Missing facts, exact values, current status, and context that make the item more useful on its own." }}
+
+                KNOWLEDGE ITEM:
+                {{ foreach.item | json }}
+
+                SOURCES (search only these):
+                {%- for source in steps.sources.output.sources %}
+                {%- unless source.error %}
+                {%- if source.type == 'esql' %}
+                - ref: {{ source.ref }}
+                  Indices: {{ source.indices | join: ", " }}
+                {%- else %}
+                - ref: {{ source.ref }}
+                  Connector "{{ source.name }}", connectorId: {{ source.connector_id }}. {{ source.description }}
+                {%- for sub_action in source.sub_actions %}
+                  subAction {{ sub_action.name }}: {{ sub_action.description }}
+                  params:
+                {{ sub_action.params }}
+                {%- endfor %}
+                {%- if source.guidance %}
+                  How to use it: {{ source.guidance }}
+                {%- endif %}
+                {%- endif %}
+                {%- endunless %}
+                {%- endfor %}
+              schema:
+                type: object
+                properties:
+                  evidence:
+                    type: array
+                    description: The information found that bears on the goal. Empty when nothing was found.
+                    maxItems: 20
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: e-1, e-2 and so on, in the order found.
+                        source:
+                          type: string
+                          description: The ref of the source it came from.
+                        uri:
+                          type: string
+                          description: Where it came from, such as index://<index>/<document id> or the URL a connector returned.
+                        title:
+                          type: string
+                          description: A short label for it.
+                        text:
+                          type: string
+                          maxLength: 1500
+                          description: What it says, quoted or closely paraphrased, with exact names, numbers and dates.
+                      required:
+                        - id
+                        - source
+                        - uri
+                        - text
+                required:
+                  - evidence
+
+          - name: collect
+            type: data.set
+            with:
+              evidence: '${{ steps.research.output.structured_output.evidence | default: consts.no_items }}'
+
+          - name: write
+            type: if
+            condition: '${{ variables.evidence.size > 0 }}'
+            steps:
+              - name: rewrite
+                type: ai.prompt
+                connector-id: '{{ consts.connector_id }}'
+                connector-id-by-feature: '{% if consts.connector_id == blank %}context_engine_prompt{% endif %}'
+                on-failure:
+                  retry:
+                    max-attempts: 2
+                    delay: '30s'
+                with:
+                  prompt: |
+                    You improve one knowledge item of an AI index with what was found in its sources.
+
+                    {%- assign pick = steps.select.output.content.selected | where: "id", foreach.item.id | first %}
+
+                    ABOUT THE AI INDEX:
+
+                    {{ consts.instructions | default: "Not described." }}
+
+                    WHAT TO IMPROVE:
+
+                    {{ consts.improvement | default: "Missing facts, exact values, current status, and context that make the item more useful on its own." }}
+
+                    GOAL FOR THIS ITEM: {{ pick.goal }}
+
+                    KNOWLEDGE ITEM:
+                    {{ foreach.item | json }}
+
+                    EVIDENCE (one per line, each with its id):
+                    {%- for item in variables.evidence %}
+                    {{ item | json }}
+                    {%- endfor %}
+
+                    Rewrite the content of the item so it includes what the EVIDENCE adds that the item lacks and the goal asks for.
+                    - Keep everything the item says that the evidence does not contradict, with every name, number, code and date exactly as stated.
+                    - Add only what the evidence states. Never add what it does not say.
+                    - When the evidence contradicts the item, prefer the evidence when it is more recent or more specific, and say what changed.
+                    - Keep what the item is: a fact stays one piece of knowledge, readable on its own; an entity stays a summary of what is known about it.
+                    - Write the knowledge itself: do not mention evidence ids, searches, or where it was found.
+                    - Return title or description only to correct them.
+                    - citations: the ids of the evidence the new content uses.
+
+                    Set changed to false, and return nothing else, when the evidence adds nothing to the item.
+                  schema:
+                    type: object
+                    properties:
+                      changed:
+                        type: boolean
+                        description: Whether the evidence adds anything to the item.
+                      content:
+                        type: string
+                        description: The whole improved content of the item.
+                      title:
+                        type: string
+                        description: A corrected title, only when it was wrong.
+                      description:
+                        type: string
+                        description: A corrected one-line description, only when it was wrong.
+                      citations:
+                        type: array
+                        description: The ids of the evidence the content uses.
+                        items:
+                          type: string
+                    required:
+                      - changed
+
+              - name: apply
+                type: context-engine.applyEnrichment
+                with:
+                  ai_index_id: '{{ consts.ai_index_id }}'
+                  ki_id: '{{ foreach.item.id }}'
+                  expected_updated_at: '{{ foreach.item.updated_at }}'
+                  changes: '${{ steps.rewrite.output.content }}'
+                  evidence: '${{ variables.evidence }}'
+                  dry_run: '${{ inputs.dry_run == true }}'
+
+              - name: tally_apply
+                type: data.set
+                with:
+                  improved: '${{ variables.improved | plus: steps.apply.output.tally.improved }}'
+                  unchanged: '${{ variables.unchanged | plus: steps.apply.output.tally.unchanged }}'
+                  skipped: '${{ variables.skipped | plus: steps.apply.output.tally.skipped }}'
+                  would_write: '${{ variables.would_write | concat: steps.apply.output.would_write }}'
+            else:
+              - name: mark
+                type: context-engine.applyEnrichment
+                with:
+                  ai_index_id: '{{ consts.ai_index_id }}'
+                  ki_id: '{{ foreach.item.id }}'
+                  expected_updated_at: '{{ foreach.item.updated_at }}'
+                  changes:
+                    changed: false
+                  evidence: '${{ consts.no_items }}'
+                  dry_run: '${{ inputs.dry_run == true }}'
+
+              - name: tally_mark
+                type: data.set
+                with:
+                  unchanged: '${{ variables.unchanged | plus: steps.mark.output.tally.unchanged }}'
+                  skipped: '${{ variables.skipped | plus: steps.mark.output.tally.skipped }}'
+
+  - name: dry_run_result
+    type: if
+    condition: '${{ inputs.dry_run == true }}'
+    steps:
+      - name: dry_run_output
+        type: workflow.output
+        status: cancelled
+        with:
+          candidates: '${{ steps.candidates.output.candidates | size | default: 0 }}'
+          selected: '${{ variables.selected | default: 0 }}'
+          improved: '${{ variables.improved | default: 0 }}'
+          unchanged: '${{ variables.unchanged | default: 0 }}'
+          skipped: '${{ variables.skipped | default: 0 }}'
+          would_write: '${{ variables.would_write }}'
+          reason: 'Dry run: nothing was written.'
+
+  - name: output_result
+    type: workflow.output
+    with:
+      candidates: '${{ steps.candidates.output.candidates | size | default: 0 }}'
+      selected: '${{ variables.selected | default: 0 }}'
+      improved: '${{ variables.improved | default: 0 }}'
+      unchanged: '${{ variables.unchanged | default: 0 }}'
+      skipped: '${{ variables.skipped | default: 0 }}'
