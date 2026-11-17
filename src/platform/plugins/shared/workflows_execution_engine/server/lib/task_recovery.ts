@@ -17,6 +17,7 @@ import {
 } from './execution_identity';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { publishFinishedWorkflowExecution } from '../topics/publish_finished_workflow_execution';
 
 /** Unified error type for executions abandoned after Kibana/Task Manager interruption (fail-fast recovery). */
 export const TASK_RECOVERY_ERROR_TYPE = 'TaskRecoveryError' as const;
@@ -109,7 +110,9 @@ export async function resolveInterruptedWorkflowRunTask({
     workflowRunId,
     {
       message: taskRecoveryMessages.workflowRunInterrupted,
-    }
+    },
+    {},
+    execution
   );
 
   logger.warn(
@@ -201,7 +204,9 @@ export async function resolveInterruptedWorkflowResumeTask({
     workflowRunId,
     {
       message: taskRecoveryMessages.workflowResumeInterrupted,
-    }
+    },
+    {},
+    execution
   );
 
   logger.warn(
@@ -236,7 +241,8 @@ export async function markExecutionFailedTaskRecovery(
       | 'TaskAttemptsExhaustedError'
       | typeof MISSING_EXECUTION_IDENTITY_ERROR_TYPE;
   },
-  options: { refresh?: boolean | 'wait_for' } = {}
+  options: { refresh?: boolean | 'wait_for' } = {},
+  sourceExecution?: Partial<EsWorkflowExecution>
 ): Promise<void> {
   const error = { type, message };
   const finishedAt = new Date().toISOString();
@@ -250,6 +256,12 @@ export async function markExecutionFailedTaskRecovery(
     },
     { refresh: options.refresh ?? false }
   );
+
+  await publishFinishedWorkflowExecution(sourceExecution, {
+    status: ExecutionStatus.FAILED,
+    error,
+    finishedAt,
+  });
 
   await stepExecutionRepository.markNonTerminalStepsFailed(executionId, error);
 }
@@ -302,7 +314,9 @@ export async function resolveExhaustedWorkflowRunTask({
         {
           type: 'TaskAttemptsExhaustedError',
           message: buildTaskAttemptsExhaustedMessage(lastMessage),
-        }
+        },
+        {},
+        execution
       );
     }
   } catch (markFailedErr) {
@@ -364,7 +378,8 @@ export async function markScheduledExecutionFailedAfterTaskError(params: {
       {
         message: taskRecoveryMessages.scheduledRunFailedAfterCreate,
       },
-      { refresh: 'wait_for' }
+      { refresh: 'wait_for' },
+      execution
     );
     logger.warn(
       `Marked workflow execution ${workflowRunId} FAILED after scheduled task error (status was ${execution.status})`
@@ -409,7 +424,9 @@ export async function failExecutionMissingIdentity(params: {
       {
         type: MISSING_EXECUTION_IDENTITY_ERROR_TYPE,
         message: MISSING_EXECUTION_IDENTITY_MESSAGE,
-      }
+      },
+      {},
+      execution
     );
     logger.warn(
       `Marked workflow execution ${workflowRunId} FAILED: ${MISSING_EXECUTION_IDENTITY_MESSAGE}`

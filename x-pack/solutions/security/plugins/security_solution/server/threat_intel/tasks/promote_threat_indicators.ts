@@ -8,6 +8,7 @@
 import { createHash } from 'crypto';
 import net from 'node:net';
 import type { estypes } from '@elastic/elasticsearch';
+import { isNonRoutableIpIoc } from '@kbn/alertzero-common';
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import {
@@ -406,12 +407,15 @@ const buildBulkOps = (reports: ReportHit[], now: string): IocIndicatorOp[] => {
     const trailLabel = report._source?.content?.title ?? null;
     const firstSeen = report._source?.lineage?.extracted_at ?? now;
 
-    // Three filters. The type/value check is defensive on the indexer boundary so
+    // Four filters. The type/value check is defensive on the indexer boundary so
     // a single malformed row never poisons the bulk write. The tier check is the
     // vetting gate: only IOCs the extractor did not already classify as noise
     // become live Indicator Match rows. `deferred_unreviewed` means semantic
     // review never ran on this IOC (batch/overflow budget) — its tier is a kept
     // heuristic, not a verdict, so it stays out until a later run reviews it.
+    // The non-routable check is by value: reports extracted before the shared
+    // range set existed can carry a promotable tier on CGNAT, multicast or other
+    // special-use space, and promoting it would match internal traffic.
     const usableIocs = iocs.filter(
       (ioc): ioc is typeof ioc & { type: IocType; value: string; tier: string } =>
         typeof ioc.value === 'string' &&
@@ -419,7 +423,8 @@ const buildBulkOps = (reports: ReportHit[], now: string): IocIndicatorOp[] => {
         isIocType(ioc.type) &&
         isWellFormedForType(ioc.type, ioc.value) &&
         isPromotableTier(ioc.tier) &&
-        ioc.deferred_unreviewed !== true
+        ioc.deferred_unreviewed !== true &&
+        !isNonRoutableIpIoc(ioc)
     );
     for (const ioc of usableIocs) {
       const id = indicatorId(spaceId, ioc.type, ioc.value);
