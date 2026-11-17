@@ -21,17 +21,19 @@ const renderCard = () =>
   );
 
 describe('AwsOnboardingSettingsCard', () => {
-  it('shows one status line per data stream with the chosen method and missing values', () => {
+  it('shows how many values a service is missing when its chosen inputs have problems', () => {
     renderCard();
 
-    expect(screen.getByTestId('awsOnboardingSettings-guardduty_findings-status')).toHaveTextContent(
-      'Findings: S3 + SQS notifications · 1 value missing'
+    expect(screen.getByTestId('awsOnboardingSettings-service-guardduty-status')).toHaveTextContent(
+      'Amazon GuardDuty: 1 value missing'
     );
-    expect(screen.getByTestId('awsOnboardingSettings-ec2_metrics-status')).toHaveTextContent(
-      'EC2 metrics: CloudWatch metrics'
-    );
-    expect(screen.getByTestId('awsOnboardingSettings-ec2_logs-status')).toHaveTextContent(
-      'EC2 logs: off'
+  });
+
+  it('shows ready for a service with nothing left to fill in', () => {
+    renderCard();
+
+    expect(screen.getByTestId('awsOnboardingSettings-service-ec2-status')).toHaveTextContent(
+      'Amazon EC2: ready'
     );
   });
 
@@ -49,25 +51,6 @@ describe('AwsOnboardingSettingsCard', () => {
     expect(screen.getByText('Use Review settings above to open the form.')).toBeInTheDocument();
     expect(screen.queryByRole('radio')).not.toBeInTheDocument();
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
-  });
-
-  it('shows a service-level problem when a service is left with nothing enabled', () => {
-    render(
-      <I18nProvider>
-        <AwsOnboardingSettingsCard
-          data={{
-            ...settingsAttachmentData,
-            answer: {
-              services: { guardduty: { data_streams: { guardduty_findings: { input: null } } } },
-            },
-          }}
-        />
-      </I18nProvider>
-    );
-
-    expect(screen.getByTestId('awsOnboardingSettings-service-guardduty-problem')).toHaveTextContent(
-      'Amazon GuardDuty: enable at least one data stream.'
-    );
   });
 
   it('pluralises the missing-values badge', () => {
@@ -92,26 +75,7 @@ describe('AwsOnboardingSettingsCard', () => {
     );
   });
 
-  it('reads the recorded answer when one is present', () => {
-    render(
-      <I18nProvider>
-        <AwsOnboardingSettingsCard
-          data={{
-            ...settingsAttachmentData,
-            answer: {
-              services: { guardduty: { data_streams: { guardduty_findings: { input: 'cel' } } } },
-            },
-          }}
-        />
-      </I18nProvider>
-    );
-
-    expect(screen.getByTestId('awsOnboardingSettings-guardduty_findings-status')).toHaveTextContent(
-      'Findings: GuardDuty API polling · 1 value missing'
-    );
-  });
-
-  it('marks a log stream with no default and no default-on sibling as not set', () => {
+  it('shows not set for a service with a log stream nobody has chosen a method for', () => {
     const [guardduty] = settingsAttachmentData.requirement.services;
     const [findings] = guardduty.data_streams;
     render(
@@ -130,8 +94,8 @@ describe('AwsOnboardingSettingsCard', () => {
       </I18nProvider>
     );
 
-    expect(screen.getByTestId('awsOnboardingSettings-guardduty_findings-status')).toHaveTextContent(
-      'Findings: not set'
+    expect(screen.getByTestId('awsOnboardingSettings-service-guardduty-status')).toHaveTextContent(
+      'Amazon GuardDuty: not set'
     );
   });
 

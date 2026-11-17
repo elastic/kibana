@@ -6,8 +6,16 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiTextColor,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import type { AwsOnboardingSettingsAttachmentData } from '../../../../common/agent_builder/aws_onboarding_settings_attachment';
@@ -15,16 +23,12 @@ import { validateSettingsAnswer } from '../../../../common/workflows/steps/setti
 
 import { seedDraft } from './fields';
 
-type Requirement = AwsOnboardingSettingsAttachmentData['requirement'];
-type DataStream = Requirement['services'][number]['data_streams'][number];
+type Service = AwsOnboardingSettingsAttachmentData['requirement']['services'][number];
 
 const unique = (messages: string[]) => [...new Set(messages)];
 
-const offText = () =>
-  i18n.translate('xpack.fleet.awsOnboardingSettingsCard.off', { defaultMessage: 'off' });
-
 /**
- * A read-only summary: what each data stream will do and how many values are still missing.
+ * A read-only summary: one status per service and the count of required values still missing.
  * Editing happens in the canvas form, opened by the header's Review settings action.
  */
 export const AwsOnboardingSettingsCard: React.FC<{
@@ -36,38 +40,40 @@ export const AwsOnboardingSettingsCard: React.FC<{
   const all = useMemo(() => [...live, ...(data.problems ?? [])], [live, data.problems]);
   const missing = live.length;
 
-  const messagesAt = (path: string) =>
-    unique(all.filter((problem) => problem.path === path).map(({ message }) => message));
-
-  const streamState = (serviceId: string, stream: DataStream) => {
-    const streamAnswer = answer.services[serviceId]?.data_streams[stream.id];
-    if (!streamAnswer) {
-      return stream.choice === 'one_of'
-        ? {
-            danger: true,
-            text: i18n.translate('xpack.fleet.awsOnboardingSettingsCard.notSet', {
-              defaultMessage: 'not set',
-            }),
-          }
-        : { danger: false, text: offText() };
+  const serviceState = (service: Service) => {
+    const answered = answer.services[service.id]?.data_streams ?? {};
+    // A one_of stream nobody chose, or a service left with nothing enabled, still needs a decision.
+    const needsChoice =
+      service.data_streams.some((stream) => stream.choice === 'one_of' && !answered[stream.id]) ||
+      live.some((problem) => problem.path === service.id);
+    if (needsChoice) {
+      return {
+        color: 'danger' as const,
+        text: i18n.translate('xpack.fleet.awsOnboardingSettingsCard.notSet', {
+          defaultMessage: 'not set',
+        }),
+      };
     }
-    const input = stream.inputs.find((candidate) => candidate.input === streamAnswer.input);
-    if (!input) return { danger: false, text: offText() };
-    const prefix = `${serviceId}.${stream.id}.`;
-    const count = live.filter((problem) => problem.path.startsWith(prefix)).length;
-    return {
-      danger: false,
-      text:
-        count > 0
-          ? i18n.translate('xpack.fleet.awsOnboardingSettingsCard.valuesMissing', {
-              defaultMessage: '{method} · {count, plural, one {# value} other {# values}} missing',
-              values: { method: input.ingestion_method, count },
-            })
-          : input.ingestion_method,
-    };
+    const count = live.filter((problem) => problem.path.startsWith(`${service.id}.`)).length;
+    return count > 0
+      ? {
+          color: 'danger' as const,
+          text: i18n.translate('xpack.fleet.awsOnboardingSettingsCard.valuesMissing', {
+            defaultMessage: '{count, plural, one {# value} other {# values}} missing',
+            values: { count },
+          }),
+        }
+      : {
+          color: 'success' as const,
+          text: i18n.translate('xpack.fleet.awsOnboardingSettingsCard.ready', {
+            defaultMessage: 'ready',
+          }),
+        };
   };
 
-  const topLevel = messagesAt('services');
+  const topLevel = unique(
+    all.filter((problem) => problem.path === 'services').map(({ message }) => message)
+  );
 
   return (
     <div data-test-subj="awsOnboardingSettingsCard">
@@ -120,42 +126,25 @@ export const AwsOnboardingSettingsCard: React.FC<{
         </>
       )}
       {requirement.services.map((service) => {
-        const serviceProblems = messagesAt(service.id);
+        const state = serviceState(service);
         return (
-          <div key={service.id} data-test-subj={`awsOnboardingSettings-service-${service.id}`}>
-            <EuiTitle size="xxs">
-              <h4>{service.name}</h4>
-            </EuiTitle>
-            {serviceProblems.length > 0 && (
-              <>
-                <EuiSpacer size="xs" />
-                <KbnDangerCallout
-                  announceOnMount={false}
-                  data-test-subj={`awsOnboardingSettings-service-${service.id}-problem`}
-                  title={serviceProblems.join(' ')}
-                />
-              </>
-            )}
-            {service.data_streams.map((stream) => {
-              const state = streamState(service.id, stream);
-              return (
-                <EuiText
-                  key={stream.id}
-                  size="xs"
-                  color={state.danger ? 'danger' : 'subdued'}
-                  data-test-subj={`awsOnboardingSettings-${stream.id}-status`}
-                >
-                  {i18n.translate('xpack.fleet.awsOnboardingSettingsCard.streamStatus', {
-                    defaultMessage: '{title}: {status}',
-                    values: { title: stream.title, status: state.text },
-                  })}
-                </EuiText>
-              );
-            })}
-            <EuiSpacer size="s" />
-          </div>
+          <EuiText
+            key={service.id}
+            size="s"
+            data-test-subj={`awsOnboardingSettings-service-${service.id}-status`}
+          >
+            <FormattedMessage
+              id="xpack.fleet.awsOnboardingSettingsCard.serviceStatus"
+              defaultMessage="{name}: {status}"
+              values={{
+                name: service.name,
+                status: <EuiTextColor color={state.color}>{state.text}</EuiTextColor>,
+              }}
+            />
+          </EuiText>
         );
       })}
+      <EuiSpacer size="s" />
       {/* The inline renderer gets no openCanvas, so the header action is the only opener. */}
       <EuiText size="xs" color="subdued">
         {i18n.translate('xpack.fleet.awsOnboardingSettingsCard.openHint', {
