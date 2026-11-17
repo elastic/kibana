@@ -86,6 +86,11 @@ export const memoryOptimizeStepDefinition = ({
         .max(128)
         .optional()
         .describe('Deterministic T_background trace id from materialize.'),
+      round_trace_id: z
+        .string()
+        .max(128)
+        .optional()
+        .describe("Trace id of the agent run for this round, so the step's spans join it."),
     }),
     outputSchema: z.object({
       status: z.literal('ok').describe('The memory optimizer finished without throwing.'),
@@ -133,6 +138,7 @@ export const memoryOptimizeStepDefinition = ({
           {
             name: 'nightshift.memoryOptimize',
             traceId: context.input.background_trace_id || workflowExecutionId,
+            foregroundTraceId: context.input.round_trace_id,
             roundId: context.input.round_id,
             conversationId: context.input.conversation_id,
             spaceId,

@@ -107,8 +107,24 @@ export interface TimeSeriesPoint {
   count: number;
 }
 
+/** The width of a histogram bucket: seconds, or a calendar day, week, month or year. */
+export interface HistogramInterval {
+  value: number;
+  unit: 's' | 'd' | 'w' | 'M' | 'y';
+}
+
+/** The buckets of a histogram response: their width and the time range they cover. */
+export interface HistogramBuckets {
+  /** The width of every bucket. */
+  interval: HistogramInterval;
+  /** The queried time range in epoch milliseconds, which the edge buckets may cover only part of. */
+  start: number;
+  end: number;
+}
+
 /** Both sources use the same buckets; a source that isn't queried has none. */
 export interface PageLoadsOverTime {
   otel: TimeSeriesPoint[];
   classic: TimeSeriesPoint[];
+  histogram: HistogramBuckets;
 }

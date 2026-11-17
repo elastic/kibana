@@ -270,6 +270,8 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
     undefined,
     panelTimeRange,
     undefined,
+    undefined,
+    undefined,
     esqlDocumentScope,
     MAX_HISTOGRAM_BARS
   );
