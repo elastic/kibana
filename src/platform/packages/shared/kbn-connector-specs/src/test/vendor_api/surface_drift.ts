@@ -113,7 +113,9 @@ const problemSection = (title: string, problems: readonly string[] = []): string
 
 const sourceSection = (drift: ConnectorDrift): string[] =>
   Object.entries(drift.sources).flatMap(([name, { status, error, changes }]) => {
-    if (status === 'unchanged') {
+    // A pinned source is reported with the facts, not here: there is nothing to act on until
+    // someone captures it again with credentials.
+    if (status === 'unchanged' || status === 'pinned') {
       return [];
     }
     if (status === 'unreachable') {
