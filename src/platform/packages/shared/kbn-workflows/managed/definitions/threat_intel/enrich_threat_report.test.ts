@@ -151,12 +151,21 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
       with?: { query?: { bool?: { must_not?: unknown[] } } };
     };
     const mustNot = step.with?.query?.bool?.must_not ?? [];
-    // The wildcard covers future pipeline versions.
+    // workflow_rejected is the current value, workflow_v4_rejected the legacy one.
     expect(mustNot).toEqual(
       expect.arrayContaining([
-        { wildcard: { 'lineage.extraction_method': { value: '*_rejected' } } },
+        { terms: { 'lineage.extraction_method': ['workflow_rejected', 'workflow_v4_rejected'] } },
         { term: { 'extracted.gate.is_intelligence': false } },
       ])
+    );
+  });
+
+  it('writes the version-independent rejected extraction method', () => {
+    expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).toContain(
+      'extraction_method: workflow_rejected'
+    );
+    expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).not.toContain(
+      'extraction_method: workflow_v4_rejected'
     );
   });
 
@@ -172,10 +181,10 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
       with?: { query?: { bool?: { must_not?: unknown[] } } };
     };
     const mustNot = step.with?.query?.bool?.must_not ?? [];
-    // The wildcard covers future pipeline versions.
+    // workflow_rejected is the current value, workflow_v4_rejected the legacy one.
     expect(mustNot).toEqual(
       expect.arrayContaining([
-        { wildcard: { 'lineage.extraction_method': { value: '*_rejected' } } },
+        { terms: { 'lineage.extraction_method': ['workflow_rejected', 'workflow_v4_rejected'] } },
         { term: { 'extracted.gate.is_intelligence': false } },
       ])
     );

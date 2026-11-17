@@ -498,13 +498,13 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
       expect(ops).toHaveLength(0);
     });
 
-    it('produces no ops for a report a later workflow version marked rejected', () => {
+    it('produces no ops for a report marked rejected with the version-independent value', () => {
       const ops = buildBulkOpsForTest(
         [
           makeReport({
-            id: 'r-workflow-v5-rejected',
+            id: 'r-workflow-rejected-current',
             iocs: [{ type: 'ip', value: '1.2.3.4' }],
-            extractionMethod: 'workflow_v5_rejected',
+            extractionMethod: 'workflow_rejected',
           }),
         ],
         NOW

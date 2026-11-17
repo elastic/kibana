@@ -80,11 +80,13 @@ steps:
                 # would strand other Spaces' pending duplicates on skip_already_extracted.
                 - term:
                     lineage.extraction_method: pending
-                # The wildcard covers any future workflow_vN_rejected value; the editor schema requires
-                # the object form for wildcard and for non-string term values.
-                - wildcard:
+                # workflow_rejected is what this workflow writes now. workflow_v4_rejected is the
+                # legacy value on existing reports. Keep in sync with REJECTED_EXTRACTION_METHODS
+                # in kbn-alertzero-common.
+                - terms:
                     lineage.extraction_method:
-                      value: "*_rejected"
+                      - workflow_rejected
+                      - workflow_v4_rejected
                 - term:
                     extracted.gate.is_intelligence: false
                 - ids:
@@ -169,7 +171,7 @@ steps:
                   context_coverage: "${{ steps.assess_relevance.output.context.coverage }}"
               lineage:
                 extracted_at: "${{ now }}"
-                extraction_method: workflow_v4_rejected
+                extraction_method: workflow_rejected
         on-failure:
           continue: true
 
@@ -317,11 +319,13 @@ steps:
                       - "{{ foreach.item._id }}"
                 # Hard-rejected reports keep stale ioc_set_hash / iocs for forensics;
                 # they must not surface as related intelligence.
-                # The wildcard covers any future workflow_vN_rejected value; the editor schema requires
-                # the object form for wildcard and for non-string term values.
-                - wildcard:
+                # workflow_rejected is what this workflow writes now. workflow_v4_rejected is the
+                # legacy value on existing reports. Keep in sync with REJECTED_EXTRACTION_METHODS
+                # in kbn-alertzero-common.
+                - terms:
                     lineage.extraction_method:
-                      value: "*_rejected"
+                      - workflow_rejected
+                      - workflow_v4_rejected
                 - term:
                     extracted.gate.is_intelligence: false
               should:

@@ -21,14 +21,18 @@ describe('HUNT_USABLE_FILTER', () => {
     });
   });
 
-  it('returns a must_not wildcard excluding any *_rejected extraction method', () => {
+  it('returns a must_not terms clause excluding the current and legacy rejected methods', () => {
     expect(HUNT_USABLE_FILTER).toMatchObject({
       bool: {
         must_not: expect.arrayContaining([
-          { wildcard: { 'lineage.extraction_method': { value: '*_rejected' } } },
+          { terms: { 'lineage.extraction_method': ['workflow_rejected', 'workflow_v4_rejected'] } },
         ]),
       },
     });
+  });
+
+  it('uses no expensive query types', () => {
+    expect(JSON.stringify(HUNT_USABLE_FILTER)).not.toMatch(/"(wildcard|regexp|prefix)"/);
   });
 
   it('returns an exists clause on lineage.extraction_method in filter', () => {
@@ -45,13 +49,16 @@ describe('HUNT_USABLE_FILTER', () => {
 });
 
 describe('isRejectedExtractionMethod', () => {
-  it.each(['workflow_v4_rejected', 'workflow_v5_rejected'])('returns true for %p', (method) => {
+  it.each(['workflow_rejected', 'workflow_v4_rejected'])('returns true for %p', (method) => {
     expect(isRejectedExtractionMethod(method)).toBe(true);
   });
 
-  it.each(['workflow_v4', 'pending', '', undefined])('returns false for %p', (method) => {
-    expect(isRejectedExtractionMethod(method)).toBe(false);
-  });
+  it.each(['workflow_v4', 'workflow_v5_rejected', 'pending', '', undefined])(
+    'returns false for %p',
+    (method) => {
+      expect(isRejectedExtractionMethod(method)).toBe(false);
+    }
+  );
 });
 
 describe('INDICATOR_ELIGIBLE_FILTER', () => {
