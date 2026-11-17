@@ -206,6 +206,41 @@ describe('checkNoVisitedCheckmarks', () => {
     expect(graded.explanation).toContain('D1 -->|yes| E3');
   });
 
+  it('stops a merge chain at the first node the final tree keeps', () => {
+    const branches = (edges: string[]) =>
+      tree([
+        'S1([Otel delivery gateway errors]) --> E1[Check gateway error logs]',
+        'E1 --> D1{{Errors point at one upstream?}}',
+        ...edges,
+        'E3 --> X1((Upstream pod loss))',
+        'E4 --> X1',
+      ]);
+    const prior = branches([
+      'D1 -->|✅ yes| E2[Correlate with the upstream pod]',
+      'D1 -->|yes| E3[Check the upstream pod restarts]',
+      'D1 -->|no| E4[Check the upstream pod lifecycle]',
+      'E2 --> X1',
+    ]);
+    const submitted = branches([
+      'D1 -->|✅ yes| E3[Check the upstream pod restarts]',
+      'D1 -->|no| E4[Check the upstream pod lifecycle]',
+    ]);
+    // A rejected attempt proposed E3 into E4; the retry folded E2 into E3 and kept E3 and E4.
+    const submissions = [[{ from: ['E3'], into: 'E4' }], [{ from: ['E2'], into: 'E3' }]].map(
+      (mergedNodes) =>
+        submit([], {
+          symptom_trees: [{ tree_id: TREE_ID, merged_nodes: mergedNodes }],
+          traversals: [{ tree_id: TREE_ID, visited_path: ['S1', 'E1', 'D1'] }],
+        })
+    );
+    const base = context({ prior, submitted, causalConfirmed: false });
+
+    const graded = checkNoVisitedCheckmarks({ ...base, output: { ...base.output, submissions } });
+
+    expect(graded.explanation).not.toContain('✅ added');
+    expect(graded.score).toBe(1);
+  });
+
   it('fails a tree without a decision node', () => {
     const graded = checkNoVisitedCheckmarks(
       context({

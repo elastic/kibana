@@ -125,7 +125,8 @@ const mergeTargets = (
   const finalTarget = (id: string): string => {
     const seen = new Set([id]);
     let target = declared.get(id) ?? id;
-    while (declared.has(target) && !seen.has(target)) {
+    // A node still in the tree absorbed the fold; a later link from it was never carried out.
+    while (!present.has(target) && declared.has(target) && !seen.has(target)) {
       seen.add(target);
       target = declared.get(target) ?? target;
     }
