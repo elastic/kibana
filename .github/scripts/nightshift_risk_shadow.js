@@ -8,38 +8,51 @@
  */
 
 // Shadow mode for low-risk auto-approval of Nightshift PRs. It labels and comments only;
-// nothing here approves a PR. A PR is Low only when every changed file is in a Nightshift
-// path AND matches a Low pattern below. Anything unknown counts as not Low.
+// nothing here approves a PR. A PR is Low only when every changed file is owned only by
+// @elastic/nightshift in CODEOWNERS AND matches a Low pattern below. Anything unknown counts
+// as not Low.
+
+const fs = require('fs');
 
 const MARKER = '<!-- nightshift-risk-shadow -->';
 const LABEL = 'nightshift:risk-low';
+const OWNER = '@elastic/nightshift';
 
-const NIGHTSHIFT_PATHS = [
-  'x-pack/solutions/observability/plugins/nightshift/',
-  'x-pack/solutions/observability/plugins/nightshift_sources/',
-  'x-pack/solutions/observability/plugins/nightshift_investigations/',
-  'x-pack/solutions/observability/plugins/significant_events/',
-  'x-pack/solutions/observability/packages/kbn-nightshift-shared/',
-  'x-pack/solutions/observability/packages/kbn-nightshift-decision-trees/',
-  'x-pack/solutions/observability/packages/kbn-investigation-output/',
-  'x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-',
-  'x-pack/solutions/observability/packages/kbn-evals-suite-significant-events/',
-  'x-pack/platform/plugins/shared/sandbox/',
-  'x-pack/platform/packages/shared/kbn-nightshift-ai/',
-  'x-pack/platform/packages/shared/kbn-significant-events-schema/',
-  // Code Nightshift owns alone outside its plugins and packages (per CODEOWNERS). Co-owned
-  // code such as agentic_investigations is left out: its other owners review it anyway.
-  'x-pack/platform/plugins/shared/actions/server/lib/relay/',
-  'src/platform/packages/shared/kbn-workflows/managed/definitions/significant_events/',
-  'src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_investigations/',
-  'x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/',
-  'x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/significant_events/',
-  'packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/nightshift-automation/',
-  'packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/nightshift-source/',
-  'packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/relay-app-connection/',
-  'packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/significant-events-maintenance-state/',
-  'x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai/',
-];
+// Turns one CODEOWNERS pattern into a regex, following GitHub's rules: a pattern with a
+// leading or inner slash is anchored at the repo root, otherwise it matches at any depth;
+// `*` stays within one path segment and `**` crosses them; a pattern matches everything
+// under a directory it names, except that `dir/*` matches only direct children.
+const patternToRegex = (pattern) => {
+  const trimmed = pattern.replace(/\/$/, '');
+  const anchored = trimmed.startsWith('/') || trimmed.includes('/');
+  const body = trimmed
+    .replace(/^\//, '')
+    .split('**')
+    .map((part) =>
+      part
+        .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+        .replace(/\*/g, '[^/]*')
+        .replace(/\?/g, '[^/]')
+    )
+    .join('.*');
+  const tail = /\/\*$/.test(trimmed) ? '$' : '(/|$)';
+  return new RegExp(`${anchored ? '^' : '(^|/)'}${body}${tail}`);
+};
+
+// Returns a function from a file path to its owners. The last matching rule wins, and a
+// rule with no owners leaves the file unowned.
+const parseCodeowners = (text) => {
+  const rules = text
+    .split('\n')
+    .map((line) => line.replace(/\s#.*$/, '').trim())
+    .filter((line) => line && !line.startsWith('#'))
+    .map((line) => {
+      const [pattern, ...owners] = line.split(/\s+/);
+      return { regex: patternToRegex(pattern), owners };
+    })
+    .reverse();
+  return (path) => rules.find((rule) => rule.regex.test(path))?.owners ?? [];
+};
 
 const TEST_PATTERNS = [
   /\.(test|spec)\.(ts|tsx|js)$/,
@@ -52,10 +65,11 @@ const LOW_PATTERNS = [
   ...TEST_PATTERNS,
   /\.stories\.tsx?$/,
   /\/__storybook__\//,
-  // Eval data only: datasets, seed data, scenarios, data generators and snapshot scripts.
-  // Judges, scorers, evaluators, their prompts and the eval harness decide what results mean,
-  // so they are not Low (see the Medium tier in .agents/skills/nightshift-review).
-  /^x-pack\/solutions\/observability\/packages\/kbn-evals-suite-(nightshift-[^/]+|significant-events|observability-ai)\/(?!.*(judge|evaluat|scor|criteria|prompt|\.text$))(.*\/)?(datasets|seed_data|scenarios|data_generators|[^/]*_snapshots?)(\/|\.ts$)/,
+  // Eval data only: datasets, seed data, scenarios, data generators and snapshot scripts, in
+  // any eval suite Nightshift owns. Judges, scorers, evaluators, their prompts and the eval
+  // harness decide what results mean, so they are not Low (see the Medium tier in
+  // .agents/skills/nightshift-review).
+  /\/kbn-evals-suite-[^/]+\/(?!.*(judge|evaluat|scor|criteria|prompt|\.text$))(.*\/)?(datasets|seed_data|scenarios|data_generators|[^/]*_snapshots?)(\/|\.ts$)/,
   // Docs only. Instruction files for coding agents are not Low.
   /^(?!.*\/(AGENTS|CLAUDE|SKILL)\.md$).*\.md$/,
 ];
@@ -65,12 +79,16 @@ const LOW_PATTERNS = [
 const DISABLED_TEST =
   /^\+.*\b(?:(?:it|describe|\w*[tT]est)(?:\.\w+)*\.(?:skip|only|todo|fixme)|xit|xdescribe|xtest|fit|fdescribe)\s*\(/m;
 
-const isNightshift = (path) => NIGHTSHIFT_PATHS.some((prefix) => path.startsWith(prefix));
 const isTest = (path) => TEST_PATTERNS.some((re) => re.test(path));
 const isLowPath = (path) => LOW_PATTERNS.some((re) => re.test(path));
 
 // files: the shape returned by pulls.listFiles. totalFiles: the PR's changed_files count.
-const classify = (files, { totalFiles = files.length, authorAssociation } = {}) => {
+// ownersOf: a path-to-owners function from parseCodeowners.
+const classify = (files, { totalFiles = files.length, authorAssociation, ownersOf }) => {
+  const isNightshift = (path) => {
+    const owners = ownersOf(path);
+    return owners.length > 0 && owners.every((o) => o === OWNER);
+  };
   const nightshiftFiles = files.filter(
     (f) => isNightshift(f.filename) || (f.previous_filename && isNightshift(f.previous_filename))
   );
@@ -87,7 +105,7 @@ const classify = (files, { totalFiles = files.length, authorAssociation } = {}) 
   for (const f of files) {
     const paths = [f.filename, f.previous_filename].filter(Boolean);
     if (!paths.every(isNightshift)) {
-      reasons.push(`\`${f.filename}\` is outside Nightshift paths`);
+      reasons.push(`\`${f.filename}\` isn't owned only by \`${OWNER}\``);
     } else if (!paths.every(isLowPath)) {
       reasons.push(`\`${f.filename}\` is not a test, story, eval data or doc file`);
     } else if (isTest(f.filename) && f.status === 'removed') {
@@ -107,7 +125,7 @@ const MAX_REASONS = 10;
 const commentBody = ({ tier, reasons }) => {
   const head =
     tier === 'low'
-      ? '**Nightshift risk (shadow mode): Low.** Every changed file is a test, story, eval data or doc file in a Nightshift path. Once approval is turned on, a PR like this could merge on a bot approval after Libra and CI pass.'
+      ? '**Nightshift risk (shadow mode): Low.** Every changed file is a test, story, eval data or doc file owned only by `@elastic/nightshift`. Once approval is turned on, a PR like this could merge on a bot approval after Libra and CI pass.'
       : '**Nightshift risk (shadow mode): not Low.** This PR needs the usual human review.';
   const list = reasons
     .slice(0, MAX_REASONS)
@@ -123,7 +141,13 @@ const commentBody = ({ tier, reasons }) => {
   ].join('\n');
 };
 
-module.exports = async ({ github, context, core }) => {
+// codeowners: the base branch's CODEOWNERS text; the workflow checks out only `.github`.
+module.exports = async ({
+  github,
+  context,
+  core,
+  codeowners = fs.readFileSync('.github/CODEOWNERS', 'utf8'),
+}) => {
   const pr = context.payload.pull_request;
   const { owner, repo } = context.repo;
   const issue_number = pr.number;
@@ -137,8 +161,13 @@ module.exports = async ({ github, context, core }) => {
   const result = classify(files, {
     totalFiles: pr.changed_files,
     authorAssociation: pr.author_association,
+    ownersOf: parseCodeowners(codeowners),
   });
   core.info(`PR #${pr.number}: ${JSON.stringify(result)}`);
+
+  // This runs on every PR to main, so stop early for the many PRs that never had a Low label.
+  const hasLabel = pr.labels.some((l) => l.name === LABEL);
+  if (result.scope === 'none' && !hasLabel) return;
 
   const comments = await github.paginate(github.rest.issues.listComments, {
     owner,
@@ -147,7 +176,6 @@ module.exports = async ({ github, context, core }) => {
     per_page: 100,
   });
   const existing = comments.find((c) => c.body?.includes(MARKER));
-  const hasLabel = pr.labels.some((l) => l.name === LABEL);
 
   if (result.tier === 'low') {
     if (!hasLabel)
@@ -174,5 +202,6 @@ module.exports = async ({ github, context, core }) => {
 
 module.exports.classify = classify;
 module.exports.commentBody = commentBody;
+module.exports.parseCodeowners = parseCodeowners;
 module.exports.LABEL = LABEL;
 module.exports.MARKER = MARKER;

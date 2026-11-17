@@ -1,7 +1,8 @@
 name: nightshift-risk-shadow
 
 # Shadow mode for low-risk auto-approval of Nightshift PRs. Labels Low PRs with
-# nightshift:risk-low and explains why; it never approves. See
+# nightshift:risk-low and explains why; it never approves. Nightshift's files are the ones
+# owned only by @elastic/nightshift in the base branch's CODEOWNERS. See
 # .github/scripts/nightshift_risk_shadow.js for the rules.
 
 on:
@@ -13,31 +14,8 @@ on:
       - synchronize
       - reopened
       - ready_for_review
-    # The script re-checks the whole PR on every run. A PR that drops all of these paths
-    # stops triggering, so its label can go stale; acceptable while this only observes.
-    paths:
-      - 'x-pack/solutions/observability/plugins/nightshift/**'
-      - 'x-pack/solutions/observability/plugins/nightshift_sources/**'
-      - 'x-pack/solutions/observability/plugins/nightshift_investigations/**'
-      - 'x-pack/solutions/observability/plugins/significant_events/**'
-      - 'x-pack/solutions/observability/packages/kbn-nightshift-shared/**'
-      - 'x-pack/solutions/observability/packages/kbn-nightshift-decision-trees/**'
-      - 'x-pack/solutions/observability/packages/kbn-investigation-output/**'
-      - 'x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-*/**'
-      - 'x-pack/solutions/observability/packages/kbn-evals-suite-significant-events/**'
-      - 'x-pack/platform/plugins/shared/sandbox/**'
-      - 'x-pack/platform/packages/shared/kbn-nightshift-ai/**'
-      - 'x-pack/platform/packages/shared/kbn-significant-events-schema/**'
-      - 'x-pack/platform/plugins/shared/actions/server/lib/relay/**'
-      - 'src/platform/packages/shared/kbn-workflows/managed/definitions/significant_events/**'
-      - 'src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_investigations/**'
-      - 'x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/**'
-      - 'x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/significant_events/**'
-      - 'packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/nightshift-automation/**'
-      - 'packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/nightshift-source/**'
-      - 'packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/relay-app-connection/**'
-      - 'packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/significant-events-maintenance-state/**'
-      - 'x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai/**'
+    # No paths filter: what Nightshift owns comes from CODEOWNERS, which a fixed list here
+    # would drift from. PRs without Nightshift files stop after one API call.
 
 concurrency:
   group: nightshift-risk-shadow-${{ github.event.pull_request.number }}

@@ -15,10 +15,29 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 
 const run = require('./nightshift_risk_shadow');
-const { classify, LABEL, MARKER } = run;
+const { classify, parseCodeowners, LABEL, MARKER } = run;
+
+// A slice of Kibana's CODEOWNERS, in its own spellings.
+const CODEOWNERS = `
+# Nightshift
+x-pack/solutions/observability/plugins/nightshift @elastic/nightshift
+x-pack/solutions/observability/plugins/nightshift_investigations @elastic/nightshift
+x-pack/solutions/observability/plugins/significant_events @elastic/nightshift
+x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations @elastic/nightshift
+x-pack/solutions/observability/packages/kbn-evals-suite-significant-events @elastic/nightshift
+x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai @elastic/nightshift
+x-pack/platform/plugins/shared/actions/server/lib/relay @elastic/nightshift
+src/platform/packages/shared/kbn-workflows/managed/definitions/nightshift_investigations @elastic/nightshift
+/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/nightshift-source @elastic/nightshift
+/x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations @elastic/nightshift # Scout suite
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/significant_events/ @elastic/nightshift
+x-pack/platform/plugins/shared/agentic_investigations @elastic/alertzero-common-layer @elastic/nightshift
+/**/scout_*/.meta/**
+`;
 
 const NI = 'x-pack/solutions/observability/plugins/nightshift_investigations';
-const member = { authorAssociation: 'MEMBER' };
+const ownersOf = parseCodeowners(CODEOWNERS);
+const member = { authorAssociation: 'MEMBER', ownersOf };
 const file = (filename, patch = '+ok', extra = {}) => ({
   filename,
   status: 'modified',
@@ -150,7 +169,7 @@ test('instruction files for coding agents are not Low', () => {
 test('one file outside Nightshift paths makes the PR not Low', () => {
   const result = classify([file(`${NI}/a.test.ts`), file('.github/CODEOWNERS')], member);
   assert.equal(result.tier, 'not_low');
-  assert.match(result.reasons[0], /outside Nightshift paths/);
+  assert.match(result.reasons[0], /isn't owned only by `@elastic\/nightshift`/);
 });
 
 test('a rename counts both paths', () => {
@@ -194,6 +213,52 @@ test('skipping or focusing a test is not Low', () => {
   assert.equal(classify([file(`${NI}/a.test.ts`, "-  it.skip('x')")], member).tier, 'low');
 });
 
+test('a generated Scout manifest has no owner, so it makes the PR not Low', () => {
+  // Manifests can mark tests skipped as data (PR 289173); CODEOWNERS leaves them unowned.
+  const manifest = `${NI}/test/scout_nightshift_investigations/.meta/api/standard.json`;
+  const result = classify([file(`${NI}/a.test.ts`), file(manifest)], member);
+  assert.equal(result.tier, 'not_low');
+  assert.match(result.reasons[0], /standard\.json/);
+});
+
+test('a plugin added to CODEOWNERS is in scope without changing this script', () => {
+  const path = 'x-pack/solutions/observability/plugins/nightshift_detection/server/a.test.ts';
+  assert.equal(classify([file(path)], member).scope, 'none');
+  const withNewPlugin = parseCodeowners(
+    `${CODEOWNERS}\nx-pack/solutions/observability/plugins/nightshift_detection @elastic/nightshift\n`
+  );
+  assert.equal(classify([file(path)], { ...member, ownersOf: withNewPlugin }).tier, 'low');
+});
+
+test('CODEOWNERS parsing follows GitHub rules', () => {
+  const owners = parseCodeowners(`
+# a comment
+*.md @elastic/docs
+/src/ @elastic/core
+/src/plugins/nightshift @elastic/nightshift
+/src/plugins/nightshift/vendor
+docs/* @elastic/docs-top
+/x/**/fixtures/ @elastic/fixtures # trailing comment
+`);
+  assert.deepEqual(owners('README.md'), ['@elastic/docs']);
+  assert.deepEqual(owners('src/a/b.md'), ['@elastic/core'], 'the last matching rule wins');
+  assert.deepEqual(owners('src/plugins/nightshift/a.ts'), ['@elastic/nightshift']);
+  assert.deepEqual(
+    owners('src/plugins/nightshift/vendor/a.ts'),
+    [],
+    'a rule without owners unsets'
+  );
+  assert.deepEqual(
+    owners('src/plugins/nightshift_extra/a.ts'),
+    ['@elastic/core'],
+    'no prefix match'
+  );
+  assert.deepEqual(owners('docs/a.txt'), ['@elastic/docs-top']);
+  assert.deepEqual(owners('docs/deep/a.txt'), [], 'dir/* matches direct children only');
+  assert.deepEqual(owners('x/a/b/fixtures/c.json'), ['@elastic/fixtures']);
+  assert.deepEqual(owners('lib/a.ts'), []);
+});
+
 test('a test file with no diff to check is not Low', () => {
   // GitHub leaves out `patch` for large or binary diffs.
   const result = classify(
@@ -209,7 +274,10 @@ test('a PR whose file list is truncated is not Low', () => {
 });
 
 test('an author outside the org is not Low', () => {
-  const result = classify([file(`${NI}/a.test.ts`)], { authorAssociation: 'CONTRIBUTOR' });
+  const result = classify([file(`${NI}/a.test.ts`)], {
+    authorAssociation: 'CONTRIBUTOR',
+    ownersOf,
+  });
   assert.match(result.reasons[0], /not an Elastic org member/);
 });
 
@@ -242,7 +310,7 @@ const core = { info: () => {} };
 
 test('a Low PR gets the label and one comment', async () => {
   const { github, calls } = createGithub({ files: [file(`${NI}/a.test.ts`)] });
-  await run({ github, context: contextFor(), core });
+  await run({ github, context: contextFor(), core, codeowners: CODEOWNERS });
   assert.deepEqual(calls.added, [[LABEL]]);
   assert.equal(calls.created.length, 1);
   assert.match(calls.created[0], /Low\./);
@@ -250,7 +318,7 @@ test('a Low PR gets the label and one comment', async () => {
 
 test('a not-Low PR without an earlier comment stays quiet', async () => {
   const { github, calls } = createGithub({ files: [file(`${NI}/server/a.ts`)] });
-  await run({ github, context: contextFor(), core });
+  await run({ github, context: contextFor(), core, codeowners: CODEOWNERS });
   assert.deepEqual(calls, { added: [], removed: [], created: [], updated: [], deleted: [] });
 });
 
@@ -259,7 +327,7 @@ test('a PR that stops being Low loses the label and its comment is updated', asy
     files: [file(`${NI}/server/a.ts`)],
     comments: [{ id: 7, body: `old\n\n${MARKER}` }],
   });
-  await run({ github, context: contextFor([{ name: LABEL }]), core });
+  await run({ github, context: contextFor([{ name: LABEL }]), core, codeowners: CODEOWNERS });
   assert.deepEqual(calls.removed, [LABEL]);
   assert.equal(calls.updated.length, 1);
   assert.match(calls.updated[0], /not Low/);
@@ -270,7 +338,20 @@ test('a PR that drops all Nightshift files loses its comment', async () => {
     files: [file('src/core/index.ts')],
     comments: [{ id: 7, body: `old\n\n${MARKER}` }],
   });
-  await run({ github, context: contextFor([{ name: LABEL }]), core });
+  await run({ github, context: contextFor([{ name: LABEL }]), core, codeowners: CODEOWNERS });
   assert.deepEqual(calls.removed, [LABEL]);
   assert.deepEqual(calls.deleted, [7]);
+});
+
+test('a PR with no Nightshift files and no label makes no API calls after listing files', async () => {
+  const { github, calls } = createGithub({ files: [file('src/core/index.ts')] });
+  let listed = 0;
+  const paginate = github.paginate;
+  github.paginate = async (fn, params) => {
+    listed += 1;
+    return paginate(fn, params);
+  };
+  await run({ github, context: contextFor(), core, codeowners: CODEOWNERS });
+  assert.equal(listed, 1);
+  assert.deepEqual(calls, { added: [], removed: [], created: [], updated: [], deleted: [] });
 });
