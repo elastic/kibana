@@ -82,12 +82,13 @@ describe('CustomContentComponent', () => {
     expect(onLoadingChange).toHaveBeenCalledWith(true);
   });
 
-  it('sandboxes the iframe so that only user-initiated top navigation is allowed', () => {
+  it('sandboxes the iframe: user-initiated top navigation and same-origin, never scripts', () => {
     const { container } = render(<CustomContentComponent {...defaultProps} />);
 
     const iframe = container.querySelector('iframe');
     expect(iframe).not.toBeNull();
-    expect(iframe!.getAttribute('sandbox')).toBe('allow-top-navigation-by-user-activation');
+    const tokens = iframe!.getAttribute('sandbox')!.split(' ');
+    expect(tokens.sort()).toEqual(['allow-same-origin', 'allow-top-navigation-by-user-activation']);
   });
 
   describe('interactions', () => {
@@ -127,16 +128,25 @@ describe('CustomContentComponent', () => {
       });
     };
 
-    it('stays isolated and scriptless unless the host asks for interactions', () => {
-      const { iframe } = mountWithColumns(undefined);
-      expect(iframe.getAttribute('sandbox')).toBe('allow-top-navigation-by-user-activation');
+    it('keeps the frame without scripts, whether or not the host listens', () => {
+      [undefined, jest.fn()].forEach((onInteraction) => {
+        const { iframe, unmount } = mountWithColumns(onInteraction);
+        expect(iframe.getAttribute('sandbox')!.split(' ')).not.toContain('allow-scripts');
+        unmount();
+      });
     });
 
-    it('turns the frame same-origin, still without scripts, when the host listens', () => {
-      const { iframe } = mountWithColumns(jest.fn());
-      const tokens = iframe.getAttribute('sandbox')!.split(' ');
-      expect(tokens).toContain('allow-same-origin');
-      expect(tokens).not.toContain('allow-scripts');
+    it('attaches no listener when the host does not listen', () => {
+      const addEventListener = jest.spyOn(EventTarget.prototype, 'addEventListener');
+      const { iframe } = mountWithColumns(undefined);
+      iframe.contentDocument!.body.innerHTML = '<button id="b">x</button>';
+      fireEvent.load(iframe);
+      const clickListeners = addEventListener.mock.calls.filter(
+        ([type], index) =>
+          type === 'click' && addEventListener.mock.contexts[index] === iframe.contentDocument
+      );
+      addEventListener.mockRestore();
+      expect(clickListeners).toHaveLength(0);
     });
 
     it('reports a click on an element that declares a valid filter', () => {
@@ -149,6 +159,13 @@ describe('CustomContentComponent', () => {
         value: 'a',
         negate: false,
       });
+    });
+
+    it('ignores an action the host did not list as supported', () => {
+      const onInteraction = jest.fn();
+      const { iframe } = mountWithColumns(onInteraction, { interactionActions: [] });
+      clickInFrame(iframe, 'data-cc-action="filter" data-cc-field="host.name" data-cc-value="a"');
+      expect(onInteraction).not.toHaveBeenCalled();
     });
 
     it('ignores a click that names a column the query did not return', () => {

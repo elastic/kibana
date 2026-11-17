@@ -73,7 +73,7 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { css } from '@emotion/react';
-import { applyFilterInteraction } from './apply_filter_interaction';
+import { SUPPORTED_INTERACTION_ACTIONS, runInteraction } from './run_interaction';
 import { getServices } from './services';
 import { readContextQueries } from '../common/panel_context_queries';
 import { getTelemetry } from './telemetry';
@@ -128,7 +128,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 > = {
   type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-    const { core, search, dataViews, agentBuilder, uiActions } = getServices();
+    const { core, search, dataViews, agentBuilder, uiActions, filterManager } = getServices();
     const rendererServices: CustomContentRendererServices = {
       http: core.http,
       uiSettings: core.uiSettings,
@@ -549,11 +549,11 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           return () => sub.unsubscribe();
         }, []);
 
-        // A click on the panel's content can add a filter to the dashboard (see `interactions.ts`).
+        // What a click on the panel's content may do is a closed list (see `run_interaction.ts`).
         const handleInteraction = useCallback((interaction: CustomContentInteraction) => {
-          applyFilterInteraction({
-            interaction,
+          runInteraction(interaction, {
             dataViews: dataSources$.getValue(),
+            filterManager,
             uiActions,
             embeddable: api,
           });
@@ -618,6 +618,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               minHeight={0}
               requestAdapter={requestAdapter}
               onInteraction={handleInteraction}
+              interactionActions={SUPPORTED_INTERACTION_ACTIONS}
               onLoadingChange={handleLoadingChange}
               setApproximationApplied={setApproximationApplied}
               onGenerateWithChat={handleGenerateWithChat}

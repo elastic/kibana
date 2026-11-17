@@ -66,6 +66,22 @@ describe('readInteraction', () => {
     expect(readInteraction(target, new Set([field]))).toBeUndefined();
   });
 
+  it.each(['constructor', '__proto__', 'toString', 'hasOwnProperty'])(
+    'does not treat the inherited key %s as an action',
+    (action) => {
+      const target = render(
+        `data-cc-action="${action}" data-cc-field="host.name" data-cc-value="a"`
+      );
+      expect(readInteraction(target, columns)).toBeUndefined();
+    }
+  );
+
+  it('accepts only the actions the host allows', () => {
+    const target = render('data-cc-action="filter" data-cc-field="host.name" data-cc-value="a"');
+    expect(readInteraction(target, columns, ['filter'])).toBeDefined();
+    expect(readInteraction(target, columns, [])).toBeUndefined();
+  });
+
   it('ignores a click outside any action, and non-element targets', () => {
     expect(readInteraction(render(''), columns)).toBeUndefined();
     expect(readInteraction(null, columns)).toBeUndefined();
