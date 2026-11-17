@@ -1869,6 +1869,40 @@ describe('Run Scheduled Report Task', () => {
       });
     });
 
+    it('does not store the notification data in the report document when sending the email fails', async () => {
+      jest
+        .spyOn(emailNotificationService, 'notify')
+        .mockRejectedValueOnce(new Error('This is a test error!'));
+      const task = new RunScheduledReportTask({
+        reporting: mockReporting,
+        config: configType,
+        logger,
+      });
+      const mockTaskManager = taskManagerMock.createStart();
+      await task.init(mockTaskManager, emailNotificationService);
+      const taskInstance = {
+        id: 'task-id',
+        runAt: new Date('2025-06-04T00:00:00Z'),
+        params: { id: 'report-so-id', jobtype: 'test1' },
+      };
+      const output = {
+        content_type: 'application/pdf',
+        notification: {
+          templateVariables: { visitors: 42 },
+          summaryMarkdown: '**Checkout app**',
+        },
+      };
+
+      // @ts-expect-error
+      await task.notify(savedReport, taskInstance, output, 2097152, scheduledReport, 'default');
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(reportStore.setReportWarning).toHaveBeenCalledWith(savedReport, {
+        output: { content_type: 'application/pdf', size: 2097152 },
+        warning: 'Error sending notification for scheduled report: This is a test error!',
+      });
+    });
+
     it('logs an error if there is an error thrown setting execution to warning', async () => {
       jest
         .spyOn(reportStore, 'setReportWarning')

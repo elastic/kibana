@@ -202,10 +202,12 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
         scheduleType: ScheduleType.SCHEDULED,
         errorMessage: message,
       });
+      // Email-only data must not be persisted in the report document.
+      const { notification: _notification, ...outputToStore } = output;
       this.saveExecutionWarning(
         report,
         {
-          ...output,
+          ...outputToStore,
           size: byteSize,
         },
         message
