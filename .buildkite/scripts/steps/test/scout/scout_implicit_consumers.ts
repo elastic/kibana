@@ -22,6 +22,7 @@
  * don't follow a common path convention.
  */
 
+import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { minimatch } from 'minimatch';
@@ -34,13 +35,22 @@ interface ImplicitConsumerRule {
   reason: string;
   /** Globs matched against the changed file paths. */
   patterns: readonly string[];
-  /** When set, a changed file matching `patterns` also needs content matching this to trigger the rule. */
-  contentPattern?: RegExp;
+  /**
+   * When set, a changed file matching `patterns` only triggers the rule when its current content,
+   * or a line the change adds or removes, matches this pattern. It must be valid both as a
+   * JavaScript RegExp and as a POSIX extended regex (for `git diff -G`): stick to literals and `|`.
+   */
+  contentPattern?: string;
   consumers: readonly string[];
 }
 
-/** Returns a changed file's content, or `undefined` when the change deleted it. */
-export type ChangedFileReader = (file: string) => string | undefined;
+/** Gives content rules access to the changed files. */
+export interface ChangedContent {
+  /** Returns a changed file's current content, or `undefined` when the change deleted it. */
+  readFile: (file: string) => string | undefined;
+  /** Returns the changed files where an added or removed line matches `pattern`. */
+  getFilesWithChangedLinesMatching: (pattern: string) => ReadonlySet<string>;
+}
 
 const IMPLICIT_REGISTRY_CONSUMERS: readonly ImplicitConsumerRule[] = [
   {
@@ -83,28 +93,63 @@ const IMPLICIT_REGISTRY_CONSUMERS: readonly ImplicitConsumerRule[] = [
     reason:
       'Custom workflow steps are defined and registered into workflows_extensions at runtime, from files without a common path convention. Changes to these files would not select the step registration tests by default.',
     patterns: ['**/*.{ts,tsx}'],
+    // Matching the added and removed lines, not only the current content, also catches deleted
+    // step files and removed registrations: the changes that leave a step registered on one side.
+    // Known gap: removing a call to a plugin helper that registers its steps (for example
+    // `registerCaseWorkflowSteps(...)`) is not caught, because that line doesn't name the step API.
     contentPattern:
-      /\b(?:registerStepDefinition|createServerStepDefinition|createPollServerStepDefinition|createPublicStepDefinition|CommonStepDefinition)\b/,
+      'registerStepDefinition|createServerStepDefinition|createPollServerStepDefinition|createPublicStepDefinition|CommonStepDefinition',
     consumers: ['@kbn/workflows-extensions'],
   },
 ];
 
-const readChangedFile: ChangedFileReader = (file) => {
-  const filePath = path.resolve(getKibanaDir(), file);
-  return fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : undefined;
+/**
+ * Reads the changed files from the working tree, and the changed lines from its diff against the
+ * merge base with `mergeBase`. In CI the working tree is the PR's head commit.
+ */
+export const createGitChangedContent = (mergeBase: string): ChangedContent => {
+  const git = (args: readonly string[]): string =>
+    execFileSync('git', args, {
+      cwd: getKibanaDir(),
+      encoding: 'utf8',
+      maxBuffer: 10 * 1024 * 1024,
+    });
+  const filesByPattern = new Map<string, ReadonlySet<string>>();
+
+  return {
+    readFile: (file) => {
+      const filePath = path.resolve(getKibanaDir(), file);
+      return fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : undefined;
+    },
+    getFilesWithChangedLinesMatching: (pattern) => {
+      const cached = filesByPattern.get(pattern);
+      if (cached) return cached;
+
+      const base = git(['merge-base', mergeBase, 'HEAD']).trim();
+      const files = new Set(
+        git(['diff', '--name-only', `-G${pattern}`, base])
+          .split('\n')
+          .map((line) => line.trim())
+          .filter(Boolean)
+      );
+      filesByPattern.set(pattern, files);
+      return files;
+    },
+  };
 };
 
 const matchesRule = (
   rule: ImplicitConsumerRule,
   file: string,
-  readFile: ChangedFileReader
+  changedContent: ChangedContent
 ): boolean => {
   const { patterns, contentPattern } = rule;
   if (!patterns.some((pattern) => minimatch(file, pattern, { dot: true }))) return false;
   if (!contentPattern) return true;
+  if (changedContent.getFilesWithChangedLinesMatching(contentPattern).has(file)) return true;
 
-  const content = readFile(file);
-  return content !== undefined && contentPattern.test(content);
+  const content = changedContent.readFile(file);
+  return content !== undefined && new RegExp(contentPattern).test(content);
 };
 
 /**
@@ -117,7 +162,7 @@ export function expandWithImplicitConsumers(
   affected: ReadonlySet<string>,
   changedFiles: readonly string[],
   log: ScoutLog,
-  readFile: ChangedFileReader = readChangedFile
+  changedContent: ChangedContent
 ): Set<string> {
   const expanded = new Set(affected);
   const relevantFiles = filterIgnoredFiles([...changedFiles], SCOUT_MODULE_GRAPH_IGNORE);
@@ -127,7 +172,7 @@ export function expandWithImplicitConsumers(
     const added = rule.consumers.filter((id) => !expanded.has(id));
     if (added.length === 0) continue;
 
-    const trigger = relevantFiles.find((file) => matchesRule(rule, file, readFile));
+    const trigger = relevantFiles.find((file) => matchesRule(rule, file, changedContent));
     if (!trigger) continue;
 
     for (const id of added) expanded.add(id);

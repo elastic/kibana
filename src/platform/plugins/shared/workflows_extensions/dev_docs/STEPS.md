@@ -1217,9 +1217,9 @@ The test prints one `echo … > …` command per offending step, ready to copy-p
 
 Every custom step must be registered on **both** the server and the client (see [Step 4](#step-4-register-in-plugin-setup) for why). A Scout UI test enforces this. It compares the step ids in the server registry (from the `internal/workflows_extensions/step_definitions` endpoint) with the step ids in the browser registry, after every async loader has settled. It fails on any step that is missing from either side.
 
-The test runs on stateful and on every serverless project type, because which plugins are enabled (and so which steps are registered) depends on the project.
+The test runs on stateful and on every serverless project type where workflows are available, because which plugins are enabled (and so which steps are registered) depends on the project. Security Essentials and Observability Logs Essentials are left out: workflows are not available in those tiers.
 
-CI runs it on every PR that changes a file defining or registering a step, in any plugin. Selective testing picks those files by their content (`registerStepDefinition`, `createServerStepDefinition`, `createPollServerStepDefinition`, `createPublicStepDefinition` or `CommonStepDefinition`), see `.buildkite/scripts/steps/test/scout/scout_implicit_consumers.ts`.
+CI runs it on every PR that changes a file defining or registering a step, in any plugin. Selective testing picks the changed files that contain, add or remove a line with `registerStepDefinition`, `createServerStepDefinition`, `createPollServerStepDefinition`, `createPublicStepDefinition` or `CommonStepDefinition`, see `.buildkite/scripts/steps/test/scout/scout_implicit_consumers.ts`.
 
 ### Running the Registration Check
 

@@ -54,6 +54,7 @@ test.describe(
       ...tags.stateful.classic,
       ...tags.serverless.search,
       ...tags.serverless.security.complete,
+      ...tags.serverless.security.ease,
       ...tags.serverless.observability.complete,
       ...tags.serverless.vectordb,
     ],
