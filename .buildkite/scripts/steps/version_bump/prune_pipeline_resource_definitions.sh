@@ -2,7 +2,6 @@
 
 set -euo pipefail
 
-source "$(dirname "$0")/wait_for_pr_merge.sh"
 source "$(dirname "$0")/versions_json_updates.sh"
 
 echo --- Prune superseded branches from pipeline resource definitions
@@ -44,10 +43,10 @@ prUrl=$(gh pr create --repo elastic/kibana --base main --head "$head_branch" \
   --label "release_note:skip" --label "backport:skip")
 echo "Opened PR: $prUrl"
 
+# Nothing in the build needs this PR merged, and `Fetch DRA Artifacts` waits for this step,
+# so enable auto-merge and finish instead of waiting for the merge.
 if [ "${DRY_RUN:-}" = "true" ]; then
-  echo "DRY_RUN is enabled — skipping auto-merge and merge wait"
+  echo "DRY_RUN is enabled — skipping auto-merge"
 else
   gh pr merge --repo elastic/kibana --auto --squash "$prUrl"
-
-  wait_for_pr_merge "$prUrl"
 fi
