@@ -103,6 +103,27 @@ describe('OracleConnector', () => {
       );
     });
 
+    it.each([
+      'db.example.com:1521/svc?ssl_server_dn_match=false#',
+      'db.example.com/svc',
+      'db.example.com?x=1',
+      'db.example.com#',
+      'user@db.example.com',
+      'db.example.com:1521',
+      'db example.com',
+      '-db.example.com',
+      '',
+    ])('rejects host %p that could alter the connect string', (host) => {
+      expect(configSchema.safeParse(makeConfig({ host })).success).toBe(false);
+    });
+
+    it.each(['db.example.com', 'localhost', '10.0.0.5', 'oracle_1.corp-net', '[2001:db8::1]'])(
+      'accepts host %p',
+      (host) => {
+        expect(configSchema.safeParse(makeConfig({ host })).success).toBe(true);
+      }
+    );
+
     it.each(['host', 'serviceName'])('rejects a config missing %s', (field) => {
       const config = makeConfig();
       delete (config as Record<string, unknown>)[field];

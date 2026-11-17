@@ -24,7 +24,7 @@ The Oracle Database connector connects directly to the Oracle listener over Orac
 
 To use the Oracle Database connector, you need:
 
-1. An Oracle Database with a listener reachable from your {{kib}} instance.
+1. An Oracle Database, version 12.1 or later, with a listener reachable from your {{kib}} instance.
 2. A database user with the `CREATE SESSION` privilege and access to the schemas you want to query.
 3. The listener hostname and port, the service name, and the user credentials.
 
@@ -45,7 +45,7 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 Oracle Database connectors have the following configuration properties:
 
 Host
-:   The hostname or IP address of the Oracle listener (for example, `oracle.example.com`). Don't include a protocol prefix.
+:   The hostname or IP address of the Oracle listener (for example, `oracle.example.com`). Wrap an IPv6 address in square brackets. Don't include a protocol prefix, port, or path.
 
 Port
 :   The port of the Oracle listener (default: 1521).

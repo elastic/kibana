@@ -138,8 +138,10 @@ export const OracleConnector: ConnectorSpec = {
         .string()
         .min(1)
         .max(253)
-        .refine((value) => !/^[a-z][a-z0-9+.-]*:\/\//i.test(value), {
-          message: 'Host must be a hostname or IP address, without a protocol prefix',
+        // The host is placed in an Easy Connect string, so characters such as / ? # : @ could add parameters to it.
+        .regex(/^(?:[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?|\[[0-9A-Fa-f:.]+\])$/, {
+          message:
+            'Host must be a hostname or IP address (an IPv6 address in square brackets), without a protocol prefix, port, or path',
         })
         .describe(
           i18n.translate('connectorSpecs.oracle.config.host.description', {
@@ -371,6 +373,7 @@ export const OracleConnector: ConnectorSpec = {
     '### Oracle SQL gotchas',
     '- There is no `LIMIT`. Use `FETCH FIRST 100 ROWS ONLY` at the end of the query. Results are also capped by `maxRows` (default 100, max 1000) and flagged with `truncated: true`.',
     '- Unquoted identifiers are stored uppercase. Use the exact names returned by `listTables` and `describeTable`; a quoted mixed-case name must be quoted in `query` too.',
+    '- The database must be Oracle 12.1 or later.',
     "- Qualify tables with their schema (`HR.EMPLOYEES`) when they are not in the connected user's schema.",
     '- Do not end SQL with a semicolon. Use `SELECT 1 FROM DUAL` for expressions with no table.',
     '- Dates come back as ISO timestamps. NUMBER values come back as JavaScript numbers, so integers beyond 2^53 lose precision; cast them to strings with `TO_CHAR` when exact digits matter.',
