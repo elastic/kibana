@@ -7,8 +7,12 @@
 
 import type { SourceChangeEvent } from '@kbn/nightshift-sources-plugin/server';
 
-/** Returns the target enabled state, or `undefined` when the setting should remain unchanged. */
-export const getContinuousOnboardingTarget = ({
+/**
+ * Target enabled state for a feature that follows source presence.
+ * Enables when the first source is created, disables when the last source is deleted,
+ * and returns `undefined` when the setting should remain unchanged.
+ */
+export const getSourcePresenceEnabledTarget = ({
   eventType,
   total,
 }: {

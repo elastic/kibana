@@ -6,9 +6,9 @@
  */
 
 import type { SourceChangeEvent } from '@kbn/nightshift-sources-plugin/server';
-import { getContinuousOnboardingTarget } from './get_continuous_onboarding_target';
+import { getSourcePresenceEnabledTarget } from './get_source_presence_enabled_target';
 
-describe('getContinuousOnboardingTarget', () => {
+describe('getSourcePresenceEnabledTarget', () => {
   it.each<{
     eventType: SourceChangeEvent['type'];
     total: number;
@@ -22,7 +22,7 @@ describe('getContinuousOnboardingTarget', () => {
   ])(
     'returns $expected for a $eventType event with $total sources',
     ({ eventType, total, expected }) => {
-      expect(getContinuousOnboardingTarget({ eventType, total })).toBe(expected);
+      expect(getSourcePresenceEnabledTarget({ eventType, total })).toBe(expected);
     }
   );
 });
