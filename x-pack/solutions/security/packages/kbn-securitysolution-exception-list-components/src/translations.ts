@@ -166,6 +166,21 @@ export const EXCEPTION_ITEM_CARD_ACTIONS_ARIA_LABEL = (itemName: string) =>
     defaultMessage: 'Actions for {itemName}',
   });
 
+export const EXCEPTION_ITEM_CARD_COMPUTED_COLUMNS_BADGE = i18n.translate(
+  'exceptionList-components.exception_item_card_computed_columns_badge',
+  {
+    defaultMessage: 'Computed columns',
+  }
+);
+
+export const EXCEPTION_ITEM_CARD_COMPUTED_COLUMNS_BADGE_TOOLTIP = i18n.translate(
+  'exceptionList-components.exception_item_card_computed_columns_badge_tooltip',
+  {
+    defaultMessage:
+      'This exception excludes rows by the columns that an ES|QL rule query computes. It only applies to ES|QL rules.',
+  }
+);
+
 export const LINKED_RULES_ARIA_LABEL = i18n.translate(
   'exceptionList-components.linked_rules_aria_label',
   {

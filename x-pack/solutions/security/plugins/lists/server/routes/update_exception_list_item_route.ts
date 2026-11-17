@@ -66,6 +66,8 @@ export const updateExceptionListItemRoute = (router: ListsPluginRouter): void =>
             tags,
             expire_time: expireTime,
           } = request.body;
+          // only the items of the detection lists can have it, which the body of an Endpoint artifact does not
+          const appliesTo = 'applies_to' in request.body ? request.body.applies_to : undefined;
 
           if (id == null && itemId == null) {
             return siemResponse.error({
@@ -82,6 +84,7 @@ export const updateExceptionListItemRoute = (router: ListsPluginRouter): void =>
           const exceptionLists = await getExceptionListClient(context);
           const exceptionListItem = await exceptionLists.updateOverwriteExceptionListItem({
             _version,
+            appliesTo,
             comments,
             description,
             entries: entriesArray,

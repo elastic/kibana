@@ -486,6 +486,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
         />
         <EuiHorizontalRule />
         <ExceptionsConditions
+          appliesTo={itemToEdit.applies_to ?? undefined}
           exceptionItemName={exceptionItemName}
           allowLargeValueLists={allowLargeValueLists}
           exceptionListItems={[itemToEdit]}

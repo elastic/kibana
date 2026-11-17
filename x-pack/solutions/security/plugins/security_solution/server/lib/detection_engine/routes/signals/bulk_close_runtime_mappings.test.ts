@@ -32,11 +32,27 @@ describe('buildSourceReadingRuntimeField', () => {
 
   it('emits a different runtime field per requested type', () => {
     const asIp = buildSourceReadingRuntimeField('source.ip_ecs', 'ip');
-    const asKeyword = buildSourceReadingRuntimeField('source.ip_ecs', 'keyword');
+    const asLong = buildSourceReadingRuntimeField('source.ip_ecs', 'long');
     expect(asIp.type).toBe('ip');
-    expect(asKeyword.type).toBe('keyword');
-    // Script body is identical modulo type — both read the same field from _source.
-    expect(asIp.script).toEqual(asKeyword.script);
+    expect(asLong.type).toBe('long');
+    // The types that take the value as it is read the same field from _source with the same script.
+    expect(asIp.script).toEqual(asLong.script);
+  });
+
+  it('writes each value of a keyword field as text, because _source can hold a number there', () => {
+    const asKeyword = buildSourceReadingRuntimeField('c_big', 'keyword');
+    const source = (asKeyword.script as { source: string }).source;
+    expect(source).toContain('emit(String.valueOf(item))');
+    expect(source).toContain('emit(String.valueOf(v))');
+  });
+
+  it('parses each value of a date field from its ISO-8601 text into epoch milliseconds', () => {
+    const asDate = buildSourceReadingRuntimeField('c_date', 'date');
+    const source = (asDate.script as { source: string }).source;
+    expect(asDate.type).toBe('date');
+    expect(source).toContain('Instant.parse(item).toEpochMilli()');
+    expect(source).toContain('Instant.parse(v).toEpochMilli()');
+    expect(source).toContain('((Number) v).longValue()');
   });
 });
 

@@ -7,8 +7,21 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiCallOut, EuiComboBox, EuiFormRow, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiCallOut,
+  EuiComboBox,
+  EuiFormRow,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
+import {
+  EXCEPTION_APPLIES_TO,
+  isEsqlOutputColumnsItem,
+} from '@kbn/securitysolution-exceptions-common/esql_output_columns';
+import type { ExceptionAppliesTo } from '@kbn/securitysolution-exceptions-common/esql_output_columns';
 import type {
   CreateRuleExceptionListItemSchema,
   CreateExceptionListItemSchema,
@@ -58,6 +71,10 @@ const SectionHeader = styled(EuiTitle)`
 `;
 
 interface ExceptionsFlyoutConditionsComponentProps {
+  /* What the item applies to. An item that does not say applies to the source documents. */
+  appliesTo?: ExceptionAppliesTo;
+  /* Offers the choice of what the item applies to, which is made when adding an item, except for Endpoint exceptions */
+  onAppliesToChange?: (appliesTo: ExceptionAppliesTo) => void;
   /* Exception list item field value for "name" */
   exceptionItemName: string;
   /* Not all rule types support large value lists */
@@ -89,6 +106,8 @@ interface ExceptionsFlyoutConditionsComponentProps {
 }
 
 const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponentProps> = ({
+  appliesTo = EXCEPTION_APPLIES_TO.SOURCE_DOCUMENTS,
+  onAppliesToChange,
   exceptionItemName,
   allowLargeValueLists,
   exceptionListItems,
@@ -201,6 +220,36 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
     return isEdit ? i18n.EDIT_EXCEPTION_SEQUENCE_WARNING : i18n.ADD_EXCEPTION_SEQUENCE_WARNING;
   }, [isEdit]);
 
+  const isEsqlOutputColumns = isEsqlOutputColumnsItem({ applies_to: appliesTo });
+  // Only known when the rules are, and an item that is added to a shared list has none
+  const hasNoEsqlRule =
+    rules != null && rules.length > 0 && rules.every(({ type }) => type !== 'esql');
+  const appliesToOptions = useMemo(
+    () => [
+      {
+        id: EXCEPTION_APPLIES_TO.SOURCE_DOCUMENTS,
+        label: i18n.APPLIES_TO_SOURCE_DOCUMENTS,
+        'data-test-subj': 'exceptionAppliesToSourceDocuments',
+      },
+      {
+        id: EXCEPTION_APPLIES_TO.ESQL_OUTPUT_COLUMNS,
+        label: i18n.APPLIES_TO_COMPUTED_COLUMNS,
+        'data-test-subj': 'exceptionAppliesToComputedColumns',
+      },
+    ],
+    []
+  );
+  const handleAppliesToChange = useCallback(
+    (id: string): void => {
+      onAppliesToChange?.(
+        id === EXCEPTION_APPLIES_TO.ESQL_OUTPUT_COLUMNS
+          ? EXCEPTION_APPLIES_TO.ESQL_OUTPUT_COLUMNS
+          : EXCEPTION_APPLIES_TO.SOURCE_DOCUMENTS
+      );
+    },
+    [onAppliesToChange]
+  );
+
   const osTypes = useMemo((): OsTypeArray => {
     return (isEdit ? exceptionListItems[0].os_types : selectedOs) ?? [];
   }, [exceptionListItems, isEdit, selectedOs]);
@@ -218,6 +267,52 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
             title={eqlCalloutWarning}
           />
           <EuiSpacer />
+        </>
+      )}
+      {onAppliesToChange != null && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiFormRow label={i18n.APPLIES_TO_LABEL}>
+            <EuiButtonGroup
+              legend={i18n.APPLIES_TO_LEGEND}
+              options={appliesToOptions}
+              idSelected={appliesTo}
+              onChange={handleAppliesToChange}
+              data-test-subj="exceptionAppliesTo"
+            />
+          </EuiFormRow>
+        </>
+      )}
+      {onAppliesToChange == null && isEsqlOutputColumns && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText size="xs" data-test-subj="exceptionItemAppliesTo">
+            <dl>
+              <dt>{i18n.APPLIES_TO_LABEL}</dt>
+              <dd>{i18n.APPLIES_TO_COMPUTED_COLUMNS}</dd>
+            </dl>
+          </EuiText>
+        </>
+      )}
+      {isEsqlOutputColumns && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            announceOnMount
+            color="warning"
+            iconType="warning"
+            size="s"
+            title={
+              hasNoEsqlRule
+                ? i18n.COMPUTED_COLUMNS_NO_EFFECT_WARNING_TITLE
+                : i18n.COMPUTED_COLUMNS_WARNING_TITLE
+            }
+            data-test-subj="exceptionComputedColumnsWarning"
+          >
+            {hasNoEsqlRule
+              ? i18n.COMPUTED_COLUMNS_NO_EFFECT_WARNING_BODY
+              : i18n.COMPUTED_COLUMNS_WARNING_BODY}
+          </EuiCallOut>
         </>
       )}
       <EuiSpacer size="s" />
@@ -250,28 +345,32 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
           <EuiSpacer />
         </>
       )}
-      {getExceptionBuilderComponentLazy({
-        allowLargeValueLists,
-        httpService: http,
-        autocompleteService: kql.autocomplete,
-        exceptionListItems,
-        listType: exceptionListType,
-        osTypes,
-        listId: listIdToUse,
-        listNamespaceType,
-        exceptionItemName,
-        indexPatterns,
-        isOrDisabled: isExceptionBuilderFormDisabled,
-        isAndDisabled: isExceptionBuilderFormDisabled,
-        isNestedDisabled: isExceptionBuilderFormDisabled,
-        dataTestSubj: 'alertExceptionBuilder',
-        idAria: 'alertExceptionBuilder',
-        onChange: handleBuilderOnChange,
-        isDisabled: isExceptionBuilderFormDisabled,
-        allowCustomFieldOptions: !isEndpointException,
-        getExtendedFields,
-        showValueListModal: ShowValueListModal,
-      })}
+      {/* The builder starts again when what the item applies to changes, because the entries of one kind are not those of the other */}
+      <React.Fragment key={appliesTo}>
+        {getExceptionBuilderComponentLazy({
+          allowLargeValueLists,
+          appliesTo,
+          httpService: http,
+          autocompleteService: kql.autocomplete,
+          exceptionListItems: isEsqlOutputColumns && !isEdit ? [] : exceptionListItems,
+          listType: exceptionListType,
+          osTypes,
+          listId: listIdToUse,
+          listNamespaceType,
+          exceptionItemName,
+          indexPatterns,
+          isOrDisabled: isExceptionBuilderFormDisabled,
+          isAndDisabled: isExceptionBuilderFormDisabled,
+          isNestedDisabled: isExceptionBuilderFormDisabled,
+          dataTestSubj: 'alertExceptionBuilder',
+          idAria: 'alertExceptionBuilder',
+          onChange: handleBuilderOnChange,
+          isDisabled: isExceptionBuilderFormDisabled,
+          allowCustomFieldOptions: !isEndpointException,
+          getExtendedFields,
+          showValueListModal: ShowValueListModal,
+        })}
+      </React.Fragment>
     </>
   );
 };

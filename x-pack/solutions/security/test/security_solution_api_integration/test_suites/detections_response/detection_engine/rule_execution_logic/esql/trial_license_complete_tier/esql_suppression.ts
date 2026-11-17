@@ -2026,6 +2026,82 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
         });
       });
+
+      describe('on a column that the query computes', () => {
+        // The exception "tier is GOLD" applies to the output columns, and `tier` is a column that the query computes. It goes at
+        // the end of the query. The rows that it excludes create no alert and are not counted as suppressed documents.
+        const previewSuppressedAlertsByHost = async () => {
+          const id = uuidv4();
+          const interval: [string, string] = [
+            '2020-10-28T06:00:00.000Z',
+            '2020-10-28T06:10:00.000Z',
+          ];
+          const documents = [
+            ...['gold', 'gold', 'gold'].map((user) => ({
+              host: { name: 'host-a' },
+              user: { name: user },
+            })),
+            ...['silver', 'silver', 'silver'].map((user) => ({
+              host: { name: 'host-b' },
+              user: { name: user },
+            })),
+            ...['silver', 'silver', 'gold'].map((user) => ({
+              host: { name: 'host-c' },
+              user: { name: user },
+            })),
+          ];
+          await indexEnhancedDocuments({ documents, interval, id });
+
+          const rule: EsqlRuleCreateProps = {
+            ...getCreateEsqlRulesSchemaMock('rule-1', true),
+            query: `${getNonAggRuleQueryWithMetadata(id)} | eval tier = to_upper(user.name)`,
+            from: 'now-1h',
+            interval: '1h',
+            alert_suppression: {
+              group_by: ['host.name'],
+              missing_fields_strategy: 'suppress',
+            },
+          };
+
+          const { previewId } = await previewRuleWithExceptionEntries({
+            supertest,
+            log,
+            rule,
+            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+            entries: [
+              [
+                {
+                  field: 'tier',
+                  operator: 'included',
+                  type: 'match',
+                  value: 'GOLD',
+                  column_type: 'keyword',
+                },
+              ],
+            ],
+            appliesTo: 'esql_output_columns',
+          });
+
+          const previewAlerts = await getPreviewAlerts({ es, previewId, size: 100 });
+          return sortBy(
+            previewAlerts.map(({ _source }) => ({
+              host: _source?.[ALERT_SUPPRESSION_TERMS]?.[0]?.value,
+              suppressedDocuments: _source?.[ALERT_SUPPRESSION_DOCS_COUNT],
+            })),
+            'host'
+          );
+        };
+
+        it('should create no alert for the rows that the exception excludes and not count them as suppressed', async () => {
+          expect(await previewSuppressedAlertsByHost()).toEqual([
+            // host-a: its three rows are excluded
+            // host-b: three rows, one alert and two suppressed documents
+            { host: 'host-b', suppressedDocuments: 2 },
+            // host-c: two rows remain, one alert and one suppressed document; the excluded row is not counted
+            { host: 'host-c', suppressedDocuments: 1 },
+          ]);
+        });
+      });
     });
 
     describe('alerts enrichment', () => {

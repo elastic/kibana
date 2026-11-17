@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionAppliesTo } from '@kbn/securitysolution-exceptions-common/esql_output_columns';
 import type { ListArray, NonEmptyEntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 
 import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
@@ -22,11 +23,13 @@ import { createExceptionListItem } from '../item/create_exception_list_item';
  * @param supertest super test agent
  * @param entries The entries to create the rule and exception list from
  * @param osTypes The os types to optionally add or not to add to the container
+ * @param appliesTo What the items apply to, when it is not the source documents
  */
 export const createContainerWithEntries = async (
   supertest: SuperTest.Agent,
   log: ToolingLog,
-  entries: NonEmptyEntriesArray[]
+  entries: NonEmptyEntriesArray[],
+  appliesTo?: ExceptionAppliesTo
 ): Promise<ListArray> => {
   // If not given any endpoint entries, return without any
   if (entries.length === 0) {
@@ -51,6 +54,7 @@ export const createContainerWithEntries = async (
         name: 'some name',
         type: 'simple',
         entries: entry,
+        ...(appliesTo != null ? { applies_to: appliesTo } : {}),
       };
       return createExceptionListItem(supertest, log, exceptionListItem);
     })

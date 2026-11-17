@@ -854,6 +854,25 @@ components:
           type: object
     EndpointListItem:
       $ref: '#/components/schemas/ExceptionListItem'
+    EsqlOutputColumnType:
+      description: >
+        The ES|QL type of the output column that the entry is tested on. Only
+        used, and then required, in the entries of an
+
+        item whose `applies_to` is `esql_output_columns`.
+      enum:
+        - keyword
+        - text
+        - integer
+        - long
+        - unsigned_long
+        - double
+        - boolean
+        - ip
+        - version
+        - date
+        - date_nanos
+      type: string
     ExceptionList:
       type: object
       properties:
@@ -950,6 +969,8 @@ components:
             retrieved. Use it ensure updates are done against the latest
             version.
           type: string
+        applies_to:
+          $ref: '#/components/schemas/ExceptionListItemAppliesTo'
         comments:
           $ref: '#/components/schemas/ExceptionListItemCommentArray'
         created_at:
@@ -1009,6 +1030,22 @@ components:
         - created_by
         - updated_at
         - updated_by
+    ExceptionListItemAppliesTo:
+      description: >
+        What the exception item applies to:
+
+        * `source_documents`: the documents of the source indices, before the
+        query of the rule runs. This is how every exception works, and an item
+        without `applies_to` has this value.
+
+        * `esql_output_columns`: the rows that the query of an ES|QL rule
+        outputs, tested on the output columns of the query. Every entry of such
+        an item needs a `column_type`. Only ES|QL rules apply these items, and
+        no other rule type does.
+      enum:
+        - source_documents
+        - esql_output_columns
+      type: string
     ExceptionListItemComment:
       type: object
       properties:
@@ -1061,6 +1098,8 @@ components:
     ExceptionListItemEntryExists:
       type: object
       properties:
+        column_type:
+          $ref: '#/components/schemas/EsqlOutputColumnType'
         field:
           $ref: '#/components/schemas/NonEmptyString'
         operator:
@@ -1102,6 +1141,8 @@ components:
     ExceptionListItemEntryMatch:
       type: object
       properties:
+        column_type:
+          $ref: '#/components/schemas/EsqlOutputColumnType'
         field:
           $ref: '#/components/schemas/NonEmptyString'
         operator:
@@ -1120,6 +1161,8 @@ components:
     ExceptionListItemEntryMatchAny:
       type: object
       properties:
+        column_type:
+          $ref: '#/components/schemas/EsqlOutputColumnType'
         field:
           $ref: '#/components/schemas/NonEmptyString'
         operator:
@@ -1141,6 +1184,8 @@ components:
     ExceptionListItemEntryMatchWildcard:
       type: object
       properties:
+        column_type:
+          $ref: '#/components/schemas/EsqlOutputColumnType'
         field:
           $ref: '#/components/schemas/NonEmptyString'
         operator:

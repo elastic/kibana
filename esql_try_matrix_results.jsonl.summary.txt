@@ -1,0 +1,4 @@
+Summary of the results in esql_try_matrix_results.jsonl
+  layer 1: {"MATCH":872}
+  layer 2: {"MATCH":1932}
+  layer 3: {"MATCH":952}
