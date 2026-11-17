@@ -1886,8 +1886,8 @@ describe('SAMLAuthenticationProvider', () => {
         in_response_to: mockSAMLSet1.requestId,
       });
       mockOptions.uiam?.getClientAuthentication.mockReturnValue({
-        scheme: 'Assertion',
-        value: 'some-assertion',
+        scheme: 'SharedSecret',
+        value: 'Assertion some-assertion',
       });
       mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
@@ -1917,7 +1917,7 @@ describe('SAMLAuthenticationProvider', () => {
             userProfileGrant: {
               type: 'uiamAccessToken',
               accessToken: 'essu_dev_some-token',
-              clientAuthentication: { scheme: 'Assertion', value: 'some-assertion' },
+              clientAuthentication: { scheme: 'SharedSecret', value: 'Assertion some-assertion' },
             },
             state: {
               accessToken: 'essu_dev_some-token',
@@ -2058,8 +2058,8 @@ describe('SAMLAuthenticationProvider', () => {
         });
 
         mockOptions.uiam?.getClientAuthentication.mockReturnValue({
-          scheme: 'Assertion',
-          value: 'some-assertion',
+          scheme: 'SharedSecret',
+          value: 'Assertion some-assertion',
         });
 
         await expect(provider.authenticate(request, sessionValue)).resolves.toEqual(
@@ -2071,7 +2071,7 @@ describe('SAMLAuthenticationProvider', () => {
             userProfileGrant: {
               type: 'uiamAccessToken',
               accessToken: 'essu_dev_new-access-token',
-              clientAuthentication: { scheme: 'Assertion', value: 'some-assertion' },
+              clientAuthentication: { scheme: 'SharedSecret', value: 'Assertion some-assertion' },
             },
             state: {
               accessToken: 'essu_dev_new-access-token',

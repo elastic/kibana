@@ -13,9 +13,9 @@
  */
 export interface ClientAuthentication {
   /**
-   * The authentication scheme: `Assertion` for a signed provenance assertion, or `SharedSecret`.
+   * The authentication scheme. Currently only `SharedSecret` scheme is supported.
    */
-  readonly scheme: 'SharedSecret' | 'Assertion' | string;
+  readonly scheme: 'SharedSecret' | string;
 
   /**
    * The authentication credentials for the scheme.

@@ -16,7 +16,7 @@ export {
   deriveInternalCallerAttestation,
   deriveUiamAttestationKey,
 } from './attestation';
-export { UIAM_ASSERTION_SCHEME, createUiamAssertionSigner } from './assertion_signer';
+export { createUiamAssertionSigner } from './assertion_signer';
 export type { UiamAssertionSigner, UiamAssertionSignerParams } from './assertion_signer';
 export type { UiamProjectType } from './project_type';
 export { markExternalUiamCredential, isExternalUiamCredential } from './external_credential';

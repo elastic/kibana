@@ -91,7 +91,6 @@ export {
   ES_CLIENT_AUTHENTICATION_HEADER,
   deriveInternalCallerAttestation,
   deriveUiamAttestationKey,
-  UIAM_ASSERTION_SCHEME,
   createUiamAssertionSigner,
   markExternalUiamCredential,
   isExternalUiamCredential,

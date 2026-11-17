@@ -347,52 +347,42 @@ describe('UiamService', () => {
   describe('#getClientAuthentication', () => {
     const credential = new HTTPAuthorizationHeader('Bearer', 'essu_access-token');
 
-    it("returns Kibana's assertion for the credential", () => {
-      const clientAuthentication = uiamService.getClientAuthentication(credential);
-      expect(clientAuthentication.scheme).toBe('Assertion');
-      expect(`Assertion ${clientAuthentication.value}`).toEqual(assertionFor('essu_access-token'));
+    it("returns Kibana's assertion for the credential under the `SharedSecret` scheme", () => {
+      expect(uiamService.getClientAuthentication(credential)).toEqual({
+        scheme: 'SharedSecret',
+        value: assertionFor('essu_access-token'),
+      });
     });
 
-    it.each(['upstream-shared-secret', ''])(
-      'preserves the incoming secret %j when it rode in with a UIAM bearer token',
-      (sharedSecret) => {
-        expect(
-          uiamService.getClientAuthentication(credential, createUiamRequest(sharedSecret))
-        ).toEqual({ scheme: 'SharedSecret', value: sharedSecret });
+    it.each(['upstream-shared-secret', 'Assertion upstream.jwt.value', ''])(
+      'preserves the incoming client authentication %j when it rode in with a UIAM bearer token',
+      (relayed) => {
+        expect(uiamService.getClientAuthentication(credential, createUiamRequest(relayed))).toEqual(
+          { scheme: 'SharedSecret', value: relayed }
+        );
       }
     );
 
-    it('preserves an incoming assertion when it rode in with a UIAM bearer token', () => {
-      expect(
-        uiamService.getClientAuthentication(
-          credential,
-          createUiamRequest('Assertion upstream.jwt.value')
-        )
-      ).toEqual({ scheme: 'Assertion', value: 'upstream.jwt.value' });
-    });
-
     it("falls back to Kibana's own assertion when the request carries none", () => {
-      const clientAuthentication = uiamService.getClientAuthentication(
-        credential,
-        createUiamRequest()
-      );
-      expect(clientAuthentication.scheme).toBe('Assertion');
-      expect(`Assertion ${clientAuthentication.value}`).toEqual(assertionFor('essu_access-token'));
+      expect(uiamService.getClientAuthentication(credential, createUiamRequest())).toEqual({
+        scheme: 'SharedSecret',
+        value: assertionFor('essu_access-token'),
+      });
     });
 
     it("falls back to Kibana's own assertion for non-bearer credentials", () => {
       const apiKeyCredential = new HTTPAuthorizationHeader('ApiKey', 'essu_key');
-      const clientAuthentication = uiamService.getClientAuthentication(
-        apiKeyCredential,
-        httpServerMock.createKibanaRequest({
-          headers: {
-            authorization: apiKeyCredential.toString(),
-            [ES_CLIENT_AUTHENTICATION_HEADER]: 'upstream-shared-secret',
-          },
-        })
-      );
-      expect(clientAuthentication.scheme).toBe('Assertion');
-      expect(`Assertion ${clientAuthentication.value}`).toEqual(assertionFor('essu_key'));
+      expect(
+        uiamService.getClientAuthentication(
+          apiKeyCredential,
+          httpServerMock.createKibanaRequest({
+            headers: {
+              authorization: apiKeyCredential.toString(),
+              [ES_CLIENT_AUTHENTICATION_HEADER]: 'upstream-shared-secret',
+            },
+          })
+        )
+      ).toEqual({ scheme: 'SharedSecret', value: assertionFor('essu_key') });
     });
   });
 

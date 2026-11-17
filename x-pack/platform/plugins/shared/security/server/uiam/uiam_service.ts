@@ -19,7 +19,6 @@ import {
   HTTPAuthorizationHeader,
   isExternalUiamCredential,
   resolveUiamClientAuthentication,
-  UIAM_ASSERTION_SCHEME,
   UIAM_ERROR_CODES,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 } from '@kbn/core-security-server';
@@ -614,9 +613,10 @@ export class UiamService implements UiamServicePublic {
     request?: KibanaRequest
   ): ClientAuthentication {
     const supplied = request ? getUiamClientAuthentication(request)?.value : undefined;
-    return UiamService.#toElasticsearchClientAuthentication(
-      supplied ?? this.#clientAuthenticationContext.signer.sign(credential)
-    );
+    return {
+      scheme: 'SharedSecret',
+      value: supplied ?? this.#clientAuthenticationContext.signer.sign(credential),
+    };
   }
 
   /**
@@ -1579,13 +1579,6 @@ export class UiamService implements UiamServicePublic {
     };
 
     throw err;
-  }
-
-  static #toElasticsearchClientAuthentication(value: string): ClientAuthentication {
-    const assertionPrefix = `${UIAM_ASSERTION_SCHEME} `;
-    return value.startsWith(assertionPrefix)
-      ? { scheme: UIAM_ASSERTION_SCHEME, value: value.slice(assertionPrefix.length) }
-      : { scheme: 'SharedSecret', value };
   }
 
   static #getErrorCode(err: unknown): string | undefined {
