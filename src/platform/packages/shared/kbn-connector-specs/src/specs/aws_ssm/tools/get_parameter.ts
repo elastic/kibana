@@ -48,7 +48,7 @@ export const getParameter: ActionDefinition<GetParameterInput> = {
   isTool: true,
   scope: 'read',
   description:
-    'Read a Parameter Store parameter by name: its type (String, StringList or SecureString), value, version, data type and when it was last changed. StringList values are comma-separated. SecureString values are never decrypted: their value is returned as null.',
+    'Read a Parameter Store parameter by name: its type (String, StringList or SecureString), value, version, data type and when it was last changed. StringList values are comma-separated. SecureString values are never decrypted: their value is returned as null. Secrets Manager references (/aws/reference/secretsmanager/...) are not supported.',
   input: GetParameterInputSchema,
   handler: async (ctx, { name }) => {
     const data = await callSsmApi({

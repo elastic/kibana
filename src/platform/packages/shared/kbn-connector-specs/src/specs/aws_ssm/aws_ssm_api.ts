@@ -11,8 +11,20 @@ import { isAxiosError } from 'axios';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionContext } from '../../connector_spec';
 
-const SSM_SERVICE = 'ssm';
 const SSM_TARGET_PREFIX = 'AmazonSSM';
+
+type SsmOperation =
+  | 'CancelCommand'
+  | 'DescribeInstanceInformation'
+  | 'GetAutomationExecution'
+  | 'GetCommandInvocation'
+  | 'GetDocument'
+  | 'GetParameter'
+  | 'ListCommands'
+  | 'ListDocuments'
+  | 'SendCommand'
+  | 'StartAutomationExecution'
+  | 'StopAutomationExecution';
 
 const regionConfigSchema = lazySchema(() => z.object({ region: z.string().min(1) }));
 
@@ -25,14 +37,6 @@ const awsJsonErrorSchema = lazySchema(() =>
     Message: z.string().optional(),
   })
 );
-
-interface CallAwsJsonApiOptions {
-  ctx: ActionContext;
-  service: string;
-  targetPrefix: string;
-  operation: string;
-  body: Record<string, unknown>;
-}
 
 const getRegion = (ctx: ActionContext): string => {
   const parsed = regionConfigSchema.safeParse(ctx.config);
@@ -56,19 +60,21 @@ const toAwsJsonError = ({ target, error }: { target: string; error: unknown }): 
   return new Error(`${target} failed${code ? ` (${code})` : ''}: ${message ?? error.message}`);
 };
 
-/** Calls an operation of an AWS service that speaks the AWS JSON 1.1 protocol. */
-const callAwsJsonApi = async ({
+/** Calls an AWS Systems Manager operation; SigV4 signing is done by the aws_credentials auth type. */
+export const callSsmApi = async ({
   ctx,
-  service,
-  targetPrefix,
   operation,
-  body,
-}: CallAwsJsonApiOptions): Promise<unknown> => {
+  body = {},
+}: {
+  ctx: ActionContext;
+  operation: SsmOperation;
+  body?: Record<string, unknown>;
+}): Promise<unknown> => {
   const region = getRegion(ctx);
-  const target = `${targetPrefix}.${operation}`;
+  const target = `${SSM_TARGET_PREFIX}.${operation}`;
   try {
     const { data } = await ctx.client.post<unknown>(
-      `https://${service}.${region}.amazonaws.com/`,
+      `https://ssm.${region}.amazonaws.com/`,
       JSON.stringify(body),
       {
         headers: {
@@ -83,15 +89,3 @@ const callAwsJsonApi = async ({
     throw toAwsJsonError({ target, error });
   }
 };
-
-/** Calls an AWS Systems Manager operation; SigV4 signing is done by the aws_credentials auth type. */
-export const callSsmApi = ({
-  ctx,
-  operation,
-  body = {},
-}: {
-  ctx: ActionContext;
-  operation: string;
-  body?: Record<string, unknown>;
-}): Promise<unknown> =>
-  callAwsJsonApi({ ctx, service: SSM_SERVICE, targetPrefix: SSM_TARGET_PREFIX, operation, body });

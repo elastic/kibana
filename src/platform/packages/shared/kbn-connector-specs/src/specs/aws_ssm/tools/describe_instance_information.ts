@@ -10,7 +10,8 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionDefinition } from '../../../connector_spec';
 import { callSsmApi } from '../aws_ssm_api';
-import { NEXT_TOKEN_MAX_LENGTH, instanceIdSchema, toIsoDate } from './shared';
+import type { SsmFilter } from './shared';
+import { instanceIdSchema, nextTokenSchema, toIsoDate, toNextToken } from './shared';
 
 // DescribeInstanceInformation returns 5-50 nodes per page.
 const MAX_RESULTS_MIN = 5;
@@ -76,11 +77,7 @@ const DescribeInstanceInformationInputSchema = lazySchema(() =>
         .describe(
           `Maximum number of nodes to return (${MAX_RESULTS_MIN}-${MAX_RESULTS_MAX}). Defaults to 10.`
         ),
-      nextToken: z
-        .string()
-        .max(NEXT_TOKEN_MAX_LENGTH)
-        .optional()
-        .describe('Pagination token from a previous response. Omit to fetch the first page.'),
+      nextToken: nextTokenSchema(),
     })
     .refine(
       ({ tags, instanceIds, pingStatus, platformType }) =>
@@ -119,11 +116,6 @@ const DescribeInstanceInformationResponseSchema = lazySchema(() =>
     NextToken: z.string().optional(),
   })
 );
-
-interface SsmFilter {
-  Key: string;
-  Values: string[];
-}
 
 const toInstanceFilters = ({
   instanceIds,
@@ -185,8 +177,7 @@ export const describeInstanceInformation: ActionDefinition<DescribeInstanceInfor
           ipAddress: IPAddress,
         })
       ),
-      // SSM answers an empty string on the last page.
-      nextToken: NextToken || null,
+      nextToken: toNextToken(NextToken),
     };
   },
 };

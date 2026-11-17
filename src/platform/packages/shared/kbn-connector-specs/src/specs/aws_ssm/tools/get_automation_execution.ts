@@ -21,6 +21,19 @@ const GetAutomationExecutionInputSchema = lazySchema(() =>
 );
 type GetAutomationExecutionInput = z.infer<typeof GetAutomationExecutionInputSchema>;
 
+// Any status not listed here, including ones AWS adds later, keeps the agent polling.
+const FINAL_AUTOMATION_STATUSES: ReadonlySet<string> = new Set([
+  'Success',
+  'Failed',
+  'TimedOut',
+  'Cancelled',
+  'Rejected',
+  'ChangeCalendarOverrideRejected',
+  'CompletedWithSuccess',
+  'CompletedWithFailure',
+  'Exited',
+]);
+
 const automationOutputsSchema = () => z.record(z.string(), z.array(z.string())).optional();
 
 const GetAutomationExecutionResponseSchema = lazySchema(() =>
@@ -58,7 +71,7 @@ export const getAutomationExecution: ActionDefinition<GetAutomationExecutionInpu
   isTool: true,
   scope: 'read',
   description:
-    'Get the progress of an Automation runbook started with startAutomationExecution: its status (e.g. Pending, InProgress, Waiting, Success, Failed, TimedOut, Cancelled), the step it is on, the failure message, the outputs it declares, and each step with its action, status, failure message and outputs. Call again after a few seconds while the status is Pending, InProgress, Waiting or Cancelling.',
+    'Get the progress of an Automation runbook started with startAutomationExecution: its status (e.g. Pending, InProgress, Waiting, Success, Failed, TimedOut, Cancelled), the step it is on, the failure message, the outputs it declares, and each step with its action, status, failure message and outputs (when stepsTruncated is true, only part of the steps are listed). Call again after a few seconds while isFinished is false.',
   input: GetAutomationExecutionInputSchema,
   handler: async (ctx, { automationExecutionId }) => {
     const data = await callSsmApi({
@@ -83,6 +96,9 @@ export const getAutomationExecution: ActionDefinition<GetAutomationExecutionInpu
       automationExecutionId: AutomationExecutionId,
       documentName: DocumentName,
       status: AutomationExecutionStatus,
+      isFinished:
+        AutomationExecutionStatus !== undefined &&
+        FINAL_AUTOMATION_STATUSES.has(AutomationExecutionStatus),
       currentStepName: CurrentStepName,
       failureMessage: FailureMessage,
       outputs: Outputs,

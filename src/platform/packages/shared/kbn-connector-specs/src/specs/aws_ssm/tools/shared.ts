@@ -14,18 +14,23 @@ const INSTANCE_ID_PATTERN = /^(i-(\w{8}|\w{17})|mi-\w{17})$/;
 const INSTANCE_ID_MAX_LENGTH = 20;
 // SendCommand and CancelCommand take at most 50 instance IDs.
 export const COMMAND_INSTANCE_IDS_MAX = 50;
-// The patterns SSM's model gives the DocumentName and DocumentVersion of SendCommand and
-// StartAutomationExecution.
+// The patterns SSM's model gives DocumentName and DocumentVersion.
 const DOCUMENT_NAME_PATTERN = /^[a-zA-Z0-9_\-.:/]{3,128}$/;
 const DOCUMENT_NAME_MAX_LENGTH = 128;
 const DOCUMENT_VERSION_PATTERN = /^(\$LATEST|\$DEFAULT|[1-9][0-9]*)$/;
 const DOCUMENT_VERSION_MAX_LENGTH = 16;
-export const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-export const UUID_LENGTH = 36;
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const UUID_LENGTH = 36;
 // SSM's model only fixes the length of an automation execution ID, not its format.
 const AUTOMATION_EXECUTION_ID_LENGTH = 36;
 // SSM documents no length limit for NextToken; this only guards against unbounded input.
-export const NEXT_TOKEN_MAX_LENGTH = 4096;
+const NEXT_TOKEN_MAX_LENGTH = 4096;
+
+/** A `Key`/`Values` filter, as DescribeInstanceInformation and ListDocuments take them. */
+export interface SsmFilter {
+  Key: string;
+  Values: string[];
+}
 
 export const instanceIdSchema = () =>
   z
@@ -36,12 +41,10 @@ export const instanceIdSchema = () =>
       'Must be an EC2 instance ID (i-...) or a managed node ID (mi-...).'
     );
 
-export const commandIdSchema = () =>
-  z
-    .string()
-    .min(UUID_LENGTH)
-    .max(UUID_LENGTH)
-    .regex(UUID_PATTERN, 'Must be a command ID returned by sendCommand.');
+export const uuidSchema = (message: string) =>
+  z.string().min(UUID_LENGTH).max(UUID_LENGTH).regex(UUID_PATTERN, message);
+
+export const commandIdSchema = () => uuidSchema('Must be a command ID returned by sendCommand.');
 
 export const automationExecutionIdSchema = () =>
   z.string().min(AUTOMATION_EXECUTION_ID_LENGTH).max(AUTOMATION_EXECUTION_ID_LENGTH);
@@ -57,6 +60,16 @@ export const documentVersionSchema = () =>
     .string()
     .max(DOCUMENT_VERSION_MAX_LENGTH)
     .regex(DOCUMENT_VERSION_PATTERN, 'Must be $DEFAULT, $LATEST, or a version number.');
+
+export const nextTokenSchema = () =>
+  z
+    .string()
+    .max(NEXT_TOKEN_MAX_LENGTH)
+    .optional()
+    .describe('Pagination token from a previous response. Omit to fetch the first page.');
+
+// SSM answers an empty string on the last page.
+export const toNextToken = (nextToken: string | undefined): string | null => nextToken || null;
 
 // SSM returns timestamps as epoch seconds.
 export const toIsoDate = (epochSeconds: number | undefined): string | undefined =>

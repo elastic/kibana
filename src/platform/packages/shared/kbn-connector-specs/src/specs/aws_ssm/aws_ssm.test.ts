@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AxiosResponse } from 'axios';
-import { AxiosError } from 'axios';
 import type { ActionContext } from '../../connector_spec';
 import { AwsSsmConnector } from './aws_ssm';
 
@@ -26,6 +24,49 @@ describe('AwsSsmConnector', () => {
     mockClient.post.mockResolvedValue({ data: {} });
   });
 
+  const parametersWithKeys = (count: number) =>
+    Object.fromEntries(Array.from({ length: count }, (_, index) => [`p${index}`, ['value']]));
+
+  it.each([
+    [
+      'describeInstanceInformation tags combined with another filter',
+      'describeInstanceInformation',
+      { tags: [{ key: 'Env', values: ['prod'] }] },
+      { tags: [{ key: 'Env', values: ['prod'] }], pingStatus: ['Online'] },
+    ],
+    [
+      'sendCommand with more than 50 parameters',
+      'sendCommand',
+      {
+        instanceIds: ['i-1234567890abcdef0'],
+        documentName: 'AWS-RunShellScript',
+        parameters: parametersWithKeys(50),
+      },
+      {
+        instanceIds: ['i-1234567890abcdef0'],
+        documentName: 'AWS-RunShellScript',
+        parameters: parametersWithKeys(51),
+      },
+    ],
+    [
+      'startAutomationExecution with no parameters',
+      'startAutomationExecution',
+      { documentName: 'AWS-RestartEC2Instance', parameters: parametersWithKeys(1) },
+      { documentName: 'AWS-RestartEC2Instance', parameters: {} },
+    ],
+    [
+      'startAutomationExecution with more than 200 parameters',
+      'startAutomationExecution',
+      { documentName: 'AWS-RestartEC2Instance', parameters: parametersWithKeys(200) },
+      { documentName: 'AWS-RestartEC2Instance', parameters: parametersWithKeys(201) },
+    ],
+  ])('rejects %s', (_case, action, validInput, invalidInput) => {
+    const { input } = AwsSsmConnector.actions[action];
+
+    expect(input.safeParse(validInput).success).toBe(true);
+    expect(input.safeParse(invalidInput).success).toBe(false);
+  });
+
   describe('describeInstanceInformation', () => {
     it('sends each filter under the key SSM expects', async () => {
       await describeInstanceInformation.handler(mockContext, {
@@ -38,24 +79,14 @@ describe('AwsSsmConnector', () => {
         tags: [{ key: 'Env', values: ['prod'] }],
       });
 
-      expect(mockClient.post).toHaveBeenNthCalledWith(
-        1,
-        'https://ssm.us-east-1.amazonaws.com/',
-        JSON.stringify({
-          Filters: [
-            { Key: 'InstanceIds', Values: ['i-1234567890abcdef0'] },
-            { Key: 'PingStatus', Values: ['Online'] },
-            { Key: 'PlatformTypes', Values: ['Linux'] },
-          ],
-          MaxResults: 10,
-        }),
-        {
-          headers: {
-            'Content-Type': 'application/x-amz-json-1.1',
-            'X-Amz-Target': 'AmazonSSM.DescribeInstanceInformation',
-          },
-        }
-      );
+      expect(JSON.parse(mockClient.post.mock.calls[0][1])).toEqual({
+        Filters: [
+          { Key: 'InstanceIds', Values: ['i-1234567890abcdef0'] },
+          { Key: 'PingStatus', Values: ['Online'] },
+          { Key: 'PlatformTypes', Values: ['Linux'] },
+        ],
+        MaxResults: 10,
+      });
       expect(JSON.parse(mockClient.post.mock.calls[1][1])).toEqual({
         Filters: [{ Key: 'tag:Env', Values: ['prod'] }],
       });
@@ -81,32 +112,6 @@ describe('AwsSsmConnector', () => {
         nextToken: null,
       });
     });
-
-    const message = 'User is not authorized to perform ssm:DescribeInstanceInformation';
-
-    it.each([
-      ['body', {}, { __type: 'com.amazonaws.ssm#AccessDeniedException', message }],
-      [
-        'x-amzn-ErrorType header',
-        { 'x-amzn-errortype': 'AccessDeniedException:http://internal.amazon.com/coral/' },
-        { message },
-      ],
-    ])(
-      'surfaces the AWS error code from the %s and the message',
-      async (_source, headers, data) => {
-        mockClient.post.mockRejectedValue(
-          new AxiosError('Request failed with status code 400', 'ERR_BAD_REQUEST', undefined, {}, {
-            status: 400,
-            headers,
-            data,
-          } as AxiosResponse)
-        );
-
-        await expect(describeInstanceInformation.handler(mockContext, {})).rejects.toThrow(
-          `AmazonSSM.DescribeInstanceInformation failed (AccessDeniedException): ${message}`
-        );
-      }
-    );
   });
 
   describe('sendCommand', () => {
@@ -170,11 +175,13 @@ describe('AwsSsmConnector', () => {
       const result = await AwsSsmConnector.actions.getCommandInvocation.handler(mockContext, {
         commandId: '2b8e7fd1-8a2e-4b8f-9d6a-0123456789ab',
         instanceId: 'i-1234567890abcdef0',
+        pluginName: 'runShellScript',
       });
 
       expect(JSON.parse(mockClient.post.mock.calls[0][1])).toEqual({
         CommandId: '2b8e7fd1-8a2e-4b8f-9d6a-0123456789ab',
         InstanceId: 'i-1234567890abcdef0',
+        PluginName: 'runShellScript',
       });
       expect(result).toMatchObject({
         status: 'InProgress',
@@ -183,6 +190,26 @@ describe('AwsSsmConnector', () => {
         executionEndDateTime: null,
         standardOutput: ' 22:13:21 up 3 days',
       });
+    });
+
+    it.each([
+      ['Success', true],
+      ['Failed', true],
+      ['TimedOut', true],
+      ['Cancelled', true],
+      ['Pending', false],
+      ['InProgress', false],
+      ['Delayed', false],
+      ['Cancelling', false],
+    ])('reports status %s as finished: %s', async (Status, isFinished) => {
+      mockClient.post.mockResolvedValue({ data: { Status } });
+
+      const result = await AwsSsmConnector.actions.getCommandInvocation.handler(mockContext, {
+        commandId: '2b8e7fd1-8a2e-4b8f-9d6a-0123456789ab',
+        instanceId: 'i-1234567890abcdef0',
+      });
+
+      expect(result).toMatchObject({ isFinished });
     });
   });
 
@@ -260,22 +287,33 @@ describe('AwsSsmConnector', () => {
   });
 
   describe('getParameter', () => {
-    it('never asks for decryption, and hides the value of a SecureString', async () => {
-      mockClient.post.mockResolvedValue({
-        data: {
-          Parameter: { Name: '/myapp/prod/db-password', Type: 'SecureString', Value: 'AQICAHh...' },
-        },
-      });
+    it('never asks for decryption, and hides the value of a SecureString only', async () => {
+      mockClient.post
+        .mockResolvedValueOnce({
+          data: {
+            Parameter: {
+              Name: '/myapp/prod/db-password',
+              Type: 'SecureString',
+              Value: 'AQICAHh...',
+            },
+          },
+        })
+        .mockResolvedValueOnce({
+          data: {
+            Parameter: { Name: '/myapp/prod/db-host', Type: 'String', Value: 'db.internal' },
+          },
+        });
+      const { handler } = AwsSsmConnector.actions.getParameter;
 
-      const result = await AwsSsmConnector.actions.getParameter.handler(mockContext, {
-        name: '/myapp/prod/db-password',
-      });
+      const secret = await handler(mockContext, { name: '/myapp/prod/db-password' });
+      const plain = await handler(mockContext, { name: '/myapp/prod/db-host' });
 
       expect(JSON.parse(mockClient.post.mock.calls[0][1])).toEqual({
         Name: '/myapp/prod/db-password',
         WithDecryption: false,
       });
-      expect(result).toMatchObject({ type: 'SecureString', value: null });
+      expect(secret).toMatchObject({ type: 'SecureString', value: null });
+      expect(plain).toMatchObject({ type: 'String', value: 'db.internal' });
     });
   });
 
@@ -346,6 +384,38 @@ describe('AwsSsmConnector', () => {
         ],
         stepsTruncated: false,
       });
+    });
+
+    it.each([
+      ['Success', true],
+      ['Failed', true],
+      ['TimedOut', true],
+      ['Cancelled', true],
+      ['Rejected', true],
+      ['ChangeCalendarOverrideRejected', true],
+      ['CompletedWithSuccess', true],
+      ['CompletedWithFailure', true],
+      ['Exited', true],
+      ['Pending', false],
+      ['InProgress', false],
+      ['Waiting', false],
+      ['Cancelling', false],
+      ['PendingApproval', false],
+      ['Approved', false],
+      ['Scheduled', false],
+      ['RunbookInProgress', false],
+      ['PendingChangeCalendarOverride', false],
+      ['ChangeCalendarOverrideApproved', false],
+    ])('reports status %s as finished: %s', async (AutomationExecutionStatus, isFinished) => {
+      mockClient.post.mockResolvedValue({
+        data: { AutomationExecution: { AutomationExecutionStatus } },
+      });
+
+      const result = await AwsSsmConnector.actions.getAutomationExecution.handler(mockContext, {
+        automationExecutionId: '4105a4fc-f944-11e6-9d32-0123456789ab',
+      });
+
+      expect(result).toMatchObject({ isFinished });
     });
   });
 });

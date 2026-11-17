@@ -10,7 +10,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionDefinition } from '../../../connector_spec';
 import { callSsmApi } from '../aws_ssm_api';
-import { UUID_LENGTH, UUID_PATTERN, documentNameSchema, documentVersionSchema } from './shared';
+import { documentNameSchema, documentVersionSchema, uuidSchema } from './shared';
 
 // StartAutomationExecution's limits for runbook parameters.
 const AUTOMATION_PARAMETER_NAME_MAX_LENGTH = 50;
@@ -46,11 +46,7 @@ const StartAutomationExecutionInputSchema = lazySchema(() =>
     documentVersion: documentVersionSchema()
       .optional()
       .describe('The runbook version to run: "$DEFAULT" (the default), "$LATEST", or a number.'),
-    clientToken: z
-      .string()
-      .min(UUID_LENGTH)
-      .max(UUID_LENGTH)
-      .regex(UUID_PATTERN, 'Must be a UUID.')
+    clientToken: uuidSchema('Must be a UUID.')
       .optional()
       .describe(
         'A UUID that identifies this start request. Retrying with the same clientToken does not start the runbook a second time.'
@@ -66,10 +62,8 @@ const StartAutomationExecutionResponseSchema = lazySchema(() =>
 );
 
 export const startAutomationExecution: ActionDefinition<StartAutomationExecutionInput> = {
-  // Runs an Automation runbook, which calls AWS APIs with the role passed as
-  // AutomationAssumeRole or with the connector's credentials. As with sendCommand, Agent Builder
-  // does not ask for confirmation per call, so IAM is the guard. Rate-controlled targeting
-  // (Targets, TargetMaps), multi-account TargetLocations and Interactive mode are left out.
+  // Agent Builder does not ask for confirmation per call (`scope` is not consulted there), so the
+  // IAM policy on the connector's credentials, or on the AutomationAssumeRole, is the only guard.
   isTool: true,
   scope: 'destroy',
   description:

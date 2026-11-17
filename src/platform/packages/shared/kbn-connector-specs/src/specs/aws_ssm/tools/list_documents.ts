@@ -10,7 +10,8 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionDefinition } from '../../../connector_spec';
 import { callSsmApi } from '../aws_ssm_api';
-import { NEXT_TOKEN_MAX_LENGTH } from './shared';
+import type { SsmFilter } from './shared';
+import { nextTokenSchema, toNextToken } from './shared';
 
 const MAX_RESULTS_MAX = 50;
 const NAME_PREFIX_MAX_LENGTH = 256;
@@ -51,11 +52,7 @@ const ListDocumentsInputSchema = lazySchema(() =>
       .max(MAX_RESULTS_MAX)
       .optional()
       .describe(`Maximum number of documents to return (1-${MAX_RESULTS_MAX}).`),
-    nextToken: z
-      .string()
-      .max(NEXT_TOKEN_MAX_LENGTH)
-      .optional()
-      .describe('Pagination token from a previous response. Omit to fetch the first page.'),
+    nextToken: nextTokenSchema(),
   })
 );
 type ListDocumentsInput = z.infer<typeof ListDocumentsInputSchema>;
@@ -84,7 +81,7 @@ const toDocumentFilters = ({
   owner,
   namePrefix,
   platformType,
-}: ListDocumentsInput): Array<{ Key: string; Values: string[] }> => [
+}: ListDocumentsInput): SsmFilter[] => [
   ...(documentType ? [{ Key: 'DocumentType', Values: [documentType] }] : []),
   ...(owner ? [{ Key: 'Owner', Values: [owner] }] : []),
   ...(namePrefix ? [{ Key: 'Name', Values: [namePrefix] }] : []),
@@ -130,8 +127,7 @@ export const listDocuments: ActionDefinition<ListDocumentsInput> = {
           targetType: TargetType,
         })
       ),
-      // SSM answers an empty string on the last page.
-      nextToken: NextToken || null,
+      nextToken: toNextToken(NextToken),
     };
   },
 };

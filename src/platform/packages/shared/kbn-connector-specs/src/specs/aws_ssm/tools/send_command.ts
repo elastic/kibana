@@ -89,10 +89,8 @@ const SendCommandResponseSchema = lazySchema(() =>
 );
 
 export const sendCommand: ActionDefinition<SendCommandInput> = {
-  // Runs arbitrary commands on the given nodes. Agent Builder does not ask for confirmation
-  // per call (`scope` is not consulted there), so the only guards are the IAM policy on the
-  // connector's credentials and which agents the connector is assigned to. Targeting is
-  // limited to explicit instance IDs so every call names the nodes it affects.
+  // Agent Builder does not ask for confirmation per call (`scope` is not consulted there), so the
+  // IAM policy on the connector's credentials is the only guard on what this runs.
   isTool: true,
   scope: 'destroy',
   description:
@@ -115,12 +113,13 @@ export const sendCommand: ActionDefinition<SendCommandInput> = {
       },
     });
     const { Command = {} } = SendCommandResponseSchema.parse(data);
+    const { CommandId, DocumentName, InstanceIds, Status, RequestedDateTime } = Command;
     return {
-      commandId: Command.CommandId,
-      documentName: Command.DocumentName,
-      instanceIds: Command.InstanceIds,
-      status: Command.Status,
-      requestedDateTime: toIsoDate(Command.RequestedDateTime),
+      commandId: CommandId,
+      documentName: DocumentName,
+      instanceIds: InstanceIds,
+      status: Status,
+      requestedDateTime: toIsoDate(RequestedDateTime),
     };
   },
 };

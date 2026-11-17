@@ -11,11 +11,12 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionDefinition } from '../../../connector_spec';
 import { callSsmApi } from '../aws_ssm_api';
 import {
-  NEXT_TOKEN_MAX_LENGTH,
   commandIdSchema,
   documentNameSchema,
   instanceIdSchema,
+  nextTokenSchema,
   toIsoDate,
+  toNextToken,
 } from './shared';
 
 const MAX_RESULTS_MAX = 50;
@@ -60,11 +61,7 @@ const ListCommandsInputSchema = lazySchema(() =>
       .max(MAX_RESULTS_MAX)
       .optional()
       .describe(`Maximum number of commands to return (1-${MAX_RESULTS_MAX}).`),
-    nextToken: z
-      .string()
-      .max(NEXT_TOKEN_MAX_LENGTH)
-      .optional()
-      .describe('Pagination token from a previous response. Omit to fetch the first page.'),
+    nextToken: nextTokenSchema(),
   })
 );
 type ListCommandsInput = z.infer<typeof ListCommandsInputSchema>;
@@ -155,8 +152,7 @@ export const listCommands: ActionDefinition<ListCommandsInput> = {
           deliveryTimedOutCount: DeliveryTimedOutCount,
         })
       ),
-      // SSM answers an empty string on the last page.
-      nextToken: NextToken || null,
+      nextToken: toNextToken(NextToken),
     };
   },
 };

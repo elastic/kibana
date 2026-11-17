@@ -12,6 +12,10 @@ import type { ActionDefinition } from '../../../connector_spec';
 import { callSsmApi } from '../aws_ssm_api';
 import { commandIdSchema, instanceIdSchema } from './shared';
 
+const PLUGIN_NAME_MIN_LENGTH = 4;
+// SSM documents no maximum for PluginName; this only guards against unbounded input.
+const PLUGIN_NAME_MAX_LENGTH = 128;
+
 const GetCommandInvocationInputSchema = lazySchema(() =>
   z.object({
     commandId: commandIdSchema().describe(
@@ -20,9 +24,25 @@ const GetCommandInvocationInputSchema = lazySchema(() =>
     instanceId: instanceIdSchema().describe(
       'One of the instance IDs the command was sent to. Call once per node to get each result.'
     ),
+    pluginName: z
+      .string()
+      .min(PLUGIN_NAME_MIN_LENGTH)
+      .max(PLUGIN_NAME_MAX_LENGTH)
+      .optional()
+      .describe(
+        'The name of the document step to read the result of. Omit it for documents with a single step, such as AWS-RunShellScript; it is required when the document has more than one step (read their names with getDocument), otherwise the call fails with InvalidPluginName.'
+      ),
   })
 );
 type GetCommandInvocationInput = z.infer<typeof GetCommandInvocationInputSchema>;
+
+// Any status not listed here, including ones AWS adds later, keeps the agent polling.
+const FINAL_INVOCATION_STATUSES: ReadonlySet<string> = new Set([
+  'Success',
+  'Failed',
+  'TimedOut',
+  'Cancelled',
+]);
 
 const GetCommandInvocationResponseSchema = lazySchema(() =>
   z.object({
@@ -43,13 +63,13 @@ export const getCommandInvocation: ActionDefinition<GetCommandInvocationInput> =
   isTool: true,
   scope: 'read',
   description:
-    'Get the result of a command sent with sendCommand on one node: its status (Pending, InProgress, Delayed, Success, Failed, TimedOut, Cancelled, Cancelling), the exit code, standard output (up to 24,000 characters) and standard error (up to 8,000 characters), and when it started and ended. Call again after a few seconds while the status is Pending, InProgress or Delayed. Right after sendCommand this can fail with InvocationDoesNotExist for a few seconds; wait and retry.',
+    'Get the result of a command sent with sendCommand on one node: its status (Pending, InProgress, Delayed, Success, Failed, TimedOut, Cancelled, Cancelling), the exit code, standard output (up to 24,000 characters) and standard error (up to 8,000 characters), and when it started and ended. Call again after a few seconds while isFinished is false. Right after sendCommand this can fail with InvocationDoesNotExist for a few seconds; wait and retry.',
   input: GetCommandInvocationInputSchema,
-  handler: async (ctx, { commandId, instanceId }) => {
+  handler: async (ctx, { commandId, instanceId, pluginName }) => {
     const data = await callSsmApi({
       ctx,
       operation: 'GetCommandInvocation',
-      body: { CommandId: commandId, InstanceId: instanceId },
+      body: { CommandId: commandId, InstanceId: instanceId, PluginName: pluginName },
     });
     const {
       CommandId,
@@ -68,6 +88,7 @@ export const getCommandInvocation: ActionDefinition<GetCommandInvocationInput> =
       instanceId: InstanceId,
       documentName: DocumentName,
       status: Status,
+      isFinished: Status !== undefined && FINAL_INVOCATION_STATUSES.has(Status),
       statusDetails: StatusDetails,
       // -1 until the command has finished on the node.
       responseCode: ResponseCode,
