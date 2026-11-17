@@ -289,22 +289,29 @@ export const recordActions = async ({
         try {
           await context.runAction(action, input);
           worked = true;
-        } catch (error) {
-          // A run that only fails with tracking is recorded without it, as an untracked action.
-          const plain = trackFields
-            ? await contextFor(false)
-                .then(async (retry) => {
-                  await retry.runAction(action, input);
-                  return retry;
-                })
-                .catch(() => undefined)
-            : undefined;
+        } catch (trackedError) {
+          // Tracking wraps response bodies in proxies, which some handlers refuse (e.g.
+          // `structuredClone`). A run that only fails with tracking is recorded without it, as an
+          // untracked action.
+          let plain: ContractContext | undefined;
+          let plainError: unknown;
+          if (trackFields) {
+            try {
+              plain = await contextFor(false);
+              await plain.runAction(action, input);
+            } catch (error) {
+              plain = undefined;
+              plainError = error;
+            }
+          }
           if (plain) {
             untracked.add(action);
             mock = plain.mock;
             worked = true;
           } else {
-            errors.push(errorMessage(error));
+            // Once it fails without tracking too, that run's error is the action's own, and the
+            // one worth reporting: the tracked run may have failed on the proxies instead.
+            errors.push(errorMessage(trackFields ? plainError : trackedError));
           }
         }
         // Token requests authenticate the run; they aren't vendor operations the action calls.
