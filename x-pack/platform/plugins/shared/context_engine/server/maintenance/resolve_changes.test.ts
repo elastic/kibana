@@ -66,11 +66,15 @@ const resolve = (
   kis: DreamedKi[],
   changes: Partial<MaintenanceChangeSet>,
   {
-    items = kis.filter(({ type }) => type !== 'memory.relationship').map(({ id }) => id),
+    neighbors = [],
+    items = kis
+      .filter(({ id, type }) => type !== 'memory.relationship' && !neighbors.includes(id))
+      .map(({ id }) => id),
     extra = {},
     links = {},
     relationships = [],
   }: {
+    neighbors?: string[];
     items?: string[];
     extra?: Record<string, Partial<MaintenanceReviewItem>>;
     links?: Record<string, DreamedKi[]>;
@@ -85,7 +89,7 @@ const resolve = (
       reasons: ['changed'],
       ...extra[id],
     })),
-    neighbors: [],
+    neighbors: neighbors.map((id) => toMaintenanceItem(byId.get(id)!)),
     about_facts: [],
     relationships,
   };
@@ -282,6 +286,25 @@ describe('resolveMaintenanceChanges', () => {
         'e-3 has different permissions than the batch',
         'facts and entities cannot be merged together',
         'e-2 is already changed by another change',
+      ]);
+    });
+
+    it('rejects a merge or contradiction among neighbors only', () => {
+      const kis = [entity('e-1'), entity('e-2'), entity('e-3'), fact('f-1'), fact('f-2')];
+
+      const resolved = resolve(
+        kis,
+        {
+          merges: [{ survivor: 'e-2', absorbed: ['e-3'], reason: 'r' }],
+          contradictions: [{ ids: ['f-1', 'f-2'], label: 'conflict', reason: 'r' }],
+        },
+        { neighbors: ['e-2', 'e-3', 'f-1', 'f-2'] }
+      );
+
+      expect(resolved.groups).toEqual([]);
+      expect(resolved.rejected.map(({ reason }) => reason)).toEqual([
+        'it names none of the reviewed items',
+        'it names none of the reviewed items',
       ]);
     });
   });

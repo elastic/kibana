@@ -127,18 +127,7 @@ describe('getApplyMaintenanceChangesStepDefinition', () => {
       ],
       needs_review: [],
       rejected: [],
-      plans: [
-        {
-          batch,
-          changes: {
-            merges: [],
-            contradictions: changes.contradictions,
-            rewrites: [],
-            summaries: [],
-            relationships: [],
-          },
-        },
-      ],
+      plans: [{ batch, changes }],
     });
   });
 
@@ -160,29 +149,39 @@ describe('getApplyMaintenanceChangesStepDefinition', () => {
   });
 
   it('rejects every change once no item of the batch is left', async () => {
+    const links = [
+      { id: 'rel-a', from: 'f-old', relation: 'precedes', to: 'f-new' },
+      { id: 'rel-b', from: 'f-new', relation: 'follows', to: 'f-old' },
+    ];
     const neighborsOnly = {
       ...batch,
       items: [{ ...toMaintenanceItem(stored.get('f-gone')!), reasons: ['changed' as const] }],
       neighbors: batch.items.map(({ reasons: _reasons, ...item }) => item),
+      relationships: links,
     };
+    const latest = new Map<string, DreamedKi>([
+      ...stored,
+      [
+        'f-gone',
+        { ...stored.get('f-gone')!, governance: { lifecycle: { status: 'deleted' as const } } },
+      ],
+      ...links.map(({ id }): [string, DreamedKi] => [
+        id,
+        { id, type: 'memory.relationship', title: id },
+      ]),
+    ]);
     const reader: Partial<MaintenanceReader> = {
       latestByIds: async (ids) =>
-        new Map(
-          ids.flatMap((id) => {
-            const ki = stored.get(id);
-            if (!ki) {
-              return [];
-            }
-            const latest: DreamedKi =
-              id === 'f-gone' ? { ...ki, governance: { lifecycle: { status: 'deleted' } } } : ki;
-            return [[id, latest] as const];
-          })
-        ),
+        new Map(ids.flatMap((id) => (latest.has(id) ? [[id, latest.get(id)!] as const] : []))),
       citing: async () => [],
     };
     jest.mocked(createMaintenanceReader).mockReturnValue(reader as MaintenanceReader);
     const context = createMockStepContext({
-      input: { ai_index_id: 'support', batch: neighborsOnly, changes },
+      input: {
+        ai_index_id: 'support',
+        batch: neighborsOnly,
+        changes: { relationships: [{ id: 'rel-a', reason: 'Inverse of rel-b' }] },
+      },
       esClient: {},
     });
 
@@ -192,15 +191,58 @@ describe('getApplyMaintenanceChangesStepDefinition', () => {
     expect(softDeleteKi).not.toHaveBeenCalled();
     expect(output?.rejected).toEqual([
       {
-        item: 'contradiction between f-old and f-new',
+        item: 'relationship rel-a',
         reason: 'no item of the batch is left to take its permissions from',
       },
     ]);
   });
 
-  it('fails on changes the model got wrong', async () => {
+  it('rejects an incomplete change on its own, keeping the rest of the batch', async () => {
     const context = createMockStepContext({
-      input: { ai_index_id: 'support', batch, changes: { merges: [{ survivor: 'f-new' }] } },
+      input: {
+        ai_index_id: 'support',
+        batch,
+        changes: {
+          ...changes,
+          rewrites: [{ id: 'f-old', content: '', reason: 'r' }],
+          merges: [{ survivor: 'f-new', absorbed: ['f-old'], title: '', reason: 'x'.repeat(2000) }],
+        },
+        plan_only: true,
+      },
+      esClient: {},
+    });
+
+    const { output } = await definition().handler(context);
+
+    expect(output?.rejected).toEqual([
+      {
+        item: 'rewrite 1',
+        reason: expect.stringContaining('the model returned it incomplete: content'),
+      },
+      expect.objectContaining({
+        item: 'contradiction between f-old and f-new',
+        reason: 'f-old is already changed by another change',
+      }),
+    ]);
+    expect(output?.changes.map(({ id, change }) => [id, change])).toEqual([
+      ['f-new', 'merged'],
+      ['f-old', 'superseded'],
+    ]);
+  });
+
+  it('fails on more changes than a batch can hold', async () => {
+    const context = createMockStepContext({
+      input: {
+        ai_index_id: 'support',
+        batch,
+        changes: {
+          rewrites: Array.from({ length: 1000 }, () => ({
+            id: 'f-old',
+            content: 'c',
+            reason: 'r',
+          })),
+        },
+      },
       esClient: {},
     });
 

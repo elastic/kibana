@@ -114,6 +114,22 @@ describe('applyMaintenanceGroups', () => {
     ]);
   });
 
+  it('changes nothing in a group whose kept item was deleted since it was planned', async () => {
+    stored.delete('e-1');
+
+    const result = await applyMaintenanceGroups(context(), [mergeGroup()]);
+
+    expect(putKiRevision).not.toHaveBeenCalled();
+    expect(softDeleteKi).not.toHaveBeenCalled();
+    expect(result.changes).toEqual([]);
+    expect(result.rejected).toEqual([
+      {
+        item: 'merge into e-1',
+        reason: 'e-1 no longer exists, so nothing can be merged into it',
+      },
+    ]);
+  });
+
   it('never tombstones a person-edited item', async () => {
     stored.set(
       'e-2',

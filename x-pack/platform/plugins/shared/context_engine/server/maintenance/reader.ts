@@ -144,6 +144,21 @@ export const createMaintenanceReader = ({
     });
   };
 
+  const latestByIds = async (ids: readonly string[]): Promise<Map<string, DreamedKi>> => {
+    const found = new Map<string, DreamedKi>();
+    for (const part of chunk([...new Set(ids)], TERMS_CHUNK_SIZE)) {
+      const hits = await search({
+        size: part.length,
+        collapse: { field: 'id', inner_hits: LATEST },
+        query: { bool: { filter: [{ terms: { id: part } }] } },
+      });
+      for (const ki of latestOf(hits)) {
+        found.set(ki.id, ki);
+      }
+    }
+    return found;
+  };
+
   return {
     changedSince: async (since, afterId) => {
       const hits = await search({
@@ -207,20 +222,7 @@ export const createMaintenanceReader = ({
       };
     },
 
-    latestByIds: async (ids) => {
-      const found = new Map<string, DreamedKi>();
-      for (const part of chunk([...new Set(ids)], TERMS_CHUNK_SIZE)) {
-        const hits = await search({
-          size: part.length,
-          collapse: { field: 'id', inner_hits: LATEST },
-          query: { bool: { filter: [{ terms: { id: part } }] } },
-        });
-        for (const ki of latestOf(hits)) {
-          found.set(ki.id, ki);
-        }
-      }
-      return found;
-    },
+    latestByIds,
 
     citing: async (uris, kind) => {
       const found = new Map<string, DreamedKi>();
@@ -284,7 +286,13 @@ export const createMaintenanceReader = ({
           neighbors.set(ki.id, latestOf(hits));
         });
       }
-      return neighbors;
+      const newest = await latestByIds([...neighbors.values()].flat().map(({ id }) => id));
+      return new Map(
+        [...neighbors].map(([id, matches]) => [
+          id,
+          matches.flatMap((match) => newest.get(match.id) ?? []),
+        ])
+      );
     },
   };
 };

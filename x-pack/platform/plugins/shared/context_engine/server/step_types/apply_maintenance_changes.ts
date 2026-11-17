@@ -9,7 +9,6 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import {
   applyMaintenanceChangesStepCommonDefinition,
-  maintenanceChangeSetSchema,
   type ApplyMaintenanceChangesOutput,
   type MaintenanceChangeSet,
 } from '../../common/step_types/apply_maintenance_changes';
@@ -19,6 +18,7 @@ import { kindOf, type DreamedKi } from '../dreaming/dreamed_ki';
 import { kiUri } from '../dreaming/ids';
 import { applyMaintenanceGroups, emptyApplyResult } from '../maintenance/apply_maintenance';
 import { audienceOf, parseRelationship } from '../maintenance/gather';
+import { parseMaintenanceChanges } from '../maintenance/parse_changes';
 import { createMaintenanceReader } from '../maintenance/reader';
 import { resolveMaintenanceChanges, type MaintenanceGroup } from '../maintenance/resolve_changes';
 import { resolveDreamingAiIndex } from './gather_maintenance';
@@ -78,14 +78,14 @@ export const getApplyMaintenanceChangesStepDefinition = ({
           message: 'Pass the changes the model returned for the batch',
         });
       }
-      const parsed = maintenanceChangeSetSchema.safeParse(context.input.changes ?? {});
-      if (!parsed.success) {
+      const parsed = parseMaintenanceChanges(context.input.changes);
+      if ('error' in parsed) {
         throw new ExecutionError({
           type: 'ValidationError',
-          message: `The maintenance model returned invalid changes: ${parsed.error.message}`,
+          message: `The maintenance model returned invalid changes: ${parsed.error}`,
         });
       }
-      const changeSet = batch ? parsed.data : EMPTY_CHANGE_SET;
+      const changeSet = batch ? parsed.changeSet : EMPTY_CHANGE_SET;
 
       const aiIndex = await resolveDreamingAiIndex(getAiIndexService, aiIndexId, spaceId);
       assertWritableDest(aiIndexId, aiIndex.dest);
@@ -178,7 +178,11 @@ export const getApplyMaintenanceChangesStepDefinition = ({
         const ki = kis.get(id);
         return ki !== undefined && kindOf(ki) !== undefined;
       }).length;
-      const rejected = [...resolved.rejected, ...result.rejected];
+      const rejected = [
+        ...(batch ? parsed.rejected : []),
+        ...resolved.rejected,
+        ...result.rejected,
+      ];
       logger.debug(
         `${planOnly ? 'Plan: maintenance' : 'Maintenance'} of AI index '${aiIndexId}' wrote ${
           result.written
@@ -192,7 +196,11 @@ export const getApplyMaintenanceChangesStepDefinition = ({
         changes: result.changes,
         needs_review: resolved.needsReview,
         rejected,
-        ...(planOnly && batch && { plans: [{ batch, changes: changeSet }] }),
+        ...(planOnly &&
+          batch &&
+          context.input.changes && {
+            plans: [{ batch, changes: context.input.changes }],
+          }),
       };
       return { output };
     },

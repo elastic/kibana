@@ -236,8 +236,16 @@ export const gatherMaintenance = async (
         ? verdict.remainingIds
             .map(visibleMemoryOf)
             .filter((memory): memory is DreamedKi => memory !== undefined)
-            .slice(0, MAX_MAINTENANCE_REMAINING_MEMORIES)
         : [];
+    if (remaining.length > MAX_MAINTENANCE_REMAINING_MEMORIES) {
+      needsReview.push({
+        id: ki.id,
+        change: 'needs_review',
+        reason: `Some of the memories it came from were deleted, and more remain than the ${MAX_MAINTENANCE_REMAINING_MEMORIES} a rewrite can read.`,
+      });
+      review.delete(ki.id);
+      continue;
+    }
     if (verdict.verdict === 'rewrite' && (remaining.length > 0 || kindOf(ki) === 'entity')) {
       rewrites.set(ki.id, {
         lost_source_ids: verdict.lostIds,

@@ -208,6 +208,26 @@ describe('gatherMaintenance', () => {
     ]);
   });
 
+  it('lists for review an item with more remaining memories than a rewrite can read', async () => {
+    const remainingIds = Array.from({ length: 11 }, (_, index) => `m-r${index}`);
+    const stored = [
+      memory('m-1', { governance: deleted }),
+      ...remainingIds.map((id) => memory(id)),
+      fact('fact-wide', { references: derivedFrom('m-1', ...remainingIds) }),
+    ];
+
+    const output = await gatherMaintenance(fakeReader(stored, { changed: [stored[0]] }), options);
+
+    expect(output.batches).toEqual([]);
+    expect(output.needs_review).toEqual([
+      expect.objectContaining({
+        id: 'fact-wide',
+        change: 'needs_review',
+        reason: expect.stringContaining('more remain than the 10'),
+      }),
+    ]);
+  });
+
   it('keeps items whose memories aged out, and lists for review those that also lost some', async () => {
     const stored = [
       memory('m-1', { governance: deleted }),

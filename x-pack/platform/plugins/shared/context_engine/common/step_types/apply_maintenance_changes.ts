@@ -27,67 +27,67 @@ import {
 export const APPLY_MAINTENANCE_CHANGES_STEP_ID = 'context-engine.applyMaintenanceChanges' as const;
 
 const MAX_CHANGES = MAINTENANCE_BATCH_SIZE * 5;
-const MAX_REASON_LENGTH = 1024;
+export const MAX_MAINTENANCE_REASON_LENGTH = 1024;
 
 const idSchema = lazySchema(() => z.string().min(1).max(MAX_KI_ID_LENGTH));
-const reasonSchema = lazySchema(() => z.string().max(MAX_REASON_LENGTH));
+const reasonSchema = lazySchema(() => z.string().max(MAX_MAINTENANCE_REASON_LENGTH));
 const titleSchema = lazySchema(() => z.string().min(1).max(MAX_KI_TITLE_LENGTH));
 const descriptionSchema = lazySchema(() => z.string().min(1).max(MAX_KI_DESCRIPTION_LENGTH));
 const contentSchema = lazySchema(() => z.string().min(1).max(MAX_KI_CONTENT_LENGTH));
 
+export const maintenanceMergeSchema = lazySchema(() =>
+  z.object({
+    survivor: idSchema,
+    absorbed: z.array(idSchema).min(1).max(MAINTENANCE_BATCH_SIZE),
+    title: titleSchema.optional(),
+    description: descriptionSchema.optional(),
+    content: contentSchema.optional(),
+    reason: reasonSchema,
+  })
+);
+
+export const maintenanceContradictionSchema = lazySchema(() =>
+  z.object({
+    ids: z.tuple([idSchema, idSchema]),
+    label: z.enum(['changed', 'conflict']),
+    content: contentSchema
+      .optional()
+      .describe('With changed: what the newer fact says, now that it replaces the older'),
+    reason: reasonSchema,
+  })
+);
+
+export const maintenanceRewriteSchema = lazySchema(() =>
+  z.object({
+    id: idSchema,
+    title: titleSchema.optional(),
+    content: contentSchema,
+    reason: reasonSchema,
+  })
+);
+
+export const maintenanceSummarySchema = lazySchema(() =>
+  z.object({
+    id: idSchema,
+    description: descriptionSchema.optional(),
+    content: contentSchema,
+    reason: reasonSchema,
+  })
+);
+
+export const maintenanceRelationshipRemovalSchema = lazySchema(() =>
+  z.object({ id: idSchema, reason: reasonSchema })
+);
+
 /** The changes the maintenance model proposes for one batch. */
 export const maintenanceChangeSetSchema = lazySchema(() =>
   z.object({
-    merges: z
-      .array(
-        z.object({
-          survivor: idSchema,
-          absorbed: z.array(idSchema).min(1).max(MAINTENANCE_BATCH_SIZE),
-          title: titleSchema.optional(),
-          description: descriptionSchema.optional(),
-          content: contentSchema.optional(),
-          reason: reasonSchema,
-        })
-      )
-      .max(MAX_CHANGES)
-      .default([]),
-    contradictions: z
-      .array(
-        z.object({
-          ids: z.tuple([idSchema, idSchema]),
-          label: z.enum(['changed', 'conflict']),
-          content: contentSchema
-            .optional()
-            .describe('With changed: what the newer fact says, now that it replaces the older'),
-          reason: reasonSchema,
-        })
-      )
-      .max(MAX_CHANGES)
-      .default([]),
-    rewrites: z
-      .array(
-        z.object({
-          id: idSchema,
-          title: titleSchema.optional(),
-          content: contentSchema,
-          reason: reasonSchema,
-        })
-      )
-      .max(MAX_CHANGES)
-      .default([]),
-    summaries: z
-      .array(
-        z.object({
-          id: idSchema,
-          description: descriptionSchema.optional(),
-          content: contentSchema,
-          reason: reasonSchema,
-        })
-      )
-      .max(MAX_CHANGES)
-      .default([]),
+    merges: z.array(maintenanceMergeSchema).max(MAX_CHANGES).default([]),
+    contradictions: z.array(maintenanceContradictionSchema).max(MAX_CHANGES).default([]),
+    rewrites: z.array(maintenanceRewriteSchema).max(MAX_CHANGES).default([]),
+    summaries: z.array(maintenanceSummarySchema).max(MAX_CHANGES).default([]),
     relationships: z
-      .array(z.object({ id: idSchema, reason: reasonSchema }))
+      .array(maintenanceRelationshipRemovalSchema)
       .max(MAX_CHANGES * 5)
       .default([])
       .describe('Relationships to remove: duplicates, and inverses of another one'),

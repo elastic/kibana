@@ -79,9 +79,14 @@ describe('createMaintenanceReader', () => {
     })),
   });
   const notSemantic = { status: 400, error: { type: 'illegal_argument_exception', reason: 'no' } };
+  const setupSimilar = (newest = { id: 'fact-near', type: 'fact.note', title: 'Near' }) => {
+    const { esClient, reader } = setup();
+    esClient.search.mockResolvedValue(searchResponse([collapsedHit(newest)]));
+    return { esClient, reader };
+  };
 
   it('finds similar items by meaning and words together', async () => {
-    const { esClient, reader } = setup();
+    const { esClient, reader } = setupSimilar();
     esClient.msearch.mockResolvedValueOnce(hitsFor(1) as never);
 
     const similar = await reader.similar([items[0]], 5);
@@ -93,8 +98,26 @@ describe('createMaintenanceReader', () => {
     expect(similar.get('fact-0')?.map(({ id }) => id)).toEqual(['fact-near']);
   });
 
+  it('gives the newest revision of each similar item, not the older one that matched', async () => {
+    const { esClient, reader } = setupSimilar({
+      id: 'fact-near',
+      type: 'fact.note',
+      title: 'Now about something else',
+    });
+    esClient.msearch.mockResolvedValueOnce(hitsFor(1) as never);
+
+    const similar = await reader.similar([items[0]], 5);
+
+    expect(JSON.stringify(esClient.search.mock.calls[0][0])).toContain(
+      '"terms":{"id":["fact-near"]}'
+    );
+    expect(similar.get('fact-0')).toEqual([
+      expect.objectContaining({ id: 'fact-near', title: 'Now about something else' }),
+    ]);
+  });
+
   it('falls back to words alone where the AI index rejects the semantic query, from then on', async () => {
-    const { esClient, reader } = setup();
+    const { esClient, reader } = setupSimilar();
     esClient.msearch
       .mockResolvedValueOnce({ took: 1, responses: Array(50).fill(notSemantic) } as never)
       .mockResolvedValueOnce(hitsFor(50) as never)
@@ -110,7 +133,7 @@ describe('createMaintenanceReader', () => {
   });
 
   it('fails on errors other than a rejected query', async () => {
-    const { esClient, reader } = setup();
+    const { esClient, reader } = setupSimilar();
     esClient.msearch.mockResolvedValueOnce({
       took: 1,
       responses: [

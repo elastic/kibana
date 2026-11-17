@@ -45,6 +45,10 @@ export const applyMaintenanceGroups = async (
         refused = `${id} has different permissions than the batch`;
         break;
       }
+      if (written === 'skipped' && tombstones.length > 0) {
+        refused = `${id} no longer exists, so nothing can be merged into it`;
+        break;
+      }
       if (written !== 'skipped') {
         result.written += 1;
       }

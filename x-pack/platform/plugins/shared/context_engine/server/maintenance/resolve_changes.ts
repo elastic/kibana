@@ -200,6 +200,9 @@ export const resolveMaintenanceChanges = (
     if (new Set(ids).size !== ids.length) {
       return 'an item is named twice';
     }
+    if (!ids.some((id) => reviewed.has(id))) {
+      return 'it names none of the reviewed items';
+    }
     return undefined;
   };
 
