@@ -151,11 +151,9 @@ describe('SLO usage collector fetcher', () => {
       const toStore: StoredCompositeSLODefinition = storedCompositeSloDefinitionSchema.parse(
         createCompositeSlo(overrides)
       );
-      await compositeSoClient.create<StoredCompositeSLODefinition>(
-        SO_SLO_COMPOSITE_TYPE,
-        toStore,
-        { namespace }
-      );
+      await compositeSoClient.create<StoredCompositeSLODefinition>(SO_SLO_COMPOSITE_TYPE, toStore, {
+        namespace,
+      });
     };
 
     afterEach(async () => {
@@ -218,9 +216,7 @@ describe('SLO usage collector fetcher', () => {
 
       expect(results.slo).toEqual(expected.slo);
       expect(results.composite).toEqual(emptyCompositeUsage);
-      expect(loggerMock.warn).toHaveBeenCalledWith(
-        'Failed to collect composite SLO usage: boom'
-      );
+      expect(loggerMock.warn).toHaveBeenCalledWith('Failed to collect composite SLO usage: boom');
     });
   });
 
