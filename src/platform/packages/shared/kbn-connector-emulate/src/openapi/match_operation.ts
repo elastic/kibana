@@ -111,18 +111,19 @@ const compileRoute = (operation: ContractOperation): Route => {
   );
   // `x-ms-paths` keys end in the operation's fixed query parameters.
   const [template] = operation.path.split('?');
-  const source = compileTemplate(template, (name) => {
+  // Vendors' docs and specs often disagree on a trailing slash, which their servers accept either
+  // way, so it is optional; `/items/` and `/items` both match `/items`. The slash is taken off the
+  // template, as `compileServerTemplate` does, rather than off the pattern compiled from it.
+  const trailingSlash = template.length > 1 && template.endsWith('/');
+  const source = compileTemplate(trailingSlash ? template.slice(0, -1) : template, (name) => {
     parameterNames.push(name);
     return multiSegment.has(name) ? '(.+?)' : '([^/]+)';
   });
-  // Vendors' docs and specs often disagree on a trailing slash, which their servers accept either
-  // way, so it is optional; `/items/` and `/items` both match `/items`.
-  const withoutSlash = template.length > 1 && source.endsWith('/') ? source.slice(0, -1) : source;
   return {
     operation,
     servers: operation.servers.map(compileServer),
-    path: new RegExp(`^${withoutSlash}/?$`),
-    exactPath: new RegExp(`^${source}$`),
+    path: new RegExp(`^${source}/?$`),
+    exactPath: new RegExp(`^${source}${trailingSlash ? '/' : ''}$`),
     parameterNames,
     template,
     multiSegmentCount: parameterNames.filter((name) => multiSegment.has(name)).length,
@@ -284,6 +285,11 @@ const decodePathSegment = (segment: string): string => {
 const samePath = ({ operation: { path } }: Route): string =>
   path.replace(new RegExp(TEMPLATE_PARAMETER, 'g'), '{}');
 
+// Orders specificity keys by their first differing element, so the key can grow without the
+// comparison having to spell out every element.
+const bySpecificity = (a: readonly number[], b: readonly number[]): number =>
+  a.reduce((order, value, index) => order || value - b[index], 0);
+
 export interface OperationMatcherOptions {
   /**
    * Breaks ties between sources: of the operations several specs describe with the same method and
@@ -329,10 +335,11 @@ export const createOperationMatcher = (
   ): OperationMatch | OperationMismatch => {
     const pathMatches = routes.flatMap((route) => {
       const path = getOperationPath(route, url);
-      const match = path === undefined ? null : route.path.exec(path);
-      return match && path !== undefined
-        ? [{ route, values: match.slice(1), exact: route.exactPath.test(path) }]
-        : [];
+      if (path === undefined) {
+        return [];
+      }
+      const match = route.path.exec(path);
+      return match ? [{ route, values: match.slice(1), exact: route.exactPath.test(path) }] : [];
     });
     if (pathMatches.length === 0) {
       return { status: 404, message: 'No operation matches the path' };
@@ -362,9 +369,7 @@ export const createOperationMatcher = (
         exact ? 0 : 1,
         -route.literalLength,
       ] as const;
-    const [mostSpecific] = forMethod
-      .map(specificity)
-      .sort((a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2] || a[3] - b[3]);
+    const [mostSpecific] = forMethod.map(specificity).sort(bySpecificity);
     const onTemplate = forMethod
       .filter((candidate) =>
         specificity(candidate).every((value, index) => value === mostSpecific[index])
