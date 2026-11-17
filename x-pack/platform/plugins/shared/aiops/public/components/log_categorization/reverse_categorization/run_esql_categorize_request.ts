@@ -54,6 +54,8 @@ export async function runEsqlCategorizeRequest({
       filter,
       dropNullColumns: true,
       kibanaQueryContext: { timeRange },
+      // Keeps the sparkline buckets aligned with the UTC epoch-aligned document count histogram.
+      timeZone: 'UTC',
     },
     { abortSignal: signal }
   );
