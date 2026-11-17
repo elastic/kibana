@@ -10,6 +10,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 import isEqual from 'lodash/isEqual';
+import omit from 'lodash/omit';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { schema } from '@kbn/config-schema';
 import type {
@@ -31,6 +32,7 @@ import {
 } from '@kbn/workflows';
 import type {
   BulkScheduleWorkflowResult,
+  EsWorkflow,
   EsWorkflowExecution,
   WorkflowExecutionEngineModel,
   WorkflowSettings,
@@ -188,6 +190,17 @@ const WORKFLOW_MINT_RETRY_DELAY_MS = 30_000;
 
 /** Batch size for bulk cancel search_after paging (internal; not exposed on the public API). */
 const BULK_CANCEL_PAGE_SIZE = 10;
+
+/** Saved runs take the stored document's lifetime, including none, without mutating the caller model. */
+const workflowWithStoredUid = (
+  workflow: WorkflowExecutionEngineModel,
+  storedWorkflowUid: string | undefined
+): WorkflowExecutionEngineModel => {
+  const withoutCallerUid = omit(workflow, 'workflowUid');
+  return storedWorkflowUid
+    ? { ...withoutCallerUid, workflowUid: storedWorkflowUid }
+    : withoutCallerUid;
+};
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
 
@@ -1537,8 +1550,8 @@ export class WorkflowsExecutionEnginePlugin
       workflow: WorkflowExecutionEngineModel,
       spaceId: string,
       request: KibanaRequest
-    ): Promise<void> => {
-      if (workflow.isEphemeral) return;
+    ): Promise<EsWorkflow | null> => {
+      if (workflow.isEphemeral) return null;
       const current = await workflowRepository.getWorkflow(workflow.id, spaceId, {
         includeGlobal: true,
         includeDeleted: true,
@@ -1549,6 +1562,7 @@ export class WorkflowsExecutionEnginePlugin
       ) {
         throw new Error('You do not have permission to execute this workflow.');
       }
+      return current;
     };
 
     const createAndPersistWorkflowExecution = async (
@@ -1567,8 +1581,11 @@ export class WorkflowsExecutionEnginePlugin
     }> => {
       const request = getWorkflowOriginalRequest(originalRequest);
       const spaceId = (context.spaceId as string | undefined) || 'default';
-      await ensureExecutionAccess(workflow, spaceId, request);
+      const storedWorkflow = await ensureExecutionAccess(workflow, spaceId, request);
       await ensureWorkflowEnabled(workflow, spaceId);
+      const workflowForExecution = storedWorkflow
+        ? workflowWithStoredUid(workflow, storedWorkflow.workflowUid)
+        : workflow;
       // Before identity resolution, persistence, and the concurrency drain. A standalone
       // delegated-identity run fails at the first inherit step and, with cancel-in-progress,
       // would cancel the space's in-flight run. Parent workflow.execute sets the flag and
@@ -1602,7 +1619,7 @@ export class WorkflowsExecutionEnginePlugin
           : await getAuthenticatedUser(request, coreStart.security, coreStart.elasticsearch.client);
 
       const workflowExecution = await buildExecutionDocument({
-        workflow,
+        workflow: workflowForExecution,
         inheritedIdentity,
         spaceId,
         context,
@@ -1922,6 +1939,7 @@ export class WorkflowsExecutionEnginePlugin
           // the execution is written and before the later concurrency drain.
           refuseDelegatedIdentityWorkflow(item.workflow);
           const spaceId = spaceIdFor(item);
+          let workflowForExecution = item.workflow;
           if (!item.workflow.isEphemeral) {
             const state = executionStates.get(`${spaceId}:${item.workflow.id}`);
             if (
@@ -1935,14 +1953,15 @@ export class WorkflowsExecutionEnginePlugin
             ) {
               throw new Error('You do not have permission to execute this workflow.');
             }
-            if (!state?.enabled) {
+            if (state == null || !state.enabled) {
               throw new Error(
                 `Workflow is disabled: ${item.workflow.id}. Enable the workflow to run it.`
               );
             }
+            workflowForExecution = workflowWithStoredUid(item.workflow, state.workflowUid);
           }
           const workflowExecution = await buildExecutionDocument({
-            workflow: item.workflow,
+            workflow: workflowForExecution,
             spaceId,
             context: item.context,
             defaultTriggeredBy: 'alert',
