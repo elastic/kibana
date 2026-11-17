@@ -38,6 +38,10 @@ const CANCEL_SETTLE_TIMEOUT_MS = FLOOR_TICK_CANCEL_TIMEOUT_MS;
 /** A failed cancel is retried once: two attempts in all. */
 const MAX_CANCEL_ATTEMPTS = 2;
 
+/** The cancel was stored, but waking the execution lost a race with its task being claimed. */
+const isWakeRace = (error: unknown): boolean =>
+  httpStatus(error) === 500 && /as it is currently running/.test(errorMessage(error));
+
 export const isTerminal = (status: ExecutionStatus): boolean =>
   TerminalExecutionStatuses.includes(status);
 
@@ -549,9 +553,12 @@ export class AttackDiscoveryWorkerClient {
 
   /**
    * The cancel route stores the cancel request before it wakes the execution's idle tasks, and that
-   * wake fails with 500 when a task is claimed between being read as idle and being run. So a
-   * failed cancel is re-read: an execution that has ended (or is gone) counts as cancelled, and
-   * one still live gets one immediate retry, which no longer sees the claimed task as idle.
+   * wake fails with 500 "currently running" when a task is claimed between being read as idle and
+   * being run. The claimed task is one of the execution's own (its loop, or the wake task that
+   * restarts the loop), and each reads the stored request, so the cancel counts as made and
+   * `settleCancelled` checks that the execution ends. Any other
+   * failure is re-read: an execution that has ended (or is gone) counts as cancelled, and one still
+   * live gets one immediate retry.
    */
   private async cancelOne(spaceId: string, executionId: string): Promise<void> {
     const post = () =>
@@ -563,12 +570,17 @@ export class AttackDiscoveryWorkerClient {
       await post();
     } catch (error) {
       if (httpStatus(error) === 404) throw error;
+      if (isWakeRace(error)) return;
       const status = await this.getExecution(spaceId, executionId).then(
         ({ status: current }) => current,
         (readError) => (httpStatus(readError) === 404 ? ExecutionStatus.CANCELLED : undefined)
       );
       if (status !== undefined && isTerminal(status)) return;
-      await post();
+      try {
+        await post();
+      } catch (retryError) {
+        if (!isWakeRace(retryError)) throw retryError;
+      }
     }
   }
 

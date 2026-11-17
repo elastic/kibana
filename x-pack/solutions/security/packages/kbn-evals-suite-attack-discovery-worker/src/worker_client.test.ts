@@ -874,6 +874,56 @@ describe('AttackDiscoveryWorkerClient.cancelPending', () => {
     expect(cancelled).toEqual(['b', 'b']);
   });
 
+  describe('when the wake loses a race with the claimed task', () => {
+    // The wrapped message the Kibana client throws, as seen in CI.
+    const wakeRace = () =>
+      Object.assign(
+        new Error(
+          '[POST - http://localhost:5620/s/s/api/workflows/executions/b/cancel] request failed ' +
+            '(attempt=1/0): undefined -- Status: 500, Cause: [POST http://localhost:5620/s/s/api/' +
+            'workflows/executions/b/cancel] 500 Internal Server Error -- {"statusCode":500,' +
+            '"error":"Internal Server Error","message":"Internal server error: Error: Failed to ' +
+            'run task \\"workflow-wake-b\\" as it is currently running"} -- and ran out of retries'
+        ),
+        { status: 500 }
+      );
+
+    // The cancel request is stored before the wake fails, so the execution's own tasks end it.
+    const raceClient = (failingPosts: Array<() => Error>) => {
+      const cancelled: string[] = [];
+      let stored = false;
+      const fetch = jest.fn(async (path: string) => {
+        if (!path.includes('/cancel')) return { id: 'b', status: stored ? 'cancelled' : 'running' };
+        cancelled.push('b');
+        const failure = failingPosts.shift()?.();
+        stored = failure === undefined || /currently running/.test(failure.message);
+        if (failure) throw failure;
+        return {};
+      });
+      const client = new AttackDiscoveryWorkerClient(fetch as unknown as HttpHandler, log);
+      client.track('s', 'b');
+      return { client, cancelled, fetch };
+    };
+
+    it('counts the cancel as made without re-reading or retrying, and settles', async () => {
+      const { client, cancelled, fetch } = raceClient([wakeRace]);
+      await expect(client.cancelPending()).resolves.toBeUndefined();
+      expect(cancelled).toEqual(['b']);
+      // The cancel POST, then the settle read.
+      expect(fetch.mock.calls.map(([path]) => String(path).endsWith('/cancel'))).toEqual([
+        true,
+        false,
+      ]);
+    });
+
+    it('counts the cancel as made when the retry hits it', async () => {
+      const otherFailure = () => Object.assign(new Error('status 500'), { status: 500 });
+      const { client, cancelled } = raceClient([otherFailure, wakeRace]);
+      await expect(client.cancelPending()).resolves.toBeUndefined();
+      expect(cancelled).toEqual(['b', 'b']);
+    });
+  });
+
   it('still retries the cancel when the re-read fails', async () => {
     const { client, cancelled } = cancelFailing({ b: 500 }, { b: 503 });
     await expect(client.cancelPending()).rejects.toThrow(
