@@ -11,7 +11,7 @@ export interface SelectedSource {
   type: SourceType;
   /** Stable identifier, unique within a source type (e.g. the ES|QL query). */
   id: string;
-  /** Human-readable label rendered in the selected-source chips. */
+  /** Human-readable label shown for the source. */
   label: string;
   /** Underlying source value sent to the AI index API (e.g. the ES|QL query). */
   value: string;

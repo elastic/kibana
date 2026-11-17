@@ -5,19 +5,21 @@
  * 2.0.
  */
 
+import type { MatchedItem } from '@kbn/data-views-plugin/public';
 import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
-import type { AiIndexSource, GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
-import type {
-  UseDataConnectorsOptions,
-  UseDataConnectorsResult,
-} from '../../hooks/use_data_connectors';
+import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
+import {
+  createConnectorHttpGetMock,
+  expectConnectorQueriesLoaded,
+} from '../source_picker/connector_test_helpers';
 import { SourcesPanel } from './sources_panel';
 
 jest.mock('@kbn/esql/public', () => ({
@@ -36,20 +38,17 @@ jest.mock('@kbn/esql/public', () => ({
   ),
 }));
 
-const mockUseDataConnectors = jest.fn(
-  (_options?: UseDataConnectorsOptions): UseDataConnectorsResult => ({
-    connectors: [{ id: 'connector-gdrive', name: 'Google Drive', actionTypeId: '.google_drive' }],
-    connectorNameById: new Map([['connector-gdrive', 'Google Drive']]),
-    connectorActionTypeById: new Map([['connector-gdrive', '.google_drive']]),
-    isLoading: false,
-    isError: false,
-    error: undefined,
-  })
-);
+const buildMatchedItem = (name: string): MatchedItem => ({
+  name,
+  tags: [],
+  item: { name },
+});
 
-jest.mock('../../hooks/use_data_connectors', () => ({
-  useDataConnectors: (options?: UseDataConnectorsOptions) => mockUseDataConnectors(options),
-}));
+const INDEX_MATCHES = [
+  buildMatchedItem('logs-*'),
+  buildMatchedItem('metrics-*'),
+  buildMatchedItem('.ds-traces-default'),
+];
 
 const baseAiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
@@ -62,52 +61,75 @@ const baseAiIndex: GetAiIndexResponse = {
   date_modified: '2026-01-01T00:00:00.000Z',
 };
 
-const sources: AiIndexSource[] = [
-  { type: 'esql', value: 'FROM a' },
-  { type: 'esql', value: 'FROM b' },
-  { type: 'esql', value: 'FROM c' },
-];
-
-const createServices = (canReadConnectors = true) => {
+const createServices = ({
+  canReadConnectors = true,
+  indices = INDEX_MATCHES,
+}: {
+  canReadConnectors?: boolean;
+  indices?: MatchedItem[];
+} = {}) => {
   const services = coreMock.createStart();
   services.application.capabilities = {
     ...services.application.capabilities,
     actions: {
       ...services.application.capabilities.actions,
+      save: canReadConnectors,
       show: canReadConnectors,
     },
   };
-  return services;
+
+  const data = dataPluginMock.createStartContract();
+  data.dataViews.getIndices = jest.fn().mockResolvedValue(indices);
+
+  (services.http.get as jest.Mock).mockImplementation(createConnectorHttpGetMock());
+
+  return {
+    ...services,
+    data,
+    triggersActionsUi: triggersActionsUiMock.createStart(),
+  };
 };
 
-const renderWithProviders = (ui: React.ReactElement, services = createServices()) => {
+const renderWithProviders = (
+  ui: React.ReactElement,
+  services = createServices()
+): { services: ReturnType<typeof createServices>; queryClient: QueryClient } => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(
+  render(
     <I18nProvider>
       <EuiProvider>
-        <KibanaContextProvider
-          services={{
-            ...services,
-            triggersActionsUi: triggersActionsUiMock.createStart(),
-          }}
-        >
+        <KibanaContextProvider services={services}>
           <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
         </KibanaContextProvider>
       </EuiProvider>
     </I18nProvider>
   );
+  return { services, queryClient };
 };
 
-const saveButton = () => screen.getByTestId('contextEditSourcesDoneButton');
-
-const addEsqlSource = (query: string) => {
-  fireEvent.change(screen.getByTestId('mockEsqlEditor'), { target: { value: query } });
-  fireEvent.click(screen.getByTestId('contextAddEsqlSourceButton'));
+const clickIndexOption = async (indexName: string) => {
+  fireEvent.click(await screen.findByTestId(`contextIndexOption-${indexName}`));
 };
+
+const openElasticsearchAddPanel = () => {
+  fireEvent.click(screen.getByTestId('contextAddElasticsearchDataCard'));
+};
+
+const openConnectorsAddPanel = () => {
+  fireEvent.click(screen.getByTestId('contextAddConnectorsCard'));
+};
+
+const propertiesBody = (sources: GetAiIndexResponse['sources']) =>
+  JSON.stringify({
+    dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
+    automations: [],
+    sources,
+    traces: [],
+  });
 
 describe('SourcesPanel', () => {
-  beforeEach(() => {
-    mockUseDataConnectors.mockClear();
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it('shows the loading skeleton while loading and no rows', () => {
@@ -116,11 +138,11 @@ describe('SourcesPanel', () => {
     );
 
     expect(screen.getByTestId('contextAiIndexSourcesLoading')).toBeInTheDocument();
-    expect(screen.queryByTestId('contextAiIndexSourceRow')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('contextAiIndexSourcesEmpty')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextSelectedSource-esql-0')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAddElasticsearchDataCard')).not.toBeInTheDocument();
   });
 
-  it('shows the inline editor immediately when not loading and there are no sources', async () => {
+  it('shows type panels, empty copy, and add cards when not loading with no sources', () => {
     renderWithProviders(
       <SourcesPanel
         isLoading={false}
@@ -130,16 +152,14 @@ describe('SourcesPanel', () => {
       />
     );
 
-    expect(await screen.findByTestId('contextEditSourcesInlineEditor')).toBeInTheDocument();
-    expect(screen.getByTestId('contextSourcePicker')).toBeInTheDocument();
-    expect(screen.getAllByTestId('contextElasticsearchDataPanel')).toHaveLength(1);
-    expect(screen.getAllByTestId('contextConnectorsPanel')).toHaveLength(1);
-    expect(screen.queryByTestId('contextAiIndexSourcesEmpty')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('contextEditSourcesButton')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('contextAddSourcesButton')).not.toBeInTheDocument();
-    expect(saveButton()).toBeDisabled();
+    expect(screen.getByTestId('contextSourcesPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('contextElasticsearchDataPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('contextConnectorsPanel')).toBeInTheDocument();
+    expect(screen.getByText('No Elasticsearch data sources.')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAddElasticsearchDataCard')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAddConnectorsCard')).toBeInTheDocument();
     expect(
-      screen.getByText('Data that automations should analyze when generating Knowledge Indicators.')
+      screen.getByText('Context reads these sources to write knowledge documents.')
     ).toBeInTheDocument();
   });
 
@@ -157,11 +177,16 @@ describe('SourcesPanel', () => {
     expect(screen.getByTestId('contextConnectorsPanel')).toBeInTheDocument();
     expect(screen.getByText('No Elasticsearch data sources.')).toBeInTheDocument();
     expect(screen.getByText('No connectors.')).toBeInTheDocument();
-    expect(screen.queryByTestId('contextAiIndexSourcesEmpty')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('contextEditSourcesInlineEditor')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAddElasticsearchDataCard')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAddConnectorsCard')).not.toBeInTheDocument();
   });
 
-  it('renders selected source rows in the inline editor for non-managed indexes', async () => {
+  it('renders saved Elasticsearch sources for non-managed indexes', () => {
+    const sources = [
+      { type: 'esql' as const, value: 'FROM a' },
+      { type: 'esql' as const, value: 'FROM b' },
+    ];
+
     renderWithProviders(
       <SourcesPanel
         isLoading={false}
@@ -171,10 +196,8 @@ describe('SourcesPanel', () => {
       />
     );
 
-    expect(await screen.findByTestId('contextEditSourcesInlineEditor')).toBeInTheDocument();
     expect(screen.getAllByTestId(/^contextSelectedSource-esql-/)).toHaveLength(sources.length);
-    expect(screen.queryByTestId('contextAiIndexSourceRow')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('contextAiIndexSourcesEmpty')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAddElasticsearchDataCard')).toBeInTheDocument();
   });
 
   it('renders read-only rows split by type for managed AI indexes with sources', () => {
@@ -194,97 +217,26 @@ describe('SourcesPanel', () => {
       />
     );
 
-    expect(screen.getByTestId('contextElasticsearchDataPanel')).toBeInTheDocument();
-    expect(screen.getByTestId('contextConnectorsPanel')).toBeInTheDocument();
-    expect(screen.getAllByTestId('contextAiIndexSourceRow')).toHaveLength(2);
-    expect(screen.queryByTestId('contextEditSourcesInlineEditor')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextSelectedSource-esql-0')).toBeInTheDocument();
+    expect(screen.getByTestId('contextSelectedSource-connector-0')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextRemoveSourceButton')).not.toBeInTheDocument();
   });
 
-  it('does not enable connector fetch from SourcesPanel for non-managed indexes', () => {
-    renderWithProviders(
+  it('does not request connectors when there are no saved connector sources', () => {
+    const { services } = renderWithProviders(
       <SourcesPanel
         isLoading={false}
-        aiIndex={{ ...baseAiIndex, sources }}
+        aiIndex={{ ...baseAiIndex, sources: [{ type: 'esql', value: 'FROM a' }] }}
         onSaved={jest.fn()}
         isManaged={false}
       />
     );
 
-    expect(mockUseDataConnectors).toHaveBeenCalledWith({ enabled: false });
+    expect(services.http.get).not.toHaveBeenCalled();
   });
 
-  it('fetches connectors from SourcePicker when a non-managed index has connector sources', () => {
-    renderWithProviders(
-      <SourcesPanel
-        isLoading={false}
-        aiIndex={{
-          ...baseAiIndex,
-          sources: [{ type: 'connector', value: 'connector-gdrive' }],
-        }}
-        onSaved={jest.fn()}
-        isManaged={false}
-      />
-    );
-
-    expect(mockUseDataConnectors).toHaveBeenCalledWith({ enabled: false });
-    expect(mockUseDataConnectors).toHaveBeenCalledWith({ enabled: true });
-  });
-
-  it('does not fetch connectors from SourcePicker without Actions read', () => {
-    renderWithProviders(
-      <SourcesPanel
-        isLoading={false}
-        aiIndex={{
-          ...baseAiIndex,
-          sources: [{ type: 'connector', value: 'connector-gdrive' }],
-        }}
-        onSaved={jest.fn()}
-        isManaged={false}
-      />,
-      createServices(false)
-    );
-
-    expect(mockUseDataConnectors).toHaveBeenCalledWith({ enabled: false });
-    expect(mockUseDataConnectors).not.toHaveBeenCalledWith({ enabled: true });
-  });
-
-  it('fetches connectors for managed indexes with connector sources', () => {
-    renderWithProviders(
-      <SourcesPanel
-        isLoading={false}
-        aiIndex={{
-          ...baseAiIndex,
-          managed: true,
-          sources: [{ type: 'connector', value: 'connector-gdrive' }],
-        }}
-        onSaved={jest.fn()}
-        isManaged
-      />
-    );
-
-    expect(mockUseDataConnectors).toHaveBeenCalledWith({ enabled: true });
-  });
-
-  it('does not fetch connectors for managed connector sources without Actions read', () => {
-    renderWithProviders(
-      <SourcesPanel
-        isLoading={false}
-        aiIndex={{
-          ...baseAiIndex,
-          managed: true,
-          sources: [{ type: 'connector', value: 'connector-gdrive' }],
-        }}
-        onSaved={jest.fn()}
-        isManaged
-      />,
-      createServices(false)
-    );
-
-    expect(mockUseDataConnectors).toHaveBeenCalledWith({ enabled: false });
-  });
-
-  it('resolves the connector name for connector sources in the inline editor', async () => {
-    renderWithProviders(
+  it('requests connectors when saved connector sources need display metadata', async () => {
+    const { services, queryClient } = renderWithProviders(
       <SourcesPanel
         isLoading={false}
         aiIndex={{
@@ -296,41 +248,40 @@ describe('SourcesPanel', () => {
       />
     );
 
+    await waitFor(() => {
+      expect(services.http.get).toHaveBeenCalledWith(
+        '/api/actions/connector_types',
+        expect.objectContaining({ signal: expect.any(AbortSignal) })
+      );
+      expect(services.http.get).toHaveBeenCalledWith(
+        '/api/actions/connectors',
+        expect.objectContaining({ signal: expect.any(AbortSignal) })
+      );
+    });
+    await waitFor(() => expectConnectorQueriesLoaded(queryClient));
     expect(await screen.findByTestId('contextSelectedSource-connector-0')).toHaveTextContent(
       'Google Drive'
     );
-    expect(screen.queryByTestId('contextAiIndexSourceRow')).not.toBeInTheDocument();
   });
 
-  it('hides header actions for managed AI indexes', () => {
-    renderWithProviders(
+  it('does not request connectors for saved connector sources without Actions read', () => {
+    const { services } = renderWithProviders(
       <SourcesPanel
         isLoading={false}
-        aiIndex={{ ...baseAiIndex, sources, managed: true }}
-        onSaved={jest.fn()}
-        isManaged
-      />
-    );
-
-    expect(screen.queryByTestId('contextEditSourcesButton')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('contextAddSourcesButton')).not.toBeInTheDocument();
-  });
-
-  it('disables Save when the current selection matches the sources loaded on open', async () => {
-    renderWithProviders(
-      <SourcesPanel
-        isLoading={false}
-        aiIndex={{ ...baseAiIndex, sources: [{ type: 'esql', value: 'FROM My view' }] }}
+        aiIndex={{
+          ...baseAiIndex,
+          sources: [{ type: 'connector', value: 'connector-gdrive' }],
+        }}
         onSaved={jest.fn()}
         isManaged={false}
-      />
+      />,
+      createServices({ canReadConnectors: false })
     );
 
-    expect(await screen.findByTestId('contextSelectedSource-esql-0')).toBeInTheDocument();
-    expect(saveButton()).toBeDisabled();
+    expect(services.http.get).not.toHaveBeenCalled();
   });
 
-  it('keeps the inline editor open and reverts the draft when Cancel is clicked', async () => {
+  it('hides the Elasticsearch add card while its add panel is open and keeps the connectors add card', () => {
     renderWithProviders(
       <SourcesPanel
         isLoading={false}
@@ -340,20 +291,30 @@ describe('SourcesPanel', () => {
       />
     );
 
-    expect(await screen.findByTestId('contextEditSourcesInlineEditor')).toBeInTheDocument();
-
-    addEsqlSource('FROM logs-* | LIMIT 10');
-    expect(screen.getByTestId('contextSelectedSource-esql-0')).toBeInTheDocument();
-
-    fireEvent.click(screen.getByTestId('contextEditSourcesCancelButton'));
-
-    expect(screen.getByTestId('contextEditSourcesInlineEditor')).toBeInTheDocument();
-    expect(screen.queryByTestId('contextSelectedSource-esql-0')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('contextAiIndexSourcesEmpty')).not.toBeInTheDocument();
-    expect(saveButton()).toBeDisabled();
+    openElasticsearchAddPanel();
+    expect(screen.getByTestId('contextAddElasticsearchDataPanel')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextAddElasticsearchDataCard')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAddConnectorsCard')).toBeInTheDocument();
   });
 
-  it('enables Save after adding a source and disables it again when the selection is reverted', async () => {
+  it('hides the connectors add card while its add panel is open and keeps the Elasticsearch add card', async () => {
+    const { queryClient } = renderWithProviders(
+      <SourcesPanel
+        isLoading={false}
+        aiIndex={{ ...baseAiIndex, sources: [] }}
+        onSaved={jest.fn()}
+        isManaged={false}
+      />
+    );
+
+    openConnectorsAddPanel();
+    expect(screen.getByTestId('contextAddConnectorsPanel')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextAddConnectorsCard')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAddElasticsearchDataCard')).toBeInTheDocument();
+    await waitFor(() => expectConnectorQueriesLoaded(queryClient));
+  });
+
+  it('opens the Elasticsearch add panel and disables confirm until a source is pending', async () => {
     renderWithProviders(
       <SourcesPanel
         isLoading={false}
@@ -363,21 +324,315 @@ describe('SourcesPanel', () => {
       />
     );
 
-    expect(await screen.findByTestId('contextEditSourcesInlineEditor')).toBeInTheDocument();
-    expect(saveButton()).toBeDisabled();
+    openElasticsearchAddPanel();
+    expect(screen.getByTestId('contextAddElasticsearchDataPanel')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextAddElasticsearchDataCard')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAddSourcesConfirmButton')).toBeDisabled();
 
-    addEsqlSource('FROM logs-* | LIMIT 10');
-    expect(saveButton()).toBeEnabled();
+    await clickIndexOption('logs-*');
+    expect(screen.getByTestId('contextAddSourcesConfirmButton')).toBeEnabled();
+  });
+
+  it('adds index sources on confirm via save', async () => {
+    const onSaved = jest.fn();
+    const testServices = createServices();
+    testServices.http.put.mockResolvedValue({ status: 'updated' });
+
+    renderWithProviders(
+      <SourcesPanel
+        isLoading={false}
+        aiIndex={{ ...baseAiIndex, sources: [] }}
+        onSaved={onSaved}
+        isManaged={false}
+      />,
+      testServices
+    );
+
+    openElasticsearchAddPanel();
+    await clickIndexOption('logs-*');
+    fireEvent.click(screen.getByTestId('contextAddSourcesConfirmButton'));
+
+    await waitFor(() => {
+      expect(testServices.http.put).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index/my-ai-index',
+        expect.objectContaining({
+          body: propertiesBody([{ type: 'esql', value: 'FROM logs-*' }]),
+        })
+      );
+    });
+    expect(onSaved).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId('contextAddElasticsearchDataPanel')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAddElasticsearchDataCard')).toBeInTheDocument();
+  });
+
+  it('hides saved simple index sources from the index picker', async () => {
+    renderWithProviders(
+      <SourcesPanel
+        isLoading={false}
+        aiIndex={{ ...baseAiIndex, sources: [{ type: 'esql', value: 'FROM logs-*' }] }}
+        onSaved={jest.fn()}
+        isManaged={false}
+      />
+    );
+
+    openElasticsearchAddPanel();
+    await screen.findByTestId('contextIndexOption-metrics-*');
+    expect(screen.queryByTestId('contextIndexOption-logs-*')).not.toBeInTheDocument();
+  });
+
+  it('adds multiple index sources on confirm and shows the plural confirm label', async () => {
+    const onSaved = jest.fn();
+    const testServices = createServices();
+    testServices.http.put.mockResolvedValue({ status: 'updated' });
+
+    renderWithProviders(
+      <SourcesPanel
+        isLoading={false}
+        aiIndex={{ ...baseAiIndex, sources: [] }}
+        onSaved={onSaved}
+        isManaged={false}
+      />,
+      testServices
+    );
+
+    openElasticsearchAddPanel();
+    await clickIndexOption('logs-*');
+    await clickIndexOption('metrics-*');
+    expect(screen.getByTestId('contextAddSourcesConfirmButton')).toHaveTextContent('Add 2 sources');
+    fireEvent.click(screen.getByTestId('contextAddSourcesConfirmButton'));
+
+    await waitFor(() => {
+      expect(testServices.http.put).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index/my-ai-index',
+        expect.objectContaining({
+          body: propertiesBody([
+            { type: 'esql', value: 'FROM logs-*' },
+            { type: 'esql', value: 'FROM metrics-*' },
+          ]),
+        })
+      );
+    });
+    expect(onSaved).toHaveBeenCalledTimes(1);
+  });
+
+  it('adds an ES|QL query source after switching modes and confirming', async () => {
+    const onSaved = jest.fn();
+    const testServices = createServices();
+    testServices.http.put.mockResolvedValue({ status: 'updated' });
+
+    renderWithProviders(
+      <SourcesPanel
+        isLoading={false}
+        aiIndex={{ ...baseAiIndex, sources: [] }}
+        onSaved={onSaved}
+        isManaged={false}
+      />,
+      testServices
+    );
+
+    openElasticsearchAddPanel();
+    fireEvent.click(screen.getByTestId('contextToggleEsqlModeButton'));
+    expect(screen.getByTestId('contextAdvancedEsqlEditor')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByTestId('mockEsqlEditor'), {
+      target: { value: 'FROM logs-* | LIMIT 10' },
+    });
+    fireEvent.click(screen.getByTestId('contextAddSourcesConfirmButton'));
+
+    await waitFor(() => {
+      expect(testServices.http.put).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index/my-ai-index',
+        expect.objectContaining({
+          body: propertiesBody([{ type: 'esql', value: 'FROM logs-* | LIMIT 10' }]),
+        })
+      );
+    });
+    expect(onSaved).toHaveBeenCalledTimes(1);
+  });
+
+  it('closes the add panel without saving when Cancel is clicked', async () => {
+    const testServices = createServices();
+
+    renderWithProviders(
+      <SourcesPanel
+        isLoading={false}
+        aiIndex={{ ...baseAiIndex, sources: [] }}
+        onSaved={jest.fn()}
+        isManaged={false}
+      />,
+      testServices
+    );
+
+    openElasticsearchAddPanel();
+    await clickIndexOption('logs-*');
+    fireEvent.click(screen.getByTestId('contextAddSourcesCancelButton'));
+
+    expect(screen.queryByTestId('contextAddElasticsearchDataPanel')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAddElasticsearchDataCard')).toBeInTheDocument();
+    expect(testServices.http.put).not.toHaveBeenCalled();
+  });
+
+  it('adds connector sources from the connectors add panel', async () => {
+    const onSaved = jest.fn();
+    const testServices = createServices();
+    testServices.http.put.mockResolvedValue({ status: 'updated' });
+
+    const { queryClient } = renderWithProviders(
+      <SourcesPanel
+        isLoading={false}
+        aiIndex={{ ...baseAiIndex, sources: [] }}
+        onSaved={onSaved}
+        isManaged={false}
+      />,
+      testServices
+    );
+
+    fireEvent.click(screen.getByTestId('contextAddConnectorsCard'));
+    expect(screen.getByTestId('contextAddConnectorsPanel')).toBeInTheDocument();
+
+    await waitFor(() => expectConnectorQueriesLoaded(queryClient));
+    const connectorCard = await screen.findByTestId('contextConnectorCard-connector-github');
+    fireEvent.click(connectorCard);
+    fireEvent.click(screen.getByTestId('contextAddSourcesConfirmButton'));
+
+    await waitFor(() => {
+      expect(testServices.http.put).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index/my-ai-index',
+        expect.objectContaining({
+          body: propertiesBody([{ type: 'connector', value: 'connector-github' }]),
+        })
+      );
+    });
+    expect(onSaved).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId('contextAddConnectorsPanel')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAddConnectorsCard')).toBeInTheDocument();
+  });
+
+  it('adds multiple connector sources on confirm and shows the plural confirm label', async () => {
+    const onSaved = jest.fn();
+    const testServices = createServices();
+    testServices.http.put.mockResolvedValue({ status: 'updated' });
+
+    const { queryClient } = renderWithProviders(
+      <SourcesPanel
+        isLoading={false}
+        aiIndex={{ ...baseAiIndex, sources: [] }}
+        onSaved={onSaved}
+        isManaged={false}
+      />,
+      testServices
+    );
+
+    openConnectorsAddPanel();
+    await waitFor(() => expectConnectorQueriesLoaded(queryClient));
+    fireEvent.click(await screen.findByTestId('contextConnectorCard-connector-github'));
+    fireEvent.click(screen.getByTestId('contextConnectorCard-connector-gdrive'));
+    expect(screen.getByTestId('contextAddSourcesConfirmButton')).toHaveTextContent('Add 2 sources');
+    fireEvent.click(screen.getByTestId('contextAddSourcesConfirmButton'));
+
+    await waitFor(() => {
+      expect(testServices.http.put).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index/my-ai-index',
+        expect.objectContaining({
+          body: propertiesBody([
+            { type: 'connector', value: 'connector-github' },
+            { type: 'connector', value: 'connector-gdrive' },
+          ]),
+        })
+      );
+    });
+    expect(onSaved).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows a privilege callout and disables confirm in the connectors add panel without Actions read', async () => {
+    renderWithProviders(
+      <SourcesPanel
+        isLoading={false}
+        aiIndex={{ ...baseAiIndex, sources: [] }}
+        onSaved={jest.fn()}
+        isManaged={false}
+      />,
+      createServices({ canReadConnectors: false })
+    );
+
+    openConnectorsAddPanel();
+    expect(screen.getByTestId('contextConnectorsMissingReadPrivilegeCallout')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAddSourcesConfirmButton')).toBeDisabled();
+  });
+
+  it('removes a saved source via save', async () => {
+    const onSaved = jest.fn();
+    const testServices = createServices();
+    testServices.http.put.mockResolvedValue({ status: 'updated' });
+
+    renderWithProviders(
+      <SourcesPanel
+        isLoading={false}
+        aiIndex={{
+          ...baseAiIndex,
+          sources: [
+            { type: 'esql', value: 'FROM a' },
+            { type: 'esql', value: 'FROM b' },
+          ],
+        }}
+        onSaved={onSaved}
+        isManaged={false}
+      />,
+      testServices
+    );
 
     const row = screen.getByTestId('contextSelectedSource-esql-0');
     fireEvent.click(within(row).getByTestId('contextRemoveSourceButton'));
 
-    expect(screen.queryByTestId('contextSelectedSource-esql-0')).not.toBeInTheDocument();
-    expect(saveButton()).toBeDisabled();
+    await waitFor(() => {
+      expect(testServices.http.put).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index/my-ai-index',
+        expect.objectContaining({
+          body: propertiesBody([{ type: 'esql', value: 'FROM b' }]),
+        })
+      );
+    });
+    expect(onSaved).toHaveBeenCalledTimes(1);
   });
 
-  it('keeps the inline editor open and shows Save loading while sources are saving', async () => {
-    const testServices = coreMock.createStart();
+  it('removes a saved connector source via save', async () => {
+    const onSaved = jest.fn();
+    const testServices = createServices();
+    testServices.http.put.mockResolvedValue({ status: 'updated' });
+
+    const { queryClient } = renderWithProviders(
+      <SourcesPanel
+        isLoading={false}
+        aiIndex={{
+          ...baseAiIndex,
+          sources: [
+            { type: 'connector', value: 'connector-gdrive' },
+            { type: 'connector', value: 'connector-github' },
+          ],
+        }}
+        onSaved={onSaved}
+        isManaged={false}
+      />,
+      testServices
+    );
+
+    await waitFor(() => expectConnectorQueriesLoaded(queryClient));
+    const row = await screen.findByTestId('contextSelectedSource-connector-0');
+    fireEvent.click(within(row).getByTestId('contextRemoveSourceButton'));
+
+    await waitFor(() => {
+      expect(testServices.http.put).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index/my-ai-index',
+        expect.objectContaining({
+          body: propertiesBody([{ type: 'connector', value: 'connector-github' }]),
+        })
+      );
+    });
+    expect(onSaved).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows confirm loading while sources are saving', async () => {
+    const testServices = createServices();
     testServices.http.put.mockImplementation(() => new Promise(() => {}));
 
     renderWithProviders(
@@ -390,13 +645,16 @@ describe('SourcesPanel', () => {
       testServices
     );
 
-    expect(await screen.findByTestId('contextEditSourcesInlineEditor')).toBeInTheDocument();
-    addEsqlSource('FROM logs-* | LIMIT 10');
-    fireEvent.click(saveButton());
+    openElasticsearchAddPanel();
+    await clickIndexOption('logs-*');
+    fireEvent.click(screen.getByTestId('contextAddSourcesConfirmButton'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('contextEditSourcesInlineEditor')).toBeInTheDocument();
-      expect(saveButton()).toBeDisabled();
+      expect(testServices.http.put).toHaveBeenCalled();
+      expect(screen.getByTestId('contextAddElasticsearchDataPanel')).toBeInTheDocument();
+      expect(screen.getByTestId('contextAddSourcesConfirmButton')).toBeDisabled();
+      expect(screen.getByTestId('contextAddSourcesCancelButton')).toBeDisabled();
+      expect(screen.getByTestId('contextIndexSearch')).toBeDisabled();
     });
   });
 });

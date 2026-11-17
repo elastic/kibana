@@ -8,51 +8,35 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
-  EuiText,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { type ReactNode } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
-import type { SelectedSource } from '../source_picker';
-
-const getRemovePendingLabel = (label: string): string =>
-  i18n.translate('xpack.contextEngine.aiIndexDetail.sources.removePendingSourceLabel', {
-    defaultMessage: 'Remove {label} from the selection',
-    values: { label },
-  });
-
 interface AddSourcePanelProps {
   title: ReactNode;
-  pendingSources: SelectedSource[];
-  onRemovePending: (source: SelectedSource) => void;
+  pendingCount: number;
   onClose: () => void;
   onConfirm: () => void;
   isSaving: boolean;
   children: ReactNode;
   headerAction?: ReactNode;
-  showPendingList?: boolean;
   'data-test-subj'?: string;
 }
 
 export const AddSourcePanel = ({
   title,
   headerAction,
-  pendingSources,
-  onRemovePending,
+  pendingCount,
   onClose,
   onConfirm,
   isSaving,
   children,
-  showPendingList = true,
   'data-test-subj': dataTestSubj,
 }: AddSourcePanelProps) => (
   <EuiPanel hasBorder color="subdued" data-test-subj={dataTestSubj}>
@@ -71,34 +55,6 @@ export const AddSourcePanel = ({
     </EuiFlexGroup>
     <EuiSpacer size="m" />
     {children}
-    {showPendingList && pendingSources.length > 0 && (
-      <>
-        <EuiSpacer size="m" />
-        <EuiText size="s">
-          <ul>
-            {pendingSources.map((source) => (
-              <li key={`${source.type}:${source.id}`}>
-                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                  <EuiFlexItem grow={false}>{source.label}</EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip content={getRemovePendingLabel(source.label)}>
-                      <EuiButtonIcon
-                        iconType="cross"
-                        size="xs"
-                        aria-label={getRemovePendingLabel(source.label)}
-                        onClick={() => onRemovePending(source)}
-                        isDisabled={isSaving}
-                        data-test-subj="contextRemovePendingSourceButton"
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </li>
-            ))}
-          </ul>
-        </EuiText>
-      </>
-    )}
     <EuiSpacer size="m" />
     <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
@@ -121,7 +77,7 @@ export const AddSourcePanel = ({
         <EuiButton
           fill
           isLoading={isSaving}
-          isDisabled={pendingSources.length === 0 || isSaving}
+          isDisabled={pendingCount === 0 || isSaving}
           onClick={onConfirm}
           data-test-subj="contextAddSourcesConfirmButton"
           {...getEbtProps({
@@ -132,7 +88,7 @@ export const AddSourcePanel = ({
           <FormattedMessage
             id="xpack.contextEngine.aiIndexDetail.sources.addSourcesConfirmButton"
             defaultMessage="{count, plural, one {Add source} other {Add # sources}}"
-            values={{ count: pendingSources.length }}
+            values={{ count: pendingCount }}
           />
         </EuiButton>
       </EuiFlexItem>

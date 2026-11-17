@@ -31,14 +31,13 @@ export const AddElasticsearchDataPanel = ({
   onClose,
   isSaving,
 }: AddPanelProps) => {
-  const [pending, setPending] = useState<SelectedSource[]>([]);
+  const [pendingIndexNames, setPendingIndexNames] = useState<string[]>([]);
   const [mode, setMode] = useState<ElasticsearchSourceMode>('index');
   const toggleMode = useCallback(
     () => setMode((current) => (current === 'index' ? 'esql' : 'index')),
     []
   );
   const [esqlQuery, setEsqlQuery] = useState('');
-  const allSelected = useMemo(() => [...savedSources, ...pending], [savedSources, pending]);
 
   const esqlSources = useMemo<SelectedSource[]>(() => {
     const query = esqlQuery.trim();
@@ -48,31 +47,29 @@ export const AddElasticsearchDataPanel = ({
     return [{ type: 'esql', id: query, label: query, value: query }];
   }, [esqlQuery, savedSources]);
 
-  const sourcesToAdd = mode === 'index' ? pending : esqlSources;
-
-  const onAddIndex = useCallback(
-    (indexName: string) => {
-      const query = createIndexEsqlQuery(indexName);
-      if (hasSelectedEsqlQuery(allSelected, query)) {
-        return;
-      }
-      setPending((current) => [
-        ...current,
-        { type: 'esql', id: query, label: query, value: query },
-      ]);
-    },
-    [allSelected]
+  const indexSources = useMemo<SelectedSource[]>(
+    () =>
+      pendingIndexNames
+        .map(createIndexEsqlQuery)
+        .filter((query) => !hasSelectedEsqlQuery(savedSources, query))
+        .map((query) => ({ type: 'esql', id: query, label: query, value: query })),
+    [pendingIndexNames, savedSources]
   );
+
+  const sourcesToAdd = mode === 'index' ? indexSources : esqlSources;
+
+  const onToggleIndex = useCallback((indexName: string, checked: boolean) => {
+    setPendingIndexNames((current) => {
+      const others = current.filter((name) => name !== indexName);
+      return checked ? [...others, indexName] : others;
+    });
+  }, []);
 
   const confirm = useCallback(async () => {
     if (await onAdd(sourcesToAdd)) {
       onClose();
     }
   }, [onAdd, onClose, sourcesToAdd]);
-
-  const onRemovePending = useCallback((source: SelectedSource) => {
-    setPending((current) => current.filter((item) => item.id !== source.id));
-  }, []);
 
   return (
     <AddSourcePanel
@@ -82,9 +79,7 @@ export const AddElasticsearchDataPanel = ({
           defaultMessage="Add Elasticsearch data"
         />
       }
-      pendingSources={sourcesToAdd}
-      showPendingList={mode === 'index'}
-      onRemovePending={onRemovePending}
+      pendingCount={sourcesToAdd.length}
       onClose={onClose}
       onConfirm={confirm}
       isSaving={isSaving}
@@ -112,8 +107,9 @@ export const AddElasticsearchDataPanel = ({
       data-test-subj="contextAddElasticsearchDataPanel"
     >
       <ElasticsearchSourcesPanel
-        selectedSources={allSelected}
-        onAddIndex={onAddIndex}
+        savedSources={savedSources}
+        pendingIndexNames={pendingIndexNames}
+        onToggleIndex={onToggleIndex}
         esqlQuery={esqlQuery}
         onEsqlQueryChange={setEsqlQuery}
         disabled={isSaving}
@@ -159,10 +155,6 @@ export const AddConnectorsPanel = ({ savedSources, onAdd, onClose, isSaving }: A
     }
   }, [onAdd, onClose, pending]);
 
-  const onRemovePending = useCallback((source: SelectedSource) => {
-    setPending((current) => current.filter((item) => item.id !== source.id));
-  }, []);
-
   const {
     canCreateConnector,
     canReadConnectors,
@@ -180,9 +172,7 @@ export const AddConnectorsPanel = ({ savedSources, onAdd, onClose, isSaving }: A
             defaultMessage="Add connectors"
           />
         }
-        pendingSources={pending}
-        showPendingList={false}
-        onRemovePending={onRemovePending}
+        pendingCount={pending.length}
         onClose={onClose}
         onConfirm={confirm}
         isSaving={isSaving}

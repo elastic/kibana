@@ -111,7 +111,7 @@ export const SourcesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: Sources
       <AiIndexDetailPanelDescription>
         <FormattedMessage
           id="xpack.contextEngine.aiIndexDetail.sources.panelDescription"
-          defaultMessage="Context reads these sources to write knowledge documents. When you add or remove a source, Context updates them for you."
+          defaultMessage="Context reads these sources to write knowledge documents."
         />
       </AiIndexDetailPanelDescription>
       <EuiSpacer size="m" />
