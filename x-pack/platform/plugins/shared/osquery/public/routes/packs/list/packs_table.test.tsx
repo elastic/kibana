@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { EuiProvider } from '@elastic/eui';
@@ -170,6 +170,39 @@ describe('PacksTable', () => {
       );
       expect(screen.getByText('pack-beta').closest('a')).toHaveAttribute('href', 'packs/so-2/edit');
     });
+  });
+
+  describe('effective policy count', () => {
+    it.each([
+      { effectiveIds: ['policy-1', 'policy-2'], count: '2', warning: true },
+      { effectiveIds: ['policy-1'], count: '1', warning: false },
+      { effectiveIds: [], count: '0', warning: false },
+      { effectiveIds: undefined, count: '1', warning: false },
+    ])(
+      'renders effective targets $effectiveIds with fallback and drift tooltip',
+      async ({ effectiveIds, count, warning }) => {
+        mockUsePacks.mockReturnValue({
+          data: { data: [createPack({ effective_policy_ids: effectiveIds })], total: 1 },
+          isLoading: false,
+          isFetching: false,
+        });
+        renderComponent();
+        const row = screen.getByText('test-pack').closest('tr');
+        expect(row).not.toBeNull();
+        const cells = within(row as HTMLElement).getAllByRole('cell');
+        expect(cells[2]).toHaveTextContent(count);
+        const tooltipTrigger = within(cells[2]).queryByText(count, {
+          selector: 'span[tabindex="0"]',
+        });
+        expect(!!tooltipTrigger).toBe(warning);
+        if (tooltipTrigger) {
+          fireEvent.mouseOver(tooltipTrigger);
+          expect(await screen.findByRole('tooltip')).toHaveTextContent(
+            'Includes agent policies receiving this pack via shared integrations.'
+          );
+        }
+      }
+    );
   });
 
   describe('active/inactive toggle', () => {

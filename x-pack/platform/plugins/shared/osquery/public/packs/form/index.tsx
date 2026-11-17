@@ -207,6 +207,11 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     };
   };
 
+  const receivingPolicyIds = useMemo(
+    () => defaultValue?.effective_policy_ids?.filter((id) => !defaultValue.policy_ids.includes(id)),
+    [defaultValue?.effective_policy_ids, defaultValue?.policy_ids]
+  );
+
   const defaultPackType = defaultValue?.shards?.['*'] ? 'global' : 'policy';
 
   const hooksForm = useHookForm<PackFormData>({
@@ -679,7 +684,10 @@ const PackFormComponent: React.FC<PackFormProps> = ({
                     {/* Scheduled agent policies / shards / Type stay editable for prebuilt
                         packs (a writePacks user may re-target them) — only a fully read-only
                         user is blocked. Matches the prebuiltPackModeDescription callout. */}
-                    <PolicyAssignmentList isReadOnly={isReadOnly} />
+                    <PolicyAssignmentList
+                      isReadOnly={isReadOnly}
+                      receivingPolicyIds={receivingPolicyIds}
+                    />
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size="m" />
@@ -706,6 +714,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     ],
     [
       availableOptions,
+      receivingPolicyIds,
       changePackType,
       defaultValue?.saved_object_id,
       euiFieldProps,

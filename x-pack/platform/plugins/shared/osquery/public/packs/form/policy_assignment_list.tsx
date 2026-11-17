@@ -210,6 +210,7 @@ interface PolicyAssignmentFormValues {
 }
 
 interface PolicyAssignmentListProps {
+  receivingPolicyIds?: string[];
   isReadOnly?: boolean;
 }
 
@@ -219,6 +220,7 @@ const tableCaption = i18n.translate('xpack.osquery.pack.policyList.tableCaption'
 
 const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
   isReadOnly = false,
+  receivingPolicyIds,
 }) => {
   const { getUrlForApp, capabilities } = useKibana().services.application;
   // The policy list is fetched with Osquery privileges only, so a user can see
@@ -451,6 +453,23 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
     [canReadFleetPolicies, getUrlForApp]
   );
 
+  const renderPolicyName = useCallback(
+    (policy: PolicyRow) => (
+      <>
+        {policy.name}
+        {receivingPolicyIds?.includes(policy.id) && (
+          <EuiText size="s" color="subdued">
+            <FormattedMessage
+              id="xpack.osquery.pack.form.sharedIntegration.receivesPackLabel"
+              defaultMessage="Receives this pack via shared integration"
+            />
+          </EuiText>
+        )}
+      </>
+    ),
+    [receivingPolicyIds]
+  );
+
   const columns = useMemo<Array<EuiBasicTableColumn<PolicyRow>>>(
     () => [
       {
@@ -486,7 +505,7 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
         }),
         sortable: true,
         render: (name: string, item: PolicyRow) => {
-          if (!item.members) return name;
+          if (!item.members) return renderPolicyName(item);
 
           const label = i18n.translate('xpack.osquery.pack.form.sharedIntegration.badge', {
             defaultMessage: 'Shared integration: {name}',
@@ -509,7 +528,7 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
                     <EuiSpacer size="xs" />
                     <EuiFlexGroup alignItems="center" gutterSize="s">
                       <EuiFlexItem>
-                        {member.name}
+                        {renderPolicyName(member)}
                         {implicitPolicyIds.has(member.id) && (
                           <EuiText size="s" color="subdued">
                             <FormattedMessage
@@ -566,6 +585,7 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
       isRowSelected,
       isRowShardAssigned,
       renderPolicyLink,
+      renderPolicyName,
       implicitPolicyIds,
     ]
   );

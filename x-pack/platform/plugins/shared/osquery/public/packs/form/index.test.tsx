@@ -210,6 +210,53 @@ describe('PackForm', () => {
     expect(mockUpdateAsync.mock.calls[0][0].policy_ids).toEqual(expected);
   });
 
+  it.each([false, true])(
+    'marks effective drift owners without adopting them (read-only: %s)',
+    async (isReadOnly) => {
+      mockUseAgentPolicies.mockReturnValue({
+        data: {
+          agentPoliciesById: {
+            A: { id: 'A', name: 'Alpha', agents: 0 },
+            E: { id: 'E', name: 'Drift owner', agents: 0 },
+          },
+          groupsByPackagePolicyId: {},
+          groupIdByPolicyId: {},
+        },
+        isFetching: false,
+        isError: false,
+      });
+      const { getByText, getByTestId, getByRole } = renderWithContext(
+        <PackForm
+          editMode
+          isReadOnly={isReadOnly}
+          defaultValue={{
+            saved_object_id: 'drift-pack',
+            id: 'drift-pack',
+            name: 'drift-pack',
+            description: '',
+            created_at: '2024-01-01',
+            created_by: 'test-user',
+            updated_at: '2024-01-01',
+            updated_by: 'test-user',
+            references: [],
+            enabled: true,
+            queries: {},
+            policy_ids: ['A'],
+            effective_policy_ids: ['A', 'E'],
+          }}
+        />
+      );
+
+      expect(getByText('Receives this pack via shared integration')).toBeInTheDocument();
+      expect(getByRole('checkbox', { name: /Drift owner/ })).not.toBeChecked();
+      if (!isReadOnly) {
+        fireEvent.click(getByTestId('update-pack-button'));
+        await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
+        expect(mockUpdateAsync.mock.calls[0][0].policy_ids).toEqual(['A']);
+      }
+    }
+  );
+
   describe('read-only mode', () => {
     const readOnlyDefaultValue = {
       id: 'ro-pack',

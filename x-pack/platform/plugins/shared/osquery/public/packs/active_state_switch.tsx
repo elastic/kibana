@@ -122,7 +122,7 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
           onConfirm={handleToggleActive}
           onCancel={hideConfirmationModal}
           agentCount={agentCount}
-          agentPolicyCount={item.policy_ids.length}
+          agentPolicyCount={(item.effective_policy_ids ?? item.policy_ids).length}
         />
       )}
     </>
