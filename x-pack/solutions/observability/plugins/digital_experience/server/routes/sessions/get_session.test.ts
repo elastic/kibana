@@ -117,9 +117,7 @@ describe('buildTimeline', () => {
       { kind: 'page_view', name: 'browser.navigation', offsetMs: 5_000, page: '/cart' },
       { kind: 'error', name: 'TypeError', offsetMs: 6_000, page: '/cart' },
     ]);
-    expect(timeline[0]).toEqual(
-      expect.objectContaining({ durationMs: 850, traceId: 't1', spanId: 's1' })
-    );
+    expect(timeline[0]).toEqual(expect.objectContaining({ traceId: 't1', spanId: 's1' }));
     expect(timeline[1].detail).toBe('1200');
     expect(timeline[2].detail).toBe('button.add');
     expect(timeline[4].detail).toBe('x is undefined');
@@ -146,7 +144,7 @@ describe('buildTimeline', () => {
     );
   });
 
-  it('counts only exceptions as errors, and tells spans from logs by their duration', () => {
+  it('counts only exceptions as errors, and leaves out what the journey does not list', () => {
     const timeline = buildTimeline(
       [
         {
@@ -162,12 +160,9 @@ describe('buildTimeline', () => {
       startMs
     );
 
-    expect(timeline.map(({ kind, name, detail }) => ({ kind, name, detail }))).toEqual([
-      // A failed request stays a span: the summary counts it as a failed request, not a JS error.
-      { kind: 'span', name: 'HTTP GET', detail: null },
-      { kind: 'span', name: 'HTTP GET', detail: null },
-      { kind: 'log', name: 'app.log', detail: null },
-    ]);
+    // A failed request is not a JS error: the summary counts it as a failed request. Nor is it, or
+    // a log, an event of the journey.
+    expect(timeline).toEqual([]);
   });
 });
 
@@ -353,7 +348,6 @@ describe('getSession', () => {
         '@timestamp',
         'name',
         'event_name',
-        'duration',
         'trace_id',
         'span_id',
         'attributes.url.full',

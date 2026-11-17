@@ -214,20 +214,14 @@ export interface SessionListResponse {
   kpis: SessionListKpis;
 }
 
-export type SessionTimelineEventKind =
-  | 'page_view'
-  | 'click'
-  | 'error'
-  | 'web_vital'
-  | 'span'
-  | 'log';
+/** The events the journey lists; the API leaves out all others, which Discover shows. */
+export type SessionTimelineEventKind = 'page_view' | 'click' | 'error' | 'web_vital';
 
 export interface SessionTimelineEvent {
   kind: SessionTimelineEventKind;
   name: string;
   timestamp: string;
   offsetMs: number;
-  durationMs: number | null;
   page: string | null;
   detail: string | null;
   /** The stack trace of an error, when the browser reported one. */

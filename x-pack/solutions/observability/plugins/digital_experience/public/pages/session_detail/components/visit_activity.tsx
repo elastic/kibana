@@ -17,7 +17,6 @@ import {
   type IconType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getEbtProps } from '@kbn/ebt-click';
 import { CORE_WEB_VITALS } from '../../../../common/core_web_vitals';
 import type { SessionRequest, SessionTimelineEvent } from '../../../../common/sessions';
 import { WebVitalBadge } from '../../../components/web_vital_badges';
@@ -29,6 +28,7 @@ import {
   axisPercent,
   displayUrl,
   formatElapsed,
+  originOf,
   requestFamilyOf,
   urlWithoutQuery,
   type ActivityRow,
@@ -113,11 +113,6 @@ const EVENT_LABELS: Partial<Record<SessionTimelineEvent['kind'], string>> = {
   click: i18n.translate('xpack.digitalExperience.sessionDetail.journey.clickLabel', {
     defaultMessage: 'Click',
   }),
-};
-
-const originOf = (url: string | null): string | null => {
-  const match = url?.match(/^https?:\/\/[^/?#]+/);
-  return match ? match[0] : null;
 };
 
 const webVitalOf = ({ kind, name, detail }: SessionTimelineEvent) => {
@@ -325,10 +320,8 @@ function Row({
           css={rowCss}
           aria-expanded={expanded}
           onClick={onToggle}
-          {...getEbtProps({
-            action: DIGITAL_EXPERIENCE_EBT_ACTIONS.EXPAND_ACTIVITY,
-            element: SESSIONS_EBT_ELEMENTS.ACTIVITY_ROW,
-          })}
+          data-ebt-action={expanded ? undefined : DIGITAL_EXPERIENCE_EBT_ACTIONS.EXPAND_ACTIVITY}
+          data-ebt-element={expanded ? undefined : SESSIONS_EBT_ELEMENTS.ACTIVITY_ROW}
         >
           {content}
         </button>
@@ -699,10 +692,8 @@ export function VisitActivity({
           iconType={showAll ? 'chevronSingleUp' : 'chevronSingleDown'}
           onClick={() => setShowAll(!showAll)}
           data-test-subj="digitalExperienceActivityShowAll"
-          {...getEbtProps({
-            action: DIGITAL_EXPERIENCE_EBT_ACTIONS.EXPAND_ACTIVITY,
-            element: SESSIONS_EBT_ELEMENTS.ACTIVITY_SHOW_ALL,
-          })}
+          data-ebt-action={showAll ? undefined : DIGITAL_EXPERIENCE_EBT_ACTIONS.EXPAND_ACTIVITY}
+          data-ebt-element={showAll ? undefined : SESSIONS_EBT_ELEMENTS.ACTIVITY_SHOW_ALL}
         >
           {showAll
             ? i18n.translate('xpack.digitalExperience.sessionDetail.activity.showFewer', {

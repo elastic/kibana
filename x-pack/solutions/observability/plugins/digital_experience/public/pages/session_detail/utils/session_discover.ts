@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { escapeStringValue } from '@kbn/esql-utils';
+import { esql } from '@elastic/esql';
 import { OTEL_LOGS_INDEX, OTEL_TRACES_INDEX } from '../../../../common/otel_data';
 import type { SessionSummary } from '../../../../common/sessions';
 
@@ -19,13 +19,9 @@ export const sessionEsqlQuery = ({
   serviceName,
   sessionId,
 }: Pick<SessionSummary, 'serviceName' | 'sessionId'>): string =>
-  [
-    `FROM ${OTEL_TRACES_INDEX}, ${OTEL_LOGS_INDEX}`,
-    `| WHERE session.id == ${escapeStringValue(sessionId)} AND service.name == ${escapeStringValue(
-      serviceName
-    )}`,
-    '| SORT @timestamp ASC',
-  ].join('\n');
+  esql.from(OTEL_TRACES_INDEX, OTEL_LOGS_INDEX)
+    .pipe`WHERE session.id == ${sessionId} AND service.name == ${serviceName}`
+    .pipe`SORT @timestamp ASC`.print('wrapping');
 
 /**
  * The time range the session's raw events fall in, or `undefined` for a session the summaries have

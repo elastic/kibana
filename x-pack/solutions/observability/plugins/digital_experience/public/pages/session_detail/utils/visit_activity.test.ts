@@ -56,7 +56,6 @@ const event = (
   name: kind,
   timestamp: at(offsetMs),
   offsetMs,
-  durationMs: null,
   page: null,
   detail,
   stacktrace: null,
@@ -297,7 +296,7 @@ describe('formatElapsed', () => {
     [0, '0 ms'],
     [850.4, '850 ms'],
     [1_234, '1.23 s'],
-    [12_345, '12.3 s'],
+    [12_345, '12.35 s'],
     [125_000, '2:05'],
   ])('formats %d ms as %s', (milliseconds, expected) => {
     expect(formatElapsed(milliseconds)).toBe(expected);

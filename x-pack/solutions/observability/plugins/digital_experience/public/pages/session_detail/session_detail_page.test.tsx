@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { ComponentProps } from 'react';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { EuiProvider } from '@elastic/eui';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
@@ -54,7 +54,6 @@ const event = (
   name,
   timestamp: at(offsetMs),
   offsetMs,
-  durationMs: null,
   page: null,
   detail,
   stacktrace,
@@ -115,7 +114,6 @@ const detail = (overrides: Partial<SessionDetailResponse> = {}): SessionDetailRe
   timeline: [
     event('page_view', 0, 'documentLoad', 'https://shop.example.com/'),
     event('click', 5_000, 'click', 'button#add'),
-    event('span', 6_000, 'GET /api/cart'),
     event('page_view', 30_000, 'navigation', 'https://shop.example.com/cart'),
     event(
       'error',
@@ -336,8 +334,8 @@ describe('SessionDetailPage', () => {
       query: {
         esql: [
           'FROM traces-*.otel-*, logs-*.otel-*',
-          '| WHERE session.id == "abcdef123456" AND service.name == "shop"',
-          '| SORT @timestamp ASC',
+          '  | WHERE session.id == "abcdef123456" AND service.name == "shop"',
+          '  | SORT @timestamp ASC',
         ].join('\n'),
       },
       timeRange: { from: '2026-10-20T09:59:00.000Z', to: '2026-10-20T10:06:00.000Z' },
@@ -371,7 +369,7 @@ describe('SessionDetailPage', () => {
     expect(marker.parentElement).toHaveStyle({ left: '75%', transform: 'translateX(-75%)' });
   });
 
-  it('lists what happened on each page, without spans and logs', async () => {
+  it('lists what happened on each page', async () => {
     mockFetch.mockResolvedValue(detail());
     const scrollIntoView = jest.fn();
     window.HTMLElement.prototype.scrollIntoView = scrollIntoView;
@@ -396,10 +394,9 @@ describe('SessionDetailPage', () => {
       within(visits[0]).getByTestId('digitalExperienceSessionEvent-page_view')
     ).toHaveTextContent('Page view');
     expect(visits[0]).not.toHaveTextContent('documentLoad');
-    expect(visits[0]).not.toHaveTextContent('GET /api/cart');
     const error = within(visits[1]).getByTestId('digitalExperienceSessionEvent-error');
-    // From the start of the page, precise to a hundredth of a second below 10s.
-    expect(error).toHaveTextContent('15.0 s');
+    // From the start of the page, to a hundredth of a second.
+    expect(error).toHaveTextContent('15.00 s');
     expect(error).toHaveTextContent('TypeError');
     expect(error).toHaveTextContent('cart is undefined');
     expect(visits[1]).toHaveTextContent('1 error');
@@ -490,10 +487,16 @@ describe('SessionDetailPage', () => {
     expect(screen.getByTestId('digitalExperienceSessionEvent-click')).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('digitalExperienceActivityFilter-request'));
+    const requestRows = () => screen.queryAllByTestId('digitalExperienceActivityRequest');
+    const before = requestRows().length;
     fireEvent.change(screen.getByTestId('digitalExperienceActivitySearch'), {
       target: { value: 'api/cart' },
     });
-    expect(screen.getAllByTestId('digitalExperienceActivityRequest')).toHaveLength(1);
+    // The pages' waterfalls aren't rebuilt for each key: the search waits for a pause in typing.
+    expect(requestRows()).toHaveLength(before);
+    expect(screen.getByTestId('digitalExperienceActivitySearch')).toHaveValue('api/cart');
+
+    await waitFor(() => expect(requestRows()).toHaveLength(1));
     expect(screen.queryByTestId('digitalExperienceSessionEvent-click')).not.toBeInTheDocument();
     expect(screen.getAllByTestId('digitalExperienceActivityEmpty')).toHaveLength(1);
   });

@@ -12,8 +12,8 @@ describe('sessionEsqlQuery', () => {
     expect(sessionEsqlQuery({ serviceName: 'shop', sessionId: 'abc-123' })).toBe(
       [
         'FROM traces-*.otel-*, logs-*.otel-*',
-        '| WHERE session.id == "abc-123" AND service.name == "shop"',
-        '| SORT @timestamp ASC',
+        '  | WHERE session.id == "abc-123" AND service.name == "shop"',
+        '  | SORT @timestamp ASC',
       ].join('\n')
     );
   });

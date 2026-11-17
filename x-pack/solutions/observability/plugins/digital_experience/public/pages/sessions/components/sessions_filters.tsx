@@ -25,10 +25,9 @@ import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../../
 import type { Formatters } from '../../../hooks/use_formatters';
 import { FacetFilter } from '../../../components/facet_filter';
 import { SingleSelectFilter } from '../../../components/single_select_filter';
+import { SEARCH_DEBOUNCE_MS } from '../../../hooks/use_debounced_text';
 import type { SessionsListState } from '../hooks/use_sessions_list_query';
 import { DURATION_BUCKETS, type SessionsListUrlQuery } from '../../../utils/sessions_list_query';
-
-export const SEARCH_DEBOUNCE_MS = 300;
 
 /** The "any value" option of a facet, which removes its filter. */
 const ANY_VALUE = '';

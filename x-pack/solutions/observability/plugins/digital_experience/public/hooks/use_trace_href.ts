@@ -6,9 +6,8 @@
  */
 
 import { useCallback } from 'react';
+import { APM_APP_ID } from '@kbn/deeplinks-observability';
 import { useKibanaServices } from './use_kibana_services';
-
-const APM_APP_ID = 'apm';
 
 /**
  * How far either side of a request APM looks for its trace. Without a range, APM finds the root

@@ -16,6 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../../ebt_constants';
+import { useDebouncedText } from '../../../hooks/use_debounced_text';
 import { ACTIVITY_KINDS, type ActivityFilters, type ActivityKind } from '../utils/visit_activity';
 
 const KIND_LABELS: Record<ActivityKind, string> = {
@@ -44,6 +45,11 @@ export function JourneyFilters({
   counts: Record<ActivityKind, number>;
   onChange: (filters: ActivityFilters) => void;
 }) {
+  // Each page's waterfall is rebuilt for a new search, so it runs once the user pauses typing.
+  const [search, setSearch] = useDebouncedText(filters.search, (text) =>
+    onChange({ ...filters, search: text })
+  );
+
   const toggle = (kind: ActivityKind) => {
     const kinds = new Set(filters.kinds);
     if (kinds.has(kind)) {
@@ -85,9 +91,8 @@ export function JourneyFilters({
         <EuiFieldSearch
           compressed
           fullWidth
-          incremental
-          value={filters.search}
-          onChange={(event) => onChange({ ...filters, search: event.target.value })}
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
           placeholder={i18n.translate(
             'xpack.digitalExperience.sessionDetail.filters.searchPlaceholder',
             { defaultMessage: '/api/cart, button.buy or TypeError' }

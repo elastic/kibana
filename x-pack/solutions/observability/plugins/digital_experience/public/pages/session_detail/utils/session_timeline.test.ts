@@ -37,7 +37,6 @@ const event = (
   name,
   timestamp: at(offsetMs),
   offsetMs,
-  durationMs: null,
   page: null,
   detail: null,
   stacktrace: null,
@@ -48,13 +47,11 @@ const event = (
 describe('groupEventsByVisit', () => {
   const visits = [visit('/', 0, 10_000), visit('/cart', 10_000, 5_000)];
 
-  it('puts each event in the visit it happened in, keeping spans and logs out', () => {
+  it('puts each event in the visit it happened in', () => {
     const groups = groupEventsByVisit(visits, [
       event('page_view', 0),
       event('click', 4_000),
-      event('span', 5_000),
       event('page_view', 10_000),
-      event('log', 11_000),
       event('error', 12_000),
       event('web_vital', 14_000),
     ]);

@@ -10,17 +10,8 @@ import type {
   SessionRequest,
   SessionSummary,
   SessionTimelineEvent,
-  SessionTimelineEventKind,
 } from '../../../../common/sessions';
 import { UNKNOWN_PAGE } from '../../../labels';
-
-/** Events the journey lists; spans and logs are left to traces and Discover. */
-export const JOURNEY_EVENT_KINDS: readonly SessionTimelineEventKind[] = [
-  'page_view',
-  'click',
-  'error',
-  'web_vital',
-];
 
 export interface PageVisitEvents {
   visit: SessionPageVisit;
@@ -62,9 +53,6 @@ export const groupEventsByVisit = (
   const startsMs = pageVisits.map(({ startTime }) => Date.parse(startTime));
   const events = pageVisits.map((): SessionTimelineEvent[] => []);
   for (const event of timeline) {
-    if (!JOURNEY_EVENT_KINDS.includes(event.kind)) {
-      continue;
-    }
     const eventMs = Date.parse(event.timestamp);
     const openIndex = Math.max(
       0,

@@ -106,16 +106,10 @@ const TIMELINE_FIELDS = [
   '@timestamp',
   OTEL_SPAN_NAME,
   OTEL_EVENT_NAME,
-  'duration',
   'trace_id',
   'span_id',
   ...TIMELINE_ATTRIBUTES.flatMap((name) => [attributeField(name), resourceAttributeField(name)]),
 ];
-
-const durationOf = (event: OtelEventFields): number | null => {
-  const duration = event.duration?.[0];
-  return typeof duration === 'number' ? duration : null;
-};
 
 const eventNameOf = (event: OtelEventFields): string =>
   fieldString(event, OTEL_EVENT_NAME) ?? fieldString(event, OTEL_SPAN_NAME) ?? '';
@@ -136,10 +130,11 @@ const webVitalOf = (event: OtelEventFields): { name: CoreWebVital; value: number
 };
 
 /**
- * The kind of a raw event. Errors are the exceptions the summary's `js_error_count` counts, so the
- * page journey and the summary above it agree; a failed request stays a span, counted separately.
+ * The kind of a raw event, or `null` for one the journey doesn't list. Errors are the exceptions the
+ * summary's `js_error_count` counts, so the page journey and the summary above it agree; a failed
+ * request is not one, and is counted separately.
  */
-const classify = (event: OtelEventFields): SessionTimelineEventKind => {
+const classify = (event: OtelEventFields): SessionTimelineEventKind | null => {
   const name = eventNameOf(event);
   if (name === EVENT_WEB_VITAL) {
     return 'web_vital';
@@ -153,7 +148,7 @@ const classify = (event: OtelEventFields): SessionTimelineEventKind => {
   if (isOneOf(name, PAGE_VIEW_EVENTS)) {
     return 'page_view';
   }
-  return durationOf(event) !== null ? 'span' : 'log';
+  return null;
 };
 
 const detailOf = (kind: SessionTimelineEventKind, event: OtelEventFields): string | null => {
@@ -189,14 +184,14 @@ const toTimelineEvent = (
     return null;
   }
   const kind = classify(event);
-  const duration = durationOf(event);
+  if (kind === null) {
+    return null;
+  }
   return {
     kind,
     name: displayNameOf(kind, event),
     timestamp,
     offsetMs: Math.max(0, ms - sessionStartMs),
-    // OTel span durations are stored in nanoseconds.
-    durationMs: duration !== null ? duration / 1e6 : null,
     page: pageOf(event),
     detail: detailOf(kind, event),
     stacktrace: kind === 'error' ? attributeString(event, EXCEPTION_STACKTRACE) : null,

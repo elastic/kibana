@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { formatDurationMs } from '../../../utils/format_duration';
 import type {
   SessionPageLoad,
   SessionPageVisit,
@@ -168,20 +169,24 @@ const DOM_CONTENT_LOADED_SHORT_LABEL = i18n.translate(
   { defaultMessage: 'DCL' }
 );
 
+const parseUrl = (url: string | null): URL | null =>
+  url && URL.canParse(url) ? new URL(url) : null;
+
+/** The origin of an absolute URL, e.g. `https://a.com:8443`, or `null` when it has none. */
+export const originOf = (url: string | null): string | null => {
+  const origin = parseUrl(url)?.origin;
+  return origin && origin !== 'null' ? origin : null;
+};
+
 /**
  * The URL as short as it reads unambiguously on its page: a path on the page's own origin. A
  * different origin that merely starts with it, as `https://a.com:8443` or `https://a.com.cdn.net`
  * does for `https://a.com`, is not on it.
  */
 export const displayUrl = (url: string, pageOrigin: string | null): string => {
-  if (pageOrigin && url.startsWith(pageOrigin)) {
-    const rest = url.slice(pageOrigin.length);
-    if (rest === '') {
-      return '/';
-    }
-    if (/^[/?#]/.test(rest)) {
-      return rest.startsWith('/') ? rest : `/${rest}`;
-    }
+  const parsed = parseUrl(url);
+  if (parsed && pageOrigin && parsed.origin === pageOrigin) {
+    return `${parsed.pathname}${parsed.search}${parsed.hash}`;
   }
   return url.replace(/^https?:\/\//, '');
 };
@@ -407,20 +412,11 @@ export const requestFamilyOf = ({ initiatorType, url }: SessionRequest): Request
   return FAMILIES[initiatorType] ?? 'other';
 };
 
-/** An offset from the start of a page, precise enough to order what happened within a second. */
+/** An offset from the start of a page: a duration below a minute, `m:ss` from there. */
 export const formatElapsed = (milliseconds: number): string => {
   const ms = Math.max(0, milliseconds);
-  if (ms < 1_000) {
-    return i18n.translate('xpack.digitalExperience.sessionDetail.elapsed.milliseconds', {
-      defaultMessage: '{milliseconds} ms',
-      values: { milliseconds: Math.round(ms) },
-    });
-  }
   if (ms < 60_000) {
-    return i18n.translate('xpack.digitalExperience.sessionDetail.elapsed.seconds', {
-      defaultMessage: '{seconds} s',
-      values: { seconds: (ms / 1_000).toFixed(ms < 10_000 ? 2 : 1) },
-    });
+    return formatDurationMs(ms);
   }
   const totalSeconds = Math.floor(ms / 1_000);
   return i18n.translate('xpack.digitalExperience.sessionDetail.elapsed.minutes', {
