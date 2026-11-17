@@ -1,0 +1,70 @@
+{
+  "operations": {
+    "callTool": [
+      {
+        "name": "tools/call who_am_i",
+        "source": "mcp"
+      }
+    ],
+    "createSharedLink": [
+      {
+        "name": "tools/call create_shared_link",
+        "source": "mcp"
+      }
+    ],
+    "getFileContent": [
+      {
+        "name": "tools/call get_file_content",
+        "source": "mcp"
+      }
+    ],
+    "getFileMetadata": [
+      {
+        "name": "tools/call get_file_metadata",
+        "source": "mcp"
+      }
+    ],
+    "listFolder": [
+      {
+        "name": "tools/call list_folder",
+        "source": "mcp"
+      }
+    ],
+    "listSharedLinks": [
+      {
+        "name": "tools/call list_shared_links",
+        "source": "mcp"
+      }
+    ],
+    "listTools": [
+      {
+        "name": "tools/list",
+        "source": "mcp"
+      }
+    ],
+    "search": [
+      {
+        "name": "tools/call search",
+        "source": "mcp"
+      }
+    ],
+    "whoAmI": [
+      {
+        "name": "tools/call who_am_i",
+        "source": "mcp"
+      }
+    ]
+  },
+  "sources": {
+    "mcp": {
+      "captured": true,
+      "endpoints": [
+        "https://mcp.dropbox.com/mcp"
+      ],
+      "fetchedAt": "2026-11-17T17:31:19.389Z",
+      "format": "mcp",
+      "note": "Dropbox's MCP server answers initialize with 401, so its tools/list can't be fetched. Captured once on 2026-11-17 with a short-lived access token from a scoped app, and committed as the snapshot. The token's scopes have to cover every tool the connector calls, including sharing.write, or the server lists fewer tools than it serves. It answers over server-sent events, so a capture takes the JSON out of the data: frame. Refreshing it means capturing it again with a token.",
+      "url": "https://mcp.dropbox.com/mcp"
+    }
+  }
+}
