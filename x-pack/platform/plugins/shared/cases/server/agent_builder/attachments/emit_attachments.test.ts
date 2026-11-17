@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { emitFromStepResult, injectAttachmentIds, toCaseAttachmentData } from './emit_attachments';
+import { createCaseAttachmentType } from './case_attachment_type';
 import {
   CASE_ATTACHMENT_TYPE,
   CASES_ATTACHMENT_TYPE,
@@ -155,8 +157,14 @@ describe('emitFromStepResult', () => {
 // ---------------------------------------------------------------------------
 
 describe('emitCaseAttachment', () => {
+  const buildRealManager = () =>
+    createAttachmentStateManager([], {
+      getTypeDefinition: (type) =>
+        type === CASE_ATTACHMENT_TYPE ? (createCaseAttachmentType() as never) : undefined,
+    });
+
   it('updates the existing attachment when the same case is emitted again', async () => {
-    const attachments = buildAttachments();
+    const attachments = buildRealManager();
     const events = buildEvents();
     const created = buildCase('c1');
     const withObservables = { ...buildCase('c1'), total_observables: 2 } as Case;
@@ -164,19 +172,16 @@ describe('emitCaseAttachment', () => {
     const first = await emitFromStepResult({ attachments, events } as never, {
       results: [{ data: { case: created } }],
     });
-    attachments.getActive.mockReturnValue([
-      buildStoredCaseAttachment('att-1', toCaseAttachmentData(created)),
-    ]);
     const second = await emitFromStepResult({ attachments, events } as never, {
       results: [{ data: { case: withObservables } }],
     });
 
-    expect(attachments.add).toHaveBeenCalledTimes(1);
-    expect(attachments.update).toHaveBeenCalledTimes(1);
-    const [updatedId, updateInput] = attachments.update.mock.calls[0];
-    expect(updatedId).toBe('att-1');
-    expect(updateInput.data.total_observables).toBe(2);
     expect(second).toEqual(first);
+    const active = attachments.getActive();
+    expect(active).toHaveLength(1);
+    expect(active[0].id).toBe(first[0]);
+    expect(active[0].versions).toHaveLength(2);
+    expect(active[0].versions[1].data).toMatchObject({ id: 'c1', total_observables: 2 });
   });
 
   it('adds a new attachment for a different case id', async () => {
@@ -199,21 +204,42 @@ describe('emitCaseAttachment', () => {
     expect(ids).toEqual(['att-2']);
   });
 
-  it('adds a new attachment when the prior attachment for the case is no longer active', async () => {
+  it('adds a new attachment when the prior attachment for the case was deleted', async () => {
+    const attachments = buildRealManager();
+    const events = buildEvents();
+
+    const [firstId] = await emitFromStepResult({ attachments, events } as never, {
+      results: [{ data: { case: buildCase('c1') } }],
+    });
+    attachments.delete(firstId);
+    const [secondId] = await emitFromStepResult({ attachments, events } as never, {
+      results: [{ data: { case: buildCase('c1') } }],
+    });
+
+    expect(secondId).not.toBe(firstId);
+    expect(attachments.getActive().map(({ id }) => id)).toEqual([secondId]);
+    expect(attachments.getAll()).toHaveLength(2);
+  });
+
+  it('does not update an active attachment of a different type that carries the same data id', async () => {
     const attachments = buildAttachments();
     const events = buildEvents();
-    // getActive() only returns active attachments, so an inactive one is simply absent.
-    attachments.getActive.mockReturnValue([]);
+    attachments.add.mockResolvedValue({ id: 'att-new' });
+    attachments.getActive.mockReturnValue([
+      {
+        ...buildStoredCaseAttachment('att-other', toCaseAttachmentData(buildCase('c1'))),
+        type: CASES_ATTACHMENT_TYPE,
+      },
+    ]);
 
-    await emitFromStepResult({ attachments, events } as never, {
+    const ids = await emitFromStepResult({ attachments, events } as never, {
       results: [{ data: { case: buildCase('c1') } }],
     });
-    await emitFromStepResult({ attachments, events } as never, {
-      results: [{ data: { case: buildCase('c1') } }],
-    });
 
-    expect(attachments.add).toHaveBeenCalledTimes(2);
     expect(attachments.update).not.toHaveBeenCalled();
+    expect(attachments.add).toHaveBeenCalledTimes(1);
+    expect(attachments.add.mock.calls[0][0].type).toBe(CASE_ATTACHMENT_TYPE);
+    expect(ids).toEqual(['att-new']);
   });
 });
 
