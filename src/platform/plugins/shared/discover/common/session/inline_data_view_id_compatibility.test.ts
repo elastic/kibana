@@ -78,5 +78,4 @@ describe('createInlineDataViewIdCompatibility', () => {
       expect(forView(undefined)).toBe(shared);
     });
   });
-
 });

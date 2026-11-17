@@ -202,12 +202,7 @@ export const normalizeInlineDataViewIds = ({
   });
 
   const loadCompatibility = createInlineDataViewLoadCompatibility({
-    views: [
-      ...sessionIdentities,
-      ...openIdentities,
-      ...closedIdentities,
-      defaultIdentity,
-    ],
+    views: [...sessionIdentities, ...openIdentities, ...closedIdentities, defaultIdentity],
     tabViews,
     conventionalTabs,
     savedDataViewIds,

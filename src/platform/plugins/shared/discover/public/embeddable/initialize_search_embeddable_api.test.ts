@@ -101,8 +101,8 @@ describe('initializeSearchEmbeddableApi inline views', () => {
     });
     const sharedView = await services.inlineDataViews.resolve(inlineSpec);
 
-    expect(first.api.dataViews$.getValue()?.[0]).toBe(sharedView);
-    expect(second.api.dataViews$.getValue()?.[0]).toBe(sharedView);
+    expect(first.api.dataSources$.getValue()?.[0]).toBe(sharedView);
+    expect(second.api.dataSources$.getValue()?.[0]).toBe(sharedView);
     expect(sharedView.id).toBe(inlineId);
     expect(first.api.filters$.getValue()).toStrictEqual([
       createFilter(inlineId),
@@ -145,7 +145,7 @@ describe('initializeSearchEmbeddableApi inline views', () => {
         filter: [createFilter('legacy-id')],
       },
     });
-    const originalView = first.api.dataViews$.getValue()?.[0];
+    const originalView = first.api.dataSources$.getValue()?.[0];
     const restoreSnapshot = first.createStateRestorer({
       serializedSearchSource: first.api.savedSearch$.getValue().searchSource.getSerializedFields(),
     });
@@ -156,7 +156,7 @@ describe('initializeSearchEmbeddableApi inline views', () => {
       serializedSearchSource: { index: otherSpec, filter: [createFilter('legacy-id')] },
     });
 
-    expect(first.api.dataViews$.getValue()?.[0].id).toBe(otherId);
+    expect(first.api.dataSources$.getValue()?.[0].id).toBe(otherId);
     expect(first.api.filters$.getValue()).toStrictEqual([createFilter(otherId)]);
     expect(first.api.savedSearch$.getValue().searchSource.getField('index')?.id).toBe(otherId);
     expect(first.internalApi.remapParentFilters([createFilter('legacy-id')])).toStrictEqual([
@@ -165,7 +165,7 @@ describe('initializeSearchEmbeddableApi inline views', () => {
 
     await restoreSnapshot();
 
-    expect(first.api.dataViews$.getValue()?.[0]).toBe(originalView);
+    expect(first.api.dataSources$.getValue()?.[0]).toBe(originalView);
     expect(first.api.filters$.getValue()).toStrictEqual([createFilter(inlineId)]);
     expect(first.internalApi.remapParentFilters([createFilter('legacy-id')])).toStrictEqual([
       createFilter(inlineId),
@@ -201,7 +201,7 @@ describe('initializeSearchEmbeddableApi inline views', () => {
     const initialState = toStoredSearchAndTable(tab);
     const embeddable = await initialize(initialState);
 
-    expect(embeddable.api.dataViews$.getValue()?.[0].id).toBe(inlineId);
+    expect(embeddable.api.dataSources$.getValue()?.[0].id).toBe(inlineId);
     expect(embeddable.api.filters$.getValue()).toStrictEqual([
       expect.objectContaining({ meta: expect.objectContaining({ index: inlineId }) }),
       expect.objectContaining({

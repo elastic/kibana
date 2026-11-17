@@ -346,8 +346,8 @@ describe('normalizeInlineSearchSource', () => {
       filter: [createFilter(inlineDataViewId)],
     };
 
-    expect(
-      normalizeInlineSearchSource(normalizedSearchSource, getOwnContext())
-    ).toBe(normalizedSearchSource);
+    expect(normalizeInlineSearchSource(normalizedSearchSource, getOwnContext())).toBe(
+      normalizedSearchSource
+    );
   });
 });

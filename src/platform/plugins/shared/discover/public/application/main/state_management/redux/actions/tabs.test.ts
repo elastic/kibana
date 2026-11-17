@@ -276,9 +276,9 @@ describe('tabs actions', () => {
         dataViewId,
         foreignFilter.meta.index,
       ]);
-      expect(services.filterManager.getGlobalFilters().map(({ meta }) => meta.index)).toStrictEqual([
-        dataViewId,
-      ]);
+      expect(services.filterManager.getGlobalFilters().map(({ meta }) => meta.index)).toStrictEqual(
+        [dataViewId]
+      );
       internalState.dispatch(internalStateActions.disconnectTab({ tabId: tab.id }));
     });
 
