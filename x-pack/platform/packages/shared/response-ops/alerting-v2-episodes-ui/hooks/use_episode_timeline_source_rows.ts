@@ -28,7 +28,6 @@ export interface UseEpisodeTimelineSourceRowsOptions {
 export interface EpisodeTimelineSourceRows {
   statusRows: EpisodeTimelineStatusRow[];
   severityRows: EpisodeTimelineSeverityRow[];
-  isCollapsed: boolean;
   /** The ES|QL row limit the events query was cut off at; set only when the rows are collapsed. */
   collapsedEventLimit: number | undefined;
   isLoading: boolean;
@@ -70,7 +69,6 @@ export const useEpisodeTimelineSourceRows = ({
   return {
     statusRows: isCollapsed ? collapsedEvents.statusRows : eventRows,
     severityRows: isCollapsed ? collapsedEvents.severityRows : eventRows,
-    isCollapsed,
     collapsedEventLimit: isCollapsed ? eventRows.length : undefined,
     isLoading: isLoadingEvents || isLoadingCollapsedEvents,
     isError,

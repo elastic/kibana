@@ -118,7 +118,6 @@ describe('useEpisodeTimelineSourceRows', () => {
     expect(result.current).toEqual({
       statusRows: eventRows,
       severityRows: eventRows,
-      isCollapsed: false,
       collapsedEventLimit: undefined,
       isLoading: false,
       isError: false,
@@ -140,7 +139,6 @@ describe('useEpisodeTimelineSourceRows', () => {
     expect(result.current).toEqual({
       statusRows: collapsedEvents.statusRows,
       severityRows: collapsedEvents.severityRows,
-      isCollapsed: true,
       collapsedEventLimit: eventRows.length,
       isLoading: false,
       isError: false,
@@ -165,7 +163,6 @@ describe('useEpisodeTimelineSourceRows', () => {
         expect.objectContaining({ enabled: false })
       );
       expect(result.current.statusRows).toBe(rows);
-      expect(result.current.isCollapsed).toBe(false);
       expect(result.current.collapsedEventLimit).toBeUndefined();
     });
 
@@ -177,7 +174,6 @@ describe('useEpisodeTimelineSourceRows', () => {
 
       const { result } = renderSourceRows();
 
-      expect(result.current.isCollapsed).toBe(true);
       expect(result.current.collapsedEventLimit).toBe(limit);
     });
   });
@@ -188,7 +184,6 @@ describe('useEpisodeTimelineSourceRows', () => {
     const { result } = renderSourceRows();
 
     expect(result.current.isLoading).toBe(true);
-    expect(result.current.isCollapsed).toBe(false);
     expect(result.current.collapsedEventLimit).toBeUndefined();
   });
 
@@ -199,7 +194,6 @@ describe('useEpisodeTimelineSourceRows', () => {
 
     expect(result.current.statusRows).toBe(eventRows);
     expect(result.current.severityRows).toBe(eventRows);
-    expect(result.current.isCollapsed).toBe(false);
     expect(result.current.collapsedEventLimit).toBeUndefined();
   });
 
