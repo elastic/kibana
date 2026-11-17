@@ -74,9 +74,11 @@ apiTest.describe(
     }
 
     // `runAt` is computed slightly before the store stamps `scheduledAt`, so the measured offset
-    // falls a few ms short of the applied one; round it to the nearest offset step.
+    // falls a few ms short of the applied one; round it to the nearest offset step. A zero offset
+    // can round to -0, which `toStrictEqual` does not treat as 0, so adding 0 normalizes it.
     function offsetStepsOf({ runAt, scheduledAt }: ScheduledTask): number {
-      return Math.round((Date.parse(runAt) - Date.parse(scheduledAt)) / EnsureScheduledOffsetMs);
+      const steps = (Date.parse(runAt) - Date.parse(scheduledAt)) / EnsureScheduledOffsetMs;
+      return Math.round(steps) + 0;
     }
 
     async function waitForOffsetReset() {
