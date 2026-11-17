@@ -21,12 +21,18 @@ import { SettingsStorage } from './settings_storage';
 
 const DOWNLOAD_LOCK_WAIT_MS = 10 * 60 * 1000;
 const DOWNLOAD_LOCK_POLL_MS = 500;
+const DOWNLOAD_LOCK_HEARTBEAT_MS = 1000;
+const DOWNLOAD_LOCK_STALE_MS = 30 * 1000;
 
 interface DownloadLockOptions {
   /** How long to wait for a live or unwritten lock before failing. */
   waitMs?: number;
   /** Delay between checks while waiting. */
   pollMs?: number;
+  /** How often the holder refreshes the lock's mtime to advertise progress. */
+  heartbeatMs?: number;
+  /** How long a lock may go unrefreshed before a waiter reclaims it. */
+  staleMs?: number;
 }
 
 /** Positive integer pid. Empty or non-numeric text means the owner is still writing the file. */
@@ -52,6 +58,46 @@ const isProcessAlive = (pid: number): boolean => {
 };
 
 const isEnoent = (error: unknown): boolean => (error as NodeJS.ErrnoException).code === 'ENOENT';
+
+/**
+ * The downloads directory lives under the home directory, so it outlives the CI build that
+ * wrote a lock and a recorded pid can be recycled by an unrelated process in a later build.
+ * A refreshed mtime is the only owner signal that survives that, so a lock whose holder has
+ * stopped advertising progress is treated as abandoned no matter what its pid resolves to.
+ */
+const isDownloadLockStale = (lockPath: string, staleMs: number): boolean => {
+  try {
+    return Date.now() - fs.statSync(lockPath).mtimeMs >= staleMs;
+  } catch (error) {
+    if (isEnoent(error)) {
+      return false;
+    }
+    throw error;
+  }
+};
+
+/** Keeps the lock's mtime advancing while the holder works. Returns the stop function. */
+const startDownloadLockHeartbeat = (
+  log: ToolingLog,
+  lockPath: string,
+  heartbeatMs: number
+): (() => void) => {
+  const timer = setInterval(() => {
+    const now = new Date();
+    try {
+      fs.utimesSync(lockPath, now, now);
+    } catch (error) {
+      if (!isEnoent(error)) {
+        // A missed refresh only risks another worker reclaiming the lock, which the release path already tolerates.
+        log.warning(
+          `Could not refresh agent download lock [${lockPath}]: ${(error as Error).message}`
+        );
+      }
+    }
+  }, heartbeatMs);
+
+  return () => clearInterval(timer);
+};
 
 /** `undefined` means the lock disappeared and the caller should try to create it again. */
 const readDownloadLock = (lockPath: string): string | undefined => {
@@ -119,6 +165,8 @@ export const withDownloadLock = async <T>(
   const started = Date.now();
   const waitMs = options?.waitMs ?? DOWNLOAD_LOCK_WAIT_MS;
   const pollMs = options?.pollMs ?? DOWNLOAD_LOCK_POLL_MS;
+  const heartbeatMs = options?.heartbeatMs ?? DOWNLOAD_LOCK_HEARTBEAT_MS;
+  const staleMs = options?.staleMs ?? DOWNLOAD_LOCK_STALE_MS;
   let reportedWait = false;
 
   while (true) {
@@ -133,7 +181,15 @@ export const withDownloadLock = async <T>(
       const ownerText = readDownloadLock(lockPath);
       if (ownerText !== undefined) {
         const owner = readLockPid(ownerText);
-        if (owner !== undefined && !isProcessAlive(owner)) {
+        const ownerIsGone = owner !== undefined && !isProcessAlive(owner);
+        const ownerStoppedProgressing = !ownerIsGone && isDownloadLockStale(lockPath, staleMs);
+
+        if (ownerIsGone || ownerStoppedProgressing) {
+          if (ownerStoppedProgressing) {
+            log.info(
+              `Reclaiming agent download lock [${lockPath}] not refreshed for ${staleMs}ms (owner [${ownerText.trim()}])`
+            );
+          }
           removeStaleDownloadLock(lockPath, ownerText);
         } else {
           if (!reportedWait) {
@@ -155,9 +211,12 @@ export const withDownloadLock = async <T>(
     }
   }
 
+  const stopHeartbeat = startDownloadLockHeartbeat(log, lockPath, heartbeatMs);
+
   try {
     return await run();
   } finally {
+    stopHeartbeat();
     releaseDownloadLock(lockPath);
   }
 };

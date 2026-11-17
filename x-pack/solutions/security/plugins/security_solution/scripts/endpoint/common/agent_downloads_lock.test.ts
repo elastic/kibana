@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { existsSync, mkdtempSync, readFileSync, rmSync, unlinkSync, writeFileSync } from 'fs';
+import {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  unlinkSync,
+  utimesSync,
+  writeFileSync,
+} from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -106,6 +114,56 @@ describe('withDownloadLock', () => {
     ).rejects.toThrow(/Timed out waiting for agent download lock/);
 
     expect(readFileSync(lockPath, 'utf8')).toBe(String(process.pid));
+  });
+
+  it('reclaims a lock whose live pid stopped refreshing it', async () => {
+    // Own pid, so only the unrefreshed mtime can mark this lock abandoned.
+    writeFileSync(lockPath, String(process.pid));
+    const longAgo = new Date(Date.now() - 60_000);
+    utimesSync(lockPath, longAgo, longAgo);
+
+    let seenPid = '';
+    await withDownloadLock(
+      log,
+      lockPath,
+      async () => {
+        seenPid = readFileSync(lockPath, 'utf8');
+      },
+      { waitMs: 2_000, pollMs: 10, staleMs: 5_000 }
+    );
+
+    expect(seenPid).toBe(String(process.pid));
+    expect(existsSync(lockPath)).toBe(false);
+  });
+
+  it('refreshes the lock it holds so waiters do not reclaim it', async () => {
+    let finishRun = () => {};
+    const running = new Promise<void>((resolve) => {
+      finishRun = resolve;
+    });
+
+    const holder = withDownloadLock(log, lockPath, () => running, {
+      waitMs: 2_000,
+      pollMs: 10,
+      heartbeatMs: 10,
+      staleMs: 150,
+    });
+
+    // Longer than `staleMs`, so only a working heartbeat keeps the lock out of reach.
+    await wait(290);
+
+    await expect(
+      withDownloadLock(log, lockPath, async () => undefined, {
+        waitMs: 0,
+        pollMs: 10,
+        staleMs: 150,
+      })
+    ).rejects.toThrow(/Timed out waiting for agent download lock/);
+
+    finishRun();
+    await holder;
+
+    expect(existsSync(lockPath)).toBe(false);
   });
 
   it('does not remove the lock in finally when another pid replaced it', async () => {
