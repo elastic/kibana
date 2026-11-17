@@ -23,6 +23,7 @@ export const getDataGridStyles = (themeContext: UseEuiTheme) => {
     grid: css({
       position: 'relative',
       overflow: 'auto',
+      overflowAnchor: 'none',
       minBlockSize: 0,
       color: euiTheme.colors.textParagraph,
       backgroundColor: euiTheme.components.dataGridRowBackground,
@@ -34,10 +35,12 @@ export const getDataGridStyles = (themeContext: UseEuiTheme) => {
         outlineOffset: `calc(-1 * ${euiTheme.focus.width})`,
       },
     }),
-    headerRow: css({
+    headerRowGroup: css({
       position: 'sticky',
       insetBlockStart: 0,
       zIndex: 1,
+    }),
+    headerRow: css({
       display: 'grid',
       backgroundColor: euiTheme.colors.emptyShade,
       borderBlockEnd: euiTheme.border.thin,
@@ -92,7 +95,17 @@ export const getDataGridStyles = (themeContext: UseEuiTheme) => {
       padding: cellPadding,
       overflowWrap: 'break-word',
       whiteSpace: 'pre-wrap',
-      '&:hover::after': {
+      outline: 'none',
+      '&:focus::after': {
+        content: '""',
+        position: 'absolute',
+        zIndex: 3,
+        pointerEvents: 'none',
+        inset: 0,
+        border: `${euiTheme.border.width.thick} solid ${euiTheme.components.dataGridRowBorderActive}`,
+        borderRadius: cellOutlineBorderRadius,
+      },
+      '&:hover:not(:focus)::after': {
         content: '""',
         position: 'absolute',
         zIndex: 2,
