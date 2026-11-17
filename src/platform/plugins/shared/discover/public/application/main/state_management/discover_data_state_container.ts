@@ -319,6 +319,7 @@ export function getDataStateContainer({
             scopedEbtManager$,
             currentDataSource$,
             cascadedLeafDataSource$,
+            replay$,
           } = selectTabRuntimeState(runtimeStateManager, currentTabId);
           const scopedProfilesManager = scopedProfilesManager$.getValue();
           const scopedEbtManager = scopedEbtManager$.getValue();
@@ -353,6 +354,9 @@ export function getDataStateContainer({
               contextKey,
             }));
           }
+
+          // Searches of this fetch (documents, histogram, hit count) are served from the snapshot
+          replay$.getValue()?.session.addSessionId(searchSessionId);
 
           const searchSource = createSearchSource({
             dataView: currentDataView,

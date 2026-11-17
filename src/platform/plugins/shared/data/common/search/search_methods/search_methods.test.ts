@@ -206,6 +206,7 @@ describe('SearchMethodsService', () => {
 
         expect(inspector.adapter.start).toHaveBeenCalledWith('Test Request', {
           description: 'Test description',
+          replayKey: expect.any(String),
         });
       });
 
@@ -678,6 +679,7 @@ describe('SearchMethodsService', () => {
 
         expect(inspector.adapter.start).toHaveBeenCalledWith('Test Request', {
           description: 'Test description',
+          replayKey: expect.any(String),
         });
       });
 

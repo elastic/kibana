@@ -269,6 +269,9 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
         services,
         savedDataViews: getState().savedDataViews,
         runtimeStateManager,
+        skipFetchFields: Boolean(
+          selectTabRuntimeState(runtimeStateManager, tabId).replay$.getValue()
+        ),
       });
       const query =
         initialQuery ??
