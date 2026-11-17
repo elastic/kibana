@@ -1,0 +1,103 @@
+{
+  "sha1": "04e5adc6bae70e7356c02a68a3941d906052e0d4",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "a5f0bae9bd2725f-2b785870d4592a4",
+      "title": "Load farequote and ecommerce data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/aiops/test/scout/ui/parallel_tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "07311552c2f3cdf-240df13758b3d9b",
+      "title": "change point chart attached from the dashboard adds a change point chart and shows empty and no-change-point states",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/aiops/test/scout/ui/parallel_tests/change_point_chart_from_dashboard.spec.ts",
+        "line": 22,
+        "column": 35
+      }
+    },
+    {
+      "id": "da3b067db07e3a8-ccd2a4f3ea8575f",
+      "title": "change point chart attached from the ML app attaches change point charts to a dashboard from the ML app",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/aiops/test/scout/ui/parallel_tests/change_point_chart_from_ml_app.spec.ts",
+        "line": 22,
+        "column": 35
+      }
+    },
+    {
+      "id": "2522a3084bf75d9-ed3f6a1d53f1c4e",
+      "title": "log rate analysis embedded in dashboard - request cancellation cancels in-flight searches when navigating away from the dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/aiops/test/scout/ui/parallel_tests/log_rate_analysis_embeddable_cancellation.spec.ts",
+        "line": 48,
+        "column": 7
+      }
+    },
+    {
+      "id": "2522a3084bf75d9-c924e0b87f55d68",
+      "title": "log rate analysis embedded in dashboard - request cancellation cancels in-flight searches when clicking the cancel button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/aiops/test/scout/ui/parallel_tests/log_rate_analysis_embeddable_cancellation.spec.ts",
+        "line": 50,
+        "column": 46
+      }
+    },
+    {
+      "id": "baaae5e4220c024-4adeb212084bc10",
+      "title": "pattern analysis embedded in dashboard - request cancellation cancels in-flight searches when navigating away from the dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/aiops/test/scout/ui/parallel_tests/pattern_analysis_embeddable_cancellation.spec.ts",
+        "line": 52,
+        "column": 7
+      }
+    },
+    {
+      "id": "baaae5e4220c024-61b9d85cd1f067c",
+      "title": "pattern analysis embedded in dashboard - request cancellation cancels in-flight searches when clicking the cancel button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/aiops/test/scout/ui/parallel_tests/pattern_analysis_embeddable_cancellation.spec.ts",
+        "line": 54,
+        "column": 46
+      }
+    }
+  ]
+}
