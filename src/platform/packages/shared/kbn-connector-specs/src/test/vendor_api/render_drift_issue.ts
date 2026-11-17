@@ -16,77 +16,63 @@ import type {
 } from './detect_drift';
 import { reviewOfChange } from './detect_drift';
 import { markerOf } from './drift_issue_marker';
+import type { ChangeCategory } from './oasdiff_text';
+import { changeCategoryOf, isRequestChange, isResponseChange } from './oasdiff_text';
 import type { Addition } from './new_in_vendor_api';
 import { newInVendorApi } from './new_in_vendor_api';
 import { OVERLAY, snapshotFile } from './load_vendor_specs';
 
-/** What kind of change a reviewer looks at, from its `oasdiff` rule. */
-type ReviewKind =
-  | 'Deprecated'
-  | 'Sunset'
-  | 'Auth requirement changed'
-  | 'Removed'
-  | 'Moved, same URL'
-  | 'Shared schema removed'
-  | 'Request changed'
-  | 'Response changed'
-  | 'Other';
+/**
+ * What kind of change a reviewer looks at: a change's own category, or that it only moved in the
+ * spec, which the check works out from where the operation went rather than from the rule.
+ */
+type ReviewKind = ChangeCategory | 'moved-same-url';
 
-// Removals first: `api-path-removed-without-deprecation` mentions a deprecation it didn't have.
-const reviewKindOf = (id: string): ReviewKind => {
-  if (id.startsWith('api-security-')) {
-    return 'Auth requirement changed';
-  }
-  if (id === 'api-schema-removed') {
-    return 'Shared schema removed';
-  }
-  if (/^api-.*removed/.test(id)) {
-    return 'Removed';
-  }
-  if (/sunset/.test(id)) {
-    return 'Sunset';
-  }
-  if (/deprecat/.test(id)) {
-    return 'Deprecated';
-  }
-  if (/^(request-|new-(required|optional)-request-)/.test(id)) {
-    return 'Request changed';
-  }
-  return id.startsWith('response-') ? 'Response changed' : 'Other';
+/** The heading the review tables and the summary give each kind. */
+const REVIEW_LABELS: Record<ReviewKind, string> = {
+  deprecated: 'Deprecated',
+  sunset: 'Sunset',
+  'auth-changed': 'Auth requirement changed',
+  removed: 'Removed',
+  'moved-same-url': 'Moved, same URL',
+  'schema-removed': 'Shared schema removed',
+  'request-changed': 'Request changed',
+  'response-changed': 'Response changed',
+  other: 'Other',
 };
 
 // How the summary says that passing actions are affected by a kind of change, one or several.
 const AFFECTED: Record<ReviewKind, readonly [string, string]> = {
-  Deprecated: ['passes but calls a deprecated endpoint', 'pass but call deprecated endpoints'],
-  Sunset: [
+  deprecated: ['passes but calls a deprecated endpoint', 'pass but call deprecated endpoints'],
+  sunset: [
     'passes but calls an endpoint with a sunset date',
     'pass but call endpoints with a sunset date',
   ],
-  'Auth requirement changed': [
+  'auth-changed': [
     'passes but calls an endpoint whose auth requirements changed',
     'pass but call endpoints whose auth requirements changed',
   ],
-  Removed: [
+  removed: [
     'passes but calls an endpoint removed from the current spec',
     'pass but call endpoints removed from the current spec',
   ],
-  'Moved, same URL': [
+  'moved-same-url': [
     'calls an endpoint that moved in the spec, keeping its URL',
     'call endpoints that moved in the spec, keeping their URL',
   ],
-  'Shared schema removed': [
+  'schema-removed': [
     'passes but uses a schema removed from the current spec',
     'pass but use schemas removed from the current spec',
   ],
-  'Request changed': [
+  'request-changed': [
     'passes but sends a request that changed',
     'pass but send requests that changed',
   ],
-  'Response changed': [
+  'response-changed': [
     'passes but gets a response that changed',
     'pass but get responses that changed',
   ],
-  Other: ['passes but calls an endpoint that changed', 'pass but call endpoints that changed'],
+  other: ['passes but calls an endpoint that changed', 'pass but call endpoints that changed'],
 };
 
 /** A spec change that keeps the issue open, with the actions that call its operation. */
@@ -293,10 +279,6 @@ const OUTCOMES: Record<Outcome, string> = {
   fails: '❌ Fails',
   'not-checked': '➖ Not checked',
 };
-
-// Changes that running an action verifies: what it sends and how it authenticates.
-const REQUEST_CHANGE = /^(request-|new-(required|optional)-request-|api-security-)/;
-const RESPONSE_CHANGE = /^(response-|api-schema-removed$)/;
 
 const RANKS: readonly Rank[] = ['fails', 'attention', 'passes', 'not-checked'];
 const ICONS: Record<Rank, string> = {
@@ -560,13 +542,13 @@ const statusOf = (
   const notable = changes.filter(({ change }) => change.kind !== 'non-breaking');
   if (notable.length > 0 && action.tracked) {
     // Its operations changed in ways running it and its field use verify.
-    const responses = notable.filter(({ change }) => RESPONSE_CHANGE.test(change.id));
+    const responses = notable.filter(({ change }) => isResponseChange(change.id));
     const passedAlong = responses.flatMap(({ source, operation }) => {
       const { copied = [], returned = [] } = action.fieldUse?.[`${source} ${operation}`] ?? {};
       return [...copied, ...returned];
     });
     const sentences = [
-      ...(notable.some(({ change }) => REQUEST_CHANGE.test(change.id))
+      ...(notable.some(({ change }) => isRequestChange(change.id))
         ? ["Vendor request has changed, and Connector's requests still match it"]
         : []),
       ...(responses.length === 0
@@ -798,9 +780,9 @@ export const renderDriftIssue = (
     )
   );
   const kindOf = (source: string, change: SpecChange): ReviewKind => {
-    const kind = reviewKindOf(change.id);
-    return kind === 'Removed' && movedOperations.has(`${source} ${change.operation}`)
-      ? 'Moved, same URL'
+    const kind = changeCategoryOf(change.id);
+    return kind === 'removed' && movedOperations.has(`${source} ${change.operation}`)
+      ? 'moved-same-url'
       : kind;
   };
   const review: ReviewItem[] = Object.entries(drift.sources).flatMap(([source, { changes = [] }]) =>
@@ -1154,7 +1136,7 @@ export const renderDriftIssue = (
   const unattachedRows: OtherProblemRow[] = review
     .filter((item) => item.actions.length === 0)
     .map(({ kind, change: { operation, text, id: rule } }) => ({
-      problem: kind,
+      problem: REVIEW_LABELS[kind],
       operation: operation ? code(operation) : '—',
       details: `${text} (${code(rule)})`,
       fix: 'Refresh the artifacts, unless the connector depends on it',

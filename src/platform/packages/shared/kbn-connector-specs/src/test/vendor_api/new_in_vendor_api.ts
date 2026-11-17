@@ -8,30 +8,17 @@
  */
 
 import type { ActionDrift, ConnectorDrift, SpecChange } from './detect_drift';
-import { toFieldPath, within } from './detect_drift';
+import { within } from './detect_drift';
+import type { ParsedAddition } from './oasdiff_text';
+import { additionOf } from './oasdiff_text';
 
-/**
- * - `request-option`: a new property of the request body.
- * - `query-parameter`: a new query parameter.
- * - `request-value`: a new value or form of a request property, e.g. an enum value.
- * - `response-field`: a new property of the response.
- */
-export type AdditionKind =
-  | 'request-option'
-  | 'query-parameter'
-  | 'request-value'
-  | 'response-field';
+export type { AdditionKind } from './oasdiff_text';
 
 /** Something the vendor added to an operation the actions call. */
-export interface Addition {
+export interface Addition extends ParsedAddition {
   readonly source: string;
   /** `METHOD /path`. */
   readonly operation: string;
-  readonly kind: AdditionKind;
-  /** As field use paths are, or the parameter's name. */
-  readonly field: string;
-  /** For `request-value`, the new enum value, if it is one. */
-  readonly value?: string;
   /** The actions calling the operation. */
   readonly actions: readonly string[];
   /** Of those, the ones it reaches: that send it, or that pass the response field along. */
@@ -40,49 +27,16 @@ export interface Addition {
   readonly unknownFor: readonly string[];
 }
 
-const additionOf = ({
-  id,
-  kind,
-  text,
-}: SpecChange): Pick<Addition, 'kind' | 'field' | 'value'> | undefined => {
-  if (kind !== 'non-breaking') {
-    return undefined;
-  }
-  const match = (pattern: RegExp) => text.match(pattern) ?? undefined;
-  switch (id) {
-    case 'new-optional-request-property': {
-      const named = match(/request property `([^`]+)`/);
-      return named && { kind: 'request-option', field: toFieldPath(named[1]) };
-    }
-    case 'new-optional-request-parameter': {
-      const named = match(/`query` request parameter `([^`]+)`/);
-      return named && { kind: 'query-parameter', field: named[1] };
-    }
-    case 'request-property-enum-value-added': {
-      const named = match(/new `([^`]+)` enum value to the request property `([^`]+)`/);
-      return named && { kind: 'request-value', field: toFieldPath(named[2]), value: named[1] };
-    }
-    case 'request-property-one-of-added':
-    case 'request-property-any-of-added': {
-      const named = match(/to the `([^`]+)` request property/);
-      return named && { kind: 'request-value', field: toFieldPath(named[1]) };
-    }
-    case 'response-optional-property-added':
-    case 'response-required-property-added': {
-      const named = match(/property `([^`]+)` to the response/);
-      return named && { kind: 'response-field', field: toFieldPath(named[1]) };
-    }
-    default:
-      return undefined;
-  }
-};
+// Only a non-breaking change adds something; a breaking one needs review instead.
+const addedBy = ({ id, kind, text }: SpecChange): ParsedAddition | undefined =>
+  kind === 'non-breaking' ? additionOf(id, text) : undefined;
 
 // Whether an addition reaches the consumers of an action: the action sends the request property
 // or parameter, or copies or returns the part of the response that holds the field.
 const reaches = (
   action: ActionDrift,
   key: string,
-  { kind, field }: Pick<Addition, 'kind' | 'field'>
+  { kind, field }: Pick<ParsedAddition, 'kind' | 'field'>
 ): boolean => {
   const use = action.fieldUse?.[key];
   if (!use) {
@@ -107,7 +61,7 @@ export const newInVendorApi = (drift: ConnectorDrift): Addition[] => {
   const additions = new Map<string, Addition>();
   for (const [source, { changes = [] }] of Object.entries(drift.sources)) {
     for (const change of changes) {
-      const addition = change.operation ? additionOf(change) : undefined;
+      const addition = change.operation ? addedBy(change) : undefined;
       if (!addition || !change.operation) {
         continue;
       }

@@ -17,6 +17,12 @@ import { MANIFEST, OVERLAY, readOptional, snapshotFile } from './load_vendor_spe
 import { compareFields } from './compare_fields';
 import type { OperationLocation } from './locate_operation';
 import { locateOperation, serverUrls } from './locate_operation';
+import {
+  deprecatedPropertyOf,
+  isVerifiedByFieldUse,
+  isVerifiedByRunning,
+  namedComponentOf,
+} from './oasdiff_text';
 import type { RecordedFieldUse } from './record_actions';
 import type { VendorApiManifest } from './manifest';
 import { parseManifest } from './manifest';
@@ -188,8 +194,6 @@ const toSpecChange = (entry: OasdiffEntry): SpecChange => ({
   ...(entry.operation && entry.path ? { operation: `${entry.operation} ${entry.path}` } : {}),
 });
 
-const NAMED_COMPONENT = /`([^`]+)`/;
-
 /**
  * Whether a removal oasdiff reports between two snapshots is only the snapshot's: a snapshot keeps
  * just the operations the actions call, with what they reference, so a path, schema or security
@@ -204,7 +208,7 @@ const stillInSpec = ({ id, text, operation, path: entryPath }: OasdiffEntry, spe
     const item = paths[entryPath];
     return isRecord(item) && operation.toLowerCase() in item;
   }
-  const name = text.match(NAMED_COMPONENT)?.[1];
+  const name = namedComponentOf(text);
   const section =
     id === 'api-schema-removed'
       ? 'schemas'
@@ -234,41 +238,19 @@ const verdictOf = (
     ? 'vendor-drift'
     : 'healthy';
 
-// Breaking changes that running the actions against the latest spec verifies: requests are
-// validated against it, and so are their credentials and OAuth scopes.
-const VERIFIED_BY_RUNNING = /^(request-|new-(required|optional)-request-|api-security-)/;
-// Breaking changes that field use verifies: only the response body fields the actions read
-// matter, and those are compared one by one (`ActionDrift.fieldChanges`). Field use only sees
-// parsed JSON bodies, so changes to response headers, statuses and media types still need review.
-const VERIFIED_BY_FIELD_USE =
-  /^(response-(body|mediatype|((required|optional)-)?(write-only-)?property)-|api-schema-removed$)/;
-
 const fieldUseComplete = (drift: Omit<ConnectorDrift, 'outcome'>): boolean =>
   drift.actions !== undefined &&
   drift.actions.every(({ operations, tracked }) => operations.length === 0 || tracked === true);
 
+// A breaking change needs no review when running the actions verifies what it changed, or when
+// comparing the response fields they read does (`ActionDrift.fieldChanges`).
 const verifiedBy = ({ kind, id }: SpecChange, passes: boolean, fieldsCompared: boolean): boolean =>
   kind === 'non-breaking' ||
   (kind === 'breaking' &&
-    ((passes && VERIFIED_BY_RUNNING.test(id)) ||
-      (fieldsCompared && VERIFIED_BY_FIELD_USE.test(id))));
+    ((passes && isVerifiedByRunning(id)) || (fieldsCompared && isVerifiedByFieldUse(id))));
 
 const passesBoth = ({ snapshotProblems, latestProblems }: ActionDrift): boolean =>
   snapshotProblems.length === 0 && latestProblems !== undefined && latestProblems.length === 0;
-
-const DEPRECATED_PROPERTY = /^(request|response)-property-deprecated$/;
-// `allOf[#/components/schemas/Options]/waitFor`: oasdiff names the subschema a property is in.
-const COMPOSITION = /(?:allOf|anyOf|oneOf)\[[^\]]*\]\/?/g;
-
-/** A property path oasdiff names, as field use paths are: without the subschemas it is in. */
-export const toFieldPath = (oasdiffPath: string): string =>
-  oasdiffPath.replace(COMPOSITION, '').replace(/\/$/, '');
-
-// The property a deprecation names.
-const deprecatedPropertyOf = ({ id, text }: SpecChange): string | undefined => {
-  const named = DEPRECATED_PROPERTY.test(id) ? text.match(/property `([^`]+)`/)?.[1] : undefined;
-  return named === undefined ? undefined : toFieldPath(named);
-};
 
 /** Whether a field path is a parent path or inside it. */
 export const within = (field: string, parent: string): boolean =>
@@ -326,7 +308,7 @@ export const reviewOfChange = (
     if (callers.length === 0) {
       return { needsReview: !verifiedBy(change, passes, fieldsCompared), actions: [] };
     }
-    const property = deprecatedPropertyOf(change);
+    const property = deprecatedPropertyOf(change.id, change.text);
     const reviewers = callers
       .filter((action) => {
         const passing = passesBoth(action);
