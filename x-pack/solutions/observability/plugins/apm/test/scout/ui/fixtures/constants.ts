@@ -38,6 +38,11 @@ export const SERVICE_MAP_KUERY_OPBEANS_JAVA = 'service.name: "opbeans-java"';
 export const SERVICE_MAP_KUERY_OPBEANS = 'service.name: opbeans*';
 export const DEPENDENCY_POSTGRESQL = 'postgresql';
 export const EDGE_OPBEANS_JAVA_TO_POSTGRESQL = `${SERVICE_OPBEANS_JAVA}~>${DEPENDENCY_POSTGRESQL}`;
+
+/** Busy + quiet pair for service-map idle-fade a11y (see `service_map_a11y_idle.ts`). */
+export const SERVICE_MAP_A11Y_BUSY = 'map-a11y-busy';
+export const SERVICE_MAP_A11Y_QUIET = 'map-a11y-quiet';
+export const SERVICE_MAP_KUERY_A11Y_IDLE = `service.name: ("${SERVICE_MAP_A11Y_BUSY}" or "${SERVICE_MAP_A11Y_QUIET}")`;
 export const SERVICE_GO = 'service-go';
 export const SERVICE_NODE = 'service-node';
 export const OPBEANS_JAVA_INSTANCE = 'opbeans-java-prod-1';

@@ -124,6 +124,7 @@ describe('RulesAdapterV2', () => {
       await adapter.createRule('rule-1', createDefinition);
 
       const data = lastCreateCall(mock).data as {
+        id: string;
         kind: string;
         metadata: { name: string; tags: string[] };
         time_field: string;
@@ -144,7 +145,7 @@ describe('RulesAdapterV2', () => {
       });
       expect(data.grouping).toEqual({ fields: ['bucket'] });
       expectMetricSeriesBreach(data.query.base);
-      expect(lastCreateCall(mock).options).toEqual({ id: 'rule-1' });
+      expect(data.id).toBe('rule-1');
     });
 
     it('keeps the source id in the ownership tag, including dots', async () => {

@@ -41,7 +41,6 @@ export interface WorkflowYamlValidationContext {
   getPropertyHandler: GetStepPropertyHandler;
   esqlCallbacks: ESQLCallbacks;
   signal?: AbortSignal;
-  warnIgnoredKibanaFetcher?: boolean;
   isManaged: boolean;
 }
 
@@ -80,7 +79,6 @@ export async function collectFullWorkflowYamlValidationResults({
     getPropertyHandler,
     esqlCallbacks,
     signal,
-    warnIgnoredKibanaFetcher,
   } = context;
 
   const connectorIdItems = collectAllConnectorIds(yamlDocument, lineCounter);
@@ -98,7 +96,6 @@ export async function collectFullWorkflowYamlValidationResults({
     workflowLookup,
     workflowGraph,
     workflowDefinition,
-    warnIgnoredKibanaFetcher,
   });
 
   if (connectorTypes.status === 'ready') {

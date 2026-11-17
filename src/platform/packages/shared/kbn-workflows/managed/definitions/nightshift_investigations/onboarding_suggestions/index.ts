@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import ONBOARDING_SUGGESTIONS_WORKFLOW_YAML from './onboarding_suggestions_workflow.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
+import { readManagedWorkflowYaml } from '../../read_managed_workflow_yaml';
 
 export const NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID =
   'system-nightshift-onboarding-suggestions';
@@ -23,7 +23,9 @@ export const NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW = {
   pluginId: 'nightshiftInvestigations',
   version: 8,
   billable: false,
-  yaml: ONBOARDING_SUGGESTIONS_WORKFLOW_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'onboarding_suggestions_workflow.yaml');
+  },
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',

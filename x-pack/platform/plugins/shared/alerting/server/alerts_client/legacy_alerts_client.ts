@@ -16,6 +16,7 @@ import { logAlerts } from '../task_runner/log_alerts';
 import type {
   AlertInstanceContext,
   AlertInstanceState,
+  RawAlertInstance,
   WithoutReservedActionGroups,
 } from '../types';
 import type { RulesSettingsFlappingProperties } from '../../common/rules_settings';
@@ -261,6 +262,12 @@ export class LegacyAlertsClient<
       this.processedAlerts.trackedRecoveredAlerts,
       shouldOptimizeTaskState
     );
+  }
+
+  // Tracked alerts are built from the task state after it is reconciled with the alert
+  // documents, and processing never changes them.
+  public getRawTrackedActiveAlert(id: string): RawAlertInstance | undefined {
+    return this.trackedAlerts.active[id]?.toRaw();
   }
 
   public determineFlappingAlerts() {

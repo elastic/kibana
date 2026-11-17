@@ -12,7 +12,12 @@ import { IconChartHeatmap } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { Visualization } from '@kbn/lens-common';
 import type { HeatmapVisualizationState } from './types';
-import { CHART_SHAPES, HEATMAP_GRID_FUNCTION, LEGEND_FUNCTION } from './constants';
+import {
+  CHART_SHAPES,
+  HEATMAP_GRID_FUNCTION,
+  LEGEND_FUNCTION,
+  NUMERIC_DATA_TYPES,
+} from './constants';
 
 export const getSuggestions: Visualization<HeatmapVisualizationState>['getSuggestions'] = ({
   table,
@@ -107,13 +112,19 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
     newState.valueAccessor = numberMetric.columnId;
   }
 
-  const [histogram, ordinal] = partition(groups, (g) => g.operation.scale === 'interval');
+  // ES|QL histogram distribution: BUCKET over a histogram field returns a number_range type
+  const hasRangeBucket = groups.some((g) => g.operation.dataType === 'number_range');
+
+  const [histogram, ordinal] = partition(
+    groups,
+    (g) => g.operation.scale === 'interval' || (hasRangeBucket && g.operation.dataType === 'date')
+  );
 
   newState.xAccessor = histogram[0]?.columnId || ordinal[0]?.columnId;
   newState.yAccessor = groups.find((g) => g.columnId !== newState.xAccessor)?.columnId;
 
   const yColumn = groups.find((g) => g.columnId === newState.yAccessor);
-  if (yColumn && yColumn.operation.dataType === 'number') {
+  if (yColumn && NUMERIC_DATA_TYPES.includes(yColumn.operation.dataType)) {
     newState.gridConfig = {
       ...newState.gridConfig,
       ySortPredicate: 'desc',
@@ -122,7 +133,7 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
 
   const hasDatehistogram = groups.some((group) => group.operation.dataType === 'date');
 
-  if (!hasDatehistogram) {
+  if (!hasDatehistogram || hasRangeBucket) {
     if (newState.xAccessor) {
       score += 0.3;
     }

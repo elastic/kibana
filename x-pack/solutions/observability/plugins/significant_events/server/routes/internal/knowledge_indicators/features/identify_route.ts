@@ -33,6 +33,8 @@ import type { SignificantEventsMaintenanceService } from '../../../../lib/mainte
 import { stateBlocksNewActivity } from '../../../../../common/maintenance/state_machine';
 import { sourceToAnalysisTarget } from '../../../../lib/significant_events/source_to_analysis_target';
 import { installFeatureIdentificationAgent } from '../../../../agent_builder/agents/feature_identification';
+import { getWorkflowExecutionIdFromRequest } from '../../../../lib/telemetry/ebt/workflow_execution_id';
+import { trackTelemetryBestEffort } from '../../../../lib/telemetry/track_telemetry_best_effort';
 import { createSignificantEventsAvailability } from '../../../../agent_builder/tools/significant_events_availability';
 
 const getSerializedByteLength = (value: unknown) =>
@@ -184,6 +186,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
       body: z.object({
         connectorId: z.string().max(MAX_ID_LENGTH).optional(),
         runId: z.string().max(MAX_ID_LENGTH).optional(),
+        parentWorkflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
         iteration: z.number().optional(),
         documents: inferenceDocumentsSchema,
         samplingTelemetry: z.object({
@@ -224,6 +227,12 @@ const identifyInferredFeaturesRoute = createServerRoute({
       maxExcludedFeaturesInPrompt,
       maxPreviouslyIdentifiedFeatures,
     } = params.body;
+    const workflowExecutionId = getWorkflowExecutionIdFromRequest(request);
+    const parentWorkflowExecutionId = params.body.parentWorkflowExecutionId?.trim();
+    const workflowProvenance = {
+      workflow_execution_id: workflowExecutionId,
+      parent_workflow_execution_id: parentWorkflowExecutionId,
+    };
     const resolvedRunId = runId?.trim() || uuidv4();
     const { totalFilters, filtersCapped, hasFilteredDocuments } = samplingTelemetry;
 
@@ -270,7 +279,19 @@ const identifyInferredFeaturesRoute = createServerRoute({
           maxExcludedFeaturesInPrompt,
           maxPreviouslyIdentifiedFeatures,
         },
-        trackFeaturesIdentified: (data) => telemetry.trackFeaturesIdentified(data),
+        trackFeaturesIdentified: (data) =>
+          trackTelemetryBestEffort({
+            logger: routeLogger,
+            description: 'features identified telemetry',
+            track: () =>
+              telemetry.trackFeaturesIdentified(
+                {
+                  ...data,
+                  ...workflowProvenance,
+                },
+                request
+              ),
+          }),
       });
 
       await bootstrapSyncWorkflow({
@@ -288,23 +309,30 @@ const identifyInferredFeaturesRoute = createServerRoute({
         }`
       );
 
-      telemetry.trackFeaturesIdentified(
-        buildTelemetry(
-          {
-            run_id: resolvedRunId,
-            connector_id: connectorId,
-            iteration: iteration ?? 1,
-            source_id: source.id,
-            docs_count: documents.length,
-            excluded_features_count: 0,
-            total_filters: totalFilters,
-            filters_capped: filtersCapped,
-            has_filtered_documents: hasFilteredDocuments,
-          },
-          Date.now() - now,
-          { state: 'failure' }
-        )
-      );
+      trackTelemetryBestEffort({
+        logger: routeLogger,
+        description: 'features identified telemetry',
+        track: () =>
+          telemetry.trackFeaturesIdentified(
+            buildTelemetry(
+              {
+                ...workflowProvenance,
+                run_id: resolvedRunId,
+                connector_id: connectorId,
+                iteration: iteration ?? 1,
+                source_id: source.id,
+                docs_count: documents.length,
+                excluded_features_count: 0,
+                total_filters: totalFilters,
+                filters_capped: filtersCapped,
+                has_filtered_documents: hasFilteredDocuments,
+              },
+              Date.now() - now,
+              { state: 'failure' }
+            ),
+            request
+          ),
+      });
 
       if (isInferenceProviderError(error)) {
         const connector = await inferenceClient
