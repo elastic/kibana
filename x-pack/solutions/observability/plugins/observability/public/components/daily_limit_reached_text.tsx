@@ -9,38 +9,11 @@ import React from 'react';
 import moment from 'moment';
 import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  isHttpFetchError,
-  type IHttpFetchError,
-  type ResponseErrorBody,
-} from '@kbn/core-http-browser';
 import { getEbtProps } from '@kbn/ebt-click';
-
-const DAILY_LIMIT_STATUS_CODE = 429;
 
 /** The user intends to change the daily investigation limits after reaching one. */
 const CHANGE_INVESTIGATION_LIMITS_EBT_ACTION = 'changeInvestigationLimits';
 const INVESTIGATION_START_FAILURE_EBT_ELEMENT = 'investigationStartFailureToast';
-
-/** Kibana routes answer errors with a `ResponseErrorBody`. */
-const isKibanaHttpError = (error: unknown): error is IHttpFetchError<ResponseErrorBody> =>
-  isHttpFetchError(error);
-
-/**
- * The reason a start failed. An HTTP error carries the server's message in its body: its own
- * message is the status text, which is empty over HTTP/2.
- */
-export const getStartFailureMessage = (error: unknown): string => {
-  if (isKibanaHttpError(error) && error.body?.message) {
-    return error.body.message;
-  }
-  return error instanceof Error ? error.message : String(error);
-};
-
-/** Whether a start was refused because a daily investigation limit was reached. */
-export const isDailyLimitError = (error: unknown): boolean =>
-  isKibanaHttpError(error) &&
-  (error.response?.status ?? error.body?.statusCode) === DAILY_LIMIT_STATUS_CODE;
 
 export interface DailyLimitReachedTextProps {
   message: string;
@@ -50,6 +23,7 @@ export interface DailyLimitReachedTextProps {
   changeLimitsUrl?: string;
 }
 
+/** Toast text for a start refused by a daily investigation limit. */
 export function DailyLimitReachedText({
   message,
   resetsAt,

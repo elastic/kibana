@@ -26,11 +26,8 @@ import { useQuery, useQueryClient } from '@kbn/react-query';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { useKibana } from '../utils/kibana_react';
 import { getInvestigationsClient } from '../services/investigations_client';
-import {
-  DailyLimitReachedText,
-  getStartFailureMessage,
-  isDailyLimitError,
-} from './investigation_start_failure';
+import { getStartFailureMessage, isDailyLimitError } from '../utils/investigation_start_failure';
+import { DailyLimitReachedText } from '../components/daily_limit_reached_text';
 
 export const VIEWED_INVESTIGATIONS_STORAGE_KEY = 'xpack.observability.viewedInvestigationIds';
 export const MAX_VIEWED_INVESTIGATIONS = 200;
