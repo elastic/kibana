@@ -80,8 +80,11 @@ steps:
                 # would strand other Spaces' pending duplicates on skip_already_extracted.
                 - term:
                     lineage.extraction_method: pending
-                - term:
-                    lineage.extraction_method: workflow_v4_rejected
+                # The wildcard covers any future workflow_vN_rejected value; the editor schema requires
+                # the object form for wildcard and for non-string term values.
+                - wildcard:
+                    lineage.extraction_method:
+                      value: "*_rejected"
                 - term:
                     extracted.gate.is_intelligence: false
                 - ids:
@@ -314,8 +317,11 @@ steps:
                       - "{{ foreach.item._id }}"
                 # Hard-rejected reports keep stale ioc_set_hash / iocs for forensics;
                 # they must not surface as related intelligence.
-                - term:
-                    lineage.extraction_method: workflow_v4_rejected
+                # The wildcard covers any future workflow_vN_rejected value; the editor schema requires
+                # the object form for wildcard and for non-string term values.
+                - wildcard:
+                    lineage.extraction_method:
+                      value: "*_rejected"
                 - term:
                     extracted.gate.is_intelligence: false
               should:

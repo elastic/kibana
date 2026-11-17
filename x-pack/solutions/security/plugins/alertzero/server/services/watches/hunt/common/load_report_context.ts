@@ -32,9 +32,9 @@ export interface ReportHuntContext {
   /**
    * True when the enrich workflow has not finished with the report: its
    * `lineage.extraction_method` is absent, blank or `pending`, so `extracted.*` is not
-   * written yet and a hunt would have nothing to search. `workflow_v4_rejected` is
-   * deliberately not pending: a rejected report has been through extraction and must
-   * retire.
+   * written yet and a hunt would have nothing to search. `*_rejected` values (today's
+   * writer still emits `workflow_v4_rejected`) are deliberately not pending: a rejected
+   * report has been through extraction and must retire.
    */
   extraction_pending: boolean;
   /**

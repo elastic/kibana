@@ -151,9 +151,10 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
       with?: { query?: { bool?: { must_not?: unknown[] } } };
     };
     const mustNot = step.with?.query?.bool?.must_not ?? [];
+    // The wildcard covers future pipeline versions.
     expect(mustNot).toEqual(
       expect.arrayContaining([
-        { term: { 'lineage.extraction_method': 'workflow_v4_rejected' } },
+        { wildcard: { 'lineage.extraction_method': { value: '*_rejected' } } },
         { term: { 'extracted.gate.is_intelligence': false } },
       ])
     );
@@ -171,9 +172,10 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
       with?: { query?: { bool?: { must_not?: unknown[] } } };
     };
     const mustNot = step.with?.query?.bool?.must_not ?? [];
+    // The wildcard covers future pipeline versions.
     expect(mustNot).toEqual(
       expect.arrayContaining([
-        { term: { 'lineage.extraction_method': 'workflow_v4_rejected' } },
+        { wildcard: { 'lineage.extraction_method': { value: '*_rejected' } } },
         { term: { 'extracted.gate.is_intelligence': false } },
       ])
     );

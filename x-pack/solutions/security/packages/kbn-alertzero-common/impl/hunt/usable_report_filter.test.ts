@@ -5,16 +5,29 @@
  * 2.0.
  */
 
-import { HUNT_USABLE_FILTER, INDICATOR_ELIGIBLE_FILTER } from './usable_report_filter';
+import {
+  HUNT_USABLE_FILTER,
+  INDICATOR_ELIGIBLE_FILTER,
+  isRejectedExtractionMethod,
+} from './usable_report_filter';
 
 describe('HUNT_USABLE_FILTER', () => {
   it.each([
     ['lineage.extraction_method', 'pending'],
-    ['lineage.extraction_method', 'workflow_v4_rejected'],
     ['extracted.gate.is_intelligence', false],
   ])('returns a must_not term excluding %s %s', (field, value) => {
     expect(HUNT_USABLE_FILTER).toMatchObject({
       bool: { must_not: expect.arrayContaining([{ term: { [field]: value } }]) },
+    });
+  });
+
+  it('returns a must_not wildcard excluding any *_rejected extraction method', () => {
+    expect(HUNT_USABLE_FILTER).toMatchObject({
+      bool: {
+        must_not: expect.arrayContaining([
+          { wildcard: { 'lineage.extraction_method': { value: '*_rejected' } } },
+        ]),
+      },
     });
   });
 
@@ -28,6 +41,16 @@ describe('HUNT_USABLE_FILTER', () => {
 
   it('returns no nested clause', () => {
     expect(JSON.stringify(HUNT_USABLE_FILTER)).not.toContain('"nested"');
+  });
+});
+
+describe('isRejectedExtractionMethod', () => {
+  it.each(['workflow_v4_rejected', 'workflow_v5_rejected'])('returns true for %p', (method) => {
+    expect(isRejectedExtractionMethod(method)).toBe(true);
+  });
+
+  it.each(['workflow_v4', 'pending', '', undefined])('returns false for %p', (method) => {
+    expect(isRejectedExtractionMethod(method)).toBe(false);
   });
 });
 
