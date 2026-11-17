@@ -75,6 +75,25 @@ describe('createStackTraceResolver', () => {
     ).toBe(JSON.stringify({ stack: 'Error: problem\n    at src/a.ts:3:5' }));
   });
 
+  it('keeps the text between locations', () => {
+    const frames = [
+      '    at /usr/share/kibana/node_modules/@kbn/b/b.js:1:1',
+      '    at /usr/share/kibana/node_modules/@kbn/a/a.js:1:1',
+      '    at async /usr/share/kibana/node_modules/@kbn/a/a.js:1:1',
+    ];
+    const log = JSON.stringify({
+      message: 'failed at startup loading /usr/share/kibana/node_modules/@kbn/a/a.js:1:1',
+      stack: `Error: problem\n${frames.join('\n')}`,
+    });
+
+    expect(createStackTraceResolver(kibanaDir)(log)).toBe(
+      JSON.stringify({
+        message: 'failed at startup loading src/a.ts:3:5',
+        stack: `Error: problem\n${frames[0]}\n    at src/a.ts:3:5\n    at async src/a.ts:3:5`,
+      })
+    );
+  });
+
   it('resolves locations in JSON, keeping its syntax', () => {
     const log = JSON.stringify({
       stack: 'Error: problem\n    at C:\\kibana\\node_modules\\@kbn\\a\\a.js:1:1',

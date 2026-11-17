@@ -21,11 +21,12 @@ const bundleLocation = (prefix: string) =>
 
 // Locations of server files and browser bundles, capturing the path relative to `dir`, line and
 // column. Starting after whitespace, `(` or a quote leaves JSON intact, and bounded paths keep long
-// text fast to match. Install paths with spaces are matched from a frame's `(` or `at `.
+// text fast to match. Install paths with spaces are matched within a frame, from a path root after
+// its `(` or `at `.
 const LOCATIONS = [
   {
     dir: '',
-    re: /(?:(?<=\(| at (?:async )?)(?!async )[^()\n"']*|(?<![^\s("'])[^\s("']*)(node_modules[\\/]+@kbn[\\/]+[^\s():"']{1,1024}?\.js):(\d+):(\d+)/g,
+    re: /(?:(?<=\(| at | at async )(?:[A-Za-z]:|[\\/])(?:(?! at )[^()\n"'])*|(?<![^\s("'])[^\s("']*)(node_modules[\\/]+@kbn[\\/]+[^\s():"']{1,1024}?\.js):(\d+):(\d+)/g,
   },
   // Shared deps are served from their packages, so they're matched before other bundles.
   ...['npm', 'src'].map((name) => ({
