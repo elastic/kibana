@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+
 import { filter, map } from 'lodash';
 
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
@@ -25,6 +27,8 @@ import {
   buildScheduleResponseSlice,
   buildExecutionDefaultsResponseSlice,
   stripPerQueryRruleFields,
+  computeEffectivePolicyIds,
+  fetchAllPackagePolicies,
 } from './utils';
 import { findPackResponseSchema } from './response_schemas';
 
@@ -90,6 +94,30 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           ...(filters.length && { filter: filters.join(' AND ') }),
         });
 
+        let effectivePolicyIds: Map<string, string[]> | undefined;
+        try {
+          const spaceId = osqueryContext?.service?.getActiveSpace
+            ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
+            : DEFAULT_SPACE_ID;
+          const packagePolicies = await fetchAllPackagePolicies(
+            osqueryContext.service.getPackagePolicyService(),
+            spaceScopedClient
+          );
+          effectivePolicyIds = await computeEffectivePolicyIds(
+            soClientResponse.saved_objects.map(({ attributes }) => attributes.name),
+            spaceId,
+            packagePolicies,
+            {
+              soClient: spaceScopedClient,
+              agentPolicyService: osqueryContext.service.getAgentPolicyService(),
+            }
+          );
+        } catch (error) {
+          osqueryContext.logFactory
+            .get('pack')
+            .warn(`Failed to compute effective pack policy ids: ${error.message}`);
+        }
+
         const isRruleFeatureEnabled = osqueryContext.experimentalFeatures.rruleScheduling;
 
         const packSavedObjects: PackResponseData[] = map(soClientResponse.saved_objects, (pack) => {
@@ -118,6 +146,9 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             updated_by_profile_uid: attributes.updated_by_profile_uid,
             saved_object_id: pack.id,
             policy_ids: policyIds,
+            ...(effectivePolicyIds && {
+              effective_policy_ids: effectivePolicyIds.get(attributes.name),
+            }),
             read_only: attributes.version !== undefined && osqueryPackAssetReference,
             // Discriminated find response — see buildScheduleResponseSlice.
             ...buildScheduleResponseSlice(attributes, isRruleFeatureEnabled),

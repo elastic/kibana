@@ -615,6 +615,8 @@ paths:
                       - created_at: '2025-02-26T13:37:30.452Z'
                         created_by: elastic
                         description: My pack
+                        effective_policy_ids:
+                          - my_policy_id
                         enabled: true
                         name: my_pack
                         queries:
@@ -745,6 +747,8 @@ paths:
                       created_at: '2025-02-26T13:37:30.452Z'
                       created_by: elastic
                       description: My pack
+                      effective_policy_ids:
+                        - my_policy_id
                       enabled: true
                       name: my_pack
                       policy_ids:
@@ -2587,6 +2591,12 @@ components:
               type: string
             description:
               $ref: '#/components/schemas/PackDescriptionOrUndefined'
+            effective_policy_ids:
+              description: Live agent-policy owners of integrations carrying this pack. Absent
+                when Fleet state is unavailable.
+              items:
+                type: string
+              type: array
             enabled:
               $ref: '#/components/schemas/EnabledOrUndefined'
             interval:
@@ -2683,6 +2693,12 @@ components:
                 type: string
               description:
                 $ref: '#/components/schemas/PackDescriptionOrUndefined'
+              effective_policy_ids:
+                description: Live agent-policy owners of integrations carrying this pack. Absent
+                  when Fleet state is unavailable.
+                items:
+                  type: string
+                type: array
               enabled:
                 $ref: '#/components/schemas/EnabledOrUndefined'
               interval:

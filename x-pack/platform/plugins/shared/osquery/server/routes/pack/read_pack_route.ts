@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+
 import { filter, map, mapValues } from 'lodash';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { type IRouter, SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -22,6 +24,8 @@ import {
   buildScheduleResponseSlice,
   buildExecutionDefaultsResponseSlice,
   stripPerQueryRruleFields,
+  computeEffectivePolicyIds,
+  fetchAllPackagePolicies,
 } from './utils';
 import { convertShardsToObject } from '../utils';
 import type { ReadPackResponseData } from './types';
@@ -88,6 +92,30 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
         const osqueryPackAssetReference = !!filter(references, ['type', 'osquery-pack-asset'])
           .length;
 
+        let effectivePolicyIds: Map<string, string[]> | undefined;
+        try {
+          const spaceId = osqueryContext?.service?.getActiveSpace
+            ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
+            : DEFAULT_SPACE_ID;
+          const packagePolicies = await fetchAllPackagePolicies(
+            osqueryContext.service.getPackagePolicyService(),
+            spaceScopedClient
+          );
+          effectivePolicyIds = await computeEffectivePolicyIds(
+            [attributes.name],
+            spaceId,
+            packagePolicies,
+            {
+              soClient: spaceScopedClient,
+              agentPolicyService: osqueryContext.service.getAgentPolicyService(),
+            }
+          );
+        } catch (error) {
+          osqueryContext.logFactory
+            .get('pack')
+            .warn(`Failed to compute effective pack policy ids: ${error.message}`);
+        }
+
         const isRruleFeatureEnabled = osqueryContext.experimentalFeatures.rruleScheduling;
 
         const data: ReadPackResponseData = {
@@ -117,6 +145,9 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           ),
           shards: convertShardsToObject(attributes.shards),
           policy_ids: policyIds,
+          ...(effectivePolicyIds && {
+            effective_policy_ids: effectivePolicyIds.get(attributes.name),
+          }),
           read_only: attributes.version !== undefined && osqueryPackAssetReference,
           // Discriminated read response — see buildScheduleResponseSlice.
           ...buildScheduleResponseSlice(attributes, isRruleFeatureEnabled),

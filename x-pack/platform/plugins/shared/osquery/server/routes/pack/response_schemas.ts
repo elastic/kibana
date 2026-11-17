@@ -73,6 +73,7 @@ const packDataSchema = schema.object(
     updated_at: schema.maybe(schema.string()),
     updated_by: schema.maybe(schema.nullable(schema.string())),
     updated_by_profile_uid: schema.maybe(schema.nullable(schema.string())),
+    effective_policy_ids: schema.maybe(schema.arrayOf(schema.string())),
     policy_ids: schema.maybe(
       schema.arrayOf(schema.string({ maxLength: 1024 }), { maxSize: 10000 })
     ),
@@ -124,6 +125,7 @@ export const readPackResponseSchema = schema.object({
       updated_at: schema.maybe(schema.string()),
       updated_by: schema.maybe(schema.nullable(schema.string())),
       updated_by_profile_uid: schema.maybe(schema.nullable(schema.string())),
+      effective_policy_ids: schema.maybe(schema.arrayOf(schema.string())),
       policy_ids: schema.maybe(
         schema.arrayOf(schema.string({ maxLength: 1024 }), { maxSize: 10000 })
       ),
