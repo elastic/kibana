@@ -135,8 +135,13 @@ const fails = (count: number): string => (count === 1 ? 'fails' : 'fail');
 
 const code = (text: string): string => `\`${text.replace(/`/g, "'")}\``;
 
-// A table cell can't hold a pipe or a line break.
-const cell = (text: string): string => text.replace(/\|/g, '\\|').replace(/\s*\n\s*/g, ' ');
+// A table cell can't hold a pipe or a line break. GitHub reads a backslash and the character after
+// it as one, so the backslashes before a pipe are doubled, and the pipe escaped after them. Other
+// backslashes stay as they are, as code spans in the cell show them literally.
+const cell = (text: string): string =>
+  text
+    .replace(/(\\*)\|/g, (_, backslashes: string) => `${backslashes}${backslashes}\\|`)
+    .replace(/\s*\n\s*/g, ' ');
 
 const listed = (items: readonly string[], max = MAX_LISTED): string => {
   const shown = items.slice(0, max);

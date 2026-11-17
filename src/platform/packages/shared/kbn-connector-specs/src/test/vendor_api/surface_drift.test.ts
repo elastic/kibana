@@ -394,6 +394,29 @@ const moved: ConnectorDrift = {
 };
 
 describe('renderDriftIssue', () => {
+  it('keeps a table cell whole when its text has a backslash before a pipe', () => {
+    const [search] = drifted.actions ?? [];
+    const { body } = renderDriftIssue(
+      {
+        ...drifted,
+        actions: [
+          {
+            ...search,
+            latestProblems: ['GET /items breaks the spec: name must match a\\|b\\\\|c'],
+          },
+        ],
+      },
+      { owners: [] }
+    );
+    const row = body.split('\n').find((line) => line.startsWith('| `search` |')) ?? '';
+    // GitHub reads a backslash and the character after it as one, so only a pipe that doesn't
+    // follow an odd number of backslashes ends a cell.
+    const cells = row.slice(1, -1).match(/(?:\\.|[^|\\])+/g);
+
+    expect(cells).toHaveLength(4);
+    expect(cells?.[3]).toContain('a\\\\\\|b\\\\\\\\\\|c');
+  });
+
   it('says that paths moved into the server URL, why the check fails and how to fix it', () => {
     const { title, body } = renderDriftIssue(moved, { owners: [] });
 
