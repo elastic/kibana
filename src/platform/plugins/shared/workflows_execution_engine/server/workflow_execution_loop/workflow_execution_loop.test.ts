@@ -87,6 +87,21 @@ describe('workflowExecutionLoop', () => {
     expect(publishWorkflowExecutionFinished).not.toHaveBeenCalled();
   });
 
+  it('does not publish a waiting_for_input save', async () => {
+    const params = createParams();
+    params.workflowRuntime.getWorkflowExecution.mockReturnValue({
+      id: 'exec-1',
+      workflowId: 'wf-1',
+      spaceId: 'default',
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+      isTestRun: false,
+    });
+
+    await workflowExecutionLoop(params as any);
+
+    expect(publishWorkflowExecutionFinished).not.toHaveBeenCalled();
+  });
+
   it.each([
     ExecutionStatus.COMPLETED,
     ExecutionStatus.FAILED,
