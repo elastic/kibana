@@ -98,7 +98,6 @@
     "**/baseline-browser-mapping": "2.9.14",
     "**/chokidar": "3.5.3",
     "**/esbuild": "0.28.1",
-    "**/fast-xml-parser": "5.5.7",
     "**/hoist-non-react-statics": "3.3.2",
     "**/isomorphic-fetch/node-fetch": "2.7.0",
     "**/qs": "6.17.0",
