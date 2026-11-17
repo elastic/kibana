@@ -73,8 +73,6 @@ function createChartLayoutTest(alertIndex: string, config: AlertTestConfig) {
 
 test.setTimeout(120_000);
 
-// TODO(scout-arch): Stateful-only with no recorded reason. Explain why this suite cannot run on
-// serverless, or update its tags so that it does.
 test.describe('Alert details - Chart layout', () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsAdmin();
