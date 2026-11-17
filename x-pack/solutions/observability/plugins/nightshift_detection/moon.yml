@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/licensing-plugin'
   - '@kbn/nightshift-shared'
+  - '@kbn/spaces-plugin'
   - '@kbn/zod'
 tags:
   - plugin

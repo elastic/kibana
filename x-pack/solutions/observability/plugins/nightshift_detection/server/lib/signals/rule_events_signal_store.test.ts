@@ -11,6 +11,7 @@ import {
   httpServerMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { RuleEventsSignalStore } from './rule_events_signal_store';
 import { wrapReading } from './wrap_reading';
 import type { DetectionSignalReading } from '../strategies/types';
@@ -47,8 +48,11 @@ function createSignal(reading: DetectionSignalReading = READING): DetectionSigna
   return result.signal;
 }
 
-function createStore() {
+function createStore({ requestSpaceId = 'default' }: { requestSpaceId?: string } = {}) {
   const createSignalEvent = jest.fn();
+  const spaces = {
+    spacesService: { getSpaceId: jest.fn().mockReturnValue(requestSpaceId) },
+  } as unknown as SpacesPluginStart;
   const alerting = {
     getAlertEventsClientWithRequest: jest.fn().mockResolvedValue({ createSignalEvent }),
   } as unknown as AlertingServerStart;
@@ -57,6 +61,7 @@ function createStore() {
   const store = new RuleEventsSignalStore(
     httpServerMock.createKibanaRequest(),
     alerting,
+    spaces,
     esClient,
     logger
   );
@@ -91,6 +96,19 @@ describe('RuleEventsSignalStore', () => {
         written: 1,
         failures: [{ fingerprint: 'cart', reason: 'invalid signal' }],
       });
+    });
+
+    it('refuses a batch with a signal of another space before writing anything', async () => {
+      const { store, createSignalEvent } = createStore({ requestSpaceId: 'other' });
+
+      const result = await store.write([
+        createSignal(),
+        createSignal({ ...READING, fingerprint: 'cart' }),
+      ]);
+
+      expect(createSignalEvent).not.toHaveBeenCalled();
+      expect(result.written).toBe(0);
+      expect(result.failures).toHaveLength(2);
     });
 
     it('fails a signal that Alerting stored in another series than the one it was wrapped for', async () => {

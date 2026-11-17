@@ -10,6 +10,7 @@ import type { AlertingServerStart } from '@kbn/alerting-v2-plugin/server';
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { Logger as CoreLogger, PluginStart } from '@kbn/core-di';
 import { Request } from '@kbn/core-di-server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { inject, injectable } from 'inversify';
 import {
   DETECTION_SIGNAL_SOURCE,
@@ -52,19 +53,30 @@ export class RuleEventsSignalStore implements DetectionSignalStore {
     @inject(Request) private readonly request: KibanaRequest,
     @inject(PluginStart<AlertingServerStart>('alertingVTwo'))
     private readonly alerting: AlertingServerStart,
+    @inject(PluginStart<SpacesPluginStart>('spaces')) private readonly spaces: SpacesPluginStart,
     @inject(DetectionEngineSystemClient) private readonly esClient: ElasticsearchClient,
     @inject(CoreLogger) private readonly logger: Logger
   ) {}
 
   /**
    * Writes the signals, at most {@link WRITE_CONCURRENCY} at a time, and reports the ones that
-   * failed. A signal stored under another series than the one it was wrapped for counts as
-   * failed: the request's space is not the signal's space.
+   * failed. Alerting v2 stores a signal in the space of the request, so a batch with a signal of
+   * another space is refused before anything is written. A signal stored under another series
+   * than the one it was wrapped for still counts as failed, as a last check.
    */
   public async write(signals: DetectionSignal[]): Promise<WriteSignalsResult> {
     const failures: WriteSignalsResult['failures'] = [];
     if (signals.length === 0) {
       return { written: 0, failures };
+    }
+
+    const requestSpaceId = this.spaces.spacesService.getSpaceId(this.request);
+    if (signals.some((signal) => signal.space_id !== requestSpaceId)) {
+      const reason = `the request is in space ${requestSpaceId}, and a signal of the batch is not`;
+      return {
+        written: 0,
+        failures: signals.map((signal) => ({ fingerprint: signal.data.fingerprint, reason })),
+      };
     }
 
     const client = await this.alerting.getAlertEventsClientWithRequest(this.request);

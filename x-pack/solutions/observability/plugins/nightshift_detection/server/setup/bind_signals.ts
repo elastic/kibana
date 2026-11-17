@@ -10,10 +10,11 @@ import { RuleEventsSignalStore } from '../lib/signals/rule_events_signal_store';
 import { DetectionSignalStore } from '../lib/signals/signal_store';
 
 /**
- * Binds the signal store to `.rule-events`. The store is not a singleton: it writes with the
- * `Request` of the tick scope it is resolved in, so it must be resolved from that scope.
+ * Binds the signal store to `.rule-events`. Core's container binds in singleton scope unless told
+ * otherwise, and the store holds the `Request` of the tick that resolved it, so it is bound in
+ * request scope: every tick scope gets its own.
  */
 export function bindSignals({ bind }: ContainerModuleLoadOptions): void {
-  bind(RuleEventsSignalStore).toSelf();
+  bind(RuleEventsSignalStore).toSelf().inRequestScope();
   bind(DetectionSignalStore).toService(RuleEventsSignalStore);
 }

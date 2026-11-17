@@ -10,6 +10,7 @@ import type { AlertingServerStart } from '@kbn/alerting-v2-plugin/server';
 import { ALERT_EVENTS_MAPPINGS } from '@kbn/alerting-v2-schemas';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import type { DetectionSignal } from '../../../../common/detection_signal';
@@ -108,6 +109,7 @@ describe('RuleEventsSignalStore reading from .rule-events', () => {
     store = new RuleEventsSignalStore(
       httpServerMock.createKibanaRequest(),
       {} as AlertingServerStart,
+      {} as SpacesPluginStart,
       esClient,
       loggingSystemMock.createLogger()
     );

@@ -18,7 +18,11 @@ export interface WriteSignalsResult {
 
 /** Where detection signals are kept. */
 export interface DetectionSignalStore {
-  /** Writes the signals in one bulk call. A rejected signal is reported, not thrown. */
+  /**
+   * Writes the signals. A rejected signal is reported, not thrown. A write has no document id, so
+   * a window written again, after a crash, stores its signals again; readers must count a reading
+   * once per series and bucket start, as `readHistory` does.
+   */
   write(signals: DetectionSignal[]): Promise<WriteSignalsResult>;
 
   /**
@@ -26,7 +30,7 @@ export interface DetectionSignalStore {
    * starts in `[from, to)` (epoch milliseconds), grouped by fingerprint, oldest first. Readings of
    * another version are left out: a version is bumped when what a reading means changes, so they
    * are not a baseline. Filtered on the bucket start, never on `@timestamp`, because a reading is
-   * written after its bucket ends. A reading stored twice, after a rollover, is returned once.
+   * written after its bucket ends. A reading stored twice is returned once.
    * When more than a read can return match, the newest are kept.
    */
   readHistory(params: {
