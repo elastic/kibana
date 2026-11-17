@@ -210,9 +210,15 @@ interface PersonaRubricToolCall {
   results?: unknown;
 }
 
+/** The shortest a fitted text can get: itself when shorter than the marker, else the marker. */
+const floorChars = (texts: ReadonlyArray<string | undefined>): number =>
+  texts.reduce((sum, text) => sum + Math.min(text?.length ?? 0, TRUNCATION_MARKER.length), 0);
+
 /**
  * Shares the budget across texts so one huge text cannot crowd out the others:
- * short texts keep their full length and pass their unused share on.
+ * short texts keep their full length and pass their unused share on. Every text
+ * keeps at least its floor, so the result stays within `budget` whenever the
+ * budget covers `floorChars(texts)`.
  */
 const fitTexts = (
   texts: ReadonlyArray<string | undefined>,
@@ -223,17 +229,18 @@ const fitTexts = (
     .map((text, index) => ({ index, length: text?.length ?? 0 }))
     .filter(({ index }) => texts[index] !== undefined)
     .sort((a, b) => a.length - b.length);
-  let remaining = Math.max(0, budget);
+  let remaining = Math.max(0, budget - floorChars(texts));
   order.forEach(({ index, length }, position) => {
-    const share = Math.floor(remaining / (order.length - position));
+    const floor = Math.min(length, TRUNCATION_MARKER.length);
+    const allowance = Math.floor(remaining / (order.length - position)) + floor;
     const text: string = texts[index] ?? '';
     fitted[index] =
-      length <= share
+      length <= allowance
         ? text
-        : share > TRUNCATION_MARKER.length
-        ? truncate(text, share)
+        : allowance > floor
+        ? truncate(text, allowance)
         : TRUNCATION_MARKER;
-    remaining -= fitted[index]?.length ?? 0;
+    remaining -= (fitted[index]?.length ?? 0) - floor;
   });
   return fitted;
 };
@@ -255,7 +262,8 @@ const formatTrace = (toolCalls: readonly PersonaRubricToolCall[], budget: number
   const fixedChars =
     labels.reduce((sum, label) => sum + label.length + 1, 0) +
     results.filter((text) => text !== undefined).length * resultPrefix.length;
-  const fittedParams = fitTexts(params, budget - fixedChars);
+  // A cut result still prints its marker, so that floor is reserved before params are paid.
+  const fittedParams = fitTexts(params, budget - fixedChars - floorChars(results));
   const paramsChars = fittedParams.reduce((sum, text) => sum + (text?.length ?? 0), 0);
   const fittedResults = fitTexts(results, budget - fixedChars - paramsChars);
   return labels

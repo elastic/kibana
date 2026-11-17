@@ -183,6 +183,26 @@ describe('PersonaRubric prompt assembly', () => {
     expect(submission.endsWith('Final answer:\nEND_ANSWER')).toBe(true);
   });
 
+  it('keeps every call head when oversized params leave nothing for results', () => {
+    const { submission } = buildPersonaRubricInput({
+      category: 'alert-analysis',
+      answer: 'END_ANSWER',
+      toolCalls: [
+        { tool_id: 'first.tool', params: { q: 'p'.repeat(1_000_000) }, results: 'r1' },
+        { tool_id: 'second.tool', params: { q: 'q'.repeat(1_000_000) }, results: 'r2' },
+        { tool_id: 'third.tool', params: { q: 's'.repeat(1_000_000) }, results: 'r3' },
+      ],
+    });
+    expect(submission.length).toBeLessThanOrEqual(PERSONA_RUBRIC_MAX_SUBMISSION_CHARS);
+    expect(submission).toContain('1. first.tool\n   params: ');
+    expect(submission).toContain('2. second.tool\n   params: ');
+    expect(submission).toContain('3. third.tool\n   params: ');
+    expect(submission).toMatch(
+      /3\. third\.tool\n {3}params: [^\n]*\n {3}result: (r3|…\[truncated\])\n/
+    );
+    expect(submission.endsWith('Final answer:\nEND_ANSWER')).toBe(true);
+  });
+
   it('splits the budget fairly between several oversized results', () => {
     const { submission } = buildPersonaRubricInput({
       category: 'alert-analysis',
