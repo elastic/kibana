@@ -56,7 +56,7 @@ x-codeSamples:
   - lang: curl
     source: |
       curl \
-        -X POST "https://${KIBANA_URL}/api/context_engine/session_memory/_forget" \
+        -X POST "https://${KIBANA_URL}/api/context_engine/memory/_forget" \
         -H "Authorization: ApiKey ${API_KEY}" \
         -H "Content-Type: application/json" \
         -H "kbn-xsrf: true" \

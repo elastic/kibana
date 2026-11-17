@@ -319,7 +319,7 @@ No changes to the Context Engine plugin are required.
 Context Engine can forget session memories over HTTP. The route is public and experimental:
 
 ```
-POST /api/context_engine/session_memory/_forget
+POST /api/context_engine/memory/_forget
 ```
 
 ```json
