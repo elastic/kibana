@@ -588,3 +588,23 @@ it('forwards the cursor to the executions search and returns the next one', asyn
   );
   expect(result.searchAfter).toEqual([2, 'next']);
 });
+
+describe('searchAfter query validation', () => {
+  const parse = (searchAfter: string) =>
+    listAutomationRunsRoute['GET /internal/nightshift/automations/{id}/runs'].params.safeParse({
+      path: { id: 'auto-1' },
+      query: { searchAfter },
+    });
+
+  it('parses a JSON cursor', () => {
+    const result = parse('[1794913928317,"qa-ex-10499"]');
+    expect(result.success && result.data.query.searchAfter).toEqual([1794913928317, 'qa-ex-10499']);
+  });
+
+  it.each(['not json', '[1,2,3,4,5]', '[{"a":1}]'])(
+    'rejects %s with a validation error',
+    (value) => {
+      expect(parse(value).success).toBe(false);
+    }
+  );
+});
