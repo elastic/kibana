@@ -525,8 +525,9 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
         soClient,
         agentPolicyId
       );
-      const pkg = packagePolicies?.find((pp) => pp.package?.name && pp.package.name !== 'system')
-        ?.package;
+      const pkg = packagePolicies?.find(
+        (pp) => pp.package?.name && pp.package.name !== 'system'
+      )?.package;
       return pkg ? { name: pkg.name, version: pkg.version } : undefined;
     } catch (error) {
       // Labelling is best effort: never fail the deployment because of it.

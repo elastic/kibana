@@ -246,10 +246,12 @@ describe('Agentless Agent service', () => {
 
     it('sends the non-system integration package so OTel policies can be labelled', async () => {
       setup();
-      jest.mocked(packagePolicyService.findAllForAgentPolicy).mockResolvedValue([
-        { package: { name: 'system', version: '2.0.0' } },
-        { package: { name: 'aws_cloudwatch_input_otel', version: '0.8.0' } },
-      ] as any);
+      jest
+        .mocked(packagePolicyService.findAllForAgentPolicy)
+        .mockResolvedValue([
+          { package: { name: 'system', version: '2.0.0' } },
+          { package: { name: 'aws_cloudwatch_input_otel', version: '0.8.0' } },
+        ] as any);
 
       await create();
 
@@ -267,9 +269,7 @@ describe('Agentless Agent service', () => {
 
     it('does not fail the deployment when the package cannot be resolved', async () => {
       setup();
-      jest
-        .mocked(packagePolicyService.findAllForAgentPolicy)
-        .mockRejectedValue(new Error('boom'));
+      jest.mocked(packagePolicyService.findAllForAgentPolicy).mockRejectedValue(new Error('boom'));
 
       await create();
 
