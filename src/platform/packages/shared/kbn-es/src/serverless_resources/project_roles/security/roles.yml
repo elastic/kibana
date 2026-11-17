@@ -76,6 +76,7 @@ viewer:
         - '.entities.v2.updates.*'
         - '.entities.v2.history.*'
         - '.entities.v2.metadata.*'
+        - '.entities.v2.system.*'
         - 'entities-latest-*'
         - 'entities-metadata-*'
         - '.ml-anomalies-*'
@@ -208,6 +209,12 @@ editor:
       privileges:
         - 'read'
         - 'write'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+    - names:
+        - '.entities.v2.system.*'
+      privileges:
+        - 'read'
         - 'view_index_metadata'
       allow_restricted_indices: false
     - names:
@@ -358,6 +365,7 @@ t1_analyst:
         - '.entities.v2.updates.*'
         - '.entities.v2.history.*'
         - '.entities.v2.metadata.*'
+        - '.entities.v2.system.*'
       privileges:
         - read
         - view_index_metadata
@@ -459,6 +467,7 @@ t2_analyst:
         - '.entities.v2.updates.*'
         - '.entities.v2.history.*'
         - '.entities.v2.metadata.*'
+        - '.entities.v2.system.*'
         - 'entities-latest-*'
         - 'entities-metadata-*'
         - '.ml-anomalies-*'
@@ -592,6 +601,7 @@ t3_analyst:
         - '.entities.v2.updates.*'
         - '.entities.v2.history.*'
         - '.entities.v2.metadata.*'
+        - '.entities.v2.system.*'
         - 'entities-latest-*'
         - 'entities-metadata-*'
         - '.ml-anomalies-*'
@@ -728,6 +738,7 @@ threat_intelligence_analyst:
         - '.entities.v2.updates.*'
         - '.entities.v2.history.*'
         - '.entities.v2.metadata.*'
+        - '.entities.v2.system.*'
         - 'entities-latest-*'
         - 'entities-metadata-*'
         - '.ml-anomalies-*'
@@ -852,6 +863,7 @@ rule_author:
         - '.entities.v2.updates.*'
         - '.entities.v2.history.*'
         - '.entities.v2.metadata.*'
+        - '.entities.v2.system.*'
         - 'entities-latest-*'
         - 'entities-metadata-*'
         - '.ml-anomalies-*'
@@ -934,6 +946,12 @@ soc_manager:
     - names:
         - '.logs-osquery_manager.actions-*'
         - '.logs-osquery_manager.action.responses-*'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+    - names:
+        - '.entities.v2.system.*'
       privileges:
         - 'read'
         - 'view_index_metadata'
@@ -1113,6 +1131,12 @@ detections_admin:
       privileges:
         - all
     - names:
+        - '.entities.v2.system.*'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+    - names:
         - .asset-criticality.asset-criticality-*
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
@@ -1240,6 +1264,12 @@ platform_engineer:
         - write
         - view_index_metadata
     - names:
+        - '.entities.v2.system.*'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+    - names:
         - '.entities.v2.metadata.*'
         - 'entities-latest-*'
         - 'entities-metadata-*'
@@ -1361,6 +1391,7 @@ endpoint_operations_analyst:
         - '.entities.v2.updates.*'
         - '.entities.v2.history.*'
         - '.entities.v2.metadata.*'
+        - '.entities.v2.system.*'
         - 'entities-latest-*'
         - 'entities-metadata-*'
         - '.ml-anomalies-*'
@@ -1494,6 +1525,7 @@ endpoint_policy_manager:
         - '.entities.v2.updates.*'
         - '.entities.v2.history.*'
         - '.entities.v2.metadata.*'
+        - '.entities.v2.system.*'
         - 'entities-latest-*'
         - 'entities-metadata-*'
         - '.ml-anomalies-*'
