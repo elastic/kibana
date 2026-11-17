@@ -332,4 +332,8 @@ describe('parseDraftDefinition', () => {
     expect(parseDraftDefinition('name: [unclosed')).toBeNull();
     expect(parseDraftDefinition('name: ok')).toEqual({ name: 'ok' });
   });
+
+  it('has no definition for YAML with an unresolved alias', () => {
+    expect(parseDraftDefinition('name: ok\nconsts:\n  message: *not_defined_yet')).toBeNull();
+  });
 });

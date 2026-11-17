@@ -65,7 +65,7 @@ export interface WorkflowContract {
   returnedOutputs?: readonly string[];
   /**
    * Names the `workflow.output` steps set, even when a run can complete without one; undefined
-   * when one of them is computed.
+   * when there is none, since every run then returns its last step's output, or one is computed.
    */
   outputStepNames?: readonly string[];
 }

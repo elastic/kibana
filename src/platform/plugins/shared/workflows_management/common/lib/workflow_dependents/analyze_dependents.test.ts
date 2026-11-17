@@ -630,6 +630,22 @@ describe('analyzeDependents', () => {
     ]);
   });
 
+  it('warns callers of an undeclared output when the last step may now return it', () => {
+    const undeclaredChild = (step: Record<string, unknown>) => ({
+      name: 'Alert context',
+      triggers: [{ type: 'manual' }],
+      steps: [{ name: 'emit', with: { severity: 'high' }, ...step }],
+    });
+    const analysis = analyzeWith(
+      [triage, childItem],
+      undeclaredChild({ type: 'data.set' }),
+      undeclaredChild({ type: 'workflow.output' })
+    );
+
+    expect(statusById(analysis).triage).toBe('warning');
+    expect(kinds(dependentOf(analysis, 'triage')?.issues)).toEqual(['outputFromLastStep:warning']);
+  });
+
   it('warns instead of breaking when a run can finish without the workflow.output step', () => {
     const analysis = analyze({
       ...makeChild(),
@@ -1530,9 +1546,14 @@ describe('analyzeCalledWorkflows', () => {
     ).toEqual([
       [CHILD_ID, ['childDisabled']],
       ['invalid', ['childInvalid']],
-      ['missing', ['childNotFound']],
       ['parent', ['selfCall']],
+      ['missing', ['childNotFound']],
     ]);
+    // The lookup leaves out workflows the user can't read, so a missing one may still run.
+    expect(called.find(({ workflowId }) => workflowId === 'missing')).toMatchObject({
+      status: 'unknown',
+      issues: [expect.objectContaining({ kind: 'childNotFound', severity: 'warning' })],
+    });
   });
 
   it('flags a managed child, which only a managed workflow can run', () => {

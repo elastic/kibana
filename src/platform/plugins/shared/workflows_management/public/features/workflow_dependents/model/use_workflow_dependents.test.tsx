@@ -161,6 +161,21 @@ describe('useWorkflowDependents', () => {
       expect(services.http.post).toHaveBeenLastCalledWith(...sending({ yaml: CALLING_YAML }));
     });
 
+    it('checks a draft with an unresolved alias instead of throwing', async () => {
+      const aliasYaml = `${SAVED_YAML}\nconsts:\n  message: *not_defined_yet`;
+      const { services, store, result } = setup(({ http }) => {
+        http.post.mockResolvedValue(response);
+      }, SAVED_YAML);
+      await waitFor(() => expect(result.current.analysis).toBeDefined());
+
+      act(() => {
+        store.dispatch(setYamlString(aliasYaml));
+      });
+      await waitFor(() => expect(services.http.post).toHaveBeenCalledTimes(2), DEBOUNCED);
+      expect(services.http.post).toHaveBeenLastCalledWith(...sending({ yaml: aliasYaml }));
+      expect(result.current.analysis).toEqual(response.analysis);
+    });
+
     it('checks drafts once the saved version runs a workflow', async () => {
       const { services, store, result } = setup(({ http }) => {
         http.post.mockResolvedValue({

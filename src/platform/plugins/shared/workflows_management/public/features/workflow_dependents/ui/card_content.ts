@@ -246,9 +246,13 @@ const getCalledVerdict = (called: CalledWorkflowImpact, childName: string): stri
         defaultMessage: 'Might fail when it runs',
       });
     case 'unknown':
-      return i18n.translate('workflows.dependents.verdict.called.unknown', {
-        defaultMessage: 'Can’t check: the inputs are computed while running',
-      });
+      return called.issues.some(({ kind }) => kind === 'childNotFound')
+        ? i18n.translate('workflows.dependents.verdict.called.notFound', {
+            defaultMessage: 'Can’t check: it doesn’t exist or you can’t access it',
+          })
+        : i18n.translate('workflows.dependents.verdict.called.unknown', {
+            defaultMessage: 'Can’t check: the inputs are computed while running',
+          });
     case 'safe':
       return i18n.translate('workflows.dependents.verdict.called.safe', {
         defaultMessage: 'Works: it sends what {childName} needs and only uses outputs it returns',

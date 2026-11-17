@@ -33,7 +33,15 @@ export interface WorkflowDependentsLookup {
 /** Parses draft YAML into the plain definition the analysis reads; null when it doesn't parse. */
 export const parseDraftDefinition = (yaml: string): unknown => {
   const document = parseDocument(yaml);
-  return document.errors.length > 0 ? null : document.toJS();
+  if (document.errors.length > 0) {
+    return null;
+  }
+  // `toJS` throws on an unresolved alias, which `parseDocument` doesn't report as an error.
+  try {
+    return document.toJS();
+  } catch {
+    return null;
+  }
 };
 
 /** Collects every workflow that runs any of `workflowIds`, directly or through other workflows. */

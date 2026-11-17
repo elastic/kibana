@@ -999,7 +999,7 @@ export interface AnalyzeCalledWorkflowsParams {
   /** The workflow whose calls are checked. */
   workflowId: string;
   definition: unknown;
-  /** The workflows it runs, and the ones they run in turn, as far as they are known. */
+  /** The workflows it runs, and the ones they run in turn, as far as the user can read them. */
   workflows: readonly WorkflowLookupItem[];
   /** Whether the checked workflow is managed, which lets it run managed workflows. */
   managed?: boolean;
@@ -1035,9 +1035,13 @@ export const analyzeCalledWorkflows = ({
         return { workflowId, workflowName: selfName, status: 'breaking', callSites: [], issues };
       }
       const child = workflowsById.get(workflowId);
+      // `workflows` only holds what the user can read, so a workflow missing from it may still run.
       if (!child) {
-        const issues = stepIssues('childNotFound', callSites, workflowId);
-        return { workflowId, status: 'breaking', callSites: [], issues };
+        const issues = stepIssues('childNotFound', callSites, workflowId).map((issue) => ({
+          ...issue,
+          severity: 'warning' as const,
+        }));
+        return { workflowId, status: 'unknown', callSites: [], issues };
       }
       if (!canRun(self, child)) {
         const issues = stepIssues('childManaged', callSites);
