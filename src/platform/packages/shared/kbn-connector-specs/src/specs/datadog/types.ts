@@ -73,9 +73,13 @@ export const DATADOG_SITE_API_URLS: Record<DatadogSite, string> = {
   'us2.ddog-gov.com': 'https://api.us2.ddog-gov.com',
 };
 
+/** An ISO 8601 timestamp, which Datadog's downtime schedule declares as `format: date-time`. */
+const ISO_DATE_TIME = /^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:\d{2})?$/;
+
 const tagsSchema = lazySchema(() =>
   z
     .array(z.string().min(1).max(MAX_TAG_LENGTH))
+    .min(1)
     .max(MAX_TAGS)
     .describe('Datadog tags, e.g. ["env:prod", "service:api"].')
 );
@@ -234,11 +238,13 @@ export const ScheduleDowntimeInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(64)
+      .regex(ISO_DATE_TIME)
       .describe('Downtime start as an ISO 8601 timestamp. Example: "2024-06-01T10:00:00Z".'),
     end: z
       .string()
       .min(1)
       .max(64)
+      .regex(ISO_DATE_TIME)
       .describe('Downtime end as an ISO 8601 timestamp. Example: "2024-06-01T12:00:00Z".'),
     message: z
       .string()
