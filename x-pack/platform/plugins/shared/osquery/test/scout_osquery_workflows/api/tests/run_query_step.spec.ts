@@ -163,6 +163,45 @@ apiTest.describe('osquery.runQuery workflow step', { tag: ['@local-stateful-clas
   );
 
   apiTest(
+    'history: a workflow dispatch is listed with source Workflow and under the workflow filter',
+    async ({ apiClient, esClient, kbnClient }) => {
+      const workflows = workflowsClient(apiClient, adminHeaders);
+      const workflowId = await workflows.create(
+        'osq-wf-history-source',
+        runQueryStep(`agent_ids: ["${AGENT_A.id}"]`)
+      );
+      const executionId = await workflows.run(workflowId);
+      const state = await workflows.waitForDispatch(executionId, 'q');
+      await answerQuery(esClient, {
+        queryActionId: state.queries[0].action_id,
+        agent: AGENT_A,
+        rows: [{ pid: '1', name: 'systemd' }],
+      });
+      await workflows.waitForEnd(executionId);
+
+      const history = async (sourceFilters?: string) => {
+        const { data } = await kbnClient.request<{
+          data: Array<{ actionId?: string; source: string }>;
+        }>({
+          method: 'GET',
+          path: `/api/osquery/history?pageSize=100${
+            sourceFilters ? `&sourceFilters=${sourceFilters}` : ''
+          }`,
+          headers: { 'elastic-api-version': '2023-10-31' },
+        });
+
+        return data.data.filter((row) => row.actionId === state.action_id);
+      };
+
+      expect(await history()).toMatchObject([{ source: 'Workflow' }]);
+      expect(await history('workflow')).toMatchObject([{ source: 'Workflow' }]);
+      expect(await history('live')).toHaveLength(0);
+      expect(await history('rule')).toHaveLength(0);
+      await workflows.delete(workflowId);
+    }
+  );
+
+  apiTest(
     'partial: one of two agents answers before the deadline',
     async ({ apiClient, esClient }) => {
       const workflows = workflowsClient(apiClient, adminHeaders);
