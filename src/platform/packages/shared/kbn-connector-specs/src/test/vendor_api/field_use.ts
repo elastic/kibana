@@ -21,6 +21,11 @@ export interface FieldUse {
   readonly returned: Set<string>;
   /** Fields of the JSON request bodies the handler sent, and query parameters as `?name`. */
   readonly sent: Set<string>;
+  /**
+   * GraphQL only: the fields the query selects, by name from the root field, without list
+   * elements; a GraphQL response has nothing else.
+   */
+  readonly selected: Set<string>;
 }
 
 export const createFieldUse = (): FieldUse => ({
@@ -28,6 +33,7 @@ export const createFieldUse = (): FieldUse => ({
   copied: new Set(),
   returned: new Set(),
   sent: new Set(),
+  selected: new Set(),
 });
 
 // Properties that every object answers, or that runtimes and test tools ask for; not fields.

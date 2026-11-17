@@ -71,6 +71,8 @@ export interface RecordedFieldUse {
   readonly returned: readonly string[];
   /** Fields of the JSON request bodies it sent, and query parameters as `?name`; left out when none. */
   readonly sent?: readonly string[];
+  /** GraphQL only: the fields its queries select; left out when none. */
+  readonly selected?: readonly string[];
 }
 
 export interface RequestedPath {
@@ -529,6 +531,7 @@ export const recordActions = async ({
                     copied: sortedList(use.copied),
                     returned: sortedList(use.returned),
                     ...(use.sent.size > 0 ? { sent: sortedList(use.sent) } : {}),
+                    ...(use.selected.size > 0 ? { selected: sortedList(use.selected) } : {}),
                   },
                 ])
               ),

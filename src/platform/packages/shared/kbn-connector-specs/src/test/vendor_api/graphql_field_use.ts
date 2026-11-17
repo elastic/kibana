@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DocumentNode, OperationDefinitionNode, ValueNode } from 'graphql';
+import type {
+  DocumentNode,
+  FragmentDefinitionNode,
+  OperationDefinitionNode,
+  SelectionSetNode,
+  ValueNode,
+} from 'graphql';
 import { Kind, parse } from 'graphql';
 import type { FieldUse } from './field_use';
 import { recordSentFields, trackFieldUse } from './field_use';
@@ -68,6 +74,34 @@ const recordArgument = (
   }
 };
 
+// Records the fields a selection set selects, through fragments, as `selected` paths.
+const recordSelection = (
+  selectionSet: SelectionSetNode | undefined,
+  fragments: ReadonlyMap<string, FragmentDefinitionNode>,
+  use: FieldUse,
+  path: string,
+  visited: ReadonlySet<string> = new Set()
+): void => {
+  for (const selection of selectionSet?.selections ?? []) {
+    if (selection.kind === Kind.FIELD) {
+      if (selection.name.value.startsWith('__')) {
+        continue;
+      }
+      const fieldPath = path ? `${path}/${selection.name.value}` : selection.name.value;
+      use.selected.add(fieldPath);
+      recordSelection(selection.selectionSet, fragments, use, fieldPath, visited);
+    } else if (selection.kind === Kind.INLINE_FRAGMENT) {
+      recordSelection(selection.selectionSet, fragments, use, path, visited);
+    } else {
+      const name = selection.name.value;
+      const fragment = fragments.get(name);
+      if (fragment && !visited.has(name)) {
+        recordSelection(fragment.selectionSet, fragments, use, path, new Set([...visited, name]));
+      }
+    }
+  }
+};
+
 /**
  * Tracks what a handler does with a GraphQL response, per root field the request's query selects:
  * each field's result, under its alias in `data`, gets the field use of that root field, which
@@ -88,6 +122,13 @@ export const trackGraphQLFieldUse = (
     return response;
   }
   const variables = isRecord(body.variables) ? body.variables : {};
+  const fragments = new Map(
+    (document?.definitions ?? []).flatMap((definition) =>
+      definition.kind === Kind.FRAGMENT_DEFINITION
+        ? [[definition.name.value, definition] as const]
+        : []
+    )
+  );
   const results: Record<string, unknown> = { ...response.data };
   for (const selection of operation.selectionSet.selections) {
     // Introspection fields aren't the vendor's operations.
@@ -99,6 +140,7 @@ export const trackGraphQLFieldUse = (
       use.sent.add(argument.name.value);
       recordArgument(argument.value, variables, use, argument.name.value);
     }
+    recordSelection(selection.selectionSet, fragments, use, '');
     const key = selection.alias?.value ?? selection.name.value;
     if (key in results) {
       results[key] = trackFieldUse(results[key], use);

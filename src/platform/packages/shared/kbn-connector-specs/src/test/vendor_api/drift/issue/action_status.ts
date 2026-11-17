@@ -14,6 +14,7 @@
  */
 
 import type { ActionDrift, SpecChange } from '../detect_drift';
+import { usesCoordinate } from '../graphql_drift';
 import { isRequestChange, isResponseChange } from '../oasdiff_text';
 import { capitalized, code, listed, plural } from './issue_markdown';
 import { firstProblem, issueLinksOf, problemText } from './problem_text';
@@ -173,33 +174,55 @@ export const statusOf = (
       )}`
     );
   }
-  // The action works, but what it calls needs a look, as the summary counts it: oasdiff's own
-  // description of each change says what.
-  const toReview = [
+  const changes = action.operations.flatMap(({ source, operation }) =>
+    changesOf(source, operation).map((change) => ({ source, operation, change }))
+  );
+  const notable = changes.filter(({ change }) => change.kind !== 'non-breaking');
+  const responses = notable.filter(({ change }) => isResponseChange(change.id));
+  // A GraphQL response has only the fields the query selects, so the changed ones it passes
+  // along are named.
+  const graphqlResponses = responses.filter(({ change }) => change.coordinate !== undefined);
+  const passedChangedOf = (except: ReadonlySet<string>) => [
     ...new Set(
-      action.operations.flatMap(({ source, operation }) =>
-        reviewOf(source, operation).map(({ change: { text } }) => capitalized(text))
-      )
+      graphqlResponses.flatMap(({ source, operation, change }) => {
+        const use = action.graphqlUse?.[`${source} ${operation}`];
+        return use &&
+          change.coordinate &&
+          !except.has(change.coordinate) &&
+          usesCoordinate(use, change)
+          ? [change.coordinate]
+          : [];
+      })
     ),
   ];
+  const passingAlong = (coordinates: readonly string[]) =>
+    `Vendor response has changed, and Connector is passing along changed fields: ${listed(
+      coordinates.map(code)
+    )}`;
+
+  // The action works, but what it calls needs a look, as the summary counts it: oasdiff's own
+  // description of each change says what.
+  const reviewed = action.operations.flatMap(({ source, operation }) =>
+    reviewOf(source, operation)
+  );
+  const toReview = [...new Set(reviewed.map(({ change: { text } }) => capitalized(text)))];
   if (toReview.length > 0) {
     const shown = toReview.slice(0, MAX_REVIEW_DETAILS);
+    const alsoPassed = passedChangedOf(
+      new Set(reviewed.flatMap(({ change: { coordinate } }) => (coordinate ? [coordinate] : [])))
+    );
     return passes(
       'passes',
       `${ICONS.attention} ${shown.join('; ')}${
         toReview.length > shown.length
           ? ` (and ${plural(toReview.length - shown.length, 'more change')})`
           : ''
-      }`
+      }${alsoPassed.length > 0 ? `. ${passingAlong(alsoPassed)}.` : ''}`
     );
   }
-  const changes = action.operations.flatMap(({ source, operation }) =>
-    changesOf(source, operation).map((change) => ({ source, operation, change }))
-  );
-  const notable = changes.filter(({ change }) => change.kind !== 'non-breaking');
   if (notable.length > 0 && action.tracked) {
     // Its operations changed in ways running it and its field use verify.
-    const responses = notable.filter(({ change }) => isResponseChange(change.id));
+    const passedChanged = passedChangedOf(new Set());
     const passedAlong = responses.flatMap(({ source, operation }) => {
       const { copied = [], returned = [] } = action.fieldUse?.[`${source} ${operation}`] ?? {};
       return [...copied, ...returned];
@@ -210,6 +233,12 @@ export const statusOf = (
         : []),
       ...(responses.length === 0
         ? []
+        : graphqlResponses.length === responses.length
+        ? [
+            passedChanged.length > 0
+              ? passingAlong(passedChanged)
+              : 'Vendor response has changed, but Connector is not using changed fields',
+          ]
         : passedAlong.includes('')
         ? [
             'Vendor response has changed, and Connector is passing along the entire changed response',

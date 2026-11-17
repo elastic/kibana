@@ -835,8 +835,20 @@ describe('protocol sources', () => {
 
       expect(drift.outcome).toBe('refresh');
       expect(drift.verdict).toBe('healthy');
+      // A change is reported per root field that reaches it, in oasdiff's terms and by coordinate.
       expect(drift.sources.main.changes).toEqual([
-        expect.objectContaining({ kind: 'non-breaking', id: 'FIELD_ADDED' }),
+        expect.objectContaining({
+          kind: 'non-breaking',
+          id: 'response-optional-property-added',
+          operation: 'MUTATION createBoard',
+          coordinate: 'Board.name',
+        }),
+        expect.objectContaining({
+          kind: 'non-breaking',
+          id: 'response-optional-property-added',
+          operation: 'QUERY board',
+          coordinate: 'Board.name',
+        }),
       ]);
       expect(await fs.readFile(path.join(directory, 'snapshots', 'main.graphql'), 'utf8')).toBe(
         before
@@ -859,7 +871,12 @@ describe('protocol sources', () => {
       expect(drift.verdict).toBe('vendor-drift');
       expect(drift.outcome).toBe('issue');
       expect(drift.sources.main.changes).toContainEqual(
-        expect.objectContaining({ kind: 'breaking', id: 'FIELD_REMOVED' })
+        expect.objectContaining({
+          kind: 'breaking',
+          id: 'response-property-removed',
+          operation: 'QUERY board',
+          coordinate: 'Board.state',
+        })
       );
     });
 

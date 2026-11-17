@@ -555,8 +555,8 @@ describe('recordActions with a GraphQL spec', () => {
     });
 
     expect(recording.operations).toEqual({
-      archiveItem: [{ source: 'api', method: 'mutation', path: 'archiveItem' }],
-      listBoards: [{ source: 'api', method: 'query', path: 'boards' }],
+      archiveItem: [{ source: 'api', name: 'mutation archiveItem' }],
+      listBoards: [{ source: 'api', name: 'query boards' }],
     });
     // A query is read-only, though it is sent with POST
     expect(recording.findings).toEqual([]);
@@ -565,12 +565,14 @@ describe('recordActions with a GraphQL spec', () => {
       copied: [],
       returned: [],
       sent: ['ids', 'ids/items'],
+      selected: ['items', 'items/id', 'name'],
     });
     expect(recording.fieldUse?.archiveItem['api MUTATION archiveItem']).toEqual({
       read: [],
       copied: [],
       returned: [''],
       sent: ['itemId', 'options', 'options/reason'],
+      selected: ['id', 'name'],
     });
   });
 });

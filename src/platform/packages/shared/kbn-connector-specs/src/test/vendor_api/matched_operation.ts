@@ -26,6 +26,15 @@ export const isGraphQLOperation = ({ method }: Pick<MatchedOperation, 'method'>)
   method === 'query' || method === 'mutation';
 
 /**
+ * The root field a named GraphQL operation calls (`query boards`), whose operation type stands in
+ * for the method and whose root field for the path. Other named operations (MCP tools) have none.
+ */
+export const graphQLRootFieldOf = (name: string): Omit<MatchedOperation, 'source'> | undefined => {
+  const [, type, field] = name.match(GRAPHQL_OPERATION) ?? [];
+  return type && field ? { method: type, path: field } : undefined;
+};
+
+/**
  * The operation a call matched: an OpenAPI operation, or a GraphQL root field, whose operation
  * type stands in for the method and whose name for the path. Other named operations (MCP tools)
  * have none.
@@ -39,6 +48,6 @@ export const matchedOperationOf = (
   if ('method' in matched) {
     return { source: matched.source, method: matched.method, path: matched.path };
   }
-  const [, type, field] = matched.name.match(GRAPHQL_OPERATION) ?? [];
-  return type && field ? { source: matched.source, method: type, path: field } : undefined;
+  const rootField = graphQLRootFieldOf(matched.name);
+  return rootField ? { source: matched.source, ...rootField } : undefined;
 };

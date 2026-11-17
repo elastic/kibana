@@ -15,6 +15,7 @@ import type { ConnectorSpec } from '../../../connector_spec';
 import type { ActionDrift, ConnectorDrift, DetectDriftOptions, SpecChange } from './detect_drift';
 import { classifyChange, detectDrift, reviewOfChange } from './detect_drift';
 import type { OasdiffEntry } from './run_oasdiff';
+import { renderDriftIssue } from './issue';
 import { updateVendorApi } from '../record/update_vendor_api';
 
 const BASE = 'https://api.example.com';
@@ -333,6 +334,73 @@ actions:
     const drift = await detect({ connector: sender, directory: senderDirectory });
 
     expect(drift.actions?.[0].fieldUse?.['main GET /items']).toMatchObject({ sent: ['?limit'] });
+  });
+
+  it('compares GraphQL schemas by the fields the actions use', async () => {
+    const GRAPHQL = 'https://api.example.com/graphql';
+    const SCHEMA_URL = 'https://api.example.com/schema.graphql';
+    const schema = (item: string) =>
+      `type Query { items: [Item!]! }\ntype Item { id: ID!, ${item} }`;
+    const lister: ConnectorSpec = {
+      ...connector,
+      actions: {
+        listNames: {
+          scope: 'read',
+          input: z.object({}),
+          handler: async ({ client }) => {
+            const { data } = await client.post(GRAPHQL, { query: '{ items { name } }' });
+            return data.data.items.map(({ name }: { name: string }) => name);
+          },
+        },
+      },
+    };
+    const graphqlDirectory = path.join(directory, 'graphql');
+    await fs.mkdir(graphqlDirectory);
+    documents[SCHEMA_URL] = schema('name: String!, size: Int');
+    await updateVendorApi({
+      connector: lister,
+      directory: graphqlDirectory,
+      sources: { api: SCHEMA_URL },
+      formats: { api: 'graphql' },
+      endpoints: { api: [GRAPHQL] },
+      fetchText: async (url) => documents[url],
+      now: () => new Date('2026-10-07T12:00:00.000Z'),
+      log: { info: () => {}, warning: () => {} },
+    });
+    documents[SCHEMA_URL] = schema('name: String! @deprecated(reason: "use title"), title: String');
+
+    const drift = await detect({
+      connector: lister,
+      directory: graphqlDirectory,
+      folder: 'src/specs/example',
+    });
+
+    expect(diff).not.toHaveBeenCalled();
+    expect(drift).toMatchObject({ verdict: 'healthy', outcome: 'issue' });
+    expect(drift.sources.api).toMatchObject({ status: 'changed' });
+    expect(
+      drift.sources.api.changes?.map(({ kind, id, coordinate }) => `${kind} ${id} ${coordinate}`)
+    ).toEqual([
+      'breaking response-property-removed Item.size',
+      'non-breaking response-optional-property-added Item.title',
+      'deprecation response-property-deprecated Item.name',
+    ]);
+    expect(drift.actions?.[0]).toMatchObject({
+      operations: [{ source: 'api', operation: 'QUERY items', latest: { status: 'present' } }],
+      latestProblems: [],
+      fieldChanges: [{ operation: 'QUERY items', field: 'items/name', changes: ['deprecated'] }],
+      graphqlUse: { 'api QUERY items': { read: ['Item.name'] } },
+    });
+
+    const { title, body } = renderDriftIssue(drift, { owners: [] });
+    expect(title).toBe('[Connectors][Validation] `.example`: 1 action needs attention');
+    expect(body).toContain(
+      '| `listNames` | `QUERY items` | ✅ Passes | ⚠️ Vendor response has changed, including fields Connector reads: `items/name` (deprecated) |'
+    );
+    expect(body).toContain('vendor_api/snapshots/api.graphql');
+    expect(body).toContain(
+      "| `QUERY items` | Response field `Item.title` | `listNames` | No, no action's query selects it |"
+    );
   });
 
   it('proposes a refresh for a breaking response change to fields no action reads', async () => {

@@ -211,7 +211,7 @@ describe('renderDriftIssue', () => {
 
     expect(title).toBe('[Connectors][Validation] `.acme`: 1 action needs attention');
     expect(body).toContain(
-      '> **1 of 2 actions works with the latest spec. 1 action needs attention.**\n>\n> `search` passes but calls a deprecated endpoint.\n>\n> Update the connector to ensure it will continue working.'
+      '> **1 of 2 actions works with the latest spec. 1 action needs attention.**\n>\n> `search` passes but uses a deprecated endpoint or field.\n>\n> Update the connector to ensure it will continue working.'
     );
     // The action's details name the change; the request change is verified by running it
     expect(body).toContain('| `search` | `GET /items` | ✅ Passes | ⚠️ Endpoint deprecated |');
@@ -345,6 +345,75 @@ describe('renderDriftIssue', () => {
       ].join('\n')
     );
     expect(body).not.toContain('<summary>New in the vendor API');
+  });
+
+  it('names the changed GraphQL fields an action passes along, and groups additions by field', () => {
+    const graphqlAction = (
+      action: string,
+      operation: string,
+      passed: string[]
+    ): NonNullable<ConnectorDrift['actions']>[number] => ({
+      action,
+      operations: [{ source: 'api', operation, latest: { status: 'present' } }],
+      unmatched: [],
+      snapshotProblems: [],
+      latestProblems: [],
+      tracked: true,
+      fieldUse: { [`api ${operation}`]: { read: [], copied: [], returned: [''] } },
+      fieldChanges: [],
+      graphqlUse: {
+        [`api ${operation}`]: { read: [], passed, types: [], sent: [], sentTypes: [] },
+      },
+    });
+    const change = (
+      operation: string,
+      id: string,
+      coordinate: string,
+      text: string,
+      kind: 'breaking' | 'non-breaking' = 'breaking'
+    ) => ({ kind, id, coordinate, operation, text });
+    const { body } = renderDriftIssue(
+      {
+        ...healthy,
+        outcome: 'refresh',
+        sources: {
+          api: {
+            status: 'changed',
+            format: 'graphql',
+            changes: ['QUERY items', 'MUTATION delete_item'].flatMap((operation) => [
+              change(
+                operation,
+                'response-property-type-changed',
+                'Group.title',
+                'Field Group.title changed type from String! to Int!.'
+              ),
+              change(
+                operation,
+                'response-optional-property-added',
+                'Item.priority',
+                'added the optional property `Item.priority` to the response',
+                'non-breaking'
+              ),
+            ]),
+          },
+        },
+        actions: [
+          graphqlAction('getItem', 'QUERY items', ['Group.title', 'Item.name']),
+          graphqlAction('deleteItem', 'MUTATION delete_item', ['Item.id']),
+        ],
+      },
+      { owners: [] }
+    );
+
+    expect(body).toContain(
+      '| `getItem` | `QUERY items` | ✅ Passes | Vendor response has changed, and Connector is passing along changed fields: `Group.title`. |'
+    );
+    expect(body).toContain(
+      '| `deleteItem` | `MUTATION delete_item` | ✅ Passes | Vendor response has changed, but Connector is not using changed fields. |'
+    );
+    expect(body).toContain(
+      "| `QUERY items`<br>`MUTATION delete_item` | Response field `Item.priority` | `getItem`, `deleteItem` | No, no action's query selects it |"
+    );
   });
 
   it('lists the changed fields that passing actions read, and those that read none', () => {

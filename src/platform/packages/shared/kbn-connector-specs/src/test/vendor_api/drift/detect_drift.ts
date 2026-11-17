@@ -15,6 +15,16 @@ import type { ConnectorSpec } from '../../../connector_spec';
 import { loadVendorSpec } from '../spec/load_vendor_spec';
 import { MANIFEST, OVERLAY, readOptional, snapshotFile } from '../spec/load_vendor_specs';
 import { compareFields } from './compare_fields';
+import { within } from './field_path';
+import { graphQLRootFieldOf } from '../matched_operation';
+import type { GraphQLFieldUse, GraphQLRootField } from './graphql_drift';
+import {
+  compareGraphQLFields,
+  diffGraphQLSchemas,
+  locateGraphQLRootField,
+  resolveGraphQLFieldUse,
+  usesCoordinate,
+} from './graphql_drift';
 import type { OperationLocation } from './locate_operation';
 import { locateOperation, serverUrls } from './locate_operation';
 import {
@@ -25,7 +35,7 @@ import {
 } from './oasdiff_text';
 import type { RecordedFieldUse } from '../record/record_actions';
 import { NoUsableAuthTypeError } from '../record/record_actions';
-import type { ManifestSource, VendorApiManifest } from '../manifest';
+import type { ManifestCall, ManifestSource, ProtocolFormat, VendorApiManifest } from '../manifest';
 import { isNamedCall, isProtocolFormat, parseManifest } from '../manifest';
 import type { DriftProblem } from '../drift_problem';
 import { otherProblem } from '../drift_problem';
@@ -51,8 +61,13 @@ export interface SpecChange {
    */
   readonly id: string;
   readonly text: string;
-  /** `METHOD /path`, or an MCP tool's name, for changes to an operation. */
+  /**
+   * For changes to an operation: `METHOD /path`, an MCP tool's name, or for GraphQL
+   * `QUERY rootField`.
+   */
   readonly operation?: string;
+  /** GraphQL only: the schema coordinate that changed, e.g. `Item.name`. */
+  readonly coordinate?: string;
 }
 
 export interface SourceDrift {
@@ -65,6 +80,11 @@ export interface SourceDrift {
   readonly servers?: { readonly snapshot: readonly string[]; readonly latest: readonly string[] };
   /** Where the source is fetched from, as the manifest records it. */
   readonly url?: string;
+  /**
+   * For GraphQL and MCP sources, the manifest's format, which names their snapshot file; other
+   * formats all snapshot as OpenAPI.
+   */
+  readonly format?: ProtocolFormat;
 }
 
 /** An operation an action calls, as the committed manifest records it. */
@@ -95,6 +115,8 @@ export interface ActionDrift {
   readonly tracked?: boolean;
   /** Response fields it reads whose schema differs between the snapshot and the latest spec. */
   readonly fieldChanges?: readonly ActionFieldChange[];
+  /** For GraphQL root fields, its `fieldUse` by schema coordinate, by `source QUERY field`. */
+  readonly graphqlUse?: Readonly<Record<string, GraphQLFieldUse>>;
 }
 
 /** A changed response field an action reads. */
@@ -261,21 +283,23 @@ const verifiedBy = ({ kind, id }: SpecChange, passes: boolean, fieldsCompared: b
 const passesBoth = ({ snapshotProblems, latestProblems }: ActionDrift): boolean =>
   snapshotProblems.length === 0 && latestProblems !== undefined && latestProblems.length === 0;
 
-/** Whether a field path is a parent path or inside it. */
-export const within = (field: string, parent: string): boolean =>
-  field === parent || field.startsWith(`${parent}/`);
-
 /**
  * Whether a tracked action uses a deprecated property of an operation's request or response:
  * sends it or something in it, reads it or something in it, or copies or returns it whole.
  */
 const usesProperty = (
-  { fieldUse = {} }: ActionDrift,
+  { fieldUse = {}, graphqlUse = {} }: ActionDrift,
   source: string,
   change: SpecChange,
   property: string
 ): boolean => {
-  const use = fieldUse[`${source} ${change.operation}`];
+  const key = `${source} ${change.operation}`;
+  // GraphQL changes name a type's field, whichever path the action reached it by.
+  if (change.coordinate !== undefined) {
+    const coordinates = graphqlUse[key];
+    return coordinates === undefined || usesCoordinate(coordinates, change);
+  }
+  const use = fieldUse[key];
   if (!use) {
     return false;
   }
@@ -353,12 +377,23 @@ const outcomeOf = (drift: Omit<ConnectorDrift, 'outcome'>): DriftOutcome => {
     : 'none';
 };
 
+/** The root fields the manifest records against a GraphQL source. */
+const rootFieldsOf = (manifest: VendorApiManifest, source: string): readonly GraphQLRootField[] =>
+  Object.values(manifest.operations)
+    .flat()
+    .flatMap((call) =>
+      isNamedCall(call) && call.source === source
+        ? [graphQLRootFieldOf(call.name) ?? []].flat()
+        : []
+    );
+
 const classifyChanges = async ({
   format,
   committed,
   current,
   diff,
   latestDocument,
+  rootFields,
 }: {
   readonly format: ManifestSource['format'];
   readonly committed: string | undefined;
@@ -366,6 +401,8 @@ const classifyChanges = async ({
   readonly diff: DiffSpecs;
   /** The latest spec, which tells a removal of the whole snapshot from one of its own. */
   readonly latestDocument: unknown;
+  /** GraphQL only: the root fields the committed manifest records for the source. */
+  readonly rootFields: readonly GraphQLRootField[];
 }): Promise<readonly SpecChange[] | undefined> => {
   if (!isProtocolFormat(format)) {
     const entries = await diff(committed ?? '{}', current ?? '{}');
@@ -376,11 +413,17 @@ const classifyChanges = async ({
   }
   // A snapshot that can't be read leaves the change unclassified, which gets an issue.
   try {
-    return diffProtocolSnapshots(format, committed, current);
+    return format === 'graphql'
+      ? diffGraphQLSchemas(committed, current, rootFields)
+      : diffProtocolSnapshots(format, committed, current);
   } catch {
     return undefined;
   }
 };
+
+// Only GraphQL and MCP snapshots are named after their format; the rest are OpenAPI.
+const protocolFormat = (format: ManifestSource['format']): { format?: ProtocolFormat } =>
+  isProtocolFormat(format) ? { format } : {};
 
 interface LatestComparison {
   readonly sources: Record<string, SourceDrift>;
@@ -461,7 +504,7 @@ const compareWithLatest = async ({
     );
     const refreshed = await readOptional(path.join(copy, MANIFEST));
     const sources: Record<string, SourceDrift> = {};
-    for (const [name, { format }] of Object.entries(manifest.sources)) {
+    for (const [name, { url, format }] of Object.entries(manifest.sources)) {
       const [committed, current] = await Promise.all(
         [directory, copy].map((root) => readOptional(path.join(root, snapshotFile(name, format))))
       );
@@ -474,9 +517,8 @@ const compareWithLatest = async ({
             },
           }
         : {};
-      const { url } = manifest.sources[name];
       if (committed === current) {
-        sources[name] = { status: 'unchanged', ...servers, url };
+        sources[name] = { status: 'unchanged', ...servers, url, ...protocolFormat(format) };
       } else {
         const changes = await classifyChanges({
           format,
@@ -484,12 +526,14 @@ const compareWithLatest = async ({
           current,
           diff,
           latestDocument,
+          rootFields: rootFieldsOf(manifest, name),
         });
         sources[name] = {
           status: 'changed',
           ...(changes === undefined ? {} : { changes }),
           ...servers,
           url,
+          ...protocolFormat(format),
         };
       }
     }
@@ -564,16 +608,21 @@ export const detectDrift = async ({
   };
   const sources: Record<string, SourceDrift> = {};
   for (const [name, source] of Object.entries(manifest.sources)) {
-    const { url } = source;
+    const { url, format } = source;
     try {
-      await (isProtocolFormat(source.format)
-        ? loadProtocolSpec(url, fetchOnce, source.format, source.endpoints ?? [])
+      await (isProtocolFormat(format)
+        ? loadProtocolSpec(url, fetchOnce, format, source.endpoints ?? [])
         : loadVendorSpec(url, fetchOnce, source));
     } catch (error) {
       log.warning(
         `${connector.metadata.id}: ${name} at ${url} didn't load: ${errorMessage(error)}`
       );
-      sources[name] = { status: 'unreachable', error: errorMessage(error), url };
+      sources[name] = {
+        status: 'unreachable',
+        error: errorMessage(error),
+        url,
+        ...protocolFormat(source.format),
+      };
     }
   }
 
@@ -629,7 +678,13 @@ const mergeFieldUse = (
 ): Record<string, RecordedFieldUse> => {
   const merged: Record<
     string,
-    { read: Set<string>; copied: Set<string>; returned: Set<string>; sent: Set<string> }
+    {
+      read: Set<string>;
+      copied: Set<string>;
+      returned: Set<string>;
+      sent: Set<string>;
+      selected: Set<string>;
+    }
   > = {};
   for (const byOperation of uses) {
     for (const [key, use] of Object.entries(byOperation ?? {})) {
@@ -638,24 +693,33 @@ const mergeFieldUse = (
         copied: new Set(),
         returned: new Set(),
         sent: new Set(),
+        selected: new Set(),
       });
       use.read.forEach((field) => entry.read.add(field));
       use.copied.forEach((field) => entry.copied.add(field));
       use.returned.forEach((field) => entry.returned.add(field));
       use.sent?.forEach((field) => entry.sent.add(field));
+      use.selected?.forEach((field) => entry.selected.add(field));
     }
   }
   return Object.fromEntries(
-    Object.entries(merged).map(([key, { read, copied, returned, sent }]) => [
+    Object.entries(merged).map(([key, { read, copied, returned, sent, selected }]) => [
       key,
       {
         read: [...read].sort(),
         copied: [...copied].sort(),
         returned: [...returned].sort(),
         ...(sent.size > 0 ? { sent: [...sent].sort() } : {}),
+        ...(selected.size > 0 ? { selected: [...selected].sort() } : {}),
       },
     ])
   );
+};
+
+// The SDL a run recorded for a GraphQL source.
+const sdlOf = (result: UpdateVendorApiResult | undefined, source: string): string | undefined => {
+  const spec = result?.protocols[source];
+  return spec?.format === 'graphql' ? spec.sdl : undefined;
 };
 
 const describeAction = ({
@@ -673,22 +737,33 @@ const describeAction = ({
   readonly snapshotSpecs?: Readonly<Record<string, OpenApiDocument>>;
   readonly latestSpecs?: Readonly<Record<string, OpenApiDocument>>;
 }): ActionDrift => {
-  const operations = (manifest.operations[action] ?? []).map((call) => {
-    // A GraphQL root field or MCP tool is named rather than addressed by method and path, so it
-    // has no location in an OpenAPI document and nothing to compare field by field.
-    if (isNamedCall(call)) {
-      const { source, name } = call;
-      return { source, method: '', path: '', operation: name };
+  const isGraphQL = (source: string) => manifest.sources[source]?.format === 'graphql';
+  // A GraphQL call names its root field (`query boards`), which stands in for a method and path.
+  const callOf = (call: ManifestCall): { method: string; path: string } | undefined =>
+    isNamedCall(call) ? graphQLRootFieldOf(call.name) : { method: call.method, path: call.path };
+  const operations = (manifest.operations[action] ?? []).flatMap((call) => {
+    const { source } = call;
+    const named = callOf(call);
+    if (!named) {
+      // An MCP tool is named rather than addressed by method and path, so it has no location in
+      // an OpenAPI document and nothing to compare field by field.
+      return isNamedCall(call) ? [{ source, method: '', path: '', operation: call.name }] : [];
     }
-    const { source, method, path: opPath } = call;
+    const { method, path: opPath } = named;
     const document = latestSpecs?.[source];
-    return {
-      source,
-      method,
-      path: opPath,
-      operation: `${method.toUpperCase()} ${opPath}`,
-      ...(document ? { latest: locateOperation(document, opPath, method) } : {}),
-    };
+    const schema = sdlOf(latestResult, source);
+    const latest = isGraphQL(source)
+      ? schema && locateGraphQLRootField(schema, { method, path: opPath })
+      : document && locateOperation(document, opPath, method);
+    return [
+      {
+        source,
+        method,
+        path: opPath,
+        operation: `${method.toUpperCase()} ${opPath}`,
+        ...(latest ? { latest } : {}),
+      },
+    ];
   });
   const recorded = [snapshotResult, latestResult].filter(
     (result): result is UpdateVendorApiResult => result?.fieldUse !== undefined
@@ -698,8 +773,16 @@ const describeAction = ({
     recorded.length > 0 && recorded.every((result) => !result.untracked?.includes(action));
   // Where the operation still is in the latest spec, the fields it reads are compared.
   const fieldChanges = operations.flatMap(({ source, method, path: opPath, operation, latest }) => {
-    const [before, after] = [snapshotSpecs?.[source], latestSpecs?.[source]];
     const fields = fieldUse[`${source} ${operation}`]?.read ?? [];
+    if (isGraphQL(source)) {
+      const [committed, current] = [sdlOf(snapshotResult, source), sdlOf(latestResult, source)];
+      return committed && current && fields.length > 0
+        ? compareGraphQLFields(committed, current, { method, path: opPath }, fields).map(
+            ({ field, changes }) => ({ operation, field, changes })
+          )
+        : [];
+    }
+    const [before, after] = [snapshotSpecs?.[source], latestSpecs?.[source]];
     if (!before || !after || fields.length === 0 || latest?.status === 'missing') {
       return [];
     }
@@ -712,6 +795,18 @@ const describeAction = ({
       fields,
     }).map(({ field, changes }) => ({ operation, field, changes }));
   });
+  // GraphQL changes name a type's field, so the field use is resolved to those too.
+  const graphqlUse = Object.fromEntries(
+    operations.flatMap(({ source, method, path: opPath, operation }) => {
+      const key = `${source} ${operation}`;
+      const schema = sdlOf(snapshotResult, source) ?? sdlOf(latestResult, source);
+      const resolved =
+        isGraphQL(source) && schema && fieldUse[key]
+          ? resolveGraphQLFieldUse(schema, { method, path: opPath }, fieldUse[key])
+          : undefined;
+      return resolved ? [[key, resolved] as const] : [];
+    })
+  );
   return {
     action,
     operations: operations.map(({ source, operation, latest }) => ({
@@ -728,6 +823,7 @@ const describeAction = ({
     snapshotProblems: snapshotResult?.problemsByAction[action] ?? [],
     ...(latestResult ? { latestProblems: latestResult.problemsByAction[action] ?? [] } : {}),
     ...(recorded.length > 0 ? { fieldUse, tracked, fieldChanges } : {}),
+    ...(Object.keys(graphqlUse).length > 0 ? { graphqlUse } : {}),
   };
 };
 
