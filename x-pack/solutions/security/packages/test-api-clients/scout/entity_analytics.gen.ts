@@ -1458,10 +1458,7 @@ Updates the details of an existing monitored privileged user by their document I
   > {
     const basePath =
       options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
-    const path = `${basePath}${replaceParams(
-      '/api/entity_analytics/watchlists/{watchlist_id}/entity_source/{id}/_update_api_key',
-      encodePathParams(props.params)
-    )}`;
+    const path = `${basePath}${replaceParams('/api/entity_analytics/watchlists/{watchlist_id}/entity_source/{id}/_update_api_key', encodePathParams(props.params))}`;
 
     return apiClient.post<
       ScoutResponseBody<TResponseType, UpdateWatchlistEntitySourceApiKeyResponse>
