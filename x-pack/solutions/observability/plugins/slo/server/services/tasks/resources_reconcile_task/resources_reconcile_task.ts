@@ -129,15 +129,14 @@ export class ResourcesReconcileTask {
       await this.lockManager.withLock(LOCK_ID_RESOURCE_INSTALLER, () => installer.install());
     } catch (err) {
       if (isLockAcquisitionError(err)) {
-        this.logger.debug('SLO resources are being installed by another process, skipping run');
+        this.logger.debug('SLO resources are being installed by another process');
       } else {
-        this.logger.warn(
-          `Failed to reconcile SLO resources, skipping SLI pipelines migration: ${err.message}`
-        );
+        this.logger.warn(`Failed to reconcile SLO resources: ${err.message}`);
       }
-      return { state: previousState };
     }
 
+    // The migration checks that the routing pipeline of each version is installed before using it,
+    // so it does not depend on the install outcome.
     let nextState: TaskState = previousState;
     try {
       nextState = await migrateSliPipelines(previousState, {

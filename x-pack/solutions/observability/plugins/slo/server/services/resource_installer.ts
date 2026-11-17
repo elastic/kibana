@@ -65,6 +65,18 @@ const BASE_INDICES: ReadonlyArray<{ index: string; template: IndicesPutIndexTemp
   { index: COMPOSITE_SUMMARY_INDEX_NAME, template: COMPOSITE_SUMMARY_INDEX_TEMPLATE },
 ];
 
+// Resources SLO create, update and reset do not need: a failure is logged without failing the install.
+const NON_CRITICAL_RESOURCES: ReadonlySet<string> = new Set([
+  COMPOSITE_SUMMARY_MAPPINGS_TEMPLATE.name,
+  COMPOSITE_SUMMARY_INDEX_TEMPLATE.name,
+  COMPOSITE_SUMMARY_INDEX_NAME,
+  `${COMPOSITE_SUMMARY_INDEX_NAME} mappings`,
+  HEALTH_INDEX_TEMPLATE.name,
+  HEALTH_DATA_STREAM_NAME,
+]);
+
+const isCritical = (name: string): boolean => !NON_CRITICAL_RESOURCES.has(name);
+
 const getComposedOf = ({ composed_of: composedOf }: IndicesPutIndexTemplateRequest): string[] =>
   [composedOf ?? []].flat();
 
@@ -141,25 +153,31 @@ export class DefaultResourceInstaller implements ResourceInstaller {
       HEALTH_INDEX_TEMPLATE.name,
     ]);
 
-    if (failed.size > 0) {
+    const failedCritical = [...failed].filter(isCritical);
+    if (failedCritical.length > 0) {
       throw new SLOResourcesNotInstalled(
-        `Failed to install SLO resources: [${[...failed].join(', ')}]`
+        `Failed to install SLO resources: [${failedCritical.join(', ')}]`
       );
     }
   }
 
+  // Checks the critical resources only, matching what install() fails on.
   public async verify(): Promise<boolean> {
     try {
       const results = await Promise.all([
-        ...COMPONENT_TEMPLATES.map(async ({ name, _meta: meta }) => {
-          const version = await this.fetchComponentTemplateVersion(name);
-          return version !== null && version === meta?.version;
-        }),
-        ...[...INDEX_TEMPLATES, HEALTH_INDEX_TEMPLATE].map(async ({ name, _meta: meta }) => {
-          const version = await this.fetchIndexTemplateVersion(name);
-          return version !== null && version === meta?.version;
-        }),
-        ...BASE_INDICES.map(({ index }) =>
+        ...COMPONENT_TEMPLATES.filter(({ name }) => isCritical(name)).map(
+          async ({ name, _meta: meta }) => {
+            const version = await this.fetchComponentTemplateVersion(name);
+            return version !== null && version === meta?.version;
+          }
+        ),
+        ...INDEX_TEMPLATES.filter(({ name }) => isCritical(name)).map(
+          async ({ name, _meta: meta }) => {
+            const version = await this.fetchIndexTemplateVersion(name);
+            return version !== null && version === meta?.version;
+          }
+        ),
+        ...BASE_INDICES.filter(({ index }) => isCritical(index)).map(({ index }) =>
           this.execute(() => this.esClient.indices.exists({ index }))
         ),
         ...SLI_ROUTED_VERSIONS.map((version) => this.isRoutingPipelineUpToDate(version)),

@@ -262,6 +262,35 @@ describe('resourceInstaller', () => {
     await expect(createInstaller(esClient).install()).resolves.toBeUndefined();
   });
 
+  it('resolves and logs an error when only non-critical resources fail', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.indices.get.mockResponse({});
+    esClient.indices.putMapping.mockRejectedValue(new Error('mapping conflict'));
+    esClient.indices.createDataStream.mockRejectedValue(new Error('boom'));
+    const logger = loggerMock.create();
+
+    await expect(
+      new DefaultResourceInstaller(esClient, logger, 'M', () => NOW).install()
+    ).resolves.toBeUndefined();
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining(`[${COMPOSITE_SUMMARY_INDEX_NAME} mappings]`)
+    );
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining(`[${HEALTH_DATA_STREAM_NAME}]`)
+    );
+  });
+
+  it('only lists the critical resources when the install fails', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.indices.get.mockResponse({});
+    esClient.indices.createDataStream.mockRejectedValue(new Error('boom'));
+    esClient.ingest.putPipeline.mockRejectedValue(new Error('boom'));
+
+    await expect(createInstaller(esClient).install()).rejects.toThrow(
+      'Failed to install SLO resources: [.slo-observability.sli.routing-v3.6]'
+    );
+  });
+
   describe('routing pipelines', () => {
     it('installs a routing pipeline for every routed version, each with its own prefix', async () => {
       mockRoutedVersions = [3.6, 3.7];
@@ -418,6 +447,33 @@ describe('resourceInstaller', () => {
       mockRoutingPipelines(esClient, { '.slo-observability.sli.routing-v3.6': upToDateRouting });
 
       await expect(createInstaller(esClient).verify()).resolves.toBe(false);
+    });
+
+    it('ignores the non-critical resources', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      mockTemplatesUpToDate(esClient);
+      esClient.indices.getIndexTemplate.mockImplementation((params) => {
+        const name = params?.name ?? '';
+        const isNonCritical = name.includes('composite') || name === HEALTH_INDEX_TEMPLATE_NAME;
+        return Promise.resolve({
+          index_templates: [
+            {
+              name,
+              index_template: {
+                index_patterns: name,
+                composed_of: [],
+                _meta: { version: isNonCritical ? 0 : SLO_RESOURCES_VERSION },
+              },
+            },
+          ],
+        });
+      });
+      esClient.indices.exists.mockImplementation((params) =>
+        Promise.resolve(params.index !== COMPOSITE_SUMMARY_INDEX_NAME)
+      );
+      mockRoutingPipelines(esClient, { '.slo-observability.sli.routing-v3.6': upToDateRouting });
+
+      await expect(createInstaller(esClient).verify()).resolves.toBe(true);
     });
 
     it('returns false on Elasticsearch errors', async () => {

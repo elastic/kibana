@@ -200,26 +200,41 @@ describe('ResourcesReconcileTask', () => {
       expect(result?.state).toEqual(expect.objectContaining({ lastScanCandidates: 0 }));
     });
 
-    it('skips the SLI pipelines migration when the install fails', async () => {
-      mockInstall.mockRejectedValue(new Error('routing pipeline failed'));
-      const previousState = { cursor: 'some-cursor' };
+    it('migrates the SLI pipelines when the install fails', async () => {
+      mockInstall.mockRejectedValue(new Error('health data stream failed'));
 
-      const result = await run({ ...createTaskInstance(), state: previousState });
+      await run();
 
-      expect(esClient.ingest.getPipeline).not.toHaveBeenCalledWith(
-        expect.objectContaining({ id: '.slo-observability.sli.pipeline-*' }),
-        expect.anything()
-      );
-      expect(perSloPipelinePuts()).toHaveLength(0);
-      expect(result).toEqual({ state: expect.objectContaining(previousState) });
+      expect(perSloPipelinePuts()).toHaveLength(1);
     });
 
-    it('skips the run when another process holds the lock', async () => {
+    it('migrates the SLI pipelines when another process holds the lock', async () => {
       lockManager.withLock.mockRejectedValue(new LockAcquisitionError('lock held'));
 
       await run();
 
       expect(mockInstall).not.toHaveBeenCalled();
+      expect(perSloPipelinePuts()).toHaveLength(1);
+    });
+
+    it('does not migrate the SLI pipelines when the routing pipeline is missing', async () => {
+      mockInstall.mockRejectedValue(new Error('routing pipeline failed'));
+      const routingId = getSLIRoutingPipelineName(SLO_RESOURCES_VERSION);
+      esClient.ingest.getPipeline.mockImplementation(async (params) => {
+        const id = params?.id ?? '';
+        const isSliPipeline = id === '.slo-observability.sli.pipeline-*' || id === SLI_PIPELINE_ID;
+        const pipelines: Record<string, IngestPipeline> = isSliPipeline
+          ? { [SLI_PIPELINE_ID]: unmigratedSliPipeline }
+          : {};
+        return pipelines;
+      });
+
+      await run();
+
+      expect(esClient.ingest.getPipeline).toHaveBeenCalledWith(
+        expect.objectContaining({ id: routingId }),
+        expect.anything()
+      );
       expect(perSloPipelinePuts()).toHaveLength(0);
     });
   });
