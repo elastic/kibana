@@ -44,7 +44,8 @@ export const useEntityList = (entityType: string): EntityListResult => {
       }
       return inventoryApi.getEntities(entityType, range, { signal });
     },
-    // TODO: refreshToken only triggers a refetch on refresh, so the lint rule flags it as unused.
+    // `refreshToken` is intentionally included to fetch again when the same relative range is
+    // submitted again.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [inventoryApi, entityType, dateRange, refreshToken],
     FETCH_OPTIONS
