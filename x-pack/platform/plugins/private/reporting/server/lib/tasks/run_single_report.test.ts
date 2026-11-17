@@ -8,10 +8,11 @@
 import { Transform } from 'stream';
 import type { estypes } from '@elastic/elasticsearch';
 import { omit } from 'lodash';
-import { Report } from '../store';
+import { Report, SavedReport } from '../store';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { CancellationToken } from '@kbn/reporting-common';
 import {
+  JOB_STATUS,
   KibanaShuttingDownError,
   QueueTimeoutError,
   RenderFailedError,
@@ -19,7 +20,7 @@ import {
   RenderServiceSaturatedError,
   RenderServiceUnavailableError,
 } from '@kbn/reporting-common';
-import type { ReportDocument, TaskRunResult } from '@kbn/reporting-common/types';
+import type { ReportDocument, ReportSource, TaskRunResult } from '@kbn/reporting-common/types';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import {
   cryptoFactory,
@@ -28,6 +29,7 @@ import {
   type ReportingConfigType,
 } from '@kbn/reporting-server';
 import { errors } from '@kbn/screenshotting-plugin/common';
+import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource, isUnrecoverableError } from '@kbn/task-manager-plugin/server/task_running';
@@ -164,7 +166,7 @@ describe('Run Single Report Task', () => {
     expect(task.getTaskDefinition()).toMatchInlineSnapshot(`
       Object {
         "createTaskRunner": [Function],
-        "maxAttempts": ${configType.capture.maxAttempts},
+        "maxAttempts": ${configType.capture.maxAttempts + 1},
         "maxConcurrency": 1,
         "timeout": "120s",
         "title": "Reporting: execute job",
@@ -210,7 +212,7 @@ describe('Run Single Report Task', () => {
     expect(task.getTaskDefinition()).toMatchInlineSnapshot(`
       Object {
         "createTaskRunner": [Function],
-        "maxAttempts": 1,
+        "maxAttempts": 2,
         "maxConcurrency": 0,
         "timeout": "55s",
         "title": "Reporting: execute job",
@@ -531,6 +533,9 @@ describe('Run Single Report Task', () => {
     ['does not count the run after queuing for page-render-service', 1, 1, false],
     ['counts a retry after the run that followed queuing failed', 2, 2, true],
   ])('%s as an attempt', async (_name, taskAttempts, claimedAttempts, claimTracked) => {
+    // room for the second attempt
+    configType = createMockConfigSchema({ capture: { maxAttempts: 3 } });
+    mockReporting = await createMockReportingCore(configType);
     mockReporting.getExportTypesRegistry().register({
       id: 'test1',
       name: 'Test1',
@@ -1180,6 +1185,258 @@ describe('Run Single Report Task', () => {
       expect(store.setReportFailed).not.toHaveBeenCalled();
       expect(store.setReportError).toHaveBeenCalledTimes(1);
     });
+  });
+
+  describe('when the previous attempt did not record an outcome', () => {
+    const setupRerunTask = async ({
+      jobType = 'PNGV2',
+      report = {},
+      state = {},
+    }: {
+      jobType?: string;
+      report?: Partial<ReportSource>;
+      state?: object;
+    } = {}) => {
+      configType = createMockConfigSchema({ capture: { maxAttempts: 3 } });
+      mockReporting = await createMockReportingCore(configType);
+      const runTaskFn = jest.fn().mockResolvedValue({ content_type: 'image/png' });
+      // stands in for the real export type of the job type
+      jest.spyOn(mockReporting.getExportTypesRegistry(), 'getByJobType').mockReturnValue({
+        id: 'test1',
+        name: 'Test1',
+        setup: jest.fn(),
+        start: jest.fn(),
+        createJob: () => new Promise(() => {}),
+        runTask: runTaskFn,
+        shouldNotifyUsage: () => true,
+        getFeatureUsageName: () => 'Reporting: test1 single export',
+        notifyUsage: jest.fn(),
+        jobContentEncoding: 'base64',
+        jobType,
+        validLicenses: [],
+      } as unknown as ExportType);
+      // Kibana stopped during the first of three attempts
+      const interruptedReport = new SavedReport({
+        _id: 'test1',
+        _index: '.reporting-foo-index-234',
+        _seq_no: 1,
+        _primary_term: 1,
+        jobtype: jobType,
+        payload: { objectType: 'dashboard' } as ReportSource['payload'],
+        status: JOB_STATUS.PROCESSING,
+        attempts: 1,
+        process_expiration: '2026-11-17T12:04:00.000Z',
+        ...report,
+      });
+      const store = {
+        findReportFromTask: jest.fn().mockResolvedValue(interruptedReport),
+        setReportClaimed: jest.fn().mockResolvedValue({ _seq_no: 2, _primary_term: 1 }),
+        setReportCompleted: jest.fn().mockResolvedValue({ _seq_no: 3, _primary_term: 1 }),
+        setReportFailed: jest.fn().mockResolvedValue({}),
+        setReportError: jest.fn().mockResolvedValue({}),
+      };
+      mockReporting.getStore = () => Promise.resolve(store as unknown as ReportingStore);
+      mockReporting.getEventTracker = jest.fn().mockReturnValue(mockEventTracker);
+      const { asInternalUser: esClient } = await mockReporting.getEsClient();
+      (esClient.get as unknown as jest.Mock).mockResolvedValue({ _seq_no: 1, _primary_term: 1 });
+      logger.info = jest.fn();
+      logger.warn = jest.fn();
+      logger.error = jest.fn();
+
+      const task = new RunSingleReportTask({
+        reporting: mockReporting,
+        config: configType,
+        logger,
+      });
+      await task.init(taskManagerMock.createStart());
+      const taskRunner = task.getTaskDefinition().createTaskRunner({
+        taskInstance: {
+          id: 'random-task-id',
+          attempts: (interruptedReport.attempts ?? 0) + 1,
+          state,
+          params: { index: '.reporting-foo-index-234', id: 'test1', jobtype: jobType, payload: {} },
+        },
+        fakeRequest: fakeRawRequest,
+      } as unknown as RunContext);
+
+      const run = (): Promise<Error | undefined> =>
+        taskRunner.run().then(
+          () => undefined,
+          (runError: Error) => runError
+        );
+
+      return { store, run, runTaskFn, interruptedReport };
+    };
+
+    it.each([['PNGV2'], ['printable_pdf_v2']])(
+      'fails a %s report instead of generating it again',
+      async (jobType) => {
+        const { store, run, runTaskFn, interruptedReport } = await setupRerunTask({ jobType });
+
+        const error = await run();
+
+        expect(runTaskFn).not.toHaveBeenCalled();
+        // the report keeps the number of attempts that ran
+        expect(store.setReportClaimed).not.toHaveBeenCalled();
+        expect(store.setReportFailed).toHaveBeenCalledWith(
+          interruptedReport,
+          expect.objectContaining({
+            completed_at: expect.any(String),
+            output: expect.objectContaining({
+              error_code: 'kibana_stopped_unexpectedly_error',
+              content: expect.stringContaining('The report was not retried'),
+            }),
+          })
+        );
+        // removes the task
+        expect(isUnrecoverableError(error!)).toBe(true);
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('most likely because Kibana stopped unexpectedly'),
+          { tags: ['test1'] }
+        );
+      }
+    );
+
+    it('keeps the task when the failed status could not be saved', async () => {
+      const { store, run, runTaskFn } = await setupRerunTask();
+      store.setReportFailed.mockRejectedValue(new Error('version conflict'));
+
+      const error = await run();
+
+      // the next run tries to save it again
+      expect(isUnrecoverableError(error!)).toBe(false);
+      expect(runTaskFn).not.toHaveBeenCalled();
+    });
+
+    it('generates a report of another type again', async () => {
+      const { store, run, runTaskFn } = await setupRerunTask({ jobType: 'csv_searchsource' });
+
+      expect(await run()).toBeUndefined();
+
+      expect(runTaskFn).toHaveBeenCalledTimes(1);
+      expect(store.setReportClaimed).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ attempts: 2 })
+      );
+      expect(store.setReportFailed).not.toHaveBeenCalled();
+    });
+
+    it('fails a report of another type when Kibana stopped during its last attempt', async () => {
+      const { store, run, runTaskFn } = await setupRerunTask({
+        jobType: 'csv_searchsource',
+        report: { attempts: 3 },
+      });
+
+      const error = await run();
+
+      expect(runTaskFn).not.toHaveBeenCalled();
+      expect(store.setReportClaimed).not.toHaveBeenCalled();
+      expect(store.setReportFailed).toHaveBeenCalledWith(
+        expect.objectContaining({ _id: 'test1' }),
+        expect.objectContaining({
+          output: expect.objectContaining({ error_code: 'kibana_stopped_unexpectedly_error' }),
+        })
+      );
+      expect(isUnrecoverableError(error!)).toBe(true);
+    });
+
+    it('generates the report again when page-render-service renders it', async () => {
+      const { store, run, runTaskFn } = await setupRerunTask();
+      const startDeps = await mockReporting.getPluginStartDeps();
+      jest.spyOn(mockReporting, 'getPluginStartDeps').mockResolvedValue({
+        ...startDeps,
+        pageRenderScreenshotting: createMockScreenshottingStart(),
+      });
+
+      expect(await run()).toBeUndefined();
+
+      expect(runTaskFn).toHaveBeenCalledTimes(1);
+      expect(store.setReportFailed).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['a pending report that no attempt claimed', { status: JOB_STATUS.PENDING, attempts: 0 }],
+      ['a report whose last attempt recorded an error', { process_expiration: null }],
+    ])('generates %s', async (_name, report) => {
+      const { store, run, runTaskFn } = await setupRerunTask({ report });
+
+      expect(await run()).toBeUndefined();
+
+      expect(runTaskFn).toHaveBeenCalledTimes(1);
+      expect(store.setReportFailed).not.toHaveBeenCalled();
+    });
+
+    it('generates a report that was only queuing for page-render-service', async () => {
+      const { store, run, runTaskFn } = await setupRerunTask({
+        report: { attempts: 0 },
+        state: { queued: true },
+      });
+
+      expect(await run()).toBeUndefined();
+
+      expect(runTaskFn).toHaveBeenCalledTimes(1);
+      expect(store.setReportFailed).not.toHaveBeenCalled();
+    });
+
+    it('does not generate a report that has no attempts left', async () => {
+      // Task Manager allows one attempt more than the report gets
+      const { store, run, runTaskFn } = await setupRerunTask({
+        report: { status: JOB_STATUS.FAILED, attempts: 3 },
+      });
+
+      const error = await run();
+
+      expect(error).toEqual(new Error('Job test1 could not be claimed. Exiting...'));
+      expect(runTaskFn).not.toHaveBeenCalled();
+      expect(store.setReportClaimed).not.toHaveBeenCalled();
+      expect(store.setReportFailed).not.toHaveBeenCalled();
+    });
+  });
+
+  it('ends the task when the last attempt fails, as Task Manager allows one more', async () => {
+    configType = createMockConfigSchema({ capture: { maxAttempts: 3 } });
+    mockReporting = await createMockReportingCore(configType);
+    mockReporting.getExportTypesRegistry().register({
+      id: 'test1',
+      name: 'Test1',
+      setup: jest.fn(),
+      start: jest.fn(),
+      createJob: () => new Promise(() => {}),
+      runTask: jest.fn().mockRejectedValue(new Error('failure generating report')),
+      shouldNotifyUsage: () => true,
+      getFeatureUsageName: () => 'Reporting: test1 single export',
+      notifyUsage: jest.fn(),
+      jobContentEncoding: 'base64',
+      jobType: 'test1',
+      validLicenses: [],
+    } as unknown as ExportType);
+    const store = await mockReporting.getStore();
+    store.setReportFailed = jest.fn().mockResolvedValue({ _id: 'test', jobtype: 'test1' });
+    const task = new RunSingleReportTask({ reporting: mockReporting, config: configType, logger });
+    jest
+      // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
+      .spyOn(task, 'claimJob')
+      .mockResolvedValueOnce({ _id: 'test', jobtype: 'test1', status: 'pending' } as never);
+    jest
+      // @ts-expect-error TS compilation fails: this overrides a protected method of the RunSingleReportTask instance
+      .spyOn(task, 'getEventTracker')
+      .mockReturnValue(mockEventTracker as never);
+    await task.init(taskManagerMock.createStart());
+    const taskDefinition = task.getTaskDefinition();
+    const taskRunner = taskDefinition.createTaskRunner({
+      taskInstance: {
+        id: 'random-task-id',
+        attempts: 3,
+        params: { index: 'cool-reporting-index', id: 'test1', jobtype: 'test1', payload: {} },
+      },
+      fakeRequest: fakeRawRequest,
+    } as unknown as RunContext);
+
+    const error = await taskRunner.run().catch((runError: Error) => runError);
+
+    expect(taskDefinition.maxAttempts).toBe(4);
+    expect(store.setReportFailed).toHaveBeenCalledTimes(1);
+    expect(isUnrecoverableError(error as Error)).toBe(true);
   });
 
   // Regression test for https://github.com/elastic/kibana/issues/255230 and

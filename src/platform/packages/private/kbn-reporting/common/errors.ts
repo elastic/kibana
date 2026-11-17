@@ -150,6 +150,19 @@ export class KibanaShuttingDownError extends ReportingError {
   }
 }
 
+export class KibanaStoppedUnexpectedlyError extends ReportingError {
+  static code = 'kibana_stopped_unexpectedly_error' as const;
+  public get code(): string {
+    return KibanaStoppedUnexpectedlyError.code;
+  }
+
+  public humanFriendlyMessage() {
+    return i18n.translate('reporting.common.kibanaStoppedUnexpectedlyErrorMessage', {
+      defaultMessage: `Can't generate this report because Kibana stopped unexpectedly while generating it. The report was not retried because it would likely fail again. Try reducing the amount of data in the report.`,
+    });
+  }
+}
+
 /**
  * Special error case that should only occur on Cloud when trying to generate
  * a report on a Kibana instance that is too small to be running Chromium.

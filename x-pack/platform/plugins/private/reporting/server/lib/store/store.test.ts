@@ -328,6 +328,104 @@ describe('ReportingStore', () => {
     expect(updateCall.if_primary_term).toBe(10002);
   });
 
+  it('setReportError clears the process expiration, as the attempt recorded how it ended', async () => {
+    const store = new ReportingStore(mockCore, mockLogger);
+    const report = new SavedReport({
+      _id: 'id-of-failure',
+      _index: '.reporting-test-index-12345',
+      _seq_no: 43,
+      _primary_term: 10002,
+      jobtype: 'test-report',
+      payload: {
+        title: 'test report',
+        headers: 'rp_test_headers',
+        objectType: 'testOt',
+        browserTimezone: 'BCD',
+        version: '7.14.0',
+      },
+      process_expiration: '2026-11-17T12:04:00.000Z',
+    });
+
+    await store.setReportError(report, { output: null, error: new Error('attempt failed') });
+
+    const [[updateCall]] = mockEsClient.update.mock.calls;
+    expect((updateCall as estypes.UpdateRequest).doc).toEqual(
+      expect.objectContaining({ process_expiration: null })
+    );
+  });
+
+  describe('findInterruptedScheduledReport', () => {
+    const runAt = new Date('2026-11-17T12:00:00.000Z');
+
+    it('finds the report that a run of the same scheduled occurrence left processing', async () => {
+      mockEsClient.search.mockResponse({
+        hits: {
+          hits: [
+            {
+              _id: 'interrupted-report-id',
+              _index: '.ds-.kibana-reporting-2026.11.17-000001',
+              _seq_no: 7,
+              _primary_term: 2,
+              _source: {
+                jobtype: 'PNGV2',
+                payload: { title: 'test report', objectType: 'dashboard' },
+                status: JOB_STATUS.PROCESSING,
+                attempts: 1,
+                created_at: runAt.toISOString(),
+                scheduled_report_id: 'scheduled-report-id',
+              },
+            },
+          ],
+        },
+      } as estypes.SearchResponse<ReportDocument['_source']>);
+      const store = new ReportingStore(mockCore, mockLogger);
+
+      const report = await store.findInterruptedScheduledReport({
+        scheduledReportId: 'scheduled-report-id',
+        runAt,
+      });
+
+      expect(report).toBeInstanceOf(SavedReport);
+      expect(report).toMatchObject({
+        _id: 'interrupted-report-id',
+        _index: '.ds-.kibana-reporting-2026.11.17-000001',
+        _seq_no: 7,
+        _primary_term: 2,
+        jobtype: 'PNGV2',
+        status: JOB_STATUS.PROCESSING,
+        scheduled_report_id: 'scheduled-report-id',
+      });
+      expect(mockEsClient.search).toHaveBeenCalledWith({
+        index: '.kibana-reporting*',
+        size: 1,
+        seq_no_primary_term: true,
+        query: {
+          bool: {
+            filter: [
+              { term: { scheduled_report_id: 'scheduled-report-id' } },
+              { term: { created_at: '2026-11-17T12:00:00.000Z' } },
+              { term: { status: 'processing' } },
+            ],
+          },
+        },
+      });
+    });
+
+    it('is undefined when the run left no report processing', async () => {
+      mockEsClient.search.mockResponse({
+        hits: { hits: [] },
+      } as unknown as estypes.SearchResponse<ReportDocument['_source']>);
+      const store = new ReportingStore(mockCore, mockLogger);
+
+      expect(
+        await store.findInterruptedScheduledReport({
+          scheduledReportId: 'scheduled-report-id',
+          runAt,
+        })
+      ).toBeUndefined();
+    });
+  });
+
   it('setReportCompleted sets the status of a saved report to completed', async () => {
     const store = new ReportingStore(mockCore, mockLogger);
     const report = new SavedReport({

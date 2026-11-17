@@ -25,6 +25,14 @@ describe('sharedI18nTexts', () => {
       );
     });
 
+    it('explains that a report was not retried when Kibana stopped unexpectedly', () => {
+      expect(
+        sharedI18nTexts.notRetriedError('kibana_stopped_unexpectedly_error')
+      ).toMatchInlineSnapshot(
+        `"Can't generate this report because Kibana stopped unexpectedly while generating it. The report was not retried because it would likely fail again. Try reducing the amount of data in the report."`
+      );
+    });
+
     it.each([
       ['a retried error', 'browser_screenshot_error'],
       ['no error code', undefined],

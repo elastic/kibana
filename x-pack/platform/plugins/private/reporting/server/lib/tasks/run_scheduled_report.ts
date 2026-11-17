@@ -66,6 +66,21 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
 
       const store = await this.opts.reporting.getStore();
 
+      const interruptedReport = await this.findInterruptedReport(scheduledReport, runAt);
+      if (interruptedReport) {
+        this.logger.warn(
+          `Scheduled report ${scheduledReportId} did not record the outcome of report ${interruptedReport._id}, most likely because Kibana stopped unexpectedly. It will not be generated again until its next scheduled run.`,
+          { tags: [interruptedReport._id] }
+        );
+        return {
+          jobId: interruptedReport._id,
+          report: interruptedReport,
+          task: interruptedReport.toReportTaskJSON(),
+          scheduledReport,
+          isInterrupted: true,
+        };
+      }
+
       // Add the report to ReportingStore to show as processing
       report = await store.addReport(
         new ScheduledReport({
@@ -106,6 +121,33 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
       task: report?.toReportTaskJSON(),
       scheduledReport,
     };
+  }
+
+  /**
+   * Task Manager reruns a scheduled report whose run was cut short by Kibana stopping, and that
+   * run left its report processing. Failing to look for it must not cost the schedule a run.
+   */
+  private async findInterruptedReport(
+    scheduledReport: SavedObject<ScheduledReportType>,
+    runAt: Date
+  ): Promise<SavedReport | undefined> {
+    try {
+      if (!(await this.isAbandonedWhenInterrupted(scheduledReport.attributes.jobType))) {
+        return undefined;
+      }
+      const store = await this.opts.reporting.getStore();
+      return await store.findInterruptedScheduledReport({
+        scheduledReportId: scheduledReport.id,
+        runAt,
+      });
+    } catch (failedToFind) {
+      errorLogger(
+        this.logger,
+        `Error in finding an interrupted run of scheduled report ${scheduledReport.id}`,
+        failedToFind
+      );
+      return undefined;
+    }
   }
 
   protected getMaxAttempts() {

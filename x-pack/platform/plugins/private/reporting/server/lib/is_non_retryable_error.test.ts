@@ -9,6 +9,7 @@ import {
   BrowserScreenshotError,
   BrowserUnexpectedlyClosedError,
   KibanaShuttingDownError,
+  KibanaStoppedUnexpectedlyError,
   PdfWorkerOutOfMemoryError,
   QueueTimeoutError,
 } from '@kbn/reporting-common';
@@ -21,6 +22,7 @@ describe('isNonRetryableError', () => {
     ['a closed browser screenshotting error', new errors.BrowserClosedUnexpectedly()],
     ['a PDF worker out of memory reporting error', new PdfWorkerOutOfMemoryError()],
     ['a PDF worker out of memory screenshotting error', new errors.PdfWorkerOutOfMemoryError()],
+    ['Kibana stopping unexpectedly', new KibanaStoppedUnexpectedlyError()],
   ])('is true for %s', (_name, error) => {
     expect(isNonRetryableError(error)).toBe(true);
   });
