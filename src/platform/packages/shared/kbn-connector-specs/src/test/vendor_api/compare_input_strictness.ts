@@ -188,10 +188,17 @@ const formatGap = (vendor: JsonSchema, connector: JsonSchema): StrictnessGap | u
  * of the ids a vendor parameter describes one at a time. So a connector that constrains the
  * shape at all is left to review, and only one that constrains it not at all is reported.
  */
+/**
+ * A pattern built only of anchors and wildcards, such as `.+` or `^.*$`. It describes no shape
+ * an input could restate, so asking for one would say nothing an author could act on.
+ */
+const isWildcard = (pattern: string) => /^[\^$.*+()\s]*$/.test(pattern);
+
 const patternGap = (vendor: JsonSchema, connector: JsonSchema): StrictnessGap | undefined => {
   const wanted = stringAt(vendor, 'pattern');
   if (
     wanted === undefined ||
+    isWildcard(wanted) ||
     stringAt(connector, 'pattern') !== undefined ||
     stringAt(connector, 'format') !== undefined ||
     enumAt(connector) !== undefined
@@ -246,9 +253,94 @@ const sameKind = (vendor: JsonSchema, connector: JsonSchema): boolean => {
   return wanted === undefined || declared === undefined || wanted === declared;
 };
 
+/**
+ * The vendor rules a fixed set of values breaks. An enum is the tightest an input can be, so it
+ * is judged by what it allows rather than by which keywords it repeats: MISP's attribute types
+ * are an enum of short names, and asking them to restate a `maxLength` of 100 says nothing.
+ */
+const gapsForValues = (vendor: JsonSchema, values: readonly unknown[]): StrictnessGap[] => {
+  const strings = values.filter((value): value is string => typeof value === 'string');
+  const numbers = values.filter((value): value is number => typeof value === 'number');
+  const print_ = (value: unknown) => print(value);
+  const breaks = (broken: unknown[], keyword: string, vendorText: string) =>
+    broken.length === 0
+      ? undefined
+      : { keyword, vendor: vendorText, connector: print(broken.map(print_)) };
+
+  const maxLength = numberAt(vendor, 'maxLength');
+  const minLength = numberAt(vendor, 'minLength');
+  const pattern = stringAt(vendor, 'pattern');
+  const allowed = enumAt(vendor);
+  const upper = upperBound(vendor);
+  const lower = lowerBound(vendor);
+  const matcher = (() => {
+    if (pattern === undefined || isWildcard(pattern)) {
+      return undefined;
+    }
+    try {
+      return new RegExp(pattern, 'u');
+    } catch {
+      try {
+        return new RegExp(pattern);
+      } catch {
+        return undefined;
+      }
+    }
+  })();
+
+  return [
+    maxLength === undefined
+      ? undefined
+      : breaks(
+          strings.filter((value) => value.length > maxLength),
+          'maxLength',
+          `${maxLength}`
+        ),
+    minLength === undefined
+      ? undefined
+      : breaks(
+          strings.filter((value) => value.length < minLength),
+          'minLength',
+          `${minLength}`
+        ),
+    matcher === undefined
+      ? undefined
+      : breaks(
+          strings.filter((value) => !matcher.test(value)),
+          'pattern',
+          pattern as string
+        ),
+    allowed === undefined
+      ? undefined
+      : breaks(
+          values.filter((value) => !allowed.includes(value)),
+          'enum',
+          print(allowed)
+        ),
+    upper === undefined
+      ? undefined
+      : breaks(
+          numbers.filter((value) => value > upper),
+          'maximum',
+          `${upper}`
+        ),
+    lower === undefined
+      ? undefined
+      : breaks(
+          numbers.filter((value) => value < lower),
+          'minimum',
+          `${lower}`
+        ),
+  ].filter((gap): gap is StrictnessGap => gap !== undefined);
+};
+
 const gapsBetween = (vendor: JsonSchema, connector: JsonSchema): StrictnessGap[] => {
   if (!sameKind(vendor, connector)) {
     return [];
+  }
+  const fixed = enumAt(connector) ?? ('const' in connector ? [connector.const] : undefined);
+  if (fixed !== undefined) {
+    return gapsForValues(vendor, fixed);
   }
   const gaps: Array<StrictnessGap | undefined> = [
     formatGap(vendor, connector),

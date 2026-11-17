@@ -72,6 +72,12 @@ describe('compareInputStrictness', () => {
       expect(compareInputStrictness(schema, { ...schema })).toEqual([]);
     });
 
+    it('ignores a pattern that is only wildcards, which describes no shape', () => {
+      for (const pattern of ['.+', '.*', '^.*$', '^.+$']) {
+        expect(compareInputStrictness({ type: 'string', pattern }, { type: 'string' })).toEqual([]);
+      }
+    });
+
     it('leaves a differently spelled pattern to review', () => {
       expect(
         compareInputStrictness(
@@ -184,6 +190,30 @@ describe('compareInputStrictness', () => {
       expect(
         compareInputStrictness(vendor, { anyOf: [{ maxLength: 20 }, { maxLength: 50 }] })
       ).toEqual([{ keyword: 'maxLength', vendor: '10', connector: '20' }]);
+    });
+  });
+
+  describe('a fixed set of values', () => {
+    it('is judged by what it allows, not by the keywords it repeats', () => {
+      expect(
+        compareInputStrictness({ type: 'string', maxLength: 100 }, { enum: ['ip-dst', 'domain'] })
+      ).toEqual([]);
+    });
+
+    it('reports the values that break a vendor rule', () => {
+      expect(
+        compareInputStrictness({ type: 'string', maxLength: 5 }, { enum: ['short', 'much-longer'] })
+      ).toEqual([{ keyword: 'maxLength', vendor: '5', connector: '["much-longer"]' }]);
+    });
+
+    it('checks the values against a vendor pattern', () => {
+      expect(
+        compareInputStrictness({ type: 'string', pattern: '^[a-z]+$' }, { enum: ['good', 'BAD1'] })
+      ).toEqual([{ keyword: 'pattern', vendor: '^[a-z]+$', connector: '["BAD1"]' }]);
+    });
+
+    it('checks numbers against the vendor bounds', () => {
+      expect(keywords({ type: 'integer', maximum: 10 }, { enum: [5, 50] })).toEqual(['maximum']);
     });
   });
 
