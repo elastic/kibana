@@ -27,6 +27,7 @@ export const createSourceDeleteTool = ({
   getScopedClients,
   server,
   logger,
+  telemetry,
 }: SourceToolDeps): BuiltinToolDefinition<typeof sourceDeleteSchema> => ({
   id: NIGHTSHIFT_SOURCE_DELETE_TOOL_ID,
   type: ToolType.builtin,
@@ -83,14 +84,17 @@ export const createSourceDeleteTool = ({
     logger,
     requireSourceChangePrivilege: true,
   }),
-  handler: async ({ source: slugOrId }, { request }) =>
+  handler: async ({ source: slugOrId }, { request, runContext }) =>
     runSourceTool({
       action: 'delete source',
       privilege: 'changeSources',
+      toolId: NIGHTSHIFT_SOURCE_DELETE_TOOL_ID,
       request,
+      runContext,
       getScopedClients,
       server,
       logger,
+      telemetry,
       run: async ({ sourcesClient }) => {
         const { id, slug, title } = await resolveSource(sourcesClient, slugOrId);
         await sourcesClient.delete(id);

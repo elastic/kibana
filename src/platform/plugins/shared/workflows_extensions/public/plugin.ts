@@ -10,6 +10,7 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { PublicStepRegistry } from './step_registry';
 import { registerInternalStepDefinitions } from './steps';
+import { installTestBridge } from './test_bridge';
 import { PublicTriggerRegistry } from './trigger_registry';
 import { registerInternalTriggerDefinitions } from './triggers';
 import type {
@@ -30,6 +31,7 @@ export class WorkflowsExtensionsPublicPlugin
 {
   private readonly stepRegistry: PublicStepRegistry;
   private readonly triggerRegistry: PublicTriggerRegistry;
+  private removeTestBridge?: () => void;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.stepRegistry = new PublicStepRegistry(initializerContext.logger.get());
@@ -53,6 +55,8 @@ export class WorkflowsExtensionsPublicPlugin
     _core: CoreStart,
     _plugins: WorkflowsExtensionsPublicPluginStartDeps
   ): WorkflowsExtensionsPublicPluginStart {
+    this.removeTestBridge = installTestBridge(this.stepRegistry);
+
     return {
       getAllStepDefinitions: () => {
         return this.stepRegistry.getAll();
@@ -78,5 +82,7 @@ export class WorkflowsExtensionsPublicPlugin
     };
   }
 
-  public stop() {}
+  public stop() {
+    this.removeTestBridge?.();
+  }
 }

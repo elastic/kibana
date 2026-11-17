@@ -13,6 +13,7 @@ import {
   type SignificantEvent,
 } from '@kbn/significant-events-schema';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
+import { createBulkWriteValidationError } from '../bulk_write';
 import {
   addsNewDetectionRules,
   extractRuleUuids,
@@ -152,7 +153,9 @@ const decideSeverity = ({
     return 'low';
   }
   if (proposed === undefined) {
-    throw new Error('events_write: an event with signals needs a proposed severity.');
+    throw createBulkWriteValidationError(
+      'events_write: an event with signals needs a proposed severity.'
+    );
   }
   return proposed;
 };
