@@ -169,7 +169,10 @@ describe('getKpiMetrics', () => {
       const clientArgs = createClientArgs({ casesList: [customMetric] });
 
       await getKpiMetrics(
-        { owner: 'securitySolution', filters: { tags: [], search: '' } },
+        {
+          owner: 'securitySolution',
+          filters: { search: '', tags: [], searchFields: ['cases.title', 'cases.description'] },
+        },
         clientArgs,
         casesClient
       );
@@ -178,6 +181,31 @@ describe('getKpiMetrics', () => {
       expect(clientArgs.services.caseService.searchCaseIds).not.toHaveBeenCalled();
       const [[request]] = clientArgs.analyticsV2Reader.msearch.mock.calls[0];
       expect(JSON.stringify(request.body.query)).not.toContain('case.id');
+    });
+
+    it('searches the case ids with the search fields when a search text is set', async () => {
+      const clientArgs = createClientArgs({ casesList: [customMetric] });
+      clientArgs.services.caseService.searchCaseIds.mockResolvedValue({ ids: ['c1'], total: 1 });
+
+      await getKpiMetrics(
+        {
+          owner: 'securitySolution',
+          filters: { search: 'phishing', searchFields: ['cases.title', 'cases.description'] },
+        },
+        clientArgs,
+        casesClient
+      );
+
+      expect(prepareCasesSearchMock).toHaveBeenCalledWith(
+        {
+          search: 'phishing',
+          searchFields: ['cases.title', 'cases.description'],
+          owner: 'securitySolution',
+        },
+        clientArgs,
+        casesClient
+      );
+      expect(clientArgs.services.caseService.searchCaseIds).toHaveBeenCalled();
     });
 
     it('uses the case search of the list with the owner of the request and no date range', async () => {

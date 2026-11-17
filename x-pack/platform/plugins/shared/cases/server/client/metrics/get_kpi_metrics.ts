@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
+import { isEmpty, omit } from 'lodash';
 import {
   CASE_CONFIGURE_SAVED_OBJECT,
   MAX_KPI_FILTER_CASE_IDS,
@@ -34,10 +34,13 @@ import { runKpiMetrics, toKpiMetricError } from './kpi';
 const isCustomMetric = (metric: KpiMetricConfiguration): metric is CustomKpiMetricConfiguration =>
   metric.kind === 'custom';
 
+/**
+ * The search fields only change how the search text works, so they alone do not filter the cases.
+ */
 const hasActiveCaseFilters = (
   filters: KpiMetricsCaseFilters | undefined
 ): filters is KpiMetricsCaseFilters =>
-  filters != null && Object.values(filters).some((value) => !isEmpty(value));
+  filters != null && Object.values(omit(filters, 'searchFields')).some((value) => !isEmpty(value));
 
 const searchFilteredCaseIds = async ({
   owner,
