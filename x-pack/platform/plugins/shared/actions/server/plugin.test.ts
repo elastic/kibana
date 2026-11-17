@@ -716,6 +716,23 @@ describe('Actions Plugin', () => {
         });
       };
 
+      const setupServerlessPlugin = async (enabledActionTypes: string[]) => {
+        context = coreMock.createPluginInitializerContext<ActionsConfig>({
+          ...getConfig(),
+          enabledActionTypes,
+        });
+        plugin = new ActionsPlugin(context);
+        await plugin.setup(coreSetup, {
+          ...pluginsSetup,
+          encryptedSavedObjects: { ...pluginsSetup.encryptedSavedObjects, canEncrypt: true },
+          serverless: serverlessPluginMock.createSetupContract(),
+        });
+        return plugin.start(coreStart, {
+          ...pluginsStart,
+          serverless: serverlessPluginMock.createStartContract(),
+        });
+      };
+
       const getTypeIds = (pluginStart: PluginStartContract) => pluginStart.getAllTypes();
 
       describe('flag on', () => {
@@ -810,6 +827,45 @@ describe('Actions Plugin', () => {
 
           await expect(pluginStart.whenCatalogReady()).resolves.toBeUndefined();
           expect(getTypeIds(pluginStart)).not.toContain(SPEC_TYPE_ID);
+        });
+
+        it('validates configured types after a delayed catalog load', async () => {
+          coreStart.featureFlags.getBooleanValue$.mockReturnValue(of(true, false));
+          seedCatalog();
+          let resolveGet: (value: unknown) => void = () => {};
+          getEsClient().get.mockReturnValue(
+            new Promise((resolve) => {
+              resolveGet = resolve;
+            })
+          );
+
+          const pluginStart = await setupServerlessPlugin([SPEC_TYPE_ID]);
+          await flush();
+
+          expect(context.logger.get().error).not.toHaveBeenCalled();
+
+          resolveGet(manifestDoc);
+          await pluginStart.whenCatalogReady();
+          await flush();
+
+          expect(getTypeIds(pluginStart)).toContain(SPEC_TYPE_ID);
+          expect(context.logger.get().error).not.toHaveBeenCalled();
+        });
+
+        it('logs an invalid configured type after the catalog load without rejecting start', async () => {
+          getEsClient().get.mockResolvedValue({
+            _index: CONNECTOR_TYPE_CATALOG_INDEX,
+            _id: 'manifest',
+            found: false,
+          });
+
+          const pluginStart = await setupServerlessPlugin(['non-existing']);
+          await pluginStart.whenCatalogReady();
+          await flush();
+
+          expect(context.logger.get().error).toHaveBeenCalledWith(
+            'Failed to validate enabled connector types: Action type "non-existing" is not registered.'
+          );
         });
       });
 

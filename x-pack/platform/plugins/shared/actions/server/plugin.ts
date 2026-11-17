@@ -655,12 +655,18 @@ export class ActionsPlugin
 
     // The handle must exist first, because the first flag value can arrive synchronously.
     const connectorCatalog = this.startConnectorCatalog(core);
+    let connectorCatalogEnabled: boolean | undefined;
     this.connectorCatalogFeatureFlagSubscription = core.featureFlags
       .getBooleanValue$(ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG, false)
       .subscribe({
-        next: (isConnectorCatalogEnabled: boolean) =>
-          connectorCatalog.onFlagValue(isConnectorCatalogEnabled),
-        error: (error: unknown) => connectorCatalog.onFlagError(error),
+        next: (isConnectorCatalogEnabled: boolean) => {
+          connectorCatalogEnabled ??= isConnectorCatalogEnabled;
+          connectorCatalog.onFlagValue(isConnectorCatalogEnabled);
+        },
+        error: (error: unknown) => {
+          connectorCatalogEnabled ??= false;
+          connectorCatalog.onFlagError(error);
+        },
       });
 
     const {
@@ -926,7 +932,24 @@ export class ActionsPlugin
       }).catch(() => {});
     }
 
-    this.validateEnabledConnectorTypes(plugins);
+    const shouldValidateServerlessConnectorTypes =
+      !!plugins.serverless &&
+      this.actionsConfig.enabledActionTypes.length > 0 &&
+      this.actionsConfig.enabledActionTypes[0] !== AllowedHosts.Any;
+    if (shouldValidateServerlessConnectorTypes && connectorCatalogEnabled !== false) {
+      // Keep start synchronous while catalog-only types are loaded asynchronously.
+      void connectorCatalog.ready
+        .then(() => this.validateEnabledConnectorTypes(plugins))
+        .catch((error: unknown) => {
+          this.logger.error(
+            `Failed to validate enabled connector types: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        });
+    } else {
+      this.validateEnabledConnectorTypes(plugins);
+    }
 
     this.connectorUsageReportingTask?.start(plugins.taskManager).catch(() => {});
 
