@@ -11,12 +11,10 @@ import {
   VISUALIZATION_ATTACHMENT_TYPE,
   getEffectiveRenderer,
   isCustomContentVisualization,
+  readAttachmentQueries,
   type VisualizationAttachmentData,
 } from '@kbn/agent-builder-visualizations-common';
-import { toEsqlQueryState } from '@kbn/custom-content-common';
 import {
-  createPanelFailureResult,
-  type InlinePanelOperationType,
   type PanelContent,
   type PanelContentAttempt,
   getRendererEmbeddableType,
@@ -28,11 +26,12 @@ const toPanelContent = (data: VisualizationAttachmentData): PanelContent => {
 
   // Custom content stores markup rather than a chart config, so its panel config is rebuilt.
   if (isCustomContentVisualization(data)) {
+    const esqlQueries = readAttachmentQueries(data);
     return {
       type,
       config: {
         template: data.visualization.template,
-        esql_query: toEsqlQueryState(data.esql),
+        esql_query: esqlQueries.length ? esqlQueries : undefined,
       },
     };
   }
@@ -51,8 +50,8 @@ export const createAttachmentPanelResolver = ({
 }: {
   attachments: AttachmentStateManager;
 }) => {
-  return (attachmentId: string, operationType: InlinePanelOperationType): PanelContentAttempt => {
-    const fail = (error: string) => createPanelFailureResult(operationType, attachmentId, error);
+  return (attachmentId: string): PanelContentAttempt => {
+    const fail = (error: string): PanelContentAttempt => ({ type: 'failure', error });
 
     const record = attachments.getAttachmentRecord(attachmentId);
     if (!record) {
@@ -71,6 +70,10 @@ export const createAttachmentPanelResolver = ({
       return fail(`Attachment "${attachmentId}" has no readable visualization data.`);
     }
 
-    return { type: 'success', panelContent: toPanelContent(data) };
+    return {
+      type: 'success',
+      panelContent: toPanelContent(data),
+      ...(isCustomContentVisualization(data) ? { heightHint: data.visualization.height } : {}),
+    };
   };
 };

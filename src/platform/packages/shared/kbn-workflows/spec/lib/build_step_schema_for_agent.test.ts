@@ -17,6 +17,7 @@ import {
 import { CONNECTOR_ID_MAX_LENGTH } from '../..';
 import { getShape } from '../../common/utils/zod/get_shape';
 import type { BaseConnectorContract } from '../../types/v1';
+import { getBuiltInStepDefinition } from '../builtin_step_definitions';
 import type { BaseStepDefinition } from '../step_definition_types';
 import { StepCategory } from '../step_definition_types';
 
@@ -172,6 +173,12 @@ describe('build_step_schema_for_agent', () => {
         makeBuiltInStep({ inputSchema: z.object({ x: z.string() }) })
       );
       const shape = getShape(schema);
+
+      expect(shape).toHaveProperty('with');
+    });
+
+    it.each(['data.set', 'workflow.output'])('includes with for the %s record input', (id) => {
+      const shape = getShape(buildBuiltInStepSchema(getBuiltInStepDefinition(id)!));
 
       expect(shape).toHaveProperty('with');
     });

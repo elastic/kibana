@@ -22,7 +22,10 @@ const WORKFLOW_OPTIONS_TIMEOUT = 15_000;
  * the action policy form flyout.
  */
 export class ActionPolicyFormPage {
-  /** Page-level wrapper; a stable anchor that the form finished rendering. */
+  /**
+   * Page-level wrapper that also holds the app header. It renders immediately, including during
+   * the edit-mode loading and fetch-error states, so wait on `nameInput` for form readiness.
+   */
   public readonly container: Locator;
   public readonly pageTitle: Locator;
   public readonly nameInput: Locator;
@@ -39,7 +42,7 @@ export class ActionPolicyFormPage {
 
   constructor(private readonly page: ScoutPage, private readonly mountConfig: AlertingMountConfig) {
     this.container = this.page.testSubj.locator('actionPolicyFormPage');
-    this.pageTitle = this.container.getByTestId('pageTitle');
+    this.pageTitle = this.container.getByTestId('appHeaderTitle');
     this.nameInput = this.container.getByTestId('nameInput');
     this.advancedMatchingToggle = this.container.getByTestId('advancedMatchingAccordionToggle');
     this.matcherInput = this.container.getByTestId('matcherInput');
@@ -53,14 +56,14 @@ export class ActionPolicyFormPage {
     await this.page.gotoApp(
       `${this.mountConfig.appRoute}${this.mountConfig.subPaths.actionPoliciesCreate}`
     );
-    await this.container.waitFor({ state: 'visible' });
+    await this.nameInput.waitFor({ state: 'visible' });
   }
 
   async gotoEdit(policyId: string) {
     await this.page.gotoApp(
       `${this.mountConfig.appRoute}${this.mountConfig.subPaths.actionPoliciesEdit(policyId)}`
     );
-    await this.container.waitFor({ state: 'visible' });
+    await this.nameInput.waitFor({ state: 'visible' });
   }
 
   async setName(name: string) {

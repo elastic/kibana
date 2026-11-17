@@ -1,9 +1,37 @@
 {
-  "sha1": "ab92b8fe6e62ee8634f1510aca8b8bd34330187d",
+  "sha1": "6814c82788e3910339bb4376ca394410eb690ad2",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "3e8bb52ac657637-97dbae5f3182fa5",
+      "title": "Dispatcher runs the default email workflow of a simple workflow a breaching rule sends one email listing every alert in the standard layout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatch_default_email_workflow.spec.ts",
+        "line": 93,
+        "column": 25
+      }
+    },
+    {
+      "id": "251e13322fcccc8-8914be317eb17c6",
+      "title": "Dispatcher runs the workflow of an action policy in a non-default space a breaching rule fires the policy and its workflow runs the space-only connector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatch_workflow_execution_space.spec.ts",
+        "line": 112,
+        "column": 25
+      }
+    },
     {
       "id": "99c74a111068925-4e8d7b869f4b346",
       "title": "Dispatcher runs the workflow of an action policy a breaching rule fires the policy and its workflow runs to completion",
@@ -22,7 +50,7 @@
     {
       "id": "98e07605e6e2555-57406c6ad330b4f",
       "title": "Dispatcher does not dispatch any episodes when there are no alert events",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -31,14 +59,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 280,
-        "column": 23
+        "line": 281,
+        "column": 47
       }
     },
     {
       "id": "98e07605e6e2555-3e4105e9415ebd2",
       "title": "Dispatcher dispatches all unique episodes when alert events have no prior fire actions",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -47,14 +75,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 292,
+        "line": 293,
         "column": 7
       }
     },
     {
       "id": "98e07605e6e2555-929937a134bb0fd",
       "title": "Dispatcher persists notified actions for dispatched action groups when the action policy has a throttle interval",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -63,14 +91,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 427,
-        "column": 64
+        "line": 430,
+        "column": 31
       }
     },
     {
       "id": "98e07605e6e2555-007600ab43704da",
       "title": "Dispatcher only dispatches the new events when some episodes already have fires",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -79,14 +107,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 507,
-        "column": 22
+        "line": 510,
+        "column": 27
       }
     },
     {
       "id": "98e07605e6e2555-5c049b2017b1c88",
       "title": "Dispatcher dispatches fire actions for non-suppressed episodes and suppress actions for suppressed ones when alert episodes have user actions",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -95,14 +123,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 606,
-        "column": 9
+        "line": 609,
+        "column": 30
       }
     },
     {
       "id": "98e07605e6e2555-bd1da056944abc9",
       "title": "Dispatcher lifts suppression when the last user action is an unsnooze, an expired snooze, or an activate",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -111,14 +139,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 897,
+        "line": 900,
         "column": 42
       }
     },
     {
       "id": "98e07605e6e2555-8e42f31ee1f6a78",
       "title": "Dispatcher does not carry an ack from a previous episode of the series over to the current episode",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -127,14 +155,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1061,
-        "column": 22
+        "line": 1065,
+        "column": 19
       }
     },
     {
       "id": "98e07605e6e2555-2e8527aacf4031e",
       "title": "Dispatcher only dispatches episodes matching the KQL expression when the action policy has a matcher",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -143,14 +171,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1105,
+        "line": 1109,
         "column": 7
       }
     },
     {
       "id": "98e07605e6e2555-65558d4a4228bd6",
       "title": "Dispatcher groups episodes by the specified data fields when the action policy groups per field",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -159,14 +187,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1180,
-        "column": 23
+        "line": 1184,
+        "column": 17
       }
     },
     {
       "id": "98e07605e6e2555-159291ccca999fe",
       "title": "Dispatcher throttle strategies / per_alert + on_status_change throttles on a second dispatch when status is unchanged",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -175,14 +203,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1289,
-        "column": 28
+        "line": 1293,
+        "column": 9
       }
     },
     {
       "id": "98e07605e6e2555-bc5270746632182",
       "title": "Dispatcher throttle strategies / per_alert + per_status_interval throttles within the interval when status is unchanged",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -191,14 +219,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1337,
-        "column": 29
+        "line": 1342,
+        "column": 28
       }
     },
     {
       "id": "98e07605e6e2555-c0bd7bec44bcc2d",
       "title": "Dispatcher throttle strategies / per_alert + every_time dispatches a new event even when the episode status is unchanged",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -207,14 +235,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1396,
-        "column": 25
+        "line": 1401,
+        "column": 22
       }
     },
     {
       "id": "98e07605e6e2555-3f23cb4f970ee65",
       "title": "Dispatcher throttle strategies / all + time_interval digest groups all episodes and stays throttled on subsequent dispatches",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -223,14 +251,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1467,
-        "column": 22
+        "line": 1474,
+        "column": 32
       }
     },
     {
       "id": "98e07605e6e2555-ce74b814830769a",
       "title": "Dispatcher throttle strategies / per_field + time_interval throttles groups on subsequent dispatches within the interval",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -239,14 +267,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1527,
-        "column": 22
+        "line": 1533,
+        "column": 25
       }
     },
     {
       "id": "98e07605e6e2555-d4efedcc2a49b50",
       "title": "Dispatcher suppresses dispatch with `reason: maintenance_window:<id>` when an enabled maintenance window covers the alert events",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -255,14 +283,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1627,
+        "line": 1635,
         "column": 1
       }
     },
     {
       "id": "98e07605e6e2555-20e906f18aa683d",
       "title": "Dispatcher tag-scoped policy / dispatches only for rules with the matching routing tag, not a matching rule tag",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -271,14 +299,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1737,
-        "column": 29
+        "line": 1747,
+        "column": 22
       }
     },
     {
       "id": "98e07605e6e2555-21a5af82115b934",
       "title": "Dispatcher multiple policies / produces one fire per matching policy when the same episode matches both",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -287,14 +315,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1796,
-        "column": 23
+        "line": 1806,
+        "column": 24
       }
     },
     {
       "id": "98e07605e6e2555-e8f512cc4896cca",
       "title": "Dispatcher lookback window / does not dispatch events older than the dispatcher lookback window",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -303,14 +331,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1851,
-        "column": 7
+        "line": 1861,
+        "column": 9
       }
     },
     {
       "id": "98e07605e6e2555-94f2614f2eba907",
       "title": "Dispatcher snoozed policy / does not dispatch when the action policy is snoozed until a future time",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -319,14 +347,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1874,
-        "column": 24
+        "line": 1886,
+        "column": 16
       }
     },
     {
       "id": "98e07605e6e2555-31a5b5e249000f9",
       "title": "Dispatcher missing destination / still records fire and notified actions when the destination workflow does not exist",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -335,14 +363,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1915,
-        "column": 14
+        "line": 1925,
+        "column": 9
       }
     },
     {
       "id": "98e07605e6e2555-497da19176376ab",
       "title": "Dispatcher writes a throttled-policy suppress record when on_status_change holds back an episode",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -351,14 +379,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1950,
-        "column": 7
+        "line": 1768,
+        "column": 27
       }
     },
     {
       "id": "98e07605e6e2555-5a5180678e1b4aa",
       "title": "Dispatcher writes an `unmatched` action record when no policy matches the rule",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -367,14 +395,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1828,
+        "line": 1839,
         "column": 27
       }
     },
     {
       "id": "98e07605e6e2555-a519d776f8731e1",
       "title": "Dispatcher dispatches external alerts (source-based episodes with no rule_id)",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -383,7 +411,23 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
-        "line": 1864,
+        "line": 1875,
+        "column": 27
+      }
+    },
+    {
+      "id": "98e07605e6e2555-24eb6122535d658",
+      "title": "Dispatcher reports the dispatch activity of the window in the snapshot telemetry",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatcher.spec.ts",
+        "line": 1928,
         "column": 27
       }
     }

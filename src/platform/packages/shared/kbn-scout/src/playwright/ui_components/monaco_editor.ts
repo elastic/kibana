@@ -8,7 +8,7 @@
  */
 
 import type { Locator } from '@playwright/test';
-// eslint-disable-next-line @kbn/imports/no_direct_monaco_import -- We intentionally use @kbn/monaco here
+// eslint-disable-next-line @kbn/kbn-monaco/no_direct_monaco_import -- We intentionally use @kbn/monaco here
 import type { monaco } from '@kbn/monaco';
 import type { ScoutPage } from '..';
 import { expect } from '../../../ui';

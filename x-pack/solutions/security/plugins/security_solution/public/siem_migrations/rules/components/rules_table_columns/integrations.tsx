@@ -16,10 +16,10 @@ import type { TableColumn } from './constants';
 import { TableHeader } from '../../../common/components';
 
 export const createIntegrationsColumn = ({
-  getMigrationRuleData,
+  getRuleIntegrations,
 }: {
-  getMigrationRuleData: (
-    ruleId: string
+  getRuleIntegrations: (
+    migrationRule: RuleMigrationRule
   ) => { relatedIntegrations?: RelatedIntegration[]; isIntegrationsLoading?: boolean } | undefined;
 }): TableColumn => {
   return {
@@ -46,11 +46,11 @@ export const createIntegrationsColumn = ({
       />
     ),
     render: (_, rule: RuleMigrationRule) => {
-      const migrationRuleData = getMigrationRuleData(rule.id);
-      if (migrationRuleData?.isIntegrationsLoading) {
+      const ruleIntegrations = getRuleIntegrations(rule);
+      if (ruleIntegrations?.isIntegrationsLoading) {
         return <EuiLoadingSpinner />;
       }
-      const relatedIntegrations = migrationRuleData?.relatedIntegrations;
+      const relatedIntegrations = ruleIntegrations?.relatedIntegrations;
       if (relatedIntegrations == null || relatedIntegrations.length === 0) {
         return null;
       }

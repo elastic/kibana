@@ -15,7 +15,7 @@ import type {
 
 export const PYTHON_INFO: CodeLanguage = {
   id: 'python',
-  title: i18n.translate('xpack.searchGettingStarted.codingLanguages.python', {
+  title: i18n.translate('xpack.searchCodeExamples.codingLanguages.python', {
     defaultMessage: 'Python (elasticsearch-py)',
   }),
   icon: 'python.svg',

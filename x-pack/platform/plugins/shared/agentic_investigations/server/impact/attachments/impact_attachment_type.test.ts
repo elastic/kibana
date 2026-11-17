@@ -11,7 +11,7 @@ import { IMPACT_ATTACHMENT_TYPE } from '../../../common/impact/attachment';
 import { createInMemoryStorage } from '../../investigation_attachments/in_memory_storage.mock';
 import { ImpactService } from '../services/impact_service';
 import type { ImpactDocument, ImpactStorageClient } from '../storage/impact_storage';
-import { formatImpactForAgent, impactAttachment } from './impact_attachment_type';
+import { formatImpactForAgent, impactAttachment, isImpactStale } from './impact_attachment_type';
 
 const legacyImpact: Impact = {
   id: 'impact-1',
@@ -127,5 +127,48 @@ describe('formatImpactForAgent', () => {
     expect(formatted).toContain('Annotations: Deploy v2.3.1 at 2026-07-28T14:01:00Z');
     expect(formatted).toContain('- svc-a\n  Latency doubled.');
     expect(formatted).not.toContain('14:05');
+  });
+});
+
+describe('isImpactStale', () => {
+  const stored: Impact = {
+    ...agentImpact,
+    entities: [
+      { id: 'host:web-01', name: 'web-01', type: 'host' },
+      { id: 'user:jdoe', name: 'jdoe', type: 'user' },
+    ],
+  };
+  const indexed = {
+    ...stored,
+    entityIds: ['host:web-01', 'user:jdoe'],
+    updatedAt: '2026-09-01T00:20:00.000Z',
+  };
+
+  it('is not stale when only the storage-only entityIds and updatedAt differ', () => {
+    expect(isImpactStale(stored, indexed)).toBe(false);
+  });
+
+  it('is stale when an entity is added, removed or renamed', () => {
+    const [host, user] = stored.entities ?? [];
+
+    expect(
+      isImpactStale(stored, { ...indexed, entities: [host, user, { id: 'host:db-02' }] })
+    ).toBe(true);
+    expect(isImpactStale(stored, { ...indexed, entities: [host] })).toBe(true);
+    expect(
+      isImpactStale(stored, { ...indexed, entities: [host, { ...user, name: 'j.doe' }] })
+    ).toBe(true);
+  });
+
+  it('is stale when the summary or the evidence changes', () => {
+    expect(
+      isImpactStale(stored, { ...indexed, summary: 'Checkout failed for 30% of users.' })
+    ).toBe(true);
+    expect(
+      isImpactStale(stored, {
+        ...indexed,
+        evidence: { description: 'A different description.' },
+      })
+    ).toBe(true);
   });
 });

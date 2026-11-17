@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { PathReporter } from 'io-ts/lib/PathReporter';
-import { CaseCustomFieldRt } from './v1';
-import { CaseCustomFieldSchema } from '../../domain_zod/custom_field/v1';
+import { CaseCustomFieldSchema } from './v1';
 
-describe('CaseCustomFieldRt', () => {
+describe('CaseCustomFieldSchema', () => {
   it.each([
     [
       'type text value text',
@@ -59,62 +57,13 @@ describe('CaseCustomFieldRt', () => {
         value: null,
       },
     ],
-  ])(`has expected attributes for customField with %s`, (_, customField) => {
-    const query = CaseCustomFieldRt.decode(customField);
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: customField,
-    });
-  });
-
-  it('fails if text type and value do not match expected attributes in request', () => {
-    const query = CaseCustomFieldRt.decode({
-      key: 'text_custom_field_1',
-      type: 'text',
-      value: 1,
-    });
-
-    expect(PathReporter.report(query)[0]).toContain('Invalid value 1 supplied');
-  });
-
-  it('fails if toggle type and value do not match expected attributes in request', () => {
-    const query = CaseCustomFieldRt.decode({
-      key: 'list_custom_field_1',
-      type: 'toggle',
-      value: 'hello',
-    });
-
-    expect(PathReporter.report(query)[0]).toContain('Invalid value "hello" supplied');
-  });
-
-  it('fails if number type but value is a string', () => {
-    const query = CaseCustomFieldRt.decode({
-      key: 'list_custom_field_1',
-      type: 'number',
-      value: 'hi',
-    });
-
-    expect(PathReporter.report(query)[0]).toContain('Invalid value "hi" supplied');
-  });
-
-  it.each([
-    [
-      'type text value text',
-      { key: 'string_custom_field_1', type: 'text', value: 'this is a text field value' },
-    ],
-    ['type text value null', { key: 'string_custom_field_2', type: 'text', value: null }],
-    ['type toggle value boolean', { key: 'toggle_custom_field_1', type: 'toggle', value: true }],
-    ['type toggle value null', { key: 'toggle_custom_field_2', type: 'toggle', value: null }],
-    ['type number value number', { key: 'number_custom_field_1', type: 'number', value: 1 }],
-    ['type number value null', { key: 'number_custom_field_2', type: 'number', value: null }],
-  ])('zod: has expected attributes for customField with %s', (_, customField) => {
+  ])('has expected attributes for customField with %s', (_, customField) => {
     const result = CaseCustomFieldSchema.safeParse(customField);
     expect(result.success).toBe(true);
     expect(result.data).toStrictEqual(customField);
   });
 
-  it('zod: fails if text type and value do not match', () => {
+  it('fails if text type and value do not match', () => {
     const result = CaseCustomFieldSchema.safeParse({
       key: 'text_custom_field_1',
       type: 'text',
@@ -123,7 +72,7 @@ describe('CaseCustomFieldRt', () => {
     expect(result.success).toBe(false);
   });
 
-  it('zod: fails if toggle type and value do not match', () => {
+  it('fails if toggle type and value do not match', () => {
     const result = CaseCustomFieldSchema.safeParse({
       key: 'list_custom_field_1',
       type: 'toggle',
@@ -132,7 +81,7 @@ describe('CaseCustomFieldRt', () => {
     expect(result.success).toBe(false);
   });
 
-  it('zod: fails if number type but value is a string', () => {
+  it('fails if number type but value is a string', () => {
     const result = CaseCustomFieldSchema.safeParse({
       key: 'list_custom_field_1',
       type: 'number',

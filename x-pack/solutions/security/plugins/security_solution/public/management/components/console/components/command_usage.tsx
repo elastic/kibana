@@ -209,7 +209,12 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef, errorMessage 
   }, [errorMessage, getTestId]);
 
   return (
-    <EuiPanel paddingSize="none" color="transparent" data-test-subj={getTestId('commandUsage')}>
+    <EuiPanel
+      hasBorder={false}
+      paddingSize="none"
+      color="transparent"
+      data-test-subj={getTestId('commandUsage')}
+    >
       {renderErrorMessage()}
 
       <EuiDescriptionList

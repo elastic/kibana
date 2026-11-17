@@ -175,5 +175,23 @@ describe('InvestigationTimelineInlineContent', () => {
     expect(
       screen.getByText('No events were reconstructed from the available telemetry.')
     ).toBeInTheDocument();
+    expect(screen.queryByTestId('investigationTimelineWindow')).not.toBeInTheDocument();
+  });
+
+  // The window is what tells "nothing in this incident's range" apart from "nothing at all",
+  // so it shows outside the accordion and on the empty state alike.
+  it('names the searched window above the events and on the empty state', () => {
+    const window = { start: '2026-09-11T12:00:00.000Z', end: '2026-09-11T16:00:00.000Z' };
+
+    const { unmount } = renderContent({ events: TWO_EVENTS, window });
+    expect(screen.getByTestId('investigationTimelineWindow')).toHaveTextContent(
+      'Searched window: Sep 11, 2026 @ 12:00:00 to Sep 11, 2026 @ 16:00:00'
+    );
+    unmount();
+
+    renderContent({ events: [], window });
+    expect(screen.getByTestId('investigationTimelineWindow')).toHaveTextContent(
+      'Searched window: Sep 11, 2026 @ 12:00:00 to Sep 11, 2026 @ 16:00:00'
+    );
   });
 });

@@ -19,6 +19,8 @@ export interface MultiselectFilterProps<T = unknown> {
   onSelectionChange?: (selectedItems: T[], changedOption: T, changedStatus: FilterChecked) => void;
   renderItem?: (item: T) => React.ReactChild;
   renderLabel?: (item: T) => string;
+  /** The test subject of an item's row, so a click anywhere on the row can be traced to the item. */
+  getItemTestSubj?: (item: T) => string;
   disabled?: boolean;
   /**
    * Width of the popover content. If undefined, the popover will take the width of the button.
@@ -31,6 +33,7 @@ interface MultiselectFilterOption<T> {
   originalItem: T;
   label: string;
   checked?: FilterChecked;
+  'data-test-subj'?: string;
 }
 
 /**
@@ -60,6 +63,7 @@ const MultiselectFilterComponent = <T extends unknown>({
   onSelectionChange = noop,
   renderLabel = String,
   renderItem = renderLabel,
+  getItemTestSubj,
 }: MultiselectFilterProps<T>) => {
   const [isPopoverOpen, _unused, closePopover, togglePopover] = useBoolState();
 
@@ -69,8 +73,9 @@ const MultiselectFilterComponent = <T extends unknown>({
       originalItem: item,
       label: renderLabel(item),
       checked: selectedItems.includes(item) ? checked : undefined,
+      'data-test-subj': getItemTestSubj?.(item),
     }));
-  }, [items, renderLabel, selectedItems]);
+  }, [items, renderLabel, selectedItems, getItemTestSubj]);
 
   const onChange = useCallback<
     NonNullable<EuiSelectableProps<MultiselectFilterOption<T>>['onChange']>

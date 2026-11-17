@@ -13,7 +13,7 @@ import webpack from 'webpack';
 // webpack.config.js is a plain CJS module that exports a factory function.
 // We import it via require() since it has no type declarations; the return
 // value is cast to webpack's Configuration type.
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 const buildWebpackConfig = require('./webpack.config') as (
   outputPath: string
 ) => webpack.Configuration;

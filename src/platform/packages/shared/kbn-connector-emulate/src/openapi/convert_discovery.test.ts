@@ -208,6 +208,60 @@ describe('convertDiscovery', () => {
     expect(paths['/gmail/v1/users/{userId}/messages/send'].post.security).toBeUndefined();
   });
 
+  it('makes the scopes of a method alternatives, as Discovery lists them', async () => {
+    const READ_ONLY = `${SCOPE}.read-only`;
+    const withScopes = (node: unknown): unknown =>
+      Array.isArray(node)
+        ? node.map(withScopes)
+        : node && typeof node === 'object'
+        ? Object.fromEntries(
+            Object.entries(node).map(([key, value]) => [
+              key,
+              key === 'scopes' && Array.isArray(value) ? [SCOPE, READ_ONLY] : withScopes(value),
+            ])
+          )
+        : node;
+    const spec = convertDiscovery(withScopes(discovery) as typeof discovery);
+    const { fetch } = createEmulatorFetch({ specs: [spec], checkScopes: true });
+    const token = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type: 'authorization_code',
+        code: 'code',
+        scope: READ_ONLY,
+      }).toString(),
+    });
+    const { access_token: accessToken } = await token.json();
+
+    const list = await fetch('https://secretmanager.googleapis.com/v1/projects/p/secrets', {
+      headers: { authorization: `Bearer ${accessToken}` },
+    });
+
+    expect((spec.paths as typeof paths)['/v1/projects/{projectsId}/secrets'].get.security).toEqual([
+      { Oauth2: [SCOPE] },
+      { Oauth2: [READ_ONLY] },
+    ]);
+    expect(list.status).toBe(200);
+  });
+
+  it.each([
+    ['original', 'https://accounts.google.com/o/oauth2/auth'],
+    ['current', 'https://accounts.google.com/o/oauth2/v2/auth'],
+  ])("serves Google's %s authorization URL", async (_, authorizationUrl) => {
+    const { fetch } = createEmulatorFetch({ specs: [convertDiscovery(discovery)] });
+    const query = new URLSearchParams({
+      response_type: 'code',
+      client_id: 'id',
+      redirect_uri: 'https://kibana/cb',
+    });
+
+    const response = await fetch(`${authorizationUrl}?${query}`);
+
+    expect(response.status).toBe(302);
+    expect(response.headers.get('location')).toMatch(/^https:\/\/kibana\/cb\?code=/);
+  });
+
   it('serves simple media uploads from rootUrl', () => {
     const upload = paths['/upload/gmail/v1/users/{userId}/messages/send'].post;
     expect(upload.servers).toEqual([{ url: 'https://secretmanager.googleapis.com' }]);

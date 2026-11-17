@@ -36,6 +36,7 @@ export interface SharedStoryArgs {
   numInfoBlocks: number;
   footer: boolean;
   secondaryActionIcon: boolean;
+  secondaryActionVariant: 'default' | 'ai';
   primaryActionKind: 'button' | 'menu';
   resizable: boolean;
   type: NonNullable<FlyoutTemplateProps['type']>;
@@ -314,11 +315,20 @@ export const bodyZone = (content: React.ReactNode) => (
 export const footerZone = (args: SharedStoryArgs) =>
   args.footer ? (
     <FlyoutTemplate.Footer>
-      <FlyoutTemplate.Footer.SecondaryAction
-        label="Discard"
-        onClick={() => {}}
-        {...(args.secondaryActionIcon ? { iconType: 'trash' } : {})}
-      />
+      {args.secondaryActionVariant === 'ai' ? (
+        <FlyoutTemplate.Footer.SecondaryAction
+          variant="ai"
+          label="Open chat"
+          onClick={() => {}}
+          {...(args.secondaryActionIcon ? { iconType: 'productAgent' as const } : {})}
+        />
+      ) : (
+        <FlyoutTemplate.Footer.SecondaryAction
+          label="Discard"
+          onClick={() => {}}
+          {...(args.secondaryActionIcon ? { iconType: 'trash' } : {})}
+        />
+      )}
       {args.primaryActionKind === 'menu' ? (
         <FlyoutTemplate.Footer.PrimaryActionMenu label="Take action" panels={MENU_PANELS} />
       ) : (

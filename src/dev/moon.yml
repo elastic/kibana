@@ -55,6 +55,8 @@ dependsOn:
   - '@kbn/swc-register'
   - '@kbn/dev-validation-runner'
   - '@kbn/test'
+  - '@kbn/product-doc-common'
+  - '@kbn/inference-common'
 tags:
   - tooling
   - package
@@ -62,6 +64,8 @@ tags:
   - group-platform
   - private
   - jest-unit-tests
+  - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - '**/*.js'

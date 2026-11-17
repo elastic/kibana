@@ -77,6 +77,25 @@ describe('default_model_section_combo', () => {
       expect(opts.map((g) => g.label)).toEqual(['Pre-configured', 'Custom models']);
     });
 
+    it('excludes connectors that are denied by region policy', () => {
+      const opts = getGlobalModelComboOptions(
+        [
+          ...connectors,
+          {
+            ...baseMockConnector,
+            connectorId: 'pre-denied',
+            name: 'Denied Model',
+            isPreconfigured: true,
+            metadata: { denied_by_region_policy: true },
+          },
+        ],
+        false
+      );
+
+      expect(opts[0]?.options?.map((option) => option.value)).toEqual(['pre-1']);
+      expect(opts[1]?.options?.map((option) => option.value)).toEqual(['custom-1']);
+    });
+
     it('omits endpoints that accept only a prompt template', () => {
       const opts = getGlobalModelComboOptions(
         [

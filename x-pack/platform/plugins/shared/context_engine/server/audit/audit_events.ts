@@ -15,6 +15,9 @@ export enum AiIndexAuditAction {
   GET = 'ai_index_get',
   LIST = 'ai_index_list',
   DELETE = 'ai_index_delete',
+  KI_RESTORE = 'ki_restore',
+  KI_UPDATE = 'ki_update',
+  KI_DELETE = 'ki_delete',
   DELETE_RESOURCES = 'ai_index_delete_resources',
   QUERY = 'ai_index_query',
   DESCRIBE = 'ai_index_describe',
@@ -29,6 +32,9 @@ const eventVerbs: Record<AiIndexAuditAction, VerbsTuple> = {
   ai_index_get: ['access', 'accessing', 'accessed'],
   ai_index_list: ['access', 'accessing', 'accessed'],
   ai_index_delete: ['delete', 'deleting', 'deleted'],
+  ki_restore: ['restore', 'restoring', 'restored'],
+  ki_update: ['update', 'updating', 'updated'],
+  ki_delete: ['delete', 'deleting', 'deleted'],
   ai_index_delete_resources: [
     'delete related resources of',
     'deleting related resources of',
@@ -45,14 +51,35 @@ const eventTypes: Record<AiIndexAuditAction, string> = {
   ai_index_get: 'access',
   ai_index_list: 'access',
   ai_index_delete: 'deletion',
+  ki_restore: 'change',
+  ki_update: 'change',
+  ki_delete: 'deletion',
   ai_index_delete_resources: 'deletion',
   ai_index_query: 'access',
   ai_index_describe: 'access',
 };
 
+type AiIndexOnlyAuditAction = Exclude<
+  AiIndexAuditAction,
+  AiIndexAuditAction.KI_UPDATE | AiIndexAuditAction.KI_DELETE | AiIndexAuditAction.KI_RESTORE
+>;
+
+export type KiAuditAction =
+  | AiIndexAuditAction.KI_UPDATE
+  | AiIndexAuditAction.KI_DELETE
+  | AiIndexAuditAction.KI_RESTORE;
+
 export interface AiIndexAuditEventParams {
-  action: AiIndexAuditAction;
+  action: AiIndexOnlyAuditAction;
   id?: string;
+  outcome?: EcsEvent['outcome'];
+  error?: Error;
+}
+
+export interface KiAuditEventParams {
+  action: KiAuditAction;
+  aiIndexId: string;
+  kiId: string;
   outcome?: EcsEvent['outcome'];
   error?: Error;
 }
@@ -67,6 +94,46 @@ export interface ImprovementAuditEventParams {
   recorded?: number;
   error?: Error;
 }
+
+interface AuditEventBodyParams {
+  action: AiIndexAuditAction;
+  doc: string;
+  savedObject?: { type: string; id: string };
+  outcome?: EcsEvent['outcome'];
+  error?: Error;
+}
+
+const auditEventBody = ({
+  action,
+  doc,
+  savedObject,
+  outcome,
+  error,
+}: AuditEventBodyParams): AuditEvent => {
+  const [present, progressive, past] = eventVerbs[action];
+  const message = error
+    ? `Failed attempt to ${present} ${doc}`
+    : outcome === 'unknown'
+    ? `User is ${progressive} ${doc}`
+    : `User has ${past} ${doc}`;
+
+  return {
+    message,
+    event: {
+      action,
+      category: ['database'],
+      type: [eventTypes[action]],
+      outcome: outcome ?? (error ? 'failure' : 'success'),
+    },
+    kibana: {
+      saved_object: savedObject,
+    },
+    error: error && {
+      code: error.name,
+      message: error.message,
+    },
+  };
+};
 
 /** Audits an analysis run recording what it proposed. */
 export const improvementAuditEvent = ({
@@ -99,27 +166,26 @@ export const aiIndexAuditEvent = ({
   error,
 }: AiIndexAuditEventParams): AuditEvent => {
   const doc = id ? `AI index [id=${id}]` : 'an AI index';
-  const [present, progressive, past] = eventVerbs[action];
-  const message = error
-    ? `Failed attempt to ${present} ${doc}`
-    : outcome === 'unknown'
-    ? `User is ${progressive} ${doc}`
-    : `User has ${past} ${doc}`;
-
-  return {
-    message,
-    event: {
-      action,
-      category: ['database'],
-      type: [eventTypes[action]],
-      outcome: outcome ?? (error ? 'failure' : 'success'),
-    },
-    kibana: {
-      saved_object: id ? { type: 'ai_index', id } : undefined,
-    },
-    error: error && {
-      code: error.name,
-      message: error.message,
-    },
-  };
+  return auditEventBody({
+    action,
+    doc,
+    savedObject: id ? { type: 'ai_index', id } : undefined,
+    outcome,
+    error,
+  });
 };
+
+export const kiAuditEvent = ({
+  action,
+  aiIndexId,
+  kiId,
+  outcome,
+  error,
+}: KiAuditEventParams): AuditEvent =>
+  auditEventBody({
+    action,
+    doc: `Knowledge Indicator [id=${kiId}] of AI index [id=${aiIndexId}]`,
+    savedObject: { type: 'ki', id: kiId },
+    outcome,
+    error,
+  });

@@ -133,7 +133,7 @@ describe('AddMitreThreat', () => {
     renderWithValue([ENTERPRISE_ROW]);
 
     expect(screen.getByTestId('mitreAttackError')).toBeInTheDocument();
-    expect(screen.getByText(/Failed to load MITRE ATT&CK data/)).toBeInTheDocument();
+    expect(screen.getByText(/Failed to load MITRE ATT&CK® data/)).toBeInTheDocument();
     expect(screen.queryByTestId('addMitreAttackTactic')).not.toBeInTheDocument();
   });
 
@@ -251,7 +251,7 @@ describe('AddMitreThreat', () => {
         ]);
 
         expect(
-          screen.getByText(/"AML.TA9999" is not in the currently supported MITRE ATLAS version/)
+          screen.getByText(/"AML.TA9999" is not in the currently supported MITRE ATLAS™ version/)
         ).toBeInTheDocument();
       } finally {
         (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);

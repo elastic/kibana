@@ -11,7 +11,7 @@ import { useIsMutating } from '@kbn/react-query';
 import dedent from 'dedent';
 import { groupBy as _groupBy, mapValues } from 'lodash';
 import React, { useEffect } from 'react';
-import { usePageReady } from '@kbn/ebt-tools';
+import { usePageReady } from '@kbn/ebt-tools/react';
 import { useFetchSloList } from '../../../hooks/use_fetch_slo_list';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useUrlSearchState } from '../hooks/use_url_search_state';

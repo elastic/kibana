@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export type FleetErrorType = 'verification_failed' | 'package_assets_verification_failed';
+import type { BreakingChangesLog } from '../../services/changelog_utils';
+
+export type FleetErrorType =
+  | 'verification_failed'
+  | 'package_assets_verification_failed'
+  | 'breaking_changes_not_acknowledged';
 
 /**
  * Categories for Elastic Package Registry (EPR) connection failures, derived from
@@ -27,5 +32,6 @@ export interface FleetErrorResponse {
     /** Underlying failure reason, e.g. a Node error code (`ETIMEDOUT`) or an HTTP status code. */
     reason?: string;
     missing_assets?: Array<{ id: string; type: string }>;
+    breaking_changes?: BreakingChangesLog;
   };
 }

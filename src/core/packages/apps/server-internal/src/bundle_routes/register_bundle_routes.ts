@@ -53,8 +53,7 @@ export function registerBundleRoutes({
   // Kibana's bundles ship source maps they don't reference, only served when enabled.
   const sourceMaps = process.env.KBN_ENABLE_BROWSER_SOURCE_MAPS === 'true' ? 'linked' : 'hidden';
 
-  // Shared deps bundles are built by webpack (see kbn-ui-shared-deps-npm/src) and
-  // loaded before the Rspack bundles
+  // Shared deps are emitted by the main Rspack bundle build and loaded before plugin bundles.
   const sharedNpmDepsPath = '/bundles/kbn-ui-shared-deps-npm/';
   registerRouteForBundle(router, {
     publicPath: staticAssets.prependPublicUrl(sharedNpmDepsPath) + '/',

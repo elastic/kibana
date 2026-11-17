@@ -38,7 +38,7 @@ export const WorkflowDetailTestModal = () => {
   const workflow = useSelector(selectWorkflow);
   const canExecuteWorkflow = hasExecutePrivilege && workflow?.permissions?.execute !== false;
 
-  const { setSelectedExecution } = useWorkflowUrlState();
+  const { setSelectedExecution, selectEditorRun } = useWorkflowUrlState();
 
   const isTestModalOpen = useSelector(selectIsTestModalOpen);
   const replayExecutionId = useSelector(selectReplayExecutionId);
@@ -95,7 +95,7 @@ export const WorkflowDetailTestModal = () => {
       const executionId = await testWorkflow({ inputs, triggerTab });
 
       if (executionId) {
-        setSelectedExecution(executionId.workflowExecutionId);
+        selectEditorRun(executionId.workflowExecutionId);
       }
     },
     [
@@ -104,6 +104,7 @@ export const WorkflowDetailTestModal = () => {
       replayIsTestRun,
       runWorkflow,
       setSelectedExecution,
+      selectEditorRun,
       testSavedWorkflow,
       testWorkflow,
       workflowId,

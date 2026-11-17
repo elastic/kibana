@@ -5,9 +5,41 @@
  * 2.0.
  */
 
-import { prepareEsqlForExecute } from './prepare_esql_for_execute';
+import { addFromExclusions, prepareEsqlForExecute } from './prepare_esql_for_execute';
+
+describe('addFromExclusions', () => {
+  it('appends each exclusion to the FROM sources and keeps the rest of the query', () => {
+    expect(
+      addFromExclusions('FROM logs-aws.cloudtrail-*\n| WHERE true\n| LIMIT 5', [
+        '*secret*',
+        'logs-elastic_agent*',
+      ])
+    ).toBe('FROM logs-aws.cloudtrail-*, -*secret*, -logs-elastic_agent*\n| WHERE TRUE\n| LIMIT 5');
+  });
+
+  it('keeps METADATA after the sources and does not repeat an exclusion', () => {
+    const once = addFromExclusions('FROM a-*, b-* METADATA _id | LIMIT 1', ['*secret*']);
+
+    expect(once).toBe('FROM a-*, b-*, -*secret* METADATA _id\n| LIMIT 1');
+    expect(addFromExclusions(once, ['*secret*'])).toBe(once);
+  });
+
+  it('returns the query untouched with no exclusions, or when it is not a valid FROM', () => {
+    const query = 'FROM logs-* | LIMIT 1';
+
+    expect(addFromExclusions(query, [])).toBe(query);
+    expect(addFromExclusions('ROW a = 1', ['*secret*'])).toBe('ROW a = 1');
+    expect(addFromExclusions('FROM logs-* |', ['*secret*'])).toBe('FROM logs-* |');
+  });
+});
 
 describe('prepareEsqlForExecute', () => {
+  it('appends exclusions with the METADATA columns', () => {
+    expect(
+      prepareEsqlForExecute('FROM logs-aws.* | LIMIT 10', { excludedIndices: ['*secret*'] })
+    ).toBe('FROM logs-aws.*, -*secret* METADATA _id, _index\n| LIMIT 10');
+  });
+
   it('returns _id and _index injected when METADATA is absent', () => {
     expect(
       prepareEsqlForExecute('FROM logs-aws.*\n| WHERE event.action == "AssumeRole"\n| LIMIT 10')

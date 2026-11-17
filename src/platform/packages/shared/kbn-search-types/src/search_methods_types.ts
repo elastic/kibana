@@ -8,11 +8,13 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { AbstractDataView } from '@kbn/data-views-plugin/common';
-import type { ProjectRouting } from '@kbn/es-query';
+import type { AggregateQuery, Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ESQLSearchParams } from '@kbn/es-types';
-import type { SanitizedConnectionRequestParams } from './types';
+import type { RequestAdapter, RequestStatistics } from '@kbn/inspector-plugin/common';
 
 /**
  * Base options shared across all typed search methods
@@ -34,14 +36,24 @@ export interface IBaseSearchOptions {
   executionContext?: KibanaExecutionContext;
 
   /**
+   * Inspector integration options for tracking requests
+   */
+  inspector?: {
+    adapter: RequestAdapter;
+    title: string;
+    description?: string;
+    getRequestStats?: () => RequestStatistics;
+  };
+}
+
+/**
+ * Params shared by the DSL and ES|QL search methods
+ */
+export interface BaseSearchParams {
+  /**
    * Project routing configuration for cross-project search (CPS).
    */
   projectRouting?: ProjectRouting;
-
-  /**
-   * When true, ES|QL queries use approximate execution for faster, estimated results.
-   */
-  approximation?: boolean;
 }
 
 // ============================================================================
@@ -51,7 +63,7 @@ export interface IBaseSearchOptions {
 /**
  * Parameters for DSL (Elasticsearch Query DSL) search
  */
-export interface IDslSearchParams {
+export interface IDslSearchParams extends BaseSearchParams {
   /**
    * Index pattern to search
    */
@@ -98,38 +110,72 @@ export interface IDslSearchParams {
   highlight?: estypes.SearchHighlight;
 
   /**
+   * Kibana query context to apply. The time range, Kibana filters, and KQL/Lucene query are
+   * compiled into a DSL bool query and merged with `query`.
+   */
+  kibanaQueryContext?: KibanaQueryContext;
+
+  /**
+   * Control total hits counting precision
+   */
+  trackTotalHits?: boolean | number;
+
+  /**
    * Allow any additional SearchRequest body properties for maximum compatibility
    */
   [key: string]: unknown;
 }
 
 /**
- * Options specific to DSL search
+ * Options specific to DSL search. `params` shapes the query; `options` is Kibana plumbing
+ * (session, inspector, abort, execution context, project routing).
  */
-export interface IDslSearchOptions extends IBaseSearchOptions {
-  /**
-   * Control total hits counting precision
-   */
-  trackTotalHits?: boolean | number;
-}
+export type IDslSearchOptions = IBaseSearchOptions;
 
-export type IDslPaginatedSearchParams = IDslSearchParams & Required<Pick<IDslSearchParams, 'sort'>>;
-
-export type IDslPaginatedSearchOptions = Omit<IDslSearchOptions, 'trackTotalHits'>;
+type IDslPaginatedBaseSearchParams = IDslSearchParams & Required<Pick<IDslSearchParams, 'sort'>>;
 
 /**
- * Pagination helpers for DSL search results
+ * Parameters for a paginated DSL search whose response counts the total hits, which is how
+ * `hasNextPage` knows whether more pages exist
  */
-export interface IDslPagination {
+export type IDslPaginatedSearchParams = IDslPaginatedBaseSearchParams & {
+  trackTotalHits?: true;
+};
+
+/**
+ * Parameters for a paginated DSL search that opts out of counting total hits, so the request can
+ * run in parallel with whatever request provides the total. `hasNextPage` then needs that total.
+ */
+export type IDslUntrackedPaginatedSearchParams = IDslPaginatedBaseSearchParams & {
+  trackTotalHits: false;
+};
+
+export type IDslPaginatedSearchOptions = IBaseSearchOptions;
+
+/**
+ * Pagination helpers for DSL search results.
+ * `TTotalHitsRequired` is true when the search did not count total hits.
+ */
+export interface IDslPagination<TTotalHitsRequired extends boolean = false> {
   /**
-   * Whether more results are available
+   * Whether more results are available. When the search did not count total hits, the caller
+   * supplies the total.
    */
-  hasNextPage: boolean;
+  hasNextPage: (
+    ...args: TTotalHitsRequired extends true ? [totalHits: number] : [totalHits?: number]
+  ) => boolean;
 
   /**
    * Fetch the next page of results using search_after
    */
-  nextPage: () => Promise<IDslPaginatedSearchResult | null>;
+  nextPage: (options?: {
+    abortSignal?: AbortSignal;
+    executionContext?: KibanaExecutionContext;
+    /** Override the inspector title for this pagination request */
+    inspectorTitle?: string;
+    /** Override the inspector description for this pagination request */
+    inspectorDescription?: string;
+  }) => Promise<IDslPaginatedSearchResult<TTotalHitsRequired> | null>;
 }
 
 /**
@@ -140,28 +186,20 @@ export interface IDslSearchResult {
    * Raw Elasticsearch search response
    */
   rawResponse: estypes.SearchResponse;
-  /**
-   * Request parameters for inspector
-   */
-  requestParams?: SanitizedConnectionRequestParams;
 }
 
 /**
  * Result from a paginated DSL search
  */
-export interface IDslPaginatedSearchResult {
+export interface IDslPaginatedSearchResult<TTotalHitsRequired extends boolean = false> {
   /**
    * Raw Elasticsearch search response
    */
   rawResponse: estypes.SearchResponse;
   /**
-   * Request parameters for inspector
-   */
-  requestParams?: SanitizedConnectionRequestParams;
-  /**
    * Pagination helpers for navigating through result pages
    */
-  pagination: IDslPagination;
+  pagination: IDslPagination<TTotalHitsRequired>;
 }
 
 // ============================================================================
@@ -169,9 +207,47 @@ export interface IDslPaginatedSearchResult {
 // ============================================================================
 
 /**
+ * Kibana query context to apply when calling a search method. The shape matches the corresponding
+ * fields of a dashboard panel's fetch context, so it can be passed through directly.
+ */
+export interface KibanaQueryContext {
+  /**
+   * Time range to restrict the search to. Adds a range filter on `timeField`.
+   */
+  timeRange?: TimeRange;
+
+  /**
+   * The date field to filter `timeRange` on.
+   */
+  timeField?: string;
+
+  /**
+   * Kibana filters to apply.
+   */
+  kibanaFilters?: Filter[];
+
+  /**
+   * KQL or Lucene query to apply. ES|QL (aggregate) queries are ignored.
+   */
+  kqlQuery?: Query | Query[] | AggregateQuery;
+}
+
+/**
+ * ES|QL-specific extension of {@link KibanaQueryContext} that adds control variable support.
+ * For ES|QL, `timeRange` also fills the `?_tstart` and `?_tend` named params; without a
+ * `timeField` the time range is only applied through those params.
+ */
+export interface EsqlKibanaQueryContext extends KibanaQueryContext {
+  /**
+   * ES|QL control variables. Values for variables used in the query are added as named params.
+   */
+  esqlVariables?: ESQLControlVariable[];
+}
+
+/**
  * Parameters for ES|QL search
  */
-export interface IEsqlSearchParams {
+export interface IEsqlSearchParams extends BaseSearchParams {
   /**
    * ES|QL query string
    */
@@ -183,12 +259,13 @@ export interface IEsqlSearchParams {
   params?: ESQLSearchParams['params'];
 
   /**
-   * Additional filter to apply
+   * Raw DSL filter to apply. AND-combined with the filter built from `kibanaQueryContext`
+   * when that is provided.
    */
   filter?: estypes.QueryDslQueryContainer | estypes.QueryDslQueryContainer[];
 
   /**
-   * Time zone for date calculations
+   * Time zone for date calculations. Defaults to the `dateFormat:tz` advanced setting.
    */
   timeZone?: string;
 
@@ -196,27 +273,50 @@ export interface IEsqlSearchParams {
    * Locale for string operations
    */
   locale?: string;
-}
 
-/**
- * Options specific to ES|QL search
- */
-export interface IEsqlSearchOptions extends IBaseSearchOptions {
+  /**
+   * Kibana query context (time range, filters, query bar, ES|QL controls) to apply.
+   * These are Kibana abstractions that get compiled into the ES request body.
+   * Pass the matching fields from a dashboard panel's fetch context directly.
+   */
+  kibanaQueryContext?: EsqlKibanaQueryContext;
+
+  // ── ES|QL-specific request flags ──────────────────────────────────────────
+
   /**
    * Drop columns that only contain null values
    */
   dropNullColumns?: boolean;
 
   /**
-   * When set to true, the response will include an extra _clusters object with information about the clusters that participated in the search along with info such as shards count. This is similar to include_ccs_metadata, but it also returns metadata when the query is not CCS/CPS
+   * When set to true, the response will include an extra _clusters object with information about
+   * the clusters that participated in the search. Similar to `include_ccs_metadata`, but also
+   * returns metadata when the query is not CCS/CPS.
    */
   includeExecutionMetadata?: boolean;
 
   /**
-   * When set to true, requests the `column_metadata` setting from Elasticsearch, which is required to
-   * receive the `_meta` field on columns in the response.
+   * When set to true, requests the `column_metadata` setting from Elasticsearch, which is required
+   * to receive the `_meta` field on columns in the response.
    */
   columnMetadata?: boolean;
+
+  /**
+   * When true, ES|QL queries use approximate execution for faster, estimated results.
+   */
+  approximation?: boolean;
+}
+
+/**
+ * Options specific to ES|QL search. `params` shapes the query; `options` is Kibana plumbing
+ * (session, inspector, abort, execution context, project routing).
+ */
+export interface IEsqlSearchOptions extends IBaseSearchOptions {
+  /**
+   * When true, the response is also mapped to an expressions `Datatable`, returned as `datatable`
+   * on the result. Defaults to false, so callers that only need `rawResponse` skip the mapping.
+   */
+  includeDataTable?: boolean;
 }
 
 /**
@@ -228,13 +328,14 @@ export interface IEsqlSearchResult {
    */
   rawResponse: estypes.EsqlAsyncQueryResponse;
   /**
-   * Request parameters for inspector
-   */
-  requestParams?: SanitizedConnectionRequestParams;
-  /**
    * Warning message from the ES Warning HTTP response header
    */
   warning?: string;
+  /**
+   * The response mapped to an expressions Datatable, ready for use in visualizations.
+   * Only present when `includeDataTable` is set.
+   */
+  datatable?: Datatable;
 }
 
 // ============================================================================
@@ -304,10 +405,6 @@ export interface IEqlSearchResult {
    * Raw Elasticsearch EQL search response
    */
   rawResponse: estypes.EqlSearchResponse;
-  /**
-   * Request parameters for inspector
-   */
-  requestParams?: SanitizedConnectionRequestParams;
 }
 
 // ============================================================================
@@ -362,11 +459,6 @@ export interface ISqlSearchResult {
    * Time in milliseconds the search took to execute
    */
   took: number;
-
-  /**
-   * Request parameters for inspector
-   */
-  requestParams?: SanitizedConnectionRequestParams;
 }
 
 // ============================================================================
@@ -391,10 +483,16 @@ export interface ISearchMethods {
   /**
    * Execute a paginated DSL (Elasticsearch Query DSL) search with pagination helpers
    */
-  dslPaginated: (
-    params: IDslPaginatedSearchParams,
-    options?: IDslPaginatedSearchOptions
-  ) => Promise<IDslPaginatedSearchResult>;
+  dslPaginated: {
+    (
+      params: IDslPaginatedSearchParams,
+      options?: IDslPaginatedSearchOptions
+    ): Promise<IDslPaginatedSearchResult>;
+    /** Opts out of counting total hits, so `hasNextPage` needs the total from the caller */
+    (params: IDslUntrackedPaginatedSearchParams, options?: IDslPaginatedSearchOptions): Promise<
+      IDslPaginatedSearchResult<true>
+    >;
+  };
 
   /**
    * Execute an EQL (Event Query Language) search

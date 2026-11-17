@@ -46,20 +46,25 @@ export type {
   ServiceAccountWorkloadCoordinates,
   ServiceAccountWorkloadRequestParams,
   ServiceAccountBoundWorkload,
+  ServiceAccountSummary,
 } from '@kbn/core-security-common';
 export type {
   CoreSecurityDelegateContract,
   AuthenticationServiceContract,
+  AuthorizationServiceContract,
   AuditServiceContract,
   ServiceAccountsServiceContract,
   CoreSecurityDelegateHandle,
   CoreSecurityDelegateServiceAccounts,
   ResolvedServiceAccountWorkload,
+  ResolveBoundWorkloadsOptions,
   ServiceAccountBoundWorkloadRef,
 } from './src/api_provider';
 export type {
   SecurityRequestHandlerContext,
   AuthcRequestHandlerContext,
+  AuthzRequestHandlerContext,
+  UiamAuthzRequestHandlerContext,
   AuditRequestHandlerContext,
 } from './src/request_handler_context';
 export type {
@@ -84,6 +89,7 @@ export {
   isUiamBearerCredential,
   isMissingApiKey,
   isRevokedApiKey,
+  UIAM_ERROR_CODES,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
   ES_CLIENT_AUTHENTICATION_HEADER,
   deriveInternalCallerAttestation,
@@ -99,5 +105,10 @@ export {
   groupSecurityPrivileges,
   flattenSecurityPrivileges,
 } from './src/authz';
+export type { CoreAuthorizationService } from './src/authz';
 export { ApiPrivileges, ApiOperation } from './src/api_privileges';
-export type { UiamProjectType, UiamClientAuthenticationParams } from './src/uiam';
+export type {
+  UiamProjectType,
+  UiamClientAuthenticationParams,
+  CoreUiamAuthorizationService,
+} from './src/uiam';

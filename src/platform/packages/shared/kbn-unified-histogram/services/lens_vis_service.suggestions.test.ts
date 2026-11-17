@@ -66,6 +66,42 @@ describe('LensVisService suggestions', () => {
     expect(lensVis.currentSuggestionContext?.suggestion).toBe(allSuggestionsMock[0]);
   });
 
+  test.each([
+    { name: 'ES|QL chart', esql: 'from the-data-view | stats maxB = max(bytes)' },
+    { name: 'ES|QL histogram', esql: 'from the-data-view | limit 100' },
+  ])('passes the unified histogram default legend to Lens for an $name', async ({ esql }) => {
+    const onLensSuggestionsApiParams = jest.fn();
+    await getLensVisMock({
+      filters: [],
+      query: { esql },
+      dataView: dataViewMock,
+      timeInterval: 'auto',
+      timeRange: {
+        from: '2023-09-03T08:00:00.000Z',
+        to: '2023-09-04T08:56:28.274Z',
+      },
+      breakdownField: undefined,
+      columns: [
+        {
+          id: 'var0',
+          name: 'var0',
+          meta: {
+            type: 'number',
+          },
+        },
+      ],
+      allSuggestions: [],
+      onLensSuggestionsApiParams,
+    });
+
+    expect(onLensSuggestionsApiParams).toHaveBeenCalled();
+    onLensSuggestionsApiParams.mock.calls.forEach(([params]) => {
+      expect(params[5]).toEqual({
+        lnsXY: { legend: { isVisible: true, position: 'right' } },
+      });
+    });
+  });
+
   test('should return suggestionUnsupported if no timerange is provided and no suggestions returned by the api', async () => {
     const lensVis = await getLensVisMock({
       filters: [],

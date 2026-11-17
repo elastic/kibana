@@ -28,10 +28,18 @@ module.exports = {
     '@kbn/eslint-plugin-i18n',
     '@kbn/eslint-plugin-alerting-v2',
     '@kbn/eslint-plugin-kbn-ui',
-    // `@elastic/eui/*` and `depend/*` rules run in oxlint (.oxlint/eui.mts, .oxlint/depend.mts).
-    // The plugins stay registered so `eslint-disable` directives naming their rules resolve.
+    // `@kbn/compat/*` rules run in oxlint; registered so `eslint-disable` directives naming them resolve.
+    '@kbn/eslint-plugin-compat',
+    '@kbn/eslint-plugin-kbn-monaco',
+    // These plugins' rules run in oxlint (.oxlint/*.mts). The plugins stay registered so
+    // `eslint-disable` directives naming their rules resolve.
     '@elastic/eui',
     'eslint-plugin-depend',
+    'eslint-plugin-n',
+    'formatjs',
+    'playwright',
+    'react-perf',
+    'testing-library',
     'prettier',
   ],
 

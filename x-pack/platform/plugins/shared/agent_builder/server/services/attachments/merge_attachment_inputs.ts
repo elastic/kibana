@@ -79,9 +79,6 @@ export const mergeAttachmentInputs = async ({
     const storedId = storedIdByContentKey.get(getContentKey(input, 'unknown'));
 
     if (storedId) {
-      // The content is already stored, so read the existing attachment rather than adding a
-      // copy. Reading tracks the access, so the message still references the attachment.
-      stateManager.get(storedId, { actor });
       continue;
     }
 

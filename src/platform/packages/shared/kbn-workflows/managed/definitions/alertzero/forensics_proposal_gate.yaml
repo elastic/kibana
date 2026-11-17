@@ -3,9 +3,12 @@ name: Forensics proposal gate
 description: >
   Creates one containment Proposal for an Endpoint analysis run and waits for
   an analyst to approve or reject it. Once every Proposal on the Investigation
-  has been decided, closes the Investigation. Continues rather than failing if
-  it can't confirm the Investigation's state afterward, since leaving the
-  Investigation open for someone to check is safer than closing it incorrectly.
+  has been decided, asks the analyst whether to close the Investigation by
+  dispatching the close gate, which raises an always-gated "Close
+  Investigation" Proposal. Never closes anything itself. Continues rather than
+  failing if it can't confirm the Investigation's state afterward, since
+  leaving the Investigation open for someone to check is safer than deciding
+  it incorrectly.
 enabled: true
 tags:
   - security
@@ -25,8 +28,8 @@ settings:
   # create_proposal.yaml gives for being strictly longer than `52w`). Hence the same
   # 176h as every other human-gated AlertZero parent — attack_discovery_review,
   # coverage_review, rule_creation, rule_tuning_review, hunt_proposal_gate. The
-  # requery/close steps after the wrap are near-instant, so the margin is all
-  # decision time.
+  # requery/dispatch steps after the wrap are near-instant, so the margin is all
+  # decision time. The close gate this dispatches parks on its own clock.
   #
   # Not to be confused with the `53w` on system-create-alertzero-proposal, the bridge
   # this child actually executes: that is a deliberate sentinel, not a decision window.
@@ -65,18 +68,52 @@ triggers:
           description: Set by the caller when its autonomy policy already permits this action. Defaults to false so the gate is fail-closed.
         investigationConversationId:
           type: string
-          description: Investigation conversation id this gate closes on settlement.
+          description: Investigation conversation id this gate asks to close on settlement.
         expectedProposalCount:
           type: number
           description: >
-            The creation barrier this gate checks (created >= this) before closing the
-            Investigation. Counts every Proposal on the Investigation, so a caller adding to
-            an Investigation that already holds Proposals must include those in the number.
+            The creation barrier this gate checks (created >= this) before asking to close
+            the Investigation. Counts every Proposal on the Investigation, so a caller adding
+            to an Investigation that already holds Proposals must include those in the number.
+        attackDiscoveryId:
+          type: string
+          minLength: 1
+          maxLength: 512
+          description: Attack Discovery alert the Investigation was opened for; passed to the close gate.
+        closeReason:
+          type: string
+          enum:
+            - false_positive
+            - benign
+            - resolved
+            - duplicate
+            - other
+          description: Investigation close reason the analysis decided on; passed to the close gate.
+        attackReason:
+          type: string
+          enum:
+            - false_positive
+            - true_positive
+            - benign_positive
+            - duplicate
+            - other
+          description: Reason for the attack and its alerts on an approved close; passed to the close gate.
+        assessment:
+          type: string
+          maxLength: 500
+          description: Short assessment from the analysis, quoted on the close card.
+        attackAlertCount:
+          type: integer
+          minimum: 0
+          description: How many detection alerts the attack lists; passed to the close gate for its card.
       required:
         - conversationId
         - comment
         - investigationConversationId
         - expectedProposalCount
+        - attackDiscoveryId
+        - closeReason
+        - attackReason
       additionalProperties: false
 outputs:
   - name: proposalStatus
@@ -85,6 +122,11 @@ outputs:
     type: string
   - name: expired
     type: boolean
+consts:
+  # Temporary: service accounts have no display name, so the chat would show the raw account
+  # id. Remove once they carry one (elastic/security-team#20422).
+  author_name: "Endpoint Analysis worker"
+
 steps:
   # The gate child adds no second gate: this is a single sync wrap of
   # system-create-alertzero-proposal's own waitForApproval.
@@ -93,7 +135,7 @@ steps:
   # caller's. on-failure: continue rather than a fallback ending in
   # workflow.output, since this is this workflow's own terminal concern, not a
   # stage a Worker branch depends on continuing past -- but continuing here still
-  # lets the requery/close steps below run their own best-effort cleanup
+  # lets the requery/dispatch steps below run their own best-effort cleanup
   # rather than aborting the whole execution if the wrap itself never resolves
   # normally.
   #
@@ -170,6 +212,7 @@ steps:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
       inputs:
+        author_name: "{{ consts.author_name }}"
         conversation_id: "{{ inputs.investigationConversationId }}"
         message: "{{ variables.lost_race_note }}"
     on-failure:
@@ -178,7 +221,7 @@ steps:
   # A wrap that errors before settling may mean this Proposal was never created, in
   # which case the settlement counts below can never reach `expectedProposalCount`
   # and the Investigation stays open with nothing saying why. Journal it so the
-  # analyst can see that. Best-effort: a failed note must not stop the requery/close
+  # analyst can see that. Best-effort: a failed note must not stop the requery/dispatch
   # steps. No `error.message`, same as journal_analysis_problem in
   # forensics_run_endpoint_analysis.yaml: later agent rounds read the journal as
   # user input. A lost race already has its own note above.
@@ -189,6 +232,7 @@ steps:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
       inputs:
+        author_name: "{{ consts.author_name }}"
         conversation_id: "{{ inputs.investigationConversationId }}"
         message: >-
           The containment proposal{% if inputs.title != blank %} "{{ inputs.title }}"{% endif %}
@@ -230,10 +274,10 @@ steps:
   # transitions executing -> failed -> re-parked pending (`create_proposal.yaml`'s own
   # retry/clone path) exactly between the pending pair and the executing pair could read
   # as absent from both. The window needs a failure-and-reclone cycle to land inside a
-  # few back-to-back, near-instant reads, and the close route below refuses to close over
-  # a pending Proposal it can see, so the worst case is a close the bridge's own reopen
-  # reverses when the clone lands. elastic/security-team#19855 (a per-status aggregate
-  # route) closes it for good.
+  # few back-to-back, near-instant reads. The close gate dispatched below reads pending
+  # once more before asking, and the close action's route refuses to close over a pending
+  # Proposal it can see, so the worst case is a question asked a little early.
+  # elastic/security-team#19855 (a per-status aggregate route) closes it for good.
   - name: requery_created
     type: kibana.request
     with:
@@ -327,10 +371,10 @@ steps:
   # creation reads blocks settlement. pending_count/executing_count are the
   # opposite case -- those gate on being *zero*, so a failed pair collapsing to
   # literal `0` would read as "nothing pending/executing" and let `resolve_settled`
-  # close the Investigation while a real pending or executing Proposal sits
+  # ask to close the Investigation while a real pending or executing Proposal sits
   # unobserved because this specific read failed, not because it doesn't exist.
   # `default: 1` keeps them fail-closed: a failed pair can never look like "none
-  # outstanding," only like "at least one," which is always safe to NOT-close on.
+  # outstanding," only like "at least one," which is always safe to NOT-ask on.
   - name: resolve_settlement_counts
     type: data.set
     with:
@@ -341,64 +385,39 @@ steps:
   # Three-term `and` chain with no `or` mixed in, which associates left-to-right
   # and so avoids the mixed and/or precedence hazard create_proposal.yaml warns
   # about. This is the full settlement predicate: enough Proposals created, none
-  # still pending, none still executing.
+  # still pending, none still executing. It gates the dispatch below, not a close.
   - name: resolve_settled
     type: data.set
     with:
       settled: "${{ variables.created_count >= inputs.expectedProposalCount and variables.pending_count == 0 and variables.executing_count == 0 }}"
 
-  # Telemetry: the status route doesn't say whether it changed anything, so read the status first.
-  - name: read_status_before_close
-    type: ai.conversation.metadata.read
-    if: "${{ variables.settled == true }}"
-    on-failure:
-      continue: true
-    with:
-      conversation_id: "{{ inputs.investigationConversationId }}"
-
-  # Over the investigations status route, not `ai.conversation.metadata.patch`:
-  # that step patches with owner access, and this gate runs as the Forensics
-  # Worker's service account while the Investigation was opened by whoever handed
-  # the host off (the Attack Discovery Worker's account, or an analyst). A
-  # non-owner's patch comes back as "conversation not found". The status route
-  # closes with converse access, which the Investigation's public access mode
-  # grants, and is how the UI closes an Investigation.
+  # Asks rather than closes. The close itself is the always-gated action's, run
+  # as the approver, and the close gate reports it (`worker_investigation_closed`),
+  # since it is the last workflow in the Worker's own chain that sees the decision.
   #
-  # `expected_proposal_ids: []` makes the route refuse the close if any Proposal
-  # is pending when it looks, which is one more check than the settlement reads
-  # above after their small non-atomic window. Idempotent on an Investigation
-  # that is already closed. Accepted unrecoverable case on failure: the
-  # Investigation stays open with its pending state visible, and recovery is
-  # manual. The route sets no `close_reason`, same as a close from the UI.
-  #
-  # The doubled `investigations` segment is the route's real shape:
-  # INVESTIGATION_STATUS_URL is `/internal/investigations` (the plugin prefix)
-  # + `/investigations/{id}/status`.
-  - name: close_if_settled
-    type: kibana.request
+  # `executeAsync`, so this run does not park a second time on that decision.
+  # Of several gates on one Investigation, only the last to settle sees nothing
+  # pending and dispatches; two that settle together both dispatch, and the close
+  # gate's dedup lets one of them create the Proposal. A gate that settles after a
+  # dismissed close question dispatches again, and the dedup mints the next
+  # generation, which is how a "keep open" is asked again only once something new
+  # has been decided. Continue on failure: the Investigation stays open with its
+  # state visible, and recovery is manual.
+  - name: dispatch_close_gate
+    type: workflow.executeAsync
     if: "${{ variables.settled == true }}"
     with:
-      method: PUT
-      path: "/s/{{ workflow.spaceId }}/internal/investigations/investigations/{{ inputs.investigationConversationId }}/status"
-      headers:
-        kbn-xsrf: "true"
-        elastic-api-version: "1"
-        Content-Type: application/json
-      body:
-        status: closed
-        expected_proposal_ids: []
+      workflow-id: system-security-forensics-close-investigation-gate
+      run-as-mode: inherit
+      inputs:
+        investigationConversationId: "{{ inputs.investigationConversationId }}"
+        attackDiscoveryId: "{{ inputs.attackDiscoveryId }}"
+        closeReason: "{{ inputs.closeReason }}"
+        attackReason: "{{ inputs.attackReason }}"
+        assessment: "${{ inputs.assessment }}"
+        attackAlertCount: "${{ inputs.attackAlertCount | default: 0 }}"
     on-failure:
       continue: true
-
-  - name: report_investigation_closed_settled
-    type: alertzero.reportWorkerOutcome
-    if: "${{ steps.read_status_before_close.output.metadata.status == 'open' and steps.close_if_settled.error == blank and steps.close_if_settled.output.status == 'closed' }}"
-    on-failure:
-      continue: true
-    with:
-      event: worker_investigation_closed
-      investigation_id: "{{ inputs.investigationConversationId }}"
-      close_reason: other
 
   - name: emit_result
     type: workflow.output

@@ -134,7 +134,9 @@ describe('agentic_investigations.set_hypotheses', () => {
       active: true,
       hidden: true,
     });
-    expect(attachments.drainChanges()).toEqual([]);
+    expect(attachments.drainChanges()).toEqual([
+      expect.objectContaining({ kind: 'added', attachment_id: HYPOTHESES_ID, hidden: true }),
+    ]);
   });
 
   it('does not ask the agent to render the hypotheses inline', async () => {

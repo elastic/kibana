@@ -73,20 +73,69 @@ describe('WhatsHappenedBlock', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('condenses a long summary until expanded', () => {
-    const summary = 'x'.repeat(130);
+  it('renders the summary as markdown', () => {
     render(
       <WhatsHappenedBlock
-        summary={summary}
+        summary="A **second sign-in** replayed the cookie."
         attachments={[]}
         groupedAttachments={groupedAttachments}
       />
     );
 
-    expect(screen.queryByText(summary)).not.toBeInTheDocument();
+    expect(screen.getByText('second sign-in').tagName).toBe('STRONG');
+  });
+
+  it('shows only the first paragraph of a multi-paragraph summary until expanded', () => {
+    render(
+      <WhatsHappenedBlock
+        summary={'First paragraph.\n\nSecond paragraph.'}
+        attachments={[]}
+        groupedAttachments={groupedAttachments}
+      />
+    );
+
+    expect(screen.getByText('First paragraph.')).toBeInTheDocument();
+    expect(screen.queryByText('Second paragraph.')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Show more' }));
-    expect(screen.getByText(summary)).toBeInTheDocument();
+    expect(screen.getByText('Second paragraph.')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Show less' }));
-    expect(screen.queryByText(summary)).not.toBeInTheDocument();
+    expect(screen.queryByText('Second paragraph.')).not.toBeInTheDocument();
+  });
+
+  it('ignores leading blank lines when it picks the first paragraph', () => {
+    render(
+      <WhatsHappenedBlock
+        summary={'\n\nFirst paragraph.\n\nSecond paragraph.'}
+        attachments={[]}
+        groupedAttachments={groupedAttachments}
+      />
+    );
+
+    expect(screen.getByText('First paragraph.')).toBeInTheDocument();
+    expect(screen.queryByText('Second paragraph.')).not.toBeInTheDocument();
+  });
+
+  it('does not offer to expand an empty summary', () => {
+    render(
+      <WhatsHappenedBlock
+        summary=""
+        attachments={[attachment]}
+        groupedAttachments={groupedAttachments}
+      />
+    );
+
+    expect(screen.queryByRole('button', { name: 'Show more' })).not.toBeInTheDocument();
+  });
+
+  it('does not offer to expand a single-paragraph summary', () => {
+    render(
+      <WhatsHappenedBlock
+        summary={'x'.repeat(300)}
+        attachments={[]}
+        groupedAttachments={groupedAttachments}
+      />
+    );
+
+    expect(screen.queryByRole('button', { name: 'Show more' })).not.toBeInTheDocument();
   });
 });

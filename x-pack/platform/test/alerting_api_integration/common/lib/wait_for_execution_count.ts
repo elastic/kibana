@@ -6,6 +6,7 @@
  */
 import expect from '@kbn/expect';
 import type supertest from 'supertest';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { getUrlPrefix } from './space_test_utils';
 
 async function delay(millis: number): Promise<void> {
@@ -26,7 +27,9 @@ export function createWaitForExecutionCount(
       return true;
     }
     const prefix = spaceId ? getUrlPrefix(spaceId) : '';
-    const getResponse = await st.get(`${prefix}/internal/alerting/rule/${id}`);
+    const getResponse = await st
+      .get(`${prefix}/internal/alerting/rule/${id}`)
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     expect(getResponse.status).to.eql(200);
     if (getResponse.body.monitoring.run.history.length >= count) {
       attempts = 0;

@@ -9,60 +9,11 @@
 
 import { isPlainObject } from 'lodash';
 import type { Logger } from '@kbn/core/server';
-import { assertWithinRunLimit, fetchDocumentFieldsByIds } from './fetch_by_ids';
-import type {
-  DocumentSelection,
-  ExpandedDocument,
-} from '../../../../../common/types/document_types';
+import { fetchDocumentFieldsByIds } from './fetch_by_ids';
+import { parseTriggerSelections } from './parse_trigger_selections';
+import type { ExpandedDocument } from '../../../../../common/types/document_types';
 import { WorkflowTriggerInputError } from '../../../workflow_trigger_input_error';
 import type { AlertPreprocessingContext } from '../../../workflows_management_api';
-
-/** Elasticsearch rejects document ids longer than 512 bytes. */
-const MAX_DOCUMENT_ID_BYTES = 512;
-/** Elasticsearch rejects index names longer than 255 bytes. */
-const MAX_INDEX_NAME_BYTES = 255;
-
-const isBoundedString = (value: unknown, maxBytes: number): value is string =>
-  typeof value === 'string' && value.length > 0 && Buffer.byteLength(value, 'utf8') <= maxBytes;
-
-/**
- * An `_index` must name one target: an index, alias, or data stream. Wildcards, lists, `_all`, and
- * exclusions would let a single pair reach documents in targets the caller never named.
- */
-const isMultiTargetExpression = (index: string): boolean =>
-  index === '_all' || index.startsWith('-') || index.includes('*') || index.includes(',');
-
-/**
- * Validates `event.documentIds` before anything reaches Elasticsearch. The run routes accept
- * `inputs` as an open record, so this is the only place the selection's shape is checked.
- */
-const parseDocumentSelections = (documentIds: unknown): DocumentSelection[] => {
-  if (!Array.isArray(documentIds)) {
-    throw new WorkflowTriggerInputError('inputs.event.documentIds must be an array.');
-  }
-
-  assertWithinRunLimit(documentIds.length, 'documents');
-
-  return documentIds.map((entry) => {
-    const record = isPlainObject(entry) ? (entry as Record<string, unknown>) : undefined;
-    const _id = record?._id;
-    const _index = record?._index;
-    if (
-      !isBoundedString(_id, MAX_DOCUMENT_ID_BYTES) ||
-      !isBoundedString(_index, MAX_INDEX_NAME_BYTES)
-    ) {
-      throw new WorkflowTriggerInputError(
-        'Every inputs.event.documentIds entry must be an object with non-empty string "_id" and "_index" properties.'
-      );
-    }
-    if (isMultiTargetExpression(_index)) {
-      throw new WorkflowTriggerInputError(
-        `inputs.event.documentIds "_index" must name a single index, alias, or data stream (received "${_index}").`
-      );
-    }
-    return { _id, _index };
-  });
-};
 
 /**
  * Expands a compact `event.documentIds` selection into the `event.documents` array workflows
@@ -90,7 +41,7 @@ export async function preprocessDocumentInputs(
     );
   }
 
-  const selections = parseDocumentSelections(documentIds);
+  const selections = parseTriggerSelections({ value: documentIds, kind: 'documentIds' });
   if (selections.length === 0) {
     return inputs;
   }
