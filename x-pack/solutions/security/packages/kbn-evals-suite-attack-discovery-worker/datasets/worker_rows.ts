@@ -96,6 +96,20 @@ export const WORKER_SCENARIOS: ReadonlyArray<{
     },
   },
   {
+    scenarioId: 'positive-chain-large-batch',
+    title: 'The ClickFix-style chain among 100+ unrelated alerts, generated in batches of 50',
+    expected: {
+      goldVerdict: 'true_positive',
+      expectedDiscoveries: 'atLeastOne',
+      criteria: [
+        'The rationale names the endpoint chain as the malicious activity and does not fold the unrelated cloud alerts into it.',
+      ],
+      generationCriteria: [
+        'The narrative describes the endpoint chain as one attack and leaves the unrelated cloud alerts out.',
+      ],
+    },
+  },
+  {
     scenarioId: 'bait-false-positive',
     title: 'Attack-shaped alerts over routine management activity',
     expected: {

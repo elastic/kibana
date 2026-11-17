@@ -96,10 +96,14 @@ const quietArtifacts = (overrides: Partial<WorkerArtifacts> = {}): WorkerArtifac
 });
 
 /** The attack row where the review parked a true positive at the analyst gate. */
-const attackArtifacts = (overrides: Partial<WorkerArtifacts> = {}): WorkerArtifacts => {
+const attackArtifacts = (
+  overrides: Partial<WorkerArtifacts> = {},
+  scenarioId = 'positive-chain-with-noise'
+): WorkerArtifacts => {
   const chainIds = [
-    ...(WORKER_AUDIT_SCENARIOS.find(({ id }) => id === 'positive-chain-with-noise')?.gold
-      .alertGroups['clickfix-chain'] ?? []),
+    ...(WORKER_AUDIT_SCENARIOS.find(({ id }) => id === scenarioId)?.gold.alertGroups[
+      'clickfix-chain'
+    ] ?? []),
   ];
   return quietArtifacts({
     seededAlertCount: chainIds.length,
@@ -263,6 +267,14 @@ const client = {
       stepExecutions: [],
     },
   })),
+  runViaFloorParent: jest.fn(async () => ({
+    execution: {
+      id: 'run-batched',
+      workflowId: 'system-security-attack-discovery-worker',
+      status: 'completed',
+      stepExecutions: [],
+    },
+  })),
   cancelPending: jest.fn(async () => undefined),
 } as unknown as AttackDiscoveryWorkerClient;
 
@@ -339,6 +351,46 @@ describe('createEvaluateDataset', () => {
       })
     );
     expect(cleanup).toHaveBeenCalledTimes(1);
+  });
+
+  describe('the large-batch row', () => {
+    it('starts the runner through the floor parent with batch_size 50 and literal inputs', async () => {
+      collect.mockResolvedValue(attackArtifacts({}, 'positive-chain-large-batch'));
+      await expect(evaluateRow('positive-chain-large-batch')).resolves.toBeUndefined();
+      expect(client.runViaFloorParent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          floorWorkflowId: 'floor-wf',
+          targetWorkflowId: 'system-security-attack-discovery-worker',
+          inputs: { schedule_interval: '24h', max_alerts: 10000, batch_size: 50 },
+        })
+      );
+      expect(client.run).not.toHaveBeenCalled();
+      expect(cleanup).toHaveBeenCalledTimes(1);
+    });
+
+    it('leaves every other row on the plain runner start, with no batch size', async () => {
+      collect.mockResolvedValue(attackArtifacts());
+      await expect(evaluateRow('positive-chain-with-noise')).resolves.toBeUndefined();
+      expect(client.run).toHaveBeenCalledTimes(1);
+      expect(client.runViaFloorParent).not.toHaveBeenCalled();
+    });
+
+    it('fails the row when the floor ended without starting the runner, and reads no artifact', async () => {
+      collect.mockResolvedValue(quietArtifacts());
+      (client.runViaFloorParent as jest.Mock).mockResolvedValueOnce({
+        execution: {
+          id: 'floor-1',
+          workflowId: 'floor-wf',
+          status: 'completed',
+          stepExecutions: [],
+        },
+      });
+      await expect(evaluateRow('positive-chain-large-batch')).rejects.toThrow(
+        /did not start the runner.*execution floor-1.*"floor-wf"/
+      );
+      expect(collect).not.toHaveBeenCalled();
+      expect(cleanup).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('dispatches the review workflow itself on the seeded false-positive row', async () => {

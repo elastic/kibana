@@ -28,10 +28,21 @@ import {
 } from '@kbn/evals-suite-attack-discovery';
 import { collectReviewArtifact, collectWorkerArtifacts, isReviewSettled } from '../collect';
 import type { CohortRouting } from '../cohort_routing';
-import { REVIEW_SETTLE_TIMEOUT_MS, REVIEW_WORKFLOW_ID } from '../constants';
+import {
+  FLOOR_SCHEDULE_INTERVAL,
+  REVIEW_SETTLE_TIMEOUT_MS,
+  REVIEW_WORKFLOW_ID,
+  RUNNER_TIMEOUT_MS,
+  RUNNER_WORKFLOW_ID,
+} from '../constants';
 import { errorMessage } from '../kibana_api';
 import { assertCleanSpace, cleanupSeed, seedScenario } from '../seed';
 import { WORKER_AUDIT_SCENARIOS } from '../scenarios';
+import {
+  LARGE_BATCH_MAX_ALERTS,
+  LARGE_BATCH_SIZE,
+  POSITIVE_CHAIN_LARGE_BATCH_SCENARIO_ID,
+} from '../scenarios/positive_chain_large_batch';
 import { SEEDED_FALSE_POSITIVE_TITLE } from '../scenarios/seeded_false_positive';
 import type { AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput } from '../types';
 import type { AttackDiscoveryWorkerClient } from '../worker_client';
@@ -73,6 +84,43 @@ const chainAlertIdsOf = (scenario: AuditScenario): string[] | undefined => {
   return requiredGroup !== undefined && alertGroups[requiredGroup]
     ? [...alertGroups[requiredGroup]]
     : undefined;
+};
+
+/**
+ * Runs the runner as a child of the floor with a generation batch size, which only a runner input
+ * sets, so the floor's dispatch is rewritten for this run (see `runViaFloorParent`). The floor's own
+ * execution comes back when it ends without starting the runner; it is not a runner run.
+ */
+const runWithBatchSize = async ({
+  client,
+  spaceId,
+  floorWorkflowId,
+}: {
+  client: AttackDiscoveryWorkerClient;
+  spaceId: string;
+  floorWorkflowId: string;
+}) => {
+  const polled = await client.runViaFloorParent({
+    spaceId,
+    floorWorkflowId,
+    targetWorkflowId: RUNNER_WORKFLOW_ID,
+    inputs: {
+      schedule_interval: FLOOR_SCHEDULE_INTERVAL,
+      max_alerts: LARGE_BATCH_MAX_ALERTS,
+      batch_size: LARGE_BATCH_SIZE,
+    },
+    maxWaitMs: RUNNER_TIMEOUT_MS,
+  });
+  if (polled.execution.workflowId !== RUNNER_WORKFLOW_ID) {
+    throw new Error(
+      `The floor-parent run did not start the runner "${RUNNER_WORKFLOW_ID}": execution ${
+        polled.execution.id
+      } is of workflow "${String(polled.execution.workflowId)}" (status ${
+        polled.execution.status
+      }).`
+    );
+  }
+  return polled;
 };
 
 /**
@@ -458,12 +506,12 @@ export const createEvaluateDataset =
         // so and the final clean-space check reports what is left.
         seeded = await seedScenario({ esClient, log, scenario, spaceId });
         const runStartedMs = Date.now();
-        const { execution: run, timedOutAfterMs } = await client.run({
-          spaceId,
-          // The floor worker is enabled with manual autonomy, which keeps true-positive and
-          // inconclusive verdicts at the gate.
-          floorWorkflowId,
-        });
+        // The floor worker is enabled with manual autonomy, which keeps true-positive and
+        // inconclusive verdicts at the gate.
+        const { execution: run, timedOutAfterMs } =
+          scenario.id === POSITIVE_CHAIN_LARGE_BATCH_SCENARIO_ID
+            ? await runWithBatchSize({ client, spaceId, floorWorkflowId })
+            : await client.run({ spaceId, floorWorkflowId });
         artifacts = await collectWorkerArtifacts({
           client,
           esClient,

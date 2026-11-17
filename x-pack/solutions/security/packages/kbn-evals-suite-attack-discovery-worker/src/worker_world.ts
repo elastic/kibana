@@ -201,6 +201,7 @@ const BENIGN_HOSTS = [
 
 const WORLDS: Readonly<Record<string, ScenarioWorld>> = {
   'positive-chain-with-noise': { hosts: { 'WS-FIN-214': CLICKFIX_HOST }, users: ['j.meyer'] },
+  'positive-chain-large-batch': { hosts: { 'WS-FIN-214': CLICKFIX_HOST }, users: ['j.meyer'] },
   'benign-batch': {
     hosts: Object.fromEntries(BENIGN_HOSTS.map((host) => [host, BENIGN_HOST])),
     users: [],
