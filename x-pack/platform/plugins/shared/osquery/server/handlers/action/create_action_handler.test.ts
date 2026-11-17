@@ -78,6 +78,85 @@ describe('createActionHandler', () => {
     ]);
   });
 
+  describe('workflow dispatch metadata', () => {
+    const fieldNames = ['dispatch_source', 'dispatch_workflow_id', 'dispatch_execution_id'];
+
+    it.each([
+      {
+        name: 'source and both trace IDs',
+        metadata: {
+          dispatchSource: 'workflow' as const,
+          dispatchWorkflowId: 'wf-1',
+          dispatchExecutionId: 'exec-1',
+        },
+        expected: {
+          dispatch_source: 'workflow',
+          dispatch_workflow_id: 'wf-1',
+          dispatch_execution_id: 'exec-1',
+        },
+      },
+      {
+        name: 'source only',
+        metadata: { dispatchSource: 'workflow' as const },
+        expected: { dispatch_source: 'workflow' },
+      },
+      {
+        name: 'source and workflow ID only',
+        metadata: { dispatchSource: 'workflow' as const, dispatchWorkflowId: 'wf-1' },
+        expected: { dispatch_source: 'workflow', dispatch_workflow_id: 'wf-1' },
+      },
+      {
+        name: 'source and execution ID only',
+        metadata: { dispatchSource: 'workflow' as const, dispatchExecutionId: 'exec-1' },
+        expected: { dispatch_source: 'workflow', dispatch_execution_id: 'exec-1' },
+      },
+      { name: 'no metadata', metadata: {}, expected: {} },
+      {
+        name: 'trace IDs without a source',
+        metadata: { dispatchWorkflowId: 'wf-1', dispatchExecutionId: 'exec-1' },
+        expected: {},
+      },
+    ])('indexes only the supplied fields for $name', async ({ metadata, expected }) => {
+      const { context, bulk } = buildOsqueryContext();
+
+      await createActionHandler(
+        context,
+        { query: 'SELECT 1;', agent_ids: [TEST_AGENT] },
+        {
+          dispatch: { entryPoint: 'live_query', source: { kind: 'caller' } },
+          ...metadata,
+        }
+      );
+
+      expect(bulk).toHaveBeenCalledTimes(1);
+      const document = bulk.mock.calls[0][0].operations[1];
+      expect(document).toMatchObject(expected);
+      for (const field of fieldNames) {
+        if (!Object.hasOwn(expected, field)) {
+          expect(document).not.toHaveProperty(field);
+        }
+      }
+    });
+
+    it('omits dispatch metadata from live query telemetry', async () => {
+      const { context, reportEvent } = buildOsqueryContext();
+      const options = {
+        dispatch: { entryPoint: 'live_query' as const, source: { kind: 'caller' as const } },
+        dispatchSource: 'workflow' as const,
+        dispatchWorkflowId: 'wf-1',
+        dispatchExecutionId: 'exec-1',
+      };
+
+      await createActionHandler(context, { query: 'SELECT 1;', agent_ids: [TEST_AGENT] }, options);
+
+      expect(reportEvent).toHaveBeenCalledTimes(1);
+      const payload = reportEvent.mock.calls[0][1];
+      for (const field of fieldNames) {
+        expect(payload).not.toHaveProperty(field);
+      }
+    });
+  });
+
   it('rejects a live query whose selected agents exceed maxAgents before writing actions', async () => {
     const { context, bulkCreate } = buildOsqueryContext();
     mockedParseAgentSelection.mockResolvedValue(['a1', 'a2']);
