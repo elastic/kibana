@@ -33,6 +33,7 @@ import type { OutputFieldProps } from './output_field';
 import type { ProxyUrlFieldProps } from './proxy_url_field';
 import type { ConditionFieldProps } from './condition_field';
 import type { ReroutePermissionsFieldProps } from './reroute_permissions_field';
+import type { CustomFieldsFieldProps } from './custom_fields_field';
 import { MAX_DESCRIPTION_LENGTH, MAX_INTEGRATION_NAME_LENGTH } from './integration_settings';
 
 const ADVANCED_ANIMATION_MS = 300;
@@ -74,6 +75,8 @@ interface SharedSettingsSectionProps {
   condition?: ConditionFieldProps;
   /** The reroute permissions field, offered for agent-based and managed integration deploys. */
   reroutePermissions?: ReroutePermissionsFieldProps;
+  /** The custom fields, offered for managed integration deploys. */
+  customFields?: CustomFieldsFieldProps;
 }
 
 /**
@@ -106,6 +109,7 @@ export function SharedSettingsSection({
   proxyUrl,
   condition,
   reroutePermissions,
+  customFields,
 }: SharedSettingsSectionProps) {
   // Show errors once the field was edited, so the prefilled form does not open with errors.
   const [nameTouched, setNameTouched] = useState(false);
@@ -117,7 +121,8 @@ export function SharedSettingsSection({
     !!namespaceError ||
     !!proxyUrl?.error ||
     !!condition?.errors?.length ||
-    !!reroutePermissions?.error;
+    !!reroutePermissions?.error ||
+    !!customFields?.errors;
   const advancedId = useGeneratedHtmlId({ prefix: 'sharedAdvancedSettings' });
   const { euiTheme } = useEuiTheme();
 
@@ -299,6 +304,7 @@ export function SharedSettingsSection({
             proxyUrl={proxyUrl}
             condition={condition}
             reroutePermissions={reroutePermissions}
+            customFields={customFields}
           />
         </div>
       </div>
