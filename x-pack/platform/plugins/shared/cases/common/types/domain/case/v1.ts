@@ -155,9 +155,9 @@ export const CaseAttributesSchema = lazySchema(() =>
     template: CaseTemplateSchema.nullable().optional(),
     [CASE_EXTENDED_FIELDS]: z.record(z.string(), z.string()).optional(),
     /**
-     * The id of the case this case was merged into
+     * The ids of the cases this case was merged into, oldest merge first
      */
-    merged_into: z.string().nullable().optional(),
+    merged_into: z.array(z.string()).optional(),
   })
 );
 

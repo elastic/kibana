@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { isEqual, pickBy } from 'lodash';
+import { isEqual, pickBy, uniq } from 'lodash';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
 import { MAX_BULK_CREATE_ATTACHMENTS } from '../../../../common/constants';
@@ -17,8 +17,14 @@ import type {
   MergeFailureStep,
 } from '../../../../common/types/api';
 import { MergeCasesRequestSchema, MergeCasesResponseSchema } from '../../../../common/types/api';
-import type { Case, MergeCopiedTotals, MergePayload } from '../../../../common/types/domain';
+import type {
+  Case,
+  MergeCopiedTotals,
+  MergePayload,
+  MergeUpdatedField,
+} from '../../../../common/types/domain';
 import { CaseStatuses, UserActionActions, UserActionTypes } from '../../../../common/types/domain';
+import { MergeUpdatedFieldSchema } from '../../../../common/types/domain/user_action/merge/v1';
 import { getCaseSettings } from '../../../../common/utils/case_settings';
 import { getNoneConnector } from '../../../../common/utils/connectors';
 import { Operations } from '../../../authorization';
@@ -27,7 +33,9 @@ import { decodeOrThrowZod, decodeWithExcessOrThrowZod } from '../../../common/ru
 import type { CaseSavedObjectTransformed } from '../../../common/types/case';
 import type { CasesClient } from '../../client';
 import type { CasesClientArgs } from '../../types';
+import { bulkCreate as bulkCreateAttachments } from '../../attachments/bulk_create';
 import { bulkUpdate } from '../bulk_update';
+import { bulkAddObservables } from '../observables';
 import type { MergeContext } from './context';
 import { loadMergeContext } from './context';
 import type { MergeAttachmentPlan } from './utils';
@@ -70,11 +78,18 @@ const createDestination = async (
   });
 };
 
+interface UpdatedDestination {
+  destinationCase: Case;
+  updatedFields: MergeUpdatedField[];
+}
+
+/** Updates the changed fields without their own activity entries; the merge entry lists them. */
 const updateDestination = async (
   { fields }: MergeCasesRequest,
   destination: Case,
+  clientArgs: CasesClientArgs,
   casesClient: CasesClient
-): Promise<Case> => {
+): Promise<UpdatedDestination> => {
   const sortedUids = (assignees: Array<{ uid: string }>) => assignees.map(({ uid }) => uid).sort();
   const changes = pickBy(
     {
@@ -97,14 +112,20 @@ const updateDestination = async (
     (value) => value !== undefined
   ) as Partial<CasePatchRequest>;
 
-  if (Object.keys(changes).length === 0) {
-    return destination;
+  const updatedFields = MergeUpdatedFieldSchema.options.filter(
+    (field) => changes[field] !== undefined
+  );
+  if (updatedFields.length === 0) {
+    return { destinationCase: destination, updatedFields };
   }
 
-  const [updated] = await casesClient.cases.bulkUpdate({
-    cases: [{ id: destination.id, version: destination.version, ...changes }],
-  });
-  return updated;
+  const [updated] = await bulkUpdate(
+    { cases: [{ id: destination.id, version: destination.version, ...changes }] },
+    clientArgs,
+    casesClient,
+    { skipUserActions: true }
+  );
+  return { destinationCase: updated, updatedFields };
 };
 
 const sumCopied = (totals: Iterable<MergeCopiedTotals>): MergeCopiedTotals => {
@@ -139,38 +160,29 @@ const addCopied = (
   }
 };
 
-const copyAttachments = async (
-  { items, observables }: MergeAttachmentPlan,
+const copyObservables = async (
+  observables: MergeAttachmentPlan['observables'],
   copiedBySource: Map<string, MergeCopiedTotals>,
-  { destinationId, casesClient, recordFailure }: MergeStepArgs
+  { destinationId, clientArgs, casesClient, recordFailure }: MergeStepArgs
 ) => {
-  for (const chunk of chunkItems(items, MAX_BULK_CREATE_ATTACHMENTS)) {
-    try {
-      await casesClient.attachments.bulkCreate({
-        caseId: destinationId,
-        attachments: chunk.map(({ payload }) => payload),
-      });
-      for (const { kind, sourceCaseId, itemCount } of chunk) {
-        addCopied(copiedBySource, sourceCaseId, kind, itemCount);
-      }
-    } catch (error) {
-      recordFailure('attachments', null, error);
-    }
-  }
-
   if (observables.length === 0) {
     return;
   }
 
   try {
-    await casesClient.cases.bulkAddObservables({
-      caseId: destinationId,
-      observables: observables.map(({ observable: { typeKey, value, description } }) => ({
-        typeKey,
-        value,
-        description,
-      })),
-    });
+    await bulkAddObservables(
+      {
+        caseId: destinationId,
+        observables: observables.map(({ observable: { typeKey, value, description } }) => ({
+          typeKey,
+          value,
+          description,
+        })),
+      },
+      clientArgs,
+      casesClient,
+      { skipUserAction: true }
+    );
     for (const { sourceCaseId } of observables) {
       addCopied(copiedBySource, sourceCaseId, 'observables', 1);
     }
@@ -179,7 +191,40 @@ const copyAttachments = async (
   }
 };
 
-/** Sets `merged_into` on the originals and returns the version each one has afterwards. */
+/**
+ * Copies the planned observables and attachments without their own user actions; the merge user
+ * action records what was copied.
+ */
+const copyAttachments = async (
+  { items, observables }: MergeAttachmentPlan,
+  copiedBySource: Map<string, MergeCopiedTotals>,
+  stepArgs: MergeStepArgs
+) => {
+  // Observables go first: copied alerts can extract the same observables, and `bulkAddObservables`
+  // rejects a request that adds nothing new.
+  await copyObservables(observables, copiedBySource, stepArgs);
+
+  const { destinationId, clientArgs, recordFailure } = stepArgs;
+  for (const chunk of chunkItems(items, MAX_BULK_CREATE_ATTACHMENTS)) {
+    try {
+      await bulkCreateAttachments(
+        { caseId: destinationId, attachments: chunk.map(({ payload }) => payload) },
+        clientArgs,
+        { skipUserActions: true }
+      );
+      for (const { kind, sourceCaseId, itemCount } of chunk) {
+        addCopied(copiedBySource, sourceCaseId, kind, itemCount);
+      }
+    } catch (error) {
+      recordFailure('attachments', null, error);
+    }
+  }
+};
+
+/**
+ * Adds the destination to `merged_into` on the originals and returns the version each one has
+ * afterwards.
+ */
 const markOriginals = async (
   originals: Case[],
   { destinationId, clientArgs, recordFailure }: MergeStepArgs
@@ -203,7 +248,7 @@ const markOriginals = async (
           originalCase,
           version: originalCase.version,
           updatedAttributes: {
-            merged_into: destinationId,
+            merged_into: uniq([...(originalCase.attributes.merged_into ?? []), destinationId]),
             updated_at: updatedAt,
             updated_by: user,
           },
@@ -270,7 +315,8 @@ const addNote = async (
 /**
  * Merges cases into a new case or into one of them. The destination is created or updated first;
  * if that fails nothing has changed. Later steps (copying attachments, marking and closing the
- * originals, activity entries, the note) are recorded in `failures` and never rolled back.
+ * originals, activity entries, the note) are recorded in `failures` and never rolled back. A case
+ * can be merged again, so its `merged_into` lists every destination.
  */
 export const merge = async (
   params: MergeCasesRequest,
@@ -287,6 +333,7 @@ export const merge = async (
   let request: MergeCasesRequest;
   let context: MergeContext;
   let destinationCase: Case;
+  let updatedFields: MergeUpdatedField[];
 
   try {
     request = decodeWithExcessOrThrowZod(MergeCasesRequestSchema)(params);
@@ -303,10 +350,13 @@ export const merge = async (
 
     throwIfOverLimit(context.plan);
 
-    destinationCase =
+    ({ destinationCase, updatedFields } =
       context.destination == null
-        ? await createDestination(request, context, casesClient)
-        : await updateDestination(request, context.destination, casesClient);
+        ? {
+            destinationCase: await createDestination(request, context, casesClient),
+            updatedFields: [],
+          }
+        : await updateDestination(request, context.destination, clientArgs, casesClient));
   } catch (error) {
     throw createCaseError({
       message: `Failed to merge cases [${(params.caseIds ?? []).join(', ')}]: ${error}`,
@@ -353,8 +403,11 @@ export const merge = async (
         title,
         incrementalId: incrementalId ?? null,
         copied: copiedBySource.get(id) ?? emptyCopiedTotals(),
+        duplicates: plan.duplicatesBySource.get(id) ?? emptyCopiedTotals(),
+        excluded: plan.excludedBySource.get(id) ?? emptyCopiedTotals(),
       })),
       closedSources: closedCaseIds.length > 0,
+      updatedFields,
     },
   };
 

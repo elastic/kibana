@@ -251,6 +251,8 @@ export class CaseUserActionService {
           UserActionTypes.comment,
           UserActionTypes.description,
           UserActionTypes.title,
+          // Attachments copied by a merge have no comment user actions of their own.
+          UserActionTypes.merge,
           /**
            * TODO: Remove when all connectors support the status, severity
            * and tags user actions or if there is a mechanism to

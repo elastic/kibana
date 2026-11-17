@@ -21,7 +21,7 @@ import type { AttachmentSavedObjectTransformedV2 } from '../../common/types/atta
 
 import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
-import type { BulkCreateArgs } from './types';
+import type { BulkCreateArgs, BulkCreateAttachmentsOptions } from './types';
 import { validateUnifiedAttachments } from './validators';
 import { validateMaxUserActions } from '../../common/validators';
 import { emitAttachmentsAddedEvent } from './trigger_utils';
@@ -29,7 +29,8 @@ import { extractAndAddObservables } from './extract_observables';
 
 const createAttachments = async (
   args: BulkCreateArgs,
-  clientArgs: CasesClientArgs
+  clientArgs: CasesClientArgs,
+  { skipUserActions = false }: BulkCreateAttachmentsOptions = {}
 ): Promise<{
   model: CaseCommentModel;
   createdAttachments: AttachmentSavedObjectTransformedV2[];
@@ -48,11 +49,13 @@ const createAttachments = async (
       BulkCreateUnifiedAttachmentsRequestSchema
     )(attachments);
 
-    await validateMaxUserActions({
-      caseId,
-      userActionService,
-      userActionsToAdd: decodedAttachments.length,
-    });
+    if (!skipUserActions) {
+      await validateMaxUserActions({
+        caseId,
+        userActionService,
+        userActionsToAdd: decodedAttachments.length,
+      });
+    }
 
     decodedAttachments.forEach((attachment) => {
       validateUnifiedAttachments({
@@ -96,6 +99,7 @@ const createAttachments = async (
 
     const { model: updatedModel, attachments: createdAttachments } = await model.bulkCreate({
       attachments: attachmentsWithIds,
+      skipUserActions,
     });
 
     const {
@@ -141,9 +145,10 @@ const createAttachments = async (
  */
 export const bulkCreate = async (
   args: BulkCreateArgs,
-  clientArgs: CasesClientArgs
+  clientArgs: CasesClientArgs,
+  options?: BulkCreateAttachmentsOptions
 ): Promise<UnifiedAttachment[]> => {
-  const { createdAttachments } = await createAttachments(args, clientArgs);
+  const { createdAttachments } = await createAttachments(args, clientArgs, options);
 
   return createdAttachments.map((attachment) =>
     toUnifiedAttachment(flattenAttachmentSavedObject(attachment))

@@ -40,6 +40,8 @@ export interface CaseDetailsLinkProps {
   children?: React.ReactNode;
   detailName: string;
   title?: string;
+  /** Set to `_blank` to open the case in a new tab instead of navigating in place. */
+  target?: EuiLinkProps['target'];
 }
 
 // TODO: Fix this manually. Issue #123375
@@ -48,6 +50,7 @@ const CaseDetailsLinkComponent: React.FC<CaseDetailsLinkProps> = ({
   children,
   detailName,
   title,
+  target,
 }) => {
   const { getCaseViewUrl, navigateToCaseView } = useCaseViewNavigation();
   const navigateToCaseViewClick = useCallback(
@@ -60,10 +63,16 @@ const CaseDetailsLinkComponent: React.FC<CaseDetailsLinkProps> = ({
 
   return (
     <LinkAnchor
-      onClick={navigateToCaseViewClick}
+      onClick={target == null ? navigateToCaseViewClick : undefined}
       href={getCaseViewUrl({ detailName })}
+      target={target}
+      external={false}
       data-test-subj="case-details-link"
-      aria-label={i18n.CASE_DETAILS_LINK_ARIA(title ?? detailName)}
+      aria-label={
+        target === '_blank'
+          ? i18n.CASE_DETAILS_LINK_NEW_TAB_ARIA(title ?? detailName)
+          : i18n.CASE_DETAILS_LINK_ARIA(title ?? detailName)
+      }
     >
       {children ? children : detailName}
     </LinkAnchor>

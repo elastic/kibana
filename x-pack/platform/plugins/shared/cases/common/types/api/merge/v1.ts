@@ -14,6 +14,8 @@ import {
   MAX_COMMENT_LENGTH,
   MAX_DESCRIPTION_LENGTH,
   MAX_LENGTH_PER_TAG,
+  MAX_MERGE_ATTACHMENT_KEY_LENGTH,
+  MAX_MERGE_EXCLUDED_ATTACHMENTS,
   MAX_TAGS_PER_CASE,
   MAX_TITLE_LENGTH,
   MIN_CASES_TO_MERGE,
@@ -55,7 +57,6 @@ export const MergePreviewCaseSchema = lazySchema(() =>
     owner: z.string(),
     createdAt: z.string(),
     totalAlerts: z.number(),
-    mergedInto: z.string().nullable(),
   })
 );
 
@@ -108,6 +109,47 @@ export const MergeAttachmentSummarySchema = lazySchema(() =>
   })
 );
 
+const mergeChoiceSchema = <T extends z.ZodRawShape>(shape: T) =>
+  z.object({
+    /** Identifies the item in `excludedAttachments` of the merge request. */
+    key: z.string(),
+    /** The original case the item is copied from. */
+    sourceCaseId: z.string(),
+    ...shape,
+  });
+
+/** Every item the merge would copy, so the user can leave some out. */
+export const MergeAttachmentChoicesSchema = lazySchema(() =>
+  z.object({
+    alerts: z.array(
+      mergeChoiceSchema({
+        alertId: z.string(),
+        index: z.string().nullable(),
+        ruleId: z.string().nullable(),
+        ruleName: z.string().nullable(),
+        /** When the alert was added to its case. */
+        addedAt: z.string(),
+      })
+    ),
+    events: z.array(
+      mergeChoiceSchema({
+        eventId: z.string(),
+        index: z.string().nullable(),
+        addedAt: z.string(),
+      })
+    ),
+    observables: z.array(mergeChoiceSchema({ typeKey: z.string(), value: z.string() })),
+    other: z.array(
+      mergeChoiceSchema({
+        type: z.string(),
+        addedAt: z.string(),
+        /** Persistable state and external references count toward the limit; others don't. */
+        countsTowardLimit: z.boolean(),
+      })
+    ),
+  })
+);
+
 export const MergeCasesPreviewResponseSchema = lazySchema(() =>
   z.object({
     cases: z.array(MergePreviewCaseSchema),
@@ -130,6 +172,8 @@ export const MergeCasesPreviewResponseSchema = lazySchema(() =>
       /** Not copied: comments stay on their original cases. */
       comments: z.object({ total: z.number() }),
     }),
+    /** Set only when a limit is exceeded. */
+    choices: MergeAttachmentChoicesSchema.nullable(),
   })
 );
 
@@ -171,6 +215,17 @@ export const MergeCasesRequestSchema = lazySchema(() =>
     }),
     closeOriginals: z.boolean(),
     note: limitedStringSchema({ fieldName: 'note', min: 1, max: MAX_COMMENT_LENGTH }).optional(),
+    /** Keys from the preview's `choices` to leave on their original cases. */
+    excludedAttachments: limitedArraySchema({
+      codec: limitedStringSchema({
+        fieldName: 'excludedAttachments',
+        min: 1,
+        max: MAX_MERGE_ATTACHMENT_KEY_LENGTH,
+      }),
+      fieldName: 'excludedAttachments',
+      min: 0,
+      max: MAX_MERGE_EXCLUDED_ATTACHMENTS,
+    }).optional(),
   })
 );
 
@@ -205,6 +260,7 @@ export type MergeCasesPreviewResponse = z.infer<typeof MergeCasesPreviewResponse
 export type MergePreviewCase = z.infer<typeof MergePreviewCaseSchema>;
 export type MergeFieldProvenance = z.infer<typeof MergeFieldProvenanceSchema>;
 export type MergeAttachmentSummary = z.infer<typeof MergeAttachmentSummarySchema>;
+export type MergeAttachmentChoices = z.infer<typeof MergeAttachmentChoicesSchema>;
 export type MergeCasesRequest = z.infer<typeof MergeCasesRequestSchema>;
 export type MergeCasesResponse = z.infer<typeof MergeCasesResponseSchema>;
 export type MergeFailureStep = z.infer<typeof MergeFailureStepSchema>;

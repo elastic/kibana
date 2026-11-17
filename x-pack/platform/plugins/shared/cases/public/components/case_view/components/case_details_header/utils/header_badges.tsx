@@ -82,12 +82,12 @@ export const getBadges = ({
   result.push(statusBadge);
 
   const { mergedInto } = caseData;
-  if (mergedInto != null) {
+  if (mergedInto != null && mergedInto.length > 0) {
     result.push({
       label: MERGED,
       color: 'hollow',
       'data-test-subj': 'case-view-merged-into-badge',
-      renderCustomBadge: () => <MergedIntoBadge destinationId={mergedInto} />,
+      renderCustomBadge: () => <MergedIntoBadge destinationIds={mergedInto} />,
     });
   }
 

@@ -122,7 +122,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     });
 
     const mergeDestinationIds = useMemo(
-      () => data.cases.flatMap(({ mergedInto }) => (mergedInto != null ? [mergedInto] : [])),
+      () => data.cases.flatMap(({ mergedInto }) => mergedInto ?? []),
       [data.cases]
     );
     const { data: mergeDestinations = NO_MERGE_DESTINATIONS } =

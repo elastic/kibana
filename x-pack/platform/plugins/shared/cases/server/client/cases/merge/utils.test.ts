@@ -8,10 +8,15 @@
 import {
   COMMENT_ATTACHMENT_TYPE,
   FILE_ATTACHMENT_TYPE,
+  LENS_ATTACHMENT_TYPE,
   SECURITY_ALERT_ATTACHMENT_TYPE,
   SECURITY_EVENT_ATTACHMENT_TYPE,
 } from '../../../../common/constants/attachments';
-import { MAX_ALERTS_PER_CASE, SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
+import {
+  MAX_ALERTS_PER_CASE,
+  MAX_TITLE_LENGTH,
+  SECURITY_SOLUTION_OWNER,
+} from '../../../../common/constants';
 import type { AttachmentV2, Case } from '../../../../common/types/domain';
 import { CaseSeverity, CustomFieldTypes } from '../../../../common/types/domain';
 import { basicCaseFields } from '../../../services/test_utils';
@@ -75,6 +80,22 @@ const fileAttachment = (id: string): AttachmentV2 => ({
   metadata: { files: [] },
 });
 
+const lensAttachment = (id: string): AttachmentV2 => ({
+  ...attachmentBase,
+  id,
+  type: LENS_ATTACHMENT_TYPE,
+  data: { state: { attributes: { title: 'A chart' }, timeRange: {} } },
+});
+
+const caseObservable = (id: string, value: string): Case['observables'][number] => ({
+  id,
+  typeKey: 'ipv4',
+  value,
+  description: null,
+  createdAt: '',
+  updatedAt: '',
+});
+
 const oldest = makeCase('oldest', '2024-01-01T00:00:00.000Z');
 const middle = makeCase('middle', '2024-02-01T00:00:00.000Z');
 const newest = makeCase('newest', '2024-03-01T00:00:00.000Z');
@@ -116,14 +137,14 @@ describe('merge utils', () => {
     });
 
     it('does not flag a conflict when every case has the same value', () => {
-      const { title } = buildFieldsPreview([
-        { ...oldest, title: 'Phishing' },
-        { ...middle, title: 'Phishing' },
+      const { description } = buildFieldsPreview([
+        { ...oldest, description: 'Phishing' },
+        { ...middle, description: 'Phishing' },
       ]);
 
-      expect(title.provenance).toBe('same');
-      expect(title.hasConflict).toBe(false);
-      expect(title.options).toEqual([{ value: 'Phishing', caseIds: ['oldest', 'middle'] }]);
+      expect(description.provenance).toBe('same');
+      expect(description.hasConflict).toBe(false);
+      expect(description.options).toEqual([{ value: 'Phishing', caseIds: ['oldest', 'middle'] }]);
     });
 
     it('returns no value when no case has one', () => {
@@ -139,15 +160,56 @@ describe('merge utils', () => {
     });
 
     it('flags a conflict and defaults to the oldest case for a new case', () => {
-      const { title } = buildFieldsPreview([
-        { ...oldest, title: 'First' },
-        { ...middle, title: 'Second' },
+      const { description } = buildFieldsPreview([
+        { ...oldest, description: 'First' },
+        { ...middle, description: 'Second' },
       ]);
 
-      expect(title.hasConflict).toBe(true);
-      expect(title.value).toBe('First');
-      expect(title.provenance).toBe('oldest');
-      expect(title.sourceCaseId).toBe('oldest');
+      expect(description.hasConflict).toBe(true);
+      expect(description.value).toBe('First');
+      expect(description.provenance).toBe('oldest');
+      expect(description.sourceCaseId).toBe('oldest');
+    });
+
+    it('names every distinct title in the title of a new case', () => {
+      const { title } = buildFieldsPreview([
+        { ...oldest, title: 'Phishing' },
+        { ...middle, title: 'Credential harvesting' },
+        { ...newest, title: 'Phishing' },
+      ]);
+
+      expect(title).toEqual({
+        value: 'Merged case: Phishing, Credential harvesting',
+        provenance: 'combined',
+        sourceCaseId: null,
+        options: [
+          { value: 'Phishing', caseIds: ['oldest', 'newest'] },
+          { value: 'Credential harvesting', caseIds: ['middle'] },
+        ],
+        hasConflict: true,
+      });
+    });
+
+    it('marks a new case as merged even when every title is the same', () => {
+      const { title } = buildFieldsPreview([
+        { ...oldest, title: 'Phishing' },
+        { ...middle, title: 'Phishing' },
+      ]);
+
+      expect(title.value).toBe('Merged case: Phishing');
+      expect(title.hasConflict).toBe(false);
+    });
+
+    it('cuts the title of a new case to the title limit', () => {
+      const { title } = buildFieldsPreview([
+        { ...oldest, title: 'a'.repeat(MAX_TITLE_LENGTH) },
+        { ...middle, title: 'b'.repeat(MAX_TITLE_LENGTH) },
+      ]);
+
+      expect(title.value).toHaveLength(MAX_TITLE_LENGTH);
+      expect(title.value).toBe(
+        `Merged case: ${'a'.repeat(MAX_TITLE_LENGTH - 'Merged case: '.length - 1)}…`
+      );
     });
 
     it("defaults to an existing destination's value when values conflict", () => {
@@ -249,6 +311,12 @@ describe('merge utils', () => {
         max: MAX_ALERTS_PER_CASE,
         overLimit: 0,
       });
+      expect(plan.duplicatesBySource).toEqual(
+        new Map([
+          ['oldest', { alerts: 0, events: 0, observables: 0, other: 0 }],
+          ['middle', { alerts: 1, events: 0, observables: 0, other: 0 }],
+        ])
+      );
       expect(plan.items).toHaveLength(2);
       expect(plan.items[1]).toEqual(
         expect.objectContaining({
@@ -289,6 +357,9 @@ describe('merge utils', () => {
       expect(plan.summaries.alerts).toEqual(
         expect.objectContaining({ total: 2, duplicates: 1, toCopy: 1, existing: 1 })
       );
+      expect(plan.duplicatesBySource).toEqual(
+        new Map([['oldest', { alerts: 1, events: 0, observables: 0, other: 0 }]])
+      );
       expect(plan.items).toHaveLength(1);
       expect(plan.items[0].sourceCaseId).toBe('oldest');
     });
@@ -307,6 +378,120 @@ describe('merge utils', () => {
 
       expect(plan.summaries.alerts.toCopy).toBe(1100);
       expect(plan.summaries.alerts.overLimit).toBe(1100 - MAX_ALERTS_PER_CASE);
+    });
+
+    it('lists what it would copy as choices, without duplicates or what the destination has', () => {
+      const plan = buildAttachmentPlan({
+        orderedCases: [
+          newest,
+          { ...oldest, observables: [caseObservable('o1', '10.0.0.1')] },
+          middle,
+        ],
+        destinationCaseId: 'newest',
+        attachmentsByCaseId: new Map([
+          ['newest', [alertAttachment('a0', ['alert-0'])]],
+          ['oldest', [alertAttachment('a1', ['alert-0', 'alert-1']), lensAttachment('l1')]],
+          [
+            'middle',
+            [alertAttachment('a2', ['alert-1', 'alert-2']), eventAttachment('e1', 'event-1')],
+          ],
+        ]),
+      });
+
+      expect(plan.choices).toEqual({
+        alerts: [
+          {
+            key: 'alerts|alert-1|alerts-index',
+            sourceCaseId: 'oldest',
+            alertId: 'alert-1',
+            index: 'alerts-index',
+            ruleId: 'rule-1',
+            ruleName: 'Rule',
+            addedAt: attachmentBase.created_at,
+          },
+          expect.objectContaining({ key: 'alerts|alert-2|alerts-index', sourceCaseId: 'middle' }),
+        ],
+        events: [
+          {
+            key: 'events|event-1|events-index',
+            sourceCaseId: 'middle',
+            eventId: 'event-1',
+            index: 'events-index',
+            addedAt: attachmentBase.created_at,
+          },
+        ],
+        observables: [
+          {
+            key: 'observables|oldest|o1',
+            sourceCaseId: 'oldest',
+            typeKey: 'ipv4',
+            value: '10.0.0.1',
+          },
+        ],
+        other: [
+          {
+            key: 'other|l1',
+            sourceCaseId: 'oldest',
+            type: LENS_ATTACHMENT_TYPE,
+            addedAt: attachmentBase.created_at,
+            countsTowardLimit: true,
+          },
+        ],
+      });
+    });
+
+    it('leaves excluded items on their cases', () => {
+      const plan = buildAttachmentPlan({
+        orderedCases: [
+          { ...oldest, observables: [caseObservable('o1', '10.0.0.1')] },
+          { ...middle, observables: [caseObservable('o2', '10.0.0.2')] },
+        ],
+        attachmentsByCaseId: new Map([
+          ['oldest', [alertAttachment('a1', ['alert-1', 'alert-2']), lensAttachment('l1')]],
+          ['middle', [alertAttachment('a2', ['alert-3'])]],
+        ]),
+        excludedKeys: new Set([
+          'alerts|alert-2|alerts-index',
+          'alerts|alert-3|alerts-index',
+          'observables|oldest|o1',
+          'other|l1',
+        ]),
+      });
+
+      expect(plan.summaries.alerts).toEqual(
+        expect.objectContaining({ total: 3, duplicates: 0, toCopy: 1 })
+      );
+      expect(plan.summaries.observables.toCopy).toBe(1);
+      expect(plan.summaries.other.toCopy).toBe(0);
+      expect(plan.items).toEqual([
+        expect.objectContaining({
+          sourceCaseId: 'oldest',
+          itemCount: 1,
+          payload: expect.objectContaining({ attachmentId: ['alert-1'] }),
+        }),
+      ]);
+      expect(plan.observables.map(({ observable: { id } }) => id)).toEqual(['o2']);
+      expect(plan.excludedBySource).toEqual(
+        new Map([
+          ['oldest', { alerts: 1, events: 0, observables: 1, other: 1 }],
+          ['middle', { alerts: 1, events: 0, observables: 0, other: 0 }],
+        ])
+      );
+      expect(plan.choices.alerts).toHaveLength(3);
+    });
+
+    it('brings an over-limit merge under the limit once enough alerts are excluded', () => {
+      const alertIds = Array.from({ length: 1001 }, (_, position) => `alert-${position}`);
+
+      const plan = buildAttachmentPlan({
+        orderedCases: [oldest],
+        attachmentsByCaseId: new Map([['oldest', [alertAttachment('a1', alertIds)]]]),
+        excludedKeys: new Set(['alerts|alert-0|alerts-index']),
+      });
+
+      expect(plan.summaries.alerts).toEqual(
+        expect.objectContaining({ toCopy: MAX_ALERTS_PER_CASE, overLimit: 0 })
+      );
     });
 
     it('dedupes events and observables', () => {
@@ -363,6 +548,12 @@ describe('merge utils', () => {
         '10.0.0.1',
         '10.0.0.2',
       ]);
+      expect(plan.duplicatesBySource.get('middle')).toEqual({
+        alerts: 0,
+        events: 1,
+        observables: 1,
+        other: 0,
+      });
     });
 
     it('counts files and comments without copying them', () => {

@@ -597,6 +597,8 @@ const incrementTemplateUsageStats = async (
 export interface BulkUpdateCasesOptions {
   /** Changes the status without syncing the status of the cases' alerts. */
   skipAlertSync?: boolean;
+  /** Updates the cases without writing user actions; the caller records the change itself. */
+  skipUserActions?: boolean;
 }
 
 /**
@@ -974,7 +976,9 @@ export const bulkUpdate = async (
       templateNamesByKey,
     });
 
-    await throwIfMaxUserActionsReached({ userActionsDict, userActionService });
+    if (options?.skipUserActions !== true) {
+      await throwIfMaxUserActionsReached({ userActionsDict, userActionService });
+    }
     notifyPlatinumUsage(licensingService, casesToUpdate);
 
     // Server-derived assignee identity, gated by feature flag `assigneeIdentity`
@@ -1085,9 +1089,11 @@ export const bulkUpdate = async (
           }, [])
         : [];
 
-    await userActionService.creator.bulkCreateUpdateCase({
-      builtUserActions,
-    });
+    if (options?.skipUserActions !== true) {
+      await userActionService.creator.bulkCreateUpdateCase({
+        builtUserActions,
+      });
+    }
 
     const casesAndAssigneesToNotifyForAssignment = getCasesAndAssigneesToNotifyForAssignment(
       updatedCases,

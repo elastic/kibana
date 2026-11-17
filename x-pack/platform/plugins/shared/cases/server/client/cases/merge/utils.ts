@@ -13,9 +13,11 @@ import {
   MAX_OBSERVABLES_PER_CASE,
   MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES,
   MAX_TAGS_PER_CASE,
+  MAX_TITLE_LENGTH,
 } from '../../../../common/constants';
 import type {
   AttachmentRequestV2,
+  MergeAttachmentChoices,
   MergeAttachmentSummary,
   MergeCasesPreviewResponse,
   MergeFieldProvenance,
@@ -37,6 +39,7 @@ import {
 } from '../../../../common/utils/attachments';
 import { toUnifiedAttachmentPayload } from '../../../common/attachments';
 import { isUnifiedPersistableStateOrExternalReference } from '../../../common/utils';
+import { MERGED_CASE_TITLE } from '../translations';
 
 type CopiedKind = keyof MergeCopiedTotals;
 type AttachmentKind = Exclude<CopiedKind, 'observables'> | 'files' | 'comments';
@@ -54,6 +57,12 @@ export interface MergeAttachmentPlan {
   items: MergeCopyItem[];
   observables: Array<{ sourceCaseId: string; observable: Case['observables'][number] }>;
   summaries: Record<CopiedKind, MergeAttachmentSummary>;
+  /** Per original case, what the destination or an earlier case already held. */
+  duplicatesBySource: Map<string, MergeCopiedTotals>;
+  /** Per original case, what the user chose to leave on it. */
+  excludedBySource: Map<string, MergeCopiedTotals>;
+  /** Everything the merge would copy before exclusions, keyed for `excludedAttachments`. */
+  choices: MergeAttachmentChoices;
   files: number;
   comments: number;
 }
@@ -209,17 +218,40 @@ const combineValues = <T>(
 
 const isEmptyString = (value: string | null) => value == null || value.trim().length === 0;
 
-export const buildFieldsPreview = (
-  orderedCases: Case[],
-  destinationCaseId?: string
-): MergeCasesPreviewResponse['fields'] => ({
-  title: buildSingleValueField({
+/**
+ * An existing destination keeps its title. A new case names every distinct title, cut to fit
+ * the title limit.
+ */
+const buildTitleField = (orderedCases: Case[], destinationCaseId?: string) => {
+  const field = buildSingleValueField({
     orderedCases,
     destinationCaseId,
     getValue: ({ title }) => title,
     isEmpty: isEmptyString,
     emptyValue: '',
-  }),
+  });
+
+  if (destinationCaseId != null || field.options.length === 0) {
+    return field;
+  }
+
+  const title = MERGED_CASE_TITLE(field.options.map(({ value }) => value).join(', '));
+  return {
+    ...field,
+    value:
+      title.length > MAX_TITLE_LENGTH
+        ? `${title.slice(0, MAX_TITLE_LENGTH - 1).trimEnd()}…`
+        : title,
+    provenance: 'combined' as const,
+    sourceCaseId: null,
+  };
+};
+
+export const buildFieldsPreview = (
+  orderedCases: Case[],
+  destinationCaseId?: string
+): MergeCasesPreviewResponse['fields'] => ({
+  title: buildTitleField(orderedCases, destinationCaseId),
   description: buildSingleValueField({
     orderedCases,
     destinationCaseId,
@@ -366,11 +398,32 @@ const withReferencedItems = (
 const referencedItemKey = (type: string, { id, index }: ReferencedItem) =>
   `${type}|${id}|${index ?? ''}`;
 
+const getRule = (
+  payload: UnifiedAttachmentPayload
+): { ruleId: string | null; ruleName: string | null } => {
+  const rule = isUnifiedReferenceAttachmentRequest(payload) ? payload.metadata?.rule : null;
+  if (rule == null || typeof rule !== 'object' || Array.isArray(rule)) {
+    return { ruleId: null, ruleName: null };
+  }
+  const { id, name } = rule;
+  return {
+    ruleId: typeof id === 'string' ? id : null,
+    ruleName: typeof name === 'string' ? name : null,
+  };
+};
+
 /** Reference attachments other than alerts and events point at one object; value attachments are copied as they are. */
 const otherAttachmentKey = (payload: UnifiedAttachmentPayload): string | null =>
   isUnifiedReferenceAttachmentRequest(payload)
     ? `${payload.type}|${toStringArray(payload.attachmentId).join(',')}`
     : null;
+
+export const emptyCopiedTotals = (): MergeCopiedTotals => ({
+  alerts: 0,
+  events: 0,
+  observables: 0,
+  other: 0,
+});
 
 const emptySummary = (max: number | null): MergeAttachmentSummary => ({
   total: 0,
@@ -391,6 +444,10 @@ const withOverLimit = (
 
 interface PlanState {
   summaries: Record<CopiedKind, MergeAttachmentSummary>;
+  duplicatesBySource: Map<string, MergeCopiedTotals>;
+  excludedBySource: Map<string, MergeCopiedTotals>;
+  excludedKeys: ReadonlySet<string>;
+  choices: MergeAttachmentChoices;
   seen: Set<string>;
   items: MergeCopyItem[];
   observables: MergeAttachmentPlan['observables'];
@@ -413,41 +470,100 @@ const markSeen = (seen: Set<string>, key: string): boolean => {
   return isDuplicate;
 };
 
-const addReferencedAttachment = (
-  { state, caseId, isDestination }: PlanEntryContext,
-  kind: 'alerts' | 'events',
-  payload: UnifiedAttachmentPayload
+const addSourceCount = (
+  bySource: Map<string, MergeCopiedTotals>,
+  caseId: string,
+  kind: CopiedKind,
+  count: number
 ) => {
+  const totals = bySource.get(caseId);
+  if (totals != null) {
+    totals[kind] += count;
+  }
+};
+
+interface PlanAttachment {
+  attachment: AttachmentV2;
+  payload: UnifiedAttachmentPayload;
+}
+
+const addReferencedChoices = (
+  { state, caseId }: PlanEntryContext,
+  kind: 'alerts' | 'events',
+  { attachment, payload }: PlanAttachment,
+  fresh: Array<{ item: ReferencedItem; key: string }>
+) => {
+  const { created_at: addedAt } = attachment;
+  if (kind === 'events') {
+    state.choices.events.push(
+      ...fresh.map(({ item, key }) => ({
+        key,
+        sourceCaseId: caseId,
+        eventId: item.id,
+        index: item.index,
+        addedAt,
+      }))
+    );
+    return;
+  }
+
+  const rule = getRule(payload);
+  state.choices.alerts.push(
+    ...fresh.map(({ item, key }) => ({
+      key,
+      sourceCaseId: caseId,
+      alertId: item.id,
+      index: item.index,
+      ...rule,
+      addedAt,
+    }))
+  );
+};
+
+const addReferencedAttachment = (
+  context: PlanEntryContext,
+  kind: 'alerts' | 'events',
+  planAttachment: PlanAttachment
+) => {
+  const { state, caseId, isDestination } = context;
+  const { payload } = planAttachment;
   const summary = state.summaries[kind];
   const referenced = getReferencedItems(payload);
-  const fresh = referenced.filter((item) => !markSeen(state.seen, referencedItemKey(kind, item)));
+  const fresh = referenced
+    .map((item) => ({ item, key: referencedItemKey(kind, item) }))
+    .filter(({ key }) => !markSeen(state.seen, key));
 
   if (isDestination) {
     summary.existing += referenced.length;
     return;
   }
 
+  const duplicateCount = referenced.length - fresh.length;
   summary.total += referenced.length;
-  summary.duplicates += referenced.length - fresh.length;
-  summary.toCopy += fresh.length;
-  if (fresh.length > 0) {
+  summary.duplicates += duplicateCount;
+  addSourceCount(state.duplicatesBySource, caseId, kind, duplicateCount);
+  addReferencedChoices(context, kind, planAttachment, fresh);
+
+  const included = fresh.filter(({ key }) => !state.excludedKeys.has(key)).map(({ item }) => item);
+  addSourceCount(state.excludedBySource, caseId, kind, fresh.length - included.length);
+  summary.toCopy += included.length;
+  if (included.length > 0) {
     state.items.push({
       kind,
       sourceCaseId: caseId,
-      payload: withReferencedItems(payload, fresh),
-      itemCount: fresh.length,
+      payload: withReferencedItems(payload, included),
+      itemCount: included.length,
     });
   }
 };
 
-const addOtherAttachment = (
-  { state, caseId, isDestination }: PlanEntryContext,
-  payload: UnifiedAttachmentPayload
-) => {
+const addOtherAttachment = (context: PlanEntryContext, { attachment, payload }: PlanAttachment) => {
+  const { state, caseId, isDestination } = context;
   const summary = state.summaries.other;
-  const limitedCount = isUnifiedPersistableStateOrExternalReference(payload) ? 1 : 0;
-  const key = otherAttachmentKey(payload);
-  const isDuplicate = key != null && markSeen(state.seen, key);
+  const countsTowardLimit = isUnifiedPersistableStateOrExternalReference(payload);
+  const limitedCount = countsTowardLimit ? 1 : 0;
+  const duplicateKey = otherAttachmentKey(payload);
+  const isDuplicate = duplicateKey != null && markSeen(state.seen, duplicateKey);
 
   if (isDestination) {
     summary.existing += 1;
@@ -458,6 +574,20 @@ const addOtherAttachment = (
   summary.total += 1;
   if (isDuplicate) {
     summary.duplicates += 1;
+    addSourceCount(state.duplicatesBySource, caseId, 'other', 1);
+    return;
+  }
+
+  const key = `other|${attachment.id}`;
+  state.choices.other.push({
+    key,
+    sourceCaseId: caseId,
+    type: payload.type,
+    addedAt: attachment.created_at,
+    countsTowardLimit,
+  });
+  if (state.excludedKeys.has(key)) {
+    addSourceCount(state.excludedBySource, caseId, 'other', 1);
     return;
   }
 
@@ -481,17 +611,15 @@ const addAttachment = (context: PlanEntryContext, attachment: AttachmentV2) => {
       break;
     case 'alerts':
     case 'events':
-      addReferencedAttachment(context, kind, payload);
+      addReferencedAttachment(context, kind, { attachment, payload });
       break;
     default:
-      addOtherAttachment(context, payload);
+      addOtherAttachment(context, { attachment, payload });
   }
 };
 
-const addObservable = (
-  { state, caseId, isDestination }: PlanEntryContext,
-  observable: Case['observables'][number]
-) => {
+const addObservable = (context: PlanEntryContext, observable: Case['observables'][number]) => {
+  const { state, caseId, isDestination } = context;
   const summary = state.summaries.observables;
   const isDuplicate = markSeen(state.seen, `observable|${observable.typeKey}|${observable.value}`);
 
@@ -503,6 +631,19 @@ const addObservable = (
   summary.total += 1;
   if (isDuplicate) {
     summary.duplicates += 1;
+    addSourceCount(state.duplicatesBySource, caseId, 'observables', 1);
+    return;
+  }
+
+  const key = `observables|${caseId}|${observable.id}`;
+  state.choices.observables.push({
+    key,
+    sourceCaseId: caseId,
+    typeKey: observable.typeKey,
+    value: observable.value,
+  });
+  if (state.excludedKeys.has(key)) {
+    addSourceCount(state.excludedBySource, caseId, 'observables', 1);
     return;
   }
 
@@ -514,17 +655,28 @@ interface BuildAttachmentPlanArgs {
   orderedCases: Case[];
   attachmentsByCaseId: Map<string, AttachmentV2[]>;
   destinationCaseId?: string;
+  /** Keys from `choices` to leave on the original cases. */
+  excludedKeys?: ReadonlySet<string>;
 }
+
+const totalsBySource = (orderedCases: Case[], destinationCaseId?: string) =>
+  new Map(
+    orderedCases
+      .filter(({ id }) => id !== destinationCaseId)
+      .map(({ id }): [string, MergeCopiedTotals] => [id, emptyCopiedTotals()])
+  );
 
 /**
  * Decides what the merge copies: alerts and events per referenced document, other reference
  * attachments per referenced object, observables by type and value. Anything the destination or an
- * earlier case already holds is a duplicate. Files and comments are counted but never copied.
+ * earlier case already holds is a duplicate, and excluded items stay where they are. Files and
+ * comments are counted but never copied.
  */
 export const buildAttachmentPlan = ({
   orderedCases,
   attachmentsByCaseId,
   destinationCaseId,
+  excludedKeys = new Set<string>(),
 }: BuildAttachmentPlanArgs): MergeAttachmentPlan => {
   const state: PlanState = {
     summaries: {
@@ -533,6 +685,10 @@ export const buildAttachmentPlan = ({
       observables: emptySummary(MAX_OBSERVABLES_PER_CASE),
       other: emptySummary(MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES),
     },
+    duplicatesBySource: totalsBySource(orderedCases, destinationCaseId),
+    excludedBySource: totalsBySource(orderedCases, destinationCaseId),
+    excludedKeys,
+    choices: { alerts: [], events: [], observables: [], other: [] },
     seen: new Set<string>(),
     items: [],
     observables: [],
@@ -555,7 +711,17 @@ export const buildAttachmentPlan = ({
     }
   }
 
-  const { summaries, items, observables, files, comments, limitedOther } = state;
+  const {
+    summaries,
+    duplicatesBySource,
+    excludedBySource,
+    choices,
+    items,
+    observables,
+    files,
+    comments,
+    limitedOther,
+  } = state;
 
   return {
     items,
@@ -566,6 +732,9 @@ export const buildAttachmentPlan = ({
       observables: withOverLimit(summaries.observables),
       other: withOverLimit(summaries.other, limitedOther),
     },
+    duplicatesBySource,
+    excludedBySource,
+    choices,
     files,
     comments,
   };
@@ -579,10 +748,3 @@ export const chunkItems = <T>(items: T[], size: number): T[][] => {
   }
   return chunks;
 };
-
-export const emptyCopiedTotals = (): MergeCopiedTotals => ({
-  alerts: 0,
-  events: 0,
-  observables: 0,
-  other: 0,
-});

@@ -48,9 +48,9 @@ export const CaseViewPage = React.memo<CaseViewPageComponentProps>(({ caseData, 
         onShowMetricsChange={setShowMetrics}
       />
       <CasesPageBody>
-        {caseData.mergedInto != null && (
+        {caseData.mergedInto != null && caseData.mergedInto.length > 0 && (
           <>
-            <MergedIntoCallout destinationId={caseData.mergedInto} />
+            <MergedIntoCallout destinationIds={caseData.mergedInto} />
             <EuiSpacer size="m" />
           </>
         )}

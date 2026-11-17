@@ -611,6 +611,22 @@ describe('CaseCommentModel', () => {
       );
     });
 
+    it('creates the attachments without user actions when skipUserActions is set', async () => {
+      clientArgs.services.attachmentService.bulkCreate.mockResolvedValueOnce({
+        saved_objects: [{ ...mockCaseComments[0], id: 'comment-1' }],
+      });
+
+      const { attachments } = await model.bulkCreate({
+        attachments: [{ id: 'comment-1', ...unifiedAlertComment }],
+        skipUserActions: true,
+      });
+
+      expect(attachments.map(({ id }) => id)).toEqual(['comment-1']);
+      expect(
+        clientArgs.services.userActionService.creator.bulkCreateAttachmentCreation
+      ).not.toHaveBeenCalled();
+    });
+
     it('drops the unified event attachment entirely when every id is already attached to the case', async () => {
       clientArgs.services.attachmentService.getter.getAllEventIds.mockResolvedValueOnce(
         new Set(['event-id-1', 'event-id-2'])

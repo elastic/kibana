@@ -25,6 +25,7 @@ export interface MergeContext {
 interface LoadMergeContextArgs {
   caseIds: string[];
   destinationCaseId?: string;
+  excludedAttachments?: string[];
 }
 
 /**
@@ -32,7 +33,7 @@ interface LoadMergeContextArgs {
  * selections that can't be merged.
  */
 export const loadMergeContext = async (
-  { caseIds, destinationCaseId }: LoadMergeContextArgs,
+  { caseIds, destinationCaseId, excludedAttachments = [] }: LoadMergeContextArgs,
   casesClient: CasesClient
 ): Promise<MergeContext> => {
   if (new Set(caseIds).size !== caseIds.length) {
@@ -55,13 +56,6 @@ export const loadMergeContext = async (
   const owners = new Set(cases.map(({ owner }) => owner));
   if (owners.size > 1) {
     throw Boom.badRequest('Cases from different solutions cannot be merged.');
-  }
-
-  const alreadyMerged = cases.find(({ merged_into: mergedInto }) => mergedInto != null);
-  if (alreadyMerged != null) {
-    throw Boom.badRequest(
-      `Case ${alreadyMerged.id} was already merged into case ${alreadyMerged.merged_into}.`
-    );
   }
 
   const orderedCases = orderCasesForMerge(cases, destinationCaseId);
@@ -89,6 +83,7 @@ export const loadMergeContext = async (
       orderedCases,
       attachmentsByCaseId,
       destinationCaseId: destination?.id,
+      excludedKeys: new Set(excludedAttachments),
     }),
   };
 };

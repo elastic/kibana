@@ -31,7 +31,6 @@ const toPreviewCase = (theCase: Case): MergePreviewCase => ({
   owner: theCase.owner,
   createdAt: theCase.created_at,
   totalAlerts: theCase.totalAlerts,
-  mergedInto: theCase.merged_into ?? null,
 });
 
 /**
@@ -52,6 +51,8 @@ export const mergePreview = async (
       casesClient
     );
 
+    const isOverLimit = Object.values(plan.summaries).some(({ overLimit }) => overLimit > 0);
+
     return decodeOrThrowZod(MergeCasesPreviewResponseSchema)({
       cases: orderedCases.map(toPreviewCase),
       destinationCaseId: destination?.id ?? null,
@@ -61,6 +62,7 @@ export const mergePreview = async (
         files: { total: plan.files },
         comments: { total: plan.comments },
       },
+      choices: isOverLimit ? plan.choices : null,
     });
   } catch (error) {
     throw createCaseError({

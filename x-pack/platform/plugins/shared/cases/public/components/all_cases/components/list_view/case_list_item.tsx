@@ -250,10 +250,10 @@ export const CaseListItem: React.FC<{
                       <EuiFlexItem grow={false}>
                         <Status status={theCase.status} />
                       </EuiFlexItem>
-                      {theCase.mergedInto != null && (
+                      {theCase.mergedInto != null && theCase.mergedInto.length > 0 && (
                         <EuiFlexItem grow={false}>
                           <MergedIntoBadge
-                            destinationId={theCase.mergedInto}
+                            destinationIds={theCase.mergedInto}
                             destinations={mergeDestinations}
                             isLink={false}
                           />

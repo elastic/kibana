@@ -50,7 +50,6 @@ const response: MergeCasesResponse = {
 describe('useMergeCases', () => {
   const showSuccessToast = jest.fn();
   const showErrorToast = jest.fn();
-  const navigateToCaseView = jest.fn();
 
   const createQueryClient = () =>
     new QueryClient({
@@ -68,7 +67,10 @@ describe('useMergeCases', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useCasesToastMock.mockReturnValue({ showSuccessToast, showErrorToast });
-    useCaseViewNavigationMock.mockReturnValue({ navigateToCaseView, getCaseViewUrl: jest.fn() });
+    useCaseViewNavigationMock.mockReturnValue({
+      navigateToCaseView: jest.fn(),
+      getCaseViewUrl: jest.fn(({ detailName }) => `/cases/${detailName}`),
+    });
   });
 
   it('reports a clean merge and links to the destination', async () => {
@@ -84,15 +86,16 @@ describe('useMergeCases', () => {
         'Merged 1 case into #118',
         undefined,
         expect.objectContaining({
-          primary: expect.objectContaining({ children: 'Open case #118' }),
+          primary: expect.objectContaining({
+            children: 'Open case #118',
+            href: '/cases/case-1',
+            target: '_blank',
+          }),
         })
       )
     );
     expect(mergeCasesMock).toHaveBeenCalledWith({ request });
     expect(invalidateQueries).toHaveBeenCalledWith(casesQueriesKeys.all);
-
-    showSuccessToast.mock.calls[0][2].primary.onClick();
-    expect(navigateToCaseView).toHaveBeenCalledWith({ detailName: 'case-1' });
   });
 
   it('warns when some steps failed after the destination was saved', async () => {

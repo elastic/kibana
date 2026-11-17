@@ -773,11 +773,14 @@ export class CaseCommentModel {
 
   /**
    * Creates the attachments that aren't duplicates. `attachments` holds the saved objects that were created.
+   * `skipUserActions` is for callers that record the change in their own user action.
    */
   public async bulkCreate({
     attachments,
+    skipUserActions = false,
   }: {
     attachments: CommentRequestWithId;
+    skipUserActions?: boolean;
   }): Promise<{ model: CaseCommentModel; attachments: AttachmentSavedObjectTransformedV2[] }> {
     try {
       await this.validateCreateCommentRequest(attachments);
@@ -834,7 +837,9 @@ export class CaseCommentModel {
         // Full duplicates were not created, so `withoutErrors` drops them.
         commentableCase.handleAlertComments(withoutErrors(attachments)),
         commentableCase.handleAttackComments(withoutErrors(attachments)),
-        this.bulkCreateCommentUserAction(withoutErrors(attachmentWithoutDuplicateAlerts)),
+        ...(skipUserActions
+          ? []
+          : [this.bulkCreateCommentUserAction(withoutErrors(attachmentWithoutDuplicateAlerts))]),
       ]);
 
       return { model: commentableCase, attachments: savedObjectsWithoutErrors };

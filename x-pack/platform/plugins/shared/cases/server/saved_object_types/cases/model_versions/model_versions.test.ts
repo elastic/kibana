@@ -301,9 +301,9 @@ describe('Model versions', () => {
         createSchema?.validate({
           ...basicESCaseFields,
           total_observables: 0,
-          merged_into: 'destination-id',
+          merged_into: ['destination-1', 'destination-2'],
         })
-      ).toEqual(expect.objectContaining({ merged_into: 'destination-id' }));
+      ).toEqual(expect.objectContaining({ merged_into: ['destination-1', 'destination-2'] }));
     });
   });
 });

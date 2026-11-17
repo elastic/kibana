@@ -36,6 +36,17 @@ export interface BulkCreateArgs {
 }
 
 /**
+ * Internal-only options: no HTTP route sets them.
+ */
+export interface BulkCreateAttachmentsOptions {
+  /**
+   * Skips the per-attachment user actions. The caller must record the change in its own user
+   * action.
+   */
+  skipUserActions?: boolean;
+}
+
+/**
  * Parameters for deleting all comments of a case.
  */
 export interface DeleteAllArgs {

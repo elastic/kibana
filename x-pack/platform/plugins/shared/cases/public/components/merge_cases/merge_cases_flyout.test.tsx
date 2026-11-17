@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { MergeCasesPreviewResponse } from '../../../common/types/api';
@@ -20,6 +20,7 @@ import { MergeCasesFlyout } from './merge_cases_flyout';
 import { useMergeCases } from './use_merge_cases';
 
 jest.mock('../../common/lib/kibana');
+jest.mock('../../common/navigation/hooks');
 jest.mock('../../common/use_cases_features');
 jest.mock('../../containers/use_get_merge_cases_preview');
 jest.mock('../../containers/user_profiles/use_bulk_get_user_profiles');
@@ -52,11 +53,11 @@ const previewCase = (id: string, incrementalId: number, title: string) => ({
   owner: 'securitySolution',
   createdAt: '2024-01-01T00:00:00.000Z',
   totalAlerts: 0,
-  mergedInto: null,
 });
 
 const buildPreview = (
-  attachments: Partial<MergeCasesPreviewResponse['attachments']> = {}
+  attachments: Partial<MergeCasesPreviewResponse['attachments']> = {},
+  choices: MergeCasesPreviewResponse['choices'] = null
 ): MergeCasesPreviewResponse => ({
   cases: [previewCase('case-1', 118, 'Phishing'), previewCase('case-2', 119, 'Follow-up')],
   destinationCaseId: null,
@@ -104,6 +105,7 @@ const buildPreview = (
     comments: { total: 1 },
     ...attachments,
   },
+  choices,
 });
 
 const mockPreview = (preview: MergeCasesPreviewResponse) => {
@@ -161,6 +163,14 @@ describe('MergeCasesFlyout', () => {
     ).toBeInTheDocument();
   });
 
+  it('opens the listed cases in a new tab so the merge stays open', () => {
+    renderFlyout();
+
+    for (const link of within(screen.getByTestId('merge-cases-table')).getAllByRole('link')) {
+      expect(link).toHaveAttribute('target', '_blank');
+    }
+  });
+
   it('says there is nothing to copy when no attachments would be copied', () => {
     mockPreview(buildPreview({ alerts: summary(), other: summary() }));
 
@@ -216,6 +226,72 @@ describe('MergeCasesFlyout', () => {
       },
       { onSuccess: onMerged }
     );
+  });
+
+  it('lets the user leave alerts out of an over-limit merge', async () => {
+    const alertChoice = (key: string, ruleId: string, ruleName: string) => ({
+      key,
+      sourceCaseId: 'case-1',
+      alertId: key,
+      index: 'alerts-index',
+      ruleId,
+      ruleName,
+      addedAt: '2024-01-01T00:00:00.000Z',
+    });
+    mockPreview(
+      buildPreview(
+        {
+          alerts: summary({ total: 3, toCopy: 3, max: 2, overLimit: 1 }),
+          other: summary(),
+        },
+        {
+          alerts: [
+            alertChoice('alert-1', 'rule-1', 'Phishing rule'),
+            alertChoice('alert-2', 'rule-1', 'Phishing rule'),
+            alertChoice('alert-3', 'rule-2', 'Malware rule'),
+          ],
+          events: [],
+          observables: [],
+          other: [],
+        }
+      )
+    );
+
+    renderFlyout();
+
+    expect(screen.getByTestId('merge-cases-blocking-reason')).toHaveTextContent(
+      '1 alert over the limit'
+    );
+    expect(screen.getByTestId('merge-cases-submit')).toBeDisabled();
+
+    await userEvent.click(screen.getByTestId('merge-cases-choose-attachments'));
+    expect(await screen.findByTestId('merge-attachments-modal')).toBeInTheDocument();
+    await userEvent.click(screen.getByTestId('merge-choices-rule-rule:rule-2-checkbox'));
+    expect(screen.getByTestId('merge-choices-alerts-status')).toHaveTextContent(
+      'Within the limit.'
+    );
+    await userEvent.click(screen.getByTestId('merge-choices-apply'));
+
+    expect(screen.queryByTestId('merge-attachments-modal')).not.toBeInTheDocument();
+    expect(screen.getByTestId('merge-cases-attachments-alerts')).toHaveTextContent(
+      '2 to copy · 1 left out'
+    );
+    expect(screen.getByTestId('merge-cases-summary')).toHaveTextContent(
+      'Copies 2 attachments into the new case.'
+    );
+
+    await userEvent.click(screen.getByTestId('merge-cases-submit'));
+
+    expect(mergeCases).toHaveBeenCalledWith(
+      expect.objectContaining({ excludedAttachments: ['alert-3'] }),
+      { onSuccess: onMerged }
+    );
+  });
+
+  it('does not offer to choose attachments when nothing is over the limit', () => {
+    renderFlyout();
+
+    expect(screen.queryByTestId('merge-cases-choose-attachments')).not.toBeInTheDocument();
   });
 
   it('blocks the merge when only one case is left', async () => {

@@ -1583,6 +1583,40 @@ describe('update', () => {
       ).resolves.not.toThrow();
     });
 
+    it('updates the case without writing user actions when skipUserActions is set', async () => {
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [{ ...mockCases[0] }],
+      });
+      clientArgs.services.userActionService.creator.buildUserActions.mockReturnValueOnce({
+        [mockCases[0].id]: [],
+      });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              title: 'Merged case',
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock,
+        { skipUserActions: true }
+      );
+
+      expect(
+        clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes
+      ).toEqual(expect.objectContaining({ title: 'Merged case' }));
+      expect(
+        clientArgs.services.userActionService.getMultipleCasesUserActionsTotal
+      ).not.toHaveBeenCalled();
+      expect(
+        clientArgs.services.userActionService.creator.bulkCreateUpdateCase
+      ).not.toHaveBeenCalled();
+    });
+
     it('throws error if the title is too long', async () => {
       await expect(
         bulkUpdate(

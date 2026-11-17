@@ -165,6 +165,31 @@ describe('bulkCreate', () => {
     );
   });
 
+  it('skips the user actions and their limit when skipUserActions is set', async () => {
+    registerCommentType();
+    userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
+      [caseId]: MAX_USER_ACTIONS_PER_CASE,
+    });
+
+    const theCase = { ...mockCases[0], id: caseId };
+    caseService.getCase.mockResolvedValue(theCase);
+    caseService.patchCase.mockResolvedValue(theCase);
+    attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+      new Map([[caseId, { alerts: 0, userComments: 0, events: 0 }]])
+    );
+    attachmentService.bulkCreate.mockResolvedValue({
+      saved_objects: [mockCaseUnifiedAttachments[0]],
+    });
+
+    const res = await bulkCreate({ attachments: [comment], caseId }, clientArgs, {
+      skipUserActions: true,
+    });
+
+    expect(res).toEqual([expect.objectContaining({ id: mockCaseUnifiedAttachments[0].id })]);
+    expect(userActionService.getMultipleCasesUserActionsTotal).not.toHaveBeenCalled();
+    expect(userActionService.creator.bulkCreateAttachmentCreation).not.toHaveBeenCalled();
+  });
+
   it('emits attachmentAdded event per attachment after bulk creating', async () => {
     if (!clientArgs.unifiedAttachmentTypeRegistry.has(commentAttachmentType.id)) {
       clientArgs.unifiedAttachmentTypeRegistry.register(commentAttachmentType);

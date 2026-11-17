@@ -208,6 +208,12 @@ export type WorkflowUserAction = UserAction<z.infer<typeof WorkflowUserActionSch
 export type BulkAttachmentsUserAction = UserAction<z.infer<typeof BulkAttachmentsUserActionSchema>>;
 export type MergeUserAction = UserAction<z.infer<typeof MergeUserActionSchema>>;
 export type { BulkAttachmentsPayload } from './bulk_attachments/v1';
-export type { MergeCaseSnapshot, MergeCopiedTotals, MergePayload, MergeSource } from './merge/v1';
+export type {
+  MergeCaseSnapshot,
+  MergeCopiedTotals,
+  MergePayload,
+  MergeSource,
+  MergeUpdatedField,
+} from './merge/v1';
 export { WorkflowUserActionSchema, WorkflowOriginSchema } from './workflow/v1';
 export type { WorkflowPayload, WorkflowOrigin, WorkflowUserActionPayload } from './workflow/v1';

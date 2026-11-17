@@ -11,7 +11,7 @@ import { CaseDetailsLink } from '../links';
 import { getCaseReference } from './utils';
 
 export const MergeCaseLink = React.memo<{ caseSnapshot: MergeCaseSnapshot }>(({ caseSnapshot }) => (
-  <CaseDetailsLink detailName={caseSnapshot.id} title={caseSnapshot.title}>
+  <CaseDetailsLink detailName={caseSnapshot.id} title={caseSnapshot.title} target="_blank">
     {getCaseReference(caseSnapshot)}
   </CaseDetailsLink>
 ));

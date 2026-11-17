@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import type { ConfigureCaseButtonProps, CaseDetailsLinkProps } from '.';
@@ -126,5 +126,19 @@ describe('CaseDetailsLink', () => {
       detailName: props.detailName,
     });
     expect(await screen.findByRole('link')).toHaveAttribute('href', '/cases/test');
+  });
+
+  it('opens the case in a new tab instead of navigating in place', async () => {
+    render(<CaseDetailsLink {...props} title="my title" target="_blank" />);
+
+    const link = await screen.findByRole('link', {
+      name: 'click to visit case with title my title in a new tab',
+    });
+    expect(link).toHaveAttribute('href', '/cases/test');
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', expect.stringContaining('noopener'));
+
+    fireEvent.click(link);
+    expect(navigateToCaseView).not.toHaveBeenCalled();
   });
 });

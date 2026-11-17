@@ -9,14 +9,18 @@ import type { MergeCasesPreviewResponse } from '../../../common/types/api';
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import { basicCase } from '../../containers/mock';
 import {
+  applyExclusions,
   buildMergeRequest,
   combineDescriptions,
+  getActiveExclusions,
   getAttachmentsToCopyCount,
+  getKeysOutsideNewest,
   getCaseReference,
   getConflictCount,
   getDefaultFieldValues,
   getMergeBlockingReason,
   getMergeDisabledReason,
+  getRoomForKind,
 } from './utils';
 
 const summary = (overrides: Partial<MergeCasesPreviewResponse['attachments']['alerts']> = {}) => ({
@@ -39,7 +43,6 @@ const previewCase = (id: string, incrementalId: number | null, title: string) =>
   owner: 'securitySolution',
   createdAt: '2024-01-01T00:00:00.000Z',
   totalAlerts: 0,
-  mergedInto: null,
 });
 
 const preview: MergeCasesPreviewResponse = {
@@ -91,6 +94,7 @@ const preview: MergeCasesPreviewResponse = {
     files: { total: 1 },
     comments: { total: 3 },
   },
+  choices: null,
 };
 
 describe('merge cases utils', () => {
@@ -130,13 +134,10 @@ describe('merge cases utils', () => {
       ).toBe('Select cases from one solution to merge them.');
     });
 
-    it('rejects a case that was already merged', () => {
+    it('allows a closed case', () => {
       expect(
-        getMergeDisabledReason([
-          selected('a'),
-          selected('b', { mergedInto: 'c', incrementalId: 121 }),
-        ])
-      ).toBe('#121 was already merged into another case. Deselect it to merge.');
+        getMergeDisabledReason([selected('a'), selected('b', { status: CaseStatuses.closed })])
+      ).toBeUndefined();
     });
   });
 
@@ -154,9 +155,74 @@ describe('merge cases utils', () => {
     });
   });
 
+  describe('exclusions', () => {
+    const alertChoice = (key: string) => ({
+      key,
+      sourceCaseId: 'case-1',
+      alertId: key,
+      index: 'alerts-index',
+      ruleId: 'rule-1',
+      ruleName: 'Rule',
+      addedAt: '2024-01-01T00:00:00.000Z',
+    });
+    const otherChoice = (key: string, countsTowardLimit: boolean) => ({
+      key,
+      sourceCaseId: 'case-1',
+      type: 'lens',
+      addedAt: '2024-01-01T00:00:00.000Z',
+      countsTowardLimit,
+    });
+    const overLimit = {
+      attachments: {
+        ...preview.attachments,
+        alerts: summary({ total: 3, toCopy: 3, existing: 1, max: 2, overLimit: 2 }),
+        other: summary({ total: 2, toCopy: 2, max: 1, overLimit: 0 }),
+      },
+      choices: {
+        alerts: [alertChoice('a1'), alertChoice('a2'), alertChoice('a3')],
+        events: [],
+        observables: [],
+        other: [otherChoice('o1', true), otherChoice('o2', false)],
+      },
+    };
+
+    it('lowers what is copied and what is over the limit', () => {
+      const selected = applyExclusions(overLimit, new Set(['a1', 'o2', 'stale']));
+
+      expect(selected.alerts).toEqual(
+        expect.objectContaining({ toCopy: 2, overLimit: 1, excluded: 1 })
+      );
+      expect(selected.other).toEqual(
+        expect.objectContaining({ toCopy: 1, overLimit: 0, excluded: 1 })
+      );
+      expect(selected.events.excluded).toBe(0);
+    });
+
+    it('reports how many items fit when a kind is over its limit', () => {
+      expect(getRoomForKind(overLimit.attachments.alerts, overLimit.choices, 'alerts')).toBe(1);
+      expect(getRoomForKind(overLimit.attachments.other, overLimit.choices, 'other')).toBeNull();
+    });
+
+    it('leaves out everything but the most recently added alerts', () => {
+      const alerts = [
+        { ...alertChoice('a1'), addedAt: '2024-01-01T00:00:00.000Z' },
+        { ...alertChoice('a2'), addedAt: '2024-03-01T00:00:00.000Z' },
+        { ...alertChoice('a3'), addedAt: '2024-02-01T00:00:00.000Z' },
+        { ...alertChoice('a4'), addedAt: '2024-03-01T00:00:00.000Z' },
+      ];
+
+      expect(getKeysOutsideNewest(alerts, 2)).toEqual(['a3', 'a1']);
+    });
+
+    it('keeps only the keys the preview still offers', () => {
+      expect(getActiveExclusions(overLimit.choices, new Set(['a2', 'stale']))).toEqual(['a2']);
+      expect(getActiveExclusions(null, new Set(['a2']))).toEqual([]);
+    });
+  });
+
   describe('getAttachmentsToCopyCount', () => {
     it('adds up every attachment kind that is copied', () => {
-      expect(getAttachmentsToCopyCount(preview)).toBe(6);
+      expect(getAttachmentsToCopyCount(preview.attachments)).toBe(6);
     });
   });
 
@@ -164,13 +230,21 @@ describe('merge cases utils', () => {
     const values = getDefaultFieldValues(preview);
 
     it('does not block a valid merge', () => {
-      expect(getMergeBlockingReason({ preview, values, includeAssignees: true })).toBeUndefined();
+      expect(
+        getMergeBlockingReason({
+          preview,
+          attachments: preview.attachments,
+          values,
+          includeAssignees: true,
+        })
+      ).toBeUndefined();
     });
 
     it('requires a title', () => {
       expect(
         getMergeBlockingReason({
           preview,
+          attachments: preview.attachments,
           values: { ...values, title: '  ' },
           includeAssignees: true,
         })
@@ -180,12 +254,10 @@ describe('merge cases utils', () => {
     it('blocks when alerts are over the limit', () => {
       expect(
         getMergeBlockingReason({
-          preview: {
-            ...preview,
-            attachments: {
-              ...preview.attachments,
-              alerts: summary({ total: 1240, toCopy: 1240, max: 1000, overLimit: 240 }),
-            },
+          preview,
+          attachments: {
+            ...preview.attachments,
+            alerts: summary({ total: 1240, toCopy: 1240, max: 1000, overLimit: 240 }),
           },
           values,
           includeAssignees: true,
@@ -200,10 +272,20 @@ describe('merge cases utils', () => {
       };
 
       expect(
-        getMergeBlockingReason({ preview, values: tooManyAssignees, includeAssignees: true })
+        getMergeBlockingReason({
+          preview,
+          attachments: preview.attachments,
+          values: tooManyAssignees,
+          includeAssignees: true,
+        })
       ).toBe('Remove 2 assignees to merge');
       expect(
-        getMergeBlockingReason({ preview, values: tooManyAssignees, includeAssignees: false })
+        getMergeBlockingReason({
+          preview,
+          attachments: preview.attachments,
+          values: tooManyAssignees,
+          includeAssignees: false,
+        })
       ).toBeUndefined();
     });
   });
@@ -219,6 +301,7 @@ describe('merge cases utils', () => {
           includeAssignees: true,
           closeOriginals: true,
           note: '  ',
+          excludedAttachments: [],
         })
       ).toEqual({
         caseIds: ['case-1', 'case-2'],
@@ -242,11 +325,13 @@ describe('merge cases utils', () => {
         includeAssignees: false,
         closeOriginals: false,
         note: ' Merged ',
+        excludedAttachments: ['alerts|alert-1|alerts-index'],
       });
 
       expect(request.destinationCaseId).toBe('case-2');
       expect(request.note).toBe('Merged');
       expect(request.fields.assignees).toBeUndefined();
+      expect(request.excludedAttachments).toEqual(['alerts|alert-1|alerts-index']);
     });
   });
 });

@@ -11,6 +11,8 @@ import {
   MIN_CASES_TO_MERGE,
 } from '../../../common/constants';
 import type {
+  MergeAttachmentChoices,
+  MergeAttachmentSummary,
   MergeCasesPreviewResponse,
   MergeCasesRequest,
   MergePreviewCase,
@@ -38,7 +40,7 @@ export const getCaseReference = ({ incrementalId, title }: CaseReferenceSource):
 
 /** Returns why the selected cases can't be merged, or `undefined` when they can. */
 export const getMergeDisabledReason = (
-  selectedCases: Array<Pick<CaseUI, 'owner' | 'mergedInto' | 'incrementalId' | 'title'>>
+  selectedCases: Array<Pick<CaseUI, 'owner'>>
 ): string | undefined => {
   if (selectedCases.length < MIN_CASES_TO_MERGE) {
     return i18n.DISABLED_TOO_FEW(MIN_CASES_TO_MERGE);
@@ -50,11 +52,6 @@ export const getMergeDisabledReason = (
 
   if (new Set(selectedCases.map(({ owner }) => owner)).size > 1) {
     return i18n.DISABLED_MIXED_OWNERS;
-  }
-
-  const alreadyMerged = selectedCases.find(({ mergedInto }) => mergedInto != null);
-  if (alreadyMerged != null) {
-    return i18n.DISABLED_ALREADY_MERGED(getCaseReference(alreadyMerged));
   }
 
   return undefined;
@@ -89,7 +86,106 @@ export const combineDescriptions = ({ cases, fields }: MergeCasesPreviewResponse
     .join('\n\n---\n\n');
 };
 
-export const getAttachmentsToCopyCount = ({ attachments }: MergeCasesPreviewResponse): number =>
+export type MergeChoiceKind = keyof MergeAttachmentChoices;
+export type MergeChoice = MergeAttachmentChoices[MergeChoiceKind][number];
+
+export const MERGE_CHOICE_KINDS: readonly MergeChoiceKind[] = [
+  'alerts',
+  'events',
+  'observables',
+  'other',
+] as const;
+
+/** A preview summary after the user's exclusions. */
+export type SelectedAttachmentSummary = MergeAttachmentSummary & { excluded: number };
+export type SelectedAttachments = Omit<MergeCasesPreviewResponse['attachments'], MergeChoiceKind> &
+  Record<MergeChoiceKind, SelectedAttachmentSummary>;
+
+/** Returns the choices that count toward the kind's limit; events have none. */
+export const getLimitedChoices = (
+  choices: MergeAttachmentChoices,
+  kind: MergeChoiceKind
+): MergeChoice[] => {
+  switch (kind) {
+    case 'events':
+      return [];
+    case 'other':
+      return choices.other.filter(({ countsTowardLimit }) => countsTowardLimit);
+    default:
+      return choices[kind];
+  }
+};
+
+/** Returns how many limited items of the kind fit, or `null` when the kind isn't over its limit. */
+export const getRoomForKind = (
+  summary: MergeAttachmentSummary,
+  choices: MergeAttachmentChoices,
+  kind: MergeChoiceKind
+): number | null =>
+  summary.overLimit > 0
+    ? Math.max(0, getLimitedChoices(choices, kind).length - summary.overLimit)
+    : null;
+
+/** Returns the keys of every alert except the `count` most recently added to a case. */
+export const getKeysOutsideNewest = (
+  alerts: MergeAttachmentChoices['alerts'],
+  count: number
+): string[] =>
+  alerts
+    .map((alert, position) => ({ alert, position }))
+    .sort(
+      (first, second) =>
+        second.alert.addedAt.localeCompare(first.alert.addedAt) || first.position - second.position
+    )
+    .slice(count)
+    .map(({ alert }) => alert.key);
+
+/** Returns the excluded keys the preview still offers, so stale ones never reach the request. */
+export const getActiveExclusions = (
+  choices: MergeAttachmentChoices | null,
+  excludedKeys: ReadonlySet<string>
+): string[] =>
+  choices == null
+    ? []
+    : MERGE_CHOICE_KINDS.flatMap((kind) => {
+        const kindChoices: MergeChoice[] = choices[kind];
+        return kindChoices.filter(({ key }) => excludedKeys.has(key)).map(({ key }) => key);
+      });
+
+/** Applies the user's exclusions to the preview counts and limits. */
+export const applyExclusions = (
+  { attachments, choices }: Pick<MergeCasesPreviewResponse, 'attachments' | 'choices'>,
+  excludedKeys: ReadonlySet<string>
+): SelectedAttachments => {
+  const summarize = (kind: MergeChoiceKind): SelectedAttachmentSummary => {
+    const summary = attachments[kind];
+    if (choices == null) {
+      return { ...summary, excluded: 0 };
+    }
+    const kindChoices: MergeChoice[] = choices[kind];
+    const isExcluded = ({ key }: MergeChoice) => excludedKeys.has(key);
+    const excluded = kindChoices.filter(isExcluded).length;
+    const excludedLimited = getLimitedChoices(choices, kind).filter(isExcluded).length;
+    return {
+      ...summary,
+      toCopy: summary.toCopy - excluded,
+      overLimit: Math.max(0, summary.overLimit - excludedLimited),
+      excluded,
+    };
+  };
+
+  return {
+    ...attachments,
+    alerts: summarize('alerts'),
+    events: summarize('events'),
+    observables: summarize('observables'),
+    other: summarize('other'),
+  };
+};
+
+type CopiedAttachmentSummaries = Pick<MergeCasesPreviewResponse['attachments'], MergeChoiceKind>;
+
+export const getAttachmentsToCopyCount = (attachments: CopiedAttachmentSummaries): number =>
   attachments.alerts.toCopy +
   attachments.events.toCopy +
   attachments.observables.toCopy +
@@ -98,22 +194,20 @@ export const getAttachmentsToCopyCount = ({ attachments }: MergeCasesPreviewResp
 /** Returns the first reason the merge can't run, in the order the spec lists them. */
 export const getMergeBlockingReason = ({
   preview,
+  attachments,
   values,
   includeAssignees,
 }: {
   preview: MergeCasesPreviewResponse;
+  /** The preview counts after the user's exclusions. */
+  attachments: CopiedAttachmentSummaries;
   values: MergeFieldValues;
   includeAssignees: boolean;
 }): string | undefined => {
-  const { cases, attachments, fields } = preview;
+  const { cases, fields } = preview;
 
   if (cases.length < MIN_CASES_TO_MERGE) {
     return i18n.BLOCKED_ADD_ANOTHER_CASE;
-  }
-
-  const alreadyMerged = cases.find(({ mergedInto }) => mergedInto != null);
-  if (alreadyMerged != null) {
-    return i18n.BLOCKED_ALREADY_MERGED(getCaseReference(alreadyMerged));
   }
 
   if (values.title.trim().length === 0) {
@@ -158,6 +252,7 @@ export const buildMergeRequest = ({
   includeAssignees,
   closeOriginals,
   note,
+  excludedAttachments,
 }: {
   caseIds: string[];
   destinationCaseId?: string;
@@ -165,6 +260,7 @@ export const buildMergeRequest = ({
   includeAssignees: boolean;
   closeOriginals: boolean;
   note: string;
+  excludedAttachments: string[];
 }): MergeCasesRequest => {
   const trimmedNote = note.trim();
 
@@ -181,5 +277,6 @@ export const buildMergeRequest = ({
     },
     closeOriginals,
     ...(trimmedNote.length > 0 ? { note: trimmedNote } : {}),
+    ...(excludedAttachments.length > 0 ? { excludedAttachments } : {}),
   };
 };

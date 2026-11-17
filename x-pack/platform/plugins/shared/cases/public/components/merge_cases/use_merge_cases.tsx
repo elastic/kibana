@@ -24,7 +24,7 @@ export const useMergeCases = () => {
   const queryClient = useQueryClient();
   const toasts = useToasts();
   const { showSuccessToast, showErrorToast } = useCasesToast();
-  const { navigateToCaseView } = useCaseViewNavigation();
+  const { getCaseViewUrl } = useCaseViewNavigation();
 
   return useMutation<MergeCasesResponse, ServerError, MergeCasesRequest>(
     (request: MergeCasesRequest) => mergeCases({ request }),
@@ -34,7 +34,11 @@ export const useMergeCases = () => {
         const caseRef = getCaseReference(destination);
         const actionProps = {
           primary: {
-            onClick: () => navigateToCaseView({ detailName: destination.id }),
+            href: getCaseViewUrl({ detailName: destination.id }),
+            target: '_blank',
+            iconType: 'external',
+            iconSide: 'right' as const,
+            'aria-label': i18n.OPEN_CASE_IN_NEW_TAB(caseRef),
             children: i18n.OPEN_CASE(caseRef),
             'data-test-subj': 'merge-cases-toast-open-case',
           },

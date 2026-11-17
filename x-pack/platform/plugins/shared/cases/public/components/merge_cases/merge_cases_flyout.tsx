@@ -51,7 +51,9 @@ import { MergeSectionTitle } from './merge_section_title';
 import { useMergeCases } from './use_merge_cases';
 import type { MergeFieldOverrides, MergeFieldValues } from './utils';
 import {
+  applyExclusions,
   buildMergeRequest,
+  getActiveExclusions,
   getAttachmentsToCopyCount,
   getCaseReference,
   getDefaultFieldValues,
@@ -184,6 +186,7 @@ export const MergeCasesFlyout = React.memo<MergeCasesFlyoutProps>(
     const [closeOriginals, setCloseOriginals] = useState(true);
     const [isNoteOpen, setIsNoteOpen] = useState(false);
     const [note, setNote] = useState('');
+    const [excludedKeys, setExcludedKeys] = useState<ReadonlySet<string>>(new Set());
 
     const {
       data: preview,
@@ -203,6 +206,14 @@ export const MergeCasesFlyout = React.memo<MergeCasesFlyoutProps>(
     const values = useMemo<MergeFieldValues | undefined>(
       () => (preview != null ? { ...getDefaultFieldValues(preview), ...overrides } : undefined),
       [overrides, preview]
+    );
+    const selectedAttachments = useMemo(
+      () => (preview != null ? applyExclusions(preview, excludedKeys) : undefined),
+      [excludedKeys, preview]
+    );
+    const activeExclusions = useMemo(
+      () => getActiveExclusions(preview?.choices ?? null, excludedKeys),
+      [excludedKeys, preview?.choices]
     );
 
     const destinationCase =
@@ -234,23 +245,24 @@ export const MergeCasesFlyout = React.memo<MergeCasesFlyoutProps>(
         return i18n.BLOCKED_ADD_ANOTHER_CASE;
       }
 
-      if (preview == null || values == null) {
+      if (preview == null || selectedAttachments == null || values == null) {
         return undefined;
       }
 
       return getMergeBlockingReason({
         preview,
+        attachments: selectedAttachments,
         values,
         includeAssignees: caseAssignmentAuthorized,
       });
-    }, [caseAssignmentAuthorized, caseIds.length, preview, values]);
+    }, [caseAssignmentAuthorized, caseIds.length, preview, selectedAttachments, values]);
 
     const summary = useMemo(() => {
-      if (preview == null) {
+      if (selectedAttachments == null) {
         return '';
       }
 
-      const attachmentsToCopy = getAttachmentsToCopyCount(preview);
+      const attachmentsToCopy = getAttachmentsToCopyCount(selectedAttachments);
       const copies =
         destinationRef != null
           ? i18n.SUMMARY_COPIES_EXISTING_CASE(attachmentsToCopy, destinationRef)
@@ -259,7 +271,7 @@ export const MergeCasesFlyout = React.memo<MergeCasesFlyoutProps>(
       return closeOriginals && casesToClose.length > 0
         ? `${copies} ${i18n.SUMMARY_CLOSES(casesToClose.length)}`
         : copies;
-    }, [casesToClose.length, closeOriginals, destinationRef, preview]);
+    }, [casesToClose.length, closeOriginals, destinationRef, selectedAttachments]);
 
     const onMerge = useCallback(() => {
       if (values == null) {
@@ -274,10 +286,12 @@ export const MergeCasesFlyout = React.memo<MergeCasesFlyoutProps>(
           includeAssignees: caseAssignmentAuthorized,
           closeOriginals,
           note,
+          excludedAttachments: activeExclusions,
         }),
         { onSuccess: onMerged }
       );
     }, [
+      activeExclusions,
       caseAssignmentAuthorized,
       caseIds,
       closeOriginals,
@@ -296,7 +310,7 @@ export const MergeCasesFlyout = React.memo<MergeCasesFlyoutProps>(
           'data-test-subj': 'merge-cases-destination-new',
         },
         ...previewCases
-          .filter(({ status, mergedInto }) => status !== CaseStatuses.closed && mergedInto == null)
+          .filter(({ status }) => status !== CaseStatuses.closed)
           .map((theCase) => ({
             value: theCase.id,
             inputDisplay: (
@@ -338,7 +352,7 @@ export const MergeCasesFlyout = React.memo<MergeCasesFlyoutProps>(
           render: (theCase: MergePreviewCase) => (
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
+                <CaseDetailsLink detailName={theCase.id} title={theCase.title} target="_blank">
                   {getCaseReference(theCase)}
                 </CaseDetailsLink>
               </EuiFlexItem>
@@ -484,10 +498,15 @@ export const MergeCasesFlyout = React.memo<MergeCasesFlyoutProps>(
           <EuiSpacer size="l" />
           <MergeSectionTitle title={i18n.ATTACHMENTS_SECTION} />
           <EuiSpacer size="s" />
-          {preview != null ? (
+          {preview != null && selectedAttachments != null ? (
             <MergeAttachmentsSection
-              attachments={preview.attachments}
+              preview={preview}
+              attachments={selectedAttachments}
+              casesById={casesById}
+              excludedKeys={excludedKeys}
+              onChangeExclusions={setExcludedKeys}
               destinationRef={destinationRef}
+              isDisabled={isControlsDisabled}
             />
           ) : (
             <EuiSkeletonText lines={3} />

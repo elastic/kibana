@@ -10,7 +10,8 @@ import { casesSchemaV12 } from '../schemas';
 import { createSchemaOverrides } from './create_schema_overrides';
 
 /**
- * Adds the `merged_into` keyword mapping. Existing cases have no value, which reads as not merged.
+ * Adds the `merged_into` keyword mapping, holding the ids of the cases a case was merged into.
+ * Existing cases have no value, which reads as not merged.
  */
 export const modelVersion12: SavedObjectsModelVersion = {
   changes: [

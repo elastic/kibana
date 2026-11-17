@@ -641,6 +641,27 @@ describe('bulkAddObservables', () => {
     });
   });
 
+  it('adds the observables without a user action when skipUserAction is set', async () => {
+    mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
+    await bulkAddObservables(
+      { caseId: caseSO.id, observables: [{ ...mockObservablePost, value: 'ip2' }] },
+      mockClientArgs,
+      mockCasesClient,
+      { skipUserAction: true }
+    );
+
+    expect(mockCaseService.patchCase).toHaveBeenCalledWith(
+      expect.objectContaining({
+        updatedAttributes: expect.objectContaining({
+          observables: expect.arrayContaining([
+            createObservableMatcher({ ...mockObservablePost, value: 'ip2' }),
+          ]),
+        }),
+      })
+    );
+    expect(mockUserActionService.creator.createUserAction).not.toHaveBeenCalled();
+  });
+
   it('emits observableTypeKeys index-aligned with observableIds for a multi-type batch', async () => {
     mockLicensingService.isAtLeastPlatinum.mockResolvedValue(true);
     // caseSO starts with no observables so all three are new

@@ -40,6 +40,16 @@ import {
 import { processObservables } from './utils';
 import { emitObservablesAddedEvent } from './trigger_utils';
 
+/**
+ * Internal-only options: no HTTP route sets them.
+ */
+export interface BulkAddObservablesOptions {
+  /**
+   * Skips the user action. The caller must record the change in its own user action.
+   */
+  skipUserAction?: boolean;
+}
+
 const ensureUpdateAuthorized = async (
   authorization: PublicMethodsOf<Authorization>,
   theCase: CaseSavedObjectTransformed
@@ -66,12 +76,14 @@ const ensureUpdateAuthorized = async (
  *
  * @param prefetchedCase - Optional already-fetched SO to avoid an extra getCase
  *   round-trip. When provided, `caseId` is ignored for the initial fetch.
+ * @param options.skipUserAction - For callers that record the change in their own user action.
  */
 export const applyObservablesToCase = async (
   caseId: string,
   observables: ObservablePost[],
   clientArgs: CasesClientArgs,
-  prefetchedCase?: CaseSavedObjectTransformed
+  prefetchedCase?: CaseSavedObjectTransformed,
+  { skipUserAction = false }: BulkAddObservablesOptions = {}
 ) => {
   const {
     services: { caseService, userActionService },
@@ -125,17 +137,19 @@ export const applyObservablesToCase = async (
     },
   });
 
-  await userActionService.creator.createUserAction({
-    userAction: {
-      type: UserActionTypes.observables,
-      caseId: retrievedCase.id,
-      owner: retrievedCase.attributes.owner,
-      user,
-      payload: {
-        observables: { count: newlyAddedObservables.length, actionType: 'add' },
+  if (!skipUserAction) {
+    await userActionService.creator.createUserAction({
+      userAction: {
+        type: UserActionTypes.observables,
+        caseId: retrievedCase.id,
+        owner: retrievedCase.attributes.owner,
+        user,
+        payload: {
+          observables: { count: newlyAddedObservables.length, actionType: 'add' },
+        },
       },
-    },
-  });
+    });
+  }
 
   // Return the merged case and the new observables so the caller can emit the
   // trigger after a successful decode — never emit from inside this function
@@ -380,7 +394,8 @@ export const deleteObservable = async (
 export const bulkAddObservables = async (
   params: BulkAddObservablesRequest,
   clientArgs: CasesClientArgs,
-  casesClient: CasesClient
+  casesClient: CasesClient,
+  options?: BulkAddObservablesOptions
 ) => {
   const {
     services: { caseService, licensingService },
@@ -423,7 +438,8 @@ export const bulkAddObservables = async (
       paramArgs.caseId,
       paramArgs.observables,
       clientArgs,
-      retrievedCase
+      retrievedCase,
+      options
     );
     if (!applied) {
       throw Boom.badRequest(`Failed to add observable`);

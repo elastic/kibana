@@ -17,7 +17,7 @@ export const MergeCaseSnapshotSchema = lazySchema(() =>
   })
 );
 
-/** How many attachments of each kind were copied from one original case. */
+/** Attachment counts by kind for one original case. */
 export const MergeCopiedTotalsSchema = lazySchema(() =>
   z.object({
     alerts: z.number(),
@@ -29,7 +29,15 @@ export const MergeCopiedTotalsSchema = lazySchema(() =>
 
 export const MergeSourceSchema = lazySchema(() =>
   MergeCaseSnapshotSchema.extend({
+    /** What the case added to the destination. */
     copied: MergeCopiedTotalsSchema,
+    /**
+     * What the case held that the destination or an earlier case already had. Missing on merges
+     * recorded before it was tracked.
+     */
+    duplicates: MergeCopiedTotalsSchema.optional(),
+    /** What the user chose to leave on the case. Missing on merges recorded before it was tracked. */
+    excluded: MergeCopiedTotalsSchema.optional(),
   })
 );
 
@@ -37,11 +45,20 @@ export const MergeSourceSchema = lazySchema(() =>
  * The same payload is written on the destination and on every original case; the UI picks the
  * wording by comparing the case it renders with `destination.id`.
  */
+export const MergeUpdatedFieldSchema = lazySchema(() =>
+  z.enum(['title', 'description', 'severity', 'category', 'tags', 'assignees'])
+);
+
 export const MergePayloadSchema = lazySchema(() =>
   z.object({
     destination: MergeCaseSnapshotSchema,
     sources: z.array(MergeSourceSchema),
     closedSources: z.boolean(),
+    /**
+     * Fields the merge changed on an existing destination. The merge entry is the destination's
+     * only record of them. Missing on merges recorded before it was tracked.
+     */
+    updatedFields: z.array(MergeUpdatedFieldSchema).optional(),
   })
 );
 
@@ -61,4 +78,5 @@ export const MergeUserActionSchema = lazySchema(() =>
 export type MergeCaseSnapshot = z.infer<typeof MergeCaseSnapshotSchema>;
 export type MergeCopiedTotals = z.infer<typeof MergeCopiedTotalsSchema>;
 export type MergeSource = z.infer<typeof MergeSourceSchema>;
+export type MergeUpdatedField = z.infer<typeof MergeUpdatedFieldSchema>;
 export type MergePayload = z.infer<typeof MergePayloadSchema>;

@@ -2252,6 +2252,22 @@ describe('CaseUserActionService', () => {
                       "function": "is",
                       "type": "function",
                     },
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "cases-user-actions.attributes.type",
+                        },
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "merge",
+                        },
+                      ],
+                      "function": "is",
+                      "type": "function",
+                    },
                   ],
                   "function": "or",
                   "type": "function",
@@ -2323,6 +2339,22 @@ describe('CaseUserActionService', () => {
                           "isQuoted": false,
                           "type": "literal",
                           "value": "title",
+                        },
+                      ],
+                      "function": "is",
+                      "type": "function",
+                    },
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "cases-user-actions.attributes.type",
+                        },
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "merge",
                         },
                       ],
                       "function": "is",

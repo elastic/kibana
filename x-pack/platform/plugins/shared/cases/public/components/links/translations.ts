@@ -12,3 +12,9 @@ export const CASE_DETAILS_LINK_ARIA = (detailName: string) =>
     values: { detailName },
     defaultMessage: 'click to visit case with title {detailName}',
   });
+
+export const CASE_DETAILS_LINK_NEW_TAB_ARIA = (detailName: string) =>
+  i18n.translate('xpack.cases.caseTable.caseDetailsLinkNewTabAria', {
+    values: { detailName },
+    defaultMessage: 'click to visit case with title {detailName} in a new tab',
+  });

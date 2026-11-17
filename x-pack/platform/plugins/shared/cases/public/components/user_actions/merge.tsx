@@ -16,9 +16,16 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SnakeToCamelCase } from '../../../common/types';
-import type { MergeCaseSnapshot, MergeSource, MergeUserAction } from '../../../common/types/domain';
+import type {
+  MergeCaseSnapshot,
+  MergeCopiedTotals,
+  MergeSource,
+  MergeUpdatedField,
+  MergeUserAction,
+} from '../../../common/types/domain';
 import { MergeCaseLink } from '../merge_cases/merge_case_link';
 import { getCaseReference } from '../merge_cases/utils';
+import { HoverableUsernameResolver } from '../user_profiles/hoverable_username_resolver';
 import type { UserActionBuilder } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import * as i18n from './translations';
@@ -35,7 +42,51 @@ const MergeCaseLinks = React.memo<{ cases: MergeCaseSnapshot[] }>(({ cases }) =>
 ));
 MergeCaseLinks.displayName = 'MergeCaseLinks';
 
-const MergeSourcesDetails = React.memo<{ sources: MergeSource[] }>(({ sources }) => {
+const COPIED_KIND_FORMATTERS: ReadonlyArray<
+  readonly [keyof MergeCopiedTotals, (count: number) => string]
+> = [
+  ['alerts', i18n.MERGE_COPIED_ALERTS],
+  ['events', i18n.MERGE_COPIED_EVENTS],
+  ['observables', i18n.MERGE_COPIED_OBSERVABLES],
+  ['other', i18n.MERGE_COPIED_OTHER],
+];
+
+/** Lists the counts by kind, leaving out the kinds with none. */
+const formatCounts = (counts: MergeCopiedTotals): string =>
+  COPIED_KIND_FORMATTERS.filter(([kind]) => counts[kind] > 0)
+    .map(([kind, format]) => format(counts[kind]))
+    .join(', ');
+
+const UPDATED_FIELD_LABELS: Readonly<Record<MergeUpdatedField, string>> = {
+  title: i18n.MERGE_UPDATED_FIELD_TITLE,
+  description: i18n.MERGE_UPDATED_FIELD_DESCRIPTION,
+  severity: i18n.MERGE_UPDATED_FIELD_SEVERITY,
+  category: i18n.MERGE_UPDATED_FIELD_CATEGORY,
+  tags: i18n.MERGE_UPDATED_FIELD_TAGS,
+  assignees: i18n.MERGE_UPDATED_FIELD_ASSIGNEES,
+};
+
+const MergeSourceDetails = React.memo<{ source: MergeSource }>(({ source }) => {
+  const { id, copied, duplicates, excluded } = source;
+  const added = formatCounts(copied);
+  const alreadyInCase = duplicates != null ? formatCounts(duplicates) : '';
+  const leftOut = excluded != null ? formatCounts(excluded) : '';
+
+  return (
+    <li data-test-subj={`merge-user-action-details-${id}`}>
+      <strong>{getCaseReference(source)}</strong>
+      <div>{added ? i18n.MERGE_SOURCE_NEW(added) : i18n.MERGE_SOURCE_NOTHING_NEW}</div>
+      {alreadyInCase ? <div>{i18n.MERGE_SOURCE_ALREADY_IN_CASE(alreadyInCase)}</div> : null}
+      {leftOut ? <div>{i18n.MERGE_SOURCE_LEFT_OUT(leftOut)}</div> : null}
+    </li>
+  );
+});
+MergeSourceDetails.displayName = 'MergeSourceDetails';
+
+const MergeSourcesDetails = React.memo<{
+  sources: MergeSource[];
+  updatedFields: MergeUpdatedField[];
+}>(({ sources, updatedFields }) => {
   const [isOpen, setIsOpen] = useState(false);
   const popoverId = useGeneratedHtmlId({ prefix: 'mergeSourcesDetails' });
 
@@ -62,21 +113,16 @@ const MergeSourcesDetails = React.memo<{ sources: MergeSource[] }>(({ sources })
       <EuiText size="s" data-test-subj="merge-user-action-details">
         <ul>
           {sources.map((source) => (
-            <li key={source.id}>
-              <FormattedMessage
-                id="xpack.cases.caseView.userActions.merge.sourceCopiedTotals"
-                defaultMessage="{caseRef}: {alerts, plural, one {# alert} other {# alerts}}, {events, plural, one {# event} other {# events}}, {observables, plural, one {# observable} other {# observables}}, {other, plural, one {# other attachment} other {# other attachments}}"
-                values={{
-                  caseRef: getCaseReference(source),
-                  alerts: source.copied.alerts,
-                  events: source.copied.events,
-                  observables: source.copied.observables,
-                  other: source.copied.other,
-                }}
-              />
-            </li>
+            <MergeSourceDetails key={source.id} source={source} />
           ))}
         </ul>
+        {updatedFields.length > 0 ? (
+          <p data-test-subj="merge-user-action-details-updated-fields">
+            {i18n.MERGE_UPDATED_FIELDS(
+              updatedFields.map((field) => UPDATED_FIELD_LABELS[field]).join(', ')
+            )}
+          </p>
+        ) : null}
       </EuiText>
     </EuiPopover>
   );
@@ -91,32 +137,47 @@ export const createMergeUserActionBuilder: UserActionBuilder = ({
 }) => ({
   build: () => {
     const action = userAction as SnakeToCamelCase<MergeUserAction>;
-    const { destination, sources } = action.payload.merge;
-    const isDestination = caseData.id === destination.id;
+    const { destination, sources, updatedFields = [] } = action.payload.merge;
 
-    const label = isDestination ? (
+    if (caseData.id !== destination.id) {
+      return createCommonUpdateUserActionBuilder({
+        userProfiles,
+        userAction,
+        handleOutlineComment,
+        label: (
+          <EuiText size="s" data-test-subj="merge-user-action-original">
+            <FormattedMessage
+              id="xpack.cases.caseView.userActions.merge.mergedThisCaseInto"
+              defaultMessage="merged this case into {destination}"
+              values={{ destination: <MergeCaseLink caseSnapshot={destination} /> }}
+            />
+          </EuiText>
+        ),
+        icon: 'merge',
+      }).build();
+    }
+
+    const label = (
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
         <EuiFlexItem grow={false}>
           <EuiText size="s" data-test-subj="merge-user-action-destination">
             <FormattedMessage
-              id="xpack.cases.caseView.userActions.merge.mergedIntoThisCase"
-              defaultMessage="merged {cases} into this case"
-              values={{ cases: <MergeCaseLinks cases={sources} /> }}
+              id="xpack.cases.caseView.userActions.merge.casesMergedIntoThisCaseBy"
+              defaultMessage="{count, plural, one {Case} other {Cases}} {cases} merged into this case by {user}"
+              values={{
+                count: sources.length,
+                cases: <MergeCaseLinks cases={sources} />,
+                user: (
+                  <HoverableUsernameResolver user={action.createdBy} userProfiles={userProfiles} />
+                ),
+              }}
             />
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <MergeSourcesDetails sources={sources} />
+          <MergeSourcesDetails sources={sources} updatedFields={updatedFields} />
         </EuiFlexItem>
       </EuiFlexGroup>
-    ) : (
-      <EuiText size="s" data-test-subj="merge-user-action-original">
-        <FormattedMessage
-          id="xpack.cases.caseView.userActions.merge.mergedThisCaseInto"
-          defaultMessage="merged this case into {destination}"
-          values={{ destination: <MergeCaseLink caseSnapshot={destination} /> }}
-        />
-      </EuiText>
     );
 
     return createCommonUpdateUserActionBuilder({
@@ -125,6 +186,7 @@ export const createMergeUserActionBuilder: UserActionBuilder = ({
       handleOutlineComment,
       label,
       icon: 'merge',
+      username: '',
     }).build();
   },
 });

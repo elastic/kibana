@@ -297,7 +297,8 @@ export const useCasesColumns = ({
             return getEmptyCellValue();
           }
 
-          if (theCase.mergedInto == null) {
+          const { mergedInto } = theCase;
+          if (mergedInto == null || mergedInto.length === 0) {
             return <Status status={status} />;
           }
 
@@ -307,10 +308,7 @@ export const useCasesColumns = ({
                 <Status status={status} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <MergedIntoBadge
-                  destinationId={theCase.mergedInto}
-                  destinations={mergeDestinations}
-                />
+                <MergedIntoBadge destinationIds={mergedInto} destinations={mergeDestinations} />
               </EuiFlexItem>
             </EuiFlexGroup>
           );
