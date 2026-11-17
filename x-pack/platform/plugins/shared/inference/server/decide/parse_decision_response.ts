@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DecisionAnswer, DecisionQuestion } from '@kbn/inference-common';
+import type { DecisionAnswer, DecisionQuestion, DecisionType } from '@kbn/inference-common';
 import { createInferenceProviderError } from '@kbn/inference-common';
 import { questionKey } from './question_keys';
 
@@ -52,35 +52,32 @@ const toProbabilities = (
   );
 };
 
-const toAnswer = (raw: RawAnswer, name: string): DecisionAnswer => {
-  switch (raw.type) {
-    case 'predicate':
-      return {
-        type: 'predicate',
-        probability: requireNumber(raw.probability, 'probability', name),
-      };
-    case 'choice':
-      if (typeof raw.choice !== 'string') {
-        throw createInferenceProviderError(`Decision answer [${name}] has no [choice]`);
-      }
-      return {
-        type: 'choice',
-        choice: raw.choice,
-        confidence: requireNumber(raw.confidence, 'confidence', name),
-        probabilities: toProbabilities(raw.probabilities, 'value', name),
-      };
-    case 'score':
-      return {
-        type: 'score',
-        score: requireNumber(raw.score, 'score', name),
-        confidence: requireNumber(raw.confidence, 'confidence', name),
-        probabilities: toProbabilities(raw.probabilities, 'label', name),
-      };
-    default:
-      throw createInferenceProviderError(
-        `Decision answer [${name}] has unknown type [${String(raw.type)}]`
-      );
-  }
+/** One parser per decision type, so a new type doesn't compile until its answers can be read. */
+const answerParsers: {
+  [T in DecisionType]: (raw: RawAnswer, name: string) => DecisionAnswer<T>;
+} = {
+  predicate: (raw, name) => ({
+    type: 'predicate',
+    probability: requireNumber(raw.probability, 'probability', name),
+  }),
+  choice: (raw, name) => {
+    if (typeof raw.choice !== 'string') {
+      throw createInferenceProviderError(`Decision answer [${name}] has no [choice]`);
+    }
+
+    return {
+      type: 'choice',
+      choice: raw.choice,
+      confidence: requireNumber(raw.confidence, 'confidence', name),
+      probabilities: toProbabilities(raw.probabilities, 'value', name),
+    };
+  },
+  score: (raw, name) => ({
+    type: 'score',
+    score: requireNumber(raw.score, 'score', name),
+    confidence: requireNumber(raw.confidence, 'confidence', name),
+    probabilities: toProbabilities(raw.probabilities, 'label', name),
+  }),
 };
 
 /**
@@ -112,6 +109,6 @@ export const parseDecisionResponse = (
       );
     }
 
-    return toAnswer(raw, name);
+    return answerParsers[question.type](raw, name);
   });
 };

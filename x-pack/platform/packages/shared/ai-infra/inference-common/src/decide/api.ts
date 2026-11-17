@@ -10,27 +10,15 @@ export interface DecisionPredicateQuestion {
   instructions: string;
 }
 
+export interface DecisionPredicateAnswer {
+  type: 'predicate';
+  probability: number;
+}
+
 export interface DecisionChoiceQuestion {
   type: 'choice';
   instructions: string;
   choices: Record<string, string>;
-}
-
-export interface DecisionScoreQuestion {
-  type: 'score';
-  instructions: string;
-  levels: Array<{ label: string; description: string }>;
-}
-
-/** A question for a decision model, in the shape of the ES `decision` inference task. */
-export type DecisionQuestion =
-  | DecisionPredicateQuestion
-  | DecisionChoiceQuestion
-  | DecisionScoreQuestion;
-
-export interface DecisionPredicateAnswer {
-  type: 'predicate';
-  probability: number;
 }
 
 export interface DecisionChoiceAnswer {
@@ -40,6 +28,12 @@ export interface DecisionChoiceAnswer {
   probabilities: Record<string, number>;
 }
 
+export interface DecisionScoreQuestion {
+  type: 'score';
+  instructions: string;
+  levels: Array<{ label: string; description: string }>;
+}
+
 export interface DecisionScoreAnswer {
   type: 'score';
   score: number;
@@ -47,14 +41,25 @@ export interface DecisionScoreAnswer {
   probabilities: Record<string, number>;
 }
 
-/** A decision model's answer to one {@link DecisionQuestion}. */
-export type DecisionAnswer = DecisionPredicateAnswer | DecisionChoiceAnswer | DecisionScoreAnswer;
+/** Fails to compile when a question's or answer's `type` doesn't match its key. */
+type WithMatchingTypes<
+  T extends { [K in keyof T]: { question: { type: K }; answer: { type: K } } }
+> = T;
 
-/** The answer type for a question type. */
-export type DecisionAnswerFor<Q extends DecisionQuestion> = Extract<
-  DecisionAnswer,
-  { type: Q['type'] }
->;
+type DecisionTypes = WithMatchingTypes<{
+  predicate: { question: DecisionPredicateQuestion; answer: DecisionPredicateAnswer };
+  choice: { question: DecisionChoiceQuestion; answer: DecisionChoiceAnswer };
+  score: { question: DecisionScoreQuestion; answer: DecisionScoreAnswer };
+}>;
+
+export type DecisionType = keyof DecisionTypes;
+
+/** `DecisionQuestion<'choice'>` narrows the union to one type; `DecisionAnswer` works the same way. */
+export type DecisionQuestion<T extends DecisionType = DecisionType> = DecisionTypes[T]['question'];
+
+export type DecisionAnswer<T extends DecisionType = DecisionType> = DecisionTypes[T]['answer'];
+
+export type DecisionAnswerFor<Q extends DecisionQuestion> = DecisionAnswer<Q['type']>;
 
 /** The answers to a list of questions, typed by position. */
 export type DecisionAnswersFor<Q extends readonly DecisionQuestion[]> = {
@@ -69,7 +74,6 @@ export interface DecideOptions {
   abortSignal?: AbortSignal;
 }
 
-/** A decision, with the inference endpoint that made it. */
 export type DecideResponse<T> = { inferenceId: string } & T;
 
 /**
@@ -78,7 +82,6 @@ export type DecideResponse<T> = { inferenceId: string } & T;
  * usable `decision` endpoint.
  */
 export interface DecideAPI {
-  /** Asks one question about the input. */
   <const Q extends DecisionQuestion>(options: DecideOptions, question: Q): Promise<
     DecideResponse<{ answer: DecisionAnswerFor<Q> }>
   >;

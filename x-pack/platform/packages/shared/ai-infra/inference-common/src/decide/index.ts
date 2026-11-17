@@ -19,4 +19,5 @@ export type {
   DecisionQuestion,
   DecisionScoreAnswer,
   DecisionScoreQuestion,
+  DecisionType,
 } from './api';

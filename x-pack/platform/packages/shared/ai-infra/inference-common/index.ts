@@ -123,6 +123,7 @@ export type {
   DecisionQuestion,
   DecisionScoreAnswer,
   DecisionScoreQuestion,
+  DecisionType,
 } from './src/decide';
 export {
   InferenceTaskEventType,
