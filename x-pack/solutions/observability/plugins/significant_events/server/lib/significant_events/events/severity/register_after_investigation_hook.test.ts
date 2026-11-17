@@ -15,7 +15,11 @@ import {
   ConversationRoundStatus,
   createConversationNotFoundError,
 } from '@kbn/agent-builder-common';
-import { HookLifecycle, type AfterExecutionHookContext } from '@kbn/agent-builder-server';
+import {
+  HookExecutionMode,
+  HookLifecycle,
+  type AfterExecutionHookContext,
+} from '@kbn/agent-builder-server';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '@kbn/nightshift-investigations-plugin/common';
 import { registerAfterInvestigationHook } from './register_after_investigation_hook';
 
@@ -111,7 +115,10 @@ describe('registerAfterInvestigationHook', () => {
   it('registers a non-blocking after-execution hook', () => {
     const { register } = setup();
 
-    expect(register.mock.calls[0][0].hooks[HookLifecycle.afterExecution].mode).toBe('nonBlocking');
+    expect(register.mock.calls[0][0].hooks[HookLifecycle.afterExecution]).toMatchObject({
+      mode: HookExecutionMode.nonBlocking,
+      requiresServiceAccountRequest: true,
+    });
   });
 
   it("syncs the events of the investigation's episodes", async () => {
@@ -185,15 +192,23 @@ describe('registerAfterInvestigationHook', () => {
       createConversationNotFoundError({ conversationId: 'inv-1' }),
     ],
     [
-      'a conversation that is not an investigation',
-      Object.assign(new Error('not an investigation'), { name: 'WrongTemplateError' }),
-    ],
-    [
       'a caller that cannot read it',
       Object.assign(new Error('no access'), { name: 'InvestigationsForbiddenError' }),
     ],
-  ])('stops quietly for %s, without retrying', async (_name, error) => {
+  ])('warns once and stops for %s, without retrying', async (_name, error) => {
     const { handler, get } = setup({ gets: [error] });
+
+    await run(handler);
+
+    expect(get).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('inv-1'));
+  });
+
+  it('stops quietly for a conversation that is not an investigation, without retrying', async () => {
+    const { handler, get } = setup({
+      gets: [Object.assign(new Error('not an investigation'), { name: 'WrongTemplateError' })],
+    });
 
     await run(handler);
 
@@ -216,5 +231,23 @@ describe('registerAfterInvestigationHook', () => {
     await run(handler, 12_000);
 
     expect(get).toHaveBeenCalledTimes(reads);
+  });
+
+  it('warns once, with the investigation id, when the events cannot be read as the caller', async () => {
+    const { handler, get } = setup({ outcome: unavailable('forbidden') });
+
+    await run(handler, 12_000);
+
+    expect(get).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('inv-1'));
+  });
+
+  it('does not warn when the investigations plugin is not installed', async () => {
+    const { handler } = setup({ outcome: unavailable('not_installed') });
+
+    await run(handler, 12_000);
+
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 });

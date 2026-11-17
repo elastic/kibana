@@ -38,17 +38,17 @@ const HOOK_ID = 'after-investigation-severity-sync';
 /** The wait before each attempt, so they run about 0, 2 and 12 s in: the final findings can land late. */
 const DEFAULT_RETRY_DELAYS_MS = [0, 2_000, 10_000];
 
-/** A conversation that is not an investigation (or no longer exists) has nothing to write through. */
+/** A conversation of another template (an ordinary chat) has nothing to write through, and is normal. */
 const isNotAnInvestigation = (error: unknown): boolean =>
-  isConversationNotFoundError(error) ||
-  (error instanceof Error && error.name === 'WrongTemplateError');
+  error instanceof Error && error.name === 'WrongTemplateError';
 
 const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 /**
  * Fast path: writes the investigation's severity through to its events after the recorder's
  * final pass. Reads and Discovery resolve the same severity, so a miss is still correct. Non-blocking,
- * so it runs after the recorder's blocking hook and never affects the investigation.
+ * so it runs after the recorder's blocking hook and never affects the investigation. It asks for
+ * the agent's service-account request because the run's credential is released before the retries.
  */
 export const registerAfterInvestigationHook = ({
   agentBuilder,
@@ -91,6 +91,11 @@ export const registerAfterInvestigationHook = ({
       eventIds: [...eventIds],
     });
     if (outcome.status === 'unavailable') {
+      if (outcome.reason === 'forbidden') {
+        logger.warn(
+          `Investigation ${conversationId} severity not written through: the events cannot be read as the caller`
+        );
+      }
       // A timeout or an error may pass; the other reasons will not by waiting.
       return outcome.reason === 'timeout' || outcome.reason === 'error'
         ? { done: false, failure: outcome.reason }
@@ -118,9 +123,16 @@ export const registerAfterInvestigationHook = ({
         if (result.done) return;
         lastFailure = result.failure;
       } catch (error) {
-        if (isForbidden(error) || isNotAnInvestigation(error)) {
-          logger.debug(
+        if (isForbidden(error) || isConversationNotFoundError(error)) {
+          // As the agent's service account this is a misconfiguration, so it is not left at debug.
+          logger.warn(
             `Investigation ${conversationId} severity not written through: it cannot be read as an investigation`
+          );
+          return;
+        }
+        if (isNotAnInvestigation(error)) {
+          logger.debug(
+            `Investigation ${conversationId} severity not written through: it is not an investigation`
           );
           return;
         }
@@ -145,7 +157,11 @@ export const registerAfterInvestigationHook = ({
   agentBuilder.hooks.register({
     id: HOOK_ID,
     hooks: {
-      [HookLifecycle.afterExecution]: { mode: HookExecutionMode.nonBlocking, handler },
+      [HookLifecycle.afterExecution]: {
+        mode: HookExecutionMode.nonBlocking,
+        requiresServiceAccountRequest: true,
+        handler,
+      },
     },
   });
 };
