@@ -12,6 +12,7 @@ import {
   NIGHTSHIFT_BOUND_DECISION_TREE_HYDRATE_WORKFLOW_ID,
   getNightshiftBoundHookWorkflowId,
 } from '@kbn/workflows/managed';
+import { NIGHTSHIFT_AGENT_CAPABILITIES } from '../investigation';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../../tools/sandbox_bash/str_replace_tool';
 import { SANDBOX_WRITE_FILE_TOOL_ID } from '../../tools/sandbox_bash/write_file_tool';
@@ -45,6 +46,7 @@ const getBaseConfiguration = (hydrateWorkflowId: string): AgentBaseConfiguration
   skill_ids: [],
   tools: [{ tool_ids: [...SANDBOX_FILE_TOOL_IDS, DECISION_TREE_SUBMIT_TOOL_ID] }],
   enable_elastic_capabilities: false,
+  capabilities: NIGHTSHIFT_AGENT_CAPABILITIES,
   connector_ids: [],
   // Hydration has to run inside this agent's own conversation: the sandbox workspace is
   // namespaced per conversation, and this agent runs in a different one than the investigator.
