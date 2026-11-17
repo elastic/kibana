@@ -11,7 +11,6 @@ import type { Logger } from '@kbn/logging';
 import {
   collectIgnoredKibanaFetcherOccurrences,
   IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
-  shouldWarnIgnoredKibanaFetcher,
   transformWorkflowYamlJsontoEsWorkflow,
 } from '@kbn/workflows';
 import type { EsWorkflow, EsWorkflowCreate, WorkflowYaml } from '@kbn/workflows';
@@ -27,7 +26,6 @@ import type { WorkflowProperties } from '../../storage/workflow_storage';
 /** Persist-time warning for ignored kibana YAML `fetcher` settings. */
 export const logIgnoredKibanaFetcherOnPersist = (params: {
   logger?: Logger;
-  warnIgnoredKibanaFetcher?: boolean;
   steps: WorkflowYaml['steps'] | undefined;
   workflowName: string;
   workflowId?: string;
@@ -37,9 +35,6 @@ export const logIgnoredKibanaFetcherOnPersist = (params: {
     return;
   }
   const ignoredFetcherSteps = collectIgnoredKibanaFetcherOccurrences(steps)
-    .filter((occurrence) =>
-      shouldWarnIgnoredKibanaFetcher(occurrence.stepType, params.warnIgnoredKibanaFetcher ?? false)
-    )
     .map((occurrence) => occurrence.stepName)
     .filter((name): name is string => typeof name === 'string' && name.length > 0);
   if (ignoredFetcherSteps.length === 0) {
@@ -114,7 +109,6 @@ export const prepareWorkflowDocumentFromYaml = async (params: {
   triggerDefinitions?: Array<{ id: string; eventSchema: z.ZodType }>;
   nameFallback?: string;
   logger?: Logger;
-  warnIgnoredKibanaFetcher?: boolean;
 }): Promise<{ id: string; workflowData: WorkflowProperties; definition?: WorkflowYaml }> => {
   const {
     id: providedId,
@@ -126,7 +120,6 @@ export const prepareWorkflowDocumentFromYaml = async (params: {
     triggerDefinitions,
     nameFallback,
     logger,
-    warnIgnoredKibanaFetcher = false,
   } = params;
 
   const looseMetadata = extractLooseMetadataFields(yaml);
@@ -156,7 +149,6 @@ export const prepareWorkflowDocumentFromYaml = async (params: {
 
   logIgnoredKibanaFetcherOnPersist({
     logger,
-    warnIgnoredKibanaFetcher,
     steps: validation.parsedWorkflow?.steps,
     workflowName: workflowToCreate.name,
     workflowId: id,
@@ -197,25 +189,16 @@ export const applyYamlUpdate = async (params: {
   zodSchema: z.ZodType;
   triggerDefinitions: Array<{ id: string; eventSchema: z.ZodType }>;
   logger?: Logger;
-  warnIgnoredKibanaFetcher?: boolean;
   workflowId?: string;
 }): Promise<{
   updatedDataPatch: Partial<WorkflowProperties>;
   validationErrors: string[];
   shouldUpdateScheduler: boolean;
 }> => {
-  const {
-    workflowYaml,
-    zodSchema,
-    triggerDefinitions,
-    logger,
-    warnIgnoredKibanaFetcher = false,
-    workflowId,
-  } = params;
+  const { workflowYaml, zodSchema, triggerDefinitions, logger, workflowId } = params;
   const validation = await validateWorkflowYaml(workflowYaml, zodSchema, { triggerDefinitions });
   logIgnoredKibanaFetcherOnPersist({
     logger,
-    warnIgnoredKibanaFetcher,
     steps: validation.parsedWorkflow?.steps,
     workflowName:
       validation.parsedWorkflow?.name ??
