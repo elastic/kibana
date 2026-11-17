@@ -246,6 +246,27 @@ describe('actionTypeRegistry', () => {
       );
     });
 
+    test('allows adding a new version to an already registered action type', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: 'catalog-type',
+          specs: new Map([['1.0', { spec: 'v1' }]]),
+        })
+      );
+      expect(actionTypeRegistry.getSpec('catalog-type', '1.0')).toEqual({ spec: 'v1' });
+      expect(actionTypeRegistry.getSpec('catalog-type', '2.0')).toBeUndefined();
+
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: 'catalog-type',
+          specs: new Map([['2.0', { spec: 'v2' }]]),
+        })
+      );
+      expect(actionTypeRegistry.getSpec('catalog-type', '1.0')).toEqual({ spec: 'v1' });
+      expect(actionTypeRegistry.getSpec('catalog-type', '2.0')).toEqual({ spec: 'v2' });
+    });
+
     test('validates the given type before adding spec versions', () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
 
