@@ -204,6 +204,26 @@ describe('BulkAlertAssigneesPanel', () => {
     );
   });
 
+  test('it keeps unresolved assignees cleared when a replacement user is selected', () => {
+    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: [mockUserProfiles[0]],
+    });
+    const onSubmit = jest.fn();
+    const wrapper = renderAssigneesMenu(mockAlertsWithMixedAssignees, jest.fn(), onSubmit);
+
+    fireEvent.click(wrapper.getByText('Clear filters'));
+    fireEvent.click(wrapper.getByText('user3'));
+    fireEvent.click(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID));
+
+    expect(onSubmit).toHaveBeenCalledWith(
+      { add: ['user-id-3'], remove: ['user-id-1', 'user-id-2'] },
+      ['test-id', 'test-id-2'],
+      expect.anything(),
+      expect.anything()
+    );
+  });
+
   test('it adds a mixed assignee to every alert when selected', () => {
     const onSubmit = jest.fn();
     const wrapper = renderAssigneesMenu(mockAlertsWithMixedAssignees, jest.fn(), onSubmit);

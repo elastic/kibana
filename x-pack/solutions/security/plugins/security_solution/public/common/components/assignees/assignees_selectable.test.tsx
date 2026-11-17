@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render } from '@testing-library/react';
+import React, { useState } from 'react';
+import { act, render } from '@testing-library/react';
 import { userEvent, type UserEvent } from '@testing-library/user-event';
 import { UserProfilesSelectable } from '@kbn/user-profile-components';
 
@@ -168,5 +168,39 @@ describe('<AssigneesSelectable />', () => {
       [['user-id-1']],
       [[]],
     ]);
+  });
+
+  it('should remove a selected filter without duplicating IDs while profiles refetch', () => {
+    (useBulkGetUserProfiles as jest.Mock).mockImplementation(({ uids }: { uids: Set<string> }) =>
+      uids.size === 1
+        ? { isLoading: false, data: [mockUserProfiles[0]] }
+        : { isLoading: true, data: undefined }
+    );
+
+    const onSelectionChange = jest.fn();
+    const ControlledSelection = () => {
+      const [selectedIds, setSelectedIds] = useState<string[]>([mockUserProfiles[0].uid]);
+      return (
+        <TestProviders>
+          <AssigneesSelectable
+            assignedUserIds={selectedIds}
+            onSelectionChange={(ids) => {
+              onSelectionChange(ids);
+              setSelectedIds(ids.filter((id): id is string => id !== null));
+            }}
+          />
+        </TestProviders>
+      );
+    };
+
+    render(<ControlledSelection />);
+    act(() => lastSelectableProps().onChange([mockUserProfiles[1], mockUserProfiles[0]]));
+    expect(onSelectionChange).toHaveBeenLastCalledWith([
+      mockUserProfiles[1].uid,
+      mockUserProfiles[0].uid,
+    ]);
+
+    act(() => lastSelectableProps().onChange([mockUserProfiles[1]]));
+    expect(onSelectionChange).toHaveBeenLastCalledWith([mockUserProfiles[1].uid]);
   });
 });
