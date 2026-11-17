@@ -74,6 +74,7 @@ export class ServerlessSearchPlugin
       id: 'serverlessHomeRedirect',
       title: homeTitle,
       appRoute: '/app/elasticsearch',
+      exactRoute: true,
       euiIconType: 'logoElastic',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       visibleIn: [],
