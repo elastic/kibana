@@ -14,6 +14,7 @@ import { InMemorySignalStore } from '../../test_utils/in_memory_signal_store';
 import { InMemorySavedObjectsRepository } from '../../test_utils/in_memory_saved_objects_repository';
 import { createTestStrategy, TEST_STRATEGY_ID } from '../../test_utils/test_strategy';
 import { EngineRunner } from './run_engine';
+import type { SpaceRunLock } from './space_run_lock';
 
 const SPACE_ID = 'default';
 const NOW = Date.UTC(2026, 10, 13, 12, 0);
@@ -23,22 +24,45 @@ function createStateClient() {
   return new DetectionStateClient(new InMemorySavedObjectsRepository().asRepository());
 }
 
+/** A run lock that lets one run per space in, like the real one, without Elasticsearch. */
+function createSpaceRunLock() {
+  const held = new Set<string>();
+  const lock: Pick<SpaceRunLock, 'run'> = {
+    run: async ({ spaceId, callback }) => {
+      if (held.has(spaceId)) {
+        return { ran: false };
+      }
+      held.add(spaceId);
+      try {
+        return { ran: true, result: await callback() };
+      } finally {
+        held.delete(spaceId);
+      }
+    },
+  };
+
+  return { lock, held };
+}
+
 function createRunner({
   strategies = [createTestStrategy()],
   isAvailable = true,
   state = createStateClient(),
   signals = new InMemorySignalStore(),
+  lock = createSpaceRunLock().lock,
 }: {
   strategies?: DetectionStrategy[];
   isAvailable?: boolean;
   state?: DetectionStateClient;
   signals?: InMemorySignalStore;
+  lock?: Pick<SpaceRunLock, 'run'>;
 } = {}) {
   const runner = new EngineRunner(
     { spaceId: SPACE_ID, runId: 'run-1', scheduledMinute: NOW },
     { isAvailable: async () => isAvailable },
     new StrategyCatalog(strategies),
     state,
+    lock,
     signals,
     { list: async () => [] },
     elasticsearchServiceMock.createElasticsearchClient(),
@@ -116,21 +140,18 @@ describe('EngineRunner', () => {
     ).toEqual(new Map());
   });
 
-  it('reports busy and writes nothing while another run holds the lease', async () => {
-    const state = createStateClient();
-    const held = await state.acquireLease({ spaceId: SPACE_ID, now: NOW });
-    const { runner, signals } = createRunner({ state });
+  it('reports busy and writes nothing while another run holds the space', async () => {
+    const { lock, held } = createSpaceRunLock();
+    held.add(SPACE_ID);
+    const { runner, signals } = createRunner({ lock });
 
     const result = await runner.run({ now: NOW + MINUTE_MS });
 
-    expect(result).toMatchObject({
-      status: 'busy',
-      held_by: held.acquired ? held.held.owner : undefined,
-    });
+    expect(result).toMatchObject({ status: 'busy', strategies: [] });
     expect(signals.written).toHaveLength(0);
   });
 
-  it('releases the lease when the run is aborted', async () => {
+  it('releases the space when the run is aborted', async () => {
     let generatorStarted: () => void = () => {};
     const started = new Promise<void>((resolve) => {
       generatorStarted = resolve;
@@ -145,8 +166,8 @@ describe('EngineRunner', () => {
           }),
       },
     };
-    const state = createStateClient();
-    const { runner } = createRunner({ strategies: [waitsForAbort], state });
+    const { lock, held } = createSpaceRunLock();
+    const { runner } = createRunner({ strategies: [waitsForAbort], lock });
     const controller = new AbortController();
 
     const running = runner.run({ now: NOW, abortSignal: controller.signal });
@@ -158,17 +179,17 @@ describe('EngineRunner', () => {
     expect(result).toMatchObject({
       strategies: [{ id: 'waits_for_abort', error: 'aborted' }],
     });
-    // Released: the next run takes the lease at once.
-    expect((await state.acquireLease({ spaceId: SPACE_ID, now: NOW })).acquired).toBe(true);
+    expect(held.has(SPACE_ID)).toBe(false);
   });
 
-  it('takes no lease while the engine is unavailable', async () => {
-    const { runner, state } = createRunner({ isAvailable: false });
-    const acquireLease = jest.spyOn(state, 'acquireLease');
+  it('takes no run lock while the engine is unavailable', async () => {
+    const { lock } = createSpaceRunLock();
+    const run = jest.spyOn(lock, 'run');
+    const { runner } = createRunner({ isAvailable: false, lock });
 
     const result = await runner.run({ now: NOW });
 
     expect(result).toMatchObject({ status: 'unavailable', strategies: [] });
-    expect(acquireLease).not.toHaveBeenCalled();
+    expect(run).not.toHaveBeenCalled();
   });
 });

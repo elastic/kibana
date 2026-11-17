@@ -31,6 +31,7 @@ dependsOn:
   - '@kbn/core-pricing-common'
   - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/licensing-plugin'
+  - '@kbn/lock-manager'
   - '@kbn/nightshift-shared'
   - '@kbn/nightshift-sources-plugin'
   - '@kbn/spaces-plugin'

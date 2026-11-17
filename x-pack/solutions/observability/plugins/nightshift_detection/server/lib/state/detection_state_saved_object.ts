@@ -11,14 +11,6 @@ import type { SavedObjectsType } from '@kbn/core/server';
 /** The saved object type that holds the engine's state. */
 export const DETECTION_STATE_SO_TYPE = 'nightshift-detection-state';
 
-/** The lease that serialises engine runs of one space. One per space, with the id `lease`. */
-export interface RunLeaseAttributes {
-  /** Unique per acquisition, so a holder can tell its lease from one that took its place. */
-  owner: string;
-  acquired_at: string;
-  expires_at: string;
-}
-
 /** Where a strategy's signal generator got to. One per strategy and space. */
 export interface GeneratorStateAttributes {
   /** End of the last fully processed minute, in epoch milliseconds. */
@@ -40,16 +32,12 @@ export const detectionStateSavedObjectType: SavedObjectsType = {
     1: {
       changes: [],
       schemas: {
-        create: schema.object({}, { unknowns: 'allow' }),
-        // One type holds both kinds of document, so every field is optional. Dropping them would let
-        // an older node read a newer document as empty during a rolling upgrade.
+        create: schema.object({ processed_until: schema.number() }),
+        // Optional, so a later kind of state document without it still reads on an older node.
+        // Dropping it would let an older node read a newer document as empty during a rolling
+        // upgrade.
         forwardCompatibility: schema.object(
-          {
-            owner: schema.maybe(schema.string()),
-            acquired_at: schema.maybe(schema.string()),
-            expires_at: schema.maybe(schema.string()),
-            processed_until: schema.maybe(schema.number()),
-          },
+          { processed_until: schema.maybe(schema.number()) },
           { unknowns: 'ignore' }
         ),
       },

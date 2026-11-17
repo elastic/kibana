@@ -21,58 +21,6 @@ const readProcessedUntil = async (client: DetectionStateClient, spaceId = SPACE_
   (await client.readGeneratorStates({ spaceId, strategyIds: [STRATEGY_ID] })).get(STRATEGY_ID);
 
 describe('DetectionStateClient', () => {
-  describe('acquireLease', () => {
-    it('gives the lease to one of several concurrent acquirers', async () => {
-      const client = createClient();
-
-      const attempts = await Promise.all(
-        Array.from({ length: 5 }, () => client.acquireLease({ spaceId: SPACE_ID }))
-      );
-
-      expect(attempts.filter(({ acquired }) => acquired)).toHaveLength(1);
-    });
-
-    it('takes over an expired lease and leaves a live holder alone', async () => {
-      const client = createClient();
-      const start = Date.now();
-
-      const first = await client.acquireLease({ spaceId: SPACE_ID, ttlMs: 1_000, now: start });
-      const whileLive = await client.acquireLease({ spaceId: SPACE_ID, now: start + 500 });
-      const afterExpiry = await client.acquireLease({ spaceId: SPACE_ID, now: start + 2_000 });
-
-      expect(first.acquired).toBe(true);
-      expect(whileLive.acquired).toBe(false);
-      expect(afterExpiry.acquired).toBe(true);
-
-      // The first holder's release must not end the lease that replaced its own.
-      if (first.acquired) {
-        await first.held.release();
-      }
-      expect((await client.acquireLease({ spaceId: SPACE_ID, now: start + 2_500 })).acquired).toBe(
-        false
-      );
-    });
-
-    it('frees the lease when its holder releases it', async () => {
-      const client = createClient();
-      const first = await client.acquireLease({ spaceId: SPACE_ID });
-
-      if (first.acquired) {
-        await first.held.release();
-      }
-
-      expect((await client.acquireLease({ spaceId: SPACE_ID })).acquired).toBe(true);
-    });
-
-    it('keeps the lease of one space apart from another', async () => {
-      const client = createClient();
-
-      await client.acquireLease({ spaceId: 'space-a' });
-
-      expect((await client.acquireLease({ spaceId: 'space-b' })).acquired).toBe(true);
-    });
-  });
-
   describe('advanceGeneratorState', () => {
     it('moves an existing generator state forward, not only the first one', async () => {
       const client = createClient();

@@ -18,6 +18,7 @@ import { NIGHTSHIFT_DETECTION_TIERED_FEATURES } from '../../common/constants';
 import { module } from '..';
 import { AvailabilityService } from '../lib/availability/availability_service';
 import { DetectionEngineSystemClient } from '../lib/engine/es_client_tokens';
+import { SpaceRunLock } from '../lib/engine/space_run_lock';
 import { TickService } from '../lib/engine/tick_service';
 import { DetectionAccountService } from '../lib/service_account/detection_account';
 import { DetectionSetupService } from '../lib/service_account/setup_service';
@@ -97,6 +98,7 @@ describe('module', () => {
     container.get(DetectionSetupService);
     container.get(DetectionWorkflowInstaller);
     container.get(TickService);
+    container.get(SpaceRunLock);
     container.getAll(OnStart);
     container.getAll(OnSetup).forEach((onSetup) => onSetup(container));
 
@@ -125,6 +127,11 @@ describe('module', () => {
       .toConstantValue(
         new DetectionStateClient(new InMemorySavedObjectsRepository().asRepository())
       );
+    // The real lock writes to Elasticsearch; this test is about the scope, not the lock.
+    await container.unbind(SpaceRunLock);
+    container.bind(SpaceRunLock).toConstantValue({
+      run: async ({ callback }) => ({ ran: true, result: await callback() }),
+    } as SpaceRunLock);
 
     const result = await container.get(TickService).run({
       accountRequest: httpServerMock.createKibanaRequest(),
