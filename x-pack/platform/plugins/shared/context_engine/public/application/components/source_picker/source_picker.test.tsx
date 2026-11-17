@@ -223,6 +223,19 @@ describe('SourcePicker', () => {
     expect(screen.queryByTestId('contextIndexOption-logs-*')).not.toBeInTheDocument();
   });
 
+  it('keeps previously picked indices when picking another one', async () => {
+    renderWithProviders(<Harness />);
+
+    await selectIndexSource('logs-*');
+    await selectIndexSource('metrics-*');
+
+    expect(screen.getAllByTestId(/^contextSelectedSource-esql-/)).toHaveLength(2);
+    expect(screen.getByTestId('contextSelectedSource-esql-0')).toHaveTextContent('FROM metrics-*');
+    expect(screen.getByTestId('contextSelectedSource-esql-1')).toHaveTextContent('FROM logs-*');
+    expect(screen.queryByTestId('contextIndexOption-logs-*')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextIndexOption-metrics-*')).not.toBeInTheDocument();
+  });
+
   it('does not add a duplicate index source', async () => {
     renderWithProviders(<Harness />);
 
