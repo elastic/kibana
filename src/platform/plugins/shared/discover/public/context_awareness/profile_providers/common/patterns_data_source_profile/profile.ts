@@ -15,7 +15,10 @@ import {
   getSparklineColumns,
 } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
-import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import type {
+  CustomGridColumnsConfiguration,
+  DataGridCellValueElementProps,
+} from '@kbn/unified-data-table';
 import { createElement } from 'react';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 import type { DataSourceProfileProvider } from '../../../profiles';
@@ -23,6 +26,7 @@ import { DataSourceCategory } from '../../../profiles';
 import { getPatternCellRenderer } from './pattern_cell_renderer';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import { SparklineCellRenderer } from '../sparkline_data_source_profile/sparkline_cell_renderer';
+import { getMetricColumns } from './get_metric_columns';
 
 const DOC_LIMIT = 10000;
 
@@ -31,9 +35,26 @@ export const createPatternsDataSourceProfileProvider = (
 ): DataSourceProfileProvider<{
   patternColumns: string[];
   sparklineColumns: string[];
+  metricColumns: string[];
 }> => ({
   profileId: 'patterns-data-source-profile',
   profile: {
+    getColumnsConfiguration:
+      (prev, { context }) =>
+      () => {
+        const previous = prev();
+        const configuration: CustomGridColumnsConfiguration = { ...previous };
+        for (const name of context.metricColumns) {
+          configuration[name] = (params) => {
+            const column = previous[name]?.(params) ?? params.column;
+            if (params.columnSettings !== undefined || column.initialWidth !== undefined) {
+              return column;
+            }
+            return { ...column, initialWidth: 150 };
+          };
+        }
+        return configuration;
+      },
     getCellRenderers:
       (prev, { context }) =>
       (params) => {
@@ -156,6 +177,7 @@ export const createPatternsDataSourceProfileProvider = (
         category: DataSourceCategory.Default,
         patternColumns,
         sparklineColumns,
+        metricColumns: getMetricColumns(query.esql),
       },
     };
   },

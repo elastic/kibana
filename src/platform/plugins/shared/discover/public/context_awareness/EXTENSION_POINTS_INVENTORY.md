@@ -262,11 +262,13 @@ columns: [
 
 ### Columns configuration — `getColumnsConfiguration`
 
-**Changes:** Header labels, icons, and metadata for columns.
+**Changes:** Header labels, icons, metadata, and default widths for columns.
 
-**Use when:** Rename headers, add icons, improve tooltips.
+**Use when:** Rename headers, add icons, improve tooltips, or size query-derived columns without changing column selection.
 
 **Returns:** `CustomGridColumnsConfiguration`
+
+Each callback receives the column and its persisted `columnSettings`. When supplying an `initialWidth`, preserve existing widths and settings; an empty settings object can represent an explicit reset to automatic sizing. Customized default widths expose the grid's **Reset width** action.
 
 **Screenshot:**
 ![Columns configuration example](./docs/extension_points/get_columns_configuration.png)

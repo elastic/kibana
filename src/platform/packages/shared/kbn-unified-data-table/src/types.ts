@@ -58,6 +58,8 @@ export type CustomCellRenderer = Record<string, FunctionComponent<DataGridCellVa
 export interface CustomGridColumnProps {
   column: EuiDataGridColumn;
   headerRowHeight?: number;
+  /** Persisted column settings, including an empty object after resetting its width. */
+  columnSettings?: UnifiedDataTableSettingsColumn;
 }
 
 export type CustomGridColumnsConfiguration = Record<
