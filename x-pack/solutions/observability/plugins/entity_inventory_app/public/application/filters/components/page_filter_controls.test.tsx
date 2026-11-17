@@ -25,12 +25,12 @@ jest.mock('../hooks/use_attribute_values', () => ({
   useAttributeValues: () => ({ values: ['one', 'two'], invalidSelections: [], isLoading: false }),
 }));
 
-const renderControls = (entityCategory: EntityInventoryEntityCategory) =>
+const renderControls = (entityCategory: EntityInventoryEntityCategory, initialEntry = '/') =>
   render(
     <KibanaContextProvider
       services={{ ...coreMock.createStart(), config: createPublicConfigMock() }}
     >
-      <Router history={createMemoryHistory()}>
+      <Router history={createMemoryHistory({ initialEntries: [initialEntry] })}>
         <EntityInventorySearchProvider entityCategory={entityCategory}>
           <EntityInventoryPageFilterControls />
         </EntityInventorySearchProvider>
@@ -63,5 +63,47 @@ describe('EntityInventoryPageFilterControls', () => {
 
     expect(screen.getByTestId('entityInventoryCategoryFilter')).toHaveTextContent('Kubernetes');
     expect(screen.getByTestId('entityInventoryTypeFilter')).toBeInTheDocument();
+  });
+
+  describe('a stale selection in the URL', () => {
+    const CLEAR = 'entityInventoryClearFilters';
+
+    it('does not offer to clear filters for an attribute that is not in the view', () => {
+      renderControls('hosts', '/hosts?_a=(filterControls:(attributes:(not.in.the.view:!(x))))');
+
+      expect(screen.queryByTestId(CLEAR)).not.toBeInTheDocument();
+    });
+
+    it('does not offer to clear filters for an attribute with no selected values', () => {
+      renderControls('hosts', '/hosts?_a=(filterControls:(attributes:(os.type:!())))');
+
+      expect(screen.queryByTestId(CLEAR)).not.toBeInTheDocument();
+    });
+
+    it('shows no category that does not exist', () => {
+      renderControls('all', '/all?_a=(filterControls:(attributes:(),category:nope))');
+
+      expect(screen.getByTestId('entityInventoryCategoryFilter')).toHaveTextContent(
+        'All categories'
+      );
+      expect(screen.queryByTestId(CLEAR)).not.toBeInTheDocument();
+    });
+
+    it('shows no type that does not exist and keeps the valid category', () => {
+      renderControls(
+        'all',
+        '/all?_a=(filterControls:(attributes:(),category:kubernetes,type:nope))'
+      );
+
+      expect(screen.getByTestId('entityInventoryCategoryFilter')).toHaveTextContent('Kubernetes');
+      expect(screen.getByTestId('entityInventoryTypeFilter')).toHaveTextContent('All types');
+      expect(screen.getByTestId(CLEAR)).toBeInTheDocument();
+    });
+
+    it('keeps offering to clear filters for a valid selection', () => {
+      renderControls('hosts', '/hosts?_a=(filterControls:(attributes:(os.type:!(linux))))');
+
+      expect(screen.getByTestId(CLEAR)).toBeInTheDocument();
+    });
   });
 });

@@ -65,6 +65,16 @@ describe('normalizeSelection', () => {
     ).toBeUndefined();
   });
 
+  it('drops an attribute that has no selected values', () => {
+    expect(
+      normalizeSelection({
+        types,
+        pageCategory: 'hosts',
+        selection: { attributes: { 'os.type': [], 'cloud.provider': ['aws'] } },
+      })
+    ).toEqual({ category: undefined, type: undefined, attributes: { 'cloud.provider': ['aws'] } });
+  });
+
   it('ignores the selected category on a page that is for a category', () => {
     expect(
       normalizeSelection({

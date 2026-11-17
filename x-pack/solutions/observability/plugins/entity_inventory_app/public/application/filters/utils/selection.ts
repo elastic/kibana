@@ -52,7 +52,9 @@ export const normalizeSelection = ({
     category: pageCategory ? undefined : category,
     type,
     attributes: Object.fromEntries(
-      Object.entries(selection.attributes).filter(([name]) => attributeNames.includes(name))
+      Object.entries(selection.attributes).filter(
+        ([name, values]) => attributeNames.includes(name) && values.length > 0
+      )
     ),
   };
 };

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import { omit, pick } from 'lodash';
+import React, { useMemo } from 'react';
+import { omit } from 'lodash';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import type { EbtClickAttrsWithoutAction } from '@kbn/ebt-click';
@@ -74,9 +74,20 @@ export function EntityInventoryFilterControls({
   error,
   pageCategory,
   timeRange,
-  selection,
+  selection: currentSelection,
   onSelectionChange,
 }: EntityInventoryFilterControlsProps) {
+  // The selection can come from the URL, so what this page cannot show is left out of what the
+  // controls use. Before the types are known every attribute would look unknown.
+  const isReady = !isLoading && !error;
+  const selection = useMemo(
+    () =>
+      isReady
+        ? normalizeSelection({ types: typeDefinitions, pageCategory, selection: currentSelection })
+        : currentSelection,
+    [currentSelection, isReady, pageCategory, typeDefinitions]
+  );
+
   if (error) {
     return <KbnDangerCallout announceOnMount size="s" title={TYPES_ERROR_MESSAGE} />;
   }
@@ -89,9 +100,6 @@ export function EntityInventoryFilterControls({
   };
   const { categories, types, attributes } = getFilterControls(scope);
   const typeIds = getTypesInScope(scope).map(({ type }) => type);
-  const attributeNames = attributes.map(({ name }) => name);
-  // The selection can come from the URL: only the attributes that have a filter here narrow the others.
-  const shownAttributes = pick(selection.attributes, attributeNames);
 
   const updateSelection = (changes: Partial<FilterControlsSelection>) =>
     onSelectionChange(
@@ -177,7 +185,7 @@ export function EntityInventoryFilterControls({
                 attribute={name}
                 label={label}
                 types={typeIds}
-                filters={omit(shownAttributes, name)}
+                filters={omit(selection.attributes, name)}
                 timeRange={timeRange}
                 selected={selection.attributes[name] ?? []}
                 onChange={(values) => updateAttribute(name, values)}
