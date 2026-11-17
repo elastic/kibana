@@ -61,17 +61,20 @@ dependsOn:
   - '@kbn/ml-plugin'
   - '@kbn/saved-search-component'
   - '@kbn/core-execution-context-common'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
     - public/**/*
     - server/**/*
     - types/**/*
+    - test/**/*
     - '!target/**/*'
 tasks: {}
