@@ -180,6 +180,7 @@ describe('createPackRoute', () => {
 
     it('warns for a partial selection without expanding persisted policy_ids or Fleet delivery', async () => {
       const partial = await runWarningCase(['A']);
+      expect(partial.responseBody.data.policy_ids).toEqual(['A']);
       expect(partial.responseBody.warnings).toEqual([
         {
           code: 'shared_integration_overdelivery',
