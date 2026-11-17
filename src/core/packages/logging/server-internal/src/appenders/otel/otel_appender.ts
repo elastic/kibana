@@ -36,6 +36,9 @@ import {
   type ReadableLogRecord,
 } from '@opentelemetry/sdk-logs';
 import type { ExporterMetrics } from '@opentelemetry/otlp-exporter-base';
+import { createOtlpHttpExporterMetrics } from '@opentelemetry/otlp-exporter-base/node-http';
+import { createOtlpGrpcExporterMetrics } from '@opentelemetry/otlp-grpc-exporter-base';
+import { LogsExporterMetricsHelper } from '@opentelemetry/otlp-transformer';
 import {
   OTEL_COMPONENT_TYPE_VALUE_OTLP_GRPC_LOG_EXPORTER,
   OTEL_COMPONENT_TYPE_VALUE_OTLP_HTTP_LOG_EXPORTER,
@@ -485,34 +488,22 @@ const createExporterMetrics = (
   config: OtelAppenderConfig,
   meterProvider: MeterProvider
 ): ExporterMetrics<ReadableLogRecord[]> => {
-  // No need to import the modules at the top if the retry layer is not used.
-  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
-  const { LogsExporterMetricsHelper } = require('@opentelemetry/otlp-transformer');
-
   switch (config.protocol) {
     case 'http':
-    case 'proto': {
-      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
-      const {
-        createOtlpHttpExporterMetrics,
-      } = require('@opentelemetry/otlp-exporter-base/node-http');
+    case 'proto':
       return createOtlpHttpExporterMetrics(
         OTEL_COMPONENT_TYPE_VALUE_OTLP_HTTP_LOG_EXPORTER,
         LogsExporterMetricsHelper,
         config.url,
         meterProvider
       );
-    }
-    case 'grpc': {
-      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
-      const { createOtlpGrpcExporterMetrics } = require('@opentelemetry/otlp-grpc-exporter-base');
+    case 'grpc':
       return createOtlpGrpcExporterMetrics(
         OTEL_COMPONENT_TYPE_VALUE_OTLP_GRPC_LOG_EXPORTER,
         LogsExporterMetricsHelper,
         config.url,
         meterProvider
       );
-    }
   }
 };
 
