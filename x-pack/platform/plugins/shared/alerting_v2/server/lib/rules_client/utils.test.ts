@@ -5,9 +5,18 @@
  * 2.0.
  */
 
-import type { CreateRuleData, UpdateRuleData } from '@kbn/alerting-v2-schemas';
+import type {
+  CreateRuleData,
+  RuleChangeHistorySnapshot,
+  UpdateRuleData,
+} from '@kbn/alerting-v2-schemas';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import { ROUTING_TAGS_SIGNAL_RULE_MESSAGE, ruleResponseSchema } from '@kbn/alerting-v2-schemas';
+import {
+  putRuleDataSchema,
+  ROUTING_TAGS_SIGNAL_RULE_MESSAGE,
+  ruleResponseSchema,
+} from '@kbn/alerting-v2-schemas';
+import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import { createRuleSoAttributes } from '../test_utils';
 import type { RotationCandidate } from './types';
 import {
@@ -24,6 +33,7 @@ import {
   ruleDisabledError,
   ruleRunningError,
   rotationFailedError,
+  toRestoreRuleData,
 } from './utils';
 
 const serverFields = {
@@ -1411,5 +1421,56 @@ describe('isTaskMidRun', () => {
     expect(isTaskMidRun(TaskStatus.DeadLetter)).toBe(false);
     expect(isTaskMidRun(TaskStatus.Idle)).toBe(false);
     expect(isTaskMidRun(undefined)).toBe(false);
+  });
+});
+
+describe('toRestoreRuleData', () => {
+  const ruleConfiguration: CreateRuleData = {
+    ...baseCreateData,
+    metadata: { name: 'restored-rule', description: 'from a snapshot' },
+    grouping: { fields: ['host.name'] },
+    artifacts: [{ id: 'runbook-1', type: 'runbook', data: { content: 'steps' } }],
+  };
+
+  const snapshot: RuleChangeHistorySnapshot = {
+    ...ruleConfiguration,
+    id: 'rule-1',
+    version: 3,
+    enabled: false,
+    created_by: { profile_uid: 'user-1' },
+    created_at: '2025-01-01T00:00:00.000Z',
+    updated_by: { profile_uid: 'user-2' },
+    updated_at: '2025-02-01T00:00:00.000Z',
+  };
+
+  it('returns the configuration fields and enabled state, and drops the server-managed fields', () => {
+    expect(toRestoreRuleData(snapshot)).toStrictEqual({ ...ruleConfiguration, enabled: false });
+  });
+
+  it('returns data that the PUT rule schema accepts', () => {
+    expect(putRuleDataSchema.safeParse(toRestoreRuleData(snapshot)).success).toBe(true);
+  });
+
+  it('omits optional configuration fields that the snapshot does not have', () => {
+    const { grouping: _grouping, artifacts: _artifacts, ...minimalSnapshot } = snapshot;
+
+    const result = toRestoreRuleData(minimalSnapshot);
+
+    expect(result).not.toHaveProperty('grouping');
+    expect(result).not.toHaveProperty('artifacts');
+  });
+
+  it('throws INVALID_RULE_DATA listing top-level fields the rule schema does not know', () => {
+    const snapshotWithFutureFields = { ...snapshot, future_field: true, other_field: 'x' };
+
+    expect(() => toRestoreRuleData(snapshotWithFutureFields)).toThrow(
+      expect.objectContaining({
+        output: expect.objectContaining({ statusCode: 400 }),
+        data: {
+          code: ALERTING_ERROR_CODES.INVALID_RULE_DATA,
+          details: { context: 'restore', unknown_fields: ['future_field', 'other_field'] },
+        },
+      })
+    );
   });
 });

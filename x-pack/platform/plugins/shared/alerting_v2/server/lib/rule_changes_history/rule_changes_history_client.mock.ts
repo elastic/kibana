@@ -14,6 +14,6 @@ export function createRuleChangesHistoryClientMock(): jest.Mocked<RuleChangesHis
   return {
     listRuleChanges: jest.fn().mockResolvedValue({ items: [], total: 0 }),
     getRuleChange: jest.fn(),
-    getRuleChangeSnapshot: jest.fn(),
+    getRuleSnapshot: jest.fn(),
   };
 }

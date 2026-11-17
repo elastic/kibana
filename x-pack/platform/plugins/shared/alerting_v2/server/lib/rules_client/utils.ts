@@ -6,10 +6,12 @@
  */
 
 import Boom from '@hapi/boom';
-import { isEqual, omit } from 'lodash';
+import { isEqual, pick } from 'lodash';
 import type {
   CreateRuleData,
   CreateRuleDataInput,
+  PutRuleData,
+  RuleChangeHistorySnapshot,
   RuleResponse,
   UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
@@ -23,10 +25,12 @@ import {
   isLifecycleConfigPresentForKind,
   isRecoveryConditionUsableWithBreach,
   isRoutingTagsAllowedForKind,
+  putRuleDataSchema,
   REQUIRE_DISTINGUISHABLE_ABSENCE_MESSAGE,
   ROUTING_TAGS_SIGNAL_RULE_MESSAGE,
   isRecoveryTransitionConsistentWithStrategy,
   recoveryStrategy,
+  ruleResponseSchema,
   validateComposedEsqlQuery,
   type ImmutableRuleField,
 } from '@kbn/alerting-v2-schemas';
@@ -499,17 +503,24 @@ export function transformRuleSoAttributesToRuleApiResponse(
   };
 }
 
-/** Server-managed {@link RuleResponse} fields that a restore never takes from a snapshot. */
-const NON_RESTORABLE_SNAPSHOT_FIELDS = [
-  'id',
-  'version',
-  'enabled',
-  'created_by',
-  'created_at',
-  'updated_by',
-  'updated_at',
-] as const;
-
 /** Returns the configuration part of a change-history snapshot, shaped as a PUT rule body. */
-export const toRestoreRuleData = (snapshot: Record<string, unknown>): Record<string, unknown> =>
-  omit(snapshot, NON_RESTORABLE_SNAPSHOT_FIELDS);
+export const toRestoreRuleData = (snapshot: RuleChangeHistorySnapshot): PutRuleData => {
+  // A field this version does not know would otherwise be dropped from the restored rule.
+  const knownFields = new Set<string>(ruleResponseSchema.keyof().options);
+  const unknownFields = Object.keys(snapshot).filter((field) => !knownFields.has(field));
+
+  if (unknownFields.length > 0) {
+    throw Boom.badRequest(
+      getInvalidRuleDataMessage(
+        'restore',
+        `Unrecognized keys: ${unknownFields.map((field) => `"${field}"`).join(', ')}`
+      ),
+      {
+        code: ALERTING_ERROR_CODES.INVALID_RULE_DATA,
+        details: { context: 'restore', unknown_fields: unknownFields },
+      }
+    );
+  }
+
+  return pick(snapshot, putRuleDataSchema.keyof().options);
+};

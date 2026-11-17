@@ -35,7 +35,7 @@ export class RestoreRuleChangeRoute extends BaseAlertingRoute {
     access: 'internal' as const,
     summary: 'Restore a rule change',
     description:
-      'Replace the rule configuration with the snapshot recorded by a change-history event. The rule keeps its enabled state and its version is incremented.',
+      "Replace the rule configuration and enabled state with the snapshot recorded by a change-history event, as a full rule replace (PUT) would. The rule's version is incremented.",
     oasOperationObject: restoreRuleChangeOasExamples,
   } as const;
   static schemas = {

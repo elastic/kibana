@@ -11,6 +11,7 @@ import type { ChangeHistoryClient, ChangeHistoryDocument } from '@kbn/change-his
 import type {
   ListRuleChangeHistoryResponse,
   RuleChangeHistoryDetail,
+  RuleChangeHistorySnapshot,
 } from '@kbn/alerting-v2-schemas';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
@@ -30,13 +31,14 @@ export interface GetRuleChangeArgs {
 
 export interface RuleChangeSnapshot {
   ruleId: string;
-  snapshot: Record<string, unknown>;
+  /** Stored as written by any Kibana version and not validated on read; parse before use. */
+  snapshot: RuleChangeHistorySnapshot;
 }
 
 export interface RuleChangesHistoryClientContract {
   listRuleChanges(args: ListRuleChangesArgs): Promise<ListRuleChangeHistoryResponse>;
   getRuleChange(args: GetRuleChangeArgs): Promise<RuleChangeHistoryDetail>;
-  getRuleChangeSnapshot(args: GetRuleChangeArgs): Promise<RuleChangeSnapshot>;
+  getRuleSnapshot(args: GetRuleChangeArgs): Promise<RuleChangeSnapshot>;
 }
 
 @injectable()
@@ -97,9 +99,12 @@ export class RuleChangesHistoryClient implements RuleChangesHistoryClientContrac
     });
   }
 
-  public async getRuleChangeSnapshot({ eventId }: GetRuleChangeArgs): Promise<RuleChangeSnapshot> {
+  public async getRuleSnapshot({ eventId }: GetRuleChangeArgs): Promise<RuleChangeSnapshot> {
     const document = await this.getRuleChangeDocument(eventId);
-    return { ruleId: document.object.id, snapshot: document.object.snapshot };
+    return {
+      ruleId: document.object.id,
+      snapshot: document.object.snapshot as RuleChangeHistorySnapshot,
+    };
   }
 
   private async getRuleChangeDocument(eventId: string): Promise<ChangeHistoryDocument> {

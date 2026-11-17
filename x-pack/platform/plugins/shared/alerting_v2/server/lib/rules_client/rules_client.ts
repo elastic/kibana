@@ -1968,14 +1968,9 @@ export class RulesClient {
     return { rule, created: false };
   }
 
-  /**
-   * Replaces a rule's configuration with the snapshot recorded by a
-   * change-history event. The current `enabled` state is kept and the version
-   * is bumped.
-   */
   @withApm
   public async restoreRule({ changeId }: { changeId: string }): Promise<RuleResponse> {
-    const { ruleId, snapshot } = await this.ruleChangesHistoryClient.getRuleChangeSnapshot({
+    const { ruleId, snapshot } = await this.ruleChangesHistoryClient.getRuleSnapshot({
       eventId: changeId,
     });
 

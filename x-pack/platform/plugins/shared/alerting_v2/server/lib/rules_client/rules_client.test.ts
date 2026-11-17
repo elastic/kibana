@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { BULK_FILTER_MAX_RESOURCES, BULK_QUERY_SAMPLE_SIZE } from '@kbn/alerting-v2-schemas';
+import type { RuleChangeHistorySnapshot } from '@kbn/alerting-v2-schemas';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { createConfigServiceMock } from '../services/config_service/config_service.mock';
@@ -2040,8 +2041,8 @@ describe('RulesClient', () => {
       updated_at: '2024-02-01T00:00:00.000Z',
     };
 
-    const mockSnapshot = (ruleSnapshot: Record<string, unknown> = snapshot) => {
-      ruleChangesHistoryClient.getRuleChangeSnapshot.mockResolvedValueOnce({
+    const mockSnapshot = (ruleSnapshot: RuleChangeHistorySnapshot = snapshot) => {
+      ruleChangesHistoryClient.getRuleSnapshot.mockResolvedValueOnce({
         ruleId: 'rule-id-1',
         snapshot: ruleSnapshot,
       });
@@ -2064,7 +2065,7 @@ describe('RulesClient', () => {
       rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-id-1' });
     };
 
-    it('applies the snapshot configuration, bumps the version and keeps enabled, creation and template', async () => {
+    it('applies the snapshot configuration and enabled state, bumps the version and keeps creation and template', async () => {
       const client = createClient();
       mockExistingRule();
 
@@ -2076,7 +2077,7 @@ describe('RulesClient', () => {
         attrs: expect.objectContaining({
           metadata: expect.objectContaining({ name: 'restored', template: { id: 'template-1' } }),
           version: 6,
-          enabled: false,
+          enabled: true,
           createdBy: { profile_uid: 'current-creator' },
           createdAt: '2024-06-01T00:00:00.000Z',
           updatedBy: { profile_uid: 'elastic_profile_uid' },
@@ -2089,11 +2090,11 @@ describe('RulesClient', () => {
         expect.objectContaining({
           id: 'rule-id-1',
           version: 6,
-          enabled: false,
+          enabled: true,
           metadata: expect.objectContaining({ name: 'restored' }),
         })
       );
-      expect(ruleChangesHistoryClient.getRuleChangeSnapshot).toHaveBeenCalledWith({
+      expect(ruleChangesHistoryClient.getRuleSnapshot).toHaveBeenCalledWith({
         eventId: 'change-1',
       });
       expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(expect.any(Object), [
@@ -2107,7 +2108,7 @@ describe('RulesClient', () => {
 
     it('throws RULE_CHANGE_NOT_FOUND without reading the rule when the change does not exist', async () => {
       const client = createClient();
-      ruleChangesHistoryClient.getRuleChangeSnapshot.mockRejectedValueOnce(
+      ruleChangesHistoryClient.getRuleSnapshot.mockRejectedValueOnce(
         Boom.notFound('Rule change with event id "missing" not found', {
           code: ALERTING_ERROR_CODES.RULE_CHANGE_NOT_FOUND,
         })
@@ -2137,7 +2138,8 @@ describe('RulesClient', () => {
     it('throws INVALID_RULE_DATA when the snapshot has keys the current schema does not know', async () => {
       const client = createClient();
 
-      mockSnapshot({ ...snapshot, future_field: true });
+      const snapshotWithFutureField = { ...snapshot, future_field: true };
+      mockSnapshot(snapshotWithFutureField);
 
       await expect(client.restoreRule({ changeId: 'change-1' })).rejects.toMatchObject({
         output: { statusCode: 400 },

@@ -10,7 +10,6 @@ import {
   getRuleChangeHistoryEventParamsSchema,
   listRuleChangeHistoryRequestSchema,
   listRuleChangeHistoryResponseSchema,
-  restoreRuleChangeParamsSchema,
   ruleChangeHistoryDetailSchema,
 } from '@kbn/alerting-v2-schemas';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
@@ -253,7 +252,7 @@ describe('RuleChangesHistoryClient', () => {
     });
   });
 
-  describe('getRuleChangeSnapshot', () => {
+  describe('getRuleSnapshot', () => {
     it('returns the rule id and snapshot without fetching neighbouring entries', async () => {
       const changeHistory = createChangeHistoryMock();
       changeHistory.getEvent.mockResolvedValue(
@@ -265,7 +264,7 @@ describe('RuleChangesHistoryClient', () => {
         'default'
       );
 
-      await expect(client.getRuleChangeSnapshot({ eventId: 'event-1' })).resolves.toEqual({
+      await expect(client.getRuleSnapshot({ eventId: 'event-1' })).resolves.toEqual({
         ruleId: 'rule-1',
         snapshot: { id: 'rule-1', metadata: { name: 'A' } },
       });
@@ -281,7 +280,7 @@ describe('RuleChangesHistoryClient', () => {
         'default'
       );
 
-      await expect(client.getRuleChangeSnapshot({ eventId: 'missing' })).rejects.toMatchObject({
+      await expect(client.getRuleSnapshot({ eventId: 'missing' })).rejects.toMatchObject({
         output: { statusCode: 404 },
         data: { code: ALERTING_ERROR_CODES.RULE_CHANGE_NOT_FOUND },
       });
@@ -300,7 +299,7 @@ describe('RuleChangesHistoryClient', () => {
         'default'
       );
 
-      await expect(client.getRuleChangeSnapshot({ eventId: 'event-1' })).rejects.toMatchObject({
+      await expect(client.getRuleSnapshot({ eventId: 'event-1' })).rejects.toMatchObject({
         output: { statusCode: 404 },
         data: { code: ALERTING_ERROR_CODES.RULE_CHANGE_NOT_FOUND },
       });
@@ -315,7 +314,7 @@ describe('RuleChangesHistoryClient', () => {
         'default'
       );
 
-      await expect(client.getRuleChangeSnapshot({ eventId: 'event-1' })).rejects.toMatchObject({
+      await expect(client.getRuleSnapshot({ eventId: 'event-1' })).rejects.toMatchObject({
         output: { statusCode: 503 },
         data: { code: ALERTING_ERROR_CODES.RULE_CHANGE_HISTORY_UNAVAILABLE },
       });
@@ -370,15 +369,5 @@ describe('rule change history schemas', () => {
     expect(getRuleChangeHistoryEventParamsSchema.parse({ change_id: 'event-1' })).toEqual({
       change_id: 'event-1',
     });
-  });
-
-  it('parses restore path params and rejects unknown keys', () => {
-    expect(restoreRuleChangeParamsSchema.parse({ change_id: 'event-1' })).toEqual({
-      change_id: 'event-1',
-    });
-    expect(restoreRuleChangeParamsSchema.safeParse({ change_id: '' }).success).toBe(false);
-    expect(
-      restoreRuleChangeParamsSchema.safeParse({ change_id: 'event-1', version: 3 }).success
-    ).toBe(false);
   });
 });
