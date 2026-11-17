@@ -367,9 +367,8 @@ const projectTools = (tools: readonly McpTool[], names: readonly string[]): stri
       name,
       inputSchema: contractOfSchema(inputSchema),
       ...(outputSchema === undefined ? {} : { outputSchema: contractOfSchema(outputSchema) }),
-      ...(typeof annotations?.readOnlyHint === 'boolean'
-        ? { annotations: { readOnlyHint: annotations.readOnlyHint } }
-        : {}),
+      // The diff treats a `false` hint as no hint, so storing it would only churn the snapshot.
+      ...(annotations?.readOnlyHint === true ? { annotations: { readOnlyHint: true } } : {}),
     }));
   return toStableJson({ tools: projected });
 };

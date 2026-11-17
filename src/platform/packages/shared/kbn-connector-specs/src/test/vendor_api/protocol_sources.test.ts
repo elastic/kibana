@@ -307,6 +307,26 @@ describe('protocol sources', () => {
       ]);
     });
 
+    it('leaves out a readOnlyHint that is not true', () => {
+      const { tools: projected } = JSON.parse(
+        projectProtocolSpec(
+          {
+            ...mcpSpec,
+            tools: [
+              {
+                name: 'search',
+                inputSchema: { type: 'object' },
+                annotations: { readOnlyHint: false },
+              },
+            ],
+          },
+          ['tools/call search']
+        )
+      );
+
+      expect(projected).toEqual([{ name: 'search', inputSchema: { type: 'object' } }]);
+    });
+
     it('reads its own MCP snapshots back', () => {
       const snapshot = projectProtocolSpec(mcpSpec, ['tools/call search']);
 
