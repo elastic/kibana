@@ -17,7 +17,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type { EndpointDeprecationInfo, EndpointDisplay, EndpointEfforts } from '../../types';
+import type { EndpointDeprecationInfo, EndpointEfforts } from '../../types';
+import type { EndpointDisplay } from './types';
 import { ModelStatusBadge } from '../model_status/model_status_badge';
 import { EffortBadge } from './effort_badge';
 import type { GlobalDefaultLockedRowProps } from './global_default_locked_row';

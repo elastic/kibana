@@ -14,12 +14,8 @@ import type {
   InferenceFeatureResponse as InferenceFeatureConfig,
   ReasoningEffortLevel,
 } from '../../../common/types';
-import {
-  EisModelStatus,
-  type EndpointDeprecationInfo,
-  type EndpointDisplay,
-  type EndpointEfforts,
-} from '../../types';
+import { EisModelStatus, type EndpointDeprecationInfo, type EndpointEfforts } from '../../types';
+import type { EndpointDisplay } from './types';
 import type { GlobalDefaultLockedRowProps } from './global_default_locked_row';
 
 jest.mock('./add_model_popover', () => ({

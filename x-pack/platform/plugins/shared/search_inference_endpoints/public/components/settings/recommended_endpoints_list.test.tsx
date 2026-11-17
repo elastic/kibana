@@ -10,7 +10,8 @@ import { render, screen } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RecommendedEndpointsList } from './recommended_endpoints_list';
-import type { EndpointDisplay, EndpointEfforts } from '../../types';
+import type { EndpointEfforts } from '../../types';
+import type { EndpointDisplay } from './types';
 import type { GlobalDefaultLockedRowProps } from './global_default_locked_row';
 
 const endpointDisplayMap = new Map<string, EndpointDisplay>([

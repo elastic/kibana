@@ -24,7 +24,8 @@ import type {
   InferenceFeatureResponse as InferenceFeatureConfig,
   ReasoningEffortLevel,
 } from '../../../common/types';
-import type { EndpointDeprecationInfo, EndpointDisplay, EndpointEfforts } from '../../types';
+import type { EndpointDeprecationInfo, EndpointEfforts } from '../../types';
+import type { EndpointDisplay } from './types';
 import { AddModelPopover } from './add_model_popover';
 import { EditableEndpointRow } from './editable_endpoint_row';
 import type { GlobalDefaultLockedRowProps } from './global_default_locked_row';

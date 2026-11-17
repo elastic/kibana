@@ -97,12 +97,6 @@ export interface EndpointDeprecationInfo {
 /** Reasoning effort per endpoint id within one feature. */
 export type EndpointEfforts = Record<string, ReasoningEffortLevel>;
 
-/** Icon and label shown for an endpoint in the assigned models list. */
-export interface EndpointDisplay {
-  icon: string;
-  label: string;
-}
-
 /** Ordered list of EIS geo codes for display in the region picker. */
 export const GEO_ORDER = ['apac', 'eu', 'us', 'other'] as const;
 
