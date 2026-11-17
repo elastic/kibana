@@ -25,7 +25,7 @@ import { buildTaskRunEventFields } from './execution_outcome';
 
 type TaskRunParams = Pick<
   RunContext,
-  'taskInstance' | 'signal' | 'executionUuid' | 'setCustomTaskRunEventFields'
+  'taskInstance' | 'signal' | 'executionUuid' | 'setCustomTaskRunEventFields' | 'memory'
 >;
 
 @injectable()
@@ -40,8 +40,9 @@ export class RuleExecutorTaskRunner {
     signal,
     executionUuid,
     setCustomTaskRunEventFields,
+    memory,
   }: TaskRunParams): Promise<RunResult> {
-    const input = this.createRuleExecutionInput(taskInstance, signal, executionUuid);
+    const input = this.createRuleExecutionInput(taskInstance, signal, executionUuid, memory);
 
     let result: RuleExecutionPipelineResult;
     try {
@@ -62,7 +63,8 @@ export class RuleExecutorTaskRunner {
   private createRuleExecutionInput(
     taskInstance: TaskRunParams['taskInstance'],
     signal: AbortSignal,
-    executionUuid: string
+    executionUuid: string,
+    memory?: TaskRunParams['memory']
   ): RuleExecutionPipelineInput {
     const params = taskInstance.params as { ruleId: string; spaceId: string };
     const spaceId = brandSpaceId(params.spaceId);
@@ -81,6 +83,7 @@ export class RuleExecutorTaskRunner {
       abortSignal: signal,
       executionUuid,
       logger,
+      ...(memory ? { memory } : {}),
     };
   }
 

@@ -207,6 +207,8 @@ export interface MockArrowBatch {
   numRows: number;
   rows: Array<Record<string, unknown>>;
   timestampColumns?: string[];
+  /** Size of the batch's buffers, as apache-arrow reports it through `data.byteLength`. */
+  byteLength?: number;
 }
 
 export interface MockArrowReader {
@@ -214,6 +216,7 @@ export interface MockArrowReader {
   cancel: jest.Mock<Promise<void>, []>;
   [Symbol.asyncIterator]: () => AsyncIterator<{
     numRows: number;
+    data?: { byteLength: number };
     schema: { fields: Array<{ name: string; typeId: number }> };
     toArray: () => Array<{ toJSON: () => Record<string, unknown> }>;
   }>;
@@ -235,6 +238,7 @@ export function createMockArrowReader(batches: MockArrowBatch[]): MockArrowReade
         const fieldNames = Array.from(new Set(batch.rows.flatMap((row) => Object.keys(row))));
         yield {
           numRows: batch.numRows,
+          ...(batch.byteLength !== undefined ? { data: { byteLength: batch.byteLength } } : {}),
           schema: {
             fields: fieldNames.map((name) => ({
               name,

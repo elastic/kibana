@@ -11,7 +11,8 @@ import { map, startWith } from 'rxjs';
 import type { JsonObject } from '@kbn/utility-types';
 import type { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
 import type { TaskManagerConfig } from '../config';
-import { CLAIM_STRATEGY_MGET } from '../config';
+import { AUTO_CAPACITY, CLAIM_STRATEGY_MGET } from '../config';
+import type { AdaptiveCapacityState } from '../lib/adaptive_capacity';
 import { getCapacityInCost, getCapacityInWorkers } from '../task_pool';
 import type { TaskPollingLifecycle } from '../polling_lifecycle';
 import type { TaskExecutionControlService, TaskExecutionControlState } from '../execution_control';
@@ -28,7 +29,14 @@ interface CapacityConfig extends JsonObject {
     config: number;
     as_workers: number;
     as_cost: number;
+    /** `auto` when the heap controller sizes capacity; absent only in older fixtures. */
+    mode?: 'fixed' | 'auto';
   };
+}
+
+interface AdaptiveCapacityConfig extends JsonObject {
+  /** Latest heap controller decision; `null` with a fixed capacity. */
+  adaptive_capacity: AdaptiveCapacityState | null;
 }
 
 interface ExecutionControlConfig extends JsonObject {
@@ -43,6 +51,7 @@ export type ConfigStat = Pick<
   'poll_interval' | 'claim_strategy' | (typeof CONFIG_FIELDS_TO_EXPOSE)[number]
 > &
   CapacityConfig &
+  AdaptiveCapacityConfig &
   ExecutionControlConfig;
 
 export function createConfigurationAggregator(
@@ -51,6 +60,7 @@ export function createConfigurationAggregator(
   taskPollingLifecycle?: TaskPollingLifecycle,
   executionControlService?: TaskExecutionControlService
 ): AggregatedStatProvider<ConfigStat> {
+  const mode = config.capacity === AUTO_CAPACITY ? 'auto' : 'fixed';
   const capacity$ = taskPollingLifecycle
     ? taskPollingLifecycle.capacityConfiguration$.pipe(
         startWith(startingCapacity),
@@ -59,16 +69,26 @@ export function createConfigurationAggregator(
             config: capacity,
             as_workers: getCapacityInWorkers(capacity),
             as_cost: getCapacityInCost(capacity),
+            mode,
           },
         }))
       )
-    : of({
+    : of<CapacityConfig>({
         capacity: {
           config: startingCapacity,
           as_workers: getCapacityInWorkers(startingCapacity),
           as_cost: getCapacityInCost(startingCapacity),
+          mode,
         },
       });
+
+  const adaptiveCapacity$ = taskPollingLifecycle?.adaptiveCapacityState$
+    ? taskPollingLifecycle.adaptiveCapacityState$.pipe(
+        map<AdaptiveCapacityState, AdaptiveCapacityConfig>((state) => ({
+          adaptive_capacity: state,
+        }))
+      )
+    : of<AdaptiveCapacityConfig>({ adaptive_capacity: null });
 
   // The execution control service runs on every node (including UI-only nodes
   // that have no polling lifecycle), so read the pause state from it directly
@@ -91,6 +111,7 @@ export function createConfigurationAggregator(
     of({ claim_strategy: config.claim_strategy ?? CLAIM_STRATEGY_MGET }),
     of({ poll_interval: config.poll_interval }),
     capacity$,
+    adaptiveCapacity$,
     executionControl$,
   ]).pipe(
     map((configurations) => ({

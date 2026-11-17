@@ -149,7 +149,9 @@ export default function ({ getService }: FtrProviderContext) {
           config: 10,
           as_workers: 10,
           as_cost: 20,
+          mode: 'fixed',
         },
+        adaptive_capacity: null,
         claim_strategy: 'mget',
         execution_control: {
           paused: false,

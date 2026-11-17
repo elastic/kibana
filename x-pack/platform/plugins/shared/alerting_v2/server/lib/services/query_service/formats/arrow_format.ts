@@ -15,9 +15,12 @@ import type {
   EsqlResponseFormat,
   EsqlRowBatchSource,
 } from './types';
+import { toTransportOptions } from './types';
 
 interface ArrowRecordBatch {
   readonly schema: { fields: ReadonlyArray<{ name: string; typeId: number }> };
+  /** The buffers backing the batch; their size is what the stream holds outside the heap. */
+  readonly data?: { readonly byteLength: number };
   toArray(): Array<{ toJSON(): EsqlRow }>;
 }
 
@@ -31,8 +34,13 @@ export const decodeArrowBatch = (batch: ArrowRecordBatch): EsqlRow[] => {
   return batch.toArray().map((row) => coerceRow(row.toJSON(), dateColumns));
 };
 
-async function* decodeBatches(reader: AsyncRecordBatchStreamReader): AsyncIterable<EsqlRow[]> {
+async function* decodeBatches(
+  reader: AsyncRecordBatchStreamReader,
+  onBytes?: (bytes: number) => void
+): AsyncIterable<EsqlRow[]> {
   for await (const batch of reader) {
+    const byteLength = (batch as ArrowRecordBatch).data?.byteLength;
+    if (onBytes && byteLength !== undefined) onBytes(byteLength);
     yield decodeArrowBatch(batch);
   }
 }
@@ -52,12 +60,17 @@ export const arrowFormat = {
     request: EsqlFormatRequest,
     options: EsqlFormatRequestOptions
   ): Promise<EsqlRowBatchSource> {
-    const reader = await esClient.helpers.esql(request, options).toArrowReader();
+    const reader = await esClient.helpers
+      .esql(request, toTransportOptions(options))
+      .toArrowReader();
 
     if (!reader) {
       throw new Error('toArrowReader returned undefined');
     }
 
-    return { batches: decodeBatches(reader), close: () => closeReader(reader) };
+    return {
+      batches: decodeBatches(reader, options.onBytes),
+      close: () => closeReader(reader),
+    };
   },
 } satisfies EsqlResponseFormat;

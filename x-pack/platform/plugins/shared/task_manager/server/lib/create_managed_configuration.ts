@@ -11,7 +11,12 @@ import { interval, merge, of } from 'rxjs';
 import { filter, mergeScan, map, scan } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
 import type { TaskManagerConfig } from '../config';
-import { CLAIM_STRATEGY_MGET, LOW_UTILIZATION_POLL_INTERVAL, MAX_CAPACITY } from '../config';
+import {
+  AUTO_CAPACITY,
+  CLAIM_STRATEGY_MGET,
+  LOW_UTILIZATION_POLL_INTERVAL,
+  MAX_CAPACITY,
+} from '../config';
 import { TaskCost } from '../task';
 import { isClusterBlockException } from './errors';
 import type { BackpressureReason } from './backpressure_reason';
@@ -288,7 +293,7 @@ function resetErrorCount() {
   };
 }
 
-function getMinCapacity(config: TaskManagerConfig) {
+export function getMinCapacity(config: TaskManagerConfig) {
   switch (config.claim_strategy) {
     case CLAIM_STRATEGY_MGET:
       return MIN_COST;
@@ -296,6 +301,10 @@ function getMinCapacity(config: TaskManagerConfig) {
     default:
       return MIN_WORKERS;
   }
+}
+
+export function isAdaptiveCapacity(config: TaskManagerConfig): boolean {
+  return config.capacity === AUTO_CAPACITY;
 }
 
 export function calculateStartingCapacity(
@@ -309,9 +318,13 @@ export function calculateStartingCapacity(
     );
   }
 
-  if (config.capacity) {
+  if (config.capacity === AUTO_CAPACITY) {
+    // The adaptive controller moves capacity between min and max; the scan below
+    // only ever lowers it from this ceiling on Elasticsearch pressure.
+    return config.adaptive_capacity.max_capacity;
+  } else if (config.capacity) {
     // Use capacity if explicitly set
-    return config.capacity!;
+    return config.capacity;
   } else if (config.max_workers) {
     // Otherwise use max_worker value as capacity, capped at MAX_CAPACITY
     return Math.min(config.max_workers, MAX_CAPACITY);
