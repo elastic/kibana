@@ -12,6 +12,8 @@ import useLatest from 'react-use/lib/useLatest';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { NIGHTSHIFT_SETTINGS_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import type { NightshiftSettingsLocatorParams } from '@kbn/nightshift-shared';
 import {
   NIGHTSHIFT_INVESTIGATION_LOCATOR_ID,
   type InvestigationLocatorParams,
@@ -24,6 +26,11 @@ import { useQuery, useQueryClient } from '@kbn/react-query';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { useKibana } from '../utils/kibana_react';
 import { getInvestigationsClient } from '../services/investigations_client';
+import {
+  DailyLimitReachedText,
+  getStartFailureMessage,
+  isDailyLimitError,
+} from './investigation_start_failure';
 
 export const VIEWED_INVESTIGATIONS_STORAGE_KEY = 'xpack.observability.viewedInvestigationIds';
 export const MAX_VIEWED_INVESTIGATIONS = 200;
@@ -96,6 +103,9 @@ export const useInvestigateAlert = ({
   const investigationsClient = getInvestigationsClient();
   const investigationLocator = services?.share?.url?.locators?.get<InvestigationLocatorParams>(
     NIGHTSHIFT_INVESTIGATION_LOCATOR_ID
+  );
+  const settingsLocator = services?.share?.url?.locators?.get<NightshiftSettingsLocatorParams>(
+    NIGHTSHIFT_SETTINGS_LOCATOR_ID
   );
   const http = services?.http;
   const basePath = http?.basePath?.get?.() ?? '';
@@ -258,8 +268,37 @@ export const useInvestigateAlert = ({
         title: i18n.translate('xpack.observability.alerts.investigationFailed', {
           defaultMessage: 'Failed to start investigation',
         }),
-        text: error instanceof Error ? error.message : String(error),
+        text: await getStartFailureText(error),
       });
+    }
+  };
+
+  /** The failure's reason; for a daily limit, also when it resets and how to raise it. */
+  const getStartFailureText = async (error: unknown) => {
+    const message = getStartFailureMessage(error);
+    if (!isDailyLimitError(error) || !investigationsClient || !services?.rendering) {
+      return message;
+    }
+    try {
+      const { window: quotaWindow, canManage } = await investigationsClient.fetch(
+        'GET /internal/nightshift/investigation_quotas',
+        { signal: null }
+      );
+      const changeLimitsUrl = canManage
+        ? settingsLocator?.getRedirectUrl({ tab: 'investigations' })
+        : undefined;
+      return toMountPoint(
+        <DailyLimitReachedText
+          message={message}
+          resetsAt={quotaWindow.resetsAt}
+          canManage={canManage}
+          changeLimitsUrl={changeLimitsUrl}
+        />,
+        services.rendering
+      );
+    } catch {
+      // Without the limits the server's message still says which limit was reached.
+      return message;
     }
   };
 
