@@ -36,7 +36,15 @@ const requirement: AwsOnboardingSettingsRequirement = {
               ingestion_method: 'API',
               title: 'GuardDuty API',
               description: 'Poll the API',
-              fields: [{ name: 'detector_id', title: 'Detector ID', type: 'text', required: true }],
+              fields: [
+                {
+                  name: 'detector_id',
+                  title: 'Detector ID',
+                  type: 'text',
+                  required: true,
+                  advanced: false,
+                },
+              ],
               var_groups: [],
             },
           ],
