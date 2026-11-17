@@ -25,6 +25,7 @@ import {
   sessionsIndexTemplate,
   type SessionDocument,
 } from './sessions_index';
+import { indexPatternCovers } from './sessions_privileges';
 
 type Client = ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
@@ -149,7 +150,18 @@ describe('sessions index', () => {
         'index.sort.field': ['start_time', 'session.id'],
         'index.sort.order': ['desc', 'asc'],
       });
-      expect(SESSIONS_INDEX).toBe(`digital-experience-sessions-${SESSIONS_VERSION}`);
+      expect(SESSIONS_INDEX).toBe(`digital-experience-sessions-browser-${SESSIONS_VERSION}`);
+    });
+
+    it('covers the browser sessions indices of every version, and no other platform’s', () => {
+      const templateCovers = (index: string): boolean =>
+        [sessionsIndexTemplate.index_patterns]
+          .flat()
+          .some((pattern) => pattern !== undefined && indexPatternCovers(pattern, index));
+
+      expect(templateCovers(SESSIONS_INDEX)).toBe(true);
+      expect(templateCovers('digital-experience-sessions-browser-2')).toBe(true);
+      expect(templateCovers('digital-experience-sessions-mobile-1')).toBe(false);
     });
 
     it('puts the template with the given client and signal', async () => {

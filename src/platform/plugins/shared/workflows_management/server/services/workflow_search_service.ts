@@ -107,6 +107,7 @@ export class WorkflowSearchService {
       'valid',
       'created_at',
       'updated_at',
+      'workflowUid',
     ];
 
     const pitResponse = await esClient.openPointInTime({
