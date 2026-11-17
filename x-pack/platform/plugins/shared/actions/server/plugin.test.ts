@@ -48,7 +48,7 @@ import { LeasePool } from './lib';
 import { defaultInboundEventsLimitConfigs } from './config';
 import { loadFixture } from './lib/declarative_connectors/__fixtures__/load_fixture';
 import { errors } from '@elastic/elasticsearch';
-import { CONNECTOR_TYPE_CATALOG_INDEX } from './lib/connector_catalog';
+import { CATALOG_STARTUP_TIMEOUT_MS, CONNECTOR_TYPE_CATALOG_INDEX } from './lib/connector_catalog';
 
 function getConfig(overrides = {}) {
   return {
@@ -650,7 +650,7 @@ describe('Actions Plugin', () => {
     describe('connector catalog feature flag', () => {
       it('subscribes to the connector catalog feature flag with a false fallback', async () => {
         await plugin.setup(coreSetup, pluginsSetup);
-        plugin.start(coreStart, pluginsStart);
+        await plugin.start(coreStart, pluginsStart);
 
         expect(coreStart.featureFlags.getBooleanValue$).toHaveBeenCalledWith(
           ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG,
@@ -663,7 +663,7 @@ describe('Actions Plugin', () => {
         coreStart.featureFlags.getBooleanValue$.mockReturnValue(connectorCatalogEnabled$);
 
         await plugin.setup(coreSetup, pluginsSetup);
-        plugin.start(coreStart, pluginsStart);
+        await plugin.start(coreStart, pluginsStart);
         expect(connectorCatalogEnabled$.observed).toBe(true);
 
         plugin.stop();
@@ -898,6 +898,48 @@ describe('Actions Plugin', () => {
 
           expect(startServerlessPlugin()).not.toBeInstanceOf(Promise);
         });
+
+        it.each(['flag value', 'catalog read'])(
+          'rejects startup within the bounded wait when the %s stalls',
+          async (stall) => {
+            jest.useFakeTimers();
+            try {
+              const connectorCatalogEnabled$ = new Subject<boolean>();
+              coreStart.featureFlags.getBooleanValue$.mockReturnValue(connectorCatalogEnabled$);
+              if (stall === 'catalog read') {
+                getEsClient().get.mockReturnValue(new Promise(() => {}));
+              }
+              await setupServerlessPlugin([SPEC_TYPE_ID]);
+
+              const startResult = startServerlessPlugin();
+              const startupRejection = expect(Promise.resolve(startResult)).rejects.toThrow(
+                `Unable to validate enabled connector types [${SPEC_TYPE_ID}] within ${CATALOG_STARTUP_TIMEOUT_MS}ms while waiting for the connector catalog.`
+              );
+              const startupSettlement = Promise.resolve(startResult).then(
+                () => 'resolved' as const,
+                () => 'rejected' as const
+              );
+              if (stall === 'catalog read') {
+                connectorCatalogEnabled$.next(true);
+                expect(getEsClient().get).toHaveBeenCalledTimes(1);
+              }
+
+              // Core stops waiting for plugin start after 10 seconds.
+              await jest.advanceTimersByTimeAsync(9_000);
+              await expect(
+                Promise.race([startupSettlement, Promise.resolve('pending' as const)])
+              ).resolves.toBe('rejected');
+              await startupRejection;
+              expect(jest.getTimerCount()).toBe(1);
+
+              plugin.stop();
+              expect(jest.getTimerCount()).toBe(0);
+            } finally {
+              plugin.stop();
+              jest.useRealTimers();
+            }
+          }
+        );
       });
 
       describe('flag off', () => {
@@ -1165,7 +1207,7 @@ describe('Actions Plugin', () => {
           const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
           pluginSetup.registerType(serverLogConnectorType);
 
-          plugin.start(coreStart, pluginsStart);
+          await plugin.start(coreStart, pluginsStart);
 
           await new Promise<void>((resolve) => setImmediate(resolve));
 

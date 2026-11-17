@@ -23,6 +23,7 @@ import type {
   ISavedObjectsRepository,
 } from '@kbn/core/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { withTimeout } from '@kbn/std';
 import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
@@ -143,6 +144,7 @@ import {
   buildTypeFromStoredSpec,
   createConnectorCatalogStorage,
   startConnectorCatalog,
+  CATALOG_STARTUP_TIMEOUT_MS,
   type ConnectorCatalogHandle,
 } from './lib/connector_catalog';
 
@@ -997,8 +999,22 @@ export class ActionsPlugin
     );
 
     if (hasExplicitServerlessAllowlist && hasUnregisteredEnabledType) {
-      // Only catalog-dependent allowlists need async start; Core enforces its lifecycle limit.
-      return connectorCatalog.ready.then(() => {
+      return withTimeout({
+        promise: connectorCatalog.ready,
+        timeoutMs: CATALOG_STARTUP_TIMEOUT_MS,
+      }).then(({ timedout }) => {
+        if (timedout) {
+          const unavailableTypes = enabledActionTypes.filter(
+            (connectorType) => !actionTypeRegistry!.has(connectorType)
+          );
+          if (unavailableTypes.length > 0) {
+            throw new Error(
+              `Unable to validate enabled connector types [${unavailableTypes.join(
+                ', '
+              )}] within ${CATALOG_STARTUP_TIMEOUT_MS}ms while waiting for the connector catalog.`
+            );
+          }
+        }
         this.validateEnabledConnectorTypes(plugins);
         return startContract;
       });
