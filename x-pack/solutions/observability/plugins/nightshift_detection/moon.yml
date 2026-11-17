@@ -29,8 +29,6 @@ dependsOn:
   - '@kbn/core-pricing-common'
   - '@kbn/core-plugins-server'
   - '@kbn/core-test-helpers-kbn-server'
-  - '@kbn/es-errors'
-  - '@kbn/es-mappings'
   - '@kbn/licensing-plugin'
   - '@kbn/nightshift-shared'
   - '@kbn/spaces-plugin'

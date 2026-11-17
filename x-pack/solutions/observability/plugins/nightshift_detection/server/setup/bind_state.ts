@@ -6,12 +6,29 @@
  */
 
 import type { ContainerModuleLoadOptions } from 'inversify';
-import { ElasticsearchStateStore } from '../lib/state/elasticsearch_state_store';
-import { StateIndex } from '../lib/state/state_index';
+import { OnSetup } from '@kbn/core-di';
+import { CoreSetup, CoreStart } from '@kbn/core-di-server';
+import { SavedObjectStateStore, StateRepository } from '../lib/state/saved_object_state_store';
 import { StateStore } from '../lib/state/state_store';
+import {
+  DETECTION_STATE_SO_TYPE,
+  detectionStateSavedObjectType,
+} from '../saved_objects/detection_state_saved_object';
 
-/** Binds the state index and the store on it. Tests bind their own `StateStore`. */
+/** Registers the state saved object type and binds the store on it. Tests bind their own `StateStore`. */
 export function bindState({ bind }: ContainerModuleLoadOptions): void {
-  bind(StateIndex).toSelf().inSingletonScope();
-  bind(StateStore).to(ElasticsearchStateStore).inSingletonScope();
+  bind(OnSetup).toResolvedValue(
+    (savedObjects) => () => {
+      savedObjects.registerType(detectionStateSavedObjectType);
+    },
+    [CoreSetup('savedObjects')]
+  );
+
+  bind(StateRepository)
+    .toResolvedValue(
+      (savedObjects) => savedObjects.createInternalRepository([DETECTION_STATE_SO_TYPE]),
+      [CoreStart('savedObjects')]
+    )
+    .inSingletonScope();
+  bind(StateStore).to(SavedObjectStateStore).inSingletonScope();
 }

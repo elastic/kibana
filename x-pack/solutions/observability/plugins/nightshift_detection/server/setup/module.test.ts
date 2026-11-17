@@ -25,6 +25,7 @@ import { EngineRunner } from '../lib/engine/run_engine';
 import { EnabledSources, RunContext } from '../lib/engine/tokens';
 import { DetectionSignalStore } from '../lib/signals/signal_store';
 import { StateStore } from '../lib/state/state_store';
+import { detectionStateSavedObjectType } from '../saved_objects/detection_state_saved_object';
 import { StrategyCatalog } from '../lib/strategies/strategy_catalog';
 
 function createContainer() {
@@ -35,6 +36,8 @@ function createContainer() {
   // No cloud plugin is bound: the availability service must still resolve (classic deployment).
   const container = new Container({ defaultScope: 'Singleton' });
   container.bind(CoreSetup('pricing')).toConstantValue(coreSetup.pricing);
+  container.bind(CoreSetup('savedObjects')).toConstantValue(coreSetup.savedObjects);
+  container.bind(CoreStart('savedObjects')).toConstantValue(core.savedObjects);
   container.bind(CoreStart('elasticsearch')).toConstantValue(core.elasticsearch);
   container.bind(CoreStart('featureFlags')).toConstantValue(core.featureFlags);
   container.bind(Logger).toConstantValue(loggingSystemMock.createLogger());
@@ -89,6 +92,7 @@ describe('module', () => {
     expect(coreSetup.pricing.registerProductFeatures).toHaveBeenCalledWith(
       NIGHTSHIFT_DETECTION_TIERED_FEATURES
     );
+    expect(coreSetup.savedObjects.registerType).toHaveBeenCalledWith(detectionStateSavedObjectType);
     // Engine indices are written as kibana_system, never as the requesting user.
     expect(container.get(DetectionEngineSystemClient)).toBe(
       core.elasticsearch.client.asInternalUser

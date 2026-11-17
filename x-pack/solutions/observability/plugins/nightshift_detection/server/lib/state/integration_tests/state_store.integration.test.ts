@@ -5,25 +5,30 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
-import { ElasticsearchStateStore } from '../elasticsearch_state_store';
-import { acquireRunLease } from '../run_lease';
+import {
+  createRootWithCorePlugins,
+  createTestServers,
+  type TestElasticsearchUtils,
+} from '@kbn/core-test-helpers-kbn-server';
+import {
+  DETECTION_STATE_SO_TYPE,
+  detectionStateSavedObjectType,
+} from '../../../saved_objects/detection_state_saved_object';
 import { StateConflictError } from '../../errors/state_conflict_error';
-import { StateIndex } from '../state_index';
+import { acquireRunLease } from '../run_lease';
+import { SavedObjectStateStore } from '../saved_object_state_store';
 
-// Runs as the test cluster's superuser: the kibana_system grant on the state index is a separate
-// Elasticsearch change, so these tests do not cover it.
-describe('ElasticsearchStateStore', () => {
+// Runs against a Kibana root with its saved objects index, so it proves the conflict and namespace
+// rules of the real repository.
+describe('SavedObjectStateStore', () => {
+  jest.setTimeout(10 * 60 * 1000);
+
   let esServer: TestElasticsearchUtils;
-  let store: ElasticsearchStateStore;
+  let root: ReturnType<typeof createRootWithCorePlugins>;
+  let store: SavedObjectStateStore;
   let spaceCounter = 0;
 
   const nextSpaceId = () => `space-${spaceCounter++}`;
-
-  jest.setTimeout(10 * 60 * 1000);
 
   beforeAll(async () => {
     const { startES } = createTestServers({
@@ -31,14 +36,18 @@ describe('ElasticsearchStateStore', () => {
       settings: { es: { license: 'basic' } },
     });
     esServer = await startES();
-    const esClient: ElasticsearchClient = esServer.es.getClient();
-    store = new ElasticsearchStateStore(
-      esClient,
-      new StateIndex(esClient, loggingSystemMock.createLogger())
+    root = createRootWithCorePlugins({});
+    await root.preboot();
+    const setup = await root.setup();
+    setup.savedObjects.registerType(detectionStateSavedObjectType);
+    const start = await root.start();
+    store = new SavedObjectStateStore(
+      start.savedObjects.createInternalRepository([DETECTION_STATE_SO_TYPE])
     );
   });
 
   afterAll(async () => {
+    await root?.shutdown();
     await esServer?.stop();
   });
 
@@ -64,7 +73,7 @@ describe('ElasticsearchStateStore', () => {
     expect(whileLive.acquired).toBe(false);
     expect(afterExpiry.acquired).toBe(true);
 
-    // The first holder's release must not delete the lease that replaced its own.
+    // The first holder's release must not end the lease that replaced its own.
     if (first.acquired) {
       await first.held.release();
     }
@@ -72,7 +81,47 @@ describe('ElasticsearchStateStore', () => {
     expect(afterStaleRelease.acquired).toBe(false);
   });
 
-  it('rejects a write made with a stale version', async () => {
+  it('frees the lease when its holder releases it', async () => {
+    const spaceId = nextSpaceId();
+
+    const first = await acquireRunLease({ state: store, spaceId });
+    if (first.acquired) {
+      await first.held.release();
+    }
+
+    expect((await acquireRunLease({ state: store, spaceId })).acquired).toBe(true);
+  });
+
+  it('keeps the state of one space apart from another', async () => {
+    const [spaceA, spaceB] = [nextSpaceId(), nextSpaceId()];
+    await store.put({
+      spaceId: spaceA,
+      kind: 'generator_state',
+      key: 's',
+      value: { processed_until: 1 },
+    });
+
+    expect(await store.get({ spaceId: spaceB, kind: 'generator_state', key: 's' })).toBeUndefined();
+    // The same document can be created in the other space, and in the default one.
+    await store.put({
+      spaceId: spaceB,
+      kind: 'generator_state',
+      key: 's',
+      value: { processed_until: 2 },
+    });
+    await store.put({
+      spaceId: 'default',
+      kind: 'generator_state',
+      key: 's',
+      value: { processed_until: 3 },
+    });
+    expect(
+      (await store.get({ spaceId: spaceA, kind: 'generator_state', key: 's' }))?.value
+        .processed_until
+    ).toBe(1);
+  });
+
+  it('rejects a write made with a stale version and one that creates an existing document', async () => {
     const spaceId = nextSpaceId();
     const created = await store.put({
       spaceId,
@@ -95,6 +144,14 @@ describe('ElasticsearchStateStore', () => {
         key: 'strategy',
         value: { processed_until: 3 },
         version: created,
+      })
+    ).rejects.toBeInstanceOf(StateConflictError);
+    await expect(
+      store.put({
+        spaceId,
+        kind: 'generator_state',
+        key: 'strategy',
+        value: { processed_until: 4 },
       })
     ).rejects.toBeInstanceOf(StateConflictError);
     expect(
