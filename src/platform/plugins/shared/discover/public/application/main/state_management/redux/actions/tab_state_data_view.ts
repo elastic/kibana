@@ -17,6 +17,7 @@ import {
   DEFAULT_COLUMNS_SETTING,
 } from '@kbn/discover-utils';
 import { DataViewSource, isSameDataset, type DataSource } from '@kbn/data-source';
+import { isEqual } from 'lodash';
 import {
   internalStateSlice,
   type TabActionPayload,
@@ -71,6 +72,43 @@ export const setDataSource: InternalStateThunkActionCreator<
       const republishedSource = dataSource.withColumns(dataSource.resultColumns);
       pinDataViewOfSource(republishedSource);
       currentDataSource$.next(republishedSource);
+    }
+  };
+
+const getEmptyColumnNames = (dataSource: DataSource | undefined): string[] =>
+  dataSource?.kind === 'esql'
+    ? dataSource.resultColumns.filter(({ isNull }) => isNull).map(({ name }) => name)
+    : [];
+
+/**
+ * Publishes the source built from a fetch result as the tab's current source. Same dataset and
+ * id as the current one; only the nullability of the result columns differs. Skipped when
+ * no column is empty or the empty columns did not change.
+ */
+export const publishFetchedEsqlSource: InternalStateThunkActionCreator<
+  [TabActionPayload<{ dataSource: DataSource }>]
+> =
+  ({ tabId, dataSource }) =>
+  (_, __, { runtimeStateManager }) => {
+    const { currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const currentSource = currentDataSource$.getValue();
+
+    if (
+      currentSource?.kind !== 'esql' ||
+      dataSource.kind !== 'esql' ||
+      currentSource === dataSource ||
+      currentSource.id !== dataSource.id
+    ) {
+      return;
+    }
+
+    const fetchedEmptyColumns = getEmptyColumnNames(dataSource);
+    if (isEqual(fetchedEmptyColumns, getEmptyColumnNames(currentSource))) {
+      return;
+    }
+
+    if (pinDataViewOfSource(dataSource)) {
+      currentDataSource$.next(dataSource);
     }
   };
 

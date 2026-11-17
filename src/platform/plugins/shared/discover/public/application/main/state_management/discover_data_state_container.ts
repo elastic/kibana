@@ -587,6 +587,11 @@ export function getDataStateContainer({
               }
 
               const { dataSource } = dataSubjects.documents$.getValue();
+              if (dataSource?.kind === 'esql') {
+                internalState.dispatch(
+                  injectCurrentTab(internalStateActions.publishFetchedEsqlSource)({ dataSource })
+                );
+              }
               const defaultColumns = uiSettings.get<string[]>(DEFAULT_COLUMNS_SETTING, []);
               const postFetchStateUpdate = resolvedProfileAppStateDefaults?.getPostFetchState({
                 defaultColumns,
