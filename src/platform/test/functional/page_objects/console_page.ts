@@ -558,8 +558,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async loadRequestFromHistory(index: number, andExcute: boolean = false) {
-    const historyItem = await this.testSubjects.find(`historyItem-${index}`);
-    await historyItem.click();
+    await this.testSubjects.click(`historyItem-${index}`);
 
     if (andExcute) {
       await this.testSubjects.click('consoleHistoryAddAndRunButton');
