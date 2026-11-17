@@ -8,6 +8,7 @@
  */
 
 import { type Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { isWorkflowIdentityTaskError } from './workflow_identity_task_error';
 
 export interface WorkflowTaskFailureLogContext {
   taskType: 'workflow:run' | 'workflow:resume' | 'workflow:scheduled';
@@ -86,6 +87,14 @@ export function logWorkflowTaskFailure(
   if (context.aborted) {
     meta.failureKind = 'aborted';
     logger.debug(LOG_MESSAGE, meta);
+    return;
+  }
+
+  // The execution is already finalized as FAILED, and the cause (for example a deleted or
+  // rebound service account) is the user's to fix, so it must not page as a plugin error.
+  if (isWorkflowIdentityTaskError(error)) {
+    meta.failureKind = 'service_account_identity';
+    logger.warn(LOG_MESSAGE, meta);
     return;
   }
 

@@ -66,6 +66,54 @@ describe('loadReportHuntContext', () => {
       ]);
     });
 
+    it('keeps tier-less and promotable-tier IOCs and drops reference, denied, and deferred', async () => {
+      expect(
+        (
+          await load({
+            ...fullSource,
+            extracted: {
+              ...fullSource.extracted,
+              iocs: [
+                { type: 'ip', value: '203.0.113.60' },
+                { type: 'hash', value: 'a'.repeat(64), tier: 'discriminating' },
+                { type: 'domain', value: 'noise.example', tier: 'reference' },
+                { type: 'domain', value: 'process.name', tier: 'denied' },
+                {
+                  type: 'url',
+                  value: 'https://pending.example/',
+                  tier: 'uncertain',
+                  deferred_unreviewed: true,
+                },
+                { type: 'email', value: 'ok@lab-demo.test', tier: 'contextual' },
+              ],
+            },
+          })
+        )?.iocs
+      ).toEqual([
+        { type: 'ip', value: '203.0.113.60' },
+        { type: 'hash', value: 'a'.repeat(64) },
+        { type: 'email', value: 'ok@lab-demo.test' },
+      ]);
+    });
+
+    it('drops non-routable IPs even when the stored tier would otherwise qualify', async () => {
+      expect(
+        (
+          await load({
+            ...fullSource,
+            extracted: {
+              ...fullSource.extracted,
+              iocs: [
+                { type: 'ip', value: '203.0.113.60', tier: 'discriminating' },
+                { type: 'ip', value: '127.0.0.1', tier: 'discriminating' },
+                { type: 'ip', value: '10.1.2.3' },
+              ],
+            },
+          })
+        )?.iocs
+      ).toEqual([{ type: 'ip', value: '203.0.113.60' }]);
+    });
+
     it('returns the trimmed vendor', async () => {
       expect((await load(fullSource))?.vendor).toBe('Amazon');
     });

@@ -25,6 +25,11 @@ interface AgentHookContextBase {
   request: KibanaRequest;
   abortSignal?: AbortSignal;
   agentId?: string;
+  /**
+   * Service account the execution runs as. A hook resolving the agent passes it to the agent
+   * registry, since the account holds no access to the agent of its own.
+   */
+  runAs?: string;
 }
 
 export interface BeforeAgentHookContext extends AgentHookContextBase {
@@ -126,6 +131,14 @@ interface BlockingHookRegistrationEntry<E extends HookLifecycle> {
 interface NonBlockingHookRegistrationEntry<E extends HookLifecycle> {
   mode: HookExecutionMode.nonBlocking;
   handler: NonBlockingHookHandler<E>;
+  /**
+   * A non-blocking hook runs after the execution has returned, when the execution's own request can
+   * no longer authenticate. Set this to receive an independently authenticated `context.request`,
+   * valid until the handler settles: the service account the agent is bound to, when the execution
+   * has `runAs`. Without `runAs`, or when unset, the hook gets the execution's request. If the
+   * request cannot be created the hook does not run.
+   */
+  requiresServiceAccountRequest?: boolean;
 }
 
 type HookRegistrationEntry<E extends HookLifecycle> =

@@ -535,6 +535,20 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect(stepIn(name)?.with?._source).toEqual(expect.any(Array));
     });
 
+    it('returns the entity fields the entity_role check reads', () => {
+      expect(stepIn('load_entities')?.with?._source).toEqual(
+        expect.arrayContaining([
+          'entity.sub_type',
+          'entity.name',
+          'asset.environment',
+          'asset.name',
+          'asset.model',
+          'asset.owner',
+          'asset.vendor',
+        ])
+      );
+    });
+
     it('keeps the alert fields the workflow expressions read', () => {
       expect(stepIn('load_alerts')?.with?._source).toEqual(
         expect.arrayContaining(['host.id', 'user.name', 'kibana.alert.original_time'])

@@ -27,11 +27,13 @@ const mockGetTriggerDefinitions = jest.fn((): PublicTriggerDefinition[] => []);
 const mockGetTriggerDefinition = jest.fn(
   (_id: string): PublicTriggerDefinition | undefined => undefined
 );
+const mockGetTriggerSchemaOptions = jest.fn(() => ({ includePageTrigger: false }));
 
 jest.mock('../../../../../../trigger_schemas', () => ({
   triggerSchemas: {
     getTriggerDefinitions: () => mockGetTriggerDefinitions(),
     getTriggerDefinition: (id: string) => mockGetTriggerDefinition(id),
+    getTriggerSchemaOptions: () => mockGetTriggerSchemaOptions(),
   },
 }));
 
@@ -157,6 +159,7 @@ describe('get_trigger_type_suggestions', () => {
         expect(casesSuggestion).toMatchObject({
           label: 'cases.caseCreated',
           detail: 'Cases - Case created',
+          filterText: 'cases.caseCreated',
         });
       });
 
@@ -164,12 +167,14 @@ describe('get_trigger_type_suggestions', () => {
         const result = getTriggerTypeSuggestions('alerting.', mockRange);
 
         expect(result.map((s) => s.label)).toEqual(['alerting.actions.alertAcked']);
+        expect(result.map((s) => s.detail)).toEqual(['Alerting - Alert acknowledged']);
       });
 
       it('should filter registered triggers by title prefix', () => {
         const result = getTriggerTypeSuggestions('Cases - Case', mockRange);
 
         expect(result.map((s) => s.label)).toEqual(['cases.caseCreated']);
+        expect(result.map((s) => s.detail)).toEqual(['Cases - Case created']);
       });
     });
 
@@ -393,10 +398,13 @@ describe('get_trigger_type_suggestions', () => {
       );
     });
 
-    it('should cache the result and return same instance on subsequent calls', () => {
-      const result1 = getBuiltInTriggerTypesFromSchema();
-      const result2 = getBuiltInTriggerTypesFromSchema();
-      expect(result1).toBe(result2);
+    it('includes the page trigger only with workflowsManagement.pages.enabled', () => {
+      expect(getBuiltInTriggerTypesFromSchema().map(({ type }) => type)).not.toContain('page');
+
+      mockGetTriggerSchemaOptions.mockReturnValueOnce({ includePageTrigger: true });
+      expect(getBuiltInTriggerTypesFromSchema()).toContainEqual(
+        expect.objectContaining({ type: 'page', label: 'Page' })
+      );
     });
 
     it('should return trigger types with correct properties', () => {

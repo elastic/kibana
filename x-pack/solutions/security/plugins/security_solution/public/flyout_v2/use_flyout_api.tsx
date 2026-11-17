@@ -37,10 +37,6 @@ import { useSharedToolsFlyoutApi } from './shared/tools/use_shared_tools_flyout_
  * flyout properties) and remain the unit each team maintains. This file only composes them, so
  * adding a new flyout type is a one-line change here.
  *
- * This API only ever opens the NEW flyout. It does not know about the legacy expandable flyout:
- * callers remain responsible for gating on `useIsNewFlyoutEnabled()` and falling back to the
- * legacy flyout when it is off.
- *
  * Must be used within the Security Solution app shell (Redux store + router + Kibana services).
  */
 export type FlyoutApi = DocumentFlyoutApi &

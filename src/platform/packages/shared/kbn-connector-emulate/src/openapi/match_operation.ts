@@ -26,6 +26,8 @@ interface ServerPrefix {
   readonly regExp: RegExp;
   /** Relative server URLs such as `/api/v2` are matched against the path only. */
   readonly relative: boolean;
+  /** Whether the server's captures are path parameters the request's path leaves out. */
+  readonly suppliesPath: boolean;
 }
 
 interface Route {
@@ -48,16 +50,29 @@ const compileTemplate = (template: string, toPattern: (name: string) => string):
     .map((part, index) => (index % 2 === 0 ? escapeRegExp(part) : toPattern(part)))
     .join('');
 
-const compileServerTemplate = ({ url, variables }: OperationServer): string =>
-  compileTemplate(url.replace(/\/+$/, ''), (name) => {
-    const values = variables[name]?.enum ?? [];
-    return values.length > 0 ? `(?:${values.map(escapeRegExp).join('|')})` : '[^/]*';
-  });
+const serverVariablePattern = (variables: OperationServer['variables'], name: string): string => {
+  const values = variables[name]?.enum ?? [];
+  return values.length > 0 ? `(?:${values.map(escapeRegExp).join('|')})` : '[^/]*';
+};
 
-const compileServer = (server: OperationServer): ServerPrefix => ({
-  regExp: new RegExp(`^${compileServerTemplate(server)}(?=/|$)`, 'i'),
-  relative: server.url.startsWith('/'),
-});
+const compileServerTemplate = ({ url, variables }: OperationServer): string =>
+  compileTemplate(url.replace(/\/+$/, ''), (name) => serverVariablePattern(variables, name));
+
+const compileServer = ({ url, variables }: OperationServer): ServerPrefix => {
+  let suppliesPath = false;
+  const source = compileTemplate(url.replace(/\/+$/, ''), (name) => {
+    if (variables[name]?.pathParameter) {
+      suppliesPath = true;
+      return '([^/]+?)';
+    }
+    return serverVariablePattern(variables, name);
+  });
+  return {
+    regExp: new RegExp(`^${source}(?=/|$)`, 'i'),
+    relative: url.startsWith('/'),
+    suppliesPath,
+  };
+};
 
 const toMatchTarget = ({ relative }: ServerPrefix, url: URL): string =>
   relative ? url.pathname : `${url.origin}${url.pathname}`;
@@ -103,9 +118,27 @@ const compileRoute = (operation: ContractOperation): Route => {
 };
 
 const hasFixedQuery = ({ operation: { fixedQuery = [] } }: Route, url: URL): boolean =>
-  fixedQuery.every(({ name, value }) => url.searchParams.getAll(name).includes(value));
+  fixedQuery.every(({ name, value, optional }) =>
+    optional && !url.searchParams.has(name) ? true : url.searchParams.getAll(name).includes(value)
+  );
 
-const fixedQueryCount = ({ operation: { fixedQuery = [] } }: Route): number => fixedQuery.length;
+const fixedQueryCount = ({ operation: { fixedQuery = [] } }: Route, url: URL): number =>
+  fixedQuery.filter(({ name, optional }) => !optional || url.searchParams.has(name)).length;
+
+// Operations on the same path that only differ in their query parameters, such as S3's
+// `GetObject` and `ListParts` (which requires `uploadId`), are told apart by the query: first
+// by the required parameters the request leaves out, then by how many of its parameters each
+// declares.
+const missingQueryCount = ({ operation: { parameters } }: Route, url: URL): number =>
+  parameters.filter(
+    ({ in: location, required, name }) =>
+      location === 'query' && required && !url.searchParams.has(name)
+  ).length;
+
+const declaredQueryCount = ({ operation: { parameters } }: Route, url: URL): number =>
+  [...new Set(url.searchParams.keys())].filter((key) =>
+    parameters.some(({ in: location, name }) => location === 'query' && name === key)
+  ).length;
 
 /** The query string and lowercase headers a request sends, for telling operations apart. */
 export interface RequestDiscriminators {
@@ -211,7 +244,14 @@ const getOperationPath = ({ servers }: Route, url: URL): string | undefined => {
   const prefixes = servers.flatMap((server) => {
     const target = toMatchTarget(server, url);
     const match = server.regExp.exec(target);
-    return match ? [target.slice(match[0].length) || '/'] : [];
+    if (!match) {
+      return [];
+    }
+    const rest = target.slice(match[0].length) || '/';
+    // `https://logs.s3.eu-west-1.amazonaws.com/2024/app.log` is `/logs/2024/app.log`.
+    return server.suppliesPath
+      ? [`/${match.slice(1).join('/')}${rest === '/' ? '' : rest}`]
+      : [rest];
   });
   return prefixes.reduce<string | undefined>(
     (shortest, path) => (shortest === undefined || path.length < shortest.length ? path : shortest),
@@ -285,7 +325,9 @@ export const createOperationMatcher = (operations: readonly ContractOperation[])
     const consistent = onTemplate.filter(({ conflicts }) => !conflicts);
     const [best] = (consistent.length > 0 ? consistent : onTemplate).sort(
       (a, b) =>
-        fixedQueryCount(b.route) - fixedQueryCount(a.route) ||
+        fixedQueryCount(b.route, url) - fixedQueryCount(a.route, url) ||
+        missingQueryCount(a.route, url) - missingQueryCount(b.route, url) ||
+        declaredQueryCount(b.route, url) - declaredQueryCount(a.route, url) ||
         b.matched - a.matched ||
         a.missing - b.missing
     );

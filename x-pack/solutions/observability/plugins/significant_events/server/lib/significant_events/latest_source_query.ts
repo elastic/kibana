@@ -150,6 +150,9 @@ export const andWhere = (
   return current ? esql.exp`${current} AND ${next}` : next;
 };
 
+export const escapeEsqlLikePattern = (value: string): string =>
+  value.toLowerCase().replace(/\\/g, '\\\\').replace(/[*?]/g, '\\$&');
+
 export const inFilter = ({
   where,
   field,

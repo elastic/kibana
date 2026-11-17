@@ -11,7 +11,6 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { isToolHandlerStandardReturn } from '@kbn/agent-builder-server';
-import type { SandboxSecretsClient } from '../../sandbox_secrets';
 import {
   buildConnectorEnv,
   deriveConnectorCredentialSecretValues,
@@ -89,26 +88,16 @@ const getAllowedConnectorSecretValues = async ({
 };
 
 /**
- * Builds the redactor for sandbox tool output: every sandbox secret stored in the request's space,
- * every in-memory connector secret, and the resolved credentials of every connector assigned to
+ * Builds the redactor for sandbox tool output: every in-memory connector secret, and the resolved credentials of every connector assigned to
  * the agent. Every allow-listed connector (preconfigured or saved) is resolved, so the exact header
  * values the bash tool would inject are known to the redactor. Whether or not a call requested
  * them, any of these may have been written to a file or kept alive in a process by an earlier
  * command.
  */
 export const createSandboxOutputRedactorProvider =
-  ({
-    getDeps,
-  }: {
-    getDeps: () => {
-      actions?: ActionsPluginStart;
-      sandboxSecretsClient?: Pick<SandboxSecretsClient, 'getRedactionValues'>;
-    };
-  }): GetSandboxOutputRedactor =>
+  ({ getDeps }: { getDeps: () => { actions?: ActionsPluginStart } }): GetSandboxOutputRedactor =>
   async (callContext) => {
-    const { actions, sandboxSecretsClient } = getDeps();
-    const { request } = callContext;
-    const sandboxSecretValues = (await sandboxSecretsClient?.getRedactionValues(request)) ?? [];
+    const { actions } = getDeps();
     // Every raw secret leaf, plus any values a credential resolver derives from them (e.g. the
     // bare API key `deriveConnectorCredentialSecretValues` extracts out of an `Authorization`
     // header) — a value that never appears verbatim in `secrets` itself would otherwise round-trip
@@ -120,18 +109,14 @@ export const createSandboxOutputRedactorProvider =
     const allowedConnectorSecretValues = actions
       ? await getAllowedConnectorSecretValues({ actions, callContext })
       : [];
-    return createOutputRedactor([
-      ...sandboxSecretValues,
-      ...connectorSecretValues,
-      ...allowedConnectorSecretValues,
-    ]);
+    return createOutputRedactor([...connectorSecretValues, ...allowedConnectorSecretValues]);
   };
 
 /**
  * Wraps a sandbox tool so every string in its results is redacted. It creates the sandbox call
  * context and hands it to the tool through `sandboxCallContext`. The redactor is loaded before
- * the tool runs: when stored secrets cannot be loaded the tool is not run at all, since its output
- * could not be redacted.
+ * the tool runs: when the connectors cannot be listed or resolved the tool is not run at all, since
+ * its output could not be redacted.
  */
 export const withSandboxOutputRedaction = <TSchema extends ZodObject>(
   tool: BuiltinToolDefinition<TSchema>,
@@ -177,18 +162,7 @@ export const withSandboxOutputRedaction = <TSchema extends ZodObject>(
           ],
         };
       }
-      logger.error(`Loading sandbox secrets for output redaction failed: ${err.message}`);
-      return {
-        results: [
-          {
-            type: ToolResultType.error,
-            data: {
-              message:
-                'Sandbox tools are unavailable: stored sandbox secrets could not be loaded to redact tool output. Ask an administrator to re-save the sandbox secrets.',
-            },
-          },
-        ],
-      };
+      throw err;
     }
 
     const toolContext: SandboxToolHandlerContext = { ...context, sandboxCallContext: callContext };

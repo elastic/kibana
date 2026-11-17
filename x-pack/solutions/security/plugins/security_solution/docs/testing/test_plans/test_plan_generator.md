@@ -6,13 +6,15 @@ This guide walks you through setting up an AI agent in Cursor that automatically
 
 ## How It Works
 
-1. A GitHub issue is labeled **`needs Test Plan`** — this is a team convention to identify which issues need a test plan. The agent works on any issue regardless of labels.
+1. A GitHub issue is labeled **`Needs Test Plan`** — this is a team convention to identify which issues need a test plan. The agent works on any issue regardless of labels.
 2. You open Cursor and type: `/test-plan-generator generate test plan for issue #1234`
 3. The agent reads the issue, navigates the parent epic (if any), explores all sub-issues, fetches linked Figma designs and images, and generates a structured test plan
 4. The test plan is saved locally as a draft at `.agents/tmp/test-plan-#<issue_number>.md` for you to review and edit
 5. When you're happy with it, you run: `/test-plan-generator publish test plan for issue #1234`
 6. The agent posts the plan as a comment on the GitHub issue — using the `gh` CLI as the primary method, or the GitHub MCP as fallback if `gh` is not available
 7. If the issue changes later, run `/test-plan-generator update test plan for issue #1234` — the agent detects only what changed and updates the draft incrementally, without rewriting everything from scratch
+
+**Related:** to decide whether an issue needs a test plan and at which level of its hierarchy, use the separate `/test-plan-triage` skill. It adds the `Needs Test Plan` label only after you confirm, and when no test plan is needed it leaves a short comment on the issue saying so.
 
 ---
 
@@ -169,7 +171,7 @@ x-pack/solutions/security/plugins/security_solution/.agents/skills/test-plan-gen
 │   ├── mode-generate.md                            # Generate / regenerate flow (run end-to-end or fill gaps when a draft exists)
 │   ├── mode-update.md                              # Incremental update flow with PR re-read, Issue Clarity Assessment re-evaluation, and full-document coherence review
 │   ├── optional-scenarios.md                       # Optional sections (RBAC, upgrade, CCS, multi-space, multi-tenant), Gherkin rules, priorities, critical-workflows pointer
-│   ├── output-formats.md                           # Scenario format, footer, Sources Summary, Gherkin self-review with sum-checks, assessment markdown layout, per-scenario Execution status block, token usage marker
+│   ├── output-formats.md                           # Scenario format, footer, Sources Summary, Gherkin self-review with sum-checks, assessment markdown layout, per-scenario Execution status block, token usage and cost markers
 │   └── security-test-directories.md                # Map of existing test locations in the repo
 └── scripts/
     ├── publish_test_plan.sh                        # Deterministic publish step (invoked in Step 4)
@@ -371,7 +373,7 @@ When publishing, the agent runs `scripts/publish_test_plan.sh`. If the script fa
 
 | Exit code | Meaning | Fix |
 |---|---|---|
-| 65 | The draft's top markers are wrong: no model identifier (no `--model` and no `generated-by:` line), or a duplicated or invalid `verbosity:` / `tokens:` marker | The script writes the top markers itself, so this usually means the draft was edited externally, or an `update` draft kept the old markers from the published comment. Open `.agents/tmp/test-plan-#<issue>.md`, fix or remove the marker lines at the top, and publish again. |
+| 65 | The draft's top markers are wrong: no model identifier (no `--model` and no `generated-by:` line), a duplicated or invalid `verbosity:` / `tokens:` / `cost:` marker, or a `cost:` marker without a `tokens:` marker | The script writes the top markers itself, so this usually means the draft was edited externally, or an `update` draft kept the old markers from the published comment. Open `.agents/tmp/test-plan-#<issue>.md`, fix or remove the marker lines at the top, and publish again. |
 | 66 | Draft file does not exist | Run `generate test plan for issue #<n>` first to create the draft. |
 | 69 | `gh` CLI is not installed | Run `brew install gh` (Step 4). |
 | 70 | Unexpected response from GitHub API (could not resolve comment id, or API returned no URL) | Usually a transient API issue. Re-run the publish command. If it persists, check `gh api /repos/<owner>/<repo>/issues/<n>/comments` manually to confirm the comment is reachable. |
@@ -457,6 +459,9 @@ The agent detected an **orphan PR** — a PR whose title or scope clearly relate
 
 **The draft has a new ⚠️ entry in *Known Limitations* I don't recognise. Is that a bug?**
 Probably not — it is the *draft coherence review* (the third self-review layer) doing its job. It re-reads the assembled draft end-to-end and compares sections of the document against each other (D1–D9) and against the gathered context (S1–S8). When it finds a contradiction the agent cannot resolve from the sources alone, it records it as a `⚠️` entry instead of guessing. Read the `⚠️` line, decide which side is correct based on your knowledge of the feature, edit the draft to resolve it, and publish. If the same kind of `⚠️` appears repeatedly across runs, the underlying issue or PR likely has a real inconsistency worth fixing at the source.
+
+**What do the *Token usage* and *Estimated cost* lines mean?**
+After saving a draft, the agent prints the tokens used and an estimated cost in US dollars, and stores both as hidden `<!-- tokens: … -->` and `<!-- cost: … -->` markers in the published comment. They are read from the Claude Code session transcript, so other agents show *not available for this session*. They cover the **whole chat session** until the draft was saved, so start a new chat to measure a single run; the closing messages after the save are not included, usually about a tenth of the total. The cost uses the API list prices in [gh-aw's model price list](https://github.com/github/gh-aw/blob/main/actions/setup/js/models.json), downloaded on every run, so price changes there apply right away. Without network access the script uses the copy in `.agents/scripts/model_prices.json` instead; the date next to the amount tells which prices were used. It is an estimate, not what your subscription is billed. The cost shows as not available when a model is not in the price list, when it rounds to zero, or when part of the session's usage has no model id and could be worth more than 1% of the cost.
 
 **Can I run this without being inside the repository folder in Cursor?**
 No — the skill only loads when you have the repository open in Cursor. The MCP servers work globally, but the skill is repo-specific.

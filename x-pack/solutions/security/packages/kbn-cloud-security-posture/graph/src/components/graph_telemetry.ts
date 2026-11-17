@@ -19,6 +19,27 @@ export type GraphNodeAction =
   | 'show_grouped_entities'
   | 'show_grouped_events';
 
+/** Node actions that add nodes to the graph; the others open a panel or flyout. */
+export type GraphExpansionAction = Extract<
+  GraphNodeAction,
+  'show_entity_relationships' | 'show_actions_by' | 'show_actions_on' | 'show_related_events'
+>;
+
+/** Why the graph rendered no nodes. */
+export type GraphEmptyStateReason = 'no_data' | 'no_results_for_filters';
+
+/** Coarse category of a failed graph data request. */
+export type GraphFetchErrorCategory =
+  | 'network'
+  | 'timeout'
+  | 'forbidden'
+  | 'client_error'
+  | 'server_error'
+  | 'unknown';
+
+/** Kind of item viewed in the grouped node preview panel. */
+export type GraphGroupedItemType = 'entity' | 'event' | 'alert';
+
 /** Whether a toggle action turned its effect on or off. */
 export type GraphToggleState = 'show' | 'hide';
 
@@ -54,7 +75,22 @@ export type GraphNodeActionEvent =
 export type GraphTelemetryEvent =
   | GraphNodeActionEvent
   | { type: 'filter_changed'; change: 'added' | 'removed' }
-  | { type: 'search_submitted'; timeRangeChanged: boolean; queryChanged: boolean };
+  | { type: 'search_submitted'; timeRangeChanged: boolean; queryChanged: boolean }
+  | {
+      type: 'expansion_result';
+      action: GraphExpansionAction;
+      nodeType: GraphNodeType;
+      state: GraphToggleState;
+      nodesAdded: boolean;
+      nodesLimitReached: boolean;
+    }
+  | { type: 'empty_state_shown'; emptyReason: GraphEmptyStateReason }
+  | { type: 'fetch_failed'; errorCategory: GraphFetchErrorCategory }
+  | {
+      type: 'grouped_panel_opened';
+      nodeType: Extract<GraphNodeType, 'grouped_entity' | 'grouped_event'>;
+    }
+  | { type: 'grouped_item_viewed'; itemType: GraphGroupedItemType };
 
 export type GraphTelemetryHandler = (event: GraphTelemetryEvent) => void;
 
@@ -82,3 +118,20 @@ export const getSearchSubmittedEvent = (
   if (!timeRangeChanged && !queryChanged) return undefined;
   return { type: 'search_submitted', timeRangeChanged, queryChanged };
 };
+
+/** Tells whether a node action expands the graph, as opposed to opening a panel or flyout. */
+export const isExpansionAction = (action: GraphNodeAction): action is GraphExpansionAction =>
+  action === 'show_entity_relationships' ||
+  action === 'show_actions_by' ||
+  action === 'show_actions_on' ||
+  action === 'show_related_events';
+
+/** Distinguishes an empty graph caused by narrowing the search from one with no data at all. */
+export const getEmptyStateReason = ({
+  hasActiveFilters,
+  timeRangeChanged,
+}: {
+  hasActiveFilters: boolean;
+  timeRangeChanged: boolean;
+}): GraphEmptyStateReason =>
+  hasActiveFilters || timeRangeChanged ? 'no_results_for_filters' : 'no_data';

@@ -32,9 +32,7 @@ describe('createHistogramDistributionQuery', () => {
         originalSource: 'metrics-*',
       })
     ).toBe(`TS metrics-a
-  | STATS count = COUNT(latency.exp, bucket) BY bucket = BUCKET(latency.exp, 10, 1, 250), TBUCKET(100)
-  | EVAL bucket = RANGE_MIN(bucket)
-  | SORT bucket DESC`);
+  | STATS count = COUNT(latency.exp, bucket) BY bucket = BUCKET(latency.exp, 10, 1, 250), TBUCKET(100)`);
   });
 
   it('uses a tdigest field directly', () => {
@@ -47,9 +45,7 @@ describe('createHistogramDistributionQuery', () => {
     });
 
     expect(query).toBe(`TS metrics-a
-  | STATS count = COUNT(latency.tdigest, bucket) BY bucket = BUCKET(latency.tdigest, 10, 1, 250), TBUCKET(100)
-  | EVAL bucket = RANGE_MIN(bucket)
-  | SORT bucket DESC`);
+  | STATS count = COUNT(latency.tdigest, bucket) BY bucket = BUCKET(latency.tdigest, 10, 1, 250), TBUCKET(100)`);
   });
 
   it('casts a legacy histogram with TO_TDIGEST', () => {
@@ -62,9 +58,7 @@ describe('createHistogramDistributionQuery', () => {
     });
 
     expect(query).toBe(`TS metrics-a
-  | STATS count = COUNT(TO_TDIGEST(latency.legacy), bucket) BY bucket = BUCKET(TO_TDIGEST(latency.legacy), 10, 1, 250), TBUCKET(100)
-  | EVAL bucket = RANGE_MIN(bucket)
-  | SORT bucket DESC`);
+  | STATS count = COUNT(TO_TDIGEST(latency.legacy), bucket) BY bucket = BUCKET(TO_TDIGEST(latency.legacy), 10, 1, 250), TBUCKET(100)`);
   });
 
   it('omits NULLIFY when WHERE cannot name an extra column', () => {
@@ -91,9 +85,22 @@ describe('createHistogramDistributionQuery', () => {
     expect(query).toBe(`SET unmapped_fields = "NULLIFY";
 TS metrics-a
   | WHERE host.name == "a"
-  | STATS count = COUNT(latency.exp, bucket) BY bucket = BUCKET(latency.exp, 10, 1, 250), TBUCKET(100)
-  | EVAL bucket = RANGE_MIN(bucket)
-  | SORT bucket DESC`);
+  | STATS count = COUNT(latency.exp, bucket) BY bucket = BUCKET(latency.exp, 10, 1, 250), TBUCKET(100)`);
+  });
+
+  it('declares the metadata fields that the WHERE clauses use in the TS source', () => {
+    const query = createHistogramDistributionQuery({
+      metricItem: createMetric(),
+      bounds,
+      whereStatements: ['_ignored IS NULL'],
+      metadataFields: ['_ignored'],
+      originalSource: 'metrics-*',
+    });
+
+    expect(query).toBe(`SET unmapped_fields = "NULLIFY";
+TS metrics-a METADATA _ignored
+  | WHERE _ignored IS NULL
+  | STATS count = COUNT(latency.exp, bucket) BY bucket = BUCKET(latency.exp, 10, 1, 250), TBUCKET(100)`);
   });
 
   it('opens a positive span when min equals max', () => {

@@ -43,6 +43,20 @@ export { toBucketMap } from './use_entity_filter_bar_counts';
 const ENTITY_TYPE_OPTIONS = getEntityAnalyticsEntityTypes();
 const RISK_LEVEL_OPTIONS = SEVERITY_UI_SORT_ORDER.slice().reverse();
 
+// Click telemetry finds these in the clicked element's `data-test-subj` chain. Data source options
+// carry no per-option id: their values can be custom index names.
+const ENTITY_TYPE_FILTER_TEST_ID = 'eaFilterEntityType';
+const RISK_LEVEL_FILTER_TEST_ID = 'eaFilterRiskLevel';
+const ASSET_CRITICALITY_FILTER_TEST_ID = 'eaFilterAssetCriticality';
+const DATA_SOURCE_FILTER_TEST_ID = 'eaFilterDataSource';
+
+const getEntityTypeItemTestSubj = (type: EntityType) =>
+  `${ENTITY_TYPE_FILTER_TEST_ID}-item-${type}`;
+const getRiskLevelItemTestSubj = (level: RiskSeverity) =>
+  `${RISK_LEVEL_FILTER_TEST_ID}-item-${level}`;
+const getAssetCriticalityItemTestSubj = (level: string) =>
+  `${ASSET_CRITICALITY_FILTER_TEST_ID}-item-${level}`;
+
 const FILTER_TITLES = {
   entityType: i18n.translate('xpack.securitySolution.entityAnalytics.home.filter.entityType', {
     defaultMessage: 'Entity type',
@@ -63,7 +77,11 @@ const FILTER_TITLES = {
 };
 
 const FilterEntry = ({ children }: { children: React.ReactNode }) => (
-  <EuiFlexItem>
+  <EuiFlexItem
+    css={css`
+      min-width: 180px;
+    `}
+  >
     <EuiFilterGroup compressed>{children}</EuiFilterGroup>
   </EuiFlexItem>
 );
@@ -117,6 +135,8 @@ interface Props {
   spaceId: string | undefined;
   rowsMode: RowsMode;
   esFilter?: QueryDslQueryContainer;
+  searchExpression?: string;
+  isSearchOverridesPending?: boolean;
   watchlistNames: Map<string, string>;
 }
 
@@ -126,6 +146,8 @@ export const EntityFiltersBar: React.FC<Props> = ({
   spaceId,
   rowsMode,
   esFilter,
+  searchExpression,
+  isSearchOverridesPending,
   watchlistNames,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -133,6 +155,8 @@ export const EntityFiltersBar: React.FC<Props> = ({
     spaceId,
     rowsMode,
     filter: esFilter,
+    searchExpression,
+    isSearchOverridesPending,
   });
 
   // static options
@@ -173,9 +197,11 @@ export const EntityFiltersBar: React.FC<Props> = ({
   ].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center">
+    <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
       <FilterEntry>
         <MultiselectFilter<EntityType>
+          data-test-subj={ENTITY_TYPE_FILTER_TEST_ID}
+          getItemTestSubj={getEntityTypeItemTestSubj}
           title={FILTER_TITLES.entityType}
           items={entityTypeOptions.map((o) => o.value)}
           selectedItems={filters.entityTypes}
@@ -201,6 +227,8 @@ export const EntityFiltersBar: React.FC<Props> = ({
 
       <FilterEntry>
         <MultiselectFilter<RiskSeverity>
+          data-test-subj={RISK_LEVEL_FILTER_TEST_ID}
+          getItemTestSubj={getRiskLevelItemTestSubj}
           title={FILTER_TITLES.riskLevel}
           items={riskLevelOptions.map((o) => o.value)}
           selectedItems={filters.riskLevels}
@@ -234,6 +262,8 @@ export const EntityFiltersBar: React.FC<Props> = ({
 
       <FilterEntry>
         <MultiselectFilter<string>
+          data-test-subj={ASSET_CRITICALITY_FILTER_TEST_ID}
+          getItemTestSubj={getAssetCriticalityItemTestSubj}
           title={FILTER_TITLES.assetCriticality}
           items={criticalityOptions.map((o) => o.value)}
           selectedItems={filters.assetCriticality}
@@ -257,6 +287,7 @@ export const EntityFiltersBar: React.FC<Props> = ({
 
       <FilterEntry>
         <MultiselectFilter<string>
+          data-test-subj={DATA_SOURCE_FILTER_TEST_ID}
           title={FILTER_TITLES.dataSource}
           items={dataSourceOptions.map((o) => o.value)}
           selectedItems={filters.dataSources}

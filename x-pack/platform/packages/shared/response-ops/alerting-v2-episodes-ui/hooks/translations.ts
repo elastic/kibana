@@ -83,3 +83,7 @@ export const SUPPRESSED_FIELD_LABEL = i18n.translate(
     defaultMessage: 'Suppressed',
   }
 );
+
+export const REASON_FIELD_LABEL = i18n.translate('xpack.alertingV2EpisodesUi.reasonFieldLabel', {
+  defaultMessage: 'Reason',
+});

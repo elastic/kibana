@@ -17,6 +17,8 @@ interface UseFailedStepFocusParams {
   /** Switches the flyout to the tab that lists the steps. */
   showStepsTab: () => void;
   selectStepExecution: (stepExecutionId: string | null) => void;
+  /** Active waitForInput step. Highlighted when the run did not fail. */
+  waitingStepExecutionId?: string;
 }
 
 interface FailedStepFocus {
@@ -34,6 +36,7 @@ export const useFailedStepFocus = ({
   workflowExecution,
   showStepsTab,
   selectStepExecution,
+  waitingStepExecutionId,
 }: UseFailedStepFocusParams): FailedStepFocus => {
   const [autoExpandErrorForStepId, setAutoExpandErrorForStepId] = useState<string | null>(null);
   const [errorArrivalPulseStepId, setErrorArrivalPulseStepId] = useState<string | null>(null);
@@ -52,7 +55,13 @@ export const useFailedStepFocus = ({
         `[data-test-subj="workflowStepTreeNode"][data-step-execution-id="${stepExecutionId}"]`
       );
       const errorRegion = node?.querySelector('[data-test-subj="workflowFailedStepErrorPanel"]');
-      (errorRegion ?? node)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const waitingRegion = node?.querySelector(
+        '[data-test-subj="workflowWaitingStepActionPanel"]'
+      );
+      (errorRegion ?? waitingRegion ?? node)?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
     }, 0);
   }, []);
 
@@ -76,17 +85,19 @@ export const useFailedStepFocus = ({
     return () => window.clearTimeout(timer);
   }, [errorArrivalPulseStepId]);
 
-  // Highlight the failed step in the tree once per execution open (not on tab switches).
+  // Highlight the failed or waiting step once per execution open (not on tab switches).
   // Do not open the step-detail sub-flyout — that is only for an explicit step click.
   useEffect(() => {
-    if (!workflowExecution || !failedPosition) return;
+    if (!workflowExecution) return;
     if (autoExpandedForExecutionIdRef.current === workflowExecution.id) return;
+    const highlightStepId = failedPosition?.step.id ?? waitingStepExecutionId;
+    if (!highlightStepId) return;
     autoExpandedForExecutionIdRef.current = workflowExecution.id;
     showStepsTab();
-    setAutoExpandErrorForStepId(failedPosition.step.id);
-    setErrorArrivalPulseStepId(failedPosition.step.id);
-    scrollToFailedStep(failedPosition.step.id);
-  }, [workflowExecution, failedPosition, scrollToFailedStep, showStepsTab]);
+    setAutoExpandErrorForStepId(highlightStepId);
+    setErrorArrivalPulseStepId(highlightStepId);
+    scrollToFailedStep(highlightStepId);
+  }, [workflowExecution, failedPosition, waitingStepExecutionId, scrollToFailedStep, showStepsTab]);
 
   return { failedPosition, autoExpandErrorForStepId, errorArrivalPulseStepId, focusFailedStep };
 };

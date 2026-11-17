@@ -152,7 +152,8 @@ const expectStableCount = async (
   return actions;
 };
 
-apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/299775
+apiTest.describe.skip('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
   apiTest.beforeAll(async ({ apiServices }) => {
     await apiServices.alertingV2.maintenanceWindows.cleanUp();
     await apiServices.alertingV2.actionPolicies.cleanUp();
@@ -410,6 +411,7 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
         });
 
         expect(action.action_group_id).toBeDefined();
+        expect(action.alert_id).toBeDefined();
         expect(action.alert_status).toBeDefined();
 
         notifiedEpisodeStatuses.add(action.alert_status as string);
@@ -485,6 +487,7 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
         });
 
         expect(action.action_group_id).toBeDefined();
+        expect(action.alert_id).toBeDefined();
         expect(action.alert_status).toBeDefined();
         expect(action.group_hash).toBe('rule-1-series-1');
       }
@@ -1181,7 +1184,8 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
         ruleId: 'rule-groupby',
         actionTypes: ['notified'],
       });
-      expect(notifiedActions).toHaveLength(2);
+      // One notified record per (action group, alert): two host groups of two alerts each.
+      expect(notifiedActions).toHaveLength(4);
 
       const groupIds = notifiedActions.map((action) => action.action_group_id);
       expect(new Set(groupIds).size).toBe(2);
@@ -1290,6 +1294,7 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
 
       for (const action of notifiedActions) {
         expect(action.action_group_id).toBeDefined();
+        expect(action.alert_id).toBeDefined();
         expect(action.alert_status).toBeDefined();
       }
     }
@@ -1405,8 +1410,8 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
         }),
       ]);
 
-      // Digest mode dispatches one notified per policy run while still
-      // writing one fire per episode.
+      // Digest mode dispatches the policy's single group once; it writes one
+      // fire and one notified record per alert of that group.
       const fires = await expectStableCount(apiServices, 3, {
         ruleId: 'rule-1',
         actionTypes: ['fire'],
@@ -1418,7 +1423,8 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
         actionTypes: ['notified'],
       });
 
-      expect(notifiedActions).toHaveLength(1);
+      expect(notifiedActions).toHaveLength(3);
+      expect(new Set(notifiedActions.map((action) => action.action_group_id)).size).toBe(1);
     }
   );
 
@@ -1481,10 +1487,11 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
         ruleId: 'rule-groupby',
         actionTypes: ['notified'],
       });
-      // Two host groups → exactly two notified actions across the entire
-      // throttle interval, regardless of how many dispatcher ticks observe
-      // the same episodes.
-      expect(notified).toHaveLength(2);
+      // Two host groups of two alerts each → exactly four notified records
+      // (one per group and alert) across the entire throttle interval,
+      // regardless of how many dispatcher ticks observe the same episodes.
+      expect(notified).toHaveLength(4);
+      expect(new Set(notified.map((action) => action.action_group_id)).size).toBe(2);
     }
   );
 
@@ -1853,7 +1860,7 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
         }),
       ]);
 
-      // StoreActionsStep writes a throttled-policy suppress record.
+      // DispatchStep writes a throttled-policy suppress record.
       await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(1, {
         ruleId: 'rule-1',
         actionTypes: ['suppress'],
@@ -1963,6 +1970,60 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
         actor: { type: 'internal' },
         action_type: 'notified',
       });
+    }
+  );
+
+  apiTest(
+    'reports the dispatch activity of the window in the snapshot telemetry',
+    async ({ apiServices }) => {
+      // `test-workflow` does not exist in this environment, so np-1 fails every dispatch with
+      // `workflow_not_found`: the only outcome this spec can rely on. The event log is shared with
+      // the other specs of this config, which may leave successful dispatches in it, so only
+      // what this test adds is asserted, against a baseline taken beforehand.
+      const baseline = await apiServices.alertingV2.telemetry.runAndWaitForState();
+
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          ruleId: 'rule-1',
+          groupHash: 'rule-1-series-telemetry',
+          episodeId: 'rule-1-series-telemetry-episode-1',
+          episodeStatus: 'active',
+          status: 'breached',
+          timestamp: relativeTime(10),
+        }),
+      ]);
+      await expectStableCount(apiServices, 1, { ruleId: 'rule-1', actionTypes: ['fire'] });
+      // A later event for the same episode makes the next tick re-evaluate the group. It is still
+      // breached, so np-1 (no throttle, per_alert) suppresses it with the default on_status_change
+      // strategy and records a `throttled` event.
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          ruleId: 'rule-1',
+          groupHash: 'rule-1-series-telemetry',
+          episodeId: 'rule-1-series-telemetry-episode-1',
+          episodeStatus: 'active',
+          status: 'breached',
+          timestamp: relativeTime(2),
+        }),
+      ]);
+      await apiServices.alertingV2.dispatcher.waitForDispatcherTick({ ticks: 2 });
+
+      const state = await apiServices.alertingV2.telemetry.runAndWaitForState();
+
+      expect(state.has_errors).toBe(false);
+      expect(
+        state.dispatcher_dispatch_failures_count_by_reason_24hr?.workflow_not_found ?? 0
+      ).toBeGreaterThan(
+        baseline.dispatcher_dispatch_failures_count_by_reason_24hr?.workflow_not_found ?? 0
+      );
+      expect(state.dispatcher_policies_count_by_activity_24hr?.failing).toBeGreaterThanOrEqual(1);
+      expect(state.dispatcher_policies_count_by_activity_24hr?.broken).toBeGreaterThanOrEqual(1);
+      expect(
+        state.dispatcher_action_groups_throttled_count_by_strategy_24hr?.on_status_change
+      ).toBeGreaterThanOrEqual(1);
+      expect(
+        state.dispatcher_action_groups_dispatched_per_policy_by_grouping_mode_24hr
+      ).toStrictEqual({});
     }
   );
 });

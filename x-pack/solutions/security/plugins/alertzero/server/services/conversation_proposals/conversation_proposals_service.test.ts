@@ -50,11 +50,13 @@ const makeProposalsService = (
  *   present in the response, matching what `bulkGet`'s `_source` allowlist always returns.
  * @param assigneesById - Raw `metadata.assignees` per conversation. Omitted entries carry no
  *   `metadata` at all, which is the shape an unassigned conversation comes back as.
+ * @param statusById - Raw `metadata.status` per conversation.
  */
 const makeAgentBuilder = (
   titlesById?: Record<string, string>,
   agentIdsById?: Record<string, string>,
-  assigneesById?: Record<string, unknown>
+  assigneesById?: Record<string, unknown>,
+  statusById?: Record<string, unknown>
 ): AgentBuilderPluginStart =>
   ({
     conversations: {
@@ -68,10 +70,15 @@ const makeAgentBuilder = (
             const title = titlesById ? titlesById[id] : `Title for ${id}`;
             if (title !== undefined) {
               const assignees = assigneesById?.[id];
+              const status = statusById?.[id];
+              const metadata = {
+                ...(assignees !== undefined ? { assignees } : {}),
+                ...(status !== undefined ? { status } : {}),
+              };
               result.set(id, {
                 title,
                 agent_id: agentIdsById ? agentIdsById[id] : 'elastic-ai-agent',
-                ...(assignees !== undefined ? { metadata: { assignees } } : {}),
+                ...(Object.keys(metadata).length > 0 ? { metadata } : {}),
               });
             }
           }
@@ -216,6 +223,41 @@ describe('ConversationProposalsService', () => {
       });
 
       expect(result.proposals[0]).not.toHaveProperty('conversationAgentId');
+    });
+
+    it.each([
+      ['closed', 'closed'],
+      ['open', 'open'],
+    ])('attaches the %s status from conversation metadata', async (raw, expected) => {
+      const service = new ConversationProposalsService(
+        makeProposalsService([makeProposal({ conversationId: 'conv-1' })]),
+        makeAgentBuilder(undefined, undefined, undefined, { 'conv-1': raw }),
+        logger,
+        makeImpactClient()
+      );
+
+      const result = await service.listByCategory('investigate', request, spaceId, {
+        size: 10,
+        from: 0,
+      });
+
+      expect(result.proposals[0].conversationStatus).toBe(expected);
+    });
+
+    it('omits the status when the metadata has none or an unknown one', async () => {
+      const service = new ConversationProposalsService(
+        makeProposalsService([makeProposal({ conversationId: 'conv-1' })]),
+        makeAgentBuilder(undefined, undefined, undefined, { 'conv-1': 'archived' }),
+        logger,
+        makeImpactClient()
+      );
+
+      const result = await service.listByCategory('investigate', request, spaceId, {
+        size: 10,
+        from: 0,
+      });
+
+      expect(result.proposals[0]).not.toHaveProperty('conversationStatus');
     });
 
     it('attaches assignees from conversation metadata', async () => {

@@ -165,7 +165,6 @@ The management plugin follows a layered architecture:
 | `navigation` | UI navigation |
 | `data`, `dataViews` | Data layer and index patterns |
 | `esUiShared` | Shared Elasticsearch UI components |
-| `stackConnectors` | Built-in connector types |
 | `fieldFormats` | Field formatting utilities |
 | `unifiedSearch` | Search capabilities |
 | `embeddable` | Workflow visualization |
@@ -410,6 +409,13 @@ cannot open X or its execution history through the Workflows UI or APIs. If Bob
 has Read Workflow Execution in that space, he can still query the permitted
 execution and step fields through Elasticsearch. Marking an index as hidden does
 not enforce the workflow ACL.
+
+The same applies to anything else built on the execution data, such as dashboards
+and options-list controls. The filter controls on the Executions page are the one
+exception: until the execution data enforces workflow ACLs, the Workflows UI scopes
+their options and counts to the workflows the user can read, to non-step
+executions, and, without Read Managed Workflow Execution, to unmanaged
+executions, so they match the executions list.
 
 This is a known technical preview limitation. Enforcing workflow ACLs for
 queryable execution data is planned follow-up work. Until then, do not rely on

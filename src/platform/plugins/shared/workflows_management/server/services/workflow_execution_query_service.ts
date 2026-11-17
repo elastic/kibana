@@ -8,10 +8,9 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { ExecutionType } from '@kbn/workflows';
+import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import type {
   EsWorkflowStepExecution,
-  ExecutionStatus,
   WorkflowExecutionDto,
   WorkflowExecutionListDto,
 } from '@kbn/workflows';
@@ -25,13 +24,18 @@ import type {
 
 import {
   createMarkStepAsRespondedUpdater,
+  createReleaseHitlStepClaimUpdater,
+  getStrippedHitlToken,
+  type HitlStepClaim,
   MARK_STEP_AS_RESPONDED_SOURCE_FIELDS,
+  type MarkStepAsRespondedCurrent,
 } from './mark_step_as_responded_updater';
 import type { WorkflowExecutionQueryDeps } from './types';
 import { WORKFLOWS_INDEX } from '../../common';
 import { buildTimeRangeFilter } from '../api/lib/build_time_range_filter';
 import {
   buildManagedWorkflowExecutionsFilter,
+  buildWorkflowDocumentFilter,
   buildWorkflowExecutionsSpaceFilter,
 } from '../api/lib/build_workflow_executions_search_query';
 import { isIndexNotFoundError } from '../api/lib/es_error_helpers';
@@ -123,6 +127,27 @@ export interface WorkflowExecutionStatusItem {
   status: ExecutionStatus;
 }
 
+export interface WorkflowExecutionStatusCountsParams {
+  workflowIds: string[];
+  startedAfter?: string;
+  startedBefore?: string;
+  executionIds?: string[];
+  accessControlFilter?: estypes.QueryDslQueryContainer;
+}
+
+export type WorkflowExecutionStatusCounts = Record<
+  string,
+  Partial<Record<ExecutionStatus, number>>
+>;
+
+interface StatusCountsAggs {
+  byWorkflow: estypes.AggregationsMultiBucketAggregateBase<
+    estypes.AggregationsStringTermsBucketKeys & {
+      byStatus: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringTermsBucketKeys>;
+    }
+  >;
+}
+
 export class WorkflowExecutionQueryService {
   constructor(private readonly deps: WorkflowExecutionQueryDeps) {}
 
@@ -192,8 +217,9 @@ export class WorkflowExecutionQueryService {
     params: SearchWorkflowExecutionsParams,
     spaceId: string
   ): Promise<WorkflowExecutionListDto> {
+    const documentFilter = buildWorkflowDocumentFilter(params);
     const must: estypes.QueryDslQueryContainer[] = [
-      ...(params.workflowId ? [{ term: { workflowId: params.workflowId } }] : []),
+      ...(documentFilter ? [documentFilter] : []),
       buildWorkflowExecutionsSpaceFilter(spaceId),
       ...(params.accessControlFilter ? [params.accessControlFilter] : []),
     ];
@@ -220,6 +246,15 @@ export class WorkflowExecutionQueryService {
     }
     if (params.executedBy && params.executedBy.length > 0) {
       must.push({ terms: { executedBy: params.executedBy } });
+    }
+
+    const runName = params.runName?.trim();
+    if (runName) {
+      must.push({
+        wildcard: {
+          runName: { value: `*${runName.replace(/[\\*?]/g, '\\$&')}*`, case_insensitive: true },
+        },
+      });
     }
 
     if (params.concurrencyGroupKey !== undefined) {
@@ -268,7 +303,88 @@ export class WorkflowExecutionQueryService {
       sort,
       searchAfter: params.searchAfter,
       collapse: params.collapse ? { field: params.collapse } : undefined,
+      // First page only. Later pages reuse this flag. List filters stay off this query.
+      // The name column follows the same document as the list, so a previous install's
+      // named runs cannot turn it on for an empty history.
+      namedExecutionQuery:
+        documentFilter && !params.searchAfter?.length
+          ? {
+              bool: {
+                must: [
+                  documentFilter,
+                  buildWorkflowExecutionsSpaceFilter(spaceId),
+                  ...(params.accessControlFilter ? [params.accessControlFilter] : []),
+                  { wildcard: { runName: { value: '?*' } } },
+                ],
+                must_not: [{ term: { deleted: true } }],
+              },
+            }
+          : undefined,
     });
+  }
+
+  async getWorkflowExecutionStatusCounts(
+    {
+      workflowIds,
+      startedAfter,
+      startedBefore,
+      executionIds,
+      accessControlFilter,
+    }: WorkflowExecutionStatusCountsParams,
+    spaceId: string
+  ): Promise<WorkflowExecutionStatusCounts> {
+    if (workflowIds.length === 0) {
+      return {};
+    }
+    const startedAtRange = buildTimeRangeFilter('startedAt', startedAfter, startedBefore);
+    try {
+      const response = (await this.deps.workflowExecutionsDataClient.search({
+        size: 0,
+        track_total_hits: false,
+        query: {
+          bool: {
+            must: [
+              { terms: { workflowId: workflowIds } },
+              buildWorkflowExecutionsSpaceFilter(spaceId),
+              ...(accessControlFilter ? [accessControlFilter] : []),
+              ...(startedAtRange ? [startedAtRange] : []),
+              ...(executionIds ? [{ terms: { id: executionIds } }] : []),
+            ],
+            must_not: [{ exists: { field: 'stepId' } }],
+          },
+        },
+        aggs: {
+          byWorkflow: {
+            terms: { field: 'workflowId', size: workflowIds.length },
+            aggs: {
+              byStatus: { terms: { field: 'status', size: Object.values(ExecutionStatus).length } },
+            },
+          },
+        },
+      })) as unknown as estypes.SearchResponse<unknown, StatusCountsAggs>;
+
+      const workflowBuckets = response.aggregations?.byWorkflow.buckets ?? [];
+      return Object.fromEntries(
+        (Array.isArray(workflowBuckets) ? workflowBuckets : []).map((workflowBucket) => {
+          const statusBuckets = workflowBucket.byStatus.buckets;
+          return [
+            String(workflowBucket.key),
+            Object.fromEntries(
+              (Array.isArray(statusBuckets) ? statusBuckets : []).map((statusBucket) => [
+                String(statusBucket.key),
+                statusBucket.doc_count,
+              ])
+            ),
+          ];
+        })
+      );
+    } catch (error) {
+      if (isIndexNotFoundError(error)) {
+        return {};
+      }
+      this.deps.logger.error(`Failed to count workflow executions by status: ${error}`);
+      throw error;
+    }
   }
 
   async searchExecutionsView(
@@ -379,7 +495,8 @@ export class WorkflowExecutionQueryService {
     return searchStepExecutions({
       stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
       logger: this.deps.logger,
-      workflowId: params.workflowId,
+      workflowId: params.workflowUid ? undefined : params.workflowId,
+      workflowUid: params.workflowUid,
       stepId: params.stepId,
       stepType: params.stepType,
       additionalQuery: workflowRunFilter || undefined,
@@ -886,34 +1003,106 @@ export class WorkflowExecutionQueryService {
     spaceId: string
   ): Promise<EsWorkflowStepExecution | null> {
     const { executionId, id } = params;
-    const response = (await this.deps.stepExecutionsDataClient.search({
-      query: {
-        bool: {
-          must: [{ term: { workflowRunId: executionId } }, { term: { id } }, { term: { spaceId } }],
-        },
-      },
-      size: 1,
-      track_total_hits: false,
-    })) as estypes.SearchResponse<EsWorkflowStepExecution>;
+    // Step writes use refresh:false. Search misses the doc until the next refresh, so an
+    // external resume link used immediately after the wait starts is rejected. getByIds
+    // reads the translog.
+    let stepExecution: EsWorkflowStepExecution | undefined;
+    try {
+      const { items } = await this.deps.stepExecutionsDataClient.getByIds([id]);
+      stepExecution = items[0]?.document;
+    } catch (error) {
+      if (isIndexNotFoundError(error)) {
+        return null;
+      }
+      throw error;
+    }
 
-    if (response.hits.hits.length === 0) {
+    if (
+      !stepExecution ||
+      stepExecution.workflowRunId !== executionId ||
+      stepExecution.spaceId !== spaceId
+    ) {
       return null;
     }
 
-    return response.hits.hits[0]._source ?? null;
+    return stepExecution;
   }
 
   /**
    * Claims a `waitForInput` step by writing HITL audit metadata before resume.
    *
-   * Returns `true` when this caller won the claim, or `false` when the doc is
-   * missing, belongs to another space, has already settled (terminal status
-   * or `finishedAt` set), or was already claimed. Unexpected ES failures are
-   * rethrown.
+   * Returns the claim when this caller won it, or `null` when the doc is
+   * missing, belongs to another space or to an execution other than
+   * `executionId`, is not a HITL wait step, has already settled (terminal
+   * status or `finishedAt` set), or was already claimed. Unexpected ES
+   * failures are rethrown.
    */
   async markStepAsResponded(
     stepExecutionId: string,
+    executionId: string,
     audit: { respondedBy: string; respondedAt: string; channel?: string },
+    spaceId: string
+  ): Promise<HitlStepClaim | null> {
+    const claimUpdater = createMarkStepAsRespondedUpdater(audit, spaceId, executionId);
+    // The bulk helper re-runs the updater after a version conflict and only the last patch can land.
+    let claimedSource: MarkStepAsRespondedCurrent | undefined;
+    try {
+      const { items } = await this.deps.stepExecutionsDataClient.bulk({
+        refresh: 'wait_for',
+        items: [
+          bulkUpdaterItem<
+            EsWorkflowStepExecution,
+            (typeof MARK_STEP_AS_RESPONDED_SOURCE_FIELDS)[number]
+          >({
+            operation: 'update',
+            documentId: stepExecutionId,
+            sourceFields: MARK_STEP_AS_RESPONDED_SOURCE_FIELDS,
+            retryOnConflict: 3,
+            updater: (current) => {
+              const patch = claimUpdater(current);
+              claimedSource = patch === 'noop' ? undefined : current;
+              return patch;
+            },
+          }),
+        ],
+      });
+
+      const writeResult = getBulkUpdaterWriteResult(items[0]);
+      if (writeResult === 'conflict') {
+        // Retries were exhausted without a write; this is not a lost claim, so surface it.
+        throw new Error(`Version conflict claiming step execution ${stepExecutionId}`);
+      }
+      if (writeResult !== 'updated') {
+        return null;
+      }
+
+      const { respondedBy, respondedAt, channel } = audit;
+      const strippedToken = claimedSource ? getStrippedHitlToken(claimedSource) : undefined;
+      return {
+        respondedBy,
+        respondedAt,
+        ...(channel != null ? { channel } : {}),
+        ...(strippedToken ? { strippedToken } : {}),
+      };
+    } catch (error) {
+      this.deps.logger.error(
+        `Failed to mark step execution ${stepExecutionId} as responded: ${error}`
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Releases a claim written by `markStepAsResponded` whose resume was not applied, restoring the
+   * external-resume token it stripped.
+   *
+   * Returns `true` when the claim was released, or `false` when the doc is
+   * missing, belongs to another space, has settled, or no longer holds this
+   * claim. Unexpected ES failures are rethrown.
+   */
+  async releaseHitlStepClaim(
+    stepExecutionId: string,
+    claim: HitlStepClaim,
     spaceId: string
   ): Promise<boolean> {
     try {
@@ -928,20 +1117,21 @@ export class WorkflowExecutionQueryService {
             documentId: stepExecutionId,
             sourceFields: MARK_STEP_AS_RESPONDED_SOURCE_FIELDS,
             retryOnConflict: 3,
-            updater: createMarkStepAsRespondedUpdater(audit, spaceId),
+            updater: createReleaseHitlStepClaimUpdater(claim, spaceId),
           }),
         ],
       });
 
       const writeResult = getBulkUpdaterWriteResult(items[0]);
       if (writeResult === 'conflict') {
-        // Retries were exhausted without a write; this is not a lost claim, so surface it.
-        throw new Error(`Version conflict claiming step execution ${stepExecutionId}`);
+        throw new Error(
+          `Version conflict releasing the claim on step execution ${stepExecutionId}`
+        );
       }
       return writeResult === 'updated';
     } catch (error) {
       this.deps.logger.error(
-        `Failed to mark step execution ${stepExecutionId} as responded: ${error}`
+        `Failed to release the claim on step execution ${stepExecutionId}: ${error}`
       );
       throw error;
     }

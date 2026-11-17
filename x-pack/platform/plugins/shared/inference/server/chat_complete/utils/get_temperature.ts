@@ -6,6 +6,7 @@
  */
 import type { InferenceConnector } from '@kbn/inference-common';
 import { InferenceConnectorType } from '@kbn/inference-common';
+import { getClaudeModelKey, isClaudeModelId } from './claude_model_key';
 
 const OPENAI_MODELS_WITHOUT_TEMPERATURE = ['o1', 'o3', 'gpt-5'];
 
@@ -25,34 +26,12 @@ const CLAUDE_MODEL_KEYS_WITH_TEMPERATURE = new Set([
   'opus-4-6',
 ]);
 
-const CLAUDE_VARIANT_FIRST_PATTERN = /-claude-(haiku|sonnet|opus)-(\d+-\d+)-/;
-const CLAUDE_VERSION_FIRST_PATTERN = /-claude-(\d+-\d+)-(haiku|sonnet|opus)-/;
-
-const normalizeModelId = (modelId: string) => modelId.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-
-// Providers order Claude model names differently, so convert them to one key before checking support.
-const getClaudeModelKey = (normalizedModelId: string) => {
-  const variantFirstMatch = normalizedModelId.match(CLAUDE_VARIANT_FIRST_PATTERN);
-  if (variantFirstMatch) {
-    const [, variant, version] = variantFirstMatch;
-    return `${variant}-${version}`;
-  }
-
-  // EIS model IDs put the version before the variant.
-  const versionFirstMatch = normalizedModelId.match(CLAUDE_VERSION_FIRST_PATTERN);
-  if (versionFirstMatch) {
-    const [, version, variant] = versionFirstMatch;
-    return `${variant}-${version}`;
-  }
-};
-
 const shouldExcludeTemperatureForModelId = (modelId: string): boolean => {
-  const normalizedModelId = `-${normalizeModelId(modelId)}-`;
-  if (!normalizedModelId.includes('-claude-')) {
+  if (!isClaudeModelId(modelId)) {
     return false;
   }
 
-  const modelKey = getClaudeModelKey(normalizedModelId);
+  const modelKey = getClaudeModelKey(modelId);
   return modelKey === undefined || !CLAUDE_MODEL_KEYS_WITH_TEMPERATURE.has(modelKey);
 };
 

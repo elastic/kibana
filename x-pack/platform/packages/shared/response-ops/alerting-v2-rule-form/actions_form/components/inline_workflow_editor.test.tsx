@@ -192,7 +192,7 @@ describe('InlineWorkflowEditor', () => {
       expect(screen.getByText('Select a connector.')).toBeInTheDocument();
       expect(screen.getByText("'to' is required.")).toBeInTheDocument();
       expect(screen.getByText("'subject' is required.")).toBeInTheDocument();
-      expect(screen.getByText("'message' is required.")).toBeInTheDocument();
+      expect(screen.queryByText("'message' is required.")).not.toBeInTheDocument();
     });
 
     it('shows params errors once the params are edited, without the connector error', () => {

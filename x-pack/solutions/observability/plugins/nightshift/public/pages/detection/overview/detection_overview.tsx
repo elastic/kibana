@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,15 +20,20 @@ import { DetectionStatusBadge } from './detection_status_badge';
 import { MetricCell, type MetricCellProps } from './metric_cell';
 import {
   DETECTION_ENGINE_LABEL,
-  getDetectionsLabel,
   getKnowledgeIndicatorsLabel,
   getRulesLabel,
+  getSignalsLabel,
   getSignificantEventsLabel,
   getEntitiesLabel,
   OVERVIEW_ERROR_MESSAGE,
   OVERVIEW_ERROR_TITLE,
   OVERVIEW_RETRY_LABEL,
 } from './translations';
+
+/** Cap at three metrics per row (six slots over two rows with five metrics). */
+const OVERVIEW_MAX_COLUMNS = 3;
+/** Same floor as the previous flex basis — wraps to 1–2 columns when the row is narrow. */
+const OVERVIEW_METRIC_MIN_WIDTH_BASE = 12;
 
 export interface DetectionOverviewCounts {
   entities: number;
@@ -47,6 +51,7 @@ export interface DetectionOverviewProps {
   isCountsLoading: boolean;
   isCountsError: boolean;
   onRetry: () => void;
+  compact?: boolean;
 }
 
 export const DetectionOverview = ({
@@ -57,8 +62,14 @@ export const DetectionOverview = ({
   isCountsLoading,
   isCountsError,
   onRetry,
+  compact = false,
 }: DetectionOverviewProps): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
+  const metricMinWidthPx = euiTheme.base * OVERVIEW_METRIC_MIN_WIDTH_BASE;
+  // Match auto-fill breakpoints: N columns need N*minWidth + (N-1)*gap.
+  const twoColumnMaxWidthPx =
+    OVERVIEW_MAX_COLUMNS * metricMinWidthPx + (OVERVIEW_MAX_COLUMNS - 1) * euiTheme.base - 1;
+  const oneColumnMaxWidthPx = 2 * metricMinWidthPx + euiTheme.base - 1;
   const metrics: Array<Omit<MetricCellProps, 'isLoading'>> = [
     {
       icon: 'chartTagCloud',
@@ -82,11 +93,11 @@ export const DetectionOverview = ({
       testSubject: 'nightshiftDetectionOverviewActiveRules',
     },
     {
-      icon: 'moon',
+      icon: 'productNightshift',
       tone: 'warning',
       value: counts?.detections,
-      getLabel: getDetectionsLabel,
-      testSubject: 'nightshiftDetectionOverviewDetections',
+      getLabel: getSignalsLabel,
+      testSubject: 'nightshiftDetectionOverviewSignals',
     },
     {
       icon: 'warning',
@@ -101,8 +112,11 @@ export const DetectionOverview = ({
     <EuiPanel
       hasBorder
       hasShadow={false}
+      grow={false}
       paddingSize="m"
-      data-test-subj="nightshiftDetectionOverview"
+      data-test-subj={
+        compact ? 'nightshiftDetectionOverviewCompact' : 'nightshiftDetectionOverview'
+      }
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
@@ -115,48 +129,109 @@ export const DetectionOverview = ({
             status={status}
             isLoading={isStatusLoading}
             isError={isStatusError}
+            data-test-subj={compact ? 'nightshiftDetectionCompactStatus' : undefined}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      {isCountsError ? (
-        <KbnDangerCallout
-          announceOnMount
-          title={OVERVIEW_ERROR_TITLE}
-          text={OVERVIEW_ERROR_MESSAGE}
-          size="s"
-          data-test-subj="nightshiftDetectionOverviewError"
-          actionProps={{
-            primary: {
-              children: OVERVIEW_RETRY_LABEL,
-              iconType: 'refresh',
-              onClick: onRetry,
-              'data-test-subj': 'nightshiftDetectionOverviewRetryButton',
-            },
-          }}
-        />
-      ) : (
-        <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" wrap>
-          {metrics.map((metric) => (
-            <EuiFlexItem
-              key={metric.testSubject}
-              grow={false}
-              css={css`
-                padding-inline: ${euiTheme.size.l};
-
-                &:first-of-type {
-                  padding-inline-start: 0;
-                }
-
-                &:not(:first-of-type) {
-                  border-inline-start: ${euiTheme.border.thin};
-                }
-              `}
+      {!compact && (
+        <>
+          <EuiSpacer size="m" />
+          {isCountsError ? (
+            <KbnDangerCallout
+              announceOnMount
+              title={OVERVIEW_ERROR_TITLE}
+              text={OVERVIEW_ERROR_MESSAGE}
+              size="s"
+              data-test-subj="nightshiftDetectionOverviewError"
+              actionProps={{
+                primary: {
+                  children: OVERVIEW_RETRY_LABEL,
+                  iconType: 'refresh',
+                  onClick: onRetry,
+                  'data-test-subj': 'nightshiftDetectionOverviewRetryButton',
+                },
+              }}
+            />
+          ) : (
+            <div
+              css={{
+                containerType: 'inline-size',
+                display: 'grid',
+                // auto-fill keeps empty tracks so a short last row does not stretch.
+                // Track min is max(floor, 1/3 of the row) so we never exceed three columns,
+                // and still drop to one or two when the banner is narrow or zoomed.
+                gridTemplateColumns: `repeat(
+                  auto-fill,
+                  minmax(
+                    max(
+                      ${metricMinWidthPx}px,
+                      calc(
+                        (100% - ${(OVERVIEW_MAX_COLUMNS - 1).toString()} * ${euiTheme.size.base}) /
+                          ${OVERVIEW_MAX_COLUMNS}
+                      )
+                    ),
+                    1fr
+                  )
+                )`,
+                gap: euiTheme.size.base,
+                alignItems: 'center',
+                // Hide hairlines on each row start for the current column count.
+                [`& > *:nth-child(${OVERVIEW_MAX_COLUMNS}n + 1) [data-metric-separator]`]: {
+                  display: 'none',
+                },
+                [`@container (max-width: ${twoColumnMaxWidthPx}px)`]: {
+                  [`& > *:nth-child(${OVERVIEW_MAX_COLUMNS}n + 1) [data-metric-separator]`]: {
+                    display: 'block',
+                  },
+                  '& > *:nth-child(2n + 1) [data-metric-separator]': {
+                    display: 'none',
+                  },
+                },
+                [`@container (max-width: ${oneColumnMaxWidthPx}px)`]: {
+                  // Match the two-column reset's specificity so `display: block` does not win.
+                  [`& > *:nth-child(${OVERVIEW_MAX_COLUMNS}n + 1) [data-metric-separator]`]: {
+                    display: 'none',
+                  },
+                  '& > *:nth-child(2n + 1) [data-metric-separator]': {
+                    display: 'none',
+                  },
+                  '& > * [data-metric-separator]': {
+                    display: 'none',
+                  },
+                },
+              }}
             >
-              <MetricCell {...metric} isLoading={isCountsLoading} />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
+              {metrics.map((metric, index) => (
+                <div
+                  key={metric.testSubject}
+                  css={{
+                    minWidth: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: euiTheme.size.base,
+                  }}
+                >
+                  {index > 0 ? (
+                    <div
+                      aria-hidden
+                      data-metric-separator
+                      css={{
+                        flexShrink: 0,
+                        width: euiTheme.border.width.thin,
+                        // Match EuiAvatar size="l".
+                        height: euiTheme.size.xxl,
+                        backgroundColor: euiTheme.colors.borderBaseSubdued,
+                      }}
+                    />
+                  ) : null}
+                  <div css={{ minWidth: 0, flex: '1 1 auto' }}>
+                    <MetricCell {...metric} isLoading={isCountsLoading} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
       )}
     </EuiPanel>
   );

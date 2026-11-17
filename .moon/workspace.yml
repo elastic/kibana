@@ -11,6 +11,7 @@ projects:
     - packages/**/moon.yml
   sources:
     kibana-buildkite: .buildkite
+    jest-tooling: .moon/projects/jest-tooling
 vcs:
   defaultBranch: main
   client: git

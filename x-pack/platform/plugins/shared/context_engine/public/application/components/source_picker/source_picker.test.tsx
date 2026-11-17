@@ -61,14 +61,18 @@ const INDEX_MATCHES = [
   buildMatchedItem('.ds-traces-default'),
 ];
 
+const INDEX_SEARCH_DEBOUNCE_MS = 300;
+
 const createServices = ({
   indices = INDEX_MATCHES,
   indicesError,
   canReadConnectors = true,
+  resolveIndices,
 }: {
   indices?: MatchedItem[];
   indicesError?: Error;
   canReadConnectors?: boolean;
+  resolveIndices?: (pattern: string) => MatchedItem[] | Promise<MatchedItem[]>;
 } = {}) => {
   const services = coreMock.createStart();
   services.application.capabilities = {
@@ -80,9 +84,15 @@ const createServices = ({
     },
   };
   const data = dataPluginMock.createStartContract();
-  data.dataViews.getIndices = indicesError
-    ? jest.fn().mockRejectedValue(indicesError)
-    : jest.fn().mockResolvedValue(indices);
+  if (resolveIndices) {
+    data.dataViews.getIndices = jest.fn(({ pattern }: { pattern: string }) =>
+      Promise.resolve(resolveIndices(pattern))
+    );
+  } else if (indicesError) {
+    data.dataViews.getIndices = jest.fn().mockRejectedValue(indicesError);
+  } else {
+    data.dataViews.getIndices = jest.fn().mockResolvedValue(indices);
+  }
 
   (services.http.get as jest.Mock).mockImplementation(
     (pathOrOptions: string | { path: string }) => {
@@ -129,10 +139,6 @@ const addEsqlSource = async (query: string) => {
   fireEvent.click(screen.getByTestId('contextAddEsqlSourceButton'));
 };
 
-const openConnectorsTab = () => {
-  fireEvent.click(screen.getByTestId('contextSourcePickerTab-connectors'));
-};
-
 const waitForConnectorQueries = async (queryClient: QueryClient) => {
   await waitFor(() => {
     const typesQuery = queryClient.getQueryState(contextEngineQueryKeys.connectors.types());
@@ -161,12 +167,26 @@ const openConnectorOptions = async (
 const getConnectorOptionByName = (name: string) => screen.getByRole('option', { name });
 
 const selectIndexSource = async (indexName: string) => {
-  const comboBox = screen.getByTestId('contextIndexComboBox');
-  const input = within(comboBox).getByRole('combobox');
+  fireEvent.click(await screen.findByTestId(`contextIndexOption-${indexName}`));
+};
 
-  fireEvent.focus(input);
-  fireEvent.click(input);
-  fireEvent.click(await screen.findByText(indexName));
+const typeIndexSearch = async (value: string) => {
+  fireEvent.change(screen.getByTestId('contextIndexSearch'), { target: { value } });
+  jest.advanceTimersByTime(INDEX_SEARCH_DEBOUNCE_MS);
+  await waitFor(() => expect(screen.getByTestId('contextIndexSelectable')).toBeInTheDocument());
+};
+
+const resolveIndicesForSearchTests = (pattern: string): MatchedItem[] => {
+  if (pattern === '*nginx*,-.*') {
+    return [buildMatchedItem('logs-nginx')];
+  }
+  if (pattern === '*metrics*,-.*') {
+    return [buildMatchedItem('metrics-*'), buildMatchedItem('logs-nginx')];
+  }
+  if (pattern === '*,-.*') {
+    return INDEX_MATCHES;
+  }
+  return [];
 };
 
 describe('SourcePicker', () => {
@@ -180,11 +200,14 @@ describe('SourcePicker', () => {
     jest.clearAllMocks();
   });
 
-  it('selects the Elasticsearch data tab by default with index picker visible', () => {
+  it('renders both Elasticsearch data and Connectors sections on mount', () => {
     renderWithProviders(<Harness />);
 
-    expect(screen.getByTestId('contextElasticsearchSourcesTab')).toBeInTheDocument();
-    expect(screen.getByTestId('contextIndexComboBox')).toBeInTheDocument();
+    expect(screen.getByTestId('contextElasticsearchDataPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('contextElasticsearchSourcesPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('contextConnectorsPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('contextConnectorsTab')).toBeInTheDocument();
+    expect(screen.getByTestId('contextIndexSelectable')).toBeInTheDocument();
     expect(screen.getByTestId('contextAdvancedEsqlAccordion')).toBeInTheDocument();
     expect(screen.getByTestId('mockEsqlEditor')).not.toBeVisible();
   });
@@ -192,26 +215,181 @@ describe('SourcePicker', () => {
   it('adds an index selection as an ES|QL source from the index picker', async () => {
     renderWithProviders(<Harness />);
 
+    await screen.findByTestId('contextIndexOption-logs-*');
     await selectIndexSource('logs-*');
 
     const row = screen.getByTestId('contextSelectedSource-esql-0');
     expect(row).toHaveTextContent('FROM logs-*');
+    expect(screen.queryByTestId('contextIndexOption-logs-*')).not.toBeInTheDocument();
+  });
+
+  it('keeps previously picked indices when picking another one', async () => {
+    renderWithProviders(<Harness />);
+
+    await selectIndexSource('logs-*');
+    await selectIndexSource('metrics-*');
+
+    expect(screen.getAllByTestId(/^contextSelectedSource-esql-/)).toHaveLength(2);
+    expect(screen.getByTestId('contextSelectedSource-esql-0')).toHaveTextContent('FROM metrics-*');
+    expect(screen.getByTestId('contextSelectedSource-esql-1')).toHaveTextContent('FROM logs-*');
+    expect(screen.queryByTestId('contextIndexOption-logs-*')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextIndexOption-metrics-*')).not.toBeInTheDocument();
   });
 
   it('does not add a duplicate index source', async () => {
     renderWithProviders(<Harness />);
 
     await selectIndexSource('logs-*');
-    expect(screen.getAllByTestId('contextSelectedSource-esql-0')).toHaveLength(1);
+    expect(screen.getAllByTestId(/^contextSelectedSource-esql-/)).toHaveLength(1);
+    expect(screen.queryByTestId('contextIndexOption-logs-*')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextIndexOption-metrics-*')).toBeInTheDocument();
+  });
 
-    const comboBox = screen.getByTestId('contextIndexComboBox');
-    const input = within(comboBox).getByRole('combobox');
-    fireEvent.focus(input);
-    fireEvent.click(input);
+  it('removes a selected index from the list and shows the option again in the picker', async () => {
+    renderWithProviders(<Harness />);
 
-    const listbox = await screen.findByRole('listbox');
-    expect(within(listbox).queryByText('logs-*')).not.toBeInTheDocument();
-    expect(within(listbox).getByText('metrics-*')).toBeInTheDocument();
+    await selectIndexSource('logs-*');
+    expect(screen.queryByTestId('contextIndexOption-logs-*')).not.toBeInTheDocument();
+
+    const row = screen.getByTestId('contextSelectedSource-esql-0');
+    fireEvent.click(within(row).getByTestId('contextRemoveSourceButton'));
+
+    expect(screen.queryByTestId('contextSelectedSource-esql-0')).not.toBeInTheDocument();
+    expect(await screen.findByTestId('contextIndexOption-logs-*')).toBeInTheDocument();
+  });
+
+  it('hides index options only for simple FROM sources in the initial selection', async () => {
+    const { unmount: unmountSimpleFrom } = renderWithProviders(
+      <Harness
+        initialSources={[
+          { type: 'esql', id: 'FROM logs-*', label: 'FROM logs-*', value: 'FROM logs-*' },
+        ]}
+      />
+    );
+
+    await screen.findByTestId('contextIndexOption-metrics-*');
+    expect(screen.queryByTestId('contextIndexOption-logs-*')).not.toBeInTheDocument();
+    unmountSimpleFrom();
+
+    renderWithProviders(
+      <Harness
+        initialSources={[
+          {
+            type: 'esql',
+            id: 'FROM a,b',
+            label: 'FROM a,b',
+            value: 'FROM a,b',
+          },
+          {
+            type: 'esql',
+            id: 'FROM logs-* | LIMIT 1',
+            label: 'FROM logs-* | LIMIT 1',
+            value: 'FROM logs-* | LIMIT 1',
+          },
+        ]}
+      />
+    );
+
+    expect(await screen.findByTestId('contextIndexOption-logs-*')).toBeInTheDocument();
+    expect(screen.getByTestId('contextIndexOption-metrics-*')).toBeInTheDocument();
+  });
+
+  it('hides selected indices from search results while a search is active', async () => {
+    renderWithProviders(
+      <Harness />,
+      createServices({ resolveIndices: resolveIndicesForSearchTests })
+    );
+
+    await screen.findByTestId('contextIndexOption-logs-*');
+
+    await typeIndexSearch('nginx');
+    await selectIndexSource('logs-nginx');
+    expect(screen.queryByTestId('contextIndexOption-logs-nginx')).not.toBeInTheDocument();
+
+    await typeIndexSearch('metrics');
+    await waitFor(() => {
+      expect(screen.getByTestId('contextIndexOption-metrics-*')).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('contextIndexOption-logs-nginx')).not.toBeInTheDocument();
+  });
+
+  it('shows the loading spinner only while the first index list loads', async () => {
+    let resolveIndices!: (value: MatchedItem[]) => void;
+    const services = createServices();
+    services.data.dataViews.getIndices = jest.fn(
+      () =>
+        new Promise<MatchedItem[]>((resolve) => {
+          resolveIndices = resolve;
+        })
+    );
+    renderWithProviders(<Harness />, services);
+
+    expect(await screen.findAllByText('Loading options')).not.toHaveLength(0);
+    expect(screen.getByTestId('contextIndexSelectableLoadingBar')).toHaveStyle({
+      visibility: 'hidden',
+    });
+
+    resolveIndices(INDEX_MATCHES);
+
+    expect(await screen.findByTestId('contextIndexOption-logs-*')).toBeInTheDocument();
+    expect(screen.queryAllByText('Loading options')).toHaveLength(0);
+  });
+
+  it('keeps the previous index list under a loading bar while a search is pending', async () => {
+    renderWithProviders(
+      <Harness />,
+      createServices({ resolveIndices: resolveIndicesForSearchTests })
+    );
+
+    await screen.findByTestId('contextIndexOption-logs-*');
+    expect(screen.getByTestId('contextIndexSelectableLoadingBar')).toHaveStyle({
+      visibility: 'hidden',
+    });
+
+    fireEvent.change(screen.getByTestId('contextIndexSearch'), { target: { value: 'nginx' } });
+
+    expect(screen.getByTestId('contextIndexOption-logs-*')).toBeInTheDocument();
+    expect(screen.queryAllByText('Loading options')).toHaveLength(0);
+    expect(screen.getByTestId('contextIndexSelectableLoadingBar')).toHaveStyle({
+      visibility: 'visible',
+    });
+
+    jest.advanceTimersByTime(INDEX_SEARCH_DEBOUNCE_MS);
+
+    expect(await screen.findByTestId('contextIndexOption-logs-nginx')).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByTestId('contextIndexSelectableLoadingBar')).toHaveStyle({
+        visibility: 'hidden',
+      })
+    );
+  });
+
+  it('does not flash the empty list message when clearing a search without matches', async () => {
+    renderWithProviders(
+      <Harness />,
+      createServices({ resolveIndices: resolveIndicesForSearchTests })
+    );
+
+    await screen.findByTestId('contextIndexOption-logs-*');
+    await typeIndexSearch('nomatch');
+    expect(await screen.findAllByText('No matches for this search.')).not.toHaveLength(0);
+
+    fireEvent.change(screen.getByTestId('contextIndexSearch'), { target: { value: '' } });
+
+    expect(screen.queryAllByText('No matches for this search.')).not.toHaveLength(0);
+    expect(screen.queryAllByText('No indices, data streams or aliases found.')).toHaveLength(0);
+
+    jest.advanceTimersByTime(INDEX_SEARCH_DEBOUNCE_MS);
+
+    expect(await screen.findByTestId('contextIndexOption-logs-*')).toBeInTheDocument();
+  });
+
+  it('shows the empty list message when there are no indices at all', async () => {
+    renderWithProviders(<Harness />, createServices({ indices: [] }));
+
+    expect(
+      await screen.findAllByText('No indices, data streams or aliases found.')
+    ).not.toHaveLength(0);
   });
 
   it('adds a raw ES|QL query as a source from the advanced accordion', async () => {
@@ -249,17 +427,17 @@ describe('SourcePicker', () => {
     expect(screen.queryByTestId('contextSelectedSource-esql-0')).not.toBeInTheDocument();
   });
 
-  it('does not fetch connectors or indices on mount when only the Elasticsearch data tab is shown', () => {
+  it('lists indices on mount without fetching connectors', async () => {
     const { services } = renderWithProviders(<Harness />);
 
+    await screen.findByTestId('contextIndexOption-logs-*');
     expect(services.http.get).not.toHaveBeenCalled();
-    expect(services.data.dataViews.getIndices).not.toHaveBeenCalled();
+    expect(services.data.dataViews.getIndices).toHaveBeenCalled();
   });
 
   it('lists only the data-retrieval connectors in the connectors tab', async () => {
     const { services, queryClient } = renderWithProviders(<Harness />);
 
-    openConnectorsTab();
     await openConnectorOptions(services, queryClient);
 
     expect(getConnectorOptionByName('Google Drive')).toHaveTextContent('Google Drive');
@@ -271,7 +449,6 @@ describe('SourcePicker', () => {
   it('adds a connector as a source when selected', async () => {
     const { services, queryClient } = renderWithProviders(<Harness />);
 
-    openConnectorsTab();
     await openConnectorOptions(services, queryClient);
     fireEvent.click(getConnectorOptionByName('Google Drive'));
 
@@ -326,8 +503,6 @@ describe('SourcePicker', () => {
     services.http.get.mockRejectedValue(new Error('Network error'));
 
     renderWithProviders(<Harness />, services);
-
-    openConnectorsTab();
 
     const comboBox = await screen.findByTestId('contextConnectorComboBox');
     fireEvent.focus(within(comboBox).getByRole('combobox'));

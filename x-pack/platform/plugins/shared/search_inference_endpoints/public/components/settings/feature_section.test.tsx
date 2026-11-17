@@ -71,6 +71,8 @@ const makeFeatureItem = (feature: InferenceFeatureConfig) => ({
   feature,
   hasSavedObject: false,
   isFeatureDirty: false,
+  efforts: {},
+  effectiveRecommendedEfforts: {},
 });
 
 beforeEach(() => {
@@ -87,6 +89,7 @@ describe('FeatureSection — ignoreGlobalDefault per-child suppression', () => {
           parentDescription="desc"
           features={[makeFeatureItem(regularFeature)]}
           onEndpointsChange={jest.fn()}
+          onEffortsChange={jest.fn()}
           invalidEndpointIds={new Set()}
           deprecatedEndpointsMap={new Map()}
           globalDefaultId="default-id"
@@ -105,6 +108,7 @@ describe('FeatureSection — ignoreGlobalDefault per-child suppression', () => {
           parentDescription="desc"
           features={[makeFeatureItem(optOutFeature)]}
           onEndpointsChange={jest.fn()}
+          onEffortsChange={jest.fn()}
           invalidEndpointIds={new Set()}
           deprecatedEndpointsMap={new Map()}
           globalDefaultId="default-id"
@@ -123,6 +127,7 @@ describe('FeatureSection — ignoreGlobalDefault per-child suppression', () => {
           parentDescription="desc"
           features={[makeFeatureItem(regularFeature), makeFeatureItem(optOutFeature)]}
           onEndpointsChange={jest.fn()}
+          onEffortsChange={jest.fn()}
           invalidEndpointIds={new Set()}
           deprecatedEndpointsMap={new Map()}
           globalDefaultId="default-id"

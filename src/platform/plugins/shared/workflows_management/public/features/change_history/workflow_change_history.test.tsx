@@ -117,6 +117,9 @@ jest.mock('@kbn/code-editor', () => {
   const actual = jest.requireActual('@kbn/code-editor');
 
   return {
+    CODE_EDITOR_DEFAULT_THEME_ID: actual.CODE_EDITOR_DEFAULT_THEME_ID,
+    initializeRegisteredLanguagesTheme: jest.fn(),
+    applyKbnCodeEditorChromeOverrides: jest.fn(() => ({ dispose: jest.fn() })),
     monaco: {
       MarkerSeverity: { Error: 8 },
       editor: {
@@ -125,6 +128,7 @@ jest.mock('@kbn/code-editor', () => {
         create: jest.fn(() => ({
           dispose: jest.fn(),
           layout: jest.fn(),
+          getDomNode: jest.fn(() => document.createElement('div')),
           getModel: jest.fn(() => ({ dispose: jest.fn() })),
           updateOptions: jest.fn(),
           createDecorationsCollection: jest.fn(() => ({ clear: jest.fn() })),
@@ -133,6 +137,7 @@ jest.mock('@kbn/code-editor', () => {
           setModel: jest.fn(),
           dispose: jest.fn(),
           layout: jest.fn(),
+          getContainerDomNode: jest.fn(() => document.createElement('div')),
           updateOptions: jest.fn(),
           getLineChanges: jest.fn(() => [
             {
@@ -157,11 +162,6 @@ jest.mock('@kbn/code-editor', () => {
     },
   };
 });
-
-jest.mock('@kbn/workflows-ui', () => ({
-  useDefineWorkflowsMonacoTheme: jest.fn(),
-  WORKFLOWS_MONACO_EDITOR_THEME: 'workflows-theme',
-}));
 
 jest.mock('../../hooks/use_kibana', () => ({
   useKibana: jest.fn(),
@@ -489,23 +489,27 @@ describe('WorkflowChangeHistoryListItem', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByTestId('workflowChangeHistoryPreviewSettingsButton')).toBeInTheDocument();
+      expect(screen.getByTestId('changeHistoryPreviewSettingsButton')).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByTestId('workflowChangeHistoryPreviewSettingsButton'));
-    fireEvent.click(screen.getByTestId('workflowChangeHistoryCompareSplit'));
+    fireEvent.click(screen.getByTestId('changeHistoryPreviewSettingsButton'));
+    fireEvent.click(screen.getByTestId('changeHistoryCompareSplit'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('workflowChangeHistoryCompareSplitPaneLabels')).toBeInTheDocument();
+      expect(screen.getByTestId('changeHistoryCompareSplitPaneLabels')).toBeInTheDocument();
     });
 
     expect(screen.getByText('Selected version:')).toBeInTheDocument();
-    expect(screen.getByTestId('workflowChangeHistoryCompareSplitCurrentBadge')).toHaveTextContent(
-      UNSAVED_CHANGES_ACTION
-    );
-    expect(screen.getByTestId('workflowChangeHistoryCompareSplitBaselineBadge')).toHaveTextContent(
-      'v3'
-    );
+    expect(
+      within(screen.getByTestId('changeHistoryCompareSplitPaneLabels')).getByTestId(
+        'workflowChangeHistoryUnsavedChangesBadge'
+      )
+    ).toHaveTextContent(UNSAVED_CHANGES_ACTION);
+    expect(
+      within(screen.getByTestId('changeHistoryCompareSplitPaneLabels')).getByTestId(
+        'workflowChangeHistoryVersionBadge'
+      )
+    ).toHaveTextContent('v3');
   });
 
   it('warns when restoring with unsaved workflow changes', async () => {
