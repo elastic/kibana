@@ -124,6 +124,9 @@ export const createMockPackLiveRow = (overrides?: Partial<LiveHistoryRow>): Live
 export const createMockRuleRow = (overrides?: Partial<LiveHistoryRow>): LiveHistoryRow =>
   createMockLiveRow({ source: 'Rule', userId: undefined, userProfileUid: undefined, ...overrides });
 
+export const createMockWorkflowRow = (overrides?: Partial<LiveHistoryRow>): LiveHistoryRow =>
+  createMockLiveRow({ source: 'Workflow', ...overrides });
+
 export const createMockScheduledRow = (
   overrides?: Partial<ScheduledHistoryRow>
 ): ScheduledHistoryRow => {

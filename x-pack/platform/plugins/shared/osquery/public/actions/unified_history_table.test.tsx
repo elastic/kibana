@@ -18,6 +18,7 @@ import {
   createMockLiveRow,
   createMockPackLiveRow,
   createMockRuleRow,
+  createMockWorkflowRow,
   createMockScheduledRow,
   defaultPermissions,
   noRunPermissions,
@@ -252,6 +253,15 @@ describe('UnifiedHistoryTable', () => {
     renderWithProviders(<UnifiedHistoryTable />);
 
     expect(screen.getByText('Rule')).toBeInTheDocument();
+  });
+
+  it('source column shows Workflow for workflow row', () => {
+    const row = createMockWorkflowRow();
+    mockHistory({ data: [row] });
+
+    renderWithProviders(<UnifiedHistoryTable />);
+
+    expect(screen.getByText('Workflow')).toBeInTheDocument();
   });
 
   it('run by column shows Elastic for rule row', () => {

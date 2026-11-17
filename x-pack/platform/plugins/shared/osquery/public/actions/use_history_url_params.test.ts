@@ -77,6 +77,12 @@ describe('parseHistoryUrlParams', () => {
     expect(result.sources).toEqual(['live', 'rule', 'scheduled']);
   });
 
+  it('restores the workflow source filter from the URL', () => {
+    const result = parseHistoryUrlParams('?sources=workflow');
+
+    expect(result.sources).toEqual(['workflow']);
+  });
+
   it('returns empty sources for completely invalid values', () => {
     const result = parseHistoryUrlParams('?sources=invalid,bad');
 
