@@ -1,0 +1,112 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { chunk } from 'lodash';
+import { SLI_DESTINATION_INDEX_PATTERN, SLO_RESOURCES_VERSION } from '../../../../common/constants';
+import { isAbortError } from '../orphan_summary_cleanup_task/types';
+import { planSliRetention } from './plan_sli_retention';
+
+const DELETE_CHUNK_SIZE = 50;
+
+interface Dependencies {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  signal: AbortSignal;
+  now: Date;
+  retentionMs: number;
+}
+
+const parseDocsCount = (value: string | null | undefined): number | undefined => {
+  if (value === null || value === undefined || value === '') {
+    return undefined;
+  }
+  const count = Number(value);
+  return Number.isFinite(count) ? count : undefined;
+};
+
+/** Deletes the SLI indices selected by the retention plan, and returns the deleted index names. */
+export const runSliRetention = async ({
+  esClient,
+  logger,
+  signal,
+  now,
+  retentionMs,
+}: Dependencies): Promise<string[]> => {
+  const catIndices = await esClient.cat.indices(
+    {
+      index: SLI_DESTINATION_INDEX_PATTERN,
+      expand_wildcards: 'all',
+      h: ['index', 'docs.count'],
+      format: 'json',
+    },
+    { signal }
+  );
+  const indices = catIndices.flatMap(({ index, 'docs.count': docsCount }) =>
+    index ? [{ index, docsCount: parseDocsCount(docsCount) }] : []
+  );
+
+  const transformDestIndices = await fetchTransformDestIndices({ esClient, logger, signal });
+  const { agedOut, emptyDated, emptyOldBase } = planSliRetention({
+    indices,
+    transformDestIndices,
+    now,
+    retentionMs,
+    currentVersion: SLO_RESOURCES_VERSION,
+  });
+
+  const toDelete = [...agedOut, ...emptyDated, ...emptyOldBase];
+  if (toDelete.length === 0) {
+    logger.debug('No SLI index to delete');
+    return [];
+  }
+
+  logger.info(
+    `Deleting ${toDelete.length} SLI indices (aged out: ${agedOut.length}, empty dated: ${emptyDated.length}, empty old base: ${emptyOldBase.length})`
+  );
+
+  const deleted: string[] = [];
+  try {
+    for (const names of chunk(toDelete, DELETE_CHUNK_SIZE)) {
+      signal.throwIfAborted();
+      await esClient.indices.delete(
+        { index: names, ignore_unavailable: true, expand_wildcards: 'all' },
+        { signal }
+      );
+      deleted.push(...names);
+      logger.info(`Deleted SLI indices: [${names.join(', ')}]`);
+    }
+  } catch (error) {
+    if (!isAbortError(error, signal)) {
+      throw error;
+    }
+    logger.debug(`SLI retention aborted after deleting ${deleted.length} indices`);
+  }
+
+  return deleted;
+};
+
+// Returns the destination indices of the SLO transforms, or undefined when they cannot be listed.
+const fetchTransformDestIndices = async ({
+  esClient,
+  logger,
+  signal,
+}: Pick<Dependencies, 'esClient' | 'logger' | 'signal'>): Promise<Set<string> | undefined> => {
+  try {
+    const { transforms } = await esClient.transform.getTransform(
+      { transform_id: 'slo-*', size: 10000, allow_no_match: true },
+      { signal }
+    );
+    return new Set(transforms.flatMap(({ dest }) => (dest.index ? [dest.index] : [])));
+  } catch (error) {
+    if (isAbortError(error, signal)) {
+      throw error;
+    }
+    logger.warn(`Failed to list SLO transforms, keeping old SLI base indices: ${error.message}`);
+    return undefined;
+  }
+};

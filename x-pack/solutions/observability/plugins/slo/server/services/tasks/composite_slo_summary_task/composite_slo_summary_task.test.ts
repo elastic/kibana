@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { of } from 'rxjs';
 import { addTransactionLabels } from '@kbn/apm-utils';
 import type { CoreSetup, LoggerFactory } from '@kbn/core/server';
@@ -78,6 +79,9 @@ describe('CompositeSloSummaryTask', () => {
     healthScanTaskEnabled: true,
     staleInstancesCleanupTaskEnabled: false,
     compositeSloSummaryTaskEnabled: true,
+    sliIndexRounding: 'M',
+    sliRetentionTaskEnabled: true,
+    sliRetentionPeriod: moment.duration(180, 'days'),
     enabled: true,
     experimental: {
       ruleFormV2: { enabled: false },

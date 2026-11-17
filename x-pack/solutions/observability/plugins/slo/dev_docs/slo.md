@@ -144,6 +144,40 @@ The default settings should be sufficient for most users, but if needed, the fol
 - **preventInitialBackfill**: A boolean preventing the backfill of the entire lookback window defined on the SLO. Useful for performance reason.
 - **syncField**: The field to use for syncing the source data with the transform. Default to the sli timestampField. It is highly recommended to use an `event.ingested` or similar field.
 
+## SLI data routing and retention
+
+### Routing pipeline
+
+Each SLO rollup transform writes to the base SLI index (`.slo-observability.sli-v3.6`) through its own SLI ingest pipeline (`.slo-observability.sli.pipeline-{sloId}-{revision}`). That pipeline calls a shared routing pipeline, one per resources version (`.slo-observability.sli.routing-v3.6`), which routes each document to a time-based index named after its `@timestamp`: `.slo-observability.sli-v3.6.YYYY-MM-DD`.
+
+The routing pipeline is managed by Kibana: the resource installer creates it on startup and the `slo:resources-reconcile` task re-installs it every hour when it is missing or outdated. Its `_meta.routing` holds the routing state:
+
+- `after`: the index rounding in use (`M` monthly, `w` weekly or `d` daily).
+- `before` and `cutover`: a cutover guard. Documents with a `@timestamp` before `cutover` (epoch millis, the first day of a UTC month) keep the `before` rounding, so a rollup bucket rewritten after a rounding change lands in the same index as the original document. The guard is removed 91 days after the cutover, once no transform can write a bucket that old.
+
+The `slo:resources-reconcile` task also migrates the SLI pipelines created before the routing pipeline existed: it replaces their `date_index_name` processor with a call to the routing pipeline of their version.
+
+### Index rounding
+
+`xpack.slo.sliIndexRounding` (`M`, `w` or `d`, defaults to `M`) sets the rounding of the SLI indices. Clusters with a large SLI volume can use `d` or `w` to keep each index small. A change applies to the documents written after the next UTC month start, and is picked up on the next Kibana start or reconcile run. The cutover guard only protects the last change: avoid changing the rounding twice within 91 days.
+
+### Retention
+
+The `slo:sli-retention-task` task runs daily and deletes, for every `v3.x` version:
+
+- dated SLI indices whose period ended before the retention period (`xpack.slo.sliRetentionPeriod`, defaults to `180d`, minimum `91d`),
+- empty dated SLI indices whose period ended more than 91 days ago,
+- empty base SLI indices of previous versions that no SLO transform writes to.
+
+The rounding of an index cannot be told from its name, so a day `01` index is kept one month after its date, and any other index 7 days after its date. Set `xpack.slo.sliRetentionTaskEnabled: false` to keep SLI data forever. A retention period shorter than 180 days truncates the history charts of 90 days SLOs.
+
+### Troubleshooting
+
+```
+GET _ingest/pipeline/.slo-observability.sli.routing-v3.6
+GET _cat/indices/.slo-observability.sli-v3*?expand_wildcards=all&s=index
+```
+
 ## Example
 
 ### Availability

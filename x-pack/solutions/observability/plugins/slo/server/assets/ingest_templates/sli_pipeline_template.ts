@@ -7,12 +7,9 @@
 
 import type { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import {
-  getSLOPipelineId,
-  SLI_INGEST_PIPELINE_INDEX_NAME_PREFIX,
-  SLO_RESOURCES_VERSION,
-} from '../../../common/constants';
+import { getSLOPipelineId, SLO_RESOURCES_VERSION } from '../../../common/constants';
 import type { SLODefinition } from '../../domain/models';
+import { getSLIRoutingProcessor } from './sli_routing_pipeline_template';
 
 export const getSLIPipelineTemplate = (
   slo: SLODefinition,
@@ -67,14 +64,7 @@ export const getSLIPipelineTemplate = (
           value: spaceId,
         },
       },
-      {
-        date_index_name: {
-          field: '@timestamp',
-          index_name_prefix: SLI_INGEST_PIPELINE_INDEX_NAME_PREFIX,
-          date_rounding: 'd',
-          date_formats: ['UNIX_MS', 'ISO8601', "yyyy-MM-dd'T'HH:mm:ss.SSSXX"],
-        },
-      },
+      getSLIRoutingProcessor(SLO_RESOURCES_VERSION),
       {
         dot_expander: {
           path: 'slo.groupings',
