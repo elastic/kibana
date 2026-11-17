@@ -99,8 +99,9 @@ export function fetchAndValidate$({
       ]) => {
         let built: ReturnType<typeof buildOptionsListFetchBody>;
         try {
-          // A field of an ES|QL source runs a generated query, like "Write a query" does. The query
-          // that the user writes is never replaced.
+          // A "Write a query" control already has its own query. A field control on an ES|QL source
+          // has none and no data view to search, so it runs a generated query through the same
+          // ES|QL path.
           const generatedQuery =
             valuesSource === ControlValuesSource.ESQL
               ? undefined

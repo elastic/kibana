@@ -80,7 +80,9 @@ export function minMax$({
         if (!dataSource || !field) {
           return { max: undefined, min: undefined };
         }
-        // The values of a field of an ES|QL source come from a query, as for a query of the user
+        // A "Write a query" control already has its own query. A field control on an ES|QL source
+        // has none and no data view to search, so it runs a generated query through the same
+        // ES|QL path.
         const esql =
           valuesSource === ControlValuesSource.ESQL
             ? esqlQuery
