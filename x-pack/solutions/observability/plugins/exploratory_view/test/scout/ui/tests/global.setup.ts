@@ -11,10 +11,14 @@ import { testData } from '../fixtures';
 globalSetupHook(
   'Ingest Exploratory View test data',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
-  async ({ esArchiver, log }) => {
+  async ({ esArchiver, log, config }) => {
+    // The RUM archives are only read by the UX prefill spec, which is stateful only, and their
+    // ILM settings (index.lifecycle.name) are rejected by serverless Elasticsearch.
+    const rumArchives = config.serverless
+      ? []
+      : [testData.ES_ARCHIVES.RUM_8_0_0, testData.ES_ARCHIVES.RUM_TEST_DATA];
     const archives = [
-      testData.ES_ARCHIVES.RUM_8_0_0,
-      testData.ES_ARCHIVES.RUM_TEST_DATA,
+      ...rumArchives,
       testData.ES_ARCHIVES.FULL_HEARTBEAT,
       testData.ES_ARCHIVES.BROWSER,
     ];
