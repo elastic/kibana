@@ -20,6 +20,7 @@ import {
   getModelReleaseDate,
   getProviderOptions,
   getRegionOptions,
+  getTaskTypeCategoryLabel,
   modelMatchesRegionOption,
   MODEL_TYPE_FILTERS,
   type EisDisplayOptions,
@@ -31,7 +32,7 @@ import { getModelId } from './get_model_id';
 /** Filter dimension for the model creator, surfaced as the "Model family" filter. */
 export const EIS_PROVIDER_FILTER_ID = 'provider';
 
-/** Filter dimension for the task-type category (`Generative`, `Embedding`, `Rerank`). */
+/** Filter dimension for the task-type category (`Generative`, `Embedding`, `Rerank`, `Decision`). */
 export const EIS_CATEGORY_FILTER_ID = 'category';
 
 /** Filter dimension for geographies and regions where a model is available. */
@@ -91,9 +92,9 @@ const sortModels = (models: GroupedModel[], sort: FindItemsParams['sort']): Grou
   }
 
   if (sort?.field === EIS_TYPE_SORT_FIELD) {
-    return [...models].sort(
-      (a, b) => a.categories.join(', ').localeCompare(b.categories.join(', ')) * direction
-    );
+    const getTypeLabel = ({ categories }: GroupedModel) =>
+      categories.map(getTaskTypeCategoryLabel).join(', ');
+    return [...models].sort((a, b) => getTypeLabel(a).localeCompare(getTypeLabel(b)) * direction);
   }
 
   if (sort?.field === EIS_RELEASED_SORT_FIELD || sort?.field === EIS_END_OF_LIFE_SORT_FIELD) {

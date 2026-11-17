@@ -44,6 +44,8 @@ interface ResolveWorkerIndexCoverageParams {
   request: KibanaRequest;
   spaceId: string;
   indexPatterns: string[];
+  /** Cross-project search is on: an unqualified pattern resolving only on a linked project is not missing. */
+  crossProjectSearch?: boolean;
   workflowId: string | null;
   serviceAccountId: string | null;
   roleName: string;
@@ -65,6 +67,7 @@ export const resolveWorkerIndexCoverage = async ({
   request,
   spaceId,
   indexPatterns,
+  crossProjectSearch = false,
   workflowId,
   serviceAccountId,
   roleName,
@@ -88,7 +91,7 @@ export const resolveWorkerIndexCoverage = async ({
       allow_no_indices: true,
       expand_wildcards: ['open'],
     });
-    missingForEveryone = unresolvedPatterns(universe, resolved);
+    missingForEveryone = unresolvedPatterns(universe, resolved, crossProjectSearch);
   } catch (err) {
     if (statusCodeOf(err) === 403) {
       return {

@@ -323,12 +323,22 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       });
     }
 
-    if (command === 'get-file' && parameters.force === true) {
-      // `force` (read a locked file from a volume snapshot) is supported on Windows only
-      requirements.push({
-        capability: 'get_file_force',
-        unsupportedMessage: 'the get-file `force` parameter (Windows only)',
-      });
+    if (command === 'get-file') {
+      if (parameters.force === true) {
+        // `force` (read a locked file from a volume snapshot) is supported on Windows only
+        requirements.push({
+          capability: 'get_file_force',
+          unsupportedMessage: 'the get-file `force` parameter (Windows only)',
+        });
+      }
+
+      // `paths` (retrieve multiple files in one action)
+      if (parameters.paths !== undefined) {
+        requirements.push({
+          capability: 'get_file_multi_path',
+          unsupportedMessage: 'the get-file `paths` parameter',
+        });
+      }
     }
 
     if ((command === 'get-file' || command === 'memory-dump') && parameters.export !== undefined) {

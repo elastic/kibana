@@ -27,6 +27,7 @@ import { LogsRepository } from '../repositories/logs_repository';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { NodesFactory } from '../step/nodes_factory';
+import { publishFinishedWorkflowExecution } from '../topics/publish_finished_workflow_execution';
 import type { WorkflowsExecutionEnginePluginStart } from '../types';
 import { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
 import { StepIoService } from '../workflow_context_manager/step_io_service';
@@ -115,12 +116,20 @@ export async function setupDependencies(
   } catch (error) {
     if (isGraphBuildError(error)) {
       const finishedAt = new Date();
+      const executionError = { type: 'GraphBuildError', message: error.message };
+      const duration = finishedAt.getTime() - new Date(workflowExecution.startedAt).getTime();
       await workflowExecutionRepository.updateWorkflowExecution({
         id: workflowRunId,
         status: ExecutionStatus.FAILED,
-        error: { type: 'GraphBuildError', message: error.message },
+        error: executionError,
         finishedAt: finishedAt.toISOString(),
-        duration: finishedAt.getTime() - new Date(workflowExecution.startedAt).getTime(),
+        duration,
+      });
+      await publishFinishedWorkflowExecution(workflowExecution, {
+        status: ExecutionStatus.FAILED,
+        error: executionError,
+        finishedAt: finishedAt.toISOString(),
+        duration,
       });
       logger.error(
         `Workflow execution ${workflowRunId} failed to build its execution graph: ${error.message}`

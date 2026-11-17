@@ -64,11 +64,13 @@ export function registerAgentBuilderTools({
       getScopedClients,
       server,
       logger: logger.get('ki_search_tool'),
+      telemetry,
     }),
     createFeatureSimilaritySearchTool({
       getScopedClients,
       server,
       logger: logger.get('ki_feature_similarity_search_tool'),
+      telemetry,
     }),
     createFeatureKnowledgeIndicatorTool({
       getScopedClients,
@@ -111,28 +113,33 @@ export function registerAgentBuilderTools({
       getScopedClients,
       server,
       logger: logger.get('source_list_tool'),
+      telemetry,
     }),
     createSourceGetTool({
       getScopedClients,
       server,
       logger: logger.get('source_get_tool'),
+      telemetry,
     }),
     createSourceCreateTool({
       getScopedClients,
       server,
       logger: logger.get('source_create_tool'),
+      telemetry,
       maintenanceService,
     }),
     createSourceUpdateTool({
       getScopedClients,
       server,
       logger: logger.get('source_update_tool'),
+      telemetry,
       maintenanceService,
     }),
     createSourceDeleteTool({
       getScopedClients,
       server,
       logger: logger.get('source_delete_tool'),
+      telemetry,
     }),
   ];
 

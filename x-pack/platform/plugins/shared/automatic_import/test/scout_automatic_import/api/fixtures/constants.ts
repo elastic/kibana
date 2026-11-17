@@ -16,7 +16,8 @@ export const COMMON_API_HEADERS = {
 /**
  * User roles for automatic_import feature privilege testing.
  *
- * - autoImportManager:  has `automatic_import: all` → granted both manage + read API tags
+ * - autoImportManager:  has `automatic_import: all` → granted both manage + read API tags, plus the
+ *   ES cluster privileges the pipeline update route needs, since it simulates as the current user
  * - autoImportReader:   has `automatic_import: read` → granted only read API tag
  * - autoImportNoAccess: has Fleet/Integrations but NO automatic_import feature entry and no base
  *   privilege → no automatic_import API tag at all
@@ -38,7 +39,7 @@ export const AUTO_IMPORT_USERS: Record<string, KibanaRole> = {
       },
     ],
     elasticsearch: {
-      cluster: ['monitor_inference'],
+      cluster: ['monitor_inference', 'manage_ingest_pipelines', 'manage_index_templates'],
       indices: [
         {
           names: ['*'],

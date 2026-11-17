@@ -13,6 +13,7 @@ import type { ChatCompletionTokenCount, InferenceCallbacks } from '@kbn/inferenc
 import { createInferenceProviderError } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { z } from '@kbn/zod/v4';
+import * as tracing from '../task_providers/tracing';
 import { createEvaluatorRegistryMock } from '../evaluators/registry.mock';
 import { latencyEvaluatorDef } from '../evaluators/trace_metrics';
 import { awaitTraceReady } from '../evaluators/trace_readiness';
@@ -370,6 +371,27 @@ describe('createEvaluationService', () => {
       expect(context.round).toBe(EVIDENCE_ROUND);
       expect(context.referenceData).toEqual({ expected: 'A bad deploy' });
       expect(context.trace).toBeUndefined();
+    });
+
+    it('runs only LLM judges inside a named judge span', async () => {
+      const spanSpy = jest
+        .spyOn(tracing, 'withEvalsJudgeChildSpan')
+        .mockImplementation((_name, run) => run());
+      const groundedness = buildEvaluator({ name: 'groundedness', kind: 'llm' });
+      const exactMatch = buildEvaluator({ name: 'exact_match', kind: 'code' });
+      const { evaluateEvidence } = setup([groundedness, exactMatch]);
+
+      await evaluateEvidence({
+        evaluators: [
+          { name: 'groundedness', connector_id: 'judge-connector' },
+          { name: 'exact_match' },
+        ],
+        evidence: { round: EVIDENCE_ROUND },
+      });
+
+      expect(spanSpy).toHaveBeenCalledTimes(1);
+      expect(spanSpy).toHaveBeenCalledWith('groundedness', expect.any(Function));
+      spanSpy.mockRestore();
     });
 
     it('fails an evaluator that reads the trace, without failing the others', async () => {
