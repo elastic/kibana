@@ -36,12 +36,14 @@ const endTimeField = lazySchema(() =>
 const nextTokenField = (maxLength: number) =>
   z
     .string()
+    .min(1)
     .max(maxLength)
     .optional()
     .describe('Pagination token from a previous response. Omit to fetch the first page.');
 const groupArnField = lazySchema(() =>
   z
     .string()
+    .min(1)
     .max(400)
     .optional()
     .describe(
@@ -51,6 +53,7 @@ const groupArnField = lazySchema(() =>
 const groupNameField = lazySchema(() =>
   z
     .string()
+    .min(1)
     .max(32)
     .optional()
     .describe(
@@ -208,6 +211,7 @@ export const GetTimeSeriesServiceStatisticsInputSchema = lazySchema(() =>
     endTime: endTimeField,
     entitySelectorExpression: z
       .string()
+      .min(1)
       .max(500)
       .optional()
       .describe(

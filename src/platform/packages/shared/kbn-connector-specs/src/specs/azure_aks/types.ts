@@ -21,6 +21,11 @@ import { z, lazySchema } from '@kbn/zod/v4';
  * override the configured one, so the discovery loop can complete without
  * requiring the user to edit the connector first.
  */
+// An AKS managed cluster name: alphanumeric at each end, dashes and underscores between.
+const CLUSTER_NAME = /^[a-zA-Z0-9]$|^[a-zA-Z0-9][-_a-zA-Z0-9]{0,61}[a-zA-Z0-9]$/;
+// An agent pool name, which Azure limits to a lowercase letter followed by lowercase alphanumerics.
+const NODE_POOL_NAME = /^[a-z][a-z0-9]{0,11}$/;
+
 const subscriptionIdInputSchema = lazySchema(() =>
   z
     .string()
@@ -62,6 +67,7 @@ export const ListClustersInputSchema = lazySchema(() =>
     subscriptionId: subscriptionIdInputSchema,
     resourceGroupName: z
       .string()
+      .min(1)
       .max(90)
       .optional()
       .describe(
@@ -79,7 +85,12 @@ export const GetClusterInputSchema = lazySchema(() =>
   z.object({
     subscriptionId: subscriptionIdInputSchema,
     resourceGroupName: z.string().min(1).max(90).describe('Resource group containing the cluster.'),
-    clusterName: z.string().min(1).max(63).describe('Name of the AKS managed cluster.'),
+    clusterName: z
+      .string()
+      .min(1)
+      .max(63)
+      .regex(CLUSTER_NAME)
+      .describe('Name of the AKS managed cluster.'),
   })
 );
 export type GetClusterInput = z.infer<typeof GetClusterInputSchema>;
@@ -99,8 +110,18 @@ export const GetNodePoolInputSchema = lazySchema(() =>
   z.object({
     subscriptionId: subscriptionIdInputSchema,
     resourceGroupName: z.string().min(1).max(90).describe('Resource group containing the cluster.'),
-    clusterName: z.string().min(1).max(63).describe('Name of the AKS managed cluster.'),
-    nodePoolName: z.string().min(1).max(12).describe('Name of the agent pool.'),
+    clusterName: z
+      .string()
+      .min(1)
+      .max(63)
+      .regex(CLUSTER_NAME)
+      .describe('Name of the AKS managed cluster.'),
+    nodePoolName: z
+      .string()
+      .min(1)
+      .max(12)
+      .regex(NODE_POOL_NAME)
+      .describe('Name of the agent pool.'),
   })
 );
 export type GetNodePoolInput = z.infer<typeof GetNodePoolInputSchema>;
@@ -113,8 +134,18 @@ export const ScaleNodePoolInputSchema = lazySchema(() =>
   z.object({
     subscriptionId: subscriptionIdInputSchema,
     resourceGroupName: z.string().min(1).max(90).describe('Resource group containing the cluster.'),
-    clusterName: z.string().min(1).max(63).describe('Name of the AKS managed cluster.'),
-    nodePoolName: z.string().min(1).max(12).describe('Name of the agent pool to scale.'),
+    clusterName: z
+      .string()
+      .min(1)
+      .max(63)
+      .regex(CLUSTER_NAME)
+      .describe('Name of the AKS managed cluster.'),
+    nodePoolName: z
+      .string()
+      .min(1)
+      .max(12)
+      .regex(NODE_POOL_NAME)
+      .describe('Name of the agent pool to scale.'),
     count: z
       .number()
       .int()
@@ -145,7 +176,12 @@ export const GetClusterCredentialsInputSchema = lazySchema(() =>
   z.object({
     subscriptionId: subscriptionIdInputSchema,
     resourceGroupName: z.string().min(1).max(90).describe('Resource group containing the cluster.'),
-    clusterName: z.string().min(1).max(63).describe('Name of the AKS managed cluster.'),
+    clusterName: z
+      .string()
+      .min(1)
+      .max(63)
+      .regex(CLUSTER_NAME)
+      .describe('Name of the AKS managed cluster.'),
     format: z
       .enum(['exec', 'azure'])
       .optional()
@@ -165,7 +201,12 @@ export const RunCommandInputSchema = lazySchema(() =>
   z.object({
     subscriptionId: subscriptionIdInputSchema,
     resourceGroupName: z.string().min(1).max(90).describe('Resource group containing the cluster.'),
-    clusterName: z.string().min(1).max(63).describe('Name of the AKS managed cluster.'),
+    clusterName: z
+      .string()
+      .min(1)
+      .max(63)
+      .regex(CLUSTER_NAME)
+      .describe('Name of the AKS managed cluster.'),
     command: z
       .string()
       .min(1)
