@@ -120,6 +120,7 @@ export {
 export {
   getStatsGroupFieldType,
   getFieldParamDefinition as getFieldParamDefinition,
+  isAggregateFilteringFunction,
 } from './utils/cascaded_documents_helpers/utils';
 export { getProjectRoutingFromEsqlQuery } from './utils/set_instructions_helpers';
 export { isComputedColumn, getQuerySummary, resolveSourceField } from './utils/get_query_summary';

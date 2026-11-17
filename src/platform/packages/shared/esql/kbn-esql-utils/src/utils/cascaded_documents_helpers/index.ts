@@ -674,12 +674,9 @@ function handleStatsByColumnLeafOperation({
 function handleStatsByCategorizeLeafOperation({
   editorQuery,
   operatingStatsCommandIndex,
-  operatingStatsCommandSummary,
   categorizeCommandNode,
-  dataViewFields,
   esqlVariables,
   nodePathMap,
-  nodeAggregatedValues,
 }: StatsByCategorizeLeafOperationArgs): AggregateQuery {
   // create a new query to populate with the cascade operation query
   const cascadeOperationQuery = EsqlQuery.fromSrc('');
@@ -759,19 +756,7 @@ function handleStatsByCategorizeLeafOperation({
   // build a where command with match expressions for the selected categorize function
   const categorizeWhereCommand = Builder.command({
     name: 'where',
-    args: [
-      combineFilterExpressionsWithAnd([
-        categorizeMatchExpression,
-        // the resulting leaf operation query for a categorize function omits the STATS command,
-        // hence we need to account for the scenario where filtering aggregate function might have been applied.
-        ...buildValuesAggregateFilterExpressions({
-          statsSummary: operatingStatsCommandSummary,
-          nodeAggregatedValues,
-          dataViewFields,
-          esqlVariables,
-        }),
-      ]),
-    ],
+    args: [categorizeMatchExpression],
   });
 
   mutate.generic.commands.append(cascadeOperationQuery.ast, categorizeWhereCommand);
