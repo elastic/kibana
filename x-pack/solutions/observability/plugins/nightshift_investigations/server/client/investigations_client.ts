@@ -40,7 +40,9 @@ import {
   investigationRunFailedEventSchema,
 } from '@kbn/agentic-investigations-plugin/common';
 import { assertNever } from '@kbn/std';
+import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
+import { assertNightshiftSpace } from '../lib/assert_nightshift_space';
 import { installAssistantAgent } from '../lib/install_assistant_agent';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import {
@@ -114,6 +116,33 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
 function asString(v: unknown): string | undefined {
   return typeof v === 'string' ? v || undefined : undefined;
 }
+
+function asLifecycleCorrelationId(v: unknown): string | undefined {
+  const value = asString(v)?.trim();
+  return value && value.length <= 500 ? value : undefined;
+}
+
+const correlationFromContext = (context: unknown): LifecycleCorrelation => {
+  if (!isPlainObject(context)) return {};
+  return {
+    event_id: asLifecycleCorrelationId(context.event_id),
+    source_workflow_execution_id: asLifecycleCorrelationId(context.source_workflow_execution_id),
+  };
+};
+
+/** The significant event behind a run: its subject, or the event whose alert triggered it. */
+const significantEventIdOf = (
+  subject: InvestigationSubject,
+  alerts: InvestigationAlertSnapshot[]
+): string | undefined => {
+  if (subject.type === 'significant_event') return asLifecycleCorrelationId(subject.id);
+  const data = alerts.flatMap((alert) =>
+    alert.alert_version === 'v2' && alert.source === SIGNIFICANT_EVENTS_ALERT_SOURCE && alert.data
+      ? [alert.data]
+      : []
+  )[0];
+  return asLifecycleCorrelationId(data?.event_id);
+};
 
 /** `inputs.context.follow_up` of the investigation runs `followUpRecoveredAlert` starts. */
 export const ALERT_RECOVERED_FOLLOW_UP = 'alert_recovered';
@@ -282,6 +311,11 @@ export interface LifecycleSubject {
   startedAt: string;
 }
 
+export interface LifecycleCorrelation {
+  event_id?: string;
+  source_workflow_execution_id?: string;
+}
+
 /**
  * A lifecycle message's view of an investigation. Until Agent Builder titles it, the title is the
  * run's `title` input; the first pending proposal stands in for the top recommendation.
@@ -327,7 +361,7 @@ const toNotifiableInvestigation = (
 });
 
 const SERVICE_ACCOUNT_REQUIRED_MESSAGE =
-  'Nightshift is not set up in this space. An admin with manage_security must enable the Nightshift service account.';
+  'Nightshift is not set up in this space. An admin with manage_security must enable the nightshift service account.';
 
 /**
  * Whether a run executes as the space's Nightshift agent account: the account its entry point is
@@ -343,7 +377,7 @@ const runsAsInvestigator = (
   effectiveIdentity.id === agentServiceAccountId;
 
 const NOT_RUN_AS_INVESTIGATOR_MESSAGE =
-  'Investigations only run as the Nightshift service account, through the entry point of the space.';
+  'Investigations only run as the nightshift service account, through the entry point of the space.';
 type StoredWorkflow = NonNullable<
   Awaited<ReturnType<WorkflowsServerPluginSetup['management']['getWorkflow']>>
 >;
@@ -510,6 +544,10 @@ export class NightshiftInvestigationsClient {
       entryPoint: InvestigationEntryPoint;
     }
   ): Promise<StartInvestigationResponse> {
+    // First, before anything is installed: the failure sweep workflow is ensured below, and the
+    // agent installers further down would otherwise be what refuses, leaving a sweep workflow
+    // behind in a space that cannot run an investigation anyway.
+    assertNightshiftSpace(this.getSpaceId());
     if (instructions !== undefined && instructions.length > MAX_AUTOMATION_INSTRUCTIONS_LENGTH) {
       throw badRequest(
         `Instructions must be at most ${MAX_AUTOMATION_INSTRUCTIONS_LENGTH} characters.`
@@ -638,6 +676,7 @@ export class NightshiftInvestigationsClient {
           : {}),
         context: {
           ...prepared.context,
+          nightshift_automation_id: automationId,
           is_follow_up: isFollowUp,
           source: resolvedSubject.type,
           [`${resolvedSubject.type}_id`]: resolvedSubject.id,
@@ -660,13 +699,29 @@ export class NightshiftInvestigationsClient {
       await this.createAcceptedInvestigation({ conversations, investigationId, executionId });
     }
 
+    const correlation = correlationFromContext(prepared.context);
+    this.telemetry?.reportInvestigationStarted({
+      investigation_id: investigationId,
+      workflow_execution_id: executionId,
+      trigger_type,
+      entry_point: entryPoint,
+      subject_type: resolvedSubject.type,
+      is_follow_up: isFollowUp,
+      automation_id: automationId,
+      ...correlation,
+      event_id: significantEventIdOf(resolvedSubject, alerts) ?? correlation.event_id,
+    });
+
     this.logger.info(
       `${isFollowUp ? 'Continued' : 'Started'} investigation "${investigationId}" for ${
         subject.type
       }/${subject.id}, execution_id=${executionId}`
     );
 
-    return { investigation_id: investigationId };
+    return {
+      investigation_id: investigationId,
+      ...(automationId ? { execution_id: executionId } : {}),
+    };
   }
 
   /**
@@ -748,7 +803,7 @@ export class NightshiftInvestigationsClient {
     );
     if (!workflow?.definition || !isEntryPointReady(workflow)) {
       this.logger.warn(
-        `Investigation workflow "${workflowId}" is not set up in space "${spaceId}"; an admin must enable the Nightshift service account`
+        `Investigation workflow "${workflowId}" is not set up in space "${spaceId}"; an admin must enable the nightshift service account`
       );
       throw new InvestigationUnavailableError(SERVICE_ACCOUNT_REQUIRED_MESSAGE);
     }
@@ -1188,6 +1243,25 @@ export class NightshiftInvestigationsClient {
     return { execution, inputs };
   }
 
+  /** Pipeline join keys from the run context; best-effort so a lifecycle event still emits when the read fails. */
+  async getLifecycleCorrelation(
+    investigationId: string,
+    executionId: string
+  ): Promise<LifecycleCorrelation> {
+    let inputs: Record<string, unknown> | undefined;
+    try {
+      ({ inputs } = await this.readInvestigationExecution(investigationId, executionId));
+    } catch (error) {
+      this.logger.warn(
+        `Could not read lifecycle correlation for investigation "${investigationId}" execution "${executionId}": ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return {};
+    }
+    return correlationFromContext(inputs?.context);
+  }
+
   /**
    * What `nightshift.sendNotifications` needs for a lifecycle phase of a run: the investigation as
    * the shared query API reads it, its conversation, and the notification destinations the run was
@@ -1447,6 +1521,14 @@ export class NightshiftInvestigationsClient {
         follow_up: ALERT_RECOVERED_FOLLOW_UP,
         entry_point: 'alert_recovery' satisfies InvestigationEntryPoint,
       },
+    });
+    this.telemetry?.reportInvestigationStarted({
+      investigation_id: existing.id,
+      workflow_execution_id: executionId,
+      trigger_type: 'automatic',
+      entry_point: 'alert_recovery',
+      subject_type: 'alert',
+      is_follow_up: true,
     });
     this.logger.info(
       `Requested a recovery round on investigation "${existing.id}" for alert/${alertUuid}, execution_id=${executionId}`

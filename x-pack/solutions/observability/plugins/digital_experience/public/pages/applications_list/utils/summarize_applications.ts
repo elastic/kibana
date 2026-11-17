@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { APPLICATION_SOURCE } from '../../../../common/application_source';
 import { CORE_WEB_VITAL, getVitalRating } from '../../../../common/core_web_vitals';
 import type {
   ApplicationSource,
@@ -15,6 +16,11 @@ import type {
 
 export interface ApplicationsSummary {
   applications: number;
+  /**
+   * Sessions of the EDOT Browser applications, `null` when there is none or when one was read from
+   * the raw events, which don't count sessions: a total of only some would read as all of them.
+   */
+  sessions: number | null;
   pageLoads: number;
   /** JS errors per page load over all the applications, `null` without page loads. */
   errorsPerPageLoad: number | null;
@@ -35,6 +41,22 @@ const hasPoorCoreWebVitals = ({ webVitals: { lcp, inp, cls } }: ApplicationSumma
 const countNames = (applications: ApplicationSummary[]): number =>
   new Set(applications.map(({ serviceName }) => serviceName)).size;
 
+/** Classic RUM has no sessions, so only EDOT Browser rows count, and each must know its own. */
+const countSessions = (applications: ApplicationSummary[]): number | null => {
+  const otelApplications = applications.filter(({ source }) => source === APPLICATION_SOURCE.otel);
+  if (otelApplications.length === 0) {
+    return null;
+  }
+  let total = 0;
+  for (const { sessions } of otelApplications) {
+    if (sessions === null) {
+      return null;
+    }
+    total += sessions.count;
+  }
+  return total;
+};
+
 /**
  * The totals of every source's rows, for the summary above the table; a name with data in both
  * sources counts as one application.
@@ -46,6 +68,7 @@ export const summarizeApplications = (applications: ApplicationSummary[]): Appli
   const pageLoads = total(({ pageLoads: { count } }) => count);
   return {
     applications: countNames(applications),
+    sessions: countSessions(applications),
     pageLoads,
     errorsPerPageLoad: ratio(
       total(({ jsErrors: { count } }) => count),
@@ -58,6 +81,15 @@ export const summarizeApplications = (applications: ApplicationSummary[]): Appli
     poorCoreWebVitals: countNames(applications.filter(hasPoorCoreWebVitals)),
   };
 };
+
+/**
+ * The sessions over time of the selected source, `null` when they are not counted. Only EDOT Browser
+ * has sessions, so Classic RUM has none, and so has a list read from the raw events.
+ */
+export const sessionsOfSource = (
+  sessionsOverTime: TimeSeriesPoint[] | null,
+  source: ApplicationSource | undefined
+): TimeSeriesPoint[] | null => (source === APPLICATION_SOURCE.classic ? null : sessionsOverTime);
 
 /** Page loads over time of one source, or of both added up when no source is selected. */
 export const pageLoadsOfSources = (

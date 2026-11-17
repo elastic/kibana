@@ -62,11 +62,15 @@ export {
   type EdotBrowserEvent,
   type EdotBrowserExceptionTemplate,
   type EdotBrowserPage,
+  type EdotBrowserReplayOptions,
+  type EdotBrowserReplayVisit,
   type EdotBrowserResource,
+  type EdotBrowserSessionDocument,
   type EdotBrowserSite,
   type EdotBrowserStackFrame,
   type EdotBrowserSpanDocument,
   type HealthProfileName,
+  type ReplaySize,
 } from './src/lib/edot_browser';
 export {
   edotReactNative,

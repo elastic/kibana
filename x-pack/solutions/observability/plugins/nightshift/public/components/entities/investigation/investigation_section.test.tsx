@@ -152,7 +152,7 @@ describe('InvestigationSection', () => {
 
     const showMore = screen.getByTestId('nightshiftInvestigationSectionShowMore-critical');
     expect(showMore).toBeInTheDocument();
-    expect(showMore).toHaveTextContent('Show 3 more');
+    expect(showMore).toHaveTextContent('Show 3 more of 10');
   });
 
   it('loads more investigations for this section only', () => {
@@ -207,6 +207,6 @@ describe('InvestigationSection', () => {
 
     fireEvent.click(screen.getByTestId('nightshiftInvestigationSectionRetry-critical'));
     expect(onRetry).toHaveBeenCalledTimes(1);
-    expect(screen.queryByText('No investigations found')).not.toBeInTheDocument();
+    expect(screen.queryByText('No open investigations')).not.toBeInTheDocument();
   });
 });

@@ -14,13 +14,14 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiRadioGroup,
   EuiText,
   EuiTextArea,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
+import { MAX_TEXT_LENGTH, type SignificantEventCloseReason } from '@kbn/significant-events-schema';
 import React, { useState } from 'react';
 import {
   NIGHTSHIFT_EBT_ACTIONS,
@@ -46,6 +47,31 @@ const REASON_LABEL = i18n.translate(
   { defaultMessage: 'Assessment note (optional)' }
 );
 
+const CLOSE_REASON_LABEL = i18n.translate(
+  'xpack.nightshift.markSignificantEventInactiveModal.closeReasonLabel',
+  { defaultMessage: 'Reason (optional)' }
+);
+
+const CLOSE_REASON_OPTIONS: Array<{ id: SignificantEventCloseReason; label: string }> = [
+  {
+    id: 'resolved',
+    label: i18n.translate(
+      'xpack.nightshift.markSignificantEventInactiveModal.closeReason.resolved',
+      { defaultMessage: 'Resolved: it was a real problem and it is over' }
+    ),
+  },
+  {
+    id: 'dismissed',
+    label: i18n.translate(
+      'xpack.nightshift.markSignificantEventInactiveModal.closeReason.dismissed',
+      { defaultMessage: 'Dismissed: it was noise or not worth surfacing' }
+    ),
+  },
+];
+
+const isCloseReason = (id: string): id is SignificantEventCloseReason =>
+  CLOSE_REASON_OPTIONS.some((option) => option.id === id);
+
 const CONFIRM_BUTTON_LABEL = i18n.translate(
   'xpack.nightshift.markSignificantEventInactiveModal.confirmButton',
   { defaultMessage: 'Mark inactive' }
@@ -66,11 +92,15 @@ export const MarkSignificantEventInactiveModal = ({
   onSuccess?: () => void;
 }): React.ReactElement => {
   const [assessmentNote, setAssessmentNote] = useState('');
+  const [closeReason, setCloseReason] = useState<SignificantEventCloseReason>();
   const { closeSignificantEvent, closingEventId } = useCloseSignificantEvent({
     onClosed: onSuccess ?? onClose,
   });
   const modalTitleId = useGeneratedHtmlId({
     prefix: 'nightshiftMarkSignificantEventInactiveModal',
+  });
+  const closeReasonGroupName = useGeneratedHtmlId({
+    prefix: 'nightshiftMarkSignificantEventInactiveCloseReason',
   });
   const isUpdating = closingEventId === eventId;
 
@@ -87,6 +117,18 @@ export const MarkSignificantEventInactiveModal = ({
         <EuiText size="s">
           <p>{MODAL_DESCRIPTION}</p>
         </EuiText>
+        <EuiFormRow label={CLOSE_REASON_LABEL} fullWidth>
+          <EuiRadioGroup
+            name={closeReasonGroupName}
+            options={CLOSE_REASON_OPTIONS}
+            idSelected={closeReason}
+            onChange={(id) => {
+              if (isCloseReason(id)) setCloseReason(id);
+            }}
+            disabled={isUpdating}
+            data-test-subj="nightshiftMarkSignificantEventInactiveCloseReason"
+          />
+        </EuiFormRow>
         <EuiFormRow label={REASON_LABEL} fullWidth>
           <EuiTextArea
             fullWidth
@@ -109,7 +151,7 @@ export const MarkSignificantEventInactiveModal = ({
         <EuiButton
           color="danger"
           fill
-          onClick={() => closeSignificantEvent(eventId, assessmentNote)}
+          onClick={() => closeSignificantEvent(eventId, assessmentNote, closeReason)}
           isLoading={isUpdating}
           isDisabled={isUpdating}
           data-test-subj="nightshiftMarkSignificantEventInactiveConfirm"

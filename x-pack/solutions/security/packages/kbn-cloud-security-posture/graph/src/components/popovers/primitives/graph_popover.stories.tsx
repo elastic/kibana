@@ -156,9 +156,8 @@ const useNodePopover = () => {
       isOpen={state.isOpen}
       anchorElement={state.anchorElement}
       closePopover={actions.closePopover}
-      // eslint-disable-next-line react/jsx-no-literals
     >
-      TODO
+      {'TODO'}
     </GraphPopover>
   ));
 

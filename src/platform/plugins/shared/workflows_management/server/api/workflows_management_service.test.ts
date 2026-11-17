@@ -31,6 +31,7 @@ import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/se
 import { WorkflowsService } from './workflows_management_service';
 import { waitForManagedWorkflowInstallReadiness } from '../lib/wait_for_managed_workflow_install_readiness';
 import { ManagedWorkflowsService } from '../services/managed_workflows_service';
+import type { HitlStepClaim } from '../services/mark_step_as_responded_updater';
 import { WorkflowChangeHistoryService } from '../services/workflow_change_history_service';
 import { WorkflowCrudService } from '../services/workflow_crud_service';
 import { WorkflowExecutionQueryService } from '../services/workflow_execution_query_service';
@@ -556,11 +557,16 @@ describe('WorkflowsService (facade)', () => {
     });
   });
 
-  const claim = {
+  const claim: HitlStepClaim = {
     respondedBy: 'alice',
     respondedAt: '2026-04-29T10:00:00.000Z',
     channel: 'inbox',
-    strippedToken: { hash: 'hash', expiresAt: '2099-01-01T00:00:00.000Z' },
+    strippedToken: {
+      hash: 'hash',
+      expiresAt: '2099-01-01T00:00:00.000Z',
+      source: 'input',
+      mirroredOnInput: false,
+    },
   };
 
   describe('markStepAsResponded', () => {

@@ -15,51 +15,48 @@ import type {
 
 // Columns in `buildColumns` order: id, identity fields, attributes, last_seen.
 const HOST_LIST_COLUMNS: InventoryListColumn[] = [
-  { name: 'entity.id', kind: 'id', type: 'keyword' },
-  { name: 'host.id', kind: 'identity', type: 'keyword' },
-  { name: 'host.name', kind: 'identity', type: 'keyword' },
-  { name: 'host.hostname', kind: 'identity', type: 'keyword' },
-  { name: 'os.type', kind: 'attribute', type: 'keyword' },
-  { name: 'os.version', kind: 'attribute', type: 'keyword' },
-  { name: 'host.arch', kind: 'attribute', type: 'keyword' },
-  { name: 'host.ip', kind: 'attribute', type: 'ip' },
-  { name: 'k8s.cluster.name', kind: 'attribute', type: 'keyword' },
-  { name: 'cloud.provider', kind: 'attribute', type: 'keyword' },
-  { name: 'cloud.platform', kind: 'attribute', type: 'keyword' },
-  { name: 'cloud.region', kind: 'attribute', type: 'keyword' },
-  { name: 'cloud.availability_zone', kind: 'attribute', type: 'keyword' },
-  { name: 'cloud.account.id', kind: 'attribute', type: 'keyword' },
-  { name: 'os.name', kind: 'attribute', type: 'keyword' },
-  { name: 'host.os.kernel', kind: 'attribute', type: 'keyword' },
-  { name: 'last_seen', kind: 'last_seen', type: 'date' },
+  { name: 'entity.id', kind: 'id' },
+  { name: 'host.id', kind: 'identity' },
+  { name: 'host.name', kind: 'identity' },
+  { name: 'host.hostname', kind: 'identity' },
+  { name: 'os.type', kind: 'attribute' },
+  { name: 'os.version', kind: 'attribute' },
+  { name: 'host.arch', kind: 'attribute' },
+  { name: 'host.ip', kind: 'attribute' },
+  { name: 'k8s.cluster.name', kind: 'attribute' },
+  { name: 'cloud.provider', kind: 'attribute' },
+  { name: 'cloud.platform', kind: 'attribute' },
+  { name: 'cloud.region', kind: 'attribute' },
+  { name: 'cloud.availability_zone', kind: 'attribute' },
+  { name: 'cloud.account.id', kind: 'attribute' },
+  { name: 'os.name', kind: 'attribute' },
+  { name: 'host.os.kernel', kind: 'attribute' },
+  { name: 'last_seen', kind: 'last_seen' },
 ];
 
 // Mirrors the k8s.deployment definition: identity fields of both naming conventions, then the
 // attributes of both sources.
 const K8S_DEPLOYMENT_LIST_COLUMNS: InventoryListColumn[] = [
-  { name: 'entity.id', kind: 'id', type: 'keyword' },
-  { name: 'k8s.cluster.name', kind: 'identity', type: 'keyword' },
-  { name: 'k8s.namespace.name', kind: 'identity', type: 'keyword' },
-  { name: 'k8s.deployment.name', kind: 'identity', type: 'keyword' },
-  { name: 'orchestrator.cluster.name', kind: 'identity', type: 'keyword' },
-  { name: 'kubernetes.namespace', kind: 'identity', type: 'keyword' },
-  { name: 'kubernetes.deployment.name', kind: 'identity', type: 'keyword' },
-  { name: 'available_replicas', kind: 'attribute', type: 'long' },
-  { name: 'desired_replicas', kind: 'attribute', type: 'long' },
-  { name: 'paused', kind: 'attribute', type: 'boolean' },
-  { name: 'app', kind: 'attribute', type: 'keyword' },
-  { name: 'resource_id', kind: 'attribute', type: 'keyword' },
-  { name: 'last_seen', kind: 'last_seen', type: 'date' },
+  { name: 'entity.id', kind: 'id' },
+  { name: 'k8s.cluster.name', kind: 'identity' },
+  { name: 'k8s.namespace.name', kind: 'identity' },
+  { name: 'k8s.deployment.name', kind: 'identity' },
+  { name: 'orchestrator.cluster.name', kind: 'identity' },
+  { name: 'kubernetes.namespace', kind: 'identity' },
+  { name: 'kubernetes.deployment.name', kind: 'identity' },
+  { name: 'available_replicas', kind: 'attribute' },
+  { name: 'desired_replicas', kind: 'attribute' },
+  { name: 'paused', kind: 'attribute' },
+  { name: 'app', kind: 'attribute' },
+  { name: 'resource_id', kind: 'attribute' },
+  { name: 'last_seen', kind: 'last_seen' },
 ];
-
-const toTypeColumns = (columns: InventoryListColumn[]) =>
-  columns.map(({ name, kind }) => ({ name, kind }));
 
 export const HOST_TYPE_FIXTURE: InventoryEntityType = {
   type: 'host',
   name: 'Host',
   identityFields: ['host.id', 'host.name', 'host.hostname'],
-  columns: toTypeColumns(HOST_LIST_COLUMNS),
+  columns: HOST_LIST_COLUMNS,
 };
 
 export const K8S_DEPLOYMENT_TYPE_FIXTURE: InventoryEntityType = {
@@ -73,7 +70,7 @@ export const K8S_DEPLOYMENT_TYPE_FIXTURE: InventoryEntityType = {
     'kubernetes.namespace',
     'kubernetes.deployment.name',
   ],
-  columns: toTypeColumns(K8S_DEPLOYMENT_LIST_COLUMNS),
+  columns: K8S_DEPLOYMENT_LIST_COLUMNS,
 };
 
 export const TYPES_RESPONSE_FIXTURE: InventoryTypesResponse = {
@@ -189,7 +186,6 @@ export const buildListResponseFixture = (type: string): InventoryListResponse | 
   return {
     columns: fixture.columns,
     rows,
-    total: rows.length,
     truncated: false,
     errors: [],
     unavailableColumns: [],

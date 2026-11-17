@@ -47,8 +47,7 @@ export const createWatchlistMaintainer = ({
 
     // Use the authenticated fakeRequest from the task manager (created with the
     // credentials of the user who installed the Entity Store) rather than
-    // buildScopedInternalSavedObjectsClientUnsafe, which builds its own fake
-    // request with empty headers and no auth credentials.
+    // buildNamespacedInternalSavedObjectsClientUnsafe, which has no auth credentials.
     const soClient = coreStart.savedObjects.getScopedClient(fakeRequest, {
       excludedExtensions: [SECURITY_EXTENSION_ID],
       includedHiddenTypes: [watchlistEntitySourceTypeName],

@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { DEFAULT_GRID_RESOLUTION } from '@kbn/geo-precision';
 import React from 'react';
 // @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
@@ -23,7 +24,6 @@ import {
   COUNT_PROP_NAME,
   COLOR_MAP_TYPE,
   FIELD_ORIGIN,
-  GRID_RESOLUTION,
   LAYER_WIZARD_CATEGORY,
   RENDER_AS,
   VECTOR_STYLES,
@@ -33,8 +33,6 @@ import {
 import { NUMERICAL_COLOR_PALETTES } from '../../styles/color_palettes';
 import { ClustersLayerIcon } from '../../layers/wizards/icons/clusters_layer_icon';
 import { getIconSize } from './get_icon_size';
-
-const DEFAULT_RESOLUTION = GRID_RESOLUTION.FINE;
 
 export const clustersLayerWizardConfig: LayerWizard = {
   id: WIZARD_ID.CLUSTERS,
@@ -53,7 +51,7 @@ export const clustersLayerWizardConfig: LayerWizard = {
 
       const sourceDescriptor = ESGeoGridSource.createDescriptor({
         ...sourceConfig,
-        resolution: DEFAULT_RESOLUTION,
+        resolution: DEFAULT_GRID_RESOLUTION,
       });
 
       const defaultDynamicProperties = getDefaultDynamicProperties();
@@ -87,7 +85,7 @@ export const clustersLayerWizardConfig: LayerWizard = {
           type: STYLE_TYPE.DYNAMIC,
           options: {
             ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options as SizeDynamicOptions),
-            ...getIconSize(DEFAULT_RESOLUTION),
+            ...getIconSize(DEFAULT_GRID_RESOLUTION),
             field: {
               name: COUNT_PROP_NAME,
               origin: FIELD_ORIGIN.SOURCE,

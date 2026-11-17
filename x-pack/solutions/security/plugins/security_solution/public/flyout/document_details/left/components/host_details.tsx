@@ -523,7 +523,6 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
             inspect={hostEntityFromStoreResult?.inspect}
             deleteQuery={deleteQuery}
             scopeId={scopeId}
-            isFlyoutOpen={true}
             renderIpLink={renderIpLink}
             linkRenderer={LinkRenderer}
             riskScoreState={effectiveRiskScoreState}

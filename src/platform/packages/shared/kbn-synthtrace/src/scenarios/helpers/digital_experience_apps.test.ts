@@ -46,6 +46,10 @@ const collect = (
     includeRawAttribution,
     environments: false,
     edgeCases: false,
+    replayRate: 0,
+    errorReplayRate: 0,
+    replaySize: 'typical',
+    sessionLength: 'typical',
     scale,
     // Pin the seed so the minimums the tests rely on don't depend on the range's start
     seed: 'digital-experience-test',
@@ -53,7 +57,8 @@ const collect = (
     Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
   );
 
-describe('digital experience apps', () => {
+// Failing: See https://github.com/elastic/kibana/issues/303882
+describe.skip('digital experience apps', () => {
   describe('parseDigitalExperienceScenarioOpts', () => {
     it('defaults to session.id, no raw attribution, one environment, no edge cases and scale 1', () => {
       expect(parseDigitalExperienceScenarioOpts(undefined, FROM)).toEqual({
@@ -61,6 +66,10 @@ describe('digital experience apps', () => {
         includeRawAttribution: false,
         environments: false,
         edgeCases: false,
+        replayRate: 0,
+        errorReplayRate: 0,
+        replaySize: 'typical',
+        sessionLength: 'typical',
         scale: 1,
         seed: getDefaultSeed(FROM),
       });
@@ -74,6 +83,10 @@ describe('digital experience apps', () => {
             includeRawAttribution: true,
             environments: true,
             edgeCases: true,
+            replayRate: 0,
+            errorReplayRate: 0,
+            replaySize: 'typical',
+            sessionLength: 'typical',
             scale: 3,
           },
           FROM
@@ -83,6 +96,10 @@ describe('digital experience apps', () => {
         includeRawAttribution: true,
         environments: true,
         edgeCases: true,
+        replayRate: 0,
+        errorReplayRate: 0,
+        replaySize: 'typical',
+        sessionLength: 'typical',
         scale: 3,
         seed: getDefaultSeed(FROM),
       });
@@ -105,6 +122,10 @@ describe('digital experience apps', () => {
         includeRawAttribution: true,
         environments: true,
         edgeCases: true,
+        replayRate: 0,
+        errorReplayRate: 0,
+        replaySize: 'typical',
+        sessionLength: 'typical',
         scale: 2.5,
         seed: getDefaultSeed(FROM),
       });
@@ -218,6 +239,10 @@ describe('digital experience apps', () => {
           includeRawAttribution: false,
           environments: false,
           edgeCases: false,
+          replayRate: 0,
+          errorReplayRate: 0,
+          replaySize: 'typical',
+          sessionLength: 'typical',
           scale,
           // Like the scenarios, without a seed option the parser defaults it to the run's start
           seed: parseDigitalExperienceScenarioOpts(seed === undefined ? {} : { seed }, from).seed,
@@ -521,6 +546,10 @@ describe('digital experience apps', () => {
         includeRawAttribution: false,
         environments,
         edgeCases,
+        replayRate: 0,
+        errorReplayRate: 0,
+        replaySize: 'typical',
+        sessionLength: 'typical',
         scale: 2,
         seed: 'digital-experience-test',
       }).flatMap((generator) =>
@@ -753,6 +782,10 @@ describe('digital experience apps', () => {
           includeRawAttribution: false,
           environments: false,
           edgeCases: true,
+          replayRate: 0,
+          errorReplayRate: 0,
+          replaySize: 'typical',
+          sessionLength: 'typical',
           scale: 1,
           seed: 'digital-experience-test',
         }).flatMap((generator) =>

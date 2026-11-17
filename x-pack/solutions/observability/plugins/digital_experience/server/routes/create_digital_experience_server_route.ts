@@ -8,7 +8,6 @@
 import { createServerRouteFactory } from '@kbn/server-route-repository';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository-utils';
 import type { ApmDataAccessPluginSetup } from '@kbn/apm-data-access-plugin/server';
-import type { SessionsSettings } from '../../common/sessions';
 import { describeError, toClientError } from '../lib/helpers/errors';
 
 export interface DigitalExperienceRouteHandlerResources extends DefaultRouteHandlerResources {
@@ -17,8 +16,6 @@ export interface DigitalExperienceRouteHandlerResources extends DefaultRouteHand
   isServerless: boolean;
   /** Whether the ux plugin is enabled; the Classic RUM source needs it, like the browser does. */
   isUxEnabled: boolean;
-  /** `xpack.digitalExperience.sessions` config: the transforms' frequency and partitions. */
-  sessionsSettings: SessionsSettings;
 }
 
 const createServerRoute = createServerRouteFactory<

@@ -8,6 +8,7 @@
 import { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
+import type { SignificantEventCloseReason } from '@kbn/significant-events-schema';
 import { useKibana } from '../../hooks/use_kibana';
 import { invalidateSignificantEventQueries } from './invalidate_significant_event_queries';
 import {
@@ -34,7 +35,11 @@ const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));
 
 interface UseCloseSignificantEventResult {
-  closeSignificantEvent: (eventId: string, assessmentNote?: string) => void;
+  closeSignificantEvent: (
+    eventId: string,
+    assessmentNote?: string,
+    closeReason?: SignificantEventCloseReason
+  ) => void;
   closingEventId?: string;
 }
 
@@ -51,7 +56,15 @@ export const useCloseSignificantEvent = ({
   const [closingEventId, setClosingEventId] = useState<string>();
 
   const mutation = useMutation({
-    mutationFn: ({ eventId, assessmentNote }: { eventId: string; assessmentNote?: string }) =>
+    mutationFn: ({
+      eventId,
+      assessmentNote,
+      closeReason,
+    }: {
+      eventId: string;
+      assessmentNote?: string;
+      closeReason?: SignificantEventCloseReason;
+    }) =>
       significantEventsRepositoryClient.fetch(
         'POST /internal/significant_events/events/{id}/update',
         {
@@ -59,6 +72,7 @@ export const useCloseSignificantEvent = ({
             path: { id: eventId },
             body: {
               status: 'inactive',
+              ...(closeReason !== undefined ? { close_reason: closeReason } : {}),
               ...(assessmentNote !== undefined ? { assessment_note: assessmentNote } : {}),
             },
           },
@@ -107,8 +121,12 @@ export const useCloseSignificantEvent = ({
   });
 
   return {
-    closeSignificantEvent: (eventId, assessmentNote) =>
-      mutation.mutate({ eventId, assessmentNote: assessmentNote?.trim() || undefined }),
+    closeSignificantEvent: (eventId, assessmentNote, closeReason) =>
+      mutation.mutate({
+        eventId,
+        assessmentNote: assessmentNote?.trim() || undefined,
+        closeReason,
+      }),
     closingEventId,
   };
 };

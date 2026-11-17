@@ -31,12 +31,8 @@ export type InventoryRow = Readonly<Record<string, InventoryCellValue>>;
  */
 export type InventoryOutputColumnKind = 'id' | 'identity' | 'attribute' | 'last_seen';
 
-/** An output column of a list response, with its Elasticsearch field type when known. */
-export interface InventoryListColumn {
-  name: string;
-  kind: InventoryOutputColumnKind;
-  type: string | null;
-}
+/** An output column of a list response: the same shape the `types` route returns. */
+export type InventoryListColumn = InventoryTypeColumn;
 
 /** A source (index pattern) whose query failed while the others succeeded. */
 export interface InventorySourceError {
@@ -66,9 +62,7 @@ export interface InventoryListRequest {
 export interface InventoryListResponse {
   columns: InventoryListColumn[];
   rows: InventoryRow[];
-  /** Exact number of matching entities, or `null` when the count failed. */
-  total: number | null;
-  /** `true` when `rows` holds fewer entities than match, or when the total is unknown. */
+  /** `true` when the row limit left matching entities out; a failed source is in `errors`. */
   truncated: boolean;
   errors: InventorySourceError[];
   unavailableColumns: InventoryUnavailableColumn[];

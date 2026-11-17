@@ -9,7 +9,6 @@ import { resolve } from 'path';
 import { REPO_ROOT as KIBANA_ROOT } from '@kbn/repo-info';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import type { FtrConfigProviderContext } from '@kbn/test';
-import { findTestPluginPaths } from '@kbn/test';
 import { services } from './services';
 import { pageObjects } from './page_objects';
 
@@ -41,7 +40,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           KIBANA_ROOT,
           'src/platform/test/plugin_functional/plugins/core_provider_plugin'
         )}`,
-        ...findTestPluginPaths(resolve(__dirname, 'plugins')),
+        `--plugin-path=${resolve(
+          KIBANA_ROOT,
+          'x-pack/solutions/security/test_plugins/resolver_test'
+        )}`,
       ],
     },
     uiSettings: xpackFunctionalConfig.get('uiSettings'),

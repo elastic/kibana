@@ -1108,6 +1108,33 @@ describe('useServiceSettings — integration name and description', () => {
     expect(result.current.isReady).toBe(false);
   });
 
+  it('is not ready with an invalid condition in agent-based mode', async () => {
+    mockServices([policyService], 'agent_based');
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+    act(() => result.current.setGlobalRegion('us-east-1'));
+
+    act(() => result.current.setPolicySetting('condition', '${host.platform} =='));
+    expect(result.current.conditionErrors).toBeDefined();
+    expect(result.current.isReady).toBe(false);
+
+    act(() => result.current.setPolicySetting('condition', '${host.platform} == "linux"'));
+    expect(result.current.conditionErrors).toBeUndefined();
+    expect(result.current.isReady).toBe(true);
+  });
+
+  it('ignores a condition kept from agent-based mode under managed integration', async () => {
+    mockServices([policyService], 'managed_integration');
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+    act(() => result.current.setGlobalRegion('us-east-1'));
+
+    act(() => result.current.setPolicySetting('condition', '${host.platform} =='));
+
+    expect(result.current.conditionErrors).toBeUndefined();
+    expect(result.current.isReady).toBe(true);
+  });
+
   it('requires a name for ECF-only selections too', () => {
     mockServices([ecfOnlyService]);
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
@@ -1162,6 +1189,50 @@ describe('useServiceSettings — integration name and description', () => {
       });
     });
 
+    it('leaves the switch to the deploy, so it stays paired with the namespace', async () => {
+      withDeployment('dep-1');
+      const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+      await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+      act(() => result.current.setNamespace('prod'));
+      act(() => result.current.setDedicatedNamespaceTemplates(true));
+
+      act(() => result.current.handleNext());
+
+      expect(mockUpdateDeployment.mock.calls[0][1]).not.toHaveProperty(
+        'dedicatedNamespaceTemplates'
+      );
+    });
+
+    describe('turning the switch off', () => {
+      it('is saved at once on an existing deployment, so reopening it does not turn the switch back on', async () => {
+        withDeployment('dep-1');
+        const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+        await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+        act(() => result.current.setNamespace('prod'));
+        act(() => result.current.setDedicatedNamespaceTemplates(true));
+        expect(mockUpdateDeployment).not.toHaveBeenCalled();
+
+        act(() => result.current.setDedicatedNamespaceTemplates(false));
+
+        expect(mockUpdateDeployment).toHaveBeenCalledTimes(1);
+        expect(mockUpdateDeployment).toHaveBeenCalledWith('dep-1', {
+          dedicatedNamespaceTemplates: false,
+        });
+      });
+
+      it('writes nothing before the first deploy has created the record', async () => {
+        withDeployment(undefined);
+        const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+        await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+        act(() => result.current.setNamespace('prod'));
+
+        act(() => result.current.setDedicatedNamespaceTemplates(true));
+        act(() => result.current.setDedicatedNamespaceTemplates(false));
+
+        expect(mockUpdateDeployment).not.toHaveBeenCalled();
+      });
+    });
+
     it('leaves the namespace to the deploy, so a change is still detected as drift', async () => {
       withDeployment('dep-1');
       const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
@@ -1182,5 +1253,103 @@ describe('useServiceSettings — integration name and description', () => {
 
       expect(mockUpdateDeployment).not.toHaveBeenCalled();
     });
+  });
+});
+
+// --- proxy URL ---
+
+describe('useServiceSettings — proxy URL', () => {
+  const withProxy = makeEntry('svc_p', {
+    dataStreams: [],
+    declaresProxyUrl: true,
+    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+  });
+  const withoutProxy = makeEntry('svc_n', {
+    dataStreams: [],
+    declaresProxyUrl: false,
+    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+  });
+  const ecfOnly = makeEntry('svc_e', {
+    dataStreams: [],
+    declaresProxyUrl: true,
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
+  });
+
+  const render = (
+    deploymentMethod: 'agent_based' | 'managed_integration' | 'ecf',
+    entries: AwsServiceMatrixEntry[]
+  ) => {
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: entries.map((e) => e.id) },
+      removeDeployInstance: jest.fn(),
+      awsServicesMap: new Map(entries.map((e) => [e.id, e])),
+      deploymentMethod,
+      setServiceSettingsMethod: jest.fn(),
+    } as unknown as ReturnType<typeof useOnboardingFlow>);
+    return renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+  };
+
+  const makeReady = (result: ReturnType<typeof render>['result']) => {
+    act(() => result.current.setGlobalRegion('us-east-1'));
+    act(() => result.current.setIntegrationName('my-aws'));
+  };
+
+  it.each(['agent_based', 'managed_integration'] as const)(
+    'is offered for %s when a selected package declares it',
+    (method) => {
+      expect(render(method, [withProxy]).result.current.isProxyUrlSupported).toBe(true);
+    }
+  );
+
+  it('is not offered for ECF', () => {
+    expect(render('ecf', [withProxy]).result.current.isProxyUrlSupported).toBe(false);
+  });
+
+  it('is not offered when no selected package declares it', () => {
+    expect(render('agent_based', [withoutProxy]).result.current.isProxyUrlSupported).toBe(false);
+  });
+
+  it('is offered when only one of several selected packages declares it', () => {
+    expect(
+      render('managed_integration', [withoutProxy, withProxy]).result.current.isProxyUrlSupported
+    ).toBe(true);
+  });
+
+  it('ignores an ECF-only service under managed integration', () => {
+    expect(render('managed_integration', [ecfOnly]).result.current.isProxyUrlSupported).toBe(false);
+  });
+
+  it('reports an invalid URL and is not ready', () => {
+    const { result } = render('agent_based', [withProxy]);
+    makeReady(result);
+    expect(result.current.isReady).toBe(true);
+
+    act(() => result.current.setPolicySetting('proxy_url', 'ftp://proxy'));
+
+    expect(result.current.proxyUrlError).toBeDefined();
+    expect(result.current.isReady).toBe(false);
+  });
+
+  it('is ready again once the URL is valid or cleared', () => {
+    const { result } = render('agent_based', [withProxy]);
+    makeReady(result);
+    act(() => result.current.setPolicySetting('proxy_url', 'not a url'));
+    expect(result.current.isReady).toBe(false);
+
+    act(() => result.current.setPolicySetting('proxy_url', 'http://proxy:3128'));
+    expect(result.current.proxyUrlError).toBeUndefined();
+    expect(result.current.isReady).toBe(true);
+
+    act(() => result.current.setPolicySetting('proxy_url', ''));
+    expect(result.current.isReady).toBe(true);
+  });
+
+  it('does not block Continue with a leftover invalid value where the field is hidden', () => {
+    const { result } = render('ecf', [withProxy]);
+    makeReady(result);
+    act(() => result.current.setPolicySetting('proxy_url', 'ftp://proxy'));
+
+    expect(result.current.proxyUrlError).toBeUndefined();
+    expect(result.current.isReady).toBe(true);
   });
 });

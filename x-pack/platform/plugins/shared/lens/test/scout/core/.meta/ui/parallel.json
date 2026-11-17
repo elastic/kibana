@@ -1,5 +1,5 @@
 {
-  "sha1": "fc9974608e93080efe481691bbbcfdf93c3294be",
+  "sha1": "16511b4d00ce2fe1f757eeb8f803cfcbc3bfa155",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1409,7 +1409,7 @@
     {
       "id": "ca140b51b7c75bc-76bb16367ac9c67",
       "title": "Lens ES|QL metric EVAL maximum renders an EVAL maximum as a bar and can switch to a trendline",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
@@ -1417,7 +1417,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_esql_eval_maximum.spec.ts",
         "line": 21,
-        "column": 5
+        "column": 7
       }
     },
     {

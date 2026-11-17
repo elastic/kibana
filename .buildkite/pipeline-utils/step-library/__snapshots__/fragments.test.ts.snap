@@ -652,7 +652,7 @@ exports[`pull_request fragments pull_request/cps_testing 1`] = `
           },
         ],
       },
-      "timeout_in_minutes": 30,
+      "timeout_in_minutes": 45,
     },
   ],
 }

@@ -14,6 +14,7 @@ import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { AttachmentTimelineEvent } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStepType,
+  ExecutionStatus,
   ToolCallInvocation,
   createInjectedContextStep,
   type ConversationRoundStep,
@@ -23,6 +24,7 @@ import { internalTools } from '@kbn/agent-builder-common/tools';
 import type { AgentEventEmitter } from '@kbn/agent-builder-server';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import { createAgentGraph } from './graph';
+import type { BackgroundExecutionService } from './background_execution_service';
 import type { CycleHookRuntime } from './cycle_hooks/cycle_hook_runtime';
 import { stepUpdates } from './step_state';
 import type { PromptFactory } from './prompts';
@@ -59,6 +61,7 @@ const createTestGraph = ({
   toolExecutionBuffer,
   runAttachmentEvents,
   cycleHooks,
+  backgroundExecutionService,
 }: {
   structuredOutput?: boolean;
   outputSchema?: Record<string, unknown>;
@@ -67,6 +70,7 @@ const createTestGraph = ({
   toolExecutionBuffer?: ToolExecutionBuffer;
   runAttachmentEvents?: RunAttachmentEvents;
   cycleHooks?: CycleHookRuntime;
+  backgroundExecutionService?: BackgroundExecutionService;
 } = {}) => {
   const researchInvoke = jest.fn();
   const structuredInvoke = jest.fn();
@@ -102,7 +106,7 @@ const createTestGraph = ({
   const graph = createAgentGraph({
     chatModel,
     toolManager,
-    configuration: { instructions: '', aiIndices: [] },
+    configuration: { instructions: '', aiIndices: [], capabilities: { attachmentTools: true } },
     logger: {} as Logger,
     events: { emit: jest.fn() } as unknown as AgentEventEmitter,
     structuredOutput,
@@ -115,6 +119,7 @@ const createTestGraph = ({
     toolExecutionBuffer,
     runAttachmentEvents,
     cycleHooks,
+    backgroundExecutionService,
     contextManagement: {
       connector: { connectorId: 'test-connector' } as InferenceConnector,
       resultStore: createToolResultStoreMock(),
@@ -187,6 +192,32 @@ describe('createAgentGraph', () => {
     expect(toolManager.recordToolUse).toHaveBeenCalledWith('test-tool');
     expect(result.finalAnswer).toBe('answer after tool call');
     expect(result.errorCount).toBe(0);
+  });
+
+  it('checks pending background work on the first pass of a run resumed mid-cycle', async () => {
+    const backgroundExecutionService = {
+      hasPending: jest.fn(() => true),
+      checkForCompletions: jest.fn().mockResolvedValue([
+        {
+          execution_id: 'child-1',
+          status: ExecutionStatus.completed,
+          response: { message: 'PEAR' },
+        },
+      ]),
+    } as unknown as BackgroundExecutionService;
+    const { graph, researchInvoke } = createTestGraph({ backgroundExecutionService });
+    researchInvoke.mockResolvedValue(new AIMessage({ content: 'the answer' }));
+
+    // Cycle 1 is not a scheduled check; a resume starts there and must still report the child.
+    const result = await graph.invoke({ cycleLimit: 10, currentCycle: 1 });
+
+    expect(backgroundExecutionService.checkForCompletions).toHaveBeenCalledTimes(1);
+    expect(result.steps).toEqual([
+      expect.objectContaining({
+        type: ConversationRoundStepType.backgroundAgentComplete,
+        execution_id: 'child-1',
+      }),
+    ]);
   });
 
   it('records tool calls as pending steps, resolves them after execution and clears pending ids', async () => {

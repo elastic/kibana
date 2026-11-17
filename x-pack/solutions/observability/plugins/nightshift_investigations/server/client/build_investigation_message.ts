@@ -6,6 +6,8 @@
  */
 
 import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { platformSignificantEventsTools } from '@kbn/agent-builder-common';
+import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
 import type {
   AlertInvestigationContext,
   AlertSnapshot,
@@ -153,11 +155,21 @@ function describeV2Alert(alert: V2AlertSnapshot): string {
     ? ` (${label})`
     : '';
   const ruleNote = alert.rule_id ? ', and the rule is the v2 rule with the id above' : '';
+  const eventId = alert.data?.event_id;
+  const significantEventNote =
+    alert.source === SIGNIFICANT_EVENTS_ALERT_SOURCE
+      ? `This is a significant event${
+          isString(eventId) ? ` (event id ${sanitize(eventId)})` : ''
+        }, not a classic alert: it is not stored in the .alerts-* indices. Read it with the ${
+          platformSignificantEventsTools.searchEvent
+        } tool (pass the event id in event_ids, and view "full" for one event's signals), or read it exactly from the ${ALERT_EVENTS_DATA_STREAM} data stream (filter on source == "${SIGNIFICANT_EVENTS_ALERT_SOURCE}" and group_hash below). Its actions are in ${ALERT_ACTIONS_DATA_STREAM}${ruleNote}.`
+      : undefined;
   const lines = [
     `Alerting v2 episode ${sanitize(alert.id)}${subject} is ${sanitize(
       alert.status
     )}, first seen at ${sanitize(alert.start)}.`,
-    `This is a v2 alert, not a classic one: it is not stored in the .alerts-* indices. Its events are in the ${ALERT_EVENTS_DATA_STREAM} data stream (filter on episode.id and type == "alert"), its actions are in ${ALERT_ACTIONS_DATA_STREAM}${ruleNote}.`,
+    significantEventNote ??
+      `This is a v2 alert, not a classic one: it is not stored in the .alerts-* indices. Its events are in the ${ALERT_EVENTS_DATA_STREAM} data stream (filter on episode.id and type == "alert"), its actions are in ${ALERT_ACTIONS_DATA_STREAM}${ruleNote}.`,
     `Group hash: ${sanitize(alert.group_hash)}`,
   ];
 
@@ -303,8 +315,8 @@ export function buildAlertRecoveredFollowUpMessage({
     "Use this recovery to verify or refute the investigation's root cause:",
     '',
     '1. Examine all available signals before, during, and after the recovery: metrics, logs, traces, topology, deployments, rollbacks, code and configuration changes, operational actions, and relevant discussions or incident records.',
-    '2. Determine what resolved the alert, or state that it is unknown. Test the existing hypotheses against what changed near recovery. If an expected fix or rollback did not happen—or the alert only cleared because load dropped, a transient condition passed, or the rule was snoozed, muted, or in a maintenance window—do not treat recovery alone as confirmation. Lower the confidence of or dismiss hypotheses contradicted by the evidence.',
-    "3. State whether the investigated root cause is confirmed, partly supported, contradicted, or unresolved, and update the investigation's hypotheses accordingly.",
+    '2. Determine what resolved the alert, or state that it is unknown. Test the existing hypotheses against what changed near recovery. If an expected fix or rollback did not happen—or the alert only cleared because load dropped, a transient condition passed, or the rule was snoozed, muted, or in a maintenance window—do not treat recovery alone as confirmation. In your reply, lower the confidence of or dismiss hypotheses contradicted by the evidence.',
+    '3. State whether the investigated root cause is confirmed, partly supported, contradicted, or unresolved.',
   ].join('\n');
 }
 

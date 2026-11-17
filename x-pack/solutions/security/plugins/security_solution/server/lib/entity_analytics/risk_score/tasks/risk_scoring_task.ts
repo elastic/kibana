@@ -31,7 +31,8 @@ import {
   type LatestTaskStateSchema as RiskScoringTaskState,
 } from './state';
 import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
-import { buildScopedInternalSavedObjectsClientUnsafe, convertRangeToISO } from './helpers';
+import { buildNamespacedInternalSavedObjectsClientUnsafe } from '../../utils/internal_saved_objects_client';
+import { convertRangeToISO } from './helpers';
 import {
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
@@ -82,7 +83,7 @@ export const registerRiskScoringTask = ({
   const getRiskScoreService: GetRiskScoreService = (namespace) =>
     getStartServices().then(([coreStart, pluginsStart]) => {
       const esClient = coreStart.elasticsearch.client.asInternalUser;
-      const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
+      const soClient = buildNamespacedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
 
       const assetCriticalityDataClient = new AssetCriticalityDataClient({
         esClient,

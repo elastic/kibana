@@ -66,7 +66,11 @@ import { useVisibleColumns } from '../../hooks/use_visible_columns';
 import { APPLICATIONS_LABEL, LAST_SEEN_LABEL, SOURCE_LABELS } from '../../labels';
 import type { ApplicationRow } from './utils/filter_applications';
 import { applicationsMatching, filterApplications } from './utils/filter_applications';
-import { pageLoadsOfSources, summarizeApplications } from './utils/summarize_applications';
+import {
+  pageLoadsOfSources,
+  sessionsOfSource,
+  summarizeApplications,
+} from './utils/summarize_applications';
 import { EDOT_BROWSER_DOCS_URL } from '../../utils/doc_links';
 import { toTimeRangeQuery } from '../../utils/time_range_query';
 import {
@@ -445,6 +449,10 @@ export function ApplicationsListPage() {
     () => pageLoadsOfSources(response?.pageLoadsOverTime ?? NO_PAGE_LOADS, selectedSource),
     [response, selectedSource]
   );
+  const sessionsOverTime = useMemo(
+    () => sessionsOfSource(response?.sessionsOverTime ?? null, selectedSource),
+    [response, selectedSource]
+  );
   const unavailableSources = response?.unavailableSources ?? [];
 
   const { visibleColumns, setVisibleColumns } = useVisibleColumns({
@@ -642,7 +650,8 @@ export function ApplicationsListPage() {
         <ApplicationsSummaryPanel summary={summary} isLoading={isLoading} />
         <EuiSpacer size="m" />
         <PageLoadsChart
-          points={pageLoadsOverTime}
+          pageLoads={pageLoadsOverTime}
+          sessions={sessionsOverTime}
           isLoading={isLoading}
           onTimeRangeSelect={setTimeRange}
         />

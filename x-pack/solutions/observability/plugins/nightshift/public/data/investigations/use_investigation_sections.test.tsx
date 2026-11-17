@@ -9,6 +9,7 @@ import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
+import { useStatusSignal } from '@kbn/agentic-investigations-plugin/public';
 import { useFetchInvestigations, type FetchInvestigationsParams } from './use_fetch_investigations';
 import { useInvestigationSections } from './use_investigation_sections';
 import { useKibana } from '../../hooks/use_kibana';
@@ -17,11 +18,15 @@ jest.mock('./use_fetch_investigations', () => ({
   ...jest.requireActual('./use_fetch_investigations'),
   useFetchInvestigations: jest.fn(),
 }));
+jest.mock('@kbn/agentic-investigations-plugin/public', () => ({
+  useStatusSignal: jest.fn(),
+}));
 jest.mock('../../hooks/use_kibana');
 
 const mockUseFetchInvestigations = useFetchInvestigations as jest.MockedFunction<
   typeof useFetchInvestigations
 >;
+const mockUseStatusSignal = useStatusSignal as jest.MockedFunction<typeof useStatusSignal>;
 const mockUseKibana = useKibana as jest.Mock;
 const httpGet = jest.fn();
 
@@ -40,16 +45,19 @@ const investigation = (id: string): InvestigationSummary => ({
 const sectionResult = ({
   ids = [],
   total = ids.length,
+  matchTotal = total,
   isPreviousData = false,
   refetch = jest.fn(),
 }: {
   ids?: string[];
   total?: number;
+  matchTotal?: number;
   isPreviousData?: boolean;
   refetch?: jest.Mock;
 } = {}) => ({
   investigations: ids.map(investigation),
   total,
+  matchTotal,
   hasMore: false,
   isInitialLoading: false,
   isFetchingNextPage: false,
@@ -65,16 +73,20 @@ const isCritical = ({ severities }: FetchInvestigationsParams) => severities?.[0
 const withInProgress =
   ({
     ids,
+    total,
+    matchTotal,
     isPreviousData,
     refetchCritical,
   }: {
     ids: string[];
+    total?: number;
+    matchTotal?: number;
     isPreviousData?: boolean;
     refetchCritical: jest.Mock;
   }) =>
   (params: FetchInvestigationsParams) => {
     if (params.inProgress) {
-      return sectionResult({ ids, isPreviousData });
+      return sectionResult({ ids, total, matchTotal, isPreviousData });
     }
     if (isCritical(params)) {
       return sectionResult({ total: 3, refetch: refetchCritical });
@@ -147,7 +159,7 @@ describe('useInvestigationSections', () => {
     expect(httpGet).toHaveBeenCalledWith(
       '/internal/investigations/investigations/_severity_counts',
       expect.objectContaining({
-        query: { in_progress: false, query: 'checkout' },
+        query: { in_progress: false, status: 'open', query: 'checkout' },
         version: '1',
       })
     );
@@ -159,7 +171,7 @@ describe('useInvestigationSections', () => {
     await waitFor(() => expect(result.current.severityCounts.critical).toBe(3));
     expect(httpGet).toHaveBeenCalledWith(
       '/internal/investigations/investigations/_severity_counts',
-      expect.objectContaining({ query: { in_progress: false } })
+      expect.objectContaining({ query: { in_progress: false, status: 'open' } })
     );
   });
 
@@ -203,6 +215,34 @@ describe('useInvestigationSections', () => {
     expect(refetchCritical).toHaveBeenCalledTimes(1);
   });
 
+  it('refetches when the API total drops even if the capped loaded rows stay the same', () => {
+    const refetchCritical = jest.fn();
+    const cappedIds = Array.from({ length: 20 }, (_, index) => `running-${index}`);
+    mockUseFetchInvestigations.mockImplementation(
+      withInProgress({
+        ids: cappedIds,
+        total: cappedIds.length,
+        matchTotal: 21,
+        refetchCritical,
+      })
+    );
+    const { rerender } = renderSections();
+    expect(refetchCritical).not.toHaveBeenCalled();
+
+    // A finish past the loaded window shrinks matchTotal without changing the capped page.
+    mockUseFetchInvestigations.mockImplementation(
+      withInProgress({
+        ids: cappedIds,
+        total: cappedIds.length,
+        matchTotal: 20,
+        refetchCritical,
+      })
+    );
+    rerender({ query: undefined });
+
+    expect(refetchCritical).toHaveBeenCalledTimes(1);
+  });
+
   it('does not refetch when new work starts or the search changes', () => {
     const refetchCritical = jest.fn();
     mockUseFetchInvestigations.mockImplementation(
@@ -220,5 +260,57 @@ describe('useInvestigationSections', () => {
     rerender({ query: 'checkout errors' });
 
     expect(refetchCritical).not.toHaveBeenCalled();
+  });
+
+  it('refetches every open section and the severity counts when the status signal bumps', async () => {
+    const refetchBySeverity = {
+      inProgress: jest.fn(),
+      critical: jest.fn(),
+      high: jest.fn(),
+      medium: jest.fn(),
+      low: jest.fn(),
+      none: jest.fn(),
+    };
+
+    mockUseFetchInvestigations.mockImplementation((params) => {
+      if (params.inProgress) {
+        return sectionResult({ ids: ['running-a'], refetch: refetchBySeverity.inProgress });
+      }
+
+      const severity = params.severities?.[0];
+      if (severity === 'critical') {
+        return sectionResult({ refetch: refetchBySeverity.critical });
+      }
+      if (severity === 'high') {
+        return sectionResult({ refetch: refetchBySeverity.high });
+      }
+      if (severity === 'medium') {
+        return sectionResult({ refetch: refetchBySeverity.medium });
+      }
+      if (severity === 'low') {
+        return sectionResult({ refetch: refetchBySeverity.low });
+      }
+      if (severity === 'none') {
+        return sectionResult({ refetch: refetchBySeverity.none });
+      }
+      return sectionResult();
+    });
+
+    renderSections();
+
+    await waitFor(() => expect(httpGet).toHaveBeenCalled());
+    httpGet.mockClear();
+
+    const onBump = mockUseStatusSignal.mock.calls.at(-1)?.[0];
+    expect(onBump).toEqual(expect.any(Function));
+    onBump!();
+
+    expect(refetchBySeverity.inProgress).toHaveBeenCalledTimes(1);
+    expect(refetchBySeverity.critical).toHaveBeenCalledTimes(1);
+    expect(refetchBySeverity.high).toHaveBeenCalledTimes(1);
+    expect(refetchBySeverity.medium).toHaveBeenCalledTimes(1);
+    expect(refetchBySeverity.low).toHaveBeenCalledTimes(1);
+    expect(refetchBySeverity.none).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
   });
 });

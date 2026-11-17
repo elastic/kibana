@@ -378,6 +378,35 @@ describe('buildInvestigationMessage with a v2 alert without a rule', () => {
   });
 });
 
+describe('buildInvestigationMessage with a significant event alert', () => {
+  const v2: V2AlertSnapshot = {
+    alert_version: 'v2',
+    id: 'episode-1',
+    group_hash: 'hash-1',
+    status: 'active',
+    start: '2026-08-24T12:00:00.000Z',
+  };
+
+  it('names the event id and how to read it', () => {
+    const message = buildInvestigationMessage({
+      alerts: [{ ...v2, source: 'elastic.significant_events', data: { event_id: 'evt-42' } }],
+    });
+
+    expect(message).toContain('significant event (event id evt-42)');
+    expect(message).toContain('sig_events.event_search');
+    expect(message).not.toContain('not a classic one');
+  });
+
+  it('keeps the generic v2 wording for other sources', () => {
+    const message = buildInvestigationMessage({
+      alerts: [{ ...v2, source: 'custom.source', data: { event_id: 'evt-42' } }],
+    });
+
+    expect(message).toContain('not a classic one');
+    expect(message).not.toContain('significant event');
+  });
+});
+
 describe('buildAlertRecoveredFollowUpMessage', () => {
   const baseRecovery = {
     alertUuid: 'alert-uuid-1',
@@ -428,8 +457,8 @@ describe('buildAlertRecoveredFollowUpMessage', () => {
         "Use this recovery to verify or refute the investigation's root cause:",
         '',
         '1. Examine all available signals before, during, and after the recovery: metrics, logs, traces, topology, deployments, rollbacks, code and configuration changes, operational actions, and relevant discussions or incident records.',
-        '2. Determine what resolved the alert, or state that it is unknown. Test the existing hypotheses against what changed near recovery. If an expected fix or rollback did not happen—or the alert only cleared because load dropped, a transient condition passed, or the rule was snoozed, muted, or in a maintenance window—do not treat recovery alone as confirmation. Lower the confidence of or dismiss hypotheses contradicted by the evidence.',
-        "3. State whether the investigated root cause is confirmed, partly supported, contradicted, or unresolved, and update the investigation's hypotheses accordingly.",
+        '2. Determine what resolved the alert, or state that it is unknown. Test the existing hypotheses against what changed near recovery. If an expected fix or rollback did not happen—or the alert only cleared because load dropped, a transient condition passed, or the rule was snoozed, muted, or in a maintenance window—do not treat recovery alone as confirmation. In your reply, lower the confidence of or dismiss hypotheses contradicted by the evidence.',
+        '3. State whether the investigated root cause is confirmed, partly supported, contradicted, or unresolved.',
       ].join('\n')
     );
   });

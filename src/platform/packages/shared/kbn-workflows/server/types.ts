@@ -77,7 +77,8 @@ export interface ManagedWorkflowStatusReport {
   storedVersion: number | null;
   registryVersion: number;
   storedHash: string | null;
-  registryHash: string;
+  /** Hash of the YAML the document should hold now; `null` for a template it cannot render. */
+  registryHash: string | null;
 }
 
 /** Persisted state exposed only to the plugin that owns the managed workflow. */

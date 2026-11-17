@@ -6,22 +6,16 @@
  */
 
 import type { EvaluatorResult, RegisteredEvaluatorDefinition } from '@kbn/evals-plugin/server';
-import { z, lazySchema } from '@kbn/zod/v4';
+import type { AlertOutcomeReferenceData } from '../alert_outcome_shared';
+import { MAX_JUDGE_INPUT_CHARS, alertOutcomeReferenceDataSchema } from '../alert_outcome_shared';
 import { roundEvidenceSchema, truncate } from '../render_round';
 import { capExplanation, gradeToScore, runJudge } from '../run_judge';
 import type { AlertOutcomeRcaAccuracyOutput } from './prompt';
 import {
   ALERT_OUTCOME_RCA_ACCURACY_TOOL_NAME,
-  MAX_JUDGE_INPUT_CHARS,
   alertOutcomeRcaAccuracyOutputSchema,
   alertOutcomeRcaAccuracyPrompt,
 } from './prompt';
-
-// Unbounded on purpose: the schema is checked for the whole evaluation, so a rejection here would
-// fail every evaluator in the set. `evaluate` truncates instead.
-const alertOutcomeReferenceDataSchema = lazySchema(() => z.object({ alert_outcome: z.string() }));
-
-type AlertOutcomeReferenceData = z.infer<typeof alertOutcomeReferenceDataSchema>;
 
 type PenaltyInput = Pick<
   AlertOutcomeRcaAccuracyOutput,

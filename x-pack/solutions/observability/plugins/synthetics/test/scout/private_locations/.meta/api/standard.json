@@ -1,5 +1,5 @@
 {
-  "sha1": "210ee661d9cb1d4f1eb513024ddc266ee254d6d2",
+  "sha1": "b095ea503efbc3a7468b980a7da0a2ae7cd9bc62",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -80,8 +80,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/clean_up_extra_package_policies.spec.ts",
-        "line": 49,
-        "column": 13
+        "line": 54,
+        "column": 40
       }
     },
     {

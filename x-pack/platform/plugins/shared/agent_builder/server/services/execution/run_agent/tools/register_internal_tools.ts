@@ -167,6 +167,7 @@ export const registerInternalTools = async ({
           conversationExists,
           transientOnly: conversationAccess !== 'readWrite',
           discoveryEnabled,
+          backgroundWakeEnabled: experimentalFeatures.backgroundWake,
         })
       );
       // send_message and sleep only serve persistent and background sub-agents.
@@ -181,6 +182,7 @@ export const registerInternalTools = async ({
             subagentTracker,
             allowedIds,
             inferenceFeatureIdBySubagent,
+            backgroundWakeEnabled: experimentalFeatures.backgroundWake,
           })
         );
         tools.push(createSleepTool());

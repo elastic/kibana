@@ -19,11 +19,12 @@ require.cache[legacyPluginPath] = { exports: oxlintPlugin };
 class RuleTester extends OxlintRuleTester {
   constructor(config = {}) {
     const isTypeScript = String(config.parser).includes('@typescript-eslint/parser');
+    const isJsx = Boolean(config.parserOptions?.ecmaFeatures?.jsx);
     super({
       eslintCompat: true,
       languageOptions: {
         sourceType: config.parserOptions?.sourceType ?? 'module',
-        parserOptions: { lang: isTypeScript ? 'ts' : 'js' },
+        parserOptions: { lang: (isTypeScript ? 'ts' : 'js') + (isJsx ? 'x' : '') },
       },
     });
   }
@@ -53,6 +54,7 @@ const parityTests = {
   module_migration: () => require('../module_migration.test.js'),
   no_async_foreach: () => require('../no_async_foreach.test.js'),
   no_async_promise_body: () => require('../no_async_promise_body.test.js'),
+  no_abort_signal_timeout: () => require('../no_abort_signal_timeout.test.js'),
   no_uncleared_race_timeout: () => require('../no_uncleared_race_timeout.test.js'),
   no_conditional_saved_object_type_registration: () =>
     require('../no_conditional_saved_object_type_registration.test.js'),
@@ -63,6 +65,7 @@ const parityTests = {
   no_feature_flag_snapshot: () => require('../no_feature_flag_snapshot.test.js'),
   no_npx_playwright: () => require('../no_npx_playwright.test.js'),
   no_sync_import_from_plugin: () => require('../no_sync_import_from_plugin.test.js'),
+  no_redundant_link_navigation: () => require('../no_redundant_link_navigation.test.js'),
   no_this_in_property_initializers: () => require('../no_this_in_property_initializers.test.js'),
   no_trailing_import_slash: () => require('../no_trailing_import_slash.test.js'),
   no_unsafe_console: () => require('../no_unsafe_console.test.js'),

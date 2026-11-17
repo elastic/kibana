@@ -33,7 +33,6 @@ describe('createFixtureEntityInventoryApiClient', () => {
       const lastSeen = list.rows.map((row) => String(row.last_seen));
 
       expect(list.rows.length).toBeGreaterThan(0);
-      expect(list.total).toBe(list.rows.length);
       expect(list.truncated).toBe(false);
       expect(lastSeen).toEqual([...lastSeen].sort().reverse());
       list.rows.forEach((row) => expect(Object.keys(row).sort()).toEqual([...columnNames].sort()));

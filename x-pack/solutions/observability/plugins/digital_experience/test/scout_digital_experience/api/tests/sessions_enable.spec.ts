@@ -19,12 +19,7 @@ const { COMMON_HEADERS, SESSIONS_ENABLE_PATH } = testData;
 const FILTERED_READ_ROLE: KibanaRole = {
   elasticsearch: {
     // `read_security` lets the user read their own roles on Serverless.
-    cluster: [
-      'manage_transform',
-      'manage_ingest_pipelines',
-      'manage_index_templates',
-      'read_security',
-    ],
+    cluster: ['manage_index_templates', 'read_security'],
     indices: [
       {
         names: [...SESSIONS_SOURCE_INDICES],
@@ -58,8 +53,7 @@ apiTest.describe('Enabling Digital Experience sessions', { tag: DIGITAL_EXPERIEN
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body.health).not.toBe('missing');
-    expect(response.body.transforms.length).toBeGreaterThan(0);
+    expect(response.body).toStrictEqual({ installed: true });
   });
 
   apiTest(

@@ -142,7 +142,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     'common',
     'findings',
     'cloudPostureDashboard',
-    'header',
     'spaceSelector',
     'cspSecurity',
     'security',
@@ -216,12 +215,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
         await findings.navigateToLatestVulnerabilitiesPage();
 
-        // give more time for the data view to be fetched before checking loading status
         await waitForDataViews({
           timeout: fetchingOfDataViewsTimeout,
           action: async () => {
-            await pageObjects.header.waitUntilLoadingHasFinished();
-
             const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
               kibanaServer.savedObjects,
               expectedDataViewId,
@@ -256,8 +252,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await waitForDataViews({
           timeout: fetchingOfDataViewsTimeout,
           action: async () => {
-            await pageObjects.header.waitUntilLoadingHasFinished();
-
             const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
               kibanaServer.savedObjects,
               expectedDataViewId,
@@ -292,7 +286,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await waitForDataViews({
           timeout: fetchingOfDataViewsTimeout,
           action: async () => {
-            await pageObjects.header.waitUntilLoadingHasFinished();
             const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
               kibanaServer.savedObjects,
               expectedDataViewId,
@@ -329,7 +322,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await waitForDataViews({
           timeout: fetchingOfDataViewsTimeout,
           action: async () => {
-            await pageObjects.header.waitUntilLoadingHasFinished();
             const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
               kibanaServer.savedObjects,
               expectedDataViewId,
@@ -372,7 +364,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await waitForDataViews({
           timeout: fetchingOfDataViewsTimeout,
           action: async () => {
-            await pageObjects.header.waitUntilLoadingHasFinished();
             const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
               kibanaServer.savedObjects,
               expectedDataViewId,

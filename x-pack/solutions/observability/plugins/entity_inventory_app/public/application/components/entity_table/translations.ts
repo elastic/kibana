@@ -26,16 +26,9 @@ export const RESET_TO_DEFAULT_LABEL = i18n.translate(
   { defaultMessage: 'Reset to default' }
 );
 
-export const getTruncationTitle = ({ returned, total }: { returned: number; total: number }) =>
-  i18n.translate('xpack.entityInventoryApp.entityTable.truncation.title', {
-    defaultMessage: 'Showing the {returned, number} most recently seen of {total, number} entities',
-    values: { returned, total },
-  });
-
-export const getTruncationTotalUnknownTitle = ({ returned }: { returned: number }) =>
-  i18n.translate('xpack.entityInventoryApp.entityTable.truncation.totalUnknownTitle', {
-    defaultMessage:
-      'Showing the {returned, number} most recently seen entities. The total could not be counted.',
+export const getTruncationTitle = ({ returned }: { returned: number }) =>
+  i18n.translate('xpack.entityInventoryApp.entityTable.truncation.moreMatchTitle', {
+    defaultMessage: 'Showing the {returned, number} most recently seen entities; more match.',
     values: { returned },
   });
 
@@ -109,9 +102,9 @@ export const getEmptyWithFailuresTitle = (typeName: string) =>
   });
 
 export const EMPTY_WITH_FAILURES_BODY = i18n.translate(
-  'xpack.entityInventoryApp.entityTable.empty.withFailures.body',
+  'xpack.entityInventoryApp.entityTable.empty.withFailures.sourcesFailedBody',
   {
     defaultMessage:
-      'Some data sources failed or the entities could not be counted, so entities may exist that are not shown. See the details above.',
+      'Some data sources failed, so entities may exist that are not shown. See the details above.',
   }
 );

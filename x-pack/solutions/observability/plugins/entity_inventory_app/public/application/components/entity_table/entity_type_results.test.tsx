@@ -30,7 +30,6 @@ import {
   getEmptyTitle,
   getEmptyWithFailuresTitle,
   getTruncationTitle,
-  getTruncationTotalUnknownTitle,
   getTypeNotAvailableTitle,
 } from './translations';
 
@@ -88,17 +87,9 @@ describe('EntityTypeResults', () => {
     renderScenario('truncated');
 
     expect(await screen.findByTestId('entityInventoryTruncationCallout')).toHaveTextContent(
-      getTruncationTitle({ returned: 250, total: 12_345 })
+      getTruncationTitle({ returned: 250 })
     );
     expect(screen.getByTestId('entityInventoryTable')).toBeInTheDocument();
-  });
-
-  it('warns that the total is unknown when the count failed', async () => {
-    renderScenario('countFailed');
-
-    expect(await screen.findByTestId('entityInventoryTruncationCallout')).toHaveTextContent(
-      getTruncationTotalUnknownTitle({ returned: 250 })
-    );
   });
 
   it('lists source errors and unavailable columns above the table', async () => {

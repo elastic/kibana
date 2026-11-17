@@ -48,6 +48,7 @@
       "src/platform/packages/private/default-nav"
     ],
     "devTools": "src/platform/plugins/shared/dev_tools",
+    "developerToolbar": "src/platform/plugins/shared/developer_toolbar",
     "discover": [
       "src/platform/plugins/shared/discover",
       "src/platform/packages/shared/kbn-discover-utils",

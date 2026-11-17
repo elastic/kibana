@@ -114,7 +114,7 @@ export const RuleCanvasContent = ({
           defaultMessage: 'View in Rules',
         }),
         icon: 'external',
-        type: ActionButtonType.OVERFLOW,
+        type: ActionButtonType.SECONDARY,
         handler: () => {
           getAlertingV2Locators(share).rulesLocators.navigateSync({
             ruleId,
@@ -138,7 +138,7 @@ export const RuleCanvasContent = ({
   return (
     <QueryClientProvider client={queryClient}>
       <LocatorProvider locators={locators}>
-        <EuiPanel paddingSize="l" hasShadow={false}>
+        <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false}>
           <RuleSummaryBody rule={summaryRule}>
             <RuleSummaryAboutSection />
             <RuleSummaryQueryPreviewSection />

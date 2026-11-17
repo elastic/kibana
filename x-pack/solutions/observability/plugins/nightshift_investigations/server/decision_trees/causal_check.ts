@@ -7,7 +7,7 @@
 
 import { HYPOTHESES_ATTACHMENT_TYPE } from '@kbn/agentic-investigations-plugin/common';
 import type { BoundInferenceClient } from '@kbn/inference-common';
-import { renderToolCalls } from '../cortex/optimize';
+import { renderToolCalls } from '../wiki/optimize';
 import {
   toolCallsFromRoundSteps,
   type RawRoundStep,
