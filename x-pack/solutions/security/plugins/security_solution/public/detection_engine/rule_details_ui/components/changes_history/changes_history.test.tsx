@@ -61,7 +61,7 @@ describe('RuleChangesHistory', () => {
 
     const { rerender } = render(
       <TestProviders>
-        <RuleChangesHistory ruleId="rule-1" header={<span />} />
+        <RuleChangesHistory ruleId="rule-1" />
       </TestProviders>
     );
 
@@ -73,7 +73,7 @@ describe('RuleChangesHistory', () => {
     // Navigate to a different rule.
     rerender(
       <TestProviders>
-        <RuleChangesHistory ruleId="rule-2" header={<span />} />
+        <RuleChangesHistory ruleId="rule-2" />
       </TestProviders>
     );
 
@@ -93,7 +93,7 @@ describe('RuleChangesHistory', () => {
 
     const { rerender } = render(
       <TestProviders>
-        <RuleChangesHistory ruleId="rule-1" header={<span />} />
+        <RuleChangesHistory ruleId="rule-1" />
       </TestProviders>
     );
 
@@ -114,7 +114,7 @@ describe('RuleChangesHistory', () => {
     );
     rerender(
       <TestProviders>
-        <RuleChangesHistory ruleId="rule-1" header={<span />} />
+        <RuleChangesHistory ruleId="rule-1" />
       </TestProviders>
     );
 
@@ -140,7 +140,7 @@ describe('RuleChangesHistory', () => {
 
     const { rerender } = render(
       <TestProviders>
-        <RuleChangesHistory ruleId="rule-1" header={<span />} />
+        <RuleChangesHistory ruleId="rule-1" />
       </TestProviders>
     );
 
@@ -171,7 +171,7 @@ describe('RuleChangesHistory', () => {
     );
     rerender(
       <TestProviders>
-        <RuleChangesHistory ruleId="rule-1" header={<span />} />
+        <RuleChangesHistory ruleId="rule-1" />
       </TestProviders>
     );
 
@@ -202,7 +202,7 @@ describe('RuleChangesHistory', () => {
 
     const { rerender } = render(
       <TestProviders>
-        <RuleChangesHistory ruleId="rule-1" header={<span />} />
+        <RuleChangesHistory ruleId="rule-1" />
       </TestProviders>
     );
 
@@ -217,7 +217,7 @@ describe('RuleChangesHistory', () => {
     );
     rerender(
       <TestProviders>
-        <RuleChangesHistory ruleId="rule-1" header={<span />} />
+        <RuleChangesHistory ruleId="rule-1" />
       </TestProviders>
     );
 
@@ -257,7 +257,7 @@ describe('RuleChangesHistory', () => {
 
     const { rerender } = render(
       <TestProviders>
-        <RuleChangesHistory ruleId="rule-1" header={<span />} />
+        <RuleChangesHistory ruleId="rule-1" />
       </TestProviders>
     );
 
@@ -278,7 +278,7 @@ describe('RuleChangesHistory', () => {
     );
     rerender(
       <TestProviders>
-        <RuleChangesHistory ruleId="rule-1" header={<span />} />
+        <RuleChangesHistory ruleId="rule-1" />
       </TestProviders>
     );
 
@@ -298,7 +298,7 @@ describe('RuleChangesHistory', () => {
 
     render(
       <TestProviders>
-        <RuleChangesHistory ruleId="rule-1" header={<span />} />
+        <RuleChangesHistory ruleId="rule-1" />
       </TestProviders>
     );
 
@@ -331,7 +331,7 @@ describe('RuleChangesHistory', () => {
 
     render(
       <TestProviders>
-        <RuleChangesHistory ruleId="rule-1" header={<span />} />
+        <RuleChangesHistory ruleId="rule-1" />
       </TestProviders>
     );
 

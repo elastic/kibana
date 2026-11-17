@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { RuleChangesHistoryPage } from './rule_change_history_page';
 import { useRuleWithFallback } from '../../../rule_management/logic/use_rule_with_fallback';
 import { RuleChangesHistoryEventTypes } from '../../../../common/lib/telemetry/events/rule_changes_history/types';
@@ -50,6 +50,18 @@ describe('RuleChangesHistoryPage', () => {
     jest.clearAllMocks();
     mockUseRuleWithFallback.mockReturnValue({ rule: undefined });
     mockUseParams.mockReturnValue({ ruleId: 'rule-1' });
+  });
+
+  it('renders the app header above the history content', () => {
+    render(
+      <TestProviders>
+        <RuleChangesHistoryPage />
+      </TestProviders>
+    );
+
+    const header = screen.getByTestId('mockRuleChangeHistoryAppHeader');
+    const history = screen.getByTestId('mockRuleChangesHistory');
+    expect(header.compareDocumentPosition(history)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
   describe('telemetry', () => {

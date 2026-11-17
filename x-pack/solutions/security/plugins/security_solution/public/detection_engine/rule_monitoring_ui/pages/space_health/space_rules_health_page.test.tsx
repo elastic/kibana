@@ -21,28 +21,74 @@ jest.mock('./space_rules_health_app_header', () => ({ SpaceRulesHealthAppHeader:
 jest.mock('../../../rule_monitoring/logic/detection_engine_health/use_space_rules_health', () => ({
   useSpaceRulesHealth: jest.fn(),
 }));
+jest.mock('../../components/health_overview', () => ({
+  HealthOverviewCards: () => <div data-test-subj="healthOverviewCards" />,
+  RulesByTypeBar: () => null,
+  LoggedMessagesBar: () => null,
+  PerformanceSection: () => null,
+  GapsAndFrozenSection: () => null,
+  TopMessagesSection: () => null,
+  HistoricalTrendsSection: () => null,
+}));
+jest.mock('../../components/health_overview/execution_outcomes', () => ({
+  ExecutionOutcomesChart: () => null,
+}));
 
 const useSpaceRulesHealthMock = useSpaceRulesHealth as jest.Mock;
 
+const renderPage = () =>
+  render(
+    <TestProviders>
+      <DetectionEngineSpaceRulesHealthPage />
+    </TestProviders>
+  );
+
+// The test environment gives every EUI form row the same generated id, so the selects
+// are found by their default selected option instead of by label.
+const getTimeRangeSelect = () => screen.getByDisplayValue('Last 24 hours');
+const getGranularitySelect = () => screen.getByDisplayValue('Hour');
+
 describe('DetectionEngineSpaceRulesHealthPage', () => {
   beforeEach(() => {
-    useSpaceRulesHealthMock.mockReturnValue({ isLoading: false, isFetching: false });
+    useSpaceRulesHealthMock.mockReturnValue({
+      isLoading: false,
+      isFetching: false,
+      data: { health: {} },
+    });
   });
 
-  it('requests health for the interval selected in the page body', () => {
-    render(
-      <TestProviders>
-        <DetectionEngineSpaceRulesHealthPage />
-      </TestProviders>
-    );
+  it('renders the interval controls in the page body above the dashboard', () => {
+    renderPage();
 
-    fireEvent.change(screen.getAllByRole('combobox')[0], {
-      target: { value: HealthIntervalType.last_hour },
-    });
+    const dashboard = screen.getByTestId('healthOverviewCards');
+    for (const control of [getTimeRangeSelect(), getGranularitySelect()]) {
+      expect(control.compareDocumentPosition(dashboard)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    }
+  });
+
+  it('requests health for the selected time range', () => {
+    renderPage();
+
+    fireEvent.change(getTimeRangeSelect(), { target: { value: HealthIntervalType.last_hour } });
 
     expect(useSpaceRulesHealthMock).toHaveBeenLastCalledWith({
       interval: {
         type: HealthIntervalType.last_hour,
+        granularity: HealthIntervalGranularity.minute,
+      },
+    });
+  });
+
+  it('requests health for the selected granularity', () => {
+    renderPage();
+
+    fireEvent.change(getGranularitySelect(), {
+      target: { value: HealthIntervalGranularity.minute },
+    });
+
+    expect(useSpaceRulesHealthMock).toHaveBeenLastCalledWith({
+      interval: {
+        type: HealthIntervalType.last_day,
         granularity: HealthIntervalGranularity.minute,
       },
     });

@@ -9,7 +9,6 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
   EuiSkeletonText,
   EuiSkeletonLoading,
   EuiSkeletonTitle,
@@ -36,10 +35,6 @@ export const DetectionEngineRuleHealthPage = memo(
         <>
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
-              <EuiSpacer size="m" />
-              <EuiTitle size="s">
-                <h3>{'Detection Engine Health'}</h3>
-              </EuiTitle>
               <EuiSpacer size="m" />
               <EuiSkeletonText lines={2} />
               <EuiSpacer size="m" />

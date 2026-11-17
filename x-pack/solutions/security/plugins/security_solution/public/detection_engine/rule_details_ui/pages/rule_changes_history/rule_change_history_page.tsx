@@ -37,10 +37,8 @@ export const RuleChangesHistoryPage = memo(function RuleChangesHistoryPage(): JS
           overflow: 'hidden',
         }}
       >
-        <RuleChangesHistory
-          ruleId={ruleId}
-          header={<RuleChangeHistoryAppHeader ruleId={ruleId} rule={rule} />}
-        />
+        <RuleChangeHistoryAppHeader ruleId={ruleId} rule={rule} />
+        <RuleChangesHistory ruleId={ruleId} />
       </SecuritySolutionPageWrapper>
       {/* We can't use SecurityPageName.rulesChangesHistory here for
           deepLinkId as deep linking doesn't support path parameters. */}

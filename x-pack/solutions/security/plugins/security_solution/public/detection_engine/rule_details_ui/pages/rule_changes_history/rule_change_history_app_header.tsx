@@ -41,6 +41,7 @@ export const RuleChangeHistoryAppHeader = React.memo<RuleChangeHistoryAppHeaderP
         }}
         metadata={metadata}
         spacing="largeBleed"
+        // The page itself does not scroll; only the diff panel scrolls.
         sticky={false}
       />
     );
