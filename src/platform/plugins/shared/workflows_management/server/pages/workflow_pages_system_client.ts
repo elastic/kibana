@@ -58,14 +58,11 @@ export interface WorkflowPagesSystemClient {
   /** Deletes every page of the given workflows. Workflow deletes call it. */
   retireWorkflowPages(params: { workflowIds: string[]; spaceId: string }): Promise<void>;
   /**
-   * Checks a secret from a page URL. True only for an online page of the workflow created at
-   * `workflowCreatedAt` whose hash matches. Never decrypts, and returns false for every miss.
+   * Checks a secret from a page URL against the page alone, so a visitor without the secret never
+   * reaches the workflow. Returns the `created_at` of the page's workflow for an online page whose
+   * hash matches, undefined for every miss. Never decrypts.
    */
-  verifyPageSecret(
-    ref: WorkflowPageRef,
-    secret: string,
-    workflowCreatedAt: string
-  ): Promise<boolean>;
+  verifyPageSecret(ref: WorkflowPageRef, secret: string): Promise<string | undefined>;
 }
 
 export interface WorkflowPagesSystemClientDeps {
@@ -138,23 +135,18 @@ export class WorkflowPagesSystemClientImpl implements WorkflowPagesSystemClient 
     await this.deletePages(await this.findWorkflowPages(workflowIds, spaceId));
   }
 
-  async verifyPageSecret(
-    ref: WorkflowPageRef,
-    secret: string,
-    workflowCreatedAt: string
-  ): Promise<boolean> {
+  async verifyPageSecret(ref: WorkflowPageRef, secret: string): Promise<string | undefined> {
     if (!this.deps.canEncrypt) {
-      return false;
+      return undefined;
     }
     const page = await getPageOrUndefined(this.deps.savedObjectsClient, ref);
-    return (
+    const verified =
       page !== undefined &&
       page.attributes.workflowId === ref.workflowId &&
       page.attributes.pageId === ref.pageId &&
-      page.attributes.workflowCreatedAt === workflowCreatedAt &&
       isPageOnline(page.attributes, this.deps.canEncrypt) &&
-      isPageSecretValid(ref, secret, page.attributes.secretHash)
-    );
+      isPageSecretValid(ref, secret, page.attributes.secretHash);
+    return verified ? page.attributes.workflowCreatedAt : undefined;
   }
 
   private async createPage(ref: WorkflowPageRef, workflowCreatedAt: string): Promise<void> {

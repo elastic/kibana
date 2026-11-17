@@ -33,7 +33,9 @@ const setup = (
           ...overrides,
         } as WorkflowProperties);
   const getWorkflowSource = jest.fn(async () => workflow);
-  const pagesSystemClient = { verifyPageSecret: jest.fn(async () => true) };
+  const pagesSystemClient = {
+    verifyPageSecret: jest.fn(async (): Promise<string | undefined> => WORKFLOW_CREATED_AT),
+  };
   const serviceAccountBindings = {
     isEnabled: jest.fn(() => bindingsEnabled),
     getWorkloadBinding: jest.fn(async () =>
@@ -64,25 +66,27 @@ describe('resolveWorkflowPage', () => {
 
     await expect(resolve(pageRef, 'the-secret')).resolves.toBe(workflow);
     expect(getWorkflowSource).toHaveBeenCalledWith(pageRef.workflowId, pageRef.spaceId);
-    expect(pagesSystemClient.verifyPageSecret).toHaveBeenCalledWith(
-      pageRef,
-      'the-secret',
-      WORKFLOW_CREATED_AT
-    );
+    expect(pagesSystemClient.verifyPageSecret).toHaveBeenCalledWith(pageRef, 'the-secret');
   });
 
   it('returns undefined when the workflow is missing, deleted, or global', async () => {
-    const { resolve, pagesSystemClient } = setup(null);
+    const { resolve } = setup(null);
 
     await expect(resolve(pageRef, 'the-secret')).resolves.toBeUndefined();
-    expect(pagesSystemClient.verifyPageSecret).not.toHaveBeenCalled();
   });
 
-  it('checks the secret before anything else about the workflow', async () => {
-    const { resolve, pagesSystemClient, serviceAccountBindings } = setup({ enabled: false });
-    pagesSystemClient.verifyPageSecret.mockResolvedValue(false);
+  it('returns undefined for a page of an earlier workflow with the same id', async () => {
+    const { resolve } = setup({ created_at: '2026-02-01T00:00:00.000Z' });
+
+    await expect(resolve(pageRef, 'the-secret')).resolves.toBeUndefined();
+  });
+
+  it('checks the secret before it reads the workflow', async () => {
+    const { resolve, getWorkflowSource, pagesSystemClient, serviceAccountBindings } = setup();
+    pagesSystemClient.verifyPageSecret.mockResolvedValue(undefined);
 
     await expect(resolve(pageRef, 'wrong')).resolves.toBeUndefined();
+    expect(getWorkflowSource).not.toHaveBeenCalled();
     expect(serviceAccountBindings.isEnabled).not.toHaveBeenCalled();
     expect(serviceAccountBindings.getWorkloadBinding).not.toHaveBeenCalled();
   });
