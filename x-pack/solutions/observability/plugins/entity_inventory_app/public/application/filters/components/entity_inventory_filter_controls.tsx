@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { omit } from 'lodash';
+import React, { useEffect, useMemo } from 'react';
+import { isEqual, isUndefined, omit, omitBy } from 'lodash';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import type { EbtClickAttrsWithoutAction } from '@kbn/ebt-click';
@@ -87,6 +87,14 @@ export function EntityInventoryFilterControls({
         : currentSelection,
     [currentSelection, isReady, pageCategory, typeDefinitions]
   );
+
+  // The selection is shared with the rest of the page (for example the data view of the search
+  // bar), so the clean one is written back instead of staying only in what is drawn here.
+  useEffect(() => {
+    if (!isEqual(omitBy(selection, isUndefined), omitBy(currentSelection, isUndefined))) {
+      onSelectionChange(selection);
+    }
+  }, [currentSelection, onSelectionChange, selection]);
 
   if (error) {
     return <KbnDangerCallout announceOnMount size="s" title={TYPES_ERROR_MESSAGE} />;

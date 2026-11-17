@@ -8,13 +8,14 @@
 import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { EntityInventoryEntityCategory } from '../../../types';
 import { createPublicConfigMock } from '../../../mocks';
 import { EntityInventorySearchProvider } from '../../context/search_context';
+import { useEntityInventoryDataView } from '../../hooks/use_entity_inventory_data_view';
 import { typesFixture as mockTypes } from '../../__fixtures__/types';
 import { EntityInventoryPageFilterControls } from './page_filter_controls';
 
@@ -25,18 +26,33 @@ jest.mock('../hooks/use_attribute_values', () => ({
   useAttributeValues: () => ({ values: ['one', 'two'], invalidSelections: [], isLoading: false }),
 }));
 
-const renderControls = (entityCategory: EntityInventoryEntityCategory, initialEntry = '/') =>
-  render(
+// Reads the data view like the search bar does, from the same shared selection.
+const DataViewProbe = () => {
+  useEntityInventoryDataView();
+  return null;
+};
+
+const renderControls = (entityCategory: EntityInventoryEntityCategory, initialEntry = '/') => {
+  const history = createMemoryHistory({ initialEntries: [initialEntry] });
+  const dataViewsCreate = jest.fn().mockResolvedValue({});
+  const result = render(
     <KibanaContextProvider
-      services={{ ...coreMock.createStart(), config: createPublicConfigMock() }}
+      services={{
+        ...coreMock.createStart(),
+        config: createPublicConfigMock(),
+        dataViews: { create: dataViewsCreate },
+      }}
     >
-      <Router history={createMemoryHistory({ initialEntries: [initialEntry] })}>
+      <Router history={history}>
         <EntityInventorySearchProvider entityCategory={entityCategory}>
           <EntityInventoryPageFilterControls />
+          <DataViewProbe />
         </EntityInventorySearchProvider>
       </Router>
     </KibanaContextProvider>
   );
+  return { history, dataViewsCreate, ...result };
+};
 
 describe('EntityInventoryPageFilterControls', () => {
   it('shows the category filter on the all resources page', () => {
@@ -104,6 +120,50 @@ describe('EntityInventoryPageFilterControls', () => {
       renderControls('hosts', '/hosts?_a=(filterControls:(attributes:(os.type:!(linux))))');
 
       expect(screen.getByTestId(CLEAR)).toBeInTheDocument();
+    });
+
+    it('removes a category that does not exist from the URL once the types are known', async () => {
+      const { history } = renderControls(
+        'all',
+        '/all?_a=(filterControls:(attributes:(),category:nope))'
+      );
+
+      await waitFor(() => expect(history.location.search).not.toContain('nope'));
+    });
+
+    it('removes an attribute that is not in the view from the URL and keeps the valid ones', async () => {
+      const { history } = renderControls(
+        'hosts',
+        '/hosts?_a=(filterControls:(attributes:(os.type:!(linux),not.in.the.view:!(x))))'
+      );
+
+      await waitFor(() => expect(history.location.search).not.toContain('not.in.the.view'));
+      expect(history.location.search).toContain('os.type');
+    });
+
+    it('does not change the URL for a valid selection', async () => {
+      const entry = '/hosts?_a=(filterControls:(attributes:(os.type:!(linux))))';
+      const { history } = renderControls('hosts', entry);
+
+      await waitFor(() => expect(history.location.search).toContain('os.type'));
+      expect(`/hosts${history.location.search}`).toContain(
+        'filterControls:(attributes:(os.type:!(linux)))'
+      );
+    });
+
+    it('gives the data view the index patterns of every type when the category in the URL does not exist', async () => {
+      const { dataViewsCreate } = renderControls(
+        'all',
+        '/all?_a=(filterControls:(attributes:(),category:nope))'
+      );
+
+      await waitFor(() => expect(dataViewsCreate).toHaveBeenCalled());
+      const titles = dataViewsCreate.mock.calls.map(([spec]) => spec.title);
+      expect(titles.at(-1)).toBe(
+        [...new Set(mockTypes.flatMap(({ sources }) => sources.map((s) => s.indexPattern)))]
+          .sort()
+          .join(',')
+      );
     });
   });
 });
