@@ -10,13 +10,13 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { LOG_ENTRIES_MAX_COLUMNS } from '../../../../common/search_strategies/log_entries/log_entries';
 import { apiTest } from '../fixtures';
+import type { LogEntriesSearchClient } from '../fixtures/log_entries';
 import {
   DOCUMENT_COUNT,
   END_TIMESTAMP,
   START_TIMESTAMP,
-  createLogIndex,
   createLogViewAttributes,
-  searchLogEntriesToCompletion,
+  getLogEntriesSearchClient,
 } from '../fixtures/log_entries';
 
 // Log view saved objects and their PUT route are not registered in Serverless.
@@ -27,31 +27,27 @@ apiTest.describe(
     const runId = randomUUID();
     const logIndex = `scout-log-entries-${runId}`;
     const logViewId = `scout-wide-log-view-${runId}`;
-    let cookieHeader: Record<string, string>;
+    let searchClient: LogEntriesSearchClient;
 
-    apiTest.beforeAll(async ({ esClient, kbnClient, samlAuth }) => {
-      await createLogIndex(esClient, logIndex);
-      await kbnClient.request({
-        method: 'PUT',
-        path: `/api/infra/log_views/${logViewId}`,
-        headers: { 'elastic-api-version': '1', 'x-elastic-internal-origin': 'kibana' },
-        body: { attributes: createLogViewAttributes(logIndex, LOG_ENTRIES_MAX_COLUMNS + 1) },
-      });
-      ({ cookieHeader } = await samlAuth.asInteractiveUser('viewer'));
+    apiTest.beforeAll(async ({ apiServices, samlAuth }) => {
+      await apiServices.logsShared.createLogIndex(logIndex);
+      await apiServices.logsShared.putLogView(
+        logViewId,
+        createLogViewAttributes(logIndex, LOG_ENTRIES_MAX_COLUMNS + 1)
+      );
+      const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+      searchClient = getLogEntriesSearchClient(cookieHeader);
     });
 
-    apiTest.afterAll(async ({ esClient, kbnClient }) => {
-      await esClient.indices.delete({ index: logIndex, ignore_unavailable: true });
-      await kbnClient.savedObjects.delete({
-        type: 'infrastructure-monitoring-log-view',
-        id: logViewId,
-      });
+    apiTest.afterAll(async ({ apiServices }) => {
+      await apiServices.logsShared.deleteLogIndex(logIndex);
+      await apiServices.logsShared.deleteLogView(logViewId);
     });
 
     apiTest(
       'returns entries for a persisted log view with more columns than the request limit',
       async ({ apiClient }) => {
-        const response = await searchLogEntriesToCompletion(apiClient, cookieHeader, {
+        const response = await searchClient.searchToCompletion(apiClient, {
           logView: { type: 'log-view-reference', logViewId },
           startTimestamp: START_TIMESTAMP,
           endTimestamp: END_TIMESTAMP,

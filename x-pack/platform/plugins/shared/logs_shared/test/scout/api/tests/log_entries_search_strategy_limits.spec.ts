@@ -12,16 +12,15 @@ import {
   LOG_ENTRIES_MAX_COLUMNS,
   LOG_ENTRIES_MAX_SIZE,
 } from '../../../../common/search_strategies/log_entries/log_entries';
-import { apiTest, testData } from '../fixtures';
+import { apiTest } from '../fixtures';
+import type { LogEntriesSearchClient } from '../fixtures/log_entries';
 import {
   DOCUMENT_COUNT,
   END_TIMESTAMP,
-  SEARCH_PATH,
   START_TIMESTAMP,
   createColumns,
-  createLogIndex,
   createLogViewAttributes,
-  searchLogEntriesToCompletion,
+  getLogEntriesSearchClient,
 } from '../fixtures/log_entries';
 
 const COLUMN_LIMIT_ERROR = `Expected at most ${LOG_ENTRIES_MAX_COLUMNS} columns, got ${
@@ -33,7 +32,7 @@ apiTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     const logIndex = `scout-log-entries-${randomUUID()}`;
-    let cookieHeader: Record<string, string>;
+    let searchClient: LogEntriesSearchClient;
 
     const createInlineParams = (columnCount: number) => ({
       logView: {
@@ -46,19 +45,19 @@ apiTest.describe(
       size: 200,
     });
 
-    apiTest.beforeAll(async ({ esClient, samlAuth }) => {
-      await createLogIndex(esClient, logIndex);
-      ({ cookieHeader } = await samlAuth.asInteractiveUser('viewer'));
+    apiTest.beforeAll(async ({ apiServices, samlAuth }) => {
+      await apiServices.logsShared.createLogIndex(logIndex);
+      const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+      searchClient = getLogEntriesSearchClient(cookieHeader);
     });
 
-    apiTest.afterAll(async ({ esClient }) => {
-      await esClient.indices.delete({ index: logIndex, ignore_unavailable: true });
+    apiTest.afterAll(async ({ apiServices }) => {
+      await apiServices.logsShared.deleteLogIndex(logIndex);
     });
 
     apiTest('returns entries for an inline log view at the column limit', async ({ apiClient }) => {
-      const response = await searchLogEntriesToCompletion(
+      const response = await searchClient.searchToCompletion(
         apiClient,
-        cookieHeader,
         createInlineParams(LOG_ENTRIES_MAX_COLUMNS)
       );
 
@@ -70,15 +69,9 @@ apiTest.describe(
     });
 
     apiTest('rejects a size above the limit', async ({ apiClient }) => {
-      const response = await apiClient.post(SEARCH_PATH, {
-        headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
-        body: {
-          params: {
-            ...createInlineParams(LOG_ENTRIES_MAX_COLUMNS),
-            size: LOG_ENTRIES_MAX_SIZE + 1,
-          },
-        },
-        responseType: 'json',
+      const response = await searchClient.search(apiClient, {
+        ...createInlineParams(LOG_ENTRIES_MAX_COLUMNS),
+        size: LOG_ENTRIES_MAX_SIZE + 1,
       });
 
       expect(response).toHaveStatusCode(400);
@@ -86,15 +79,9 @@ apiTest.describe(
     });
 
     apiTest('rejects request columns above the limit', async ({ apiClient }) => {
-      const response = await apiClient.post(SEARCH_PATH, {
-        headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
-        body: {
-          params: {
-            ...createInlineParams(LOG_ENTRIES_MAX_COLUMNS),
-            columns: createColumns(LOG_ENTRIES_MAX_COLUMNS + 1),
-          },
-        },
-        responseType: 'json',
+      const response = await searchClient.search(apiClient, {
+        ...createInlineParams(LOG_ENTRIES_MAX_COLUMNS),
+        columns: createColumns(LOG_ENTRIES_MAX_COLUMNS + 1),
       });
 
       expect(response).toHaveStatusCode(400);
@@ -102,11 +89,10 @@ apiTest.describe(
     });
 
     apiTest('rejects an inline log view with columns above the limit', async ({ apiClient }) => {
-      const response = await apiClient.post(SEARCH_PATH, {
-        headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
-        body: { params: createInlineParams(LOG_ENTRIES_MAX_COLUMNS + 1) },
-        responseType: 'json',
-      });
+      const response = await searchClient.search(
+        apiClient,
+        createInlineParams(LOG_ENTRIES_MAX_COLUMNS + 1)
+      );
 
       expect(response).toHaveStatusCode(400);
       expect(response.body.message).toBe(COLUMN_LIMIT_ERROR);
@@ -116,11 +102,11 @@ apiTest.describe(
       const requestId = Buffer.from(JSON.stringify({ esRequestId: 'scout-request-id' })).toString(
         'base64'
       );
-      const response = await apiClient.post(`${SEARCH_PATH}/${encodeURIComponent(requestId)}`, {
-        headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
-        body: { params: createInlineParams(LOG_ENTRIES_MAX_COLUMNS + 1) },
-        responseType: 'json',
-      });
+      const response = await searchClient.poll(
+        apiClient,
+        requestId,
+        createInlineParams(LOG_ENTRIES_MAX_COLUMNS + 1)
+      );
 
       expect(response).toHaveStatusCode(400);
       expect(response.body.message).toBe(COLUMN_LIMIT_ERROR);

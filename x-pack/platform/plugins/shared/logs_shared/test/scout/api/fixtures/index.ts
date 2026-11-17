@@ -5,9 +5,28 @@
  * 2.0.
  */
 
-import type { ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
+import type { ApiServicesFixture } from '@kbn/scout';
 import { apiTest as baseApiTest } from '@kbn/scout';
+import {
+  getLogsSharedApiService,
+  type LogsSharedApiService,
+} from '../services/logs_shared_api_service';
 
-export const apiTest = baseApiTest.extend<ScoutTestFixtures, ScoutWorkerFixtures>({});
+declare module '@kbn/scout' {
+  interface ApiServicesFixture {
+    logsShared: LogsSharedApiService;
+  }
+}
 
-export * as testData from './constants';
+export const apiTest = baseApiTest.extend<{}, { apiServices: ApiServicesFixture }>({
+  apiServices: [
+    async ({ apiServices, esClient, kbnClient, log }, use) => {
+      await use(
+        Object.assign(apiServices, {
+          logsShared: getLogsSharedApiService({ esClient, kbnClient, log }),
+        })
+      );
+    },
+    { scope: 'worker' },
+  ],
+});
