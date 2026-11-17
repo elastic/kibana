@@ -308,6 +308,16 @@ const ICONS: Record<Rank, string> = {
 
 const NOT_IN_SPEC_STATUS = 'Not checked: no spec describes the endpoint';
 
+const LAST_CHECKED_ROW = '| **Last checked** |';
+
+/** An issue body without when it was last checked, which changes on every run, to compare findings. */
+export const findingsOf = (body: string): string =>
+  body
+    .split('\n')
+    .filter((line) => !line.startsWith(LAST_CHECKED_ROW))
+    .join('\n')
+    .trim();
+
 // The issues a recorded reason links to, as `[#123](url)`.
 const issueLinksOf = (reason: string): string[] =>
   [...reason.matchAll(/https:\/\/github\.com\/[\w.-]+\/[\w.-]+\/issues\/(\d+)/g)].map(
@@ -1018,7 +1028,7 @@ export const renderDriftIssue = (
   }
   if (drift.checkedAt) {
     facts.push(
-      `| **Last checked** | ${drift.checkedAt.slice(0, 10)}${
+      `${LAST_CHECKED_ROW} ${drift.checkedAt.slice(0, 10)}${
         buildUrl ? ` ([build](${buildUrl}))` : ''
       } |`
     );

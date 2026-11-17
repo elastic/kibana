@@ -166,6 +166,19 @@ describe('surfaceDrift', () => {
     expect(tracker.update).not.toHaveBeenCalled();
   });
 
+  it('refreshes when the issue was last checked without commenting, when only that changed', async () => {
+    const { tracker, issues, comments } = createTracker([issueOf(drifted, 7, 'open')]);
+    const nextWeek: ConnectorDrift = { ...drifted, checkedAt: '2026-11-23T06:00:00.000Z' };
+
+    const { actions } = await surface([nextWeek], tracker, {
+      buildUrl: 'https://buildkite.com/build/2',
+    });
+
+    expect(actions[0]).toMatchObject({ action: 'unchanged', issue: { number: 7 } });
+    expect(comments).toEqual([]);
+    expect(issues[0].body).toContain('2026-11-23 ([build](https://buildkite.com/build/2))');
+  });
+
   it('updates the open issue, its title included, and comments when the findings change', async () => {
     const { tracker, issues, comments } = createTracker([issueOf(drifted, 7, 'open')]);
     const changed: ConnectorDrift = {

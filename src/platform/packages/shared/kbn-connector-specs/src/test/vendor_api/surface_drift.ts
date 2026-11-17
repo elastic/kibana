@@ -8,7 +8,13 @@
  */
 
 import type { ConnectorDrift, DriftReportEntry, FailedDrift } from './detect_drift';
-import { changeList, DRIFT_ISSUE_LABEL, markerOf, renderDriftIssue } from './render_drift_issue';
+import {
+  changeList,
+  DRIFT_ISSUE_LABEL,
+  findingsOf,
+  markerOf,
+  renderDriftIssue,
+} from './render_drift_issue';
 import type { VendorApiLog } from './update_vendor_api';
 
 export { DRIFT_ISSUE_LABEL, renderDriftIssue } from './render_drift_issue';
@@ -189,7 +195,7 @@ export const surfaceDrift = async ({
           );
         });
         actions.push({ connector, action: 'reopened', issue: existing });
-      } else if (existing.body.trim() !== body.trim() || existing.title !== title) {
+      } else if (findingsOf(existing.body) !== findingsOf(body) || existing.title !== title) {
         await write(`update #${existing.number} for ${connector}`, async () => {
           await tracker.update(existing.number, { title, body });
           await tracker.comment(
@@ -199,6 +205,12 @@ export const surfaceDrift = async ({
         });
         actions.push({ connector, action: 'updated', issue: existing });
       } else {
+        // Only when it was last checked changed: editing the body notifies no one.
+        if (existing.body.trim() !== body.trim()) {
+          await write(`refresh when #${existing.number} was last checked`, () =>
+            tracker.update(existing.number, { body })
+          );
+        }
         actions.push({ connector, action: 'unchanged', issue: existing });
       }
     } catch (error) {
