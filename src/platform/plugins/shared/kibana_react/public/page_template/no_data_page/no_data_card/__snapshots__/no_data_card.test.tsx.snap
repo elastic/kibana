@@ -190,7 +190,7 @@ exports[`NoDataCard props no button and no href/onClick renders no footer contro
 
 exports[`NoDataCard props recommended 1`] = `
 <div
-  class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-euiCard-center-hasBetaBadge"
+  class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-euiCard-center-hasBetaBadge-betaBadgePadding"
 >
   <div
     class="euiCard__main emotion-euiCard__main-vertical"
@@ -218,7 +218,7 @@ exports[`NoDataCard props recommended 1`] = `
       </div>
     </div>
     <span
-      class="emotion-euiCard__betaBadgeAnchor"
+      class="emotion-euiCard__betaBadgeAnchor-betaBadgeAnchorPadding"
     >
       <span
         class="euiBetaBadge emotion-euiBetaBadge-hollow-m-baseline-euiCard__betaBadge"
