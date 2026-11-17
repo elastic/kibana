@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { isLockAcquisitionError, withLock } from '@kbn/lock-manager';
+import { getLock, isLockAcquisitionError, withLock } from '@kbn/lock-manager';
 
 /** Either the run happened and returned `result`, or another run held the space. */
 export type SpaceRunOutcome<T> = { ran: true; result: T } | { ran: false };
@@ -29,13 +29,14 @@ export class SpaceRunLock {
     callback: () => Promise<T>;
   }): Promise<SpaceRunOutcome<T>> {
     let started = false;
+    const lockId = getLockId(spaceId);
 
     try {
       const result = await withLock(
         {
           esClient: this.esClient,
           logger: this.logger,
-          lockId: getLockId(spaceId),
+          lockId,
           metadata: { spaceId },
         },
         () => {
@@ -48,7 +49,18 @@ export class SpaceRunLock {
     } catch (error) {
       // A lock error thrown by the callback itself is the callback's failure, not a busy space.
       if (!started && isLockAcquisitionError(error)) {
-        return { ran: false };
+        // The lock manager also fails to acquire when Elasticsearch times out or refuses the
+        // write. Only a live lock document means another run holds the space; anything else is a
+        // broken lock backend, which must not read as a busy space tick after tick.
+        const holder = await getLock({ esClient: this.esClient, logger: this.logger, lockId });
+        if (holder) {
+          return { ran: false };
+        }
+
+        throw new Error(
+          `Could not take the run lock of space [${spaceId}], and no other run holds it`,
+          { cause: error }
+        );
       }
 
       throw error;

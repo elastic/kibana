@@ -6,15 +6,17 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { LockAcquisitionError, withLock } from '@kbn/lock-manager';
+import { LockAcquisitionError, getLock, withLock } from '@kbn/lock-manager';
 import { SpaceRunLock } from './space_run_lock';
 
 jest.mock('@kbn/lock-manager', () => ({
   ...jest.requireActual('@kbn/lock-manager'),
   withLock: jest.fn(),
+  getLock: jest.fn(),
 }));
 
 const withLockMock = withLock as jest.MockedFunction<typeof withLock>;
+const getLockMock = getLock as jest.MockedFunction<typeof getLock>;
 
 function createLock() {
   return new SpaceRunLock(
@@ -26,6 +28,7 @@ function createLock() {
 describe('SpaceRunLock', () => {
   beforeEach(() => {
     withLockMock.mockReset();
+    getLockMock.mockReset();
   });
 
   it('runs the callback under a lock of its space and returns its result', async () => {
@@ -42,10 +45,25 @@ describe('SpaceRunLock', () => {
 
   it('skips the run when another run holds the space', async () => {
     withLockMock.mockRejectedValue(new LockAcquisitionError('held'));
+    getLockMock.mockResolvedValue({
+      createdAt: '',
+      expiresAt: '',
+      metadata: {},
+      token: 'other-run',
+    });
     const callback = jest.fn();
 
     expect(await createLock().run({ spaceId: 'space-a', callback })).toEqual({ ran: false });
     expect(callback).not.toHaveBeenCalled();
+  });
+
+  it('fails, not skips, when the lock was not taken and nobody holds it', async () => {
+    withLockMock.mockRejectedValue(new LockAcquisitionError('Elasticsearch refused the write'));
+    getLockMock.mockResolvedValue(undefined);
+
+    await expect(createLock().run({ spaceId: 'space-a', callback: jest.fn() })).rejects.toThrow(
+      'Could not take the run lock of space [space-a]'
+    );
   });
 
   it('rethrows a lock error raised by the callback itself', async () => {
