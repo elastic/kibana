@@ -491,6 +491,27 @@ describe('SubFeatureCard', () => {
 
       expect(screen.getByTestId('global-default-row-test_feature')).toBeInTheDocument();
     });
+
+    it('renders the deprecated badge on the global default locked row', () => {
+      const deprecatedInfo: EndpointDeprecationInfo = {
+        name: 'Claude 2',
+        status: EisModelStatus.Deprecated,
+        metadata: {
+          heuristics: { status: 'deprecated', end_of_life_date: '2099-01-01' },
+        },
+      };
+      renderCard(
+        [],
+        undefined,
+        new Set(),
+        ['__different__'],
+        { hasSavedObject: false, isFeatureDirty: false, globalDefaultId: 'ep-3' },
+        new Map([['ep-3', deprecatedInfo]])
+      );
+
+      expect(screen.getByTestId('global-default-row-test_feature')).toBeInTheDocument();
+      expect(screen.getByTestId('modelDeprecatedBadge-ep-3')).toBeInTheDocument();
+    });
   });
 
   describe('editable mode endpoint list', () => {
@@ -579,16 +600,6 @@ describe('SubFeatureCard', () => {
 
       expect(onEndpointsChange).toHaveBeenCalledWith('test_feature', ['ep-2']);
     });
-
-    it('shows a warning indicator for an invalid endpoint in editable mode', () => {
-      renderCard(['ep-1'], undefined, new Set(['ep-1']));
-
-      // In JSDOM, EuiIcon renders the aria-label as text content, so the warning message
-      // is queryable as visible text.
-      expect(
-        screen.getByText('Inference endpoint Claude is no longer available')
-      ).toBeInTheDocument();
-    });
   });
 
   describe('ignoreGlobalDefault — globalDefaultId set to NO_DEFAULT_MODEL', () => {
@@ -599,65 +610,6 @@ describe('SubFeatureCard', () => {
       });
 
       expect(screen.queryByTestId('global-default-row-test_feature')).not.toBeInTheDocument();
-    });
-  });
-
-  describe('deprecation badges', () => {
-    const deprecatedInfo: EndpointDeprecationInfo = {
-      name: 'Claude 2',
-      status: EisModelStatus.Deprecated,
-      metadata: {
-        heuristics: { status: 'deprecated', end_of_life_date: '2099-01-01' },
-      },
-    };
-    const eolInfo: EndpointDeprecationInfo = {
-      name: 'Claude 2',
-      status: EisModelStatus.DeprecatedEOL,
-      metadata: {
-        heuristics: { status: 'deprecated', end_of_life_date: '2020-01-01' },
-      },
-    };
-
-    it('renders the deprecated badge for an assigned deprecated endpoint', () => {
-      renderCard(
-        ['ep-2'],
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        new Map([['ep-2', deprecatedInfo]])
-      );
-
-      expect(screen.getByTestId('modelDeprecatedBadge-ep-2')).toBeInTheDocument();
-      expect(screen.queryByTestId('modelEolBadge-ep-2')).not.toBeInTheDocument();
-    });
-
-    it('renders the EOL badge for an assigned EOL endpoint', () => {
-      renderCard(
-        ['ep-2'],
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        new Map([['ep-2', eolInfo]])
-      );
-
-      expect(screen.getByTestId('modelEolBadge-ep-2')).toBeInTheDocument();
-      expect(screen.queryByTestId('modelDeprecatedBadge-ep-2')).not.toBeInTheDocument();
-    });
-
-    it('renders the deprecated badge on the global default locked row', () => {
-      renderCard(
-        [],
-        undefined,
-        new Set(),
-        ['__different__'],
-        { hasSavedObject: false, isFeatureDirty: false, globalDefaultId: 'ep-3' },
-        new Map([['ep-3', deprecatedInfo]])
-      );
-
-      expect(screen.getByTestId('global-default-row-test_feature')).toBeInTheDocument();
-      expect(screen.getByTestId('modelDeprecatedBadge-ep-3')).toBeInTheDocument();
     });
   });
 
@@ -872,29 +824,6 @@ describe('SubFeatureCard', () => {
       mockUseSupportedEffortLevels.mockReturnValue(new Map([['ep-1', ['low', 'medium', 'high']]]));
     });
 
-    it('shows the effort control only for models with supported effort levels', () => {
-      renderEffortCard();
-
-      expect(screen.getByTestId('add-effort-ep-1')).toBeInTheDocument();
-      expect(screen.queryByTestId('add-effort-ep-2')).not.toBeInTheDocument();
-    });
-
-    it('shows a saved effort with its remove action when the model lists no effort levels', () => {
-      renderEffortCard({ efforts: { 'ep-2': 'low' } });
-
-      fireEvent.click(screen.getByTestId('effort-badge-ep-2'));
-
-      expect(screen.queryByTestId('reasoningEffortButtonGroup')).not.toBeInTheDocument();
-      expect(screen.getByTestId('remove-effort-customization')).toBeInTheDocument();
-    });
-
-    it('shows the customized effort as a pill', () => {
-      renderEffortCard({ efforts: { 'ep-1': 'high' } });
-
-      expect(screen.getByTestId('effort-badge-ep-1')).toHaveTextContent('high');
-      expect(screen.queryByTestId('add-effort-ep-1')).not.toBeInTheDocument();
-    });
-
     it('sets an effort for the model', () => {
       renderEffortCard({ efforts: { 'ep-2': 'low' } });
 
@@ -914,15 +843,6 @@ describe('SubFeatureCard', () => {
       fireEvent.click(screen.getByTestId('remove-effort-customization'));
 
       expect(onEffortsChange).toHaveBeenCalledWith('test_feature', { 'ep-2': 'low' });
-    });
-
-    it('shows a read-only pill and no add control without manage permission', () => {
-      renderEffortCard({ efforts: { 'ep-1': 'high' }, endpointIds: ['ep-1'], canManage: false });
-
-      fireEvent.click(screen.getByTestId('effort-badge-ep-1'));
-
-      expect(screen.queryByTestId('effort-popover-ep-1')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('remove-effort-customization')).not.toBeInTheDocument();
     });
 
     it('copies efforts with the models to other features', () => {
