@@ -9,28 +9,19 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 import { useStore } from 'react-redux-v7';
-import type { Store } from 'redux-v4';
 import { parseDocument } from 'yaml';
 import type { ConfirmDisableWorkflows } from './use_disable_workflows_confirmation';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import type { RootState } from '../../../entities/workflows/store/types';
 import {
+  selectIsSaveInProgress,
   selectWorkflow,
   selectWorkflowId,
   selectYamlString,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
+import { setIsCheckingSave } from '../../../entities/workflows/store/workflow_detail/slice';
 import { getActiveProposalContent } from '../../ai_integration';
 import { useConfirmBreakingChange } from '../../workflow_dependents/model/workflow_dependents_context';
-
-// The save being checked or sent for each store. The header and the editor each save through their
-// own hook, and the checks run before the save marks itself in progress.
-const savingStores = new WeakMap<Store, symbol>();
-
-const releaseSave = (store: Store, save: symbol): void => {
-  if (savingStores.get(store) === save) {
-    savingStores.delete(store);
-  }
-};
 
 // What saving persists: the draft with any pending AI proposals accepted.
 const getDraftToSave = (state: RootState): string =>
@@ -49,19 +40,27 @@ export const useSaveYamlWithConfirmation = (
   const confirmBreakingChange = useConfirmBreakingChange();
   // The store outlives the editor, so leaving the editor has to stop a save still being checked.
   const isMountedRef = useRef(false);
-  // A save this hook is still checking, which leaving the editor lets others start again, even if
-  // a confirmation never settles.
+  // The save this hook is checking. The header and the editor each save through their own hook, and
+  // leaving the editor lets either save again, even if a confirmation never settles.
   const checkingSaveRef = useRef<symbol>();
+  const stopChecking = useCallback(
+    (save: symbol) => {
+      if (checkingSaveRef.current === save) {
+        checkingSaveRef.current = undefined;
+        store.dispatch(setIsCheckingSave(false));
+      }
+    },
+    [store]
+  );
   useEffect(() => {
     isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
       if (checkingSaveRef.current) {
-        releaseSave(store, checkingSaveRef.current);
-        checkingSaveRef.current = undefined;
+        stopChecking(checkingSaveRef.current);
       }
     };
-  }, [store]);
+  }, [stopChecking]);
 
   const confirmAndSave = useCallback(
     async (onSend: () => void) => {
@@ -92,20 +91,13 @@ export const useSaveYamlWithConfirmation = (
   );
 
   return useCallback(() => {
-    if (savingStores.has(store)) {
+    if (selectIsSaveInProgress(store.getState())) {
       return Promise.resolve(false);
     }
     const save = Symbol('save');
-    savingStores.set(store, save);
     checkingSaveRef.current = save;
-    const stopChecking = () => {
-      if (checkingSaveRef.current === save) {
-        checkingSaveRef.current = undefined;
-      }
-    };
-    return confirmAndSave(stopChecking).finally(() => {
-      stopChecking();
-      releaseSave(store, save);
-    });
-  }, [confirmAndSave, store]);
+    store.dispatch(setIsCheckingSave(true));
+    // The save thunk marks the save in progress as soon as it is sent.
+    return confirmAndSave(() => stopChecking(save)).finally(() => stopChecking(save));
+  }, [confirmAndSave, stopChecking, store]);
 };

@@ -18,7 +18,7 @@ import {
 } from '@kbn/workflows/spec/lib/field_conversion';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { isRecord } from '@kbn/workflows-yaml';
-import { collectWorkflowOutputBlocks } from './find_call_sites';
+import { collectWorkflowOutputBlocks, getOutputStepNames } from './find_call_sites';
 import type { ContractChange, ContractField, WorkflowContract } from './types';
 import { alwaysEndsInOutputStep, getReturnedOutputNames } from '../get_returned_output_names';
 
@@ -47,12 +47,12 @@ const toFields = (
   defaults?: Readonly<Record<string, unknown>>
 ): Record<string, ContractField> => {
   const fields: Record<string, ContractField> = {};
-  if (!schema?.properties) {
+  if (!schema) {
     return fields;
   }
   // A draft being typed can hold anything here.
   const required = new Set(Array.isArray(schema.required) ? schema.required : []);
-  for (const [name, rawProperty] of Object.entries(schema.properties)) {
+  for (const [name, rawProperty] of Object.entries(schema.properties ?? {})) {
     const property = resolveProperty(rawProperty, schema);
     fields[name] = {
       name,
@@ -62,6 +62,13 @@ const toFields = (
       enumValues: property.enum,
       schema: property,
     };
+  }
+  // Runs require these keys too, checked against the `additionalProperties` schema.
+  const additional = toAdditionalInputsField(schema);
+  for (const name of required) {
+    if (additional && typeof name === 'string' && !getOwn(fields, name)) {
+      fields[name] = { ...additional, name, required: true };
+    }
   }
   return fields;
 };
@@ -133,6 +140,7 @@ const buildWorkflowContract = (definition: unknown): WorkflowContract => {
     additionalInputs,
     alwaysReturnsOutput: alwaysEndsInOutputStep(definition),
     returnedOutputs,
+    outputStepNames: getOutputStepNames(definition),
   };
 
   if (declaredOutputs?.properties) {

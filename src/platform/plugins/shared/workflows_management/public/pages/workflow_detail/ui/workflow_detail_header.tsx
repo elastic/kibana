@@ -27,7 +27,7 @@ import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_
 import {
   selectHasChanges,
   selectHasYamlSchemaValidationErrors,
-  selectIsSavingYaml,
+  selectIsSaveInProgress,
   selectIsYamlSynced,
   selectIsYamlSyntaxValid,
   selectWorkflow,
@@ -161,7 +161,7 @@ export const WorkflowDetailHeader = React.memo(
 
     const { confirmDisable, confirmModal: disableConfirmModal } = useDisableWorkflowsConfirmation();
     const saveYaml = useSaveYamlWithConfirmation(confirmDisable);
-    const isSaving = useSelector(selectIsSavingYaml);
+    const isSaving = useSelector(selectIsSaveInProgress);
     const handleSaveWorkflow = useCallback(() => {
       saveYaml();
     }, [saveYaml]);
