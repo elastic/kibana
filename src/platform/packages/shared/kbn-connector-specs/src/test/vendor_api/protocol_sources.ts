@@ -11,6 +11,7 @@ import type {
   DefinitionNode,
   DocumentNode,
   GraphQLNamedType,
+  GraphQLObjectType,
   GraphQLSchema,
   IntrospectionQuery,
 } from 'graphql';
@@ -207,21 +208,24 @@ const projectSdl = (
       schema.getPossibleTypes(type).forEach((possible) => visitType(possible));
     }
   };
+  const visitRoot = (root: GraphQLObjectType, fields: Set<string>) => {
+    const rootFields = root.getFields();
+    visitImplemented(root);
+    // A root implementing an interface needs the fields it declares, even those unused.
+    root
+      .getInterfaces()
+      .forEach((implemented) =>
+        Object.keys(implemented.getFields()).forEach((name) => fields.add(name))
+      );
+    for (const field of fields) {
+      visitType(getNamedType(rootFields[field].type));
+      rootFields[field].args.forEach((arg) => visitType(getNamedType(arg.type)));
+    }
+  };
   for (const [rootName, fields] of kept) {
     const root = schema.getType(rootName);
     if (isObjectType(root)) {
-      const rootFields = root.getFields();
-      visitImplemented(root);
-      // A root implementing an interface needs the fields it declares, even those unused.
-      root
-        .getInterfaces()
-        .forEach((implemented) =>
-          Object.keys(implemented.getFields()).forEach((name) => fields.add(name))
-        );
-      for (const field of fields) {
-        visitType(getNamedType(rootFields[field].type));
-        rootFields[field].args.forEach((arg) => visitType(getNamedType(arg.type)));
-      }
+      visitRoot(root, fields);
     }
   }
   // A fragment can name a type the root fields don't reach, such as `... on Card` inside a fragment
@@ -234,18 +238,31 @@ const projectSdl = (
     }
   }
   // A fragment spread between two abstract types is valid only if they share a possible type, so
-  // keep one object of each overlap that isn't already kept.
+  // keep one object of each overlap that isn't already kept. A root type is the last resort, and
+  // then keeps only the fields of the interfaces it implements.
   const abstractNamed = namedTypes.flatMap((name) => {
     const type = schema.getType(name);
     return type && isAbstractType(type) ? [type] : [];
   });
+  const witnessOrder = (a: GraphQLObjectType, b: GraphQLObjectType) =>
+    Number(rootNames.has(a.name)) - Number(rootNames.has(b.name)) || (a.name < b.name ? -1 : 1);
   abstractNamed.forEach((first, index) =>
     abstractNamed.slice(index + 1).forEach((second) => {
       const shared = schema
         .getPossibleTypes(first)
         .filter((possible) => schema.isSubType(second, possible));
-      if (shared.length > 0 && !shared.some(({ name }) => reachable.has(name))) {
-        const [overlap] = [...shared].sort((a, b) => (a.name < b.name ? -1 : 1));
+      if (shared.some(({ name }) => reachable.has(name) || kept.has(name))) {
+        return;
+      }
+      const [overlap] = [...shared].sort(witnessOrder);
+      if (overlap === undefined) {
+        return;
+      }
+      if (rootNames.has(overlap.name)) {
+        const fields = new Set<string>();
+        kept.set(overlap.name, fields);
+        visitRoot(overlap, fields);
+      } else {
         visitType(overlap, false);
       }
     })

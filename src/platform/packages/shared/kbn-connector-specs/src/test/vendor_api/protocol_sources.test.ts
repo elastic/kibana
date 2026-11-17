@@ -956,6 +956,40 @@ describe('protocol sources', () => {
       expect(snapshot).not.toContain('OnlyTitled');
     });
 
+    const overlapSchema = (extra = '') => `
+      type Query { holder: Holder }
+      type Mutation implements Named & Titled { id: ID!, unused: String }
+      interface Named { id: ID! }
+      interface Titled { id: ID! }
+      type Holder implements Named { id: ID! }
+      ${extra}
+    `;
+    const overlapQuery =
+      'query { holder { ...N } } fragment N on Named { id ... on Titled { id } }';
+
+    it('keeps an object rather than a root type for an overlap of interfaces', async () => {
+      const { recorded, offline } = await recordQuery(
+        overlapSchema('type Both implements Named & Titled { id: ID! }'),
+        overlapQuery
+      );
+
+      expect(recorded.problems).toEqual([]);
+      expect(offline).toEqual({ changed: [], problems: [] });
+      const snapshot = await fs.readFile(path.join(directory, 'snapshots', 'main.graphql'), 'utf8');
+      expect(snapshot).toContain('type Both');
+      expect(snapshot).not.toContain('Mutation');
+    });
+
+    it('keeps only the interface fields of a root type that is the only overlap', async () => {
+      const { recorded, offline } = await recordQuery(overlapSchema(), overlapQuery);
+
+      expect(recorded.problems).toEqual([]);
+      expect(offline).toEqual({ changed: [], problems: [] });
+      const snapshot = await fs.readFile(path.join(directory, 'snapshots', 'main.graphql'), 'utf8');
+      expect(snapshot).toContain('type Mutation implements Named & Titled');
+      expect(snapshot).not.toContain('unused');
+    });
+
     it('re-records offline a read query whose every root field is skipped', async () => {
       const { recorded, offline } = await recordQuery(
         'type Query { a: String, b: String }',
