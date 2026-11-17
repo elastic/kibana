@@ -8,6 +8,7 @@
 import { Socket } from 'node:net';
 
 import { errors } from '@elastic/elasticsearch';
+import { computeTokenHmac } from '@kbn/crypto';
 import type { DiagnosticResult, TransportResult } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-common';
@@ -28,7 +29,6 @@ import {
 } from '@kbn/connector-specs';
 
 import { CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
-import { computeIngestTokenHash } from './compute_ingest_token_hash';
 import { composeIngestToken } from './ingress_credential';
 import { INBOUND_EVENTS_DISABLED_MESSAGE, INBOUND_EVENTS_MAX_EMITTED_DEFAULT } from './constants';
 import { dispatchConnectorEvents } from './dispatch_connector_events';
@@ -80,11 +80,7 @@ describe('ingestInboundEvent', () => {
   const credentialId = 'cred-1';
   const token = composeIngestToken(credentialId, 'ingest-token-value');
   const spaceId = DEFAULT_SPACE_ID;
-  const ingestTokenHash = computeIngestTokenHash({
-    connectorId,
-    spaceId,
-    token,
-  });
+  const ingestTokenHash = computeTokenHmac(token, connectorId, spaceId);
 
   const mockConnectorGet = (config: Record<string, unknown> = { other: 'kept' }) => ({
     id: connectorId,
@@ -657,11 +653,7 @@ describe('ingestInboundEvent', () => {
   it('returns 404 for the previous token after rotate', async () => {
     const rotatedCredentialId = 'cred-2';
     const rotatedToken = composeIngestToken(rotatedCredentialId, 'rotated-secret');
-    const rotatedHash = computeIngestTokenHash({
-      connectorId,
-      spaceId,
-      token: rotatedToken,
-    });
+    const rotatedHash = computeTokenHmac(rotatedToken, connectorId, spaceId);
     const eventId = buildEventId('.myConnector', 'received');
     const handleEvents = jest.fn().mockResolvedValue({
       type: 'emit',
