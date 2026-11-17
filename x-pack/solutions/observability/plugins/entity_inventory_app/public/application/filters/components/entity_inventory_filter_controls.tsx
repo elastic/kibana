@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { omit } from 'lodash';
+import { omit, pick } from 'lodash';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import type { EbtClickAttrsWithoutAction } from '@kbn/ebt-click';
@@ -89,6 +89,9 @@ export function EntityInventoryFilterControls({
   };
   const { categories, types, attributes } = getFilterControls(scope);
   const typeIds = getTypesInScope(scope).map(({ type }) => type);
+  const attributeNames = attributes.map(({ name }) => name);
+  // The selection can come from the URL: only the attributes that have a filter here narrow the others.
+  const shownAttributes = pick(selection.attributes, attributeNames);
 
   const updateSelection = (changes: Partial<FilterControlsSelection>) =>
     onSelectionChange(
@@ -174,7 +177,7 @@ export function EntityInventoryFilterControls({
                 attribute={name}
                 label={label}
                 types={typeIds}
-                filters={omit(selection.attributes, name)}
+                filters={omit(shownAttributes, name)}
                 timeRange={timeRange}
                 selected={selection.attributes[name] ?? []}
                 onChange={(values) => updateAttribute(name, values)}
