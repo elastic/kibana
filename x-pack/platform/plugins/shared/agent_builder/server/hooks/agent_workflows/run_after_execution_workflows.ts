@@ -6,7 +6,7 @@
  */
 
 import type { AfterExecutionHookContext } from '@kbn/agent-builder-server';
-import type { CoreSetup, KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import {
   ConversationRoundStatus,
   isPreExecutionWorkflowStep,
@@ -25,7 +25,6 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
 import { context as otelContext, ROOT_CONTEXT } from '@opentelemetry/api';
 import type { InternalStartServices } from '../../services/types';
-import { AGENT_WORKLOAD_TYPE } from '../../services/agents/service_account_binding';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { AfterExecutionWorkflowParams } from './types';
 import { withDeclaredInputs } from './with_declared_inputs';
@@ -67,7 +66,6 @@ export interface RunAfterExecutionWorkflowsParams {
   context: AfterExecutionHookContext;
   workflowApi: WorkflowApi;
   getInternalServices: () => InternalStartServices;
-  getStartServices: CoreSetup['getStartServices'];
   logger: Logger;
 }
 
@@ -75,7 +73,6 @@ export const runAfterExecutionWorkflows = async ({
   context,
   workflowApi,
   getInternalServices,
-  getStartServices,
   logger,
 }: RunAfterExecutionWorkflowsParams): Promise<void> => {
   const workflowIds = context.agentConfiguration.post_execution_workflow_ids ?? [];
@@ -187,21 +184,7 @@ export const runAfterExecutionWorkflows = async ({
     }
   };
 
-  // The round's service-account request is released once the round settles, and this
-  // non-blocking hook runs after that, so a bound agent mints its own credential here.
-  if (context.runAs && context.agentId) {
-    const [coreStart] = await getStartServices();
-    await coreStart.security.serviceAccounts.withScopedRequestForWorkload(
-      {
-        workloadType: AGENT_WORKLOAD_TYPE,
-        workloadId: context.agentId,
-        spaceId,
-        expectedServiceAccountId: context.runAs,
-      },
-      run
-    );
-    return;
-  }
-
+  // The hooks runner hands this non-blocking hook a request for the agent's bound service account
+  // (`requiresServiceAccountRequest`), since the round's own request is released once it settles.
   await run(context.request);
 };

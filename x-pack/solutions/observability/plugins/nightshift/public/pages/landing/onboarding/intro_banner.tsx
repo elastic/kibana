@@ -7,17 +7,8 @@
 
 import { css } from '@emotion/react';
 import React from 'react';
-import {
-  EuiButton,
-  EuiButtonIcon,
-  EuiPanel,
-  EuiText,
-  EuiTitle,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiPanel, EuiText, EuiTitle, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EXPLORE_LIVE_EXAMPLE_HREF } from '../../../common/live_example';
 import {
   type IntroBannerDismissal,
   useIntroBannerDismissal,
@@ -105,24 +96,6 @@ const IntroBanner = ({
             })}
           </p>
         </EuiText>
-        <div
-          css={css`
-            margin-top: ${euiTheme.size.m};
-          `}
-        >
-          <EuiButton
-            size="s"
-            iconType="external"
-            iconSide="right"
-            href={EXPLORE_LIVE_EXAMPLE_HREF}
-            target="_blank"
-            data-test-subj="nightshiftOnboardingExploreLiveExample"
-          >
-            {i18n.translate('xpack.nightshift.onboarding.exploreLiveExampleButton', {
-              defaultMessage: 'Explore live example',
-            })}
-          </EuiButton>
-        </div>
       </div>
       <div
         css={css`

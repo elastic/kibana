@@ -69,7 +69,7 @@ const summaryResponse = (
   timed_out: false,
   _shards: { total: 1, successful: 1, failed: 0 },
   hits: {
-    hits: source ? [{ _index: 'digital-experience-sessions-1', _source: source }] : [],
+    hits: source ? [{ _index: 'digital-experience-sessions-browser-1', _source: source }] : [],
   },
 });
 
