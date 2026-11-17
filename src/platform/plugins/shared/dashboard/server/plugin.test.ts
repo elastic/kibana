@@ -11,6 +11,7 @@ import { DashboardPlugin } from './plugin';
 import { coreMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { createEmbeddableStartMock } from '@kbn/embeddable-plugin/server/mocks';
+import { createIndexPatternsStartMock } from '@kbn/data-views-plugin/server/mocks';
 import { scheduleDashboardTelemetry, TASK_ID } from './usage/dashboard_telemetry_collection_task';
 import { read } from './api';
 
@@ -46,6 +47,7 @@ describe('DashboardPlugin', () => {
       const dashboardPlugin = new DashboardPlugin(initContext);
       dashboardPlugin.start(mockCoreStart, {
         embeddable: mockEmbeddable,
+        dataViews: createIndexPatternsStartMock(),
         taskManager: mockTaskManager,
       });
       expect(scheduleDashboardTelemetry).toHaveBeenCalledTimes(1);
@@ -58,6 +60,7 @@ describe('DashboardPlugin', () => {
       mockTaskManager.runSoon.mockRejectedValueOnce(500);
       const response = dashboardPlugin.start(mockCoreStart, {
         embeddable: mockEmbeddable,
+        dataViews: createIndexPatternsStartMock(),
         taskManager: mockTaskManager,
       });
       expect(scheduleDashboardTelemetry).toHaveBeenCalledTimes(1);
@@ -72,6 +75,7 @@ describe('DashboardPlugin', () => {
       const savedObjectsClient = savedObjectsClientMock.create();
       const { client } = new DashboardPlugin(initContext).start(mockCoreStart, {
         embeddable: mockEmbeddable,
+        dataViews: createIndexPatternsStartMock(),
         taskManager: mockTaskManager,
       });
 

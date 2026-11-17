@@ -44,6 +44,10 @@ export type { DashboardPluginSetup, DashboardPluginStart } from './types';
 export { DashboardValidationError } from './dashboard_validation_error';
 export type {
   DashboardSanitizeResponseBody,
+  DashboardTerraformResponseBody,
+  LibraryItem,
+  LiteralDataView,
+  LiteralTag,
   DashboardCreateResponseBody,
   DashboardReadResponseBody,
   DashboardSearchRequestParams,

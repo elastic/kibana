@@ -113,6 +113,15 @@ export const getExportItemMeta = (integrationId: string) => {
     };
   }
 
+  if (integrationId === 'exportTerraform') {
+    return {
+      label: topNavStrings.export.terraformLabel,
+      testId: 'exportMenuItem-Terraform',
+      iconType: 'pipelineApp',
+      order: 0.5,
+    };
+  }
+
   if (integrationId === 'pdfReports') {
     return {
       label: topNavStrings.export.pdfLabel,

@@ -244,6 +244,9 @@ export const topNavStrings = {
     jsonLabel: i18n.translate('dashboard.topNave.exportJsonButtonAriaLabel', {
       defaultMessage: 'Export JSON',
     }),
+    terraformLabel: i18n.translate('dashboard.topNave.exportTerraformButtonLabel', {
+      defaultMessage: 'Terraform',
+    }),
     pngLabel: i18n.translate('dashboard.topNave.exportPngButtonAriaLabel', {
       defaultMessage: 'PNG reports',
     }),

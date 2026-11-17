@@ -1,0 +1,47 @@
+{
+  "title": "Web logs by data view",
+  "filters": [
+    {
+      "type": "condition",
+      "data_view_id": "logs-dv",
+      "condition": {
+        "field": "message",
+        "operator": "is",
+        "value": "${not_a_reference}"
+      }
+    }
+  ],
+  "pinned_panels": [
+    {
+      "type": "options_list_control",
+      "width": "medium",
+      "grow": true,
+      "config": {
+        "title": "Host",
+        "data_view_id": "logs-dv",
+        "field_name": "host.keyword"
+      }
+    }
+  ],
+  "panels": [
+    {
+      "grid": { "x": 0, "y": 0, "w": 24, "h": 10 },
+      "type": "vis",
+      "config": {
+        "type": "metric",
+        "title": "Requests",
+        "data_source": { "type": "data_view_reference", "ref_id": "logs-dv" },
+        "metrics": [{ "type": "primary", "operation": "count" }]
+      }
+    },
+    {
+      "grid": { "x": 24, "y": 0, "w": 24, "h": 10 },
+      "type": "field_stats_table",
+      "config": {
+        "view_type": "dataview",
+        "data_view_id": "logs-dv",
+        "title": "Fields"
+      }
+    }
+  ]
+}

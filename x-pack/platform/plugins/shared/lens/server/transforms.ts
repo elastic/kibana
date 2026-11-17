@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, tfJsonLeaf, tfVariant, tfUnionOverride, tfUnion } from '@kbn/zod';
 import { lensApiConfigSchema, type LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import type { LensByRefSerializedAPIConfig } from '@kbn/lens-common-2';
 import type { EmbeddableSetup, GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
@@ -77,7 +77,7 @@ export function registerLensEmbeddableTransforms(
 const getSharedPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
   z
     .object({
-      references: referencesSchema.optional(),
+      references: referencesSchema.optional().meta(tfJsonLeaf()),
       ...serializedTimeRangeSchema.shape,
       ...serializedTitlesSchema.shape,
       ...getDrilldownsSchema(LENS_SUPPORTED_DRILLDOWN_TRIGGERS).shape,
@@ -85,19 +85,38 @@ const getSharedPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
     .strip();
 
 export const getLensByValuePanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) => {
-  return lensApiConfigSchema
-    .and(getSharedPanelSchema(getDrilldownsSchema))
-    .meta(BY_VALUE_SCHEMA_META);
+  return lensApiConfigSchema.and(getSharedPanelSchema(getDrilldownsSchema)).meta({
+    ...BY_VALUE_SCHEMA_META,
+    ...tfVariant({ key: 'by_value', match: { absent: 'ref_id' } }),
+  });
 };
 
-const getLensByRefPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
-  z
+const getLensByRefPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) => {
+  const sharedShape = getSharedPanelSchema(getDrilldownsSchema).shape;
+  return z
     .object({
       ref_id: z.string(),
     })
-    .extend(getSharedPanelSchema(getDrilldownsSchema).shape)
+    .extend({
+      ...sharedShape,
+      // Per-location override. The baseline names by-reference drilldown keys
+      // `dashboard` / `discover` / `url`, unlike every other location.
+      drilldowns: sharedShape.drilldowns.meta({
+        ...tfUnionOverride({
+          variant_keys: {
+            dashboard_drilldown: 'dashboard',
+            discover_drilldown: 'discover',
+            url_drilldown: 'url',
+          },
+        }),
+      }),
+    })
     .strip()
-    .meta(BY_REF_SCHEMA_META);
+    .meta({
+      ...BY_REF_SCHEMA_META,
+      ...tfVariant({ key: 'by_reference', match: { present: 'ref_id' } }),
+    });
+};
 
 export const getLensPanelSchema = (
   getDrilldownsSchema: GetDrilldownsSchemaFnType
@@ -114,4 +133,5 @@ export const getLensPanelSchema = (
     ])
     .meta({
       description: 'Lens embeddable schema',
+      ...tfUnion({ structural: true }), // recognizers live on the branches
     });

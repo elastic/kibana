@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, tfDataViewRef } from '@kbn/zod';
 import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
@@ -15,9 +15,14 @@ export const logRateAnalysisEmbeddableStateSchema = z
   .object({
     ...serializedTitlesSchema.shape,
     ...serializedTimeRangeSchema.shape,
-    data_view_id: z.string().min(1).max(1000).meta({
-      description: 'The data view ID used to run log rate analysis.',
-    }),
+    data_view_id: z
+      .string()
+      .min(1)
+      .max(1000)
+      .meta({
+        description: 'The data view ID used to run log rate analysis.',
+        ...tfDataViewRef(),
+      }),
   })
   .strip()
   .meta({

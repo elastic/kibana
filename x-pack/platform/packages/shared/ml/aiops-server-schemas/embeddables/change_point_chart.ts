@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, tfDataViewRef } from '@kbn/zod';
 import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
@@ -34,9 +34,14 @@ export const changePointChartEmbeddableStateSchema = z
   .object({
     ...serializedTitlesSchema.shape,
     ...serializedTimeRangeSchema.shape,
-    data_view_id: z.string().min(1).max(10000).meta({
-      description: 'The data view ID used to run change point detection.',
-    }),
+    data_view_id: z
+      .string()
+      .min(1)
+      .max(10000)
+      .meta({
+        description: 'The data view ID used to run change point detection.',
+        ...tfDataViewRef(),
+      }),
     view_type: viewTypeSchema,
     aggregation_function: aggregationFunctionSchema,
     metric_field: z.string().min(1).max(10000).meta({

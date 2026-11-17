@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { uniqBy } from 'lodash';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import type { Warnings } from '../types';
 import type { DashboardSanitizeResponseBody } from './types';
@@ -15,6 +14,7 @@ import { transformDashboardIn, transformDashboardOut } from '../transforms';
 import { stripUnmappedKeys } from '../scope_tooling';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { MAX_RELATED_ITEMS } from './schemas';
+import { toRelatedItems } from './related_items';
 
 export async function sanitize(
   dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
@@ -45,14 +45,8 @@ export async function sanitize(
   // TODO: As part of sanitization, we should drop panels, filters, etc. that exceed their max array sizes
   const sanitizedDashboardState = dashboardStateSchema.parse(scopedDashboardState);
 
-  const uniqueRelatedItems = uniqBy(references ?? [], ({ type, id }) => `${type}:${id}`);
-  const relatedItems = uniqueRelatedItems.slice(0, MAX_RELATED_ITEMS).map(({ type, id }) => {
-    return {
-      type,
-      type_label: getTypeDisplayName(type),
-      id,
-    };
-  });
+  const uniqueRelatedItems = toRelatedItems(references ?? [], getTypeDisplayName);
+  const relatedItems = uniqueRelatedItems.slice(0, MAX_RELATED_ITEMS);
 
   // access_control is separate from the transforms and stripping logic since it is not part of the
   // dashboard saved object attributes but it should be preserved in the sanitized output if present

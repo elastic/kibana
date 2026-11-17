@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, tfUnion, tfVariant } from '@kbn/zod';
 import {
   BY_REF_SCHEMA_META,
   BY_VALUE_SCHEMA_META,
@@ -46,18 +46,20 @@ function withPanelSchemas<T extends z.ZodRawShape>(
 
 const getDiscoverSessionByValueEmbeddableSchema = withPanelSchemas(
   discoverSessionApiEmbeddableByValueConfigSchema,
-  BY_VALUE_SCHEMA_META
+  { ...BY_VALUE_SCHEMA_META, ...tfVariant({ key: 'by_value', match: { present: 'tabs' } }) }
 );
 
 const getDiscoverSessionByReferenceEmbeddableSchema = withPanelSchemas(
   discoverSessionApiEmbeddableByReferenceConfigSchema,
-  BY_REF_SCHEMA_META
+  { ...BY_REF_SCHEMA_META, ...tfVariant({ key: 'by_reference', match: { present: 'ref_id' } }) }
 );
 
 export const getDiscoverSessionEmbeddableSchema = (
   getDrilldownsSchema: GetDrilldownsSchemaFnType
 ) =>
-  z.union([
-    getDiscoverSessionByValueEmbeddableSchema(getDrilldownsSchema),
-    getDiscoverSessionByReferenceEmbeddableSchema(getDrilldownsSchema),
-  ]);
+  z
+    .union([
+      getDiscoverSessionByValueEmbeddableSchema(getDrilldownsSchema),
+      getDiscoverSessionByReferenceEmbeddableSchema(getDrilldownsSchema),
+    ])
+    .meta(tfUnion({ structural: true }));

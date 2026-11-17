@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, tfUnion, tfFlatten } from '@kbn/zod';
 import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { DEFAULT_OBJECT_FIT, IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS } from '../common';
@@ -34,7 +34,10 @@ const imageUrlSrcSchema = z
 
 const imageConfigSchema = z
   .object({
-    src: z.union([imageFileSrcSchema, imageUrlSrcSchema]).meta({ description: 'Image source' }),
+    src: z.union([imageFileSrcSchema, imageUrlSrcSchema]).meta({
+      description: 'Image source',
+      ...tfUnion({ discriminator: 'type', key_template: '{value}' }),
+    }),
     alt_text: z.string().optional(),
     object_fit: z
       .union([z.literal('fill'), z.literal('contain'), z.literal('cover'), z.literal('none')])
@@ -50,7 +53,8 @@ export function getImageEmbeddableSchema(getDrilldownsSchemas: GetDrilldownsSche
     .object({
       ...getDrilldownsSchemas(IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS).shape,
       ...serializedTitlesSchema.shape,
-      image_config: imageConfigSchema,
+      // Terraform drops this level (image_config.* sits directly under panels[].image_config)
+      image_config: imageConfigSchema.meta(tfFlatten()),
     })
     .strict()
     .meta({

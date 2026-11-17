@@ -1,0 +1,56 @@
+{
+  "title": "Image url src",
+  "description": "Dashboard with typed image panel (URL src, mixed drilldowns)",
+  "time_range": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "refresh_interval": {
+    "pause": true,
+    "value": 0
+  },
+  "query": {
+    "language": "kql",
+    "expression": ""
+  },
+  "panels": [
+    {
+      "type": "image",
+      "grid": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 10
+      },
+      "config": {
+        "title": "Image panel title",
+        "description": "Image panel description",
+        "hide_title": false,
+        "hide_border": true,
+        "image_config": {
+          "src": {
+            "type": "url",
+            "url": "https://example.com/logo.png"
+          },
+          "alt_text": "Logo",
+          "background_color": "#111111",
+          "object_fit": "cover"
+        },
+        "drilldowns": [
+          {
+            "type": "dashboard_drilldown",
+            "dashboard_id": "spike0-target-dashboard",
+            "label": "Open dashboard",
+            "trigger": "on_click_image"
+          },
+          {
+            "type": "url_drilldown",
+            "url": "https://example.com/details/{{context.panel.title}}",
+            "label": "External link",
+            "trigger": "on_click_image"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, tfDataViewRef } from '@kbn/zod';
 import { ControlValuesSource, DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
 
 export const controlTitleSchema = z
@@ -57,9 +57,13 @@ export const dataControlFieldVariantSchema = z
   .object({
     ...sharedDataControlProps,
     values_source: dataControlFieldValuesSourceSchema,
-    data_view_id: z.string().min(1).meta({
-      description: 'The ID of the data view that provides field options for this control.', // this will generate a reference
-    }),
+    data_view_id: z
+      .string()
+      .min(1)
+      .meta({
+        description: 'The ID of the data view that provides field options for this control.', // this will generate a reference
+        ...tfDataViewRef(),
+      }),
     field_name: z.string().min(1).meta({
       description: 'The name of the field in the data view that this control filters on.',
     }),

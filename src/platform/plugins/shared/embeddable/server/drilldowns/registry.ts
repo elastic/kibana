@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, tfUnion } from '@kbn/zod';
 import type { DrilldownSetup } from './types';
 import { getTransformDrilldownsIn } from '../../common/drilldowns/transform_drilldowns_in';
 import { getTransformDrilldownsOut } from '../../common/drilldowns/transform_drilldowns_out';
@@ -72,7 +72,15 @@ export function getDrilldownRegistry() {
 
       return z
         .object({
-          drilldowns: z.array(z.union(drilldownSchemas)).max(100).optional(),
+          drilldowns: z
+            .array(
+              z.union(drilldownSchemas).meta({
+                // Default drilldown mapping; locations can override.
+                ...tfUnion({ discriminator: 'type', key_template: '{value}' }),
+              })
+            )
+            .max(100)
+            .optional(),
         })
         .strict();
     },

@@ -6,7 +6,7 @@
  */
 
 import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
-import { z } from '@kbn/zod';
+import { z, tfJsonLeaf, tfUnion } from '@kbn/zod';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
@@ -43,7 +43,8 @@ const GroupOverviewCustomSchema = z
         // Bounded to avoid unbounded-array warnings; 100 aligns with other embeddable list limits.
         groups: z.array(z.string().max(256)).max(100).optional(),
         // Bounded to avoid unbounded-array warnings; 500 matches dashboard filters limit.
-        filters: z.array(asCodeFilterSchema).max(500).optional(),
+        // Terraform keeps the whole list as one JSON string (`filters_json`).
+        filters: z.array(asCodeFilterSchema).max(500).optional().meta(tfJsonLeaf()),
         kql_query: z.string().max(2048).optional(),
       })
       .strict()
@@ -86,7 +87,10 @@ export const getOverviewEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSc
       getSingleOverviewEmbeddableSchema(getDrilldownsSchema),
       getGroupOverviewEmbeddableSchema(getDrilldownsSchema),
     ])
-    .meta({ description: 'SLO Overview embeddable schema' });
+    .meta({
+      description: 'SLO Overview embeddable schema',
+      ...tfUnion({ discriminator: 'overview_mode' }),
+    });
 };
 
 export type GroupBy = z.output<typeof groupBySchema>;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, tfUnion, tfDataViewRef, tfUnwrap } from '@kbn/zod';
 import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
@@ -27,7 +27,7 @@ const fieldStatsDataViewSchema = z
       .string()
       .min(1)
       .max(1000)
-      .meta({ description: 'Data view ID (stored as a panel reference).' }),
+      .meta({ description: 'Data view ID (stored as a panel reference).', ...tfDataViewRef() }),
   })
   .strict();
 
@@ -38,7 +38,7 @@ const fieldStatsEsqlSchema = z
     query: z
       .object({ esql: z.string().max(1000).meta({ description: 'The ES|QL query string.' }) })
       .strict()
-      .meta({ description: 'ES|QL query.' }),
+      .meta({ description: 'ES|QL query.', ...tfUnwrap() }),
   })
   .strict();
 
@@ -47,6 +47,7 @@ export const fieldStatsTableEmbeddableSchema = z
   .meta({
     id: 'data_visualizer_field_stats',
     description: 'Field statistics table embeddable schema',
+    ...tfUnion({ discriminator: 'view_type', key_template: 'by_{value}' }),
   });
 
 export type FieldStatsTableEmbeddableState = z.output<typeof fieldStatsTableEmbeddableSchema>;

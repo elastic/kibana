@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, tfVariant, tfUnion } from '@kbn/zod';
 import {
   DEFAULT_DSL_OPTIONS_LIST_STATE,
   DEFAULT_ESQL_OPTIONS_LIST_STATE,
@@ -108,19 +108,29 @@ const optionsListDSLExtras = {
 
 export const optionsListDSLControlSchema = z.preprocess(
   withFieldValuesSourceDefault,
-  z.discriminatedUnion('values_source', [
-    dataControlEsqlVariantSchema.extend(optionsListDSLExtras).meta({
-      id: 'kbn-controls-schemas-options-list-dsl-control-schema-esql',
-      title: 'EsqlOptionsListControl',
-      description:
-        "An options list control whose available options come from an ES|QL query's results.",
-    }),
-    dataControlFieldVariantSchema.extend(optionsListDSLExtras).meta({
-      id: 'kbn-controls-schemas-options-list-dsl-control-schema-field',
-      title: 'FieldOptionsListControl',
-      description: 'An options list control whose available options come from a data view field.',
-    }),
-  ])
+  z
+    .discriminatedUnion('values_source', [
+      dataControlEsqlVariantSchema.extend(optionsListDSLExtras).meta({
+        id: 'kbn-controls-schemas-options-list-dsl-control-schema-esql',
+        title: 'EsqlOptionsListControl',
+        ...tfVariant({ keep_discriminator: true }),
+        description:
+          "An options list control whose available options come from an ES|QL query's results.",
+      }),
+      dataControlFieldVariantSchema.extend(optionsListDSLExtras).meta({
+        id: 'kbn-controls-schemas-options-list-dsl-control-schema-field',
+        title: 'FieldOptionsListControl',
+        description: 'An options list control whose available options come from a data view field.',
+      }),
+    ])
+    .meta({
+      // Same mapping as the range slider
+      ...tfUnion({
+        discriminator: 'values_source',
+        default_value: 'field',
+        variant_keys: { field: 'by_field', esql: 'by_esql' },
+      }),
+    })
 );
 
 const baseEsqlControlSchema = z
@@ -153,34 +163,37 @@ const baseEsqlControlSchema = z
   })
   .strip();
 
-export const optionsListESQLControlSchema = z.discriminatedUnion('control_type', [
-  baseEsqlControlSchema
-    .extend({
-      control_type: z.literal('STATIC_VALUES'),
-      available_options: z.array(z.string()).max(MAX_OPTIONS_LIST_REQUEST_SIZE).meta({
-        description: 'A fixed list of option strings displayed in the control.',
-      }),
-    })
-    .strip()
-    .meta({
-      id: 'kbn-controls-schemas-options-list-esql-control-schema-static-values',
-      title: 'STATIC_VALUES',
-      description:
-        'An ES|QL variable control with a fixed list of selectable options defined directly in `available_options`.',
-    }),
-  baseEsqlControlSchema
-    .extend({
-      control_type: z.literal('VALUES_FROM_QUERY'),
-      esql_query: z.string().meta({
+export const optionsListESQLControlSchema = z
+  .discriminatedUnion('control_type', [
+    baseEsqlControlSchema
+      .extend({
+        control_type: z.literal('STATIC_VALUES'),
+        available_options: z.array(z.string()).max(MAX_OPTIONS_LIST_REQUEST_SIZE).meta({
+          description: 'A fixed list of option strings displayed in the control.',
+        }),
+      })
+      .strip()
+      .meta({
+        id: 'kbn-controls-schemas-options-list-esql-control-schema-static-values',
+        title: 'STATIC_VALUES',
         description:
-          'An ES|QL query whose results populate the list of available options in the control popover.',
+          'An ES|QL variable control with a fixed list of selectable options defined directly in `available_options`.',
       }),
-    })
-    .strip()
-    .meta({
-      id: 'kbn-controls-schemas-options-list-esql-control-schema-values-from-query',
-      title: 'VALUES_FROM_QUERY',
-      description:
-        'An ES|QL variable control whose selectable options are dynamically retrieved by running an ES|QL query.',
-    }),
-]);
+    baseEsqlControlSchema
+      .extend({
+        control_type: z.literal('VALUES_FROM_QUERY'),
+        esql_query: z.string().meta({
+          description:
+            'An ES|QL query whose results populate the list of available options in the control popover.',
+        }),
+      })
+      .strip()
+      .meta({
+        id: 'kbn-controls-schemas-options-list-esql-control-schema-values-from-query',
+        title: 'VALUES_FROM_QUERY',
+        description:
+          'An ES|QL variable control whose selectable options are dynamically retrieved by running an ES|QL query.',
+      }),
+  ])
+  // Terraform has one flat object; `control_type` stays an attribute.
+  .meta(tfUnion({ merge: true }));

@@ -22,6 +22,9 @@ export const DASHBOARD_INTERNAL_API_PATH = '/internal/dashboards';
 export const DASHBOARD_APP_API_PATH = `${DASHBOARD_INTERNAL_API_PATH}/app`;
 export const DASHBOARD_APP_API_VERSION = '1';
 
+/** Feature flag for Export → Terraform (technical preview). */
+export const DASHBOARD_TERRAFORM_EXPORT_FLAG = 'dashboard.terraformExport';
+
 export const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';
 
 export const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;

@@ -14,7 +14,7 @@
  * in * as Code APIs.
  */
 
-import { z } from '@kbn/zod';
+import { z, tfJsonLeaf, tfDataViewRef } from '@kbn/zod';
 import {
   ASCODE_FILTER_OPERATOR,
   ASCODE_GROUPED_CONDITION_TYPE,
@@ -76,9 +76,13 @@ const commonBasePropertiesSchema = z
       description:
         'Identifier of the panel that manages this filter. When set, the filter is treated as owned by that panel.',
     }),
-    data_view_id: z.string().optional().meta({
-      description: 'Identifier of the data view used as context for this filter.',
-    }),
+    data_view_id: z
+      .string()
+      .optional()
+      .meta({
+        description: 'Identifier of the data view used as context for this filter.',
+        ...tfDataViewRef(),
+      }),
     label: z
       .string()
       .optional()
@@ -311,4 +315,5 @@ export const asCodeFilterSchema = z
     description:
       'A filter applied to query results. Can be a field condition (`condition`), a logical group of conditions (`group`), a raw Elasticsearch DSL query (`dsl`), or a geo spatial query (`spatial`).',
     id: 'kbn-as-code-filters-schema_asCodeFilterSchema',
+    ...tfJsonLeaf('filter_json'),
   });

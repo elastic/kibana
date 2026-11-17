@@ -11,8 +11,12 @@ import { DASHBOARD_INTERNAL_API_PATH } from '../../../../../common/constants';
 import type { DashboardSanitizeResponseBody } from '../../../../../server';
 import { coreServices } from '../../../../services/kibana_services';
 
-export async function sanitizeDashboard(dashboardState: unknown, signal?: AbortSignal) {
-  const result = await coreServices.http.post<DashboardSanitizeResponseBody>(
+/** Posts the dashboard to the sanitize route and returns its response as is. */
+export const fetchSanitizedDashboard = (
+  dashboardState: unknown,
+  signal?: AbortSignal
+): Promise<DashboardSanitizeResponseBody> =>
+  coreServices.http.post<DashboardSanitizeResponseBody>(
     `${DASHBOARD_INTERNAL_API_PATH}/_sanitize`,
     {
       version: '1',
@@ -20,6 +24,9 @@ export async function sanitizeDashboard(dashboardState: unknown, signal?: AbortS
       signal,
     }
   );
+
+export async function sanitizeDashboard(dashboardState: unknown, signal?: AbortSignal) {
+  const result = await fetchSanitizedDashboard(dashboardState, signal);
 
   return {
     data: result.data,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, tfDataViewRef } from '@kbn/zod';
 import {
   compositeRuntimeFieldSchema,
   primitiveRuntimeFieldSchema,
@@ -38,6 +38,7 @@ export const dataViewReferenceSchema = z
     ref_id: z.string().meta({
       description:
         'The id of the Kibana data view to use as the data source. Example: "my-data-view".',
+      ...tfDataViewRef(),
     }),
   })
   .strict()

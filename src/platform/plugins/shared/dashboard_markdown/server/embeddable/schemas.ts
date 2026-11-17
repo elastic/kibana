@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, tfVariant, tfUnion } from '@kbn/zod';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { BY_REF_SCHEMA_META, BY_VALUE_SCHEMA_META } from '@kbn/presentation-publishing-schemas';
 import { markdownStateSchema } from '@kbn/dashboard-markdown-schemas';
@@ -18,7 +18,10 @@ export const markdownByValueStateSchema = z
     ...markdownStateSchema.shape,
   })
   .strip()
-  .meta(BY_VALUE_SCHEMA_META);
+  .meta({
+    ...BY_VALUE_SCHEMA_META,
+    ...tfVariant({ key: 'by_value', match: { present: 'content' } }),
+  });
 
 const markdownByReferenceStateSchema = z
   .object({
@@ -28,12 +31,16 @@ const markdownByReferenceStateSchema = z
     }),
   })
   .strip()
-  .meta(BY_REF_SCHEMA_META);
+  .meta({
+    ...BY_REF_SCHEMA_META,
+    ...tfVariant({ key: 'by_reference', match: { present: 'ref_id' } }),
+  });
 
 export const markdownEmbeddableSchema = z
   .union([markdownByValueStateSchema, markdownByReferenceStateSchema])
   .meta({
     description: 'Markdown panel config',
+    ...tfUnion({ structural: true }),
   });
 
 export type MarkdownByValueState = z.output<typeof markdownByValueStateSchema>;

@@ -69,6 +69,7 @@ import type {
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
+import { DASHBOARD_TERRAFORM_EXPORT_FLAG } from '../common/constants';
 import type { DashboardMountContextProps } from './dashboard_app/types';
 import type { DashboardListingTab } from './dashboard_listing/types';
 import {
@@ -162,6 +163,8 @@ export class DashboardPlugin
   }
 
   private appStateSubscription?: Subscription;
+  private terraformExportFlagSubscription?: Subscription;
+  private isTerraformExportEnabled = false;
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private urlUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private deepLinksUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
@@ -213,6 +216,17 @@ export class DashboardPlugin
         getShareIntegrationConfig: async () => {
           const { exportJsonConfig } = await import('./dashboard_renderer/dashboard_module');
           return exportJsonConfig;
+        },
+      });
+      share.registerShareIntegration<ExportShareDerivatives>('dashboard', {
+        id: 'exportTerraform',
+        groupId: 'exportDerivatives',
+        prerequisiteCheck: () => this.isTerraformExportEnabled,
+        getShareIntegrationConfig: async () => {
+          const { exportTerraformConfig } = await import(
+            './dashboard_app/top_nav/share/export_terraform/export_terraform_config'
+          );
+          return exportTerraformConfig;
         },
       });
     }
@@ -358,6 +372,11 @@ export class DashboardPlugin
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
     setKibanaServices(core, plugins);
+    this.terraformExportFlagSubscription = core.featureFlags
+      .getBooleanValue$(DASHBOARD_TERRAFORM_EXPORT_FLAG, false)
+      .subscribe((enabled) => {
+        this.isTerraformExportEnabled = enabled;
+      });
 
     registerActions(plugins);
 
@@ -425,5 +444,6 @@ export class DashboardPlugin
       this.stopUrlTracking();
     }
     this.appStateSubscription?.unsubscribe();
+    this.terraformExportFlagSubscription?.unsubscribe();
   }
 }
