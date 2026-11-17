@@ -750,4 +750,29 @@ describe('StatusService', () => {
       );
     });
   });
+
+  describe('#setReady', () => {
+    it('logs when transitioning to ready and back to not ready', () => {
+      service.setReady(true);
+      service.setReady(false);
+
+      expect(loggingSystemMock.collect(logger).info).toEqual([
+        ['Kibana is ready to serve traffic'],
+        ['Kibana is not ready to serve traffic'],
+      ]);
+    });
+
+    it('does not log when setting the same readiness state repeatedly', () => {
+      service.setReady(false);
+      service.setReady(true);
+      service.setReady(true);
+      service.setReady(false);
+      service.setReady(false);
+
+      expect(loggingSystemMock.collect(logger).info).toEqual([
+        ['Kibana is ready to serve traffic'],
+        ['Kibana is not ready to serve traffic'],
+      ]);
+    });
+  });
 });
