@@ -1847,4 +1847,20 @@ describe('analyzeRemovalImpact', () => {
     expect(impact.callers.map(({ id }) => id)).toEqual(['nightly']);
     expect(impact.indirect).toBe(0);
   });
+
+  it('doesn’t follow callers that run a failing caller in the background', () => {
+    const background = workflow('background', [
+      callStep('run', {}, 'workflow.executeAsync', 'triage'),
+    ]);
+    expect(analyzeRemovalImpact([CHILD_ID], [triage, background]).indirect).toBe(0);
+  });
+
+  it('doesn’t count unmanaged workflows above a managed caller, since they can’t run it', () => {
+    const managedCaller = { ...triage, managed: true };
+    const runTriage = callStep('run', {}, undefined, 'triage');
+    const unmanagedTop = workflow('top', [runTriage]);
+    const managedTop = { ...workflow('managed-top', [runTriage]), managed: true };
+    expect(analyzeRemovalImpact([CHILD_ID], [managedCaller, unmanagedTop]).indirect).toBe(0);
+    expect(analyzeRemovalImpact([CHILD_ID], [managedCaller, managedTop]).indirect).toBe(1);
+  });
 });

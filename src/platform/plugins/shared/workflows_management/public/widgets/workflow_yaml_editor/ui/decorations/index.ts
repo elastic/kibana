@@ -9,6 +9,7 @@
 
 export { useFocusedStepDecoration, type StepLineRange } from './use_focused_step_decoration';
 export { useStepDecorationsInExecution } from './use_step_decorations_in_execution';
+export { useStepDurationDecorations } from './use_step_duration_decorations';
 export { useTriggerTypeDecorations } from './use_trigger_type_decorations';
 export { useConnectorTypeDecorations } from './use_connector_type_decorations';
 export { useLineDifferencesDecorations } from './use_line_differences_decorations';
