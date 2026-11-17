@@ -601,7 +601,7 @@ describe('invokeAttackDiscoveryGraphWithAlerts', () => {
       ).rejects.toThrow('Maximum generation attempts (10) reached.');
     });
 
-    it('throws inside the root span callback, after the counters are recorded, so the span ends in error', async () => {
+    it('rethrows the retry-limit error from inside the root span callback, after the counters are recorded', async () => {
       mockSpan = { setAttributes: mockSetAttributes };
       const limitError = new Error('Maximum generation attempts (10) reached.');
       mockGraphInvoke.mockResolvedValue({
