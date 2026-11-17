@@ -46,14 +46,12 @@ evaluate.describe(
         expect(repetitions, 'ORCA re-grades each stored run once').toBe(1);
         const stored = await loadStoredOrcaRuns(evalsClient, experimentId);
         const missingReports = [...stored.outputs.values()].filter(needsOrcaReport).length;
-        // A missing report.md is written by the model under test, so it must be the model that
-        // ran the investigations.
-        if (missingReports > 0) {
-          expect(
-            buildModelFromConnector(connector).id,
-            `${missingReports} runs need a report.md; re-grade with the connector of the model that ran ${experimentId}`
-          ).toBe(stored.taskModelId);
-        }
+        // The new experiment records its scores under the connector's model, and that model writes
+        // any missing report.md, so it must be the model that ran the investigations.
+        expect(
+          buildModelFromConnector(connector).id,
+          `Re-grade ${experimentId} with the connector of the model that ran it`
+        ).toBe(stored.taskModelId);
         // The pinned release, not the experiment's dataset, so earlier releases get orca_expected.
         const release = await loadOrcaDataset(evalsClient, { release: run.release });
         const dataset = await storeOrcaSlice(

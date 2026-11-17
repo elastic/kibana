@@ -1080,7 +1080,8 @@ re-scores a stored ORCA experiment without new investigations. It reads each run
 takes its task's metadata (and so `orca_expected`) from the release `NIGHTSHIFT_ORCA_RELEASE`
 names, writes `report.md` for runs stored before the report step, and records the ORCA scores as a
 new experiment on the dataset `<release>/regrade-<id>`. The connector must be the model that ran
-the experiment, since it writes the missing reports. It needs no sandbox and no ORCA cluster.
+the experiment: the new experiment is recorded under it, and it writes any missing reports. It
+needs no sandbox and no ORCA cluster.
 
 ```bash
 NIGHTSHIFT_DATASETS=orcabench-regrade NIGHTSHIFT_ORCA_RELEASE=public755 \

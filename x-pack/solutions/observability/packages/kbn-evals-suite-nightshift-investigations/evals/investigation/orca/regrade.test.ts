@@ -7,9 +7,11 @@
 
 import type { EvalsClient, EvaluationDataset } from '@kbn/evals';
 import type { InvestigationExample, InvestigationTaskOutput } from '../types';
+import { NO_CONCLUSION_ERROR } from '../task';
 import {
   buildOrcaRegradeDataset,
   loadStoredOrcaRuns,
+  needsOrcaReport,
   resolveOrcaRegradeExperiment,
 } from './regrade';
 
@@ -75,6 +77,20 @@ describe('ORCA re-grade', () => {
     expect(() =>
       buildOrcaRegradeDataset(release, new Map([['z', { case_id: 'z', query: 'z' }]]), 'x')
     ).toThrow('no task for 1 stored runs');
+  });
+
+  it('writes a report.md only for a gradable run stored before the report step', () => {
+    const run = (output: Partial<InvestigationTaskOutput>) =>
+      needsOrcaReport({ case_id: 'a', query: 'Why?', ...output });
+    expect(run({})).toBe(true);
+    // An empty report is the model's answer, not a missing one.
+    expect(run({ orca_report_md: '' })).toBe(false);
+    expect(run({ orca_report_md: '# Report' })).toBe(false);
+    expect(run({ orca_report_error: 'report model failed' })).toBe(false);
+    // ORCA leaves these unscored, or scores the agent's failure without a report.
+    expect(run({ execution_error: 'Investigation round failed: boom' })).toBe(false);
+    expect(run({ execution_error: NO_CONCLUSION_ERROR })).toBe(false);
+    expect(run({ report_truncated: true })).toBe(false);
   });
 
   it('needs the experiment id', () => {
