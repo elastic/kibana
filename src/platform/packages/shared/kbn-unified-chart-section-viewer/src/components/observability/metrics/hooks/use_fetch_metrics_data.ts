@@ -111,6 +111,7 @@ export function useFetchMetricsData({
           } = await executeEsqlQuery<MetricsESQLResponse>({
             esqlQuery: metricsInfoQuery,
             search: services.data.search.search,
+            sessionId: fetchParams.searchSessionId,
             signal,
             timeFieldName: fetchParams.dataSource?.timeFieldName,
             timeRange: fetchParams.timeRange,
@@ -152,6 +153,7 @@ export function useFetchMetricsData({
       fetchParams.dataSource,
       fetchParams.columnsMap,
       fetchParams.timeRange,
+      fetchParams.searchSessionId,
       fetchParams.filters,
       fetchParams.esqlVariables,
       services.data.search.search,

@@ -28,10 +28,10 @@ import {
   resolveSourcesBySlugOrId,
   toSourceRef,
 } from '../../utils/resolve_source_slugs';
-import { trackTelemetryBestEffort } from '../bulk_write';
 import { reportToolFailure, toTelemetryErrorMessage } from '../tool_failure';
 import { startKiIdentificationToolHandler } from './handler';
 import type { GetScopedClients } from '../../../routes/types';
+import { trackTelemetryBestEffort } from '../../../lib/telemetry/track_telemetry_best_effort';
 
 export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_IDENTIFICATION_START_TOOL_ID =
   'platform.sig_events.ki_identification_start';

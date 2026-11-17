@@ -11,22 +11,22 @@ import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { UxPluginStart } from '@kbn/ux-plugin/public';
 
 export interface DigitalExperienceSetupDeps {
   observabilityShared: ObservabilitySharedPluginSetup;
+  share: SharePluginSetup;
 }
 
 export interface DigitalExperienceStartDeps {
   data: DataPublicPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
+  share: SharePluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   /** Undefined on serverless, which disables the ux plugin and so has no Classic RUM data. */
   ux?: UxPluginStart;
-  /** For links to other apps, e.g. Discover; undefined when the share plugin is disabled. */
-  share?: SharePluginStart;
 }
 
 export type DigitalExperienceServices = CoreStart & DigitalExperienceStartDeps;
