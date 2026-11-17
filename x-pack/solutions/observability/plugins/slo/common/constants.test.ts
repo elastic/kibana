@@ -8,7 +8,6 @@
 import {
   getSLIIndexNamePrefix,
   getSLIRoutingPipelineName,
-  SLI_INGEST_PIPELINE_INDEX_NAME_PREFIX,
   SLI_ROUTED_VERSIONS,
   SLI_ROUTING_MIN_VERSION,
   SLO_RESOURCES_VERSION,
@@ -28,10 +27,7 @@ describe('SLI routing constants', () => {
     });
   });
 
-  it('derives the current SLI index name prefix from the resources version', () => {
-    expect(getSLIIndexNamePrefix(SLO_RESOURCES_VERSION)).toBe(
-      SLI_INGEST_PIPELINE_INDEX_NAME_PREFIX
-    );
+  it('derives the SLI index name prefix from the resources version', () => {
     expect(getSLIIndexNamePrefix(3.6)).toBe('.slo-observability.sli-v3.6.');
   });
 

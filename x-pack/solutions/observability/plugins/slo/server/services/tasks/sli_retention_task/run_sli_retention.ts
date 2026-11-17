@@ -12,6 +12,7 @@ import { isAbortError } from '../orphan_summary_cleanup_task/types';
 import { planSliRetention } from './plan_sli_retention';
 
 const DELETE_CHUNK_SIZE = 50;
+const TRANSFORMS_PAGE_SIZE = 10_000;
 
 interface Dependencies {
   esClient: ElasticsearchClient;
@@ -97,10 +98,16 @@ const fetchTransformDestIndices = async ({
   signal,
 }: Pick<Dependencies, 'esClient' | 'logger' | 'signal'>): Promise<Set<string> | undefined> => {
   try {
-    const { transforms } = await esClient.transform.getTransform(
-      { transform_id: 'slo-*', size: 10000, allow_no_match: true },
+    const { count, transforms } = await esClient.transform.getTransform(
+      { transform_id: 'slo-*', size: TRANSFORMS_PAGE_SIZE, allow_no_match: true },
       { signal }
     );
+    if (count > transforms.length) {
+      logger.warn(
+        `Listed ${transforms.length} of ${count} SLO transforms, keeping old SLI base indices`
+      );
+      return undefined;
+    }
     return new Set(transforms.flatMap(({ dest }) => (dest.index ? [dest.index] : [])));
   } catch (error) {
     if (isAbortError(error, signal)) {

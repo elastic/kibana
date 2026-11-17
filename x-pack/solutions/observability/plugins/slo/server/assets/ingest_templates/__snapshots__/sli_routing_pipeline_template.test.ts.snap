@@ -18,6 +18,19 @@ Object {
   "id": ".slo-observability.sli.routing-v3.6",
   "processors": Array [
     Object {
+      "date": Object {
+        "description": "Normalize the timestamp for the cutover guard",
+        "field": "@timestamp",
+        "formats": Array [
+          "UNIX_MS",
+          "ISO8601",
+          "yyyy-MM-dd'T'HH:mm:ss.SSSXX",
+        ],
+        "output_format": "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
+        "target_field": "slo_routing.timestamp",
+      },
+    },
+    Object {
       "script": Object {
         "description": "Pick the index rounding, honoring the cutover guard",
         "lang": "painless",
@@ -26,7 +39,7 @@ Object {
           "before": "d",
           "cutover": 1796083200000,
         },
-        "source": "def ts = ctx['@timestamp']; long ms = ts instanceof Number ? ((Number) ts).longValue() : ZonedDateTime.parse(ts.toString()).toInstant().toEpochMilli(); ctx.slo_routing = ['rounding': (params.cutover != null && ms < params.cutover) ? params.before : params.after];",
+        "source": "long ms = ZonedDateTime.parse(ctx.slo_routing.timestamp).toInstant().toEpochMilli(); ctx.slo_routing.rounding = (params.cutover != null && ms < params.cutover) ? params.before : params.after;",
       },
     },
     Object {
@@ -69,6 +82,19 @@ Object {
   "id": ".slo-observability.sli.routing-v3.6",
   "processors": Array [
     Object {
+      "date": Object {
+        "description": "Normalize the timestamp for the cutover guard",
+        "field": "@timestamp",
+        "formats": Array [
+          "UNIX_MS",
+          "ISO8601",
+          "yyyy-MM-dd'T'HH:mm:ss.SSSXX",
+        ],
+        "output_format": "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
+        "target_field": "slo_routing.timestamp",
+      },
+    },
+    Object {
       "script": Object {
         "description": "Pick the index rounding, honoring the cutover guard",
         "lang": "painless",
@@ -77,7 +103,7 @@ Object {
           "before": "M",
           "cutover": null,
         },
-        "source": "def ts = ctx['@timestamp']; long ms = ts instanceof Number ? ((Number) ts).longValue() : ZonedDateTime.parse(ts.toString()).toInstant().toEpochMilli(); ctx.slo_routing = ['rounding': (params.cutover != null && ms < params.cutover) ? params.before : params.after];",
+        "source": "long ms = ZonedDateTime.parse(ctx.slo_routing.timestamp).toInstant().toEpochMilli(); ctx.slo_routing.rounding = (params.cutover != null && ms < params.cutover) ? params.before : params.after;",
       },
     },
     Object {

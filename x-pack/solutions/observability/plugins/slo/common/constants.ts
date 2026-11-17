@@ -75,8 +75,6 @@ export const getSLIIndexNamePrefix = (version: number): string =>
 export const getSLIRoutingPipelineName = (version: number): string =>
   `.slo-observability.sli.routing-v${version}`;
 
-export const SLI_INGEST_PIPELINE_INDEX_NAME_PREFIX = getSLIIndexNamePrefix(SLO_RESOURCES_VERSION);
-
 // First resources version routed through a shared routing pipeline.
 export const SLI_ROUTING_MIN_VERSION = 3.6;
 // Every resources version from SLI_ROUTING_MIN_VERSION up to SLO_RESOURCES_VERSION, append on each bump.

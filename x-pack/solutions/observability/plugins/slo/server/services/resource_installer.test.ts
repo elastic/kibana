@@ -275,13 +275,15 @@ describe('resourceInstaller', () => {
       expect(esClient.ingest.putPipeline).toHaveBeenCalledTimes(2);
       const [[first], [second]] = esClient.ingest.putPipeline.mock.calls;
       expect(first.id).toBe('.slo-observability.sli.routing-v3.6');
-      expect(first.processors?.[1]?.date_index_name?.index_name_prefix).toBe(
-        '.slo-observability.sli-v3.6.'
-      );
+      expect(
+        first.processors?.find((processor) => processor?.date_index_name)?.date_index_name
+          ?.index_name_prefix
+      ).toBe('.slo-observability.sli-v3.6.');
       expect(second.id).toBe('.slo-observability.sli.routing-v3.7');
-      expect(second.processors?.[1]?.date_index_name?.index_name_prefix).toBe(
-        '.slo-observability.sli-v3.7.'
-      );
+      expect(
+        second.processors?.find((processor) => processor?.date_index_name)?.date_index_name
+          ?.index_name_prefix
+      ).toBe('.slo-observability.sli-v3.7.');
       // the index listing is shared across versions
       expect(esClient.indices.get).toHaveBeenCalledTimes(1);
     });

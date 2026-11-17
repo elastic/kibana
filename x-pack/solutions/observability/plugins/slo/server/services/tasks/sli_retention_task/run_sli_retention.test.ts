@@ -148,6 +148,17 @@ describe('runSliRetention', () => {
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('forbidden'));
   });
 
+  it('keeps old base indices when the transforms list is truncated', async () => {
+    mockIndices([['.slo-observability.sli-v3.5', '0']]);
+    esClient.transform.getTransform.mockResolvedValue({
+      ...transformsResponse(['.slo-observability.sli-v3.6']),
+      count: 10001,
+    });
+
+    await expect(run()).resolves.toEqual([]);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('1 of 10001'));
+  });
+
   it('keeps an old base index a transform writes to', async () => {
     mockIndices([['.slo-observability.sli-v3.5', '0']]);
     esClient.transform.getTransform.mockResolvedValue(

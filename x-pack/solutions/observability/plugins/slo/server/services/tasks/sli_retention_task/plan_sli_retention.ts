@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import { SLO_RESOURCES_VERSION_MAJOR } from '../../../../common/constants';
+
 const DAY_MS = 24 * 60 * 60 * 1000;
 // Longest transform backfill (90d) plus a one day buffer: no write targets an older index.
 export const EMPTY_INDEX_MIN_AGE_MS = 91 * DAY_MS;
 
-const DATED_INDEX_REGEX = /^\.slo-observability\.sli-v3(?:\.\d+)?\.(\d{4})-(\d{2})-(\d{2})$/;
-const BASE_INDEX_REGEX = /^\.slo-observability\.sli-v(3(?:\.\d+)?)$/;
+// Matches the SLI indices of SLI_DESTINATION_INDEX_PATTERN, capturing their resources version.
+const SLI_INDEX_REGEX_SOURCE = `^\\.slo-observability\\.sli-v(${SLO_RESOURCES_VERSION_MAJOR}(?:\\.\\d+)?)`;
+const DATED_INDEX_REGEX = new RegExp(`${SLI_INDEX_REGEX_SOURCE}\\.(\\d{4})-(\\d{2})-(\\d{2})$`);
+const BASE_INDEX_REGEX = new RegExp(`${SLI_INDEX_REGEX_SOURCE}$`);
 
 export interface SliIndex {
   index: string;
@@ -40,9 +44,9 @@ const getPeriodEnd = (index: string): number | undefined => {
     return undefined;
   }
 
-  const year = Number(match[1]);
-  const month = Number(match[2]);
-  const day = Number(match[3]);
+  const year = Number(match[2]);
+  const month = Number(match[3]);
+  const day = Number(match[4]);
   const start = Date.UTC(year, month - 1, day);
   const startDate = new Date(start);
   if (startDate.getUTCMonth() !== month - 1 || startDate.getUTCDate() !== day) {

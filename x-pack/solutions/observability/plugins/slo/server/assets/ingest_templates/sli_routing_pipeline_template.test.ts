@@ -23,10 +23,12 @@ describe('getSLIRoutingPipelineTemplate', () => {
   it('uses the index prefix and pipeline name of the given version', () => {
     const template = getSLIRoutingPipelineTemplate(3.7, { before: 'M', after: 'M', cutover: null });
 
+    const dateIndexName = template.processors?.find(
+      (processor) => processor?.date_index_name !== undefined
+    )?.date_index_name;
+
     expect(template.id).toBe('.slo-observability.sli.routing-v3.7');
-    expect(template.processors?.[1]?.date_index_name?.index_name_prefix).toBe(
-      '.slo-observability.sli-v3.7.'
-    );
+    expect(dateIndexName?.index_name_prefix).toBe('.slo-observability.sli-v3.7.');
     expect(template._meta?.version).toBe(3.7);
   });
 });
