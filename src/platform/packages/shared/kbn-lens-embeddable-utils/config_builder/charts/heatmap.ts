@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  FormBasedPersistedState,
-  GenericIndexPatternColumn,
-  HeatmapPalette,
-  HeatmapVisualizationState,
-  RangeIndexPatternColumn,
-  TermsIndexPatternColumn,
-  ValueFormatConfig,
+import {
+  LENS_HEATMAP_DEFAULT_COLOR_STEPS,
+  LENS_RANGE_MODES,
+  type FormBasedPersistedState,
+  type GenericIndexPatternColumn,
+  type HeatmapPalette,
+  type HeatmapVisualizationState,
+  type RangeIndexPatternColumn,
+  type TermsIndexPatternColumn,
+  type ValueFormatConfig,
 } from '@kbn/lens-common';
-import { LENS_HEATMAP_DEFAULT_COLOR_STEPS } from '@kbn/lens-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { BuildDependencies, LensAttributes, LensHeatmapConfig } from '../types';
 import { DEFAULT_LAYER_ID } from '../constants';
@@ -150,11 +151,21 @@ function withBreakdownFormat(
   }
   if (column.operationType === 'range') {
     const rangeColumn = column as RangeIndexPatternColumn;
+    // Histogram keys are numbers, so they keep a scalar format. Explicit ranges are
+    // RangeKey objects and need the range wrapper or lens_format_column drops the bounds.
+    const parentFormat =
+      rangeColumn.params.type === LENS_RANGE_MODES.Range
+        ? rangeColumn.params.parentFormat ?? {
+            id: 'range',
+            params: { template: 'arrow_right', replaceInfinity: true },
+          }
+        : undefined;
     return {
       ...rangeColumn,
       params: {
         ...rangeColumn.params,
         format,
+        ...(parentFormat ? { parentFormat } : {}),
       },
     };
   }

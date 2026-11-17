@@ -391,12 +391,12 @@ test('writes the breakdown format onto the data view Y column', async () => {
   const columns = result.state.datasourceStates.formBased?.layers.layer_0.columns;
   const yColumn = columns?.y_metric_formula_accessor;
   const valueColumn = columns?.metric_formula_accessor;
-  const yFormat = yColumn && 'params' in yColumn ? yColumn.params?.format : undefined;
+  const yParams = yColumn && 'params' in yColumn ? yColumn.params : undefined;
   const valueFormat =
     valueColumn && 'params' in valueColumn ? valueColumn.params?.format : undefined;
 
   expect(yColumn?.operationType).toBe('range');
-  expect(yFormat).toEqual({
+  expect(yParams?.format).toEqual({
     id: 'duration',
     params: {
       compact: true,
@@ -404,6 +404,10 @@ test('writes the breakdown format onto the data view Y column', async () => {
       fromUnit: 'milliseconds',
       toUnit: 'humanizePrecise',
     },
+  });
+  expect(yParams && 'parentFormat' in yParams ? yParams.parentFormat : undefined).toEqual({
+    id: 'range',
+    params: { template: 'arrow_right', replaceInfinity: true },
   });
   expect(valueFormat).toBeUndefined();
 });
