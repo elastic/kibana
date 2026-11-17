@@ -178,6 +178,34 @@ describe('checkNoVisitedCheckmarks', () => {
     }
   });
 
+  it('does not move a legacy ✅ through a merge the final tree does not carry out', () => {
+    const twoBranches = (first: string, second: string) =>
+      tree([
+        'S1([Otel delivery gateway errors]) --> E1[Check gateway error logs]',
+        'E1 --> D1{{Errors point at one upstream?}}',
+        `D1 -->|${first}| E2[Correlate with the upstream pod]`,
+        `D1 -->|${second}| E3[Check the upstream pod restarts]`,
+        'E2 --> X1((Upstream pod loss))',
+        'E3 --> X1',
+      ]);
+
+    const graded = checkNoVisitedCheckmarks(
+      context({
+        prior: twoBranches('✅ yes', 'yes'),
+        submitted: twoBranches('yes', '✅ yes'),
+        // A rejected attempt proposed the fold; the final tree keeps both nodes.
+        submission: submit([], {
+          symptom_trees: [{ tree_id: TREE_ID, merged_nodes: [{ from: ['E2'], into: 'E3' }] }],
+          traversals: [{ tree_id: TREE_ID, visited_path: ['S1', 'E1', 'D1'] }],
+        }),
+        causalConfirmed: false,
+      })
+    );
+
+    expect(graded.score).toBe(0);
+    expect(graded.explanation).toContain('D1 -->|yes| E3');
+  });
+
   it('fails a tree without a decision node', () => {
     const graded = checkNoVisitedCheckmarks(
       context({
@@ -412,6 +440,40 @@ describe('checkStructurePreserved', () => {
 
     expect(graded.explanation).not.toContain('E4');
     expect(graded.score).toBe(1);
+  });
+
+  it('fails when a merge drops an unrelated branch of the node that absorbed it', () => {
+    const duplicate = tree([
+      'S1([Otel delivery gateway errors]) --> E1[Check gateway error logs]',
+      'E1 --> D2{{Errors stop after the pod is replaced?}}',
+      'E1 --> D3{{Errors stop after the pod restarts?}}',
+      'D2 -->|yes| X1((Upstream pod loss))',
+      'D2 -->|no| X2((Upstream fault persists))',
+      'D3 -->|yes| X1',
+      'E1 --> X2',
+    ]);
+    const merged = tree([
+      'S1([Otel delivery gateway errors]) --> E1[Check gateway error logs]',
+      'E1 --> D2{{Errors stop after the pod is replaced?}}',
+      'D2 -->|yes| X1((Upstream pod loss))',
+      'E1 --> X2((Upstream fault persists))',
+    ]);
+
+    const graded = checkStructurePreserved(
+      context({
+        prior: duplicate,
+        submitted: merged,
+        submission: submit([], {
+          symptom_trees: [{ tree_id: TREE_ID, merged_nodes: [{ from: ['D3'], into: 'D2' }] }],
+          traversals: [{ tree_id: TREE_ID, visited_path: ['S1', 'E1'] }],
+        }),
+        causalConfirmed: false,
+      })
+    );
+
+    expect(graded.score).toBe(0);
+    expect(graded.explanation).toContain('edge D2 -->|no| X2 was removed');
+    expect(graded.explanation).not.toContain('D3');
   });
 
   it('passes a round that seeded no tree', () => {

@@ -102,19 +102,39 @@ const NODE_PAIR_SEPARATOR = '\u0000';
 const nodePair = (source: string, target: string): string =>
   [source, target].join(NODE_PAIR_SEPARATOR);
 
-/** Each node a submit for this tree folded away, mapped to the node that absorbed it. */
-const mergeTargets = (submissions: SubmitArguments[]): Map<string, string> => {
+/**
+ * Each node a submit for this tree folded away, mapped to the node that absorbed it. Only folds the
+ * submitted tree shows count: the removed node is gone and the absorbing node is there. A merge a
+ * rejected attempt proposed but the final tree does not carry out is ignored.
+ */
+const mergeTargets = (
+  submissions: SubmitArguments[],
+  submitted: DecisionTreeView | undefined
+): Map<string, string> => {
+  const present = new Set((submitted?.nodes ?? []).map(({ node_id: nodeId }) => nodeId));
   const targets = new Map<string, string>();
   for (const submission of submissions) {
     for (const tree of submission.symptom_trees ?? []) {
       for (const { from, into } of tree.merged_nodes ?? []) {
-        if (!into) continue;
-        for (const id of from ?? []) targets.set(id, into);
+        if (!into || !present.has(into)) continue;
+        for (const id of from ?? []) {
+          if (id !== into && !present.has(id)) targets.set(id, into);
+        }
       }
     }
   }
   return targets;
 };
+
+/** The edge with each endpoint moved through the merges. */
+const remapEdge = (
+  edge: DecisionEdgeView,
+  merges: ReadonlyMap<string, string>
+): DecisionEdgeView => ({
+  ...edge,
+  source_node_id: merges.get(edge.source_node_id) ?? edge.source_node_id,
+  target_node_id: merges.get(edge.target_node_id) ?? edge.target_node_id,
+});
 
 const edgePair = ({ source_node_id: source, target_node_id: target }: DecisionEdgeView): string =>
   nodePair(source, target);
@@ -137,13 +157,8 @@ const edgesPerPair = (edges: DecisionEdgeView[]): Map<string, number> => {
  * when the prior and submitted trees each have one edge between those nodes, that edge relabelled.
  */
 const newCheckmarks = ({ prior, submitted, submissions }: TreeState): DecisionEdgeView[] => {
-  const merges = mergeTargets(submissions);
-  const remap = (nodeId: string): string => merges.get(nodeId) ?? nodeId;
-  const priorEdges = (prior?.edges ?? []).map((edge) => ({
-    ...edge,
-    source_node_id: remap(edge.source_node_id),
-    target_node_id: remap(edge.target_node_id),
-  }));
+  const merges = mergeTargets(submissions, submitted);
+  const priorEdges = (prior?.edges ?? []).map((edge) => remapEdge(edge, merges));
   const priorTaken = priorEdges.filter((edge) => edge.is_taken);
   const priorTakenKeys = new Set(priorTaken.map(decisionEdgeKey));
   const priorTakenPairs = new Set(priorTaken.map(edgePair));
@@ -316,10 +331,9 @@ export const checkCausalPathMarked = ({
   return result(perTree.flat(), passed);
 };
 
-/** Node ids a submit for this tree walked, and the nodes its merges removed or absorbed into. */
-const walkedAndMerged = (submissions: SubmitArguments[]) => {
+/** Node ids a submit for this tree walked. */
+const walkedNodes = (submissions: SubmitArguments[]): Set<string> => {
   const walked = new Set<string>();
-  const merged = new Set<string>();
   for (const submission of submissions) {
     for (const { visited_path: visited, causal_path: causal } of submission.traversals ?? []) {
       for (const step of [...(visited ?? []), ...(causal ?? [])]) {
@@ -327,13 +341,8 @@ const walkedAndMerged = (submissions: SubmitArguments[]) => {
         if (id) walked.add(id);
       }
     }
-    for (const tree of submission.symptom_trees ?? []) {
-      for (const { from, into } of tree.merged_nodes ?? []) {
-        for (const id of [...(from ?? []), ...(into ? [into] : [])]) merged.add(id);
-      }
-    }
   }
-  return { walked, merged };
+  return walked;
 };
 
 const branchKey = ({ source_node_id: source, condition }: DecisionEdgeView): string =>
@@ -377,9 +386,11 @@ const reaches = (tree: DecisionTreeView, from: string, to: string): boolean => {
 
 /**
  * The seeded tree keeps every node the round did not walk or merge (same id, type and label) and
- * every edge it did not merge (same source, target and condition, ✅ ignored). A walked edge may be
- * relabelled when it is the only edge between its nodes, or gain verified steps when the walked
- * branch still reaches its old target.
+ * every edge (same source, target and condition, ✅ ignored), with edges moved through the merges
+ * the submitted tree carries out. A moved edge may change its condition, since folding combines
+ * branches, but must still join the same nodes. A walked edge may be relabelled when it is the only
+ * edge between its nodes, or gain verified steps when the walked branch still reaches its old
+ * target.
  */
 export const checkStructurePreserved = ({ output, seededTreeId }: CheckContext): CheckResult => {
   if (!seededTreeId) return pass('No prior tree: the round created a new tree.');
@@ -393,11 +404,15 @@ export const checkStructurePreserved = ({ output, seededTreeId }: CheckContext):
   }
   if (!submitted) return fail(unparsed(treeId));
 
-  const { walked, merged } = walkedAndMerged(submissions);
+  const walked = walkedNodes(submissions);
+  const merges = mergeTargets(submissions, submitted);
+  // A folded node is gone, and the node that absorbed it may take a combined label.
+  const merged = new Set([...merges.keys(), ...merges.values()]);
   const after = new Map(submitted.nodes.map((node) => [node.node_id, node]));
   const afterEdges = new Set(submitted.edges.map(decisionEdgeKey));
+  const afterPairs = new Set(submitted.edges.map(edgePair));
   const walkedOnTree = walkedEdges(submitted, submissions);
-  const priorPairCounts = edgesPerPair(prior.edges);
+  const priorPairCounts = edgesPerPair(prior.edges.map((edge) => remapEdge(edge, merges)));
   const rewrittenByWalk = (edge: DecisionEdgeView): boolean => {
     const { target_node_id: target } = edge;
     const relabelled =
@@ -424,11 +439,15 @@ export const checkStructurePreserved = ({ output, seededTreeId }: CheckContext):
       );
     }
   }
-  for (const edge of prior.edges) {
+  for (const priorEdge of prior.edges) {
+    const edge = remapEdge(priorEdge, merges);
     const { source_node_id: source, target_node_id: target } = edge;
-    if (merged.has(source) || merged.has(target)) continue;
+    // The fold joined the two ends into one node.
+    if (source === target) continue;
     if (afterEdges.has(decisionEdgeKey(edge)) || rewrittenByWalk(edge)) continue;
-    problems.push(`${treeId}: edge ${formatEdge(edge)} was removed.`);
+    const moved = source !== priorEdge.source_node_id || target !== priorEdge.target_node_id;
+    if (moved && afterPairs.has(edgePair(edge))) continue;
+    problems.push(`${treeId}: edge ${formatEdge(priorEdge)} was removed.`);
   }
   return result(problems, `${treeId} keeps every node and edge the round did not walk or merge.`);
 };
