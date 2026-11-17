@@ -281,7 +281,9 @@ const askItem = async (allowedKinds) => {
     operator !== 'does_not_match' &&
     operator !== 'does_not_exist';
   const canBeInvalid =
-    kind !== 'wrong_type' && INVALID_VALUES[type] !== undefined && ['is', 'is_one_of'].includes(base);
+    kind !== 'wrong_type' &&
+    INVALID_VALUES[type] !== undefined &&
+    ['is', 'is_one_of'].includes(base);
   const invalid =
     canBeInvalid &&
     (await yesNo(
@@ -481,18 +483,19 @@ const planFor = () => {
         code: 'item_never_matches',
         text: `not applied (item_never_matches): "${absentInclusive.field}" is not in the output of the query`,
       };
-    const mismatch = ex.items.find(
-      (it) => !isMissing(it) && it.declared !== outputTypeOf(it)
-    );
+    const mismatch = ex.items.find((it) => !isMissing(it) && it.declared !== outputTypeOf(it));
     if (mismatch) {
       const message = `The rule did not run because exception items declare a column type that is not the type that the query outputs: "${nameOf(
         ex
-      )}" (list "${LIST_ID}", item "${itemIdOf(ex)}") declares the column "${
-        mismatch.field
-      }" as ${mismatch.declared}, and the query outputs it as ${outputTypeOf(
+      )}" (list "${LIST_ID}", item "${itemIdOf(ex)}") declares the column "${mismatch.field}" as ${
+        mismatch.declared
+      }, and the query outputs it as ${outputTypeOf(
         mismatch
       )}. Fix the type in these exception items, or remove them from this rule.`;
-      failures.push({ cause: 'column_type', text: `Kibana fails the rule before the query runs: ${message}` });
+      failures.push({
+        cause: 'column_type',
+        text: `Kibana fails the rule before the query runs: ${message}`,
+      });
       return { status: 'fails', text: `fails the rule: ${message}` };
     }
     // The entries with an exclusive operator on columns that are not in the output are true for every row and are dropped. When no entry is left, the
@@ -620,9 +623,9 @@ const creationMismatches = exceptions.flatMap((ex, i) => {
   return ok
     ? []
     : [
-        `exception ${ex.k}: expected ${rejected ? 'a 400' : 'a success'}, the API answered ${apiText(
-          ex
-        )}`,
+        `exception ${ex.k}: expected ${
+          rejected ? 'a 400' : 'a success'
+        }, the API answered ${apiText(ex)}`,
       ];
 });
 const anyCreated = plan.plans.some((p) => p.status !== 'rejected');
@@ -674,7 +677,10 @@ if (!anyCreated) {
 } else {
   console.log(`  Alerts for: ${expectedAlerts.join(', ') || '(none)'}`);
 }
-const expectsLog = anyCreated && !plan.failures.length && plan.plans.some((p) => ['end', 'skipped'].includes(p.status));
+const expectsLog =
+  anyCreated &&
+  !plan.failures.length &&
+  plan.plans.some((p) => ['end', 'skipped'].includes(p.status));
 const expectedApplied = exceptions
   .filter((ex, i) => plan.plans[i].status === 'end')
   .map(itemIdOf)

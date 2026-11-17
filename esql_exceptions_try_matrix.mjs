@@ -243,7 +243,10 @@ const ARCHETYPES = {
   'end-redefined-column-shown-one-of': [
     item('output_redefined', 'text', 'is_one_of', { mode: 'shown' }),
   ],
-  'end-computed-and-computed': [item('computed', 'keyword', 'is'), item('computed', 'integer', 'is')],
+  'end-computed-and-computed': [
+    item('computed', 'keyword', 'is'),
+    item('computed', 'integer', 'is'),
+  ],
   'end-computed-and-missing-is-not': [
     item('computed', 'keyword', 'is'),
     item('output_missing', 'keyword', 'is_not'),
@@ -345,7 +348,9 @@ const keyLines = (out) =>
   out
     .split('\n')
     .filter((l) =>
-      /^(  Alerts for|  The rule fails|  API:|Result:|Alerts created|This |Applied at|Not applied)/.test(l)
+      /^(  Alerts for|  The rule fails|  API:|Result:|Alerts created|This |Applied at|Not applied)/.test(
+        l
+      )
     );
 
 const http = async (url, method = 'GET', body) => {
