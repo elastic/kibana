@@ -124,6 +124,9 @@ function makeEsIndexMappings(
       },
       agent_ids: { ignore_above: 1024, type: 'keyword' },
       tags: { ignore_above: 256, type: 'keyword' },
+      dispatch_source: { ignore_above: 256, type: 'keyword' },
+      dispatch_workflow_id: { ignore_above: 256, type: 'keyword' },
+      dispatch_execution_id: { ignore_above: 256, type: 'keyword' },
       ...overrides,
     },
   };
@@ -402,6 +405,54 @@ describe('createTransformIndices', () => {
       expect(logger.debug).toHaveBeenCalledWith(
         'Mappings for "test-index" are outdated. Updating mappings...'
       );
+    });
+
+    it('should update the actions template and index mapping when workflow dispatch fields are missing', async () => {
+      const dispatchFields = ['dispatch_source', 'dispatch_workflow_id', 'dispatch_execution_id'];
+      const currentMappings = {
+        properties: Object.fromEntries(
+          Object.entries(actionsMapping.properties ?? {}).filter(
+            ([field]) => !dispatchFields.includes(field)
+          )
+        ),
+      };
+
+      mockEsClient.indices.exists.mockResolvedValueOnce(true);
+      mockEsClient.indices.getIndexTemplate.mockResolvedValueOnce({
+        index_templates: [
+          {
+            name: ACTIONS_INDEX_NAME,
+            index_template: { template: { mappings: currentMappings } },
+          },
+        ],
+      });
+
+      await createIndexIfNotExists(
+        mockEsClient as unknown as ElasticsearchClient,
+        ACTIONS_INDEX_NAME,
+        ACTIONS_INDEX_DEFAULT_NS,
+        actionsMapping,
+        logger
+      );
+
+      expect(mockEsClient.indices.putIndexTemplate).toHaveBeenCalledWith({
+        name: ACTIONS_INDEX_NAME,
+        index_patterns: ACTIONS_INDEX_DEFAULT_NS,
+        template: { mappings: actionsMapping },
+        priority: 500,
+      });
+      expect(mockEsClient.indices.putMapping).toHaveBeenCalledWith({
+        index: ACTIONS_INDEX_DEFAULT_NS,
+        body: { properties: actionsMapping.properties },
+      });
+      expect(actionsMapping.properties).toEqual(
+        expect.objectContaining({
+          dispatch_source: { type: 'keyword', ignore_above: 256 },
+          dispatch_workflow_id: { type: 'keyword', ignore_above: 256 },
+          dispatch_execution_id: { type: 'keyword', ignore_above: 256 },
+        })
+      );
+      expect(mockEsClient.indices.create).not.toHaveBeenCalled();
     });
 
     it('should log error if index creation fails', async () => {

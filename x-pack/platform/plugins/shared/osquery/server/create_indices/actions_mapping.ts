@@ -34,6 +34,18 @@ export const actionsMapping: MappingTypeMapping = {
         },
       },
     },
+    dispatch_source: {
+      type: 'keyword',
+      ignore_above: 256,
+    },
+    dispatch_workflow_id: {
+      type: 'keyword',
+      ignore_above: 256,
+    },
+    dispatch_execution_id: {
+      type: 'keyword',
+      ignore_above: 256,
+    },
     event: {
       properties: {
         agent_id_status: {
