@@ -18,6 +18,15 @@ const STATE_REASON_DATA_MAX_LENGTH = 4000;
 // Shared building blocks
 // ============================================================================
 
+/** CloudWatch log group names, which AWS limits to this character set. */
+const LOG_GROUP_NAME = /^[\.\-_/#A-Za-z0-9]+$/;
+/** The same characters, for the substring `logGroupNamePattern` matches on. */
+const LOG_GROUP_NAME_PATTERN = /^[\.\-_/#A-Za-z0-9]*$/;
+/** A metric namespace, which AWS only forbids from starting with a colon. */
+const METRIC_NAMESPACE = /^[^:]/;
+/** The characters AWS allows in the ARNs its anomaly detectors are named by. */
+const ANOMALY_DETECTOR_ARN = /^[\w#+=/:,.@-]*$/;
+
 export const MetricDimensionSchema = lazySchema(() =>
   z.object({
     name: z
@@ -36,6 +45,7 @@ export const MetricStatSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(255)
+      .regex(METRIC_NAMESPACE)
       .describe('The metric namespace, e.g. "AWS/EC2", "AWS/Lambda", or a custom namespace.'),
     metricName: z
       .string()
@@ -128,7 +138,12 @@ const AlarmActionArnSchema = lazySchema(() =>
 export const MetricDimensionFilterSchema = lazySchema(() =>
   z.object({
     name: z.string().min(1).max(255).describe('Dimension name to filter by.'),
-    value: z.string().max(1024).optional().describe('Optional dimension value to filter by.'),
+    value: z
+      .string()
+      .min(1)
+      .max(1024)
+      .optional()
+      .describe('Optional dimension value to filter by.'),
   })
 );
 export type MetricDimensionFilter = z.infer<typeof MetricDimensionFilterSchema>;
@@ -371,6 +386,7 @@ export const PutMetricAlarmInputSchema = lazySchema(() =>
         .string()
         .min(1)
         .max(255)
+        .regex(METRIC_NAMESPACE)
         .optional()
         .describe('The metric namespace, e.g. "AWS/EC2".'),
       statistic: z
@@ -441,6 +457,7 @@ export const ListMetricsInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(255)
+      .regex(METRIC_NAMESPACE)
       .optional()
       .describe('Only return metrics in this namespace, e.g. "AWS/EC2", "AWS/Lambda".'),
     metricName: z
@@ -492,6 +509,7 @@ export const ListLogGroupsInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(512)
+      .regex(LOG_GROUP_NAME)
       .optional()
       .describe(
         'Only return log groups whose name starts with this prefix. Mutually exclusive with logGroupNamePattern.'
@@ -499,6 +517,7 @@ export const ListLogGroupsInputSchema = lazySchema(() =>
     logGroupNamePattern: z
       .string()
       .max(512)
+      .regex(LOG_GROUP_NAME_PATTERN)
       .optional()
       .describe(
         'Only return log groups whose name contains this case-sensitive substring. Mutually exclusive with logGroupNamePrefix.'
@@ -516,6 +535,7 @@ export const ListLogGroupsInputSchema = lazySchema(() =>
       .describe('Maximum number of log groups to return (1-50). Defaults to 50.'),
     nextToken: z
       .string()
+      .min(1)
       .max(4000)
       .optional()
       .describe('Pagination token from a previous listLogGroups response.'),
@@ -530,6 +550,7 @@ export const FilterLogEventsInputSchema = lazySchema(() =>
         .string()
         .min(1)
         .max(512)
+        .regex(LOG_GROUP_NAME)
         .optional()
         .describe(
           'The log group to search, by name. Provide exactly one of logGroupName or logGroupIdentifier.'
@@ -606,6 +627,7 @@ export const StartLogsQueryInputSchema = lazySchema(() =>
         .string()
         .min(1)
         .max(512)
+        .regex(LOG_GROUP_NAME)
         .optional()
         .describe(
           'A single log group to query, by name. Provide exactly one of logGroupName or logGroupNames, unless the queryString itself includes a SOURCE command.'
@@ -667,6 +689,7 @@ export const ListLogAnomaliesInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(2048)
+      .regex(ANOMALY_DETECTOR_ARN)
       .optional()
       .describe(
         'Only return anomalies found by this specific anomaly detector ARN. Omit to return anomalies from all detectors.'
@@ -684,6 +707,7 @@ export const ListLogAnomaliesInputSchema = lazySchema(() =>
       .describe('Maximum number of anomalies to return (1-50). Defaults to 50.'),
     nextToken: z
       .string()
+      .min(1)
       .max(4000)
       .optional()
       .describe('Pagination token from a previous listLogAnomalies response.'),
