@@ -383,6 +383,19 @@ const kiExcludeTypesQuerySchema = schema.oneOf(
   }
 );
 
+const kiGroupTypesQuerySchema = schema.oneOf(
+  [
+    kiTypeQuerySchema('A Knowledge Indicator type.'),
+    schema.arrayOf(kiTypeQuerySchema('A Knowledge Indicator type.'), { maxSize: MAX_KI_GROUPS }),
+  ],
+  {
+    meta: {
+      description:
+        'When set, exactly these types are the groups (types without a match are left out) and `max_groups` is ignored. `total_other` counts all other KIs.',
+    },
+  }
+);
+
 const kiListSortQuerySchema = schema.oneOf(
   KI_LIST_SORTS.map((value) => schema.literal(value)) as [Type<KiListSort>],
   {
@@ -424,6 +437,7 @@ export const listKiGroupsQuerySchema = schema.object({
     validate: validateInteger,
     meta: { description: 'The most type groups to return, biggest first.' },
   }),
+  types: schema.maybe(kiGroupTypesQuerySchema),
   preview_size: schema.number({
     min: 1,
     max: MAX_KI_GROUP_PREVIEW_SIZE,

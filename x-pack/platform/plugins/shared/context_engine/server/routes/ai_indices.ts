@@ -784,12 +784,14 @@ export const registerAiIndexRoutes = ({
         const { aiIndexId } = request.params;
         const {
           max_groups: maxGroups,
+          types: type,
           preview_size: previewSize,
           status,
           query,
           sort,
         } = request.query;
         const statuses = status !== undefined ? [status].flat() : undefined;
+        const types = type !== undefined ? [type].flat() : undefined;
         const spaceId = resolveSpaceId(await getSpaces(), request);
         try {
           const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
@@ -797,6 +799,7 @@ export const registerAiIndexRoutes = ({
           const body: ListKiGroupsResponse = await getKiGroups(esClient, {
             dest: aiIndex.dest,
             maxGroups,
+            ...(types !== undefined ? { types } : {}),
             previewSize,
             ...(statuses !== undefined ? { statuses } : {}),
             ...(query !== undefined ? { query } : {}),

@@ -1430,6 +1430,36 @@ describe('ai indices routes', () => {
       expect(() => validateQuery({ exclude_types: 'faq' })).toThrow();
     });
 
+    it('accepts types as a string or a bounded array of bounded strings', () => {
+      expect(validateQuery({ types: 'faq' })).toEqual(expect.objectContaining({ types: 'faq' }));
+      expect(() =>
+        validateQuery({ types: Array.from({ length: MAX_KI_GROUPS }, (_, i) => `t${i}`) })
+      ).not.toThrow();
+      expect(() =>
+        validateQuery({ types: Array.from({ length: MAX_KI_GROUPS + 1 }, (_, i) => `t${i}`) })
+      ).toThrow('[types]');
+      expect(() => validateQuery({ types: '' })).toThrow('[types]');
+      expect(() => validateQuery({ types: 'a'.repeat(257) })).toThrow('[types]');
+    });
+
+    it('passes the given types to the buckets query as params', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      esEsqlQuery
+        .mockResolvedValueOnce(probe)
+        .mockResolvedValueOnce(groupBuckets([[2, 'faq', 3, false]]))
+        .mockResolvedValueOnce(rows([]));
+
+      await callRoute('GET', AI_INDEX_KI_GROUPS_PATH, {
+        params: { aiIndexId: 'customer_support' },
+        query: { max_groups: 5, preview_size: 1, types: 'faq', sort: 'updated' },
+      });
+
+      expect(esEsqlQuery.mock.calls[1][0]).toEqual({
+        query: expect.stringContaining('type IN (?groupType0)'),
+        params: [{ groupType0: 'faq' }],
+      });
+    });
+
     it('returns the groups, reads as the current user and audits the read', async () => {
       aiIndexService.get.mockResolvedValue(aiIndexItem);
       esEsqlQuery
