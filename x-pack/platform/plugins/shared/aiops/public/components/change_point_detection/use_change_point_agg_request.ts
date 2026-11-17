@@ -9,7 +9,6 @@ import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { isDefined } from '@kbn/ml-is-defined';
-import { extractErrorMessage } from '@kbn/ml-error-utils';
 import type { MappingRuntimeFields, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { RequestCancellationManager } from '@kbn/ml-cancellable-search';
@@ -143,7 +142,6 @@ export function useChangePointResults(
    * null also means the fetching has been complete
    */
   const [progress, setProgress] = useState<number | null>(0);
-  const [error, setError] = useState<Error | undefined>(undefined);
 
   const isSingleMetric = !isDefined(fieldConfig.splitField);
 
@@ -314,7 +312,6 @@ export function useChangePointResults(
         }
       } catch (e) {
         setProgress(null);
-        setError(e instanceof Error ? e : new Error(extractErrorMessage(e)));
         if (usageCollection?.reportUiCounter && embeddingOrigin) {
           usageCollection.reportUiCounter(
             embeddingOrigin,
@@ -352,7 +349,6 @@ export function useChangePointResults(
   useEffect(
     function fetchResultsOnInputChange() {
       setProgress(0);
-      setError(undefined);
       reset();
 
       if (fieldConfig.splitField && splitFieldCardinality === null) {
@@ -397,7 +393,6 @@ export function useChangePointResults(
     isUsingSampleData,
     reset,
     progress,
-    error,
   };
 }
 

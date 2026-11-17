@@ -21,12 +21,10 @@ jest.mock('../../hooks/use_reload');
 const runRequest = jest.fn();
 const cancelRequest = jest.fn();
 const addError = jest.fn();
-let refreshTimestamp = 1;
 
 describe('useChangePointResults', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    refreshTimestamp = 1;
 
     jest.mocked(useAiopsAppContext).mockReturnValue({
       notifications: { toasts: { addError } },
@@ -42,12 +40,10 @@ describe('useChangePointResults', () => {
         timeFieldName: '@timestamp',
       },
     } as unknown as ReturnType<typeof useDataSource>);
-    jest
-      .mocked(useReload)
-      .mockImplementation(() => ({ refreshTimestamp } as ReturnType<typeof useReload>));
+    jest.mocked(useReload).mockReturnValue({ refreshTimestamp: 1 } as ReturnType<typeof useReload>);
   });
 
-  it('reports a search error and clears it when retrying', async () => {
+  it('stops loading and shows a toast when the search fails', async () => {
     const searchError = new Error('search failed');
     runRequest.mockRejectedValueOnce(searchError);
 
@@ -58,27 +54,13 @@ describe('useChangePointResults', () => {
       filters: [],
     };
     const query = {};
-    const { result, rerender } = renderHook(() =>
+    const { result } = renderHook(() =>
       useChangePointResults({ fn: 'avg', metricField: 'bytes' }, requestParams, query, 10000)
     );
 
     await waitFor(() => {
-      expect(result.current).toMatchObject({
-        isLoading: false,
-        error: searchError,
-      });
+      expect(result.current.isLoading).toBe(false);
     });
     expect(addError).toHaveBeenCalledWith(searchError, expect.any(Object));
-
-    runRequest.mockReturnValueOnce(new Promise(() => {}));
-    refreshTimestamp = 2;
-    rerender();
-
-    await waitFor(() => {
-      expect(result.current).toMatchObject({
-        isLoading: true,
-        error: undefined,
-      });
-    });
   });
 });

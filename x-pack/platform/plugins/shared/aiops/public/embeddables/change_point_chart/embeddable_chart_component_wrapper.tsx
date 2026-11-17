@@ -99,7 +99,7 @@ export const ChartGridEmbeddableWrapper: FC<ChangePointDetectionProps> = ({
     return { interval } as ChangePointDetectionRequestParams;
   }, [interval]);
 
-  const { results, isLoading, isUsingSampleData, error } = useChangePointResults(
+  const { results, isLoading, isUsingSampleData } = useChangePointResults(
     fieldConfig,
     requestParams,
     combinedQuery,
@@ -112,12 +112,6 @@ export const ChartGridEmbeddableWrapper: FC<ChangePointDetectionProps> = ({
       onLoading?.(true);
     }
   }, [isLoading, onLoading]);
-
-  useEffect(() => {
-    if (error) {
-      onError?.(error);
-    }
-  }, [error, onError]);
 
   const changePoints = useMemo<ChangePointAnnotation[]>(() => {
     let resultChangePoints: ChangePointAnnotation[] = results.sort((a, b) => {

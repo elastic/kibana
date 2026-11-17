@@ -64,7 +64,7 @@ export interface ChangePointDetectionProps {
   embeddingOrigin?: string;
   onLoading?: (isLoading: boolean) => void;
   onRenderComplete: () => void;
-  onError?: (error: Error) => void;
+  onError: (error: Error) => void;
   filtersApi?: PublishesFilters;
   /** Optional manager used by dashboard panels to cancel in-flight and pending requests */
   requestCancellationManager?: RequestCancellationManager;
