@@ -54,6 +54,7 @@ import {
   getEditSuccessMessage,
   MAX_PROVIDERS_TOOLTIP,
   NAME_COLUMN_LABEL,
+  PROVIDER_CHANGED_ERROR_MESSAGE,
   SAVE_ERROR_TITLE,
   SERVICE_URL_COLUMN_LABEL,
   STORAGE_PROVIDERS_DESCRIPTION,
@@ -98,6 +99,9 @@ export const StorageProvidersLayout = memo<StorageProvidersLayoutProps>(({ polic
 
   const [flyoutState, setFlyoutState] = useState<FlyoutState | undefined>();
   const [providerToDelete, setProviderToDelete] = useState<ExportProvider | undefined>();
+  // The provider being edited or deleted is no longer in the latest policy (e.g. a rename that
+  // finished after the tab was left changed its id), so saving would change nothing
+  const [isProviderGone, setIsProviderGone] = useState(false);
 
   const providers = useMemo(
     () => getExportProviders(policy.inputs[0].config.policy.value),
@@ -105,6 +109,7 @@ export const StorageProvidersLayout = memo<StorageProvidersLayoutProps>(({ polic
   );
   const isAtLimit = providers.length >= MAX_EXPORT_PROVIDERS_PER_POLICY;
   const saveErrorMessage = saveError ? getServerErrorMessage(saveError) : undefined;
+  const dialogErrorMessage = isProviderGone ? PROVIDER_CHANGED_ERROR_MESSAGE : saveErrorMessage;
 
   // Whether a flyout or modal is open to show an update's error; false once this tab unmounts
   const isDialogOpenRef = useRef(false);
@@ -158,25 +163,30 @@ export const StorageProvidersLayout = memo<StorageProvidersLayoutProps>(({ polic
   const closeFlyout = useCallback(() => setFlyoutState(undefined), []);
   const closeDeleteModal = useCallback(() => setProviderToDelete(undefined), []);
 
-  const openAddFlyout = useCallback(() => {
+  const resetDialogErrors = useCallback(() => {
     resetSaveState();
-    setFlyoutState({});
+    setIsProviderGone(false);
   }, [resetSaveState]);
+
+  const openAddFlyout = useCallback(() => {
+    resetDialogErrors();
+    setFlyoutState({});
+  }, [resetDialogErrors]);
 
   const openEditFlyout = useCallback(
     (provider: ExportProvider) => {
-      resetSaveState();
+      resetDialogErrors();
       setFlyoutState({ provider });
     },
-    [resetSaveState]
+    [resetDialogErrors]
   );
 
   const openDeleteModal = useCallback(
     (provider: ExportProvider) => {
-      resetSaveState();
+      resetDialogErrors();
       setProviderToDelete(provider);
     },
-    [resetSaveState]
+    [resetDialogErrors]
   );
 
   const handleFlyoutSave = useCallback(
@@ -184,6 +194,10 @@ export const StorageProvidersLayout = memo<StorageProvidersLayoutProps>(({ polic
       if (flyoutState?.provider) {
         // Matched by the saved id: a rename changes `id` in place, keeping the provider's position
         const { id: savedId } = flyoutState.provider;
+        if (!providers.some(({ id }) => id === savedId)) {
+          setIsProviderGone(true);
+          return;
+        }
         saveProviders(
           providers.map((existing) => (existing.id === savedId ? provider : existing)),
           { successMessage: getEditSuccessMessage(provider.id), errorTitle: SAVE_ERROR_TITLE },
@@ -201,16 +215,21 @@ export const StorageProvidersLayout = memo<StorageProvidersLayoutProps>(({ polic
   );
 
   const handleDeleteConfirm = useCallback(() => {
-    if (providerToDelete) {
-      saveProviders(
-        providers.filter(({ id }) => id !== providerToDelete.id),
-        {
-          successMessage: getDeleteSuccessMessage(providerToDelete.id),
-          errorTitle: DELETE_ERROR_TITLE,
-        },
-        closeDeleteModal
-      );
+    if (!providerToDelete) {
+      return;
     }
+    if (!providers.some(({ id }) => id === providerToDelete.id)) {
+      setIsProviderGone(true);
+      return;
+    }
+    saveProviders(
+      providers.filter(({ id }) => id !== providerToDelete.id),
+      {
+        successMessage: getDeleteSuccessMessage(providerToDelete.id),
+        errorTitle: DELETE_ERROR_TITLE,
+      },
+      closeDeleteModal
+    );
   }, [closeDeleteModal, providerToDelete, providers, saveProviders]);
 
   const otherIds = useMemo(
@@ -320,7 +339,7 @@ export const StorageProvidersLayout = memo<StorageProvidersLayoutProps>(({ polic
           provider={flyoutState.provider}
           otherIds={otherIds}
           isSaving={isSaving}
-          errorMessage={saveErrorMessage}
+          errorMessage={dialogErrorMessage}
           onSave={handleFlyoutSave}
           onClose={closeFlyout}
         />
@@ -329,7 +348,7 @@ export const StorageProvidersLayout = memo<StorageProvidersLayoutProps>(({ polic
         <DeleteStorageProviderModal
           provider={providerToDelete}
           isDeleting={isSaving}
-          errorMessage={saveErrorMessage}
+          errorMessage={dialogErrorMessage}
           onConfirm={handleDeleteConfirm}
           onCancel={closeDeleteModal}
         />

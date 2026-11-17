@@ -22,6 +22,7 @@ import {
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
+  EuiText,
   EuiTextColor,
   EuiTitle,
   useGeneratedHtmlId,
@@ -41,6 +42,7 @@ import {
   CONTAINER_FIELD_LABEL,
   CREATE_FLYOUT_TITLE,
   CREATE_SUBMIT_BUTTON_LABEL,
+  DESTINATION_CHANGED_WARNING,
   EDIT_FLYOUT_TITLE,
   EDIT_SUBMIT_BUTTON_LABEL,
   EXPORT_PROVIDER_TYPE_LABELS,
@@ -125,6 +127,12 @@ export const StorageProviderFlyout = memo<StorageProviderFlyoutProps>(
     const isChanged = !isEdit || !isEqual(updatedProvider, provider);
     const canSave = isValid && isChanged && !isSaving;
     const isRenamed = isEdit && values.id !== provider.id;
+    // Where exports to this name go; changing it redirects pending exports too
+    const isDestinationChanged =
+      isEdit &&
+      (values.account_name !== provider.account_name ||
+        values.container !== provider.container ||
+        values.service_url !== (provider.service_url ?? ''));
 
     const getVisibleError = (field: ExportProviderFieldName): string | undefined => {
       const error = fieldErrors[field];
@@ -308,6 +316,18 @@ export const StorageProviderFlyout = memo<StorageProviderFlyoutProps>(
                 />
               </EuiFormRow>
             </EuiAccordion>
+            {isDestinationChanged && (
+              <>
+                <EuiSpacer size="m" />
+                <EuiText
+                  size="xs"
+                  color="warning"
+                  data-test-subj="storageProviderFlyout-destinationChangedWarning"
+                >
+                  <p>{DESTINATION_CHANGED_WARNING}</p>
+                </EuiText>
+              </>
+            )}
           </EuiForm>
         </EuiFlyoutBody>
         <EuiFlyoutFooter>

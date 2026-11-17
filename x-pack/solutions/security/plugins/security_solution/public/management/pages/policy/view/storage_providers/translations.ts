@@ -173,6 +173,19 @@ export const NAME_CHANGED_WARNING = i18n.translate(
   { defaultMessage: "Exports to the old name that haven't reached a host yet will fail." }
 );
 
+export const DESTINATION_CHANGED_WARNING = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.storageProviders.flyout.destinationChangedWarningDescription',
+  {
+    defaultMessage:
+      "Exports to this provider, including ones that haven't reached a host yet, will go to the new destination.",
+  }
+);
+
+export const PROVIDER_CHANGED_ERROR_MESSAGE = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.storageProviders.providerChangedErrorMessage',
+  { defaultMessage: 'This storage provider was changed or removed. Close and reopen it.' }
+);
+
 export const ACCOUNT_NAME_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.policy.storageProviders.flyout.accountNameLabel',
   { defaultMessage: 'Storage account name' }

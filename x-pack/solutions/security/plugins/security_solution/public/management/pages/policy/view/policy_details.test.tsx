@@ -35,6 +35,7 @@ import {
 } from '../../../common/routing';
 import { policyListApiPathHandlers } from '../store/test_mock_utils';
 import { PolicyDetails } from './policy_details';
+import { PolicyContainer } from '..';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { createLicenseServiceMock } from '../../../../../common/license/mocks';
 import { licenseService as licenseServiceMocked } from '../../../../common/hooks/__mocks__/use_license';
@@ -467,6 +468,44 @@ describe('Policy Details', () => {
           await renderResult.findByTestId('policyDetailsUnsavedChangesModal')
         ).toBeInTheDocument();
         expect(history.location.pathname).toBe(getPolicyStorageProvidersPath('1'));
+      });
+
+      describe('route', () => {
+        // Through the policy routes, which gate the URL on the flag and the license
+        const renderStorageProvidersUrl = async () => {
+          act(() => {
+            history.push(getPolicyStorageProvidersPath('1'));
+          });
+          renderResult = mockedContext.render(<PolicyContainer />);
+          await asyncActions;
+        };
+
+        it('should render the storage providers tab on its URL', async () => {
+          await renderStorageProvidersUrl();
+
+          expect(await renderResult.findByTestId('storageProvidersLayout')).toBeInTheDocument();
+        });
+
+        it.each([
+          [
+            'the feature flag is off',
+            () => setExperimentalFlag({ responseActionsEndpointFileExport: false }),
+          ],
+          [
+            'the license is below Enterprise',
+            () => {
+              const licenseServiceMock = createLicenseServiceMock();
+              licenseServiceMock.isEnterprise.mockReturnValue(false);
+              useLicenseMock.mockReturnValue(licenseServiceMock);
+            },
+          ],
+        ])('should not route to the storage providers URL when %s', async (_, setUp) => {
+          setUp();
+          await renderStorageProvidersUrl();
+
+          expect(await renderResult.findByTestId('notFoundPage')).toBeInTheDocument();
+          expect(renderResult.queryByTestId('storageProvidersLayout')).not.toBeInTheDocument();
+        });
       });
     });
 
