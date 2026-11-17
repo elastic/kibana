@@ -5,11 +5,5 @@
  * 2.0.
  */
 
-export { DetectionStateService } from './detection_state_service';
 export { DetectionStateClient } from './detection_state_client';
-export type {
-  DetectionStateServiceSetupDeps,
-  DetectionStateServiceStart,
-  DetectionStateServiceStartDeps,
-} from './types';
 export type { HeldRunLease, RunLeaseAttempt } from './detection_state_client';

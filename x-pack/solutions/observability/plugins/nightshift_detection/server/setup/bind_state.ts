@@ -8,26 +8,30 @@
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { OnSetup } from '@kbn/core-di';
 import { CoreSetup, CoreStart } from '@kbn/core-di-server';
-import { DetectionStateClient, DetectionStateService } from '../lib/state';
+import { DetectionStateClient } from '../lib/state';
+import {
+  DETECTION_STATE_SO_TYPE,
+  detectionStateSavedObjectType,
+} from '../saved_objects/detection_state_saved_object';
 
 /**
- * Runs the state service's two phases: setup registers the saved object type, and the client is
- * the product of its start, resolved once Core has started.
+ * The module's setup and start phases are the `OnSetup` hook and the `CoreStart` token: the type is
+ * registered at setup, and the client is built once Core has started, on the internal repository of
+ * that type.
  */
 export function bindState({ bind }: ContainerModuleLoadOptions): void {
-  bind(DetectionStateService).toSelf().inSingletonScope();
-
   bind(OnSetup).toResolvedValue(
-    (service, savedObjects) => () => {
-      service.setup({ savedObjects });
+    (savedObjects) => () => {
+      savedObjects.registerType(detectionStateSavedObjectType);
     },
-    [DetectionStateService, CoreSetup('savedObjects')]
+    [CoreSetup('savedObjects')]
   );
 
   bind(DetectionStateClient)
     .toResolvedValue(
-      (service, savedObjects) => service.start({ savedObjects }).getClient(),
-      [DetectionStateService, CoreStart('savedObjects')]
+      (savedObjects) =>
+        new DetectionStateClient(savedObjects.createInternalRepository([DETECTION_STATE_SO_TYPE])),
+      [CoreStart('savedObjects')]
     )
     .inSingletonScope();
 }
