@@ -26,7 +26,7 @@ export interface FastInferenceEndpointsProvider {
 }
 
 export interface EsqlServerPluginStart {
-  inference: InferenceServerStart;
+  inference?: InferenceServerStart;
   actions: ActionsPluginStart;
   searchInferenceEndpoints?: FastInferenceEndpointsProvider;
 }

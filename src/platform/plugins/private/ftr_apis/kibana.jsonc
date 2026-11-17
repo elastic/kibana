@@ -13,7 +13,7 @@
     "configPath": [
       "ftr_apis"
     ],
-    "requiredPlugins": [
+    "optionalPlugins": [
       "taskManager"
     ]
   }

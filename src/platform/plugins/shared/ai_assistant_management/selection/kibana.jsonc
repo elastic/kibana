@@ -14,15 +14,15 @@
       "aiAssistantManagementSelection"
     ],
     "requiredPlugins": [
-      "management",
-      "licensing"
+      "management"
     ],
     "optionalPlugins": [
       "home",
       "serverless",
       "features",
       "cloud",
-      "spaces"
+      "spaces",
+      "licensing"
     ],
     "requiredBundles": [
       "kibanaReact"

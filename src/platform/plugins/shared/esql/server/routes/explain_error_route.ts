@@ -127,6 +127,13 @@ export const registerExplainErrorRoute = (
         const { queryString, errorMessage } = request.body;
         const [, { inference, searchInferenceEndpoints }] = await getStartServices();
 
+        if (!inference) {
+          return response.customError({
+            statusCode: 503,
+            body: { message: 'Inference plugin is unavailable.' },
+          });
+        }
+
         const connectorId = await resolveConnectorId({
           inference,
           request,

@@ -76,6 +76,13 @@ export const registerNLtoESQLRoute = (
         const client = core.elasticsearch.client.asCurrentUser;
         const [, { inference, searchInferenceEndpoints }] = await getStartServices();
 
+        if (!inference) {
+          return response.customError({
+            statusCode: 503,
+            body: { message: 'Inference plugin is unavailable.' },
+          });
+        }
+
         const connectorId = await resolveConnectorId({
           inference,
           request,
