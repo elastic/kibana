@@ -60,6 +60,32 @@ describe('trackFieldUse', () => {
     expect(sorted(use.copied)).toEqual(['', 'labels/items']);
   });
 
+  it('records reads that follow enumerating keys without copying them', async () => {
+    const use = createFieldUse();
+    const data = trackFieldUse(body(), use);
+
+    Object.keys(data);
+    expect(data.state).toBe('opened');
+    // The first key in order is told apart only once the turn ends without the copy going on.
+    Object.keys(data.owner);
+    expect(data.owner.login).toBe('octo');
+    await Promise.resolve();
+
+    expect(sorted(use.read)).toEqual(['owner', 'owner/login', 'state']);
+    expect(sorted(use.copied)).toEqual(['', 'owner']);
+  });
+
+  it('records a copy that a read of its own interrupts as a copy and a read', () => {
+    const use = createFieldUse();
+    const data = trackFieldUse(body(), use);
+
+    const copy = { ...data, label: data.labels[0].name };
+
+    expect(copy.label).toBe('bug');
+    expect(sorted(use.read)).toEqual(['labels', 'labels/items', 'labels/items/name']);
+    expect(sorted(use.copied)).toEqual(['']);
+  });
+
   it('ignores what every object answers, such as awaiting it or array methods', async () => {
     const use = createFieldUse();
     const data = trackFieldUse(body(), use);

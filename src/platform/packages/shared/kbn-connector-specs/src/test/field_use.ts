@@ -92,20 +92,34 @@ export const trackFieldUse = <T>(value: T, use: FieldUse, path = ''): T => {
   }
   const isArray = Array.isArray(value);
   const children = new Map<string, unknown>();
-  // Keys of an object being enumerated: reading them copies the object rather than reads a field.
-  const enumerating = new Set<string | symbol>();
+  // An enumeration of the object. A spread, `JSON.stringify` or `Object.entries` goes on to read
+  // its enumerable keys in order, which copies the object; `Object.keys` reads none. So reads of
+  // the next key in order are held as the copy's, and become reads if the turn ends before it does.
+  let enumeration: { keys: string[]; next: number; held: string[] } | undefined;
+  const endEnumeration = () => {
+    enumeration?.held.forEach((field) => use.read.add(field));
+    enumeration = undefined;
+  };
   const isField = (target: object, key: string): boolean =>
     isArray ? /^\d+$/.test(key) : Object.hasOwn(target, key) || !(key in Object.prototype);
 
   const proxy = new Proxy(value, {
     get(target, key, receiver) {
       const result = Reflect.get(target, key, receiver);
+      const copy = enumeration?.keys[enumeration.next] === key ? enumeration : undefined;
+      if (copy) {
+        copy.next += 1;
+        // A copy that read every key is done, and its held reads were the copy's.
+        if (copy.next === copy.keys.length) {
+          enumeration = undefined;
+        }
+      }
       if (typeof key === 'symbol' || NOT_FIELDS.has(key) || !isField(target, key)) {
         return result;
       }
       const field = isArray ? join(path, 'items') : join(path, key);
-      if (enumerating.has(key)) {
-        enumerating.delete(key);
+      if (copy) {
+        copy.held.push(field);
       } else {
         use.read.add(field);
       }
@@ -125,10 +139,23 @@ export const trackFieldUse = <T>(value: T, use: FieldUse, path = ''): T => {
     },
     ownKeys(target) {
       use.copied.add(path);
+      endEnumeration();
       const keys = Reflect.ownKeys(target);
-      keys.forEach((key) => enumerating.add(key));
-      // The reads that follow an enumeration in the same turn are the copy.
-      queueMicrotask(() => enumerating.clear());
+      const current = {
+        keys: keys.filter(
+          (key): key is string =>
+            typeof key === 'string' &&
+            Object.getOwnPropertyDescriptor(target, key)?.enumerable === true
+        ),
+        next: 0,
+        held: [],
+      };
+      enumeration = current.keys.length > 0 ? current : undefined;
+      queueMicrotask(() => {
+        if (enumeration === current) {
+          endEnumeration();
+        }
+      });
       return keys;
     },
   });
