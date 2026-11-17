@@ -75,6 +75,7 @@ exports[`Search should render normally 1`] = `
                   Category
                 </span>
                 <span
+                  aria-hidden="true"
                   color="inherit"
                   data-euiicon-type="chevronSingleDown"
                 />

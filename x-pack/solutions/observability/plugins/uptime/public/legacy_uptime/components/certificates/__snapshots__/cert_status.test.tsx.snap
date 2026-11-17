@@ -16,6 +16,7 @@ exports[`CertStatus renders expected elements for valid props 1`] = `
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <span
+        aria-hidden="true"
         color="success"
         data-euiicon-type="dot"
       />
