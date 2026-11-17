@@ -86,6 +86,7 @@ export const useFetchExemplars = ({
       const metricsByStream = await probeExemplarsAvailability({
         fetchId: fetchParams.lastReloadRequestTime,
         search,
+        sessionId: fetchParams.searchSessionId,
         timeFieldName,
         timeRange: fetchParams.timeRange,
         uiSettings,
@@ -100,6 +101,7 @@ export const useFetchExemplars = ({
         const { rawResponse } = await executeEsqlQuery({
           esqlQuery,
           search,
+          sessionId: fetchParams.searchSessionId,
           signal,
           timeFieldName,
           timeRange: fetchParams.timeRange,
@@ -134,6 +136,7 @@ export const useFetchExemplars = ({
       originalSource,
       search,
       fetchParams.timeRange,
+      fetchParams.searchSessionId,
       fetchParams.filters,
       fetchParams.esqlVariables,
       fetchParams.lastReloadRequestTime,

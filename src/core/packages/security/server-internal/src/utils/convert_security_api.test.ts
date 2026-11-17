@@ -44,6 +44,12 @@ describe('convertSecurityApi', () => {
           },
         },
       },
+      authz: {
+        uiam: {
+          canViewBillingDetails: jest.fn(),
+          canInviteOrganizationMembers: jest.fn(),
+        },
+      },
       audit: {
         asScoped: jest.fn().mockReturnValue(createAuditLoggerMock.create()),
         withoutRequest: createAuditLoggerMock.create(),
@@ -62,9 +68,10 @@ describe('convertSecurityApi', () => {
     };
   });
 
-  it('passes through delegate apiKeys, audit, and getRedactedSessionId', () => {
+  it('passes through delegate apiKeys, authz, audit, and getRedactedSessionId', () => {
     const output = convertSecurityApi(source, workloadTypes);
     expect(output.authc.apiKeys).toBe(source.authc.apiKeys);
+    expect(output.authz).toBe(source.authz);
     expect(output.authc.getRedactedSessionId).toBe(source.authc.getRedactedSessionId);
     expect(output.audit.asScoped).toBe(source.audit.asScoped);
     expect(output.audit.withoutRequest).toBe(source.audit.withoutRequest);
