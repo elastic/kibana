@@ -75,16 +75,7 @@ export const setDataSource: InternalStateThunkActionCreator<
     }
   };
 
-const getEmptyColumnNames = (dataSource: DataSource | undefined): string[] =>
-  dataSource?.kind === 'esql'
-    ? dataSource.resultColumns.filter(({ isNull }) => isNull).map(({ name }) => name)
-    : [];
-
-/**
- * Publishes the source built from a fetch result as the tab's current source. Same dataset and
- * id as the current one; only the nullability of the result columns differs. Skipped when
- * no column is empty or the empty columns did not change.
- */
+/** Publishes the fetched ES|QL source as the tab's source when its empty columns differ from the current one's. */
 export const publishFetchedEsqlSource: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataSource: DataSource }>]
 > =
@@ -102,8 +93,7 @@ export const publishFetchedEsqlSource: InternalStateThunkActionCreator<
       return;
     }
 
-    const fetchedEmptyColumns = getEmptyColumnNames(dataSource);
-    if (isEqual(fetchedEmptyColumns, getEmptyColumnNames(currentSource))) {
+    if (isEqual(dataSource.getEmptyColumnNames(), currentSource.getEmptyColumnNames())) {
       return;
     }
 

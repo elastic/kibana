@@ -155,7 +155,7 @@ export const getDataViewOfSource = (dataSource: DataSource | undefined): DataVie
     : esqlDataViewsBySource.get(dataSource) ?? getRegisteredEsqlDataView(dataSource);
 };
 
-/** Pins the DataView shim of an ES|QL source (the registered one by default) for as long as the source is in use. */
+/** Pins the DataView shim of an ES|QL source, the registered one unless given, for as long as the source is in use. */
 export const pinDataViewOfSource = (
   dataSource: DataSource,
   dataViewToPin?: DataView

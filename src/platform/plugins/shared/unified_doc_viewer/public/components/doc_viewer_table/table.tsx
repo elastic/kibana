@@ -228,9 +228,9 @@ const InternalDocViewerTable = ({
       return names;
     }
     const presentNames = new Set(names);
-    const emptyColumnNames = dataSource.resultColumns
-      .filter(({ isNull, name }) => isNull && !presentNames.has(name))
-      .map(({ name }) => name);
+    const emptyColumnNames = dataSource
+      .getEmptyColumnNames()
+      .filter((name) => !presentNames.has(name));
     return emptyColumnNames.length ? [...names, ...emptyColumnNames] : names;
   }, [flattened, dataSource]);
 

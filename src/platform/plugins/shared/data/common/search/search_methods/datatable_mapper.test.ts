@@ -199,6 +199,7 @@ describe('mapEsqlResponseToDatatable', () => {
       { host: 'web', bytes: 10 },
       { host: 'db', bytes: 20 },
     ]);
+    result.rows.forEach((row) => expect(Object.keys(row)).toEqual(['host', 'bytes']));
   });
 
   it('includes meta.type = ESQL_TABLE_TYPE and statistics', () => {

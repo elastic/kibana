@@ -13,7 +13,6 @@ import { render } from '@elastic/eui/lib/test/rtl';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { EsqlSource } from '@kbn/data-source';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { generateEsHits } from '@kbn/discover-utils/src/__mocks__';
@@ -439,7 +438,7 @@ describe('DocViewerTable', () => {
   });
 
   describe('ES|QL all-null columns', () => {
-    const makeColumn = (name: string, isNull: boolean): DatatableColumn => ({
+    const makeColumn = (name: string, isNull: boolean): EsqlSource['resultColumns'][number] => ({
       id: name,
       name,
       meta: { type: 'string' },
