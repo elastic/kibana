@@ -15,6 +15,7 @@ import { appContextService } from '../../services/app_context';
 import {
   awsOnboardingCredentialsService,
   awsOnboardingDiscoveryService,
+  awsOnboardingStackService,
 } from '../../services/aws_onboarding';
 
 import { createGetAwsOnboardingStateTool } from './get_aws_onboarding_state';
@@ -25,10 +26,12 @@ jest.mock('../../services/app_context');
 jest.mock('../../services/aws_onboarding', () => ({
   awsOnboardingCredentialsService: { getPublic: jest.fn() },
   awsOnboardingDiscoveryService: { verify: jest.fn() },
+  awsOnboardingStackService: { status: jest.fn() },
 }));
 
 const getPublic = awsOnboardingCredentialsService.getPublic as jest.Mock;
 const verify = awsOnboardingDiscoveryService.verify as jest.Mock;
+const stackStatus = awsOnboardingStackService.status as jest.Mock;
 
 const request = httpServerMock.createKibanaRequest();
 
@@ -376,6 +379,152 @@ describe('get_aws_onboarding_state', () => {
       );
 
       expect(results[0].data).not.toHaveProperty('settings_requirement');
+    });
+  });
+
+  describe('stack progress', () => {
+    const KEY = 'CREATE_IN_PROGRESS|WiiOidcProvider:CREATE_IN_PROGRESS';
+    const event = (resource: string, status = 'CREATE_IN_PROGRESS') => ({
+      resource,
+      status,
+      timestamp: '2026-11-17T00:00:00Z',
+    });
+    const inProgress = (latestEvent = event('WiiOidcProvider')) => ({
+      status: 'in_progress',
+      stackStatus: 'CREATE_IN_PROGRESS',
+      latestEvent,
+    });
+    const createStackStep = step('create_stack', 3, {
+      status: 'completed',
+      output: { stack_id: 'arn:aws:cloudformation:us-east-1:1:stack/s/1' },
+    });
+    const runningExecution = (stepExecutions: unknown[] = [createStackStep]) => ({
+      id: 'exec-1',
+      workflowId: FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID,
+      status: 'running',
+      startedAt: '2026-11-13T00:00:00Z',
+      workflowDefinition: { name: 'AWS Agentless Onboarding', steps: [] },
+      stepExecutions,
+    });
+    const logger = { warn: jest.fn() };
+
+    beforeEach(() => {
+      jest.mocked(appContextService.getLogger).mockReturnValue(logger as any);
+    });
+
+    const runWait = async (
+      executions: unknown[],
+      waitForChangeSince?: string
+    ): Promise<Record<string, any>> => {
+      const getWorkflowExecution = jest.fn();
+      executions.forEach((e, i) =>
+        i === executions.length - 1
+          ? getWorkflowExecution.mockResolvedValue(e)
+          : getWorkflowExecution.mockResolvedValueOnce(e)
+      );
+      const returned = (await createGetAwsOnboardingStateTool({
+        workflowApi: { getWorkflowExecution } as any,
+        waitIntervalMs: 1,
+        waitTimeoutMs: 20,
+      }).handler(
+        {
+          execution_id: 'exec-1',
+          ...(waitForChangeSince !== undefined && { wait_for_change_since: waitForChangeSince }),
+        },
+        { request, spaceId: 'default' } as any
+      )) as unknown as { results: Array<{ data: Record<string, unknown> }> };
+      return returned.results[0].data;
+    };
+
+    it('reads the stack live while the run is creating it and returns a progress key', async () => {
+      stackStatus.mockResolvedValue(inProgress());
+
+      const data = await runWait([runningExecution()]);
+
+      expect(stackStatus).toHaveBeenCalledTimes(1);
+      expect(data.stack).toEqual({
+        stack_id: 'arn:aws:cloudformation:us-east-1:1:stack/s/1',
+        status: 'in_progress',
+        stack_status: 'CREATE_IN_PROGRESS',
+        latest_event: event('WiiOidcProvider'),
+        progress_key: KEY,
+      });
+    });
+
+    it('uses the engine output without a live read when there is no create_stack output', async () => {
+      const data = await runWait([
+        runningExecution([
+          step('stack_status', 4, {
+            status: 'completed',
+            output: { status: 'in_progress', stack_status: 'CREATE_IN_PROGRESS' },
+          }),
+        ]),
+      ]);
+
+      expect(stackStatus).not.toHaveBeenCalled();
+      expect((data.stack as any).progress_key).toBe('CREATE_IN_PROGRESS|:');
+    });
+
+    it('falls back to the engine output when the live read throws', async () => {
+      stackStatus.mockRejectedValue(new Error('throttled'));
+
+      const data = await runWait([
+        runningExecution([
+          createStackStep,
+          step('stack_status', 4, {
+            status: 'completed',
+            output: { status: 'in_progress', stack_status: 'CREATE_IN_PROGRESS' },
+          }),
+        ]),
+      ]);
+
+      expect((data.stack as any).status).toBe('in_progress');
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('throttled'));
+    });
+
+    it('returns as soon as the progress key changes during a wait', async () => {
+      stackStatus
+        .mockResolvedValueOnce(inProgress())
+        .mockResolvedValue(inProgress(event('WiiRole')));
+
+      const data = await runWait([runningExecution()], KEY);
+
+      expect((data.stack as any).progress_key).toBe(
+        'CREATE_IN_PROGRESS|WiiRole:CREATE_IN_PROGRESS'
+      );
+      expect((data.stack as any).timed_out).toBeUndefined();
+      expect(stackStatus).toHaveBeenCalledTimes(2);
+    });
+
+    it('ends the wait when the run reaches a pause', async () => {
+      stackStatus.mockResolvedValue(inProgress());
+      const paused = {
+        ...runningExecution([
+          createStackStep,
+          step('name_identity', 9, { status: 'waiting_for_input' }),
+        ]),
+        status: 'waiting_for_input',
+        workflowDefinition: {
+          name: 'AWS Agentless Onboarding',
+          steps: [{ name: 'name_identity', type: 'waitForInput', with: { message: 'Name?' } }],
+        },
+      };
+
+      const data = await runWait([runningExecution(), paused], KEY);
+
+      expect((data.waiting as any).step_name).toBe('name_identity');
+      expect((data.stack as any).timed_out).toBeUndefined();
+    });
+
+    it('returns timed_out with the same key after a quiet wait', async () => {
+      stackStatus.mockResolvedValue(inProgress());
+
+      const data = await runWait([runningExecution()], KEY);
+
+      expect((data.stack as any).timed_out).toBe(true);
+      expect((data.stack as any).progress_key).toBe(KEY);
+      expect(stackStatus.mock.calls.length).toBeGreaterThanOrEqual(2);
+      expect(stackStatus.mock.calls.length).toBeLessThan(40);
     });
   });
 });

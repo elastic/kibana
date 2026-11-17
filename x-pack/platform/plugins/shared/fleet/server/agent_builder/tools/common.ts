@@ -21,6 +21,8 @@ export interface AwsOnboardingToolDeps {
   workflowApi: WorkflowApi;
 }
 
+export const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 /**
  * Returns an error result when the feature is off or the user lacks the required Fleet
  * privilege, and undefined when the call may proceed.

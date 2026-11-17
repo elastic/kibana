@@ -16,7 +16,7 @@ import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { awsOnboardingSettingsAnswerSchema } from '../../../common/workflows/steps/settings';
 import { submitSettingsAnswer } from '../../services/aws_onboarding/settings_answer';
 
-import { checkOnboardingAccess, getOnboardingExecution } from './common';
+import { checkOnboardingAccess, getOnboardingExecution, sleep } from './common';
 import type { AwsOnboardingToolDeps } from './common';
 
 const answerSchema = lazySchema(() =>
@@ -37,8 +37,6 @@ const answerSchema = lazySchema(() =>
 
 const DEFAULT_SETTLE_INTERVAL_MS = 1000;
 const DEFAULT_SETTLE_TIMEOUT_MS = 15000;
-
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const createAnswerAwsOnboardingTool = ({
   workflowApi,

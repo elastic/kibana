@@ -32,16 +32,81 @@ import { appContextService } from '../../services/app_context';
 import {
   awsOnboardingCredentialsService,
   awsOnboardingDiscoveryService,
+  awsOnboardingStackService,
 } from '../../services/aws_onboarding';
 
-import { checkOnboardingAccess, getOnboardingExecution } from './common';
+import { checkOnboardingAccess, getOnboardingExecution, sleep } from './common';
 import type { AwsOnboardingToolDeps } from './common';
 
 const stateSchema = lazySchema(() =>
   z.object({
     execution_id: z.string().describe('Execution id returned by start_aws_onboarding.'),
+    wait_for_change_since: z
+      .string()
+      .optional()
+      .describe(
+        'progress_key from the previous result; the tool returns when it changes, when the run pauses or ends, or after 15 seconds'
+      ),
   })
 );
+
+const DEFAULT_WAIT_INTERVAL_MS = 1000;
+const DEFAULT_WAIT_TIMEOUT_MS = 15000;
+
+interface StackProgress {
+  stack?: {
+    stack_id?: string;
+    status?: AwsOnboardingStackStatusOutput['status'];
+    stack_status?: string;
+    reason?: string;
+    latest_event?: AwsOnboardingStackStatusOutput['latest_event'];
+    progress_key: string;
+  };
+  progressKey?: string;
+}
+
+/**
+ * The stack block of the result. While the run is creating the stack it is read live, because the
+ * engine output is only as fresh as its last poll; otherwise the engine output is used.
+ */
+const readStackProgress = async (execution: WorkflowExecutionDto): Promise<StackProgress> => {
+  const createStack = lastOutput<AwsOnboardingCreateStackOutput>(execution, 'create_stack');
+  let current = lastOutput<AwsOnboardingStackStatusOutput>(execution, 'stack_status');
+
+  if (execution.status === ExecutionStatus.RUNNING && createStack?.stack_id) {
+    try {
+      const live = await awsOnboardingStackService.status(createStack.stack_id);
+      current = {
+        status: live.status,
+        stack_status: live.stackStatus,
+        reason: live.reason,
+        latest_event: live.latestEvent,
+      };
+    } catch (e) {
+      appContextService
+        .getLogger()
+        .warn(`Could not read the AWS onboarding stack live: ${e.message}`);
+    }
+  }
+
+  if (!createStack && !current) {
+    return {};
+  }
+  const progressKey = `${current?.stack_status ?? ''}|${current?.latest_event?.resource ?? ''}:${
+    current?.latest_event?.status ?? ''
+  }`;
+  return {
+    progressKey,
+    stack: {
+      stack_id: createStack?.stack_id,
+      status: current?.status,
+      stack_status: current?.stack_status,
+      reason: current?.reason,
+      latest_event: current?.latest_event,
+      progress_key: progressKey,
+    },
+  };
+};
 
 /** Output of the last execution of a step, which differs from the first inside loops. */
 const lastOutput = <T>(execution: WorkflowExecutionDto, stepId: string): T | undefined => {
@@ -157,14 +222,22 @@ const syncCredentialsCard = async ({
 
 export const createGetAwsOnboardingStateTool = ({
   workflowApi,
-}: AwsOnboardingToolDeps): BuiltinSkillBoundedTool<typeof stateSchema> => ({
+  waitIntervalMs = DEFAULT_WAIT_INTERVAL_MS,
+  waitTimeoutMs = DEFAULT_WAIT_TIMEOUT_MS,
+}: AwsOnboardingToolDeps & {
+  waitIntervalMs?: number;
+  waitTimeoutMs?: number;
+}): BuiltinSkillBoundedTool<typeof stateSchema> => ({
   id: 'get_aws_onboarding_state',
   type: ToolType.builtin,
   description:
-    'Get the progress of an AWS onboarding run: its status, the step it is waiting on (with the message to relay and the answer schema), and the outputs of the steps completed so far.',
+    'Get the progress of an AWS onboarding run: its status, the step it is waiting on (with the message to relay and the answer schema), and the outputs of the steps completed so far. While the stack is being created, pass the previous stack.progress_key as wait_for_change_since to wait for the next change.',
   schema: stateSchema,
   confirmation: { askUser: 'never' },
-  handler: async ({ execution_id: executionId }, { request, spaceId, attachments }) => {
+  handler: async (
+    { execution_id: executionId, wait_for_change_since: waitForChangeSince },
+    { request, spaceId, attachments }
+  ) => {
     const denied = await checkOnboardingAccess(request, 'read');
     if (denied) {
       return { results: [denied] };
@@ -180,7 +253,40 @@ export const createGetAwsOnboardingStateTool = ({
     if ('error' in found) {
       return { results: [found.error] };
     }
-    const { execution } = found;
+    let { execution } = found;
+    let { stack, progressKey } = await readStackProgress(execution);
+
+    // Wait for the stack to move on. The result below is built from the last execution read, so a
+    // pause reached during the wait is relayed in the same result.
+    let timedOut = false;
+    const isPaused = (e: WorkflowExecutionDto) =>
+      e.stepExecutions.some((s) => s.status === ExecutionStatus.WAITING_FOR_INPUT);
+    if (waitForChangeSince !== undefined && waitForChangeSince === progressKey) {
+      const deadline = Date.now() + waitTimeoutMs;
+      while (
+        execution.status === ExecutionStatus.RUNNING &&
+        !isPaused(execution) &&
+        progressKey === waitForChangeSince
+      ) {
+        if (Date.now() >= deadline) {
+          timedOut = true;
+          break;
+        }
+        await sleep(waitIntervalMs);
+        const next = await getOnboardingExecution({
+          workflowApi,
+          executionId,
+          spaceId,
+          request,
+          includeOutput: true,
+        });
+        if ('error' in next) {
+          return { results: [next.error] };
+        }
+        execution = next.execution;
+        ({ stack, progressKey } = await readStackProgress(execution));
+      }
+    }
 
     const state = toWorkflowExecutionState(execution, executionId);
     if (execution.status === ExecutionStatus.COMPLETED) {
@@ -192,8 +298,6 @@ export const createGetAwsOnboardingStateTool = ({
     );
     const discover = lastOutput<AwsOnboardingDiscoverOutput>(execution, 'discover');
     const resolve = lastOutput<AwsOnboardingResolveOutput>(execution, 'resolve');
-    const createStack = lastOutput<AwsOnboardingCreateStackOutput>(execution, 'create_stack');
-    const stack = lastOutput<AwsOnboardingStackStatusOutput>(execution, 'stack_status');
     const policies = lastOutput<AwsOnboardingCreatePoliciesOutput>(execution, 'create_policies');
     const hasData = lastOutput<AwsOnboardingHasDataOutput>(execution, 'has_data');
     const credentialsOutput =
@@ -251,13 +355,7 @@ export const createGetAwsOnboardingStateTool = ({
               suggested_identity_name: resolve.suggested_identity_name,
             },
           }),
-          ...((createStack || stack) && {
-            stack: {
-              stack_id: createStack?.stack_id,
-              status: stack?.status,
-              reason: stack?.reason,
-            },
-          }),
+          ...(stack && { stack: { ...stack, ...(timedOut && { timed_out: true as const }) } }),
           ...(policies && { policies: policies.policies }),
           ...(hasData && {
             has_data: hasData.has_data,
