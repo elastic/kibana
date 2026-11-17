@@ -14,6 +14,7 @@ import type { EntityInventoryApiClient } from '../../inventory_api/client';
 import { createFixtureEntityInventoryApiClient } from '../../__fixtures__/inventory_client';
 import { createScenarioEntityInventoryApiClient } from '../../__fixtures__/inventory_scenarios';
 import { createAppServicesMock } from '../../mocks';
+import { DEFAULT_TIME_RANGE } from '../constants';
 import { EntityInventorySearchProvider, useEntityInventorySearch } from '../context/search_context';
 import { INITIAL_LIST_RESPONSE, useEntityList } from './use_entity_list';
 
@@ -116,6 +117,19 @@ describe('useEntityList', () => {
     expect(firstSignal?.aborted).toBe(true);
     await waitFor(() => expect(result.current.result.loading).toBe(false));
     expect(result.current.result.data.rows.length).toBeGreaterThan(0);
+  });
+
+  it('does not list again when a submitted time range is invalid', async () => {
+    const inventoryApi = createClientMock();
+    const { result } = renderUseEntityList(inventoryApi);
+    await waitFor(() => expect(result.current.result.loading).toBe(false));
+
+    act(() => {
+      result.current.search.submit({ dateRange: { from: 'now-5x', to: 'now' } });
+    });
+
+    expect(result.current.search.dateRange).toEqual(DEFAULT_TIME_RANGE);
+    expect(inventoryApi.getEntities).toHaveBeenCalledTimes(1);
   });
 
   it('lists again on refresh', async () => {

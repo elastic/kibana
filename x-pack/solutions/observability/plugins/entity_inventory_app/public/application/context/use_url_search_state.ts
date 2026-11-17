@@ -25,8 +25,9 @@ import {
 } from '../constants';
 import { EMPTY_SELECTION } from '../filters/utils/selection';
 import type { FilterControlsSelection } from '../filters/utils/selection';
-import { clampTimeRange } from '../utils/clamp_time_range';
+import { checkTimeRange, getMaxTimeRange } from '../utils/check_time_range';
 import { validateQuery } from '../utils/validate_query';
+import { TIME_RANGE_CLAMPED_TOAST_TITLE } from '../translations';
 
 export interface UrlSearchState {
   dateRange: TimeRange;
@@ -67,18 +68,33 @@ const canBuildEsQuery = (filter: Filter): boolean => {
   }
 };
 
+interface UrlReadResult {
+  state: UrlSearchState;
+  /** The URL holds something the state does not: it is written again with the state. */
+  needsRepair: boolean;
+  /** The range in the URL is not allowed, so the state holds the widest allowed range. */
+  wasLimited: boolean;
+}
+
+const URL_STATE_KEYS = ['dateRange', 'query', 'filters', 'filterControls'] as const;
+
 const sanitize = (
   decoded: rt.TypeOf<typeof UrlSearchStateRT>,
-  uiSettings: IUiSettingsClient
-): UrlSearchState => {
-  const clamped = decoded.dateRange
-    ? clampTimeRange(decoded.dateRange, ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS)
-    : undefined;
-  const dateRange = clamped?.isValid ? clamped.range : DEFAULT_TIME_RANGE;
+  uiSettings: IUiSettingsClient,
+  maxDays: number
+): UrlReadResult => {
+  const rangeCheck = decoded.dateRange ? checkTimeRange(decoded.dateRange, maxDays) : undefined;
+  const wasLimited = rangeCheck === 'not_allowed';
+  const dateRange =
+    decoded.dateRange && rangeCheck === 'valid'
+      ? decoded.dateRange
+      : wasLimited
+      ? getMaxTimeRange(maxDays)
+      : DEFAULT_TIME_RANGE;
   const query =
     decoded.query && !validateQuery(decoded.query, uiSettings) ? decoded.query : DEFAULT_QUERY;
 
-  return {
+  const state: UrlSearchState = {
     dateRange: reuseDefaultIfEqual(dateRange, DEFAULT_URL_SEARCH_STATE.dateRange),
     query: reuseDefaultIfEqual(query, DEFAULT_URL_SEARCH_STATE.query),
     filters: reuseDefaultIfEqual(
@@ -90,6 +106,11 @@ const sanitize = (
       DEFAULT_URL_SEARCH_STATE.filterControls
     ),
   };
+  const needsRepair = URL_STATE_KEYS.some(
+    (key) => decoded[key] !== undefined && !isEqual(decoded[key], state[key])
+  );
+
+  return { state, needsRepair, wasLimited };
 };
 
 const getStateParam = (search: string) => {
@@ -97,13 +118,17 @@ const getStateParam = (search: string) => {
   return Array.isArray(param) ? param[0] : param;
 };
 
-const readUrlSearchState = (value: string | null | undefined, uiSettings: IUiSettingsClient) => {
+const readUrlSearchState = (
+  value: string | null | undefined,
+  uiSettings: IUiSettingsClient,
+  maxDays: number
+): UrlReadResult | undefined => {
   if (!value) {
     return undefined;
   }
   try {
     const decoded = UrlSearchStateRT.decode(decode(value));
-    return isRight(decoded) ? sanitize(decoded.right, uiSettings) : undefined;
+    return isRight(decoded) ? sanitize(decoded.right, uiSettings, maxDays) : undefined;
   } catch {
     return undefined;
   }
@@ -113,13 +138,14 @@ export const useUrlSearchState = (): [UrlSearchState, (patch: Partial<UrlSearchS
   const history = useHistory();
   const { search } = useLocation();
   const {
-    services: { uiSettings },
+    services: { uiSettings, config, notifications },
   } = useKibana();
+  const maxDays = config.timeRangeLimit.disabled ? Infinity : ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS;
 
   const stateParam = getStateParam(search);
-  const urlState = useMemo(
-    () => readUrlSearchState(stateParam, uiSettings),
-    [stateParam, uiSettings]
+  const urlRead = useMemo(
+    () => readUrlSearchState(stateParam, uiSettings, maxDays),
+    [stateParam, uiSettings, maxDays]
   );
 
   const write = useCallback(
@@ -137,23 +163,28 @@ export const useUrlSearchState = (): [UrlSearchState, (patch: Partial<UrlSearchS
   );
 
   const readCurrent = useCallback(
-    () => readUrlSearchState(getStateParam(history.location.search), uiSettings),
-    [history, uiSettings]
+    () => readUrlSearchState(getStateParam(history.location.search), uiSettings, maxDays),
+    [history, uiSettings, maxDays]
   );
 
   const update = useCallback(
     (patch: Partial<UrlSearchState>) =>
-      write({ ...(readCurrent() ?? DEFAULT_URL_SEARCH_STATE), ...patch }),
+      write({ ...(readCurrent()?.state ?? DEFAULT_URL_SEARCH_STATE), ...patch }),
     [readCurrent, write]
   );
 
-  const writeDefaultsWhenMissing = useCallback(() => {
-    if (!urlState) {
+  const repairUrl = useCallback(() => {
+    if (!urlRead) {
       write(DEFAULT_URL_SEARCH_STATE);
+    } else if (urlRead.needsRepair) {
+      write(urlRead.state);
+      if (urlRead.wasLimited) {
+        notifications.toasts.addWarning({ title: TIME_RANGE_CLAMPED_TOAST_TITLE });
+      }
     }
-  }, [urlState, write]);
+  }, [notifications, urlRead, write]);
 
-  useEffect(writeDefaultsWhenMissing, [writeDefaultsWhenMissing]);
+  useEffect(repairUrl, [repairUrl]);
 
-  return [urlState ?? DEFAULT_URL_SEARCH_STATE, update];
+  return [urlRead?.state ?? DEFAULT_URL_SEARCH_STATE, update];
 };

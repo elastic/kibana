@@ -10,8 +10,8 @@ import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { EntityInventoryEntityCategory } from '../../types';
 import { ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS } from '../constants';
 import { useKibana } from '../../hooks/use_kibana';
-import { INVALID_QUERY_TOAST_TITLE, TIME_RANGE_CLAMPED_TOAST_TITLE } from '../translations';
-import { clampTimeRange } from '../utils/clamp_time_range';
+import { INVALID_QUERY_TOAST_TITLE, TIME_RANGE_NOT_ALLOWED_TOAST_TITLE } from '../translations';
+import { checkTimeRange } from '../utils/check_time_range';
 import { validateQuery } from '../utils/validate_query';
 import type { FilterControlsSelection } from '../filters/utils/selection';
 import { useUrlSearchState } from './use_url_search_state';
@@ -74,23 +74,25 @@ export const EntityInventorySearchProvider = ({
         queryToCommit = undefined;
       }
 
-      // Without the limit, clampTimeRange never clamps and only checks that the range is valid.
-      const { range, wasClamped, isValid } = clampTimeRange(
+      const rangeCheck = checkTimeRange(
         submittedRange,
         isTimeRangeLimited ? ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS : Infinity
       );
-      const effectiveRange = isValid ? range : dateRange;
-
-      if (wasClamped) {
-        notifications.toasts.addWarning({ title: TIME_RANGE_CLAMPED_TOAST_TITLE });
+      const isRangeAccepted = rangeCheck === 'valid';
+      if (rangeCheck === 'not_allowed') {
+        notifications.toasts.addWarning({ title: TIME_RANGE_NOT_ALLOWED_TOAST_TITLE });
       }
-      updateSearchState({
-        ...(queryToCommit && { query: queryToCommit }),
-        dateRange: effectiveRange,
-      });
-      setRefreshToken((token) => token + 1);
+      if (queryToCommit || isRangeAccepted) {
+        updateSearchState({
+          ...(queryToCommit && { query: queryToCommit }),
+          ...(isRangeAccepted && { dateRange: submittedRange }),
+        });
+      }
+      if (isRangeAccepted) {
+        setRefreshToken((token) => token + 1);
+      }
 
-      return effectiveRange;
+      return isRangeAccepted ? submittedRange : dateRange;
     },
     [dateRange, isTimeRangeLimited, notifications, updateSearchState, uiSettings]
   );

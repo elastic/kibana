@@ -10,6 +10,8 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { Router } from '@kbn/shared-ux-router';
+import { createMemoryHistory } from 'history';
 import type { EntityInventoryApiClient } from '../../../inventory_api/client';
 import { createFixtureEntityInventoryApiClient } from '../../../__fixtures__/inventory_client';
 import {
@@ -71,17 +73,20 @@ const renderResults = (
   inventoryApi: EntityInventoryApiClient,
   entityTypeIdPrefix: string | null = 'host'
 ) => {
+  const history = createMemoryHistory();
   const results = (prefix: string | null) => (
     <I18nProvider>
       <EuiProvider>
         <KibanaContextProvider services={createAppServicesMock({ inventoryApi })}>
           <EntityTablePreferencesProvider>
-            <EntityInventorySearchProvider entityCategory="hosts">
-              <EntityTypesProvider>
-                <NewRangeButton />
-                <EntityCategoryResults entityTypeIdPrefix={prefix ?? undefined} />
-              </EntityTypesProvider>
-            </EntityInventorySearchProvider>
+            <Router history={history}>
+              <EntityInventorySearchProvider entityCategory="hosts">
+                <EntityTypesProvider>
+                  <NewRangeButton />
+                  <EntityCategoryResults entityTypeIdPrefix={prefix ?? undefined} />
+                </EntityTypesProvider>
+              </EntityInventorySearchProvider>
+            </Router>
           </EntityTablePreferencesProvider>
         </KibanaContextProvider>
       </EuiProvider>

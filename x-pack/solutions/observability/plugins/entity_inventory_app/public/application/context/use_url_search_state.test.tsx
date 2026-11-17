@@ -13,6 +13,7 @@ import { act, renderHook } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { decode } from '@kbn/rison';
+import { createPublicConfigMock } from '../../mocks';
 import { DEFAULT_TIME_RANGE } from '../constants';
 import type { UrlSearchState } from './use_url_search_state';
 import { useUrlSearchState } from './use_url_search_state';
@@ -29,12 +30,13 @@ const DEFAULT_STATE = {
 const readWrittenState = (history: MemoryHistory) =>
   decode(new URLSearchParams(history.location.search).get('_a') ?? '');
 
-const renderUrlState = (initialEntry = '/kubernetes') => {
+const renderUrlState = (initialEntry = '/kubernetes', { timeRangeLimitDisabled = false } = {}) => {
   const core = coreMock.createStart();
+  const config = createPublicConfigMock({ timeRangeLimitDisabled });
   const history = createMemoryHistory({ initialEntries: [initialEntry] });
   const seen: UrlSearchState[] = [];
   const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <KibanaContextProvider services={core}>
+    <KibanaContextProvider services={{ ...core, config }}>
       <Router history={history}>{children}</Router>
     </KibanaContextProvider>
   );
@@ -156,6 +158,14 @@ describe('useUrlSearchState', () => {
       const { result } = renderUrlState('/kubernetes?_a=(dateRange:(from:now-30d,to:now))');
 
       expect(result.current[0].dateRange).toEqual({ from: 'now-3d', to: 'now' });
+    });
+
+    it('keeps a time range from the URL over the maximum when the limit is disabled', () => {
+      const { result } = renderUrlState('/kubernetes?_a=(dateRange:(from:now-30d,to:now))', {
+        timeRangeLimitDisabled: true,
+      });
+
+      expect(result.current[0].dateRange).toEqual({ from: 'now-30d', to: 'now' });
     });
 
     it('falls back to the default query when the query in the URL is invalid KQL', () => {
