@@ -63,8 +63,9 @@ export const mssqlClientType: ClientTypeSpec<ConnectionPool> = {
       requestTimeout: timeout,
       pool: { max: 5, min: 0, idleTimeoutMillis: 30000 },
       options: {
-        // Azure SQL rejects unencrypted connections, so encryption is not configurable.
-        encrypt: true,
+        // Azure SQL rejects unencrypted connections, so it never sets `ssl`. Self-managed SQL Server can opt out
+        // with `config.ssl: 'disabled'` (as MySQL does); anything else keeps encryption on.
+        encrypt: ctx.config?.ssl !== 'disabled',
         trustServerCertificate: tls.rejectUnauthorized === false,
         cryptoCredentialsDetails: {
           ...(tls.ca ? { ca: tls.ca } : {}),
