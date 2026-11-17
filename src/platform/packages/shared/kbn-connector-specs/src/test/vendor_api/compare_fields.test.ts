@@ -78,6 +78,44 @@ describe('compareFields', () => {
     expect(compare(after, ['items/name'])).toEqual([]);
   });
 
+  it('reports enum changes through allOf, oneOf and anyOf', () => {
+    const compareSchemas = (before: unknown, after: unknown) =>
+      compareFields({
+        before: spec(group({ state: before })),
+        after: spec(group({ state: after })),
+        method: 'get',
+        path: '/groups',
+        fields: ['items/state'],
+      });
+    const wrapped = (values: string[]) => ({ allOf: [{ type: 'string', enum: values }] });
+    const nullable = (values: string[]) => ({
+      oneOf: [{ type: 'string', enum: values }, { type: 'null' }],
+    });
+
+    expect(compareSchemas(wrapped(['active']), wrapped(['active', 'locked']))).toEqual([
+      { field: 'items/state', changes: ['new values: locked'] },
+    ]);
+    expect(compareSchemas(nullable(['active']), nullable(['active', 'locked']))).toEqual([
+      { field: 'items/state', changes: ['new values: locked'] },
+    ]);
+    // Each part of an allOf limits the field, so the values are those every part allows.
+    expect(
+      compareSchemas(
+        { allOf: [{ type: 'string' }, { enum: ['active', 'archived'] }] },
+        { allOf: [{ enum: ['active', 'archived', 'locked'] }, { enum: ['active', 'locked'] }] }
+      )
+    ).toEqual([
+      { field: 'items/state', changes: ['new values: locked', 'values removed: archived'] },
+    ]);
+    // A branch without a list of values allows any value.
+    expect(
+      compareSchemas(
+        { anyOf: [{ enum: ['active'] }, { type: 'string' }] },
+        { anyOf: [{ enum: ['active', 'locked'] }, { type: 'string' }] }
+      )
+    ).toEqual([]);
+  });
+
   it('reports a field that is gone, and follows the operation to its latest path', () => {
     const after = { type: 'object', properties: { id: { type: 'integer' } } };
 

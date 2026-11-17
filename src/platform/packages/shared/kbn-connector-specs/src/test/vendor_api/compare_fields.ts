@@ -68,7 +68,7 @@ const operationOf = (
   return undefined;
 };
 
-/** The schemas of an operation's successful JSON responses. */
+/** The schemas of an operation's successful JSON responses, not expanded. */
 const responseSchemas = (document: OpenApiDocument, method: string, path: string): Schema[] => {
   const responses = operationOf(document, method, path)?.responses;
   if (!isRecord(responses)) {
@@ -80,35 +80,54 @@ const responseSchemas = (document: OpenApiDocument, method: string, path: string
     return isRecord(content)
       ? Object.entries(content)
           .filter(([mediaType]) => /json/i.test(mediaType))
-          .flatMap(([, media]) => (isRecord(media) ? expand(document, media.schema) : []))
+          .flatMap(([, media]) => {
+            const schema = isRecord(media) ? resolve(document, media.schema) : undefined;
+            return schema ? [schema] : [];
+          })
       : [];
   });
 };
 
 interface FieldSchemas {
+  /** The schemas the field may have, as declared, one per place that declares it. */
+  readonly declared: readonly Schema[];
+  /** The declared schemas expanded, with the parts of their combinators. */
   readonly schemas: readonly Schema[];
   /** Whether every schema that declares the field requires it. */
   readonly required: boolean;
 }
 
 const fieldAt = (document: OpenApiDocument, roots: Schema[], field: string): FieldSchemas => {
-  let current: { schemas: Schema[]; required: boolean } = { schemas: roots, required: true };
+  let current: FieldSchemas = {
+    declared: roots,
+    schemas: roots.flatMap((root) => expand(document, root)),
+    required: true,
+  };
   for (const segment of field.split('/').filter((part) => part !== '')) {
-    const next: Schema[] = [];
+    const declared: Schema[] = [];
     let required = true;
     for (const schema of current.schemas) {
       const properties = isRecord(schema.properties) ? schema.properties : {};
+      let child: unknown;
       if (segment in properties) {
-        next.push(...expand(document, properties[segment]));
+        child = properties[segment];
         required &&= Array.isArray(schema.required) && schema.required.includes(segment);
       } else if (segment === 'items' && schema.items !== undefined) {
-        next.push(...expand(document, schema.items));
+        child = schema.items;
       } else if (isRecord(schema.additionalProperties)) {
-        next.push(...expand(document, schema.additionalProperties));
+        child = schema.additionalProperties;
         required = false;
       }
+      const resolved = resolve(document, child);
+      if (resolved) {
+        declared.push(resolved);
+      }
     }
-    current = { schemas: next, required: next.length > 0 && required && current.required };
+    current = {
+      declared,
+      schemas: declared.flatMap((schema) => expand(document, schema)),
+      required: declared.length > 0 && required && current.required,
+    };
   }
   return current;
 };
@@ -132,25 +151,71 @@ const typesOf = (schemas: readonly Schema[]): Set<string> => {
   return types;
 };
 
-const valuesOf = (schemas: readonly Schema[], key: 'format' | 'enum'): Set<string> | undefined => {
-  // A schema without the constraint allows anything, so the field isn't limited by it.
-  const constrained = schemas.filter((schema) => schema[key] !== undefined);
-  if (
-    constrained.length === 0 ||
-    constrained.length < schemas.filter((s) => s.type !== 'null').length
-  ) {
+type Constraint = 'format' | 'enum';
+
+const intersect = (sets: ReadonlyArray<Set<string>>): Set<string> =>
+  sets.reduce((all, set) => new Set([...all].filter((value) => set.has(value))));
+
+// The values a schema limits a field to, or undefined when it allows any: its own, and those of
+// every `allOf` part (all apply), and of its `oneOf` or `anyOf` when every branch has some.
+const valuesOfSchema = (
+  document: OpenApiDocument,
+  value: unknown,
+  key: Constraint,
+  depth = 0
+): Set<string> | undefined => {
+  const schema = resolve(document, value);
+  if (!schema || depth > MAX_DEPTH) {
     return undefined;
   }
-  return new Set(
-    constrained.flatMap((schema) =>
-      (Array.isArray(schema[key]) ? (schema[key] as unknown[]) : [schema[key]]).map(String)
-    )
-  );
+  const own = schema[key];
+  const limits = own === undefined ? [] : [new Set((Array.isArray(own) ? own : [own]).map(String))];
+  for (const part of Array.isArray(schema.allOf) ? schema.allOf : []) {
+    const values = valuesOfSchema(document, part, key, depth + 1);
+    if (values) {
+      limits.push(values);
+    }
+  }
+  for (const combinator of ['oneOf', 'anyOf']) {
+    const branches = schema[combinator];
+    const values = Array.isArray(branches)
+      ? valuesOfAny(document, branches, key, depth + 1)
+      : undefined;
+    if (values) {
+      limits.push(values);
+    }
+  }
+  return limits.length > 0 ? intersect(limits) : undefined;
 };
+
+// The values any of several schemas allows, or undefined when one allows any. A branch that
+// only allows null is left out, as `null` is a type change, not a value.
+const valuesOfAny = (
+  document: OpenApiDocument,
+  schemas: readonly unknown[],
+  key: Constraint,
+  depth = 0
+): Set<string> | undefined => {
+  const branches = schemas.filter((schema) => resolve(document, schema)?.type !== 'null');
+  const values = branches.map((schema) => valuesOfSchema(document, schema, key, depth));
+  return values.length > 0 && values.every((set) => set !== undefined)
+    ? new Set(values.flatMap((set) => [...(set ?? [])]))
+    : undefined;
+};
+
+const valuesOf = (
+  document: OpenApiDocument,
+  { declared }: FieldSchemas,
+  key: Constraint
+): Set<string> | undefined => valuesOfAny(document, declared, key);
 
 const list = (values: Iterable<string>): string => [...values].sort().join(', ');
 
-const describeChanges = (before: FieldSchemas, after: FieldSchemas): string[] => {
+interface FieldInSpec extends FieldSchemas {
+  readonly document: OpenApiDocument;
+}
+
+const describeChanges = (before: FieldInSpec, after: FieldInSpec): string[] => {
   if (before.schemas.length === 0) {
     // Undocumented in the committed snapshot: nothing to compare.
     return [];
@@ -170,15 +235,15 @@ const describeChanges = (before: FieldSchemas, after: FieldSchemas): string[] =>
     );
   }
   const [formatBefore, formatAfter] = [
-    valuesOf(before.schemas, 'format'),
-    valuesOf(after.schemas, 'format'),
+    valuesOf(before.document, before, 'format'),
+    valuesOf(after.document, after, 'format'),
   ];
   if (formatBefore && formatAfter && list(formatBefore) !== list(formatAfter)) {
     changes.push(`format ${list(formatBefore)} → ${list(formatAfter)}`);
   }
   const [enumBefore, enumAfter] = [
-    valuesOf(before.schemas, 'enum'),
-    valuesOf(after.schemas, 'enum'),
+    valuesOf(before.document, before, 'enum'),
+    valuesOf(after.document, after, 'enum'),
   ];
   if (enumBefore && !enumAfter) {
     changes.push('no longer limited to a list of values');
@@ -226,8 +291,8 @@ export const compareFields = ({
   }
   return fields.flatMap((field) => {
     const changes = describeChanges(
-      fieldAt(before, rootsBefore, field),
-      fieldAt(after, rootsAfter, field)
+      { document: before, ...fieldAt(before, rootsBefore, field) },
+      { document: after, ...fieldAt(after, rootsAfter, field) }
     );
     return changes.length > 0 ? [{ field, changes }] : [];
   });
