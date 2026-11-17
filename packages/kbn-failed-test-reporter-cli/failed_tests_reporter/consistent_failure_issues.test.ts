@@ -158,6 +158,7 @@ const mockGithub = (issues: GithubIssue[] = []) => {
     } as unknown as GithubApi,
     listIssues,
     createIssue,
+    getIssue,
     editIssue,
     addIssueComment,
     closeAsDuplicate,
@@ -498,6 +499,24 @@ describe('reportConsistentFailureIssues', () => {
     });
     expect(duplicate.editIssue).not.toHaveBeenCalled();
     expect(filed.created).toHaveLength(1);
+  });
+
+  it('waits for the next day on an issue another job reopened since it was listed', async () => {
+    const postedAt = new Date(NOW.getTime() - 2 * HOUR_MS);
+    const closed = failingSuiteIssue(postedAt, { state: 'closed', state_reason: 'completed' });
+    const { github, getIssue, editIssue, addIssueComment } = mockGithub([closed]);
+    getIssue.mockResolvedValue({ ...closed, state: 'open' });
+
+    const summary = await report({
+      es: mockEs(brokenSince('test-1', 101, 102)).es,
+      github,
+      failures: [scoutFailure('test-1', 'shows results')],
+      now: NOW,
+    });
+
+    expect(addIssueComment).not.toHaveBeenCalled();
+    expect(editIssue).not.toHaveBeenCalled();
+    expect(summary.tracked).toEqual([{ filePath: SPEC, url: closed.html_url }]);
   });
 
   it('skips a suite whose every test has a per-test issue, but not one with a test without', async () => {

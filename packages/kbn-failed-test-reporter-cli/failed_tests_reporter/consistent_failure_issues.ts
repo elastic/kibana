@@ -341,13 +341,13 @@ export const reportConsistentFailureIssues = async (
 
   /**
    * Posts the break on the issue already about the suite, at most once per `POST_INTERVAL_MS` for
-   * this pipeline and branch while it is open, and reopens it, with the post, if closed. The time
-   * of the last post is read from GitHub as it is now, as other jobs of the build find the same
-   * break, and recorded once the comment is posted: a comment that failed isn't taken as posted,
-   * and the next build posts it. The break's tests, branch and pipeline are recorded with it, for
-   * `/skip`. The per-test issues `replacing` join the body's "Previously tracked in" line, and the
-   * post names them, even within `POST_INTERVAL_MS`: they are closed after it, so one still open
-   * was never named.
+   * this pipeline and branch while it is open, and reopens it, with the post, if closed. Its state
+   * and the time of the last post are read from GitHub as it is now, as other jobs of the build
+   * find the same break, and the time is recorded once the comment is posted: a comment that
+   * failed isn't taken as posted, and the next build posts it. The break's tests, branch and
+   * pipeline are recorded with it, for `/skip`. The per-test issues `replacing` join the body's
+   * "Previously tracked in" line, and the post names them, even within `POST_INTERVAL_MS`: they
+   * are closed after it, so one still open was never named.
    */
   const postBreak = async (
     suite: FailingSuite,
@@ -355,10 +355,11 @@ export const reportConsistentFailureIssues = async (
     replacing: readonly number[]
   ) => {
     const ref = { filePath: suite.filePath, url: issue.html_url };
-    const body = (await github.getIssue(issue.number))?.body ?? issue.body;
+    const current = await github.getIssue(issue.number);
+    const body = current?.body ?? issue.body;
     const postedAt = failingPostedAt(body);
     const last = postedAt[key];
-    const reopen = issue.state === 'closed';
+    const reopen = (current?.state ?? issue.state) === 'closed';
     if (
       !reopen &&
       replacing.length === 0 &&
