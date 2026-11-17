@@ -28,12 +28,12 @@ const mockedOtel = jest.mocked(getOtelApplicationsFromBestSource);
 
 const runHandler = ({
   isServerless,
-  query = { start: START, end: END },
+  query = { start: START, end: END, timeZone: 'UTC' },
   withApmDataAccess = true,
   isUxEnabled = !isServerless,
 }: {
   isServerless: boolean;
-  query?: { start: string; end: string; environment?: string };
+  query?: { start: string; end: string; environment?: string; timeZone: string };
   withApmDataAccess?: boolean;
   isUxEnabled?: boolean;
 }) => {
@@ -100,7 +100,7 @@ describe('GET /internal/digital_experience/applications', () => {
   it('passes the environment to both sources and returns every environment', async () => {
     const response = await runHandler({
       isServerless: false,
-      query: { start: START, end: END, environment: 'production' },
+      query: { start: START, end: END, environment: 'production', timeZone: 'UTC' },
     }).result;
 
     expect(mockedOtel).toHaveBeenCalledWith(expect.objectContaining({ environment: 'production' }));
@@ -138,6 +138,24 @@ describe('GET /internal/digital_experience/applications', () => {
     );
     expect(mockedOtel).toHaveBeenCalledWith(
       expect.not.objectContaining({ internalEsClient: expect.anything() })
+    );
+  });
+
+  it('passes the time zone to both sources', async () => {
+    await runHandler({
+      isServerless: false,
+      query: { start: START, end: END, timeZone: 'America/New_York' },
+    }).result;
+
+    expect(mockedOtel).toHaveBeenCalledWith(
+      expect.objectContaining({
+        histogram: expect.objectContaining({ timeZone: 'America/New_York' }),
+      })
+    );
+    expect(mockedClassic).toHaveBeenCalledWith(
+      expect.objectContaining({
+        histogram: expect.objectContaining({ timeZone: 'America/New_York' }),
+      })
     );
   });
 

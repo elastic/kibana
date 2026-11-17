@@ -13,6 +13,7 @@ import type {
   ApplicationSource,
   ApplicationSummary,
   ApplicationsResponse,
+  HistogramBuckets,
   PageLoadsOverTime,
   TimeSeriesPoint,
 } from '../../../common/types/applications';
@@ -56,12 +57,15 @@ const byPageLoadsThenName = (a: ApplicationSummary, b: ApplicationSummary): numb
  * `partiallyAvailableSources`.
  */
 export const getApplications = async ({
+  histogram,
   getOtelApplications,
   getClassicApplications,
   hasPartialOtelAccess,
   hasPartialClassicAccess,
   logger,
 }: {
+  /** The page loads buckets every source was searched with. */
+  histogram: HistogramBuckets;
   getOtelApplications: ApplicationsFetcher;
   /** Undefined when the Classic source is not available (serverless). */
   getClassicApplications?: ApplicationsFetcher;
@@ -100,7 +104,11 @@ export const getApplications = async ({
   const loaded: SourceApplications[] = [];
   const failures: SourceFailure[] = [];
   const partiallyAvailableSources: ApplicationSource[] = [];
-  const pageLoadsOverTime: PageLoadsOverTime = { otel: [], classic: [] };
+  const pageLoadsOverTime: PageLoadsOverTime = {
+    otel: [],
+    classic: [],
+    histogram,
+  };
   // Only EDOT Browser has sessions, and only when its source read them from the sessions index.
   let sessionsOverTime: TimeSeriesPoint[] | null = null;
   results.forEach((result, index) => {
