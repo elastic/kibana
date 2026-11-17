@@ -129,16 +129,6 @@ export const createPatternsDataSourceProfileProvider = (
           },
         ];
       },
-    getDefaultAppState: (prev) => (params) => {
-      return {
-        ...prev(params),
-        columns: [
-          { name: 'Count', width: 150 },
-          { name: 'Sparkline', width: 150 },
-          { name: 'Pattern', width: undefined },
-        ],
-      };
-    },
   },
   resolve: (params) => {
     if (!isDataSourceType(params.dataSource, DataSourceType.Esql)) {
