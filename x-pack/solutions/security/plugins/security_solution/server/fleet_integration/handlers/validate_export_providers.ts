@@ -94,7 +94,11 @@ const getProviderErrors = (
 
   for (const key of Object.keys(provider)) {
     if (!(PROVIDER_FIELDS as readonly string[]).includes(key)) {
-      errors.push(`${label}: ${NOT_YET_SUPPORTED_KEY_MESSAGES[key] ?? `${key} is not supported`}`);
+      // Own-property check: keys such as `constructor` or `__proto__` must not hit the prototype
+      const message = Object.hasOwn(NOT_YET_SUPPORTED_KEY_MESSAGES, key)
+        ? NOT_YET_SUPPORTED_KEY_MESSAGES[key]
+        : `${key} is not supported`;
+      errors.push(`${label}: ${message}`);
     }
   }
 

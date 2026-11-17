@@ -141,6 +141,21 @@ describe('validateExportProviders()', () => {
       expect(getError(policy).message).toBe('export_providers[0] "azure-1": foo is not supported');
     });
 
+    it.each(['constructor', '__proto__'])(
+      'should reject an unknown %s key without reading the prototype',
+      (key) => {
+        // JSON.parse makes `__proto__` an own key, as an API payload would
+        const provider: Record<string, unknown> = JSON.parse(
+          `{"id":"azure-1","type":"azure_blob","account_name":"acct","container":"dumps","${key}":{}}`
+        );
+        expect(Object.keys(provider)).toContain(key);
+
+        expect(getError(buildPolicy([provider])).message).toBe(
+          `export_providers[0] "azure-1": ${key} is not supported`
+        );
+      }
+    );
+
     it.each<[string, Record<string, unknown>, string]>([
       ['a missing id', { id: undefined }, 'export_providers[0]: id is required'],
       ['an empty id', { id: '' }, 'export_providers[0]: id is required'],
