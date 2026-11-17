@@ -8,15 +8,16 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import {
   EuiIcon,
+  EuiIconTip,
   EuiAccordion,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiTitle,
   EuiButtonEmpty,
   EuiHorizontalRule,
-  useEuiTheme,
   EuiMarkdownFormat,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -62,7 +63,6 @@ export interface AiInsightProps {
 }
 
 export function AiInsight({ title, insightType, createStream, buildAttachments }: AiInsightProps) {
-  const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
 
   const {
@@ -151,39 +151,45 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
     return null;
   }
 
+  const description = i18n.translate('xpack.observabilityAgentBuilder.aiInsight.description', {
+    defaultMessage: 'Get helpful insights from our Elastic AI Agent',
+  });
+
   return (
     <EuiPanel hasBorder={true} hasShadow={false} paddingSize="m">
       <EuiAccordion
         id="agentBuilderAiInsight"
-        arrowProps={{ css: { alignSelf: 'flex-start' } }}
+        extraAction={
+          <EuiIconTip
+            type="info"
+            content={description}
+            aria-label={description}
+            color="subdued"
+            size="m"
+            position="top"
+          />
+        }
+        buttonProps={{
+          css: {
+            '&:hover, &:focus, &:focus-visible': {
+              textDecoration: 'none',
+            },
+          },
+        }}
         buttonContent={
           <EuiFlexGroup
-            wrap
+            alignItems="center"
+            gutterSize="s"
             responsive={false}
-            gutterSize="m"
-            alignItems="flexStart"
             data-test-subj="agentBuilderAiInsight"
           >
             <EuiFlexItem grow={false}>
-              <EuiIcon
-                type="sparkles"
-                color={euiTheme.colors.primary}
-                style={{ marginTop: 6 }}
-                size="l"
-                aria-hidden={true}
-              />
+              <EuiIcon type="sparkles" color="text" size="m" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiText css={{ marginTop: 2, marginBottom: 1 }}>
-                <h5>{title}</h5>
-              </EuiText>
-              <EuiText size="s" css={{ color: euiTheme.colors.textSubdued }}>
-                <span>
-                  {i18n.translate('xpack.observabilityAgentBuilder.aiInsight.description', {
-                    defaultMessage: 'Get helpful insights from our Elastic AI Agent',
-                  })}
-                </span>
-              </EuiText>
+              <EuiTitle size="xxs">
+                <span>{title}</span>
+              </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
         }
