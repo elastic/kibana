@@ -72,6 +72,11 @@ export async function createAgentAction(
   const actionId = newAgentAction.id ?? uuidv4();
   const now = Date.now();
   const timestamp = new Date(now).toISOString();
+  // Anchored to the same timestamp as `@timestamp`, which agents use as the action's creation time.
+  const startTime =
+    newAgentAction.start_delay_seconds === undefined
+      ? newAgentAction.start_time
+      : new Date(now + newAgentAction.start_delay_seconds * 1000).toISOString();
 
   let data;
   let secretReferences: SecretReference[] | undefined;
@@ -102,7 +107,7 @@ export async function createAgentAction(
     action_id: actionId,
     data,
     type: newAgentAction.type,
-    start_time: newAgentAction.start_time,
+    start_time: startTime,
     minimum_execution_duration: newAgentAction.minimum_execution_duration,
     rollout_duration_seconds: newAgentAction.rollout_duration_seconds,
     total: newAgentAction.total,
@@ -136,6 +141,7 @@ export async function createAgentAction(
   return {
     id: actionId,
     ...newAgentAction,
+    ...(startTime !== undefined && { start_time: startTime }),
     created_at: timestamp,
   };
 }

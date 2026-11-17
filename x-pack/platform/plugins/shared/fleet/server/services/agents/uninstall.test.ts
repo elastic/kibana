@@ -21,7 +21,7 @@ import {
   UNINSTALL_DELAY_MIN_SECONDS,
 } from '../../../common/services';
 
-import { bulkUninstallAgents, getUninstallActionTiming, uninstallAgent } from './uninstall';
+import { bulkUninstallAgents, resolveUninstallDelaySeconds, uninstallAgent } from './uninstall';
 import { getAgentById, getAgentsById, getAgentsByKuery, openPointInTime } from './crud';
 import { createAgentAction, createErrorActionResults } from './actions';
 import { UninstallActionRunner, uninstallBatch } from './uninstall_action_runner';
@@ -94,29 +94,25 @@ describe('uninstall', () => {
     mockGetCurrentNamespace.mockReturnValue('default');
   });
 
-  describe('getUninstallActionTiming', () => {
-    const now = Date.parse('2026-10-30T12:00:00.000Z');
-
-    it('defaults to a 1 hour grace period and expires 24h after start_time', () => {
-      expect(getUninstallActionTiming(undefined, now)).toEqual({
-        startTime: '2026-10-30T13:00:00.000Z',
-        expiration: '2026-10-31T13:00:00.000Z',
-      });
+  describe('resolveUninstallDelaySeconds', () => {
+    it('defaults to a 1 hour grace period', () => {
+      expect(resolveUninstallDelaySeconds()).toBe(UNINSTALL_DELAY_DEFAULT_SECONDS);
     });
 
-    it('accepts the minimum and maximum delay', () => {
-      expect(getUninstallActionTiming(UNINSTALL_DELAY_MIN_SECONDS, now).startTime).toBe(
-        '2026-10-30T13:00:00.000Z'
+    it('accepts the minimum, maximum and a custom delay', () => {
+      expect(resolveUninstallDelaySeconds(UNINSTALL_DELAY_MIN_SECONDS)).toBe(
+        UNINSTALL_DELAY_MIN_SECONDS
       );
-      expect(getUninstallActionTiming(UNINSTALL_DELAY_MAX_SECONDS, now).startTime).toBe(
-        '2026-10-31T12:00:00.000Z'
+      expect(resolveUninstallDelaySeconds(UNINSTALL_DELAY_MAX_SECONDS)).toBe(
+        UNINSTALL_DELAY_MAX_SECONDS
       );
+      expect(resolveUninstallDelaySeconds(2 * 60 * 60)).toBe(2 * 60 * 60);
     });
 
     it.each([0, UNINSTALL_DELAY_MIN_SECONDS - 1, UNINSTALL_DELAY_MAX_SECONDS + 1, 3600.5, -3600])(
       'rejects delay %p',
       (delay) => {
-        expect(() => getUninstallActionTiming(delay, now)).toThrow(FleetError);
+        expect(() => resolveUninstallDelaySeconds(delay)).toThrow(FleetError);
       }
     );
   });
@@ -136,24 +132,24 @@ describe('uninstall', () => {
         agents: ['agent-1'],
         created_at: expect.any(String),
         type: 'UNINSTALL',
-        start_time: expect.any(String),
+        start_delay_seconds: UNINSTALL_DELAY_DEFAULT_SECONDS,
         expiration: expect.any(String),
         namespaces: ['default'],
       });
-      const startMs = Date.parse(action.start_time!);
-      expect(startMs).toBeGreaterThanOrEqual(before + UNINSTALL_DELAY_DEFAULT_SECONDS * 1000);
-      expect(Date.parse(action.expiration!)).toBeGreaterThan(startMs);
+      // start_time is derived by createAgentAction from the action's creation timestamp
+      expect(action).not.toHaveProperty('start_time');
+      expect(Date.parse(action.expiration!)).toBeGreaterThanOrEqual(
+        before + UNINSTALL_DELAY_DEFAULT_SECONDS * 1000
+      );
     });
 
     it('honors a custom delay', async () => {
       mockGetAgentById.mockResolvedValue(makeAgent({ policy_id: undefined }));
       mockCreateAgentAction.mockResolvedValue({ id: 'action-1' } as any);
-      const before = Date.now();
 
       await uninstallAgent(esClient, soClient, 'agent-1', { delaySeconds: 2 * 60 * 60 });
 
-      const startMs = Date.parse(mockCreateAgentAction.mock.calls[0][2].start_time!);
-      expect(startMs).toBeGreaterThanOrEqual(before + 2 * 60 * 60 * 1000);
+      expect(mockCreateAgentAction.mock.calls[0][2].start_delay_seconds).toBe(2 * 60 * 60);
     });
 
     it('rejects an invalid delay before reading the agent', async () => {
@@ -212,7 +208,7 @@ describe('uninstall', () => {
   });
 
   describe('bulkUninstallAgents', () => {
-    it('calls uninstallBatch with the computed timing when agentIds are provided', async () => {
+    it('calls uninstallBatch with the validated delay when agentIds are provided', async () => {
       const agents = [{ id: 'agent-1' }, { id: 'agent-2' }] as any[];
       mockGetAgentsById.mockResolvedValue(agents);
       mockUninstallBatch.mockResolvedValue({ actionId: 'bulk-action-1' });
@@ -225,8 +221,7 @@ describe('uninstall', () => {
 
       expect(result).toEqual({ actionId: 'bulk-action-1' });
       expect(mockUninstallBatch).toHaveBeenCalledWith(esClient, soClient, agents, {
-        startTime: expect.any(String),
-        expiration: expect.any(String),
+        delaySeconds: 2 * 60 * 60,
         spaceId: 'default',
         total: 2,
       });
@@ -281,13 +276,12 @@ describe('uninstall', () => {
 
       expect(result).toEqual({ actionId: 'bulk-action-2' });
       expect(mockUninstallBatch).toHaveBeenCalledWith(esClient, soClient, agents, {
-        startTime: expect.any(String),
-        expiration: expect.any(String),
+        delaySeconds: UNINSTALL_DELAY_DEFAULT_SECONDS,
         spaceId: 'default',
       });
     });
 
-    it('uses UninstallActionRunner with a single timing for a kuery when total > batchSize', async () => {
+    it('uses UninstallActionRunner with the validated delay for a kuery when total > batchSize', async () => {
       mockGetAgentsByKuery.mockResolvedValue({ total: 10001, agents: [] } as any);
       mockOpenPointInTime.mockResolvedValue('pit-id');
       const mockRunActionAsyncTask = jest.fn().mockResolvedValue({ actionId: 'runner-action-1' });
@@ -303,8 +297,7 @@ describe('uninstall', () => {
         soClient,
         expect.objectContaining({
           kuery: 'status:online',
-          startTime: expect.any(String),
-          expiration: expect.any(String),
+          delaySeconds: UNINSTALL_DELAY_DEFAULT_SECONDS,
           total: 10001,
           spaceId: 'default',
         }),

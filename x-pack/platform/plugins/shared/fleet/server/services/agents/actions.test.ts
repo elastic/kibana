@@ -122,7 +122,77 @@ describe('Agent actions', () => {
       });
     });
 
-    it.each(['UNENROLL', 'UPGRADE', 'MIGRATE', 'RESTART'] as AgentActionType[])(
+    it('derives start_time from the same timestamp as @timestamp when start_delay_seconds is set', async () => {
+      const esClient = elasticsearchServiceMock.createInternalClient();
+      const soClient = savedObjectsClientMock.create();
+
+      const action = await createAgentAction(esClient, soClient, {
+        id: 'action1',
+        type: 'UNINSTALL',
+        agents: ['agent1'],
+        start_delay_seconds: 60 * 60,
+      });
+
+      const document = esClient.create.mock.calls[0][0].document as Record<string, string>;
+      // exactly the delay after the creation timestamp, so an agent bounding the grace
+      // period relative to created_at never sees it as even slightly too soon
+      expect(Date.parse(document.start_time) - Date.parse(document['@timestamp'])).toBe(
+        60 * 60 * 1000
+      );
+      expect(action.start_time).toBe(document.start_time);
+      expect(action.created_at).toBe(document['@timestamp']);
+    });
+
+    it('prefers start_delay_seconds over an explicit start_time', async () => {
+      const esClient = elasticsearchServiceMock.createInternalClient();
+      const soClient = savedObjectsClientMock.create();
+
+      await createAgentAction(esClient, soClient, {
+        id: 'action1',
+        type: 'UNINSTALL',
+        agents: ['agent1'],
+        start_time: '2000-01-01T00:00:00.000Z',
+        start_delay_seconds: 2 * 60 * 60,
+      });
+
+      const document = esClient.create.mock.calls[0][0].document as Record<string, string>;
+      expect(Date.parse(document.start_time) - Date.parse(document['@timestamp'])).toBe(
+        2 * 60 * 60 * 1000
+      );
+    });
+
+    it('keeps an explicit start_time when no delay is given', async () => {
+      const esClient = elasticsearchServiceMock.createInternalClient();
+      const soClient = savedObjectsClientMock.create();
+
+      const action = await createAgentAction(esClient, soClient, {
+        id: 'action1',
+        type: 'UPGRADE',
+        agents: ['agent1'],
+        start_time: '2099-01-01T00:00:00.000Z',
+      });
+
+      const document = esClient.create.mock.calls[0][0].document as Record<string, string>;
+      expect(document.start_time).toBe('2099-01-01T00:00:00.000Z');
+      expect(action.start_time).toBe('2099-01-01T00:00:00.000Z');
+    });
+
+    it('does not add a start_time when neither is given', async () => {
+      const esClient = elasticsearchServiceMock.createInternalClient();
+      const soClient = savedObjectsClientMock.create();
+
+      const action = await createAgentAction(esClient, soClient, {
+        id: 'action1',
+        type: 'UPGRADE',
+        agents: ['agent1'],
+      });
+
+      const document = esClient.create.mock.calls[0][0].document as Record<string, unknown>;
+      expect(document.start_time).toBeUndefined();
+      expect(action).not.toHaveProperty('start_time');
+    });
+
+    it.each(['UNENROLL', 'UPGRADE', 'MIGRATE', 'RESTART', 'UNINSTALL'] as AgentActionType[])(
       'should sign %s action',
       async (actionType: AgentActionType) => {
         const esClient = elasticsearchServiceMock.createInternalClient();

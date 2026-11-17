@@ -45,9 +45,8 @@ const mockGetInternalSOClient =
     typeof appContextService.getInternalUserSOClientForSpaceId
   >;
 
-const START_TIME = '2026-10-30T18:00:00.000Z';
-const EXPIRATION = '2026-10-31T18:00:00.000Z';
-const timing = { startTime: START_TIME, expiration: EXPIRATION, spaceId: 'default' };
+const DELAY_SECONDS = 2 * 60 * 60;
+const timing = { delaySeconds: DELAY_SECONDS, spaceId: 'default' };
 
 const makeAgent = (
   id: string,
@@ -81,7 +80,8 @@ describe('uninstallBatch', () => {
     mockCreateErrorActionResults.mockResolvedValue(undefined);
   });
 
-  it('creates an UNINSTALL action with start_time and expiration for eligible agents', async () => {
+  it('creates an UNINSTALL action anchored to its creation time with an expiration for eligible agents', async () => {
+    const before = Date.now();
     const result = await uninstallBatch(
       esClient,
       soClient,
@@ -96,12 +96,19 @@ describe('uninstallBatch', () => {
       expect.objectContaining({
         agents: ['a1', 'a2'],
         type: 'UNINSTALL',
-        start_time: START_TIME,
-        expiration: EXPIRATION,
+        start_delay_seconds: DELAY_SECONDS,
+        expiration: expect.any(String),
         namespaces: ['default'],
       })
     );
-    expect(mockCreateAgentAction.mock.calls[0][2]).not.toHaveProperty('data');
+    const action = mockCreateAgentAction.mock.calls[0][2];
+    // start_time is derived from the action's own creation timestamp, never precomputed here
+    expect(action).not.toHaveProperty('start_time');
+    expect(action).not.toHaveProperty('data');
+    // expires after the grace period plus a day
+    expect(Date.parse(action.expiration!)).toBeGreaterThanOrEqual(
+      before + DELAY_SECONDS * 1000 + 24 * 60 * 60 * 1000
+    );
     expect(mockCreateErrorActionResults).toHaveBeenCalledWith(
       esClient,
       expect.any(String),

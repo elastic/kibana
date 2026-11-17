@@ -148,6 +148,9 @@ export default function (providerContext: FtrProviderContext) {
         expect(startMs).to.be.greaterThan(before + ONE_HOUR_SECONDS * 1000 - 1);
         expect(startMs).to.be.lessThan(Date.now() + ONE_HOUR_SECONDS * 1000 + 1);
         expect(Date.parse(action.expiration)).to.be.greaterThan(startMs);
+        // The agent rejects a start_time earlier than 1h after the action's creation time
+        // (its `@timestamp`), so the grace period must be anchored to it exactly.
+        expect(startMs - Date.parse(action['@timestamp'])).to.eql(ONE_HOUR_SECONDS * 1000);
       });
 
       it('honors a custom delay_seconds', async () => {

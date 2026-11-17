@@ -78,6 +78,8 @@ export interface NewAgentAction {
   id?: string;
   expiration?: string;
   start_time?: string;
+  /** Seconds after the action's creation timestamp at which it starts; takes precedence over `start_time`. */
+  start_delay_seconds?: number;
   minimum_execution_duration?: number;
   rollout_duration_seconds?: number;
   source_uri?: string;

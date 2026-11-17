@@ -34,12 +34,18 @@ export const getUninstallIneligibleMessage = (
   reason: AgentUninstallIneligibleReason
 ): string => `Agent ${agentId} ${INELIGIBLE_REASON_MESSAGES[reason]}.`;
 
+// How long after its start the action stays valid, so an uninstall that never ran is observable.
+const UNINSTALL_EXPIRATION_AFTER_START_MS = 24 * 60 * 60 * 1000;
+
+/** Expiration of an UNINSTALL action that starts `delaySeconds` from now. */
+export const getUninstallExpiration = (delaySeconds: number, now: number = Date.now()): string =>
+  new Date(now + delaySeconds * 1000 + UNINSTALL_EXPIRATION_AFTER_START_MS).toISOString();
+
 export class UninstallActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
     return await uninstallBatch(this.esClient, this.soClient, agents, {
       ...this.actionParams,
-      startTime: this.actionParams.startTime,
-      expiration: this.actionParams.expiration,
+      delaySeconds: this.actionParams.delaySeconds,
     });
   }
 
@@ -57,8 +63,7 @@ export async function uninstallBatch(
   soClient: SavedObjectsClientContract,
   givenAgents: Agent[],
   options: {
-    startTime: string;
-    expiration: string;
+    delaySeconds: number;
     actionId?: string;
     total?: number;
     spaceId?: string;
@@ -99,8 +104,8 @@ export async function uninstallBatch(
     agents: eligibleAgents.map((agent) => agent.id),
     created_at: now,
     type: 'UNINSTALL',
-    start_time: options.startTime,
-    expiration: options.expiration,
+    start_delay_seconds: options.delaySeconds,
+    expiration: getUninstallExpiration(options.delaySeconds),
     total,
     namespaces,
   });

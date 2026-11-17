@@ -30,29 +30,22 @@ import { getAgentById, getAgentsById, getAgentsByKuery, openPointInTime } from '
 import { createAgentAction, createErrorActionResults } from './actions';
 import { throwIfAgentlessAgentPolicy } from './hosted_agent';
 import {
+  getUninstallExpiration,
   getUninstallIneligibleMessage,
   UninstallActionRunner,
   uninstallBatch,
 } from './uninstall_action_runner';
 
-// How long after start_time the action stays valid, so an uninstall that never ran is observable.
-const UNINSTALL_EXPIRATION_AFTER_START_MS = 24 * 60 * 60 * 1000;
-
-/** Computes the grace period (start_time) and expiration of an UNINSTALL action. */
-export const getUninstallActionTiming = (
-  delaySeconds: number = UNINSTALL_DELAY_DEFAULT_SECONDS,
-  now: number = Date.now()
-): { startTime: string; expiration: string } => {
+/** Validates the grace period, defaulting to 1 hour. */
+export const resolveUninstallDelaySeconds = (
+  delaySeconds: number = UNINSTALL_DELAY_DEFAULT_SECONDS
+): number => {
   if (!isUninstallDelayValid(delaySeconds)) {
     throw new FleetError(
       `Invalid uninstall delay: must be a whole number of seconds between ${UNINSTALL_DELAY_MIN_SECONDS} and ${UNINSTALL_DELAY_MAX_SECONDS}.`
     );
   }
-  const startTime = now + delaySeconds * 1000;
-  return {
-    startTime: new Date(startTime).toISOString(),
-    expiration: new Date(startTime + UNINSTALL_EXPIRATION_AFTER_START_MS).toISOString(),
-  };
+  return delaySeconds;
 };
 
 export async function uninstallAgent(
@@ -61,7 +54,7 @@ export async function uninstallAgent(
   agentId: string,
   options: { delaySeconds?: number } = {}
 ): Promise<{ actionId: string }> {
-  const { startTime, expiration } = getUninstallActionTiming(options.delaySeconds);
+  const delaySeconds = resolveUninstallDelaySeconds(options.delaySeconds);
   const agent = await getAgentById(esClient, soClient, agentId);
 
   const ineligibleReason = getAgentUninstallIneligibleReason(agent);
@@ -83,8 +76,8 @@ export async function uninstallAgent(
     agents: [agentId],
     created_at: new Date().toISOString(),
     type: 'UNINSTALL',
-    start_time: startTime,
-    expiration,
+    start_delay_seconds: delaySeconds,
+    expiration: getUninstallExpiration(delaySeconds),
     namespaces: [getCurrentNamespace(soClient)],
   });
   return { actionId: action.id };
@@ -100,7 +93,7 @@ export async function bulkUninstallAgents(
   }
 ): Promise<{ actionId: string }> {
   const currentSpaceId = getCurrentNamespace(soClient);
-  const timing = getUninstallActionTiming(options.delaySeconds);
+  const delaySeconds = resolveUninstallDelaySeconds(options.delaySeconds);
 
   if ('agentIds' in options) {
     const uniqueAgentIds = [...new Set(options.agentIds)];
@@ -115,7 +108,7 @@ export async function bulkUninstallAgents(
       }
     }
     const result = await uninstallBatch(esClient, soClient, givenAgents, {
-      ...timing,
+      delaySeconds,
       spaceId: currentSpaceId,
       total: uniqueAgentIds.length,
     });
@@ -142,7 +135,10 @@ export async function bulkUninstallAgents(
       page: 1,
       perPage: batchSize,
     });
-    return await uninstallBatch(esClient, soClient, agents, { ...timing, spaceId: currentSpaceId });
+    return await uninstallBatch(esClient, soClient, agents, {
+      delaySeconds,
+      spaceId: currentSpaceId,
+    });
   }
 
   const runner = new UninstallActionRunner(
@@ -150,7 +146,7 @@ export async function bulkUninstallAgents(
     soClient,
     {
       ...options,
-      ...timing,
+      delaySeconds,
       batchSize,
       total,
       spaceId: currentSpaceId,
