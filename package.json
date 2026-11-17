@@ -102,7 +102,6 @@
     "**/cheerio": "1.0.0-rc.12",
     "**/chokidar": "3.5.3",
     "**/esbuild": "0.28.1",
-    "**/fast-xml-parser": "5.5.7",
     "**/flatted": "3.4.2",
     "**/hoist-non-react-statics": "3.3.2",
     "**/isomorphic-fetch/node-fetch": "2.7.0",
