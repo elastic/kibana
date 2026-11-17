@@ -138,6 +138,23 @@ describe('mapLiveHitToRow', () => {
     expect(mapLiveHitToRow(hit).source).toBe('Rule');
   });
 
+  test.each([undefined, ['alert-1']])('detects Workflow source with alert_ids %p', (alertIds) => {
+    expect(
+      mapLiveHitToRow({
+        _source: { dispatch_source: 'workflow', alert_ids: alertIds },
+      }).source
+    ).toBe('Workflow');
+  });
+
+  test('detects Workflow source from fields ahead of alerts', () => {
+    expect(
+      mapLiveHitToRow({
+        fields: { dispatch_source: ['workflow'] },
+        _source: { alert_ids: ['alert-1'] },
+      }).source
+    ).toBe('Workflow');
+  });
+
   test('sets empty queryText for pack queries (multiple queries)', () => {
     const hit = {
       _source: {
