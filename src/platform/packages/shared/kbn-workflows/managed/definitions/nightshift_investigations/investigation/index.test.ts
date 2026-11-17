@@ -357,6 +357,25 @@ describe('Nightshift investigation workflow', () => {
       expect(declared.required.filter((name) => !passed.includes(name))).toEqual([]);
     });
 
+    it.each([
+      [
+        'a first round',
+        { alerts: [{ rule_type_id: 'apm.transaction_error_rate' }] },
+        'apm.transaction_error_rate',
+      ],
+      [
+        'a recovery round',
+        { follow_up: 'alert_recovered', alert_rule_type: 'apm.transaction_error_rate' },
+        'apm.transaction_error_rate',
+      ],
+      ['a run without an alert', { source: 'manual' }, undefined],
+    ])('sends the alert rule type of %s', (_, context, expected) => {
+      const expression = start.with.inputs.alert_rule_type.slice(3, -2);
+      expect(createWorkflowLiquidEngine().evalValueSync(expression, { inputs: { context } })).toBe(
+        expected
+      );
+    });
+
     it('sends the run start as a date the score step can read, to the millisecond', () => {
       const startedAt = new Date('2026-11-02T15:04:05.123Z');
       const rendered = createWorkflowLiquidEngine().parseAndRenderSync(
