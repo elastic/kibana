@@ -10,9 +10,27 @@ the Investigation conversation, its Proposals, and the report doc).
 All CODE evaluators are gates: 1 means the expectation was met. `score: null` is never a pass.
 `label: 'N/A'` means the check does not apply to the row; `label: 'MISSING'` means the
 artifact it needed was absent. After each dataset's summary, `assertCodeScoresPass` throws if any
-CODE evaluator scored anything but 1 or N/A on any row, naming the evaluator and the row, so a
+CODE evaluator scored anything but 1 or N/A on a gating row, naming the evaluator and the row, so a
 pinned behavior that changes turns the Playwright test (and the CI step) red. LLM judges are
-never part of that gate.
+never part of that gate. The error starts with one line per row naming the shared root cause
+(`coordinator <status>`, else `outcome <label>`), because a failed Tier 2 grounding scores 0 on
+every downstream check of its row.
+
+Each row has a gate tag in its `metadata`:
+
+- `invariant` (the default for an untagged row): a contract every subject model must hold, such as
+  the scope gate, fault handling, or no Proposal without a hit. A miss fails any model.
+- `capability`: the pin needs the subject model to ground its Tier 2 query and finish `completed`
+  (`golden-hit-aws-iam-behavior-only`, `golden-clean-aws-iam-clean`, `hard-clean-repeat`,
+  `holdout-clean-aws-iam-clean`). A miss fails only the reference models. For every other model
+  it is logged as a capability report and does not fail the run.
+
+The reference models are `anthropic-claude-5.5-opus` and `openai-gpt-6-sol`
+(`DEFAULT_REFERENCE_MODELS` in `src/evaluators/reference_models.ts`), the two that passed every
+CODE check across the PR eval builds this split was based on. `HUNT_WATCH_REFERENCE_MODELS`
+overrides the list with comma-separated model names (connector id, inference id or catalog name
+all match), and `all` makes capability rows gate every model. A subject the suite cannot name
+gates, so it fails closed.
 
 | Name | Kind | What it checks |
 |---|---|---|

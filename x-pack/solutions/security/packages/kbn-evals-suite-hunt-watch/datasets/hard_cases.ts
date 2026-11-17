@@ -89,6 +89,9 @@ export const hardCases: HuntWatchExample[] = [
     // not just on the golden one.
     id: 'hard-clean-repeat',
     cohort: 'hard',
+    // Capability: `completed` needs the subject model to ground the Tier 2 query; weaker models
+    // end `partial` (coordinator incomplete_retryable). See `HuntGate`.
+    metadata: { gate: 'capability' },
     input: { spaceId: DEFAULT_EVAL_SPACE_ID, reportIds: [HUNT_REPORT_IDS.cleanRepeat] },
     output: {
       expected: {

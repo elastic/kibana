@@ -103,9 +103,28 @@ export interface HuntExpected {
  */
 export type HuntFault = 'investigation_locked';
 
+/**
+ * How a row's CODE misses gate the run (see `assertCodeScoresPass`):
+ *  - `invariant`: a contract every subject model must hold (scope gate, fault handling, no
+ *    Proposal without a hit). A miss fails any model.
+ *  - `capability`: the pinned outcome needs the subject model to ground its Tier 2 query, so it
+ *    separates strong models from weak ones. A miss fails reference models only and is reported
+ *    for every other model.
+ * An untagged row is `invariant`.
+ */
+export type HuntGate = 'invariant' | 'capability';
+
+// A type alias, not an interface: dataset metadata must be assignable to
+// `Record<string, unknown>`, and interfaces carry no implicit index signature.
+export interface HuntRowMetadata {
+  gate?: HuntGate;
+}
+
 export interface HuntWatchExample {
   id: string;
   cohort: HuntCohort;
+  /** Forwarded to every evaluator by the executor, unlike `id`. */
+  metadata?: HuntRowMetadata;
   input: {
     spaceId: string;
     /** Named report ids for the manual trigger. */
