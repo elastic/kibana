@@ -1,0 +1,1300 @@
+directive @defer(if: Boolean! = true, label: String) on FRAGMENT_SPREAD | INLINE_FRAGMENT
+
+type Account {
+  active_members_count: Int
+  country_code: String
+  created_at: Date
+  first_day_of_the_week: FirstDayOfTheWeek!
+  id: ID!
+  is_during_trial: Boolean
+  is_trial_expired: Boolean
+  logo: String
+  name: String!
+  plan: Plan
+  products: [AccountProduct]
+  show_timeline_weekends: Boolean!
+  sign_up_product_kind: String
+  slug: String!
+  tier: String
+}
+
+type AccountProduct {
+  default_workspace_id: ID
+  id: ID
+  kind: String
+  tier: String
+}
+
+type ActivityLog {
+  account_id: ID
+  correlation_id: ID
+  created_at: String
+  data: String
+  entity: String
+  event: String
+  id: ID
+  triggering_flow_id: ID
+  triggering_flow_type: String
+  user_id: ID
+}
+
+type ActivityLogType {
+  account_id: String!
+  created_at: String!
+  data: String!
+  entity: String!
+  event: String!
+  id: String!
+  user_id: String!
+}
+
+type Asset {
+  created_at: Date
+  file_extension: String!
+  file_size: Int!
+  id: ID!
+  name: String!
+  original_geometry: String
+  public_url: String!
+  uploaded_by: User!
+  url: String!
+  url_thumbnail: String
+}
+
+enum AssetsSource {
+  all
+  columns
+  gallery
+}
+
+enum AttributionEntity {
+  AGENT
+}
+
+type BatteryValue implements ColumnValue {
+  battery_value: [BatteryValueItem!]!
+  column: Column!
+  id: ID!
+  is_leaf: Boolean!
+  text: String
+  type: ColumnType!
+  value: JSON
+}
+
+type BatteryValueItem {
+  count: Int!
+  key: ID!
+}
+
+type Board {
+  access_level: BoardAccessLevel!
+  activity_logs(column_ids: [String], from: ISO8601DateTime, group_ids: [String], item_ids: [ID!], limit: Int = 25, page: Int = 1, to: ISO8601DateTime, user_ids: [ID!]): [ActivityLogType]
+  board_folder_id: ID
+  board_kind: BoardKind!
+  columns(capabilities: [ColumnCapability], ids: [String], types: [ColumnType!]): [Column]
+  columns_namespace: String
+  communication: JSON
+  created_at: ISO8601DateTime
+  created_from_board_id: ID
+  creator: User!
+  description: String
+  folder: Folder
+  groups(ids: [String]): [Group]
+  hierarchy_type: BoardHierarchy
+  id: ID!
+  inferred_metadata: BoardInferredMetadata
+  item_terminology: String
+  items_count: Int
+  items_limit: Int
+  items_page(cursor: String, hierarchy_scope_config: String, limit: Int! = 25, query_params: ItemsQuery): ItemsResponse!
+  manual_metadata: BoardManualMetadata
+  name: String!
+  object_type_unique_key: String
+  owner: User! @deprecated(reason: "This field returned creator of the board. Please use 'creator' or 'owners' fields instead.")
+  owners: [User]!
+  permissions: String!
+  state: State!
+  subscribers: [User]!
+  tags: [Tag]
+  team_owners(limit: Int = 25, page: Int = 1): [Team!]
+  team_subscribers(limit: Int = 25, page: Int = 1): [Team!]
+  top_group: Group!
+  type: BoardObjectType
+  updated_at: ISO8601DateTime
+  updates(board_updates_only: Boolean, from_date: ISO8601DateTime, ids: [ID!], limit: Int = 25, page: Int = 1, to_date: ISO8601DateTime): [Update!]
+  updates_page(cursor: String, limit: Int = 25): UpdatesPage
+  url: String!
+  views(ids: [ID!], type: String): [BoardView]
+  workspace: Workspace
+  workspace_id: ID
+}
+
+enum BoardAccessLevel {
+  edit
+  view
+}
+
+enum BoardHierarchy {
+  classic
+  multi_level
+}
+
+type BoardInferredMetadata {
+  item_type: String
+}
+
+enum BoardKind {
+  private
+  public
+  share
+}
+
+type BoardManualMetadata {
+  board_md: String
+}
+
+enum BoardObjectType {
+  board
+  custom_object
+  document
+  sub_items_board
+}
+
+type BoardRelationValue implements ColumnValue {
+  column: Column!
+  display_value: String!
+  id: ID!
+  is_leaf: Boolean!
+  linked_item_ids: [ID!]!
+  linked_items: [Item!]!
+  text: String
+  type: ColumnType!
+  updated_at: Date
+  value: JSON
+}
+
+type BoardView {
+  access_level: BoardViewAccessLevel!
+  filter: JSON
+  filter_team_id: Int
+  filter_user_id: Int
+  id: ID!
+  name: String!
+  settings: JSON
+  settings_str: String!
+  sort: JSON
+  source_view_id: ID
+  tags: [String!]
+  type: String
+  view_specific_data_str: String!
+}
+
+enum BoardViewAccessLevel {
+  edit
+  view
+}
+
+type ButtonValue implements ColumnValue {
+  color: String
+  column: Column!
+  id: ID!
+  is_leaf: Boolean!
+  label: String
+  text: String
+  type: ColumnType!
+  value: JSON
+}
+
+type CalculatedCapability {
+  calculated_type: ColumnType
+  function: CalculatedFunction!
+}
+
+enum CalculatedFunction {
+  COUNT_KEYS
+  MAX
+  MIN
+  MIN_MAX
+  NONE
+  SUM
+}
+
+type CheckboxValue implements ColumnValue {
+  checked: Boolean
+  column: Column!
+  id: ID!
+  is_leaf: Boolean!
+  text: String
+  type: ColumnType!
+  updated_at: Date
+  value: JSON
+}
+
+type ColorPickerValue implements ColumnValue {
+  color: String
+  column: Column!
+  id: ID!
+  is_leaf: Boolean!
+  text: String
+  type: ColumnType!
+  updated_at: Date
+  value: JSON
+}
+
+type Column {
+  archived: Boolean!
+  capabilities: ColumnCapabilities!
+  description: String
+  id: ID!
+  revision: String!
+  settings: JSON
+  settings_str: String! @deprecated(reason: "From version 2025-10, use settings instead. Will be removed in a future version.")
+  title: String!
+  type: ColumnType!
+  width: Int
+}
+
+type ColumnCapabilities {
+  calculated: CalculatedCapability
+  visibility: String
+}
+
+enum ColumnCapability {
+  CALCULATED
+  VISIBILITY
+}
+
+enum ColumnType {
+  auto_number
+  board_relation
+  button
+  checkbox
+  color_picker
+  country
+  creation_log
+  date
+  dependency
+  direct_doc
+  doc
+  dropdown
+  email
+  file
+  formula
+  group
+  hour
+  integration
+  item_assignees
+  item_id
+  last_updated
+  link
+  location
+  long_text
+  mirror
+  name
+  numbers
+  people
+  person
+  phone
+  progress
+  rating
+  status
+  subtasks
+  tags
+  team
+  text
+  time_tracking
+  timeline
+  unsupported
+  vote
+  week
+  world_clock
+}
+
+interface ColumnValue {
+  column: Column!
+  id: ID!
+  is_leaf: Boolean!
+  text: String
+  type: ColumnType!
+  value: JSON
+}
+
+scalar CompareValue
+
+type Country {
+  code: String!
+  name: String!
+}
+
+type CountryValue implements ColumnValue {
+  column: Column!
+  country: Country
+  id: ID!
+  is_leaf: Boolean!
+  text: String
+  type: ColumnType!
+  updated_at: Date
+  value: JSON
+}
+
+type CreationLogValue implements ColumnValue {
+  column: Column!
+  created_at: Date!
+  creator: User!
+  creator_id: ID!
+  id: ID!
+  is_leaf: Boolean!
+  text: String
+  type: ColumnType!
+  value: JSON
+}
+
+type CustomFieldMetas {
+  description: String
+  editable: Boolean
+  field_type: String
+  flagged: Boolean
+  icon: String
+  id: String
+  position: String
+  title: String
+}
+
+type CustomFieldValue {
+  custom_field_meta_id: String
+  value: String
+}
+
+scalar Date
+
+type DateValue implements ColumnValue {
+  column: Column!
+  date: String
+  icon: String
+  id: ID!
+  is_leaf: Boolean!
+  text: String
+  time: String
+  type: ColumnType!
+  updated_at: Date
+  value: JSON
+}
+
+type Department {
+  assigned_seats: Int!
+  id: ID!
+  members: [User!]
+  name: String!
+  owners: [User!]
+  reserved_seats: Int!
+}
+
+type DependencyLink {
+  dependency_type: Int
+  lag: Int
+  linked_item_id: ID!
+}
+
+type DependencyValue implements ColumnValue {
+  column: Column!
+  dependency_links: [DependencyLink!]!
+  display_value: String!
+  id: ID!
+  is_leaf: Boolean!
+  linked_item_ids: [ID!]!
+  linked_items: [Item!]!
+  text: String
+  type: ColumnType!
+  updated_at: Date
+  value: JSON
+}
+
+type DirectDocValue implements ColumnValue {
+  column: Column!
+  file: DirectDocValue
+  id: ID!
+  is_leaf: Boolean!
+  text: String
+  type: ColumnType!
+  value: JSON
+}
+
+type DocValue implements ColumnValue {
+  column: Column!
+  file: FileDocValue
+  id: ID!
+  is_leaf: Boolean!
+  text: String
+  type: ColumnType!
+  value: JSON
+}
+
+type Document {
+  blocks(limit: Int = 25, page: Int = 1): [DocumentBlock]
+  created_at: Date
+  created_by: User
+  doc_folder_id: ID
+  doc_kind: BoardKind!
+  id: ID!
+  name: String!
+  object_id: ID!
+  relative_url: String
+  settings: JSON
+  updated_at: Date
+  url: String
+  workspace: Workspace
+  workspace_id: ID
+}
+
+type DocumentBlock {
+  content: JSON
+  created_at: Date
+  created_by: User
+  doc_id: ID
+  id: String!
+  parent_block_id: String
+  position: Float
+  type: String
+  updated_at: Date
+}
+
+type DropdownValue implements ColumnValue {
+  column: Column!
+  id: ID!
+  is_leaf: Boolean!
+  text: String
+  type: ColumnType!
+  value: JSON
+  values: [DropdownValueOption!]!
+}
+
+type DropdownValueOption {
+  id: ID!
+  label: String!
+}
+
+type EmailValue implements ColumnValue {
+  column: Column!
+  email: String
+  id: ID!
+  is_leaf: Boolean!
+  label: String
+  text: String
+  type: ColumnType!
+  updated_at: Date
+  value: JSON
+}
+
+type FileAssetInvalidValue {
+  asset_id: ID!
+  created_at: Date!
+  creator: User
+  creator_id: ID
+  error: String!
+  name: String
+}
+
+type FileAssetValue {
+  asset: Asset!
+  asset_id: ID!
+  created_at: Date!
+  creator: User
+  creator_id: ID
+  is_image: Boolean!
+  name: String!
+}
+
+type FileDocValue {
+  created_at: Date!
+  creator: User
+  creator_id: ID
+  doc: Document!
+  file_id: ID!
+  object_id: ID!
+  url: String
+}
+
+type FileLinkValue {
+  created_at: Date!
+  creator: User
+  creator_id: ID
+  file_id: ID!
+  kind: FileLinkValueKind!
+  name: String!
+  url: String
+}
+
+enum FileLinkValueKind {
+  box
+  dropbox
+  google_drive
+  link
+  onedrive
+}
+
+type FileValue implements ColumnValue {
+  column: Column!
+  files: [FileValueItem!]!
+  id: ID!
+  is_leaf: Boolean!
+  text: String
+  type: ColumnType!
+  value: JSON
+}
+
+union FileValueItem = FileAssetInvalidValue | FileAssetValue | FileDocValue | FileLinkValue
+
+enum FirstDayOfTheWeek {
+  monday
+  sunday
+}
+
+type Folder {
+  app_feature_slug: String
+  children: [Board]!
+  color: FolderColor
+  created_at: Date!
+  custom_icon: FolderCustomIcon
+  font_weight: FolderFontWeight
+  id: ID!
+  name: String!
+  owner_id: ID
+  parent: Folder
+  sub_folders: [Folder]!
+  workspace: Workspace!
+}
+
+enum FolderColor {
+  AQUAMARINE
+  BRIGHT_BLUE
+  BRIGHT_GREEN
+  CHILI_BLUE
+  DARK_ORANGE
+  DARK_PURPLE
+  DARK_RED
+  DONE_GREEN
+  INDIGO
+  LIPSTICK
+  NULL
+  PURPLE
+  SOFIA_PINK
+  STUCK_RED
+  SUNSET
+  WORKING_ORANGE
+}
+
+enum FolderCustomIcon {
+  FOLDER
+  MOREBELOW
+  MOREBELOWFILLED
+  NULL
+  WORK
+}
+
+enum FolderFontWeight {
+  FONT_WEIGHT_BOLD
+  FONT_WEIGHT_LIGHT
+  FONT_WEIGHT_NORMAL
+  FONT_WEIGHT_VERY_LIGHT
+  NULL
+}
+
+type FormulaValue implements ColumnValue {
+  column: Column!
+  display_value: String!
+  id: ID!
+  is_leaf: Boolean!
+  text: String
+  type: ColumnType!
+  value: JSON
+}
+
+type Group {
+  archived: Boolean
+  color: String!
+  deleted: Boolean
+  id: ID!
+  items_page(cursor: String, hierarchy_scope_config: String, limit: Int! = 25, query_params: ItemsQuery): ItemsResponse!
+  position: String!
+  title: String!
+}
+
+type GroupValue implements ColumnValue {
+  column: Column!
+  group: Group
+  group_id: ID
+  id: ID!
+  is_leaf: Boolean!
+  text: String
+  type: ColumnType!
+  value: JSON
+}
+
+type HourValue implements ColumnValue {
+  column: Column!
+  hour: Int
+  id: ID!
+  is_leaf: Boolean!
+  minute: Int
+  text: String
+  type: ColumnType!
+  updated_at: Date
+  value: JSON
+}
+
+scalar ISO8601DateTime
+
+type IntegrationValue implements ColumnValue {
+  column: Column!
+  entity_id: ID
+  id: ID!
+  is_leaf: Boolean!
+  issue_api_url: ID
+  issue_id: String
+  text: String
+  type: ColumnType!
+  value: JSON
+}
+
+enum InvitationMethod {
+  AGENT_USER_CREATION
+  API_USER_CREATION
+  AUTH_DOMAIN
+  CONSOLIDATION
+  FIRST_USER
+  INTERNAL_CREATION
+  SCIM
+  SERVICE_PORTAL_AUTH_DOMAIN
+  SERVICE_PORTAL_USER_INVITATION
+  SSO
+  SYSTEM_CREATION
+  UNKNOWN
+  USER
+}
+
+type Item {
+  assets(assets_source: AssetsSource, column_ids: [String]): [Asset]
+  board: Board
+  column_values(capabilities: [ColumnCapability!], ids: [String!], types: [ColumnType!]): [ColumnValue!]!
+  created_at: Date
+  creator: User
+  creator_id: String!
+  description: ItemDescription
+  email: String!
+  group: Group
+  id: ID!
+  linked_items(link_to_item_column_id: String!, linked_board_id: ID!): [Item!]!
+  name: String!
+  parent_item: Item
+  relative_link: String
+  state: State
+  subitems: [Item]
+  subscribers: [User]!
+  updated_at: Date
+  updates(ids: [ID!], limit: Int = 25, page: Int = 1): [Update!]
+  updates_page(cursor: String, limit: Int = 25): UpdatesPage
+  url: String!
+}
+
+type ItemDescription {
+  blocks(limit: Int = 25, page: Int = 1): [DocumentBlock]
+  id: ID
+}
+
+type ItemIdValue implements ColumnValue {
+  column: Column!
+  id: ID!
+  is_leaf: Boolean!
+  item_id: ID!
+  text: String
+  type: ColumnType!
+  value: JSON
+}
+
+enum ItemsOrderByDirection {
+  asc
+  desc
+}
+
+input ItemsPageByColumnValuesQuery {
+  column_id: String!
+  column_values: [String]!
+}
+
+input ItemsQuery {
+  groups: [ItemsQueryGroup!]
+  ids: [ID!]
+  operator: ItemsQueryOperator = and
+  order_by: [ItemsQueryOrderBy!]
+  rules: [ItemsQueryRule!]
+}
+
+input ItemsQueryGroup {
+  groups: [ItemsQueryGroup!]
+  operator: ItemsQueryOperator = and
+  rules: [ItemsQueryRule!]
+}
+
+enum ItemsQueryOperator {
+  and
+  or
+}
+
+input ItemsQueryOrderBy {
+  column_id: String!
+  direction: ItemsOrderByDirection = asc
+}
+
+input ItemsQueryRule {
+  column_id: ID!
+  compare_attribute: String
+  compare_value: CompareValue!
+  operator: ItemsQueryRuleOperator = any_of
+}
+
+enum ItemsQueryRuleOperator {
+  any_of
+  between
+  contains_terms
+  contains_text
+  ends_with
+  greater_than
+  greater_than_or_equals
+  is_empty
+  is_not_empty
+  lower_than
+  lower_than_or_equal
+  not_any_of
+  not_contains_text
+  starts_with
+  within_the_last
+  within_the_next
+}
+
+type ItemsResponse {
+  cursor: String
+  items: [Item!]!
+}
+
+scalar JSON
+
+enum Kind {
+  agent
+  person
+  team
+}
+
+type LastUpdatedValue implements ColumnValue {
+  column: Column!
+  id: ID!
+  is_leaf: Boolean!
+  text: String
+  type: ColumnType!
+  updated_at: Date
+  updater: User
+  updater_id: ID
+  value: JSON
+}
+
+type Like {
+  attribution_entity_ref: String
+  attribution_entity_type: AttributionEntity
+  created_at: Date
+  creator: User
+  creator_id: String
+  id: ID!
+  reaction_type: String
+  updated_at: Date
+}
+
+type LinkValue implements ColumnValue {
+  column: Column!
+  id: ID!
+  is_leaf: Boolean!
+  text: String
+  type: ColumnType!
+  updated_at: Date
+  url: String
+  url_text: String
+  value: JSON
+}
+
+type LocationValue implements ColumnValue {
+  address: String
+  city: String
+  city_short: String
+  column: Column!
+  country: String
+  country_short: String
+  id: ID!
+  is_leaf: Boolean!
+  lat: Float
+  lng: Float
+  place_id: String
+  street: String
+  street_number: String
+  street_number_short: String
+  street_short: String
+  text: String
+  type: ColumnType!
+  updated_at: Date
+  value: JSON
+}
+
+type LongTextValue implements ColumnValue {
+  column: Column!
+  id: ID!
+  is_leaf: Boolean!
+  text: String
+  type: ColumnType!
+  updated_at: Date
+  value: JSON
+}
+
+type MirrorValue implements ColumnValue {
+  column: Column!
+  display_value: String!
+  id: ID!
+  is_leaf: Boolean!
+  mirrored_items: [MirroredItem!]!
+  text: String
+  type: ColumnType!
+  value: JSON
+}
+
+type MirroredItem {
+  linked_board: Board!
+  linked_board_id: ID!
+  linked_item: Item!
+  mirrored_value: MirroredValue
+}
+
+union MirroredValue = BatteryValue | Board | BoardRelationValue | ButtonValue | CheckboxValue | ColorPickerValue | CountryValue | CreationLogValue | DateValue | DependencyValue | DirectDocValue | DocValue | DropdownValue | EmailValue | FileValue | FormulaValue | Group | GroupValue | HourValue | IntegrationValue | ItemIdValue | LastUpdatedValue | LinkValue | LocationValue | LongTextValue | MirrorValue | NumbersValue | PeopleValue | PersonValue | PhoneValue | ProgressValue | RatingValue | StatusValue | SubtasksValue | TagsValue | TeamValue | TextValue | TimeTrackingValue | TimelineValue | UnsupportedValue | VoteValue | WeekValue | WorldClockValue
+
+type Mutation {
+  archive_item(item_id: ID): Item
+  create_subitem(column_values: JSON, create_labels_if_missing: Boolean, item_name: String!, parent_item_id: ID!): Item
+  delete_item(item_id: ID): Item
+  edit_update(body: String!, id: ID!): Update!
+  move_item_to_group(group_id: String!, item_id: ID): Item
+}
+
+enum NumberValueUnitDirection {
+  left
+  right
+}
+
+type NumbersValue implements ColumnValue {
+  column: Column!
+  direction: NumberValueUnitDirection
+  id: ID!
+  is_leaf: Boolean!
+  number: Float
+  symbol: String
+  text: String
+  type: ColumnType!
+  value: JSON
+}
+
+type OutOfOffice {
+  active: Boolean
+  disable_notifications: Boolean
+  end_date: Date
+  start_date: Date
+  type: String
+}
+
+type PeopleEntity {
+  id: ID!
+  kind: Kind
+}
+
+type PeopleValue implements ColumnValue {
+  column: Column!
+  id: ID!
+  is_leaf: Boolean!
+  persons_and_teams: [PeopleEntity!]
+  text: String
+  type: ColumnType!
+  updated_at: Date
+  value: JSON
+}
+
+type PersonValue implements ColumnValue {
+  column: Column!
+  id: ID!
+  is_leaf: Boolean!
+  person_id: ID
+  text: String
+  type: ColumnType!
+  updated_at: Date
+  value: JSON
+}
+
+type PhoneValue implements ColumnValue {
+  column: Column!
+  country_short_name: String
+  id: ID!
+  is_leaf: Boolean!
+  phone: String
+  text: String
+  type: ColumnType!
+  updated_at: Date
+  value: JSON
+}
+
+type PhotoUrl {
+  original: String
+  small: String
+  thumb: String
+  thumb_small: String
+  tiny: String
+}
+
+type Plan {
+  max_users: Int!
+  period: String
+  tier: String
+  version: Int!
+}
+
+type ProgressValue implements ColumnValue {
+  column: Column!
+  id: ID!
+  is_leaf: Boolean!
+  text: String
+  type: ColumnType!
+  value: JSON
+}
+
+type Query {
+  items(exclude_nonactive: Boolean, ids: [ID!], limit: Int = 25, newest_first: Boolean, page: Int = 1): [Item]
+  items_page_by_column_values(board_id: ID!, columns: [ItemsPageByColumnValuesQuery!], cursor: String, hierarchy_scope_config: String, limit: Int! = 25): ItemsResponse!
+}
+
+type RatingValue implements ColumnValue {
+  column: Column!
+  id: ID!
+  is_leaf: Boolean!
+  rating: Int
+  text: String
+  type: ColumnType!
+  updated_at: Date
+  value: JSON
+}
+
+type Reply {
+  assets: [Asset]
+  body: String!
+  created_at: Date
+  creator: User
+  creator_id: String
+  edited_at: Date!
+  id: ID!
+  kind: String!
+  likes: [Like!]!
+  pinned_to_top: [UpdatePin!]!
+  text_body: String
+  updated_at: Date
+  viewers(limit: Int = 100, page: Int = 1): [Watcher!]!
+}
+
+enum State {
+  active
+  all
+  archived
+  deleted
+}
+
+type StatusLabelStyle {
+  border: String!
+  color: String!
+}
+
+type StatusValue implements ColumnValue {
+  column: Column!
+  id: ID!
+  index: Int
+  is_done: Boolean
+  is_leaf: Boolean!
+  label: String
+  label_style: StatusLabelStyle
+  text: String
+  type: ColumnType!
+  update_id: ID
+  updated_at: Date
+  value: JSON
+}
+
+type SubtasksValue implements ColumnValue {
+  column: Column!
+  display_value: String!
+  id: ID!
+  is_leaf: Boolean!
+  subitems: [Item!]!
+  subitems_ids: [ID!]!
+  text: String
+  type: ColumnType!
+  value: JSON
+}
+
+type Tag {
+  color: String!
+  id: ID!
+  name: String!
+}
+
+type TagsValue implements ColumnValue {
+  column: Column!
+  id: ID!
+  is_leaf: Boolean!
+  tag_ids: [Int!]!
+  tags: [Tag!]!
+  text: String
+  type: ColumnType!
+  value: JSON
+}
+
+type Team {
+  created_at: String
+  id: ID!
+  is_guest: Boolean
+  name: String!
+  owners(ids: [ID!]): [User!]!
+  picture_url: String
+  users(emails: [String], ids: [ID!], kind: UserKind, limit: Int, name: String, newest_first: Boolean, non_active: Boolean, page: Int): [User]
+}
+
+type TeamValue implements ColumnValue {
+  column: Column!
+  id: ID!
+  is_leaf: Boolean!
+  team_id: Int
+  text: String
+  type: ColumnType!
+  updated_at: Date
+  value: JSON
+}
+
+type TextValue implements ColumnValue {
+  column: Column!
+  id: ID!
+  is_leaf: Boolean!
+  text: String
+  type: ColumnType!
+  value: JSON
+}
+
+type TimeTrackingHistoryItem {
+  created_at: Date!
+  ended_at: Date
+  ended_user_id: ID
+  id: ID!
+  manually_entered_end_date: Boolean!
+  manually_entered_end_time: Boolean!
+  manually_entered_start_date: Boolean!
+  manually_entered_start_time: Boolean!
+  started_at: Date
+  started_user_id: ID
+  status: String!
+  updated_at: Date
+}
+
+type TimeTrackingValue implements ColumnValue {
+  column: Column!
+  duration: Int
+  history: [TimeTrackingHistoryItem!]!
+  id: ID!
+  is_leaf: Boolean!
+  running: Boolean
+  started_at: Date
+  text: String
+  type: ColumnType!
+  updated_at: Date
+  value: JSON
+}
+
+type TimelineValue implements ColumnValue {
+  column: Column!
+  from: Date
+  id: ID!
+  is_leaf: Boolean!
+  text: String
+  to: Date
+  type: ColumnType!
+  updated_at: Date
+  value: JSON
+  visualization_type: String
+}
+
+type UnsupportedValue implements ColumnValue {
+  column: Column!
+  id: ID!
+  is_leaf: Boolean!
+  text: String
+  type: ColumnType!
+  value: JSON
+}
+
+type Update {
+  assets: [Asset]
+  body: String!
+  created_at: Date
+  creator: User
+  creator_id: String
+  edited_at: Date!
+  id: ID!
+  item: Item
+  item_id: String
+  likes: [Like!]!
+  original_creation_date: String
+  pinned_to_top: [UpdatePin!]!
+  replies: [Reply!]
+  text_body: String
+  updated_at: Date
+  viewers(limit: Int = 100, page: Int = 1): [Watcher!]!
+}
+
+type UpdatePin {
+  item_id: ID!
+}
+
+type UpdatesPage {
+  cursor: String
+  updates: [Update!]!
+}
+
+type User {
+  account: Account!
+  account_id: ID!
+  account_products: [AccountProduct!]
+  activity_logs(board_ids: [ID!], correlation_ids: [ID!], cursor: String, entities: [String!], event_types: [String!], from: String, limit: Int, to: String): UserActivityLogsPage
+  bb_visitor_id: ID!
+  became_active_at: ISO8601DateTime
+  birthday: String
+  country_code: String
+  created_at: ISO8601DateTime!
+  current_language: String
+  custom_field_metas: [CustomFieldMetas]
+  custom_field_values: [CustomFieldValue]
+  department: Department
+  email: String!
+  id: ID!
+  invitation_method: InvitationMethod!
+  is_deleted: Boolean!
+  is_email_confirmed: Boolean!
+  kind: String!
+  last_activity: Date
+  location: String
+  mobile_phone: String
+  name: String!
+  out_of_office: OutOfOffice
+  phone: String
+  photo_url: PhotoUrl
+  serial_number: Int
+  status: UserStatus!
+  teams(ids: [ID!]): [Team]
+  time_zone_identifier: String
+  title: String!
+  url: String!
+  user_config: UserConfig!
+  utc_hours_diff: Float
+}
+
+type UserActivityLogsPage {
+  cursor: String
+  logs: [ActivityLog!]
+}
+
+type UserConfig {
+  behaviors: [String!]!
+  group: String!
+  kind: String!
+  role_id: ID!
+  visibility: [String!]!
+}
+
+enum UserKind {
+  all
+  guests
+  non_guests
+  non_pending
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+}
+
+type VoteValue implements ColumnValue {
+  column: Column!
+  id: ID!
+  is_leaf: Boolean!
+  text: String
+  type: ColumnType!
+  updated_at: Date
+  value: JSON
+  vote_count: Int!
+  voter_ids: [ID!]!
+  voters: [User!]!
+}
+
+type Watcher {
+  medium: String!
+  user: User
+  user_id: ID!
+}
+
+type WeekValue implements ColumnValue {
+  column: Column!
+  end_date: Date
+  id: ID!
+  is_leaf: Boolean!
+  start_date: Date
+  text: String
+  type: ColumnType!
+  value: JSON
+}
+
+type Workspace {
+  account_product: AccountProduct
+  created_at: Date
+  description: String
+  id: ID
+  is_default_workspace: Boolean
+  kind: WorkspaceKind
+  name: String!
+  owners_subscribers(limit: Int = 25, page: Int = 1): [User]
+  settings: WorkspaceSettings
+  state: State
+  team_owners_subscribers(limit: Int = 25, page: Int = 1): [Team!]
+  teams_subscribers(limit: Int = 25, page: Int = 1): [Team]
+  users_subscribers(limit: Int = 25, page: Int = 1): [User]
+}
+
+type WorkspaceIcon {
+  color: String
+  image: String
+}
+
+enum WorkspaceKind {
+  closed
+  open
+  template
+}
+
+type WorkspaceSettings {
+  icon: WorkspaceIcon
+}
+
+type WorldClockValue implements ColumnValue {
+  column: Column!
+  id: ID!
+  is_leaf: Boolean!
+  text: String
+  timezone: String
+  type: ColumnType!
+  updated_at: Date
+  value: JSON
+}
