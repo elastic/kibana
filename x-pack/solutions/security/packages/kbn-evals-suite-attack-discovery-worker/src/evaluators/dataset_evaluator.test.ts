@@ -74,6 +74,7 @@ const quietArtifacts = (overrides: Partial<WorkerArtifacts> = {}): WorkerArtifac
   runnerExecutionId: 'run-1',
   runnerStatus: 'completed',
   runnerStepCount: 4,
+  stepTimings: [],
   seededAlertCount: 3,
   seededAlertIds: SEEDED_IDS,
   openAlertIds: SEEDED_IDS,

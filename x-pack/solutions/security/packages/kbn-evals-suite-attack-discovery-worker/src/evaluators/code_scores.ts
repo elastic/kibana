@@ -463,6 +463,37 @@ export const scoreOutcomeReported: CodeScorer = (_expected, artifacts) => {
     : pass(`reported ${run.runOutcome} and ${worker.runOutcome}`);
 };
 
+const MAX_UNKNOWN_IDS_REPORTED = 20;
+
+/**
+ * Fraction of the distinct alert ids the discoveries cite that were seeded. A cited id outside
+ * the seeded set is one the model or the batch merge invented or corrupted. `chainRecall` reports
+ * whether every seeded alert of the gold recall-target group is cited (absent when the scenario
+ * names no such group).
+ */
+export const scoreAlertIdSurvival: CodeScorer = (_expected, artifacts) => {
+  const cited = new Set(artifacts.insights.flatMap(({ alertIds }) => alertIds));
+  if (cited.size === 0) return notApplicable('no discovery cites an alert');
+  const seeded = new Set(artifacts.seededAlertIds);
+  const unknown = [...cited].filter((id) => !seeded.has(id));
+  const survived = cited.size - unknown.length;
+  const { chainAlertIds } = artifacts;
+  const chainRecall =
+    chainAlertIds !== undefined && chainAlertIds.length > 0
+      ? chainAlertIds.every((id) => cited.has(id))
+      : undefined;
+  return {
+    score: survived / cited.size,
+    explanation: `${survived} of ${cited.size} cited alert ids were seeded`,
+    metadata: {
+      cited: cited.size,
+      seeded: survived,
+      unknown: unknown.slice(0, MAX_UNKNOWN_IDS_REPORTED),
+      ...(chainRecall !== undefined ? { chainRecall } : {}),
+    },
+  };
+};
+
 type StageRouting = Pick<CohortRouting, 'generationModel' | 'reviewModel'>;
 
 const joined = (values: readonly string[]): string => (values.length > 0 ? values.join(', ') : '-');
@@ -486,6 +517,10 @@ export const stageUsageMetadata = (artifacts: WorkerArtifacts): Record<string, u
     ['review.input_tokens', sum(({ inputTokens }) => inputTokens)],
     ['review.output_tokens', sum(({ outputTokens }) => outputTokens)],
     ['review.cached_tokens', sum(({ cachedTokens }) => cachedTokens)],
+    ['timing.wall_time_ms', artifacts.wallTimeMs],
+    ['timing.wall_time_source', artifacts.wallTimeSource],
+    ['timing.step_count', artifacts.stepTimings.length],
+    ['timing.steps', artifacts.stepTimings],
   ];
   return Object.fromEntries(entries.filter(([, value]) => value !== undefined));
 };
@@ -597,6 +632,7 @@ export const CODE_SCORERS: ReadonlyArray<{ name: string; stage: Stage; scorer: C
   { name: 'ReviewsSettled', stage: 'pipeline', scorer: scoreReviewsSettled },
   { name: 'OneReviewPerAttack', stage: 'pipeline', scorer: scoreOneReviewPerAttack },
   { name: 'InvestigationOpened', stage: 'pipeline', scorer: scoreInvestigationOpened },
+  { name: 'AlertIdSurvival', stage: 'generation', scorer: scoreAlertIdSurvival },
   { name: 'VerdictMatchesGold', stage: 'review', scorer: scoreVerdictMatchesGold },
   { name: 'BlindReviewAbstained', stage: 'review', scorer: scoreBlindReviewAbstained },
   { name: 'ParkedAtGate', stage: 'pipeline', scorer: scoreParkedAtGate },

@@ -39,7 +39,9 @@ import type {
   ReviewAnalysisUsage,
   ReviewArtifact,
   StepSnapshot,
+  StepTiming,
   Verdict,
+  WallTimeSource,
   WorkerArtifacts,
   WorkerOutcomeEvent,
 } from './worker_types';
@@ -675,6 +677,49 @@ export const splitFingerprintMatch = (
   };
 };
 
+/** Most step timings kept per row, so a runner with many batches cannot bloat score metadata. */
+export const MAX_STEP_TIMINGS = 200;
+
+const startMs = (timestamp: string | undefined): number => {
+  const parsed = timestamp === undefined ? NaN : Date.parse(timestamp);
+  return Number.isFinite(parsed) ? parsed : Number.MAX_SAFE_INTEGER;
+};
+
+/** Per-step timings of an execution in start order, at most `MAX_STEP_TIMINGS`. */
+export const extractStepTimings = (run: WorkflowExecutionDto): StepTiming[] =>
+  [...(run.stepExecutions ?? [])]
+    .sort(
+      (a, b) =>
+        startMs(a.startedAt) - startMs(b.startedAt) ||
+        (a.globalExecutionIndex ?? 0) - (b.globalExecutionIndex ?? 0)
+    )
+    .slice(0, MAX_STEP_TIMINGS)
+    .map(({ stepId, stepType, startedAt, finishedAt, executionTimeMs }) => ({
+      stepId,
+      ...(stepType !== undefined ? { stepType } : {}),
+      startedAt,
+      ...(finishedAt !== undefined ? { finishedAt } : {}),
+      ...(executionTimeMs !== undefined ? { executionTimeMs } : {}),
+    }));
+
+/**
+ * Runner wall time: the engine's `finishedAt - startedAt` when both are readable, otherwise the
+ * time the client measured around the run (`clientWallTimeMs`), with the source recorded.
+ */
+export const wallTimeOf = (
+  run: WorkflowExecutionDto,
+  clientWallTimeMs?: number
+): { wallTimeMs?: number; wallTimeSource?: WallTimeSource } => {
+  const started = Date.parse(run.startedAt ?? '');
+  const finished = Date.parse(run.finishedAt ?? '');
+  if (Number.isFinite(started) && Number.isFinite(finished) && finished >= started) {
+    return { wallTimeMs: finished - started, wallTimeSource: 'execution' };
+  }
+  return clientWallTimeMs !== undefined
+    ? { wallTimeMs: clientWallTimeMs, wallTimeSource: 'client' }
+    : {};
+};
+
 /**
  * Collects what one runner execution produced: the persisted discoveries, the fingerprint
  * match result, every review it dispatched (polled until it ends or parks at the analyst gate)
@@ -685,6 +730,8 @@ export const collectWorkerArtifacts = async ({
   esClient,
   run,
   runTimedOutAfterMs,
+  clientWallTimeMs,
+  chainAlertIds,
   spaceId,
   seeded,
   fetch,
@@ -694,6 +741,10 @@ export const collectWorkerArtifacts = async ({
   esClient: Client;
   run: WorkflowExecutionDto;
   runTimedOutAfterMs?: number;
+  /** Time the client measured around the run; used only when the execution carries no timestamps. */
+  clientWallTimeMs?: number;
+  /** The scenario's ids of the gold recall-target group, for `AlertIdSurvival`. */
+  chainAlertIds?: string[];
   spaceId: string;
   seeded: SeededScenario;
   fetch: HttpHandler;
@@ -783,6 +834,9 @@ export const collectWorkerArtifacts = async ({
     runnerStatus: run.status,
     runnerError: run.error?.message,
     runnerStepCount: run.stepExecutions.length,
+    stepTimings: extractStepTimings(run),
+    ...wallTimeOf(run, clientWallTimeMs),
+    ...(chainAlertIds !== undefined ? { chainAlertIds } : {}),
     ...(runTimedOutAfterMs !== undefined ? { runnerTimedOutAfterMs: runTimedOutAfterMs } : {}),
     seededAlertCount: seeded.alertCount,
     seededAlertIds: [...seeded.goldIdBySeededId.values()],

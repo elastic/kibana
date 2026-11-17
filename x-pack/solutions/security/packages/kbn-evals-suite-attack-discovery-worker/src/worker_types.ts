@@ -57,6 +57,18 @@ export interface WorkerExampleMetadata extends RoutingMetadata {
 
 export type WorkerExample = Example<WorkerInput, WorkerExpected, WorkerExampleMetadata>;
 
+/** One runner step execution's timing, read from the workflow engine's step record. */
+export interface StepTiming {
+  stepId: string;
+  stepType?: string;
+  startedAt: string;
+  finishedAt?: string;
+  executionTimeMs?: number;
+}
+
+/** Where `wallTimeMs` came from: the engine's execution timestamps or the client's own clock. */
+export type WallTimeSource = 'execution' | 'client';
+
 export interface StepSnapshot {
   stepId: string;
   status: string;
@@ -149,11 +161,18 @@ export interface WorkerArtifacts {
   runnerError?: string;
   /** Number of step executions the runner recorded; 0 means it never ran a step. */
   runnerStepCount: number;
+  /** Per-step timings of the runner execution, in start order, capped at `MAX_STEP_TIMINGS`. */
+  stepTimings: StepTiming[];
+  /** Runner wall time: execution `finishedAt - startedAt`, else the client's time around the run. */
+  wallTimeMs?: number;
+  wallTimeSource?: WallTimeSource;
   /** Set when the wait for the runner ran out before it ended. */
   runnerTimedOutAfterMs?: number;
   seededAlertCount: number;
   /** The scenario's own ids of the alerts seeded into the space. */
   seededAlertIds: string[];
+  /** The scenario's own ids of the alerts in the gold recall-target group, when it has one. */
+  chainAlertIds?: string[];
   /** The scenario's own ids of every open alert in the space once seeded (the readable set). */
   openAlertIds: string[];
   alertsAnalyzed?: number;

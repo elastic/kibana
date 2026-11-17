@@ -14,12 +14,15 @@ import {
   collectReviewArtifact,
   collectWorkerArtifacts,
   countIndexedAttacks,
+  extractStepTimings,
   generationUsageOf,
   isParkedAtGate,
   isReviewSettled,
+  MAX_STEP_TIMINGS,
   readGenerationFault,
   splitFingerprintMatch,
   toInsights,
+  wallTimeOf,
 } from './collect';
 import { BATCHED_GENERATION_WORKFLOW_ID, attackDiscoveryIndexForSpace } from './constants';
 import type { WorkerOutcomeEvent } from './worker_types';
@@ -423,7 +426,129 @@ describe('splitFingerprintMatch', () => {
   });
 });
 
+const timedStep = (
+  stepId: string,
+  startedAt: string,
+  extra: Record<string, unknown> = {}
+): WorkflowStepExecutionDto =>
+  ({ id: `${stepId}-1`, stepId, startedAt, ...extra } as unknown as WorkflowStepExecutionDto);
+
+const timedRun = (overrides: Record<string, unknown>): WorkflowExecutionDto =>
+  ({
+    id: 'run-t',
+    status: 'completed',
+    stepExecutions: [],
+    ...overrides,
+  } as unknown as WorkflowExecutionDto);
+
+describe('extractStepTimings', () => {
+  it('returns the steps in start order with only the fields the engine recorded', () => {
+    const run = timedRun({
+      stepExecutions: [
+        timedStep('late', '2026-01-01T00:00:05.000Z', {
+          stepType: 'workflow.execute',
+          finishedAt: '2026-01-01T00:00:09.000Z',
+          executionTimeMs: 4000,
+        }),
+        timedStep('early', '2026-01-01T00:00:01.000Z'),
+      ],
+    });
+    expect(extractStepTimings(run)).toEqual([
+      { stepId: 'early', startedAt: '2026-01-01T00:00:01.000Z' },
+      {
+        stepId: 'late',
+        stepType: 'workflow.execute',
+        startedAt: '2026-01-01T00:00:05.000Z',
+        finishedAt: '2026-01-01T00:00:09.000Z',
+        executionTimeMs: 4000,
+      },
+    ]);
+  });
+
+  it('breaks start-time ties by the engine execution index', () => {
+    const at = '2026-01-01T00:00:00.000Z';
+    const run = timedRun({
+      stepExecutions: [
+        timedStep('second', at, { globalExecutionIndex: 2 }),
+        timedStep('first', at, { globalExecutionIndex: 1 }),
+      ],
+    });
+    expect(extractStepTimings(run).map(({ stepId }) => stepId)).toEqual(['first', 'second']);
+  });
+
+  it('keeps at most MAX_STEP_TIMINGS steps', () => {
+    const run = timedRun({
+      stepExecutions: Array.from({ length: MAX_STEP_TIMINGS + 25 }, (_, i) =>
+        timedStep(`s${i}`, new Date(Date.UTC(2026, 0, 1, 0, 0, i)).toISOString())
+      ),
+    });
+    const timings = extractStepTimings(run);
+    expect(MAX_STEP_TIMINGS).toBe(200);
+    expect(timings).toHaveLength(MAX_STEP_TIMINGS);
+    expect(timings[0].stepId).toBe('s0');
+  });
+});
+
+describe('wallTimeOf', () => {
+  it('uses the execution timestamps when both are readable', () => {
+    const run = timedRun({
+      startedAt: '2026-01-01T00:00:00.000Z',
+      finishedAt: '2026-01-01T00:01:30.000Z',
+    });
+    expect(wallTimeOf(run, 5)).toEqual({ wallTimeMs: 90_000, wallTimeSource: 'execution' });
+  });
+
+  it.each([
+    ['missing', { startedAt: '2026-01-01T00:00:00.000Z' }],
+    ['empty', { startedAt: '', finishedAt: '' }],
+    ['invalid', { startedAt: 'nope', finishedAt: '2026-01-01T00:00:00.000Z' }],
+    ['inverted', { startedAt: '2026-01-01T00:00:10.000Z', finishedAt: '2026-01-01T00:00:00.000Z' }],
+  ])('falls back to the client timing when the execution timestamps are %s', (_, timestamps) => {
+    expect(wallTimeOf(timedRun(timestamps), 1234)).toEqual({
+      wallTimeMs: 1234,
+      wallTimeSource: 'client',
+    });
+  });
+
+  it('reports no wall time when neither source has one', () => {
+    expect(wallTimeOf(timedRun({}))).toEqual({});
+  });
+});
+
 describe('collectWorkerArtifacts', () => {
+  it('carries step timings, wall time and the chain ids into the artifacts', async () => {
+    const run = timedRun({
+      startedAt: '2026-01-01T00:00:00.000Z',
+      finishedAt: '2026-01-01T00:00:02.000Z',
+      stepExecutions: [timedStep('emit_result', '2026-01-01T00:00:01.000Z')],
+    });
+    const artifacts = await collectWorkerArtifacts({
+      client: { track: jest.fn() } as unknown as AttackDiscoveryWorkerClient,
+      esClient: {} as Client,
+      run,
+      clientWallTimeMs: 99,
+      chainAlertIds: ['c1', 'c2'],
+      spaceId: 'space',
+      seeded: {
+        runMarker: 'marker',
+        spaceId: 'space',
+        goldIdBySeededId: new Map(),
+        alertCount: 0,
+        openAlertIds: [],
+        worldDocs: [],
+      },
+      fetch: jest.fn() as unknown as HttpHandler,
+      log: { info: jest.fn(), warning: jest.fn(), debug: jest.fn() } as unknown as ToolingLog,
+    });
+
+    expect(artifacts).toMatchObject({
+      stepTimings: [{ stepId: 'emit_result', startedAt: '2026-01-01T00:00:01.000Z' }],
+      wallTimeMs: 2000,
+      wallTimeSource: 'execution',
+      chainAlertIds: ['c1', 'c2'],
+    });
+  });
+
   it('wires the fingerprint split into the artifacts', async () => {
     const run = {
       id: 'run-1',

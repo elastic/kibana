@@ -63,6 +63,7 @@ export const PIPELINE_CODE_EVALUATORS: ReadonlySet<string> = new Set([
  * alike, and the run could no longer tell models apart.
  */
 export const QUALITY_CODE_EVALUATORS: ReadonlySet<string> = new Set([
+  'AlertIdSurvival',
   'VerdictMatchesGold',
   'BlindReviewAbstained',
   AUDIT_FORBIDDEN_JOIN_EVALUATOR_NAME,

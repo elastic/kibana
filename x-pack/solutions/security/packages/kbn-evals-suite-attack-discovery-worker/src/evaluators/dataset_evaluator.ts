@@ -18,6 +18,7 @@ import type { BoundInferenceClient } from '@kbn/inference-common';
 import {
   getGoldForVariant,
   type AuditReferenceResolver,
+  type AuditScenario,
   createAuditConditionalRemediationEvaluator,
   createAuditConditionalRemediationJudgeEvaluator,
   createAuditForbiddenJoinEvaluator,
@@ -66,6 +67,14 @@ export interface AuditJudgeDeps {
 
 const DIRECTION = 'maximize' as const;
 
+/** The scenario's own ids of the gold recall-target group; undefined when it names none. */
+const chainAlertIdsOf = (scenario: AuditScenario): string[] | undefined => {
+  const { alertGroups, requiredGroup } = scenario.gold;
+  return requiredGroup !== undefined && alertGroups[requiredGroup]
+    ? [...alertGroups[requiredGroup]]
+    : undefined;
+};
+
 /**
  * What a row returns when it threw. The task never throws for a row: the real executor rejects the
  * whole experiment on the first throw, which would skip the final clean-space check and the code
@@ -78,6 +87,7 @@ export const failedRowArtifacts = (rowError: string): WorkerArtifacts => ({
   runnerExecutionId: '',
   runnerStatus: 'not_run',
   runnerStepCount: 0,
+  stepTimings: [],
   seededAlertCount: 0,
   seededAlertIds: [],
   openAlertIds: [],
@@ -447,6 +457,7 @@ export const createEvaluateDataset =
         // A failed seed removes its own partial writes; if that removal failed too, the error says
         // so and the final clean-space check reports what is left.
         seeded = await seedScenario({ esClient, log, scenario, spaceId });
+        const runStartedMs = Date.now();
         const { execution: run, timedOutAfterMs } = await client.run({
           spaceId,
           // The floor worker is enabled with manual autonomy, which keeps true-positive and
@@ -458,6 +469,8 @@ export const createEvaluateDataset =
           esClient,
           run,
           runTimedOutAfterMs: timedOutAfterMs,
+          clientWallTimeMs: Date.now() - runStartedMs,
+          chainAlertIds: chainAlertIdsOf(scenario),
           spaceId,
           seeded,
           fetch,

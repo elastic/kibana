@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import type { ReviewArtifact, WorkerArtifacts, WorkerExpected } from '../worker_types';
 import {
   MODEL_FAULT_LABEL,
+  scoreAlertIdSurvival,
   scoreAlertsRetrieved,
   scoreBlindReviewAbstained,
   scoreDiscoveriesPersisted,
@@ -51,6 +53,7 @@ const artifacts = (overrides: Partial<WorkerArtifacts> = {}): WorkerArtifacts =>
   runnerExecutionId: 'run-1',
   runnerStatus: 'completed',
   runnerStepCount: 3,
+  stepTimings: [],
   seededAlertCount: 3,
   seededAlertIds: [],
   openAlertIds: [],
@@ -753,8 +756,100 @@ describe('scoreStageModelResolved', () => {
       'review.input_tokens': 100,
       'review.output_tokens': 20,
       'review.cached_tokens': 10,
+      'timing.step_count': 0,
+      'timing.steps': [],
     });
     expect(stageUsageMetadata(artifacts())).not.toHaveProperty('review.input_tokens');
+  });
+
+  it('stamps wall time, its source and the step timings when the artifacts carry them', () => {
+    const stepTimings = [
+      {
+        stepId: 'run_generation',
+        stepType: 'workflow.execute',
+        startedAt: '2026-01-01T00:00:00.000Z',
+        finishedAt: '2026-01-01T00:00:03.000Z',
+        executionTimeMs: 3000,
+      },
+    ];
+    expect(
+      stageUsageMetadata(artifacts({ wallTimeMs: 4000, wallTimeSource: 'client', stepTimings }))
+    ).toMatchObject({
+      'timing.wall_time_ms': 4000,
+      'timing.wall_time_source': 'client',
+      'timing.step_count': 1,
+      'timing.steps': stepTimings,
+    });
+    expect(stageUsageMetadata(artifacts())).not.toHaveProperty('timing.wall_time_ms');
+  });
+});
+
+describe('scoreAlertIdSurvival', () => {
+  const insight = (alertIds: string[]): AttackDiscovery => ({
+    alertIds,
+    detailsMarkdown: '',
+    summaryMarkdown: '',
+    title: 't',
+  });
+
+  it('is N/A when no discovery cites an alert', () => {
+    const result = scoreAlertIdSurvival(expected, artifacts({ seededAlertIds: ['a1'] }));
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('N/A');
+  });
+
+  it('scores 1 when every cited id was seeded, counting a repeated id once', () => {
+    const result = scoreAlertIdSurvival(
+      expected,
+      artifacts({
+        seededAlertIds: ['a1', 'a2', 'a3'],
+        insights: [insight(['a1', 'a2']), insight(['a2'])],
+      })
+    );
+    expect(result.score).toBe(1);
+    expect(result.metadata).toEqual({ cited: 2, seeded: 2, unknown: [] });
+  });
+
+  it('scores the seeded fraction and lists the unknown ids', () => {
+    const result = scoreAlertIdSurvival(
+      expected,
+      artifacts({
+        seededAlertIds: ['a1', 'a2'],
+        insights: [insight(['a1', 'a2', 'ghost-1', 'ghost-2'])],
+      })
+    );
+    expect(result.score).toBe(0.5);
+    expect(result.metadata).toEqual({ cited: 4, seeded: 2, unknown: ['ghost-1', 'ghost-2'] });
+  });
+
+  it('lists at most 20 unknown ids', () => {
+    const ghosts = Array.from({ length: 30 }, (_, i) => `ghost-${i}`);
+    const result = scoreAlertIdSurvival(
+      expected,
+      artifacts({ seededAlertIds: [], insights: [insight(ghosts)] })
+    );
+    expect(result.score).toBe(0);
+    expect(result.metadata?.cited).toBe(30);
+    expect(result.metadata?.unknown).toEqual(ghosts.slice(0, 20));
+  });
+
+  it('reports whether the whole gold chain is cited', () => {
+    const base = { seededAlertIds: ['c1', 'c2', 'n1'] };
+    expect(
+      scoreAlertIdSurvival(
+        expected,
+        artifacts({ ...base, chainAlertIds: ['c1', 'c2'], insights: [insight(['c1', 'c2'])] })
+      ).metadata?.chainRecall
+    ).toBe(true);
+    expect(
+      scoreAlertIdSurvival(
+        expected,
+        artifacts({ ...base, chainAlertIds: ['c1', 'c2'], insights: [insight(['c1', 'n1'])] })
+      ).metadata?.chainRecall
+    ).toBe(false);
+    expect(
+      scoreAlertIdSurvival(expected, artifacts({ ...base, insights: [insight(['c1'])] })).metadata
+    ).not.toHaveProperty('chainRecall');
   });
 });
 
