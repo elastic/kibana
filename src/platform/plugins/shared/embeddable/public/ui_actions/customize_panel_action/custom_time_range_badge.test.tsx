@@ -11,6 +11,8 @@ import type { Filter, TimeRange } from '@kbn/es-query';
 import { type AggregateQuery, type Query } from '@kbn/es-query';
 
 import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import { render, screen } from '@testing-library/react';
+import React from 'react';
 import { BehaviorSubject, take } from 'rxjs';
 import { CustomTimeRangeBadge } from './custom_time_range_badge';
 
@@ -53,5 +55,15 @@ describe('custom time range badge action', () => {
       done();
     });
     updateTimeRange(undefined);
+  });
+
+  it('labels the clickable badge with the displayed duration', () => {
+    updateTimeRange(mockTimeRange);
+    const { MenuItem } = action;
+    render(<MenuItem context={context} dataTestSubj="customTimeRangeBadge" />);
+
+    const badge = screen.getByRole('button', { name: 'Last 17 minutes' });
+    expect(badge).toHaveAttribute('aria-label', 'Last 17 minutes');
+    expect(badge).toHaveTextContent('Last 17 minutes');
   });
 });
