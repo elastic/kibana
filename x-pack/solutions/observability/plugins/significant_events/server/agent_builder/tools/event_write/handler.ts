@@ -153,10 +153,12 @@ export async function eventsWriteBulkHandler({
   });
 
   // Facts are derived once per candidate so the no-op check and the final document agree.
-  // Only an existing event can have an investigation; a new one takes the agent's severity. A closed
-  // event keeps its stored severity, as the write-through and the page read leave it alone.
-  const existingEvents = held.kept.flatMap(({ eventId, latest }) =>
-    latest && latest.status !== ALERT_EPISODE_STATUS.INACTIVE
+  // Only an existing event can have an investigation; a new one takes the agent's severity. An event
+  // that stays closed keeps its stored severity, as the write-through and the page read leave it
+  // alone; one that reopens is open again and takes the investigation's.
+  const existingEvents = held.kept.flatMap(({ eventId, latest, status }) =>
+    latest &&
+    !(latest.status === ALERT_EPISODE_STATUS.INACTIVE && status === ALERT_EPISODE_STATUS.INACTIVE)
       ? [{ eventId, storedSeverity: latest.severity }]
       : []
   );
