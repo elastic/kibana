@@ -32,6 +32,8 @@ import { updateEventStatusToolHandler } from './handler';
 export const SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID =
   platformSignificantEventsTools.updateEventStatus;
 
+const UNMATCHED_EVENT_ID = 'unknown';
+
 export const eventStatusUpdateSchema = lazySchema(() =>
   significantEventSchema
     .pick({
@@ -97,6 +99,9 @@ export function createEventStatusUpdateTool({
           workflowExecutionId,
         });
 
+        const isUnmatched = data.reason === 'not_found';
+        // An id that matches no event is whatever the model sent, so it stays out of telemetry.
+        const telemetryEventId = isUnmatched ? UNMATCHED_EVENT_ID : toolParams.event_id;
         trackTelemetryBestEffort({
           logger,
           description: 'event_status_update telemetry',
@@ -105,15 +110,16 @@ export function createEventStatusUpdateTool({
               {
                 workflow_execution_id: workflowExecutionId,
                 ...existingAlertIdentity({
-                  eventId: toolParams.event_id,
+                  eventId: telemetryEventId,
                   spaceId: request.spaceId,
                 }),
                 success:
                   data.updated === 1 ||
                   data.reason === 'already_in_state' ||
                   data.reason === 'not_a_breach',
-                event_id: toolParams.event_id,
+                event_id: telemetryEventId,
                 status: toolParams.status,
+                ...(isUnmatched ? { error_message: 'not_found' } : {}),
               },
               request
             ),

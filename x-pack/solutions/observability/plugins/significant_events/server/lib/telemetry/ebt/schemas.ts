@@ -504,7 +504,7 @@ const agentToolEventStatusUpdateSchema: RootSchema<AgentToolEventStatusUpdatePro
     type: 'keyword',
     _meta: {
       description:
-        'The stable event id of the updated significant event; the same value as `fingerprint`, kept for compatibility',
+        'The stable event id of the updated significant event, or `unknown` (as is `fingerprint`) when no event matched the requested id; the same value as `fingerprint`, kept for compatibility',
     },
   },
   status: {
@@ -516,7 +516,8 @@ const agentToolEventStatusUpdateSchema: RootSchema<AgentToolEventStatusUpdatePro
   error_message: {
     type: 'text',
     _meta: {
-      description: 'Error message when event status update fails',
+      description:
+        'Error message when event status update fails; `not_found` when no event matched the requested id',
       optional: true,
     },
   },
