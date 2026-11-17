@@ -56,6 +56,7 @@ import {
 } from '../../../common/services/output_helpers';
 
 import { appContextService } from '../app_context';
+import { packagePolicyService } from '../package_policy';
 
 import { listEnrollmentApiKeys } from '../api_keys';
 import { fleetServerHostService } from '../fleet_server_host';
@@ -199,7 +200,11 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
       soClient,
       agentlessAgentPolicy.id
     );
-    const policyDetails = await this.getPolicyDetails(soClient, fullPolicy);
+    const policyDetails = await this.getPolicyDetails(
+      soClient,
+      fullPolicy,
+      agentlessAgentPolicy.id
+    );
 
     const requestConfig: AxiosRequestConfig = {
       url: prependAgentlessApiBasePathToEndpoint(agentlessConfig, '/deployments'),
@@ -480,10 +485,16 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
 
   private async getPolicyDetails(
     soClient: SavedObjectsClientContract,
-    fullPolicy: FullAgentPolicy | null
+    fullPolicy: FullAgentPolicy | null,
+    agentPolicyId: string
   ) {
+    const pkg = await this.getIntegrationPackage(soClient, agentPolicyId);
     return {
       output_name: Object.keys(fullPolicy?.outputs || {})?.[0], // Agentless policies only have one output
+      // OTel integrations have their `otelcol` inputs moved out of `inputs` in the full agent
+      // policy, so agentless-api cannot derive the package from `inputs[].meta.package`.
+      // Send it explicitly so the deployment is labelled with the integration name/version.
+      ...(pkg ? { package: pkg } : {}),
     };
   }
 
@@ -502,6 +513,30 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
         ? { elasticsearch_cluster_id: cloudSetup.elasticsearchClusterId }
         : {}),
     };
+  }
+
+  /** The (single) non-system integration package of an agentless policy, if any. */
+  private async getIntegrationPackage(
+    soClient: SavedObjectsClientContract,
+    agentPolicyId: string
+  ): Promise<{ name: string; version: string } | undefined> {
+    try {
+      const packagePolicies = await packagePolicyService.findAllForAgentPolicy(
+        soClient,
+        agentPolicyId
+      );
+      const pkg = packagePolicies?.find((pp) => pp.package?.name && pp.package.name !== 'system')
+        ?.package;
+      return pkg ? { name: pkg.name, version: pkg.version } : undefined;
+    } catch (error) {
+      // Labelling is best effort: never fail the deployment because of it.
+      appContextService
+        .getLogger()
+        .warn(
+          `[Agentless API] Could not resolve integration package for ${agentPolicyId}: ${error}`
+        );
+      return undefined;
+    }
   }
 
   private getAgentlessTags(agentlessAgentPolicy: AgentPolicy) {

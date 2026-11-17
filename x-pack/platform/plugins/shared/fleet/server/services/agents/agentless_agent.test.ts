@@ -26,6 +26,7 @@ import {
 
 import { appContextService } from '../app_context';
 import { agentPolicyService } from '../agent_policy';
+import { packagePolicyService } from '../package_policy';
 import { listEnrollmentApiKeys } from '../api_keys';
 import { fleetServerHostService } from '../fleet_server_host';
 
@@ -206,6 +207,78 @@ describe('Agentless Agent service', () => {
         url: 'http://api.agentless.com/api/v1/ess/deployments',
       })
     );
+  });
+
+  describe('policy_details.package', () => {
+    const setup = () => {
+      jest.mocked(axios).mockResolvedValueOnce(mockAgentlessDeploymentResponse);
+      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+        agentless: {
+          enabled: true,
+          api: { url: 'http://api.agentless.com', tls: { certificate: 'c', key: 'k', ca: 'ca' } },
+        },
+      } as any);
+      jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+      mockedFleetServerHostService.get.mockResolvedValue({
+        id: 'id',
+        host: 'http://fleetserver:8220',
+        active: true,
+        is_default: true,
+        host_urls: ['http://fleetserver:8220'],
+      } as any);
+      mockedListEnrollmentApiKeys.mockResolvedValue({
+        items: [{ id: 't', policy_id: 'p', api_key: 'k' }],
+      } as any);
+    };
+    const create = () =>
+      agentlessAgentService.createAgentlessAgent(
+        elasticsearchServiceMock.createClusterClient().asInternalUser,
+        getAgentPolicyCreateMock(),
+        {
+          id: 'otel-policy',
+          name: 'otel',
+          namespace: 'default',
+          fleet_server_host_id: 'h',
+          data_output_id: 'o',
+          supports_agentless: true,
+        } as AgentPolicy
+      );
+
+    it('sends the non-system integration package so OTel policies can be labelled', async () => {
+      setup();
+      jest.mocked(packagePolicyService.findAllForAgentPolicy).mockResolvedValue([
+        { package: { name: 'system', version: '2.0.0' } },
+        { package: { name: 'aws_cloudwatch_input_otel', version: '0.8.0' } },
+      ] as any);
+
+      await create();
+
+      expect(axios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            policy_details: {
+              output_name: 'default',
+              package: { name: 'aws_cloudwatch_input_otel', version: '0.8.0' },
+            },
+          }),
+        })
+      );
+    });
+
+    it('does not fail the deployment when the package cannot be resolved', async () => {
+      setup();
+      jest
+        .mocked(packagePolicyService.findAllForAgentPolicy)
+        .mockRejectedValue(new Error('boom'));
+
+      await create();
+
+      expect(axios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ policy_details: { output_name: 'default' } }),
+        })
+      );
+    });
   });
 
   it('should include is_elastic_staff_owned when cloud reports elastic staff owned deployment', async () => {
