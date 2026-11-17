@@ -110,9 +110,6 @@ test.describe(
       await pageObjects.streams.fillRoutingRuleName('test-error-modal');
       await pageObjects.streams.saveRoutingRule();
 
-      // Wait for the error toast
-      await pageObjects.toasts.waitFor();
-
       // Click "See the full error" button
       const fullErrorButton = page.getByTestId('errorToastBtn');
       await expect(fullErrorButton).toBeVisible();
