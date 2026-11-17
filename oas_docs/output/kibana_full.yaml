@@ -194002,7 +194002,7 @@ components:
           description: The name of the palette to apply across the value range.
         steps:
           description: Number of color bands the palette is split into. Defaults to the chart's default band count.
-          maximum: 9007199254740991
+          maximum: 100
           minimum: 1
           type: integer
         type:
