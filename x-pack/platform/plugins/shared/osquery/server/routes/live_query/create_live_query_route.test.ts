@@ -9,7 +9,13 @@ import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { CoreStart, RequestHandler } from '@kbn/core/server';
 import { escapeQuotes } from '@kbn/es-query';
-import { API_VERSIONS, OSQUERY_MAX_AGENTS_HEADER } from '../../../common/constants';
+import {
+  API_VERSIONS,
+  OSQUERY_MAX_AGENTS_HEADER,
+  OSQUERY_DISPATCH_SOURCE_HEADER,
+  OSQUERY_DISPATCH_WORKFLOW_ID_HEADER,
+  OSQUERY_DISPATCH_EXECUTION_ID_HEADER,
+} from '../../../common/constants';
 import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { createLiveQueryRoute, maxAgentsFromHeader } from './create_live_query_route';
@@ -153,7 +159,7 @@ describe('createLiveQueryRoute', () => {
       racGet?: jest.Mock;
       getActiveSpace?: jest.Mock;
       workflowsExtensionsEnabled?: boolean;
-      headers?: Record<string, string>;
+      headers?: Record<string, string | string[]>;
     } = {}
   ) => {
     const start = coreStart ?? createMockCoreStart({ [SAVED_QUERY_ID]: { query: STORED_QUERY } });
@@ -422,6 +428,93 @@ describe('createLiveQueryRoute', () => {
         }),
       })
     );
+  });
+
+  describe('dispatch source headers', () => {
+    const body = { saved_query_id: SAVED_QUERY_ID, agent_ids: ['agent-1'] };
+    const idHeaders = {
+      [OSQUERY_DISPATCH_WORKFLOW_ID_HEADER]: 'workflow-1',
+      [OSQUERY_DISPATCH_EXECUTION_ID_HEADER]: 'execution-1',
+    };
+
+    it.each([
+      ['the marker alone', {}, undefined, undefined],
+      ['both trace IDs', idHeaders, 'workflow-1', 'execution-1'],
+      [
+        'IDs at the length limit',
+        {
+          [OSQUERY_DISPATCH_WORKFLOW_ID_HEADER]: 'w'.repeat(256),
+          [OSQUERY_DISPATCH_EXECUTION_ID_HEADER]: 'e'.repeat(256),
+        },
+        'w'.repeat(256),
+        'e'.repeat(256),
+      ],
+      [
+        'an oversized workflow ID',
+        { ...idHeaders, [OSQUERY_DISPATCH_WORKFLOW_ID_HEADER]: 'w'.repeat(257) },
+        undefined,
+        'execution-1',
+      ],
+      [
+        'an oversized execution ID',
+        { ...idHeaders, [OSQUERY_DISPATCH_EXECUTION_ID_HEADER]: 'e'.repeat(257) },
+        'workflow-1',
+        undefined,
+      ],
+      [
+        'empty IDs',
+        { [OSQUERY_DISPATCH_WORKFLOW_ID_HEADER]: '', [OSQUERY_DISPATCH_EXECUTION_ID_HEADER]: '' },
+        undefined,
+        undefined,
+      ],
+      [
+        'repeated IDs',
+        {
+          [OSQUERY_DISPATCH_WORKFLOW_ID_HEADER]: ['workflow-1', 'workflow-2'],
+          [OSQUERY_DISPATCH_EXECUTION_ID_HEADER]: ['execution-1', 'execution-2'],
+        },
+        undefined,
+        undefined,
+      ],
+    ])('dispatches with %s', async (_name, headers, workflowId, executionId) => {
+      const response = await invokeRoute(body, {
+        workflowsExtensionsEnabled: true,
+        headers: { [OSQUERY_DISPATCH_SOURCE_HEADER]: 'workflow', ...headers },
+      });
+
+      expect(response.ok).toHaveBeenCalled();
+      expect(mockedCreateActionHandler).toHaveBeenCalledTimes(1);
+      expect(mockedCreateActionHandler.mock.calls[0][2]).toMatchObject({
+        dispatchSource: 'workflow',
+        dispatchWorkflowId: workflowId,
+        dispatchExecutionId: executionId,
+      });
+    });
+
+    it.each([
+      ['no marker', undefined, true],
+      ['an unknown source', 'unknown', true],
+      ['a different case', 'Workflow', true],
+      ['an empty source', '', true],
+      ['a repeated source', ['workflow', 'workflow'], true],
+      ['a comma-joined source', 'workflow, workflow', true],
+      ['the feature disabled', 'workflow', false],
+    ])('ignores the source and IDs with %s', async (_name, source, workflowsExtensionsEnabled) => {
+      const response = await invokeRoute(body, {
+        workflowsExtensionsEnabled,
+        headers: {
+          ...idHeaders,
+          ...(source === undefined ? {} : { [OSQUERY_DISPATCH_SOURCE_HEADER]: source }),
+        },
+      });
+
+      expect(response.ok).toHaveBeenCalled();
+      expect(mockedCreateActionHandler).toHaveBeenCalledTimes(1);
+      const options = mockedCreateActionHandler.mock.calls[0][2];
+      expect(options).not.toHaveProperty('dispatchSource');
+      expect(options).not.toHaveProperty('dispatchWorkflowId');
+      expect(options).not.toHaveProperty('dispatchExecutionId');
+    });
   });
 
   describe('max agents header', () => {

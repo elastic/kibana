@@ -14,7 +14,14 @@ import type { ECSMappingOrUndefined } from '@kbn/osquery-io-ts-types';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
 import { createLiveQueryRequestBodySchema } from '../../../common/api';
-import { API_VERSIONS, OSQUERY_MAX_AGENTS_HEADER } from '../../../common/constants';
+import {
+  API_VERSIONS,
+  OSQUERY_MAX_AGENTS_HEADER,
+  OSQUERY_DISPATCH_SOURCE_HEADER,
+  OSQUERY_DISPATCH_WORKFLOW_ID_HEADER,
+  OSQUERY_DISPATCH_EXECUTION_ID_HEADER,
+  OSQUERY_DISPATCH_SOURCES,
+} from '../../../common/constants';
 import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
 import { replaceParamsQuery } from '../../../common/utils/replace_params_query';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
@@ -227,6 +234,23 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
             });
           }
 
+          const dispatchSource = osqueryContext.experimentalFeatures.workflowsExtensionsEnabled
+            ? OSQUERY_DISPATCH_SOURCES.find(
+                (source) => source === request.headers[OSQUERY_DISPATCH_SOURCE_HEADER]
+              )
+            : undefined;
+          const dispatchMetadata = dispatchSource
+            ? {
+                dispatchSource,
+                dispatchWorkflowId: traceIdFromHeader(
+                  request.headers[OSQUERY_DISPATCH_WORKFLOW_ID_HEADER]
+                ),
+                dispatchExecutionId: traceIdFromHeader(
+                  request.headers[OSQUERY_DISPATCH_EXECUTION_ID_HEADER]
+                ),
+              }
+            : {};
+
           const { response: osqueryAction, fleetActionsCount } = await createActionHandler(
             osqueryContext,
             request.body,
@@ -236,6 +260,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
               space,
               dispatch: { entryPoint: 'live_query', source: liveDispatchSource },
               maxAgents,
+              ...dispatchMetadata,
             }
           );
 
@@ -289,3 +314,6 @@ export const maxAgentsFromHeader = (
 
   return Math.min(...values.map(Number));
 };
+
+const traceIdFromHeader = (header: string | string[] | undefined): string | undefined =>
+  typeof header === 'string' && header.length > 0 && header.length <= 256 ? header : undefined;
