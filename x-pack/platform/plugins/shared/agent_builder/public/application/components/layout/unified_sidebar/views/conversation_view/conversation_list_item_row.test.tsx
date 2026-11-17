@@ -9,7 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { MemoryRouter } from '@kbn/shared-ux-router';
-import { ConversationDisplayStatus } from '@kbn/agent-builder-common';
+import { ConversationDisplayStatus, DEFAULT_CONVERSATION_TITLE } from '@kbn/agent-builder-common';
 import type { ConversationPermissions } from '../../../../../../../common/http_api/conversations';
 import { useConversationListMutations } from '../../../../../hooks/use_conversation_list_mutations';
 import { ConversationListItemRow } from './conversation_list_item_row';
@@ -33,11 +33,13 @@ const renderRow = (
     read,
     openMenu = true,
     showActionsMenu,
+    title = 'My conversation',
   }: {
     status?: ConversationDisplayStatus;
     read?: boolean;
     openMenu?: boolean;
     showActionsMenu?: boolean;
+    title?: string;
   } = {}
 ) => {
   render(
@@ -46,7 +48,7 @@ const renderRow = (
         <ConversationListItemRow
           agentId="agent-1"
           conversationId={conversationId}
-          title="My conversation"
+          title={title}
           isActive={false}
           routeConversationId={conversationId}
           status={status}
@@ -133,6 +135,12 @@ describe('ConversationListItemRow', () => {
     expect(
       within(link).queryByText(/^(New|Working|Waiting for input|Error)$/)
     ).not.toBeInTheDocument();
+  });
+
+  it('shows "New chat" until the generated title arrives', () => {
+    renderRow({}, { openMenu: false, title: DEFAULT_CONVERSATION_TITLE });
+
+    expect(screen.getByText('New chat')).toBeInTheDocument();
   });
 
   it('keeps the actions slot but hides the menu while the agent is responding', () => {

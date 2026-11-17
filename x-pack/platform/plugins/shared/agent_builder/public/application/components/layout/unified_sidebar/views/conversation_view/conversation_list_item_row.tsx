@@ -26,7 +26,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import type { ConversationDisplayStatus } from '@kbn/agent-builder-common';
-import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT, DEFAULT_CONVERSATION_TITLE } from '@kbn/agent-builder-common';
 
 import type { ConversationPermissions } from '../../../../../../../common/http_api/conversations';
 import { appPaths } from '../../../../../utils/app_paths';
@@ -70,6 +70,9 @@ const labels = {
   }),
   deleteError: i18n.translate('xpack.agentBuilder.sidebar.conversationList.deleteError', {
     defaultMessage: 'Failed to delete conversation',
+  }),
+  newChat: i18n.translate('xpack.agentBuilder.sidebar.conversationList.newChat', {
+    defaultMessage: 'New chat',
   }),
 };
 
@@ -363,7 +366,9 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
                   min-width: 0;
                 `}
               >
-                <EuiTextTruncate text={title || conversationId} />
+                <EuiTextTruncate
+                  text={!title || title === DEFAULT_CONVERSATION_TITLE ? labels.newChat : title}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </Link>
