@@ -17,6 +17,7 @@ import {
 import {
   buildTaskAttemptsExhaustedMessage,
   failExecutionMissingIdentity,
+  markExecutionFailedTaskRecovery,
   markScheduledExecutionFailedAfterTaskError,
   resolveExhaustedWorkflowRunTask,
   resolveInterruptedWorkflowResumeTask,
@@ -25,6 +26,10 @@ import {
   TASK_RECOVERY_ERROR_TYPE,
   taskRecoveryMessages,
 } from './task_recovery';
+
+jest.mock('../topics/publish_workflow_execution_finished', () => ({
+  publishWorkflowExecutionFinished: jest.fn().mockResolvedValue(undefined),
+}));
 import type { WorkflowExecutionsDataClient } from '../repositories/data_access_layer';
 import {
   createMockGetExecutionsByIdsResponse,
@@ -34,6 +39,7 @@ import {
 
 import { StepExecutionRepository } from '../repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { publishWorkflowExecutionFinished } from '../topics/publish_workflow_execution_finished';
 
 const createRecoveryTestHarness = () => {
   const workflowExecutionsDataClient = createMockWorkflowDataClient();
@@ -78,6 +84,72 @@ const expectFailedWorkflowUpdate = (
     })
   );
 };
+
+describe('markExecutionFailedTaskRecovery', () => {
+  beforeEach(() => {
+    jest.mocked(publishWorkflowExecutionFinished).mockClear();
+  });
+
+  it('publishes the failed execution after the write', async () => {
+    const { repository, stepExecutionRepository } = createRecoveryTestHarness();
+    const source = {
+      id: 'exec-1',
+      workflowId: 'wf-1',
+      spaceId: 'default',
+      status: ExecutionStatus.RUNNING,
+      isTestRun: false,
+      triggeredBy: 'scheduled',
+    } as EsWorkflowExecution;
+
+    await markExecutionFailedTaskRecovery(
+      repository,
+      stepExecutionRepository,
+      source.id,
+      { message: taskRecoveryMessages.workflowRunInterrupted },
+      {},
+      source
+    );
+
+    expect(publishWorkflowExecutionFinished).toHaveBeenCalledTimes(1);
+    expect(publishWorkflowExecutionFinished).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionId: 'exec-1',
+        workflowId: 'wf-1',
+        spaceId: 'default',
+        status: 'failed',
+        isTestRun: false,
+        triggeredBy: 'scheduled',
+        errorType: TASK_RECOVERY_ERROR_TYPE,
+        finishedAt: expect.any(String),
+      })
+    );
+  });
+
+  it('does not publish when the execution was already terminal', async () => {
+    const { workflowExecutionsDataClient, repository, stepExecutionRepository } =
+      createRecoveryTestHarness();
+    const source = {
+      id: 'exec-1',
+      workflowId: 'wf-1',
+      spaceId: 'default',
+      status: ExecutionStatus.FAILED,
+      isTestRun: false,
+      finishedAt: '2026-01-01T00:00:00.000Z',
+    } as EsWorkflowExecution;
+
+    await markExecutionFailedTaskRecovery(
+      repository,
+      stepExecutionRepository,
+      source.id,
+      { message: taskRecoveryMessages.workflowRunInterrupted },
+      {},
+      source
+    );
+
+    expect(workflowExecutionsDataClient.bulk).toHaveBeenCalled();
+    expect(publishWorkflowExecutionFinished).not.toHaveBeenCalled();
+  });
+});
 
 describe('shouldFailOnWorkflowRunRetry', () => {
   const base = (status: ExecutionStatus): EsWorkflowExecution =>

@@ -14,8 +14,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
   const functionalConfig = await readConfigFile(require.resolve('./kerberos.config'));
 
-  const kerberosKeytabPath = resolve(__dirname, './packages/helpers/kerberos/krb5.keytab');
-  const kerberosConfigPath = resolve(__dirname, './packages/helpers/kerberos/krb5.conf');
+  const kerberosKeytabPath = resolve(
+    __dirname,
+    '../../test_plugins/security_api_integration/packages/helpers/kerberos/krb5.keytab'
+  );
+  const kerberosConfigPath = resolve(
+    __dirname,
+    '../../test_plugins/security_api_integration/packages/helpers/kerberos/krb5.conf'
+  );
 
   return configureHTTP2({
     ...functionalConfig.getAll(),
