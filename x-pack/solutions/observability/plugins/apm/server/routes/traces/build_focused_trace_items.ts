@@ -43,8 +43,18 @@ export function buildChildrenTree({
   return findChildren(initialTraceDoc);
 }
 
+/**
+ * Returns the trace root item, falling back to the first orphan item (whose parent is not part
+ * of the trace items) when the actual root is missing, mirroring the full trace waterfall.
+ */
 export function findRootItem(traceItems: TraceItem[]) {
-  return traceItems.find((item) => !item.parentId);
+  const rootItem = traceItems.find((item) => !item.parentId);
+  if (rootItem) {
+    return rootItem;
+  }
+
+  const ids = new Set(traceItems.map(({ id }) => id));
+  return traceItems.find((item) => item.parentId && !ids.has(item.parentId));
 }
 
 export function buildFocusedTraceItems({
@@ -82,7 +92,7 @@ export function buildFocusedTraceItems({
     return acc;
   }, {});
 
-  const rootDoc = itemsGroupedByParentId.root?.[0];
+  const rootDoc = itemsGroupedByParentId.root?.[0] ?? findRootItem(traceItems);
   if (!rootDoc) {
     return undefined;
   }

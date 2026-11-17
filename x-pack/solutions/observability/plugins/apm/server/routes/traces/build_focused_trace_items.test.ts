@@ -6,7 +6,11 @@
  */
 
 import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
-import { buildChildrenTree, buildFocusedTraceItems } from './build_focused_trace_items';
+import {
+  buildChildrenTree,
+  buildFocusedTraceItems,
+  findRootItem,
+} from './build_focused_trace_items';
 
 const mockTraceDoc = (id: string, parentId?: string) => ({ id, parentId } as TraceItem);
 
@@ -145,5 +149,46 @@ describe('buildFocusedTraceItems', () => {
     const traceItems = [mockTraceDoc('1'), mockTraceDoc('2', '1'), mockTraceDoc('3', '2')];
     const result = buildFocusedTraceItems({ traceItems, docId: '1' });
     expect(result?.rootDoc).toEqual(mockTraceDoc('1'));
+  });
+
+  it('falls back to the first orphan document as root when the trace root is missing', () => {
+    const traceItems = [
+      mockTraceDoc('2', 'missing-root'),
+      mockTraceDoc('3', '2'),
+      mockTraceDoc('4', '3'),
+    ];
+    const result = buildFocusedTraceItems({ traceItems, docId: '3' });
+    expect(result).toEqual({
+      rootDoc: mockTraceDoc('2', 'missing-root'),
+      parentDoc: mockTraceDoc('2', 'missing-root'),
+      focusedTraceDoc: mockTraceDoc('3', '2'),
+      focusedTraceTree: [{ traceDoc: mockTraceDoc('4', '3'), children: [] }],
+    });
+  });
+
+  it('returns undefined when there is neither a root nor an orphan document', () => {
+    const traceItems = [mockTraceDoc('1', '2'), mockTraceDoc('2', '1')];
+    const result = buildFocusedTraceItems({ traceItems, docId: '1' });
+    expect(result).toBeUndefined();
+  });
+});
+
+describe('findRootItem', () => {
+  it('returns the document without a parent', () => {
+    const traceItems = [mockTraceDoc('2', '1'), mockTraceDoc('1')];
+    expect(findRootItem(traceItems)).toEqual(mockTraceDoc('1'));
+  });
+
+  it('falls back to the first orphan document when the root is missing', () => {
+    const traceItems = [
+      mockTraceDoc('3', '2'),
+      mockTraceDoc('2', 'missing'),
+      mockTraceDoc('4', 'x'),
+    ];
+    expect(findRootItem(traceItems)).toEqual(mockTraceDoc('2', 'missing'));
+  });
+
+  it('returns undefined for an empty list', () => {
+    expect(findRootItem([])).toBeUndefined();
   });
 });
