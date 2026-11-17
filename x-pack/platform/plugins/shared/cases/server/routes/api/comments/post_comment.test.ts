@@ -42,7 +42,7 @@ describe('POST comment route', () => {
   });
 
   it.each(['alert', 'event'])(
-    'reports the legacy `%s` type on the attachmentsAdded trigger',
+    'reports `%s` as sent on the attachmentsAdded trigger',
     async (type) => {
       await post({ type, owner: 'securitySolution' });
 
