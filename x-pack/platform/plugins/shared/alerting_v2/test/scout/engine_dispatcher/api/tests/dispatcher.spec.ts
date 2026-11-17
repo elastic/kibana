@@ -1753,13 +1753,21 @@ apiTest.describe.skip('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
 
       // The episode lands as unmatched because every enabled policy in
       // the space is snoozed.
-      const unmatched = await expectStableCount(apiServices, 1, {
+      await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(1, {
         ruleId: 'rule-1',
+        groupHash: 'rule-1-snoozed-series',
+        actionTypes: ['unmatched'],
+      });
+      const unmatched = await apiServices.alertingV2.alertActionsEvents.find({
+        ruleId: 'rule-1',
+        groupHash: 'rule-1-snoozed-series',
         actionTypes: ['unmatched'],
       });
 
+      expect(unmatched.length).toBeGreaterThanOrEqual(1);
       expect(unmatched[0]).toMatchObject({
         rule_id: 'rule-1',
+        group_hash: 'rule-1-snoozed-series',
         action_type: 'unmatched',
       });
 
