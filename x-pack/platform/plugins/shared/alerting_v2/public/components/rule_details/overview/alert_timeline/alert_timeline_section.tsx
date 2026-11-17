@@ -25,7 +25,7 @@ import { PluginStart } from '@kbn/core-di';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { useSpaceId } from '@kbn/alerting-v2-episodes-ui/hooks/use_space_id';
+import { useActiveSpaceId } from '@kbn/alerting-v2-episodes-ui/hooks/use_space_id';
 import { deriveAlertTimelineData } from '@kbn/alerting-v2-episodes-ui/alert_timeline';
 import { AlertTimelineLegend } from '@kbn/alerting-v2-episodes-ui/alert_timeline';
 import { AlertingDateRangePicker } from '@kbn/alerting-v2-browser-shared';
@@ -43,7 +43,7 @@ export const AlertTimelineSection: React.FC = () => {
   const data = useService(PluginStart('data')) as DataPublicPluginStart;
   const share = useService(PluginStart('share')) as SharePluginStart;
   const spaces = useService(PluginStart('spaces')) as SpacesPluginStart;
-  const spaceId = useSpaceId(spaces);
+  const spaceId = useActiveSpaceId(spaces);
   const application = useService(CoreStart('application'));
   const uiSettings = useService(CoreStart('uiSettings'));
   const http = useService(CoreStart('http'));

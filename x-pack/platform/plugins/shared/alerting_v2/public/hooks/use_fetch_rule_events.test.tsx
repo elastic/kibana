@@ -86,6 +86,48 @@ describe('useFetchRuleEvents', () => {
     );
   });
 
+  it('waits for the active space before fetching the phases', async () => {
+    const data = dataPluginMock.createStartContract();
+    const initialProps: { spaceId: string | undefined } = { spaceId: undefined };
+    const isPhasesCall = ([{ params }]: Parameters<typeof runEsqlAsyncSearch>) =>
+      params.query.includes('seg_start');
+    const { result, rerender } = renderHook(
+      ({ spaceId }: { spaceId: string | undefined }) =>
+        useFetchRuleEvents({
+          ruleId: 'rule-1',
+          windowStartMs: WINDOW_START_MS,
+          windowEndMs: WINDOW_END_MS,
+          spaceId,
+          data,
+        }),
+      { wrapper: createWrapper(), initialProps }
+    );
+
+    await waitFor(() =>
+      expect(
+        runEsqlAsyncSearchMock.mock.calls.some(([{ params }]) =>
+          params.query.includes('BY episode.id, group_hash')
+        )
+      ).toBe(true)
+    );
+    expect(runEsqlAsyncSearchMock.mock.calls.some(isPhasesCall)).toBe(false);
+    expect(result.current.isLoading).toBe(true);
+
+    rerender({ spaceId: 'space-1' });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    const phasesCalls = runEsqlAsyncSearchMock.mock.calls.filter(isPhasesCall);
+    expect(phasesCalls).toHaveLength(1);
+    expect(phasesCalls[0][0].params.query).toBe(
+      buildCollapsedStatusPhasesQuery({
+        spaceId: 'space-1',
+        ruleId: 'rule-1',
+        alertIds: ['ep-1'],
+        window: { startMs: WINDOW_START_MS, endMs: WINDOW_END_MS },
+      }).print('basic')
+    );
+  });
+
   it('does not query when there is no rule', () => {
     renderHook(
       () =>

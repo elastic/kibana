@@ -55,7 +55,7 @@ export interface UseFetchRuleEventsOptions {
   groupingFields?: readonly string[];
   /** Max alerts drawn per series (lane). Defaults to {@link MAX_ALERTS_PER_LANE}. */
   perLaneLimit?: number;
-  spaceId: string;
+  spaceId: string | undefined;
   data: DataPublicPluginStart;
 }
 
@@ -141,19 +141,21 @@ export const useFetchRuleEvents = ({
 
   const phasesQuery = useQuery({
     queryKey: ruleOverviewQueryKeys.episodePhases(
+      spaceId ?? '',
       ruleId ?? '',
       windowStartMs,
       windowEndMs,
       selectedAlertIds
     ),
-    enabled: phasesEnabled,
+    // Wait for the active space so phases are never fetched for the wrong one.
+    enabled: phasesEnabled && spaceId !== undefined,
     refetchOnWindowFocus: false,
     queryFn: ({ signal }) =>
       runEsqlAsyncSearch({
         data,
         params: {
           query: buildCollapsedStatusPhasesQuery({
-            spaceId,
+            spaceId: spaceId ?? '',
             ruleId: ruleId!,
             window: { startMs: windowStartMs, endMs: windowEndMs },
             alertIds: selectedAlertIds,
