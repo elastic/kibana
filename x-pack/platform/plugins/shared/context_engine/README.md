@@ -410,12 +410,16 @@ and answers 404 while either is off. The space comes from the request URL.
 
 ### Privileges and audit
 
-The route needs `contextEngine:write`. The events belong to the caller's user profile, as
-core's `userProfile.getCurrentProfileId()` resolves it: the profile of a UI session, the API key
+The route needs `contextEngine:write` and `contextEngine:manageMemory`. The second privilege is
+not part of All, so an admin grants it explicitly, for example to the API key a harness uses. It
+lets the holder save events for any user in the space, by naming that user in `user_id`. The
+future `_remember` route will need the same privilege.
+
+Without `user_id`, the events belong to the caller's user profile, as core's
+`userProfile.getCurrentProfileId()` resolves it: the profile of a UI session, the API key
 owner's profile, or for basic auth the profile Elasticsearch activates for those credentials. A
 caller without a profile, such as a service account or an API key whose owner never logged in to
-Kibana, gets 403. `user_id` may only name the caller for now; saving events for another user
-returns 403.
+Kibana, gets 403 unless it names `user_id`.
 
 Each AI index in `ai_index_ids` must exist in the space (404 otherwise), and the caller needs
 the Elasticsearch `write` privilege on its backing index, checked with `has_privileges` (403

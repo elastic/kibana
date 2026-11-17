@@ -36,13 +36,11 @@ import { errorResponseSchema } from './schemas/ai_indices_schema';
 import { MEMORY_DISABLED_MESSAGE, withContextEngineFeatureFlag } from './with_feature_flag';
 
 const WRITE_SECURITY: RouteSecurity = {
-  authz: { requiredPrivileges: [apiPrivileges.writeContextEngine] },
+  authz: { requiredPrivileges: [apiPrivileges.writeContextEngine, apiPrivileges.manageMemory] },
 };
 
-const OTHER_USER_MESSAGE =
-  'Saving events for another user is not supported yet. Leave out `user_id`, or set it to your own user id.';
 const NO_PROFILE_MESSAGE =
-  'The caller has no user profile, so its events cannot be attributed to a user. Log in to Kibana once to create one, or use an API key whose owner has one.';
+  'The caller has no user profile, so its events cannot be attributed to a user. Set `user_id`, log in to Kibana once to create a profile, or use an API key whose owner has one.';
 
 const forbidden = (message: string): Error =>
   Object.assign(new Error(message), { name: 'Forbidden' });
@@ -159,7 +157,7 @@ const saveEventsBodySchema = schema.object({
       maxLength: MAX_SESSION_EVENT_USER_ID_LENGTH,
       meta: {
         description:
-          'The user the events belong to. Defaults to the caller. Saving events for another user is not supported yet.',
+          "The user the events belong to. Defaults to the caller's user profile. Any user in the space can be named.",
       },
     })
   ),
@@ -221,7 +219,7 @@ export const registerSessionEventsRoutes = ({
         'Saves the events of an agent session, one document per event, so the session can be searched later. User and assistant messages are indexed for semantic search.',
         `Takes 1 to ${MAX_SESSION_EVENTS_PER_REQUEST} events and a body of up to 10 MB. A request that fails validation is rejected as a whole. Any field an event carries beyond the documented ones, such as a tool event's \`result\` or a tool call's \`args\`, is stored as sent, whatever its JSON type.`,
         'Each event gets its own result, in request order. A `failed` event, for example when its content could not be embedded, does not fail the request; resend it to retry. A resent event is stored again, and readers drop duplicates by session and event id.',
-        "The events belong to the caller's user profile, and a caller without one gets a 403. Saving events for another user is not supported yet. Each AI index in `ai_index_ids` must exist in this space, and the caller needs the Elasticsearch `write` privilege on its backing index. Otherwise the request is rejected and nothing is saved.",
+        "The route needs the `contextEngine:manageMemory` privilege on top of `contextEngine:write`. It lets the caller save events for any user in the space by naming them in `user_id`. Without `user_id` the events belong to the caller's user profile, and a caller without one gets a 403. Each AI index in `ai_index_ids` must exist in this space, and the caller needs the Elasticsearch `write` privilege on its backing index. Otherwise the request is rejected and nothing is saved.",
         'Each request writes one `memory_save_event` audit event.',
         'Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`), when memory is turned off, or when an AI index in `ai_index_ids` does not exist.',
       ].join('\n\n'),
@@ -244,7 +242,7 @@ export const registerSessionEventsRoutes = ({
             403: {
               body: errorResponseSchema,
               description:
-                '`user_id` names another user, the caller has no user profile, or the caller cannot write to one of the AI indices.',
+                '`user_id` is missing and the caller has no user profile, or the caller cannot write to one of the AI indices.',
             },
             404: {
               body: errorResponseSchema,
@@ -282,11 +280,8 @@ export const registerSessionEventsRoutes = ({
           return response[status]({ body: { message: error.message } });
         };
 
-        if (profileUid === undefined) {
+        if (userId === undefined) {
           return reject(forbidden(NO_PROFILE_MESSAGE), 'forbidden');
-        }
-        if (userId !== profileUid) {
-          return reject(forbidden(OTHER_USER_MESSAGE), 'forbidden');
         }
 
         try {

@@ -124,11 +124,15 @@ describe('session events routes', () => {
     });
   });
 
-  it('registers a public experimental route that needs the write privilege and takes 10 MB', () => {
+  it('registers a public experimental route that needs the write and manage memory privileges and takes 10 MB', () => {
     expect(route.config).toMatchObject({
       path: '/api/context_engine/memory/_save_event',
       access: 'public',
-      security: { authz: { requiredPrivileges: [apiPrivileges.writeContextEngine] } },
+      security: {
+        authz: {
+          requiredPrivileges: [apiPrivileges.writeContextEngine, apiPrivileges.manageMemory],
+        },
+      },
       options: { availability: { stability: 'experimental' } },
     });
     expect(SESSION_EVENTS_SAVE_PATH).toBe(route.config.path);
@@ -214,40 +218,39 @@ describe('session events routes', () => {
   });
 
   describe('user_id', () => {
-    it("is the caller's id when it is left out or set to the caller", async () => {
+    it("is the caller's id when it is left out", async () => {
       await callRoute({ session_id: 's1', events: [userEvent] });
-      await callRoute({ session_id: 's1', user_id: 'u_jdoe_profile', events: [userEvent] });
 
-      expect(service.saveEvents.mock.calls.map(([scope]) => scope.userId)).toEqual([
-        'u_jdoe_profile',
-        'u_jdoe_profile',
-      ]);
+      expect(savedScope()).toEqual({ space: 'marketing', userId: 'u_jdoe_profile' });
+      expect(response.ok).toHaveBeenCalledTimes(1);
     });
 
-    it('returns 403 and saves nothing for another user', async () => {
+    it('files the events under another user when user_id names one', async () => {
       await callRoute({ session_id: 's1', user_id: 'u_other', events: [userEvent] });
 
-      expect(response.forbidden).toHaveBeenCalledWith({
-        body: {
-          message:
-            'Saving events for another user is not supported yet. Leave out `user_id`, or set it to your own user id.',
-        },
-      });
-      expect(service.saveEvents).not.toHaveBeenCalled();
+      expect(savedScope()).toEqual({ space: 'marketing', userId: 'u_other' });
+      expect(response.forbidden).not.toHaveBeenCalled();
+      expect(response.ok).toHaveBeenCalledTimes(1);
     });
 
-    it.each([
-      ['without user_id', {}],
-      ['naming a user', { user_id: 'u_someone' }],
-    ])('returns 403 and saves nothing for a caller without a profile, %s', async (_name, body) => {
+    it('returns 403 and saves nothing for a caller without a profile and without user_id', async () => {
       profileUid = null;
 
-      await callRoute({ session_id: 's1', ...body, events: [userEvent] });
+      await callRoute({ session_id: 's1', events: [userEvent] });
 
       expect(response.forbidden).toHaveBeenCalledWith({
         body: { message: expect.stringContaining('The caller has no user profile') },
       });
       expect(service.saveEvents).not.toHaveBeenCalled();
+    });
+
+    it('saves for the named user when the caller has no profile', async () => {
+      profileUid = null;
+
+      await callRoute({ session_id: 's1', user_id: 'u_someone', events: [userEvent] });
+
+      expect(savedScope()).toEqual({ space: 'marketing', userId: 'u_someone' });
+      expect(response.forbidden).not.toHaveBeenCalled();
     });
   });
 
@@ -323,13 +326,25 @@ describe('session events routes', () => {
       ]);
     });
 
-    it('records a rejected request as a failure', async () => {
+    it('records the named user as the target of the events', async () => {
       await callRoute({ session_id: 's1', user_id: 'u_other', events: [userEvent] });
 
       expect(auditedEvents()).toEqual([
         expect.objectContaining({
-          event: expect.objectContaining({ action: 'memory_save_event', outcome: 'failure' }),
+          event: expect.objectContaining({ action: 'memory_save_event', outcome: 'success' }),
           user: { target: { id: 'u_other' } },
+        }),
+      ]);
+    });
+
+    it('records a rejected request as a failure', async () => {
+      profileUid = null;
+
+      await callRoute({ session_id: 's1', events: [userEvent] });
+
+      expect(auditedEvents()).toEqual([
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'memory_save_event', outcome: 'failure' }),
           error: expect.objectContaining({ code: 'Forbidden' }),
         }),
       ]);
