@@ -370,6 +370,16 @@ export class WorkflowsService {
     return this.crudService.getWorkflow(id, spaceId, options);
   }
 
+  public async getDefinitionToStore(
+    yaml: string,
+    workflow: { id: string; enabled: boolean },
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<EsWorkflow['definition'] | null> {
+    await this.ensureInitialized();
+    return this.crudService.getDefinitionToStore(yaml, workflow, spaceId, request);
+  }
+
   public async getHistoryForWorkflow(
     id: string,
     spaceId: string,
@@ -407,7 +417,12 @@ export class WorkflowsService {
     ids: string[],
     spaceId: string,
     source?: string[],
-    options?: { includeDeleted?: boolean; accessControlFilter?: estypes.QueryDslQueryContainer }
+    options?: {
+      includeDeleted?: boolean;
+      accessControlFilter?: estypes.QueryDslQueryContainer;
+      managedFilter?: ManagedFilter;
+      allowPartialResults?: boolean;
+    }
   ): Promise<WorkflowPartialDetailDto[]> {
     await this.ensureInitialized();
     return this.crudService.getWorkflowsSourceByIds(ids, spaceId, source, options);

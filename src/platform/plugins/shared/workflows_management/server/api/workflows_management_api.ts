@@ -64,7 +64,11 @@ import type {
   StepLogsParams,
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
 import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
-import { parseYamlToJSONWithoutValidation, WorkflowValidationError } from '@kbn/workflows-yaml';
+import {
+  isRecord,
+  parseYamlToJSONWithoutValidation,
+  WorkflowValidationError,
+} from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import {
   type ExternalResumeFormPageParams,
@@ -80,7 +84,11 @@ import type { LoadAlertDocumentsRequest, LoadedAlertDocuments } from './lib/load
 import { loadAlertDocuments } from './lib/load_alert_documents';
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import type { WorkflowDependentsLookup } from './lib/workflow_dependents_impact';
-import { analyzeWorkflowRemovalImpact } from './lib/workflow_dependents_impact';
+import {
+  analyzeWorkflowDependentsImpact,
+  analyzeWorkflowRemovalImpact,
+  parseDraftDefinition,
+} from './lib/workflow_dependents_impact';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
 import { ManagedWorkflowReadForbiddenError } from './managed_workflow_read_error';
@@ -103,6 +111,7 @@ import type {
   RestoreWorkflowVersionResponseDto,
   WorkflowChangesHistoryResponse,
 } from '../../common/lib/workflow_change_history/types';
+import type { WorkflowDependentsImpactResponse } from '../../common/lib/workflow_dependents/api';
 import type { RemovalImpact } from '../../common/lib/workflow_dependents/types';
 import { updateWorkflowYamlFields } from '../../common/lib/yaml/update_workflow_yaml_fields';
 import {
@@ -335,6 +344,16 @@ export interface ExecuteWorkflowResult {
 const isExecuteInlineWorkflowParams = (
   params: ExecuteWorkflowParams
 ): params is ExecuteInlineWorkflowParams => params.yaml !== undefined;
+
+/** The enabled flag lives on the document; callers fail when it is off, so fold it in. */
+const withEnabledState = ({
+  definition,
+  enabled,
+}: Pick<WorkflowPartialDetailDto, 'definition' | 'enabled'>): unknown =>
+  definition ? { ...definition, enabled: enabled ?? definition.enabled } : definition;
+
+const hasServiceAccount = (definition: unknown): boolean =>
+  isRecord(definition) && isRecord(definition.settings) && Boolean(definition.settings.run_as);
 
 export class WorkflowsManagementApi {
   private smlClient: Pick<
@@ -662,6 +681,52 @@ export class WorkflowsManagementApi {
     return result;
   }
 
+  /** Grades the workflows that run a workflow, and the ones it runs, against draft YAML. */
+  public async getWorkflowDependentsImpact(
+    id: string,
+    spaceId: string,
+    request: KibanaRequest,
+    yaml: string | undefined,
+    { allowManagedWorkflowRead = false }: { allowManagedWorkflowRead?: boolean } = {}
+  ): Promise<WorkflowDependentsImpactResponse> {
+    const workflow = await this.getWorkflow(id, spaceId, request);
+    if (!workflow) throw new WorkflowNotFoundError(id);
+    if (workflow.managed === true && !allowManagedWorkflowRead) {
+      throw new ManagedWorkflowReadForbiddenError();
+    }
+    const savedDefinition = withEnabledState(workflow);
+    const draft =
+      yaml === undefined
+        ? undefined
+        : await this.getDraftDefinition(yaml, workflow, spaceId, request);
+    return analyzeWorkflowDependentsImpact({
+      workflowId: id,
+      savedDefinition,
+      draftDefinition: draft ? draft.definition : savedDefinition,
+      isDraftValid: draft?.isValid ?? true,
+      managed: workflow.managed === true,
+      lookup: await this.getDependentsLookup(spaceId, request, allowManagedWorkflowRead),
+    });
+  }
+
+  // What saving `yaml` would store. Invalid YAML is stored without a definition, so the parsed
+  // YAML stands in to describe the calls; YAML that doesn't parse runs nothing.
+  private async getDraftDefinition(
+    yaml: string,
+    workflow: { id: string; enabled: boolean },
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<{ definition: unknown; isValid: boolean }> {
+    const parsedDraft = parseDraftDefinition(yaml);
+    const storedDraft = await this.workflowsService.getDefinitionToStore(
+      yaml,
+      workflow,
+      spaceId,
+      request
+    );
+    return { definition: storedDraft ?? parsedDraft, isValid: storedDraft !== null };
+  }
+
   /** Lists the workflows that fail when the given workflows are turned off or deleted. */
   public async getWorkflowRemovalImpact(
     ids: string[],
@@ -714,8 +779,27 @@ export class WorkflowsManagementApi {
           managedFilter,
           includeUnindexed: true,
         });
-        this.indexCalledWorkflowIdsInBackground(workflows.map(({ id }) => id));
+        // Writing a workflow bound to a service account needs a user request, so those stay
+        // unindexed until they are next saved.
+        this.indexCalledWorkflowIdsInBackground(
+          workflows.filter(({ definition }) => !hasServiceAccount(definition)).map(({ id }) => id)
+        );
         return workflows;
+      },
+      getWorkflowsByIds: async (ids) => {
+        const workflows = await this.workflowsService.getWorkflowsSourceByIds(
+          ids,
+          spaceId,
+          ['name', 'enabled', 'definition', 'managed'],
+          { accessControlFilter, managedFilter, allowPartialResults: false }
+        );
+        return workflows.map((workflow) => ({
+          id: workflow.id,
+          name: workflow.name ?? workflow.id,
+          enabled: workflow.enabled === true,
+          definition: withEnabledState(workflow),
+          managed: workflow.managed === true,
+        }));
       },
     };
   }
