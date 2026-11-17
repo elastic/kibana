@@ -118,23 +118,6 @@ describe('SLO usage collector fetcher', () => {
             "disabled": 0,
             "enabled": 8,
           },
-          "composite": Object {
-            "by_budgeting_method": Object {},
-            "by_composite_method": Object {},
-            "by_status": Object {
-              "disabled": 0,
-              "enabled": 0,
-            },
-            "definitions": Object {
-              "total": 0,
-            },
-            "members": Object {
-              "at_max_count": 0,
-              "avg": 0,
-              "max": 0,
-              "min": 0,
-            },
-          },
           "definitions": Object {
             "total": 8,
             "total_with_ccs": 0,
@@ -191,7 +174,7 @@ describe('SLO usage collector fetcher', () => {
     it('returns zeros when there are no composites', async () => {
       const results = await fetcher({ soClient, esClient }, loggerMock, getCompositeSoClient);
 
-      expect(results.slo.composite).toEqual(emptyCompositeUsage);
+      expect(results.composite).toEqual(emptyCompositeUsage);
       expect(loggerMock.warn).not.toHaveBeenCalled();
     });
 
@@ -206,7 +189,7 @@ describe('SLO usage collector fetcher', () => {
 
       const results = await fetcher({ soClient, esClient }, loggerMock, getCompositeSoClient);
 
-      expect(results.slo.composite).toEqual({
+      expect(results.composite).toEqual({
         definitions: { total: 4 },
         by_status: { enabled: 2, disabled: 2 },
         by_budgeting_method: { occurrences: 4 },
@@ -221,8 +204,8 @@ describe('SLO usage collector fetcher', () => {
 
       const results = await fetcher({ soClient, esClient }, loggerMock, getCompositeSoClient);
 
-      expect(results.slo.composite.definitions.total).toBe(2);
-      expect(results.slo.composite.members).toEqual({ min: 2, avg: 3, max: 4, at_max_count: 0 });
+      expect(results.composite.definitions.total).toBe(2);
+      expect(results.composite.members).toEqual({ min: 2, avg: 3, max: 4, at_max_count: 0 });
     });
 
     it('returns zeros, logs a warning and keeps the slo block when reading composites fails', async () => {
@@ -233,7 +216,8 @@ describe('SLO usage collector fetcher', () => {
         Promise.reject(new Error('boom'))
       );
 
-      expect(results.slo).toEqual({ ...expected.slo, composite: emptyCompositeUsage });
+      expect(results.slo).toEqual(expected.slo);
+      expect(results.composite).toEqual(emptyCompositeUsage);
       expect(loggerMock.warn).toHaveBeenCalledWith(
         'Failed to collect composite SLO usage: boom'
       );

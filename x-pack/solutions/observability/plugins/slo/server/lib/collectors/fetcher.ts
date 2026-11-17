@@ -19,7 +19,7 @@ import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
 
 export type GetCompositeSoClient = () => Promise<SavedObjectsClientContract>;
 
-const getEmptyCompositeUsage = (): Usage['slo']['composite'] => ({
+const getEmptyCompositeUsage = (): Usage['composite'] => ({
   definitions: { total: 0 },
   by_status: { enabled: 0, disabled: 0 },
   by_budgeting_method: {},
@@ -30,7 +30,7 @@ const getEmptyCompositeUsage = (): Usage['slo']['composite'] => ({
 const fetchCompositeUsage = async (
   getCompositeSoClient: GetCompositeSoClient,
   logger: Logger
-): Promise<Usage['slo']['composite']> => {
+): Promise<Usage['composite']> => {
   const usage = getEmptyCompositeUsage();
   let totalMembers = 0;
   let finder: ISavedObjectsPointInTimeFinder<StoredCompositeSLODefinition, unknown> | undefined;
@@ -104,7 +104,7 @@ export const fetcher = async (
     },
   });
 
-  let usage: Usage['slo'] = {
+  let sloUsage: Usage['slo'] = {
     total: 0,
     definitions: {
       total: 0,
@@ -125,11 +125,10 @@ export const fetcher = async (
       occurrences: 0,
       timeslices: 0,
     },
-    composite: await fetchCompositeUsage(getCompositeSoClient, logger),
   };
 
   for await (const response of finder.find()) {
-    usage = response.saved_objects.reduce((acc, so) => {
+    sloUsage = response.saved_objects.reduce((acc, so) => {
       return {
         ...acc,
         total: acc.total + 1, // deprecated in favor of definitions.total
@@ -175,12 +174,13 @@ export const fetcher = async (
           }),
         },
       };
-    }, usage);
+    }, sloUsage);
   }
 
   await finder.close();
 
   return {
-    slo: usage,
+    slo: sloUsage,
+    composite: await fetchCompositeUsage(getCompositeSoClient, logger),
   };
 };
