@@ -23,7 +23,7 @@ import { DetectionAccountService } from '../lib/service_account/detection_accoun
 import { DetectionSetupService } from '../lib/service_account/setup_service';
 import { DetectionWorkflowInstaller } from '../lib/workflows/detection_workflow_installer';
 import { DetectionSignalStore } from '../lib/signals/signal_store';
-import { DetectionStateClient } from '../lib/state/detection_state_client';
+import { DetectionStateClient } from '../lib/state';
 import { detectionStateSavedObjectType } from '../saved_objects/detection_state_saved_object';
 import { StrategyCatalog } from '../lib/strategies/strategy_catalog';
 import { InMemorySavedObjectsRepository } from '../test_utils/in_memory_saved_objects_repository';
