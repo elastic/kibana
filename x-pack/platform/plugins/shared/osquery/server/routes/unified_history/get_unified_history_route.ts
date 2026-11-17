@@ -40,7 +40,7 @@ import type { LiveActionHit } from './map_live_hit_to_row';
 
 import { unifiedHistoryResponseSchema } from './response_schemas';
 
-const VALID_SOURCE_FILTERS = new Set(['live', 'rule', 'scheduled']);
+const VALID_SOURCE_FILTERS = new Set(['live', 'rule', 'scheduled', 'workflow']);
 
 export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   const logger: Logger = osqueryContext.logFactory.get('unifiedHistory');
@@ -72,7 +72,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
                     if (invalid.length) {
                       return `invalid sourceFilter values: ${invalid.join(
                         ', '
-                      )}. Allowed: live, rule, scheduled`;
+                      )}. Allowed: live, rule, scheduled, workflow`;
                     }
                   },
                 })

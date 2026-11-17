@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ObjectType } from '@kbn/config-schema';
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import {
@@ -80,7 +81,39 @@ describe('getUnifiedHistoryRoute', () => {
     }
 
     routeHandler = routeVersion.handler;
+
+    return routeVersion.config;
   };
+
+  describe('sourceFilters validation', () => {
+    const validateSourceFilters = (sourceFilters: string) => {
+      const { validate } = setupRoute();
+      if (
+        !validate ||
+        typeof validate === 'function' ||
+        !(validate.request?.query instanceof ObjectType)
+      ) {
+        throw new Error('Expected a query validation schema');
+      }
+
+      return validate.request.query.validate({ sourceFilters });
+    };
+
+    it.each(['workflow', 'live,rule,scheduled,workflow'])(
+      'accepts sourceFilters=%s',
+      (sourceFilters) => {
+        expect(validateSourceFilters(sourceFilters)).toEqual(
+          expect.objectContaining({ sourceFilters })
+        );
+      }
+    );
+
+    it.each(['unknown', 'workflow,unknown'])('rejects sourceFilters=%s', (sourceFilters) => {
+      expect(() => validateSourceFilters(sourceFilters)).toThrow(
+        'invalid sourceFilter values: unknown'
+      );
+    });
+  });
 
   describe('when CPS is enabled', () => {
     beforeEach(() => {
