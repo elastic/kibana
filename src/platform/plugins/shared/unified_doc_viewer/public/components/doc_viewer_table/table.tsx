@@ -219,6 +219,17 @@ const InternalDocViewerTable = ({
     [showOnlySelectedFields, isShowOnlySelectedFieldsDisabled]
   );
 
+  const allFieldNames = useMemo(() => {
+    const names = Object.keys(flattened);
+    if (dataSource?.kind !== 'esql') {
+      return names;
+    }
+    const emptyColumnNames = dataSource.resultColumns
+      .filter(({ isNull, name }) => isNull && !(name in flattened))
+      .map(({ name }) => name);
+    return emptyColumnNames.length ? [...names, ...emptyColumnNames] : names;
+  }, [flattened, dataSource]);
+
   const displayedFieldNames = useMemo(() => {
     if (shouldShowOnlySelectedFields) {
       return getVisibleColumns(
@@ -232,7 +243,7 @@ const InternalDocViewerTable = ({
         )
       );
     }
-    return Object.keys(flattened).sort((fieldA, fieldB) => {
+    return [...allFieldNames].sort((fieldA, fieldB) => {
       const mappingA = mapping(fieldA);
       const mappingB = mapping(fieldB);
       const nameA = !mappingA || !mappingA.displayName ? fieldA : mappingA.displayName;
@@ -241,7 +252,7 @@ const InternalDocViewerTable = ({
     });
   }, [
     fieldsFromColumns,
-    flattened,
+    allFieldNames,
     shouldShowOnlySelectedFields,
     mapping,
     dataView,
