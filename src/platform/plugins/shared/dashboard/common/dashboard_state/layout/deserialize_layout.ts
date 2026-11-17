@@ -10,8 +10,8 @@
 import { v4 } from 'uuid';
 import type { DashboardPanel } from '@kbn/as-code-dashboard-schema';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
-import { isDashboardSection } from '../../../common';
-import type { DashboardChildState, DashboardLayout } from './types';
+import { isDashboardSection } from '../../is_dashboard_section';
+import type { DashboardChildState, DashboardLayout } from './layout_types';
 
 export function deserializeLayout(
   panels: DashboardState['panels'],
