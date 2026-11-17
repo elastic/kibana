@@ -8,7 +8,11 @@
  */
 
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
-import { GROUP_NOT_SET_VALUE, type ESQLStatsQueryMeta } from '@kbn/esql-utils';
+import {
+  GROUP_NOT_SET_VALUE,
+  isAggregateFilteringFunction,
+  type ESQLStatsQueryMeta,
+} from '@kbn/esql-utils';
 import { useMemo, useState } from 'react';
 import {
   type DataCascadeRowProps,
@@ -70,16 +74,32 @@ export const useGroupedCascadeData = ({
             groupValue,
             aggregatedValues: groupRows.reduce<ESQLDataGroupNode['aggregatedValues']>(
               (allValues, row) => {
-                queryMeta.appliedFunctions.forEach(({ identifier }) => {
+                queryMeta.appliedFunctions.forEach(({ identifier, aggregation }) => {
                   const currentValue = row.flattened[identifier];
 
                   if (isNil(currentValue)) {
+                    // Recording the null keeps "every result row held null for this aggregate"
+                    // distinguishable from "this aggregate never appeared", which the leaf query
+                    // needs in order to filter on null rather than leave documents unconstrained.
+                    // A later row carrying a real value still overwrites it, because every branch
+                    // below treats a nil existing value as nothing collected yet.
+                    if (!(identifier in allValues)) {
+                      allValues[identifier] = null;
+                    }
                     return;
                   }
 
                   const existingValue = allValues[identifier];
 
-                  if (typeof currentValue === 'number') {
+                  // Several result rows collapse into one cascade node whenever the cascade groups
+                  // by fewer columns than the STATS command does. Adding the figures together is
+                  // right for an aggregate that reduces its group to a single number, but an
+                  // aggregate that collects the values held by the group has to keep them apart,
+                  // otherwise the row displays a number no document ever held, and the leaf query
+                  // built from it looks for that number.
+                  const collectsGroupValues = isAggregateFilteringFunction(aggregation);
+
+                  if (typeof currentValue === 'number' && !collectsGroupValues) {
                     if (!columnTypes.has(identifier)) {
                       columnTypes.set(identifier, 'number');
                     }
@@ -88,7 +108,7 @@ export const useGroupedCascadeData = ({
                     } else if (isNil(existingValue)) {
                       allValues[identifier] = currentValue;
                     }
-                  } else if (typeof currentValue === 'string') {
+                  } else if (typeof currentValue === 'string' || typeof currentValue === 'number') {
                     if (!columnTypes.has(identifier)) {
                       columnTypes.set(identifier, 'array');
                     }

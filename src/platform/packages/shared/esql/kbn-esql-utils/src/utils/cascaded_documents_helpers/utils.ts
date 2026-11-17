@@ -212,18 +212,31 @@ export function getStatsGroupFieldType<
  * Values displayed for the aggregates of the cascade row that's being operated on,
  * keyed by the aggregate identifier as it is displayed in the UI.
  */
-export type NodeAggregatedValues = Record<string, number | Array<string | number> | undefined>;
+export type NodeAggregatedValues = Record<
+  string,
+  number | Array<string | number> | null | undefined
+>;
 
 /**
- * List of aggregate functions that can act as filters,
+ * Subset of aggregate functions of interest that act as filters, when applied on a grouped dataset.
  */
 const AGGREGATE_FILTERING_FUNCTIONS = [
-  /**
-   * The VALUES function because it returns a deduplicated list of values, when specifically applied on a multivalued field, over a grouped dataset it acts as a filter.
-   * {@see https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions#esql-values | VALUES}
-   */
-  'values',
+  'values', // see https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions/values
+  'top', // see https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions/top
+  'sample', // see https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions/sample
+  'first', // see https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions/first
+  'earliest', // see https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions/earliest
+  'last', // see https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions/last
+  'latest', // see https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/aggregation-functions/latest
 ];
+
+/**
+ * Returns true when the aggregate function collects the values held by the group rather than
+ * reducing them to a single figure, which means its result can be expressed as a document level
+ * predicate, and equally that its displayed values must never be combined arithmetically.
+ */
+export const isAggregateFilteringFunction = (functionName: string | undefined): boolean =>
+  Boolean(functionName) && AGGREGATE_FILTERING_FUNCTIONS.includes(functionName!.toLowerCase());
 
 /**
  * Kibana field types for which an exact phrase match is the appropriate document level predicate
@@ -319,7 +332,7 @@ export const buildValuesAggregateFilterExpressions = ({
 
       if (
         !isFunctionExpression(aggregateDefinition) ||
-        !AGGREGATE_FILTERING_FUNCTIONS.includes(aggregateDefinition.name)
+        !isAggregateFilteringFunction(aggregateDefinition.name)
       ) {
         // aggregates like COUNT or AVG have no per document equivalent we could filter on
         return filters;
@@ -349,11 +362,29 @@ export const buildValuesAggregateFilterExpressions = ({
 
       const displayedValues = nodeAggregatedValues[removeBackticks(aggregate.field)];
 
-      const aggregateValues = (Array.isArray(displayedValues) ? displayedValues : [displayedValues])
-        .filter((value): value is string | number => value !== undefined && value !== null)
-        .filter((value) => value !== '');
+      const aggregateValues = Array.from(
+        // the values of several rows can be collected into a single cascade node,
+        // so the same value can be present more than once
+        new Set(
+          (Array.isArray(displayedValues) ? displayedValues : [displayedValues])
+            .filter((value): value is string | number => value !== undefined && value !== null)
+            .filter((value) => value !== '')
+        )
+      );
 
       if (!aggregateValues.length) {
+        // A row that displays no value at all for an aggregate is only telling us something when
+        // it held null, which is how the aggregate functions we filter on report a group whose
+        // documents all lack the field. That group is still expressible as a predicate. An
+        // aggregate missing from the row tells us nothing, so its documents stay unconstrained.
+        if (displayedValues === null) {
+          filters.push(
+            Builder.expression.func.postfix('IS NULL', [
+              Builder.identifier({ name: aggregatedColumnName }),
+            ])
+          );
+        }
+
         return filters;
       }
 

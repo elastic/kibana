@@ -74,6 +74,7 @@ export {
   appendFilteringWhereClauseForCascadeLayout,
   getStatsGroupFieldType,
   getFieldParamDefinition,
+  isAggregateFilteringFunction,
   getESQLSources,
   getEsqlColumns,
   getEsqlSourceColumns,

@@ -184,6 +184,90 @@ describe('data_fetching related hooks', () => {
       expect(result.current.columnTypes.get('ext')).toBe('array');
     });
 
+    it('should collect, not add, scalar numeric values of an aggregate that holds group values', () => {
+      // ES|QL returns a single valued VALUES() result unwrapped, and several result rows collapse
+      // into one node whenever the cascade groups by fewer columns than the STATS command does
+      const mockRows = createMockRows([
+        { category: 'A', count: 10, bytes: 1024 },
+        { category: 'A', count: 5, bytes: 2048 },
+      ]);
+
+      const queryMetaWithNumericValues: ESQLStatsQueryMeta = {
+        groupByFields: [{ field: 'category', type: 'column' }],
+        appliedFunctions: [
+          { identifier: 'count', aggregation: 'count' },
+          { identifier: 'bytes', aggregation: 'values' },
+        ],
+      };
+
+      const { result } = renderHook(() =>
+        useGroupedCascadeData({
+          selectedCascadeGroups: defaultSelectedCascadeGroups,
+          rows: mockRows,
+          queryMeta: queryMetaWithNumericValues,
+          esqlVariables: undefined,
+        })
+      );
+
+      expect(result.current.data).toHaveLength(1);
+      expect(result.current.data[0].aggregatedValues.bytes).toEqual([1024, 2048]);
+      expect(result.current.columnTypes.get('bytes')).toBe('array');
+      // aggregates that reduce their group to a single figure are still added together
+      expect(result.current.data[0].aggregatedValues.count).toBe(15);
+    });
+
+    it('should record a null for an aggregate every row in the group held null for', () => {
+      const mockRows = createMockRows([
+        { category: 'A', count: 10, host: null },
+        { category: 'A', count: 5, host: null },
+      ]);
+
+      const { result } = renderHook(() =>
+        useGroupedCascadeData({
+          selectedCascadeGroups: defaultSelectedCascadeGroups,
+          rows: mockRows,
+          queryMeta: {
+            groupByFields: [{ field: 'category', type: 'column' }],
+            appliedFunctions: [
+              { identifier: 'count', aggregation: 'count' },
+              { identifier: 'host', aggregation: 'values' },
+            ],
+          },
+          esqlVariables: undefined,
+        })
+      );
+
+      expect(result.current.data).toHaveLength(1);
+      // the leaf query reads this as "every document behind the row lacks the field", which an
+      // aggregate missing from the row entirely must not be mistaken for
+      expect(result.current.data[0].aggregatedValues.host).toBeNull();
+    });
+
+    it('should let a value reported by a later row replace a recorded null', () => {
+      const mockRows = createMockRows([
+        { category: 'A', count: 10, host: null },
+        { category: 'A', count: 5, host: 'host-2' },
+      ]);
+
+      const { result } = renderHook(() =>
+        useGroupedCascadeData({
+          selectedCascadeGroups: defaultSelectedCascadeGroups,
+          rows: mockRows,
+          queryMeta: {
+            groupByFields: [{ field: 'category', type: 'column' }],
+            appliedFunctions: [
+              { identifier: 'count', aggregation: 'count' },
+              { identifier: 'host', aggregation: 'values' },
+            ],
+          },
+          esqlVariables: undefined,
+        })
+      );
+
+      expect(result.current.data).toHaveLength(1);
+      expect(result.current.data[0].aggregatedValues.host).toEqual(['host-2']);
+    });
+
     it('should package scalar string aggregation values into arrays', () => {
       const mockRows = createMockRows([{ category: 'A', count: 10, host: 'host-1' }]);
 
