@@ -28,7 +28,7 @@ jest.mock('./data_stream', () => ({
   initializeDataStreamClient: jest.fn(),
 }));
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 const { initializeDataStreamClient } = require('./data_stream');
 
 describe('LogsRepository', () => {
