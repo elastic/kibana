@@ -24,10 +24,9 @@ export interface LeftoverPackagePolicies {
 }
 
 /**
- * Compares existing private-location package policies with the ids that monitors expect:
- * `{configId}-{locationId}`, or `{heartbeatId}-{locationId}` for a policy that was created under
- * that id before policy ids were built from the saved-object id. A policy that exists under both
- * is a duplicate, and only the `{configId}` one is kept.
+ * Compares existing private-location package policies with the ids that monitors expect: the
+ * `{configId}-{locationId}` one, or the `{heartbeatId}-{locationId}` one while that is the only one
+ * that exists. A policy under both ids is a duplicate, and only the `{configId}` one is kept.
  */
 export const findLeftoverPackagePolicies = async (
   server: SyntheticsServerSetup,
@@ -48,11 +47,8 @@ export const findLeftoverPackagePolicies = async (
   }
 
   const privateLocationAPI = new SyntheticsPrivateLocation(server);
-  const expectedPolicies: Array<{
-    policyId: string;
-    heartbeatPolicyId: string;
-    locationId: string;
-  }> = [];
+  const expectedIds = new Set<string>();
+  const missingLocationIds = new Set<string>();
   const finder = soClient.createPointInTimeFinder<EncryptedSyntheticsMonitorAttributes>({
     type: syntheticsMonitorSOTypes,
     fields: ['id', 'name', 'locations', 'origin'],
@@ -63,12 +59,15 @@ export const findLeftoverPackagePolicies = async (
       for (const { id, attributes } of monitors) {
         for (const location of attributes.locations ?? []) {
           if (!location.isServiceManaged) {
-            const policyConfig = { id: attributes.id, config_id: id };
-            expectedPolicies.push({
-              policyId: privateLocationAPI.getPolicyId(policyConfig, location.id),
-              heartbeatPolicyId: privateLocationAPI.getHeartbeatPolicyId(policyConfig, location.id),
-              locationId: location.id,
-            });
+            const policyId = privateLocationAPI.findExistingPolicyId(
+              { id: attributes.id, config_id: id },
+              location.id,
+              existingIds
+            );
+            expectedIds.add(policyId);
+            if (!existingIds.has(policyId)) {
+              missingLocationIds.add(location.id);
+            }
           }
         }
       }
@@ -77,16 +76,6 @@ export const findLeftoverPackagePolicies = async (
     finder.close().catch(() => {});
   }
 
-  const expectedIds = new Set<string>();
-  const missingLocationIds = new Set<string>();
-  for (const { policyId, heartbeatPolicyId, locationId } of expectedPolicies) {
-    expectedIds.add(policyId);
-    if (existingIds.has(heartbeatPolicyId) && !existingIds.has(policyId)) {
-      expectedIds.add(heartbeatPolicyId);
-    } else if (!existingIds.has(policyId)) {
-      missingLocationIds.add(locationId);
-    }
-  }
   const leftoverIds = [...existingIds].filter((id) => !expectedIds.has(id));
   return { leftoverIds, missingLocationIds: [...missingLocationIds] };
 };

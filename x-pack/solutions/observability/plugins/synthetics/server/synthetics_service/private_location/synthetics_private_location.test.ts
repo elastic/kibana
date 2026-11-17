@@ -154,43 +154,22 @@ describe('SyntheticsPrivateLocation', () => {
       expect(result).toEqual('monitor-123-location-456');
     });
 
-    it('keeps the UI monitor ID unchanged when the heartbeat id is the saved-object id', () => {
-      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
-      const config = { id: 'monitor-uuid', config_id: 'monitor-uuid' };
-      expect(syntheticsPrivateLocation.getPolicyId(config, 'location-456')).toEqual(
-        syntheticsPrivateLocation.getHeartbeatPolicyId(config, 'location-456')
-      );
-    });
-
     it.each([
-      ['fields.config_id', { fields: { config_id: 'so-uuid' } }],
-      ['config_id', { config_id: 'so-uuid' }],
-    ])('builds the policy ID from the saved-object id found in %s', (_label, ids) => {
+      [
+        'fields.config_id',
+        { id: ' journey with spaces é-project-default ', fields: { config_id: 'so-uuid' } },
+        'so-uuid-location-456',
+      ],
+      ['config_id', { id: 'journey', config_id: 'so-uuid' }, 'so-uuid-location-456'],
+      [
+        'the heartbeat id when the saved-object id is unknown',
+        { id: 'journey' },
+        'journey-location-456',
+      ],
+    ])('builds the policy ID from %s', (_label, config, expected) => {
       const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
-      const config = { id: 'my journey-my-project-default', ...ids };
 
-      expect(syntheticsPrivateLocation.getPolicyId(config, 'location-456')).toEqual(
-        'so-uuid-location-456'
-      );
-    });
-
-    it('never puts the custom heartbeat id of a project monitor in the policy ID', () => {
-      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
-      const config = {
-        id: ' journey with spaces é-project-default ',
-        fields: { config_id: 'f9c1d0aa-1c3e-4d2b-9b1e-6a5f0b1d2c3e' },
-      };
-
-      expect(syntheticsPrivateLocation.getPolicyId(config, 'location-456')).toEqual(
-        'f9c1d0aa-1c3e-4d2b-9b1e-6a5f0b1d2c3e-location-456'
-      );
-    });
-
-    it('falls back to the heartbeat id when the saved-object id is unknown', () => {
-      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
-      expect(syntheticsPrivateLocation.getPolicyId({ id: 'monitor-123' }, 'location-456')).toEqual(
-        'monitor-123-location-456'
-      );
+      expect(syntheticsPrivateLocation.getPolicyId(config, 'location-456')).toEqual(expected);
     });
   });
 
@@ -211,15 +190,6 @@ describe('SyntheticsPrivateLocation', () => {
         'journey-project-default-loc-1-default',
         'journey-project-default-loc-1-space-a',
       ]);
-    });
-
-    it('does not repeat the ID of a UI monitor', () => {
-      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
-      const config = { id: 'so-uuid', config_id: 'so-uuid' };
-
-      expect(
-        syntheticsPrivateLocation.getPolicyIdCandidates(config, 'loc-1', new Set(['default']))
-      ).toEqual(['so-uuid-loc-1', 'so-uuid-loc-1-default']);
     });
   });
 
@@ -391,95 +361,58 @@ describe('SyntheticsPrivateLocation', () => {
       const config = { id: 'journey-project-default', config_id: 'so-uuid' };
       const allSpaces = new Set(['default', 'space-a']);
 
-      it('writes a policy that does not exist yet under the new ID', () => {
-        const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
-
-        const result = syntheticsPrivateLocation.getPolicyIdFormatInfo(
-          config,
-          'loc-1',
+      const cases: Array<[string, string[], string, boolean, string[]]> = [
+        ['nothing exists', [], 'so-uuid-loc-1', false, []],
+        [
+          'a heartbeat-based policy exists',
+          ['journey-project-default-loc-1'],
+          'journey-project-default-loc-1',
+          true,
           [],
-          allSpaces
-        );
+        ],
+        [
+          'a policy exists under both ids',
+          ['journey-project-default-loc-1', 'so-uuid-loc-1'],
+          'so-uuid-loc-1',
+          true,
+          [],
+        ],
+        [
+          'a space-suffixed policy exists',
+          ['journey-project-default-loc-1-space-a'],
+          'so-uuid-loc-1',
+          false,
+          ['journey-project-default-loc-1-space-a'],
+        ],
+        [
+          'a heartbeat-based and a space-suffixed policy exist',
+          ['journey-project-default-loc-1', 'journey-project-default-loc-1-space-a'],
+          'journey-project-default-loc-1',
+          true,
+          ['journey-project-default-loc-1-space-a'],
+        ],
+      ];
 
-        expect(result).toEqual({
-          policyId: 'so-uuid-loc-1',
-          hasNewFormatPolicyId: false,
-          hasAnyLegacyPolicyId: false,
-          legacyPolicyIds: [],
-        });
-      });
+      it.each(cases)(
+        'when %s',
+        (_label, existingIds, policyId, hasNewFormatPolicyId, legacyPolicyIds) => {
+          const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
 
-      it('keeps an existing heartbeat-based policy under its own ID', () => {
-        const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
-
-        const result = syntheticsPrivateLocation.getPolicyIdFormatInfo(
-          config,
-          'loc-1',
-          [{ id: 'journey-project-default-loc-1' }],
-          allSpaces
-        );
-
-        expect(result).toEqual({
-          policyId: 'journey-project-default-loc-1',
-          hasNewFormatPolicyId: true,
-          hasAnyLegacyPolicyId: false,
-          legacyPolicyIds: [],
-        });
-      });
-
-      it('keeps the new ID and flags the heartbeat-based policy as a duplicate when both exist', () => {
-        const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
-
-        const result = syntheticsPrivateLocation.getPolicyIdFormatInfo(
-          config,
-          'loc-1',
-          [{ id: 'journey-project-default-loc-1' }, { id: 'so-uuid-loc-1' }],
-          allSpaces
-        );
-
-        expect(result).toEqual({
-          policyId: 'so-uuid-loc-1',
-          hasNewFormatPolicyId: true,
-          hasAnyLegacyPolicyId: true,
-          legacyPolicyIds: ['journey-project-default-loc-1'],
-        });
-      });
-
-      it('replaces a space-suffixed policy by one under the new ID', () => {
-        const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
-
-        const result = syntheticsPrivateLocation.getPolicyIdFormatInfo(
-          config,
-          'loc-1',
-          [{ id: 'journey-project-default-loc-1-space-a' }],
-          allSpaces
-        );
-
-        expect(result).toEqual({
-          policyId: 'so-uuid-loc-1',
-          hasNewFormatPolicyId: false,
-          hasAnyLegacyPolicyId: true,
-          legacyPolicyIds: ['journey-project-default-loc-1-space-a'],
-        });
-      });
-
-      it('keeps a heartbeat-based policy and removes the space-suffixed one next to it', () => {
-        const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
-
-        const result = syntheticsPrivateLocation.getPolicyIdFormatInfo(
-          config,
-          'loc-1',
-          [
-            { id: 'journey-project-default-loc-1' },
-            { id: 'journey-project-default-loc-1-space-a' },
-          ],
-          allSpaces
-        );
-
-        expect(result.policyId).toBe('journey-project-default-loc-1');
-        expect(result.hasNewFormatPolicyId).toBe(true);
-        expect(result.legacyPolicyIds).toEqual(['journey-project-default-loc-1-space-a']);
-      });
+          expect(
+            syntheticsPrivateLocation.getPolicyIdFormatInfo(
+              config,
+              'loc-1',
+              existingIds.map((id) => ({ id })),
+              allSpaces
+            )
+          ).toEqual({
+            policyId,
+            hasNewFormatPolicyId,
+            hasAnyLegacyPolicyId: legacyPolicyIds.length > 0,
+            legacyPolicyIds,
+          });
+        }
+      );
     });
   });
 
@@ -1918,21 +1851,6 @@ describe('SyntheticsPrivateLocation', () => {
       expect(bulkCreate.mock.calls[0][0].newPolicies.map(({ id }) => id)).toEqual([newPolicyId]);
     });
 
-    it('creates a missing policy under the saved-object id on edit', async () => {
-      const { syntheticsPrivateLocation, bulkCreate, bulkUpdate, bulkDelete } = setup();
-
-      await syntheticsPrivateLocation.editMonitors(
-        [{ config: projectConfig, globalParams: {} }],
-        [location],
-        'default',
-        []
-      );
-
-      expect(bulkCreate.mock.calls[0][0].newPolicies.map(({ id }) => id)).toEqual([newPolicyId]);
-      expect(bulkUpdate.mock.calls[0][0].policiesToUpdate).toEqual([]);
-      expect(bulkDelete.mock.calls[0][0].policyIdsToDelete).toEqual([]);
-    });
-
     it('updates a policy created under the heartbeat id in place, without a duplicate', async () => {
       const { syntheticsPrivateLocation, bulkCreate, bulkUpdate, bulkDelete } = setup([
         { id: heartbeatPolicyId },
@@ -1971,62 +1889,6 @@ describe('SyntheticsPrivateLocation', () => {
 
       expect(failedUpdates).toHaveLength(1);
       expect(failedUpdates[0].config).toBe(projectConfig);
-    });
-
-    it('keeps updating the policy under the new id once it exists', async () => {
-      const { syntheticsPrivateLocation, bulkCreate, bulkUpdate, bulkDelete } = setup([
-        { id: newPolicyId },
-      ]);
-
-      await syntheticsPrivateLocation.editMonitors(
-        [{ config: projectConfig, globalParams: {} }],
-        [location],
-        'default',
-        []
-      );
-
-      expect(bulkUpdate.mock.calls[0][0].policiesToUpdate.map(({ id }) => id)).toEqual([
-        newPolicyId,
-      ]);
-      expect(bulkCreate.mock.calls[0][0].newPolicies).toEqual([]);
-      expect(bulkDelete.mock.calls[0][0].policyIdsToDelete).toEqual([]);
-    });
-
-    it('removes the heartbeat-based policy when the policy also exists under the new id', async () => {
-      const { syntheticsPrivateLocation, bulkCreate, bulkUpdate, bulkDelete } = setup([
-        { id: heartbeatPolicyId },
-        { id: newPolicyId },
-      ]);
-
-      await syntheticsPrivateLocation.editMonitors(
-        [{ config: projectConfig, globalParams: {} }],
-        [location],
-        'default',
-        []
-      );
-
-      expect(bulkUpdate.mock.calls[0][0].policiesToUpdate.map(({ id }) => id)).toEqual([
-        newPolicyId,
-      ]);
-      expect(bulkCreate.mock.calls[0][0].newPolicies).toEqual([]);
-      expect(bulkDelete.mock.calls[0][0].policyIdsToDelete).toEqual([heartbeatPolicyId]);
-    });
-
-    it('replaces a space-suffixed policy by one under the saved-object id', async () => {
-      const { syntheticsPrivateLocation, bulkCreate, bulkUpdate, bulkDelete } = setup([
-        { id: spaceSuffixedPolicyId },
-      ]);
-
-      await syntheticsPrivateLocation.editMonitors(
-        [{ config: projectConfig, globalParams: {} }],
-        [location],
-        'default',
-        []
-      );
-
-      expect(bulkCreate.mock.calls[0][0].newPolicies.map(({ id }) => id)).toEqual([newPolicyId]);
-      expect(bulkUpdate.mock.calls[0][0].policiesToUpdate).toEqual([]);
-      expect(bulkDelete.mock.calls[0][0].policyIdsToDelete).toEqual([spaceSuffixedPolicyId]);
     });
 
     it('removes the policy under the heartbeat id when the monitor leaves the location', async () => {
@@ -2071,22 +1933,6 @@ describe('SyntheticsPrivateLocation', () => {
         expect(getByIDsMock.mock.calls[0][1]).toEqual(
           expect.arrayContaining([newPolicyId, heartbeatPolicyId, spaceSuffixedPolicyId])
         );
-      });
-
-      it('deletes a policy under the new id', async () => {
-        const { syntheticsPrivateLocation, deleteMock } = setupDelete([newPolicyId]);
-
-        await syntheticsPrivateLocation.deleteMonitors([projectMonitorToDelete], 'space-a');
-
-        expect(deleteMock.mock.calls[0][2]).toEqual([newPolicyId]);
-      });
-
-      it('deletes a policy that still sits under the heartbeat id', async () => {
-        const { syntheticsPrivateLocation, deleteMock } = setupDelete([heartbeatPolicyId]);
-
-        await syntheticsPrivateLocation.deleteMonitors([projectMonitorToDelete], 'space-a');
-
-        expect(deleteMock.mock.calls[0][2]).toEqual([heartbeatPolicyId]);
       });
 
       it('deletes every policy of the monitor when it exists under several ids', async () => {

@@ -184,21 +184,12 @@ describe('findLeftoverPackagePolicies', () => {
       queryId: 'journey-project',
     });
 
-    it('keeps a policy created under the heartbeat id, so it is not deleted and recreated', async () => {
+    it.each([
+      ['the heartbeat id, so it is not deleted and recreated', 'journey-project-loc1'],
+      ['the saved-object id', 'saved-object-id-loc1'],
+    ])('keeps a policy created under %s', async (_label, policyId) => {
       const { server, soClient } = makeServer({
-        policyIdPages: [['journey-project-loc1']],
-        monitorPages: [[projectMonitor]],
-      });
-
-      await expect(findLeftoverPackagePolicies(server, soClient)).resolves.toEqual({
-        leftoverIds: [],
-        missingLocationIds: [],
-      });
-    });
-
-    it('keeps a policy created under the saved-object id', async () => {
-      const { server, soClient } = makeServer({
-        policyIdPages: [['saved-object-id-loc1']],
+        policyIdPages: [[policyId]],
         monitorPages: [[projectMonitor]],
       });
 

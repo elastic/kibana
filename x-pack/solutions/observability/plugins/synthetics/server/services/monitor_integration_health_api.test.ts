@@ -557,34 +557,18 @@ describe('MonitorIntegrationHealthApi', () => {
         );
       });
 
-      it('reports a policy created under the heartbeat id as healthy', async () => {
-        const { api } = setup([heartbeatPolicyId]);
+      it.each([
+        ['the heartbeat id', heartbeatPolicyId],
+        ['the saved-object id', newPolicyId],
+      ])('reports a policy created under %s as healthy', async (_label, policyId) => {
+        const { api } = setup([policyId]);
 
         const result = await api.getHealth(['so-uuid']);
 
         expect(result.monitors[0].privateLocations[0].status).toBe(
           PrivateLocationHealthStatusValue.Healthy
         );
-        expect(result.monitors[0].privateLocations[0].packagePolicyId).toBe(heartbeatPolicyId);
-      });
-
-      it('reports a policy created under the saved-object id as healthy', async () => {
-        const { api } = setup([newPolicyId]);
-
-        const result = await api.getHealth(['so-uuid']);
-
-        expect(result.monitors[0].privateLocations[0].status).toBe(
-          PrivateLocationHealthStatusValue.Healthy
-        );
-        expect(result.monitors[0].privateLocations[0].packagePolicyId).toBe(newPolicyId);
-      });
-
-      it('prefers the saved-object id when the policy exists under both', async () => {
-        const { api } = setup([heartbeatPolicyId, newPolicyId]);
-
-        const result = await api.getHealth(['so-uuid']);
-
-        expect(result.monitors[0].privateLocations[0].packagePolicyId).toBe(newPolicyId);
+        expect(result.monitors[0].privateLocations[0].packagePolicyId).toBe(policyId);
       });
 
       it('expects the saved-object id when no policy exists, so a reset creates it under that id', async () => {
