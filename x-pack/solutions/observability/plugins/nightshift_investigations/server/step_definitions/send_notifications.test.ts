@@ -52,6 +52,7 @@ const setup = (
   const urlService = new MockUrlService();
   const investigationLocator = urlService.locators.create(new InvestigationLocatorDefinition());
   const ensureForFailure = jest.fn(async () => 'conv-1');
+  const reportRunEnded = jest.fn(async () => {});
   const getLifecycleSubject = jest.fn(async () => ({
     subject: { type: 'manual', id: 'question' },
     triggerType: 'manual',
@@ -65,6 +66,7 @@ const setup = (
   const getInvestigationsClient = jest.fn(() => ({
     getInvestigationExecutionContext,
     ensureForFailure,
+    reportRunEnded,
     getLifecycleSubject,
     getLifecycleCorrelation,
     recordSlackThreadStatusMessage,
@@ -106,6 +108,7 @@ const setup = (
     definition,
     failureDefinition,
     ensureForFailure,
+    reportRunEnded,
     getLifecycleSubject,
     emitter,
     controller,
@@ -381,6 +384,7 @@ describe('nightshift.handleInvestigationFailure step', () => {
       failureDefinition,
       context,
       ensureForFailure,
+      reportRunEnded,
       emitter,
       execute,
       routing,
@@ -391,6 +395,7 @@ describe('nightshift.handleInvestigationFailure step', () => {
       output: { sent: 1, failed: 0, unconfirmed: 0 },
     });
     expect(ensureForFailure).toHaveBeenCalledWith('inv-1', 'exec-follow-up', 'Model unavailable');
+    expect(reportRunEnded).toHaveBeenCalledWith('inv-1', 'exec-follow-up', 'failed');
     expect(getActionsClientWithRequestInSpace).toHaveBeenCalledWith(request, spaceId);
     expect(emitter).toHaveBeenCalledWith(
       'nightshift-investigations.failed',

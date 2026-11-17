@@ -48,14 +48,7 @@ import {
 } from './lib/slack_app/saved_object';
 import { SlackAppService } from './lib/slack_app/service';
 import { getSignificantEventsMaintenanceStateSavedObjectType } from './lib/maintenance/saved_object';
-import {
-  consumeInvestigationRunQuota,
-  createRunQuotaInternalRepository,
-  dayKey,
-  resolveDailyWindow,
-  runQuotaLedgerSavedObjectType,
-  runQuotaSettingsSavedObjectType,
-} from './lib/run_quotas';
+import { runQuotaLedgerSavedObjectType, runQuotaSettingsSavedObjectType } from './lib/run_quotas';
 import {
   createSignificantEventsMaintenanceService,
   type SignificantEventsMaintenanceService,
@@ -136,6 +129,7 @@ import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboa
 import { WorkflowExecutionService } from './lib/workflows/workflow_execution_service';
 import { createSourceChangeListener } from './routes/internal/knowledge_indicators/reconcile_source_catalog';
 import { syncContinuousOnboarding } from './lib/continuous_onboarding/sync_continuous_onboarding';
+import { syncScheduledDiscovery } from './lib/scheduled_discovery/sync_scheduled_discovery';
 
 const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significantEvents';
 const SLACK_CONNECTOR_RECONCILE_INTERVAL_MS = 60_000;
@@ -184,29 +178,22 @@ export class SignificantEventsPlugin
     core.savedObjects.registerType(runQuotaSettingsSavedObjectType);
     core.savedObjects.registerType(runQuotaLedgerSavedObjectType);
 
-    plugins.nightshiftInvestigations?.registerInvestigationQuota(async (trigger) => {
-      if (!this.server?.core) {
-        throw new Error('Significant Events start services are unavailable');
-      }
-      const result = await consumeInvestigationRunQuota({
-        internalRepository: createRunQuotaInternalRepository(this.server),
-        group: trigger === 'manual' ? 'manual_investigation' : 'investigation',
-        date: dayKey(resolveDailyWindow()),
-      });
-      if (result.allowed) {
-        return result;
-      }
-      return {
-        allowed: false,
-        deniedBy: result.deniedBy === 'total_investigation' ? 'all' : trigger,
-        limit: result.limit,
-      };
-    });
-
     core.dataStreams.registerDataStream(detectionsDataStream);
     core.dataStreams.registerDataStream(knowledgeIndicatorsDataStream);
 
-    this.ebtTelemetryService.setup(core.analytics);
+    this.ebtTelemetryService.setup(
+      core.analytics,
+      {
+        cpsEnabled: plugins.cps?.getCpsEnabled() ?? false,
+        originProjectId: plugins.cloud?.serverless.projectId,
+        getLinkedProjectIds: async (request) => {
+          const [, pluginsStart] = await core.getStartServices();
+          const linkedProjects = await pluginsStart.cps?.getLinkedProjects(request);
+          return linkedProjects?.map(({ id }) => id);
+        },
+      },
+      this.logger.get('telemetry')
+    );
 
     const significantEventsServices = createSignificantEventsServices();
     const knowledgeIndicatorService = new KnowledgeIndicatorService(core, this.logger);
@@ -277,7 +264,10 @@ export class SignificantEventsPlugin
           request,
           logger: this.logger,
         }),
-        telemetry: this.ebtTelemetryService.getClient(),
+        telemetry: {
+          trackEventStatusChanged: (params) =>
+            this.ebtTelemetryService.getClient().trackEventStatusChanged(params, request),
+        },
       });
 
       const getAlertingV2RulesClient = async () =>
@@ -581,6 +571,17 @@ export class SignificantEventsPlugin
           syncContinuousOnboarding({
             event,
             workflowService: continuousOnboardingWorkflowService,
+            maintenanceService: this.maintenanceService,
+            getStartServices: async () => {
+              const [coreStart, pluginsStart] = await core.getStartServices();
+              return { coreStart, pluginsStart };
+            },
+            logger: this.logger,
+          }),
+        syncScheduledDiscovery: (event) =>
+          syncScheduledDiscovery({
+            event,
+            workflowService: significantEventsScheduledWorkflowsService,
             maintenanceService: this.maintenanceService,
             getStartServices: async () => {
               const [coreStart, pluginsStart] = await core.getStartServices();

@@ -147,10 +147,17 @@ export const AutomationsTable = ({
       render: (isEnabled: boolean, automation: Automation) => (
         <EuiToolTip content={editDisabledReason}>
           <EuiSwitch
-            label={i18n.translate('xpack.nightshift.automations.toggleLabel', {
-              defaultMessage: '{action} {name}',
-              values: { action: isEnabled ? 'Pause' : 'Enable', name: automation.name },
-            })}
+            label={
+              isEnabled
+                ? i18n.translate('xpack.nightshift.automations.pauseToggleLabel', {
+                    defaultMessage: 'Pause {name}',
+                    values: { name: automation.name },
+                  })
+                : i18n.translate('xpack.nightshift.automations.enableToggleLabel', {
+                    defaultMessage: 'Enable {name}',
+                    values: { name: automation.name },
+                  })
+            }
             showLabel={false}
             compressed
             checked={isEnabled}
