@@ -113,9 +113,18 @@ export const useListKiPanel = ({ id: aiIndexId }: GetAiIndexResponse) => {
     [groupResults, kis, summary.countsByType, total, typeFilter]
   );
 
-  const showMore = useCallback((type: string, loadedCount: number) => {
-    setGroupSizes((current) => ({ ...current, [type]: getNextGroupSize(loadedCount) }));
-  }, []);
+  const showMore = useCallback(
+    (type: string, loadedCount: number) => {
+      const groupResult = groupResults[type];
+      // After a failed "Show more" the next size would be the same, so ask again instead.
+      if (groupResult?.isError) {
+        groupResult.retry();
+        return;
+      }
+      setGroupSizes((current) => ({ ...current, [type]: getNextGroupSize(loadedCount) }));
+    },
+    [groupResults]
+  );
 
   // Rows in the order the list shows them. The first one opens when nothing is selected.
   const visibleKis = useMemo(() => groups.flatMap((group) => group.kis), [groups]);

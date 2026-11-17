@@ -22,9 +22,9 @@ interface ListKiRowProps {
   onHover: (ki: KiListItem) => void;
 }
 
-/** Scrolls only the list box (not the page) so the row is visible. */
+/** Scrolls only the list (not the page) so the row is visible. */
 const scrollRowIntoList = (row: HTMLElement) => {
-  const list = row.closest<HTMLElement>('[role="listbox"]');
+  const list = row.closest<HTMLElement>('nav');
   if (!list || row.offsetParent !== list) {
     return;
   }
@@ -53,8 +53,7 @@ export const ListKiRow = ({ ki, isSelected, onSelect, onHover }: ListKiRowProps)
     <button
       ref={rowRef}
       type="button"
-      role="option"
-      aria-selected={isSelected}
+      aria-current={isSelected ? 'true' : undefined}
       css={[styles.row, isSelected && styles.selectedRow]}
       onClick={() => onSelect(ki)}
       onMouseEnter={() => onHover(ki)}

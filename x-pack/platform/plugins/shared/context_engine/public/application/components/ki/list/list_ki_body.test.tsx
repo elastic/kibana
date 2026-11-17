@@ -8,6 +8,7 @@
 import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
 import { listKiTestAiIndex, renderListKiWithProviders } from './test_helpers';
+import { ListKiBody } from './list_ki_body';
 import { ListKiPanel } from './list_ki_panel';
 
 const mockUseListKi = jest.fn();
@@ -90,5 +91,34 @@ describe('ListKiBody', () => {
     expect(mockUseListKi).toHaveBeenLastCalledWith(
       expect.objectContaining({ status: ['active'], query: undefined, type: undefined })
     );
+  });
+  describe('with a selected document', () => {
+    const renderEmptyBody = (hasActiveFilters: boolean) =>
+      renderListKiWithProviders(
+        <ListKiBody
+          aiIndexId="sample-ki"
+          groups={[]}
+          onSelectKi={jest.fn()}
+          onShowMore={jest.fn()}
+          hasActiveFilters={hasActiveFilters}
+          onClearFilters={jest.fn()}
+          isLoading={false}
+          viewer={<div data-test-subj="testViewer" />}
+        />
+      );
+
+    it('keeps the viewer open when filters hide every row (an unsaved edit stays)', () => {
+      renderEmptyBody(true);
+
+      expect(screen.getByTestId('contextListKiNoResults')).toBeInTheDocument();
+      expect(screen.getByTestId('testViewer')).toBeInTheDocument();
+    });
+
+    it('keeps the viewer open next to an empty list (a shared link still opens)', () => {
+      renderEmptyBody(false);
+
+      expect(screen.getByTestId('contextListKiEmpty')).toBeInTheDocument();
+      expect(screen.getByTestId('testViewer')).toBeInTheDocument();
+    });
   });
 });

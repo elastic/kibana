@@ -59,8 +59,8 @@ export const ListKiGroups = ({
   );
 
   return (
-    <div
-      role="listbox"
+    // A list of buttons in a nav, not a listbox: groups also hold headers and "Show more".
+    <nav
       aria-label={i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.listLabel', {
         defaultMessage: 'Knowledge documents',
       })}
@@ -82,6 +82,6 @@ export const ListKiGroups = ({
           discoverHref={discoverHref}
         />
       ))}
-    </div>
+    </nav>
   );
 };

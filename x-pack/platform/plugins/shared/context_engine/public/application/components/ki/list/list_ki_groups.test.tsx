@@ -129,7 +129,7 @@ describe('ListKiGroups', () => {
     expect(history.action).toBe('REPLACE');
     expect(searchParam(history.location.search, 'doc')).toBe('faq-1');
     expect(history.location.pathname).toBe(`${TAB_PATH}/${INDEX}`);
-    expect(screen.getAllByTestId('contextKiRow')[0]).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getAllByTestId('contextKiRow')[0]).toHaveAttribute('aria-current', 'true');
   });
 
   it('selects a row in the URL when it is clicked', () => {
@@ -140,7 +140,7 @@ describe('ListKiGroups', () => {
     expect(history.action).toBe('PUSH');
     expect(history.location.pathname).toBe(`${TAB_PATH}/${INDEX}`);
     expect(searchParam(history.location.search, 'doc')).toBe('faq-2');
-    expect(screen.getAllByTestId('contextKiRow')[1]).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getAllByTestId('contextKiRow')[1]).toHaveAttribute('aria-current', 'true');
   });
 
   it('keeps a deep-linked document that is not in the list', () => {
