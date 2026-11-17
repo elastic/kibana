@@ -26,6 +26,7 @@ import {
   getQuickCreateUrl,
   setQuickCreateStackName,
   setQuickCreateStackParams,
+  withConsoleRegion,
 } from '../../../common/services';
 import { IAC_MANAGED_ONBOARDING_BOOTSTRAP_WORKFLOW } from '../../../common/types/rest_spec/iac_provisioner';
 import { AWS_CLOUD_PROVIDER } from '../../../common/types/models/cloud_connector';
@@ -213,10 +214,13 @@ export const getBootstrapLaunchHandler: FleetRequestHandler<
     }
     // The mode chosen in Kibana pre-fills the console form's ManagementMode parameter; it stays
     // editable there, like any approval screen.
-    const quickCreateUrl = setQuickCreateStackParams(
+    const { mode, region } = request.query;
+    const stackUrl = setQuickCreateStackParams(
       setQuickCreateStackName(getQuickCreateUrl(rendered.artifactUrl), BOOTSTRAP_STACK_NAME),
-      { ManagementMode: request.query.mode }
+      { ManagementMode: mode }
     );
+    // The region keeps the console, and so the stack, in the region the credentials will use.
+    const quickCreateUrl = region ? withConsoleRegion(stackUrl, region) : stackUrl;
     return response.ok({
       body: { quickCreateUrl, expiresAt: rendered.expiresAt, blueprint: rendered.blueprint },
     });

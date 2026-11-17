@@ -108,9 +108,12 @@ export const AwsOnboardingCredentialsCard: React.FC<{
   const status = useCardStatus(data);
 
   const launch = useQuery(
-    [LAUNCH_QUERY_KEY, 'fully-managed'],
+    [LAUNCH_QUERY_KEY, 'fully-managed', data.region],
     async () => {
-      const { data: result, error } = await sendGetAwsOnboardingBootstrapLaunch('fully-managed');
+      const { data: result, error } = await sendGetAwsOnboardingBootstrapLaunch(
+        'fully-managed',
+        data.region
+      );
       if (error || !result) {
         throw toRequestError(error, 'Failed to prepare the CloudFormation launch link');
       }
@@ -121,11 +124,78 @@ export const AwsOnboardingCredentialsCard: React.FC<{
       enabled: isEnabled && !isCredentialsLoading && !isConfigured,
       staleTime: 0,
       refetchOnWindowFocus: true,
+      // Refresh about a minute before the signed template URL expires, even while the tab keeps focus.
+      refetchInterval: (result) =>
+        result
+          ? Math.max(new Date(result.expiresAt).getTime() - Date.now() - 60_000, 30_000)
+          : false,
       retry: false,
     }
   );
 
   const statusText = getStatusText(status);
+
+  const launchNote = (
+    <EuiText size="s">
+      {i18n.translate('xpack.fleet.awsOnboardingCredentialsCard.launchNote', {
+        defaultMessage:
+          'Opens the AWS console with the Elastic bootstrap template pre-loaded. Create the stack, then copy the secret from Secrets Manager.',
+      })}
+    </EuiText>
+  );
+
+  let launchStepContent: React.ReactNode;
+  if (isConfigured) {
+    launchStepContent = (
+      <EuiText size="s" data-test-subj="awsOnboardingCredentialsCardLaunchDone">
+        {i18n.translate('xpack.fleet.awsOnboardingCredentialsCard.launchDone', {
+          defaultMessage: 'Bootstrap stack created.',
+        })}
+      </EuiText>
+    );
+  } else if (!isEnabled) {
+    launchStepContent = launchNote;
+  } else {
+    launchStepContent = (
+      <>
+        {launchNote}
+        <EuiSpacer size="s" />
+        {launch.error && !launch.data ? (
+          <KbnWarningCallout
+            announceOnMount={false}
+            data-test-subj="awsOnboardingCredentialsCardLaunchError"
+            title={(launch.error as Error).message}
+          />
+        ) : (
+          <>
+            <EuiButton
+              fill
+              size="s"
+              iconType="rocket"
+              href={launch.data?.quickCreateUrl}
+              target="_blank"
+              isLoading={launch.isLoading}
+              isDisabled={!launch.data}
+              data-test-subj="awsOnboardingCredentialsCardLaunch"
+            >
+              {i18n.translate('xpack.fleet.awsOnboardingCredentialsCard.launchButton', {
+                defaultMessage: 'Launch in CloudFormation',
+              })}
+            </EuiButton>
+            {launch.data && !Number.isNaN(new Date(launch.data.expiresAt).getTime()) && (
+              <EuiText size="xs" data-test-subj="awsOnboardingCredentialsCardLaunchExpiry">
+                <FormattedMessage
+                  id="xpack.fleet.awsOnboardingCredentialsCard.launchExpiry"
+                  defaultMessage="Link expires at {time}"
+                  values={{ time: <FormattedTime value={launch.data.expiresAt} /> }}
+                />
+              </EuiText>
+            )}
+          </>
+        )}
+      </>
+    );
+  }
 
   return (
     <>
@@ -136,50 +206,8 @@ export const AwsOnboardingCredentialsCard: React.FC<{
             title: i18n.translate('xpack.fleet.awsOnboardingCredentialsCard.launchStep', {
               defaultMessage: 'Launch in CloudFormation',
             }),
-            children: (
-              <>
-                <EuiText size="s">
-                  {i18n.translate('xpack.fleet.awsOnboardingCredentialsCard.launchNote', {
-                    defaultMessage:
-                      'Opens the AWS console with the Elastic bootstrap template pre-loaded. Create the stack, then copy the secret from Secrets Manager.',
-                  })}
-                </EuiText>
-                <EuiSpacer size="s" />
-                {launch.error ? (
-                  <KbnWarningCallout
-                    announceOnMount={false}
-                    data-test-subj="awsOnboardingCredentialsCardLaunchError"
-                    title={(launch.error as Error).message}
-                  />
-                ) : (
-                  <>
-                    <EuiButton
-                      fill
-                      size="s"
-                      iconType="rocket"
-                      href={launch.data?.quickCreateUrl}
-                      target="_blank"
-                      isLoading={launch.isFetching}
-                      isDisabled={!launch.data}
-                      data-test-subj="awsOnboardingCredentialsCardLaunch"
-                    >
-                      {i18n.translate('xpack.fleet.awsOnboardingCredentialsCard.launchButton', {
-                        defaultMessage: 'Launch in CloudFormation',
-                      })}
-                    </EuiButton>
-                    {launch.data && !Number.isNaN(new Date(launch.data.expiresAt).getTime()) && (
-                      <EuiText size="xs" data-test-subj="awsOnboardingCredentialsCardLaunchExpiry">
-                        <FormattedMessage
-                          id="xpack.fleet.awsOnboardingCredentialsCard.launchExpiry"
-                          defaultMessage="Link expires at {time}"
-                          values={{ time: <FormattedTime value={launch.data.expiresAt} /> }}
-                        />
-                      </EuiText>
-                    )}
-                  </>
-                )}
-              </>
-            ),
+            status: isConfigured ? 'complete' : undefined,
+            children: launchStepContent,
           },
           {
             title: i18n.translate('xpack.fleet.awsOnboardingCredentialsCard.enterStep', {

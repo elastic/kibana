@@ -67,6 +67,7 @@ export const GetAwsOnboardingBootstrapLaunchRequestSchema = {
     mode: schema.oneOf([schema.literal('fully-managed'), schema.literal('partially-managed')], {
       defaultValue: 'fully-managed',
     }),
+    region: schema.maybe(schema.string({ minLength: 1, maxLength: 32, validate: validateRegion })),
   }),
 };
 

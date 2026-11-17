@@ -28,7 +28,7 @@ interface AwsOnboardingCredentialsSOAttributes {
   stackNamePrefix: string;
   /** ARN of the bootstrap stack that created the user; lets Kibana delete it with the credentials. */
   bootstrapStackArn?: string;
-  /** Roles the key may assume (see the bootstrap template). Provisioning is absent when partially managed. */
+  /** Roles the key may assume (see the IaCP blueprint `aws/managed_onboarding_bootstrap`). Provisioning is absent when partially managed. */
   discoveryRoleArn?: string;
   provisioningRoleArn?: string;
   createdAt: string;

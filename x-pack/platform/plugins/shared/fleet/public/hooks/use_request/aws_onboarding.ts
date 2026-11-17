@@ -88,12 +88,15 @@ export function sendUpdateAwsOnboardingStack(
   });
 }
 
-export function sendGetAwsOnboardingBootstrapLaunch(mode: AwsOnboardingManagementMode) {
+export function sendGetAwsOnboardingBootstrapLaunch(
+  mode: AwsOnboardingManagementMode,
+  region?: string
+) {
   return sendRequest<GetAwsOnboardingBootstrapLaunchResponse>({
     method: 'get',
     path: AWS_ONBOARDING_API_ROUTES.BOOTSTRAP_LAUNCH_PATTERN,
     version: API_VERSIONS.internal.v1,
-    query: { mode },
+    query: { mode, ...(region ? { region } : {}) },
   });
 }
 

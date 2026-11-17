@@ -9,6 +9,7 @@ import {
   getQuickCreateUrl,
   setQuickCreateStackName,
   setQuickCreateStackParams,
+  withConsoleRegion,
 } from './cloud_formation_urls';
 
 describe('setQuickCreateStackName', () => {
@@ -41,6 +42,27 @@ describe('setQuickCreateStackName', () => {
       )
     ).toBe(
       'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https%3A%2F%2Fbucket%2Fx%3Fsig%3D1&stackName=elastic-bootstrap-onboarding&param_ManagementMode=fully-managed'
+    );
+  });
+});
+
+describe('withConsoleRegion', () => {
+  const base = 'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?a=1';
+
+  it('adds the region before the fragment', () => {
+    expect(withConsoleRegion(base, 'eu-west-1')).toBe(
+      'https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/quickcreate?a=1'
+    );
+  });
+
+  it('replaces a region already on the url', () => {
+    expect(
+      withConsoleRegion(
+        'https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/quickcreate',
+        'ap-south-1'
+      )
+    ).toBe(
+      'https://console.aws.amazon.com/cloudformation/home?region=ap-south-1#/stacks/quickcreate'
     );
   });
 });

@@ -173,7 +173,12 @@ export {
 
 // Cloud Connector accessor module
 export * from './cloud_connectors';
-export * from './cloud_formation_urls';
+export {
+  getQuickCreateUrl,
+  setQuickCreateStackName,
+  setQuickCreateStackParams,
+  withConsoleRegion,
+} from './cloud_formation_urls';
 
 export { validateSslCertPath } from './ssl_validators';
 export { getOtelCollectorDisplayName, getOtelCollectorConfigName } from './otel_collector';

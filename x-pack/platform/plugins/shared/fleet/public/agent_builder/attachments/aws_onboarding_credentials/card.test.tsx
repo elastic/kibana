@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { of } from 'rxjs';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -39,7 +39,10 @@ const renderCard = ({
   flagEnabled = true,
   attachmentData = data,
 }: { flagEnabled?: boolean; attachmentData?: AwsOnboardingCredentialsAttachmentData } = {}) => {
-  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+    logger: { log: jest.fn(), warn: jest.fn(), error: jest.fn() },
+  });
   return render(
     <I18nProvider>
       <KibanaContextProvider services={createStartServices(flagEnabled)}>
@@ -206,6 +209,54 @@ describe('AwsOnboardingCredentialsCard', () => {
 
     await waitFor(() => expect(sendGetAwsOnboardingVerify).toHaveBeenCalled());
     expect(sendGetAwsOnboardingBootstrapLaunch).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('awsOnboardingCredentialsCardLaunch')).not.toBeInTheDocument();
+    expect(screen.getByTestId('awsOnboardingCredentialsCardLaunchDone')).toHaveTextContent(
+      'Bootstrap stack created.'
+    );
+    expect(screen.getByText('Step 1 is complete')).toBeInTheDocument();
+  });
+
+  it('shows no launch button and requests no link when onboarding is not enabled', async () => {
+    renderCard({ flagEnabled: false });
+
+    await screen.findByTestId('awsOnboardingCredentialsCardStatus');
+    expect(screen.queryByTestId('awsOnboardingCredentialsCardLaunch')).not.toBeInTheDocument();
+    expect(sendGetAwsOnboardingBootstrapLaunch).not.toHaveBeenCalled();
+  });
+
+  it('requests the link for the attachment region', async () => {
+    jest.mocked(sendGetAwsOnboardingCredentials).mockResolvedValue({
+      data: { configured: false },
+      error: null,
+    } as never);
+    renderCard();
+
+    await waitFor(() =>
+      expect(sendGetAwsOnboardingBootstrapLaunch).toHaveBeenCalledWith('fully-managed', 'eu-west-1')
+    );
+  });
+
+  it('refreshes the link before it expires', async () => {
+    jest.useFakeTimers({ now: new Date('2026-11-16T10:00:00.000Z') });
+    try {
+      jest.mocked(sendGetAwsOnboardingCredentials).mockResolvedValue({
+        data: { configured: false },
+        error: null,
+      } as never);
+      jest
+        .mocked(sendGetAwsOnboardingBootstrapLaunch)
+        .mockResolvedValue(launchResponse('2026-11-16T10:05:00.000Z'));
+      renderCard();
+
+      await waitFor(() => expect(sendGetAwsOnboardingBootstrapLaunch).toHaveBeenCalledTimes(1));
+      // Expiry is 5 minutes out, so the refresh is due after 4.
+      await act(async () => {
+        jest.advanceTimersByTime(4 * 60_000 + 1000);
+      });
+      await waitFor(() => expect(sendGetAwsOnboardingBootstrapLaunch).toHaveBeenCalledTimes(2));
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('trusts the attachment status when onboarding is not enabled, without inventing an account', async () => {

@@ -79,6 +79,46 @@ describe('getBootstrapLaunchHandler', () => {
     });
   });
 
+  it('returns 502 when the provider answers without a rendered artifact', async () => {
+    mockedRender.mockResolvedValueOnce({
+      render: false,
+      blueprint: { id: 'bp', version: '1' },
+    } as any);
+
+    await getBootstrapLaunchHandler({} as any, request as any, response);
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 502,
+      body: { message: 'The IaC Provisioner did not render the bootstrap template' },
+    });
+    expect(response.ok).not.toHaveBeenCalled();
+  });
+
+  it('puts the region on the console url when one is given', async () => {
+    mockedRender.mockResolvedValueOnce({
+      render: true,
+      artifactUrl: 'https://bucket/x?sig=1',
+      expiresAt: '2026-11-16T12:00:00Z',
+      templateSha: 'abc',
+      blueprint: { id: 'bp', version: '1' },
+    });
+
+    await getBootstrapLaunchHandler(
+      {} as any,
+      httpServerMock.createKibanaRequest({
+        query: { mode: 'fully-managed', region: 'eu-west-1' },
+      }) as any,
+      response
+    );
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: expect.objectContaining({
+        quickCreateUrl:
+          'https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/quickcreate?templateURL=https%3A%2F%2Fbucket%2Fx%3Fsig%3D1&stackName=elastic-bootstrap-onboarding&param_ManagementMode=fully-managed',
+      }),
+    });
+  });
+
   it('returns the quick-create url, expiry and blueprint on success', async () => {
     mockedRender.mockResolvedValueOnce({
       render: true,

@@ -34,6 +34,24 @@ export const setQuickCreateStackParams = (url: string, stackParams: StackParams)
     return `${acc}${acc.includes('?') ? '&' : '?'}${param}`;
   }, url);
 
+const CONSOLE_REGION_PARAM_REGEX = /([?&])region=[^&#]*/;
+
+/** Sets the console `region` (before the `#` fragment), replacing one already on the URL. */
+export const withConsoleRegion = (url: string, region: string): string => {
+  const param = `region=${encodeURIComponent(region)}`;
+  if (CONSOLE_REGION_PARAM_REGEX.test(url)) {
+    // A replacer function keeps `$` sequences in the value literal.
+    return url.replace(
+      CONSOLE_REGION_PARAM_REGEX,
+      (_match, separator: string) => `${separator}${param}`
+    );
+  }
+  const hashIndex = url.indexOf('#');
+  const base = hashIndex === -1 ? url : url.slice(0, hashIndex);
+  const fragment = hashIndex === -1 ? '' : url.slice(hashIndex);
+  return `${base}${base.includes('?') ? '&' : '?'}${param}${fragment}`;
+};
+
 const STACK_NAME_PARAM_REGEX = /([?&])stackName=[^&]*/;
 
 /** Sets the quick-create `stackName`, replacing one already on the URL. */
