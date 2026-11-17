@@ -552,7 +552,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         // What a click on the panel's content may do is a closed list (see `run_interaction.ts`).
         const handleInteraction = useCallback((interaction: CustomContentInteraction) => {
           runInteraction(interaction, {
-            dataViews: dataSources$.getValue(),
+            dataSources: dataSources$.getValue(),
             filterManager,
             uiActions,
             embeddable: api,

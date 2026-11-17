@@ -6,13 +6,13 @@
  */
 
 import type { FilterManager } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { FilterableSource } from '@kbn/data-source';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 /** What the panel offers an interaction to act on. Add to it when an action needs more. */
 export interface InteractionHost {
-  /** The data views of the panel's queries, once resolved. */
-  dataViews: readonly DataView[] | undefined;
+  /** What the panel's queries read (data views or ES|QL datasets), once resolved. */
+  dataSources: readonly FilterableSource[] | undefined;
   /** The dashboard's filters, to reuse a filter that is already there. */
   filterManager: FilterManager;
   uiActions: UiActionsStart;

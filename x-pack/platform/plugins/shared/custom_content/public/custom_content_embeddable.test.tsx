@@ -504,8 +504,7 @@ describe('customContentEmbeddableFactory', () => {
       mockGetESQLAdHocDataview.mockResolvedValue({
         id: 'logs',
         getIndexPattern: () => 'logs',
-        getFieldByName: (name: string) =>
-          name === 'host.name' ? { name, type: 'string', filterable: true } : undefined,
+        fields: [{ name: 'host.name', type: 'string', filterable: true }],
       });
     });
 
@@ -516,7 +515,7 @@ describe('customContentEmbeddableFactory', () => {
       expect(capturedComponentProps?.interactionActions).toEqual(['filter']);
     });
 
-    it('applies a filter built from the panel data views', async () => {
+    it('applies a filter built from the panel data sources', async () => {
       const { embeddable } = await buildEmbeddable(baseState);
       await waitFor(() => expect(embeddable.api.dataSources$.getValue()).toBeDefined());
       await act(async () => render(<embeddable.Component />));
@@ -541,7 +540,7 @@ describe('customContentEmbeddableFactory', () => {
       });
     });
 
-    it('applies nothing for a field none of the panel data views has', async () => {
+    it('applies nothing for a field none of the panel data sources has', async () => {
       const { embeddable } = await buildEmbeddable(baseState);
       await waitFor(() => expect(embeddable.api.dataSources$.getValue()).toBeDefined());
       await act(async () => render(<embeddable.Component />));

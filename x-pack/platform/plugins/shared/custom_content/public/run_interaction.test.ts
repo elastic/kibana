@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { FilterableSource } from '@kbn/data-source';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { CustomContentInteraction } from '@kbn/custom-content-renderer';
 import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { SUPPORTED_INTERACTION_ACTIONS, runInteraction } from './run_interaction';
 
-const dataView = {
+const source: FilterableSource = {
   id: 'logs',
-  getFieldByName: (name: string) =>
-    name === 'host.name' ? { name, type: 'string', filterable: true } : undefined,
-} as unknown as DataView;
+  title: 'logs',
+  fields: [{ name: 'host.name', type: 'string', filterable: true }],
+  isTimeBased: () => false,
+};
 
 describe('runInteraction', () => {
   it('runs a filter interaction through the apply filter trigger', async () => {
@@ -24,7 +25,7 @@ describe('runInteraction', () => {
     await runInteraction(
       { action: 'filter', field: 'host.name', value: 'a', negate: false },
       {
-        dataViews: [dataView],
+        dataSources: [source],
         filterManager: { getAppFilters: () => [] } as unknown as FilterManager,
         uiActions: { executeTriggerActions } as unknown as UiActionsStart,
         embeddable: {},
@@ -37,7 +38,7 @@ describe('runInteraction', () => {
     const unknown = { action: 'navigate' } as unknown as CustomContentInteraction;
     await expect(
       runInteraction(unknown, {
-        dataViews: undefined,
+        dataSources: undefined,
         filterManager: {} as FilterManager,
         uiActions: {} as UiActionsStart,
         embeddable: {},

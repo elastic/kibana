@@ -7,7 +7,7 @@
 
 import { generateFilters, type FilterManager } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { FilterableSource } from '@kbn/data-source';
 import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { FilterInteraction } from '@kbn/custom-content-renderer';
 import type { InteractionHost } from './interaction_host';
@@ -27,30 +27,31 @@ const PLAIN_NUMBER = /^-?\d+(\.\d+)?$/;
  */
 export const buildInteractionFilters = (
   { field, value, negate }: FilterInteraction,
-  dataViews: readonly DataView[],
+  dataSources: readonly FilterableSource[],
   filterManager: FilterManager
 ): Filter[] => {
-  const dataView = dataViews.find((candidate) => {
-    const dataViewField = candidate.getFieldByName(field);
-    return dataViewField?.filterable === true && !dataViewField.scripted;
-  });
-  const dataViewField = dataView?.getFieldByName(field);
-  if (!dataView || !dataViewField) return [];
+  // A data view or an ES|QL dataset: all this reads is `fields`, and `generateFilters` takes the
+  // `DataViewBase` a source is, so the same code serves both.
+  const isFilterableField = ({ name, filterable, scripted }: FilterableSource['fields'][number]) =>
+    name === field && filterable === true && !scripted;
+  const source = dataSources.find(({ fields }) => fields.some(isFilterableField));
+  const sourceField = source?.fields.find(isFilterableField);
+  if (!source || !sourceField) return [];
 
   // `Number()` alone would turn " " into 0 and "0x10" or "1e3" into other numbers.
-  if (dataViewField.type === 'number' && !PLAIN_NUMBER.test(value)) return [];
-  const filterValue = dataViewField.type === 'number' ? Number(value) : value;
+  if (sourceField.type === 'number' && !PLAIN_NUMBER.test(value)) return [];
+  const filterValue = sourceField.type === 'number' ? Number(value) : value;
   if (typeof filterValue === 'number' && !Number.isFinite(filterValue)) return [];
 
-  return generateFilters(filterManager, dataViewField, filterValue, negate ? '-' : '+', dataView);
+  return generateFilters(filterManager, sourceField, filterValue, negate ? '-' : '+', source);
 };
 
 /** Applies the filters through the platform trigger, so the dashboard decides what happens to them. */
 export const applyFilterInteraction = async (
   interaction: FilterInteraction,
-  { dataViews, filterManager, uiActions, embeddable }: InteractionHost
+  { dataSources, filterManager, uiActions, embeddable }: InteractionHost
 ): Promise<void> => {
-  const filters = buildInteractionFilters(interaction, dataViews ?? [], filterManager);
+  const filters = buildInteractionFilters(interaction, dataSources ?? [], filterManager);
   if (filters.length === 0) return;
   await uiActions.executeTriggerActions(ON_APPLY_FILTER, { filters, embeddable });
 };

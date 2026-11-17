@@ -5,33 +5,32 @@
  * 2.0.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { FilterableField, FilterableSource } from '@kbn/data-source';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { Filter } from '@kbn/es-query';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import { applyFilterInteraction, buildInteractionFilters } from './apply_filter_interaction';
 
-interface FakeField {
-  name: string;
-  type: string;
-  filterable: boolean;
-  scripted?: boolean;
-}
+const createSource = (id: string, fields: FilterableField[]): FilterableSource => ({
+  id,
+  title: id,
+  fields,
+  isTimeBased: () => false,
+});
 
-const createDataView = (id: string, fields: FakeField[]) =>
-  ({
-    id,
-    getFieldByName: (name: string) => fields.find((field) => field.name === name),
-  } as unknown as DataView);
-
-const logs = createDataView('logs', [
+const logs = createSource('logs', [
   { name: 'host.name', type: 'string', filterable: true },
   { name: 'bytes', type: 'number', filterable: true },
   { name: 'message', type: 'string', filterable: false },
   { name: 'scripted', type: 'string', filterable: true, scripted: true },
 ]);
-const metrics = createDataView('metrics', [{ name: 'cpu.id', type: 'string', filterable: true }]);
+const metrics = createSource('metrics', [{ name: 'cpu.id', type: 'string', filterable: true }]);
+// What an ES|QL dataset publishes: no data view behind it, only an id and filterable fields.
+const esqlDataset: FilterableSource = {
+  ...createSource('esql-logs', [{ name: 'host.name', type: 'string', filterable: true }]),
+  kind: 'esql',
+};
 
 const interaction = (field: string, value: string, negate = false) => ({
   action: 'filter' as const,
@@ -46,9 +45,9 @@ const createFilterManager = (appFilters: Filter[] = []) =>
 describe('buildInteractionFilters', () => {
   const build = (
     value: ReturnType<typeof interaction>,
-    dataViews: DataView[],
+    dataSources: FilterableSource[],
     appFilters: Filter[] = []
-  ) => buildInteractionFilters(value, dataViews, createFilterManager(appFilters));
+  ) => buildInteractionFilters(value, dataSources, createFilterManager(appFilters));
 
   it('builds a phrase filter bound to the data view that has the field', () => {
     const [filter] = build(interaction('cpu.id', '3'), [logs, metrics]);
@@ -88,19 +87,27 @@ describe('buildInteractionFilters', () => {
     expect(build(interaction(field, 'a'), [logs])).toEqual([]);
   });
 
-  it('refuses when the panel has no data views', () => {
+  it('builds a filter on an ES|QL dataset, bound to the dataset id', () => {
+    const [filter] = build(interaction('host.name', 'a'), [esqlDataset]);
+    expect(filter).toMatchObject({
+      meta: { index: 'esql-logs' },
+      query: { match_phrase: { 'host.name': 'a' } },
+    });
+  });
+
+  it('refuses when the panel has no data sources', () => {
     expect(build(interaction('host.name', 'a'), [])).toEqual([]);
   });
 });
 
 describe('applyFilterInteraction', () => {
   const embeddable = { uuid: 'panel' };
-  const createHost = (dataViews: DataView[] | undefined) => {
+  const createHost = (dataSources: FilterableSource[] | undefined) => {
     const executeTriggerActions = jest.fn();
     const uiActions = { executeTriggerActions } as unknown as UiActionsStart;
     return {
       executeTriggerActions,
-      host: { dataViews, filterManager: createFilterManager(), uiActions, embeddable },
+      host: { dataSources, filterManager: createFilterManager(), uiActions, embeddable },
     };
   };
 
@@ -124,7 +131,7 @@ describe('applyFilterInteraction', () => {
     expect(executeTriggerActions).not.toHaveBeenCalled();
   });
 
-  it('does nothing while the data views are not resolved yet', async () => {
+  it('does nothing while the data sources are not resolved yet', async () => {
     const { executeTriggerActions, host } = createHost(undefined);
     await applyFilterInteraction(interaction('host.name', 'a'), host);
     expect(executeTriggerActions).not.toHaveBeenCalled();
