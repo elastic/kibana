@@ -583,6 +583,8 @@ export class NightshiftInvestigationsPlugin
             isPaused: isOnlineEvalsPaused,
             shouldIncludeExplanations,
             telemetry,
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
           })
         );
         // `agentBuilder` is only available from `start()`, so the step resolves it lazily.
@@ -718,6 +720,7 @@ export class NightshiftInvestigationsPlugin
             getUiSettings: () => this.uiSettings,
             logger: this.logger.get('decision_trees'),
             isEnabled: () => this.decisionTreesEnabled,
+            telemetry,
           })
         );
         plugins.workflowsExtensions.registerStepDefinition(

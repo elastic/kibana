@@ -102,6 +102,8 @@ import type {
   ProcessedWaitForInputFacets,
   ProcessedWaitForInputFilters,
   WaitForInputListResult,
+  WorkflowExecutionStatusCounts,
+  WorkflowExecutionStatusCountsParams,
   WorkflowExecutionStatusItem,
 } from '../services/workflow_execution_query_service';
 import { WorkflowExecutionQueryService } from '../services/workflow_execution_query_service';
@@ -272,6 +274,12 @@ export class WorkflowsService {
       getCoreStart: () => this.coreStart,
       licensing: pluginsStart.licensing,
       logger: this.logger,
+      getWorkflowsForOutputs: async (ids, spaceId, request) => {
+        const access = await this.getAccessControl();
+        return this.crudService.getWorkflowsSourceByIds(ids, spaceId, ['name', 'definition'], {
+          accessControlFilter: await access.readFilter(request),
+        });
+      },
       pagesEnabled: this.pagesEnabled,
     });
 
@@ -594,6 +602,14 @@ export class WorkflowsService {
   ): Promise<WorkflowExecutionListDto> {
     await this.ensureInitialized();
     return this.executionQueryService.getWorkflowExecutions(params, spaceId);
+  }
+
+  public async getWorkflowExecutionStatusCounts(
+    params: WorkflowExecutionStatusCountsParams,
+    spaceId: string
+  ): Promise<WorkflowExecutionStatusCounts> {
+    await this.ensureInitialized();
+    return this.executionQueryService.getWorkflowExecutionStatusCounts(params, spaceId);
   }
 
   public async searchExecutionsView(

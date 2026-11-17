@@ -1,5 +1,5 @@
 {
-  "sha1": "0097fb1502c8cfa9a6cf2935d53cec0fe27fa0ed",
+  "sha1": "e591db3d114b3dd868d53d899123de6e1704a568",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -21,6 +21,92 @@
       }
     },
     {
+      "id": "dc68425b4c45805-6bc16f8f5169b27",
+      "title": "Service map grouping with service map grouping disabled does not group the map, however many services it has",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_grouping_flag_off.spec.ts",
+        "line": 32,
+        "column": 17
+      }
+    },
+    {
+      "id": "330bc4659d4e93d-aba0dd0a9d74aba",
+      "title": "Service map grouping by calls groups every service on the map by its calls, shown automatically",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_grouping.spec.ts",
+        "line": 66,
+        "column": 15
+      }
+    },
+    {
+      "id": "330bc4659d4e93d-0c269b5a201f596",
+      "title": "Service map grouping by calls finds each team, named after one of its services",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_grouping.spec.ts",
+        "line": 77,
+        "column": 66
+      }
+    },
+    {
+      "id": "330bc4659d4e93d-ea88b834645b1ac",
+      "title": "Service map grouping by calls puts the services every team calls in the shared group, and those cut off from the rest in the not connected group",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_grouping.spec.ts",
+        "line": 89,
+        "column": 13
+      }
+    },
+    {
+      "id": "330bc4659d4e93d-2c8e08928ab843b",
+      "title": "Service map grouping by calls does not group a map with fewer than 100 services",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_grouping.spec.ts",
+        "line": 95,
+        "column": 27
+      }
+    },
+    {
+      "id": "330bc4659d4e93d-0b3958bae714074",
+      "title": "Service map grouping by calls does not group the map of a single service",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_grouping.spec.ts",
+        "line": 111,
+        "column": 16
+      }
+    },
+    {
       "id": "569f27decfa4346-76dffd7aa1dc58e",
       "title": "Service map stats with service map grouping disabled returns the services without stats",
       "expectedStatus": "passed",
@@ -32,7 +118,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_stats_flag_off.spec.ts",
-        "line": 82,
+        "line": 57,
         "column": 55
       }
     },
@@ -48,7 +134,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_stats_flag_off.spec.ts",
-        "line": 88,
+        "line": 63,
         "column": 14
       }
     },
@@ -62,7 +148,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_stats.spec.ts",
-        "line": 104,
+        "line": 79,
         "column": 31
       }
     },
@@ -76,7 +162,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_stats.spec.ts",
-        "line": 104,
+        "line": 79,
         "column": 31
       }
     },
@@ -90,7 +176,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_stats.spec.ts",
-        "line": 104,
+        "line": 79,
         "column": 31
       }
     },
@@ -104,8 +190,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_stats.spec.ts",
-        "line": 141,
-        "column": 18
+        "line": 117,
+        "column": 20
       }
     },
     {
@@ -118,8 +204,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_stats.spec.ts",
-        "line": 141,
-        "column": 18
+        "line": 117,
+        "column": 20
       }
     },
     {
@@ -132,7 +218,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_stats.spec.ts",
-        "line": 148,
+        "line": 131,
         "column": 20
       }
     },
@@ -146,7 +232,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_stats.spec.ts",
-        "line": 173,
+        "line": 160,
         "column": 13
       }
     },
@@ -162,8 +248,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_overview/metrics.spec.ts",
-        "line": 38,
-        "column": 42
+        "line": 31,
+        "column": 28
       }
     },
     {
@@ -178,7 +264,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_overview/metrics.spec.ts",
-        "line": 69,
+        "line": 62,
         "column": 7
       }
     },
@@ -194,7 +280,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_overview/metrics.spec.ts",
-        "line": 99,
+        "line": 92,
         "column": 14
       }
     },
