@@ -486,9 +486,10 @@ describe('When rendering the StorageProvidersLayout', () => {
 
       await waitFor(() => {
         const { policyItem } = mockedContext.store.getState().management.policyDetails;
-        expect(
-          policyItem && getExportProviders(policyItem.inputs[0].config.policy.value)
-        ).toEqual([existing, added]);
+        expect(policyItem && getExportProviders(policyItem.inputs[0].config.policy.value)).toEqual([
+          existing,
+          added,
+        ]);
       });
     });
   });
