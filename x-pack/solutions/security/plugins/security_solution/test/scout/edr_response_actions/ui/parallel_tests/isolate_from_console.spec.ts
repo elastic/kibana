@@ -107,6 +107,7 @@ spaceTest.describe(
           // The list reads agent status once on load; reload only after it reports isolated.
           await waitForHostIsolation({
             kbnClient,
+            esClient,
             spaceId: scoutSpace.id,
             agentId: host.agentId,
             isolated: true,

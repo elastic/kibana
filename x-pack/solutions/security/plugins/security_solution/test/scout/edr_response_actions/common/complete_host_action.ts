@@ -23,6 +23,7 @@ import {
   sendFleetActionResponse,
 } from '../../../../scripts/endpoint/common/response_actions';
 import { createSystemIndicesEsClient } from '../ui/fixtures/system_indices_es_client';
+import { collectHostIsolationDiagnostics } from './host_isolation_diagnostics';
 import { withMetadataTransformLock } from './with_metadata_transform_lock';
 
 interface AgentStatusResponse {
@@ -221,6 +222,8 @@ const HOST_ISOLATION_POLL_MS = 60_000;
 
 interface HostIsolationWaitParams {
   kbnClient: KbnClient;
+  /** Only read when the poll times out, to add ES-side evidence to the error. */
+  esClient: EsClient;
   spaceId: string;
   agentId: string;
   isolated: boolean;
@@ -240,6 +243,7 @@ export const waitForHostIsolation = (params: HostIsolationWaitParams): Promise<v
 
 const pollHostIsolation = async ({
   kbnClient,
+  esClient,
   spaceId,
   agentId,
   isolated,
@@ -251,6 +255,7 @@ const pollHostIsolation = async ({
   )}&agentType=endpoint`;
 
   let lastError: unknown;
+  let lastAgentStatus: unknown;
   while (Date.now() < deadline) {
     try {
       const response = await kbnClient.request<AgentStatusResponse>({
@@ -261,6 +266,7 @@ const pollHostIsolation = async ({
           ...INTERNAL_API_HEADERS,
         },
       });
+      lastAgentStatus = response.data;
 
       if (response.data?.data?.[agentId]?.isolated === isolated) {
         return;
@@ -273,7 +279,8 @@ const pollHostIsolation = async ({
   }
 
   const detail = lastError instanceof Error ? `: ${lastError.message}` : '';
+  const diagnostics = await collectHostIsolationDiagnostics({ esClient, agentId, lastAgentStatus });
   throw new Error(
-    `Timed out waiting for agent ${agentId} isolation to be ${isolated} in space ${spaceId}${detail}`
+    `Timed out waiting for agent ${agentId} isolation to be ${isolated} in space ${spaceId}${detail}\n${diagnostics}`
   );
 };

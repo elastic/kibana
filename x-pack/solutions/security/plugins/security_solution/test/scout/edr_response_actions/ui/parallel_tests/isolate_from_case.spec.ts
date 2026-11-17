@@ -128,6 +128,7 @@ spaceTest.describe(
           await completeHostAction({ esClient, config, action });
           await waitForHostIsolation({
             kbnClient,
+            esClient,
             spaceId: scoutSpace.id,
             agentId: host.agentId,
             isolated: true,
