@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { createHash } from 'crypto';
 import type { BulkResponseItem } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { SESSION_EVENTS_DATA_STREAM } from './data_streams';
@@ -16,11 +15,6 @@ import type {
   StoredSessionEvent,
   StoredSessionEventTypeFields,
 } from './types';
-
-const toDocumentId = (space: string, sessionId: string, id: string): string =>
-  createHash('sha256')
-    .update(JSON.stringify([space, sessionId, id]))
-    .digest('hex');
 
 const toTypeFields = (event: SessionEventInput): StoredSessionEventTypeFields => {
   switch (event.type) {
@@ -38,7 +32,7 @@ const toTypeFields = (event: SessionEventInput): StoredSessionEventTypeFields =>
       return {
         type: 'tool',
         tool_name: event.tool_name,
-        ...(event.ok !== undefined && { ok: event.ok }),
+        status: event.status ?? 'unknown',
       };
     case 'reasoning':
     case 'meta':
@@ -50,9 +44,6 @@ const toResult = (id: string, item: BulkResponseItem | undefined): SaveEventResu
   const error = item?.error;
   if (!error) {
     return { id, status: 'created' };
-  }
-  if (error.type === 'version_conflict_engine_exception') {
-    return { id, status: 'already_stored' };
   }
   return { id, status: 'failed', error: error.reason ?? error.type };
 };
@@ -68,13 +59,10 @@ export const createSessionEventsService = (
 
     const timestamp = new Date().toISOString();
     const response = await esClient.bulk<StoredSessionEvent>({
+      // Without a data stream template, Elasticsearch would create a plain index under this name.
+      require_data_stream: true,
       operations: events.flatMap((event) => [
-        {
-          create: {
-            _index: SESSION_EVENTS_DATA_STREAM,
-            _id: toDocumentId(space, sessionId, event.id),
-          },
-        },
+        { create: { _index: SESSION_EVENTS_DATA_STREAM } },
         {
           '@timestamp': timestamp,
           event_at: event.event_at,
@@ -83,7 +71,7 @@ export const createSessionEventsService = (
           space,
           ai_index_id: aiIndexIds,
           session_id: sessionId,
-          round_id: event.round_id,
+          turn_id: event.turn_id,
           user_id: userId,
           ...toTypeFields(event),
           raw: event,

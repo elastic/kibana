@@ -8,7 +8,7 @@
 interface SessionEventBase {
   /** Unique within the session. */
   id: string;
-  round_id: string;
+  turn_id: string;
   /** ISO date at which the agent created the event. */
   event_at: string;
   seq?: number;
@@ -41,7 +41,8 @@ export interface ToolSessionEvent extends SessionEventBase {
   tool_call_id: string;
   tool_name: string;
   result?: string;
-  ok?: boolean | null;
+  /** Null or missing when the outcome is unknown. */
+  status?: 'successful' | 'failed' | null;
 }
 
 export interface MetaSessionEvent extends SessionEventBase {
@@ -64,7 +65,7 @@ interface StoredSessionEventBase {
   space: string;
   ai_index_id: readonly string[];
   session_id: string;
-  round_id: string;
+  turn_id: string;
   user_id: string;
   raw: SessionEventInput;
 }
@@ -73,7 +74,7 @@ export type StoredSessionEventTypeFields =
   | { type: 'user'; content: string }
   | { type: 'assistant'; content?: string; tool_name?: readonly string[] }
   | { type: 'reasoning' }
-  | { type: 'tool'; tool_name: string; ok?: boolean | null }
+  | { type: 'tool'; tool_name: string; status: 'successful' | 'failed' | 'unknown' }
   | { type: 'meta' };
 
 /** One document in the session events data stream, mapped strictly by Elasticsearch. */
@@ -91,13 +92,13 @@ export interface SaveEventsInput {
 }
 
 export type SaveEventResult =
-  | { id: string; status: 'created' | 'already_stored' }
+  | { id: string; status: 'created' }
   | { id: string; status: 'failed'; error: string };
 
 export interface SessionEventsService {
   /**
-   * Writes each event once, keyed by space, session and event id. A resent event keeps its first
-   * write and reports `already_stored`. Results follow the order of `input.events`.
+   * Writes one document per event. A resent event is stored again, so readers drop duplicates by
+   * session and event id. Results follow the order of `input.events`.
    */
   saveEvents(
     scope: SessionEventsScope,

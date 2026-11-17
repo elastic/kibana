@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { createHash } from 'crypto';
 import type { EsTestCluster } from '@kbn/test';
 import { createEsClientForTesting, createTestEsCluster } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -21,12 +20,7 @@ describe('session events', () => {
   let service: SessionEventsService;
 
   const jdoe = { space: 'default', userId: 'jdoe' };
-  const base = { round_id: 'round-1', event_at: '2026-11-16T09:59:00.000Z' };
-
-  const expectedId = (space: string, sessionId: string, id: string) =>
-    createHash('sha256')
-      .update(JSON.stringify([space, sessionId, id]))
-      .digest('hex');
+  const base = { turn_id: 'turn-1', event_at: '2026-11-16T09:59:00.000Z' };
 
   const readSession = async (sessionId: string) => {
     await esClient.indices.refresh({ index: SESSION_EVENTS_DATA_STREAM });
@@ -36,7 +30,7 @@ describe('session events', () => {
       sort: [{ seq: 'asc' }],
       size: 100,
     });
-    return response.hits.hits.map(({ _id, _source }) => ({ _id, _source }));
+    return response.hits.hits.map(({ _source }) => _source);
   };
 
   const countEvents = async (query: Record<string, string>) => {
@@ -72,16 +66,24 @@ describe('session events', () => {
     tool_call_id: 'call-1',
     tool_name: 'search',
     result: 'connection pool exhausted',
-    ok: false,
+    status: 'failed',
+  };
+  const unknownOutcome: SessionEventInput = {
+    ...base,
+    type: 'tool',
+    id: 'interrupted',
+    seq: 3,
+    tool_call_id: 'call-2',
+    tool_name: 'search',
   };
   const meta = {
     ...base,
     type: 'meta' as const,
     id: 'meta',
-    seq: 3,
+    seq: 4,
     harness: { name: 'claude-code', cwd: '/srv/checkout' },
   };
-  const batch: SessionEventInput[] = [toolCall, toolResult, meta];
+  const batch: SessionEventInput[] = [toolCall, toolResult, unknownOutcome, meta];
 
   beforeAll(async () => {
     esServer = createTestEsCluster({
@@ -99,7 +101,7 @@ describe('session events', () => {
     await esServer?.stop();
   });
 
-  it('stores every mapped field of each event under its hashed id', async () => {
+  it('stores every mapped field of each event', async () => {
     const { results } = await service.saveEvents(jdoe, {
       sessionId: 'session-1',
       aiIndexIds: ['ops-memory'],
@@ -108,6 +110,7 @@ describe('session events', () => {
     expect(results).toEqual([
       { id: 'call', status: 'created' },
       { id: 'result', status: 'created' },
+      { id: 'interrupted', status: 'created' },
       { id: 'meta', status: 'created' },
     ]);
 
@@ -117,68 +120,38 @@ describe('session events', () => {
       space: 'default',
       ai_index_id: ['ops-memory'],
       session_id: 'session-1',
-      round_id: 'round-1',
+      turn_id: 'turn-1',
       user_id: 'jdoe',
     };
     expect(await readSession('session-1')).toEqual([
       {
-        _id: expectedId('default', 'session-1', 'call'),
-        _source: {
-          ...scopeFields,
-          id: 'call',
-          seq: 1,
-          type: 'assistant',
-          tool_name: ['search'],
-          raw: toolCall,
-        },
+        ...scopeFields,
+        id: 'call',
+        seq: 1,
+        type: 'assistant',
+        tool_name: ['search'],
+        raw: toolCall,
       },
       {
-        _id: expectedId('default', 'session-1', 'result'),
-        _source: {
-          ...scopeFields,
-          id: 'result',
-          seq: 2,
-          type: 'tool',
-          tool_name: 'search',
-          ok: false,
-          raw: toolResult,
-        },
+        ...scopeFields,
+        id: 'result',
+        seq: 2,
+        type: 'tool',
+        tool_name: 'search',
+        status: 'failed',
+        raw: toolResult,
       },
       {
-        _id: expectedId('default', 'session-1', 'meta'),
-        _source: { ...scopeFields, id: 'meta', seq: 3, type: 'meta', raw: meta },
+        ...scopeFields,
+        id: 'interrupted',
+        seq: 3,
+        type: 'tool',
+        tool_name: 'search',
+        status: 'unknown',
+        raw: unknownOutcome,
       },
+      { ...scopeFields, id: 'meta', seq: 4, type: 'meta', raw: meta },
     ]);
-  });
-
-  it('keeps the first write of a resent batch', async () => {
-    const input = { sessionId: 'session-resent', events: batch };
-    await service.saveEvents(jdoe, input);
-    const firstWrite = await readSession('session-resent');
-
-    const { results } = await service.saveEvents(jdoe, input);
-
-    expect(results.map(({ status }) => status)).toEqual([
-      'already_stored',
-      'already_stored',
-      'already_stored',
-    ]);
-    expect(await readSession('session-resent')).toEqual(firstWrite);
-  });
-
-  it('stores the same event id once per session', async () => {
-    const event: SessionEventInput = { ...base, type: 'meta', id: 'shared-id' };
-
-    const [first, second] = await Promise.all([
-      service.saveEvents(jdoe, { sessionId: 'session-a', events: [event] }),
-      service.saveEvents(jdoe, { sessionId: 'session-b', events: [event] }),
-    ]);
-
-    expect([...first.results, ...second.results]).toEqual([
-      { id: 'shared-id', status: 'created' },
-      { id: 'shared-id', status: 'created' },
-    ]);
-    expect(await countEvents({ id: 'shared-id' })).toBe(2);
   });
 
   it('reports an event that Elasticsearch rejects without failing the batch', async () => {

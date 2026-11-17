@@ -13,7 +13,7 @@ import type { SessionEventInput, SessionEventsScope, StoredSessionEvent } from '
 
 const NOW = new Date('2026-11-16T10:00:00.000Z');
 const scope: SessionEventsScope = { space: 'default', userId: 'jdoe' };
-const base = { round_id: 'round-1', event_at: '2026-11-16T09:59:00.000Z' };
+const base = { turn_id: 'turn-1', event_at: '2026-11-16T09:59:00.000Z' };
 
 const STRICT_TEMPLATE_FIELDS = [
   '@timestamp',
@@ -23,24 +23,16 @@ const STRICT_TEMPLATE_FIELDS = [
   'space',
   'ai_index_id',
   'session_id',
-  'round_id',
+  'turn_id',
   'user_id',
   'type',
   'content',
   'tool_name',
-  'ok',
+  'status',
   'raw',
 ];
 
 const created: BulkResponseItem = { _index: '.ds-events', status: 201, result: 'created' };
-const conflict: BulkResponseItem = {
-  _index: '.ds-events',
-  status: 409,
-  error: {
-    type: 'version_conflict_engine_exception',
-    reason: 'version conflict, document already exists (current version [1])',
-  },
-};
 const inferenceFailure: BulkResponseItem = {
   _index: '.ds-events',
   status: 400,
@@ -65,14 +57,10 @@ describe('createSessionEventsService', () => {
     const { results } = await service.saveEvents(saveScope, { sessionId, aiIndexIds, events });
     const [request] = esClient.bulk.mock.calls[esClient.bulk.mock.calls.length - 1];
     const operations = request.operations ?? [];
-    const actions = operations.filter((_, index) => index % 2 === 0) as Array<{
-      create: { _index: string; _id: string };
-    }>;
     return {
       request,
       results,
-      actions,
-      ids: actions.map(({ create }) => create._id),
+      actions: operations.filter((_, index) => index % 2 === 0),
       documents: operations.filter((_, index) => index % 2 === 1) as StoredSessionEvent[],
     };
   };
@@ -80,14 +68,6 @@ describe('createSessionEventsService', () => {
   const saveOne = async (event: SessionEventInput): Promise<StoredSessionEvent> => {
     const { documents } = await save([event]);
     return documents[0];
-  };
-
-  const documentId = async (
-    eventId: string,
-    options: { sessionId?: string; saveScope?: SessionEventsScope } = {}
-  ) => {
-    const { ids } = await save([{ ...base, type: 'meta', id: eventId }], options);
-    return ids[0];
   };
 
   beforeAll(() => {
@@ -111,7 +91,7 @@ describe('createSessionEventsService', () => {
       tool_call_id: 'call-1',
       tool_name: 'search',
       result: '{"hits":2}',
-      ok: true,
+      status: 'successful',
     };
 
     expect(await saveOne(event)).toEqual({
@@ -122,16 +102,16 @@ describe('createSessionEventsService', () => {
       space: 'default',
       ai_index_id: ['ops-memory'],
       session_id: 'session-1',
-      round_id: 'round-1',
+      turn_id: 'turn-1',
       user_id: 'jdoe',
       type: 'tool',
       tool_name: 'search',
-      ok: true,
+      status: 'successful',
       raw: event,
     });
   });
 
-  it('sends one bulk request of create operations without a refresh', async () => {
+  it('sends one bulk request of create operations that must target a data stream', async () => {
     const { request, actions } = await save([
       { ...base, type: 'meta', id: 'event-1' },
       { ...base, type: 'meta', id: 'event-2' },
@@ -139,19 +119,10 @@ describe('createSessionEventsService', () => {
 
     expect(esClient.bulk).toHaveBeenCalledTimes(1);
     expect(request.refresh).toBeUndefined();
+    expect(request.require_data_stream).toBe(true);
     expect(actions).toEqual([
-      {
-        create: {
-          _index: SESSION_EVENTS_DATA_STREAM,
-          _id: expect.stringMatching(/^[0-9a-f]{64}$/),
-        },
-      },
-      {
-        create: {
-          _index: SESSION_EVENTS_DATA_STREAM,
-          _id: expect.stringMatching(/^[0-9a-f]{64}$/),
-        },
-      },
+      { create: { _index: SESSION_EVENTS_DATA_STREAM } },
+      { create: { _index: SESSION_EVENTS_DATA_STREAM } },
     ]);
   });
 
@@ -235,24 +206,22 @@ describe('createSessionEventsService', () => {
     });
   });
 
-  describe('ok', () => {
-    it.each([true, false, null])('keeps %p on a tool event', async (ok) => {
-      const document = await saveOne({
-        ...base,
-        type: 'tool',
-        id: 'e1',
-        tool_call_id: 'call-1',
-        tool_name: 'search',
-        ok,
-      });
+  describe('status', () => {
+    const toolEvent = {
+      ...base,
+      type: 'tool' as const,
+      id: 'e1',
+      tool_call_id: 'c1',
+      tool_name: 'search',
+    };
 
-      expect(document).toHaveProperty('ok', ok);
+    it.each(['successful', 'failed'] as const)('keeps %s on a tool event', async (status) => {
+      expect(await saveOne({ ...toolEvent, status })).toHaveProperty('status', status);
     });
 
-    it('is left out of a tool event without an outcome', async () => {
-      expect(
-        await saveOne({ ...base, type: 'tool', id: 'e1', tool_call_id: 'c1', tool_name: 'search' })
-      ).not.toHaveProperty('ok');
+    it('is unknown on a tool event whose outcome is null or missing', async () => {
+      expect(await saveOne({ ...toolEvent, status: null })).toHaveProperty('status', 'unknown');
+      expect(await saveOne(toolEvent)).toHaveProperty('status', 'unknown');
     });
   });
 
@@ -263,7 +232,7 @@ describe('createSessionEventsService', () => {
       id: 'e1',
       harness: { name: 'claude-code', version: '2.1.0' },
       content: 'not indexed on a meta event',
-      ok: true,
+      status: 'failed',
       tool_name: 'not indexed either',
     };
     const document = await saveOne(event);
@@ -271,42 +240,26 @@ describe('createSessionEventsService', () => {
     expect(document.raw).toEqual(event);
     expect(STRICT_TEMPLATE_FIELDS).toEqual(expect.arrayContaining(Object.keys(document)));
     expect(document).not.toHaveProperty('content');
-    expect(document).not.toHaveProperty('ok');
+    expect(document).not.toHaveProperty('status');
     expect(document).not.toHaveProperty('tool_name');
   });
 
-  describe('_id', () => {
-    it('is the same for the same event in the same session', async () => {
-      expect(await documentId('e1')).toBe(await documentId('e1'));
-    });
-
-    it('differs for the same event id in another session or space', async () => {
-      const ids = [
-        await documentId('e1'),
-        await documentId('e1', { sessionId: 'session-2' }),
-        await documentId('e1', { saveScope: { ...scope, space: 'other-space' } }),
-      ];
-
-      expect(new Set(ids).size).toBe(3);
-    });
-  });
-
-  it('reports each event as created, already stored or failed, in order', async () => {
-    esClient.bulk.mockResolvedValueOnce(bulkResponse([created, conflict, inferenceFailure]));
+  it('reports each event as created or failed, in order', async () => {
+    esClient.bulk.mockResolvedValueOnce(bulkResponse([created, inferenceFailure, created]));
 
     const { results } = await service.saveEvents(scope, {
       sessionId: 'session-1',
       events: [
         { ...base, type: 'meta', id: 'first' },
-        { ...base, type: 'meta', id: 'second' },
-        { ...base, type: 'user', id: 'third', content: 'Why is it slow?' },
+        { ...base, type: 'user', id: 'second', content: 'Why is it slow?' },
+        { ...base, type: 'meta', id: 'third' },
       ],
     });
 
     expect(results).toEqual([
       { id: 'first', status: 'created' },
-      { id: 'second', status: 'already_stored' },
-      { id: 'third', status: 'failed', error: 'Inference endpoint is unavailable' },
+      { id: 'second', status: 'failed', error: 'Inference endpoint is unavailable' },
+      { id: 'third', status: 'created' },
     ]);
   });
 
