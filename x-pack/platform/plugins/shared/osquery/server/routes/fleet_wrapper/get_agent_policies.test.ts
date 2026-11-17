@@ -67,7 +67,7 @@ describe('getAgentPoliciesRoute integration ownership', () => {
     asInternalScopedUser.mockReturnValue({ getAgentStatusForAgentPolicy });
     jest
       .mocked(createInternalSavedObjectsClientForSpaceId)
-      .mockResolvedValue(spaceScopedClient as SavedObjectsClient);
+      .mockResolvedValue(spaceScopedClient as unknown as SavedObjectsClient);
     setPackagePolicies([[makePackagePolicy('shared', ['A', 'B', 'C'])]]);
 
     const service = new OsqueryAppContextService();

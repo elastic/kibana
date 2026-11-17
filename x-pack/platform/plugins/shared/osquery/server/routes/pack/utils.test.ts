@@ -2351,7 +2351,7 @@ const targetingPackagePolicy = (
     policy_ids: policyIds,
     package: { name: 'osquery_manager', version },
     inputs: [{ config: { osquery: { value: { packs } } } }],
-  } as PackagePolicy);
+  } as unknown as PackagePolicy);
 
 describe('resolveSharedIntegrationOverdelivery', () => {
   const shared = targetingPackagePolicy('shared', ['A', 'C', 'B', 'B']);

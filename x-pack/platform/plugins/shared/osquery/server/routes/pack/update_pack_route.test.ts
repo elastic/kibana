@@ -187,11 +187,11 @@ describe('updatePackRoute', () => {
       (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
       jest.mocked(mockOsqueryContext.service.getAgentPolicyService).mockReturnValue({
         getByIds: jest.fn().mockResolvedValue(policyIds.map((id) => ({ id, name: id }))),
-      } as ReturnType<typeof mockOsqueryContext.service.getAgentPolicyService>);
+      } as unknown as ReturnType<typeof mockOsqueryContext.service.getAgentPolicyService>);
       jest.mocked(mockOsqueryContext.service.getPackagePolicyService).mockReturnValue({
         fetchAllItems: mockFetchAllItems(packagePolicies),
         update: packagePolicyUpdate,
-      } as ReturnType<typeof mockOsqueryContext.service.getPackagePolicyService>);
+      } as unknown as ReturnType<typeof mockOsqueryContext.service.getPackagePolicyService>);
       const request = httpServerMock.createKibanaRequest({
         params: { id: 'pack-id' },
         body: {

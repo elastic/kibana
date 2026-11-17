@@ -101,13 +101,18 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             osqueryContext.service.getPackagePolicyService(),
             spaceScopedClient
           );
+          const agentPolicyService = osqueryContext.service.getAgentPolicyService();
+          if (!agentPolicyService) {
+            throw new Error('Agent policy service is unavailable');
+          }
+
           effectivePolicyIds = await computeEffectivePolicyIds(
             [attributes.name],
             spaceId,
             packagePolicies,
             {
               soClient: spaceScopedClient,
-              agentPolicyService: osqueryContext.service.getAgentPolicyService(),
+              agentPolicyService,
             }
           );
         } catch (error) {
