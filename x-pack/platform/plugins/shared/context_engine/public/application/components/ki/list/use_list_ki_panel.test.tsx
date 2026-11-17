@@ -9,11 +9,13 @@ import { act, renderHook } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
+import type { KiGroup, KiListItem } from '../../../../../common/http_api/knowledge_indicators';
 import { listKiTestAiIndex } from './test_helpers';
 import { useListKiPanel } from './use_list_ki_panel';
 
 const mockUseListKi = jest.fn();
 const mockUseListKiByType = jest.fn();
+const mockUseListKiGroups = jest.fn();
 
 jest.mock('../../../hooks/use_list_ki', () => ({
   useListKi: (...args: unknown[]) => mockUseListKi(...args),
@@ -23,28 +25,72 @@ jest.mock('../../../hooks/use_list_ki_by_type', () => ({
   useListKiByType: (...args: unknown[]) => mockUseListKiByType(...args),
 }));
 
-const listKiQuery = () => mockUseListKi.mock.calls.at(-1)?.[0];
+jest.mock('../../../hooks/use_list_ki_groups', () => ({
+  useListKiGroups: (...args: unknown[]) => mockUseListKiGroups(...args),
+}));
+
+const groupsQuery = () => mockUseListKiGroups.mock.calls.at(-1)?.[0];
+const otherQuery = () => mockUseListKi.mock.calls.at(-1)?.[0];
 const byTypeQuery = () => mockUseListKiByType.mock.calls.at(-1)?.[0];
 
-const renderPanelHook = () => {
-  const history = createMemoryHistory({
-    initialEntries: ['/ai_index/sample-ki/knowledge_documents'],
-  });
-  return renderHook(() => useListKiPanel(listKiTestAiIndex), {
+const ki = (id: string, type?: string): KiListItem => ({
+  id,
+  index: 'ai-index-idx-sample-ki',
+  ...(type !== undefined ? { type } : {}),
+  status: 'active',
+});
+
+const rows = (count: number, type: string) =>
+  Array.from({ length: count }, (_, position) => ki(`${type}-${position}`, type));
+
+const GROUPS: KiGroup[] = [
+  { type: 'faq', count: 40, kis: rows(10, 'faq') },
+  { type: 'playbook', count: 3, kis: rows(3, 'playbook') },
+];
+
+const groupsResult = (overrides: Record<string, unknown> = {}) => ({
+  groups: GROUPS,
+  total: 48,
+  totalOther: 5,
+  isLoading: false,
+  isFetching: false,
+  isPreviousData: false,
+  error: undefined,
+  ...overrides,
+});
+
+const otherResult = (overrides: Record<string, unknown> = {}) => ({
+  kis: [],
+  total: 0,
+  summary: { total: 0, countsByType: [] },
+  isLoading: false,
+  isFetching: false,
+  isPreviousData: false,
+  error: undefined,
+  refetch: jest.fn(),
+  ...overrides,
+});
+
+const renderPanelHook = (initialPath = '/ai_index/sample-ki/knowledge_documents') => {
+  const history = createMemoryHistory({ initialEntries: [initialPath] });
+  const view = renderHook(() => useListKiPanel(listKiTestAiIndex), {
     wrapper: ({ children }) => <Router history={history}>{children}</Router>,
   });
+  return { ...view, history };
+};
+
+const tile = (result: { current: ReturnType<typeof useListKiPanel> }, key: string) => {
+  const found = result.current.tiles.find((candidate) => candidate.key === key);
+  if (!found) {
+    throw new Error(`No tile ${key}`);
+  }
+  return found;
 };
 
 describe('useListKiPanel', () => {
   beforeEach(() => {
-    mockUseListKi.mockReturnValue({
-      kis: [],
-      total: 0,
-      summary: { total: 0, countsByType: [] },
-      isLoading: false,
-      isFetching: false,
-      error: undefined,
-    });
+    mockUseListKiGroups.mockReturnValue(groupsResult());
+    mockUseListKi.mockReturnValue(otherResult());
     mockUseListKiByType.mockReturnValue({});
   });
 
@@ -52,102 +98,223 @@ describe('useListKiPanel', () => {
     jest.clearAllMocks();
   });
 
-  it('keeps query undefined until search is submitted', () => {
+  it('loads the 5 biggest types with 10 rows each, active KIs, newest first', () => {
+    renderPanelHook();
+    expect(groupsQuery()).toEqual(
+      expect.objectContaining({
+        maxGroups: 5,
+        previewSize: 10,
+        status: ['active'],
+        sort: 'updated',
+      })
+    );
+  });
+
+  it('keeps the tiles while searching, with live counts, and keeps a type selection strict', () => {
+    // The tile request has no search; the search request asks for exactly the tile types.
+    mockUseListKiGroups.mockImplementation(({ query }: { query?: string }) =>
+      query === undefined
+        ? groupsResult()
+        : groupsResult({
+            groups: [{ type: 'faq', count: 2, kis: rows(2, 'faq') }],
+            total: 3,
+            totalOther: 1,
+          })
+    );
     const { result } = renderPanelHook();
 
-    expect(listKiQuery()).toEqual(expect.objectContaining({ query: undefined }));
-
     act(() => {
-      result.current.onSearchTextChange('refund');
+      result.current.onToggleTile(tile(result, 'type:playbook'));
     });
-
-    expect(listKiQuery()).toEqual(expect.objectContaining({ query: undefined }));
-
     act(() => {
       result.current.onSearchSubmit('refund');
     });
 
-    expect(listKiQuery()).toEqual(expect.objectContaining({ query: 'refund' }));
-    expect(result.current.submittedQuery).toBe('refund');
+    const calls = mockUseListKiGroups.mock.calls.slice(-2).map(([args]) => args);
+    expect(calls[0].query).toBeUndefined();
+    expect(calls[0]).not.toHaveProperty('types');
+    expect(calls[1]).toEqual(
+      expect.objectContaining({ query: 'refund', types: ['faq', 'playbook'], enabled: true })
+    );
+
+    // Same tiles, counts from the search: playbook has no match.
+    expect(result.current.tiles.map(({ key, count }) => [key, count])).toEqual([
+      ['type:faq', 2],
+      ['type:playbook', 0],
+      ['other', 1],
+    ]);
+    // Playbook stays selected, and the list does not fall back to other types.
+    expect(result.current.selection.types.has('playbook')).toBe(true);
+    expect(result.current.groups).toEqual([]);
+    expect(result.current.total).toBe(3);
   });
 
-  it('trims text when committing search but keeps what the user typed', () => {
+  it('keeps query undefined until search is submitted, and trims it', () => {
     const { result } = renderPanelHook();
+    expect(groupsQuery()).toEqual(expect.objectContaining({ query: undefined }));
 
     act(() => {
       result.current.onSearchTextChange('  refund  ');
+    });
+    expect(groupsQuery()).toEqual(expect.objectContaining({ query: undefined }));
+
+    act(() => {
       result.current.onSearchSubmit('  refund  ');
     });
-
     expect(result.current.searchText).toBe('  refund  ');
     expect(result.current.submittedQuery).toBe('refund');
-    expect(listKiQuery()).toEqual(expect.objectContaining({ query: 'refund' }));
+    expect(groupsQuery()).toEqual(expect.objectContaining({ query: 'refund' }));
   });
 
-  it('loads the first page without a type, 25 rows', () => {
-    renderPanelHook();
-    expect(listKiQuery()).toEqual(
-      expect.objectContaining({ size: 25, type: undefined, status: ['active'] })
+  it('builds tiles from the groups plus "Other", and shows every group without a selection', () => {
+    const { result } = renderPanelHook();
+    expect(result.current.tiles.map(({ key, count }) => [key, count])).toEqual([
+      ['type:faq', 40],
+      ['type:playbook', 3],
+      ['other', 5],
+    ]);
+    expect(result.current.groups.map(({ key }) => key)).toEqual(['type:faq', 'type:playbook']);
+    expect(result.current.total).toBe(48);
+  });
+
+  it('does not ask for "Other" until its tile is selected, then excludes the group types', () => {
+    const { result } = renderPanelHook();
+    expect(otherQuery()).toEqual(expect.objectContaining({ enabled: false }));
+
+    act(() => {
+      result.current.onToggleTile(tile(result, 'other'));
+    });
+    expect(otherQuery()).toEqual(
+      expect.objectContaining({ enabled: true, excludeTypes: ['faq', 'playbook'], size: 25 })
     );
+    expect(result.current.groups.map(({ key }) => key)).toEqual(['other']);
+    expect(result.current.selection.other).toBe(true);
   });
 
-  it('keeps "Show more" sizes per type and resets them when a filter changes', () => {
+  it('waits for fresh groups before asking for "Other"', () => {
+    mockUseListKiGroups.mockReturnValue(groupsResult({ isPreviousData: true, isFetching: true }));
+    const { result } = renderPanelHook();
+    act(() => {
+      result.current.onToggleTile(tile(result, 'other'));
+    });
+    expect(otherQuery()).toEqual(expect.objectContaining({ enabled: false }));
+  });
+
+  it('loads a page of a selected type that has more rows than its preview', () => {
     const { result } = renderPanelHook();
 
     act(() => {
-      result.current.showMore('faq', 25);
-      result.current.showMore('playbook', 3);
+      result.current.onToggleTile(tile(result, 'type:faq'));
     });
-    expect(byTypeQuery()).toEqual(
-      expect.objectContaining({ sizesByType: { faq: 50, playbook: 28 } })
-    );
+    expect(byTypeQuery()).toEqual(expect.objectContaining({ sizesByType: { faq: 25 } }));
+    expect(result.current.groups.map(({ key }) => key)).toEqual(['type:faq']);
+
+    act(() => {
+      result.current.onToggleTile(tile(result, 'type:playbook'));
+    });
+    // playbook already shows all 3 rows: no request.
+    expect(byTypeQuery()).toEqual(expect.objectContaining({ sizesByType: { faq: 25 } }));
+  });
+
+  it('keeps "Show more" sizes per section, caps them, and resets them when a filter changes', () => {
+    mockUseListKi.mockReturnValue(otherResult({ kis: rows(25, 'zeta'), total: 60 }));
+    const { result } = renderPanelHook();
+
+    act(() => {
+      result.current.showMore('type:faq', 10);
+    });
+    expect(byTypeQuery()).toEqual(expect.objectContaining({ sizesByType: { faq: 35 } }));
+
+    act(() => {
+      result.current.showMore('type:faq', 90);
+    });
+    expect(byTypeQuery()).toEqual(expect.objectContaining({ sizesByType: { faq: 100 } }));
+
+    act(() => {
+      result.current.onToggleTile(tile(result, 'other'));
+    });
+    act(() => {
+      result.current.showMore('other', 25);
+    });
+    expect(otherQuery()).toEqual(expect.objectContaining({ size: 50 }));
 
     act(() => {
       result.current.onStatusFilterChange('deleted');
     });
     expect(byTypeQuery()).toEqual(expect.objectContaining({ sizesByType: {} }));
-    expect(listKiQuery()).toEqual(expect.objectContaining({ status: ['deleted'] }));
-
-    act(() => {
-      result.current.showMore('faq', 25);
-      result.current.onTypeFilterChange({ kind: 'type', value: 'playbook' });
-    });
-    expect(byTypeQuery()).toEqual(expect.objectContaining({ sizesByType: {} }));
-    expect(listKiQuery()).toEqual(expect.objectContaining({ type: 'playbook' }));
-
-    act(() => {
-      result.current.showMore('faq', 25);
-      result.current.onSearchSubmit('refund');
-    });
-    expect(byTypeQuery()).toEqual(expect.objectContaining({ sizesByType: {} }));
+    expect(otherQuery()).toEqual(expect.objectContaining({ size: 25 }));
+    expect(groupsQuery()).toEqual(expect.objectContaining({ status: ['deleted'] }));
   });
 
-  it('caps "Show more" at 100 rows', () => {
+  it('ignores a selected type that is no tile any more, and brings it back later', () => {
+    const { result, rerender } = renderPanelHook();
+    act(() => {
+      result.current.onToggleTile(tile(result, 'type:playbook'));
+    });
+    expect(result.current.groups.map(({ key }) => key)).toEqual(['type:playbook']);
+
+    mockUseListKiGroups.mockReturnValue(groupsResult({ groups: [GROUPS[0]] }));
+    rerender();
+    expect(result.current.selection.types.size).toBe(0);
+    expect(result.current.groups.map(({ key }) => key)).toEqual(['type:faq']);
+
+    mockUseListKiGroups.mockReturnValue(groupsResult());
+    rerender();
+    expect(result.current.groups.map(({ key }) => key)).toEqual(['type:playbook']);
+  });
+
+  it('shows "Other" by default when no document has a type', () => {
+    mockUseListKiGroups.mockReturnValue(groupsResult({ groups: [], total: 4, totalOther: 4 }));
+    mockUseListKi.mockReturnValue(otherResult({ kis: [ki('a'), ki('b')], total: 4 }));
     const { result } = renderPanelHook();
-
-    act(() => {
-      result.current.showMore('faq', 90);
-    });
-
-    expect(byTypeQuery()).toEqual(expect.objectContaining({ sizesByType: { faq: 100 } }));
+    expect(otherQuery()).toEqual(expect.objectContaining({ enabled: true, excludeTypes: [] }));
+    expect(result.current.groups.map(({ key }) => key)).toEqual(['other']);
   });
 
-  it('reports active filters and clears them', () => {
+  it('opens the first visible row when a tile hides the open document', () => {
+    const { result, history } = renderPanelHook(
+      '/ai_index/sample-ki/knowledge_documents/ai-index-idx-sample-ki?doc=faq-3'
+    );
+    act(() => {
+      result.current.onToggleTile(tile(result, 'type:playbook'));
+    });
+    expect(history.location.search).toBe('?doc=playbook-0');
+  });
+
+  it('keeps a deep-linked document that is not in the visible list', () => {
+    const { history } = renderPanelHook(
+      '/ai_index/sample-ki/knowledge_documents/ai-index-idx-sample-ki?doc=other-doc'
+    );
+    expect(history.location.search).toBe('?doc=other-doc');
+  });
+
+  it('reports active filters; a second tile click deselects, Clear filters clears everything', () => {
     const { result } = renderPanelHook();
     expect(result.current.hasActiveFilters).toBe(false);
 
     act(() => {
+      result.current.onToggleTile(tile(result, 'type:faq'));
+    });
+    expect(result.current.hasActiveFilters).toBe(true);
+    act(() => {
+      result.current.onToggleTile(tile(result, 'type:faq'));
+    });
+    expect(result.current.hasActiveFilters).toBe(false);
+
+    act(() => {
+      result.current.onToggleTile(tile(result, 'type:faq'));
       result.current.onStatusFilterChange('all');
+      result.current.onSortChange('title');
       result.current.onSearchTextChange('refund');
       result.current.onSearchSubmit('refund');
     });
-    expect(result.current.hasActiveFilters).toBe(true);
-
     act(() => {
       result.current.clearFilters();
     });
     expect(result.current.hasActiveFilters).toBe(false);
     expect(result.current.searchText).toBe('');
     expect(result.current.statusFilter).toBe('active');
+    expect(result.current.selection.types.size).toBe(0);
+    expect(result.current.sort).toBe('title');
   });
 });

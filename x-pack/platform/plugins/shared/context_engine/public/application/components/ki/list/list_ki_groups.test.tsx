@@ -7,12 +7,13 @@
 
 import { fireEvent, screen, within } from '@testing-library/react';
 import React from 'react';
-import type { KiListItem } from '../../../../../common/http_api/knowledge_indicators';
+import type { KiGroup, KiListItem } from '../../../../../common/http_api/knowledge_indicators';
 import { listKiTestAiIndex, renderListKiWithProviders } from './test_helpers';
 import { ListKiPanel } from './list_ki_panel';
 
 const mockUseListKi = jest.fn();
 const mockUseListKiByType = jest.fn();
+const mockUseListKiGroups = jest.fn();
 
 jest.mock('../../../hooks/use_list_ki', () => ({
   useListKi: (...args: unknown[]) => mockUseListKi(...args),
@@ -22,37 +23,56 @@ jest.mock('../../../hooks/use_list_ki_by_type', () => ({
   useListKiByType: (...args: unknown[]) => mockUseListKiByType(...args),
 }));
 
+jest.mock('../../../hooks/use_list_ki_groups', () => ({
+  useListKiGroups: (...args: unknown[]) => mockUseListKiGroups(...args),
+}));
+
 const TAB_PATH = '/ai_index/sample-ki/knowledge_documents';
 const INDEX = 'ai-index-idx-sample-ki';
 
-const ki = (id: string, type: string, extra: Partial<KiListItem> = {}): KiListItem => ({
+const ki = (id: string, type: string | undefined, extra: Partial<KiListItem> = {}): KiListItem => ({
   id,
   index: INDEX,
-  type,
+  ...(type !== undefined ? { type } : {}),
   title: `Title ${id}`,
   status: 'active',
   ...extra,
 });
 
-const defaultKis = [
-  ki('faq-1', 'faq'),
-  ki('play-1', 'playbook', { status: 'deleted' }),
-  ki('faq-2', 'faq', { status: 'expired' }),
-];
+const FAQ: KiGroup = {
+  type: 'faq',
+  count: 30,
+  kis: [ki('faq-1', 'faq'), ki('faq-2', 'faq', { status: 'expired' })],
+};
+const PLAYBOOK: KiGroup = {
+  type: 'playbook',
+  count: 1,
+  kis: [ki('play-1', 'playbook', { status: 'deleted' })],
+};
 
-const mockList = (kis: KiListItem[] = defaultKis) =>
-  mockUseListKi.mockImplementation(({ status }: { status: string[] }) => ({
-    kis: status.includes('deleted') && status.length === 1 ? [kis[1]] : kis,
-    total: 40,
-    summary: {
-      total: 40,
-      countsByType: [
-        { type: 'faq', count: 30 },
-        { type: 'playbook', count: 1 },
-      ],
-    },
+const mockGroups = ({ totalOther = 0 }: { totalOther?: number } = {}) =>
+  mockUseListKiGroups.mockImplementation(({ status }: { status: string[] }) => {
+    const onlyDeleted = status.length === 1 && status[0] === 'deleted';
+    const groups = onlyDeleted ? [PLAYBOOK] : [FAQ, PLAYBOOK];
+    return {
+      groups,
+      total: groups.reduce((sum, { count }) => sum + count, 0) + totalOther,
+      totalOther,
+      isLoading: false,
+      isFetching: false,
+      isPreviousData: false,
+      error: undefined,
+    };
+  });
+
+const mockOther = (kis: KiListItem[] = [], total = kis.length) =>
+  mockUseListKi.mockImplementation(({ enabled }: { enabled: boolean }) => ({
+    kis: enabled ? kis : [],
+    total: enabled ? total : 0,
+    summary: { total: 0, countsByType: [] },
     isLoading: false,
     isFetching: false,
+    isPreviousData: false,
     error: undefined,
     refetch: jest.fn(),
   }));
@@ -61,7 +81,8 @@ const searchParam = (search: string, key: string) => new URLSearchParams(search)
 
 describe('ListKiGroups', () => {
   beforeEach(() => {
-    mockList();
+    mockGroups();
+    mockOther();
     mockUseListKiByType.mockReturnValue({});
   });
 
@@ -69,7 +90,7 @@ describe('ListKiGroups', () => {
     jest.clearAllMocks();
   });
 
-  it('groups rows by type, biggest type first, with the type total', () => {
+  it('shows the groups biggest first, with the group total and its first rows', () => {
     renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
 
     const headers = screen.getAllByTestId('contextListKiGroupHeader');
@@ -121,6 +142,37 @@ describe('ListKiGroups', () => {
         'contextListKiShowMoreButton'
       )
     ).not.toBeInTheDocument();
+  });
+
+  it('shows header, tiles and only the selected sections, with "Other" as one flat section', () => {
+    mockGroups({ totalOther: 3 });
+    mockOther([ki('o-1', 'zeta'), ki('o-2', undefined), ki('o-3', 'eta')]);
+    renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
+
+    expect(screen.getByTestId('contextListKiHeaderCount')).toHaveTextContent(
+      '34 Knowledge documents'
+    );
+    expect(screen.queryByTestId('contextListKiGroupOther')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('contextListKiTileOther'));
+    expect(screen.getByTestId('contextListKiTileOther')).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.queryByTestId('contextListKiGroup-faq')).not.toBeInTheDocument();
+    const otherSection = screen.getByTestId('contextListKiGroupOther');
+    expect(within(otherSection).getByTestId('contextListKiGroupHeader')).toHaveTextContent(
+      'Other3'
+    );
+    expect(within(otherSection).getAllByTestId('contextKiRow')).toHaveLength(3);
+
+    fireEvent.click(screen.getByTestId('contextListKiTile-faq'));
+    expect(
+      screen.getAllByTestId('contextListKiGroupHeader').map((header) => header.textContent)
+    ).toEqual(['faq30', 'Other3']);
+
+    // A second click deselects; with nothing selected every group is back, "Other" hides.
+    fireEvent.click(screen.getByTestId('contextListKiTile-faq'));
+    fireEvent.click(screen.getByTestId('contextListKiTileOther'));
+    expect(screen.getAllByTestId('contextListKiGroupHeader')).toHaveLength(2);
+    expect(screen.queryByTestId('contextListKiGroupOther')).not.toBeInTheDocument();
   });
 
   it('opens the first document when none is selected, without a new history entry', () => {
