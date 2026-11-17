@@ -19,7 +19,6 @@ const renderButton = ({
   ...props
 }: FlyoutFooterSecondaryActionProps): React.ReactElement => {
   if (props.variant === 'ai') {
-    // `addToChat` replaces children with the shared Add to chat label, so none is passed.
     if (props.iconType === 'addToChat') {
       const { variant: _variant, ...buttonProps } = props;
       return React.createElement(AiButtonEmpty, {
