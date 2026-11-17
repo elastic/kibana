@@ -171,6 +171,34 @@ describe('AgentPolicyBaseSchema', () => {
       }).toThrow('output_permissions overrides is not allowed');
     });
 
+    it.each(['receivers', 'exporters', 'processors', 'connectors', 'extensions', 'service'])(
+      'should throw an error if the OTel key %s is provided',
+      (key) => {
+        expect(() => {
+          AgentPolicyBaseSchema.overrides.validate({ [key]: { foo: {} } });
+        }).toThrow(`${key} overrides is not allowed`);
+      }
+    );
+
+    it('should throw an error if a dotted OTel key is provided', () => {
+      expect(() => {
+        AgentPolicyBaseSchema.overrides.validate({ 'extensions.pprof.save_to_file': '/tmp/x' });
+      }).toThrow('extensions overrides is not allowed');
+      expect(() => {
+        AgentPolicyBaseSchema.overrides.validate({ 'service.pipelines': {} });
+      }).toThrow('service overrides is not allowed');
+    });
+
+    it('should not throw for keys that only share a prefix with denied keys', () => {
+      expect(() => {
+        AgentPolicyBaseSchema.overrides.validate({ 'servicefoo.bar': 1, outputs: {} });
+      }).not.toThrow();
+    });
+
+    it('should not throw for null overrides', () => {
+      expect(() => AgentPolicyBaseSchema.overrides.validate(null)).not.toThrow();
+    });
+
     it('should not throw for valid overrides keys', () => {
       expect(() => {
         AgentPolicyBaseSchema.overrides.validate({ 'agent.monitoring.use_output': 'custom' });

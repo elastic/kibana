@@ -14,7 +14,7 @@ import {
   dataTypes,
   FLEET_SCHEMA_NAME_MAX_LENGTH,
 } from '../../../common/constants';
-import { isValidNamespace } from '../../../common/services';
+import { getDeniedAgentPolicyOverrideKey, isValidNamespace } from '../../../common/services';
 import { getSettingsAPISchema } from '../../services/form_settings';
 
 import { ProxyHeadersSchema } from '../rest_spec/fleet_proxies';
@@ -129,13 +129,16 @@ export const AgentPolicyBaseSchema = {
           if (Object.keys(val).some((key) => key.match(/^inputs(\.)?/))) {
             return 'inputs overrides is not allowed';
           }
-          if (Object.keys(val).some((key) => key.match(/^output_permissions(\.)?/))) {
-            return 'output_permissions overrides is not allowed';
+          for (const key of Object.keys(val)) {
+            const denied = getDeniedAgentPolicyOverrideKey(key);
+            if (denied) {
+              return `${denied} overrides is not allowed`;
+            }
           }
         },
         meta: {
           description:
-            'Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.',
+            'Override settings that are defined in the agent policy. Input, output permissions and OpenTelemetry collector settings (receivers, exporters, processors, connectors, extensions, service) cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.',
         },
       }),
     ])
