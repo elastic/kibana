@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { CaseUI } from '../../../common';
 import type { Observable } from '../../../common/types/domain/observable/v1';
 import { AddObservable } from './add_observable';
+import { ExtractObservablesButton } from './extract_observables_button';
 import { ExtractObservablesSwitch } from '../case_settings/extract_observables_switch';
 import { DefaultObservableTypesModal } from './default_observable_types_modal';
 import { useCasesFeatures } from '../../common/use_cases_features';
@@ -83,6 +84,8 @@ export const ObservablesUtilityBar = ({
           </EuiFlexItem>
         </>
       ) : null}
+
+      <ExtractObservablesButton caseData={caseData} isDisabled={isLoading} />
 
       <EuiFlexItem grow={false}>
         <AddObservable caseData={caseData} />

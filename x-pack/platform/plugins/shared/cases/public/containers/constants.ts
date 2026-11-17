@@ -91,6 +91,7 @@ export const casesMutationsKeys = {
   patchObservable: ['patch-observable'] as const,
   deleteObservable: ['delete-observable'] as const,
   bulkDeleteObservables: ['bulk-delete-observables'] as const,
+  extractObservables: ['extract-observables'] as const,
   createTemplate: ['create-template'] as const,
   updateTemplate: ['update-template'] as const,
   deleteTemplate: ['delete-template'] as const,
