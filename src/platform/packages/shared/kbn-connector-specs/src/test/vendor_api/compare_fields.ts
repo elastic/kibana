@@ -8,6 +8,7 @@
  */
 
 import type { OpenApiDocument } from '@kbn/connector-emulate';
+import { isRecord } from './values';
 
 /** How a response field changed between two specs, e.g. `type string → boolean`. */
 export interface FieldChange {
@@ -19,9 +20,6 @@ export interface FieldChange {
 type Schema = Record<string, unknown>;
 
 const MAX_DEPTH = 32;
-
-const isRecord = (value: unknown): value is Schema =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const resolvePointer = (document: OpenApiDocument, ref: string): unknown =>
   ref

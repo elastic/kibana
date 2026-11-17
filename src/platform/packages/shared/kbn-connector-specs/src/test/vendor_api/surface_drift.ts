@@ -8,16 +8,10 @@
  */
 
 import type { ConnectorDrift, DriftReportEntry, FailedDrift } from './detect_drift';
-import {
-  changeList,
-  DRIFT_ISSUE_LABEL,
-  findingsOf,
-  markerOf,
-  renderDriftIssue,
-} from './render_drift_issue';
+import { connectorOf, DRIFT_ISSUE_LABEL, markerOf } from './drift_issue_marker';
+import { changeList, findingsOf, renderDriftIssue } from './render_drift_issue';
 import type { VendorApiLog } from './update_vendor_api';
-
-export { DRIFT_ISSUE_LABEL, renderDriftIssue } from './render_drift_issue';
+import { errorMessage } from './values';
 
 export interface DriftIssue {
   readonly number: number;
@@ -84,10 +78,6 @@ export interface SurfaceDriftOptions {
   readonly log: VendorApiLog;
 }
 
-const MARKER_PATTERN = new RegExp(`<!-- ${DRIFT_ISSUE_LABEL}:(\\S+) -->`);
-
-const connectorOf = ({ body }: DriftIssue): string | undefined => body.match(MARKER_PATTERN)?.[1];
-
 const isFailed = (entry: DriftReportEntry): entry is FailedDrift => 'error' in entry;
 
 /** The body of the bot PR refreshing the artifacts of connectors with non-breaking drift. */
@@ -111,9 +101,6 @@ export const renderRefreshPr = (drifts: readonly ConnectorDrift[]): string =>
       ];
     }),
   ].join('\n');
-
-const message = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
 
 /**
  * Turns a drift report into GitHub issues: one per connector that needs one, found again by the
@@ -214,14 +201,14 @@ export const surfaceDrift = async ({
         actions.push({ connector, action: 'unchanged', issue: existing });
       }
     } catch (error) {
-      log.warning(`${connector}: ${message(error)}`);
-      actions.push({ connector, action: 'failed', error: message(error) });
+      log.warning(`${connector}: ${errorMessage(error)}`);
+      actions.push({ connector, action: 'failed', error: errorMessage(error) });
     }
   }
 
   // A removed connector is in no report, so nothing above would ever close its issue.
   for (const issue of issues) {
-    const connector = connectorOf(issue);
+    const connector = connectorOf(issue.body);
     if (issue.state !== 'open' || connector === undefined || knownConnectors.has(connector)) {
       continue;
     }
@@ -235,8 +222,8 @@ export const surfaceDrift = async ({
       });
       actions.push({ connector, action: 'closed', issue });
     } catch (error) {
-      log.warning(`${connector}: ${message(error)}`);
-      actions.push({ connector, action: 'failed', error: message(error) });
+      log.warning(`${connector}: ${errorMessage(error)}`);
+      actions.push({ connector, action: 'failed', error: errorMessage(error) });
     }
   }
 

@@ -9,7 +9,7 @@
 
 import { spawn } from 'child_process';
 import type { DriftIssue, IssueTracker } from './surface_drift';
-import { DRIFT_ISSUE_LABEL } from './surface_drift';
+import { DRIFT_ISSUE_LABEL } from './drift_issue_marker';
 
 /** Runs `gh api` with an optional JSON body on stdin, and returns its stdout. */
 export type RunGhApi = (args: readonly string[], input?: unknown) => Promise<string>;

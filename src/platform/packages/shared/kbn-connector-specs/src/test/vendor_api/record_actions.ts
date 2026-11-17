@@ -19,6 +19,7 @@ import type { GeneratedInputs, RejectedInput } from './generate_action_inputs';
 import { generateActionInputs } from './generate_action_inputs';
 import type { ManifestOperation } from './manifest';
 import { matchesPathTemplate } from './manifest';
+import { errorMessage } from './values';
 
 const SAFE_METHODS = new Set(['get', 'head', 'options']);
 
@@ -176,9 +177,6 @@ const authTypeIdsOf = ({ auth }: ConnectorSpec): string[] =>
         typeof definition === 'string' ? definition : definition.type
       )
     : ['none'];
-
-const errorMessage = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
 
 // A list of overrides generates the inputs once per entry; inputs that come out the same run once.
 const generateFixtureInputs = async (

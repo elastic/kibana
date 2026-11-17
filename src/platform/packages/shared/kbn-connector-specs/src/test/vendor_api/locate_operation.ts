@@ -8,6 +8,7 @@
  */
 
 import type { OpenApiDocument } from '@kbn/connector-emulate';
+import { isRecord } from './values';
 
 /** Where a path, or an operation on it, is in a spec. */
 export type OperationLocation =
@@ -18,9 +19,6 @@ export type OperationLocation =
    */
   | { readonly status: 'moved'; readonly path: string; readonly serverPath: string }
   | { readonly status: 'missing' };
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 /** The spec's server URLs, as written. */
 export const serverUrls = (document: OpenApiDocument): string[] =>
@@ -41,8 +39,9 @@ const serverPaths = (document: OpenApiDocument): string[] => [
 const pathItem = (document: OpenApiDocument, path: string): Record<string, unknown> | undefined => {
   for (const key of ['paths', 'x-ms-paths']) {
     const paths = document[key];
-    if (isRecord(paths) && isRecord(paths[path])) {
-      return paths[path] as Record<string, unknown>;
+    const item = isRecord(paths) ? paths[path] : undefined;
+    if (isRecord(item)) {
+      return item;
     }
   }
   return undefined;

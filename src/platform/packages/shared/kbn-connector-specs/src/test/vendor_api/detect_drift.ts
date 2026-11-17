@@ -26,6 +26,7 @@ import { createOasdiff } from './run_oasdiff';
 import { toStableJson } from './stable_json';
 import type { UpdateVendorApiResult, VendorApiLog } from './update_vendor_api';
 import { updateVendorApi } from './update_vendor_api';
+import { errorMessage, isRecord } from './values';
 
 export type { OperationLocation } from './locate_operation';
 
@@ -187,9 +188,6 @@ const toSpecChange = (entry: OasdiffEntry): SpecChange => ({
   ...(entry.operation && entry.path ? { operation: `${entry.operation} ${entry.path}` } : {}),
 });
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
-
 const NAMED_COMPONENT = /`([^`]+)`/;
 
 /**
@@ -219,9 +217,6 @@ const stillInSpec = ({ id, text, operation, path: entryPath }: OasdiffEntry, spe
   const named = components[section];
   return isRecord(named) && name in named;
 };
-
-const message = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
 
 // What the actions call; `apiVersion` and `fetchedAt` change without the contract changing.
 const callsOf = ({ operations, unmatched }: VendorApiManifest): string =>
@@ -414,7 +409,7 @@ const compareWithLatest = async ({
         result = updated;
         return updated.problems;
       },
-      (error) => [message(error)]
+      (error) => [errorMessage(error)]
     );
     const refreshed = await readOptional(path.join(copy, MANIFEST));
     const sources: Record<string, SourceDrift> = {};
@@ -501,7 +496,7 @@ export const detectDrift = async ({
       snapshotResult = result;
       return result.problems;
     },
-    (error) => [message(error)]
+    (error) => [errorMessage(error)]
   );
 
   // Each document is fetched once, for the reachability check and the recording alike.
@@ -517,8 +512,8 @@ export const detectDrift = async ({
     try {
       await loadVendorSpec(url, fetchOnce, source);
     } catch (error) {
-      log.warning(`${connector.metadata.id}: ${name} at ${url} didn't load: ${message(error)}`);
-      sources[name] = { status: 'unreachable', error: message(error), url };
+      log.warning(`${connector.metadata.id}: ${name} at ${url} didn't load: ${errorMessage(error)}`);
+      sources[name] = { status: 'unreachable', error: errorMessage(error), url };
     }
   }
 

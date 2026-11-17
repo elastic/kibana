@@ -15,6 +15,7 @@ import type {
   StaleCorrection,
 } from './detect_drift';
 import { reviewOfChange } from './detect_drift';
+import { markerOf } from './drift_issue_marker';
 import type { Addition } from './new_in_vendor_api';
 import { newInVendorApi } from './new_in_vendor_api';
 import { OVERLAY, snapshotFile } from './load_vendor_specs';
@@ -95,12 +96,6 @@ interface ReviewItem {
   readonly change: SpecChange;
   readonly actions: readonly string[];
 }
-
-/** The label of every drift issue; the connector is named by a marker in the body. */
-export const DRIFT_ISSUE_LABEL = 'connector-validation';
-
-/** The hidden marker that finds a connector's issue again. */
-export const markerOf = (connector: string): string => `<!-- ${DRIFT_ISSUE_LABEL}:${connector} -->`;
 
 const REPO_BLOB_URL = 'https://github.com/elastic/kibana/blob/main';
 const SKILLS = 'src/platform/packages/shared/kbn-connector-specs/.claude/skills';
