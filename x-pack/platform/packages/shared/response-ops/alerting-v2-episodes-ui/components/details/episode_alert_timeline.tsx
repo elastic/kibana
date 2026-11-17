@@ -110,7 +110,12 @@ export const AlertEpisodeAlertTimeline = ({
                       <EpisodeSeverityTimelineRow
                         segments={severityTimelineData.segments}
                         transitions={severityTimelineData.transitions}
-                        onTransitionClick={setSelectedSeverityTransition}
+                        // Collapsed rows carry no event data, so their markers open no panel.
+                        onTransitionClick={
+                          collapsedEventLimit === undefined
+                            ? setSelectedSeverityTransition
+                            : undefined
+                        }
                         {...rowProps}
                       />
                     ),

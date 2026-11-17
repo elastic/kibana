@@ -102,6 +102,18 @@ describe('AlertEpisodeAlertTimeline', () => {
     expect(screen.getByText('server-1')).toBeInTheDocument();
   });
 
+  it('does not open the event-data panel when the rows are collapsed', () => {
+    renderTimeline([createEventRow({ severity: 'high' })], 1000);
+
+    expect(screen.getByText('Severity')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open severity transition' }));
+
+    expect(
+      screen.queryByTestId('alertingV2EpisodeSeverityHeatmapDetailPanel')
+    ).not.toBeInTheDocument();
+  });
+
   it('hides the severity lane when no events have a supported severity', () => {
     renderTimeline([createEventRow()]);
 

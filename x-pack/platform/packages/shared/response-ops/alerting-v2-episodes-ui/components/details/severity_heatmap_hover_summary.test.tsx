@@ -20,4 +20,11 @@ describe('SeverityHeatmapHoverSummary', () => {
     expect(screen.getByText('Jan 1, 2024, 12:00:00 AM')).toBeInTheDocument();
     expect(screen.getByText('Click to see data')).toBeInTheDocument();
   });
+
+  it('omits the click hint when the marker cannot be clicked', () => {
+    render(<SeverityHeatmapHoverSummary severityLabel="High" showClickHint={false} />);
+
+    expect(screen.getByText('High')).toBeInTheDocument();
+    expect(screen.queryByText('Click to see data')).not.toBeInTheDocument();
+  });
 });
