@@ -8,26 +8,31 @@
  */
 
 import { Session } from 'node:inspector/promises';
+import { relative, sep } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { SAMPLING_INTERVAL_US } from './constants';
 
 /** The parts of a V8 CPU profile (`Profiler.Profile`) the watchdog reads. */
 export interface CpuProfile {
-  nodes: ReadonlyArray<{
-    id: number;
-    callFrame: {
-      functionName: string;
-      url?: string;
-      /** 0-based; -1 when unknown. */
-      lineNumber?: number;
-    };
-    children?: readonly number[];
-  }>;
+  nodes: readonly CpuProfileNode[];
   /** Microseconds; when profiling was requested, before the first sample. */
   startTime: number;
   endTime: number;
   samples?: readonly number[];
   /** Microseconds between samples; the first is measured from `startTime`. */
   timeDeltas?: readonly number[];
+}
+
+export interface CpuProfileNode {
+  id: number;
+  callFrame: {
+    functionName: string;
+    url?: string;
+    /** 0-based; -1 when unknown. */
+    lineNumber?: number;
+  };
+  children?: readonly number[];
+  hitCount?: number;
 }
 
 /** The inspector session calls a capture makes; injectable for tests. */
@@ -83,3 +88,53 @@ export class ProfileCapture {
     this.session.disconnect();
   }
 }
+
+// Chrome DevTools' default ignore list (`/node_modules/|^node:`) would hide every Kibana frame.
+const fileUrl = (url: string | undefined, root: string): string | undefined => {
+  if (!url || url.startsWith('node:')) return url;
+  const path = url.startsWith('file://') ? fileURLToPath(url) : url;
+  const rel = relative(root, path).split(sep).join('/');
+  if (rel.startsWith('node_modules/@kbn/')) return rel.slice('node_modules/'.length);
+  return rel.startsWith('src/') || rel.startsWith('x-pack/') ? rel : url;
+};
+
+/** Trims the cold-start lead-in and the idle tail, prunes unsampled nodes and rewrites Kibana URLs. */
+export const prepareProfile = (profile: CpuProfile, root: string): CpuProfile => {
+  const { nodes, samples = [], timeDeltas = [] } = profile;
+  const byId = new Map(nodes.map((node) => [node.id, node]));
+  let kept = samples.length;
+  while (kept > 0 && byId.get(samples[kept - 1])?.callFrame.functionName === '(idle)') kept--;
+  const keptSamples = samples.slice(0, kept);
+  const keptDeltas = timeDeltas.slice(0, kept).map((delta, i) => (i === 0 ? 0 : delta));
+  const startTime = profile.startTime + (timeDeltas[0] ?? 0);
+  const endTime = keptDeltas.reduce((time, delta) => time + delta, startTime);
+
+  const hits = new Map<number, number>();
+  for (const id of keptSamples) hits.set(id, (hits.get(id) ?? 0) + 1);
+  const parents = new Map<number, number>();
+  for (const { id, children = [] } of nodes) for (const child of children) parents.set(child, id);
+  const keep = new Set<number>();
+  for (const sampled of hits.keys()) {
+    let id: number | undefined = sampled;
+    while (id !== undefined && !keep.has(id)) {
+      keep.add(id);
+      id = parents.get(id);
+    }
+  }
+
+  return {
+    ...profile,
+    nodes: nodes
+      .filter(({ id }) => keep.has(id))
+      .map((node) => ({
+        ...node,
+        callFrame: { ...node.callFrame, url: fileUrl(node.callFrame.url, root) },
+        hitCount: hits.get(node.id) ?? 0,
+        children: node.children?.filter((child) => keep.has(child)),
+      })),
+    startTime,
+    endTime,
+    samples: keptSamples,
+    timeDeltas: keptDeltas,
+  };
+};

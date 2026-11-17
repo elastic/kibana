@@ -7,49 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { CpuProfile, CpuProfileNode } from './profile_capture';
 import { capLocation, capName, relativeLocation } from './sanitize';
 
-interface CallFrame {
-  functionName: string;
-  url?: string;
-  /** 0-based; -1 when unknown. */
-  lineNumber?: number;
-}
-
-/** The parts of a V8 CPU profile (`Profiler.Profile`) `summarizeProfile` reads. */
-export interface SummarizableProfile {
-  nodes: ReadonlyArray<{
-    id: number;
-    callFrame: CallFrame;
-    children?: readonly number[];
-  }>;
-  /** Microseconds on the profile's monotonic clock. */
-  startTime: number;
-  endTime: number;
-  samples?: readonly number[];
-  /** Microseconds between samples; the first is measured from `startTime`. */
-  timeDeltas?: readonly number[];
-}
+type CallFrame = CpuProfileNode['callFrame'];
 
 export interface CallerSummary {
   name: string;
   location?: string;
 }
 
-export interface FrameSummary {
-  name: string;
-  location?: string;
+export interface FrameSummary extends CallerSummary {
   percent: number;
-}
-
-export interface KibanaFrameSummary extends FrameSummary {
   /** Nearest Kibana callers: the most common pair among the call frame's samples. */
-  callers: CallerSummary[];
-}
-
-export interface TopKibanaFrame {
-  location?: string;
-  percent: number;
+  callers?: CallerSummary[];
 }
 
 export interface ProfileSummary {
@@ -58,16 +29,9 @@ export interface ProfileSummary {
   /** Top call frames on top of the stack (self time), any code. */
   frames: FrameSummary[];
   /** Nearest Kibana call frame of each sample, with its Kibana callers. */
-  kibanaFrames: KibanaFrameSummary[];
+  kibanaFrames: FrameSummary[];
   /** Scalar copy of `kibanaFrames[0]` for fleet-wide ES|QL aggregation. */
-  topKibanaFrame?: TopKibanaFrame;
-}
-
-export interface SummarizeProfileOptions {
-  /** Repo root path, used to turn `file://` URLs into repo-relative locations. */
-  root: string;
-  /** Block end on the profile's clock (µs); samples after it are left out. */
-  inBlockUntilUs?: number;
+  topKibanaFrame?: Pick<FrameSummary, 'location' | 'percent'>;
 }
 
 const MAX_FRAMES = 2;
@@ -115,8 +79,9 @@ const cap = ({ name, location }: CallerSummary): CallerSummary =>
 
 /** Summarises a block's CPU profile: busy call frames, and the Kibana code they were reached from. */
 export const summarizeProfile = (
-  { nodes, samples = [], timeDeltas = [], startTime }: SummarizableProfile,
-  { root, inBlockUntilUs }: SummarizeProfileOptions
+  { nodes, samples = [], timeDeltas = [], startTime }: CpuProfile,
+  /** `inBlockUntilUs`: block end on the profile's clock (µs); samples after it are left out. */
+  { root, inBlockUntilUs }: { root: string; inBlockUntilUs?: number }
 ): ProfileSummary => {
   const nodeById = new Map(nodes.map((node) => [node.id, node]));
   const parentById = new Map<number, number>();
@@ -204,7 +169,7 @@ export const summarizeProfile = (
     percent: percentOf(count, busy),
   }));
 
-  const kibanaFrames: KibanaFrameSummary[] = top(kibanaCounts, MAX_KIBANA_FRAMES).map(
+  const kibanaFrames: FrameSummary[] = top(kibanaCounts, MAX_KIBANA_FRAMES).map(
     ([frameKey, { value, count }]) => {
       let mostCommon: Counted<CallFrame[]> | undefined;
       for (const entry of callerCounts.get(frameKey)?.values() ?? []) {
