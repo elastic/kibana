@@ -32,6 +32,14 @@ export const FLEET_CLOUD_DEFEND_PACKAGE = 'cloud_defend';
 export const FLEET_CLOUD_BEAT_PACKAGE = 'cloudbeat';
 export const FLEET_CONNECTORS_PACKAGE = 'elastic_connectors';
 
+/**
+ * Packages that are not FIPS compatible but do not declare `fips_compatible: false` in their manifest,
+ * so the generic policy template check cannot detect them.
+ * Remove an entry once a version of the package flagging all its templates as `fips_compatible: false`
+ * is published and older versions are no longer relevant.
+ */
+export const FIPS_INCOMPATIBLE_PACKAGES: readonly string[] = [FLEET_CONNECTORS_PACKAGE];
+
 export const GLOBAL_DATA_TAG_EXCLUDED_INPUTS = new Set<string>([
   FLEET_APM_PACKAGE,
   `pf-host-agent`,

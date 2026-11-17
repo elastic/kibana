@@ -44,6 +44,7 @@ import {
   MAX_BULK_WRITE_ITEMS,
 } from '../bulk_write';
 import { trackTelemetryBestEffort } from '../../../lib/telemetry/track_telemetry_best_effort';
+import { reportToolFailure, toTelemetryErrorMessage } from '../tool_failure';
 import { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from '../../agents/discovery/discovery';
 import { eventsWriteBulkHandler, type EventsWriteInput } from './handler';
 import { loadSourceCatalog, toSourceRef } from '../../utils/resolve_source_slugs';
@@ -305,7 +306,8 @@ const enrichCausalFeatures = async (
             .map((id) => JSON.stringify(id))
             .join(
               ', '
-            )} is not a Knowledge Indicator id. Copy each feature_id exactly as ki_search returned it (no prefix, no change of case), or leave that node out.`
+            )} is not a Knowledge Indicator id. Copy each feature_id exactly as ki_search returned it (no prefix, no change of case), or leave that node out.`,
+          { reason: 'unresolved_feature_reference', count: unresolved.length }
         );
       }
     }
@@ -524,7 +526,16 @@ export function createEventsWriteTool({
         };
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
-        logger.error(`Error running events_write: ${message}`);
+        const failure = reportToolFailure({
+          error,
+          toolId: SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID,
+          errorLogMessage: `Error running events_write: ${message}`,
+          logger,
+          telemetry,
+          request,
+          runContext: context.runContext,
+          itemCount: toolParams.items.length,
+        });
         // Source ids exist only once the slugs resolved; earlier failures report none.
         (storedItems ?? toolParams.items).forEach((input) => {
           trackTelemetryBestEffort({
@@ -543,7 +554,7 @@ export function createEventsWriteTool({
                   written: false,
                   source_ids: 'source_ids' in input ? input.source_ids : [],
                   ...('source_ids' in input ? detectionRunsOf(input) : {}),
-                  error_message: message,
+                  error_message: toTelemetryErrorMessage(failure, message),
                 },
                 request
               ),
