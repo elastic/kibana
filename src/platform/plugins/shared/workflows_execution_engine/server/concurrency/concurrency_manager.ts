@@ -257,13 +257,30 @@ export class ConcurrencyManager {
           ...writtenCancel,
         }))
       );
-      // A running task is still inside the execution loop, which publishes when it
-      // finalizes. Every other slot status has already left that loop, or never
-      // entered it. runWorkflow returns before the loop once this write has set
-      // cancelled, so those victims publish here.
-      const victimsWithoutALiveLoop = victims.flatMap((execution) =>
-        execution && execution.status !== ExecutionStatus.RUNNING ? [execution] : []
-      );
+      // A pre-write RUNNING status is not a live loop. The execution can park
+      // before this write, and the woken task then returns without publishing
+      // because the document is already cancelled. An active task can still
+      // finalize that cancel. Every other victim publishes here.
+      const victimsWithoutALiveLoop = (
+        await Promise.all(
+          victims.map(async (execution) => {
+            if (!execution?.id) {
+              return null;
+            }
+            try {
+              if (await this.workflowTaskManager.hasActiveExecutionTask(execution.id)) {
+                return null;
+              }
+            } catch (error) {
+              const detail = error instanceof Error ? error.message : String(error);
+              this.logger?.warn(
+                `Could not tell whether workflow execution ${execution.id} still has a running task: ${detail}`
+              );
+            }
+            return execution;
+          })
+        )
+      ).flatMap((execution) => (execution ? [execution] : []));
       await Promise.all(
         victimsWithoutALiveLoop.map((execution) =>
           publishFinishedWorkflowExecution(execution, writtenCancel)
