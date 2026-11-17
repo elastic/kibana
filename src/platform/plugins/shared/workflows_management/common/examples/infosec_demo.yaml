@@ -1060,8 +1060,6 @@ steps:
             type: kibana.request
             with:
               use_server_info: true
-              fetcher:
-                skip_ssl_verification: true
               method: POST
               path: '/s/{{ consts.space_id }}/api/search_with_session'
               body: |
@@ -1251,8 +1249,6 @@ steps:
             type: kibana.request
             with:
               use_server_info: true
-              fetcher:
-                skip_ssl_verification: true
               method: POST
               path: '/s/{{ consts.space_id }}/api/detection_engine/signals/status'
               body:
@@ -1274,8 +1270,6 @@ steps:
                 type: kibana.request
                 with:
                   use_server_info: true
-                  fetcher:
-                    skip_ssl_verification: true
                   method: POST
                   path: '/s/{{ consts.space_id }}/api/detection_engine/signals/tags'
                   body:
@@ -1298,8 +1292,6 @@ steps:
                 type: kibana.request
                 with:
                   use_server_info: true
-                  fetcher:
-                    skip_ssl_verification: true
                   method: POST
                   path: '/s/{{ consts.space_id }}/api/detection_engine/signals/tags'
                   body:
@@ -1322,8 +1314,6 @@ steps:
                 type: kibana.request
                 with:
                   use_server_info: true
-                  fetcher:
-                    skip_ssl_verification: true
                   method: POST
                   path: '/s/{{ consts.space_id }}/api/detection_engine/signals/tags'
                   body:
@@ -1346,8 +1336,6 @@ steps:
                 type: kibana.request
                 with:
                   use_server_info: true
-                  fetcher:
-                    skip_ssl_verification: true
                   method: POST
                   path: '/s/{{ consts.space_id }}/api/detection_engine/signals/tags'
                   body:
@@ -1385,8 +1373,6 @@ steps:
                 type: kibana.request
                 with:
                   use_server_info: true
-                  fetcher:
-                    skip_ssl_verification: true
                   method: POST
                   path: '/s/{{ consts.space_id }}/api/detection_engine/signals/status'
                   body:
@@ -1419,10 +1405,6 @@ steps:
                     type: kibana.request
                     with:
                       use_server_info: true
-                      headers:
-                        x-elastic-internal-origin: kibana
-                      fetcher:
-                        skip_ssl_verification: true
                       method: POST
                       path: '/s/{{ consts.space_id }}/api/workflows/{{ consts.wf2_id }}/run'
                       body:
