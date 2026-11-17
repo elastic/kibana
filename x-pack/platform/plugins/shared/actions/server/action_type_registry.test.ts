@@ -246,7 +246,7 @@ describe('actionTypeRegistry', () => {
       );
     });
 
-    test('allows adding a new version to an already registered action type', () => {
+    test('allows adding a new version to an already registered action type and does not re-register task definitions', () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
       actionTypeRegistry.register(
         getConnectorType({
@@ -256,6 +256,15 @@ describe('actionTypeRegistry', () => {
       );
       expect(actionTypeRegistry.getSpec('catalog-type', '1.0')).toEqual({ spec: 'v1' });
       expect(actionTypeRegistry.getSpec('catalog-type', '2.0')).toBeUndefined();
+      expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledWith({
+        'actions:catalog-type': {
+          createTaskRunner: expect.any(Function),
+          maxAttempts: 3,
+          cost: TaskCost.Tiny,
+          taskTypeGroup: 'actions',
+          title: 'My connector type',
+        },
+      });
 
       actionTypeRegistry.register(
         getConnectorType({
@@ -265,6 +274,7 @@ describe('actionTypeRegistry', () => {
       );
       expect(actionTypeRegistry.getSpec('catalog-type', '1.0')).toEqual({ spec: 'v1' });
       expect(actionTypeRegistry.getSpec('catalog-type', '2.0')).toEqual({ spec: 'v2' });
+      expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
     });
 
     test('validates the given type before adding spec versions', () => {

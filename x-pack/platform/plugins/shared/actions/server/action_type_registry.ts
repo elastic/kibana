@@ -258,8 +258,8 @@ export class ActionTypeRegistry {
       ...(specs && { specs: new Map([...(registeredActionType?.specs ?? []), ...specs]) }),
     } as unknown as ActionType);
 
-    // Skip task type registration for connectors without execute/params
-    if (actionType.executor && actionType.validate.params) {
+    // Skip task type registration for new connectors without execute/params or for already registered connectors
+    if (!registeredActionType && actionType.executor && actionType.validate.params) {
       this.taskManager.registerTaskDefinitions({
         [`actions:${actionType.id}`]: {
           title: actionType.name,
