@@ -1,0 +1,31 @@
+{
+  "operations": {
+    "describeInstanceInformation": [
+      {
+        "method": "post",
+        "pagination": {
+          "request": {
+            "cursorParam": "NextToken",
+            "in": "body",
+            "sizeParam": "MaxResults"
+          },
+          "response": {
+            "itemsPath": "InstanceInformationList",
+            "nextPath": "NextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/DescribeInstanceInformation",
+        "source": "ssm"
+      }
+    ]
+  },
+  "sources": {
+    "ssm": {
+      "apiVersion": "2014-11-06",
+      "fetchedAt": "2026-11-17T10:50:49.641Z",
+      "format": "smithy",
+      "url": "https://raw.githubusercontent.com/aws/api-models-aws/main/models/ssm/service/2014-11-06/ssm-2014-11-06.json"
+    }
+  }
+}

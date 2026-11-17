@@ -1,0 +1,419 @@
+{
+  "components": {
+    "schemas": {
+      "DescribeInstanceInformationRequestContent": {
+        "properties": {
+          "Filters": {
+            "items": {
+              "$ref": "#/components/schemas/InstanceInformationStringFilter"
+            },
+            "minItems": 0,
+            "type": "array"
+          },
+          "InstanceInformationFilterList": {
+            "items": {
+              "$ref": "#/components/schemas/InstanceInformationFilter"
+            },
+            "minItems": 0,
+            "type": "array"
+          },
+          "MaxResults": {
+            "format": "int32",
+            "maximum": 50,
+            "minimum": 5,
+            "type": "integer"
+          },
+          "NextToken": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DescribeInstanceInformationResponseContent": {
+        "properties": {
+          "InstanceInformationList": {
+            "items": {
+              "$ref": "#/components/schemas/InstanceInformation"
+            },
+            "type": "array"
+          },
+          "NextToken": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InstanceAggregatedAssociationOverview": {
+        "properties": {
+          "DetailedStatus": {
+            "type": "string"
+          },
+          "InstanceAssociationStatusAggregatedCount": {
+            "additionalProperties": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "InstanceInformation": {
+        "properties": {
+          "ActivationId": {
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "type": "string"
+          },
+          "AgentVersion": {
+            "pattern": "^[0-9]{1,6}(\\.[0-9]{1,6}){2,3}$",
+            "type": "string"
+          },
+          "AssociationOverview": {
+            "$ref": "#/components/schemas/InstanceAggregatedAssociationOverview"
+          },
+          "AssociationStatus": {
+            "type": "string"
+          },
+          "ComputerName": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "IPAddress": {
+            "format": "password",
+            "maxLength": 46,
+            "minLength": 1,
+            "type": "string"
+          },
+          "IamRole": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "InstanceId": {
+            "pattern": "^(^i-(\\w{8}|\\w{17})$)|(^mi-\\w{17}$)$",
+            "type": "string"
+          },
+          "IsLatestVersion": {
+            "type": "boolean"
+          },
+          "LastAssociationExecutionDate": {
+            "format": "double",
+            "type": "number"
+          },
+          "LastPingDateTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "LastSuccessfulAssociationExecutionDate": {
+            "format": "double",
+            "type": "number"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "PingStatus": {
+            "$ref": "#/components/schemas/PingStatus"
+          },
+          "PlatformName": {
+            "type": "string"
+          },
+          "PlatformType": {
+            "$ref": "#/components/schemas/PlatformType"
+          },
+          "PlatformVersion": {
+            "type": "string"
+          },
+          "RegistrationDate": {
+            "format": "double",
+            "type": "number"
+          },
+          "ResourceType": {
+            "$ref": "#/components/schemas/ResourceType"
+          },
+          "SourceId": {
+            "maxLength": 128,
+            "minLength": 0,
+            "pattern": "^[a-zA-Z0-9:_-]*$",
+            "type": "string"
+          },
+          "SourceLocation": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^.{1,128}$",
+            "type": "string"
+          },
+          "SourceType": {
+            "$ref": "#/components/schemas/SourceType"
+          }
+        },
+        "type": "object"
+      },
+      "InstanceInformationFilter": {
+        "properties": {
+          "key": {
+            "$ref": "#/components/schemas/InstanceInformationFilterKey"
+          },
+          "valueSet": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "key",
+          "valueSet"
+        ],
+        "type": "object"
+      },
+      "InstanceInformationFilterKey": {
+        "enum": [
+          "InstanceIds",
+          "AgentVersion",
+          "PingStatus",
+          "PlatformTypes",
+          "ActivationIds",
+          "IamRole",
+          "ResourceType",
+          "AssociationStatus"
+        ],
+        "type": "string"
+      },
+      "InstanceInformationStringFilter": {
+        "properties": {
+          "Key": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "Values": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "Key",
+          "Values"
+        ],
+        "type": "object"
+      },
+      "InternalServerErrorResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidFilterKeyResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidInstanceIdResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidInstanceInformationFilterValueResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidNextTokenResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PingStatus": {
+        "enum": [
+          "Online",
+          "ConnectionLost",
+          "Inactive"
+        ],
+        "type": "string"
+      },
+      "PlatformType": {
+        "enum": [
+          "Windows",
+          "Linux",
+          "MacOS"
+        ],
+        "type": "string"
+      },
+      "ResourceType": {
+        "enum": [
+          "ManagedInstance",
+          "EC2Instance"
+        ],
+        "type": "string"
+      },
+      "SourceType": {
+        "enum": [
+          "AWS::EC2::Instance",
+          "AWS::IoT::Thing",
+          "AWS::SSM::ManagedInstance",
+          "Microsoft.Compute/virtualMachines",
+          "compute.googleapis.com/Instance"
+        ],
+        "type": "string"
+      }
+    },
+    "securitySchemes": {
+      "aws.auth.sigv4": {
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      }
+    }
+  },
+  "info": {
+    "title": "Amazon Simple Systems Manager (SSM)"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/DescribeInstanceInformation": {
+      "post": {
+        "operationId": "DescribeInstanceInformation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DescribeInstanceInformationRequestContent"
+              }
+            },
+            "application/x-amz-json-1.1": {
+              "schema": {
+                "$ref": "#/components/schemas/DescribeInstanceInformationRequestContent"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DescribeInstanceInformationResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/DescribeInstanceInformationResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidFilterKeyResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidInstanceIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidInstanceInformationFilterValueResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidNextTokenResponseContent"
+                    }
+                  ]
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidFilterKeyResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidInstanceIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidInstanceInformationFilterValueResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidNextTokenResponseContent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "aws.auth.sigv4": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://ssm.{region}.amazonaws.com",
+      "variables": {
+        "region": {
+          "default": "us-east-1"
+        }
+      }
+    }
+  ],
+  "x-amz-json": {
+    "endpointPrefix": "ssm",
+    "targetPrefix": "AmazonSSM",
+    "version": "1.1"
+  }
+}

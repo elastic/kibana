@@ -1,0 +1,11 @@
+{
+  "describeInstanceInformation": {
+    "queries": [
+      {
+        "source": "ssm",
+        "method": "POST",
+        "path": "/DescribeInstanceInformation"
+      }
+    ]
+  }
+}
