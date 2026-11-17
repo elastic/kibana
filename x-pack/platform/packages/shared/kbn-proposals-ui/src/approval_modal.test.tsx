@@ -65,7 +65,6 @@ describe('ApprovalModal', () => {
     expect(baseProps.onConfirm).not.toHaveBeenCalled();
     expect(baseProps.onDismiss).not.toHaveBeenCalled();
 
-    // Hover the EUI tooltip anchor — aria-disabled buttons use pointer-events: none.
     fireEvent.mouseEnter(confirm.parentElement!);
     expect(await screen.findByRole('tooltip')).toHaveTextContent(
       "You don't have permissions to apply or decline proposals."

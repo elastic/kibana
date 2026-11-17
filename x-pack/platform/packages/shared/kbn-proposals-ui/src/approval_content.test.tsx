@@ -397,7 +397,6 @@ describe('ApprovalContent', () => {
 
       const reopen = screen.getByTestId('approvalContent-reopen');
       expect(reopen).toHaveAttribute('aria-disabled', 'true');
-      // Hover the EUI tooltip anchor — aria-disabled buttons use pointer-events: none.
       fireEvent.mouseEnter(reopen.parentElement!);
       expect(await screen.findByRole('tooltip')).toHaveTextContent(
         "You don't have permissions to apply or decline proposals."
