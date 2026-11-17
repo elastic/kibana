@@ -255,7 +255,7 @@ export class ActionTypeRegistry {
 
     this.actionTypes.set(actionType.id, {
       ...actionType,
-      ...(specs && { specs: new Map(specs) }),
+      ...(specs && { specs: new Map([...registeredActionType?.specs ?? [], ...specs]) }),
     } as unknown as ActionType);
 
     // Skip task type registration for connectors without execute/params
