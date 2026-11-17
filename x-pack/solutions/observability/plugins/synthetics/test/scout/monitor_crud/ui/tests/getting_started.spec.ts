@@ -10,42 +10,46 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../common/ui/fixtures';
 
 // Failing: See https://github.com/elastic/kibana/issues/302135
-test.describe.skip('GettingStarted', { tag: tags.stateful.classic }, () => {
-  let locationLabel: string;
+test.describe.skip(
+  'GettingStarted',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    let locationLabel: string;
 
-  test.beforeAll(async ({ syntheticsServices }) => {
-    await syntheticsServices.enable();
-    await syntheticsServices.deleteMonitors();
-    const location = await syntheticsServices.ensurePrivateLocationExists();
-    locationLabel = location.label;
-  });
-
-  test.afterAll(async ({ syntheticsServices }) => {
-    await syntheticsServices.deleteMonitors();
-    await syntheticsServices.deletePrivateLocations();
-  });
-
-  test('creates a basic monitor from getting started page', async ({
-    pageObjects,
-    page,
-    browserAuth,
-  }) => {
-    await test.step('navigate to monitor management and login', async () => {
-      await browserAuth.loginAsPrivilegedUser();
-      await pageObjects.syntheticsApp.navigateToGettingStarted();
+    test.beforeAll(async ({ syntheticsServices }) => {
+      await syntheticsServices.enable();
+      await syntheticsServices.deleteMonitors();
+      const location = await syntheticsServices.ensurePrivateLocationExists();
+      locationLabel = location.label;
     });
 
-    await test.step('shows validation error on submit', async () => {
-      await page.testSubj.click('syntheticsMonitorConfigSubmitButton');
-      await expect(page.getByText('URL is required')).toBeVisible();
+    test.afterAll(async ({ syntheticsServices }) => {
+      await syntheticsServices.deleteMonitors();
+      await syntheticsServices.deletePrivateLocations();
     });
 
-    await test.step('create basic monitor', async () => {
-      await pageObjects.syntheticsApp.fillFirstMonitorDetails({
-        url: 'https://www.elastic.co',
-        location: locationLabel,
+    test('creates a basic monitor from getting started page', async ({
+      pageObjects,
+      page,
+      browserAuth,
+    }) => {
+      await test.step('navigate to monitor management and login', async () => {
+        await browserAuth.loginAsPrivilegedUser();
+        await pageObjects.syntheticsApp.navigateToGettingStarted();
       });
-      await pageObjects.syntheticsApp.confirmAndSave();
+
+      await test.step('shows validation error on submit', async () => {
+        await page.testSubj.click('syntheticsMonitorConfigSubmitButton');
+        await expect(page.getByText('URL is required')).toBeVisible();
+      });
+
+      await test.step('create basic monitor', async () => {
+        await pageObjects.syntheticsApp.fillFirstMonitorDetails({
+          url: 'https://www.elastic.co',
+          location: locationLabel,
+        });
+        await pageObjects.syntheticsApp.confirmAndSave();
+      });
     });
-  });
-});
+  }
+);

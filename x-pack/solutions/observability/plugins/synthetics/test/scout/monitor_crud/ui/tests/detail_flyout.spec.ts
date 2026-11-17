@@ -9,52 +9,54 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../common/ui/fixtures';
 
-// TODO(scout-arch): Stateful-only with no recorded reason. Explain why this suite cannot run on
-// serverless, or update its tags so that it does.
-test.describe('MonitorDetailFlyout', { tag: tags.stateful.classic }, () => {
-  const monitorName = 'test-flyout-http-monitor';
-  let locationLabel: string;
-  let locationId: string;
+test.describe(
+  'MonitorDetailFlyout',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    const monitorName = 'test-flyout-http-monitor';
+    let locationLabel: string;
+    let locationId: string;
 
-  test.beforeAll(async ({ syntheticsServices }) => {
-    await syntheticsServices.enable();
-    await syntheticsServices.deleteMonitors();
-    const location = await syntheticsServices.ensurePrivateLocationExists();
-    locationLabel = location.label;
-    locationId = location.id;
-  });
-
-  test.afterAll(async ({ syntheticsServices }) => {
-    await syntheticsServices.deleteMonitors();
-  });
-
-  test('creates HTTP monitor and opens detail flyout', async ({
-    pageObjects,
-    page,
-    browserAuth,
-  }) => {
-    await test.step('login and navigate to add monitor', async () => {
-      await browserAuth.loginAsPrivilegedUser();
-      await pageObjects.syntheticsApp.navigateToAddMonitor();
-      await pageObjects.syntheticsApp.ensureIsOnMonitorConfigPage();
+    test.beforeAll(async ({ syntheticsServices }) => {
+      await syntheticsServices.enable();
+      await syntheticsServices.deleteMonitors();
+      const location = await syntheticsServices.ensurePrivateLocationExists();
+      locationLabel = location.label;
+      locationId = location.id;
     });
 
-    await test.step('create HTTP monitor', async () => {
-      await pageObjects.syntheticsApp.createBasicHTTPMonitorDetails({
-        name: monitorName,
-        url: 'https://www.elastic.co',
-        apmServiceName: 'dev',
-        locations: [locationLabel],
+    test.afterAll(async ({ syntheticsServices }) => {
+      await syntheticsServices.deleteMonitors();
+    });
+
+    test('creates HTTP monitor and opens detail flyout', async ({
+      pageObjects,
+      page,
+      browserAuth,
+    }) => {
+      await test.step('login and navigate to add monitor', async () => {
+        await browserAuth.loginAsPrivilegedUser();
+        await pageObjects.syntheticsApp.navigateToAddMonitor();
+        await pageObjects.syntheticsApp.ensureIsOnMonitorConfigPage();
       });
-      await pageObjects.syntheticsApp.confirmAndSave();
-    });
 
-    await test.step('open overview flyout', async () => {
-      await page.testSubj.click('syntheticsMonitorOverviewTab');
-      await expect(page.getByText(monitorName)).toBeVisible();
-      await page.testSubj.click(`${monitorName}-${locationId}-metric-item`);
-      const flyoutHeader = page.locator('.euiFlyoutHeader');
-      await expect(flyoutHeader).toContainText(monitorName);
+      await test.step('create HTTP monitor', async () => {
+        await pageObjects.syntheticsApp.createBasicHTTPMonitorDetails({
+          name: monitorName,
+          url: 'https://www.elastic.co',
+          apmServiceName: 'dev',
+          locations: [locationLabel],
+        });
+        await pageObjects.syntheticsApp.confirmAndSave();
+      });
+
+      await test.step('open overview flyout', async () => {
+        await page.testSubj.click('syntheticsMonitorOverviewTab');
+        await expect(page.getByText(monitorName)).toBeVisible();
+        await page.testSubj.click(`${monitorName}-${locationId}-metric-item`);
+        const flyoutHeader = page.locator('.euiFlyoutHeader');
+        await expect(flyoutHeader).toContainText(monitorName);
+      });
     });
-  });
-});
+  }
+);

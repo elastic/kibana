@@ -53,6 +53,10 @@ const TRIGGER_SYNC_TASK_PATH = 'internal/synthetics/trigger_task_run/syncPrivate
  * only the deferred bump can move it past them.
  */
 // Failing: See https://github.com/elastic/kibana/issues/298264
+// Stateful-only: `indexFakeFleetAgent` (common/fixtures/fleet.ts) writes fake agents into
+// `.fleet-agents` as a native ES user it creates with `security.putUser`, with
+// `allow_restricted_indices`. Serverless Elasticsearch has no native realm users, so that
+// helper can't run there.
 apiTest.describe.skip(
   'ScalablePrivateLocationMaintenanceWindowSync',
   { tag: tags.local.stateful.classic },

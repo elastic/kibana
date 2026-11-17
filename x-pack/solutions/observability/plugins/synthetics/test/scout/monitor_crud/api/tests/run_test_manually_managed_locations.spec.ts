@@ -48,11 +48,9 @@ const ROLE_CONFIGS = {
  * sub-feature, matching the UI, which disables "Run test manually" for such monitors without it.
  * Monitors on private locations only are not affected.
  */
-// TODO(scout-arch): Stateful-only with no recorded reason. Explain why this suite cannot run on
-// serverless, or update its tags so that it does.
 apiTest.describe(
   'RunTestManuallyPermissions - Elastic managed locations',
-  { tag: tags.local.stateful.classic },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete] },
   () => {
     let allHeaders: Record<string, string>;
     let readWithRunHeaders: Record<string, string>;

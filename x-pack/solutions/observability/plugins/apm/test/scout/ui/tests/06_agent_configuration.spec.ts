@@ -9,8 +9,7 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
-// TODO(scout-arch): Stateful-only with no recorded reason. Explain why this suite cannot run on
-// serverless, or update its tags so that it does.
+// Agent configuration is not available on serverless, so this test only runs on stateful.
 test.describe('Agent Configuration', { tag: [...tags.stateful.classic] }, () => {
   test('Viewer should not be able to modify settings', async ({
     pageObjects: { agentConfigurationsPage },

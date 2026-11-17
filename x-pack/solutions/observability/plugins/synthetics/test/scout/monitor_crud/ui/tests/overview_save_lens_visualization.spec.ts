@@ -9,54 +9,59 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../common/ui/fixtures';
 
-// TODO(scout-arch): Stateful-only with no recorded reason. Explain why this suite cannot run on
-// serverless, or update its tags so that it does.
-test.describe('OverviewSaveLensVisualization', { tag: tags.stateful.classic }, () => {
-  test.beforeAll(async ({ syntheticsServices }) => {
-    await syntheticsServices.cleanUp();
-  });
-
-  test.afterAll(async ({ syntheticsServices }) => {
-    await syntheticsServices.cleanUp();
-  });
-
-  test('opens save lens visualization modal with correct attributes', async ({
-    pageObjects,
-    page,
-    browserAuth,
-    syntheticsServices,
-  }) => {
-    await test.step('login and navigate to overview', async () => {
-      await browserAuth.loginAsViewer();
-      await pageObjects.syntheticsApp.navigateToOverview(15);
+test.describe(
+  'OverviewSaveLensVisualization',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    test.beforeAll(async ({ syntheticsServices }) => {
+      await syntheticsServices.cleanUp();
+      // The viewer can't enable Synthetics, and on serverless the overview then has no date
+      // picker, so enable it up front (same as filter_monitors).
+      await syntheticsServices.enable();
     });
 
-    await test.step('create test monitor via API', async () => {
-      await syntheticsServices.addMonitor('Test Overview Save Lens Visualization Monitor', {
-        type: 'http',
-        urls: 'https://www.google.com',
+    test.afterAll(async ({ syntheticsServices }) => {
+      await syntheticsServices.cleanUp();
+    });
+
+    test('opens save lens visualization modal with correct attributes', async ({
+      pageObjects,
+      page,
+      browserAuth,
+      syntheticsServices,
+    }) => {
+      await test.step('login and navigate to overview', async () => {
+        await browserAuth.loginAsViewer();
+        await pageObjects.syntheticsApp.navigateToOverview(15);
       });
-      await pageObjects.syntheticsApp.refreshOverview();
-    });
 
-    await test.step('open save lens visualization', async () => {
-      // The old per-monitor error sparklines panel (`overviewErrorsSparklines`)
-      // was replaced by the combined "Pings over time" chart.
-      const activityChart = page.testSubj.locator('overviewActivityChart');
-      const menuIcon = activityChart.locator('[data-test-subj="embeddablePanelToggleMenuIcon"]');
-      // Hover the stable panel wrapper (not the transient hover-actions row) and wait for the
-      // toggle to be visible before clicking, so the reveal animation can't leave a spacer
-      // intercepting the pointer.
-      await activityChart.hover();
-      await menuIcon.waitFor({ state: 'visible' });
-      await menuIcon.click();
-      await page.testSubj.click('embeddablePanelAction-expViewSave');
-    });
+      await test.step('create test monitor via API', async () => {
+        await syntheticsServices.addMonitor('Test Overview Save Lens Visualization Monitor', {
+          type: 'http',
+          urls: 'https://www.google.com',
+        });
+        await pageObjects.syntheticsApp.refreshOverview();
+      });
 
-    await test.step('verify prefilled attributes', async () => {
-      await expect(page.testSubj.locator('savedObjectTitle')).toHaveValue(
-        'Prefilled from exploratory view app'
-      );
+      await test.step('open save lens visualization', async () => {
+        // The old per-monitor error sparklines panel (`overviewErrorsSparklines`)
+        // was replaced by the combined "Pings over time" chart.
+        const activityChart = page.testSubj.locator('overviewActivityChart');
+        const menuIcon = activityChart.locator('[data-test-subj="embeddablePanelToggleMenuIcon"]');
+        // Hover the stable panel wrapper (not the transient hover-actions row) and wait for the
+        // toggle to be visible before clicking, so the reveal animation can't leave a spacer
+        // intercepting the pointer.
+        await activityChart.hover();
+        await menuIcon.waitFor({ state: 'visible' });
+        await menuIcon.click();
+        await page.testSubj.click('embeddablePanelAction-expViewSave');
+      });
+
+      await test.step('verify prefilled attributes', async () => {
+        await expect(page.testSubj.locator('savedObjectTitle')).toHaveValue(
+          'Prefilled from exploratory view app'
+        );
+      });
     });
-  });
-});
+  }
+);

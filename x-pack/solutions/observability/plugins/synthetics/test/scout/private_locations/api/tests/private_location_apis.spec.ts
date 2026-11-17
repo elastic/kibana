@@ -125,227 +125,231 @@ const addLegacyPrivateLocations = async (
   return locations;
 };
 
-apiTest.describe('PrivateLocationAPI', { tag: tags.local.stateful.classic }, () => {
-  let adminHeaders: Record<string, string>;
-  let minimalAllHeaders: Record<string, string>;
-  let canManageHeaders: Record<string, string>;
-  const createdSpaces: string[] = [];
+apiTest.describe(
+  'PrivateLocationAPI',
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete] },
+  () => {
+    let adminHeaders: Record<string, string>;
+    let minimalAllHeaders: Record<string, string>;
+    let canManageHeaders: Record<string, string>;
+    const createdSpaces: string[] = [];
 
-  apiTest.beforeAll(async ({ apiServices, requestAuth, kbnClient }) => {
-    await kbnClient.savedObjects.clean({
-      types: [legacyPrivateLocationsSavedObjectName, privateLocationSavedObjectName],
-    });
-    await apiServices.syntheticsPrivateLocations.cleanUpPrivateLocationsAndPolicies();
-    await apiServices.syntheticsPrivateLocations.installSyntheticsPackage();
-
-    // Seed the legacy private-locations singleton (FTR `adds a test legacy
-    // private location`); the plugin migrates it to the new per-location SO
-    // type on the next read.
-    const legacyLocations = await addLegacyPrivateLocations(
-      kbnClient,
-      apiServices.syntheticsPrivateLocations.addFleetPolicy
-    );
-    expect(legacyLocations).toHaveLength(2);
-
-    const { apiKeyHeader: adminKey } = await requestAuth.getApiKeyForAdmin();
-    adminHeaders = mergeSyntheticsApiHeaders(adminKey, { Accept: 'application/json' });
-    const { apiKeyHeader: minimalKey } = await requestAuth.getApiKeyForCustomRole(
-      UPTIME_MINIMAL_ALL_ROLE
-    );
-    minimalAllHeaders = mergeSyntheticsApiHeaders(minimalKey, { Accept: 'application/json' });
-    const { apiKeyHeader: canManageKey } = await requestAuth.getApiKeyForCustomRole(
-      UPTIME_CAN_MANAGE_ROLE
-    );
-    canManageHeaders = mergeSyntheticsApiHeaders(canManageKey, { Accept: 'application/json' });
-  });
-
-  apiTest.afterAll(async ({ apiServices, kbnClient }) => {
-    await kbnClient.savedObjects.clean({
-      types: [legacyPrivateLocationsSavedObjectName, privateLocationSavedObjectName],
-    });
-    await apiServices.syntheticsPrivateLocations.cleanUpPrivateLocationsAndPolicies();
-    for (const spaceId of createdSpaces) {
-      await kbnClient.spaces.delete(spaceId).catch(() => {});
-    }
-  });
-
-  const newSpace = async (kbnClient: KbnClient): Promise<string> => {
-    const spaceId = `test-space-${uuidv4()}`;
-    await kbnClient.spaces.create({ id: spaceId, name: `test-space-name ${uuidv4()}` });
-    createdSpaces.push(spaceId);
-    return spaceId;
-  };
-
-  apiTest('adds a test private location', async ({ apiClient, apiServices }) => {
-    const { id: agentPolicyId } = await apiServices.syntheticsPrivateLocations.addFleetPolicy(
-      `Fleet policy ${uuidv4()}`
-    );
-    const res = await postPrivateLocation(apiClient, adminHeaders, getLocation(agentPolicyId));
-    expect(res).toHaveStatusCode(200);
-  });
-
-  apiTest(
-    'lists all locations and migrates the legacy singleton to the new saved object type',
-    async ({ apiClient, kbnClient }) => {
-      // The two seeded legacy locations plus the one created above; reading the
-      // list triggers the legacy -> new SO migration.
-      const locations = await listPrivateLocations(apiClient, adminHeaders);
-      expect(locations).toHaveLength(3);
-
-      const newData = await kbnClient.savedObjects.find({ type: privateLocationSavedObjectName });
-      expect(newData.saved_objects).toHaveLength(3);
-
-      // The legacy singleton is removed once it has been migrated to the new type.
-      const legacyData = await kbnClient.savedObjects.find({
-        type: legacyPrivateLocationsSavedObjectName,
+    apiTest.beforeAll(async ({ apiServices, requestAuth, kbnClient }) => {
+      await kbnClient.savedObjects.clean({
+        types: [legacyPrivateLocationsSavedObjectName, privateLocationSavedObjectName],
       });
-      expect(legacyData.saved_objects).toHaveLength(0);
-    }
-  );
+      await apiServices.syntheticsPrivateLocations.cleanUpPrivateLocationsAndPolicies();
+      await apiServices.syntheticsPrivateLocations.installSyntheticsPackage();
 
-  apiTest(
-    'cannot create private location if privileges are missing',
-    async ({ apiClient, apiServices }) => {
+      // Seed the legacy private-locations singleton (FTR `adds a test legacy
+      // private location`); the plugin migrates it to the new per-location SO
+      // type on the next read.
+      const legacyLocations = await addLegacyPrivateLocations(
+        kbnClient,
+        apiServices.syntheticsPrivateLocations.addFleetPolicy
+      );
+      expect(legacyLocations).toHaveLength(2);
+
+      const { apiKeyHeader: adminKey } = await requestAuth.getApiKeyForAdmin();
+      adminHeaders = mergeSyntheticsApiHeaders(adminKey, { Accept: 'application/json' });
+      const { apiKeyHeader: minimalKey } = await requestAuth.getApiKeyForCustomRole(
+        UPTIME_MINIMAL_ALL_ROLE
+      );
+      minimalAllHeaders = mergeSyntheticsApiHeaders(minimalKey, { Accept: 'application/json' });
+      const { apiKeyHeader: canManageKey } = await requestAuth.getApiKeyForCustomRole(
+        UPTIME_CAN_MANAGE_ROLE
+      );
+      canManageHeaders = mergeSyntheticsApiHeaders(canManageKey, { Accept: 'application/json' });
+    });
+
+    apiTest.afterAll(async ({ apiServices, kbnClient }) => {
+      await kbnClient.savedObjects.clean({
+        types: [legacyPrivateLocationsSavedObjectName, privateLocationSavedObjectName],
+      });
+      await apiServices.syntheticsPrivateLocations.cleanUpPrivateLocationsAndPolicies();
+      for (const spaceId of createdSpaces) {
+        await kbnClient.spaces.delete(spaceId).catch(() => {});
+      }
+    });
+
+    const newSpace = async (kbnClient: KbnClient): Promise<string> => {
+      const spaceId = `test-space-${uuidv4()}`;
+      await kbnClient.spaces.create({ id: spaceId, name: `test-space-name ${uuidv4()}` });
+      createdSpaces.push(spaceId);
+      return spaceId;
+    };
+
+    apiTest('adds a test private location', async ({ apiClient, apiServices }) => {
       const { id: agentPolicyId } = await apiServices.syntheticsPrivateLocations.addFleetPolicy(
         `Fleet policy ${uuidv4()}`
-      );
-      const res = await postPrivateLocation(
-        apiClient,
-        minimalAllHeaders,
-        getLocation(agentPolicyId)
-      );
-      expect(res).toHaveStatusCode(403);
-    }
-  );
-
-  apiTest(
-    'can create private location if privileges are added',
-    async ({ apiClient, apiServices }) => {
-      const { id: agentPolicyId } = await apiServices.syntheticsPrivateLocations.addFleetPolicy(
-        `Fleet policy ${uuidv4()}`
-      );
-      const res = await postPrivateLocation(
-        apiClient,
-        canManageHeaders,
-        getLocation(agentPolicyId)
-      );
-      expect(res).toHaveStatusCode(200);
-    }
-  );
-
-  apiTest('can delete private location if privileges are added', async ({ apiClient }) => {
-    const locations = await listPrivateLocations(apiClient, canManageHeaders);
-    for (const location of locations) {
-      const res = await apiClient.delete(`${privateLocationsPath()}/${location.id}`, {
-        headers: { ...canManageHeaders, 'elastic-api-version': PUBLIC_API_VERSION },
-        responseType: 'json',
-      });
-      expect(res).toHaveStatusCode(200);
-    }
-  });
-
-  apiTest(
-    'can create private location in multiple spaces',
-    async ({ apiClient, apiServices, kbnClient }) => {
-      const spaceId = await newSpace(kbnClient);
-      const { id: agentPolicyId } = await apiServices.syntheticsPrivateLocations.addFleetPolicy(
-        `Fleet policy ${uuidv4()}`,
-        ['default', spaceId]
-      );
-      const res = await postPrivateLocation(
-        apiClient,
-        adminHeaders,
-        getLocation(agentPolicyId, [spaceId, 'default'])
-      );
-      expect(res).toHaveStatusCode(200);
-    }
-  );
-
-  apiTest(
-    'creates private location in agent policy spaces if no spaces are defined for the location',
-    async ({ apiClient, apiServices, kbnClient }) => {
-      const spaceId = await newSpace(kbnClient);
-      const { id: agentPolicyId } = await apiServices.syntheticsPrivateLocations.addFleetPolicy(
-        `Fleet policy ${uuidv4()}`,
-        ['default', spaceId]
       );
       const res = await postPrivateLocation(apiClient, adminHeaders, getLocation(agentPolicyId));
       expect(res).toHaveStatusCode(200);
-      expect((res.body as ListedPrivateLocation).spaces).toStrictEqual(['default', spaceId]);
-    }
-  );
+    });
 
-  apiTest(
-    'creates private location in agent policy spaces if locations spaces is an empty array',
-    async ({ apiClient, apiServices, kbnClient }) => {
-      const spaceId = await newSpace(kbnClient);
-      const { id: agentPolicyId } = await apiServices.syntheticsPrivateLocations.addFleetPolicy(
-        `Fleet policy ${uuidv4()}`,
-        ['default', spaceId]
-      );
-      const res = await postPrivateLocation(
-        apiClient,
-        adminHeaders,
-        getLocation(agentPolicyId, [])
-      );
-      expect(res).toHaveStatusCode(200);
-      expect((res.body as ListedPrivateLocation).spaces).toStrictEqual(['default', spaceId]);
-    }
-  );
+    apiTest(
+      'lists all locations and migrates the legacy singleton to the new saved object type',
+      async ({ apiClient, kbnClient }) => {
+        // The two seeded legacy locations plus the one created above; reading the
+        // list triggers the legacy -> new SO migration.
+        const locations = await listPrivateLocations(apiClient, adminHeaders);
+        expect(locations).toHaveLength(3);
 
-  apiTest(
-    'validation errors works in multiple spaces as well',
-    async ({ apiClient, apiServices, kbnClient }) => {
-      const spaceId = await newSpace(kbnClient);
-      const { id: agentPolicyId } = await apiServices.syntheticsPrivateLocations.addFleetPolicy(
-        `Fleet policy ${uuidv4()}`,
-        ['default', spaceId]
-      );
-      const location = getLocation(agentPolicyId, [spaceId, 'default']);
-      const res = await postPrivateLocation(apiClient, adminHeaders, location);
-      expect(res).toHaveStatusCode(200);
+        const newData = await kbnClient.savedObjects.find({ type: privateLocationSavedObjectName });
+        expect(newData.saved_objects).toHaveLength(3);
 
-      const res1 = await postPrivateLocation(apiClient, canManageHeaders, {
-        ...location,
-        spaces: [spaceId],
-      });
-      expect(res1).toHaveStatusCode(400);
-    }
-  );
+        // The legacy singleton is removed once it has been migrated to the new type.
+        const legacyData = await kbnClient.savedObjects.find({
+          type: legacyPrivateLocationsSavedObjectName,
+        });
+        expect(legacyData.saved_objects).toHaveLength(0);
+      }
+    );
 
-  apiTest(
-    'cannot create private location in multiple spaces if the agent policy does not belong to those spaces',
-    async ({ apiClient, apiServices, kbnClient }) => {
-      const spaceId = await newSpace(kbnClient);
-      const { id: agentPolicyId } = await apiServices.syntheticsPrivateLocations.addFleetPolicy(
-        `Fleet policy ${uuidv4()}`
-      );
-      const res = await postPrivateLocation(
-        apiClient,
-        adminHeaders,
-        getLocation(agentPolicyId, [spaceId, 'default'])
-      );
-      expect(res).toHaveStatusCode(400);
-      expect((res.body as { message: string }).message).toBe(
-        `Invalid spaces. Private location spaces [${spaceId}, default] must be fully contained within agent policy ${agentPolicyId} spaces [default].`
-      );
-    }
-  );
+    apiTest(
+      'cannot create private location if privileges are missing',
+      async ({ apiClient, apiServices }) => {
+        const { id: agentPolicyId } = await apiServices.syntheticsPrivateLocations.addFleetPolicy(
+          `Fleet policy ${uuidv4()}`
+        );
+        const res = await postPrivateLocation(
+          apiClient,
+          minimalAllHeaders,
+          getLocation(agentPolicyId)
+        );
+        expect(res).toHaveStatusCode(403);
+      }
+    );
 
-  apiTest(
-    'can create private location in any space if agent policy has "*" space id',
-    async ({ apiClient, apiServices, kbnClient }) => {
-      const spaceId = await newSpace(kbnClient);
-      const { id: agentPolicyId } = await apiServices.syntheticsPrivateLocations.addFleetPolicy(
-        `Fleet policy ${uuidv4()}`,
-        ['*']
-      );
-      const res = await postPrivateLocation(
-        apiClient,
-        adminHeaders,
-        getLocation(agentPolicyId, [spaceId])
-      );
-      expect(res).toHaveStatusCode(200);
-    }
-  );
-});
+    apiTest(
+      'can create private location if privileges are added',
+      async ({ apiClient, apiServices }) => {
+        const { id: agentPolicyId } = await apiServices.syntheticsPrivateLocations.addFleetPolicy(
+          `Fleet policy ${uuidv4()}`
+        );
+        const res = await postPrivateLocation(
+          apiClient,
+          canManageHeaders,
+          getLocation(agentPolicyId)
+        );
+        expect(res).toHaveStatusCode(200);
+      }
+    );
+
+    apiTest('can delete private location if privileges are added', async ({ apiClient }) => {
+      const locations = await listPrivateLocations(apiClient, canManageHeaders);
+      for (const location of locations) {
+        const res = await apiClient.delete(`${privateLocationsPath()}/${location.id}`, {
+          headers: { ...canManageHeaders, 'elastic-api-version': PUBLIC_API_VERSION },
+          responseType: 'json',
+        });
+        expect(res).toHaveStatusCode(200);
+      }
+    });
+
+    apiTest(
+      'can create private location in multiple spaces',
+      async ({ apiClient, apiServices, kbnClient }) => {
+        const spaceId = await newSpace(kbnClient);
+        const { id: agentPolicyId } = await apiServices.syntheticsPrivateLocations.addFleetPolicy(
+          `Fleet policy ${uuidv4()}`,
+          ['default', spaceId]
+        );
+        const res = await postPrivateLocation(
+          apiClient,
+          adminHeaders,
+          getLocation(agentPolicyId, [spaceId, 'default'])
+        );
+        expect(res).toHaveStatusCode(200);
+      }
+    );
+
+    apiTest(
+      'creates private location in agent policy spaces if no spaces are defined for the location',
+      async ({ apiClient, apiServices, kbnClient }) => {
+        const spaceId = await newSpace(kbnClient);
+        const { id: agentPolicyId } = await apiServices.syntheticsPrivateLocations.addFleetPolicy(
+          `Fleet policy ${uuidv4()}`,
+          ['default', spaceId]
+        );
+        const res = await postPrivateLocation(apiClient, adminHeaders, getLocation(agentPolicyId));
+        expect(res).toHaveStatusCode(200);
+        expect((res.body as ListedPrivateLocation).spaces).toStrictEqual(['default', spaceId]);
+      }
+    );
+
+    apiTest(
+      'creates private location in agent policy spaces if locations spaces is an empty array',
+      async ({ apiClient, apiServices, kbnClient }) => {
+        const spaceId = await newSpace(kbnClient);
+        const { id: agentPolicyId } = await apiServices.syntheticsPrivateLocations.addFleetPolicy(
+          `Fleet policy ${uuidv4()}`,
+          ['default', spaceId]
+        );
+        const res = await postPrivateLocation(
+          apiClient,
+          adminHeaders,
+          getLocation(agentPolicyId, [])
+        );
+        expect(res).toHaveStatusCode(200);
+        expect((res.body as ListedPrivateLocation).spaces).toStrictEqual(['default', spaceId]);
+      }
+    );
+
+    apiTest(
+      'validation errors works in multiple spaces as well',
+      async ({ apiClient, apiServices, kbnClient }) => {
+        const spaceId = await newSpace(kbnClient);
+        const { id: agentPolicyId } = await apiServices.syntheticsPrivateLocations.addFleetPolicy(
+          `Fleet policy ${uuidv4()}`,
+          ['default', spaceId]
+        );
+        const location = getLocation(agentPolicyId, [spaceId, 'default']);
+        const res = await postPrivateLocation(apiClient, adminHeaders, location);
+        expect(res).toHaveStatusCode(200);
+
+        const res1 = await postPrivateLocation(apiClient, canManageHeaders, {
+          ...location,
+          spaces: [spaceId],
+        });
+        expect(res1).toHaveStatusCode(400);
+      }
+    );
+
+    apiTest(
+      'cannot create private location in multiple spaces if the agent policy does not belong to those spaces',
+      async ({ apiClient, apiServices, kbnClient }) => {
+        const spaceId = await newSpace(kbnClient);
+        const { id: agentPolicyId } = await apiServices.syntheticsPrivateLocations.addFleetPolicy(
+          `Fleet policy ${uuidv4()}`
+        );
+        const res = await postPrivateLocation(
+          apiClient,
+          adminHeaders,
+          getLocation(agentPolicyId, [spaceId, 'default'])
+        );
+        expect(res).toHaveStatusCode(400);
+        expect((res.body as { message: string }).message).toBe(
+          `Invalid spaces. Private location spaces [${spaceId}, default] must be fully contained within agent policy ${agentPolicyId} spaces [default].`
+        );
+      }
+    );
+
+    apiTest(
+      'can create private location in any space if agent policy has "*" space id',
+      async ({ apiClient, apiServices, kbnClient }) => {
+        const spaceId = await newSpace(kbnClient);
+        const { id: agentPolicyId } = await apiServices.syntheticsPrivateLocations.addFleetPolicy(
+          `Fleet policy ${uuidv4()}`,
+          ['*']
+        );
+        const res = await postPrivateLocation(
+          apiClient,
+          adminHeaders,
+          getLocation(agentPolicyId, [spaceId])
+        );
+        expect(res).toHaveStatusCode(200);
+      }
+    );
+  }
+);

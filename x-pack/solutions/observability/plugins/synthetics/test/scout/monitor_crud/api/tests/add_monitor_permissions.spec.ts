@@ -55,12 +55,12 @@ const UPTIME_READ_ROLE: KibanaRole = {
  * The FTR suite minted Kibana API keys with `kibana_role_descriptors` and
  * created bespoke ES users + basic auth. Scout resolves the equivalent scoped
  * credentials with `requestAuth.getApiKey` / `getApiKeyForCustomRole`. The
- * suite is `@local-stateful-classic` only: it depends on api-key/role auth and
+ * suite is local-only (stateful + serverless): it depends on api-key/role auth and
  * public service locations that the FTR original tagged `skipCloud`.
  */
 apiTest.describe(
   'AddNewMonitorsUI permissions and warnings',
-  { tag: tags.local.stateful.classic },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete] },
   () => {
     let editorHeaders: Record<string, string>;
     let uptimeAllHeaders: Record<string, string>;
