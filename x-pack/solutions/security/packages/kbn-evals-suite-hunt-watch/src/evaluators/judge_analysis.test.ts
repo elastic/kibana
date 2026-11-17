@@ -122,15 +122,15 @@ describe('judge_analysis', () => {
       })
     );
     expect(groundTruth).toContain(
-      "The Investigation's recorded state is closed, close_reason other."
+      'This run recorded the Investigation as closed, close_reason other; a narrative that states'
     );
     expect(
       buildGroundTruth(
         buildOutput(),
         buildArtifacts({ conversation: { id: 'c', metadata: { status: 'open' } } })
       )
-    ).toContain("The Investigation's recorded state is open.");
-    expect(buildGroundTruth(buildOutput(), buildArtifacts())).not.toContain('recorded state');
+    ).toContain('This run recorded the Investigation as open;');
+    expect(buildGroundTruth(buildOutput(), buildArtifacts())).not.toContain('This run recorded');
   });
 
   it('names the indicators IOC Hunt searched and the report indicators it left out', () => {

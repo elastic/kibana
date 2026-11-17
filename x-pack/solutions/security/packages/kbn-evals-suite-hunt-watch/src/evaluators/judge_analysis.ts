@@ -86,7 +86,10 @@ const describeReport = (report: HuntReportExpectation, actual?: HuntReportArtifa
   const recorded = actual?.conversation?.metadata;
   if (recorded?.status) {
     const reason = recorded.close_reason ? `, close_reason ${recorded.close_reason}` : '';
-    lines.push(`The Investigation's recorded state is ${recorded.status}${reason}.`);
+    lines.push(
+      `This run recorded the Investigation as ${recorded.status}${reason}; a narrative that ` +
+        'states this recorded state is accurate even where it differs from the expected outcome.'
+    );
   }
   return lines.join(' ');
 };

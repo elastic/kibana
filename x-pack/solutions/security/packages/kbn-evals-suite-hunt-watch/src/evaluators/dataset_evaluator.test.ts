@@ -7,6 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
+import type { HuntResult } from '@kbn/alertzero-common';
 import type { DefaultEvaluators, EvalsExecutorClient, Evaluator } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { collectHuntArtifacts, type HuntArtifacts, type HuntReportArtifacts } from '../collect';
@@ -242,6 +243,30 @@ describe('createNarrativeRubricEvaluator', () => {
     expect(result.label).toBe('N/A');
     expect(result.metadata).toEqual({ cascadeFrom: 'Hit Consistency' });
     expect(criteria).not.toHaveBeenCalled();
+  });
+
+  it('judges the narrative when only the SSE hit fields disagree', async () => {
+    const output = judgedOutput(true);
+    const huntResult: HuntResult = {
+      has_confirmed_hit: true,
+      hit_sources: [],
+      time_range: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-02T00:00:00.000Z' },
+      tier1: {
+        status: 'no_environment_hits',
+        counts: { total_hits: 0, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
+        per_index: [],
+        resolved_iocs: [],
+      },
+    };
+    output.reports[REPORT_ID].sseEvents = [{ severity: 'high', hunt_result: huntResult }];
+    const result = await rubric.evaluate({
+      input: blockedRow.input,
+      output,
+      expected: hitRow,
+      metadata: null,
+    });
+    expect(result.score).toBe(1);
+    expect(criteria).toHaveBeenCalledWith(hitRow.criteria);
   });
 
   it('judges the narrative when the hit verdict matches', async () => {

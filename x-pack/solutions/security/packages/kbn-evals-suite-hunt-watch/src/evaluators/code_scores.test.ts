@@ -781,13 +781,22 @@ describe('hit verdict cascade', () => {
     }
   });
 
-  it('marks an unexpected hit as the same cascade on a zero row', () => {
+  it('still fails a zero row that minted a Proposal after an unexpected hit', () => {
     const result = scoreProposalPresence(
       buildExpected({ tier1Status: 'no_environment_hits', pendingProposals: 0 }),
       buildArtifacts({
         hunt: { hit: true },
         proposals: [proposalAt('2026-01-01T12:05:00.000Z', 'pending')],
       })
+    );
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('1 Proposal(s) created by this run');
+  });
+
+  it('marks an unexpected hit as a cascade on the SSE attachment of a zero row', () => {
+    const result = scoreSseAttachment(
+      buildExpected({ tier1Status: 'no_environment_hits', pendingProposals: 0 }),
+      buildArtifacts({ hunt: { hit: true } })
     );
     expect(result.label).toBe('N/A');
   });

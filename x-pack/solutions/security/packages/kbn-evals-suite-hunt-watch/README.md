@@ -25,11 +25,11 @@ never part of that gate.
 | Tier 2 Execution | CODE | whether any behavior query executed |
 | SSE Attachment | CODE | a `security.significant_security_event` attachment with a `hunt_result` exists iff expected; `N/A` when the hit verdict is wrong (see below) |
 | Evidence Honesty | CODE | report `evidence[]` written iff the coordinator result's `completed_successfully` is true (`complete` or `incomplete_final`, never `incomplete_retryable`), the same flag the hunt child's `write_evidence` step reads |
-| Proposal Presence | CODE | pending Proposals on the Investigation match the exact count or minimum; a row pinned to zero checks the run created no Proposal in any status; `N/A` when the hit verdict is wrong (see below) |
+| Proposal Presence | CODE | pending Proposals on the Investigation match the exact count or minimum; a row pinned to zero checks the run created no Proposal in any status; `N/A` when the hit verdict is wrong (see below), except on a zero row |
 | Proposal Convergence | CODE | multi-candidate only: each actioned subject (target plus criticality level, the key packaging converges on) is pending under one Investigation, and a convergence note or `Also raised by [Investigation]` line is present |
 | Investigation Status | CODE | conversation `metadata.status`, or no conversation at all |
 | Canary Inverted | CODE | 1 iff the hunt reached a verdict with Tier 1 `no_searchable_terms` and the prose-only report produced no hit, no Tier 2 execution, no Proposal, no SSE; a hunt that failed before searching scores 0 |
-| Narrative Rubric | LLM | per-row criteria over the messages the Worker posted to the Investigation; `N/A` when Hit Consistency scores 0, since the criteria assume the row's verdict; reported, not gated |
+| Narrative Rubric | LLM | per-row criteria over the messages the Worker posted to the Investigation; `N/A` when the hunt `hit` verdict is wrong, since the criteria assume the row's verdict; reported, not gated |
 | Factuality | LLM | the judge's verdict on the narrative's claims against a ground truth synthesized from the row's pinned expectations plus the report's recorded metadata, search scope and executed behaviors: 1 for `ACCURATE` or `MINOR_INACCURACIES`, 0 otherwise, with the claim-score mean kept as `claimScore`; reported, not gated |
 | Relevance | LLM | share of narrative claims that answer the hunt question; reported, not gated |
 | Groundedness | LLM | narrative claims against the hunt facts (hunt output, SSE `hunt_result`, packaging, Proposals, evidence); reported, not gated |
@@ -61,6 +61,9 @@ A hunt that reached the wrong hit verdict (hunt `hit` differs from the row's `ha
 fails Hit Consistency once. The SSE attachment, the Proposals and the narrative all follow from
 the verdict, so SSE Attachment, Proposal Presence and Narrative Rubric return `N/A` with
 `metadata.cascadeFrom: 'Hit Consistency'` instead of each adding a failure for the same miss.
+A row pinned to zero Proposals keeps Proposal Presence scored: a Proposal minted on a clean report
+is a hard kill, and that check is its only detector. A mismatch only in the SSE
+`has_confirmed_hit` or `hit_sources` fails Hit Consistency without the cascade.
 
 The gate itself has a positive control. `src/evaluators/dataset_evaluator.test.ts` drives the
 whole seam (stub executor, task, evaluator callbacks, score collector, `assertCodeScoresPass`)

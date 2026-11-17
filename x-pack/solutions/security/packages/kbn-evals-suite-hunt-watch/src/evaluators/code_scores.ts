@@ -497,7 +497,9 @@ export const scoreProposalPresence = (
     (report, actual) => {
       const want = report.pendingProposals;
       if (want === undefined) return notApplicable('Proposal count not pinned');
-      const cascade = hitCascade(report, actual);
+      // A zero row stays scored after a hit miss: a Proposal minted on a clean report is a hard
+      // kill, and this check is its only detector.
+      const cascade = want === 0 ? undefined : hitCascade(report, actual);
       if (cascade) return cascade;
       if (want === 0) {
         // A Proposal the run minted and then executed is `executing` or `succeeded`, never
