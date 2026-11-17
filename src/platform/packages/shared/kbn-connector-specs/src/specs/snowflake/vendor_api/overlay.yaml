@@ -1,0 +1,13 @@
+overlay: 1.0.0
+info:
+  title: Snowflake REST and SQL API corrections
+  version: 1.0.0
+actions:
+  - target: $.servers
+    description: >-
+      The specs name one placeholder server, https://org-account.snowflakecomputing.com, but each
+      account has its own URL: https://docs.snowflake.com/en/developer-guide/sql-api/submitting-requests
+      sends requests to "https://<account_identifier>.snowflakecomputing.com/api/v2/statements",
+      and the connector takes that account URL as config. Without a fixed server, requests to any
+      account URL match, as with the Cortex Search spec, which declares none.
+    remove: true

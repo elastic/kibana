@@ -14,6 +14,7 @@ The `@kbn/connector-specs` package provides a simplified, declarative way to def
 - **UI Derivation**: UI forms are automatically generated from schemas using metadata extensions
 - **Standard Auth Patterns**: Reusable authentication schemas (Basic, Bearer, Headers)
 - **Policy-Based Configuration**: Built-in support for rate limiting, retry policies, pagination, and more
+- **Inbound events**: The same spec can receive vendor webhooks (`events`) and call the vendor (`actions`)
 
 ## Quick Start (Recommended): Build a Connector with AI
 
@@ -54,6 +55,7 @@ This will walk through 12 tasks: generating code, reviewing it, activating the c
 | `/create-connector <name>` | Generate just the connector spec, workflows, tests, and docs (no activation or testing) |
 | `/activate-connector <type>` | Create a connector instance in a running Kibana via the Actions API |
 | `/review-connector` | Review connector spec changes against a quality checklist |
+| `/update-connector <id> [issue]` | Follow a vendor API change: fix a drift issue from the weekly check, refresh the connector's vendor API artifacts and open a draft PR |
 
 ## Alternate: Generate a New Connector Spec
 
@@ -223,11 +225,19 @@ features. Serverless rollouts and rollbacks leave nodes on different Kibana vers
 while, and a user action referencing a connector type that a node does not have breaks on
 that node. So adding a connector takes two PRs:
 
-1. Ship the connector with `supportedFeatureIds: ['agentBuilder']`.
-2. Once the connector is registered in every Production-NonCanary version, add `'workflows'`
-   and any other user-facing feature IDs in a follow-up PR.
+1. Ship the connector with `supportedFeatureIds: ['agentBuilder']` and no `events`.
+2. Once the connector is registered in every Production-NonCanary version, add `'workflows'`,
+   any other user-facing feature IDs, and `events` in a follow-up PR.
 
-Mention the required follow-up PR in the first PR's description so it is not forgotten.
+`events` wait for that follow-up too. Workflow triggers are registered from `events.definitions`
+without reading `supportedFeatureIds`, and the workflows connector list includes a type that has
+events even when `'workflows'` is absent. Leaving the feature id at `['agentBuilder']` does not
+hide them. A saved workflow that names the new event id breaks on a node that does not have the
+connector type yet.
+
+Mention the required follow-up PR, including the event keys, in the first PR's description so it
+is not forgotten. An inbound-only connector uses the same split: the first PR registers the type
+with no `events`, and the follow-up adds `events` with `supportedFeatureIds: ['workflows']`.
 
 ### Auth Type
 
@@ -307,7 +317,8 @@ test: {
 
 Test handler contract: **throw on failure**; do not return an `{ ok }` flag. A resolved
 return value (including `{}` or optional data) is treated as success. Set `enabled: true` only
-after migrating the handler to this contract.
+after migrating the handler to this contract. An inbound-only spec (events, no actions) keeps
+`enabled: false`: Test is an outbound call.
 
 ### Policies (Optional)
 
@@ -322,6 +333,121 @@ policies: {
   streaming?: StreamingPolicy,
 }
 ```
+
+## Inbound events
+
+Outbound `actions` call the vendor. Inbound `events` are the other direction: the vendor POSTs to Kibana, and the spec turns that body into typed events. A bi-directional connector (the response-ops shape: ServiceNow, and the same pattern on Slack, GitHub, Datadog, and Microsoft Teams) declares `actions` and `events` together.
+
+| Shape | What the spec has | Examples |
+| --- | --- | --- |
+| Dual | `actions` and `events` | `.servicenow_search` (incident, comment, work note, change approval), `.slack2`, `.github`, `.datadog` (`datadog.alert`), `.microsoft-teams` |
+| Inbound-only | `events`, `actions: {}`, `test.enabled: false` | `.inboundWebhook` (`inboundWebhook.received`) |
+| Outbound-only | `actions`, no `events` | Connectors that only call the vendor |
+
+Workflows register one trigger per `events.definitions` entry (`requiresConnectorId: true`) whenever inbound events are enabled. That registration does not read `supportedFeatureIds`. On a brand-new connector type, declare `events` in the follow-up PR described under [Intermediate release state](#intermediate-release-state), together with `'workflows'`.
+
+### Allowlist
+
+`SPECS_ALLOWED_EVENTS` in [`src/specs_allowed_events.ts`](./src/specs_allowed_events.ts) is a temporary CI gate, not a runtime registry. A spec that sets `events` must list its `metadata.id` there, or `connector_spec_contract.test.ts` fails. Add the id in the same PR. Current members: `.datadog`, `.github`, `.inboundWebhook`, `.microsoft-teams`, `.servicenow_search`, `.slack2`.
+
+The ingest route is gated by `xpack.actions.inboundEvents.enabled` (default `true`). LaunchDarkly `actions.inboundEventsEnabled` can force ingress off. Dual specs stay registered when ingress is off. Inbound-only types are unregistered.
+
+### Ingest
+
+```
+POST {publicBaseUrl}/s/{spaceId}/api/actions/events/{connector_type_id}/{connector_id}
+```
+
+The `default` space has no `/s/{spaceId}` prefix. `{connector_type_id}` is the connector id with or without the leading dot. Auth is a connector-scoped ingest token: `Authorization: Bearer`, or `?token=` when `Authorization` is absent. The hub verifies that token before `handleEvents` runs. `handleEvents` does not receive secrets. Do not add `ingestTokenHash` to the connector schema; the factory injects it.
+
+On a dual connector, Receive events stays off until it is turned on for that instance. The ingest token comes from rotate.
+
+The hub accepts JSON and `application/x-www-form-urlencoded`. A form webhook may arrive as an object whose `payload` field is a JSON string (GitHub does this).
+
+### Declaring events
+
+Put definitions and `handleEvents` in `src/specs/<connector>/events.ts` and assign the export to `events` on the spec, next to `actions`. Each definition key becomes a public event id through `buildEventId(metadata.id, key)`: `.github` + `issues` → `github.issues`. The definition's `eventId` must equal that value. `title` and `description` go through `i18n.translate`. `eventSchema` is a `z.object` wrapped in `lazySchema()`.
+
+Keep the payload flat. The hub rejects more than 32 keys, an `eventId` or `correlationKey` over 128 characters, more than 25 events per request by default (cap 250), or payloads over `xpack.actions.inboundEvents.maxBodyBytes` (default 1mb). The hub also adds `connectorId`, `connectorTypeId`, `spaceId`, and `correlationKey` onto the workflow trigger schema, so leave those off `eventSchema`.
+
+```typescript
+import { i18n } from '@kbn/i18n';
+import { z, lazySchema } from '@kbn/zod/v4';
+import type {
+  ConnectorIngressContext,
+  ConnectorSpecEvents,
+  HandleEventsResult,
+} from '../../connector_spec_events';
+import { buildEventId } from '../../event_type_id';
+
+const ITEM_CREATED_KEY = 'item_created' as const;
+const ITEM_CREATED_EVENT_ID = buildEventId('.my_connector', ITEM_CREATED_KEY);
+
+const ItemCreatedEventSchema = lazySchema(() =>
+  z.object({
+    id: z.string().min(1).max(128).describe('Vendor id of the item.'),
+    name: z.string().min(1).max(1024).describe('Item name.'),
+  })
+);
+
+export const myConnectorEvents: ConnectorSpecEvents = {
+  definitions: {
+    [ITEM_CREATED_KEY]: {
+      eventId: ITEM_CREATED_EVENT_ID,
+      title: i18n.translate('connectorSpecs.myConnector.events.itemCreated.title', {
+        defaultMessage: 'Item created',
+      }),
+      description: i18n.translate('connectorSpecs.myConnector.events.itemCreated.description', {
+        defaultMessage: 'An item was created.',
+      }),
+      eventSchema: ItemCreatedEventSchema,
+    },
+  },
+  handleEvents: async (ctx: ConnectorIngressContext): Promise<HandleEventsResult> => {
+    const parsed = ItemCreatedEventSchema.safeParse(ctx.rawBody);
+    if (!parsed.success) {
+      return { type: 'emit', events: [] };
+    }
+    return {
+      type: 'emit',
+      events: [
+        {
+          eventId: ITEM_CREATED_EVENT_ID,
+          correlationKey: parsed.data.id,
+          payload: parsed.data,
+        },
+      ],
+    };
+  },
+};
+```
+
+Declare a typed event when you can name the payload. A body you do not recognize returns `{ type: 'emit', events: [] }`. A vendor handshake (URL verification, a `validationToken` query, a top-level `challenge`) returns an HTTP ack and does not emit:
+
+```typescript
+return {
+  type: 'http',
+  httpResponse: { status: 200, body: { challenge } },
+};
+```
+
+An emit may also set `httpResponse` when the vendor requires a specific response and the events must still be scheduled (Slack slash commands return HTTP 200 with an empty body). Ack bodies are at most 8KB. Response headers may only be `content-type` and `cache-control`.
+
+`correlationKey` should be a vendor id when the payload has one (`event_id`, `sys_id`, a delivery id), so a retry is the same key. Fall back to a UUID only when the vendor sends none.
+
+`ConnectorIngressContext` provides `rawBody`, `config` (no secrets), `connectorId`, `connectorTypeId`, `spaceId`, `log`, `query` (the ingest token is already removed), and `headers`. `headers` contains only the lowercase names listed on `events.headers`. Never list `authorization` or `cookie`. Do not log `rawBody` at info.
+
+### Tests and docs
+
+`events.test.ts` should cover:
+
+- the connector id is in `SPECS_ALLOWED_EVENTS`
+- every `eventId` equals `buildEventId(metadata.id, key)`
+- a recognized body emits that id and `validateEmittedEvents` accepts it
+- an unrecognized body emits no events
+- a handshake, when you have one, returns `type: 'http'` and does not emit
+
+The connector doc page (`docs/reference/connectors-kibana/{type}-action-type.md`) states the ingest URL for this type id, how the vendor sends the token (`?token=` or a Bearer header), an example body, and which `event.*` fields a workflow should read.
 
 ## Authentication Patterns
 
@@ -593,8 +719,12 @@ Each connector can have a `vendor_api/` folder next to its spec, recording the v
 The vendor spec rejecting any of them fails recording, so the action's schema has to be at least as strict as the vendor's: a limit the vendor doesn't have is fine, a looser one isn't.
 
 ```sh
-# First run: name each vendor spec; YAML or JSON, external $refs are bundled
-node scripts/connector_vendor_api --connector datadog --source v1=https://… --source v2=https://…
+# Before writing the connector: list what a vendor spec offers, which adds it to manifest.json
+node scripts/connector_vendor_api --inspect --connector datadog --source v1=https://… --grep monitor
+# Then describe the operations to call
+node scripts/connector_vendor_api --inspect --connector datadog --operation 'GET /api/v1/monitor'
+# First recording: against the inspected sources, or name each vendor spec; YAML or JSON, external $refs are bundled
+node scripts/connector_vendor_api --connector datadog [--source v1=https://… --source v2=https://…]
 # After changing the connector: record offline against the committed snapshots
 node scripts/connector_vendor_api --connector datadog
 # Pick up vendor changes: fetch every source in manifest.json again
@@ -605,11 +735,24 @@ node scripts/connector_vendor_api --connector datadog --check
 NODE_OPTIONS=--max-old-space-size=8192 node scripts/connector_vendor_api --connector microsoft-teams --refresh
 ```
 
+Fetched documents are kept by URL in `data/connector_vendor_api` (not committed), and the manifest's `fetchedAt` says when. A spec inspected before writing a connector is then the one it is recorded against, even when the vendor publishes it from a moving branch. `--refresh` fetches every source again.
+
+`--inspect` needs no connector code, so it can run before any exists. It loads specs the way recording does (converted to OpenAPI 3, `$ref`s bundled, and with `--connector`, the connector's manifest sources and overlay). With `--connector`, `--source` specs the manifest doesn't have yet are added to it, so the source is declared once; a source it has can only be moved by recording with `--source`. A connector that isn't written yet keeps them in `specs/<id>/vendor_api`, with underscores for the id's hyphens, so write its spec in that folder. It then either lists operations (`METHOD path operationId summary`, up to 200 per source; narrow with `--grep`) or, for each `--operation` (`METHOD /path` or an `operationId`), prints as YAML what an action needs to call it: servers, security schemes and required scopes, every parameter with its location and effective `style`/`explode`, the request body and success response schemas with `$ref`s inlined `--depth` levels deep (default 4), and the `pagination` descriptor recording would propose. Examples and `x-` extensions are left out and descriptions shortened, so even a large spec gives a short answer.
+
+Vendors that publish their API reference as Markdown pages with an [`llms.txt`](https://llmstxt.org) index, instead of a spec, are recorded from those pages. `--format` names the template the pages follow (`databricks-markdown` or `brave-markdown`, see the `@kbn/connector-emulate` README), and the source's URL is the index. `--pages` limits the pages fetched to URL prefixes, absolute or relative to the index, such as the folders of the API groups the connector calls; without it, every page the index links to on its own origin is fetched. Both are kept in `manifest.json`, so `--refresh` needs neither:
+
+```sh
+node scripts/connector_vendor_api --connector brave-search --source search=https://api-dashboard.search.brave.com/llms.txt --format search=brave-markdown --pages search=api-reference/web/search/
+node scripts/connector_vendor_api --connector databricks --source docs=https://docs.databricks.com/api/llms.txt --format docs=databricks-markdown --pages docs=jobs/v2/ --pages docs=clusters/v2/ --pages docs=warehouses/v1/ --pages docs=alerts/v1/
+```
+
+The pages are converted to OpenAPI with `convertMarkdownReference`, and recorded, projected and snapshotted like any other source. A prefix that selects no page fails the run, as the vendor may have moved the group. `--inspect` takes `--format` and `--pages` too, and adds them to the manifest with the source.
+
 The folder holds:
 
 - `manifest.json`: the sources and the operations each action calls.
-- `snapshots/<source>.openapi.json`: each vendor spec, converted to OpenAPI 3 if needed (from Swagger 2.0, or from a Google API Discovery document such as `https://gmail.googleapis.com/$discovery/rest?version=v1`) and cut down to the recorded operations and what they reference. Descriptions, examples and `x-` extensions other than `x-speakeasy-pagination`, `x-ms-pageable` and `x-ms-skip-url-encoding` (which marks a path parameter that spans segments, such as Azure's `{scope}`) are dropped so that wording changes don't produce diffs. Snapshots are the vendor's spec as published: the overlay is not applied to them, but they keep the components its updates reference.
-- `overlay.yaml` (optional): an [OpenAPI Overlay](https://spec.openapis.org/overlay/latest.html) correcting the vendor specs, applied whenever they are loaded, including while recording. An action that no longer matches anything is reported, as the vendor may have fixed the spec.
+- `snapshots/<source>.openapi.json`: each vendor spec, converted to OpenAPI 3 if needed (from Swagger 2.0, from a Google API Discovery document such as `https://gmail.googleapis.com/$discovery/rest?version=v1`, or from an AWS Smithy model, such as the files in [`aws/api-models-aws`](https://github.com/aws/api-models-aws), pinned to a commit; `awsJson1_0` and `awsJson1_1` services, such as CloudWatch, become an operation per `POST /<Operation>`, marked `x-amz-json` so the mock serves them by `X-Amz-Target`) and cut down to the recorded operations (under `paths`, or AutoRest's `x-ms-paths` for specs such as Azure Blob Storage's) and what they reference. Descriptions, examples and `x-` extensions other than `x-speakeasy-pagination`, `x-ms-pageable` and `x-ms-skip-url-encoding` (which marks a path parameter that spans segments, such as Azure's `{scope}`), and the routing that converted Smithy models carry (`x-path-parameter` for S3's virtual-hosted buckets, `x-optional-fixed-query` for its `x-id`) are dropped so that wording changes don't produce diffs. Snapshots are the vendor's spec as published: the overlay is not applied to them, but they keep the components its updates reference.
+- `overlay.yaml` (optional): an [OpenAPI Overlay](https://spec.openapis.org/overlay/latest.html) correcting the vendor specs, applied whenever they are loaded, including while recording. An action that matches nothing in specs fetched from the vendor (`--refresh`, `--drift`) is reported, as the vendor may have fixed the spec. Offline runs (`--check`) don't report it: a snapshot only has the operations the connector calls, so the action may still be needed.
 - `fixtures.json` (optional): see below.
 
 Actions run with a connector config sampled from the connector's `schema`, required properties only, so optional settings such as custom base URLs keep their defaults. They run under each auth type in `auth.types`, with placeholder secrets, and the manifest lists the operations reached under any of them, so an action that only some auth types allow (such as Gmail's write actions, which Elastic-managed OAuth refuses) is still recorded.
@@ -618,10 +761,13 @@ Connectors that can't have a vendor spec, such as ones that talk to a database d
 
 Recording checks each action's `scope`. A `read` action may only send `GET`, `HEAD` or `OPTIONS`, or call the operations its fixture lists in `queries`, so other tools (such as live verification) can rely on `scope: 'read'` meaning the action changes no vendor state.
 
+Recording also checks OAuth scopes. Auth types that get a token through `getToken` (such as `oauth_authorization_code` and `oauth_client_credentials`) receive one carrying the `scope` they request, usually the auth type's `defaults`, and the mock runs with `checkScopes: 'report'`: a request whose operation needs a scope the token lacks is still answered, so the recording doesn't change, but it is reported with the granted scopes and those that would do. The scopes a spec lists for an operation are read as alternatives, as vendors mean them. Scopes the contract context samples aren't checked: an auth type without a default `scope` requests its own fallback, as it would in Kibana. Where the vendor's spec is wrong about scopes, correct it in `overlay.yaml`.
+
 The script fails when:
 
 - a request breaks the spec;
 - a `read` action sends any other request;
+- an operation an action calls needs OAuth scopes its auth type doesn't request;
 - a `queries` entry is never needed;
 - a response override breaks the spec;
 - a request matches no operation and isn't listed in `unmatched`;
@@ -670,7 +816,7 @@ Other handler errors, auth types that can't be used against the contract mock, a
 }
 ```
 
-- `sources`: one entry per vendor spec. `format` is what the vendor publishes (`openapi`, `swagger` or `discovery`). `apiVersion` is the spec's `info.version`. `fetchedAt` only changes when the snapshot changes. An optional `note`, written by hand and kept on updates, explains an unusual source, such as a vendor test fixture.
+- `sources`: one entry per vendor spec. `format` is what the vendor publishes (`openapi`, `swagger`, `discovery` or `smithy`, or the template of a Markdown reference, whose `url` is its `llms.txt` index and `pages` the URL prefixes fetched). `apiVersion` is the spec's `info.version`; Markdown references have none. `fetchedAt` only changes when the snapshot changes. An optional `note`, written by hand and kept on updates, explains an unusual source, such as a vendor test fixture.
 - `operations`: per action, the operations its runs matched, by source, lowercase method and path template, sorted.
 - `pagination`: how an operation pages, as the contract mock takes it (see the `@kbn/connector-emulate` README), or `"none"` for one that returns everything at once. Operations look like they return a collection when they take a cursor, offset or page parameter, a page size next to an array in the response, or return a bare array. For those without one, the script proposes a descriptor from `x-speakeasy-pagination`, `x-ms-pageable` or parameter and field names, and warns so it gets reviewed; when it can't, it fails until one is declared. Declared descriptors are kept on every run.
 - `unmatched`: per action, requests that match no operation in any source, with the reason that's expected. A `{name}` path segment matches any value, as the generated inputs vary. A request that matches nothing and isn't listed fails the script.
@@ -693,16 +839,112 @@ Keys are sorted at every depth (`serializeManifest`), so regenerating without ve
 
 Per action:
 
-- `input`: merged into each generated input, for values the schema can't describe, such as cross-field rules or IDs with a vendor format.
+- `input`: merged into each generated input, for values the schema can't describe, such as cross-field rules or IDs with a vendor format. A list of inputs generates the inputs once per entry, for rules no single value satisfies in every input, such as two mutually exclusive options.
 - `config`: merged into the connector config for the action's runs. Recording samples only the required config fields, so use this to set an optional field the action needs, such as a second server URL.
 - `queries`: for a `read` action, operations that use another method but only query, such as a search sent as `POST`. Each entry states that the operation changes no vendor state, so reviewers should check it. A `source` restricts an entry to one spec. Requests that match no operation (those in `"unmatched"`, such as calls to a vendor's MCP server) are matched by their path, where a `{name}` segment matches any segment.
-- `responses`: served by the mock for the action's runs instead of sampled responses, so handlers that branch on a response take the intended path. A `source` restricts an override to one spec. Overrides that break the spec, or name an operation it lacks, are reported.
+- `responses`: served by the mock for the action's runs instead of sampled responses, so handlers that branch on a response take the intended path. A `source` restricts an override to one spec, and a `when` (`path`, `query` and `headers` by value, and the `body` fields it lists) to the requests with those values. Overrides that break the spec, or name an operation it lacks, are reported.
 
 `vendorApiFixturesSchema` is the schema.
+
+### Drift detection
+
+`--drift` compares a connector's committed artifacts with the vendor's latest specs, without writing them:
+
+```bash
+# One connector, or every connector with a manifest when --connector is left out
+node scripts/connector_vendor_api --drift --connector firecrawl --report target/drift.json
+```
+
+For each connector it:
+
+- fetches every source in `manifest.json` (a source that doesn't load is reported as unreachable);
+- records the actions against the committed snapshots and against the latest specs, with the overlay applied, as a refresh would, but in a temporary copy of the folder;
+- compares each regenerated snapshot with the committed one and classifies the changes with [`oasdiff`](https://github.com/oasdiff/oasdiff) `changelog`. The binary is `OASDIFF_BIN`, else `oasdiff` on the `PATH`, as for `@kbn/api-contracts`; Kibana's CI agents have it. A response that widens (a new enum value, a longer string) is breaking, since a connector reading the field may not handle it; deprecations are their own kind;
+- reports overlay actions that no longer match the latest specs.
+
+Each connector in the JSON report gets a `verdict`: `healthy`, `vendor-drift` (the actions pass against the snapshots but not the latest specs), `kibana-regression` (they fail against the snapshots already) or `unknown` (a spec didn't load). Its `outcome` says what to do: `none`, `refresh` (only non-breaking changes, or the actions now call other operations, and everything passes; a run with `--refresh` updates the artifacts) or `issue` (anything breaking, deprecated, unreachable, unclassified without `oasdiff`, failing, or a stale overlay action). A new `info.version` alone changes nothing, since some vendors bump it on every deploy.
+
+A connector the check can't run on at all is reported with an `error` instead.
+
+`--surface` turns a report into GitHub issues, with `gh` and its `GITHUB_TOKEN`:
+
+```bash
+node scripts/connector_vendor_api --surface --report target/drift.json --github-repo elastic/kibana --dry-run
+```
+
+Each connector whose outcome is `issue` gets one issue labelled `connector-validation`, found again on later runs by a marker in its body. The issue reports the two-mock result, the classified changes, the problems and the stale overlay actions, and mentions the CODEOWNERS of the connector's folder. A later run updates it when the findings change, reopens it when the connector drifts again, and closes it once the connector no longer needs an issue or no longer has vendor API artifacts. The issue points to the `/update-connector` skill, which fixes the connector. The summary (`--summary`, default `target/connector_vendor_api/drift_summary.json`) lists the connectors to refresh, with the body of the refresh PR. `--dry-run` reads the issues but only logs what it would write.
+
+The `kibana / connector vendor API drift` Buildkite pipeline (`.buildkite/pipelines/connector_vendor_api_drift.yml`) runs both weekly, creates the `connector-validation` label if it's missing, and refreshes the artifacts of the `refresh` connectors in a single bot PR, which it closes once there is nothing left to refresh. Start a build by hand to check now; set `CONNECTOR_VENDOR_API_CONNECTOR` on the build to check one connector, which leaves the refresh PR alone. `CONNECTOR_VENDOR_API_GITHUB_REPO` in its resource definition switches it from a dry run (empty) to a sandbox repository or to `elastic/kibana`.
+
+### Running a connector in Kibana against its contract mock
+
+`node scripts/connector_emulate` serves a connector's contract mock as an HTTP forward proxy (see the server mode section of `@kbn/connector-emulate`'s README), so a running Kibana can execute the connector without vendor credentials:
+
+```bash
+# Answers from the committed snapshots, with the overlay applied
+node scripts/connector_emulate --connector firecrawl
+# Answers from each source's current vendor spec instead
+node scripts/connector_emulate --connector firecrawl --spec latest --port 5691
+```
+
+The mock answers with the manifest's pagination, but not with the per-action `responses` in `fixtures.json`, because a proxied request doesn't say which action sent it. To serve specific responses for one run, such as an empty inbox or a rate limit, pass them with `--fixtures` and `--recordings`:
+
+```bash
+# fixtures.json-style responses: [{ "method": "POST", "path": "/scrape", "status": 200, "body": { ... } }]
+node scripts/connector_emulate --connector firecrawl --fixtures scenarios/empty_results.json
+# Recordings ({ "exchanges": [{ operation, request, response }] }): one file, or a folder of them
+node scripts/connector_emulate --connector firecrawl --recordings scenarios/recorded/
+```
+
+A fixture can take a `when`, to answer only some requests. A request gets the matching fixture that checks the most values, else the operation's fixture without `when`. Fixtures are served as written, so on a paginated operation, give one per page:
+
+```json
+[
+  { "method": "GET", "path": "/items", "status": 200, "body": { "items": [{ "id": "1" }], "next": "two" } },
+  { "method": "GET", "path": "/items", "when": { "query": { "cursor": "two" } }, "status": 200, "body": { "items": [] } },
+  { "method": "GET", "path": "/items/{id}", "when": { "path": { "id": "missing" } }, "status": 404 }
+]
+```
+
+For an action that polls until a job finishes, such as Firecrawl's `crawlAndWait`, give `responses` in place of `status`, `headers` and `body`. The requests the fixture answers get them in turn, the last one repeating, and `POST /_mock/reset` starts the sequence again:
+
+```json
+[
+  {
+    "method": "GET",
+    "path": "/crawl/{id}",
+    "responses": [
+      { "status": 200, "body": { "status": "scraping" } },
+      { "status": 200, "body": { "status": "completed", "data": [] } }
+    ]
+  }
+]
+```
+
+Paths are the spec's path templates, relative to its server URL. Fixtures are served first, then conforming recordings (those given for the run ahead of any committed in `vendor_api/recordings/`), then the spec's examples and samples. Fixtures and recordings the spec rejects are listed on startup.
+
+It logs every request with its status, where the response came from (`[fixture]` or `[recording]`), and the violations of failed ones. Tests read and reset the calls through the control endpoints on the proxy's own origin (`GET /_mock/calls`, `POST /_mock/reset`, `GET /_mock/operations`, or `createEmulatorControl` from `@kbn/connector-emulate`). On startup it prints the Kibana settings to use: `xpack.actions.proxyUrl` pointing at the proxy, and `xpack.actions.customHostSettings` entries that trust its CA for the vendor hosts in the specs, including per-operation servers and OAuth token URLs. Vendor hosts that come from connector config, such as a tenant's subdomain, need the CA trusted for every host instead, by starting Kibana with `NODE_EXTRA_CA_CERTS=data/connector_emulate/ca.crt`. The CA is created there on first use and reused afterwards, so Kibana keeps trusting it when the mock restarts.
+
+#### Several connectors in one Kibana
+
+One proxy can serve several connectors, so one Kibana runs all their tests:
+
+```bash
+node scripts/connector_emulate --connector outlook,one_drive
+# Every connector with a vendor_api/manifest.json
+node scripts/connector_emulate --all
+# Run fixtures and recordings name their connector
+node scripts/connector_emulate --connector outlook,one_drive --fixtures outlook=scenarios/empty_inbox.json
+```
+
+Each connector is answered from its own specs, overlay, fixtures and recordings. A request goes to the connector whose credential it carries: `emulate-<id>`, e.g. `emulate-one_drive`, as an API key, token, Basic auth user or password, OAuth client ID, or a claim of a JWT assertion. The tokens its token URLs issue carry the credential too, so OAuth connectors only need it as their client ID. Other requests go to the first connector whose specs name the URL's host, else the first whose specs match it with a relative server, as self-hosted products' specs declare. Vendor hosts that several connectors call, such as `graph.microsoft.com`, are listed on startup: give those connectors the credential so they get their own responses.
+
+The control endpoints take `?connector=<id>` (`createEmulatorControl(proxyUrl, { connector })`) to see or reset only that connector's calls, so tests running in parallel don't read or clear each other's. Start Kibana with `NODE_EXTRA_CA_CERTS` rather than the printed `customHostSettings`, which list every vendor host. To compare the committed snapshots with the latest vendor specs, run one proxy and one Kibana per `--spec`, as Kibana has one `xpack.actions.proxyUrl`.
 
 ## Related Documentation
 
 - [Connector Spec](./src/connector_spec.ts) - Full API reference
+- [Inbound events](./src/connector_spec_events.ts) - `events`, `handleEvents`, and ingress context
 - [UI Metadata System](./src/connector_spec_ui.ts) - UI derivation documentation
 - [Client types](./src/lib/clients/README.md) - Authoring and review checklist for pooled `ctx.getClient` client types
 
@@ -721,7 +963,8 @@ When adding a new connector:
 5. Include proper TypeScript types
 6. Add appropriate UI metadata for better UX
 7. Consider adding a test file (`src/specs/{connector}.test.ts`) to validate your action handlers. See existing connector tests for examples.
-8. End-user documentation for connectors lives in `docs/reference/connectors-kibana/{connector-name}-action-type.md`. See existing connector docs for the expected structure. Don't forget to update the TOC and relevant `_snippets/` files!
+8. When the vendor pushes webhooks, subscriptions, or callbacks, add `events` on this same spec (see [Inbound events](#inbound-events)). On a brand-new connector type, that waits for the follow-up PR in [Intermediate release state](#intermediate-release-state), together with `'workflows'`. Add the connector id to `SPECS_ALLOWED_EVENTS` and cover `handleEvents` in `{connector}/events.test.ts`.
+9. End-user documentation for connectors lives in `docs/reference/connectors-kibana/{connector-name}-action-type.md`. See existing connector docs for the expected structure. Don't forget to update the TOC and relevant `_snippets/` files! A connector with `events` documents the ingest URL, the token, and an example payload.
 
 ### Adding a Lazy Icon
 

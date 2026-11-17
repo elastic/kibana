@@ -263,6 +263,10 @@ const createFieldSelectionCellRenderer = (
     return (
       <EuiCheckbox
         id="selectAllFields"
+        aria-label={i18n.translate(
+          'xpack.streams.streamDetailSchemaEditor.fieldsTable.selectAllFieldsAriaLabel',
+          { defaultMessage: 'Select all fields' }
+        )}
         onChange={(e) => {
           onChange(
             selectableFields.map((field) => field.name),
@@ -285,6 +289,10 @@ const createFieldSelectionCellRenderer = (
     return (
       <EuiCheckbox
         id={field.name}
+        aria-label={i18n.translate(
+          'xpack.streams.streamDetailSchemaEditor.fieldsTable.selectRowAriaLabel',
+          { defaultMessage: 'Select row {fieldName}', values: { fieldName: field.name } }
+        )}
         onChange={(e) => onChange([field.name], e.target.checked)}
         checked={selectedFields.includes(field.name)}
       />

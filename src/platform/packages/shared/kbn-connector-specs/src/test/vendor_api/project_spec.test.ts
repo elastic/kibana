@@ -169,6 +169,122 @@ describe('projectSpec', () => {
     expect(loadContractOperations(projectSpec(document, operations))).toHaveLength(2);
   });
 
+  describe('discriminator mappings', () => {
+    const polymorphic = {
+      openapi: '3.0.3',
+      info: { title: 'Animals' },
+      paths: {
+        '/animals': {
+          get: {
+            responses: { '200': ok({ $ref: '#/components/schemas/Animal' }) },
+          },
+        },
+        '/cats': {
+          get: {
+            responses: { '200': ok({ $ref: '#/components/schemas/Cat' }) },
+          },
+        },
+      },
+      components: {
+        schemas: {
+          Animal: {
+            type: 'object',
+            required: ['kind'],
+            properties: { kind: { type: 'string' } },
+            discriminator: {
+              propertyName: 'kind',
+              mapping: {
+                cat: '#/components/schemas/Cat',
+                dog: '#/components/schemas/Dog',
+                bird: 'Bird',
+                fish: 'Fish',
+                lizard: 'https://example.com/reptiles.yaml#/Lizard',
+              },
+            },
+          },
+          Cat: { allOf: [{ $ref: '#/components/schemas/Animal' }] },
+          Dog: { allOf: [{ $ref: '#/components/schemas/Animal' }] },
+          Bird: { type: 'object' },
+          Fish: { type: 'object' },
+          Plant: {
+            type: 'object',
+            discriminator: {
+              propertyName: 'kind',
+              mapping: { tree: '#/components/schemas/Tree' },
+            },
+          },
+          Tree: { type: 'object' },
+        },
+      },
+    };
+    const animals = [{ method: 'get', path: '/animals' }];
+    const schemasOf = (projected: unknown) =>
+      (projected as { components: { schemas: Record<string, { discriminator?: unknown }> } })
+        .components.schemas;
+
+    it('drops the entries naming schemas the projection left out, and keeps the rest', () => {
+      // `Cat` is only kept through the operation that returns it; `Dog`, `Bird` and `Fish` aren't.
+      const { Animal } = schemasOf(
+        projectSpec(polymorphic, [...animals, { method: 'get', path: '/cats' }])
+      );
+
+      expect(Animal.discriminator).toEqual({
+        propertyName: 'kind',
+        mapping: {
+          cat: '#/components/schemas/Cat',
+          // Not a schema of this document, so it can't be judged.
+          lizard: 'https://example.com/reptiles.yaml#/Lizard',
+        },
+      });
+    });
+
+    it('keeps the entries that name a schema by its name when it is kept', () => {
+      const projected = projectSpec(polymorphic, animals, ['#/components/schemas/Bird']);
+
+      expect(
+        (schemasOf(projected).Animal.discriminator as { mapping: Record<string, string> }).mapping
+      ).toEqual({
+        bird: 'Bird',
+        lizard: 'https://example.com/reptiles.yaml#/Lizard',
+      });
+    });
+
+    it('removes a mapping that ends up empty, keeping the property name', () => {
+      const projected = projectSpec(polymorphic, animals, ['#/components/schemas/Plant']);
+
+      expect(schemasOf(projected).Plant.discriminator).toEqual({ propertyName: 'kind' });
+    });
+
+    it('leaves nothing for a strict loader to resolve, and is idempotent', () => {
+      const projected = projectSpec(polymorphic, animals);
+      const mapped = Object.values(
+        (schemasOf(projected).Animal.discriminator as { mapping: Record<string, string> }).mapping
+      );
+
+      expect(mapped).toEqual(['https://example.com/reptiles.yaml#/Lizard']);
+      expect(projectSpec(projected, animals)).toEqual(projected);
+    });
+
+    it('leaves a property named `discriminator` alone', () => {
+      const property = { type: 'object', mapping: { gone: '#/components/schemas/Dog' } };
+      const projected = projectSpec(
+        {
+          ...polymorphic,
+          components: {
+            schemas: { Fish: { type: 'object', properties: { discriminator: property } } },
+          },
+        },
+        [],
+        ['#/components/schemas/Fish']
+      );
+
+      expect(schemasOf(projected).Fish).toEqual({
+        type: 'object',
+        properties: { discriminator: property },
+      });
+    });
+  });
+
   it('keeps overlays applicable, reporting corrections of operations left out as no-match', () => {
     const { document: corrected, findings } = applyOverlay(projectSpec(document, operations), {
       overlay: '1.1.0',
@@ -236,6 +352,95 @@ describe('projectSpec', () => {
       },
     });
     expect(projected.components).toEqual({ schemas: { Thing: { type: 'object' } } });
+    expect(loadContractOperations(projected)).toHaveLength(1);
+  });
+
+  it('keeps operations under x-ms-paths, with what they reference', () => {
+    const azure = {
+      openapi: '3.0.3',
+      info: { title: 'Blobs', version: '1' },
+      paths: {},
+      'x-ms-paths': {
+        '/?comp=list': {
+          get: {
+            'x-ms-pageable': { nextLinkName: 'NextMarker' },
+            responses: { '200': ok({ $ref: '#/components/schemas/List' }) },
+          },
+        },
+        '/?comp=properties': { get: { responses: { '200': ok({ type: 'object' }) } } },
+      },
+      components: { schemas: { List: { type: 'object' } } },
+    };
+
+    const projected = projectSpec(azure, [{ method: 'get', path: '/?comp=list' }]);
+
+    expect(projected.paths).toEqual({});
+    expect(projected['x-ms-paths']).toEqual({
+      '/?comp=list': {
+        get: {
+          'x-ms-pageable': { nextLinkName: 'NextMarker' },
+          responses: { '200': okProjected({ $ref: '#/components/schemas/List' }) },
+        },
+      },
+    });
+    expect(projected.components).toEqual({ schemas: { List: { type: 'object' } } });
+    expect(loadContractOperations(projected)).toHaveLength(1);
+  });
+
+  it('leaves out x-ms-paths when no operation is under it', () => {
+    expect(projectSpec(document, operations)).not.toHaveProperty(['x-ms-paths']);
+  });
+
+  it('keeps the routing extensions of converted Smithy models', () => {
+    const bucket = { default: 'bucket', 'x-path-parameter': true };
+    const s3 = {
+      openapi: '3.0.3',
+      info: { title: 'S3', version: '1' },
+      servers: [
+        { url: 'https://{Bucket}.s3.amazonaws.com', variables: { Bucket: bucket } },
+        { url: 'https://s3.amazonaws.com' },
+      ],
+      paths: {},
+      'x-ms-paths': {
+        '/?x-id=ListBuckets': {
+          get: {
+            'x-optional-fixed-query': ['x-id'],
+            responses: { '200': ok({ type: 'object' }) },
+          },
+        },
+      },
+    };
+
+    const projected = projectSpec(s3, [{ method: 'get', path: '/?x-id=ListBuckets' }]);
+
+    expect(projected.servers).toEqual(s3.servers);
+    expect(projected['x-ms-paths']).toEqual({
+      '/?x-id=ListBuckets': {
+        get: {
+          'x-optional-fixed-query': ['x-id'],
+          responses: { '200': okProjected({ type: 'object' }) },
+        },
+      },
+    });
+    expect(loadContractOperations(projected)).toHaveLength(1);
+  });
+
+  it('keeps the marker of converted awsJson services, which the mock serves by X-Amz-Target', () => {
+    const awsJson = {
+      openapi: '3.0.3',
+      info: { title: 'Metrics', version: '1' },
+      servers: [{ url: 'https://monitoring.us-east-1.amazonaws.com' }],
+      paths: {
+        '/GetMetricData': { post: { responses: { '200': ok({ type: 'object' }) } } },
+        '/ListMetrics': { post: { responses: { '200': ok({ type: 'object' }) } } },
+      },
+      'x-amz-json': { version: '1.0', targetPrefix: 'Metrics', endpointPrefix: 'monitoring' },
+    };
+
+    const projected = projectSpec(awsJson, [{ method: 'post', path: '/GetMetricData' }]);
+
+    expect(projected['x-amz-json']).toEqual(awsJson['x-amz-json']);
+    expect(Object.keys(projected.paths as object)).toEqual(['/GetMetricData']);
     expect(loadContractOperations(projected)).toHaveLength(1);
   });
 });

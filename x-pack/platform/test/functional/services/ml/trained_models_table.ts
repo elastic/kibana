@@ -187,13 +187,19 @@ export function TrainedModelsTableProvider(
     }
 
     public async assertModelCollapsedActionsButtonExists(modelId: string, expectedValue: boolean) {
-      const actionsExists = await this.doesModelCollapsedActionsButtonExist(modelId);
-      expect(actionsExists).to.eql(
-        expectedValue,
-        `Expected row collapsed actions menu button for trained model '${modelId}' to be ${
-          expectedValue ? 'visible' : 'hidden'
-        } (got ${actionsExists ? 'visible' : 'hidden'})`
-      );
+      await headerPage.waitUntilLoadingHasFinished();
+      // The actions cell reflows between inline and collapsed as the row's action set settles.
+      await retry.tryForTime(10 * 1000, async () => {
+        const actionsExists = await testSubjects.exists(
+          this.rowSelector(modelId, 'euiCollapsedItemActionsButton')
+        );
+        expect(actionsExists).to.eql(
+          expectedValue,
+          `Expected row collapsed actions menu button for trained model '${modelId}' to be ${
+            expectedValue ? 'visible' : 'hidden'
+          } (got ${actionsExists ? 'visible' : 'hidden'})`
+        );
+      });
     }
 
     public async doesModelCollapsedActionsButtonExist(modelId: string): Promise<boolean> {
@@ -492,16 +498,11 @@ export function TrainedModelsTableProvider(
     }
 
     public async clickDeployAction(modelId: string) {
-      const actionsButtonExists = await this.doesModelCollapsedActionsButtonExist(modelId);
-
-      if (actionsButtonExists) {
-        await this.toggleActionsContextMenu(modelId, true);
-        const panelElement = await find.byCssSelector('.euiContextMenuPanel');
-        const actionButton = await panelElement.findByTestSubject('mlModelsTableRowDeployAction');
-        await actionButton.click();
-      } else {
-        await testSubjects.click(this.rowSelector(modelId, 'mlModelsTableRowDeployAction'));
-      }
+      await mlCommonUI.invokeTableRowAction(
+        this.rowSelector(modelId),
+        'mlModelsTableRowDeployAction',
+        'auto'
+      );
 
       await this.assertDeployModelFlyoutExists();
     }

@@ -60,7 +60,7 @@ export class EnterStepTimeoutZoneNodeImpl implements NodeImplementation, Monitor
     const currentTimeMs = new Date().getTime();
     const currentStepDuration = currentTimeMs - whenStepStartedTime;
 
-    if (currentStepDuration > timeoutMs) {
+    if (currentStepDuration >= timeoutMs) {
       monitoredContext.abortController.abort();
       throw new ExecutionError({
         type: 'TimeoutError',

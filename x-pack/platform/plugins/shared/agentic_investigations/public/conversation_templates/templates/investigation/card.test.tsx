@@ -7,10 +7,16 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { EuiProvider } from '@elastic/eui';
+import { EuiProvider, useResizeObserver } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { InvestigationSummary } from '../../../../common';
 import { InvestigationCard } from './card';
+
+// jsdom has no ResizeObserver, so the card's actions width is supplied here.
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  useResizeObserver: jest.fn(() => ({ width: 0, height: 0 })),
+}));
 
 const investigation = (overrides: Partial<InvestigationSummary> = {}): InvestigationSummary => ({
   id: 'conv-1',
@@ -53,6 +59,32 @@ const renderCard = (props: React.ComponentProps<typeof InvestigationCard>) =>
   );
 
 describe('InvestigationCard', () => {
+  describe('age', () => {
+    beforeEach(() => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-07-30T14:00:00.000Z'));
+    });
+    afterEach(() => jest.useRealTimers());
+
+    const aged = {
+      created_at: '2026-07-28T14:00:00.000Z',
+      updated_at: '2026-07-30T12:00:00.000Z',
+    };
+
+    it('shows when the investigation was created by default', () => {
+      renderCard({ investigation: investigation(aged) });
+
+      expect(screen.getByText('2 days ago')).toBeInTheDocument();
+      expect(screen.queryByText(/Updated/)).not.toBeInTheDocument();
+    });
+
+    it('shows when it was last updated, labelled, when the host asks for it', () => {
+      renderCard({ investigation: investigation(aged), timestamp: 'updated' });
+
+      expect(screen.getByText(/Updated/)).toHaveTextContent('Updated 2 hours ago');
+      expect(screen.queryByText('2 days ago')).not.toBeInTheDocument();
+    });
+  });
+
   it('shows the title, summary, and impacted entities, but not subjects or proposals', () => {
     renderCard({ investigation: investigation() });
 
@@ -155,5 +187,19 @@ describe('InvestigationCard', () => {
     fireEvent.click(screen.getByTestId('cardAction'));
 
     expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it('reserves the measured width of the actions so they do not cover the age', () => {
+    jest.mocked(useResizeObserver).mockReturnValue({ width: 184, height: 32 });
+
+    renderCard({
+      investigation: investigation(),
+      actions: <button type="button">Action</button>,
+    });
+
+    expect(screen.getByTestId('investigationCardActionsSpacer')).toHaveStyleRule(
+      'inline-size',
+      '184px'
+    );
   });
 });

@@ -25,6 +25,8 @@ import type { ProcessorSuggestionsService } from '../lib/streams/ingest_pipeline
 import type { IPatternExtractionService } from '../lib/pattern_extraction/pattern_extraction_service';
 import type { StreamsSettingsStorageClient } from '../lib/streams/storage/streams_settings_storage_client';
 import type { UnitConfigHooks } from '../lib/unit_config/types';
+import type { InvalidateApiKeysAsInternalUser } from '../lib/unit_config/unit_api_keys';
+import type { ComponentCatalogueService } from '../lib/component_catalogue/component_catalogue_service';
 
 export type GetScopedClients = (params: {
   request: KibanaRequest;
@@ -34,8 +36,11 @@ export type GetScopedClients = (params: {
 export interface RouteHandlerScopedClients {
   scopedClusterClient: IScopedClusterClient;
   soClient: SavedObjectsClientContract;
+  /** Internal client for the cluster-wide unit saved objects. Callers must authorize first. */
+  unitSoClient: SavedObjectsClientContract;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   canEncrypt: boolean;
+  invalidateApiKeysAsInternalUser: InvalidateApiKeysAsInternalUser;
   attachmentClient: AttachmentClient;
   streamsClient: StreamsClient;
   unitStatsClient: UnitStatsClient;
@@ -57,6 +62,7 @@ export interface RouteDependencies {
   patternExtractionService: IPatternExtractionService;
   getSpaceId: (request: KibanaRequest) => Promise<string>;
   unitConfigHooks: UnitConfigHooks;
+  componentCatalogue: ComponentCatalogueService;
 }
 
 export type StreamsRouteHandlerResources = RouteDependencies & DefaultRouteHandlerResources;

@@ -58,6 +58,12 @@ export interface ApplicationSummary {
   /** Environments the application reported in the time range, up to 10; empty when none is set. */
   environments: string[];
   pageLoads: { count: number };
+  /**
+   * Sessions that started in the time range, as `ApplicationsResponse.sessionsOverTime` counts
+   * them, `null` when the source doesn't count them. Only the sessions index does: the raw events
+   * and Classic RUM don't.
+   */
+  sessions: { count: number } | null;
   webVitals: WebVitals;
   jsErrors: {
     count: number;
@@ -80,11 +86,18 @@ export interface ApplicationsResponse {
   /** Page loads over the time range in the selected environment, per source. */
   pageLoadsOverTime: PageLoadsOverTime;
   /**
-   * Sources whose search failed while others loaded, so their rows are missing; empty when none.
-   * Indices the user can't read are left out of the search rather than failing it, so partial
-   * index access is not reported here.
+   * The EDOT Browser sessions that started in each bucket of the time range in the selected
+   * environment, in the same buckets as `pageLoadsOverTime`. `null` when the sessions index did not
+   * answer, as the raw events and Classic RUM don't count sessions.
    */
+  sessionsOverTime: TimeSeriesPoint[] | null;
+  /** Sources whose search failed while others loaded, so their rows are missing; empty when none. */
   unavailableSources: ApplicationSource[];
+  /**
+   * Sources that loaded but whose indices the user can't all read, so rows may be missing; empty
+   * when none. A source in `unavailableSources` is never listed here.
+   */
+  partiallyAvailableSources: ApplicationSource[];
 }
 
 /** The documents in one bucket of a histogram over the time range. */

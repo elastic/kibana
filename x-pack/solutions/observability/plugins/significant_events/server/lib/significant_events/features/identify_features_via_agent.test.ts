@@ -9,6 +9,10 @@ import { of } from 'rxjs';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import {
+  EVENT_CHAIN_DEPTH_HEADER,
+  EVENT_CHAIN_SOURCE_EXECUTION_HEADER,
+} from '@kbn/workflows-extensions/server';
 import { AgentExecutionMode, ChatEventType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { FEATURE_IDENTIFICATION_AGENT_ID } from '../../../agent_builder/agents/feature_identification';
@@ -75,7 +79,13 @@ describe('executeFeatureIdentificationAgent', () => {
       },
       execution: { executeAgent },
     } as unknown as AgentBuilderPluginStart;
-    const request = {} as KibanaRequest;
+    const request = {
+      isInternalApiRequest: true,
+      headers: {
+        [EVENT_CHAIN_DEPTH_HEADER]: '0',
+        [EVENT_CHAIN_SOURCE_EXECUTION_HEADER]: 'workflow-run-1',
+      },
+    } as unknown as KibanaRequest;
 
     await expect(
       executeFeatureIdentificationAgent({
@@ -123,6 +133,7 @@ describe('executeFeatureIdentificationAgent', () => {
             productFeature: 'nightshift',
             interactionId: 'run-1',
           },
+          workflowExecutionId: 'workflow-run-1',
         }),
       })
     );

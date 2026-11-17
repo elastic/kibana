@@ -12,6 +12,7 @@ import {
   INTERNAL_HEADERS,
   PUBLIC_HEADERS,
   INVESTIGATION_ASSIGNEES_PATH,
+  INVESTIGATIONS_PATH,
   CREATE_ESCALATION_PATH,
   AB_CONVERSATIONS_PATH,
   expectCreated,
@@ -122,6 +123,33 @@ apiTest.describe(
         expect(res.body.metadata?.assignees).toStrictEqual([editorProfileUid]);
       }
     );
+
+    apiTest('the investigations list returns the assignees', async ({ apiClient }) => {
+      const investigationId = await createInvestigation(apiClient);
+      const listById = () =>
+        apiClient.get(`${INVESTIGATIONS_PATH}?id=${encodeURIComponent(investigationId)}`, {
+          headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
+          responseType: 'json',
+        });
+
+      const before = await listById();
+      expect(before).toHaveStatusCode(200);
+      expect(before.body.results[0].metadata.assignees).toBeUndefined();
+
+      const assigned = await apiClient.put(INVESTIGATION_ASSIGNEES_PATH(investigationId), {
+        headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
+        body: { assignees: [editorProfileUid, adminProfileUid] },
+        responseType: 'json',
+      });
+      expect(assigned).toHaveStatusCode(200);
+
+      const after = await listById();
+      expect(after).toHaveStatusCode(200);
+      expect(after.body.results[0].metadata.assignees).toStrictEqual([
+        editorProfileUid,
+        adminProfileUid,
+      ]);
+    });
 
     apiTest(
       'editor (has manage_investigations) can reassign a public investigation',

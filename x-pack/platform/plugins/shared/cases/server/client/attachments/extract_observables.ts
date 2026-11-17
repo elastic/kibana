@@ -10,6 +10,7 @@ import { getFlattenedObject } from '@kbn/std';
 import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 import type { Case } from '../../../common/types/domain';
 import type { AlertInfo } from '../../common/types';
+import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { LICENSING_CASE_OBSERVABLES_FEATURE } from '../../common/constants';
 import { getObservablesFromEcs } from '../../../common/observables/get_observables_from_ecs';
 import type { FlattedEcsData } from '../../../common/observables/get_observables_from_ecs';
@@ -67,6 +68,7 @@ const toFlattedEcsData = (flatDoc: Record<string, unknown>): FlattedEcsData[] =>
  * - Gated on case.settings.extractObservables === true.
  * - Requires a Platinum license; skips (debug-log) if the license is insufficient.
  * - Never throws — a failure here must not abort the attachment creation.
+ * - Returns the patched case when new observables were saved, otherwise `undefined`.
  *
  * Authorization note: the resulting write to `observables` / `total_observables`
  * is a side effect of an already-authorized bulkCreateAttachments operation and
@@ -79,7 +81,7 @@ export const extractAndAddObservables = async (
   attachments: UnifiedAttachmentPayload[],
   { settings }: Pick<Case, 'settings'>,
   clientArgs: CasesClientArgs
-): Promise<void> => {
+): Promise<CaseSavedObjectTransformed | undefined> => {
   if (!settings?.extractObservables) {
     return;
   }
@@ -148,6 +150,8 @@ export const extractAndAddObservables = async (
     logger.debug(
       `[extractAndAddObservables] Added ${result.newlyAddedObservables.length} observable(s) to case ${caseId}`
     );
+
+    return result.caseWithPatch;
   } catch (error) {
     logger.warn(
       `[extractAndAddObservables] Failed to extract observables for case ${caseId}: ${error}`

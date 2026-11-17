@@ -10,6 +10,7 @@ import type {
   ServiceAccountWorkloadDetails,
   ServiceAccountWorkloadLocator,
 } from '@kbn/core-security-server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import {
   agentBuilderDefaultAgentId,
   createBadRequestError,
@@ -17,7 +18,7 @@ import {
   type CurrentUser,
 } from '@kbn/agent-builder-common';
 import { AGENTBUILDER_PATH } from '../../../common/features';
-import { createSpaceDslFilter } from '../../utils/spaces';
+import { createSpaceDslFilter, isDefaultSpace } from '../../utils/spaces';
 import { hasConfigureExecutionIdentityAccess, hasEditBoundAgentAccess } from './access_control';
 import type { AgentProfileStorage, AgentProperties } from './persisted/client/storage';
 
@@ -119,41 +120,66 @@ export const unbindDeletedAgent = async ({
   });
 };
 
-/** Lets the service account management page show the bound agents' names and pages. */
+/**
+ * Tells Core whether each bound agent still exists, and names and links the ones that do. Core
+ * deletes the binding of a `missing` agent, so only a complete search without a hit for that agent
+ * counts as proof that it is gone.
+ */
 export const resolveAgentWorkloads = async ({
   storage,
   workloads,
+  signal,
 }: {
   storage: AgentProfileStorage;
   workloads: ReadonlyArray<ServiceAccountWorkloadLocator>;
-}): Promise<Array<ServiceAccountWorkloadDetails | undefined>> => {
+  signal?: AbortSignal;
+}): Promise<ServiceAccountWorkloadDetails[]> => {
   if (workloads.length === 0) {
     return [];
   }
-  const response = await storage.getClient().search({
-    track_total_hits: false,
-    size: workloads.length,
-    _source: ['id', 'name', 'space'],
-    query: {
-      bool: {
-        should: workloads.map(({ workloadId, spaceId }) => ({
-          bool: {
-            filter: [createSpaceDslFilter(spaceId), { term: { id: workloadId } }],
-          },
-        })),
-        minimum_should_match: 1,
+  const toKey = (spaceId: string, agentId: string) => `${spaceId}:${agentId}`;
+  const size = new Set(workloads.map(({ workloadId, spaceId }) => toKey(spaceId, workloadId))).size;
+  const response = await storage.getClient().search(
+    {
+      track_total_hits: false,
+      size,
+      _source: ['id', 'name', 'space'],
+      query: {
+        bool: {
+          should: workloads.map(({ workloadId, spaceId }) => ({
+            bool: {
+              filter: [createSpaceDslFilter(spaceId), { term: { id: workloadId } }],
+            },
+          })),
+          minimum_should_match: 1,
+        },
       },
     },
-  });
+    { signal }
+  );
+  // A timed out or partial search, or one without an index to search, can leave agents out.
+  if (response.timed_out || response._shards.failed > 0 || response._shards.total === 0) {
+    return workloads.map(() => ({ status: 'unknown' }));
+  }
   const byKey = new Map<string, ServiceAccountWorkloadDetails>();
   for (const hit of response.hits.hits) {
     const source = hit._source;
-    if (source?.id && source.space) {
-      byKey.set(`${source.space}:${source.id}`, {
-        title: source.name,
+    if (source?.id) {
+      // `createSpaceDslFilter` also matches default space agents stored without a `space`.
+      const space = isDefaultSpace(source.space) ? DEFAULT_SPACE_ID : source.space;
+      byKey.set(toKey(space, source.id), {
+        status: 'present',
+        ...(typeof source.name === 'string' && source.name.trim() !== ''
+          ? { title: source.name }
+          : {}),
         path: `${AGENTBUILDER_PATH}/agents/${encodeURIComponent(source.id)}/overview`,
       });
     }
   }
-  return workloads.map(({ workloadId, spaceId }) => byKey.get(`${spaceId}:${workloadId}`));
+  // The page holds one hit per workload, so a full page can leave out agents that exist, for
+  // example when one ID matches more than one document.
+  const notFound: 'missing' | 'unknown' = response.hits.hits.length >= size ? 'unknown' : 'missing';
+  return workloads.map(
+    ({ workloadId, spaceId }) => byKey.get(toKey(spaceId, workloadId)) ?? { status: notFound }
+  );
 };

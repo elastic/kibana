@@ -10,10 +10,13 @@
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { act } from 'react-dom/test-utils';
-import { StubBrowserStorage, mountWithIntl } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { StubBrowserStorage, mountWithIntl, renderWithI18n } from '@kbn/test-jest-helpers';
 import type { ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { createMockChromeComponentsDeps, TestChromeProviders } from '../test_helpers';
+import { CHROME_HEADER_TEST_SUBJECTS } from '../test_subjects';
 import { ClassicHeader } from './header';
 
 describe('Header', () => {
@@ -83,5 +86,27 @@ describe('Header', () => {
     const rootNode = component.find('[data-test-subj="headerGlobalNav"]').getDOMNode();
     expect(rootNode.querySelector('.my-extension1')).toBeTruthy();
     expect(rootNode.querySelector('.my-extension2')).toBeTruthy();
+  });
+
+  it('keeps the help menu open when the subscription badge resolves', async () => {
+    const chrome = chromeServiceMock.createStartContract();
+
+    renderWithI18n(
+      <TestChromeProviders chrome={chrome}>
+        <ClassicHeader />
+      </TestChromeProviders>
+    );
+
+    await userEvent.click(screen.getByTestId(CHROME_HEADER_TEST_SUBJECTS.helpButton));
+    expect(screen.getByText('Kibana documentation')).toBeInTheDocument();
+
+    act(() => {
+      chrome.controls.subscriptionBadge.set(<span>Basic</span>);
+    });
+
+    expect(screen.getByTestId(CHROME_HEADER_TEST_SUBJECTS.subscriptionBadge)).toHaveTextContent(
+      'Basic'
+    );
+    expect(screen.getByText('Kibana documentation')).toBeInTheDocument();
   });
 });

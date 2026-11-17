@@ -14,6 +14,8 @@ import {
   getDocCounts,
   getStreamCounts,
   lastHourRange,
+  postDocCounts,
+  refreshFailureStore,
 } from '../../lib/doc_counts';
 import { failingClassicUpsertRequest } from '../../lib/streams';
 
@@ -47,6 +49,7 @@ apiTest.describe(
           document: { '@timestamp': new Date().toISOString(), message: 'failing document' },
         });
         expect(indexResponse.result).toBe('created');
+        await refreshFailureStore(esClient, STREAM);
 
         await expect
           .poll(
@@ -64,6 +67,25 @@ apiTest.describe(
         );
         expect(readOnlyResponse).toHaveStatusCode(200);
         expect(findCount(readOnlyResponse.body, STREAM) ?? 0).toBe(0);
+
+        const postBody = { ...lastHourRange(), streams: [STREAM] };
+        const adminPostResponse = await postDocCounts(
+          apiClient,
+          admin.cookieHeader,
+          'ingestion',
+          postBody
+        );
+        expect(adminPostResponse).toHaveStatusCode(200);
+        expect(findCount(adminPostResponse.body, STREAM)).toBe(1);
+
+        const readOnlyPostResponse = await postDocCounts(
+          apiClient,
+          readOnly.cookieHeader,
+          'ingestion',
+          postBody
+        );
+        expect(readOnlyPostResponse).toHaveStatusCode(200);
+        expect(findCount(readOnlyPostResponse.body, STREAM) ?? 0).toBe(0);
       }
     );
   }
