@@ -397,7 +397,7 @@ function TrialInvestigationCard({
             )}
           </EuiText>
         </EuiFlexItem>
-        {!isActive && (
+        {!isActive && !isSelected && (
           <EuiFlexItem grow={false}>
             <EuiButton
               size="s"
