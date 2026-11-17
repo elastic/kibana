@@ -33,6 +33,7 @@ interface Services {
  */
 export function handleWarnings({
   callback,
+  ignoreEmptyClusters,
   request,
   requestId,
   requestName,
@@ -41,6 +42,8 @@ export function handleWarnings({
   services,
 }: {
   callback?: WarningHandlerCallback;
+  /** Do not warn about clusters that have no index matching the requested pattern. */
+  ignoreEmptyClusters?: boolean;
   request: estypes.SearchRequest;
   requestAdapter: RequestAdapter;
   requestId?: string;
@@ -53,7 +56,8 @@ export function handleWarnings({
     services.inspector,
     requestAdapter,
     requestName,
-    requestId
+    requestId,
+    { ignoreEmptyClusters }
   );
   if (warnings.length === 0) {
     return;

@@ -2027,6 +2027,20 @@ groups:
           self: ga
           serverless: unavailable
 
+      - setting: "search:ignoreEmptyClusters"
+        id: search-ignoreemptyclusters
+        description: |
+          Doesn't warn about remote clusters that are reachable but have no index matching the searched pattern, for example when you search `*:logs-myapp` and only some clusters contain it. Clusters that are unreachable, time out, or return errors are still reported.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga 9.7+
+          ech: ga
+          ece: ga 9.7+
+          eck: ga 9.7+
+          self: ga 9.7+
+          serverless: unavailable
+
   - group: Security solution
     id: kibana-siem-settings
     settings:

@@ -105,6 +105,7 @@ export interface UsageStats {
   'securitySolution:enableRuleChangesHistory': boolean;
   'securitySolution:enableAlertZero': boolean;
   'search:includeFrozen': boolean;
+  'search:ignoreEmptyClusters': boolean;
   'courier:maxConcurrentShardRequests': number;
   'courier:setRequestPreference': string;
   'courier:customRequestPreference': string;

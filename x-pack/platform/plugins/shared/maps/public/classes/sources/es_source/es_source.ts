@@ -11,6 +11,7 @@ import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import type { Filter, ProjectRouting } from '@kbn/es-query';
 import type { DataViewField, DataView, ISearchSource } from '@kbn/data-plugin/common';
 import type { Query } from '@kbn/data-plugin/common';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
 import { lastValueFrom } from 'rxjs';
@@ -25,6 +26,7 @@ import {
   getInspector,
   getSearchService,
   getTimeFilter,
+  getUiSettings,
 } from '../../../kibana_services';
 import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
 import { createExtentFilter } from '../../../../common/elasticsearch_util';
@@ -155,9 +157,9 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       );
 
       if (disableWarningToasts) {
-        extractWarnings(resp, getInspector(), requestsAdapter, requestName, requestId).forEach(
-          onWarning
-        );
+        extractWarnings(resp, getInspector(), requestsAdapter, requestName, requestId, {
+          ignoreEmptyClusters: getUiSettings().get(UI_SETTINGS.SEARCH_IGNORE_EMPTY_CLUSTERS),
+        }).forEach(onWarning);
       }
 
       return resp;
