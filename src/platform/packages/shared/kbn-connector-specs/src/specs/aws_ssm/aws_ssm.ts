@@ -15,6 +15,9 @@ import { cancelCommand } from './tools/cancel_command';
 import { describeInstanceInformation } from './tools/describe_instance_information';
 import { getAutomationExecution } from './tools/get_automation_execution';
 import { getCommandInvocation } from './tools/get_command_invocation';
+import { getDocument } from './tools/get_document';
+import { listCommands } from './tools/list_commands';
+import { listDocuments } from './tools/list_documents';
 import { sendCommand } from './tools/send_command';
 import { startAutomationExecution } from './tools/start_automation_execution';
 import { stopAutomationExecution } from './tools/stop_automation_execution';
@@ -64,8 +67,11 @@ export const AwsSsmConnector: ConnectorSpec = {
 
   actions: {
     describeInstanceInformation,
+    listDocuments,
+    getDocument,
     sendCommand,
     getCommandInvocation,
+    listCommands,
     cancelCommand,
     startAutomationExecution,
     getAutomationExecution,
@@ -81,6 +87,8 @@ export const AwsSsmConnector: ConnectorSpec = {
     '- To find unreachable nodes, call `describeInstanceInformation` with `pingStatus: ["ConnectionLost"]`.',
     '- To run a shell command: find the nodes with `describeInstanceInformation` (they must be `Online`), call `sendCommand` with `documentName: "AWS-RunShellScript"` (or `"AWS-RunPowerShellScript"` on Windows) and `parameters: { "commands": [...] }`, then call `getCommandInvocation` with the returned `commandId` and each instance ID until `status` is no longer `Pending`, `InProgress` or `Delayed`.',
     '- To run an Automation runbook (e.g. `AWS-RestartEC2Instance` with `parameters: { "InstanceId": ["i-..."] }`): call `startAutomationExecution`, then call `getAutomationExecution` with the returned `automationExecutionId` until `status` is no longer `Pending`, `InProgress`, `Waiting` or `Cancelling`. On `Failed`, the failed step\'s `failureMessage` says why.',
+    '- To find what you can run, call `listDocuments` with `documentType` (`"Command"` or `"Automation"`) and `owner: "Self"` for the account\'s own documents or a `namePrefix` such as `"AWS-"`; then call `getDocument` to read the parameters it takes and what it does, and tell the user before running it.',
+    '- To see what ran on a node, call `listCommands` with its `instanceId` (and `invokedAfter` to narrow the window); `parameters` shows the commands that ran, and `getCommandInvocation` gives the output.',
     '- To stop something you started, call `cancelCommand` for a command or `stopAutomationExecution` for a runbook, then read its status again to confirm it was cancelled.',
     '- To find nodes running an outdated SSM Agent, list the nodes and keep those with `isLatestAgentVersion: false`.',
     '- To scope to a team or environment, filter by `tags`, e.g. `[{ key: "Environment", values: ["Production"] }]`. Tags cannot be combined with `instanceIds`, `pingStatus` or `platformType` in the same call; filter the returned list yourself for the rest.',
@@ -96,6 +104,8 @@ export const AwsSsmConnector: ConnectorSpec = {
     '- Runbooks change AWS resources (restart, stop or patch instances, and more). Confirm the runbook and its parameters with the user before starting one. Cancelling a command or runbook does not undo what already ran.',
     '- A runbook without an `AutomationAssumeRole` parameter runs with the connector credentials, and fails with an access error if they lack the permissions the runbook needs.',
     "- When `stepsTruncated` is true, `steps` lists only part of the runbook's steps.",
+    '- `listDocuments` without filters returns hundreds of AWS-owned documents; always filter it.',
+    '- `listCommands` only covers the last 30 days, and runbook executions are not commands: they do not appear there.',
   ].join('\n'),
 
   test: {

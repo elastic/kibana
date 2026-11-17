@@ -13,5 +13,20 @@
     "queries": [
       { "source": "ssm", "method": "POST", "path": "/GetCommandInvocation" }
     ]
+  },
+  "getDocument": {
+    "queries": [
+      { "source": "ssm", "method": "POST", "path": "/GetDocument" }
+    ]
+  },
+  "listCommands": {
+    "queries": [
+      { "source": "ssm", "method": "POST", "path": "/ListCommands" }
+    ]
+  },
+  "listDocuments": {
+    "queries": [
+      { "source": "ssm", "method": "POST", "path": "/ListDocuments" }
+    ]
   }
 }

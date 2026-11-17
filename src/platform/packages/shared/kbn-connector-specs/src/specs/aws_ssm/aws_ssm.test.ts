@@ -186,6 +186,79 @@ describe('AwsSsmConnector', () => {
     });
   });
 
+  describe('listDocuments', () => {
+    it('sends each filter under the key SSM expects', async () => {
+      await AwsSsmConnector.actions.listDocuments.handler(mockContext, {
+        documentType: 'Automation',
+        owner: 'Amazon',
+        namePrefix: 'AWS-Restart',
+        platformType: 'Linux',
+      });
+
+      expect(JSON.parse(mockClient.post.mock.calls[0][1])).toEqual({
+        Filters: [
+          { Key: 'DocumentType', Values: ['Automation'] },
+          { Key: 'Owner', Values: ['Amazon'] },
+          { Key: 'Name', Values: ['AWS-Restart'] },
+          { Key: 'PlatformTypes', Values: ['Linux'] },
+        ],
+      });
+    });
+  });
+
+  describe('getDocument', () => {
+    it('asks for the document as YAML', async () => {
+      await AwsSsmConnector.actions.getDocument.handler(mockContext, {
+        name: 'AWS-RestartEC2Instance',
+      });
+
+      expect(JSON.parse(mockClient.post.mock.calls[0][1])).toEqual({
+        Name: 'AWS-RestartEC2Instance',
+        DocumentFormat: 'YAML',
+      });
+    });
+  });
+
+  describe('listCommands', () => {
+    it('sends lowercase key/value filters, and returns the parameters each command ran with', async () => {
+      mockClient.post.mockResolvedValue({
+        data: {
+          Commands: [
+            {
+              CommandId: '2b8e7fd1-8a2e-4b8f-9d6a-0123456789ab',
+              Parameters: { commands: ['uptime'] },
+              RequestedDateTime: 1700000000.5,
+            },
+          ],
+        },
+      });
+
+      const result = await AwsSsmConnector.actions.listCommands.handler(mockContext, {
+        instanceId: 'i-1234567890abcdef0',
+        status: 'Failed',
+        invokedAfter: '2026-11-01T00:00:00Z',
+      });
+
+      expect(JSON.parse(mockClient.post.mock.calls[0][1])).toEqual({
+        InstanceId: 'i-1234567890abcdef0',
+        Filters: [
+          { key: 'Status', value: 'Failed' },
+          { key: 'InvokedAfter', value: '2026-11-01T00:00:00Z' },
+        ],
+      });
+      expect(result).toEqual({
+        commands: [
+          expect.objectContaining({
+            commandId: '2b8e7fd1-8a2e-4b8f-9d6a-0123456789ab',
+            parameters: { commands: ['uptime'] },
+            requestedDateTime: '2023-11-14T22:13:20.500Z',
+          }),
+        ],
+        nextToken: null,
+      });
+    });
+  });
+
   describe('startAutomationExecution', () => {
     it('starts the runbook with its parameters, and returns the execution ID', async () => {
       mockClient.post.mockResolvedValue({

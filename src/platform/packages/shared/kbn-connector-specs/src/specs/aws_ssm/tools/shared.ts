@@ -13,7 +13,7 @@ import { z } from '@kbn/zod/v4';
 const INSTANCE_ID_PATTERN = /^(i-(\w{8}|\w{17})|mi-\w{17})$/;
 const INSTANCE_ID_MAX_LENGTH = 20;
 // SendCommand and CancelCommand take at most 50 instance IDs.
-export const SEND_COMMAND_INSTANCE_IDS_MAX = 50;
+export const COMMAND_INSTANCE_IDS_MAX = 50;
 // The patterns SSM's model gives the DocumentName and DocumentVersion of SendCommand and
 // StartAutomationExecution.
 const DOCUMENT_NAME_PATTERN = /^[a-zA-Z0-9_\-.:/]{3,128}$/;
@@ -24,6 +24,8 @@ export const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0
 export const UUID_LENGTH = 36;
 // SSM's model only fixes the length of an automation execution ID, not its format.
 const AUTOMATION_EXECUTION_ID_LENGTH = 36;
+// SSM documents no length limit for NextToken; this only guards against unbounded input.
+export const NEXT_TOKEN_MAX_LENGTH = 4096;
 
 export const instanceIdSchema = () =>
   z

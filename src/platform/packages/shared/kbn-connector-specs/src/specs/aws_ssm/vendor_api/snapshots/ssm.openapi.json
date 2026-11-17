@@ -53,6 +53,37 @@
         ],
         "type": "object"
       },
+      "AttachmentContent": {
+        "properties": {
+          "Hash": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+          },
+          "HashType": {
+            "$ref": "#/components/schemas/AttachmentHashType"
+          },
+          "Name": {
+            "pattern": "^[a-zA-Z0-9_\\-.]{3,128}$",
+            "type": "string"
+          },
+          "Size": {
+            "default": 0,
+            "format": "int64",
+            "type": "integer"
+          },
+          "Url": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AttachmentHashType": {
+        "enum": [
+          "Sha256"
+        ],
+        "type": "string"
+      },
       "AutomationDefinitionNotFoundExceptionResponseContent": {
         "properties": {
           "Message": {
@@ -519,6 +550,33 @@
         },
         "type": "object"
       },
+      "CommandFilter": {
+        "properties": {
+          "key": {
+            "$ref": "#/components/schemas/CommandFilterKey"
+          },
+          "value": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "value"
+        ],
+        "type": "object"
+      },
+      "CommandFilterKey": {
+        "enum": [
+          "InvokedAfter",
+          "InvokedBefore",
+          "Status",
+          "ExecutionStage",
+          "DocumentName"
+        ],
+        "type": "string"
+      },
       "CommandInvocationStatus": {
         "enum": [
           "Pending",
@@ -586,10 +644,192 @@
         },
         "type": "object"
       },
+      "DocumentFilter": {
+        "properties": {
+          "key": {
+            "$ref": "#/components/schemas/DocumentFilterKey"
+          },
+          "value": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "value"
+        ],
+        "type": "object"
+      },
+      "DocumentFilterKey": {
+        "enum": [
+          "Name",
+          "Owner",
+          "PlatformTypes",
+          "DocumentType"
+        ],
+        "type": "string"
+      },
+      "DocumentFormat": {
+        "enum": [
+          "YAML",
+          "JSON",
+          "TEXT"
+        ],
+        "type": "string"
+      },
       "DocumentHashType": {
         "enum": [
           "Sha256",
           "Sha1"
+        ],
+        "type": "string"
+      },
+      "DocumentIdentifier": {
+        "properties": {
+          "Author": {
+            "type": "string"
+          },
+          "CreatedDate": {
+            "format": "double",
+            "type": "number"
+          },
+          "DisplayName": {
+            "maxLength": 1024,
+            "minLength": 0,
+            "pattern": "^[\\w\\.\\-\\:\\/ ]*$",
+            "type": "string"
+          },
+          "DocumentFormat": {
+            "$ref": "#/components/schemas/DocumentFormat"
+          },
+          "DocumentType": {
+            "$ref": "#/components/schemas/DocumentType"
+          },
+          "DocumentVersion": {
+            "pattern": "^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$",
+            "type": "string"
+          },
+          "Name": {
+            "pattern": "^[a-zA-Z0-9_\\-.:/]{3,128}$",
+            "type": "string"
+          },
+          "Owner": {
+            "type": "string"
+          },
+          "PlatformTypes": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformType"
+            },
+            "type": "array"
+          },
+          "Requires": {
+            "items": {
+              "$ref": "#/components/schemas/DocumentRequires"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "ReviewStatus": {
+            "$ref": "#/components/schemas/ReviewStatus"
+          },
+          "SchemaVersion": {
+            "pattern": "^([0-9]+)\\.([0-9]+)$",
+            "type": "string"
+          },
+          "Tags": {
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            },
+            "maxItems": 1000,
+            "minItems": 0,
+            "type": "array"
+          },
+          "TargetType": {
+            "maxLength": 200,
+            "minLength": 0,
+            "pattern": "^\\/[\\w\\.\\-\\:\\/]*$",
+            "type": "string"
+          },
+          "VersionName": {
+            "pattern": "^[a-zA-Z0-9_\\-.]{1,128}$",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DocumentKeyValuesFilter": {
+        "properties": {
+          "Key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Values": {
+            "items": {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "DocumentRequires": {
+        "properties": {
+          "Name": {
+            "pattern": "^[a-zA-Z0-9_\\-.:/]{3,128}$",
+            "type": "string"
+          },
+          "RequireType": {
+            "maxLength": 128,
+            "minLength": 0,
+            "pattern": "^[a-zA-Z0-9_\\-.]{1,128}$",
+            "type": "string"
+          },
+          "Version": {
+            "pattern": "^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$",
+            "type": "string"
+          },
+          "VersionName": {
+            "pattern": "^[a-zA-Z0-9_\\-.]{1,128}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "Name"
+        ],
+        "type": "object"
+      },
+      "DocumentStatus": {
+        "enum": [
+          "Creating",
+          "Active",
+          "Updating",
+          "Deleting",
+          "Failed"
+        ],
+        "type": "string"
+      },
+      "DocumentType": {
+        "enum": [
+          "Command",
+          "Policy",
+          "Automation",
+          "Session",
+          "Package",
+          "ApplicationConfiguration",
+          "ApplicationConfigurationSchema",
+          "DeploymentStrategy",
+          "ChangeCalendar",
+          "Automation.ChangeTemplate",
+          "ProblemAnalysis",
+          "ProblemAnalysisTemplate",
+          "CloudFormation",
+          "ConformancePackTemplate",
+          "QuickSetup",
+          "ManualApprovalPolicy",
+          "AutoApprovalPolicy"
         ],
         "type": "string"
       },
@@ -754,6 +994,88 @@
           "StatusDetails": {
             "maxLength": 100,
             "minLength": 0,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GetDocumentRequestContent": {
+        "properties": {
+          "DocumentFormat": {
+            "$ref": "#/components/schemas/DocumentFormat"
+          },
+          "DocumentVersion": {
+            "pattern": "^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$",
+            "type": "string"
+          },
+          "Name": {
+            "pattern": "^[a-zA-Z0-9_\\-.:/]{3,128}$",
+            "type": "string"
+          },
+          "VersionName": {
+            "pattern": "^[a-zA-Z0-9_\\-.]{1,128}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "Name"
+        ],
+        "type": "object"
+      },
+      "GetDocumentResponseContent": {
+        "properties": {
+          "AttachmentsContent": {
+            "items": {
+              "$ref": "#/components/schemas/AttachmentContent"
+            },
+            "type": "array"
+          },
+          "Content": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "CreatedDate": {
+            "format": "double",
+            "type": "number"
+          },
+          "DisplayName": {
+            "maxLength": 1024,
+            "minLength": 0,
+            "pattern": "^[\\w\\.\\-\\:\\/ ]*$",
+            "type": "string"
+          },
+          "DocumentFormat": {
+            "$ref": "#/components/schemas/DocumentFormat"
+          },
+          "DocumentType": {
+            "$ref": "#/components/schemas/DocumentType"
+          },
+          "DocumentVersion": {
+            "pattern": "^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$",
+            "type": "string"
+          },
+          "Name": {
+            "pattern": "^[a-zA-Z0-9_\\-.:/]{3,128}$",
+            "type": "string"
+          },
+          "Requires": {
+            "items": {
+              "$ref": "#/components/schemas/DocumentRequires"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "ReviewStatus": {
+            "$ref": "#/components/schemas/ReviewStatus"
+          },
+          "Status": {
+            "$ref": "#/components/schemas/DocumentStatus"
+          },
+          "StatusInformation": {
+            "type": "string"
+          },
+          "VersionName": {
+            "pattern": "^[a-zA-Z0-9_\\-.]{1,128}$",
             "type": "string"
           }
         },
@@ -1105,6 +1427,94 @@
         },
         "type": "object"
       },
+      "ListCommandsRequestContent": {
+        "properties": {
+          "CommandId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "type": "string"
+          },
+          "Filters": {
+            "items": {
+              "$ref": "#/components/schemas/CommandFilter"
+            },
+            "maxItems": 5,
+            "minItems": 1,
+            "type": "array"
+          },
+          "InstanceId": {
+            "pattern": "^(^i-(\\w{8}|\\w{17})$)|(^mi-\\w{17}$)$",
+            "type": "string"
+          },
+          "MaxResults": {
+            "format": "int32",
+            "maximum": 50,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "NextToken": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ListCommandsResponseContent": {
+        "properties": {
+          "Commands": {
+            "items": {
+              "$ref": "#/components/schemas/Command"
+            },
+            "type": "array"
+          },
+          "NextToken": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ListDocumentsRequestContent": {
+        "properties": {
+          "DocumentFilterList": {
+            "items": {
+              "$ref": "#/components/schemas/DocumentFilter"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "Filters": {
+            "items": {
+              "$ref": "#/components/schemas/DocumentKeyValuesFilter"
+            },
+            "maxItems": 6,
+            "minItems": 0,
+            "type": "array"
+          },
+          "MaxResults": {
+            "format": "int32",
+            "maximum": 50,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "NextToken": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ListDocumentsResponseContent": {
+        "properties": {
+          "DocumentIdentifiers": {
+            "items": {
+              "$ref": "#/components/schemas/DocumentIdentifier"
+            },
+            "type": "array"
+          },
+          "NextToken": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "MaxDocumentSizeExceededResponseContent": {
         "properties": {
           "Message": {
@@ -1238,6 +1648,15 @@
         "enum": [
           "ManagedInstance",
           "EC2Instance"
+        ],
+        "type": "string"
+      },
+      "ReviewStatus": {
+        "enum": [
+          "APPROVED",
+          "NOT_REVIEWED",
+          "PENDING",
+          "REJECTED"
         ],
         "type": "string"
       },
@@ -2192,6 +2611,252 @@
                     },
                     {
                       "$ref": "#/components/schemas/InvocationDoesNotExistResponseContent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/GetDocument": {
+      "post": {
+        "operationId": "GetDocument",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetDocumentRequestContent"
+              }
+            },
+            "application/x-amz-json-1.1": {
+              "schema": {
+                "$ref": "#/components/schemas/GetDocumentRequestContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDocumentResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDocumentResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidDocumentResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidDocumentVersionResponseContent"
+                    }
+                  ]
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidDocumentResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidDocumentVersionResponseContent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ListCommands": {
+      "post": {
+        "operationId": "ListCommands",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListCommandsRequestContent"
+              }
+            },
+            "application/x-amz-json-1.1": {
+              "schema": {
+                "$ref": "#/components/schemas/ListCommandsRequestContent"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListCommandsResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListCommandsResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidCommandIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidFilterKeyResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidInstanceIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidNextTokenResponseContent"
+                    }
+                  ]
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidCommandIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidFilterKeyResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidInstanceIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidNextTokenResponseContent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ListDocuments": {
+      "post": {
+        "operationId": "ListDocuments",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListDocumentsRequestContent"
+              }
+            },
+            "application/x-amz-json-1.1": {
+              "schema": {
+                "$ref": "#/components/schemas/ListDocumentsRequestContent"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListDocumentsResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListDocumentsResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidFilterKeyResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidNextTokenResponseContent"
+                    }
+                  ]
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidFilterKeyResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidNextTokenResponseContent"
                     }
                   ]
                 }

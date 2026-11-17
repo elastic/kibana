@@ -10,7 +10,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionDefinition } from '../../../connector_spec';
 import { callSsmApi } from '../aws_ssm_api';
-import { SEND_COMMAND_INSTANCE_IDS_MAX, commandIdSchema, instanceIdSchema } from './shared';
+import { COMMAND_INSTANCE_IDS_MAX, commandIdSchema, instanceIdSchema } from './shared';
 
 const CancelCommandInputSchema = lazySchema(() =>
   z.object({
@@ -18,7 +18,7 @@ const CancelCommandInputSchema = lazySchema(() =>
     instanceIds: z
       .array(instanceIdSchema())
       .min(1)
-      .max(SEND_COMMAND_INSTANCE_IDS_MAX)
+      .max(COMMAND_INSTANCE_IDS_MAX)
       .optional()
       .describe(
         'Only cancel the command on these nodes. Omit to cancel it on every node it was sent to.'

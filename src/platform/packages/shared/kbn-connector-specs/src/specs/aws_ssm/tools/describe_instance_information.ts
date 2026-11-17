@@ -10,13 +10,11 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionDefinition } from '../../../connector_spec';
 import { callSsmApi } from '../aws_ssm_api';
-import { instanceIdSchema, toIsoDate } from './shared';
+import { NEXT_TOKEN_MAX_LENGTH, instanceIdSchema, toIsoDate } from './shared';
 
 // DescribeInstanceInformation returns 5-50 nodes per page.
 const MAX_RESULTS_MIN = 5;
 const MAX_RESULTS_MAX = 50;
-// SSM documents no length limit for NextToken; this only guards against unbounded input.
-const NEXT_TOKEN_MAX_LENGTH = 4096;
 // An SSM filter takes at most 100 values.
 const FILTER_VALUES_MAX = 100;
 const TAG_KEY_MAX_LENGTH = 128;
