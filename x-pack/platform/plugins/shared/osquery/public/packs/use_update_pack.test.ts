@@ -24,13 +24,23 @@ const createWrapper = (queryClient: QueryClient) => {
 
 describe('useUpdatePack error toast (6.9)', () => {
   let mockHttp: { put: jest.Mock };
-  let mockToasts: { addSuccess: jest.Mock; addError: jest.Mock; remove: jest.Mock };
+  let mockToasts: {
+    addSuccess: jest.Mock;
+    addError: jest.Mock;
+    addWarning: jest.Mock;
+    remove: jest.Mock;
+  };
   let queryClient: QueryClient;
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockHttp = { put: jest.fn() };
-    mockToasts = { addSuccess: jest.fn(), addError: jest.fn(), remove: jest.fn() };
+    mockToasts = {
+      addSuccess: jest.fn(),
+      addError: jest.fn(),
+      addWarning: jest.fn(),
+      remove: jest.fn(),
+    };
 
     useKibanaMock.mockReturnValue({
       services: {
@@ -96,5 +106,57 @@ describe('useUpdatePack error toast (6.9)', () => {
 
     expect(invalidateSpy).toHaveBeenCalledWith(['packList']);
     expect(invalidateSpy).toHaveBeenCalledWith(['pack', { packId: 'pack-1' }]);
+  });
+
+  it('shows a warning toast naming the additional agent policies when the response carries warnings', async () => {
+    queryClient.setQueryData(
+      ['agentPolicies'],
+      [
+        { id: 'policy-a', name: 'Policy A' },
+        { id: 'policy-b', name: 'Policy B' },
+      ]
+    );
+    mockHttp.put.mockResolvedValue({
+      data: { name: 'my-pack' },
+      warnings: [
+        {
+          code: 'shared_integration_overdelivery',
+          package_policy_id: 'pp-shared',
+          package_policy_name: 'Shared osquery',
+          additional_policy_ids: ['policy-b', 'policy-missing'],
+        },
+      ],
+    });
+
+    const { result } = renderHook(() => useUpdatePack({ withRedirect: false }), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    await act(async () => {
+      result.current.mutate({ id: 'pack-1', name: 'my-pack', policy_ids: ['policy-a'] });
+    });
+
+    await waitFor(() => expect(mockToasts.addWarning).toHaveBeenCalledTimes(1));
+    const [toast] = mockToasts.addWarning.mock.calls[0];
+    expect(toast.title).toBe('Pack also runs on other agent policies');
+    expect(toast.text).toBe(
+      'The integration "Shared osquery" is shared, so this pack also runs on: Policy B, policy-missing.'
+    );
+    expect(mockToasts.addSuccess).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not show a warning toast when the response has no warnings', async () => {
+    mockHttp.put.mockResolvedValue({ data: { name: 'my-pack' } });
+
+    const { result } = renderHook(() => useUpdatePack({ withRedirect: false }), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    await act(async () => {
+      result.current.mutate({ id: 'pack-1', name: 'my-pack' });
+    });
+
+    await waitFor(() => expect(mockToasts.addSuccess).toHaveBeenCalled());
+    expect(mockToasts.addWarning).not.toHaveBeenCalled();
   });
 });

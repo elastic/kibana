@@ -18,6 +18,7 @@ import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useUpdatePack } from './use_update_pack';
 import { PACKS_ID } from './constants';
 import type { PackSavedObject } from './types';
+import { addSharedIntegrationWarningToasts } from './shared_integration_warning_toast';
 
 const euiLoadingSpinnerCss = ({ euiTheme }: UseEuiTheme) => ({
   marginRight: euiTheme.size.s,
@@ -72,6 +73,7 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
                 },
               })
         );
+        addSharedIntegrationWarningToasts(response?.warnings, toasts, queryClient);
       },
     },
   });
