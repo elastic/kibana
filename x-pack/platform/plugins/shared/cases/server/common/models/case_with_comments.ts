@@ -592,7 +592,10 @@ export class CaseCommentModel {
     const alerts = getAlertInfoFromComments(alertAttachments, true);
 
     if (alerts.length > 0) {
-      await this.params.services.alertsService.ensureAlertsAuthorized({ alerts });
+      await this.params.services.alertsService.ensureAlertsAuthorized({
+        alerts,
+        spaceId: this.params.spaceId,
+      });
     }
 
     const eventAttachments = attachments.filter((a) => isEventAttachmentType(a.type));
