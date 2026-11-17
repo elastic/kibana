@@ -47,7 +47,7 @@ groups:
           self: ga
           serverless: ga
 
-  - group: Universal Alerting
+  - group: "{{product.kibana}} Universal Alerting"
     id: kibana-alerting-v2-global-settings
     settings:
 

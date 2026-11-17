@@ -1487,7 +1487,7 @@ groups:
           ech: ga
           self: ga
 
-  - group: Universal Alerting settings
+  - group: "{{kib}} Universal Alerting settings"
     id: alerting-v2-settings
     settings:
 
