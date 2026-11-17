@@ -37,7 +37,7 @@ export const reassignAgent = async (
     body: { policy_id: agentPolicyId },
   });
 
-export const readAgent = async (
+const readAgent = async (
   apiClient: ApiClientFixture,
   headers: RequestHeaders,
   agentId: string

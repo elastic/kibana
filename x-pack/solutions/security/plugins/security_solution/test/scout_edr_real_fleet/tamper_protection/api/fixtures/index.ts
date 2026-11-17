@@ -31,7 +31,7 @@ export interface EndpointAgentPolicies {
   second: EndpointAgentPolicy;
 }
 
-export interface AgentPolicyOptions {
+interface AgentPolicyOptions {
   /** Policies are named `<namePrefix>-a-<timestamp>` and `<namePrefix>-b-<timestamp>`. */
   namePrefix: string;
   firstProtected: boolean;
