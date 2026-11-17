@@ -1203,7 +1203,22 @@ describe('test getDataStateContainer', () => {
   });
 
   describe('cascaded documents', () => {
-    const setup = async ({ featureFlagEnabled = true }: { featureFlagEnabled?: boolean } = {}) => {
+    let trackCascadeEvent: jest.SpiedFunction<ScopedDiscoverEBTManager['trackCascadeEvent']>;
+
+    beforeEach(() => {
+      trackCascadeEvent = jest
+        .spyOn(ScopedDiscoverEBTManager.prototype, 'trackCascadeEvent')
+        .mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      trackCascadeEvent.mockRestore();
+    });
+
+    const setup = async ({
+      featureFlagEnabled = true,
+      esql = 'FROM test | STATS count() BY colA, colB',
+    }: { featureFlagEnabled?: boolean; esql?: string } = {}) => {
       const services = createDiscoverServicesMock();
 
       jest
@@ -1218,9 +1233,7 @@ describe('test getDataStateContainer', () => {
         internalStateActions.updateAppState({
           tabId: toolkit.getCurrentTab().id,
           appState: {
-            query: {
-              esql: 'FROM test | STATS count() BY colA, colB',
-            },
+            query: { esql },
           },
         })
       );
@@ -1232,6 +1245,9 @@ describe('test getDataStateContainer', () => {
 
       return { toolkit };
     };
+
+    const TS_MULTIPLE_STATS_QUERY =
+      'TS test | STATS peak = MAX(AVG_OVER_TIME(bytes)) BY colA, colB | STATS count = COUNT(peak) BY colA';
 
     it('should update available and selected cascade groups after fetching', async () => {
       const { toolkit } = await setup();
@@ -1361,6 +1377,69 @@ describe('test getDataStateContainer', () => {
 
       expect(toolkit.getCurrentTab().cascadedDocumentsState.availableCascadeGroups).toEqual([]);
       expect(toolkit.getCurrentTab().cascadedDocumentsState.selectedCascadeGroups).toEqual([]);
+    });
+
+    it('should offer no cascade groups for a TS query with multiple STATS commands, and report why', async () => {
+      const { toolkit } = await setup({ esql: TS_MULTIPLE_STATS_QUERY });
+
+      await toolkit.waitForDataFetching({ tabId: toolkit.getCurrentTab().id });
+
+      expect(toolkit.getCurrentTab().cascadedDocumentsState.availableCascadeGroups).toEqual([]);
+      expect(toolkit.getCurrentTab().cascadedDocumentsState.selectedCascadeGroups).toEqual([]);
+      expect(trackCascadeEvent).toHaveBeenCalledTimes(1);
+      expect(trackCascadeEvent).toHaveBeenCalledWith({
+        eventName: 'cascaded_documents_unsupported_query',
+        tabId: toolkit.getCurrentTab().id,
+        exclusionReason: 'timeseries_multiple_stats',
+      });
+    });
+
+    it('should report an unsupported query once, however often it is fetched', async () => {
+      const { toolkit } = await setup({ esql: TS_MULTIPLE_STATS_QUERY });
+
+      await toolkit.waitForDataFetching({ tabId: toolkit.getCurrentTab().id });
+      expect(trackCascadeEvent).toHaveBeenCalledTimes(1);
+
+      toolkit.getCurrentTabDataStateContainer().fetch();
+
+      await toolkit.waitForDataFetching({ tabId: toolkit.getCurrentTab().id });
+
+      expect(trackCascadeEvent).toHaveBeenCalledTimes(1);
+    });
+
+    it('should offer no cascade groups for a TS query whose FORK holds a STATS command, and report why', async () => {
+      const { toolkit } = await setup({
+        esql: 'TS test | FORK (WHERE bytes > 1000 | STATS peak = MAX(AVG_OVER_TIME(bytes)) BY colA) (WHERE bytes <= 1000) | STATS count = COUNT(*) BY colA',
+      });
+
+      await toolkit.waitForDataFetching({ tabId: toolkit.getCurrentTab().id });
+
+      expect(toolkit.getCurrentTab().cascadedDocumentsState.availableCascadeGroups).toEqual([]);
+      expect(trackCascadeEvent).toHaveBeenCalledWith({
+        eventName: 'cascaded_documents_unsupported_query',
+        tabId: toolkit.getCurrentTab().id,
+        exclusionReason: 'timeseries_stats_in_fork',
+      });
+    });
+
+    it('should not report queries that simply do not describe a cascade', async () => {
+      const { toolkit } = await setup({ esql: 'FROM test | WHERE bytes > 1000 | LIMIT 10' });
+
+      await toolkit.waitForDataFetching({ tabId: toolkit.getCurrentTab().id });
+
+      expect(toolkit.getCurrentTab().cascadedDocumentsState.availableCascadeGroups).toEqual([]);
+      expect(trackCascadeEvent).not.toHaveBeenCalled();
+    });
+
+    it('should not report an unsupported query while the cascade feature flag is off', async () => {
+      const { toolkit } = await setup({
+        esql: TS_MULTIPLE_STATS_QUERY,
+        featureFlagEnabled: false,
+      });
+
+      await toolkit.waitForDataFetching({ tabId: toolkit.getCurrentTab().id });
+
+      expect(trackCascadeEvent).not.toHaveBeenCalled();
     });
   });
 });
