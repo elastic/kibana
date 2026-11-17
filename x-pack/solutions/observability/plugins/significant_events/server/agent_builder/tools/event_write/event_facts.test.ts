@@ -275,7 +275,12 @@ describe('computeEventFacts', () => {
   it('refuses signals without a proposed severity rather than guessing one', () => {
     expect(() =>
       facts({ signals: [makeSignal()], candidateOverrides: { severity: undefined } })
-    ).toThrow('needs a proposed severity');
+    ).toThrow(
+      expect.objectContaining({
+        code: 'validation_error',
+        message: expect.stringContaining('needs a proposed severity'),
+      })
+    );
   });
 
   it('is unchanged however many topology entities the event lists', () => {

@@ -14,6 +14,7 @@ import {
   mockSourcesClient,
   sourceWithSlug,
 } from '../../utils/test_helpers';
+import { FEATURE_IDENTIFICATION_AGENT_ID } from '../../../../common/constants';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { searchEventsToolHandler } from './handler';
@@ -30,6 +31,7 @@ jest.mock('./handler', () => ({
 
 const createMockTelemetry = () => ({
   trackAgentToolEventSearch: jest.fn(),
+  trackAgentToolFailed: jest.fn(),
 });
 
 describe('event_search tool', () => {
@@ -277,5 +279,65 @@ describe('event_search tool', () => {
 
     expect(searchEventsToolHandler).not.toHaveBeenCalled();
     expect(result).toMatchObject({ results: [{ type: 'error' }] });
+  });
+
+  it('reports an unknown source as a refused call and keeps its name out of telemetry', async () => {
+    (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
+    const telemetry = createMockTelemetry();
+    const logger = loggingSystemMock.createLogger();
+    const tool = createSearchEventsTool({
+      getScopedClients: jest.fn().mockResolvedValue({
+        getEventSearchClient: jest.fn().mockReturnValue({}),
+        licensing: {},
+        uiSettingsClient: {},
+        sourcesClient: mockSourcesClient(['logs.checkout']),
+      }) as unknown as GetScopedClients,
+      server: readerServer,
+      logger,
+      telemetry: telemetry as never,
+    });
+    const context = createMockToolContext();
+    context.runContext.stack = [{ type: 'agent', agentId: FEATURE_IDENTIFICATION_AGENT_ID }];
+
+    const result = await invokeHandler(
+      tool as never,
+      { slugs: ['motel-ingest-collector'], status: 'active' },
+      context
+    );
+
+    expect(searchEventsToolHandler).not.toHaveBeenCalled();
+    expect(result).toMatchObject({
+      results: [
+        {
+          type: 'error',
+          data: {
+            message: expect.stringContaining(
+              'Source not found in this space: motel-ingest-collector'
+            ),
+          },
+        },
+      ],
+    });
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      'platform.sig_events.event_search refused the call: unknown_source'
+    );
+    expect(telemetry.trackAgentToolFailed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tool_id: 'platform.sig_events.event_search',
+        error_code: 'unknown_source',
+        input_rejected: true,
+        agent_id: FEATURE_IDENTIFICATION_AGENT_ID,
+        unresolved_count: 1,
+      }),
+      expect.anything()
+    );
+    expect(telemetry.trackAgentToolEventSearch).toHaveBeenCalledWith(
+      expect.objectContaining({ success: false, error_message: 'unknown_source' }),
+      expect.anything()
+    );
+    expect(JSON.stringify(telemetry.trackAgentToolEventSearch.mock.calls)).not.toContain(
+      'motel-ingest-collector'
+    );
   });
 });
