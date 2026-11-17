@@ -8,18 +8,22 @@
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 
 /**
  * Who triggers a migration. The library always owns *how* it runs - locking,
  * idempotency, retry, status and metrics. The consumer only chooses *when*.
- *
- * A planned third mode, `auto`, would have a shared background task run migrations
- * unattended. It is deliberately absent: running migrations nobody asked for requires
- * a registry that spans plugins and owns a Kibana lifecycle, which a package cannot
- * provide. Declaring it before it works would promise behaviour that silently does
- * nothing.
  */
 export type ExecutionMode =
+  /**
+   * A background task runs it unattended. Requires the consumer to supply its own Task
+   * Manager at registration, which is what lets a package own a task without becoming a
+   * plugin - and gives once-per-cluster execution for free via the task claim.
+   */
+  | 'auto'
   /** The plugin calls `reconcile` from its own lifecycle. */
   | 'lifecycle'
   /** Runs only when an operator or an API invokes it. */
@@ -52,6 +56,11 @@ export interface DataStepContext {
   /** The resolved concrete resource name for the namespace being reconciled. */
   resourceName: string;
   namespace: string;
+  /**
+   * Aborted on task timeout or Kibana shutdown. A backfill is the most likely step to
+   * outlive its timeout, so pass this to every request it makes.
+   */
+  signal?: AbortSignal;
 }
 
 /**
@@ -120,9 +129,42 @@ export interface MigrationDefinition {
  * Enumeration is what a status surface and the version-gap metric both need - neither
  * can be assembled from scattered call sites.
  */
+export interface MigrationRegistryOptions {
+  /** Names the task type and task id, so one plugin owns exactly one of each. */
+  pluginId: string;
+  /**
+   * Required for `auto` migrations. Supplied by the consumer because a package has no
+   * lifecycle of its own, and must be the *setup* contract - the only one Task Manager
+   * accepts a task definition from.
+   */
+  taskManager?: TaskManagerSetupContract;
+  /**
+   * How long one run may take before Task Manager kills it. Set it here rather than
+   * accept the default when migrations are heavier (a large backfill, many namespaces)
+   * or trivially fast. Belongs at setup because it is part of the task definition.
+   *
+   * Format `{number}{s|m|h|d}`. Defaults to `10m`.
+   */
+  timeout?: string;
+}
+
+export interface MigrationStartOptions extends MigrationRunnerDeps {
+  taskManager: TaskManagerStartContract;
+  /**
+   * How often the sweep runs. Migrations arrive on upgrade, so this is a safety net
+   * rather than the delivery mechanism. Defaults to `60m`.
+   */
+  interval?: string;
+}
+
 export interface MigrationRegistry {
-  /** Throws if a different migration is already registered under the same id. */
+  /**
+   * Throws if a different migration already holds the id, if the definition declares
+   * `auto` without a taskManager, or if called after `start()`.
+   */
   register: (definition: MigrationDefinition) => void;
+  /** Call during plugin start. Schedules the task when `auto` migrations are present. */
+  start: (options: MigrationStartOptions) => Promise<void>;
   get: (id: string) => MigrationDefinition | undefined;
   has: (id: string) => boolean;
   all: () => MigrationDefinition[];
@@ -157,4 +199,28 @@ export interface ReconcileOptions {
   esClient: ElasticsearchClient;
   logger: Logger;
   namespace: string;
+  /** Aborted on task timeout or shutdown; passed to every Elasticsearch request. */
+  signal?: AbortSignal;
+}
+
+/** What one `auto` run did, kept so an unattended failure is still answerable later. */
+export interface LastRun {
+  version: number;
+  status: ReconcileStatus;
+  namespace: string;
+  at: string;
+  error?: string;
+}
+
+/**
+ * Supplied by the consumer at start.
+ *
+ * The package asks for these rather than reaching for them, which is what keeps it free
+ * of a `spaces` dependency and lets it own a task without becoming a plugin.
+ */
+export interface MigrationRunnerDeps {
+  getEsClient: () => Promise<ElasticsearchClient> | ElasticsearchClient;
+  /** Every namespace to reconcile. One definition covers all of them. */
+  getNamespaces: () => Promise<string[]> | string[];
+  logger: Logger;
 }

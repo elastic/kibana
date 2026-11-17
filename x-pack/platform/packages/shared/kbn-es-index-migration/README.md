@@ -30,19 +30,42 @@ export const assetCriticalityMigration = defineMigration({
   id: 'asset-criticality',
   resource: { kind: 'index', name: (namespace) => getAssetCriticalityIndex(namespace) },
   baseline: 1,
-  execution: 'lifecycle',
+  execution: 'auto',
   versions: {
     2: { change: 'additive', mappings: mappingsV2 },
     3: { change: 'data', run: backfillEventIngested },
   },
 });
+```
 
-// Once, at plugin setup. Registration rejects a duplicate id, which would otherwise
-// silently merge two migrations in status, metrics and logs.
-const registry = createMigrationRegistry();
-registry.register(assetCriticalityMigration);
+```ts
+// setup - registration rejects a duplicate id, which would otherwise silently merge two
+// migrations in status, metrics and logs.
+this.registry = createMigrationRegistry({
+  pluginId: 'securitySolution',
+  taskManager: plugins.taskManager, // required for `auto`
+  timeout: '45m',                   // optional, defaults to DEFAULT_TIMEOUT ('10m')
+});
+this.registry.register(assetCriticalityMigration);
 
-// At the point your plugin chooses to run it.
+// start
+await this.registry.start({
+  taskManager: plugins.taskManager,
+  getEsClient: async () => (await core.getStartServices())[0].elasticsearch.client.asInternalUser,
+  getNamespaces: () => listSpaceIds(),
+  logger: this.logger,
+  interval: '30m',                  // optional, defaults to DEFAULT_INTERVAL ('60m')
+});
+```
+
+`timeout` belongs at setup because it is part of the task definition; `interval` belongs at start
+because it is part of the schedule. Raise `timeout` when migrations are heavy (a large backfill,
+many namespaces) and lower it when they are trivially fast, so a wedged run releases its slot
+sooner.
+
+For `lifecycle` or `triggered` migrations, skip the task wiring and call `reconcile` yourself:
+
+```ts
 const result = await reconcile({
   definition: assetCriticalityMigration,
   esClient,
@@ -74,13 +97,26 @@ this space get used.
 
 `execution` says **who pulls the trigger**, never how the work is done:
 
+- `auto` - a background task runs it unattended
 - `lifecycle` - the plugin calls `reconcile` from its own startup path
 - `triggered` - runs only when an operator or API invokes it
 
-A third mode, `auto`, is the eventual goal: a shared background task running migrations
-unattended. It is deliberately not in the type yet. Running migrations nobody asked for needs a
-registry spanning plugins, owning a Kibana lifecycle and a Task Manager task - none of which a
-package can provide. A registry here is per-plugin, which is enough for the two modes above.
+`auto` needs a Task Manager, and the consumer supplies its own. That is what lets a package own a
+background task without becoming a plugin, and Task Manager's claim then provides
+once-per-cluster execution for free. One task type and one task instance per consuming plugin,
+not per migration, so `registerTaskDefinitions` is called exactly once during setup while
+migrations can still be registered afterwards.
+
+Two guards exist so the wiring cannot be silently wrong. Declaring `auto` without supplying a
+`taskManager` throws, rather than producing a migration that never runs and never complains.
+Calling `register` after `start` also throws, since Task Manager only accepts definitions during
+setup and the task may already have run.
+
+**Run history is persisted for `auto` only.** The other two modes hand their `ReconcileResult`
+straight back to a caller who is standing there to receive it; `auto` fires with nobody watching,
+so its outcome is kept in the task's state to stay answerable later. A consequence worth knowing:
+the status of a `lifecycle` migration shows the version gap but not the last error, which lives in
+the plugin's own startup logs. A missing error there does not mean success.
 
 The library always owns classification, locking, idempotency, retry, status and metrics. The
 consumer only chooses when it runs and how it orders against its own work. Both halves matter: if

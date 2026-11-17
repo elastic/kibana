@@ -7,8 +7,10 @@
   "include": ["**/*.ts"],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/config-schema",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-test-helpers-kbn-server",
-    "@kbn/logging"
+    "@kbn/logging",
+    "@kbn/task-manager-plugin"
   ]
 }

@@ -11,8 +11,19 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 /** Key under `mappings._meta` holding the version this library has brought the resource to. */
 export const VERSION_META_KEY = 'kbnMigrationVersion';
 
-export const indexExists = async (esClient: ElasticsearchClient, index: string): Promise<boolean> =>
-  esClient.indices.exists({ index });
+/**
+ * Task Manager aborts this signal on timeout or shutdown. It is the only channel it has
+ * to ask for a stop, so it is passed to every request rather than only the long ones.
+ */
+export interface Abortable {
+  signal?: AbortSignal;
+}
+
+export const indexExists = async (
+  esClient: ElasticsearchClient,
+  index: string,
+  { signal }: Abortable = {}
+): Promise<boolean> => esClient.indices.exists({ index }, { signal });
 
 /**
  * Reads the version stamped on the concrete index.
@@ -26,9 +37,10 @@ export const indexExists = async (esClient: ElasticsearchClient, index: string):
  */
 export const readVersion = async (
   esClient: ElasticsearchClient,
-  index: string
+  index: string,
+  { signal }: Abortable = {}
 ): Promise<number | undefined> => {
-  const response = await esClient.indices.getMapping({ index });
+  const response = await esClient.indices.getMapping({ index }, { signal });
   const meta = Object.values(response)[0]?.mappings?._meta;
   const version = meta?.[VERSION_META_KEY];
   return typeof version === 'number' ? version : undefined;
@@ -45,40 +57,49 @@ export const applyMappings = async (
   esClient: ElasticsearchClient,
   index: string,
   mappings: MappingTypeMapping,
-  version: number
+  version: number,
+  { signal }: Abortable = {}
 ): Promise<void> => {
-  await esClient.indices.putMapping({
-    index,
-    ...mappings,
-    _meta: { ...mappings._meta, [VERSION_META_KEY]: version },
-  });
+  await esClient.indices.putMapping(
+    {
+      index,
+      ...mappings,
+      _meta: { ...mappings._meta, [VERSION_META_KEY]: version },
+    },
+    { signal }
+  );
 };
 
 /** Stamps a version without changing the shape. Used after a data step. */
 export const stampVersion = async (
   esClient: ElasticsearchClient,
   index: string,
-  version: number
+  version: number,
+  { signal }: Abortable = {}
 ): Promise<void> => {
-  const response = await esClient.indices.getMapping({ index });
+  const response = await esClient.indices.getMapping({ index }, { signal });
   const meta = Object.values(response)[0]?.mappings?._meta ?? {};
-  await esClient.indices.putMapping({
-    index,
-    _meta: { ...meta, [VERSION_META_KEY]: version },
-  });
+  await esClient.indices.putMapping(
+    { index, _meta: { ...meta, [VERSION_META_KEY]: version } },
+    { signal }
+  );
 };
 
 export const createIndex = async (
   esClient: ElasticsearchClient,
   index: string,
   mappings: MappingTypeMapping,
-  version: number
+  version: number,
+  { signal }: Abortable = {}
 ): Promise<void> => {
-  await esClient.indices.create({
-    index,
-    mappings: {
-      ...mappings,
-      _meta: { ...mappings._meta, [VERSION_META_KEY]: version },
+  await esClient.indices.create(
+    {
+      index,
+      mappings: {
+        ...mappings,
+        _meta: { ...mappings._meta, [VERSION_META_KEY]: version },
+      },
     },
-  });
+    { signal }
+  );
 };

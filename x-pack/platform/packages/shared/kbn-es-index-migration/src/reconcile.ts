@@ -36,11 +36,13 @@ export const reconcile = async ({
   esClient,
   logger,
   namespace,
+  signal,
 }: ReconcileOptions): Promise<ReconcileResult> => {
   const { id, resource, baseline, versions } = definition;
   const resourceName = resource.name(namespace);
   const declared = sortedVersionNumbers(versions);
   const target = declared.length > 0 ? declared[declared.length - 1] : baseline;
+  const abortable = { signal };
 
   const base: Omit<ReconcileResult, 'status' | 'installed' | 'target' | 'applied'> = {
     migrationId: id,
@@ -48,13 +50,19 @@ export const reconcile = async ({
     namespace,
   };
 
-  if (!(await indexExists(esClient, resourceName))) {
-    await createIndex(esClient, resourceName, mappingsAtVersion(definition, target), target);
+  if (!(await indexExists(esClient, resourceName, abortable))) {
+    await createIndex(
+      esClient,
+      resourceName,
+      mappingsAtVersion(definition, target),
+      target,
+      abortable
+    );
     logger.info(`[${id}] created ${resourceName} at version ${target}`);
     return { ...base, status: 'created', installed: target, target, applied: [] };
   }
 
-  const installed = (await readVersion(esClient, resourceName)) ?? baseline;
+  const installed = (await readVersion(esClient, resourceName, abortable)) ?? baseline;
 
   if (installed >= target) {
     return { ...base, status: 'up_to_date', installed, target, applied: [] };
@@ -64,8 +72,25 @@ export const reconcile = async ({
 
   for (const version of declared.filter((candidate) => candidate > installed)) {
     const step = versions[version];
+
+    // Stop between steps rather than mid-step, so the stamp always matches what was
+    // applied and the next run resumes cleanly.
+    if (signal?.aborted) {
+      logger.info(`[${id}] ${resourceName} aborted after version ${applied.at(-1) ?? installed}`);
+      return { ...base, status: 'migrated', installed, target, applied };
+    }
+
     try {
-      await applyStep({ definition, step, version, esClient, logger, namespace, resourceName });
+      await applyStep({
+        definition,
+        step,
+        version,
+        esClient,
+        logger,
+        namespace,
+        resourceName,
+        signal,
+      });
       applied.push(version);
     } catch (error) {
       // Elasticsearch is the final authority: a field-limit breach or a rule the static
@@ -105,15 +130,17 @@ const applyStep = async ({
   logger,
   namespace,
   resourceName,
+  signal,
 }: ApplyStepArgs): Promise<void> => {
   if (step.change === 'additive') {
-    await applyMappings(esClient, resourceName, step.mappings, version);
+    await applyMappings(esClient, resourceName, step.mappings, version, { signal });
     return;
   }
 
-  // The library declares and orders data steps; the plugin owns the body.
-  await step.run({ esClient, logger, resourceName, namespace });
-  await stampVersion(esClient, resourceName, version);
+  // The library declares and orders data steps; the plugin owns the body. The signal is
+  // handed over too, since a backfill is the most likely thing to outlive the timeout.
+  await step.run({ esClient, logger, resourceName, namespace, signal });
+  await stampVersion(esClient, resourceName, version, { signal });
 };
 
 /**

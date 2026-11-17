@@ -17,6 +17,13 @@ export {
   isTotalFieldsBreach,
 } from './src/es_errors';
 export { MUTABLE_PARAMETERS_BY_TYPE } from './src/allowlist';
+export {
+  DEFAULT_INTERVAL,
+  DEFAULT_TIMEOUT,
+  TASK_TYPE_PREFIX,
+  taskIdFor,
+  taskTypeFor,
+} from './src/task';
 
 export type {
   AdditiveVersion,
@@ -25,9 +32,13 @@ export type {
   DataVersion,
   Drift,
   ExecutionMode,
+  LastRun,
   MigrationDefinition,
   MigrationRegistry,
+  MigrationRegistryOptions,
   MigrationResource,
+  MigrationRunnerDeps,
+  MigrationStartOptions,
   MigrationVersion,
   ReconcileOptions,
   ReconcileResult,
@@ -36,4 +47,5 @@ export type {
   Violation,
   ViolationKind,
 } from './src/types';
+export type { MigrationTaskState } from './src/task';
 export type { EsRefusalKind } from './src/es_errors';

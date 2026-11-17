@@ -17,9 +17,11 @@ project:
   owner: '@elastic/security-entity-analytics'
   sourceRoot: x-pack/platform/packages/shared/kbn-es-index-migration
 dependsOn:
+  - '@kbn/config-schema'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/logging'
+  - '@kbn/task-manager-plugin'
 tags:
   - shared-server
   - package
