@@ -13,8 +13,7 @@ import { act, renderHook } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { decode } from '@kbn/rison';
-import { createPublicConfigMock } from '../../mocks';
-import { DEFAULT_TIME_RANGE } from '../constants';
+import { DEFAULT_TIME_RANGE, ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS } from '../constants';
 import { TIME_RANGE_CLAMPED_TOAST_TITLE } from '../translations';
 import type { UrlSearchState } from './use_url_search_state';
 import { useUrlSearchState } from './use_url_search_state';
@@ -31,19 +30,21 @@ const DEFAULT_STATE = {
 const readWrittenState = (history: MemoryHistory) =>
   decode(new URLSearchParams(history.location.search).get('_a') ?? '');
 
-const renderUrlState = (initialEntry = '/kubernetes', { timeRangeLimitDisabled = false } = {}) => {
+const renderUrlState = (
+  initialEntry = '/kubernetes',
+  { maxDays = ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS } = {}
+) => {
   const core = coreMock.createStart();
-  const config = createPublicConfigMock({ timeRangeLimitDisabled });
   const history = createMemoryHistory({ initialEntries: [initialEntry] });
   const seen: UrlSearchState[] = [];
   const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <KibanaContextProvider services={{ ...core, config }}>
+    <KibanaContextProvider services={core}>
       <Router history={history}>{children}</Router>
     </KibanaContextProvider>
   );
   const hook = renderHook(
     () => {
-      const value = useUrlSearchState();
+      const value = useUrlSearchState({ maxDays });
       seen.push(value[0]);
       return value;
     },
@@ -252,7 +253,7 @@ describe('useUrlSearchState', () => {
 
     it('keeps a time range from the URL over the maximum when the limit is disabled', () => {
       const entry = '/kubernetes?_a=(dateRange:(from:now-30d,to:now))';
-      const { result, history, core } = renderUrlState(entry, { timeRangeLimitDisabled: true });
+      const { result, history, core } = renderUrlState(entry, { maxDays: Infinity });
 
       expect(result.current[0].dateRange).toEqual({ from: 'now-30d', to: 'now' });
       expect(`/kubernetes${history.location.search}`).toBe(entry);

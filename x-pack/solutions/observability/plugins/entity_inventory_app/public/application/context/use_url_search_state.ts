@@ -17,12 +17,7 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import { decode, encode } from '@kbn/rison';
 import { url } from '@kbn/kibana-utils-plugin/common';
 import { useKibana } from '../../hooks/use_kibana';
-import {
-  DEFAULT_QUERY,
-  DEFAULT_TIME_RANGE,
-  ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS,
-  URL_SEARCH_STATE_KEY,
-} from '../constants';
+import { DEFAULT_QUERY, DEFAULT_TIME_RANGE, URL_SEARCH_STATE_KEY } from '../constants';
 import { EMPTY_SELECTION } from '../filters/utils/selection';
 import type { FilterControlsSelection } from '../filters/utils/selection';
 import { checkTimeRange, getMaxTimeRange } from '../utils/check_time_range';
@@ -147,13 +142,16 @@ const readUrlSearchState = (
   }
 };
 
-export const useUrlSearchState = (): [UrlSearchState, (patch: Partial<UrlSearchState>) => void] => {
+export const useUrlSearchState = ({
+  maxDays,
+}: {
+  maxDays: number;
+}): [UrlSearchState, (patch: Partial<UrlSearchState>) => void] => {
   const history = useHistory();
   const { search } = useLocation();
   const {
-    services: { uiSettings, config, notifications },
+    services: { uiSettings, notifications },
   } = useKibana();
-  const maxDays = config.timeRangeLimit.disabled ? Infinity : ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS;
 
   const stateParam = getStateParam(search);
   const urlRead = useMemo(

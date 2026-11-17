@@ -50,7 +50,10 @@ export const EntityInventorySearchProvider = ({
     services: { notifications, uiSettings, config },
   } = useKibana();
   const isTimeRangeLimited = !config.timeRangeLimit.disabled;
-  const [{ query, filters, dateRange, filterControls }, updateSearchState] = useUrlSearchState();
+  const maxDays = isTimeRangeLimited ? ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS : Infinity;
+  const [{ query, filters, dateRange, filterControls }, updateSearchState] = useUrlSearchState({
+    maxDays,
+  });
   const [refreshToken, setRefreshToken] = useState(0);
 
   const setFilters = useCallback(
@@ -74,10 +77,7 @@ export const EntityInventorySearchProvider = ({
         queryToCommit = undefined;
       }
 
-      const rangeCheck = checkTimeRange(
-        submittedRange,
-        isTimeRangeLimited ? ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS : Infinity
-      );
+      const rangeCheck = checkTimeRange(submittedRange, maxDays);
       const isRangeAccepted = rangeCheck === 'valid';
       if (rangeCheck === 'not_allowed') {
         notifications.toasts.addWarning({ title: TIME_RANGE_NOT_ALLOWED_TOAST_TITLE });
@@ -94,7 +94,7 @@ export const EntityInventorySearchProvider = ({
 
       return isRangeAccepted ? submittedRange : dateRange;
     },
-    [dateRange, isTimeRangeLimited, notifications, updateSearchState, uiSettings]
+    [dateRange, maxDays, notifications, updateSearchState, uiSettings]
   );
 
   const value = useMemo(
