@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { FieldSchema } from '../../../../common/types/domain/template/fields';
 import { TemplateSettingsSchema } from '../../../../common/types/domain/template/v1';
 import { CaseSeverity as CaseSeveritySchema } from '../../../../common/bundled-types.gen';
@@ -17,17 +17,19 @@ import { checkTemplateExists } from '../utils';
 import type { ValidatedFile } from './use_validate_yaml';
 import * as i18n from '../translations';
 
-const ImportedDefinitionSchema = z.object({
-  fields: z.array(FieldSchema).refine(
-    (fields) => {
-      const fieldNames = new Set(
-        fields.map((field) => ('$ref' in field ? (field.name ?? field.$ref) : field.name))
-      );
-      return fieldNames.size === fields.length;
-    },
-    { message: 'Field names must be unique.' }
-  ),
-});
+const ImportedDefinitionSchema = lazySchema(() =>
+  z.object({
+    fields: z.array(FieldSchema).refine(
+      (fields) => {
+        const fieldNames = new Set(
+          fields.map((field) => ('$ref' in field ? (field.name ?? field.$ref) : field.name))
+        );
+        return fieldNames.size === fields.length;
+      },
+      { message: 'Field names must be unique.' }
+    ),
+  })
+);
 
 const ImportedTemplateSchema = z
   .object({
