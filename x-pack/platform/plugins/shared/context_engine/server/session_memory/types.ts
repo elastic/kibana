@@ -20,17 +20,6 @@ export interface StoredSessionMemory {
   deleted_at?: string;
 }
 
-export interface StoredSessionEvent {
-  '@timestamp': string;
-  id: string;
-  space: string;
-  session_id: string;
-  turn_id?: string;
-  user_id: string;
-  ai_index_id: readonly string[];
-  transcript: string;
-}
-
 export interface SessionMemoryScope {
   space: string;
   userId: string;
@@ -55,15 +44,6 @@ export interface RememberInput {
   attributes?: Readonly<Record<string, string>>;
 }
 
-export interface SaveEventInput {
-  /** Defaults to a generated id. */
-  id?: string;
-  sessionId: string;
-  turnId?: string;
-  transcript: string;
-  aiIndexIds?: readonly string[];
-}
-
 export type ForgetOutcome = 'forgotten' | 'already_forgotten' | 'not_found';
 
 export interface SessionMemoryService {
@@ -78,5 +58,4 @@ export interface SessionMemoryService {
     scope: SessionMemoryScope,
     ids: readonly string[]
   ): Promise<{ deletedDocuments: number }>;
-  saveEvent(scope: SessionMemoryScope, input: SaveEventInput): Promise<{ id: string }>;
 }

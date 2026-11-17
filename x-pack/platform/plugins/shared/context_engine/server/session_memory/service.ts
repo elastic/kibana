@@ -8,12 +8,11 @@
 import { randomUUID } from 'crypto';
 import type { BulkResponse, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { SESSION_EVENTS_DATA_STREAM, SESSION_MEMORY_DATA_STREAM } from './data_streams';
+import { SESSION_MEMORY_DATA_STREAM } from './data_streams';
 import type {
   ForgetOutcome,
   SessionMemoryScope,
   SessionMemoryService,
-  StoredSessionEvent,
   StoredSessionMemory,
 } from './types';
 
@@ -52,7 +51,7 @@ const getForgetOutcome = (latest: StoredSessionMemory | undefined): ForgetOutcom
 };
 
 /**
- * Creates the service that reads and writes the session memory data streams.
+ * Creates the service that reads and writes the session memory data stream.
  * `esClient` must send the product origin that system data streams require, as core's clients do.
  */
 export const createSessionMemoryService = (
@@ -62,6 +61,7 @@ export const createSessionMemoryService = (
     const { id = randomUUID(), sessionId, content, aiIndexIds = [], attributes = {} } = input;
     await esClient.index<StoredSessionMemory>({
       index: SESSION_MEMORY_DATA_STREAM,
+      op_type: 'create',
       document: {
         '@timestamp': new Date().toISOString(),
         id,
@@ -153,23 +153,5 @@ export const createSessionMemoryService = (
       );
     }
     return { deletedDocuments: deleted };
-  },
-
-  saveEvent: async ({ space, userId }, input) => {
-    const { id = randomUUID(), sessionId, turnId, transcript, aiIndexIds = [] } = input;
-    await esClient.index<StoredSessionEvent>({
-      index: SESSION_EVENTS_DATA_STREAM,
-      document: {
-        '@timestamp': new Date().toISOString(),
-        id,
-        space,
-        session_id: sessionId,
-        turn_id: turnId,
-        user_id: userId,
-        ai_index_id: aiIndexIds,
-        transcript,
-      },
-    });
-    return { id };
   },
 });

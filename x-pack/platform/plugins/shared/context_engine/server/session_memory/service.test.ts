@@ -77,6 +77,7 @@ describe('createSessionMemoryService', () => {
       expect(result).toEqual({ id: expect.any(String) });
       expect(esClient.index).toHaveBeenCalledWith({
         index: SESSION_MEMORY_DATA_STREAM,
+        op_type: 'create',
         document: {
           '@timestamp': NOW.toISOString(),
           id: result.id,
