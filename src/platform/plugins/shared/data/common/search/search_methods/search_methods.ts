@@ -114,11 +114,15 @@ export class SearchMethodsService implements ISearchMethods {
     try {
       const response = await this.executeSearch(request, searchOptions);
 
-      requestResponder?.stats(getEsqlInspectorStats(response.rawResponse));
-      requestResponder?.ok({
-        json: { rawResponse: response.rawResponse },
-        requestParams: response.requestParams,
-      });
+      // A request aborted on purpose while it ran (e.g. superseded, or ended along with a sibling)
+      // is not worth showing in Inspector
+      if (!options?.abortSignal?.aborted) {
+        requestResponder?.stats(getEsqlInspectorStats(response.rawResponse));
+        requestResponder?.ok({
+          json: { rawResponse: response.rawResponse },
+          requestParams: response.requestParams,
+        });
+      }
 
       // An all-empty `values` (e.g. every column dropped) is reported as no rows
       const rawResponse: IEsqlSearchResult['rawResponse'] = response.rawResponse.values?.every(
@@ -142,9 +146,12 @@ export class SearchMethodsService implements ISearchMethods {
         datatable,
       };
     } catch (error) {
-      requestResponder?.error({
-        json: getInspectorErrorJson(error),
-      });
+      // See above: an abort on purpose is not a failed request
+      if (!options?.abortSignal?.aborted) {
+        requestResponder?.error({
+          json: getInspectorErrorJson(error),
+        });
+      }
       return formatAndRethrowEsqlError(error);
     }
   }

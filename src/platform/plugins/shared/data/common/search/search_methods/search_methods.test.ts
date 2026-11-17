@@ -289,6 +289,54 @@ describe('SearchMethodsService', () => {
         expect(inspector.adapter.start).not.toHaveBeenCalled();
       });
 
+      it('does not log an error for a request aborted while it was running', async () => {
+        const controller = new AbortController();
+        mockSearch.mockImplementation(() =>
+          throwError(() => {
+            controller.abort();
+            return new DOMException('The operation was aborted', 'AbortError');
+          })
+        );
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await expect(
+          service.esql({ query: 'FROM logs' }, { inspector, abortSignal: controller.signal })
+        ).rejects.toMatchObject({ name: 'AbortError' });
+
+        expect(inspector.adapter.start).toHaveBeenCalledTimes(1);
+        expect(requestResponder.error).not.toHaveBeenCalled();
+      });
+
+      it('does not log a response that arrives after the request was aborted', async () => {
+        const controller = new AbortController();
+        mockSearch.mockImplementation(() => {
+          controller.abort();
+          return createMockResponse({ columns: [], values: [] });
+        });
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.esql({ query: 'FROM logs' }, { inspector, abortSignal: controller.signal });
+
+        expect(requestResponder.ok).not.toHaveBeenCalled();
+      });
+
+      it('still logs a failure when the request was not aborted', async () => {
+        mockSearch.mockReturnValue(throwError(() => new Error('boom')));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await expect(
+          service.esql(
+            { query: 'FROM logs' },
+            { inspector, abortSignal: new AbortController().signal }
+          )
+        ).rejects.toThrow();
+
+        expect(requestResponder.error).toHaveBeenCalledWith({ json: { message: 'boom' } });
+      });
+
       it('includes approximation and project_routing in the request params when set', async () => {
         mockSearch.mockReturnValue(createMockResponse({ columns: [], values: [] }));
         const requestResponder = createMockRequestResponder();
