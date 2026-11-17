@@ -239,7 +239,7 @@ export const runFpTpAnalysisWorkflow = async ({
   const output = readAnalysisOutput(execution);
 
   const conversationIds = conversationIdsOf(execution);
-  // The agent is tool-less, so no tool is exempt from the zero-tool guardrail.
+  // Read every tool call; the trajectory evaluator decides which runtime built-ins to ignore.
   const { toolCallIds, unavailable } = await readAgentToolCallsFromTraces({
     traceEsClient,
     conversationIds,
