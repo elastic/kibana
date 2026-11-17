@@ -190,7 +190,8 @@ describe('ServiceDashboards', () => {
 
       // Render dashboard A and publish its API through A's closure.
       const { rerender } = render(<ServiceDashboards />);
-      const onApiAvailableA = capturedOnApiAvailableHistory[capturedOnApiAvailableHistory.length - 1];
+      const onApiAvailableA =
+        capturedOnApiAvailableHistory[capturedOnApiAvailableHistory.length - 1];
       const onApiCleanupA = capturedOnApiCleanupHistory[capturedOnApiCleanupHistory.length - 1];
 
       await act(async () => {
@@ -203,7 +204,8 @@ describe('ServiceDashboards', () => {
         mockQuery = { ...defaultMockQuery, dashboardId: 'dashboard-2' };
         rerender(<ServiceDashboards />);
       });
-      const onApiAvailableB = capturedOnApiAvailableHistory[capturedOnApiAvailableHistory.length - 1];
+      const onApiAvailableB =
+        capturedOnApiAvailableHistory[capturedOnApiAvailableHistory.length - 1];
 
       await act(async () => {
         onApiAvailableB(dashboardApiB);
