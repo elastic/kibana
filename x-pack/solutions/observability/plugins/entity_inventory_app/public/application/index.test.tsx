@@ -27,13 +27,25 @@ import {
 } from '../mocks';
 import { ENTITY_INVENTORY_PAGES } from '../pages';
 import { entityInventoryRouter } from '../routes/config';
+import type { EntityDataGridProps } from './components/entity_table/entity_data_grid';
 import { EntityInventoryShell, renderApp } from '.';
 
-// The shell tests check which tables it shows and when it requests the types, not how a grid
-// renders, which `entity_data_grid.test.tsx` covers. The real grid is slow to mount in jsdom.
+// The shell tests check which tables it shows, when it requests the types and that the column
+// choices outlive a page change, not how a grid renders, which `entity_data_grid.test.tsx` covers.
+// The real grid is slow to mount in jsdom, so the stub shows the choices it was given and lets a
+// test make one.
 jest.mock('./components/entity_table/entity_data_grid', () => ({
-  EntityDataGrid: ({ entityType }: { entityType: { type: string } }) => (
-    <div data-test-subj="entityInventoryTable" data-entity-type={entityType.type} />
+  EntityDataGrid: ({ entityType, preferences, onPreferencesChange }: EntityDataGridProps) => (
+    <div
+      data-test-subj="entityInventoryTable"
+      data-entity-type={entityType.type}
+      data-visible-columns={preferences.visibleColumns?.join(',')}
+    >
+      <button
+        data-test-subj="entityInventoryTableStubChooseColumns"
+        onClick={() => onPreferencesChange({ visibleColumns: ['host.name'] })}
+      />
+    </div>
   ),
 }));
 
@@ -174,6 +186,31 @@ describe('EntityInventoryShell', () => {
       'host'
     );
     expect(getTypes).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the column choices of a type while another page is open', async () => {
+    const { history } = renderShellAt('/hosts');
+    expect(await screen.findByTestId('entityInventoryTable')).not.toHaveAttribute(
+      'data-visible-columns'
+    );
+    fireEvent.click(screen.getByTestId('entityInventoryTableStubChooseColumns'));
+    expect(screen.getByTestId('entityInventoryTable')).toHaveAttribute(
+      'data-visible-columns',
+      'host.name'
+    );
+
+    act(() => history.push('/kubernetes'));
+    expect(await screen.findByTestId('entityInventoryTable')).toHaveAttribute(
+      'data-entity-type',
+      'k8s.deployment'
+    );
+    expect(screen.getByTestId('entityInventoryTable')).not.toHaveAttribute('data-visible-columns');
+    act(() => history.push('/hosts'));
+
+    expect(await screen.findByTestId('entityInventoryTable')).toHaveAttribute(
+      'data-visible-columns',
+      'host.name'
+    );
   });
 
   it('requests the entity types once more on a retry after the types request fails, and not again on a page change', async () => {

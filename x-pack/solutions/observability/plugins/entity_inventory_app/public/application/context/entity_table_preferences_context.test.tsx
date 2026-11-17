@@ -44,22 +44,19 @@ describe('useEntityTablePreferences', () => {
     expect(result.current.kubernetes.preferences).toBe(NO_PREFERENCES);
   });
 
-  it('keeps the choices of a type while its table is unmounted, and gives them to the next table', () => {
+  it('gives the choices of a type back when its table is shown again after another type', () => {
     const preferences = { visibleColumns: ['host.name'], pageSize: 50 };
     const { result, rerender } = renderHook(
-      ({ showHostTable }: { showHostTable: boolean }) => ({
-        kubernetes: useEntityTablePreferences('k8s.deployment'),
-        host: useEntityTablePreferences(showHostTable ? 'host' : 'k8s.deployment'),
-      }),
-      { wrapper, initialProps: { showHostTable: true } }
+      ({ entityType }: { entityType: string }) => useEntityTablePreferences(entityType),
+      { wrapper, initialProps: { entityType: 'host' } }
     );
-    act(() => result.current.host.onPreferencesChange(preferences));
+    act(() => result.current.onPreferencesChange(preferences));
 
-    rerender({ showHostTable: false });
-    expect(result.current.host.preferences).toBe(NO_PREFERENCES);
+    rerender({ entityType: 'k8s.deployment' });
+    expect(result.current.preferences).toBe(NO_PREFERENCES);
 
-    rerender({ showHostTable: true });
-    expect(result.current.host.preferences).toEqual(preferences);
+    rerender({ entityType: 'host' });
+    expect(result.current.preferences).toEqual(preferences);
   });
 
   it('throws outside of a provider', () => {
