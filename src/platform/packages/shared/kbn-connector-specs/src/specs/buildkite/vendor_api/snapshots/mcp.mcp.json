@@ -1,0 +1,743 @@
+{
+  "tools": [
+    {
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "build_number": {
+            "type": "string"
+          },
+          "org_slug": {
+            "type": "string"
+          },
+          "pipeline_slug": {
+            "type": "string"
+          },
+          "telemetry": {
+            "additionalProperties": false,
+            "properties": {
+              "context": {
+                "maxLength": 256,
+                "type": "string"
+              }
+            },
+            "required": [
+              "context"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "org_slug",
+          "pipeline_slug",
+          "build_number"
+        ],
+        "type": "object"
+      },
+      "name": "cancel_build"
+    },
+    {
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "append": {
+            "type": "boolean"
+          },
+          "body": {
+            "type": "string"
+          },
+          "build_number": {
+            "type": "string"
+          },
+          "context": {
+            "type": "string"
+          },
+          "job_id": {
+            "type": "string"
+          },
+          "org_slug": {
+            "type": "string"
+          },
+          "pipeline_slug": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "integer"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "style": {
+            "type": "string"
+          },
+          "telemetry": {
+            "additionalProperties": false,
+            "properties": {
+              "context": {
+                "maxLength": 256,
+                "type": "string"
+              }
+            },
+            "required": [
+              "context"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "org_slug",
+          "pipeline_slug",
+          "build_number",
+          "body"
+        ],
+        "type": "object"
+      },
+      "name": "create_annotation"
+    },
+    {
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "branch": {
+            "type": "string"
+          },
+          "commit": {
+            "type": "string"
+          },
+          "environment": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "key": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "key",
+                "value"
+              ],
+              "type": "object"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "ignore_branch_filters": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "metadata": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "key": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "key",
+                "value"
+              ],
+              "type": "object"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "org_slug": {
+            "type": "string"
+          },
+          "pipeline_slug": {
+            "type": "string"
+          },
+          "telemetry": {
+            "additionalProperties": false,
+            "properties": {
+              "context": {
+                "maxLength": 256,
+                "type": "string"
+              }
+            },
+            "required": [
+              "context"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "org_slug",
+          "pipeline_slug",
+          "commit",
+          "branch",
+          "message"
+        ],
+        "type": "object"
+      },
+      "name": "create_build"
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "telemetry": {
+            "additionalProperties": false,
+            "properties": {
+              "context": {
+                "maxLength": 256,
+                "type": "string"
+              }
+            },
+            "required": [
+              "context"
+            ],
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "name": "current_user"
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "build_number": {
+            "type": "string"
+          },
+          "org_slug": {
+            "type": "string"
+          },
+          "pipeline_slug": {
+            "type": "string"
+          },
+          "telemetry": {
+            "additionalProperties": false,
+            "properties": {
+              "context": {
+                "maxLength": 256,
+                "type": "string"
+              }
+            },
+            "required": [
+              "context"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "org_slug",
+          "pipeline_slug",
+          "build_number"
+        ],
+        "type": "object"
+      },
+      "name": "get_build"
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "detail_level": {
+            "type": "string"
+          },
+          "org_slug": {
+            "type": "string"
+          },
+          "pipeline_slug": {
+            "type": "string"
+          },
+          "telemetry": {
+            "additionalProperties": false,
+            "properties": {
+              "context": {
+                "maxLength": 256,
+                "type": "string"
+              }
+            },
+            "required": [
+              "context"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "org_slug",
+          "pipeline_slug"
+        ],
+        "type": "object"
+      },
+      "name": "get_pipeline"
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "body_format": {
+            "type": "string"
+          },
+          "build_number": {
+            "type": "string"
+          },
+          "job_id": {
+            "type": "string"
+          },
+          "org_slug": {
+            "type": "string"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "per_page": {
+            "type": "integer"
+          },
+          "pipeline_slug": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "telemetry": {
+            "additionalProperties": false,
+            "properties": {
+              "context": {
+                "maxLength": 256,
+                "type": "string"
+              }
+            },
+            "required": [
+              "context"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "org_slug",
+          "pipeline_slug",
+          "build_number"
+        ],
+        "type": "object"
+      },
+      "name": "list_annotations"
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "build_number": {
+            "type": "string"
+          },
+          "org_slug": {
+            "type": "string"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "per_page": {
+            "type": "integer"
+          },
+          "pipeline_slug": {
+            "type": "string"
+          },
+          "telemetry": {
+            "additionalProperties": false,
+            "properties": {
+              "context": {
+                "maxLength": 256,
+                "type": "string"
+              }
+            },
+            "required": [
+              "context"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "org_slug",
+          "pipeline_slug",
+          "build_number"
+        ],
+        "type": "object"
+      },
+      "name": "list_artifacts_for_build"
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "branch": {
+            "type": "string"
+          },
+          "commit": {
+            "type": "string"
+          },
+          "created_from": {
+            "type": "string"
+          },
+          "created_to": {
+            "type": "string"
+          },
+          "creator": {
+            "type": "string"
+          },
+          "finished_from": {
+            "type": "string"
+          },
+          "org_slug": {
+            "type": "string"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "per_page": {
+            "type": "integer"
+          },
+          "pipeline_slug": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "telemetry": {
+            "additionalProperties": false,
+            "properties": {
+              "context": {
+                "maxLength": 256,
+                "type": "string"
+              }
+            },
+            "required": [
+              "context"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "org_slug"
+        ],
+        "type": "object"
+      },
+      "name": "list_builds"
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "after": {
+            "type": "string"
+          },
+          "before": {
+            "type": "string"
+          },
+          "build_number": {
+            "type": "string"
+          },
+          "detail_level": {
+            "type": "string"
+          },
+          "group_key": {
+            "type": "string"
+          },
+          "include_agent": {
+            "type": "boolean"
+          },
+          "include_retried_jobs": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "org_slug": {
+            "type": "string"
+          },
+          "per_page": {
+            "type": "integer"
+          },
+          "pipeline_slug": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "step_key": {
+            "type": "string"
+          },
+          "telemetry": {
+            "additionalProperties": false,
+            "properties": {
+              "context": {
+                "maxLength": 256,
+                "type": "string"
+              }
+            },
+            "required": [
+              "context"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "org_slug",
+          "pipeline_slug",
+          "build_number"
+        ],
+        "type": "object"
+      },
+      "name": "list_jobs"
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "detail_level": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "org_slug": {
+            "type": "string"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "per_page": {
+            "type": "integer"
+          },
+          "repository": {
+            "type": "string"
+          },
+          "telemetry": {
+            "additionalProperties": false,
+            "properties": {
+              "context": {
+                "maxLength": 256,
+                "type": "string"
+              }
+            },
+            "required": [
+              "context"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "org_slug"
+        ],
+        "type": "object"
+      },
+      "name": "list_pipelines"
+    },
+    {
+      "annotations": {
+        "readOnlyHint": true
+      },
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "build_number": {
+            "type": "string"
+          },
+          "cache_ttl": {
+            "type": "string"
+          },
+          "force_refresh": {
+            "type": "boolean"
+          },
+          "job_id": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "integer"
+          },
+          "org_slug": {
+            "type": "string"
+          },
+          "pipeline_slug": {
+            "type": "string"
+          },
+          "seek": {
+            "type": "integer"
+          },
+          "telemetry": {
+            "additionalProperties": false,
+            "properties": {
+              "context": {
+                "maxLength": 256,
+                "type": "string"
+              }
+            },
+            "required": [
+              "context"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "org_slug",
+          "pipeline_slug",
+          "build_number",
+          "job_id"
+        ],
+        "type": "object"
+      },
+      "name": "read_logs"
+    },
+    {
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "build_number": {
+            "type": "string"
+          },
+          "org_slug": {
+            "type": "string"
+          },
+          "pipeline_slug": {
+            "type": "string"
+          },
+          "telemetry": {
+            "additionalProperties": false,
+            "properties": {
+              "context": {
+                "maxLength": 256,
+                "type": "string"
+              }
+            },
+            "required": [
+              "context"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "org_slug",
+          "pipeline_slug",
+          "build_number"
+        ],
+        "type": "object"
+      },
+      "name": "rebuild_build"
+    },
+    {
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "build_number": {
+            "type": "string"
+          },
+          "job_id": {
+            "type": "string"
+          },
+          "org_slug": {
+            "type": "string"
+          },
+          "pipeline_slug": {
+            "type": "string"
+          },
+          "telemetry": {
+            "additionalProperties": false,
+            "properties": {
+              "context": {
+                "maxLength": 256,
+                "type": "string"
+              }
+            },
+            "required": [
+              "context"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "org_slug",
+          "pipeline_slug",
+          "build_number",
+          "job_id"
+        ],
+        "type": "object"
+      },
+      "name": "retry_job"
+    },
+    {
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "build_number": {
+            "type": "string"
+          },
+          "fields": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "job_id": {
+            "type": "string"
+          },
+          "org_slug": {
+            "type": "string"
+          },
+          "pipeline_slug": {
+            "type": "string"
+          },
+          "telemetry": {
+            "additionalProperties": false,
+            "properties": {
+              "context": {
+                "maxLength": 256,
+                "type": "string"
+              }
+            },
+            "required": [
+              "context"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "org_slug",
+          "pipeline_slug",
+          "build_number",
+          "job_id"
+        ],
+        "type": "object"
+      },
+      "name": "unblock_job"
+    }
+  ]
+}

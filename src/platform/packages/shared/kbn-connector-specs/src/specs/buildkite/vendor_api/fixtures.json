@@ -1,0 +1,8 @@
+{
+  "callTool": {
+    "input": {
+      "name": "current_user",
+      "arguments": {}
+    }
+  }
+}
