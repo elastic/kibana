@@ -27,6 +27,9 @@ export interface AssigneesApplyPanelProps {
    */
   assignedUserIds: string[];
 
+  /** Ids of users assigned to only some of the selected alerts. */
+  mixedUserIds?: string[];
+
   /**
    * A callback function that will be called on apply button click
    */
@@ -37,32 +40,41 @@ export interface AssigneesApplyPanelProps {
  * The popover to allow selection of users from a list
  */
 export const AssigneesApplyPanel: FC<AssigneesApplyPanelProps> = memo(
-  ({ searchInputId, assignedUserIds, onApply }) => {
+  ({ searchInputId, assignedUserIds, mixedUserIds, onApply }) => {
     /**
      * We use `selectedUserIds` to keep track of currently selected user ids,
      * whereas `assignedUserIds` holds actually assigned user ids.
      */
     const [selectedUserIds, setSelectedUserIds] =
       useState<AssigneesIdsSelection[]>(assignedUserIds);
+    const [selectedMixedUserIds, setSelectedMixedUserIds] = useState<string[]>(mixedUserIds ?? []);
 
     const assigneesToUpdate = useMemo<AlertAssignees>(() => {
       const updatedIds = removeNoAssigneesSelection(selectedUserIds);
       const assigneesToAddArray = updatedIds.filter((uid) => !assignedUserIds.includes(uid));
-      const assigneesToRemoveArray = assignedUserIds.filter((uid) => !updatedIds.includes(uid));
+      const assigneesToRemoveArray = [...assignedUserIds, ...(mixedUserIds ?? [])].filter(
+        (uid) => !updatedIds.includes(uid) && !selectedMixedUserIds.includes(uid)
+      );
       return {
         add: assigneesToAddArray,
         remove: assigneesToRemoveArray,
       };
-    }, [assignedUserIds, selectedUserIds]);
+    }, [assignedUserIds, mixedUserIds, selectedMixedUserIds, selectedUserIds]);
 
     const isDirty = useMemo(
       () => assigneesToUpdate.add.length || assigneesToUpdate.remove.length,
       [assigneesToUpdate]
     );
 
-    const handleSelectionChange = useCallback((userIds: AssigneesIdsSelection[]) => {
-      setSelectedUserIds(userIds);
-    }, []);
+    const handleSelectionChange = useCallback(
+      (userIds: AssigneesIdsSelection[], remainingMixedUserIds?: string[]) => {
+        setSelectedUserIds(userIds);
+        if (remainingMixedUserIds) {
+          setSelectedMixedUserIds(remainingMixedUserIds);
+        }
+      },
+      []
+    );
 
     const handleApplyButtonClick = useCallback(async () => {
       onApply(assigneesToUpdate);
@@ -73,6 +85,7 @@ export const AssigneesApplyPanel: FC<AssigneesApplyPanelProps> = memo(
         <AssigneesSelectable
           searchInputId={searchInputId}
           assignedUserIds={assignedUserIds}
+          mixedUserIds={mixedUserIds}
           onSelectionChange={handleSelectionChange}
         />
         <EuiButton

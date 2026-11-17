@@ -32,6 +32,9 @@ export interface AssigneesSelectableProps {
    */
   assignedUserIds: AssigneesIdsSelection[];
 
+  /** Ids of users assigned to only some of the selected alerts. */
+  mixedUserIds?: string[];
+
   /**
    * Show "Unassigned" option if needed
    */
@@ -40,19 +43,19 @@ export interface AssigneesSelectableProps {
   /**
    * Callback to handle changing of the assignees selection
    */
-  onSelectionChange?: (userIds: AssigneesIdsSelection[]) => void;
+  onSelectionChange?: (userIds: AssigneesIdsSelection[], mixedUserIds?: string[]) => void;
 }
 
 /**
  * Renders a selectable component given a list of assignees ids
  */
 export const AssigneesSelectable: FC<AssigneesSelectableProps> = memo(
-  ({ searchInputId, assignedUserIds, showUnassignedOption, onSelectionChange }) => {
+  ({ searchInputId, assignedUserIds, mixedUserIds, showUnassignedOption, onSelectionChange }) => {
     const { data: currentUserProfile, isLoading: isLoadingCurrentUserProfile } =
       useGetCurrentUserProfile();
     const existingIds = useMemo(
-      () => new Set(removeNoAssigneesSelection(assignedUserIds)),
-      [assignedUserIds]
+      () => new Set([...removeNoAssigneesSelection(assignedUserIds), ...(mixedUserIds ?? [])]),
+      [assignedUserIds, mixedUserIds]
     );
     const { isLoading: isLoadingUserProfiles, data: assignedUserProfiles } = useBulkGetUserProfiles(
       {
@@ -94,27 +97,78 @@ export const AssigneesSelectable: FC<AssigneesSelectableProps> = memo(
     const [selectedUserProfiles, setSelectedUserProfiles] = useState<AssigneesProfilesSelection[]>(
       []
     );
+    const [mixedUserProfiles, setMixedUserProfiles] = useState<AssigneesProfilesSelection[]>([]);
     useEffect(() => {
       if (isLoadingUserProfiles || !assignedUserProfiles) {
         return;
       }
       const hasNoAssigneesSelection = assignedUserIds.find((uid) => uid === NO_ASSIGNEES_VALUE);
+      const selectedIds = new Set(removeNoAssigneesSelection(assignedUserIds));
       const newAssignees =
         hasNoAssigneesSelection !== undefined
-          ? [NO_ASSIGNEES_VALUE, ...assignedUserProfiles]
-          : assignedUserProfiles;
+          ? [
+              NO_ASSIGNEES_VALUE,
+              ...assignedUserProfiles.filter((profile) => selectedIds.has(profile.uid)),
+            ]
+          : assignedUserProfiles.filter((profile) => selectedIds.has(profile.uid));
       setSelectedUserProfiles(newAssignees);
-    }, [assignedUserIds, assignedUserProfiles, isLoadingUserProfiles]);
+      setMixedUserProfiles(
+        assignedUserProfiles.filter((profile) => mixedUserIds?.includes(profile.uid))
+      );
+    }, [assignedUserIds, assignedUserProfiles, isLoadingUserProfiles, mixedUserIds]);
 
     const handleSelectedAssignees = useCallback(
-      (newAssignees: AssigneesProfilesSelection[]) => {
-        if (!isEqual(newAssignees, selectedUserProfiles)) {
+      (
+        newAssignees: AssigneesProfilesSelection[],
+        newMixedAssignees?: AssigneesProfilesSelection[]
+      ) => {
+        if (
+          !isEqual(newAssignees, selectedUserProfiles) ||
+          !isEqual(newMixedAssignees ?? [], mixedUserProfiles)
+        ) {
           setSelectedUserProfiles(newAssignees);
-          onSelectionChange?.(newAssignees.map((assignee) => assignee?.uid ?? NO_ASSIGNEES_VALUE));
+          const selectedIds = newAssignees.map((assignee) => assignee?.uid ?? NO_ASSIGNEES_VALUE);
+          const unresolvedSelectedIds = assignedUserIds.filter(
+            (uid): uid is string =>
+              uid !== NO_ASSIGNEES_VALUE &&
+              !assignedUserProfiles?.some((profile) => profile.uid === uid)
+          );
+          if (mixedUserIds !== undefined) {
+            const mixedIds = (newMixedAssignees ?? []).flatMap((assignee) =>
+              assignee ? [assignee.uid] : []
+            );
+            const unresolvedMixedIds = mixedUserIds.filter(
+              (uid) => !assignedUserProfiles?.some((profile) => profile.uid === uid)
+            );
+            setMixedUserProfiles(newMixedAssignees ?? []);
+            onSelectionChange?.(
+              [...selectedIds, ...unresolvedSelectedIds],
+              [...mixedIds, ...unresolvedMixedIds]
+            );
+          } else {
+            onSelectionChange?.([...selectedIds, ...unresolvedSelectedIds]);
+          }
         }
       },
-      [onSelectionChange, selectedUserProfiles]
+      [
+        assignedUserIds,
+        assignedUserProfiles,
+        mixedUserIds,
+        mixedUserProfiles,
+        onSelectionChange,
+        selectedUserProfiles,
+      ]
     );
+
+    const handleClear = useCallback(() => {
+      setSelectedUserProfiles([]);
+      setMixedUserProfiles([]);
+      if (mixedUserIds !== undefined) {
+        onSelectionChange?.([], []);
+      } else {
+        onSelectionChange?.([]);
+      }
+    }, [mixedUserIds, onSelectionChange]);
 
     const selectedStatusMessage = useCallback(
       (total: number) => i18n.ASSIGNEES_SELECTION_STATUS_MESSAGE(total),
@@ -132,9 +186,11 @@ export const AssigneesSelectable: FC<AssigneesSelectableProps> = memo(
             setSearchTerm(term);
           }}
           onChange={handleSelectedAssignees}
+          onClear={handleClear}
           selectedStatusMessage={selectedStatusMessage}
           options={searchResultProfiles}
           selectedOptions={selectedUserProfiles}
+          mixedOptions={mixedUserIds === undefined ? undefined : mixedUserProfiles}
           isLoading={isLoading}
           height={'full'}
           singleSelection={false}

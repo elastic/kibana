@@ -184,6 +184,62 @@ describe('UserProfilesSelectable', () => {
     ]);
   });
 
+  it('should render mixed users and clear both selected and mixed users', () => {
+    const onChange = jest.fn();
+    const [selected, mixed, unselected] = userProfiles;
+    const wrapper = mount(
+      <UserProfilesSelectable
+        selectedOptions={[selected]}
+        mixedOptions={[mixed]}
+        defaultOptions={[unselected]}
+        onChange={onChange}
+      />
+    );
+
+    expect(wrapper.find('EuiSelectable').prop('options')).toEqual([
+      expect.objectContaining({ key: selected.uid, checked: 'on' }),
+      expect.objectContaining({ key: mixed.uid, checked: 'mixed' }),
+      expect.objectContaining({ isGroupLabel: true }),
+      expect.objectContaining({ key: unselected.uid, checked: undefined }),
+    ]);
+    expect(wrapper.find('EuiText').first().text()).toContain('2 users selected');
+
+    wrapper.find('EuiButtonEmpty').simulate('click');
+    expect(onChange).toHaveBeenCalledWith([], []);
+  });
+
+  it('should use a custom clear handler when provided', () => {
+    const onChange = jest.fn();
+    const onClear = jest.fn();
+    const wrapper = mount(
+      <UserProfilesSelectable
+        selectedOptions={[userProfiles[0]]}
+        onChange={onChange}
+        onClear={onClear}
+      />
+    );
+
+    wrapper.find('EuiButtonEmpty').simulate('click');
+    expect(onClear).toHaveBeenCalledTimes(1);
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('should preserve hidden mixed users when a visible mixed user is selected', () => {
+    const onChange = jest.fn();
+    const [selected, visibleMixed, hiddenMixed, unselected] = userProfiles;
+    const wrapper = mount(
+      <UserProfilesSelectable
+        selectedOptions={[selected]}
+        mixedOptions={[visibleMixed, hiddenMixed]}
+        options={[visibleMixed, unselected]}
+        onChange={onChange}
+      />
+    );
+
+    wrapper.find('EuiSelectableListItem').first().simulate('click');
+    expect(onChange).toHaveBeenCalledWith([visibleMixed, selected], [hiddenMixed]);
+  });
+
   it('should trigger `onChange` callback when selection changes', () => {
     const onChange = jest.fn();
     const [firstOption, secondOption] = userProfiles;

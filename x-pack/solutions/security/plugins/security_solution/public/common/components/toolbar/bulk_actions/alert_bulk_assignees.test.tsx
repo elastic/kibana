@@ -55,6 +55,20 @@ const mockAlertsWithAssignees = [
   },
 ];
 
+const mockAlertsWithMixedAssignees = [
+  mockAlertsWithAssignees[0],
+  {
+    _id: 'test-id-2',
+    data: [
+      {
+        field: ALERT_WORKFLOW_ASSIGNEE_IDS,
+        value: ['user-id-1'],
+      },
+    ],
+    ecs: { _id: 'test-id-2' },
+  },
+];
+
 (useGetCurrentUserProfile as jest.Mock).mockReturnValue({
   isLoading: false,
   data: mockUserProfiles[0],
@@ -89,6 +103,10 @@ const renderAssigneesMenu = (
 describe('BulkAlertAssigneesPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: mockUserProfiles,
+    });
   });
 
   test('it renders', () => {
@@ -128,6 +146,94 @@ describe('BulkAlertAssigneesPanel', () => {
     });
     // No changes => Apply button is disabled
     expect(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).toBeDisabled();
+  });
+
+  test('it shows partial assignees as mixed and preserves them when adding another user', () => {
+    const onSubmit = jest.fn();
+    const wrapper = renderAssigneesMenu(mockAlertsWithMixedAssignees, jest.fn(), onSubmit);
+
+    expect(wrapper.getByText('user2').closest('li')).toHaveAttribute('aria-checked', 'mixed');
+    expect(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID)).toBeDisabled();
+
+    fireEvent.click(wrapper.getByText('user3'));
+    fireEvent.click(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID));
+
+    expect(onSubmit).toHaveBeenCalledWith(
+      { add: ['user-id-3'], remove: [] },
+      ['test-id', 'test-id-2'],
+      expect.anything(),
+      expect.anything()
+    );
+  });
+
+  test('it preserves a partial assignee whose profile cannot be fetched', () => {
+    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: [mockUserProfiles[0]],
+    });
+    const onSubmit = jest.fn();
+    const wrapper = renderAssigneesMenu(mockAlertsWithMixedAssignees, jest.fn(), onSubmit);
+
+    fireEvent.click(wrapper.getByText('user3'));
+    fireEvent.click(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID));
+
+    expect(onSubmit).toHaveBeenCalledWith(
+      { add: ['user-id-3'], remove: [] },
+      ['test-id', 'test-id-2'],
+      expect.anything(),
+      expect.anything()
+    );
+  });
+
+  test('it removes unresolved assignees when all users are cleared explicitly', () => {
+    (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: [mockUserProfiles[0]],
+    });
+    const onSubmit = jest.fn();
+    const wrapper = renderAssigneesMenu(mockAlertsWithMixedAssignees, jest.fn(), onSubmit);
+
+    fireEvent.click(wrapper.getByText('Clear filters'));
+    fireEvent.click(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID));
+
+    expect(onSubmit).toHaveBeenCalledWith(
+      { add: [], remove: ['user-id-1', 'user-id-2'] },
+      ['test-id', 'test-id-2'],
+      expect.anything(),
+      expect.anything()
+    );
+  });
+
+  test('it adds a mixed assignee to every alert when selected', () => {
+    const onSubmit = jest.fn();
+    const wrapper = renderAssigneesMenu(mockAlertsWithMixedAssignees, jest.fn(), onSubmit);
+
+    fireEvent.click(wrapper.getByText('user2'));
+    expect(wrapper.getByText('user2').closest('li')).toBeChecked();
+    fireEvent.click(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID));
+
+    expect(onSubmit).toHaveBeenCalledWith(
+      { add: ['user-id-2'], remove: [] },
+      ['test-id', 'test-id-2'],
+      expect.anything(),
+      expect.anything()
+    );
+  });
+
+  test('it removes a mixed assignee from every alert after selecting and deselecting them', () => {
+    const onSubmit = jest.fn();
+    const wrapper = renderAssigneesMenu(mockAlertsWithMixedAssignees, jest.fn(), onSubmit);
+
+    fireEvent.click(wrapper.getByText('user2'));
+    fireEvent.click(wrapper.getByText('user2'));
+    fireEvent.click(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID));
+
+    expect(onSubmit).toHaveBeenCalledWith(
+      { add: [], remove: ['user-id-2'] },
+      ['test-id', 'test-id-2'],
+      expect.anything(),
+      expect.anything()
+    );
   });
 
   test('it updates state correctly', () => {

@@ -57,6 +57,12 @@ export interface UserProfilesSelectableProps<Option extends UserProfileWithAvata
   selectedOptions?: Option[];
 
   /**
+   * Users selected for some, but not all, items in a bulk selection.
+   * Only supported when `singleSelection` is false.
+   */
+  mixedOptions?: Option[];
+
+  /**
    * List of users from search results. Should be updated based on the search term provided by `onSearchChange` callback.
    */
   options?: Option[];
@@ -71,8 +77,12 @@ export interface UserProfilesSelectableProps<Option extends UserProfileWithAvata
   /**
    * Passes back the current selection.
    * @param options Either the list of selected users or `null` (no users).
+   * @param mixedOptions Users that remain selected for only some items when `mixedOptions` is provided.
    */
-  onChange?(options: Option[]): void;
+  onChange?(options: Option[], mixedOptions?: Option[]): void;
+
+  /** Called by the clear button instead of `onChange`, when provided. */
+  onClear?(): void;
 
   /**
    * Passes back the search term.
@@ -133,9 +143,11 @@ export interface UserProfilesSelectableProps<Option extends UserProfileWithAvata
  */
 export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | null>({
   selectedOptions,
+  mixedOptions,
   defaultOptions,
   options,
   onChange,
+  onClear,
   onSearchChange,
   isLoading = false,
   singleSelection = false,
@@ -158,7 +170,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
   const [displayedOptions, setDisplayedOptions] = useState<SelectableOption[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const selectedCount = selectedOptions ? selectedOptions.length : 0;
+  const selectedCount = (selectedOptions?.length ?? 0) + (mixedOptions?.length ?? 0);
   const limitReached = limit ? selectedCount >= limit : false;
 
   // Resets all displayed options
@@ -207,9 +219,8 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
             .map((option) => toSelectableOption(option, nullOptionLabel, nullOptionProps))
         : [];
 
-      // Get any newly added default options
-      const defaultOptionsToAdd: SelectableOption[] = defaultOptions
-        ? defaultOptions
+      const mixedOptionsToAdd: SelectableOption[] = mixedOptions
+        ? mixedOptions
             .filter(
               (profile) =>
                 !nextOptions.find((option) => isMatchingOption(option, profile)) &&
@@ -218,13 +229,25 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
             .map((option) => toSelectableOption(option, nullOptionLabel, nullOptionProps))
         : [];
 
+      // Get any newly added default options
+      const defaultOptionsToAdd: SelectableOption[] = defaultOptions
+        ? defaultOptions
+            .filter(
+              (profile) =>
+                !nextOptions.find((option) => isMatchingOption(option, profile)) &&
+                !selectedOptionsToAdd.find((option) => isMatchingOption(option, profile)) &&
+                !mixedOptionsToAdd.find((option) => isMatchingOption(option, profile))
+            )
+            .map((option) => toSelectableOption(option, nullOptionLabel, nullOptionProps))
+        : [];
+
       // Merge in any new options and add group separator if necessary
       if (defaultOptionsToAdd.length) {
         const separatorIndex = ensureSeparator(nextOptions);
-        nextOptions.splice(separatorIndex, 0, ...selectedOptionsToAdd);
+        nextOptions.splice(separatorIndex, 0, ...selectedOptionsToAdd, ...mixedOptionsToAdd);
         nextOptions.push(...defaultOptionsToAdd);
       } else {
-        nextOptions.push(...selectedOptionsToAdd);
+        nextOptions.push(...selectedOptionsToAdd, ...mixedOptionsToAdd);
       }
 
       return nextOptions;
@@ -235,9 +258,10 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
   const updateCheckedStatus = () => {
     setDisplayedOptions((values) =>
       values.map((option) => {
-        if (selectedOptions) {
-          const match = selectedOptions.find((profile) => isMatchingOption(option, profile));
-          const checked = match === undefined ? undefined : 'on';
+        if (selectedOptions || mixedOptions) {
+          const isSelected = selectedOptions?.some((profile) => isMatchingOption(option, profile));
+          const isMixed = mixedOptions?.some((profile) => isMatchingOption(option, profile));
+          const checked = isSelected ? 'on' : isMixed ? 'mixed' : undefined;
           const disabled = checked ? false : limitReached;
           return {
             ...option,
@@ -259,8 +283,8 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
   };
 
   useEffect(resetDisplayedOptions, [options]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(updateDisplayedOptions, [defaultOptions, selectedOptions]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(updateCheckedStatus, [options, defaultOptions, selectedOptions]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(updateDisplayedOptions, [defaultOptions, selectedOptions, mixedOptions]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(updateCheckedStatus, [options, defaultOptions, selectedOptions, mixedOptions]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <EuiSelectable
@@ -271,38 +295,39 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
           return;
         }
 
-        // Take all selected options from `nextOptions` unless already in `props.selectedOptions`
-        // @ts-expect-error
-        const values: Option[] = nextOptions
-          .filter((option) => {
-            if (option.isGroupLabel || option.checked !== 'on') {
-              return false;
-            }
-            if (
-              selectedOptions &&
-              selectedOptions.find((profile) => isMatchingOption(option, profile)) !== undefined
-            ) {
-              return false;
-            }
-            return true;
-          })
-          .map((option) => (option.key === NULL_OPTION_KEY ? null : option.data));
+        const getOptionsWithStatus = (status: 'on' | 'mixed', currentOptions?: Option[]) => {
+          // The visible list may omit selections when results are supplied by an asynchronous search.
+          const values = nextOptions
+            .filter(
+              (option) =>
+                !option.isGroupLabel &&
+                option.checked === status &&
+                !currentOptions?.some((profile) => isMatchingOption(option, profile))
+            )
+            .map((option) => (option.key === NULL_OPTION_KEY ? null : option.data) as Option);
 
-        // Add all options from `props.selectedOptions` unless they have been deselected in `nextOptions`
-        if (selectedOptions && !singleSelection) {
-          selectedOptions.forEach((profile) => {
-            const match = nextOptions.find((option) => isMatchingOption(option, profile));
-            if (match === undefined || match.checked === 'on') {
-              if (match && match.key === NULL_OPTION_KEY) {
-                values.unshift(profile);
-              } else {
-                values.push(profile);
+          if (!singleSelection) {
+            currentOptions?.forEach((profile) => {
+              const match = nextOptions.find((option) => isMatchingOption(option, profile));
+              if (match === undefined || match.checked === status) {
+                if (match?.key === NULL_OPTION_KEY) {
+                  values.unshift(profile);
+                } else {
+                  values.push(profile);
+                }
               }
-            }
-          });
-        }
+            });
+          }
 
-        onChange(values);
+          return values;
+        };
+
+        const values = getOptionsWithStatus('on', selectedOptions);
+        if (mixedOptions !== undefined) {
+          onChange(values, getOptionsWithStatus('mixed', mixedOptions));
+        } else {
+          onChange(values);
+        }
       }}
       css={{ maxHeight: height }}
       singleSelection={singleSelection}
@@ -383,7 +408,19 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     {selectedCount ? (
-                      <EuiButtonEmpty size="xs" flush="right" onClick={() => onChange?.([])}>
+                      <EuiButtonEmpty
+                        size="xs"
+                        flush="right"
+                        onClick={() => {
+                          if (onClear) {
+                            onClear();
+                          } else if (mixedOptions !== undefined) {
+                            onChange?.([], []);
+                          } else {
+                            onChange?.([]);
+                          }
+                        }}
+                      >
                         {clearButtonLabel ?? (
                           <FormattedMessage
                             id="userProfileComponents.userProfilesSelectable.clearButtonLabel"
