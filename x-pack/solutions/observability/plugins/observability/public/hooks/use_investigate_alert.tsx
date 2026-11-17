@@ -26,7 +26,11 @@ import { useQuery, useQueryClient } from '@kbn/react-query';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { useKibana } from '../utils/kibana_react';
 import { getInvestigationsClient } from '../services/investigations_client';
-import { getStartFailureMessage, isDailyLimitError } from '../utils/investigation_start_failure';
+import {
+  getReachedInvestigationLimit,
+  getStartFailureMessage,
+  isTooManyRequestsError,
+} from '../utils/investigation_start_failure';
 import { DailyLimitReachedText } from '../components/daily_limit_reached_text';
 
 export const VIEWED_INVESTIGATIONS_STORAGE_KEY = 'xpack.observability.viewedInvestigationIds';
@@ -47,6 +51,9 @@ const IN_PROGRESS_REFETCH_INTERVAL_MS = 5_000;
  * until the list shows it, for at most this long.
  */
 const PENDING_START_TIMEOUT_MS = 2 * 60_000;
+
+/** How long a failure toast waits for the daily limits before showing the server's reason alone. */
+export const QUOTAS_LOOKUP_TIMEOUT_MS = 3_000;
 
 type AlertInvestigationStart =
   | { status: 'starting'; alertId: string }
@@ -270,17 +277,26 @@ export const useInvestigateAlert = ({
     }
   };
 
-  /** The failure's reason; for a daily limit, also when it resets and how to raise it. */
+  /** The failure's reason; for a reached daily limit, also when it resets and how to raise it. */
   const getStartFailureText = async (error: unknown) => {
     const message = getStartFailureMessage(error);
-    if (!isDailyLimitError(error) || !investigationsClient || !services?.rendering) {
+    if (!isTooManyRequestsError(error) || !investigationsClient || !services?.rendering) {
       return message;
     }
+    // The toast waits for the limits, so a slow lookup must not hold it back for long.
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), QUOTAS_LOOKUP_TIMEOUT_MS);
     try {
-      const { window: quotaWindow, canManage } = await investigationsClient.fetch(
+      const quotas = await investigationsClient.fetch(
         'GET /internal/nightshift/investigation_quotas',
-        { signal: null }
+        { signal: controller.signal }
       );
+      const reachedLimit = getReachedInvestigationLimit(quotas);
+      // A 429 without a reached limit came from elsewhere, such as Kibana's rate limiter.
+      if (!reachedLimit) {
+        return message;
+      }
+      const { window: quotaWindow, canManage } = quotas;
       const changeLimitsUrl = canManage
         ? settingsLocator?.getRedirectUrl({ tab: 'investigations' })
         : undefined;
@@ -288,6 +304,7 @@ export const useInvestigateAlert = ({
         <DailyLimitReachedText
           message={message}
           resetsAt={quotaWindow.resetsAt}
+          blockedUntilChanged={reachedLimit.blockedUntilChanged}
           canManage={canManage}
           changeLimitsUrl={changeLimitsUrl}
         />,
@@ -296,6 +313,8 @@ export const useInvestigateAlert = ({
     } catch {
       // Without the limits the server's message still says which limit was reached.
       return message;
+    } finally {
+      clearTimeout(timeout);
     }
   };
 

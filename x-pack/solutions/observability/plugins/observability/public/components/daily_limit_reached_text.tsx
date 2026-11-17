@@ -6,18 +6,16 @@
  */
 
 import React from 'react';
-import moment from 'moment';
 import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { getEbtProps } from '@kbn/ebt-click';
-
-/** The user intends to change the daily investigation limits after reaching one. */
-const CHANGE_INVESTIGATION_LIMITS_EBT_ACTION = 'changeInvestigationLimits';
-const INVESTIGATION_START_FAILURE_EBT_ELEMENT = 'investigationStartFailureToast';
+import { OBSERVABILITY_EBT_CLICK_ACTIONS, OBSERVABILITY_EBT_ELEMENTS } from '../ebt_constants';
 
 export interface DailyLimitReachedTextProps {
   message: string;
   resetsAt: string;
+  /** A reached limit of 0 blocks new starts until it is changed, whatever the reset. */
+  blockedUntilChanged: boolean;
   canManage: boolean;
   /** Where the limits are changed; only offered to users who may change them. */
   changeLimitsUrl?: string;
@@ -27,6 +25,7 @@ export interface DailyLimitReachedTextProps {
 export function DailyLimitReachedText({
   message,
   resetsAt,
+  blockedUntilChanged,
   canManage,
   changeLimitsUrl,
 }: DailyLimitReachedTextProps) {
@@ -35,11 +34,18 @@ export function DailyLimitReachedText({
       <EuiText size="s">
         <p>{message}</p>
         <p>
-          <FormattedMessage
-            id="xpack.observability.alerts.investigationLimitResets"
-            defaultMessage="The limit resets {resetIn}."
-            values={{ resetIn: moment(resetsAt).fromNow() }}
-          />
+          {blockedUntilChanged ? (
+            <FormattedMessage
+              id="xpack.observability.alerts.investigationLimitBlockedUntilChanged"
+              defaultMessage="New investigations stay blocked until the limit is changed or enforcement is turned off."
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.observability.alerts.investigationLimitResets"
+              defaultMessage="The limit resets {resetIn}."
+              values={{ resetIn: <FormattedRelative value={resetsAt} /> }}
+            />
+          )}
         </p>
         {!canManage && (
           <p>
@@ -67,8 +73,8 @@ export function DailyLimitReachedText({
             href={changeLimitsUrl}
             data-test-subj="alertInvestigationChangeLimitsLink"
             {...getEbtProps({
-              action: CHANGE_INVESTIGATION_LIMITS_EBT_ACTION,
-              element: INVESTIGATION_START_FAILURE_EBT_ELEMENT,
+              action: OBSERVABILITY_EBT_CLICK_ACTIONS.CHANGE_INVESTIGATION_LIMITS,
+              element: OBSERVABILITY_EBT_ELEMENTS.INVESTIGATION_START_FAILURE_TOAST,
             })}
           >
             <FormattedMessage
