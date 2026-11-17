@@ -206,6 +206,42 @@ branches:
     });
   });
 
+  describe('a list that is still empty', () => {
+    // `placeholderFor` seeds switch cases and parallel branches with `[]`, which `yaml` keeps as a
+    // flow sequence: every item written (and every step inserted under it later) would then be
+    // flow style too, which turns multi-line strings into multi-line double-quoted scalars.
+    it('writes the first switch case in block style', () => {
+      const out = writeFragmentValue(
+        'name: s\ntype: switch\nexpression: x\ncases: []\n',
+        field(['cases'], { kind: 'switch-cases' }),
+        [{ match: 'a', steps: [] }],
+        2
+      );
+
+      expect(toJs(out).cases).toEqual([{ match: 'a', steps: [] }]);
+      expect(out).toMatch(/cases:\n {2}- match: a\n {4}steps: \[\]/);
+    });
+
+    it('writes the first parallel branch in block style', () => {
+      const out = writeFragmentValue(
+        'name: p\ntype: parallel\nbranches: []\n',
+        field(['branches'], { kind: 'parallel-branches' }),
+        [{ name: 'left', steps: [] }],
+        2
+      );
+
+      expect(out).toMatch(/branches:\n {2}- name: left/);
+    });
+
+    it('leaves an empty list as it was when it is written empty again', () => {
+      const text = 'name: s\ncases: [] # none yet\n';
+
+      const required = field(['cases'], { kind: 'switch-cases', required: true });
+
+      expect(writeFragmentValue(text, required, [], 2)).toBe(text);
+    });
+  });
+
   describe('a fragment with YAML errors', () => {
     const BROKEN = 'name: a\ntype: x\nwith: {a: 1\n';
 

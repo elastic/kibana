@@ -399,3 +399,14 @@ describe('WorkflowGraphEdge — on-failure route', () => {
     expect(screen.getByTestId('workflowGraphEdgeFailureLabel')).toBeInTheDocument();
   });
 });
+
+describe('WorkflowGraphEdge — pointer events', () => {
+  it('never takes the pointer, so the add-step strip over the wire keeps hover on its centre line', () => {
+    // React Flow lifts edges inside containers above the overlay layer; a hit-testable 1px stroke
+    // would otherwise un-hover the strip exactly where the user aims.
+    renderSingleEdge(makeEdgeProps({ id: 'e-plain', data: {} }));
+
+    const path = document.querySelector('path.react-flow__edge-path') as SVGPathElement | null;
+    expect(path?.style.pointerEvents).toBe('none');
+  });
+});

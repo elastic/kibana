@@ -49,9 +49,16 @@ export interface WireInsertionControl {
   readonly kind: WireControlKind;
   /** Control centre in flow-space — see `kind` for how it's placed. */
   readonly centre: WireSegmentPoint;
-  /** Segment start (source exit) — for stub wire rendering on terminals. */
+  /**
+   * Start of the wire segment this control owns: the hover strip and, on terminals, the drawn
+   * stub start. Source exit, or the branch chip's far edge for a fork head.
+   */
   readonly segmentStart: WireSegmentPoint;
-  /** Segment end (target entry or terminal stub tip). */
+  /**
+   * End of the owned wire segment: target entry, the merge bus for a branch tail, the branch
+   * head entry for a fork head, or the stub tip for a terminal. `centre` (where the + sits) can
+   * be anywhere along it.
+   */
   readonly segmentEnd: WireSegmentPoint;
   /** Fully-resolved insertion context — passed directly to `edit.onInsert`. */
   readonly insertContext: WorkflowGraphInsertionContext;
@@ -299,6 +306,21 @@ export function computeWireInsertionControls(args: {
         // Use position:'start' so clicking this "+" prepends to the branch.
         const headContext: WorkflowGraphInsertionContext =
           insertContext.mode === 'branch' ? { ...insertContext, position: 'start' } : insertContext;
+        // An empty branch is drawn as a bypass lane that rejoins at the merge bus: the lane has no
+        // ports of its own, so this head control owns the whole wire down to that bus.
+        const rejoin =
+          targetNode.type === 'bypassLane'
+            ? edges.find((e) => e.source === edge.target && isMergeEdge(e))
+            : undefined;
+        const joinNode = rejoin ? byId.get(rejoin.target) : undefined;
+        const joinEntry = joinNode
+          ? nodeEntryPoint(absoluteNodeBounds(joinNode, byId), direction)
+          : undefined;
+        const stripEnd: WireSegmentPoint = joinEntry
+          ? direction === 'LR'
+            ? { x: joinEntry.x - MERGE_BUS_TRUNK, y: end.y }
+            : { x: end.x, y: joinEntry.y - MERGE_BUS_TRUNK }
+          : end;
         // Arrow stub starts at the chip's far edge (incl 1px border), not its centre,
         // so the dashed line doesn't overlap the chip label.
         const stubStart =
@@ -310,7 +332,8 @@ export function computeWireInsertionControls(args: {
           kind: 'wire',
           centre: plusPos,
           segmentStart: stubStart,
-          segmentEnd: plusPos,
+          // The strip owns the whole wire down to the branch head (or the bus), not just the stub.
+          segmentEnd: stripEnd,
           insertContext: headContext,
           fallbackStepName: fallbackStepNameFor(ports, sourceNode),
           direction,
@@ -347,12 +370,15 @@ export function computeWireInsertionControls(args: {
             direction === 'LR'
               ? { x: start.x + stub, y: start.y }
               : { x: start.x, y: start.y + stub };
+          // The strip owns the whole wire down to the merge bus, not just the stub to the +.
+          const busPoint =
+            direction === 'LR' ? { x: busMain, y: start.y } : { x: start.x, y: busMain };
           controls.push({
             id: `terminal:branch-tail:${edge.id}`,
             kind: 'wire',
             centre: tip,
             segmentStart: start,
-            segmentEnd: tip,
+            segmentEnd: busPoint,
             insertContext,
             fallbackStepName: fallbackStepNameFor(ports, sourceNode),
             direction,

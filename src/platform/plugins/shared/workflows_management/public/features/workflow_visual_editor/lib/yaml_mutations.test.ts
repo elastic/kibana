@@ -8,6 +8,8 @@
  */
 
 import { parse } from 'yaml';
+import { writeFragmentValue } from './fragment_yaml';
+import type { StepFormField } from './step_form_schema';
 import {
   appendTrigger,
   collectStepNames,
@@ -269,6 +271,60 @@ steps:
       expect(r.success).toBe(true);
       expect(r.yaml).not.toMatch(/else: \[/);
       expect(r.yaml).toMatch(/else:\n\s+- name: no/);
+    });
+  });
+
+  describe('a switch whose first case is added through the form', () => {
+    const workflow = `name: demo
+triggers:
+  - type: manual
+steps:
+  - name: route
+    type: switch
+    expression: x
+    cases: []
+`;
+    const casesField: StepFormField = {
+      key: 'cases',
+      path: ['cases'],
+      label: 'cases',
+      required: false,
+      kind: 'switch-cases',
+    };
+    const multiLineStep = [
+      'name: report',
+      'type: data.set',
+      'with:',
+      '  text: |-',
+      '    line one',
+      '    **Evidence:** {{ x }}',
+      '    done',
+      '',
+    ].join('\n');
+
+    it('keeps the cases and the steps inserted under them in block style, so multi-line text stays a block scalar', () => {
+      const fragment = getStepFragment(workflow, 'route') ?? '';
+      const edited = replaceStepFragment(
+        workflow,
+        'route',
+        writeFragmentValue(fragment, casesField, [{ match: 'a', steps: [] }], 2)
+      );
+      expect(edited.success).toBe(true);
+
+      const inserted = insertStepIntoBranch(edited.yaml, multiLineStep, 'route', {
+        kind: 'case',
+        index: 0,
+        match: 'a',
+      });
+
+      expect(inserted.success).toBe(true);
+      expect(inserted.yaml).not.toMatch(/cases: \[/);
+      expect(inserted.yaml).toContain('text: |-\n');
+      // No multi-line double-quoted scalar: the form `**Evidence:**` line must stay content.
+      expect(inserted.yaml).not.toMatch(/text: "line one/);
+      expect(parse(inserted.yaml).steps[0].cases[0].steps[0].with.text).toBe(
+        'line one\n**Evidence:** {{ x }}\ndone'
+      );
     });
   });
 

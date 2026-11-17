@@ -18,6 +18,7 @@ export { getStepNodeAtPosition } from './get_step_node_at_position';
 export { getTriggerNodes, getTriggersPair } from './get_trigger_nodes';
 export { getTriggerOnChainOptionPairs } from './get_trigger_on_chain_option_pairs';
 export { correctYamlSyntax } from './correct_yaml_syntax';
+export { getMultiLineScalarContinuationLines } from './get_multi_line_scalar_continuation_lines';
 export { affectsYamlMetadata, updateWorkflowYamlFields } from './update_workflow_yaml_fields';
 export {
   buildWorkflowLookup,

@@ -86,7 +86,13 @@ export const writeFragmentValue = (
     }
   } else {
     const current = doc.getIn(path, true);
-    if (isSeq(current) && Array.isArray(value)) syncSequence(doc, current, value);
+    // An empty list has no items whose nodes are worth keeping, only its `[]` flow style, which
+    // would drag every item written into it (and every step inserted under it later) into flow
+    // style. So the first items are written fresh, in block style.
+    const growsFromEmpty =
+      isSeq(current) && current.items.length === 0 && Array.isArray(value) && value.length > 0;
+    if (isSeq(current) && Array.isArray(value) && !growsFromEmpty)
+      syncSequence(doc, current, value);
     else doc.setIn(path, value);
   }
   return doc.toString({ indent, lineWidth: 0 });

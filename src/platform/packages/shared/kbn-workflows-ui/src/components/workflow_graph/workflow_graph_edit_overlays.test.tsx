@@ -41,9 +41,12 @@ jest.mock('@elastic/eui', () => {
   return { ...jest.requireActual('@elastic/eui'), useGeneratedHtmlId };
 });
 
+let mockZoom = 1;
 jest.mock('@xyflow/react', () => ({
   ...jest.requireActual('@xyflow/react'),
   ViewportPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useStore: (selector: (state: { transform: [number, number, number] }) => unknown) =>
+    selector({ transform: [0, 0, mockZoom] }),
 }));
 
 const renderOverlays = () =>
@@ -75,5 +78,34 @@ describe('WorkflowGraphEditOverlays terminal stubs', () => {
     stubSvgs.forEach((svg, index) => {
       expect(svg.querySelector('line')).toHaveAttribute('marker-end', `url(#${markerIds[index]})`);
     });
+  });
+});
+
+describe('WorkflowGraphEditOverlays wire hit size', () => {
+  afterEach(() => {
+    mockZoom = 1;
+  });
+
+  it('scopes the strip size to the canvas zoom through a CSS variable', () => {
+    renderOverlays();
+
+    const scope = screen.getByTestId('workflowGraphWireHitScope');
+    expect(scope.style.getPropertyValue('--workflowGraphWireHit')).toBe('44px');
+  });
+
+  it('widens the strip in flow space when zoomed out so it keeps a usable screen size', () => {
+    mockZoom = 0.2;
+    renderOverlays();
+
+    const scope = screen.getByTestId('workflowGraphWireHitScope');
+    // 24 screen px / 0.2 zoom = 120 flow px.
+    expect(scope.style.getPropertyValue('--workflowGraphWireHit')).toBe('120px');
+  });
+
+  it('renders every wire control inside the scope', () => {
+    renderOverlays();
+
+    const scope = screen.getByTestId('workflowGraphWireHitScope');
+    expect(scope).toContainElement(screen.getByTestId('workflowGraphWireControl-terminal'));
   });
 });
