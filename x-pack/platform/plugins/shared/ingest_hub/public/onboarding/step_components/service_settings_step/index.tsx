@@ -73,6 +73,9 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     policySettings,
     isProxyUrlSupported,
     proxyUrlError,
+    isReroutePermissionsSupported,
+    reroutePermissions,
+    reroutePermissionsError,
     setPolicySetting,
     conditionErrors,
     bareNamePackage,
@@ -151,6 +154,11 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
 
   const setProxyUrl = useCallback(
     (proxyUrl: string) => setPolicySetting('proxy_url', proxyUrl),
+    [setPolicySetting]
+  );
+
+  const setReroutePermissions = useCallback(
+    (permissions: string[]) => setPolicySetting('additional_datastreams_permissions', permissions),
     [setPolicySetting]
   );
 
@@ -298,7 +306,8 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
       descriptionError ||
       namespaceError ||
       proxyUrlError ||
-      conditionErrors
+      conditionErrors ||
+      reroutePermissionsError
     ) {
       reasons.push(
         i18n.translate('xpack.ingestHub.serviceSettingsStep.continueTooltip.integrationSettings', {
@@ -326,6 +335,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     namespaceError,
     proxyUrlError,
     conditionErrors,
+    reroutePermissionsError,
     incompleteInstances,
   ]);
 
@@ -616,6 +626,15 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
                 value: policySettings.condition ?? '',
                 onChange: setCondition,
                 errors: conditionErrors,
+              }
+            : undefined
+        }
+        reroutePermissions={
+          isReroutePermissionsSupported
+            ? {
+                value: reroutePermissions,
+                onChange: setReroutePermissions,
+                error: reroutePermissionsError,
               }
             : undefined
         }

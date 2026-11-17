@@ -7,7 +7,7 @@
 
 import type { TimeWindow } from './generator';
 
-/** What `InventoryService.list` reads: one type, a window and how many rows to return. */
+/** What `InventoryService.list` and `plan` read: one type, a window and how many rows to return. */
 export interface ListRequest {
   type: string;
   window: TimeWindow;

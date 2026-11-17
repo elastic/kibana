@@ -234,6 +234,10 @@ export function extractNormalizedInputsFromYaml(
   return undefined;
 }
 
+// Boolean schemas, and the `null` a half-written draft can declare, set no defaults.
+const isSchemaObject = (schema: unknown): schema is JSONSchema7 =>
+  typeof schema === 'object' && schema !== null;
+
 /**
  * Applies defaults to a nested object property
  * @param prop - The property schema
@@ -246,6 +250,9 @@ function applyDefaultToObjectProperty(
   inputsSchema?: ReturnType<typeof normalizeFieldsToJsonSchema>,
   renderInputValue?: RenderInputValue
 ): unknown {
+  if (!isSchemaObject(prop)) {
+    return currentValue;
+  }
   if (currentValue === undefined) {
     if (prop.default !== undefined) {
       return renderValue(prop.default, renderInputValue, 'default');
@@ -304,6 +311,9 @@ export function hasDefaultsRecursive(
   schema: JSONSchema7,
   inputsSchema?: ReturnType<typeof normalizeFieldsToJsonSchema>
 ): boolean {
+  if (!isSchemaObject(schema)) {
+    return false;
+  }
   // Resolve $ref if present
   if (schema.$ref && inputsSchema) {
     const resolvedSchema = resolveRef(schema.$ref, inputsSchema);
@@ -344,7 +354,7 @@ function createObjectWithDefaults(
   const result: Record<string, unknown> = {};
   for (const [key, propSchema] of Object.entries(schema.properties || {})) {
     const prop = propSchema as JSONSchema7;
-    const isRequired = schema.required?.includes(key) ?? false;
+    const isRequired = Array.isArray(schema.required) && schema.required.includes(key);
 
     // Include property if:
     // 1. It's required, OR
@@ -372,8 +382,8 @@ export function resolveRef(
   ref: string,
   inputsSchema: ReturnType<typeof normalizeFieldsToJsonSchema>
 ): JSONSchema7 | null {
-  if (!ref.startsWith('#/')) {
-    // External references not supported yet
+  // A draft being typed can hold any value here; external references are not supported yet.
+  if (typeof ref !== 'string' || !ref.startsWith('#/')) {
     return null;
   }
 
@@ -414,6 +424,9 @@ function applyDefaultFromSchema(
   inputsSchema?: ReturnType<typeof normalizeFieldsToJsonSchema>,
   renderInputValue?: RenderInputValue
 ): unknown {
+  if (!isSchemaObject(schema)) {
+    return value;
+  }
   // Resolve $ref if present
   if (schema.$ref && inputsSchema) {
     const resolvedSchema = resolveRef(schema.$ref, inputsSchema);

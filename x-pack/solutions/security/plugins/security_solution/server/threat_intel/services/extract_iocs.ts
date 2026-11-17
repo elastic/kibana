@@ -6,11 +6,11 @@
  */
 
 import { createHash } from 'crypto';
+import { isNonRoutableIPv4 } from '@kbn/alertzero-common';
 import { type IocType, MAX_URL_LENGTH } from '../../../common/threat_intel';
 import { IANA_TLDS } from '../data/iana_tlds';
 import { IOC_NOISE_DOMAINS } from '../data/ioc_noise_domains';
 import { classifyHeader } from './section_headers';
-import { isNonRoutableIPv4 } from '../lib/ip_ranges';
 
 /** IOC tier for correlation anchoring. */
 export type IocTier = 'discriminating' | 'contextual' | 'reference' | 'denied' | 'uncertain';
