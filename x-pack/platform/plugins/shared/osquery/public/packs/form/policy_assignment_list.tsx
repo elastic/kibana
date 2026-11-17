@@ -10,6 +10,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useController, useWatch } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
@@ -314,6 +315,21 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
     return selected;
   }, [selectedIds, groupsByPackagePolicyId]);
 
+  const implicitPolicyIds = useMemo(() => {
+    const explicit = new Set(selectedIds ?? []);
+
+    return new Set([...selectedSet].filter((id) => !explicit.has(id)));
+  }, [selectedIds, selectedSet]);
+
+  const implicitPolicyNames = useMemo(
+    () =>
+      i18n.formatList(
+        'conjunction',
+        knownPolicies.filter(({ id }) => implicitPolicyIds.has(id)).map(({ name }) => name)
+      ),
+    [knownPolicies, implicitPolicyIds]
+  );
+
   const isRowSelected = useCallback(
     (row: PolicyRow) => (row.members ?? [row]).some(({ id }) => selectedSet.has(id)),
     [selectedSet]
@@ -494,6 +510,14 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
                     <EuiFlexGroup alignItems="center" gutterSize="s">
                       <EuiFlexItem>
                         {member.name}
+                        {implicitPolicyIds.has(member.id) && (
+                          <EuiText size="s" color="subdued">
+                            <FormattedMessage
+                              id="xpack.osquery.pack.form.sharedIntegration.includedLabel"
+                              defaultMessage="Included via shared integration"
+                            />
+                          </EuiText>
+                        )}
                         <DescriptionCell description={member.description} />
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
@@ -536,7 +560,14 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
         render: (item: PolicyRow) => (item.members ? null : renderPolicyLink(item)),
       },
     ],
-    [togglePolicy, isAssignmentDisabled, isRowSelected, isRowShardAssigned, renderPolicyLink]
+    [
+      togglePolicy,
+      isAssignmentDisabled,
+      isRowSelected,
+      isRowShardAssigned,
+      renderPolicyLink,
+      implicitPolicyIds,
+    ]
   );
 
   // Must return true: `EuiInMemoryTable` skips its own in-memory filtering for
@@ -664,6 +695,30 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
       fullWidth
     >
       <EuiPanel hasBorder paddingSize="s">
+        {implicitPolicyIds.size > 0 && (
+          <>
+            <KbnInfoCallout
+              announceOnMount
+              size="s"
+              data-test-subj="policyAssignmentSharedIntegrationCallout"
+              title={i18n.translate(
+                'xpack.osquery.pack.form.sharedIntegration.partialSelectionTitle',
+                {
+                  defaultMessage: 'Shared integration includes additional agent policies',
+                }
+              )}
+              text={i18n.translate(
+                'xpack.osquery.pack.form.sharedIntegration.partialSelectionDescription',
+                {
+                  defaultMessage:
+                    'These agent policies already receive this pack via a shared integration and will be included when you save: {policyNames}.',
+                  values: { policyNames: implicitPolicyNames },
+                }
+              )}
+            />
+            <EuiSpacer size="s" />
+          </>
+        )}
         {isLoadError && !hasNoPolicyRows && (
           <>
             <EuiCallOut

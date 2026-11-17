@@ -117,6 +117,37 @@ describe('PolicyAssignmentList', () => {
       mockUseAgentPolicies.mockReturnValue({ data: sharedData, isFetching: false, isError: false });
     });
 
+    it.each([false, true])('explains a partial saved selection (read-only: %s)', (isReadOnly) => {
+      const onFormChange = jest.fn();
+      render(
+        <FormWrapper
+          defaultValues={{ policy_ids: ['policy-1'] }}
+          isReadOnly={isReadOnly}
+          onFormChange={onFormChange}
+        />
+      );
+
+      expect(screen.getByRole('checkbox', { name: groupName })).toBeChecked();
+      expect(screen.getByTestId('policyAssignmentCount')).toHaveTextContent('2 of 3 selected');
+      const marker = screen.getByText('Included via shared integration');
+      expect(marker.closest('li')).toHaveTextContent('Beta Policy');
+      expect(marker.closest('li')).not.toHaveTextContent('Alpha Policy');
+      expect(screen.getByTestId('policyAssignmentSharedIntegrationCallout')).toHaveTextContent(
+        'Beta Policy'
+      );
+      expect(onFormChange).toHaveBeenLastCalledWith({ policy_ids: ['policy-1'], shards: {} });
+
+      if (!isReadOnly) {
+        fireEvent.click(screen.getByTestId('policyAssignmentUnselectAll'));
+        expect(screen.getByRole('checkbox', { name: groupName })).not.toBeChecked();
+        expect(screen.queryByText('Included via shared integration')).not.toBeInTheDocument();
+        expect(
+          screen.queryByTestId('policyAssignmentSharedIntegrationCallout')
+        ).not.toBeInTheDocument();
+        expect(onFormChange).toHaveBeenLastCalledWith({ policy_ids: [], shards: {} });
+      }
+    });
+
     it('renders one named group checkbox, nested members with links, and an unchanged unshared row', async () => {
       render(<FormWrapper />);
       expect(screen.getAllByRole('checkbox')).toHaveLength(2);

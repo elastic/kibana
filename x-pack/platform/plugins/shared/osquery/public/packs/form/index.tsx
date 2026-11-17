@@ -124,7 +124,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     notifications: { toasts },
   } = useKibana().services;
 
-  const { data: { agentPoliciesById } = {} } = useAgentPolicies();
+  const { data: { agentPoliciesById, groupsByPackagePolicyId } = {} } = useAgentPolicies();
 
   // Cancel returns to the Packs list. The read-only Pack details page was
   // removed, so edit mode no longer navigates back to `packs/:packId`.
@@ -381,7 +381,12 @@ const PackFormComponent: React.FC<PackFormProps> = ({
               })
             ) as string[])
           : [];
-        const policies = [...payloadAgentPolicyIds, ...mappedShards];
+        const policies = new Set([...payloadAgentPolicyIds, ...mappedShards]);
+        for (const { policyIds: groupPolicyIds } of Object.values(groupsByPackagePolicyId ?? {})) {
+          if (groupPolicyIds.some((id) => payloadAgentPolicyIds.includes(id))) {
+            groupPolicyIds.forEach((id) => policies.add(id));
+          }
+        }
 
         // Emit schedule fields only when the user touched the schedule or the pack
         // already has one — otherwise an untouched legacy pack triggers a spurious
@@ -414,7 +419,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
         return {
           ...restPayload,
-          policy_ids: policies ?? [],
+          policy_ids: [...policies],
           // On edit, round-trip each query's id so the server preserves schedule_id.
           queries: convertSOQueriesToPack(payloadQueries, { includeId: editMode }),
           shards: getShards() ?? {},
@@ -447,6 +452,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       dirtyFields.schedule,
       editMode,
       getShards,
+      groupsByPackagePolicyId,
       isRruleSchedulingEnabled,
       originalStartDate,
       packHasExplicitSchedule,

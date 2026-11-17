@@ -167,6 +167,49 @@ describe('PackForm', () => {
     expect(mockUseRouterNavigate).toHaveBeenCalledWith('packs');
   });
 
+  it.each([
+    { label: 'expands a partial shared selection', shared: true, expected: ['A', 'B'] },
+    { label: 'preserves unshared selections', shared: false, expected: ['A'] },
+  ])('$label on submit', async ({ shared, expected }) => {
+    mockUseAgentPolicies.mockReturnValue({
+      data: {
+        agentPoliciesById: {
+          A: { id: 'A', name: 'Alpha', agents: 0 },
+          B: { id: 'B', name: 'Beta', agents: 0 },
+        },
+        groupsByPackagePolicyId: shared
+          ? { integration: { id: 'integration', name: 'Shared hosts', policyIds: ['A', 'B'] } }
+          : {},
+        groupIdByPolicyId: shared ? { A: 'integration', B: 'integration' } : {},
+      },
+      isFetching: false,
+      isError: false,
+    });
+    const { getByTestId } = renderWithContext(
+      <PackForm
+        editMode
+        defaultValue={{
+          saved_object_id: 'partial-pack',
+          id: 'partial-pack',
+          name: 'partial-pack',
+          description: '',
+          created_at: '2024-01-01',
+          created_by: 'test-user',
+          updated_at: '2024-01-01',
+          updated_by: 'test-user',
+          references: [],
+          enabled: true,
+          queries: {},
+          policy_ids: ['A'],
+        }}
+      />
+    );
+
+    fireEvent.click(getByTestId('update-pack-button'));
+    await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
+    expect(mockUpdateAsync.mock.calls[0][0].policy_ids).toEqual(expected);
+  });
+
   describe('read-only mode', () => {
     const readOnlyDefaultValue = {
       id: 'ro-pack',
