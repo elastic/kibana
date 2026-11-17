@@ -12,6 +12,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import { AwsOnboardingSettingsCard } from './card';
 import { clearSettingsDraft } from './drafts';
+import { seedDraft } from './fields';
 import { settingsAttachmentData } from './fixtures';
 
 const renderCard = () =>
@@ -113,6 +114,58 @@ describe('AwsOnboardingSettingsCard', () => {
     );
 
     expect(screen.getByLabelText(/GuardDuty API polling — Collect logs/)).toBeChecked();
+  });
+
+  it('leaves a log stream with no default and no default-on sibling unselected', () => {
+    const [guardduty] = settingsAttachmentData.requirement.services;
+    const [findings] = guardduty.data_streams;
+    render(
+      <I18nProvider>
+        <AwsOnboardingSettingsCard
+          attachmentId="att-1:v1"
+          data={{
+            ...settingsAttachmentData,
+            requirement: {
+              ...settingsAttachmentData.requirement,
+              services: [
+                { ...guardduty, data_streams: [{ ...findings, default_input: undefined }] },
+              ],
+            },
+          }}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByLabelText(/S3 \+ SQS notifications/)).not.toBeChecked();
+    expect(screen.getByLabelText(/GuardDuty API polling/)).not.toBeChecked();
+    expect(screen.getByLabelText(/Don't collect Findings/)).not.toBeChecked();
+    expect(
+      screen.getByTestId('awsOnboardingSettings-guardduty_findings-input-problem')
+    ).toHaveTextContent('choose a collection method');
+  });
+
+  it('seeds a log stream with a default input off when a metrics stream of the service is on', () => {
+    const [, ec2] = settingsAttachmentData.requirement.services;
+    const draft = seedDraft({
+      ...settingsAttachmentData.requirement,
+      services: [
+        {
+          ...ec2,
+          data_streams: ec2.data_streams.map((stream) =>
+            stream.choice === 'one_of' ? { ...stream, default_input: 'aws-cloudwatch' } : stream
+          ),
+        },
+      ],
+    });
+
+    expect(draft.services.ec2.data_streams.ec2_logs).toEqual({ input: null });
+  });
+
+  it('seeds a log stream to its default input when the service has no default-on metrics', () => {
+    const [guardduty] = settingsAttachmentData.requirement.services;
+    const draft = seedDraft({ ...settingsAttachmentData.requirement, services: [guardduty] });
+
+    expect(draft.services.guardduty.data_streams.guardduty_findings).toEqual({ input: 'aws-s3' });
   });
 
   it('shows a top-level problem when no service is selected', () => {

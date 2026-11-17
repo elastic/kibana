@@ -29,7 +29,17 @@ const logDataStream = (path: string, dataset: string, type: 'logs' | 'metrics' =
   type,
   dataset,
   title: path,
-  streams: [{ input: 'aws-s3', enabled: true, vars: [] }],
+  streams: [
+    {
+      input: 'aws-s3',
+      enabled: true,
+      // As in the aws package: two optional sources, of which one is needed.
+      vars: [
+        { name: 'bucket_arn', title: 'Bucket ARN', type: 'text', show_user: true },
+        { name: 'queue_url', title: 'Queue URL', type: 'text', show_user: true },
+      ],
+    },
+  ],
 });
 
 /** Just enough of the `aws` package for the catalog: three policy templates, one not agentless. */

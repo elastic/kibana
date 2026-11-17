@@ -17,7 +17,10 @@ import {
   buildSettingsRequirement,
   getServiceIndexPatterns,
 } from '../../../common/services/aws_onboarding_catalog';
-import type { AwsServiceMatrixEntry } from '../../../common/services/aws_onboarding_catalog';
+import type {
+  AwsServiceMatrixEntry,
+  PackageInputEntry,
+} from '../../../common/services/aws_onboarding_catalog';
 import { awsOnboardingResolveCommonDefinition } from '../../../common/workflows/steps/resolve';
 import {
   settingsAnswerToServiceVars,
@@ -28,6 +31,31 @@ import { isAgenticAwsOnboardingEnabled } from '../../services/utils/agentic_aws_
 import { loadAwsServiceMatrix, isAgentless } from './aws_service_matrix';
 
 const DEFAULT_NAMESPACE = 'default';
+
+/**
+ * Fleet leaves a stream the body does not list at its package default, so on every input the body
+ * enables, each of the service's streams the answer did not switch on is listed as disabled (S3's
+ * storage and request metrics share one input and are both on by default).
+ */
+const disableUnansweredStreams = (
+  service: AwsServiceMatrixEntry,
+  inputs: Record<string, PackageInputEntry>
+): Record<string, PackageInputEntry> => {
+  const ptName = service.policyTemplate ?? service.id;
+  const result = { ...inputs };
+  service.dataStreams.forEach((dsId) => {
+    const streamKey = `${service.packageName}.${dsId}`;
+    (service.varDefsByDataStream?.[dsId]?.inputs ?? []).forEach((inputType) => {
+      const entry = result[`${ptName}-${inputType}`];
+      if (!entry || entry.streams[streamKey]) return;
+      result[`${ptName}-${inputType}`] = {
+        ...entry,
+        streams: { ...entry.streams, [streamKey]: { enabled: false, vars: {} } },
+      };
+    });
+  });
+  return result;
+};
 
 export const awsOnboardingResolveStepDefinition = createServerStepDefinition({
   ...awsOnboardingResolveCommonDefinition,
@@ -124,7 +152,7 @@ export const awsOnboardingResolveStepDefinition = createServerStepDefinition({
           policy_template: service.policyTemplate ?? service.id,
           ...(packageVars ? { vars: packageVars } : {}),
           inputs: disableUnlistedPackageInputs(
-            buildPackageInputs([service], serviceVars, region),
+            disableUnansweredStreams(service, buildPackageInputs([service], serviceVars, region)),
             packageInfo.policy_templates
           ),
         },

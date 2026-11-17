@@ -200,9 +200,15 @@ export function isRequiredBySelectedOption(
  * that declares its own `var_groups` (see getStreamVarGroups) bypasses this table: its selected
  * option drives the required fields instead.
  */
-const SOURCE_VAR_GROUPS: Record<string, string[]> = {
+export const SOURCE_VAR_GROUPS: Record<string, string[]> = {
   'aws-s3': ['bucket_arn', 'access_point_arn', 'queue_url'],
   'aws-cloudwatch': ['log_group_arn', 'log_group_name', 'log_group_name_prefix'],
+};
+
+/** Source vars that name a resource without its region, mapped to the region var read with them. */
+export const SOURCE_VAR_REGION_FIELDS: Record<string, string> = {
+  log_group_name: 'region_name',
+  log_group_name_prefix: 'region_name',
 };
 
 /**

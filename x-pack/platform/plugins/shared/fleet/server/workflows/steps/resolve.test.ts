@@ -24,7 +24,11 @@ jest.mock('../../services/app_context', () => ({
   },
 }));
 
-const s3Answer = { input: 'aws-s3' };
+const s3Answer = {
+  input: 'aws-s3',
+  vars: { queue_url: 'https://sqs.us-east-1.amazonaws.com/123456789012/q' },
+  var_group_selections: { source: 'queue_url' },
+};
 const logsSettings = {
   services: {
     guardduty: { data_streams: { guardduty: s3Answer } },
@@ -261,6 +265,52 @@ describe('awsOnboardingResolveStepDefinition', () => {
         message: expect.stringContaining('detector_id'),
       }),
     });
+  });
+
+  it('lists a stream the answer switched off as disabled when a sibling on its input stays on', async () => {
+    (getPackageInfo as jest.Mock).mockResolvedValue({
+      ...awsPackageInfoFixture,
+      policy_templates: [
+        {
+          name: 's3',
+          title: 'AWS S3',
+          data_streams: ['s3_daily_storage', 's3_request'],
+          deployment_modes: { agentless: { enabled: true } },
+          inputs: [
+            { type: 'aws/metrics', title: 'Metrics', deployment_modes: ['default', 'agentless'] },
+          ],
+        },
+      ],
+      data_streams: [
+        {
+          path: 's3_daily_storage',
+          type: 'metrics',
+          dataset: 'aws.s3_daily_storage',
+          title: 'S3 daily storage',
+          streams: [{ input: 'aws/metrics', enabled: true, vars: [] }],
+        },
+        {
+          path: 's3_request',
+          type: 'metrics',
+          dataset: 'aws.s3_request',
+          title: 'S3 request',
+          streams: [{ input: 'aws/metrics', enabled: true, vars: [] }],
+        },
+      ],
+    } as unknown as PackageInfo);
+
+    const result = await awsOnboardingResolveStepDefinition.handler(
+      createStepContext({
+        services: ['s3'],
+        region: 'us-east-1',
+        settings: { services: { s3: { data_streams: { s3_request: { input: null } } } } },
+      })
+    );
+
+    const { output } = result as { output: Record<string, any> };
+    const { streams } = output.policies[0].body.inputs['s3-aws/metrics'];
+    expect(streams['aws.s3_daily_storage'].enabled).toBe(true);
+    expect(streams['aws.s3_request']).toEqual({ enabled: false, vars: {} });
   });
 
   it('refuses to run while the feature flag is off', async () => {

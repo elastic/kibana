@@ -64,6 +64,8 @@ const guardduty = {
           access_key_id: v('access_key_id', { required: true }),
           region: v('region', { required: true }),
           proxy_url: v('proxy_url'),
+          api_token: v('api_token', { required: true, secret: true }),
+          client_password: v('client_password', { type: 'password', show_user: true }),
         },
         'aws-s3': s3Vars,
       },
@@ -93,7 +95,12 @@ const ec2 = {
       inputs: ['aws-cloudwatch', 'aws-s3'],
       defaultEnabledInputs: ['aws-cloudwatch'],
       varDefsByInput: {
-        'aws-cloudwatch': { log_group_arn: v('log_group_arn', { required: true }) },
+        // As in the aws package: every source var optional, no var_groups.
+        'aws-cloudwatch': {
+          log_group_arn: v('log_group_arn', { title: 'Log group ARN', show_user: true }),
+          log_group_name: v('log_group_name', { title: 'Log group name', show_user: true }),
+          region_name: v('region_name'),
+        },
         'aws-s3': { bucket_arn: v('bucket_arn', { show_user: true }) },
       },
     } as DataStreamInfo,
@@ -206,6 +213,38 @@ describe('buildSettingsRequirement', () => {
       },
     ]);
     expect(s3.fields.every(({ required }) => required)).toBe(true);
+  });
+
+  it('synthesises a required source group for an input whose manifest declares none', () => {
+    const cloudwatch = dataStream(build(), 'ec2', 'ec2_logs').inputs[0];
+
+    expect(cloudwatch.var_groups).toEqual([
+      {
+        name: 'source',
+        title: 'Source',
+        options: [
+          { name: 'log_group_arn', title: 'Log group ARN', vars: ['log_group_arn'] },
+          {
+            name: 'log_group_name',
+            title: 'Log group name',
+            vars: ['log_group_name', 'region_name'],
+          },
+        ],
+      },
+    ]);
+    expect(cloudwatch.fields.map(({ name, required }) => [name, required])).toEqual([
+      ['log_group_arn', true],
+      ['log_group_name', true],
+    ]);
+  });
+
+  it('never asks for secret or password vars', () => {
+    const names = dataStream(build(), 'guardduty', 'guardduty').inputs[0].fields.map(
+      ({ name }) => name
+    );
+
+    expect(names).not.toContain('api_token');
+    expect(names).not.toContain('client_password');
   });
 
   it('attaches readme notes per service when given', () => {

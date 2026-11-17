@@ -5,12 +5,22 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import type { PackageInfo, RegistryVarsEntry } from '../../types';
 import type { AwsOnboardingSettingsRequirement } from '../../workflows/steps/settings';
 
 import type { AwsServiceMatrixEntry, DataStreamInfo } from './aws_service_matrix';
-import { REGION_FIELD_NAMES, getStreamVarGroups } from './field_config';
+import {
+  REGION_FIELD_NAMES,
+  SOURCE_VAR_GROUPS,
+  SOURCE_VAR_REGION_FIELDS,
+  getStreamVarGroups,
+} from './field_config';
 import type { CredentialVarName } from './types';
+
+/** The name of the source group synthesised for an input whose manifest declares no var_groups. */
+const SOURCE_GROUP_NAME = 'source';
 
 type RequirementService = AwsOnboardingSettingsRequirement['services'][number];
 type RequirementDataStream = RequirementService['data_streams'][number];
@@ -101,6 +111,8 @@ const buildFields = (
       if (REGION_FIELD_NAMES.has(name) || CREDENTIAL_VAR_NAMES.has(name as CredentialVarName)) {
         return false;
       }
+      // Secrets never travel through this pause: the agent would read them back in the chat.
+      if (def.secret === true || def.type === 'password') return false;
       return def.required === true || def.show_user === true || groupVars.has(name);
     })
     .map(([name, def]) => {
@@ -119,6 +131,44 @@ const buildFields = (
       };
     });
 
+interface SourceGroup {
+  name: string;
+  title: string;
+  required?: boolean;
+  options: Array<{ name: string; title: string; vars: string[] }>;
+}
+
+/**
+ * A required one-of group over the input's source vars, for an input whose manifest declares no
+ * var_groups but which cannot collect without one source. One option per source var; an option
+ * that names a resource without its region also carries the region var, so the answer converter
+ * fills it from the run's region.
+ */
+const buildSourceGroup = (
+  input: string,
+  varDefs: Record<string, RegistryVarsEntry> | undefined
+): SourceGroup[] => {
+  const sourceVars = (SOURCE_VAR_GROUPS[input] ?? []).filter((name) => varDefs?.[name]);
+  if (sourceVars.length < 2) return [];
+  return [
+    {
+      name: SOURCE_GROUP_NAME,
+      title: i18n.translate('xpack.fleet.awsOnboardingSettings.sourceGroupTitle', {
+        defaultMessage: 'Source',
+      }),
+      required: true,
+      options: sourceVars.map((name) => {
+        const regionVar = SOURCE_VAR_REGION_FIELDS[name];
+        return {
+          name,
+          title: varDefs?.[name]?.title ?? name,
+          vars: regionVar && varDefs?.[regionVar] ? [name, regionVar] : [name],
+        };
+      }),
+    },
+  ];
+};
+
 const buildInput = (
   service: AwsServiceMatrixEntry,
   dsInfo: DataStreamInfo,
@@ -129,12 +179,13 @@ const buildInput = (
     ?.find(({ dataset }) => dataset === dsInfo.dataset)
     ?.streams?.find((candidate) => candidate.input === input);
 
-  const registryGroups = getStreamVarGroups(service, input);
-  const groupVars = new Set(
-    registryGroups.flatMap(({ options }) => options.flatMap((o) => o.vars))
-  );
+  const varDefs = dsInfo.varDefsByInput[input];
+  const manifestGroups = getStreamVarGroups(service, input);
+  const groups: SourceGroup[] =
+    manifestGroups.length > 0 ? manifestGroups : buildSourceGroup(input, varDefs);
+  const groupVars = new Set(groups.flatMap(({ options }) => options.flatMap((o) => o.vars)));
   const requiredGroupVars = new Set(
-    registryGroups
+    groups
       .filter(({ required }) => required === true)
       .flatMap(({ options }) => options.flatMap((o) => o.vars))
   );
@@ -144,9 +195,9 @@ const buildInput = (
     ingestion_method: stream?.ingestion_method ?? input,
     title: stream?.title ?? input,
     description: stream?.description ?? '',
-    fields: buildFields(dsInfo.varDefsByInput[input], groupVars, requiredGroupVars),
+    fields: buildFields(varDefs, groupVars, requiredGroupVars),
     // Manifest order is kept: the first option is the default.
-    var_groups: registryGroups.map(({ name, title, options }) => ({
+    var_groups: groups.map(({ name, title, options }) => ({
       name,
       title,
       options: options.map((option) => ({

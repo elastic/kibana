@@ -48,19 +48,29 @@ const req: AwsOnboardingSettingsRequirement = {
               ],
               var_groups: [],
             },
+            // The shape buildSettingsRequirement gives an S3 input whose manifest has no var_groups.
             {
               input: 'aws-s3',
               ingestion_method: 'AWS S3',
               title: 'S3 or SQS',
               description: 'Read from S3',
-              fields: [field('queue_url'), field('bucket_arn')],
+              fields: [
+                field('bucket_arn', { required: true }),
+                field('access_point_arn', { required: true }),
+                field('queue_url', { required: true }),
+              ],
               var_groups: [
                 {
                   name: 'source',
                   title: 'Source',
                   options: [
-                    { name: 'sqs', title: 'SQS', vars: ['queue_url'] },
-                    { name: 'bucket', title: 'Bucket', vars: ['bucket_arn'] },
+                    { name: 'bucket_arn', title: 'Bucket ARN', vars: ['bucket_arn'] },
+                    {
+                      name: 'access_point_arn',
+                      title: 'Access point ARN',
+                      vars: ['access_point_arn'],
+                    },
+                    { name: 'queue_url', title: 'Queue URL', vars: ['queue_url'] },
                   ],
                 },
               ],
@@ -100,13 +110,36 @@ const req: AwsOnboardingSettingsRequirement = {
           choice: 'one_of',
           default_input: 'aws-cloudwatch',
           inputs: [
+            // The shape buildSettingsRequirement gives a CloudWatch input without var_groups.
             {
               input: 'aws-cloudwatch',
               ingestion_method: 'AWS CloudWatch',
               title: 'CloudWatch',
               description: '',
-              fields: [],
-              var_groups: [],
+              fields: [
+                field('log_group_arn', { required: true }),
+                field('log_group_name', { required: true }),
+                field('log_group_name_prefix', { required: true }),
+              ],
+              var_groups: [
+                {
+                  name: 'source',
+                  title: 'Source',
+                  options: [
+                    { name: 'log_group_arn', title: 'Log group ARN', vars: ['log_group_arn'] },
+                    {
+                      name: 'log_group_name',
+                      title: 'Log group name',
+                      vars: ['log_group_name', 'region_name'],
+                    },
+                    {
+                      name: 'log_group_name_prefix',
+                      title: 'Log group name prefix',
+                      vars: ['log_group_name_prefix', 'region_name'],
+                    },
+                  ],
+                },
+              ],
             },
           ],
         },
@@ -120,7 +153,11 @@ const okAnswer: AwsOnboardingSettingsAnswer = {
     guardduty: {
       data_streams: { guardduty: { input: 'httpjson', vars: { detector_id: '12abc' } } },
     },
-    ec2: { data_streams: { ec2_logs: { input: 'aws-cloudwatch' } } },
+    ec2: {
+      data_streams: {
+        ec2_logs: { input: 'aws-cloudwatch', vars: { log_group_arn: 'arn:aws:logs:group' } },
+      },
+    },
   },
 };
 
@@ -150,6 +187,13 @@ describe('validateSettingsAnswer', () => {
     });
   });
 
+  it('rejects a CloudWatch logs stream with no log group', () => {
+    const problems = validateSettingsAnswer(req, {
+      services: { ec2: { data_streams: { ec2_logs: { input: 'aws-cloudwatch' } } } },
+    });
+    expect(problems.map(({ path }) => path)).toEqual(['ec2.ec2_logs.vars.log_group_arn']);
+  });
+
   it('accepts a logs stream set to null when another stream stays enabled', () => {
     expect(
       validateSettingsAnswer(req, {
@@ -175,18 +219,29 @@ describe('validateSettingsAnswer', () => {
     expect(problems.map(({ path }) => path)).toEqual(['guardduty.guardduty.vars.detector_id']);
   });
 
-  it("requires only the selected var-group option's vars and none when they are optional", () => {
-    expect(
-      validateSettingsAnswer(req, {
-        services: {
-          guardduty: {
-            data_streams: {
-              guardduty: { input: 'aws-s3', var_group_selections: { source: 'sqs' } },
+  it("requires only the selected source option's var", () => {
+    const problems = validateSettingsAnswer(req, {
+      services: {
+        guardduty: {
+          data_streams: {
+            guardduty: { input: 'aws-s3', var_group_selections: { source: 'queue_url' } },
+          },
+        },
+        ec2: {
+          data_streams: {
+            ec2_logs: {
+              input: 'aws-cloudwatch',
+              vars: { log_group_arn: 'arn:aws:logs:group' },
+              var_group_selections: { source: 'log_group_name' },
             },
           },
         },
-      })
-    ).toEqual([]);
+      },
+    });
+    expect(problems.map(({ path }) => path)).toEqual([
+      'guardduty.guardduty.vars.queue_url',
+      'ec2.ec2_logs.vars.log_group_name',
+    ]);
   });
 
   it('rejects vars that belong to another input', () => {
@@ -252,6 +307,40 @@ describe('settingsAnswerToServiceVars', () => {
       varsByInput: { httpjson: { detector_id: '12abc' } },
       varGroupSelectionsByInput: { httpjson: {} },
     });
+  });
+
+  it("drops the values of unselected source options and fills the selected option's region", () => {
+    const sv = settingsAnswerToServiceVars(req, {
+      services: {
+        ec2: {
+          data_streams: {
+            ec2_logs: {
+              input: 'aws-cloudwatch',
+              vars: { log_group_arn: 'arn:aws:logs:group', log_group_name: 'my-group' },
+              var_group_selections: { source: 'log_group_name' },
+            },
+          },
+        },
+      },
+    });
+    expect(sv.ec2.varsByDataStream.ec2_logs?.varsByInput['aws-cloudwatch']).toEqual({
+      log_group_name: 'my-group',
+      region_name: 'us-east-1',
+    });
+  });
+
+  it('accepts a number for a var and stringifies it', () => {
+    const answer = awsOnboardingSettingsAnswerSchema.parse({
+      services: {
+        guardduty: {
+          data_streams: { guardduty: { input: 'httpjson', vars: { detector_id: 300 } } },
+        },
+      },
+    });
+    expect(
+      settingsAnswerToServiceVars(req, answer).guardduty.varsByDataStream.guardduty?.varsByInput
+        .httpjson
+    ).toEqual({ detector_id: '300' });
   });
 });
 

@@ -8,6 +8,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 import type { ServiceVars } from '../../services/aws_onboarding_catalog/types';
+import { REGION_FIELD_NAMES } from '../../services/aws_onboarding_catalog/field_config';
 
 /** What the run asks for: one entry per selected service, derived from the package manifest. */
 export const awsOnboardingSettingsRequirementSchema = lazySchema(() =>
@@ -89,7 +90,13 @@ export const awsOnboardingSettingsAnswerSchema = lazySchema(() =>
                   vars: z
                     .record(
                       z.string().max(256),
-                      z.union([z.string().max(4096), z.boolean(), z.array(z.string().max(4096))])
+                      z.union([
+                        z.string().max(4096),
+                        // An agent may send a number such as `period: 300`; it is stringified.
+                        z.number(),
+                        z.boolean(),
+                        z.array(z.string().max(4096)),
+                      ])
                     )
                     .optional(),
                   var_group_selections: z
@@ -237,6 +244,40 @@ export const validateSettingsAnswer = (
 };
 
 /**
+ * The answer's vars for one input with the values of unselected var-group options dropped, so a
+ * value typed under one source never rides along with another, and numbers stringified. A region
+ * var the selected option names (a log group name needs `region_name`) gets the run's region.
+ */
+const selectedOptionVars = (
+  input: RequirementInput,
+  selected: Record<string, string>,
+  vars: AnswerDataStream['vars'],
+  region: string
+): Record<string, string | boolean | string[]> => {
+  const selectedVars = new Set(
+    input.var_groups.flatMap(
+      ({ name, options }) => options.find((option) => option.name === selected[name])?.vars ?? []
+    )
+  );
+  const unselectedVars = new Set(
+    input.var_groups
+      .flatMap(({ name, options }) => options.filter((option) => option.name !== selected[name]))
+      .flatMap((option) => option.vars)
+      .filter((name) => !selectedVars.has(name))
+  );
+
+  const result: Record<string, string | boolean | string[]> = {};
+  Object.entries(vars ?? {}).forEach(([name, value]) => {
+    if (unselectedVars.has(name)) return;
+    result[name] = typeof value === 'number' ? String(value) : value;
+  });
+  selectedVars.forEach((name) => {
+    if (REGION_FIELD_NAMES.has(name) && !hasValue(result[name])) result[name] = region;
+  });
+  return result;
+};
+
+/**
  * Converts a validated answer into the catalog's `ServiceVars`, one entry per answered service.
  * Var values pass through as given, so a boolean stays a boolean even though `ServiceVars`
  * declares strings; the package-input builder serialises them.
@@ -268,10 +309,11 @@ export const settingsAnswerToServiceVars = (
       if (!input) return;
 
       enabledDataStreams.push(stream.id);
+      const selected = effectiveSelections(input, selections);
       varsByDataStream[stream.id] = {
         enabledInputs: [chosen],
-        varsByInput: { [chosen]: vars ?? {} },
-        varGroupSelectionsByInput: { [chosen]: effectiveSelections(input, selections) },
+        varsByInput: { [chosen]: selectedOptionVars(input, selected, vars, requirement.region) },
+        varGroupSelectionsByInput: { [chosen]: selected },
       };
     });
 

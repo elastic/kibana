@@ -41,7 +41,19 @@ const OFF = '__off__';
 // EuiRadioGroup renders the option id as the DOM id, so scope it to the stream.
 const radioId = (streamId: string, id: string) => `${streamId}:${id}`;
 
-/** Answer a user would send untouched: package defaults, with log streams off unless one is default. */
+/**
+ * A log stream's starting point: off when the service already collects through a default-on
+ * metrics stream, else its single default input, else no choice so the user is asked to pick one.
+ */
+const seedLogStream = (service: Service, stream: DataStream): StreamAnswer | undefined => {
+  const hasDefaultOnToggle = service.data_streams.some(
+    (other) => other !== stream && other.choice === 'toggle' && other.default_enabled === true
+  );
+  if (hasDefaultOnToggle) return { input: null };
+  return stream.default_input ? { input: stream.default_input } : undefined;
+};
+
+/** Answer a user would send untouched: package defaults, as the approved card mockup shows them. */
 export const seedDraft = (
   requirement: AwsOnboardingSettingsRequirement,
   answer?: AwsOnboardingSettingsAnswer
@@ -52,12 +64,13 @@ export const seedDraft = (
         service.id,
         {
           data_streams: Object.fromEntries(
-            service.data_streams.map((stream): [string, StreamAnswer] => [
-              stream.id,
-              stream.choice === 'one_of'
-                ? { input: stream.default_input ?? null }
-                : { input: stream.default_enabled ? stream.inputs[0]?.input ?? null : null },
-            ])
+            service.data_streams.flatMap((stream): Array<[string, StreamAnswer]> => {
+              const seeded =
+                stream.choice === 'one_of'
+                  ? seedLogStream(service, stream)
+                  : { input: stream.default_enabled ? stream.inputs[0]?.input ?? null : null };
+              return seeded ? [[stream.id, seeded]] : [];
+            })
           ),
         },
       ])
@@ -183,7 +196,7 @@ const FieldControl: React.FC<{
     <EuiFieldText
       fullWidth
       compressed
-      value={typeof value === 'string' ? value : ''}
+      value={typeof value === 'string' || typeof value === 'number' ? String(value) : ''}
       onChange={(e) => onChange(e.target.value)}
       data-test-subj={testSubj}
     />
@@ -283,10 +296,17 @@ const StreamEditor: React.FC<{
   problems: SettingsProblem[];
   onChange: (draft: AwsOnboardingSettingsAnswer) => void;
 }> = ({ service, stream, draft, problems, onChange }) => {
-  const streamAnswer = draft.services[service.id]?.data_streams[stream.id] ?? { input: null };
+  const answered = draft.services[service.id]?.data_streams[stream.id];
+  const streamAnswer = answered ?? { input: null };
   const pathPrefix = `${service.id}.${stream.id}`;
   const selected = stream.inputs.find((candidate) => candidate.input === streamAnswer.input);
-  const inputProblems = problems.filter((problem) => problem.path === `${pathPrefix}.input`);
+  const inputProblems = [
+    ...new Set(
+      problems
+        .filter((problem) => problem.path === `${pathPrefix}.input`)
+        .map((problem) => problem.message)
+    ),
+  ];
   const change = (update: (previous: StreamAnswer) => StreamAnswer) =>
     onChange(updateStream(draft, service.id, stream.id, update));
 
@@ -331,7 +351,8 @@ const StreamEditor: React.FC<{
       </EuiText>
       <EuiRadioGroup
         name={`${pathPrefix}-input`}
-        idSelected={radioId(stream.id, streamAnswer.input ?? OFF)}
+        // A stream with no answer yet has nothing checked, not "Don't collect".
+        idSelected={answered ? radioId(stream.id, answered.input ?? OFF) : undefined}
         options={[
           ...stream.inputs.map((input) => ({
             id: radioId(stream.id, input.input),
@@ -359,8 +380,13 @@ const StreamEditor: React.FC<{
           change((previous) => withInput(previous, value === OFF ? null : value, stream));
         }}
       />
-      {inputProblems.map((problem) => (
-        <EuiFormErrorText key={problem.message}>{problem.message}</EuiFormErrorText>
+      {inputProblems.map((message) => (
+        <EuiFormErrorText
+          key={message}
+          data-test-subj={`awsOnboardingSettings-${stream.id}-input-problem`}
+        >
+          {message}
+        </EuiFormErrorText>
       ))}
       {fields}
     </>
@@ -374,18 +400,21 @@ export const SettingsSections: React.FC<{
   problems?: SettingsProblem[];
   onChange: (draft: AwsOnboardingSettingsAnswer) => void;
 }> = ({ requirement, draft, problems = [], onChange }) => {
+  const live = validateSettingsAnswer(requirement, draft);
   // Service-level rules, such as "enable at least one data stream", have no field to sit under.
   const serviceProblems = (serviceId: string) => [
     ...new Set(
-      [...validateSettingsAnswer(requirement, draft), ...problems]
+      [...live, ...problems]
         .filter((problem) => problem.path === serviceId)
         .map((problem) => problem.message)
     ),
   ];
+  // A missing collection method shows at once; missing values wait for a save.
+  const streamProblems = [...problems, ...live.filter(({ path }) => path.endsWith('.input'))];
 
   const topLevel = [
     ...new Set(
-      [...validateSettingsAnswer(requirement, draft), ...problems]
+      [...live, ...problems]
         .filter((problem) => problem.path === 'services')
         .map((problem) => problem.message)
     ),
@@ -423,7 +452,7 @@ export const SettingsSections: React.FC<{
                 service={service}
                 stream={stream}
                 draft={draft}
-                problems={problems}
+                problems={streamProblems}
                 onChange={onChange}
               />
             </React.Fragment>
@@ -439,7 +468,10 @@ export const SettingsSections: React.FC<{
                 initialIsOpen
                 paddingSize="s"
               >
-                <EuiText size="s">{service.readme_notes}</EuiText>
+                {/* The notes are verbatim README lines: keep each bullet on its own line. */}
+                <EuiText size="s" css={{ whiteSpace: 'pre-wrap' }}>
+                  {service.readme_notes}
+                </EuiText>
               </EuiAccordion>
             </>
           ) : null}
