@@ -6,8 +6,7 @@
  */
 
 import { buildEsQuery } from '@kbn/es-query';
-import type { EsQueryConfig, Filter, Query } from '@kbn/es-query';
-import type { InventoryDocumentFilter } from '../../inventory_api/types';
+import type { BoolQuery, EsQueryConfig, Filter, Query } from '@kbn/es-query';
 
 export interface BuildDocumentFilterParams {
   query?: Query;
@@ -23,7 +22,7 @@ export const buildDocumentFilter = ({
   attributes = {},
   excludeAttribute,
   esQueryConfig,
-}: BuildDocumentFilterParams): InventoryDocumentFilter | undefined => {
+}: BuildDocumentFilterParams): { bool: BoolQuery } | undefined => {
   const { bool } = buildEsQuery(undefined, query ? [query] : [], filters, esQueryConfig);
 
   const attributeClauses = Object.entries(attributes)
