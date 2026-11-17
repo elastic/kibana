@@ -19,18 +19,20 @@ import {
   createBulkWriteItemError,
   createBulkWriteOutcomeUnknownError,
 } from '../bulk_write';
+import { MAX_DEDUP_SCAN_LIMIT } from '../../../lib/significant_events/query_utils';
 import { RECOVERY_TIMEOUT_ASSESSMENT_NOTE } from '../../../lib/significant_events/events/cleanup_stale_events';
 import { assessMembers } from '../../../lib/significant_events/events/event_members';
 import {
   decideLifecycle,
   StatusChange,
 } from '../../../lib/significant_events/events/lifecycle/lifecycle_controller';
-import { mergeSignalsLatestPerRule } from './episode_context';
+import { extractRuleUuids, mergeSignalsLatestPerRule } from './episode_context';
 import {
   buildWriteCandidates,
   DEFAULT_INACTIVE_LOOKBACK_MS,
   fetchInactiveEventsForReuse,
   fetchLiveEventsForDedup,
+  findRulesHeldByOtherEvents,
   markDuplicateKeys,
   competingInactiveHeads,
   reopenMatchingInactiveSeries,
@@ -146,8 +148,13 @@ export async function eventsWriteBulkHandler({
   const eventHistory = await loadHistory({ eventSearchClient, candidates: toWrite });
   const known = keepKnownEvents({ candidates: eventHistory, enabled: rejectUnknownEventIds });
   const decided = decideStatuses({ candidates: known.kept, timestamp });
-  const held = await holdDeactivatedReopens({
+  const ruleHeld = await holdRulesHeldByOtherEvents({
     candidates: decided.kept,
+    eventSearchClient,
+    logger,
+  });
+  const held = await holdDeactivatedReopens({
+    candidates: ruleHeld.kept,
     eventSearchClient,
     logger,
   });
@@ -172,7 +179,7 @@ export async function eventsWriteBulkHandler({
   );
   const changed = keepChanged({ facts: eventsFacts });
 
-  [known, decided, held, changed].forEach(({ skipped }) =>
+  [known, decided, ruleHeld, held, changed].forEach(({ skipped }) =>
     skipped.forEach((result) => {
       results[result.index] = result;
     })
@@ -296,6 +303,70 @@ const decideStatuses = ({
       written: false,
       skipped: true,
       reason: 'unchanged_outcome',
+    });
+  });
+  return stage;
+};
+
+/**
+ * Sets aside the items that would make a rule a confirmed member of a second live event, so a rule
+ * lives in at most one. It covers continuations, new-event items and reopens of a closed series
+ * alike (see `findRulesHeldByOtherEvents` for which rules count). The server never redirects an
+ * item to the holder: the agent re-sends the held rules on it. The read has no time bound, and a
+ * read that throws or fills the scan limit fails the batch, because a missing holder would let a
+ * second event take the rule.
+ */
+const holdRulesHeldByOtherEvents = async ({
+  candidates,
+  eventSearchClient,
+  logger,
+}: {
+  candidates: ResolvedWriteCandidate[];
+  eventSearchClient: RuleEventsClient;
+  logger?: Logger;
+}): Promise<Stage<ResolvedWriteCandidate>> => {
+  const stage: Stage<ResolvedWriteCandidate> = { kept: [], skipped: [] };
+  const ruleUuids = [
+    ...new Set(candidates.flatMap(({ input }) => extractRuleUuids(input.signals))),
+  ];
+  if (ruleUuids.length === 0) {
+    stage.kept.push(...candidates);
+    return stage;
+  }
+
+  const { hits: liveEvents } = await eventSearchClient.findLatestLive({ ruleUuids });
+  if (liveEvents.length >= MAX_DEDUP_SCAN_LIMIT) {
+    const reason = `Live events that hold the item rules reached the scan limit (${MAX_DEDUP_SCAN_LIMIT}), so holders may be missing; nothing was written.`;
+    logger?.error(reason);
+    throw new Error(reason);
+  }
+
+  candidates.forEach((candidate) => {
+    // A write that leaves the event closed adds no live membership, so it holds no rule.
+    const found = SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS.some(
+      (status) => status === candidate.status
+    )
+      ? findRulesHeldByOtherEvents({ candidate, liveEvents })
+      : undefined;
+    if (found === undefined) {
+      stage.kept.push(candidate);
+      return;
+    }
+    const { holder, heldRules } = found;
+    logger?.info(
+      `rule_held_by_event event_id=${candidate.eventId} holder=${holder.event_id} rules=${heldRules
+        .map(({ rule_uuid: ruleUuid }) => ruleUuid)
+        .join(',')}`
+    );
+    stage.skipped.push({
+      index: candidate.index,
+      event_id: candidate.eventId,
+      ...(candidate.latest ? { status: candidate.latest.status } : {}),
+      written: false,
+      skipped: true,
+      reason: 'rule_held_by_event',
+      existing_event_id: holder.event_id,
+      held_rules: heldRules,
     });
   });
   return stage;
@@ -473,7 +544,8 @@ const writeVersions = ({
 /**
  * Single-item adapter for callers that require thrown item errors (e.g. `event_create`).
  * Callers must supply `event_id` (snapshot mode). Find-or-create callers (no `event_id`) will
- * hit `existing_active_event`, which this adapter throws as `createBulkWriteOutcomeUnknownError`.
+ * hit `existing_active_event`, and a write that would put a rule in a second live event returns
+ * `rule_held_by_event`; this adapter throws both as `createBulkWriteOutcomeUnknownError`.
  */
 export async function eventsWriteHandler({
   eventSearchClient,
@@ -497,8 +569,12 @@ export async function eventsWriteHandler({
       return result;
     }
     if ('skipped' in result) {
+      const cause =
+        result.reason === 'rule_held_by_event'
+          ? 'a rule is already confirmed by another live event'
+          : 'existing active event';
       throw createBulkWriteOutcomeUnknownError(
-        `Event write skipped (existing active event): existing event_id=${result.existing_event_id}`
+        `Event write skipped (${cause}): existing event_id=${result.existing_event_id}`
       );
     }
     throw createBulkWriteItemError(result.error);

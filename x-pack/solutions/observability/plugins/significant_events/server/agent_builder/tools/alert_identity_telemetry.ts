@@ -49,6 +49,10 @@ export const eventsWriteResultEventId = (
     return result.event_id;
   }
   if ('skipped' in result) {
+    // The holder of a rule is not the event the item addressed; the caller's own target is.
+    if (result.reason === 'rule_held_by_event') {
+      return callerEventId;
+    }
     if (result.reason !== 'unchanged_outcome') {
       return result.existing_event_id;
     }
