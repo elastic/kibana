@@ -6,10 +6,11 @@
  */
 
 import type { DatasetRunResult } from '@kbn/evals';
-import { knownNumbers, runReplyGates, type ReplyGates } from './gates';
-import { expandAttachments, recordedAttachments, replayCorpus } from './replay';
+import type { ReplyGates } from './gates';
+import { expandAttachments, recordedAttachments } from './replay';
 import type { PairTally } from './judges';
 import {
+  gatesForRound,
   REPLY_FAITHFULNESS_EVALUATOR,
   REPLY_VS_BASELINE_EVALUATOR,
   REPLY_VS_GOLDEN_EVALUATOR,
@@ -83,10 +84,9 @@ export const toWriteupRows = (
       const output = run.output as WriteupTaskOutput;
       const input = run.input as WriteupExample['input'];
       const expected = run.expected as WriteupExample['output'];
-      const known = knownNumbers(replayCorpus(input.rounds, input.round_index));
       const recorded = recordedAttachments(input.rounds, input.round_index);
-      const gates = (reply?: string | null) =>
-        reply ? runReplyGates(reply, output.reply_type, known) : null;
+      const gates = (reply?: string | null, attachments?: readonly ReplyAttachment[]) =>
+        reply ? gatesForRound(input, reply, output.reply_type, attachments) : null;
       const result = (name: string) =>
         evaluationRuns.find((e) => e.experimentRunId === runId && e.name === name)?.result;
       const tally = (name: string) => {
@@ -106,7 +106,7 @@ export const toWriteupRows = (
         attachments: shownAttachments(output.reply, [...(output.attachments ?? []), ...recorded]),
         ...(output.error ? { error: output.error } : {}),
         extra_calls: output.extra_calls,
-        gates: gates(output.reply),
+        gates: gates(output.reply, output.attachments),
         faith: faith?.raw_score ?? null,
         unsupported_claims: faith?.unsupported_claims ?? [],
         vs_golden: tally(REPLY_VS_GOLDEN_EVALUATOR),
@@ -120,12 +120,23 @@ export const toWriteupRows = (
                 ...(output.baseline.attachments ?? []),
                 ...recorded,
               ]),
-              gates: gates(output.baseline.reply),
+              gates: gates(output.baseline.reply, output.baseline.attachments),
             }
           : null,
       };
     })
     .sort((a, b) => a.case_id.localeCompare(b.case_id) || a.sample - b.sample);
+
+/**
+ * Judge evaluations that had something to judge, and which of them came back without a score. A
+ * judge that keeps failing (an outage, a quota) leaves scores missing, so the run can't pass as if
+ * it had been judged.
+ */
+export const judgeCoverage = (evaluationRuns: readonly EvaluationRun[]) => {
+  const applicable = evaluationRuns.filter((e) => e.kind === 'LLM' && e.result?.label !== 'n/a');
+  const missing = applicable.filter((e) => e.result?.score == null);
+  return { applicable: applicable.length, missing: missing.map((e) => e.name) };
+};
 
 /**
  * A candidate may replace its golden when every gate passes, faithfulness is at least 4, and it

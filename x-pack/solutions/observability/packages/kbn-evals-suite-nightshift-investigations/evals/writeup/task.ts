@@ -7,12 +7,11 @@
 
 import { createHash } from 'crypto';
 import { execFileSync } from 'child_process';
-// Eval tooling, not Kibana runtime code: the cache lives in the repository's data directory.
-// eslint-disable-next-line @kbn/eslint/require_kbn_fs
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { join, resolve } from 'path';
 import { setTimeout } from 'timers/promises';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { getSafePath, writeFileSync } from '@kbn/fs';
 import {
   MessageRole,
   ToolChoiceType,
@@ -214,19 +213,21 @@ export const replayReply = async (
   };
 };
 
-/** A JSON file cache keyed by content hash. Failed generations aren't cached. */
-export const createGenerationCache = (dir = join(WRITEUP_DATA_DIR, 'cache')) => ({
+/**
+ * A JSON file cache keyed by content hash, in `data/<volume>` (gitignored). Failed generations
+ * aren't cached.
+ */
+export const createGenerationCache = (volume = 'nightshift_writeup/cache') => ({
   key: (parts: string[]) => hashText(['v3', ...parts].join('\n')),
   read(key: string): GeneratedReply | undefined {
-    const file = join(dir, `${key}.json`);
-    return existsSync(file)
-      ? (JSON.parse(readFileSync(file, 'utf8')) as GeneratedReply)
+    const { fullPath } = getSafePath(`${key}.json`, volume);
+    return existsSync(fullPath)
+      ? (JSON.parse(readFileSync(fullPath, 'utf8')) as GeneratedReply)
       : undefined;
   },
   write(key: string, value: GeneratedReply) {
     if (!value.reply) return;
-    mkdirSync(dir, { recursive: true });
-    writeFileSync(join(dir, `${key}.json`), JSON.stringify(value));
+    writeFileSync(`${key}.json`, JSON.stringify(value), { volume });
   },
 });
 

@@ -209,6 +209,34 @@ describe('tables and attachments in the reply', () => {
   });
 });
 
+describe('grounding quoted queries and attachments', () => {
+  const queries = knownNumbers('{"query":"FROM logs-* | WHERE status >= 500 | LIMIT 1000"}');
+
+  it('grounds a quoted query against the recorded queries, but not the same number in prose', () => {
+    const quoted = [
+      'Errors came from one query over the last hour.',
+      '```esql\nFROM logs-* | WHERE status >= 500 | LIMIT 1000\n```',
+    ].join('\n');
+    expect(
+      runReplyGates(quoted, 'method', known, { queryNumbers: queries }).metrics.ungroundedNumbers
+    ).toEqual([]);
+    expect(
+      runReplyGates('Checkout failed 1000 times in that hour.', 'answer', known, {
+        queryNumbers: queries,
+      }).metrics.ungroundedNumbers
+    ).toEqual(['1000']);
+  });
+
+  it('checks the numbers in an attachment the reply shows, outside the word caps', () => {
+    const reply = 'Checkout failed 127 times in the window.\n<render_attachment id="t1" />';
+    const gates = runReplyGates(reply, 'answer', known, {
+      attachments: ['| Service | Errors |\n| --- | --- |\n| checkout | 127 |\n| cart | 4031 |'],
+    });
+    expect(gates.metrics.attachmentUngroundedNumbers).toEqual(['4031']);
+    expect(gates.failed).toEqual(['ungrounded numbers in an attachment: 4031']);
+  });
+});
+
 describe('splitSentences', () => {
   it('splits on sentence ends and line breaks, dropping fragments under three words', () => {
     expect(splitSentences('It failed at 14:30. Then it recovered fully.\nOK.\n- a b c d')).toEqual([

@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { mkdtempSync, writeFileSync } from 'fs';
+import { randomUUID } from 'crypto';
+import { mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { MessageRole } from '@kbn/inference-common';
 import { buildReplay } from './replay';
 import {
@@ -138,9 +140,20 @@ describe('replayReply', () => {
 
 describe('createWriteupTask', () => {
   const arm = { label: 'current', prompt: 'prompt', hash: 'h1' };
+  // The cache writes through @kbn/fs, so each test gets its own volume under data/.
+  const volumes: string[] = [];
+  const testCache = () => {
+    const volume = `nightshift_writeup/test-cache-${randomUUID()}`;
+    volumes.push(volume);
+    return createGenerationCache(volume);
+  };
+  afterAll(() => {
+    for (const volume of volumes)
+      rmSync(join(REPO_ROOT, 'data', volume), { recursive: true, force: true });
+  });
 
   it('rewrites the reply under the current and baseline prompts and caches each sample', async () => {
-    const cache = createGenerationCache(mkdtempSync(join(tmpdir(), 'writeup-')));
+    const cache = testCache();
     const client = fakeClient([
       reply(REPLY),
       reply(`${REPLY} Baseline.`),
@@ -184,7 +197,7 @@ describe('createWriteupTask', () => {
   });
 
   it('generates again when the replayed conversation changes under the same case ID', async () => {
-    const cache = createGenerationCache(mkdtempSync(join(tmpdir(), 'writeup-')));
+    const cache = testCache();
     const run = (ex: WriteupExample, text: string) =>
       createWriteupTask({
         inferenceClient: fakeClient([reply(text)]),

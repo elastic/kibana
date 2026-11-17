@@ -159,6 +159,20 @@ export const replayCorpus = (rounds: readonly RecordedRound[], roundIndex: numbe
     ])
     .join('\n');
 
+/**
+ * The parameters of every recorded tool call up to the replayed round, such as the queries the agent
+ * ran. A reply that quotes a query repeats its literals, which the results needn't contain.
+ */
+export const replayToolParams = (rounds: readonly RecordedRound[], roundIndex: number): string =>
+  rounds
+    .slice(0, roundIndex + 1)
+    .flatMap((round) =>
+      stepsFromRound(round.steps).flatMap((s) =>
+        s.kind === 'tool' ? [JSON.stringify(s.params ?? {})] : []
+      )
+    )
+    .join('\n');
+
 /** The replay history as text, for a judge to read. The end (the replayed round) stays whole. */
 export const replayText = (replay: Replay, budget = 300_000): string => {
   const text = replay.messages

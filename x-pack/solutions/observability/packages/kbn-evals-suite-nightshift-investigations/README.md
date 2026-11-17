@@ -664,6 +664,12 @@ list 200, detail 400, visual 150) and nothing else on its shape. Table rows coun
 words nor sentences. A reply that mentions an attachment ("attached", "the table above") must show
 one with a `<render_attachment>` tag. The minimum length doesn't apply when a table or an
 attachment carries the answer, and tag lines are skipped when finding the first sentence.
+Numbers inside code may also come from the recorded tool calls, so a quoted query's `LIMIT 1000`
+passes while the same number in prose still needs a result behind it. An attachment the reply
+created and shows skips the word caps but gets the same number check.
+
+The run fails when fewer than 80% of rounds get a reply, or fewer than 80% of the judge calls that
+had something to judge come back with a score, so a judge outage can't pass as a judged run.
 
 The pairwise judge ([`judges.ts`](evals/writeup/judges.ts)) reads what the agent had seen, what the
 investigation panel shows (summary, verdict, impact, hypotheses, proposed actions), the latest

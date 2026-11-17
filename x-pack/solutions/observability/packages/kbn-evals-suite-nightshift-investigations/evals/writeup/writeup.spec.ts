@@ -13,7 +13,7 @@ import { evaluate } from '../../src/evaluate';
 import { ORCA_WRITEUP_RELEASE, guardValidatedExamples, loadWriteupDataset } from './datasets';
 import { goldensByCase, goldensDirFor, readGoldens } from './goldens';
 import { createWriteupEvaluators } from './evaluators';
-import { formatReport, toWriteupRows, type WriteupResults } from './report';
+import { formatReport, judgeCoverage, toWriteupRows, type WriteupResults } from './report';
 import { WRITEUP_DATA_DIR, createGenerationCache, createWriteupTask, loadPromptArm } from './task';
 import type { WriteupTaskOutput } from './types';
 
@@ -27,6 +27,8 @@ const suiteTags = [...tags.stateful.classic, ...tags.serverless.observability.co
 
 /** Runs below this share of generated replies mean the setup is broken, not the prompt. */
 const MIN_REPLY_RATE = 0.8;
+/** Judge calls that came back with a score, of those with something to judge. */
+const MIN_JUDGED_RATE = 0.8;
 
 const parseVotes = (value = process.env.NIGHTSHIFT_WRITEUP_VOTES): number => {
   if (!value) return 2;
@@ -138,6 +140,16 @@ evaluate.describe('Nightshift investigations: writeup', { tag: suiteTags }, () =
         (runs.length - failed.length) / runs.length,
         `Too few replies were generated (${failed.length} of ${runs.length} failed)`
       ).toBeGreaterThanOrEqual(MIN_REPLY_RATE);
+
+      // A judge outage turns every judge score into null; that's a broken run, not a passing one.
+      const judged = judgeCoverage(experiment.evaluationRuns);
+      if (judged.missing.length) {
+        log.warning(`${judged.missing.length} of ${judged.applicable} judge calls got no score`);
+      }
+      expect(
+        judged.applicable ? 1 - judged.missing.length / judged.applicable : 1,
+        `Too few judge calls came back (${judged.missing.length} of ${judged.applicable} missing)`
+      ).toBeGreaterThanOrEqual(MIN_JUDGED_RATE);
     }
   );
 });

@@ -281,6 +281,15 @@ describe('the pinned ORCA release', () => {
     expect(guarded.changed).toEqual([examples[1].metadata.case_id]);
   });
 
+  it('checks the pinned dataset when it is named explicitly too', async () => {
+    const client = {
+      getDatasetByName: jest.fn().mockResolvedValue({ ...stored, id: 'not-the-pinned-id' }),
+    };
+    await expect(
+      loadWriteupDataset(client, { datasetName: ORCA_WRITEUP_RELEASE.name })
+    ).rejects.toThrow('identity differs');
+  });
+
   it('is what loads when no dataset or file is named', async () => {
     const client = { getDatasetByName: jest.fn().mockResolvedValue(null) };
     await expect(loadWriteupDataset(client, {})).rejects.toThrow(ORCA_WRITEUP_RELEASE.name);

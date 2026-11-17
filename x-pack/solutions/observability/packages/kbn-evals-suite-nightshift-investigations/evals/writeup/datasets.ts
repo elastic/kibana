@@ -189,7 +189,10 @@ export const getWriteupDatasetHash = (
 ): string => {
   const ordered = examples
     .map(({ id, input, output, metadata }) => ({ id, input, output, metadata }))
-    .sort((a, b) => a.metadata.case_id.localeCompare(b.metadata.case_id));
+    // Plain code-unit order, as in `orca_dataset.ts`, so the hash doesn't depend on the locale.
+    .sort((a, b) =>
+      a.metadata.case_id < b.metadata.case_id ? -1 : a.metadata.case_id > b.metadata.case_id ? 1 : 0
+    );
   const serialized = stringify(ordered);
   assert(serialized, 'Cannot serialize the writeup dataset');
   return createHash('sha256').update(serialized).digest('hex');
@@ -278,7 +281,8 @@ export const loadWriteupDataset = async (
   const name = datasetName ?? ORCA_WRITEUP_RELEASE.name;
   const dataset = await client.getDatasetByName(name);
   if (!dataset) throw new Error(`Writeup dataset not found: ${name}`);
-  if (!datasetName) return validateOrcaWriteupDataset(dataset);
+  // The pinned name is checked whichever way it was chosen.
+  if (name === ORCA_WRITEUP_RELEASE.name) return validateOrcaWriteupDataset(dataset);
   const examples = storedExamplesSchema.parse(dataset.examples);
   assertDistinctCaseIds(examples);
   return fromStored(dataset, examples);

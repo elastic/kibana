@@ -7,7 +7,13 @@
 
 import type { DatasetRunResult } from '@kbn/evals';
 import { judgeAgreement, pearson } from './judge_agreement';
-import { formatReport, ratchetCandidates, toWriteupRows, type WriteupResults } from './report';
+import {
+  formatReport,
+  judgeCoverage,
+  ratchetCandidates,
+  toWriteupRows,
+  type WriteupResults,
+} from './report';
 import {
   REPLY_FAITHFULNESS_EVALUATOR,
   REPLY_VS_BASELINE_EVALUATOR,
@@ -136,6 +142,36 @@ describe('attachments in rows', () => {
     expect(judgeAgreement([rows('opus', 'order 1'), rows('gpt', 'order 9')])).toContain(
       'dropped case/r2#0'
     );
+  });
+});
+
+describe('judgeCoverage', () => {
+  const run = (
+    name: string,
+    kind: 'LLM' | 'CODE',
+    result?: { score: number | null; label?: string }
+  ) => ({
+    name,
+    kind,
+    result,
+    experimentRunId: 'r1',
+    direction: 'maximize' as const,
+  });
+
+  it('counts judge calls that had something to judge and came back without a score', () => {
+    expect(
+      judgeCoverage([
+        run('reply_gates', 'CODE', { score: null, label: 'n/a' }),
+        run('reply_faithfulness', 'LLM', { score: 0.75, label: '4/5' }),
+        run('reply_faithfulness', 'LLM', { score: null, label: 'failed' }),
+        run('reply_vs_golden', 'LLM', { score: null, label: 'n/a' }),
+        run('reply_vs_baseline', 'LLM', { score: null, label: '0W 0L 0T' }),
+        run('reply_vs_baseline', 'LLM'),
+      ])
+    ).toEqual({
+      applicable: 4,
+      missing: ['reply_faithfulness', 'reply_vs_baseline', 'reply_vs_baseline'],
+    });
   });
 });
 

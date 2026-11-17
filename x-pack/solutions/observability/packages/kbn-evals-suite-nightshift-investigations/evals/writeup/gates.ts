@@ -34,8 +34,20 @@ export interface ReplyGateMetrics {
   method: string[];
   /** Numbers of two or more digits that appear nowhere in what the agent saw. */
   ungroundedNumbers: string[];
+  /** The same, in attachments the reply created and shows. */
+  attachmentUngroundedNumbers: string[];
   /** Emojis in the reply; the prompt rules them out for every reply type. */
   emojis: string[];
+}
+
+export interface ReplyGateOptions {
+  /**
+   * Numbers in the recorded tool parameters, such as a query's `LIMIT 1000`. They ground numbers
+   * inside code only, so a quoted query passes while a count in the prose still needs a result.
+   */
+  queryNumbers?: Set<string>;
+  /** Contents of the attachments the reply created and shows; their numbers are checked too. */
+  attachments?: readonly string[];
 }
 
 export interface ReplyGates {
@@ -89,6 +101,36 @@ export const NUMBER = /\d[\d,]*(\.\d+)?/g;
 /** `6,600` and `6600` are the same number. */
 export const normalizeNumber = (n: string) => n.replace(/,/g, '');
 
+// Fenced blocks (closed or not) and inline code spans.
+const CODE = /```[\s\S]*?(?:```|$)|`[^`\n]+`/g;
+
+const ungroundedIn = (text: string, known: Set<string>): string[] =>
+  (text.match(NUMBER) ?? [])
+    .map(normalizeNumber)
+    .filter((n) => n.replace(/\D/g, '').length >= 2)
+    .filter(
+      (n) =>
+        !known.has(n) &&
+        !isDerivedNumber(n, known, {
+          percent: new RegExp(`${n.replace('.', '\\.')}\\s?%`).test(text),
+        })
+    );
+
+/**
+ * Numbers of two or more digits in `text` that the agent can't have got from what it saw. Prose
+ * is checked against `known`; code also against `queryNumbers`, the literals of recorded queries.
+ */
+export const findUngroundedNumbers = (
+  text: string,
+  known: Set<string>,
+  queryNumbers?: Set<string>
+): string[] => {
+  const code = (text.match(CODE) ?? []).join('\n');
+  const prose = plain(text.replace(CODE, ' '));
+  const codeKnown = queryNumbers?.size ? new Set([...known, ...queryNumbers]) : known;
+  return [...new Set([...ungroundedIn(prose, known), ...ungroundedIn(code, codeKnown)])];
+};
+
 export const splitSentences = (text: string): string[] =>
   text
     .split(/(?<=[.!?])\s+(?=[A-Z0-9`"(])|\n+/)
@@ -125,7 +167,12 @@ export const isDerivedNumber = (
   );
 };
 
-export const runReplyGates = (reply: string, type: ReplyType, known: Set<string>): ReplyGates => {
+export const runReplyGates = (
+  reply: string,
+  type: ReplyType,
+  known: Set<string>,
+  { queryNumbers, attachments = [] }: ReplyGateOptions = {}
+): ReplyGates => {
   const long = isLongReplyType(type);
   const all = reply
     .split('\n')
@@ -152,20 +199,10 @@ export const runReplyGates = (reply: string, type: ReplyType, known: Set<string>
   const mentions = tables ? reply.replace(/\bthe table above\b/gi, '') : reply;
   const attachmentUnshown = !attachmentShown && MENTIONS_ATTACHMENT.test(mentions);
   const method = [...new Set([...reply.matchAll(METHOD)].map((m) => m[0]))];
-  const plainReply = plain(reply);
-  const numbers = (plainReply.match(NUMBER) ?? [])
-    .map(normalizeNumber)
-    .filter((n) => n.replace(/\D/g, '').length >= 2);
-  const ungroundedNumbers = [
-    ...new Set(
-      numbers.filter(
-        (n) =>
-          !known.has(n) &&
-          !isDerivedNumber(n, known, {
-            percent: new RegExp(`${n.replace('.', '\\.')}\\s?%`).test(plainReply),
-          })
-      )
-    ),
+  const ungroundedNumbers = findUngroundedNumbers(reply, known, queryNumbers);
+  // An attachment is exempt from the word caps, not from grounding.
+  const attachmentUngroundedNumbers = [
+    ...new Set(attachments.flatMap((a) => findUngroundedNumbers(a, known, queryNumbers))),
   ];
 
   const emojis = [...new Set(reply.match(EMOJI) ?? [])];
@@ -183,6 +220,7 @@ export const runReplyGates = (reply: string, type: ReplyType, known: Set<string>
     attachmentUnshown,
     method,
     ungroundedNumbers,
+    attachmentUngroundedNumbers,
     emojis,
   };
   const limits = REPLY_GATE_LIMITS;
@@ -212,6 +250,11 @@ export const runReplyGates = (reply: string, type: ReplyType, known: Set<string>
   if (attachmentUnshown) failed.push("mentions an attachment it doesn't show");
   if (ungroundedNumbers.length) {
     failed.push(`ungrounded numbers: ${ungroundedNumbers.slice(0, 5).join(', ')}`);
+  }
+  if (attachmentUngroundedNumbers.length) {
+    failed.push(
+      `ungrounded numbers in an attachment: ${attachmentUngroundedNumbers.slice(0, 5).join(', ')}`
+    );
   }
   return { pass: failed.length === 0, failed, metrics };
 };

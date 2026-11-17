@@ -16,9 +16,16 @@ import {
   panelText,
   recordedAttachments,
   replayCorpus,
+  replayToolParams,
   withExtraTurns,
 } from './replay';
-import type { WriteupEvaluator, WriteupExample, WriteupTaskOutput } from './types';
+import type {
+  ReplyAttachment,
+  ReplyType,
+  WriteupEvaluator,
+  WriteupExample,
+  WriteupTaskOutput,
+} from './types';
 
 export const REPLY_GENERATED_EVALUATOR = 'reply_generated';
 export const REPLY_GATES_EVALUATOR = 'reply_gates';
@@ -29,11 +36,24 @@ export const REPLY_VS_BASELINE_EVALUATOR = 'reply_vs_baseline';
 
 const NO_REPLY = { score: null, label: 'n/a', explanation: 'No reply was generated.' };
 
-const gatesFor = (
+/**
+ * The gates for a reply to the replayed round. Numbers are grounded in what the agent saw, numbers
+ * in quoted code also in the recorded queries, and the attachments the reply made and shows are
+ * checked for numbers as well.
+ */
+export const gatesForRound = (
   { rounds, round_index: roundIndex }: WriteupExample['input'],
-  output: WriteupTaskOutput,
-  reply: string
-) => runReplyGates(reply, output.reply_type, knownNumbers(replayCorpus(rounds, roundIndex)));
+  reply: string,
+  type: ReplyType,
+  attachments: readonly ReplyAttachment[] = []
+) =>
+  runReplyGates(reply, type, knownNumbers(replayCorpus(rounds, roundIndex)), {
+    queryNumbers: knownNumbers(replayToolParams(rounds, roundIndex)),
+    attachments: attachments.filter((a) => reply.includes(`id="${a.id}"`)).map((a) => a.content),
+  });
+
+const gatesFor = (input: WriteupExample['input'], output: WriteupTaskOutput, reply: string) =>
+  gatesForRound(input, reply, output.reply_type, output.attachments);
 
 /** Whether the model wrote a reply at all; quality scores below skip runs that didn't. */
 export const replyGeneratedEvaluator: WriteupEvaluator = {
