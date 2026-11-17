@@ -247,34 +247,10 @@ describe('TaskManagerMetricsCollector', () => {
 
     await new Promise((resolve) => setImmediate(resolve));
     expect(mockTaskStore.aggregate).toHaveBeenCalledTimes(2);
-    expect(mockTaskStore.aggregate.mock.calls[1][0].query).toMatchObject({
-      bool: {
-        filter: [
-          {
-            bool: {
-              must: [
-                {
-                  bool: {
-                    must: [
-                      {
-                        terms: {
-                          'task.taskType': [
-                            'taskType1',
-                            'taskType2',
-                            'taskType3',
-                            'lateRegisteredTaskType',
-                          ],
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    });
+    expect(mockTaskStore.aggregate.mock.calls[1][0].query).toHaveProperty(
+      'bool.filter[0].bool.must[0].bool.must[0].terms',
+      { 'task.taskType': ['taskType1', 'taskType2', 'taskType3', 'lateRegisteredTaskType'] }
+    );
     expect(handler).toHaveBeenCalledTimes(2);
     expect(handler).toHaveBeenCalledWith({
       event: {

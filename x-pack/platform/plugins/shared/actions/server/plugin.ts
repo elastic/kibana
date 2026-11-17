@@ -989,39 +989,8 @@ export class ActionsPlugin
       },
     };
 
-    const { enabledActionTypes } = actionsConfig;
-    const hasExplicitServerlessAllowlist =
-      !!plugins.serverless &&
-      enabledActionTypes.length > 0 &&
-      enabledActionTypes[0] !== AllowedHosts.Any;
-    const hasUnregisteredEnabledType = enabledActionTypes.some(
-      (connectorType) => !actionTypeRegistry!.has(connectorType)
-    );
-
-    if (hasExplicitServerlessAllowlist && hasUnregisteredEnabledType) {
-      return withTimeout({
-        promise: connectorCatalog.ready,
-        timeoutMs: CATALOG_STARTUP_TIMEOUT_MS,
-      }).then(({ timedout }) => {
-        if (timedout) {
-          const unavailableTypes = enabledActionTypes.filter(
-            (connectorType) => !actionTypeRegistry!.has(connectorType)
-          );
-          if (unavailableTypes.length > 0) {
-            throw new Error(
-              `Unable to validate enabled connector types [${unavailableTypes.join(
-                ', '
-              )}] within ${CATALOG_STARTUP_TIMEOUT_MS}ms while waiting for the connector catalog.`
-            );
-          }
-        }
-        this.validateEnabledConnectorTypes(plugins);
-        return startContract;
-      });
-    }
-
-    this.validateEnabledConnectorTypes(plugins);
-    return startContract;
+    const validation = this.validateEnabledConnectorTypes(plugins, connectorCatalog.ready);
+    return validation ? validation.then(() => startContract) : startContract;
   }
 
   private getUnsecuredSavedObjectsClient = (
@@ -1287,17 +1256,37 @@ export class ActionsPlugin
     return handle;
   }
 
-  private validateEnabledConnectorTypes = (plugins: ActionsPluginsStart) => {
+  private validateEnabledConnectorTypes = (
+    plugins: ActionsPluginsStart,
+    catalogReady: Promise<void>
+  ): Promise<void> | undefined => {
+    const { enabledActionTypes } = this.actionsConfig;
     if (
-      !!plugins.serverless &&
-      this.actionsConfig.enabledActionTypes.length > 0 &&
-      this.actionsConfig.enabledActionTypes[0] !== AllowedHosts.Any
+      !plugins.serverless ||
+      enabledActionTypes.length === 0 ||
+      enabledActionTypes[0] === AllowedHosts.Any ||
+      enabledActionTypes.every((connectorType) => this.actionTypeRegistry?.has(connectorType))
     ) {
-      this.actionsConfig.enabledActionTypes.forEach((connectorType) => {
-        // Throws error if action type doesn't exist
-        this.actionTypeRegistry?.get(connectorType);
-      });
+      return;
     }
+
+    return withTimeout({ promise: catalogReady, timeoutMs: CATALOG_STARTUP_TIMEOUT_MS }).then(
+      ({ timedout }) => {
+        if (timedout) {
+          const unavailableTypes = enabledActionTypes.filter(
+            (connectorType) => !this.actionTypeRegistry?.has(connectorType)
+          );
+          if (unavailableTypes.length > 0) {
+            throw new Error(
+              `Unable to validate enabled connector types [${unavailableTypes.join(
+                ', '
+              )}] within ${CATALOG_STARTUP_TIMEOUT_MS}ms while waiting for the connector catalog.`
+            );
+          }
+        }
+        enabledActionTypes.forEach((connectorType) => this.actionTypeRegistry?.get(connectorType));
+      }
+    );
   };
 
   private getAxiosInstanceWithAuthHelper = (
