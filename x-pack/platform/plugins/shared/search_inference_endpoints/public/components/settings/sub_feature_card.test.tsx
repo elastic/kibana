@@ -1011,32 +1011,6 @@ describe('SubFeatureCard', () => {
       expect(screen.queryByTestId('add-effort-ep-1')).not.toBeInTheDocument();
     });
 
-    it('turns the recommended defaults toggle off when the effort differs from the recommended one', () => {
-      renderEffortCard({
-        endpointIds: ['ep-1'],
-        effectiveRecommendedEndpoints: ['ep-1'],
-        efforts: { 'ep-1': 'high' },
-        effectiveRecommendedEfforts: { 'ep-1': 'low' },
-      });
-
-      expect(screen.getByTestId('useRecommendedDefaultsToggle-test_feature')).not.toBeChecked();
-    });
-
-    it('resets efforts to the recommended ones with the recommended endpoints', () => {
-      renderEffortCard({
-        endpointIds: ['ep-1'],
-        effectiveRecommendedEndpoints: ['ep-1'],
-        efforts: { 'ep-1': 'high' },
-        effectiveRecommendedEfforts: { 'ep-1': 'low' },
-      });
-
-      fireEvent.click(screen.getByTestId('useRecommendedDefaultsToggle-test_feature'));
-      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-
-      expect(onEndpointsChange).toHaveBeenCalledWith('test_feature', ['ep-1']);
-      expect(onEffortsChange).toHaveBeenCalledWith('test_feature', { 'ep-1': 'low' });
-    });
-
     it('copies efforts with the models to other features', () => {
       mockUseRegisteredFeatures.mockReturnValue({
         features: [feature, { ...feature, featureId: 'sibling', featureName: 'Sibling' }],

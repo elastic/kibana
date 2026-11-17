@@ -28,7 +28,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { isEqual, omit, pick } from 'lodash';
+import { omit, pick } from 'lodash';
 import { NO_DEFAULT_MODEL } from '../../../common/constants';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
 import { getConnectorIcon } from '../../utils/connector_display';
@@ -50,6 +50,7 @@ import { ReasoningEffortPopover } from './reasoning_effort_popover';
 import { RecommendedDefaultsSwitch } from './recommended_defaults_switch';
 import { ResetDefaultsModal } from './reset_defaults_modal';
 import { SettingTitle } from './setting_title';
+import { useRecommendedDefaults } from './use_recommended_defaults';
 
 const COLLAPSED_COUNT = 5;
 const NO_EFFORT_LEVELS: ReasoningEffortLevel[] = [];
@@ -59,9 +60,6 @@ const endpointRowStyles = css`
     opacity: 1;
   }
 `;
-
-const arraysEqual = (a: string[], b: string[]) =>
-  a.length === b.length && a.every((v, i) => v === b[i]);
 
 interface SubFeatureCardProps {
   featureId: string;
@@ -104,43 +102,33 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   const supportedEffortLevels = useSupportedEffortLevels();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
-  const [isDisableModalOpen, setIsDisableModalOpen] = useState(false);
-  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   const [listWidth, setListWidth] = useState<number | undefined>(undefined);
-  // Sticky session flag: the editable list is seeded with the recommended endpoints, so without this
-  // the toggle would snap back to ON immediately after the user confirms "Turn off recommended defaults".
-  const [hasOptedIntoCustomMode, setHasOptedIntoCustomMode] = useState(false);
-  useEffect(() => {
-    // Discarding restores the saved assignments, so the card must also leave custom mode.
-    setHasOptedIntoCustomMode(false);
-  }, [discardVersion]);
   const listRef = useRef<HTMLDivElement>(null);
   const { isTechPreview, isBeta } = feature;
 
   const { regionDeniedEndpointIds, availableEndpointIds } =
     useRegionAvailableEndpoints(endpointIds);
-  const availableRecommendedEndpointIds = useMemo(
-    () =>
-      effectiveRecommendedEndpoints.filter(
-        (endpointId) => !regionDeniedEndpointIds.has(endpointId)
-      ),
-    [effectiveRecommendedEndpoints, regionDeniedEndpointIds]
-  );
-  const hasAvailableRecommendedEndpoints = availableRecommendedEndpointIds.length > 0;
-
-  const matchesRecommendedDefaults = useMemo(() => {
-    const matchesRecommendedEndpoints = arraysEqual(endpointIds, effectiveRecommendedEndpoints);
-    const matchesRecommendedSelection =
-      matchesRecommendedEndpoints && isEqual(efforts, effectiveRecommendedEfforts);
-    return !hasOptedIntoCustomMode && matchesRecommendedSelection;
-  }, [
-    hasOptedIntoCustomMode,
+  const {
+    hasAvailableRecommendedEndpoints,
+    isUsingRecommendedDefaults,
+    isDisableModalOpen,
+    isResetModalOpen,
+    toggleRecommendedDefaults,
+    confirmDisableRecommendedDefaults,
+    confirmResetToDefaults,
+    closeDisableModal,
+    closeResetModal,
+  } = useRecommendedDefaults({
+    featureId,
     endpointIds,
     effectiveRecommendedEndpoints,
     efforts,
     effectiveRecommendedEfforts,
-  ]);
-  const isUsingRecommendedDefaults = hasAvailableRecommendedEndpoints && matchesRecommendedDefaults;
+    regionDeniedEndpointIds,
+    onEndpointsChange,
+    onEffortsChange,
+    discardVersion,
+  });
 
   useEffect(() => {
     const el = listRef.current;
@@ -243,38 +231,6 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
     [efforts, featureId, onEffortsChange]
   );
 
-  const handleToggleRecommendedDefaults = useCallback(
-    (checked: boolean) => {
-      if (checked) {
-        if (!isUsingRecommendedDefaults) {
-          setIsResetModalOpen(true);
-        }
-        return;
-      }
-      setIsDisableModalOpen(true);
-    },
-    [isUsingRecommendedDefaults]
-  );
-
-  const confirmResetToDefaults = useCallback(() => {
-    setHasOptedIntoCustomMode(false);
-    onEndpointsChange(featureId, [...effectiveRecommendedEndpoints]);
-    onEffortsChange(featureId, { ...effectiveRecommendedEfforts });
-    setIsResetModalOpen(false);
-  }, [
-    featureId,
-    effectiveRecommendedEndpoints,
-    effectiveRecommendedEfforts,
-    onEndpointsChange,
-    onEffortsChange,
-  ]);
-
-  const confirmDisableRecommendedDefaults = useCallback(() => {
-    setHasOptedIntoCustomMode(true);
-    onEndpointsChange(featureId, [...availableRecommendedEndpointIds]);
-    setIsDisableModalOpen(false);
-  }, [featureId, availableRecommendedEndpointIds, onEndpointsChange]);
-
   const showAddModelPopover = canManage && (!hasOverflow || isExpanded) && canAddMore;
   const showCopyToButton = canManage && (!hasOverflow || isExpanded) && hasOtherSubFeatures;
 
@@ -331,7 +287,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
             checked={isUsingRecommendedDefaults}
             hasAvailableRecommendedEndpoints={hasAvailableRecommendedEndpoints}
             canManage={canManage}
-            onChange={handleToggleRecommendedDefaults}
+            onChange={toggleRecommendedDefaults}
           />
         </EuiFlexItem>
 
@@ -627,14 +583,11 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
       {isDisableModalOpen && (
         <DisableRecommendedModelsModal
           onConfirm={confirmDisableRecommendedDefaults}
-          onCancel={() => setIsDisableModalOpen(false)}
+          onCancel={closeDisableModal}
         />
       )}
       {isResetModalOpen && (
-        <ResetDefaultsModal
-          onConfirm={confirmResetToDefaults}
-          onCancel={() => setIsResetModalOpen(false)}
-        />
+        <ResetDefaultsModal onConfirm={confirmResetToDefaults} onCancel={closeResetModal} />
       )}
     </>
   );
