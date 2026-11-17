@@ -5,37 +5,33 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
-import type { CloudStart } from '@kbn/cloud-plugin/public';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { FleetConfigType } from '../../common/types';
+import type { FleetStartServices } from '../plugin';
+import type { UIExtensionsStorage } from '../types';
 
-import type { FleetStart } from '../plugin';
-
-export interface FleetPublicStartServices {
-  core: CoreStart;
-  fleet: FleetStart;
-  cloud?: CloudStart;
-  spaces?: SpacesPluginStart;
+export interface FleetAppServices {
+  startServices: FleetStartServices;
+  config: FleetConfigType;
   kibanaVersion: string;
+  extensions: UIExtensionsStorage;
 }
 
-let startServices: FleetPublicStartServices | undefined;
+let appServices: FleetAppServices | undefined;
 
 /**
  * Module singleton, set in the plugin's `start()`.
  *
- * Components Fleet exports to other plugins (e.g. the Add integration modal) render inside a
- * host's React tree, so they cannot receive Fleet's own start services through props without
- * every host wiring them. Fleet already uses this pattern for its HTTP client (`setHttpClient`)
- * and its experimental features service.
+ * `FleetStartServices` is core plus every one of Fleet's own start dependencies, so a plugin
+ * embedding Integrations UI cannot assemble it without taking on Fleet's whole dependency list.
+ * Holding it here lets Fleet hand out a ready provider instead (see `EmbeddedIntegrationsProvider`).
  */
-export function setStartServices(services: FleetPublicStartServices) {
-  startServices = services;
+export function setFleetAppServices(services: FleetAppServices) {
+  appServices = services;
 }
 
-export function getStartServices(): FleetPublicStartServices {
-  if (!startServices) {
-    throw new Error('Fleet start services are not initialized');
+export function getFleetAppServices(): FleetAppServices {
+  if (!appServices) {
+    throw new Error('Fleet app services are not initialized');
   }
-  return startServices;
+  return appServices;
 }

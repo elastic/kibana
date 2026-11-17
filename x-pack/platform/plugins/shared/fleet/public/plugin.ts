@@ -99,7 +99,7 @@ import type {
 import { LazyCustomLogsAssetsExtension } from './lazy_custom_logs_assets_extension';
 import { setCustomIntegrations, setCustomIntegrationsStart } from './services/custom_integrations';
 import { createIngestHubStart, registerIngestHubApps } from './ingest_hub/register';
-import { setStartServices } from './services/start_services';
+import { setFleetAppServices } from './services/start_services';
 import type { IngestFlow, IngestHubStart } from './ingest_hub/types';
 import { getFleetDeepLinks } from './deep_links';
 
@@ -175,6 +175,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
   private extensions: UIExtensionsStorage = {};
   private experimentalFeatures: ExperimentalFeatures;
   private storage = new Storage(localStorage);
+  private cloudSetup?: CloudSetup;
   private appUpdater$ = new Subject<AppUpdater>();
   private logger: Logger;
   private ingestFlows: IngestFlow[] = [];
@@ -193,6 +194,8 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     const config = this.config;
     const kibanaVersion = this.kibanaVersion;
     const extensions = this.extensions;
+
+    this.cloudSetup = deps.cloud;
 
     // registerEventType is on AnalyticsServiceSetup (setup), not AnalyticsServiceStart (start).
     registerAwsOnboardingEvents(core.analytics);
@@ -453,14 +456,20 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       },
     };
 
-    // Components Fleet renders inside other plugins' React trees (e.g. the Add integration
-    // modal) reach core and Fleet's own contract through this singleton.
-    setStartServices({
-      core,
-      fleet: startContract,
-      cloud: deps.cloud,
-      spaces: deps.spaces,
+    // Integrations UI rendered inside another app (the Add integration modal) needs Fleet's own
+    // start services, which a host plugin cannot assemble; hold them for the embedded provider.
+    const cloud = this.cloudSetup && deps.cloud ? { ...this.cloudSetup, ...deps.cloud } : undefined;
+    setFleetAppServices({
+      startServices: {
+        ...core,
+        ...deps,
+        storage: this.storage,
+        cloud,
+        authz,
+      },
+      config: this.config,
       kibanaVersion: this.kibanaVersion,
+      extensions: this.extensions,
     });
 
     return startContract;

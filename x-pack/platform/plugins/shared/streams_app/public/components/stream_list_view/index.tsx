@@ -12,8 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
 import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
 import { isEmpty } from 'lodash';
-import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
-import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
+import React, { Suspense, useEffect, useMemo, useState } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
@@ -131,23 +130,7 @@ export function StreamListView({ tabs }: { tabs?: AppHeaderTab[] }) {
   // POC (elastic/ingest-dev#10466): "Add data" opens the integrations catalogue in a modal,
   // which Ingest Hub composes out of Fleet's browse page.
   const [isAddDataModalOpen, setIsAddDataModalOpen] = useState(false);
-  const AddIntegrationModal = fleet?.ingestHub.AddIntegrationModal;
-  const onIntegrationSelected = useCallback(
-    (card: IntegrationCardItem) => {
-      setIsAddDataModalOpen(false);
-      core.notifications.toasts.addInfo({
-        title: i18n.translate('xpack.streams.streamsListView.integrationSelectedToastTitle', {
-          defaultMessage: 'Selected {title}',
-          values: { title: card.title },
-        }),
-        text: i18n.translate('xpack.streams.streamsListView.integrationSelectedToastText', {
-          defaultMessage: 'POC only: the onboarding wizard is not wired up yet.',
-        }),
-      });
-    },
-    [core.notifications.toasts]
-  );
-
+  const AddIntegrationModal = fleet?.ingestHub?.AddIntegrationModal;
   const pageTitle = i18n.translate('xpack.streams.streamsListView.pageHeaderTitle', {
     defaultMessage: 'Streams',
   });
@@ -308,7 +291,6 @@ export function StreamListView({ tabs }: { tabs?: AppHeaderTab[] }) {
         <Suspense fallback={<EuiLoadingSpinner size="l" />}>
           <AddIntegrationModal
             onClose={() => setIsAddDataModalOpen(false)}
-            onIntegrationSelected={onIntegrationSelected}
             title={addDataLabel}
             subtitle={i18n.translate('xpack.streams.streamsListView.addDataModalSubtitle', {
               defaultMessage: 'Choose a technology to start collecting from',

@@ -21,6 +21,7 @@ import {
   useBreadcrumbs,
   useStartServices,
 } from '../../../../hooks';
+import { useEmbeddedContext } from '../../../../../../hooks/use_embedded_context';
 import { NoEprCallout } from '../../components/no_epr_callout';
 import { categoryExists } from '../home';
 import type { IntegrationCardItem } from '../home';
@@ -54,9 +55,11 @@ export interface BrowseIntegrationsPageProps {
 
 export const BrowseIntegrationsPage: React.FC<BrowseIntegrationsPageProps> = ({
   prereleaseIntegrationsEnabled,
-  embedded = false,
+  embedded: embeddedProp,
   onIntegrationSelected,
 }) => {
+  const { isEmbedded } = useEmbeddedContext();
+  const embedded = embeddedProp ?? isEmbedded;
   useBreadcrumbs('integrations_all', {}, { enabled: !embedded });
 
   const { automaticImport, cloud } = useStartServices();
