@@ -56,8 +56,11 @@ export interface SpecChange {
 }
 
 export interface SourceDrift {
-  /** `unreachable` when the latest spec couldn't be fetched or loaded. */
-  readonly status: 'unchanged' | 'changed' | 'unreachable';
+  /**
+   * `unreachable` when the latest spec couldn't be fetched or loaded, and `pinned` for a captured
+   * source, which has no latest to compare with until someone captures it again with credentials.
+   */
+  readonly status: 'unchanged' | 'changed' | 'unreachable' | 'pinned';
   readonly error?: string;
   /** For changed sources; undefined when no `oasdiff` was available to classify them. */
   readonly changes?: readonly SpecChange[];
@@ -461,7 +464,11 @@ const compareWithLatest = async ({
     );
     const refreshed = await readOptional(path.join(copy, MANIFEST));
     const sources: Record<string, SourceDrift> = {};
-    for (const [name, { format }] of Object.entries(manifest.sources)) {
+    for (const [name, { format, captured }] of Object.entries(manifest.sources)) {
+      if (captured) {
+        sources[name] = { status: 'pinned' };
+        continue;
+      }
       const [committed, current] = await Promise.all(
         [directory, copy].map((root) => readOptional(path.join(root, snapshotFile(name, format))))
       );
@@ -565,6 +572,10 @@ export const detectDrift = async ({
   const sources: Record<string, SourceDrift> = {};
   for (const [name, source] of Object.entries(manifest.sources)) {
     const { url } = source;
+    if (source.captured) {
+      // Fetching it would only answer 401, which is not news; it is refreshed by capturing it again.
+      continue;
+    }
     try {
       await (isProtocolFormat(source.format)
         ? loadProtocolSpec({

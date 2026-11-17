@@ -266,6 +266,7 @@ export const updateVendorApi = async ({
   for (const [name, url] of Object.entries(urls)) {
     const known = previous?.sources[name];
     const declaredFormat = formatFlags[name] ?? known?.format;
+    const captured = known?.captured;
     const endpoints = endpointFlags[name] ?? known?.endpoints;
     if (isProtocolFormat(declaredFormat)) {
       if (endpoints === undefined) {
@@ -276,7 +277,10 @@ export const updateVendorApi = async ({
       if (tools !== undefined && declaredFormat !== 'mcp') {
         throw new Error(`${name}: --tool only applies to MCP sources`);
       }
-      const snapshot = fetchAll ? undefined : await read(snapshotFile(name, declaredFormat));
+      // A captured source is never fetched again, so a refresh keeps the snapshot it was
+      // captured into. Without one, it is being captured now, from a primed spec cache.
+      const snapshot =
+        fetchAll && !captured ? undefined : await read(snapshotFile(name, declaredFormat));
       if (snapshot === undefined) {
         log.info(`Loading ${name} from ${url}`);
         protocols[name] = await loadProtocolSpec({
@@ -298,7 +302,8 @@ export const updateVendorApi = async ({
     if (toolFlags[name] !== undefined) {
       throw new Error(`${name}: --tool only applies to MCP sources; pass --format`);
     }
-    const snapshot = fetchAll ? undefined : await read(snapshotFile(name, declaredFormat));
+    const snapshot =
+      fetchAll && !captured ? undefined : await read(snapshotFile(name, declaredFormat));
     if (snapshot === undefined) {
       const markdownFormat = markdownFormatOf(name);
       const pages = pagesOf(name);
@@ -512,6 +517,7 @@ export const updateVendorApi = async ({
       url: urls[name],
       ...(name in protocols && endpoints ? { endpoints: [...endpoints] } : {}),
       ...(tools === undefined ? {} : { tools: [...tools] }),
+      ...(previous?.sources[name]?.captured ? { captured: true as const } : {}),
       ...(pages === undefined ? {} : { pages: [...pages] }),
       ...(apiVersion === undefined ? {} : { apiVersion }),
       fetchedAt: fetchedAt ?? now().toISOString(),

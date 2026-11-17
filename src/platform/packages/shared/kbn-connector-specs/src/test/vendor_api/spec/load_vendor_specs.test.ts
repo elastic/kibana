@@ -112,6 +112,26 @@ describe('loadVendorSpecs', () => {
     });
   });
 
+  it('reads a captured source from its snapshot even with latest, as it has no latest', async () => {
+    const capturedManifest: VendorApiManifest = {
+      ...manifest,
+      sources: {
+        v1: {
+          ...manifest.sources.v1,
+          captured: true,
+          note: 'The vendor only serves this spec to a request carrying credentials.',
+        },
+      },
+    };
+    await fs.writeFile(path.join(directory, 'manifest.json'), serializeManifest(capturedManifest));
+    const fetchText = jest.fn(async () => JSON.stringify(snapshot('Latest')));
+
+    const { specs } = await loadVendorSpecs({ directory, latest: true, fetchText, log });
+
+    expect(fetchText).not.toHaveBeenCalled();
+    expect((specs.v1 as OpenApiDocument).info).toMatchObject({ title: 'Snapshot' });
+  });
+
   it('fetches a Markdown reference with latest from its index and pages', async () => {
     const markdownManifest: VendorApiManifest = {
       sources: {

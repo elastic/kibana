@@ -153,8 +153,9 @@ export const loadVendorSpecs = async ({
   const protocols: Record<string, GraphQLSpec | McpSpec> = {};
   let fetchedEverySource = true;
   for (const [name, source] of Object.entries(manifest.sources)) {
-    const { url, format, endpoints = [], tools } = source;
-    const snapshot = latest ? undefined : await read(snapshotFile(name, format));
+    const { url, format, endpoints = [], tools, captured } = source;
+    // A captured source has no latest to fetch: its snapshot is the only copy of it there is.
+    const snapshot = latest && !captured ? undefined : await read(snapshotFile(name, format));
     if (isProtocolFormat(format)) {
       if (snapshot === undefined) {
         log.info(`Fetching ${name} from ${url}`);

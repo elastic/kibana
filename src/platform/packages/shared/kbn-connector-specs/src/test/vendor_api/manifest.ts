@@ -56,6 +56,14 @@ const sourceSchema = z
      * to fetch, such as the folders of the API groups the connector calls.
      */
     pages: z.array(z.string().min(1)).min(1).optional(),
+    /**
+     * Set when the vendor only serves this spec to a request carrying credentials, so it was
+     * captured once and committed as the snapshot. It is never fetched again: `--refresh` and
+     * `--drift` read the snapshot, and drift reports the source as pinned rather than unreachable.
+     * Refreshing it means capturing it again, by hand, with credentials. Needs a `note` saying
+     * what the capture took.
+     */
+    captured: z.literal(true).optional(),
     /** The spec's `info.version`, when it has one. */
     apiVersion: z.string().optional(),
     /** When the snapshot last changed, as an ISO date-time. */
@@ -76,6 +84,10 @@ const sourceSchema = z
   .refine(({ format, tools }) => tools === undefined || format === 'mcp', {
     message: '"tools" only applies to MCP sources',
     path: ['tools'],
+  })
+  .refine(({ captured, note }) => captured === undefined || note !== undefined, {
+    message: 'A captured source needs a "note" saying what capturing it took',
+    path: ['note'],
   });
 
 const located = { in: z.enum(['query', 'body', 'header']).optional() };
