@@ -9,11 +9,17 @@
 
 import {
   assertConnectorSucceeded,
+  escapeHitlEmailLinkLabel,
+  escapeHitlEmailMarkdown,
   escapeServiceNowCommentText,
+  escapeSlackMrkdwnLabel,
+  escapeSlackMrkdwnText,
   escapeTeamsHtml,
   fitHitlTextPreservingSuffix,
+  fitSlackMrkdwnSectionText,
   SERVICENOW_COMMENT_MAX_LENGTH,
   serviceNowCommentLink,
+  SLACK_SECTION_TEXT_MAX_LENGTH,
   slackApiChannelTarget,
   TEAMS_CONTENT_MAX_LENGTH,
   teamsHtmlLink,
@@ -96,6 +102,72 @@ describe('fitHitlTextPreservingSuffix', () => {
     expect(() => fitHitlTextPreservingSuffix('prompt', 'x'.repeat(11), 10)).toThrow(
       'exceed the 10 character connector limit'
     );
+  });
+});
+
+describe('generated notification text', () => {
+  it('escapes email markdown link syntax and keeps a scheme URL from autolinking', () => {
+    expect(escapeHitlEmailMarkdown('See [click](https://evil.example)')).toBe(
+      'See \\[click\\](https:\u2060//evil.example)'
+    );
+    expect(escapeHitlEmailMarkdown('ship (prod)')).toBe('ship (prod)');
+    expect(escapeHitlEmailMarkdown('C:\\temp')).toBe('C:\\temp');
+    expect(escapeHitlEmailMarkdown('a < b')).toBe('a < b');
+    expect(escapeHitlEmailMarkdown('<https://evil.example>')).toBe(
+      '\\<https:\u2060//evil.example>'
+    );
+    expect(escapeHitlEmailMarkdown('<mailto:a@b.co>')).toBe('\\<mailto:a@b.co>');
+    expect(escapeHitlEmailLinkLabel('Approve\\')).toBe('Approve\\\\');
+    expect(escapeHitlEmailMarkdown('is https://elastic.co a valid indicator')).toBe(
+      'is https:\u2060//elastic.co a valid indicator'
+    );
+    expect(escapeHitlEmailMarkdown('see www.elastic.co')).toBe('see www.elastic.co');
+    expect(escapeHitlEmailMarkdown('```\n~~~')).toBe('\\`\\`\\`\n\\~\\~\\~');
+    expect(escapeHitlEmailMarkdown('\\[Approve\\](//evil.example)')).toBe(
+      '\\[Approve\\](/\u2060/evil.example)'
+    );
+    expect(escapeHitlEmailMarkdown('\\\\[Approve](//evil.example)')).toBe(
+      '\\\\\\[Approve\\](/\u2060/evil.example)'
+    );
+    expect(escapeHitlEmailMarkdown('//evil.example')).toBe('/\u2060/evil.example');
+    expect(escapeHitlEmailMarkdown('\\'.repeat(8))).toBe('\\'.repeat(8));
+    expect(escapeHitlEmailMarkdown(`${'\\'.repeat(8)}[`)).toBe(`${'\\'.repeat(9)}[`);
+    expect(escapeHitlEmailMarkdown(`${'\\'.repeat(7)}[`)).toBe(`${'\\'.repeat(7)}[`);
+  });
+
+  it('escapes Slack mrkdwn link syntax and keeps a scheme URL from autolinking', () => {
+    expect(escapeSlackMrkdwnText('See <https://evil.example|click> & more')).toBe(
+      'See &lt;https:\u2060//evil.example|click&gt; &amp; more'
+    );
+    expect(escapeSlackMrkdwnText('Hey <@U123> <#C123> <!here> <mailto:a@b.co|Approve>')).toBe(
+      'Hey <@U123> <#C123> <!here> &lt;mailto:a@b.co|Approve&gt;'
+    );
+    expect(escapeSlackMrkdwnText('see //evil.example')).toBe('see /\u2060/evil.example');
+  });
+
+  it('shortens an escaped Slack section to the API limit without splitting an entity', () => {
+    const withinLimit = 'a'.repeat(SLACK_SECTION_TEXT_MAX_LENGTH);
+    expect(fitSlackMrkdwnSectionText(withinLimit)).toBe(withinLimit);
+
+    const splitEntity = `${'a'.repeat(SLACK_SECTION_TEXT_MAX_LENGTH - 2)}&amp;`;
+    expect(fitSlackMrkdwnSectionText(splitEntity)).toBe(
+      'a'.repeat(SLACK_SECTION_TEXT_MAX_LENGTH - 2)
+    );
+
+    const keptEntity = `${'b'.repeat(SLACK_SECTION_TEXT_MAX_LENGTH - 4)}&lt;tail`;
+    expect(fitSlackMrkdwnSectionText(keptEntity)).toBe(
+      `${'b'.repeat(SLACK_SECTION_TEXT_MAX_LENGTH - 4)}&lt;`
+    );
+  });
+
+  it('keeps a Slack link label from splitting the generated link', () => {
+    expect(escapeSlackMrkdwnLabel('Approve|https://evil.example')).toBe(
+      'Approve\uff5chttps:\u2060//evil.example'
+    );
+    expect(escapeSlackMrkdwnLabel('Approve\nhttps://evil.example')).toBe(
+      'Approve https:\u2060//evil.example'
+    );
+    expect(escapeSlackMrkdwnLabel('<@U123>')).toBe('&lt;@U123&gt;');
   });
 });
 
