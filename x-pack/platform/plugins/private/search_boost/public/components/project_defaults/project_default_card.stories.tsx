@@ -8,10 +8,12 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
+import { EuiPanel } from '@elastic/eui';
 
 import type { BoostProfileType, BoostRuleMatch } from '../../../common/types';
 import type { ProjectDefaultCardProps } from './project_default_card';
 import { ProjectDefaultCard } from './project_default_card';
+import { ProjectDefaults } from './project_defaults';
 
 type CardData = Pick<ProjectDefaultCardProps, 'ruleName' | 'profile' | 'matches'>;
 
@@ -96,4 +98,26 @@ export const NoMatches: Story = {
   args: {
     matches: [],
   },
+};
+
+export const ProjectDefaultsSection: Story = {
+  render: ({ canEdit, onViewProfile }) => (
+    <ProjectDefaults
+      canEdit={canEdit}
+      indices={CARD_DATA.indices}
+      dataStreams={CARD_DATA.data_streams}
+      onEdit={action('onEdit')}
+      onViewProfile={onViewProfile}
+    />
+  ),
+  argTypes: {
+    type: { table: { disable: true } },
+  },
+  decorators: [
+    (Story) => (
+      <EuiPanel color="plain" hasShadow={false} borderRadius="none" paddingSize="l">
+        <Story />
+      </EuiPanel>
+    ),
+  ],
 };
