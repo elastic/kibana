@@ -87,11 +87,15 @@ describe('session memory routes', () => {
     });
   });
 
-  it('registers a public experimental route that needs the write privilege', () => {
+  it('registers a public experimental route that needs the write and manage memory privileges', () => {
     expect(route.config).toMatchObject({
       path: SESSION_MEMORY_FORGET_PATH,
       access: 'public',
-      security: { authz: { requiredPrivileges: [apiPrivileges.writeContextEngine] } },
+      security: {
+        authz: {
+          requiredPrivileges: [apiPrivileges.writeContextEngine, apiPrivileges.manageMemory],
+        },
+      },
       options: { availability: { stability: 'experimental' } },
     });
   });

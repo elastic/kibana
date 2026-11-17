@@ -29,8 +29,10 @@ import { resolveSpaceId } from '../utils/resolve_space_id';
 import { errorResponseSchema } from './schemas/ai_indices_schema';
 import { withContextEngineFeatureFlag } from './with_feature_flag';
 
-const WRITE_SECURITY: RouteSecurity = {
-  authz: { requiredPrivileges: [apiPrivileges.writeContextEngine] },
+const MANAGE_MEMORY_SECURITY: RouteSecurity = {
+  authz: {
+    requiredPrivileges: [apiPrivileges.writeContextEngine, apiPrivileges.manageMemory],
+  },
 };
 
 const forgetBodySchema = schema.object({
@@ -134,10 +136,11 @@ export const registerSessionMemoryRoutes = ({
   router.versioned
     .post({
       path: SESSION_MEMORY_FORGET_PATH,
-      security: WRITE_SECURITY,
+      security: MANAGE_MEMORY_SECURITY,
       access: 'public',
       summary: 'Forget session memories',
       description: [
+        'Requires the `contextEngine:write` and `contextEngine:manageMemory` privileges. With `contextEngine:manageMemory` the caller can forget the memories of any user in the space.',
         'Forgets session memories by id, for the user in `user_id`. A memory of another user or in another space is reported as `not_found`, as if it did not exist.',
         'In `tombstone` mode (the default) the memory stops being returned but its revisions are kept until retention removes them. In `hard_delete` mode every revision is removed now.',
         'Each memory is audited. Forgetting still works when memory is turned off.',

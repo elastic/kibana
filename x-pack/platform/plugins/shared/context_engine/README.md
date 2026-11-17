@@ -342,9 +342,14 @@ still works after memory is turned off.
 
 ### Privileges and audit
 
-The route needs `contextEngine:write` for both modes. `user_id` is the subject of the
-memory, supplied by the caller as the session memory RFC describes. It is not checked
-against the authenticated user, and a mismatch with the memory's owner reads as `not_found`.
+The route needs `contextEngine:write` and `contextEngine:manageMemory` for both modes.
+`contextEngine:manageMemory` is not part of All, so an administrator grants it explicitly.
+With it a caller can forget the memories of any user in the space. The future `_remember`
+route will use the same privilege.
+
+`user_id` is the subject of the memory, supplied by the caller as the session memory RFC
+describes. It is not checked against the authenticated user, and a mismatch with the
+memory's owner reads as `not_found`.
 
 Each unique id writes one audit event, `session_memory_forget` or
 `session_memory_hard_delete`. The event records the authenticated actor in `user.*`, the
