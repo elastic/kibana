@@ -260,40 +260,36 @@ groups:
         default: true
         applies_to:
           stack: preview 9.6+
-          ech: preview 9.6+
-          ece: preview 9.6+
-          eck: preview 9.6+
-          self: preview 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
 
       - setting: xpack.actions.inboundEvents.admission.maxInFlight
         description: |
-          Maximum inbound event requests in flight on this {{kib}} process. A request over the cap returns HTTP 429 and the body is not read.
+          Maximum inbound event requests in flight on this {{kib}} process. Allowed values are 1 to 100. A request over the cap returns HTTP 429 and the body is not read.
         datatype: int
         default: 50
-        options:
-          - option: minimum 1 and maximum 100
         applies_to:
           stack: preview 9.6+
-          ech: preview 9.6+
-          ece: preview 9.6+
-          eck: preview 9.6+
-          self: preview 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
 
       - setting: xpack.actions.inboundEvents.admission.maxInFlightPerConnector
         description: |
-          Maximum in-flight inbound event requests for one connector on this process. The value must be less than or equal to `xpack.actions.inboundEvents.admission.maxInFlight`.
+          Maximum in-flight inbound event requests for one connector on this process. Allowed values are 1 to 100. The value must be less than or equal to `xpack.actions.inboundEvents.admission.maxInFlight`.
         datatype: int
         default: 10
-        options:
-          - option: minimum 1 and maximum 100
         applies_to:
           stack: preview 9.6+
-          ech: preview 9.6+
-          ece: preview 9.6+
-          eck: preview 9.6+
-          self: preview 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
 
       - setting: xpack.actions.inboundEvents.rateLimit.enabled
@@ -303,40 +299,36 @@ groups:
         default: true
         applies_to:
           stack: preview 9.6+
-          ech: preview 9.6+
-          ece: preview 9.6+
-          eck: preview 9.6+
-          self: preview 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
 
       - setting: xpack.actions.inboundEvents.rateLimit.maxKeys
         description: |
-          Maximum number of keys in each rate-limit map on this process. Failed authentications and authenticated requests each have their own map, and this limit applies to each one. The default of 10000 allows up to 20000 keys on the process. A new key is rejected when its map is full and no key in that map has expired.
+          Maximum number of keys in each rate-limit map on this process. Allowed values are 1 to 10000. Failed authentications and authenticated requests each have their own map, and this limit applies to each one, so the process can hold twice this many keys. A new key is rejected when its map is full and no key in that map has expired.
         datatype: int
         default: 10000
-        options:
-          - option: minimum 1 and maximum 10000
         applies_to:
           stack: preview 9.6+
-          ech: preview 9.6+
-          ece: preview 9.6+
-          eck: preview 9.6+
-          self: preview 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
 
       - setting: xpack.actions.inboundEvents.rateLimit.remoteAddress.limit
         description: |
-          Failed inbound-event authentications allowed for one socket address and one connector during `xpack.actions.inboundEvents.rateLimit.remoteAddress.window`. The key includes the space, the connector type, and the connector ID, so one address has a separate allowance for each connector. A successful request does not count. {{kib}} uses the socket address and does not read `X-Forwarded-For`.
+          Failed inbound-event authentications allowed for one socket address and one connector during `xpack.actions.inboundEvents.rateLimit.remoteAddress.window`. Allowed values are 1 to 1500. The key includes the space, the connector type, and the connector ID, so one address has a separate allowance for each connector. A successful request does not count. {{kib}} uses the socket address and does not read `X-Forwarded-For`.
         datatype: int
         default: 10
-        options:
-          - option: minimum 1 and maximum 1500
         applies_to:
           stack: preview 9.6+
-          ech: preview 9.6+
-          ece: preview 9.6+
-          eck: preview 9.6+
-          self: preview 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
 
       - setting: xpack.actions.inboundEvents.rateLimit.remoteAddress.window
@@ -346,25 +338,23 @@ groups:
         default: 1m
         applies_to:
           stack: preview 9.6+
-          ech: preview 9.6+
-          ece: preview 9.6+
-          eck: preview 9.6+
-          self: preview 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
 
       - setting: xpack.actions.inboundEvents.rateLimit.connector.limit
         description: |
-          Authenticated inbound event requests allowed for one connector during `xpack.actions.inboundEvents.rateLimit.connector.window`. A request over the limit returns HTTP 429 for that connector only.
+          Authenticated inbound event requests allowed for one connector during `xpack.actions.inboundEvents.rateLimit.connector.window`. Allowed values are 1 to 1500. A request over the limit returns HTTP 429 for that connector only.
         datatype: int
         default: 300
-        options:
-          - option: minimum 1 and maximum 1500
         applies_to:
           stack: preview 9.6+
-          ech: preview 9.6+
-          ece: preview 9.6+
-          eck: preview 9.6+
-          self: preview 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
 
       - setting: xpack.actions.inboundEvents.rateLimit.connector.window
@@ -374,10 +364,10 @@ groups:
         default: 1m
         applies_to:
           stack: preview 9.6+
-          ech: preview 9.6+
-          ece: preview 9.6+
-          eck: preview 9.6+
-          self: preview 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
           serverless: unavailable
 
       - setting: xpack.actions.microsoftExchangeUrl
