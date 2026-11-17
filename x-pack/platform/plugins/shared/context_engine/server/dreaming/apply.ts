@@ -9,8 +9,6 @@ import { isEqual, pick } from 'lodash';
 import pRetry from 'p-retry';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
-  EDITED_AT_ATTRIBUTE,
-  EDITED_BY_ATTRIBUTE,
   ENTITY_TYPE_PREFIX,
   FACT_TYPE_PREFIX,
   LAST_SEEN_AT_ATTRIBUTE,
@@ -186,22 +184,6 @@ const fitsAudience = (
 
 const SIGHTING_ATTRIBUTES = [OCCURRENCES_ATTRIBUTE, LAST_SEEN_AT_ATTRIBUTE];
 
-/**
- * The edit marker of a KI edited before the marker existed, taken from the revision the KI update
- * API wrote, so that it survives this write.
- */
-const legacyEditMarker = (current: DreamedKi): DreamedKiAttributes => {
-  if (current.attributes?.[EDITED_BY_ATTRIBUTE] !== undefined) {
-    return {};
-  }
-  const editedBy = current.governance?.provenance?.updated_by?.uri;
-  const { updated_at: editedAt } = current;
-  return {
-    ...(editedBy !== undefined && { [EDITED_BY_ATTRIBUTE]: editedBy }),
-    ...(typeof editedAt === 'string' && { [EDITED_AT_ATTRIBUTE]: editedAt }),
-  };
-};
-
 /** Keeps what a person-edited KI says, taking only the new sighting and references. */
 const keepPersonEdits = (
   current: DreamedKi,
@@ -214,7 +196,7 @@ const keepPersonEdits = (
   }
   return {
     ...current,
-    attributes: { ...attributes, ...legacyEditMarker(current) },
+    attributes,
     references,
   };
 };

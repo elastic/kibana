@@ -354,7 +354,7 @@ describe('applyOperations', () => {
       );
     });
 
-    it('keeps a KI edited before the marker existed protected after it writes it', async () => {
+    it('updates a KI the update API wrote without marking it edited, such as a tag change', async () => {
       stored.set('entity-person-bob', {
         id: 'entity-person-bob',
         type: 'entity.person',
@@ -376,19 +376,8 @@ describe('applyOperations', () => {
         },
       ]);
 
-      expect(written()[0]).toEqual(
-        expect.objectContaining({
-          title: 'Robert',
-          attributes: {
-            'memory.number_of_occurrences': 2,
-            'memory.edited_by': person.uri,
-            'memory.edited_at': '2026-10-01T00:00:00.000Z',
-          },
-          governance: expect.objectContaining({
-            provenance: expect.objectContaining({ updated_by: writer }),
-          }),
-        })
-      );
+      expect(written()[0]).toEqual(expect.objectContaining({ title: 'Bob' }));
+      expect(written()[0].attributes).not.toHaveProperty('memory.edited_by');
     });
 
     it('writes nothing when the memory is already cited', async () => {

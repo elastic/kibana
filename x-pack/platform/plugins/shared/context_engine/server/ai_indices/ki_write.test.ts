@@ -81,8 +81,8 @@ describe('isPersonEdited', () => {
     ).toBe(true);
   });
 
-  it('is true when the latest revision came from the update API', () => {
-    expect(isPersonEdited({ governance: { provenance: { updated_by: apiWriter } } })).toBe(true);
+  it('is false when the update API wrote the KI without marking it edited', () => {
+    expect(isPersonEdited({ governance: { provenance: { updated_by: apiWriter } } })).toBe(false);
   });
 
   it('is false for KIs only automation, deletes or restores wrote', () => {

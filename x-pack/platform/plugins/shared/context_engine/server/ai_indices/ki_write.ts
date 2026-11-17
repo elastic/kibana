@@ -27,8 +27,6 @@ export const buildKiApiWriter = (action: KiApiWriterAction, spaceId: string): Ki
   metadata: { space_id: spaceId },
 });
 
-const KI_API_UPDATE_URI = buildKiApiWriter('update', '').uri;
-
 const PERSON_EDITED_FIELDS = ['type', 'title', 'description', 'content', 'attributes'] as const;
 
 const attributesOf = (ki: StoredKi | undefined): Record<string, unknown> | undefined => {
@@ -38,13 +36,9 @@ const attributesOf = (ki: StoredKi | undefined): Record<string, unknown> | undef
     : undefined;
 };
 
-/**
- * Whether a person edited what the KI says, so automation must leave its text alone. KIs edited
- * before the marker existed count when the KI update API wrote their current revision.
- */
+/** Whether a person edited what the KI says, so automation must leave its text alone. */
 export const isPersonEdited = (ki: StoredKi | undefined): boolean =>
-  attributesOf(ki)?.[EDITED_BY_ATTRIBUTE] !== undefined ||
-  ki?.governance?.provenance?.updated_by?.uri === KI_API_UPDATE_URI;
+  attributesOf(ki)?.[EDITED_BY_ATTRIBUTE] !== undefined;
 
 const changesWhatItSays = (source: StoredKi, ki: KiPartialFields): boolean =>
   PERSON_EDITED_FIELDS.some(
