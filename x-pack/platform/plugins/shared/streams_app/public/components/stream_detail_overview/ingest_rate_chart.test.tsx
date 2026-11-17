@@ -80,8 +80,6 @@ const renderChart = () =>
         streamName="accounting-2026"
         esqlSource="FROM accounting-2026"
         canReadFailureStore={false}
-        isQueryStream={false}
-        isDraft={false}
         totals={totals}
       />
     </I18nProvider>
