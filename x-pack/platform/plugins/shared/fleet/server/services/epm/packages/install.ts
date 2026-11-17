@@ -676,7 +676,7 @@ function assertFipsCompatibleOrThrow(
 ) {
   if (
     !appContextService.getIsFipsEnabled() ||
-    !isPackageFipsIncompatible(packageInfo.policy_templates)
+    !isPackageFipsIncompatible(packageInfo.policy_templates, packageInfo.name)
   ) {
     return;
   }

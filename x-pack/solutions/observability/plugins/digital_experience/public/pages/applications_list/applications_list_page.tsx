@@ -396,7 +396,7 @@ const HIDDEN_BY_DEFAULT: OptionalColumnId[] = ['fcp', 'ttfb', 'jsErrors'];
 
 const HIDDEN_COLUMNS_STORAGE_KEY = 'xpack.digitalExperience.applications.hiddenColumns';
 
-const NO_PAGE_LOADS: PageLoadsOverTime = { otel: [], classic: [] };
+const NO_PAGE_LOADS: Pick<PageLoadsOverTime, ApplicationSource> = { otel: [], classic: [] };
 
 export function ApplicationsListPage() {
   const { application, ux } = useKibanaServices();
@@ -411,18 +411,21 @@ export function ApplicationsListPage() {
 
   const apiClient = useApiClient();
 
+  const { timeZone } = formatters;
+
   const {
     value: response,
     loading,
     error,
     refresh,
   } = useAbortableAsync(
-    async ({ signal }) =>
-      apiClient.fetch('GET /internal/digital_experience/applications', {
+    async ({ signal }) => {
+      return apiClient.fetch('GET /internal/digital_experience/applications', {
         signal,
-        params: { query: toTimeRangeQuery(timeRange, environment) },
-      }),
-    [apiClient, timeRange, environment],
+        params: { query: toTimeRangeQuery(timeRange, environment, timeZone) },
+      });
+    },
+    [apiClient, timeRange, environment, timeZone],
     { unsetValueOnError: true }
   );
   // Nothing has been fetched before the first request starts.
@@ -457,9 +460,10 @@ export function ApplicationsListPage() {
       ),
     [response, selectedSource]
   );
+  const pageLoadsOfResponse = response?.pageLoadsOverTime ?? NO_PAGE_LOADS;
   const pageLoadsOverTime = useMemo(
-    () => pageLoadsOfSources(response?.pageLoadsOverTime ?? NO_PAGE_LOADS, selectedSource),
-    [response, selectedSource]
+    () => pageLoadsOfSources(pageLoadsOfResponse, selectedSource),
+    [pageLoadsOfResponse, selectedSource]
   );
   const sessionsOverTime = useMemo(
     () => sessionsOfSource(response?.sessionsOverTime ?? null, selectedSource),
@@ -671,6 +675,7 @@ export function ApplicationsListPage() {
         <PageLoadsChart
           pageLoads={pageLoadsOverTime}
           sessions={sessionsOverTime}
+          histogram={response?.pageLoadsOverTime.histogram}
           isLoading={isLoading}
           onTimeRangeSelect={setTimeRange}
         />

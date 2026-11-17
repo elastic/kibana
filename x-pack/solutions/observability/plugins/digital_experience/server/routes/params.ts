@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment-timezone';
 import { isoDateTime, z } from '@kbn/zod/v4';
 import {
   OVERVIEW_KUERY_MAX_LENGTH,
@@ -17,6 +18,8 @@ import {
   readOverviewFilters,
 } from '../../common/overview_filters_param';
 import { MAX_ENVIRONMENT_LENGTH } from '../lib/constants';
+
+const MAX_TIME_ZONE_LENGTH = 64;
 
 /** The params of a route over a time range and an optional environment. */
 export const timeRangeShape = () => ({
@@ -35,6 +38,20 @@ export const START_AFTER_END_ISSUE = {
   message: '`start` must be before `end`',
   path: ['end'],
 };
+
+// The offset `getUserTimeZone` falls back to when the browser can't name its time zone.
+const UTC_OFFSET = /^[+-](0\d|1[0-4]):[0-5]\d$/;
+
+/** The time zone the histogram buckets of a route line up with: a moment-timezone name or a UTC offset. */
+export const timeZoneShape = () => ({
+  timeZone: z
+    .string()
+    .max(MAX_TIME_ZONE_LENGTH)
+    .refine((value) => UTC_OFFSET.test(value) || moment.tz.zone(value) !== null, {
+      message: 'Unknown time zone',
+    })
+    .default('UTC'),
+});
 
 /** The query of a route over a time range and an optional environment; `start` precedes `end`. */
 export const timeRangeQuery = () =>

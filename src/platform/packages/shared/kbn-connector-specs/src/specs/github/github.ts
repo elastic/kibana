@@ -20,6 +20,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { UISchemas, type ConnectorSpec } from '../../connector_spec';
 import { withMcpClient, callToolContent, callToolJson } from '../../lib/mcp';
 import { githubEvents } from './events';
+import { githubSkillFile } from './skills/github_skill';
 import { toTimelinePage } from './timeline';
 import type {
   AddAssigneeInput,
@@ -760,11 +761,14 @@ export const GithubConnector: ConnectorSpec = {
     },
   },
 
+  skillFiles: [githubSkillFile],
+
   skill: [
     'Action strategy guide:',
     '- Parameter names are camelCase. Use the exact names shown (e.g. issueNumber, pullNumber, workflowId) — never snake_case equivalents like issue_number or pull_number.',
     '- Start with getMe to identify the authenticated user.',
     '- For broad discovery: use search* actions (searchCode, searchRepositories, searchIssues, searchPullRequests, searchUsers).',
+    '- If the `/connector-github` skill is available, prefer it for searching and listing issues and pull requests: it returns compact results instead of the full (very large) API payload.',
     '- For browsing a specific repo: use list* actions (listIssues, listPullRequests, listCommits, listBranches, listReleases, listTags). All use cursor-based pagination via "first" + "after".',
     '- For specific details: use get* actions (getIssue, getIssueComments, pullRequestRead, getCommit, getLatestRelease, getFileContents).',
     '- For history (who or when a label was added, links from other repos, review requests): getIssueTimeline. Pass excludeEventTypes ["subscribed","mentioned"] by default: they are most of a timeline and rarely answer a history question. Events are oldest first: for the latest change, call once and then read the page given in lastPage. Keep paging while hasMore is true, even after an empty page.',

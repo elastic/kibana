@@ -134,7 +134,7 @@ pageLoadAssetSize:
   mitreAttack: 2022
   ml: 950
   monitoring: 22416
-  navigation: 13400
+  navigation: 14840
   newsfeed: 10708
   nightshift: 5665
   nightshiftInvestigations: 9405
@@ -173,7 +173,7 @@ pageLoadAssetSize:
   screenshotMode: 979
   screenshotting: 1655
   searchAssistant: 1887
-  searchBoost: 1569
+  searchBoost: 1189
   searchGettingStarted: 2697
   searchHomepage: 4290
   searchInferenceEndpoints: 4743
@@ -194,7 +194,7 @@ pageLoadAssetSize:
   share: 379
   shared-core: 343009
   shared-misc: 155260
-  shared-packages: 6066047
+  shared-packages: 6065481
   shared-plugins: 13536562
   shared-solution-packages: 386709
   significantEvents: 4439
