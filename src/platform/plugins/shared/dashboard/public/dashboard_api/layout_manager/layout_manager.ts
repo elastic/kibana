@@ -62,8 +62,8 @@ import {
   areLayoutsEqual,
   arePanelLayoutsEqual,
   arePinnedPanelLayoutsEqual,
-} from './are_layouts_equal';
-import { deserializeLayout } from './deserialize_layout';
+} from '../../../common/dashboard_state/layout/are_layouts_equal';
+import { deserializeLayout } from '../../../common/dashboard_state/layout/deserialize_layout';
 import { initializeGridLayout } from './grid_layout';
 import {
   getLayoutBottomRow,
