@@ -26,7 +26,7 @@ export const citedMemoryKiIds = (ki: DreamedKi): string[] =>
 
 /**
  * Whether an item lost the memories it came from, and what to do about it. A trace round always
- * counts as present. A memory missing from the AI index counts as deleted.
+ * counts as present. A memory missing from the AI index aged out, and only a deleted one is lost.
  */
 export const sourceVerdictOf = (
   ki: DreamedKi,
@@ -36,17 +36,24 @@ export const sourceVerdictOf = (
   const memoryIds = cited.filter((memoryId) => !isTraceRound(memoryId));
   const lostIds = memoryIds.filter((memoryId) => {
     const memory = memories.get(memoryId);
-    return memory === undefined || isKiDeleted(memory);
+    return memory !== undefined && isKiDeleted(memory);
   });
   if (lostIds.length === 0) {
     return { verdict: 'intact' };
   }
   const remainingIds = memoryIds.filter((memoryId) => !lostIds.includes(memoryId));
+  const agedOut = remainingIds.filter((memoryId) => !memories.has(memoryId)).length;
   const citesTraces = cited.length > memoryIds.length;
   if (isPersonEdited(ki)) {
     return {
       verdict: 'needs_review',
       reason: `A person edited it, and ${lostIds.length} of the memories it came from were deleted.`,
+    };
+  }
+  if (agedOut > 0) {
+    return {
+      verdict: 'needs_review',
+      reason: `${lostIds.length} of the memories it came from were deleted, and ${agedOut} more aged out, so a rewrite from those left would drop what the aged-out ones stated.`,
     };
   }
   if (citesTraces && kindOf(ki) !== 'entity') {

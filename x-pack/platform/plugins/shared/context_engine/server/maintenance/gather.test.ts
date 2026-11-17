@@ -208,6 +208,32 @@ describe('gatherMaintenance', () => {
     ]);
   });
 
+  it('keeps items whose memories aged out, and lists for review those that also lost some', async () => {
+    const stored = [
+      memory('m-1', { governance: deleted }),
+      fact('fact-aged', { references: derivedFrom('m-gone') }),
+      fact('fact-mixed', { references: derivedFrom('m-1', 'm-gone') }),
+    ];
+
+    const output = await gatherMaintenance(fakeReader(stored, { changed: [stored[0]] }), {
+      ...options,
+      sweepSize: 10,
+    });
+
+    expect(output.fixes).toEqual([]);
+    expect(output.needs_review).toEqual([
+      expect.objectContaining({
+        id: 'fact-mixed',
+        change: 'needs_review',
+        reason: expect.stringContaining('aged out'),
+      }),
+    ]);
+    expect(output.batches[0].items).toEqual([
+      expect.objectContaining({ id: 'fact-aged', reasons: ['sweep'] }),
+    ]);
+    expect(output.batches[0].items[0].lost_source_ids).toBeUndefined();
+  });
+
   it('refreshes an entity whose facts changed, with the facts about it', async () => {
     const stored = [
       memory('m-1'),

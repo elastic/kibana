@@ -44,10 +44,22 @@ describe('sourceVerdictOf', () => {
     });
   });
 
-  it('tombstones an item whose memories were all deleted or are gone', () => {
-    expect(sourceVerdictOf(fact(), new Map([memory('m-1', true)]))).toEqual({
+  it('tombstones an item whose memories were all deleted', () => {
+    expect(sourceVerdictOf(fact(), new Map([memory('m-1', true), memory('m-2', true)]))).toEqual({
       verdict: 'tombstone',
       reason: 'Every memory it came from was deleted.',
+    });
+  });
+
+  it('keeps an item whose memories aged out of the AI index', () => {
+    expect(sourceVerdictOf(fact(), new Map())).toEqual({ verdict: 'intact' });
+    expect(sourceVerdictOf(fact(), new Map([memory('m-1')]))).toEqual({ verdict: 'intact' });
+  });
+
+  it('leaves for review an item that lost memories while others aged out', () => {
+    expect(sourceVerdictOf(fact(), new Map([memory('m-1', true)]))).toEqual({
+      verdict: 'needs_review',
+      reason: expect.stringContaining('1 more aged out'),
     });
   });
 
@@ -96,10 +108,11 @@ describe('sourceVerdictOf', () => {
   });
 
   it('does not tombstone an item at the reference cap, whose older memories may remain', () => {
-    const atCap = fact({
-      references: derivedFrom(...Array.from({ length: 100 }, (_, index) => `ki://m-${index}`)),
-    });
+    const ids = Array.from({ length: 100 }, (_, index) => `m-${index}`);
+    const atCap = fact({ references: derivedFrom(...ids.map((id) => `ki://${id}`)) });
 
-    expect(sourceVerdictOf(atCap, new Map()).verdict).toBe('needs_review');
+    expect(sourceVerdictOf(atCap, new Map(ids.map((id) => memory(id, true)))).verdict).toBe(
+      'needs_review'
+    );
   });
 });
