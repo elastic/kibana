@@ -8,14 +8,13 @@
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { OnSetup } from '@kbn/core-di';
 import { CoreSetup, CoreStart } from '@kbn/core-di-server';
-import { SavedObjectStateStore, StateRepository } from '../lib/state/saved_object_state_store';
-import { StateStore } from '../lib/state/state_store';
+import { DetectionStateClient } from '../lib/state/detection_state_client';
 import {
   DETECTION_STATE_SO_TYPE,
   detectionStateSavedObjectType,
 } from '../saved_objects/detection_state_saved_object';
 
-/** Registers the state saved object type and binds the store on it. Tests bind their own `StateStore`. */
+/** Registers the state saved object type and binds the client on it. */
 export function bindState({ bind }: ContainerModuleLoadOptions): void {
   bind(OnSetup).toResolvedValue(
     (savedObjects) => () => {
@@ -24,11 +23,11 @@ export function bindState({ bind }: ContainerModuleLoadOptions): void {
     [CoreSetup('savedObjects')]
   );
 
-  bind(StateRepository)
+  bind(DetectionStateClient)
     .toResolvedValue(
-      (savedObjects) => savedObjects.createInternalRepository([DETECTION_STATE_SO_TYPE]),
+      (savedObjects) =>
+        new DetectionStateClient(savedObjects.createInternalRepository([DETECTION_STATE_SO_TYPE])),
       [CoreStart('savedObjects')]
     )
     .inSingletonScope();
-  bind(StateStore).to(SavedObjectStateStore).inSingletonScope();
 }
