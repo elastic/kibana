@@ -20,6 +20,7 @@ import {
 import { removeDeviceControl } from '../../../common/endpoint/models/policy_config_helpers';
 import { set } from '@kbn/safer-lodash-set';
 import type { PolicyConfig } from '../../../common/endpoint/types';
+import { setExportProviders } from '../../../common/endpoint/models/export_providers';
 
 const ESSENTIALS_KEYS = ALL_PRODUCT_FEATURE_KEYS.filter(
   (key) =>
@@ -149,6 +150,53 @@ describe('validatePolicyAgainstProductFeatures', () => {
       );
       expect(thrown?.statusCode).toBe(403);
       expect(thrown?.apiPassThrough).toBe(true);
+    });
+  });
+
+  describe('export providers gating', () => {
+    const withoutResponseActions = createProductFeaturesServiceMock(
+      ALL_PRODUCT_FEATURE_KEYS.filter(
+        (key) => key !== ProductFeatureSecurityKey.endpointResponseActions
+      )
+    );
+    const policyWithProviders = setExportProviders(policyFactory(), [
+      { id: 'azure-1', type: 'azure_blob', account_name: 'acct', container: 'dumps' },
+    ]);
+
+    it('throws 403 for export providers when endpointResponseActions is disabled', () => {
+      let thrown: (Error & { statusCode?: number; apiPassThrough?: boolean }) | undefined;
+      try {
+        validatePolicyAgainstProductFeatures(
+          makeInput(policyWithProviders),
+          withoutResponseActions
+        );
+      } catch (e) {
+        thrown = e;
+      }
+
+      expect(thrown?.message).toBe(
+        'To configure export providers, you must add Endpoint Complete to your project.'
+      );
+      expect(thrown?.statusCode).toBe(403);
+      expect(thrown?.apiPassThrough).toBe(true);
+    });
+
+    it('passes for export providers when endpointResponseActions is enabled', () => {
+      expect(() =>
+        validatePolicyAgainstProductFeatures(
+          makeInput(policyWithProviders),
+          createProductFeaturesServiceMock()
+        )
+      ).not.toThrow();
+    });
+
+    it('passes without export providers when endpointResponseActions is disabled', () => {
+      expect(() =>
+        validatePolicyAgainstProductFeatures(
+          makeInput(setExportProviders(policyFactory(), [])),
+          withoutResponseActions
+        )
+      ).not.toThrow();
     });
   });
 });

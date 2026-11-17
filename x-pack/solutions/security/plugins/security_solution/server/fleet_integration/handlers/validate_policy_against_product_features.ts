@@ -8,6 +8,7 @@
 import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import { checkIfPopupMessagesContainCustomNotifications } from '../../../common/endpoint/models/policy_config_helpers';
+import { hasExportProviders } from '../../../common/endpoint/models/export_providers';
 import type { ProductFeaturesService } from '../../lib/product_features_service';
 
 export const validatePolicyAgainstProductFeatures = (
@@ -46,6 +47,17 @@ export const validatePolicyAgainstProductFeatures = (
         new Error(
           'To customize the user notification, you must add Endpoint Protection Complete to your project.'
         );
+      productFeatureError.statusCode = 403;
+      productFeatureError.apiPassThrough = true;
+      throw productFeatureError;
+    }
+
+    if (
+      hasExportProviders(policySettings) &&
+      !productFeaturesService.isEnabled(ProductFeatureSecurityKey.endpointResponseActions)
+    ) {
+      const productFeatureError: Error & { statusCode?: number; apiPassThrough?: boolean } =
+        new Error('To configure export providers, you must add Endpoint Complete to your project.');
       productFeatureError.statusCode = 403;
       productFeatureError.apiPassThrough = true;
       throw productFeatureError;

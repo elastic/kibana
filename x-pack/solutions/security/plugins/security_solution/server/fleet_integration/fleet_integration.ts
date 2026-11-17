@@ -39,6 +39,8 @@ import { createPolicyDataStreamsIfNeeded } from './handlers/create_policy_datast
 import { updateAntivirusRegistrationEnabled } from '../../common/endpoint/utils/update_antivirus_registration_enabled';
 import { validatePolicyAgainstProductFeatures } from './handlers/validate_policy_against_product_features';
 import { validateEndpointPackagePolicy } from './handlers/validate_endpoint_package_policy';
+import { validateExportProviders } from './handlers/validate_export_providers';
+import { removeExportProviders } from '../../common/endpoint/models/export_providers';
 import {
   isPolicySetToEventCollectionOnly,
   ensureOnlyEventCollectionIsAllowed,
@@ -325,6 +327,17 @@ export const getPackagePolicyUpdateCallback = (
         );
       }
 
+      // Export providers are only configurable behind their flag, so deployments with it off never
+      // persist them via the API (and never get a product-feature or license error about them).
+      if (
+        !experimentalFeatures.responseActionsEndpointFileExport &&
+        endpointIntegrationData.inputs?.[0]?.config?.policy?.value
+      ) {
+        endpointIntegrationData.inputs[0].config.policy.value = removeExportProviders(
+          endpointIntegrationData.inputs[0].config.policy.value as PolicyConfig
+        );
+      }
+
       // Validate that Endpoint Security policy uses only enabled App Features
       validatePolicyAgainstProductFeatures(endpointIntegrationData.inputs, productFeatures);
 
@@ -366,6 +379,12 @@ export const getPackagePolicyUpdateCallback = (
 
       // Make sure policy includes general expected data
       validateEndpointPackagePolicy(endpointIntegrationData.inputs, 'update');
+
+      if (endpointIntegrationData.inputs?.[0]?.config?.policy?.value) {
+        validateExportProviders(
+          endpointIntegrationData.inputs[0].config.policy.value as PolicyConfig
+        );
+      }
     } catch (error) {
       // Fleet swallows callback errors lacking `apiPassThrough` and persists the payload unvalidated,
       // so any unexpected failure while checking it must be converted into a rejection.
