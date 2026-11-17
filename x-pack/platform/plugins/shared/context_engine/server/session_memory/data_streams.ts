@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-// Both streams are system data streams owned by Elasticsearch, which creates each one on its first
-// write. Their mappings, settings and retention live in `context-engine-session-*.json` in the
-// Elasticsearch Kibana module, so Kibana registers no template for them.
-
+// A system data stream owned by Elasticsearch, which creates it on the first write. Its mappings,
+// settings and retention live in `context-engine-session-memory.json` in the Elasticsearch Kibana
+// module, so Kibana registers no template for it.
 export const SESSION_MEMORY_DATA_STREAM = '.context-engine-session-memory';
-export const SESSION_EVENTS_DATA_STREAM = '.context-engine-session-events';

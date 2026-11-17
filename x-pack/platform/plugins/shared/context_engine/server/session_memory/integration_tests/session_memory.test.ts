@@ -8,11 +8,9 @@
 import type { EsTestCluster } from '@kbn/test';
 import { createEsClientForTesting, createTestEsCluster } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
-import { SESSION_EVENTS_DATA_STREAM, SESSION_MEMORY_DATA_STREAM } from '../data_streams';
+import { SESSION_MEMORY_DATA_STREAM } from '../data_streams';
 import { createSessionMemoryService } from '../service';
 import type { SessionMemoryService, StoredSessionMemory } from '../types';
-
-const STREAMS = [SESSION_MEMORY_DATA_STREAM, SESSION_EVENTS_DATA_STREAM];
 
 describe('session memory', () => {
   jest.setTimeout(180_000);
@@ -24,7 +22,7 @@ describe('session memory', () => {
   const jdoe = { space: 'default', userId: 'jdoe' };
 
   const refresh = () =>
-    esClient.indices.refresh({ index: STREAMS.join(','), ignore_unavailable: true });
+    esClient.indices.refresh({ index: SESSION_MEMORY_DATA_STREAM, ignore_unavailable: true });
 
   // Writing `content` runs semantic_text inference, which the test cluster's basic license does not
   // allow. Memories are seeded without content, which is enough for forget and hardDelete.
@@ -74,7 +72,7 @@ describe('session memory', () => {
     await esServer?.stop();
   });
 
-  it('finds nothing before Elasticsearch creates the streams', async () => {
+  it('finds nothing before Elasticsearch creates the stream', async () => {
     await expect(service.forget(jdoe, ['missing'])).resolves.toEqual({ missing: 'not_found' });
     await expect(service.hardDelete(jdoe, ['missing'])).resolves.toEqual({ missing: 'not_found' });
   });
@@ -150,33 +148,5 @@ describe('session memory', () => {
     await refresh();
 
     expect(await countRevisions('shared-id')).toBe(2);
-  });
-
-  it('stores one session event per turn', async () => {
-    await service.saveEvent(jdoe, {
-      id: 'event-1',
-      sessionId: 'session-events',
-      turnId: 'turn-1',
-      transcript: 'User: is checkout healthy?\nAgent: yes',
-      aiIndexIds: ['ops-memory'],
-    });
-    await refresh();
-
-    const response = await esClient.search({
-      index: SESSION_EVENTS_DATA_STREAM,
-      query: { term: { session_id: 'session-events' } },
-    });
-    expect(response.hits.hits.map(({ _source }) => _source)).toEqual([
-      {
-        '@timestamp': expect.any(String),
-        id: 'event-1',
-        space: 'default',
-        session_id: 'session-events',
-        turn_id: 'turn-1',
-        user_id: 'jdoe',
-        ai_index_id: ['ops-memory'],
-        transcript: 'User: is checkout healthy?\nAgent: yes',
-      },
-    ]);
   });
 });

@@ -8,14 +8,9 @@
 import { randomUUID } from 'crypto';
 import type { BulkResponse, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { SESSION_EVENTS_DATA_STREAM, SESSION_MEMORY_DATA_STREAM } from './data_streams';
+import { SESSION_MEMORY_DATA_STREAM } from './data_streams';
 import type { ForgetOutcome } from '../../common/http_api/session_memory';
-import type {
-  SessionMemoryScope,
-  SessionMemoryService,
-  StoredSessionEvent,
-  StoredSessionMemory,
-} from './types';
+import type { SessionMemoryScope, SessionMemoryService, StoredSessionMemory } from './types';
 
 // Every read and delete goes through this filter, so a memory in another space or of another user
 // behaves exactly like one that does not exist.
@@ -70,7 +65,7 @@ const findLatestRevisions = async (
 };
 
 /**
- * Creates the service that reads and writes the session memory data streams.
+ * Creates the service that reads and writes the session memory data stream.
  * `esClient` must send the product origin that system data streams require, as core's clients do.
  */
 export const createSessionMemoryService = (
@@ -80,6 +75,7 @@ export const createSessionMemoryService = (
     const { id = randomUUID(), sessionId, content, aiIndexIds = [], attributes = {} } = input;
     await esClient.index<StoredSessionMemory>({
       index: SESSION_MEMORY_DATA_STREAM,
+      op_type: 'create',
       document: {
         '@timestamp': new Date().toISOString(),
         id,
@@ -170,23 +166,5 @@ export const createSessionMemoryService = (
     return Object.fromEntries(
       uniqueIds.map((id) => [id, foundIds.has(id) ? 'deleted' : 'not_found'])
     );
-  },
-
-  saveEvent: async ({ space, userId }, input) => {
-    const { id = randomUUID(), sessionId, turnId, transcript, aiIndexIds = [] } = input;
-    await esClient.index<StoredSessionEvent>({
-      index: SESSION_EVENTS_DATA_STREAM,
-      document: {
-        '@timestamp': new Date().toISOString(),
-        id,
-        space,
-        session_id: sessionId,
-        turn_id: turnId,
-        user_id: userId,
-        ai_index_id: aiIndexIds,
-        transcript,
-      },
-    });
-    return { id };
   },
 });

@@ -63,7 +63,6 @@ describe('session memory routes', () => {
       get: jest.fn(),
       forget: jest.fn(),
       hardDelete: jest.fn(),
-      saveEvent: jest.fn(),
     };
 
     const router = {
