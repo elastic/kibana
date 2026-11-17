@@ -6,6 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { setWorkflowEventChainContext } from '@kbn/workflows-extensions/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SignificantEventsServer } from '../../../types';
 import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
@@ -74,13 +75,27 @@ describe('event_status_update tool', () => {
       telemetry: telemetry as never,
     });
 
+    const context = createMockToolContext();
+    setWorkflowEventChainContext(context.request, {
+      depth: 0,
+      sourceExecutionId: 'workflow-run-1',
+    });
     const result = await invokeHandler(
       tool as never,
-      { event_id: 'e1', status: 'inactive', assessment_note: 'Recovered after rollback' },
-      createMockToolContext()
+      {
+        event_id: 'e1',
+        status: 'inactive',
+        close_reason: 'resolved',
+        assessment_note: 'Recovered after rollback',
+      },
+      context
     );
     expect(updateEventStatusToolHandler).toHaveBeenCalledWith(
-      expect.objectContaining({ assessmentNote: 'Recovered after rollback' })
+      expect.objectContaining({
+        closeReason: 'resolved',
+        assessmentNote: 'Recovered after rollback',
+        workflowExecutionId: 'workflow-run-1',
+      })
     );
 
     if ('results' in result) {
@@ -88,6 +103,10 @@ describe('event_status_update tool', () => {
     }
     expect(assertCanManageSignificantEvents).toHaveBeenCalledWith(
       expect.objectContaining({ request: expect.anything() })
+    );
+    expect(telemetry.trackAgentToolEventStatusUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ workflow_execution_id: 'workflow-run-1' }),
+      expect.anything()
     );
   });
 
@@ -147,7 +166,6 @@ describe('event_status_update tool', () => {
     });
 
     it.each([
-      ['not_found', false],
       ['already_in_state', true],
       ['not_a_breach', true],
       ['superseded', false],
@@ -167,6 +185,30 @@ describe('event_status_update tool', () => {
         success,
         event_id: 'event-1',
         status: 'inactive',
+      });
+    });
+
+    it('reports an unmatched id as unknown with the not_found cause', async () => {
+      (updateEventStatusToolHandler as jest.Mock).mockResolvedValue({
+        event_id: 'event-1',
+        updated: 0,
+        ignored: 1,
+        status: 'inactive',
+        reason: 'not_found',
+      });
+
+      const { payload, result } = await run();
+
+      expect(payload).toEqual({
+        ...identity,
+        fingerprint: 'unknown',
+        success: false,
+        event_id: 'unknown',
+        status: 'inactive',
+        error_message: 'not_found',
+      });
+      expect(result).toMatchObject({
+        results: [{ type: 'other', data: { event_id: 'event-1', reason: 'not_found' } }],
       });
     });
 

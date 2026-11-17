@@ -19,22 +19,19 @@
     "@kbn/alerting-plugin",
     "@kbn/utility-types",
     "@kbn/es-query",
-    "@kbn/securitysolution-ecs",
     "@kbn/securitysolution-t-grid",
     "@kbn/securitysolution-timeline-common",
     "@kbn/securitysolution-timeline-components",
     "@kbn/rule-data-utils",
     "@kbn/rule-registry-plugin",
-    "@kbn/data-views-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/ui-theme",
     "@kbn/i18n-react",
     "@kbn/alerts-as-data-utils",
-    "@kbn/search-types",
     "@kbn/react-kibana-mount",
     "@kbn/config-schema",
-    "@kbn/zod"
+    "@kbn/securitysolution-timeline-search-strategy"
   ],
   "exclude": [
     "target/**/*"

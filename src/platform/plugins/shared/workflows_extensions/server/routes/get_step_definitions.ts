@@ -94,6 +94,8 @@ export function registerGetStepDefinitionsRoute(
       validate: false,
     },
     async (_context, _request, response) => {
+      // Async loaders (e.g. dynamic imports waiting on start services) may still be pending.
+      await registry.whenReady();
       const allStepDefinitions = registry.getAll();
       const steps = allStepDefinitions
         // hash the serializable contract (schemas + metadata) to detect changes

@@ -141,6 +141,7 @@ const ContentListToolbarComponent = ({
 
   return (
     <EuiSearchBar
+      compressed
       query={queryText}
       box={{
         placeholder: labels.searchPlaceholder ?? defaultPlaceholder,

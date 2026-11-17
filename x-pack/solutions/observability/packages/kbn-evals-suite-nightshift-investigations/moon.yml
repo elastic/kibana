@@ -17,12 +17,8 @@ project:
   owner: '@elastic/nightshift'
   sourceRoot: x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations
 dependsOn:
-  - '@kbn/dev-cli-errors'
-  - '@kbn/dev-cli-runner'
-  - '@kbn/es-snapshot-loader'
   - '@kbn/evals'
   - '@kbn/evals-common'
-  - '@kbn/kibana-api-cli'
   - '@kbn/scout'
   - '@kbn/tooling-log'
   - '@kbn/agent-builder-common'

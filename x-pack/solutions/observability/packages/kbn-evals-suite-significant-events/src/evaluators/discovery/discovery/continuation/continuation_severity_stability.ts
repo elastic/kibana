@@ -8,11 +8,6 @@
 import type { ContinuationCycle, ContinuationEvaluator } from './continuation_stability';
 import { severityRank } from '../severity/severity_rank';
 
-const openEventsWithSeverity = (cycle: ContinuationCycle) =>
-  (cycle.producedEvents ?? []).filter(
-    (event) => event.event_id && event.status === 'active' && event.severity
-  );
-
 export interface ContinuationSeverityStabilityResult {
   score: number | null;
   stableChecks: number;
@@ -21,52 +16,39 @@ export interface ContinuationSeverityStabilityResult {
 }
 
 /**
- * Scores whether continued active events keep or raise severity relative to the establishing cycle.
- * Downgrades on unchanged reuse paths are failures; escalations are allowed.
+ * Scores active continuations against their establishing tier and recovery against the latest active tier.
  */
 export const scoreContinuationSeverityStability = (
   cycles: ContinuationCycle[]
 ): ContinuationSeverityStabilityResult => {
-  let established = false;
   const baselineSeverityByEventId = new Map<string, number>();
+  const latestActiveSeverityByEventId = new Map<string, number>();
   let stableChecks = 0;
   let comparableChecks = 0;
   const issues: string[] = [];
 
   cycles.forEach((cycle, cycleIndex) => {
-    const openEvents = openEventsWithSeverity(cycle);
+    const scoreCycle = cycle.expectReuse !== false || baselineSeverityByEventId.size === 0;
+    for (const { event_id: eventId, status, severity } of cycle.producedEvents ?? []) {
+      if (!eventId || !severity) continue;
+      const isActive = status === 'active';
+      if (!isActive && status !== 'recovering' && status !== 'inactive') continue;
 
-    if (!established) {
-      if (openEvents.length === 0) {
-        return;
+      const followUpRank = severityRank(severity);
+      if (isActive && followUpRank !== undefined) {
+        latestActiveSeverityByEventId.set(eventId, followUpRank);
       }
-      for (const event of openEvents) {
-        const rank = severityRank(event.severity);
-        if (rank !== undefined && event.event_id) {
-          baselineSeverityByEventId.set(event.event_id, rank);
-        }
-      }
-      established = true;
-      return;
-    }
+      if (!scoreCycle) continue;
 
-    if (cycle.expectReuse === false || openEvents.length === 0) {
-      return;
-    }
-
-    for (const event of openEvents) {
-      const eventId = event.event_id!;
-      const baselineRank = baselineSeverityByEventId.get(eventId);
+      const baselineRank = (
+        isActive ? baselineSeverityByEventId : latestActiveSeverityByEventId
+      ).get(eventId);
       if (baselineRank === undefined) {
-        // Event first seen after the establishing cycle — seed it now so later cycles can track it
-        const seedRank = severityRank(event.severity);
-        if (seedRank !== undefined) {
-          baselineSeverityByEventId.set(eventId, seedRank);
+        if (isActive && followUpRank !== undefined) {
+          baselineSeverityByEventId.set(eventId, followUpRank);
         }
         continue;
       }
-
-      const followUpRank = severityRank(event.severity);
       comparableChecks++;
       if (followUpRank === undefined) {
         issues.push(
@@ -75,13 +57,16 @@ export const scoreContinuationSeverityStability = (
         continue;
       }
 
-      if (followUpRank <= baselineRank) {
+      const isStable = isActive ? followUpRank <= baselineRank : followUpRank === baselineRank;
+      if (isStable) {
         stableChecks++;
         continue;
       }
 
       issues.push(
-        `cycle ${cycleIndex}: severity downgraded for continued event "${eventId}" (${event.severity})`
+        isActive
+          ? `cycle ${cycleIndex}: severity downgraded for continued event "${eventId}" (${severity})`
+          : `cycle ${cycleIndex}: recovery changed severity for event "${eventId}" (${severity})`
       );
     }
   });
@@ -94,7 +79,7 @@ export const scoreContinuationSeverityStability = (
       explanation:
         issues.length > 0
           ? `No comparable continued events with severity: ${issues.join('; ')}`
-          : 'No continued active events with severity to compare against the establishing cycle',
+          : 'No comparable continuations or recoveries with a known active severity',
     };
   }
 
@@ -105,14 +90,14 @@ export const scoreContinuationSeverityStability = (
     comparableChecks,
     explanation:
       issues.length > 0
-        ? `${stableChecks}/${comparableChecks} continued event(s) kept or raised severity (${issues.join(
+        ? `${stableChecks}/${comparableChecks} continued event(s) satisfied severity stability (${issues.join(
             '; '
           )})`
-        : `All ${comparableChecks} continued event(s) kept or raised severity`,
+        : `All ${comparableChecks} continued event(s) satisfied severity stability`,
   };
 };
 
-/** CODE evaluator: continued active events must not downgrade severity on reuse paths. */
+/** CODE evaluator: active continuations must not downgrade, and recovery must preserve the latest active tier. */
 export const continuationSeverityStabilityEvaluator: ContinuationEvaluator = {
   name: 'continuation_severity_stability',
   kind: 'CODE',

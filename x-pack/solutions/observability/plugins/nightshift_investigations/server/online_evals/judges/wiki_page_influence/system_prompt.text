@@ -24,4 +24,4 @@ missed_influence: how much useful page content went unused. Look for page conten
 
 Base every judgement only on what is in the conversation. Do not credit a page for something the agent did that the page does not support. Do not reward or penalise formatting or style.
 
-Write each reasoning field as one or two short sentences in your own words. Name the pages by their ids. Summarise; do not quote the pages, the tool results or the answer.
+Write each reasoning field as one or two short sentences in your own words. Refer to pages by what they cover (for example "the checkout service page"), not by their ids. Summarise; do not quote the pages, the tool results or the answer.
