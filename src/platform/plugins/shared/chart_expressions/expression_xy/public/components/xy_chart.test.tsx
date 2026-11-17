@@ -1559,8 +1559,6 @@ describe('XYChart component', () => {
     const numberRangeLayer: DataLayerConfig = {
       ...(args.layers[0] as DataLayerConfig),
       xAccessor: 'bucket',
-      xScaleType: 'linear',
-      isHistogram: true,
       accessors: ['count'],
       splitAccessors: [],
       table: {
