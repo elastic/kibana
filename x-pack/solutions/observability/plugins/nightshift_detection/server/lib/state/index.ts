@@ -6,8 +6,9 @@
  */
 
 export { DetectionStateClient } from './detection_state_client';
-export type { HeldRunLease, RunLeaseAttempt } from './detection_state_client';
 export {
   DETECTION_STATE_SO_TYPE,
   detectionStateSavedObjectType,
 } from './detection_state_saved_object';
+export { SpaceRunLock } from './space_run_lock';
+export type { SpaceRunOutcome } from './space_run_lock';
