@@ -253,18 +253,61 @@ describe('flakySuiteIssueTitle', () => {
 });
 
 describe('renderFlakySuiteIssueBody', () => {
-  it('opens by counting the tests and naming the suite, then the tests table', () => {
+  it('opens by counting the tests, naming the suite and the days they failed on, then the tests table', () => {
     const single = singleTestReport();
     expect(renderFlakySuiteIssueBody(single.suite, { report: single.report })).toContain(
       [
-        `1 test in the [\`Default status alert\`](https://github.com/elastic/kibana/blob/main/${SUITE_PATH}) suite appears to be flaky:`,
+        `1 test in the [\`Default status alert\`](https://github.com/elastic/kibana/blob/main/${SUITE_PATH}) suite appears to be flaky. ` +
+          'It failed on **5 of the past 7&nbsp;days**:',
         '',
-        '| Test | Flaky branches | Dashboard |',
+        '|  | Test | Flaky branches | Past&nbsp;7&nbsp;days |',
       ].join('\n')
     );
+    // test a of this suite comes from a report written before the days were recorded
     const multi = multiTestReport();
     expect(renderFlakySuiteIssueBody(multi.suite, { report: multi.report })).toContain(
-      `3 tests in the [\`Default status alert\`](https://github.com/elastic/kibana/blob/main/${SUITE_PATH}) suite appear to be flaky:\n\n| Test |`
+      `3 tests in the [\`Default status alert\`](https://github.com/elastic/kibana/blob/main/${SUITE_PATH}) suite appear to be flaky:\n\n|  | Test |`
+    );
+  });
+
+  it('counts the days any of the tests failed on, on the branches each is flaky on', () => {
+    const days = (failed: number[]): Partial<FlakyTestBranchStats> => ({
+      failedDaysAgo: failed,
+      ranDaysAgo: [0, 1, 2, 3, 4, 5, 6],
+    });
+    const report = flakyReport([
+      flakyTest({
+        testId: 'a',
+        byBranch: [
+          { branch: 'main', builds: 100, failedBuilds: 5, buildFailRate: 0.05, ...days([0, 4]) },
+          // a stray failure on a branch it is not flaky on does not count
+          { branch: '9.6', builds: 100, failedBuilds: 1, buildFailRate: 0.01, ...days([2]) },
+        ],
+      }),
+      flakyTest({
+        testId: 'b',
+        title: 'another test',
+        byBranch: [
+          { branch: 'main', builds: 100, failedBuilds: 5, buildFailRate: 0.05, ...days([4, 5]) },
+        ],
+      }),
+    ]);
+    const [suite] = groupIntoSuites(report.flaky, report.files);
+    const body = renderFlakySuiteIssueBody(suite, { report });
+
+    expect(body).toContain(
+      'suite appear to be flaky. They failed on **3 of the past 7&nbsp;days**:'
+    );
+    expect(body).toContain(
+      `| another test | **\`main\` 5%&nbsp;(5&nbsp;/&nbsp;100)** | ${[
+        '🟩',
+        '🟥',
+        '🟥',
+        '🟩',
+        '🟩',
+        '🟩',
+        '🟩',
+      ].join('\u2060')} |`
     );
   });
 
@@ -274,11 +317,11 @@ describe('renderFlakySuiteIssueBody', () => {
       [
         '#### Status by Branch',
         '',
-        '| Branch | Status | Failed builds | Sample failure |',
-        '|---|---|---|---|',
-        '| `main` | 🔴 Flaky | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |',
-        '| `9.2` | 🔴 Flaky | 3 / 64 (**5%**) | [#12290](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200) · 2026-09-07 11:40 UTC |',
-        '| `9.1` | ✅ No failures | 0 / 58 |  |',
+        '| Branch | Failed builds | Last failure |',
+        '|---|---|---|',
+        '| 🔴 **Flaky**: `main` | **10%**&nbsp;(49&nbsp;/&nbsp;509) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd)&nbsp;·&nbsp;9&nbsp;Sep&nbsp;06:12 |',
+        '| 🔴 **Flaky**: `9.2` | **5%**&nbsp;(3&nbsp;/&nbsp;64) | [#12290](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200)&nbsp;·&nbsp;7&nbsp;Sep&nbsp;11:40 |',
+        '| ✅ **No failures**: `9.1` | 0&nbsp;/&nbsp;58 |  |',
       ].join('\n')
     );
   });
@@ -333,13 +376,13 @@ describe('renderFlakySuiteIssueBody', () => {
 
     expect(renderFlakySuiteIssueBody(suite, { report })).toContain(
       [
-        '| Branch | Status | Failed builds | Sample failure |',
-        '|---|---|---|---|',
-        '| `9.5` | 🔴 Flaky | 3 / 100 (**3%**) | 2026-09-08 10:00 UTC |',
-        '| `9.3` | 🟠 Some failures | 2 / 5 (**40%**) | 2026-09-04 10:00 UTC |',
-        '| `main` | ⏭️ Skipped, last ran 7 Sep | 8 / 100 (**8%**) | 2026-09-05 10:00 UTC |',
-        '| `9.4` | ⏭️ Skipped in every run | 0 / 0 |  |',
-        '| `8.19` | ✅ No failures | 0 / 40 |  |',
+        '| Branch | Failed builds | Last failure |',
+        '|---|---|---|',
+        '| 🔴 **Flaky**: `9.5` | **3%**&nbsp;(3&nbsp;/&nbsp;100) | 8&nbsp;Sep&nbsp;10:00 |',
+        '| 🟠 **Some failures**: `9.3` | **40%**&nbsp;(2&nbsp;/&nbsp;5) | 4&nbsp;Sep&nbsp;10:00 |',
+        '| ⏭️ **Skipped**: `main`, last ran 7 Sep | **8%**&nbsp;(8&nbsp;/&nbsp;100) | 5&nbsp;Sep&nbsp;10:00 |',
+        '| ⏭️ **Skipped**: `9.4`, in every run | 0&nbsp;/&nbsp;0 |  |',
+        '| ✅ **No failures**: `8.19` | 0&nbsp;/&nbsp;40 |  |',
       ].join('\n')
     );
   });
@@ -361,8 +404,8 @@ describe('renderFlakySuiteIssueBody', () => {
 
     const body = renderFlakySuiteIssueBody(suite, { report });
 
-    expect(body).toContain('| another test | **`main` 6% (3 / 50)** |');
-    expect(body).toContain('| `main` | 🔴 Flaky | 4 / 200 (**2%**) |  |');
+    expect(body).toContain('| another test | **`main` 6%&nbsp;(3&nbsp;/&nbsp;50)** |');
+    expect(body).toContain('| 🔴 **Flaky**: `main` | **2%**&nbsp;(4&nbsp;/&nbsp;200) |  |');
   });
 
   it('dates a failure without a recorded build, for reports written before it was', () => {
@@ -381,7 +424,7 @@ describe('renderFlakySuiteIssueBody', () => {
     ]);
     const [suite] = groupIntoSuites(report.flaky, report.files);
     expect(renderFlakySuiteIssueBody(suite, { report })).toContain(
-      '| `main` | 🔴 Flaky | 2 / 10 (**20%**) | 2026-09-09 06:12 UTC |'
+      '| 🔴 **Flaky**: `main` | **20%**&nbsp;(2&nbsp;/&nbsp;10) | 9&nbsp;Sep&nbsp;06:12 |'
     );
   });
 
@@ -389,34 +432,46 @@ describe('renderFlakySuiteIssueBody', () => {
     const { suite, report } = multiTestReport();
     expect(renderFlakySuiteIssueBody(suite, { report })).toContain(
       [
-        '#### Failures by Target',
+        '#### Status by Target',
         '',
-        '| Target | Environment | Failed builds | Sample failure |',
+        '| Environment | Target | Failed builds | Last failure |',
         '|---|---|---|---|',
-        '| 🔴 `stateful-classic` | Local deployment | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |',
-        '| 🔴 `serverless-security_complete` | MKI | 3 / 64 (**5%**) | 2026-09-07 11:40 UTC |',
-        '| ✅ `serverless-observability_complete` | Local serverless simulation | 0 / 426 |  |',
+        '| 🔴 **Failures**: Local deployment | `stateful-classic` | **10%**&nbsp;(49&nbsp;/&nbsp;509) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd)&nbsp;·&nbsp;9&nbsp;Sep&nbsp;06:12 |',
+        '| 🔴 **Failures**: MKI | `serverless-security_complete` | **5%**&nbsp;(3&nbsp;/&nbsp;64) | 7&nbsp;Sep&nbsp;11:40 |',
+        '| ✅ **No failures**: Local serverless simulation | `serverless-observability_complete` | 0&nbsp;/&nbsp;426 |  |',
       ].join('\n')
     );
   });
 
-  it('names what the config runs in the suite details, unless unknown', () => {
+  it('names the owners and the config in a line, the config from the folder it shares with the file', () => {
     const single = singleTestReport();
-    expect(renderFlakySuiteIssueBody(single.suite, { report: single.report })).toContain(
-      '| **Framework** | Scout (Playwright) |\n| **Category** | UI test |\n| **File** |'
+    const body = renderFlakySuiteIssueBody(single.suite, { report: single.report });
+    expect(body).toContain(
+      '**Owners** `elastic/obs-signals-logs-team` · **Config** [`playwright.config.ts`](' +
+        'https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/synthetics/test/scout/ui/playwright.config.ts)'
     );
-    const report = flakyReport([flakyTest({ configCategory: 'unknown' })]);
+    expect(body).not.toContain('### Suite');
+
+    const report = flakyReport([
+      flakyTest({
+        filePath: 'x-pack/test/functional/apps/discover/group1/a.ts',
+        configPath: 'x-pack/test/functional/apps/discover/config.ts',
+        owners: [],
+      }),
+    ]);
     const [suite] = groupIntoSuites(report.flaky, report.files);
-    expect(renderFlakySuiteIssueBody(suite, { report })).not.toContain('**Category**');
+    expect(renderFlakySuiteIssueBody(suite, { report })).toContain(
+      '\n\n**Config** [`config.ts`](https://github.com/elastic/kibana/blob/main/x-pack/test/functional/apps/discover/config.ts)\n\n'
+    );
   });
 
   it('names the branches each pipeline failed on, collapsing pull request heads', () => {
     const { suite, report } = singleTestReport();
     const body = renderFlakySuiteIssueBody(suite, { report });
-    expect(body).toContain('| 70 / 661 (**11%**) | `main`, 63 PRs | ');
-    expect(body).toContain('| 49 / 509 (**10%**) | `main` | ');
+    expect(body).toContain('| **11%**&nbsp;(70&nbsp;/&nbsp;661) | `main`, 63 PRs | ');
+    expect(body).toContain('| **10%**&nbsp;(49&nbsp;/&nbsp;509) | `main` | ');
     // the count, for a report written before the names were recorded
-    expect(body).toContain('| 1 / 5 (**20%**) | 1 | ');
+    expect(body).toContain('| **20%**&nbsp;(1&nbsp;/&nbsp;5) | 1 | ');
   });
 
   it('omits the target table when no test of the suite recorded a target', () => {
@@ -430,7 +485,7 @@ describe('renderFlakySuiteIssueBody', () => {
     ]);
     const [suite] = groupIntoSuites(report.flaky, report.files);
     const body = renderFlakySuiteIssueBody(suite, { report });
-    expect(body).not.toContain('Failures by Target');
+    expect(body).not.toContain('Status by Target');
     expect(body).toContain('#### Status by Branch');
   });
 
@@ -447,17 +502,15 @@ describe('renderFlakySuiteIssueBody', () => {
         '<code>Error: expect(locator).toBeVisible() failed</code> · 1–9 Sep 2026</summary>'
     );
     expect(body).toContain(
-      [
-        '| **Tests** | *does not keep a hidden histogram after visiting Dashboard*, *reverts breakdown, interval, and visibility on a saved session* |',
-        '| **Pipelines** | `kibana-on-merge` (13), `kibana-pull-request` (8) |',
-        '| **Branches** | `main`, `9.2`, 2 PRs |',
-        '| **Targets** | `serverless-security_complete`, `stateful-classic` |',
-        '| **Last seen** | [#12350](https://buildkite.com/elastic/kibana-on-merge/builds/12350#0199-b000) · 2026-09-09 12:00 UTC |',
-      ].join('\n')
+      'Hit by *does not keep a hidden histogram after visiting Dashboard* and *reverts breakdown, interval, and visibility on a saved session* · ' +
+        'seen on `kibana-on-merge` (13) and `kibana-pull-request` (8) · ' +
+        '`main`, `9.2`, 2 PRs · ' +
+        '`serverless-security_complete`, `stateful-classic` · ' +
+        'last seen [#12350](https://buildkite.com/elastic/kibana-on-merge/builds/12350#0199-b000), 2026-09-09 12:00 UTC\n\n</details>'
     );
     // the newest failure's message is the one shown, first thing inside the block
     expect(body).toContain(
-      '</summary>\n\n```text\nError: expect(locator).toBeVisible() failed\n\nLocator: chart | pipe\n\nfrom b\n```\n\n| Field | Value |'
+      '</summary>\n\n```text\nError: expect(locator).toBeVisible() failed\n\nLocator: chart | pipe\n\nfrom b\n```\n\nHit by '
     );
     // its one build also hit the first error, so the shares add up to more than 100%; an unknown
     // target is not a target
@@ -466,7 +519,8 @@ describe('renderFlakySuiteIssueBody', () => {
         '<code>TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.</code> · 7 Sep 2026</summary>'
     );
     expect(body).toContain(
-      '| **Pipelines** | `kibana-on-merge` only |\n| **Branches** | `main` |\n| **Last seen** | [#12200]'
+      'Hit by *reverts breakdown, interval, and visibility on a saved session* · seen on `kibana-on-merge` · `main` · ' +
+        'last seen [#12200](https://buildkite.com/elastic/kibana-on-merge/builds/12200), 2026-09-07 06:12 UTC'
     );
     // the pull-request-only error is counted, not shown
     expect(body).not.toContain('Cannot read properties of undefined');
@@ -479,7 +533,9 @@ describe('renderFlakySuiteIssueBody', () => {
     ]);
     const body = renderFlakySuiteIssueBody(groupIntoSuites(report.flaky)[0], { report });
     expect(body).toContain('1 distinct error:\n\n<details open>');
-    expect(body).toContain('| **Branches** | - |');
+    expect(body).toContain(
+      '```\n\nSeen on `kibana-on-merge` (40) and `kibana-pull-request` (9) · `stateful-classic` · last seen '
+    );
     expect(body).not.toContain('were excluded');
   });
 
@@ -551,8 +607,12 @@ describe('renderFlakySuiteIssueBody', () => {
       previousIssues: new Map([[testId, [7, 8]]]),
     });
 
-    expect(body).toContain('| Test | Flaky branches | Dashboard | Previously tracked in |');
-    expect(body).toMatch(/^\| creates default alert.* \| \[dashboard\]\(.*\) \| #7, #8 \|$/m);
+    expect(body).toContain(
+      '|  | Test | Flaky branches | Past&nbsp;7&nbsp;days | Previously tracked in |'
+    );
+    expect(body).toMatch(
+      /^\| \[!\[Dashboard\]\(.*\)\]\(.*\) \| creates default alert.* \| #7, #8 \|$/m
+    );
     expect(body).not.toContain('Previously tracked in #');
     expect(
       getIssueMetadata(body, 'suite.previousIssues', undefined, FLAKY_TEST_SUITE_METADATA_PREFIX)
@@ -1106,19 +1166,27 @@ describe('a suite flaky only in a pipeline judged on its own', () => {
   it('names the pipeline where it is flaky, and records only the branch for /skip', () => {
     const body = renderFlakySuiteIssueBody(suite, { report });
 
-    expect(body).toContain('**`main` in `kibana-fips` 29% (4 / 14)**');
-    expect(body).toContain('| `main` in `kibana-fips` | 🔴 Flaky | 4 / 14');
-    expect(body).toContain('| `main` | 🟠 Some failures | 1 / 509');
+    expect(body).toContain('**`main` in `kibana-fips` 29%&nbsp;(4&nbsp;/&nbsp;14)**');
+    expect(body).toContain(
+      '| 🔴 **Flaky**: `main` in `kibana-fips` | **29%**&nbsp;(4&nbsp;/&nbsp;14)'
+    );
+    expect(body).toContain('| 🟠 **Some failures**: `main` | **<1%**&nbsp;(1&nbsp;/&nbsp;509)');
     expect(readFlakySuiteIssueMetadata(body)?.['suite.branches']).toEqual(['main']);
   });
 
   it('gives the FIPS runs of a target their own row in the failures by target', () => {
     const body = renderFlakySuiteIssueBody(suite, { report });
 
-    expect(body).toContain('| 🔴 `stateful-classic` | Local deployment (FIPS enabled) | 4 / 14');
-    expect(body).toContain('| 🔴 `stateful-classic` | Local deployment | 1 / 509');
+    expect(body).toContain(
+      '| 🔴 **Failures**: Local deployment (FIPS enabled) | `stateful-classic` | **29%**&nbsp;(4&nbsp;/&nbsp;14) |'
+    );
+    expect(body).toContain(
+      '| 🔴 **Failures**: Local deployment | `stateful-classic` | **<1%**&nbsp;(1&nbsp;/&nbsp;509) |'
+    );
     // a Cloud target already says where it ran
-    expect(body).toContain('| ✅ `serverless-observability_complete` | MKI | 0 / 65');
+    expect(body).toContain(
+      '| ✅ **No failures**: MKI | `serverless-observability_complete` | 0&nbsp;/&nbsp;65 |'
+    );
   });
 
   it('says where it is still flaky in its comments', () => {

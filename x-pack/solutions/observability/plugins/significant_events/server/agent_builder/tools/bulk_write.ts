@@ -18,15 +18,32 @@ export interface CompactBulkError {
 
 export type BulkWriteErrorCode = 'validation_error' | 'outcome_unknown' | 'bulk_error';
 
+/** Which check refused the write, for telemetry: the message names ids and cannot be counted. */
+export type BulkWriteValidationReason =
+  | 'detection_rule_mismatch'
+  | 'detection_not_stored'
+  | 'unresolved_feature_reference';
+
+export interface BulkWriteValidationDetails {
+  reason: BulkWriteValidationReason;
+  count?: number;
+}
+
 export class BulkWriteError extends Error {
-  constructor(public readonly code: BulkWriteErrorCode, message: string) {
+  constructor(
+    public readonly code: BulkWriteErrorCode,
+    message: string,
+    public readonly details?: BulkWriteValidationDetails
+  ) {
     super(message);
     this.name = 'BulkWriteError';
   }
 }
 
-export const createBulkWriteValidationError = (message: string): BulkWriteError =>
-  new BulkWriteError('validation_error', message);
+export const createBulkWriteValidationError = (
+  message: string,
+  details?: BulkWriteValidationDetails
+): BulkWriteError => new BulkWriteError('validation_error', message, details);
 
 export const createBulkWriteOutcomeUnknownError = (message: string): BulkWriteError =>
   new BulkWriteError('outcome_unknown', message);
