@@ -544,7 +544,11 @@ export const EditRolePage: FunctionComponent<Props> = ({
         {header}
         <KbnDangerCallout
           title={i18n.translate('xpack.security.management.editRole.featureCheckErrorMessage', {
-            defaultMessage: 'Unable to load security features.',
+            defaultMessage: 'Unable to load the role editor',
+          })}
+          text={i18n.translate('xpack.security.management.editRole.featureCheckErrorDescription', {
+            defaultMessage:
+              "Kibana couldn't check which role settings are available. Try again. If the problem continues, contact your administrator.",
           })}
           actionProps={{
             primary: {
@@ -552,7 +556,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
               children: i18n.translate(
                 'xpack.security.management.editRole.retryFeatureCheckButtonLabel',
                 {
-                  defaultMessage: 'Retry',
+                  defaultMessage: 'Try again',
                 }
               ),
             },

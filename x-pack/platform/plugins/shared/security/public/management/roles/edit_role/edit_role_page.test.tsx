@@ -310,11 +310,16 @@ describe('<EditRolePage />', () => {
       return originalGet(options);
     });
     renderEditor(props);
-    await screen.findByText('Unable to load security features.');
+    await screen.findByText('Unable to load the role editor');
+    expect(
+      screen.getByText(
+        "Kibana couldn't check which role settings are available. Try again. If the problem continues, contact your administrator."
+      )
+    ).toBeInTheDocument();
     expect(screen.queryByTestId('sectionLoading')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
     await screen.findByTestId('roleFormNameInput');
-    expect(screen.queryByText('Unable to load security features.')).not.toBeInTheDocument();
+    expect(screen.queryByText('Unable to load the role editor')).not.toBeInTheDocument();
   });
 
   it('prevents duplicate submissions and allows retrying a failed save', async () => {
