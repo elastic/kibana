@@ -336,31 +336,11 @@ agentBuilder.agents.register({
 
 `inference_feature_id` is only supported for built-in agents, and cannot be set by agent types.
 
-### Choosing the agent's reasoning level
-
-A built-in agent can declare the reasoning level its runs use by default:
-
-```ts
-agentBuilder.agents.register({
-  id: 'platform.my_solution.agent',
-  name: 'My solution agent',
-  description: 'Agent specialized in my solution',
-  configuration: {
-    instructions: 'You are a specialist [...]',
-    tools: [{ tool_ids: ['[...]'] }],
-    inference_feature_id: 'my_solution_agent',
-    reasoning_level: 'high',
-  },
-});
-```
-
-`reasoning_level` is only supported for built-in agents, and cannot be set by agent types.
-
 ### Turning off built-in agent features (`capabilities`)
 
 Every agent gets some built-in Agent Builder features, such as the generic attachment tools. An agent that has no use for one can turn it off with `capabilities`:
 
-- **Who can set it:** agent types and built-in agents. Unlike `reasoning_level`, it also works from an agent type's base configuration. It cannot be set through the HTTP API, the agent form, `configuration_overrides` or the `ai.agent` workflow step.
+- **Who can set it:** agent types and built-in agents. Unlike `inference_feature_id`, it also works from an agent type's base configuration. It cannot be set through the HTTP API, the agent form, `configuration_overrides` or the `ai.agent` workflow step.
 - **Defaults:** a missing `capabilities`, a missing key or a missing `enabled` all mean on. Only `enabled: false` turns a feature off.
 - **Merge:** when both an agent type and its agent set `capabilities`, they are merged per key, and the agent's value wins.
 
@@ -512,7 +492,7 @@ const myAttachmentType: AttachmentTypeDefinition<'my_type', MyData> = {
 
 - **Heading.** `title` becomes a `header` and `subtitle` a `context` line, above the body.
 - **Nodes.** `markdown` for prose (GitHub-flavored markdown is converted per surface), `fields` for labeled values, `code` for source shown as written, `table` for rows, `context`, `section`, `quote`, `divider`, `link` and `actions`. Each primitive's schema describes it.
-- **Links back to Kibana.** Use `link` with an app id and a path, not a URL. Slack resolves it against the Kibana URL of the conversation's space, and leaves it out when there's none. `actions` take absolute URLs only: a relative `/app/…` URL would lose the base path and the space. For a button, build one from the context's `kibanaUrl`, the space's public Kibana URL, and leave the button out when it's undefined.
+- **Links back to Kibana.** Use an `actions` button, or a `link`, with an app route and a path, not a URL. Slack resolves it against the Kibana URL of the conversation's space, and leaves it out when there's none. A relative `/app/…` URL would lose the base path and the space.
 - **Limits.** Each primitive has limits, such as 12,000 characters of `code` or 10 items in a `fields` node, and plain text can't be blank. A composition that fails validation, or a mapping that throws, leaves the whole attachment out.
 
 See the `agentBuilderPlatform` types, such as `esql`, `skill` and `connector_setup`, for examples.

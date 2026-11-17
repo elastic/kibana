@@ -32,6 +32,10 @@ const detectionsLabel = i18n.translate('xpack.nightshift.settingsPage.backToDete
   defaultMessage: 'Detections',
 });
 
+const automationsLabel = i18n.translate('xpack.nightshift.settingsPage.backToAutomationsLabel', {
+  defaultMessage: 'Automations',
+});
+
 const settingsTabLabels: Record<SettingsTabId, string> = {
   general: i18n.translate('xpack.nightshift.settingsPage.tabs.general', {
     defaultMessage: 'General',
@@ -78,8 +82,19 @@ export function SettingsPage({ headerProps }: { headerProps: SettingsPageHeaderP
     },
     'data-test-subj': `nightshiftSettingsTab-${id}`,
   }));
-  const backToDetections =
-    tab === 'detections' && new URLSearchParams(search).get('origin') === 'detections';
+  const origin = new URLSearchParams(search).get('origin');
+  const backToDetections = tab === 'detections' && origin === 'detections';
+  const backToAutomations = tab === 'investigations' && origin === 'automations';
+  const backHref = backToDetections
+    ? '/detections/events'
+    : backToAutomations
+    ? '/automations'
+    : '/';
+  const backLabel = backToDetections
+    ? detectionsLabel
+    : backToAutomations
+    ? automationsLabel
+    : nightshiftLabel;
 
   return (
     <>
@@ -87,9 +102,9 @@ export function SettingsPage({ headerProps }: { headerProps: SettingsPageHeaderP
         page="settings"
         back={{
           href: application.getUrlForApp(NIGHTSHIFT_APP_ID, {
-            path: backToDetections ? '/detections/events' : '/',
+            path: backHref,
           }),
-          label: backToDetections ? detectionsLabel : nightshiftLabel,
+          label: backLabel,
         }}
         tabs={tabs}
       />

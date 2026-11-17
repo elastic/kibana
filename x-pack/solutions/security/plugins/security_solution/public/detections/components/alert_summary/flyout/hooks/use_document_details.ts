@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { TimelineEventsDetailsItem } from '@kbn/securitysolution-timeline-search-strategy';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SearchHit } from '../../../../../../common/search_strategy';

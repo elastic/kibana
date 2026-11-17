@@ -141,6 +141,7 @@ describe('WorkflowsManagementApi', () => {
         .fn()
         .mockResolvedValue({ id: 'run-1', workflowId: 'workflow-123' }),
       getWorkflowExecutions: jest.fn(),
+      getWorkflowExecutionStatusCounts: jest.fn(),
       getExecutionStepExecutions: jest.fn(),
       searchStepExecutions: jest.fn(),
       markStepAsResponded: jest.fn(),
@@ -327,6 +328,26 @@ describe('WorkflowsManagementApi', () => {
       expect(access.assertAccess).not.toHaveBeenCalled();
     });
 
+    it('filters editor history by the current document uid', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue({
+        ...workflow,
+        workflowUid: 'uid-current',
+      });
+      const params = { workflowId: workflow.id, request: mockRequest };
+
+      await api.getWorkflowExecutions(params, 'default');
+      expect(mockWorkflowsService.getWorkflowExecutions).toHaveBeenCalledWith(
+        { ...params, accessControlFilter: undefined, workflowUid: 'uid-current' },
+        'default'
+      );
+
+      await api.searchStepExecutions(params, 'default');
+      expect(mockWorkflowsService.searchStepExecutions).toHaveBeenCalledWith(
+        { ...params, workflowUid: 'uid-current' },
+        'default'
+      );
+    });
+
     it('keeps the space filter for cross-workflow history', async () => {
       const access = await mockWorkflowsService.getAccessControl();
       const filter = { bool: { must_not: [{ terms: { workflowId: ['hidden'] } }] } };
@@ -338,6 +359,21 @@ describe('WorkflowsManagementApi', () => {
       expect(mockWorkflowsService.getWorkflow).not.toHaveBeenCalled();
       expect(mockWorkflowsService.getWorkflowExecutions).toHaveBeenCalledWith(
         { request: mockRequest, accessControlFilter: filter },
+        'default'
+      );
+    });
+
+    it('applies the execution access filter to status counts', async () => {
+      const access = await mockWorkflowsService.getAccessControl();
+      const filter = { bool: { must_not: [{ terms: { workflowId: ['hidden'] } }] } };
+      jest.mocked(access.executionFilter).mockResolvedValue(filter);
+      const params = { workflowIds: [workflow.id], request: mockRequest };
+
+      await api.getWorkflowExecutionStatusCounts(params, 'default');
+
+      expect(access.executionFilter).toHaveBeenCalledWith('default', mockRequest);
+      expect(mockWorkflowsService.getWorkflowExecutionStatusCounts).toHaveBeenCalledWith(
+        { ...params, accessControlFilter: filter },
         'default'
       );
     });
@@ -984,6 +1020,9 @@ steps:
           },
           mockRequest
         );
+        expect(mockWorkflowsExecutionEngine.executeWorkflow.mock.calls[0][0]).not.toHaveProperty(
+          'workflowUid'
+        );
       });
 
       it('should throw error when YAML validation fails', async () => {
@@ -1115,6 +1154,7 @@ steps:
       it('should fetch workflow YAML by ID and execute it', async () => {
         mockWorkflowsService.getWorkflow.mockResolvedValue({
           ...mockWorkflowDetailDto,
+          workflowUid: 'uid-current',
           managed: true,
           managedBy: 'workflowsExtensionsExample',
           originManagedWorkflowId: 'system-example-greeting',
@@ -1138,6 +1178,7 @@ steps:
           expect.objectContaining({
             id: 'existing-workflow-id',
             yaml: mockWorkflowYaml,
+            workflowUid: 'uid-current',
             managed: true,
             managedBy: 'workflowsExtensionsExample',
             originManagedWorkflowId: 'system-example-greeting',
@@ -1151,6 +1192,7 @@ steps:
       it('should preserve managed metadata when testing provided YAML for a saved workflow', async () => {
         mockWorkflowsService.getWorkflow.mockResolvedValue({
           ...mockWorkflowDetailDto,
+          workflowUid: 'uid-current',
           managed: true,
           managedBy: 'workflowsExtensionsExample',
           originManagedWorkflowId: 'system-example-greeting',
@@ -1169,6 +1211,7 @@ steps:
         expect(engine.executeWorkflow).toHaveBeenCalledWith(
           expect.objectContaining({
             id: 'existing-workflow-id',
+            workflowUid: 'uid-current',
             managed: true,
             managedBy: 'workflowsExtensionsExample',
             originManagedWorkflowId: 'system-example-greeting',
@@ -1363,6 +1406,52 @@ steps:
           id: 'internal-test-workflow',
           isTestRun: true,
           isEphemeral: true,
+        }),
+        'step1',
+        undefined,
+        {},
+        mockRequest
+      );
+      expect(mockWorkflowsExecutionEngine.executeWorkflowStep.mock.calls[0][0]).not.toHaveProperty(
+        'workflowUid'
+      );
+    });
+
+    it('links a step test of a saved workflow to that document', async () => {
+      mockWorkflowsService.validateWorkflow.mockResolvedValue({
+        valid: true,
+        diagnostics: [],
+        parsedWorkflow: {
+          version: '1',
+          name: 'Test Workflow',
+          enabled: true,
+          triggers: [{ type: 'manual' }],
+          steps: [{ name: 'step1', type: 'console' }],
+        },
+      });
+      mockWorkflowsService.getWorkflow.mockResolvedValue({
+        id: 'existing-workflow-id',
+        workflowUid: 'uid-current',
+      } as WorkflowDetailDto);
+      mockWorkflowsExecutionEngine.executeWorkflowStep.mockResolvedValue({
+        workflowExecutionId: 'test-step-exec-id',
+      });
+
+      await api.testStep(
+        'name: Test Workflow',
+        'step1',
+        'existing-workflow-id',
+        undefined,
+        {},
+        'default',
+        mockRequest
+      );
+
+      expect(mockWorkflowsExecutionEngine.executeWorkflowStep).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'existing-workflow-id',
+          workflowUid: 'uid-current',
+          isTestRun: true,
         }),
         'step1',
         undefined,
@@ -2098,6 +2187,86 @@ steps:
       ).resolves.toBe(updateResult);
 
       expect(mockWorkflowsService.updateWorkflow).toHaveBeenCalled();
+    });
+  });
+
+  describe('getWorkflowDependentsImpact', () => {
+    it('grades a draft with a YAML syntax error like any draft saved invalid', async () => {
+      const definition = {
+        name: 'Test workflow',
+        triggers: [{ type: 'manual' }],
+        steps: [{ name: 'log', type: 'console', with: { message: 'hi' } }],
+      };
+      mockWorkflowsService.getWorkflow.mockResolvedValue({
+        id: 'workflow-123',
+        name: 'Test workflow',
+        enabled: true,
+        valid: true,
+        definition,
+      } as any);
+      const caller = {
+        id: 'caller',
+        name: 'Caller',
+        enabled: true,
+        definition: {
+          name: 'Caller',
+          steps: [
+            { name: 'run', type: 'workflow.execute', with: { 'workflow-id': 'workflow-123' } },
+          ],
+        },
+      };
+      Object.assign(mockWorkflowsService, {
+        getDefinitionToStore: jest.fn().mockResolvedValue(null),
+        findWorkflowsCalling: jest.fn(async (ids: string[]) =>
+          ids.includes('workflow-123') ? [caller] : []
+        ),
+      });
+
+      const { analysis, calledWorkflows } = await api.getWorkflowDependentsImpact(
+        'workflow-123',
+        'default',
+        mockRequest,
+        'steps: ['
+      );
+
+      expect(analysis.dependents).toEqual([
+        expect.objectContaining({
+          workflowId: 'caller',
+          status: 'breaking',
+          issues: [expect.objectContaining({ kind: 'childInvalid', isNew: true })],
+        }),
+      ]);
+      expect(calledWorkflows).toEqual([]);
+    });
+
+    it('leaves workflows bound to a service account out of the background indexing', async () => {
+      const unindexed = (id: string, settings?: Record<string, unknown>) => ({
+        id,
+        name: id,
+        enabled: true,
+        definition: { name: id, settings, steps: [] },
+      });
+      mockWorkflowsService.getWorkflow.mockResolvedValue({
+        id: 'workflow-123',
+        name: 'Test workflow',
+        enabled: true,
+        valid: true,
+        definition: { name: 'Test workflow', triggers: [{ type: 'manual' }], steps: [] },
+      } as any);
+      const indexCalledWorkflowIds = jest.fn().mockResolvedValue(undefined);
+      Object.assign(mockWorkflowsService, {
+        indexCalledWorkflowIds,
+        findWorkflowsCalling: jest.fn(
+          async (_ids: string[], _spaceId: string, options?: { includeUnindexed?: boolean }) =>
+            options?.includeUnindexed
+              ? [unindexed('bound', { run_as: 'service-account-1' }), unindexed('unbound')]
+              : []
+        ),
+      });
+
+      await api.getWorkflowDependentsImpact('workflow-123', 'default', mockRequest, undefined);
+
+      expect(indexCalledWorkflowIds).toHaveBeenCalledWith(['unbound']);
     });
   });
 

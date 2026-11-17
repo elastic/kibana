@@ -12,6 +12,7 @@ import type {
   ManagedWorkflowId,
   ManagedWorkflowTemplateValues,
   ManagedWorkflowTemplateValuesForId,
+  TemplatedManagedWorkflowId,
 } from '../managed';
 
 interface ManagedWorkflowOperationBaseOptions {
@@ -51,6 +52,34 @@ export type ManagedWorkflowServiceInstallOptions = ManagedWorkflowOperationBaseO
     values?: ManagedWorkflowTemplateValues;
   };
 
+/**
+ * One static workflow in an `installMany` batch. Templated workflows are not supported here yet;
+ * install them with `install()`. It's a typing limit, not a runtime one: one array can't type each
+ * item's `values` by its own id. A generic helper function that builds one item per call would
+ * solve it.
+ */
+export type ManagedWorkflowInstallManyItem = ManagedWorkflowOperationBaseOptions & {
+  id: Exclude<ManagedWorkflowId, TemplatedManagedWorkflowId>;
+};
+
+export type ManagedWorkflowServiceInstallManyItem = ManagedWorkflowOperationBaseOptions & {
+  id: ManagedWorkflowId;
+  values?: ManagedWorkflowTemplateValues;
+};
+
+export interface ManagedWorkflowInstallFailure {
+  /** Managed workflow definition id. */
+  id: ManagedWorkflowId;
+  /** Workflow document id, when the item resolved to one. */
+  workflowId?: string;
+  spaceId: string;
+  error: Error;
+}
+
+export interface ManagedWorkflowInstallManyResult {
+  failed: ManagedWorkflowInstallFailure[];
+}
+
 export type ExecuteManagedWorkflowOptions = ManagedWorkflowOperationOptions & {
   inputs?: Record<string, unknown>;
   triggeredBy?: string;
@@ -77,7 +106,8 @@ export interface ManagedWorkflowStatusReport {
   storedVersion: number | null;
   registryVersion: number;
   storedHash: string | null;
-  registryHash: string;
+  /** Hash of the YAML the document should hold now; `null` for a template it cannot render. */
+  registryHash: string | null;
 }
 
 /** Persisted state exposed only to the plugin that owns the managed workflow. */
@@ -124,6 +154,21 @@ export interface RegisteredManagedWorkflowsLifecycleApi {
     id: TId,
     options: ManagedWorkflowInstallOptions<TId>
   ) => Promise<void>;
+  /**
+   * Install or update this plugin's static managed workflows in one pass: one read, then `_bulk`
+   * writes in bounded chunks with one refresh each. Use it for the static set a plugin installs at
+   * start-up; `install()` keeps writing one workflow at a time.
+   *
+   * A failed item (unknown or dynamic definition, a `settings.run_as` binding, a user workflow
+   * with the same id, a write error) is reported in `failed` and does not stop the others. Rejects
+   * only when the whole pass fails, such as the initial read. Best-effort like `install()`: may
+   * resolve without persisting when Workflows is unavailable, Kibana is stopping, or ES is not
+   * ready for managed writes. Templated workflows are not accepted yet; see
+   * {@link ManagedWorkflowInstallManyItem}.
+   */
+  installMany: (
+    items: ReadonlyArray<ManagedWorkflowInstallManyItem>
+  ) => Promise<ManagedWorkflowInstallManyResult>;
   uninstall: <TId extends ManagedWorkflowId>(
     id: TId,
     options: ManagedWorkflowOperationOptions
@@ -233,6 +278,14 @@ export interface ResumeExternalHitlParams {
 
 export interface WorkflowsClient {
   isWorkflowsAvailable: boolean;
+  /**
+   * Emit a trigger event.
+   *
+   * `authenticatedUser` is a principal from a verified authentication, the same kind of value
+   * the inbound hub forwards after Elasticsearch authenticates a service-account bearer. It is
+   * written as `executedBy` and skips the missing-identity check, so an unverified name is
+   * recorded as the run's identity.
+   */
   emitEvent: (
     triggerId: string,
     payload: Record<string, unknown>,
