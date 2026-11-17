@@ -442,6 +442,71 @@ describe('checkStructurePreserved', () => {
     expect(graded.score).toBe(1);
   });
 
+  it.each([
+    [
+      'a merge chained across attempts',
+      tree([
+        'S1([Otel delivery gateway errors]) --> E1[Check gateway error logs]',
+        'E1 --> D1{{Errors point at one upstream?}}',
+        'D1 -->|yes| E2[Correlate with the upstream pod]',
+        'D1 -->|yes| E3[Check the upstream pod restarts]',
+        'D1 -->|yes| E4[Check the upstream pod lifecycle]',
+        'E2 --> X1((Upstream pod loss))',
+        'E3 --> X1',
+        'E4 --> X1',
+        'D1 -->|no| X2((Gateway fault))',
+      ]),
+      tree([
+        'S1([Otel delivery gateway errors]) --> E1[Check gateway error logs]',
+        'E1 --> D1{{Errors point at one upstream?}}',
+        'D1 -->|yes| E4[Check the upstream pod lifecycle]',
+        'E4 --> X1((Upstream pod loss))',
+        'D1 -->|no| X2((Gateway fault))',
+      ]),
+      [
+        { from: ['E2'], into: 'E3' },
+        { from: ['E3'], into: 'E4' },
+      ],
+    ],
+    [
+      'a merge that combines differently labelled edges',
+      tree([
+        'S1([Otel delivery gateway errors]) --> E1[Check gateway error logs]',
+        'E1 --> D1{{Errors point at one upstream?}}',
+        'D1 -->|pod named| E2[Correlate with the upstream pod]',
+        'D1 -->|pod restarted| E3[Check the upstream pod restarts]',
+        'E2 --> X1((Upstream pod loss))',
+        'E3 --> X1',
+        'D1 -->|no| X2((Gateway fault))',
+      ]),
+      tree([
+        'S1([Otel delivery gateway errors]) --> E1[Check gateway error logs]',
+        'E1 --> D1{{Errors point at one upstream?}}',
+        'D1 -->|pod named or restarted| E3[Check the upstream pod restarts]',
+        'E3 --> X1((Upstream pod loss))',
+        'D1 -->|no| X2((Gateway fault))',
+      ]),
+      [{ from: ['E2'], into: 'E3' }],
+    ],
+  ])('passes %s', (_case, prior, submitted, merges) => {
+    // One submit per merge, as a retry would send them.
+    const submissions = merges.map((merge) =>
+      submit([], {
+        symptom_trees: [{ tree_id: TREE_ID, merged_nodes: [merge] }],
+        traversals: [{ tree_id: TREE_ID, visited_path: ['S1', 'E1'] }],
+      })
+    );
+    const base = context({ prior, submitted, causalConfirmed: false });
+
+    const graded = checkStructurePreserved({
+      ...base,
+      output: { ...base.output, submissions },
+    });
+
+    expect(graded.explanation).toContain('keeps every node and edge');
+    expect(graded.score).toBe(1);
+  });
+
   it('fails when a merge drops an unrelated branch of the node that absorbed it', () => {
     const duplicate = tree([
       'S1([Otel delivery gateway errors]) --> E1[Check gateway error logs]',

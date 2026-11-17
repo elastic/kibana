@@ -103,25 +103,38 @@ const nodePair = (source: string, target: string): string =>
   [source, target].join(NODE_PAIR_SEPARATOR);
 
 /**
- * Each node a submit for this tree folded away, mapped to the node that absorbed it. Only folds the
- * submitted tree shows count: the removed node is gone and the absorbing node is there. A merge a
- * rejected attempt proposed but the final tree does not carry out is ignored.
+ * Each node a submit for this tree folded away, mapped to the node that finally absorbed it. Folds
+ * chain across attempts (E2 into E3, then E3 into E4, maps E2 to E4). Only folds the submitted tree
+ * shows count: the removed node is gone and its final absorbing node is there. A merge a rejected
+ * attempt proposed but the final tree does not carry out is ignored.
  */
 const mergeTargets = (
   submissions: SubmitArguments[],
   submitted: DecisionTreeView | undefined
 ): Map<string, string> => {
   const present = new Set((submitted?.nodes ?? []).map(({ node_id: nodeId }) => nodeId));
-  const targets = new Map<string, string>();
+  const declared = new Map<string, string>();
   for (const submission of submissions) {
     for (const tree of submission.symptom_trees ?? []) {
       for (const { from, into } of tree.merged_nodes ?? []) {
-        if (!into || !present.has(into)) continue;
-        for (const id of from ?? []) {
-          if (id !== into && !present.has(id)) targets.set(id, into);
-        }
+        if (!into) continue;
+        for (const id of from ?? []) if (id !== into) declared.set(id, into);
       }
     }
+  }
+  const finalTarget = (id: string): string => {
+    const seen = new Set([id]);
+    let target = declared.get(id) ?? id;
+    while (declared.has(target) && !seen.has(target)) {
+      seen.add(target);
+      target = declared.get(target) ?? target;
+    }
+    return target;
+  };
+  const targets = new Map<string, string>();
+  for (const id of declared.keys()) {
+    const target = finalTarget(id);
+    if (target !== id && !present.has(id) && present.has(target)) targets.set(id, target);
   }
   return targets;
 };
@@ -387,8 +400,8 @@ const reaches = (tree: DecisionTreeView, from: string, to: string): boolean => {
 /**
  * The seeded tree keeps every node the round did not walk or merge (same id, type and label) and
  * every edge (same source, target and condition, ✅ ignored), with edges moved through the merges
- * the submitted tree carries out. A moved edge may change its condition, since folding combines
- * branches, but must still join the same nodes. A walked edge may be relabelled when it is the only
+ * the submitted tree carries out. Edges a fold moved onto one node pair, and any edge already
+ * there, may be combined under new conditions, but the pair must still be joined. A walked edge may be relabelled when it is the only
  * edge between its nodes, or gain verified steps when the walked branch still reaches its old
  * target.
  */
@@ -411,6 +424,14 @@ export const checkStructurePreserved = ({ output, seededTreeId }: CheckContext):
   const after = new Map(submitted.nodes.map((node) => [node.node_id, node]));
   const afterEdges = new Set(submitted.edges.map(decisionEdgeKey));
   const afterPairs = new Set(submitted.edges.map(edgePair));
+  // Node pairs a fold moved at least one prior edge onto. Folding may combine every edge on such a
+  // pair, including one that was already there, into fewer edges with new conditions.
+  const collapsedPairs = new Set(
+    prior.edges
+      .map((edge) => ({ edge, moved: remapEdge(edge, merges) }))
+      .filter(({ edge, moved }) => edgePair(edge) !== edgePair(moved))
+      .map(({ moved }) => edgePair(moved))
+  );
   const walkedOnTree = walkedEdges(submitted, submissions);
   const priorPairCounts = edgesPerPair(prior.edges.map((edge) => remapEdge(edge, merges)));
   const rewrittenByWalk = (edge: DecisionEdgeView): boolean => {
@@ -445,8 +466,7 @@ export const checkStructurePreserved = ({ output, seededTreeId }: CheckContext):
     // The fold joined the two ends into one node.
     if (source === target) continue;
     if (afterEdges.has(decisionEdgeKey(edge)) || rewrittenByWalk(edge)) continue;
-    const moved = source !== priorEdge.source_node_id || target !== priorEdge.target_node_id;
-    if (moved && afterPairs.has(edgePair(edge))) continue;
+    if (collapsedPairs.has(edgePair(edge)) && afterPairs.has(edgePair(edge))) continue;
     problems.push(`${treeId}: edge ${formatEdge(priorEdge)} was removed.`);
   }
   return result(problems, `${treeId} keeps every node and edge the round did not walk or merge.`);
