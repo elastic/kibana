@@ -11,7 +11,7 @@ import type { StateStore } from './state_store';
  * The end of the last fully processed minute of each strategy, in epoch milliseconds. A strategy
  * that never ran is absent.
  */
-export async function readWatermarks({
+export async function readGeneratorStates({
   state,
   spaceId,
   strategyIds,
@@ -23,23 +23,23 @@ export async function readWatermarks({
   const stored = await Promise.all(
     strategyIds.map(async (strategyId) => ({
       strategyId,
-      watermark: await state.get({ spaceId, kind: 'watermark', key: strategyId }),
+      generatorState: await state.get({ spaceId, kind: 'generator_state', key: strategyId }),
     }))
   );
 
   return new Map(
-    stored.flatMap(({ strategyId, watermark }) =>
-      watermark ? [[strategyId, watermark.value.processed_until] as const] : []
+    stored.flatMap(({ strategyId, generatorState }) =>
+      generatorState ? [[strategyId, generatorState.value.processed_until] as const] : []
     )
   );
 }
 
 /**
- * Moves a strategy's watermark forward. It never moves back, so a late writer cannot undo the
+ * Moves a strategy's generator state forward. It never moves back, so a late writer cannot undo the
  * progress of a newer run. A conflict is thrown: the caller's lease expired and another node took
  * over, so the caller must stop writing.
  */
-export async function advanceWatermark({
+export async function advanceGeneratorState({
   state,
   spaceId,
   strategyId,
@@ -50,7 +50,7 @@ export async function advanceWatermark({
   strategyId: string;
   processedUntil: number;
 }): Promise<void> {
-  const current = await state.get({ spaceId, kind: 'watermark', key: strategyId });
+  const current = await state.get({ spaceId, kind: 'generator_state', key: strategyId });
 
   if (current && current.value.processed_until >= processedUntil) {
     return;
@@ -58,7 +58,7 @@ export async function advanceWatermark({
 
   await state.put({
     spaceId,
-    kind: 'watermark',
+    kind: 'generator_state',
     key: strategyId,
     value: { processed_until: processedUntil },
     version: current?.version,

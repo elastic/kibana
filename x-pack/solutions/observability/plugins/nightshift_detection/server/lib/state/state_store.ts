@@ -15,7 +15,7 @@ export interface VersionedState<TKind extends StateKind> {
 }
 
 /**
- * Documents the engine keeps per space: the run lease and the strategy watermarks. A document is
+ * Documents the engine keeps per space: the run lease and the generator state of each strategy. A document is
  * addressed by space, kind and an optional key.
  */
 export interface StateStore {

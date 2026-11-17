@@ -14,7 +14,7 @@ import { DetectionSignalStore } from '../signals/signal_store';
 import { wrapReading } from '../signals/wrap_reading';
 import { acquireRunLease } from '../state/run_lease';
 import { StateStore } from '../state/state_store';
-import { advanceWatermark, readWatermarks } from '../state/watermarks';
+import { advanceGeneratorState, readGeneratorStates } from '../state/generator_states';
 import { StrategyCatalog } from '../strategies/strategy_catalog';
 import type { GenerateResult } from '../strategies/types';
 import { DetectionEngineDataClient } from './es_client_tokens';
@@ -54,7 +54,7 @@ function rejectOnAbort(signal: AbortSignal): Promise<never> {
 
 /**
  * One tick of the detection engine in one space: takes the space's lease, runs every due
- * strategy over its window, stores the signals, and moves each strategy's watermark. It knows no
+ * strategy over its window, stores the signals, and moves each strategy's generator state. It knows no
  * identity: the clients and the tick's context are injected, so the `_tick` route decides who the
  * tick runs as.
  */
@@ -78,12 +78,12 @@ export class EngineRunner {
    * 2. Take the space's lease, or report who holds it.
    * 3. Plan a window for every strategy that is due.
    * 4. Run the due strategies in parallel within the run budget.
-   * 5. Store each strategy's signals and move its watermark when nothing was lost.
+   * 5. Store each strategy's signals and move its generator state when nothing was lost.
    * 6. Triage and lifecycle (not built yet).
    * 7. Release the lease.
    *
    * Strategies that are not due are left out of the result. A strategy that fails or runs out of
-   * time is reported and keeps its watermark, so the next tick reads its window again; the others
+   * time is reported and keeps its generator state, so the next tick reads its window again; the others
    * are not affected.
    */
   public async run({
@@ -119,14 +119,14 @@ export class EngineRunner {
     }
 
     try {
-      // 3. What is due: watermarks per strategy, then a window per due strategy.
+      // 3. What is due: the generator state per strategy, then a window per due strategy.
       const strategies = this.catalog.list();
-      const watermarks = await readWatermarks({
+      const processedUntil = await readGeneratorStates({
         state: this.state,
         spaceId,
         strategyIds: strategies.map(({ descriptor }) => descriptor.id),
       });
-      const windows = planWindows({ strategies, watermarks, now, skipBacklog });
+      const windows = planWindows({ strategies, processedUntil, now, skipBacklog });
 
       // 4 and 5. Every due strategy runs on its own; one failing does not stop the others.
       const sources = windows.length > 0 ? await this.enabledSources.list() : [];
@@ -217,7 +217,7 @@ export class EngineRunner {
       ]);
       notes.push(...generated.notes);
       if (generated.truncated) {
-        // The same cap would cut the same window again, so the watermark still moves.
+        // The same cap would cut the same window again, so the generator state still moves.
         notes.push(`${strategyId}: reading stopped at a cap, so the window is partly covered`);
       }
 
@@ -256,7 +256,7 @@ export class EngineRunner {
       }
 
       assertLeaseHeld(leaseDeadline);
-      await advanceWatermark({ state: this.state, spaceId, strategyId, processedUntil: to });
+      await advanceGeneratorState({ state: this.state, spaceId, strategyId, processedUntil: to });
     } catch (error) {
       result.error = getErrorMessage(error);
       this.logger.warn(`Strategy ${strategyId} failed in space ${spaceId}: ${result.error}`);

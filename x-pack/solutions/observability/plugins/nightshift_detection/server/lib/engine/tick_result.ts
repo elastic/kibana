@@ -15,7 +15,7 @@ export interface StrategyRunResult {
   signals: number;
   skipped_minutes: number;
   notes: string[];
-  /** Set when the strategy failed or ran out of time; its watermark did not move. */
+  /** Set when the strategy failed or ran out of time; its generator state did not move. */
   error?: string;
 }
 

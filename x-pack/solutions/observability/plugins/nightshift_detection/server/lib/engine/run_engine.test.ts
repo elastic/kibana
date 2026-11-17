@@ -14,7 +14,7 @@ import { InMemorySignalStore } from '../../test_utils/in_memory_signal_store';
 import { InMemoryStateStore } from '../../test_utils/in_memory_state_store';
 import { createTestStrategy, TEST_STRATEGY_ID } from '../../test_utils/test_strategy';
 import { EngineRunner } from './run_engine';
-import { readWatermarks } from '../state/watermarks';
+import { readGeneratorStates } from '../state/generator_states';
 
 const SPACE_ID = 'default';
 const NOW = Date.UTC(2026, 10, 13, 12, 0);
@@ -59,7 +59,7 @@ function createFailingStrategy(): DetectionStrategy {
 }
 
 describe('EngineRunner', () => {
-  it('writes the signals of a due strategy and moves its watermark', async () => {
+  it('writes the signals of a due strategy and moves its generator state', async () => {
     const { runner, state, signals } = createRunner();
 
     const result = await runner.run({ now: NOW });
@@ -70,13 +70,13 @@ describe('EngineRunner', () => {
     });
     expect(signals.written).toHaveLength(2);
     expect(
-      (await readWatermarks({ state, spaceId: SPACE_ID, strategyIds: [TEST_STRATEGY_ID] })).get(
-        TEST_STRATEGY_ID
-      )
+      (
+        await readGeneratorStates({ state, spaceId: SPACE_ID, strategyIds: [TEST_STRATEGY_ID] })
+      ).get(TEST_STRATEGY_ID)
     ).toBe(NOW);
   });
 
-  it('keeps the watermark of a failing generator and still runs the others', async () => {
+  it('keeps the generator state of a failing generator and still runs the others', async () => {
     const { runner, state, signals } = createRunner({
       strategies: [createFailingStrategy(), createTestStrategy()],
     });
@@ -91,15 +91,15 @@ describe('EngineRunner', () => {
       ],
     });
     expect(signals.written).toHaveLength(2);
-    const watermarks = await readWatermarks({
+    const processedUntil = await readGeneratorStates({
       state,
       spaceId: SPACE_ID,
       strategyIds: ['failing_strategy', TEST_STRATEGY_ID],
     });
-    expect([...watermarks.keys()]).toEqual([TEST_STRATEGY_ID]);
+    expect([...processedUntil.keys()]).toEqual([TEST_STRATEGY_ID]);
   });
 
-  it('keeps the watermark when the store rejects a signal', async () => {
+  it('keeps the generator state when the store rejects a signal', async () => {
     const { runner, state } = createRunner({
       signals: new InMemorySignalStore(['test-series-breached']),
     });
@@ -110,7 +110,7 @@ describe('EngineRunner', () => {
       strategies: [{ id: TEST_STRATEGY_ID, signals: 1, error: expect.any(String) }],
     });
     expect(
-      await readWatermarks({ state, spaceId: SPACE_ID, strategyIds: [TEST_STRATEGY_ID] })
+      await readGeneratorStates({ state, spaceId: SPACE_ID, strategyIds: [TEST_STRATEGY_ID] })
     ).toEqual(new Map());
   });
 
