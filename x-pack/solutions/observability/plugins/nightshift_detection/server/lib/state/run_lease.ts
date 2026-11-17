@@ -21,7 +21,7 @@ export const DEFAULT_RUN_LEASE_TTL_MS = 6 * 60_000;
 export interface HeldRunLease {
   owner: string;
   expires_at: string;
-  /** Deletes the lease if it is still ours. Call it in a `finally`. */
+  /** Ends the lease if it is still ours. Call it in a `finally`. */
   release(): Promise<void>;
 }
 
@@ -85,9 +85,15 @@ export async function acquireRunLease({
       expires_at: lease.expires_at,
       release: async () => {
         try {
-          await state.delete({ spaceId, kind: 'lease', version });
+          // Expired from the moment it was acquired, so it is free for the next acquirer.
+          await state.put({
+            spaceId,
+            kind: 'lease',
+            value: { ...lease, expires_at: lease.acquired_at },
+            version,
+          });
         } catch (error) {
-          // Someone took over our expired lease; theirs is not ours to delete.
+          // Someone took over our expired lease; theirs is not ours to end.
           if (!(error instanceof StateConflictError)) {
             throw error;
           }

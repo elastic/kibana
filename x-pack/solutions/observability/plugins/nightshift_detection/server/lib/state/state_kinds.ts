@@ -6,10 +6,7 @@
  */
 
 /** The write token of a state document: a conditional write presents the version it read. */
-export interface StateVersion {
-  seq_no: number;
-  primary_term: number;
-}
+export type StateVersion = string;
 
 /** The lease that serialises engine runs of one space. */
 export interface RunLeaseDocument {
