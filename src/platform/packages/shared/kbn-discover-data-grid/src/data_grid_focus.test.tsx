@@ -364,6 +364,31 @@ describe('DataGrid keyboard and logical focus', () => {
     outsideButton.remove();
   });
 
+  it.each([
+    { key: '{ArrowDown}', start: 'Name 1', destination: 'Name 2' },
+    { key: '{ArrowUp}', start: 'Name 0', destination: 'Name 0' },
+    { key: '{Home}', start: '1', destination: 'Name 1' },
+    { key: '{End}', start: 'Name 1', destination: '1' },
+    { key: '{Control>}{Home}{/Control}', start: '1', destination: 'Name 0' },
+    { key: '{Meta>}{End}{/Meta}', start: 'Name 1', destination: '99' },
+  ])(
+    'resumes $key navigation when pointer focus remains on the grid',
+    async ({ key, start, destination }) => {
+      const user = userEvent.setup();
+      renderGrid();
+      await user.click(screen.getByRole('gridcell', { name: start }));
+
+      const grid = screen.getByRole('grid');
+      focusVisibleTestHarness.set(false);
+      await user.click(grid);
+      expect(document.activeElement).toBe(grid);
+
+      await user.keyboard(key);
+
+      await expectFocus(destination);
+    }
+  );
+
   it('preserves logical row and column identity through reordering', async () => {
     const { rerender } = renderGrid();
     const activeCell = screen.getByRole('gridcell', { name: 'Name 1' });

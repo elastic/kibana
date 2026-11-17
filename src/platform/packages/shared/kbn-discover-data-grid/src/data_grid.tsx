@@ -23,6 +23,7 @@ import { useDataGridAnnouncements } from './data_grid_announcements';
 import { DataGridCell } from './data_grid_cell';
 import type { DataGridColumn } from './data_grid_column';
 import { getDataGridColumnValue } from './data_grid_column';
+import { getDataGridNavigationIntent } from './data_grid_navigation';
 import { DEFAULT_DATA_GRID_ROW_HEIGHT, getDataGridStyles } from './data_grid.styles';
 import { useDataGridFocus } from './use_data_grid_focus';
 
@@ -206,6 +207,31 @@ export const DataGrid = <TRow extends object>({
     },
     [columnIds, focus, rowIds]
   );
+  const onGridKeyDownCapture = useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (event.key === keys.TAB) {
+        focus.releaseFocusOwnership();
+        return;
+      }
+      if (event.target !== event.currentTarget || !focus.activeCell) {
+        return;
+      }
+
+      const navigationIntent = getDataGridNavigationIntent(
+        { rowIds, columnIds },
+        focus.activeCell,
+        event.key,
+        event.ctrlKey || event.metaKey
+      );
+      if (!navigationIntent.handled) {
+        return;
+      }
+
+      event.preventDefault();
+      void focus.focusCell(navigationIntent.target ?? focus.activeCell);
+    },
+    [columnIds, focus, rowIds]
+  );
 
   return (
     <>
@@ -221,11 +247,7 @@ export const DataGrid = <TRow extends object>({
           css={styles.grid}
           style={{ blockSize: height, scrollPaddingBlockStart: headerHeight }}
           onFocus={onGridFocus}
-          onKeyDownCapture={(event) => {
-            if (event.key === keys.TAB) {
-              focus.releaseFocusOwnership();
-            }
-          }}
+          onKeyDownCapture={onGridKeyDownCapture}
         >
           <div ref={setHeaderRowGroupElement} role="rowgroup" css={styles.headerRowGroup}>
             {headerGroups.map((headerGroup, headerGroupIndex) => (
