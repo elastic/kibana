@@ -193,8 +193,7 @@ export class HydrateAlertDataStep implements DispatcherStep {
       let offset = 0;
       while (offset < chunk.length) {
         const processed = chunkStart + offset;
-        const budgetReached =
-          hydratedBytes + this.maxResponseSizeBytes > this.tickBudgetBytes;
+        const budgetReached = hydratedBytes + this.maxResponseSizeBytes > this.tickBudgetBytes;
         if (budgetReached && processed >= firstSeriesSize) {
           return { rows, oversizedAlertIds, deferredAlertIds: alertIds.slice(processed) };
         }
