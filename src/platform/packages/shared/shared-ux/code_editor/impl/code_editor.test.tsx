@@ -144,6 +144,14 @@ describe('<CodeEditor />', () => {
     expect((monaco.languages.registerHoverProvider as jest.Mock).mock.calls.length).toBe(1);
   });
 
+  test('looks up the find controller on mount to place the find widget tooltips below their controls', () => {
+    renderWithI18n(<CodeEditor languageId="loglang" value={logs} onChange={() => {}} />);
+
+    expect(mockedEditorInstance?.getContribution).toHaveBeenCalledWith(
+      'editor.contrib.findController'
+    );
+  });
+
   test('scopedCss receives selectors for this instance and is injected once per scope', () => {
     const scopedCss = jest.fn(() => ({ outline: 'none' }));
 

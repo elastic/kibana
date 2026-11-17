@@ -39,6 +39,7 @@ import {
   useFitToContent,
   ReBroadcastMouseDownEvents,
   usePersistHoverContentWidget,
+  useFindWidgetTooltipPosition,
   globalMonacoStyleOverrides,
 } from './mods';
 import { styles } from './editor.styles';
@@ -323,6 +324,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     [persistHoverContentWidget]
   );
 
+  const placeFindWidgetTooltipsBelow = useFindWidgetTooltipPosition();
+
   const isReadOnly = options?.readOnly ?? false;
 
   const [_editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor | null>(null);
@@ -593,6 +596,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       hoverContentPersistenceSubscription.current?.dispose();
       hoverContentPersistenceSubscription.current = wireHoverContentPersistence(editor);
 
+      placeFindWidgetTooltipsBelow(editor);
+
       if (enableCustomContextMenu) {
         registerContextMenuActions({
           editor,
@@ -614,6 +619,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       isReadOnly,
       customContextMenuActions,
       wireHoverContentPersistence,
+      placeFindWidgetTooltipsBelow,
     ]
   );
 
