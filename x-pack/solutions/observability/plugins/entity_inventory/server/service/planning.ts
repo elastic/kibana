@@ -7,9 +7,10 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { RegisteredEntityDefinition } from '@kbn/entity-store/server';
+import type { SourceError } from '../../common';
 import { InventoryTypeDefinitionError } from '../inventory/errors/inventory_type_definition_error';
 import { probeSources } from '../inventory/executor';
-import type { ProbeResult, SourceError } from '../inventory/executor';
+import type { ProbeResult } from '../inventory/executor';
 import { getDynamicBlock, planSources } from '../inventory/generator';
 import type { QueryPlan } from '../inventory/generator';
 

@@ -8,7 +8,8 @@
 import type { OutputColumn } from './columns';
 import { fieldOfColumn } from './columns';
 import { quoteIdentifier } from './esql_syntax';
-import type { NamedParams, QueryPlan } from './types';
+import type { NamedParams } from '../../../common';
+import type { QueryPlan } from './types';
 
 /** The values picked in dropdowns: column name to the labels selected, as the response shows them. */
 export type AttributeSelections = Record<string, string[]>;

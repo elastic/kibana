@@ -9,7 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { RegisteredEntityDefinition } from '@kbn/entity-store/server';
 import { InventoryRequestError } from '../inventory/errors/inventory_request_error';
 import { executeEsql, planRowLimit, toSourceError } from '../inventory/executor';
-import type { EsqlQueryResult, SourceError } from '../inventory/executor';
+import type { EsqlQueryResult } from '../inventory/executor';
 import {
   ATTRIBUTE_VALUE_COLUMN,
   generateAttributeValuesQueries,
@@ -18,7 +18,7 @@ import {
 import type { GeneratedQuery, QueryPlan } from '../inventory/generator';
 import { noReadableIndexReason, partialValuesReason } from '../inventory/reasons';
 import type { ListAttributeValuesRequest } from '../inventory/types';
-import type { AttributeValuesResponse } from '../../common';
+import type { AttributeValuesResponse, SourceError } from '../../common';
 import { probeAndPlanSources, toTypeDefinitionError } from './planning';
 
 /** What listing the values of an attribute reads from the plugin. */

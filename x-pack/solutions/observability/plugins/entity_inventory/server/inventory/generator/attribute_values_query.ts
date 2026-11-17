@@ -16,7 +16,8 @@ import { resolveIdentityPlan } from './identity';
 import { assertParses } from './parse_guard';
 import { CONTINUATION, INDEX_MODE, TIMESTAMP } from './constants';
 import { assertValidLimit, sourceCommandOf } from './utils';
-import type { GeneratedQuery, NamedParams, QueryPlan, TimeWindow } from './types';
+import type { NamedParams } from '../../../common';
+import type { GeneratedQuery, QueryPlan, TimeWindow } from './types';
 
 /** The column the query returns: the distinct values of the attribute, as text. */
 export const ATTRIBUTE_VALUE_COLUMN = 'value';
