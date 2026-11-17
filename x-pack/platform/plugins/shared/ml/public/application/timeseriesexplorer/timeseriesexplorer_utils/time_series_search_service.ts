@@ -20,6 +20,7 @@ import {
   isModelPlotChartableForDetector,
   isModelPlotEnabled,
 } from '../../../../common/util/job_utils';
+import { isEsqlDatafeed } from '../../../../common/util/esql_metric_query';
 import { useMlKibana } from '../../contexts/kibana';
 
 interface TimeSeriesExplorerChartDetails {
@@ -94,32 +95,46 @@ export function timeSeriesSearchServiceFactory(mlResultsService: MlResultsServic
       };
 
       const chartConfig = buildConfigFromDetector(job, detectorIndex);
+      const metricFunction = esMetricFunction ?? chartConfig.metricFunction;
 
-      return mlResultsService
-        .getMetricData(
-          chartConfig.datafeedConfig.indices.join(','),
-          entityFields,
-          chartConfig.datafeedConfig.query,
-          esMetricFunction ?? chartConfig.metricFunction,
-          chartConfig.metricFieldName,
-          chartConfig.summaryCountFieldName,
-          chartConfig.timeField,
-          earliestMs,
-          latestMs,
-          intervalMs,
-          chartConfig?.datafeedConfig
-        )
-        .pipe(
-          map((resp) => {
-            each(resp.results, (value, time) => {
-              // @ts-ignore
-              obj.results[time] = {
-                actual: value,
-              };
-            });
-            return obj;
+      const metricData$ = isEsqlDatafeed(chartConfig.datafeedConfig)
+        ? mlApi.results.getEsqlMetricData$({
+            jobId: job.job_id,
+            entityFields: entityFields.map(({ fieldName, fieldValue }) => ({
+              fieldName,
+              fieldValue: fieldValue ?? null,
+            })),
+            metricFunction,
+            metricFieldName: chartConfig.metricFieldName,
+            earliestMs,
+            latestMs,
+            intervalMs,
           })
-        );
+        : mlResultsService.getMetricData(
+            chartConfig.datafeedConfig.indices.join(','),
+            entityFields,
+            chartConfig.datafeedConfig.query,
+            metricFunction,
+            chartConfig.metricFieldName,
+            chartConfig.summaryCountFieldName,
+            chartConfig.timeField,
+            earliestMs,
+            latestMs,
+            intervalMs,
+            chartConfig?.datafeedConfig
+          );
+
+      return metricData$.pipe(
+        map((resp) => {
+          each(resp.results, (value, time) => {
+            // @ts-ignore
+            obj.results[time] = {
+              actual: value,
+            };
+          });
+          return obj;
+        })
+      );
     }
   }
   /**
@@ -172,9 +187,11 @@ export function timeSeriesSearchServiceFactory(mlResultsService: MlResultsServic
         resolve(obj);
       } else {
         const entityFieldNames: string[] = blankEntityFields.map((f) => f.fieldName);
+        // ES|QL datafeeds have no indices; the server reads the query from the datafeed instead.
+        const index = isEsqlDatafeed(datafeed) ? '' : chartConfig.datafeedConfig.indices.join(',');
         mlApi
           .getCardinalityOfFields({
-            index: chartConfig.datafeedConfig.indices.join(','),
+            index,
             fieldNames: entityFieldNames,
             query: chartConfig.datafeedConfig.query,
             timeFieldName: chartConfig.timeField,

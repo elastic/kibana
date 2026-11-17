@@ -40,6 +40,7 @@ import type { JobValidationMessage, JobValidationMessageId } from '../constants/
 import { getAggregations, getDatafeedAggregations } from './datafeed_utils';
 import { findAggField } from './validation_utils';
 import { getFirstKeyInObject } from './object_utils';
+import { isEsqlDatafeed } from './esql_metric_query';
 
 export interface ValidationResults {
   valid: boolean;
@@ -153,6 +154,12 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
     const hasDatafeed = isPopulatedObject(job.datafeed_config);
 
     if (isSourceDataChartable && hasDatafeed) {
+      // ES|QL datafeeds cannot use script fields or aggregations, and the detector fields are
+      // output columns of the ES|QL query, which the source data chart re-runs.
+      if (isEsqlDatafeed(job.datafeed_config)) {
+        return true;
+      }
+
       // Perform extra check to see if the detector is using a scripted field.
       if (isPopulatedObject(job.datafeed_config.script_fields)) {
         // If the datafeed uses script fields, we can only plot the time series if

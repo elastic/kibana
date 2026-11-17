@@ -127,6 +127,37 @@ export const getDatafeedResultsChartDataSchema = schema.object({
   end: schema.number(),
 });
 
+export const getEsqlMetricDataSchema = schema.object({
+  jobId: schema.string({
+    maxLength: 10000,
+    meta: { description: 'ID of the anomaly detection job with an ES|QL datafeed' },
+  }),
+  entityFields: schema.arrayOf(
+    schema.object({
+      fieldName: schema.string({ maxLength: 10000 }),
+      fieldValue: schema.nullable(
+        schema.oneOf([schema.string({ maxLength: 10000 }), schema.number()])
+      ),
+    }),
+    { maxSize: 3 }
+  ),
+  metricFunction: schema.nullable(
+    schema.oneOf([
+      schema.literal('count'),
+      schema.literal('avg'),
+      schema.literal('max'),
+      schema.literal('min'),
+      schema.literal('sum'),
+      schema.literal('percentiles'),
+      schema.literal('cardinality'),
+    ])
+  ),
+  metricFieldName: schema.maybe(schema.string({ maxLength: 10000 })),
+  earliestMs: schema.number(),
+  latestMs: schema.number(),
+  intervalMs: schema.number({ min: 1 }),
+});
+
 export const getAnomalyChartsSchema = schema.object({
   jobIds: schema.arrayOf(schema.string({ maxLength: 10000 }), { maxSize: 10000 }),
   influencers: schema.arrayOf(schema.any(), { maxSize: 10000 }),

@@ -25,6 +25,7 @@ import type {
   ExplorerChartsData,
   GetTopInfluencersRequest,
   InfluencersByFieldResponse,
+  MetricData,
 } from '@kbn/ml-common-types/results';
 
 import type { CriteriaField } from '@kbn/ml-common-types/results';
@@ -187,6 +188,23 @@ export const resultsApiProvider = (httpService: HttpService) => ({
       path: `${ML_INTERNAL_BASE_PATH}/results/datafeed_results_chart`,
       method: 'POST',
       body,
+      version: '1',
+    });
+  },
+
+  getEsqlMetricData$(params: {
+    jobId: string;
+    entityFields: Array<{ fieldName: string; fieldValue: string | number | null }>;
+    metricFunction: string | null;
+    metricFieldName?: string;
+    earliestMs: number;
+    latestMs: number;
+    intervalMs: number;
+  }) {
+    return httpService.http$<MetricData>({
+      path: `${ML_INTERNAL_BASE_PATH}/results/esql_metric_data`,
+      method: 'POST',
+      body: JSON.stringify(params),
       version: '1',
     });
   },
