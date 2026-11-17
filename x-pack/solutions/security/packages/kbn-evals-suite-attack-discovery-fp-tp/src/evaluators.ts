@@ -394,7 +394,9 @@ const ALERT_LINK_FIELDS: ReadonlySet<string> = new Set([
  *
  * World claims are deduplicated on (check, result, source, id) so repeating one grounded
  * claim does not inflate the score, while conflicting results for the same (check, source,
- * id) are each scored. Score = grounded claims / total claims.
+ * id) are each scored. Score = grounded claims / total claims. `metadata.inventedIds` counts
+ * distinct cited ids found in no seeded document (entities, events or alerts), the fabrication
+ * sub-count of the ungrounded claims.
  */
 export const claimGrounding: Evaluator = {
   name: 'ClaimGrounding',
@@ -447,6 +449,8 @@ export const claimGrounding: Evaluator = {
 
     let grounded = 0;
     let total = 0;
+    // Ids found in no seeded document at all, kept apart from wrong-source claims.
+    const inventedIds = new Set<string>();
 
     const rawChecks = (raw?.checks ?? []) as RawCheck[];
     const checkResults = new Map(
@@ -468,6 +472,9 @@ export const claimGrounding: Evaluator = {
       })
     );
     const seededEventIds = new Set(seededEvidence.events.map(({ id }) => id));
+    const seededAlerts = new Map(seededEvidence.alerts.map(({ id, source }) => [id, source]));
+    const isSeededAnywhere = (id: string): boolean =>
+      seededEntityIds.has(id) || seededEventIds.has(id) || seededAlerts.has(id);
 
     // Repeating one claim must not raise the score, so count each identical claim once.
     // `result` is part of the key: two claims citing the same (check, source, id) with
@@ -501,6 +508,9 @@ export const claimGrounding: Evaluator = {
         claimProblems.push('no id');
       } else if (!seeded) {
         claimProblems.push(`id "${claim.id}" not in the seeded ${claim.source ?? 'unknown'}`);
+        if (!isSeededAnywhere(claim.id)) {
+          inventedIds.add(claim.id);
+        }
       } else if (
         permittedSource !== undefined &&
         claimSource !== undefined &&
@@ -555,7 +565,6 @@ export const claimGrounding: Evaluator = {
           ].join(', ')})`
         );
       }
-      const seededAlerts = new Map(seededEvidence.alerts.map(({ id, source }) => [id, source]));
       if ((alertLink.alert_ids ?? []).length < 2) {
         linkProblems.push('fewer than 2 alert_ids');
       } else if (new Set(alertLink.alert_ids).size < 2) {
@@ -567,6 +576,7 @@ export const claimGrounding: Evaluator = {
         const source = seededAlerts.get(alertId);
         if (source === undefined) {
           linkProblems.push(`alert "${alertId}" not seeded`);
+          inventedIds.add(alertId);
         } else if (!pivotCarries(dottedValue(source, alertLink.field ?? ''), alertLink.value)) {
           linkProblems.push(
             `alert "${alertId}" does not carry ${alertLink.field}="${alertLink.value}"`
@@ -580,10 +590,16 @@ export const claimGrounding: Evaluator = {
       }
     }
 
+    if (inventedIds.size > 0) {
+      problems.unshift(
+        `${inventedIds.size} invented id(s), cited but not seeded: ${[...inventedIds].join(', ')}`
+      );
+    }
     return {
       score: total === 0 ? 1 : grounded / total,
       label: grounded === total ? 'grounded' : 'ungrounded',
       explanation: problems.length === 0 ? null : problems.join('; '),
+      metadata: { claims: total, grounded, inventedIds: inventedIds.size },
     };
   },
 };

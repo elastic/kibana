@@ -778,6 +778,42 @@ describe('ClaimGrounding', () => {
     expect(result.explanation).toContain('not in the seeded raw_event');
   });
 
+  it('counts cited ids found in no seeded document as invented', async () => {
+    const result = await claimGrounding.evaluate({
+      input: {},
+      output: groundedRun({
+        raw: {
+          ...groundedRun().raw!,
+          claims: {
+            world: [
+              { check: 'entity_role', result: 'contradicts', source: 'entity_store', id: 'ghost' },
+              { check: 'entity_role', result: 'contradicts', source: 'raw_event', id: 'ghost' },
+              { check: 'process_parent', result: 'contradicts', source: 'raw_event', id: 'ent-1' },
+              { check: 'process_parent', result: 'contradicts', source: 'raw_event', id: 'ev-1' },
+            ],
+            alert_link: { field: 'host.name', value: 'web-01', alert_ids: ['alert-1', 'alert-9'] },
+          },
+        },
+      }),
+      expected: { outcome: 'false_positive' },
+      metadata: {},
+    });
+    // 'ghost' twice counts once; 'ent-1' cited from the wrong source exists, so it is not invented.
+    expect(result.metadata).toEqual({ claims: 5, grounded: 1, inventedIds: 2 });
+    expect(result.explanation).toContain('2 invented id(s), cited but not seeded: ghost, alert-9');
+  });
+
+  it('reports zero invented ids for a grounded run', async () => {
+    const result = await claimGrounding.evaluate({
+      input: {},
+      output: groundedRun(),
+      expected: { outcome: 'false_positive' },
+      metadata: {},
+    });
+    expect(result.metadata).toEqual({ claims: 2, grounded: 2, inventedIds: 0 });
+    expect(result.explanation).toBeNull();
+  });
+
   it('scores 0 when a claim result contradicts raw.checks', async () => {
     const result = await claimGrounding.evaluate({
       input: {},
