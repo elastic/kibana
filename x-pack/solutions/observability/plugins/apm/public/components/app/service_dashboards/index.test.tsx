@@ -10,12 +10,10 @@ import React from 'react';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { ServiceDashboards } from '.';
 
-let capturedOnApiAvailable: ((api: unknown) => void) | undefined;
-let capturedOnApiCleanup: (() => void) | undefined;
-
 // Every render of the mocked renderer records the closures it received. Keeping the full history
 // lets a test replay the race where a canceled load for a previous dashboard fires its (stale)
-// cleanup after a newer dashboard has already published its API.
+// cleanup after a newer dashboard has already published its API. Tests that only care about the
+// most recent render read the last element.
 let capturedOnApiAvailableHistory: Array<(api: unknown) => void> = [];
 let capturedOnApiCleanupHistory: Array<() => void> = [];
 
@@ -24,8 +22,6 @@ jest.mock('@kbn/dashboard-plugin/public', () => ({
     onApiAvailable?: (api: unknown) => void;
     onApiCleanup?: () => void;
   }) => {
-    capturedOnApiAvailable = props.onApiAvailable;
-    capturedOnApiCleanup = props.onApiCleanup;
     if (props.onApiAvailable) capturedOnApiAvailableHistory.push(props.onApiAvailable);
     if (props.onApiCleanup) capturedOnApiCleanupHistory.push(props.onApiCleanup);
     return <div data-test-subj="dashboardRenderer" />;
@@ -107,8 +103,6 @@ jest.mock('../../../hooks/use_fetcher', () => {
 
 describe('ServiceDashboards', () => {
   beforeEach(() => {
-    capturedOnApiAvailable = undefined;
-    capturedOnApiCleanup = undefined;
     capturedOnApiAvailableHistory = [];
     capturedOnApiCleanupHistory = [];
     mockQuery = { ...defaultMockQuery };
@@ -128,12 +122,12 @@ describe('ServiceDashboards', () => {
 
       const { rerender } = render(<ServiceDashboards />);
 
-      expect(capturedOnApiAvailable).toBeDefined();
-      expect(capturedOnApiCleanup).toBeDefined();
+      expect(capturedOnApiAvailableHistory.at(-1)).toBeDefined();
+      expect(capturedOnApiCleanupHistory.at(-1)).toBeDefined();
 
       // Dashboard becomes available, so the effect pushes the initial state onto it.
       await act(async () => {
-        capturedOnApiAvailable!(dashboardApi);
+        capturedOnApiAvailableHistory.at(-1)!(dashboardApi);
       });
 
       expect(dashboardApi.setFilters).toHaveBeenCalled();
@@ -144,7 +138,7 @@ describe('ServiceDashboards', () => {
       // The DashboardRenderer tears the embeddable down (e.g. on unmount/recreate), which clears
       // the stale reference so later effects cannot operate on a destroyed dashboard.
       await act(async () => {
-        capturedOnApiCleanup!();
+        capturedOnApiCleanupHistory.at(-1)!();
       });
 
       // Change a search input and rerender so the synchronization effect re-runs. If the stale
@@ -168,7 +162,7 @@ describe('ServiceDashboards', () => {
       };
 
       await act(async () => {
-        capturedOnApiAvailable!(recreatedDashboardApi);
+        capturedOnApiAvailableHistory.at(-1)!(recreatedDashboardApi);
       });
 
       expect(recreatedDashboardApi.setFilters).toHaveBeenCalled();
@@ -190,9 +184,8 @@ describe('ServiceDashboards', () => {
 
       // Render dashboard A and publish its API through A's closure.
       const { rerender } = render(<ServiceDashboards />);
-      const onApiAvailableA =
-        capturedOnApiAvailableHistory[capturedOnApiAvailableHistory.length - 1];
-      const onApiCleanupA = capturedOnApiCleanupHistory[capturedOnApiCleanupHistory.length - 1];
+      const onApiAvailableA = capturedOnApiAvailableHistory.at(-1)!;
+      const onApiCleanupA = capturedOnApiCleanupHistory.at(-1)!;
 
       await act(async () => {
         onApiAvailableA(dashboardApiA);
@@ -204,8 +197,7 @@ describe('ServiceDashboards', () => {
         mockQuery = { ...defaultMockQuery, dashboardId: 'dashboard-2' };
         rerender(<ServiceDashboards />);
       });
-      const onApiAvailableB =
-        capturedOnApiAvailableHistory[capturedOnApiAvailableHistory.length - 1];
+      const onApiAvailableB = capturedOnApiAvailableHistory.at(-1)!;
 
       await act(async () => {
         onApiAvailableB(dashboardApiB);
@@ -218,8 +210,10 @@ describe('ServiceDashboards', () => {
       dashboardApiB.setQuery.mockClear();
       dashboardApiB.setTimeRange.mockClear();
 
-      // A's canceled load now fires its late cleanup. Because it is keyed on A's id and B has
-      // already published, the guard short-circuits and B's reference survives.
+      // Fire A's cleanup after B has already published. In the real renderer a published load's
+      // cleanup runs synchronously at the switch, so this exact ordering cannot occur there; the
+      // test asserts a strictly stronger property — even a late, out-of-order A cleanup must not
+      // clear B's reference, because the guard is keyed on A's id rather than on ordering.
       await act(async () => {
         onApiCleanupA();
       });
