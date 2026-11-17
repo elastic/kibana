@@ -88,7 +88,7 @@ use only returned KIs and treat missing topology as unknown, not as evidence tha
 
 ES|QL call for a row-level sample, with the modifications from `<query_rules>` applied (`{1|3}` is `1` for the `sample` and `3` for the `re-sample`; an aggregate KI has no `SORT` and gets `| LIMIT 2`):
 ```json
-{ "query": "FROM {view_name} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {KI predicate} | SORT @timestamp DESC | LIMIT {1|3}", "time_range": { "from": "{sample_from}", "to": "now" }, "timeout_seconds": 60 }
+{ "query": "FROM {view_name} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {KI predicate} | SORT @timestamp DESC | LIMIT {1|3}", "time_range": { "from": "{sample_from}", "to": "now" }, "timeout_seconds": 60, "include_frozen": true }
 ```
 Response: `{ "columns": [{ "name": "...", "type": "..." }], "values": [["..."]] }`. `values` is `[]` when empty.
 
@@ -125,6 +125,8 @@ Placeholders used in the Confirm and Profile steps:
    `from` into every `sample` and `re-sample` of that rule; it never comes from `now` or from another
    query's range.
    Deadline: every call, the Profile step's included, passes `"timeout_seconds": 60`.
+   Tiers: every call also passes `"include_frozen": true`. Without it the tool adds a request filter
+   that makes a query on a source view too slow to finish.
 4. **Reuse the KI query verbatim.** Remove `METADATA _id, _source`; never modify its `WHERE` clauses,
    field names, or `FROM`. A `FROM $.{name}` keeps its literal `$.`. Never invent fields, conditions,
    or functions in a Confirm query. ES|QL strings use double quotes.
