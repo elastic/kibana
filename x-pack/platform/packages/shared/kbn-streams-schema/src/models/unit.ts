@@ -368,7 +368,8 @@ export const streamsUnitStatsDestinationResultSchema = lazySchema(() =>
       }),
       /**
        * Present only when the request asks for it, and then with no points when nothing was found.
-       * It covers `meta.window`.
+       * A destination type that has no way to report one leaves it out, and so does a destination
+       * whose series could not be read, which has an `error`. It covers `meta.window`.
        */
       delivery: z.object({ series: streamsUnitStatsDeliverySeriesSchema }).optional(),
     }),
