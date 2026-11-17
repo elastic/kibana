@@ -22,7 +22,7 @@ export interface UserSessionEvent extends SessionEventBase {
 export interface AssistantToolCall {
   id: string;
   name: string;
-  args?: string;
+  args?: JsonValue;
 }
 
 export interface AssistantSessionEvent extends SessionEventBase {
@@ -36,11 +36,19 @@ export interface ReasoningSessionEvent extends SessionEventBase {
   content?: string;
 }
 
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue };
+
 export interface ToolSessionEvent extends SessionEventBase {
   type: 'tool';
   tool_call_id: string;
   tool_name: string;
-  result?: string;
+  result?: JsonValue;
   /** Null or missing when the outcome is unknown. */
   status?: 'successful' | 'failed' | null;
 }

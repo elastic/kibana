@@ -8,9 +8,11 @@
 import type { RequestHandler } from '@kbn/core/server';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 
+export const MEMORY_DISABLED_MESSAGE = 'Context Engine memory is turned off.';
+
 /**
  * Gates a Context Engine route on the Context Engine advanced setting. While the setting is off the
- * route 404s as if it did not exist. Shared by the AI index and Signals routes.
+ * route 404s as if it did not exist.
  */
 export const withContextEngineFeatureFlag =
   <P, Q, B>(handler: RequestHandler<P, Q, B>): RequestHandler<P, Q, B> =>

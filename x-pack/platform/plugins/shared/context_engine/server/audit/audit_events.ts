@@ -159,6 +159,43 @@ export const improvementAuditEvent = ({
   },
 });
 
+export enum SessionEventsAuditAction {
+  SAVE = 'memory_save_event',
+}
+
+/** Audits one `_save_event` request; core adds the caller, the space and the request id. */
+export const sessionEventsSaveAuditEvent = ({
+  sessionId,
+  targetUserId,
+  saved = 0,
+  failed = 0,
+  error,
+}: {
+  sessionId: string;
+  targetUserId?: string;
+  saved?: number;
+  failed?: number;
+  error?: Error;
+}): AuditEvent => ({
+  message: error
+    ? `Failed attempt to save events of session [id=${sessionId}]`
+    : `User has saved ${saved} event(s) of session [id=${sessionId}], ${failed} failed`,
+  event: {
+    action: SessionEventsAuditAction.SAVE,
+    category: ['database'],
+    type: ['creation'],
+    outcome: error ? 'failure' : 'success',
+  },
+  ...(targetUserId !== undefined && { user: { target: { id: targetUserId } } }),
+  kibana: {
+    saved_object: { type: 'session_events', id: sessionId },
+  },
+  error: error && {
+    code: error.name,
+    message: error.message,
+  },
+});
+
 export const aiIndexAuditEvent = ({
   action,
   id,
