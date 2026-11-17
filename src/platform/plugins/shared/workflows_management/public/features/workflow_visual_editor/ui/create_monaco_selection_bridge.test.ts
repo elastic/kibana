@@ -130,4 +130,119 @@ describe('createMonacoSelectionBridge', () => {
       expect(fake.focus).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('listen', () => {
+    const events = () => ({ onKeyDown: jest.fn(), onCaretChange: jest.fn(), onBlur: jest.fn() });
+
+    it('passes the editor keys on, with ways to stop them from reaching the editor', () => {
+      const fake = createFakeMonacoEditor(TEXT);
+      const handlers = events();
+      handlers.onKeyDown.mockImplementation((event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      });
+      createMonacoSelectionBridge(fake.editor, () => 0).listen?.(handlers);
+
+      const outcome = fake.pressKey('Enter');
+
+      expect(handlers.onKeyDown).toHaveBeenCalledWith(expect.objectContaining({ key: 'Enter' }));
+      expect(outcome).toEqual({ defaultPrevented: true, propagationStopped: true });
+    });
+
+    it('hears a key before the editor and its wrappers do, so one the dropdown used never reaches them', () => {
+      const fake = createFakeMonacoEditor(TEXT);
+      const handlers = events();
+      handlers.onKeyDown.mockImplementation((event) => event.stopPropagation());
+      createMonacoSelectionBridge(fake.editor, () => 0).listen?.(handlers);
+      const editorsOwn = jest.fn();
+      fake.input.addEventListener('keydown', editorsOwn);
+
+      fake.pressKey('Escape');
+
+      expect(editorsOwn).not.toHaveBeenCalled();
+    });
+
+    it('leaves a key it did not stop to the editor', () => {
+      const fake = createFakeMonacoEditor(TEXT);
+      createMonacoSelectionBridge(fake.editor, () => 0).listen?.(events());
+      const editorsOwn = jest.fn();
+      fake.input.addEventListener('keydown', editorsOwn);
+
+      fake.pressKey('a');
+
+      expect(editorsOwn).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports where the caret went, as an offset', () => {
+      const fake = createFakeMonacoEditor(TEXT);
+      const handlers = events();
+      createMonacoSelectionBridge(fake.editor, () => 0).listen?.(handlers);
+
+      fake.moveCaretTo(13);
+
+      expect(handlers.onCaretChange).toHaveBeenCalledWith(13);
+    });
+
+    it('reports when the editor loses focus', () => {
+      const fake = createFakeMonacoEditor(TEXT);
+      const handlers = events();
+      createMonacoSelectionBridge(fake.editor, () => 0).listen?.(handlers);
+
+      fake.blur();
+
+      expect(handlers.onBlur).toHaveBeenCalledTimes(1);
+    });
+
+    it('stops listening to everything once unsubscribed', () => {
+      const fake = createFakeMonacoEditor(TEXT);
+      const handlers = events();
+      const stop = createMonacoSelectionBridge(fake.editor, () => 0).listen?.(handlers);
+      expect(fake.listenerCount()).toBe(3);
+
+      stop?.();
+      fake.pressKey('a');
+      fake.moveCaretTo(2);
+      fake.blur();
+
+      expect(fake.listenerCount()).toBe(0);
+      expect(handlers.onKeyDown).not.toHaveBeenCalled();
+      expect(handlers.onCaretChange).not.toHaveBeenCalled();
+      expect(handlers.onBlur).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getCaretRect', () => {
+    const rectOf = (offset: number, editorAt: { top: number; left: number }) => {
+      const fake = createFakeMonacoEditor(TEXT);
+      jest.spyOn(fake.domNode, 'getBoundingClientRect').mockReturnValue(editorAt as DOMRect);
+      return {
+        fake,
+        rect: createMonacoSelectionBridge(fake.editor, () => 0).getCaretRect?.(offset),
+      };
+    };
+
+    it('is where an offset is drawn, in viewport coordinates', () => {
+      // Offset 13 is line 2, column 3 of TEXT: two characters in, one line down.
+      const { rect } = rectOf(13, { top: 100, left: 50 });
+      expect(rect).toEqual({ top: 100 + 18, left: 50 + 14, height: 18 });
+    });
+
+    it('moves with the editor, not with the page: the editor position is read each time', () => {
+      expect(rectOf(0, { top: 10, left: 20 }).rect).toEqual({ top: 10, left: 20, height: 18 });
+      expect(rectOf(0, { top: 300, left: 400 }).rect).toEqual({ top: 300, left: 400, height: 18 });
+    });
+
+    it('is undefined when the editor cannot say where the offset is, as outside its viewport', () => {
+      const fake = createFakeMonacoEditor(TEXT);
+      fake.getScrolledVisiblePosition.mockReturnValueOnce(null);
+      expect(createMonacoSelectionBridge(fake.editor, () => 0).getCaretRect?.(3)).toBeUndefined();
+    });
+
+    it('is undefined when the editor has no model or no container', () => {
+      const noModel = createFakeMonacoEditor(TEXT, { withModel: false });
+      expect(
+        createMonacoSelectionBridge(noModel.editor, () => 0).getCaretRect?.(3)
+      ).toBeUndefined();
+    });
+  });
 });

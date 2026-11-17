@@ -19,9 +19,8 @@ import { ReferenceCapableField } from './reference_capable_field';
 import { ContainerInSentenceCallout } from './reference_container_callout';
 import { ReferenceTextInput } from './reference_text_input';
 import { useStepFormReadOnly } from './step_form_read_only_context';
-import { caretAfterChange, useReferenceEditor } from './use_reference_editor';
+import { caretAfterChange, typedCharacter, useReferenceEditor } from './use_reference_editor';
 import type { buildDataReferenceCatalog } from '../lib/build_data_reference_catalog';
-import { opensPickerOnAt } from '../lib/opens_picker_on_at';
 import { insertTokenAsJsonText } from '../lib/reference_tokens';
 import { type StepFormField } from '../lib/step_form_schema';
 
@@ -192,7 +191,7 @@ export function CodeField({
         value={draft}
         onChange={applyDraft}
         onExpand={onExpand}
-        openOnAt={opensPickerOnAt(field.language)}
+        anchorAtCaret
         valueFormWhenWhole={field.valueFormWhenWhole}
       >
         {({ teachingPlaceholder, appendControls, reportChange, registerSelection }) => (
@@ -232,7 +231,9 @@ export function CodeField({
                 languageId={monacoLanguageFor(field.language)}
                 chromeOverrides={workflowsEditorChromeOverrides}
                 value={draft}
-                onChange={(text, event) => reportChange(text, caretAfterChange(text, event))}
+                onChange={(text, event) =>
+                  reportChange(text, caretAfterChange(text, event), typedCharacter(event))
+                }
                 height={editorHeight}
                 aria-label={field.label}
                 placeholder={draft.length === 0 ? teachingPlaceholder : undefined}
@@ -309,7 +310,6 @@ export function CodeField({
       onChange={editsInExpanded ? appendToOriginal : applyDraft}
       onExpand={onExpand}
       openOnBrace={field.language === 'plaintext'}
-      openOnAt={opensPickerOnAt(field.language)}
       valueFormWhenWhole={field.valueFormWhenWhole}
     >
       {(bind) => (

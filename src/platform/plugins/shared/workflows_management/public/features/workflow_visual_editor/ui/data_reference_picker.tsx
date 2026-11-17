@@ -7,32 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiFieldSearch,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiIconTip,
-  EuiPopover,
-  EuiText,
-  transparentize,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFieldSearch, EuiPopover, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { DataReferenceItemRowContent } from './data_reference_item_row';
+import type { NavigableEntry } from './data_reference_picker_parts';
+import {
+  getNavigableEntries,
+  getVisibleRows,
+  PickerFooter,
+  PickerHeader,
+  ReferenceList,
+} from './data_reference_picker_parts';
 import { getInputCaretCoordinates } from './get_input_caret_coordinates';
 import type {
   DataReferenceCatalog,
-  DataReferenceGroup,
   DataReferenceGroupId,
   DataReferenceItem,
 } from '../lib/build_data_reference_catalog';
 import {
-  flattenDataReferenceLeaves,
   formatDataReferenceToken,
   isDataReferenceInsertable,
 } from '../lib/build_data_reference_catalog';
@@ -40,17 +32,26 @@ import {
 const PICKER_MAX_HEIGHT = 400;
 /** Fixed floating-layer width — must not match the panel field width. */
 const PICKER_WIDTH = 340;
-/** Root browse view: show this many rows per group before "Show all". */
-const ROOT_GROUP_ROW_CAP = 5;
+/** A key press forwarded from the editor the typeahead belongs to. */
+export interface TypeaheadKeyEvent {
+  readonly key: string;
+  readonly preventDefault: () => void;
+}
 
-type NavigableEntry =
-  | { readonly kind: 'item'; readonly item: DataReferenceItem }
-  | {
-      readonly kind: 'expander';
-      readonly groupId: DataReferenceGroupId;
-      readonly expanded: boolean;
-      readonly total: number;
-    };
+/**
+ * The picker as a dropdown under a field that is being typed in, instead of a popover of its own:
+ * what was typed after the trigger filters the list, the editor keeps the focus and sends its keys
+ * through `keyHandlerRef`. The handler returns true when it used the key.
+ */
+export interface DataReferenceTypeahead {
+  readonly query: string;
+  /**
+   * Where to open, in px from the top-left of the field: under the cursor of a multi-line editor.
+   * Unset, the dropdown opens under the control.
+   */
+  readonly anchor?: { readonly top: number; readonly left: number };
+  readonly keyHandlerRef: React.MutableRefObject<((event: TypeaheadKeyEvent) => boolean) | null>;
+}
 
 export interface DataReferencePickerProps {
   readonly catalog: DataReferenceCatalog;
@@ -64,8 +65,45 @@ export interface DataReferencePickerProps {
    * form fields leave this unset so the popover sizes to the control.
    */
   readonly fillHeight?: boolean;
+  /** Set to open as a typeahead (no search box, no focus change); unset for the search popover. */
+  readonly typeahead?: DataReferenceTypeahead;
   readonly 'data-test-subj'?: string;
 }
+
+interface Spot {
+  readonly top: number | string;
+  readonly left: number | string;
+  readonly height: number | string;
+}
+
+/**
+ * Where the popover box sits, which is what the popover places its panel from (below its
+ * bottom-left corner). A typeahead goes where it is given; with none the box spans the control, so
+ * the panel opens under it. The position is there from the first render, when the popover reads it.
+ */
+const popoverBoxPosition = (
+  anchor: DataReferenceTypeahead['anchor'],
+  underControl: boolean
+): Spot =>
+  anchor
+    ? { top: anchor.top, left: anchor.left, height: 0 }
+    : { top: 0, left: 0, height: underControl ? '100%' : 0 };
+
+/**
+ * The caret anchor of an explicit picker, measured once it is laid out. A typeahead is placed by
+ * its popover box instead.
+ */
+const caretSpot = (
+  isTypeahead: boolean,
+  caretAnchor: { top: number; left: number; height: number } | null
+): Spot =>
+  isTypeahead
+    ? { top: 0, left: 0, height: 0 }
+    : {
+        top: caretAnchor?.top ?? 0,
+        left: caretAnchor?.left ?? 0,
+        height: caretAnchor?.height ?? 1,
+      };
 
 /**
  * On-demand data reference popover — search, drill, keyboard insert.
@@ -78,6 +116,7 @@ export function DataReferencePicker({
   onInsert,
   input,
   fillHeight = false,
+  typeahead,
   'data-test-subj': dataTestSubj = 'workflowDataReferencePicker',
 }: DataReferencePickerProps) {
   const { euiTheme } = useEuiTheme();
@@ -85,7 +124,13 @@ export function DataReferencePicker({
   const panelElRef = useRef<HTMLElement | null>(null);
   const inputElRef = useRef<HTMLElement | null>(null);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
-  const [search, setSearch] = useState('');
+  const [typedSearch, setSearch] = useState('');
+  const isTypeahead = typeahead !== undefined;
+  const search = typeahead ? typeahead.query : typedSearch;
+  // A dropdown opens at the point it is given, or else under the control, not over the text being
+  // typed in. The caret of a popover for an input is measured below.
+  const typeaheadAnchor = typeahead?.anchor;
+  const underControl = isTypeahead && typeaheadAnchor === undefined;
   const [drillStack, setDrillStack] = useState<DataReferenceItem[]>([]);
   const [highlightIndex, setHighlightIndex] = useState(0);
   const [expandedGroups, setExpandedGroups] = useState<ReadonlySet<DataReferenceGroupId>>(
@@ -107,15 +152,17 @@ export function DataReferencePicker({
       setCaretAnchor(null);
       return;
     }
+    // A typeahead leaves the focus in the editor the user is typing in.
+    if (isTypeahead) return;
     const id = window.setTimeout(() => searchRef.current?.focus(), 0);
     return () => window.clearTimeout(id);
-  }, [isOpen]);
+  }, [isOpen, isTypeahead]);
 
   // Position the popover under the caret (not the full field bbox). Critical for
   // the expanded editor where the textarea fills the pane — downLeft on that
   // box lands far from where the user typed `@`.
   useLayoutEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || isTypeahead) return;
 
     const findField = (): HTMLInputElement | HTMLTextAreaElement | null => {
       const root = inputElRef.current;
@@ -149,7 +196,7 @@ export function DataReferencePicker({
     return () => {
       field?.removeEventListener('scroll', updateAnchor);
     };
-  }, [isOpen]);
+  }, [isOpen, isTypeahead]);
 
   // Close when an ancestor of the anchor scrolls (e.g. the config panel body).
   useEffect(() => {
@@ -179,57 +226,15 @@ export function DataReferencePicker({
 
   const drilledItem = drillStack.length > 0 ? drillStack[drillStack.length - 1] : undefined;
 
-  const visibleRows = useMemo(() => {
-    const query = search.trim().toLowerCase();
-    if (query) {
-      const leaves = flattenDataReferenceLeaves(catalog).filter(
-        (item) =>
-          item.path.toLowerCase().includes(query) ||
-          item.label.toLowerCase().includes(query) ||
-          item.subtitle?.toLowerCase().includes(query) ||
-          item.originLabel.toLowerCase().includes(query)
-      );
-      return { mode: 'search' as const, items: leaves, groups: [] as DataReferenceGroup[] };
-    }
-    if (drilledItem?.children) {
-      return {
-        mode: 'drill' as const,
-        items: drilledItem.children,
-        groups: [] as DataReferenceGroup[],
-      };
-    }
-    return {
-      mode: 'browse' as const,
-      items: [] as DataReferenceItem[],
-      groups: catalog.groups.filter((g) => g.items.length > 0),
-    };
-  }, [catalog, drilledItem, search]);
+  const visibleRows = useMemo(
+    () => getVisibleRows(catalog, search, drilledItem),
+    [catalog, drilledItem, search]
+  );
 
-  const flatNavigable = useMemo((): readonly NavigableEntry[] => {
-    if (visibleRows.mode !== 'browse') {
-      return visibleRows.items.map((item) => ({ kind: 'item' as const, item }));
-    }
-    const entries: NavigableEntry[] = [];
-    for (const group of visibleRows.groups) {
-      const expanded = expandedGroups.has(group.id);
-      const capped =
-        !expanded && group.items.length > ROOT_GROUP_ROW_CAP
-          ? group.items.slice(0, ROOT_GROUP_ROW_CAP)
-          : group.items;
-      for (const item of capped) {
-        entries.push({ kind: 'item', item });
-      }
-      if (group.items.length > ROOT_GROUP_ROW_CAP) {
-        entries.push({
-          kind: 'expander',
-          groupId: group.id,
-          expanded,
-          total: group.items.length,
-        });
-      }
-    }
-    return entries;
-  }, [expandedGroups, visibleRows]);
+  const flatNavigable = useMemo(
+    () => getNavigableEntries(visibleRows, expandedGroups),
+    [expandedGroups, visibleRows]
+  );
 
   useEffect(() => {
     setHighlightIndex(0);
@@ -269,6 +274,41 @@ export function DataReferencePicker({
     },
     [insertItem, toggleGroupExpanded]
   );
+
+  const handleEditorKey = useCallback(
+    (event: TypeaheadKeyEvent): boolean => {
+      // With the dropdown closed, or nothing listed in it, it is not on screen: the keys are the
+      // editor's (a new line in a multi-line editor, Escape to leave it).
+      if (!isOpen || flatNavigable.length === 0) return false;
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onClose();
+        return true;
+      }
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        const step = event.key === 'ArrowDown' ? 1 : -1;
+        setHighlightIndex((i) => Math.max(0, Math.min(i + step, flatNavigable.length - 1)));
+        return true;
+      }
+      if (event.key === 'Enter' || event.key === 'Tab') {
+        event.preventDefault();
+        activateEntry(flatNavigable[highlightIndex]);
+        return true;
+      }
+      return false;
+    },
+    [activateEntry, flatNavigable, highlightIndex, isOpen, onClose]
+  );
+
+  const keyHandlerRef = typeahead?.keyHandlerRef;
+  useEffect(() => {
+    if (!keyHandlerRef) return;
+    keyHandlerRef.current = handleEditorKey;
+    return () => {
+      keyHandlerRef.current = null;
+    };
+  }, [keyHandlerRef, handleEditorKey]);
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
@@ -313,101 +353,12 @@ export function DataReferencePicker({
     setSearch('');
   }, []);
 
-  const renderItemRow = (item: DataReferenceItem, index: number, showOrigin: boolean) => {
-    const isHighlighted = index === highlightIndex;
-    const insertable = isDataReferenceInsertable(item);
-    return (
-      <button
-        key={`${item.path}-${item.label}-${index}`}
-        type="button"
-        data-test-subj={`workflowDataReferenceRow-${item.path}`}
-        draggable={insertable}
-        onMouseEnter={() => setHighlightIndex(index)}
-        onClick={() => insertItem(item)}
-        onDragStart={
-          insertable
-            ? (e) => {
-                e.dataTransfer.setData('text/plain', formatDataReferenceToken(item.path));
-                e.dataTransfer.effectAllowed = 'copy';
-              }
-            : undefined
-        }
-        css={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: euiTheme.size.s,
-          width: '100%',
-          textAlign: 'left',
-          padding: `${euiTheme.size.xs} ${euiTheme.size.s}`,
-          border: 'none',
-          background: isHighlighted ? euiTheme.colors.backgroundBaseHighlighted : 'transparent',
-          cursor: insertable ? 'grab' : 'pointer',
-          minWidth: 0,
-        }}
-      >
-        <DataReferenceItemRowContent item={item} showOrigin={showOrigin} />
-      </button>
-    );
-  };
-
-  const renderExpanderRow = (
-    entry: Extract<NavigableEntry, { kind: 'expander' }>,
-    index: number
-  ) => {
-    const isHighlighted = index === highlightIndex;
-    const label = entry.expanded
-      ? i18n.translate('workflows.dataReferencePicker.showFewer', {
-          defaultMessage: 'Show fewer',
-        })
-      : i18n.translate('workflows.dataReferencePicker.showAll', {
-          defaultMessage: 'Show all ({count})',
-          values: { count: entry.total },
-        });
-    return (
-      <button
-        key={`expander-${entry.groupId}`}
-        type="button"
-        data-test-subj={`workflowDataReferenceShowAll-${entry.groupId}`}
-        onMouseEnter={() => setHighlightIndex(index)}
-        onClick={() => toggleGroupExpanded(entry.groupId)}
-        css={{
-          display: 'block',
-          width: '100%',
-          textAlign: 'left',
-          padding: `${euiTheme.size.xs} ${euiTheme.size.s}`,
-          border: 'none',
-          background: isHighlighted ? euiTheme.colors.backgroundBaseHighlighted : 'transparent',
-          cursor: 'pointer',
-          color: euiTheme.colors.textSubdued,
-          fontSize: euiTheme.size.m,
-        }}
-      >
-        {label}
-      </button>
-    );
-  };
-
-  const footerKeyCss = {
-    display: 'inline-block' as const,
-    padding: `0 ${euiTheme.size.xs}`,
-    borderRadius: euiTheme.border.radius.small,
-    border: `${euiTheme.border.width.thin} solid ${transparentize(
-      euiTheme.colors.textParagraph,
-      0.2
-    )}`,
-    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-    fontFamily: euiTheme.font.familyCode,
-    fontSize: 'inherit',
-    fontWeight: euiTheme.font.weight.medium,
-  };
-
-  const insertDataLabel = i18n.translate('workflows.dataReferencePicker.insertData', {
-    defaultMessage: 'Insert data',
-  });
+  const navigateBack = useCallback(() => setDrillStack((stack) => stack.slice(0, -1)), []);
+  const isDrilled = drillStack.length > 0 && !search;
 
   const popover = (
     <EuiPopover
-      isOpen={isOpen}
+      isOpen={isOpen && (!isTypeahead || flatNavigable.length > 0)}
       closePopover={onClose}
       button={
         <span
@@ -415,11 +366,10 @@ export function DataReferencePicker({
           data-test-subj="workflowDataReferencePickerCaretAnchor"
           css={{
             position: 'absolute',
-            // Fall back to the field top-left until layout measures the caret.
-            top: caretAnchor?.top ?? 0,
-            left: caretAnchor?.left ?? 0,
+            // A typeahead is placed by its popover box (below); this is the caret of an explicit
+            // picker, measured once it is laid out.
+            ...caretSpot(isTypeahead, caretAnchor),
             width: 1,
-            height: caretAnchor?.height ?? 1,
             pointerEvents: 'none',
           }}
         />
@@ -435,6 +385,8 @@ export function DataReferencePicker({
         panelElRef.current = el;
       }}
       panelProps={{
+        // The panel only exists while open, so this id says whether the dropdown is on screen.
+        ...(isTypeahead ? { 'data-test-subj': 'workflowDataReferenceTypeahead' } : {}),
         css: {
           width: PICKER_WIDTH,
           maxWidth: PICKER_WIDTH,
@@ -449,7 +401,10 @@ export function DataReferencePicker({
       }}
     >
       <div
+        role="presentation"
         onKeyDown={handleKeyDown}
+        // A press must not take the focus from the editor being typed in: it would blur it.
+        onMouseDown={isTypeahead ? (event) => event.preventDefault() : undefined}
         css={{
           display: 'flex',
           flexDirection: 'column',
@@ -458,196 +413,46 @@ export function DataReferencePicker({
           minHeight: 0,
         }}
       >
-        <EuiFlexGroup
-          gutterSize="s"
-          alignItems="center"
-          responsive={false}
-          css={{ padding: euiTheme.size.s, paddingBottom: 0, flexWrap: 'wrap' }}
-        >
-          {drillStack.length > 0 && !search ? (
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="chevronSingleLeft"
-                size="xs"
-                aria-label={i18n.translate('workflows.dataReferencePicker.back', {
-                  defaultMessage: 'Back',
+        {isTypeahead && drillStack.length === 0 ? null : (
+          <PickerHeader
+            drillStack={drillStack}
+            isDrilled={isDrilled}
+            onBack={navigateBack}
+            onNavigate={navigateBreadcrumb}
+          />
+        )}
+
+        {isTypeahead ? null : (
+          <>
+            <div css={{ padding: euiTheme.size.s, paddingBottom: euiTheme.size.s }}>
+              <EuiFieldSearch
+                inputRef={(el) => {
+                  searchRef.current = el;
+                }}
+                compressed
+                fullWidth
+                placeholder={i18n.translate('workflows.dataReferencePicker.search', {
+                  defaultMessage: 'Search',
                 })}
-                onClick={() => setDrillStack((stack) => stack.slice(0, -1))}
-                data-test-subj="workflowDataReferenceBack"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                data-test-subj="workflowDataReferenceSearch"
               />
-            </EuiFlexItem>
-          ) : null}
-          <EuiFlexItem grow>
-            {drillStack.length > 0 && !search ? (
-              <EuiFlexGroup
-                gutterSize="xs"
-                alignItems="center"
-                responsive={false}
-                wrap
-                data-test-subj="workflowDataReferenceBreadcrumb"
-              >
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    size="xs"
-                    flush="both"
-                    onClick={() => navigateBreadcrumb(0)}
-                    css={{ fontWeight: euiTheme.font.weight.bold, fontSize: 12 }}
-                  >
-                    {insertDataLabel}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                {drillStack.map((segment, i) => (
-                  <React.Fragment key={`${segment.path}-${i}`}>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="xs" color="subdued">
-                        ›
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty
-                        size="xs"
-                        flush="both"
-                        onClick={() => navigateBreadcrumb(i + 1)}
-                        css={{ fontWeight: euiTheme.font.weight.bold, fontSize: 12 }}
-                      >
-                        {segment.label}
-                      </EuiButtonEmpty>
-                    </EuiFlexItem>
-                  </React.Fragment>
-                ))}
-              </EuiFlexGroup>
-            ) : (
-              <EuiText size="xs" css={{ fontWeight: euiTheme.font.weight.bold, fontSize: 12 }}>
-                {insertDataLabel}
-              </EuiText>
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            </div>
+          </>
+        )}
 
-        <div css={{ padding: euiTheme.size.s, paddingBottom: euiTheme.size.s }}>
-          <EuiFieldSearch
-            inputRef={(el) => {
-              searchRef.current = el;
-            }}
-            compressed
-            fullWidth
-            placeholder={i18n.translate('workflows.dataReferencePicker.search', {
-              defaultMessage: 'Search',
-            })}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            data-test-subj="workflowDataReferenceSearch"
-          />
-        </div>
+        <ReferenceList
+          visibleRows={visibleRows}
+          expandedGroups={expandedGroups}
+          isEmpty={flatNavigable.length === 0 && visibleRows.mode === 'search'}
+          highlightIndex={highlightIndex}
+          onHighlight={setHighlightIndex}
+          onPick={insertItem}
+          onToggleGroup={toggleGroupExpanded}
+        />
 
-        <div
-          css={{
-            flex: '1 1 auto',
-            minHeight: 0,
-            overflow: 'auto',
-            paddingBottom: euiTheme.size.xs,
-            borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
-            borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
-          }}
-          data-test-subj="workflowDataReferenceBody"
-        >
-          {visibleRows.mode === 'browse'
-            ? (() => {
-                let index = 0;
-                return visibleRows.groups.map((group) => {
-                  const expanded = expandedGroups.has(group.id);
-                  const showCap = !expanded && group.items.length > ROOT_GROUP_ROW_CAP;
-                  const visibleItems = showCap
-                    ? group.items.slice(0, ROOT_GROUP_ROW_CAP)
-                    : group.items;
-                  const nodes = visibleItems.map((item) => {
-                    const row = renderItemRow(item, index, false);
-                    index += 1;
-                    return row;
-                  });
-                  let expander: React.ReactNode = null;
-                  if (group.items.length > ROOT_GROUP_ROW_CAP) {
-                    expander = renderExpanderRow(
-                      {
-                        kind: 'expander',
-                        groupId: group.id,
-                        expanded,
-                        total: group.items.length,
-                      },
-                      index
-                    );
-                    index += 1;
-                  }
-                  return (
-                    <div key={group.id} data-test-subj={`workflowDataReferenceGroup-${group.id}`}>
-                      <div
-                        css={{
-                          position: 'sticky',
-                          top: 0,
-                          zIndex: 1,
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: euiTheme.size.xs,
-                          padding: `${euiTheme.size.xs} ${euiTheme.size.s}`,
-                          background: euiTheme.colors.backgroundBaseSubdued,
-                        }}
-                      >
-                        {group.iconType ? (
-                          <EuiIcon type={group.iconType} size="s" color="subdued" aria-hidden />
-                        ) : null}
-                        <EuiText
-                          size="xs"
-                          color="subdued"
-                          css={{ fontWeight: euiTheme.font.weight.medium }}
-                        >
-                          {group.title}
-                        </EuiText>
-                        <EuiIconTip
-                          type="info"
-                          color="subdued"
-                          position="top"
-                          content={group.description}
-                        />
-                      </div>
-                      {nodes}
-                      {expander}
-                    </div>
-                  );
-                });
-              })()
-            : visibleRows.items.map((item, i) =>
-                renderItemRow(item, i, visibleRows.mode === 'search')
-              )}
-          {flatNavigable.length === 0 && visibleRows.mode === 'search' ? (
-            <EuiText
-              size="s"
-              color="subdued"
-              css={{ padding: euiTheme.size.m, textAlign: 'center' }}
-            >
-              {i18n.translate('workflows.dataReferencePicker.empty', {
-                defaultMessage: 'No matching references',
-              })}
-            </EuiText>
-          ) : null}
-        </div>
-
-        <EuiText
-          size="xs"
-          color="subdued"
-          css={{
-            padding: euiTheme.size.s,
-            '& kbd': footerKeyCss,
-          }}
-        >
-          <FormattedMessage
-            id="workflows.dataReferencePicker.footer"
-            defaultMessage="Type {at} or {braces} in any field to open this"
-            values={{
-              at: <kbd>@</kbd>,
-              braces: <kbd>{'{{'}</kbd>,
-            }}
-          />
-        </EuiText>
+        {isTypeahead ? null : <PickerFooter />}
       </div>
     </EuiPopover>
   );
@@ -671,11 +476,9 @@ export function DataReferencePicker({
         // Keep the popover chrome out of flex layout; the panel portals to body.
         '& > .euiPopover': {
           position: 'absolute',
-          top: 0,
-          left: 0,
           width: 0,
-          height: 0,
           display: 'block !important',
+          ...popoverBoxPosition(typeaheadAnchor, underControl),
         },
       }}
     >

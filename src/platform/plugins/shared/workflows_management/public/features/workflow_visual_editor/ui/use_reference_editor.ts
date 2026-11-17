@@ -9,6 +9,7 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import type { CSSObject } from '@emotion/react';
+import type React from 'react';
 import { useCallback, useMemo, useState } from 'react';
 import type { monaco } from '@kbn/code-editor';
 import {
@@ -24,12 +25,33 @@ type Editor = monaco.editor.IStandaloneCodeEditor;
 
 interface TextChange {
   readonly changes: ReadonlyArray<{ readonly rangeOffset: number; readonly text: string }>;
+  readonly isUndoing?: boolean;
+  readonly isRedoing?: boolean;
 }
 
 /** Where the caret is after an edit: the end of the last change, or the end of the text. */
 export const caretAfterChange = (text: string, event: TextChange | undefined): number => {
   const last = event?.changes?.[event.changes.length - 1];
   return Math.min(last ? last.rangeOffset + last.text.length : text.length, text.length);
+};
+
+/**
+ * The one character the user just typed, or undefined for a deletion, a paste, an undo or any
+ * other edit. Typed text is what may start a reference; the same text arriving otherwise may not.
+ */
+export const typedCharacter = (event: TextChange | undefined): string | undefined => {
+  if (!event || event.isUndoing || event.isRedoing || event.changes.length !== 1) return undefined;
+  const [{ text }] = event.changes;
+  return text.length === 1 ? text : undefined;
+};
+
+/** The same as `typedCharacter`, for a plain `<input>` or `<textarea>` rather than a Monaco editor. */
+export const typedCharacterOfInput = (
+  event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+): string | undefined => {
+  const native = event.nativeEvent;
+  if (!(native instanceof InputEvent) || native.inputType !== 'insertText') return undefined;
+  return native.data?.length === 1 ? native.data : undefined;
 };
 
 /**

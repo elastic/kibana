@@ -38,6 +38,13 @@ export const changeBetween = (
   return { rangeOffset: start, rangeLength: previousEnd - start, text: next.slice(start, caret) };
 };
 
+/** What Monaco hands an `onKeyDown` listener: the browser event, and ways to stop it. */
+export interface MockKeyEvent {
+  readonly browserEvent: KeyboardEvent;
+  readonly preventDefault: () => void;
+  readonly stopPropagation: () => void;
+}
+
 export interface MockCodeEditorProps {
   readonly value: string;
   readonly languageId: string;
@@ -77,7 +84,10 @@ const MockCodeEditor = ({
   editorDidMount,
 }: MockCodeEditorProps) => {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-  const blurRef = useRef<(() => void) | null>(null);
+  // Like Monaco, an editor tells every listener, and a listener can stop listening.
+  const keyListeners = useRef(new Set<(event: MockKeyEvent) => void>());
+  const blurListeners = useRef(new Set<() => void>());
+  const cursorListeners = useRef(new Set<(event: { position: Position }) => void>());
   // Monaco mounts once and keeps the callbacks it was given; the editor reads what is current.
   const latest = useRef({ value, onChange, editorDidMount });
   latest.current = { value, onChange, editorDidMount };
@@ -101,9 +111,18 @@ const MockCodeEditor = ({
       },
       setSelection: () => undefined,
       revealPosition: () => undefined,
-      onKeyDown: () => undefined,
-      onDidBlurEditorText: (callback: () => void) => {
-        blurRef.current = callback;
+      getDomNode: () => textareaRef.current,
+      onKeyDown: (listener: (event: MockKeyEvent) => void) => {
+        keyListeners.current.add(listener);
+        return { dispose: () => keyListeners.current.delete(listener) };
+      },
+      onDidBlurEditorText: (listener: () => void) => {
+        blurListeners.current.add(listener);
+        return { dispose: () => blurListeners.current.delete(listener) };
+      },
+      onDidChangeCursorPosition: (listener: (event: { position: Position }) => void) => {
+        cursorListeners.current.add(listener);
+        return { dispose: () => cursorListeners.current.delete(listener) };
       },
       getTargetAtClientPoint: () => ({
         position: { lineNumber: 1, column: mockCodeEditorState.dropColumn },
@@ -156,7 +175,20 @@ const MockCodeEditor = ({
       aria-label={ariaLabel}
       placeholder={placeholder}
       value={value}
-      onBlur={() => blurRef.current?.()}
+      onBlur={() => blurListeners.current.forEach((listener) => listener())}
+      onKeyDown={(event) =>
+        keyListeners.current.forEach((listener) =>
+          listener({
+            browserEvent: event.nativeEvent,
+            preventDefault: () => event.preventDefault(),
+            stopPropagation: () => event.stopPropagation(),
+          })
+        )
+      }
+      onSelect={(event) => {
+        const position = positionAt(value, event.currentTarget.selectionStart ?? value.length);
+        cursorListeners.current.forEach((listener) => listener({ position }));
+      }}
       onChange={(event) => {
         const next = event.target.value;
         const caret = event.target.selectionStart ?? next.length;

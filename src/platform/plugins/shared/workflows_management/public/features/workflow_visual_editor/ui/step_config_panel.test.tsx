@@ -1305,16 +1305,59 @@ with:
     expect(screen.queryByTestId('workflowStepConfigPanelEmpty')).not.toBeInTheDocument();
   });
 
-  it('opens the picker from a Slack message body on typed @', () => {
-    renderPanel();
-    const message = activateField('workflowStepConfigField-with.message') as HTMLTextAreaElement;
-    const affordance = message
-      .closest('.euiFormRow')
-      ?.querySelector('[data-test-subj="workflowStepConfigDataReference"]');
-    expect(affordance).not.toBeNull();
-    expect(affordance).toBeEnabled();
-    fireEvent.change(message, { target: { value: 'Hi @', selectionStart: 4, selectionEnd: 4 } });
-    expect(screen.getByTestId('workflowDataReferenceSearch')).toBeInTheDocument();
+  describe('the reference dropdown of a Slack message body', () => {
+    const typeInMessage = (...texts: string[]) => {
+      const message = activateField('workflowStepConfigField-with.message') as HTMLTextAreaElement;
+      texts.forEach((value) =>
+        fireEvent.change(message, {
+          target: { value, selectionStart: value.length, selectionEnd: value.length },
+        })
+      );
+      return message;
+    };
+
+    it('has an insert control', () => {
+      renderPanel();
+      const message = activateField('workflowStepConfigField-with.message');
+      const affordance = message
+        .closest('.euiFormRow')
+        ?.querySelector('[data-test-subj="workflowStepConfigDataReference"]');
+      expect(affordance).not.toBeNull();
+      expect(affordance).toBeEnabled();
+    });
+
+    it('opens under a typed {{ without a search box, and the field keeps what was typed', () => {
+      renderPanel({
+        initialFragment: 'name: n\ntype: slack\nconnector-id: abc\nwith:\n  message: "Hi "\n',
+      });
+
+      const message = typeInMessage('Hi {', 'Hi {{', 'Hi {{ ');
+
+      expect(screen.getByTestId('workflowDataReferenceTypeahead')).toBeInTheDocument();
+      expect(screen.queryByTestId('workflowDataReferenceSearch')).not.toBeInTheDocument();
+      expect(message).toHaveValue('Hi {{ ');
+    });
+
+    it('does not open under a typed @', () => {
+      renderPanel({
+        initialFragment: 'name: n\ntype: slack\nconnector-id: abc\nwith:\n  message: "Hi "\n',
+      });
+
+      typeInMessage('Hi @');
+
+      expect(screen.queryByTestId('workflowDataReferenceTypeahead')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workflowDataReferenceSearch')).not.toBeInTheDocument();
+    });
+
+    it('does not open again when the text is deleted back to {{', () => {
+      renderPanel({
+        initialFragment: 'name: n\ntype: slack\nconnector-id: abc\nwith:\n  message: "{{a"\n',
+      });
+
+      typeInMessage('{{');
+
+      expect(screen.queryByTestId('workflowDataReferenceTypeahead')).not.toBeInTheDocument();
+    });
   });
 
   it('lets ES|QL query fields accept Liquid references without JSON parsing', () => {
@@ -1891,13 +1934,14 @@ with:
       expect(chip).toHaveAttribute('data-tone', 'neutral');
     });
 
-    it('opens the picker on the chip to swap it when a chip is clicked', () => {
+    it('opens the dropdown on the chip to swap it when a chip is clicked', () => {
       renderPanel();
       const chip = within(screen.getByTestId('workflowStepConfigField-with.message')).getByTestId(
         'workflowReferenceChip'
       );
       fireEvent.click(chip);
-      expect(screen.getByTestId('workflowDataReferenceSearch')).toBeInTheDocument();
+      expect(screen.getByTestId('workflowDataReferenceTypeahead')).toBeInTheDocument();
+      expect(screen.queryByTestId('workflowDataReferenceSearch')).not.toBeInTheDocument();
     });
 
     it('teaches { as the trigger in an empty plain text field', () => {
@@ -1909,14 +1953,15 @@ with:
       );
     });
 
-    it('opens the picker on a single typed { in plain text', () => {
+    it('opens the dropdown on a single typed { in plain text', () => {
       renderPanel({
         initialFragment: 'name: n\ntype: slack\nconnector-id: abc\nwith:\n  message: "Hi "\n',
       });
       fireEvent.change(activateField('workflowStepConfigField-with.message'), {
         target: { value: 'Hi {', selectionStart: 4, selectionEnd: 4 },
       });
-      expect(screen.getByTestId('workflowDataReferenceSearch')).toBeInTheDocument();
+      expect(screen.getByTestId('workflowDataReferenceTypeahead')).toBeInTheDocument();
+      expect(screen.queryByTestId('workflowDataReferenceSearch')).not.toBeInTheDocument();
     });
 
     it('does not treat { as a trigger inside a JSON field', () => {
@@ -1928,6 +1973,7 @@ with:
         target: { value: '{ "a": 1 }{', selectionStart: 11, selectionEnd: 11 },
       });
       expect(screen.queryByTestId('workflowDataReferenceSearch')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workflowDataReferenceTypeahead')).not.toBeInTheDocument();
     });
 
     it('warns about a list inside a sentence and rewrites it as JSON text', () => {
