@@ -322,7 +322,10 @@ export {
   type ConversationAddEventInput,
 } from './timeline_events';
 export type {
+  ChatCallbackEvent,
   ChatCallbackEventResponse,
+  ChatCallbackExecutionTerminatedEvent,
   ChatCallbackFailureResponse,
   ChatCallbackResponse,
+  ChatCallbackToolCall,
 } from './callback';

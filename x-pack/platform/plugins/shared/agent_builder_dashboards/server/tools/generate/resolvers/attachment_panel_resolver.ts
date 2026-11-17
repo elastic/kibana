@@ -70,6 +70,10 @@ export const createAttachmentPanelResolver = ({
       return fail(`Attachment "${attachmentId}" has no readable visualization data.`);
     }
 
-    return { type: 'success', panelContent: toPanelContent(data) };
+    return {
+      type: 'success',
+      panelContent: toPanelContent(data),
+      ...(isCustomContentVisualization(data) ? { heightHint: data.visualization.height } : {}),
+    };
   };
 };
