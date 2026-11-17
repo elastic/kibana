@@ -66,7 +66,10 @@ export class FunctionsPage {
 
   async clickTopNFunctionsActionButton(rowIndex: number) {
     const firstRowSelector = `[data-grid-row-index="${rowIndex}"] [data-test-subj="dataGridRowCell"]`;
-    await this.page.locator(firstRowSelector).getByRole('button').click();
+    await this.page
+      .locator(firstRowSelector)
+      .getByTestId('profilingTopNFunctionsGridButton')
+      .click();
   }
 
   async getNoDataPrompt() {
@@ -87,7 +90,10 @@ export class FunctionsPage {
   }
 
   async clickFirstRowActionButton(firstRowSelector: string) {
-    await this.page.locator(firstRowSelector).getByRole('button').click();
+    await this.page
+      .locator(firstRowSelector)
+      .getByTestId('profilingTopNFunctionsGridButton')
+      .click();
     await this.page.getByText('Frame information').waitFor({ state: 'visible' });
     await this.page.getByText('Impact estimates').waitFor({ state: 'visible' });
   }
