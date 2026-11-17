@@ -62,8 +62,8 @@ describe('MetaAlertAsEvidence evaluator', () => {
     });
   });
 
-  it('scores 1 with no discoveries', async () => {
-    expect(await run([])).toMatchObject({ score: 1, label: 'no_discoveries' });
+  it('is N/A with no discoveries', async () => {
+    expect(await run([])).toMatchObject({ score: null, label: 'N/A' });
   });
 
   it('is null with no_citations when discoveries cite nothing', async () => {

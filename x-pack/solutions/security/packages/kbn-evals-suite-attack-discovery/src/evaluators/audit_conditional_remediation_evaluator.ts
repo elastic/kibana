@@ -339,6 +339,14 @@ export const findUnconditionalContainment = (markdown: string): string[] => {
   return flagged;
 };
 
+/** Whether the markdown gives any containment instruction, conditional or not. */
+const hasContainmentInstruction = (markdown: string): boolean =>
+  markdown
+    .split('\n')
+    .some((line) =>
+      splitSentences(line).some((sentence) => splitClauses(sentence).some(isInstructionClause))
+    );
+
 /**
  * Unconditional containment advice. A discovery is exempt when every alert it cites belongs to a
  * group the gold marks as confirmed malicious (`confirmedGroups`); advice on anything else, or in
@@ -401,8 +409,18 @@ export const createAuditConditionalRemediationEvaluator = (
       )
     );
 
-    return offending.length === 0
-      ? { score: 1, label: 'conditional_or_none' }
-      : { score: 0, label: 'unconditional_containment', explanation: offending.join(' | ') };
+    if (offending.length > 0) {
+      return { score: 0, label: 'unconditional_containment', explanation: offending.join(' | ') };
+    }
+    const advised = scored.some((discovery) =>
+      hasContainmentInstruction(getDiscoveryMarkdown(discovery))
+    );
+    return advised
+      ? { score: 1, label: 'conditional' }
+      : {
+          score: 1,
+          label: 'no_containment_advice',
+          explanation: 'No scored discovery gives a containment instruction.',
+        };
   },
 });

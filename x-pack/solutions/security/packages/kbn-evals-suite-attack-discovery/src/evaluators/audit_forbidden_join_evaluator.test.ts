@@ -49,6 +49,15 @@ describe('ForbiddenJoin evaluator', () => {
     expect(await run(gold, [])).toMatchObject({ score: 1 });
   });
 
+  it('is N/A on a scenario that expects no discoveries, naming the join', async () => {
+    const noneGold = makeGold({ ...gold, expectedDiscoveries: 'none' });
+    const joined = await run(noneGold, [['a1', 'b1']]);
+    expect(joined).toMatchObject({ score: null, label: 'N/A' });
+    expect(joined.explanation).toContain('joins a with b');
+    expect(await run(noneGold, [])).toMatchObject({ score: null, label: 'N/A' });
+    expect(await run(noneGold, [['made-up-1']])).toMatchObject({ score: null, label: 'N/A' });
+  });
+
   it('is N/A when the scenario has no forbidden pairs', async () => {
     const result = await run(makeGold({ alertGroups: { a: ['a1'] } }), [['a1']]);
     expect(result).toMatchObject({ score: null, label: 'N/A' });
