@@ -18,7 +18,6 @@ import {
   Settings,
   Tooltip,
 } from '@elastic/charts';
-import type { DomainRange } from '@elastic/charts';
 import {
   EuiButtonGroup,
   EuiSelect,
@@ -39,8 +38,11 @@ import {
   OVERVIEW_PERCENTILES,
 } from '../../../../../common/overview_filters';
 import type { OverviewPercentile } from '../../../../../common/overview_filters';
+import type { HistogramBuckets } from '../../../../../common/types/applications';
 import type { OverviewTrendPoint } from '../../../../../common/types/overview';
 import { ChartArea } from '../../../../components/chart_area';
+import { PartialBucketsEndzones } from '../../../../components/partial_buckets_endzones';
+import { getTimeChartXDomain, type TimeChartXDomain } from '../../../../utils/histogram_interval';
 import {
   APPLICATION_OVERVIEW_EBT_ELEMENTS,
   DIGITAL_EXPERIENCE_EBT_ACTIONS,
@@ -143,7 +145,7 @@ function TrendChart({
   color: string;
   formatValue: (value: number) => string;
   chartType: TrendChartType;
-  xDomain: DomainRange | undefined;
+  xDomain: TimeChartXDomain | undefined;
   onTimeRangeSelect: TimeRangeSelect;
 }) {
   const baseTheme = useElasticChartsTheme();
@@ -171,6 +173,7 @@ function TrendChart({
         xDomain={xDomain}
       />
       <Tooltip headerFormatter={({ value }) => formatDate(value)} />
+      <PartialBucketsEndzones xDomain={xDomain} />
       <Axis id="time" position={Position.Bottom} style={HIDDEN_AXIS_LINES} />
       <Axis
         id={`${metric}Axis`}
@@ -252,6 +255,7 @@ function TrendRow({
  */
 export function OverviewTrends({
   points,
+  histogram,
   pageLoads,
   loadTimePercentileMs,
   percentile,
@@ -260,6 +264,8 @@ export function OverviewTrends({
   onTimeRangeSelect,
 }: {
   points: OverviewTrendPoint[];
+  /** The buckets of the points; `undefined` until the first response. */
+  histogram: HistogramBuckets | undefined;
   /** The page loads of the whole range, the sum of the points. */
   pageLoads: number;
   /** The load time of the whole range, which the points' percentiles do not add up to. */
@@ -271,7 +277,7 @@ export function OverviewTrends({
   onTimeRangeSelect: TimeRangeSelect;
 }) {
   const { euiTheme } = useEuiTheme();
-  const { formatNumber } = useFormatters();
+  const { formatNumber, timeZone } = useFormatters();
   // The chart type the user last picked, kept across visits; areas by default.
   const [chartType, setChartType] = usePersistedChoice(
     CHART_TYPE_STORAGE_KEY,
@@ -283,10 +289,12 @@ export function OverviewTrends({
   const hasLoadTimes = points.some((point) => point.loadTimePercentileMs !== null);
 
   // Both charts span the whole time range, whatever each one has data for.
-  const xDomain: DomainRange | undefined =
-    points.length > 0
-      ? { min: points[0].timestamp, max: points[points.length - 1].timestamp }
-      : undefined;
+  const xDomain = getTimeChartXDomain({
+    points,
+    histogram,
+    timeZone,
+    hasBars: chartType === 'bar',
+  });
 
   const chartProps = { points, chartType, xDomain, onTimeRangeSelect };
 

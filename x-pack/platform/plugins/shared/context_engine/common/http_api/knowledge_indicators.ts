@@ -32,6 +32,22 @@ export interface ListKisResponse {
   summary: KiListSummary;
 }
 
+/** One KI type with its count and its first KIs in the requested sort. */
+export interface KiGroup {
+  type: string;
+  count: number;
+  kis: KiListItem[];
+}
+
+export interface ListKiGroupsResponse {
+  /** KIs that match the filters. */
+  total: number;
+  /** KIs that match the filters but are in none of the returned groups. */
+  total_other: number;
+  /** The biggest types, `count` descending, then `type` ascending. */
+  groups: KiGroup[];
+}
+
 export type KiJsonPrimitive = string | number | boolean | null;
 export type KiJsonValue = KiJsonPrimitive | KiJsonValue[] | { [key: string]: KiJsonValue };
 
