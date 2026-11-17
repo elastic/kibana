@@ -11,10 +11,9 @@ import { attachAlertToCase } from '../fixtures/attach_alert_to_case';
 import { spaceTest, tags } from '../fixtures';
 import { seedHostWithAlert, type SeededHostAlert } from '../../common/seed_endpoint_hosts';
 import {
-  completeHostAction,
+  completeHostIsolationAction,
   deleteSubmittedHostActions,
   HOST_ISOLATION_LOCK_WAIT_MS,
-  waitForHostIsolation,
 } from '../../common/complete_host_action';
 import { PARALLEL_HOST_SEED_TIMEOUT_MS } from '../../common/get_file_spec_helpers';
 import { captureEndpointAction } from '../fixtures/page_objects/host_isolation_form';
@@ -25,9 +24,10 @@ spaceTest.describe(
     tag: tags.stateful.classic,
   },
   () => {
-    // Isolate, release, and the agent-status poll do not fit in the default 60s. The poll can
-    // first wait for the other worker's host seed to release the metadata-transform lock.
-    spaceTest.setTimeout(HOST_ISOLATION_LOCK_WAIT_MS + 240_000);
+    // Isolate, release, and the agent-status polls do not fit in the default 60s. Completing each
+    // of the two actions can first wait for the other worker's host seed to release the
+    // metadata-transform lock.
+    spaceTest.setTimeout(2 * HOST_ISOLATION_LOCK_WAIT_MS + 240_000);
 
     let seeded: (SeededHostAlert & { cleanup: () => Promise<void> }) | undefined;
     let caseId: string | undefined;
@@ -36,7 +36,7 @@ spaceTest.describe(
 
     spaceTest.beforeAll(async ({ esClient, kbnClient, scoutSpace, config }) => {
       // One host seed waits up to 8 minutes, after the other worker's metadata-transform lock,
-      // which is held for one host seed or one isolation poll.
+      // which is held for one host seed or one isolate or release action and its poll.
       spaceTest.setTimeout(PARALLEL_HOST_SEED_TIMEOUT_MS);
       await scoutSpace.setSolutionView('security');
       const hostAlert = await seedHostWithAlert({
@@ -125,13 +125,13 @@ spaceTest.describe(
           await hostIsolation.waitUntilClosed();
           await page.gotoApp(`security/cases/${attachedCaseId}`);
           await expect(activity).toContainText(isolateComment);
-          await completeHostAction({ esClient, config, action });
-          await waitForHostIsolation({
-            kbnClient,
+          await completeHostIsolationAction({
             esClient,
+            kbnClient,
+            config,
             spaceId: scoutSpace.id,
             agentId: host.agentId,
-            isolated: true,
+            action,
           });
         });
 
@@ -152,7 +152,14 @@ spaceTest.describe(
           ).toBeVisible();
           await hostIsolation.waitUntilClosed();
           await page.gotoApp(`security/cases/${attachedCaseId}`);
-          await completeHostAction({ esClient, config, action });
+          await completeHostIsolationAction({
+            esClient,
+            kbnClient,
+            config,
+            spaceId: scoutSpace.id,
+            agentId: host.agentId,
+            action,
+          });
           await expect(activity).toContainText(isolateComment);
           await expect(activity).toContainText(releaseComment);
         });

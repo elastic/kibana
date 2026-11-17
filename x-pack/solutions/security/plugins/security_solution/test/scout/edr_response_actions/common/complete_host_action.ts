@@ -16,6 +16,7 @@ import {
   ENDPOINT_ACTIONS_INDEX,
   FILE_STORAGE_DATA_INDEX,
   FILE_STORAGE_METADATA_INDEX,
+  METADATA_DATASTREAM,
 } from '../../../../common/endpoint/constants';
 import { getFileDownloadId } from '../../../../common/endpoint/service/response_actions/get_file_download_id';
 import {
@@ -212,12 +213,12 @@ export const deleteGetFileUploads = async ({
 };
 
 /**
- * How long `waitForHostIsolation` waits for the metadata-transform lock: the suite's budget for
- * one host seed (`HOST_SEED_TIMEOUT_MS`), the longest lock hold the suite plans for.
+ * How long `completeHostIsolationAction` waits for the metadata-transform lock: the suite's budget
+ * for one host seed (`HOST_SEED_TIMEOUT_MS`), the longest lock hold the suite plans for.
  */
 export const HOST_ISOLATION_LOCK_WAIT_MS = 600_000;
 
-/** Agent-status poll budget, counted once the lock is held. */
+/** Agent-status poll budget, counted once the isolation document is written. */
 const HOST_ISOLATION_POLL_MS = 60_000;
 
 interface HostIsolationWaitParams {
@@ -229,17 +230,51 @@ interface HostIsolationWaitParams {
   isolated: boolean;
 }
 
+const ISOLATION_BY_COMMAND: Readonly<Record<string, boolean>> = {
+  isolate: true,
+  unisolate: false,
+};
+
 /**
- * Waits until agent status reports the isolation flag written by `completeHostAction`.
- * The metadata transform has to pick up the new document before the flyout can show it.
- * The poll holds the metadata-transform lock, so another worker's host seed cannot
- * force-stop that transform while it waits. Waiting for the lock fails after
- * `HOST_ISOLATION_LOCK_WAIT_MS`; the 60s poll budget starts once the lock is held.
+ * Completes an isolate or release `action` (see `completeHostAction`) and waits until agent
+ * status reports the new isolation state for `agentId`.
+ * The write, a refresh of the metadata data stream and the agent-status poll all run under one
+ * metadata-transform lock: another worker's host seed restarts that transform and writes
+ * metadata, which can make it checkpoint past the isolation document before it is searchable,
+ * and then it never picks it up. Waiting for the lock fails after `HOST_ISOLATION_LOCK_WAIT_MS`;
+ * the 60s poll budget starts once the document is written.
  */
-export const waitForHostIsolation = (params: HostIsolationWaitParams): Promise<void> =>
-  withMetadataTransformLock(() => pollHostIsolation(params), {
-    acquireTimeoutMs: HOST_ISOLATION_LOCK_WAIT_MS,
-  });
+export const completeHostIsolationAction = async ({
+  esClient,
+  kbnClient,
+  config,
+  spaceId,
+  agentId,
+  action,
+}: {
+  esClient: EsClient;
+  kbnClient: KbnClient;
+  config: ScoutTestConfig;
+  spaceId: string;
+  agentId: string;
+  action: ActionDetails;
+}): Promise<void> => {
+  const isolated = ISOLATION_BY_COMMAND[action.command];
+  if (isolated === undefined) {
+    throw new Error(`Expected an isolate or unisolate action, got ${action.command} ${action.id}`);
+  }
+
+  await withMetadataTransformLock(
+    async () => {
+      await completeHostAction({ esClient, config, action });
+      // sendEndpointMetadataUpdate does not refresh: make the isolation document searchable
+      // before the metadata transform's next checkpoint can move past it.
+      await esClient.indices.refresh({ index: METADATA_DATASTREAM });
+      await pollHostIsolation({ kbnClient, esClient, spaceId, agentId, isolated });
+    },
+    { acquireTimeoutMs: HOST_ISOLATION_LOCK_WAIT_MS }
+  );
+};
 
 const pollHostIsolation = async ({
   kbnClient,

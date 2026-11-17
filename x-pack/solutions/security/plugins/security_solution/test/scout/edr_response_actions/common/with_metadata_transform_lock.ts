@@ -16,8 +16,9 @@ const STALE_AFTER_MS = 2 * 60_000;
 const RETRY_INTERVAL_MS = 1_000;
 
 /**
- * Serializes this suite's metadata seeding, and the waits that need the shared metadata transform
- * running, so one worker cannot force-stop that transform while another seeds or waits on it.
+ * Serializes this suite's metadata seeding, and the isolation writes and waits that need the shared
+ * metadata transform running, so one worker cannot force-stop that transform, or write metadata,
+ * while another seeds or waits on it.
  * Not reentrant: `fn` must not take the lock again. With `acquireTimeoutMs`, waiting for the lock
  * fails after that long instead of waiting indefinitely. Remove this once current-time seeds no
  * longer call stopMetadataTransforms.
