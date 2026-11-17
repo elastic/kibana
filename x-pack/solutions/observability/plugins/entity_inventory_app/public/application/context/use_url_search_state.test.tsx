@@ -28,7 +28,9 @@ const DEFAULT_STATE = {
 };
 
 const readWrittenState = (history: MemoryHistory) =>
-  decode(new URLSearchParams(history.location.search).get('_a') ?? '');
+  decode(
+    new URLSearchParams(history.location.search).get('_a') ?? ''
+  ) as unknown as Partial<UrlSearchState>;
 
 const renderUrlState = (
   initialEntry = '/kubernetes',
