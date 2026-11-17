@@ -7,14 +7,7 @@
 
 import { css } from '@emotion/react';
 import React from 'react';
-import {
-  EuiButtonIcon,
-  EuiPanel,
-  EuiText,
-  EuiTitle,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiPanel, EuiText, EuiTitle, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   type IntroBannerDismissal,

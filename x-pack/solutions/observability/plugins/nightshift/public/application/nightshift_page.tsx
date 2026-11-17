@@ -481,7 +481,6 @@ export function NightshiftPage(): React.ReactElement | null {
         <>
           <NightshiftAppHeader
             page={canUseAutomationsPage ? 'automations' : 'landing'}
-           
             onKnowledgeClick={navigateToKnowledge}
             knowledgeHref={knowledgeHref}
             onSettingsClick={
@@ -537,7 +536,7 @@ export function NightshiftPage(): React.ReactElement | null {
                 automationsHref={canUseAutomations ? automationsHref : undefined}
                 onFinish={finishOnboarding}
                 introBannerDismissal={introBannerDismissal}
-                />
+              />
             ) : onboarding.isLoading ? (
               <EuiFlexGroup justifyContent="center" data-test-subj="nightshiftOnboardingLoading">
                 <EuiLoadingSpinner size="xl" />
