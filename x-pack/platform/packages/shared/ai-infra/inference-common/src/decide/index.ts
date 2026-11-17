@@ -8,7 +8,6 @@
 export type {
   DecideAPI,
   DecideOptions,
-  DecideResponse,
   DecisionAnswer,
   DecisionAnswerFor,
   DecisionAnswersFor,

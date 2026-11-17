@@ -83,10 +83,7 @@ describe('createDecideApi', () => {
       path: '/_inference/decision/my-decision',
       body: { input, task_settings: { questions: { question_1: shouldRespond } } },
     });
-    expect(result).toEqual({
-      inferenceId: 'my-decision',
-      answer: { type: 'predicate', probability: 0.94 },
-    });
+    expect(result).toEqual({ answer: { type: 'predicate', probability: 0.94 } });
 
     const probability: number = result.answer.probability;
     expect(probability).toBe(0.94);

@@ -74,8 +74,6 @@ export interface DecideOptions {
   abortSignal?: AbortSignal;
 }
 
-export type DecideResponse<T> = { inferenceId: string } & T;
-
 /**
  * Asks a decision model bounded questions about an input: fast, cheap answers with
  * probabilities. Throws an inference request error with status 404 when the `decision` endpoint
@@ -83,12 +81,12 @@ export type DecideResponse<T> = { inferenceId: string } & T;
  * @experimental The Elasticsearch `decision` inference task it calls is experimental.
  */
 export interface DecideAPI {
-  <const Q extends DecisionQuestion>(options: DecideOptions, question: Q): Promise<
-    DecideResponse<{ answer: DecisionAnswerFor<Q> }>
-  >;
+  <const Q extends DecisionQuestion>(options: DecideOptions, question: Q): Promise<{
+    answer: DecisionAnswerFor<Q>;
+  }>;
   /** Asks several questions about the same input in one call; answers follow the questions' order. */
   <const Q extends [DecisionQuestion, DecisionQuestion, ...DecisionQuestion[]]>(
     options: DecideOptions,
     ...questions: Q
-  ): Promise<DecideResponse<{ answers: DecisionAnswersFor<Q> }>>;
+  ): Promise<{ answers: DecisionAnswersFor<Q> }>;
 }

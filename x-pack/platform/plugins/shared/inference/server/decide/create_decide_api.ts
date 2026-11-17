@@ -17,7 +17,6 @@ import { anonymizeMessages } from '@kbn/ai-anonymization-server';
 import type {
   DecideAPI,
   DecideOptions,
-  DecideResponse,
   DecisionAnswer,
   DecisionQuestion,
 } from '@kbn/inference-common';
@@ -113,7 +112,7 @@ const invokeDecision = async ({
   esClient: ElasticsearchClient;
   options: DecideOptions;
   questions: DecisionQuestion[];
-}): Promise<DecideResponse<{ answers: DecisionAnswer[] }>> => {
+}): Promise<DecisionAnswer[]> => {
   if (abortSignal?.aborted) {
     throw createInferenceRequestAbortedError();
   }
@@ -127,7 +126,7 @@ const invokeDecision = async ({
     { signal: abortSignal }
   );
 
-  return { inferenceId, answers: parseDecisionResponse(body, questions) };
+  return parseDecisionResponse(body, questions);
 };
 
 /**
@@ -145,7 +144,7 @@ export function createDecideApi({
   return async (
     options: DecideOptions,
     ...questions: DecisionQuestion[]
-  ): Promise<DecideResponse<{ answer: DecisionAnswer } | { answers: DecisionAnswer[] }>> => {
+  ): Promise<{ answer: DecisionAnswer } | { answers: DecisionAnswer[] }> => {
     if (questions.length === 0) {
       throw createInferenceRequestError('decide() needs at least one question', 400);
     }
@@ -168,24 +167,22 @@ export function createDecideApi({
             anonymization,
           });
 
-          const { inferenceId, answers } = await invokeDecision({
+          const answers = await invokeDecision({
             esClient,
             options: { ...options, input },
             questions,
           });
 
-          span?.setAttributes({ 'elastic.decision.inference_id': inferenceId });
+          span?.setAttributes({ 'elastic.decision.inference_id': options.inferenceId });
 
           logger.debug(
             () =>
-              `Decision [${questionTypes}] from [${inferenceId}] in ${
+              `Decision [${questionTypes}] from [${options.inferenceId}] in ${
                 Date.now() - startedAt
               }ms: ${JSON.stringify(answers)}`
           );
 
-          return questions.length === 1
-            ? { inferenceId, answer: answers[0] }
-            : { inferenceId, answers };
+          return questions.length === 1 ? { answer: answers[0] } : { answers };
         } catch (error) {
           const inferenceError = toInferenceError({ error, abortSignal: options.abortSignal });
 
