@@ -19,6 +19,7 @@ import { getNodeSwcConfig } from '@kbn/swc-config/node';
 import { makeMatcher } from '@kbn/picomatcher';
 import { PackageFileMap } from '@kbn/repo-file-maps';
 import { getRepoFiles } from '@kbn/get-repo-files';
+import { REPO_ROOT } from '@kbn/repo-info';
 import type { Task } from '../lib';
 import { deleteAll, scanCopy, write } from '../lib';
 import type { Record } from '../lib/fs_records';

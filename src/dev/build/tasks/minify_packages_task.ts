@@ -39,7 +39,7 @@ export async function minifyFile(file: string, minify = STRIP_ONLY): Promise<voi
       parser: { syntax: 'ecmascript' },
       minify,
       // Otherwise classes shadowing an outer name are renamed, changing their `name`.
-      keepClassNames: true,
+      keepClassNames: minify === STRIP_ONLY,
     },
   });
   await Fsp.writeFile(file, code);
@@ -57,8 +57,10 @@ export const MinifyPackages: Task = {
       {
         cwd: build.resolvePath('node_modules'),
         absolute: true,
+        // Only a package's top-level `public` is browser code.
         ignore: [
-          '**/{node_modules,public,shared_built_assets,target_workers,target_vega_sandbox}/**',
+          '@kbn/*/public/**',
+          '**/{node_modules,shared_built_assets,target_workers,target_vega_sandbox}/**',
         ],
       }
     );
