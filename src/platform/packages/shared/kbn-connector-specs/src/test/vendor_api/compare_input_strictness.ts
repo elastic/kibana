@@ -141,13 +141,17 @@ const ceilingGap = (
     : undefined;
 };
 
-/** A floor the connector must not fall below: `minLength`, `minimum`, `minItems`. */
+/**
+ * A floor the connector must not fall below: `minLength`, `minimum`, `minItems`. A length or
+ * size floor of 0 allows everything, so it asks nothing of the connector; a `minimum` of 0 does
+ * rule out negatives, so it still counts.
+ */
 const floorGap = (
   keyword: string,
   vendor: number | undefined,
   connector: number | undefined
 ): StrictnessGap | undefined => {
-  if (vendor === undefined) {
+  if (vendor === undefined || (vendor === 0 && keyword !== 'minimum')) {
     return undefined;
   }
   if (connector === undefined) {
@@ -218,7 +222,34 @@ const enumGap = (vendor: JsonSchema, connector: JsonSchema): StrictnessGap | und
     : { keyword: 'enum', vendor: print(allowed), connector: print(extra) };
 };
 
+const typeOf = (schema: JsonSchema): string | undefined => {
+  const { type } = schema;
+  if (typeof type === 'string') {
+    return type === 'integer' ? 'number' : type;
+  }
+  // A union with `null`, as OpenAPI 3.1 and zod both spell a nullable value.
+  if (Array.isArray(type)) {
+    const named = type.filter((entry) => typeof entry === 'string' && entry !== 'null');
+    return named.length === 1 ? String(named[0]).replace('integer', 'number') : undefined;
+  }
+  return undefined;
+};
+
+/**
+ * Whether the two schemas describe the same kind of value. When they don't, the handler converts
+ * the input on its way out, as CloudWatch's does from an ISO timestamp to epoch milliseconds,
+ * and the vendor's rules say nothing about what the input may be.
+ */
+const sameKind = (vendor: JsonSchema, connector: JsonSchema): boolean => {
+  const wanted = typeOf(vendor);
+  const declared = typeOf(connector);
+  return wanted === undefined || declared === undefined || wanted === declared;
+};
+
 const gapsBetween = (vendor: JsonSchema, connector: JsonSchema): StrictnessGap[] => {
+  if (!sameKind(vendor, connector)) {
+    return [];
+  }
   const gaps: Array<StrictnessGap | undefined> = [
     formatGap(vendor, connector),
     patternGap(vendor, connector),

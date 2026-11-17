@@ -139,6 +139,17 @@ describe('compareInputStrictness', () => {
       ).toEqual([{ keyword: 'maximum', vendor: '100', connector: '150' }]);
     });
 
+    it('ignores a length or size floor of zero, which allows everything', () => {
+      expect(compareInputStrictness({ type: 'string', minLength: 0 }, { type: 'string' })).toEqual(
+        []
+      );
+      expect(compareInputStrictness({ type: 'array', minItems: 0 }, { type: 'array' })).toEqual([]);
+    });
+
+    it('keeps a minimum of zero, which rules out negatives', () => {
+      expect(keywords({ type: 'integer', minimum: 0 }, { type: 'integer' })).toEqual(['minimum']);
+    });
+
     it('checks string lengths and array sizes', () => {
       expect(
         keywords(
@@ -173,6 +184,27 @@ describe('compareInputStrictness', () => {
       expect(
         compareInputStrictness(vendor, { anyOf: [{ maxLength: 20 }, { maxLength: 50 }] })
       ).toEqual([{ keyword: 'maxLength', vendor: '10', connector: '20' }]);
+    });
+  });
+
+  describe('kinds', () => {
+    it('says nothing when the handler converts the value on its way out', () => {
+      expect(
+        compareInputStrictness(
+          { type: 'integer', minimum: 0 },
+          { type: 'string', description: 'an ISO 8601 timestamp the handler turns into millis' }
+        )
+      ).toEqual([]);
+    });
+
+    it('reads integer and number as the same kind', () => {
+      expect(keywords({ type: 'integer', maximum: 10 }, { type: 'number' })).toEqual(['maximum']);
+    });
+
+    it('reads a nullable value as its named type', () => {
+      expect(keywords({ type: 'string', maxLength: 5 }, { type: ['string', 'null'] })).toEqual([
+        'maxLength',
+      ]);
     });
   });
 
