@@ -46,6 +46,7 @@ browserslist
 react-day-picker
 mysql2
 mssql
+pg
 jszip
 @rsdoctor/rspack-plugin
 @rspack/core
