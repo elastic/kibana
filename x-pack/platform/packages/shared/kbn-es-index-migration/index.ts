@@ -21,6 +21,7 @@ export {
   isTotalFieldsBreach,
 } from './src/es_errors';
 export { MUTABLE_PARAMETERS_BY_TYPE } from './src/allowlist';
+export { METER_NAME } from './src/metrics';
 export {
   DEFAULT_INTERVAL,
   DEFAULT_TIMEOUT,

@@ -200,6 +200,41 @@ sustained above zero is the signal that something is stuck.
 Without that distinction, a blank error on a `lifecycle` migration reads as "it succeeded" when it
 actually means "we never kept a record."
 
+## Metrics
+
+The library emits a fixed set. A plugin gets them by adopting and cannot rename them, which is
+what makes one dashboard across Kibana possible.
+
+| Metric | Type | Per | Attributes |
+|---|---|---|---|
+| `kibana.es_index_migration.run.count` | Counter | namespace | `migration_id` `execution_mode` `namespace` `outcome` `reason` |
+| `kibana.es_index_migration.run.duration` | Gauge (`s`) | sweep | `migration_id` `execution_mode` `outcome` |
+| `kibana.es_index_migration.versions_behind` | Gauge | namespace | `migration_id` `execution_mode` `namespace` |
+| `kibana.es_index_migration.drift.count` | Counter | namespace | `migration_id` `namespace` `kind` |
+
+`outcome` is `up_to_date | created | migrated | failed` - the same vocabulary `reconcile` returns,
+so a log line and a metric describe an event the same way. `reason` is present only on `failed`,
+carried as an attribute rather than left to a log line so one failure is distinguishable from
+another.
+
+**`versions_behind` is the alertable one.** Sustained above zero means a deployment is stuck, and
+until now there was no way to see that at all.
+
+**`up_to_date` matters more than it looks.** A steady stream of skips proves the sweep is alive, and
+watching outcomes shift from `migrated` to `up_to_date` across a fleet is the rollout-complete
+signal. Without it, "nothing changed" cannot be told apart from "never ran".
+
+Two deliberate choices worth knowing:
+
+- **Duration is a gauge, not a histogram.** A sweep runs hourly and a real migration happens a
+  handful of times in a deployment's life, so there are never enough samples for a distribution to
+  mean anything - and histograms ship as bucketed structures that are awkward to aggregate across
+  deployments. **Filter to `outcome != up_to_date` before averaging**, or no-op sweeps will
+  dominate the mean.
+- **Duration is per sweep, count is per namespace.** Different questions: *which deployment is
+  slowest* needs no namespace and would cost a series per space; *which space failed and why*
+  needs one.
+
 ## Status of the package
 
-Concrete indices only. Still to come: the predefined metric set, and a data stream backend.
+Concrete indices only. Still to come: a data stream backend.

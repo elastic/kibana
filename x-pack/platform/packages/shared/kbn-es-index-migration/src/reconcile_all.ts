@@ -9,6 +9,7 @@ import { reconcile } from './reconcile';
 import { describeEsRefusal } from './es_errors';
 import { sortedVersionNumbers } from './define_migration';
 import { namespacesFor, resolveName } from './resource';
+import { recordSweep } from './metrics';
 import type { ReconcileAllOptions, ReconcileResult } from './types';
 
 /**
@@ -32,6 +33,7 @@ export const reconcileAll = async ({
   const declared = sortedVersionNumbers(definition.versions);
   const target = declared.length > 0 ? declared[declared.length - 1] : definition.baseline;
   const results: ReconcileResult[] = [];
+  const startedAt = Date.now();
 
   // A global resource is one index however many spaces exist, so it collapses to a
   // single pass rather than repeating the same no-op per namespace.
@@ -70,6 +72,10 @@ export const reconcileAll = async ({
       `[${definition.id}] ${failed.length}/${results.length} spaces failed: ` +
         failed.map(({ namespace }) => namespace).join(', ')
     );
+  }
+
+  if (results.length > 0) {
+    recordSweep(definition.id, definition.execution, (Date.now() - startedAt) / 1000, results);
   }
 
   return results;

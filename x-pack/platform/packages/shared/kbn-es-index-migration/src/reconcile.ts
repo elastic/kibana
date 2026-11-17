@@ -9,6 +9,8 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { sortedVersionNumbers } from './define_migration';
 import { classifyEsError, describeEsRefusal } from './es_errors';
 import { resolveName } from './resource';
+import { recordDrift, recordRun } from './metrics';
+import { verifyAdditive } from './verify';
 import {
   applyMappings,
   createIndex,
@@ -58,7 +60,13 @@ export const reconcile = async (options: ReconcileOptions): Promise<ReconcileRes
     return running;
   }
 
-  const run = runReconcile(options).finally(() => inFlight.delete(key));
+  const run = runReconcile(options)
+    .then((result) => {
+      recordRun(result, options.definition.execution);
+      return result;
+    })
+    .finally(() => inFlight.delete(key));
+
   inFlight.set(key, run);
   return run;
 };
@@ -156,6 +164,7 @@ interface ApplyStepArgs extends ReconcileOptions {
 }
 
 const applyStep = async ({
+  definition,
   step,
   version,
   esClient,
@@ -165,6 +174,7 @@ const applyStep = async ({
   signal,
 }: ApplyStepArgs): Promise<void> => {
   if (step.change === 'additive') {
+    reportDrift({ definition, step, version, namespace, logger });
     await applyMappings(esClient, resourceName, step.mappings, version, { signal });
     return;
   }
@@ -173,6 +183,68 @@ const applyStep = async ({
   // handed over too, since a backfill is the most likely thing to outlive the timeout.
   await step.run({ esClient, logger, resourceName, namespace, signal });
   await stampVersion(esClient, resourceName, version, { signal });
+};
+
+/**
+ * Surfaces a declared removal that Elasticsearch will not apply.
+ *
+ * Re-derived here rather than carried from `defineMigration`, because drift is a
+ * property of applying a step, not of declaring one - and it needs the namespace, which
+ * the declaration does not have.
+ *
+ * Not a failure: the step still applies, and refusing would block a legitimate
+ * declaration cleanup. But the index keeps the field, so the declaration stops matching
+ * reality and that should not be silent.
+ */
+const reportDrift = ({
+  definition,
+  step,
+  version,
+  namespace,
+  logger,
+}: Pick<ApplyStepArgs, 'definition' | 'step' | 'version' | 'namespace' | 'logger'>): void => {
+  if (step.change !== 'additive') {
+    return;
+  }
+
+  const previous = previousMappings(definition, version);
+  if (previous === undefined) {
+    return;
+  }
+
+  const { drift } = verifyAdditive(
+    previous,
+    step.mappings,
+    definition.resource.backing ?? 'concrete_index'
+  );
+
+  if (drift.length === 0) {
+    return;
+  }
+
+  recordDrift(definition.id, namespace, drift);
+  drift.forEach(({ path, detail }) =>
+    logger.warn(`[${definition.id}] ${namespace} v${version} drift at ${path}: ${detail}`)
+  );
+};
+
+/** The mappings of the newest additive version strictly below the given one. */
+const previousMappings = (
+  definition: MigrationDefinition,
+  version: number
+): MappingTypeMapping | undefined => {
+  const earlier = sortedVersionNumbers(definition.versions)
+    .filter((candidate) => candidate < version)
+    .reverse();
+
+  for (const candidate of earlier) {
+    const step = definition.versions[candidate];
+    if (step.change === 'additive') {
+      return step.mappings;
+    }
+  }
+
+  return undefined;
 };
 
 /**
