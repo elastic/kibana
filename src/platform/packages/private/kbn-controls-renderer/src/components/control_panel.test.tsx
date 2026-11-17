@@ -115,6 +115,26 @@ describe('render', () => {
       expect(controlFrame.getAttribute('class')).toContain('euiFlexItem-grow');
     });
   });
+
+  describe('accessibility', () => {
+    test('should not render a generic aria-label on the control frame', () => {
+      const controlPanel = render(
+        <ControlPanel
+          control={{
+            ...DEFAULT_PINNED_CONTROL_STATE,
+            id: 'control1',
+            type: 'options_list_control',
+            order: 0,
+          }}
+          parentApi={parentApi}
+          setControlPanelRef={jest.fn()}
+        />
+      );
+      const formRow = controlPanel.getByTestId('control-frame-title');
+      expect(formRow.hasAttribute('aria-label')).toBe(false);
+      expect(controlPanel.container.innerHTML).not.toContain('undefined');
+    });
+  });
 });
 
 /**
