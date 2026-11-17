@@ -284,3 +284,4 @@ export {
   isHuntEligibleIoc,
   type HuntEligibleIocTier,
 } from './impl/hunt/hunt_eligible_ioc';
+export { isNonRoutableIPv4, isNonRoutableIPv6, isNonRoutableIpIoc } from './impl/ip_ranges';
