@@ -103,7 +103,7 @@ export const DestinationFailureIcon = ({
       >
         <DestinationFailurePopoverSummary
           failed={failedWithTrend}
-          period={{ kind: 'lastMinutes', minutes: STATS_DEFAULT_WINDOW_MINUTES }}
+          minutes={STATS_DEFAULT_WINDOW_MINUTES}
         />
       </div>
     </EuiPopover>

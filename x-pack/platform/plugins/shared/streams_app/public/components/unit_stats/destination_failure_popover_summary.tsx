@@ -10,52 +10,16 @@ import { css } from '@emotion/react';
 import { EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  formatFailureBasis,
   formatPercentageParts,
   formatRateParts,
 } from '../../services/unit_stats_client/format_stats';
 import type { DestinationFailedView } from '../../services/unit_stats_client/types';
 import {
   getFailureClasses,
+  getFailureSubtitle,
   hasDestinationFailures,
-  hasFailures,
-  type FailurePeriod,
 } from './destination_failures';
 import { FailureSparkline } from './failure_sparkline';
-
-/**
- * What the figures are a share of, and for how long, said once: `Of events in the last 15
- * minutes`. A destination reports in one unit, so the first class with failures names it.
- */
-function FailureSubtitle({
-  failed,
-  period,
-  dataTestSubj,
-}: {
-  failed: DestinationFailedView;
-  period: FailurePeriod;
-  dataTestSubj: string;
-}) {
-  const { unit } = hasFailures(failed.authentication)
-    ? failed.authentication
-    : failed.authorization;
-  const basis = formatFailureBasis(unit);
-
-  return (
-    <EuiText size="xs" color="subdued" data-test-subj={dataTestSubj}>
-      {period.kind === 'lastMinutes'
-        ? i18n.translate('xpack.streams.unitStats.failurePopoverSummary.subtitleLastMinutes', {
-            defaultMessage:
-              'Of {basis} in the last {minutes, plural, one {minute} other {# minutes}}',
-            values: { basis, minutes: period.minutes },
-          })
-        : i18n.translate('xpack.streams.unitStats.failurePopoverSummary.subtitleTimePicker', {
-            defaultMessage: 'Of {basis} based on the time picker',
-            values: { basis },
-          })}
-    </EuiText>
-  );
-}
 
 /**
  * A stat in the style of the stats of the flyout: a title in regular weight and the subdued color,
@@ -109,11 +73,12 @@ function FailureStat({
  */
 export function DestinationFailurePopoverSummary({
   failed,
-  period,
+  minutes,
   dataTestSubj = 'streamsDestinationFailurePopoverSummary',
 }: {
   failed: DestinationFailedView;
-  period: FailurePeriod;
+  /** How many minutes the figures cover. */
+  minutes: number;
   dataTestSubj?: string;
 }) {
   const { euiTheme } = useEuiTheme();
@@ -136,7 +101,9 @@ export function DestinationFailurePopoverSummary({
             })}
           </h4>
         </EuiTitle>
-        <FailureSubtitle failed={failed} period={period} dataTestSubj={`${dataTestSubj}Subtitle`} />
+        <EuiText size="xs" color="subdued" data-test-subj={`${dataTestSubj}Subtitle`}>
+          {getFailureSubtitle(failed, minutes)}
+        </EuiText>
       </div>
       {getFailureClasses(failed).map(({ key, title, failureClass }) => {
         const percentage = formatPercentageParts(failureClass.percentage);

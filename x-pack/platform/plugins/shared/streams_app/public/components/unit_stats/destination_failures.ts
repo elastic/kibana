@@ -6,14 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { formatFailureBasis } from '../../services/unit_stats_client/format_stats';
 import type {
   DestinationFailedView,
   FailureClassView,
   FailureRateView,
 } from '../../services/unit_stats_client/types';
-
-/** The time that the failures cover: a fixed number of minutes, or the range of the time picker. */
-export type FailurePeriod = { kind: 'lastMinutes'; minutes: number } | { kind: 'timePicker' };
 
 /**
  * A class has failures when its percentage is above 0. With no percentage, which happens when
@@ -27,6 +25,25 @@ export const hasDestinationFailures = ({
   authentication,
   authorization,
 }: DestinationFailedView): boolean => hasFailures(authentication) || hasFailures(authorization);
+
+/**
+ * What the figures of the Map are a share of, and for how long, said once: `Of events in the last
+ * 15 minutes`. A destination reports in one unit, so the first class with failures names it, and a
+ * destination with none names the unit of its authentication class. The flyout does not use this: it
+ * says `For selected time range`, as the ingest chart of a local Elasticsearch destination does, and
+ * puts what the figures are a share of in their units.
+ */
+export const getFailureSubtitle = (failed: DestinationFailedView, minutes: number): string => {
+  const { unit } =
+    hasFailures(failed.authorization) && !hasFailures(failed.authentication)
+      ? failed.authorization
+      : failed.authentication;
+
+  return i18n.translate('xpack.streams.unitStats.failures.subtitleLastMinutes', {
+    defaultMessage: 'Of {basis} in the last {minutes, plural, one {minute} other {# minutes}}',
+    values: { basis: formatFailureBasis(unit), minutes },
+  });
+};
 
 /** The failure classes of a destination that have failures, with the name that each one shows. */
 export const getFailureClasses = (

@@ -19,7 +19,7 @@ import { placeholderFailureSeries } from './placeholder_failure_series';
 const meta: Meta<typeof DestinationFailurePopoverSummary> = {
   component: DestinationFailurePopoverSummary,
   title: 'streams/unit stats/DestinationFailurePopoverSummary',
-  args: { period: { kind: 'lastMinutes', minutes: 15 } },
+  args: { minutes: 15 },
   // The width of the popover on the Map node.
   decorators: [
     (Story) => (
@@ -101,13 +101,5 @@ export const NoSeries: Story = {
     failed: failed({
       authentication: failureClass({ rate: 0.5, percentage: 11.9, hasSeries: false }),
     }),
-  },
-};
-
-/** The flyout covers the range of the time picker, so the subtitle says so. */
-export const TimePickerPeriod: Story = {
-  args: {
-    period: { kind: 'timePicker' },
-    failed: failed({ authentication: failureClass({ rate: 0.5, percentage: 11.9 }) }),
   },
 };
