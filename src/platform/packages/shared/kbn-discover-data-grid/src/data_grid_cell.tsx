@@ -49,7 +49,9 @@ const getWrappedTabStop = (
   target: Node,
   backwards: boolean
 ): HTMLElement | SVGElement => {
-  const currentIndex = tabStops.findIndex((tabStop) => tabStop.contains(target));
+  const ownIndex = tabStops.findIndex((tabStop) => tabStop === target);
+  const currentIndex =
+    ownIndex >= 0 ? ownIndex : tabStops.findLastIndex((tabStop) => tabStop.contains(target));
   const start = currentIndex >= 0 ? currentIndex : backwards ? 0 : -1;
   const step = backwards ? -1 : 1;
   return tabStops[(start + step + tabStops.length) % tabStops.length];

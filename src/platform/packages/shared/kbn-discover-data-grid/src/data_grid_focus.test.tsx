@@ -732,6 +732,38 @@ describe('DataGrid keyboard and logical focus', () => {
       expect(after).toHaveFocus();
     });
 
+    it('wraps Tab through tab stops nested inside a focusable container', async () => {
+      const user = userEvent.setup();
+      renderGridBetweenButtons({
+        gridColumns: createContentColumns((rowId) => (
+          <div tabIndex={0} role="region" aria-label={`Actions ${rowId}`}>
+            <button type="button">{`First ${rowId}`}</button>
+            <button type="button">{`Second ${rowId}`}</button>
+          </div>
+        )),
+      });
+      const container = screen.getByRole('region', { name: 'Actions row-0' });
+      const firstButton = screen.getByRole('button', { name: 'First row-0' });
+      const secondButton = screen.getByRole('button', { name: 'Second row-0' });
+
+      await user.tab();
+      await user.tab();
+      await user.keyboard('{ArrowRight}');
+      await user.keyboard('{Enter}');
+      expect(container).toHaveFocus();
+
+      await user.tab();
+      expect(firstButton).toHaveFocus();
+      await user.tab();
+      expect(secondButton).toHaveFocus();
+      await user.tab();
+      expect(container).toHaveFocus();
+      await user.tab({ shift: true });
+      expect(secondButton).toHaveFocus();
+      await user.tab({ shift: true });
+      expect(firstButton).toHaveFocus();
+    });
+
     it('describes how to enter a cell with focusable content and announces how to leave', async () => {
       const user = userEvent.setup();
       renderGridBetweenButtons({ gridColumns: columnsWithLinks });
