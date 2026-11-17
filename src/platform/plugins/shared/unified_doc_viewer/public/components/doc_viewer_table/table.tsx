@@ -106,6 +106,9 @@ const savePinnedFieldsToStorage = (newFields: string[], dataViewId: string, stor
   });
 };
 
+const getOwnValue = (flattened: Record<string, unknown>, field: string): unknown =>
+  Object.hasOwn(flattened, field) ? flattened[field] : undefined;
+
 const InternalDocViewerTable = ({
   columns,
   dataSource,
@@ -196,7 +199,7 @@ const InternalDocViewerTable = ({
     (field: string, isPinned: boolean): FieldRow => {
       return new FieldRow({
         name: field,
-        flattenedValue: flattened[field],
+        flattenedValue: getOwnValue(flattened, field),
         hit,
         dataView,
         fieldFormats,
@@ -224,8 +227,9 @@ const InternalDocViewerTable = ({
     if (dataSource?.kind !== 'esql') {
       return names;
     }
+    const presentNames = new Set(names);
     const emptyColumnNames = dataSource.resultColumns
-      .filter(({ isNull, name }) => isNull && !(name in flattened))
+      .filter(({ isNull, name }) => isNull && !presentNames.has(name))
       .map(({ name }) => name);
     return emptyColumnNames.length ? [...names, ...emptyColumnNames] : names;
   }, [flattened, dataSource]);
@@ -268,7 +272,8 @@ const InternalDocViewerTable = ({
           if (!shouldShowOnlySelectedFields && !shouldShowFieldHandler(curFieldName)) {
             return acc;
           }
-          const shouldHideNullValue = hideNullValues && flattened[curFieldName] == null;
+          const shouldHideNullValue =
+            hideNullValues && getOwnValue(flattened, curFieldName) == null;
           if (shouldHideNullValue) {
             return acc;
           }
