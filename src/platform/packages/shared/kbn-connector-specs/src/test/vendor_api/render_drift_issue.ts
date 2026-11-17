@@ -16,6 +16,8 @@ import type {
 } from './detect_drift';
 import { reviewOfChange } from './detect_drift';
 import { markerOf } from './drift_issue_marker';
+import type { DriftProblem } from './drift_problem';
+import { otherProblem, problemTextOf } from './drift_problem';
 import type { ChangeCategory } from './oasdiff_text';
 import { changeCategoryOf, isRequestChange, isResponseChange } from './oasdiff_text';
 import type { Addition } from './new_in_vendor_api';
@@ -192,59 +194,36 @@ interface OtherProblemRow {
   readonly fix: string;
 }
 
-const METHOD = '(GET|PUT|POST|DELETE|PATCH|HEAD|OPTIONS|TRACE)';
-// `Auth type bearer: 2 schema(s) are invalid:`, then one line per schema, indented.
-const INVALID_SCHEMAS = /^Auth type (\S+): \d+ schema\(s\) are invalid:$/;
-const INVALID_SCHEMA = new RegExp(`^\\s+${METHOD} (\\S+) \\(([^)]*)\\): (.*)$`);
-const UNDECLARED_PAGINATION = new RegExp(
-  `^${METHOD} (\\S+) \\(([^)]+)\\) looks like it returns a collection, as (.+); declare its "pagination" in manifest\\.json, or "none" if it returns everything at once$`
-);
-
 /**
- * The problems that concern no single action, as table rows: the messages the drift check writes
- * for invalid spec schemas (once per auth type) and undeclared pagination are read into their
- * parts, and any other message is kept as it is.
+ * The problems that concern no single action, as table rows. The check reports each with its own
+ * parts, so nothing is read back out of a sentence here; the invalid schemas of one operation are
+ * the same problem under every auth type that hit them, so they share a row.
  */
-const otherProblemRows = (problems: readonly string[]): OtherProblemRow[] => {
+const otherProblemRows = (problems: readonly DriftProblem[]): OtherProblemRow[] => {
   const schemas = new Map<string, { operation: string; details: string; authTypes: string[] }>();
   const rows: OtherProblemRow[] = [];
   for (const problem of problems) {
-    const pagination = problem.match(UNDECLARED_PAGINATION);
-    if (pagination) {
-      const [, method, path, source, reason] = pagination;
+    if (problem.kind === 'invalid-schema') {
+      const { operation, location, message, authType } = problem;
+      const key = `${operation} ${location} ${message}`;
+      const entry = schemas.get(key) ?? {
+        operation: code(operation),
+        details: `${location}: ${message}`,
+        authTypes: [],
+      };
+      if (!entry.authTypes.includes(authType)) {
+        entry.authTypes.push(authType);
+      }
+      schemas.set(key, entry);
+    } else if (problem.kind === 'undeclared-pagination') {
       rows.push({
         problem: 'Pagination not declared',
-        operation: `${code(`${method} ${path}`)} (${code(source)})`,
-        details: `returns a collection, as ${reason}`,
+        operation: `${code(problem.operation)} (${code(problem.source)})`,
+        details: `returns a collection, as ${problem.reason}`,
         fix: 'Declare its `pagination` in `manifest.json`, or `"none"`',
       });
-      continue;
-    }
-    let authType: string | undefined;
-    let parsed = false;
-    for (const line of problem.split('\n')) {
-      const header = line.match(INVALID_SCHEMAS);
-      const schema = line.match(INVALID_SCHEMA);
-      if (header) {
-        [, authType] = header;
-        parsed = true;
-      } else if (schema && authType !== undefined) {
-        const [, method, path, where, message] = schema;
-        const key = `${method} ${path} ${where} ${message}`;
-        const entry = schemas.get(key) ?? {
-          operation: code(`${method} ${path}`),
-          details: `${where}: ${message}`,
-          authTypes: [],
-        };
-        entry.authTypes.push(authType);
-        schemas.set(key, entry);
-      } else {
-        parsed = false;
-        break;
-      }
-    }
-    if (!parsed) {
-      rows.push({ problem: 'Other', operation: '—', details: problem, fix: '—' });
+    } else {
+      rows.push({ problem: 'Other', operation: '—', details: problem.text, fix: '—' });
     }
   }
   return [
@@ -802,16 +781,17 @@ const conclusionsOf = (drift: ConnectorDrift): DriftConclusions => {
   );
   const movedOnly = failing.length > 0 && failing.every(({ reason }) => reason === 'moved');
 
-  // Reports written before the per-action findings list every problem outside the actions.
-  const unattributed =
+  // Reports written before the per-action findings list every problem outside the actions, as
+  // text; they are read as problems with no parts of their own, so the sections below see one
+  // shape whichever report they were given. Two problems are the same when they read the same.
+  const unattributed = (
     drift.actions === undefined
-      ? [...new Set([...drift.snapshotProblems, ...(drift.latestProblems ?? [])])]
-      : [
-          ...new Set([
-            ...(drift.otherProblems?.snapshot ?? []),
-            ...(drift.otherProblems?.latest ?? []),
-          ]),
-        ];
+      ? [...drift.snapshotProblems, ...(drift.latestProblems ?? [])].map(otherProblem)
+      : [...(drift.otherProblems?.snapshot ?? []), ...(drift.otherProblems?.latest ?? [])]
+  ).filter(
+    (problem, index, all) =>
+      all.findIndex((candidate) => problemTextOf(candidate) === problemTextOf(problem)) === index
+  );
 
   return {
     actions,

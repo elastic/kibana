@@ -24,8 +24,11 @@ import {
   namedComponentOf,
 } from './oasdiff_text';
 import type { RecordedFieldUse } from './record_actions';
+import { NoUsableAuthTypeError } from './record_actions';
 import type { VendorApiManifest } from './manifest';
 import { parseManifest } from './manifest';
+import type { DriftProblem } from './drift_problem';
+import { otherProblem } from './drift_problem';
 import { parseSpecText } from './parse_spec_text';
 import type { DiffSpecs, OasdiffEntry } from './run_oasdiff';
 import { createOasdiff } from './run_oasdiff';
@@ -142,8 +145,8 @@ export interface ConnectorDrift {
   readonly actions?: readonly ActionDrift[];
   /** Problems that concern no single action, e.g. a missing pagination declaration. */
   readonly otherProblems?: {
-    readonly snapshot: readonly string[];
-    readonly latest?: readonly string[];
+    readonly snapshot: readonly DriftProblem[];
+    readonly latest?: readonly DriftProblem[];
   };
   readonly staleCorrections?: readonly StaleCorrection[];
   /** The zero-based index of the overlay action that targets the servers, if any. */
@@ -351,7 +354,31 @@ interface LatestComparison {
   readonly overlayFindings: readonly string[];
   /** Undefined when recording against the latest specs failed outright. */
   readonly result?: UpdateVendorApiResult;
+  /** The problems of such a failure, which has no result to take them from. */
+  readonly failure?: readonly DriftProblem[];
 }
+
+/**
+ * What a recording that failed outright found, with its parts where it has them: a spec whose
+ * schemas don't validate names each one, so an issue can table them rather than read them back
+ * out of the error's message.
+ */
+const problemsOfFailure = (error: unknown): DriftProblem[] => {
+  if (!(error instanceof NoUsableAuthTypeError)) {
+    return [otherProblem(errorMessage(error))];
+  }
+  return error.authTypes.flatMap(({ authType, message, schemas }) =>
+    schemas && schemas.length > 0
+      ? schemas.map(({ operation, location, message: schemaMessage }) => ({
+          kind: 'invalid-schema' as const,
+          authType,
+          operation,
+          location,
+          message: schemaMessage,
+        }))
+      : [otherProblem(`Auth type ${authType}: ${message}`)]
+  );
+};
 
 // Regenerates the artifacts from the latest specs in a temporary copy of the folder, and
 // compares them with the committed ones.
@@ -371,6 +398,7 @@ const compareWithLatest = async ({
     await fs.cp(directory, copy, { recursive: true });
     const overlayFindings: string[] = [];
     let result: UpdateVendorApiResult | undefined;
+    let failure: DriftProblem[] | undefined;
     const problems = await updateVendorApi({
       connector,
       directory: copy,
@@ -391,7 +419,10 @@ const compareWithLatest = async ({
         result = updated;
         return updated.problems;
       },
-      (error) => [errorMessage(error)]
+      (error) => {
+        failure = problemsOfFailure(error);
+        return [errorMessage(error)];
+      }
     );
     const refreshed = await readOptional(path.join(copy, MANIFEST));
     const sources: Record<string, SourceDrift> = {};
@@ -431,6 +462,7 @@ const compareWithLatest = async ({
       problems,
       overlayFindings,
       result,
+      ...(failure ? { failure } : {}),
     };
   } finally {
     await fs.rm(copy, { recursive: true, force: true });
@@ -465,6 +497,7 @@ export const detectDrift = async ({
   const checkedAt = now().toISOString();
 
   let snapshotResult: UpdateVendorApiResult | undefined;
+  let snapshotFailure: DriftProblem[] | undefined;
   const snapshot = await updateVendorApi({
     connector,
     directory,
@@ -478,7 +511,10 @@ export const detectDrift = async ({
       snapshotResult = result;
       return result.problems;
     },
-    (error) => [errorMessage(error)]
+    (error) => {
+      snapshotFailure = problemsOfFailure(error);
+      return [errorMessage(error)];
+    }
   );
 
   // Each document is fetched once, for the reachability check and the recording alike.
@@ -494,7 +530,9 @@ export const detectDrift = async ({
     try {
       await loadVendorSpec(url, fetchOnce, source);
     } catch (error) {
-      log.warning(`${connector.metadata.id}: ${name} at ${url} didn't load: ${errorMessage(error)}`);
+      log.warning(
+        `${connector.metadata.id}: ${name} at ${url} didn't load: ${errorMessage(error)}`
+      );
       sources[name] = { status: 'unreachable', error: errorMessage(error), url };
     }
   }
@@ -535,8 +573,8 @@ export const detectDrift = async ({
         })
       ),
     otherProblems: {
-      snapshot: snapshotResult?.otherProblems ?? snapshot,
-      ...(latest ? { latest: latest.result?.otherProblems ?? latest.problems } : {}),
+      snapshot: snapshotResult?.otherProblems ?? snapshotFailure ?? [],
+      ...(latest ? { latest: latest.result?.otherProblems ?? latest.failure ?? [] } : {}),
     },
     staleCorrections: (latest?.result?.staleOverlayActions ?? []).map((index) =>
       describeStaleCorrection(index, overlay, latestSpecs)

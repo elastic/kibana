@@ -41,6 +41,8 @@ import {
 import { parseSpecText } from './parse_spec_text';
 import { projectSpec } from './project_spec';
 import { assessPagination } from './propose_pagination';
+import type { DriftProblem } from './drift_problem';
+import { otherProblem, problemTextOf } from './drift_problem';
 import type { ActionsRecording, RecordingFinding } from './record_actions';
 import { recordActions } from './record_actions';
 import { toStableJson } from './stable_json';
@@ -81,7 +83,7 @@ export interface UpdateVendorApiResult {
   /** The `problems` of each action, without the action's name in front. */
   readonly problemsByAction: Readonly<Record<string, readonly string[]>>;
   /** The `problems` that concern no single action, e.g. a missing pagination declaration. */
-  readonly otherProblems: readonly string[];
+  readonly otherProblems: readonly DriftProblem[];
   /** The specs the actions were recorded against, by source, without the overlay. */
   readonly specs: Readonly<Record<string, OpenApiDocument>>;
   /**
@@ -107,26 +109,32 @@ const listSnapshots = async (directory: string): Promise<string[]> => {
   }
 };
 
+/** The action a finding is about, when it is about one. */
+const actionOf = (finding: RecordingFinding): string | undefined =>
+  'action' in finding ? finding.action : undefined;
+
+/**
+ * What a finding says, without naming the action it is about: {@link actionOf} has that, and
+ * `problemText` puts the two together for the list the script prints.
+ */
 const describeFinding = (finding: RecordingFinding): string => {
   switch (finding.kind) {
     case 'no-input':
-      return `${finding.action}: no generated input passes the action's schema; add an input to ${FIXTURES}`;
+      return `no generated input passes the action's schema; add an input to ${FIXTURES}`;
     case 'handler-error':
-      return `${finding.action}: the handler threw: ${finding.message}`;
+      return `the handler threw: ${finding.message}`;
     case 'no-auth-type':
-      return `${
-        finding.action
-      }: threw before sending a request under every auth type: ${Object.entries(finding.errors)
+      return `threw before sending a request under every auth type: ${Object.entries(finding.errors)
         .map(([authType, message]) => `${authType}: ${message}`)
         .join('; ')}`;
     case 'auth-type-error':
       return `auth type ${finding.authType} can't be used against the contract mock, so no action was recorded with it: ${finding.message}`;
     case 'request-violation':
-      return `${finding.action}: ${finding.request} breaks the spec: ${finding.violations
+      return `${finding.request} breaks the spec: ${finding.violations
         .map(({ message }) => message)
         .join('; ')}`;
     case 'insufficient-scope':
-      return `${finding.action}: under auth type ${finding.authType}, ${
+      return `under auth type ${finding.authType}, ${
         finding.operation
       } needs OAuth scopes the auth type doesn't request: ${finding.violations
         .map(({ message }) => message)
@@ -134,14 +142,21 @@ const describeFinding = (finding: RecordingFinding): string => {
           '; '
         )}; add one to the auth type's default "scope", or correct the spec's scopes in ${OVERLAY}`;
     case 'read-scope':
-      return `${finding.action}: has scope 'read' but sent ${finding.request}; if the operation only queries, add it to the action's "queries" in ${FIXTURES}, otherwise correct the scope`;
+      return `has scope 'read' but sent ${finding.request}; if the operation only queries, add it to the action's "queries" in ${FIXTURES}, otherwise correct the scope`;
     case 'unused-query':
-      return `${finding.action}: lists ${finding.operation} in "queries" in ${FIXTURES}, but no request of a 'read' scoped run needed it; remove it`;
+      return `lists ${finding.operation} in "queries" in ${FIXTURES}, but no request of a 'read' scoped run needed it; remove it`;
     case 'rejected-response':
-      return `${finding.action}: the response override for ${
-        finding.operation
-      } breaks the spec: ${finding.violations.map(({ message }) => message).join('; ')}`;
+      return `the response override for ${finding.operation} breaks the spec: ${finding.violations
+        .map(({ message }) => message)
+        .join('; ')}`;
   }
+};
+
+/** A finding as the script lists it: the action it is about, then what it says. */
+const problemText = (finding: RecordingFinding): string => {
+  const action = actionOf(finding);
+  const described = describeFinding(finding);
+  return action === undefined ? described : `${action}: ${described}`;
 };
 
 const isProblem = ({ kind }: RecordingFinding): boolean =>
@@ -265,24 +280,30 @@ export const updateVendorApi = async ({
   // Each generated input reports its own findings, which are often the same.
   const problems = new Set<string>();
   const problemsByAction = new Map<string, Set<string>>();
-  const otherProblems = new Set<string>();
-  const addProblem = (text: string, action?: string) => {
+  const otherProblems = new Map<string, DriftProblem>();
+  // The list the script prints names the action a problem is about; `problemsByAction` keys by it.
+  // A problem about no action keeps its parts, so an issue can table it; `addOtherProblem` takes
+  // the parts, and `addProblem` the text of one that has none of its own.
+  const addOtherProblem = (problem: DriftProblem, text = problemTextOf(problem)) => {
     problems.add(text);
+    otherProblems.set(text, problem);
+  };
+  const addProblem = (text: string, action?: string) => {
     if (action === undefined) {
-      otherProblems.add(text);
+      addOtherProblem(otherProblem(text), text);
       return;
     }
-    const prefix = `${action}: `;
+    problems.add(`${action}: ${text}`);
     const own = problemsByAction.get(action) ?? new Set<string>();
-    own.add(text.startsWith(prefix) ? text.slice(prefix.length) : text);
+    own.add(text);
     problemsByAction.set(action, own);
   };
   const warnings = new Set<string>();
   for (const finding of recording.findings) {
     if (isProblem(finding)) {
-      addProblem(describeFinding(finding), 'action' in finding ? finding.action : undefined);
+      addProblem(describeFinding(finding), actionOf(finding));
     } else {
-      warnings.add(describeFinding(finding));
+      warnings.add(problemText(finding));
     }
   }
 
@@ -308,9 +329,13 @@ export const updateVendorApi = async ({
         `${key}: proposed "pagination" from ${proposed.basis} in ${MANIFEST}; review it`
       );
     } else if (assessment.listLike) {
-      addProblem(
-        `${key} looks like it returns a collection, as ${assessment.reason}; declare its "pagination" in ${MANIFEST}, or "none" if it returns everything at once`
-      );
+      const { source, method, path: operationPath } = operation;
+      addOtherProblem({
+        kind: 'undeclared-pagination',
+        operation: `${method.toUpperCase()} ${operationPath}`,
+        source,
+        reason: assessment.reason,
+      });
     }
     declared.set(key, proposed?.pagination);
     return proposed?.pagination;
@@ -355,13 +380,13 @@ export const updateVendorApi = async ({
       const broken = brokenOperationOf(method, requestPath);
       if (broken) {
         addProblem(
-          `${action}: calls ${broken.operation}, whose schema in the spec is invalid (${broken.location}): ${broken.message}; correct the spec in ${OVERLAY}`,
+          `calls ${broken.operation}, whose schema in the spec is invalid (${broken.location}): ${broken.message}; correct the spec in ${OVERLAY}`,
           action
         );
       } else {
         const refreshHint = fetchAll ? '' : '; if it is new to the connector, rerun with --refresh';
         addProblem(
-          `${action}: ${method.toUpperCase()} ${requestPath} matches no operation of any source; correct the spec in ${OVERLAY}, or add it to "unmatched" in ${MANIFEST} with a reason${refreshHint}`,
+          `${method.toUpperCase()} ${requestPath} matches no operation of any source; correct the spec in ${OVERLAY}, or add it to "unmatched" in ${MANIFEST} with a reason${refreshHint}`,
           action
         );
       }
@@ -425,7 +450,7 @@ export const updateVendorApi = async ({
     problemsByAction: Object.fromEntries(
       [...problemsByAction].map(([action, own]) => [action, [...own]])
     ),
-    otherProblems: [...otherProblems],
+    otherProblems: [...otherProblems.values()],
     specs: raw,
     staleOverlayActions,
     ...(recording.fieldUse ? { fieldUse: recording.fieldUse } : {}),

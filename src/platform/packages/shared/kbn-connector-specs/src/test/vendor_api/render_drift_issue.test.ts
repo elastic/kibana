@@ -8,6 +8,7 @@
  */
 
 import type { ConnectorDrift } from './detect_drift';
+import type { DriftProblem } from './drift_problem';
 import { drifted, healthy } from './drift_fixtures';
 import { renderDriftIssue } from './render_drift_issue';
 
@@ -442,8 +443,14 @@ describe('renderDriftIssue', () => {
   });
 
   it('says when the actions pass but the check found problems outside them, as a table', () => {
-    const invalid = (authType: string) =>
-      `Auth type ${authType}: 1 schema(s) are invalid:\n  POST /items (response 200 application/json): $ref "#/components/schemas/Void" does not resolve to a schema`;
+    // The same invalid schema under two auth types is one problem to fix, so it shares a row.
+    const invalid = (authType: string): DriftProblem => ({
+      kind: 'invalid-schema',
+      authType,
+      operation: 'POST /items',
+      location: 'response 200 application/json',
+      message: '$ref "#/components/schemas/Void" does not resolve to a schema',
+    });
     const { title, body } = renderDriftIssue(
       {
         ...drifted,
@@ -452,9 +459,15 @@ describe('renderDriftIssue', () => {
         otherProblems: {
           snapshot: [],
           latest: [
-            `${invalid('bearer')}\n${invalid('oauth')}`,
-            'GET /items (main) looks like it returns a collection, as it returns an array; declare its "pagination" in manifest.json, or "none" if it returns everything at once',
-            'something the renderer does not recognise',
+            invalid('bearer'),
+            invalid('oauth'),
+            {
+              kind: 'undeclared-pagination',
+              operation: 'GET /items',
+              source: 'main',
+              reason: 'it returns an array',
+            },
+            { kind: 'other', text: 'something the renderer does not recognise' },
           ],
         },
       },
@@ -611,9 +624,13 @@ describe('renderDriftIssue', () => {
         actions: drifted.actions?.map((action) => ({ ...action, latestProblems: [] })),
         otherProblems: {
           snapshot: [],
-          latest: [
-            'Auth type bearer: 2 schema(s) are invalid:\n  POST /a (response 207 application/json): $ref "#/components/schemas/Void" does not resolve to a schema\n  POST /b (response 207 application/json): $ref "#/components/schemas/Void" does not resolve to a schema',
-          ],
+          latest: ['/a', '/b'].map((path) => ({
+            kind: 'invalid-schema' as const,
+            authType: 'bearer',
+            operation: `POST ${path}`,
+            location: 'response 207 application/json',
+            message: '$ref "#/components/schemas/Void" does not resolve to a schema',
+          })),
         },
       },
       { owners: [] }

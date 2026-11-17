@@ -9,7 +9,7 @@
 
 import { z } from '@kbn/zod/v4';
 import type { ActionDefinition, ConnectorSpec } from '../../connector_spec';
-import { recordActions } from './record_actions';
+import { NoUsableAuthTypeError, recordActions } from './record_actions';
 
 const item = { type: 'object', required: ['name'], properties: { name: { type: 'string' } } };
 const ok = (schema: unknown) => ({
@@ -405,6 +405,20 @@ describe('recordActions', () => {
           secrets: { username: '' },
         })
       ).rejects.toThrow(/Auth type basic/);
+    });
+
+    it("names the auth types it could not use, so a caller needn't read its message", async () => {
+      const error = await recordActions({
+        connector: multiAuth,
+        specs: multiAuthSpecs,
+        authType: 'basic',
+        secrets: { username: '' },
+      }).catch((thrown: unknown) => thrown);
+
+      expect(error).toBeInstanceOf(NoUsableAuthTypeError);
+      expect((error as NoUsableAuthTypeError).authTypes).toEqual([
+        expect.objectContaining({ authType: 'basic' }),
+      ]);
     });
   });
 

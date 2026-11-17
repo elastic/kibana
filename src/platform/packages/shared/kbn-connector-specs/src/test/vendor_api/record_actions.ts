@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ContractCall, Emulator, OpenApiDocument, Violation } from '@kbn/connector-emulate';
+import type {
+  ContractCall,
+  Emulator,
+  InvalidSchemaFailure,
+  OpenApiDocument,
+  Violation,
+} from '@kbn/connector-emulate';
+import { InvalidSchemaError } from '@kbn/connector-emulate';
 import type { ActionDefinition, ConnectorSpec } from '../../connector_spec';
 import type { ContractContext, ContractContextOptions } from '../create_contract_context';
 import { createContractContext } from '../create_contract_context';
@@ -22,6 +29,28 @@ import { matchesPathTemplate } from './manifest';
 import { errorMessage } from './values';
 
 const SAFE_METHODS = new Set(['get', 'head', 'options']);
+
+interface BrokenAuthType {
+  readonly message: string;
+  /** The schemas the spec got wrong, when that is why the auth type couldn't be used. */
+  readonly schemas?: readonly InvalidSchemaFailure[];
+}
+
+/** Why each auth type of a connector failed, when none of them could be used. */
+export interface UnusableAuthType extends BrokenAuthType {
+  readonly authType: string;
+}
+
+/**
+ * Thrown when no auth type could record the connector's actions. It carries why each one failed,
+ * so a drift issue can report the parts rather than parse them out of the message.
+ */
+export class NoUsableAuthTypeError extends Error {
+  constructor(public readonly authTypes: readonly UnusableAuthType[]) {
+    super(authTypes.map(({ authType, message }) => `Auth type ${authType}: ${message}`).join('\n'));
+    this.name = 'NoUsableAuthTypeError';
+  }
+}
 
 export interface RecordActionsOptions
   extends Omit<ContractContextOptions, 'specs' | 'fixtures' | 'recordings' | 'trackFields'> {
@@ -244,7 +273,7 @@ export const recordActions = async ({
   const unmatched: ActionsRecording['unmatched'] = {};
   const findings: RecordingFinding[] = [];
   const invalidOperations = new Map<string, Emulator['invalidOperations'][number]>();
-  const brokenAuthTypes = new Map<string, string>();
+  const brokenAuthTypes = new Map<string, BrokenAuthType>();
 
   for (const action of Object.keys(connector.actions).sort()) {
     const fixture = fixtures[action] ?? {};
@@ -279,7 +308,12 @@ export const recordActions = async ({
         try {
           context = await contextFor(trackFields);
         } catch (error) {
-          brokenAuthTypes.set(id, errorMessage(error));
+          // A spec whose schemas don't validate names each one; those parts are kept, so an
+          // issue can table them without reading them back out of the message.
+          brokenAuthTypes.set(id, {
+            message: errorMessage(error),
+            ...(error instanceof InvalidSchemaError ? { schemas: error.failures } : {}),
+          });
           break;
         }
         let { mock } = context;
@@ -412,11 +446,15 @@ export const recordActions = async ({
     }
   }
   if (brokenAuthTypes.size === authTypes.length && authTypes.length > 0) {
-    throw new Error(
-      [...brokenAuthTypes].map(([id, message]) => `Auth type ${id}: ${message}`).join('\n')
+    throw new NoUsableAuthTypeError(
+      [...brokenAuthTypes].map(([id, { message, schemas }]) => ({
+        authType: id,
+        message,
+        ...(schemas ? { schemas } : {}),
+      }))
     );
   }
-  for (const [id, message] of brokenAuthTypes) {
+  for (const [id, { message }] of brokenAuthTypes) {
     findings.push({ kind: 'auth-type-error', authType: id, message });
   }
   return {
