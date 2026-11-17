@@ -26,6 +26,7 @@ export {
 } from './reasoning';
 export type { BoundChatCompleteAPI, UnboundChatCompleteOptions } from './bound_api';
 export { parseTemplateJson } from './parse_template_json';
+export { MAX_OUTPUT_TOKENS, normalizeMaxTokens } from './normalize_max_tokens';
 export {
   ChatCompletionEventType,
   type ChatCompletionMessageEvent,

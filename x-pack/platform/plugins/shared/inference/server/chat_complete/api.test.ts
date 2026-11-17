@@ -182,6 +182,30 @@ describe('createChatCompleteApi', () => {
     );
   });
 
+  it('forwards `maxTokens` down to `inferenceAdapter.chatComplete`', async () => {
+    await chatComplete({
+      connectorId: 'connectorId',
+      messages: [{ role: MessageRole.User, content: 'question' }],
+      maxTokens: 16000,
+      maxRetries: 0,
+    });
+
+    expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(1);
+    expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
+      expect.objectContaining({ maxTokens: 16000 })
+    );
+  });
+
+  it('omits maxTokens when it is not set', async () => {
+    await chatComplete({
+      connectorId: 'connectorId',
+      messages: [{ role: MessageRole.User, content: 'question' }],
+      maxRetries: 0,
+    });
+
+    expect(inferenceAdapter.chatComplete.mock.calls[0][0]).not.toHaveProperty('maxTokens');
+  });
+
   it('throws if the connector is not compatible', async () => {
     getInferenceAdapterMock.mockReturnValue(undefined);
 

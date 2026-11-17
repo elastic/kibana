@@ -11,6 +11,7 @@ import { messagesToOpenAI, toolChoiceToOpenAI, toolsToOpenAI } from '../openai';
 import type { CreateOpenAIRequestOptions } from './types';
 import { applyProviderTransforms } from './providers';
 import { getTemperatureIfValid } from '../../utils/get_temperature';
+import { getOutputTokenLimit } from '../../utils/get_output_token_limit';
 import { resolveChatCompletionReasoning } from '../../utils/resolve_chat_completion_reasoning';
 import { getModelId } from './utils';
 
@@ -22,6 +23,7 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
     tools,
     simulatedFunctionCalling,
     temperature = 0,
+    maxTokens,
     modelName,
     reasoning,
     logger,
@@ -29,6 +31,11 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
 
   // Preconfigured EIS connectors carry no model_id, so fall back to the inference endpoint id.
   const model = modelName ?? getModelId(options.connector) ?? options.connector.config?.inferenceId;
+  const outputTokenLimit = getOutputTokenLimit(maxTokens, {
+    connector: options.connector,
+    modelName,
+    modelId: model,
+  });
 
   let request: OpenAIRequest;
   if (simulatedFunctionCalling) {
@@ -45,6 +52,7 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
     });
     request = {
       ...getTemperatureIfValid(temperature, { connector: options.connector, modelName }),
+      ...outputTokenLimit,
       model: modelName,
       messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
       ...(resolvedReasoning ? { reasoning: resolvedReasoning } : {}),
@@ -60,6 +68,7 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
 
     request = {
       ...getTemperatureIfValid(temperature, { connector: options.connector, modelName }),
+      ...outputTokenLimit,
       model: modelName,
       messages: messagesToOpenAI({ system, messages }),
       ...(hasTools

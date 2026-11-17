@@ -36,6 +36,8 @@ export {
   type FeatureChatCompleteOptions,
   type ChatCompleteTemplate,
   parseTemplateJson,
+  MAX_OUTPUT_TOKENS,
+  normalizeMaxTokens,
   type ChatCompleteCompositeResponse,
   chatCompletionReasoningEfforts,
   type ChatCompletionReasoning,

@@ -255,6 +255,69 @@ describe('inferenceAdapter', () => {
       });
     });
 
+    it('forwards maxTokens as max_tokens', () => {
+      inferenceAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          maxTokens: 16000,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith({
+        subAction: 'unified_completion_stream',
+        subActionParams: expect.objectContaining({
+          body: expect.objectContaining({
+            max_tokens: 16000,
+          }),
+        }),
+      });
+    });
+
+    it('sends max_completion_tokens for a gpt-5 model', () => {
+      inferenceAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          modelName: 'gpt-5',
+          maxTokens: 16000,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith({
+        subAction: 'unified_completion_stream',
+        subActionParams: expect.objectContaining({
+          body: expect.objectContaining({
+            max_completion_tokens: 16000,
+          }),
+        }),
+      });
+      expect(executorMock.invoke.mock.calls[0][0].subActionParams.body).not.toHaveProperty(
+        'max_tokens'
+      );
+    });
+
+    it('omits max_tokens when maxTokens is not set, so the provider default applies', () => {
+      inferenceAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith({
+        subAction: 'unified_completion_stream',
+        subActionParams: expect.objectContaining({
+          body: expect.not.objectContaining({
+            max_tokens: expect.anything(),
+          }),
+        }),
+      });
+    });
+
     it('forwards only connector-supported telemetry metadata', () => {
       inferenceAdapter
         .chatComplete({

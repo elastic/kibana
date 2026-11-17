@@ -125,6 +125,13 @@ export type ChatCompleteOptions = {
    */
   temperature?: number;
   /**
+   * Maximum number of tokens the model may generate, including reasoning tokens.
+   *
+   * When omitted or not a positive integer, connectors send no output-token limit and the
+   * provider default applies. OpenAI reasoning models receive this as `max_completion_tokens`.
+   */
+  maxTokens?: number;
+  /**
    * Optional reasoning configuration for the Elasticsearch unified chat completion API.
    *
    * When native function tools are present and this is omitted, the Inference adapter

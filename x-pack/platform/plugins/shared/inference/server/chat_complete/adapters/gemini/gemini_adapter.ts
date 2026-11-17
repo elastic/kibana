@@ -8,7 +8,7 @@
 import * as Gemini from '@google/generative-ai';
 import { defer, map } from 'rxjs';
 import type { Message, ToolOptions } from '@kbn/inference-common';
-import { MessageRole, ToolChoiceType } from '@kbn/inference-common';
+import { MessageRole, normalizeMaxTokens, ToolChoiceType } from '@kbn/inference-common';
 import type { InferenceConnectorAdapter } from '../../types';
 import {
   handleConnectorDataResponse,
@@ -35,6 +35,7 @@ export const geminiAdapter: InferenceConnectorAdapter = {
     toolChoice,
     tools,
     temperature = 0,
+    maxTokens,
     modelName,
     abortSignal,
     metadata,
@@ -42,6 +43,7 @@ export const geminiAdapter: InferenceConnectorAdapter = {
     maxContentLength,
     stream = false,
   }) => {
+    const normalizedMaxTokens = normalizeMaxTokens(maxTokens);
     const connector = executor.getConnector();
     const useThoughtSignature = mustUseThoughtSignature(
       modelName ?? connector.config?.defaultModel
@@ -56,6 +58,7 @@ export const geminiAdapter: InferenceConnectorAdapter = {
           tools: toolsToGemini(tools),
           toolConfig: toolChoiceToConfig(toolChoice),
           ...getTemperatureIfValid(temperature, { connector, modelName }),
+          ...(normalizedMaxTokens !== undefined ? { maxOutputTokens: normalizedMaxTokens } : {}),
           model: modelName,
           signal: abortSignal,
           stopSequences: ['\n\nHuman:'],

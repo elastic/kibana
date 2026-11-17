@@ -8,7 +8,13 @@
 import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { ToolCall } from '@kbn/inference-common';
-import { MessageRole, ModelFamily, ModelProvider, ToolChoiceType } from '@kbn/inference-common';
+import {
+  MAX_OUTPUT_TOKENS,
+  MessageRole,
+  ModelFamily,
+  ModelProvider,
+  ToolChoiceType,
+} from '@kbn/inference-common';
 import type { ChatCompleteRequestBody } from '../../common';
 import type { PromptRequestBody } from '../../common/http_apis';
 
@@ -84,6 +90,17 @@ export const chatCompleteBaseSchema = schema.object({
     })
   ),
   temperature: schema.maybe(schema.number()),
+  maxTokens: schema.maybe(
+    schema.number({
+      min: 1,
+      max: MAX_OUTPUT_TOKENS,
+      validate(value) {
+        if (!Number.isInteger(value)) {
+          return 'must be an integer';
+        }
+      },
+    })
+  ),
   modelName: schema.maybe(nameSchema),
   metadata: schema.maybe(
     schema.object({

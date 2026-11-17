@@ -394,6 +394,49 @@ describe('InferenceChatModel', () => {
       });
     });
 
+    it('forwards maxTokens and lets a call option override the constructor value', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        maxTokens: 16000,
+      });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question');
+      await chatModel.invoke('question', { maxTokens: 32000 });
+
+      expect(chatComplete).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ maxTokens: 16000 })
+      );
+      expect(chatComplete).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ maxTokens: 32000 })
+      );
+    });
+
+    it('omits a non-positive maxTokens value', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        maxTokens: 0,
+      });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question', { maxTokens: -1 });
+
+      expect(chatComplete.mock.calls[0][0]).not.toHaveProperty('maxTokens');
+    });
+
+    it('omits maxTokens when it is not set, so the provider default applies', async () => {
+      const chatModel = new InferenceChatModel({ chatComplete, connector });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question');
+
+      expect(chatComplete.mock.calls[0][0]).not.toHaveProperty('maxTokens');
+    });
+
     it('uses invocation parameters', async () => {
       const chatModel = new InferenceChatModel({
         chatComplete,

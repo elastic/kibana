@@ -33,6 +33,7 @@ import {
   wrapWithSimulatedFunctionCalling,
 } from '../../simulated_function_calling';
 import { getTemperatureIfValid } from '../../utils/get_temperature';
+import { getOutputTokenLimit } from '../../utils/get_output_token_limit';
 import type { InferenceEndpointExecutor } from '../../utils/inference_endpoint_executor';
 import { ensureToolsWhenHistoryHasToolUse } from '../../utils/ensure_tools_when_history_has_tool_use';
 import { resolveChatCompletionReasoning } from '../../utils/resolve_chat_completion_reasoning';
@@ -46,6 +47,11 @@ export interface InferenceEndpointAdapterChatCompleteOptions {
   system?: string;
   functionCalling?: FunctionCallingMode;
   temperature?: number;
+  /**
+   * Maximum number of tokens the model may generate.
+   * Omitted from the request when unset.
+   */
+  maxTokens?: number;
   reasoning?: ChatCompletionReasoning;
   modelName?: string;
   // Endpoint model identity is authoritative for parameter support.
@@ -78,6 +84,7 @@ export const inferenceEndpointAdapter = {
       tools,
       functionCalling,
       temperature,
+      maxTokens,
       reasoning,
       modelName,
       endpointModelId,
@@ -91,9 +98,15 @@ export const inferenceEndpointAdapter = {
       template,
     } = options;
 
+    const outputTokenLimit = getOutputTokenLimit(maxTokens, {
+      modelName,
+      modelId: endpointModelId,
+    });
+
     if (template) {
       const request = {
         ...getTemperatureIfValid(temperature, { modelId: endpointModelId ?? modelName }),
+        ...outputTokenLimit,
         template,
       };
       return defer(() =>
@@ -123,6 +136,7 @@ export const inferenceEndpointAdapter = {
       tools: sanitizedTools,
       simulatedFunctionCalling: useSimulatedFunctionCalling,
       temperature,
+      maxTokens,
       reasoning,
       modelName,
       endpointModelId,
@@ -156,6 +170,7 @@ const createEndpointRequest = ({
   tools,
   simulatedFunctionCalling,
   temperature,
+  maxTokens,
   reasoning,
   modelName,
   endpointModelId,
@@ -170,6 +185,7 @@ const createEndpointRequest = ({
   tools?: ToolOptions['tools'];
   simulatedFunctionCalling: boolean;
   temperature?: number;
+  maxTokens?: number;
   reasoning?: ChatCompletionReasoning;
   modelName?: string;
   endpointModelId?: string;
@@ -180,6 +196,10 @@ const createEndpointRequest = ({
 }): InferenceEndpointRequest => {
   const temperatureOptions = getTemperatureIfValid(temperature, {
     modelId: endpointModelId ?? modelName,
+  });
+  const outputTokenLimit = getOutputTokenLimit(maxTokens, {
+    modelName,
+    modelId: endpointModelId,
   });
 
   const eisFields: Pick<InferenceEndpointRequest, 'cache_control' | 'session_id'> = {};
@@ -209,6 +229,7 @@ const createEndpointRequest = ({
     });
     return {
       ...temperatureOptions,
+      ...outputTokenLimit,
       ...eisFields,
       model: modelName,
       messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
@@ -227,6 +248,7 @@ const createEndpointRequest = ({
 
   return {
     ...temperatureOptions,
+    ...outputTokenLimit,
     ...eisFields,
     model: modelName,
     messages: messagesToOpenAI({ system, messages }),

@@ -16,6 +16,7 @@ import {
   getConnectorProvider,
   getConnectorPlatform,
   getConnectorDefaultModel,
+  normalizeMaxTokens,
   type ChatCompleteCompositeResponse,
   MessageRole,
 } from '@kbn/inference-common';
@@ -269,6 +270,7 @@ function createChatCompletePipeline({
         metadata,
         modelName,
         temperature,
+        maxTokens,
         reasoning,
         toolChoice,
         tools,
@@ -278,6 +280,7 @@ function createChatCompletePipeline({
         sessionId,
         template,
       } = callback(callbackContext);
+      const normalizedMaxTokens = normalizeMaxTokens(maxTokens);
 
       const logTokenUsage = tokenUsageLogger
         ? handleTokenUsageLogging({
@@ -330,6 +333,7 @@ function createChatCompletePipeline({
               messages: [],
               template: maskedTemplate,
               temperature,
+              ...(normalizedMaxTokens !== undefined ? { maxTokens: normalizedMaxTokens } : {}),
               reasoning,
               logger,
               functionCalling,
@@ -401,6 +405,7 @@ function createChatCompletePipeline({
                 toolChoice,
                 tools,
                 temperature,
+                ...(normalizedMaxTokens !== undefined ? { maxTokens: normalizedMaxTokens } : {}),
                 reasoning,
                 logger,
                 functionCalling,

@@ -18,6 +18,10 @@ import type {
 export interface ChatCompleteRequestBodyBase {
   connectorId: string;
   temperature?: number;
+  /**
+   * Positive integer output-token cap. Omitted when unset.
+   */
+  maxTokens?: number;
   modelName?: string;
   functionCalling?: FunctionCallingMode;
   maxRetries?: number;
