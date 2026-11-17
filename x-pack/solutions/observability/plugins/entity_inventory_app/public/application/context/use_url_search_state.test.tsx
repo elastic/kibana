@@ -197,6 +197,38 @@ describe('useUrlSearchState', () => {
       expect(core.notifications.toasts.addWarning).not.toHaveBeenCalled();
     });
 
+    it('drops a filter whose metadata has the wrong types and keeps the others', () => {
+      const { result, history } = renderUrlState(
+        '/kubernetes?_a=(filters:!((meta:(alias:(a:b)),query:(match_all:())),(meta:(alias:foo),query:(match_all:())),(meta:(alias:!n),query:(match_all:()))))'
+      );
+
+      const expected = [
+        { meta: { alias: 'foo' }, query: { match_all: {} } },
+        { meta: { alias: null }, query: { match_all: {} } },
+      ];
+      expect(result.current[0].filters).toEqual(expected);
+      expect(readWrittenState(history).filters).toEqual(expected);
+    });
+
+    it.each([
+      ['negate', '(meta:(negate:yes),query:(match_all:()))'],
+      ['disabled', '(meta:(disabled:1),query:(match_all:()))'],
+    ])('drops a filter whose %s has the wrong type', (_, filter) => {
+      const { result } = renderUrlState(`/kubernetes?_a=(filters:!(${filter}))`);
+
+      expect(result.current[0].filters).toEqual([]);
+    });
+
+    it('keeps a filter with metadata that the filter bar does not draw', () => {
+      const { result } = renderUrlState(
+        '/kubernetes?_a=(filters:!((meta:(key:host.name,type:phrase,negate:!t),query:(match_all:()))))'
+      );
+
+      expect(result.current[0].filters).toEqual([
+        { meta: { key: 'host.name', type: 'phrase', negate: true }, query: { match_all: {} } },
+      ]);
+    });
+
     it('writes a URL without the filters that cannot be built', () => {
       const { history } = renderUrlState(
         '/kubernetes?_a=(filters:!((meta:(type:combined))),dateRange:(from:now-1h,to:now))'

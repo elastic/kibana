@@ -56,6 +56,16 @@ const UrlSearchStateRT = rt.partial({
   ]),
 });
 
+// The filter bar draws `alias`, `negate` and `disabled` from the metadata of a filter, so a filter
+// whose metadata has other types is dropped instead of crashing the page.
+const FilterRT = rt.type({
+  meta: rt.partial({
+    alias: rt.union([rt.null, rt.string]),
+    negate: rt.boolean,
+    disabled: rt.boolean,
+  }),
+});
+
 const reuseDefaultIfEqual = <T>(value: T, fallback: T): T =>
   isEqual(value, fallback) ? fallback : value;
 
@@ -98,7 +108,10 @@ const sanitize = (
     dateRange: reuseDefaultIfEqual(dateRange, DEFAULT_URL_SEARCH_STATE.dateRange),
     query: reuseDefaultIfEqual(query, DEFAULT_URL_SEARCH_STATE.query),
     filters: reuseDefaultIfEqual(
-      (decoded.filters ?? []).filter(isFilter).filter(canBuildEsQuery),
+      (decoded.filters ?? [])
+        .filter(isFilter)
+        .filter((filter) => FilterRT.is(filter))
+        .filter(canBuildEsQuery),
       DEFAULT_URL_SEARCH_STATE.filters
     ),
     filterControls: reuseDefaultIfEqual(
