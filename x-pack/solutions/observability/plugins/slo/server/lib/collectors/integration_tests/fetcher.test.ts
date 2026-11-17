@@ -16,8 +16,13 @@ import {
   type Logger,
   type SavedObjectsClientContract,
 } from '@kbn/core/server';
+import { COMPOSITE_SLO_MAX_MEMBERS, storedCompositeSloDefinitionSchema } from '@kbn/slo-schema';
+import { v4 as uuidv4 } from 'uuid';
+import type { CompositeSLODefinition, StoredCompositeSLODefinition } from '../../../domain/models';
+import { SO_SLO_COMPOSITE_TYPE } from '../../../saved_objects';
 import type { SLODefinitionRepository } from '../../../services';
 import { DefaultSLODefinitionRepository } from '../../../services';
+import { createCompositeSlo } from '../../../services/fixtures/composite_slo';
 import {
   createAPMTransactionDurationIndicator,
   createAPMTransactionErrorRateIndicator,
@@ -34,6 +39,7 @@ const createLoggerMock = (): jest.Mocked<Logger> => {
   const logger = {
     debug: jest.fn(),
     info: jest.fn(),
+    warn: jest.fn(),
     error: jest.fn(),
     get: jest.fn(),
   } as unknown as jest.Mocked<Logger>;
@@ -47,12 +53,18 @@ describe('SLO usage collector fetcher', () => {
   let esServer: TestElasticsearchUtils;
   let esClient: ElasticsearchClient;
   let soClient: SavedObjectsClientContract;
+  let compositeSoClient: SavedObjectsClientContract;
+  let getCompositeSoClient: jest.Mock<Promise<SavedObjectsClientContract>>;
   let kibanaServer: TestKibanaUtils;
   let sloRepository: SLODefinitionRepository;
   let loggerMock: jest.Mocked<Logger>;
 
   beforeAll(async () => {
     await createServers();
+  });
+
+  beforeEach(() => {
+    loggerMock.warn.mockClear();
   });
 
   afterAll(async () => {
@@ -82,7 +94,7 @@ describe('SLO usage collector fetcher', () => {
     });
 
     it('returns the correct metrics', async () => {
-      const results = await fetcher({ soClient, esClient });
+      const results = await fetcher({ soClient, esClient }, loggerMock, getCompositeSoClient);
 
       expect(results.slo).toMatchInlineSnapshot(`
         Object {
@@ -106,6 +118,23 @@ describe('SLO usage collector fetcher', () => {
             "disabled": 0,
             "enabled": 8,
           },
+          "composite": Object {
+            "by_budgeting_method": Object {},
+            "by_composite_method": Object {},
+            "by_status": Object {
+              "disabled": 0,
+              "enabled": 0,
+            },
+            "definitions": Object {
+              "total": 0,
+            },
+            "members": Object {
+              "at_max_count": 0,
+              "avg": 0,
+              "max": 0,
+              "min": 0,
+            },
+          },
           "definitions": Object {
             "total": 8,
             "total_with_ccs": 0,
@@ -117,6 +146,97 @@ describe('SLO usage collector fetcher', () => {
           "total": 8,
         }
       `);
+    });
+  });
+
+  describe('with composite SLOs', () => {
+    const emptyCompositeUsage = {
+      definitions: { total: 0 },
+      by_status: { enabled: 0, disabled: 0 },
+      by_budgeting_method: {},
+      by_composite_method: {},
+      members: { min: 0, avg: 0, max: 0, at_max_count: 0 },
+    };
+
+    const createMembers = (count: number): CompositeSLODefinition['members'] =>
+      Array.from({ length: count }, () => ({ sloId: uuidv4(), weight: 1 }));
+
+    const createStoredComposite = async (
+      overrides: Partial<CompositeSLODefinition>,
+      namespace?: string
+    ) => {
+      const toStore: StoredCompositeSLODefinition = storedCompositeSloDefinitionSchema.parse(
+        createCompositeSlo(overrides)
+      );
+      await compositeSoClient.create<StoredCompositeSLODefinition>(
+        SO_SLO_COMPOSITE_TYPE,
+        toStore,
+        { namespace }
+      );
+    };
+
+    afterEach(async () => {
+      const response = await compositeSoClient.find({
+        type: SO_SLO_COMPOSITE_TYPE,
+        namespaces: ['*'],
+        perPage: 100,
+      });
+      await Promise.all(
+        response.saved_objects.map(({ id, namespaces }) =>
+          compositeSoClient.delete(SO_SLO_COMPOSITE_TYPE, id, { namespace: namespaces?.[0] })
+        )
+      );
+    });
+
+    it('returns zeros when there are no composites', async () => {
+      const results = await fetcher({ soClient, esClient }, loggerMock, getCompositeSoClient);
+
+      expect(results.slo.composite).toEqual(emptyCompositeUsage);
+      expect(loggerMock.warn).not.toHaveBeenCalled();
+    });
+
+    it('aggregates several composites with different member counts and statuses', async () => {
+      await createStoredComposite({ members: createMembers(2) });
+      await createStoredComposite({ members: createMembers(5), enabled: false });
+      await createStoredComposite({ members: createMembers(COMPOSITE_SLO_MAX_MEMBERS) });
+      await createStoredComposite({
+        members: createMembers(COMPOSITE_SLO_MAX_MEMBERS),
+        enabled: false,
+      });
+
+      const results = await fetcher({ soClient, esClient }, loggerMock, getCompositeSoClient);
+
+      expect(results.slo.composite).toEqual({
+        definitions: { total: 4 },
+        by_status: { enabled: 2, disabled: 2 },
+        by_budgeting_method: { occurrences: 4 },
+        by_composite_method: { weightedAverage: 4 },
+        members: { min: 2, avg: 14.25, max: COMPOSITE_SLO_MAX_MEMBERS, at_max_count: 2 },
+      });
+    });
+
+    it('counts composites in all spaces', async () => {
+      await createStoredComposite({ members: createMembers(2) });
+      await createStoredComposite({ members: createMembers(4) }, 'custom-space');
+
+      const results = await fetcher({ soClient, esClient }, loggerMock, getCompositeSoClient);
+
+      expect(results.slo.composite.definitions.total).toBe(2);
+      expect(results.slo.composite.members).toEqual({ min: 2, avg: 3, max: 4, at_max_count: 0 });
+    });
+
+    it('returns zeros, logs a warning and keeps the slo block when reading composites fails', async () => {
+      await createStoredComposite({ members: createMembers(3) });
+      const expected = await fetcher({ soClient, esClient }, loggerMock, getCompositeSoClient);
+
+      const results = await fetcher({ soClient, esClient }, loggerMock, () =>
+        Promise.reject(new Error('boom'))
+      );
+
+      expect(results.slo).toEqual({ ...expected.slo, composite: emptyCompositeUsage });
+      expect(loggerMock.warn).toHaveBeenCalledWith(
+        'Failed to collect composite SLO usage: boom'
+      );
     });
   });
 
@@ -142,6 +262,10 @@ describe('SLO usage collector fetcher', () => {
     soClient = new SavedObjectsClient(
       kibanaServer.coreStart.savedObjects.createInternalRepository()
     );
+    compositeSoClient = new SavedObjectsClient(
+      kibanaServer.coreStart.savedObjects.createInternalRepository([SO_SLO_COMPOSITE_TYPE])
+    );
+    getCompositeSoClient = jest.fn().mockResolvedValue(compositeSoClient);
     loggerMock = createLoggerMock();
 
     sloRepository = new DefaultSLODefinitionRepository(soClient, loggerMock);
