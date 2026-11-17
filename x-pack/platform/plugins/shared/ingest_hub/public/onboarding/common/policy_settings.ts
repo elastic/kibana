@@ -19,6 +19,8 @@ export interface PolicySettings {
   condition?: string;
   /** A package var (`vars.proxy_url`), not a top-level package policy field. */
   proxy_url?: string;
+  /** Extra data stream names the policy may write to (the reroute processor permissions). */
+  additional_datastreams_permissions?: string[];
 }
 
 type PolicySettingKey = keyof PolicySettings;
@@ -27,6 +29,8 @@ type PolicySettingKey = keyof PolicySettings;
 type PolicySettingsSource = PolicySettings | Record<string, unknown> | undefined;
 
 const isString = (value: unknown): boolean => typeof value === 'string';
+const isStringArray = (value: unknown): boolean =>
+  Array.isArray(value) && value.every((item) => typeof item === 'string');
 
 /**
  * The deployment methods each setting applies to, and what a value must look like. Managed
@@ -40,15 +44,44 @@ const isString = (value: unknown): boolean => typeof value === 'string';
  */
 const POLICY_SETTINGS: Record<
   PolicySettingKey,
-  { methods: DeploymentMethod[]; target: 'field' | 'var'; isValid: (value: unknown) => boolean }
+  {
+    methods: DeploymentMethod[];
+    target: 'field' | 'var';
+    isValid: (value: unknown) => boolean;
+    /** What an update sends to clear the setting. Both Fleet APIs take an empty list, not null. */
+    cleared?: unknown;
+  }
 > = {
   output_id: { methods: ['agent_based'], target: 'field', isValid: isString },
   condition: { methods: ['agent_based'], target: 'field', isValid: isString },
   proxy_url: { methods: ['agent_based', 'managed_integration'], target: 'var', isValid: isString },
+  additional_datastreams_permissions: {
+    methods: ['agent_based', 'managed_integration'],
+    target: 'field',
+    isValid: isStringArray,
+    cleared: [],
+  },
 };
 
 const isEmptySetting = (value: unknown): boolean =>
-  value === undefined || value === null || value === '';
+  value === undefined ||
+  value === null ||
+  value === '' ||
+  (Array.isArray(value) && value.length === 0);
+
+/**
+ * Strings are trimmed (Step 2 keeps what was typed, so a space typed mid-edit is not eaten). In a
+ * list, each entry is trimmed and blank or repeated ones are dropped, and the order the user chose
+ * is kept (it is what Step 2 shows again on resume). A list with a non-string entry is left as it
+ * is for `isValid` to reject.
+ */
+const normalizeSetting = (value: unknown): unknown => {
+  if (typeof value === 'string') return value.trim();
+  if (isStringArray(value)) {
+    return [...new Set((value as string[]).map((item) => item.trim()).filter(Boolean))];
+  }
+  return value;
+};
 
 const getKeys = (method: DeploymentMethod, target?: 'field' | 'var'): PolicySettingKey[] =>
   (Object.keys(POLICY_SETTINGS) as PolicySettingKey[]).filter(
@@ -57,19 +90,30 @@ const getKeys = (method: DeploymentMethod, target?: 'field' | 'var'): PolicySett
       (!target || POLICY_SETTINGS[key].target === target)
   );
 
+/**
+ * The reroute permissions Step 2 shows. The saved object is an open record, so an API write can
+ * leave another type here (a plain string is valid for any key). That reads as no permissions
+ * rather than reaching code that expects a list, as `getPolicySettings` does at deploy.
+ */
+export const getReroutePermissions = (settings: PolicySettingsSource): string[] => {
+  const value = (settings as Record<string, unknown> | undefined)
+    ?.additional_datastreams_permissions;
+  return isStringArray(value) ? (value as string[]) : [];
+};
+
 /** Whether a setting applies to the deployment method, which decides whether Step 2 offers it. */
 export const supportsPolicySetting = (key: PolicySettingKey, method: DeploymentMethod): boolean =>
   POLICY_SETTINGS[key].methods.includes(method);
 
 /**
- * The settings with a value, as the saved object stores them. Strings are trimmed (Step 2 keeps
- * what was typed, so a space typed mid-edit is not eaten) and empty ones are left out, so an
+ * The settings with a value, as the saved object stores them. Values are normalized (see
+ * `normalizeSetting`) and empty ones are left out, so an
  * onboarding saved before a setting existed reads the same as one where it was left at its default.
  */
 export const compactPolicySettings = (settings: PolicySettingsSource): Record<string, unknown> =>
   Object.fromEntries(
     Object.entries(settings ?? {})
-      .map(([key, value]) => [key, typeof value === 'string' ? value.trim() : value])
+      .map(([key, value]) => [key, normalizeSetting(value)])
       .filter(([, value]) => !isEmptySetting(value))
   );
 
@@ -89,7 +133,7 @@ const pickSettings = (settings: PolicySettingsSource, keys: PolicySettingKey[]):
 export const getPolicySettings = (
   settings: PolicySettingsSource,
   method: DeploymentMethod
-): Pick<PolicySettings, 'output_id' | 'condition'> =>
+): Pick<PolicySettings, 'output_id' | 'condition' | 'additional_datastreams_permissions'> =>
   pickSettings(settings, getKeys(method, 'field'));
 
 /**
@@ -117,8 +161,9 @@ export const getSavedPolicySettings = (
 ): PolicySettings => pickSettings(settings, getKeys(method));
 
 /**
- * The settings an update of a deployed policy sends. A setting set back to empty is sent as `null`,
- * which clears the value the policy has; one never set, or with an invalid value, is left out, so
+ * The settings an update of a deployed policy sends. A setting set back to empty is sent as its
+ * cleared value (`null`, or an empty list for a list), which clears the value the policy has; one
+ * never set, or with an invalid value, is left out, so
  * the policy keeps its own.
  */
 const pickSettingsUpdate = (
@@ -128,9 +173,9 @@ const pickSettingsUpdate = (
   Object.fromEntries(
     keys.flatMap((key) => {
       const raw = (settings as Record<string, unknown> | undefined)?.[key];
-      const value = typeof raw === 'string' ? raw.trim() : raw;
+      const value = normalizeSetting(raw);
       if (value === undefined) return [];
-      if (isEmptySetting(value)) return [[key, null]];
+      if (isEmptySetting(value)) return [[key, POLICY_SETTINGS[key].cleared ?? null]];
       return POLICY_SETTINGS[key].isValid(value) ? [[key, value]] : [];
     })
   );
@@ -155,6 +200,18 @@ export const getPolicyVarSettingsUpdate = (
   ) as Record<string, string | null>;
 
 /**
+ * A list is a set of permissions, so for the drift check only its entries count, not their order:
+ * removing and re-adding one in another position must not mark the deployment dirty.
+ */
+const withSortedLists = (settings: PolicySettings): Record<string, unknown> =>
+  Object.fromEntries(
+    Object.entries(settings).map(([key, value]) => [
+      key,
+      Array.isArray(value) ? [...value].sort() : value,
+    ])
+  );
+
+/**
  * Whether the settings that apply to the deployment method differ from the ones saved with the
  * last deploy. Settings of other methods are ignored, so one left over from a method switch does
  * not mark the deployment dirty.
@@ -164,4 +221,7 @@ export const detectPolicySettingsDrift = (
   saved: PolicySettingsSource,
   method: DeploymentMethod
 ): boolean =>
-  !isEqual(pickSettings(current, getKeys(method)), pickSettings(saved, getKeys(method)));
+  !isEqual(
+    withSortedLists(pickSettings(current, getKeys(method))),
+    withSortedLists(pickSettings(saved, getKeys(method)))
+  );
