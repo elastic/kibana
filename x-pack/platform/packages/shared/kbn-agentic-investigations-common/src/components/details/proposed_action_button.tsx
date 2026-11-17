@@ -94,7 +94,6 @@ const rowStyles = ({ euiTheme }: UseEuiTheme) => ({
     align-items: center;
     box-sizing: border-box;
     inline-size: 100%;
-    /* Match GroupedAttachmentRow / other flyout cells: 12px vertical, 16px horizontal. */
     padding: ${euiTheme.size.m} ${euiTheme.size.base};
     border: 0;
     background: transparent;
@@ -117,8 +116,7 @@ const rowStyles = ({ euiTheme }: UseEuiTheme) => ({
   text: css`
     display: flex;
     flex-direction: column;
-    /* Match GroupedAttachmentRow title ↔ caption spacing. */
-    gap: 2px;
+    gap: ${euiTheme.size.xxs};
     min-inline-size: 0;
   `,
   title: css`

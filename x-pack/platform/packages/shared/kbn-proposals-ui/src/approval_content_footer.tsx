@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, type ReactElement, type ReactNode } from 'react';
+import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButton,
@@ -23,33 +23,8 @@ interface ApprovalContentFooterProps {
   onPrimaryClick: (action: ApprovalAction) => void;
 }
 
-/**
- * Disabled buttons do not receive pointer events, so the tooltip wraps a span.
- */
-const withDisabledReasonTooltip = (
-  disabledReason: ReactNode | undefined,
-  control: ReactElement
-): ReactNode => {
-  if (disabledReason == null) {
-    return control;
-  }
-  return (
-    <EuiToolTip content={disabledReason} position="top">
-      {/*
-        Disabled controls do not receive pointer/keyboard events, so the
-        tooltip anchors on a focusable wrapper (EUI a11y requirement).
-      */}
-      <span
-        tabIndex={0}
-        css={css`
-          display: inline-block;
-        `}
-      >
-        {control}
-      </span>
-    </EuiToolTip>
-  );
-};
+const permissionTooltipFor = (action: ApprovalAction): string | undefined =>
+  action.isDisabled && action.disabledReason !== undefined ? action.disabledReason : undefined;
 
 /**
  * The Approve/Decline row. Rendered only while a decision is still pending: `ApprovalContent`
@@ -59,6 +34,29 @@ const withDisabledReasonTooltip = (
 export const ApprovalContentFooter = memo<ApprovalContentFooterProps>(
   ({ secondaryActions, primaryAction, defaultButtonColor, onPrimaryClick }) => {
     const { euiTheme } = useEuiTheme();
+    const primaryPermissionTooltip = primaryAction
+      ? permissionTooltipFor(primaryAction)
+      : undefined;
+
+    const primaryButton = primaryAction ? (
+      <EuiButton
+        fill={primaryAction.fill ?? true}
+        size="s"
+        color={primaryAction.color ?? defaultButtonColor}
+        iconType={primaryAction.iconType ?? 'play'}
+        isDisabled={primaryAction.isDisabled}
+        hasAriaDisabled={primaryPermissionTooltip !== undefined}
+        isLoading={primaryAction.isLoading}
+        onClick={
+          primaryPermissionTooltip !== undefined
+            ? () => undefined
+            : () => onPrimaryClick(primaryAction)
+        }
+        data-test-subj={primaryAction['data-test-subj']}
+      >
+        {primaryAction.label}
+      </EuiButton>
+    ) : null;
 
     return (
       <div
@@ -70,40 +68,42 @@ export const ApprovalContentFooter = memo<ApprovalContentFooterProps>(
         })}
       >
         {/* Secondaries first so the decision that commits something sits rightmost. */}
-        {secondaryActions?.map((action, i) => (
-          <React.Fragment key={i}>
-            {withDisabledReasonTooltip(
-              action.isDisabled ? action.disabledReason : undefined,
-              <EuiButtonEmpty
-                size="s"
-                color={action.color ?? 'primary'}
-                iconType={action.iconType}
-                isDisabled={action.isDisabled}
-                isLoading={action.isLoading}
-                onClick={action.onClick}
-                data-test-subj={action['data-test-subj']}
-              >
-                {action.label}
-              </EuiButtonEmpty>
-            )}
-          </React.Fragment>
-        ))}
-        {primaryAction &&
-          withDisabledReasonTooltip(
-            primaryAction.isDisabled ? primaryAction.disabledReason : undefined,
-            <EuiButton
-              fill={primaryAction.fill ?? true}
+        {secondaryActions?.map((action, i) => {
+          const permissionTooltip = permissionTooltipFor(action);
+          const button = (
+            <EuiButtonEmpty
               size="s"
-              color={primaryAction.color ?? defaultButtonColor}
-              iconType={primaryAction.iconType ?? 'play'}
-              isDisabled={primaryAction.isDisabled}
-              isLoading={primaryAction.isLoading}
-              onClick={() => onPrimaryClick(primaryAction)}
-              data-test-subj={primaryAction['data-test-subj']}
+              color={action.color ?? 'primary'}
+              iconType={action.iconType}
+              isDisabled={action.isDisabled}
+              hasAriaDisabled={permissionTooltip !== undefined}
+              isLoading={action.isLoading}
+              onClick={permissionTooltip !== undefined ? () => undefined : action.onClick}
+              data-test-subj={action['data-test-subj']}
             >
-              {primaryAction.label}
-            </EuiButton>
-          )}
+              {action.label}
+            </EuiButtonEmpty>
+          );
+          return (
+            <React.Fragment key={i}>
+              {permissionTooltip !== undefined ? (
+                <EuiToolTip content={permissionTooltip} position="top">
+                  {button}
+                </EuiToolTip>
+              ) : (
+                button
+              )}
+            </React.Fragment>
+          );
+        })}
+        {primaryButton &&
+          (primaryPermissionTooltip !== undefined ? (
+            <EuiToolTip content={primaryPermissionTooltip} position="top">
+              {primaryButton}
+            </EuiToolTip>
+          ) : (
+            primaryButton
+          ))}
       </div>
     );
   }

@@ -25,7 +25,7 @@ export interface ApprovalAction {
    * Shown in a tooltip while {@link isDisabled}. Used for read-only / missing
    * decide privilege so a disabled Approve/Decline is not silent.
    */
-  disabledReason?: ReactNode;
+  disabledReason?: string;
   'data-test-subj'?: string;
 }
 

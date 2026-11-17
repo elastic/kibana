@@ -56,21 +56,24 @@ describe('ApprovalModal', () => {
   it('keeps proposal details readable but prevents decisions in read-only mode', async () => {
     renderModal({ readOnly: true });
     expect(screen.getByText('Apply monitored exception')).toBeInTheDocument();
-    expect(screen.getByTestId('approvalModal-confirm')).toBeDisabled();
-    expect(screen.getByTestId('approvalModal-dismiss')).toBeDisabled();
-    fireEvent.click(screen.getByTestId('approvalModal-confirm'));
-    fireEvent.click(screen.getByTestId('approvalModal-dismiss'));
+    const confirm = screen.getByTestId('approvalModal-confirm');
+    const dismiss = screen.getByTestId('approvalModal-dismiss');
+    expect(confirm).toHaveAttribute('aria-disabled', 'true');
+    expect(dismiss).toHaveAttribute('aria-disabled', 'true');
+    fireEvent.click(confirm);
+    fireEvent.click(dismiss);
     expect(baseProps.onConfirm).not.toHaveBeenCalled();
     expect(baseProps.onDismiss).not.toHaveBeenCalled();
 
-    fireEvent.mouseOver(screen.getByTestId('approvalModal-confirm'));
+    // Hover the EUI tooltip anchor — aria-disabled buttons use pointer-events: none.
+    fireEvent.mouseEnter(confirm.parentElement!);
     expect(await screen.findByRole('tooltip')).toHaveTextContent(
-      "You don't have permissions to apply proposals."
+      "You don't have permissions to apply or decline proposals."
     );
-    fireEvent.mouseOut(screen.getByTestId('approvalModal-confirm'));
-    fireEvent.mouseOver(screen.getByTestId('approvalModal-dismiss'));
+    fireEvent.mouseLeave(confirm.parentElement!);
+    fireEvent.mouseEnter(dismiss.parentElement!);
     expect(await screen.findByRole('tooltip')).toHaveTextContent(
-      "You don't have permissions to decline proposals."
+      "You don't have permissions to apply or decline proposals."
     );
   });
 
@@ -81,7 +84,10 @@ describe('ApprovalModal', () => {
 
     rerender(<ApprovalModal {...baseProps} readOnly />);
 
-    expect(screen.getByTestId('approvalModal-confirm-decline')).toBeDisabled();
+    expect(screen.getByTestId('approvalModal-confirm-decline')).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
     fireEvent.click(screen.getByTestId('approvalModal-confirm-decline'));
     expect(baseProps.onDismiss).not.toHaveBeenCalled();
   });

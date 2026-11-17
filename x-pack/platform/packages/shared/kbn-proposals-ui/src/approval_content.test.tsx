@@ -395,31 +395,35 @@ describe('ApprovalContent', () => {
     it('disables Mark as not applied when read-only', async () => {
       renderContent({ proposal: appliedTodo, onReopen: jest.fn(), readOnly: true });
 
-      expect(screen.getByTestId('approvalContent-reopen')).toBeDisabled();
-      fireEvent.mouseOver(screen.getByTestId('approvalContent-reopen'));
+      const reopen = screen.getByTestId('approvalContent-reopen');
+      expect(reopen).toHaveAttribute('aria-disabled', 'true');
+      // Hover the EUI tooltip anchor — aria-disabled buttons use pointer-events: none.
+      fireEvent.mouseEnter(reopen.parentElement!);
       expect(await screen.findByRole('tooltip')).toHaveTextContent(
-        "You don't have permissions to mark proposals as not applied."
+        "You don't have permissions to apply or decline proposals."
       );
     });
 
-    it('explains read-only Mark as applied and Decline with matching tooltips', async () => {
+    it('explains read-only Mark as applied and Decline with a shared tooltip', async () => {
       renderContent({
         proposal: todoProposal,
         readOnly: true,
         onDismiss: jest.fn(),
       });
 
-      expect(screen.getByTestId('approvalContent-confirm')).toBeDisabled();
-      expect(screen.getByTestId('approvalContent-dismiss')).toBeDisabled();
+      const confirm = screen.getByTestId('approvalContent-confirm');
+      const dismiss = screen.getByTestId('approvalContent-dismiss');
+      expect(confirm).toHaveAttribute('aria-disabled', 'true');
+      expect(dismiss).toHaveAttribute('aria-disabled', 'true');
 
-      fireEvent.mouseOver(screen.getByTestId('approvalContent-confirm'));
+      fireEvent.mouseEnter(confirm.parentElement!);
       expect(await screen.findByRole('tooltip')).toHaveTextContent(
-        "You don't have permissions to mark proposals as applied."
+        "You don't have permissions to apply or decline proposals."
       );
-      fireEvent.mouseOut(screen.getByTestId('approvalContent-confirm'));
-      fireEvent.mouseOver(screen.getByTestId('approvalContent-dismiss'));
+      fireEvent.mouseLeave(confirm.parentElement!);
+      fireEvent.mouseEnter(dismiss.parentElement!);
       expect(await screen.findByRole('tooltip')).toHaveTextContent(
-        "You don't have permissions to decline proposals."
+        "You don't have permissions to apply or decline proposals."
       );
     });
 
