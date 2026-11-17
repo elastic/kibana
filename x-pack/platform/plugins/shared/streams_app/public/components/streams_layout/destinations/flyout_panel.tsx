@@ -10,22 +10,23 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, EuiTitle } fro
 import { OverviewTimeFilter } from '../../stream_detail_overview/overview_time_filter';
 
 /**
- * A bordered panel for stats in the destination flyout, laid out as the ingest chart panel of a
- * local Elasticsearch destination is: a title and a subtitle on the left and, when asked, the time
- * picker on the right. A destination that has no other picker in its flyout, such as S3, passes
- * `showTimePicker`, so that the range of its stats can be changed from the flyout. The picker is
+ * A bordered panel in the destination flyout, laid out as the ingest chart panel of a local
+ * Elasticsearch destination is: a title and a subtitle on the left and, when asked, the time picker
+ * on the right. It holds the stats of a destination and its configuration, so that nothing floats
+ * loose in the flyout. A destination that has no other picker in its flyout, such as S3, passes
+ * `showTimePicker` on its stats, so that their range can be changed from the flyout. The picker is
  * the page's own, so two panels that both show one are always on the same range.
  */
-export function FlyoutStatsPanel({
+export function FlyoutPanel({
   title,
   subtitle,
-  showTimePicker,
+  showTimePicker = false,
   children,
   'data-test-subj': dataTestSubj,
 }: React.PropsWithChildren<{
   title: React.ReactNode;
   subtitle?: React.ReactNode;
-  showTimePicker: boolean;
+  showTimePicker?: boolean;
   'data-test-subj'?: string;
 }>) {
   return (

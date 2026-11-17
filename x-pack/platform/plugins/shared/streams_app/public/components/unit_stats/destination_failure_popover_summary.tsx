@@ -19,51 +19,8 @@ import {
   getFailureSubtitle,
   hasDestinationFailures,
 } from './destination_failures';
+import { StatCell } from '../stream_detail_overview/stat_cell';
 import { FailureSparkline } from './failure_sparkline';
-
-/**
- * A stat in the style of the stats of the flyout: a title in regular weight and the subdued color,
- * then the number, which is the only bold part, in the default text color, and its unit beside it,
- * smaller and in regular weight. The unit sits 4 px from the number, and neither ever wraps.
- */
-function FailureStat({
-  title,
-  value,
-  unit,
-  dataTestSubj,
-}: {
-  title: string;
-  value: string;
-  unit: string;
-  dataTestSubj: string;
-}) {
-  const { euiTheme } = useEuiTheme();
-
-  return (
-    <div data-test-subj={dataTestSubj}>
-      <EuiText size="s" color="subdued">
-        <p>{title}</p>
-      </EuiText>
-      <div
-        css={css`
-          display: flex;
-          align-items: baseline;
-          gap: ${euiTheme.size.xs};
-          white-space: nowrap;
-        `}
-      >
-        <EuiTitle size="m">
-          <span data-test-subj={`${dataTestSubj}Value`}>{value}</span>
-        </EuiTitle>
-        {unit !== '' && (
-          <EuiText size="s" color="subdued">
-            <span data-test-subj={`${dataTestSubj}Unit`}>{unit}</span>
-          </EuiText>
-        )}
-      </div>
-    </div>
-  );
-}
 
 /**
  * The failures of a destination at a glance, for the Map popover: for each class that has failures,
@@ -124,21 +81,21 @@ export function DestinationFailurePopoverSummary({
                 align-items: center;
               `}
             >
-              <FailureStat
+              <StatCell
                 title={i18n.translate('xpack.streams.unitStats.failurePopoverSummary.percentage', {
                   defaultMessage: 'Percentage',
                 })}
                 value={percentage.value}
-                unit={percentage.unit}
-                dataTestSubj={`${dataTestSubj}${key}Percentage`}
+                unit={percentage.unit === '' ? undefined : percentage.unit}
+                data-test-subj={`${dataTestSubj}${key}Percentage`}
               />
-              <FailureStat
+              <StatCell
                 title={i18n.translate('xpack.streams.unitStats.failurePopoverSummary.rate', {
                   defaultMessage: 'Rate',
                 })}
                 value={rate.value}
-                unit={rate.unit}
-                dataTestSubj={`${dataTestSubj}${key}Rate`}
+                unit={rate.unit === '' ? undefined : rate.unit}
+                data-test-subj={`${dataTestSubj}${key}Rate`}
               />
               <div
                 css={css`
