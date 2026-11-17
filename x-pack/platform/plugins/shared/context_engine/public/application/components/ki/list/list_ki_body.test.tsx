@@ -88,7 +88,7 @@ describe('ListKiBody', () => {
     fireEvent.click(screen.getByTestId('contextListKiClearFilters'));
     expect(screen.getByTestId('contextListKiStatusFilter')).toHaveValue('active');
     expect(mockUseListKi).toHaveBeenLastCalledWith(
-      expect.objectContaining({ lifecycleStatus: ['active'], query: undefined, type: undefined })
+      expect.objectContaining({ status: ['active'], query: undefined, type: undefined })
     );
   });
 });

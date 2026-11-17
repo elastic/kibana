@@ -554,10 +554,10 @@ import type {
   UpsertRuleMigrationResourcesResponse,
 } from '../siem_migrations/model/api/rules/rule_migration.gen';
 import type {
+  CreateTinesWorkflowMigrationWorkflowsRequestParamsInput,
+  CreateTinesWorkflowMigrationWorkflowsRequestBodyInput,
   CreateWorkflowMigrationRequestBodyInput,
   CreateWorkflowMigrationResponse,
-  CreateWorkflowMigrationWorkflowsRequestParamsInput,
-  CreateWorkflowMigrationWorkflowsRequestBodyInput,
   DeleteWorkflowMigrationRequestParamsInput,
   GetAllWorkflowMigrationStatsResponse,
   GetWorkflowMigrationRequestParamsInput,
@@ -1071,6 +1071,26 @@ For detailed information on Kibana actions and alerting, and additional API call
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+    * Parses Tines story exports and stores each story as an original workflow with vendor tines and format json. Use this for a raw Tines story export. An empty list stores nothing. A body that is not a Tines story is rejected and stores nothing. A missing migration id returns 404.
+
+    */
+  async createTinesWorkflowMigrationWorkflows(props: CreateTinesWorkflowMigrationWorkflowsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateTinesWorkflowMigrationWorkflows`);
+    return this.kbnClient
+      .request({
+        path: replaceParams(
+          '/internal/siem_migrations/workflows/{migration_id}/tines/workflows',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Create or update the protection updates note for a package policy.
    */
   async createUpdateProtectionUpdatesNote(props: CreateUpdateProtectionUpdatesNoteProps) {
@@ -1133,25 +1153,6 @@ For detailed information on Kibana actions and alerting, and additional API call
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'PUT',
-        body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-   * Adds original Tines story exports to an already existing workflow migration
-   */
-  async createWorkflowMigrationWorkflows(props: CreateWorkflowMigrationWorkflowsProps) {
-    this.log.info(`${new Date().toISOString()} Calling API CreateWorkflowMigrationWorkflows`);
-    return this.kbnClient
-      .request({
-        path: replaceParams(
-          '/internal/siem_migrations/workflows/{migration_id}/workflows',
-          props.params
-        ),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'POST',
         body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
@@ -3998,6 +3999,10 @@ export interface CreateSentinelRuleMigrationRulesProps {
 export interface CreateTimelinesProps {
   body: CreateTimelinesRequestBodyInput;
 }
+export interface CreateTinesWorkflowMigrationWorkflowsProps {
+  params: CreateTinesWorkflowMigrationWorkflowsRequestParamsInput;
+  body: CreateTinesWorkflowMigrationWorkflowsRequestBodyInput;
+}
 export interface CreateUpdateProtectionUpdatesNoteProps {
   params: CreateUpdateProtectionUpdatesNoteRequestParamsInput;
   body: CreateUpdateProtectionUpdatesNoteRequestBodyInput;
@@ -4011,10 +4016,6 @@ export interface CreateWatchlistEntitySourceProps {
 }
 export interface CreateWorkflowMigrationProps {
   body: CreateWorkflowMigrationRequestBodyInput;
-}
-export interface CreateWorkflowMigrationWorkflowsProps {
-  params: CreateWorkflowMigrationWorkflowsRequestParamsInput;
-  body: CreateWorkflowMigrationWorkflowsRequestBodyInput;
 }
 export interface DeleteAssetCriticalityRecordProps {
   query: DeleteAssetCriticalityRecordRequestQueryInput;

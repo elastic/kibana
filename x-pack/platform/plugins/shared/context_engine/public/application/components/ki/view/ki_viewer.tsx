@@ -32,7 +32,7 @@ import type { SelectedKi } from '../../../hooks/use_selected_ki';
 import { resolveKiStatus } from '../../../utils/ki_expiry';
 import { getKiDisplayTitle } from '../list/list_ki_helpers';
 import { KiFormattedDate } from '../shared/ki_formatted_date';
-import { KiLifecycleStatusBadge } from '../shared/ki_lifecycle_status_badge';
+import { KiStatusBadge } from '../shared/ki_status_badge';
 import { KiTypeDisplay } from '../shared/ki_type_display';
 import { KiContentPanel } from './content/ki_content_panel';
 import { ViewKiRawJsonPanel } from './content/view_ki_raw_json_panel';
@@ -66,11 +66,7 @@ const KiViewerBadges = ({ document }: { document: KiDocument }) => {
     >
       <KiTypeDisplay as="badge" type={document.type} data-test-subj="contextViewKiTypeBadge" />
       {status !== 'active' ? (
-        <KiLifecycleStatusBadge
-          lifecycleStatus={lifecycleStatus}
-          expiresAt={document.expires_at}
-          data-test-subj="contextViewKiStatusBadge"
-        />
+        <KiStatusBadge status={status} data-test-subj="contextViewKiStatusBadge" />
       ) : null}
       {(document.tags ?? []).map((tag) => (
         <EuiBadge key={tag} color="default" data-test-subj="contextViewKiTagBadge">

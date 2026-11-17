@@ -87,7 +87,7 @@ describe('useListKiPanel', () => {
   it('loads the first page without a type, 25 rows', () => {
     renderPanelHook();
     expect(listKiQuery()).toEqual(
-      expect.objectContaining({ size: 25, type: undefined, lifecycleStatus: ['active'] })
+      expect.objectContaining({ size: 25, type: undefined, status: ['active'] })
     );
   });
 
@@ -106,7 +106,7 @@ describe('useListKiPanel', () => {
       result.current.onStatusFilterChange('deleted');
     });
     expect(byTypeQuery()).toEqual(expect.objectContaining({ sizesByType: {} }));
-    expect(listKiQuery()).toEqual(expect.objectContaining({ lifecycleStatus: ['deleted'] }));
+    expect(listKiQuery()).toEqual(expect.objectContaining({ status: ['deleted'] }));
 
     act(() => {
       result.current.showMore('faq', 25);

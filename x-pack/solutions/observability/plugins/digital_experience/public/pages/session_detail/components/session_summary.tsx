@@ -47,8 +47,16 @@ export function SessionSummary({
     {
       id: 'pages',
       title: formatNumber(session.pageViewCount),
+      // Page views, not page loads: in-app navigations count too.
       description: i18n.translate('xpack.digitalExperience.sessionDetail.summary.pagesLabel', {
         defaultMessage: 'Page views',
+      }),
+    },
+    {
+      id: 'pageLoads',
+      title: formatNumber(session.pageLoadCount),
+      description: i18n.translate('xpack.digitalExperience.sessionDetail.summary.pageLoadsLabel', {
+        defaultMessage: 'Page loads',
       }),
     },
     {
@@ -59,12 +67,24 @@ export function SessionSummary({
       }),
     },
     {
-      id: 'errors',
-      title: formatNumber(session.errorCount),
-      titleColor: session.errorCount > 0 ? ('danger' as const) : undefined,
-      description: i18n.translate('xpack.digitalExperience.sessionDetail.summary.errorsLabel', {
-        defaultMessage: 'Errors',
+      id: 'jsErrors',
+      title: formatNumber(session.jsErrorCount),
+      titleColor: session.jsErrorCount > 0 ? ('danger' as const) : undefined,
+      description: i18n.translate('xpack.digitalExperience.sessionDetail.summary.jsErrorsLabel', {
+        defaultMessage: 'JS errors',
       }),
+    },
+    {
+      id: 'failedRequests',
+      title: formatNumber(session.failedRequestCount),
+      titleColor: session.failedRequestCount > 0 ? ('danger' as const) : undefined,
+      description: i18n.translate(
+        'xpack.digitalExperience.sessionDetail.summary.failedRequestsLabel',
+        {
+          defaultMessage: 'Failed requests of {count}',
+          values: { count: formatNumber(session.httpRequestCount) },
+        }
+      ),
     },
   ];
 
@@ -86,6 +106,12 @@ export function SessionSummary({
         defaultMessage: 'User',
       }),
       description: session.user ?? ANONYMOUS_USER,
+    },
+    {
+      title: i18n.translate('xpack.digitalExperience.sessionDetail.summary.environmentLabel', {
+        defaultMessage: 'Environment',
+      }),
+      description: session.environment ?? UNKNOWN,
     },
     {
       title: i18n.translate('xpack.digitalExperience.sessionDetail.summary.clientLabel', {

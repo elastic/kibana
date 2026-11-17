@@ -16,7 +16,7 @@ import {
   ALL_TYPE_FILTER,
   DEFAULT_SORT,
   DEFAULT_STATUS_FILTER,
-  getLifecycleStatusesForFilter,
+  getStatusesForFilter,
   type ListKiStatusFilterValue,
   type ListKiTypeFilter,
 } from './list_ki_helpers';
@@ -75,24 +75,21 @@ export const useListKiPanel = ({ id: aiIndexId }: GetAiIndexResponse) => {
   };
 
   const query = submittedQuery.length > 0 ? submittedQuery : undefined;
-  const lifecycleStatus = useMemo(
-    () => getLifecycleStatusesForFilter(statusFilter),
-    [statusFilter]
-  );
+  const status = useMemo(() => getStatusesForFilter(statusFilter), [statusFilter]);
 
   const { kis, total, summary, isLoading, isFetching, error } = useListKi({
     aiIndexId,
     size: DEFAULT_KI_PAGE_SIZE,
     type: typeFilter.kind === 'type' ? typeFilter.value : undefined,
     query,
-    lifecycleStatus,
+    status,
   });
 
   const groupResults = useListKiByType({
     aiIndexId,
     sizesByType: groupSizes,
     query,
-    lifecycleStatus,
+    status,
   });
 
   const groups = useMemo(

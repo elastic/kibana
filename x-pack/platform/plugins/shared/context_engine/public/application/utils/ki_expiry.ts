@@ -6,9 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { KiStatus } from '../../../common/ki_lifecycle_status';
 import type { KiLifecycleStatus } from '../../../common/step_types/ki';
-
-export type KiStatus = KiLifecycleStatus | 'expired';
 
 /** Only Failed stands out; other statuses use the default badge. */
 export const KI_STATUS_BADGE_COLOR: Record<KiStatus, 'default' | 'success' | 'danger'> = {

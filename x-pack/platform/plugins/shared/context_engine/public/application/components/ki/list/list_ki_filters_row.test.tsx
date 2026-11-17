@@ -85,9 +85,7 @@ describe('ListKiFiltersRow', () => {
 
     expect(screen.getByTestId('contextListKiStatusFilter')).toHaveValue('active');
     expect(screen.getByTestId('contextListKiSortSelect')).toHaveValue('updated');
-    expect(mockUseListKi).toHaveBeenLastCalledWith(
-      expect.objectContaining({ lifecycleStatus: ['active'] })
-    );
+    expect(mockUseListKi).toHaveBeenLastCalledWith(expect.objectContaining({ status: ['active'] }));
   });
 
   it('requests every status for All statuses', () => {
@@ -96,15 +94,15 @@ describe('ListKiFiltersRow', () => {
       target: { value: 'all' },
     });
     expect(mockUseListKi).toHaveBeenLastCalledWith(
-      expect.objectContaining({ lifecycleStatus: ['active', 'deleted', 'verification_failed'] })
+      expect.objectContaining({
+        status: ['active', 'deleted', 'verification_failed', 'expired'],
+      })
     );
   });
 
   it('requests active KIs by default', () => {
     renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
-    expect(mockUseListKi).toHaveBeenLastCalledWith(
-      expect.objectContaining({ lifecycleStatus: ['active'] })
-    );
+    expect(mockUseListKi).toHaveBeenLastCalledWith(expect.objectContaining({ status: ['active'] }));
   });
 
   it('requests a type filter when a type is selected', () => {
@@ -119,7 +117,7 @@ describe('ListKiFiltersRow', () => {
       target: { value: 'deleted' },
     });
     expect(mockUseListKi).toHaveBeenLastCalledWith(
-      expect.objectContaining({ lifecycleStatus: ['deleted'] })
+      expect.objectContaining({ status: ['deleted'] })
     );
   });
 

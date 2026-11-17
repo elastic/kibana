@@ -10,7 +10,7 @@ import {
   getDiscoverEsqlQuery,
   getIndexManagementLocatorParams,
   getKiDisplayTitle,
-  getLifecycleStatusesForFilter,
+  getStatusesForFilter,
   getListKiStatusFilterLabel,
   getListKiTypeFilterLabel,
 } from './list_ki_helpers';
@@ -65,16 +65,17 @@ describe('getKiDisplayTitle', () => {
   });
 });
 
-describe('getLifecycleStatusesForFilter', () => {
+describe('getStatusesForFilter', () => {
   it('asks for one status', () => {
-    expect(getLifecycleStatusesForFilter('deleted')).toEqual(['deleted']);
+    expect(getStatusesForFilter('deleted')).toEqual(['deleted']);
   });
 
   it('asks for every status for All statuses', () => {
-    expect(getLifecycleStatusesForFilter('all')).toEqual([
+    expect(getStatusesForFilter('all')).toEqual([
       'active',
       'deleted',
       'verification_failed',
+      'expired',
     ]);
   });
 });

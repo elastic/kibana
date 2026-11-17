@@ -30,18 +30,19 @@ const ki = (id: string, type: string, extra: Partial<KiListItem> = {}): KiListIt
   index: INDEX,
   type,
   title: `Title ${id}`,
+  status: 'active',
   ...extra,
 });
 
 const defaultKis = [
   ki('faq-1', 'faq'),
-  ki('play-1', 'playbook', { lifecycle_status: 'deleted' }),
-  ki('faq-2', 'faq', { expires_at: '2000-01-01T00:00:00.000Z' }),
+  ki('play-1', 'playbook', { status: 'deleted' }),
+  ki('faq-2', 'faq', { status: 'expired' }),
 ];
 
 const mockList = (kis: KiListItem[] = defaultKis) =>
-  mockUseListKi.mockImplementation(({ lifecycleStatus }: { lifecycleStatus: string[] }) => ({
-    kis: lifecycleStatus.includes('deleted') && lifecycleStatus.length === 1 ? [kis[1]] : kis,
+  mockUseListKi.mockImplementation(({ status }: { status: string[] }) => ({
+    kis: status.includes('deleted') && status.length === 1 ? [kis[1]] : kis,
     total: 40,
     summary: {
       total: 40,

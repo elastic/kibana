@@ -9,9 +9,8 @@ import { getEbtProps } from '@kbn/ebt-click';
 import React, { useEffect, useRef } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../../common/telemetry';
 import type { KiListItem } from '../../../../../common/http_api/knowledge_indicators';
-import { resolveKiStatus } from '../../../utils/ki_expiry';
 import { KiFormattedDate } from '../shared/ki_formatted_date';
-import { KiLifecycleStatusBadge } from '../shared/ki_lifecycle_status_badge';
+import { KiStatusBadge } from '../shared/ki_status_badge';
 import { KiTypeDisplay } from '../shared/ki_type_display';
 import { getKiDisplayTitle } from './list_ki_helpers';
 import { useListKiGroupsStyles } from './list_ki_groups_styles';
@@ -40,14 +39,7 @@ const scrollRowIntoList = (row: HTMLElement) => {
 
 export const ListKiRow = ({ ki, isSelected, onSelect, onHover }: ListKiRowProps) => {
   const styles = useListKiGroupsStyles();
-  const {
-    title,
-    type,
-    lifecycle_status: lifecycleStatus,
-    expires_at: expiresAt,
-    updated_at: updatedAt,
-  } = ki;
-  const status = resolveKiStatus(lifecycleStatus, expiresAt);
+  const { title, type, status, updated_at: updatedAt } = ki;
   const rowRef = useRef<HTMLButtonElement>(null);
 
   // A deep link or a filter can select a row below the visible part of the list.
@@ -81,9 +73,7 @@ export const ListKiRow = ({ ki, isSelected, onSelect, onHover }: ListKiRowProps)
       </span>
       <span css={styles.rowMeta}>
         <KiTypeDisplay as="badge" type={type} data-test-subj="contextKiRowType" />
-        {status !== 'active' ? (
-          <KiLifecycleStatusBadge lifecycleStatus={lifecycleStatus} expiresAt={expiresAt} />
-        ) : null}
+        {status !== 'active' ? <KiStatusBadge status={status} /> : null}
         {updatedAt ? (
           <span css={styles.rowUpdated} data-test-subj="contextKiRowUpdatedAt">
             <KiFormattedDate value={updatedAt} />

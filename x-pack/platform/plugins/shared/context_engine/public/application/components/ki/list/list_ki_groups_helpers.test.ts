@@ -10,7 +10,13 @@ import type { KiListItem } from '../../../../../common/http_api/knowledge_indica
 import { ALL_TYPE_FILTER } from './list_ki_helpers';
 import { buildListKiGroups, getNextGroupSize } from './list_ki_groups_helpers';
 
-const ki = (id: string, type?: string): KiListItem => ({ id, index: 'idx', type, title: id });
+const ki = (id: string, type?: string): KiListItem => ({
+  id,
+  index: 'idx',
+  type,
+  title: id,
+  status: 'active',
+});
 
 const kis = [ki('a1', 'alpha'), ki('b1', 'beta'), ki('a2', 'alpha'), ki('n1'), ki('c1', 'gamma')];
 
