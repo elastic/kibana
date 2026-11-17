@@ -64,12 +64,12 @@ const MAX_CONFIGURABLE_ROWS = 10_000;
 const MAX_CONFIGURABLE_COLUMNS = 20;
 const configurableColumnHelper = createDataGridColumnHelper<ConfigurableRow>();
 const getConfigurableRowId = (row: ConfigurableRow) => row.id;
-const clampCount = (count: number, maximum: number): number =>
-  Number.isFinite(count) ? Math.min(Math.max(Math.floor(count), 0), maximum) : 0;
+const clampCount = (count: number, minimum: number, maximum: number): number =>
+  Number.isFinite(count) ? Math.min(Math.max(Math.floor(count), minimum), maximum) : minimum;
 
 const ConfigurableDataGrid = ({ rowCount, columnCount, height }: ConfigurableDataGridProps) => {
-  const safeRowCount = clampCount(rowCount, MAX_CONFIGURABLE_ROWS);
-  const safeColumnCount = clampCount(columnCount, MAX_CONFIGURABLE_COLUMNS);
+  const safeRowCount = clampCount(rowCount, 0, MAX_CONFIGURABLE_ROWS);
+  const safeColumnCount = clampCount(columnCount, 1, MAX_CONFIGURABLE_COLUMNS);
   const configurableColumns = React.useMemo(
     () =>
       Array.from({ length: safeColumnCount }, (_columnValue, columnIndex) => {
@@ -195,7 +195,7 @@ export const ConfigurableSize: StoryObj<typeof ConfigurableDataGrid> = {
       description: 'Number of logical rows in the grid.',
     },
     columnCount: {
-      control: { type: 'number', min: 0, max: MAX_CONFIGURABLE_COLUMNS, step: 1 },
+      control: { type: 'number', min: 1, max: MAX_CONFIGURABLE_COLUMNS, step: 1 },
       description: 'Number of logical columns in the grid.',
     },
     height: {

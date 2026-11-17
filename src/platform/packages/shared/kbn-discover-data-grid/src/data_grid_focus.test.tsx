@@ -8,7 +8,7 @@
  */
 
 import React, { createRef } from 'react';
-import { act, fireEvent, screen, waitFor } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import type { DataGridApi, DataGridCommandResult } from './data_grid_api';
@@ -28,6 +28,7 @@ import {
   rows,
   runFocusCommand,
   TestDataGrid,
+  type TestDataGridProps,
   virtualizerTestHarness,
 } from './data_grid.test.helpers';
 
@@ -48,61 +49,67 @@ const columnsWithTwoLinks = createContentColumns((rowId) => (
     <a href={`https://example.com/${rowId}/second`}>{`Second ${rowId}`}</a>
   </>
 ));
+const renderGridWithApi = (props: Omit<TestDataGridProps, 'apiRef'> = {}) => {
+  const apiRef = createRef<DataGridApi>();
+  const renderResult = renderGrid({ ...props, apiRef });
+  const api = apiRef.current;
+  if (!api) {
+    throw new Error('Expected a data grid API.');
+  }
+  return { ...renderResult, api, apiRef };
+};
 
 describe('DataGrid keyboard and logical focus', () => {
   beforeEach(resetDataGridTestState);
   afterEach(cleanupDataGridTestState);
 
   it('supports Arrow, Home, End, and Ctrl/Cmd+Home/End navigation', async () => {
+    const user = userEvent.setup();
     renderGrid();
     const firstCell = screen.getByRole('gridcell', { name: 'Name 0' });
-    focusElement(firstCell);
+    await user.click(firstCell);
 
-    fireEvent.keyDown(firstCell, { key: 'ArrowRight' });
-    const valueZero = await expectFocus('0');
-    fireEvent.keyDown(valueZero, { key: 'ArrowDown' });
-    const valueOne = await expectFocus('1');
-    fireEvent.keyDown(valueOne, { key: 'Home' });
-    const nameOne = await expectFocus('Name 1');
-    fireEvent.keyDown(nameOne, { key: 'End' });
-    const valueOneAgain = await expectFocus('1');
+    await user.keyboard('{ArrowRight}');
+    await expectFocus('0');
+    await user.keyboard('{ArrowDown}');
+    await expectFocus('1');
+    await user.keyboard('{Home}');
+    await expectFocus('Name 1');
+    await user.keyboard('{End}');
+    await expectFocus('1');
 
-    fireEvent.keyDown(valueOneAgain, { key: 'End', ctrlKey: true });
-    const lastCell = await expectFocus('99');
+    await user.keyboard('{Control>}{End}{/Control}');
+    await expectFocus('99');
     expect(virtualizerTestHarness.getOffsetForIndex).toHaveBeenLastCalledWith(99, 'auto');
 
-    fireEvent.keyDown(lastCell, { key: 'Home', metaKey: true });
+    await user.keyboard('{Meta>}{Home}{/Meta}');
     await expectFocus('Name 0');
   });
 
   it('does not wrap navigation at grid boundaries', async () => {
-    const apiRef = createRef<DataGridApi>();
-    renderGrid({ apiRef });
+    const user = userEvent.setup();
+    const { api } = renderGridWithApi();
     const firstCell = screen.getByRole('gridcell', { name: 'Name 0' });
-    focusElement(firstCell);
+    await user.click(firstCell);
 
-    fireEvent.keyDown(firstCell, { key: 'ArrowUp' });
-    fireEvent.keyDown(firstCell, { key: 'ArrowLeft' });
+    await user.keyboard('{ArrowUp}{ArrowLeft}');
     expect(document.activeElement).toBe(firstCell);
 
-    if (!apiRef.current) {
-      throw new Error('Expected a data grid API.');
-    }
-    expect(await runFocusCommand(apiRef.current, 'row-99', 'value')).toEqual({
+    expect(await runFocusCommand(api, 'row-99', 'value')).toEqual({
       status: 'completed',
     });
     const lastCell = await expectFocus('99');
-    fireEvent.keyDown(lastCell, { key: 'ArrowDown' });
-    fireEvent.keyDown(lastCell, { key: 'ArrowRight' });
+    await user.keyboard('{ArrowDown}{ArrowRight}');
     expect(document.activeElement).toBe(lastCell);
   });
 
   it('mounts and focuses an off-screen keyboard destination through virtualizer lifecycle', async () => {
+    const user = userEvent.setup();
     renderGrid();
     const lastMountedCell = screen.getByRole('gridcell', { name: 'Name 2' });
-    focusElement(lastMountedCell);
+    await user.click(lastMountedCell);
 
-    fireEvent.keyDown(lastMountedCell, { key: 'ArrowDown' });
+    await user.keyboard('{ArrowDown}');
 
     await expectFocus('Name 3');
     expect(virtualizerTestHarness.getOffsetForIndex).toHaveBeenLastCalledWith(3, 'auto');
@@ -110,21 +117,17 @@ describe('DataGrid keyboard and logical focus', () => {
 
   it('does not let a delayed focus mount override a newer semantic scroll', async () => {
     virtualizerTestHarness.delayMounts();
-    const apiRef = createRef<DataGridApi>();
-    renderGrid({ apiRef });
-    if (!apiRef.current) {
-      throw new Error('Expected a data grid API.');
-    }
+    const { api } = renderGridWithApi();
 
     let pendingFocus: Promise<DataGridCommandResult> | undefined;
     act(() => {
-      pendingFocus = apiRef.current?.focusCell({ rowId: 'row-50', columnId: 'name' });
+      pendingFocus = api.focusCell({ rowId: 'row-50', columnId: 'name' });
     });
     expect(virtualizerTestHarness.pendingScrollCount).toBe(1);
 
-    await expect(
-      apiRef.current.scrollToCell({ rowId: 'row-10', columnId: 'name' })
-    ).resolves.toEqual({ status: 'completed' });
+    await expect(api.scrollToCell({ rowId: 'row-10', columnId: 'name' })).resolves.toEqual({
+      status: 'completed',
+    });
     await expect(pendingFocus).resolves.toEqual({ status: 'cancelled', reason: 'superseded' });
     expect(virtualizerTestHarness.pendingScrollCount).toBe(2);
 
@@ -145,18 +148,14 @@ describe('DataGrid keyboard and logical focus', () => {
 
   it('re-resolves a delayed pending focus after row reordering', async () => {
     virtualizerTestHarness.delayMounts();
-    const apiRef = createRef<DataGridApi>();
-    const { rerender } = renderGrid({ apiRef });
+    const { api, apiRef, rerender } = renderGridWithApi();
     const outsideButton = document.createElement('button');
     document.body.append(outsideButton);
     focusElement(outsideButton);
-    if (!apiRef.current) {
-      throw new Error('Expected a data grid API.');
-    }
 
     let pendingFocus: Promise<DataGridCommandResult> | undefined;
     act(() => {
-      pendingFocus = apiRef.current?.focusCell({ rowId: 'row-50', columnId: 'name' });
+      pendingFocus = api.focusCell({ rowId: 'row-50', columnId: 'name' });
     });
     expect(virtualizerTestHarness.getOffsetForIndex).toHaveBeenLastCalledWith(50, 'auto');
 
@@ -180,16 +179,12 @@ describe('DataGrid keyboard and logical focus', () => {
 
   it('preserves pending focus when reordering unmounts the active row', async () => {
     virtualizerTestHarness.delayMounts();
-    const apiRef = createRef<DataGridApi>();
-    const { rerender } = renderGrid({ apiRef });
+    const { api, apiRef, rerender } = renderGridWithApi();
     focusElement(screen.getByRole('gridcell', { name: 'Name 0' }));
-    if (!apiRef.current) {
-      throw new Error('Expected a data grid API.');
-    }
 
     let pendingFocus: Promise<DataGridCommandResult> | undefined;
     act(() => {
-      pendingFocus = apiRef.current?.focusCell({ rowId: 'row-50', columnId: 'name' });
+      pendingFocus = api.focusCell({ rowId: 'row-50', columnId: 'name' });
     });
     expect(virtualizerTestHarness.pendingScrollCount).toBe(1);
 
@@ -211,23 +206,20 @@ describe('DataGrid keyboard and logical focus', () => {
   });
 
   it('does not reclaim focus when a delayed destination mounts after Tab leaves the grid', async () => {
+    const user = userEvent.setup();
     virtualizerTestHarness.delayMounts();
-    const apiRef = createRef<DataGridApi>();
-    renderGrid({ apiRef });
+    const { api } = renderGridWithApi();
     const activeCell = screen.getByRole('gridcell', { name: 'Name 0' });
     const outsideButton = document.createElement('button');
     document.body.append(outsideButton);
-    focusElement(activeCell);
-    if (!apiRef.current) {
-      throw new Error('Expected a data grid API.');
-    }
+    await user.click(activeCell);
 
     let pendingFocus: Promise<DataGridCommandResult> | undefined;
     act(() => {
-      pendingFocus = apiRef.current?.focusCell({ rowId: 'row-50', columnId: 'name' });
+      pendingFocus = api.focusCell({ rowId: 'row-50', columnId: 'name' });
     });
-    fireEvent.keyDown(activeCell, { key: 'Tab' });
-    focusElement(outsideButton);
+    await user.tab();
+    expect(document.activeElement).toBe(outsideButton);
 
     await expect(pendingFocus).resolves.toEqual({ status: 'cancelled', reason: 'superseded' });
     virtualizerTestHarness.flushScroll(0);
@@ -236,35 +228,32 @@ describe('DataGrid keyboard and logical focus', () => {
   });
 
   it('scrolls an already mounted navigation target into the visible viewport', async () => {
+    const user = userEvent.setup();
     renderGrid();
     const middleCell = screen.getByRole('gridcell', { name: 'Name 1' });
-    focusElement(middleCell);
+    await user.click(middleCell);
 
-    fireEvent.keyDown(middleCell, { key: 'ArrowDown' });
+    await user.keyboard('{ArrowDown}');
 
-    const nextCell = await expectFocus('Name 2');
+    await expectFocus('Name 2');
     expect(virtualizerTestHarness.getOffsetForIndex).toHaveBeenLastCalledWith(2, 'auto');
     expect(virtualizerTestHarness.scrollToOffset).toHaveBeenLastCalledWith(80);
 
-    fireEvent.keyDown(nextCell, { key: 'ArrowUp' });
+    await user.keyboard('{ArrowUp}');
     await expectFocus('Name 1');
     expect(virtualizerTestHarness.getOffsetForIndex).toHaveBeenLastCalledWith(1, 'auto');
     expect(virtualizerTestHarness.scrollToOffset).toHaveBeenLastCalledWith(40);
   });
 
   it('focuses an off-screen semantic command target and fails missing targets explicitly', async () => {
-    const apiRef = createRef<DataGridApi>();
-    renderGrid({ apiRef });
-    if (!apiRef.current) {
-      throw new Error('Expected a data grid API.');
-    }
+    const { api } = renderGridWithApi();
 
-    expect(await runFocusCommand(apiRef.current, 'row-50', 'value')).toEqual({
+    expect(await runFocusCommand(api, 'row-50', 'value')).toEqual({
       status: 'completed',
     });
     await expectFocus('50');
 
-    expect(await runFocusCommand(apiRef.current, 'missing', 'value')).toEqual({
+    expect(await runFocusCommand(api, 'missing', 'value')).toEqual({
       status: 'failed',
       reason: 'row_not_found',
     });
@@ -276,7 +265,7 @@ describe('DataGrid keyboard and logical focus', () => {
 
     let missingColumnResult: DataGridCommandResult | undefined;
     await act(async () => {
-      missingColumnResult = await apiRef.current?.scrollToCell({
+      missingColumnResult = await api.scrollToCell({
         rowId: 'row-1',
         columnId: 'missing',
       });
@@ -290,17 +279,13 @@ describe('DataGrid keyboard and logical focus', () => {
   });
 
   it('contains failed scroll commands without changing the active cell or DOM focus', async () => {
-    const apiRef = createRef<DataGridApi>();
-    renderGrid({ apiRef });
+    const { api } = renderGridWithApi();
     const activeCell = screen.getByRole('gridcell', { name: 'Name 0' });
     focusElement(activeCell);
-    if (!apiRef.current) {
-      throw new Error('Expected a data grid API.');
-    }
 
     virtualizerTestHarness.failOffsetLookup();
 
-    expect(await runFocusCommand(apiRef.current, 'row-50', 'value')).toEqual({
+    expect(await runFocusCommand(api, 'row-50', 'value')).toEqual({
       status: 'failed',
       reason: 'scroll_failed',
     });
@@ -315,7 +300,7 @@ describe('DataGrid keyboard and logical focus', () => {
 
     let scrollResult: DataGridCommandResult | undefined;
     await act(async () => {
-      scrollResult = await apiRef.current?.scrollToCell({ rowId: 'row-50', columnId: 'value' });
+      scrollResult = await api.scrollToCell({ rowId: 'row-50', columnId: 'value' });
     });
     expect(scrollResult).toEqual({
       status: 'failed',
@@ -326,7 +311,7 @@ describe('DataGrid keyboard and logical focus', () => {
     virtualizerTestHarness.allowOffsetLookup();
     virtualizerTestHarness.throwOnNextScroll();
     await act(async () => {
-      scrollResult = await apiRef.current?.scrollToCell({ rowId: 'row-50', columnId: 'value' });
+      scrollResult = await api.scrollToCell({ rowId: 'row-50', columnId: 'value' });
     });
     expect(scrollResult).toEqual({
       status: 'failed',
@@ -336,37 +321,29 @@ describe('DataGrid keyboard and logical focus', () => {
   });
 
   it('restores DOM focus when the active logical cell is virtually unmounted and remounted', async () => {
-    const apiRef = createRef<DataGridApi>();
-    const { container } = renderGrid({ apiRef });
+    const { api, container } = renderGridWithApi();
     const activeCell = screen.getByRole('gridcell', { name: 'Name 1' });
     focusElement(activeCell);
-    if (!apiRef.current) {
-      throw new Error('Expected a data grid API.');
-    }
 
     await act(async () => {
-      await apiRef.current?.scrollToCell({ rowId: 'row-50', columnId: 'name' });
+      await api.scrollToCell({ rowId: 'row-50', columnId: 'name' });
     });
     expect(screen.queryByRole('gridcell', { name: 'Name 1' })).toBeNull();
     expect(getCompositeTabStops(container)).toHaveLength(1);
     expect(screen.getByRole('grid').getAttribute('tabindex')).toBe('0');
 
     await act(async () => {
-      await apiRef.current?.scrollToCell({ rowId: 'row-1', columnId: 'name' });
+      await api.scrollToCell({ rowId: 'row-1', columnId: 'name' });
     });
     await expectFocus('Name 1');
   });
 
   it('does not restore stale focus lost to virtual scrolling after a model change', async () => {
-    const apiRef = createRef<DataGridApi>();
-    const { rerender } = renderGrid({ apiRef });
+    const { api, apiRef, rerender } = renderGridWithApi();
     focusElement(screen.getByRole('gridcell', { name: 'Name 1' }));
-    if (!apiRef.current) {
-      throw new Error('Expected a data grid API.');
-    }
 
     await act(async () => {
-      await apiRef.current?.scrollToCell({ rowId: 'row-50', columnId: 'name' });
+      await api.scrollToCell({ rowId: 'row-50', columnId: 'name' });
     });
     expect(screen.getByRole('grid')).toHaveFocus();
     expect(virtualizerTestHarness.getOffsetForIndex).toHaveBeenCalledTimes(1);
@@ -381,16 +358,12 @@ describe('DataGrid keyboard and logical focus', () => {
   });
 
   it('restores an off-screen active cell only when the grid receives keyboard focus', async () => {
-    const apiRef = createRef<DataGridApi>();
-    renderGrid({ apiRef });
+    const { api } = renderGridWithApi();
     const activeCell = screen.getByRole('gridcell', { name: 'Name 0' });
     focusElement(activeCell);
-    if (!apiRef.current) {
-      throw new Error('Expected a data grid API.');
-    }
 
     await act(async () => {
-      await apiRef.current?.scrollToCell({ rowId: 'row-50', columnId: 'name' });
+      await api.scrollToCell({ rowId: 'row-50', columnId: 'name' });
     });
     const grid = screen.getByRole('grid');
     expect(grid.getAttribute('tabindex')).toBe('0');
@@ -412,6 +385,31 @@ describe('DataGrid keyboard and logical focus', () => {
     expect(virtualizerTestHarness.getOffsetForIndex).toHaveBeenLastCalledWith(0, 'auto');
     outsideButton.remove();
   });
+
+  it.each([
+    { key: '{ArrowDown}', start: 'Name 1', destination: 'Name 2' },
+    { key: '{ArrowUp}', start: 'Name 0', destination: 'Name 0' },
+    { key: '{Home}', start: '1', destination: 'Name 1' },
+    { key: '{End}', start: 'Name 1', destination: '1' },
+    { key: '{Control>}{Home}{/Control}', start: '1', destination: 'Name 0' },
+    { key: '{Meta>}{End}{/Meta}', start: 'Name 1', destination: '99' },
+  ])(
+    'resumes $key navigation when pointer focus remains on the grid',
+    async ({ key, start, destination }) => {
+      const user = userEvent.setup();
+      renderGrid();
+      await user.click(screen.getByRole('gridcell', { name: start }));
+
+      const grid = screen.getByRole('grid');
+      focusVisibleTestHarness.set(false);
+      await user.click(grid);
+      expect(document.activeElement).toBe(grid);
+
+      await user.keyboard(key);
+
+      await expectFocus(destination);
+    }
+  );
 
   it('preserves logical row and column identity through reordering', async () => {
     const { rerender } = renderGrid();
