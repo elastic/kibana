@@ -30,6 +30,8 @@ export interface EntityInventorySearchContextValue {
   filterControls: FilterControlsSelection;
   setFilterControls: (selection: FilterControlsSelection) => void;
   refreshToken: number;
+  /** False when `xpack.entityInventoryApp.timeRangeLimit.disabled` turns the time range limit off. */
+  isTimeRangeLimited: boolean;
   /** Commits a search and returns the effective date range. An invalid query is not committed. */
   submit: (payload: EntityInventorySearchSubmitPayload) => TimeRange;
 }
@@ -45,8 +47,9 @@ export const EntityInventorySearchProvider = ({
   children?: React.ReactNode;
 }) => {
   const {
-    services: { notifications, uiSettings },
+    services: { notifications, uiSettings, config },
   } = useKibana();
+  const isTimeRangeLimited = !config.timeRangeLimit.disabled;
   const [{ query, filters, dateRange, filterControls }, updateSearchState] = useUrlSearchState();
   const [refreshToken, setRefreshToken] = useState(0);
 
@@ -71,9 +74,10 @@ export const EntityInventorySearchProvider = ({
         queryToCommit = undefined;
       }
 
+      // Without the limit, clampTimeRange never clamps and only checks that the range is valid.
       const { range, wasClamped, isValid } = clampTimeRange(
         submittedRange,
-        ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS
+        isTimeRangeLimited ? ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS : Infinity
       );
       const effectiveRange = isValid ? range : dateRange;
 
@@ -88,7 +92,7 @@ export const EntityInventorySearchProvider = ({
 
       return effectiveRange;
     },
-    [dateRange, notifications, updateSearchState, uiSettings]
+    [dateRange, isTimeRangeLimited, notifications, updateSearchState, uiSettings]
   );
 
   const value = useMemo(
@@ -101,6 +105,7 @@ export const EntityInventorySearchProvider = ({
       filterControls,
       setFilterControls,
       refreshToken,
+      isTimeRangeLimited,
       submit,
     }),
     [
@@ -112,6 +117,7 @@ export const EntityInventorySearchProvider = ({
       filterControls,
       setFilterControls,
       refreshToken,
+      isTimeRangeLimited,
       submit,
     ]
   );

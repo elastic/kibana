@@ -14,13 +14,18 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DEFAULT_TIME_RANGE } from '../constants';
 import { INVALID_QUERY_TOAST_TITLE, TIME_RANGE_CLAMPED_TOAST_TITLE } from '../translations';
+import { createPublicConfigMock } from '../../mocks';
 import { EntityInventorySearchProvider, useEntityInventorySearch } from './search_context';
 
-const renderSearchHook = (initialEntry = '/kubernetes') => {
+const renderSearchHook = (
+  initialEntry = '/kubernetes',
+  { timeRangeLimitDisabled = false } = {}
+) => {
   const core = coreMock.createStart();
+  const config = createPublicConfigMock({ timeRangeLimitDisabled });
   const history = createMemoryHistory({ initialEntries: [initialEntry] });
   const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <KibanaContextProvider services={core}>
+    <KibanaContextProvider services={{ ...core, config }}>
       <Router history={history}>
         <EntityInventorySearchProvider entityCategory="kubernetes">
           {children}
@@ -43,6 +48,7 @@ describe('EntityInventorySearchProvider', () => {
     expect(result.current.filters).toEqual([]);
     expect(result.current.dateRange).toEqual(DEFAULT_TIME_RANGE);
     expect(result.current.filterControls).toEqual({ attributes: {} });
+    expect(result.current.isTimeRangeLimited).toBe(true);
   });
 
   it('keeps the filter selection of the page', () => {
@@ -88,6 +94,33 @@ describe('EntityInventorySearchProvider', () => {
     expect(core.notifications.toasts.addWarning).toHaveBeenCalledWith({
       title: TIME_RANGE_CLAMPED_TOAST_TITLE,
     });
+  });
+
+  it('commits a submission over the maximum time range as-is when the limit is disabled', () => {
+    const { result, core } = renderSearchHook(undefined, { timeRangeLimitDisabled: true });
+    const dateRange = { from: 'now-30d', to: 'now' };
+    let committed;
+
+    act(() => {
+      committed = result.current.submit({ dateRange });
+    });
+
+    expect(result.current.isTimeRangeLimited).toBe(false);
+    expect(committed).toEqual(dateRange);
+    expect(result.current.dateRange).toEqual(dateRange);
+    expect(core.notifications.toasts.addWarning).not.toHaveBeenCalled();
+  });
+
+  it('keeps the previous time range for invalid datemath when the limit is disabled', () => {
+    const { result } = renderSearchHook(undefined, { timeRangeLimitDisabled: true });
+    let committed;
+
+    act(() => {
+      committed = result.current.submit({ dateRange: { from: 'now-5x', to: 'now' } });
+    });
+
+    expect(committed).toEqual(DEFAULT_TIME_RANGE);
+    expect(result.current.dateRange).toEqual(DEFAULT_TIME_RANGE);
   });
 
   it('does not commit invalid KQL, surfaces an error and still commits the time range', () => {

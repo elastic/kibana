@@ -46,7 +46,7 @@ import type { NightshiftAutomationAttributes } from '../lib/automations/types';
 import { createAutomationBudget } from '../lib/automations/automation_budget';
 import { AutomationDailyLimitReachedError, InvestigationQuotaDeniedError } from '../client/errors';
 import type { AutomationBudget } from '../types';
-import type { NightshiftTelemetryClient } from '../telemetry';
+import { alertIdentityOf, triggeringAlertOf, type NightshiftTelemetryClient } from '../telemetry';
 
 const inputSchema = lazySchema(() =>
   z.object({
@@ -183,6 +183,9 @@ const resolveAlerts = async ({
   }, ALERT_VISIBILITY_RETRY_OPTIONS);
 };
 
+const nonEmptyString = (value: unknown): string | undefined =>
+  typeof value === 'string' && value.length > 0 ? value : undefined;
+
 const toSubjectId = ({
   subject_type: subjectType,
   subject_id: subjectId,
@@ -288,15 +291,17 @@ export const triggerInvestigationStepDefinition = (
               getEpisodeLookup,
             })
           : undefined;
-      const alertTitle = alerts?.flatMap((snapshot) => {
-        const dataTitle =
-          snapshot.alert_version === 'v2' && snapshot.source === SIGNIFICANT_EVENTS_ALERT_SOURCE
-            ? snapshot.data?.title
-            : undefined;
-        return typeof dataTitle === 'string' && dataTitle.length > 0
-          ? dataTitle.slice(0, MAX_TITLE_LENGTH)
-          : [];
-      })[0];
+      const significantEventData = alerts?.flatMap((snapshot) =>
+        snapshot.alert_version === 'v2' &&
+        snapshot.source === SIGNIFICANT_EVENTS_ALERT_SOURCE &&
+        snapshot.data
+          ? [snapshot.data]
+          : []
+      )[0];
+      const alertTitle = nonEmptyString(significantEventData?.title)?.slice(0, MAX_TITLE_LENGTH);
+      const sourceWorkflowExecutionId = nonEmptyString(
+        significantEventData?.workflow_execution_id
+      )?.slice(0, MAX_ID_LENGTH);
       const title =
         input.title && input.title !== subjectId ? input.title : alertTitle ?? input.title;
       try {
@@ -315,7 +320,12 @@ export const triggerInvestigationStepDefinition = (
               (input.automation_id && input.subject_type === 'alert' ? input.message : undefined),
             source_ids: input.source_ids,
             context: alerts
-              ? { alerts }
+              ? {
+                  alerts,
+                  ...(sourceWorkflowExecutionId
+                    ? { source_workflow_execution_id: sourceWorkflowExecutionId }
+                    : {}),
+                }
               : input.scope_query && input.subject_type === 'manual'
               ? { ...input.context, scope_query: input.scope_query }
               : input.context,
@@ -336,11 +346,30 @@ export const triggerInvestigationStepDefinition = (
           context.logger.info(
             `Skipped investigation of ${input.subject_type}/${subjectId} for automation ${input.automation_id}: daily limit of ${error.limit} reached`
           );
+          // Other subjects have no triggering alert: the client ignores any alerts they carry.
+          const contextAlerts = input.context?.alerts;
+          const suppliedAlerts = Array.isArray(contextAlerts)
+            ? contextAlerts.filter(
+                (alert): alert is Record<string, unknown> =>
+                  alert != null && typeof alert === 'object' && !Array.isArray(alert)
+              )
+            : [];
+          const alertIdentity =
+            input.subject_type === 'alert'
+              ? alertIdentityOf(spaceId, triggeringAlertOf(subjectId, alerts ?? suppliedAlerts))
+              : {};
+          const significantEventAlertId =
+            alertIdentity.source_kind === 'significant_events'
+              ? alertIdentity.fingerprint
+              : undefined;
           telemetry.reportInvestigationSkipped({
             trigger: 'automation',
             origin: input.subject_type,
             automation_id: input.automation_id,
             skip_reason: 'automation_daily_limit',
+            event_id:
+              input.subject_type === 'significant_event' ? subjectId : significantEventAlertId,
+            ...alertIdentity,
           });
           return { output: { skip_reason: 'daily_limit' as const, daily_limit: error.limit } };
         }

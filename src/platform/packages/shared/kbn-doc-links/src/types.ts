@@ -95,13 +95,6 @@ export interface DocLinks {
     readonly auditdModule: string;
     readonly systemModule: string;
   };
-  readonly searchHomepage: {
-    readonly visitSearchLabs: string;
-    readonly notebooksExamples: string;
-    readonly customerEngineerRequestForm: string;
-    readonly elasticCommunity: string;
-    readonly elasticCloud: string;
-  };
   readonly searchGettingStarted: {
     readonly visitSearchLabs: string;
     readonly notebooksExamples: string;
@@ -340,6 +333,7 @@ export interface DocLinks {
     readonly attackDiscovery: string;
     readonly mitreCoverage: string;
     readonly remapMitreAttack: string;
+    readonly valueReport: string;
   };
   readonly server: {
     readonly protocol: string;
@@ -634,6 +628,7 @@ export interface DocLinks {
     grantESAccessToStandaloneAgents: string;
     packageSignatures: string;
     upgradeElasticAgent: string;
+    unenrollElasticAgent: string;
     learnMoreBlog: string;
     apiKeysLearnMore: string;
     onPremRegistry: string;

@@ -11,12 +11,11 @@ import { createMemoryHistory } from 'history';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { EntityInventoryApiClient } from '../../inventory_api/client';
-import { ENTITY_INVENTORY_LIST_LIMIT } from '../../inventory_api/client';
-import { createFixtureEntityInventoryApiClient } from '../../inventory_api/fixture_client';
-import { createScenarioEntityInventoryApiClient } from '../../inventory_api/fixture_scenarios';
+import { createFixtureEntityInventoryApiClient } from '../../__fixtures__/inventory_client';
+import { createScenarioEntityInventoryApiClient } from '../../__fixtures__/inventory_scenarios';
 import { createAppServicesMock } from '../../mocks';
 import { EntityInventorySearchProvider, useEntityInventorySearch } from '../context/search_context';
-import { EntityTypeNotFoundError, useEntityList } from './use_entity_list';
+import { INITIAL_LIST_RESPONSE, useEntityList } from './use_entity_list';
 
 const createClientMock = (
   client: EntityInventoryApiClient = createFixtureEntityInventoryApiClient()
@@ -54,11 +53,10 @@ describe('useEntityList', () => {
     expect(inventoryApi.getEntities).toHaveBeenCalledTimes(1);
     const [[type, request]] = inventoryApi.getEntities.mock.calls;
     expect(type).toBe('host');
-    expect(request.limit).toBe(ENTITY_INVENTORY_LIST_LIMIT);
     expect(Date.parse(request.to) - Date.parse(request.from)).toBe(15 * 60 * 1000);
     expect(new Date(request.from).toISOString()).toBe(request.from);
-    expect(result.current.result.entityType?.type).toBe('host');
-    expect(result.current.result.list?.rows.length).toBeGreaterThan(0);
+    expect(inventoryApi.getTypes).not.toHaveBeenCalled();
+    expect(result.current.result.data.rows.length).toBeGreaterThan(0);
     expect(result.current.result.error).toBeUndefined();
   });
 
@@ -67,15 +65,7 @@ describe('useEntityList', () => {
     const { result } = renderUseEntityList(createScenarioEntityInventoryApiClient({ failWith }));
 
     await waitFor(() => expect(result.current.result.error).toBe(failWith));
-    expect(result.current.result.list).toBeUndefined();
-  });
-
-  it('fails with a not found error when the type is not registered', async () => {
-    const { result } = renderUseEntityList(createFixtureEntityInventoryApiClient(), 'service');
-
-    await waitFor(() =>
-      expect(result.current.result.error).toBeInstanceOf(EntityTypeNotFoundError)
-    );
+    expect(result.current.result.data).toBe(INITIAL_LIST_RESPONSE);
   });
 
   it('lists again when a search is submitted', async () => {
@@ -109,6 +99,25 @@ describe('useEntityList', () => {
     await waitFor(() => expect(inventoryApi.getEntities).toHaveBeenCalledTimes(3));
   });
 
+  it('aborts the pending request when the time range changes', async () => {
+    const inventoryApi = createClientMock();
+    // The first request never settles, so only an abort can end it.
+    inventoryApi.getEntities.mockImplementationOnce(() => new Promise(() => {}));
+    const { result } = renderUseEntityList(inventoryApi);
+    await waitFor(() => expect(inventoryApi.getEntities).toHaveBeenCalledTimes(1));
+    const [[, , { signal: firstSignal }]] = inventoryApi.getEntities.mock.calls;
+    expect(firstSignal?.aborted).toBe(false);
+
+    act(() => {
+      result.current.search.submit({ dateRange: { from: 'now-1h', to: 'now' } });
+    });
+
+    await waitFor(() => expect(inventoryApi.getEntities).toHaveBeenCalledTimes(2));
+    expect(firstSignal?.aborted).toBe(true);
+    await waitFor(() => expect(result.current.result.loading).toBe(false));
+    expect(result.current.result.data.rows.length).toBeGreaterThan(0);
+  });
+
   it('lists again on refresh', async () => {
     const inventoryApi = createClientMock();
     const { result } = renderUseEntityList(inventoryApi);
@@ -119,44 +128,82 @@ describe('useEntityList', () => {
     await waitFor(() => expect(inventoryApi.getEntities).toHaveBeenCalledTimes(2));
   });
 
-  it('sends no document filter when nothing narrows the list', async () => {
+  it('stops reporting loading once the request fails, and reports it again on retry', async () => {
+    const failWith = new Error('Request failed');
     const inventoryApi = createClientMock();
+    // The retry never settles, so `loading` stays true for the assertion after it.
+    inventoryApi.getEntities
+      .mockRejectedValueOnce(failWith)
+      .mockImplementation(() => new Promise<never>(() => {}));
     const { result } = renderUseEntityList(inventoryApi);
 
-    await waitFor(() => expect(result.current.result.loading).toBe(false));
+    await waitFor(() => expect(result.current.result.error).toBe(failWith));
+    expect(result.current.result.loading).toBe(false);
 
-    const [[, request]] = inventoryApi.getEntities.mock.calls;
-    expect(request).not.toHaveProperty('documentFilter');
+    act(() => result.current.result.refresh());
+
+    await waitFor(() => expect(result.current.result.loading).toBe(true));
+    expect(result.current.result.data).toBe(INITIAL_LIST_RESPONSE);
   });
 
-  it('lists again with the dropdown selections as a document filter', async () => {
+  it('starts with the initial response, loading, before the request is sent', () => {
     const inventoryApi = createClientMock();
-    const { result } = renderUseEntityList(inventoryApi);
-    await waitFor(() => expect(result.current.result.loading).toBe(false));
+    // Never settles, so every render of this test happens before a response.
+    inventoryApi.getEntities.mockImplementation(() => new Promise<never>(() => {}));
+    const states: Array<{ loading: boolean; rowCount: number }> = [];
 
-    act(() => {
-      result.current.search.setFilterControls({ attributes: { 'os.type': ['linux'] } });
-    });
+    renderHook(
+      () => {
+        const { loading, data } = useEntityList('host');
+        states.push({ loading, rowCount: data.rows.length });
+        return null;
+      },
+      {
+        wrapper: ({ children }) => (
+          <KibanaContextProvider services={createAppServicesMock({ inventoryApi })}>
+            <Router history={createMemoryHistory()}>
+              <EntityInventorySearchProvider entityCategory="hosts">
+                {children}
+              </EntityInventorySearchProvider>
+            </Router>
+          </KibanaContextProvider>
+        ),
+      }
+    );
 
-    await waitFor(() => expect(inventoryApi.getEntities).toHaveBeenCalledTimes(2));
-    const [, request] = inventoryApi.getEntities.mock.calls[1];
-    expect(request.documentFilter?.bool.filter).toEqual([{ terms: { 'os.type': ['linux'] } }]);
+    expect(states[0]).toEqual({ loading: true, rowCount: 0 });
+    expect(states.every(({ loading }) => loading)).toBe(true);
   });
 
-  it('lists again with the submitted query in the document filter', async () => {
+  it('keeps the rows of the previous range while the next one loads', async () => {
     const inventoryApi = createClientMock();
     const { result } = renderUseEntityList(inventoryApi);
     await waitFor(() => expect(result.current.result.loading).toBe(false));
+    const firstRows = result.current.result.data.rows;
+    expect(firstRows.length).toBeGreaterThan(0);
+    // The reload never settles, so it stays in flight for the assertions below.
+    inventoryApi.getEntities.mockImplementationOnce(() => new Promise<never>(() => {}));
 
     act(() => {
-      result.current.search.submit({
-        dateRange: { from: 'now-15m', to: 'now' },
-        query: { language: 'kuery', query: 'host.name: web-1' },
-      });
+      result.current.search.submit({ dateRange: { from: 'now-1h', to: 'now' } });
     });
 
-    await waitFor(() => expect(inventoryApi.getEntities).toHaveBeenCalledTimes(2));
-    const [, request] = inventoryApi.getEntities.mock.calls[1];
-    expect(JSON.stringify(request.documentFilter)).toContain('web-1');
+    await waitFor(() => expect(result.current.result.loading).toBe(true));
+    expect(result.current.result.data.rows).toBe(firstRows);
+  });
+
+  it('replaces the rows with the initial response when a reload fails', async () => {
+    const failWith = new Error('Request failed');
+    const inventoryApi = createClientMock();
+    const { result } = renderUseEntityList(inventoryApi);
+    await waitFor(() => expect(result.current.result.loading).toBe(false));
+    expect(result.current.result.data.rows.length).toBeGreaterThan(0);
+    inventoryApi.getEntities.mockRejectedValueOnce(failWith);
+
+    act(() => result.current.result.refresh());
+
+    await waitFor(() => expect(result.current.result.error).toBe(failWith));
+    expect(result.current.result.loading).toBe(false);
+    expect(result.current.result.data).toBe(INITIAL_LIST_RESPONSE);
   });
 });

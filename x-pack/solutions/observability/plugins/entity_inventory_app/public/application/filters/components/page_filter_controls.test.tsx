@@ -13,6 +13,7 @@ import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { EntityInventoryEntityCategory } from '../../../types';
+import { createPublicConfigMock } from '../../../mocks';
 import { EntityInventorySearchProvider } from '../../context/search_context';
 import { typesFixture as mockTypes } from '../../__fixtures__/types';
 import { EntityInventoryPageFilterControls } from './page_filter_controls';
@@ -26,7 +27,9 @@ jest.mock('../hooks/use_attribute_values', () => ({
 
 const renderControls = (entityCategory: EntityInventoryEntityCategory) =>
   render(
-    <KibanaContextProvider services={coreMock.createStart()}>
+    <KibanaContextProvider
+      services={{ ...coreMock.createStart(), config: createPublicConfigMock() }}
+    >
       <Router history={createMemoryHistory()}>
         <EntityInventorySearchProvider entityCategory={entityCategory}>
           <EntityInventoryPageFilterControls />

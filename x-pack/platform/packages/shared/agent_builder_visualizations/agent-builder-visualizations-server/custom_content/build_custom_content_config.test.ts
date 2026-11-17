@@ -52,12 +52,12 @@ describe('buildCustomContentConfig', () => {
       );
       expect(mockResolveTemplate).toHaveBeenCalledWith({
         prompt: 'Show KPI',
-        esqlQuery: GENERATED,
+        esqlQueries: [GENERATED],
+        isQueryChanging: true,
         existingTemplate: undefined,
-        hasExistingQuery: false,
       });
       expect(result).toEqual({
-        esqlQuery: GENERATED,
+        esqlQueries: [GENERATED],
         template: '<div>resolved</div>',
         height: 320,
       });
@@ -67,7 +67,7 @@ describe('buildCustomContentConfig', () => {
       const result = await build({ esql: EXPLICIT, hasData: true });
 
       expect(mockGenerate).not.toHaveBeenCalled();
-      expect(result.esqlQuery).toBe(EXPLICIT);
+      expect(result.esqlQueries[0]).toBe(EXPLICIT);
     });
 
     it('creates a data-free panel when hasData is false', async () => {
@@ -75,20 +75,20 @@ describe('buildCustomContentConfig', () => {
 
       expect(mockGenerate).not.toHaveBeenCalled();
       expect(mockResolveTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ prompt: 'Show KPI', esqlQuery: undefined })
+        expect.objectContaining({ prompt: 'Show KPI', esqlQueries: [] })
       );
-      expect(result.esqlQuery).toBeUndefined();
+      expect(result.esqlQueries[0]).toBeUndefined();
     });
 
     it('lets a supplied query win over hasData: false', async () => {
-      expect((await build({ esql: EXPLICIT, hasData: false })).esqlQuery).toBe(EXPLICIT);
+      expect((await build({ esql: EXPLICIT, hasData: false })).esqlQueries[0]).toBe(EXPLICIT);
     });
 
     it('treats a blank supplied query as not supplied', async () => {
       const result = await build({ esql: '  ', hasData: true });
 
       expect(mockGenerate).toHaveBeenCalledTimes(1);
-      expect(result.esqlQuery).toBe(GENERATED);
+      expect(result.esqlQueries[0]).toBe(GENERATED);
     });
 
     it('passes the time range to the generation', async () => {
@@ -107,7 +107,7 @@ describe('buildCustomContentConfig', () => {
   });
 
   describe('an edit of a panel with data', () => {
-    const existing = { esqlQuery: STORED, template: OLD_TEMPLATE };
+    const existing = { esqlQueries: [STORED], template: OLD_TEMPLATE };
 
     it('keeps the stored query by default and refines the template without sampling', async () => {
       const result = await build({ nlQuery: 'Make it blue', existing });
@@ -115,26 +115,26 @@ describe('buildCustomContentConfig', () => {
       expect(mockGenerate).not.toHaveBeenCalled();
       expect(mockResolveTemplate).toHaveBeenCalledWith({
         prompt: 'Make it blue',
-        esqlQuery: undefined,
+        esqlQueries: [STORED],
+        isQueryChanging: false,
         existingTemplate: OLD_TEMPLATE,
-        hasExistingQuery: true,
       });
-      expect(result.esqlQuery).toBe(STORED);
+      expect(result.esqlQueries[0]).toBe(STORED);
     });
 
     it('keeps the stored query when hasData is true', async () => {
       const result = await build({ existing, hasData: true });
 
       expect(mockGenerate).not.toHaveBeenCalled();
-      expect(result.esqlQuery).toBe(STORED);
+      expect(result.esqlQueries[0]).toBe(STORED);
     });
 
     it('replaces the stored query with a supplied one and samples it', async () => {
       const result = await build({ existing, esql: EXPLICIT });
 
-      expect(result.esqlQuery).toBe(EXPLICIT);
+      expect(result.esqlQueries[0]).toBe(EXPLICIT);
       expect(mockResolveTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ esqlQuery: EXPLICIT, hasExistingQuery: false })
+        expect.objectContaining({ esqlQueries: [EXPLICIT], isQueryChanging: true })
       );
     });
 
@@ -142,21 +142,23 @@ describe('buildCustomContentConfig', () => {
       await build({ existing, esql: STORED });
 
       expect(mockResolveTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ esqlQuery: undefined, hasExistingQuery: true })
+        expect.objectContaining({ esqlQueries: [STORED], isQueryChanging: false })
       );
     });
 
     it('keeps the stored query when the supplied query is blank', async () => {
-      expect((await build({ existing, esql: '' })).esqlQuery).toBe(STORED);
+      expect((await build({ existing, esql: '' })).esqlQueries[0]).toBe(STORED);
     });
 
     it('removes the query when hasData is false or esql is null', async () => {
-      expect((await build({ existing, hasData: false })).esqlQuery).toBeUndefined();
-      expect((await build({ existing, esql: null })).esqlQuery).toBeUndefined();
+      expect((await build({ existing, hasData: false })).esqlQueries[0]).toBeUndefined();
+      expect((await build({ existing, esql: null })).esqlQueries[0]).toBeUndefined();
     });
 
     it('lets a supplied query win over hasData: false', async () => {
-      expect((await build({ existing, esql: EXPLICIT, hasData: false })).esqlQuery).toBe(EXPLICIT);
+      expect((await build({ existing, esql: EXPLICIT, hasData: false })).esqlQueries[0]).toBe(
+        EXPLICIT
+      );
     });
 
     it('regenerates from the stored query when asked to', async () => {
@@ -165,14 +167,14 @@ describe('buildCustomContentConfig', () => {
       expect(mockGenerate).toHaveBeenCalledWith(
         expect.objectContaining({ existingQueries: [STORED] })
       );
-      expect(result.esqlQuery).toBe(GENERATED);
+      expect(result.esqlQueries[0]).toBe(GENERATED);
     });
 
     it('lets a supplied query or hasData: false win over regenerating', async () => {
-      expect((await build({ existing, esql: EXPLICIT, regenerateESQL: true })).esqlQuery).toBe(
+      expect((await build({ existing, esql: EXPLICIT, regenerateESQL: true })).esqlQueries[0]).toBe(
         EXPLICIT
       );
-      expect((await build({ existing, hasData: false, regenerateESQL: true })).esqlQuery).toBe(
+      expect((await build({ existing, hasData: false, regenerateESQL: true })).esqlQueries[0]).toBe(
         undefined
       );
       expect(mockGenerate).not.toHaveBeenCalled();
@@ -186,12 +188,12 @@ describe('buildCustomContentConfig', () => {
       const result = await build({ existing });
 
       expect(mockGenerate).not.toHaveBeenCalled();
-      expect(result.esqlQuery).toBeUndefined();
+      expect(result.esqlQueries[0]).toBeUndefined();
     });
 
     it('generates a query when hasData is true or when asked to regenerate', async () => {
-      expect((await build({ existing, hasData: true })).esqlQuery).toBe(GENERATED);
-      expect((await build({ existing, regenerateESQL: true })).esqlQuery).toBe(GENERATED);
+      expect((await build({ existing, hasData: true })).esqlQueries[0]).toBe(GENERATED);
+      expect((await build({ existing, regenerateESQL: true })).esqlQueries[0]).toBe(GENERATED);
       expect(mockGenerate).toHaveBeenCalledWith(expect.objectContaining({ existingQueries: [] }));
     });
   });
@@ -200,25 +202,25 @@ describe('buildCustomContentConfig', () => {
     it('is kept, without a model call, when an edit has no prompt and keeps the query', async () => {
       const result = await buildCustomContentConfig({
         ...deps,
-        existing: { esqlQuery: STORED, template: OLD_TEMPLATE },
+        existing: { esqlQueries: [STORED], template: OLD_TEMPLATE },
       });
 
       expect(mockResolveTemplate).not.toHaveBeenCalled();
-      expect(result).toEqual({ esqlQuery: STORED, template: OLD_TEMPLATE });
+      expect(result).toEqual({ esqlQueries: [STORED], template: OLD_TEMPLATE });
     });
 
     it('is written again, with an empty prompt, when an edit only changes the query', async () => {
       const result = await buildCustomContentConfig({
         ...deps,
         esql: EXPLICIT,
-        existing: { esqlQuery: STORED, template: OLD_TEMPLATE },
+        existing: { esqlQueries: [STORED], template: OLD_TEMPLATE },
       });
 
       expect(mockResolveTemplate).toHaveBeenCalledWith({
         prompt: '',
-        esqlQuery: EXPLICIT,
+        esqlQueries: [EXPLICIT],
+        isQueryChanging: true,
         existingTemplate: OLD_TEMPLATE,
-        hasExistingQuery: false,
       });
       expect(result.template).toBe('<div>resolved</div>');
     });
@@ -227,11 +229,11 @@ describe('buildCustomContentConfig', () => {
       await buildCustomContentConfig({
         ...deps,
         hasData: false,
-        existing: { esqlQuery: STORED, template: OLD_TEMPLATE },
+        existing: { esqlQueries: [STORED], template: OLD_TEMPLATE },
       });
 
       expect(mockResolveTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ prompt: '', esqlQuery: undefined })
+        expect.objectContaining({ prompt: '', esqlQueries: [], isQueryChanging: true })
       );
     });
 
@@ -241,6 +243,58 @@ describe('buildCustomContentConfig', () => {
       await expect(build({ hasData: false })).rejects.toThrow('Generated template was rejected');
     });
   });
+  describe('additional queries', () => {
+    const existing = {
+      esqlQueries: [STORED, 'FROM metrics', 'FROM traces'],
+      template: OLD_TEMPLATE,
+    };
+
+    it('keeps them through an edit, and gives them to the template resolver with the main query', async () => {
+      const result = await build({ nlQuery: 'Make it blue', existing });
+
+      expect(result.esqlQueries).toEqual([STORED, 'FROM metrics', 'FROM traces']);
+      expect(mockResolveTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          esqlQueries: [STORED, 'FROM metrics', 'FROM traces'],
+          isQueryChanging: false,
+        })
+      );
+    });
+
+    it('keeps them, and the template, when an edit has no prompt and keeps the query', async () => {
+      const result = await buildCustomContentConfig({ ...deps, existing });
+
+      expect(mockResolveTemplate).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        esqlQueries: [STORED, 'FROM metrics', 'FROM traces'],
+        template: OLD_TEMPLATE,
+      });
+    });
+
+    it('keeps them after the main query when it is replaced or regenerated', async () => {
+      const replaced = await build({ esql: EXPLICIT, existing });
+      const regenerated = await build({ regenerateESQL: true, existing });
+
+      expect(replaced.esqlQueries).toEqual([EXPLICIT, 'FROM metrics', 'FROM traces']);
+      expect(regenerated.esqlQueries).toEqual([GENERATED, 'FROM metrics', 'FROM traces']);
+    });
+
+    it('drops them, and does not pass them on, when the main query is removed', async () => {
+      const result = await build({ esql: null, existing });
+
+      expect(result.esqlQueries).toEqual([]);
+      expect(mockResolveTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ esqlQueries: [] })
+      );
+    });
+
+    it('does not give a new panel any', async () => {
+      const result = await build({ hasData: true });
+
+      expect(result.esqlQueries).toEqual([GENERATED]);
+    });
+  });
+
   describe('control values', () => {
     const esqlVariables = [{ key: 'host', value: 'web-1', type: ESQLVariableType.VALUES }];
     const hostQuery = 'FROM logs | WHERE host.name == ?host | STATS n = COUNT(*)';
@@ -275,7 +329,7 @@ describe('buildCustomContentConfig', () => {
       await build({
         regenerateESQL: true,
         resolveEsqlVariables,
-        existing: { esqlQuery: stored, template: OLD_TEMPLATE },
+        existing: { esqlQueries: [stored], template: OLD_TEMPLATE },
       });
 
       expect(resolveEsqlVariables).toHaveBeenNthCalledWith(1, [stored], { anyVariable: true });
@@ -288,7 +342,7 @@ describe('buildCustomContentConfig', () => {
       await build({ hasData: false, resolveEsqlVariables });
       await build({
         resolveEsqlVariables,
-        existing: { esqlQuery: hostQuery, template: OLD_TEMPLATE },
+        existing: { esqlQueries: [hostQuery], template: OLD_TEMPLATE },
       });
 
       expect(resolveEsqlVariables).not.toHaveBeenCalled();

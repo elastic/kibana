@@ -221,13 +221,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       upgrade9x: `${ENTERPRISE_SEARCH_DOCS}upgrading-to-9-x.html`,
       usersAccess: `${ENTERPRISE_SEARCH_DOCS}users-access.html`,
     },
-    searchHomepage: {
-      visitSearchLabs: `${ELASTIC_WEBSITE_URL}search-labs`,
-      notebooksExamples: `${ELASTIC_WEBSITE_URL}search-labs/tutorials/examples`,
-      customerEngineerRequestForm: `${ELASTIC_WEBSITE_URL}contact/ce-help`,
-      elasticCommunity: `${ELASTIC_WEBSITE_URL}community/`,
-      elasticCloud: `${ELASTIC_WEBSITE_URL}cloud/`,
-    },
     searchGettingStarted: {
       visitSearchLabs: `${ELASTIC_WEBSITE_URL}search-labs`,
       notebooksExamples: `${ELASTIC_WEBSITE_URL}search-labs/tutorials/examples`,
@@ -486,6 +479,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       attackDiscovery: `${ELASTIC_DOCS}solutions/security/ai/attack-discovery`,
       mitreCoverage: `${ELASTIC_DOCS}solutions/security/detect-and-alert/mitre-attack-coverage`,
       remapMitreAttack: `${ELASTIC_DOCS}solutions/security/detect-and-alert/remap-mitre-attack`,
+      valueReport: `${ELASTIC_DOCS}solutions/security/ai/ease/ease-value-report`,
     },
     server: {
       protocol: `${ELASTIC_DOCS}reference/kibana/configuration-reference/general-settings#server-protocol`,
@@ -1004,6 +998,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       installElasticAgentStandalone: `${ELASTIC_DOCS}reference/fleet/install-standalone-elastic-agent`,
       grantESAccessToStandaloneAgents: `${ELASTIC_DOCS}reference/fleet/grant-access-to-elasticsearch`,
       upgradeElasticAgent: `${ELASTIC_DOCS}reference/fleet/upgrade-elastic-agent`,
+      unenrollElasticAgent: `${ELASTIC_DOCS}reference/fleet/unenroll-elastic-agent`,
       learnMoreBlog: `https://www.elastic.co/blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic`,
       apiKeysLearnMore: isServerless
         ? `${ELASTIC_DOCS}deploy-manage/api-keys/serverless-project-api-keys`

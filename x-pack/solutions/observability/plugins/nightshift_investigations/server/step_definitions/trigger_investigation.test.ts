@@ -97,6 +97,38 @@ describe('triggerInvestigationStepDefinition', () => {
       );
     });
 
+    it('reads the producer run from significant event alert data, ignoring the step context', async () => {
+      const significantEventAlerts = [
+        {
+          alert_version: 'v2',
+          id: 'episode-1',
+          source: 'elastic.significant_events',
+          data: { workflow_execution_id: 'discovery-run-1' },
+        },
+      ];
+      (fetchInvestigationAlertSnapshots as jest.Mock).mockResolvedValue(significantEventAlerts);
+      const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
+      const { definition } = createDefinition(start);
+
+      await definition.handler(
+        createContext({
+          subject_type: 'alert',
+          subject_id: 'episode-1',
+          context: { source_workflow_execution_id: 'forged-run' },
+        })
+      );
+
+      expect(start).toHaveBeenCalledWith(
+        expect.objectContaining({
+          context: {
+            alerts: significantEventAlerts,
+            source_workflow_execution_id: 'discovery-run-1',
+          },
+        }),
+        expect.anything()
+      );
+    });
+
     describe('title fallback', () => {
       it.each([
         ['an empty title', 'elastic.significant_events', undefined, 'Checkout event'],
@@ -639,6 +671,10 @@ describe('automation budget enforcement before dispatch', () => {
         origin: subjectType,
         automation_id: 'a1',
         skip_reason: 'automation_daily_limit',
+        event_id: subjectType === 'significant_event' ? 'subject-1' : undefined,
+        ...(subjectType === 'alert'
+          ? { alert_version: 'v2', alert_source: 'other.source', source_kind: 'external' }
+          : {}),
       });
       expect(soClient.update).not.toHaveBeenCalled();
       expect(logger.info).toHaveBeenCalledWith(

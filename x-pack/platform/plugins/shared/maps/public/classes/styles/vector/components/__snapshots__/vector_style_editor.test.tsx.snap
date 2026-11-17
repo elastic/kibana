@@ -371,7 +371,6 @@ exports[`should render 1`] = `
   />
   <VectorStyleLabelBorderSizeEditor
     disabled={true}
-    disabledBy="labelText"
     handlePropertyChange={[Function]}
     styleProperty={
       LabelBorderSizeProperty {
@@ -720,7 +719,6 @@ exports[`should render with no style fields 1`] = `
   />
   <VectorStyleLabelBorderSizeEditor
     disabled={true}
-    disabledBy="labelText"
     handlePropertyChange={[Function]}
     styleProperty={
       LabelBorderSizeProperty {

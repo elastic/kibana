@@ -34,6 +34,7 @@ import type {
   EsWorkflowStepExecution,
   GetAvailableConnectorsResponse,
   ResumeWorkflowExecutionResponseDto,
+  TriggerSchemaOptions,
   UpdatedWorkflowResponseDto,
   ValidateWorkflowResponseDto,
   WorkflowAccessControlRole,
@@ -111,6 +112,8 @@ import type {
   ProcessedWaitForInputFacets,
   ProcessedWaitForInputFilters,
   WaitForInputListResult,
+  WorkflowExecutionStatusCounts,
+  WorkflowExecutionStatusCountsParams,
   WorkflowExecutionStatusItem,
 } from '../services/workflow_execution_query_service';
 
@@ -198,7 +201,7 @@ export interface GetExecutionStepExecutionsParams {
 export interface SearchStepExecutionsParams {
   request?: KibanaRequest;
   workflowId: string;
-  stepId?: string;
+  stepId?: string | string[];
   /**
    * When set, only step executions of this type, e.g. `ai.agent`. A step id can be shared by more
    * than one document — the engine's step-level timeout wrapper reuses it — so this narrows a
@@ -1248,6 +1251,20 @@ export class WorkflowsManagementApi {
     return this.workflowsService.getWorkflowExecutions({ ...params, accessControlFilter }, spaceId);
   }
 
+  public async getWorkflowExecutionStatusCounts(
+    params: Omit<WorkflowExecutionStatusCountsParams, 'accessControlFilter'> & {
+      request: KibanaRequest;
+    },
+    spaceId: string
+  ): Promise<WorkflowExecutionStatusCounts> {
+    const access = await this.workflowsService.getAccessControl();
+    const accessControlFilter = await access.executionFilter(spaceId, params.request);
+    return this.workflowsService.getWorkflowExecutionStatusCounts(
+      { ...params, accessControlFilter },
+      spaceId
+    );
+  }
+
   public async searchExecutionsView(
     params: SearchExecutionsViewParams & { request: KibanaRequest | undefined },
     spaceId: string
@@ -1720,6 +1737,11 @@ export class WorkflowsManagementApi {
 
   public async getRegisteredTriggers(): Promise<ServerTriggerDefinition[]> {
     return this.workflowsService.getRegisteredCustomTriggerDefinitions();
+  }
+
+  /** Trigger schema options from `workflowsManagement.pages.enabled`. */
+  public getTriggerSchemaOptions(): TriggerSchemaOptions {
+    return this.workflowsService.getTriggerSchemaOptions();
   }
 
   public async getWorkflowJsonSchema(

@@ -28,6 +28,8 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/core-user-profile-common'
   - '@kbn/core-user-settings-types'
+  - '@kbn/picomatcher'
+  - '@kbn/repo-packages'
 tags:
   - shared-common
   - package
