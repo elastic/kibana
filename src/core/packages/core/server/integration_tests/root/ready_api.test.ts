@@ -114,6 +114,13 @@ describe('/api/ready', () => {
       await request.get('/api/ready').expect(200, { ok: true });
 
       await esServer.stop();
+      await waitFor(
+        async () => {
+          const response = await request.get('/api/status');
+          return response.status === 503;
+        },
+        { timeoutMs: 60_000 }
+      );
       await request.get('/api/ready').expect(200, { ok: true });
     });
 
