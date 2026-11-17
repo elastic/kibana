@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/platform/packages/shared/kbn-es-index-migration
 dependsOn:
   - '@kbn/core-elasticsearch-server'
+  - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/logging'
 tags:
   - shared-server
@@ -26,6 +27,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
 fileGroups:
   src:
     - '**/*.ts'

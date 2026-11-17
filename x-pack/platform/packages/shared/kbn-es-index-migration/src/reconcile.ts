@@ -7,6 +7,7 @@
 
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { sortedVersionNumbers } from './define_migration';
+import { classifyEsError, describeEsRefusal } from './es_errors';
 import {
   applyMappings,
   createIndex,
@@ -67,8 +68,13 @@ export const reconcile = async ({
       await applyStep({ definition, step, version, esClient, logger, namespace, resourceName });
       applied.push(version);
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      logger.error(`[${id}] ${resourceName} failed applying version ${version}: ${message}`);
+      // Elasticsearch is the final authority: a field-limit breach or a rule the static
+      // verifier does not model still surfaces here, and the two need different remedies.
+      const message = describeEsRefusal(error);
+      logger.error(
+        `[${id}] ${resourceName} failed applying version ${version} ` +
+          `(${classifyEsError(error)}): ${message}`
+      );
       // Stop at the last version that succeeded rather than skipping ahead, so the
       // resource is never stamped with changes it did not receive.
       return {

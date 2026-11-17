@@ -54,11 +54,49 @@ export interface DataStepContext {
   namespace: string;
 }
 
+/**
+ * How the resource is backed, which decides what a declared field removal means.
+ *
+ * On a rolling template the field simply stops appearing in new backing indices, so the
+ * removal costs nothing. On a live concrete index Elasticsearch keeps the field, so the
+ * declaration and the index quietly diverge and that is worth reporting.
+ */
+export type BackingType = 'concrete_index' | 'rolling_template';
+
 export interface MigrationResource {
   /** Only concrete indices for now; data streams and templates follow. */
   kind: 'index';
   /** Resolves the concrete name for a namespace, so one definition covers every space. */
   name: (namespace: string) => string;
+  /** Defaults to `concrete_index`, the conservative reading. */
+  backing?: BackingType;
+}
+
+export type ViolationKind =
+  | 'type_changed'
+  | 'parameter_immutable'
+  | 'structural_immutable'
+  | 'subfield_removed'
+  | 'subfield_retyped';
+
+/** A difference Elasticsearch will not apply in place. */
+export interface Violation {
+  path: string;
+  kind: ViolationKind;
+  detail: string;
+}
+
+/** A difference that is applied, but leaves the declaration out of step with reality. */
+export interface Drift {
+  path: string;
+  kind: 'field_removed';
+  detail: string;
+}
+
+export interface VerifyResult {
+  ok: boolean;
+  violations: Violation[];
+  drift: Drift[];
 }
 
 export interface MigrationDefinition {
