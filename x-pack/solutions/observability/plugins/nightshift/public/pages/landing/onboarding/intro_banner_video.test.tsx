@@ -7,10 +7,16 @@
 
 import React from 'react';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { IntroBannerVideo, NIGHTSHIFT_PROMO_VIDEO_ID } from './intro_banner_video';
+import {
+  IntroBannerVideo,
+  NIGHTSHIFT_PROMO_VIDEO_ID,
+  NIGHTSHIFT_PROMO_VIDEO_ID_DARK,
+} from './intro_banner_video';
 
 jest.mock('./nightshift_promo_poster.jpg', () => 'nightshift-promo-poster.jpg');
+jest.mock('./nightshift_promo_poster_dark.jpg', () => 'nightshift-promo-poster-dark.jpg');
 
 const PREVIEW_SRC = `https://play.vidyard.com/${NIGHTSHIFT_PROMO_VIDEO_ID}.html?autoplay=1&muted=1&hidden_controls=1`;
 const EXPANDED_SRC = `https://play.vidyard.com/${NIGHTSHIFT_PROMO_VIDEO_ID}.html?autoplay=1`;
@@ -83,6 +89,32 @@ describe('IntroBannerVideo', () => {
     expect(screen.queryByTestId('nightshiftOnboardingIntroVideoExpanded')).toBeNull();
     // Without the pre-open blur, EuiFocusTrap restores focus to the preview instead of <body>.
     expect(preview).toHaveFocus();
+  });
+
+  it('uses the dark-themed promo video and poster in dark mode', () => {
+    render(
+      <EuiProvider colorMode="dark">
+        <I18nProvider>
+          <div style={{ position: 'relative', width: 425, height: 239 }}>
+            <IntroBannerVideo />
+          </div>
+        </I18nProvider>
+      </EuiProvider>
+    );
+
+    const preview = screen.getByTestId('nightshiftOnboardingIntroVideoPreview');
+    expect(within(preview).getByTitle('Nightshift introduction video')).toHaveAttribute(
+      'src',
+      `https://play.vidyard.com/${NIGHTSHIFT_PROMO_VIDEO_ID_DARK}.html?autoplay=1&muted=1&hidden_controls=1`
+    );
+    expect(preview.querySelector('img')).toHaveAttribute('src', 'nightshift-promo-poster-dark.jpg');
+
+    fireEvent.click(preview);
+    const expanded = screen.getByTestId('nightshiftOnboardingIntroVideoExpanded');
+    expect(within(expanded).getByTitle('Nightshift introduction video')).toHaveAttribute(
+      'src',
+      `https://play.vidyard.com/${NIGHTSHIFT_PROMO_VIDEO_ID_DARK}.html?autoplay=1`
+    );
   });
 
   it('skips the muted preview iframe when the user prefers reduced motion', () => {

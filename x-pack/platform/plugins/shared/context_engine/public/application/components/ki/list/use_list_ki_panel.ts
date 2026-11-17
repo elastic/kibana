@@ -54,7 +54,7 @@ export const useListKiPanel = ({ id: aiIndexId }: GetAiIndexResponse) => {
     size,
     type: typeFilter.kind === 'type' ? typeFilter.value : undefined,
     query: submittedQuery.length > 0 ? submittedQuery : undefined,
-    lifecycleStatus: [statusFilter],
+    status: [statusFilter],
   });
 
   const loadMore = () =>

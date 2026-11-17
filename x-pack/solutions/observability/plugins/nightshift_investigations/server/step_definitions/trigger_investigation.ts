@@ -7,7 +7,6 @@
 
 import { lazySchema, z } from '@kbn/zod/v4';
 import {
-  MAX_ARRAY_LENGTH,
   MAX_ID_LENGTH,
   MAX_TEXT_LENGTH,
   MAX_TITLE_LENGTH,
@@ -101,16 +100,6 @@ const inputSchema = lazySchema(() =>
       .describe(
         'Additional operator guidance for this investigation round; empty means no additional guidance'
       ),
-    source_ids: z
-      .array(z.string().max(MAX_ID_LENGTH))
-      .max(MAX_ARRAY_LENGTH)
-      .optional()
-      .describe('Nightshift source ids to scope the investigation'),
-    scope_query: z
-      .string()
-      .max(MAX_TEXT_LENGTH)
-      .optional()
-      .describe('Query scope guidance for a manual investigation; not an enforced access filter'),
     timeout_seconds: z
       .number()
       .int()
@@ -318,7 +307,6 @@ export const triggerInvestigationStepDefinition = (
             instructions:
               input.instructions ??
               (input.automation_id && input.subject_type === 'alert' ? input.message : undefined),
-            source_ids: input.source_ids,
             context: alerts
               ? {
                   alerts,
@@ -326,8 +314,6 @@ export const triggerInvestigationStepDefinition = (
                     ? { source_workflow_execution_id: sourceWorkflowExecutionId }
                     : {}),
                 }
-              : input.scope_query && input.subject_type === 'manual'
-              ? { ...input.context, scope_query: input.scope_query }
               : input.context,
             timeout_seconds: input.timeout_seconds,
             notificationDestinations: input.notificationDestinations,

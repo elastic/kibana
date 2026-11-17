@@ -1,5 +1,5 @@
 {
-  "sha1": "09f1ddceaec701e8ee023d16d82da778eeffae04",
+  "sha1": "a0c783d987915ae7456312389c0c5364b268ca8a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -16,6 +16,20 @@
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/global.setup.ts",
         "line": 5,
         "column": 1
+      }
+    },
+    {
+      "id": "b57c3f49719590f-12bd27d5a7ad176",
+      "title": "Digital Experience applications API from the sessions index reads the applications from the raw events, then from the sessions index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/applications_from_sessions.spec.ts",
+        "line": 255,
+        "column": 32
       }
     },
     {
@@ -357,6 +371,71 @@
       }
     },
     {
+      "id": "a96b174c2f77244-e079573bd9db89f",
+      "title": "Digital Experience applications API with partial index access on serverless reports EDOT Browser as partially available when its logs are not readable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/partial_index_access_serverless.spec.ts",
+        "line": 34,
+        "column": 49
+      }
+    },
+    {
+      "id": "a96b174c2f77244-460300abe87d21f",
+      "title": "Digital Experience applications API with partial index access on serverless reports no partially available source for the viewer role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/partial_index_access_serverless.spec.ts",
+        "line": 46,
+        "column": 11
+      }
+    },
+    {
+      "id": "b11fddbc68c0b06-f347b6ec04ba511",
+      "title": "Digital Experience applications API with partial index access reports Classic RUM as partially available when only the OTel indices are readable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/partial_index_access.spec.ts",
+        "line": 60,
+        "column": 20
+      }
+    },
+    {
+      "id": "b11fddbc68c0b06-a38450f417dbdf4",
+      "title": "Digital Experience applications API with partial index access reports EDOT Browser as partially available when its logs are not readable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/partial_index_access.spec.ts",
+        "line": 75,
+        "column": 25
+      }
+    },
+    {
+      "id": "b11fddbc68c0b06-366f847e6947fd2",
+      "title": "Digital Experience applications API with partial index access reports no partially available source for the viewer role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/partial_index_access.spec.ts",
+        "line": 84,
+        "column": 37
+      }
+    },
+    {
       "id": "c004af908bbcd9d-8a5b577f1ca42bf",
       "title": "Enabling Digital Experience sessions enables sessions for an admin",
       "expectedStatus": "passed",
@@ -366,8 +445,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/sessions_enable.spec.ts",
-        "line": 58,
-        "column": 21
+        "line": 57,
+        "column": 35
       }
     },
     {
@@ -381,7 +460,21 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/sessions_enable.spec.ts",
         "line": 70,
-        "column": 30
+        "column": 13
+      }
+    },
+    {
+      "id": "4f9ec263bb0efae-fef534748fff23e",
+      "title": "Digital Experience session summaries task summarizes the OTel events of a session, and recovers from an invalidated key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/api/tests/sessions_task.spec.ts",
+        "line": 209,
+        "column": 5
       }
     },
     {
