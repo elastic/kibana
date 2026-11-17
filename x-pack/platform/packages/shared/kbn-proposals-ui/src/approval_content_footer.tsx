@@ -86,13 +86,14 @@ export const ApprovalContentFooter = memo<ApprovalContentFooterProps>(
             <React.Fragment key={i}>{button}</React.Fragment>
           );
         })}
-        {primaryPermissionTooltip ? (
-          <EuiToolTip content={primaryPermissionTooltip} position="top">
-            {primaryButton}
-          </EuiToolTip>
-        ) : (
-          primaryButton
-        )}
+        {primaryButton &&
+          (primaryPermissionTooltip ? (
+            <EuiToolTip content={primaryPermissionTooltip} position="top">
+              {primaryButton}
+            </EuiToolTip>
+          ) : (
+            primaryButton
+          ))}
       </div>
     );
   }
