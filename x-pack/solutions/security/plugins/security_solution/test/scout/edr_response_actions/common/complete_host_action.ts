@@ -214,7 +214,8 @@ export const deleteGetFileUploads = async ({
 
 /**
  * How long `completeHostIsolationAction` waits for the metadata-transform lock: the suite's budget
- * for one host seed (`HOST_SEED_TIMEOUT_MS`), the longest lock hold the suite plans for.
+ * for one host seed (`HOST_SEED_TIMEOUT_MS`). The lock is not fair, so consecutive seeds by the
+ * other worker can exceed it.
  */
 export const HOST_ISOLATION_LOCK_WAIT_MS = 600_000;
 
@@ -230,7 +231,7 @@ interface HostIsolationWaitParams {
   isolated: boolean;
 }
 
-const ISOLATION_BY_COMMAND: Readonly<Record<string, boolean>> = {
+const ISOLATION_BY_COMMAND: Readonly<Partial<Record<ActionDetails['command'], boolean>>> = {
   isolate: true,
   unisolate: false,
 };
@@ -267,8 +268,9 @@ export const completeHostIsolationAction = async ({
   await withMetadataTransformLock(
     async () => {
       await completeHostAction({ esClient, config, action });
-      // sendEndpointMetadataUpdate does not refresh: make the isolation document searchable
-      // before the metadata transform's next checkpoint can move past it.
+      // sendEndpointMetadataUpdate does not refresh: refreshing here narrows, but does not close,
+      // the window in which the metadata transform's next checkpoint can move past the isolation
+      // document (a few tens of ms remain). A Flaky Test Runner run is the gate for this.
       await esClient.indices.refresh({ index: METADATA_DATASTREAM });
       await pollHostIsolation({ kbnClient, esClient, spaceId, agentId, isolated });
     },

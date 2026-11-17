@@ -15,7 +15,8 @@ export const HOST_SEED_TIMEOUT_MS = 600_000;
 
 /**
  * Seed budget for parallel UI workers: one host seed, after waiting for the other
- * worker's metadata-transform lock, which is held for one host seed or one isolate or release action and its poll.
+ * worker's metadata-transform lock, which is held for one host seed or one isolate or release
+ * action and its poll.
  */
 export const PARALLEL_HOST_SEED_TIMEOUT_MS = 2 * HOST_SEED_TIMEOUT_MS;
 

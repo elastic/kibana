@@ -16,6 +16,12 @@ import {
   metadataIndexPattern,
 } from '../../../../common/endpoint/constants';
 
+/*
+ * These diagnostics are kept on purpose. Remove them under the same condition as
+ * `with_metadata_transform_lock.ts`: once the endpoint package is fixed, or once current-time
+ * seeds no longer stop the metadata transforms.
+ */
+
 const PROBE_OPTIONS = { requestTimeout: 5_000, maxRetries: 0 } as const;
 const MAX_PROBE_CHARS = 1_500;
 const MAX_REPORT_CHARS = 8_000;
