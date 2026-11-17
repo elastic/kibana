@@ -12,7 +12,7 @@ import {
   RouteRenderer,
   RouterProvider,
 } from '@kbn/typed-react-router-config';
-import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { PerformanceContextProvider } from '@kbn/ebt-tools/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { rememberClassicTabOrigin } from '../../hooks/use_streams_home_link';
 import { StreamsAppContextProvider } from '../streams_app_context_provider';

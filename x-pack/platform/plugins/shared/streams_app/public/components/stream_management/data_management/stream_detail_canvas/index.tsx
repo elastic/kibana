@@ -90,6 +90,7 @@ import {
   useCanvasIsUnitUnavailable,
   useCanvasNodePositions,
   useCanvasUnitDefinition,
+  useCanvasPersistedUnit,
   useCanvasDestinationsRef,
   useCanvasSourcesRef,
   useCanvasUrlRef,
@@ -106,6 +107,7 @@ import { createUnitRepository, type Unit } from '../../../../services/unit_repos
 import type { SourceType, SourceViewModel } from '../../../streams_layout/sources/types';
 import { SOURCE_TYPE_CONFIG_BY_TYPE } from '../../../streams_layout/sources/source_type_config';
 import {
+  connectedDestinations,
   getSourceDisplaySignals,
   getUnitSources,
   withUnitSources,
@@ -287,6 +289,18 @@ function StreamsCanvasInner() {
     [openFlyout]
   );
 
+  // Stats describe the deployed unit, so the saved unit decides which destinations are requested.
+  const savedUnit = useCanvasPersistedUnit();
+  const savedConnectedDestinationIds = useMemo(
+    () =>
+      new Set(
+        Object.values(connectedDestinations(savedUnit))
+          .flat()
+          .map(({ id }) => id)
+      ),
+    [savedUnit]
+  );
+
   const graph = useMemo<ClassicCanvasGraph>(() => {
     const { processingNodes, routingNodes, edges } = buildUnitCanvasGraph(
       unitDefinition,
@@ -304,7 +318,8 @@ function StreamsCanvasInner() {
       buildConfiguredDestinationNode(
         destination,
         connectedDestinationIds.has(destination.id),
-        resolvedIndicesByDestination.get(destination.id)?.map((index) => index.name) ?? []
+        resolvedIndicesByDestination.get(destination.id)?.map((index) => index.name) ?? [],
+        savedConnectedDestinationIds.has(destination.id)
       )
     );
     const graphNodes = [
@@ -317,7 +332,14 @@ function StreamsCanvasInner() {
       nodes: applyLayout(graphNodes, edges),
       edges,
     };
-  }, [destinations, resolvedIndicesByDestination, routingDiagnostics, sources, unitDefinition]);
+  }, [
+    destinations,
+    resolvedIndicesByDestination,
+    routingDiagnostics,
+    savedConnectedDestinationIds,
+    sources,
+    unitDefinition,
+  ]);
 
   // Local (non-persisted) node state so nodes can be dragged around the canvas.
   // Metadata-only updates (e.g. index count after resolved indices reload) are
@@ -1128,7 +1150,8 @@ const getEndpointHost = (endpoint: string): string => {
 export const buildConfiguredDestinationNode = (
   destination: DestinationViewModel,
   hasConnectedSource: boolean,
-  targetedIndexNames: string[]
+  targetedIndexNames: string[],
+  hasSavedSource: boolean
 ): DestinationNode => {
   const signal = destination.signals.map((value) => DESTINATION_SIGNAL_LABELS[value]).join(', ');
   const noSourceLabel = i18n.translate(
@@ -1163,6 +1186,7 @@ export const buildConfiguredDestinationNode = (
       data: {
         destinationId: destination.id,
         destinationType: destination.type,
+        hasSavedSource,
         signals: destination.signals,
         ...location,
         title: destination.name,
@@ -1202,6 +1226,7 @@ export const buildConfiguredDestinationNode = (
     data: {
       destinationId: destination.id,
       destinationType: destination.type,
+      hasSavedSource,
       signals: destination.signals,
       streamName: getDestinationIndices(destination).join(' ') || undefined,
       indexCount: targetedIndexNames.length,

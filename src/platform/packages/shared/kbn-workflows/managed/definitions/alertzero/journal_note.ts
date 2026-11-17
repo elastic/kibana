@@ -11,8 +11,8 @@ import {
   ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
 } from './constants';
-import JOURNAL_NOTE_YAML from './journal_note.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
+import { readManagedWorkflowYaml } from '../read_managed_workflow_yaml';
 
 export const ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID = 'system-alertzero-journal-note';
 
@@ -28,5 +28,7 @@ export const ALERTZERO_JOURNAL_NOTE_WORKFLOW = {
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 1,
-  yaml: JOURNAL_NOTE_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'journal_note.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;

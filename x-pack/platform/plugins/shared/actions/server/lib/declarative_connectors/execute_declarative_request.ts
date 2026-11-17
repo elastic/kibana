@@ -6,7 +6,7 @@
  */
 
 import type { ActionContext } from '@kbn/connector-specs';
-import type { DeclarativeRequest } from './types';
+import type { DeclarativeRequest, DeclarativeResponseMapping } from './types';
 import { renderTemplateValue, renderUrlTemplate, type TemplateContext } from './render_template';
 
 export interface ExecuteDeclarativeRequestOptions {
@@ -14,6 +14,28 @@ export interface ExecuteDeclarativeRequestOptions {
   request: DeclarativeRequest;
   input: Record<string, unknown>;
   config?: Record<string, unknown>;
+}
+
+interface ClientResponse {
+  status: number;
+  headers: Record<string, unknown> & { get?: (name: string) => unknown };
+  data: unknown;
+}
+
+interface RequestConfig {
+  method: string;
+  url: string;
+  params?: unknown;
+  headers?: Record<string, string>;
+  data?: unknown;
+}
+
+interface HttpError extends Error {
+  response?: {
+    status: number;
+    headers: Record<string, unknown>;
+    data: unknown;
+  };
 }
 
 const toHeaderRecord = (value: unknown): Record<string, string> => {
@@ -147,6 +169,82 @@ const buildUrl = (request: DeclarativeRequest, context: TemplateContext): string
   );
 };
 
+const plainHeaders = (headers: ClientResponse['headers'] | undefined): Record<string, unknown> => {
+  if (!headers || typeof headers !== 'object') {
+    return {};
+  }
+  const toJson = (headers as { toJSON?: () => unknown }).toJSON;
+  if (typeof toJson === 'function') {
+    const json = toJson.call(headers);
+    if (json && typeof json === 'object' && !Array.isArray(json)) {
+      return json as Record<string, unknown>;
+    }
+  }
+  return { ...headers };
+};
+
+const getHeader = (
+  headers: ClientResponse['headers'] | undefined,
+  name: string
+): string | undefined => {
+  if (!headers) {
+    return undefined;
+  }
+  const getter = headers.get;
+  const direct = typeof getter === 'function' ? getter.call(headers, name) : undefined;
+  const value =
+    direct ??
+    Object.entries(plainHeaders(headers)).find(
+      ([key]) => key.toLowerCase() === name.toLowerCase()
+    )?.[1];
+  if (typeof value === 'string') {
+    return value;
+  }
+  if (Array.isArray(value) && typeof value[0] === 'string') {
+    return value[0];
+  }
+  return undefined;
+};
+
+const toHttpError = (response: ClientResponse): HttpError => {
+  const error = new Error(`Request failed with status code ${response.status}`) as HttpError;
+  error.response = {
+    status: response.status,
+    headers: plainHeaders(response.headers),
+    data: response.data,
+  };
+  return error;
+};
+
+const getPath = (value: unknown, path: string): { found: boolean; value: unknown } => {
+  let current = value;
+  for (const segment of path.split('.')) {
+    if (
+      current === null ||
+      typeof current !== 'object' ||
+      !Object.prototype.hasOwnProperty.call(current, segment)
+    ) {
+      return { found: false, value: undefined };
+    }
+    current = (current as Record<string, unknown>)[segment];
+  }
+  return { found: true, value: current };
+};
+
+const applyResponseMapping = (
+  data: unknown,
+  mapping: DeclarativeResponseMapping | undefined
+): unknown => {
+  if (!mapping?.dataPath) {
+    return mapping?.outputKey ? { [mapping.outputKey]: data } : data;
+  }
+  const selected = getPath(data, mapping.dataPath);
+  if (!selected.found) {
+    throw new Error(`Response path "${mapping.dataPath}" not found`);
+  }
+  return mapping.outputKey ? { [mapping.outputKey]: selected.value } : selected.value;
+};
+
 const toFormBody = (value: unknown): URLSearchParams => {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) {
     throw new Error('Declarative form request bodies must be objects.');
@@ -195,7 +293,19 @@ const toResult = (data: unknown): Record<string, unknown> => {
   return { data };
 };
 
-/** Runs one declarative HTTP request and returns the response body. */
+const withLinkHeader = (
+  result: Record<string, unknown>,
+  response: ClientResponse,
+  mapping: DeclarativeResponseMapping['linkHeader']
+): Record<string, unknown> => {
+  if (!mapping) {
+    return result;
+  }
+  const header = getHeader(response.headers, mapping.header ?? 'link');
+  return { ...result, [mapping.outputKey]: header || undefined };
+};
+
+/** Runs one declarative HTTP request and applies its response mappings. */
 export const executeDeclarativeRequest = async ({
   client,
   request,
@@ -205,20 +315,28 @@ export const executeDeclarativeRequest = async ({
   const context: TemplateContext = { input, config: config ?? {} };
   const url = buildUrl(request, context);
   const renderedHeaders = toHeaderRecord(renderTemplateValue(request.headers ?? {}, context));
-  const query = renderTemplateValue(request.query ?? {}, context);
+  const renderedQuery = renderTemplateValue(request.query ?? {}, context);
   const renderedBody =
     request.body === undefined ? undefined : renderTemplateValue(request.body, context);
   const data =
     renderedBody === undefined ? undefined : toRequestBody(renderedBody, request.bodyType);
   const headers = withContentType(renderedHeaders, request.bodyType, data !== undefined);
-
-  const response = await client.request({
+  const requestConfig: RequestConfig = {
     method: request.method,
     url,
-    params: query,
+    params: renderedQuery,
     headers,
     ...(data !== undefined ? { data } : {}),
-  });
+  };
 
-  return toResult(response.data);
+  const response = (await client.request(requestConfig)) as ClientResponse;
+  if (response.status >= 400) {
+    throw toHttpError(response);
+  }
+  const mapped = withLinkHeader(
+    toResult(applyResponseMapping(response.data, request.response)),
+    response,
+    request.response?.linkHeader
+  );
+  return mapped;
 };

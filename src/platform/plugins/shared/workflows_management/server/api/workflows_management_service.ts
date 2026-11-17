@@ -40,8 +40,10 @@ import type { ManagedWorkflowId } from '@kbn/workflows/managed';
 import type {
   ExecuteManagedWorkflowOptions,
   GetManagedWorkflowStatusOptions,
+  ManagedWorkflowInstallManyResult,
   ManagedWorkflowInstanceState,
   ManagedWorkflowOperationOptions,
+  ManagedWorkflowServiceInstallManyItem,
   ManagedWorkflowServiceInstallOptions,
   ManagedWorkflowStatusReport,
 } from '@kbn/workflows/server/types';
@@ -100,6 +102,8 @@ import type {
   ProcessedWaitForInputFacets,
   ProcessedWaitForInputFilters,
   WaitForInputListResult,
+  WorkflowExecutionStatusCounts,
+  WorkflowExecutionStatusCountsParams,
   WorkflowExecutionStatusItem,
 } from '../services/workflow_execution_query_service';
 import { WorkflowExecutionQueryService } from '../services/workflow_execution_query_service';
@@ -270,6 +274,12 @@ export class WorkflowsService {
       getCoreStart: () => this.coreStart,
       licensing: pluginsStart.licensing,
       logger: this.logger,
+      getWorkflowsForOutputs: async (ids, spaceId, request) => {
+        const access = await this.getAccessControl();
+        return this.crudService.getWorkflowsSourceByIds(ids, spaceId, ['name', 'definition'], {
+          accessControlFilter: await access.readFilter(request),
+        });
+      },
       pagesEnabled: this.pagesEnabled,
     });
 
@@ -594,6 +604,14 @@ export class WorkflowsService {
     return this.executionQueryService.getWorkflowExecutions(params, spaceId);
   }
 
+  public async getWorkflowExecutionStatusCounts(
+    params: WorkflowExecutionStatusCountsParams,
+    spaceId: string
+  ): Promise<WorkflowExecutionStatusCounts> {
+    await this.ensureInitialized();
+    return this.executionQueryService.getWorkflowExecutionStatusCounts(params, spaceId);
+  }
+
   public async searchExecutionsView(
     params: SearchExecutionsViewParams,
     spaceId: string
@@ -785,6 +803,26 @@ export class WorkflowsService {
       registeredPluginId,
       request
     );
+  }
+
+  /**
+   * Install or update static managed workflows with `_bulk`, after one ES readiness check for the
+   * whole batch. Best-effort like {@link installManagedWorkflow}: a gated batch resolves with no
+   * failures and marks the plugin install pass incomplete.
+   */
+  public async bulkInstallManagedWorkflows(
+    items: readonly ManagedWorkflowServiceInstallManyItem[],
+    registeredPluginId: string
+  ): Promise<ManagedWorkflowInstallManyResult> {
+    await this.ensureInitialized();
+    const readiness = await this.ensureManagedInstallReady(
+      `install of ${items.length} workflow(s) for plugin '${registeredPluginId}'`
+    );
+    if (!readiness.ready) {
+      this.managedWorkflowsService.markInstallIncomplete(registeredPluginId);
+      return { failed: [] };
+    }
+    return this.managedWorkflowsService.bulkInstallManagedWorkflows(items, registeredPluginId);
   }
 
   public async uninstallManagedWorkflow(
