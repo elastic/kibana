@@ -31,7 +31,7 @@ import { ServiceAccountTokenExchangeError } from './token_exchange_error';
 import type {
   CloudProjectContext,
   ListServiceAccountsParams,
-  ServiceAccountFacts,
+  ServiceAccountLookup,
   ServiceAccountsBackend,
 } from './types';
 import { UIAM_SERVICE_ACCOUNT_ROLE_LIMITS } from './uiam_role_limits';
@@ -344,10 +344,10 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     }
   }
 
-  async getAccountFactsAsInternalUser(
+  async lookupAccountAsInternalUser(
     id: string,
     { signal }: { signal?: AbortSignal }
-  ): Promise<ServiceAccountFacts> {
+  ): Promise<ServiceAccountLookup> {
     try {
       const account = await this.uiam.getServiceAccount(id, { signal });
       // UIAM keeps a revoked account around for a while, but it cannot be exchanged.

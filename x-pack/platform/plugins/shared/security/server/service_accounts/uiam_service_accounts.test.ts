@@ -882,7 +882,7 @@ describe('UiamServiceAccounts', () => {
     });
   });
 
-  describe('#getAccountFactsAsInternalUser', () => {
+  describe('#lookupAccountAsInternalUser', () => {
     const signal = new AbortController().signal;
     const account = {
       ...validResponse,
@@ -894,7 +894,7 @@ describe('UiamServiceAccounts', () => {
       mockUiam.getServiceAccount.mockResolvedValue(account);
 
       await expect(
-        serviceAccounts.getAccountFactsAsInternalUser('service-account-id', { signal })
+        serviceAccounts.lookupAccountAsInternalUser('service-account-id', { signal })
       ).resolves.toEqual({ status: 'present' });
       expect(mockUiam.getServiceAccount).toHaveBeenCalledWith('service-account-id', { signal });
     });
@@ -903,7 +903,7 @@ describe('UiamServiceAccounts', () => {
       mockUiam.getServiceAccount.mockResolvedValue({ ...account, revoked: true });
 
       await expect(
-        serviceAccounts.getAccountFactsAsInternalUser('service-account-id', { signal })
+        serviceAccounts.lookupAccountAsInternalUser('service-account-id', { signal })
       ).resolves.toEqual({ status: 'missing' });
     });
 
@@ -911,7 +911,7 @@ describe('UiamServiceAccounts', () => {
       mockUiam.getServiceAccount.mockRejectedValue(uiamRefusal('0xEDF789', 403));
 
       await expect(
-        serviceAccounts.getAccountFactsAsInternalUser('service-account-id', { signal })
+        serviceAccounts.lookupAccountAsInternalUser('service-account-id', { signal })
       ).resolves.toEqual({ status: 'missing' });
     });
 
@@ -922,7 +922,7 @@ describe('UiamServiceAccounts', () => {
       mockUiam.getServiceAccount.mockRejectedValue(error);
 
       await expect(
-        serviceAccounts.getAccountFactsAsInternalUser('service-account-id', { signal })
+        serviceAccounts.lookupAccountAsInternalUser('service-account-id', { signal })
       ).resolves.toEqual({ status: 'unknown' });
     });
   });

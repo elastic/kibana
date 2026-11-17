@@ -44,7 +44,7 @@ import { SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS, ServiceAccountFakeRequests } from
 import { ServiceAccountTokenExchangeError } from './token_exchange_error';
 import type {
   ListServiceAccountsParams,
-  ServiceAccountFacts,
+  ServiceAccountLookup,
   ServiceAccountsBackend,
 } from './types';
 import type { SecurityLicense } from '../../common';
@@ -483,10 +483,10 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     return toDirectoryEntry(account, await this.isAssumable(esClient, principal, stored));
   }
 
-  async getAccountFactsAsInternalUser(
+  async lookupAccountAsInternalUser(
     id: string,
     { signal }: { signal?: AbortSignal }
-  ): Promise<ServiceAccountFacts> {
+  ): Promise<ServiceAccountLookup> {
     // Only accounts in Kibana's namespace can be exchanged. Any other ID tells nothing about an
     // account a workload could run as.
     const principal = parseEsServiceAccountId(id);

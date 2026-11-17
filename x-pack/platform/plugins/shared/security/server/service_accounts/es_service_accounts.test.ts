@@ -1205,7 +1205,7 @@ describe('EsServiceAccounts', () => {
     });
   });
 
-  describe('#getAccountFactsAsInternalUser', () => {
+  describe('#lookupAccountAsInternalUser', () => {
     const ACCOUNT_ID = 'kibana/nightshift-relay';
     const signal = new AbortController().signal;
 
@@ -1214,7 +1214,7 @@ describe('EsServiceAccounts', () => {
       credentialStore.getDecrypted.mockResolvedValue(staleCredential());
 
       await expect(
-        serviceAccounts.getAccountFactsAsInternalUser(ACCOUNT_ID, { signal })
+        serviceAccounts.lookupAccountAsInternalUser(ACCOUNT_ID, { signal })
       ).resolves.toEqual({ status: 'present', credentialCreatedAt: '2026-09-21T00:00:00.000Z' });
 
       expect(clusterClient.asInternalUser.transport.request).toHaveBeenCalledWith(READ_ACCOUNT, {
@@ -1229,7 +1229,7 @@ describe('EsServiceAccounts', () => {
       clusterClient.asInternalUser.transport.request.mockResolvedValueOnce(accountEntry());
 
       await expect(
-        serviceAccounts.getAccountFactsAsInternalUser(ACCOUNT_ID, { signal })
+        serviceAccounts.lookupAccountAsInternalUser(ACCOUNT_ID, { signal })
       ).resolves.toEqual({ status: 'present' });
     });
 
@@ -1237,7 +1237,7 @@ describe('EsServiceAccounts', () => {
       clusterClient.asInternalUser.transport.request.mockResolvedValueOnce({});
 
       await expect(
-        serviceAccounts.getAccountFactsAsInternalUser(ACCOUNT_ID, { signal })
+        serviceAccounts.lookupAccountAsInternalUser(ACCOUNT_ID, { signal })
       ).resolves.toEqual({ status: 'missing' });
       expect(credentialStore.getDecrypted).not.toHaveBeenCalled();
     });
@@ -1273,16 +1273,16 @@ describe('EsServiceAccounts', () => {
       arrange();
 
       await expect(
-        serviceAccounts.getAccountFactsAsInternalUser(ACCOUNT_ID, { signal })
+        serviceAccounts.lookupAccountAsInternalUser(ACCOUNT_ID, { signal })
       ).resolves.toEqual({ status: 'unknown' });
     });
 
     it.each(['not-an-id', 'elastic/fleet-server'])(
       'reports unknown for [%s], which no workload can run as',
       async (id) => {
-        await expect(
-          serviceAccounts.getAccountFactsAsInternalUser(id, { signal })
-        ).resolves.toEqual({ status: 'unknown' });
+        await expect(serviceAccounts.lookupAccountAsInternalUser(id, { signal })).resolves.toEqual({
+          status: 'unknown',
+        });
         expect(clusterClient.asInternalUser.transport.request).not.toHaveBeenCalled();
       }
     );
