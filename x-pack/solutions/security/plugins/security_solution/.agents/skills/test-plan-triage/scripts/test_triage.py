@@ -366,6 +366,8 @@ class CommentNoTests(unittest.TestCase):
             {"suggested": private},
             {"reason": "a slice of elastic/security-team#2"},
             {"reason": "covered by the Security-Team epic"},
+            {"reason": "a slice of elastic/some-internal-repo#2"},
+            {"reason": "a slice of https://github.com/elastic/some-internal-repo/issues/2"},
         )
         for kwargs in cases:
             gh = FakeGh({"elastic/kibana#1": api_issue("elastic/kibana", 1)})
@@ -373,6 +375,20 @@ class CommentNoTests(unittest.TestCase):
                 self.comment(gh, **kwargs)
             self.assertEqual((raised.exception.exit_code, raised.exception.gate), (triage.EXIT_FAIL, "private_link"))
             self.assertEqual(gh.calls, [])
+
+    def test_public_issue_never_names_the_repo_of_a_private_ancestor(self):
+        issues = {
+            "elastic/kibana#1": api_issue("elastic/kibana", 1, parent="elastic/kibana#2"),
+            "elastic/kibana#2": api_issue("elastic/kibana", 2, parent="elastic/some-internal-repo#3", children=1),
+            "elastic/some-internal-repo#3": api_issue("elastic/some-internal-repo", 3, children=1),
+        }
+        for reason in ("tracked in some-internal-repo", "tracked in Elastic/Some-Internal-Repo"):
+            gh = FakeGh(issues, post_result={"html_url": "x"})
+            with self.assertRaises(triage.TriageError) as raised:
+                self.comment(gh, reason=reason, suggested=self.parent)
+            self.assertEqual(raised.exception.gate, "private_link")
+            self.assertEqual(gh.posts(), [])
+        self.assertEqual(self.comment(FakeGh(issues), suggested=self.parent, dry_run=True)["action"], "dry_run")
 
     def test_private_issue_may_point_to_a_private_repo(self):
         self.ref = triage.IssueRef("elastic/security-team", 1)

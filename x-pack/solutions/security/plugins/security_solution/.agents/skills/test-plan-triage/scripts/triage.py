@@ -38,7 +38,7 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
-from typing import Any, Optional, TextIO
+from typing import Any, Iterable, Optional, TextIO
 from urllib.parse import quote
 
 ALLOWED_REPOS = ("elastic/kibana", "elastic/security-team")
@@ -68,6 +68,7 @@ _URL_RE = re.compile(
     r"^https?://github\.com/(?P<repo>[\w.-]+/[\w.-]+)/(?:issues|pull)/(?P<number>\d+)(?:[/?#].*)?$"
 )
 _SHORT_RE = re.compile(r"^(?P<repo>[\w.-]+/[\w.-]+)#(?P<number>\d+)$")
+_REPO_MENTION_RE = re.compile(r"([\w.-]+/[\w.-]+)(?:#\d+|/(?:issues|pull)/\d+)")
 _API_ISSUE_RE = re.compile(r"/repos/(?P<repo>[\w.-]+/[\w.-]+)/issues/(?P<number>\d+)$")
 
 
@@ -438,21 +439,24 @@ def _check_reason(reason: str) -> str:
     return text
 
 
-def _check_public_comment(ref: IssueRef, reason: str, suggested: Optional[IssueRef]) -> None:
+def _check_public_comment(ref: IssueRef, reason: str, suggested: Optional[IssueRef], private_repos: Iterable[str]) -> None:
     """A comment on a public issue must not link to or name a private repo."""
-    if ref.repo in PRIVATE_REPOS:
+    if ref.repo not in PUBLIC_REPOS:
         return
-    if suggested and suggested.repo in PRIVATE_REPOS:
+    if suggested and suggested.repo not in PUBLIC_REPOS:
         raise TriageError(
             f"{ref} is public and {suggested} is private; drop --suggested so the comment does not link a private issue",
             gate="private_link",
         )
-    if any(repo in reason.casefold() or repo.split("/")[1] in reason.casefold() for repo in PRIVATE_REPOS):
+    folded = reason.casefold()
+    mentions_private = any(repo.lower() not in PUBLIC_REPOS for repo in _REPO_MENTION_RE.findall(reason))
+    if mentions_private or any(name in folded for repo in private_repos for name in (repo, repo.split("/")[1])):
         raise TriageError(f"{ref} is public; the reason must not name a private repo or its issues", gate="private_link")
 
 
-def _check_open_ancestor(gh: Gh, ref: IssueRef, issue: dict, suggested: IssueRef) -> None:
-    """The suggested level must be an open issue on the target's parent chain."""
+def _parent_chain(gh: Gh, ref: IssueRef, issue: dict) -> list[tuple[IssueRef, Optional[dict]]]:
+    """Every parent up to the root; an unreadable parent is kept with None and ends the walk."""
+    chain: list[tuple[IssueRef, Optional[dict]]] = []
     current, seen = issue, {str(ref)}
     while current.get("parent_issue_url") and len(seen) <= MAX_ANCESTORS:
         parent_ref = ref_from_api_url(current["parent_issue_url"])
@@ -462,9 +466,17 @@ def _check_open_ancestor(gh: Gh, ref: IssueRef, issue: dict, suggested: IssueRef
         try:
             current = gh.get(f"repos/{parent_ref.repo}/issues/{parent_ref.number}")
         except NotFound:
+            chain.append((parent_ref, None))
             break
-        if parent_ref == suggested:
-            if current.get("state") != "open":
+        chain.append((parent_ref, current))
+    return chain
+
+
+def _check_open_ancestor(ref: IssueRef, parents: list[tuple[IssueRef, Optional[dict]]], suggested: IssueRef) -> None:
+    """The suggested level must be an open issue on the target's parent chain."""
+    for parent_ref, parent in parents:
+        if parent is not None and parent_ref == suggested:
+            if parent.get("state") != "open":
                 raise TriageError(f"--suggested {suggested} is closed; suggest an open ancestor")
             return
     raise TriageError(f"--suggested {suggested} is not an ancestor of {ref}")
@@ -477,10 +489,12 @@ def comment_no(
     if rule_id not in NO_RULES:
         raise TriageError(f"--rule must be one of {', '.join(NO_RULES)}; '{rule}' is not a No rule")
     text = _check_reason(reason)
-    _check_public_comment(ref, text, suggested)
+    _check_public_comment(ref, text, suggested, PRIVATE_REPOS)
     issue = _open_issue(gh, ref, "commented on")
+    parents = _parent_chain(gh, ref, issue)
+    _check_public_comment(ref, text, suggested, {parent_ref.repo for parent_ref, _ in parents if parent_ref.repo not in PUBLIC_REPOS})
     if suggested:
-        _check_open_ancestor(gh, ref, issue, suggested)
+        _check_open_ancestor(ref, parents, suggested)
     url = issue.get("html_url")
     if _has_label(issue):
         raise TriageError(f"{ref} has `{LABEL}`; a No comment would contradict it", exit_code=EXIT_ASK, gate="already_labeled")
