@@ -7,16 +7,11 @@
 
 import React, { Suspense, useMemo } from 'react';
 import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
   EuiModal,
   EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiPanel,
-  EuiSpacer,
+  EuiLoadingSpinner,
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -41,48 +36,24 @@ export interface AddIntegrationModalProps {
   /** "Add data" in Streams, "Add integration" elsewhere. */
   title?: string;
   subtitle?: string;
-  /** Rendered as a callout above the catalogue, e.g. "send to the Ingest API instead". */
-  calloutAction?: { label: string; text: string; onClick: () => void };
-  /** Header escape hatch, e.g. "Your integrations" -> the installed integrations page. */
-  headerAction?: { label: string; onClick: () => void };
-  /** Opens the catalogue pre-filtered. */
-  initialSearch?: string;
-  initialCategories?: string[];
   prereleaseIntegrationsEnabled?: boolean;
 }
 
 // The catalogue drives its filter state through the URL (path category, query params). A memory
 // router absorbs every push/replace so the filters keep working without touching the host's URL.
 const CATALOGUE_ROUTE = '/browse/:category?/:subcategory?';
-
-function buildInitialEntry(initialSearch?: string, initialCategories?: string[]) {
-  const params = new URLSearchParams();
-  if (initialSearch) {
-    params.set('q', initialSearch);
-  }
-  initialCategories?.filter(Boolean).forEach((category) => params.append('category', category));
-  const search = params.toString();
-  return search ? `/browse?${search}` : '/browse';
-}
+const CATALOGUE_ENTRY = '/browse';
 
 export function AddIntegrationModal({
   onClose,
   onIntegrationSelected,
   title,
   subtitle,
-  calloutAction,
-  headerAction,
-  initialSearch,
-  initialCategories,
   prereleaseIntegrationsEnabled = false,
 }: AddIntegrationModalProps) {
   const { core, deps, kibanaVersion } = getStartServices();
   const titleId = useGeneratedHtmlId({ prefix: 'ingestHubAddIntegrationModalTitle' });
   const queryClient = useMemo(() => new QueryClient(), []);
-  const initialEntry = useMemo(
-    () => buildInitialEntry(initialSearch, initialCategories),
-    [initialSearch, initialCategories]
-  );
 
   return (
     <EuiModal
@@ -93,57 +64,21 @@ export function AddIntegrationModal({
       data-test-subj="ingestHubAddIntegrationModal"
     >
       <EuiModalHeader>
-        <EuiFlexGroup alignItems="flexStart" justifyContent="spaceBetween" gutterSize="m">
-          <EuiFlexItem>
-            <EuiModalHeaderTitle id={titleId}>
-              {title ??
-                i18n.translate('xpack.ingestHub.addIntegrationModal.title', {
-                  defaultMessage: 'Add integration',
-                })}
-            </EuiModalHeaderTitle>
-            {subtitle && (
-              <EuiText size="s" color="subdued">
-                {subtitle}
-              </EuiText>
-            )}
-          </EuiFlexItem>
-          {headerAction && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconType="external"
-                iconSide="right"
-                onClick={headerAction.onClick}
-                data-test-subj="ingestHubAddIntegrationModalHeaderAction"
-              >
-                {headerAction.label}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
+        <div>
+          <EuiModalHeaderTitle id={titleId}>
+            {title ??
+              i18n.translate('xpack.ingestHub.addIntegrationModal.title', {
+                defaultMessage: 'Add integration',
+              })}
+          </EuiModalHeaderTitle>
+          {subtitle && (
+            <EuiText size="s" color="subdued">
+              {subtitle}
+            </EuiText>
           )}
-        </EuiFlexGroup>
+        </div>
       </EuiModalHeader>
       <EuiModalBody>
-        {calloutAction && (
-          <>
-            <EuiPanel hasShadow={false} hasBorder paddingSize="s">
-              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                <EuiFlexItem>
-                  <EuiText size="s">{calloutAction.text}</EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    size="s"
-                    flush="both"
-                    onClick={calloutAction.onClick}
-                    data-test-subj="ingestHubAddIntegrationModalCalloutAction"
-                  >
-                    {calloutAction.label}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-            <EuiSpacer size="m" />
-          </>
-        )}
         <EuiThemeProvider>
           <KibanaContextProvider
             services={{
@@ -158,7 +93,7 @@ export function AddIntegrationModal({
               <FleetStatusProvider>
                 <FlyoutContextProvider>
                   <KibanaVersionContext.Provider value={kibanaVersion}>
-                    <MemoryRouter initialEntries={[initialEntry]}>
+                    <MemoryRouter initialEntries={[CATALOGUE_ENTRY]}>
                       <Routes>
                         <Route path={CATALOGUE_ROUTE}>
                           <Suspense fallback={<EuiLoadingSpinner size="l" />}>

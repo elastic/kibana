@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiLoadingElastic } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
 import type { AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
 import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
 import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
 import { isEmpty } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import type { IntegrationCardItem } from '@kbn/ingest-hub-plugin/public';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
@@ -33,6 +34,7 @@ export function StreamListView({ tabs }: { tabs?: AppHeaderTab[] }) {
     dependencies: {
       start: {
         streams: { streamsRepositoryClient, getClassicStatus, getWiredStatus },
+        ingestHub,
       },
     },
     core,
@@ -126,12 +128,34 @@ export function StreamListView({ tabs }: { tabs?: AppHeaderTab[] }) {
     React.useState(false);
   const [isQueryStreamCreationFlyoutOpen, setIsQueryStreamCreationFlyoutOpen] =
     React.useState(false);
+  // POC (elastic/ingest-dev#10466): "Add data" opens the integrations catalogue in a modal,
+  // which Ingest Hub composes out of Fleet's browse page.
+  const [isAddDataModalOpen, setIsAddDataModalOpen] = useState(false);
+  const AddIntegrationModal = ingestHub?.AddIntegrationModal;
+  const onIntegrationSelected = useCallback(
+    (card: IntegrationCardItem) => {
+      setIsAddDataModalOpen(false);
+      core.notifications.toasts.addInfo({
+        title: i18n.translate('xpack.streams.streamsListView.integrationSelectedToastTitle', {
+          defaultMessage: 'Selected {title}',
+          values: { title: card.title },
+        }),
+        text: i18n.translate('xpack.streams.streamsListView.integrationSelectedToastText', {
+          defaultMessage: 'POC only: the onboarding wizard is not wired up yet.',
+        }),
+      });
+    },
+    [core.notifications.toasts]
+  );
 
   const pageTitle = i18n.translate('xpack.streams.streamsListView.pageHeaderTitle', {
     defaultMessage: 'Streams',
   });
   const settingsLabel = i18n.translate('xpack.streams.streamsListView.settingsButtonLabel', {
     defaultMessage: 'Settings',
+  });
+  const addDataLabel = i18n.translate('xpack.streams.streamsListView.addDataButtonLabel', {
+    defaultMessage: 'Add data',
   });
   const createClassicStreamLabel = i18n.translate(
     'xpack.streams.streamsListView.createClassicStreamButtonLabel',
@@ -155,6 +179,18 @@ export function StreamListView({ tabs }: { tabs?: AppHeaderTab[] }) {
 
   const menu = useMemo<AppHeaderMenu>(() => {
     const items: NonNullable<AppHeaderMenu['items']> = [
+      ...(AddIntegrationModal
+        ? [
+            {
+              id: 'addData',
+              order: 0,
+              label: addDataLabel,
+              iconType: 'plusCircle',
+              run: () => setIsAddDataModalOpen(true),
+              testId: 'streamsAppAddDataButton',
+            },
+          ]
+        : []),
       {
         id: 'settings',
         order: 1,
@@ -207,6 +243,8 @@ export function StreamListView({ tabs }: { tabs?: AppHeaderTab[] }) {
       items,
     };
   }, [
+    AddIntegrationModal,
+    addDataLabel,
     canCreateClassicStream,
     classicStreamMenuItemLabel,
     createClassicStreamLabel,
@@ -265,6 +303,18 @@ export function StreamListView({ tabs }: { tabs?: AppHeaderTab[] }) {
           onClose={() => setIsQueryStreamCreationFlyoutOpen(false)}
           onQueryStreamCreated={streamsListFetch.refresh}
         />
+      )}
+      {isAddDataModalOpen && AddIntegrationModal && (
+        <Suspense fallback={<EuiLoadingSpinner size="l" />}>
+          <AddIntegrationModal
+            onClose={() => setIsAddDataModalOpen(false)}
+            onIntegrationSelected={onIntegrationSelected}
+            title={addDataLabel}
+            subtitle={i18n.translate('xpack.streams.streamsListView.addDataModalSubtitle', {
+              defaultMessage: 'Choose a technology to start collecting from',
+            })}
+          />
+        </Suspense>
       )}
     </>
   );

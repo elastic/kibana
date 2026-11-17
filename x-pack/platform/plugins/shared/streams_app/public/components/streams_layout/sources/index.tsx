@@ -19,7 +19,6 @@ import { getSourceDisplaySignals } from './source_models';
 import { getSourceSortableValue } from './source_grid_cell';
 import { SourcesGrid } from './sources_grid';
 import { SourcesToolbar } from './sources_toolbar';
-import { useAddSourceFlow } from './use_add_source_flow';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { UnitReadOnlyCallout } from '../unit_read_only_callout';
 
@@ -38,7 +37,6 @@ export const SourcesTab = () => {
     sortingColumns,
     pagination,
     visibleColumnIds,
-    availableSourceTypes,
     deleteSources,
     refreshUnit,
     setQuery,
@@ -57,11 +55,6 @@ export const SourcesTab = () => {
   const {
     v2: { manage: canManage },
   } = useStreamsPrivileges();
-  const { openAddSource, addSourceModals } = useAddSourceFlow({
-    availableSourceTypes,
-    openCreateModal,
-    enabled: canManage,
-  });
   const [sourcesPendingDeletion, setSourcesPendingDeletion] = useState<SourceViewModel[]>([]);
   const navigateToCanvasSearch = useNavigateToCanvasSearch();
   const showOnCanvas = useCallback(
@@ -139,7 +132,7 @@ export const SourcesTab = () => {
             onQueryChange={setQuery}
             onSelectedTypesChange={setSelectedTypes}
             onRefresh={refreshUnit}
-            onAddSource={canManage ? openAddSource : undefined}
+            onAddSource={canManage ? openCreateModal : undefined}
             isAddDisabled={isUnitSaving}
           />
           <EuiSpacer size="s" />
@@ -168,7 +161,6 @@ export const SourcesTab = () => {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {addSourceModals}
       {canManage && isCreateModalOpen && (
         <CreateSourceModal sources={sourcesController} onClose={closeCreateModal} />
       )}
