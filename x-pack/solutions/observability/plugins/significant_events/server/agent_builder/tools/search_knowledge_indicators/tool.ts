@@ -16,11 +16,7 @@ import {
 } from '@kbn/significant-events-schema';
 import { platformSignificantEventsTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type {
-  BuiltinToolDefinition,
-  StaticToolRegistration,
-  ToolAvailabilityResult,
-} from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import dedent from 'dedent';
 import { DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE } from '@kbn/nightshift-ai';
@@ -28,6 +24,7 @@ import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertCanReadSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
+import { createSignificantEventsAvailability } from '../significant_events_availability';
 import {
   KNOWLEDGE_INDICATOR_FEATURE_TYPES,
   MAX_COMPACT_META_ARRAY_SAMPLE,
@@ -138,7 +135,7 @@ export function createSearchKnowledgeIndicatorsTool({
     id: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_SEARCH_TOOL_ID,
     type: ToolType.builtin,
     description: dedent`
-      Search Knowledge Indicators (KIs) for Nightshift sources.
+      Search Knowledge Indicators (KIs) for nightshift sources.
 
       KIs include:
       - Feature-based indicators
@@ -166,31 +163,7 @@ export function createSearchKnowledgeIndicatorsTool({
     },
     schema: searchKnowledgeIndicatorsSchema,
     tags: ['streams', 'significant-events'],
-    availability: {
-      cacheMode: 'space',
-      handler: async (): Promise<ToolAvailabilityResult> => {
-        try {
-          await assertSignificantEventsAccess({
-            server,
-            licensing: server.licensing,
-          });
-          return { status: 'available' };
-        } catch (error) {
-          if (error instanceof Error) {
-            logger.debug(error.stack ?? error.message);
-          } else {
-            logger.debug(String(error));
-          }
-          return {
-            status: 'unavailable',
-            reason:
-              error instanceof Error
-                ? error.message
-                : 'Significant events access is not available in the current context',
-          };
-        }
-      },
-    },
+    availability: createSignificantEventsAvailability({ server, logger }),
     handler: async (toolParams, context) => {
       const { request } = context;
 

@@ -74,7 +74,7 @@ export class FetchSuppressionsStep implements DispatcherStep {
   private runQueries<T>(requests: EsqlRequest[], abortSignal: AbortSignal): Promise<T[][]> {
     return Promise.all(
       requests.map((request) =>
-        this.queryService.executeQueryRows<T>({ query: request.query, abortSignal })
+        this.queryService.executeQuery<T>({ query: request.query, abortSignal })
       )
     );
   }

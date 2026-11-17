@@ -19,9 +19,7 @@ export interface BreakdownItem {
   pageLoads: number;
 }
 
-export type DeviceName = 'mobile' | 'desktop';
-
-/** The page loads by browser, operating system and device type. */
+/** The page loads by browser, operating system and device. */
 export interface Breakdowns {
   /** Every page load, the denominator of each row's share. */
   pageLoads: number;
@@ -29,8 +27,8 @@ export interface Breakdowns {
   browsers: BreakdownItem[];
   /** By page loads, descending. */
   operatingSystems: BreakdownItem[];
-  /** `mobile` or `desktop` from `browser.mobile`, by page loads, descending. */
-  devices: Array<{ name: DeviceName; pageLoads: number }>;
+  /** By page loads, descending. */
+  devices: BreakdownItem[];
 }
 
 /** The clicks on one element. */

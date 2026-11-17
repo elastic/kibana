@@ -8,10 +8,11 @@
  */
 
 import { castDraft, produce } from 'immer-v9';
-import type { TableState, ExpandedState, RowSelectionState } from '@tanstack/react-table';
+import type { ExpandedState, RowSelectionState } from '@tanstack/react-table';
 import { getLeafIdFromCacheKey } from '../lib/utils';
+import type { CascadeTableState } from '../lib/core/table/table_features';
 
-export type { TableState };
+export type { CascadeTableState };
 
 /**
  * Represents a document, with a base expectation that specifies
@@ -32,7 +33,7 @@ export type LeafNode = DocWithId;
 export type ColumnGroups = Array<keyof Omit<GroupNode, 'children' | 'id'>>;
 
 export interface IStoreState<G extends GroupNode, L extends LeafNode> {
-  readonly table: TableState;
+  readonly table: CascadeTableState;
   /**
    * Record of group nodes that can be displayed in the table.
    */
@@ -62,7 +63,7 @@ export function createStoreReducers<G extends GroupNode, L extends LeafNode>() {
     ) {
       return produce(state, (draft) => {
         // since the group node and available columns are changing, we need to reset the table and leaf nodes
-        draft.table = {} as TableState;
+        draft.table = {} as CascadeTableState;
         draft.leafNodes = new Map(castDraft([]));
         draft.groupNodes = castDraft(payload.groupNodes);
         draft.groupByColumns = castDraft(payload.groupByColumns);

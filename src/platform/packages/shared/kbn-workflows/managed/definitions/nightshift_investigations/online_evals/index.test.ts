@@ -49,6 +49,7 @@ describe('nightshift online evals workflow', () => {
             { name: 'nightshift_rca_reward' },
             { name: 'nightshift_investigation_process' },
             { name: 'nightshift_conclusion_quality' },
+            { name: 'nightshift_missing_data' },
           ],
           entry_point: '${{ inputs.entry_point }}',
         }),
@@ -64,7 +65,11 @@ describe('nightshift online evals workflow', () => {
           round_kind: '{{ inputs.round_kind }}',
           graded_report: 'first_round',
           evaluator_set: 'reference_based',
-          evaluators: [{ name: 'nightshift_alert_outcome_rca_accuracy' }],
+          evaluators: [
+            { name: 'nightshift_alert_outcome_rca_accuracy' },
+            { name: 'nightshift_alert_outcome_benign_classification' },
+            { name: 'nightshift_alert_outcome_rca_reporting_gap' },
+          ],
           entry_point: '${{ inputs.entry_point }}',
         }),
       })

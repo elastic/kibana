@@ -33,7 +33,7 @@ const createRouteContext = (enabled = true) => {
     get: jest.fn().mockResolvedValue({ hosts: ['api.github.com'] }),
     replace: jest.fn().mockResolvedValue({ hosts: ['api.github.com'] }),
   };
-  const request = {};
+  const request = { spaceId: 'default' };
   const context = {
     core: Promise.resolve({
       featureFlags: {

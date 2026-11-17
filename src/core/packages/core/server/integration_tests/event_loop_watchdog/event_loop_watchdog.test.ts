@@ -31,7 +31,29 @@ interface WorkerLogLine {
       phase?: string;
       blockedMs?: number;
       ongoing?: boolean;
-      stats?: { starting: PhaseStats; running: PhaseStats; heapUsed: number };
+      stats?: {
+        starting: PhaseStats;
+        running: PhaseStats;
+        heapUsed: number;
+        profiling?: {
+          pastStartAfter: number;
+          profiled: number;
+          captureFailed: number;
+          skippedCooldown: number;
+        };
+      };
+      profile?: {
+        blockedMs: number;
+        profiledAfterMs: number;
+        profilerStartMs: number;
+        sampledMs: number;
+        coverage: number;
+        captureDurationMs: number;
+        samples: number;
+        nodes: number;
+        heapUsed: number;
+        stopReason: string;
+      };
     };
   };
 }
@@ -144,6 +166,16 @@ const statsOf = ({ workerLogLines }: HarnessResult) =>
 const statsLogLines = ({ workerLogLines }: HarnessResult) =>
   workerLogLines.filter(({ kibana }) => kibana?.event_loop_watchdog?.stats);
 const blockOf = ({ kibana }: WorkerLogLine) => kibana?.event_loop_watchdog;
+const profileLogLines = ({ workerLogLines }: HarnessResult) =>
+  workerLogLines.filter(({ kibana }) => kibana?.event_loop_watchdog?.profile);
+/** The profiler's thread only shows in /proc, so the check runs on Linux. */
+const expectProfilerStopped = ({ mainLogLines }: HarnessResult) => {
+  if (process.platform === 'linux') {
+    expect(mainLogLines.map(({ message }) => message)).toContain('profiler thread stopped');
+  }
+};
+const restarts = ({ mainLogLines }: HarnessResult) =>
+  mainLogLines.filter(({ message }) => message.includes('exited unexpectedly'));
 
 describe('event loop watchdog in a child process', () => {
   let blocks: HarnessResult;
@@ -241,6 +273,20 @@ describe('event loop watchdog in a child process', () => {
     });
   }, 120_000);
 
+  it('passes profiling toggles to the running worker without restarting it', async () => {
+    const result = await runHarness('profiling_toggle');
+    expectCleanExit(result);
+    expect(result.workerLogLines.map(({ message }) => message)).toEqual([
+      'profiling 1',
+      'profiling 0',
+      'profiling 1',
+    ]);
+    const readyLines = result.mainLogLines.filter(({ message }) =>
+      message.startsWith('Worker event-loop-watchdog ready ')
+    );
+    expect(readyLines).toHaveLength(1);
+  }, 120_000);
+
   it('detects ongoing event loop blocks once short-block notifications exceed the rate limit', async () => {
     const blockWarnings = (lines: WorkerLogLine[], ongoing: boolean) =>
       lines.filter((line) => blockOf(line)?.ongoing === ongoing);
@@ -268,4 +314,87 @@ describe('event loop watchdog in a child process', () => {
     expect(sinceBlockingMs).toBeGreaterThan(0);
     expect(sinceBlockingMs).toBeLessThan(10_000);
   }, 90_000);
+
+  describe('profiling', () => {
+    it('profiles a block past the start threshold and logs it when the block ends', async () => {
+      const result = await runHarness('profile_blocks');
+      expectCleanExit(result);
+      const lines = profileLogLines(result);
+      expect(lines).toHaveLength(1);
+      expect(lines[0]).toMatchObject({
+        message: expect.stringMatching(/^Event loop block profiled: block ~\d+ms \(profiled after/),
+        log: { level: 'INFO', logger: 'metrics.event_loop_watchdog' },
+        kibana: { event_loop_watchdog: { profile: { stopReason: 'block_ended' } } },
+      });
+      const profile = lines[0].kibana?.event_loop_watchdog?.profile;
+      expect(profile?.profiledAfterMs).toBeGreaterThanOrEqual(1_000);
+      expect(profile?.blockedMs).toBeGreaterThanOrEqual(3_900);
+      expect(profile?.samples).toBeGreaterThan(50);
+      expect(profile?.coverage).toBeGreaterThan(0);
+      expect(profile?.coverage).toBeLessThanOrEqual(1);
+      expect(profile?.captureDurationMs).toBeGreaterThan(0);
+      expect(restarts(result)).toEqual([]);
+    }, 120_000);
+
+    it('stops a capture at its maximum duration while the main thread is still blocked', async () => {
+      const result = await runHarness('profile_max_duration');
+      expectCleanExit(result);
+      const [line] = profileLogLines(result);
+      expect(line.kibana?.event_loop_watchdog?.profile).toMatchObject({
+        stopReason: 'max_duration',
+        samples: expect.any(Number),
+      });
+      // The block went on past the capture, so the capture covers only part of it.
+      expect(line.kibana?.event_loop_watchdog?.profile?.coverage).toBeLessThan(1);
+      expect(line.message).toMatch(/so far/);
+      const ended = result.mainLogLines.find(({ message }) => message === 'block ended');
+      // Logged by the worker before the main thread's block ended.
+      expect(Date.parse(line['@timestamp'])).toBeLessThan(ended?.at ?? NaN);
+    }, 120_000);
+
+    it('profiles a large block without running out of memory at the 32 MB limit (installs outside containers)', async () => {
+      const result = await runHarness('profile_large', { timeoutMs: 120_000 });
+      expectCleanExit(result);
+      const [line] = profileLogLines(result);
+      const profile = line.kibana?.event_loop_watchdog?.profile;
+      expect(profile?.stopReason).toBe('max_duration');
+      expect(profile?.nodes).toBeGreaterThan(10_000);
+      expect(profile?.heapUsed).toBeGreaterThan(0);
+      // No out-of-memory restart at the shipped limit.
+      expect(restarts(result)).toEqual([]);
+    }, 150_000);
+
+    it("ends the main thread's profile when the worker crashes while profiling", async () => {
+      const result = await runHarness('profile_crash');
+      expectCleanExit(result);
+      expect(result.workerLogLines.map(({ message }) => message)).toContain('profiling started');
+      expectProfilerStopped(result);
+    }, 120_000);
+
+    it("ends the main thread's profile when the watchdog stops while a capture's stop is in flight", async () => {
+      const result = await runHarness('profile_shutdown');
+      expectCleanExit(result);
+      expect(result.mainLogLines.map(({ message }) => message)).toContain(
+        'Event loop watchdog stopped'
+      );
+      expect(restarts(result)).toEqual([]);
+      expectProfilerStopped(result);
+    }, 120_000);
+
+    it('logs the running capture when profiling is turned off, and profiles no later block', async () => {
+      const result = await runHarness('profile_flag_off');
+      expectCleanExit(result);
+      const lines = profileLogLines(result);
+      expect(lines).toHaveLength(1);
+      const second = result.mainLogLines.find(({ message }) => message === 'second block');
+      expect(Date.parse(lines[0]['@timestamp'])).toBeLessThan(second?.at ?? NaN);
+      // Both blocks are past the start threshold, profiled or not.
+      const pastStartAfter = statsOf(result).reduce(
+        (total, { profiling }) => total + (profiling?.pastStartAfter ?? 0),
+        0
+      );
+      expect(pastStartAfter).toBe(2);
+      expect(restarts(result)).toEqual([]);
+    }, 120_000);
+  });
 });

@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
+import type { OverviewFilters } from '../../../../../common/overview_filters';
 import type { Breakdowns } from '../../../../../common/types/usage';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import { createUiSettingsMock } from '../../../../test_utils/ui_settings_mock';
@@ -23,8 +24,8 @@ const BREAKDOWNS: Breakdowns = {
   ],
   operatingSystems: [{ name: 'macOS', pageLoads: 40 }],
   devices: [
-    { name: 'desktop', pageLoads: 30 },
-    { name: 'mobile', pageLoads: 10 },
+    { name: 'iPhone', pageLoads: 30 },
+    { name: 'Pixel 8', pageLoads: 10 },
   ],
 };
 
@@ -34,14 +35,23 @@ const sessionsHref = jest.fn((query: Record<string, unknown>) => {
   return `/sessions?${new URLSearchParams(query as never)}`;
 });
 
-const renderPanel = (breakdowns = BREAKDOWNS, isLoading = false) => {
+const onSelectFilter = jest.fn();
+
+const renderPanel = (breakdowns = BREAKDOWNS, isLoading = false, filters: OverviewFilters = {}) => {
   return render(
-    <BreakdownsPanel breakdowns={breakdowns} isLoading={isLoading} sessionsHref={sessionsHref} />,
+    <BreakdownsPanel
+      breakdowns={breakdowns}
+      isLoading={isLoading}
+      sessionsHref={sessionsHref}
+      filters={filters}
+      onSelectFilter={onSelectFilter}
+    />,
     { wrapper: EuiProvider }
   );
 };
 
 beforeEach(() => {
+  jest.clearAllMocks();
   jest.mocked(useKibanaServices).mockReturnValue({
     uiSettings: createUiSettingsMock(),
   } as unknown as ReturnType<typeof useKibanaServices>);
@@ -89,13 +99,48 @@ describe('BreakdownsPanel', () => {
     );
   });
 
-  it('labels the devices Desktop and Mobile, without links', () => {
+  it('lists the devices by name, without sessions to open', () => {
     renderPanel();
 
     const devices = within(screen.getByTestId('digitalExperienceOverviewDevices'));
-    expect(devices.getByText('Desktop')).toBeInTheDocument();
-    expect(devices.getByText('Mobile')).toBeInTheDocument();
+    expect(devices.getByText('iPhone')).toBeInTheDocument();
+    expect(devices.getByText('Pixel 8')).toBeInTheDocument();
     expect(devices.queryByRole('link')).not.toBeInTheDocument();
+  });
+
+  it('filters by a browser, an operating system or a device when its row is clicked', () => {
+    renderPanel();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Filter by Safari' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Filter by macOS' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Filter by Pixel 8' }));
+
+    expect(onSelectFilter.mock.calls).toEqual([
+      ['browser', 'Safari'],
+      ['os', 'macOS'],
+      ['device', 'Pixel 8'],
+    ]);
+  });
+
+  it('shows the rows the Overview is filtered by as pressed, and offers to take the filter off', () => {
+    renderPanel(BREAKDOWNS, false, {
+      browser: [{ value: 'Chrome', exclude: false }],
+      os: [{ value: 'macOS', exclude: true }],
+    });
+
+    expect(screen.getByRole('button', { name: 'Stop filtering by Chrome' })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+    expect(screen.getByRole('button', { name: 'Filter by Safari' })).toHaveAttribute(
+      'aria-pressed',
+      'false'
+    );
+    // An excluded value is not selected: a click includes it instead.
+    expect(screen.getByRole('button', { name: 'Filter by macOS' })).toHaveAttribute(
+      'aria-pressed',
+      'false'
+    );
   });
 
   it('shows a spinner while loading', () => {

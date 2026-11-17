@@ -30,7 +30,11 @@ import {
   toOnboardingDeploymentQuery,
 } from './policy_cleanup';
 import type { BuildPolicyBodyOpts, PolicyCleanupOps } from './policy_cleanup';
-import { getPolicySettingsUpdate } from '../../common/policy_settings';
+import {
+  getPolicySettingsUpdate,
+  getPolicyVarSettings,
+  getPolicyVarSettingsUpdate,
+} from '../../common/policy_settings';
 
 export interface UpdateAgentBasedPolicyOpts extends BuildPolicyBodyOpts {
   selectedAgentPolicyIds: string[];
@@ -216,7 +220,12 @@ export async function updateAgentBasedPolicy(
   }
 
   const services = members.map(({ service }) => service);
-  const inputs = buildPackageInputs(services, serviceVarsMap, globalRegion);
+  const inputs = buildPackageInputs(
+    services,
+    serviceVarsMap,
+    globalRegion,
+    getPolicyVarSettings(policySettings, 'agent_based')
+  );
 
   const pkgTemplates: Array<{
     name?: string;
@@ -240,14 +249,15 @@ export async function updateAgentBasedPolicy(
     staticKeys,
     pkgVarNames,
     agentCredentials,
-    authenticateAndDeployStep.existingSecretRefs ?? existingSecretRefs
+    authenticateAndDeployStep.existingSecretRefs ?? existingSecretRefs,
+    getPolicyVarSettingsUpdate(policySettings, 'agent_based', pkgVarNames)
   );
   // When new credentials are explicitly provided, use only the newly built vars — merging the
   // existing values would retain stale fields from the old credential method (e.g. access_key_id
   // left over after switching to shared_credentials). When no credentials are in memory (access/
   // temp keys are memory-only and lost after reload), merge existing vars as a base so a
   // service-var-only dirty redeploy does not silently clear credential fields from the policy.
-  let vars: Record<string, string | { isSecretRef: boolean; id: string }> | undefined;
+  let vars: Record<string, string | null | { isSecretRef: boolean; id: string }> | undefined;
   if (agentCredentials) {
     vars = builtVars;
   } else {

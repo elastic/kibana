@@ -38,10 +38,17 @@ import {
   isMainPackageName,
 } from '../authenticate_and_deploy_step/deploy_group_helpers';
 import { getNamespaceError } from './instance_namespace_field';
-import type { PolicySettings } from '../../common/policy_settings';
 import {
+  getReroutePermissions,
+  supportsPolicySetting,
+  type PolicySettings,
+} from '../../common/policy_settings';
+import {
+  getConditionErrors,
   getDescriptionError,
   getIntegrationNameError,
+  getProxyUrlError,
+  getReroutePermissionsError,
   supportsIntegrationSettings,
 } from './integration_settings';
 
@@ -73,6 +80,12 @@ export interface ServiceVars {
    * namespace; a duplicate with none takes it too.
    */
   namespace?: string;
+  /**
+   * Whether Fleet creates a dedicated index template for the dataset, as in Fleet's form. The
+   * package policy takes one value, so it is written to every service that deploys in the policy.
+   * Absent means on. Stored beside the vars, so it is never sent as a package var.
+   */
+  createDatasetTemplates?: boolean;
 }
 
 /**
@@ -106,6 +119,11 @@ export interface ServiceSettingsPersistedState {
    * its own (`ServiceVars.namespace`). Empty or absent inherits the agent policy's.
    */
   namespace?: string;
+  /**
+   * Whether the global namespace uses dedicated index templates. Applied to the installed
+   * packages after a deploy; never applies to a duplicate's own namespace.
+   */
+  dedicatedNamespaceTemplates?: boolean;
   /**
    * Package policy fields every policy of the onboarding gets (e.g. the output), keyed by Fleet
    * field name. Each deployment method applies only the ones it supports. An empty value is the
@@ -268,6 +286,27 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       });
     },
     [persisted, setPersisted]
+  );
+
+  // The switch means nothing without a namespace, so it reads as off while there is none.
+  const dedicatedNamespaceTemplates =
+    !!persisted?.dedicatedNamespaceTemplates && !!namespace.trim();
+
+  const setDedicatedNamespaceTemplates = useCallback(
+    (value: boolean) => {
+      setPersisted({
+        ...(persisted ?? { globalRegion: '', serviceVars: {} }),
+        dedicatedNamespaceTemplates: value,
+      });
+      // Turning it off changes nothing on the package, so nothing else would save it, and a saved
+      // "on" would come back when the deployment is reopened. Turning it on is saved once it was
+      // applied, so that it stays paired with the namespace it was applied for.
+      const deploymentId = detectAndReviewStep?.onboardingDeploymentId;
+      if (!value && deploymentId) {
+        updateDeployment(deploymentId, { dedicatedNamespaceTemplates: false });
+      }
+    },
+    [persisted, setPersisted, detectAndReviewStep?.onboardingDeploymentId, updateDeployment]
   );
 
   const policySettings = useMemo(
@@ -462,26 +501,38 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       enabledDataStreams: string[],
       instanceNamespace?: string,
       /** A new display name for the instance, written in the same update. */
-      newName?: string
+      newName?: string,
+      /** The template choice of the whole policy, written to each of its services in one update. */
+      policyTemplates?: { instanceIds: string[]; enabled: boolean }
     ) => {
       const current = getServiceVars(instanceId);
       const merged = mergeVarsByDataStream(current.varsByDataStream, newVarsByDataStream);
       // Only a duplicate has a namespace of its own; an original always follows the global one.
       const isDuplicate = instances.some((i) => i.instanceId === instanceId && i.isDuplicate);
       const ownNamespace = isDuplicate ? instanceNamespace ?? current.namespace : undefined;
+      const serviceVars: Record<string, ServiceVars> = {
+        ...((persisted?.serviceVars ?? {}) as Record<string, ServiceVars>),
+        [instanceId]: {
+          enabledDataStreams,
+          varsByDataStream: merged,
+          namespace: ownNamespace,
+          ...(current.createDatasetTemplates !== undefined && {
+            createDatasetTemplates: current.createDatasetTemplates,
+          }),
+        },
+      };
+      for (const id of policyTemplates?.instanceIds ?? []) {
+        serviceVars[id] = {
+          ...(serviceVars[id] ?? getServiceVars(id)),
+          createDatasetTemplates: policyTemplates?.enabled,
+        };
+      }
       setPersisted({
         ...(persisted ?? { globalRegion: '', serviceVars: {} }),
         instances: newName
           ? instances.map((i) => (i.instanceId === instanceId ? { ...i, name: newName } : i))
           : instances,
-        serviceVars: {
-          ...(persisted?.serviceVars ?? {}),
-          [instanceId]: {
-            enabledDataStreams,
-            varsByDataStream: merged,
-            namespace: ownNamespace,
-          },
-        },
+        serviceVars,
       });
     },
     [persisted, setPersisted, getServiceVars, instances]
@@ -493,7 +544,9 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       newName: string,
       newVarsByDataStream: Record<string, ServiceDataStreamVars>,
       enabledDataStreams: string[],
-      instanceNamespace?: string
+      instanceNamespace?: string,
+      /** The duplicate has a policy of its own, so it takes its own template choice. */
+      createDatasetTemplates?: boolean
     ) => {
       const source = instances.find((i) => i.instanceId === sourceInstanceId);
       if (!source) return;
@@ -526,6 +579,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
               : sourceVars.enabledDataStreams,
             varsByDataStream: mergedByDs,
             namespace: instanceNamespace ?? sourceVars.namespace,
+            ...(createDatasetTemplates !== undefined && { createDatasetTemplates }),
           },
         },
       });
@@ -577,6 +631,54 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   const integrationNameError = getIntegrationNameError(integrationName);
   const descriptionError = getDescriptionError(description);
   const namespaceError = getNamespaceError(namespace);
+  // Only where the condition is offered: one kept from another deployment method is never sent,
+  // and could not be fixed from a hidden field.
+  const condition = policySettings.condition ?? '';
+  const conditionErrors = useMemo(
+    () =>
+      supportsPolicySetting('condition', deploymentMethod)
+        ? getConditionErrors(condition)
+        : undefined,
+    [condition, deploymentMethod]
+  );
+
+  // The proxy URL reaches only the policies of services whose package declares the var, and only
+  // for the deployment methods that send it. Elsewhere the field is hidden, so a value left over
+  // from another method or selection must not block Continue.
+  const isProxyUrlSupported = useMemo(
+    () =>
+      supportsPolicySetting('proxy_url', deploymentMethod) &&
+      instances.some((inst) => {
+        const service = awsServicesMap?.get(inst.serviceId);
+        return (
+          !!service &&
+          supportsIntegrationSettings(service, deploymentMethod) &&
+          !!service.declaresProxyUrl
+        );
+      }),
+    [instances, awsServicesMap, deploymentMethod]
+  );
+  const proxyUrl = policySettings.proxy_url ?? '';
+  const proxyUrlError = isProxyUrlSupported ? getProxyUrlError(proxyUrl) : undefined;
+
+  // The reroute permissions reach every package policy of the deployment methods that send them,
+  // so any selected service that gets a policy is enough. Under managed integration an ECF-only
+  // service gets none (it is deployed through CloudFormation), so with only such services the
+  // field would do nothing. Elsewhere the field is hidden, so a value left over from another
+  // method or selection must not block Continue.
+  const isReroutePermissionsSupported = useMemo(
+    () =>
+      supportsPolicySetting('additional_datastreams_permissions', deploymentMethod) &&
+      instances.some((inst) => {
+        const service = awsServicesMap?.get(inst.serviceId);
+        return !!service && supportsIntegrationSettings(service, deploymentMethod);
+      }),
+    [instances, awsServicesMap, deploymentMethod]
+  );
+  const reroutePermissions = getReroutePermissions(policySettings);
+  const reroutePermissionsError = isReroutePermissionsSupported
+    ? getReroutePermissionsError(reroutePermissions)
+    : undefined;
 
   const isReady = useMemo(
     () =>
@@ -584,8 +686,20 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       incompleteInstances.length === 0 &&
       !integrationNameError &&
       !descriptionError &&
-      !namespaceError,
-    [globalRegion, incompleteInstances, integrationNameError, descriptionError, namespaceError]
+      !namespaceError &&
+      !proxyUrlError &&
+      !conditionErrors &&
+      !reroutePermissionsError,
+    [
+      globalRegion,
+      incompleteInstances,
+      integrationNameError,
+      descriptionError,
+      namespaceError,
+      proxyUrlError,
+      conditionErrors,
+      reroutePermissionsError,
+    ]
   );
 
   const [globalRegionTouched, setGlobalRegionTouched] = useState(false);
@@ -625,8 +739,16 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     namespace,
     setNamespace,
     namespaceError,
+    dedicatedNamespaceTemplates,
+    setDedicatedNamespaceTemplates,
     policySettings,
     setPolicySetting,
+    isProxyUrlSupported,
+    proxyUrlError,
+    conditionErrors,
+    isReroutePermissionsSupported,
+    reroutePermissions,
+    reroutePermissionsError,
     bareNamePackage,
     instances,
     filteredInstances,
