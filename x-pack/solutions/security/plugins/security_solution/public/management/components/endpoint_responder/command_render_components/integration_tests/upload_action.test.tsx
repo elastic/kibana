@@ -255,6 +255,10 @@ describe('When using `upload` response action', () => {
     await waitFor(() => {
       expect(getByTestId('upload-success')).toBeTruthy();
     });
+
+    expect(getByTestId('upload-actionResult-hostStatus')).toHaveTextContent(
+      'upload completed successfully'
+    );
   });
 
   it.each([
