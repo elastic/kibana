@@ -456,6 +456,38 @@ describe('ConcurrencyManager', () => {
       );
     });
 
+    it('publishes a pending victim whose task is already claimed', async () => {
+      const settings: ConcurrencySettings = {
+        key: 'server-1',
+        strategy: 'cancel-in-progress',
+        max: 1,
+      };
+      mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockResolvedValue([
+        'exec-1',
+      ]);
+      mockWorkflowExecutionRepository.getWorkflowExecutionById.mockResolvedValue({
+        id: 'exec-1',
+        workflowId: 'wf-1',
+        spaceId: 'default',
+        status: ExecutionStatus.PENDING,
+        isTestRun: false,
+        triggeredBy: 'manual',
+      } as never);
+      mockWorkflowTaskManager.hasActiveExecutionTask.mockResolvedValue(true);
+
+      await concurrencyManager.checkConcurrency(settings, 'server-1', 'exec-2', 'default');
+
+      expect(publishFinishedWorkflowExecution).toHaveBeenCalledTimes(1);
+      expect(publishFinishedWorkflowExecution).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'exec-1', status: ExecutionStatus.PENDING }),
+        expect.objectContaining({
+          status: ExecutionStatus.CANCELLED,
+          cancelledBy: 'system',
+        })
+      );
+      expect(mockWorkflowTaskManager.forceRunIdleTasks).toHaveBeenCalledWith('exec-1');
+    });
+
     it('publishes when the active-task check fails', async () => {
       const logger = loggingSystemMock.createLogger();
       const manager = new ConcurrencyManager(
