@@ -42,7 +42,6 @@
     "@kbn/search-inference-endpoints",
     "@kbn/core-http-server",
     "@kbn/logging",
-    "@kbn/security-plugin-types-public",
     "@kbn/deeplinks-search",
     "@kbn/core-application-browser",
     "@kbn/search-shared-ui",

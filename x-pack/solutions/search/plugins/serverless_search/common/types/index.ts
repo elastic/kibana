@@ -8,14 +8,6 @@
 import type { IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
 import type { Connector } from '@kbn/search-connectors/types/connectors';
 
-export interface IndexData {
-  name: string;
-  count: number;
-}
-
-export interface FetchIndicesResult {
-  indices: IndexData[];
-}
 export interface FetchIndexResult {
   index: IndicesIndexState & {
     connector?: Connector;
