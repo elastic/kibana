@@ -1494,9 +1494,9 @@ groups:
       - setting: xpack.alerting_v2.enabled
         id: xpack-alerting-v2-enabled
         description: |
-          Set to `false` to turn off Universal Alerting completely. {{kib}} doesn't load it, so existing rules and action policies stop running, and its pages, APIs, and the **Universal Alerting** advanced setting aren't available. Rules, action policies, and alert data stay in place, and rules start running again when you set it back to `true`.
+          Set to `false` to turn off Universal Alerting completely. Existing rules and action policies stop running, and Universal Alerting is hidden from the interface, including its pages and the **Universal Alerting** advanced setting. Its APIs aren't available either. Rules, action policies, and alert data stay in place, and rules start running again when you set it back to `true`.
 
-          This is the only setting that stops rules and action policies from running. The [`alerting:v2:enabled`](/reference/advanced-settings.md#alerting-v2-enabled) advanced setting only hides the interface and rejects API requests.
+          To stop all rules and action policies from running, use this setting instead of the [`alerting:v2:enabled`](/reference/advanced-settings.md#alerting-v2-enabled) advanced setting. The advanced setting only hides the interface and rejects API requests, so existing rules and action policies keep running.
         warning: |
           Set this value back to `true` before you upgrade {{kib}}. If Universal Alerting rules or action policies exist while it's `false`, the upgrade fails.
         datatype: bool
