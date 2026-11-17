@@ -1,3 +1,3 @@
 # @kbn/coloring
 
-This package contains the types, utility methods, and components needed to make Color Palette work.
+This package contains the types and utility methods needed to make Color Palette work. The React components live in `@kbn/coloring-components`.

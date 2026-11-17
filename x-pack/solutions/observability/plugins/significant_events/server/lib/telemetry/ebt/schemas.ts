@@ -11,10 +11,13 @@ import type {
   ExistingAlertIdentityProps,
   AgentBuilderKnowledgeIndicatorCreatedProps,
   AgentToolEventCreateProps,
-  AgentToolEventInvestigationAttachProps,
   AgentToolEventStatusUpdateProps,
+  AgentToolFailedProps,
   AgentToolKnowledgeIndicatorIdentificationStartedProps,
+  KnowledgeIndicatorQueriesGenerationFailedProps,
   DetectionScanProps,
+  DiscoveryCompletedProps,
+  DiscoveryStartedProps,
   DiscoveryTriggeredProps,
   EventStatusChangedProps,
   KnowledgeIndicatorFeaturesIdentifiedProps,
@@ -22,10 +25,46 @@ import type {
   KnowledgeIndicatorOnboardingScheduledProps,
   AgentToolEventWriteProps,
   AgentToolEventSearchProps,
+  EbtTelemetryContext,
   OptionalWorkflowExecutionTelemetryProps,
   ParentWorkflowExecutionTelemetryProps,
   WorkflowExecutionTelemetryProps,
 } from './types';
+
+const ebtTelemetryContextSchema: RootSchema<EbtTelemetryContext> = {
+  space_id: {
+    type: 'keyword',
+    _meta: { description: 'The Kibana space in which the operation ran' },
+  },
+  target_cluster_scope: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'CPS target scope: origin for operations limited to the Nightshift project, or all for operations spanning linked projects',
+      optional: true,
+    },
+  },
+  target_cluster_ids: {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: { description: 'An opaque serverless project ID' },
+    },
+    _meta: {
+      description:
+        'Stable opaque IDs of the Elasticsearch projects targeted by this operation; only present when CPS is enabled',
+      optional: true,
+    },
+  },
+  target_cluster_ids_complete: {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether target_cluster_ids includes every project in the target scope visible to the request',
+      optional: true,
+    },
+  },
+};
 
 const workflowExecutionTelemetrySchema: RootSchema<WorkflowExecutionTelemetryProps> = {
   workflow_execution_id: {
@@ -62,6 +101,7 @@ const parentWorkflowExecutionTelemetrySchema: RootSchema<ParentWorkflowExecution
 
 const knowledgeIndicatorQueriesGeneratedSchema: RootSchema<KnowledgeIndicatorQueriesGeneratedProps> =
   {
+    ...ebtTelemetryContextSchema,
     ...optionalWorkflowExecutionTelemetrySchema,
     ...parentWorkflowExecutionTelemetrySchema,
     count: {
@@ -170,6 +210,7 @@ const knowledgeIndicatorQueriesGeneratedSchema: RootSchema<KnowledgeIndicatorQue
 
 const knowledgeIndicatorFeaturesIdentifiedSchema: RootSchema<KnowledgeIndicatorFeaturesIdentifiedProps> =
   {
+    ...ebtTelemetryContextSchema,
     ...optionalWorkflowExecutionTelemetrySchema,
     ...parentWorkflowExecutionTelemetrySchema,
     run_id: {
@@ -299,6 +340,7 @@ const knowledgeIndicatorFeaturesIdentifiedSchema: RootSchema<KnowledgeIndicatorF
 
 const agentBuilderKnowledgeIndicatorCreatedSchema: RootSchema<AgentBuilderKnowledgeIndicatorCreatedProps> =
   {
+    ...ebtTelemetryContextSchema,
     ...optionalWorkflowExecutionTelemetrySchema,
     ki_kind: {
       type: 'keyword',
@@ -334,7 +376,7 @@ const agentBuilderKnowledgeIndicatorCreatedSchema: RootSchema<AgentBuilderKnowle
       type: 'keyword',
       _meta: {
         description:
-          'The `feature.id` or `query.id` the write addressed, unique within `source_id`; absent only when a failed query write had no caller-supplied id',
+          'The `feature.id` or `query.id` created, unique within `source_id`; absent when the write failed',
         optional: true,
       },
     },
@@ -349,6 +391,7 @@ const agentBuilderKnowledgeIndicatorCreatedSchema: RootSchema<AgentBuilderKnowle
 
 const agentToolKnowledgeIndicatorIdentificationStartedSchema: RootSchema<AgentToolKnowledgeIndicatorIdentificationStartedProps> =
   {
+    ...ebtTelemetryContextSchema,
     ...optionalWorkflowExecutionTelemetrySchema,
     success: {
       type: 'boolean',
@@ -379,11 +422,6 @@ const alertSourceSchema = {
   },
 };
 
-const alertSpaceIdSchema = {
-  type: 'keyword' as const,
-  _meta: { description: 'The Kibana space that owns the alert' },
-};
-
 const fingerprintDescription =
   'The stable caller-visible series identity of the alert the operation addressed, before Alerting v2 hashes it with space and source into `group_hash`. The operation may have failed; filter on `success` to keep only alerts that exist in `.rule-events`';
 
@@ -397,12 +435,13 @@ const groupHashSchema = {
 };
 
 const existingAlertIdentitySchema: RootSchema<ExistingAlertIdentityProps> = {
+  ...ebtTelemetryContextSchema,
   alert_source: alertSourceSchema,
   fingerprint: { type: 'keyword', _meta: { description: fingerprintDescription } },
-  space_id: alertSpaceIdSchema,
 };
 
 const alertCreationAttemptIdentitySchema: RootSchema<AlertCreationAttemptIdentityProps> = {
+  ...ebtTelemetryContextSchema,
   alert_source: alertSourceSchema,
   fingerprint: {
     type: 'keyword',
@@ -412,7 +451,6 @@ const alertCreationAttemptIdentitySchema: RootSchema<AlertCreationAttemptIdentit
     },
   },
   group_hash: groupHashSchema,
-  space_id: alertSpaceIdSchema,
 };
 
 const agentToolEventCreateSchema: RootSchema<AgentToolEventCreateProps> = {
@@ -466,7 +504,7 @@ const agentToolEventStatusUpdateSchema: RootSchema<AgentToolEventStatusUpdatePro
     type: 'keyword',
     _meta: {
       description:
-        'The stable event id of the updated significant event; the same value as `fingerprint`, kept for compatibility',
+        'The stable event id of the updated significant event, or `unknown` (as is `fingerprint`) when no event matched the requested id; the same value as `fingerprint`, kept for compatibility',
     },
   },
   status: {
@@ -478,7 +516,8 @@ const agentToolEventStatusUpdateSchema: RootSchema<AgentToolEventStatusUpdatePro
   error_message: {
     type: 'text',
     _meta: {
-      description: 'Error message when event status update fails',
+      description:
+        'Error message when event status update fails; `not_found` when no event matched the requested id',
       optional: true,
     },
   },
@@ -510,14 +549,14 @@ const eventStatusChangedSchema: RootSchema<EventStatusChangedProps> = {
     type: 'keyword',
     _meta: {
       description:
-        'The entry point that wrote the version: `agent_tool` (an Agent Builder tool, in discovery or chat), `rest_api` (the event update route, which the UI calls) or `stale_event_cleanup` (the cleanup that closes events whose rule was deleted). It names the code path, not whether a person was behind it',
+        'The entry point that wrote the version: `agent_tool` (an Agent Builder tool, in discovery or chat), `rest_api` (the event update route, which the UI calls) or `stale_event_cleanup` (the cleanup that closes events whose rule was deleted or that stayed recovering past the timeout). It names the code path, not whether a person was behind it',
     },
   },
   change_kind: {
     type: 'keyword',
     _meta: {
       description:
-        'How the status was decided: `operator` (a status chosen through the update route or a chat tool), `assessment` (discovery re-checked the member signals) or `rule_deleted`. Absent when the writer supplied the status itself, as `event_create` does. An `operator` deactivation is a manual close; `close_reason` says why when the caller stated it',
+        'How the status was decided: `operator` (a status chosen through the update route or a chat tool), `assessment` (discovery re-checked the member signals), `rule_deleted` or `recovery_timeout` (the cleanup closed an event that stayed recovering past the timeout). Absent when the writer supplied the status itself, as `event_create` does. An `operator` deactivation is a manual close; `close_reason` says why when the caller stated it',
       optional: true,
     },
   },
@@ -585,6 +624,7 @@ const eventStatusChangedSchema: RootSchema<EventStatusChangedProps> = {
 };
 
 const discoveryTriggeredSchema: RootSchema<DiscoveryTriggeredProps> = {
+  ...ebtTelemetryContextSchema,
   ...workflowExecutionTelemetrySchema,
   execution_id: {
     type: 'keyword' as const,
@@ -593,13 +633,96 @@ const discoveryTriggeredSchema: RootSchema<DiscoveryTriggeredProps> = {
         'Deprecated alias of workflow_execution_id; retained for discovery-triggered compatibility',
     },
   },
-  space_id: {
-    type: 'keyword' as const,
-    _meta: { description: 'The Kibana space in which the pipeline was triggered' },
+};
+
+const optionalCount = (description: string) => ({
+  type: 'long' as const,
+  _meta: { description, optional: true as const },
+});
+
+const discoveryStartedSchema: RootSchema<DiscoveryStartedProps> = {
+  ...ebtTelemetryContextSchema,
+  parent_workflow_execution_id: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The workflow execution that started this run: the orchestrator execution `discovery-triggered` carries as `workflow_execution_id` for a manual run, the scheduled review execution for a scheduled one (several runs can share it, one per review pass); absent when the discovery workflow was run directly',
+      optional: true,
+    },
+  },
+  workflow_execution_id: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The discovery workflow execution that reported; pairs `discovery-started` with `discovery-completed` and joins the workflow engine events for that execution',
+    },
+  },
+  alert_source: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The `.rule-events` `source` of the alerts this run produces; always `elastic.significant_events` until other sources feed discovery',
+    },
+  },
+};
+
+const discoveryCompletedSchema: RootSchema<DiscoveryCompletedProps> = {
+  ...discoveryStartedSchema,
+  outcome: {
+    type: 'keyword',
+    _meta: {
+      description:
+        '`completed` when the workflow reached an exit, `failed` when a step failed and `timed_out` when the discovery agent step exceeded its timeout; the workflow-level fallback reports both. A cancelled run, or one ended by the workflow timeout, never reports; pair with the workflow engine `workflows_execution_workflow_cancelled` event',
+    },
+  },
+  duration_ms: {
+    type: 'long',
+    _meta: {
+      description:
+        'Milliseconds from the discovery execution start to this report; absent when the execution could not be read',
+      optional: true,
+    },
+  },
+  has_work: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether any detection reached the discovery agent',
+      optional: true,
+    },
+  },
+  budget_denied: {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether the run ended before reading any detection because the run quota denied it',
+      optional: true,
+    },
+  },
+  processed_count: optionalCount('Detections handed to the run after classification'),
+  skipped_count: optionalCount('Detections the classifier skipped'),
+  held_back_count: optionalCount('Detections the classifier held back'),
+  needs_agent_count: optionalCount('Detections the classifier routed to the agent'),
+  written_rule_count: optionalCount(
+    'Distinct rules the agent reported done in this run, including those whose detections it wrote no event for'
+  ),
+  classifier_failed: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the detection classifier failed and the run fell back to the agent',
+      optional: true,
+    },
+  },
+  error_message: {
+    type: 'text',
+    _meta: {
+      description: 'The failing step error when `outcome` is `failed`',
+      optional: true,
+    },
   },
 };
 
 const detectionScanSchema: RootSchema<DetectionScanProps> = {
+  ...ebtTelemetryContextSchema,
   ...optionalWorkflowExecutionTelemetrySchema,
   took_ms: {
     type: 'long',
@@ -674,15 +797,10 @@ const detectionScanSchema: RootSchema<DetectionScanProps> = {
       description: 'Default analysis outer bucket interval (e.g. `5m`)',
     },
   },
-  space_id: {
-    type: 'keyword',
-    _meta: {
-      description: 'The Kibana space in which the scan ran',
-    },
-  },
 };
 
 const onboardingScheduledSchema: RootSchema<KnowledgeIndicatorOnboardingScheduledProps> = {
+  ...ebtTelemetryContextSchema,
   ...workflowExecutionTelemetrySchema,
   source_id: {
     type: 'keyword',
@@ -703,12 +821,6 @@ const onboardingScheduledSchema: RootSchema<KnowledgeIndicatorOnboardingSchedule
       description: 'The managed workflow ID that was triggered (system-streams-ki-onboarding)',
     },
   },
-  space_id: {
-    type: 'keyword',
-    _meta: {
-      description: 'The Kibana space in which the workflow execution was created',
-    },
-  },
   skip_features: {
     type: 'boolean',
     _meta: {
@@ -722,48 +834,6 @@ const onboardingScheduledSchema: RootSchema<KnowledgeIndicatorOnboardingSchedule
     },
   },
 };
-
-const agentToolEventInvestigationAttachSchema: RootSchema<AgentToolEventInvestigationAttachProps> =
-  {
-    ...optionalWorkflowExecutionTelemetrySchema,
-    ...existingAlertIdentitySchema,
-    success: {
-      type: 'boolean',
-      _meta: {
-        description: 'Whether the investigation attachment succeeded',
-      },
-    },
-    event_uuid: {
-      type: 'keyword',
-      _meta: {
-        description:
-          'Deprecated — superseded by `event_id`. The identifier of the significant event the investigation was attached to',
-        optional: true,
-      },
-    },
-    event_id: {
-      type: 'keyword',
-      _meta: {
-        description:
-          'The stable event id of the significant event the investigation was attached to; the same value as `fingerprint`, kept for compatibility',
-        optional: true,
-      },
-    },
-    investigation_id: {
-      type: 'keyword',
-      _meta: {
-        description:
-          'Agent Builder conversation ID of the attached investigation; joins to nightshift-investigation-started.investigation_id',
-      },
-    },
-    error_message: {
-      type: 'text',
-      _meta: {
-        description: 'Error message when investigation attachment fails',
-        optional: true,
-      },
-    },
-  };
 
 const agentToolEventWriteSchema: RootSchema<AgentToolEventWriteProps> = {
   ...optionalWorkflowExecutionTelemetrySchema,
@@ -837,6 +907,7 @@ const agentToolEventWriteSchema: RootSchema<AgentToolEventWriteProps> = {
 };
 
 const agentToolEventSearchSchema: RootSchema<AgentToolEventSearchProps> = {
+  ...ebtTelemetryContextSchema,
   ...optionalWorkflowExecutionTelemetrySchema,
   success: {
     type: 'boolean',
@@ -890,15 +961,117 @@ const agentToolEventSearchSchema: RootSchema<AgentToolEventSearchProps> = {
   },
 };
 
+const agentToolFailedSchema: RootSchema<AgentToolFailedProps> = {
+  ...ebtTelemetryContextSchema,
+  ...optionalWorkflowExecutionTelemetrySchema,
+  tool_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'Agent Builder id of the tool whose call failed',
+    },
+  },
+  error_code: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Why the call failed. Calls refused for their arguments: unknown_source, source_disabled, detection_rule_mismatch, detection_not_stored, unresolved_feature_reference, validation_error, bad_request, not_found. Other failures: forbidden, paused, lease_held, reconcile_pending, stale_revision, conflict, outcome_unknown, bulk_error, internal_error',
+    },
+  },
+  input_rejected: {
+    type: 'boolean',
+    _meta: {
+      description:
+        'True when the tool refused the call because of its arguments; false when it failed for a reason the caller could not avoid by changing them',
+    },
+  },
+  agent_id: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Agent that made the call: the id of a built-in agent, or custom-<hash> for a user-created one, as on the Agent Builder events. Absent when the tool ran outside an agent',
+      optional: true,
+    },
+  },
+  tool_call_id: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Id of the tool call, as on agent_builder_tool_call_error, which carries the model, the conversation and the error text',
+      optional: true,
+    },
+  },
+  status_code: {
+    type: 'long',
+    _meta: {
+      description: 'HTTP status the error carries, when it carries one',
+      optional: true,
+    },
+  },
+  item_count: {
+    type: 'long',
+    _meta: {
+      description:
+        'Items in the failed call of a tool that takes a batch (events for events_write, candidates for ki_feature_similarity_search); a failed call processes none of them',
+      optional: true,
+    },
+  },
+  unresolved_count: {
+    type: 'long',
+    _meta: {
+      description:
+        'How many of the values the call named could not be resolved (source slugs for unknown_source, feature ids for unresolved_feature_reference)',
+      optional: true,
+    },
+  },
+};
+
+const knowledgeIndicatorQueriesGenerationFailedSchema: RootSchema<KnowledgeIndicatorQueriesGenerationFailedProps> =
+  {
+    ...ebtTelemetryContextSchema,
+    ...optionalWorkflowExecutionTelemetrySchema,
+    ...parentWorkflowExecutionTelemetrySchema,
+    error_code: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Why this attempt failed: agent_did_not_finalize (the agent ended without a finalized validate_queries result), unexpected_source (it finalized for another source), model_not_found, model_blocked, aborted (the request was cancelled), or internal_error. The event is reported once per failed attempt and the queries generation workflow retries, so several can share a workflow_execution_id; the run failed only when no queries-generated event follows under that id',
+      },
+    },
+    connector_id: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'The ID of the LLM connector used for the inference; absent when model resolution failed',
+        optional: true,
+      },
+    },
+    source_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'The nightshift source id the queries were generated for',
+      },
+    },
+    duration_ms: {
+      type: 'long',
+      _meta: {
+        description:
+          'Wall-clock duration of the failed generation attempt, including model resolution and context loading, in milliseconds',
+      },
+    },
+  };
+
 export {
+  agentToolFailedSchema,
+  knowledgeIndicatorQueriesGenerationFailedSchema,
   agentBuilderKnowledgeIndicatorCreatedSchema,
   agentToolEventCreateSchema,
-  agentToolEventInvestigationAttachSchema,
   agentToolEventSearchSchema,
   agentToolEventStatusUpdateSchema,
   agentToolEventWriteSchema,
   agentToolKnowledgeIndicatorIdentificationStartedSchema,
   detectionScanSchema,
+  discoveryCompletedSchema,
+  discoveryStartedSchema,
   discoveryTriggeredSchema,
   eventStatusChangedSchema,
   knowledgeIndicatorFeaturesIdentifiedSchema,

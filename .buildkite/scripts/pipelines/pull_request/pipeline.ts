@@ -340,7 +340,6 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
 
     if (
       GITHUB_PR_LABELS.includes('ci:build-cloud-image') &&
-      !GITHUB_PR_LABELS.includes('ci:deploy-cloud') &&
       !GITHUB_PR_LABELS.includes('ci:cloud-deploy') &&
       !GITHUB_PR_LABELS.includes('ci:cloud-redeploy')
     ) {
@@ -349,7 +348,6 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
 
     if (
       GITHUB_PR_LABELS.includes('ci:build-cloud-fips-image') &&
-      !GITHUB_PR_LABELS.includes('ci:deploy-cloud') &&
       !GITHUB_PR_LABELS.includes('ci:cloud-deploy') &&
       !GITHUB_PR_LABELS.includes('ci:cloud-redeploy')
     ) {
@@ -357,7 +355,6 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     }
 
     if (
-      GITHUB_PR_LABELS.includes('ci:deploy-cloud') ||
       GITHUB_PR_LABELS.includes('ci:cloud-deploy') ||
       GITHUB_PR_LABELS.includes('ci:cloud-redeploy')
     ) {

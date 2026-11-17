@@ -26,7 +26,8 @@ import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_c
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import { alertCreationAttemptIdentity } from '../alert_identity_telemetry';
-import { trackTelemetryBestEffort } from '../bulk_write';
+import { trackTelemetryBestEffort } from '../../../lib/telemetry/track_telemetry_best_effort';
+import { reportToolFailure, toTelemetryErrorMessage } from '../tool_failure';
 import { createEventToolHandler } from './handler';
 import { classifyError } from '../../utils/error_utils';
 import { loadSourceCatalog, toSourceRef } from '../../utils/resolve_source_slugs';
@@ -140,16 +141,19 @@ export function createEventTool({
           logger,
           description: 'event_create telemetry',
           track: () =>
-            telemetry.trackAgentToolEventCreate({
-              workflow_execution_id: workflowExecutionId,
-              ...alertCreationAttemptIdentity({
-                spaceId: request.spaceId,
-                eventId: data.event_id,
-                groupHash: data.group_hash,
-              }),
-              success: true,
-              source_ids: sourceIds,
-            }),
+            telemetry.trackAgentToolEventCreate(
+              {
+                workflow_execution_id: workflowExecutionId,
+                ...alertCreationAttemptIdentity({
+                  spaceId: request.spaceId,
+                  eventId: data.event_id,
+                  groupHash: data.group_hash,
+                }),
+                success: true,
+                source_ids: sourceIds,
+              },
+              request
+            ),
         });
 
         return {
@@ -169,19 +173,30 @@ export function createEventTool({
       } catch (error) {
         const classified = classifyError(error);
         const rawMessage = error instanceof Error ? error.message : String(error);
-        logger.error(`Error running event_create: ${rawMessage}`);
+        const failure = reportToolFailure({
+          error,
+          toolId: SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID,
+          errorLogMessage: `Error running event_create: ${rawMessage}`,
+          logger,
+          telemetry,
+          request,
+          runContext: context.runContext,
+        });
         // The event id is generated inside the write, so a failed create identifies no alert.
         trackTelemetryBestEffort({
           logger,
           description: 'failed event_create telemetry',
           track: () =>
-            telemetry.trackAgentToolEventCreate({
-              workflow_execution_id: workflowExecutionId,
-              ...alertCreationAttemptIdentity({ spaceId: request.spaceId }),
-              success: false,
-              source_ids: sourceIds,
-              error_message: rawMessage,
-            }),
+            telemetry.trackAgentToolEventCreate(
+              {
+                workflow_execution_id: workflowExecutionId,
+                ...alertCreationAttemptIdentity({ spaceId: request.spaceId }),
+                success: false,
+                source_ids: sourceIds,
+                error_message: toTelemetryErrorMessage(failure, rawMessage),
+              },
+              request
+            ),
         });
         return {
           results: [

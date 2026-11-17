@@ -40,6 +40,7 @@ export type MetricsWithExemplars = ReadonlyMap<string, ReadonlySet<string>>;
 
 export interface FetchMetricsWithExemplarsParams {
   search: ISearchGeneric;
+  sessionId?: string;
   timeFieldName?: string;
   timeRange: TimeRange;
   uiSettings: IUiSettingsClient;
@@ -50,6 +51,7 @@ export interface FetchMetricsWithExemplarsParams {
 
 export const fetchMetricsWithExemplars = async ({
   search,
+  sessionId,
   timeFieldName,
   timeRange,
   uiSettings,
@@ -62,6 +64,7 @@ export const fetchMetricsWithExemplars = async ({
   const { rawResponse } = await executeEsqlQuery({
     esqlQuery: EXEMPLARS_PROBE_QUERY,
     search,
+    sessionId,
     signal,
     timeFieldName,
     timeRange,

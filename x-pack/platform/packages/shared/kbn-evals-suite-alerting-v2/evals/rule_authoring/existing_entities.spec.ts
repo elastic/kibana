@@ -100,7 +100,6 @@ evaluate.describe(
                   ],
                   expectedSkills: [ACTION_POLICY_AUTHORING_SKILL_ID],
                   expectedToolIds: [
-                    ALERTING_TOOL_IDS.findActionPolicies,
                     ALERTING_TOOL_IDS.attachActionPolicy,
                     ALERTING_TOOL_IDS.manageActionPolicy,
                   ],

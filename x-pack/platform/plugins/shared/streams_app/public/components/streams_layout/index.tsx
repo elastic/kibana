@@ -19,7 +19,6 @@ import { StreamsAppHeader, StreamsAppPageTemplate } from '../streams_app_page_te
 import { defaultStreamsLayoutTab, isStreamsLayoutTab, STREAMS_LAYOUT_TABS } from './tab_ids';
 import { streamsLayoutTabs } from './tabs';
 import { UnitNotFoundPrompt } from './unit_not_found_prompt';
-import { useShowClassicTab } from './use_show_classic_tab';
 import { useUnitCheck } from './use_unit_check';
 
 const techPreviewBadge = {
@@ -29,27 +28,11 @@ const techPreviewBadge = {
   }),
 };
 
-/** Renders the V2 layout once the Classic tab check has settled, so the tab bar never changes. */
-export function StreamsV2LayoutGate() {
-  const { loading, showClassic } = useShowClassicTab();
-
-  if (loading) {
-    return (
-      <StreamsAppPageTemplate.EmptyPrompt
-        data-test-subj="streamsClassicTabLoading"
-        icon={<EuiLoadingSpinner size="xl" />}
-      />
-    );
-  }
-
-  return <StreamsLayout showClassic={showClassic} />;
-}
-
 /**
  * Top-level tabbed layout for Streams. It owns the tab bar and delegates each
  * tab's content to the matching entry in the tab registry.
  */
-export function StreamsLayout({ showClassic }: { showClassic: boolean }) {
+export function StreamsLayout() {
   const {
     path: { unitId, tab },
   } = useStreamsAppParams('/v2/unit/{unitId}/{tab}');
@@ -57,6 +40,7 @@ export function StreamsLayout({ showClassic }: { showClassic: boolean }) {
   const { rangeFrom, rangeTo } = useTimeRange();
   const { access } = useStreamsPrivileges();
   const unitCheck = useUnitCheck(unitId);
+  const showClassic = access.legacy;
 
   // No cleanup: opening a stream unmounts the layout, and the flag has to survive that.
   // AppRoot clears it when Streams itself unmounts.

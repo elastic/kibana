@@ -25,6 +25,7 @@ import {
   createRuntimeStateManager,
   selectTabSavedSearch,
   selectAllTabs,
+  TabInitializationStatus,
 } from './redux';
 import type { History } from 'history';
 import { createBrowserHistory, createMemoryHistory } from 'history';
@@ -401,6 +402,40 @@ describe('Discover state', () => {
   });
 
   describe('Initial data view list', () => {
+    test('reinitializes with a newly created data view after finding no data views', async () => {
+      const toolkit = getDiscoverInternalStateMock({ persistedDataViews: [dataViewMock] });
+      await toolkit.initializeTabs();
+      const { internalState, runtimeStateManager, services } = toolkit;
+      const tabId = toolkit.getCurrentTab().id;
+      internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId,
+          appState: { query: { language: 'kuery', query: '' } },
+        })
+      );
+      jest.mocked(services.dataViews.hasData.hasDataView).mockResolvedValue(false);
+      jest.mocked(services.dataViews.hasData.hasESData).mockResolvedValue(true);
+
+      await toolkit.initializeSingleTab({ tabId, skipWaitForDataFetching: true });
+
+      expect(toolkit.getCurrentTab().initializationState.initializationStatus).toBe(
+        TabInitializationStatus.NoData
+      );
+
+      internalState.dispatch(
+        internalStateActions.setInitializationState({ hasESData: true, hasDataView: true })
+      );
+      await toolkit.initializeSingleTab({ tabId, skipWaitForDataFetching: true });
+
+      expect(toolkit.getCurrentTab().initializationState.initializationStatus).toBe(
+        TabInitializationStatus.Complete
+      );
+      expect(getTabDataView(selectTabRuntimeState(runtimeStateManager, tabId))).toBe(dataViewMock);
+      expect(services.dataViews.hasData.hasDataView).toHaveBeenCalledTimes(1);
+
+      internalState.dispatch(internalStateActions.disconnectTab({ tabId }));
+    });
+
     test('initializes a persisted data view spec without a prefetched data view list', async () => {
       const toolkit = getDiscoverInternalStateMock({ persistedDataViews: [dataViewMock] });
       await toolkit.initializeTabs();

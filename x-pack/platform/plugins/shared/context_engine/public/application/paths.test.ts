@@ -6,12 +6,12 @@
  */
 
 import {
-  decodeRouteParam,
   getAiIndexDetailPath,
   getAiIndexSourcesPath,
-  getAiIndexKnowledgeIndicatorsPath,
-  getViewKiDocumentPath,
-  getViewKiPath,
+  getAiIndexKnowledgeDocumentsPath,
+  getKnowledgeDocumentPath,
+  getAiIndexSettingsPath,
+  getAiIndexDreamingTemplatePath,
 } from './paths';
 
 describe('getAiIndexDetailPath', () => {
@@ -26,41 +26,32 @@ describe('getAiIndexSourcesPath', () => {
   });
 });
 
-describe('getAiIndexKnowledgeIndicatorsPath', () => {
-  it('builds the knowledge indicators tab path', () => {
-    expect(getAiIndexKnowledgeIndicatorsPath('my-ai-index')).toBe(
-      '/ai_index/my-ai-index/knowledge_indicators'
+describe('getAiIndexKnowledgeDocumentsPath', () => {
+  it('builds the knowledge documents tab path', () => {
+    expect(getAiIndexKnowledgeDocumentsPath('my-ai-index')).toBe(
+      '/ai_index/my-ai-index/knowledge_documents'
     );
   });
 });
 
-describe('getViewKiPath', () => {
-  it('builds the path with an unencoded AI index id and encoded KI id', () => {
-    expect(getViewKiPath('my-ai-index', 'ki-1')).toBe('/ai_index/my-ai-index/ki/ki-1');
-  });
-
-  it('encodes KI ids that contain slashes', () => {
-    expect(
-      getViewKiPath('quick-test', 'quick-test-metadata-2/traces-agent_builder.otel-default')
-    ).toBe('/ai_index/quick-test/ki/quick-test-metadata-2%2Ftraces-agent_builder.otel-default');
+describe('getAiIndexSettingsPath', () => {
+  it('builds the settings tab path', () => {
+    expect(getAiIndexSettingsPath('my-ai-index')).toBe('/ai_index/my-ai-index/settings');
   });
 });
 
-describe('getViewKiDocumentPath', () => {
-  it('appends /document to the view KI path', () => {
-    expect(getViewKiDocumentPath('my-ai-index', 'ki-1')).toBe(
-      '/ai_index/my-ai-index/ki/ki-1/document'
+describe('getAiIndexDreamingTemplatePath', () => {
+  it('builds the dreaming setup path', () => {
+    expect(getAiIndexDreamingTemplatePath('my-ai-index')).toBe(
+      '/ai_index/my-ai-index/dreaming_template'
     );
   });
 });
 
-describe('decodeRouteParam', () => {
-  it('decodes a slash that history left encoded as %2F', () => {
-    expect(decodeRouteParam('a%2Fb')).toBe('a/b');
-  });
-
-  it('returns the value as-is when it is not a valid percent-escape', () => {
-    // history already ran `decodeURI` on this, turning the original `%25` into `%2`
-    expect(decodeRouteParam('ki-1%2')).toBe('ki-1%2');
+describe('getKnowledgeDocumentPath', () => {
+  it('puts the backing index in the path', () => {
+    expect(getKnowledgeDocumentPath('my-ai-index', 'ai-index-idx-sample')).toBe(
+      '/ai_index/my-ai-index/knowledge_documents/ai-index-idx-sample'
+    );
   });
 });

@@ -51,6 +51,11 @@ jest.mock('../../../hooks', () => ({
     items: [
       { id: 'policy1', is_managed: false },
       { id: 'managed_policy', is_managed: true },
+      {
+        id: 'fleet_server_policy',
+        is_managed: false,
+        package_policies: [{ package: { name: 'fleet_server' } }],
+      },
     ],
   }),
   sendGetAgentPolicies: jest.fn().mockResolvedValue({ data: { items: [] } }),
@@ -138,9 +143,16 @@ jest.mock('./hooks/use_session_agent_list_state', () => ({
 
 jest.mock('./components/search_and_filter_bar', () => {
   return {
-    SearchAndFilterBar: ({ onClickAddCollector }: { onClickAddCollector: () => void }) => (
+    SearchAndFilterBar: ({
+      onClickAddCollector,
+      selectionHasFleetServer,
+    }: {
+      onClickAddCollector: () => void;
+      selectionHasFleetServer: boolean;
+    }) => (
       <>
         SearchAndFilterBar
+        <span data-test-subj="mockSelectionHasFleetServer">{String(selectionHasFleetServer)}</span>
         <button data-test-subj="mockAddCollectorButton" onClick={onClickAddCollector}>
           Add collector
         </button>
@@ -350,6 +362,65 @@ describe('agent_list_page', () => {
           sortOrder: 'asc',
         })
       );
+    });
+  });
+
+  describe('Fleet Server in a bulk selection', () => {
+    let renderResult: RenderResult;
+
+    const selectRow = async (hostname: string) => {
+      const checkbox = renderResult
+        .getByText(hostname)
+        .closest('tr')!
+        .querySelector('input[type="checkbox"]')!;
+      await act(async () => {
+        fireEvent.click(checkbox);
+      });
+    };
+
+    beforeEach(async () => {
+      mockedSendGetAgentsForRq.mockResolvedValue({
+        items: [
+          {
+            id: 'agent1',
+            active: true,
+            policy_id: 'policy1',
+            local_metadata: { host: { hostname: 'agent1' } },
+          },
+          {
+            id: 'agent2',
+            active: true,
+            policy_id: 'fleet_server_policy',
+            local_metadata: { host: { hostname: 'agent2' } },
+          },
+        ],
+        total: 2,
+        statusSummary: { online: 2 },
+      });
+      mockedSendGetAgentStatus.mockResolvedValue({
+        data: { results: { inactive: 0 }, totalInactive: 0 },
+      });
+
+      const renderer = createFleetTestRendererMock();
+      await act(async () => {
+        renderResult = renderer.render(<AgentListPage />);
+      });
+      await waitFor(() => {
+        expect(renderResult.queryByText('Showing 2 agents')).toBeInTheDocument();
+      });
+    });
+
+    it('should flag a manual selection that includes a Fleet Server agent', async () => {
+      await selectRow('agent1');
+      await selectRow('agent2');
+
+      expect(renderResult.getByTestId('mockSelectionHasFleetServer')).toHaveTextContent('true');
+    });
+
+    it('should not flag a manual selection without a Fleet Server agent', async () => {
+      await selectRow('agent1');
+
+      expect(renderResult.getByTestId('mockSelectionHasFleetServer')).toHaveTextContent('false');
     });
   });
 

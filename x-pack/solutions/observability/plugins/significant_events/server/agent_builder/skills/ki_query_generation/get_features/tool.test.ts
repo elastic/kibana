@@ -10,14 +10,16 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../../routes/types';
 import {
   createMockToolContext,
+  createMockToolFailureTelemetry,
   createSignificantEventsServer,
   invokeHandler,
   mockSourcesClient,
 } from '../../../utils/test_helpers';
-import { createGetFeaturesTool } from './tool';
+import { createGetFeaturesTool, SIGNIFICANT_EVENTS_GET_FEATURES_TOOL_ID } from './tool';
 
 describe('ki_features_get tool', () => {
   const logger = loggingSystemMock.createLogger();
+  const telemetry = createMockToolFailureTelemetry();
   const getFeatures = jest.fn();
   const getScopedClients = jest.fn(async () => {
     return {
@@ -49,6 +51,7 @@ describe('ki_features_get tool', () => {
       getScopedClients,
       server: createSignificantEventsServer({ featurePrivilege: 'read' }),
       logger,
+      telemetry,
     });
 
   it('bounds its input', () => {
@@ -107,12 +110,20 @@ describe('ki_features_get tool', () => {
       getScopedClients,
       server: createSignificantEventsServer({ featurePrivilege: 'none' }),
       logger,
+      telemetry,
     });
 
     const result = await invokeHandler(tool, { slug: 'logs.test' }, createMockToolContext());
 
     expect(getFeatures).not.toHaveBeenCalled();
     expect(result).toMatchObject({ results: [{ type: 'error' }] });
+    expect(telemetry.trackAgentToolFailed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tool_id: SIGNIFICANT_EVENTS_GET_FEATURES_TOOL_ID,
+        error_code: 'forbidden',
+      }),
+      expect.anything()
+    );
   });
 
   it('does not load stored features when the caller cannot read the source data', async () => {

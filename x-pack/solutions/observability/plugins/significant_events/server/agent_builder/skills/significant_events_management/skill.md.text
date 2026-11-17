@@ -21,7 +21,7 @@ Examples of conversation signals that may indicate a SignificantEvent:
 
 <severity_and_confidence>
 
-`severity` is one of `critical` | `high` | `medium` | `low`, reflecting user-experience impact; `confidence` is a float 0.0–1.0 measuring root-cause correctness. Tier definitions and scoring rules are embedded in the tool schema field descriptions — read them when calling `event_create` or `event_status_update`. When uncertain, choose the lower tier.
+`severity` is one of `critical` | `high` | `medium` | `low`, reflecting user-experience impact; `confidence` is a float 0.0–1.0. Tier definitions and the meaning of confidence are embedded in the tool schema field descriptions — read them when calling `event_create` or `event_status_update`. When uncertain, choose the lower tier.
 
 </severity_and_confidence>
 
@@ -128,7 +128,7 @@ Tool: `event_create`
   "title": "Checkout service — connection pool: timeouts",
   "summary": "Checkout service: requests failing with connection timeout. Users cannot complete purchases; payment-gateway is exposed. ~150 errors/min since 14:22 UTC, no sign of recovery. Immediately scale checkout connection pool.",
   "slugs": ["nginx-errors", "checkout"],
-  "confidence": 0.78
+  "confidence": <number from 0.0 to 1.0>
 }
 
 Example: update an existing significant event status (`assessment_note` is optional)

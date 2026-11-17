@@ -12,7 +12,7 @@ import { DraggableBadge } from '../../../../../common/components/draggables';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry/events/flyout_v2/types';
 import { DEFAULT_ALERTS_INDEX } from '../../../../../../common/constants';
-import { ENTITY_TYPE_BY_FIELD, getFlyoutPanelProps } from './helpers';
+import { ENTITY_TYPE_BY_FIELD } from './helpers';
 import { useEntityEuidFromAlerts } from './use_entity_euid_from_alerts';
 import { useMarkdownFormatterContext } from '../context';
 import { DisabledFieldMarkdownRenderer } from './disabled_field_markdown_renderer';
@@ -25,8 +25,6 @@ export const ALERTS_INDEX_PATTERN = `${DEFAULT_ALERTS_INDEX}-*` as const;
 
 /** Alert-document `_id` fields whose chips open the alert-details flyout when clicked. */
 const ALERT_ID_FIELDS: ReadonlySet<string> = new Set(['_id', 'kibana.alert.uuid']);
-
-const contextId = 'FieldMarkdownRenderer';
 
 const InteractiveFieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
   const { scopeId, alertIds } = useMarkdownFormatterContext();
@@ -54,7 +52,7 @@ const InteractiveFieldMarkdownRenderer = ({ icon, name, value }: ParsedField) =>
     });
   }, [openDocumentFlyoutFromPattern, stringValue]);
 
-  const isEntityField = name in ENTITY_TYPE_BY_FIELD && typeof value === 'string';
+  const isEntityField = Object.hasOwn(ENTITY_TYPE_BY_FIELD, name) && typeof value === 'string';
 
   const { euid, isLoading } = useEntityEuidFromAlerts({
     alertIds: alertIds ?? [],
@@ -63,17 +61,12 @@ const InteractiveFieldMarkdownRenderer = ({ icon, name, value }: ParsedField) =>
     enabled: isEntityField,
   });
 
-  const flyoutPanelProps = useMemo(
-    () => getFlyoutPanelProps({ contextId, fieldName: name, value, entityId: euid, scopeId }),
-    [euid, name, value, scopeId]
-  );
-
   const onEntityClick = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
       // Prevent the click from bubbling up to parent interactive elements (e.g. accordion buttons).
       event.stopPropagation();
 
-      if (flyoutPanelProps == null) {
+      if (!isEntityField) {
         return;
       }
 
@@ -83,12 +76,12 @@ const InteractiveFieldMarkdownRenderer = ({ icon, name, value }: ParsedField) =>
         openUserFlyout({ userName: value as string, entityId: euid, scopeId });
       }
     },
-    [flyoutPanelProps, openHostFlyout, openUserFlyout, name, value, euid, scopeId]
+    [isEntityField, openHostFlyout, openUserFlyout, name, value, euid, scopeId]
   );
 
   const entityButton: React.ReactElement | null = useMemo(
     () =>
-      flyoutPanelProps != null ? (
+      isEntityField ? (
         <EuiButtonEmpty
           css={css`
             font-size: ${euiTheme.font.scale.s}rem;
@@ -110,7 +103,7 @@ const InteractiveFieldMarkdownRenderer = ({ icon, name, value }: ParsedField) =>
           )}
         </EuiButtonEmpty>
       ) : null,
-    [euiTheme.font.scale.s, euiTheme.size.xs, flyoutPanelProps, isLoading, onEntityClick, value]
+    [euiTheme.font.scale.s, euiTheme.size.xs, isEntityField, isLoading, onEntityClick, value]
   );
 
   if (isClickableAlertId && stringValue != null) {
