@@ -9,7 +9,6 @@ import { useController } from 'react-hook-form';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useAgentPolicies } from '../../../agent_policies';
 import type { ShardsFormReturn } from './shards_form';
 
 interface ShardsPolicyFieldComponent {
@@ -27,8 +26,6 @@ const ShardsPolicyFieldComponent = ({
   hideLabel,
   options,
 }: ShardsPolicyFieldComponent) => {
-  const { data: { agentPoliciesById } = {} } = useAgentPolicies();
-
   const missingValueError = i18n.translate(
     'xpack.osquery.pack.form.shardsPolicyFieldMissingErrorMessage',
     {
@@ -66,11 +63,8 @@ const ShardsPolicyFieldComponent = ({
   );
 
   useEffect(() => {
-    const foundPolicy = agentPoliciesById?.[value.key];
-    if (value && foundPolicy) {
-      setSelected([{ label: value.label || foundPolicy.name, value: value.key }]);
-    }
-  }, [agentPoliciesById, value]);
+    setSelected(value?.key ? [{ ...value, value: value.key }] : []);
+  }, [value]);
 
   const singleSelectionConfig = useMemo(() => ({ asPlainText: true }), []);
 

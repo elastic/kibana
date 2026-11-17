@@ -210,6 +210,55 @@ describe('PackForm', () => {
     expect(mockUpdateAsync.mock.calls[0][0].policy_ids).toEqual(expected);
   });
 
+  it('sets 25% for a shared integration and submits member shards', async () => {
+    mockUseAgentPolicies.mockReturnValue({
+      data: {
+        agentPoliciesById: {
+          A: { id: 'A', name: 'Alpha', agents: 0 },
+          B: { id: 'B', name: 'Beta', agents: 0 },
+        },
+        groupsByPackagePolicyId: {
+          integration: { id: 'integration', name: 'Shared hosts', policyIds: ['A', 'B'] },
+        },
+        groupIdByPolicyId: { A: 'integration', B: 'integration' },
+      },
+      isFetching: false,
+      isError: false,
+    });
+    const { getByTestId, getByText, getByRole } = renderWithContext(
+      <PackForm
+        editMode
+        defaultValue={{
+          saved_object_id: 'sharded-pack',
+          id: 'sharded-pack',
+          name: 'sharded-pack',
+          description: '',
+          created_at: '2024-01-01',
+          created_by: 'test-user',
+          updated_at: '2024-01-01',
+          updated_by: 'test-user',
+          references: [],
+          enabled: true,
+          queries: {},
+          policy_ids: ['A', 'B'],
+          shards: { A: 10, B: 50 },
+        }}
+      />
+    );
+
+    const row = getByTestId('packShardsForm-0');
+    expect(within(row).getByRole('combobox')).toHaveValue('Alpha, Beta');
+    expect(getByText('One value applies to the whole integration')).toBeInTheDocument();
+    expect(getByRole('checkbox', { name: /Shared hosts/ })).toBeDisabled();
+    const percentage = within(row).getByRole('spinbutton');
+    expect(percentage).toHaveValue(50);
+    fireEvent.change(percentage, { target: { value: '25' } });
+    fireEvent.click(getByTestId('update-pack-button'));
+    await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
+    expect(mockUpdateAsync.mock.calls[0][0].shards).toEqual({ A: 25, B: 25 });
+    expect(mockUpdateAsync.mock.calls[0][0].policy_ids).toEqual(['A', 'B']);
+  });
+
   it.each([false, true])(
     'marks effective drift owners without adopting them (read-only: %s)',
     async (isReadOnly) => {
