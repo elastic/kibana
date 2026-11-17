@@ -7,10 +7,10 @@
 
 import { Container } from 'inversify';
 import { of } from 'rxjs';
-import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { Logger, OnSetup, OnStart, PluginStart } from '@kbn/core-di';
-import { CoreSetup, CoreStart } from '@kbn/core-di-server';
+import { CoreSetup, CoreStart, Request } from '@kbn/core-di-server';
 import { NIGHTSHIFT_DETECTION_TIERED_FEATURES } from '../../common/constants';
 import { module } from '..';
 import { AvailabilityService } from '../lib/availability/availability_service';
@@ -29,6 +29,8 @@ function createContainer() {
   container.bind(CoreStart('elasticsearch')).toConstantValue(core.elasticsearch);
   container.bind(CoreStart('featureFlags')).toConstantValue(core.featureFlags);
   container.bind(Logger).toConstantValue(loggingSystemMock.createLogger());
+  container.bind(Request).toConstantValue(httpServerMock.createKibanaRequest());
+  container.bind(PluginStart('alertingVTwo')).toConstantValue({});
   container.bind(CoreStart('pricing')).toConstantValue(core.pricing);
   container.bind(PluginStart('licensing')).toConstantValue(licensingMock.createStart());
   container.load(module);

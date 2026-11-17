@@ -39,7 +39,7 @@ export interface DetectionSignalStore {
   }): Promise<Map<string, DetectionSignalReading[]>>;
 }
 
-/** The engine's signal store. Bound to the fallback store until the `.rule-events` store exists. */
+/** The engine's signal store, backed by `.rule-events`. */
 export const DetectionSignalStore = createToken<DetectionSignalStore>(
   'nightshiftDetection.DetectionSignalStore'
 );

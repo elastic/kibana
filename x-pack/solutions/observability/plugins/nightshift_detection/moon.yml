@@ -17,6 +17,8 @@ project:
   owner: '@elastic/nightshift'
   sourceRoot: x-pack/solutions/observability/plugins/nightshift_detection
 dependsOn:
+  - '@kbn/alerting-v2-constants'
+  - '@kbn/alerting-v2-plugin'
   - '@kbn/alerting-v2-schemas'
   - '@kbn/cloud-plugin'
   - '@kbn/config-schema'
