@@ -303,6 +303,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                         Bytes in
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon euiTableSortIcon--sortable"
                         color="subdued"
                         data-euiicon-type="sortable"
@@ -337,6 +338,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                         Bytes out
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon"
                         data-euiicon-type="sortDown"
                       />
@@ -370,6 +372,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                         Flows
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon euiTableSortIcon--sortable"
                         color="subdued"
                         data-euiicon-type="sortable"
@@ -661,6 +664,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                 Rows per page: 10
               </span>
               <span
+                aria-hidden="true"
                 color="inherit"
                 data-euiicon-type="chevronSingleDown"
               />
@@ -1132,6 +1136,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                         Bytes in
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon euiTableSortIcon--sortable"
                         color="subdued"
                         data-euiicon-type="sortable"
@@ -1166,6 +1171,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                         Bytes out
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon"
                         data-euiicon-type="sortDown"
                       />
@@ -1199,6 +1205,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                         Flows
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon euiTableSortIcon--sortable"
                         color="subdued"
                         data-euiicon-type="sortable"
@@ -1233,6 +1240,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                         Destination IPs
                       </span>
                       <span
+                        aria-hidden="true"
                         class="euiTableSortIcon euiTableSortIcon--sortable"
                         color="subdued"
                         data-euiicon-type="sortable"
@@ -1542,6 +1550,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                 Rows per page: 10
               </span>
               <span
+                aria-hidden="true"
                 color="inherit"
                 data-euiicon-type="chevronSingleDown"
               />

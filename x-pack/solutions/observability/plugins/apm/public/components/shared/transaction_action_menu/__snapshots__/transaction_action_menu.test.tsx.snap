@@ -20,6 +20,7 @@ exports[`TransactionActionMenu  matches the snapshot 1`] = `
           Investigate
         </span>
         <span
+          aria-hidden="true"
           color="inherit"
           data-euiicon-type="chevronSingleDown"
         />
