@@ -383,8 +383,8 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
 
     expect(readExisting?._source).toEqual(expect.arrayContaining(['description', 'content']));
     expect(readExisting?.query?.bool?.should).toEqual([
-      { prefix: { type: 'fact.' } },
-      { prefix: { type: 'entity.' } },
+      { prefix: { type: { value: 'fact.' } } },
+      { prefix: { type: { value: 'entity.' } } },
     ]);
   });
 
@@ -459,7 +459,9 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
         name: 'latest',
         size: 1,
         sort: [{ updated_at: 'desc' }],
-        _source: expect.arrayContaining(['governance.lifecycle.status', 'permissions']),
+        _source: {
+          includes: expect.arrayContaining(['governance.lifecycle.status', 'permissions']),
+        },
         docvalue_fields: [{ field: 'expires_at', format: 'strict_date_time' }],
       }),
     });

@@ -167,7 +167,10 @@ describe('CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW', () => {
 
     expect(types).toEqual({
       bool: {
-        should: [{ prefix: { type: 'fact.' } }, { prefix: { type: 'entity.' } }],
+        should: [
+          { prefix: { type: { value: 'fact.' } } },
+          { prefix: { type: { value: 'entity.' } } },
+        ],
         minimum_should_match: 1,
       },
     });

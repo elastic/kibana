@@ -80,6 +80,9 @@ import CONTEXT_ENGINE_TRACE_DREAMING_YAML from './definitions/context_engine/dre
 import CONTEXT_ENGINE_TRACE_DREAMING_BATCH_YAML from './definitions/context_engine/dreaming_traces_batch.yaml';
 import CONTEXT_ENGINE_RELATIONSHIPS_YAML from './definitions/context_engine/relationships.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
+import { visitNestedSteps } from '../definition/definition_utils';
+import type { VisitNestedStepEntry, WorkflowStep } from '../definition/definition_utils';
+import { getElasticsearchConnectors } from '../spec/elasticsearch';
 import { WorkflowSchemaBase } from '../spec/schema';
 
 const ManagedWorkflowSchema = WorkflowSchemaBase.extend({
@@ -257,6 +260,16 @@ function hasYaml(
   return typeof definition.yaml === 'string';
 }
 
+const elasticsearchConnectorsByType = new Map(
+  getElasticsearchConnectors().map((connector) => [connector.type, connector])
+);
+
+// Copies of kbn-workflows-yaml/common/regex.ts (that package depends on @kbn/workflows, so it
+// cannot be imported here).
+const DYNAMIC_VALUE_REGEX = /^\$\{\{\s*\S[\s\S]*\}\}$/;
+const VARIABLE_VALUE_REGEX = /^\{\{\s*\S[\s\S]*\}\}$/;
+const LIQUID_TAG_VALUE_REGEX = /\{\%[^%]*\%\}/;
+
 function renderWorkflowYaml(definition: ManagedWorkflowDefinition): string {
   const { id } = definition;
 
@@ -345,8 +358,8 @@ it.each([
   [ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID, ACTION_ISOLATE_HOST_YAML, '6:46476397'],
   [ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID, ACTION_KILL_PROCESS_YAML, '8:54a3c745'],
   [ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID, ACTION_SUSPEND_PROCESS_YAML, '7:908d3f54'],
-  [CONTEXT_ENGINE_DREAMING_WORKFLOW_ID, CONTEXT_ENGINE_DREAMING_YAML, '5:2fc422ee'],
-  [CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID, CONTEXT_ENGINE_RELATIONSHIPS_YAML, '1:a86208ac'],
+  [CONTEXT_ENGINE_DREAMING_WORKFLOW_ID, CONTEXT_ENGINE_DREAMING_YAML, '6:4dcfae3f'],
+  [CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID, CONTEXT_ENGINE_RELATIONSHIPS_YAML, '2:f969e0c5'],
   [CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID, CONTEXT_ENGINE_TRACE_DREAMING_YAML, '5:53938616'],
   [
     CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
@@ -521,6 +534,85 @@ describe('managedWorkflowDefinitions', () => {
     (id, definition) => {
       const renderedYaml = renderWorkflowYaml(definition);
       assertWorkflowYamlIsValid(id, renderedYaml);
+    }
+  );
+
+  // Mirrors the editor's Run validation (POST /api/workflows/test): every elasticsearch.* step's
+  // `with` must satisfy the connector paramsSchema from spec/elasticsearch; a stored `valid: true`
+  // does not cover it. Values that are whole-string {{ }} / ${{ }} templates or contain {% %} tags
+  // are skipped, as parseWorkflowYamlToJSON does. elasticsearch.request is allowlist-skipped.
+  it.each(managedDefinitionsById)(
+    '%s elasticsearch steps satisfy the connector params schema',
+    (_id, definition) => {
+      // The raw parse is walked (not ManagedWorkflowSchema.parse) so zod stripping cannot hide a
+      // `with` key, and because the schema types settings.on-failure.fallback as BaseStep[], which
+      // visitNestedSteps does not accept.
+      const parsed = parse(renderWorkflowYaml(definition)) as {
+        steps: WorkflowStep[];
+        settings?: { 'on-failure'?: { fallback?: WorkflowStep[] } };
+      };
+      const failures: Array<{ path: string; issuePaths: string[]; error: string }> = [];
+
+      const visitor = ({ step, path }: VisitNestedStepEntry) => {
+        if (!step.type.startsWith('elasticsearch.')) {
+          return;
+        }
+        const connector = elasticsearchConnectorsByType.get(step.type);
+        if (!connector) {
+          if (step.type !== 'elasticsearch.request') {
+            failures.push({
+              path,
+              issuePaths: [],
+              error: `Unknown elasticsearch step type '${step.type}': extend the allowlist or add a package connector`,
+            });
+          }
+          return;
+        }
+
+        const params = (step as { with?: unknown }).with;
+        const result = connector.paramsSchema.safeParse(params ?? {});
+        if (result.success) {
+          return;
+        }
+
+        const survivingIssues = result.error.issues.filter((issue) => {
+          if (issue.path.length === 0) {
+            return true;
+          }
+          let current: unknown = params;
+          for (const segment of issue.path) {
+            if (current === null || typeof current !== 'object') {
+              return true;
+            }
+            current = (current as Record<string, unknown>)[String(segment)];
+          }
+          if (current === undefined) {
+            return true;
+          }
+          const isTemplateValue =
+            typeof current === 'string' &&
+            (DYNAMIC_VALUE_REGEX.test(current) ||
+              VARIABLE_VALUE_REGEX.test(current) ||
+              LIQUID_TAG_VALUE_REGEX.test(current));
+          return !isTemplateValue;
+        });
+
+        if (survivingIssues.length > 0) {
+          failures.push({
+            path,
+            issuePaths: survivingIssues.map((issue) => issue.path.map(String).join('.')),
+            error: z.prettifyError(new z.ZodError(survivingIssues)),
+          });
+        }
+      };
+
+      visitNestedSteps(parsed.steps, visitor);
+      const fallback = parsed.settings?.['on-failure']?.fallback;
+      if (Array.isArray(fallback)) {
+        visitNestedSteps(fallback, visitor);
+      }
+
+      expect(failures).toEqual([]);
     }
   );
 
