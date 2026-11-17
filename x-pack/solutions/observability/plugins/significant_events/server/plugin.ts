@@ -266,6 +266,7 @@ export class SignificantEventsPlugin
         telemetry: {
           trackEventStatusChanged: (params) =>
             this.ebtTelemetryService.getClient().trackEventStatusChanged(params, request),
+          logger: this.logger,
         },
       });
 
