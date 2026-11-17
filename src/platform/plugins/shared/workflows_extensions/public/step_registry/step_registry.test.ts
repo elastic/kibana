@@ -236,5 +236,18 @@ describe('PublicStepRegistry', () => {
       registry.register(defaultDefinition);
       await expect(registry.whenReady()).resolves.toBeUndefined();
     });
+
+    it('should wait for loaders that settle after the current microtask queue (e.g. dynamic imports)', async () => {
+      registry.register(
+        () =>
+          new Promise<PublicStepDefinition>((resolve) => {
+            setTimeout(() => resolve(defaultDefinition), 0);
+          })
+      );
+
+      await registry.whenReady();
+
+      expect(registry.has(stepId)).toBe(true);
+    });
   });
 });

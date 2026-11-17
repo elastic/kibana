@@ -8,6 +8,7 @@
 import { buildCustomContentConfig } from '@kbn/agent-builder-visualizations-server';
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+  toEsqlQueryState,
   type CustomContentState,
 } from '@kbn/custom-content-common';
 import {
@@ -31,16 +32,13 @@ export const createCustomContentPanelResolver = ({
   esClient,
 }: VisPanelResolverDeps) => {
   return async (request: CustomContentPanelResolutionRequest): Promise<PanelContentAttempt> => {
-    const { nlQuery, index, esql, hasData, existingPanel, resolveEsqlVariables } = request;
-    const regenerateESQL = request.existingPanel ? request.regenerateESQL : undefined;
+    const { nlQuery, dataQueries, removeAllQueries, existingPanel, resolveEsqlVariables } = request;
     try {
       const existing = existingPanel?.config as CustomContentState | undefined;
-      const { esqlQueries, template } = await buildCustomContentConfig({
+      const { esqlQueries, template, height } = await buildCustomContentConfig({
         nlQuery,
-        index,
-        esql,
-        hasData,
-        regenerateESQL,
+        dataQueries,
+        removeAllQueries,
         resolveEsqlVariables,
         existing: existing && { esqlQueries: existing.esql_query, template: existing.template },
         modelProvider,
@@ -54,10 +52,11 @@ export const createCustomContentPanelResolver = ({
           type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
           config: {
             ...existing,
-            esql_query: esqlQueries.length ? esqlQueries : undefined,
+            esql_query: toEsqlQueryState(esqlQueries),
             template,
           },
         },
+        heightHint: height,
       };
     } catch (error) {
       return { type: 'failure', error: getErrorMessage(error) };

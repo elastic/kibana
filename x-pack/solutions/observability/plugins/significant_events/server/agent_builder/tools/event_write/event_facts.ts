@@ -13,6 +13,7 @@ import {
   type SignificantEvent,
 } from '@kbn/significant-events-schema';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
+import { createBulkWriteValidationError } from '../bulk_write';
 import {
   addsNewDetectionRules,
   extractRuleUuids,
@@ -152,7 +153,9 @@ const decideSeverity = ({
     return 'low';
   }
   if (proposed === undefined) {
-    throw new Error('events_write: an event with signals needs a proposed severity.');
+    throw createBulkWriteValidationError(
+      'events_write: an event with signals needs a proposed severity.'
+    );
   }
   return proposed;
 };
@@ -183,9 +186,12 @@ export const loadHistory = async ({
 export const computeEventFacts = ({
   candidate,
   timestamp,
+  resolvedSeverity,
 }: {
   candidate: ResolvedWriteCandidate;
   timestamp: string;
+  /** The severity the event should have, which wins over the agent's and the status. */
+  resolvedSeverity?: Severity;
 }): EventFacts => {
   const { event_id: _explicitId, ...rest } = candidate.input;
   const { latest, priorDocs } = candidate;
@@ -210,12 +216,14 @@ export const computeEventFacts = ({
 
   const { status } = candidate;
 
-  const severity = decideSeverity({
-    proposed: candidate.input.severity,
-    storedSeverity: latest?.severity,
-    status,
-    signals,
-  });
+  const severity =
+    resolvedSeverity ??
+    decideSeverity({
+      proposed: candidate.input.severity,
+      storedSeverity: latest?.severity,
+      status,
+      signals,
+    });
 
   // For continuations: if no new rule UUIDs are introduced, freeze title and symptom_hypothesis to prevent identity hijack
   // A rule that now confirms what the event stored as unconfirmed changes what the event is about:
