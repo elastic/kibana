@@ -1,5 +1,5 @@
 {
-  "sha1": "b5adee85932fd3ebbd3227ea44f77ca64143cf9c",
+  "sha1": "487734817402ed9e3a410f5173e6260b2fa48adf",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -521,8 +521,8 @@
       }
     },
     {
-      "id": "63a66063df79f9e-4086e916e3d62e9",
-      "title": "Scheduled Nightshift automations an edited schedule starts a scoped investigation and stops it at the configured timeout",
+      "id": "63a66063df79f9e-ce3f009945d7bf5",
+      "title": "Scheduled Nightshift automations an edited schedule starts an investigation and stops it at the configured timeout",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -544,7 +544,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/scheduled_automations.spec.ts",
-        "line": 220,
+        "line": 219,
         "column": 15
       }
     },
@@ -558,7 +558,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/scheduled_automations.spec.ts",
-        "line": 379,
+        "line": 377,
         "column": 66
       }
     },

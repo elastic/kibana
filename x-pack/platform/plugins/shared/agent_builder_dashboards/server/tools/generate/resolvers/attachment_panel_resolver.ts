@@ -11,9 +11,9 @@ import {
   VISUALIZATION_ATTACHMENT_TYPE,
   getEffectiveRenderer,
   isCustomContentVisualization,
+  readAttachmentQueries,
   type VisualizationAttachmentData,
 } from '@kbn/agent-builder-visualizations-common';
-import { toEsqlQueryState } from '@kbn/custom-content-common';
 import {
   type PanelContent,
   type PanelContentAttempt,
@@ -26,11 +26,12 @@ const toPanelContent = (data: VisualizationAttachmentData): PanelContent => {
 
   // Custom content stores markup rather than a chart config, so its panel config is rebuilt.
   if (isCustomContentVisualization(data)) {
+    const esqlQueries = readAttachmentQueries(data);
     return {
       type,
       config: {
         template: data.visualization.template,
-        esql_query: toEsqlQueryState(data.esql),
+        esql_query: esqlQueries.length ? esqlQueries : undefined,
       },
     };
   }
@@ -69,6 +70,10 @@ export const createAttachmentPanelResolver = ({
       return fail(`Attachment "${attachmentId}" has no readable visualization data.`);
     }
 
-    return { type: 'success', panelContent: toPanelContent(data) };
+    return {
+      type: 'success',
+      panelContent: toPanelContent(data),
+      ...(isCustomContentVisualization(data) ? { heightHint: data.visualization.height } : {}),
+    };
   };
 };

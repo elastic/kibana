@@ -8,10 +8,10 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { chunk } from 'lodash';
 import { randomBytes } from 'node:crypto';
 
 import pMap from 'p-map';
-import { firstValueFrom } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core/server';
 import { buildEntityReadAccessQuery, isEntityAccessControlAdmin } from '@kbn/entity-access-control';
 import { isNotFoundError, isResponseError } from '@kbn/es-errors';
@@ -32,7 +32,6 @@ import {
   toCustomTriggerSchemaConfigs,
   type UpdatedWorkflowResponseDto,
   type WorkflowDetailDto,
-  WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG,
   type WorkflowYaml,
 } from '@kbn/workflows';
 import { buildWorkflowFilters, GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
@@ -74,6 +73,7 @@ import type {
   RestoreWorkflowVersionResponseDto,
   WorkflowRestoreMetadata,
 } from '../../common/lib/workflow_change_history/types';
+import { getCalledWorkflowIds } from '../../common/lib/workflow_dependents/find_call_sites';
 import { getWorkflowZodSchema } from '../../common/schema';
 import {
   fetchOccHitsByIds,
@@ -118,6 +118,7 @@ import { unscheduleWorkflowTasks } from '../task_defs/unschedule_workflow_tasks'
 // against `op_type: 'create'`. The id resolver itself walks up to MAX_COLLISION_RETRIES
 // candidates per call, so the practical ceiling is far higher than this number;
 // this only bounds repeated round-trips when many concurrent writers share a base ID.
+const INDEX_CALLED_WORKFLOW_IDS_BATCH_SIZE = 500;
 const TOCTOU_MAX_RETRIES = 5;
 
 // `OccWriter.readModifyWrite` always indexes what `mutate` returns; throwing this skips the write.
@@ -168,14 +169,6 @@ type SuccessfullyWrittenBulkEntry = BulkWorkflowEntry & {
 
 export class WorkflowCrudService {
   constructor(private readonly deps: WorkflowCrudDeps) {}
-
-  private async shouldWarnIgnoredKibanaFetcher(): Promise<boolean> {
-    return firstValueFrom(
-      this.deps
-        .getCoreStart()
-        .featureFlags.getBooleanValue$(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, true)
-    );
-  }
 
   async logWorkflowChangesAfterWrite(params: {
     workflows: Array<{ id: string; document: WorkflowProperties }>;
@@ -330,6 +323,35 @@ export class WorkflowCrudService {
       }
     }
     return { documents, unavailable };
+  }
+
+  /**
+   * Stores which workflows each of `ids` runs, for documents saved before saving stored it. A
+   * document saved meanwhile is left as it is, since the save stored it.
+   */
+  async indexCalledWorkflowIds(ids: string[]): Promise<void> {
+    for (const idsChunk of chunk(ids, INDEX_CALLED_WORKFLOW_IDS_BATCH_SIZE)) {
+      const { documents } = await this.readWorkflowDocumentsWithVersion(idsChunk);
+      const writes: WorkflowDocumentBulkWrite[] = [];
+      for (const [id, previous] of documents) {
+        const { source } = previous;
+        // Bound workflows can't be written in bulk (see bulkWriteWorkflowDocuments).
+        if (source.calledWorkflowIdsIndexed !== true && !source.definition?.settings?.run_as) {
+          writes.push({
+            id,
+            previous,
+            document: {
+              ...source,
+              calledWorkflowIds: getCalledWorkflowIds(source.definition),
+              calledWorkflowIdsIndexed: true,
+            },
+          });
+        }
+      }
+      if (writes.length > 0) {
+        await this.bulkWriteWorkflowDocuments(writes);
+      }
+    }
   }
 
   /**
@@ -671,7 +693,6 @@ export class WorkflowCrudService {
       spaceId: params.spaceId,
       triggerDefinitions,
       logger: this.deps.logger,
-      warnIgnoredKibanaFetcher: await this.shouldWarnIgnoredKibanaFetcher(),
     });
     const profileId = params.request
       ? (await this.deps
@@ -857,7 +878,6 @@ export class WorkflowCrudService {
       triggerDefinitions,
       nameFallback: options?.nameFallback,
       logger: this.deps.logger,
-      warnIgnoredKibanaFetcher: await this.shouldWarnIgnoredKibanaFetcher(),
     });
 
     const profileId =
@@ -933,7 +953,6 @@ export class WorkflowCrudService {
     const profileId = await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request });
     const now = new Date();
     const triggerDefinitions = this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
-    const warnIgnoredKibanaFetcher = await this.shouldWarnIgnoredKibanaFetcher();
 
     const created: WorkflowDetailDto[] = [];
     const failed: BulkFailureEntry[] = [];
@@ -955,7 +974,6 @@ export class WorkflowCrudService {
           spaceId,
           triggerDefinitions,
           logger: this.deps.logger,
-          warnIgnoredKibanaFetcher,
         });
 
         if (profileId) {
@@ -1151,7 +1169,6 @@ export class WorkflowCrudService {
               zodSchema,
               triggerDefinitions,
               logger: this.deps.logger,
-              warnIgnoredKibanaFetcher: await this.shouldWarnIgnoredKibanaFetcher(),
               workflowId: id,
             })),
           }
@@ -1211,6 +1228,8 @@ export class WorkflowCrudService {
         if (merged.triggerTypes === undefined) {
           merged.triggerTypes = getTriggerTypesFromDefinition(merged.definition) ?? [];
         }
+        merged.calledWorkflowIds = getCalledWorkflowIds(merged.definition);
+        merged.calledWorkflowIdsIndexed = true;
         previousVersion = existingSource.version;
         return merged;
       },

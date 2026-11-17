@@ -11,6 +11,7 @@
     "server": true,
     "configPath": ["xpack", "nightshiftDetection"],
     "requiredPlugins": [
+      "alertingVTwo",
       "significantEvents",
       "nightshiftSources",
       "licensing",

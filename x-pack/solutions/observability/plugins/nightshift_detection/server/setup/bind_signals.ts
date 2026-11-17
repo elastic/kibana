@@ -6,15 +6,15 @@
  */
 
 import type { ContainerModuleLoadOptions } from 'inversify';
-import { FallbackSignalStore } from '../lib/signals/fallback_signal_store';
+import { RuleEventsSignalStore } from '../lib/signals/rule_events_signal_store';
 import { DetectionSignalStore } from '../lib/signals/signal_store';
 
 /**
- * Binds the signal store to the fallback data stream. Once Alerting v2 can take engine signals
- * through its external signal path (kibana#304859), a `.rule-events` store replaces this
- * binding and the fallback store goes away.
+ * Binds the signal store to `.rule-events`. Core's container binds in singleton scope unless told
+ * otherwise, and the store holds the `Request` of the tick that resolved it, so it is bound in
+ * request scope: every tick scope gets its own.
  */
 export function bindSignals({ bind }: ContainerModuleLoadOptions): void {
-  bind(FallbackSignalStore).toSelf().inSingletonScope();
-  bind(DetectionSignalStore).toService(FallbackSignalStore);
+  bind(RuleEventsSignalStore).toSelf().inRequestScope();
+  bind(DetectionSignalStore).toService(RuleEventsSignalStore);
 }
