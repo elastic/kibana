@@ -2077,7 +2077,6 @@
     "controls.controlGroup.ariaActions.moveControlButtonAction": "移动控件 {controlTitle}",
     "controls.controlGroup.clickToHighlight": "选择以突出显示面板。",
     "controls.controlGroup.clickToStopHighlighting": "取消选择以停止突出显示面板。",
-    "controls.controlGroup.controlFrameAriaLabel": "用于 ${controlTitle} 的控件",
     "controls.controlGroup.controlSettingTooltipLabel.tooltipAriaLabel": "深入了解 {label}",
     "controls.controlGroup.dataSource.valuesSourceOptions.field": "选择字段",
     "controls.controlGroup.dataSource.valuesSourceOptions.query": "编写查询",

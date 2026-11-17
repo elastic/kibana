@@ -2077,7 +2077,6 @@
     "controls.controlGroup.ariaActions.moveControlButtonAction": "Déplacer le contrôle {controlTitle}",
     "controls.controlGroup.clickToHighlight": "Sélectionnez pour mettre les panneaux en surbrillance.",
     "controls.controlGroup.clickToStopHighlighting": "Désélectionnez pour arrêter de mettre les panneaux en surbrillance.",
-    "controls.controlGroup.controlFrameAriaLabel": "Contrôle pour ${controlTitle}",
     "controls.controlGroup.controlSettingTooltipLabel.tooltipAriaLabel": "En savoir plus sur {label}",
     "controls.controlGroup.dataSource.valuesSourceOptions.field": "Sélectionner un champ",
     "controls.controlGroup.dataSource.valuesSourceOptions.query": "Écrire une requête",

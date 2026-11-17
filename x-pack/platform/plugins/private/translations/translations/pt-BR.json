@@ -2094,7 +2094,6 @@
     "controls.controlGroup.ariaActions.moveControlButtonAction": "Mover controle {controlTitle}",
     "controls.controlGroup.clickToHighlight": "Selecione para destacar os painéis.",
     "controls.controlGroup.clickToStopHighlighting": "Desmarque para parar de destacar os painéis.",
-    "controls.controlGroup.controlFrameAriaLabel": "Controle para ${controlTitle}",
     "controls.controlGroup.controlSettingTooltipLabel.tooltipAriaLabel": "Mais sobre {label}",
     "controls.controlGroup.dataSource.valuesSourceOptions.field": "Selecionar um campo",
     "controls.controlGroup.dataSource.valuesSourceOptions.query": "Escreva uma consulta",

@@ -2079,7 +2079,6 @@
     "controls.controlGroup.ariaActions.moveControlButtonAction": "コントロール{controlTitle}を移動",
     "controls.controlGroup.clickToHighlight": "選択すると、パネルがハイライト表示されます。",
     "controls.controlGroup.clickToStopHighlighting": "選択を解除すると、パネルのハイライト表示が停止します。",
-    "controls.controlGroup.controlFrameAriaLabel": "${controlTitle}のコントロール",
     "controls.controlGroup.controlSettingTooltipLabel.tooltipAriaLabel": "{label}の詳細",
     "controls.controlGroup.dataSource.valuesSourceOptions.field": "フィールドを選択",
     "controls.controlGroup.dataSource.valuesSourceOptions.query": "クエリを作成",
