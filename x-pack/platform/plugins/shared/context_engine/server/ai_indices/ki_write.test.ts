@@ -363,9 +363,10 @@ describe('softDeleteKi', () => {
       dest: indexDest,
       kiId: 'ki-1',
       writer: deleteWriter,
+      deleteLinkedRelationships: true,
     });
 
-    expect(result).toEqual({ id: 'ki-1' });
+    expect(result).toEqual({ id: 'ki-1', deletedRelationshipIds: [] });
     expect(esClient.delete).not.toHaveBeenCalled();
     expectEsRequest(esClient.update as jest.Mock, {
       index: 'ai-index-idx-my-ai-index',
@@ -394,6 +395,7 @@ describe('softDeleteKi', () => {
       dest: indexDest,
       kiId: 'ki-1',
       writer: deleteWriter,
+      deleteLinkedRelationships: true,
       backingIndex: pinnedBackingIndex,
     });
 
@@ -409,7 +411,7 @@ describe('softDeleteKi', () => {
       sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
       size: REVISION_TIE_WINDOW,
       seq_no_primary_term: true,
-      _source: ['id', 'governance'],
+      _source: true,
     });
   });
 
@@ -425,9 +427,10 @@ describe('softDeleteKi', () => {
       dest: dataStreamDest,
       kiId: 'ki-1',
       writer: deleteWriter,
+      deleteLinkedRelationships: true,
     });
 
-    expect(result).toEqual({ id: 'ki-1' });
+    expect(result).toEqual({ id: 'ki-1', deletedRelationshipIds: [] });
     expect(esClient.delete).not.toHaveBeenCalled();
     expectEsRequest(esClient.index as jest.Mock, {
       index: 'ai-index-ds-my-ai-index',
@@ -457,9 +460,10 @@ describe('softDeleteKi', () => {
       dest: indexDest,
       kiId: 'ki-1',
       writer: deleteWriter,
+      deleteLinkedRelationships: true,
     });
 
-    expect(result).toEqual({ id: 'ki-1' });
+    expect(result).toEqual({ id: 'ki-1', deletedRelationshipIds: [] });
     expect(esClient.update).not.toHaveBeenCalled();
     expect(esClient.index).not.toHaveBeenCalled();
   });
@@ -476,11 +480,118 @@ describe('softDeleteKi', () => {
       dest: indexDest,
       kiId: 'missing-ki',
       writer: deleteWriter,
+      deleteLinkedRelationships: true,
     }).catch((e) => e);
 
     expect(thrown).toBeInstanceOf(KiNotFoundError);
     expect(esClient.update).not.toHaveBeenCalled();
     expect(esClient.index).not.toHaveBeenCalled();
+  });
+
+  const linkedEntityClient = (entitySource: object = {}) => {
+    const revisionHit = (id: string, source: object) => ({
+      hits: {
+        hits: [
+          {
+            _id: `doc-${id}`,
+            _index: indexDest.value,
+            _seq_no: 5,
+            _primary_term: 1,
+            _source: { id, ...source },
+          },
+        ],
+      },
+    });
+    const search = jest.fn(async (request: { collapse?: object; query: object }) => {
+      if (request.collapse) {
+        return {
+          hits: {
+            hits: [
+              {
+                sort: ['rel-1'],
+                inner_hits: { latest: { hits: { hits: [{ _source: { id: 'rel-1' } }] } } },
+              },
+            ],
+          },
+        };
+      }
+      return JSON.stringify(request.query).includes('rel-1')
+        ? revisionHit('rel-1', { type: 'memory.relationship' })
+        : revisionHit('ki-1', { type: 'entity.customer', ...entitySource });
+    });
+    return {
+      search,
+      update: jest.fn().mockResolvedValue({ result: 'updated' }),
+    } as unknown as ElasticsearchClient;
+  };
+
+  it('also deletes the relationships linking a fact or entity', async () => {
+    const esClient = linkedEntityClient();
+
+    const result = await softDeleteKi(esClient, {
+      aiIndexId: 'my-ai-index',
+      dest: indexDest,
+      kiId: 'ki-1',
+      writer: deleteWriter,
+      deleteLinkedRelationships: true,
+      refresh: false,
+    });
+
+    expect(result).toEqual({ id: 'ki-1', deletedRelationshipIds: ['rel-1'] });
+    expect((esClient.update as jest.Mock).mock.calls.map(([{ id }]) => id)).toEqual([
+      'doc-ki-1',
+      'doc-rel-1',
+    ]);
+    expect(esClient.update).not.toHaveBeenCalledWith(
+      expect.objectContaining({ refresh: expect.anything() })
+    );
+  });
+
+  it('finishes deleting the linked relationships of an already-deleted fact or entity', async () => {
+    const esClient = linkedEntityClient({ governance: { lifecycle: { status: 'deleted' } } });
+
+    const result = await softDeleteKi(esClient, {
+      aiIndexId: 'my-ai-index',
+      dest: indexDest,
+      kiId: 'ki-1',
+      writer: deleteWriter,
+      deleteLinkedRelationships: true,
+    });
+
+    expect(result).toEqual({ id: 'ki-1', deletedRelationshipIds: ['rel-1'] });
+    expect((esClient.update as jest.Mock).mock.calls.map(([{ id }]) => id)).toEqual(['doc-rel-1']);
+  });
+
+  it('leaves the linked relationships alone when asked to', async () => {
+    const esClient = linkedEntityClient();
+
+    const result = await softDeleteKi(esClient, {
+      aiIndexId: 'my-ai-index',
+      dest: indexDest,
+      kiId: 'ki-1',
+      writer: deleteWriter,
+      deleteLinkedRelationships: false,
+    });
+
+    expect(result).toEqual({ id: 'ki-1', deletedRelationshipIds: [] });
+    expect((esClient.update as jest.Mock).mock.calls.map(([{ id }]) => id)).toEqual(['doc-ki-1']);
+  });
+
+  it('does not look up relationships for other KI types', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
+      update: jest.fn().mockResolvedValue({ result: 'updated' }),
+    } as unknown as ElasticsearchClient;
+
+    await softDeleteKi(esClient, {
+      aiIndexId: 'my-ai-index',
+      dest: indexDest,
+      kiId: 'ki-1',
+      writer: deleteWriter,
+      deleteLinkedRelationships: true,
+    });
+
+    expect(esClient.search).toHaveBeenCalledTimes(1);
   });
 });
 

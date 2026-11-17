@@ -188,7 +188,19 @@ export class SignificantEventsPlugin
     core.dataStreams.registerDataStream(detectionsDataStream);
     core.dataStreams.registerDataStream(knowledgeIndicatorsDataStream);
 
-    this.ebtTelemetryService.setup(core.analytics);
+    this.ebtTelemetryService.setup(
+      core.analytics,
+      {
+        cpsEnabled: plugins.cps?.getCpsEnabled() ?? false,
+        originProjectId: plugins.cloud?.serverless.projectId,
+        getLinkedProjectIds: async (request) => {
+          const [, pluginsStart] = await core.getStartServices();
+          const linkedProjects = await pluginsStart.cps?.getLinkedProjects(request);
+          return linkedProjects?.map(({ id }) => id);
+        },
+      },
+      this.logger.get('telemetry')
+    );
 
     const significantEventsServices = createSignificantEventsServices();
     const knowledgeIndicatorService = new KnowledgeIndicatorService(core, this.logger);
@@ -259,7 +271,10 @@ export class SignificantEventsPlugin
           request,
           logger: this.logger,
         }),
-        telemetry: this.ebtTelemetryService.getClient(),
+        telemetry: {
+          trackEventStatusChanged: (params) =>
+            this.ebtTelemetryService.getClient().trackEventStatusChanged(params, request),
+        },
       });
 
       const getAlertingV2RulesClient = async () =>

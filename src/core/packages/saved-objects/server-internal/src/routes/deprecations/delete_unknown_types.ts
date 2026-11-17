@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ReservedPrivilegesSet } from '@kbn/core-http-server';
 import { catchAndReturnBoomErrors } from '../utils';
 import type { InternalSavedObjectRouter } from '../../internal_types';
 import { deleteUnknownTypeObjects } from '../../deprecations';
@@ -25,8 +26,7 @@ export const registerDeleteUnknownTypesRoute = (
       validate: false,
       security: {
         authz: {
-          enabled: false,
-          reason: 'This route delegates authorization to the Saved Objects Client',
+          requiredPrivileges: [ReservedPrivilegesSet.superuser],
         },
       },
     },

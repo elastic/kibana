@@ -379,10 +379,10 @@ export function createEventsWriteTool({
       is born only from evidence that points to an error (a confirms signal or an off_topic row);
       healthy or empty evidence is not written.
       Signals and topology are merged with prior versions. \`severity\` is your verdict under
-      its field contract, decided from the merged confirming signals; the writer stores it as given
-      (an inactive event is low) and returns the stored tier. No-op if the stored severity and
-      status are unchanged (written: false, reason: unchanged_outcome). When no new rule UUIDs are introduced, title and
-      symptom_hypothesis are frozen to the stored values and narrative_preserved: true is returned.
+      its field contract, decided from the merged evidence. The response reports the tier actually
+      stored. No-op if the stored severity and status are unchanged (written: false, reason:
+      unchanged_outcome). When no new rule UUIDs are introduced, title and symptom_hypothesis are
+      frozen to the stored values and narrative_preserved: true is returned.
 
       **Without event_id**: find-or-create. When the item has confirmed rules, scans all
       currently-active events for one that confirms every submitted confirmed rule and shares at
@@ -485,22 +485,25 @@ export function createEventsWriteTool({
             logger,
             description: 'events_write telemetry',
             track: () =>
-              telemetry.trackAgentToolEventsWrite({
-                workflow_execution_id: workflowExecutionId,
-                ...alertCreationAttemptIdentity({
-                  spaceId: request.spaceId,
-                  eventId: eventsWriteResultEventId(result, input.event_id),
-                  groupHash: result.written && result.created ? result.group_hash : undefined,
-                }),
-                success: result.written || isSkipped,
-                event_id: result.event_id ?? 'unknown',
-                status: result.status,
-                written: result.written,
-                source_ids: input.source_ids,
-                ...detectionRunsOf(input),
-                error_message: isBulkError ? result.error.reason : undefined,
-                ...(result.written ? { severity: result.severity } : {}),
-              }),
+              telemetry.trackAgentToolEventsWrite(
+                {
+                  workflow_execution_id: workflowExecutionId,
+                  ...alertCreationAttemptIdentity({
+                    spaceId: request.spaceId,
+                    eventId: eventsWriteResultEventId(result, input.event_id),
+                    groupHash: result.written && result.created ? result.group_hash : undefined,
+                  }),
+                  success: result.written || isSkipped,
+                  event_id: result.event_id ?? 'unknown',
+                  status: result.status,
+                  written: result.written,
+                  source_ids: input.source_ids,
+                  ...detectionRunsOf(input),
+                  error_message: isBulkError ? result.error.reason : undefined,
+                  ...(result.written ? { severity: result.severity } : {}),
+                },
+                request
+              ),
           });
         });
 
@@ -535,19 +538,22 @@ export function createEventsWriteTool({
             logger,
             description: 'failed events_write telemetry',
             track: () =>
-              telemetry.trackAgentToolEventsWrite({
-                workflow_execution_id: workflowExecutionId,
-                ...alertCreationAttemptIdentity({
-                  spaceId: request.spaceId,
-                  eventId: input.event_id,
-                }),
-                success: false,
-                event_id: input.event_id ?? 'unknown',
-                written: false,
-                source_ids: 'source_ids' in input ? input.source_ids : [],
-                ...('source_ids' in input ? detectionRunsOf(input) : {}),
-                error_message: message,
-              }),
+              telemetry.trackAgentToolEventsWrite(
+                {
+                  workflow_execution_id: workflowExecutionId,
+                  ...alertCreationAttemptIdentity({
+                    spaceId: request.spaceId,
+                    eventId: input.event_id,
+                  }),
+                  success: false,
+                  event_id: input.event_id ?? 'unknown',
+                  written: false,
+                  source_ids: 'source_ids' in input ? input.source_ids : [],
+                  ...('source_ids' in input ? detectionRunsOf(input) : {}),
+                  error_message: message,
+                },
+                request
+              ),
           });
         });
         const code = getBulkWriteToolErrorCode(error instanceof Error ? error : new Error(message));

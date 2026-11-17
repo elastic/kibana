@@ -27,7 +27,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { CPSServerSetup } from '@kbn/cps/server';
+import type { CPSServerSetup, CPSServerStart } from '@kbn/cps/server';
 import type {
   FieldsMetadataServerSetup,
   FieldsMetadataServerStart,
@@ -80,6 +80,7 @@ export interface SignificantEventsPluginStartDependencies {
   nightshiftSources: NightshiftSourcesServerStart;
   nightshiftInvestigations?: NightshiftInvestigationsServerStart;
   agenticInvestigations?: AgenticInvestigationsPluginStart;
+  cps?: CPSServerStart;
 }
 
 export interface SignificantEventsServer {

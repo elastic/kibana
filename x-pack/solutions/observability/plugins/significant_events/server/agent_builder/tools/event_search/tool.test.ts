@@ -151,16 +151,19 @@ describe('event_search tool', () => {
         ],
       })
     );
-    expect(telemetry.trackAgentToolEventSearch).toHaveBeenCalledWith({
-      workflow_execution_id: 'workflow-run-1',
-      success: true,
-      result_count: 1,
-      has_query: false,
-      has_source_filter: true,
-      status_filter: 'active',
-      view: 'compact',
-      page: 1,
-    });
+    expect(telemetry.trackAgentToolEventSearch).toHaveBeenCalledWith(
+      {
+        workflow_execution_id: 'workflow-run-1',
+        success: true,
+        result_count: 1,
+        has_query: false,
+        has_source_filter: true,
+        status_filter: 'active',
+        view: 'compact',
+        page: 1,
+      },
+      expect.anything()
+    );
     expect(searchEventsToolHandler).toHaveBeenCalledWith(
       expect.objectContaining({
         params: expect.objectContaining({

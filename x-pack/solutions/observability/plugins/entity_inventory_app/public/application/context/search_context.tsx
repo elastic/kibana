@@ -30,6 +30,8 @@ export interface EntityInventorySearchContextValue {
   setFilters: (filters: Filter[]) => void;
   filterSelection: FilterControlsSelection;
   setFilterSelection: (selection: FilterControlsSelection) => void;
+  /** False when `xpack.entityInventoryApp.timeRangeLimit.disabled` turns the time range limit off. */
+  isTimeRangeLimited: boolean;
   /** Commits a search and returns the effective date range. An invalid query is not committed. */
   submit: (payload: EntityInventorySearchSubmitPayload) => TimeRange;
 }
@@ -47,8 +49,9 @@ export const EntityInventorySearchProvider = ({
   children?: React.ReactNode;
 }) => {
   const {
-    services: { notifications, uiSettings },
+    services: { notifications, uiSettings, config },
   } = useKibana();
+  const isTimeRangeLimited = !config.timeRangeLimit.disabled;
   const [query, setQuery] = useState<Query>(DEFAULT_QUERY);
   const [filters, setFilters] = useState<Filter[]>([]);
   const [dateRange, setDateRange] = useState<TimeRange>(DEFAULT_TIME_RANGE);
@@ -81,9 +84,10 @@ export const EntityInventorySearchProvider = ({
         }
       }
 
+      // Without the limit, clampTimeRange never clamps and only checks that the range is valid.
       const { range, wasClamped, isValid } = clampTimeRange(
         submittedRange,
-        ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS
+        isTimeRangeLimited ? ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS : Infinity
       );
       const effectiveRange = isValid ? range : dateRange;
 
@@ -97,7 +101,7 @@ export const EntityInventorySearchProvider = ({
 
       return effectiveRange;
     },
-    [dateRange, notifications, uiSettings]
+    [dateRange, isTimeRangeLimited, notifications, uiSettings]
   );
 
   const value = useMemo(
@@ -109,9 +113,19 @@ export const EntityInventorySearchProvider = ({
       setFilters,
       filterSelection,
       setFilterSelection,
+      isTimeRangeLimited,
       submit,
     }),
-    [entityCategory, query, filters, dateRange, filterSelection, setFilterSelection, submit]
+    [
+      entityCategory,
+      query,
+      filters,
+      dateRange,
+      filterSelection,
+      setFilterSelection,
+      isTimeRangeLimited,
+      submit,
+    ]
   );
 
   return (

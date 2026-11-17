@@ -176,13 +176,33 @@ describe('computeEventFacts', () => {
     }
   });
 
-  it('floors an inactive event to low', () => {
+  it('rates a new inactive event on its evidence', () => {
     expect(
       facts({
         signals: [makeSignal()],
         candidateOverrides: { status: 'inactive', severity: 'high' },
       }).severity
-    ).toBe('low');
+    ).toBe('high');
+  });
+
+  it('preserves the stored severity when closing an existing event', () => {
+    expect(
+      facts({
+        signals: [makeSignal({ verdict: 'refutes' })],
+        candidateOverrides: { status: 'inactive', severity: 'low' },
+        stored: makeStored([makeSignal()], { severity: 'critical' }),
+      }).severity
+    ).toBe('critical');
+  });
+
+  it('rates a reopened episode from its new evidence', () => {
+    expect(
+      facts({
+        signals: [makeSignal()],
+        candidateOverrides: { severity: 'medium' },
+        stored: makeStored([makeSignal()], { status: 'inactive', severity: 'high' }),
+      }).severity
+    ).toBe('medium');
   });
 
   it('judges the merged member-union of stored and submitted signals', () => {

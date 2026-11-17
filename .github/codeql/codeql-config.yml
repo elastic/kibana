@@ -121,6 +121,7 @@ paths-ignore:
   - src/platform/packages/shared/kbn-tooling-log
   - src/platform/plugins/private/interactive_setup/test/**
   - src/platform/test
+  - src/platform/test_plugins
   - typings
   - x-pack/examples
   - x-pack/packages/ai-infra/product-doc-artifact-builder
@@ -132,11 +133,13 @@ paths-ignore:
   - x-pack/platform/packages/shared/kbn-sample-parser
   - x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/public/assets/**
   - x-pack/platform/test
+  - x-pack/platform/test_plugins
   - x-pack/performance
   - x-pack/scripts
   - x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant
   - x-pack/solutions/observability/packages/kbn-genai-cli
   - x-pack/solutions/*/test
+  - x-pack/solutions/*/test_plugins
 query-filters:
   - exclude:
       paths:
