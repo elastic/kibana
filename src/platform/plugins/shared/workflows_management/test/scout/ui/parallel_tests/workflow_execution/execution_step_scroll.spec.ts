@@ -42,7 +42,7 @@ test.describe('Workflow execution - Step scroll', { tag: [...tags.stateful.class
     // The execution flyout opens the step detail. It does not scroll the YAML editor.
     const expectStepDetail = async (stepName: string) => {
       await expect(
-        pageObjects.workflowExecution.executionPanel.getByRole('heading', { name: stepName })
+        pageObjects.workflowExecution.stepDetail.getByRole('heading', { name: stepName })
       ).toBeVisible();
     };
 

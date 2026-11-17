@@ -1,0 +1,130 @@
+# GitHub
+
+Use for: repository listing, file and directory browsing, code search, commits, branches, tags,
+pull requests and issues. Not for: GitLab or Bitbucket, or files already in the sandbox.
+
+## Authentication
+
+Check `/workspace/connectors.md` for a GitHub connector:
+
+- **GitHub connector**: pass its id as `connector_id`. For that single command only, the
+  environment contains `CONNECTOR_HEADER_AUTHORIZATION` (full `Authorization` header value,
+  `Bearer <token>`) and `CONNECTOR_CONFIG_SERVERURL` (the GitHub MCP server URL; do not use it for
+  REST calls).
+- **No connector**: public repositories work without credentials; drop the `Authorization` header.
+  Unauthenticated REST calls are limited to 60 requests per hour, so prefer a shallow clone for
+  bulk reads.
+
+The REST API base is `https://api.github.com`:
+
+```bash
+curl --fail-with-body -sS --max-time 60 \
+  -H "Authorization: $CONNECTOR_HEADER_AUTHORIZATION" \
+  -H "Accept: application/vnd.github+json" \
+  "https://api.github.com/repos/{owner}/{repo}"
+```
+
+GitHub is read-only for investigations: never create, update or comment on issues, pull
+requests, branches or files. Record what should change as a proposal instead.
+
+## Strategy: prefer the API over cloning
+
+Use the REST API for nearly everything; calls typically return in 1–3s, while cloning a large
+repository takes 30–100s or more. Only clone when you need a local checkout, for example to grep
+across many files. When you clone, always use `--depth 1` unless you need history.
+
+## Investigations: what changed
+
+- Commits merged around the incident onset:
+  `GET /repos/{owner}/{repo}/commits?since=<ISO8601>&until=<ISO8601>&per_page=100`
+- What changed between two released versions (for example the image tags that were running before
+  and during the incident): `GET /repos/{owner}/{repo}/compare/{base}...{head}`
+- Pull requests merged in a window:
+  `GET /search/issues?q=repo:{owner}/{repo}+is:pr+is:merged+merged:<from>..<to>`
+- Once logs name a file or function, read it at the deployed version with
+  `GET /repos/{owner}/{repo}/contents/{path}?ref={tag-or-sha}` and tie the finding to concrete lines.
+
+## API reference
+
+### Repository discovery
+
+| Operation | Endpoint |
+|-----------|----------|
+| Repos the token can access | `GET /user/repos?visibility=all&affiliation=owner,collaborator,organization_member&per_page=100` |
+| Search repos | `GET /search/repositories?q={query}+org:{org}` |
+| Repo info | `GET /repos/{owner}/{repo}` (`.default_branch`) |
+
+### Files and directories (prefer over cloning)
+
+| Operation | Endpoint |
+|-----------|----------|
+| List a directory or get a file | `GET /repos/{owner}/{repo}/contents/{path}?ref={ref}` (file content is base64) |
+| Full file tree | `GET /repos/{owner}/{repo}/git/trees/{ref}?recursive=1` |
+
+The tree endpoint returns every path in one call; use it for broad discovery instead of code search,
+which can miss results. Very large repositories may return `"truncated": true`; then walk
+`contents/{path}` or make a shallow clone.
+
+Decode a file from the contents endpoint:
+
+```bash
+curl … "https://api.github.com/repos/{owner}/{repo}/contents/{path}?ref={ref}" | jq -r '.content' | base64 -d
+```
+
+### Code search
+
+| Operation | Endpoint |
+|-----------|----------|
+| Search code | `GET /search/code?q={query}+repo:{owner}/{repo}` |
+
+Code search is ranked and paginated, not exhaustive. For complete file listings use the tree or
+contents endpoints.
+
+### Commits and history
+
+| Operation | Endpoint |
+|-----------|----------|
+| List commits | `GET /repos/{owner}/{repo}/commits?sha={branch}&path={path}&since=…&until=…&per_page=100` |
+| Commit detail (with files and patch) | `GET /repos/{owner}/{repo}/commits/{sha}` |
+| Compare | `GET /repos/{owner}/{repo}/compare/{base}...{head}` |
+
+The commit detail returns the GitHub username in `.author.login`; `git log` only shows name and email.
+
+### Branches, tags and releases
+
+| Operation | Endpoint |
+|-----------|----------|
+| List branches | `GET /repos/{owner}/{repo}/branches?per_page=100` |
+| List tags | `GET /repos/{owner}/{repo}/tags?per_page=100` |
+| List releases | `GET /repos/{owner}/{repo}/releases?per_page=100` |
+
+### Pull requests and issues
+
+| Operation | Endpoint |
+|-----------|----------|
+| List PRs | `GET /repos/{owner}/{repo}/pulls?state={open,closed,all}&per_page=100` |
+| PR detail | `GET /repos/{owner}/{repo}/pulls/{number}` |
+| PR files | `GET /repos/{owner}/{repo}/pulls/{number}/files` |
+| List issues | `GET /repos/{owner}/{repo}/issues?state={open,closed,all}&per_page=100` |
+
+## Pagination
+
+Responses default to 30 items. Always set `per_page=100` (the maximum), check the `Link` response
+header (`curl -sS -D -`) for `rel="next"`, and request further pages with `&page=N`.
+
+## Cloning (last resort)
+
+Public repositories clone without credentials:
+
+```bash
+git clone --depth 1 --filter=blob:none https://github.com/{owner}/{repo}.git
+```
+
+For a private repository, pass the token as a header instead of embedding it in the URL, and never
+echo it:
+
+```bash
+git -c http.extraHeader="Authorization: Basic $(printf 'x-access-token:%s' "${CONNECTOR_HEADER_AUTHORIZATION#* }" | base64 | tr -d '\n')" \
+  clone --depth 1 --filter=blob:none https://github.com/{owner}/{repo}.git
+```
+Use `--depth 100` when you need some history; a full clone only when the API cannot answer.

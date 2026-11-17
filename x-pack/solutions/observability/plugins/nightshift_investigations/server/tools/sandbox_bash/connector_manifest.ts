@@ -6,13 +6,26 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { SandboxSession } from '@kbn/sandbox-plugin/server';
+import type { AuditedSandboxSession } from '../../sandbox_audit';
 import type { AgentConnector, ActionsClient } from './agent_connectors';
 import { listAgentConnectors } from './agent_connectors';
 import type { SandboxCallContext } from './tool_utils';
+import { CONNECTOR_DOCS, CONNECTOR_DOCS_ROOT, CONNECTOR_MANIFEST_PATH } from './connector_docs';
 
 const renderConnectorSection = (connector: AgentConnector): string =>
   `## ${connector.name} (connector-id: ${connector.id}, type: ${connector.actionTypeId})`;
+
+const renderGuidesSection = (): string[] => [
+  '',
+  '---',
+  '',
+  '# Service guides',
+  '',
+  'API recipes and how to authenticate through a connector, or without credentials where the',
+  'service allows it. Read one when you need that service.',
+  '',
+  ...CONNECTOR_DOCS.map(({ service, path }) => `- ${service}: \`${path}\``),
+];
 
 export const writeConnectorManifest = async ({
   session,
@@ -20,7 +33,7 @@ export const writeConnectorManifest = async ({
   getActionsClient,
   logger,
 }: {
-  session: SandboxSession;
+  session: AuditedSandboxSession;
   callContext: SandboxCallContext;
   getActionsClient: ((req: KibanaRequest) => Promise<ActionsClient>) | undefined;
   logger: Logger;
@@ -57,11 +70,24 @@ export const writeConnectorManifest = async ({
     }
   }
 
+  sections.push(...renderGuidesSection());
+
   const content = sections.join('\n') + '\n';
 
   logger.debug(`Writing connector manifest (${connectors.length} connector(s))`);
 
-  await session.writeFiles([
-    { path: '/workspace/connectors.md', content: Buffer.from(content, 'utf8') },
-  ]);
+  const files = [
+    { path: CONNECTOR_MANIFEST_PATH, content: Buffer.from(content, 'utf8') },
+    ...CONNECTOR_DOCS.map(({ path, content: doc }) => ({
+      path,
+      content: Buffer.from(doc, 'utf8'),
+    })),
+  ];
+  await session.mkdirs([CONNECTOR_DOCS_ROOT]);
+  const results = await session.writeFiles(files);
+  // A failed overwrite can leave a stale file that the workspace cache would take as ready.
+  const failedPaths = files.filter((_, index) => !results[index]?.success).map(({ path }) => path);
+  if (failedPaths.length > 0) {
+    throw new Error(`Failed to write sandbox connector guidance: ${failedPaths.join(', ')}`);
+  }
 };

@@ -125,6 +125,12 @@ export class ActionTypeRegistry {
     Boolean(this.actionTypes.get(actionTypeId)?.isSystemActionType);
 
   /**
+   * Returns true if the action type is defined by a connector spec
+   */
+  public isSpecActionType = (actionTypeId: string): boolean =>
+    this.actionTypes.get(actionTypeId)?.source === ACTION_TYPE_SOURCES.spec;
+
+  /**
    * Returns true if the connector type has a sub-feature type defined
    */
   public hasSubFeature = (actionTypeId: string): boolean =>

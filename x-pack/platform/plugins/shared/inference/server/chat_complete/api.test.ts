@@ -20,6 +20,7 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import {
   type ChatCompleteAPI,
   type ChatCompletionChunkEvent,
+  type InferenceClient,
   MessageRole,
   isChatCompletionChunkEvent,
   isChatCompletionTokenCountEvent,
@@ -39,6 +40,7 @@ import type { AnonymizationRule, NamedEntityRecognitionRule } from '@kbn/ai-anon
 import { createChatCompleteApi } from './api';
 import { createChatCompleteCallbackApi } from './callback_api';
 import { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
+import { bindClient } from '../../common/inference_client/bind_client';
 
 describe('createChatCompleteApi', () => {
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
@@ -638,7 +640,6 @@ describe('createChatCompleteApi', () => {
     it('calls the top endpoint of the feature with its parameters', async () => {
       const resolveFeatureEndpoint = jest.fn().mockResolvedValue({
         connectorId: 'feature-connector',
-        temperature: 0.3,
         reasoning: { effort: 'low' },
       });
       const chatCompleteForFeature = createChatCompleteForFeature(resolveFeatureEndpoint);
@@ -654,9 +655,54 @@ describe('createChatCompleteApi', () => {
         expect.objectContaining({ connectorId: 'feature-connector' })
       );
       expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
-        expect.objectContaining({ temperature: 0.3, reasoning: { effort: 'low' } })
+        expect.objectContaining({ reasoning: { effort: 'low' } })
       );
       expect(response.content).toEqual('chunk-1');
+    });
+
+    it('passes the caller temperature along with the feature endpoint parameters', async () => {
+      const resolveFeatureEndpoint = jest.fn().mockResolvedValue({
+        connectorId: 'feature-connector',
+        reasoning: { effort: 'low' },
+      });
+      const chatCompleteForFeature = createChatCompleteForFeature(resolveFeatureEndpoint);
+
+      await chatCompleteForFeature({
+        featureId: 'my_feature',
+        temperature: 0.3,
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
+      });
+
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({ temperature: 0.3, reasoning: { effort: 'low' } })
+      );
+    });
+
+    it('feature reasoning overrides caller reasoning on a feature-bound chatComplete', async () => {
+      const resolveFeatureEndpoint = jest.fn().mockResolvedValue({
+        connectorId: 'feature-connector',
+        reasoning: { effort: 'low' },
+      });
+      const chatCompleteForFeature = createChatCompleteForFeature(resolveFeatureEndpoint);
+      const boundClient = bindClient(
+        { chatComplete: chatCompleteForFeature } as unknown as InferenceClient,
+        { featureId: 'my_feature' }
+      );
+
+      await boundClient.chatComplete({
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        reasoning: { effort: 'high' },
+        maxRetries: 0,
+      });
+
+      expect(resolveFeatureEndpoint).toHaveBeenCalledWith('my_feature');
+      expect(getInferenceExecutorMock).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorId: 'feature-connector' })
+      );
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({ reasoning: { effort: 'low' } })
+      );
     });
 
     it('calls the connector when featureId is undefined', async () => {
@@ -708,14 +754,14 @@ describe('createChatCompleteApi', () => {
       });
 
       expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
-        expect.objectContaining({ temperature: undefined, reasoning: undefined })
+        expect.objectContaining({ reasoning: undefined })
       );
     });
 
     it('returns an observable in stream mode and resolves the endpoint on subscription', async () => {
       const resolveFeatureEndpoint = jest.fn().mockResolvedValue({
         connectorId: 'feature-connector',
-        temperature: 0.3,
+        reasoning: { effort: 'low' },
       });
       const chatCompleteForFeature = createChatCompleteForFeature(resolveFeatureEndpoint);
 
@@ -736,7 +782,7 @@ describe('createChatCompleteApi', () => {
       expect(chunks.map(({ content }) => content)).toEqual(['chunk-1']);
       expect(resolveFeatureEndpoint).toHaveBeenCalledTimes(1);
       expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
-        expect.objectContaining({ temperature: 0.3 })
+        expect.objectContaining({ reasoning: { effort: 'low' } })
       );
     });
 
@@ -1749,6 +1795,41 @@ describe('createChatCompleteApi', () => {
             connectorId: 'my-endpoint',
             featureId: 'my_feature',
           }),
+        })
+      );
+    });
+
+    it('records the space the request was made in', async () => {
+      const callbackApi = createChatCompleteCallbackApi({
+        request,
+        namespace: 'my-space',
+        actions,
+        logger,
+        anonymizationRulesPromise: Promise.resolve([]),
+        regexWorker,
+        esClient: mockEsClient,
+        endpointIdCache,
+        tokenUsageLogger: tokenUsageLogger as any,
+        isTokenUsageTrackingEnabled,
+      });
+
+      await createChatCompleteApi({ callbackApi })({
+        connectorId: 'my-endpoint',
+        messages: [],
+        modelName: 'gpt-4o',
+        template: {
+          id: '.attack-discovery-fp-tp',
+          version: 1,
+          variables: { cited_alerts: 'no email here' },
+        },
+        maxRetries: 0,
+      });
+
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(tokenUsageLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          context: expect.objectContaining({ spaceId: 'my-space' }),
         })
       );
     });

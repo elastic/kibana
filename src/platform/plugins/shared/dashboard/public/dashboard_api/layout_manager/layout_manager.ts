@@ -9,7 +9,7 @@
 
 import { getSafe } from '@kbn/std';
 import deepEqual from 'fast-deep-equal';
-import { cloneDeep, filter, map as lodashMap, max, pick } from 'lodash';
+import { cloneDeep, filter, map as lodashMap, max, omit, pick } from 'lodash';
 import {
   BehaviorSubject,
   combineLatest,
@@ -248,12 +248,45 @@ export function initializeLayoutManager(
     if (!embeddables?.length) return;
     const first = embeddables[0];
     if (!first.embeddableId) first.embeddableId = v4(); // give first panel an ID so we can place others around it
+    const applyStatePromises: Array<Promise<void>> = [];
+    let anchorId: string | undefined;
 
     for (const incomingEmbeddable of embeddables) {
       const { serializedState, size, type } = incomingEmbeddable;
       const uuid = incomingEmbeddable.embeddableId ?? v4();
       const existingPanel: DashboardLayoutPanel | undefined = layout$.value.panels[uuid];
-      const sameType = existingPanel?.type === type;
+      const existingPinnedPanel = layout$.value.pinnedPanels[uuid];
+
+      const sameType = (existingPanel ?? existingPinnedPanel)?.type === type;
+      const nextState = {
+        ...(sameType && currentChildState[uuid] ? currentChildState[uuid] : {}),
+        ...serializedState,
+      };
+      currentChildState[uuid] = nextState;
+
+      // A mounted child doesn't re-read currentChildState.
+      const child = children$.value[uuid];
+      if (sameType && child && apiHasSerializableState(child)) {
+        const stateToApply = cloneDeep(nextState);
+        // Apply state after the loop so loading is set first and a synchronous error doesn't stop the remaining panels.
+        applyStatePromises.push(
+          Promise.resolve().then(() => child.applySerializedState(stateToApply))
+        );
+      }
+
+      if (!existingPanel && existingPinnedPanel) {
+        layout$.next({
+          ...layout$.value,
+          pinnedPanels: {
+            ...layout$.value.pinnedPanels,
+            [uuid]: { ...existingPinnedPanel, type },
+          },
+        });
+        continue;
+      }
+
+      // Anchor on the first grid panel that lands, so nothing is placed beside or scrolled to a pinned control.
+      anchorId ??= uuid;
 
       const updatedLayout = existingPanel
         ? {
@@ -275,19 +308,25 @@ export function initializeLayoutManager(
             },
             /**
              * We can assume that all panels being sent as a single package are related; so,
-             * place them close together by grouping them around the first embeddable.
+             * place them close together by grouping them around the first grid embeddable.
              */
-            beside: uuid === first.embeddableId ? undefined : first.embeddableId,
+            beside: uuid === anchorId ? undefined : anchorId,
           });
-      currentChildState[uuid] = {
-        ...(sameType && currentChildState[uuid] ? currentChildState[uuid] : {}),
-        ...serializedState,
-      };
 
       layout$.next(updatedLayout);
     }
-    trackPanel.setScrollToPanelId(first.embeddableId);
-    trackPanel.setHighlightPanelId(first.embeddableId);
+
+    if (applyStatePromises.length) {
+      childrenStateLoading$.next(true);
+      void Promise.allSettled(applyStatePromises).then(() => {
+        childrenStateLoading$.next(false);
+      });
+    }
+
+    if (anchorId) {
+      trackPanel.setScrollToPanelId(anchorId);
+      trackPanel.setHighlightPanelId(anchorId);
+    }
   };
 
   // --------------------------------------------------------------------------------------
@@ -359,34 +398,28 @@ export function initializeLayoutManager(
     return (await getChildApi(uuid)) as ApiType;
   };
 
-  const removePanel = (uuid: string) => {
+  // Removes grid and pinned panels in a single layout update, so subscribers never see a partial removal
+  const removePanels = (uuids: string[]) => {
     const currentLayout = layout$.value;
-    const panels = { ...currentLayout.panels };
-    const pinnedPanels = { ...currentLayout.pinnedPanels };
-    if (panels[uuid]) {
-      delete panels[uuid];
-      layout$.next({ ...layout$.value, panels });
-    } else if (pinnedPanels[uuid]) {
-      delete pinnedPanels[uuid];
-      // Recompute the order of the remaining pinned panels
-      const newPinnedPanels: typeof pinnedPanels = Object.entries(pinnedPanels)
-        .sort(([, a], [, b]) => a.order - b.order)
-        .reduce(
-          (result, [key, value], i) => ({ ...result, [key as string]: { ...value, order: i } }),
-          {}
-        );
-      layout$.next({ ...layout$.value, pinnedPanels: newPinnedPanels });
-    }
+    const gridPanelIds = uuids.filter((uuid) => Boolean(currentLayout.panels[uuid]));
+    const pinnedPanelIds = uuids.filter((uuid) => Boolean(currentLayout.pinnedPanels[uuid]));
+    if (!gridPanelIds.length && !pinnedPanelIds.length) return;
 
-    const children = { ...children$.value };
-    if (children[uuid]) {
-      delete children[uuid];
-      children$.next(children);
-    }
-    if (currentChildState[uuid]) {
-      delete currentChildState[uuid];
-    }
+    // Panels whose API never registered (e.g. in a collapsed section) are not in children$, so
+    // removeOrphanedChildrenSubscription would not clear their state
+    [...gridPanelIds, ...pinnedPanelIds].forEach((uuid) => delete currentChildState[uuid]);
+
+    // removeOrphanedChildrenSubscription drops the removed panels from children$
+    layout$.next({
+      ...currentLayout,
+      panels: gridPanelIds.length ? omit(currentLayout.panels, gridPanelIds) : currentLayout.panels,
+      pinnedPanels: pinnedPanelIds.length
+        ? reorderPinnedPanels(omit(currentLayout.pinnedPanels, pinnedPanelIds))
+        : currentLayout.pinnedPanels,
+    });
   };
+
+  const removePanel = (uuid: string) => removePanels([uuid]);
 
   const replacePanel = async (idToRemove: string, panelPackage: PanelPackage) => {
     try {
@@ -630,6 +663,7 @@ export function initializeLayoutManager(
       addNewPanel,
       addIncomingEmbeddables,
       removePanel,
+      removePanels,
       replacePanel,
       duplicatePanel,
       getDashboardPanelFromId,
@@ -748,6 +782,17 @@ function getClonedPanelTitle(panelTitles: string[], rawTitle: string) {
     ? baseTitle + ` (${clonedTag})`
     : baseTitle + ` (${clonedTag} ${similarBaseTitlesCount + 1})`;
 }
+
+/** Renumbers the pinned panels' `order` from 0 so removed panels leave no gaps */
+const reorderPinnedPanels = (
+  pinnedPanels: DashboardLayout['pinnedPanels']
+): DashboardLayout['pinnedPanels'] =>
+  Object.entries(pinnedPanels)
+    .sort(([, a], [, b]) => a.order - b.order)
+    .reduce<DashboardLayout['pinnedPanels']>(
+      (result, [key, value], i) => ({ ...result, [key]: { ...value, order: i } }),
+      {}
+    );
 
 const transformDashboardLayoutToGridLayout = (
   layout: DashboardLayout,

@@ -172,6 +172,32 @@ describe('ActionPolicyClient', () => {
       );
     });
 
+    it('creates a disabled policy when the body sets enabled=false', async () => {
+      mockSavedObjectsClient.create.mockResolvedValueOnce({
+        id: 'policy-id-disabled',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {} as ActionPolicySavedObjectAttributes,
+        references: [],
+        version: 'WzEsMV0=',
+      });
+
+      const res = await client.createActionPolicy({
+        data: {
+          name: 'disabled-policy',
+          destinations: [{ type: 'workflow', id: 'my-workflow' }],
+          enabled: false,
+        },
+        options: { id: 'policy-id-disabled' },
+      });
+
+      expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+        ACTION_POLICY_SAVED_OBJECT_TYPE,
+        expect.objectContaining({ enabled: false }),
+        { id: 'policy-id-disabled', overwrite: false }
+      );
+      expect(res.enabled).toBe(false);
+    });
+
     it('trims surrounding whitespace from the policy name for the API key and stored attributes', async () => {
       mockSavedObjectsClient.create.mockResolvedValueOnce({
         id: 'policy-id-1',
@@ -930,7 +956,7 @@ describe('ActionPolicyClient', () => {
       });
 
       const patch = (data: UpdateActionPolicyData) =>
-        client.updateActionPolicy({ data, options: { id: 'policy-leaf' } });
+        client.updateActionPolicy({ data, id: 'policy-leaf' });
 
       it('sets one matcher leaf and keeps its sibling', async () => {
         const res = await patch({ matcher: { tags: ['staging'] } });
@@ -1044,7 +1070,7 @@ describe('ActionPolicyClient', () => {
           grouping: null,
           throttle: null,
         },
-        options: { id: 'policy-id-update-1' },
+        id: 'policy-id-update-1',
       });
 
       expect(apiKeyService.create).toHaveBeenCalledWith('Action Policy: original-policy');
@@ -1104,7 +1130,7 @@ describe('ActionPolicyClient', () => {
 
       const res = await client.updateActionPolicy({
         data: { throttle: { strategy: 'on_status_change' } },
-        options: { id: 'policy-id-update-1' },
+        id: 'policy-id-update-1',
       });
 
       expect(storedByUpdate().throttle).toStrictEqual({ strategy: 'on_status_change' });
@@ -1147,7 +1173,7 @@ describe('ActionPolicyClient', () => {
 
       const res = await client.updateActionPolicy({
         data: { throttle: { strategy: 'per_status_interval', interval: '5m' } },
-        options: { id: 'policy-id-update-1' },
+        id: 'policy-id-update-1',
       });
 
       expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
@@ -1195,7 +1221,7 @@ describe('ActionPolicyClient', () => {
           name: 'updated-policy',
           destinations: [{ type: 'workflow', id: 'updated-workflow' }],
         },
-        options: { id: 'policy-id-update-1' },
+        id: 'policy-id-update-1',
       });
 
       expect(apiKeyService.create).toHaveBeenCalledWith('Action Policy: updated-policy');
@@ -1268,7 +1294,7 @@ describe('ActionPolicyClient', () => {
           name: 'updated-policy',
           destinations: [{ type: 'workflow', id: 'updated-workflow' }],
         },
-        options: { id: 'policy-id-update-1' },
+        id: 'policy-id-update-1',
       });
 
       await Promise.resolve();
@@ -1322,7 +1348,7 @@ describe('ActionPolicyClient', () => {
           name: 'updated-policy',
           destinations: [{ type: 'workflow', id: 'updated-workflow' }],
         },
-        options: { id: 'policy-id-update-decrypt-fail' },
+        id: 'policy-id-update-decrypt-fail',
       });
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
@@ -1372,7 +1398,7 @@ describe('ActionPolicyClient', () => {
 
       await client.updateActionPolicy({
         data: { name: 'renamed-policy' },
-        options: { id: 'policy-id-update-1' },
+        id: 'policy-id-update-1',
       });
 
       expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
@@ -1430,7 +1456,7 @@ describe('ActionPolicyClient', () => {
           name: 'updated-policy',
           destinations: [{ type: 'workflow', id: 'updated-workflow' }],
         },
-        options: { id: 'policy-id-update-1' },
+        id: 'policy-id-update-1',
       });
 
       expect(apiKeyService.markApiKeysForInvalidation).not.toHaveBeenCalled();
@@ -1476,7 +1502,7 @@ describe('ActionPolicyClient', () => {
             name: 'updated-policy',
             destinations: [{ type: 'workflow', id: 'updated-workflow' }],
           },
-          options: { id: 'policy-id-update-throw' },
+          id: 'policy-id-update-throw',
         })
       ).rejects.toThrow('storage error');
 
@@ -1526,7 +1552,7 @@ describe('ActionPolicyClient', () => {
           name: 'updated-policy',
           destinations: [{ type: 'workflow', id: 'updated-workflow' }],
         },
-        options: { id: 'policy-id-update-no-key' },
+        id: 'policy-id-update-no-key',
       });
 
       expect(apiKeyService.markApiKeysForInvalidation).not.toHaveBeenCalled();
@@ -1536,7 +1562,7 @@ describe('ActionPolicyClient', () => {
       await expect(
         client.updateActionPolicy({
           data: { destinations: [] },
-          options: { id: 'policy-id-update-invalid' },
+          id: 'policy-id-update-invalid',
         })
       ).rejects.toMatchObject({
         output: { statusCode: 400 },
@@ -1557,7 +1583,7 @@ describe('ActionPolicyClient', () => {
       await expect(
         client.updateActionPolicy({
           data: { destinations: [{ type: 'workflow', id: 'some-workflow' }] },
-          options: { id: 'policy-id-update-404' },
+          id: 'policy-id-update-404',
         })
       ).rejects.toMatchObject({
         output: { statusCode: 404 },
@@ -1623,8 +1649,29 @@ describe('ActionPolicyClient', () => {
         expect(apiKeyService.markApiKeysForInvalidation).not.toHaveBeenCalled();
       });
 
-      // A replace cannot carry lifecycle state, so creating through PUT lands enabled like a POST.
-      it('creates the policy enabled', async () => {
+      it('creates the policy disabled when the body sets enabled=false', async () => {
+        mockSavedObjectsClient.create.mockResolvedValueOnce({
+          id: 'policy-id-upsert-new',
+          type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {} as ActionPolicySavedObjectAttributes,
+          references: [],
+          version: 'WzEsMV0=',
+        });
+
+        const res = await client.upsertActionPolicy({
+          id: 'policy-id-upsert-new',
+          data: { ...baseUpsertData, enabled: false },
+        });
+
+        expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+          ACTION_POLICY_SAVED_OBJECT_TYPE,
+          expect.objectContaining({ enabled: false }),
+          { id: 'policy-id-upsert-new', overwrite: false }
+        );
+        expect(res.policy.enabled).toBe(false);
+      });
+
+      it('creates the policy enabled when the body omits enabled', async () => {
         mockSavedObjectsClient.create.mockResolvedValueOnce({
           id: 'policy-id-upsert-new',
           type: ACTION_POLICY_SAVED_OBJECT_TYPE,
@@ -1751,8 +1798,30 @@ describe('ActionPolicyClient', () => {
         expect(res.created).toBe(false);
       });
 
-      // A replace never resurrects a disabled policy: `_enable` is the only way back on.
-      it('leaves a disabled policy disabled', async () => {
+      it('enables a disabled policy when the body sets enabled=true', async () => {
+        mockSavedObjectsClient.update.mockResolvedValueOnce({
+          id: 'policy-id-update-1',
+          type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {} as ActionPolicySavedObjectAttributes,
+          references: [],
+          version: 'WzIsMV0=',
+        });
+
+        const res = await client.upsertActionPolicy({
+          id: 'policy-id-update-1',
+          data: { ...baseUpsertData, enabled: true },
+        });
+
+        expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+          ACTION_POLICY_SAVED_OBJECT_TYPE,
+          'policy-id-update-1',
+          expect.objectContaining({ enabled: true }),
+          { version: 'WzEsMV0=', mergeAttributes: false }
+        );
+        expect(res.policy.enabled).toBe(true);
+      });
+
+      it('leaves a disabled policy disabled when the body omits enabled', async () => {
         mockSavedObjectsClient.update.mockResolvedValueOnce({
           id: 'policy-id-update-1',
           type: ACTION_POLICY_SAVED_OBJECT_TYPE,
@@ -3108,7 +3177,7 @@ describe('ActionPolicyClient', () => {
         () =>
           client.updateActionPolicy({
             data: { name: 'renamed' },
-            options: { id: 'policy-id-update-1' },
+            id: 'policy-id-update-1',
           }),
       ],
       ['upsertActionPolicy', () => client.upsertActionPolicy({ id: 'policy-1', data: validData })],
@@ -3243,7 +3312,7 @@ describe('ActionPolicyClient', () => {
       await expect(
         client.updateActionPolicy({
           data: { destinations: [{ type: 'workflow', id: 'new-workflow' }] },
-          options: { id: 'policy-version-conflict' },
+          id: 'policy-version-conflict',
         })
       ).rejects.toMatchObject({
         output: { statusCode: 409 },
@@ -3647,7 +3716,7 @@ describe('ActionPolicyClient', () => {
 
       await client.updateActionPolicy({
         data: { grouping: null, throttle: null },
-        options: { id: 'policy-updated' },
+        id: 'policy-updated',
       });
 
       expect(eventPublisher.emitActionPolicyUpdated).toHaveBeenCalledTimes(1);
@@ -3669,7 +3738,7 @@ describe('ActionPolicyClient', () => {
       );
 
       await expect(
-        client.updateActionPolicy({ data: { name: 'renamed' }, options: { id: 'policy-conflict' } })
+        client.updateActionPolicy({ data: { name: 'renamed' }, id: 'policy-conflict' })
       ).rejects.toMatchObject({ output: { statusCode: 409 } });
 
       expect(eventBus.publish).not.toHaveBeenCalled();

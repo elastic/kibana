@@ -22,11 +22,11 @@ import type { ManagedWorkflowDefinition } from '../../types';
 export const ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID = 'system-security-floor-alert-triage';
 
 export const ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
   management: ALERTZERO_WORKER_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 17,
+  version: 18,
   yamlTemplate: (values: AlertTriageWorkerTemplateValues): string =>
     renderAlertTriageWorkerYaml(
       FLOOR_ALERT_TRIAGE_YAML,

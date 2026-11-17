@@ -10,7 +10,8 @@ export {
   parseYamlChangelog,
   formatChangelog,
   getBreakingChanges,
+  getBreakingChangesInRange,
   ChangeType,
   type Changelog,
   type BreakingChangesLog,
-} from './changelog_utils';
+} from '../../../../../../../../common/services/changelog_utils';

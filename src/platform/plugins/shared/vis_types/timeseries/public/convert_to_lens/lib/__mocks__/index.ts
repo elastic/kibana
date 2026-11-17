@@ -50,7 +50,7 @@ export const createPanel = (parialPanel?: Partial<Panel>): Panel => ({
   ignore_daylight_time: true,
   index_pattern: { id: 'test' },
   interval: '',
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   markdown_openLinksInNewTab: 0,
   markdown_scrollbars: 0,
   max_bars: 0,

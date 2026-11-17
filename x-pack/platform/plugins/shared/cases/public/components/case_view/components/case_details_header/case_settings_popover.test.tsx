@@ -48,6 +48,7 @@ describe('CaseSettingsPopover', () => {
     renderWithTestingProviders(<CaseSettingsPopover {...defaultProps} />);
 
     expect(await screen.findByTestId('case-settings-sync-alerts-switch')).toBeInTheDocument();
+    expect(screen.getByText('Sync detections')).toBeInTheDocument();
   });
 
   it('renders show metrics switch when metrics features are configured', async () => {

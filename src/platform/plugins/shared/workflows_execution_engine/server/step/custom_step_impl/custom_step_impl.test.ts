@@ -38,6 +38,7 @@ const createMocks = () => {
   const stepExecutionRuntime = {
     contextManager: {
       renderValueAccordingToContext: jest.fn((v: unknown) => v),
+      renderObjectAccordingToContextAsync: jest.fn(async (v: Record<string, unknown>) => v),
       getContext: jest.fn(() => ({})),
       getEsClientAsUser: jest.fn(() => ({})),
       getFakeRequest: jest.fn(() => null),
@@ -216,11 +217,9 @@ describe('CustomStepImpl', () => {
     it('delegates to the one-shot handler onCancel with rendered input, raw with, and config', async () => {
       mockOneShotOnCancel.mockResolvedValue(undefined);
       const mocks = createMocks();
-      (
-        mocks.stepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
-      ).mockReturnValue({
-        rendered: true,
-      });
+      mocks.stepExecutionRuntime.contextManager.renderObjectAccordingToContextAsync.mockResolvedValue(
+        { rendered: true }
+      );
 
       const impl = buildImpl({ handler: jest.fn() }, mocks);
       await impl.onCancel();
@@ -353,7 +352,7 @@ describe('CustomStepImpl', () => {
   });
 
   describe('getInput', () => {
-    it('renders node configuration with data via the execution runtime', () => {
+    it('renders node configuration with data via the execution runtime', async () => {
       const mocks = createMocks();
       const node = {
         ...defaultNode,
@@ -361,11 +360,11 @@ describe('CustomStepImpl', () => {
       };
 
       const impl = buildImpl({ handler: jest.fn() }, mocks, node);
-      const input = impl.getInput();
+      const input = await impl.getInput();
 
       expect(input).toEqual({ foo: 'bar' });
       expect(
-        mocks.stepExecutionRuntime.contextManager.renderValueAccordingToContext
+        mocks.stepExecutionRuntime.contextManager.renderObjectAccordingToContextAsync
       ).toHaveBeenCalledWith({ foo: 'bar' });
     });
   });

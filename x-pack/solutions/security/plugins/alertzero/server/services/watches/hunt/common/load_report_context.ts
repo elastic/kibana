@@ -10,6 +10,7 @@ import type { HuntIoc } from '@kbn/alertzero-common';
 import { HuntIocType, isHuntEligibleIoc } from '@kbn/alertzero-common';
 import { HUNT_REPORTS_INDEX } from '../../../../../common/constants';
 import { buildHuntSpaceFilterTerms } from './space_filter';
+import { MAX_HUNT_TECHNIQUE_IDS } from './hunt_technique_limit';
 
 /** What a hunt needs from a threat report: the IOCs and techniques Tier 1 searches for and the text Tier 2 reads. */
 export interface ReportHuntContext {
@@ -36,6 +37,18 @@ export interface ReportHuntContext {
    * retire.
    */
   extraction_pending: boolean;
+  /**
+   * The techniques earlier hunts in this space already searched for this report (the coverage
+   * ledger on its per-space `evidence` element), so a run can spend its generation budget on
+   * the rest. Empty when no earlier run recorded any.
+   */
+  already_searched_technique_ids: string[];
+  /**
+   * The techniques earlier hunts left for a later one (the report's recorded pending ids), so a
+   * run can keep them as work to do even when its own extraction no longer returns them. Empty
+   * when none are recorded.
+   */
+  pending_technique_ids: string[];
   /** Descriptive fields the Investigation narratives cite; absent when the report does not carry them. */
   title?: string;
   source_name?: string;
@@ -72,6 +85,11 @@ interface StoredReportSource {
   source?: { name?: string };
   lineage?: { extraction_method?: string };
   severity?: { level?: string };
+  evidence?: Array<{
+    space_id?: string;
+    hunted_technique_ids?: string[];
+    pending_technique_ids?: string[];
+  }>;
   extracted?: {
     iocs?: Array<{ type?: string; value?: string; tier?: unknown; deferred_unreviewed?: unknown }>;
     ttps?: { techniques?: string[] };
@@ -89,8 +107,6 @@ const MAX_HUNT_IOC_VALUE_CHARS = 2048;
  * Matches `MAX_IOCS_PER_REPORT` in the extract_iocs service, the most a stored report holds.
  */
 const MAX_HUNT_EXCLUDED_IOCS = 5_000;
-/** Matches the OpenAPI `techniques` maxItems and item maxLength. */
-export const MAX_HUNT_REPORT_TECHNIQUES = 100;
 const MAX_HUNT_TECHNIQUE_CHARS = 32;
 /** A vendor or product name is a short label; anything longer is malformed extraction, not a name. */
 const MAX_HUNT_VENDOR_PRODUCT_CHARS = 256;
@@ -139,11 +155,13 @@ const readVendorProduct = (value: unknown): string | undefined => {
  * Loads the hunt inputs for one report from `.kibana-threat-reports`, scoped to
  * the acting space. Returns null when the report is not visible there. IOC
  * kinds Tier 1 cannot map to an ECS field (for example `user`) are dropped.
- * Adjudicated-out IOCs (`reference`, `denied`, deferred) are also dropped from
- * `iocs` and reported on `excluded_iocs` when any remain. Every loaded field is
- * clamped to the same bounds the HTTP schemas enforce on caller-supplied input
- * (text length, IOC and technique counts and lengths), so a stored report
- * cannot bypass the Tier 1 query or Tier 2 input bounds.
+ * Adjudicated-out IOCs (`reference`, `denied`, deferred) and non-routable
+ * `ip` / `cidr` values (loopback, RFC1918, and the shared special-use set) are
+ * also dropped from `iocs` and reported on `excluded_iocs` when any remain.
+ * The value check covers legacy docs that lack a `reference` tier. Every loaded
+ * field is clamped to the same bounds the HTTP schemas enforce on
+ * caller-supplied input (text length, IOC and technique counts and lengths), so
+ * a stored report cannot bypass the Tier 1 query or Tier 2 input bounds.
  *
  * `esClient` must be the internal user: the reports index is plugin-owned and
  * hidden, and Kibana feature privileges grant no Elasticsearch access to it, so
@@ -175,6 +193,9 @@ export const loadReportHuntContext = async ({
       'source.name',
       'severity.level',
       'lineage.extraction_method',
+      'evidence.space_id',
+      'evidence.hunted_technique_ids',
+      'evidence.pending_technique_ids',
       'extracted.iocs',
       'extracted.ttps.techniques',
       'extracted.vulnerability.vendor',
@@ -237,10 +258,10 @@ export const loadReportHuntContext = async ({
         ...(oversizedIocs > 0 && { oversized: oversizedIocs }),
       },
     }),
-    ...(validTechniques.length > MAX_HUNT_REPORT_TECHNIQUES && {
+    ...(validTechniques.length > MAX_HUNT_TECHNIQUE_IDS && {
       techniques: {
-        kept: MAX_HUNT_REPORT_TECHNIQUES,
-        dropped: validTechniques.length - MAX_HUNT_REPORT_TECHNIQUES,
+        kept: MAX_HUNT_TECHNIQUE_IDS,
+        dropped: validTechniques.length - MAX_HUNT_TECHNIQUE_IDS,
       },
     }),
     ...(hasText &&
@@ -263,14 +284,28 @@ export const loadReportHuntContext = async ({
       ? source.lineage.extraction_method.trim()
       : '';
   const extractionPending = method.length === 0 || method === 'pending';
+  // One element per space; another space's ledger is never read.
+  const ledger = (Array.isArray(source.evidence) ? source.evidence : []).find(
+    (element) => element?.space_id === spaceId
+  );
+  const alreadySearched = (
+    Array.isArray(ledger?.hunted_technique_ids) ? ledger.hunted_technique_ids : []
+  )
+    .filter(isHuntTechnique)
+    .slice(0, MAX_HUNT_TECHNIQUE_IDS);
+  const pending = (Array.isArray(ledger?.pending_technique_ids) ? ledger.pending_technique_ids : [])
+    .filter(isHuntTechnique)
+    .slice(0, MAX_HUNT_TECHNIQUE_IDS);
   return {
     extraction_pending: extractionPending,
+    already_searched_technique_ids: alreadySearched,
+    pending_technique_ids: pending,
     ...(title !== undefined ? { title } : {}),
     ...(sourceName !== undefined ? { source_name: sourceName } : {}),
     ...(publishedAt !== undefined ? { published_at: publishedAt } : {}),
     ...(severity !== undefined ? { severity } : {}),
     iocs: mappableIocs.slice(0, MAX_HUNT_REPORT_IOCS).map(({ type, value }) => ({ type, value })),
-    techniques: validTechniques.slice(0, MAX_HUNT_REPORT_TECHNIQUES),
+    techniques: validTechniques.slice(0, MAX_HUNT_TECHNIQUE_IDS),
     ...(text !== undefined ? { text } : {}),
     ...(vendor !== undefined ? { vendor } : {}),
     ...(product !== undefined ? { product } : {}),

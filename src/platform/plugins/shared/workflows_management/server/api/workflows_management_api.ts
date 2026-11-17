@@ -34,6 +34,7 @@ import type {
   EsWorkflowStepExecution,
   GetAvailableConnectorsResponse,
   ResumeWorkflowExecutionResponseDto,
+  TriggerSchemaOptions,
   UpdatedWorkflowResponseDto,
   ValidateWorkflowResponseDto,
   WorkflowAccessControlRole,
@@ -75,14 +76,17 @@ import {
 } from './external_resume/external_resume_service';
 import { withHitlClaim } from './hitl_claim_release';
 import type { GetExecutionStepExecutionsResult } from './lib/get_execution_step_executions';
+import type { LoadAlertDocumentsRequest, LoadedAlertDocuments } from './lib/load_alert_documents';
+import { loadAlertDocuments } from './lib/load_alert_documents';
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
+import { ManagedWorkflowReadForbiddenError } from './managed_workflow_read_error';
+import type { TriggerSelectionKind } from './routes/executions/utils/parse_trigger_selections';
 import {
   ALL_TRIGGER_SELECTION_KINDS,
   preprocessTriggerInputs,
 } from './routes/executions/utils/preprocess_trigger_inputs';
-import type { TriggerSelectionKind } from './routes/executions/utils/preprocess_trigger_inputs';
 import type { WorkflowManagementAuditLog } from './routes/utils/workflow_audit_logging';
 import { WorkflowRequiresDelegatedIdentityError } from './workflow_requires_delegated_identity_error';
 import type { WorkflowsManagementClient } from './workflows_management_client';
@@ -108,6 +112,8 @@ import type {
   ProcessedWaitForInputFacets,
   ProcessedWaitForInputFilters,
   WaitForInputListResult,
+  WorkflowExecutionStatusCounts,
+  WorkflowExecutionStatusCountsParams,
   WorkflowExecutionStatusItem,
 } from '../services/workflow_execution_query_service';
 
@@ -195,7 +201,7 @@ export interface GetExecutionStepExecutionsParams {
 export interface SearchStepExecutionsParams {
   request?: KibanaRequest;
   workflowId: string;
-  stepId?: string;
+  stepId?: string | string[];
   /**
    * When set, only step executions of this type, e.g. `ai.agent`. A step id can be shared by more
    * than one document — the engine's step-level timeout wrapper reuses it — so this narrows a
@@ -479,12 +485,20 @@ export class WorkflowsManagementApi {
   public async getHistoryForWorkflow(
     id: string,
     spaceId: string,
-    options: { page?: number; perPage?: number; request: KibanaRequest }
+    options: {
+      page?: number;
+      perPage?: number;
+      request: KibanaRequest;
+      allowManagedWorkflowRead?: boolean;
+    }
   ): Promise<WorkflowChangesHistoryResponse> {
     const workflow = await this.workflowsService.getWorkflow(id, spaceId, { includeDeleted: true });
     if (!workflow) throw new WorkflowNotFoundError(id);
     const access = await this.workflowsService.getAccessControl();
     await access.assertAccess(workflow, 'read', options.request);
+    if (workflow.managed === true && options.allowManagedWorkflowRead !== true) {
+      throw new ManagedWorkflowReadForbiddenError();
+    }
     return this.workflowsService.getHistoryForWorkflow(id, spaceId, options);
   }
 
@@ -786,6 +800,26 @@ export class WorkflowsManagementApi {
       request
     );
     return executeResponse.workflowExecutionId;
+  }
+
+  /**
+   * Loads alert documents in the same shape alert-triggered workflows receive, so steps that load
+   * alerts themselves see identical documents. Reads run as the user behind `request`.
+   */
+  public async loadAlertDocuments({
+    request,
+    ...loadRequest
+  }: LoadAlertDocumentsRequest & { request: KibanaRequest }): Promise<LoadedAlertDocuments> {
+    const [coreStart, { alerting }] = await Promise.all([
+      this.workflowsService.getCoreStart(),
+      this.workflowsService.getPluginsStart(),
+    ]);
+    return loadAlertDocuments({
+      ...loadRequest,
+      esClient: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
+      ruleTypes: alerting?.listTypes() ?? new Map(),
+      logger: this.logger,
+    });
   }
 
   /**
@@ -1215,6 +1249,20 @@ export class WorkflowsManagementApi {
       accessControlFilter = await access.executionFilter(spaceId, params.request);
     }
     return this.workflowsService.getWorkflowExecutions({ ...params, accessControlFilter }, spaceId);
+  }
+
+  public async getWorkflowExecutionStatusCounts(
+    params: Omit<WorkflowExecutionStatusCountsParams, 'accessControlFilter'> & {
+      request: KibanaRequest;
+    },
+    spaceId: string
+  ): Promise<WorkflowExecutionStatusCounts> {
+    const access = await this.workflowsService.getAccessControl();
+    const accessControlFilter = await access.executionFilter(spaceId, params.request);
+    return this.workflowsService.getWorkflowExecutionStatusCounts(
+      { ...params, accessControlFilter },
+      spaceId
+    );
   }
 
   public async searchExecutionsView(
@@ -1689,6 +1737,11 @@ export class WorkflowsManagementApi {
 
   public async getRegisteredTriggers(): Promise<ServerTriggerDefinition[]> {
     return this.workflowsService.getRegisteredCustomTriggerDefinitions();
+  }
+
+  /** Trigger schema options from `workflowsManagement.pages.enabled`. */
+  public getTriggerSchemaOptions(): TriggerSchemaOptions {
+    return this.workflowsService.getTriggerSchemaOptions();
   }
 
   public async getWorkflowJsonSchema(

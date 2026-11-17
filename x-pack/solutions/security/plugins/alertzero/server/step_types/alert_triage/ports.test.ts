@@ -7,6 +7,7 @@
 
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { ALERT_FETCH_LIMIT, BATCH_ALERT_CAP, RULE_FETCH_LIMIT } from '../../alert_triage/constants';
+import { LOADED_ALERT_FIELDS } from '../../alert_triage/loaded_alert_fields';
 import {
   fetchTriageAlerts,
   listLiveExecutionIds,
@@ -176,14 +177,56 @@ describe('loadAlertsByIds', () => {
     ]);
   });
 
-  it('asks only for the given fields', async () => {
+  it('asks only for the loaded alert fields', async () => {
     const callKibanaApi = jest
       .fn()
       .mockResolvedValue({ status: 200, headers: {}, body: { hits: { hits: [] } } });
-    await loadAlertsByIds({ callKibanaApi }, ['a1'], ['host.name']);
     await loadAlertsByIds({ callKibanaApi }, ['a1']);
-    expect(callKibanaApi.mock.calls[0][0].body._source).toEqual(['host.name']);
-    expect(callKibanaApi.mock.calls[1][0].body).not.toHaveProperty('_source');
+    expect(callKibanaApi.mock.calls[0][0].body._source).toEqual(LOADED_ALERT_FIELDS);
+  });
+
+  describe('with more ids than one search takes', () => {
+    const ids = Array.from({ length: 250 }, (_, index) => `a${index}`);
+    const hitsFor = (values: string[]) => values.map((_id) => ({ _id, _index: 'i', _source: {} }));
+
+    it('searches in chunks of 100 ids and returns one list', async () => {
+      const callKibanaApi = jest.fn().mockImplementation(async ({ body }) => ({
+        status: 200,
+        headers: {},
+        body: { hits: { hits: hitsFor(body.query.ids.values) } },
+      }));
+
+      const { alerts, missingAlertIds } = await loadAlertsByIds({ callKibanaApi }, ids);
+
+      expect(callKibanaApi.mock.calls.map(([{ body }]) => body.query.ids.values.length)).toEqual([
+        100, 100, 50,
+      ]);
+      expect(alerts).toHaveLength(250);
+      expect(missingAlertIds).toEqual([]);
+    });
+
+    it('reports an id that is missing from any chunk', async () => {
+      const callKibanaApi = jest.fn().mockImplementation(async ({ body }) => ({
+        status: 200,
+        headers: {},
+        body: {
+          hits: { hits: hitsFor(body.query.ids.values.filter((id: string) => id !== 'a150')) },
+        },
+      }));
+
+      const { missingAlertIds } = await loadAlertsByIds({ callKibanaApi }, ids);
+
+      expect(missingAlertIds).toEqual(['a150']);
+    });
+
+    it('fails the whole load when a chunk fails, so a partial list is never returned', async () => {
+      const callKibanaApi = jest
+        .fn()
+        .mockResolvedValueOnce({ status: 200, headers: {}, body: { hits: { hits: [] } } })
+        .mockRejectedValueOnce(new Error('boom'));
+
+      await expect(loadAlertsByIds({ callKibanaApi }, ids)).rejects.toThrow('boom');
+    });
   });
 
   it('reports the ids that could not be loaded', async () => {

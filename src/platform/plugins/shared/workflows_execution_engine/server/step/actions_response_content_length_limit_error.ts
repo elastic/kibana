@@ -84,6 +84,7 @@ export class ActionsResponseContentLengthLimitError extends ExecutionError {
 
     super({
       type: 'ActionsResponseContentLengthExceeded',
+      retryable: false,
       message: canOverrideWithMaxStepSize
         ? `Step "${stepName}" connector response exceeded the current Actions HTTP response limit${formattedLimit} before the workflow step output was built.${contentLengthMessage}${estimatedOutputMessage} ${maxStepSizeSuggestion}`
         : `Step "${stepName}" connector response exceeded the Actions HTTP response limit${formattedLimit}. This limit is controlled by "${ACTIONS_MAX_RESPONSE_CONTENT_LENGTH_CONFIG}" and is enforced before the workflow step output is stored.${contentLengthMessage}${estimatedOutputMessage} Increasing "max-step-size" will not change this limit; ${suggestion}`,

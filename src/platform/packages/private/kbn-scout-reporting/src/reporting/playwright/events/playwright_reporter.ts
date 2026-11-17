@@ -316,7 +316,7 @@ export class ScoutPlaywrightReporter implements Reporter {
     return stats;
   }
 
-  async onEnd(result: FullResult) {
+  private recordRunResults(result: FullResult) {
     const tests = this.suite?.allTests() ?? [];
 
     // One `test-outcome` event per test with its final classification, in addition to the
@@ -364,13 +364,16 @@ export class ScoutPlaywrightReporter implements Reporter {
         uptime: Math.floor(process.uptime() * 1000),
       },
     });
+  }
 
-    // Save, upload events & conclude the report
+  // Kept synchronous and non-throwing: Playwright only force-exits once every hook has returned,
+  // and marks the whole run failed if one throws.
+  onEnd(result: FullResult) {
     try {
+      this.recordRunResults(result);
       this.report.save(this.reportRootPath);
     } catch (e) {
-      // Log the error but don't propagate it
-      this.log.error(e);
+      this.log.error(`${this.report.reportName} failed, run results may be incomplete: ${e}`);
     } finally {
       this.report.conclude();
     }
