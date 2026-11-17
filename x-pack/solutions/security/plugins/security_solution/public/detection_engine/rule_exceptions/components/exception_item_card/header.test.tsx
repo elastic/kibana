@@ -43,6 +43,38 @@ describe('ExceptionItemCardHeader', () => {
     );
   });
 
+  it('shows the computed columns badge for an item that applies to the output columns', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <ExceptionItemCardHeader
+          item={{ ...getExceptionListItemSchemaMock(), applies_to: 'esql_output_columns' }}
+          dataTestSubj="exceptionItemHeader"
+          actions={[]}
+        />
+      </TestProviders>
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="exceptionItemHeader-computedColumnsBadge"]').exists()
+    ).toBe(true);
+  });
+
+  it('shows no badge for an item that applies to the source documents', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <ExceptionItemCardHeader
+          item={getExceptionListItemSchemaMock()}
+          dataTestSubj="exceptionItemHeader"
+          actions={[]}
+        />
+      </TestProviders>
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="exceptionItemHeader-computedColumnsBadge"]').exists()
+    ).toBe(false);
+  });
+
   it('it displays actions', () => {
     const handleEdit = jest.fn();
     const handleDelete = jest.fn();

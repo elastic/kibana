@@ -35,6 +35,21 @@ export const ENDPOINT_EXCEPTION_ITEM_DELETE_BUTTON = i18n.translate(
   }
 );
 
+export const EXCEPTION_ITEM_COMPUTED_COLUMNS_BADGE = i18n.translate(
+  'xpack.securitySolution.ruleExceptions.exceptionItem.computedColumnsBadge',
+  {
+    defaultMessage: 'Computed columns',
+  }
+);
+
+export const EXCEPTION_ITEM_COMPUTED_COLUMNS_BADGE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.ruleExceptions.exceptionItem.computedColumnsBadgeTooltip',
+  {
+    defaultMessage:
+      'This exception excludes rows by the columns that an ES|QL rule query computes. It only applies to ES|QL rules.',
+  }
+);
+
 export const EXCEPTION_ITEM_CREATED_LABEL = i18n.translate(
   'xpack.securitySolution.ruleExceptions.exceptionItem.createdLabel',
   {

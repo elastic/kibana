@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/es-query'
   - '@kbn/i18n'
+  - '@kbn/securitysolution-exceptions-common'
   - '@kbn/securitysolution-io-ts-list-types'
   - '@kbn/securitysolution-io-ts-utils'
   - '@kbn/securitysolution-list-constants'

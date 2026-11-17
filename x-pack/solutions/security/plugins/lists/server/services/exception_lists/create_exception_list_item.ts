@@ -8,6 +8,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
 import type {
+  AppliesTo,
   CreateCommentsArray,
   Description,
   EntriesArray,
@@ -26,12 +27,14 @@ import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 
 import type { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
+import { validateItemForList } from './utils/esql_output_columns';
 import {
   transformCreateCommentsToComments,
   transformSavedObjectToExceptionListItem,
 } from './utils';
 
 interface CreateExceptionListItemOptions {
+  appliesTo?: AppliesTo;
   comments: CreateCommentsArray;
   listId: ListId;
   itemId: ItemId;
@@ -50,6 +53,7 @@ interface CreateExceptionListItemOptions {
 }
 
 export const createExceptionListItem = async ({
+  appliesTo,
   comments,
   entries,
   expireTime,
@@ -66,6 +70,14 @@ export const createExceptionListItem = async ({
   tieBreaker,
   type,
 }: CreateExceptionListItemOptions): Promise<ExceptionListItemSchema> => {
+  await validateItemForList({
+    appliesTo,
+    entries,
+    listId,
+    namespaceType,
+    osTypes,
+    savedObjectsClient,
+  });
   const savedObjectType = getSavedObjectType({ namespaceType });
   const dateNow = new Date().toISOString();
   const transformedComments = transformCreateCommentsToComments({
@@ -73,6 +85,7 @@ export const createExceptionListItem = async ({
     user,
   });
   const savedObject = await savedObjectsClient.create<ExceptionListSoSchema>(savedObjectType, {
+    applies_to: appliesTo,
     comments: transformedComments,
     created_at: dateNow,
     created_by: user,

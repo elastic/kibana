@@ -15,7 +15,9 @@ import {
   getMvExpandFields,
 } from '@kbn/securitysolution-utils';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { removeExpiredExceptions } from '@kbn/lists-plugin/server/services/exception_lists';
 import { buildEsqlSearchRequest } from './build_esql_search_request';
+import type { BuildEqlSearchRequestParams } from './build_esql_search_request';
 import { performEsqlRequest } from './esql_request';
 import { wrapEsqlAlerts } from './wrap_esql_alerts';
 import { wrapSuppressedEsqlAlerts } from './wrap_suppressed_esql_alerts';
@@ -33,6 +35,15 @@ import {
   omitReservedMetadataColumns,
 } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
+import { applyEndStageExceptions } from './utils/end_stage_exceptions/apply_end_stage_exceptions';
+import type { EndStageExceptionsResult } from './utils/end_stage_exceptions/apply_end_stage_exceptions';
+import { ColumnTypeMismatchError } from './utils/end_stage_exceptions/column_type_mismatch_error';
+import { EndStageLimitExceededError } from './utils/end_stage_exceptions/end_stage_limit_exceeded_error';
+import {
+  ExceptionsClauseLimitError,
+  explainClauseLimit,
+} from './utils/end_stage_exceptions/exceptions_clause_limit_error';
+import { InvalidExceptionValuesError } from './utils/end_stage_exceptions/invalid_exception_values_error';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
@@ -62,6 +73,59 @@ import { bulkCreate, wrapHits } from '../factories';
 import type { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
 
 const MAX_EXCLUDED_DOCUMENTS = 100 * 1000;
+
+/** Returns the query with the exceptions on the output columns applied at the end of the query, or the same query when there are none, with the warnings for the rule. */
+const getQueryWithOutputColumnExceptions = async ({
+  sharedParams,
+  services,
+  transformedQuery,
+  size,
+  filters,
+  excludedDocuments,
+  ruleExecutionTimeout,
+}: {
+  sharedParams: SecuritySharedParams<EsqlRuleParams>;
+  services: SecurityRuleServices;
+  transformedQuery: string;
+  size: number;
+  filters: BuildEqlSearchRequestParams['filters'];
+  excludedDocuments: Record<string, ExcludedDocument[]>;
+  ruleExecutionTimeout: string | undefined;
+}): Promise<EndStageExceptionsResult> => {
+  const {
+    outputColumnExceptionItems,
+    startedAt = new Date(),
+    tuple,
+    primaryTimestamp,
+    secondaryTimestamp,
+    exceptionFilter,
+    ruleExecutionLogger,
+  } = sharedParams;
+  const items = removeExpiredExceptions(outputColumnExceptionItems ?? [], startedAt);
+  if (items.length === 0) {
+    return { query: transformedQuery, warnings: [] };
+  }
+
+  return applyEndStageExceptions({
+    esClient: services.scopedClusterClient.asCurrentUser,
+    ruleExecutionLogger,
+    query: transformedQuery,
+    // the same filter as the real request, to resolve the same indices as it does
+    probeFilter: buildEsqlSearchRequest({
+      query: transformedQuery,
+      from: tuple.from.toISOString(),
+      to: tuple.to.toISOString(),
+      size,
+      filters,
+      primaryTimestamp,
+      secondaryTimestamp,
+      exceptionFilter,
+      excludedDocuments,
+      ruleExecutionTimeout,
+    }).filter,
+    items,
+  });
+};
 
 export const esqlExecutor = async ({
   sharedParams,
@@ -131,6 +195,20 @@ export const esqlExecutor = async ({
     let totalEventsFound = 0;
     const removedMetadataColumns = new Set<string>();
     try {
+      // The exceptions on the output columns of the query are inlined at the end of the query. The other exceptions
+      // are in the DSL filter, which the common wrapper builds from them alone.
+      const { query: queryToRun, warnings: outputColumnExceptionWarnings } =
+        await getQueryWithOutputColumnExceptions({
+          sharedParams,
+          services,
+          transformedQuery,
+          size,
+          filters: [...dataTiersFilters, ...dataStreamNamespaceFilters],
+          excludedDocuments,
+          ruleExecutionTimeout,
+        });
+      result.warningMessages.push(...outputColumnExceptionWarnings);
+
       while (result.createdSignalsCount <= tuple.maxSignals) {
         const totalExcludedDocumentsLength = Object.values(excludedDocuments).reduce(
           (acc, docs) => acc + docs.length,
@@ -144,7 +222,7 @@ export const esqlExecutor = async ({
         }
 
         const esqlRequest = buildEsqlSearchRequest({
-          query: transformedQuery,
+          query: queryToRun,
           from: tuple.from.toISOString(),
           to: tuple.to.toISOString(),
           size,
@@ -163,6 +241,7 @@ export const esqlExecutor = async ({
         };
         const hasLoggedRequestsReachedLimit = iteration >= 2;
 
+        const exceptionsWereAppended = queryToRun !== transformedQuery;
         ruleExecutionLogger.trace(`ES|QL query to execute\n${JSON.stringify(esqlRequest)}`);
         const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
         if (exceptionsWarning) {
@@ -178,6 +257,11 @@ export const esqlExecutor = async ({
           shouldStopExecution: services.shouldStopExecution,
           ruleExecutionLogger,
           loggedRequests: isLoggedRequestsEnabled ? loggedRequests : undefined,
+        }).catch((error) => {
+          if (exceptionsWereAppended) {
+            throw explainClauseLimit(error);
+          }
+          throw error;
         });
 
         logClusterShardFailuresEsql({ response, result });
@@ -359,7 +443,13 @@ export const esqlExecutor = async ({
         iteration++;
       }
     } catch (error) {
-      if (checkErrorDetails(error).isUserError) {
+      if (
+        checkErrorDetails(error).isUserError ||
+        error instanceof InvalidExceptionValuesError ||
+        error instanceof ColumnTypeMismatchError ||
+        error instanceof EndStageLimitExceededError ||
+        error instanceof ExceptionsClauseLimitError
+      ) {
         result.userError = true;
       }
       result.errors.push(error.message);

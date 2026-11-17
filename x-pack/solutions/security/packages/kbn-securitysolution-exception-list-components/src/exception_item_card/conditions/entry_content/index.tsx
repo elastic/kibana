@@ -12,7 +12,7 @@ import { css } from '@emotion/react';
 import type { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { Entry } from '../types';
 import * as i18n from '../../translations';
-import { getValue, getValueExpression } from './entry_content.helper';
+import { getColumnType, getValue, getValueExpression } from './entry_content.helper';
 
 interface EntryContentProps {
   entry: Entry;
@@ -26,6 +26,7 @@ export const EntryContent: FC<EntryContentProps> = memo(
   ({ entry, index, isNestedEntry = false, dataTestSubj, showValueListModal }) => {
     const { field, type } = entry;
     const value = getValue(entry);
+    const columnType = getColumnType(entry);
     const operator = 'operator' in entry ? entry.operator : '';
 
     const { euiTheme } = useEuiTheme();
@@ -56,7 +57,8 @@ export const EntryContent: FC<EntryContentProps> = memo(
                 type as ListOperatorTypeEnum,
                 operator,
                 value,
-                showValueListModal
+                showValueListModal,
+                columnType
               )}
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -68,7 +70,13 @@ export const EntryContent: FC<EntryContentProps> = memo(
               color={index === 0 ? 'primary' : 'subdued'}
               data-test-subj={`${dataTestSubj || ''}SingleEntry`}
             />
-            {getValueExpression(type as ListOperatorTypeEnum, operator, value, showValueListModal)}
+            {getValueExpression(
+              type as ListOperatorTypeEnum,
+              operator,
+              value,
+              showValueListModal,
+              columnType
+            )}
           </>
         )}
       </div>
