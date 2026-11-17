@@ -46,6 +46,12 @@ const sourceSchema = z
     /** GraphQL and MCP only: the URLs the connector calls, as the spec's URL can't tell. */
     endpoints: z.array(z.url()).min(1).optional(),
     /**
+     * MCP only: the tool documents the server's tools are assembled from, as URLs absolute or
+     * relative to `url`, for a vendor that publishes a document per tool rather than a
+     * `tools/list` result. Without them, `url` itself serves the tool list.
+     */
+    tools: z.array(z.string().min(1)).min(1).optional(),
+    /**
      * Markdown references only: URL prefixes, absolute or relative to the index, of the pages
      * to fetch, such as the folders of the API groups the connector calls.
      */
@@ -66,6 +72,10 @@ const sourceSchema = z
   .refine(({ format, endpoints }) => isProtocolFormat(format) === (endpoints !== undefined), {
     message: 'GraphQL and MCP sources need "endpoints", and other sources have none',
     path: ['endpoints'],
+  })
+  .refine(({ format, tools }) => tools === undefined || format === 'mcp', {
+    message: '"tools" only applies to MCP sources',
+    path: ['tools'],
   });
 
 const located = { in: z.enum(['query', 'body', 'header']).optional() };

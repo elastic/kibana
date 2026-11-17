@@ -141,7 +141,12 @@ describe('protocol sources', () => {
         data: introspectionFromSchema(buildSchema('type Query { hello: String }')),
       });
       const load = (text: string) =>
-        loadProtocolSpec(GRAPHQL_SPEC_URL, async () => text, 'graphql', [GRAPHQL_ENDPOINT]);
+        loadProtocolSpec({
+          url: GRAPHQL_SPEC_URL,
+          fetchText: async () => text,
+          format: 'graphql',
+          endpoints: [GRAPHQL_ENDPOINT],
+        });
 
       expect(await load('type Query { hello: String }')).toEqual({
         format: 'graphql',
@@ -154,11 +159,40 @@ describe('protocol sources', () => {
 
     it('reads MCP from a tools/list result, wrapped in JSON-RPC or not', async () => {
       const load = (value: unknown) =>
-        loadProtocolSpec(MCP_SPEC_URL, async () => JSON.stringify(value), 'mcp', [MCP_ENDPOINT]);
+        loadProtocolSpec({
+          url: MCP_SPEC_URL,
+          fetchText: async () => JSON.stringify(value),
+          format: 'mcp',
+          endpoints: [MCP_ENDPOINT],
+        });
 
       expect(await load({ tools })).toEqual(mcpSpec);
       expect(await load({ jsonrpc: '2.0', id: 1, result: { tools } })).toEqual(mcpSpec);
       await expect(load({ tools: [{ name: 'no schema' }] })).rejects.toThrow(/tools\/list/);
+    });
+
+    it('assembles MCP tools from a document per tool, for a server that lists none', async () => {
+      const documents: Record<string, unknown> = Object.fromEntries(
+        tools.map((tool) => [new URL(`${tool.name}.json`, MCP_SPEC_URL).href, tool])
+      );
+      const load = (names: readonly string[]) =>
+        loadProtocolSpec({
+          url: MCP_SPEC_URL,
+          fetchText: async (url: string) => {
+            const document = documents[url];
+            if (document === undefined) {
+              throw new Error(`404 Not Found: ${url}`);
+            }
+            return JSON.stringify(document);
+          },
+          format: 'mcp',
+          endpoints: [MCP_ENDPOINT],
+          tools: names,
+        });
+
+      expect(await load(tools.map((tool) => `${tool.name}.json`))).toEqual(mcpSpec);
+      // A tool the vendor stopped publishing fails the source instead of shrinking the snapshot.
+      await expect(load(['gone.json'])).rejects.toThrow(/404 Not Found/);
     });
   });
 
