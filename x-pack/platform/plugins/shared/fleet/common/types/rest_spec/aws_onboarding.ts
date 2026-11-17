@@ -133,12 +133,18 @@ export interface GetAwsOnboardingStackResponse {
   };
 }
 
-export interface GetAwsOnboardingBootstrapLaunchResponse {
-  /** CloudFormation console link that pre-fills the bootstrap stack; embeds a short-lived signed template URL. */
-  quickCreateUrl: string;
-  expiresAt: string;
-  blueprint: { id: string; version: string };
-}
+export type GetAwsOnboardingBootstrapLaunchResponse =
+  | {
+      kind: 'quick_create';
+      /** CloudFormation console link that pre-fills the bootstrap stack; embeds a short-lived signed template URL. */
+      quickCreateUrl: string;
+      expiresAt: string;
+      blueprint: { id: string; version: string };
+    }
+  | {
+      /** The provisioner cannot serve the bootstrap blueprint; download the Kibana-hosted template instead. */
+      kind: 'download';
+    };
 
 export interface GetAwsOnboardingBootstrapTemplateResponse {
   filename: string;

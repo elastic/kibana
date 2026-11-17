@@ -11,7 +11,7 @@ import { appContextService } from '../../services/app_context';
 import { iacProvisionerService } from '../../services/iac_provisioner';
 import { isAwsManagedOnboardingEnabled } from '../../services/utils/aws_onboarding';
 import { isIacProvisionerEnabled } from '../../services/utils/iac_provisioner';
-import { IacProvisionerUnavailableError } from '../../errors';
+import { IacProvisionerRequestError, IacProvisionerUnavailableError } from '../../errors';
 
 import { getBootstrapLaunchHandler, getBootstrapTemplateHandler } from './handlers';
 
@@ -57,16 +57,56 @@ describe('getBootstrapLaunchHandler', () => {
     expect(mockedRender).not.toHaveBeenCalled();
   });
 
-  it('returns 503 when the IaC Provisioner is disabled', async () => {
+  it('answers download when the IaC Provisioner is disabled', async () => {
     jest.mocked(isIacProvisionerEnabled).mockResolvedValue(false);
 
     await getBootstrapLaunchHandler({} as any, request as any, response);
 
-    expect(response.customError).toHaveBeenCalledWith({
-      statusCode: 503,
-      body: { message: 'The IaC Provisioner is not available' },
-    });
+    expect(response.ok).toHaveBeenCalledWith({ body: { kind: 'download' } });
     expect(mockedRender).not.toHaveBeenCalled();
+  });
+
+  it('answers download when the provisioner has no account-render endpoint', async () => {
+    mockedRender.mockRejectedValueOnce(
+      new IacProvisionerRequestError('request rejected with status 404', 404)
+    );
+
+    await getBootstrapLaunchHandler({} as any, request as any, response);
+
+    expect(response.ok).toHaveBeenCalledWith({ body: { kind: 'download' } });
+    expect(response.customError).not.toHaveBeenCalled();
+  });
+
+  it('answers download when the provisioner does not know the bootstrap workflow', async () => {
+    mockedRender.mockRejectedValueOnce(
+      new IacProvisionerRequestError(
+        'request rejected with status 422, render.unknown_workflow: unknown workflow',
+        422,
+        ['render.unknown_workflow']
+      )
+    );
+
+    await getBootstrapLaunchHandler({} as any, request as any, response);
+
+    expect(response.ok).toHaveBeenCalledWith({ body: { kind: 'download' } });
+    expect(response.customError).not.toHaveBeenCalled();
+  });
+
+  it('still returns 502 for other provisioner rejections', async () => {
+    const error = new IacProvisionerRequestError(
+      'request rejected with status 400, render.invalid_request: bad request',
+      400,
+      ['render.invalid_request']
+    );
+    mockedRender.mockRejectedValueOnce(error);
+
+    await getBootstrapLaunchHandler({} as any, request as any, response);
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 502,
+      body: { message: error.message },
+    });
+    expect(response.ok).not.toHaveBeenCalled();
   });
 
   it('returns 502 with the provider message when the render fails', async () => {
@@ -115,6 +155,7 @@ describe('getBootstrapLaunchHandler', () => {
 
     expect(response.ok).toHaveBeenCalledWith({
       body: expect.objectContaining({
+        kind: 'quick_create',
         quickCreateUrl:
           'https://console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks/quickcreate?templateURL=https%3A%2F%2Fbucket%2Fx%3Fsig%3D1&stackName=elastic-bootstrap-onboarding&param_ManagementMode=fully-managed',
       }),
@@ -142,6 +183,7 @@ describe('getBootstrapLaunchHandler', () => {
     });
     expect(response.ok).toHaveBeenCalledWith({
       body: {
+        kind: 'quick_create',
         quickCreateUrl:
           'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https%3A%2F%2Fbucket%2Fx%3Fsig%3D1&stackName=elastic-bootstrap-onboarding&param_ManagementMode=partially-managed',
         expiresAt: '2026-11-16T12:00:00Z',

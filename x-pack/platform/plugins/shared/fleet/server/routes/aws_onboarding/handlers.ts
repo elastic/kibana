@@ -79,6 +79,14 @@ export const createSubmitSettingsHandler =
 
 const BOOTSTRAP_STACK_NAME = 'elastic-bootstrap-onboarding';
 
+const BOOTSTRAP_FALLBACK_ERROR_CODES = ['render.unknown_workflow', 'render.unknown_blueprint'];
+
+/** True when the provisioner cannot serve the blueprint at all (older deployment or unknown workflow), as opposed to failing on this request. */
+const canFallBackToTemplate = (error: unknown): boolean =>
+  error instanceof IacProvisionerRequestError &&
+  (error.statusCode === 404 ||
+    error.errorCodes.some((code) => BOOTSTRAP_FALLBACK_ERROR_CODES.includes(code)));
+
 const notEnabled = (response: KibanaResponseFactory) =>
   response.notFound({ body: { message: 'Managed AWS onboarding is not enabled' } });
 
@@ -211,10 +219,7 @@ export const getBootstrapLaunchHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   if (!(await isAwsManagedOnboardingEnabled())) return notEnabled(response);
   if (!(await isIacProvisionerEnabled())) {
-    return response.customError({
-      statusCode: 503,
-      body: { message: 'The IaC Provisioner is not available' },
-    });
+    return response.ok({ body: { kind: 'download' } });
   }
   const logger = appContextService.getLogger().get('AwsOnboarding');
   try {
@@ -238,7 +243,12 @@ export const getBootstrapLaunchHandler: FleetRequestHandler<
     // The region keeps the console, and so the stack, in the region the credentials will use.
     const quickCreateUrl = region ? withConsoleRegion(stackUrl, region) : stackUrl;
     return response.ok({
-      body: { quickCreateUrl, expiresAt: rendered.expiresAt, blueprint: rendered.blueprint },
+      body: {
+        kind: 'quick_create',
+        quickCreateUrl,
+        expiresAt: rendered.expiresAt,
+        blueprint: rendered.blueprint,
+      },
     });
   } catch (error) {
     // Message only: the artifact URL embeds signing credentials.
@@ -247,6 +257,7 @@ export const getBootstrapLaunchHandler: FleetRequestHandler<
         error instanceof Error ? error.message : 'unknown error'
       }`
     );
+    if (canFallBackToTemplate(error)) return response.ok({ body: { kind: 'download' } });
     return mapError(error, response);
   }
 };
