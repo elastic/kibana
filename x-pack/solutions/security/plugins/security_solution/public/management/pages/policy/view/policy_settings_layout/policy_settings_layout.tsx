@@ -25,6 +25,10 @@ import type {
   PolicyData,
   PolicyDetailsRouteState,
 } from '../../../../../../common/endpoint/types';
+import {
+  getExportProviders,
+  setExportProviders,
+} from '../../../../../../common/endpoint/models/export_providers';
 import { useKibana, useToasts } from '../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../common';
 import { getPoliciesPath } from '../../../../common/routing';
@@ -97,7 +101,12 @@ export const PolicySettingsLayout = memo<PolicySettingsLayoutProps>(
     const handleSaveConfirmation = useCallback(() => {
       const update = cloneDeep(policy);
 
-      update.inputs[0].config.policy.value = policySettings;
+      // Storage providers are saved from their own tab; keep the latest ones from the store instead
+      // of the copy this form took when it mounted, so this save can't revert them
+      update.inputs[0].config.policy.value = setExportProviders(
+        policySettings,
+        getExportProviders(policy.inputs[0].config.policy.value)
+      );
       sendPolicyUpdate({ policy: update })
         .then(({ item: policyItem }) => {
           toasts.addSuccess({

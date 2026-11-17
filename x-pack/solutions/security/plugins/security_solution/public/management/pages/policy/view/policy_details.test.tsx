@@ -42,6 +42,7 @@ import { useHostIsolationExceptionsAccess } from '../../../hooks/artifacts/use_h
 import { getUserPrivilegesMockDefaultValue } from '../../../../common/components/user_privileges/__mocks__';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../common/components/user_privileges/endpoint/mocks';
 import { useProductFeatureKeys } from '../../../../common/hooks/use_product_feature_keys';
+import { getPolicySettingsFormTestSubjects } from './policy_settings_form/mocks';
 
 jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../../../common/hooks/use_license');
@@ -445,6 +446,27 @@ describe('Policy Details', () => {
           'true'
         );
         expect(renderResult.queryByTestId('storageProvidersLayout')).not.toBeInTheDocument();
+      });
+
+      it('should confirm leaving unsaved policy settings shown in place of the unavailable tab', async () => {
+        useProductFeatureKeysMock.mockReturnValue(new Set());
+        act(() => {
+          history.push(getPolicyStorageProvidersPath('1'));
+        });
+        render();
+        await asyncActions;
+
+        await userEvent.click(
+          await renderResult.findByTestId(
+            getPolicySettingsFormTestSubjects().perOsMalware.enableDisableSwitch
+          )
+        );
+        await userEvent.click(renderResult.getByTestId('policyEventFiltersTab'));
+
+        expect(
+          await renderResult.findByTestId('policyDetailsUnsavedChangesModal')
+        ).toBeInTheDocument();
+        expect(history.location.pathname).toBe(getPolicyStorageProvidersPath('1'));
       });
     });
 

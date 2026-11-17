@@ -740,16 +740,20 @@ export const usePolicyTabs = (): UsePolicyTabsResult => {
   // be confirmed before the URL changes.
   const onTabClick = useCallback(
     (tabId: PolicyTabKeys) => {
+      // Checked against the tab whose content is shown, not the URL: an unavailable tab's URL
+      // (e.g. storage providers) shows the policy settings form
+      const { id: selectedTabId } = currentSelectedTab;
       if (
-        (isInSettingsTab && unsavedChanges[PolicyTabKeys.SETTINGS]) ||
-        (isInProtectionUpdatesTab && unsavedChanges[PolicyTabKeys.PROTECTION_UPDATES])
+        (selectedTabId === PolicyTabKeys.SETTINGS ||
+          selectedTabId === PolicyTabKeys.PROTECTION_UPDATES) &&
+        unsavedChanges[selectedTabId]
       ) {
         setUnsavedChangesModal({ showModal: true, nextTabId: tabId });
       } else {
         changeTab(tabId);
       }
     },
-    [changeTab, isInProtectionUpdatesTab, isInSettingsTab, unsavedChanges]
+    [changeTab, currentSelectedTab, unsavedChanges]
   );
 
   const cancelUnsavedChangesModal = useCallback(() => {

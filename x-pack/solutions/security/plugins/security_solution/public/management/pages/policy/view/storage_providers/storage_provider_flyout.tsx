@@ -185,6 +185,7 @@ export const StorageProviderFlyout = memo<StorageProviderFlyoutProps>(
           {errorMessage && (
             <>
               <KbnDangerCallout
+                announceOnMount
                 size="s"
                 title={SAVE_ERROR_TITLE}
                 text={errorMessage}

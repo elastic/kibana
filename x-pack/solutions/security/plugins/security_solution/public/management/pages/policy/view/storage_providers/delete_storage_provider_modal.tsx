@@ -52,6 +52,7 @@ export const DeleteStorageProviderModal = memo<DeleteStorageProviderModalProps>(
         {errorMessage && (
           <>
             <KbnDangerCallout
+              announceOnMount
               size="s"
               title={DELETE_ERROR_TITLE}
               text={errorMessage}

@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { FleetPackagePolicyGenerator } from '../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
-import type { PolicyData } from '../../../../../../common/endpoint/types';
+import type { ExportProvider, PolicyData } from '../../../../../../common/endpoint/types';
+import { setExportProviders } from '../../../../../../common/endpoint/models/export_providers';
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import { PolicySettingsLayout } from './policy_settings_layout';
@@ -160,6 +161,31 @@ describe('When rendering PolicySettingsLayout', () => {
         body: JSON.stringify(getPolicyDataForUpdate(expectedUpdatedPolicy)),
         version: API_VERSIONS.public.v1,
       });
+    });
+
+    it('should keep storage providers saved after the form was opened', async () => {
+      const { rerender } = render();
+
+      // Providers are saved from their own tab while this form is mounted, so the store's
+      // (latest) policy has them but the form's copy of the settings doesn't
+      const providers: ExportProvider[] = [
+        { id: 'azure-1', type: 'azure_blob', account_name: 'acct1', container: 'dumps' },
+      ];
+      const latestPolicy = cloneDeep(policyData);
+      latestPolicy.inputs[0].config.policy.value = setExportProviders(
+        latestPolicy.inputs[0].config.policy.value,
+        providers
+      );
+      rerender(<PolicySettingsLayout policy={latestPolicy} setUnsavedChanges={jest.fn()} />);
+
+      await makeMinimalUpdates();
+      await clickSave();
+
+      const [[{ body }]] = apiMocks.responseProvider.updateEndpointPolicy.mock.calls;
+      const { windows, mac, linux } = JSON.parse(body as string).inputs[0].config.policy.value;
+      for (const os of [windows, mac, linux]) {
+        expect(os.response_actions.export_providers).toEqual(providers);
+      }
     });
 
     it('should show buttons disabled while update is in flight', async () => {
