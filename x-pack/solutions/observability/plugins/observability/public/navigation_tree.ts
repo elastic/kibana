@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+// CI control: no functional change. Exists only to select the same Scout lanes as
+// elastic/kibana#305684 so we can tell lane selection apart from a real regression.
 import type {
   NavigationTreeDefinition,
   PanelOpenerChildDefinition,
