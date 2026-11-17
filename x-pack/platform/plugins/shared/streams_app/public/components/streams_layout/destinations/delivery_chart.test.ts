@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DeliverySeriesView } from '../../services/unit_stats_client/types';
+import type { DeliverySeriesView } from '../../../services/unit_stats_client/types';
 import { toDeliveryBuckets } from './delivery_chart';
 
 const MINUTE_MS = 60_000;

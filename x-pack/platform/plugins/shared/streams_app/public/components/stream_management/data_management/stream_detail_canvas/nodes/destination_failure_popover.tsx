@@ -10,7 +10,7 @@ import { css } from '@emotion/react';
 import { EuiBadge, EuiPopover, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DestinationFailedView } from '../../../../../services/unit_stats_client/types';
-import { DestinationFailurePopoverSummary } from '../../../../unit_stats/destination_failure_popover_summary';
+import { DestinationFailurePopoverSummary } from '../../../../streams_layout/destinations/destination_failure_popover_summary';
 import { STATS_DEFAULT_WINDOW_MINUTES } from '../../../../unit_stats/state_management/constants';
 
 /**

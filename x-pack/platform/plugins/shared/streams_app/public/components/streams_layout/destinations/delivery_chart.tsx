@@ -21,9 +21,9 @@ import type { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../hooks/use_kibana';
-import type { DeliverySeriesView } from '../../services/unit_stats_client/types';
-import { getChartTimeZone } from '../stream_detail_overview/ingest_rate_chart';
+import { useKibana } from '../../../hooks/use_kibana';
+import type { DeliverySeriesView } from '../../../services/unit_stats_client/types';
+import { getChartTimeZone } from '../../stream_detail_overview/ingest_rate_chart';
 
 const CHART_HEIGHT = 200;
 

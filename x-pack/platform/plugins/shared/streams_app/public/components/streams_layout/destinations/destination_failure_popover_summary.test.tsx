@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { EMPTY_DESTINATION_FAILED } from '../../services/unit_stats_client/map_stats_response';
+import { EMPTY_DESTINATION_FAILED } from '../../../services/unit_stats_client/map_stats_response';
 import type {
   DeliverySeriesView,
   DestinationFailedView,
   FailureClassView,
-} from '../../services/unit_stats_client/types';
+} from '../../../services/unit_stats_client/types';
 import { DestinationFailurePopoverSummary } from './destination_failure_popover_summary';
 
 // The sparkline is a chart, which needs the services of the page, and has tests of its own.

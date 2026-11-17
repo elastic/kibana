@@ -12,7 +12,9 @@ import type { DestinationFailedView } from '../../../../../services/unit_stats_c
 import { DestinationFailurePopover } from './destination_failure_popover';
 
 // The sparklines are charts, which need the services of the page, and have tests of their own.
-jest.mock('../../../../unit_stats/failure_sparkline', () => ({ FailureSparkline: () => null }));
+jest.mock('../../../../streams_layout/destinations/failure_sparkline', () => ({
+  FailureSparkline: () => null,
+}));
 
 const ICON = 'streamsCanvasDestinationFailures';
 const POPOVER = `${ICON}Popover`;

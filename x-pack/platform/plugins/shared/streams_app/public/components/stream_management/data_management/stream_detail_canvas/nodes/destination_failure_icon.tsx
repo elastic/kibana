@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import type { DestinationFailedView } from '../../../../../services/unit_stats_client/types';
-import { hasDestinationFailures } from '../../../../unit_stats/destination_failures';
+import { hasDestinationFailures } from '../../../../streams_layout/destinations/destination_failures';
 import { useDestinationPopoverFailures } from '../../../../unit_stats/use_destination_popover_failures';
 import { DestinationFailurePopover } from './destination_failure_popover';
 

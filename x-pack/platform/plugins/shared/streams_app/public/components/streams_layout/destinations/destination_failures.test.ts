@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EMPTY_DESTINATION_FAILED } from '../../services/unit_stats_client/map_stats_response';
+import { EMPTY_DESTINATION_FAILED } from '../../../services/unit_stats_client/map_stats_response';
 import type {
   DestinationFailedView,
   FailureClassView,
   FailureRateView,
-} from '../../services/unit_stats_client/types';
+} from '../../../services/unit_stats_client/types';
 import {
   getFailureClasses,
   getFailureRangeSubtitle,

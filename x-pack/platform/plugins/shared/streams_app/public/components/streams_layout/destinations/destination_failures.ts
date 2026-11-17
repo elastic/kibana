@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { formatFailureBasis } from '../../services/unit_stats_client/format_stats';
+import { formatFailureBasis } from '../../../services/unit_stats_client/format_stats';
 import type {
   DestinationFailedView,
   FailureClassView,
   FailureRateView,
-} from '../../services/unit_stats_client/types';
+} from '../../../services/unit_stats_client/types';
 
 /**
  * A class has failures when its percentage is above 0. With no percentage, which happens when

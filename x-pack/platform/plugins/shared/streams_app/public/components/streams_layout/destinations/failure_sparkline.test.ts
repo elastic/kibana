@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DeliverySeriesView } from '../../services/unit_stats_client/types';
+import type { DeliverySeriesView } from '../../../services/unit_stats_client/types';
 import { downsample, MAX_SPARKLINE_POINTS, toPercentagePoints } from './failure_sparkline';
 
 const MINUTE_MS = 60_000;

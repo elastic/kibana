@@ -12,14 +12,14 @@ import { i18n } from '@kbn/i18n';
 import {
   formatPercentageParts,
   formatRateParts,
-} from '../../services/unit_stats_client/format_stats';
-import type { DestinationFailedView } from '../../services/unit_stats_client/types';
+} from '../../../services/unit_stats_client/format_stats';
+import type { DestinationFailedView } from '../../../services/unit_stats_client/types';
 import {
   getFailureClasses,
   getFailureSubtitle,
   hasDestinationFailures,
 } from './destination_failures';
-import { StatCell } from '../stream_detail_overview/stat_cell';
+import { StatCell } from '../../stream_detail_overview/stat_cell';
 import { FailureSparkline } from './failure_sparkline';
 
 /**

@@ -25,7 +25,7 @@ import type {
 import { DestinationFailuresView } from './destination_failures_section';
 
 // The chart needs the services of the page, and has tests of its own.
-jest.mock('../../unit_stats/delivery_chart', () => ({
+jest.mock('./delivery_chart', () => ({
   DeliveryChart: () => <div data-test-subj="streamsDestinationDeliveryChart" />,
 }));
 // The picker is the page's own, and reads its time filter and route.

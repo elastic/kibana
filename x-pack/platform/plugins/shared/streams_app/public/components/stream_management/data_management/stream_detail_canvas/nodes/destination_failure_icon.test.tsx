@@ -12,7 +12,7 @@ import type { DestinationFailedView } from '../../../../../services/unit_stats_c
 import { DestinationFailureIcon } from './destination_failure_icon';
 
 // The sparklines are charts, which need the services of the page, and have tests of their own.
-jest.mock('../../../../unit_stats/failure_sparkline', () => ({
+jest.mock('../../../../streams_layout/destinations/failure_sparkline', () => ({
   FailureSparkline: ({ dataTestSubj }: { dataTestSubj?: string }) => (
     <div data-test-subj={dataTestSubj} />
   ),

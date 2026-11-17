@@ -10,8 +10,8 @@ import { AreaSeries, Chart, CurveType, ScaleType, Settings, Tooltip } from '@ela
 import { useEuiTheme } from '@elastic/eui';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../hooks/use_kibana';
-import type { DeliverySeriesView } from '../../services/unit_stats_client/types';
+import { useKibana } from '../../../hooks/use_kibana';
+import type { DeliverySeriesView } from '../../../services/unit_stats_client/types';
 
 /** EUI's guidance: a sparkline is a single series of no more than 12 values. */
 export const MAX_SPARKLINE_POINTS = 12;

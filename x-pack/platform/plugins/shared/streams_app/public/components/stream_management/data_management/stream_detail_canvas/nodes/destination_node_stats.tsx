@@ -13,7 +13,7 @@ import {
   formatDuration,
   formatEventsRate,
 } from '../../../../../services/unit_stats_client/format_stats';
-import { hasDestinationFailures } from '../../../../unit_stats/destination_failures';
+import { hasDestinationFailures } from '../../../../streams_layout/destinations/destination_failures';
 import { useDestinationStats } from '../../../../unit_stats/state_management/use_stats_manager';
 import { DestinationFailureIcon } from './destination_failure_icon';
 import { StatsProblemIcon } from './stats_problem_icon';

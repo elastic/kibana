@@ -29,8 +29,8 @@ import {
   getFailureClasses,
   getFailureRangeSubtitle,
   hasDestinationFailures,
-} from '../../unit_stats/destination_failures';
-import { DeliveryChart } from '../../unit_stats/delivery_chart';
+} from './destination_failures';
+import { DeliveryChart } from './delivery_chart';
 import { useDestinationFailures } from '../../unit_stats/use_destination_failures';
 import { useTimeRangeUpdate } from '../../../hooks/use_time_range_update';
 import { StatCell } from '../../stream_detail_overview/stat_cell';
