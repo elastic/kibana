@@ -100,7 +100,7 @@ export const AwsRds: ConnectorSpec = {
   metadata: {
     id: '.aws_rds',
     displayName: 'AWS RDS',
-    description: i18n.translate('core.kibanaConnectorSpecs.awsRds.metadata.description', {
+    description: i18n.translate('connectorSpecs.awsRds.metadata.description', {
       defaultMessage:
         'Query tables, explore schema, and execute SQL in Amazon Aurora databases through the RDS Data API',
     }),
@@ -124,13 +124,13 @@ export const AwsRds: ConnectorSpec = {
         .max(30)
         .regex(REGION_PATTERN, 'Must be an AWS region such as us-east-1')
         .describe(
-          i18n.translate('core.kibanaConnectorSpecs.awsRds.config.region.description', {
+          i18n.translate('connectorSpecs.awsRds.config.region.description', {
             defaultMessage: 'The AWS Region of the Aurora cluster',
           })
         )
         .meta({
           widget: 'text',
-          label: i18n.translate('core.kibanaConnectorSpecs.awsRds.config.region.label', {
+          label: i18n.translate('connectorSpecs.awsRds.config.region.label', {
             defaultMessage: 'AWS Region',
           }),
           placeholder: 'us-east-1',
@@ -141,17 +141,17 @@ export const AwsRds: ConnectorSpec = {
         .max(MAX_ARN_LENGTH)
         .regex(CLUSTER_ARN_PATTERN, 'Must be an Aurora DB cluster ARN')
         .describe(
-          i18n.translate('core.kibanaConnectorSpecs.awsRds.config.clusterArn.description', {
+          i18n.translate('connectorSpecs.awsRds.config.clusterArn.description', {
             defaultMessage: 'The ARN of the Aurora DB cluster',
           })
         )
         .meta({
           widget: 'text',
-          label: i18n.translate('core.kibanaConnectorSpecs.awsRds.config.clusterArn.label', {
+          label: i18n.translate('connectorSpecs.awsRds.config.clusterArn.label', {
             defaultMessage: 'DB cluster ARN',
           }),
           placeholder: 'arn:aws:rds:us-east-1:123456789012:cluster:my-cluster',
-          helpText: i18n.translate('core.kibanaConnectorSpecs.awsRds.config.clusterArn.helpText', {
+          helpText: i18n.translate('connectorSpecs.awsRds.config.clusterArn.helpText', {
             defaultMessage:
               'The Aurora DB cluster must have the RDS Data API enabled. The IAM user needs rds-data:ExecuteStatement on this cluster.',
           }),
@@ -162,18 +162,18 @@ export const AwsRds: ConnectorSpec = {
         .max(MAX_ARN_LENGTH)
         .regex(SECRET_ARN_PATTERN, 'Must be a Secrets Manager secret ARN')
         .describe(
-          i18n.translate('core.kibanaConnectorSpecs.awsRds.config.secretArn.description', {
+          i18n.translate('connectorSpecs.awsRds.config.secretArn.description', {
             defaultMessage:
               'The ARN of the Secrets Manager secret holding the database credentials',
           })
         )
         .meta({
           widget: 'text',
-          label: i18n.translate('core.kibanaConnectorSpecs.awsRds.config.secretArn.label', {
+          label: i18n.translate('connectorSpecs.awsRds.config.secretArn.label', {
             defaultMessage: 'Secret ARN',
           }),
           placeholder: 'arn:aws:secretsmanager:us-east-1:123456789012:secret:my-db-secret-AbCdEf',
-          helpText: i18n.translate('core.kibanaConnectorSpecs.awsRds.config.secretArn.helpText', {
+          helpText: i18n.translate('connectorSpecs.awsRds.config.secretArn.helpText', {
             defaultMessage:
               'The secret holds the database username and password. Use a read-only database user unless writes are needed. The IAM user needs secretsmanager:GetSecretValue on this secret.',
           }),
@@ -182,16 +182,16 @@ export const AwsRds: ConnectorSpec = {
         .enum(['mysql', 'postgresql'])
         .default('mysql')
         .describe(
-          i18n.translate('core.kibanaConnectorSpecs.awsRds.config.engine.description', {
+          i18n.translate('connectorSpecs.awsRds.config.engine.description', {
             defaultMessage: 'The database engine of the Aurora cluster',
           })
         )
         .meta({
           widget: 'select',
-          label: i18n.translate('core.kibanaConnectorSpecs.awsRds.config.engine.label', {
+          label: i18n.translate('connectorSpecs.awsRds.config.engine.label', {
             defaultMessage: 'Engine',
           }),
-          helpText: i18n.translate('core.kibanaConnectorSpecs.awsRds.config.engine.helpText', {
+          helpText: i18n.translate('connectorSpecs.awsRds.config.engine.helpText', {
             defaultMessage:
               'Aurora MySQL or Aurora PostgreSQL. Used to pick the right schema discovery queries.',
           }),
@@ -202,17 +202,17 @@ export const AwsRds: ConnectorSpec = {
         .max(64)
         .optional()
         .describe(
-          i18n.translate('core.kibanaConnectorSpecs.awsRds.config.database.description', {
+          i18n.translate('connectorSpecs.awsRds.config.database.description', {
             defaultMessage: 'The default database to run SQL in',
           })
         )
         .meta({
           widget: 'text',
-          label: i18n.translate('core.kibanaConnectorSpecs.awsRds.config.database.label', {
+          label: i18n.translate('connectorSpecs.awsRds.config.database.label', {
             defaultMessage: 'Database',
           }),
           placeholder: 'my_database',
-          helpText: i18n.translate('core.kibanaConnectorSpecs.awsRds.config.database.helpText', {
+          helpText: i18n.translate('connectorSpecs.awsRds.config.database.helpText', {
             defaultMessage: 'The name of the default database to query',
           }),
         }),
@@ -359,7 +359,7 @@ export const AwsRds: ConnectorSpec = {
   },
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.awsRds.test.description', {
+    description: i18n.translate('connectorSpecs.awsRds.test.description', {
       defaultMessage: 'Verifies the RDS Data API connection by running a lightweight query',
     }),
     enabled: true,
