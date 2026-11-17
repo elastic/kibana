@@ -162,7 +162,40 @@ describe('AdAxesRubric', () => {
     it('stops after one call when the first verdict is valid', async () => {
       const { prompt, result } = await runAgainstFakeJudge(goodArgs);
       expect(prompt).toHaveBeenCalledTimes(1);
-      expect(result).toMatchObject({ score: 0.8 });
+      expect(result).toMatchObject({ score: 0.8, metadata: { judge_calls: 1 } });
+    });
+
+    it('records both judge calls when the verdict stays invalid', async () => {
+      const { result } = await runAgainstFakeJudge({ ...goodArgs, coverage: 11 });
+      expect(result.metadata).toEqual({ judge_calls: 2 });
+    });
+
+    it('records the judge call that answered without a grade', async () => {
+      const prompt = jest.fn().mockResolvedValue({ content: 'no verdict', toolCalls: [] });
+      executeUntilValidMock.mockImplementation(realExecuteUntilValid);
+      const result = await createAdAxesRubricEvaluator({
+        inferenceClient: { prompt } as unknown as BoundInferenceClient,
+      }).evaluate({
+        input: {},
+        expected: {},
+        output: { insights: [{ title: 'x' }] },
+        metadata: {},
+      } as never);
+      expect(result).toMatchObject({ label: 'unavailable', metadata: { judge_calls: 1 } });
+    });
+
+    it('records the judge call that threw', async () => {
+      const prompt = jest.fn().mockRejectedValue(new Error('connector down'));
+      executeUntilValidMock.mockImplementation(realExecuteUntilValid);
+      const result = await createAdAxesRubricEvaluator({
+        inferenceClient: { prompt } as unknown as BoundInferenceClient,
+      }).evaluate({
+        input: {},
+        expected: {},
+        output: { insights: [{ title: 'x' }] },
+        metadata: {},
+      } as never);
+      expect(result).toMatchObject({ label: 'unavailable', metadata: { judge_calls: 1 } });
     });
   });
 

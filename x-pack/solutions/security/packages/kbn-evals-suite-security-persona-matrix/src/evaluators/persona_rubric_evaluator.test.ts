@@ -303,7 +303,53 @@ describe('runPersonaRubricJudge', () => {
     it('stops after one call when the first verdict is valid', async () => {
       const { prompt, result } = await runAgainstFakeJudge({ score: 8, explanation: 'ok' });
       expect(prompt).toHaveBeenCalledTimes(1);
-      expect(result).toMatchObject({ score: 0.8 });
+      expect(result).toMatchObject({ score: 0.8, metadata: { judge_calls: 1 } });
+    });
+
+    it('records both judge calls when the verdict stays invalid', async () => {
+      const { result } = await runAgainstFakeJudge({ score: 11 });
+      expect(result.metadata).toEqual({ judge_calls: 2 });
+    });
+
+    it('records two judge calls when the retry is accepted', async () => {
+      const grade = (id: string, args: unknown) => ({
+        content: '',
+        toolCalls: [{ toolCallId: id, function: { name: 'grade', arguments: args } }],
+      });
+      const prompt = jest
+        .fn()
+        .mockResolvedValueOnce(grade('c1', { score: 11 }))
+        .mockResolvedValueOnce(grade('c2', { score: 6, explanation: '' }));
+      executeUntilValidMock.mockImplementation(realExecuteUntilValid);
+      const result = await runPersonaRubricJudge({
+        inferenceClient: { prompt } as unknown as BoundInferenceClient,
+        category: 'alert-analysis',
+        judgeOutput: withTools,
+      });
+      expect(result).toMatchObject({ score: 0.6, metadata: { judge_calls: 2 } });
+    });
+
+    it('records the judge call that answered without a grade', async () => {
+      const prompt = jest.fn().mockResolvedValue({ content: 'no verdict', toolCalls: [] });
+      executeUntilValidMock.mockImplementation(realExecuteUntilValid);
+      const result = await runPersonaRubricJudge({
+        inferenceClient: { prompt } as unknown as BoundInferenceClient,
+        category: 'alert-analysis',
+        judgeOutput: withTools,
+      });
+      expect(result).toMatchObject({ label: 'unavailable', metadata: { judge_calls: 1 } });
+    });
+
+    it('records the judge call that threw', async () => {
+      const prompt = jest.fn().mockRejectedValue(new Error('connector down'));
+      executeUntilValidMock.mockImplementation(realExecuteUntilValid);
+      const result = await runPersonaRubricJudge({
+        inferenceClient: { prompt } as unknown as BoundInferenceClient,
+        category: 'alert-analysis',
+        judgeOutput: withTools,
+      });
+      expect(result).toMatchObject({ label: 'unavailable', metadata: { judge_calls: 1 } });
+      expect(result.explanation).toContain('connector down');
     });
   });
 

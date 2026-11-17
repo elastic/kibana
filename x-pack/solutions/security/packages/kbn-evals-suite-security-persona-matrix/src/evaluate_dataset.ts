@@ -791,7 +791,6 @@ export function createEvaluatePersonaMatrixDataset({
     // too. The default profile is left untouched: example metadata is hashed into
     // the dataset example id, so stamping it would re-add every example of the
     // established dataset and split its score history.
-    const categoryById = new Map(shardedExamples.map((example) => [example.id, example.category]));
     const wrappedExamples = shardedExamples.map((example) => {
       const wrapped = toDatasetExample(example);
       return agentProfile === 'default'
@@ -972,7 +971,7 @@ export function createEvaluatePersonaMatrixDataset({
               expected,
               judgeOutput,
               metadata: example.metadata,
-              category: example.id ? categoryById.get(example.id) : undefined,
+              category: example.category,
             });
 
           for (const [name, settled] of [

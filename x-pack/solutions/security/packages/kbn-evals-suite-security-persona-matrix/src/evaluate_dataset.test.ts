@@ -1438,6 +1438,20 @@ describe('createEvaluatePersonaMatrixDataset PersonaRubric flag', () => {
     expect(taskResult).toHaveProperty('correctnessAnalysis');
   });
 
+  it('grades an example that has no id with its own category', async () => {
+    process.env[PERSONA_RUBRIC_JUDGE_ENV] = '1';
+    const { id, ...withoutId } = baseExample;
+    const { taskResult } = await runWith({
+      client,
+      example: withoutId as unknown as PersonaMatrixExample,
+    });
+    expect(executeUntilValidMock).toHaveBeenCalledTimes(1);
+    expect(taskResult.personaRubricAnalysis).toMatchObject({
+      score: 0.8,
+      metadata: { category: 'alert-analysis' },
+    });
+  });
+
   it('skips the judge when the flag is on but no client is available', async () => {
     process.env[PERSONA_RUBRIC_JUDGE_ENV] = '1';
     const { evaluatorNames, taskResult } = await runWith({ client: undefined });

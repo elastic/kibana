@@ -17,6 +17,7 @@ import {
   resolvePersonaToolsRow,
 } from './persona_rubric_prompt';
 import {
+  countingJudgeClient,
   describeJudgeFailure,
   InvalidVerdictError,
   JUDGE_MAX_RETRIES,
@@ -33,10 +34,14 @@ export const PERSONA_RUBRIC_JUDGE_ENV = 'PERSONA_MATRIX_RUBRIC_JUDGE';
 export const isPersonaRubricJudgeEnabled = (env: NodeJS.ProcessEnv = process.env): boolean =>
   env[PERSONA_RUBRIC_JUDGE_ENV]?.trim() === '1';
 
-const unavailable = (explanation: string): EvaluationResult => ({
+const unavailable = (
+  explanation: string,
+  metadata?: EvaluationResult['metadata']
+): EvaluationResult => ({
   score: null,
   label: 'unavailable',
   explanation,
+  ...(metadata ? { metadata } : {}),
 });
 
 const getToolCallsWithResults = (output: unknown) =>
@@ -90,10 +95,11 @@ export const runPersonaRubricJudge = async ({
     return unavailable(reason);
   }
   const toolCalls = getToolCallsWithResults(judgeOutput);
+  const judge = countingJudgeClient(inferenceClient);
   try {
     const response = await executeUntilValid({
       prompt: PersonaRubricPrompt,
-      inferenceClient,
+      inferenceClient: judge.client,
       input: buildPersonaRubricInput({
         category,
         expectedTools,
@@ -120,7 +126,9 @@ export const runPersonaRubricJudge = async ({
 
     const verdict = parseScore(response.toolCalls[0]?.function.arguments);
     if (!verdict) {
-      return unavailable('Judge returned no integer score between 1 and 10.');
+      return unavailable('Judge returned no integer score between 1 and 10.', {
+        judge_calls: judge.calls(),
+      });
     }
 
     const capped = toolCalls.length === 0;
@@ -134,12 +142,15 @@ export const runPersonaRubricJudge = async ({
         capped_score: finalScore,
         capped,
         category,
+        judge_calls: judge.calls(),
       },
     };
   } catch (error) {
     const message = describeJudgeFailure(error);
     warnSafely(log, `[persona-matrix] PersonaRubric judge failed: ${message}`);
-    return unavailable(`Judge call failed: ${message}`.slice(0, 1000));
+    return unavailable(`Judge call failed: ${message}`.slice(0, 1000), {
+      judge_calls: judge.calls(),
+    });
   }
 };
 

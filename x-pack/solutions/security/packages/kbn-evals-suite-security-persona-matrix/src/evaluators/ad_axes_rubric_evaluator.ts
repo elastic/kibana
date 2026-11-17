@@ -16,6 +16,7 @@ import {
   AdAxesRubricPrompt,
 } from './ad_axes_rubric_prompt';
 import {
+  countingJudgeClient,
   describeJudgeFailure,
   InvalidVerdictError,
   JUDGE_MAX_RETRIES,
@@ -27,10 +28,14 @@ export const AD_AXES_RUBRIC_EVALUATOR_NAME = 'AdAxesRubric';
 
 const AXES = ['coverage', 'accuracy', 'correlation', 'actionability'] as const;
 
-const unavailable = (explanation: string): EvaluationResult => ({
+const unavailable = (
+  explanation: string,
+  metadata?: EvaluationResult['metadata']
+): EvaluationResult => ({
   score: null,
   label: 'unavailable',
   explanation,
+  ...(metadata ? { metadata } : {}),
 });
 
 /** Rounds a numeric score to the nearest integer; undefined when it is not a finite number in range. */
@@ -121,10 +126,11 @@ export const createAdAxesRubricEvaluator = ({
       );
     }
 
+    const judge = countingJudgeClient(inferenceClient);
     try {
       const response = await executeUntilValid({
         prompt: AdAxesRubricPrompt,
-        inferenceClient,
+        inferenceClient: judge.client,
         input,
         finalToolChoice: { function: 'grade' } as ToolChoice<'grade'>,
         maxRetries: JUDGE_MAX_RETRIES,
@@ -150,7 +156,7 @@ export const createAdAxesRubricEvaluator = ({
 
       const args = response.toolCalls[0]?.function.arguments;
       if (!isRecord(args)) {
-        return unavailable('Judge did not return a grade.');
+        return unavailable('Judge did not return a grade.', { judge_calls: judge.calls() });
       }
       const overall = normalizeScore(args.overall);
       const [coverage, accuracy, correlation, actionability] = AXES.map((axis) =>
@@ -163,19 +169,30 @@ export const createAdAxesRubricEvaluator = ({
         correlation === undefined ||
         actionability === undefined
       ) {
-        return unavailable('Judge returned a missing or out-of-range axis score.');
+        return unavailable('Judge returned a missing or out-of-range axis score.', {
+          judge_calls: judge.calls(),
+        });
       }
 
       return {
         score: overall / AD_AXES_MAX_SCORE,
         label: String(overall),
         explanation: typeof args.explanation === 'string' ? args.explanation : '',
-        metadata: { coverage, accuracy, correlation, actionability, overall },
+        metadata: {
+          coverage,
+          accuracy,
+          correlation,
+          actionability,
+          overall,
+          judge_calls: judge.calls(),
+        },
       };
     } catch (error) {
       const message = describeJudgeFailure(error);
       warnSafely(log, `[persona-matrix] ${AD_AXES_RUBRIC_EVALUATOR_NAME} judge failed: ${message}`);
-      return unavailable(`Judge call failed: ${message}`.slice(0, 1000));
+      return unavailable(`Judge call failed: ${message}`.slice(0, 1000), {
+        judge_calls: judge.calls(),
+      });
     }
   },
 });

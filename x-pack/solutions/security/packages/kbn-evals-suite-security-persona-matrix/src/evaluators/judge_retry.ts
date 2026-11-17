@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { BoundInferenceClient } from '@kbn/inference-common';
+
 /**
  * Retry budget for an invalid verdict. Each attempt re-sends a submission of up to hundreds
  * of thousands of characters, so one correction chance is all the cost justifies.
@@ -29,6 +31,22 @@ export const describeJudgeFailure = (error: unknown): string => {
   return `LLM could not complete task successfully in ${calls} attempts${
     error.errors.length ? `; last rejection: ${messageOf(lastRejection)}` : ''
   }`;
+};
+
+/**
+ * Wraps a bound client so every `prompt` call (one judge call each, retries included) is counted.
+ * The judge's cost is otherwise invisible: a score from a retried verdict looks like any other.
+ */
+export const countingJudgeClient = (
+  inferenceClient: BoundInferenceClient
+): { client: BoundInferenceClient; calls: () => number } => {
+  let calls = 0;
+  const client: BoundInferenceClient = Object.create(inferenceClient);
+  client.prompt = ((...args: Parameters<BoundInferenceClient['prompt']>) => {
+    calls++;
+    return inferenceClient.prompt(...args);
+  }) as BoundInferenceClient['prompt'];
+  return { client, calls: () => calls };
 };
 
 /** Logs a warning without letting a failing logger break a judge that promises not to throw. */

@@ -19,7 +19,7 @@ import { createAdAxesRubricEvaluator } from './evaluators/ad_axes_rubric_evaluat
 import { createChainCoverageEvaluator } from './evaluators/chain_coverage_evaluator';
 import { isPersonaRubricJudgeEnabled } from './evaluators/persona_rubric_evaluator';
 
-// Derived from the rubric evaluator so this package needs no direct inference dependency.
+// Derived from the AD suite's rubric evaluator so this stays whatever client type it accepts.
 type EvaluationInferenceClient = Parameters<
   typeof createAttackDiscoveryRubricEvaluator
 >[0]['inferenceClient'];
