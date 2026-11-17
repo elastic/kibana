@@ -12,6 +12,9 @@ import supertest from 'supertest';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
 
+// This test exercises preboot -> main-server handoff. We intentionally target localhost:port
+// instead of getSupertest(root, ...), because getSupertest is bound to the main server listener
+// and cannot hit the preboot server paths and the handoff that this lifecycle test needs.
 const getFreePort = (): Promise<number> =>
   new Promise((resolve, reject) => {
     const server = createServer();
