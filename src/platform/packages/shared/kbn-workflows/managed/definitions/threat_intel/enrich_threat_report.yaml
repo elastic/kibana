@@ -230,7 +230,7 @@ steps:
         type: data.set
         if: "${{ steps.extract_iocs.error == null and steps.enrich_report_core.error == null }}"
         with:
-          extraction_method: workflow_v4
+          extraction_method: workflow
 
       - name: mark_llm_enrich_incomplete
         type: data.set

@@ -708,6 +708,7 @@ describe('loadReportHuntContext', () => {
     });
 
     it.each([
+      'workflow',
       'workflow_v4',
       'workflow_rejected',
       'workflow_v4_rejected',

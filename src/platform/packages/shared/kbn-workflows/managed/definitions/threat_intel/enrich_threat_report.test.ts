@@ -60,9 +60,9 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
       expect(gate.if).toContain(`steps.${step}.error == null`);
     });
 
-    it('marks the report workflow_v4 when the gate passes', () => {
+    it('marks the report workflow when the gate passes', () => {
       const gate = gateCondition('mark_llm_enrich_complete');
-      expect(gate.with?.extraction_method).toBe('workflow_v4');
+      expect(gate.with?.extraction_method).toBe('workflow');
     });
 
     it.each(GATED_STEPS)('leaves the report pending when %s failed', (step) => {

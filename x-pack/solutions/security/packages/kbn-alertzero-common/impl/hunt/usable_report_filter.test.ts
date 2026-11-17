@@ -53,7 +53,7 @@ describe('isRejectedExtractionMethod', () => {
     expect(isRejectedExtractionMethod(method)).toBe(true);
   });
 
-  it.each(['workflow_v4', 'workflow_v5_rejected', 'pending', '', undefined])(
+  it.each(['workflow', 'workflow_v4', 'workflow_v5_rejected', 'pending', '', undefined])(
     'returns false for %p',
     (method) => {
       expect(isRejectedExtractionMethod(method)).toBe(false);

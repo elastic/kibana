@@ -14,7 +14,7 @@ import type { estypes } from '@elastic/elasticsearch';
  * and not `pending` (enrich still owes work), with title or body text and
  * `severity.level`. It is a denylist on `pending` and on gate rejections
  * (`REJECTED_EXTRACTION_METHODS`, `extracted.gate.is_intelligence: false`), so
- * `workflow_v4`, `kev`, `text_indicator_list`, `seeded` and any future adapter
+ * `workflow`, the legacy `workflow_v4`, `kev`, `text_indicator_list`, `seeded` and any future adapter
  * value count; a missing `extraction_method` does not.
  *
  * Consumers: the threat intel find route, the readiness route, and the AlertZero
