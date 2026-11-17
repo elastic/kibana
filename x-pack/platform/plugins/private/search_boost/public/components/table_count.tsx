@@ -34,7 +34,9 @@ export const TableCount = ({ formatTotal, 'data-test-subj': dataTestSubj }: Tabl
 
   return (
     <EuiText size="xs" color="subdued" aria-live="polite" data-test-subj={dataTestSubj}>
-      {first === last ? getShowingOneLabel(first, total) : getShowingRangeLabel(first, last, total)}
+      {totalItems === 1
+        ? getShowingOneLabel(first, total)
+        : getShowingRangeLabel(first, last, total)}
     </EuiText>
   );
 };

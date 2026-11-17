@@ -34,6 +34,7 @@ export const NameCell = ({
             isStruckThrough && {
               color: euiTheme.colors.textDisabled,
               textDecoration: 'line-through',
+              '&:hover, &:focus': { textDecoration: 'underline line-through' },
             }
           }
           data-test-subj={dataTestSubj}

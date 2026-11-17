@@ -204,7 +204,7 @@ describe('RulesTab', () => {
     const { rerenderRulesTab } = renderRulesTab({ rules: createMockRules(21) });
 
     await user.click(await screen.findByRole('button', { name: /Page 3 of 3/ }));
-    await waitForCount('Showing 21 of 21 boost rules');
+    await waitForCount('Showing 21–21 of 21 boost rules');
 
     rerenderRulesTab({ rules: createMockRules(20) });
     await waitForCount('Showing 11–20 of 20 boost rules');
