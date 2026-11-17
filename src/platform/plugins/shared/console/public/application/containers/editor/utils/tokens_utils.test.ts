@@ -164,7 +164,62 @@ describe('tokens_utils', () => {
   });
 
   describe('parseBody', () => {
+    describe.each(['// comment\n', '# comment\n', '/* comment */'])('after %s', (comment) => {
+      it('skips indentation before the opening object', () => {
+        expect(parseBody(`${comment}\n  { "description": "`)).toEqual(['{', 'description']);
+      });
+
+      it('keeps the property value context after an indented comment', () => {
+        expect(parseBody(`{"value": [], ${comment}\n  "description": "`)).toEqual([
+          '{',
+          'description',
+        ]);
+      });
+
+      it('keeps the array item context after an indented comment', () => {
+        expect(parseBody(`{"items": [${comment}\n  {"description": "`)).toEqual([
+          '{',
+          'items',
+          '[',
+          '{',
+          'description',
+        ]);
+      });
+
+      it('keeps the nested value context after an indented comment', () => {
+        expect(parseBody(`{"items": ${comment}\n  [{"description": "`)).toEqual([
+          '{',
+          'items',
+          '[',
+          '{',
+          'description',
+        ]);
+      });
+
+      it('skips consecutive comments separated by indentation', () => {
+        expect(
+          parseBody(`{${comment}\n  // another comment\n  /* last comment */\n  "description": "`)
+        ).toEqual(['{', 'description']);
+      });
+    });
+
     const testCases: Array<{ value: string; tokens: string[] }> = [
+      {
+        value: '{"value": /* unfinished',
+        tokens: ['{', 'value'],
+      },
+      {
+        value: '{"value": [ // unfinished',
+        tokens: ['{', 'value', '['],
+      },
+      {
+        value: '{"value": [ # unfinished',
+        tokens: ['{', 'value', '['],
+      },
+      {
+        value: '{"value": "https://example.test/#fragment/*literal*/", "description": "',
+        tokens: ['{', 'description'],
+      },
       {
         // add opening curly brackets to tokens
         value: '{',
