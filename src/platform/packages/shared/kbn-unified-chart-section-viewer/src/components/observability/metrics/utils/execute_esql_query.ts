@@ -28,6 +28,7 @@ import { getMetricsExecutionContext } from './execution_context';
 export interface ExecuteEsqlParams {
   esqlQuery: string;
   search: Pick<ISearchMethods, 'esql'>;
+  sessionId?: string;
   signal?: AbortSignal;
   timeFieldName?: string;
   timeRange?: TimeRange;
@@ -57,6 +58,7 @@ export interface ExecuteEsqlResult<TDocument> {
 export async function executeEsqlQuery<TDocument extends object = Record<string, unknown>>({
   esqlQuery,
   search,
+  sessionId,
   signal,
   timeFieldName,
   timeRange,
@@ -85,6 +87,7 @@ export async function executeEsqlQuery<TDocument extends object = Record<string,
     },
     {
       abortSignal: signal,
+      sessionId,
       ...getMetricsExecutionContext(MetricsExecutionContextAction.FETCH, executionContextName, {
         profile_id: profileId,
       }),

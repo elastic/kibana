@@ -19,7 +19,12 @@ import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
 
 import { cancelWorkflow } from './cancel_workflow';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { publishWorkflowExecutionFinished } from '../topics/publish_workflow_execution_finished';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
+
+jest.mock('../topics/publish_workflow_execution_finished', () => ({
+  publishWorkflowExecutionFinished: jest.fn().mockResolvedValue(undefined),
+}));
 
 const buildExecution = (overrides: Partial<EsWorkflowExecution> = {}): EsWorkflowExecution =>
   ({
@@ -63,6 +68,9 @@ const buildCancelParams = ({
 });
 
 describe('cancelWorkflow', () => {
+  beforeEach(() => {
+    jest.mocked(publishWorkflowExecutionFinished).mockClear();
+  });
   const workflowExecutionId = 'exec-1';
   const spaceId = 'default';
   const schedulingRequest = { headers: {} } as KibanaRequest;
@@ -101,6 +109,7 @@ describe('cancelWorkflow', () => {
 
       expect(workflowExecutionRepository.updateWorkflowExecution).not.toHaveBeenCalled();
       expect(workflowTaskManager.forceRunIdleTasks).not.toHaveBeenCalled();
+      expect(publishWorkflowExecutionFinished).not.toHaveBeenCalled();
     }
   );
 
@@ -121,7 +130,12 @@ describe('cancelWorkflow', () => {
 
   it('sets cancelRequested, flips to CANCELLED, and wakes idle tasks for pending', async () => {
     const workflowExecutionRepository = buildRepository(
-      buildExecution({ status: ExecutionStatus.PENDING })
+      buildExecution({
+        status: ExecutionStatus.PENDING,
+        workflowId: 'wf-1',
+        isTestRun: false,
+        triggeredBy: 'manual',
+      })
     );
     const workflowTaskManager = buildTaskManager();
 
@@ -134,6 +148,16 @@ describe('cancelWorkflow', () => {
     expect(workflowTaskManager.forceRunIdleTasks).toHaveBeenCalledWith(workflowExecutionId, {
       spaceId,
       fakeRequest: schedulingRequest,
+    });
+    expect(publishWorkflowExecutionFinished).toHaveBeenCalledTimes(1);
+    expect(publishWorkflowExecutionFinished).toHaveBeenCalledWith({
+      executionId: workflowExecutionId,
+      workflowId: 'wf-1',
+      spaceId,
+      status: 'cancelled',
+      finishedAt: '2025-08-05T20:00:00.000Z',
+      isTestRun: false,
+      triggeredBy: 'manual',
     });
   });
 
@@ -173,7 +197,11 @@ describe('cancelWorkflow', () => {
 
   it('routes WAITING_FOR_INPUT cancels through the unified path (no synchronous status flip)', async () => {
     const workflowExecutionRepository = buildRepository(
-      buildExecution({ status: ExecutionStatus.WAITING_FOR_INPUT })
+      buildExecution({
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+        workflowId: 'wf-1',
+        isTestRun: false,
+      })
     );
     const workflowTaskManager = buildTaskManager();
 
@@ -187,6 +215,7 @@ describe('cancelWorkflow', () => {
       spaceId,
       fakeRequest: schedulingRequest,
     });
+    expect(publishWorkflowExecutionFinished).not.toHaveBeenCalled();
   });
 
   it('passes through forceRunIdleTasks errors to the caller', async () => {

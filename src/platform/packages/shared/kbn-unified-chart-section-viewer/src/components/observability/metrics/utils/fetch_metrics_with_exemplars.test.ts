@@ -21,6 +21,7 @@ const mockExecuteEsqlQuery = executeEsqlQuery as jest.MockedFunction<typeof exec
 
 const params = {
   search: { esql: jest.fn() } as unknown as Pick<ISearchMethods, 'esql'>,
+  sessionId: 'cached-session',
   timeFieldName: '@timestamp',
   timeRange: { from: 'now-15m', to: 'now' },
   uiSettings: {} as IUiSettingsClient,

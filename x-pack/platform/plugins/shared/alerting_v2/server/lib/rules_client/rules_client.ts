@@ -689,7 +689,7 @@ export class RulesClient {
     const prepared = this.prepareRuleForCreate({
       data,
       id,
-      enabled: params.options?.enabled ?? true,
+      enabled: data.enabled ?? true,
       actor,
       nowIso,
       version: this.getNextVersion(),
@@ -746,7 +746,7 @@ export class RulesClient {
         const rule = this.prepareRuleForCreate({
           data,
           id,
-          enabled,
+          enabled: enabled ?? true,
           actor,
           nowIso,
           version: ruleVersion,
@@ -1955,8 +1955,7 @@ export class RulesClient {
     const exists = await this.ruleExists({ id });
 
     if (!exists) {
-      const { enabled, ...createData } = parsed;
-      const rule = await this.createRule({ data: { ...createData, id }, options: { enabled } });
+      const rule = await this.createRule({ data: { ...parsed, id } });
       return { rule, created: true };
     }
 

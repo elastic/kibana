@@ -7,6 +7,7 @@
 
 import type { KiLifecycleStatus } from '../../../common/step_types/ki';
 import type { KiStatus } from '../../../common/ki_lifecycle_status';
+import type { KiListSort } from '../../../common/ki_list_sort';
 
 export const contextEngineQueryKeys = {
   aiIndex: {
@@ -18,7 +19,8 @@ export const contextEngineQueryKeys = {
       size: number,
       type: string | undefined,
       query: string | undefined,
-      status?: readonly KiStatus[]
+      status?: readonly KiStatus[],
+      sort?: KiListSort
     ) =>
       [
         'context_engine',
@@ -29,6 +31,7 @@ export const contextEngineQueryKeys = {
         type ?? '',
         query ?? '',
         status?.join(',') ?? '',
+        sort ?? '',
       ] as const,
     viewKi: (
       aiIndexId: string,

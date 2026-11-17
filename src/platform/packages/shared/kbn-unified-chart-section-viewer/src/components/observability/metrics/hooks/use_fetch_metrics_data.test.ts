@@ -315,6 +315,7 @@ describe('useFetchMetricsData', () => {
       await waitFor(() =>
         expect(result.current.loadedFetchParams?.searchSessionId).toBe('session-1')
       );
+      expect(mockExecuteEsqlQuery.mock.calls[0][0].sessionId).toBe('session-1');
 
       // A Discover refresh starts a new session and replaces the abort controller.
       rerender({
@@ -337,6 +338,7 @@ describe('useFetchMetricsData', () => {
       await waitFor(() =>
         expect(result.current.loadedFetchParams?.searchSessionId).toBe('session-2')
       );
+      expect(mockExecuteEsqlQuery.mock.calls[1][0].sessionId).toBe('session-2');
     });
   });
 

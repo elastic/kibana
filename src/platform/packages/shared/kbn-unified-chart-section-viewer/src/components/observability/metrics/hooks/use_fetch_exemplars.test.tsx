@@ -84,6 +84,7 @@ const createParams = (
     query: { esql: 'TS metrics-generic.otel-default' },
     dataSource: createMockEsqlSource([], [], '@timestamp', 'TS metrics-generic.otel-default'),
     timeRange: { from: 'now-15m', to: 'now' },
+    searchSessionId: 'cached-session',
     filters: TEST_FILTERS,
     esqlVariables: TEST_ESQL_VARIABLES,
   }),
@@ -251,6 +252,7 @@ describe('useFetchExemplars', () => {
     expect(mockProbe).toHaveBeenCalledWith({
       fetchId: params.fetchParams.lastReloadRequestTime,
       search: params.services.data.search,
+      sessionId: params.fetchParams.searchSessionId,
       timeFieldName: '@timestamp',
       timeRange: params.fetchParams.timeRange,
       uiSettings: params.services.uiSettings,
@@ -260,6 +262,7 @@ describe('useFetchExemplars', () => {
     expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
       esqlQuery: TEST_ESQL_QUERY,
       search: params.services.data.search,
+      sessionId: params.fetchParams.searchSessionId,
       signal: expect.any(AbortSignal),
       timeFieldName: '@timestamp',
       timeRange: params.fetchParams.timeRange,
