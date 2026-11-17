@@ -643,6 +643,17 @@ describe('ConversationInput', () => {
         expect(mockHandlePasteFile).not.toHaveBeenCalled();
       });
 
+      it('keeps the draft and refuses the steer when it holds a pasted image', () => {
+        editorController.getPlaceholderNames.mockReturnValueOnce(['shot.png']);
+        renderInput(<ConversationInput />);
+
+        fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+        expect(mockSendSteer).not.toHaveBeenCalled();
+        expect(editorController.clear).not.toHaveBeenCalled();
+        expect(addErrorToast).toHaveBeenCalledTimes(1);
+      });
+
       it('still uploads a pasted image when skipping the agent', () => {
         mockHandlePasteFile.mockReturnValue('shot.png');
         renderInput(<ConversationInput />);

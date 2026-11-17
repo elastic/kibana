@@ -192,6 +192,13 @@ interface ConversationInputProps {
 }
 
 // A steer carries text only.
+const imageInSteerMessage = i18n.translate(
+  'xpack.agentBuilder.conversationInput.steer.imageNotSent',
+  {
+    defaultMessage:
+      "Images can't be sent to a running agent. Remove the image, or wait for the agent to finish.",
+  }
+);
 const imagePasteWhileRunningMessage = i18n.translate(
   'xpack.agentBuilder.conversationInput.steer.imagePasteRefused',
   {
@@ -550,6 +557,11 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
             values: { max: STEER_MESSAGE_MAX_LENGTH },
           })
         );
+        return;
+      }
+      // An image pasted before switching to this mode would travel as a bare reference.
+      if (messageEditorController.getPlaceholderNames().length > 0) {
+        addErrorToast(imageInSteerMessage);
         return;
       }
       // Cleared at the submit, as for an ordinary send, so edits made during the request are kept.
