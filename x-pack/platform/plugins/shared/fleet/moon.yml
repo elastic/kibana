@@ -139,6 +139,15 @@ dependsOn:
   - '@kbn/app-header'
   - '@kbn/core-http-browser'
   - '@kbn/core-feature-flags-server'
+  - '@kbn/workflows'
+  - '@kbn/workflows-extensions'
+  - '@kbn/workflows-management-plugin'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/agent-builder-genai-utils'
+  - '@kbn/agent-builder-tools-base'
+  - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-browser'
+  - '@kbn/agent-builder-server'
 tags:
   - plugin
   - prod
