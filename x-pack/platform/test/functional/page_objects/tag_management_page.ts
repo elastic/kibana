@@ -23,7 +23,6 @@ type TagFormValidation = FillTagFormFields;
  * Sub page object to manipulate the create/edit tag modal.
  */
 class TagModal extends FtrService {
-  private readonly browser = this.ctx.getService('browser');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
   private readonly header = this.ctx.getPageObject('header');
@@ -66,17 +65,8 @@ class TagModal extends FtrService {
       });
     }
     if (fields.color !== undefined) {
-      await this.testSubjects.click('~createModalField-color');
-      await this.testSubjects.setValue('~createModalField-color', fields.color, {
+      await this.testSubjects.setValue('createModalField-color', fields.color, {
         clearWithKeyboard,
-      });
-      // Close the popover before moving to the next input, as it can get in the way of interacting with other elements
-      await this.testSubjects.existOrFail('euiSaturation');
-      await this.retry.try(async () => {
-        if (await this.testSubjects.exists('euiSaturation')) {
-          await this.browser.pressKeys(this.browser.keys.ENTER);
-        }
-        await this.testSubjects.missingOrFail('euiSaturation', { timeout: 250 });
       });
     }
     if (fields.description !== undefined) {
@@ -98,7 +88,7 @@ class TagModal extends FtrService {
   async getFormValues(): Promise<Required<FillTagFormFields>> {
     return {
       name: (await this.testSubjects.getAttribute('createModalField-name', 'value')) ?? '',
-      color: (await this.testSubjects.getAttribute('~createModalField-color', 'value')) ?? '',
+      color: (await this.testSubjects.getAttribute('createModalField-color', 'value')) ?? '',
       description:
         (await this.testSubjects.getAttribute('createModalField-description', 'value')) ?? '',
     };
