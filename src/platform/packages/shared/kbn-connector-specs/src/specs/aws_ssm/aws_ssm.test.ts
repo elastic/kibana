@@ -259,6 +259,26 @@ describe('AwsSsmConnector', () => {
     });
   });
 
+  describe('getParameter', () => {
+    it('never asks for decryption, and hides the value of a SecureString', async () => {
+      mockClient.post.mockResolvedValue({
+        data: {
+          Parameter: { Name: '/myapp/prod/db-password', Type: 'SecureString', Value: 'AQICAHh...' },
+        },
+      });
+
+      const result = await AwsSsmConnector.actions.getParameter.handler(mockContext, {
+        name: '/myapp/prod/db-password',
+      });
+
+      expect(JSON.parse(mockClient.post.mock.calls[0][1])).toEqual({
+        Name: '/myapp/prod/db-password',
+        WithDecryption: false,
+      });
+      expect(result).toMatchObject({ type: 'SecureString', value: null });
+    });
+  });
+
   describe('startAutomationExecution', () => {
     it('starts the runbook with its parameters, and returns the execution ID', async () => {
       mockClient.post.mockResolvedValue({

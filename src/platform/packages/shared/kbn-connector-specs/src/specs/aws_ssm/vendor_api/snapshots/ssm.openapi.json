@@ -1081,6 +1081,30 @@
         },
         "type": "object"
       },
+      "GetParameterRequestContent": {
+        "properties": {
+          "Name": {
+            "maxLength": 2048,
+            "minLength": 1,
+            "type": "string"
+          },
+          "WithDecryption": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "Name"
+        ],
+        "type": "object"
+      },
+      "GetParameterResponseContent": {
+        "properties": {
+          "Parameter": {
+            "$ref": "#/components/schemas/Parameter"
+          }
+        },
+        "type": "object"
+      },
       "IdempotentParameterMismatchResponseContent": {
         "properties": {
           "Message": {
@@ -1348,6 +1372,17 @@
         },
         "type": "object"
       },
+      "InvalidKeyIdResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "InvalidNextTokenResponseContent": {
         "properties": {
           "Message": {
@@ -1560,6 +1595,78 @@
           "Invocation"
         ],
         "type": "string"
+      },
+      "Parameter": {
+        "properties": {
+          "ARN": {
+            "type": "string"
+          },
+          "DataType": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "LastModifiedDate": {
+            "format": "double",
+            "type": "number"
+          },
+          "Name": {
+            "maxLength": 2048,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Selector": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "SourceResult": {
+            "type": "string"
+          },
+          "Type": {
+            "$ref": "#/components/schemas/ParameterType"
+          },
+          "Value": {
+            "format": "password",
+            "type": "string"
+          },
+          "Version": {
+            "default": 0,
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ParameterNotFoundResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ParameterType": {
+        "enum": [
+          "String",
+          "StringList",
+          "SecureString"
+        ],
+        "type": "string"
+      },
+      "ParameterVersionNotFoundResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
       },
       "ParentStepDetails": {
         "properties": {
@@ -2689,6 +2796,90 @@
                     },
                     {
                       "$ref": "#/components/schemas/InvalidDocumentVersionResponseContent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/GetParameter": {
+      "post": {
+        "operationId": "GetParameter",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetParameterRequestContent"
+              }
+            },
+            "application/x-amz-json-1.1": {
+              "schema": {
+                "$ref": "#/components/schemas/GetParameterRequestContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetParameterResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetParameterResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidKeyIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ParameterNotFoundResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ParameterVersionNotFoundResponseContent"
+                    }
+                  ]
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidKeyIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ParameterNotFoundResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ParameterVersionNotFoundResponseContent"
                     }
                   ]
                 }

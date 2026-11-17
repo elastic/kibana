@@ -19,6 +19,11 @@
       { "source": "ssm", "method": "POST", "path": "/GetDocument" }
     ]
   },
+  "getParameter": {
+    "queries": [
+      { "source": "ssm", "method": "POST", "path": "/GetParameter" }
+    ]
+  },
   "listCommands": {
     "queries": [
       { "source": "ssm", "method": "POST", "path": "/ListCommands" }

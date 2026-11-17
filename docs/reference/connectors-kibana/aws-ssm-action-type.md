@@ -1,7 +1,7 @@
 ---
 navigation_title: "AWS Systems Manager"
 type: reference
-description: "Use the AWS Systems Manager connector to find and inspect the managed nodes registered with AWS Systems Manager, run commands on them, and run Automation runbooks."
+description: "Use the AWS Systems Manager connector to find and inspect the managed nodes registered with AWS Systems Manager, run commands on them, run Automation runbooks, and read Parameter Store values."
 applies_to:
   stack: preview 9.7
   serverless: preview
@@ -9,7 +9,7 @@ applies_to:
 
 # AWS Systems Manager connector [aws-ssm-action-type]
 
-The AWS Systems Manager connector connects directly to the [AWS Systems Manager API](https://docs.aws.amazon.com/systems-manager/latest/APIReference/Welcome.html). It lets an agent find the nodes Systems Manager manages, such as EC2 instances and hybrid servers, check which of them are reachable, run commands on them, and run Automation runbooks, without opening the AWS console.
+The AWS Systems Manager connector connects directly to the [AWS Systems Manager API](https://docs.aws.amazon.com/systems-manager/latest/APIReference/Welcome.html). It lets an agent find the nodes Systems Manager manages, such as EC2 instances and hybrid servers, check which of them are reachable, run commands on them, run Automation runbooks, and read Parameter Store values, without opening the AWS console.
 
 ::::{note}
 This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release.
@@ -45,6 +45,7 @@ Authentication
 | `startAutomationExecution` | Start an Automation runbook, such as `AWS-RestartEC2Instance`. Returns an `automationExecutionId` immediately; the runbook runs asynchronously. Parameters: `documentName` (required), `parameters` (for example `{ "InstanceId": ["i-0123456789abcdef0"] }`), `documentVersion`, `clientToken`. |
 | `getAutomationExecution` | Get the status of a runbook execution, the step it is on, its failure message and outputs, and each step with its action, status, failure message, and outputs. Parameters: `automationExecutionId` (required). |
 | `stopAutomationExecution` | Cancel a runbook execution. Steps that already ran are not undone. Parameters: `automationExecutionId` (required). |
+| `getParameter` | Read a Parameter Store parameter: its type, value, version, data type, and last modified date. `SecureString` parameters are never decrypted; their value is returned as null. Parameters: `name` (required, optionally with `:<version>` or `:<label>`). |
 
 ::::{warning}
 `sendCommand` runs commands with the privileges of SSM Agent on the node, usually root or SYSTEM, and `startAutomationExecution` runs runbooks that change AWS resources. An agent this connector is assigned to can call both without asking for confirmation. Limit what they can run with the IAM policy described in [Get API credentials](#aws-ssm-api-credentials), and assign the connector only to agents that should change your nodes and resources.
@@ -58,7 +59,7 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
 1. Sign in to the [AWS Management Console](https://console.aws.amazon.com/) and open **IAM**.
 2. Create (or choose) an IAM user or role that will be used only for this connector, then attach a policy granting the Systems Manager actions it uses:
-   - `ssm:DescribeInstanceInformation`, `ssm:ListDocuments`, `ssm:GetDocument`, `ssm:ListCommands`, `ssm:GetCommandInvocation`, and `ssm:GetAutomationExecution` on resource `*`. The AWS managed policy **AmazonSSMReadOnlyAccess** covers them.
+   - `ssm:DescribeInstanceInformation`, `ssm:ListDocuments`, `ssm:GetDocument`, `ssm:ListCommands`, `ssm:GetCommandInvocation`, and `ssm:GetAutomationExecution` on resource `*`, and `ssm:GetParameter` on the parameters it may read (for example `arn:aws:ssm:<region>:<account-id>:parameter/myapp/*`). The AWS managed policy **AmazonSSMReadOnlyAccess** covers them. The connector never asks for `SecureString` values to be decrypted, so it needs no `kms:Decrypt` permission.
    - `ssm:SendCommand` on both the documents it may run (for example `arn:aws:ssm:<region>::document/AWS-RunShellScript`) and the nodes it may run them on (for example `arn:aws:ec2:<region>:<account-id>:instance/*`, narrowed with a tag condition), and `ssm:CancelCommand` on resource `*`.
    - `ssm:StartAutomationExecution` on the runbooks it may run (for example `arn:aws:ssm:<region>::automation-definition/AWS-RestartEC2Instance:$DEFAULT`), and `ssm:StopAutomationExecution` on resource `*`. A runbook runs as the role passed in its `AutomationAssumeRole` parameter, which also needs `iam:PassRole` for that role, or else with these credentials, which then need every permission the runbook uses.
    - Leave out the permissions of the second and third items to keep the connector read-only; those actions then fail with `AccessDeniedException`.

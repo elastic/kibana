@@ -16,6 +16,7 @@ import { describeInstanceInformation } from './tools/describe_instance_informati
 import { getAutomationExecution } from './tools/get_automation_execution';
 import { getCommandInvocation } from './tools/get_command_invocation';
 import { getDocument } from './tools/get_document';
+import { getParameter } from './tools/get_parameter';
 import { listCommands } from './tools/list_commands';
 import { listDocuments } from './tools/list_documents';
 import { sendCommand } from './tools/send_command';
@@ -29,7 +30,7 @@ export const AwsSsmConnector: ConnectorSpec = {
     displayName: 'AWS Systems Manager',
     description: i18n.translate('connectorSpecs.awsSsm.metadata.description', {
       defaultMessage:
-        'Find and inspect the managed nodes registered with AWS Systems Manager, run commands on them, and run Automation runbooks',
+        'Find and inspect the managed nodes registered with AWS Systems Manager, run commands on them, run Automation runbooks, and read Parameter Store values',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
@@ -76,12 +77,13 @@ export const AwsSsmConnector: ConnectorSpec = {
     startAutomationExecution,
     getAutomationExecution,
     stopAutomationExecution,
+    getParameter,
   },
 
   skill: [
     '## AWS Systems Manager Connector',
     '',
-    'Use this connector to find and inspect the managed nodes (EC2 instances and hybrid servers running SSM Agent) registered with Systems Manager in the region configured on the connector, to run commands on them, and to run Automation runbooks.',
+    'Use this connector to find and inspect the managed nodes (EC2 instances and hybrid servers running SSM Agent) registered with Systems Manager in the region configured on the connector, to run commands on them, to run Automation runbooks, and to read Parameter Store values.',
     '',
     '### Common patterns',
     '- To find unreachable nodes, call `describeInstanceInformation` with `pingStatus: ["ConnectionLost"]`.',
@@ -105,6 +107,7 @@ export const AwsSsmConnector: ConnectorSpec = {
     '- A runbook without an `AutomationAssumeRole` parameter runs with the connector credentials, and fails with an access error if they lack the permissions the runbook needs.',
     "- When `stepsTruncated` is true, `steps` lists only part of the runbook's steps.",
     '- `listDocuments` without filters returns hundreds of AWS-owned documents; always filter it.',
+    '- `getParameter` never decrypts `SecureString` parameters: their `value` is null. Do not try to obtain secrets another way, such as with `sendCommand`.',
     '- `listCommands` only covers the last 30 days, and runbook executions are not commands: they do not appear there.',
   ].join('\n'),
 

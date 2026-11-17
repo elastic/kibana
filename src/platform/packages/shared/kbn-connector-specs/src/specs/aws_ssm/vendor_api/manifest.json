@@ -47,6 +47,13 @@
         "source": "ssm"
       }
     ],
+    "getParameter": [
+      {
+        "method": "post",
+        "path": "/GetParameter",
+        "source": "ssm"
+      }
+    ],
     "listCommands": [
       {
         "method": "post",
