@@ -397,7 +397,11 @@ describe('MetricsExperienceGridContent', () => {
   it('skips the histogram bounds fetch when a percentile is selected', () => {
     useMetricsExperienceStateMock.mockReturnValue({
       ...useMetricsExperienceStateMock(),
-      gridSettings: { ...METRICS_GRID_SETTINGS_DEFAULTS, histogramPercentile: 'p95' },
+      gridSettings: {
+        ...METRICS_GRID_SETTINGS_DEFAULTS,
+        histogramPercentile: 'p95',
+        histogramVisualization: 'lnsXY',
+      },
     });
 
     render(<MetricsExperienceGridContent {...defaultProps} />, { wrapper: IntlProvider });

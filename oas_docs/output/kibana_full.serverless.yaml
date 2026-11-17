@@ -168026,9 +168026,10 @@ components:
                               - p99
                             type: string
                           histogram_visualization:
-                            description: How histogram metrics are drawn. If omitted, Discover uses the percentile chart.
+                            description: How histogram metrics are drawn. If omitted, Discover uses the distribution chart.
                             enum:
                               - lnsXY
+                              - lnsHeatmap
                             type: string
                           row_height:
                             anyOf:
@@ -170161,9 +170162,10 @@ components:
                       - p99
                     type: string
                   histogram_visualization:
-                    description: How histogram metrics are drawn. If omitted, Discover uses the percentile chart.
+                    description: How histogram metrics are drawn. If omitted, Discover uses the distribution chart.
                     enum:
                       - lnsXY
+                      - lnsHeatmap
                     type: string
                   id:
                     description: A unique identifier. Must contain only lowercase letters, numbers, hyphens, and underscores.

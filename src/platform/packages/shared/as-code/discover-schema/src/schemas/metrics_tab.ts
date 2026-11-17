@@ -48,7 +48,7 @@ export const discoverSessionApiMetricsTabTypeStateSchema = z
     }),
     histogram_visualization: z.enum(METRICS_GRID_HISTOGRAM_VISUALIZATIONS).optional().meta({
       description:
-        'How histogram metrics are drawn. If omitted, Discover uses the percentile chart.',
+        'How histogram metrics are drawn. If omitted, Discover uses the distribution chart.',
     }),
     grid_sort_field: z
       .enum(METRICS_GRID_SORT_FIELDS)

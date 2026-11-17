@@ -81,7 +81,7 @@ export const FEATURE_FLAG_DEFAULTS: Record<FeatureFlag, boolean> = {
   [FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED]: true,
   [FEATURE_FLAGS.IS_SORTING_ENABLED]: true,
   [FEATURE_FLAGS.IS_EXEMPLARS_ENABLED]: false,
-  [FEATURE_FLAGS.IS_HEATMAPS_ENABLED]: false,
+  [FEATURE_FLAGS.IS_HEATMAPS_ENABLED]: true,
 };
 
 // OTel exemplars live in a parallel `exemplars-*` stream with the same dataset and namespace.

@@ -88,8 +88,7 @@ export const METRICS_GRID_SETTINGS_DEFAULTS: MetricsGridSettings = {
   counterAggregation: FunctionNames.SUM,
   gaugeAggregation: FunctionNames.AVG,
   histogramPercentile: 'p95',
-  // Heatmaps stay opt-in until observability.metricsHeatmapsEnabled is on by default.
-  histogramVisualization: 'lnsXY',
+  histogramVisualization: 'lnsHeatmap',
   dimensions: [],
   searchTerm: '',
 };
