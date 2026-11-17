@@ -77,8 +77,17 @@ export interface ContractCall {
    * such as GraphQL; and, for named specs, the spec's name.
    */
   readonly matched?: OperationRef | NamedOperationRef;
+  /**
+   * Set for a protocol request that executed no operation, such as GraphQL root fields that all
+   * sit behind `@skip`: the spec's name, for named specs.
+   */
+  readonly source?: string;
   /** Set for named operations: whether the operation only reads, e.g. a GraphQL query. */
   readonly readOnly?: boolean;
+  /** Set for GraphQL: the types the request names, in fragments and variables. */
+  readonly namedTypes?: readonly string[];
+  /** Set for GraphQL: the root fields the request's document mentions, called or not. */
+  readonly namedRootFields?: readonly string[];
   /**
    * Set for protocol messages that call no vendor operation, such as MCP's `initialize`;
    * `operation` names the message.
@@ -572,6 +581,7 @@ export const createEmulatorFetch = ({
         response,
         operations: called,
         messages = [],
+        skipped,
         requestViolations,
         responseViolations = [],
       } = await protocol.handle(request);
@@ -582,14 +592,33 @@ export const createEmulatorFetch = ({
         responseViolations,
       };
       if (called.length === 0 && messages.length === 0) {
-        record(base);
+        record({
+          ...base,
+          ...(skipped === undefined
+            ? {}
+            : {
+                ...(skipped.source === undefined ? {} : { source: skipped.source }),
+                readOnly: skipped.readOnly,
+                ...(skipped.namedTypes === undefined ? {} : { namedTypes: skipped.namedTypes }),
+                ...(skipped.namedRootFields === undefined
+                  ? {}
+                  : { namedRootFields: skipped.namedRootFields }),
+              }),
+        });
       }
       for (const message of messages) {
         record({ ...base, operation: message, protocolMessage: true });
       }
-      for (const { name, source, readOnly } of called) {
+      for (const { name, source, readOnly, namedTypes, namedRootFields } of called) {
         const matched = { name, ...(source === undefined ? {} : { source }) };
-        record({ ...base, operation: name, matched, readOnly });
+        record({
+          ...base,
+          operation: name,
+          matched,
+          readOnly,
+          ...(namedTypes === undefined ? {} : { namedTypes }),
+          ...(namedRootFields === undefined ? {} : { namedRootFields }),
+        });
       }
       return response;
     }

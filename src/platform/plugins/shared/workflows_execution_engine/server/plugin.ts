@@ -110,6 +110,9 @@ import {
   WORKFLOW_SERVICE_ACCOUNT_TYPE,
 } from './service_account_execution';
 import { resolveWorkflowWorkloads } from './service_account_workload_resolver';
+import { publishFinishedWorkflowExecution } from './topics/publish_finished_workflow_execution';
+import { setWorkflowExecutionFinishedPublisher } from './topics/publish_workflow_execution_finished';
+import { workflowExecutionFinishedTopic } from './topics/workflow_execution_finished';
 import { initializeTriggerEventsDataStream, TriggerEventHandler } from './trigger_events';
 import { initializeTriggerEventsClient } from './trigger_events/event_logs';
 import { searchTriggerEventLog as querySearchTriggerEventLog } from './trigger_events/event_logs/trigger_event_log_query';
@@ -433,6 +436,9 @@ export class WorkflowsExecutionEnginePlugin
     plugins: WorkflowsExecutionEnginePluginSetupDeps
   ) {
     this.logger.debug('Workflows execution engine setup');
+
+    // Before any task can run. Publication does not depend on a consumer being enabled.
+    core.pubsub.registerTopic(workflowExecutionFinishedTopic);
 
     // Register telemetry event schemas
     WorkflowExecutionTelemetryClient.setup(core.analytics);
@@ -1250,6 +1256,7 @@ export class WorkflowsExecutionEnginePlugin
                       workflowRepository,
                       workflowExecutionRepository
                     );
+                    await publishFinishedWorkflowExecution(workflowExecution);
                     if (workflowExecution.status === ExecutionStatus.FAILED) {
                       return false;
                     }
@@ -1446,6 +1453,7 @@ export class WorkflowsExecutionEnginePlugin
       throw new Error('Core setup not available');
     }
     setConcurrencyGroupLock(new LockManagerService(this.coreSetup, this.logger));
+    setWorkflowExecutionFinishedPublisher({ pubsub: coreStart.pubsub, logger: this.logger });
 
     const dependencies: ContextDependencies = {
       ...this.setupDependencies,
@@ -1633,12 +1641,12 @@ export class WorkflowsExecutionEnginePlugin
               ? options.refresh
               : false,
           });
-
           await ensureBoundExecutionAdmitted(
             workflowExecution,
             workflowRepository,
             workflowExecutionRepository
           );
+          await publishFinishedWorkflowExecution(workflowExecution);
           if (!afterPersist) {
             return 'proceed' as const;
           }
@@ -1991,6 +1999,7 @@ export class WorkflowsExecutionEnginePlugin
                 workflowExecutionRepository
               );
               succeeded.push(p);
+              await publishFinishedWorkflowExecution(p.workflowExecution);
             } catch (error) {
               results[p.idx] = {
                 status: 'error',
@@ -2066,6 +2075,7 @@ export class WorkflowsExecutionEnginePlugin
                     workflowRepository,
                     workflowExecutionRepository
                   );
+                  await publishFinishedWorkflowExecution(item.workflowExecution);
                   checkedIdx.add(item.idx);
                   const proceed = await this.checkConcurrencyIfNeeded(item.workflowExecution);
                   if (proceed) {
@@ -2199,6 +2209,7 @@ export class WorkflowsExecutionEnginePlugin
       workflowExecution.stepId = stepId;
 
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
+      await publishFinishedWorkflowExecution(workflowExecution);
 
       if (workflowExecution.status === ExecutionStatus.FAILED) {
         return {
@@ -2396,6 +2407,7 @@ export class WorkflowsExecutionEnginePlugin
   }
 
   public stop() {
+    setWorkflowExecutionFinishedPublisher(undefined);
     setConcurrencyGroupLock(undefined);
     void this.dataClientBundle.stop();
   }
@@ -2491,7 +2503,8 @@ export class WorkflowsExecutionEnginePlugin
         workflowExecution.workflowDefinition.settings.concurrency,
         workflowExecution.concurrencyGroupKey,
         workflowExecution.id,
-        workflowExecution.spaceId
+        workflowExecution.spaceId,
+        workflowExecution
       );
 
       if (!canProceed) {

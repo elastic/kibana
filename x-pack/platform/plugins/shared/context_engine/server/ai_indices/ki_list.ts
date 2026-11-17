@@ -149,12 +149,34 @@ export const probeColumns = async (
 };
 
 /**
+ * "Recently updated" order: `updated_at` (the date the UI shows), else the revision `@timestamp`.
+ * In-place edits, deletes and restores on an index dest change only `updated_at`.
+ */
+const getUpdatedSort = (
+  has: (field: KiListField) => boolean
+): { evalClauses: string[]; sortKeys: string[] } => {
+  if (has('updated_at') && has('@timestamp')) {
+    return {
+      evalClauses: ['EVAL updated_sort = COALESCE(TO_DATETIME(updated_at), revision_time)'],
+      sortKeys: ['updated_sort DESC'],
+    };
+  }
+  if (has('updated_at')) {
+    return {
+      evalClauses: ['EVAL updated_sort = TO_DATETIME(updated_at)'],
+      sortKeys: ['updated_sort DESC NULLS LAST'],
+    };
+  }
+  return { evalClauses: [], sortKeys: has('@timestamp') ? ['revision_time DESC'] : [] };
+};
+
+/**
  * A search ranks by best match first; the chosen sort only breaks score ties.
  * ES|QL sorts `text` case-sensitively, and an empty title sorts first unless nulled.
  */
 const getRowsSort = (
   sort: KiListSort,
-  hasTimestampColumn: boolean,
+  has: (field: KiListField) => boolean,
   query: string | undefined
 ): string[] => {
   const scoreKeys = query !== undefined ? ['_score DESC'] : [];
@@ -164,8 +186,8 @@ const getRowsSort = (
       `SORT ${[...scoreKeys, 'title_sort ASC NULLS LAST', 'id ASC'].join(', ')}`,
     ];
   }
-  const sortKeys = hasTimestampColumn ? ['revision_time DESC', 'id ASC'] : ['id ASC'];
-  return [`SORT ${[...scoreKeys, ...sortKeys].join(', ')}`];
+  const { evalClauses, sortKeys } = getUpdatedSort(has);
+  return [...evalClauses, `SORT ${[...scoreKeys, ...sortKeys, 'id ASC'].join(', ')}`];
 };
 
 /**
@@ -252,7 +274,7 @@ export const getKis = async (
     KI_STATUS_ALIAS,
   ].join(', ');
 
-  const rowsSort = getRowsSort(sort, has('@timestamp'), query);
+  const rowsSort = getRowsSort(sort, has, query);
 
   const rowsQuery = [
     base,
