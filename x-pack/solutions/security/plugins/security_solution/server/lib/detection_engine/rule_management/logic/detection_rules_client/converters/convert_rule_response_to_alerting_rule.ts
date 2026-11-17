@@ -6,6 +6,7 @@
  */
 
 import type { UpdateRuleData } from '@kbn/alerting-plugin/server/application/rule/methods/update';
+import type { IntervalSchedule } from '@kbn/alerting-plugin/common';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RuleActionCamel } from '@kbn/securitysolution-io-ts-alerting-types';
 
@@ -40,10 +41,15 @@ type RuntimeFields =
   | 'revision'
   | 'execution_summary';
 
+// Security rules always run on an interval, never on an rrule schedule
+type AlertingRuleWithIntervalSchedule = Omit<UpdateRuleData<RuleParams>, 'schedule'> & {
+  schedule: IntervalSchedule;
+};
+
 export const convertRuleResponseToAlertingRule = (
   rule: Omit<RuleResponse, RuntimeFields>,
   actionsClient: ActionsClient
-): UpdateRuleData<RuleParams> => {
+): AlertingRuleWithIntervalSchedule => {
   const [ruleSystemActions, ruleActions] = separateActionsAndSystemAction(
     actionsClient,
     rule.actions
