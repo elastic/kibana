@@ -233,6 +233,7 @@ describe('new panel placement strategies', () => {
             y: 12, // maxY is 12 for section1; maxY of 100 in section 0 is ignored
             w: 6,
             h: 6,
+            sectionId: 'section1',
           },
         },
       };

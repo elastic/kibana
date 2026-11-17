@@ -8,6 +8,7 @@
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { buildProbeQuery } from '../generator';
+import { toEsqlRequestBody } from './esql_client';
 import { probeSources } from './source_probe';
 
 const responseError = (statusCode: number, type: string, reason: string) =>
@@ -50,7 +51,11 @@ describe('probeSources', () => {
 
     const results = await probeSources(client, ['metrics-*']);
 
-    expect(results.get('metrics-*')).toEqual({ failed: false, hasTimeSeries });
+    expect(results.get('metrics-*')).toEqual({
+      failed: false,
+      hasTimeSeries,
+      query: buildProbeQuery('metrics-*'),
+    });
   });
 
   it('reads a response without @timestamp as no time-series index', async () => {
@@ -59,6 +64,7 @@ describe('probeSources', () => {
     expect((await probeSources(client, ['metrics-*'])).get('metrics-*')).toEqual({
       failed: false,
       hasTimeSeries: false,
+      query: buildProbeQuery('metrics-*'),
     });
   });
 
@@ -81,6 +87,20 @@ describe('probeSources', () => {
     expect(body).toEqual({ query: esql, params, include_execution_metadata: true });
   });
 
+  it('returns the probe query it sent with each result', async () => {
+    const client = setup(async (query) => {
+      if (patternOf(query) === 'logs-*') {
+        throw responseError(503, 'unavailable_shards_exception', 'no shard available');
+      }
+      return probeResponse('date');
+    });
+
+    const results = await probeSources(client, ['metrics-*', 'logs-*']);
+
+    const sent = client.esql.query.mock.calls.map(([body]) => body);
+    expect([...results.values()].map(({ query }) => toEsqlRequestBody(query))).toEqual(sent);
+  });
+
   it('reads a verification error as no time-series index', async () => {
     const client = setup(async () => {
       throw responseError(400, 'verification_exception', 'Found 1 problem');
@@ -89,6 +109,7 @@ describe('probeSources', () => {
     expect((await probeSources(client, ['logs-app'])).get('logs-app')).toEqual({
       failed: false,
       hasTimeSeries: false,
+      query: buildProbeQuery('logs-app'),
     });
   });
 
@@ -104,6 +125,7 @@ describe('probeSources', () => {
       failed: true,
       status,
       reason: `${type}: ${reason}`,
+      query: buildProbeQuery('metrics-*'),
     });
   });
 
@@ -116,6 +138,7 @@ describe('probeSources', () => {
       failed: true,
       status: null,
       reason: 'connection reset',
+      query: buildProbeQuery('metrics-*'),
     });
   });
 
@@ -128,6 +151,7 @@ describe('probeSources', () => {
       failed: true,
       status: 400,
       reason: 'parsing_exception: verification_exception',
+      query: buildProbeQuery('metrics-*'),
     });
   });
 
@@ -152,13 +176,14 @@ describe('probeSources', () => {
 
     expect(results).toEqual(
       new Map([
-        ['metrics-*', { failed: false, hasTimeSeries: true }],
+        ['metrics-*', { failed: false, hasTimeSeries: true, query: buildProbeQuery('metrics-*') }],
         [
           'logs-*',
           {
             failed: true,
             status: 503,
             reason: 'unavailable_shards_exception: no shard available',
+            query: buildProbeQuery('logs-*'),
           },
         ],
       ])
