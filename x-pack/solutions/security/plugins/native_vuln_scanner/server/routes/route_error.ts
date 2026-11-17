@@ -9,7 +9,7 @@ import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/s
 import { i18n } from '@kbn/i18n';
 import { FleetUnauthorizedError } from '@kbn/fleet-plugin/server';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
-import { ErrorCode } from '../../common/onboarding/constants';
+import { ErrorCode } from '@kbn/cloud-security-posture-common/native_vuln_scanner/constants';
 
 const statusCodeOf = (error: unknown): number | undefined =>
   typeof error === 'object' && error !== null && 'statusCode' in error

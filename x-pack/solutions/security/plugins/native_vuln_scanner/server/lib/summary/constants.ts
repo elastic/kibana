@@ -14,31 +14,9 @@
  */
 export const SUMMARY_INDEX = '.kibana-native-vuln-scanner-runs';
 
-export type SummaryRunStatus = 'success' | 'partial' | 'failed' | 'aborted' | 'no_pack';
-
-export type SummaryFeedStatus = 'matched' | 'unavailable' | 'failed';
-
-export interface SummaryFeed {
-  /** `family:version`, e.g. `ubuntu:noble`. */
-  release: string;
-  status: SummaryFeedStatus;
-  /** Validator the vendor sent with the feed, when it sent one. */
-  etag?: string;
-  /** Why the release failed. */
-  error?: string;
-}
-
-export interface SummaryDoc {
-  '@timestamp': string;
-  /** The workflow execution id; also the doc id, so a retried summarize overwrites instead of duplicating. */
-  run_id: string;
-  started_at: string;
-  finished_at: string;
-  status: SummaryRunStatus;
-  hosts_scanned: number;
-  findings_open: number;
-  findings_fixed: number;
-  feeds: SummaryFeed[];
-  /** Per-release failure messages, mirrored from `feeds` for easy display. */
-  failures: string[];
-}
+export type {
+  SummaryDoc,
+  SummaryFeed,
+  SummaryFeedStatus,
+  SummaryRunStatus,
+} from '@kbn/cloud-security-posture-common/native_vuln_scanner/types';

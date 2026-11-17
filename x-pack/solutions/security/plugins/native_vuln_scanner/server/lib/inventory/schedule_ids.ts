@@ -6,7 +6,7 @@
  */
 
 import type { ISavedObjectsRepository } from '@kbn/core/server';
-import { INVENTORY_PACK_NAME } from '../../../common/inventory/pack_body';
+import { INVENTORY_PACK_NAME } from '@kbn/cloud-security-posture-common/native_vuln_scanner/pack_body';
 import type { InventoryQueryKind } from './queries';
 import { KIND_BY_QUERY_ID } from './queries';
 

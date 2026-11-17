@@ -7,20 +7,26 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import type {
+  PackAction,
+  PackDifference,
+  PackInspection,
+  PackPlan,
+} from '@kbn/cloud-security-posture-common/native_vuln_scanner/types';
 import { INVENTORY_PACK_BODY, INVENTORY_PACK_NAME, OSQUERY_PACK_SO_TYPE } from '../inventory';
+
+export type {
+  PackAction,
+  PackDifference,
+  PackDifferenceCode,
+  PackInspection,
+  PackPlan,
+  PackState,
+} from '@kbn/cloud-security-posture-common/native_vuln_scanner/types';
 
 /** Type of the references osquery stores on a pack for the agent policies it is assigned to. */
 const POLICY_REFERENCE_TYPE = 'ingest-agent-policies';
 const PER_PAGE = 100;
-
-export type PackState = 'missing' | 'ok' | 'differs';
-
-export type PackAction =
-  | 'create'
-  | 'add_policies'
-  | 'repair_queries'
-  | 'repair_queries_and_add_policies'
-  | 'no_change';
 
 interface StoredPackQuery {
   id?: string;
@@ -39,30 +45,6 @@ interface StoredPack {
   platform?: string;
   result_type?: string;
   queries?: StoredPackQuery[];
-}
-
-/** Machine-readable reason a pack differs; the browser renders the text. */
-export type PackDifferenceCode =
-  | 'pack_disabled'
-  | 'interval_differs'
-  | 'query_missing'
-  | 'query_sql_differs'
-  | 'query_platform_differs'
-  | 'query_not_snapshot'
-  | 'query_disabled';
-
-export interface PackDifference {
-  code: PackDifferenceCode;
-  /** The query concerned; absent for pack-level differences. */
-  queryId?: string;
-}
-
-export interface PackInspection {
-  state: PackState;
-  /** Why the pack differs from the expected body; empty unless `state` is `differs`. */
-  differences: PackDifference[];
-  /** Agent policies the pack is assigned to. */
-  policyIds: string[];
 }
 
 const parsePlatformTokens = (value: string): Set<string> =>
@@ -138,8 +120,9 @@ const compareQueries = (pack: StoredPack): PackDifference[] => {
     if (!samePlatforms(effectivePlatform(actual, pack), expected.platform)) {
       differences.push({ code: 'query_platform_differs', queryId });
     }
-    if (effectiveResultType(actual, pack) !== 'snapshot')
+    if (effectiveResultType(actual, pack) !== 'snapshot') {
       differences.push({ code: 'query_not_snapshot', queryId });
+    }
     if (actual.enabled === false) differences.push({ code: 'query_disabled', queryId });
   }
   return differences;
@@ -178,14 +161,6 @@ export const inspectInventoryPack = async (
     }
   }
 };
-
-export interface PackPlan {
-  state: PackState;
-  action: PackAction;
-  differences: PackDifference[];
-  /** Selected policies the pack is not yet assigned to. */
-  addPolicyIds: string[];
-}
 
 /** What applying the onboarding would do to the pack for the selected policies. */
 export const planPackAction = (inspection: PackInspection, policyIds: string[]): PackPlan => {

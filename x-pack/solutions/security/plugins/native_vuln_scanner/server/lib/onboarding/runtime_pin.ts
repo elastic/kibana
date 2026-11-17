@@ -7,6 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { isMap, isScalar, parseDocument } from 'yaml';
+import type { RuntimePinConflict } from '@kbn/cloud-security-posture-common/native_vuln_scanner/types';
+
+export type { RuntimePinConflict } from '@kbn/cloud-security-posture-common/native_vuln_scanner/types';
 
 /** The only keys of `agent_internal` this plugin writes. */
 export const RUNTIME_PIN_KEYS: ReadonlyArray<readonly string[]> = [
@@ -16,12 +19,6 @@ export const RUNTIME_PIN_KEYS: ReadonlyArray<readonly string[]> = [
 ];
 
 export const RUNTIME_PIN_VALUE = 'process';
-
-export interface RuntimePinConflict {
-  key: string;
-  from: string;
-  to: string;
-}
 
 /** Machine-readable reason a policy's `agent_internal` cannot be edited. */
 export type RuntimePinRefusalCode =
@@ -35,6 +32,31 @@ export type RuntimePinMerge =
   | { ok: true; before: string; after: string; changed: boolean; conflicts: RuntimePinConflict[] }
   | { ok: false; before: string; key: string; code: RuntimePinRefusalCode; message: string };
 
+const refusalDetail = (code: RuntimePinRefusalCode): string => {
+  switch (code) {
+    case 'yaml_parse_error':
+      return i18n.translate('xpack.nativeVulnScanner.onboarding.runtimePinRefused.yamlParseError', {
+        defaultMessage: 'the YAML cannot be parsed',
+      });
+    case 'not_mapping':
+      return i18n.translate('xpack.nativeVulnScanner.onboarding.runtimePinRefused.notMapping', {
+        defaultMessage: 'the document is not a YAML mapping',
+      });
+    case 'not_string':
+      return i18n.translate('xpack.nativeVulnScanner.onboarding.runtimePinRefused.notString', {
+        defaultMessage: 'its value is not a string',
+      });
+    case 'set_failed':
+      return i18n.translate('xpack.nativeVulnScanner.onboarding.runtimePinRefused.setFailed', {
+        defaultMessage: 'the value cannot be set at that path',
+      });
+    case 'value_not_set':
+      return i18n.translate('xpack.nativeVulnScanner.onboarding.runtimePinRefused.valueNotSet', {
+        defaultMessage: 'the value did not persist after editing',
+      });
+  }
+};
+
 const refuse = (before: string, key: string, code: RuntimePinRefusalCode): RuntimePinMerge => ({
   ok: false,
   before,
@@ -43,7 +65,7 @@ const refuse = (before: string, key: string, code: RuntimePinRefusalCode): Runti
   message: i18n.translate('xpack.nativeVulnScanner.onboarding.runtimePinRefused', {
     defaultMessage:
       'Cannot pin the osquerybeat runtime: "{key}" in the agent_internal settings of the policy is not editable ({detail}). Fix the YAML or remove the key and retry.',
-    values: { key, detail: code },
+    values: { key, detail: refusalDetail(code) },
   }),
 });
 

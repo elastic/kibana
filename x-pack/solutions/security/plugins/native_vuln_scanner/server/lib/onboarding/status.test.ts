@@ -16,7 +16,7 @@ import {
   createMockAgentClient,
   createMockAgentPolicyService,
 } from '@kbn/fleet-plugin/server/mocks';
-import { INVENTORY_PACK_BODY, INVENTORY_PACK_NAME } from '../inventory';
+import { INVENTORY_PACK_BODY, INVENTORY_PACK_NAME, OSQUERY_RESULTS_INDEX } from '../inventory';
 import { createPolicy, OSQUERY_PINNED_YAML } from './policy_fixture.mock';
 import {
   AGENT_LIST_CAP,
@@ -75,7 +75,7 @@ const setup = ({
   // The internal user reads both the run summary and the aggregate-only osquery results.
   const esInternal = elasticsearchServiceMock.createElasticsearchClient();
   esInternal.search.mockImplementation((async (params: { index?: string }) =>
-    params.index === 'logs-osquery_manager.result-*'
+    params.index === OSQUERY_RESULTS_INDEX
       ? { aggregations: { reporting: { buckets: reportingAgentIds.map((key) => ({ key })) } } }
       : { hits: { hits: lastScan ? [{ _source: lastScan }] : [] } }) as never);
 
@@ -285,12 +285,57 @@ describe('collectOnboardingStatus', () => {
     expect((await collectOnboardingStatus(deps)).agentsTruncated).toBe(true);
   });
 
+  it('does not flag truncation when the agent total equals the cap exactly', async () => {
+    const agents = Array.from({ length: AGENT_LIST_CAP }, (_, i) => ({
+      id: `a${i}`,
+      policy_id: 'p',
+      status: 'online',
+    }));
+    const { deps } = setup({ policies: [createPolicy({ id: 'p' })], agents });
+    const status = await collectOnboardingStatus(deps);
+    expect(status.agentsTruncated).toBe(false);
+    expect(status.policies[0].agents?.total).toBe(AGENT_LIST_CAP);
+  });
+
+  it('does not flag truncation when the cap is reached and later batches have no agents', async () => {
+    const policies = Array.from({ length: 101 }, (_, i) => createPolicy({ id: `p${i}` }));
+    const agents = Array.from({ length: AGENT_LIST_CAP }, (_, i) => ({
+      id: `a${i}`,
+      policy_id: 'p0',
+      status: 'online',
+    }));
+    const { deps, agentClient } = setup({ policies });
+    agentClient.listAgents
+      .mockResolvedValueOnce({ agents, total: AGENT_LIST_CAP, page: 1, perPage: 5000 } as never)
+      .mockResolvedValueOnce({ agents: [], total: 0, page: 1, perPage: 1 } as never);
+    expect((await collectOnboardingStatus(deps)).agentsTruncated).toBe(false);
+  });
+
+  it('flags truncation when the cap is reached and a later batch still has agents', async () => {
+    const policies = Array.from({ length: 101 }, (_, i) => createPolicy({ id: `p${i}` }));
+    const agents = Array.from({ length: AGENT_LIST_CAP }, (_, i) => ({
+      id: `a${i}`,
+      policy_id: 'p0',
+      status: 'online',
+    }));
+    const { deps, agentClient } = setup({ policies });
+    agentClient.listAgents
+      .mockResolvedValueOnce({ agents, total: AGENT_LIST_CAP, page: 1, perPage: 5000 } as never)
+      .mockResolvedValueOnce({
+        agents: [{ id: 'x', policy_id: 'p100', status: 'online' }],
+        total: 1,
+        page: 1,
+        perPage: 1,
+      } as never);
+    expect((await collectOnboardingStatus(deps)).agentsTruncated).toBe(true);
+  });
+
   it('does not search results when there are no agents', async () => {
     const { deps, esInternal } = setup({ policies: [createPolicy({ id: 'p' })] });
     const status = await collectOnboardingStatus(deps);
     expect(status.agentsTruncated).toBe(false);
     expect(esInternal.search).not.toHaveBeenCalledWith(
-      expect.objectContaining({ index: 'logs-osquery_manager.result-*' })
+      expect.objectContaining({ index: OSQUERY_RESULTS_INDEX })
     );
   });
 
@@ -304,7 +349,7 @@ describe('collectOnboardingStatus', () => {
     await collectOnboardingStatus(deps);
     expect(esInternal.search).toHaveBeenCalledTimes(2);
     expect(esInternal.search).toHaveBeenCalledWith(
-      expect.objectContaining({ index: 'logs-osquery_manager.result-*', size: 0 })
+      expect.objectContaining({ index: OSQUERY_RESULTS_INDEX, size: 0 })
     );
     expect(esInternal.search).toHaveBeenCalledWith(
       expect.objectContaining({ index: expect.stringContaining('native-vuln-scanner') })
@@ -357,7 +402,7 @@ describe('collectOnboardingStatus', () => {
         { id: 'q', state: 'not_configured', agents: null, reportingInventory: null },
       ]);
       expect(esInternal.search).not.toHaveBeenCalledWith(
-        expect.objectContaining({ index: 'logs-osquery_manager.result-*' })
+        expect.objectContaining({ index: OSQUERY_RESULTS_INDEX })
       );
     });
 

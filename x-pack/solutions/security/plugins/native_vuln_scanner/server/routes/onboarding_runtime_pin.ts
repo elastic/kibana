@@ -6,23 +6,22 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { RuntimePinResult } from '@kbn/cloud-security-posture-common/native_vuln_scanner/types';
 import {
   FLEET_AGENT_POLICIES_ALL_PRIVILEGE,
   NATIVE_VULN_SCANNER_API_VERSION,
   ONBOARDING_RUNTIME_PIN_PATH,
-} from '../../common/onboarding/constants';
-import type { PolicyPlan } from '../lib/onboarding';
+} from '@kbn/cloud-security-posture-common/native_vuln_scanner/constants';
 import { planPolicies } from '../lib/onboarding';
 import { policyIdsBodySchema } from './policy_ids_schema';
 import { fleetUnavailable, respondWithError } from './route_error';
 import type { RouteDependencies } from './types';
 import { withLicense } from './with_license';
 
-export type RuntimePinOutcome = 'updated' | 'no_change' | 'refused' | 'not_found' | 'failed';
-
-export interface RuntimePinResult extends Omit<PolicyPlan, 'outcome' | 'before' | 'after'> {
-  outcome: RuntimePinOutcome;
-}
+export type {
+  RuntimePinOutcome,
+  RuntimePinResult,
+} from '@kbn/cloud-security-posture-common/native_vuln_scanner/types';
 
 export const registerOnboardingRuntimePinRoute = ({
   router,
@@ -53,6 +52,7 @@ export const registerOnboardingRuntimePinRoute = ({
           // internal ES client (as Fleet's own update handler does) and `{ user }` for the audit
           // trail. `force` is never passed, so managed policies stay untouched.
           const soClient = core.savedObjects.client;
+          // Origin-only under CPS: Fleet's policy update reads and writes the project this Kibana runs in.
           const esClient = core.elasticsearch.client.asInternalUser;
           const user = core.security.authc.getCurrentUser() ?? undefined;
           const { policies, plans } = await planPolicies(

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React, { lazy, Suspense, useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { createHtmlPortalNode, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/react';
@@ -16,7 +16,7 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { findingsNavigation } from '@kbn/cloud-security-posture';
 import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
 import { Configurations } from '../configurations';
-import { cloudPosturePages } from '../../common/navigation/constants';
+import { cloudPosturePages, SCANNER_SETTINGS_PATH } from '../../common/navigation/constants';
 import { LOCAL_STORAGE_FINDINGS_LAST_SELECTED_TAB_KEY } from '../../common/constants';
 import { VULNERABILITIES_INDEX_NAME, FINDINGS_INDEX_NAME } from '../../../common/constants';
 import { getStatusForIndexName } from '../../../common/utils/helpers';
@@ -24,6 +24,14 @@ import { Vulnerabilities } from '../vulnerabilities';
 import { CspAppHeader } from '../../components/csp_app_header';
 import { FindingsSearchBarPortalContext } from '../../common/contexts/findings_search_bar_portal_context';
 import { useKibana } from '../../common/hooks/use_kibana';
+import { CspLoadingState } from '../../components/csp_loading_state';
+
+// The scanner settings page is a deep link only, so it stays out of the main chunk.
+const LazyScannerSettings = lazy(() =>
+  import('../vulnerabilities/scanner_settings').then(({ ScannerSettingsPage }) => ({
+    default: ScannerSettingsPage,
+  }))
+);
 
 type FindingsTabKey = 'vuln_mgmt' | 'configurations';
 
@@ -86,7 +94,8 @@ export const Findings = () => {
   const isVulnerabilitiesTabSelected = (pathname: string) => {
     return (
       pathname === findingsNavigation.vulnerabilities.path ||
-      pathname === findingsNavigation.vulnerabilities_by_resource.path
+      pathname === findingsNavigation.vulnerabilities_by_resource.path ||
+      pathname === SCANNER_SETTINGS_PATH
     );
   };
 
@@ -139,6 +148,14 @@ export const Findings = () => {
         />
         <Route path={findingsNavigation.findings_default.path} component={Configurations} />
         <Route path={findingsNavigation.findings_by_resource.path} component={Configurations} />
+        <Route
+          path={SCANNER_SETTINGS_PATH}
+          render={() => (
+            <Suspense fallback={<CspLoadingState />}>
+              <LazyScannerSettings />
+            </Suspense>
+          )}
+        />
         <Route path={findingsNavigation.vulnerabilities.path} component={Vulnerabilities} />
         <Route
           path={findingsNavigation.vulnerabilities_by_resource.path}

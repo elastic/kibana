@@ -16,7 +16,7 @@ import {
   FLEET_AGENT_POLICIES_ALL_PRIVILEGE,
   NATIVE_VULN_SCANNER_API_VERSION,
   SCAN_PATH,
-} from '../../common/onboarding/constants';
+} from '@kbn/cloud-security-posture-common/native_vuln_scanner/constants';
 import { isScanRunning } from '../lib/onboarding';
 import { respondWithError } from './route_error';
 import type { RouteDependencies } from './types';

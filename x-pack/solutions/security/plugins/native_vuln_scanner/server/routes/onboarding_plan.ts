@@ -10,7 +10,7 @@ import {
   FLEET_AGENT_POLICIES_ALL_PRIVILEGE,
   NATIVE_VULN_SCANNER_API_VERSION,
   ONBOARDING_PLAN_PATH,
-} from '../../common/onboarding/constants';
+} from '@kbn/cloud-security-posture-common/native_vuln_scanner/constants';
 import { buildOnboardingPlan } from '../lib/onboarding';
 import { policyIdsBodySchema } from './policy_ids_schema';
 import { fleetUnavailable, respondWithError } from './route_error';

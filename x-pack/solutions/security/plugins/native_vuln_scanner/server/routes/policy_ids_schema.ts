@@ -6,7 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { MAX_POLICY_ID_LENGTH, MAX_POLICY_IDS } from '../../common/onboarding/constants';
+import {
+  MAX_POLICY_ID_LENGTH,
+  MAX_POLICY_IDS,
+} from '@kbn/cloud-security-posture-common/native_vuln_scanner/constants';
 
 export const policyIdsBodySchema = schema.object({
   policyIds: schema.arrayOf(schema.string({ minLength: 1, maxLength: MAX_POLICY_ID_LENGTH }), {

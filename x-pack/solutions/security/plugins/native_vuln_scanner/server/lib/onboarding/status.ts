@@ -19,6 +19,11 @@ import type { AgentPolicy } from '@kbn/fleet-plugin/common';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import { NATIVE_VULN_SCANNER_SCAN_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
+import type {
+  OnboardingStatus,
+  PolicyOnboardingState,
+  PolicyStatus,
+} from '@kbn/cloud-security-posture-common/native_vuln_scanner/types';
 import {
   findInventoryScheduleIds,
   INVENTORY_PACK_INTERVAL_SECONDS,
@@ -27,7 +32,6 @@ import {
 } from '../inventory';
 import type { SummaryDoc } from '../summary';
 import { SUMMARY_INDEX } from '../summary';
-import type { PackInspection } from './pack_state';
 import { inspectInventoryPack } from './pack_state';
 import { mergeRuntimePin } from './runtime_pin';
 
@@ -44,40 +48,11 @@ const KUERY_POLICY_BATCH = 100;
 /** Results younger than two pack intervals still show an agent as reporting. */
 const REPORTING_WINDOW = `now-${2 * INVENTORY_PACK_INTERVAL_SECONDS}s`;
 
-export type PolicyOnboardingState =
-  | 'not_configured'
-  | 'pending_inventory'
-  | 'reporting'
-  | 'scanned';
-
-export interface PolicyStatus {
-  id: string;
-  name: string;
-  packAssigned: boolean;
-  runtimePinned: boolean;
-  /** Null when the caller cannot read Fleet agents. */
-  agents: { total: number; online: number } | null;
-  /** Null when agents are not readable by the caller. */
-  reportingInventory: number | null;
-  state: PolicyOnboardingState;
-}
-
-export interface OnboardingStatus {
-  license: 'ok';
-  pack: PackInspection;
-  policies: PolicyStatus[];
-  /** Policies without a usable osquery_manager integration. */
-  needsOsqueryIntegration: Array<{ id: string; name: string }>;
-  /** Agentless policies: they cannot run osquerybeat, so they are never onboarded. */
-  agentlessPolicies: Array<{ id: string; name: string }>;
-  lastScan: SummaryDoc | null;
-  schedule: { installed: boolean; enabled: boolean };
-  scanRunning: boolean;
-  /** False when the caller lacks Fleet agents read: agent counts and reporting are then null. */
-  agentsVisible: boolean;
-  /** True when the agent list hit `AGENT_LIST_CAP`, so per-policy counts may be low. */
-  agentsTruncated: boolean;
-}
+export type {
+  OnboardingStatus,
+  PolicyOnboardingState,
+  PolicyStatus,
+} from '@kbn/cloud-security-posture-common/native_vuln_scanner/types';
 
 export interface OnboardingDeps {
   request: KibanaRequest;
@@ -126,16 +101,18 @@ const listAgents = async (
   try {
     for (const batch of chunk(policyIds, KUERY_POLICY_BATCH)) {
       const remaining = AGENT_LIST_CAP - agents.length;
-      if (remaining <= 0) {
-        truncated = true;
-        break;
-      }
+      // At the cap, fetch one agent only to learn whether this batch has any: the cap being
+      // reached exactly is not truncation.
       const result = await agentClient.listAgents({
         showInactive: false,
-        perPage: remaining,
+        perPage: Math.max(remaining, 1),
         page: 1,
         kuery: policyAgentsKuery(batch),
       });
+      if (remaining <= 0) {
+        if (result.total > 0) truncated = true;
+        break;
+      }
       for (const { id, policy_id: policyId, status } of result.agents) {
         if (policyId) agents.push({ id, policyId, online: status === 'online' });
       }

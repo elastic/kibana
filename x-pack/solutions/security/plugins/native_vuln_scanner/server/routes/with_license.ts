@@ -12,7 +12,7 @@ import type {
   IKibanaResponse,
 } from '@kbn/core/server';
 import type { ILicense } from '@kbn/licensing-types';
-import { ErrorCode } from '../../common/onboarding/constants';
+import { ErrorCode } from '@kbn/cloud-security-posture-common/native_vuln_scanner/constants';
 import { isEnterprise, LICENSE_REQUIRED_MESSAGE } from '../lib/license';
 
 export type GetLicense = () => Promise<ILicense>;

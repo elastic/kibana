@@ -56,7 +56,6 @@
     "@kbn/unified-doc-viewer",
     "@kbn/kibana-utils-plugin",
     "@kbn/ui-actions-plugin",
-    "@kbn/core-http-server-mocks",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/grouping",
     "@kbn/alerting-plugin",
@@ -82,7 +81,8 @@
     "@kbn/es-errors",
     "@kbn/app-header",
     "@kbn/app-menu",
-    "@kbn/security-solution-features"
+    "@kbn/security-solution-features",
+    "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]
 }

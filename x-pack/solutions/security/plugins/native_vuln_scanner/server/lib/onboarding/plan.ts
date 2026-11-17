@@ -9,40 +9,21 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { AgentPolicyServiceInterface } from '@kbn/fleet-plugin/server';
 import type { AgentPolicy } from '@kbn/fleet-plugin/common';
-import type { PackPlan } from './pack_state';
+import type {
+  OnboardingPlan,
+  PolicyPlan,
+  PolicyRefusalReason,
+} from '@kbn/cloud-security-posture-common/native_vuln_scanner/types';
 import { inspectInventoryPack, planPackAction } from './pack_state';
-import type { RuntimePinConflict } from './runtime_pin';
 import { mergeRuntimePin } from './runtime_pin';
 import { hasUsableOsqueryManager, MIN_OSQUERY_MANAGER_VERSION } from './status';
 
-export type PolicyPlanOutcome = 'change' | 'no_change' | 'refused' | 'not_found';
-
-export type PolicyRefusalReason =
-  | 'not_found'
-  | 'managed'
-  | 'agentless'
-  | 'no_osquery_integration'
-  | 'invalid_agent_internal';
-
-export interface PolicyPlan {
-  id: string;
-  name: string | null;
-  outcome: PolicyPlanOutcome;
-  /** Set when `outcome` is `refused` or `not_found`. */
-  reason?: PolicyRefusalReason;
-  /** Names the `agent_internal` key that cannot be edited, for `invalid_agent_internal`. */
-  key?: string;
-  message?: string;
-  /** `agent_internal` YAML as stored, and as it would be written. Only set for `change`. */
-  before?: string;
-  after?: string;
-  conflicts: RuntimePinConflict[];
-}
-
-export interface OnboardingPlan {
-  pack: PackPlan;
-  policies: PolicyPlan[];
-}
+export type {
+  OnboardingPlan,
+  PolicyPlan,
+  PolicyPlanOutcome,
+  PolicyRefusalReason,
+} from '@kbn/cloud-security-posture-common/native_vuln_scanner/types';
 
 const refused = (
   policy: AgentPolicy,

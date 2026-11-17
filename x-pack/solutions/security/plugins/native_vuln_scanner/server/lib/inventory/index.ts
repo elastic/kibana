@@ -31,8 +31,8 @@ export {
 export type {
   InventoryPackBody,
   InventoryPackQueryBody,
-} from '../../../common/inventory/pack_body';
+} from '@kbn/cloud-security-posture-common/native_vuln_scanner/pack_body';
 export {
   INVENTORY_PACK_BODY,
   INVENTORY_PACK_INTERVAL_SECONDS,
-} from '../../../common/inventory/pack_body';
+} from '@kbn/cloud-security-posture-common/native_vuln_scanner/pack_body';

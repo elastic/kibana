@@ -114,6 +114,15 @@ unrelated:
     }
   });
 
+  it('keeps the machine code out of the human message', () => {
+    const result = mergeRuntimePin('agent: [unclosed\n  x: : y\n');
+    expect(result).toMatchObject({ ok: false, code: 'yaml_parse_error' });
+    if (!result.ok) {
+      expect(result.message).not.toContain('yaml_parse_error');
+      expect(result.message).toContain('the YAML cannot be parsed');
+    }
+  });
+
   it('refuses invalid YAML', () => {
     const result = mergeRuntimePin('agent: [unclosed\n  x: : y\n');
     expect(result).toMatchObject({ ok: false, code: 'yaml_parse_error' });

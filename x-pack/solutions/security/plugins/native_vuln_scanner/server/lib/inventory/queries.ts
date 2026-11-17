@@ -5,5 +5,11 @@
  * 2.0.
  */
 
-export type { InventoryQuery, InventoryQueryKind } from '../../../common/inventory/queries';
-export { INVENTORY_QUERIES, KIND_BY_QUERY_ID } from '../../../common/inventory/queries';
+export type {
+  InventoryQuery,
+  InventoryQueryKind,
+} from '@kbn/cloud-security-posture-common/native_vuln_scanner/queries';
+export {
+  INVENTORY_QUERIES,
+  KIND_BY_QUERY_ID,
+} from '@kbn/cloud-security-posture-common/native_vuln_scanner/queries';
