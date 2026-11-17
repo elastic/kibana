@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+// CI control: no functional change. Touching Fleet expands Scout's affected-module set the
+// same way elastic/kibana#305684 does, so the same lanes get selected.
+
 import React from 'react';
 import type {
   AppMountParameters,
