@@ -172,11 +172,18 @@ describe('buildRenameSourceFieldMap', () => {
       expect(buildRenameSourceFieldMap(query)).toEqual(new Map([['size', 'bytes']]));
     });
 
-    it('does not preserve an identity EVAL overwritten by a computed EVAL', () => {
-      const query =
-        'FROM (FROM logs | EVAL bytes = bytes | EVAL bytes = bytes * 2) | RENAME bytes AS size';
-
+    it.each([
+      'FROM (FROM logs | EVAL bytes = bytes | EVAL bytes = bytes * 2) | RENAME bytes AS size',
+      'FROM (FROM logs | EVAL bytes = bytes) | EVAL bytes = bytes * 2 | RENAME bytes AS size',
+    ])('does not preserve an identity EVAL overwritten by a computed EVAL: %s', (query) => {
       expect(buildRenameSourceFieldMap(query)).toEqual(new Map());
+    });
+
+    it('preserves an alias captured before an outer computed EVAL', () => {
+      const query =
+        'FROM (FROM logs | EVAL bytes = bytes) | EVAL saved = bytes | EVAL bytes = bytes * 2 | RENAME saved AS size';
+
+      expect(resolve('size', query)).toBe('bytes');
     });
 
     it.each([

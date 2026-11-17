@@ -95,7 +95,12 @@ function resolveOneField(
   let current = fieldName;
   // Walk backwards so the most recent rename wins when a column is renamed more than once.
   for (let i = commandSummaries.length - 1; i >= 0; i--) {
+    const { cmd, summary } = commandSummaries[i];
     const pairMap = renameNewToOldByCommandIndex[i];
+    // Computed EVALs also invalidate intermediate names in the rename chain.
+    if (cmd.name === 'eval' && summary.newColumns.has(current) && !pairMap?.has(current)) {
+      return undefined;
+    }
     if (!pairMap?.size) {
       continue;
     }
