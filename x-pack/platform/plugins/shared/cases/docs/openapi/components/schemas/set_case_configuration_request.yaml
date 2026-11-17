@@ -43,6 +43,10 @@ properties:
       When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability.
       Observable extraction is available only for Security cases. For Stack and Observability cases,
       a value that is not sent resolves to `false`, and setting it to `true` returns a 400 error.
+  observableTypes:
+    $ref: 'observable_types_request.yaml'
+  observableTypeSettings:
+    $ref: 'observable_type_settings_request.yaml'
   owner:
     $ref: 'owner.yaml'
   templates:
