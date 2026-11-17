@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import moment from 'moment';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, finalize } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { z } from '@kbn/zod/v4';
 import type { PluginInitializerContext, RequestHandlerContext } from '@kbn/core/server';
@@ -618,6 +618,46 @@ describe('Actions Plugin', () => {
         encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
         eventLog: eventLogMock.createStart(),
       };
+    });
+
+    it('exposes catalog flag changes through the request context and unsubscribes on stop', async () => {
+      const enabled$ = new BehaviorSubject(true);
+      const onUnsubscribe = jest.fn();
+      coreStart.featureFlags.getBooleanValue$.mockReturnValue(
+        enabled$.pipe(finalize(onUnsubscribe))
+      );
+      coreSetup.getStartServices.mockResolvedValue([coreStart, pluginsStart, {}]);
+      plugin.setup(coreSetup, pluginsSetup);
+      const [, handler] = coreSetup.http.registerRouteHandlerContext.mock.calls[0];
+      const actionsContext = await handler(
+        { core: {} } as unknown as RequestHandlerContext,
+        httpServerMock.createKibanaRequest(),
+        httpServerMock.createResponseFactory()
+      );
+      if (
+        !('isConnectorCatalogEnabled' in actionsContext) ||
+        typeof actionsContext.isConnectorCatalogEnabled !== 'function'
+      ) {
+        throw new Error('Actions context does not expose the connector catalog flag');
+      }
+      expect(actionsContext.isConnectorCatalogEnabled()).toBe(false);
+
+      plugin.start(coreStart, pluginsStart);
+      expect(coreStart.featureFlags.getBooleanValue$).toHaveBeenCalledWith(
+        ACTIONS_CONNECTOR_CATALOG_ENABLED_FLAG,
+        false
+      );
+      expect(actionsContext.isConnectorCatalogEnabled()).toBe(true);
+
+      enabled$.next(false);
+      expect(actionsContext.isConnectorCatalogEnabled()).toBe(false);
+      enabled$.next(true);
+      expect(actionsContext.isConnectorCatalogEnabled()).toBe(true);
+
+      plugin.stop();
+      expect(onUnsubscribe).toHaveBeenCalledTimes(1);
+      enabled$.next(true);
+      expect(actionsContext.isConnectorCatalogEnabled()).toBe(false);
     });
 
     it('should throw when there is an invalid connector type in enabledActionTypes', async () => {
