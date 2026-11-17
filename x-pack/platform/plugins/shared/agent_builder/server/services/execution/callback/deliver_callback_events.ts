@@ -13,7 +13,6 @@ import {
   defer,
   catchError,
   filter,
-  lastValueFrom,
   type Observable,
 } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -27,28 +26,27 @@ import {
   type ChatEvent,
   type RoundCompleteEvent,
 } from '@kbn/agent-builder-common';
-import type { AgentExecution } from '@kbn/agent-builder-server/execution';
+import type {
+  AgentExecution,
+  ConversationAgentExecution,
+} from '@kbn/agent-builder-server/execution';
 import type { SurfacesService } from '../../surfaces';
 import { serializeExecutionError } from '../utils/serialize_execution_error';
 import type { CallbackDeliveryService } from './callback_delivery_service';
 
 /**
- * The execution's callback URL when it has a usable one: only conversation executions have
- * callbacks, and a URL the Actions config does not allow is logged and skipped.
+ * The execution's callback URL when it has a usable one: a URL the Actions config does not allow
+ * is logged and skipped.
  */
 const getCallbackUrl = ({
   execution,
   callbackDeliveryService,
   logger,
 }: {
-  execution: AgentExecution;
+  execution: ConversationAgentExecution;
   callbackDeliveryService: CallbackDeliveryService;
   logger: Logger;
 }): string | undefined => {
-  if (execution.executionMode !== AgentExecutionMode.conversation) {
-    return undefined;
-  }
-
   const callbackUrl = execution.agentParams.callback?.url;
 
   if (!callbackUrl) {
@@ -68,7 +66,8 @@ const getCallbackUrl = ({
   return callbackUrl;
 };
 
-const sendFailureCallback = ({
+/** Never rejects: a failed delivery is logged. */
+const sendFailureCallback = async ({
   execution,
   error,
   callbackUrl,
@@ -80,25 +79,22 @@ const sendFailureCallback = ({
   callbackUrl: string;
   callbackDeliveryService: CallbackDeliveryService;
   logger: Logger;
-}): Observable<void> => {
-  const failureDelivery = callbackDeliveryService.makeCallbackRequest({
-    payload: {
-      execution_id: execution.executionId,
-      error: serializeExecutionError(error),
-      idempotency_key: execution.executionId,
-    },
-    callbackUrl,
-    retry: true,
-  });
-
-  return from(failureDelivery).pipe(
-    catchError((deliveryError) => {
-      logger.warn(
-        `Failed to deliver failure callback for execution ${execution.executionId}: ${deliveryError.message}`
-      );
-      return EMPTY;
-    })
-  );
+}): Promise<void> => {
+  try {
+    await callbackDeliveryService.makeCallbackRequest({
+      payload: {
+        execution_id: execution.executionId,
+        error: serializeExecutionError(error),
+        idempotency_key: execution.executionId,
+      },
+      callbackUrl,
+      retry: true,
+    });
+  } catch (deliveryError) {
+    logger.warn(
+      `Failed to deliver failure callback for execution ${execution.executionId}: ${deliveryError.message}`
+    );
+  }
 };
 
 /**
@@ -116,16 +112,18 @@ export const deliverFailureCallback = async ({
   callbackDeliveryService: CallbackDeliveryService;
   logger: Logger;
 }): Promise<void> => {
+  // Only conversation executions have callbacks.
+  if (execution.executionMode !== AgentExecutionMode.conversation) {
+    return;
+  }
+
   const callbackUrl = getCallbackUrl({ execution, callbackDeliveryService, logger });
 
   if (!callbackUrl) {
     return;
   }
 
-  await lastValueFrom(
-    sendFailureCallback({ execution, error, callbackUrl, callbackDeliveryService, logger }),
-    { defaultValue: undefined }
-  );
+  await sendFailureCallback({ execution, error, callbackUrl, callbackDeliveryService, logger });
 };
 
 /**
@@ -235,7 +233,9 @@ export const deliverCallbackEvents = ({
           })
         ),
         catchError((error) =>
-          sendFailureCallback({ execution, error, callbackUrl, callbackDeliveryService, logger })
+          from(
+            sendFailureCallback({ execution, error, callbackUrl, callbackDeliveryService, logger })
+          )
         )
       )
       .subscribe({
