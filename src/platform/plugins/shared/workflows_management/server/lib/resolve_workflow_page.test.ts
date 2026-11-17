@@ -11,6 +11,8 @@ import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { resolveWorkflowPage } from './resolve_workflow_page';
 import { pageDefinition, pageRef, WORKFLOW_CREATED_AT } from '../pages/fake_page_store.mock';
 import type { WorkflowPageRef } from '../pages/page_secret';
+import type { WorkflowPageMissReason } from '../pages/types';
+import type { VerifyPageSecretResult } from '../pages/workflow_pages_system_client';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
 const boundPageDefinition = (pageId?: string) => ({
@@ -34,7 +36,9 @@ const setup = (
         } as WorkflowProperties);
   const getWorkflowSource = jest.fn(async () => workflow);
   const pagesSystemClient = {
-    verifyPageSecret: jest.fn(async (): Promise<string | undefined> => WORKFLOW_CREATED_AT),
+    verifyPageSecret: jest.fn(
+      async (): Promise<VerifyPageSecretResult> => ({ workflowCreatedAt: WORKFLOW_CREATED_AT })
+    ),
   };
   const serviceAccountBindings = {
     isEnabled: jest.fn(() => bindingsEnabled),
@@ -64,41 +68,39 @@ describe('resolveWorkflowPage', () => {
   it('returns the workflow when every check passes', async () => {
     const { resolve, workflow, getWorkflowSource, pagesSystemClient } = setup();
 
-    await expect(resolve(pageRef, 'the-secret')).resolves.toBe(workflow);
-    expect(getWorkflowSource).toHaveBeenCalledWith(pageRef.workflowId, pageRef.spaceId);
+    await expect(resolve(pageRef, 'the-secret')).resolves.toEqual({ workflow });
     expect(pagesSystemClient.verifyPageSecret).toHaveBeenCalledWith(pageRef, 'the-secret');
+    expect(getWorkflowSource).toHaveBeenCalledWith(pageRef.workflowId, pageRef.spaceId);
   });
 
-  it('returns undefined when the workflow is missing, deleted, or global', async () => {
+  it.each(['page_not_found', 'page_offline', 'secret_mismatch'] as const)(
+    'returns %s from the page check, before it reads the workflow',
+    async (reason) => {
+      const { resolve, getWorkflowSource, pagesSystemClient, serviceAccountBindings } = setup();
+      pagesSystemClient.verifyPageSecret.mockResolvedValue({ reason });
+
+      await expect(resolve(pageRef, 'wrong')).resolves.toEqual({ reason });
+      expect(getWorkflowSource).not.toHaveBeenCalled();
+      expect(serviceAccountBindings.getWorkloadBinding).not.toHaveBeenCalled();
+    }
+  );
+
+  it('returns workflow_not_found when the workflow is missing, deleted, or global', async () => {
     const { resolve } = setup(null);
-
-    await expect(resolve(pageRef, 'the-secret')).resolves.toBeUndefined();
+    await expect(resolve(pageRef, 'the-secret')).resolves.toEqual({
+      reason: 'workflow_not_found',
+    });
   });
 
-  it('returns undefined for a page of an earlier workflow with the same id', async () => {
-    const { resolve } = setup({ created_at: '2026-02-01T00:00:00.000Z' });
-
-    await expect(resolve(pageRef, 'the-secret')).resolves.toBeUndefined();
-  });
-
-  it('checks the secret before it reads the workflow', async () => {
-    const { resolve, getWorkflowSource, pagesSystemClient, serviceAccountBindings } = setup();
-    pagesSystemClient.verifyPageSecret.mockResolvedValue(undefined);
-
-    await expect(resolve(pageRef, 'wrong')).resolves.toBeUndefined();
-    expect(getWorkflowSource).not.toHaveBeenCalled();
-    expect(serviceAccountBindings.isEnabled).not.toHaveBeenCalled();
-    expect(serviceAccountBindings.getWorkloadBinding).not.toHaveBeenCalled();
-  });
-
-  it.each<[string, Partial<WorkflowProperties>]>([
-    ['the workflow is disabled', { enabled: false }],
-    ['the workflow is invalid', { valid: false }],
-    ['the workflow has no service account', { definition: pageDefinition() }],
-    ['the page trigger is gone', { definition: boundPageDefinition('other-page') }],
-  ])('returns undefined when %s, even with the right secret', async (_, overrides) => {
+  it.each<[WorkflowPageMissReason, Partial<WorkflowProperties>]>([
+    ['stale_page', { created_at: '2026-02-01T00:00:00.000Z' }],
+    ['workflow_disabled', { enabled: false }],
+    ['workflow_invalid', { valid: false }],
+    ['trigger_missing', { definition: boundPageDefinition('other-page') }],
+    ['not_bound', { definition: pageDefinition() }],
+  ])('returns %s with the right secret', async (reason, overrides) => {
     const { resolve } = setup(overrides);
-    await expect(resolve(pageRef, 'the-secret')).resolves.toBeUndefined();
+    await expect(resolve(pageRef, 'the-secret')).resolves.toEqual({ reason });
   });
 
   it('reads the binding of the workflow in its space', async () => {
@@ -117,17 +119,17 @@ describe('resolveWorkflowPage', () => {
     ['service account execution is off', { bindingsEnabled: false }],
     ['the workflow has no binding', { boundAccountId: null }],
     ['the binding names another account', { boundAccountId: 'service-account-2' }],
-  ])('returns undefined when %s, even with the right secret', async (_, bindingState) => {
+  ])('returns not_bound when %s', async (_, bindingState) => {
     const { resolve } = setup({}, bindingState);
-    await expect(resolve(pageRef, 'the-secret')).resolves.toBeUndefined();
+    await expect(resolve(pageRef, 'the-secret')).resolves.toEqual({ reason: 'not_bound' });
   });
 
   it('never resolves a page in the global space', async () => {
-    const { resolve, getWorkflowSource } = setup();
+    const { resolve, pagesSystemClient } = setup();
 
     await expect(
       resolve({ ...pageRef, spaceId: GLOBAL_WORKFLOW_SPACE_ID }, 'the-secret')
-    ).resolves.toBeUndefined();
-    expect(getWorkflowSource).not.toHaveBeenCalled();
+    ).resolves.toEqual({ reason: 'global_space' });
+    expect(pagesSystemClient.verifyPageSecret).not.toHaveBeenCalled();
   });
 });

@@ -142,8 +142,10 @@ describe('WorkflowPagesClient', () => {
       const rotated = await client.rotateSecret(key);
 
       expect(rotated).not.toBe(secret);
-      await expect(systemClient.verifyPageSecret(ref, secret)).resolves.toBeUndefined();
-      await expect(systemClient.verifyPageSecret(ref, rotated)).resolves.toBe(WORKFLOW_CREATED_AT);
+      await expect(systemClient.verifyPageSecret(ref, secret)).resolves.toHaveProperty('reason');
+      await expect(systemClient.verifyPageSecret(ref, rotated)).resolves.toEqual({
+        workflowCreatedAt: WORKFLOW_CREATED_AT,
+      });
       await expect(client.getSecret(key)).resolves.toBe(rotated);
     });
 
@@ -153,10 +155,12 @@ describe('WorkflowPagesClient', () => {
       const secret = await client.getSecret(key);
 
       await client.setEnabled(key, false);
-      await expect(systemClient.verifyPageSecret(ref, secret)).resolves.toBeUndefined();
+      await expect(systemClient.verifyPageSecret(ref, secret)).resolves.toHaveProperty('reason');
 
       await client.setEnabled(key, true);
-      await expect(systemClient.verifyPageSecret(ref, secret)).resolves.toBe(WORKFLOW_CREATED_AT);
+      await expect(systemClient.verifyPageSecret(ref, secret)).resolves.toEqual({
+        workflowCreatedAt: WORKFLOW_CREATED_AT,
+      });
     });
 
     it('reads the page once and builds the result from the update', async () => {
@@ -265,9 +269,9 @@ describe('WorkflowPagesClient', () => {
         expect.objectContaining({ online: true, enabled: true })
       );
       await expect(client.getSecret(key)).resolves.toBe(rotated);
-      await expect(systemClient.verifyPageSecret(teamRef, rotated)).resolves.toBe(
-        WORKFLOW_CREATED_AT
-      );
+      await expect(systemClient.verifyPageSecret(teamRef, rotated)).resolves.toEqual({
+        workflowCreatedAt: WORKFLOW_CREATED_AT,
+      });
     });
   });
 

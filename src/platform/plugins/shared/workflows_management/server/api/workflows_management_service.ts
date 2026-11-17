@@ -86,6 +86,7 @@ import type {
 import { getAuthenticatedUser } from '../lib/get_user';
 import { getHistoryForWorkflow } from '../lib/get_workflow_change_history';
 import { resolveWorkflowPage } from '../lib/resolve_workflow_page';
+import type { ResolveWorkflowPageResult } from '../lib/resolve_workflow_page';
 import {
   type ManagedInstallReadinessResult,
   waitForManagedWorkflowInstallReadiness,
@@ -371,11 +372,11 @@ export class WorkflowsService {
     return this.pages.getClient({ request });
   }
 
-  /** Returns the workflow behind a page URL, or undefined when the page must not run. */
+  /** Returns the workflow behind a page URL, or why the page must not run. */
   public async resolveWorkflowPage(
     ref: WorkflowPageRef,
     secret: string
-  ): Promise<WorkflowProperties | undefined> {
+  ): Promise<ResolveWorkflowPageResult> {
     await this.ensureInitialized();
     if (!this.pages) throw new Error('Workflow pages are not set up');
     return resolveWorkflowPage(

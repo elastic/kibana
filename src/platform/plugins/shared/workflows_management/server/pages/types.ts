@@ -12,6 +12,19 @@ import type { WorkflowAccessOperation } from '@kbn/workflows';
 import type { WorkflowPageAccess } from './page_saved_object';
 import type { WorkflowPageRef } from './page_secret';
 
+/** Why a page URL did not resolve. For the audit log only: the visitor always gets a plain 404. */
+export type WorkflowPageMissReason =
+  | 'global_space'
+  | 'page_not_found'
+  | 'page_offline'
+  | 'secret_mismatch'
+  | 'workflow_not_found'
+  | 'stale_page'
+  | 'workflow_disabled'
+  | 'workflow_invalid'
+  | 'trigger_missing'
+  | 'not_bound';
+
 /** What callers see of a page. Never holds the secret or its hash. */
 export interface WorkflowPageDto {
   workflowId: string;

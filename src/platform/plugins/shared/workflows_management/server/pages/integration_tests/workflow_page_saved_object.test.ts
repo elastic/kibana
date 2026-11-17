@@ -154,11 +154,13 @@ describe('workflow-page saved object', () => {
     await sync('workflow-verify');
     await publishWithSecret(pageRef, 'the-secret');
 
-    await expect(systemClient.verifyPageSecret(pageRef, 'the-secret')).resolves.toBe(CREATED_AT);
-    await expect(systemClient.verifyPageSecret(pageRef, 'wrong')).resolves.toBeUndefined();
+    await expect(systemClient.verifyPageSecret(pageRef, 'the-secret')).resolves.toEqual({
+      workflowCreatedAt: CREATED_AT,
+    });
+    await expect(systemClient.verifyPageSecret(pageRef, 'wrong')).resolves.toHaveProperty('reason');
     await expect(
       systemClient.verifyPageSecret({ ...pageRef, spaceId: 'default' }, 'the-secret')
-    ).resolves.toBeUndefined();
+    ).resolves.toHaveProperty('reason');
   });
 
   it('moves the page with a workflow that moved to another space', async () => {

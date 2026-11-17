@@ -19,6 +19,7 @@ import { getWorkflowPageSavedObjectId, WORKFLOW_PAGE_SAVED_OBJECT_TYPE } from '.
 import type { WorkflowPageAttributes } from './page_saved_object';
 import { computePageSecretHash, generatePageSecret, isPageSecretValid } from './page_secret';
 import type { WorkflowPageRef } from './page_secret';
+import type { WorkflowPageMissReason } from './types';
 import { getPageOrUndefined, isPageOnline, namespaceOf } from './utils';
 import { WorkflowPagesUnavailableError } from './workflow_pages_unavailable_error';
 
@@ -31,6 +32,15 @@ const getWantedPageIds = (spaceId: string, definition: WorkflowYaml | null | und
   spaceId === GLOBAL_WORKFLOW_SPACE_ID
     ? new Set<string>()
     : new Set((definition?.triggers ?? []).filter(isPageTrigger).map(getPageTriggerId));
+
+export type VerifyPageSecretResult =
+  | { workflowCreatedAt: string }
+  | {
+      reason: Extract<
+        WorkflowPageMissReason,
+        'page_not_found' | 'page_offline' | 'secret_mismatch'
+      >;
+    };
 
 /** Page operations that run without a user. Only workflows internals get this client. */
 export interface WorkflowPagesSystemClient {
@@ -59,10 +69,10 @@ export interface WorkflowPagesSystemClient {
   retireWorkflowPages(params: { workflowIds: string[]; spaceId: string }): Promise<void>;
   /**
    * Checks a secret from a page URL against the page alone, so a visitor without the secret never
-   * reaches the workflow. Returns the `created_at` of the page's workflow for an online page whose
-   * hash matches, undefined for every miss. Never decrypts.
+   * reaches the workflow. Returns the `created_at` of the page's workflow, or why it failed.
+   * Never decrypts.
    */
-  verifyPageSecret(ref: WorkflowPageRef, secret: string): Promise<string | undefined>;
+  verifyPageSecret(ref: WorkflowPageRef, secret: string): Promise<VerifyPageSecretResult>;
 }
 
 export interface WorkflowPagesSystemClientDeps {
@@ -135,18 +145,21 @@ export class WorkflowPagesSystemClientImpl implements WorkflowPagesSystemClient 
     await this.deletePages(await this.findWorkflowPages(workflowIds, spaceId));
   }
 
-  async verifyPageSecret(ref: WorkflowPageRef, secret: string): Promise<string | undefined> {
+  async verifyPageSecret(ref: WorkflowPageRef, secret: string): Promise<VerifyPageSecretResult> {
     if (!this.deps.canEncrypt) {
-      return undefined;
+      return { reason: 'page_offline' };
     }
     const page = await getPageOrUndefined(this.deps.savedObjectsClient, ref);
-    const verified =
-      page !== undefined &&
-      page.attributes.workflowId === ref.workflowId &&
-      page.attributes.pageId === ref.pageId &&
-      isPageOnline(page.attributes, this.deps.canEncrypt) &&
-      isPageSecretValid(ref, secret, page.attributes.secretHash);
-    return verified ? page.attributes.workflowCreatedAt : undefined;
+    if (page?.attributes.workflowId !== ref.workflowId || page.attributes.pageId !== ref.pageId) {
+      return { reason: 'page_not_found' };
+    }
+    if (!isPageOnline(page.attributes, this.deps.canEncrypt)) {
+      return { reason: 'page_offline' };
+    }
+    if (!isPageSecretValid(ref, secret, page.attributes.secretHash)) {
+      return { reason: 'secret_mismatch' };
+    }
+    return { workflowCreatedAt: page.attributes.workflowCreatedAt };
   }
 
   private async createPage(ref: WorkflowPageRef, workflowCreatedAt: string): Promise<void> {

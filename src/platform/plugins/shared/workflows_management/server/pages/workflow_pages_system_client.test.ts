@@ -280,38 +280,46 @@ describe('WorkflowPagesSystemClient', () => {
 
     it('returns the workflow created_at of an online page for its secret, without a decrypt', async () => {
       const { client, store } = await onlinePage();
-      await expect(client.verifyPageSecret(ref, 'the-secret')).resolves.toBe(WORKFLOW_CREATED_AT);
+      await expect(client.verifyPageSecret(ref, 'the-secret')).resolves.toEqual({
+        workflowCreatedAt: WORKFLOW_CREATED_AT,
+      });
       expect(store.encryptedClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
     });
 
-    it('rejects a wrong secret, another workflow, and another space', async () => {
+    it('rejects a wrong secret with secret_mismatch', async () => {
       const { client } = await onlinePage();
-      await expect(client.verifyPageSecret(ref, 'wrong')).resolves.toBeUndefined();
-      await expect(
-        client.verifyPageSecret({ ...ref, workflowId: 'workflow-2' }, 'the-secret')
-      ).resolves.toBeUndefined();
-      await expect(
-        client.verifyPageSecret({ ...ref, spaceId: 'other' }, 'the-secret')
-      ).resolves.toBeUndefined();
+      await expect(client.verifyPageSecret(ref, 'wrong')).resolves.toEqual({
+        reason: 'secret_mismatch',
+      });
     });
 
-    it('rejects a page without an access level', async () => {
-      const { client, storedPage } = await onlinePage();
-      const page = storedPage();
-      if (page) page.attributes.access = null;
-      await expect(client.verifyPageSecret(ref, 'the-secret')).resolves.toBeUndefined();
+    it.each([
+      ['another workflow', { ...ref, workflowId: 'workflow-2' }],
+      ['another space', { ...ref, spaceId: 'other' }],
+    ])('rejects a page of %s with page_not_found', async (_, otherRef) => {
+      const { client } = await onlinePage();
+      await expect(client.verifyPageSecret(otherRef, 'the-secret')).resolves.toEqual({
+        reason: 'page_not_found',
+      });
     });
 
-    it('rejects a disabled page', async () => {
+    it.each([
+      ['without an access level', { access: null }],
+      ['that is disabled', { enabled: false }],
+    ])('rejects a page %s with page_offline', async (_, attributes) => {
       const { client, storedPage } = await onlinePage();
       const page = storedPage();
-      if (page) page.attributes.enabled = false;
-      await expect(client.verifyPageSecret(ref, 'the-secret')).resolves.toBeUndefined();
+      if (page) page.attributes = { ...page.attributes, ...attributes };
+      await expect(client.verifyPageSecret(ref, 'the-secret')).resolves.toEqual({
+        reason: 'page_offline',
+      });
     });
 
     it('rejects every secret without an encryption key', async () => {
       const { client } = setup({ canEncrypt: false });
-      await expect(client.verifyPageSecret(ref, 'anything')).resolves.toBeUndefined();
+      await expect(client.verifyPageSecret(ref, 'anything')).resolves.toEqual({
+        reason: 'page_offline',
+      });
     });
   });
 });
