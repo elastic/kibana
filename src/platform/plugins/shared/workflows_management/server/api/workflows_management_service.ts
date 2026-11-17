@@ -104,6 +104,8 @@ import type {
   ProcessedWaitForInputFacets,
   ProcessedWaitForInputFilters,
   WaitForInputListResult,
+  WorkflowExecutionStatusCounts,
+  WorkflowExecutionStatusCountsParams,
   WorkflowExecutionStatusItem,
 } from '../services/workflow_execution_query_service';
 import { WorkflowExecutionQueryService } from '../services/workflow_execution_query_service';
@@ -635,6 +637,14 @@ export class WorkflowsService {
   ): Promise<WorkflowExecutionListDto> {
     await this.ensureInitialized();
     return this.executionQueryService.getWorkflowExecutions(params, spaceId);
+  }
+
+  public async getWorkflowExecutionStatusCounts(
+    params: WorkflowExecutionStatusCountsParams,
+    spaceId: string
+  ): Promise<WorkflowExecutionStatusCounts> {
+    await this.ensureInitialized();
+    return this.executionQueryService.getWorkflowExecutionStatusCounts(params, spaceId);
   }
 
   public async searchExecutionsView(

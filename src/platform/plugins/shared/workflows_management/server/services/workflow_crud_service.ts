@@ -12,7 +12,6 @@ import { chunk } from 'lodash';
 import { randomBytes } from 'node:crypto';
 
 import pMap from 'p-map';
-import { firstValueFrom } from 'rxjs';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { buildEntityReadAccessQuery, isEntityAccessControlAdmin } from '@kbn/entity-access-control';
 import { isNotFoundError, isResponseError } from '@kbn/es-errors';
@@ -33,7 +32,6 @@ import {
   toCustomTriggerSchemaConfigs,
   type UpdatedWorkflowResponseDto,
   type WorkflowDetailDto,
-  WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG,
   type WorkflowYaml,
 } from '@kbn/workflows';
 import type { ManagedFilter } from '@kbn/workflows/server';
@@ -173,14 +171,6 @@ type SuccessfullyWrittenBulkEntry = BulkWorkflowEntry & {
 
 export class WorkflowCrudService {
   constructor(private readonly deps: WorkflowCrudDeps) {}
-
-  private async shouldWarnIgnoredKibanaFetcher(): Promise<boolean> {
-    return firstValueFrom(
-      this.deps
-        .getCoreStart()
-        .featureFlags.getBooleanValue$(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, true)
-    );
-  }
 
   async logWorkflowChangesAfterWrite(params: {
     workflows: Array<{ id: string; document: WorkflowProperties }>;
@@ -705,7 +695,6 @@ export class WorkflowCrudService {
       spaceId: params.spaceId,
       triggerDefinitions,
       logger: this.deps.logger,
-      warnIgnoredKibanaFetcher: await this.shouldWarnIgnoredKibanaFetcher(),
     });
     const profileId = params.request
       ? (await this.deps
@@ -897,7 +886,6 @@ export class WorkflowCrudService {
       triggerDefinitions,
       nameFallback: options?.nameFallback,
       logger: this.deps.logger,
-      warnIgnoredKibanaFetcher: await this.shouldWarnIgnoredKibanaFetcher(),
     });
 
     const profileId =
@@ -973,7 +961,6 @@ export class WorkflowCrudService {
     const profileId = await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request });
     const now = new Date();
     const triggerDefinitions = this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
-    const warnIgnoredKibanaFetcher = await this.shouldWarnIgnoredKibanaFetcher();
 
     const created: WorkflowDetailDto[] = [];
     const failed: BulkFailureEntry[] = [];
@@ -995,7 +982,6 @@ export class WorkflowCrudService {
           spaceId,
           triggerDefinitions,
           logger: this.deps.logger,
-          warnIgnoredKibanaFetcher,
         });
 
         if (profileId) {
@@ -1179,7 +1165,6 @@ export class WorkflowCrudService {
     const yamlUpdate = workflowYaml
       ? await this.prepareYamlUpdate(workflowYaml, id, spaceId, request, {
           logger: this.deps.logger,
-          warnIgnoredKibanaFetcher: await this.shouldWarnIgnoredKibanaFetcher(),
         })
       : undefined;
     const yamlResult = workflowYaml && yamlUpdate ? { workflowYaml, ...yamlUpdate } : undefined;
@@ -1271,7 +1256,7 @@ export class WorkflowCrudService {
     workflowId: string,
     spaceId: string,
     request: KibanaRequest,
-    logging: { logger?: Logger; warnIgnoredKibanaFetcher?: boolean } = {}
+    logging: { logger?: Logger } = {}
   ): Promise<Awaited<ReturnType<typeof applyYamlUpdate>> | undefined> {
     const zodSchema = await this.deps.validationService.getWorkflowZodSchema(
       { loose: false },
