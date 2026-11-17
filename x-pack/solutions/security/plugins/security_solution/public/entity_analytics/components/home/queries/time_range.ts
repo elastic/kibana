@@ -11,4 +11,5 @@ export type TimeRange = keyof typeof TIME_RANGE_DAYS;
 
 export const TIME_RANGE_OPTIONS = Object.keys(TIME_RANGE_DAYS) as readonly TimeRange[];
 
+/** One date-math start shared by every grid and tile query, so they agree; ES|QL still pushes it down. */
 export const buildLookback = (range: TimeRange): string => `NOW() - ${TIME_RANGE_DAYS[range]} days`;
