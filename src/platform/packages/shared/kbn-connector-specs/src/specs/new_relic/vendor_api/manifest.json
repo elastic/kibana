@@ -1,0 +1,108 @@
+{
+  "operations": {
+    "acknowledgeIssue": [
+      {
+        "name": "mutation aiIssuesAckIssue",
+        "source": "nerdgraph"
+      }
+    ],
+    "createAlertPolicy": [
+      {
+        "name": "mutation alertsPolicyCreate",
+        "source": "nerdgraph"
+      }
+    ],
+    "createDeploymentMarker": [
+      {
+        "name": "mutation changeTrackingCreateEvent",
+        "source": "nerdgraph"
+      }
+    ],
+    "createMutingRule": [
+      {
+        "name": "mutation alertsMutingRuleCreate",
+        "source": "nerdgraph"
+      }
+    ],
+    "createNrqlCondition": [
+      {
+        "name": "mutation alertsNrqlConditionStaticCreate",
+        "source": "nerdgraph"
+      }
+    ],
+    "deleteMutingRule": [
+      {
+        "name": "mutation alertsMutingRuleDelete",
+        "source": "nerdgraph"
+      }
+    ],
+    "listAlertPolicies": [
+      {
+        "name": "query actor",
+        "source": "nerdgraph"
+      }
+    ],
+    "listIncidents": [
+      {
+        "name": "query actor",
+        "source": "nerdgraph"
+      }
+    ],
+    "listIssues": [
+      {
+        "name": "query actor",
+        "source": "nerdgraph"
+      }
+    ],
+    "listMutingRules": [
+      {
+        "name": "query actor",
+        "source": "nerdgraph"
+      }
+    ],
+    "listNrqlConditions": [
+      {
+        "name": "query actor",
+        "source": "nerdgraph"
+      }
+    ],
+    "resolveIssue": [
+      {
+        "name": "mutation aiIssuesResolveIssue",
+        "source": "nerdgraph"
+      }
+    ],
+    "runNrqlQuery": [
+      {
+        "name": "query actor",
+        "source": "nerdgraph"
+      }
+    ],
+    "unacknowledgeIssue": [
+      {
+        "name": "mutation aiIssuesUnackIssue",
+        "source": "nerdgraph"
+      }
+    ],
+    "updateMutingRule": [
+      {
+        "name": "mutation alertsMutingRuleUpdate",
+        "source": "nerdgraph"
+      }
+    ]
+  },
+  "sources": {
+    "nerdgraph": {
+      "captured": true,
+      "endpoints": [
+        "https://api.newrelic.com/graphql",
+        "https://api.eu.newrelic.com/graphql",
+        "https://api.jp.newrelic.com/graphql"
+      ],
+      "fetchedAt": "2026-11-17T16:11:34.702Z",
+      "format": "graphql",
+      "note": "NerdGraph serves its schema only by introspection behind a User API key, so it can't be fetched. Captured once on 2026-11-17 from the EU endpoint with a trial account's key, and committed as the snapshot; the schema is the same for every region, and the connector calls whichever its config names. Refreshing it means introspecting again with a key. NerdGraph predates the current introspection query, so a capture has to leave out inputValueDeprecation.",
+      "url": "https://api.eu.newrelic.com/graphql"
+    }
+  }
+}
