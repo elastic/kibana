@@ -728,6 +728,7 @@
     "@kbn/entity-store": "workspace:*",
     "@kbn/error-boundary-example-plugin": "workspace:*",
     "@kbn/es-errors": "workspace:*",
+    "@kbn/es-index-migration": "workspace:*",
     "@kbn/es-mappings": "workspace:*",
     "@kbn/es-query": "workspace:*",
     "@kbn/es-query-constants": "workspace:*",

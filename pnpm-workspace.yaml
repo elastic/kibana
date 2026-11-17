@@ -1328,6 +1328,7 @@ packages:
   - 'x-pack/platform/packages/shared/kbn-elastic-assistant'
   - 'x-pack/platform/packages/shared/kbn-elastic-assistant-common'
   - 'x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state'
+  - 'x-pack/platform/packages/shared/kbn-es-index-migration'
   - 'x-pack/platform/packages/shared/kbn-es-snapshot-loader'
   - 'x-pack/platform/packages/shared/kbn-evals'
   - 'x-pack/platform/packages/shared/kbn-evals-common'
