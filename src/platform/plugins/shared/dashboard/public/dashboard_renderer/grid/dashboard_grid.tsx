@@ -14,6 +14,7 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getScrollContainer, getScrollPosition } from '@kbn/core-chrome-layout-utils';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { GridLayoutData, GridPanelData } from '@kbn/grid-layout';
 import { GridLayout } from '@kbn/grid-layout';
@@ -24,6 +25,8 @@ import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../common/page_bundle_constan
 import { areLayoutsEqual, type DashboardLayout } from '../../dashboard_api/layout_manager';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
+import { usageCollectionService } from '../../services/kibana_services';
+import { DASHBOARD_UI_METRIC_ID } from '../../utils/telemetry_constants';
 import {
   DASHBOARD_GRID_HEIGHT,
   DASHBOARD_MARGIN_SIZE,
@@ -124,6 +127,14 @@ export const DashboardGrid = () => {
         }
       });
       if (!areLayoutsEqual(currLayout, updatedLayout)) {
+        Object.entries(currLayout.panels).forEach(([id, { type }]) => {
+          if (updatedLayout.panels[id]) return;
+          usageCollectionService?.reportUiCounter(
+            DASHBOARD_UI_METRIC_ID,
+            METRIC_TYPE.CLICK,
+            `${type}:panel_remove`
+          );
+        });
         dashboardApi.layout$.next(updatedLayout);
       }
     },

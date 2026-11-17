@@ -27,6 +27,8 @@ import {
   getMockPanels,
   getMockPanelsWithSections,
 } from '../../mocks';
+import { usageCollectionService } from '../../services/kibana_services';
+import { DASHBOARD_UI_METRIC_ID } from '../../utils/telemetry_constants';
 import { DashboardGrid } from './dashboard_grid';
 import type { Props as DashboardGridItemProps } from './dashboard_grid_item';
 
@@ -67,6 +69,8 @@ jest.mock('./dashboard_grid_item', () => {
     ),
   };
 });
+
+const reportUiCounterMock = usageCollectionService?.reportUiCounter as jest.Mock;
 
 const verifyElementHasClass = (
   component: RenderResult,
@@ -263,6 +267,7 @@ describe('DashboardGrid', () => {
           },
         ],
       });
+      reportUiCounterMock.mockClear();
 
       // can delete empty section
       const deleteEmptySectionButton = getByLabelText(
@@ -275,6 +280,7 @@ describe('DashboardGrid', () => {
       await waitFor(() => {
         expect(Object.keys(dashboardApi.layout$.getValue().sections)).not.toContain('emptySection');
       });
+      expect(reportUiCounterMock).not.toHaveBeenCalled();
 
       // can delete non-empty section
       const deleteSection1Button = getByLabelText(
@@ -292,6 +298,12 @@ describe('DashboardGrid', () => {
         expect(Object.keys(dashboardApi.layout$.getValue().sections)).not.toContain('section1');
         expect(Object.keys(dashboardApi.layout$.getValue().panels)).not.toContain('3'); // this is the panel in section1
       });
+      expect(reportUiCounterMock).toHaveBeenCalledTimes(1);
+      expect(reportUiCounterMock).toHaveBeenCalledWith(
+        DASHBOARD_UI_METRIC_ID,
+        'click',
+        'testPanelType:panel_remove'
+      );
     });
   });
 
