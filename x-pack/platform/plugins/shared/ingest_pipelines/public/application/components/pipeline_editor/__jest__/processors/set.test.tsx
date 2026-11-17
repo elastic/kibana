@@ -169,7 +169,7 @@ describe('Processor: Set', () => {
     const processors = getProcessorValue(onUpdate);
     expect(processors[0][SET_TYPE]).toEqual({
       field: 'field_1',
-      // prettier-ignore
+      // eslint-disable-next-line prettier/prettier
       value: { value_1: 'aaa\"bbb', value_2: 'aaa(bbb' },
     });
   });

@@ -37,9 +37,9 @@ report_oxlint_crashes() {
   done
 }
 
-# disable "Exit immediately" mode so that we can run oxlint and prettier, capture their exit codes,
+# disable "Exit immediately" mode so that we can run oxlint and eslint, capture their exit codes,
 # and respond appropriately after possibly commiting fixed files to the repo.
-# oxlint runs first so that prettier formats any oxlint autofixes in the same pass.
+# oxlint runs first so that eslint (prettier) formats any oxlint autofixes in the same pass.
 set +e;
 if is_pr && ! is_auto_commit_disabled; then
   fix_flag="--fix"
@@ -52,24 +52,24 @@ node scripts/lint.js --quiet $fix_flag
 oxlint_exit=$?
 report_oxlint_crashes
 
-echo '--- Lint: prettier'
-node scripts/prettier_all_files $fix_flag
-prettier_exit=$?
+echo '--- Lint: eslint'
+node scripts/eslint_all_files --no-cache $fix_flag
+eslint_exit=$?
 # re-enable "Exit immediately" mode
 set -e;
 
-desc="node scripts/lint.js --quiet $fix_flag && node scripts/prettier_all_files $fix_flag"
+desc="node scripts/lint.js --quiet $fix_flag && node scripts/eslint_all_files --no-cache $fix_flag"
 check_for_changed_files "$desc" true
 
 if [[ "${oxlint_exit}" != "0" ]]; then
   echo "oxlint ❌"
 fi
-if [[ "${prettier_exit}" != "0" ]]; then
-  echo "prettier ❌"
+if [[ "${eslint_exit}" != "0" ]]; then
+  echo "eslint ❌"
 fi
-if [[ "${oxlint_exit}" != "0" || "${prettier_exit}" != "0" ]]; then
+if [[ "${oxlint_exit}" != "0" || "${eslint_exit}" != "0" ]]; then
   exit 1
 fi
 
 echo "oxlint ✅"
-echo "prettier ✅"
+echo "eslint ✅"

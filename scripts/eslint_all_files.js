@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('@kbn/dev/prettier/run_prettier_full');
+require('@kbn/dev/eslint/run_eslint_full');

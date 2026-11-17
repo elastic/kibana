@@ -1,7 +1,2 @@
 # use stylelint
 *.scss
-
-# not formatted on purpose
-src/platform/packages/shared/kbn-expect/expect.js
-src/platform/packages/shared/kbn-safer-lodash-set/lodash/_baseSet.js
-x-pack/solutions/security/plugins/cloud_security_posture/server/routes/graph/runtime_evaluations/integrations/*.ts
