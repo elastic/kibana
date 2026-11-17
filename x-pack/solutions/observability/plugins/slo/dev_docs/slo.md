@@ -152,14 +152,16 @@ Each SLO rollup transform writes to the base SLI index (`.slo-observability.sli-
 
 The routing pipeline is managed by Kibana: the resource installer creates it on startup and the `slo:resources-reconcile` task re-installs it every hour when it is missing or outdated. Its `_meta.routing` holds the routing state:
 
-- `after`: the index rounding in use (`M` monthly, `w` weekly or `d` daily).
-- `before` and `cutover`: a cutover guard. Documents with a `@timestamp` before `cutover` (epoch millis, the first day of a UTC month) keep the `before` rounding, so a rollup bucket rewritten after a rounding change lands in the same index as the original document. The guard is removed 91 days after the cutover, once no transform can write a bucket that old.
+- `rounding`: the index rounding (`M` monthly, `w` weekly or `d` daily).
+- `cutover`: a cutover guard, or `null`. Documents with a `@timestamp` before `cutover` (epoch millis, the first day of a UTC month) keep the daily rounding of the indices written before the routing pipeline existed, so a rollup bucket rewritten later lands in the same index as the original document. It is set only when daily indices exist and the rounding is not `d`.
+
+The routing state is set once, when the routing pipeline of a resources version is created, and is never changed afterwards.
 
 The `slo:resources-reconcile` task also migrates the SLI pipelines created before the routing pipeline existed: it replaces their `date_index_name` processor with a call to the routing pipeline of their version.
 
 ### Index rounding
 
-`xpack.slo.sliIndexRounding` (`M`, `w` or `d`, defaults to `M`) sets the rounding of the SLI indices. Clusters with a large SLI volume can use `d` or `w` to keep each index small. A change applies to the documents written after the next UTC month start, and is picked up on the next Kibana start or reconcile run. The cutover guard only protects the last change: avoid changing the rounding twice within 91 days.
+`xpack.slo.sliIndexRounding` (`M`, `w` or `d`, defaults to `M`) sets the rounding of the SLI indices. Clusters with a large SLI volume can use `d` or `w` to keep each index small. The setting is read when the routing pipeline of a resources version is created: a later change is not applied to the existing routing pipeline (Kibana logs a warning) and takes effect with the next resources version. Changing the rounding of an existing routing pipeline would route a rewritten rollup bucket to a different index than the original document and double count it.
 
 ### Retention
 

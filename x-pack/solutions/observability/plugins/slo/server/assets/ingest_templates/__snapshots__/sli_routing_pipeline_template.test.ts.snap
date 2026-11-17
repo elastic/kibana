@@ -7,9 +7,8 @@ Object {
     "managed": true,
     "managed_by": "observability",
     "routing": Object {
-      "after": "M",
-      "before": "d",
       "cutover": 1796083200000,
+      "rounding": "M",
     },
     "template_version": 3.6,
     "version": 3.6,
@@ -35,11 +34,10 @@ Object {
         "description": "Pick the index rounding, honoring the cutover guard",
         "lang": "painless",
         "params": Object {
-          "after": "M",
-          "before": "d",
           "cutover": 1796083200000,
+          "rounding": "M",
         },
-        "source": "long ms = ZonedDateTime.parse(ctx.slo_routing.timestamp).toInstant().toEpochMilli(); ctx.slo_routing.rounding = (params.cutover != null && ms < params.cutover) ? params.before : params.after;",
+        "source": "long ms = ZonedDateTime.parse(ctx.slo_routing.timestamp).toInstant().toEpochMilli(); ctx.slo_routing.rounding = (params.cutover != null && ms < params.cutover) ? 'd' : params.rounding;",
       },
     },
     Object {
@@ -71,9 +69,8 @@ Object {
     "managed": true,
     "managed_by": "observability",
     "routing": Object {
-      "after": "M",
-      "before": "M",
       "cutover": null,
+      "rounding": "M",
     },
     "template_version": 3.6,
     "version": 3.6,
@@ -99,11 +96,10 @@ Object {
         "description": "Pick the index rounding, honoring the cutover guard",
         "lang": "painless",
         "params": Object {
-          "after": "M",
-          "before": "M",
           "cutover": null,
+          "rounding": "M",
         },
-        "source": "long ms = ZonedDateTime.parse(ctx.slo_routing.timestamp).toInstant().toEpochMilli(); ctx.slo_routing.rounding = (params.cutover != null && ms < params.cutover) ? params.before : params.after;",
+        "source": "long ms = ZonedDateTime.parse(ctx.slo_routing.timestamp).toInstant().toEpochMilli(); ctx.slo_routing.rounding = (params.cutover != null && ms < params.cutover) ? 'd' : params.rounding;",
       },
     },
     Object {

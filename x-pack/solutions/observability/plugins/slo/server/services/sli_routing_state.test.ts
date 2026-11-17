@@ -6,10 +6,8 @@
  */
 
 import {
-  computeRoutingState,
-  isSameRoutingState,
+  computeInitialRoutingState,
   parseRoutingStateFromMeta,
-  ROUTING_GUARD_EXPIRY_MS,
   startOfNextUtcMonth,
 } from './sli_routing_state';
 
@@ -27,128 +25,47 @@ describe('startOfNextUtcMonth', () => {
   });
 });
 
-describe('computeRoutingState', () => {
-  it('guards daily history when no routing pipeline exists yet', () => {
+describe('computeInitialRoutingState', () => {
+  it('guards the daily history until the next UTC month start', () => {
     expect(
-      computeRoutingState({
-        existing: undefined,
-        configured: 'M',
-        now: NOV_17,
-        hasDailyHistory: true,
-      })
-    ).toEqual({ before: 'd', after: 'M', cutover: DEC_1 });
+      computeInitialRoutingState({ configured: 'M', now: NOV_17, hasDailyHistory: true })
+    ).toEqual({ rounding: 'M', cutover: DEC_1 });
   });
 
-  it('does not guard when no routing pipeline exists and there is no daily history', () => {
+  it('does not guard without daily history', () => {
     expect(
-      computeRoutingState({
-        existing: undefined,
-        configured: 'M',
-        now: NOV_17,
-        hasDailyHistory: false,
-      })
-    ).toEqual({ before: 'M', after: 'M', cutover: null });
+      computeInitialRoutingState({ configured: 'w', now: NOV_17, hasDailyHistory: false })
+    ).toEqual({ rounding: 'w', cutover: null });
   });
 
-  it('does not guard daily history when daily indices are configured', () => {
+  it('does not guard the daily history when daily indices are configured', () => {
     expect(
-      computeRoutingState({
-        existing: undefined,
-        configured: 'd',
-        now: NOV_17,
-        hasDailyHistory: true,
-      })
-    ).toEqual({ before: 'd', after: 'd', cutover: null });
-  });
-
-  it('keeps the state unchanged while the guard is active', () => {
-    const existing = { before: 'd' as const, after: 'M' as const, cutover: DEC_1 };
-
-    expect(
-      computeRoutingState({
-        existing,
-        configured: 'M',
-        now: new Date(DEC_1 + ROUTING_GUARD_EXPIRY_MS - 1),
-        hasDailyHistory: true,
-      })
-    ).toEqual(existing);
-  });
-
-  it('removes the guard once it expired', () => {
-    expect(
-      computeRoutingState({
-        existing: { before: 'd', after: 'M', cutover: DEC_1 },
-        configured: 'M',
-        now: new Date(DEC_1 + ROUTING_GUARD_EXPIRY_MS),
-        hasDailyHistory: true,
-      })
-    ).toEqual({ before: 'M', after: 'M', cutover: null });
-  });
-
-  it('keeps the previous before rounding when the setting changes before the previous cutover', () => {
-    expect(
-      computeRoutingState({
-        existing: { before: 'd', after: 'M', cutover: DEC_1 },
-        configured: 'w',
-        now: NOV_17,
-        hasDailyHistory: true,
-      })
-    ).toEqual({ before: 'd', after: 'w', cutover: DEC_1 });
-  });
-
-  it('uses the previous after rounding when the setting changes after the previous cutover', () => {
-    expect(
-      computeRoutingState({
-        existing: { before: 'd', after: 'M', cutover: DEC_1 },
-        configured: 'd',
-        now: new Date('2026-12-15T00:00:00.000Z'),
-        hasDailyHistory: true,
-      })
-    ).toEqual({ before: 'M', after: 'd', cutover: JAN_1 });
-  });
-
-  it('guards a setting change without a previous guard', () => {
-    expect(
-      computeRoutingState({
-        existing: { before: 'M', after: 'M', cutover: null },
-        configured: 'd',
-        now: NOV_17,
-        hasDailyHistory: false,
-      })
-    ).toEqual({ before: 'M', after: 'd', cutover: DEC_1 });
+      computeInitialRoutingState({ configured: 'd', now: NOV_17, hasDailyHistory: true })
+    ).toEqual({ rounding: 'd', cutover: null });
   });
 });
 
 describe('parseRoutingStateFromMeta', () => {
   it('parses a valid routing state', () => {
-    expect(
-      parseRoutingStateFromMeta({ routing: { before: 'd', after: 'M', cutover: DEC_1 } })
-    ).toEqual({ before: 'd', after: 'M', cutover: DEC_1 });
-    expect(
-      parseRoutingStateFromMeta({ routing: { before: 'M', after: 'M', cutover: null } })
-    ).toEqual({ before: 'M', after: 'M', cutover: null });
+    expect(parseRoutingStateFromMeta({ routing: { rounding: 'M', cutover: DEC_1 } })).toEqual({
+      rounding: 'M',
+      cutover: DEC_1,
+    });
+    expect(parseRoutingStateFromMeta({ routing: { rounding: 'd', cutover: null } })).toEqual({
+      rounding: 'd',
+      cutover: null,
+    });
   });
 
   it.each([
     ['missing meta', undefined],
     ['missing routing', {}],
     ['routing not an object', { routing: 'M' }],
-    ['unknown rounding', { routing: { before: 'h', after: 'M', cutover: null } }],
-    ['missing after', { routing: { before: 'M', cutover: null } }],
-    ['string cutover', { routing: { before: 'd', after: 'M', cutover: '2026-12-01' } }],
-    ['missing cutover', { routing: { before: 'd', after: 'M' } }],
+    ['unknown rounding', { routing: { rounding: 'h', cutover: null } }],
+    ['missing rounding', { routing: { cutover: null } }],
+    ['string cutover', { routing: { rounding: 'M', cutover: '2026-12-01' } }],
+    ['missing cutover', { routing: { rounding: 'M' } }],
   ])('returns undefined on %s', (_, meta) => {
     expect(parseRoutingStateFromMeta(meta)).toBeUndefined();
-  });
-});
-
-describe('isSameRoutingState', () => {
-  it('compares every field', () => {
-    const state = { before: 'd' as const, after: 'M' as const, cutover: DEC_1 };
-
-    expect(isSameRoutingState(state, { ...state })).toBe(true);
-    expect(isSameRoutingState(state, { ...state, cutover: null })).toBe(false);
-    expect(isSameRoutingState(state, { ...state, before: 'M' })).toBe(false);
-    expect(isSameRoutingState(state, { ...state, after: 'w' })).toBe(false);
   });
 });

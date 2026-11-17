@@ -7,14 +7,12 @@
 
 export type Rounding = 'M' | 'w' | 'd';
 
+// Set once, when the routing pipeline of a resources version is created. Documents with a @timestamp
+// before `cutover` keep the daily rounding of the indices written before the routing pipeline existed.
 export interface SliRoutingState {
-  before: Rounding;
-  after: Rounding;
+  rounding: Rounding;
   cutover: number | null;
 }
-
-// Transform source ranges go back at most 90 days, plus a one day buffer.
-export const ROUTING_GUARD_EXPIRY_MS = 91 * 24 * 60 * 60 * 1000;
 
 const ROUNDINGS: readonly Rounding[] = ['M', 'w', 'd'];
 
@@ -22,41 +20,19 @@ const ROUNDINGS: readonly Rounding[] = ['M', 'w', 'd'];
 export const startOfNextUtcMonth = (now: Date): number =>
   Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1);
 
-const effectiveRounding = (existing: SliRoutingState, now: Date): Rounding =>
-  existing.cutover !== null && now.getTime() < existing.cutover ? existing.before : existing.after;
-
-const withGuard = (before: Rounding, after: Rounding, now: Date): SliRoutingState => ({
-  before,
-  after,
-  cutover: before === after ? null : startOfNextUtcMonth(now),
-});
-
-/** Computes the routing state a routing pipeline must hold, given its current state and the configured rounding. */
-export const computeRoutingState = ({
-  existing,
+/** Computes the routing state of a routing pipeline created now with the configured rounding. */
+export const computeInitialRoutingState = ({
   configured,
   now,
   hasDailyHistory,
 }: {
-  existing: SliRoutingState | undefined;
   configured: Rounding;
   now: Date;
   hasDailyHistory: boolean;
-}): SliRoutingState => {
-  if (!existing) {
-    return withGuard(hasDailyHistory ? 'd' : configured, configured, now);
-  }
-
-  if (existing.after !== configured) {
-    return withGuard(effectiveRounding(existing, now), configured, now);
-  }
-
-  if (existing.cutover !== null && now.getTime() >= existing.cutover + ROUTING_GUARD_EXPIRY_MS) {
-    return { before: existing.after, after: existing.after, cutover: null };
-  }
-
-  return existing;
-};
+}): SliRoutingState => ({
+  rounding: configured,
+  cutover: hasDailyHistory && configured !== 'd' ? startOfNextUtcMonth(now) : null,
+});
 
 const isRounding = (value: unknown): value is Rounding =>
   typeof value === 'string' && (ROUNDINGS as readonly string[]).includes(value);
@@ -70,17 +46,13 @@ export const parseRoutingStateFromMeta = (
     return undefined;
   }
 
-  const { before, after, cutover } = routing as Record<string, unknown>;
-  if (!isRounding(before) || !isRounding(after)) {
+  const { rounding, cutover } = routing as Record<string, unknown>;
+  if (!isRounding(rounding)) {
     return undefined;
   }
   if (cutover !== null && (typeof cutover !== 'number' || !Number.isFinite(cutover))) {
     return undefined;
   }
 
-  return { before, after, cutover };
+  return { rounding, cutover };
 };
-
-/** Returns true when both routing states are equal. */
-export const isSameRoutingState = (a: SliRoutingState, b: SliRoutingState): boolean =>
-  a.before === b.before && a.after === b.after && a.cutover === b.cutover;

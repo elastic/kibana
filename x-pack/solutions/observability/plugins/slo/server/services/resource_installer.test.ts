@@ -302,8 +302,8 @@ describe('resourceInstaller', () => {
       await createInstaller(esClient).install();
 
       const [[first], [second]] = esClient.ingest.putPipeline.mock.calls;
-      expect(first._meta?.routing).toEqual({ before: 'd', after: 'M', cutover: DEC_1 });
-      expect(second._meta?.routing).toEqual({ before: 'M', after: 'M', cutover: null });
+      expect(first._meta?.routing).toEqual({ rounding: 'M', cutover: DEC_1 });
+      expect(second._meta?.routing).toEqual({ rounding: 'M', cutover: null });
     });
 
     it('does not install the routing pipeline when it is up to date', async () => {
@@ -311,8 +311,7 @@ describe('resourceInstaller', () => {
       mockTemplatesUpToDate(esClient);
       mockRoutingPipelines(esClient, {
         '.slo-observability.sli.routing-v3.6': routingPipeline(3.6, {
-          before: 'd',
-          after: 'M',
+          rounding: 'M',
           cutover: DEC_1,
         }),
       });
@@ -326,7 +325,7 @@ describe('resourceInstaller', () => {
     it('reinstalls the routing pipeline with the same routing when the template version differs', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
       mockTemplatesUpToDate(esClient);
-      const routing: SliRoutingState = { before: 'd', after: 'M', cutover: DEC_1 };
+      const routing: SliRoutingState = { rounding: 'M', cutover: DEC_1 };
       mockRoutingPipelines(esClient, {
         '.slo-observability.sli.routing-v3.6': routingPipeline(3.6, routing, 3.5),
       });
@@ -339,24 +338,23 @@ describe('resourceInstaller', () => {
       );
     });
 
-    it('reinstalls the routing pipeline when the configured rounding changed', async () => {
+    it('keeps the routing state and warns when the configured rounding changed', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
       mockTemplatesUpToDate(esClient);
       mockRoutingPipelines(esClient, {
         '.slo-observability.sli.routing-v3.6': routingPipeline(3.6, {
-          before: 'M',
-          after: 'M',
+          rounding: 'M',
           cutover: null,
         }),
       });
+      const logger = loggerMock.create();
 
-      await new DefaultResourceInstaller(esClient, loggerMock.create(), 'd', () => NOW).install();
+      await new DefaultResourceInstaller(esClient, logger, 'd', () => NOW).install();
 
-      expect(esClient.ingest.putPipeline.mock.calls[0][0]._meta?.routing).toEqual({
-        before: 'M',
-        after: 'd',
-        cutover: DEC_1,
-      });
+      expect(esClient.ingest.putPipeline).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('keeps rounding [M], the configured rounding [d]')
+      );
     });
 
     it('still installs the other versions when one routing pipeline fails', async () => {
@@ -379,7 +377,7 @@ describe('resourceInstaller', () => {
   });
 
   describe('verify', () => {
-    const upToDateRouting = routingPipeline(3.6, { before: 'd', after: 'M', cutover: DEC_1 });
+    const upToDateRouting = routingPipeline(3.6, { rounding: 'M', cutover: DEC_1 });
 
     it('returns true when every resource is up to date', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -400,20 +398,15 @@ describe('resourceInstaller', () => {
       await expect(createInstaller(esClient).verify()).resolves.toBe(false);
     });
 
-    it('returns false when the routing pipeline guard expired', async () => {
+    it('returns true when the configured rounding differs from the routing state', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
       mockTemplatesUpToDate(esClient);
       esClient.indices.exists.mockResponse(true);
       mockRoutingPipelines(esClient, { '.slo-observability.sli.routing-v3.6': upToDateRouting });
 
-      const installer = new DefaultResourceInstaller(
-        esClient,
-        loggerMock.create(),
-        'M',
-        () => new Date('2027-06-01T00:00:00.000Z')
-      );
+      const installer = new DefaultResourceInstaller(esClient, loggerMock.create(), 'd', () => NOW);
 
-      await expect(installer.verify()).resolves.toBe(false);
+      await expect(installer.verify()).resolves.toBe(true);
     });
 
     it('returns false when a base index is missing', async () => {

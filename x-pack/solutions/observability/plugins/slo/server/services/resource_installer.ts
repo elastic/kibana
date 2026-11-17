@@ -36,12 +36,8 @@ import { SUMMARY_INDEX_TEMPLATE } from '../assets/index_templates/summary_index_
 import { getSLIRoutingPipelineTemplate } from '../assets/ingest_templates/sli_routing_pipeline_template';
 import { SLOResourcesNotInstalled } from '../errors';
 import { retryTransientEsErrors } from '../utils/retry';
-import type { Rounding, SliRoutingState } from './sli_routing_state';
-import {
-  computeRoutingState,
-  isSameRoutingState,
-  parseRoutingStateFromMeta,
-} from './sli_routing_state';
+import type { Rounding } from './sli_routing_state';
+import { computeInitialRoutingState, parseRoutingStateFromMeta } from './sli_routing_state';
 
 export interface ResourceInstaller {
   install(): Promise<void>;
@@ -183,51 +179,44 @@ export class DefaultResourceInstaller implements ResourceInstaller {
     const name = getSLIRoutingPipelineName(version);
     const current = await this.fetchRoutingPipeline(version);
     const existing = parseRoutingStateFromMeta(current?._meta);
-    const desired = computeRoutingState({
-      existing,
-      configured: this.configuredRounding,
-      now: this.now(),
-      hasDailyHistory: existing ? false : await hasDailyHistory(version),
-    });
 
-    if (current && existing && this.isRoutingPipelineCurrent(current, version, existing, desired)) {
+    // The routing state is set once per resources version: a later rounding change is not applied.
+    if (existing && existing.rounding !== this.configuredRounding) {
+      this.logger.warn(
+        `SLO routing pipeline [${name}] keeps rounding [${existing.rounding}], the configured rounding [${this.configuredRounding}] applies from the next resources version`
+      );
+    }
+
+    if (current && existing && this.isRoutingPipelineCurrent(current, version)) {
       this.logger.debug(`SLO routing pipeline [${name}] is up to date`);
       return;
     }
 
-    this.logger.info(`Installing SLO routing pipeline [${name}] with ${JSON.stringify(desired)}`);
+    const routing =
+      existing ??
+      computeInitialRoutingState({
+        configured: this.configuredRounding,
+        now: this.now(),
+        hasDailyHistory: await hasDailyHistory(version),
+      });
+
+    this.logger.info(`Installing SLO routing pipeline [${name}] with ${JSON.stringify(routing)}`);
     await this.execute(() =>
-      this.esClient.ingest.putPipeline(getSLIRoutingPipelineTemplate(version, desired))
+      this.esClient.ingest.putPipeline(getSLIRoutingPipelineTemplate(version, routing))
     );
   }
 
   private async isRoutingPipelineUpToDate(version: number): Promise<boolean> {
     const current = await this.fetchRoutingPipeline(version);
-    const existing = parseRoutingStateFromMeta(current?._meta);
-    if (!current || !existing) {
+    if (!current || !parseRoutingStateFromMeta(current._meta)) {
       return false;
     }
 
-    const desired = computeRoutingState({
-      existing,
-      configured: this.configuredRounding,
-      now: this.now(),
-      hasDailyHistory: false,
-    });
-    return this.isRoutingPipelineCurrent(current, version, existing, desired);
+    return this.isRoutingPipelineCurrent(current, version);
   }
 
-  private isRoutingPipelineCurrent(
-    { _meta: meta }: IngestPipeline,
-    version: number,
-    existing: SliRoutingState,
-    desired: SliRoutingState
-  ): boolean {
-    return (
-      meta?.version === version &&
-      meta?.template_version === SLO_RESOURCES_VERSION &&
-      isSameRoutingState(existing, desired)
-    );
+  private isRoutingPipelineCurrent({ _meta: meta }: IngestPipeline, version: number): boolean {
+    return meta?.version === version && meta?.template_version === SLO_RESOURCES_VERSION;
   }
 
   private async fetchRoutingPipeline(version: number): Promise<IngestPipeline | undefined> {
