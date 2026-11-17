@@ -197,14 +197,3 @@ On CI, attributes are declared automatically from the build. Locally, pass them 
 ::::::{note}
 Use tags to **include** suites where they make sense, instead of skipping suites after the fact.
 ::::::
-
-## Lint rules for tags [scout-deployment-tags-lint]
-
-These lint rules check how Scout suites are tagged:
-
-| Rule                                    | What it does                                                                                                                                                                        |
-| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@kbn/eslint/scout_no_deprecated_tags`  | Rejects deprecated string tags such as `@ess` and `@svlOblt`, and per-solution stateful domain tags.                                                                                  |
-| `@kbn/eslint/scout_prefer_both_arch_tags` | Warns when a suite targets only stateful or only serverless. It also understands `tags.local.*`. Enabled for Observability, except for the single-architecture plugins.               |
-| `@kbn/eslint/scout_require_tags`        | Requires every root-level `describe` to declare `tag`. A suite without a `tag` passes if its tests are tagged individually. Enabled for Observability only.                           |
-

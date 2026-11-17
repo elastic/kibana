@@ -57,15 +57,12 @@ const getArchInfo = (node) => {
     const chain = getMemberChain(node);
     if (!chain) return { hasStateful: false, hasServerless: false, hasUnknown: true };
     if (chain[0] === 'tags') {
-      // `tags.local.*` mirrors `tags.*` but limits the test to local targets, so the
-      // architecture is the segment after `local` (e.g. tags.local.stateful.classic).
-      const arch = chain[1] === 'local' ? chain[2] : chain[1];
       // Known tags.* shapes — none are unknown
-      if (arch === 'deploymentAgnostic')
+      if (chain[1] === 'deploymentAgnostic')
         return { hasStateful: true, hasServerless: true, hasUnknown: false };
-      if (arch === 'stateful')
+      if (chain[1] === 'stateful')
         return { hasStateful: true, hasServerless: false, hasUnknown: false };
-      if (arch === 'serverless')
+      if (chain[1] === 'serverless')
         return { hasStateful: false, hasServerless: true, hasUnknown: false };
       // tags.performance and future keys → known neutral
       return { hasStateful: false, hasServerless: false, hasUnknown: false };
