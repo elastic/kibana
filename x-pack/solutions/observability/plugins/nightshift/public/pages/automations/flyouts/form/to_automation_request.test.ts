@@ -13,6 +13,7 @@ import {
   type TriggerFormValues,
 } from './automation_form_values';
 import type { Automation } from '../../../../data/automations/use_automations';
+import type { AlertSeverity } from '@kbn/rule-data-utils';
 import { toAutomationRequestBody, toAutomationUpdateBody } from './to_automation_request';
 
 const buildAutomation = (overrides: Partial<Automation>): Automation => ({
@@ -87,6 +88,7 @@ describe('automation request', () => {
             ruleNamePattern: ' cpu ',
             ruleNames: ['Disk full'],
             ruleTags: ['infra'],
+            severities: ['critical', 'major'],
             alertSources: ['classic', 'elastic.significant_events'],
             alertSourceMode: 'exclude',
           },
@@ -100,6 +102,7 @@ describe('automation request', () => {
             {
               kind: 'alert',
               ruleNamePattern: 'cpu',
+              severities: ['critical', 'major'],
               ruleNames: ['Disk full'],
               tags: ['infra'],
               alertSources: ['classic', 'elastic.significant_events'],
@@ -220,6 +223,43 @@ describe('automation request', () => {
       ).toEqual({ promptTemplate: null, reasoningMode: 'observe' });
     });
 
+    it.each<AlertSeverity[] | undefined>([undefined, [], ['high', 'warning']])(
+      'round trips severity selection through editing and clears it: %j',
+      (severities) => {
+        const automation = buildAutomation({
+          trigger: {
+            rows: [
+              { kind: 'alert', severities, alertSources: ['internal'], alertSourceMode: 'exclude' },
+            ],
+          },
+        });
+        const values = toAutomationFormValues(automation);
+        const { trigger } = values;
+        if (trigger?.kind !== 'alert') throw new Error('Expected an alert trigger');
+
+        expect(trigger.severities).toEqual(severities ?? []);
+        expect(toAutomationRequestBody({ ...values, trigger }).trigger.rows[0]).toEqual({
+          kind: 'alert',
+          ...(severities?.length ? { severities } : {}),
+          alertSources: ['internal'],
+          alertSourceMode: 'exclude',
+        });
+        expect(
+          toAutomationUpdateBody(
+            { ...values, trigger: { ...trigger, ruleNamePattern: 'cpu', severities: [] } },
+            automation
+          ).trigger?.rows
+        ).toEqual([
+          {
+            kind: 'alert',
+            ruleNamePattern: 'cpu',
+            alertSources: ['internal'],
+            alertSourceMode: 'exclude',
+          },
+        ]);
+      }
+    );
+
     it('keeps trigger fields and rows the form does not model', () => {
       const automation = buildAutomation({
         trigger: {
@@ -238,7 +278,7 @@ describe('automation request', () => {
       });
     });
 
-    it('keeps the schedule scope query', () => {
+    it('updates a schedule and keeps the other trigger rows', () => {
       const automation = buildAutomation({
         trigger: {
           rows: [
@@ -246,8 +286,8 @@ describe('automation request', () => {
               kind: 'schedule',
               schedulePreset: 'daily',
               time: '09:00',
-              scopeQuery: 'host:a',
             },
+            { kind: 'alert', ruleNames: ['CPU usage'] },
           ],
         },
       });
@@ -262,17 +302,15 @@ describe('automation request', () => {
           schedulePreset: 'daily',
           time: '10:00',
           timezone: 'UTC',
-          scopeQuery: 'host:a',
         },
+        { kind: 'alert', ruleNames: ['CPU usage'] },
       ]);
     });
 
     it('replaces the rows when the trigger kind changes', () => {
       const automation = buildAutomation({
         trigger: {
-          rows: [
-            { kind: 'schedule', schedulePreset: 'daily', time: '09:00', scopeQuery: 'host:a' },
-          ],
+          rows: [{ kind: 'schedule', schedulePreset: 'daily', time: '09:00' }],
         },
       });
 

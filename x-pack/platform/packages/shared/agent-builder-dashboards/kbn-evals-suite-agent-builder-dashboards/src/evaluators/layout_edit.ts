@@ -13,7 +13,7 @@ import {
   type DashboardSection,
 } from '@kbn/agent-builder-dashboards-common';
 import { byReadingOrder, formatGrid, getPanelContainers, getPanelKind } from '../dashboard_panels';
-import { getLastWrittenDashboardId } from '../extract_dashboard';
+import { hasWrittenDashboard } from '../extract_dashboard';
 import { noDashboardResult, scoreChecks, skippedResult, type Check } from '../evaluator_utils';
 import {
   TOP_LEVEL,
@@ -186,6 +186,31 @@ const checkCollapsed = (seed: LayoutIndex, result: LayoutIndex): Check[] => {
   ];
 };
 
+/** An edit without controls gold leaves the controls alone, so they come back as they were. */
+const checkControlsKept = (
+  before: DashboardAttachmentData,
+  dashboard: DashboardAttachmentData
+): Check[] => {
+  const seedControls = before.pinned_panels ?? [];
+  if (seedControls.length === 0) {
+    return [];
+  }
+  const kept = isEqual(seedControls, dashboard.pinned_panels ?? []);
+  return [
+    {
+      assertion: 'controls',
+      passed: kept,
+      detail: kept
+        ? 'controls unchanged'
+        : `controls [${seedControls.map(({ id }) => id).join(', ')}] -> [${(
+            dashboard.pinned_panels ?? []
+          )
+            .map(({ id }) => id)
+            .join(', ')}]`,
+    },
+  ];
+};
+
 /** Reading order of the item's container; the outer order for a section. */
 const getSiblingOrder = (id: string, result: LayoutIndex): string[] => {
   if (result.sections.has(id)) {
@@ -280,8 +305,10 @@ const checkPlacement = (
 /**
  * Checks that a layout edit changed only what the prompt asked: kept and
  * removed panels, panels staying in their containers and unchanged grids
- * in the containers the edit should not touch, edited panels, the outer order of surviving top-level panels and sections, collapsed
- * sections, and where the prompt puts each panel. Gaps and overlaps are
+ * in the containers the edit should not touch, edited panels, the outer order
+ * of surviving top-level panels and sections, collapsed sections, unchanged
+ * controls (Dashboard Control Sourcing scores an edit that changes them), and
+ * where the prompt puts each panel. Gaps and overlaps are
  * scored by Dashboard Layout Rules.
  */
 export const dashboardLayoutEditEvaluator: DashboardAgentEvaluator = {
@@ -293,9 +320,9 @@ export const dashboardLayoutEditEvaluator: DashboardAgentEvaluator = {
     if (!gold) {
       return skippedResult('No layout edit gold.');
     }
-    const { before, dashboard, steps = [] } = output;
+    const { before, dashboard } = output;
     // Without a write the result is the seed itself, which would pass every preservation check.
-    if (!dashboard || getLastWrittenDashboardId(steps) === undefined) {
+    if (!dashboard || !hasWrittenDashboard(output)) {
       return noDashboardResult;
     }
     if (!before) {
@@ -310,6 +337,7 @@ export const dashboardLayoutEditEvaluator: DashboardAgentEvaluator = {
       ...checkEdited(gold, seed, result),
       checkOuterOrder(seed, result),
       ...checkCollapsed(seed, result),
+      ...(expected?.controls ? [] : checkControlsKept(before, dashboard)),
       ...(gold.placements ?? []).map((placement, index) =>
         checkPlacement(placement, index, seed, result)
       ),

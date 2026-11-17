@@ -17,13 +17,14 @@ import { registerSiemWorkflowMigrationsStatsAllRoute } from './stats_all';
 import { registerSiemWorkflowMigrationsStopRoute } from './stop';
 import { registerSiemWorkflowMigrationsTranslationStatsRoute } from './translation_stats';
 import { registerSiemWorkflowMigrationsUpdateRoute } from './update';
-import { registerSiemWorkflowMigrationsCreateWorkflowsRoute } from './workflows/create';
 import { registerSiemWorkflowMigrationsGetWorkflowsRoute } from './workflows/get';
+import { registerSiemWorkflowMigrationsCreateTinesWorkflowsRoute } from './workflows/tines/create';
 import { registerSiemWorkflowMigrationsUpdateWorkflowsRoute } from './workflows/update';
 
 /**
  * Workflow migration routes follow the SIEM rule migration API.
- * Handlers are placeholders until they are wired to the data service.
+ * Vendor routes parse that vendor's export and store the original workflow.
+ * Start, stop, and stats stay placeholders.
  */
 export const registerSiemWorkflowMigrationsRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -41,9 +42,11 @@ export const registerSiemWorkflowMigrationsRoutes = (
   registerSiemWorkflowMigrationsUpdateRoute(router, logger);
 
   /** Workflows */
-  registerSiemWorkflowMigrationsCreateWorkflowsRoute(router, logger);
   registerSiemWorkflowMigrationsGetWorkflowsRoute(router, logger);
   registerSiemWorkflowMigrationsUpdateWorkflowsRoute(router, logger);
+
+  /** Tines */
+  registerSiemWorkflowMigrationsCreateTinesWorkflowsRoute(router, logger);
 
   /** Tasks */
   registerSiemWorkflowMigrationsStatsAllRoute(router, logger);

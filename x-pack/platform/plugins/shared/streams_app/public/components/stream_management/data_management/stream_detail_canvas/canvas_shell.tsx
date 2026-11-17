@@ -202,6 +202,8 @@ interface CanvasShellProps<NodeType extends Node, EdgeType extends Edge> {
   edgesReconnectable?: boolean;
   onNodeClick?: NodeMouseHandler<NodeType>;
   onNodeContextMenu?: NodeMouseHandler<NodeType>;
+  onNodeMouseEnter?: NodeMouseHandler<NodeType>;
+  onNodeMouseLeave?: NodeMouseHandler<NodeType>;
   onNodeDragStart?: OnNodeDrag<NodeType>;
   onPaneContextMenu?: (event: MouseEvent | React.MouseEvent) => void;
   /**
@@ -216,6 +218,8 @@ interface CanvasShellProps<NodeType extends Node, EdgeType extends Edge> {
   nodesFocusable?: boolean;
   /** Whether edges are keyboard-focusable (Tab). Defaults to `false` (edges are non-actionable). */
   edgesFocusable?: boolean;
+  /** Disables the zoom and fit-to-screen buttons, e.g. while the canvas saves. */
+  zoomControlsDisabled?: boolean;
   /** Accessible name for the interactive canvas region. */
   ariaLabel?: string;
   /** Id of an element describing the canvas keyboard controls. */
@@ -253,6 +257,8 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
   edgesReconnectable = false,
   onNodeClick,
   onNodeContextMenu,
+  onNodeMouseEnter,
+  onNodeMouseLeave,
   onNodeDragStart,
   onPaneContextMenu,
   onSelectionContextMenu,
@@ -261,6 +267,7 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
   elementsSelectable,
   nodesFocusable = true,
   edgesFocusable = false,
+  zoomControlsDisabled = false,
   ariaLabel,
   ariaDescribedById,
   children,
@@ -339,6 +346,8 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
           onEdgeClick={noop}
           onNodeClick={onNodeClick}
           onNodeContextMenu={onNodeContextMenu}
+          onNodeMouseEnter={onNodeMouseEnter}
+          onNodeMouseLeave={onNodeMouseLeave}
           onNodeDragStart={onNodeDragStart}
           onPaneContextMenu={onPaneContextMenu}
           onSelectionContextMenu={onSelectionContextMenu}
@@ -364,7 +373,7 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
           proOptions={{ hideAttribution: true }}
         >
           <Background gap={GRID_SIZE} color={euiTheme.colors.borderBasePlain} />
-          <CanvasZoomControls />
+          <CanvasZoomControls isDisabled={zoomControlsDisabled} />
           <CanvasMinimap />
         </ReactFlow>
         {children}

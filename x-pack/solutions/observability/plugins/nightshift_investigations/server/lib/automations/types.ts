@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AlertSeverity } from '@kbn/rule-data-utils';
 import type { PresetSchedule } from '../../../common/automation_schedule';
 import type { AlertSourceMode } from '../../../common/automation_limits';
 
@@ -24,10 +25,11 @@ export type NightshiftTriggerRow =
       ruleNames?: string[];
       ruleNameMatchMode?: RuleNameMatchMode;
       tags?: string[];
+      severities?: AlertSeverity[];
       alertSources?: string[];
       alertSourceMode?: AlertSourceMode;
     }
-  | (PresetSchedule & { kind: 'schedule'; scopeQuery?: string })
+  | (PresetSchedule & { kind: 'schedule' })
   | {
       kind: 'slack';
       event: SlackTriggerEvent;

@@ -42,6 +42,8 @@ export const AutomationsTable = ({
   pageIndex,
   pageSize,
   onPageChange,
+  onRun,
+  isRunPending,
   onClone,
   onDelete,
   onOpenAutomation,
@@ -61,6 +63,8 @@ export const AutomationsTable = ({
   pageIndex: number;
   pageSize: number;
   onPageChange: (index: number, size: number) => void;
+  onRun: (automation: Automation) => void;
+  isRunPending: boolean;
   onClone: (automation: Automation) => void;
   onDelete: (automation: Automation) => void;
   onOpenAutomation: (automation: Automation) => void;
@@ -143,10 +147,17 @@ export const AutomationsTable = ({
       render: (isEnabled: boolean, automation: Automation) => (
         <EuiToolTip content={editDisabledReason}>
           <EuiSwitch
-            label={i18n.translate('xpack.nightshift.automations.toggleLabel', {
-              defaultMessage: '{action} {name}',
-              values: { action: isEnabled ? 'Pause' : 'Enable', name: automation.name },
-            })}
+            label={
+              isEnabled
+                ? i18n.translate('xpack.nightshift.automations.pauseToggleLabel', {
+                    defaultMessage: 'Pause {name}',
+                    values: { name: automation.name },
+                  })
+                : i18n.translate('xpack.nightshift.automations.enableToggleLabel', {
+                    defaultMessage: 'Enable {name}',
+                    values: { name: automation.name },
+                  })
+            }
             showLabel={false}
             compressed
             checked={isEnabled}
@@ -177,6 +188,8 @@ export const AutomationsTable = ({
             render: (automation: Automation) => (
               <AutomationActions
                 automation={automation}
+                onRun={() => onRun(automation)}
+                isRunPending={isRunPending}
                 onClone={() => onClone(automation)}
                 onDelete={() => onDelete(automation)}
               />

@@ -12,6 +12,13 @@ import {
   type DashboardSection,
 } from '@kbn/agent-builder-dashboards-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import {
+  SAMPLE_LOGS_CONTROLS,
+  dataViewBarPanel,
+  dslVegaPanel,
+  mlSwimlanePanel,
+  vegaPanel,
+} from './non_esql_panels';
 
 const LOGS = 'kibana_sample_data_logs';
 const TIME_WINDOW = '| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend';
@@ -122,10 +129,13 @@ const IS_4XX_OR_5XX = '\n| WHERE TO_INTEGER(response.keyword) >= 400';
 
 /**
  * A clean logs dashboard with sections, the seed of the layout edit examples.
- * Top level: an intro markdown and four KPIs, then Traffic, a note, Errors and
- * Visitors. It breaks no layout or chart rule, so any gap, overlap or styling
- * miss in a result comes from the edit. Ids are readable, so the gold can name
- * the panels and sections a prompt moves.
+ * Top level: an intro markdown and four KPIs, then Traffic, a note, Errors,
+ * Visitors, and Other sources with a data-view Lens chart, a Vega chart and
+ * an ML swim lane that no edit touches. Three controls (options list, range
+ * slider, time slider) that no edit asks to change. It breaks no layout or
+ * chart rule, so any gap, overlap or styling miss in a result comes from the
+ * edit. Ids are readable, so the gold can name the panels and sections a
+ * prompt moves.
  */
 export const SECTIONED_LOGS_DASHBOARD: DashboardAttachmentData = {
   title: 'Web traffic, errors and visitors',
@@ -245,7 +255,28 @@ ${TIME_WINDOW}
         { title: 'Top referrers', field: 'referer' }
       ),
     ]),
+    section('other-sources', 'Other sources', 18, [
+      dataViewBarPanel('requests-by-extension', { x: 0, y: 0, w: 24, h: 10 }),
+      vegaPanel('requests-by-os-vega', { x: 24, y: 0, w: 24, h: 10 }),
+      mlSwimlanePanel('request-rate-anomalies', { x: 0, y: 10, w: 48, h: 10 }),
+    ]),
   ],
+  pinned_panels: SAMPLE_LOGS_CONTROLS,
+};
+
+/** The same dashboard with its Vega chart reading an Elasticsearch query instead of ES|QL. */
+export const SECTIONED_LOGS_DASHBOARD_DSL_VEGA: DashboardAttachmentData = {
+  ...SECTIONED_LOGS_DASHBOARD,
+  panels: SECTIONED_LOGS_DASHBOARD.panels.map((widget) =>
+    isSection(widget) && widget.id === 'other-sources'
+      ? {
+          ...widget,
+          panels: widget.panels.map((panel) =>
+            panel.type === 'vega' ? dslVegaPanel(panel.id, panel.grid) : panel
+          ),
+        }
+      : widget
+  ),
 };
 
 /** The same dashboard with the Visitors section collapsed. */

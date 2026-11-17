@@ -25,7 +25,7 @@ export interface SourceCatalog {
  * unknown slugs are not dropped.
  */
 export class UnknownSourceSlugError extends StatusError {
-  constructor(slugs: readonly string[]) {
+  constructor(public readonly slugs: readonly string[]) {
     super(`Source not found in this space: ${slugs.join(', ')}`, 404);
     this.name = 'UnknownSourceSlugError';
   }

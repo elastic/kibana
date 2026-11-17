@@ -86,10 +86,13 @@ const SELECT_HINT_DURATION_MS = 2000;
  */
 export const MARQUEE_PREVIEW_CLASS = 'dshDashboardGrid__item--marqueePreview';
 
-/** Escape pressed while focus is here belongs to that element (close a menu / flyout, leave an input) */
-const ESCAPE_OWNED_BY_TARGET_SELECTOR = [
+/**
+ * Keyboard shortcuts pressed while focus is here belong to that element (Escape closes a menu / flyout
+ * or leaves an input, Cmd/Ctrl+A selects the text)
+ */
+const KEYBOARD_OWNED_BY_TARGET_SELECTOR = [
   '[data-euiportal]',
-  'input',
+  'input:not([type="checkbox"]):not([type="radio"])',
   'textarea',
   'select',
   '[contenteditable="true"]',
@@ -101,6 +104,9 @@ const toRect = (a: { x: number; y: number }, b: { x: number; y: number }): Selec
   right: Math.max(a.x, b.x),
   bottom: Math.max(a.y, b.y),
 });
+
+const isSelectAllShortcut = (e: KeyboardEvent): boolean =>
+  isSelectionModifier(e) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'a';
 
 const intersects = (a: SelectionRect, b: DOMRect) =>
   a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
@@ -115,6 +121,7 @@ const getPanelElement = (ref: React.Ref<HTMLDivElement>): HTMLDivElement | null 
  * - once at least one panel is selected (selection mode), plain clicks and drags inside the grid behave
  *   the same way, so panels act as selection items and their content does not react
  * - a plain click outside the selected panels, or pressing Escape, clears the selection
+ * - in selection mode, the modifier + A selects every panel rendered in the grid
  * - a plain click on a panel's drag area (title bar or move icon) that does not become a drag briefly
  *   shows a "how to select" hint on that panel
  * Returns the rectangle currently being drawn (viewport coordinates) and the rectangle of the panel to
@@ -153,6 +160,12 @@ export const usePanelSelectionGestures = ({
           const element = getPanelElement(ref);
           return element ? intersects(rect, element.getBoundingClientRect()) : false;
         })
+        .map(([panelId]) => panelId);
+
+    // Panels in collapsed sections keep their ref but are not mounted
+    const getMountedPanelIds = (): string[] =>
+      Object.entries(panelRefs.current)
+        .filter(([, ref]) => getPanelElement(ref))
         .map(([panelId]) => panelId);
 
     const setMarqueePreview = (previewPanelIds: string[]) => {
@@ -233,12 +246,16 @@ export const usePanelSelectionGestures = ({
 
     const onDocumentKeyDown = (e: KeyboardEvent) => {
       if (!isSelectionModifier(e)) hideSelectHint(); // pressing the modifier itself keeps the hint around
-      if (e.key !== 'Escape' || e.defaultPrevented) return;
-      if (!dashboardApi.selectedPanelIds$.value.length) return;
-      // Let open menus, flyouts and text inputs consume their own Escape first
+      if (e.defaultPrevented || !dashboardApi.selectedPanelIds$.value.length) return;
+      // Let open menus, flyouts and text inputs consume their own shortcuts first
       const target = e.target instanceof HTMLElement ? e.target : null;
-      if (target?.closest(ESCAPE_OWNED_BY_TARGET_SELECTOR)) return;
-      dashboardApi.clearSelectedPanels();
+      if (target?.closest(KEYBOARD_OWNED_BY_TARGET_SELECTOR)) return;
+      if (isSelectAllShortcut(e)) {
+        e.preventDefault(); // no native select-all of the page text
+        dashboardApi.addPanelsToSelection(getMountedPanelIds());
+        return;
+      }
+      if (e.key === 'Escape') dashboardApi.clearSelectedPanels();
     };
 
     const onRootMouseDown = (e: MouseEvent) => {
@@ -257,6 +274,9 @@ export const usePanelSelectionGestures = ({
 
       e.preventDefault(); // no text selection or native drag
       e.stopPropagation(); // charts, maps and the grid drag/resize handles never see this mousedown
+      // preventDefault also keeps focus where it was (e.g. the query bar), which would then receive
+      // the selection keyboard shortcuts
+      if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
 
       // The page may scroll while the rectangle is being drawn (auto-scroll near the viewport edges),
       // so the start corner is anchored to the document and converted back to viewport coordinates

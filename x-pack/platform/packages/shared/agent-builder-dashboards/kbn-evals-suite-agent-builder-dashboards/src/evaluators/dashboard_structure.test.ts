@@ -49,6 +49,21 @@ describe('dashboard structure evaluator', () => {
     expect(result.explanation).toContain('sections[1]');
   });
 
+  it('requires a gold section to hold panels running the given queries', async () => {
+    const query = 'FROM logs | STATS `Value` = COUNT(*)';
+    const structure: DashboardStructureGold = {
+      sections: [{ titleIncludesAny: ['key'], queries: [query] }],
+    };
+    const holding = await evaluateStructure(structure, [
+      section('s1', 'Key charts', 0, [metric('a', grid, 'FROM logs\n| STATS `Value` = COUNT(*)')]),
+    ]);
+    const missing = await evaluateStructure(structure, [
+      section('s1', 'Key charts', 0, [metric('a', grid, 'FROM other | STATS c = COUNT(*)')]),
+    ]);
+    expect(holding.score).toBe(1);
+    expect(missing.score).toBe(0);
+  });
+
   it('checks that each gold row sits directly below the previous one', async () => {
     const rows: DashboardStructureGold['rows'] = [
       { kind: 'metric' },
@@ -70,6 +85,23 @@ describe('dashboard structure evaluator', () => {
     expect(misplaced.explanation).toContain('metric panels are not in one row');
     expect(misplaced.explanation).toContain('xy panels are not full width');
     expect(misplaced.explanation).toContain('xy row is not directly below rows[0]');
+  });
+
+  it('pins an atTop row to the top of the dashboard, not only of its section', async () => {
+    const rows: DashboardStructureGold['rows'] = [{ kind: 'metric', atTop: true }];
+    const kpis = [
+      metric('a', { x: 0, y: 0, w: 24, h: 5 }),
+      metric('b', { x: 24, y: 0, w: 24, h: 5 }),
+    ];
+    const topSection = await evaluateStructure({ rows }, [section('s1', 'KPIs', 0, kpis)]);
+    expect(topSection.score).toBe(1);
+
+    const belowChart = await evaluateStructure({ rows }, [
+      xy('c', { x: 0, y: 0, w: 48, h: 10 }),
+      section('s1', 'KPIs', 10, kpis),
+    ]);
+    expect(belowChart.score).toBe(0);
+    expect(belowChart.explanation).toContain('metric row is not the top row');
   });
 
   it('needs one height per row, and fails the row below a missing one', async () => {

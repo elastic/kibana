@@ -5,17 +5,9 @@
  * 2.0.
  */
 
-import type {
-  ApplicationUsageResponse,
-  Breakdowns,
-  DeviceName,
-} from '../../../../common/types/usage';
+import type { ApplicationUsageResponse, Breakdowns } from '../../../../common/types/usage';
 import { firstBucketKey, getP75 } from '../../../lib/helpers/aggregations';
-import type { UsageAggregations, DeviceBucket } from './search_response';
-
-const toDeviceName = ({ key, key_as_string: keyAsString }: DeviceBucket): DeviceName => {
-  return key === 1 || key === 'true' || keyAsString === 'true' ? 'mobile' : 'desktop';
-};
+import type { UsageAggregations } from './search_response';
 
 const toBreakdowns = (logs?: UsageAggregations): Breakdowns => {
   const pageLoads = logs?.inEnvironment.pageLoads;
@@ -29,12 +21,7 @@ const toBreakdowns = (logs?: UsageAggregations): Breakdowns => {
     pageLoads: pageLoads?.doc_count ?? 0,
     browsers: toItems(pageLoads?.browsers.buckets),
     operatingSystems: toItems(pageLoads?.operatingSystems.buckets),
-    devices: (pageLoads?.devices.buckets ?? []).map((bucket) => {
-      return {
-        name: toDeviceName(bucket),
-        pageLoads: bucket.doc_count,
-      };
-    }),
+    devices: toItems(pageLoads?.devices.buckets),
   };
 };
 

@@ -682,14 +682,14 @@ export class RulesClient {
 
   @withApm
   public async createRule(params: CreateRuleParams): Promise<RuleResponse> {
-    const parsed = this.parseRuleData(createRuleDataSchema, params.data, 'create');
+    const { id, ...data } = this.parseRuleData(createRuleDataSchema, params.data, 'create');
     const actor = await this.userService.getCurrentActor();
     const nowIso = new Date().toISOString();
 
     const prepared = this.prepareRuleForCreate({
-      data: parsed,
-      id: params.options?.id,
-      enabled: params.options?.enabled ?? true,
+      data,
+      id,
+      enabled: data.enabled ?? true,
       actor,
       nowIso,
       version: this.getNextVersion(),
@@ -746,7 +746,7 @@ export class RulesClient {
         const rule = this.prepareRuleForCreate({
           data,
           id,
-          enabled,
+          enabled: enabled ?? true,
           actor,
           nowIso,
           version: ruleVersion,
@@ -869,6 +869,11 @@ export class RulesClient {
       attrs: nextAttrs,
       references,
     });
+    const prevRule = this.toRuleApiResponse({
+      id,
+      attrs: existingAttrs,
+      references: existingReferences,
+    });
 
     this.ruleEventPublisher.emitRuleUpdated(this.eventContext, [
       {
@@ -876,6 +881,7 @@ export class RulesClient {
         spaceId: this.spaceId,
         rule,
         templateId: nextAttrs.metadata.template?.id,
+        prevRule,
       },
     ]);
 
@@ -1675,11 +1681,17 @@ export class RulesClient {
         attrs: item.attrs,
         references: item.references,
       });
+      const prevRule = this.toRuleApiResponse({
+        id: item.id,
+        attrs: rotatedCandidates[i].attrs,
+        references: item.references,
+      });
       updatedRules.push({
         ruleId: rule.id,
         spaceId,
         rule,
         templateId: item.attrs.metadata.template?.id,
+        prevRule,
       });
     }
 
@@ -1943,8 +1955,7 @@ export class RulesClient {
     const exists = await this.ruleExists({ id });
 
     if (!exists) {
-      const { enabled, ...createData } = parsed;
-      const rule = await this.createRule({ data: createData, options: { id, enabled } });
+      const rule = await this.createRule({ data: { ...parsed, id } });
       return { rule, created: true };
     }
 
@@ -2000,12 +2011,18 @@ export class RulesClient {
       attrs: nextAttrs,
       references,
     });
+    const prevRule = this.toRuleApiResponse({
+      id,
+      attrs: existingAttrs,
+      references: existingReferences,
+    });
     this.ruleEventPublisher.emitRuleUpdated(this.eventContext, [
       {
         ruleId: rule.id,
         spaceId: this.spaceId,
         rule,
         templateId: nextAttrs.metadata.template?.id,
+        prevRule,
       },
     ]);
     return { rule, created: false };
