@@ -247,11 +247,14 @@ describe('Color Schema', () => {
       });
 
       describe('validation errors', () => {
-        it.each([0, -1, 2.5, 101, 1_000_000_000])('throws for an invalid band count (%s)', (steps) => {
-          const input = { type: 'distributed_palette', palette: 'status', steps };
+        it.each([0, -1, 2.5, 101, 1_000_000_000])(
+          'throws for an invalid band count (%s)',
+          (steps) => {
+            const input = { type: 'distributed_palette', palette: 'status', steps };
 
-          expect(() => allColoringTypeSchema.parse(input)).toThrow();
-        });
+            expect(() => allColoringTypeSchema.parse(input)).toThrow();
+          }
+        );
 
         it('throws when the palette name is missing', () => {
           const input = {
