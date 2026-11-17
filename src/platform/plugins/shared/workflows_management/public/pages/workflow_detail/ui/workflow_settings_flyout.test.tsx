@@ -48,7 +48,7 @@ steps:
 `;
 
 describe('WorkflowSettingsFlyout', () => {
-  const renderFlyout = (yaml = BASE_YAML) => {
+  const renderFlyout = (yaml = BASE_YAML, readOnly = false) => {
     const store = createMockStore();
     store.dispatch(
       setWorkflow({
@@ -80,7 +80,9 @@ describe('WorkflowSettingsFlyout', () => {
 
     return {
       store,
-      ...render(<WorkflowSettingsFlyout isOpen onClose={jest.fn()} />, { wrapper }),
+      ...render(<WorkflowSettingsFlyout isOpen onClose={jest.fn()} readOnly={readOnly} />, {
+        wrapper,
+      }),
     };
   };
 
@@ -187,6 +189,62 @@ describe('WorkflowSettingsFlyout', () => {
     fireEvent.click(screen.getByTestId('workflowSettingsOutputAdd'));
     expect(screen.queryByTestId('workflowSettingsOutputEmpty')).not.toBeInTheDocument();
     // The output fields load lazily.
-    expect(await screen.findByTestId(/workflowSettingsOutputValue-/)).toBeInTheDocument();
+    expect(await screen.findByTestId(/workflowSettingsOutputFallback-/)).toBeInTheDocument();
+  });
+
+  describe('when read-only', () => {
+    const YAML_WITH_OUTPUT = `${BASE_YAML}outputs:
+  - name: summary
+    type: string
+    default: n/a
+`;
+
+    it('shows the general settings but cannot change them', () => {
+      const { store } = renderFlyout(BASE_YAML, true);
+
+      expect(screen.getByTestId('workflowSettingsNameInput')).toBeDisabled();
+      expect(screen.getByTestId('workflowSettingsDescriptionInput')).toBeDisabled();
+      expect(
+        within(screen.getByTestId('workflowSettingsTagsInput')).getByRole('combobox')
+      ).toBeDisabled();
+      expect(selectYamlString(store.getState())).toBe(BASE_YAML);
+    });
+
+    it('offers Close but not Done', () => {
+      renderFlyout(BASE_YAML, true);
+
+      expect(screen.getByTestId('workflowSettingsFlyoutClose')).toBeInTheDocument();
+      expect(screen.queryByTestId('workflowSettingsFlyoutDone')).not.toBeInTheDocument();
+    });
+
+    it('lists the constants without add or remove controls', () => {
+      renderFlyout(BASE_YAML, true);
+
+      fireEvent.click(screen.getByTestId('workflowSettingsTab-constants'));
+
+      expect(screen.getByText('region')).toBeInTheDocument();
+      expect(screen.queryByTestId('workflowSettingsConstAdd')).not.toBeInTheDocument();
+      expect(screen.queryByLabelText('Remove constant')).not.toBeInTheDocument();
+    });
+
+    it('lists the outputs with disabled fields and no add or remove controls', async () => {
+      renderFlyout(YAML_WITH_OUTPUT, true);
+
+      fireEvent.click(screen.getByTestId('workflowSettingsTab-outputs'));
+
+      expect(await screen.findByTestId(/workflowSettingsOutputFallback-/)).toBeDisabled();
+      expect(screen.queryByTestId('workflowSettingsOutputAdd')).not.toBeInTheDocument();
+      expect(screen.queryByLabelText('Remove output')).not.toBeInTheDocument();
+    });
+
+    it('keeps the editable flyout editable (positive control)', async () => {
+      renderFlyout(YAML_WITH_OUTPUT, false);
+
+      expect(screen.getByTestId('workflowSettingsNameInput')).toBeEnabled();
+      expect(screen.getByTestId('workflowSettingsFlyoutDone')).toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('workflowSettingsTab-outputs'));
+      expect(await screen.findByTestId(/workflowSettingsOutputFallback-/)).toBeEnabled();
+      expect(screen.getByTestId('workflowSettingsOutputAdd')).toBeInTheDocument();
+    });
   });
 });

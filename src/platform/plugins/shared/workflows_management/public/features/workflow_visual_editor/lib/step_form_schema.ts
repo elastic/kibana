@@ -181,16 +181,8 @@ const resolveFieldLabel = (key: string, schema: z.ZodType): string =>
   readMetaLabel(schema) ?? prettifyFieldKey(key);
 
 const readFieldMeta = (schema: z.ZodType): Record<string, unknown> | undefined => {
-  const readMeta = (s: z.ZodType): Record<string, unknown> | undefined => {
-    const metaFn = (s as { meta?: () => Record<string, unknown> }).meta;
-    if (typeof metaFn === 'function') {
-      const meta = metaFn.call(s);
-      if (meta && typeof meta === 'object') return meta;
-    }
-    return undefined;
-  };
   for (const candidate of [schema, unwrapSchema(schema)]) {
-    const meta = readMeta(candidate as z.ZodType);
+    const meta = candidate.meta();
     if (meta) return meta;
   }
   return undefined;
@@ -268,10 +260,7 @@ const getDefault = (schema: z.ZodType): unknown => {
     current instanceof z.ZodDefault ||
     current instanceof z.ZodNullable
   ) {
-    if (current instanceof z.ZodDefault) {
-      const def = (current as unknown as { def: { defaultValue: unknown } }).def.defaultValue;
-      return typeof def === 'function' ? (def as () => unknown)() : def;
-    }
+    if (current instanceof z.ZodDefault) return current.def.defaultValue;
     current = current.unwrap() as z.ZodType;
   }
   return undefined;

@@ -16,19 +16,15 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { ConnectorContractUnion, WorkflowYaml } from '@kbn/workflows';
 import { SettingsEntryListHost, SettingsEntryRow } from './settings_entry_row';
 import type { SettingsEditorAddControls } from './workflow_constants_editor';
 import { createEmptyOutput, type OutputField } from './workflow_settings_fields_model';
-import { buildDataReferenceCatalog } from '../../../features/workflow_visual_editor/lib/build_data_reference_catalog';
 
 export interface WorkflowOutputsEditorProps {
   readonly fields: readonly OutputField[];
   readonly onChange: (next: readonly OutputField[]) => void;
-  readonly workflowDefinition: WorkflowYaml | undefined;
-  readonly connectors: readonly ConnectorContractUnion[];
   readonly findReferencingSteps?: (name: string) => string[];
   readonly readOnly?: boolean;
   /**
@@ -48,8 +44,6 @@ export interface WorkflowOutputsEditorProps {
 export function WorkflowOutputsEditor({
   fields,
   onChange,
-  workflowDefinition,
-  connectors,
   findReferencingSteps,
   readOnly = false,
   discardDraftSignal,
@@ -71,17 +65,6 @@ export function WorkflowOutputsEditor({
     nextName: string;
     steps: string[];
   } | null>(null);
-
-  const catalog = useMemo(
-    () =>
-      buildDataReferenceCatalog({
-        definition: workflowDefinition,
-        currentStepName: '',
-        connectors,
-        stepsScope: 'allSteps',
-      }),
-    [workflowDefinition, connectors]
-  );
 
   const handleAdd = useCallback(() => {
     if (draftField || readOnly) return;
@@ -214,7 +197,6 @@ export function WorkflowOutputsEditor({
               mode="draft"
               field={draftField}
               siblings={fields}
-              catalog={catalog}
               readOnly={readOnly}
               onCommit={commitDraft}
               onDiscard={() => setDraftField(null)}
@@ -227,7 +209,6 @@ export function WorkflowOutputsEditor({
             mode="committed"
             field={field}
             siblings={fields}
-            catalog={catalog}
             readOnly={readOnly}
             onChange={handleUpdate}
             onRequestDelete={() => requestDelete(field)}

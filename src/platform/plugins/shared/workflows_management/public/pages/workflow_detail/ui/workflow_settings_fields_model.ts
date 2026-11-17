@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isMap, isSeq, parseDocument } from 'yaml';
+import { parseDocument } from 'yaml';
+import { detectIndent } from '@kbn/workflows-yaml';
 import {
   parseInputsToSchemaProperties,
   schemaPropertiesToJsonSchema,
@@ -28,9 +29,7 @@ export interface OutputField {
   readonly name: string;
   readonly type: SchemaPropertyField['type'];
   readonly description: string;
-  /** Expression that produces the output (e.g. `{{ steps.x.output }}`). */
-  readonly value: string;
-  /** Used when the expression resolves to nothing. */
+  /** Default value for the output (JSON Schema `default`). */
   readonly fallback: string;
   readonly properties?: readonly SchemaPropertyField[];
   readonly itemType?: SchemaPropertyField['type'];
@@ -56,7 +55,6 @@ export const createEmptyOutput = (overrides: Partial<OutputField> = {}): OutputF
   name: '',
   type: 'string',
   description: '',
-  value: '',
   fallback: '',
   ...overrides,
 });
@@ -158,7 +156,6 @@ export const parseOutputsToFields = (outputs: unknown): OutputField[] => {
           ? type
           : 'string',
         description: typeof item.description === 'string' ? item.description : '',
-        value: typeof item.value === 'string' ? item.value : '',
         fallback:
           item.default === undefined || item.default === null
             ? ''
@@ -170,25 +167,20 @@ export const parseOutputsToFields = (outputs: unknown): OutputField[] => {
   }
   const parsed = parseInputsToSchemaProperties(outputs);
   if (!Array.isArray(parsed)) return [];
-  const base = parsed.map((prop) =>
+  return parsed.map((prop) =>
     createEmptyOutput({
       name: prop.name,
       type: prop.type,
       description: prop.description,
-      value: '',
       fallback: prop.defaultValue,
       properties: prop.properties,
       itemType: prop.itemType,
       itemProperties: prop.itemProperties,
     })
   );
-  return enrichOutputsFromJsonSchema(base, outputs);
 };
 
-/**
- * Serialize outputs to JSON Schema. Expression values live on each property as
- * `x-kibana-value`; fallback maps to JSON Schema `default`.
- */
+/** Serialize outputs to JSON Schema; fallback maps to JSON Schema `default`. */
 export const outputsToJsonSchema = (fields: readonly OutputField[]) => {
   const asSchemaProps: SchemaPropertyField[] = fields.map((f) => ({
     id: f.id,
@@ -205,15 +197,6 @@ export const outputsToJsonSchema = (fields: readonly OutputField[]) => {
   }));
   const schema = schemaPropertiesToJsonSchema(asSchemaProps);
   if (!schema.properties) return undefined;
-  for (const field of fields) {
-    const name = field.name.trim();
-    if (!name || !schema.properties[name]) continue;
-    if (field.value.trim()) {
-      Object.assign(schema.properties[name], { 'x-kibana-value': field.value.trim() });
-    }
-  }
-  // When reading back, parseInputs may not restore x-kibana-value into value —
-  // handle in parseOutputsToFields for object format:
   return Object.keys(schema.properties).length > 0 ? schema : undefined;
 };
 
@@ -225,32 +208,14 @@ export const writeRootYamlMapping = (
 ): string => {
   try {
     const doc = parseDocument(yamlString);
-    if (!isMap(doc.contents) && !isSeq(doc.contents)) {
-      // still try
-    }
     if (value === undefined) {
       doc.deleteIn([key]);
     } else {
       doc.setIn([key], doc.createNode(value));
     }
-    return doc.toString({ lineWidth: 0 });
+    // Keep the document's own indentation, as every other mutation does.
+    return doc.toString({ indent: detectIndent(yamlString), lineWidth: 0 });
   } catch {
     return yamlString;
   }
-};
-
-/** Restore expression values stored as `x-kibana-value` when parsing JSON Schema outputs. */
-export const enrichOutputsFromJsonSchema = (
-  fields: OutputField[],
-  outputs: unknown
-): OutputField[] => {
-  if (!outputs || typeof outputs !== 'object' || Array.isArray(outputs)) return fields;
-  const props = (outputs as { properties?: Record<string, Record<string, unknown>> }).properties;
-  if (!props) return fields;
-  return fields.map((field) => {
-    const prop = props[field.name];
-    if (!prop) return field;
-    const xValue = prop['x-kibana-value'];
-    return typeof xValue === 'string' && xValue ? { ...field, value: xValue } : field;
-  });
 };

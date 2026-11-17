@@ -85,9 +85,6 @@ export const boundsFromNodes = (nodes: readonly Node[]): GraphBounds | undefined
  * Falls back to the full graph when there are no triggers yet.
  */
 export const getHomeFrameBounds = (nodes: readonly Node[], fallback: GraphBounds): GraphBounds => {
-  // Frame the leading rank: settings (when present) + triggers so the home
-  // view keeps both rows in view under TOP_PADDING.
-  // Prefer the settings group (absolute) over child cards (parent-relative).
-  const leading = nodes.filter((n) => n.type === 'trigger' || n.type === 'settingsGroup');
+  const leading = nodes.filter((n) => n.type === 'trigger');
   return boundsFromNodes(leading.length > 0 ? leading : nodes) ?? fallback;
 };

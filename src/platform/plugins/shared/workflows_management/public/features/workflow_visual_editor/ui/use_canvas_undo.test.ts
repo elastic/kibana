@@ -46,6 +46,17 @@ describe('useCanvasUndo', () => {
     expect(trigger).toHaveBeenCalledWith('graph-gesture', 'undo', null);
   });
 
+  it('leaves ⇧⌘Z (redo) alone instead of undoing', () => {
+    const { editor, trigger } = makeEditor('name: a\n');
+    renderUndo(editor, 'name: a\n');
+
+    // Browsers report the shifted key as 'Z'.
+    const event = press({ key: 'Z', metaKey: true, shiftKey: true });
+
+    expect(event.defaultPrevented).toBe(false);
+    expect(trigger).not.toHaveBeenCalled();
+  });
+
   it('also reacts to Ctrl+Z', () => {
     const { editor, trigger } = makeEditor('name: a\n');
     renderUndo(editor, 'name: a\n');

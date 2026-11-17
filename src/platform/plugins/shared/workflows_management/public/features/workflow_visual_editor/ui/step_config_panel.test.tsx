@@ -192,6 +192,101 @@ describe('StepConfigPanel', () => {
     expect(screen.getByTestId('workflowStepConfigPanelTypeSubtitle')).toHaveTextContent(/^slack$/);
   });
 
+  describe('read-only', () => {
+    it('shows the step without any way to add, remove, rename or reset', () => {
+      renderPanel({ readOnly: true });
+
+      expect(screen.getByTestId('workflowStepConfigPanelTitle')).toHaveTextContent('notify');
+      expect(screen.getByTestId('workflowStepConfigField-with.message')).toBeInTheDocument();
+      expect(screen.queryByTestId('workflowStepConfigAddOptionalField')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workflowStepConfigPanelEditName')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workflowStepConfigPanelResetNode')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workflowStepConfigPanelRemoveNode')).not.toBeInTheDocument();
+    });
+
+    it('does not remove an optional field that already has a value', () => {
+      renderPanel({
+        readOnly: true,
+        initialFragment: `${FRAGMENT}`.replace('with:', 'with:\n  query:\n    a: 1'),
+      });
+
+      expect(screen.getByTestId('workflowStepConfigField-with.query')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('workflowStepConfigRemoveOptional-with.query')
+      ).not.toBeInTheDocument();
+    });
+
+    it('keeps a text field a preview: focusing it never mounts the editor', () => {
+      renderPanel({ readOnly: true });
+
+      const field = screen.getByTestId('workflowStepConfigField-with.message');
+      expect(field).toHaveAttribute('data-mode', 'read');
+      fireEvent.focusIn(field);
+      fireEvent.click(field);
+
+      expect(screen.getByTestId('workflowStepConfigField-with.message')).toHaveAttribute(
+        'data-mode',
+        'read'
+      );
+      expect(screen.getByTestId('workflowStepConfigField-with.message')).toHaveAttribute(
+        'aria-readonly',
+        'true'
+      );
+    });
+
+    it('disables the Advanced settings but still lets them be opened and read', () => {
+      renderPanel({ readOnly: true });
+
+      expandSettingsAccordion();
+
+      expect(screen.getByTestId('workflowStepConfigPanelSettings')).toBeDisabled();
+      expect(screen.getByTestId('workflowStepConfigErrorHandlingSection')).toBeInTheDocument();
+    });
+
+    it('never reports a fragment change', () => {
+      const { onFragmentChange } = renderPanel({ readOnly: true });
+
+      expect(onFragmentChange).not.toHaveBeenCalled();
+    });
+
+    it('offers Open in YAML and Run step in place of Reset, when given', () => {
+      const onOpenInYaml = jest.fn();
+      const onRunStep = jest.fn();
+      renderPanel({ readOnly: true, onOpenInYaml, onRunStep });
+
+      fireEvent.click(screen.getByTestId('workflowStepConfigPanelOpenInYaml'));
+      fireEvent.click(screen.getByTestId('workflowStepConfigPanelRunStep'));
+
+      expect(onOpenInYaml).toHaveBeenCalledTimes(1);
+      expect(onRunStep).toHaveBeenCalledTimes(1);
+    });
+
+    it('omits Run step when the user cannot run it', () => {
+      renderPanel({ readOnly: true, onOpenInYaml: jest.fn() });
+
+      expect(screen.getByTestId('workflowStepConfigPanelOpenInYaml')).toBeInTheDocument();
+      expect(screen.queryByTestId('workflowStepConfigPanelRunStep')).not.toBeInTheDocument();
+    });
+
+    it('closes without a discard prompt', () => {
+      const { onClose } = renderPanel({ readOnly: true });
+
+      fireEvent.click(screen.getByTestId('workflowStepConfigPanelClose'));
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(screen.queryByTestId('workflowStepConfigPanelDiscardModal')).not.toBeInTheDocument();
+    });
+
+    it('stays editable by default (positive control)', () => {
+      const { onFragmentChange } = renderPanel();
+
+      expect(screen.getByTestId('workflowStepConfigAddOptionalField')).toBeInTheDocument();
+      expect(screen.getByTestId('workflowStepConfigPanelEditName')).toBeInTheDocument();
+      expect(screen.getByTestId('workflowStepConfigPanelResetNode')).toBeInTheDocument();
+      expect(onFragmentChange).toHaveBeenCalled();
+    });
+  });
+
   describe('field descriptions', () => {
     const SHORT = 'Where to look.';
     const LONG =

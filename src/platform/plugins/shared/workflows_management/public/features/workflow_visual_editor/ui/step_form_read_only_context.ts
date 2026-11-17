@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/** Shared history group for step config ↔ field-editor child flyouts. */
-export const WORKFLOW_STEP_CONFIG_FLYOUT_HISTORY_KEY = Symbol(
-  'workflow-step-config-flyout-history'
-);
+import { createContext, useContext } from 'react';
+
+/**
+ * True while a step form is shown but must not be edited. A disabled `<fieldset>` already makes
+ * native controls inert; this is for the fields that are not native controls (a focusable `div`
+ * that mounts an editor, a Monaco editor), which ignore it.
+ */
+export const StepFormReadOnlyContext = createContext(false);
+
+export const useStepFormReadOnly = (): boolean => useContext(StepFormReadOnlyContext);

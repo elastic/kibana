@@ -39,11 +39,6 @@ import {
 import { setIsTestModalOpen } from '../../../entities/workflows/store/workflow_detail/slice';
 import { useDisableWorkflowsConfirmation } from '../../../features/linked_rules/model/use_disable_workflows_confirmation';
 import { useSaveYamlWithConfirmation } from '../../../features/linked_rules/model/use_save_yaml_with_confirmation';
-import {
-  getWorkflowSettingsSurfaceVariant,
-  subscribeWorkflowSettingsSurfaceVariant,
-  type WorkflowSettingsSurfaceVariant,
-} from '../../../features/workflow_visual_editor/ui/workflow_settings_surface_variant';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowEditorReadOnly } from '../../../hooks/use_workflow_editor_read_only';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
@@ -162,21 +157,12 @@ export const WorkflowDetailHeader = React.memo(
       WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID
     );
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-    const [settingsSurfaceVariant, setSettingsSurfaceVariant] =
-      useState<WorkflowSettingsSurfaceVariant>(() => getWorkflowSettingsSurfaceVariant());
-    // Settings-surface variant 'a' is the shipped header flyout; it must still sit
-    // behind the experimental flag like every other graph-authoring surface.
-    const showHeaderSettingsGear = settingsSurfaceVariant === 'a' && isVisualEditorEnabled;
+    // The settings flyout is always reachable, but only editable with the visual editor on and
+    // when the user can edit the workflow.
+    const isSettingsReadOnly = !isVisualEditorEnabled || isEditorReadOnly;
     const canReadVisibleWorkflowExecution =
       canReadWorkflowExecution && (!isManagedWorkflow || canReadManagedWorkflowExecution);
 
-    useEffect(
-      () =>
-        subscribeWorkflowSettingsSurfaceVariant(() => {
-          setSettingsSurfaceVariant(getWorkflowSettingsSurfaceVariant());
-        }),
-      []
-    );
     const executionsTabDisabledTooltip = isManagedWorkflow
       ? executionsTabReadManagedExecutionDisabledTooltip
       : executionsTabReadExecutionDisabledTooltip;
@@ -402,24 +388,21 @@ export const WorkflowDetailHeader = React.memo(
     const badges = useMemo<AppHeaderBadge[]>(() => {
       const result: AppHeaderBadge[] = [];
 
-      // Variant A keeps the header flyout. B/C open settings from the canvas.
-      if (showHeaderSettingsGear) {
-        result.push({
-          label: settingsAriaLabel,
-          // Custom gear control sits beside the title; AppHeader has no public titleAppend.
-          renderCustomBadge: () => (
-            <EuiToolTip content={settingsAriaLabel} disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType="gear"
-                color="text"
-                aria-label={settingsAriaLabel}
-                onClick={openSettings}
-                data-test-subj="workflowSettingsButton"
-              />
-            </EuiToolTip>
-          ),
-        });
-      }
+      result.push({
+        label: settingsAriaLabel,
+        // Custom gear control sits beside the title; AppHeader has no public titleAppend.
+        renderCustomBadge: () => (
+          <EuiToolTip content={settingsAriaLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="gear"
+              color="text"
+              aria-label={settingsAriaLabel}
+              onClick={openSettings}
+              data-test-subj="workflowSettingsButton"
+            />
+          </EuiToolTip>
+        ),
+      });
 
       if (isManagedWorkflow) {
         result.push({
@@ -463,7 +446,6 @@ export const WorkflowDetailHeader = React.memo(
 
       return result;
     }, [
-      showHeaderSettingsGear,
       settingsAriaLabel,
       openSettings,
       isManagedWorkflow,
@@ -603,13 +585,11 @@ export const WorkflowDetailHeader = React.memo(
             spacing="compact"
           />
         </EuiPageTemplate>
-        {showHeaderSettingsGear ? (
-          <WorkflowSettingsFlyout
-            isOpen={isSettingsOpen}
-            onClose={closeSettings}
-            readOnly={isEditorReadOnly}
-          />
-        ) : null}
+        <WorkflowSettingsFlyout
+          isOpen={isSettingsOpen}
+          onClose={closeSettings}
+          readOnly={isSettingsReadOnly}
+        />
         {isAccessOpen && workflow && (
           <WorkflowAccessControlModal workflow={workflow} onClose={() => setIsAccessOpen(false)} />
         )}

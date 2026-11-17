@@ -9,8 +9,13 @@
 
 import YAML, { LineCounter } from 'yaml';
 import type { WorkflowDetailDto } from '@kbn/workflows';
-import { flushWorkflowComputation } from './middleware';
-import { HIGHLIGHTED_STEP_TRIGGER, setCursorPosition, setWorkflow, setYamlString } from './slice';
+import {
+  applyYamlEdit,
+  HIGHLIGHTED_STEP_TRIGGER,
+  setCursorPosition,
+  setWorkflow,
+  setYamlString,
+} from './slice';
 import type { ComputedData } from './types';
 import {
   createStepInfo,
@@ -281,7 +286,7 @@ describe('workflowComputationMiddleware', () => {
     jest.useRealTimers();
   });
 
-  it('flushWorkflowComputation runs a pending debounced compute immediately', () => {
+  it('applyYamlEdit computes immediately and drops a pending debounced compute', () => {
     jest.useFakeTimers();
 
     const mockComputed: ComputedData = {
@@ -295,12 +300,18 @@ describe('workflowComputationMiddleware', () => {
     store.dispatch(setYamlString('name: first'));
     performComputation.mockClear();
 
-    store.dispatch(setYamlString('name: visual-edit'));
+    // A typing edit is pending behind the debounce…
+    store.dispatch(setYamlString('name: typed'));
     expect(performComputation).not.toHaveBeenCalled();
 
-    flushWorkflowComputation();
+    // …and a canvas gesture computes in the same tick, superseding it.
+    store.dispatch(applyYamlEdit('name: visual-edit'));
     expect(performComputation).toHaveBeenCalledTimes(1);
     expect(performComputation).toHaveBeenCalledWith('name: visual-edit', undefined);
+    expect(store.getState().detail.yamlString).toBe('name: visual-edit');
+
+    jest.advanceTimersByTime(500);
+    expect(performComputation).toHaveBeenCalledTimes(1);
 
     jest.useRealTimers();
   });

@@ -32,6 +32,7 @@ export function StepConfigHeader({
   typeSubtitleId,
   nameEditor,
   onClose,
+  readOnly,
   children,
 }: {
   readonly stepType: string;
@@ -41,6 +42,8 @@ export function StepConfigHeader({
   readonly typeSubtitleId: string;
   readonly nameEditor: StepNameEditor;
   readonly onClose: () => void;
+  /** Shows the name as plain text: no rename button or pencil. */
+  readonly readOnly?: boolean;
   readonly children?: React.ReactNode;
 }) {
   const { euiTheme } = useEuiTheme();
@@ -191,6 +194,27 @@ export function StepConfigHeader({
                   </EuiText>
                 ) : null}
               </div>
+            ) : readOnly ? (
+              <EuiTitle size="xxs">
+                <h2
+                  id={titleId}
+                  css={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    minHeight: euiTheme.size.xl,
+                    maxWidth: '100%',
+                    margin: 0,
+                  }}
+                >
+                  <span
+                    title={headerTitle}
+                    data-test-subj="workflowStepConfigPanelTitle"
+                    css={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                  >
+                    {headerTitle}
+                  </span>
+                </h2>
+              </EuiTitle>
             ) : (
               <EuiTitle size="xxs">
                 <h2

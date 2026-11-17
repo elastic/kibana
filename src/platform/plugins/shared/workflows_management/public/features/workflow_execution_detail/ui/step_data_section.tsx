@@ -238,7 +238,11 @@ export const StepDataSection = ({
                       }
                     )}
                     data-test-subj="workflowExecutionStepDataCopyFieldPath"
-                    onClick={() => copyToClipboard(appendKeyPath(fieldPathPrefix, field))}
+                    onClick={(e: React.MouseEvent) => {
+                      // The cell is a click-to-insert reference source; copying must not insert.
+                      e.stopPropagation();
+                      copyToClipboard(appendKeyPath(fieldPathPrefix, field));
+                    }}
                   />
                 </EuiToolTip>
               )}

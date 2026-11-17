@@ -1,8 +1,18 @@
 # ADR-0006 — Graph mutations reuse the snippet insertion path
 
-**Status:** Accepted
+**Status:** Accepted — amended 2026-11-17 (see below)
 **Date:** 2026-09-16
 **Deciders:** @elastic/workflows-eng
+
+> **Amendment (2026-11-17): what shipped differs from the decision below.** Graph mutations did
+> not reuse `insertStepSnippet` or the Monaco model. They are pure functions over the `yaml`
+> `Document` AST in [`yaml_mutations.ts`](../../public/features/workflow_visual_editor/lib/yaml_mutations.ts):
+> each takes the full workflow YAML and returns the new YAML (or a typed `MutationResult` error),
+> preserving comments, quoting and unknown keys. The caller commits the result with
+> `applyYamlEdit` (ADR-0002), and undo works because the controlled editor `value` changes
+> (ADR-0005), not through `pushEditOperations`. `setStepFallback` shipped; `duplicateStep` did not
+> (it was removed unused). The `insertStepSnippet` extension described here was not made. The
+> Context and Decision sections are kept as the original reasoning.
 
 ## Context
 
@@ -63,6 +73,6 @@ The handler lives in `workflows_management` (the package never sees YAML), and `
 ## Consequences
 
 - Graph mutations and editor-menu mutations share one implementation. Bugs fixed in `insertStepSnippet` are fixed for both surfaces.
-- `setStepFallback` (spec 07) and `duplicateStep` (spec 05) follow the snippet module's conventions (colocated in `lib/snippets/`, use `pushUndoStop` / `pushEditOperations`, dispatch `applyYamlEdit`).
+- `setStepFallback` (spec 07) was planned to follow the snippet module's conventions (colocated in `lib/snippets/`, use `pushUndoStop` / `pushEditOperations`, dispatch `applyYamlEdit`); see the amendment above for what shipped. `duplicateStep` (spec 05) did not ship.
 - `yaml_edit`'s insertion primitives remain exported but unproven-in-production. A future team choosing to use them should be aware of this.
 - One wrinkle to assert, not discover: after `applyYamlEdit`, the editor's debounced `onChange → setYamlString` fires ~200ms later with the same string, costing one redundant compute. Idempotent, but two dispatches for one edit. Spec 04 must confirm this is the actual behaviour.

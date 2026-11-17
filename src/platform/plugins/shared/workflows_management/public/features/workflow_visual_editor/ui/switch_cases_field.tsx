@@ -119,10 +119,11 @@ export function SwitchCasesField({ value, onChange }: SwitchCasesFieldProps) {
   const inputRefs = useRef<Map<string, HTMLInputElement | null>>(new Map());
   const valueFingerprint = useMemo(() => JSON.stringify(value ?? null), [value]);
 
-  // Sync from parent when the fragment changes externally (Apply / reopen).
+  // Sync from parent when the fragment changes externally (Apply / reopen). The fingerprint is the
+  // value as JSON, so the rows are rebuilt from it and the effect depends on nothing else.
   useEffect(() => {
     setRows((prev) => {
-      const incoming = toSwitchCaseRows(value);
+      const incoming = toSwitchCaseRows(JSON.parse(valueFingerprint));
       if (
         JSON.stringify(switchCaseRowsToValue(prev)) ===
         JSON.stringify(switchCaseRowsToValue(incoming))
@@ -134,7 +135,6 @@ export function SwitchCasesField({ value, onChange }: SwitchCasesFieldProps) {
         id: prev[index]?.id ?? newRowId(),
       }));
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- fingerprint tracks value identity
   }, [valueFingerprint]);
 
   useEffect(() => {

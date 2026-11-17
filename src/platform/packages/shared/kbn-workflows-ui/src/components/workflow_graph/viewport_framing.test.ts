@@ -66,13 +66,9 @@ describe('getHomeFrameBounds', () => {
     height: 50,
   });
 
-  it('frames only triggers and settings groups when present', () => {
+  it('frames only triggers when present', () => {
     expect(getHomeFrameBounds([trigger, wide], EMPTY_GRAPH_BOUNDS)).toEqual(
       boundsFromNodes([trigger])
-    );
-    const group = makeNode({ id: 'g', type: 'settingsGroup', position: { x: 0, y: -100 } });
-    expect(getHomeFrameBounds([group, trigger, wide], EMPTY_GRAPH_BOUNDS)).toEqual(
-      boundsFromNodes([group, trigger])
     );
   });
 

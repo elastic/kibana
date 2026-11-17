@@ -21,6 +21,4 @@ export { createWorkflowsStore as createWorkflowDetailStore } from './store';
 // Selectors
 export * from './workflow_detail/selectors';
 
-// Middleware (if needed for custom store setup)
-export { flushWorkflowComputation } from './workflow_detail/middleware';
 export { WorkflowDetailStoreProvider } from './provider';

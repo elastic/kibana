@@ -38,6 +38,7 @@ export function StepForm({
   onChange,
   onDraftErrorChange,
   onExpandField,
+  readOnly = false,
 }: {
   stepType: string;
   fields: readonly StepFormField[];
@@ -49,6 +50,8 @@ export function StepForm({
   onChange: (field: StepFormField, value: unknown) => void;
   onDraftErrorChange: (id: string, error: string | undefined) => void;
   onExpandField: (field: StepFormField) => void;
+  /** Shows the form without offering to add or remove optional fields. */
+  readOnly?: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
   const inputsAccordionId = useGeneratedHtmlId({ prefix: 'workflowStepConfigInputs' });
@@ -152,7 +155,7 @@ export function StepForm({
         showValidation={showValidation}
         referenceCatalog={referenceCatalog}
         showOptionalMarker={options.showOptionalMarker ?? !field.required}
-        onRemove={options.removable ? () => removeOptionalField(field) : undefined}
+        onRemove={options.removable && !readOnly ? () => removeOptionalField(field) : undefined}
         onChange={(value) => onChange(field, value)}
         onDraftErrorChange={(error) => onDraftErrorChange(fieldId(field), error)}
         onExpand={() => onExpandField(field)}
@@ -180,7 +183,7 @@ export function StepForm({
   ));
 
   const addOptionalButton =
-    availableOptionalFields.length > 0 ? (
+    !readOnly && availableOptionalFields.length > 0 ? (
       <EuiPopover
         isOpen={optionalPickerOpen}
         closePopover={() => setOptionalPickerOpen(false)}

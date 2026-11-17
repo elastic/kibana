@@ -18,6 +18,7 @@ import { monacoLanguageFor } from './monaco_language';
 import { ReferenceCapableField } from './reference_capable_field';
 import { ContainerInSentenceCallout } from './reference_container_callout';
 import { ReferenceTextInput } from './reference_text_input';
+import { useStepFormReadOnly } from './step_form_read_only_context';
 import { caretAfterChange, useReferenceEditor } from './use_reference_editor';
 import type { buildDataReferenceCatalog } from '../lib/build_data_reference_catalog';
 import { opensPickerOnAt } from '../lib/opens_picker_on_at';
@@ -80,6 +81,7 @@ export function CodeField({
   fixedOnly?: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
+  const readOnly = useStepFormReadOnly();
   const isJson = field.language === 'json';
   const isEsql = field.language === 'esql';
   const isJsonLiquid = field.language === 'json-liquid';
@@ -241,6 +243,7 @@ export function CodeField({
                   captureEditor(editor);
                 }}
                 options={{
+                  readOnly,
                   automaticLayout: true,
                   fontSize: 12,
                   minimap: { enabled: false },

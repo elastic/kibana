@@ -16,6 +16,7 @@ import { createMonacoSelectionBridge } from './create_monaco_selection_bridge';
 import type { ReferenceCapableBind } from './reference_capable_field';
 import { ReferenceChip } from './reference_chip';
 import { ContainerInSentenceCallout } from './reference_container_callout';
+import { useStepFormReadOnly } from './step_form_read_only_context';
 import { caretAfterChange, useReferenceEditor } from './use_reference_editor';
 import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
 import type { ReferenceToken } from '../lib/reference_tokens';
@@ -112,6 +113,7 @@ export function ReferenceTextInput({
 }) {
   const { euiTheme } = useEuiTheme();
   const { fontSize } = useEuiFontSize('xs');
+  const readOnly = useStepFormReadOnly();
   const { value, isOpen, appendControls, registerSelection, openPickerAtRange } = bind;
   const [isEditing, setIsEditing] = useState(false);
   const pendingRef = useRef<Pending | undefined>({ kind: 'end' });
@@ -132,12 +134,18 @@ export function ReferenceTextInput({
       quotedStringsAreValues: language === 'json',
     });
 
-  const startEditing = useCallback((pending: Pending) => {
-    pendingRef.current = pending;
-    setIsEditing(true);
-  }, []);
+  const startEditing = useCallback(
+    (pending: Pending) => {
+      // A read-only field stays a preview: it never mounts the editor.
+      if (readOnly) return;
+      pendingRef.current = pending;
+      setIsEditing(true);
+    },
+    [readOnly]
+  );
 
   const requestEdit = (pending: Pending) => {
+    if (readOnly) return;
     if (onEditRequest) onEditRequest();
     else startEditing(pending);
   };
@@ -243,6 +251,7 @@ export function ReferenceTextInput({
       role="textbox"
       aria-label={ariaLabel}
       aria-invalid={isInvalid}
+      aria-readonly={readOnly || undefined}
       tabIndex={0}
       onMouseDown={handleMouseDown}
       onClick={handleClick}
@@ -267,7 +276,7 @@ export function ReferenceTextInput({
         overflow: 'hidden',
         whiteSpace: 'pre',
         fontSize,
-        cursor: 'text',
+        cursor: readOnly ? 'default' : 'text',
         outline: 'none',
       }}
       data-test-subj={testSubj}

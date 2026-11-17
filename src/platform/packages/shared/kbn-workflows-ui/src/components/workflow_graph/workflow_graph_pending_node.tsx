@@ -21,7 +21,7 @@ import { computeEdgePath } from './compute_edge_path';
 import type { InsertionPoints } from './compute_insertion_points';
 import { deslugifyStepName } from './deslugify_step_name';
 import { NodeIconChip, NodeStepIcon } from './node_icon_chip';
-import { CHIP_BORDER_RADIUS, NODE_BORDER_RADIUS, nodeLabelTypography } from './node_styles';
+import { nodeLabelTypography } from './node_styles';
 import {
   computePendingInsertConnector,
   computePendingInsertOrigin,
@@ -99,7 +99,8 @@ export function WorkflowGraphPendingNode({
   const isContainer = pending.phase === 'configuring' && CONTAINER_STEP_TYPES.has(pending.stepType);
   const isTriggerDraft = pending.context.mode === 'trigger';
   const isHorizontal = direction === 'LR';
-  const borderRadius = NODE_BORDER_RADIUS;
+  const borderRadius = euiTheme.border.radius.panel;
+  const chipBorderRadius = euiTheme.border.radius.control;
   const ariaLabel = isConfiguring
     ? isTriggerDraft
       ? i18n.translate('workflowsUi.graph.pendingConfiguringTriggerAria', {
@@ -243,7 +244,7 @@ export function WorkflowGraphPendingNode({
               <NodeIconChip
                 background={colors.chipBackground}
                 border={colors.chipBorder}
-                borderRadius={CHIP_BORDER_RADIUS}
+                borderRadius={chipBorderRadius}
                 useAiGradient={colors.chipUseAiGradient}
                 size={28}
                 data-test-subj="workflowGraphPendingNodeChip"
@@ -293,7 +294,7 @@ export function WorkflowGraphPendingNode({
                 <NodeIconChip
                   background={colors.chipBackground}
                   border={colors.chipBorder}
-                  borderRadius={CHIP_BORDER_RADIUS}
+                  borderRadius={chipBorderRadius}
                   useAiGradient={colors.chipUseAiGradient}
                   fillRow
                   data-test-subj="workflowGraphPendingNodeChip"

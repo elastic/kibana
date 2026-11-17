@@ -41,6 +41,8 @@ export const useCanvasUndo = (
   useEffect(() => {
     if (!editorRef) return undefined;
     const onKeyDown = (event: KeyboardEvent) => {
+      // Shift turns ⌘Z into redo, which the workflow has no canvas gesture for.
+      if (event.shiftKey) return;
       if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== 'z') return;
       // Focus in an editor or a form control: that control's own undo applies, not the workflow's.
       const { target } = event;

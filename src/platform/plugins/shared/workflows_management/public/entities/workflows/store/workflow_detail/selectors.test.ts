@@ -66,6 +66,35 @@ steps: []
     expect(selectHasChanges(store.getState())).toBe(false);
   });
 
+  it.each([
+    ['the name', scaffold.replace('name: New workflow', 'name: Renamed')],
+    ['the description', scaffold.replace('This is a new workflow', 'Describes the goal')],
+    ['the consts', scaffold.replace('triggers: []', 'consts:\n  limit: 5\ntriggers: []')],
+    ['the tags', scaffold.replace('triggers: []', 'tags:\n  - prod\ntriggers: []')],
+  ])('is dirty when only %s of a never-saved workflow changed', (_label, edited) => {
+    const store = createMockStore();
+    store.dispatch(seedCreateYaml(scaffold));
+    store.dispatch(setYamlString(edited));
+
+    expect(selectHasChanges(store.getState())).toBe(true);
+  });
+
+  it('is dirty when a renamed never-saved workflow also dropped its empty structure keys', () => {
+    const store = createMockStore();
+    store.dispatch(seedCreateYaml(scaffold));
+    store.dispatch(setYamlString('version: "1"\nname: Renamed\nenabled: false\nsteps: []\n'));
+
+    expect(selectHasChanges(store.getState())).toBe(true);
+  });
+
+  it('is dirty when a never-saved workflow no longer parses', () => {
+    const store = createMockStore();
+    store.dispatch(seedCreateYaml(scaffold));
+    store.dispatch(setYamlString('name: [unclosed\n'));
+
+    expect(selectHasChanges(store.getState())).toBe(true);
+  });
+
   it('is clean again after reverting create YAML to the exact baseline', () => {
     const store = createMockStore();
     store.dispatch(seedCreateYaml(scaffold));

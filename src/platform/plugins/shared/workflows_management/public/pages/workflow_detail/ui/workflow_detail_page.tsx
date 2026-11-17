@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
 import { useWorkflowsCapabilities, type WorkflowsCreateRouteState } from '@kbn/workflows-ui';
-import { workflowDefaultYaml } from './workflow_default_yml';
+import { workflowDefaultYaml, workflowYamlEditorSeedYaml } from './workflow_default_yml';
 import { WorkflowDetailEditor } from './workflow_detail_editor';
 import { WorkflowDetailHeader } from './workflow_detail_header';
 import { WorkflowEditorLayout } from './workflow_detail_layout';
@@ -166,6 +166,12 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   // toggles re-run this effect and reload the workflow (skeleton flash).
   const editorViewRef = useRef(editorView);
   editorViewRef.current = editorView;
+  const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(
+    WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID
+  );
+  // Read at seed time only, for the same reason as the editor view.
+  const isVisualEditorEnabledRef = useRef(isVisualEditorEnabled);
+  isVisualEditorEnabledRef.current = isVisualEditorEnabled;
 
   // A navigation can hand `/create` its initial content through history
   // state (`WorkflowsCreateRouteState`) — e.g. the Template library's
@@ -187,9 +193,14 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     }
     seededRef.current = true;
 
-    dispatch(seedCreateYaml(initialYaml || workflowDefaultYaml));
+    // Without the visual editor the user lands in the YAML editor, so they get the runnable
+    // hello-world sample instead of the empty structure the canvas starts from.
+    const isVisual = isVisualEditorEnabledRef.current;
+    dispatch(
+      seedCreateYaml(initialYaml || (isVisual ? workflowDefaultYaml : workflowYamlEditorSeedYaml))
+    );
     telemetry.reportWorkflowCreateOpened({
-      editorType: editorViewRef.current === 'graph' ? 'visual' : 'yaml',
+      editorType: isVisual && editorViewRef.current === 'graph' ? 'visual' : 'yaml',
     });
   }, [loadWorkflow, id, dispatch, telemetry, initialYaml]);
 
@@ -256,11 +267,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   }, [closeExecutionList, isExecutionListOpen, selectedExecutionId, setUrlTab]);
 
   // `/create` starts on the agentic-first landing. `?startBlank=true` ("Start manually"
-  // on the empty list) skips it, and so does the visual editor: its canvas creation
-  // panel owns the AI entry point and the recommended templates there.
-  const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(
-    WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID
-  );
+  // on the empty list) skips it.
   const startBlank = new URLSearchParams(location.search).get('startBlank') === 'true';
   // Prompt from this page's landing or from the empty list (`location.state`).
   const [pendingPrompt, setPendingPrompt] = useState<PendingAgentPrompt | undefined>(() => {
@@ -271,8 +278,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   });
   // "Remix with AI" arrives with the template YAML, so it skips the landing too.
   const shouldShowAgenticLandingRef = useRef(false);
-  shouldShowAgenticLandingRef.current =
-    !id && !isVisualEditorEnabled && !startBlank && !pendingPrompt && !initialYaml;
+  shouldShowAgenticLandingRef.current = !id && !startBlank && !pendingPrompt && !initialYaml;
   const [showAgenticLanding, setShowAgenticLanding] = useState(shouldShowAgenticLandingRef.current);
   // Re-check only when the route switches between `/create` and `/:id`. URL
   // churn on `/create` (view toggle, run selection) drops the query and the

@@ -211,7 +211,7 @@ describe('WorkflowGraphPendingNode icon chip', () => {
       </I18nProvider>
     );
 
-  it('uses the same 4px icon tile radius as a committed node', () => {
+  it('uses the EUI control radius (8px in Borealis) for the icon tile, like a committed node', () => {
     renderPending({
       phase: 'configuring',
       context: { mode: 'step', sourceNodeId: 'a' },
@@ -219,7 +219,7 @@ describe('WorkflowGraphPendingNode icon chip', () => {
       label: 'console_step',
     });
     expect(getComputedStyle(screen.getByTestId('workflowGraphPendingNodeChip')).borderRadius).toBe(
-      '4px'
+      '8px'
     );
   });
 

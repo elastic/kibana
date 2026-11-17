@@ -32,7 +32,6 @@ import {
   type ConstantType,
   type OutputField,
 } from './workflow_settings_fields_model';
-import type { DataReferenceCatalog } from '../../../features/workflow_visual_editor/lib/build_data_reference_catalog';
 import {
   type SchemaPropertyField,
   validateSchemaPropertyName,
@@ -68,7 +67,6 @@ export type OutputSettingsEntryRowProps = SettingsEntryRowSharedProps & {
   readonly kind: 'output';
   readonly field: OutputField;
   readonly siblings: readonly OutputField[];
-  readonly catalog: DataReferenceCatalog;
 };
 
 export type CommittedSettingsEntryRowProps = (
@@ -321,7 +319,6 @@ export function SettingsEntryRow(props: SettingsEntryRowProps) {
         <SettingsEntryOutputFieldsLazy
           field={activeField as OutputField}
           siblings={props.siblings as readonly OutputField[]}
-          catalog={props.catalog}
           readOnly={props.readOnly}
           onUpdate={handleUpdate}
         />

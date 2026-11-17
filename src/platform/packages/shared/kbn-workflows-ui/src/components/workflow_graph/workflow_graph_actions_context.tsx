@@ -77,9 +77,6 @@ export interface WorkflowGraphEditActions {
 /** Applied-state reason for the node warning badge tooltip. */
 export type NodeConfigWarningReason = 'incomplete' | 'misconfigured' | 'both';
 
-/** Settings node kinds (Option B canvas row above triggers). */
-export type WorkflowSettingsNodeKind = 'info' | 'constants' | 'outputs';
-
 /**
  * Stable, caller-supplied callbacks only. Per-node volatile values (port
  * targets, config warnings, pending error-path flag) travel on each node's
@@ -92,11 +89,6 @@ export interface WorkflowGraphActions {
   canRunSteps?: boolean;
   /** Called when the user keyboard-activates (Enter/Space) a node. */
   onStepSelect?: (nodeId: string) => void;
-  /**
-   * Called when the user activates a settings node (info / constants /
-   * outputs). `undefined` clears the settings selection (e.g. pane click).
-   */
-  onSettingsNodeSelect?: (kind: WorkflowSettingsNodeKind | undefined) => void;
   /**
    * Optional renderer for step icons inside graph nodes. When provided, the
    * canvas delegates icon resolution to the caller (e.g. the plugin's
