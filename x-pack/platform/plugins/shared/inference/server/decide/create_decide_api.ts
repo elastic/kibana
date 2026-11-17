@@ -8,6 +8,12 @@
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import type { AnonymizationRule } from '@kbn/ai-anonymization-common';
+import type {
+  InferenceAnonymizationOptions,
+  RegexWorkerService,
+} from '@kbn/ai-anonymization-server';
+import { anonymizeMessages } from '@kbn/ai-anonymization-server';
 import type {
   DecideAPI,
   DecideOptions,
@@ -20,9 +26,18 @@ import {
   createInferenceRequestAbortedError,
   createInferenceRequestError,
   isInferenceError,
+  MessageRole,
 } from '@kbn/inference-common';
 import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
 import { parseDecisionResponse, questionKey } from './parse_decision_response';
+
+interface CreateDecideApiOptions {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  anonymizationRulesPromise: Promise<AnonymizationRule[]>;
+  regexWorker: RegexWorkerService;
+  anonymization?: InferenceAnonymizationOptions;
+}
 
 interface DecisionEndpointsResponse {
   endpoints?: Array<{ inference_id: string }>;
@@ -89,6 +104,37 @@ const toInferenceError = ({
   return createInferenceProviderError(error.message);
 };
 
+/**
+ * Masks the input with the space's anonymization rules, like chat completion does. Answers are
+ * probabilities and caller-defined keys, so there's nothing to restore and no replacements to keep.
+ */
+const anonymizeInput = async ({
+  input,
+  esClient,
+  logger,
+  anonymizationRulesPromise,
+  regexWorker,
+  anonymization,
+}: CreateDecideApiOptions & { input: string }): Promise<string> => {
+  const {
+    messages: [masked],
+  } = await anonymizeMessages({
+    messages: [{ role: MessageRole.User, content: input }],
+    anonymizationRules: await anonymizationRulesPromise,
+    regexWorker,
+    esClient,
+    salt: await anonymization?.saltPromise,
+    onFailure: (await anonymization?.onFailurePromise) ?? 'block',
+    logger,
+  });
+
+  if (masked?.role !== MessageRole.User || typeof masked.content !== 'string') {
+    throw createInferenceProviderError('Anonymization did not return the decision input as text');
+  }
+
+  return masked.content;
+};
+
 /** Sends the questions to the `decision` inference task and reads the answers back. */
 const invokeDecision = async ({
   esClient,
@@ -125,14 +171,14 @@ const invokeDecision = async ({
  * Creates the `decide` API, which calls the Elasticsearch `decision` inference task as the
  * user `esClient` is scoped to.
  */
-export function createDecideApi(opts: { esClient: ElasticsearchClient; logger: Logger }): DecideAPI;
+export function createDecideApi(opts: CreateDecideApiOptions): DecideAPI;
 export function createDecideApi({
   esClient,
   logger,
-}: {
-  esClient: ElasticsearchClient;
-  logger: Logger;
-}) {
+  anonymizationRulesPromise,
+  regexWorker,
+  anonymization,
+}: CreateDecideApiOptions) {
   return async (
     options: DecideOptions,
     ...questions: DecisionQuestion[]
@@ -150,7 +196,20 @@ export function createDecideApi({
         const startedAt = Date.now();
 
         try {
-          const { inferenceId, answers } = await invokeDecision({ esClient, options, questions });
+          const input = await anonymizeInput({
+            input: options.input,
+            esClient,
+            logger,
+            anonymizationRulesPromise,
+            regexWorker,
+            anonymization,
+          });
+
+          const { inferenceId, answers } = await invokeDecision({
+            esClient,
+            options: { ...options, input },
+            questions,
+          });
 
           span?.setAttributes({ 'elastic.decision.inference_id': inferenceId });
 

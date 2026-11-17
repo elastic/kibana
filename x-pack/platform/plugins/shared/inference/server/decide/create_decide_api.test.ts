@@ -15,6 +15,9 @@ import {
   isInferenceRequestAbortedError,
   isInferenceRequestError,
 } from '@kbn/inference-common';
+import type { AnonymizationRule } from '@kbn/ai-anonymization-common';
+import { executeRegexRulesTask } from '@kbn/ai-anonymization-server';
+import { createRegexWorkerServiceMock } from '../test_utils';
 import { decisionResponse } from './__fixtures__/decision_response';
 import { decisionEndpoints } from './__fixtures__/decision_endpoints';
 import { createDecideApi } from './create_decide_api';
@@ -41,12 +44,30 @@ const responseError = (statusCode: number, reason: string) =>
     meta: {} as never,
   });
 
-const setup = () => {
+const emailRule: AnonymizationRule = {
+  type: 'RegExp',
+  entityClass: 'EMAIL',
+  pattern: '([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})',
+  enabled: true,
+};
+
+const setup = ({ anonymizationRules = [] }: { anonymizationRules?: AnonymizationRule[] } = {}) => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const logger = loggerMock.create();
-  const decide = createDecideApi({ esClient, logger });
+  const regexWorker = createRegexWorkerServiceMock();
 
-  return { decide, logger, transportRequest: esClient.transport.request };
+  jest
+    .mocked(regexWorker.run)
+    .mockImplementation(async (payload) => executeRegexRulesTask(payload));
+
+  const decide = createDecideApi({
+    esClient,
+    logger,
+    anonymizationRulesPromise: Promise.resolve(anonymizationRules),
+    regexWorker,
+  });
+
+  return { decide, logger, regexWorker, transportRequest: esClient.transport.request };
 };
 
 describe('createDecideApi', () => {
@@ -213,6 +234,37 @@ describe('createDecideApi', () => {
 
     expect(transportRequest.mock.calls[0][1]).toEqual({ signal: controller.signal });
     expect(isInferenceRequestAbortedError(error)).toBe(true);
+  });
+
+  it('masks the input with the anonymization rules before sending it', async () => {
+    const { decide, transportRequest } = setup({ anonymizationRules: [emailRule] });
+
+    transportRequest.mockResolvedValue(decisionResponse);
+
+    await decide(
+      { input: 'Ask claudia@example.com about checkout', inferenceId: 'my-decision' },
+      shouldRespond
+    );
+
+    expect(transportRequest.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        body: expect.objectContaining({
+          input: expect.stringMatching(/^Ask EMAIL_\w+ about checkout$/),
+        }),
+      })
+    );
+  });
+
+  it('does not send the input when anonymization fails', async () => {
+    const { decide, regexWorker, transportRequest } = setup({ anonymizationRules: [emailRule] });
+
+    jest.mocked(regexWorker.run).mockRejectedValue(new Error('regex failed'));
+
+    await expect(
+      decide({ input: 'Ask claudia@example.com', inferenceId: 'my-decision' }, shouldRespond)
+    ).rejects.toThrow('regex failed');
+
+    expect(transportRequest).not.toHaveBeenCalled();
   });
 
   it('never logs the input text', async () => {
