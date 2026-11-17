@@ -154,13 +154,15 @@ const verdictScores = (
   expected: HuntExpected,
   artifacts: HuntArtifacts,
   check: (expected: HuntReportExpectation, actual: HuntReportArtifacts) => CodeScore,
-  emptyExplanation: string
+  emptyExplanation: string,
+  keepScored: (report: HuntReportExpectation) => boolean = () => false
 ): CodeScore => {
+  const deferredFor = (report: HuntReportExpectation, actual: HuntReportArtifacts | undefined) =>
+    actual && !keepScored(report) ? deferredVerdict(expected, actual) : undefined;
   // When every report deferred, say why instead of folding to the generic empty explanation.
-  const deferred = expected.reports.flatMap(({ reportId }) => {
-    const actual = artifacts.reports[reportId];
-    const result = actual && deferredVerdict(expected, actual);
-    return result ? [`${reportId}: ${result.explanation}`] : [];
+  const deferred = expected.reports.flatMap((report) => {
+    const result = deferredFor(report, artifacts.reports[report.reportId]);
+    return result ? [`${report.reportId}: ${result.explanation}`] : [];
   });
   if (deferred.length > 0 && deferred.length === expected.reports.length) {
     return notApplicable(deferred.join('; '));
@@ -168,7 +170,7 @@ const verdictScores = (
   return reportScores(
     expected,
     artifacts,
-    (report, actual) => deferredVerdict(expected, actual) ?? check(report, actual),
+    (report, actual) => deferredFor(report, actual) ?? check(report, actual),
     emptyExplanation
   );
 };
@@ -524,7 +526,9 @@ export const scoreProposalPresence = (
             statuses: actual.proposals.map((p) => p.status),
           });
     },
-    'no reports'
+    'no reports',
+    // Zero rows stay scored on a deferred verdict too, for the same hard-kill reason.
+    (report) => report.pendingProposals === 0
   );
 
 export const scoreInvestigationStatus = (

@@ -730,6 +730,16 @@ describe('deferred verdict', () => {
     }
   });
 
+  it('still fails a Proposal minted on a zero row when the verdict was deferred', () => {
+    const expected = buildExpected(
+      { hasConfirmedHit: false, pendingProposals: 0 },
+      { outcome: ['completed'] }
+    );
+    const artifacts = retryable();
+    artifacts.reports[REPORT_ID].proposals = [proposalAt('2026-01-01T12:05:00.000Z', 'pending')];
+    expect(scoreProposalPresence(expected, artifacts)).toMatchObject({ score: 0 });
+  });
+
   it('scores evidence by the write rule on a deferred verdict', () => {
     expect(scoreEvidenceHonesty(hitRow(), retryable()).score).toBe(1);
     expect(
