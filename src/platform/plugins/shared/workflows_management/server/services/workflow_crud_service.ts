@@ -8,15 +8,16 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { chunk } from 'lodash';
 import { randomBytes } from 'node:crypto';
 
 import pMap from 'p-map';
-import { firstValueFrom } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core/server';
 import { buildEntityReadAccessQuery, isEntityAccessControlAdmin } from '@kbn/entity-access-control';
-import { isNotFoundError } from '@kbn/es-errors';
+import { isNotFoundError, isResponseError } from '@kbn/es-errors';
 import {
   DEFAULT_MAX_RETRIES,
+  delayMs,
   isElasticsearchWriteConflict,
   isOccConflictError,
   OCC_CONFLICT_STATUS_CODE,
@@ -31,7 +32,6 @@ import {
   toCustomTriggerSchemaConfigs,
   type UpdatedWorkflowResponseDto,
   type WorkflowDetailDto,
-  WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG,
   type WorkflowYaml,
 } from '@kbn/workflows';
 import { buildWorkflowFilters, GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
@@ -52,6 +52,8 @@ import type {
   ManagedWorkflowOrphan,
   ReadModifyWriteWorkflowDocumentParams,
   VersionedWorkflowDocument,
+  WorkflowDocumentBulkWrite,
+  WorkflowDocumentBulkWriteResult,
   WorkflowDocumentGetOptions,
   WriteWorkflowDocumentWithOccParams,
 } from './workflow_occ_types';
@@ -71,8 +73,13 @@ import type {
   RestoreWorkflowVersionResponseDto,
   WorkflowRestoreMetadata,
 } from '../../common/lib/workflow_change_history/types';
+import { getCalledWorkflowIds } from '../../common/lib/workflow_dependents/find_call_sites';
 import { getWorkflowZodSchema } from '../../common/schema';
-import { fetchOccHitsByIds, type OccWorkflowHit } from '../api/lib/bulk_occ_index';
+import {
+  fetchOccHitsByIds,
+  type OccWorkflowHit,
+  type WorkflowStorageClient,
+} from '../api/lib/bulk_occ_index';
 import { extractBulkItemError } from '../api/lib/bulk_response_helpers';
 import { cleanupDeletedWorkflows, deleteWorkflows } from '../api/lib/workflow_deletion';
 import { disableAllWorkflows, mutateWorkflowToDisabled } from '../api/lib/workflow_disable_all';
@@ -111,6 +118,7 @@ import { unscheduleWorkflowTasks } from '../task_defs/unschedule_workflow_tasks'
 // against `op_type: 'create'`. The id resolver itself walks up to MAX_COLLISION_RETRIES
 // candidates per call, so the practical ceiling is far higher than this number;
 // this only bounds repeated round-trips when many concurrent writers share a base ID.
+const INDEX_CALLED_WORKFLOW_IDS_BATCH_SIZE = 500;
 const TOCTOU_MAX_RETRIES = 5;
 
 // `OccWriter.readModifyWrite` always indexes what `mutate` returns; throwing this skips the write.
@@ -133,6 +141,18 @@ export type {
   WriteWorkflowDocumentWithOccParams,
 } from './workflow_occ_types';
 
+/**
+ * Per-document read errors of a shard that is not ready yet, such as right after another Kibana
+ * node or plugin created the workflow index. They clear on their own, so the read is retried.
+ */
+const SHARD_UNAVAILABLE_READ_ERROR_TYPES: ReadonlySet<string> = new Set([
+  'no_shard_available_action_exception',
+  'unavailable_shards_exception',
+]);
+/** Waits between reads while the shard is unavailable: about 3 seconds in all. */
+const SHARD_UNAVAILABLE_READ_RETRY_DELAYS_MS = [100, 200, 400, 800, 1600] as const;
+const TOO_MANY_REQUESTS_STATUS_CODE = 429;
+
 interface ApplyWorkflowUpdateResult {
   response: UpdatedWorkflowResponseDto;
   finalData: WorkflowProperties;
@@ -149,14 +169,6 @@ type SuccessfullyWrittenBulkEntry = BulkWorkflowEntry & {
 
 export class WorkflowCrudService {
   constructor(private readonly deps: WorkflowCrudDeps) {}
-
-  private async shouldWarnIgnoredKibanaFetcher(): Promise<boolean> {
-    return firstValueFrom(
-      this.deps
-        .getCoreStart()
-        .featureFlags.getBooleanValue$(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, false)
-    );
-  }
 
   async logWorkflowChangesAfterWrite(params: {
     workflows: Array<{ id: string; document: WorkflowProperties }>;
@@ -228,6 +240,207 @@ export class WorkflowCrudService {
       seqNo: hit._seq_no,
       primaryTerm: hit._primary_term,
     };
+  }
+
+  /**
+   * Reads workflow documents by id with one real-time multi-get, across all spaces and including
+   * deleted ones. Being real-time, it sees a write another Kibana node made before it is refreshed,
+   * which is what a writer needs after losing that write with a 409. Retries while the index's
+   * shard is not ready yet, and throws on any other failed read.
+   */
+  async getWorkflowDocumentsWithVersionByIds(
+    ids: readonly string[]
+  ): Promise<Map<string, VersionedWorkflowDocument>> {
+    const uniqueIds = [...new Set(ids)];
+    if (uniqueIds.length === 0) {
+      return new Map();
+    }
+
+    for (let attempt = 0; ; attempt++) {
+      const { documents, unavailable } = await this.readWorkflowDocumentsWithVersion(uniqueIds);
+      if (!unavailable) {
+        return documents;
+      }
+      const message = `Could not read workflow ${unavailable.id}: ${unavailable.reason}`;
+      if (attempt >= SHARD_UNAVAILABLE_READ_RETRY_DELAYS_MS.length) {
+        throw new Error(message);
+      }
+      const retryDelayMs = SHARD_UNAVAILABLE_READ_RETRY_DELAYS_MS[attempt];
+      this.deps.logger.debug(`${message}. Retrying in ${retryDelayMs} ms.`);
+      await delayMs(retryDelayMs);
+    }
+  }
+
+  /**
+   * One real-time multi-get. Documents on a shard that is not ready yet are returned in
+   * `unavailable` (the first one) instead of thrown, so the caller can retry.
+   */
+  private async readWorkflowDocumentsWithVersion(ids: string[]): Promise<{
+    documents: Map<string, VersionedWorkflowDocument>;
+    unavailable?: { id: string; reason: string };
+  }> {
+    const documents = new Map<string, VersionedWorkflowDocument>();
+    let unavailable: { id: string; reason: string } | undefined;
+
+    let response;
+    try {
+      response = await this.deps
+        .getCoreStart()
+        .elasticsearch.client.asInternalUser.mget<WorkflowProperties>({
+          index: workflowIndexName,
+          ids,
+          // Already the default; kept explicit because the 409 re-read relies on it.
+          realtime: true,
+        });
+    } catch (error) {
+      // No workflow has been written yet, so the index does not exist.
+      if (isNotFoundError(error)) {
+        return { documents };
+      }
+      throw error;
+    }
+
+    for (const doc of response.docs) {
+      if ('error' in doc) {
+        const { type } = doc.error;
+        if (SHARD_UNAVAILABLE_READ_ERROR_TYPES.has(type)) {
+          unavailable ??= { id: doc._id, reason: extractBulkItemError(doc.error) };
+        } else if (type !== 'index_not_found_exception') {
+          // Elasticsearch answers 200 with index_not_found_exception on every document when the
+          // index does not exist yet, the state of a fresh deployment before its first write. Any
+          // other failed read would otherwise look like a missing workflow.
+          throw new Error(`Could not read workflow ${doc._id}: ${extractBulkItemError(doc.error)}`);
+        }
+      } else if (doc.found) {
+        if (!doc._source || doc._seq_no == null || doc._primary_term == null) {
+          throw new Error(`Missing workflow revision or source for ${doc._id}.`);
+        }
+        documents.set(doc._id, {
+          source: doc._source,
+          seqNo: doc._seq_no,
+          primaryTerm: doc._primary_term,
+        });
+      }
+    }
+    return { documents, unavailable };
+  }
+
+  /**
+   * Stores which workflows each of `ids` runs, for documents saved before saving stored it. A
+   * document saved meanwhile is left as it is, since the save stored it.
+   */
+  async indexCalledWorkflowIds(ids: string[]): Promise<void> {
+    for (const idsChunk of chunk(ids, INDEX_CALLED_WORKFLOW_IDS_BATCH_SIZE)) {
+      const { documents } = await this.readWorkflowDocumentsWithVersion(idsChunk);
+      const writes: WorkflowDocumentBulkWrite[] = [];
+      for (const [id, previous] of documents) {
+        const { source } = previous;
+        // Bound workflows can't be written in bulk (see bulkWriteWorkflowDocuments).
+        if (source.calledWorkflowIdsIndexed !== true && !source.definition?.settings?.run_as) {
+          writes.push({
+            id,
+            previous,
+            document: {
+              ...source,
+              calledWorkflowIds: getCalledWorkflowIds(source.definition),
+              calledWorkflowIdsIndexed: true,
+            },
+          });
+        }
+      }
+      if (writes.length > 0) {
+        await this.bulkWriteWorkflowDocuments(writes);
+      }
+    }
+  }
+
+  /**
+   * Writes workflow documents in one `_bulk` request with `refresh: true`: `create` for new
+   * documents and `index` guarded by the previous seq_no/primary_term for updates. Documents that
+   * carry or replace a service-account binding are refused, because changing a binding needs a
+   * user request (see {@link indexWorkflowDocument}).
+   */
+  async bulkWriteWorkflowDocuments(
+    writes: readonly WorkflowDocumentBulkWrite[]
+  ): Promise<WorkflowDocumentBulkWriteResult[]> {
+    const results: WorkflowDocumentBulkWriteResult[] = [];
+    const operations: Parameters<WorkflowStorageClient['bulk']>[0]['operations'] = [];
+    const operationWriteIndexes: number[] = [];
+
+    for (const [writeIndex, { id, document, previous }] of writes.entries()) {
+      // Backstop for any caller. ManagedWorkflowsService is the main guard: it refuses bound
+      // workflows before writing.
+      if (document.definition?.settings?.run_as || previous?.source.definition?.settings?.run_as) {
+        results[writeIndex] = {
+          status: 'failed',
+          error: new Error(
+            `Workflow ${id} is bound to a service account and cannot be written in bulk.`
+          ),
+        };
+      } else {
+        operationWriteIndexes.push(writeIndex);
+        operations.push(
+          previous
+            ? {
+                index: {
+                  _id: id,
+                  document,
+                  if_seq_no: previous.seqNo,
+                  if_primary_term: previous.primaryTerm,
+                },
+              }
+            : { create: { _id: id, document } }
+        );
+      }
+    }
+
+    if (operations.length === 0) {
+      return results;
+    }
+
+    let items;
+    try {
+      ({ items } = await this.deps.workflowStorage.getClient().bulk({
+        operations,
+        refresh: true,
+      }));
+    } catch (error) {
+      // Elasticsearch rejected the whole request before writing any of it.
+      if (isResponseError(error) && error.statusCode === TOO_MANY_REQUESTS_STATUS_CODE) {
+        for (const writeIndex of operationWriteIndexes) {
+          results[writeIndex] = { status: 'rejected', error };
+        }
+        return results;
+      }
+      throw error;
+    }
+
+    for (const [operationIndex, writeIndex] of operationWriteIndexes.entries()) {
+      const item = items[operationIndex];
+      const operation = item?.index ?? item?.create;
+      if (!operation) {
+        results[writeIndex] = {
+          status: 'failed',
+          error: new Error(`Missing bulk response item for workflow ${writes[writeIndex].id}.`),
+        };
+      } else if (!operation.error) {
+        results[writeIndex] = { status: 'written' };
+      } else if (operation.status === OCC_CONFLICT_STATUS_CODE) {
+        results[writeIndex] = { status: 'conflict' };
+      } else if (operation.status === TOO_MANY_REQUESTS_STATUS_CODE) {
+        // A full write queue rejects items inside a successful response.
+        results[writeIndex] = {
+          status: 'rejected',
+          error: new Error(extractBulkItemError(operation.error)),
+        };
+      } else {
+        results[writeIndex] = {
+          status: 'failed',
+          error: new Error(extractBulkItemError(operation.error)),
+        };
+      }
+    }
+    return results;
   }
 
   private async getWorkflowRevision(
@@ -480,7 +693,6 @@ export class WorkflowCrudService {
       spaceId: params.spaceId,
       triggerDefinitions,
       logger: this.deps.logger,
-      warnIgnoredKibanaFetcher: await this.shouldWarnIgnoredKibanaFetcher(),
     });
     const profileId = params.request
       ? (await this.deps
@@ -666,7 +878,6 @@ export class WorkflowCrudService {
       triggerDefinitions,
       nameFallback: options?.nameFallback,
       logger: this.deps.logger,
-      warnIgnoredKibanaFetcher: await this.shouldWarnIgnoredKibanaFetcher(),
     });
 
     const profileId =
@@ -742,7 +953,6 @@ export class WorkflowCrudService {
     const profileId = await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request });
     const now = new Date();
     const triggerDefinitions = this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
-    const warnIgnoredKibanaFetcher = await this.shouldWarnIgnoredKibanaFetcher();
 
     const created: WorkflowDetailDto[] = [];
     const failed: BulkFailureEntry[] = [];
@@ -764,7 +974,6 @@ export class WorkflowCrudService {
           spaceId,
           triggerDefinitions,
           logger: this.deps.logger,
-          warnIgnoredKibanaFetcher,
         });
 
         if (profileId) {
@@ -960,7 +1169,6 @@ export class WorkflowCrudService {
               zodSchema,
               triggerDefinitions,
               logger: this.deps.logger,
-              warnIgnoredKibanaFetcher: await this.shouldWarnIgnoredKibanaFetcher(),
               workflowId: id,
             })),
           }
@@ -1020,6 +1228,8 @@ export class WorkflowCrudService {
         if (merged.triggerTypes === undefined) {
           merged.triggerTypes = getTriggerTypesFromDefinition(merged.definition) ?? [];
         }
+        merged.calledWorkflowIds = getCalledWorkflowIds(merged.definition);
+        merged.calledWorkflowIdsIndexed = true;
         previousVersion = existingSource.version;
         return merged;
       },

@@ -9,7 +9,7 @@ import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task'
 import type { DispatcherServiceContract } from './dispatcher';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import {
-  createDispatcherConfigAccessor,
+  createDispatcherConfigService,
   createDispatcherPipelineInput,
 } from './fixtures/test_utils';
 import { DispatcherTaskRunner } from './task_runner';
@@ -39,7 +39,7 @@ describe('DispatcherTaskRunner', () => {
     dispatcherService = { run: jest.fn() };
     runner = new DispatcherTaskRunner(
       dispatcherService,
-      createDispatcherConfigAccessor(),
+      createDispatcherConfigService(),
       createLoggerService().loggerService
     );
     signal = new AbortController().signal;
@@ -136,7 +136,7 @@ describe('DispatcherTaskRunner', () => {
     beforeEach(() => {
       pausedRunner = new DispatcherTaskRunner(
         dispatcherService,
-        createDispatcherConfigAccessor({ paused: true }),
+        createDispatcherConfigService({ paused: true }),
         createLoggerService().loggerService
       );
     });

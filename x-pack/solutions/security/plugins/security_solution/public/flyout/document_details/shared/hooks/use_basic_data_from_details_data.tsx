@@ -7,7 +7,7 @@
 
 import { some } from 'lodash/fp';
 import { useMemo } from 'react';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { TimelineEventsDetailsItem } from '@kbn/securitysolution-timeline-search-strategy';
 import { getAlertDetailsFieldValue } from '../../../../common/lib/endpoint/utils/get_event_details_field_values';
 
 export interface UseBasicDataFromDetailsDataResult {

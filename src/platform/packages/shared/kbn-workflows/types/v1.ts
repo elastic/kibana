@@ -366,6 +366,11 @@ export interface WorkflowExecutionListDto {
    * Absent when there are no further results.
    */
   searchAfter?: unknown[];
+  /**
+   * True when this workflow has a named execution in the space, ignoring list
+   * filters. Present only on the first page of a per-workflow list.
+   */
+  hasNamedExecution?: boolean;
 }
 
 export interface WorkflowStepExecutionListDto {

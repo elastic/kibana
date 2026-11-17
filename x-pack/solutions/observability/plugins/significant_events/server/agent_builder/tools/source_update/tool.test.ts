@@ -203,7 +203,7 @@ describe('source_update tool', () => {
           type: 'error',
           data: {
             message: expect.stringContaining(
-              'requires the Nightshift manage and Nightshift configure privileges'
+              'requires the nightshift manage and nightshift configure privileges'
             ),
           },
         },

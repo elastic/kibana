@@ -9,15 +9,6 @@ import type { IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { DataStreamType } from '../../../../common/types';
 
-export const fetchDatasetTypesPrivilegesFailedNotifier = (toasts: IToasts, error: Error) => {
-  toasts.addDanger({
-    title: i18n.translate('xpack.datasetQuality.fetchDatasetTypesPrivilegesFailed', {
-      defaultMessage: "We couldn't get your data set types privileges.",
-    }),
-    text: error.message,
-  });
-};
-
 export const fetchDatasetStatsFailedNotifier = (toasts: IToasts, error: Error) => {
   toasts.addDanger({
     title: i18n.translate('xpack.datasetQuality.fetchDatasetStatsFailed', {

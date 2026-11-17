@@ -67,12 +67,16 @@ const detail = (overrides: Partial<SessionDetailResponse> = {}): SessionDetailRe
     durationMs: 60_000,
     eventCount: 12,
     pageViewCount: 2,
+    pageLoadCount: 1,
     clickCount: 3,
-    errorCount: 1,
+    jsErrorCount: 1,
+    httpRequestCount: 8,
+    failedRequestCount: 2,
     bounced: false,
     entryPage: '/',
     exitPage: '/cart',
     journey: ['/', '/cart'],
+    environment: 'production',
     user: 'jane@example.com',
     userAgent: { browser: 'Firefox', browserVersion: '131', os: 'Linux', device: null },
     geo: { countryIso: 'NL', region: 'North Holland', city: 'Amsterdam' },
@@ -127,7 +131,9 @@ const renderPage = () => {
     uiSettings: createUiSettingsMock(),
   } as unknown as ReturnType<typeof useKibanaServices>);
   const history = createMemoryHistory({
-    initialEntries: [`/shop/sessions/abcdef123456?${TIME_QUERY}&source=otel&hasErrors=true&page=2`],
+    initialEntries: [
+      `/shop/sessions/abcdef123456?${TIME_QUERY}&source=otel&withJsErrors=true&page=2`,
+    ],
   });
   render(
     <RouterProvider
@@ -148,7 +154,7 @@ const renderPage = () => {
   );
 };
 
-const SESSIONS_HREF = `/app/digital_experience/shop/sessions?hasErrors=true&page=2&${TIME_QUERY}&source=otel`;
+const SESSIONS_HREF = `/app/digital_experience/shop/sessions?page=2&${TIME_QUERY}&source=otel&withJsErrors=true`;
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -205,9 +211,19 @@ describe('SessionDetailPage', () => {
     expect(screen.getByTestId('digitalExperienceSessionStat-duration')).toHaveTextContent(
       '1 min 0 s'
     );
-    expect(screen.getByTestId('digitalExperienceSessionStat-errors')).toHaveTextContent('1');
+    const stat = (id: string) => within(screen.getByTestId(`digitalExperienceSessionStat-${id}`));
+    // Page views count in-app navigations too, page loads only full loads.
+    expect(stat('pages').getByText('Page views')).toBeInTheDocument();
+    expect(stat('pages').getByText('2')).toBeInTheDocument();
+    expect(stat('pageLoads').getByText('Page loads')).toBeInTheDocument();
+    expect(stat('pageLoads').getByText('1')).toBeInTheDocument();
+    expect(stat('jsErrors').getByText('JS errors')).toBeInTheDocument();
+    expect(stat('jsErrors').getByText('1')).toBeInTheDocument();
+    expect(stat('failedRequests').getByText('Failed requests of 8')).toBeInTheDocument();
+    expect(stat('failedRequests').getByText('2')).toBeInTheDocument();
     const metadata = screen.getByTestId('digitalExperienceSessionMetadata');
     expect(metadata).toHaveTextContent('jane@example.com');
+    expect(metadata).toHaveTextContent('Environmentproduction');
     expect(metadata).toHaveTextContent('Firefox 131 · Linux');
     expect(metadata).toHaveTextContent('Amsterdam, North Holland, NL');
     expect(metadata).toHaveTextContent('/ → /cart');

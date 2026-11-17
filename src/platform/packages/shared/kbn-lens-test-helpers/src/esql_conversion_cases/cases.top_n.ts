@@ -386,10 +386,57 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
     {
       group: 'top_n',
       dataset: logs,
-      description: 'terms above a date histogram with other bucket is not convertible yet',
+      description: 'terms below a date histogram with other bucket is not convertible',
+      columns: {
+        col1: dateHistogram('timestamp', { interval: '1d' }),
+        col2: terms('host.keyword', {
+          size: 5,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+          otherBucket: true,
+        }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: false,
+        reason: 'terms_other_bucket_not_supported',
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description:
+        'terms above a date histogram with other bucket and missing values is not convertible',
       columns: {
         col1: terms('host.keyword', {
           size: 5,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+          otherBucket: true,
+          missingBucket: true,
+        }),
+        col2: dateHistogram('timestamp', { interval: '1d' }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: false,
+        reason: 'terms_other_bucket_not_supported',
+      },
+    },
+    // Top values above a date histogram with Other: the typed key from the single Top values shape
+    // is the series, and the same remap keeps Other as one series that sorts last. The dataset
+    // has 4 hosts, so size 2 groups two hosts into Other; the last row is Other on the last date
+    // bucket (2023-06-15) and its value is the aggregate over every remaining document of that
+    // bucket, not any single host's.
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'terms above a date histogram with other bucket ranked by metric DESC',
+      columns: {
+        col1: terms('host.keyword', {
+          size: 2,
           orderBy: { type: 'column', columnId: 'col3' },
           orderDirection: 'desc',
           otherBucket: true,
@@ -399,8 +446,101 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       },
       columnOrder: ['col1', 'col2', 'col3'],
       expected: {
-        success: false,
-        reason: 'terms_other_bucket_not_supported',
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | EVAL key_host_keyword = CASE(host.keyword IN (${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | STATS rank_host_keyword = AVG(bytes) BY host.keyword | SORT rank_host_keyword DESC, host.keyword ASC | LIMIT 2 | KEEP host.keyword), host.keyword, NULL) | INLINE STATS rank_host_keyword = AVG(bytes) BY key_host_keyword | STATS AVG(bytes) BY rank_host_keyword, key_host_keyword, BUCKET(timestamp, 1 day) | EVAL named_host_keyword = CASE(key_host_keyword IS NULL, 0::LONG, 1::LONG) | SORT named_host_keyword DESC, rank_host_keyword DESC, key_host_keyword ASC, \`BUCKET(timestamp, 1 day)\` ASC | EVAL host.keyword = COALESCE(TO_STRING(key_host_keyword), "Other"::KEYWORD) | DROP named_host_keyword, key_host_keyword, rank_host_keyword`,
+        columnNames: ['AVG(bytes)', 'BUCKET(timestamp, 1 day)', 'host.keyword'],
+        expectedSourceIds: {
+          'AVG(bytes)': ['col3'],
+          'host.keyword': ['col1'],
+          'BUCKET(timestamp, 1 day)': ['col2'],
+        },
+        // Other is www.elastic.co and elastic-elastic-elastic.org: 74 documents, 359124 bytes.
+        expectedLastRow: { 'host.keyword': 'Other', 'AVG(bytes)': 359124 / 74 },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'terms above a date histogram with other bucket ranked by metric ASC',
+      columns: {
+        col1: terms('host.keyword', {
+          size: 2,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'asc',
+          otherBucket: true,
+        }),
+        col2: dateHistogram('timestamp', { interval: '1d' }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | EVAL key_host_keyword = CASE(host.keyword IN (${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | STATS rank_host_keyword = AVG(bytes) BY host.keyword | SORT rank_host_keyword ASC, host.keyword ASC | LIMIT 2 | KEEP host.keyword), host.keyword, NULL) | INLINE STATS rank_host_keyword = AVG(bytes) BY key_host_keyword | STATS AVG(bytes) BY rank_host_keyword, key_host_keyword, BUCKET(timestamp, 1 day) | EVAL named_host_keyword = CASE(key_host_keyword IS NULL, 0::LONG, 1::LONG) | SORT named_host_keyword DESC, rank_host_keyword ASC, key_host_keyword ASC, \`BUCKET(timestamp, 1 day)\` ASC | EVAL host.keyword = COALESCE(TO_STRING(key_host_keyword), "Other"::KEYWORD) | DROP named_host_keyword, key_host_keyword, rank_host_keyword`,
+        columnNames: ['AVG(bytes)', 'BUCKET(timestamp, 1 day)', 'host.keyword'],
+        expectedSourceIds: {
+          'AVG(bytes)': ['col3'],
+          'host.keyword': ['col1'],
+          'BUCKET(timestamp, 1 day)': ['col2'],
+        },
+        // Other is artifacts.elastic.co and cdn.elastic-elastic-elastic.org: 131 documents,
+        // 825173 bytes.
+        expectedLastRow: { 'host.keyword': 'Other', 'AVG(bytes)': 825173 / 131 },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'terms above a date histogram (auto interval) with other bucket',
+      columns: {
+        col1: terms('host.keyword', {
+          size: 2,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+          otherBucket: true,
+        }),
+        col2: dateHistogram('timestamp', { interval: 'auto' }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | EVAL key_host_keyword = CASE(host.keyword IN (${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | STATS rank_host_keyword = AVG(bytes) BY host.keyword | SORT rank_host_keyword DESC, host.keyword ASC | LIMIT 2 | KEEP host.keyword), host.keyword, NULL) | INLINE STATS rank_host_keyword = AVG(bytes) BY key_host_keyword | STATS AVG(bytes) BY rank_host_keyword, key_host_keyword, timestamp = BUCKET(timestamp, 75, ?_tstart, ?_tend) | EVAL named_host_keyword = CASE(key_host_keyword IS NULL, 0::LONG, 1::LONG) | SORT named_host_keyword DESC, rank_host_keyword DESC, key_host_keyword ASC, timestamp ASC | EVAL host.keyword = COALESCE(TO_STRING(key_host_keyword), "Other"::KEYWORD) | DROP named_host_keyword, key_host_keyword, rank_host_keyword`,
+        columnNames: ['AVG(bytes)', 'timestamp', 'host.keyword'],
+        expectedSourceIds: {
+          'AVG(bytes)': ['col3'],
+          'host.keyword': ['col1'],
+          timestamp: ['col2'],
+        },
+        // The auto bucket width depends on Elasticsearch, so only the label is pinned here.
+        expectedLastRow: { 'host.keyword': 'Other' },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'terms above a date histogram with other bucket ranked alphabetically DESC',
+      columns: {
+        col1: terms('host.keyword', {
+          size: 2,
+          orderBy: { type: 'alphabetical' },
+          orderDirection: 'desc',
+          otherBucket: true,
+        }),
+        col2: dateHistogram('timestamp', { interval: '1d' }),
+        col3: count(),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | EVAL key_host_keyword = CASE(host.keyword IN (${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | STATS COUNT(*) BY host.keyword | SORT host.keyword DESC | LIMIT 2 | KEEP host.keyword), host.keyword, NULL) | STATS COUNT(*) BY key_host_keyword, BUCKET(timestamp, 1 day) | EVAL named_host_keyword = CASE(key_host_keyword IS NULL, 0::LONG, 1::LONG) | SORT named_host_keyword DESC, key_host_keyword DESC, \`BUCKET(timestamp, 1 day)\` ASC | EVAL host.keyword = COALESCE(TO_STRING(key_host_keyword), "Other"::KEYWORD) | DROP named_host_keyword, key_host_keyword`,
+        columnNames: ['COUNT(*)', 'BUCKET(timestamp, 1 day)', 'host.keyword'],
+        expectedSourceIds: {
+          'COUNT(*)': ['col3'],
+          'host.keyword': ['col1'],
+          'BUCKET(timestamp, 1 day)': ['col2'],
+        },
+        // Other is artifacts.elastic.co and cdn.elastic-elastic-elastic.org.
+        expectedLastRow: { 'host.keyword': 'Other', 'COUNT(*)': 131 },
       },
     },
     // Top values above a date histogram: rank the top N globally, then plot those series over

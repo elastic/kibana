@@ -6,8 +6,6 @@
  */
 
 import { inject, injectable } from 'inversify';
-import { PluginInitializer } from '@kbn/core-di-server';
-import type { PluginInitializerContext } from '@kbn/core/server';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
 import {
   createAlertEventsBatchBuilder,
@@ -21,7 +19,7 @@ import {
 import { forwardThenFinalize, guardedExpandStep } from '../stream_utils';
 import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
-import type { PluginConfig } from '../../../config';
+import { ConfigService } from '../../services/config_service/config_service';
 
 @injectable()
 export class CreateAlertEventsStep implements RuleExecutionStep {
@@ -31,11 +29,9 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
 
   constructor(
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
-    @inject(PluginInitializer('config'))
-    pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
+    @inject(ConfigService) configService: ConfigService
   ) {
-    this.maxGroupsPerExecution =
-      pluginConfigAccessor.get<PluginConfig>().rules.run.maxGroupsPerExecution;
+    this.maxGroupsPerExecution = configService.get('rules.run.maxGroupsPerExecution');
   }
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {

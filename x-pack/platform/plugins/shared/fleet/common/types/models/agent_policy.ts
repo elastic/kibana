@@ -244,6 +244,9 @@ export interface FullAgentPolicyDownload {
   secrets?: FullAgentPolicyDownloadSecrets;
   proxy_url?: string;
   proxy_headers?: any;
+  reserve_diskspace?: {
+    enabled: boolean;
+  };
 }
 
 export interface FullAgentPolicy {
