@@ -18,10 +18,6 @@ import {
 } from '../../services/aws_onboarding';
 import { appContextService } from '../../services/app_context';
 import { isAwsManagedOnboardingEnabled } from '../../services/utils/aws_onboarding';
-import { isAgenticAwsOnboardingEnabled } from '../../services/utils/agentic_aws_onboarding';
-import { submitSettingsAnswer } from '../../services/aws_onboarding/settings_answer';
-import type { WorkflowApi } from '../../agent_builder/tools/common';
-import type { AwsOnboardingSettingsAnswer } from '../../../common/workflows/steps/settings';
 import { isIacProvisionerEnabled } from '../../services/utils/iac_provisioner';
 import { iacProvisionerService } from '../../services/iac_provisioner';
 import {
@@ -45,37 +41,8 @@ import type {
   GetAwsOnboardingBootstrapTemplateRequestSchema,
   GetAwsOnboardingStackRequestSchema,
   PutAwsOnboardingCredentialsRequestSchema,
-  SubmitAwsOnboardingSettingsRequestSchema,
   UpdateAwsOnboardingStackRequestSchema,
 } from '../../types/rest_spec/aws_onboarding';
-
-/** Validates the settings answer against the run's requirement and resumes it when valid. */
-export const createSubmitSettingsHandler =
-  (
-    workflowApi: WorkflowApi
-  ): FleetRequestHandler<
-    TypeOf<typeof SubmitAwsOnboardingSettingsRequestSchema.params>,
-    undefined,
-    AwsOnboardingSettingsAnswer
-  > =>
-  async (context, request, response) => {
-    if (!(await isAgenticAwsOnboardingEnabled())) return notEnabled(response);
-    try {
-      const { spaceId } = await context.fleet;
-      const result = await submitSettingsAnswer({
-        workflowApi,
-        executionId: request.params.executionId,
-        spaceId,
-        request,
-        answer: request.body,
-      });
-      return response.ok({ body: result });
-    } catch (error) {
-      return response.conflict({
-        body: { message: error instanceof Error ? error.message : 'Could not submit settings' },
-      });
-    }
-  };
 
 const BOOTSTRAP_STACK_NAME = 'elastic-bootstrap-onboarding';
 

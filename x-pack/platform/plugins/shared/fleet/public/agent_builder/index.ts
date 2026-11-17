@@ -8,11 +8,9 @@
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 
 import { AWS_ONBOARDING_CREDENTIALS_ATTACHMENT_TYPE } from '../../common/agent_builder/aws_onboarding_credentials_attachment';
-import { AWS_ONBOARDING_SETTINGS_ATTACHMENT_TYPE } from '../../common/agent_builder/aws_onboarding_settings_attachment';
 import type { FleetStartServices } from '../plugin';
 
 import { createAwsOnboardingCredentialsAttachmentDefinition } from './attachments/aws_onboarding_credentials/definition';
-import { createAwsOnboardingSettingsAttachmentDefinition } from './attachments/aws_onboarding_settings/definition';
 
 export const registerFleetAgentBuilderAttachments = ({
   attachments,
@@ -24,9 +22,5 @@ export const registerFleetAgentBuilderAttachments = ({
   attachments.addAttachmentType(
     AWS_ONBOARDING_CREDENTIALS_ATTACHMENT_TYPE,
     createAwsOnboardingCredentialsAttachmentDefinition(startServices)
-  );
-  attachments.addAttachmentType(
-    AWS_ONBOARDING_SETTINGS_ATTACHMENT_TYPE,
-    createAwsOnboardingSettingsAttachmentDefinition(startServices)
   );
 };

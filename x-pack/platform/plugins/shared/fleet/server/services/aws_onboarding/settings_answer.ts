@@ -6,14 +6,8 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { ExecutionStatus } from '@kbn/workflows';
 
-import {
-  AWS_ONBOARDING_SETTINGS_ATTACHMENT_TYPE,
-  type AwsOnboardingSettingsAttachmentData,
-} from '../../../common/agent_builder/aws_onboarding_settings_attachment';
 import { validateSettingsAnswer } from '../../../common/workflows/steps/settings';
 import type {
   AwsOnboardingSettingsAnswer,
@@ -39,14 +33,12 @@ export const submitSettingsAnswer = async ({
   spaceId,
   request,
   answer,
-  attachments,
 }: {
   workflowApi: WorkflowApi;
   executionId: string;
   spaceId: string;
   request: KibanaRequest;
   answer: AwsOnboardingSettingsAnswer;
-  attachments?: AttachmentStateManager;
 }): Promise<SubmitSettingsAnswerResult> => {
   const found = await getOnboardingExecution({
     workflowApi,
@@ -86,7 +78,6 @@ export const submitSettingsAnswer = async ({
 
   const problems = validateSettingsAnswer(requirement, answer);
   if (problems.length > 0) {
-    await recordAttempt({ attachments, executionId, answer, problems });
     return { status: 'invalid', problems };
   }
 
@@ -94,30 +85,4 @@ export const submitSettingsAnswer = async ({
     stepExecutionId: waitingStep.id,
   });
   return { status: 'resumed' };
-};
-
-/** Keeps an invalid attempt on the settings card so it reflects what the user gave in chat. */
-const recordAttempt = async ({
-  attachments,
-  executionId,
-  answer,
-  problems,
-}: {
-  attachments?: AttachmentStateManager;
-  executionId: string;
-  answer: AwsOnboardingSettingsAnswer;
-  problems: SettingsProblem[];
-}) => {
-  if (!attachments) return;
-  const card = attachments
-    .getActive()
-    .find(
-      (a) =>
-        a.type === AWS_ONBOARDING_SETTINGS_ATTACHMENT_TYPE &&
-        (getLatestVersion(a)?.data as Partial<AwsOnboardingSettingsAttachmentData> | undefined)
-          ?.execution_id === executionId
-    );
-  if (!card) return;
-  const stored = getLatestVersion(card)?.data as AwsOnboardingSettingsAttachmentData;
-  await attachments.update(card.id, { data: { ...stored, answer, problems } });
 };

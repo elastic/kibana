@@ -83,18 +83,7 @@ const setup = (waitingStepId = 'ask_settings') => {
     getWorkflowExecution: jest.fn().mockResolvedValue(execution(waitingStepId)),
     resumeWorkflowExecution: jest.fn().mockResolvedValue({}),
   } as any;
-  const card = {
-    id: 'att-1',
-    type: 'fleet_aws_onboarding_settings',
-    versions: [{ version: 1, data: { execution_id: 'exec-1', requirement } }],
-    current_version: 1,
-  };
-  const attachments = {
-    getActive: jest.fn().mockReturnValue([card]),
-    add: jest.fn(),
-    update: jest.fn().mockResolvedValue(undefined),
-  } as any;
-  return { workflowApi, attachments };
+  return { workflowApi };
 };
 
 const base = { executionId: 'exec-1', spaceId: 'default', request };
@@ -119,19 +108,6 @@ describe('submitSettingsAnswer', () => {
     expect(result.status).toBe('invalid');
     expect(result.problems?.[0].path).toBe('guardduty.guardduty.vars.detector_id');
     expect(workflowApi.resumeWorkflowExecution).not.toHaveBeenCalled();
-  });
-
-  it('records the attempt on the attachment', async () => {
-    const { workflowApi, attachments } = setup();
-    const { problems } = await submitSettingsAnswer({
-      ...base,
-      workflowApi,
-      answer: invalidAnswer,
-      attachments,
-    });
-    expect(attachments.update).toHaveBeenCalledWith('att-1', {
-      data: { execution_id: 'exec-1', requirement, answer: invalidAnswer, problems },
-    });
   });
 
   it('refuses when the run is not waiting at ask_settings', async () => {

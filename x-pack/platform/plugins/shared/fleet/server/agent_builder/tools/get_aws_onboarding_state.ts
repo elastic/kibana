@@ -365,8 +365,7 @@ export const createGetAwsOnboardingStateTool = ({
           .getLogger()
           .warn(`Could not sync the AWS onboarding credentials card: ${e.message}`);
       }
-      // The settings card is not shown while the pause is handled in the chat; the attachment
-      // type and route stay so it can be re-enabled.
+      // Settings are settled in the chat, so no settings card is created.
     }
 
     return {

@@ -15,14 +15,11 @@ import {
   GetAwsOnboardingBootstrapTemplateRequestSchema,
   GetAwsOnboardingStackRequestSchema,
   PutAwsOnboardingCredentialsRequestSchema,
-  SubmitAwsOnboardingSettingsRequestSchema,
   UpdateAwsOnboardingStackRequestSchema,
 } from '../../types/rest_spec/aws_onboarding';
-import type { WorkflowApi } from '../../agent_builder/tools/common';
 
 import {
   createStackHandler,
-  createSubmitSettingsHandler,
   deleteCredentialsHandler,
   getBootstrapLaunchHandler,
   getBootstrapTemplateHandler,
@@ -58,27 +55,6 @@ const WRITE_SECURITY = {
       },
     ],
   },
-};
-
-/**
- * The settings route needs the workflows management API, which exists only when the Workflows
- * plugin is available, so the plugin registers it from the block that already holds that API.
- */
-export const registerSettingsRoute = (router: FleetAuthzRouter, workflowApi: WorkflowApi) => {
-  router.versioned
-    .post({
-      path: AWS_ONBOARDING_API_ROUTES.SETTINGS_PATTERN,
-      summary: 'Submit the integration settings answer for an onboarding run',
-      access: 'internal',
-      security: WRITE_SECURITY,
-    })
-    .addVersion(
-      {
-        version: API_VERSIONS.internal.v1,
-        validate: { request: SubmitAwsOnboardingSettingsRequestSchema },
-      },
-      createSubmitSettingsHandler(workflowApi)
-    );
 };
 
 /** POC: Kibana-managed AWS onboarding (CloudFormation via the AWS SDK). Internal, gated by a feature flag. */

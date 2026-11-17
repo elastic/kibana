@@ -54,7 +54,7 @@ export const createAnswerAwsOnboardingTool = ({
   confirmation: { askUser: 'never' },
   handler: async (
     { execution_id: executionId, step_name: stepName, answer },
-    { request, spaceId, attachments }
+    { request, spaceId }
   ) => {
     const denied = await checkOnboardingAccess(request, 'write');
     if (denied) {
@@ -86,7 +86,7 @@ export const createAnswerAwsOnboardingTool = ({
 
     try {
       if (stepName === 'ask_settings') {
-        // Validation and resume live in one service so the settings route behaves the same.
+        // Validation and resume live in one service.
         const parsed = awsOnboardingSettingsAnswerSchema.safeParse(answer);
         if (!parsed.success) {
           return {
@@ -99,7 +99,6 @@ export const createAnswerAwsOnboardingTool = ({
           spaceId,
           request,
           answer: parsed.data,
-          attachments,
         });
         if (submitted.status === 'invalid') {
           return {
