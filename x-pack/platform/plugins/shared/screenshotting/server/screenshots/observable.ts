@@ -9,7 +9,16 @@ import type { Headers } from '@kbn/core/server';
 import type { ConfigType } from '@kbn/screenshotting-server';
 import { durationToNumber as toNumber } from '@kbn/screenshotting-server';
 import type { Observable } from 'rxjs';
-import { catchError, defer, forkJoin, mergeMap, switchMapTo, throwError, timeoutWith } from 'rxjs';
+import {
+  catchError,
+  defer,
+  forkJoin,
+  mergeMap,
+  switchMapTo,
+  takeUntil,
+  throwError,
+  timeoutWith,
+} from 'rxjs';
 import { errors } from '../../common';
 import type { Context, HeadlessChromiumDriver } from '../browsers';
 import { DEFAULT_VIEWPORT, getChromiumDisconnectedError } from '../browsers';
@@ -281,6 +290,7 @@ export class ScreenshotObservableHandler {
                   error: data.error,
                 });
           } catch (e) {
+            this.checkPageIsOpen(); // a capture that failed because the browser closed is not a capture failure
             throw new errors.FailedToCaptureScreenshot(e.message);
           }
           const { timeRange, error: setupError, renderErrors } = data;
@@ -292,7 +302,9 @@ export class ScreenshotObservableHandler {
             renderErrors,
             elementsPositionAndAttributes: elements,
           };
-        })
+        }),
+        // Calls to a crashed page never settle, so the capture cannot be relied on to fail.
+        takeUntil(this.driver.browserExit$.pipe(mergeMap((error) => throwError(() => error))))
       );
   }
 

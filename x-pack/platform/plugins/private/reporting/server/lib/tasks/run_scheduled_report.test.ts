@@ -23,7 +23,8 @@ import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { ScheduleType, type ExportType, type ReportingConfigType } from '@kbn/reporting-server';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { getErrorSource, isUnrecoverableError } from '@kbn/task-manager-plugin/server/task_running';
+import { errors } from '@kbn/screenshotting-plugin/common';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
 import { EventTracker } from '../../usage';
@@ -1049,6 +1050,73 @@ describe('Run Scheduled Report Task', () => {
       error: expect.objectContaining({ name: 'Error', message: 'failure generating report' }),
     });
     jest.useRealTimers();
+  });
+
+  it('does not retry when the browser closed unexpectedly, and keeps the schedule', async () => {
+    configType = createMockConfigSchema({ capture: { maxAttempts: 3 } });
+    mockReporting = await createMockReportingCore(configType);
+    const runThisTaskFn = jest
+      .fn()
+      .mockRejectedValue(new errors.BrowserClosedUnexpectedly('Browser was closed unexpectedly!'));
+    mockReporting.getExportTypesRegistry().register({
+      id: 'test2',
+      name: 'Test2',
+      setup: jest.fn(),
+      start: jest.fn(),
+      createJob: () => new Promise(() => {}),
+      runTask: runThisTaskFn,
+      shouldNotifyUsage: () => true,
+      getFeatureUsageName: () => 'Reporting: test2 scheduled export',
+      notifyUsage: jest.fn(),
+      jobContentEncoding: 'base64',
+      jobType: 'test2',
+      validLicenses: [],
+    } as unknown as ExportType);
+    const store = await mockReporting.getStore();
+    const thisSavedReport = new SavedReport({ ...savedReportData, jobtype: 'test2' });
+    store.addReport = jest.fn().mockImplementation(async () => thisSavedReport);
+    store.setReportFailed = jest.fn().mockResolvedValue({ _id: 'test', jobtype: 'test2' });
+    store.setReportError = jest.fn();
+    const task = new RunScheduledReportTask({
+      reporting: mockReporting,
+      config: configType,
+      logger,
+    });
+    await task.init(taskManagerMock.createStart(), emailNotificationService);
+
+    const schedule = { rrule: { freq: Frequency.DAILY, interval: 2, tzid: 'UTC' } };
+    const taskRunner = task.getTaskDefinition().createTaskRunner({
+      taskInstance: {
+        id: 'report-so-id',
+        runAt: new Date('2023-10-01T00:00:00Z'),
+        schedule,
+        params: { id: 'report-so-id', jobtype: 'test2', schedule },
+      },
+      fakeRequest: fakeRawRequest,
+    } as unknown as RunContext);
+
+    const error: Error = await taskRunner.run().then(
+      () => {
+        throw new Error('Expected the task run to fail');
+      },
+      (runError: Error) => runError
+    );
+
+    expect(runThisTaskFn).toHaveBeenCalledTimes(1); // two retries were left
+    expect(store.setReportError).not.toHaveBeenCalled();
+    expect(store.setReportFailed).toHaveBeenCalledWith(
+      thisSavedReport,
+      expect.objectContaining({
+        completed_at: expect.any(String),
+        output: expect.objectContaining({
+          error_code: 'browser_unexpectedly_closed_error',
+          content: expect.stringContaining('The report was not retried'),
+        }),
+      })
+    );
+    // an unrecoverable error would delete the recurring task, and with it the schedule
+    expect(error).toBeInstanceOf(errors.BrowserClosedUnexpectedly);
+    expect(isUnrecoverableError(error)).toBe(false);
   });
 
   describe('timeout classification', () => {
