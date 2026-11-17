@@ -37,7 +37,7 @@ import type {
 import { useConnectors } from '../../hooks/use_connectors';
 import { useRegionAvailableEndpoints } from '../../hooks/use_region_available_endpoints';
 import { useSupportedEffortLevels } from '../../hooks/use_supported_effort_levels';
-import type { EndpointDeprecationInfo, EndpointEfforts } from '../../types';
+import type { EndpointDeprecationInfo, EndpointDisplay, EndpointEfforts } from '../../types';
 import { ModelStatusBadge } from '../model_status/model_status_badge';
 import { AddModelPopover } from './add_model_popover';
 import { CopyToModal } from './copy_to_modal';
@@ -46,6 +46,7 @@ import { EffortBadge } from './effort_badge';
 import { GlobalDefaultLockedRow } from './global_default_locked_row';
 import { ADD_EFFORT_CLASS_NAME } from './add_effort_badge';
 import { ReasoningEffortPopover } from './reasoning_effort_popover';
+import { RecommendedEndpointsList } from './recommended_endpoints_list';
 import { ResetDefaultsModal } from './reset_defaults_modal';
 import { SubFeatureCardHeader } from './sub_feature_card_header';
 import { useRecommendedDefaults } from './use_recommended_defaults';
@@ -141,7 +142,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
 
   const endpointDisplayMap = useMemo(
     () =>
-      new Map(
+      new Map<string, EndpointDisplay>(
         connectors.map((connector) => [
           connector.connectorId,
           {
@@ -550,98 +551,5 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
         <ResetDefaultsModal onConfirm={confirmResetToDefaults} onCancel={closeResetModal} />
       )}
     </>
-  );
-};
-
-interface RecommendedEndpointsListProps {
-  featureId: string;
-  endpointIds: string[];
-  efforts: EndpointEfforts;
-  endpointDisplayMap: Map<string, { icon: string; label: string }>;
-  invalidEndpointIds: Set<string>;
-  deprecatedEndpointsMap: Map<string, EndpointDeprecationInfo>;
-  globalDefaultRow?: {
-    icon: string;
-    label: string;
-    showBadge: boolean;
-    globalDefaultId: string;
-    deprecationInfo?: EndpointDeprecationInfo;
-  };
-}
-
-const RecommendedEndpointsList: React.FC<RecommendedEndpointsListProps> = ({
-  featureId,
-  endpointIds,
-  efforts,
-  endpointDisplayMap,
-  invalidEndpointIds,
-  deprecatedEndpointsMap,
-  globalDefaultRow,
-}) => {
-  return (
-    <EuiSplitPanel.Outer hasBorder>
-      {globalDefaultRow && (
-        <GlobalDefaultLockedRow
-          featureId={featureId}
-          icon={globalDefaultRow.icon}
-          label={globalDefaultRow.label}
-          showBadge={globalDefaultRow.showBadge}
-          globalDefaultId={globalDefaultRow.globalDefaultId}
-          deprecationInfo={globalDefaultRow.deprecationInfo}
-        />
-      )}
-      {endpointIds.map((endpointId, index) => {
-        const { icon = 'processor', label = endpointId } = endpointDisplayMap.get(endpointId) ?? {};
-        const isInvalid = invalidEndpointIds.has(endpointId);
-        const deprecationInfo = deprecatedEndpointsMap.get(endpointId);
-        const effort = efforts[endpointId];
-        return (
-          <div key={endpointId}>
-            <EuiSplitPanel.Inner paddingSize="s" data-test-subj={`endpoint-row-${endpointId}`}>
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  {isInvalid ? (
-                    <EuiIconTip
-                      type="warning"
-                      size="m"
-                      color="warning"
-                      content={i18n.translate(
-                        'xpack.searchInferenceEndpoints.settings.endpointUnavailable',
-                        { defaultMessage: 'This inference endpoint is no longer available' }
-                      )}
-                    />
-                  ) : (
-                    <EuiIcon type={icon} size="m" color="subdued" aria-hidden />
-                  )}
-                </EuiFlexItem>
-                <EuiFlexItem
-                  grow
-                  css={css`
-                    min-width: 0;
-                  `}
-                >
-                  <EuiText size="s" color="subdued">
-                    <span>{label}</span>
-                  </EuiText>
-                </EuiFlexItem>
-                {deprecationInfo && (
-                  <ModelStatusBadge
-                    id={endpointId}
-                    status={deprecationInfo.status}
-                    metadata={deprecationInfo.metadata}
-                  />
-                )}
-                {effort !== undefined && (
-                  <EuiFlexItem grow={false}>
-                    <EffortBadge endpointId={endpointId} effort={effort} />
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-            </EuiSplitPanel.Inner>
-            {index !== endpointIds.length - 1 && <EuiHorizontalRule margin="none" />}
-          </div>
-        );
-      })}
-    </EuiSplitPanel.Outer>
   );
 };

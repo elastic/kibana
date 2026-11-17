@@ -374,31 +374,6 @@ describe('SubFeatureCard', () => {
 
       expect(onEndpointsChange).toHaveBeenCalledWith('test_feature', ['ep-1']);
     });
-
-    it('shows a focusable warning indicator for an invalid endpoint in the read-only recommended-defaults list', () => {
-      render(
-        <Wrapper>
-          <SubFeatureCard
-            featureId={feature.featureId}
-            feature={feature}
-            endpointIds={['ep-1']}
-            effectiveRecommendedEndpoints={['ep-1']}
-            onEndpointsChange={onEndpointsChange}
-            efforts={{}}
-            effectiveRecommendedEfforts={{}}
-            onEffortsChange={jest.fn()}
-            invalidEndpointIds={new Set(['ep-1'])}
-            deprecatedEndpointsMap={new Map()}
-            {...defaultGlobalRowProps}
-          />
-        </Wrapper>
-      );
-
-      const row = screen.getByTestId('endpoint-row-ep-1');
-      expect(row).toBeInTheDocument();
-      // EuiIconTip renders its inner icon with tabIndex={0}; the normal aria-hidden icon has none.
-      expect(row.querySelector('[tabindex="0"]')).not.toBeNull();
-    });
   });
 
   describe('Copy to control', () => {
@@ -948,19 +923,6 @@ describe('SubFeatureCard', () => {
 
       expect(screen.queryByTestId('effort-popover-ep-1')).not.toBeInTheDocument();
       expect(screen.queryByTestId('remove-effort-customization')).not.toBeInTheDocument();
-    });
-
-    it('shows the recommended effort as read-only when using recommended defaults', () => {
-      renderEffortCard({
-        endpointIds: ['ep-1'],
-        effectiveRecommendedEndpoints: ['ep-1'],
-        efforts: { 'ep-1': 'low' },
-        effectiveRecommendedEfforts: { 'ep-1': 'low' },
-      });
-
-      expect(screen.getByTestId('useRecommendedDefaultsToggle-test_feature')).toBeChecked();
-      expect(screen.getByTestId('effort-badge-ep-1')).toHaveTextContent('low');
-      expect(screen.queryByTestId('add-effort-ep-1')).not.toBeInTheDocument();
     });
 
     it('copies efforts with the models to other features', () => {
