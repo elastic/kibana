@@ -92,7 +92,7 @@ export const SourcesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: Sources
   const addConnectorsDescription = i18n.translate(
     'xpack.contextEngine.aiIndexDetail.sources.addConnectorsCardDescription',
     {
-      defaultMessage: 'Use a connector set up in this space, or create one',
+      defaultMessage: 'Pick or create a connector',
     }
   );
 
@@ -111,7 +111,7 @@ export const SourcesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: Sources
       <AiIndexDetailPanelDescription>
         <FormattedMessage
           id="xpack.contextEngine.aiIndexDetail.sources.panelDescription"
-          defaultMessage="Context reads these sources to write knowledge documents."
+          defaultMessage="Context reads these sources to write knowledge documents. When you add or remove a source, Context updates them for you."
         />
       </AiIndexDetailPanelDescription>
       <EuiSpacer size="m" />

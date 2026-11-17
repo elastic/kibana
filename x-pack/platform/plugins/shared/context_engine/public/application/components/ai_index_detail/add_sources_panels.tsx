@@ -85,8 +85,7 @@ export const AddElasticsearchDataPanel = ({
       isSaving={isSaving}
       headerAction={
         <EuiButtonEmpty
-          size="xs"
-          iconType={mode === 'index' ? 'code' : 'listBullet'}
+          size="s"
           onClick={toggleMode}
           isDisabled={isSaving}
           data-test-subj="contextToggleEsqlModeButton"
@@ -99,7 +98,7 @@ export const AddElasticsearchDataPanel = ({
           ) : (
             <FormattedMessage
               id="xpack.contextEngine.aiIndexDetail.sources.useIndexPickerInstead"
-              defaultMessage="Use index picker instead"
+              defaultMessage="Pick indices instead"
             />
           )}
         </EuiButtonEmpty>
@@ -155,13 +154,8 @@ export const AddConnectorsPanel = ({ savedSources, onAdd, onClose, isSaving }: A
     }
   }, [onAdd, onClose, pending]);
 
-  const {
-    canCreateConnector,
-    canReadConnectors,
-    openCreateFlyout,
-    createConnectorButton,
-    createConnectorFlyout,
-  } = useCreateConnectorFlyout({ onConnectorCreated: onToggle, disabled: isSaving });
+  const { canCreateConnector, canReadConnectors, openCreateFlyout, createConnectorFlyout } =
+    useCreateConnectorFlyout({ onConnectorCreated: onToggle, disabled: isSaving });
 
   return (
     <>
@@ -176,7 +170,6 @@ export const AddConnectorsPanel = ({ savedSources, onAdd, onClose, isSaving }: A
         onClose={onClose}
         onConfirm={confirm}
         isSaving={isSaving}
-        headerAction={createConnectorButton}
         data-test-subj="contextAddConnectorsPanel"
       >
         <ConnectorsTab

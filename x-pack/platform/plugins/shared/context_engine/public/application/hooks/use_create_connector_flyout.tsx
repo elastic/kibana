@@ -68,30 +68,10 @@ export const useCreateConnectorFlyout = ({
     [handleCloseCreateFlyout, handleConnectorCreated, isCreateFlyoutOpen, triggersActionsUi]
   );
 
-  const createConnectorButton =
-    canCreateConnector && canReadConnectors ? (
-      <EuiButtonEmpty
-        iconType="plusCircle"
-        onClick={openCreateFlyout}
-        isDisabled={disabled}
-        data-test-subj="contextCreateConnectorButton"
-        {...getEbtProps({
-          element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageSourcesPanel,
-          action: CONTEXT_ENGINE_UI_EBT.action.sources.CREATE_CONNECTOR,
-        })}
-      >
-        <FormattedMessage
-          id="xpack.contextEngine.sourcePicker.connectors.createButton"
-          defaultMessage="Create connector"
-        />
-      </EuiButtonEmpty>
-    ) : null;
-
   return {
     canCreateConnector,
     canReadConnectors,
     openCreateFlyout,
-    createConnectorButton,
     createConnectorFlyout,
   };
 };
