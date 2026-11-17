@@ -186,8 +186,8 @@ describe('ActionPolicyClient', () => {
           name: 'disabled-policy',
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
           enabled: false,
+          id: 'policy-id-disabled',
         },
-        options: { id: 'policy-id-disabled' },
       });
 
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
