@@ -11,6 +11,9 @@ applies_to:
 
 The Inbound Webhook connector lets any tool that can send an HTTP `POST` request start {{kib}} workflows. The tool sends data, such as JSON, to the connector's webhook URL. Each request starts the workflows that subscribe to the connector, and those workflows can read the request body. Use it with tools that have no built-in way to start a {{kib}} workflow, such as Prometheus Alertmanager, a CI/CD system, or an in-house service.
 
+% TODO: After the docs-content page that this line links to is published, uncomment the following line.
+% To import alerts from a monitoring tool into {{kib}} Universal Alerting, refer to [Import alerts from other monitoring tools](docs-content://explore-analyze/alerting/esql/alerts/import-alerts-from-other-tools.md).
+
 You can use this connector in **Workflows** only. It receives requests and has no actions, so workflows use it as a trigger, not as a step.
 
 ## Requirements [inbound-webhook-requirements]
@@ -134,8 +137,6 @@ triggers:
 ```
 
 For more about triggers that run on events, refer to [Event-driven triggers](docs-content://explore-analyze/workflows/triggers/event-driven-triggers.md).
-
-<!-- TODO: Link to the page about importing alerts from third-party tools with this connector once it's published. -->
 
 ### Event fields [inbound-webhook-event-fields]
 
