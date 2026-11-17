@@ -8,12 +8,12 @@ components:
     SourceFilter:
       description: 'The type of history source to include.'
       type: string
-      enum: [live, rule, scheduled]
+      enum: [live, rule, scheduled, workflow]
 
     UnifiedHistorySource:
-      description: 'The display label for the history source.'
+      description: 'The display label for the history source. Workflow is a caller-asserted display label, not provenance.'
       type: string
-      enum: [Live, Scheduled, Rule]
+      enum: [Live, Scheduled, Rule, Workflow]
 
     GetUnifiedHistoryRequestQuery:
       type: object
@@ -35,7 +35,7 @@ components:
           example: 'elastic,admin'
           type: string
         sourceFilters:
-          description: 'Comma-separated list of source types to include. Valid values are `live`, `rule`, and `scheduled`.'
+          description: 'Comma-separated list of source types to include. Valid values are `live`, `rule`, `scheduled`, and `workflow`.'
           example: 'live,scheduled'
           type: string
         startDate:
@@ -105,9 +105,9 @@ components:
               type: string
               enum: [live]
             source:
-              description: 'Whether this was a manually run live query or triggered by a rule.'
+              description: 'Whether this was a manually run live query, triggered by a rule, or labelled as Workflow. Workflow is a caller-asserted display label, not provenance.'
               type: string
-              enum: [Live, Rule]
+              enum: [Live, Rule, Workflow]
             actionId:
               description: 'The Fleet action ID for the live query.'
               type: string
