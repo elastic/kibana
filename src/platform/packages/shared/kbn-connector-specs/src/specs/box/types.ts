@@ -36,17 +36,10 @@ export const SearchFilesKeywordInputSchema = lazySchema(() =>
       .optional()
       .default(20)
       .describe('Maximum number of results to return (1–200, default 20)'),
-    offset: z
-      .number()
-      .int()
-      .min(0)
-      .optional()
-      .describe(
-        'Pagination offset. Pass the next offset from a previous response to get subsequent pages.'
-      ),
     folderId: z
       .string()
-      .max(256)
+      .regex(/^\d+$/)
+      .max(255)
       .optional()
       .describe(
         'Restrict search to files inside a specific folder (by folder ID). Leave empty to search all content.'
@@ -78,7 +71,8 @@ export const ListFolderContentInputSchema = lazySchema(() =>
   z.object({
     folderId: z
       .string()
-      .max(256)
+      .regex(/^\d+$/)
+      .max(255)
       .describe(
         'The ID of the folder to list. Use "0" for the root folder, or a folder ID from search results.'
       ),
@@ -111,8 +105,8 @@ export const GetFileDetailsInputSchema = lazySchema(() =>
   z.object({
     fileId: z
       .string()
-      .min(1)
-      .max(256)
+      .regex(/^\d+$/)
+      .max(255)
       .describe(
         'The ID of the file to retrieve details for. Use file IDs from searchFilesKeyword or listFolderContent results.'
       ),
@@ -124,8 +118,8 @@ export const GetFolderDetailsInputSchema = lazySchema(() =>
   z.object({
     folderId: z
       .string()
-      .min(1)
-      .max(256)
+      .regex(/^\d+$/)
+      .max(255)
       .describe(
         'The ID of the folder to retrieve details for. Use folder IDs from searchFoldersByName or listFolderContent results.'
       ),
@@ -249,7 +243,7 @@ export const GetHubDetailsInputSchema = lazySchema(() =>
     hubId: z
       .string()
       .min(1)
-      .max(256)
+      .max(255)
       .describe(
         'The ID of the Box Hub to retrieve details for. Use hub IDs from listHubs results.'
       ),
@@ -270,26 +264,12 @@ export const GetHubItemsInputSchema = lazySchema(() =>
 );
 export type GetHubItemsInput = z.infer<typeof GetHubItemsInputSchema>;
 
-export const ListRecentItemsInputSchema = lazySchema(() =>
-  z.object({
-    limit: z
-      .number()
-      .int()
-      .min(1)
-      .max(1000)
-      .optional()
-      .default(100)
-      .describe('Maximum number of recent items to return (1–1000, default 100)'),
-  })
-);
-export type ListRecentItemsInput = z.infer<typeof ListRecentItemsInputSchema>;
-
 export const GetCommentsInputSchema = lazySchema(() =>
   z.object({
     fileId: z
       .string()
-      .min(1)
-      .max(256)
+      .regex(/^\d+$/)
+      .max(255)
       .describe(
         'The ID of the Box file to retrieve comments for. Use file IDs from searchFilesKeyword or listFolderContent results.'
       ),

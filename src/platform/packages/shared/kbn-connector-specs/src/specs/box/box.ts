@@ -34,7 +34,6 @@ import type {
   GetHubDetailsInput,
   GetHubItemsInput,
   ListFolderContentInput,
-  ListRecentItemsInput,
   SearchByMetadataInput,
   SearchFilesKeywordInput,
   SearchFoldersByNameInput,
@@ -54,7 +53,6 @@ import {
   GetHubItemsInputSchema,
   ListFolderContentInputSchema,
   ListHubsInputSchema,
-  ListRecentItemsInputSchema,
   ListToolsInputSchema,
   SearchByMetadataInputSchema,
   SearchFilesKeywordInputSchema,
@@ -136,14 +134,13 @@ export const Box: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description:
-        'Search for files in Box by keyword. Box searches across file and folder names, document content, descriptions, and metadata. Returns file IDs, names, and paths. Use this as the primary way to locate files before reading their content or details.',
+        'Search for files in Box by keyword. Box searches across file and folder names, document content, descriptions, and metadata. Returns file IDs, names, and paths, up to the limit given. Use this as the primary way to locate files before reading their content or details.',
       input: SearchFilesKeywordInputSchema,
       handler: async (ctx, input: SearchFilesKeywordInput) => {
         return callToolJson(ctx, 'search_files_keyword', {
           query: input.query,
           limit: input.limit,
-          offset: input.offset,
-          folder_id: input.folderId,
+          ancestor_folder_id: input.folderId,
         });
       },
     },
@@ -156,7 +153,7 @@ export const Box: ConnectorSpec = {
       input: SearchFoldersByNameInputSchema,
       handler: async (ctx, input: SearchFoldersByNameInput) => {
         return callToolJson(ctx, 'search_folders_by_name', {
-          query: input.query,
+          folder_name: input.query,
           limit: input.limit,
         });
       },
@@ -215,19 +212,6 @@ export const Box: ConnectorSpec = {
       },
     },
 
-    listRecentItems: {
-      isTool: true,
-      scope: 'read',
-      description:
-        'List files and folders recently accessed or modified by the authenticated user in Box. Returns item IDs, names, types, and interaction timestamps. Use this to surface recently active content without needing a search query.',
-      input: ListRecentItemsInputSchema,
-      handler: async (ctx, input: ListRecentItemsInput) => {
-        return callToolJson(ctx, 'list_recent_items', {
-          limit: input.limit,
-        });
-      },
-    },
-
     getComments: {
       isTool: true,
       scope: 'read',
@@ -235,7 +219,7 @@ export const Box: ConnectorSpec = {
         'Retrieve all comments posted on a specific Box file. Returns comment text, author details, and timestamps. Use this to understand discussion or review feedback on a document.',
       input: GetCommentsInputSchema,
       handler: async (ctx, input: GetCommentsInput) => {
-        return callToolJson(ctx, 'get_file_comments', {
+        return callToolJson(ctx, 'list_file_comments', {
           file_id: input.fileId,
         });
       },
@@ -248,10 +232,9 @@ export const Box: ConnectorSpec = {
         'Search for Box files and folders using metadata template fields and a structured query expression (e.g. `amount >= 100 AND currency = "USD"`). Returns items whose metadata matches the query. Use this when you need to filter content by structured attributes rather than keyword text. Use callTool with list_metadata_templates to discover available template keys and field names.',
       input: SearchByMetadataInputSchema,
       handler: async (ctx, input: SearchByMetadataInput) => {
-        return callToolJson(ctx, 'search_by_metadata_query', {
+        return callToolJson(ctx, 'search_files_metadata', {
+          from: `${input.scope}.${input.templateKey}`,
           query: input.query,
-          template_key: input.templateKey,
-          scope: input.scope,
           ancestor_folder_id: input.ancestorFolderId,
           limit: input.limit,
         });
@@ -308,7 +291,7 @@ export const Box: ConnectorSpec = {
       input: AiExtractFreeformInputSchema,
       handler: async (ctx, input: AiExtractFreeformInput) => {
         return callToolJson(ctx, 'ai_extract_freeform', {
-          file_id: input.fileId,
+          file_ids: [input.fileId],
           prompt: input.prompt,
         });
       },
@@ -322,7 +305,7 @@ export const Box: ConnectorSpec = {
       input: AiExtractStructuredFromMetadataTemplateInputSchema,
       handler: async (ctx, input: AiExtractStructuredFromMetadataTemplateInput) => {
         return callToolJson(ctx, 'ai_extract_structured_from_metadata_template', {
-          file_id: input.fileId,
+          file_ids: [input.fileId],
           template_key: input.templateKey,
           scope: input.scope,
         });
@@ -412,7 +395,6 @@ export const Box: ConnectorSpec = {
     '### Finding and reading files',
     'To read a file: call `searchFilesKeyword` (or `searchFoldersByName` + `listFolderContent`) to get an ID,',
     'then `getFileDetails` to check size and permissions before calling `getFileContent`.',
-    'For recently touched content, use `listRecentItems` instead of searching.',
     '',
     '### Metadata and comments',
     'Use `searchByMetadata` to filter content by structured attributes from a metadata template.',
