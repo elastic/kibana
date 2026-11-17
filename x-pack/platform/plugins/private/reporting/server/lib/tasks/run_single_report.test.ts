@@ -730,6 +730,8 @@ describe('Run Single Report Task', () => {
   });
 
   it('fails without running the export type when a serverless feature flag has disabled it', async () => {
+    configType = createMockConfigSchema({ capture: { maxAttempts: 3 } });
+    mockReporting = await createMockReportingCore(configType);
     const isExportTypeEnabled = jest
       .spyOn(mockReporting, 'isExportTypeEnabled')
       .mockResolvedValue(false);
@@ -785,6 +787,8 @@ describe('Run Single Report Task', () => {
   });
 
   it('fails without retrying when no export type is registered for the job type', async () => {
+    configType = createMockConfigSchema({ capture: { maxAttempts: 3 } });
+    mockReporting = await createMockReportingCore(configType);
     const store = await mockReporting.getStore();
     store.setReportError = jest.fn();
     store.setReportFailed = jest.fn();
