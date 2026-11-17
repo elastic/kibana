@@ -117,7 +117,7 @@ steps:
   - name: ask_settings
     type: waitForInput
     with:
-      message: "Set the collection method and required values for each selected service (see the settings card), then reply with the settings."
+      message: "Let's set how each selected service is collected, one service at a time. Reply when the assistant has your settings."
       schema:
         properties:
           services:
