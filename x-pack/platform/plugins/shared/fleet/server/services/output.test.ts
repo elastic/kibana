@@ -4989,7 +4989,7 @@ describe('Output Service', () => {
             },
           });
 
-          expect(soClient.update).toBeCalledWith(
+          expect(soClient.update).toHaveBeenCalledWith(
             expect.anything(),
             expect.anything(),
             expect.objectContaining({
@@ -5008,7 +5008,7 @@ describe('Output Service', () => {
             otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
           });
 
-          expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+          expect(soClient.update).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
             type: 'otlp',
             otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
           });
@@ -5026,7 +5026,7 @@ describe('Output Service', () => {
             },
           });
 
-          expect(soClient.update).toBeCalledWith(
+          expect(soClient.update).toHaveBeenCalledWith(
             expect.anything(),
             expect.anything(),
             expect.objectContaining({
@@ -5047,7 +5047,7 @@ describe('Output Service', () => {
             },
           });
 
-          expect(soClient.update).toBeCalledWith(
+          expect(soClient.update).toHaveBeenCalledWith(
             expect.anything(),
             expect.anything(),
             expect.objectContaining({

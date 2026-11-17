@@ -1161,7 +1161,7 @@ describe('ServiceAccountWorkloadBindings', () => {
         bindings.withScopedRequest(PLUGIN_ID, WORKLOAD_IN_SPACE, async () => {
           throw new Error('execution failed');
         })
-      ).rejects.toThrowError('execution failed');
+      ).rejects.toThrow('execution failed');
 
       expect(assumeAttempt.succeeded).toHaveBeenCalledTimes(1);
       expect(assumeAttempt.failed).not.toHaveBeenCalled();
