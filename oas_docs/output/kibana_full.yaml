@@ -10528,7 +10528,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: "The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. You can't change it after creation. Avoid reusing a deleted policy's ID: the new policy inherits its execution history and throttling state. IDs appear in URLs and logs, so don't include sensitive data."
           in: path
           name: id
           required: true
@@ -10645,7 +10645,7 @@ paths:
         Get an action policy by identifier.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-action-policies.
       operationId: get-alerting-v2-action-policies-id
       parameters:
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: "The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. You can't change it after creation. Avoid reusing a deleted policy's ID: the new policy inherits its execution history and throttling state. IDs appear in URLs and logs, so don't include sensitive data."
           in: path
           name: id
           required: true
@@ -10797,7 +10797,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: "The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. You can't change it after creation. Avoid reusing a deleted policy's ID: the new policy inherits its execution history and throttling state. IDs appear in URLs and logs, so don't include sensitive data."
           in: path
           name: id
           required: true
@@ -10990,7 +10990,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: "The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. You can't change it after creation. Avoid reusing a deleted policy's ID: the new policy inherits its execution history and throttling state. IDs appear in URLs and logs, so don't include sensitive data."
           in: path
           name: id
           required: true
@@ -11205,7 +11205,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: "The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. You can't change it after creation. Avoid reusing a deleted policy's ID: the new policy inherits its execution history and throttling state. IDs appear in URLs and logs, so don't include sensitive data."
           in: path
           name: id
           required: true
@@ -11373,7 +11373,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: "The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. You can't change it after creation. Avoid reusing a deleted policy's ID: the new policy inherits its execution history and throttling state. IDs appear in URLs and logs, so don't include sensitive data."
           in: path
           name: id
           required: true
@@ -11551,7 +11551,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: "The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. You can't change it after creation. Avoid reusing a deleted policy's ID: the new policy inherits its execution history and throttling state. IDs appear in URLs and logs, so don't include sensitive data."
           in: path
           name: id
           required: true
@@ -11730,7 +11730,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: "The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. You can't change it after creation. Avoid reusing a deleted policy's ID: the new policy inherits its execution history and throttling state. IDs appear in URLs and logs, so don't include sensitive data."
           in: path
           name: id
           required: true
@@ -11898,7 +11898,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: 'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+        - description: "The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. You can't change it after creation. Avoid reusing a deleted policy's ID: the new policy inherits its execution history and throttling state. IDs appear in URLs and logs, so don't include sensitive data."
           in: path
           name: id
           required: true
@@ -163385,7 +163385,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping'
           description: 'How matched alerts are batched into notifications. Absent falls back to `per_alert`; send `null` on PATCH to clear it. The mode decides the rest of the block, so a PATCH replaces it whole: send the complete mode variant rather than a single field.'
         id:
-          description: 'Optional action policy ID. If omitted, Kibana generates one. If an action policy with this ID already exists, the request fails with HTTP 409 and the existing policy is not changed. Chosen at creation and permanent — it cannot be changed afterwards. Re-using the id of a deleted resource is allowed but discouraged: execution history, change history, and alerts recorded under that id are retained and are attributed to the new resource. Ids appear in URLs and logs, so keep them free of sensitive data.'
+          description: "The action policy ID. If omitted, Kibana generates one. If a policy with this ID already exists, the request returns a 409 error. You can't change it after creation. Avoid reusing a deleted policy's ID: the new policy inherits its execution history and throttling state. IDs appear in URLs and logs, so don't include sensitive data."
           maxLength: 150
           minLength: 1
           pattern: ^[a-zA-Z0-9_-]+$
