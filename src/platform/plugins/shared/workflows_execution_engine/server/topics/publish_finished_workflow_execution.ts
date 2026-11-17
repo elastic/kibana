@@ -7,15 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v 1".
- */
-
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import type {
@@ -52,7 +43,7 @@ function toWorkflowExecutionFinishedData(
     return undefined;
   }
   const status = toFinishedStatus(execution.status);
-  if (!status || typeof execution.isTestRun !== 'boolean') {
+  if (!status) {
     return undefined;
   }
   const finishedAt =
@@ -64,7 +55,8 @@ function toWorkflowExecutionFinishedData(
     spaceId: execution.spaceId,
     status,
     finishedAt,
-    isTestRun: execution.isTestRun,
+    // Saved-workflow runs leave this unset. Only an explicit test run sets true.
+    isTestRun: execution.isTestRun === true,
   };
   if (execution.triggeredBy) {
     data.triggeredBy = execution.triggeredBy;

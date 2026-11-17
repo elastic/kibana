@@ -84,10 +84,12 @@ export const validateWorkflowInputs = async (
       type: 'InputValidationError',
       message,
     };
+    const finishedAt = new Date().toISOString();
     const update = {
       id: workflowExecution.id,
       status: ExecutionStatus.FAILED,
       error,
+      finishedAt,
     };
     if (workflowExecution.concurrencyGroupKey) {
       await workflowExecutionRepository.updateWorkflowExecution(update, { refresh: true });
@@ -97,6 +99,7 @@ export const validateWorkflowInputs = async (
     await publishFinishedWorkflowExecution(workflowExecution, {
       status: ExecutionStatus.FAILED,
       error,
+      finishedAt,
     });
   };
 

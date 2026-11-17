@@ -7,16 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v 1".
- */
-
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, toWorkflowExecutionEngineModel } from '@kbn/workflows';
+import { buildWorkflowExecutionDocument } from '../lib/build_workflow_execution_document';
 import { publishFinishedWorkflowExecution } from './publish_finished_workflow_execution';
 import { publishWorkflowExecutionFinished } from './publish_workflow_execution_finished';
 
@@ -111,8 +103,55 @@ describe('publishFinishedWorkflowExecution', () => {
     });
     await publishFinishedWorkflowExecution(null);
     await publishFinishedWorkflowExecution({ ...execution, workflowId: undefined });
-    await publishFinishedWorkflowExecution({ ...execution, isTestRun: undefined });
 
     expect(publishWorkflowExecutionFinished).not.toHaveBeenCalled();
+  });
+
+  it('publishes a saved-workflow execution that never set isTestRun as not a test run', async () => {
+    const workflow = toWorkflowExecutionEngineModel({
+      id: 'wf-1',
+      name: 'Production',
+      enabled: true,
+      yaml: 'name: Production',
+      definition: {
+        name: 'Production',
+        version: '1',
+        enabled: true,
+        triggers: [],
+        steps: [],
+      },
+    });
+    const document = buildWorkflowExecutionDocument({
+      workflow,
+      spaceId: 'default',
+      context: {},
+      defaultTriggeredBy: 'scheduled',
+      authenticatedUser: {
+        executedBy: 'user-1',
+        user: { name: 'User One', username: 'user-1' },
+      },
+      now: new Date('2026-01-01T00:00:00.000Z'),
+      maxEventChainDepth: 10,
+      getConcurrencyGroupKey: () => null,
+      getRunName: () => undefined,
+    });
+
+    await publishFinishedWorkflowExecution({
+      ...document,
+      status: ExecutionStatus.COMPLETED,
+      finishedAt: '2026-01-01T00:01:00.000Z',
+    });
+
+    expect(document.isTestRun).toBeUndefined();
+    expect(publishWorkflowExecutionFinished).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflowId: 'wf-1',
+        spaceId: 'default',
+        status: 'completed',
+        isTestRun: false,
+        triggeredBy: 'scheduled',
+        finishedAt: '2026-01-01T00:01:00.000Z',
+      })
+    );
   });
 });

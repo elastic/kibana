@@ -1251,12 +1251,12 @@ export class WorkflowsExecutionEnginePlugin
                     await workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
                       refresh: 'wait_for',
                     });
-                    await publishFinishedWorkflowExecution(workflowExecution);
                     await ensureBoundExecutionAdmitted(
                       workflowExecution,
                       workflowRepository,
                       workflowExecutionRepository
                     );
+                    await publishFinishedWorkflowExecution(workflowExecution);
                     if (workflowExecution.status === ExecutionStatus.FAILED) {
                       return false;
                     }
@@ -1447,7 +1447,8 @@ export class WorkflowsExecutionEnginePlugin
     const workflowRepository = new WorkflowRepository({ esClient, logger: this.logger });
     this.concurrencyManager = new ConcurrencyManager(
       workflowTaskManager,
-      workflowExecutionRepository
+      workflowExecutionRepository,
+      this.logger
     );
     if (!this.coreSetup) {
       throw new Error('Core setup not available');
@@ -1641,13 +1642,12 @@ export class WorkflowsExecutionEnginePlugin
               ? options.refresh
               : false,
           });
-          await publishFinishedWorkflowExecution(workflowExecution);
-
           await ensureBoundExecutionAdmitted(
             workflowExecution,
             workflowRepository,
             workflowExecutionRepository
           );
+          await publishFinishedWorkflowExecution(workflowExecution);
           if (!afterPersist) {
             return 'proceed' as const;
           }
@@ -2000,6 +2000,7 @@ export class WorkflowsExecutionEnginePlugin
                 workflowExecutionRepository
               );
               succeeded.push(p);
+              await publishFinishedWorkflowExecution(p.workflowExecution);
             } catch (error) {
               results[p.idx] = {
                 status: 'error',
@@ -2069,13 +2070,13 @@ export class WorkflowsExecutionEnginePlugin
                     item.workflowExecution,
                     { refresh: 'wait_for' }
                   );
-                  await publishFinishedWorkflowExecution(item.workflowExecution);
                   persisted = true;
                   await ensureBoundExecutionAdmitted(
                     item.workflowExecution,
                     workflowRepository,
                     workflowExecutionRepository
                   );
+                  await publishFinishedWorkflowExecution(item.workflowExecution);
                   checkedIdx.add(item.idx);
                   const proceed = await this.checkConcurrencyIfNeeded(item.workflowExecution);
                   if (proceed) {
