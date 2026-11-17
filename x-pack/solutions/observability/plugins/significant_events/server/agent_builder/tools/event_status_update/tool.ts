@@ -99,7 +99,8 @@ export function createEventStatusUpdateTool({
           workflowExecutionId,
         });
 
-        const isUnmatched = data.reason === 'not_found';
+        const reason = data.updated === 0 ? data.reason : undefined;
+        const isUnmatched = reason === 'not_found';
         // An id that matches no event is whatever the model sent, so it stays out of telemetry.
         const telemetryEventId = isUnmatched ? UNMATCHED_EVENT_ID : toolParams.event_id;
         trackTelemetryBestEffort({
@@ -114,9 +115,7 @@ export function createEventStatusUpdateTool({
                   spaceId: request.spaceId,
                 }),
                 success:
-                  data.updated === 1 ||
-                  data.reason === 'already_in_state' ||
-                  data.reason === 'not_a_breach',
+                  data.updated === 1 || reason === 'already_in_state' || reason === 'not_a_breach',
                 event_id: telemetryEventId,
                 status: toolParams.status,
                 ...(isUnmatched ? { error_message: 'not_found' } : {}),
