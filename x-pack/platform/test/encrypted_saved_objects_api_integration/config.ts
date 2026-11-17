@@ -33,7 +33,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           'a'.repeat(32),
           'b'.repeat(32),
         ])}`,
-        `--plugin-path=${path.resolve(__dirname, './plugins/api_consumer_plugin')}`,
+        `--plugin-path=${path.resolve(
+          __dirname,
+          '../../test_plugins/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin'
+        )}`,
       ],
     },
   };

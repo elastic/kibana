@@ -13,24 +13,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const contentList = getService('contentList');
   const inspector = getService('inspector');
-  const { common, header, home, maps } = getPageObjects(['common', 'header', 'home', 'maps']);
+  const sampleData = getService('sampleData');
+  const { common, maps } = getPageObjects(['common', 'maps']);
 
   describe('Maps app Accessibility', () => {
     before(async () => {
-      await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-      await header.waitUntilLoadingHasFinished();
-      await home.addSampleDataSet('flights');
+      await sampleData.testResources.installKibanaSampleData('flights');
       await common.navigateToApp('maps');
     });
 
     after(async () => {
-      await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-      await header.waitUntilLoadingHasFinished();
-      await home.removeSampleDataSet('flights');
+      await sampleData.testResources.removeKibanaSampleData('flights');
     });
 
     it('loads  maps workpads', async function () {
