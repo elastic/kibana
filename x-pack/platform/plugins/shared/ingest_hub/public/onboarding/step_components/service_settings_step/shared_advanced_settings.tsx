@@ -16,6 +16,10 @@ import { getNamespaceError, InstanceNamespaceField } from './instance_namespace_
 import { OutputField, type OutputFieldProps } from './output_field';
 import { ProxyUrlField, type ProxyUrlFieldProps } from './proxy_url_field';
 import { ConditionField, type ConditionFieldProps } from './condition_field';
+import {
+  ReroutePermissionsField,
+  type ReroutePermissionsFieldProps,
+} from './reroute_permissions_field';
 
 interface SharedAdvancedSettingsProps {
   namespace: string;
@@ -36,6 +40,8 @@ interface SharedAdvancedSettingsProps {
   proxyUrl?: ProxyUrlFieldProps;
   /** The condition field. Like the output, agent-based deploys only. */
   condition?: ConditionFieldProps;
+  /** The reroute permissions field. It applies to agent-based and managed integration deploys. */
+  reroutePermissions?: ReroutePermissionsFieldProps;
 }
 
 /**
@@ -54,6 +60,7 @@ export function SharedAdvancedSettings({
   output,
   proxyUrl,
   condition,
+  reroutePermissions,
 }: SharedAdvancedSettingsProps) {
   const { services } = useKibana<CoreStart>();
   // Like Fleet's switch, it needs a valid namespace to act on.
@@ -143,6 +150,11 @@ export function SharedAdvancedSettings({
       {condition && (
         <EuiFlexItem>
           <ConditionField {...condition} />
+        </EuiFlexItem>
+      )}
+      {reroutePermissions && (
+        <EuiFlexItem>
+          <ReroutePermissionsField {...reroutePermissions} />
         </EuiFlexItem>
       )}
     </EuiFlexGrid>
