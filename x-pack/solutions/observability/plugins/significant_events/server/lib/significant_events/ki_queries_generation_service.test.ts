@@ -149,6 +149,34 @@ describe('generateKIQueries', () => {
     );
   });
 
+  it('returns generated queries when reporting telemetry throws', async () => {
+    const telemetry = {
+      trackSignificantEventsQueriesGenerated: jest.fn(() => {
+        throw new Error('unregistered event type');
+      }),
+    } as unknown as EbtTelemetryClient;
+
+    const result = await generateKIQueries(
+      {
+        source,
+        connectorId: 'test-connector',
+        runId: 'run-1',
+        maxExistingQueriesForContext: 10,
+      },
+      makeDeps({ telemetry, logger })
+    );
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        queries: [expect.objectContaining({ title: 'Detects failures' })],
+        connectorId: 'test-connector',
+      })
+    );
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Failed to track queries generated telemetry: unregistered event type'
+    );
+  });
+
   it('uses the canonical connector returned by model resolution', async () => {
     const resolveModel = jest.fn().mockResolvedValue('canonical-connector');
 
