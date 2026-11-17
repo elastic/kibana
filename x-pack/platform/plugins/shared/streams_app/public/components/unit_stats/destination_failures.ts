@@ -64,12 +64,16 @@ export const getFailureRangeSubtitle = (failed: DestinationFailedView): string =
 export const getFailureClasses = (
   failed: DestinationFailedView
 ): Array<{
+  /** The name of the class in the fields of the failures, for example of a series. */
+  id: 'authentication' | 'authorization';
+  /** The same, for a test id. */
   key: 'Authentication' | 'Authorization';
   title: string;
   failureClass: FailureClassView;
 }> =>
   [
     {
+      id: 'authentication' as const,
       key: 'Authentication' as const,
       title: i18n.translate('xpack.streams.unitStats.failures.authentication', {
         defaultMessage: 'Authentication',
@@ -77,6 +81,7 @@ export const getFailureClasses = (
       failureClass: failed.authentication,
     },
     {
+      id: 'authorization' as const,
       key: 'Authorization' as const,
       title: i18n.translate('xpack.streams.unitStats.failures.authorization', {
         defaultMessage: 'Authorization',

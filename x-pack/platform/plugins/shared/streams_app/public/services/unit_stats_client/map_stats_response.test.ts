@@ -162,9 +162,23 @@ describe('mapStatsResponse', () => {
           {
             collection: 'logs-generic.otel-default',
             reason: 'security_exception',
-            rate: 1.9,
+            rate: 1.1,
             unit: '{item}',
-            percentage: 45.2,
+            percentage: 26.2,
+          },
+          {
+            collection: 'logs-nginx.access-default',
+            reason: 'security_exception',
+            rate: 0.5,
+            unit: '{item}',
+            percentage: 11.9,
+          },
+          {
+            collection: 'metrics-system.cpu-default',
+            reason: 'security_exception',
+            rate: 0.3,
+            unit: '{item}',
+            percentage: 7.1,
           },
         ],
       });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { mapStatsResponse } from './map_stats_response';
 import type {
@@ -307,7 +308,7 @@ export const STATS_FIXTURE_RESPONSES: Record<StatsFixtureScenario, StreamsUnit.S
     meta: META,
   },
   // `es-dev` is refused, in items. A request-level 401 has no cause in the breakdown. A per-document
-  // 403 names the data stream and the error type. The percentages are shares of 4.2 items a second.
+  // 403 names the data stream and the error type, for each of the data streams that it refused. The percentages are shares of 4.2 items a second.
   authFailures: {
     components: {
       destinations: {
@@ -331,8 +332,20 @@ export const STATS_FIXTURE_RESPONSES: Record<StatsFixtureScenario, StreamsUnit.S
               {
                 collection: 'logs-generic.otel-default',
                 reason: 'security_exception',
-                rate: 1.9,
-                percentage: 45.2,
+                rate: 1.1,
+                percentage: 26.2,
+              },
+              {
+                collection: 'logs-nginx.access-default',
+                reason: 'security_exception',
+                rate: 0.5,
+                percentage: 11.9,
+              },
+              {
+                collection: 'metrics-system.cpu-default',
+                reason: 'security_exception',
+                rate: 0.3,
+                percentage: 7.1,
               },
             ],
           },
@@ -471,3 +484,17 @@ export const createFixtureUnitStatsClient = ({
     );
   },
 });
+
+/**
+ * A repository client that answers the stats route from a fixture scenario, as the server does, for
+ * a story whose code builds its own stats client from the repository client of the page, such as
+ * the popover of a node, so that the real client maps the response.
+ */
+export const createFixtureStreamsRepositoryClient = (
+  scenario: StatsFixtureScenario
+): StreamsRepositoryClient =>
+  ({
+    fetch: async (_endpoint: string, { params }: { params: { body: StreamsUnit.StatsRequest } }) =>
+      withRequestedSeries(STATS_FIXTURE_RESPONSES[scenario], params.body.components ?? []),
+    // The type of the client is that of every route, and a story answers only this one.
+  } as unknown as StreamsRepositoryClient);

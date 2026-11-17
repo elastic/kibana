@@ -202,7 +202,11 @@ export const UnitDestinationFlyout = ({
             {hasFailureStats && (
               <>
                 {/* S3 has no ingest chart, so no picker: the section brings its own. */}
-                <DestinationFailuresSection destinationId={destination.id} showTimePicker />
+                <DestinationFailuresSection
+                  destinationId={destination.id}
+                  destinationType={destination.type}
+                  showTimePicker
+                />
                 <EuiSpacer size="l" />
               </>
             )}
@@ -214,7 +218,11 @@ export const UnitDestinationFlyout = ({
           <>
             {hasFailureStats && (
               <>
-                <DestinationFailuresSection destinationId={destination.id} showTimePicker />
+                <DestinationFailuresSection
+                  destinationId={destination.id}
+                  destinationType={destination.type}
+                  showTimePicker
+                />
                 <EuiSpacer size="l" />
               </>
             )}
@@ -242,6 +250,7 @@ export const UnitDestinationFlyout = ({
                 {/* The ingest chart holds the picker, so the section brings one only without it. */}
                 <DestinationFailuresSection
                   destinationId={destination.id}
+                  destinationType={destination.type}
                   showTimePicker={!esqlSource}
                 />
                 <EuiSpacer size="l" />

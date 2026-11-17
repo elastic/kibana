@@ -65,7 +65,7 @@ function FailureClassStats({
         <h4>{title}</h4>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiFlexGroup responsive wrap={false} gutterSize="xl">
+      <EuiFlexGroup responsive wrap={false} gutterSize="m">
         <StatCell
           data-test-subj={`${dataTestSubj}Percentage`}
           title={i18n.translate('xpack.streams.destinations.failures.percentageLabel', {
@@ -91,10 +91,12 @@ function FailureClassStats({
 function FailureClassCauses({
   title,
   failureClass,
+  destinationType,
   dataTestSubj,
 }: {
   title: string;
   failureClass: FailureClassView;
+  destinationType: string;
   dataTestSubj: string;
 }) {
   return (
@@ -109,6 +111,7 @@ function FailureClassCauses({
           defaultMessage: '{class} failures by cause',
           values: { class: title },
         })}
+        destinationType={destinationType}
         dataTestSubj={dataTestSubj}
       />
     </div>
@@ -129,9 +132,11 @@ function FailureClassCauses({
  */
 export function DestinationFailuresSection({
   destinationId,
+  destinationType,
   showTimePicker,
 }: {
   destinationId: string;
+  destinationType: string;
   showTimePicker: boolean;
 }) {
   const { value, loading, error } = useDestinationFailures(destinationId);
@@ -140,6 +145,7 @@ export function DestinationFailuresSection({
   return (
     <DestinationFailuresView
       value={value}
+      destinationType={destinationType}
       loading={loading}
       error={error}
       showTimePicker={showTimePicker}
@@ -150,12 +156,14 @@ export function DestinationFailuresSection({
 
 export function DestinationFailuresView({
   value,
+  destinationType,
   loading,
   error,
   showTimePicker,
   onBrushEnd,
 }: {
   value: ReturnType<typeof useDestinationFailures>['value'];
+  destinationType: string;
   loading: boolean;
   error?: Error;
   showTimePicker: boolean;
@@ -234,6 +242,7 @@ export function DestinationFailuresView({
                   <FailureClassCauses
                     title={title}
                     failureClass={failureClass}
+                    destinationType={destinationType}
                     dataTestSubj={`streamsDestinationFailures${key}Causes`}
                   />
                 </React.Fragment>

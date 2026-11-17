@@ -14,6 +14,7 @@ import {
   STATS_NO_VALUE_LABEL,
 } from '../../../services/unit_stats_client/format_stats';
 import type { FailureCauseView } from '../../../services/unit_stats_client/types';
+import { REMOTE_ELASTICSEARCH_TYPE } from './types';
 
 /**
  * The causes of one failure class as a table, set up as the indices table of the flyout is:
@@ -25,12 +26,17 @@ import type { FailureCauseView } from '../../../services/unit_stats_client/types
 export function DestinationFailureCausesTable({
   causes,
   caption,
+  destinationType,
   dataTestSubj,
 }: {
   causes: FailureCauseView[];
   caption: string;
+  destinationType: string;
   dataTestSubj: string;
 }) {
+  // What an Elasticsearch destination reports as the collection is the name of an index.
+  const isElasticsearch =
+    destinationType === 'elasticsearch' || destinationType === REMOTE_ELASTICSEARCH_TYPE;
   const hasCollection = causes.some(({ collection }) => collection !== null);
   const hasReason = causes.some(({ reason }) => reason !== null);
 
@@ -38,9 +44,13 @@ export function DestinationFailureCausesTable({
   if (hasCollection) {
     columns.push({
       field: 'collection',
-      name: i18n.translate('xpack.streams.destinations.failures.columnCollection', {
-        defaultMessage: 'Collection',
-      }),
+      name: isElasticsearch
+        ? i18n.translate('xpack.streams.destinations.failures.columnIndexName', {
+            defaultMessage: 'Index name',
+          })
+        : i18n.translate('xpack.streams.destinations.failures.columnCollection', {
+            defaultMessage: 'Collection',
+          }),
       'data-test-subj': `${dataTestSubj}Collection`,
       render: (_value: unknown, { collection }: FailureCauseView) =>
         collection ?? STATS_NO_VALUE_LABEL,

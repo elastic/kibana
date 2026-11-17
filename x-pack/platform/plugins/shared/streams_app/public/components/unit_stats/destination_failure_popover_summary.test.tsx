@@ -9,6 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EMPTY_DESTINATION_FAILED } from '../../services/unit_stats_client/map_stats_response';
 import type {
+  DeliverySeriesView,
   DestinationFailedView,
   FailureClassView,
 } from '../../services/unit_stats_client/types';
@@ -16,32 +17,29 @@ import { DestinationFailurePopoverSummary } from './destination_failure_popover_
 
 // The sparkline is a chart, which needs the services of the page, and has tests of its own.
 jest.mock('./failure_sparkline', () => ({
-  FailureSparkline: ({ dataTestSubj }: { dataTestSubj?: string }) => (
-    <div data-test-subj={dataTestSubj} />
-  ),
+  FailureSparkline: ({
+    dataTestSubj,
+    failureClass,
+  }: {
+    dataTestSubj?: string;
+    failureClass: string;
+  }) => <div data-test-subj={dataTestSubj} data-failure-class={failureClass} />,
 }));
 
 const SUMMARY = 'streamsDestinationFailurePopoverSummary';
 
+const series: DeliverySeriesView = {
+  bucketMs: 60_000,
+  unit: '{item}',
+  window: { start: '2026-11-16T20:00:00.000Z', end: '2026-11-16T20:05:00.000Z' },
+  points: [],
+};
+
 const failureClass = (
   rate: number | null,
   percentage: number | null,
-  { unit = '{item}', withSeries = false }: { unit?: string; withSeries?: boolean } = {}
-): FailureClassView => ({
-  rate,
-  unit,
-  percentage,
-  breakdown: [],
-  ...(withSeries
-    ? {
-        series: {
-          bucketMs: 60_000,
-          window: { start: '2026-11-16T20:00:00.000Z', end: '2026-11-16T20:05:00.000Z' },
-          points: [],
-        },
-      }
-    : {}),
-});
+  { unit = '{item}' }: { unit?: string } = {}
+): FailureClassView => ({ rate, unit, percentage, breakdown: [] });
 
 const renderSummary = (failed: Partial<DestinationFailedView>) =>
   render(
@@ -93,11 +91,30 @@ describe('DestinationFailurePopoverSummary', () => {
     expect(text(`${SUMMARY}Subtitle`)).toBe('Of upload attempts in the last 15 minutes');
   });
 
-  it('shows a sparkline for a class that has a series, and none for one that has not', () => {
+  it('shows a sparkline of its own class for each class with failures when there is a series', () => {
     renderSummary({
-      authentication: failureClass(0.5, 11.9, { withSeries: true }),
+      authentication: failureClass(0.5, 11.9),
       authorization: failureClass(1.9, 45.2),
+      series,
     });
+
+    expect(screen.getByTestId(`${SUMMARY}AuthenticationSparkline`)).toHaveAttribute(
+      'data-failure-class',
+      'authentication'
+    );
+    expect(screen.getByTestId(`${SUMMARY}AuthorizationSparkline`)).toHaveAttribute(
+      'data-failure-class',
+      'authorization'
+    );
+  });
+
+  it('shows no sparkline without a series', () => {
+    renderSummary({ authentication: failureClass(0.5, 11.9) });
+    expect(isShown(`${SUMMARY}AuthenticationSparkline`)).toBe(false);
+  });
+
+  it('draws no sparkline for a class with no failures, whatever the series', () => {
+    renderSummary({ authentication: failureClass(0.5, 11.9), series });
 
     expect(isShown(`${SUMMARY}AuthenticationSparkline`)).toBe(true);
     expect(isShown(`${SUMMARY}AuthorizationSparkline`)).toBe(false);

@@ -62,7 +62,7 @@ export function DestinationFailurePopoverSummary({
           {getFailureSubtitle(failed, minutes)}
         </EuiText>
       </div>
-      {getFailureClasses(failed).map(({ key, title, failureClass }) => {
+      {getFailureClasses(failed).map(({ id, key, title, failureClass }) => {
         const percentage = formatPercentageParts(failureClass.percentage);
         const rate = formatRateParts(failureClass.rate);
 
@@ -102,9 +102,10 @@ export function DestinationFailurePopoverSummary({
                   min-inline-size: 0;
                 `}
               >
-                {failureClass.series && (
+                {failed.series && (
                   <FailureSparkline
-                    series={failureClass.series}
+                    series={failed.series}
+                    failureClass={id}
                     dataTestSubj={`${dataTestSubj}${key}Sparkline`}
                   />
                 )}

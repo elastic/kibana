@@ -99,7 +99,11 @@ export function DestinationNodeStats({
         </>
       )}
       {hasFailures && failed && (
-        <DestinationFailureIcon failed={failed} dataTestSubj="streamsCanvasDestinationFailures" />
+        <DestinationFailureIcon
+          destinationId={destinationId}
+          failed={failed}
+          dataTestSubj="streamsCanvasDestinationFailures"
+        />
       )}
       {entry?.status === 'stale' && (
         <StatsProblemIcon problem="stale" dataTestSubj="streamsCanvasDestinationStale" />

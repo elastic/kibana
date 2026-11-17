@@ -29,7 +29,7 @@ const meta: Meta<typeof DestinationFailuresView> = {
     ),
   ],
   // The picker reads the page's time filter, which a story does not have.
-  args: { loading: false, showTimePicker: false },
+  args: { destinationType: 'elasticsearch', loading: false, showTimePicker: false },
 };
 
 export default meta;
@@ -44,7 +44,7 @@ export const BothClasses: Story = {
 };
 
 export const S3UploadAttempts: Story = {
-  args: { value: fixtureValue('s3Failures', 's3-test') },
+  args: { destinationType: 's3', value: fixtureValue('s3Failures', 's3-test') },
 };
 
 export const PartialError: Story = {

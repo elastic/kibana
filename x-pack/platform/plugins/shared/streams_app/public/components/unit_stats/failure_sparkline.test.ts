@@ -5,60 +5,70 @@
  * 2.0.
  */
 
-import type { FailureSeriesView } from '../../services/unit_stats_client/types';
-import { downsample, fillBuckets, MAX_SPARKLINE_POINTS } from './failure_sparkline';
+import type { DeliverySeriesView } from '../../services/unit_stats_client/types';
+import { downsample, MAX_SPARKLINE_POINTS, toPercentagePoints } from './failure_sparkline';
 
 const MINUTE_MS = 60_000;
 const START = Date.parse('2026-11-16T20:00:00.000Z');
 const at = (minutes: number) => new Date(START + minutes * MINUTE_MS).toISOString();
 
 const series = (
-  points: Array<[number, number]>,
-  { windowMinutes = 5, bucketMs = MINUTE_MS }: { windowMinutes?: number; bucketMs?: number } = {}
-): FailureSeriesView => ({
-  bucketMs,
-  window: { start: at(0), end: at(windowMinutes) },
-  points: points.map(([minutes, value]) => ({ start: at(minutes), value })),
+  points: Array<{
+    minutes: number;
+    total: number;
+    authentication?: number;
+    authorization?: number;
+  }>
+): DeliverySeriesView => ({
+  bucketMs: MINUTE_MS,
+  unit: '{item}',
+  window: { start: at(0), end: at(5) },
+  points: points.map(({ minutes, total, authentication = 0, authorization = 0 }) => ({
+    start: at(minutes),
+    total,
+    failed: authentication + authorization,
+    authentication,
+    authorization,
+  })),
 });
 
-describe('fillBuckets', () => {
-  it('has a bucket for every step of the window, with 0 where the series has no point', () => {
+describe('toPercentagePoints', () => {
+  it('is the share of the attempts of each bucket that the class is, in percent, at the start of the bucket', () => {
+    const delivery = series([
+      { minutes: 0, total: 100, authentication: 10, authorization: 40 },
+      { minutes: 1, total: 50, authentication: 25, authorization: 5 },
+    ]);
+
+    expect(toPercentagePoints(delivery, 'authentication')).toEqual([
+      { x: START, y: 10 },
+      { x: START + MINUTE_MS, y: 50 },
+    ]);
+    expect(toPercentagePoints(delivery, 'authorization')).toEqual([
+      { x: START, y: 40 },
+      { x: START + MINUTE_MS, y: 10 },
+    ]);
+  });
+
+  it('is 0 for a bucket that had attempts and none of the class', () => {
+    expect(toPercentagePoints(series([{ minutes: 0, total: 20 }]), 'authentication')).toEqual([
+      { x: START, y: 0 },
+    ]);
+  });
+
+  it('has no point for a bucket with no attempts, which is not a share of 0', () => {
+    const delivery = series([
+      { minutes: 0, total: 10, authentication: 5 },
+      { minutes: 1, total: 0 },
+      { minutes: 2, total: 10, authentication: 10 },
+    ]);
+
     expect(
-      fillBuckets(
-        series([
-          [1, 4],
-          [3, 2],
-        ])
-      )
-    ).toEqual([
-      { x: START, y: 0 },
-      { x: START + MINUTE_MS, y: 4 },
-      { x: START + 2 * MINUTE_MS, y: 0 },
-      { x: START + 3 * MINUTE_MS, y: 2 },
-      { x: START + 4 * MINUTE_MS, y: 0 },
-    ]);
+      toPercentagePoints(delivery, 'authentication').map(({ x }) => (x - START) / MINUTE_MS)
+    ).toEqual([0, 2]);
   });
 
-  it('draws a series with no points as 0 over the whole window', () => {
-    expect(fillBuckets(series([])).map(({ y }) => y)).toEqual([0, 0, 0, 0, 0]);
-  });
-
-  it('puts a point in the bucket that contains it, when the window starts inside a bucket', () => {
-    const offset = 20_000;
-    const filled = fillBuckets({
-      bucketMs: MINUTE_MS,
-      window: {
-        start: new Date(START + offset).toISOString(),
-        end: new Date(START + 2 * MINUTE_MS + offset).toISOString(),
-      },
-      points: [{ start: at(1), value: 7 }],
-    });
-
-    expect(filled).toEqual([
-      { x: START, y: 0 },
-      { x: START + MINUTE_MS, y: 7 },
-      { x: START + 2 * MINUTE_MS, y: 0 },
-    ]);
+  it('has no points for a series with no points', () => {
+    expect(toPercentagePoints(series([]), 'authentication')).toEqual([]);
   });
 });
 

@@ -11,28 +11,28 @@ import { useEuiTheme } from '@elastic/eui';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../hooks/use_kibana';
-import type { FailureSeriesView } from '../../services/unit_stats_client/types';
+import type { DeliverySeriesView } from '../../services/unit_stats_client/types';
 
 /** EUI's guidance: a sparkline is a single series of no more than 12 values. */
 export const MAX_SPARKLINE_POINTS = 12;
 
-/**
- * Every bucket of the window, in order, with 0 for a bucket that has no point: no failures, not
- * missing data. The buckets are on the grid of `bucketMs` that the series uses, so a point lines up
- * with its bucket, whatever time the window starts at.
- */
-export const fillBuckets = (series: FailureSeriesView): Array<{ x: number; y: number }> => {
-  const { bucketMs, window, points } = series;
-  const bucketOf = (time: number) => Math.floor(time / bucketMs) * bucketMs;
-  const values = new Map(points.map(({ start, value }) => [bucketOf(Date.parse(start)), value]));
-  const end = Date.parse(window.end);
+/** The class whose share of the attempts a sparkline draws. */
+type SparklineClass = 'authentication' | 'authorization';
 
-  const filled: Array<{ x: number; y: number }> = [];
-  for (let x = bucketOf(Date.parse(window.start)); x < end; x += bucketMs) {
-    filled.push({ x, y: values.get(x) ?? 0 });
-  }
-  return filled;
-};
+/**
+ * The share of the attempts of each bucket that the class is, in percent, in order. A bucket with
+ * no attempts has no share, so it has no point and the line passes over it, where a share of 0 would
+ * say that nothing failed.
+ */
+export const toPercentagePoints = (
+  { points }: DeliverySeriesView,
+  failureClass: SparklineClass
+): Array<{ x: number; y: number }> =>
+  points.flatMap((point) =>
+    point.total > 0
+      ? [{ x: Date.parse(point.start), y: (point[failureClass] / point.total) * 100 }]
+      : []
+  );
 
 /**
  * Reduces a series to at most `MAX_SPARKLINE_POINTS` points, each the mean of the consecutive
@@ -56,7 +56,8 @@ export const downsample = (
 };
 
 /**
- * A small line of how a percentage moves over the window, as EUI's guidance for sparklines asks:
+ * A small line of how the share of the attempts that a class is moves over the window, as EUI's
+ * guidance for sparklines asks:
  * one series of at most 12 values, with no axes, ticks, labels, grid lines, legend or tooltip, and
  * EUI's own sparkline override of the chart theme. It is decoration for the figures beside it, which
  * say the same in words, so it is hidden from assistive technology. It draws nothing for a series
@@ -64,9 +65,11 @@ export const downsample = (
  */
 export function FailureSparkline({
   series,
+  failureClass,
   dataTestSubj,
 }: {
-  series: FailureSeriesView;
+  series: DeliverySeriesView;
+  failureClass: SparklineClass;
   dataTestSubj?: string;
 }) {
   const { euiTheme } = useEuiTheme();
@@ -78,7 +81,10 @@ export function FailureSparkline({
   } = useKibana();
   const sparklineOverrides = charts.theme.useSparklineOverrides();
 
-  const data = useMemo(() => downsample(fillBuckets(series)), [series]);
+  const data = useMemo(
+    () => downsample(toPercentagePoints(series, failureClass)),
+    [series, failureClass]
+  );
 
   if (data.length < 2) return null;
 

@@ -33,34 +33,17 @@ export interface FailureCauseView extends FailureRateView {
   reason: string | null;
 }
 
-/**
- * How a value moves over a window, one point for each bucket of `bucketMs`. A bucket with no
- * failures may have no point, so `window` says what the series covers, and a chart draws the missing
- * buckets as 0 over that whole window, in line with the series of other classes.
- */
-export interface FailureSeriesView {
-  bucketMs: number;
-  /** The time that the series covers, as ISO times. */
-  window: { start: string; end: string };
-  points: Array<{ start: string; value: number }>;
-}
-
 /** The failures of one class, with its causes. The percentage of a cause is a share of all attempts. */
 export interface FailureClassView extends FailureRateView {
   breakdown: FailureCauseView[];
-  /**
-   * The percentage of the class in each bucket of the window, for a trend line. The API does not
-   * send it yet, so it is absent.
-   */
-  series?: FailureSeriesView;
 }
 
 /**
  * What was attempted and what failed in each bucket of `bucketMs`, as counts in `unit`, for the
  * delivery chart of the flyout. `failed` includes both classes, so the delivered count is `total`
  * minus `failed`, and the failures of other causes are `failed` minus the two classes. A bucket
- * with no attempts may have no point, so `window` says what the series covers. The API does not
- * send it yet, so it is absent.
+ * with no attempts has no point, so `window` says what the series covers. It is only there when the
+ * request asked for it, and the destination type can report it.
  */
 export interface DeliverySeriesView {
   bucketMs: number;

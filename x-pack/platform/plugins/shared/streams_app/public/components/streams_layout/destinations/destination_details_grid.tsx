@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexGrid, EuiFlexItem, EuiText } from '@elastic/eui';
 
-export interface DestinationDetailItem {
+interface DestinationDetailItem {
   title: React.ReactNode;
   description: React.ReactNode;
 }

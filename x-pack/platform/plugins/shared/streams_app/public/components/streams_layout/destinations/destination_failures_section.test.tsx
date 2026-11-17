@@ -60,6 +60,7 @@ const renderView = (props: Partial<React.ComponentProps<typeof DestinationFailur
   render(
     <I18nProvider>
       <DestinationFailuresView
+        destinationType="elasticsearch"
         loading={false}
         showTimePicker={false}
         value={undefined}
@@ -98,8 +99,18 @@ describe('DestinationFailuresView', () => {
     it('shows the causes of the class that has them, and no table for one that has none', () => {
       const causes = screen.getByTestId('streamsDestinationFailuresAuthorizationCauses');
 
-      expect(within(causes).getByText('logs-generic.otel-default')).toBeInTheDocument();
-      expect(within(causes).getByText('security_exception')).toBeInTheDocument();
+      [
+        'logs-generic.otel-default',
+        'logs-nginx.access-default',
+        'metrics-system.cpu-default',
+      ].forEach((name) => expect(within(causes).getByText(name)).toBeInTheDocument());
+      expect(within(causes).getAllByText('security_exception')).toHaveLength(3);
+      // What an Elasticsearch destination reports as the collection is the name of an index.
+      expect(
+        within(causes)
+          .getAllByRole('columnheader')
+          .map(({ textContent }) => textContent)
+      ).toEqual(['Index name', 'Error type', 'Percentage', 'Rate']);
       expect(isShown('streamsDestinationFailuresAuthenticationCauses')).toBe(false);
     });
   });

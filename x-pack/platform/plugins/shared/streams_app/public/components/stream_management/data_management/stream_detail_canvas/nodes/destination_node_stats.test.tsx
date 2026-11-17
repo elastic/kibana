@@ -17,6 +17,10 @@ import { DestinationNodeStats } from './destination_node_stats';
 
 // The sparklines are charts, which need the services of the page, and have tests of their own.
 jest.mock('../../../../unit_stats/failure_sparkline', () => ({ FailureSparkline: () => null }));
+// What the popover fetches when it opens needs the services of the page, and has tests of its own.
+jest.mock('../../../../unit_stats/use_destination_popover_failures', () => ({
+  useDestinationPopoverFailures: () => undefined,
+}));
 
 const mockUseDestinationStats = jest.fn();
 

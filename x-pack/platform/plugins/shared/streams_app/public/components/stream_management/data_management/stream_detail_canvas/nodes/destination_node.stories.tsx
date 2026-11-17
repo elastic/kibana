@@ -8,11 +8,57 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React, { useMemo } from 'react';
 import { ReactFlowProvider, type NodeProps } from '@xyflow/react';
-import { createFixtureUnitStatsClient } from '../../../../../services/unit_stats_client/fixture_unit_stats_client';
+import { createMemoryHistory } from 'history';
+import * as t from 'io-ts';
+import { createRouter, RouterProvider, type RouteMap } from '@kbn/typed-react-router-config';
+import { useKibana } from '../../../../../hooks/use_kibana';
+import {
+  createFixtureStreamsRepositoryClient,
+  createFixtureUnitStatsClient,
+} from '../../../../../services/unit_stats_client/fixture_unit_stats_client';
+import { StreamsAppContextProvider } from '../../../../streams_app_context_provider';
 import type { StatsFixtureScenario } from '../../../../../services/unit_stats_client/fixture_unit_stats_client';
 import { StatsManagerProvider } from '../../../../unit_stats/state_management/use_stats_manager';
 import type { DestinationNodeData, DestinationNode as DestinationNodeType } from '../types';
 import { DestinationNode } from './destination_node';
+
+// The route of the unit, which the popover reads the unit from when it asks for the series of a
+// destination. Nothing renders it, and the page of the unit is not loaded.
+const storyRouter = createRouter<RouteMap>({
+  '/v2/unit/{unitId}/{tab}': {
+    element: <></>,
+    params: t.type({ path: t.type({ unitId: t.string, tab: t.string }) }),
+  },
+});
+const storyHistory = createMemoryHistory({ initialEntries: ['/v2/unit/default/map'] });
+
+/**
+ * The popover of a node asks for the series of its destination with a client that it builds from
+ * the repository client of the page. This gives that client the answers of the fixture scenario.
+ */
+function FixtureRepositoryClient({
+  scenario,
+  children,
+}: React.PropsWithChildren<{ scenario: StatsFixtureScenario }>) {
+  const kibana = useKibana();
+  const context = useMemo(
+    () => ({
+      ...kibana,
+      dependencies: {
+        start: {
+          ...kibana.dependencies.start,
+          streams: {
+            ...kibana.dependencies.start.streams,
+            streamsRepositoryClient: createFixtureStreamsRepositoryClient(scenario),
+          },
+        },
+      },
+    }),
+    [kibana, scenario]
+  );
+
+  return <StreamsAppContextProvider context={context}>{children}</StreamsAppContextProvider>;
+}
 
 /**
  * A destination node as the Map draws it, with its stats from a fixture scenario. The stats arrive
@@ -29,15 +75,19 @@ function DestinationNodeStory({
   const client = useMemo(() => createFixtureUnitStatsClient({ scenario }), [scenario]);
 
   return (
-    <ReactFlowProvider>
-      <StatsManagerProvider unitId="default" client={client}>
-        <div style={{ inlineSize: 280, paddingBlockStart: 260 }}>
-          <DestinationNode
-            {...({ data, selected: false, dragging: false } as NodeProps<DestinationNodeType>)}
-          />
-        </div>
-      </StatsManagerProvider>
-    </ReactFlowProvider>
+    <RouterProvider history={storyHistory} router={storyRouter}>
+      <FixtureRepositoryClient scenario={scenario}>
+        <ReactFlowProvider>
+          <StatsManagerProvider unitId="default" client={client}>
+            <div style={{ inlineSize: 280, paddingBlockStart: 260 }}>
+              <DestinationNode
+                {...({ data, selected: false, dragging: false } as NodeProps<DestinationNodeType>)}
+              />
+            </div>
+          </StatsManagerProvider>
+        </ReactFlowProvider>
+      </FixtureRepositoryClient>
+    </RouterProvider>
   );
 }
 

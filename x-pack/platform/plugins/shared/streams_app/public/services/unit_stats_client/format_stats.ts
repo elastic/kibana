@@ -97,7 +97,7 @@ export const formatFailureBasis = (unit: string): string => {
  * A number and its unit apart, for a stat that shows the unit smaller than the number, as the flyout
  * does: `12` and `%`. `null` means no data, which has a dash and no unit.
  */
-export interface FormattedParts {
+interface FormattedParts {
   value: string;
   unit: string;
 }

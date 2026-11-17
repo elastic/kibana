@@ -30,9 +30,13 @@ const START = Date.parse('2026-11-16T19:00:00.000Z');
 const END = Date.parse('2026-11-16T20:00:00.000Z');
 
 /** The function that the hook gives to the fetch, run as the fetch would run it. */
-const runFetch = async (client: UnitStatsClient, destinationId = 'es-dev') => {
+const runFetch = async (
+  client: UnitStatsClient,
+  destinationId = 'es-dev',
+  options?: Parameters<typeof useDestinationFailures>[1]
+) => {
   mockCreateUnitStatsClient.mockReturnValue(client);
-  renderHook(() => useDestinationFailures(destinationId));
+  renderHook(() => useDestinationFailures(destinationId, options));
   const [fetchFn] = mockUseStreamsAppFetch.mock.calls[0];
   const signal = new AbortController().signal;
   return fetchFn({ signal, timeState: { start: START, end: END } });
@@ -62,6 +66,41 @@ describe('useDestinationFailures', () => {
       },
       { signal: expect.any(AbortSignal) }
     );
+  });
+
+  it('asks over the window that the Map uses, with no range, when told to', async () => {
+    const client: UnitStatsClient = {
+      fetchStats: jest.fn(createFixtureUnitStatsClient({ scenario: 'authFailures' }).fetchStats),
+    };
+
+    await runFetch(client, 'es-dev', { range: 'default' });
+
+    expect(client.fetchStats).toHaveBeenCalledWith(
+      expect.objectContaining({ window: { kind: 'default' } }),
+      { signal: expect.any(AbortSignal) }
+    );
+  });
+
+  it('makes no request, and has no value, while it is not enabled', async () => {
+    const client: UnitStatsClient = {
+      fetchStats: jest.fn(createFixtureUnitStatsClient({ scenario: 'authFailures' }).fetchStats),
+    };
+
+    const result = await runFetch(client, 'es-dev', { enabled: false });
+
+    expect(client.fetchStats).not.toHaveBeenCalled();
+    expect(result).toBeUndefined();
+  });
+
+  it('asks again when it becomes enabled, or when the range changes', () => {
+    mockCreateUnitStatsClient.mockReturnValue(
+      createFixtureUnitStatsClient({ scenario: 'authFailures' })
+    );
+
+    renderHook(() => useDestinationFailures('es-dev', { range: 'default', enabled: true }));
+
+    const [, deps] = mockUseStreamsAppFetch.mock.calls[0];
+    expect(deps).toEqual([expect.anything(), 'es-dev', 'default', true]);
   });
 
   it('gives the stats of that destination', async () => {

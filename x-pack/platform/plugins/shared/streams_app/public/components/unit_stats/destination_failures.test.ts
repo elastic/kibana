@@ -70,8 +70,18 @@ describe('getFailureClasses', () => {
     const authorization = failureClass(1.9, 45.2);
 
     expect(getFailureClasses(failed({ authentication, authorization }))).toEqual([
-      { key: 'Authentication', title: 'Authentication', failureClass: authentication },
-      { key: 'Authorization', title: 'Authorization', failureClass: authorization },
+      {
+        id: 'authentication',
+        key: 'Authentication',
+        title: 'Authentication',
+        failureClass: authentication,
+      },
+      {
+        id: 'authorization',
+        key: 'Authorization',
+        title: 'Authorization',
+        failureClass: authorization,
+      },
     ]);
     expect(getFailureClasses(failed({ authorization })).map(({ key }) => key)).toEqual([
       'Authorization',

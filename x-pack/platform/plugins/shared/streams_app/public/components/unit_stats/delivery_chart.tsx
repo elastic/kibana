@@ -138,7 +138,7 @@ export function DeliveryChart({
       <Chart size={{ width: '100%', height: CHART_HEIGHT }}>
         <Settings
           showLegend
-          legendPosition={Position.Bottom}
+          legendPosition={Position.Right}
           xDomain={{ min: start, max: end, minInterval: series.bucketMs }}
           locale={i18n.getLocale()}
           baseTheme={chartBaseTheme}
