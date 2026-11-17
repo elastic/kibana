@@ -783,8 +783,8 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
   ): Promise<ServiceAccountLookup> {
     // Only accounts in Kibana's namespace can be exchanged. Any other ID tells nothing about an
     // account a workload could run as.
-    const principal = parseEsServiceAccountId(id);
-    if (!principal || principal.namespace !== ES_SERVICE_ACCOUNT_NAMESPACE) {
+    const principal = parseBindableEsServiceAccountId(id);
+    if (!principal) {
       this.logger.debug(`Cannot look up service account [${id}]: not a Kibana-managed account ID`);
       return { status: 'unknown' };
     }
