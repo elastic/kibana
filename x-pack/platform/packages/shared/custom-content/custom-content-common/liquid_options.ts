@@ -20,3 +20,11 @@ export const CUSTOM_CONTENT_LIQUID_OPTIONS = {
   memoryLimit: 100_000_000,
   parseLimit: 1_000_000,
 } as const;
+
+/**
+ * Filters a template may not use. `raw` switches off the HTML escaping of a value, which would let
+ * data (a hostname in a log line, say) write markup, including the `data-cc-*` attributes that make
+ * an element act on a click. The renderer turns each into a no-op and the server rejects the
+ * template, so a saved panel cannot get around either.
+ */
+export const CUSTOM_CONTENT_FORBIDDEN_FILTERS: readonly string[] = ['raw'];

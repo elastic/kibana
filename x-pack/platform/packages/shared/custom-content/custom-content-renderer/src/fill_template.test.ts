@@ -76,6 +76,16 @@ describe('fillTemplateDatasets with one query', () => {
     expect(result).toContain('&lt;script&gt;');
   });
 
+  it('keeps escaping when a template applies the raw filter', async () => {
+    const result = await fillTemplateDatasets(
+      '<p data-x="{{ rows[0]["label"].value | raw }}">{{ rows[0]["label"].value | raw }}</p>',
+      [{ columns: [{ name: 'label', type: 'keyword' }], rows: [['a" onmouseover="x <b>']] }]
+    );
+    expect(result).not.toContain('<b>');
+    expect(result).not.toContain('" onmouseover');
+    expect(result).toContain('&#34;');
+  });
+
   it('rejects when a template exceeds the render limit (DoS guard)', async () => {
     const template = '{% for a in (1..5000) %}{% for b in (1..5000) %}x{% endfor %}{% endfor %}';
     await expect(fillTemplateDatasets(template, [])).rejects.toThrow();

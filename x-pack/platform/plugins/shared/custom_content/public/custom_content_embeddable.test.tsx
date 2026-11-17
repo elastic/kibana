@@ -35,8 +35,16 @@ let capturedComponentProps:
       requestAdapter?: unknown;
       onGenerateWithChat?: () => void;
       onLoadingChange?: (isLoading: boolean) => void;
+      onInteraction?: (interaction: {
+        action: 'filter';
+        field: string;
+        value: string;
+        negate: boolean;
+      }) => void;
     }
   | undefined;
+
+const mockExecuteTriggerActions = jest.fn();
 
 jest.mock('@kbn/custom-content-renderer', () => ({
   CustomContentComponent: (props: {
@@ -132,6 +140,7 @@ jest.mock('./services', () => ({
     agentBuilder: mockAgentBuilder,
     core: { http: {} },
     search: jest.fn(),
+    uiActions: { executeTriggerActions: mockExecuteTriggerActions },
   }),
 }));
 
@@ -484,6 +493,55 @@ describe('customContentEmbeddableFactory', () => {
         'data-is-interactive',
         expected
       );
+    });
+  });
+
+  describe('interactions', () => {
+    beforeEach(() => {
+      mockGetESQLAdHocDataview.mockReset();
+      mockGetESQLAdHocDataview.mockResolvedValue({
+        id: 'logs',
+        getIndexPattern: () => 'logs',
+        getFieldByName: (name: string) =>
+          name === 'host.name' ? { name, type: 'string', filterable: true } : undefined,
+      });
+    });
+
+    it('applies a filter built from the panel data views', async () => {
+      const { embeddable } = await buildEmbeddable(baseState);
+      await waitFor(() => expect(embeddable.api.dataSources$.getValue()).toBeDefined());
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () =>
+        capturedComponentProps?.onInteraction?.({
+          action: 'filter',
+          field: 'host.name',
+          value: 'a',
+          negate: false,
+        })
+      );
+
+      expect(mockExecuteTriggerActions).toHaveBeenCalledWith('on_apply_filter', {
+        filters: [{ meta: { index: 'logs' }, query: { match_phrase: { 'host.name': 'a' } } }],
+        embeddable: expect.objectContaining({ uuid: 'test-uuid' }),
+      });
+    });
+
+    it('applies nothing for a field none of the panel data views has', async () => {
+      const { embeddable } = await buildEmbeddable(baseState);
+      await waitFor(() => expect(embeddable.api.dataSources$.getValue()).toBeDefined());
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () =>
+        capturedComponentProps?.onInteraction?.({
+          action: 'filter',
+          field: 'user.id',
+          value: 'a',
+          negate: false,
+        })
+      );
+
+      expect(mockExecuteTriggerActions).not.toHaveBeenCalled();
     });
   });
 

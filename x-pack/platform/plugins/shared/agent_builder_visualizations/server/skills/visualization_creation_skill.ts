@@ -151,7 +151,7 @@ ${
 
 ### Custom content
 
-Pass \`target.type: "custom_content"\` and describe the panel in \`query\` — layout, copy, and any values or fields to show. Do not write HTML, and never pass a template: the markup is generated server-side.
+Pass \`target.type: "custom_content"\` and describe the panel in \`query\` — layout, copy, and any values or fields to show. Do not write HTML, and never pass a template: the markup is generated server-side. The panel can also be made interactive: say in \`query\` that clicking a value should filter the dashboard (for example "click a host to filter the dashboard by it"), and only when the user asks for it.
 
 You always decide whether the panel has data and say so; there is no default:
 - Pass \`target.dataQueries\` for a panel with live data: one entry per query, each saying what ONE query returns, and a query is generated for it from \`query\` and the description (the common case). The entry can carry a query from ${

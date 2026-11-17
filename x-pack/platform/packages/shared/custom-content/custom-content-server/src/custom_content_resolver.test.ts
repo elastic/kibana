@@ -85,6 +85,20 @@ describe('createCustomContentTemplateResolver — system prompt selection', () =
     expect(systemArg).not.toContain('Liquid template syntax');
   });
 
+  it('teaches click-to-filter only in the prompt of a panel with data', async () => {
+    mockChatComplete.mockResolvedValue({ content: '<div>ok</div>' });
+
+    await resolve({ prompt: 'Restyle', esqlQueries: ['FROM logs'] });
+    await resolve({ prompt: 'A banner' });
+
+    const [withData, withoutData] = mockChatComplete.mock.calls.map(([{ system }]) => system);
+    expect(withData).toContain('CLICK TO FILTER');
+    expect(withData).toContain('data-cc-action="filter"');
+    expect(withData).toContain('ONLY when the request asks for it');
+    expect(withData).toContain('UNCHANGED from a field of the index');
+    expect(withoutData).not.toContain('CLICK TO FILTER');
+  });
+
   it('tells the model that links are only allowed to Dashboards and Discover', async () => {
     mockChatComplete.mockResolvedValue({ content: '<div>hello</div>' });
 

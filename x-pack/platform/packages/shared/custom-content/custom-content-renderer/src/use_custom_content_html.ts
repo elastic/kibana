@@ -46,12 +46,16 @@ export interface UseCustomContentHtmlParams {
 
 export interface UseCustomContentHtmlResult {
   html: string;
+  /** The names of the columns the panel's queries returned, for hosts that validate interactions. */
+  columns: ReadonlySet<string>;
   isLoading: boolean;
   error: string | undefined;
   noContent: boolean;
 }
 
 /** Keeps the same array while its items are the same, for callers that build the list inline. */
+const NO_COLUMNS: ReadonlySet<string> = new Set();
+
 const useStableList = (list: readonly string[]): readonly string[] => {
   const stable = useRef(list);
   const isSame =
@@ -80,6 +84,7 @@ export function useCustomContentHtml({
   setApproximationApplied,
 }: UseCustomContentHtmlParams): UseCustomContentHtmlResult {
   const [filledHtml, setFilledHtml] = useState('');
+  const [columns, setColumns] = useState<ReadonlySet<string>>(NO_COLUMNS);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
 
@@ -91,6 +96,7 @@ export function useCustomContentHtml({
   useEffect(() => {
     if (trimmedTemplate && stableEsqlQueries.length === 0) {
       setFilledHtml(stripMarkdownFences(trimmedTemplate));
+      setColumns(NO_COLUMNS);
       setIsLoading(false);
       setError(undefined);
       return;
@@ -112,7 +118,12 @@ export function useCustomContentHtml({
         requestAdapter,
       })
         .then(({ datasets, approximationApplied }) => {
-          if (!controller.signal.aborted) setApproximationApplied?.(approximationApplied);
+          if (!controller.signal.aborted) {
+            setApproximationApplied?.(approximationApplied);
+            setColumns(
+              new Set(datasets.flatMap((dataset) => dataset.columns.map(({ name }) => name)))
+            );
+          }
           return fillTemplateDatasets(template, datasets);
         })
         .then((rawHtml) => {
@@ -134,6 +145,7 @@ export function useCustomContentHtml({
 
     setApproximationApplied?.(undefined);
     setFilledHtml('');
+    setColumns(NO_COLUMNS);
     setError(undefined);
     setIsLoading(false);
   }, [
@@ -166,5 +178,5 @@ export function useCustomContentHtml({
     [filledHtml, http, isInteractive, colorMode, euiTheme]
   );
 
-  return { html, isLoading, error, noContent: !trimmedTemplate };
+  return { html, columns, isLoading, error, noContent: !trimmedTemplate };
 }

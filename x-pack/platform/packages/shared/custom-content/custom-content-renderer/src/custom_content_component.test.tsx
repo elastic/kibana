@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { useCustomContentHtml } from './use_custom_content_html';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { CustomContentComponent } from './custom_content_component';
@@ -38,6 +38,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockUseCustomContentHtml.mockReturnValue({
     html: '<p>hi</p>',
+    columns: new Set<string>(),
     isLoading: false,
     error: undefined,
     noContent: false,
@@ -70,6 +71,7 @@ describe('CustomContentComponent', () => {
     const onLoadingChange = jest.fn();
     mockUseCustomContentHtml.mockReturnValue({
       html: '',
+      columns: new Set<string>(),
       isLoading: true,
       error: undefined,
       noContent: false,
@@ -86,6 +88,91 @@ describe('CustomContentComponent', () => {
     const iframe = container.querySelector('iframe');
     expect(iframe).not.toBeNull();
     expect(iframe!.getAttribute('sandbox')).toBe('allow-top-navigation-by-user-activation');
+  });
+
+  describe('interactions', () => {
+    const columns = new Set(['host.name']);
+
+    const mountWithColumns = (onInteraction?: jest.Mock, props = {}) => {
+      mockUseCustomContentHtml.mockReturnValue({
+        html: '<button>x</button>',
+        columns,
+        isLoading: false,
+        error: undefined,
+        noContent: false,
+      });
+      const view = render(
+        <CustomContentComponent {...defaultProps} onInteraction={onInteraction} {...props} />
+      );
+      const iframe = view.container.querySelector('iframe')!;
+      return { iframe, ...view };
+    };
+
+    // jsdom has no user input and its `isTrusted` cannot be forged, so the click listener is
+    // captured as the component registers it and called with the event a browser would build.
+    const clickInFrame = (iframe: HTMLIFrameElement, attributes: string, isTrusted = true) => {
+      const frameDocument = iframe.contentDocument!;
+      frameDocument.body.innerHTML = `<button id="b" ${attributes}>x</button>`;
+      const addEventListener = jest.spyOn(EventTarget.prototype, 'addEventListener');
+      fireEvent.load(iframe);
+      const clickCall = addEventListener.mock.calls.findIndex(
+        ([type], index) =>
+          type === 'click' && addEventListener.mock.contexts[index] === frameDocument
+      );
+      const [, listener] = addEventListener.mock.calls[clickCall];
+      addEventListener.mockRestore();
+      (listener as (event: Pick<MouseEvent, 'isTrusted' | 'target'>) => void)({
+        isTrusted,
+        target: frameDocument.getElementById('b'),
+      });
+    };
+
+    it('stays isolated and scriptless unless the host asks for interactions', () => {
+      const { iframe } = mountWithColumns(undefined);
+      expect(iframe.getAttribute('sandbox')).toBe('allow-top-navigation-by-user-activation');
+    });
+
+    it('turns the frame same-origin, still without scripts, when the host listens', () => {
+      const { iframe } = mountWithColumns(jest.fn());
+      const tokens = iframe.getAttribute('sandbox')!.split(' ');
+      expect(tokens).toContain('allow-same-origin');
+      expect(tokens).not.toContain('allow-scripts');
+    });
+
+    it('reports a click on an element that declares a valid filter', () => {
+      const onInteraction = jest.fn();
+      const { iframe } = mountWithColumns(onInteraction);
+      clickInFrame(iframe, 'data-cc-action="filter" data-cc-field="host.name" data-cc-value="a"');
+      expect(onInteraction).toHaveBeenCalledWith({
+        action: 'filter',
+        field: 'host.name',
+        value: 'a',
+        negate: false,
+      });
+    });
+
+    it('ignores a click that names a column the query did not return', () => {
+      const onInteraction = jest.fn();
+      const { iframe } = mountWithColumns(onInteraction);
+      clickInFrame(iframe, 'data-cc-action="filter" data-cc-field="user.id" data-cc-value="a"');
+      expect(onInteraction).not.toHaveBeenCalled();
+    });
+
+    it('ignores a click that is not from the user', () => {
+      const onInteraction = jest.fn();
+      const { iframe } = mountWithColumns(onInteraction);
+      clickInFrame(
+        iframe,
+        'data-cc-action="filter" data-cc-field="host.name" data-cc-value="a"',
+        false
+      );
+      expect(onInteraction).not.toHaveBeenCalled();
+    });
+
+    it('never offers interactions in a non-interactive view', () => {
+      const { iframe } = mountWithColumns(jest.fn(), { isInteractive: false });
+      expect(iframe.getAttribute('sandbox')).toBe('');
+    });
   });
 
   it('blocks all navigation from the iframe in a non-interactive view', () => {
@@ -117,6 +204,7 @@ describe('CustomContentComponent', () => {
   it('keeps the preview iframe fully sandboxed so a click cannot navigate away from the editor', () => {
     mockUseCustomContentHtml.mockReturnValue({
       html: '',
+      columns: new Set<string>(),
       isLoading: false,
       error: undefined,
       noContent: false,

@@ -14,3 +14,8 @@ export const CUSTOM_CONTENT_CSP_META =
 export const CUSTOM_CONTENT_IFRAME_SANDBOX = 'allow-top-navigation-by-user-activation';
 
 export const CUSTOM_CONTENT_ALLOWED_LINK_APPS: readonly string[] = ['dashboards', 'discover'];
+
+// Interactions need the parent to listen to clicks inside the frame, which takes a same-origin
+// frame. `allow-scripts` stays off, so the browser itself keeps any script from running, whatever
+// the content holds: the parent is the only code that ever touches the frame's document.
+export const CUSTOM_CONTENT_IFRAME_SANDBOX_WITH_INTERACTIONS = `${CUSTOM_CONTENT_IFRAME_SANDBOX} allow-same-origin`;
