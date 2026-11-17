@@ -13,7 +13,7 @@
  * - Prints a safe error message on failure (without dumping config contents).
  *
  * NOTE: This script is executed from CI "repository hooks" before dependencies are installed,
- * so it MUST NOT require repo packages (e.g. @kbn/babel-register).
+ * so it MUST NOT require repo packages (e.g. @kbn/swc-register).
  */
 
 const Fs = require('fs');

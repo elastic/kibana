@@ -518,7 +518,7 @@
     {
       "groupName": "@elastic/contextual-security-apps dependencies",
       "matchDepNames": ["@mswjs/http-middleware", "@types/byte-size", "byte-size", "msw", "@xterm/xterm"],
-      "reviewers": ["team:contextual-security-apps"],
+      "reviewers": ["team:contextual-security-apps", "team:siem-beacon"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Cloud Security"],
       "enabled": true,
@@ -1778,7 +1778,7 @@
     {
       "groupName": "i18n-iso-countries",
       "matchDepNames": ["i18n-iso-countries"],
-      "reviewers": ["team:security-entity-analytics", "team:contextual-security-apps"],
+      "reviewers": ["team:security-entity-analytics", "team:contextual-security-apps", "team:siem-beacon"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Entity Analytics", "Team:Cloud Security"],
       "minimumReleaseAge": "14 days",
@@ -2049,6 +2049,7 @@
       "reviewers": [
         "team:response-ops",
         "team:contextual-security-apps",
+        "team:siem-beacon",
         "team:security-asset-management",
         "team:fleet",
         "team:awp-platform",
@@ -2461,7 +2462,7 @@
     {
       "groupName": "@xyflow/react",
       "matchPackageNames": ["@xyflow/react"],
-      "reviewers": ["team:contextual-security-apps"],
+      "reviewers": ["team:contextual-security-apps", "team:siem-beacon"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Cloud Security"],
       "minimumReleaseAge": "14 days",
@@ -2470,7 +2471,7 @@
     {
       "groupName": "@dagrejs/dagre",
       "matchPackageNames": ["@dagrejs/dagre"],
-      "reviewers": ["team:contextual-security-apps"],
+      "reviewers": ["team:contextual-security-apps", "team:siem-beacon"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Cloud Security"],
       "minimumReleaseAge": "14 days",
