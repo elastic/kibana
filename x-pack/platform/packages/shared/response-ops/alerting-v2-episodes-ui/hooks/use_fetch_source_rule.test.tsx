@@ -138,6 +138,22 @@ describe('useFetchSourceRule', () => {
     });
   });
 
+  it('keeps the initial rule and reports an error when the refresh fails', async () => {
+    const http = createHttp();
+    const initialRule = { id: 'r1', metadata: { name: 'Cached Rule' } } as unknown as RuleResponse;
+    const source = createTestEpisodeSource({
+      resolveRules: jest.fn().mockRejectedValue(new Error('source unavailable')),
+    });
+    const { Wrapper } = createWrapper(source);
+
+    const { result } = renderHook(() => useFetchSourceRule({ ruleId: 'r1', http, initialRule }), {
+      wrapper: Wrapper,
+    });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(result.current.rule).toEqual(initialRule);
+  });
+
   it('does not reuse a cached rule when the data source id changes', async () => {
     const http = createHttp();
     const ruleA = { id: 'r1', metadata: { name: 'Source A' } } as unknown as RuleResponse;

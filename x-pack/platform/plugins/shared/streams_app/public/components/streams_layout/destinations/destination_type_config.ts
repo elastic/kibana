@@ -36,6 +36,11 @@ export const DESTINATION_AUTO_MODE_LABEL = i18n.translate(
   { defaultMessage: 'Auto (default)' }
 );
 
+export const WRITING_MODE_STEP_TITLE = i18n.translate(
+  'xpack.streams.destinations.writingModeStepTitle',
+  { defaultMessage: 'How should its documents be written?' }
+);
+
 export const DESTINATION_FIXED_INDEX_MODE_LABEL = i18n.translate(
   'xpack.streams.destinations.fixedIndexModeLabel',
   { defaultMessage: 'Fixed index per signal' }

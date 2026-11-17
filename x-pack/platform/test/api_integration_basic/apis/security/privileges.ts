@@ -55,6 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
             logs: ['all', 'read', 'minimal_all', 'minimal_read'],
             uptime: ['all', 'read', 'minimal_all', 'minimal_read'],
             apm: ['all', 'read', 'minimal_all', 'minimal_read'],
+            digital_experience: ['all', 'read', 'minimal_all', 'minimal_read'],
             osquery: ['all', 'read', 'minimal_all', 'minimal_read'],
             enterpriseSearch: ['all', 'read', 'minimal_all', 'minimal_read'],
             enterpriseSearchApplications: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -557,6 +558,7 @@ export default function ({ getService }: FtrProviderContext) {
             ],
             manageReporting: ['all', 'read', 'minimal_all', 'minimal_read'],
             apm: ['all', 'read', 'minimal_all', 'minimal_read', 'settings_save'],
+            digital_experience: ['all', 'read', 'minimal_all', 'minimal_read', 'manage_sessions'],
             discover: [
               'all',
               'read',

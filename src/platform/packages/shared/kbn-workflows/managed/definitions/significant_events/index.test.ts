@@ -41,6 +41,7 @@ interface WorkflowStep {
     written_rule_uuids?: string;
     inputs?: Record<string, string>;
     schema?: WorkflowJsonSchema;
+    message?: string;
   };
   foreach?: string;
 }
@@ -245,6 +246,22 @@ describe('significant events persistence workflow contracts', () => {
     expect(
       requireStep(featuresIdentification, 'identify_inferred').with?.body?.parentWorkflowExecutionId
     ).toBe('${{ parent.executionId }}');
+  });
+
+  it('ends the features identification loop on its time budget without failing the run', () => {
+    const { settings } = parse(SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW.yaml) as {
+      settings: { timeout: string };
+    };
+    const loop = requireStep(featuresIdentification, 'identify_loop');
+
+    expect(parseInt(loop.timeout ?? '', 10)).toBeLessThan(parseInt(settings.timeout, 10));
+    expect(loop['on-failure']).toEqual({ continue: true });
+    expect(requireStep(featuresIdentification, 'check_all_failed').condition).toBe(
+      '${{ variables.hasSuccess == false and steps.prepare.output.hasDocuments != false }}'
+    );
+    expect(requireStep(featuresIdentification, 'all_failed').with?.message).toContain(
+      '{{ steps.identify_loop.error.message }}'
+    );
   });
 
   it('stamps discovery detections only from reported completed outcomes', () => {

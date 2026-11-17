@@ -15,7 +15,7 @@ export interface SessionsStatusState {
   loading: boolean;
   error: Error | undefined;
   refresh: () => void;
-  /** Installs or updates the sessions transforms with the current user's access. */
+  /** Sets sessions up, or again, with the current user's access. */
   enable: () => Promise<void>;
   enabling: boolean;
   enableError: Error | undefined;
