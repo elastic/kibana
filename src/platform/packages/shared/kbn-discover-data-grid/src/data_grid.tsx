@@ -80,6 +80,9 @@ export const DataGrid = <TRow extends object>({
   if (ariaLabel.trim().length === 0) {
     throw new Error('DataGrid requires a non-empty accessible name.');
   }
+  if (columns.length === 0) {
+    throw new Error('DataGrid requires at least one column.');
+  }
 
   const styles = useEuiMemoizedStyles(getDataGridStyles);
   const scrollContainerRef = useRef<HTMLDivElement>(null);

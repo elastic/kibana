@@ -53,6 +53,10 @@ describe('DataGrid accessibility', () => {
     );
   });
 
+  it('requires at least one column', () => {
+    expect(() => renderGrid({ gridColumns: [] })).toThrow('DataGrid requires at least one column.');
+  });
+
   it('allows a column header to override its accessible name', () => {
     renderGrid({ gridColumns: columnsWithAriaLabel });
 
