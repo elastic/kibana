@@ -349,6 +349,22 @@ actions:
     expect(drift).toMatchObject({ verdict: 'healthy', outcome: 'refresh' });
   });
 
+  it.each([
+    'response-header-removed',
+    'response-success-status-removed',
+    'response-media-type-removed',
+  ])('opens an issue for a breaking %s, which field use does not observe', async (id) => {
+    documents[SPEC_URL] = specYaml({
+      itemProperties: '{ name: { type: string }, color: { type: string } }',
+    });
+    diffEntries = [entry(id, 3)];
+
+    const drift = await detect();
+
+    expect(drift.actions?.[0]).toMatchObject({ tracked: true });
+    expect(drift).toMatchObject({ verdict: 'healthy', outcome: 'issue' });
+  });
+
   it('proposes a refresh for a removed auth requirement the passing actions verify', async () => {
     documents[SPEC_URL] = specYaml({
       itemProperties: '{ name: { type: string }, color: { type: string } }',

@@ -242,9 +242,11 @@ const verdictOf = (
 // Breaking changes that running the actions against the latest spec verifies: requests are
 // validated against it, and so are their credentials and OAuth scopes.
 const VERIFIED_BY_RUNNING = /^(request-|new-(required|optional)-request-|api-security-)/;
-// Breaking changes that field use verifies: only the response fields the actions read matter,
-// and those are compared one by one (`ActionDrift.fieldChanges`).
-const VERIFIED_BY_FIELD_USE = /^(response-|api-schema-removed$)/;
+// Breaking changes that field use verifies: only the response body fields the actions read
+// matter, and those are compared one by one (`ActionDrift.fieldChanges`). Field use only sees
+// parsed JSON bodies, so changes to response headers, statuses and media types still need review.
+const VERIFIED_BY_FIELD_USE =
+  /^(response-(body|mediatype|((required|optional)-)?(write-only-)?property)-|api-schema-removed$)/;
 
 const fieldUseComplete = (drift: Omit<ConnectorDrift, 'outcome'>): boolean =>
   drift.actions !== undefined &&
