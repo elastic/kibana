@@ -216,6 +216,36 @@ describe('InternalStateStore', () => {
     expect(selectTab(store.getState(), initialTabId).appState).toEqual(initialTab.appState);
   });
 
+  it('should prefer the unsubmitted search draft query when asking in natural language', async () => {
+    const { store } = await setup();
+    const initialTabId = store.getState().tabs.unsafeCurrentId;
+    store.dispatch(
+      internalStateActions.updateAppState({
+        tabId: initialTabId,
+        appState: { query: { query: 'response:404', language: 'kuery' } },
+      })
+    );
+    store.dispatch(
+      internalStateActions.setSearchDraftUiState({
+        tabId: initialTabId,
+        searchDraftUiState: { query: { query: 'response:500', language: 'kuery' } },
+      })
+    );
+
+    await store.dispatch(
+      internalStateActions.openAskInEsqlTab({
+        tabId: initialTabId,
+        dataView: dataViewMock,
+        prompt: 'show me logs',
+      })
+    );
+
+    const { byId, unsafeCurrentId } = store.getState().tabs;
+    expect(byId[unsafeCurrentId].appState.query).toEqual({
+      esql: expect.stringMatching(/WHERE KQL\("""response:500"""\)/),
+    });
+  });
+
   it('should copy tab UI state when duplicating a tab', async () => {
     const { store, runtimeStateManager } = await setup();
     const sourceTabId = store.getState().tabs.unsafeCurrentId;

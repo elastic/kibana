@@ -663,8 +663,10 @@ export const openAskInEsqlTab: InternalStateThunkActionCreator<
   Promise<void>
 > = ({ tabId, dataView, prompt }) =>
   function openAskInEsqlTabThunkFn(dispatch, getState, { services }) {
-    const { appState, globalState } = selectTab(getState(), tabId);
-    const query = appState.query && isOfQueryType(appState.query) ? appState.query : undefined;
+    const { appState, globalState, uiState } = selectTab(getState(), tabId);
+    // Unsubmitted query edits live in the search draft; app state only has the last submitted query
+    const liveQuery = uiState.searchDraft?.query ?? appState.query;
+    const query = isOfQueryType(liveQuery) ? liveQuery : undefined;
     const filters = [...(appState.filters ?? []), ...(globalState.filters ?? [])];
     const refreshInterval = globalState.refreshInterval ?? services.timefilter.getRefreshInterval();
 
