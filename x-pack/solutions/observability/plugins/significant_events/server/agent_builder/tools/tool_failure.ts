@@ -21,7 +21,8 @@ import { StatusError } from '../../lib/errors/status_error';
 import type { AgentToolFailureCode, EbtTelemetryClient } from '../../lib/telemetry/ebt';
 import { getWorkflowExecutionIdFromRequest } from '../../lib/telemetry/ebt/workflow_execution_id';
 import { SourceDisabledError, UnknownSourceSlugError } from '../utils/resolve_source_slugs';
-import { BulkWriteError, trackTelemetryBestEffort } from './bulk_write';
+import { BulkWriteError } from './bulk_write';
+import { trackTelemetryBestEffort } from '../../lib/telemetry/track_telemetry_best_effort';
 
 export interface ToolFailure {
   code: AgentToolFailureCode;

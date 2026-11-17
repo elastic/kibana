@@ -59,6 +59,7 @@ packages/kbn-capture-oas-snapshot-cli @elastic/kibana-core
 packages/kbn-check-kibana-settings-cli @elastic/kibana-core
 packages/kbn-check-prod-native-modules-cli @elastic/kibana-operations
 packages/kbn-check-saved-objects-cli @elastic/kibana-core
+packages/kbn-check-server-import-graph-cli @elastic/appex-sharedux
 packages/kbn-ci-stats-performance-metrics @elastic/kibana-operations
 packages/kbn-ci-stats-shipper-cli @elastic/kibana-operations
 packages/kbn-cli-dev-mode @elastic/kibana-operations
@@ -785,6 +786,7 @@ src/platform/packages/shared/kbn-visualizations-common @elastic/kibana-dashboard
 src/platform/packages/shared/kbn-visualizations-components @elastic/kibana-dashboards
 src/platform/packages/shared/kbn-workflows @elastic/workflows-eng
 src/platform/packages/shared/kbn-workflows-library @elastic/workflows-eng
+src/platform/packages/shared/kbn-workflows-topics @elastic/workflows-eng
 src/platform/packages/shared/kbn-workflows-ui @elastic/workflows-eng
 src/platform/packages/shared/kbn-workflows-yaml @elastic/workflows-eng
 src/platform/packages/shared/kbn-workspaces @elastic/kibana-core
@@ -3237,6 +3239,7 @@ x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/
 /x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/endpoint @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/endpoint @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/endpoint @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution/server/workflows/endpoint @elastic/security-defend-workflows
 
 # Significant Events managed workflows
 src/platform/packages/shared/kbn-workflows/managed/definitions/significant_events @elastic/nightshift
