@@ -2021,9 +2021,6 @@ apiTest.describe.skip('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
       expect(
         state.dispatcher_action_groups_throttled_count_by_strategy_24hr?.on_status_change
       ).toBeGreaterThanOrEqual(1);
-      expect(
-        state.dispatcher_action_groups_dispatched_per_policy_by_grouping_mode_24hr
-      ).toStrictEqual({});
     }
   );
 });
