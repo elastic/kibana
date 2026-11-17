@@ -45,7 +45,7 @@ export abstract class SiemMigrationTelemetryClient<I extends ItemDocument = Item
   }
 
   public reportSourceQueryKeywords(params: {
-    type: 'rules' | 'dashboards';
+    type: 'rules' | 'dashboards' | 'workflows';
     keywords: string[];
   }): void {
     if (params.keywords.length === 0) {
