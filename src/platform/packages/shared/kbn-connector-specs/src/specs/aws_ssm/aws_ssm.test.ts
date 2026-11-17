@@ -82,20 +82,30 @@ describe('AwsSsmConnector', () => {
       });
     });
 
-    it('surfaces the AWS error code and message', async () => {
-      mockClient.post.mockRejectedValue(
-        new AxiosError('Request failed with status code 400', 'ERR_BAD_REQUEST', undefined, {}, {
-          status: 400,
-          data: {
-            __type: 'com.amazonaws.ssm#AccessDeniedException',
-            message: 'User is not authorized to perform ssm:DescribeInstanceInformation',
-          },
-        } as AxiosResponse)
-      );
+    const message = 'User is not authorized to perform ssm:DescribeInstanceInformation';
 
-      await expect(describeInstanceInformation.handler(mockContext, {})).rejects.toThrow(
-        'AmazonSSM.DescribeInstanceInformation failed (AccessDeniedException): User is not authorized to perform ssm:DescribeInstanceInformation'
-      );
-    });
+    it.each([
+      ['body', {}, { __type: 'com.amazonaws.ssm#AccessDeniedException', message }],
+      [
+        'x-amzn-ErrorType header',
+        { 'x-amzn-errortype': 'AccessDeniedException:http://internal.amazon.com/coral/' },
+        { message },
+      ],
+    ])(
+      'surfaces the AWS error code from the %s and the message',
+      async (_source, headers, data) => {
+        mockClient.post.mockRejectedValue(
+          new AxiosError('Request failed with status code 400', 'ERR_BAD_REQUEST', undefined, {}, {
+            status: 400,
+            headers,
+            data,
+          } as AxiosResponse)
+        );
+
+        await expect(describeInstanceInformation.handler(mockContext, {})).rejects.toThrow(
+          `AmazonSSM.DescribeInstanceInformation failed (AccessDeniedException): ${message}`
+        );
+      }
+    );
   });
 });

@@ -85,7 +85,7 @@ export const AwsSsmConnector: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description:
-        'List the nodes managed by AWS Systems Manager (EC2 instances and hybrid servers) with their instance ID, SSM Agent ping status and version, platform, host name and IP address. Use it to find instance IDs and to check which nodes are reachable: filter by pingStatus ["Online"], by platformType, by instanceIds, or by tags (tags cannot be combined with the other filters). Pass nextToken from the response as nextToken to fetch the next page.',
+        'List the nodes managed by AWS Systems Manager (EC2 instances and hybrid servers) with their instance ID, SSM Agent ping status and version (and whether it is the latest), association status, resource type, platform, host name and IP address. Use it to find instance IDs, to check which nodes are reachable, and to find nodes running an outdated SSM Agent: filter by pingStatus ["Online"], by platformType, by instanceIds, or by tags (tags cannot be combined with the other filters). Pass nextToken from the response as nextToken to fetch the next page.',
       input: DescribeInstanceInformationInputSchema,
       handler: async (ctx, input: DescribeInstanceInformationInput) => {
         const { maxResults, nextToken } = input;
@@ -110,6 +110,9 @@ export const AwsSsmConnector: ConnectorSpec = {
               PlatformType,
               PlatformName,
               AgentVersion,
+              IsLatestVersion,
+              AssociationStatus,
+              ResourceType,
               ComputerName,
               IPAddress,
             }) => ({
@@ -119,6 +122,9 @@ export const AwsSsmConnector: ConnectorSpec = {
               platformType: PlatformType,
               platformName: PlatformName,
               agentVersion: AgentVersion,
+              isLatestAgentVersion: IsLatestVersion,
+              associationStatus: AssociationStatus,
+              resourceType: ResourceType,
               computerName: ComputerName,
               ipAddress: IPAddress,
             })
@@ -129,6 +135,23 @@ export const AwsSsmConnector: ConnectorSpec = {
       },
     },
   },
+
+  skill: [
+    '## AWS Systems Manager Connector',
+    '',
+    'Use this connector to find and inspect the managed nodes (EC2 instances and hybrid servers running SSM Agent) registered with Systems Manager in the region configured on the connector.',
+    '',
+    '### Common patterns',
+    '- To find unreachable nodes, call `describeInstanceInformation` with `pingStatus: ["ConnectionLost"]`.',
+    '- To find nodes running an outdated SSM Agent, list the nodes and keep those with `isLatestAgentVersion: false`.',
+    '- To scope to a team or environment, filter by `tags`, e.g. `[{ key: "Environment", values: ["Production"] }]`. Tags cannot be combined with `instanceIds`, `pingStatus` or `platformType` in the same call; filter the returned list yourself for the rest.',
+    '',
+    '### Gotchas',
+    '- Results are paged (10 nodes by default, `maxResults` 5-50). While `nextToken` is not null, call again with it and the same filters. Do not report a fleet-wide count from a single page.',
+    '- Stopped and terminated EC2 instances are never returned, so a missing node may simply be stopped.',
+    '- Passing an `instanceIds` value that is not a managed node, or that the credentials cannot see, fails with an `InvalidInstanceId` error rather than returning an empty list.',
+    '- Only the connector region is searched; nodes in other regions need a connector configured for that region.',
+  ].join('\n'),
 
   test: {
     handler: async (ctx) => {

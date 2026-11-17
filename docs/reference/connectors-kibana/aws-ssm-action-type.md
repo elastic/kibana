@@ -35,7 +35,7 @@ Authentication
 
 | Action | Description |
 |--------|-------------|
-| `describeInstanceInformation` | List managed nodes with their instance ID, SSM Agent ping status and version, platform, host name, and IP address. Parameters: `instanceIds`, `pingStatus` (`Online`, `ConnectionLost`, `Inactive`), `platformType` (`Windows`, `Linux`, `MacOS`), `tags`, `maxResults` (5-50), `nextToken`. `tags` cannot be combined with the other filters. |
+| `describeInstanceInformation` | List managed nodes with their instance ID, SSM Agent ping status and version (and whether it is the latest), association status, resource type, platform, host name, and IP address. Stopped and terminated EC2 instances are not returned. Parameters: `instanceIds`, `pingStatus` (`Online`, `ConnectionLost`, `Inactive`), `platformType` (`Windows`, `Linux`, `MacOS`), `tags`, `maxResults` (5-50), `nextToken`. `tags` cannot be combined with the other filters. |
 
 ## Connector networking configuration [aws-ssm-connector-networking-configuration]
 

@@ -17,6 +17,7 @@ const SSM_TARGET_PREFIX = 'AmazonSSM';
 const regionConfigSchema = lazySchema(() => z.object({ region: z.string().min(1) }));
 
 // AWS JSON protocol error body; `__type` is either `<namespace>#<ErrorCode>` or the bare code.
+// The code may come in the `x-amzn-ErrorType` header instead, as `<ErrorCode>:<url>`.
 const awsJsonErrorSchema = lazySchema(() =>
   z.object({
     __type: z.string().optional(),
@@ -46,7 +47,11 @@ const toAwsJsonError = ({ target, error }: { target: string; error: unknown }): 
     return error;
   }
   const parsed = awsJsonErrorSchema.safeParse(error.response?.data);
-  const code = parsed.success ? parsed.data.__type?.split('#').pop() : undefined;
+  const headerType = error.response?.headers['x-amzn-errortype'];
+  const type =
+    (typeof headerType === 'string' ? headerType : undefined) ??
+    (parsed.success ? parsed.data.__type : undefined);
+  const code = type?.split(':')[0].split('#').pop();
   const message = parsed.success ? parsed.data.message ?? parsed.data.Message : undefined;
   return new Error(`${target} failed${code ? ` (${code})` : ''}: ${message ?? error.message}`);
 };

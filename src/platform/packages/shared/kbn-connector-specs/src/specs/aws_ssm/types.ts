@@ -120,6 +120,9 @@ export const DescribeInstanceInformationResponseSchema = lazySchema(() =>
           PlatformType: z.string().optional(),
           PlatformName: z.string().optional(),
           AgentVersion: z.string().optional(),
+          IsLatestVersion: z.boolean().optional(),
+          AssociationStatus: z.string().optional(),
+          ResourceType: z.string().optional(),
           ComputerName: z.string().optional(),
           IPAddress: z.string().optional(),
         })
