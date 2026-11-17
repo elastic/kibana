@@ -50,7 +50,6 @@ export type SimplifiedPackagePolicyStreams = Record<
   {
     enabled?: undefined | boolean;
     vars?: SimplifiedVars;
-    var_group_selections?: Record<string, string>;
     condition?: AgentConditionExpression | null;
     /** Selected option per stream-level var_group (package-spec ≥ 3.6.0). */
     var_group_selections?: Record<string, string>;
@@ -175,8 +174,6 @@ function formatStreams(
     acc[stream.data_stream.dataset] = {
       enabled: isInputAllowed === false ? false : stream.enabled,
       vars: formatVars(stream.vars),
-      // Stream selections round-trip like package-level ones, so a supplied selection isn't lost.
-      ...(stream.var_group_selections ? { var_group_selections: stream.var_group_selections } : {}),
       ...(stream.condition !== undefined ? { condition: stream.condition } : {}),
       ...(stream.var_group_selections ? { var_group_selections: stream.var_group_selections } : {}),
     };
@@ -323,7 +320,6 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
       const {
         enabled: streamEnabled,
         vars: streamsLevelVars,
-        var_group_selections: streamVarGroupSelections,
         condition: streamCondition,
         var_group_selections: streamVarGroupSelections,
       } = streamVal;
@@ -339,11 +335,6 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
 
       if (streamsLevelVars) {
         assignVariables(streamsLevelVars, packagePolicyStream.vars, `${inputId} ${streamId}`);
-      }
-
-      // Keep a supplied stream-level selection, so validation checks the option the caller picked.
-      if (streamVarGroupSelections) {
-        packagePolicyStream.var_group_selections = streamVarGroupSelections;
       }
 
       if (streamCondition !== undefined) {
