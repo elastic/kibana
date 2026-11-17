@@ -39,12 +39,13 @@ def api_issue(repo, number, *, title="t", state="open", labels=(), parent=None, 
 class FakeGh(triage.Gh):
     """Serves issues from a dict; records every call; POST answers are configurable."""
 
-    def __init__(self, issues, *, comments=None, post_result=None, eval_mode=False):
+    def __init__(self, issues, *, comments=None, post_result=None, eval_mode=False, repo_labels=("elastic/kibana", "elastic/security-team")):
         super().__init__(command=["gh"])
         self.eval_mode = eval_mode
         self.issues = issues
         self.comments = comments or {}
         self.post_result = post_result
+        self.repo_labels = repo_labels
         self.calls = []
 
     def run(self, args):
@@ -55,6 +56,9 @@ class FakeGh(triage.Gh):
             return subprocess.CompletedProcess(args, 0, json.dumps(self.post_result), "")
         path = args[-1].split("?")[0]
         parts = path.split("/")
+        if parts[3] == "labels":
+            found = f"{parts[1]}/{parts[2]}" in self.repo_labels and parts[4] == "Needs%20Test%20Plan"
+            return subprocess.CompletedProcess(args, 0 if found else 1, json.dumps({"name": "Needs Test Plan"}), "" if found else "gh: Not Found (HTTP 404)")
         ref = f"{parts[1]}/{parts[2]}#{parts[4]}"
         if ref not in self.issues:
             return subprocess.CompletedProcess(args, 1, "", "gh: Not Found (HTTP 404)")
@@ -116,6 +120,14 @@ class ContextTests(unittest.TestCase):
         self.assertTrue(result["ancestors"][0]["allowed_repo"])
         self.assertEqual((result["target"]["private"], result["ancestors"][0]["private"]), (False, True))
 
+    def test_parent_outside_the_allowed_repos_counts_as_private(self):
+        issues = {
+            "elastic/kibana#1": api_issue("elastic/kibana", 1, parent="elastic/some-internal-repo#2"),
+            "elastic/some-internal-repo#2": api_issue("elastic/some-internal-repo", 2, children=1),
+        }
+        ancestor = triage.context(FakeGh(issues), triage.IssueRef("elastic/kibana", 1))["ancestors"][0]
+        self.assertEqual((ancestor["allowed_repo"], ancestor["private"]), (False, True))
+
     def test_unreadable_parent_is_marked_and_stops_the_walk(self):
         issues = {
             "elastic/kibana#1": api_issue("elastic/kibana", 1, parent="elastic/kibana#2"),
@@ -139,14 +151,18 @@ class ContextTests(unittest.TestCase):
     def test_descendants_are_breadth_first_and_capped(self):
         issues = {"elastic/kibana#1": api_issue("elastic/kibana", 1, children=3)}
         for number in (2, 3, 4):
-            issues[f"elastic/kibana#{number}"] = api_issue("elastic/kibana", number, parent="elastic/kibana#1")
+            issues[f"elastic/kibana#{number}"] = api_issue("elastic/kibana", number, parent="elastic/kibana#1", children=1 if number == 2 else 0)
+        issues["elastic/kibana#5"] = api_issue("elastic/kibana", 5, parent="elastic/kibana#2")
         result = triage.context(FakeGh(issues), triage.IssueRef("elastic/kibana", 1))
-        self.assertEqual([entry["ref"] for entry in result["descendants"]], ["elastic/kibana#2", "elastic/kibana#3", "elastic/kibana#4"])
+        self.assertEqual(
+            [(entry["ref"], entry["depth"]) for entry in result["descendants"]],
+            [("elastic/kibana#2", 1), ("elastic/kibana#3", 1), ("elastic/kibana#4", 1), ("elastic/kibana#5", 2)],
+        )
         self.assertNotIn("body", result["descendants"][0])
         self.assertFalse(result["descendants_truncated"])
-        with mock.patch.object(triage, "MAX_DESCENDANTS", 2):
+        with mock.patch.object(triage, "MAX_DESCENDANTS", 3):
             capped = triage.context(FakeGh(issues), triage.IssueRef("elastic/kibana", 1))
-        self.assertEqual(len(capped["descendants"]), 2)
+        self.assertEqual(len(capped["descendants"]), 3)
         self.assertTrue(capped["descendants_truncated"])
 
     def test_gates(self):
@@ -176,6 +192,7 @@ class ContextTests(unittest.TestCase):
         result = triage.context(FakeGh(issues, comments=comments), triage.IssueRef("elastic/kibana", 1))
         self.assertEqual(result["gates"], ["already_triaged"])
         self.assertEqual(result["target"]["triaged_no_at"], "2026-09-15T08:00:00Z")
+        self.assertEqual((result["target"]["triaged_no_by"], result["target"]["test_plan_by"]), ("qa", None))
 
     def test_pull_request_stops_early(self):
         issues = {"elastic/kibana#1": api_issue("elastic/kibana", 1, pr=True)}
@@ -214,7 +231,16 @@ class LabelTests(unittest.TestCase):
 
     def test_dry_run_writes_nothing(self):
         gh = FakeGh({"elastic/kibana#1": api_issue("elastic/kibana", 1)})
-        self.assertEqual(triage.label(gh, self.ref, dry_run=True)["action"], "would_label")
+        result = triage.label(gh, self.ref, dry_run=True)
+        self.assertEqual(result["action"], "dry_run")
+        self.assertEqual(gh.posts(), [])
+
+    def test_missing_label_is_never_created(self):
+        gh = FakeGh({"elastic/kibana#1": api_issue("elastic/kibana", 1)}, post_result=[{"name": "Needs Test Plan"}], repo_labels=())
+        for dry_run in (True, False):
+            with self.assertRaises(triage.TriageError) as raised:
+                triage.label(gh, self.ref, dry_run=dry_run)
+            self.assertEqual(raised.exception.gate, "label_missing")
         self.assertEqual(gh.posts(), [])
 
     def test_eval_mode_logs_instead_of_writing(self):
@@ -254,12 +280,16 @@ class CommentNoTests(unittest.TestCase):
     def setUp(self):
         self.ref = triage.IssueRef("elastic/kibana", 1)
         self.parent = triage.IssueRef("elastic/kibana", 2)
+        self.with_parent = {
+            "elastic/kibana#1": api_issue("elastic/kibana", 1, parent="elastic/kibana#2"),
+            "elastic/kibana#2": api_issue("elastic/kibana", 2, children=1),
+        }
 
     def comment(self, gh, *, rule="N4", reason="one control of the editor.", suggested=None, dry_run=False):
         return triage.comment_no(gh, self.ref, rule=rule, reason=reason, suggested=suggested, dry_run=dry_run, today=self.TODAY)
 
     def test_body_is_the_fixed_template(self):
-        gh = FakeGh({"elastic/kibana#1": api_issue("elastic/kibana", 1)})
+        gh = FakeGh(self.with_parent)
         result = self.comment(gh, rule="n4", suggested=self.parent, dry_run=True)
         self.assertEqual(
             result["body"],
@@ -268,7 +298,7 @@ class CommentNoTests(unittest.TestCase):
             "Suggested level for a test plan: [elastic/kibana#2](https://github.com/elastic/kibana/issues/2).\n\n"
             "_Decided on 2026-11-12 with the `test-plan-triage` skill._",
         )
-        self.assertEqual(result["action"], "would_comment")
+        self.assertEqual(result["action"], "dry_run")
         self.assertEqual(gh.posts(), [])
 
     def test_posts_one_comment_once(self):
@@ -288,12 +318,12 @@ class CommentNoTests(unittest.TestCase):
             self.assertEqual(len(gh.posts()), 1)
 
     def test_eval_mode_logs_instead_of_writing(self):
-        gh = FakeGh({"elastic/kibana#1": api_issue("elastic/kibana", 1)}, eval_mode=True)
+        gh = FakeGh(self.with_parent, eval_mode=True)
         with tempfile.TemporaryDirectory() as tmp:
             log = Path(tmp) / "writes.log"
             with mock.patch.dict(os.environ, {triage.WRITE_LOG_ENV: str(log)}):
-                self.comment(gh, suggested=self.parent)
-                self.comment(gh, dry_run=True)
+                self.assertEqual(self.comment(gh, suggested=self.parent)["action"], "would_comment")
+                self.assertEqual(self.comment(gh, dry_run=True)["action"], "dry_run")
             self.assertEqual(log.read_text(encoding="utf-8"), "comment elastic/kibana#1 rule=N4 suggested=elastic/kibana#2 reason=one control of the editor\n")
         self.assertEqual(gh.posts(), [])
 
@@ -311,9 +341,24 @@ class CommentNoTests(unittest.TestCase):
                 self.comment(gh, reason=reason)
         self.assertEqual(gh.calls, [])
 
-    def test_suggested_level_cannot_be_the_issue(self):
-        with self.assertRaises(triage.TriageError):
-            self.comment(FakeGh({}), suggested=self.ref)
+    def test_suggested_level_must_be_an_open_ancestor(self):
+        issues = {
+            **self.with_parent,
+            "elastic/kibana#3": api_issue("elastic/kibana", 3),
+            "elastic/kibana#4": api_issue("elastic/kibana", 4, parent="elastic/kibana#5"),
+            "elastic/kibana#5": api_issue("elastic/kibana", 5, state="closed", children=1),
+        }
+        for target, suggested, error in (
+            (1, 1, "is not an ancestor"),
+            (1, 3, "is not an ancestor"),
+            (4, 5, "is closed"),
+        ):
+            self.ref = triage.IssueRef("elastic/kibana", target)
+            gh = FakeGh(issues, post_result={"html_url": "x"})
+            with self.assertRaises(triage.TriageError) as raised:
+                self.comment(gh, suggested=triage.IssueRef("elastic/kibana", suggested))
+            self.assertIn(error, str(raised.exception))
+            self.assertEqual(gh.posts(), [])
 
     def test_public_issue_never_points_to_a_private_repo(self):
         private = triage.IssueRef("elastic/security-team", 2)
@@ -331,7 +376,10 @@ class CommentNoTests(unittest.TestCase):
 
     def test_private_issue_may_point_to_a_private_repo(self):
         self.ref = triage.IssueRef("elastic/security-team", 1)
-        gh = FakeGh({"elastic/security-team#1": api_issue("elastic/security-team", 1)})
+        gh = FakeGh({
+            "elastic/security-team#1": api_issue("elastic/security-team", 1, parent="elastic/security-team#2"),
+            "elastic/security-team#2": api_issue("elastic/security-team", 2, children=1),
+        })
         result = self.comment(gh, suggested=triage.IssueRef("elastic/security-team", 2), dry_run=True)
         self.assertIn("(https://github.com/elastic/security-team/issues/2)", result["body"])
 

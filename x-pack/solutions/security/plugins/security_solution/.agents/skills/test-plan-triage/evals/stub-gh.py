@@ -2,7 +2,8 @@
 """Simulated `gh api` for the evals. Used through TEST_PLAN_TRIAGE_GH; never talks to GitHub.
 
 Serves GET requests for issues, sub-issues and comments from fixtures/issues.json
-(STUB_FIXTURES overrides the path). Every other request fails, so a stray write
+(STUB_FIXTURES overrides the path), and the `Needs Test Plan` label of the two allowed
+repos. Every other request fails, so a stray write
 cannot succeed. When TEST_PLAN_TRIAGE_WRITE_LOG is set, every request path is also
 appended to requests.log next to it, for score.py.
 """
@@ -14,6 +15,7 @@ from pathlib import Path
 
 FIXTURES = Path(os.environ.get("STUB_FIXTURES") or Path(__file__).resolve().parent / "fixtures" / "issues.json")
 ISSUE_PATH = re.compile(r"^repos/([\w.-]+/[\w.-]+)/issues/(\d+)(/sub_issues|/comments)?(?:\?.*)?$")
+LABEL_PATH = re.compile(r"^repos/elastic/(kibana|security-team)/labels/Needs%20Test%20Plan$")
 
 
 def fail(message, code=1):
@@ -56,6 +58,9 @@ def main():
     if not args or args[0] != "api" or "--method" in args or "-X" in args:
         fail("stub-gh: only `gh api` GET requests are simulated (read-only)")
     path = args[-1]
+    if LABEL_PATH.match(path):
+        print(json.dumps({"name": "Needs Test Plan"}))
+        return
     match = ISSUE_PATH.match(path)
     if not match:
         fail(f"gh: Not Found (HTTP 404) {path}")

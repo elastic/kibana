@@ -337,7 +337,7 @@
     "proposed_comment": true,
     "answer": {"comment_excludes": ["security-team", "Larkspur"]}
   },
-  "s36-slice-under-meta-task": {
+  "s36-slice-under-release-bucket": {
     "reps": 3,
     "decision": "ask",
     "rule": "A2",
@@ -356,5 +356,16 @@
     "labeled": [],
     "comments": [],
     "answer": {"question": true}
+  },
+  "s38-bug-under-epic": {
+    "reps": 3,
+    "decision": "no",
+    "rule": "N1",
+    "suggested_level": null,
+    "proposed": [],
+    "labeled": [],
+    "comments": [],
+    "proposed_comment": true,
+    "answer": {"comment_excludes": ["913800"]}
   }
 }

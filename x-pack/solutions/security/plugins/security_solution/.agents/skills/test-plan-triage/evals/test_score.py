@@ -176,6 +176,10 @@ class CheckTest(unittest.TestCase):
         self.assertEqual(score.check(expected, "with", write_run(self.work, answer)), [])
         leaking = answer.replace("(N4: one badge)", "(N4: one badge of elastic/security-team#9)")
         self.assertEqual(score.check(expected, "with", write_run(self.work, leaking)), ["proposed comment names ['security-team']"])
+        in_code_block = answer.replace("> **Test plan triage:** no test plan needed (N4: one badge).\n", "```\n**Test plan triage:** no test plan needed (N4: one badge of elastic/security-team#9).\n```\n")
+        self.assertEqual(score.check(expected, "with", write_run(self.work, in_code_block)), ["proposed comment names ['security-team']"])
+        other_quote = answer.replace("**Suggested level", "> The epic elastic/security-team#9 is private.\n**Suggested level")
+        self.assertEqual(score.check(expected, "with", write_run(self.work, other_quote)), [])
         unquoted = answer.replace("> **Test plan triage:** no test plan needed (N4: one badge).\n", "")
         self.assertEqual(score.check(expected, "with", write_run(self.work, unquoted)), ["answer does not quote the proposed comment"])
 

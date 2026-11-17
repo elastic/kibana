@@ -95,6 +95,24 @@ def parse_template(message: str) -> dict | None:
     return parsed
 
 
+TEMPLATE_FIELDS = ("Issue", "Decision", "Hierarchy", "Suggested level for a test plan", "Proposed label changes", "Proposed comment", "Question")
+
+
+def proposed_comment(message: str) -> list[str]:
+    """The lines after **Proposed comment:**, up to the next template field or the closing "Reply" line."""
+    lines = message.splitlines()
+    start = _field(lines, "Proposed comment")
+    if start is None:
+        return []
+    block = []
+    for line in lines[start + 1 :]:
+        text = line.strip()
+        if text.startswith("Reply ") or any(text.startswith(f"**{name}:**") for name in TEMPLATE_FIELDS):
+            break
+        block.append(line)
+    return block
+
+
 def _first_ref(item: str) -> str | None:
     """The issue a proposed-label item labels: its first ref, unless the item says "none"."""
     text = item.strip().lower()
@@ -158,8 +176,7 @@ def check_template(expected: dict, result: dict, message: str) -> list[str]:
         failures.append("answer has no **Proposed comment:** line")
     if expected.get("proposed_comment") and COMMENT_TEXT not in message.lower():
         failures.append("answer does not quote the proposed comment")
-    quoted = [line for line in message.splitlines() if line.lstrip().startswith(">")]
-    words = leaked(quoted, expected.get("answer", {}).get("comment_excludes", []))
+    words = leaked(proposed_comment(message), expected.get("answer", {}).get("comment_excludes", []))
     if words:
         failures.append(f"proposed comment names {words}")
     if template["decision"] != result.get("decision", "").lower():

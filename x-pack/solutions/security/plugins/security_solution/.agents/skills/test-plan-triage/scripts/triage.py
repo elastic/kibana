@@ -6,21 +6,25 @@ Commands (JSON on stdout; exit 0 ok, 1 failure, 2 the agent must ask the user):
                                     the descendant tree. Long bodies and comments are cut, and
                                     every cut is reported (`body_truncated`,
                                     `comments_truncated`, `descendants_truncated`).
-  label --issue <ref> [--dry-run]   Add `Needs Test Plan` to one open issue. Never retried.
+  label --issue <ref> [--dry-run]   Add `Needs Test Plan` to one open issue. Never retried,
+                                    and never creates the label if the repo lacks it.
   comment-no --issue <ref> --rule <N1-N5> [--suggested <ref>] [--dry-run] < reason
                                     Post one fixed-format comment saying the issue needs no
                                     test plan. Never retried, never posted twice. The reason
                                     is read from stdin, never from the command line, so the
-                                    shell does not expand text quoted from the issue. On a
-                                    public issue, refuses a suggested level or a reason that
-                                    points to a private repo.
+                                    shell does not expand text quoted from the issue. The
+                                    suggested level must be an open ancestor. On a public
+                                    issue, refuses a suggested level or a reason that points
+                                    to a private repo.
 
 <ref> is a GitHub issue URL or `owner/repo#N`. Only elastic/kibana and
-elastic/security-team are accepted; elastic/security-team is private.
+elastic/security-team are accepted. Every repo except elastic/kibana is treated as private.
+
+`--dry-run` writes nothing and reports `"action": "dry_run"`.
 
 TEST_PLAN_TRIAGE_GH replaces `gh` with another command (the evals stub). While it is set,
-`label` and `comment-no` never write: they report what they would write and, if
-TEST_PLAN_TRIAGE_WRITE_LOG names a file, append one line per write to it.
+`label` and `comment-no` never write: without --dry-run they report `would_label` or
+`would_comment` and, if TEST_PLAN_TRIAGE_WRITE_LOG names a file, append one line per write to it.
 """
 
 from __future__ import annotations
@@ -35,9 +39,11 @@ import sys
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
 from typing import Any, Optional, TextIO
+from urllib.parse import quote
 
 ALLOWED_REPOS = ("elastic/kibana", "elastic/security-team")
-PRIVATE_REPOS = ("elastic/security-team",)
+PUBLIC_REPOS = ("elastic/kibana",)
+PRIVATE_REPOS = tuple(repo for repo in ALLOWED_REPOS if repo not in PUBLIC_REPOS)
 LABEL = "Needs Test Plan"
 # Written by test-plan-generator (scripts/publish_test_plan.sh); if you change it, change both skills.
 TEST_PLAN_MARKER = "<!-- test-plan-generated -->"
@@ -155,6 +161,13 @@ class Gh:
     def get(self, path: str) -> dict:
         return self._json(["api", path])
 
+    def has_label_in_repo(self, repo: str) -> bool:
+        try:
+            self.get(f"repos/{repo}/labels/{quote(LABEL)}")
+        except NotFound:
+            return False
+        return True
+
     def get_list(self, path: str) -> list:
         pages = self._json(["api", "--paginate", "--slurp", path])
         return [item for page in pages for item in page]
@@ -212,7 +225,7 @@ def summarize(issue: dict, *, body_limit: Optional[int]) -> dict:
         "is_pull_request": bool(issue.get("pull_request")),
         "sub_issues_total": (issue.get("sub_issues_summary") or {}).get("total", 0),
         "allowed_repo": repo in ALLOWED_REPOS,
-        "private": repo in PRIVATE_REPOS,
+        "private": repo not in PUBLIC_REPOS,
     }
     if body_limit is not None:
         body, truncated = _excerpt(issue.get("body"), body_limit)
@@ -227,6 +240,10 @@ def _ref(issue: dict) -> IssueRef:
 
 def _comments(gh: Gh, ref: IssueRef) -> list:
     return gh.get_list(f"repos/{ref.repo}/issues/{ref.number}/comments?per_page=100")
+
+
+def _author(comment: dict) -> Optional[str]:
+    return (comment.get("user") or {}).get("login")
 
 
 def _marked(comments: list, marker: str) -> list:
@@ -312,7 +329,7 @@ def collect_descendants(gh: Gh, issue: dict) -> tuple[list[dict], bool]:
 def _comment_summary(comment: dict) -> dict:
     body, truncated = _excerpt(comment.get("body"), COMMENT_BODY_LIMIT)
     return {
-        "author": (comment.get("user") or {}).get("login"),
+        "author": _author(comment),
         "created_at": comment.get("created_at"),
         "body": body,
         "body_truncated": truncated,
@@ -327,9 +344,12 @@ def context(gh: Gh, ref: IssueRef) -> dict:
         gates.append("pull_request")
         return {"ok": True, "target": target, "gates": gates, "ancestors": [], "descendants": []}
     comments = _comments(gh, ref)
-    target["has_test_plan"] = has_test_plan(gh, ref, comments)
+    plans = _marked(comments, TEST_PLAN_MARKER)
+    target["has_test_plan"] = bool(plans)
+    target["test_plan_by"] = _author(plans[-1]) if plans else None
     no_plan = _marked(comments, NO_PLAN_MARKER)
     target["triaged_no_at"] = no_plan[-1].get("created_at") if no_plan else None
+    target["triaged_no_by"] = _author(no_plan[-1]) if no_plan else None
     target["comments"] = [_comment_summary(comment) for comment in comments[-MAX_COMMENTS:]]
     target["comments_total"] = len(comments)
     target["comments_truncated"] = len(comments) > MAX_COMMENTS
@@ -379,13 +399,13 @@ def label(gh: Gh, ref: IssueRef, *, dry_run: bool) -> dict:
     url = issue.get("html_url")
     if _has_label(issue):
         return {"ok": True, "action": "none", "reason": "already_labeled", "ref": str(ref), "url": url}
-    if dry_run or gh.eval_mode:
-        result = {"ok": True, "action": "would_label", "ref": str(ref), "url": url, "label": LABEL}
-        if gh.eval_mode:
-            result["simulated"] = True
-            if not dry_run:
-                _log_simulated_write(f"label {ref}")
-        return result
+    if not gh.has_label_in_repo(ref.repo):
+        raise TriageError(f"{ref.repo} has no `{LABEL}` label; the skill never creates labels", gate="label_missing")
+    if dry_run:
+        return {"ok": True, "action": "dry_run", "ref": str(ref), "url": url, "label": LABEL}
+    if gh.eval_mode:
+        _log_simulated_write(f"label {ref}")
+        return {"ok": True, "action": "would_label", "simulated": True, "ref": str(ref), "url": url, "label": LABEL}
     applied = gh.add_label(ref)
     if not any(_has_label({"labels": [item]}) for item in applied):
         raise TriageError(f"GitHub did not confirm the label on {ref}; not retried")
@@ -427,8 +447,27 @@ def _check_public_comment(ref: IssueRef, reason: str, suggested: Optional[IssueR
             f"{ref} is public and {suggested} is private; drop --suggested so the comment does not link a private issue",
             gate="private_link",
         )
-    if any(repo.casefold() in reason.casefold() or repo.split("/")[1] in reason.casefold() for repo in PRIVATE_REPOS):
+    if any(repo in reason.casefold() or repo.split("/")[1] in reason.casefold() for repo in PRIVATE_REPOS):
         raise TriageError(f"{ref} is public; the reason must not name a private repo or its issues", gate="private_link")
+
+
+def _check_open_ancestor(gh: Gh, ref: IssueRef, issue: dict, suggested: IssueRef) -> None:
+    """The suggested level must be an open issue on the target's parent chain."""
+    current, seen = issue, {str(ref)}
+    while current.get("parent_issue_url") and len(seen) <= MAX_ANCESTORS:
+        parent_ref = ref_from_api_url(current["parent_issue_url"])
+        if str(parent_ref) in seen:
+            break
+        seen.add(str(parent_ref))
+        try:
+            current = gh.get(f"repos/{parent_ref.repo}/issues/{parent_ref.number}")
+        except NotFound:
+            break
+        if parent_ref == suggested:
+            if current.get("state") != "open":
+                raise TriageError(f"--suggested {suggested} is closed; suggest an open ancestor")
+            return
+    raise TriageError(f"--suggested {suggested} is not an ancestor of {ref}")
 
 
 def comment_no(
@@ -438,10 +477,10 @@ def comment_no(
     if rule_id not in NO_RULES:
         raise TriageError(f"--rule must be one of {', '.join(NO_RULES)}; '{rule}' is not a No rule")
     text = _check_reason(reason)
-    if suggested == ref:
-        raise TriageError("--suggested must be an ancestor, not the issue itself")
     _check_public_comment(ref, text, suggested)
     issue = _open_issue(gh, ref, "commented on")
+    if suggested:
+        _check_open_ancestor(gh, ref, issue, suggested)
     url = issue.get("html_url")
     if _has_label(issue):
         raise TriageError(f"{ref} has `{LABEL}`; a No comment would contradict it", exit_code=EXIT_ASK, gate="already_labeled")
@@ -451,13 +490,11 @@ def comment_no(
     if _marked(comments, NO_PLAN_MARKER):
         return {"ok": True, "action": "none", "reason": "already_triaged", "ref": str(ref), "url": url}
     body = no_plan_body(rule_id, text, suggested, today or datetime.now(timezone.utc).date())
-    if dry_run or gh.eval_mode:
-        result = {"ok": True, "action": "would_comment", "ref": str(ref), "url": url, "body": body}
-        if gh.eval_mode:
-            result["simulated"] = True
-            if not dry_run:
-                _log_simulated_write(f"comment {ref} rule={rule_id} suggested={suggested or 'none'} reason={text}")
-        return result
+    if dry_run:
+        return {"ok": True, "action": "dry_run", "ref": str(ref), "url": url, "body": body}
+    if gh.eval_mode:
+        _log_simulated_write(f"comment {ref} rule={rule_id} suggested={suggested or 'none'} reason={text}")
+        return {"ok": True, "action": "would_comment", "simulated": True, "ref": str(ref), "url": url, "body": body}
     posted = gh.add_comment(ref, body)
     if not posted.get("html_url"):
         raise TriageError(f"GitHub did not confirm the comment on {ref}; not retried")

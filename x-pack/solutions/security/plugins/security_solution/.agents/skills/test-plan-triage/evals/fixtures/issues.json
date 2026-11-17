@@ -371,13 +371,7 @@
     "type": "Enhancement",
     "labels": ["Team:Detection Engine"],
     "parent": "elastic/kibana#912200",
-    "body": "## Description\nAdd a `Shared in N spaces` badge to each exception list card on the shared exception lists page.\n\n## Acceptance criteria\n- The badge shows the number of spaces the list applies to.\n- Lists that apply to one space show no badge.",
-    "comments": [
-      {
-        "author": "triager",
-        "body": "<!-- test-plan-triage:no-plan -->\n**Test plan triage:** no test plan needed (N4: one badge with two acceptance criteria, a small part of shared exception lists). Suggested level for a test plan: [elastic/kibana#912200](https://github.com/elastic/kibana/issues/912200).\n\n_Decided on 2026-11-12 with the `test-plan-triage` skill._"
-      }
-    ]
+    "body": "## Description\nAdd a `Shared in N spaces` badge to each exception list card on the shared exception lists page.\n\n## Acceptance criteria\n- The badge shows the number of spaces the list applies to.\n- Lists that apply to one space show no badge."
   },
   "elastic/kibana#912300": {
     "title": "[Cases] Case templates",
@@ -598,30 +592,30 @@
     "parent": "elastic/security-team#915001"
   },
   "elastic/kibana#915100": {
-    "title": "[Investigations] Meta Task: tasks before GA",
+    "title": "[Entity Analytics] Follow-ups for the 9.4 release",
     "type": "Task",
-    "labels": ["Team:Threat Hunting:Investigations"],
-    "body": "Tracking everything left before the timeline revamp goes GA."
+    "labels": ["Team:Entity Analytics"],
+    "body": "Small items the team wants to close before 9.4 ships. Each one is tracked in its own sub-issue."
   },
   "elastic/kibana#915101": {
-    "title": "[Investigations] EQL queries in timeline notes",
+    "title": "[Entity Analytics] Filter the entity list by asset criticality",
     "type": "Task",
-    "labels": ["Team:Threat Hunting:Investigations"],
-    "body": "Let users attach an EQL query to a note and run it from the note.",
+    "labels": ["Team:Entity Analytics"],
+    "body": "Add an `Asset criticality` filter to the entity list, with one option per criticality level.",
     "parent": "elastic/kibana#915100"
   },
   "elastic/kibana#915102": {
-    "title": "[Investigations] Export pinned events to CSV",
+    "title": "[Entity Analytics] Risk score history chart in the entity flyout",
     "type": "Task",
-    "labels": ["Team:Threat Hunting:Investigations"],
-    "body": "Add an export action to the pinned events tab that downloads the pinned events as CSV.",
+    "labels": ["Team:Entity Analytics"],
+    "body": "Add a chart of the entity's risk score over the last 30 days to the entity flyout.",
     "parent": "elastic/kibana#915100"
   },
   "elastic/kibana#915103": {
-    "title": "[Investigations] Show the note count on the timeline Notes tab",
+    "title": "[Entity Analytics] Show when the risk score was last updated in the entity flyout header",
     "type": "Task",
-    "labels": ["Team:Threat Hunting:Investigations"],
-    "body": "Add a counter badge to the `Notes` tab in timeline.\n\n## Acceptance criteria\n- The badge shows the number of notes on the timeline.\n- The badge is hidden when there are no notes.",
+    "labels": ["Team:Entity Analytics"],
+    "body": "Add `Updated <relative time>` next to the risk score in the entity flyout header.\n\n## Acceptance criteria\n- The header shows how long ago the risk score was last calculated.\n- Hovering it shows the exact date and time.",
     "parent": "elastic/kibana#915100"
   },
   "elastic/kibana#913701": {
@@ -639,5 +633,25 @@
         "body": "Scope update after the design review on 2026-11-04. Notes first, the decision for this issue is at the end.\n\nAttendees: design, the Investigations PM, two engineers from the team and one from the data quality group.\n\nOptions we went through:\n1. Ship the export flyout as written above, with CSV and NDJSON, the field picker and the 10,000 event cap. Design liked the flow, but the field picker needs the new field list component, which will not land before the next minor.\n2. Ship CSV only, without the field picker, exporting the columns currently shown in the timeline. Smaller, but support asked twice for NDJSON so that exports can be loaded back into an index, so CSV alone would be revisited soon.\n3. Split the work: keep the export behavior in one issue and track the setting that turns it on in another, so that the setting can ship first and the export later behind it.\n\nConcerns raised: the 10,000 event cap is lower than the alerts table export, which confuses users who use both; the file name should include the timeline title and the time range; and the export must respect the field-level security of the user who runs it, which the current query helper does not do yet.\n\n**Decision for this issue:** option 3. The export flyout and its acceptance criteria move to a new issue owned by the data quality group, and this issue now only adds the advanced setting that turns timeline export on, off by default."
       }
     ]
+  },
+  "elastic/kibana#913800": {
+    "title": "[Timeline] Saved queries in timeline",
+    "type": "Epic",
+    "labels": ["Team:Threat Hunting:Investigations"],
+    "body": "Users save the KQL query of a timeline under a name, pick a saved query from the query bar, and update or delete it. Saved queries are per space."
+  },
+  "elastic/kibana#913801": {
+    "title": "[Timeline] Save the current timeline query under a name",
+    "type": "Enhancement",
+    "labels": ["Team:Threat Hunting:Investigations"],
+    "parent": "elastic/kibana#913800",
+    "body": "## Acceptance criteria\n- The query bar menu has `Save query`, which asks for a name and an optional description.\n- Saved queries appear in the query bar picker in the same space.\n- Saving with a name that already exists asks whether to replace it."
+  },
+  "elastic/kibana#913802": {
+    "title": "Saved query picker forgets the selected query after a page refresh",
+    "type": "Bug",
+    "labels": ["Team:Threat Hunting:Investigations"],
+    "parent": "elastic/kibana#913800",
+    "body": "## Steps to reproduce\n1. Open a timeline and pick a saved query from the query bar picker.\n2. Refresh the page.\n\n## Current behavior\nThe query bar still shows the query text, but the picker shows `No saved query` and `Update query` is disabled.\n\n## Expected behavior\nThe picker keeps the selected saved query after a refresh."
   }
 }

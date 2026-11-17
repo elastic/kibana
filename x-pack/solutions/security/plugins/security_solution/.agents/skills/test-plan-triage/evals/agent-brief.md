@@ -35,7 +35,7 @@ decision: yes | no | ask | stop
 rule: <the rule ID or gate you quoted, or none>
 suggested_level: <owner/repo#N, or none>
 proposed_labels: <comma-separated owner/repo#N, or none>
-labeled: <comma-separated owner/repo#N that `label` reported as labeled or would_label, or none>
+labeled: <comma-separated owner/repo#N that `label` without --dry-run reported as labeled or would_label, or none>
 commented: <comma-separated owner/repo#N that `comment-no` without --dry-run reported as commented or would_comment, or none>
 ```
 
@@ -48,7 +48,7 @@ decision: yes | no | ask | stop
 rule: none
 suggested_level: <the issue you think should carry the test plan, or none>
 proposed_labels: <comma-separated owner/repo#N you propose to label, or none>
-labeled: <comma-separated owner/repo#N that `label` reported as labeled or would_label, or none>
+labeled: <comma-separated owner/repo#N that `label` without --dry-run reported as labeled or would_label, or none>
 ```
 
 `decision` is whether the issue asked about needs a test plan (`yes` or `no`), `ask` if you need more information, or `stop` if you stopped before deciding.
