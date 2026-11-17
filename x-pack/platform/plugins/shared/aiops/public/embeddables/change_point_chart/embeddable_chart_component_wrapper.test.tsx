@@ -8,6 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { ChangePointAnnotation } from '../../components/change_point_detection/change_point_detection_context';
 import { useChangePointResults } from '../../components/change_point_detection/use_change_point_agg_request';
 import { ChartGridEmbeddableWrapper } from './embeddable_chart_component_wrapper';
@@ -50,10 +51,10 @@ const changePoint: ChangePointAnnotation = {
   p_value: 0.01,
 };
 
-const renderWrapper = (
+const buildWrapperElement = (
   props: Partial<React.ComponentProps<typeof ChartGridEmbeddableWrapper>> = {}
-) =>
-  render(
+) => (
+  <I18nProvider>
     <EuiProvider>
       <ChartGridEmbeddableWrapper
         dataViewId="logs-*"
@@ -66,7 +67,12 @@ const renderWrapper = (
         {...props}
       />
     </EuiProvider>
-  );
+  </I18nProvider>
+);
+
+const renderWrapper = (
+  props: Partial<React.ComponentProps<typeof ChartGridEmbeddableWrapper>> = {}
+) => render(buildWrapperElement(props));
 
 describe('ChartGridEmbeddableWrapper', () => {
   beforeEach(() => {
@@ -76,6 +82,7 @@ describe('ChartGridEmbeddableWrapper', () => {
       isUsingSampleData: false,
       reset: jest.fn(),
       progress: 0,
+      error: undefined,
     });
   });
 
@@ -90,21 +97,9 @@ describe('ChartGridEmbeddableWrapper', () => {
       isUsingSampleData: false,
       reset: jest.fn(),
       progress: null,
+      error: undefined,
     });
-    rerender(
-      <EuiProvider>
-        <ChartGridEmbeddableWrapper
-          dataViewId="logs-*"
-          timeRange={{ from: 'now-15m', to: 'now' }}
-          fn="avg"
-          metricField="bytes"
-          onLoading={onLoading}
-          onRenderComplete={onRenderComplete}
-          onError={jest.fn()}
-          parentApi={{}}
-        />
-      </EuiProvider>
-    );
+    rerender(buildWrapperElement({ onLoading, onRenderComplete }));
 
     expect(onLoading.mock.calls).toEqual([[true]]);
     expect(onRenderComplete).not.toHaveBeenCalled();
@@ -112,5 +107,22 @@ describe('ChartGridEmbeddableWrapper', () => {
 
   it('renders while loading when onLoading is omitted', () => {
     expect(() => renderWrapper()).not.toThrow();
+  });
+
+  it('reports search errors through onError', () => {
+    const searchError = new Error('search failed');
+    const onError = jest.fn();
+    mockUseChangePointResults.mockReturnValue({
+      results: [],
+      isLoading: false,
+      isUsingSampleData: false,
+      reset: jest.fn(),
+      progress: null,
+      error: searchError,
+    });
+
+    renderWrapper({ onError });
+
+    expect(onError).toHaveBeenCalledWith(searchError);
   });
 });

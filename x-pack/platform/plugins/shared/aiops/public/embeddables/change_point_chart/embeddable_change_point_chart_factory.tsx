@@ -163,7 +163,12 @@ export const getChangePointChartEmbeddableFactory = (
         pluginStart
       );
 
-      const onLoading = (v: boolean) => dataLoading$.next(v);
+      const onLoading = (v: boolean) => {
+        if (v) {
+          blockingError$.next(undefined);
+        }
+        dataLoading$.next(v);
+      };
       const onRenderComplete = () => dataLoading$.next(false);
       const onError = (error: Error) => {
         // A cancellation is not a panel error
