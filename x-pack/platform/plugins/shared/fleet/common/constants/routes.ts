@@ -157,6 +157,7 @@ export const AWS_ONBOARDING_API_ROUTES = {
   STACK_INFO_PATTERN: `${INTERNAL_ROOT}/aws_onboarding/stacks/{stackId}`,
   STACK_UPDATE_PATTERN: `${INTERNAL_ROOT}/aws_onboarding/cloud_connectors/{cloudConnectorId}/stack_update`,
   BOOTSTRAP_LAUNCH_PATTERN: `${INTERNAL_ROOT}/aws_onboarding/bootstrap_launch`,
+  BOOTSTRAP_TEMPLATE_PATTERN: `${INTERNAL_ROOT}/aws_onboarding/bootstrap_template`,
   DISCOVERY_PATTERN: `${INTERNAL_ROOT}/aws_onboarding/discovery`,
   VERIFY_PATTERN: `${INTERNAL_ROOT}/aws_onboarding/verify`,
   SETTINGS_PATTERN: `${INTERNAL_ROOT}/aws_onboarding/executions/{executionId}/settings`,

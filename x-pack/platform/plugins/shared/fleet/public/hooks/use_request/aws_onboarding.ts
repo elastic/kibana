@@ -8,6 +8,7 @@
 import type {
   AwsOnboardingCredentialsPublic,
   GetAwsOnboardingBootstrapLaunchResponse,
+  GetAwsOnboardingBootstrapTemplateResponse,
   CreateAwsOnboardingStackRequest,
   CreateAwsOnboardingStackResponse,
   GetAwsOnboardingStackResponse,
@@ -97,6 +98,15 @@ export function sendGetAwsOnboardingBootstrapLaunch(
     path: AWS_ONBOARDING_API_ROUTES.BOOTSTRAP_LAUNCH_PATTERN,
     version: API_VERSIONS.internal.v1,
     query: { mode, ...(region ? { region } : {}) },
+  });
+}
+
+export function sendGetAwsOnboardingBootstrapTemplate(mode: AwsOnboardingManagementMode) {
+  return sendRequest<GetAwsOnboardingBootstrapTemplateResponse>({
+    method: 'get',
+    path: AWS_ONBOARDING_API_ROUTES.BOOTSTRAP_TEMPLATE_PATTERN,
+    version: API_VERSIONS.internal.v1,
+    query: { mode },
   });
 }
 

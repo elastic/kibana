@@ -71,6 +71,14 @@ export const GetAwsOnboardingBootstrapLaunchRequestSchema = {
   }),
 };
 
+export const GetAwsOnboardingBootstrapTemplateRequestSchema = {
+  query: schema.object({
+    mode: schema.oneOf([schema.literal('fully-managed'), schema.literal('partially-managed')], {
+      defaultValue: 'fully-managed',
+    }),
+  }),
+};
+
 export const DeleteAwsOnboardingCredentialsRequestSchema = {
   query: schema.object({
     force: schema.boolean({ defaultValue: false }),

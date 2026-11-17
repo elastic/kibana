@@ -13,6 +13,8 @@ import {
   awsOnboardingDiscoveryService,
   awsOnboardingStackService,
   isAwsSdkError,
+  BOOTSTRAP_TEMPLATE_YAML,
+  BOOTSTRAP_TEMPLATE_FILENAME,
 } from '../../services/aws_onboarding';
 import { appContextService } from '../../services/app_context';
 import { isAwsManagedOnboardingEnabled } from '../../services/utils/aws_onboarding';
@@ -40,6 +42,7 @@ import type {
   CreateAwsOnboardingStackRequestSchema,
   DeleteAwsOnboardingCredentialsRequestSchema,
   GetAwsOnboardingBootstrapLaunchRequestSchema,
+  GetAwsOnboardingBootstrapTemplateRequestSchema,
   GetAwsOnboardingStackRequestSchema,
   PutAwsOnboardingCredentialsRequestSchema,
   SubmitAwsOnboardingSettingsRequestSchema,
@@ -187,6 +190,19 @@ export const updateStackHandler: FleetRequestHandler<
   } catch (error) {
     return mapError(error, response);
   }
+};
+
+export const getBootstrapTemplateHandler: FleetRequestHandler<
+  undefined,
+  TypeOf<typeof GetAwsOnboardingBootstrapTemplateRequestSchema.query>
+> = async (context, request, response) => {
+  if (!(await isAwsManagedOnboardingEnabled())) return notEnabled(response);
+  // The mode chosen in Kibana pre-fills the ManagementMode parameter, which stays editable in the console.
+  const template = BOOTSTRAP_TEMPLATE_YAML.replace(
+    'Default: fully-managed\n',
+    `Default: ${request.query.mode}\n`
+  );
+  return response.ok({ body: { filename: BOOTSTRAP_TEMPLATE_FILENAME, template } });
 };
 
 export const getBootstrapLaunchHandler: FleetRequestHandler<

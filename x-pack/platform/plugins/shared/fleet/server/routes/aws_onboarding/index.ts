@@ -12,6 +12,7 @@ import {
   CreateAwsOnboardingStackRequestSchema,
   DeleteAwsOnboardingCredentialsRequestSchema,
   GetAwsOnboardingBootstrapLaunchRequestSchema,
+  GetAwsOnboardingBootstrapTemplateRequestSchema,
   GetAwsOnboardingStackRequestSchema,
   PutAwsOnboardingCredentialsRequestSchema,
   SubmitAwsOnboardingSettingsRequestSchema,
@@ -24,6 +25,7 @@ import {
   createSubmitSettingsHandler,
   deleteCredentialsHandler,
   getBootstrapLaunchHandler,
+  getBootstrapTemplateHandler,
   getCredentialsHandler,
   getDiscoveryHandler,
   getStackHandler,
@@ -95,6 +97,21 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         validate: { request: GetAwsOnboardingBootstrapLaunchRequestSchema },
       },
       getBootstrapLaunchHandler
+    );
+
+  router.versioned
+    .get({
+      path: AWS_ONBOARDING_API_ROUTES.BOOTSTRAP_TEMPLATE_PATTERN,
+      summary: 'Get the managed onboarding bootstrap CloudFormation template',
+      access: 'internal',
+      security: READ_SECURITY,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: { request: GetAwsOnboardingBootstrapTemplateRequestSchema },
+      },
+      getBootstrapTemplateHandler
     );
 
   router.versioned

@@ -13,7 +13,7 @@ import { isAwsManagedOnboardingEnabled } from '../../services/utils/aws_onboardi
 import { isIacProvisionerEnabled } from '../../services/utils/iac_provisioner';
 import { IacProvisionerUnavailableError } from '../../errors';
 
-import { getBootstrapLaunchHandler } from './handlers';
+import { getBootstrapLaunchHandler, getBootstrapTemplateHandler } from './handlers';
 
 jest.mock('../../services/app_context');
 jest.mock('../../services/aws_onboarding', () => ({
@@ -21,6 +21,8 @@ jest.mock('../../services/aws_onboarding', () => ({
   awsOnboardingDiscoveryService: {},
   awsOnboardingStackService: {},
   isAwsSdkError: jest.fn(),
+  BOOTSTRAP_TEMPLATE_YAML: 'Parameters:\n  ManagementMode:\n    Default: fully-managed\n',
+  BOOTSTRAP_TEMPLATE_FILENAME: 'kibana-managed-onboarding-bootstrap.yml',
 }));
 jest.mock('../../services/utils/aws_onboarding', () => ({
   isAwsManagedOnboardingEnabled: jest.fn(),
@@ -144,6 +146,39 @@ describe('getBootstrapLaunchHandler', () => {
           'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https%3A%2F%2Fbucket%2Fx%3Fsig%3D1&stackName=elastic-bootstrap-onboarding&param_ManagementMode=partially-managed',
         expiresAt: '2026-11-16T12:00:00Z',
         blueprint: { id: 'bp', version: '1' },
+      },
+    });
+  });
+});
+
+describe('getBootstrapTemplateHandler', () => {
+  let response: ReturnType<typeof httpServerMock.createResponseFactory>;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    response = httpServerMock.createResponseFactory();
+    jest.mocked(isAwsManagedOnboardingEnabled).mockResolvedValue(true);
+  });
+
+  it('returns 404 when managed onboarding is disabled', async () => {
+    jest.mocked(isAwsManagedOnboardingEnabled).mockResolvedValue(false);
+    const request = httpServerMock.createKibanaRequest({ query: { mode: 'fully-managed' } });
+
+    await getBootstrapTemplateHandler({} as any, request as any, response);
+
+    expect(response.notFound).toHaveBeenCalled();
+    expect(response.ok).not.toHaveBeenCalled();
+  });
+
+  it('pre-sets the ManagementMode default to the requested mode', async () => {
+    const request = httpServerMock.createKibanaRequest({ query: { mode: 'partially-managed' } });
+
+    await getBootstrapTemplateHandler({} as any, request as any, response);
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: {
+        filename: 'kibana-managed-onboarding-bootstrap.yml',
+        template: 'Parameters:\n  ManagementMode:\n    Default: partially-managed\n',
       },
     });
   });

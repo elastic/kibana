@@ -139,3 +139,9 @@ export interface GetAwsOnboardingBootstrapLaunchResponse {
   expiresAt: string;
   blueprint: { id: string; version: string };
 }
+
+export interface GetAwsOnboardingBootstrapTemplateResponse {
+  filename: string;
+  /** CloudFormation YAML with the ManagementMode default pre-set to the requested mode. */
+  template: string;
+}
