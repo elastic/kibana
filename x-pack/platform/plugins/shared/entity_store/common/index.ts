@@ -218,6 +218,7 @@ export type {
   EngineComponentResource,
   EngineComponentStatus,
   GetEntityStoreStatusResponse,
+  SetupSystemEventsResponse,
   InitEntityStoreResponse,
   InspectQuery,
   ListEntitiesResponse,
