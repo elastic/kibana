@@ -314,8 +314,20 @@ export class AwsOnboardingStackService {
       : undefined;
   }
 
-  public async status(stackArn: string): Promise<GetAwsOnboardingStackResponse> {
+  /** A provisioning session for status reads, so a caller polling a stack assumes the role once. */
+  public async createStatusClient(): Promise<AwsCloudFormationClient> {
     const { client } = await this.getClient('status');
+    return client;
+  }
+
+  public async status(stackArn: string): Promise<GetAwsOnboardingStackResponse> {
+    return this.statusWith(await this.createStatusClient(), stackArn);
+  }
+
+  public async statusWith(
+    client: AwsCloudFormationClient,
+    stackArn: string
+  ): Promise<GetAwsOnboardingStackResponse> {
     const stack = await client.describeStack(stackArn);
     if (!stack) {
       return { status: 'not_found' };

@@ -100,6 +100,7 @@ describe('AwsOnboardingStackService.status', () => {
       StackName: 'elastic-onboarding-x',
       StackStatus: 'CREATE_IN_PROGRESS',
     });
+    // The newest event sits in the middle, so neither the first nor the last entry is it.
     describeStackEvents.mockResolvedValue([
       {
         LogicalResourceId: 'WiiOidcProviderFunction',
@@ -111,6 +112,11 @@ describe('AwsOnboardingStackService.status', () => {
         ResourceStatus: 'CREATE_IN_PROGRESS',
         ResourceStatusReason: 'Resource creation Initiated',
         Timestamp: new Date('2026-11-17T10:00:05.000Z'),
+      },
+      {
+        LogicalResourceId: 'WiiOidcProviderFunctionRole',
+        ResourceStatus: 'CREATE_COMPLETE',
+        Timestamp: new Date('2026-11-17T09:59:50.000Z'),
       },
     ]);
 
