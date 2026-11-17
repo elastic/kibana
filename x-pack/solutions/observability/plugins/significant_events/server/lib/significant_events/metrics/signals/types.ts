@@ -9,7 +9,7 @@ import type { Condition } from '@kbn/streamlang';
 
 export type SignalSchema = 'ecs' | 'otel';
 export type SignalDirection = 'higher_is_worse' | 'lower_is_worse';
-export type SignalComparison = '>' | '>=' | '==';
+export type SignalComparison = '>' | '>=' | '<' | '==';
 
 export type SignalSource =
   | {
@@ -28,14 +28,16 @@ export type SignalFormulaKind =
   | 'restart_delta'
   | 'not_ready_count'
   | 'minimum'
-  | 'error_rate';
+  | 'maximum'
+  | 'error_rate'
+  | 'ratio'
+  | 'oom_killed_count';
 
-export interface SignalTemplateVariant {
+interface SignalTemplateVariantBase {
   schema: SignalSchema;
   dataset: string;
   field: string;
   formula: string;
-  formulaKind: SignalFormulaKind;
   preAggregationFilter?: string;
   additionalBreakdown?: readonly string[];
   minimumSampleCount?: number;
@@ -44,6 +46,34 @@ export interface SignalTemplateVariant {
   threshold: number;
   source: SignalSource;
 }
+
+export type SignalTemplateVariant = SignalTemplateVariantBase &
+  (
+    | {
+        formulaKind:
+          | 'average'
+          | 'inverse_average'
+          | 'restart_delta'
+          | 'minimum'
+          | 'maximum'
+          | 'error_rate';
+      }
+    | { formulaKind: 'not_ready_count'; matchingValues?: readonly string[] }
+    | { formulaKind: 'ratio'; denominatorField: string }
+    | { formulaKind: 'oom_killed_count'; reasonField: string; reasonValue: string }
+  );
+
+/** Returns every data field required to render a signal variant. */
+export const getSignalVariantFields = (variant: SignalTemplateVariant): string[] => {
+  switch (variant.formulaKind) {
+    case 'ratio':
+      return [variant.field, variant.denominatorField];
+    case 'oom_killed_count':
+      return [variant.field, variant.reasonField];
+    default:
+      return [variant.field];
+  }
+};
 
 export interface SignalTemplate {
   signal: string;

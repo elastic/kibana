@@ -18,6 +18,7 @@ import {
 import { quoteEsqlString } from '../entity_rows/helpers';
 import { WORKLOAD_OWNER_DERIVATION } from '../kubernetes/workloads';
 import type { SignalFieldPresence } from './check_signal_fields';
+import { getSignalVariantFields } from './types';
 import type { SignalCheck, SignalTemplate, SignalTemplateVariant, SkippedSignal } from './types';
 
 const CLUSTER_FIELD = 'orchestrator.cluster.name';
@@ -97,7 +98,10 @@ const hasFieldForScope = (
 ): boolean => {
   const namedCluster = getNamedCluster(scope);
   return fieldPresence.some(({ dataset, cluster, fields }) => {
-    if (dataset !== variant.dataset || !fields.has(variant.field)) {
+    if (
+      dataset !== variant.dataset ||
+      !getSignalVariantFields(variant).every((field) => fields.has(field))
+    ) {
       return false;
     }
     if (namedCluster !== undefined) {
@@ -161,19 +165,44 @@ const buildAggregationPipeline = ({
 | EVAL restart_delta = max_restarts - min_restarts
 | STATS signal_value = SUM(restart_delta) BY ${groupBy}`;
       break;
-    case 'not_ready_count':
-      aggregation = `| STATS signal_value = COUNT(${variant.field})
-    WHERE ${variant.field} IN ("false", "unknown")
+    case 'not_ready_count': {
+      const matchingValues = variant.matchingValues ?? ['false', 'unknown'];
+      const matchingCondition =
+        matchingValues.length === 1
+          ? `${variant.field} == ${quoteEsqlString(matchingValues[0])}`
+          : `${variant.field} IN (${matchingValues.map(quoteEsqlString).join(', ')})`;
+      aggregation = `| STATS signal_value = COUNT(*)
+    WHERE ${matchingCondition}
   BY ${groupBy}`;
       break;
+    }
     case 'minimum':
       aggregation = `| STATS signal_value = MIN(${variant.field}) BY ${groupBy}`;
+      break;
+    case 'maximum':
+      aggregation = `| STATS signal_value = MAX(${variant.field}) BY ${groupBy}`;
       break;
     case 'error_rate':
       aggregation = `| STATS successful = SUM(${variant.field}), total = COUNT(${variant.field})
   BY ${groupBy}
 | WHERE total > 0
 | EVAL signal_value = 1 - successful / total`;
+      break;
+    case 'ratio':
+      aggregation = `| STATS numerator_value = AVG(${variant.field}),
+        denominator_value = AVG(${variant.denominatorField})
+  BY ${groupBy}
+| WHERE denominator_value > 0
+| EVAL signal_value = TO_DOUBLE(numerator_value) / TO_DOUBLE(denominator_value)`;
+      break;
+    case 'oom_killed_count':
+      aggregation = `| STATS max_restarts = MAX(${variant.field}),
+        min_restarts = MIN(${variant.field}),
+        matching_reasons = COUNT(${variant.reasonField})
+          WHERE ${variant.reasonField} == ${quoteEsqlString(variant.reasonValue)}
+  BY ${groupBy}, kubernetes.pod.uid, kubernetes.container.name
+| WHERE max_restarts - min_restarts > 0 AND matching_reasons > 0
+| STATS signal_value = COUNT(*) BY ${groupBy}`;
       break;
   }
 

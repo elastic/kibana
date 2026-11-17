@@ -10,6 +10,7 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import { toFromSourceQuery } from '@kbn/nightshift-shared';
 import { timeoutSignal } from '@kbn/std';
 import { formatDatasetList } from '../entity_rows/helpers';
+import { getSignalVariantFields } from './types';
 import type { SignalTemplate } from './types';
 
 const SIGNAL_FIELD_QUERY_TIMEOUT_MS = 30_000;
@@ -22,7 +23,7 @@ export interface SignalFieldPresence {
 
 const buildSignalFieldQuery = (esql: string, templates: readonly SignalTemplate[]): string => {
   const fields = [
-    ...new Set(templates.flatMap(({ variants }) => variants.map(({ field }) => field))),
+    ...new Set(templates.flatMap(({ variants }) => variants.flatMap(getSignalVariantFields))),
   ];
   const datasets = [
     ...new Set(templates.flatMap(({ variants }) => variants.map(({ dataset }) => dataset))),
@@ -64,7 +65,9 @@ export const checkSignalFields = async ({
   }
 
   const fields = [
-    ...new Set(applicableTemplates.flatMap(({ variants }) => variants.map(({ field }) => field))),
+    ...new Set(
+      applicableTemplates.flatMap(({ variants }) => variants.flatMap(getSignalVariantFields))
+    ),
   ];
   const deadline = timeoutSignal(SIGNAL_FIELD_QUERY_TIMEOUT_MS);
   try {

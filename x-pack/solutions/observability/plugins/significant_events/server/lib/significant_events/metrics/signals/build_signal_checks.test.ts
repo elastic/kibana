@@ -10,6 +10,7 @@ import type { Condition } from '@kbn/streamlang';
 import { buildSignalChecks, type MetricsTypeKnowledgeIndicator } from './build_signal_checks';
 import type { SignalFieldPresence } from './check_signal_fields';
 import { SIGNAL_TEMPLATES } from './signal_templates';
+import { getSignalVariantFields } from './types';
 import type { SignalTemplate, SignalTemplateVariant } from './types';
 
 const createTypeKI = ({
@@ -42,6 +43,9 @@ const createTypeKI = ({
 };
 
 const getBreakdown = (subtype: string): string[] => {
+  if (subtype === 'k8s.namespace') {
+    return ['kubernetes.namespace'];
+  }
   if (subtype.startsWith('k8s.') && subtype !== 'k8s.node') {
     return ['kubernetes.namespace', 'kubernetes.deployment.name'];
   }
@@ -54,7 +58,7 @@ const getBreakdown = (subtype: string): string[] => {
 const createPresence = (variant: SignalTemplateVariant, cluster?: string): SignalFieldPresence => ({
   dataset: variant.dataset,
   cluster,
-  fields: new Set([variant.field]),
+  fields: new Set(getSignalVariantFields(variant)),
 });
 
 describe('buildSignalChecks', () => {
@@ -163,6 +167,33 @@ describe('buildSignalChecks', () => {
         }
       });
     });
+  });
+
+  it('casts both sides of ratio previews to double', () => {
+    const filesystemTemplate = SIGNAL_TEMPLATES.find(
+      ({ signal }) => signal === 'k8s.node.filesystem_usage'
+    );
+    if (!filesystemTemplate) {
+      throw new Error('Node filesystem template is missing');
+    }
+    const [ecs] = filesystemTemplate.variants;
+    const [check] = buildSignalChecks({
+      esql: 'FROM metrics-*',
+      typeKIs: [
+        createTypeKI({
+          id: 'k8s.nodes:cluster-a',
+          subtype: 'k8s.node',
+          breakdown: ['kubernetes.node.name'],
+          cluster: 'cluster-a',
+        }),
+      ],
+      templates: [filesystemTemplate],
+      fieldPresence: [createPresence(ecs, 'cluster-a')],
+    }).checks;
+
+    expect(check.esql_preview).toContain(
+      'TO_DOUBLE(numerator_value) / TO_DOUBLE(denominator_value)'
+    );
   });
 
   it('renders ES|QL previews that parse for every template variant', () => {
