@@ -145,7 +145,10 @@ export const AwsOnboardingSettingsCard: React.FC<{
                   color={state.danger ? 'danger' : 'subdued'}
                   data-test-subj={`awsOnboardingSettings-${stream.id}-status`}
                 >
-                  {`${stream.title}: ${state.text}`}
+                  {i18n.translate('xpack.fleet.awsOnboardingSettingsCard.streamStatus', {
+                    defaultMessage: '{title}: {status}',
+                    values: { title: stream.title, status: state.text },
+                  })}
                 </EuiText>
               );
             })}

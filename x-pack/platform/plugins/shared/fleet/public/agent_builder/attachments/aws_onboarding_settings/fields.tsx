@@ -121,13 +121,16 @@ const normalizeTitle = (title: string) =>
     .trim()
     .replace(/^collect\s+/i, '')
     .replace(/\s+from aws$/i, '')
+    .replace(/\s+(logs|metrics)$/i, '')
     .toLowerCase();
 
 /** The input's title is help only when it says something the stream title does not. */
 const inputHelp = (stream: DataStream, input: Input): string | undefined => {
   const help = input.title || input.description;
   if (!help) return undefined;
-  return normalizeTitle(help) === normalizeTitle(stream.title) ? undefined : help;
+  const [a, b] = [normalizeTitle(help), normalizeTitle(stream.title)];
+  // Redundant when one title merely repeats the other, e.g. "... Findings" vs "... Findings logs".
+  return a && b && (a.includes(b) || b.includes(a)) ? undefined : help;
 };
 
 const isSecret = (field: Field) => field.type === 'password' || field.type === 'secret';

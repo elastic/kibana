@@ -185,4 +185,43 @@ describe('AwsOnboardingSettingsForm', () => {
     expect(screen.queryByText('The agent polls the GuardDuty API.')).not.toBeInTheDocument();
     expect(screen.getByLabelText("Don't collect")).not.toBeChecked();
   });
+
+  it('hides the input title when it only repeats the stream title without the trailing noun', () => {
+    const [guardduty] = settingsAttachmentData.requirement.services;
+    const [findings] = guardduty.data_streams;
+    const [s3, cel] = findings.inputs;
+    render(
+      <I18nProvider>
+        <AwsOnboardingSettingsForm
+          attachmentId={KEY}
+          onSubmitted={jest.fn()}
+          data={{
+            ...settingsAttachmentData,
+            requirement: {
+              ...settingsAttachmentData.requirement,
+              services: [
+                {
+                  ...guardduty,
+                  data_streams: [
+                    {
+                      ...findings,
+                      title: 'Collect Amazon GuardDuty Findings logs from AWS',
+                      inputs: [s3, { ...cel, title: 'Collect Amazon GuardDuty Findings from AWS' }],
+                    },
+                  ],
+                },
+              ],
+            },
+          }}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByText('GuardDuty API polling')).toBeInTheDocument();
+    expect(
+      screen.queryByText('Collect Amazon GuardDuty Findings from AWS')
+    ).not.toBeInTheDocument();
+    // A genuinely different title is still shown as help.
+    expect(screen.getByText('Collect logs from S3')).toBeInTheDocument();
+  });
 });
