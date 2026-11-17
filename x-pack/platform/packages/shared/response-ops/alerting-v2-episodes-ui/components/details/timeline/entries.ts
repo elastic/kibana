@@ -149,12 +149,26 @@ export const mergeTimelineEntries = (
   actionEntries: EpisodeActionHistoryEntry[]
 ): TimelineEntry[] => {
   const actionItems: TimelineEntry[] = actionEntries.map((entry) => ({ kind: 'action', entry }));
-  return [...stateChangeEntries, ...severityChangeEntries, ...actionItems].sort((a, b) => {
-    const timestampComparison = getEntryTimestamp(b).localeCompare(getEntryTimestamp(a));
-    return timestampComparison !== 0
-      ? timestampComparison
-      : KIND_PRIORITY[a.kind] - KIND_PRIORITY[b.kind];
-  });
+  // State and severity changes arrive oldest first. Collapsed phases can put two changes of
+  // the same kind at one instant (a one-event phase, then the value that resumes), so on a
+  // tie the later change must sort as the newer one.
+  const items = [
+    ...stateChangeEntries.map((entry, order) => ({ entry, order })),
+    ...severityChangeEntries.map((entry, order) => ({ entry, order })),
+    ...actionItems.map((entry) => ({ entry, order: 0 })),
+  ];
+  return items
+    .sort((a, b) => {
+      const timestampComparison = getEntryTimestamp(b.entry).localeCompare(
+        getEntryTimestamp(a.entry)
+      );
+      if (timestampComparison !== 0) {
+        return timestampComparison;
+      }
+      const kindComparison = KIND_PRIORITY[a.entry.kind] - KIND_PRIORITY[b.entry.kind];
+      return kindComparison !== 0 ? kindComparison : b.order - a.order;
+    })
+    .map(({ entry }) => entry);
 };
 
 export const formatTimestamp = (iso: string): string =>
