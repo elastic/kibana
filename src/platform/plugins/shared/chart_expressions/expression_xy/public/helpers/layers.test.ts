@@ -33,11 +33,15 @@ describe('toXRangeLowerBounds', () => {
       },
     };
 
-    expect(toXRangeLowerBounds(layer).table.rows).toEqual([
+    const { table } = toXRangeLowerBounds(layer);
+
+    expect(table.rows).toEqual([
       { bucket: 500, count: 3 },
       { bucket: 0, count: 5 },
       { bucket: 1000, count: 1 },
     ]);
+    // The axis formats the lower bounds as numbers
+    expect(table.columns[0].meta.params).toEqual({ id: 'number' });
   });
 
   it('should keep the layer as it is for other x-axis types', () => {
