@@ -227,12 +227,13 @@ describe('StepExecutionRuntime', () => {
       expect(underTest.isInputRecorded).toBe(false);
     });
 
-    it('sets the flag on step state and keeps fields already stored there', () => {
+    it('sets the flag on step state and keeps fields already stored there', async () => {
       installState({ dynamicTimeout: '72h' });
 
       underTest.setInput({ message: 'hi' });
 
-      expect(stepIoService.getStepInput(fakeStepExecutionId)).toEqual({ message: 'hi' });
+      const inputs = await stepIoService.readBatch([fakeStepExecutionId], 'input');
+      expect(inputs.get(fakeStepExecutionId)).toEqual({ message: 'hi' });
       expect(underTest.isInputRecorded).toBe(true);
       expect(underTest.getCurrentStepState()).toEqual({
         dynamicTimeout: '72h',
