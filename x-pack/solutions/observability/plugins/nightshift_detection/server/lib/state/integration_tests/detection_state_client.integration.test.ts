@@ -11,7 +11,11 @@ import {
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 import { StateConflictError } from '../../errors/state_conflict_error';
-import { DetectionStateService, type DetectionStateClient } from '..';
+import {
+  DETECTION_STATE_SO_TYPE,
+  detectionStateSavedObjectType,
+} from '../../../saved_objects/detection_state_saved_object';
+import { DetectionStateClient } from '..';
 
 // Runs against a Kibana root with its saved objects index, so it proves the conflict and namespace
 // rules of the real repository that the in-memory one only imitates.
@@ -34,10 +38,11 @@ describe('DetectionStateClient on saved objects', () => {
     root = createRootWithCorePlugins({});
     await root.preboot();
     const setup = await root.setup();
-    const service = new DetectionStateService();
-    service.setup({ savedObjects: setup.savedObjects });
+    setup.savedObjects.registerType(detectionStateSavedObjectType);
     const start = await root.start();
-    client = service.start({ savedObjects: start.savedObjects }).getClient();
+    client = new DetectionStateClient(
+      start.savedObjects.createInternalRepository([DETECTION_STATE_SO_TYPE])
+    );
   });
 
   afterAll(async () => {
