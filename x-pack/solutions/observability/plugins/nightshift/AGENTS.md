@@ -47,7 +47,7 @@ When the right number of tests is zero (a constant, config or rename, wiring, do
 
 # Where code goes in `public/`
 
-These rules apply to every new file and to any file you move. Older folders don't follow them yet (see "Legacy folders").
+These rules apply to every new file and to any file you move.
 
 | Folder | Holds | May import |
 |---|---|---|
@@ -71,12 +71,3 @@ These rules apply to every new file and to any file you move. Older folders don'
 - A new page or tab is a module-scope `React.lazy` import. A heavy flyout or editor loads on open, like `SourceFlyout` in `sources/sources_view.tsx`.
 - Import individual files. Don't add barrel files that re-export a folder.
 - The plugin entry (`index.ts`) exports the initializer and types only. Never export page UI from it.
-
-## Legacy folders
-
-These folders predate the layout and will move under `pages/`, `components/` or `data/` over time: `app/`, `automations/`, `custom_context/`, `knowledge/`, `landing/`, `onboarding/`, `settings/`, `sources/`, and `nightshift_page.tsx`.
-
-- Edit files in place. Don't move a legacy folder as a side effect of a feature change.
-- A new file that only that legacy page uses can go inside its folder.
-- A new file that more than one page uses goes in the target folder from the table, even when the feature lives in a legacy folder.
-- Don't add a new import from one legacy folder into another. If you need code from another page, move that code first.

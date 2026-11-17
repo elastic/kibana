@@ -143,7 +143,13 @@ kibana_vars=(
     ops.cGroupOverrides.cpuPath
     ops.eventLoopWatchdog.blockThreshold
     ops.eventLoopWatchdog.enabled
+    ops.eventLoopWatchdog.profiling.cooldown
+    ops.eventLoopWatchdog.profiling.maxDuration
+    ops.eventLoopWatchdog.profiling.startAfter
     ops.eventLoopWatchdog.startup.blockThreshold
+    ops.eventLoopWatchdog.startup.profiling.cooldown
+    ops.eventLoopWatchdog.startup.profiling.maxDuration
+    ops.eventLoopWatchdog.startup.profiling.startAfter
     ops.eventLoopWatchdog.statsInterval
     ops.interval
     path.data
@@ -241,6 +247,15 @@ kibana_vars=(
     xpack.actions.email.services.enabled
     xpack.actions.enableFooterInEmail
     xpack.actions.enabledActionTypes
+    xpack.actions.inboundEvents.admission.enabled
+    xpack.actions.inboundEvents.admission.maxInFlight
+    xpack.actions.inboundEvents.admission.maxInFlightPerConnector
+    xpack.actions.inboundEvents.rateLimit.connector.limit
+    xpack.actions.inboundEvents.rateLimit.connector.window
+    xpack.actions.inboundEvents.rateLimit.enabled
+    xpack.actions.inboundEvents.rateLimit.maxKeys
+    xpack.actions.inboundEvents.rateLimit.remoteAddress.limit
+    xpack.actions.inboundEvents.rateLimit.remoteAddress.window
     xpack.actions.maxResponseContentLength
     xpack.actions.preconfigured
     xpack.actions.preconfiguredAlertHistoryEsIndex

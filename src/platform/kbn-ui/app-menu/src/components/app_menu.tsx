@@ -8,7 +8,6 @@
  */
 
 import React, { useState } from 'react';
-import { css } from '@emotion/react';
 import { getAppMenuItems, hasNonGlobalStaticItems, processStaticItems } from '../utils';
 import { AppMenuActionButton } from './app_menu_action_button';
 import { AppMenuItem } from './app_menu_item';
@@ -22,11 +21,6 @@ import {
   type AppMenuBreakpointSource,
   type AppMenuLayout,
 } from './app_menu_responsive';
-
-const secondaryActionsCss = css`
-  display: flex;
-  align-items: center;
-`;
 
 export type { AppMenuBreakpointSource };
 
@@ -115,36 +109,30 @@ export const AppMenuComponent = ({
     const inlineItems = displayedItems.slice(0, inlineItemLimit);
     const responsiveOverflowItems = [...displayedItems.slice(inlineItemLimit), ...overflowItems];
     const shouldShowOverflow = responsiveOverflowItems.length > 0 || hasStaticItems;
-    const hasSecondaryActions =
-      Boolean(switchConfig) || inlineItems.length > 0 || shouldShowOverflow;
 
     return (
       <>
-        {hasSecondaryActions && (
-          <div css={secondaryActionsCss}>
-            {historyConfig && <AppMenuHistoryComponent historyConfig={historyConfig} />}
-            {switchConfig && <AppMenuSwitchComponent switchConfig={switchConfig} />}
-            {inlineItems.map((menuItem) => (
-              <AppMenuItem
-                key={menuItem.id}
-                {...menuItem}
-                isPopoverOpen={openPopoverId === menuItem.id}
-                onPopoverToggle={() => handlePopoverToggle(menuItem.id)}
-                onPopoverClose={handleOnPopoverClose}
-              />
-            ))}
-            {shouldShowOverflow && (
-              <AppMenuOverflowButton
-                items={responsiveOverflowItems}
-                staticItems={processedStaticItems}
-                isPopoverOpen={openPopoverId === showMoreButtonId}
-                onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
-                onPopoverClose={handleOnPopoverClose}
-              />
-            )}
-          </div>
-        )}
+        {historyConfig && <AppMenuHistoryComponent historyConfig={historyConfig} />}
+        {switchConfig && <AppMenuSwitchComponent switchConfig={switchConfig} />}
+        {inlineItems.map((menuItem) => (
+          <AppMenuItem
+            key={menuItem.id}
+            {...menuItem}
+            isPopoverOpen={openPopoverId === menuItem.id}
+            onPopoverToggle={() => handlePopoverToggle(menuItem.id)}
+            onPopoverClose={handleOnPopoverClose}
+          />
+        ))}
         {primaryActionComponent}
+        {shouldShowOverflow && (
+          <AppMenuOverflowButton
+            items={responsiveOverflowItems}
+            staticItems={processedStaticItems}
+            isPopoverOpen={openPopoverId === showMoreButtonId}
+            onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
+            onPopoverClose={handleOnPopoverClose}
+          />
+        )}
       </>
     );
   };

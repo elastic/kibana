@@ -99,6 +99,7 @@ dependsOn:
   - '@kbn/cps-common'
   - '@kbn/mock-idp-utils'
   - '@kbn/ui-callout'
+  - '@kbn/shared-ux-label-formatter'
 tags:
   - plugin
   - prod

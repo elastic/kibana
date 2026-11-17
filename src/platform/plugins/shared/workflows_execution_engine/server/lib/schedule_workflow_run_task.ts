@@ -11,6 +11,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { TaskInstance, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { publishFinishedWorkflowExecution } from '../topics/publish_finished_workflow_execution';
 import type { StartWorkflowExecutionParams } from '../workflow_task_manager/types';
 
 export interface ScheduleWorkflowRunTaskDeps {
@@ -38,29 +39,56 @@ const getErrorMessage = (error: unknown): string => {
 // A persisted execution with no task would otherwise stay pending forever.
 const markExecutionsFailed = async (
   { workflowExecutionRepository, logger }: ScheduleWorkflowRunTaskDeps,
-  executionIds: string[],
+  executions: Array<{ id: string; spaceId: string }>,
   message: string
 ): Promise<void> => {
-  if (executionIds.length === 0) {
+  if (executions.length === 0) {
     return;
   }
   const finishedAt = new Date().toISOString();
-  await workflowExecutionRepository
-    .bulkUpdateWorkflowExecutions(
-      executionIds.map((id) => ({
+  const error = { type: 'TaskScheduleError', message };
+  const existing = await Promise.all(
+    executions.map(async ({ id, spaceId }) => {
+      try {
+        return await workflowExecutionRepository.getWorkflowExecutionById(id, spaceId);
+      } catch (readError) {
+        logger.debug(
+          `Could not read workflow execution ${id} before marking it FAILED: ${getErrorMessage(
+            readError
+          )}`
+        );
+        return null;
+      }
+    })
+  );
+  try {
+    await workflowExecutionRepository.bulkUpdateWorkflowExecutions(
+      executions.map(({ id }) => ({
         id,
         status: ExecutionStatus.FAILED,
-        error: { type: 'TaskScheduleError', message },
+        error,
         finishedAt,
       }))
+    );
+  } catch (updateError) {
+    logger.error(
+      `Failed to mark workflow executions [${executions
+        .map(({ id }) => id)
+        .join(', ')}] as FAILED after task schedule error "${message}": ${getErrorMessage(
+        updateError
+      )}`
+    );
+    return;
+  }
+  await Promise.all(
+    existing.map((execution) =>
+      publishFinishedWorkflowExecution(execution, {
+        status: ExecutionStatus.FAILED,
+        error,
+        finishedAt,
+      })
     )
-    .catch((updateError) => {
-      logger.error(
-        `Failed to mark workflow executions [${executionIds.join(
-          ', '
-        )}] as FAILED after task schedule error "${message}": ${getErrorMessage(updateError)}`
-      );
-    });
+  );
 };
 
 /** Schedules one workflow run task; if scheduling throws, marks its execution FAILED and rethrows. */
@@ -72,7 +100,11 @@ export const scheduleRunTaskOrMarkFailed = async (
   try {
     await deps.taskManager.schedule(taskInstance, { request, cloneApiKey: true });
   } catch (error) {
-    await markExecutionsFailed(deps, [taskInstance.params.workflowRunId], getErrorMessage(error));
+    await markExecutionsFailed(
+      deps,
+      [{ id: taskInstance.params.workflowRunId, spaceId: taskInstance.params.spaceId }],
+      getErrorMessage(error)
+    );
     throw error;
   }
 };
@@ -97,7 +129,10 @@ export const bulkScheduleRunTasksOrMarkFailed = async (
     unscheduled = tasks.filter((_task, index) => found[index]?.tag !== 'ok');
     message = getErrorMessage(error);
   }
-  const failedExecutionIds = unscheduled.map(({ params }) => params.workflowRunId);
-  await markExecutionsFailed(deps, failedExecutionIds, message);
-  return { failedExecutionIds: new Set(failedExecutionIds), message };
+  const failedExecutions = unscheduled.map(({ params }) => ({
+    id: params.workflowRunId,
+    spaceId: params.spaceId,
+  }));
+  await markExecutionsFailed(deps, failedExecutions, message);
+  return { failedExecutionIds: new Set(failedExecutions.map(({ id }) => id)), message };
 };

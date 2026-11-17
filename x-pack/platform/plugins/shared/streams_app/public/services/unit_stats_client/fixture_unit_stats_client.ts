@@ -7,11 +7,17 @@
 
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { mapStatsResponse } from './map_stats_response';
-import type { DestinationStatsView, ProcessorInstanceStatsView, UnitStatsClient } from './types';
+import type {
+  DestinationStatsView,
+  ProcessorInstanceStatsView,
+  SourceStatsView,
+  UnitStatsClient,
+} from './types';
 
 const seconds = (value: number | null) => ({ value, unit: 's' });
 const items = (value: number | null) => ({ value, unit: '{item}' });
 const perSecond = (value: number | null) => ({ value, unit: '{item}', time_unit: 's' });
+const percent = (value: number | null) => ({ value, unit: '%' });
 
 const META: StreamsUnit.StatsMeta = {
   window: { start: '2026-10-27T12:00:00.000Z', end: '2026-10-27T12:15:00.000Z' },
@@ -35,8 +41,24 @@ const destinationResult = ({
       rate: perSecond(eventsRate),
       series: { bucket_ms: series.bucketMs, points: series.points },
     },
-    failed: { rate: perSecond(failedRate) },
+    // The client does not read the failure classes yet, so they have no data here.
+    failed: {
+      rate: perSecond(failedRate),
+      percentage: percent(null),
+      authentication: { rate: perSecond(null), percentage: percent(null) },
+      authorization: { rate: perSecond(null), percentage: percent(null) },
+    },
   },
+});
+
+const sourceResult = ({
+  acceptedRate = null,
+  error,
+}: Partial<SourceStatsView> & {
+  error?: StreamsUnit.StatsError;
+} = {}): StreamsUnit.StatsSourceResult => ({
+  ...(error ? { error } : {}),
+  events: { accepted: { rate: perSecond(acceptedRate) } },
 });
 
 const processorInstance = ({
@@ -118,6 +140,10 @@ export const STATS_FIXTURE_RESPONSES: Record<StatsFixtureScenario, StreamsUnit.S
     components: {
       destinations: DESTINATIONS_WITH_DATA,
       processors: { 'uppercase-message': REUSED_PROCESSOR },
+      sources: {
+        'otlp-input': sourceResult({ acceptedRate: 3700 }),
+        'idle-input': sourceResult({ acceptedRate: 0 }),
+      },
     },
     meta: META,
   },
@@ -125,6 +151,7 @@ export const STATS_FIXTURE_RESPONSES: Record<StatsFixtureScenario, StreamsUnit.S
     components: {
       destinations: { 'es-prod': destinationResult(), 'es-dev': destinationResult() },
       processors: { 'uppercase-message': { instances: [] } },
+      sources: { 'otlp-input': sourceResult() },
     },
     meta: META,
   },
@@ -138,6 +165,7 @@ export const STATS_FIXTURE_RESPONSES: Record<StatsFixtureScenario, StreamsUnit.S
         }),
       },
       processors: { 'uppercase-message': REUSED_PROCESSOR },
+      sources: {},
     },
     meta: META,
   },
@@ -153,6 +181,11 @@ export const STATS_FIXTURE_RESPONSES: Record<StatsFixtureScenario, StreamsUnit.S
         }),
       },
       processors: { 'uppercase-message': REUSED_PROCESSOR },
+      sources: {
+        'otlp-input': sourceResult({
+          error: { code: 'unavailable', reason: 'Elasticsearch is unavailable' },
+        }),
+      },
     },
     meta: META,
   },
@@ -161,10 +194,11 @@ export const STATS_FIXTURE_RESPONSES: Record<StatsFixtureScenario, StreamsUnit.S
     components: {
       destinations: { 's3-archive': destinationResult() },
       processors: {},
+      sources: {},
     },
     meta: META,
   },
-  // A destination that is staged on the Map but not in the persisted unit yet.
+  // A destination or source that is staged on the Map but not in the persisted unit yet.
   notFound: {
     components: {
       destinations: {
@@ -173,6 +207,11 @@ export const STATS_FIXTURE_RESPONSES: Record<StatsFixtureScenario, StreamsUnit.S
         }),
       },
       processors: {},
+      sources: {
+        'otlp-staged': sourceResult({
+          error: { code: 'not_found', reason: 'source otlp-staged is not in the unit' },
+        }),
+      },
     },
     meta: META,
   },

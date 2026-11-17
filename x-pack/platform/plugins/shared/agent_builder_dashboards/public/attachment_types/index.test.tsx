@@ -7,6 +7,7 @@
 
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import type { ChromeStart } from '@kbn/core/public';
+import { notificationServiceMock } from '@kbn/core/public/mocks';
 import type {
   DashboardApi,
   DashboardRendererProps,
@@ -104,7 +105,11 @@ const createMockDashboardApi = (
     filters$,
     query$,
     timeRange$,
+    getAppContext: () => ({ currentAppId: 'dashboards' }),
+    isEditableByUser: true,
+    isManaged: false,
     setState,
+    setViewMode: jest.fn(),
     getSerializedState,
     setSavedObjectId: (id: string | undefined) => savedObjectId$.next(id),
     emitSave: (event: DashboardSaveEvent) => onSave$.next(event),
@@ -227,6 +232,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       },
       currentAppId$,
       draftAttachmentId: createIdGenerator(),
+      toasts: notificationServiceMock.createStartContract().toasts,
     };
   };
 
@@ -326,6 +332,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
         ui: { SearchBar: jest.fn() },
       } as unknown as UnifiedSearchPublicPluginStart,
       draftAttachmentId: createIdGenerator(),
+      toasts: notificationServiceMock.createStartContract().toasts,
     };
 
     let cleanup: (() => void) | undefined;

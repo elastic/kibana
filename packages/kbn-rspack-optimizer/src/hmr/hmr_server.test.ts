@@ -206,6 +206,40 @@ describe('HmrServer', () => {
     }
   });
 
+  it('binds loopback by default and KBN_HMR_HOST when set', async () => {
+    const originalHost = process.env.KBN_HMR_HOST;
+    const originalPort = process.env.KBN_HMR_PORT;
+    process.env.KBN_HMR_PORT = '0';
+
+    try {
+      delete process.env.KBN_HMR_HOST;
+      server = new HmrServer();
+      await server.start();
+      expect((server as unknown as { server: http.Server }).server.address()).toMatchObject({
+        address: '127.0.0.1',
+      });
+      await server.close();
+
+      process.env.KBN_HMR_HOST = '0.0.0.0';
+      server = new HmrServer();
+      await server.start();
+      expect((server as unknown as { server: http.Server }).server.address()).toMatchObject({
+        address: '0.0.0.0',
+      });
+    } finally {
+      if (originalHost === undefined) {
+        delete process.env.KBN_HMR_HOST;
+      } else {
+        process.env.KBN_HMR_HOST = originalHost;
+      }
+      if (originalPort === undefined) {
+        delete process.env.KBN_HMR_PORT;
+      } else {
+        process.env.KBN_HMR_PORT = originalPort;
+      }
+    }
+  });
+
   describe('port-collision fallback', () => {
     let squatter: http.Server;
     let squattedPort: number;

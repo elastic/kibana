@@ -219,9 +219,32 @@ describe('createSyntheticScenario', () => {
         spaceId: 'default',
         name: `Test rule ${index + 1}`,
         routingTags: ['prod', 'web'],
+        groupingFields: [],
       });
       expect(PolicyMatcher.of(policy.matcher).matchesRoutingTags(rule.routingTags)).toBe(true);
     });
+  });
+
+  it.each<[string, ActionPolicy]>([
+    ['per_alert', createActionPolicy({ grouping: { mode: 'per_alert' } })],
+    ['all', createActionPolicy({ grouping: { mode: 'all' } })],
+  ])('builds placeholder rules without grouping fields for a %s policy', (_, policy) => {
+    const { rules } = createSyntheticScenario(buildParams(policy));
+
+    expect(rules.every(({ groupingFields }) => groupingFields.length === 0)).toBe(true);
+  });
+
+  it('builds placeholder rules grouped by the data fields of a per_field policy', () => {
+    const [payload] = buildGroups(
+      createActionPolicy({
+        grouping: { mode: 'per_field', fields: ['data.host.name', 'severity', 'data.env'] },
+      })
+    );
+
+    expect(Object.values(payload.rules)).toHaveLength(DEFAULT_AGGREGATED_ALERT_COUNT);
+    for (const rule of Object.values(payload.rules)) {
+      expect(rule.grouping_fields).toEqual(['host.name', 'env']);
+    }
   });
 
   it('builds synthetic alerts in the policy space with production-shaped alert urls', () => {

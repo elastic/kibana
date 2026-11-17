@@ -34,6 +34,9 @@ export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract
         uiam: null,
       },
     },
+    authz: {
+      uiam: null,
+    },
     audit: {
       asScoped: () => {
         return { log: () => undefined, enabled: false, includeSavedObjectNames: false };
@@ -51,6 +54,7 @@ export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract
       bindWorkload: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
       unbindWorkload: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
       getWorkloadBinding: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
+      getWorkloadServiceAccountSummary: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
       withScopedRequestForWorkload: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
     },
     // No security delegate registered, so there are no user profiles to bind.
