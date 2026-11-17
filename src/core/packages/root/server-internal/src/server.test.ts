@@ -45,8 +45,10 @@ import { MIGRATION_EXCEPTION_CODE } from './constants';
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import type { UiamAssertionSigner } from '@kbn/core-security-server';
 import {
   deriveInternalCallerAttestation,
+  deriveUiamAttestationKey,
   ES_CLIENT_AUTHENTICATION_HEADER,
   HTTPAuthorizationHeader,
   isExternalUiamCredential,
@@ -696,12 +698,17 @@ describe('self client UIAM attestation getter', () => {
   });
 
   it('mints an attestation the receiving UIAM service accepts', async () => {
-    const sharedSecret = 'shared-secret';
+    const attestationKey = deriveUiamAttestationKey('a'.repeat(32));
+    const signer: UiamAssertionSigner = {
+      subject: 'spiffe://kibana.test',
+      sign: (credential) => `Assertion signed-for(${credential.toString()})`,
+      isOwnAssertion: () => false,
+    };
     const uiam = getUiamMock();
     uiam.getInternalCallerAttestationHeaders.mockImplementation(
       (credential: HTTPAuthorizationHeader) => ({
         [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
-          sharedSecret,
+          attestationKey,
           credential
         ),
       })
@@ -715,7 +722,7 @@ describe('self client UIAM attestation getter', () => {
 
     expect(minted).toEqual(expect.any(String));
     expect(
-      createCoreUiamService(sharedSecret).getElasticsearchClientAuthentication({
+      createCoreUiamService({ signer, attestationKey }).getElasticsearchClientAuthentication({
         credentialSource: 'inbound',
         credential: new HTTPAuthorizationHeader('Bearer', 'essu_outbound'),
         relayedClientAuthentication: undefined,
@@ -723,7 +730,7 @@ describe('self client UIAM attestation getter', () => {
           [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: minted ?? '',
         },
       })
-    ).toBe(sharedSecret);
+    ).toBe('Assertion signed-for(Bearer essu_outbound)');
   });
 });
 

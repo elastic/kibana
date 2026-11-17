@@ -26,5 +26,6 @@
     "@kbn/config-mocks",
     "@kbn/core-spaces-common",
     "@kbn/std",
+    "@kbn/dev-utils",
   ]
 }

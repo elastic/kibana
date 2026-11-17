@@ -15,6 +15,8 @@ import type {
   SecurityServiceSetup,
   SecurityServiceStart,
   SecurityRequestHandlerContext,
+  UiamAssertionSigner,
+  UiamClientAuthenticationContext,
 } from '@kbn/core-security-server';
 import type {
   InternalSecurityServiceSetup,
@@ -86,10 +88,23 @@ const createStartMock = (): SecurityStartMock => {
   return mock;
 };
 
+const MOCK_UIAM_ASSERTION_PREFIX = 'Assertion mock-assertion-for';
+
+const mockUiamAssertionSigner: UiamAssertionSigner = {
+  subject: 'spiffe://kibana.mock',
+  sign: (credential) => `${MOCK_UIAM_ASSERTION_PREFIX}(${credential.toString()})`,
+  isOwnAssertion: (headerValue) => headerValue.startsWith(`${MOCK_UIAM_ASSERTION_PREFIX}(`),
+};
+
+const uiamClientAuthenticationContext: UiamClientAuthenticationContext = Object.freeze({
+  signer: Object.freeze(mockUiamAssertionSigner),
+  attestationKey: Buffer.from('mock-uiam-attestation-key-for-tests'),
+});
+
 const createInternalSetupMock = () => {
   // Back the mock with the real CoreUiamService so tests exercise the actual attach/attestation
   // logic, wrap the method in a jest.fn so callers can still spy on / override it.
-  const uiam = createCoreUiamService('some-shared-secret');
+  const uiam = createCoreUiamService(uiamClientAuthenticationContext);
   const mock: jest.Mocked<InternalSecurityServiceSetup> = lazyObject({
     registerSecurityDelegate: jest.fn().mockImplementation(createDelegateHandleMock),
     acquireFakeRequestEnricher: jest.fn().mockReturnValue(jest.fn()),
@@ -178,4 +193,5 @@ export const securityServiceMock = {
   createRequestHandlerContext: createRequestHandlerContextMock,
   createMockAuthenticatedUser: (props: MockAuthenticatedUserProps = {}) =>
     mockAuthenticatedUser(props),
+  uiamClientAuthenticationContext,
 };

@@ -40,6 +40,11 @@ import {
   deriveInternalCallerAttestation,
 } from '@kbn/core-security-server';
 
+const { attestationKey: UIAM_ATTESTATION_KEY, signer: uiamSigner } =
+  securityServiceMock.uiamClientAuthenticationContext;
+const ownAssertion = (authorization: string) =>
+  uiamSigner.sign(HTTPAuthorizationHeader.parseFromValue(authorization)!);
+
 const createConfig = (
   parts: Partial<ElasticsearchClientConfig> = {}
 ): ElasticsearchClientConfig => {
@@ -946,7 +951,7 @@ describe('ClusterClient', () => {
           // The attestation is bound to the effective (post-authentication) credential, not to the
           // one that came in on the wire.
           [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
-            'some-shared-secret',
+            UIAM_ATTESTATION_KEY,
             new HTTPAuthorizationHeader('ApiKey', 'essu_dev_yes')
           ),
         },
@@ -962,7 +967,7 @@ describe('ClusterClient', () => {
           headers: {
             ...defaultHeaders,
             [AUTHORIZATION_HEADER]: 'ApiKey essu_dev_yes',
-            [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: ownAssertion('ApiKey essu_dev_yes'),
             'x-opaque-id': expect.any(String),
           },
         })
@@ -989,10 +994,10 @@ describe('ClusterClient', () => {
       const request = httpServerMock.createKibanaRequest({
         headers: {
           [AUTHORIZATION_HEADER]: 'Bearer override',
-          // Genuinely minted with the shared secret, but for a different credential, so replaying it
-          // here must not authorize the shared secret.
+          // Genuinely minted with the attestation key, but for a different credential, so replaying
+          // it here must not earn Kibana's own assertion.
           [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
-            'some-shared-secret',
+            UIAM_ATTESTATION_KEY,
             new HTTPAuthorizationHeader('Bearer', 'essu_dev_other')
           ),
         },
@@ -1057,7 +1062,7 @@ describe('ClusterClient', () => {
         headers: {
           [AUTHORIZATION_HEADER]: 'Bearer override',
           [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
-            'some-shared-secret',
+            UIAM_ATTESTATION_KEY,
             new HTTPAuthorizationHeader('Bearer', 'not-uiam')
           ),
         },
@@ -1119,12 +1124,12 @@ describe('ClusterClient', () => {
       }
     );
 
-    it("attaches Kibana's shared secret for a UIAM OAuth ephemeral token", () => {
+    it("attaches Kibana's own assertion for a UIAM OAuth ephemeral token", () => {
       // `UiamService.getAuthenticationHeaders` hands the ephemeral token to the auth service
-      // together with Kibana's own secret, so the passthrough carries it to Elasticsearch.
+      // together with Kibana's own assertion, so the passthrough carries it to Elasticsearch.
       const authenticationHeaders = {
         [AUTHORIZATION_HEADER]: 'Bearer essu_ephemeral_token',
-        [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
+        [ES_CLIENT_AUTHENTICATION_HEADER]: ownAssertion('Bearer essu_ephemeral_token'),
       };
       authHeaders.get.mockReturnValue(authenticationHeaders);
 
@@ -1163,7 +1168,7 @@ describe('ClusterClient', () => {
           headers: {
             ...defaultHeaders,
             [ES_SECONDARY_AUTH_HEADER]: 'Bearer essu_ephemeral_token',
-            [ES_SECONDARY_CLIENT_AUTH_HEADER]: 'some-shared-secret',
+            [ES_SECONDARY_CLIENT_AUTH_HEADER]: ownAssertion('Bearer essu_ephemeral_token'),
           },
         })
       );
@@ -1201,7 +1206,7 @@ describe('ClusterClient', () => {
         headers: {
           ...authenticationHeaders,
           [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
-            'some-shared-secret',
+            UIAM_ATTESTATION_KEY,
             authorization
           ),
         },
@@ -1251,7 +1256,7 @@ describe('ClusterClient', () => {
         headers: {
           ...authenticationHeaders,
           [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
-            'some-shared-secret',
+            UIAM_ATTESTATION_KEY,
             authorization
           ),
         },
@@ -1262,7 +1267,7 @@ describe('ClusterClient', () => {
       client = scopedClusterClient.asCurrentUser;
 
       // Nothing else resolved the client authentication, so the attestation is what decides. Only
-      // a caller holding Kibana's shared secret can mint one, which is what tells a Kibana
+      // a caller holding Kibana's attestation key can mint one, which is what tells a Kibana
       // loopback call apart from a token relayed by some other client.
       expect(security.uiam!.getElasticsearchClientAuthentication).toHaveBeenCalledWith(
         expect.objectContaining({ credentialSource: 'inbound' })
@@ -1272,7 +1277,7 @@ describe('ClusterClient', () => {
           headers: {
             ...defaultHeaders,
             ...authenticationHeaders,
-            [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: ownAssertion('Bearer essu_ephemeral_token'),
             'x-opaque-id': expect.any(String),
           },
         })
@@ -1368,7 +1373,7 @@ describe('ClusterClient', () => {
           headers: {
             ...defaultHeaders,
             [AUTHORIZATION_HEADER]: 'Bearer essu_dev_yes',
-            [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: ownAssertion('Bearer essu_dev_yes'),
           },
         })
       );
@@ -1407,7 +1412,7 @@ describe('ClusterClient', () => {
           headers: {
             ...defaultHeaders,
             [AUTHORIZATION_HEADER]: 'ApiKey essu_granted_key',
-            [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: ownAssertion('ApiKey essu_granted_key'),
           },
         })
       );
@@ -1419,7 +1424,7 @@ describe('ClusterClient', () => {
           headers: {
             ...defaultHeaders,
             [ES_SECONDARY_AUTH_HEADER]: 'ApiKey essu_granted_key',
-            [ES_SECONDARY_CLIENT_AUTH_HEADER]: 'some-shared-secret',
+            [ES_SECONDARY_CLIENT_AUTH_HEADER]: ownAssertion('ApiKey essu_granted_key'),
           },
         })
       );
@@ -1488,7 +1493,7 @@ describe('ClusterClient', () => {
       expect(scopedClient.child).toHaveBeenCalledWith(
         expect.objectContaining({
           headers: expect.objectContaining({
-            [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: ownAssertion('ApiKey essu_user_created_key'),
           }),
         })
       );
@@ -1831,7 +1836,7 @@ describe('ClusterClient', () => {
       );
       expect(internalClient.child).toHaveBeenCalledWith(
         expect.not.objectContaining({
-          headers: { [ES_SECONDARY_CLIENT_AUTH_HEADER]: 'some-shared-secret' },
+          headers: { [ES_SECONDARY_CLIENT_AUTH_HEADER]: ownAssertion('Bearer yes') },
         })
       );
       expect(internalClient.child).toHaveBeenCalledWith(
@@ -1869,7 +1874,7 @@ describe('ClusterClient', () => {
           headers: {
             ...defaultHeaders,
             [ES_SECONDARY_AUTH_HEADER]: 'ApiKey essu_dev_yes',
-            [ES_SECONDARY_CLIENT_AUTH_HEADER]: 'some-shared-secret',
+            [ES_SECONDARY_CLIENT_AUTH_HEADER]: ownAssertion('ApiKey essu_dev_yes'),
           },
         })
       );
@@ -1940,7 +1945,7 @@ describe('ClusterClient', () => {
           headers: {
             ...defaultHeaders,
             [ES_SECONDARY_AUTH_HEADER]: 'Bearer essu_service_account_token',
-            [ES_SECONDARY_CLIENT_AUTH_HEADER]: 'some-shared-secret',
+            [ES_SECONDARY_CLIENT_AUTH_HEADER]: ownAssertion('Bearer essu_service_account_token'),
           },
         })
       );
@@ -1964,7 +1969,7 @@ describe('ClusterClient', () => {
         headers: {
           ...headers,
           [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
-            'some-shared-secret',
+            UIAM_ATTESTATION_KEY,
             authorization
           ),
         },
@@ -1977,7 +1982,7 @@ describe('ClusterClient', () => {
           headers: {
             ...defaultHeaders,
             [ES_SECONDARY_AUTH_HEADER]: headers.authorization,
-            [ES_SECONDARY_CLIENT_AUTH_HEADER]: 'some-shared-secret',
+            [ES_SECONDARY_CLIENT_AUTH_HEADER]: uiamSigner.sign(authorization),
           },
         })
       );

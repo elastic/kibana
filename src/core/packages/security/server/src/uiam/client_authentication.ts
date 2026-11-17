@@ -11,11 +11,22 @@ import { timingSafeEqual } from 'crypto';
 
 import type { Headers } from '@kbn/core-http-server';
 import type { HTTPAuthorizationHeader } from '../authentication';
+import type { UiamAssertionSigner } from './assertion_signer';
 import {
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
   deriveInternalCallerAttestation,
 } from './attestation';
 import { isUiamCredential } from './utils';
+
+/**
+ * What {@link resolveUiamClientAuthentication} needs to vouch for a UIAM credential.
+ */
+export interface UiamClientAuthenticationContext {
+  /** Signs the provenance assertion Kibana attaches to the credentials it vouches for. */
+  readonly signer: UiamAssertionSigner;
+  /** Key the loopback internal-caller attestation is derived from. */
+  readonly attestationKey: Buffer;
+}
 
 /**
  * The credential and its source used by {@link resolveUiamClientAuthentication}.
@@ -30,7 +41,7 @@ export type UiamClientAuthenticationParams =
   | {
       /**
        * The credential is a user-created (external) UIAM API key. UIAM rejects external keys
-       * presented with client authentication, so the shared secret must never be attached to it.
+       * presented with client authentication, so nothing must ever be attached to it.
        * Consumers signal this by marking the fake request that carries the credential with
        * `markExternalUiamCredential` from `@kbn/core-security-server`.
        */
@@ -66,7 +77,7 @@ const constantTimeEqual = (a: string, b: string): boolean => {
 
 /** Resolves the client authentication to attach to a UIAM credential based on its source. */
 export const resolveUiamClientAuthentication = (
-  sharedSecret: string,
+  context: UiamClientAuthenticationContext,
   params: UiamClientAuthenticationParams
 ): string | string[] | undefined => {
   if (!isUiamCredential(params.credential)) {
@@ -79,20 +90,20 @@ export const resolveUiamClientAuthentication = (
 
   if (params.credentialSource === 'inbound') {
     // The token may be bound to another client, so whatever already speaks for it is never
-    // replaced by Kibana's own secret. Checked ahead of the attestation so that, should a
-    // caller ever present both, the outcome is its own secret and never Kibana's.
+    // replaced by Kibana's own assertion. Checked ahead of the attestation so that, should a
+    // caller ever present both, the outcome is its own client authentication and never Kibana's.
     if (params.relayedClientAuthentication !== undefined) {
       return params.relayedClientAuthentication;
     }
 
     // The attestation is bound to the credential it rides with, so one captured from another
     // request (or another credential) does not validate here.
-    const expected = deriveInternalCallerAttestation(sharedSecret, params.credential);
+    const expected = deriveInternalCallerAttestation(context.attestationKey, params.credential);
     const presented = params.requestHeaders[UIAM_INTERNAL_CALLER_ATTESTATION_HEADER];
     if (typeof presented !== 'string' || !constantTimeEqual(presented, expected)) {
       return;
     }
   }
 
-  return sharedSecret;
+  return context.signer.sign(params.credential);
 };
