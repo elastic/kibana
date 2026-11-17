@@ -354,8 +354,6 @@ const getEffectiveVarGroupSelections = (
   return effective ?? validSelections;
 };
 
-const VALIDATE_DATASTREAMS_PERMISSION_REGEX = /^(logs|metrics|traces|synthetics|profiles)-(.+)$/;
-
 /*
  * Returns validation information for a given package policy and package info
  * Note: this method assumes that `packagePolicy` is correctly structured for the given package
