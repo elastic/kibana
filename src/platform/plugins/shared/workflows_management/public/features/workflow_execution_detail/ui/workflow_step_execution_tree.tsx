@@ -747,7 +747,13 @@ function convertTreeToOpenNodes(
         !isIterationStepType(stepType) &&
         options?.definition?.steps &&
         (
-          getStepByNameFromNestedSteps(options.definition.steps, stepId) as {
+          getStepByNameFromNestedSteps(
+            [
+              ...options.definition.steps,
+              ...(options.definition.settings?.['on-failure']?.fallback ?? []),
+            ] as WorkflowYaml['steps'],
+            stepId
+          ) as {
             mock?: unknown;
           } | null
         )?.mock != null

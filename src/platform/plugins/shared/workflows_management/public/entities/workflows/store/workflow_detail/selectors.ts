@@ -93,8 +93,6 @@ export const selectHighlightedStepId = createSelector(
   (detail) => detail.highlightedStepId
 );
 
-export const selectBreakpoints = createSelector(selectDetail, (detail) => detail.breakpoints);
-
 export const selectIsTestModalOpen = createSelector(
   selectDetail,
   (detail) => detail.isTestModalOpen
@@ -200,6 +198,16 @@ export const selectEditorYamlDocument = createSelector(
 export const selectEditorWorkflowLookup = createSelector(
   selectEditorComputed,
   (computed) => computed?.workflowLookup
+);
+
+/** Breakpoints on steps that still exist, so renamed or deleted steps drop out. */
+export const selectBreakpoints = createSelector(
+  (state: RootState) => state.detail.breakpoints,
+  selectEditorWorkflowLookup,
+  (breakpoints, workflowLookup) => {
+    const existing = breakpoints.filter((stepId) => workflowLookup?.steps[stepId]);
+    return existing.length === breakpoints.length ? breakpoints : existing;
+  }
 );
 
 export const selectEditorFocusedStepInfo = createSelector(

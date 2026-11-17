@@ -41,6 +41,8 @@ export const WorkflowDetailTestModal = () => {
   const { canExecuteWorkflow: hasExecutePrivilege } = useWorkflowsCapabilities();
   const workflow = useSelector(selectWorkflow);
   const canExecuteWorkflow = hasExecutePrivilege && workflow?.permissions?.execute !== false;
+  // Debug runs of a saved workflow require edit access.
+  const canDebugWorkflow = workflow?.permissions?.edit !== false;
 
   const { setSelectedExecution, selectEditorRun } = useWorkflowUrlState();
 
@@ -182,7 +184,7 @@ export const WorkflowDetailTestModal = () => {
       yamlString={yamlString}
       onClose={closeModal}
       onSubmit={handleRunWorkflow}
-      onDebugSubmit={handleDebugWorkflow}
+      onDebugSubmit={canDebugWorkflow ? handleDebugWorkflow : undefined}
       hasBreakpoints={breakpoints.length > 0}
       initialExecutionId={replayExecutionId ?? undefined}
     />

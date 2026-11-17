@@ -135,11 +135,12 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
     );
 
     const hasStepMocks = useMemo(() => {
-      if (!definition?.steps) {
-        return false;
-      }
+      const steps = [
+        ...(definition?.steps ?? []),
+        ...(definition?.settings?.['on-failure']?.fallback ?? []),
+      ];
       let found = false;
-      walkStepTree(definition.steps as unknown as Parameters<typeof walkStepTree>[0], (step) => {
+      walkStepTree(steps as unknown as Parameters<typeof walkStepTree>[0], (step) => {
         if ((step as { mock?: unknown }).mock != null) {
           found = true;
         }
@@ -155,8 +156,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
       return !hasAlertTrigger && !hasWorkflowInputFields(normalizedInputs);
     }, [definition, normalizedInputs]);
 
-    const isDebugConfigured =
-      (isTestRun || Boolean(onDebugSubmit)) && (hasBreakpoints || hasStepMocks);
+    const isDebugConfigured = Boolean(onDebugSubmit) && (hasBreakpoints || hasStepMocks);
     const shouldAutoRun = isAutoRunEligible && !isDebugConfigured;
 
     const [selectedTrigger, setSelectedTrigger] = useState<WorkflowTriggerTab>(() => {

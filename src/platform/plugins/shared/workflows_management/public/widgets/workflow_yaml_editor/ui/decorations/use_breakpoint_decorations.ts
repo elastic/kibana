@@ -83,6 +83,16 @@ export const useBreakpointDecorations = (
   const isExecutionsTabRef = useRef(isExecutionsTab);
   isExecutionsTabRef.current = isExecutionsTab;
   const [hoveredLineNumber, setHoveredLineNumber] = useState<number | null>(null);
+  const breakpointLines = useMemo(() => {
+    const steps = workflowLookup?.steps ?? {};
+    return new Set(
+      Object.values(steps)
+        .filter((step) => canSetBreakpointOnStep(step, steps))
+        .map((step) => step.lineStart)
+    );
+  }, [workflowLookup]);
+  const breakpointLinesRef = useRef(breakpointLines);
+  breakpointLinesRef.current = breakpointLines;
 
   const decorationsCollection = useMemo(() => {
     if (!editor) {
@@ -160,8 +170,14 @@ export const useBreakpointDecorations = (
       return;
     }
 
+    // Only step header lines are tracked, so moving across other lines does not re-render the editor.
     const mouseMoveDisposable = editor.onMouseMove((event) => {
-      setHoveredLineNumber(event.target.position?.lineNumber ?? null);
+      const lineNumber = event.target.position?.lineNumber;
+      setHoveredLineNumber(
+        !isExecutionsTabRef.current && lineNumber && breakpointLinesRef.current.has(lineNumber)
+          ? lineNumber
+          : null
+      );
     });
     const mouseLeaveDisposable = editor.onMouseLeave(() => setHoveredLineNumber(null));
 
