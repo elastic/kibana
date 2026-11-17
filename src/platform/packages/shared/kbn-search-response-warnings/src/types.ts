@@ -14,9 +14,10 @@ import type { estypes } from '@elastic/elasticsearch';
  * ES returns incomplete results when:
  * 1) Set timeout flag on search and the timeout expires on cluster
  * 2) Some shard failures on a cluster
- * 3) skipped remote(s) (skip_unavailable=true)
+ * 3) skipped remote(s) (skip_unavailable=true) that failed or disconnected
  *   a. all shards failed
  *   b. disconnected/not-connected
+ * A reachable remote with no matching index is skipped with zero shards and no failures, and is not incomplete.
  * @public
  */
 export interface SearchResponseIncompleteWarning {

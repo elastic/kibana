@@ -13,6 +13,54 @@ import type { Start as InspectorStartContract, RequestAdapter } from '@kbn/inspe
 import type { SearchResponseWarning } from './types';
 
 /**
+ * A reachable remote with no index matching the pattern is `skipped`, has zero shards, and no failures.
+ * That is not an incomplete result. A skipped cluster that timed out or has failures still is.
+ */
+const isEmptySkippedCluster = (cluster: estypes.ClusterDetails): boolean =>
+  cluster.status === 'skipped' &&
+  cluster.timed_out !== true &&
+  cluster._shards?.total === 0 &&
+  !cluster.failures?.length;
+
+const clustersForWarning = (
+  clusters: estypes.ClusterStatistics
+): Record<string, estypes.ClusterDetails> =>
+  clusters.details
+    ? Object.fromEntries(
+        Object.entries(clusters.details).filter(([, cluster]) => !isEmptySkippedCluster(cluster))
+      )
+    : {};
+
+const hasClusterProblem = ({
+  partial,
+  running,
+  skipped,
+  details,
+}: estypes.ClusterStatistics): boolean => {
+  // `failed` alone is not a problem.
+  if (partial + running + skipped === 0) {
+    return false;
+  }
+
+  // Without per-cluster details a skip cannot be told apart from a disconnect.
+  if (details == null) {
+    return true;
+  }
+
+  const clusters = Object.values(details);
+  const emptySkippedCount = clusters.filter(isEmptySkippedCluster).length;
+
+  // The counters report problems that the details do not explain, so trust the counters.
+  if (partial > 0 || running > 0 || skipped > emptySkippedCount) {
+    return true;
+  }
+
+  return clusters.some(
+    (cluster) => cluster.status !== 'successful' && !isEmptySkippedCluster(cluster)
+  );
+};
+
+/**
  * @internal
  */
 export function extractWarnings(
@@ -26,9 +74,7 @@ export function extractWarnings(
 
   // ES|QL supports _clusters in case of CCS but doesnt support _shards and timed_out (yet)
   const isPartial = rawResponse._clusters
-    ? rawResponse._clusters.partial > 0 ||
-      rawResponse._clusters.skipped > 0 ||
-      rawResponse._clusters.running > 0
+    ? hasClusterProblem(rawResponse._clusters)
     : ('timed_out' in rawResponse && rawResponse.timed_out) ||
       ('_shards' in rawResponse && rawResponse._shards.failed > 0);
   if (isPartial) {
@@ -36,7 +82,7 @@ export function extractWarnings(
       type: 'incomplete',
       requestName,
       clusters: rawResponse._clusters
-        ? rawResponse._clusters.details ?? {}
+        ? clustersForWarning(rawResponse._clusters)
         : {
             '(local)': {
               status: 'partial',
