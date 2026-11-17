@@ -126,6 +126,8 @@ export interface GetAwsOnboardingStackResponse {
   /** Raw CloudFormation StackStatus, e.g. CREATE_IN_PROGRESS. */
   stackStatus?: string;
   reason?: string;
+  /** The newest CloudFormation resource event; `reason` is set only for failed events. */
+  latestEvent?: { resource: string; status: string; timestamp: string; reason?: string };
   /** Present only when `status` is `complete`. */
   outputs?: {
     roleArn?: string;

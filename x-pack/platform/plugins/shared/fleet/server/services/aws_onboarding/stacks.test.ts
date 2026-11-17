@@ -83,7 +83,7 @@ describe('AwsOnboardingStackService.status', () => {
     expect(warn).toHaveBeenCalledTimes(1);
   });
 
-  it('does not query the events for a stack that completed', async () => {
+  it('queries the events once for a stack that completed', async () => {
     describeStack.mockResolvedValue({
       StackName: 'elastic-onboarding-x',
       StackStatus: 'CREATE_COMPLETE',
@@ -92,6 +92,64 @@ describe('AwsOnboardingStackService.status', () => {
     const result = await new AwsOnboardingStackService().status(stackArn);
 
     expect(result.status).toBe('complete');
-    expect(describeStackEvents).not.toHaveBeenCalled();
+    expect(describeStackEvents).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports the newest resource event by timestamp while the stack is in progress', async () => {
+    describeStack.mockResolvedValue({
+      StackName: 'elastic-onboarding-x',
+      StackStatus: 'CREATE_IN_PROGRESS',
+    });
+    describeStackEvents.mockResolvedValue([
+      {
+        LogicalResourceId: 'WiiOidcProviderFunction',
+        ResourceStatus: 'CREATE_COMPLETE',
+        Timestamp: new Date('2026-11-17T10:00:00.000Z'),
+      },
+      {
+        LogicalResourceId: 'WiiOidcProvider',
+        ResourceStatus: 'CREATE_IN_PROGRESS',
+        ResourceStatusReason: 'Resource creation Initiated',
+        Timestamp: new Date('2026-11-17T10:00:05.000Z'),
+      },
+    ]);
+
+    const result = await new AwsOnboardingStackService().status(stackArn);
+
+    expect(result.latestEvent).toEqual({
+      resource: 'WiiOidcProvider',
+      status: 'CREATE_IN_PROGRESS',
+      timestamp: '2026-11-17T10:00:05.000Z',
+    });
+  });
+
+  it('carries the reason only on a failed event', async () => {
+    describeStack.mockResolvedValue(rolledBack);
+    describeStackEvents.mockResolvedValue([
+      {
+        LogicalResourceId: 'WiiOidcProvider',
+        ResourceType: 'Custom::WiiOidcProvider',
+        ResourceStatus: 'CREATE_FAILED',
+        ResourceStatusReason: 'Could not connect to the issuer',
+        Timestamp: new Date('2026-11-17T10:00:05.000Z'),
+      },
+    ]);
+
+    const result = await new AwsOnboardingStackService().status(stackArn);
+
+    expect(result.latestEvent?.reason).toBe('Could not connect to the issuer');
+  });
+
+  it('omits latestEvent when the events lookup fails', async () => {
+    describeStack.mockResolvedValue({
+      StackName: 'elastic-onboarding-x',
+      StackStatus: 'CREATE_IN_PROGRESS',
+    });
+    describeStackEvents.mockRejectedValue(new Error('AccessDenied'));
+
+    const result = await new AwsOnboardingStackService().status(stackArn);
+
+    expect(result.status).toBe('in_progress');
+    expect(result.latestEvent).toBeUndefined();
   });
 });

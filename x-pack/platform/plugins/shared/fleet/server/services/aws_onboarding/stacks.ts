@@ -8,7 +8,7 @@
 import { randomBytes } from 'crypto';
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { Parameter } from '@aws-sdk/client-cloudformation';
+import type { Parameter, StackEvent } from '@aws-sdk/client-cloudformation';
 
 import { AWS_CLOUD_PROVIDER } from '../../../common/types/models/cloud_connector';
 import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../common/types/rest_spec/iac_provisioner';
@@ -44,6 +44,29 @@ export const toStackStatus = (stackStatus: string | undefined): AwsOnboardingSta
   if (COMPLETE_STATUSES.has(stackStatus)) return 'complete';
   if (stackStatus.endsWith('_IN_PROGRESS')) return 'in_progress';
   return 'failed';
+};
+
+/** The newest event by timestamp; only a failed event carries its reason. */
+const toLatestEvent = (
+  events: StackEvent[] | undefined
+): GetAwsOnboardingStackResponse['latestEvent'] => {
+  const newest = events?.reduce<StackEvent | undefined>(
+    (latest, event) =>
+      event.Timestamp && (!latest?.Timestamp || event.Timestamp > latest.Timestamp)
+        ? event
+        : latest,
+    undefined
+  );
+  if (!newest?.Timestamp || !newest.LogicalResourceId || !newest.ResourceStatus) {
+    return undefined;
+  }
+  const failed = newest.ResourceStatus.endsWith('_FAILED') && newest.ResourceStatusReason;
+  return {
+    resource: newest.LogicalResourceId,
+    status: newest.ResourceStatus,
+    timestamp: newest.Timestamp.toISOString(),
+    ...(failed ? { reason: newest.ResourceStatusReason } : {}),
+  };
 };
 
 export class AwsOnboardingStackService {
@@ -250,29 +273,13 @@ export class AwsOnboardingStackService {
     return started ? 'deletion_started' : 'skipped';
   }
 
-  /**
-   * The stack-level reason is empty once a failed create has rolled back and been deleted, so
-   * name the earliest failed resource instead: later failures are usually its rollback.
-   */
-  private async findFailedResourceReason(
+  /** One events call per status check; a failed lookup only degrades the progress detail. */
+  private async readStackEvents(
     client: AwsCloudFormationClient,
-    stackArn: string,
-    stackName: string | undefined
-  ): Promise<string | undefined> {
+    stackArn: string
+  ): Promise<StackEvent[] | undefined> {
     try {
-      const events = await client.describeStackEvents(stackArn);
-      // Events are newest first, so the last match is the earliest failure.
-      const failed = events
-        .filter(
-          (event) =>
-            event.ResourceStatus?.endsWith('_FAILED') &&
-            event.ResourceType !== 'AWS::CloudFormation::Stack' &&
-            event.LogicalResourceId !== stackName
-        )
-        .pop();
-      return failed?.ResourceStatusReason
-        ? `${failed.LogicalResourceId}: ${failed.ResourceStatusReason}`
-        : undefined;
+      return await client.describeStackEvents(stackArn);
     } catch (error) {
       appContextService
         .getLogger()
@@ -283,6 +290,28 @@ export class AwsOnboardingStackService {
         );
       return undefined;
     }
+  }
+
+  /**
+   * The stack-level reason is empty once a failed create has rolled back and been deleted, so
+   * name the earliest failed resource instead: later failures are usually its rollback.
+   */
+  private findFailedResourceReason(
+    events: StackEvent[] | undefined,
+    stackName: string | undefined
+  ): string | undefined {
+    // Events are newest first, so the last match is the earliest failure.
+    const failed = events
+      ?.filter(
+        (event) =>
+          event.ResourceStatus?.endsWith('_FAILED') &&
+          event.ResourceType !== 'AWS::CloudFormation::Stack' &&
+          event.LogicalResourceId !== stackName
+      )
+      .pop();
+    return failed?.ResourceStatusReason
+      ? `${failed.LogicalResourceId}: ${failed.ResourceStatusReason}`
+      : undefined;
   }
 
   public async status(stackArn: string): Promise<GetAwsOnboardingStackResponse> {
@@ -300,15 +329,17 @@ export class AwsOnboardingStackService {
               ?.OutputValue,
           }
         : undefined;
+    const events = await this.readStackEvents(client, stackArn);
+    const latestEvent = toLatestEvent(events);
     const reason =
       status === 'failed'
-        ? (await this.findFailedResourceReason(client, stackArn, stack.StackName)) ??
-          stack.StackStatusReason
+        ? this.findFailedResourceReason(events, stack.StackName) ?? stack.StackStatusReason
         : stack.StackStatusReason;
     return {
       status,
       stackStatus: stack.StackStatus,
       reason,
+      ...(latestEvent ? { latestEvent } : {}),
       ...(outputs ? { outputs } : {}),
     };
   }

@@ -87,4 +87,28 @@ describe('awsOnboardingStackStatusStepDefinition', () => {
       }),
     });
   });
+
+  it('maps the newest resource event to latest_event', async () => {
+    describeStack.mockResolvedValue({ StackStatus: 'CREATE_IN_PROGRESS' });
+    describeStackEvents.mockResolvedValue([
+      {
+        LogicalResourceId: 'Role',
+        ResourceStatus: 'CREATE_IN_PROGRESS',
+        Timestamp: new Date('2026-11-17T10:00:05.000Z'),
+      },
+    ]);
+
+    const result = await run();
+
+    expect(result).toEqual({
+      output: expect.objectContaining({
+        status: 'in_progress',
+        latest_event: {
+          resource: 'Role',
+          status: 'CREATE_IN_PROGRESS',
+          timestamp: '2026-11-17T10:00:05.000Z',
+        },
+      }),
+    });
+  });
 });

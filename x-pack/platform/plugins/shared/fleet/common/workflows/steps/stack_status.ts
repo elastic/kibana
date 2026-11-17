@@ -23,6 +23,14 @@ export const awsOnboardingStackStatusOutputSchema = lazySchema(() =>
     status: z.enum(['in_progress', 'complete', 'failed', 'not_found']),
     stack_status: z.string().optional(),
     reason: z.string().optional(),
+    latest_event: z
+      .object({
+        resource: z.string(),
+        status: z.string(),
+        timestamp: z.string(),
+        reason: z.string().optional(),
+      })
+      .optional(),
     role_arn: z.string().optional(),
     oidc_provider_arn: z.string().optional(),
   })

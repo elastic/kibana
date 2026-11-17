@@ -31,6 +31,7 @@ export const awsOnboardingStackStatusStepDefinition = createServerStepDefinition
           status: result.status,
           stack_status: result.stackStatus,
           reason: result.reason,
+          latest_event: result.latestEvent,
           role_arn: result.outputs?.roleArn,
           oidc_provider_arn: result.outputs?.oidcProviderArn,
         },
