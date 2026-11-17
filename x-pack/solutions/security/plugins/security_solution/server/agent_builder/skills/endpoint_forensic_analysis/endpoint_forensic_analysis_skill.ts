@@ -14,6 +14,8 @@ import { getConfigurationTroubleshootingSkillName } from '../configuration_troub
 import type { InvestigationIocCategory } from '../../attachments/investigation_iocs';
 import { MAX_IOCS_PER_CATEGORY } from '../../attachments/investigation_iocs';
 import { securityTool } from '../../tools/constants';
+import { SECURITY_ALERTS_TOOL_ID } from '../../tools';
+import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import {
   resolveSearchWindow,
   searchWindowShape,
@@ -228,6 +230,12 @@ Trace outbound internal connections from source host; correlate with process cre
 ### 7. Persistence
 Enumerate registry run keys, scheduled tasks, services, and startup items from telemetry indices.
 
+## Alerts in this space
+
+- Look up detection alerts in the \`alerts_index\` the discovery tool returned, or with \`${SECURITY_ALERTS_TOOL_ID}\`.
+- Never hardcode \`${DEFAULT_ALERTS_INDEX}-default\`, \`.siem-signals-*\`, or another space's index.
+- Alert ids added to a case must come from the current space's index. Pass each alert's \`_id\` and \`_index\` exactly as returned.
+
 ## Tool Selection Guardrails
 
 - **Always** call \`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID}\` before ES|QL.
@@ -274,6 +282,7 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
           } catch (error) {
             discoveryError = error instanceof Error ? error.message : String(error);
           }
+          const alertsIndex = `${DEFAULT_ALERTS_INDEX}-${context.spaceId}`;
           const missingPatterns = discoveryError
             ? []
             : ENDPOINT_TELEMETRY_INDEX_PATTERNS.filter(
@@ -291,13 +300,15 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
                   ...(discoveryError ? { index_discovery_error: discoveryError } : {}),
                   scoped_hosts: hosts ?? [],
                   searched_window: searchedWindow,
+                  alerts_index: alertsIndex,
                   guidance:
                     `Next: platform.core.generate_esql then platform.core.execute_esql scoped to host.name and ` +
                     `this exact range: ${toEsqlTimestampClause(searchedWindow)}. ${
                       searchedWindow.anchor === 'incident'
                         ? 'The range is the incident window. Events outside it are history, not this incident.'
                         : 'The range is a lookback from now, not anchored on an incident.'
-                    }`,
+                    } Query detection alerts only from \`${alertsIndex}\` (the current space), and attach only ` +
+                    `alert \`_id\`s read from it.`,
                 },
               },
             ],

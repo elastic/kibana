@@ -12,6 +12,7 @@ import {
   isToolHandlerStandardReturn,
   type ToolHandlerContext,
 } from '@kbn/agent-builder-server/tools';
+import { SECURITY_ALERTS_TOOL_ID } from '../../tools';
 import {
   ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID,
   ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID,
@@ -85,9 +86,12 @@ describe('endpointForensicAnalysisSkill', () => {
 
   describe(`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID} handler`, () => {
     const resolveIndex = jest.fn();
-    const context = {
-      esClient: { asCurrentUser: { indices: { resolveIndex } } },
-    } as unknown as ToolHandlerContext;
+    const createContext = (spaceId: string) =>
+      ({
+        spaceId,
+        esClient: { asCurrentUser: { indices: { resolveIndex } } },
+      } as unknown as ToolHandlerContext);
+    const context = createContext('default');
 
     const getTool = async (): Promise<BuiltinSkillBoundedTool> => {
       const inlineTools = (await endpointForensicAnalysisSkill.getInlineTools?.()) ?? [];
@@ -102,9 +106,12 @@ describe('endpointForensicAnalysisSkill', () => {
       return tool;
     };
 
-    const runHandler = async (args: Record<string, unknown> = {}) => {
+    const runHandler = async (
+      args: Record<string, unknown> = {},
+      handlerContext: ToolHandlerContext = context
+    ) => {
       const tool = await getTool();
-      const toolReturn = await tool.handler(args, context);
+      const toolReturn = await tool.handler(args, handlerContext);
       if (!isToolHandlerStandardReturn(toolReturn)) {
         throw new Error('discover_telemetry did not return a standard tool result');
       }
@@ -245,12 +252,36 @@ describe('endpointForensicAnalysisSkill', () => {
       });
     });
 
+    it.each([
+      ['ritik', '.alerts-security.alerts-ritik'],
+      ['default', '.alerts-security.alerts-default'],
+    ])('returns the alerts index of space %s', async (spaceId, alertsIndex) => {
+      const data = await runHandler({ hosts: ['WKSTN-RECV01'] }, createContext(spaceId));
+
+      expect(data.alerts_index).toBe(alertsIndex);
+      expect(data.guidance).toContain(`only from \`${alertsIndex}\``);
+      expect(data.guidance).toContain('`_id`');
+    });
+
     it('rejects a start without an end', async () => {
       const tool = await getTool();
       await expect(
         tool.handler({ hosts: ['h'], start: '2026-10-16T10:00:00.000Z' }, context)
       ).rejects.toThrow();
     });
+  });
+
+  it('scopes alert lookups and case attachments to the current space', () => {
+    const { content } = endpointForensicAnalysisSkill;
+    expect(content).toContain('## Alerts in this space');
+    expect(content).toContain('`alerts_index`');
+    expect(content).toContain(`\`${SECURITY_ALERTS_TOOL_ID}\``);
+    expect(content).toContain('Never hardcode');
+    expect(content).toContain('another space');
+    expect(content).toContain('`_id` and `_index` exactly as returned');
+    // The default-space index may be named only as a thing to avoid, never as a query target.
+    expect(content).toMatch(/Never hardcode[^\n]*`\.alerts-security\.alerts-default`/);
+    expect(content.match(/\.alerts-security\.alerts-default/g)).toHaveLength(1);
   });
 
   it('tells the agent to anchor on the incident and keep history apart from it', () => {
