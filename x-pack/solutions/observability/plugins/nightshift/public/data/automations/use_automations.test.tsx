@@ -141,12 +141,12 @@ describe('use_automations', () => {
     });
     investigationsFetch.mockImplementation((_endpoint, { params }) =>
       Promise.resolve({
-        runs:
-          params.query.page === 1
-            ? Array.from({ length: 100 }, (_, i) => run(`r${i}`))
-            : [run('last')],
+        runs: params.query.searchAfter
+          ? [run('last')]
+          : Array.from({ length: 100 }, (_, i) => run(`r${i}`)),
         total: 101,
-        usedToday: params.query.page === 1 ? 7 : 0,
+        usedToday: params.query.searchAfter ? 0 : 7,
+        ...(params.query.searchAfter ? {} : { searchAfter: [1, 'r99'] }),
       })
     );
     const { result } = renderWithClient(() =>
@@ -161,7 +161,7 @@ describe('use_automations', () => {
 
   it('stops fetching runs after a page fails and keeps the runs already loaded', async () => {
     investigationsFetch.mockImplementation((_endpoint, { params }) =>
-      params.query.page === 1
+      !params.query.searchAfter
         ? Promise.resolve({
             runs: Array.from({ length: 100 }, (_, i) => ({
               id: `r${i}`,
@@ -170,6 +170,7 @@ describe('use_automations', () => {
             })),
             total: 250,
             usedToday: 0,
+            searchAfter: [1, 'r99'],
           })
         : Promise.reject(new Error('boom'))
     );
@@ -189,16 +190,17 @@ describe('use_automations', () => {
   it('resumes loading the remaining runs after retry succeeds', async () => {
     let failPageTwo = true;
     investigationsFetch.mockImplementation((_endpoint, { params }) => {
-      const { page } = params.query;
-      if (page === 2 && failPageTwo) return Promise.reject(new Error('boom'));
+      const { searchAfter } = params.query;
+      if (searchAfter && failPageTwo) return Promise.reject(new Error('boom'));
       return Promise.resolve({
-        runs: Array.from({ length: page === 1 ? 100 : 1 }, (_, i) => ({
-          id: `p${page}-${i}`,
+        runs: Array.from({ length: searchAfter ? 1 : 100 }, (_, i) => ({
+          id: `p${searchAfter ? 2 : 1}-${i}`,
           status: 'succeeded',
           startedAt: '2026-10-01T00:00:00.000Z',
         })),
         total: 101,
         usedToday: 0,
+        ...(searchAfter ? {} : { searchAfter: [1, 'p1-99'] }),
       });
     });
     const { result } = renderWithClient(() =>

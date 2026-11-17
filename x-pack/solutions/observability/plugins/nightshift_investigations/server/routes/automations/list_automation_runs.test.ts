@@ -43,7 +43,13 @@ const mockContext = {
 
 const call = (
   id: string,
-  query: { page?: number; size?: number; startedAfter?: string; startedBefore?: string } = {}
+  query: {
+    page?: number;
+    size?: number;
+    searchAfter?: Array<string | number>;
+    startedAfter?: string;
+    startedBefore?: string;
+  } = {}
 ) =>
   handler({
     request: mockRequest,
@@ -52,6 +58,7 @@ const call = (
       query: {
         page: query.page ?? 1,
         size: query.size ?? 20,
+        searchAfter: query.searchAfter,
         startedAfter: query.startedAfter,
         startedBefore: query.startedBefore,
       },
@@ -562,3 +569,22 @@ it.each(['missing', 'failed'])(
     expect(result.total).toBe(1);
   }
 );
+
+it('forwards the cursor to the executions search and returns the next one', async () => {
+  mockGet.mockResolvedValue({ attributes: { workflowId: 'wf-1', runtime: {} } });
+  mockGetWorkflowExecutions.mockResolvedValue({
+    results: [],
+    total: 20000,
+    page: 1,
+    size: 100,
+    searchAfter: [2, 'next'],
+  });
+
+  const result = await call('auto-1', { searchAfter: [1, 'prev'] });
+
+  expect(mockGetWorkflowExecutions).toHaveBeenCalledWith(
+    expect.objectContaining({ searchAfter: [1, 'prev'] }),
+    'default'
+  );
+  expect(result.searchAfter).toEqual([2, 'next']);
+});

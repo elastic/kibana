@@ -157,20 +157,20 @@ export const useAutomationRunsInRange = (
     useInfiniteQuery({
       queryKey: [...AUTOMATIONS_QUERY_KEY, id, 'pagedRuns', startedAfter, startedBefore],
       enabled: investigationsClient != null,
-      queryFn: async ({ pageParam = 1 }) => {
+      queryFn: async ({ pageParam }: { pageParam?: string }) => {
         if (!investigationsClient) {
           throw new Error('Nightshift investigations plugin is unavailable');
         }
         return investigationsClient.fetch('GET /internal/nightshift/automations/{id}/runs', {
           params: {
             path: { id },
-            query: { page: pageParam, size: RUNS_PAGE_SIZE, startedAfter, startedBefore },
+            query: { searchAfter: pageParam, size: RUNS_PAGE_SIZE, startedAfter, startedBefore },
           },
           signal: null,
         });
       },
-      getNextPageParam: (lastPage, pages) =>
-        pages.length * RUNS_PAGE_SIZE < lastPage.total ? pages.length + 1 : undefined,
+      getNextPageParam: ({ searchAfter }) =>
+        searchAfter ? JSON.stringify(searchAfter) : undefined,
       retry: false,
     });
 

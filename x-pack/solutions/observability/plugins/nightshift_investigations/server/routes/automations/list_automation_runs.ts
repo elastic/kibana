@@ -6,7 +6,7 @@
  */
 
 import { serverUnavailable } from '@hapi/boom';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { MANUAL_AUTOMATION_TRIGGER_SOURCE } from '../../../common/automation_run';
 import { mapRunStatus, SKIP_REASONS } from './map_run_status';
@@ -29,15 +29,34 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
   security: {
     authz: { requiredPrivileges: ['read_nightshift'] },
   },
-  params: z.object({
-    path: z.object({ id: z.string().min(1).max(512) }),
-    query: z.object({
-      page: z.coerce.number().int().min(1).optional().default(1),
-      size: z.coerce.number().int().min(1).max(100).optional().default(20),
-      startedAfter: z.string().max(64).optional(),
-      startedBefore: z.string().max(64).optional(),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ id: z.string().min(1).max(512) }),
+      query: z.object({
+        page: z.coerce.number().int().min(1).optional().default(1),
+        size: z.coerce.number().int().min(1).max(100).optional().default(20),
+        searchAfter: z
+          .string()
+          .max(256)
+          .transform((value, ctx) => {
+            try {
+              return JSON.parse(value);
+            } catch {
+              ctx.issues.push({
+                code: 'custom',
+                message: 'searchAfter must be JSON',
+                input: value,
+              });
+              return z.NEVER;
+            }
+          })
+          .pipe(z.array(z.union([z.string().max(128), z.number()])).max(4))
+          .optional(),
+        startedAfter: z.string().max(64).optional(),
+        startedBefore: z.string().max(64).optional(),
+      }),
+    })
+  ),
   handler: async ({
     request,
     params,
@@ -71,6 +90,7 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
         omitStepRuns: true,
         page: params.query.page,
         size: params.query.size,
+        searchAfter: params.query.searchAfter,
         startedAfter: params.query.startedAfter,
         startedBefore: params.query.startedBefore,
         request,
@@ -190,6 +210,7 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
       usedToday,
       page: executions.page,
       size: executions.size,
+      searchAfter: executions.searchAfter,
     };
   },
 });
