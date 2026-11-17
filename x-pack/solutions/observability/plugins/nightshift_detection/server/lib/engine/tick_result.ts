@@ -22,5 +22,5 @@ export interface StrategyRunResult {
 /** What a tick did. */
 export type TickResult =
   | { run_id: string; status: 'completed'; strategies: StrategyRunResult[] }
-  | { run_id: string; status: 'busy'; held_by: string; strategies: [] }
+  | { run_id: string; status: 'busy'; strategies: [] }
   | { run_id: string; status: 'unavailable'; strategies: [] };

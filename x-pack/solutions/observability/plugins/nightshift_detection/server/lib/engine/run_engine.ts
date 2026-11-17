@@ -18,6 +18,7 @@ import type { GenerateResult } from '../strategies/types';
 import { DetectionEngineDataClient } from './es_client_tokens';
 import { planWindows } from './plan_windows';
 import type { PlannedWindow } from './plan_windows';
+import { SpaceRunLock } from './space_run_lock';
 import type { StrategyRunResult, TickResult } from './tick_result';
 import { EnabledSources, RunContext } from './tokens';
 
@@ -41,7 +42,7 @@ function rejectOnAbort(signal: AbortSignal): Promise<never> {
 }
 
 /**
- * One tick of the detection engine in one space: takes the space's lease, runs every due
+ * One tick of the detection engine in one space: takes the space's run lock, runs every due
  * strategy over its window, stores the signals, and moves each strategy's generator state. It knows no
  * identity: the clients and the tick's context are injected, so the `_tick` route decides who the
  * tick runs as.
@@ -54,6 +55,7 @@ export class EngineRunner {
     private readonly availability: Pick<AvailabilityService, 'isAvailable'>,
     @inject(StrategyCatalog) private readonly catalog: StrategyCatalog,
     @inject(DetectionStateClient) private readonly state: DetectionStateClient,
+    @inject(SpaceRunLock) private readonly spaceRunLock: Pick<SpaceRunLock, 'run'>,
     @inject(DetectionSignalStore) private readonly signalStore: DetectionSignalStore,
     @inject(EnabledSources) private readonly enabledSources: EnabledSources,
     @inject(DetectionEngineDataClient) private readonly dataClient: ElasticsearchClient,
@@ -63,12 +65,12 @@ export class EngineRunner {
   /**
    * Runs one tick:
    * 1. Check the engine is available for this deployment.
-   * 2. Take the space's lease, or report who holds it.
+   * 2. Take the space's run lock, or report that another run holds it.
    * 3. Plan a window for every strategy that is due.
    * 4. Run the due strategies in parallel within the run budget.
    * 5. Store each strategy's signals and move its generator state when nothing was lost.
    * 6. Triage and lifecycle (not built yet).
-   * 7. Release the lease.
+   * 7. Release the run lock.
    *
    * Strategies that are not due are left out of the result. A strategy that fails or runs out of
    * time is reported and keeps its generator state, so the next tick reads its window again; the others
@@ -90,12 +92,25 @@ export class EngineRunner {
       return { run_id: runId, status: 'unavailable', strategies: [] };
     }
 
-    // 2. One run per space at a time.
-    const attempt = await this.state.acquireLease({ spaceId, now });
-    if (!attempt.acquired) {
-      return { run_id: runId, status: 'busy', held_by: attempt.held_by, strategies: [] };
-    }
+    // 2. One run per space at a time. The lock is released when the callback ends, however it ends.
+    const outcome = await this.spaceRunLock.run({
+      spaceId,
+      callback: () => this.runLocked({ now, skipBacklog, abortSignal }),
+    });
 
+    return outcome.ran ? outcome.result : { run_id: runId, status: 'busy', strategies: [] };
+  }
+
+  private async runLocked({
+    now,
+    skipBacklog,
+    abortSignal,
+  }: {
+    now: number;
+    skipBacklog: boolean;
+    abortSignal?: AbortSignal;
+  }): Promise<TickResult> {
+    const { runId, spaceId } = this.runContext;
     const budget = new AbortController();
     const budgetTimer = setTimeout(() => budget.abort('the run budget is spent'), RUN_BUDGET_MS);
     const abortRun = () => budget.abort(abortSignal?.reason ?? 'the run was aborted');
@@ -123,17 +138,8 @@ export class EngineRunner {
 
       return { run_id: runId, status: 'completed', strategies: results };
     } finally {
-      // 7. Always, so an aborted or failed run does not block the space until the lease expires.
       clearTimeout(budgetTimer);
       abortSignal?.removeEventListener('abort', abortRun);
-      try {
-        await attempt.held.release();
-      } catch (error) {
-        // The lease expires on its own, and throwing here would replace the result of the run.
-        this.logger.warn(
-          `Could not release the run lease of space ${spaceId}: ${getErrorMessage(error)}`
-        );
-      }
     }
   }
 

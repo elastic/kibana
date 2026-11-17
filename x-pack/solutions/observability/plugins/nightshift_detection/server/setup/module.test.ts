@@ -23,6 +23,7 @@ import {
 } from '../lib/engine/es_client_tokens';
 import { EngineRunner } from '../lib/engine/run_engine';
 import { EnabledSources, RunContext } from '../lib/engine/tokens';
+import { SpaceRunLock } from '../lib/engine/space_run_lock';
 import { DetectionSignalStore } from '../lib/signals/signal_store';
 import { DetectionStateClient, detectionStateSavedObjectType } from '../lib/state';
 import { StrategyCatalog } from '../lib/strategies/strategy_catalog';
@@ -85,6 +86,7 @@ describe('module', () => {
     container.get(EngineRunner);
     container.get(DetectionSignalStore);
     container.get(DetectionStateClient);
+    container.get(SpaceRunLock);
     container.getAll(OnStart);
     container.getAll(OnSetup).forEach((onSetup) => onSetup(container));
 
