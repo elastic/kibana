@@ -9,7 +9,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import {
   durationSchema,
   entityIdSchema,
-  ENTITY_ID_NOTE,
+  ACTION_POLICY_ID_NOTE,
   futureIsoDateTime,
   queryIntSchema,
 } from './common';
@@ -325,7 +325,7 @@ export const createActionPolicyDataSchema = lazySchema(() =>
       id: entityIdSchema
         .optional()
         .describe(
-          `Optional action policy ID. If omitted, Kibana generates one. If an action policy with this ID already exists, the request fails with HTTP 409 and the existing policy is not changed. ${ENTITY_ID_NOTE}`
+          `The action policy ID. If omitted, Kibana generates one. If a policy with this ID already exists, the request returns a 409 error. ${ACTION_POLICY_ID_NOTE}`
         ),
     })
     .check(validateGroupingModeAndStrategy)
