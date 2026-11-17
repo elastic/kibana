@@ -93,6 +93,11 @@ export type OverviewPercentile = (typeof OVERVIEW_PERCENTILES)[number];
 /** A percentile as the routes take it in a query, e.g. `'95'`. */
 export type OverviewPercentileParam = `${OverviewPercentile}`;
 
+/** Every percentile as a query param, for a schema of the params. */
+export const OVERVIEW_PERCENTILE_PARAMS = OVERVIEW_PERCENTILES.map(
+  (percentile): OverviewPercentileParam => `${percentile}`
+);
+
 export const DEFAULT_OVERVIEW_PERCENTILE: OverviewPercentile = 75;
 
 /** The longest KQL query the Overview takes. */

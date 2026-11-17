@@ -2117,6 +2117,86 @@ steps:
     });
   });
 
+  describe('getWorkflowDependentsImpact', () => {
+    it('grades a draft with a YAML syntax error like any draft saved invalid', async () => {
+      const definition = {
+        name: 'Test workflow',
+        triggers: [{ type: 'manual' }],
+        steps: [{ name: 'log', type: 'console', with: { message: 'hi' } }],
+      };
+      mockWorkflowsService.getWorkflow.mockResolvedValue({
+        id: 'workflow-123',
+        name: 'Test workflow',
+        enabled: true,
+        valid: true,
+        definition,
+      } as any);
+      const caller = {
+        id: 'caller',
+        name: 'Caller',
+        enabled: true,
+        definition: {
+          name: 'Caller',
+          steps: [
+            { name: 'run', type: 'workflow.execute', with: { 'workflow-id': 'workflow-123' } },
+          ],
+        },
+      };
+      Object.assign(mockWorkflowsService, {
+        getDefinitionToStore: jest.fn().mockResolvedValue(null),
+        findWorkflowsCalling: jest.fn(async (ids: string[]) =>
+          ids.includes('workflow-123') ? [caller] : []
+        ),
+      });
+
+      const { analysis, calledWorkflows } = await api.getWorkflowDependentsImpact(
+        'workflow-123',
+        'default',
+        mockRequest,
+        'steps: ['
+      );
+
+      expect(analysis.dependents).toEqual([
+        expect.objectContaining({
+          workflowId: 'caller',
+          status: 'breaking',
+          issues: [expect.objectContaining({ kind: 'childInvalid', isNew: true })],
+        }),
+      ]);
+      expect(calledWorkflows).toEqual([]);
+    });
+
+    it('leaves workflows bound to a service account out of the background indexing', async () => {
+      const unindexed = (id: string, settings?: Record<string, unknown>) => ({
+        id,
+        name: id,
+        enabled: true,
+        definition: { name: id, settings, steps: [] },
+      });
+      mockWorkflowsService.getWorkflow.mockResolvedValue({
+        id: 'workflow-123',
+        name: 'Test workflow',
+        enabled: true,
+        valid: true,
+        definition: { name: 'Test workflow', triggers: [{ type: 'manual' }], steps: [] },
+      } as any);
+      const indexCalledWorkflowIds = jest.fn().mockResolvedValue(undefined);
+      Object.assign(mockWorkflowsService, {
+        indexCalledWorkflowIds,
+        findWorkflowsCalling: jest.fn(
+          async (_ids: string[], _spaceId: string, options?: { includeUnindexed?: boolean }) =>
+            options?.includeUnindexed
+              ? [unindexed('bound', { run_as: 'service-account-1' }), unindexed('unbound')]
+              : []
+        ),
+      });
+
+      await api.getWorkflowDependentsImpact('workflow-123', 'default', mockRequest, undefined);
+
+      expect(indexCalledWorkflowIds).toHaveBeenCalledWith(['unbound']);
+    });
+  });
+
   describe('restoreWorkflowVersion', () => {
     const createWorkflowDto = (overrides: Partial<WorkflowDetailDto> = {}): WorkflowDetailDto => ({
       id: 'wf-1',
