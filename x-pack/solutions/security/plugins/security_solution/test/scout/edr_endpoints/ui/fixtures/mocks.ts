@@ -6,13 +6,11 @@
  */
 
 import type { ScoutPage } from '@kbn/scout-security';
+import { INFERENCE_CONNECTORS_INTERNAL_API_PATH } from '@kbn/inference-common';
 import {
   WORKFLOW_INSIGHTS_PENDING_ROUTE,
   WORKFLOW_INSIGHTS_ROUTE,
 } from '../../../../../common/endpoint/constants';
-
-/** Served by the inference plugin; `useLoadConnectors` adds `?featureId=defend_insights`. */
-const INFERENCE_CONNECTORS_ROUTE = '/internal/search_inference_endpoints/connectors';
 
 export interface MockInferenceConnector {
   readonly connectorId: string;
@@ -45,13 +43,14 @@ const fulfillGet = async (page: ScoutPage, apiPath: string, body: unknown): Prom
 /**
  * Serves one inference connector to the workflow insights connector selector, so no real
  * connector (and no secret) is needed. The body uses `connectorId`, as the API does:
- * `@kbn/inference-connectors` maps it to the selector option id.
+ * `@kbn/inference-connectors` maps it to the selector option id. The UI adds
+ * `?featureId=defend_insights`, which the pathname match ignores.
  */
 export const mockInferenceConnectors = async (
   page: ScoutPage,
   { connectorId, name }: MockInferenceConnector
 ): Promise<void> => {
-  await fulfillGet(page, INFERENCE_CONNECTORS_ROUTE, {
+  await fulfillGet(page, INFERENCE_CONNECTORS_INTERNAL_API_PATH, {
     connectors: [
       {
         connectorId,
