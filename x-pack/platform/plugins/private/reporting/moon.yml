@@ -88,6 +88,7 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/deeplinks-analytics'
   - '@kbn/es-query'
+  - '@kbn/core-logging-server-mocks'
 tags:
   - plugin
   - prod
