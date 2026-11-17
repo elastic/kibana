@@ -13,8 +13,6 @@ import type {
   DecideOptions,
   DecideResponse,
   DecisionAnswer,
-  DecisionAnswerFor,
-  DecisionAnswersFor,
   DecisionQuestion,
 } from '@kbn/inference-common';
 import {
@@ -123,25 +121,18 @@ const invokeDecision = async ({
  * Creates the `decide` API, which calls the Elasticsearch `decision` inference task as the
  * user `esClient` is scoped to.
  */
-export const createDecideApi = ({
+export function createDecideApi(opts: { esClient: ElasticsearchClient; logger: Logger }): DecideAPI;
+export function createDecideApi({
   esClient,
   logger,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
-}): DecideAPI => {
-  function decide<const Q extends DecisionQuestion>(
-    options: DecideOptions,
-    question: Q
-  ): Promise<DecideResponse<{ answer: DecisionAnswerFor<Q> }>>;
-  function decide<const Q extends [DecisionQuestion, DecisionQuestion, ...DecisionQuestion[]]>(
-    options: DecideOptions,
-    ...questions: Q
-  ): Promise<DecideResponse<{ answers: DecisionAnswersFor<Q> }>>;
-  async function decide(
+}) {
+  return async (
     options: DecideOptions,
     ...questions: DecisionQuestion[]
-  ): Promise<DecideResponse<{ answer: DecisionAnswer } | { answers: DecisionAnswer[] }>> {
+  ): Promise<DecideResponse<{ answer: DecisionAnswer } | { answers: DecisionAnswer[] }>> => {
     if (questions.length === 0) {
       throw createInferenceRequestError('decide() needs at least one question', 400);
     }
@@ -182,7 +173,5 @@ export const createDecideApi = ({
         }
       }
     );
-  }
-
-  return decide;
-};
+  };
+}
