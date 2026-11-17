@@ -47,7 +47,7 @@ export interface ActivePanelEvent {
   sensorType: 'mouse' | 'touch' | 'keyboard';
 
   /**
-   * The rendered width of every panel when a resize event starts
+   * The rendered width of every panel when the interaction starts
    */
   panelWidths?: Record<string, number>;
 

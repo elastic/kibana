@@ -20,6 +20,7 @@ import { isFlexPanelDataEqual } from '../../utils/equality_checks';
 import { getPanelKeysInOrder } from '../../utils/panel_order';
 import type { UserKeyboardEvent } from '../../../common/sensors/keyboard/types';
 import { getDragOrder } from './get_drag_order';
+import { getFlowRects } from './get_flow_rects';
 import { getAllowedBreakpoints, getKeyboardDragPosition, getResizePreviewRect } from './utils';
 
 let startingLayout: FlexLayoutData | undefined;
@@ -36,14 +37,11 @@ export const startAction = (
   startingLayout = gridLayoutStateManager.gridLayout$.getValue();
   const panelRect = panelRef.getBoundingClientRect();
   // measure every panel in a single read pass, before any styles change, so only one layout is forced
-  const panelWidths =
-    type === 'resize'
-      ? Object.fromEntries(
-          Object.entries(gridLayoutStateManager.panelRefs.current).flatMap(([id, element]) =>
-            element ? [[id, element.getBoundingClientRect().width]] : []
-          )
-        )
-      : undefined;
+  const panelWidths = Object.fromEntries(
+    Object.entries(gridLayoutStateManager.panelRefs.current).flatMap(([id, element]) =>
+      element ? [[id, element.getBoundingClientRect().width]] : []
+    )
+  );
   gridLayoutStateManager.activePanelEvent$.next({
     type,
     id: panelId,
@@ -97,7 +95,6 @@ export const moveAction = (
     gridSettings$: { value: gridSettings },
     activePanelEvent$,
     gridLayout$,
-    panelRefs: { current: panelElements },
     layoutRef: { current: gridLayoutElement },
   } = gridLayoutStateManager;
   const activePanel = activePanelEvent$.value;
@@ -145,18 +142,17 @@ export const moveAction = (
       gridLayout$.next(nextLayout);
     }
   } else {
-    const otherPanelRects = Object.fromEntries(
-      Object.entries(panelElements).flatMap(([id, panel]) =>
-        id === activePanel.id || !panel ? [] : [[id, panel.getBoundingClientRect()]]
-      )
-    );
-    const sorted = getDragOrder({ activeId: activePanel.id, previewRect, otherPanelRects });
+    // check collisions against simulated rects, because the placeholder keeps shifting the live ones
+    const otherPanelRects = getFlowRects(gridLayoutStateManager);
+    if (otherPanelRects) {
+      const sorted = getDragOrder({ activeId: activePanel.id, previewRect, otherPanelRects });
 
-    const nextLayout: FlexLayoutData = {};
-    sorted.forEach((id, order) => {
-      nextLayout[id] = { ...currentLayout[id], order };
-    });
-    gridLayout$.next(nextLayout);
+      const nextLayout: FlexLayoutData = {};
+      sorted.forEach((id, order) => {
+        nextLayout[id] = { ...currentLayout[id], order };
+      });
+      gridLayout$.next(nextLayout);
+    }
   }
 
   // re-render the active panel
