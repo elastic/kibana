@@ -8,7 +8,9 @@
 import { lazySchema, z } from '@kbn/zod/v4';
 import type { DecisionAnswer, DecisionQuestion, DecisionType } from '@kbn/inference-common';
 import { createInferenceProviderError } from '@kbn/inference-common';
-import { questionKey } from './question_keys';
+
+/** The key a question is sent under, from its position: providers need names, callers don't. */
+export const questionKey = (index: number): string => `question_${index + 1}`;
 
 const toProbabilities = (entries: Array<[string, number]>): Record<string, number> =>
   Object.fromEntries(entries);

@@ -22,12 +22,16 @@ import {
   isInferenceError,
 } from '@kbn/inference-common';
 import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
-import { parseDecisionResponse } from './parse_decision_response';
-import { toKeyedQuestions } from './question_keys';
+import { parseDecisionResponse, questionKey } from './parse_decision_response';
 
 interface DecisionEndpointsResponse {
   endpoints?: Array<{ inference_id: string }>;
 }
+
+const toKeyedQuestions = (
+  questions: readonly DecisionQuestion[]
+): Record<string, DecisionQuestion> =>
+  Object.fromEntries(questions.map((question, index) => [questionKey(index), question]));
 
 /** The given inference id, else the first `decision` endpoint the cluster lists. */
 const resolveInferenceId = async ({
