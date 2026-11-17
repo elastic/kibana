@@ -10,6 +10,7 @@ import type { CreateCompositeSLOInput } from '@kbn/slo-schema';
 
 export interface CompositeSloLifecycleApi {
   create(compositeSlo: CreateCompositeSLOInput): Promise<ApiClientResponse>;
+  delete(id: string): Promise<void>;
   deleteAll(): Promise<void>;
 }
 
@@ -26,6 +27,16 @@ export function createCompositeSloLifecycleApi(
         body: compositeSlo,
         responseType: 'json',
       });
+    },
+
+    async delete(id: string) {
+      const response = await apiClient.delete(`api/observability/slo_composites/${id}`, {
+        headers: jsonHeaders,
+        responseType: 'json',
+      });
+      if (response.statusCode !== 204 && response.statusCode !== 404) {
+        throw new Error(`delete composite SLO ${id} failed with ${response.statusCode}`);
+      }
     },
 
     async deleteAll() {

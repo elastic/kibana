@@ -6,7 +6,7 @@
  */
 
 import { eventHit } from '@kbn/securitysolution-t-grid';
-import type { EventHit } from '@kbn/timelines-plugin/common/search_strategy';
+import type { EventHit } from '@kbn/securitysolution-timeline-search-strategy';
 import { buildObjectRecursive } from './build_object_recursive';
 
 describe('buildObjectRecursive', () => {

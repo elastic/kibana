@@ -22,6 +22,9 @@ export const STREAMS_DEFAULT_UNIT_ID = 'default';
 /** Max data stream names in one request to the POST variants of the bulk stats endpoints. */
 export const MAX_STATS_STREAM_NAMES = 1000;
 
+/** Classic data stream the V2 backend writes unit telemetry to, in the project itself. */
+export const UNIT_METRICS_STREAM = 'metrics-streams.otel-default';
+
 export const getStreamsUiMetadataSavedObjectId = (configurationSavedObjectId: string): string =>
   `${configurationSavedObjectId}-streams-ui-metadata`;
 

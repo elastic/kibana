@@ -11,21 +11,40 @@ import { coreMock, elasticsearchServiceMock, httpServerMock } from '@kbn/core/se
 import { loggerMock } from '@kbn/logging-mocks';
 import { GEN_AI_SETTINGS_INFERENCE_STREAMING } from '@kbn/management-settings-ids';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import type { InferenceSetupDependencies } from './types';
+import {
+  InferenceConnectorType,
+  InferenceTaskErrorCode,
+  type InferenceConnector,
+} from '@kbn/inference-common';
+import type { FeatureEndpointResolver, InferenceSetupDependencies } from './types';
 import {
   createInferenceStreamingResolver,
   InferencePlugin,
   resolveOnFailureMode,
   resolveReplacementsEncryptionKey,
 } from './plugin';
-import { createClient } from './inference_client';
+import { createChatModel, createClient } from './inference_client';
+import { getConnectorById } from './util/get_connector_by_id';
 
 jest.mock('./inference_client', () => ({
-  ...jest.requireActual('./inference_client'),
+  ...jest.requireActual<typeof import('./inference_client')>('./inference_client'),
   createClient: jest.fn(),
+  createChatModel: jest.fn(),
+}));
+
+jest.mock('./util/get_connector_by_id', () => ({
+  ...jest.requireActual<typeof import('./util/get_connector_by_id')>('./util/get_connector_by_id'),
+  getConnectorById: jest.fn(),
 }));
 
 const createClientMock = jest.mocked(createClient);
+const createChatModelMock = jest.mocked(createChatModel);
+const getConnectorByIdMock = jest.mocked(getConnectorById);
+
+type FeatureEndpointResolverMock = jest.MockedFunction<FeatureEndpointResolver>;
+
+const createFeatureEndpointResolverMock = (): FeatureEndpointResolverMock =>
+  jest.fn<ReturnType<FeatureEndpointResolver>, Parameters<FeatureEndpointResolver>>();
 
 describe('resolveReplacementsEncryptionKey', () => {
   it('returns undefined when anonymization is disabled', async () => {
@@ -204,14 +223,16 @@ describe('InferencePlugin.setup', () => {
   it('accepts one feature endpoint resolver', () => {
     const { registerFeatureEndpointResolver } = setupPlugin(true);
 
-    expect(() => registerFeatureEndpointResolver(jest.fn())).not.toThrow();
+    expect(() =>
+      registerFeatureEndpointResolver(createFeatureEndpointResolverMock())
+    ).not.toThrow();
   });
 
   it('throws when a second feature endpoint resolver is registered', () => {
     const { registerFeatureEndpointResolver } = setupPlugin(true);
-    registerFeatureEndpointResolver(jest.fn());
+    registerFeatureEndpointResolver(createFeatureEndpointResolverMock());
 
-    expect(() => registerFeatureEndpointResolver(jest.fn())).toThrow(
+    expect(() => registerFeatureEndpointResolver(createFeatureEndpointResolverMock())).toThrow(
       'A feature endpoint resolver is already registered'
     );
   });
@@ -220,7 +241,10 @@ describe('InferencePlugin.setup', () => {
 describe('InferencePlugin.start getClient', () => {
   const request = httpServerMock.createKibanaRequest();
 
-  const getClientOptions = async (resolver?: jest.Mock, coreStart = coreMock.createStart()) => {
+  const getClientOptions = async (
+    resolver?: FeatureEndpointResolverMock,
+    coreStart = coreMock.createStart()
+  ) => {
     const plugin = createPlugin(false);
     const { registerFeatureEndpointResolver } = plugin.setup(
       coreMock.createSetup(),
@@ -240,7 +264,7 @@ describe('InferencePlugin.start getClient', () => {
   });
 
   it('passes the registered feature endpoint resolver scoped to the request', async () => {
-    const resolver = jest.fn().mockResolvedValue({ connectorId: 'top' });
+    const resolver = createFeatureEndpointResolverMock().mockResolvedValue({ connectorId: 'top' });
     const { resolveFeatureEndpoint } = await getClientOptions(resolver);
 
     await expect(resolveFeatureEndpoint?.('my_feature')).resolves.toEqual({ connectorId: 'top' });
@@ -279,5 +303,132 @@ describe('InferencePlugin.start getClient', () => {
 
       await expect(anonymizationRulesPromise).rejects.toBe(settingsError);
     });
+  });
+});
+
+describe('InferencePlugin.start getChatModel', () => {
+  const request = httpServerMock.createKibanaRequest();
+
+  const getChatModelOptions = async (
+    target: { connectorId: string } | { featureId: string },
+    resolver?: FeatureEndpointResolverMock
+  ) => {
+    const plugin = createPlugin(false);
+    const { registerFeatureEndpointResolver } = plugin.setup(
+      coreMock.createSetup(),
+      setupDependencies
+    );
+    if (resolver) {
+      registerFeatureEndpointResolver(resolver);
+    }
+    await plugin
+      .start(coreMock.createStart(), { actions: actionsMock.createStart() })
+      .getChatModel({ request, ...target, chatModelOptions: {} });
+    await plugin.stop();
+    expect(createChatModelMock).toHaveBeenCalledTimes(1);
+    return createChatModelMock.mock.calls[0][0];
+  };
+
+  afterEach(() => {
+    createChatModelMock.mockReset();
+  });
+
+  it('passes the registered feature endpoint resolver to getChatModel', async () => {
+    const resolver = createFeatureEndpointResolverMock().mockResolvedValue({ connectorId: 'top' });
+    const { resolveFeatureEndpoint, featureId, connectorId } = await getChatModelOptions(
+      { featureId: 'my_feature' },
+      resolver
+    );
+
+    expect(featureId).toBe('my_feature');
+    expect(connectorId).toBeUndefined();
+    expect(resolveFeatureEndpoint).toBeDefined();
+    await expect(resolveFeatureEndpoint?.('my_feature')).resolves.toEqual({ connectorId: 'top' });
+    expect(resolver).toHaveBeenCalledWith('my_feature', request);
+  });
+
+  it('forwards the connectorId to getChatModel', async () => {
+    const { featureId, connectorId } = await getChatModelOptions({ connectorId: 'my-connector' });
+
+    expect(connectorId).toBe('my-connector');
+    expect(featureId).toBeUndefined();
+  });
+});
+
+describe('InferencePlugin.start resolveFeatureConnector', () => {
+  const request = httpServerMock.createKibanaRequest();
+  const connector: InferenceConnector = {
+    type: InferenceConnectorType.OpenAI,
+    name: 'Top connector',
+    connectorId: 'top',
+    config: {},
+    capabilities: {},
+    isInferenceEndpoint: false,
+    isPreconfigured: false,
+  };
+
+  let plugin: InferencePlugin;
+
+  const startPlugin = (resolver?: FeatureEndpointResolverMock) => {
+    plugin = createPlugin(false);
+    const { registerFeatureEndpointResolver } = plugin.setup(
+      coreMock.createSetup(),
+      setupDependencies
+    );
+    if (resolver) {
+      registerFeatureEndpointResolver(resolver);
+    }
+    const coreStart = coreMock.createStart();
+    const actions = actionsMock.createStart();
+    const start = plugin.start(coreStart, { actions });
+    return { start, coreStart, actions };
+  };
+
+  afterEach(async () => {
+    await plugin.stop();
+    getConnectorByIdMock.mockReset();
+  });
+
+  it("returns the connector of the feature's top endpoint", async () => {
+    getConnectorByIdMock.mockResolvedValue(connector);
+    const resolver = createFeatureEndpointResolverMock().mockResolvedValue({
+      connectorId: 'top',
+      reasoning: { effort: 'low' },
+    });
+    const { start, coreStart, actions } = startPlugin(resolver);
+
+    await expect(start.resolveFeatureConnector('my_feature', request)).resolves.toBe(connector);
+    expect(resolver).toHaveBeenCalledWith('my_feature', request);
+    expect(getConnectorByIdMock).toHaveBeenCalledTimes(1);
+    expect(getConnectorByIdMock).toHaveBeenCalledWith({
+      connectorId: 'top',
+      actions,
+      request,
+      esClient: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
+      logger: expect.anything(),
+    });
+    expect(coreStart.elasticsearch.client.asScoped).toHaveBeenCalledWith(request);
+  });
+
+  it('rejects with a 400 request error when the feature has no endpoint', async () => {
+    const resolver = createFeatureEndpointResolverMock().mockResolvedValue(undefined);
+    const { start } = startPlugin(resolver);
+
+    await expect(start.resolveFeatureConnector('my_feature', request)).rejects.toMatchObject({
+      code: InferenceTaskErrorCode.requestError,
+      status: 400,
+      message: expect.stringContaining('No endpoint is available for feature "my_feature"'),
+    });
+    expect(getConnectorByIdMock).not.toHaveBeenCalled();
+  });
+
+  it('rejects with an internal error when no resolver is registered', async () => {
+    const { start } = startPlugin();
+
+    await expect(start.resolveFeatureConnector('my_feature', request)).rejects.toMatchObject({
+      code: InferenceTaskErrorCode.internalError,
+      message: expect.stringContaining('no feature endpoint resolver is registered'),
+    });
+    expect(getConnectorByIdMock).not.toHaveBeenCalled();
   });
 });

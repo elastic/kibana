@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { ChangeHistoryCompareMode } from '../telemetry/types';
+import type { ChangeHistoryDiffViewMode } from '../telemetry/types';
 
 /** Callbacks for preview consumers to report diff UI interactions (telemetry owned by the package). */
 export interface ChangeHistoryDiffTelemetry {
-  compareMode: ChangeHistoryCompareMode;
-  setCompareMode: (mode: ChangeHistoryCompareMode) => void;
+  diffMode: ChangeHistoryDiffViewMode;
+  setDiffMode: (mode: ChangeHistoryDiffViewMode) => void;
   /**
    * Preview consumer invokes this when a non-empty diff is shown (domain decides when —
    * e.g. baseline snapshot content differs from target). Implementation is package-owned:
