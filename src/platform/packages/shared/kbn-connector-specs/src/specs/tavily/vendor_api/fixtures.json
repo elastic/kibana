@@ -1,0 +1,10 @@
+{
+  "callTool": {
+    "input": {
+      "name": "tavily_search",
+      "arguments": {
+        "query": "elastic kibana"
+      }
+    }
+  }
+}
