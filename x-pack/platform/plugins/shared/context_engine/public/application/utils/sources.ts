@@ -54,15 +54,11 @@ export const hasSelectedEsqlQuery = (
   esqlQuery: string
 ): boolean => selectedSources.some((source) => source.type === 'esql' && source.id === esqlQuery);
 
-const INDEX_ESQL_QUERY_PATTERN = /^FROM ([^\s|,]+)$/;
-
-/** Names of the simple index-picker sources (`FROM <index>`) in the selection. */
-export const getIndexPickerSourceNames = (selectedSources: SelectedSource[]): string[] =>
-  selectedSources.flatMap((source) => {
-    const indexName =
-      source.type === 'esql' ? INDEX_ESQL_QUERY_PATTERN.exec(source.value)?.[1] : undefined;
-    return indexName ? [indexName] : [];
-  });
+/** Whether a simple index-picker source (`FROM <index>`) is already in the selection. */
+export const isIndexPickerSourceSelected = (
+  selectedSources: SelectedSource[],
+  indexName: string
+): boolean => hasSelectedEsqlQuery(selectedSources, createIndexEsqlQuery(indexName));
 
 const sourceKey = ({ type, value }: SelectedSource) => `${type}:${value}`;
 

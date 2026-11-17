@@ -61,14 +61,18 @@ const INDEX_MATCHES = [
   buildMatchedItem('.ds-traces-default'),
 ];
 
+const INDEX_SEARCH_DEBOUNCE_MS = 300;
+
 const createServices = ({
   indices = INDEX_MATCHES,
   indicesError,
   canReadConnectors = true,
+  resolveIndices,
 }: {
   indices?: MatchedItem[];
   indicesError?: Error;
   canReadConnectors?: boolean;
+  resolveIndices?: (pattern: string) => MatchedItem[] | Promise<MatchedItem[]>;
 } = {}) => {
   const services = coreMock.createStart();
   services.application.capabilities = {
@@ -80,9 +84,15 @@ const createServices = ({
     },
   };
   const data = dataPluginMock.createStartContract();
-  data.dataViews.getIndices = indicesError
-    ? jest.fn().mockRejectedValue(indicesError)
-    : jest.fn().mockResolvedValue(indices);
+  if (resolveIndices) {
+    data.dataViews.getIndices = jest.fn(({ pattern }: { pattern: string }) =>
+      Promise.resolve(resolveIndices(pattern))
+    );
+  } else if (indicesError) {
+    data.dataViews.getIndices = jest.fn().mockRejectedValue(indicesError);
+  } else {
+    data.dataViews.getIndices = jest.fn().mockResolvedValue(indices);
+  }
 
   (services.http.get as jest.Mock).mockImplementation(
     (pathOrOptions: string | { path: string }) => {
@@ -160,6 +170,25 @@ const selectIndexSource = async (indexName: string) => {
   fireEvent.click(await screen.findByTestId(`contextIndexOption-${indexName}`));
 };
 
+const typeIndexSearch = async (value: string) => {
+  fireEvent.change(screen.getByTestId('contextIndexSearch'), { target: { value } });
+  jest.advanceTimersByTime(INDEX_SEARCH_DEBOUNCE_MS);
+  await waitFor(() => expect(screen.getByTestId('contextIndexSelectable')).toBeInTheDocument());
+};
+
+const resolveIndicesForSearchTests = (pattern: string): MatchedItem[] => {
+  if (pattern === '*nginx*') {
+    return [buildMatchedItem('logs-nginx')];
+  }
+  if (pattern === '*metrics*') {
+    return [buildMatchedItem('metrics-*'), buildMatchedItem('logs-nginx')];
+  }
+  if (pattern === '*,-.*') {
+    return INDEX_MATCHES;
+  }
+  return [];
+};
+
 describe('SourcePicker', () => {
   beforeEach(() => {
     jest.useFakeTimers();
@@ -186,39 +215,38 @@ describe('SourcePicker', () => {
   it('adds an index selection as an ES|QL source from the index picker', async () => {
     renderWithProviders(<Harness />);
 
+    await screen.findByTestId('contextIndexOption-logs-*');
     await selectIndexSource('logs-*');
 
     const row = screen.getByTestId('contextSelectedSource-esql-0');
     expect(row).toHaveTextContent('FROM logs-*');
+    expect(screen.queryByTestId('contextIndexOption-logs-*')).not.toBeInTheDocument();
   });
 
-  it('adds several indices at once and keeps them checked', async () => {
+  it('does not add a duplicate index source', async () => {
     renderWithProviders(<Harness />);
 
     await selectIndexSource('logs-*');
-    await selectIndexSource('metrics-*');
-
-    expect(screen.getAllByTestId(/^contextSelectedSource-esql-/)).toHaveLength(2);
-    expect(screen.getByTestId('contextIndexOption-logs-*')).toHaveAttribute('aria-checked', 'true');
-    expect(screen.getByTestId('contextIndexOption-metrics-*')).toHaveAttribute(
-      'aria-checked',
-      'true'
-    );
+    expect(screen.getAllByTestId(/^contextSelectedSource-esql-/)).toHaveLength(1);
+    expect(screen.queryByTestId('contextIndexOption-logs-*')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextIndexOption-metrics-*')).toBeInTheDocument();
   });
 
-  it('removes the index source when its option is unchecked', async () => {
+  it('removes a selected index from the list and shows the option again in the picker', async () => {
     renderWithProviders(<Harness />);
 
     await selectIndexSource('logs-*');
-    expect(screen.getByTestId('contextSelectedSource-esql-0')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextIndexOption-logs-*')).not.toBeInTheDocument();
 
-    await selectIndexSource('logs-*');
+    const row = screen.getByTestId('contextSelectedSource-esql-0');
+    fireEvent.click(within(row).getByTestId('contextRemoveSourceButton'));
 
     expect(screen.queryByTestId('contextSelectedSource-esql-0')).not.toBeInTheDocument();
+    expect(await screen.findByTestId('contextIndexOption-logs-*')).toBeInTheDocument();
   });
 
-  it('shows an index as checked when it is already selected as a simple FROM source', async () => {
-    renderWithProviders(
+  it('hides index options only for simple FROM sources in the initial selection', async () => {
+    const { unmount: unmountSimpleFrom } = renderWithProviders(
       <Harness
         initialSources={[
           { type: 'esql', id: 'FROM logs-*', label: 'FROM logs-*', value: 'FROM logs-*' },
@@ -226,10 +254,50 @@ describe('SourcePicker', () => {
       />
     );
 
-    expect(await screen.findByTestId('contextIndexOption-logs-*')).toHaveAttribute(
-      'aria-checked',
-      'true'
+    await screen.findByTestId('contextIndexOption-metrics-*');
+    expect(screen.queryByTestId('contextIndexOption-logs-*')).not.toBeInTheDocument();
+    unmountSimpleFrom();
+
+    renderWithProviders(
+      <Harness
+        initialSources={[
+          {
+            type: 'esql',
+            id: 'FROM a,b',
+            label: 'FROM a,b',
+            value: 'FROM a,b',
+          },
+          {
+            type: 'esql',
+            id: 'FROM logs-* | LIMIT 1',
+            label: 'FROM logs-* | LIMIT 1',
+            value: 'FROM logs-* | LIMIT 1',
+          },
+        ]}
+      />
     );
+
+    expect(await screen.findByTestId('contextIndexOption-logs-*')).toBeInTheDocument();
+    expect(screen.getByTestId('contextIndexOption-metrics-*')).toBeInTheDocument();
+  });
+
+  it('hides selected indices from search results while a search is active', async () => {
+    renderWithProviders(
+      <Harness />,
+      createServices({ resolveIndices: resolveIndicesForSearchTests })
+    );
+
+    await screen.findByTestId('contextIndexOption-logs-*');
+
+    await typeIndexSearch('nginx');
+    await selectIndexSource('logs-nginx');
+    expect(screen.queryByTestId('contextIndexOption-logs-nginx')).not.toBeInTheDocument();
+
+    await typeIndexSearch('metrics');
+    await waitFor(() => {
+      expect(screen.getByTestId('contextIndexOption-metrics-*')).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('contextIndexOption-logs-nginx')).not.toBeInTheDocument();
   });
 
   it('adds a raw ES|QL query as a source from the advanced accordion', async () => {

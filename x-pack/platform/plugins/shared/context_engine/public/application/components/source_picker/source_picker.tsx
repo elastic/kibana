@@ -16,7 +16,6 @@ import { SelectedSourcesList } from '../selected_sources_list';
 import { SourceTypePanel } from '../source_type_panel';
 import { ConnectorsTab } from './connectors_tab';
 import { ElasticsearchSourcesPanel } from './elasticsearch_sources_panel';
-import type { IndexToggleChange } from './index_multi_select';
 import type { SelectedSource } from './types';
 
 interface SourcePickerProps {
@@ -58,13 +57,8 @@ export const SourcePicker = ({
     onChange([{ type: 'esql', id: query, label: query, value: query }, ...selectedSources]);
   };
 
-  const toggleIndexSource = ({ name, checked }: IndexToggleChange) => {
-    const query = createIndexEsqlQuery(name);
-    if (checked) {
-      addEsqlSource(query);
-      return;
-    }
-    onChange(selectedSources.filter((source) => !(source.type === 'esql' && source.id === query)));
+  const addIndexSource = (indexName: string) => {
+    addEsqlSource(createIndexEsqlQuery(indexName));
   };
 
   const toggleConnectorSource = ({
@@ -104,7 +98,7 @@ export const SourcePicker = ({
       >
         <ElasticsearchSourcesPanel
           selectedSources={selectedSources}
-          onToggleIndex={toggleIndexSource}
+          onAddIndex={addIndexSource}
           onAddEsql={addEsqlSource}
           disabled={disabled}
         />

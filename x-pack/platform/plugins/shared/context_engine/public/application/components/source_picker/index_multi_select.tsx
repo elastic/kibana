@@ -10,65 +10,35 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDebouncedValue } from '@kbn/react-hooks';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useIndices } from '../../hooks/use_indices';
 
 const SEARCH_DEBOUNCE_MS = 300;
-const ROW_HEIGHT = 36;
-
-export interface IndexToggleChange {
-  name: string;
-  checked: boolean;
-}
 
 interface IndexMultiSelectProps {
-  selectedIndexNames: string[];
-  /** Indices that are already used elsewhere and must not be offered again. */
-  excludedIndexNames?: string[];
-  onToggle: (change: IndexToggleChange) => void;
+  /** Selected indices are hidden from the list. */
+  isIndexSelected: (indexName: string) => boolean;
+  onSelect: (indexName: string) => void;
   disabled?: boolean;
 }
 
 export const IndexMultiSelect = ({
-  selectedIndexNames,
-  excludedIndexNames = [],
-  onToggle,
+  isIndexSelected,
+  onSelect,
   disabled = false,
 }: IndexMultiSelectProps) => {
   const [searchValue, setSearchValue] = useState('');
-  const debouncedSearch = useDebouncedValue(searchValue, SEARCH_DEBOUNCE_MS).trim();
+  const debouncedSearch = useDebouncedValue(searchValue, SEARCH_DEBOUNCE_MS);
 
-  const { indexNames, isFetching } = useIndices({ search: debouncedSearch });
+  const { indexNames, isFetching } = useIndices({ search: debouncedSearch.trim() });
 
-  const options = useMemo<EuiSelectableOption[]>(() => {
-    const excluded = new Set(excludedIndexNames);
-    const selected = new Set(selectedIndexNames);
-    const loaded = new Set(indexNames);
-    const normalizedSearch = debouncedSearch.toLowerCase();
-
-    // The result list is capped, so keep checked indices visible when they match the search.
-    const selectedOutsideResults = selectedIndexNames.filter(
-      (name) => !loaded.has(name) && name.toLowerCase().includes(normalizedSearch)
-    );
-
-    return [...indexNames, ...selectedOutsideResults]
-      .filter((name) => !excluded.has(name))
-      .map((name) => ({
-        key: name,
-        label: name,
-        checked: selected.has(name) ? 'on' : undefined,
-        disabled,
-        'data-test-subj': `contextIndexOption-${name}`,
-      }));
-  }, [indexNames, selectedIndexNames, excludedIndexNames, debouncedSearch, disabled]);
-
-  const handleChange = (
-    _options: EuiSelectableOption[],
-    _event: unknown,
-    changedOption: EuiSelectableOption
-  ) => {
-    onToggle({ name: changedOption.label, checked: changedOption.checked === 'on' });
-  };
+  const options: EuiSelectableOption[] = indexNames
+    .filter((name) => !isIndexSelected(name))
+    .map((name) => ({
+      label: name,
+      disabled,
+      'data-test-subj': `contextIndexOption-${name}`,
+    }));
 
   return (
     <EuiFormRow
@@ -81,18 +51,10 @@ export const IndexMultiSelect = ({
       }
       labelType="legend"
       helpText={
-        selectedIndexNames.length > 0 ? (
-          <FormattedMessage
-            id="xpack.contextEngine.sourcePicker.index.selectedCount"
-            defaultMessage="{count} selected. Select one or more."
-            values={{ count: selectedIndexNames.length }}
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.contextEngine.sourcePicker.index.fieldHelp"
-            defaultMessage="Search, then select one or more from the list."
-          />
-        )
+        <FormattedMessage
+          id="xpack.contextEngine.sourcePicker.index.fieldHelp"
+          defaultMessage="Start typing to search, then select a match from the list."
+        />
       }
     >
       <EuiSelectable
@@ -103,8 +65,8 @@ export const IndexMultiSelect = ({
         isPreFiltered
         isLoading={isFetching}
         options={options}
-        onChange={handleChange}
-        listProps={{ bordered: true, paddingSize: 's', rowHeight: ROW_HEIGHT, onFocusBadge: false }}
+        onChange={(_options, _event, changedOption) => onSelect(changedOption.label)}
+        listProps={{ bordered: true, paddingSize: 's', rowHeight: 36, onFocusBadge: false }}
         searchProps={{
           onChange: setSearchValue,
           disabled,

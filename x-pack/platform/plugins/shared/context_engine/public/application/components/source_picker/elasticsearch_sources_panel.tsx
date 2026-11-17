@@ -17,10 +17,10 @@ import type { AggregateQuery } from '@kbn/es-query';
 import { getEbtProps } from '@kbn/ebt-click';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useId, useMemo, useState } from 'react';
+import React, { useId, useState } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
-import { getIndexPickerSourceNames } from '../../utils/sources';
-import { IndexMultiSelect, type IndexToggleChange } from './index_multi_select';
+import { isIndexPickerSourceSelected } from '../../utils/sources';
+import { IndexMultiSelect } from './index_multi_select';
 import type { SelectedSource } from './types';
 
 const EDITOR_INLINE_MIN_HEIGHT = 180;
@@ -29,25 +29,20 @@ const getEsqlQuery = (query: AggregateQuery): string => ('esql' in query ? query
 
 interface ElasticsearchSourcesPanelProps {
   selectedSources: SelectedSource[];
-  onToggleIndex: (change: IndexToggleChange) => void;
+  onAddIndex: (indexName: string) => void;
   onAddEsql: (query: string) => void;
   disabled?: boolean;
 }
 
 export const ElasticsearchSourcesPanel = ({
   selectedSources,
-  onToggleIndex,
+  onAddIndex,
   onAddEsql,
   disabled = false,
 }: ElasticsearchSourcesPanelProps) => {
   const accordionId = useId();
   const [esqlQuery, setEsqlQuery] = useState('');
   const trimmedEsqlQuery = esqlQuery.trim();
-  const selectedIndexNames = useMemo(
-    () => getIndexPickerSourceNames(selectedSources),
-    [selectedSources]
-  );
-
   const handleAddEsql = () => {
     if (!trimmedEsqlQuery) {
       return;
@@ -59,8 +54,8 @@ export const ElasticsearchSourcesPanel = ({
   return (
     <div data-test-subj="contextElasticsearchSourcesPanel">
       <IndexMultiSelect
-        selectedIndexNames={selectedIndexNames}
-        onToggle={onToggleIndex}
+        isIndexSelected={(indexName) => isIndexPickerSourceSelected(selectedSources, indexName)}
+        onSelect={onAddIndex}
         disabled={disabled}
       />
 

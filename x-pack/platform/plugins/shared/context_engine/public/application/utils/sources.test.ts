@@ -9,8 +9,8 @@ import type { SelectedSource } from '../components/source_picker';
 import {
   areSourceSelectionsEqual,
   createIndexEsqlQuery,
-  getIndexPickerSourceNames,
   hasSelectedEsqlQuery,
+  isIndexPickerSourceSelected,
   toAiIndexSources,
   toSelectedSources,
   toSourceType,
@@ -73,16 +73,15 @@ describe('sources utils', () => {
     });
   });
 
-  describe('getIndexPickerSourceNames', () => {
-    it('returns the names of simple FROM sources', () => {
+  describe('isIndexPickerSourceSelected', () => {
+    it('returns true for an index that has a simple FROM source', () => {
       const selected: SelectedSource[] = [
         { type: 'esql', id: 'FROM logs-*', label: 'FROM logs-*', value: 'FROM logs-*' },
-        { type: 'connector', id: 'FROM-x', label: 'x', value: 'FROM x' },
       ];
-      expect(getIndexPickerSourceNames(selected)).toEqual(['logs-*']);
+      expect(isIndexPickerSourceSelected(selected, 'logs-*')).toBe(true);
     });
 
-    it('ignores custom ES|QL queries', () => {
+    it('returns false when only a custom ES|QL query is selected', () => {
       const selected: SelectedSource[] = [
         {
           type: 'esql',
@@ -90,9 +89,8 @@ describe('sources utils', () => {
           label: 'FROM logs-* | LIMIT 10',
           value: 'FROM logs-* | LIMIT 10',
         },
-        { type: 'esql', id: 'FROM a,b', label: 'FROM a,b', value: 'FROM a,b' },
       ];
-      expect(getIndexPickerSourceNames(selected)).toEqual([]);
+      expect(isIndexPickerSourceSelected(selected, 'logs-*')).toBe(false);
     });
   });
 
