@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { useBreakingChangeConfirmation } from './use_breaking_change_confirmation';
+import { useWorkflowDependents } from './use_workflow_dependents';
 import type { ConfirmBreakingChange } from './workflow_dependents_context';
 import type { WorkflowDependentsImpactResponse } from '../../../../common/lib/workflow_dependents/api';
 import type { DependentImpact } from '../../../../common/lib/workflow_dependents/types';
@@ -21,6 +22,7 @@ import {
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { createStartServicesMock } from '../../../mocks';
 import { TestProvider } from '../../../shared/mocks/test_providers';
+import { createTestQueryClient } from '../../../shared/test_utils';
 
 const SAVED_YAML = 'name: Alert context\nsteps: []';
 
@@ -243,5 +245,43 @@ describe('useBreakingChangeConfirmation', () => {
     finishCheck(impact([]));
 
     await expect(confirmation).resolves.toBe(false);
+  });
+
+  it('keeps checking the save when editing cancels the panel’s check of the same draft', async () => {
+    const requests: Array<{ signal?: AbortSignal; resolve: (value: unknown) => void }> = [];
+    (services.http.post as jest.Mock).mockImplementation(
+      (_path: string, { signal }: { signal?: AbortSignal }) =>
+        new Promise((resolve) => requests.push({ signal, resolve }))
+    );
+    const PanelAndSave = () => {
+      useWorkflowDependents();
+      return <Harness />;
+    };
+    draft = `${SAVED_YAML}\n`;
+    store = createMockStore();
+    store.dispatch(setWorkflow(workflowDto('alert-context', 'Alert context')));
+    store.dispatch(setYamlString(draft));
+    render(
+      <TestProvider services={services} store={store} queryClient={createTestQueryClient()}>
+        <PanelAndSave />
+      </TestProvider>
+    );
+    await waitFor(() => expect(requests).toHaveLength(1));
+
+    let confirmation: Promise<boolean> = Promise.resolve(false);
+    act(() => {
+      confirmation = confirmBreakingChange(draft);
+    });
+    act(() => {
+      store.dispatch(setYamlString(`${draft}# more`));
+    });
+    await waitFor(() => expect(requests).toHaveLength(3));
+    await act(async () => {
+      requests.forEach(({ resolve }) => resolve(impact([])));
+    });
+
+    expect(requests[0].signal?.aborted).toBe(true);
+    await expect(confirmation).resolves.toBe(true);
+    expect(screen.queryByTestId('workflowBreakingChangeConfirmModal')).not.toBeInTheDocument();
   });
 });
