@@ -10,12 +10,14 @@ import { Agent } from 'undici';
 
 import {
   deriveInternalCallerAttestation,
+  deriveUiamAttestationKey,
   HTTPAuthorizationHeader,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 } from '@kbn/core-security-server';
 import {
   createSAMLResponse,
   MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN,
+  MOCK_IDP_UIAM_KIBANA_ENCRYPTION_KEY,
   MOCK_IDP_UIAM_ORG_ADMIN_API_KEY,
   MOCK_IDP_UIAM_SERVICE_URL,
   MOCK_IDP_UIAM_SHARED_SECRET,
@@ -219,7 +221,7 @@ apiTest.describe(
             ...COMMON_HEADERS,
             Authorization: credential.toString(),
             [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
-              MOCK_IDP_UIAM_SHARED_SECRET,
+              deriveUiamAttestationKey(MOCK_IDP_UIAM_KIBANA_ENCRYPTION_KEY),
               credential
             ),
           },
@@ -266,7 +268,7 @@ apiTest.describe(
             ...COMMON_HEADERS,
             Authorization: credential.toString(),
             [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
-              'a-different-shared-secret',
+              deriveUiamAttestationKey('a-different-encryption-key-0123456789'),
               credential
             ),
           },
@@ -294,7 +296,7 @@ apiTest.describe(
             ...COMMON_HEADERS,
             Authorization: `ApiKey ${(await internalUiamApiKeyResponse.json()).key}`,
             [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
-              MOCK_IDP_UIAM_SHARED_SECRET,
+              deriveUiamAttestationKey(MOCK_IDP_UIAM_KIBANA_ENCRYPTION_KEY),
               new HTTPAuthorizationHeader(
                 'ApiKey',
                 (

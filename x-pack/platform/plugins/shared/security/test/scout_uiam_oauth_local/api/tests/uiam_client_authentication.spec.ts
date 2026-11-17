@@ -7,13 +7,14 @@
 
 import {
   deriveInternalCallerAttestation,
+  deriveUiamAttestationKey,
   HTTPAuthorizationHeader,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 } from '@kbn/core-security-server';
 import {
   MOCK_IDP_GATEWAY_SHARED_SECRET,
+  MOCK_IDP_UIAM_KIBANA_ENCRYPTION_KEY,
   MOCK_IDP_UIAM_ORG_ADMIN_API_KEY,
-  MOCK_IDP_UIAM_SHARED_SECRET,
 } from '@kbn/mock-idp-utils';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
@@ -116,7 +117,7 @@ apiTest.describe(
           ...COMMON_UNSAFE_HEADERS,
           Authorization: credential.toString(),
           [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
-            MOCK_IDP_UIAM_SHARED_SECRET,
+            deriveUiamAttestationKey(MOCK_IDP_UIAM_KIBANA_ENCRYPTION_KEY),
             credential
           ),
         };

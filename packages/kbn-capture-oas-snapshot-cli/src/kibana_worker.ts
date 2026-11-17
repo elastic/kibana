@@ -11,6 +11,7 @@ import {
   createRootWithCorePlugins,
   createServerlessKibana,
 } from '@kbn/core-test-helpers-kbn-server';
+import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { set } from '@kbn/safer-lodash-set';
 import type { Root } from '@kbn/core-root-server-internal';
 import { PLUGIN_SYSTEM_ENABLE_ALL_PLUGINS_CONFIG_PATH } from '@kbn/core-plugins-server-internal/src/constants';
@@ -67,11 +68,13 @@ export type Result = string;
     set(settings, 'xpack.spaces.allowFeatureVisibility', false);
     set(settings, 'xpack.spaces.allowSolutionVisibility', false);
     // Satisfy security config for serverless: UIAM is always on there, and the security plugin
-    // refuses to set up without it. The URL and shared secret are never dialled, because the
-    // worker only boots far enough to generate the OAS document.
+    // refuses to set up without it. The URL is never dialled, because the worker only boots far
+    // enough to generate the OAS document.
     set(settings, 'xpack.security.uiam.enabled', true);
     set(settings, 'xpack.security.uiam.url', 'https://uiam.example.invalid');
-    set(settings, 'xpack.security.uiam.sharedSecret', 'capture-oas-snapshot');
+    set(settings, 'xpack.security.uiam.ssl.certificate', KBN_CERT_PATH);
+    set(settings, 'xpack.security.uiam.ssl.key', KBN_KEY_PATH);
+    set(settings, 'xpack.security.encryptionKey', 'capture-oas-snapshot-encryption-key');
     root = createServerlessKibana(settings, cliArgs);
   } else {
     root = createRootWithCorePlugins(settings, cliArgs);
