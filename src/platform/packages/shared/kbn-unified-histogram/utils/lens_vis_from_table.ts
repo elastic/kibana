@@ -15,9 +15,11 @@ import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 export const enrichLensAttributesWithTablesData = ({
   attributes,
   table,
+  esqlQuery,
 }: {
   attributes: LensAttributes;
   table: Datatable | undefined;
+  esqlQuery?: string;
 }): LensAttributes => {
   if (!attributes.state.datasourceStates.textBased) {
     return attributes;
@@ -44,8 +46,10 @@ export const enrichLensAttributesWithTablesData = ({
   };
 
   for (const key of Object.keys(layers)) {
-    const newLayer = { ...layers[key], table };
-    if (!table) {
+    const layer = layers[key];
+    const canReuseTable = table && esqlQuery !== undefined && layer.query?.esql === esqlQuery;
+    const newLayer = { ...layer, table };
+    if (!canReuseTable) {
       delete newLayer.table;
     }
     updatedAttributes.state.datasourceStates.textBased.layers[key] = newLayer;
