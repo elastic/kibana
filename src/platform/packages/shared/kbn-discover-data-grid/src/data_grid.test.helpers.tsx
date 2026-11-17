@@ -74,20 +74,25 @@ jest.mock('@tanstack/react-virtual', () => {
       const [requestedStart, setRequestedStart] = react.useState(0);
       const maximumStart = Math.max(options.count - VISIBLE_ROW_COUNT, 0);
       const start = Math.min(requestedStart, maximumStart);
-      const virtualItems = Array.from(
-        { length: Math.min(VISIBLE_ROW_COUNT, options.count) },
-        (_, offset) => {
-          const index = start + offset;
-          return {
-            index,
-            key: options.getItemKey?.(index) ?? index,
-            start: index * ROW_HEIGHT,
-            end: (index + 1) * ROW_HEIGHT,
-            size: ROW_HEIGHT,
-            lane: 0,
-          };
-        }
-      );
+      const visibleCount = Math.min(VISIBLE_ROW_COUNT, options.count);
+      const extractRange = options.rangeExtractor ?? actual.defaultRangeExtractor;
+      const indexes =
+        visibleCount > 0
+          ? extractRange({
+              startIndex: start,
+              endIndex: start + visibleCount - 1,
+              overscan: 0,
+              count: options.count,
+            })
+          : [];
+      const virtualItems = indexes.map((index) => ({
+        index,
+        key: options.getItemKey?.(index) ?? index,
+        start: index * ROW_HEIGHT,
+        end: (index + 1) * ROW_HEIGHT,
+        size: ROW_HEIGHT,
+        lane: 0,
+      }));
 
       return {
         getTotalSize: () => options.count * ROW_HEIGHT,

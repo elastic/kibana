@@ -16,7 +16,8 @@ import {
   useResizeObserver,
 } from '@elastic/eui';
 import { createColumnHelper, metaHelper, tableFeatures, useTable } from '@tanstack/react-table';
-import { useVirtualizer } from '@tanstack/react-virtual';
+import type { Range, Virtualizer } from '@tanstack/react-virtual';
+import { defaultRangeExtractor, useVirtualizer } from '@tanstack/react-virtual';
 
 import type { DataGridApi } from './data_grid_api';
 import { useDataGridAnnouncements } from './data_grid_announcements';
@@ -145,32 +146,23 @@ export const DataGrid = <TRow extends object>({
   );
   const estimateRowSize = useCallback(() => estimatedRowHeight, [estimatedRowHeight]);
 
-  const rowVirtualizer = useVirtualizer({
-    count: tableRows.length,
-    getScrollElement: () => scrollContainerRef.current,
-    estimateSize: estimateRowSize,
-    getItemKey: getVirtualItemKey,
-    overscan: rowOverscan,
-    scrollMargin: headerHeight,
-    scrollPaddingStart: headerHeight,
-    initialRect: { width: 0, height },
-  });
-  const virtualRows = rowVirtualizer.getVirtualItems();
-  const scrollToRow = useCallback(
-    (rowIndex: number): boolean => {
-      try {
-        const offset = rowVirtualizer.getOffsetForIndex(rowIndex, 'auto')?.[0];
-        if (offset === undefined) {
-          return false;
-        }
-        rowVirtualizer.scrollToOffset(offset);
-        return true;
-      } catch {
+  const rowVirtualizerRef = useRef<Virtualizer<HTMLDivElement, Element> | null>(null);
+  const scrollToRow = useCallback((rowIndex: number): boolean => {
+    const rowVirtualizer = rowVirtualizerRef.current;
+    if (!rowVirtualizer) {
+      return false;
+    }
+    try {
+      const offset = rowVirtualizer.getOffsetForIndex(rowIndex, 'auto')?.[0];
+      if (offset === undefined) {
         return false;
       }
-    },
-    [rowVirtualizer]
-  );
+      rowVirtualizer.scrollToOffset(offset);
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
 
   const {
     liveRegion,
@@ -191,6 +183,34 @@ export const DataGrid = <TRow extends object>({
     onRowsBecameEmpty: announceRowsBecameEmpty,
   });
   useImperativeHandle(apiRef, () => focus.api, [focus.api]);
+
+  // Keeps the active row rendered while it is scrolled out of the virtual window, so the focused cell,
+  // or focused content inside it, never loses DOM focus to virtualization. Rows stay in index order,
+  // which keeps reading and copy order logical.
+  const activeRowIndex = focus.activeCell ? rowIds.indexOf(focus.activeCell.rowId) : -1;
+  const extractRowRange = useCallback(
+    (range: Range): number[] => {
+      const indexes = defaultRangeExtractor(range);
+      return activeRowIndex < 0 || indexes.includes(activeRowIndex)
+        ? indexes
+        : [...indexes, activeRowIndex].sort((first, second) => first - second);
+    },
+    [activeRowIndex]
+  );
+
+  const rowVirtualizer = useVirtualizer({
+    count: tableRows.length,
+    getScrollElement: () => scrollContainerRef.current,
+    estimateSize: estimateRowSize,
+    getItemKey: getVirtualItemKey,
+    overscan: rowOverscan,
+    rangeExtractor: extractRowRange,
+    scrollMargin: headerHeight,
+    scrollPaddingStart: headerHeight,
+    initialRect: { width: 0, height },
+  });
+  rowVirtualizerRef.current = rowVirtualizer;
+  const virtualRows = rowVirtualizer.getVirtualItems();
 
   const activeRowIsMounted = Boolean(
     focus.activeCell &&

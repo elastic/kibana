@@ -120,9 +120,9 @@ export const useDataGridFocus = ({
   // Records which request still has permission to move browser focus.
   const focusOwnershipRef = useRef<number | null>(null);
 
-  // Remembers an active cell whose focused DOM element was removed by virtualization.
+  // Remembers an active cell whose focused DOM element was removed with its row or column. The grid
+  // keeps the active row rendered, so virtualization never removes it.
   const lostOwnedFocusRef = useRef<DataGridCellAddress | null>(null);
-  const lostOwnedFocusModelRef = useRef(currentModel);
 
   // Keeps stable callbacks connected to the latest virtualizer and announcement handlers.
   const scrollToRowRef = useRef(scrollToRow);
@@ -242,17 +242,13 @@ export const useDataGridFocus = ({
     [cancelPendingFocus, resolveAddress]
   );
 
-  // Tracks mounted cells and completes pending or restorable focus when elements appear.
+  // Tracks mounted cells and completes pending focus when elements appear.
   const registerCell = useCallback(
     (address: DataGridCellAddress, element: HTMLDivElement | null) => {
       const previousElement = setAddressedElement(cellElementsRef.current, address, element);
       if (!element) {
         if (elementOwnsFocus(previousElement)) {
           lostOwnedFocusRef.current = address;
-          lostOwnedFocusModelRef.current = modelRef.current;
-          // The cell is still attached when its ref detaches, so focus can move to the grid instead of
-          // falling to the page, where the browser would continue Tab from the removed cell's position.
-          gridRef.current?.focus({ preventScroll: true });
         }
         return;
       }
@@ -276,19 +272,9 @@ export const useDataGridFocus = ({
         pendingFocusRef.current = null;
         commitFocusedCell(address, element);
         pendingFocus.resolve(completedResult);
-        return;
-      }
-
-      if (
-        areDataGridCellAddressesEqual(lostOwnedFocusRef.current, address) &&
-        areDataGridCellAddressesEqual(activeCellRef.current, address) &&
-        (document.activeElement === document.body || document.activeElement === gridRef.current)
-      ) {
-        lostOwnedFocusRef.current = null;
-        element.focus({ preventScroll: true });
       }
     },
-    [commitFocusedCell, failPendingFocus, gridRef, resolveAddress]
+    [commitFocusedCell, failPendingFocus, resolveAddress]
   );
 
   // Makes a directly focused cell active and cancels stale focus work.
@@ -330,10 +316,6 @@ export const useDataGridFocus = ({
       } else if (rowOrderChanged && !scrollToRowRef.current(resolution.rowIndex)) {
         failPendingFocus('scroll_failed');
       }
-    }
-
-    if (lostOwnedFocusModelRef.current !== currentModel) {
-      lostOwnedFocusRef.current = null;
     }
 
     if (areDataGridCellAddressesEqual(previousActiveCell, reconciledActiveCell)) {

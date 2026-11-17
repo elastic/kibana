@@ -90,6 +90,11 @@ The first body cell is the initial tab stop. The last surviving logical cell is 
 entry, and an empty grid uses the named grid itself as its tab stop. Static headers are semantic but
 are not part of the keyboard navigation plane.
 
+The active cell's row stays rendered while it is scrolled out of view, so focus, including focus
+inside the cell's content, survives scrolling. Keys keep working from there, and arrow keys scroll
+their destination into view. When rows are reordered, focus stays on the same logical row and the
+viewport does not move.
+
 - Arrow keys move one cell without wrapping.
 - Home and End move to the first and last cell in the current row.
 - Ctrl/Cmd+Home and Ctrl/Cmd+End move to the first and last body cell.
@@ -108,12 +113,9 @@ such as links rendered by a field formatter. Those elements are never Tab stops:
 them with Enter, and they stay clickable and reachable through screen-reader link navigation.
 
 - Visually hidden focus guards before and after the grid catch Tab and Shift+Tab entry and move focus
-  to the logical active cell. If virtualization removed that cell's row, the grid mounts and scrolls
-  to it first.
+  to the logical active cell, scrolling to it if it is out of view.
 - Tab and Shift+Tab from a cell, or from an empty grid, hand focus to the matching guard, and the
   browser's default Tab continues from there, past the grid.
-- If scrolling removes the focused cell's row, focus moves to the grid itself, so Tab and Shift+Tab
-  still leave through the guards.
 
 Consumers that need semantic control can pass `apiRef` and call `focusCell` or `scrollToCell` with a
 stable `{ rowId, columnId }` address. Commands return explicit completed, failed, or cancelled
