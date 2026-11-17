@@ -547,6 +547,38 @@ Wrap evaluators with `selectEvaluators()` then control which run via environment
 SELECTED_EVALUATORS="Factuality,Relevance" node scripts/evals run --suite agent-builder
 ```
 
+### Multi-turn conversations
+
+For an agent that should keep context across turns, give each example its user turns in `input.turns`, and optionally ground truth per turn in `output.turns`, matched by id:
+
+```ts
+const example: MultiTurnExample = {
+  input: {
+    turns: [
+      { id: 't1', message: 'Who owns checkout?' },
+      { id: 't2', message: 'Who owns checkout now?' },
+    ],
+  },
+  output: {
+    expected: 'Ownership moved from Payments to Commerce.',
+    turns: [{ id: 't2', expected: 'Commerce' }],
+  },
+};
+```
+
+`createConversationTask({ client: agentBuilderClient, agentId })` runs the turns in order on one Agent Builder conversation. It answers the prompts the agent is waiting on (such as `ask_user_question`) with the next turn, and runs each turn in its own trace. A `nextMessage` callback can choose further turns from the replies so far, up to `maxTurns`; it never sees the expected output.
+
+Existing evaluators grade a conversation through these wrappers, and each score gets its own name, so turns don't collide:
+
+| Wrapper | Grades | Score name |
+| --- | --- | --- |
+| `forTurn(evaluator, 't2')` | One turn, with that turn's trace and `expected` | `<name> [t2]` |
+| `forFinalTurn(evaluator)` | The last turn | `<name> [final turn]` |
+| `acrossTurns(evaluator, { aggregate })` | Every turn, reported as one score (`mean`, `min`, `max`, or `sum` for trace metrics) | `<name> [turns: mean]` |
+| `forConversation(evaluator)` | The whole transcript, e.g. with `createConversationCoherenceEvaluator` | `<name> [conversation]` |
+
+The turn's message is the evaluator's `input.question`, the earlier messages are `input.history`, and its reply is the latest message in `output.messages`. See the smoke-tests suite's `multi_turn.spec.ts` for a full example.
+
 ### Customizing report display
 
 Override `reportModelScore` to create custom reports:

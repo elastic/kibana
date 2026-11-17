@@ -114,7 +114,12 @@ export {
   createGroundednessAnalysisEvaluator,
 } from './src/evaluators/groundedness';
 export type { EvaluationDataset, EvaluationWorkerFixtures, EvaluationReport } from './src/types';
-export { withEvaluatorSpan, withTaskSpan, getCurrentTraceId } from './src/utils/tracing';
+export {
+  withEvaluatorSpan,
+  withTaskSpan,
+  withTurnSpan,
+  getCurrentTraceId,
+} from './src/utils/tracing';
 export { withRetry, type RetryOptions } from './src/utils/retry_utils';
 export { calculateSetMetrics, type SetMetrics } from './src/utils/set_metrics';
 export {
@@ -193,6 +198,30 @@ export { createEsqlEquivalenceEvaluator } from './src/evaluators/esql';
 
 export { createTrajectoryEvaluator } from './src/evaluators/trajectory';
 export { createConversationCoherenceEvaluator } from './src/evaluators/conversation_coherence';
+export {
+  runConversation,
+  createConversationTask,
+  ConversationRunError,
+  answerPromptsWithNextTurn,
+  forTurn,
+  forFinalTurn,
+  acrossTurns,
+  forConversation,
+  type RunConversationParams,
+  type ConversationTaskOptions,
+  type TurnScoreAggregate,
+  type ConversationTurnInput,
+  type ConversationTurnExpectation,
+  type ConversationTurnResult,
+  type ConversationMessage,
+  type ConversationResult,
+  type ConversationStopReason,
+  type MultiTurnInput,
+  type MultiTurnExpected,
+  type MultiTurnExample,
+  type NextMessageFn,
+  type RespondToPromptsFn,
+} from './src/multi_turn';
 export { createMultiJudgeEvaluator } from './src/evaluators/multi_judge';
 export {
   createToolPoisoningEvaluator,
