@@ -22,8 +22,6 @@ describe('FROM > summary', () => {
       newColumns: new Set([]),
       metadataColumns: new Set([]),
       renamedColumnsPairs: new Set([]),
-      aggregates: new Set([]),
-      grouping: new Set([]),
     });
   });
 
@@ -33,8 +31,6 @@ describe('FROM > summary', () => {
       newColumns: new Set([]),
       metadataColumns: new Set(['_index', '_id']),
       renamedColumnsPairs: new Set([]),
-      aggregates: new Set([]),
-      grouping: new Set([]),
     });
   });
 
@@ -48,16 +44,7 @@ describe('FROM > summary', () => {
       newColumns: new Set(['computed']),
       metadataColumns: new Set([]),
       renamedColumnsPairs: new Set([]),
-      aggregates: new Set([]),
-      grouping: new Set([]),
     });
-  });
-
-  it('collects aggregates and grouping from a subquery', () => {
-    const result = summary(synth.cmd`FROM (FROM logs | STATS n = COUNT() BY host)`, '', context);
-
-    expect(result.aggregates).toEqual(new Set([expect.objectContaining({ field: 'n' })]));
-    expect(result.grouping).toEqual(new Set([expect.objectContaining({ field: 'host' })]));
   });
 
   it('collects columns from multiple subqueries', () => {
@@ -70,8 +57,6 @@ describe('FROM > summary', () => {
       newColumns: new Set(['a', 'b']),
       metadataColumns: new Set([]),
       renamedColumnsPairs: new Set([]),
-      aggregates: new Set([]),
-      grouping: new Set([]),
     });
   });
 });

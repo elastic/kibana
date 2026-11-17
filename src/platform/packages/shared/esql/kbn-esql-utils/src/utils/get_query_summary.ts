@@ -95,17 +95,13 @@ export function getQuerySummaryFromCommands(
   };
 }
 
-/**
- * Builds the context that gives a source command the summary of the LETs it reads, each one
- * summarized once with `summarizeBinding` and seeing only the LETs declared before it.
- */
-export const createNamedSubquerySummaryContext = (
-  namedSubqueries: readonly NamedSubquery[],
-  summarizeBinding: (
-    commands: readonly ESQLAstCommand[],
-    context: ESQLCommandSummaryContext
-  ) => ESQLCommandSummary
+/** Builds a context that caches each LET's summary using only previously declared bindings. */
+export const createQuerySummaryContext = (
+  { header }: ESQLAstQueryExpression,
+  query: string,
+  summarizeBinding = getQuerySummaryFromCommands
 ): ESQLCommandSummaryContext => {
+  const namedSubqueries = getNamedSubqueries(header);
   const summaries = new Map<NamedSubquery, ESQLCommandSummary>();
 
   const createScope = (scope: readonly NamedSubquery[]): ESQLCommandSummaryContext => ({
@@ -118,6 +114,7 @@ export const createNamedSubquerySummaryContext = (
 
       const summary = summarizeBinding(
         namedSubquery.query.commands,
+        query,
         createScope(getNamedSubqueriesAvailableTo(namedSubqueries, namedSubquery))
       );
       summaries.set(namedSubquery, summary);
@@ -127,15 +124,6 @@ export const createNamedSubquerySummaryContext = (
 
   return createScope(namedSubqueries);
 };
-
-/** Builds the summary context of a parsed query from the LETs in its header. */
-export const createQuerySummaryContext = (
-  { header }: ESQLAstQueryExpression,
-  query: string
-): ESQLCommandSummaryContext =>
-  createNamedSubquerySummaryContext(getNamedSubqueries(header), (commands, bindingContext) =>
-    getQuerySummaryFromCommands(commands, query, bindingContext)
-  );
 
 /**
  * Analyzes the provided ES|QL query and returns a summary of new columns,

@@ -9,13 +9,9 @@
 
 import { isColumn } from '@elastic/esql';
 import type { ESQLAstCommand, ESQLColumn } from '@elastic/esql/types';
+import type { ESQLCommandSummary, ESQLCommandSummaryContext } from '@kbn/esql-language';
 import {
-  getNamedSubqueries,
-  type ESQLCommandSummary,
-  type ESQLCommandSummaryContext,
-} from '@kbn/esql-language';
-import {
-  createNamedSubquerySummaryContext,
+  createQuerySummaryContext,
   getQuerySummaryFromCommands,
   getSummaryPerCommand,
 } from './get_query_summary';
@@ -194,15 +190,10 @@ export function buildRenameSourceFieldMapFromCommands(
  */
 export function buildRenameSourceFieldMap(query: string): Map<string, string> {
   const { root } = parseEsqlCached(query);
-  // Each LET builds its own rename map, so FROM gets its columns already mapped to source fields.
-  const summaryContext = createNamedSubquerySummaryContext(
-    getNamedSubqueries(root.header),
-    (commands, bindingContext) => ({
-      ...getQuerySummaryFromCommands(commands, query, bindingContext),
-      renamedColumnsPairs: new Set(
-        buildRenameSourceFieldMapFromCommands(commands, query, bindingContext)
-      ),
-    })
-  );
+  // Resolve renames within each LET before combining it with the outer pipeline.
+  const summaryContext = createQuerySummaryContext(root, query, (commands, source, context) => ({
+    ...getQuerySummaryFromCommands(commands, source, context),
+    renamedColumnsPairs: new Set(buildRenameSourceFieldMapFromCommands(commands, source, context)),
+  }));
   return buildRenameSourceFieldMapFromCommands(root.commands, query, summaryContext);
 }
