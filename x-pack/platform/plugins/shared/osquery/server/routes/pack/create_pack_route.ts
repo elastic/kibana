@@ -32,6 +32,7 @@ import {
   groupAgentPolicyIdsByPackagePolicy,
   makePackKey,
   resolveSharedPackagePolicyShard,
+  resolveSharedIntegrationOverdelivery,
   validatePackScheduleFields,
   buildScheduleResponseSlice,
   buildExecutionDefaultsResponseSlice,
@@ -328,9 +329,18 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           ...buildExecutionDefaultsResponseSlice(packSO.attributes),
         };
 
+        const warnings = attributes.enabled
+          ? resolveSharedIntegrationOverdelivery(
+              packSO.references.map(({ id }) => id),
+              packagePolicies,
+              shards
+            )
+          : [];
+
         return response.ok({
           body: {
             data,
+            ...(warnings.length ? { warnings } : {}),
           },
         });
       }

@@ -7,9 +7,11 @@
 
 import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
+import type { SharedIntegrationWarning } from '../../../common/api/packs/shared_integration_warning';
 import { API_VERSIONS } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { createPackRoute } from './create_pack_route';
+import { createPackResponseSchema } from './response_schemas';
 import { createPackRequestBodySchema } from '../../../common/api/packs/create_pack_route';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { getUserInfo } from '../../lib/get_user_info';
@@ -126,6 +128,83 @@ describe('createPackRoute', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('shared integration warnings', () => {
+    const runWarningCase = async (policyIds: string[], enabled = true, global = false) => {
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const packagePolicies = [
+        {
+          id: 'shared',
+          name: 'Shared integration',
+          policy_ids: ['A', 'B', 'C'],
+          package: { name: 'osquery_manager', version: '1.0.0' },
+          inputs: [{ type: 'osquery', streams: [], config: { osquery: { value: { packs: {} } } } }],
+        },
+        {
+          id: 'dedicated',
+          name: 'Dedicated integration',
+          policy_ids: ['D'],
+          package: { name: 'osquery_manager', version: '1.0.0' },
+          inputs: [{ type: 'osquery', streams: [], config: { osquery: { value: { packs: {} } } } }],
+        },
+      ];
+      const { mockClient } = setupRoute({
+        agentPolicies: policyIds.map((id) => ({ id, name: id })),
+        packagePolicies,
+        packagePolicyUpdate,
+      });
+      const request = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: {
+          name: 'my-pack',
+          queries: {},
+          enabled,
+          policy_ids: policyIds,
+          shards: global ? { '*': 100 } : {},
+        },
+      });
+      const response = httpServerMock.createResponseFactory();
+      await routeHandler(buildMockContext() as Parameters<RequestHandler>[0], request, response);
+      expect(response.ok).toHaveBeenCalledTimes(1);
+      const responseBody = response.ok.mock.calls[0][0]?.body as {
+        data: { policy_ids?: string[] };
+        warnings?: SharedIntegrationWarning[];
+      };
+      expect(() => createPackResponseSchema.validate(responseBody)).not.toThrow();
+      const references = mockClient.create.mock.calls[0][2].references as Array<{ id: string }>;
+      expect(references.map(({ id }) => id)).toEqual(global ? ['A', 'B', 'C', 'D'] : policyIds);
+
+      return { responseBody, writes: packagePolicyUpdate.mock.calls.map((call) => call[3]) };
+    };
+
+    it('warns for a partial selection without expanding persisted policy_ids or Fleet delivery', async () => {
+      const partial = await runWarningCase(['A']);
+      expect(partial.responseBody.warnings).toEqual([
+        {
+          code: 'shared_integration_overdelivery',
+          package_policy_id: 'shared',
+          package_policy_name: 'Shared integration',
+          additional_policy_ids: ['B', 'C'],
+        },
+      ]);
+      const full = await runWarningCase(['A', 'B', 'C']);
+      expect(full.responseBody).not.toHaveProperty('warnings');
+      expect(partial.writes).toHaveLength(1);
+      expect(partial.writes).toEqual(full.writes);
+    });
+
+    it('omits warnings for an unshared integration', async () => {
+      expect((await runWarningCase(['D'])).responseBody).not.toHaveProperty('warnings');
+    });
+
+    it('omits warnings for a global pack', async () => {
+      expect((await runWarningCase([], true, true)).responseBody).not.toHaveProperty('warnings');
+    });
+
+    it('omits warnings for a disabled pack', async () => {
+      expect((await runWarningCase(['A'], false)).responseBody).not.toHaveProperty('warnings');
+    });
   });
 
   describe('Fleet package-policy write dedup', () => {

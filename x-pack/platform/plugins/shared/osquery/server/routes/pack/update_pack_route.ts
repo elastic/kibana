@@ -40,6 +40,7 @@ import {
   removePackFromPolicy,
   makePackKey,
   resolveSharedPackagePolicyShard,
+  resolveSharedIntegrationOverdelivery,
   validatePackScheduleFields,
   resolvePackScheduleForUpdate,
   buildScheduleResponseSlice,
@@ -486,8 +487,21 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           };
         };
 
+        const buildResponseBody = () => {
+          const data = buildResponseData();
+          const warnings = data.enabled
+            ? resolveSharedIntegrationOverdelivery(
+                data.policy_ids ?? [],
+                packagePolicies,
+                effectiveShards
+              )
+            : [];
+
+          return { data, ...(warnings.length ? { warnings } : {}) };
+        };
+
         if (enabled == null && !currentPackSO.attributes.enabled) {
-          return response.ok({ body: { data: buildResponseData() } });
+          return response.ok({ body: buildResponseBody() });
         }
 
         // The pack SO (source of truth) is already committed. These Fleet writes
@@ -775,7 +789,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         }
 
         return response.ok({
-          body: { data: buildResponseData() },
+          body: buildResponseBody(),
         });
       }
     );

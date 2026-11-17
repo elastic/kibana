@@ -2000,6 +2000,30 @@ components:
           required:
             - saved_object_id
             - name
+        warnings:
+          description: Additional agent policies receiving this enabled pack through a
+            shared integration.
+          items:
+            type: object
+            properties:
+              additional_policy_ids:
+                items:
+                  type: string
+                type: array
+              code:
+                enum:
+                  - shared_integration_overdelivery
+                type: string
+              package_policy_id:
+                type: string
+              package_policy_name:
+                type: string
+            required:
+              - code
+              - package_policy_id
+              - package_policy_name
+              - additional_policy_ids
+          type: array
       required:
         - data
     CreateSavedQueryRequestBody:
@@ -3711,6 +3735,30 @@ components:
             version:
               description: The pack version number.
               type: integer
+        warnings:
+          description: Additional agent policies receiving this enabled pack through a
+            shared integration.
+          items:
+            type: object
+            properties:
+              additional_policy_ids:
+                items:
+                  type: string
+                type: array
+              code:
+                enum:
+                  - shared_integration_overdelivery
+                type: string
+              package_policy_id:
+                type: string
+              package_policy_name:
+                type: string
+            required:
+              - code
+              - package_policy_id
+              - package_policy_name
+              - additional_policy_ids
+          type: array
     UpdateSavedQueryRequestBody:
       example:
         id: updated_my_saved_query_name
