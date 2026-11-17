@@ -2137,6 +2137,205 @@ describe('Package policy service', () => {
       await expect(createPackagePolicy(soClient)).resolves.toBeDefined();
     });
 
+    describe('package listed as FIPS incompatible without fips_compatible flags', () => {
+      const connectorsPkgInfo = {
+        name: 'elastic_connectors',
+        version: '0.0.1',
+        policy_templates: [{ name: 'github', inputs: [] }],
+      };
+      const connectorsPolicy: NewPackagePolicy = {
+        ...newPackagePolicy,
+        inputs: [{ type: 'connectors-py', policy_template: 'github', enabled: true, streams: [] }],
+        package: { name: 'elastic_connectors', title: 'Elastic Connectors', version: '0.0.1' },
+      };
+
+      beforeEach(() => {
+        (getPackageInfo as jest.Mock).mockResolvedValue(connectorsPkgInfo);
+      });
+
+      it('create should reject the package when FIPS is enabled', async () => {
+        const soClient = createSavedObjectClientMock();
+        mockAgentPolicyGet();
+
+        const promise = createPackagePolicy(soClient, {}, connectorsPolicy);
+
+        await expect(promise).rejects.toBeInstanceOf(PackageFipsIncompatibleError);
+        await expect(promise).rejects.toThrow(
+          'Cannot create a package policy for elastic_connectors: the integration is not FIPS compatible'
+        );
+        expect(soClient.create).not.toHaveBeenCalled();
+      });
+
+      it('create should allow the package when using the force flag', async () => {
+        const soClient = createSavedObjectClientMock();
+        mockCreateSuccess(soClient);
+
+        await expect(
+          createPackagePolicy(soClient, { force: true }, connectorsPolicy)
+        ).resolves.toBeDefined();
+      });
+
+      it('create should allow the package when FIPS is not enabled', async () => {
+        jest.spyOn(appContextService, 'getIsFipsEnabled').mockReturnValue(false);
+        const soClient = createSavedObjectClientMock();
+        mockCreateSuccess(soClient);
+
+        await expect(createPackagePolicy(soClient, {}, connectorsPolicy)).resolves.toBeDefined();
+      });
+
+      describe('update', () => {
+        const connectorsPkgInfoWithTemplates = {
+          ...connectorsPkgInfo,
+          policy_templates: [
+            { name: 'github', inputs: [] },
+            { name: 'jira', inputs: [] },
+          ],
+        };
+        const connectorInput = (policyTemplate: string, enabled: boolean) => ({
+          type: 'connectors-py',
+          policy_template: policyTemplate,
+          enabled,
+          streams: [],
+        });
+        const buildPolicy = (inputs: NewPackagePolicy['inputs']) => ({
+          ...connectorsPolicy,
+          inputs,
+        });
+
+        beforeEach(() => {
+          (getPackageInfo as jest.Mock).mockResolvedValue(connectorsPkgInfoWithTemplates);
+        });
+
+        const runUpdate = (
+          oldInputs: NewPackagePolicy['inputs'],
+          newInputs: NewPackagePolicy['inputs'],
+          options: { force?: boolean } = {}
+        ) => {
+          const soClient = createSavedObjectClientMock();
+          mockAgentPolicyGet();
+          soClient.bulkGet.mockResolvedValue({
+            saved_objects: [
+              {
+                id: 'test-package-policy',
+                type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+                references: [],
+                version: 'test',
+                attributes: buildPolicy(oldInputs) as any,
+              },
+            ],
+          });
+          soClient.get.mockResolvedValue({
+            id: 'test-package-policy',
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            attributes: buildPolicy(newInputs) as any,
+          });
+          soClient.update.mockImplementation((async (_type: string, _id: string, attrs: any) => ({
+            id: 'test-package-policy',
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            attributes: attrs,
+          })) as any);
+          return packagePolicyService.update(
+            soClient,
+            elasticsearchServiceMock.createClusterClient().asInternalUser,
+            'test-package-policy',
+            buildPolicy(newInputs),
+            { skipUniqueNameVerification: true, ...options }
+          );
+        };
+
+        it('should allow editing an already enabled connector input without enabling new ones', async () => {
+          await expect(
+            runUpdate([connectorInput('github', true)], [connectorInput('github', true)])
+          ).resolves.toBeDefined();
+        });
+
+        it('should reject enabling a new connector input', async () => {
+          const promise = runUpdate(
+            [connectorInput('github', true), connectorInput('jira', false)],
+            [connectorInput('github', true), connectorInput('jira', true)]
+          );
+
+          await expect(promise).rejects.toBeInstanceOf(PackageFipsIncompatibleError);
+          await expect(promise).rejects.toThrow(
+            'Cannot update a package policy for elastic_connectors: the policy template jira is not FIPS compatible'
+          );
+        });
+
+        it('should allow enabling a new connector input when using the force flag', async () => {
+          await expect(
+            runUpdate(
+              [connectorInput('github', true), connectorInput('jira', false)],
+              [connectorInput('github', true), connectorInput('jira', true)],
+              { force: true }
+            )
+          ).resolves.toBeDefined();
+        });
+
+        it('should allow enabling a new connector input when FIPS is not enabled', async () => {
+          jest.spyOn(appContextService, 'getIsFipsEnabled').mockReturnValue(false);
+
+          await expect(
+            runUpdate(
+              [connectorInput('github', true), connectorInput('jira', false)],
+              [connectorInput('github', true), connectorInput('jira', true)]
+            )
+          ).resolves.toBeDefined();
+        });
+
+        describe('bulkUpdate', () => {
+          const runBulkUpdate = (
+            oldInputs: NewPackagePolicy['inputs'],
+            newInputs: NewPackagePolicy['inputs']
+          ) => {
+            const soClient = createSavedObjectClientMock();
+            mockAgentPolicyGet();
+            soClient.bulkGet.mockResolvedValue({
+              saved_objects: [
+                {
+                  id: 'test-package-policy',
+                  type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+                  references: [],
+                  version: 'test',
+                  attributes: buildPolicy(oldInputs) as any,
+                },
+              ],
+            });
+            soClient.bulkUpdate.mockResolvedValue({ saved_objects: [] });
+            return packagePolicyService.bulkUpdate(
+              soClient,
+              elasticsearchServiceMock.createClusterClient().asInternalUser,
+              [{ ...buildPolicy(newInputs), id: 'test-package-policy' } as any]
+            );
+          };
+
+          it('should put a policy enabling a new connector input in failedPolicies', async () => {
+            const res = await runBulkUpdate(
+              [connectorInput('github', true), connectorInput('jira', false)],
+              [connectorInput('github', true), connectorInput('jira', true)]
+            );
+
+            expect(res.updatedPolicies).toHaveLength(0);
+            expect(res.failedPolicies).toHaveLength(1);
+            expect(res.failedPolicies[0].error).toBeInstanceOf(PackageFipsIncompatibleError);
+            expect((res.failedPolicies[0].error as Error).message).toBe(
+              'Cannot update a package policy for elastic_connectors: the policy template jira is not FIPS compatible'
+            );
+          });
+
+          it('should not fail a policy that only keeps its already enabled connector input', async () => {
+            const res = await runBulkUpdate(
+              [connectorInput('github', true)],
+              [connectorInput('github', true)]
+            );
+
+            expect(res.failedPolicies).toHaveLength(0);
+          });
+        });
+      });
+    });
+
     describe('package with a mix of FIPS compatible and non FIPS policy templates', () => {
       const policyWithInput = (policyTemplate: string, enabled = true): NewPackagePolicy => ({
         ...newPackagePolicy,
