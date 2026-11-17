@@ -39,7 +39,7 @@ import { ScannerExplainer } from './scanner_explainer';
 import { SCANNER_SETTINGS_TEST_SUBJECTS } from './test_subjects';
 
 /** How long to wait for a started scan to show up as running before the page stops waiting. */
-const SCAN_START_GRACE_MS = 60000;
+export const SCAN_START_GRACE_MS = 60000;
 
 const PAGE_TITLE = i18n.translate('xpack.csp.nativeVulnScanner.page.title', {
   defaultMessage: 'Host vulnerability scanning',
@@ -60,7 +60,7 @@ export const ScannerSettingsPage = () => {
   const [applyResult, setApplyResult] = useState<ApplyOnboardingResult | null>(null);
   const [deniedByServer, setDeniedByServer] = useState(false);
 
-  const { data: status, isLoading, isError } = useNativeVulnScannerStatus({ awaitingScan });
+  const { data: status, isLoading } = useNativeVulnScannerStatus({ awaitingScan });
 
   // The scan counts as started once a run shows as running or a new summary appears.
   const scanBaselineRunId = useRef<string | undefined>();
@@ -87,7 +87,10 @@ export const ScannerSettingsPage = () => {
   // A run can end SKIPPED before it is ever seen as running, so waiting has to end by itself.
   useEffect(() => {
     if (!awaitingScan) return;
-    const timer = setTimeout(() => setAwaitingScan(false), SCAN_START_GRACE_MS);
+    const timer = setTimeout(() => {
+      // Once the run was seen, the effect above ends the wait when it finishes.
+      if (!scanSeenRunning.current) setAwaitingScan(false);
+    }, SCAN_START_GRACE_MS);
     return () => clearTimeout(timer);
   }, [awaitingScan]);
 
@@ -136,7 +139,8 @@ export const ScannerSettingsPage = () => {
     );
   }
 
-  if (isError || !status) {
+  // A failed background refetch keeps the last good data, so only a first load without data errors.
+  if (!status) {
     return (
       <KbnDangerCallout
         announceOnMount

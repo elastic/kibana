@@ -55,6 +55,7 @@
     "@kbn/unified-field-list",
     "@kbn/unified-doc-viewer",
     "@kbn/kibana-utils-plugin",
+    "@kbn/test-jest-helpers",
     "@kbn/ui-actions-plugin",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/grouping",

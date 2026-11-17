@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
@@ -20,10 +20,11 @@ import type {
   OnboardingPlan,
   OnboardingStatus,
   PolicyStatus,
+  SummaryDoc,
 } from '@kbn/cloud-security-posture-common/native_vuln_scanner/types';
 import { TestProvider } from '../../../test/test_provider';
 import { getMockDependencies } from '../../../test/fixtures/get_mock_dependencies';
-import { ScannerSettingsPage } from '.';
+import { SCAN_START_GRACE_MS, ScannerSettingsPage } from '.';
 import {
   SCANNER_SETTINGS_TEST_SUBJECTS,
   getApplyPolicyTestSubject,
@@ -84,7 +85,8 @@ const httpError = (status: number, message: string, code?: string) => ({
 });
 
 interface HttpHandlers {
-  status?: unknown;
+  /** A function is called on every status request, so a test can change the answer over time. */
+  status?: unknown | (() => unknown);
   plan?: unknown;
   scan?: unknown;
   packs?: Array<{ saved_object_id: string; name: string; policy_ids?: string[] }>;
@@ -115,7 +117,10 @@ const setup = (handlers: HttpHandlers = {}, { canEditPolicies = true } = {}) => 
 
   core.http.get.mockImplementation(async (path: unknown) => {
     calls.push(`GET ${path}`);
-    if (path === ONBOARDING_STATUS_PATH) return respond(handlers.status ?? createStatus());
+    if (path === ONBOARDING_STATUS_PATH) {
+      const { status } = handlers;
+      return respond(typeof status === 'function' ? status() : status ?? createStatus());
+    }
     if (path === OSQUERY_PACKS_PATH) return { data: handlers.packs ?? [] };
     throw new Error(`Unexpected GET ${path}`);
   });
@@ -379,6 +384,118 @@ describe('ScannerSettingsPage', () => {
       expect(
         await screen.findByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.SCAN_ERROR)
       ).toHaveTextContent('boom');
+    });
+
+    describe('while a scan is awaited', () => {
+      const SCAN_POLL_INTERVAL_MS = 5000;
+      const finishedScan: SummaryDoc = {
+        '@timestamp': '2026-11-17T08:00:00.000Z',
+        run_id: 'run-2',
+        started_at: '2026-11-17T07:59:00.000Z',
+        finished_at: '2026-11-17T08:00:00.000Z',
+        status: 'success',
+        hosts_scanned: 3,
+        findings_open: 1,
+        findings_fixed: 0,
+        feeds: [],
+        failures: [],
+      };
+
+      beforeEach(() => {
+        jest.useFakeTimers();
+      });
+
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
+      it('keeps polling every 5 s past the start grace once the run was seen running', async () => {
+        let current = createStatus();
+        const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+        const { calls } = setup({ status: () => current });
+        await waitForPage();
+
+        current = createStatus({ scanRunning: true });
+        await user.click(screen.getByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.SCAN_NOW_BUTTON));
+        await waitFor(() =>
+          expect(
+            screen.getByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.SCAN_RUNNING)
+          ).toBeInTheDocument()
+        );
+
+        await act(async () => {
+          await jest.advanceTimersByTimeAsync(SCAN_START_GRACE_MS + 1000);
+        });
+        expect(screen.getByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.SCAN_NOW_BUTTON)).toBeDisabled();
+        expect(screen.getByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.SCAN_RUNNING)).toBeInTheDocument();
+
+        // The run ends with a new summary; the next 5 s poll, not a 30 s one, has to see it.
+        current = createStatus({ scanRunning: false, lastScan: finishedScan });
+        const statusCallsBefore = calls.filter((call) => call.includes(ONBOARDING_STATUS_PATH));
+        await act(async () => {
+          await jest.advanceTimersByTimeAsync(SCAN_POLL_INTERVAL_MS + 100);
+        });
+
+        expect(
+          calls.filter((call) => call.includes(ONBOARDING_STATUS_PATH)).length
+        ).toBeGreaterThan(statusCallsBefore.length);
+        await waitFor(() =>
+          expect(
+            screen.queryByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.SCAN_RUNNING)
+          ).not.toBeInTheDocument()
+        );
+        expect(screen.getByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.SCAN_NOW_BUTTON)).toBeEnabled();
+      });
+
+      it('stops waiting after the start grace when the run is never seen running', async () => {
+        const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+        setup();
+        await waitForPage();
+
+        await user.click(screen.getByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.SCAN_NOW_BUTTON));
+        await waitFor(() =>
+          expect(
+            screen.getByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.SCAN_RUNNING)
+          ).toBeInTheDocument()
+        );
+
+        await act(async () => {
+          await jest.advanceTimersByTimeAsync(SCAN_START_GRACE_MS + 1000);
+        });
+
+        expect(
+          screen.queryByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.SCAN_RUNNING)
+        ).not.toBeInTheDocument();
+        expect(screen.getByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.SCAN_NOW_BUTTON)).toBeEnabled();
+      });
+    });
+  });
+
+  describe('status loading', () => {
+    it('shows the error callout when the first load fails and there is no data', async () => {
+      setup({ status: httpError(500, 'boom') });
+
+      expect(await screen.findByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.ERROR)).toBeInTheDocument();
+      expect(screen.queryByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.PAGE)).not.toBeInTheDocument();
+    });
+
+    it('keeps the page when a background refetch fails and cached data exists', async () => {
+      let failing = false;
+      const user = userEvent.setup();
+      const { calls } = setup({
+        status: () => (failing ? httpError(500, 'boom') : createStatus()),
+      });
+      await waitForPage();
+
+      failing = true;
+      await user.click(screen.getByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.SCAN_NOW_BUTTON));
+      await waitFor(() =>
+        expect(calls.filter((call) => call.includes(ONBOARDING_STATUS_PATH)).length).toBe(2)
+      );
+      await act(async () => {});
+
+      expect(screen.getByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.PAGE)).toBeInTheDocument();
+      expect(screen.queryByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.ERROR)).not.toBeInTheDocument();
     });
   });
 

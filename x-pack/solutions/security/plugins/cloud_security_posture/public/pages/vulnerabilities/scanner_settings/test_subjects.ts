@@ -18,8 +18,6 @@ export const SCANNER_SETTINGS_TEST_SUBJECTS = {
   AGENTLESS_CALLOUT: 'nativeVulnScannerAgentlessCallout',
   PACK_DRIFT_CALLOUT: 'nativeVulnScannerPackDriftCallout',
   POLICY_TABLE: 'nativeVulnScannerPolicyTable',
-  AGENTS_HIDDEN: 'nativeVulnScannerAgentsHidden',
-  REPORTING_HIDDEN: 'nativeVulnScannerReportingHidden',
   ENABLE_BUTTON: 'nativeVulnScannerEnableButton',
   PLAN_ERROR: 'nativeVulnScannerPlanError',
   CONFIRM_MODAL: 'nativeVulnScannerConfirmModal',

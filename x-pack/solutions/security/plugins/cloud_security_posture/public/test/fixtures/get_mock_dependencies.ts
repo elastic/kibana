@@ -13,6 +13,7 @@ import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
 
@@ -25,6 +26,6 @@ export const getMockDependencies = () => ({
   fleet: fleetMock.createStartMock(),
   licensing: licensingMock.createStart(),
   uiActions: uiActionsPluginMock.createStartContract(),
-  storage: new Storage(window.localStorage),
+  storage: new Storage(new StubBrowserStorage()),
   share: sharePluginMock.createStartContract(),
 });

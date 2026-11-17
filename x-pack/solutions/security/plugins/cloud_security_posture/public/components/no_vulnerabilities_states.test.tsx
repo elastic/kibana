@@ -9,6 +9,7 @@ import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { OnboardingStatus } from '@kbn/cloud-security-posture-common/native_vuln_scanner/types';
 import { NoVulnerabilitiesStates } from './no_vulnerabilities_states';
 import * as useCspSetupStatusApi from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
 import * as useCspIntegrationLink from '../common/navigation/use_csp_integration_link';
@@ -130,7 +131,11 @@ describe('NoVulnerabilitiesStates', () => {
   it('shows a link to the scanner settings page when the status route answers 200', async () => {
     cleanup();
     httpGet.mockReset();
-    httpGet.mockResolvedValue({ license: 'sufficient', policies: [] });
+    const statusBody: Pick<OnboardingStatus, 'license' | 'policies'> = {
+      license: 'ok',
+      policies: [],
+    };
+    httpGet.mockResolvedValue(statusBody);
     renderStates();
 
     const button = await screen.findByTestId(NATIVE_VULN_SCANNER_EMPTY_STATE_SUBJECTS.BUTTON);
