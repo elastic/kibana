@@ -23,7 +23,11 @@ import type {
   RegistryVarGroup,
 } from '../types';
 
-import { DATASET_VAR_NAME, DATA_STREAM_TYPE_VAR_NAME } from '../constants';
+import {
+  DATASET_VAR_NAME,
+  DATA_STREAM_TYPE_VAR_NAME,
+  VALIDATE_DATASTREAMS_PERMISSION_REGEX,
+} from '../constants';
 
 import {
   isValidNamespace,

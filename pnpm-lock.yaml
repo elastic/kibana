@@ -432,8 +432,8 @@ importers:
         specifier: 2.0.2
         version: 2.0.2
       '@elastic/monaco-esql':
-        specifier: 4.38.0
-        version: 4.38.0(monaco-editor@0.56.0)
+        specifier: 4.39.0
+        version: 4.39.0(monaco-editor@0.56.0)
       '@elastic/node-crypto':
         specifier: 1.2.3
         version: 1.2.3
@@ -4202,6 +4202,9 @@ importers:
       '@kbn/workflows-extensions-example':
         specifier: workspace:*
         version: link:examples/workflows_extensions_example
+      '@kbn/workflows-inbound-hub-test-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/test/workflows_inbound_hub/plugins/inbound_hub_connector
       '@kbn/workflows-library':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-workflows-library
@@ -4674,8 +4677,8 @@ importers:
         specifier: 3.1.1
         version: 3.1.1
       jsondiffpatch:
-        specifier: 0.7.6
-        version: 0.7.6
+        specifier: 0.7.7
+        version: 0.7.7
       jsonwebtoken:
         specifier: 9.0.2
         version: 9.0.2
@@ -5813,7 +5816,7 @@ importers:
         version: link:src/platform/packages/private/kbn-optimizer-webpack-helpers
       '@kbn/osquery-plugin-cypress':
         specifier: workspace:*
-        version: link:x-pack/platform/plugins/shared/osquery/cypress
+        version: link:x-pack/platform/packages/private/osquery-plugin-cypress
       '@kbn/otel-demo':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-otel-demo
@@ -6053,7 +6056,7 @@ importers:
         version: link:x-pack/solutions/security/test
       '@kbn/test-suites-xpack-security-endpoint':
         specifier: workspace:*
-        version: link:x-pack/solutions/security/test/security_solution_endpoint
+        version: link:x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint
       '@kbn/test-suites-xpack-vectordb':
         specifier: workspace:*
         version: link:x-pack/solutions/vectordb/test
@@ -9044,6 +9047,7 @@ importers:
 
   x-pack/platform/packages/private/ml/validators: {}
 
+  x-pack/platform/packages/private/osquery-plugin-cypress: {}
   x-pack/platform/packages/private/rollup: {}
 
   x-pack/platform/packages/private/security/authorization_core: {}
@@ -9580,7 +9584,6 @@ importers:
 
   x-pack/platform/plugins/shared/osquery: {}
 
-  x-pack/platform/plugins/shared/osquery/cypress: {}
 
   x-pack/platform/plugins/shared/proposals: {}
 
@@ -9623,6 +9626,8 @@ importers:
   x-pack/platform/plugins/shared/usage_api: {}
 
   x-pack/platform/test: {}
+
+  x-pack/platform/test/workflows_inbound_hub/plugins/inbound_hub_connector: {}
 
   x-pack/platform/test_plugins/agent_builder_sml_test_types: {}
 
@@ -9942,6 +9947,7 @@ importers:
 
   x-pack/solutions/security/packages/kbn-securitysolution-utils: {}
 
+  x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint: {}
   x-pack/solutions/security/packages/navigation: {}
 
   x-pack/solutions/security/packages/security-ai-prompts: {}
@@ -10004,7 +10010,6 @@ importers:
 
   x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response: {}
 
-  x-pack/solutions/security/test/security_solution_endpoint: {}
 
   x-pack/solutions/security/test_plugins/resolver_test: {}
 
@@ -11328,8 +11333,8 @@ packages:
     engines: {node: '>=20'}
     hasBin: true
 
-  '@elastic/monaco-esql@4.38.0':
-    resolution: {integrity: sha512-bKvBxq9/u+QWg7HvLsrJphKhi34eKqxiSWSfeJ8O5Cgp1lca10pzCsBqelobzcJd2hQLVAb8EPCK7IySc4vbnA==}
+  '@elastic/monaco-esql@4.39.0':
+    resolution: {integrity: sha512-AQUmxK7zSKZpS9RqovPsGIbd07EJ5YP1TxHkDbt35KqZedTrs4PuxzOBW930sa2v8Z7cUrvRW9I+zyS5M4HWXg==}
     peerDependencies:
       monaco-editor: '>=0.30.0'
 
@@ -20288,8 +20293,8 @@ packages:
   jsonc-parser@3.3.1:
     resolution: {integrity: sha512-HUgH65KyejrUFPvHFPbqOY0rsFip3Bo5wb4ngvdi1EpCYWUQDC5V+Y7mZws+DLkr4M//zQJoanu1SP+87Dv1oQ==}
 
-  jsondiffpatch@0.7.6:
-    resolution: {integrity: sha512-zE9+AXFq+MkTolDor2Cw1nJzLC0aleqPkYf52Kb4Kn4mJcka/gFHpGI2JBVEJCfWOvBl0OoxZS+wuLdislQcqg==}
+  jsondiffpatch@0.7.7:
+    resolution: {integrity: sha512-C3375q+xluwQYS6Je613YqXpZhW9uSi2YFRR+8QTJVYhdk0GZiDr7HD9bXNrdV9PJCpmwsCgJM9ZXXESSZPCzA==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
 
@@ -27362,7 +27367,7 @@ snapshots:
 
   '@elastic/micro-jq@2.0.2': {}
 
-  '@elastic/monaco-esql@4.38.0(monaco-editor@0.56.0)':
+  '@elastic/monaco-esql@4.39.0(monaco-editor@0.56.0)':
     dependencies:
       '@elastic/esql-definitions': 4.38.0
       monaco-editor: 0.56.0
@@ -37917,7 +37922,7 @@ snapshots:
 
   jsonc-parser@3.3.1: {}
 
-  jsondiffpatch@0.7.6:
+  jsondiffpatch@0.7.7:
     dependencies:
       '@dmsnell/diff-match-patch': 1.1.0
 

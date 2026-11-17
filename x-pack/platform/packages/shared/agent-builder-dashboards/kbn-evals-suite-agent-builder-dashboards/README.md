@@ -42,6 +42,7 @@ Chart presentation is checked on each panel's Lens Config API config, against th
   - when the gold sets `timeSlider`, the dashboard keeps exactly one time slider (`true`) or none (`false`)
   - the reply repeats no raw control error text
   Whether the reply accounts for requested controls it could not add is judged by Dashboard Reply. On a seeded example the agent never wrote, it scores 0, since the seed has none of the requested controls. Here and in the other evaluators, a `generate_dashboard` call that left the dashboard as it was counts as no write.
+- **Dashboard Panel Config Reference** (`CODE`): for the ML panel types the prompt asks for (`panelConfigTypes`), the agent reads the type's config reference (`panel_configs/<type>.md`) with `read_file` before its first `generate_dashboard` call that writes a panel of that type, since those config schemas are not in the tool schema. A write that came first counts as a failure even if it later succeeds. Scored as the fraction of gold types that hold. Skipped on examples without `panelConfigTypes`.
 - **Enhance Mode Question** (`CODE`): a bare "enhance" request ends the opening turn with one `ask_user_question` offering an appearance option and a content option, before anything is written. A request that names the mode does not ask.
 - **Enhance Mode Compliance** (`CODE`), binary:
   - Appearance mode keeps every panel id, every panel's ES|QL, the controls and filters unchanged (compared by content, not count), and the time range. It may delete markdown panels.
@@ -85,10 +86,11 @@ Every check is deterministic except Dashboard Reply, which judges reply wording 
 
 ## Dataset
 
-Forty-two examples, because each dashboard example costs 150k–300k input tokens:
+Forty-four examples, because each dashboard example costs 150k–300k input tokens:
 
 - **Creation** (`datasets/creation.ts`, 4): a rich logs dashboard, two requested sections, six compact KPIs, and four KPIs above a time series.
 - **Routing** (`datasets/routing.ts`, 4): a standalone chart, ES|QL help, and field discovery, which must stay out of the dashboard skill, and a dashboard over a `nonexistent-*` index, which loads the skill but must end without a dashboard (`noDashboard`). Nothing is generated, so these are cheap.
+- **ML panels** (`datasets/ml_panels.ts`, 2): a swim lane with anomaly charts, and a single metric viewer, each for a job named in the prompt. They check that the agent reads the panel config references.
 - **Enhance** (`datasets/enhance.ts`, 3), all over the same seeded dashboard:
   - `[/dashboards](skill://dashboards) Enhance this dashboard`, the prompt the dashboard's "Enhance this dashboard" action sends. The agent should ask for the mode, and the task answers the `ask_user_question` prompt by picking "Appearance only".
   - Appearance mode named up front.
@@ -111,7 +113,7 @@ Forty-two examples, because each dashboard example costs 150k–300k input token
   - add a markdown note, a second ML swim lane and a Vega heatmap to a section (`structure.panelKinds`, placements of the added kinds, and `panelEdits` on the note's terms, the swim lane's job and view, and the heatmap's `rect` mark);
   - delete the Errors section but keep its errors by host table, and recolor the 4xx chart while moving it into Traffic (`removed`, placements and `panelEdits`).
 
-Every example carries `metadata.behaviour` (`creation` | `routing` | `enhance` | `discover_results` | `layout_edit` | `edit_scenario`) and `metadata.dataSource` (`logs`, or `logs_dissect` for the Discover results). Enhance examples also carry `metadata.enhanceMode`, so golden-cluster results can be sliced. `datasets/gold_ids.test.ts` fails when gold names a panel or section id its seeded dashboard does not have, so seed edits cannot silently zero an assertion.
+Every example carries `metadata.behaviour` (`creation` | `routing` | `enhance` | `discover_results` | `layout_edit` | `edit_scenario` | `ml_panels`) and `metadata.dataSource` (`logs`, or `logs_dissect` for the Discover results). Enhance examples also carry `metadata.enhanceMode`, so golden-cluster results can be sliced. `datasets/gold_ids.test.ts` fails when gold names a panel or section id its seeded dashboard does not have, so seed edits cannot silently zero an assertion.
 
 ### Seeded dashboard
 
@@ -219,6 +221,7 @@ Test titles, one per spec:
 - `builds dashboards from DISSECT results with controls on mapped fields only` (`dashboard_discover_results.spec.ts`)
 - `edits a sectioned dashboard and keeps the rest of the layout` (`dashboard_layout_edit.spec.ts`)
 - `edits non-ES|QL panels, controls and sections of a sectioned dashboard` (`dashboard_edit_scenarios.spec.ts`)
+- `reads the ML panel config references before writing ML panels` (`dashboard_ml_panels.spec.ts`)
 
 After the eval stack is already running, use `run` for faster iteration:
 
