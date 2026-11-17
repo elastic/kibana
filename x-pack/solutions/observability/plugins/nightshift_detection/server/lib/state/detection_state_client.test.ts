@@ -1,0 +1,152 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { StateConflictError } from '../errors/state_conflict_error';
+import { InMemorySavedObjectsRepository } from '../../test_utils/in_memory_saved_objects_repository';
+import { DetectionStateClient } from './detection_state_client';
+
+const SPACE_ID = 'default';
+const STRATEGY_ID = 'error_rate';
+
+function createClient() {
+  return new DetectionStateClient(new InMemorySavedObjectsRepository().asRepository());
+}
+
+const readProcessedUntil = async (client: DetectionStateClient, spaceId = SPACE_ID) =>
+  (await client.readGeneratorStates({ spaceId, strategyIds: [STRATEGY_ID] })).get(STRATEGY_ID);
+
+describe('DetectionStateClient', () => {
+  describe('acquireLease', () => {
+    it('gives the lease to one of several concurrent acquirers', async () => {
+      const client = createClient();
+
+      const attempts = await Promise.all(
+        Array.from({ length: 5 }, () => client.acquireLease({ spaceId: SPACE_ID }))
+      );
+
+      expect(attempts.filter(({ acquired }) => acquired)).toHaveLength(1);
+    });
+
+    it('takes over an expired lease and leaves a live holder alone', async () => {
+      const client = createClient();
+      const start = Date.now();
+
+      const first = await client.acquireLease({ spaceId: SPACE_ID, ttlMs: 1_000, now: start });
+      const whileLive = await client.acquireLease({ spaceId: SPACE_ID, now: start + 500 });
+      const afterExpiry = await client.acquireLease({ spaceId: SPACE_ID, now: start + 2_000 });
+
+      expect(first.acquired).toBe(true);
+      expect(whileLive.acquired).toBe(false);
+      expect(afterExpiry.acquired).toBe(true);
+
+      // The first holder's release must not end the lease that replaced its own.
+      if (first.acquired) {
+        await first.held.release();
+      }
+      expect((await client.acquireLease({ spaceId: SPACE_ID, now: start + 2_500 })).acquired).toBe(
+        false
+      );
+    });
+
+    it('frees the lease when its holder releases it', async () => {
+      const client = createClient();
+      const first = await client.acquireLease({ spaceId: SPACE_ID });
+
+      if (first.acquired) {
+        await first.held.release();
+      }
+
+      expect((await client.acquireLease({ spaceId: SPACE_ID })).acquired).toBe(true);
+    });
+
+    it('keeps the lease of one space apart from another', async () => {
+      const client = createClient();
+
+      await client.acquireLease({ spaceId: 'space-a' });
+
+      expect((await client.acquireLease({ spaceId: 'space-b' })).acquired).toBe(true);
+    });
+  });
+
+  describe('advanceGeneratorState', () => {
+    it('moves an existing generator state forward, not only the first one', async () => {
+      const client = createClient();
+      await client.advanceGeneratorState({
+        spaceId: SPACE_ID,
+        strategyId: STRATEGY_ID,
+        processedUntil: 100,
+      });
+
+      await client.advanceGeneratorState({
+        spaceId: SPACE_ID,
+        strategyId: STRATEGY_ID,
+        processedUntil: 200,
+      });
+
+      expect(await readProcessedUntil(client)).toBe(200);
+    });
+
+    it('never moves back, so a late writer cannot undo the progress of a newer run', async () => {
+      const client = createClient();
+      await client.advanceGeneratorState({
+        spaceId: SPACE_ID,
+        strategyId: STRATEGY_ID,
+        processedUntil: 200,
+      });
+
+      await client.advanceGeneratorState({
+        spaceId: SPACE_ID,
+        strategyId: STRATEGY_ID,
+        processedUntil: 100,
+      });
+
+      expect(await readProcessedUntil(client)).toBe(200);
+    });
+
+    it('throws a conflict to the writer that lost a race, so it stops writing', async () => {
+      const client = createClient();
+
+      const outcomes = await Promise.allSettled(
+        [100, 200].map((processedUntil) =>
+          client.advanceGeneratorState({
+            spaceId: SPACE_ID,
+            strategyId: STRATEGY_ID,
+            processedUntil,
+          })
+        )
+      );
+
+      const rejected = outcomes.filter(({ status }) => status === 'rejected');
+      expect(rejected).toHaveLength(1);
+      expect((rejected[0] as PromiseRejectedResult).reason).toBeInstanceOf(StateConflictError);
+    });
+  });
+
+  describe('readGeneratorStates', () => {
+    it('leaves out a strategy that never ran and one that ran in another space', async () => {
+      const client = createClient();
+      await client.advanceGeneratorState({
+        spaceId: SPACE_ID,
+        strategyId: STRATEGY_ID,
+        processedUntil: 100,
+      });
+      await client.advanceGeneratorState({
+        spaceId: 'other',
+        strategyId: 'other_strategy',
+        processedUntil: 5,
+      });
+
+      const states = await client.readGeneratorStates({
+        spaceId: SPACE_ID,
+        strategyIds: [STRATEGY_ID, 'never_ran', 'other_strategy'],
+      });
+
+      expect([...states.keys()]).toEqual([STRATEGY_ID]);
+      expect(await readProcessedUntil(client, 'other')).toBeUndefined();
+    });
+  });
+});

@@ -24,7 +24,7 @@ import {
 import { EngineRunner } from '../lib/engine/run_engine';
 import { EnabledSources, RunContext } from '../lib/engine/tokens';
 import { DetectionSignalStore } from '../lib/signals/signal_store';
-import { StateStore } from '../lib/state/state_store';
+import { DetectionStateClient } from '../lib/state/detection_state_client';
 import { detectionStateSavedObjectType } from '../saved_objects/detection_state_saved_object';
 import { StrategyCatalog } from '../lib/strategies/strategy_catalog';
 
@@ -85,7 +85,7 @@ describe('module', () => {
     container.get(StrategyCatalog);
     container.get(EngineRunner);
     container.get(DetectionSignalStore);
-    container.get(StateStore);
+    container.get(DetectionStateClient);
     container.getAll(OnStart);
     container.getAll(OnSetup).forEach((onSetup) => onSetup(container));
 
