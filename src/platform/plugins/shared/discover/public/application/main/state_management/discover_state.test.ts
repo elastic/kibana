@@ -749,7 +749,7 @@ describe('Discover state', () => {
 
       expect(getCurrentDataViewId(state, tabId)).toBe(apiDataViewId);
       expectLoadedFilters(services, apiDataViewId);
-      expect(services.core.notifications.toasts.addWarning).toHaveBeenCalledWith(
+      expect(services.toastNotifications.addWarning).toHaveBeenCalledWith(
         expect.objectContaining({ 'data-test-subj': 'dscDataViewNotFoundShowSavedWarning' })
       );
     });

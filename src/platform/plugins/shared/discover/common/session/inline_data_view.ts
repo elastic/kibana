@@ -8,7 +8,7 @@
  */
 
 import type { AsCodeDataViewSpec } from '@kbn/as-code-data-views-schema';
-import { fromStoredDataView } from '@kbn/as-code-data-views-transforms';
+import { fromStoredDataView, fromStoredScriptedFields } from '@kbn/as-code-data-views-transforms';
 import { Sha256 } from '@kbn/crypto-browser';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
@@ -52,9 +52,27 @@ export const isInlineDataViewSpec = (spec: DataViewSpec): boolean =>
 export const isInlineDataView = (dataView: DataView): boolean =>
   !dataView.isPersisted() && isInlineDataViewSpec(dataView.toMinimalSpec());
 
+/** Returns the spec that identifies a view, keeping the scripted fields its minimal spec omits. */
+export const getInlineDataViewIdentitySpec = (dataView: DataView): DataViewSpec => {
+  const scriptedFields = [...dataView.fields].filter(({ scripted }) => scripted);
+  if (scriptedFields.length === 0) {
+    return dataView.toMinimalSpec();
+  }
+
+  return {
+    ...dataView.toMinimalSpec(),
+    fields: Object.fromEntries(scriptedFields.map((field) => [field.name, field.toSpec()])),
+  };
+};
+
 const getCanonicalInlineDataViewSpec = (dataView: DataViewSpec) => {
   const spec = fromStoredDataView(dataView) as AsCodeDataViewSpec;
   const fieldSettings = omitBy(spec.field_settings, (settings) => every(settings, isUndefined));
+  const scriptedFields = fromStoredScriptedFields(
+    dataView.fields,
+    dataView.fieldFormats,
+    dataView.fieldAttrs
+  );
 
   return {
     type: 'data_view_spec' as const,
@@ -63,7 +81,14 @@ const getCanonicalInlineDataViewSpec = (dataView: DataViewSpec) => {
     // DataView.toMinimalSpec() includes this default even when the API document omits it.
     allow_hidden_indices: spec.allow_hidden_indices ?? false,
     ...pick(spec, ['index_pattern', 'time_field']),
-    ...omitBy({ field_settings: fieldSettings, field_filters: spec.field_filters }, isEmpty),
+    ...omitBy(
+      {
+        field_settings: fieldSettings,
+        field_filters: spec.field_filters,
+        scripted_fields: scriptedFields,
+      },
+      isEmpty
+    ),
   };
 };
 

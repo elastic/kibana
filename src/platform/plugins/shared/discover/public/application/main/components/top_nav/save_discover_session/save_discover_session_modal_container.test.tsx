@@ -478,7 +478,11 @@ describe('DiscoverSessionSaveModalContainer', () => {
             services,
           });
           jest.mocked(services.discoverSessionService.save).mockClear();
-          const dataViewList = Promise.withResolvers<void>();
+          const dataViewListLoaded = internalStateActions.loadDataViewList.fulfilled(
+            [unopenedTabDataView] as DataViewListItem[],
+            'requestId'
+          );
+          const dataViewList = Promise.withResolvers<typeof dataViewListLoaded>();
           const loadDataViewListOnceSpy = jest
             .spyOn(internalStateActions, 'loadDataViewListOnce')
             .mockReturnValue(() => dataViewList.promise);
@@ -489,13 +493,8 @@ describe('DiscoverSessionSaveModalContainer', () => {
             await act(async () => {
               const savePromise = modalProps?.onSave(getOnSaveProps({ newTimeRestore: true }));
 
-              toolkit.internalState.dispatch(
-                internalStateActions.loadDataViewList.fulfilled(
-                  [unopenedTabDataView] as DataViewListItem[],
-                  'requestId'
-                )
-              );
-              dataViewList.resolve();
+              toolkit.internalState.dispatch(dataViewListLoaded);
+              dataViewList.resolve(dataViewListLoaded);
               await savePromise;
             });
           } finally {

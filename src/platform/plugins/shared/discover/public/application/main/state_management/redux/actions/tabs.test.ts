@@ -35,6 +35,7 @@ import * as contextAwarenessToolkitModule from '../context_awareness_toolkit';
 import { APP_STATE_URL_KEY, PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
 import { TABS_LOCAL_STORAGE_KEY } from '../../tabs_storage_manager';
 import type { UISession } from '@kbn/data-plugin/public';
+import { FilterManager } from '@kbn/data-plugin/public';
 import { SearchSessionStatus } from '@kbn/data-plugin/common';
 import type { DiscoverAppLocatorParams } from '../../../../../../common';
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -223,6 +224,9 @@ describe('tabs actions', () => {
     it('restores a legacy inline view with matching app and pinned filter references', async () => {
       const { internalState, getCurrentTab, initializeSingleTab, runtimeStateManager, services } =
         await setup();
+      const filterManager = new FilterManager(services.uiSettings);
+      services.filterManager = filterManager;
+      services.data.query.filterManager = filterManager;
       const dataViewSpec = {
         id: 'legacy-inline-id',
         title: 'logs-*',

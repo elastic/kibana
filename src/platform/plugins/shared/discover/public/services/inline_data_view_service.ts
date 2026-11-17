@@ -16,6 +16,7 @@ import type { DataView, DataViewSpec, DataViewsContract } from '@kbn/data-views-
 import {
   generateInlineDataViewId,
   getInlineDataView,
+  getInlineDataViewIdentitySpec,
   isInlineDataView,
   isInlineDataViewSpec,
 } from '../../common/session/inline_data_view';
@@ -69,7 +70,7 @@ export const createInlineDataViewService = ({
   // still matches its ID.
   const getConsistentDataView = async (id: string, createDataView: () => Promise<DataView>) => {
     const cachedDataView = await createDataView();
-    if (generateInlineDataViewId(cachedDataView.toMinimalSpec()) === id) {
+    if (generateInlineDataViewId(getInlineDataViewIdentitySpec(cachedDataView)) === id) {
       return cachedDataView;
     }
 
@@ -83,7 +84,7 @@ export const createInlineDataViewService = ({
       return dataView;
     }
 
-    const id = generateInlineDataViewId(dataView.toMinimalSpec());
+    const id = generateInlineDataViewId(getInlineDataViewIdentitySpec(dataView));
     if (id === dataView.id) {
       return dataView;
     }

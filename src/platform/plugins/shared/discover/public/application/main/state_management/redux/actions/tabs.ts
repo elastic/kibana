@@ -473,17 +473,20 @@ export const initializeTabs = createInternalStateAsyncThunk(
       }
     };
 
+    const initialTabState = services.getScopedHistory<InitialTabState>()?.location.state;
+    // Only a navigation spec with an ID needs the saved list to be classified as saved or inline,
+    // so other loads do not wait for the list.
+    const needsDataViewList = Boolean(initialTabState?.dataViewSpec?.id);
+
     const [userId, spaceId, persistedDiscoverSession, dataViewListResult] = await Promise.all([
       existingUserId === undefined ? getUserId() : existingUserId,
       existingSpaceId === undefined ? getSpaceId() : existingSpaceId,
       loadPersistedDiscoverSession(),
-      dispatch(loadDataViewListOnce()),
+      needsDataViewList ? dispatch(loadDataViewListOnce()) : undefined,
     ]);
 
-    const initialTabState = services.getScopedHistory<InitialTabState>()?.location.state;
-
     // Without the list, a navigation spec's ID cannot be classified as saved or inline.
-    if (initialTabState?.dataViewSpec?.id && loadDataViewList.rejected.match(dataViewListResult)) {
+    if (dataViewListResult && loadDataViewList.rejected.match(dataViewListResult)) {
       throw dataViewListResult.error;
     }
 
@@ -492,9 +495,9 @@ export const initializeTabs = createInternalStateAsyncThunk(
       setBreadcrumbs({ services, titleBreadcrumbText: persistedDiscoverSession.title });
     }
 
-    const savedDataViewIds = loadDataViewList.rejected.match(dataViewListResult)
-      ? undefined
-      : getState().savedDataViews.map(({ id }) => id);
+    const savedDataViewIds = dataViewListResult
+      ? getState().savedDataViews.map(({ id }) => id)
+      : undefined;
     const { inlineDataViewIds, outdatedSelectedTab, hasNewSavedVersion, ...initialTabsState } =
       tabsStorageManager.loadLocally({
         userId,
