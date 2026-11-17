@@ -200,17 +200,21 @@ describe('WorkflowInsightsAB scan flow (real hooks and children, mocked http)', 
     authMockSetter.reset();
   });
 
-  it('disables Scan after the user starts a scan', async () => {
+  it('disables Scan and polls pending scans after the user starts a scan', async () => {
     apiMocks.responseProvider.pendingScans.mockReturnValue({ pending: [RUNNING_EXECUTION] });
     apiMocks.responseProvider.pendingScans.mockReturnValueOnce({ pending: [] });
     render();
     await waitFor(() => expect(scanButton()).toBeEnabled());
+    expect(apiMocks.responseProvider.pendingScans).toHaveBeenCalledTimes(1);
 
     await user.click(scanButton());
 
     await waitFor(() => expect(apiMocks.responseProvider.triggerScan).toHaveBeenCalledTimes(1));
+    // Polling restarts only once the POST returns an execution.
+    await waitFor(() => expect(apiMocks.responseProvider.pendingScans).toHaveBeenCalledTimes(2));
     await waitFor(() => expect(scanButton()).toBeDisabled());
     await advanceOnePoll();
+    expect(apiMocks.responseProvider.pendingScans).toHaveBeenCalledTimes(3);
     expect(scanButton()).toBeDisabled();
   });
 
