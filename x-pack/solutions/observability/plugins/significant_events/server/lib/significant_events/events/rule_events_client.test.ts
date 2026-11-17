@@ -1671,14 +1671,35 @@ describe('RuleEventsClient', () => {
       ]);
     });
 
-    it("reads when the member's verdict was reached from its signal", async () => {
+    it.each([
+      [
+        'prefers the explicit collection timestamp',
+        '2026-10-19T10:00:00.000Z',
+        '2026-10-19T11:00:00.000Z',
+        '2026-10-19T10:00:00.000Z',
+      ],
+      [
+        'falls back to evidence time',
+        undefined,
+        '2026-10-19T11:00:00.000Z',
+        '2026-10-19T11:00:00.000Z',
+      ],
+      ['leaves the verdict time unknown without either timestamp', undefined, undefined, undefined],
+    ])('%s', async (_name, collectedAt, evidenceTo, expected) => {
       const rows = [
         seriesRow({
           eventId: 'event-1',
           signals: [
             {
               ...detectionSignal({ ruleUuid: 'rule-A', verdict: 'confirms' }),
-              collected_at: '2026-10-19T10:00:00.000Z',
+              collected_at: collectedAt,
+              evidence: {
+                esql_query: 'FROM $.a',
+                result: 'found',
+                time_range: evidenceTo
+                  ? { from: '2026-10-19T09:00:00.000Z', to: evidenceTo }
+                  : undefined,
+              },
             },
           ],
         }),
@@ -1690,7 +1711,7 @@ describe('RuleEventsClient', () => {
         from: '2000-01-01T00:00:00.000Z',
       });
 
-      expect(live.get('rule-A')?.[0].verifiedAt).toBe('2026-10-19T10:00:00.000Z');
+      expect(live.get('rule-A')?.[0].verifiedAt).toBe(expected);
     });
 
     it('returns one entry per live series when a rule is a member of several', async () => {
