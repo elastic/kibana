@@ -107,6 +107,25 @@ describe('searchEventsToolHandler', () => {
     }
   );
 
+  it('returns the severities the reconcile step gives, on both read paths', async () => {
+    const reconcileSeverities = async <T extends { severity: string }>(hits: T[]) =>
+      hits.map((hit) => ({ ...hit, severity: 'low' }));
+
+    const filtered = await searchEventsToolHandler({
+      eventSearchClient: makeClient() as never,
+      params: { status: 'active' },
+      reconcileSeverities: reconcileSeverities as never,
+    });
+    const unfiltered = await searchEventsToolHandler({
+      eventSearchClient: makeClient() as never,
+      params: {},
+      reconcileSeverities: reconcileSeverities as never,
+    });
+
+    expect(filtered.events[0].severity).toBe('low');
+    expect(unfiltered.events[0].severity).toBe('low');
+  });
+
   it('lists a rule whose only signal is inconclusive', async () => {
     const result = await searchEventsToolHandler({
       eventSearchClient: makeClient([{ ...event, signals: [event.signals[2]] }]) as never,

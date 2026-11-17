@@ -18,7 +18,7 @@ import type {
   KnowledgeIndicatorQueriesGenerationFailureCode,
 } from '../telemetry/ebt';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
-import { trackTelemetryBestEffort } from '../../agent_builder/tools/bulk_write';
+import { trackTelemetryBestEffort } from '../telemetry/track_telemetry_best_effort';
 import {
   executeKIQueryGenerationAgent,
   KIQueryGenerationAgentError,

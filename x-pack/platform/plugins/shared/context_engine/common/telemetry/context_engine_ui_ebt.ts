@@ -111,6 +111,7 @@ const ebtAction = {
     DISCOVER_LINK: 'open_ki_discover',
     FILTER_TYPE: 'filter_type',
     FILTER_STATUS: 'filter_status',
+    SORT: 'sort_ki',
     SEARCH: 'search_ki',
     LOAD_MORE: 'load_more_ki',
     DISCOVER_CAP_REACHED: 'open_ki_discover_cap_reached',

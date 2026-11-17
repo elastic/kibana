@@ -28,9 +28,12 @@ describe('registerOsqueryWorkflowSteps (public)', () => {
     const loaded = await Promise.all(
       plugin.registerStepDefinition.mock.calls.map(([load]) => load())
     );
-    expect(loaded.map((definition) => definition.id)).toEqual(['osquery.runQuery']);
+    expect(loaded.map((definition) => definition.id)).toEqual([
+      'osquery.runQuery',
+      'osquery.runPack',
+    ]);
     expect(loaded.map((definition) => Object.keys(definition.editorHandlers?.input ?? {}))).toEqual(
-      [['saved_query']]
+      [['saved_query'], ['pack', 'prebuilt_pack']]
     );
   });
 

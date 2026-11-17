@@ -121,6 +121,25 @@ read:
 
 Numbers, percents, dates and the chart's time zone follow the Advanced Settings.
 
+#### Chart buckets and time zones
+
+The page loads chart and the Overview trends bucket by the time zone of Advanced Settings
+(`dateFormat:tz`, or the browser's for `Browser`). From 1 day up, the buckets are calendar days,
+weeks or months, so they start at local midnight. Below that they are fixed intervals (up to 12
+hours) that keep their local alignment across daylight saving changes; the bucket holding a change
+is an hour shorter or longer. The first and last buckets, which cover only part of the selected
+range, are shaded as partial data, as in Lens (`Endzones` from `@kbn/charts-plugin`), with its
+limits: area charts aren't shaded, and as every bucket is measured by the shortest one, a last
+bucket longer than that (a 31-day month after February, a day after a daylight saving change) may
+not be.
+
+Both routes take an optional `timeZone` (at most 64 characters; `UTC` when left out): a name
+moment-timezone knows, or a `+HH:MM`/`-HH:MM` offset, which the browser sends when it can't name
+its time zone. Anything else is a 400. The page sends the four `dateFormat:tz` names Elasticsearch
+rejects (`EST`, `HST`, `MST`, `ROC`) as the zones they link to. They return the bucket interval and
+the queried range next to the buckets: `pageLoadsOverTime.histogram` on the Applications route and
+`overview.trendHistogram` on the Overview route.
+
 ### Application details (`/{serviceName}?source=otel|classic`)
 
 Opened from the list. The Overview of a Classic RUM application renders the Classic RUM dashboard
