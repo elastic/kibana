@@ -158,6 +158,10 @@ export function createDecideApi({
         const startedAt = Date.now();
 
         try {
+          if (options.abortSignal?.aborted) {
+            throw createInferenceRequestAbortedError();
+          }
+
           const input = await anonymizeInput({
             input: options.input,
             esClient,

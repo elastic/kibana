@@ -174,11 +174,30 @@ describe('createDecideApi', () => {
     );
   });
 
-  it('throws an aborted error without calling Elasticsearch when already aborted', async () => {
-    const { decide, transportRequest } = setup();
+  it('throws an aborted error without masking or calling Elasticsearch when already aborted', async () => {
+    const { decide, regexWorker, transportRequest } = setup({ anonymizationRules: [emailRule] });
     const controller = new AbortController();
 
     controller.abort();
+
+    const error = await decide(
+      { input, inferenceId: 'my-decision', abortSignal: controller.signal },
+      shouldRespond
+    ).catch((thrown) => thrown);
+
+    expect(isInferenceRequestAbortedError(error)).toBe(true);
+    expect(regexWorker.run).not.toHaveBeenCalled();
+    expect(transportRequest).not.toHaveBeenCalled();
+  });
+
+  it('does not call Elasticsearch when aborted while the input is masked', async () => {
+    const { decide, regexWorker, transportRequest } = setup({ anonymizationRules: [emailRule] });
+    const controller = new AbortController();
+
+    jest.mocked(regexWorker.run).mockImplementation(async (payload) => {
+      controller.abort();
+      return executeRegexRulesTask(payload);
+    });
 
     const error = await decide(
       { input, inferenceId: 'my-decision', abortSignal: controller.signal },
