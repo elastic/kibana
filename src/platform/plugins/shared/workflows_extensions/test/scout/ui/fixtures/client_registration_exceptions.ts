@@ -34,7 +34,6 @@ export const CLIENT_REGISTRATION_EXCEPTIONS: readonly string[] = [
   'nightshift.resolveModel',
   'nightshift.sendNotifications',
   'nightshift.sweepInvestigationFailures',
-  'nightshift.triggerInvestigation',
   'nightshift.wikiHydrate',
   'nightshift.wikiOptimize',
 
