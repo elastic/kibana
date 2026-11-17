@@ -8,9 +8,9 @@
  */
 
 import { ExecutionStatus, toWorkflowExecutionEngineModel } from '@kbn/workflows';
-import { buildWorkflowExecutionDocument } from '../lib/build_workflow_execution_document';
 import { publishFinishedWorkflowExecution } from './publish_finished_workflow_execution';
 import { publishWorkflowExecutionFinished } from './publish_workflow_execution_finished';
+import { buildWorkflowExecutionDocument } from '../lib/build_workflow_execution_document';
 
 jest.mock('./publish_workflow_execution_finished', () => ({
   publishWorkflowExecutionFinished: jest.fn().mockResolvedValue(undefined),
