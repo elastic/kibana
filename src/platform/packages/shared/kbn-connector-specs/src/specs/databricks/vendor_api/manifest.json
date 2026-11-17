@@ -170,35 +170,35 @@
       {
         "method": "post",
         "path": "/api/2.0/mcp/sql",
-        "reason": "Databricks' managed SQL MCP server, which the REST API reference doesn't document"
+        "reason": "Databricks' managed SQL MCP server, which the REST API reference doesn't document. It can't be pinned as an MCP source yet: the server is per-workspace (https://<workspace>/api/2.0/mcp/sql) and needs OAuth, so its tools/list needs credentials, and Databricks publishes no machine-readable tool definitions to pin in their place (both checked 2026-11-17)"
       }
     ],
     "executeStatement": [
       {
         "method": "post",
         "path": "/api/2.0/mcp/sql",
-        "reason": "Databricks' managed SQL MCP server, which the REST API reference doesn't document"
+        "reason": "Databricks' managed SQL MCP server, which the REST API reference doesn't document. It can't be pinned as an MCP source yet: the server is per-workspace (https://<workspace>/api/2.0/mcp/sql) and needs OAuth, so its tools/list needs credentials, and Databricks publishes no machine-readable tool definitions to pin in their place (both checked 2026-11-17)"
       }
     ],
     "listTools": [
       {
         "method": "post",
         "path": "/api/2.0/mcp/sql",
-        "reason": "Databricks' managed SQL MCP server, which the REST API reference doesn't document"
+        "reason": "Databricks' managed SQL MCP server, which the REST API reference doesn't document. It can't be pinned as an MCP source yet: the server is per-workspace (https://<workspace>/api/2.0/mcp/sql) and needs OAuth, so its tools/list needs credentials, and Databricks publishes no machine-readable tool definitions to pin in their place (both checked 2026-11-17)"
       }
     ],
     "pollResponse": [
       {
         "method": "post",
         "path": "/api/2.0/mcp/sql",
-        "reason": "Databricks' managed SQL MCP server, which the REST API reference doesn't document"
+        "reason": "Databricks' managed SQL MCP server, which the REST API reference doesn't document. It can't be pinned as an MCP source yet: the server is per-workspace (https://<workspace>/api/2.0/mcp/sql) and needs OAuth, so its tools/list needs credentials, and Databricks publishes no machine-readable tool definitions to pin in their place (both checked 2026-11-17)"
       }
     ],
     "runQuery": [
       {
         "method": "post",
         "path": "/api/2.0/mcp/sql",
-        "reason": "Databricks' managed SQL MCP server, which the REST API reference doesn't document"
+        "reason": "Databricks' managed SQL MCP server, which the REST API reference doesn't document. It can't be pinned as an MCP source yet: the server is per-workspace (https://<workspace>/api/2.0/mcp/sql) and needs OAuth, so its tools/list needs credentials, and Databricks publishes no machine-readable tool definitions to pin in their place (both checked 2026-11-17)"
       }
     ]
   }
