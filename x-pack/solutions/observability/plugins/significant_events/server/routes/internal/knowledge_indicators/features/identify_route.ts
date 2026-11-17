@@ -477,7 +477,7 @@ const getMetricsSignalChecksRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{sourceId}/metrics/signal_checks',
   options: {
     access: 'internal',
-    summary: 'Build runnable USE and RED signal checks for a metrics source',
+    summary: 'Build runnable signal checks for a metrics source',
     timeout: { idleSocket: 300_000 },
   },
   security: {
