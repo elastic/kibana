@@ -261,9 +261,15 @@ describe('endpointForensicAnalysisSkill', () => {
       expect(data.guidance).toContain(`only from \`${alertsIndex}\``);
       expect(data.guidance).toContain(`FROM ${alertsIndex} METADATA _id, _index`);
       expect(data.guidance).toContain('`_id` and `_index` unchanged');
-      if (spaceId !== 'default') {
-        expect(JSON.stringify(data)).not.toContain('alerts-default');
-      }
+      expect(data.guidance).toContain(
+        `If \`${alertsIndex}\` does not exist, the space has no alerts; do not query another index.`
+      );
+    });
+
+    it('never mentions the default-space alerts index for a non-default space', async () => {
+      const data = await runHandler({ hosts: ['WKSTN-RECV01'] }, createContext('ritik'));
+
+      expect(JSON.stringify(data)).not.toContain('alerts-default');
     });
 
     it('rejects a start without an end', async () => {
@@ -283,6 +289,10 @@ describe('endpointForensicAnalysisSkill', () => {
     expect(content).toContain('do not rewrite it to the alias');
     expect(content).toContain('`kibana.alert.uuid` equals `_id`');
     expect(content).toContain('This skill has no case tool');
+    expect(content).toContain('`platform.core.cases.manage_attachments`, mode `add_alerts`');
+    expect(content).toContain(
+      'If the `alerts_index` does not exist, the space has no alerts; do not query another index.'
+    );
     // The skill registers no alerts tool, so it must not tell the agent to call one.
     expect(content).not.toContain('`security.alerts`');
     expect(content).toContain('Never hardcode');

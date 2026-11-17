@@ -233,7 +233,8 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
 
 - Look up detection alerts with ES|QL against the \`alerts_index\` the discovery tool returned: \`FROM <alerts_index> METADATA _id, _index\`.
 - Never hardcode \`${DEFAULT_ALERTS_INDEX}-default\`, \`.siem-signals-*\`, or another space's index.
-- This skill has no case tool. Alerts are attached with the Cases tools (for example \`add_alerts\` with \`{alertId, index}\`); this rule is about which values to pass there.
+- If the \`alerts_index\` does not exist, the space has no alerts; do not query another index.
+- This skill has no case tool. Alerts are attached with the Cases attachments tool (\`platform.core.cases.manage_attachments\`, mode \`add_alerts\`, \`{alertId, index}\`); this rule is about which values to pass there.
 - Pass \`_id\` and \`_index\` unchanged from the \`METADATA _id, _index\` columns. \`_index\` is the backing index (\`.internal.alerts-security.alerts-<space>-00000N\`); do not rewrite it to the alias. \`kibana.alert.uuid\` equals \`_id\`.
 
 ## Tool Selection Guardrails
@@ -310,7 +311,8 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
                         : 'The range is a lookback from now, not anchored on an incident.'
                     } Query detection alerts only from \`${alertsIndex}\` (the current space) with ` +
                     `\`FROM ${alertsIndex} METADATA _id, _index\`, and pass \`_id\` and \`_index\` unchanged ` +
-                    `when attaching alerts to a case.`,
+                    `when attaching alerts to a case. If \`${alertsIndex}\` does not exist, the space has no ` +
+                    `alerts; do not query another index.`,
                 },
               },
             ],
