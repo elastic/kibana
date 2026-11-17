@@ -18,7 +18,7 @@ export type { AlertingV2AlertsProviderProps } from './application/alerts_provide
 export type { PrivilegeCheck } from './application/privilege_check_context';
 
 export interface AlertingV2PublicSetup {
-  registerRuleBuilder(definition: RuleBuilderDefinition): void;
+  registerRuleBuilder<TState>(definition: RuleBuilderDefinition<TState>): void;
 }
 
 export interface AlertingV2PublicStart {

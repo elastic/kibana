@@ -15,7 +15,9 @@ const registeredTypes = new Set<string>(['threshold']);
 let registry: RuleBuilderRegistryContract | undefined;
 let applying: Promise<RuleBuilderRegistryContract> | undefined;
 
-const normalizeRuleBuilder = (definition: RuleBuilderDefinition): RuleBuilderDefinition => {
+const normalizeRuleBuilder = <TState>(
+  definition: RuleBuilderDefinition<TState>
+): RuleBuilderDefinition => {
   const type = definition.type.trim();
   if (!type) {
     throw new Error('Rule builder type must be a non-empty string');
@@ -23,10 +25,12 @@ const normalizeRuleBuilder = (definition: RuleBuilderDefinition): RuleBuilderDef
   if (registeredTypes.has(type)) {
     throw new Error(`Rule builder "${type}" is already registered`);
   }
-  return type === definition.type ? definition : { ...definition, type };
+  return (type === definition.type ? definition : { ...definition, type }) as RuleBuilderDefinition;
 };
 
-export const queueRuleBuilderRegistration = (definition: RuleBuilderDefinition): void => {
+export const queueRuleBuilderRegistration = <TState>(
+  definition: RuleBuilderDefinition<TState>
+): void => {
   const normalized = normalizeRuleBuilder(definition);
   registeredTypes.add(normalized.type);
   if (registry) {
