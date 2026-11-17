@@ -124,46 +124,49 @@ const cell = (text: string): string =>
     .replace(/(\\*)\|/g, (_, backslashes: string) => `${backslashes}${backslashes}\\|`)
     .replace(/\s*\n\s*/g, ' ');
 
+/** `a`, `b` and `c`, up to `max` of them, then "and 2 more". Nothing listed reads as nothing. */
 const listed = (items: readonly string[], max = MAX_LISTED): string => {
   const shown = items.slice(0, max);
   const rest = items.length - shown.length;
   if (rest > 0) {
     return `${shown.join(', ')} and ${rest} more`;
   }
-  return shown.length > 1 ? `${shown.slice(0, -1).join(', ')} and ${shown.at(-1)}` : shown[0];
+  if (shown.length <= 1) {
+    return shown[0] ?? '';
+  }
+  return `${shown.slice(0, -1).join(', ')} and ${shown[shown.length - 1]}`;
 };
 
-// How the summary names failing actions, by the start of their status, one or several. The
-// actions table has the details.
-const CREDENTIALS_STATUS = 'Fails on credentials against the latest spec';
 // Specs that start documenting OAuth scopes per operation drop the other schemes by accident.
 const CREDENTIALS_ADVICE = `Check the vendor's docs on authentication: if they still accept the connector's credentials, correct the spec in \`${OVERLAY}\` rather than the connector.`;
 
-const FAILURES: ReadonlyArray<readonly [string, readonly [string, string]]> = [
+/**
+ * Why an action needs attention. An action has one as soon as the check can't call it passing, so
+ * `reason` is also what tells the actions that need attention from the rest.
+ */
+type FailureReason = 'credentials' | 'latest' | 'snapshot' | 'removed' | 'moved';
+
+// How the summary names failing actions, one or several, in the order the sentences are written.
+// The actions table has the details.
+const FAILURES: ReadonlyArray<readonly [FailureReason, readonly [string, string]]> = [
   [
-    CREDENTIALS_STATUS,
+    'credentials',
     [
       "fails because the latest spec requires credentials it doesn't send",
       "fail because the latest spec requires credentials they don't send",
     ],
   ],
+  ['latest', ['fails against the latest vendor spec', 'fail against the latest vendor spec']],
+  ['snapshot', ['fails against the committed snapshot', 'fail against the committed snapshot']],
   [
-    'Fails against the latest spec',
-    ['fails against the latest vendor spec', 'fail against the latest vendor spec'],
-  ],
-  [
-    'Fails against the committed snapshot',
-    ['fails against the committed snapshot', 'fail against the committed snapshot'],
-  ],
-  [
-    'Removed from current spec',
+    'removed',
     [
       'calls an endpoint removed from the current spec',
       'call endpoints removed from the current spec',
     ],
   ],
   [
-    MOVED_STATUS,
+    'moved',
     [
       'calls an endpoint that moved in the spec, keeping its URL',
       'call endpoints that moved in the spec, keeping their URL',
@@ -173,9 +176,9 @@ const FAILURES: ReadonlyArray<readonly [string, readonly [string, string]]> = [
 
 /** One sentence per way of failing, naming the actions: "`a` and `b` fail against …". */
 const failureSentences = (failing: Attention['failing']): string[] =>
-  FAILURES.flatMap(([prefix, [one, many]]) => {
+  FAILURES.flatMap(([failure, [one, many]]) => {
     const named = failing
-      .filter(({ status }) => status.startsWith(prefix))
+      .filter(({ reason }) => reason === failure)
       .map(({ action }) => code(action));
     return named.length > 0
       ? [`${listed(named, MAX_NAMED_ACTIONS)} ${named.length === 1 ? one : many}.`]
@@ -266,8 +269,8 @@ type Outcome = 'passes' | 'fails' | 'not-checked';
 
 interface ActionStatus {
   readonly rank: Rank;
-  /** How the summary tells failures apart, by their start. */
-  readonly text: string;
+  /** Why it needs attention, if it does; what the summary groups the failing actions by. */
+  readonly reason?: FailureReason;
   /** The Status column. */
   readonly outcome: Outcome;
   /** The Details column. */
@@ -280,6 +283,9 @@ const OUTCOMES: Record<Outcome, string> = {
   'not-checked': '➖ Not checked',
 };
 
+// Every action of the report has a status; this stands in if one is ever missing.
+const PASSES: ActionStatus = { rank: 'passes', outcome: 'passes', details: '' };
+
 const RANKS: readonly Rank[] = ['fails', 'attention', 'passes', 'not-checked'];
 const ICONS: Record<Rank, string> = {
   fails: '❌',
@@ -287,8 +293,6 @@ const ICONS: Record<Rank, string> = {
   passes: '✅',
   'not-checked': '➖',
 };
-
-const NOT_IN_SPEC_STATUS = 'Not checked: no spec describes the endpoint';
 
 const LAST_CHECKED_ROW = '| **Last checked** |';
 
@@ -422,7 +426,7 @@ const statusOf = (
     const problem = firstProblem(action.snapshotProblems);
     return {
       rank: 'fails',
-      text: `Fails against the committed snapshot: ${problem}`,
+      reason: 'snapshot',
       outcome: 'fails',
       details: `Against the committed snapshot: ${problem}`,
     };
@@ -430,7 +434,6 @@ const statusOf = (
   if (action.latestProblems === undefined && isChecked(action)) {
     return {
       rank: 'attention',
-      text: 'Not checked against the latest spec',
       outcome: 'not-checked',
       details: "The latest spec didn't load; passes against the committed snapshot",
     };
@@ -442,7 +445,7 @@ const statusOf = (
     if (unmatchedOnly && locations.includes('moved') && !locations.includes('missing')) {
       return {
         rank: 'attention',
-        text: MOVED_STATUS,
+        reason: 'moved',
         // Its request goes where it did, but the check can't match it to the latest spec.
         outcome: 'not-checked',
         details: `${ICONS.attention} ${MOVED_STATUS}, so it isn't checked against the latest spec (see below)`,
@@ -450,10 +453,10 @@ const statusOf = (
     }
     if (unmatchedOnly && locations.includes('missing')) {
       const missing = action.operations.filter(({ latest }) => latest?.status === 'missing');
-      const text = `Removed from current spec: ${listed(
+      const details = `Removed from current spec: ${listed(
         missing.map(({ operation }) => code(operation))
       )}`;
-      return { rank: 'fails', text, outcome: 'fails', details: text };
+      return { rank: 'fails', reason: 'removed', outcome: 'fails', details };
     }
     // Credentials the latest spec doesn't accept, and nothing else: often a spec that started
     // documenting OAuth scopes per operation, rather than a vendor that stopped taking the others.
@@ -467,7 +470,7 @@ const statusOf = (
       );
       return {
         rank: 'fails',
-        text: CREDENTIALS_STATUS,
+        reason: 'credentials',
         outcome: 'fails',
         details: `The latest spec requires credentials the connector doesn't send: ${problemText(
           `expected ${listed([...new Set(expected)])}`
@@ -477,7 +480,7 @@ const statusOf = (
     const problem = firstProblem(latestProblems);
     return {
       rank: 'fails',
-      text: `Fails against the latest spec: ${problem}`,
+      reason: 'latest',
       outcome: 'fails',
       details: `Against the latest spec: ${problem}`,
     };
@@ -488,7 +491,6 @@ const statusOf = (
     const issues = [...new Set(action.unmatched.flatMap(({ reason }) => issueLinksOf(reason)))];
     return {
       rank: 'not-checked',
-      text: NOT_IN_SPEC_STATUS,
       outcome: 'not-checked',
       details: `No spec describes the endpoint (${[...issues, 'see below'].join(', ')})`,
     };
@@ -496,14 +498,12 @@ const statusOf = (
   if (!isChecked(action)) {
     return {
       rank: 'not-checked',
-      text: 'Not checked: calls no vendor operation',
       outcome: 'not-checked',
       details: 'Calls no vendor operation',
     };
   }
   const passes = (rank: Rank, details: string): ActionStatus => ({
     rank,
-    text: 'Passes',
     outcome: 'passes',
     details,
   });
@@ -657,8 +657,8 @@ const specChanges = (drift: ConnectorDrift): string[] => {
 
 /** Which actions need attention, and why. */
 interface Attention {
-  /** Actions that fail, with their status. */
-  readonly failing: ReadonlyArray<{ readonly action: string; readonly status: string }>;
+  /** Actions that need attention, with why. */
+  readonly failing: ReadonlyArray<{ readonly action: string; readonly reason: FailureReason }>;
   /** Actions that read a response field that changed. */
   readonly readers: readonly string[];
   /** Per kind of change to review, the actions it affects. */
@@ -709,53 +709,42 @@ const attentionOf = (
   };
 };
 
-// What needs attention besides the actions: problems outside them, spec changes no action calls,
-// spec corrections that no longer apply, and specs that couldn't be fetched or classified.
-// Counted as the "Other problems" table lists them, one row per operation.
-const problemsOutsideActions = (drift: ConnectorDrift, attention: Attention): number =>
-  otherProblemRows(
-    drift.verdict === 'kibana-regression'
-      ? drift.otherProblems?.snapshot ?? []
-      : drift.otherProblems?.latest ?? []
-  ).length +
-  attention.unattached +
-  (drift.staleCorrections?.length ?? 0) +
-  Object.values(drift.sources).filter(
-    ({ status, changes }) => status === 'unreachable' || (status === 'changed' && !changes)
-  ).length;
-
 /**
- * Every drift issue's title: `[Connectors][Validation] `.acme`: 2 actions need attention`, or
- * the problems that do when no action does.
+ * What the check concluded about a connector, worked out once from its report. The title and each
+ * section of the body read this, rather than each deriving its own view of the same findings.
  */
-const titleOf = (drift: ConnectorDrift, attention: Attention): string => {
-  // When a latest spec didn't load, no action could be checked against it.
-  const actions = drift.verdict === 'unknown' ? attention.total : attention.actions.size;
-  const problems = actions === 0 ? problemsOutsideActions(drift, attention) : 0;
-  const [count, noun] = problems > 0 ? [problems, 'problem'] : [actions, 'action'];
-  return `[Connectors][Validation] \`${drift.connector}\`: ${plural(count, noun)} ${
-    count === 1 ? 'needs' : 'need'
-  } attention`;
-};
-
-export interface RenderDriftIssueOptions {
-  /** The teams owning the connector's folder, without the `@`. */
-  readonly owners: readonly string[];
-  /** The build that ran the check. */
-  readonly buildUrl?: string;
+interface DriftConclusions {
+  readonly actions: readonly ActionDrift[];
+  /** Each action's status, by action name. */
+  readonly statuses: ReadonlyMap<string, ActionStatus>;
+  /** The spec changes that keep the issue open, with the actions that need to review them. */
+  readonly review: readonly ReviewItem[];
+  readonly attention: Attention;
+  /** The actions that need attention, with why. */
+  readonly failing: ReadonlyArray<ActionDrift & { readonly reason: FailureReason }>;
+  readonly notChecked: readonly ActionDrift[];
+  /** Where an action's path moved into the server URL, keeping the full URL. */
+  readonly moved: ReadonlyArray<{ readonly source: string; readonly serverPath: string }>;
+  /** The base paths that moved, named in the summary and the legend. */
+  readonly serverPaths: readonly string[];
+  /** Every action that needs attention only moved in the spec. */
+  readonly movedOnly: boolean;
+  /**
+   * The overlay correction whose change to the servers explains every move, if one does: then the
+   * moves are the check's own doing, and the connector is most likely fine.
+   */
+  readonly movesCausedBy?: number;
+  readonly stale: readonly StaleCorrection[];
+  // The problems outside the actions, read into rows once rather than per section that counts them.
+  readonly snapshotProblems: readonly OtherProblemRow[];
+  readonly latestProblems: readonly OtherProblemRow[];
+  /** The rows the "Other problems" table lists. */
+  readonly tabledProblems: readonly OtherProblemRow[];
+  /** Changes to review that no action calls, as rows of the same table. */
+  readonly unattachedProblems: readonly OtherProblemRow[];
 }
 
-/**
- * The title and body of a connector's drift issue: what needs attention first, then each action
- * with its status, then the details. The same drift always renders the same.
- */
-export const renderDriftIssue = (
-  drift: ConnectorDrift,
-  { owners, buildUrl }: RenderDriftIssueOptions
-): { title: string; body: string } => {
-  const id = drift.connector.replace(/^\./, '');
-  const { folder } = drift;
-  const name = drift.displayName ?? drift.connector;
+const conclusionsOf = (drift: ConnectorDrift): DriftConclusions => {
   const actions = drift.actions ?? [];
 
   const changesByOperation = new Map<string, SpecChange[]>();
@@ -769,7 +758,7 @@ export const renderDriftIssue = (
   }
   const changesOf = (source: string, operation: string) =>
     changesByOperation.get(`${source} ${operation}`) ?? [];
-  // The spec changes that keep the issue open, with the actions that need to review them.
+
   const reviewersOf = reviewOfChange(drift);
   // A path the actions call that moved into the server URL is reported as removed by oasdiff.
   const movedOperations = new Set(
@@ -795,40 +784,157 @@ export const renderDriftIssue = (
   );
   const reviewOf = (source: string, operation: string) =>
     review.filter((item) => item.source === source && item.change.operation === operation);
+
   const statuses = new Map(
     actions.map((action) => [action.action, statusOf(action, changesOf, reviewOf)])
   );
-  // Counted once, for the title and the summary.
-  const attention = attentionOf(
-    actions,
-    review,
-    actions.flatMap(({ action }) => {
-      const status = statuses.get(action);
-      return status?.rank === 'fails' || status?.text === MOVED_STATUS
-        ? [{ action, status: status.text }]
-        : [];
-    })
-  );
-
-  const notChecked = actions.filter((action) => !isChecked(action));
-  const failing = actions.filter((action) => {
-    const status = statuses.get(action.action);
-    return status?.rank === 'fails' || status?.text === MOVED_STATUS;
+  // An action needs attention as soon as its status says why, which is what the summary groups
+  // the failures by; counted once, for the title, the summary and the Result row.
+  const failing = actions.flatMap((action) => {
+    const reason = statuses.get(action.action)?.reason;
+    return reason === undefined ? [] : [{ ...action, reason }];
   });
+
   const moved = actions.flatMap(({ operations }) =>
     operations.flatMap(({ source, latest }) =>
       latest?.status === 'moved' ? [{ source, serverPath: latest.serverPath }] : []
     )
   );
-  const movedOnly =
-    failing.length > 0 &&
-    failing.every((action) => statuses.get(action.action)?.text === MOVED_STATUS);
-  const serverPaths = [...new Set(moved.map(({ serverPath }) => serverPath))];
-  const stale = drift.staleCorrections ?? [];
-  const { serversCorrection } = drift;
-  const overlayCausesMoves = movedOnly && serversCorrection !== undefined;
+  const movedOnly = failing.length > 0 && failing.every(({ reason }) => reason === 'moved');
 
-  // Summary
+  // Reports written before the per-action findings list every problem outside the actions.
+  const unattributed =
+    drift.actions === undefined
+      ? [...new Set([...drift.snapshotProblems, ...(drift.latestProblems ?? [])])]
+      : [
+          ...new Set([
+            ...(drift.otherProblems?.snapshot ?? []),
+            ...(drift.otherProblems?.latest ?? []),
+          ]),
+        ];
+
+  return {
+    actions,
+    statuses,
+    review,
+    attention: attentionOf(actions, review, failing),
+    failing,
+    notChecked: actions.filter((action) => !isChecked(action)),
+    moved,
+    serverPaths: [...new Set(moved.map(({ serverPath }) => serverPath))],
+    movedOnly,
+    ...(movedOnly && drift.serversCorrection !== undefined
+      ? { movesCausedBy: drift.serversCorrection }
+      : {}),
+    stale: drift.staleCorrections ?? [],
+    snapshotProblems: otherProblemRows(drift.otherProblems?.snapshot ?? []),
+    latestProblems: otherProblemRows(drift.otherProblems?.latest ?? []),
+    tabledProblems: otherProblemRows(unattributed),
+    unattachedProblems: review
+      .filter((item) => item.actions.length === 0)
+      .map(({ kind, change: { operation, text, id: rule } }) => ({
+        problem: REVIEW_LABELS[kind],
+        operation: operation ? code(operation) : '—',
+        details: `${text} (${code(rule)})`,
+        fix: 'Refresh the artifacts, unless the connector depends on it',
+      })),
+  };
+};
+
+// What needs attention besides the actions: problems outside them, spec changes no action calls,
+// spec corrections that no longer apply, and specs that couldn't be fetched or classified.
+// Counted as the "Other problems" table lists them, one row per operation.
+const problemsOutsideActions = (drift: ConnectorDrift, found: DriftConclusions): number =>
+  (drift.verdict === 'kibana-regression' ? found.snapshotProblems : found.latestProblems).length +
+  found.attention.unattached +
+  found.stale.length +
+  Object.values(drift.sources).filter(
+    ({ status, changes }) => status === 'unreachable' || (status === 'changed' && !changes)
+  ).length;
+
+/**
+ * Every drift issue's title: `[Connectors][Validation] `.acme`: 2 actions need attention`, or
+ * the problems that do when no action does.
+ */
+const titleOf = (drift: ConnectorDrift, found: DriftConclusions): string => {
+  const { attention } = found;
+  // When a latest spec didn't load, no action could be checked against it.
+  const actions = drift.verdict === 'unknown' ? attention.total : attention.actions.size;
+  const problems = actions === 0 ? problemsOutsideActions(drift, found) : 0;
+  const [count, noun] = problems > 0 ? [problems, 'problem'] : [actions, 'action'];
+  return `[Connectors][Validation] \`${drift.connector}\`: ${plural(count, noun)} ${
+    count === 1 ? 'needs' : 'need'
+  } attention`;
+};
+
+type AlertKind = 'NOTE' | 'WARNING' | 'CAUTION';
+
+interface Section {
+  readonly lines: readonly string[];
+  /**
+   * How readily the section goes when the body doesn't fit: the lowest number is dropped first.
+   * A section without one always stays.
+   */
+  readonly dropFirst?: number;
+}
+
+/**
+ * The sections as one body, within GitHub's limit. Whole sections are dropped, the least useful
+ * first, rather than the text being cut: a cut lands in the middle of a table row or a fold, and
+ * takes "What to do" with it, which is the part that says how to fix the issue.
+ */
+const assembleBody = (sections: readonly Section[]): string => {
+  const join = (dropped: ReadonlySet<Section>) =>
+    sections
+      .filter((section) => !dropped.has(section))
+      .flatMap(({ lines }) => lines)
+      .join('\n');
+
+  const droppable = sections
+    .filter(({ dropFirst, lines }) => dropFirst !== undefined && lines.length > 0)
+    .sort((a, b) => (a.dropFirst ?? 0) - (b.dropFirst ?? 0));
+
+  const dropped = new Set<Section>();
+  let body = join(dropped);
+  for (const section of droppable) {
+    if (body.length <= MAX_BODY_LENGTH) {
+      break;
+    }
+    dropped.add(section);
+    body = join(dropped);
+  }
+  if (body.length > MAX_BODY_LENGTH) {
+    // Even what has to stay is too long.
+    return `${body.slice(
+      0,
+      MAX_BODY_LENGTH
+    )}\n\n…truncated; run the command above for the full report.`;
+  }
+  return dropped.size > 0
+    ? `${body}\n\n${plural(
+        dropped.size,
+        'section'
+      )} left out to fit GitHub's limit; run the command above for all of it.`
+    : body;
+};
+
+export interface RenderDriftIssueOptions {
+  /** The teams owning the connector's folder, without the `@`. */
+  readonly owners: readonly string[];
+  /** The build that ran the check. */
+  readonly buildUrl?: string;
+}
+
+/**
+ * The alert at the top of the issue: what the check concluded, which actions need attention and
+ * why, and what to do about it.
+ */
+const summaryOf = (
+  drift: ConnectorDrift,
+  found: DriftConclusions
+): { alert: AlertKind; summary: string } => {
+  const { attention, failing, movedOnly, movesCausedBy, serverPaths, stale } = found;
+  const name = drift.displayName ?? drift.connector;
   // Actions the manifest records as calling endpoints no spec describes, which aren't checked.
   const { notInSpec } = attention;
   const notInSpecNote =
@@ -855,9 +961,7 @@ export const renderDriftIssue = (
     // The actions are the point of these sentences, so more of them are named.
     const sentence = (named: readonly string[], [one, many]: readonly [string, string]) =>
       `${listed(named.map(code), MAX_NAMED_ACTIONS)} ${named.length === 1 ? one : many}.`;
-    const credentialFailures = attention.failing.filter(
-      ({ status }) => status === CREDENTIALS_STATUS
-    );
+    const credentialFailures = attention.failing.filter(({ reason }) => reason === 'credentials');
     const onlyCredentials =
       credentialFailures.length > 0 && credentialFailures.length === attention.actions.size;
     // The credentials sentence comes first; its advice follows it, or closes the note when
@@ -918,7 +1022,7 @@ export const renderDriftIssue = (
   // Vendor drift gets the same note, unless every failing action only moved in the spec, which
   // has its own diagnosis.
   const vendorDriftNote = drift.verdict === 'vendor-drift' && !movedOnly;
-  const otherLatest = otherProblemRows(drift.otherProblems?.latest ?? []).length;
+  const otherLatest = found.latestProblems.length;
   const outsideActions =
     otherLatest > 0
       ? [
@@ -927,7 +1031,7 @@ export const renderDriftIssue = (
           } occur against the committed snapshot (see "Other problems").`,
         ]
       : [];
-  let alert: 'NOTE' | 'WARNING' | 'CAUTION';
+  let alert: AlertKind;
   let summary: string;
   switch (drift.verdict) {
     case 'unknown':
@@ -944,7 +1048,7 @@ export const renderDriftIssue = (
           : `**The committed snapshot of \`${
               drift.connector
             }\` fails the drift check, though every checked action passes against it:** the check found ${plural(
-              otherProblemRows(drift.otherProblems?.snapshot ?? []).length,
+              found.snapshotProblems.length,
               'problem'
             )} outside the actions (see "Other problems"). The vendor didn't cause this: the connector, its artifacts or the checking tooling changed.`;
       break;
@@ -964,7 +1068,7 @@ export const renderDriftIssue = (
         }, but every operation ${
           failing.length === 1 ? 'it calls' : 'they call'
         } is still in the latest spec, at the same full URL.${
-          overlayCausesMoves
+          movesCausedBy !== undefined
             ? ` Update the connector's spec corrections in \`${OVERLAY}\`, not the connector.`
             : ''
         }`;
@@ -978,8 +1082,17 @@ export const renderDriftIssue = (
   if (!(drift.verdict === 'healthy' || vendorDriftNote) && notInSpecNote.length > 0) {
     summary += ` ${notInSpecNote.join(' ')}`;
   }
+  return { alert, summary };
+};
 
-  // Facts
+/** The two-column table under the alert: the connector, the verdict and each vendor spec. */
+const factsOf = (
+  drift: ConnectorDrift,
+  found: DriftConclusions,
+  buildUrl: string | undefined
+): string[] => {
+  const { folder } = drift;
+  const { failing } = found;
   const facts: string[] = [
     `| **Connector** | ${link(code(drift.connector), folder)} |`,
     `| **Result** | ${resultOf(drift.verdict, failing.length > 0)} |`,
@@ -1015,15 +1128,20 @@ export const renderDriftIssue = (
       } |`
     );
   }
+  return facts;
+};
 
-  // Actions
-  const ordered = [...actions].sort(
-    (a, b) =>
-      RANKS.indexOf(statuses.get(a.action)?.rank ?? 'passes') -
-        RANKS.indexOf(statuses.get(b.action)?.rank ?? 'passes') || a.action.localeCompare(b.action)
-  );
-  const actionRows = ordered.map((action) => {
-    const status = statuses.get(action.action) as ActionStatus;
+/** The Actions table: every action with what it calls, its status and the details. */
+const actionsSection = (drift: ConnectorDrift, found: DriftConclusions): string[] => {
+  const { actions, statuses, notChecked, moved, serverPaths } = found;
+  const ordered = actions
+    .map((action) => ({ action, status: statuses.get(action.action) ?? PASSES }))
+    .sort(
+      (a, b) =>
+        RANKS.indexOf(a.status.rank) - RANKS.indexOf(b.status.rank) ||
+        a.action.action.localeCompare(b.action.action)
+    );
+  const actionRows = ordered.map(({ action, status }) => {
     const calls =
       action.operations.length > 0
         ? action.operations.map(({ operation }) => code(operation))
@@ -1063,25 +1181,47 @@ export const renderDriftIssue = (
         .join(', ')}): the manifest records why: _${reason}_`
     );
   }
+  if (actions.length === 0) {
+    return [];
+  }
+  return [
+    '### Actions',
+    '',
+    '| Action | Calls | Status | Details |',
+    '|---|---|---|---|',
+    ...actionRows,
+    '',
+    ...legend.flatMap((line) => [line, '']),
+  ];
+};
 
-  // Why the check fails, when an overlay correction of the servers explains every move
-  const why = overlayCausesMoves
-    ? [
-        '### Why the check fails',
-        '',
-        `Correction ${serversCorrection + 1} in ${link(
-          code(OVERLAY),
-          folder,
-          `vendor_api/${OVERLAY}`
-        )} changes the spec's servers, so the check matches requests against the spec's paths alone. Now that ${listed(
-          serverPaths.map(code)
-        )} is part of the server URL, the paths no longer include it, and requests to ${listed(
-          serverPaths.map((serverPath) => code(`${serverPath}/…`))
-        )} match nothing.`,
-        '',
-      ]
-    : [];
+// Why the check fails, when an overlay correction of the servers explains every move.
+const whySection = (drift: ConnectorDrift, found: DriftConclusions): string[] => {
+  const { folder } = drift;
+  const { serverPaths, movesCausedBy } = found;
+  const why =
+    movesCausedBy !== undefined
+      ? [
+          '### Why the check fails',
+          '',
+          `Correction ${movesCausedBy + 1} in ${link(
+            code(OVERLAY),
+            folder,
+            `vendor_api/${OVERLAY}`
+          )} changes the spec's servers, so the check matches requests against the spec's paths alone. Now that ${listed(
+            serverPaths.map(code)
+          )} is part of the server URL, the paths no longer include it, and requests to ${listed(
+            serverPaths.map((serverPath) => code(`${serverPath}/…`))
+          )} match nothing.`,
+          '',
+        ]
+      : [];
+  return why;
+};
 
+/** The response fields each action reads whose schema changed between the two specs. */
+const changedFieldsSection = (found: DriftConclusions): string[] => {
+  const { actions } = found;
   const changedFields = actions.flatMap(({ action, fieldChanges = [] }) =>
     fieldChanges.map((change) => ({ action, ...change }))
   );
@@ -1101,7 +1241,11 @@ export const renderDriftIssue = (
           '',
         ]
       : [];
+  return fieldsSection;
+};
 
+/** What the vendor added to the operations the actions call, and whether it reaches consumers. */
+const additionsSectionOf = (drift: ConnectorDrift): string[] => {
   // What the vendor added to the operations the actions call, which needs no change.
   const additions = newInVendorApi(drift);
   const shownAdditions = additions.slice(0, MAX_ADDITION_ROWS);
@@ -1131,17 +1275,13 @@ export const renderDriftIssue = (
           '',
         ]
       : [];
+  return additionsSection;
+};
 
-  // Spec changes to review that no action calls, with the problems outside the actions.
-  const unattachedRows: OtherProblemRow[] = review
-    .filter((item) => item.actions.length === 0)
-    .map(({ kind, change: { operation, text, id: rule } }) => ({
-      problem: REVIEW_LABELS[kind],
-      operation: operation ? code(operation) : '—',
-      details: `${text} (${code(rule)})`,
-      fix: 'Refresh the artifacts, unless the connector depends on it',
-    }));
-
+/** The overlay corrections that match nothing in the latest spec any more. */
+const correctionsSection = (drift: ConnectorDrift, found: DriftConclusions): string[] => {
+  const { folder } = drift;
+  const { stale } = found;
   const corrections = stale.length
     ? [
         '### Spec corrections that no longer apply',
@@ -1163,24 +1303,23 @@ export const renderDriftIssue = (
         '',
       ]
     : [];
+  return corrections;
+};
 
-  const otherProblems = [
-    ...new Set([...(drift.otherProblems?.snapshot ?? []), ...(drift.otherProblems?.latest ?? [])]),
-  ];
-  // Reports from before the per-action fields list every problem here instead.
-  const unattributed =
-    drift.actions === undefined
-      ? [...new Set([...drift.snapshotProblems, ...(drift.latestProblems ?? [])])]
-      : otherProblems;
-  const changes = specChanges(drift);
-
-  // What to do
+/** The numbered steps that close every issue, and who to tell about it. */
+const whatToDoSection = (
+  drift: ConnectorDrift,
+  found: DriftConclusions,
+  owners: readonly string[]
+): string[] => {
+  const id = drift.connector.replace(/^\./, '');
+  const { stale, movesCausedBy, serverPaths } = found;
   const movedCorrections = stale.filter(({ latest }) => latest?.status === 'moved');
   let firstStep: string;
-  if (overlayCausesMoves) {
+  if (movesCausedBy !== undefined) {
     firstStep = `In \`${OVERLAY}\`, keep the ${listed(
       serverPaths.map(code)
-    )} base path when correction ${serversCorrection + 1} changes the servers${
+    )} base path when correction ${movesCausedBy + 1} changes the servers${
       movedCorrections.length > 0
         ? `, and point ${movedCorrections.length === 1 ? 'correction' : 'corrections'} ${listed(
             movedCorrections.map(({ index }) => String(index + 1))
@@ -1194,46 +1333,7 @@ export const renderDriftIssue = (
   } else {
     firstStep = `Check the vendor's docs and changelog for the changes above, then update the connector, or correct the spec in \`${OVERLAY}\` where the spec is wrong.`;
   }
-
-  const body = [
-    markerOf(drift.connector),
-    `> [!${alert}]`,
-    // A blank quoted line separates the summary's paragraphs inside the alert.
-    ...summary.split('\n').map((line) => (line ? `> ${line}` : '>')),
-    '',
-    '| | |',
-    '|---|---|',
-    ...facts,
-    '',
-    ...(actions.length > 0
-      ? [
-          '### Actions',
-          '',
-          '| Action | Calls | Status | Details |',
-          '|---|---|---|---|',
-          ...actionRows,
-          '',
-          ...legend.flatMap((line) => [line, '']),
-        ]
-      : []),
-    ...why,
-    ...fieldsSection,
-    ...additionsSection,
-    ...corrections,
-    ...(unattributed.length + unattachedRows.length > 0
-      ? [
-          '### Other problems',
-          '',
-          '| Problem | Operation | Details | How to fix |',
-          '|---|---|---|---|',
-          ...[...otherProblemRows(unattributed), ...unattachedRows].map(
-            ({ problem, operation, details, fix }) =>
-              `| ${problem} | ${operation} | ${cell(details)} | ${fix} |`
-          ),
-          '',
-        ]
-      : []),
-    ...(changes.length > 0 ? ['### Spec changes', '', ...changes] : []),
+  return [
     '### What to do',
     '',
     `1. ${firstStep}`,
@@ -1250,16 +1350,62 @@ export const renderDriftIssue = (
     '',
     'The weekly check updates this issue, and closes it once it finds nothing here that needs attention.',
     ...(owners.length > 0 ? ['', `cc ${owners.map((owner) => `@${owner}`).join(' ')}`] : []),
-  ].join('\n');
+  ];
+};
 
-  return {
-    title: titleOf(drift, attention),
-    body:
-      body.length > MAX_BODY_LENGTH
-        ? `${body.slice(
-            0,
-            MAX_BODY_LENGTH
-          )}\n\n…truncated; run the command above for the full report.`
-        : body,
-  };
+/**
+ * The title and body of a connector's drift issue: what needs attention first, then each action
+ * with its status, then the details. The same drift always renders the same.
+ */
+export const renderDriftIssue = (
+  drift: ConnectorDrift,
+  { owners, buildUrl }: RenderDriftIssueOptions
+): { title: string; body: string } => {
+  const found = conclusionsOf(drift);
+  const { alert, summary } = summaryOf(drift, found);
+  // The problems outside the actions, with the changes to review that no action calls.
+  const problemRows = [...found.tabledProblems, ...found.unattachedProblems];
+  const changes = specChanges(drift);
+
+  const sections: Section[] = [
+    {
+      lines: [
+        markerOf(drift.connector),
+        `> [!${alert}]`,
+        // A blank quoted line separates the summary's paragraphs inside the alert.
+        ...summary.split('\n').map((line) => (line ? `> ${line}` : '>')),
+        '',
+        '| | |',
+        '|---|---|',
+        ...factsOf(drift, found, buildUrl),
+        '',
+      ],
+    },
+    { lines: actionsSection(drift, found) },
+    { lines: whySection(drift, found) },
+    { lines: changedFieldsSection(found), dropFirst: 3 },
+    { lines: additionsSectionOf(drift), dropFirst: 2 },
+    { lines: correctionsSection(drift, found), dropFirst: 4 },
+    {
+      lines:
+        problemRows.length > 0
+          ? [
+              '### Other problems',
+              '',
+              '| Problem | Operation | Details | How to fix |',
+              '|---|---|---|---|',
+              ...problemRows.map(
+                ({ problem, operation, details, fix }) =>
+                  `| ${problem} | ${operation} | ${cell(details)} | ${fix} |`
+              ),
+              '',
+            ]
+          : [],
+      dropFirst: 5,
+    },
+    { lines: changes.length > 0 ? ['### Spec changes', '', ...changes] : [], dropFirst: 1 },
+    { lines: whatToDoSection(drift, found, owners) },
+  ];
+
+  return { title: titleOf(drift, found), body: assembleBody(sections) };
 };
