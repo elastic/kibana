@@ -9,7 +9,7 @@
 
 import type { ConnectorDrift, DriftReportEntry, FailedDrift } from './detect_drift';
 import { connectorOf, DRIFT_ISSUE_LABEL, markerOf } from './drift_issue_marker';
-import { changeList, findingsOf, renderDriftIssue } from './render_drift_issue';
+import { changeList, findingsOf, renderDriftIssue } from './drift_issue';
 import type { VendorApiLog } from './update_vendor_api';
 import { errorMessage } from './values';
 

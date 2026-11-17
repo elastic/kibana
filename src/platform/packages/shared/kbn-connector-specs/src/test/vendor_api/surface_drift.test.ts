@@ -10,7 +10,7 @@
 import type { ConnectorDrift, DriftReportEntry } from './detect_drift';
 import { DRIFT_ISSUE_LABEL } from './drift_issue_marker';
 import { drifted, healthy } from './drift_fixtures';
-import { renderDriftIssue } from './render_drift_issue';
+import { renderDriftIssue } from './drift_issue';
 import type { DriftIssue, IssueTracker, SurfaceDriftOptions } from './surface_drift';
 import { renderRefreshPr, surfaceDrift } from './surface_drift';
 

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConnectorDrift } from './detect_drift';
-import type { DriftProblem } from './drift_problem';
-import { drifted, healthy } from './drift_fixtures';
-import { renderDriftIssue } from './render_drift_issue';
+import type { ConnectorDrift } from '../detect_drift';
+import type { DriftProblem } from '../drift_problem';
+import { drifted, healthy } from '../drift_fixtures';
+import { renderDriftIssue } from '.';
 
 const moved: ConnectorDrift = {
   connector: '.sentry',
