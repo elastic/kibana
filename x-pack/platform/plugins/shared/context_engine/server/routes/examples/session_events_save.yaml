@@ -74,7 +74,7 @@ responses:
                   status: created
                 - id: evt-004
                   status: failed
-                  error: Exception when running inference id [.elser-2-elasticsearch] on field [content.semantic]
+                  error: Exception when running inference id [.elser-2-elasticsearch] on field [content.semantic_text]
   403:
     content:
       application/json:
