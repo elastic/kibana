@@ -1,0 +1,7 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/umap-webgpu",
+  "owner": ["@elastic/search-ml-ux"],
+  "group": "platform",
+  "visibility": "private"
+}
