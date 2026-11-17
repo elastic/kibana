@@ -12,6 +12,7 @@ import type { SignificantEventsQueriesGenerationResult } from '@kbn/significant-
 import type { EbtTelemetryClient } from '../telemetry/ebt';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
 import { executeKIQueryGenerationAgent } from './identify_ki_queries_via_agent';
+import { trackTelemetryBestEffort } from '../telemetry/track_telemetry_best_effort';
 
 export interface GenerateKIQueriesParams {
   source: NightshiftSource;
@@ -74,20 +75,25 @@ export async function generateKIQueries(
   });
   const durationMs = Date.now() - startedAt;
 
-  telemetry.trackSignificantEventsQueriesGenerated(
-    {
-      workflow_execution_id: workflowExecutionId,
-      parent_workflow_execution_id: parentWorkflowExecutionId,
-      count: queries.length,
-      connector_id: connectorId,
-      source_id: source.id,
-      input_tokens_used: tokensUsed.prompt,
-      output_tokens_used: tokensUsed.completion,
-      cached_tokens_used: tokensUsed.cached ?? 0,
-      duration_ms: durationMs,
-    },
-    request
-  );
+  trackTelemetryBestEffort({
+    logger,
+    description: 'queries generated telemetry',
+    track: () =>
+      telemetry.trackSignificantEventsQueriesGenerated(
+        {
+          workflow_execution_id: workflowExecutionId,
+          parent_workflow_execution_id: parentWorkflowExecutionId,
+          count: queries.length,
+          connector_id: connectorId,
+          source_id: source.id,
+          input_tokens_used: tokensUsed.prompt,
+          output_tokens_used: tokensUsed.completion,
+          cached_tokens_used: tokensUsed.cached ?? 0,
+          duration_ms: durationMs,
+        },
+        request
+      ),
+  });
 
   return { queries, tokensUsed, connectorId };
 }

@@ -400,6 +400,7 @@ export class SignificantEventsPlugin
     const workflowClients = createWorkflowClients(
       plugins.workflowsManagement?.management,
       telemetryClient,
+      this.logger,
       async (request) => {
         const [, pluginsStart] = await core.getStartServices();
         return pluginsStart.nightshiftSources.getSourcesClient({ request });

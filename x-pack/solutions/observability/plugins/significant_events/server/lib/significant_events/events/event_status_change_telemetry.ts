@@ -82,9 +82,9 @@ export const reportEventStatusChange = ({
   spaceId: string;
 }): void => {
   if (!telemetry) return;
-  const props = buildEventStatusChangedProps(change);
-  if (!props) return;
   try {
+    const props = buildEventStatusChangedProps(change);
+    if (!props) return;
     telemetry.trackEventStatusChanged(props);
   } catch (error) {
     logger?.warn(

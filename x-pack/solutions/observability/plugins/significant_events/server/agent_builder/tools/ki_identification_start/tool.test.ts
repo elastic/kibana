@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
 import { createKiIdentificationStartTool } from './tool';
 import {
   createMockToolContext,
@@ -41,6 +42,7 @@ describe('createKiIdentificationStartTool', () => {
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
       managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
       telemetry: { trackOnboardingScheduled: jest.fn() } as never,
+      logger: loggerMock.create(),
       getSourcesClient,
     });
     const maintenanceService = {

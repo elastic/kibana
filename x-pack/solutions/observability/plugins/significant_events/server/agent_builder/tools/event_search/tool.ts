@@ -39,6 +39,7 @@ import {
   type SourceCatalog,
 } from '../../utils/resolve_source_slugs';
 import { sourceSlugsSchema } from '../../utils/stored_source_fields';
+import { trackTelemetryBestEffort } from '../../../lib/telemetry/track_telemetry_best_effort';
 
 export const SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID = platformSignificantEventsTools.searchEvent;
 
@@ -282,19 +283,24 @@ export function createSearchEventsTool({
           },
         });
 
-        telemetry.trackAgentToolEventSearch(
-          {
-            workflow_execution_id: workflowExecutionId,
-            success: true,
-            result_count: data.total,
-            has_query: query !== undefined,
-            has_source_filter: (slugs?.length ?? 0) > 0,
-            status_filter: toolParams.status,
-            view: data.view,
-            page: data.page,
-          },
-          request
-        );
+        trackTelemetryBestEffort({
+          logger,
+          description: 'event_search telemetry',
+          track: () =>
+            telemetry.trackAgentToolEventSearch(
+              {
+                workflow_execution_id: workflowExecutionId,
+                success: true,
+                result_count: data.total,
+                has_query: query !== undefined,
+                has_source_filter: (slugs?.length ?? 0) > 0,
+                status_filter: toolParams.status,
+                view: data.view,
+                page: data.page,
+              },
+              request
+            ),
+        });
 
         return {
           results: [
@@ -318,20 +324,25 @@ export function createSearchEventsTool({
         const message = error instanceof Error ? error.message : 'Unknown error';
         logger.error(`Error running event_search: ${message}`);
 
-        telemetry.trackAgentToolEventSearch(
-          {
-            workflow_execution_id: workflowExecutionId,
-            success: false,
-            result_count: 0,
-            has_query: query !== undefined,
-            has_source_filter: (toolParams.slugs?.length ?? 0) > 0,
-            status_filter: toolParams.status,
-            view: toolParams.view,
-            page: toolParams.page,
-            error_message: message,
-          },
-          request
-        );
+        trackTelemetryBestEffort({
+          logger,
+          description: 'event_search telemetry',
+          track: () =>
+            telemetry.trackAgentToolEventSearch(
+              {
+                workflow_execution_id: workflowExecutionId,
+                success: false,
+                result_count: 0,
+                has_query: query !== undefined,
+                has_source_filter: (toolParams.slugs?.length ?? 0) > 0,
+                status_filter: toolParams.status,
+                view: toolParams.view,
+                page: toolParams.page,
+                error_message: message,
+              },
+              request
+            ),
+        });
 
         return {
           results: [

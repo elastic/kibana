@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
 import { parse } from 'yaml';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema';
@@ -55,6 +56,7 @@ const createClient = (overrides: Record<string, jest.Mock> = {}) => {
   const client = new SignificantEventsKIsOnboardingClient({
     managementApi: managementApi as never,
     telemetry: telemetry as never,
+    logger: loggerMock.create(),
     getSourcesClient,
   });
   return { client, managementApi, telemetry };

@@ -29,6 +29,7 @@ import {
 } from '../../utils/resolve_source_slugs';
 import { startKiIdentificationToolHandler } from './handler';
 import type { GetScopedClients } from '../../../routes/types';
+import { trackTelemetryBestEffort } from '../../../lib/telemetry/track_telemetry_best_effort';
 
 export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_IDENTIFICATION_START_TOOL_ID =
   'platform.sig_events.ki_identification_start';
@@ -81,7 +82,7 @@ export const createKiIdentificationStartTool = ({
     - On failure: an error result with \`message\`, \`slug\`, \`operation\`, and \`likely_cause\`
   `,
   schema: onboardingStartSchema,
-  handler: async ({ slug, steps, connectors }, { request }) => {
+  handler: async ({ slug, steps, connectors }, { request, logger }) => {
     const workflowExecutionId = getWorkflowExecutionIdFromRequest(request);
     let sourceId = '';
     try {
@@ -102,14 +103,19 @@ export const createKiIdentificationStartTool = ({
         request,
       });
 
-      telemetry.trackAgentToolKiIdentificationStarted(
-        {
-          workflow_execution_id: workflowExecutionId,
-          success: true,
-          source_id: source.id,
-        },
-        request
-      );
+      trackTelemetryBestEffort({
+        logger,
+        description: 'ki_identification_start telemetry',
+        track: () =>
+          telemetry.trackAgentToolKiIdentificationStarted(
+            {
+              workflow_execution_id: workflowExecutionId,
+              success: true,
+              source_id: source.id,
+            },
+            request
+          ),
+      });
 
       return {
         results: [
@@ -122,15 +128,20 @@ export const createKiIdentificationStartTool = ({
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
 
-      telemetry.trackAgentToolKiIdentificationStarted(
-        {
-          workflow_execution_id: workflowExecutionId,
-          success: false,
-          source_id: sourceId,
-          error_message: message,
-        },
-        request
-      );
+      trackTelemetryBestEffort({
+        logger,
+        description: 'ki_identification_start telemetry',
+        track: () =>
+          telemetry.trackAgentToolKiIdentificationStarted(
+            {
+              workflow_execution_id: workflowExecutionId,
+              success: false,
+              source_id: sourceId,
+              error_message: message,
+            },
+            request
+          ),
+      });
 
       return {
         results: [
