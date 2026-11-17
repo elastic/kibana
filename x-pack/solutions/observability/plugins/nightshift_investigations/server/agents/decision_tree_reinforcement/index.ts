@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AgentCapabilities } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { AgentBaseConfiguration, AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import { buildReinforcementSystemPrompt } from '@kbn/nightshift-decision-trees';
@@ -41,12 +42,21 @@ export const DECISION_TREE_REINFORCEMENT_AGENT_DESCRIPTION =
   'Distills a finished investigation into a reusable Mermaid decision tree, merging this run ' +
   'into the existing tree for the symptom and recording what a human had to correct.';
 
+/**
+ * The reinforcement agent edits decision-tree files in the sandbox and submits one result, so it
+ * also drops the generic attachment tools, which the investigator and the assistant keep.
+ */
+const DECISION_TREE_REINFORCEMENT_CAPABILITIES: AgentCapabilities = {
+  ...NIGHTSHIFT_AGENT_CAPABILITIES,
+  attachment_tools: { enabled: false },
+};
+
 const getBaseConfiguration = (hydrateWorkflowId: string): AgentBaseConfiguration => ({
   instructions: buildReinforcementSystemPrompt(DECISION_TREE_PROMPT_TOOLS),
   skill_ids: [],
   tools: [{ tool_ids: [...SANDBOX_FILE_TOOL_IDS, DECISION_TREE_SUBMIT_TOOL_ID] }],
   enable_elastic_capabilities: false,
-  capabilities: NIGHTSHIFT_AGENT_CAPABILITIES,
+  capabilities: DECISION_TREE_REINFORCEMENT_CAPABILITIES,
   connector_ids: [],
   // Hydration has to run inside this agent's own conversation: the sandbox workspace is
   // namespaced per conversation, and this agent runs in a different one than the investigator.
