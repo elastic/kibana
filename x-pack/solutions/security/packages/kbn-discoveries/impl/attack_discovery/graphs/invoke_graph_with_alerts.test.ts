@@ -9,6 +9,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { InferenceClient } from '@kbn/inference-common';
+import { withActiveInferenceSpan } from '@kbn/inference-tracing';
 import { invokeAttackDiscoveryGraphWithAlerts } from './invoke_graph_with_alerts';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
@@ -16,6 +17,15 @@ import { getDefaultAttackDiscoveryGraph } from '.';
 import { throwIfErrorCountsExceeded } from './throw_if_error_counts_exceeded';
 import { resolveAttackDiscoveryTemplateCompletion } from './template_completion';
 
+const mockSetAttributes = jest.fn();
+let mockSpan: { setAttributes: jest.Mock } | undefined;
+
+jest.mock('@kbn/inference-tracing', () => ({
+  ElasticGenAIAttributes: { InferenceSpanKind: 'elastic.inference.span.kind' },
+  withActiveInferenceSpan: jest.fn(
+    (_name: string, _opts: unknown, cb: (span: unknown) => unknown) => cb(mockSpan)
+  ),
+}));
 jest.mock('@kbn/langchain/server');
 jest.mock('@kbn/langchain/server/tracers/langsmith');
 jest.mock('.', () => ({
@@ -67,6 +77,7 @@ describe('invokeAttackDiscoveryGraphWithAlerts', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSpan = undefined;
     (getDefaultAttackDiscoveryGraph as jest.Mock).mockReturnValue(mockGraph);
     (getLangSmithTracer as jest.Mock).mockReturnValue([]);
   });
@@ -323,6 +334,8 @@ describe('invokeAttackDiscoveryGraphWithAlerts', () => {
 
     mockGraphInvoke.mockResolvedValue({
       anonymizedDocuments: mockAlerts,
+      generationAttempts: 2,
+      hallucinationFailures: 1,
       insights: mockDiscoveries,
       replacements: mockReplacements,
     });
@@ -343,7 +356,53 @@ describe('invokeAttackDiscoveryGraphWithAlerts', () => {
     expect(result).toEqual({
       alertsContextCount: 2,
       discoveries: mockDiscoveries,
+      generationAttempts: 2,
+      hallucinationFailures: 1,
       replacements: mockReplacements,
+    });
+  });
+
+  it('records the graph result counters on the root span', async () => {
+    mockSpan = { setAttributes: mockSetAttributes };
+    mockGraphInvoke.mockResolvedValue({
+      anonymizedDocuments: mockAlerts,
+      errors: ['parse error'],
+      generationAttempts: 3,
+      generations: ['g1', 'g2'],
+      hallucinationFailures: 1,
+      insights: [],
+      maxGenerationAttempts: 10,
+      maxHallucinationFailures: 5,
+      refinements: ['r1'],
+      replacements: {},
+    });
+
+    await invokeAttackDiscoveryGraphWithAlerts({
+      actionsClient: mockActionsClient,
+      alerts: mockAlerts,
+      apiConfig: {
+        action_type_id: '.gen-ai',
+        connector_id: 'test-connector',
+      },
+      connectorTimeout: 60000,
+      esClient: mockEsClient,
+      logger: mockLogger,
+      prompts: mockPrompts,
+    });
+
+    expect(withActiveInferenceSpan).toHaveBeenCalledWith(
+      'attack_discovery.graph',
+      expect.anything(),
+      expect.any(Function)
+    );
+    expect(mockSetAttributes).toHaveBeenCalledWith({
+      'attack_discovery.errors_count': 1,
+      'attack_discovery.generation_attempts': 3,
+      'attack_discovery.generations_count': 2,
+      'attack_discovery.hallucination_failures': 1,
+      'attack_discovery.max_generation_attempts': 10,
+      'attack_discovery.max_hallucination_failures': 5,
+      'attack_discovery.refinements_count': 1,
     });
   });
 
