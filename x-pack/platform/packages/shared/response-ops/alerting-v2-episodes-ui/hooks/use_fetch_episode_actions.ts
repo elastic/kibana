@@ -31,8 +31,8 @@ const toEpisodeActionsMap = (rows: AlertEpisodeAction[]) => {
       lastAckAction: row.last_ack_action ?? null,
       lastAssigneeUid: row.last_assignee_uid ?? null,
       lastAckActor: row.last_ack_actor ?? null,
-      lastDeactivateAction: row.last_deactivate_action ?? null,
-      lastDeactivateActor: row.last_deactivate_actor ?? null,
+      lastDeactivateAction: row.last_lifecycle_action ?? null,
+      lastDeactivateActor: row.last_lifecycle_actor ?? null,
       tags: normalizeTags(row.last_tags),
     });
   }

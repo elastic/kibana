@@ -10,14 +10,17 @@ import { act, renderHook } from '@testing-library/react';
 import type { Filter } from '@kbn/es-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { EntityInventoryEntityCategory } from '../../types';
 import { DEFAULT_TIME_RANGE } from '../constants';
 import { INVALID_QUERY_TOAST_TITLE, TIME_RANGE_CLAMPED_TOAST_TITLE } from '../translations';
+import { createPublicConfigMock } from '../../mocks';
 import { EntityInventorySearchProvider, useEntityInventorySearch } from './search_context';
 
-const renderSearchHook = () => {
+const renderSearchHook = ({ timeRangeLimitDisabled = false } = {}) => {
   const core = coreMock.createStart();
+  const config = createPublicConfigMock({ timeRangeLimitDisabled });
   const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <KibanaContextProvider services={core}>
+    <KibanaContextProvider services={{ ...core, config }}>
       <EntityInventorySearchProvider entityCategory="kubernetes">
         {children}
       </EntityInventorySearchProvider>
@@ -30,6 +33,12 @@ const renderSearchHook = () => {
 const kuery = (query: string) => ({ language: 'kuery', query });
 
 describe('EntityInventorySearchProvider', () => {
+  let category: EntityInventoryEntityCategory = 'kubernetes';
+
+  beforeEach(() => {
+    category = 'kubernetes';
+  });
+
   it('exposes the default search state and the entity category', () => {
     const { result } = renderSearchHook();
 
@@ -37,6 +46,53 @@ describe('EntityInventorySearchProvider', () => {
     expect(result.current.query).toEqual(kuery(''));
     expect(result.current.filters).toEqual([]);
     expect(result.current.dateRange).toEqual(DEFAULT_TIME_RANGE);
+    expect(result.current.filterSelection).toEqual({ attributes: {} });
+    expect(result.current.isTimeRangeLimited).toBe(true);
+  });
+
+  it('keeps the filter selection of the page', () => {
+    const { result } = renderSearchHook();
+
+    act(() => {
+      result.current.setFilterSelection({
+        type: 'k8s.pod',
+        attributes: { 'k8s.pod.phase': ['Running'] },
+      });
+    });
+
+    expect(result.current.filterSelection).toEqual({
+      type: 'k8s.pod',
+      attributes: { 'k8s.pod.phase': ['Running'] },
+    });
+  });
+
+  it('resets the filter selection every time the entity category changes', () => {
+    const core = coreMock.createStart();
+    const config = createPublicConfigMock();
+    const { result, rerender } = renderHook(() => useEntityInventorySearch(), {
+      wrapper: ({ children }: { children?: React.ReactNode }) => (
+        <KibanaContextProvider services={{ ...core, config }}>
+          <EntityInventorySearchProvider entityCategory={category}>
+            {children}
+          </EntityInventorySearchProvider>
+        </KibanaContextProvider>
+      ),
+    });
+
+    act(() => {
+      result.current.setFilterSelection({ attributes: { 'os.type': ['linux'] } });
+    });
+    expect(result.current.filterSelection).toEqual({ attributes: { 'os.type': ['linux'] } });
+
+    category = 'hosts';
+    rerender();
+
+    expect(result.current.filterSelection).toEqual({ attributes: {} });
+
+    category = 'kubernetes';
+    rerender();
+
+    expect(result.current.filterSelection).toEqual({ attributes: {} });
   });
 
   it('commits a submission within the maximum time range as-is', () => {
@@ -66,6 +122,33 @@ describe('EntityInventorySearchProvider', () => {
     expect(core.notifications.toasts.addWarning).toHaveBeenCalledWith({
       title: TIME_RANGE_CLAMPED_TOAST_TITLE,
     });
+  });
+
+  it('commits a submission over the maximum time range as-is when the limit is disabled', () => {
+    const { result, core } = renderSearchHook({ timeRangeLimitDisabled: true });
+    const dateRange = { from: 'now-30d', to: 'now' };
+    let committed;
+
+    act(() => {
+      committed = result.current.submit({ dateRange });
+    });
+
+    expect(result.current.isTimeRangeLimited).toBe(false);
+    expect(committed).toEqual(dateRange);
+    expect(result.current.dateRange).toEqual(dateRange);
+    expect(core.notifications.toasts.addWarning).not.toHaveBeenCalled();
+  });
+
+  it('keeps the previous time range for invalid datemath when the limit is disabled', () => {
+    const { result } = renderSearchHook({ timeRangeLimitDisabled: true });
+    let committed;
+
+    act(() => {
+      committed = result.current.submit({ dateRange: { from: 'now-5x', to: 'now' } });
+    });
+
+    expect(committed).toEqual(DEFAULT_TIME_RANGE);
+    expect(result.current.dateRange).toEqual(DEFAULT_TIME_RANGE);
   });
 
   it('does not commit invalid KQL, surfaces an error and still commits the time range', () => {

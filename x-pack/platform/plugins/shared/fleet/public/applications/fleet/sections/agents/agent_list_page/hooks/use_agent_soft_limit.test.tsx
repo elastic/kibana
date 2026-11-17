@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { createFleetTestRendererMock } from '../../../../../../mock';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
+import { renderHook, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+
 import { useConfig, sendGetAgents } from '../../../../hooks';
 
 import { useAgentSoftLimit } from './use_agent_soft_limit';
@@ -16,14 +20,20 @@ const mockedSendGetAgents = jest.mocked(sendGetAgents);
 const mockedUseConfig = jest.mocked(useConfig);
 
 describe('useAgentSoftLimit', () => {
+  let wrapper: FC<PropsWithChildren>;
+
   beforeEach(() => {
     mockedSendGetAgents.mockReset();
     mockedUseConfig.mockReset();
+
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    wrapper = ({ children }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
   });
-  it('should return shouldDisplayAgentSoftLimit:false if soft limit is not enabled in config', async () => {
-    const renderer = createFleetTestRendererMock();
+  it('should return shouldDisplayAgentSoftLimit:false if soft limit is not enabled in config', () => {
     mockedUseConfig.mockReturnValue({} as any);
-    const { result } = renderer.renderHook(() => useAgentSoftLimit());
+    const { result } = renderHook(() => useAgentSoftLimit(), { wrapper });
 
     expect(result.current.shouldDisplayAgentSoftLimit).toEqual(false);
 
@@ -31,15 +41,14 @@ describe('useAgentSoftLimit', () => {
   });
 
   it('should return shouldDisplayAgentSoftLimit:false if soft limit is enabled in config and there is less online agents than the limit', async () => {
-    const renderer = createFleetTestRendererMock();
     mockedUseConfig.mockReturnValue({ internal: { activeAgentsSoftLimit: 10 } } as any);
     mockedSendGetAgents.mockResolvedValue({
       data: {
         total: 5,
       },
     } as any);
-    const { result, rerender } = renderer.renderHook(() => useAgentSoftLimit());
-    await renderer.waitFor(() => expect(mockedSendGetAgents).toHaveBeenCalled());
+    const { result, rerender } = renderHook(() => useAgentSoftLimit(), { wrapper });
+    await waitFor(() => expect(mockedSendGetAgents).toHaveBeenCalled());
 
     // re-render so cache is updated to value from most recent call
     rerender();
@@ -48,15 +57,14 @@ describe('useAgentSoftLimit', () => {
   });
 
   it('should return shouldDisplayAgentSoftLimit:true if soft limit is enabled in config and there is more online agents than the limit', async () => {
-    const renderer = createFleetTestRendererMock();
     mockedUseConfig.mockReturnValue({ internal: { activeAgentsSoftLimit: 10 } } as any);
     mockedSendGetAgents.mockResolvedValue({
       data: {
         total: 15,
       },
     } as any);
-    const { result, rerender } = renderer.renderHook(() => useAgentSoftLimit());
-    await renderer.waitFor(() => expect(mockedSendGetAgents).toHaveBeenCalled());
+    const { result, rerender } = renderHook(() => useAgentSoftLimit(), { wrapper });
+    await waitFor(() => expect(mockedSendGetAgents).toHaveBeenCalled());
 
     // re-render so cache is updated to value from most recent call
     rerender();

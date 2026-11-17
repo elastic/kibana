@@ -29,7 +29,8 @@ import type { SessionSortField, SessionSummary } from '../../../../common/sessio
 import { WebVitalBadge } from '../../../components/web_vital_badges';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../../ebt_constants';
 import type { Formatters } from '../../../hooks/use_formatters';
-import { ANONYMOUS_USER } from '../../../labels';
+import { TruncatedCode } from '../../../components/truncated_code';
+import { ANONYMOUS_USER, DEVICE_LABEL } from '../../../labels';
 import { clientOf, locationOf } from '../../../utils/describe_session';
 import { formatSessionDuration } from '../../../utils/format_session_duration';
 import type { SessionsListState } from '../hooks/use_sessions_list_query';
@@ -46,7 +47,8 @@ const SORT_FIELDS = {
   durationMs: 'duration_ms',
   pageViewCount: 'page_view_count',
   clickCount: 'click_count',
-  errorCount: 'error_count',
+  jsErrorCount: 'js_error_count',
+  failedRequestCount: 'http_failed_request_count',
 } as const satisfies Partial<Record<keyof SessionSummary, SessionSortField>>;
 
 type SortableColumn = keyof typeof SORT_FIELDS;
@@ -62,7 +64,9 @@ export type SessionsOptionalColumnId =
   | 'duration'
   | 'pages'
   | 'clicks'
-  | 'errors'
+  | 'jsErrors'
+  | 'failedRequests'
+  | 'environment'
   | 'location'
   | 'entryPage'
   | 'exitPage'
@@ -80,15 +84,21 @@ const COLUMN_LABELS: Record<SessionsOptionalColumnId, string> = {
   duration: i18n.translate('xpack.digitalExperience.sessions.table.durationColumn', {
     defaultMessage: 'Duration',
   }),
-  // As the session page and the transform call them.
+  // Page views, not page loads: in-app navigations count too.
   pages: i18n.translate('xpack.digitalExperience.sessions.table.pageViewsColumn', {
     defaultMessage: 'Page views',
   }),
   clicks: i18n.translate('xpack.digitalExperience.sessions.table.clicksColumn', {
     defaultMessage: 'Clicks',
   }),
-  errors: i18n.translate('xpack.digitalExperience.sessions.table.errorsColumn', {
-    defaultMessage: 'Errors',
+  jsErrors: i18n.translate('xpack.digitalExperience.sessions.table.jsErrorsColumn', {
+    defaultMessage: 'JS errors',
+  }),
+  failedRequests: i18n.translate('xpack.digitalExperience.sessions.table.failedRequestsColumn', {
+    defaultMessage: 'Failed requests',
+  }),
+  environment: i18n.translate('xpack.digitalExperience.sessions.table.environmentColumn', {
+    defaultMessage: 'Environment',
   }),
   location: i18n.translate('xpack.digitalExperience.sessions.table.locationColumn', {
     defaultMessage: 'Location',
@@ -99,9 +109,7 @@ const COLUMN_LABELS: Record<SessionsOptionalColumnId, string> = {
   exitPage: i18n.translate('xpack.digitalExperience.sessions.table.exitPageColumn', {
     defaultMessage: 'Exit page',
   }),
-  device: i18n.translate('xpack.digitalExperience.sessions.table.deviceColumn', {
-    defaultMessage: 'Device',
-  }),
+  device: DEVICE_LABEL,
   sessionId: i18n.translate('xpack.digitalExperience.sessions.table.sessionIdColumn', {
     defaultMessage: 'Session ID',
   }),
@@ -129,7 +137,9 @@ export const SESSIONS_OPTIONAL_COLUMNS: ReadonlyArray<{
     'duration',
     'pages',
     'clicks',
-    'errors',
+    'jsErrors',
+    'failedRequests',
+    'environment',
     'location',
     'entryPage',
     'exitPage',
@@ -144,8 +154,13 @@ export const SESSIONS_OPTIONAL_COLUMNS: ReadonlyArray<{
 
 export const SESSIONS_OPTIONAL_COLUMN_IDS = SESSIONS_OPTIONAL_COLUMNS.map(({ id }) => id);
 
-/** Shown until the user picks columns: the summary's counts, not the details. */
+/**
+ * Shown until the user picks columns: the summary's counts, not the details. Failed requests have
+ * their own filter and KPI, so the table keeps its width.
+ */
 export const SESSIONS_HIDDEN_BY_DEFAULT: readonly SessionsOptionalColumnId[] = [
+  'failedRequests',
+  'environment',
   'location',
   'entryPage',
   'exitPage',
@@ -164,15 +179,8 @@ const NO = i18n.translate('xpack.digitalExperience.sessions.table.noValue', {
   defaultMessage: 'No',
 });
 
-/** A page path in code font, truncated with the full path in its title. */
 const renderPage = (page: string | null) =>
-  page ? (
-    <EuiText size="xs" className="eui-textTruncate" title={page}>
-      <EuiCode transparentBackground>{page}</EuiCode>
-    </EuiText>
-  ) : (
-    <EmptyCellValue />
-  );
+  page ? <TruncatedCode value={page} /> : <EmptyCellValue />;
 
 const renderText = (text: string | null) =>
   text ? (
@@ -287,6 +295,14 @@ export function SessionsTable({
     ];
 
     const renderCount = (count: number) => formatNumber(count);
+    const renderProblemCount = (testSubj: string) => (count: number) =>
+      count > 0 ? (
+        <EuiBadge color="danger" data-test-subj={testSubj}>
+          {formatNumber(count)}
+        </EuiBadge>
+      ) : (
+        formatNumber(count)
+      );
     const optionalColumns: Record<SessionsOptionalColumnId, EuiBasicTableColumn<SessionSummary>> = {
       journey: {
         field: 'journey',
@@ -305,6 +321,12 @@ export function SessionsTable({
       pages: {
         field: 'pageViewCount',
         name: COLUMN_LABELS.pages,
+        nameTooltip: {
+          content: i18n.translate('xpack.digitalExperience.sessions.table.pageViewsTooltip', {
+            defaultMessage:
+              'Page loads and in-app navigations. The applications list counts page loads only.',
+          }),
+        },
         sortable: true,
         ...numberColumn(),
         render: renderCount,
@@ -316,19 +338,25 @@ export function SessionsTable({
         ...numberColumn(),
         render: renderCount,
       },
-      errors: {
-        field: 'errorCount',
-        name: COLUMN_LABELS.errors,
+      jsErrors: {
+        field: 'jsErrorCount',
+        name: COLUMN_LABELS.jsErrors,
         sortable: true,
         ...numberColumn(),
-        render: (count: number) =>
-          count > 0 ? (
-            <EuiBadge color="danger" data-test-subj="digitalExperienceSessionErrors">
-              {formatNumber(count)}
-            </EuiBadge>
-          ) : (
-            formatNumber(count)
-          ),
+        render: renderProblemCount('digitalExperienceSessionJsErrors'),
+      },
+      failedRequests: {
+        field: 'failedRequestCount',
+        name: COLUMN_LABELS.failedRequests,
+        sortable: true,
+        ...numberColumn(),
+        render: renderProblemCount('digitalExperienceSessionFailedRequests'),
+      },
+      environment: {
+        field: 'environment',
+        name: COLUMN_LABELS.environment,
+        width: '10em',
+        render: renderText,
       },
       location: {
         field: 'geo',
