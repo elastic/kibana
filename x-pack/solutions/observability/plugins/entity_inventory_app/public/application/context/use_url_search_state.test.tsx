@@ -15,6 +15,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { decode } from '@kbn/rison';
 import { createPublicConfigMock } from '../../mocks';
 import { DEFAULT_TIME_RANGE } from '../constants';
+import { TIME_RANGE_CLAMPED_TOAST_TITLE } from '../translations';
 import type { UrlSearchState } from './use_url_search_state';
 import { useUrlSearchState } from './use_url_search_state';
 
@@ -49,7 +50,7 @@ const renderUrlState = (initialEntry = '/kubernetes', { timeRangeLimitDisabled =
     { wrapper }
   );
 
-  return { history, seen, ...hook };
+  return { core, history, seen, ...hook };
 };
 
 describe('useUrlSearchState', () => {
@@ -154,18 +155,76 @@ describe('useUrlSearchState', () => {
   });
 
   describe('reading the URL', () => {
-    it('limits a time range from the URL to the maximum time range', () => {
-      const { result } = renderUrlState('/kubernetes?_a=(dateRange:(from:now-30d,to:now))');
+    it('limits a time range from the URL to the last 3 days, writes it back and warns once', () => {
+      const { result, history, core } = renderUrlState(
+        '/kubernetes?_a=(dateRange:(from:now-30d,to:now))'
+      );
 
       expect(result.current[0].dateRange).toEqual({ from: 'now-3d', to: 'now' });
+      expect(readWrittenState(history).dateRange).toEqual({ from: 'now-3d', to: 'now' });
+      expect(core.notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
+      expect(core.notifications.toasts.addWarning).toHaveBeenCalledWith({
+        title: TIME_RANGE_CLAMPED_TOAST_TITLE,
+      });
+    });
+
+    it('turns a window older than the maximum into the last 3 days', () => {
+      const { result, history } = renderUrlState(
+        '/kubernetes?_a=(dateRange:(from:now-10d,to:now-9d))'
+      );
+
+      expect(result.current[0].dateRange).toEqual({ from: 'now-3d', to: 'now' });
+      expect(readWrittenState(history).dateRange).toEqual({ from: 'now-3d', to: 'now' });
+    });
+
+    it('uses the default range, without a warning, when the range in the URL is invalid', () => {
+      const { result, history, core } = renderUrlState(
+        '/kubernetes?_a=(dateRange:(from:now-5x,to:now))'
+      );
+
+      expect(result.current[0].dateRange).toEqual(DEFAULT_TIME_RANGE);
+      expect(readWrittenState(history).dateRange).toEqual(DEFAULT_TIME_RANGE);
+      expect(core.notifications.toasts.addWarning).not.toHaveBeenCalled();
+    });
+
+    it('writes an invalid query back as the default one, without a warning', () => {
+      const { history, core } = renderUrlState(
+        "/kubernetes?_a=(query:(language:kuery,query:'foo:'),dateRange:(from:now-1h,to:now))"
+      );
+
+      expect(readWrittenState(history).query).toEqual(kuery(''));
+      expect(readWrittenState(history).dateRange).toEqual({ from: 'now-1h', to: 'now' });
+      expect(core.notifications.toasts.addWarning).not.toHaveBeenCalled();
+    });
+
+    it('writes a URL without the filters that cannot be built', () => {
+      const { history } = renderUrlState(
+        '/kubernetes?_a=(filters:!((meta:(type:combined))),dateRange:(from:now-1h,to:now))'
+      );
+
+      expect(readWrittenState(history).filters).toEqual([]);
+    });
+
+    it.each([
+      ['a valid URL', '/kubernetes?_a=(dateRange:(from:now-1h,to:now))'],
+      [
+        'a URL that only misses parts of the state',
+        '/kubernetes?_a=(filterControls:(attributes:(os.type:!(linux))))',
+      ],
+    ])('does not rewrite %s', (_, entry) => {
+      const { history, core } = renderUrlState(entry);
+
+      expect(`/kubernetes${history.location.search}`).toBe(entry);
+      expect(core.notifications.toasts.addWarning).not.toHaveBeenCalled();
     });
 
     it('keeps a time range from the URL over the maximum when the limit is disabled', () => {
-      const { result } = renderUrlState('/kubernetes?_a=(dateRange:(from:now-30d,to:now))', {
-        timeRangeLimitDisabled: true,
-      });
+      const entry = '/kubernetes?_a=(dateRange:(from:now-30d,to:now))';
+      const { result, history, core } = renderUrlState(entry, { timeRangeLimitDisabled: true });
 
       expect(result.current[0].dateRange).toEqual({ from: 'now-30d', to: 'now' });
+      expect(`/kubernetes${history.location.search}`).toBe(entry);
+      expect(core.notifications.toasts.addWarning).not.toHaveBeenCalled();
     });
 
     it('falls back to the default query when the query in the URL is invalid KQL', () => {
