@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/** Server-owned hash: omit from public connector HTTP `config`. The hub still reads the stored value. */
+/** Legacy `config.ingestTokenHash`. Nothing reads it. Hide it from connector HTTP responses. */
 export const omitIngestTokenHashFromConfig = (
   config?: Record<string, unknown>
 ): Record<string, unknown> | undefined => {
