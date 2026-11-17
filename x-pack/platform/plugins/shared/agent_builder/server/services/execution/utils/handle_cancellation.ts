@@ -7,6 +7,7 @@
 
 import type { OperatorFunction } from 'rxjs';
 import { Observable } from 'rxjs';
+import type { ExecutionAbortReason } from '@kbn/agent-builder-common';
 import { createRequestAbortedError, isExecutionAbortReason } from '@kbn/agent-builder-common';
 import { CANCELLATION_DEADLINE_MS } from '../constants';
 
@@ -15,10 +16,15 @@ import { CANCELLATION_DEADLINE_MS } from '../constants';
  * `AbortMonitor`) and is stamped on the error meta so every reader of the error — stream,
  * execution document, follower, callback, conversation — sees where the abort came from.
  */
-export const createAbortedError = (abortSignal: AbortSignal) =>
+export const createAbortedErrorFromReason = (reason?: ExecutionAbortReason) =>
   createRequestAbortedError(
     'Converse request was aborted',
-    isExecutionAbortReason(abortSignal.reason) ? { abort_reason: abortSignal.reason } : undefined
+    reason ? { abort_reason: reason } : undefined
+  );
+
+export const createAbortedError = (abortSignal: AbortSignal) =>
+  createAbortedErrorFromReason(
+    isExecutionAbortReason(abortSignal.reason) ? abortSignal.reason : undefined
   );
 
 /**

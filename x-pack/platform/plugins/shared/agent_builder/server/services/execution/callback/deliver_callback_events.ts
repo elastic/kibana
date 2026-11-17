@@ -13,6 +13,7 @@ import {
   defer,
   catchError,
   filter,
+  lastValueFrom,
   type Observable,
 } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -30,6 +31,102 @@ import type { AgentExecution } from '@kbn/agent-builder-server/execution';
 import type { SurfacesService } from '../../surfaces';
 import { serializeExecutionError } from '../utils/serialize_execution_error';
 import type { CallbackDeliveryService } from './callback_delivery_service';
+
+/**
+ * The execution's callback URL when it has a usable one: only conversation executions have
+ * callbacks, and a URL the Actions config does not allow is logged and skipped.
+ */
+const getCallbackUrl = ({
+  execution,
+  callbackDeliveryService,
+  logger,
+}: {
+  execution: AgentExecution;
+  callbackDeliveryService: CallbackDeliveryService;
+  logger: Logger;
+}): string | undefined => {
+  if (execution.executionMode !== AgentExecutionMode.conversation) {
+    return undefined;
+  }
+
+  const callbackUrl = execution.agentParams.callback?.url;
+
+  if (!callbackUrl) {
+    return undefined;
+  }
+
+  try {
+    callbackDeliveryService.validateCallbackUrl(callbackUrl);
+  } catch (error) {
+    logger.error(
+      `Skipping callback delivery for execution ${execution.executionId}: ${error.message}`
+    );
+
+    return undefined;
+  }
+
+  return callbackUrl;
+};
+
+const sendFailureCallback = ({
+  execution,
+  error,
+  callbackUrl,
+  callbackDeliveryService,
+  logger,
+}: {
+  execution: AgentExecution;
+  error: unknown;
+  callbackUrl: string;
+  callbackDeliveryService: CallbackDeliveryService;
+  logger: Logger;
+}): Observable<void> => {
+  const failureDelivery = callbackDeliveryService.makeCallbackRequest({
+    payload: {
+      execution_id: execution.executionId,
+      error: serializeExecutionError(error),
+      idempotency_key: execution.executionId,
+    },
+    callbackUrl,
+    retry: true,
+  });
+
+  return from(failureDelivery).pipe(
+    catchError((deliveryError) => {
+      logger.warn(
+        `Failed to deliver failure callback for execution ${execution.executionId}: ${deliveryError.message}`
+      );
+      return EMPTY;
+    })
+  );
+};
+
+/**
+ * Delivers the failure callback of an execution that never streamed events, such as one aborted
+ * before it started. Never rejects; a no-op when the execution has no callback.
+ */
+export const deliverFailureCallback = async ({
+  execution,
+  error,
+  callbackDeliveryService,
+  logger,
+}: {
+  execution: AgentExecution;
+  error: unknown;
+  callbackDeliveryService: CallbackDeliveryService;
+  logger: Logger;
+}): Promise<void> => {
+  const callbackUrl = getCallbackUrl({ execution, callbackDeliveryService, logger });
+
+  if (!callbackUrl) {
+    return;
+  }
+
+  await lastValueFrom(
+    sendFailureCallback({ execution, error, callbackUrl, callbackDeliveryService, logger }),
+    { defaultValue: undefined }
+  );
+};
 
 /**
  * Delivers the execution's events to its configured callback URL, resolving once every
@@ -61,19 +158,9 @@ export const deliverCallbackEvents = ({
     return Promise.resolve();
   }
 
-  const callbackUrl = execution.agentParams.callback?.url;
+  const callbackUrl = getCallbackUrl({ execution, callbackDeliveryService, logger });
 
   if (!callbackUrl) {
-    return Promise.resolve();
-  }
-
-  try {
-    callbackDeliveryService.validateCallbackUrl(callbackUrl);
-  } catch (error) {
-    logger.error(
-      `Skipping callback delivery for execution ${execution.executionId}: ${error.message}`
-    );
-
     return Promise.resolve();
   }
 
@@ -147,26 +234,9 @@ export const deliverCallbackEvents = ({
             );
           })
         ),
-        catchError((error) => {
-          const failureDelivery = callbackDeliveryService.makeCallbackRequest({
-            payload: {
-              execution_id: execution.executionId,
-              error: serializeExecutionError(error),
-              idempotency_key: execution.executionId,
-            },
-            callbackUrl,
-            retry: true,
-          });
-
-          return from(failureDelivery).pipe(
-            catchError((deliveryError) => {
-              logger.warn(
-                `Failed to deliver failure callback for execution ${execution.executionId}: ${deliveryError.message}`
-              );
-              return EMPTY;
-            })
-          );
-        })
+        catchError((error) =>
+          sendFailureCallback({ execution, error, callbackUrl, callbackDeliveryService, logger })
+        )
       )
       .subscribe({
         complete: () => resolve(),

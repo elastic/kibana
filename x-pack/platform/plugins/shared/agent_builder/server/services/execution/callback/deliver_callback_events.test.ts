@@ -24,7 +24,7 @@ import type { AgentExecution } from '@kbn/agent-builder-server/execution';
 import type { AttachmentServiceStart } from '../../attachments';
 import { SurfacesServiceImpl } from '../../surfaces';
 import type { CallbackDeliveryService } from './callback_delivery_service';
-import { deliverCallbackEvents } from './deliver_callback_events';
+import { deliverCallbackEvents, deliverFailureCallback } from './deliver_callback_events';
 
 const callbackUrl = 'https://callback.example.com/v1/events?token=abc';
 const getTypeDefinition = jest.fn();
@@ -655,6 +655,60 @@ describe('deliverCallbackEvents', () => {
         events$: throwError(() => new Error('agent boom')),
         callbackDeliveryService: service,
         ...surfacesDeps,
+        logger: loggerMock.create(),
+      })
+    ).resolves.toBeUndefined();
+  });
+});
+
+describe('deliverFailureCallback', () => {
+  it('delivers a retried failure payload with the execution id as idempotency key', async () => {
+    const { service } = createCallbackDeliveryServiceMock();
+
+    await deliverFailureCallback({
+      execution: createConversationExecution(),
+      error: createRequestAbortedError('request aborted'),
+      callbackDeliveryService: service,
+      logger: loggerMock.create(),
+    });
+
+    expect(service.makeCallbackRequest).toHaveBeenCalledWith({
+      payload: {
+        execution_id: 'execution-1',
+        error: {
+          code: AgentBuilderErrorCode.requestAborted,
+          message: 'request aborted',
+          meta: {},
+        },
+        idempotency_key: 'execution-1',
+      },
+      callbackUrl,
+      retry: true,
+    });
+  });
+
+  it('does nothing when the execution has no callback', async () => {
+    const { service } = createCallbackDeliveryServiceMock();
+
+    await deliverFailureCallback({
+      execution: createConversationExecution(null),
+      error: createRequestAbortedError('request aborted'),
+      callbackDeliveryService: service,
+      logger: loggerMock.create(),
+    });
+
+    expect(service.makeCallbackRequest).not.toHaveBeenCalled();
+  });
+
+  it('resolves even when the delivery fails', async () => {
+    const { service } = createCallbackDeliveryServiceMock();
+    service.makeCallbackRequest.mockRejectedValue(new Error('callback failed'));
+
+    await expect(
+      deliverFailureCallback({
+        execution: createConversationExecution(),
+        error: createRequestAbortedError('request aborted'),
+        callbackDeliveryService: service,
         logger: loggerMock.create(),
       })
     ).resolves.toBeUndefined();
