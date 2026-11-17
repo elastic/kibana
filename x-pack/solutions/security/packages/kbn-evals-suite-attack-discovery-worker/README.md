@@ -165,6 +165,7 @@ Per-scenario gold:
 | `same-display-name-cross-account`     | inconclusive (TP also accepted)          |
 | `bait-false-positive`                 | FP, only if a discovery is written       |
 | `seeded-false-positive`               | FP (review of a seeded discovery)        |
+| `positive-chain-large-batch`          | TP (106 alerts, runner at batch size 50) |
 
 `bait-false-positive` is a negative control built as bait: attack-shaped rule names (encoded
 PowerShell, an outbound PowerShell connection, a SYSTEM scheduled task) over Configuration Manager
@@ -275,11 +276,11 @@ AD_WORKER_EVAL_COHORT=whole \
   settle 10 min, per-row overhead (seeding, cleanup, judge) 5 min, floor idle wait 2 min. A row
   that exceeds these is stuck, not slow. Playwright rows x (runner + review settle + overhead +
   floor idle wait) per test, plus one review settle for the seeded row's floor-parent review and
-  two more floor idle waits (238 min for 7 rows: 7 x 32 + 10 + 4), so the suite's own timeouts
+  two more floor idle waits (270 min for 8 rows: 8 x 32 + 10 + 4), so the suite's own timeouts
   fire first. Wall time per row is dominated by one generation batch plus one review per
   unmatched attack (review concurrency 2).
-- CI step timeout: `stepTimeoutInMinutes` in `.buildkite/pipelines/evals/evals.suites.json` is 270
-  min, the 238 min Playwright timeout plus headroom for bootstrap, Scout boot and report upload.
+- CI step timeout: `stepTimeoutInMinutes` in `.buildkite/pipelines/evals/evals.suites.json` is 300
+  min, the 270 min Playwright timeout plus headroom for bootstrap, Scout boot and report upload.
   Without it the step falls back to the 120 min default and Buildkite kills it before the suite's own
   timeouts fire, losing every score. `src/ci_step_timeout.test.ts` fails if the step timeout drops
   below the Playwright timeout (for example when a dataset row is added).

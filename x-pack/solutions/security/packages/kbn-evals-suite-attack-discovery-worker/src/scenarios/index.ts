@@ -11,8 +11,9 @@ import { positiveChainLargeBatchScenario } from './positive_chain_large_batch';
 import { seededFalsePositiveScenario } from './seeded_false_positive';
 
 /**
- * Every scenario the worker suite runs: the shared audit scenarios plus the two worker-only
- * false-positive rows, whose worlds live in `worker_world.ts` rather than the shared suite.
+ * Every scenario the worker suite runs: the shared audit scenarios plus the worker-only rows (two
+ * false-positive rows and the large-batch positive control), whose worlds live in `worker_world.ts`
+ * rather than the shared suite.
  */
 export const WORKER_AUDIT_SCENARIOS: readonly AuditScenario[] = [
   ...AUDIT_SCENARIOS,
