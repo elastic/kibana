@@ -297,16 +297,29 @@ describe('osquery workflow step pickers', () => {
       expect(details.message).toBe('No pack named "My pack" in this space.');
     });
 
-    it('resolves an exact match even when the scan hits the page cap', async () => {
+    it('refuses an exact match when the scan hits the page cap, like the server does', async () => {
       const selection = createPackSelection(http);
       const fuzzy = Array.from({ length: 100 }, () => ({ ...pack, name: 'other' }));
       http.get.mockResolvedValue({ data: fuzzy, total: 1001 });
       http.get.mockResolvedValueOnce({ data: [pack, ...fuzzy.slice(1)], total: 1001 });
 
-      expect(await selection.resolve('My pack', context('pack'))).toMatchObject({
-        value: 'My pack',
-      });
+      expect(await selection.resolve('My pack', context('pack'))).toBeNull();
       expect(http.get).toHaveBeenCalledTimes(10);
+      expect((await selection.getDetails('My pack', context('pack'), null)).message).toBe(
+        'Too many packs match "My pack"; refine the name.'
+      );
+    });
+
+    it('scans without a search for a punctuation-only name', async () => {
+      http.get.mockResolvedValue({ data: [{ ...pack, name: '---' }] });
+
+      const option = await createPackSelection(http).resolve('---', context('pack'));
+
+      expect(http.get).toHaveBeenCalledWith('/api/osquery/packs', {
+        version: '2023-10-31',
+        query: { page: 1, pageSize: 100 },
+      });
+      expect(option).toMatchObject({ value: '---' });
     });
 
     it('finds an exact match on a later page', async () => {

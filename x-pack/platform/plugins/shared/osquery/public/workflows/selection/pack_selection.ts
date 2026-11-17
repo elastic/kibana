@@ -105,6 +105,11 @@ export const createPackSelection = (http: HttpSetup): PropertySelectionHandler<s
       try {
         const matches: PackItem[] = [];
         let truncated = false;
+        // Punctuation-only names have no searchable terms in the route's analyzer: scan instead,
+        // like the server's `resolvePackIdByName`.
+        const search = /[\p{L}\p{N}]/u.test(name)
+          ? { search: `"${name.replace(/["\\]/g, '\\$&')}"` }
+          : {};
         for (let page = 1; page <= RESOLVE_MAX_PAGES; page++) {
           // The route has no exact-name filter: search the quoted name, keep exact matches only.
           const { data = [], total = 0 } = await http.get<{
@@ -115,7 +120,7 @@ export const createPackSelection = (http: HttpSetup): PropertySelectionHandler<s
             query: {
               page,
               pageSize: RESOLVE_PAGE_SIZE,
-              search: `"${name.replace(/["\\]/g, '\\$&')}"`,
+              ...search,
             },
           });
           matches.push(...data.filter((pack) => pack.name === name));
@@ -136,7 +141,8 @@ export const createPackSelection = (http: HttpSetup): PropertySelectionHandler<s
           return null;
         }
 
-        if (matches.length === 1) return toOption(matches[0]);
+        // An incomplete scan can neither prove the name is missing nor unique: a duplicate may sit
+        // past the cap, and the server refuses to run in that case, so the editor must too.
         if (truncated) {
           validationErrors.set(
             name,
@@ -145,7 +151,11 @@ export const createPackSelection = (http: HttpSetup): PropertySelectionHandler<s
               values: { name: escapeMarkdown(name) },
             })
           );
+
+          return null;
         }
+
+        if (matches.length === 1) return toOption(matches[0]);
 
         return null;
       } catch (error) {
