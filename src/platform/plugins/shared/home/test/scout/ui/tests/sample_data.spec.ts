@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { test, tags } from '@kbn/scout';
+import { getRenderedChartStatus, test, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 const SAMPLE_DATA_SETS = ['flights', 'logs', 'ecommerce'] as const;
@@ -73,11 +73,7 @@ test.describe('Sample data', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('at least one XY chart has rendered', async () => {
-      await expect(
-        page.locator(
-          '[data-test-subj="xyVisChart"] .echChartStatus[data-ech-render-complete="true"]'
-        )
-      ).not.toHaveCount(0);
+      await expect(getRenderedChartStatus(page.testSubj.locator('xyVisChart'))).not.toHaveCount(0);
     });
 
     await test.step('saved search has data', async () => {

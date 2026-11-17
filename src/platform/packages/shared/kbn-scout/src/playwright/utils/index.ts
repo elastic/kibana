@@ -18,4 +18,10 @@ export { resolveSelector, type SelectorInput } from './locator_helper';
 export { keyTo } from './a11y_utils';
 export { checkA11y, type RunA11yScanOptions } from './axe';
 export { findImportedSavedObjectId } from './saved_objects';
-export { enableElasticChartDebug, type ElasticChartDebugTarget } from './elastic_chart_debug';
+export {
+  enableElasticChartDebug,
+  getChartDebugState,
+  getRenderedChartStatus,
+  waitForChartRenderComplete,
+  type ElasticChartDebugTarget,
+} from './elastic_chart_debug';

@@ -8,7 +8,14 @@
  */
 
 import type { KbnClient, ScoutPage } from '@kbn/scout';
-import { enableElasticChartDebug, findImportedSavedObjectId, spaceTest, tags } from '@kbn/scout';
+import type { DebugState } from '@elastic/charts';
+import {
+  enableElasticChartDebug,
+  findImportedSavedObjectId,
+  getChartDebugState,
+  spaceTest,
+  tags,
+} from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 const KBN_ARCHIVE =
@@ -60,23 +67,15 @@ spaceTest.describe('Dashboard to dashboard drilldown', { tag: tags.stateful.clas
     await kbnClient.spaces.delete(copyToSpaceId).catch(() => {});
   });
 
-  const waitForChart = async (chart: ReturnType<ScoutPage['testSubj']['locator']>) => {
-    await expect(chart).toBeVisible();
-    await expect(chart.locator('.echChartStatus[data-ech-debug-state]')).toBeAttached();
-  };
-
   const clickPieSlice = async (page: ScoutPage, sliceName: string) => {
     const pie = page.testSubj.locator('partitionVisChart');
-    await waitForChart(pie);
     await expect(async () => {
-      const debugState = JSON.parse(
-        (await pie.locator('.echChartStatus').getAttribute('data-ech-debug-state')) ?? '{}'
-      );
-      const slice = (debugState?.partition?.[0]?.partitions ?? []).find(
-        (s: { name: string | number }) => String(s.name) === sliceName
+      const debugState = await getChartDebugState<DebugState>(pie);
+      const slice = (debugState.partition?.[0]?.partitions ?? []).find(
+        (s) => String(s.name) === sliceName
       );
       expect(slice).toBeDefined();
-      await pie.click({ position: { x: slice.coords[0], y: slice.coords[1] } });
+      await pie.click({ position: { x: slice!.coords[0], y: slice!.coords[1] } });
       await expect(page.testSubj.locator('multipleActionsContextMenu')).toBeVisible({
         timeout: 2_000,
       });

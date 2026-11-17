@@ -121,6 +121,9 @@ export type { SelectorInput } from './src/playwright/utils';
 export {
   enableElasticChartDebug,
   findImportedSavedObjectId,
+  getChartDebugState,
+  getRenderedChartStatus,
+  waitForChartRenderComplete,
   type ElasticChartDebugTarget,
 } from './src/playwright/utils';
 
