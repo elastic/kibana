@@ -157,7 +157,7 @@ steps:
 
                 You are given ITEMS to review, NEIGHBORS (similar items they may duplicate or contradict), FACTS ABOUT the reviewed entities, and RELATIONSHIPS between them. Each item shows its kind (fact or entity), how many memories it was seen in (occurrences) and when it was last seen (last_seen_at). Each of the ITEMS shows why it is reviewed (reasons).
 
-                Return only changes, each with a short reason. Change nothing you are not sure about: an empty answer is valid.
+                Return only changes, each with a short reason. Change nothing you are not sure about. When nothing needs to change, return every list empty.
                 - merges: items of the same kind that state or name the same thing. Keep the most complete one as survivor and list the others in absorbed. Give a title and content for the survivor that keep everything the group states, with exact names, numbers, codes and dates. Never merge items that are only related.
                 - contradictions: two facts that cannot both be true now.
                   - label changed: each was true at a different time, such as a plan that moved from Basic to Pro. Give content for the newer one that states the latest value and the earlier ones with when they held, such as "28 mpg as of May 2023, down from 30 in February 2023".
@@ -197,6 +197,12 @@ steps:
                 {%- endfor %}
               schema:
                 type: object
+                required:
+                  - merges
+                  - contradictions
+                  - rewrites
+                  - summaries
+                  - relationships
                 properties:
                   merges:
                     type: array

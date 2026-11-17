@@ -290,18 +290,14 @@ describe('CONTEXT_ENGINE_MAINTENANCE_WORKFLOW', () => {
     );
   });
 
-  it('asks the model for each kind of change', () => {
+  it('asks the model for each kind of change, every list required so a batch with nothing to change still answers', () => {
     const { schema } = findStep(batchSteps(), 'maintain').with as {
-      schema: { properties: Record<string, unknown> };
+      schema: { properties: Record<string, unknown>; required: string[] };
     };
+    const kinds = ['merges', 'contradictions', 'rewrites', 'summaries', 'relationships'];
 
-    expect(Object.keys(schema.properties)).toEqual([
-      'merges',
-      'contradictions',
-      'rewrites',
-      'summaries',
-      'relationships',
-    ]);
+    expect(Object.keys(schema.properties)).toEqual(kinds);
+    expect(schema.required).toEqual(kinds);
   });
 
   it('brakes when the run would tombstone more than the gather step allows', () => {
