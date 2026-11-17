@@ -22,6 +22,7 @@ import {
 import { EngineDescriptorClient, EntityStoreGlobalStateClient } from './domain/saved_objects';
 import { LogsExtractionClient } from './domain/logs_extraction';
 import { HistorySnapshotClient } from './domain/history_snapshot';
+import { SystemEventsWriter, createSystemEventsDashboardClient } from './domain/system_events';
 import { CRUDClient } from './domain/crud';
 import { EntityMetadataClient } from './domain/entity_metadata';
 import { RelationshipsClient } from './domain/relationships';
@@ -102,6 +103,12 @@ export async function createRequestHandlerContext({
     globalStateClient,
   });
 
+  const systemEventsWriter = new SystemEventsWriter({
+    esClient: core.elasticsearch.client.asInternalUser,
+    logger,
+    namespace,
+  });
+
   const historySnapshotClient = new HistorySnapshotClient({
     logger,
     esClient,
@@ -109,6 +116,7 @@ export async function createRequestHandlerContext({
     namespace,
     globalStateClient,
     taskManager: taskManagerStart,
+    systemEventsWriter,
   });
 
   return {
@@ -130,6 +138,11 @@ export async function createRequestHandlerContext({
       isLegacySecurityAssetsMigrationEnabled: () =>
         getLegacySecurityAssetsMigrationFlag(coreStart.featureFlags),
       isDualProcessEnabled: () => isDualProcessEnabled(coreStart.featureFlags),
+      systemEventsDashboard: createSystemEventsDashboardClient({
+        savedObjects: coreStart.savedObjects,
+        namespace,
+        logger,
+      }),
     }),
     entityMaintainersClient: new EntityMaintainersClient({
       logger,
@@ -167,6 +180,7 @@ export async function createRequestHandlerContext({
     isDualProcessEnabled: () => isDualProcessEnabled(coreStart.featureFlags),
     logsExtractionClient,
     historySnapshotClient,
+    systemEventsWriter,
     security: startPlugins.security,
     namespace,
     analytics,

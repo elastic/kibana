@@ -21,6 +21,7 @@ import {
   hasPriorityExtractionGate,
   resolveExtractionMode,
 } from '../../../common/domain/definitions/registry';
+import { toExtractionRunEvent } from '../../domain/system_events';
 
 const ALL_PROCESSES = 'all';
 
@@ -67,7 +68,12 @@ export function registerForceLogExtraction(router: EntityStorePluginRouter) {
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { logger: baseLogger, logsExtractionClient, isDualProcessEnabled } = entityStoreCtx;
+        const {
+          logger: baseLogger,
+          logsExtractionClient,
+          isDualProcessEnabled,
+          systemEventsWriter,
+        } = entityStoreCtx;
         const { entityType } = req.params;
         const { fromDateISO, toDateISO, process } = req.body;
 
@@ -88,12 +94,33 @@ export function registerForceLogExtraction(router: EntityStorePluginRouter) {
           });
         }
 
-        if (process === ALL_PROCESSES) {
-          logger.debug(`Force log extraction API called for entity type ${entityType} as all`);
-          const extract = (mode: ExtractionMode) =>
-            logsExtractionClient
+        const extract = async (mode: ExtractionMode) => {
+          const runEventBase = {
+            startedAt: Date.now(),
+            trigger: 'user',
+            entityType,
+            mode,
+          } as const;
+          try {
+            const summary = await logsExtractionClient
               .withExtractionMode(mode)
               .extractLogs(entityType, { specificWindow: { fromDateISO, toDateISO } });
+            const runEvent = toExtractionRunEvent(runEventBase, { summary });
+            if (runEvent) {
+              await systemEventsWriter.writeRun(runEvent);
+            }
+            return summary;
+          } catch (error) {
+            const runEvent = toExtractionRunEvent(runEventBase, { error });
+            if (runEvent) {
+              await systemEventsWriter.writeRun(runEvent);
+            }
+            throw error;
+          }
+        };
+
+        if (process === ALL_PROCESSES) {
+          logger.debug(`Force log extraction API called for entity type ${entityType} as all`);
           const [priority, nonPriority] = await Promise.all([
             extract(EXTRACTION_MODE.priority),
             extract(EXTRACTION_MODE.nonPriority),
@@ -109,11 +136,7 @@ export function registerForceLogExtraction(router: EntityStorePluginRouter) {
           `Force log extraction API called for entity type ${entityType} as ${extractionMode}`
         );
 
-        const summary = await logsExtractionClient
-          .withExtractionMode(extractionMode)
-          .extractLogs(entityType, {
-            specificWindow: { fromDateISO, toDateISO },
-          });
+        const summary = await extract(extractionMode);
 
         return res.ok({
           body: summary,

@@ -19,6 +19,7 @@ import {
   registerInitMaintainers,
   registerRunMaintainer,
   registerForceHistorySnapshot,
+  registerSystemEventsSetup,
   registerEnableHistorySnapshot,
   registerDisableHistorySnapshot,
   registerCRUDCreate,
@@ -48,6 +49,7 @@ export function registerRoutes(router: EntityStorePluginRouter) {
   registerUninstall(router);
   registerForceLogExtraction(router);
   registerForceHistorySnapshot(router);
+  registerSystemEventsSetup(router);
   registerEnableHistorySnapshot(router);
   registerDisableHistorySnapshot(router);
   registerCheckPrivileges(router);

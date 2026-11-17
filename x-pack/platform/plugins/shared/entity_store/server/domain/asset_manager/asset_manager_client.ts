@@ -35,6 +35,11 @@ import {
 } from '../../tasks/regenerate_task_api_keys';
 import { entityMaintainersRegistry } from '../../tasks/entity_maintainers/entity_maintainers_registry';
 import { installSharedElasticsearchAssets, uninstallElasticsearchAssets } from './install_assets';
+import {
+  installSystemEventsStreams,
+  uninstallSystemEventsStreams,
+  type SystemEventsDashboardClient,
+} from '../system_events';
 import { deleteLegacyRemoteStateSavedObjects } from '../saved_objects/remote_log_extraction_state/types';
 import type { LogExtractionConfig } from '../saved_objects';
 import {
@@ -107,6 +112,7 @@ interface AssetManagerDependencies {
   savedObjectsClient: SavedObjectsClientContract;
   isLegacySecurityAssetsMigrationEnabled?: () => Promise<boolean>;
   isDualProcessEnabled?: () => Promise<boolean>;
+  systemEventsDashboard?: SystemEventsDashboardClient;
 }
 
 export class AssetManagerClient {
@@ -124,6 +130,7 @@ export class AssetManagerClient {
   private readonly savedObjectsClient: SavedObjectsClientContract;
   private readonly isLegacySecurityAssetsMigrationEnabled: () => Promise<boolean>;
   private readonly isDualProcessEnabled: () => Promise<boolean>;
+  private readonly systemEventsDashboard?: SystemEventsDashboardClient;
 
   constructor(deps: AssetManagerDependencies) {
     this.logger = deps.logger;
@@ -141,6 +148,7 @@ export class AssetManagerClient {
     this.isLegacySecurityAssetsMigrationEnabled =
       deps.isLegacySecurityAssetsMigrationEnabled ?? (async () => false);
     this.isDualProcessEnabled = deps.isDualProcessEnabled ?? (async () => false);
+    this.systemEventsDashboard = deps.systemEventsDashboard;
   }
 
   public async init(
@@ -221,6 +229,8 @@ export class AssetManagerClient {
           namespace: this.namespace,
           request,
         }),
+
+        this.installSystemEvents(),
       ]);
     } catch (error) {
       this.analytics.reportEvent(ENTITY_STORE_INITIALIZATION_FAILURE_EVENT, {
@@ -229,6 +239,31 @@ export class AssetManagerClient {
       });
       this.logger.error(`Error during entity store init: ${getErrorMessage(error)}`);
       throw error;
+    }
+  }
+
+  /**
+   * Creates the system events streams and dashboard as the internal user. Best-effort: run
+   * history is not needed for the store to work. The first write retries the streams, and the
+   * Settings tab retries the dashboard through the system events setup route.
+   */
+  public async installSystemEvents(): Promise<void> {
+    try {
+      await installSystemEventsStreams(this.internalEsClient, this.namespace, this.logger);
+      await this.systemEventsDashboard?.install();
+    } catch (error) {
+      this.logger.warn(`Failed to install system events assets: ${getErrorMessage(error)}`);
+    }
+  }
+
+  private async uninstallSystemEvents(): Promise<void> {
+    try {
+      await Promise.all([
+        uninstallSystemEventsStreams(this.internalEsClient, this.namespace),
+        this.systemEventsDashboard?.uninstall(),
+      ]);
+    } catch (error) {
+      this.logger.warn(`Failed to delete system events assets: ${getErrorMessage(error)}`);
     }
   }
 
@@ -505,6 +540,7 @@ export class AssetManagerClient {
         namespace: this.namespace,
         logger: this.logger,
       }),
+      this.uninstallSystemEvents(),
     ]);
 
     this.logger.debug(

@@ -15,7 +15,12 @@ import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import type { EntityStoreStatus, GetStatusSuccessResult } from '../../domain/types';
-import type { EngineError, EngineStatus, LogExtractionConfig } from '../../domain/saved_objects';
+import type {
+  EngineError,
+  EngineStatus,
+  HistorySnapshotState,
+  LogExtractionConfig,
+} from '../../domain/saved_objects';
 import { capAtMaxLogsPerWindow } from '../../domain/logs_extraction/effective_page_limits';
 import { ENTITY_STORE_STATUS } from '../../domain/constants';
 
@@ -85,6 +90,7 @@ export interface EntityStoreStatusResponseBody {
   status: EntityStoreStatus;
   engines: StatusEngine[];
   excludedUserNames?: string[];
+  historySnapshot?: Pick<HistorySnapshotState, 'status' | 'frequency' | 'retentionDays'>;
 }
 
 const querySchema = lazySchema(() =>
@@ -211,6 +217,7 @@ export function registerStatus(router: EntityStorePluginRouter) {
             logsExtractionConfigByType,
             nonPriorityLogsExtractionConfigByType,
             excludedUserNames,
+            historySnapshot,
           } = rest as GetStatusSuccessResult;
 
           return res.ok({
@@ -224,6 +231,11 @@ export function registerStatus(router: EntityStorePluginRouter) {
                 )
               ),
               excludedUserNames,
+              historySnapshot: historySnapshot && {
+                status: historySnapshot.status,
+                frequency: historySnapshot.frequency,
+                retentionDays: historySnapshot.retentionDays,
+              },
             },
           });
         }
