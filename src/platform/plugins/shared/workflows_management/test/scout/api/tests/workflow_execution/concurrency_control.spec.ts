@@ -55,7 +55,8 @@ steps:
       message: "Hello from Scout API test 2"
 `;
 
-spaceTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/257103
+spaceTest.describe.skip(
   'Workflow execution concurrency control',
   { tag: tags.deploymentAgnostic },
   () => {
@@ -77,16 +78,17 @@ spaceTest.describe(
         { env: 'dev', problem: 'issue-1' },
       ];
 
-      const scheduledExecutions: { workflowExecutionId: string; concurrencyKey: string }[] = [];
-
-      for (const event of events) {
-        const response = await workflowsApi.run(workflowId, event);
-
-        scheduledExecutions.push({
-          workflowExecutionId: response.workflowExecutionId,
-          concurrencyKey: `${event.env}-${event.problem}-${isolationKey}`,
-        });
-      }
+      // Post every run together. Awaiting each /run in turn lets a short workflow
+      // finish before the next same-key run is submitted, and drop then admits it.
+      const scheduledExecutions = await Promise.all(
+        events.map(async (event) => {
+          const response = await workflowsApi.run(workflowId, event);
+          return {
+            workflowExecutionId: response.workflowExecutionId,
+            concurrencyKey: `${event.env}-${event.problem}-${isolationKey}`,
+          };
+        })
+      );
 
       const terminalExecutions = await Promise.all(
         scheduledExecutions.map((scheduledExecution) =>

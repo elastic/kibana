@@ -10,12 +10,14 @@
 import { EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { useWorkflowExecutionRerun } from './use_workflow_executions_bulk_actions';
 import { useWorkflowExecutionsPageFilters } from './use_workflow_executions_page_filters';
 import { WorkflowExecutionDetailFlyout } from './workflow_execution_detail_flyout';
 import { createWorkflowExecutionsDataView } from './workflow_executions_data_view';
 import { WorkflowExecutionsFilters } from './workflow_executions_filters';
 import { WorkflowExecutionsSearchBar } from './workflow_executions_search_bar';
+import { isUnsupportedFilter } from './workflow_executions_search_query';
 import { WorkflowExecutionsTable } from './workflow_executions_table';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSpaceId } from '../../hooks/use_space_id';
@@ -51,7 +53,7 @@ const clearSelectedExecutionIfChanged = (
 };
 
 export const WorkflowExecutionsPageContent = React.memo(() => {
-  const { fieldFormats } = useKibana().services;
+  const { fieldFormats, notifications } = useKibana().services;
   const spaceId = useSpaceId();
   const telemetry = useTelemetry();
   const dataView = useMemo(() => createWorkflowExecutionsDataView(fieldFormats), [fieldFormats]);
@@ -147,7 +149,22 @@ export const WorkflowExecutionsPageContent = React.memo(() => {
   );
 
   const handleSearchBarFiltersUpdated = useCallback(
-    (filters: Filter[]) => {
+    (updatedFilters: Filter[]) => {
+      // Filters that cannot be sent to the API are disabled so the pill does not claim to narrow the table.
+      const hasUnsupported = updatedFilters.some(isUnsupportedFilter);
+      const filters = hasUnsupported
+        ? updatedFilters.map((f) =>
+            isUnsupportedFilter(f) ? { ...f, meta: { ...f.meta, disabled: true } } : f
+          )
+        : updatedFilters;
+      if (hasUnsupported) {
+        notifications.toasts.addWarning(
+          i18n.translate('workflows.executionsPage.unsupportedFilterWarning', {
+            defaultMessage:
+              'Some filters cannot be applied to the executions list and were disabled. Use a KQL query instead.',
+          })
+        );
+      }
       setSearchBarFilters(filters);
       const nextKey = JSON.stringify(filters);
       if (previousSearchBarFiltersKey.current !== nextKey && filters.length > 0) {
@@ -160,7 +177,7 @@ export const WorkflowExecutionsPageContent = React.memo(() => {
         setSelectedExecution(null, { replace: true })
       );
     },
-    [setSelectedExecution, telemetry]
+    [notifications.toasts, setSelectedExecution, telemetry]
   );
 
   const handleCloseExecution = useCallback(() => {

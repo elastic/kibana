@@ -5,7 +5,9 @@
   },
   "include": ["**/*"],
   "kbn_references": [
+    "@kbn/apm-types",
     "@kbn/synthtrace",
+    "@kbn/synthtrace-client",
     "@kbn/scout-oblt",
     "@kbn/scout-synthtrace",
     // Synth helpers, shared constants, and the ingestApmMetricsFixtures()

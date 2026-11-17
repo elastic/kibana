@@ -539,6 +539,22 @@ describe('saved search embeddable', () => {
       expect(api.esql$.getValue()).toEqual([]);
     });
 
+    it('should support JSON export', async () => {
+      const { search } = createSearchFnMock(1);
+      runtimeState = getInitialRuntimeState({ searchMock: search });
+
+      const { api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { ref_id: 'id', overrides: {} },
+        finalizeApi: finalizeApiMock,
+        uuid,
+        parentApi: mockedDashboardApi,
+      });
+      await waitOneTick();
+
+      expect(api.supportsJsonExport).toBe(true);
+    });
+
     it('should not provide inline editing overrides for by-value embeddables', async () => {
       const { search } = createSearchFnMock(1);
       runtimeState = getInitialRuntimeState({

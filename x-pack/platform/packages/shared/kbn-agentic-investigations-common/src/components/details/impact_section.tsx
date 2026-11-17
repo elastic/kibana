@@ -26,28 +26,26 @@ export interface ImpactSectionProps {
  * own section rather than a row inside the grouped attachments.
  */
 export const ImpactSection = memo<ImpactSectionProps>(({ attachments }) => {
-  const sections = useMemo(
-    () =>
-      getActiveAttachments(attachments ?? [])
-        .filter((attachment) => attachment.type === IMPACT_ATTACHMENT_TYPE)
-        .map((attachment) => {
-          const content = renderImpactDetails(toRenderAttachment(attachment).data);
-          if (!content) {
-            return null;
-          }
-          return <div key={attachment.id}>{content}</div>;
-        })
-        .filter(Boolean),
-    [attachments]
-  );
+  const content = useMemo(() => {
+    const documents = getActiveAttachments(attachments ?? []).reduce<unknown[]>(
+      (acc, attachment) => {
+        if (attachment.type === IMPACT_ATTACHMENT_TYPE) {
+          acc.push(toRenderAttachment(attachment).data);
+        }
+        return acc;
+      },
+      []
+    );
+    return documents.length > 0 ? renderImpactDetails(documents) : null;
+  }, [attachments]);
 
-  if (sections.length === 0) {
+  if (!content) {
     return null;
   }
 
   return (
     <EuiFlexItem>
-      <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.impact}>{sections}</DetailsBlock>
+      <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.impact}>{content}</DetailsBlock>
     </EuiFlexItem>
   );
 });

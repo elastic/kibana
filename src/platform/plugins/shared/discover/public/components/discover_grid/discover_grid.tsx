@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactNode } from 'react';
 import React, { useCallback, useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
   DEFAULT_PAGINATION_MODE,
   renderCustomToolbar,
@@ -99,22 +99,25 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
       dataSource?.kind === 'esql' && !!cascadedDocumentsContext?.availableCascadeGroups.length;
 
     const externalAdditionalControls = useMemo(() => {
-      const additionalControls: ReactNode[] = [];
-
-      if (customExternalAdditionalControls) {
-        additionalControls.push(customExternalAdditionalControls);
+      if (!customExternalAdditionalControls && !isCascadedDocumentsAvailable) {
+        return undefined;
       }
 
-      if (isCascadedDocumentsAvailable) {
-        additionalControls.push(
-          groupBySelectorRenderer(
-            cascadedDocumentsContext.availableCascadeGroups,
-            cascadedDocumentsContext.selectedCascadeGroups
-          )
-        );
-      }
-
-      return additionalControls.length ? additionalControls : undefined;
+      return (
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          {customExternalAdditionalControls && (
+            <EuiFlexItem grow={false}>{customExternalAdditionalControls}</EuiFlexItem>
+          )}
+          {isCascadedDocumentsAvailable && (
+            <EuiFlexItem grow={false}>
+              {groupBySelectorRenderer(
+                cascadedDocumentsContext.availableCascadeGroups,
+                cascadedDocumentsContext.selectedCascadeGroups
+              )}
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      );
     }, [
       cascadedDocumentsContext,
       customExternalAdditionalControls,

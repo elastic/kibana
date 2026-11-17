@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { AppHeaderView } from '@kbn/app-header';
 import { css } from '@emotion/react';
 import { transparentize, useEuiTheme } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
-import { useAlertZeroDocumentationLink } from '../../hooks/use_alertzero_documentation_link';
+import {
+  useAlertZeroDocumentationLink,
+  type AlertZeroDocumentationPage,
+} from '../../hooks/use_alertzero_documentation_link';
+import { AppHeadingDocLinkContext } from './app_heading_doc_link';
+import { AppHeadingTitleContext } from './app_heading_title';
 import { BRAND_TITLE, NAV_ESCALATIONS } from './translations';
 
 /**
@@ -45,42 +50,50 @@ interface AppChromeLayoutProps {
  * and left rail (including Launchpad, Dev Tools, Settings, collapse).
  */
 export const AppChromeLayout: React.FC<AppChromeLayoutProps> = ({ children }) => {
-  const docLink = useAlertZeroDocumentationLink();
   const { euiTheme } = useEuiTheme();
   const { pathname } = useLocation();
+  // Set by a page through `useAppHeadingTitle`. Overrides the route's title while it's mounted.
+  const [pageTitle, setPageTitle] = useState<string | undefined>();
+  // Set by a page through `useAppHeadingDocLink`. `/` hosts both onboarding and Proposed actions,
+  // so only the page knows which documentation applies. Falls back to the AlertZero overview.
+  const [docLinkPage, setDocLinkPage] = useState<AlertZeroDocumentationPage | undefined>();
+  const docLink = useAlertZeroDocumentationLink(docLinkPage ?? 'overview');
 
   const isWatchesShell = matchesRoute(pathname, CHROME_SCROLLED_ROUTES);
   const isChromeScrolled = isWatchesShell || CHROME_SCROLLED_EXACT_ROUTES.includes(pathname);
   const overflow = isChromeScrolled ? 'visible' : 'auto';
   const hideAppHeading = isWatchesShell;
-  const appHeadingTitle = matchesRoute(pathname, ['/escalations']) ? NAV_ESCALATIONS : BRAND_TITLE;
+  const appHeadingTitle =
+    pageTitle ?? (matchesRoute(pathname, ['/escalations']) ? NAV_ESCALATIONS : BRAND_TITLE);
 
   return (
-    <>
-      {hideAppHeading ? null : (
-        <AppHeaderView title={appHeadingTitle} spacing="compact" docLink={docLink} />
-      )}
-      <div
-        css={css`
-          display: flex;
-          flex-direction: column;
-          flex: 1;
-          min-height: 0;
-          overflow: ${overflow};
-          background: ${euiTheme.colors.emptyShade};
-          background: linear-gradient(
-              180deg,
-              ${euiTheme.colors.emptyShade} 0%,
-              ${euiTheme.colors.backgroundBaseSubdued} 50%,
-              ${euiTheme.colors.emptyShade} 100%
-            ),
-            ${euiTheme.colors.emptyShade};
-          box-shadow: 0 1px 2px ${transparentize(euiTheme.colors.shadow, 0.04)};
-        `}
-        data-test-subj="alertZeroAppChromeLayout"
-      >
-        {children}
-      </div>
-    </>
+    <AppHeadingTitleContext.Provider value={setPageTitle}>
+      <AppHeadingDocLinkContext.Provider value={setDocLinkPage}>
+        {hideAppHeading ? null : (
+          <AppHeaderView title={appHeadingTitle} spacing="compact" docLink={docLink} />
+        )}
+        <div
+          css={css`
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+            overflow: ${overflow};
+            background: ${euiTheme.colors.emptyShade};
+            background: linear-gradient(
+                180deg,
+                ${euiTheme.colors.emptyShade} 0%,
+                ${euiTheme.colors.backgroundBaseSubdued} 50%,
+                ${euiTheme.colors.emptyShade} 100%
+              ),
+              ${euiTheme.colors.emptyShade};
+            box-shadow: 0 1px 2px ${transparentize(euiTheme.colors.shadow, 0.04)};
+          `}
+          data-test-subj="alertZeroAppChromeLayout"
+        >
+          {children}
+        </div>
+      </AppHeadingDocLinkContext.Provider>
+    </AppHeadingTitleContext.Provider>
   );
 };

@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import { buildPatternKeys, getField, PATTERN_KEY_FIELDS } from './pattern_key';
+import { buildPatternKeys, getField } from './pattern_key';
 
 type AlertDocument = Record<string, unknown>;
-
-/** Every field the proposal title, comment and pattern history read from an alert. */
-export const PROPOSAL_TEXT_FIELDS: readonly string[] = [
-  ...new Set([...PATTERN_KEY_FIELDS, 'host.name', 'user.name', 'process.executable']),
-];
 
 const MAX_LISTED = 5;
 const SHOWN = 2;

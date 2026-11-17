@@ -23,6 +23,7 @@ import type {
   EsWorkflowStepExecution,
   ExecutionStatus,
   ExecutionType,
+  TriggerSchemaOptions,
   UpdatedWorkflowResponseDto,
   ValidateWorkflowResponseDto,
   WorkflowAggsDto,
@@ -36,11 +37,14 @@ import type {
   WorkflowStatsDto,
 } from '@kbn/workflows';
 import type { ManagedWorkflowId } from '@kbn/workflows/managed';
+import type { ManagedFilter } from '@kbn/workflows/server';
 import type {
   ExecuteManagedWorkflowOptions,
   GetManagedWorkflowStatusOptions,
+  ManagedWorkflowInstallManyResult,
   ManagedWorkflowInstanceState,
   ManagedWorkflowOperationOptions,
+  ManagedWorkflowServiceInstallManyItem,
   ManagedWorkflowServiceInstallOptions,
   ManagedWorkflowStatusReport,
 } from '@kbn/workflows/server/types';
@@ -81,6 +85,7 @@ import type {
   RestoreWorkflowVersionResponseDto,
   WorkflowChangesHistoryResponse,
 } from '../../common/lib/workflow_change_history/types';
+import type { WorkflowLookupItem } from '../../common/lib/workflow_dependents/types';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { getHistoryForWorkflow } from '../lib/get_workflow_change_history';
 import {
@@ -99,6 +104,8 @@ import type {
   ProcessedWaitForInputFacets,
   ProcessedWaitForInputFilters,
   WaitForInputListResult,
+  WorkflowExecutionStatusCounts,
+  WorkflowExecutionStatusCountsParams,
   WorkflowExecutionStatusItem,
 } from '../services/workflow_execution_query_service';
 import { WorkflowExecutionQueryService } from '../services/workflow_execution_query_service';
@@ -140,6 +147,7 @@ export interface SearchWorkflowExecutionsParams {
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   executedBy?: string[];
+  runName?: string;
   concurrencyGroupKey?: string;
   omitStepRuns?: boolean;
   finishedAfter?: string;
@@ -187,7 +195,9 @@ export class WorkflowsService {
     public readonly core: CoreSetup<WorkflowsServerPluginStartDeps>,
     public readonly plugins: WorkflowsServerPluginSetupDeps,
     private readonly logger: Logger,
-    public readonly kibanaVersion: string
+    public readonly kibanaVersion: string,
+    /** `workflowsManagement.pages.enabled`. */
+    private readonly pagesEnabled = false
   ) {
     this.changeHistoryService = new WorkflowChangeHistoryService(logger, kibanaVersion);
     this.initPromise = this.initialize(core);
@@ -266,6 +276,13 @@ export class WorkflowsService {
       getCoreStart: () => this.coreStart,
       licensing: pluginsStart.licensing,
       logger: this.logger,
+      getWorkflowsForOutputs: async (ids, spaceId, request) => {
+        const access = await this.getAccessControl();
+        return this.crudService.getWorkflowsSourceByIds(ids, spaceId, ['name', 'definition'], {
+          accessControlFilter: await access.readFilter(request),
+        });
+      },
+      pagesEnabled: this.pagesEnabled,
     });
 
     const { workflowExecutionsDataClient, stepExecutionsDataClient } =
@@ -508,6 +525,24 @@ export class WorkflowsService {
     return this.searchService.getWorkflowsSubscribedToTrigger(triggerId, spaceId);
   }
 
+  public async indexCalledWorkflowIds(ids: string[]): Promise<void> {
+    await this.ensureInitialized();
+    await this.crudService.indexCalledWorkflowIds(ids);
+  }
+
+  public async findWorkflowsCalling(
+    workflowIds: string[],
+    spaceId: string,
+    options: {
+      accessControlFilter?: estypes.QueryDslQueryContainer;
+      includeUnindexed?: boolean;
+      managedFilter?: ManagedFilter;
+    }
+  ): Promise<WorkflowLookupItem[]> {
+    await this.ensureInitialized();
+    return this.searchService.findWorkflowsCalling(workflowIds, spaceId, options);
+  }
+
   public async getWorkflows(
     params: GetWorkflowsParams,
     spaceId: string,
@@ -587,6 +622,14 @@ export class WorkflowsService {
   ): Promise<WorkflowExecutionListDto> {
     await this.ensureInitialized();
     return this.executionQueryService.getWorkflowExecutions(params, spaceId);
+  }
+
+  public async getWorkflowExecutionStatusCounts(
+    params: WorkflowExecutionStatusCountsParams,
+    spaceId: string
+  ): Promise<WorkflowExecutionStatusCounts> {
+    await this.ensureInitialized();
+    return this.executionQueryService.getWorkflowExecutionStatusCounts(params, spaceId);
   }
 
   public async searchExecutionsView(
@@ -728,6 +771,10 @@ export class WorkflowsService {
     return this.validationService.getAvailableConnectors(spaceId, request);
   }
 
+  public getTriggerSchemaOptions(): TriggerSchemaOptions {
+    return { includePageTrigger: this.pagesEnabled };
+  }
+
   public async getRegisteredCustomTriggerDefinitions(): Promise<ServerTriggerDefinition[]> {
     await this.ensureInitialized();
     return this.validationService.getRegisteredCustomTriggerDefinitions();
@@ -778,6 +825,26 @@ export class WorkflowsService {
     );
   }
 
+  /**
+   * Install or update static managed workflows with `_bulk`, after one ES readiness check for the
+   * whole batch. Best-effort like {@link installManagedWorkflow}: a gated batch resolves with no
+   * failures and marks the plugin install pass incomplete.
+   */
+  public async bulkInstallManagedWorkflows(
+    items: readonly ManagedWorkflowServiceInstallManyItem[],
+    registeredPluginId: string
+  ): Promise<ManagedWorkflowInstallManyResult> {
+    await this.ensureInitialized();
+    const readiness = await this.ensureManagedInstallReady(
+      `install of ${items.length} workflow(s) for plugin '${registeredPluginId}'`
+    );
+    if (!readiness.ready) {
+      this.managedWorkflowsService.markInstallIncomplete(registeredPluginId);
+      return { failed: [] };
+    }
+    return this.managedWorkflowsService.bulkInstallManagedWorkflows(items, registeredPluginId);
+  }
+
   public async uninstallManagedWorkflow(
     id: ManagedWorkflowId,
     options: ManagedWorkflowOperationOptions,
@@ -791,6 +858,15 @@ export class WorkflowsService {
       registeredPluginId,
       request
     );
+  }
+
+  public async disableManagedWorkflow(
+    id: ManagedWorkflowId,
+    options: ManagedWorkflowOperationOptions,
+    registeredPluginId: string
+  ): Promise<boolean> {
+    await this.ensureInitialized();
+    return this.managedWorkflowsService.disableManagedWorkflow(id, options, registeredPluginId);
   }
 
   public async getManagedWorkflowStatus(

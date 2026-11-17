@@ -115,7 +115,7 @@ export interface EcsSecurityExtension {
   // Not representative of the parsed types that are camel cased.
   'kibana.alert.rule.parameters'?: { index: string[]; data_view_id?: string; type?: string };
   'kibana.alert.workflow_status'?: 'open' | 'acknowledged' | 'in-progress' | 'closed';
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   Memory_protection?: MemoryProtection;
   Ransomware?: Ransomware;
   Target?: Target;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { jsonValueSchema } from '../../../schema';
 import {
   SECURITY_EVENT_ATTACHMENT_TYPE,
@@ -13,6 +13,7 @@ import {
   OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
   STACK_ALERT_ATTACHMENT_TYPE,
   SECURITY_ENTITY_ATTACHMENT_TYPE,
+  SECURITY_ATTACK_ATTACHMENT_TYPE,
 } from '../../../constants/attachments';
 import {
   AlertAttachmentAttributesSchema,
@@ -71,6 +72,7 @@ export const UnifiedAttachmentAttributesSchema = UnifiedAttachmentPayloadSchema.
 export const UnifiedAttachmentSchema = UnifiedAttachmentAttributesSchema.and(
   z.object({ id: z.string(), version: z.string() })
 );
+export const UnifiedAttachmentsSchema = lazySchema(() => z.array(UnifiedAttachmentSchema));
 
 /**
  * Partial payload props for patch (reference and value). `owner` cannot be changed after creation.
@@ -97,6 +99,7 @@ export type UnifiedValueAttachmentPayload = z.infer<typeof UnifiedValueAttachmen
 export type UnifiedAttachmentPayload = z.infer<typeof UnifiedAttachmentPayloadSchema>;
 export type UnifiedAttachmentAttributes = z.infer<typeof UnifiedAttachmentAttributesSchema>;
 export type UnifiedAttachment = z.infer<typeof UnifiedAttachmentSchema>;
+export type UnifiedAttachments = z.infer<typeof UnifiedAttachmentsSchema>;
 
 /**
  * Combined v1 legacy and v2 unified attachment types
@@ -130,25 +133,28 @@ const UnifiedDocumentAttachmentMetadataSchema = z
   ])
   .optional();
 
-const UnifiedDocumentAttachmentPayloadSchema = z
-  .object({
-    type: z.union([
-      z.literal(SECURITY_EVENT_ATTACHMENT_TYPE),
-      z.literal(SECURITY_ALERT_ATTACHMENT_TYPE),
-      z.literal(OBSERVABILITY_ALERT_ATTACHMENT_TYPE),
-      z.literal(STACK_ALERT_ATTACHMENT_TYPE),
-      z.literal(SECURITY_ENTITY_ATTACHMENT_TYPE),
-    ]),
-    attachmentId: z.union([z.string(), z.array(z.string())]),
-    owner: z.string(),
-  })
-  .and(
-    z
-      .object({
-        metadata: UnifiedDocumentAttachmentMetadataSchema,
-      })
-      .partial()
-  );
+const UnifiedDocumentAttachmentPayloadSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.union([
+        z.literal(SECURITY_EVENT_ATTACHMENT_TYPE),
+        z.literal(SECURITY_ALERT_ATTACHMENT_TYPE),
+        z.literal(OBSERVABILITY_ALERT_ATTACHMENT_TYPE),
+        z.literal(STACK_ALERT_ATTACHMENT_TYPE),
+        z.literal(SECURITY_ENTITY_ATTACHMENT_TYPE),
+        z.literal(SECURITY_ATTACK_ATTACHMENT_TYPE),
+      ]),
+      attachmentId: z.union([z.string(), z.array(z.string())]),
+      owner: z.string(),
+    })
+    .and(
+      z
+        .object({
+          metadata: UnifiedDocumentAttachmentMetadataSchema,
+        })
+        .partial()
+    )
+);
 
 const UnifiedDocumentAttachmentAttributesSchema = UnifiedDocumentAttachmentPayloadSchema.and(
   AttachmentAttributesBasicSchema

@@ -353,6 +353,24 @@ describe('fetchEsqlData', () => {
       expect(requestAdapter.getRequests()[0].stats).not.toHaveProperty('queryTime');
     });
 
+    it('names the request by the title it is given, else "Data"', async () => {
+      const requestAdapter = new RequestAdapter();
+
+      await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal, {
+        requestAdapter,
+      });
+      await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal, {
+        requestAdapter,
+        keepRequests: true,
+        requestTitle: 'Data (query 2)',
+      });
+
+      expect(requestAdapter.getRequests().map(({ name }) => name)).toEqual([
+        'Data',
+        'Data (query 2)',
+      ]);
+    });
+
     it('keeps only the latest request, so refetches do not pile up', async () => {
       const requestAdapter = new RequestAdapter();
 

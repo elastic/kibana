@@ -13,6 +13,7 @@ import { encodeKqlTemplateValue } from '@kbn/eval-kql';
 import { i18n } from '@kbn/i18n';
 import type { LiquidSettings } from '@kbn/workflows';
 import { createWorkflowLiquidEngine } from '@kbn/workflows';
+import { yieldToEventLoop } from '@kbn/workflows/server';
 
 type TemplateVariableSegment = string | number;
 type TemplateVariableSegments = TemplateVariableSegment[];
@@ -71,6 +72,13 @@ export class WorkflowTemplatingEngine {
 
   public render<T>(obj: T, context: Record<string, unknown>): T {
     return this.renderValueRecursively(obj, context) as T;
+  }
+
+  /**
+   * Same as {@link render}, but yields to the event loop before each value at any depth.
+   */
+  public async renderAsync<T>(obj: T, context: Record<string, unknown>): Promise<T> {
+    return (await this.renderValueRecursivelyAsync(obj, context)) as T;
   }
 
   /**
@@ -152,6 +160,35 @@ export class WorkflowTemplatingEngine {
     }
 
     // Return primitive values as-is (numbers, booleans, etc.)
+    return value;
+  }
+
+  private async renderValueRecursivelyAsync(
+    value: unknown,
+    context: Record<string, unknown>
+  ): Promise<unknown> {
+    await yieldToEventLoop();
+
+    if (typeof value === 'string') {
+      return this.renderValueRecursively(value, context);
+    }
+
+    if (Array.isArray(value)) {
+      const renderedArray: unknown[] = [];
+      for (const item of value) {
+        renderedArray.push(await this.renderValueRecursivelyAsync(item, context));
+      }
+      return renderedArray;
+    }
+
+    if (value !== null && typeof value === 'object') {
+      const renderedObject: Record<string, unknown> = {};
+      for (const [key, val] of Object.entries(value)) {
+        renderedObject[key] = await this.renderValueRecursivelyAsync(val, context);
+      }
+      return renderedObject;
+    }
+
     return value;
   }
 

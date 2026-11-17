@@ -32,7 +32,6 @@ tasks:
       - '!test/scout*/**/*playwright.config.ts'
       - '!test/scout*/**/.meta/**/*'
       - '!**/integration_tests/**/*'
-      - '!**/__integration_tests__/**/*'
       - '!**/jest.integration.config.{js,cjs,json}'
     options:
       mergeArgs: append

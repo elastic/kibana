@@ -80,8 +80,7 @@ export class RulesAdapterV2 implements IRulesManagementClient {
   async createRule(id: string, definition: SignificantEventsRuleDefinition): Promise<void> {
     await this.rulesClient
       .createRule({
-        data: toV2CreateBody({ definition, cpsEnabled: this.cpsEnabled }),
-        options: { id },
+        data: { ...toV2CreateBody({ definition, cpsEnabled: this.cpsEnabled }), id },
       })
       .catch((error) => {
         if (isBoom(error) && error.output.statusCode === 409) {
@@ -337,8 +336,7 @@ export class RulesAdapterV2 implements IRulesManagementClient {
   ): Promise<void> {
     await this.rulesClient
       .createRule({
-        data: toV2CreateBody({ definition, cpsEnabled: this.cpsEnabled }),
-        options: { id },
+        data: { ...toV2CreateBody({ definition, cpsEnabled: this.cpsEnabled }), id },
       })
       .catch((error) => {
         if (isBoom(error) && error.output.statusCode === 409) {

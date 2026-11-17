@@ -91,6 +91,7 @@ export const buildAlertTilesHead = ({
         steps: [
           `WHERE ${isEntityDoc}`,
           // Alias rows are not in any bucket of the sparkline: they have no time.
+          // This query runs only when the entity index exists, so resolved_to is already KEYWORD.
           `| EVAL _ea_entity_id = ${RESOLVED_TO}, alias_watchlisted = entity.attributes.watchlists IS NOT NULL${
             bucketExpression ? ', @timestamp = TO_DATETIME(null)' : ''
           }`,

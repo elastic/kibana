@@ -44,6 +44,10 @@ jest.mock('./pre_build.ts', () => ({
   runPreBuild: mockRunPreBuild,
 }));
 
+jest.mock('./frequent_cancellations_tip.ts', () => ({
+  postFrequentCancellationsTip: jest.fn().mockResolvedValue(undefined),
+}));
+
 jest.mock('../../../pipelines/evals/eval_pipeline.ts', () => ({
   getEvalTriggerStep: mockGetEvalTriggerStep,
 }));
@@ -374,7 +378,7 @@ describe('pull_request pipeline generation', () => {
     const changes = [
       {
         filename:
-          'x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/ui/tests/automated_response_actions.spec.ts',
+          'x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/shared_host/ui/tests/automated_response_actions.spec.ts',
       },
     ];
     mockGetPrChangesCached.mockResolvedValue(changes);

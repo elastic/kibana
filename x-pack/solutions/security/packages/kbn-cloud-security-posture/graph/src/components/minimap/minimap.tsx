@@ -12,12 +12,12 @@ import { Global, css } from '@emotion/react';
 import {
   GRAPH_MINIMAP_ID,
   GRAPH_MINIMAP_ENTITY_NODE_ID,
-  GRAPH_MINIMAP_LABEL_NODE_ID,
+  GRAPH_MINIMAP_EVENT_NODE_ID,
   GRAPH_MINIMAP_RELATIONSHIP_NODE_ID,
   GRAPH_MINIMAP_UNKNOWN_NODE_ID,
 } from '../test_ids';
 import type { NodeViewModel } from '../types';
-import { isEntityNode, isLabelNode, isRelationshipNode, isStackNode } from '../utils';
+import { isEntityNode, isEventNode, isRelationshipNode, isStackNode } from '../utils';
 import { NODE_HEIGHT, NODE_WIDTH, NODE_LABEL_HEIGHT, NODE_LABEL_WIDTH } from '../node/styles';
 
 interface MiniMapNodeRenderedProps extends MiniMapNodeProps {
@@ -60,17 +60,17 @@ const MiniMapNode = ({
     );
   }
 
-  // For groups of label nodes, render them as individual label nodes below
+  // For groups of event nodes, render them as individual event nodes below
   if (isStackNode(data)) {
     return null;
   }
 
-  // For label nodes, render a horizontal rectangle
-  if (isLabelNode(data)) {
+  // For event nodes, render a horizontal rectangle
+  if (isEventNode(data)) {
     return (
       <rect
         data-id={data.id}
-        data-test-subj={GRAPH_MINIMAP_LABEL_NODE_ID}
+        data-test-subj={GRAPH_MINIMAP_EVENT_NODE_ID}
         x={x}
         y={y}
         height={NODE_LABEL_HEIGHT}
