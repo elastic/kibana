@@ -52,7 +52,7 @@ const describeProposals = (count: HuntReportExpectation['pendingProposals']): st
   return `At least ${count.min} pending Proposal${count.min === 1 ? '' : 's'} raised for action.`;
 };
 
-const describeReport = (report: HuntReportExpectation): string => {
+const describeReport = (report: HuntReportExpectation, actual?: HuntReportArtifacts): string => {
   const lines = [
     `Report ${report.reportId}: ${
       report.hasConfirmedHit
@@ -76,9 +76,17 @@ const describeReport = (report: HuntReportExpectation): string => {
   }
   lines.push(describeProposals(report.pendingProposals));
   if (report.investigationStatus === 'closed' && !report.hasConfirmedHit) {
-    lines.push('No confirmed hit, so packaging closes the Investigation as benign.');
+    lines.push(
+      'No confirmed hit, so packaging closes the Investigation: as benign when the whole report ' +
+        'was searched, as other when the report is retired with part of it never searched.'
+    );
   } else if (report.investigationStatus && report.investigationStatus !== 'none') {
     lines.push(`Investigation left ${report.investigationStatus}.`);
+  }
+  const recorded = actual?.conversation?.metadata;
+  if (recorded?.status) {
+    const reason = recorded.close_reason ? `, close_reason ${recorded.close_reason}` : '';
+    lines.push(`The Investigation's recorded state is ${recorded.status}${reason}.`);
   }
   return lines.join(' ');
 };
@@ -94,12 +102,108 @@ const asString = (value: unknown): string | undefined =>
 const asStrings = (value: unknown): string[] =>
   Array.isArray(value) ? value.filter((v): v is string => typeof v === 'string') : [];
 
-const describeBehavior = ({ technique_name: name, execution }: HuntBehaviorOutput): string => {
-  const label = name ?? 'unnamed behavior';
+/** The narrative names each matched behavior's technique, severity, confidence, hosts and users. */
+const describeBehavior = ({
+  technique_name: name,
+  technique_id: techniqueId,
+  severity,
+  confidence,
+  execution,
+  affected_hosts: hosts,
+  affected_users: users,
+}: HuntBehaviorOutput): string => {
+  const title = [techniqueId, name].filter(Boolean).join(' ') || 'unnamed behavior';
+  const rating = [
+    severity,
+    typeof confidence === 'number' && `confidence ${Math.round(confidence * 100)}%`,
+  ].filter(Boolean);
+  const label = rating.length > 0 ? `${title} (${rating.join(', ')})` : title;
   if (!execution?.executed) return `${label} not executed`;
-  return typeof execution.row_count === 'number'
-    ? `${label} executed, ${execution.row_count} row(s)`
-    : `${label} executed, row count not recorded`;
+  const rows =
+    typeof execution.row_count === 'number'
+      ? `${execution.row_count} row(s)`
+      : 'row count not recorded';
+  const hostList = asStrings(hosts);
+  const userList = asStrings(users);
+  return [
+    `${label} executed, ${rows}`,
+    hostList.length > 0 && `hosts ${hostList.join(', ')}`,
+    userList.length > 0 && `users ${userList.join(', ')}`,
+  ]
+    .filter(Boolean)
+    .join(', ');
+};
+
+const describeIocs = (iocs: unknown): string[] =>
+  (Array.isArray(iocs) ? iocs : []).map(asRecord).flatMap((ioc) => {
+    const value = asString(ioc?.value);
+    return value ? [`${asString(ioc?.type) ?? 'indicator'} ${value}`] : [];
+  });
+
+/**
+ * IOC Hunt searches the indicators it could resolve to a field, capped at the hunt's input
+ * limit, so the narrative's indicator count can be lower than the report's. Naming the ones left
+ * out keeps a correct "N indicators searched" from reading as a contradiction.
+ */
+const describeSearchedIocs = (reportIocs: string[], searched: string[]): string => {
+  const searchedSet = new Set(searched);
+  const skipped = reportIocs.filter((ioc) => !searchedSet.has(ioc));
+  const head = `IOC Hunt searched ${searched.length} indicator(s)`;
+  if (skipped.length === 0) return head;
+  return `${head}; not searched: ${skipped.join(', ')}`;
+};
+
+const asNumber = (value: unknown): number | undefined =>
+  typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+
+const namedCounts = (value: unknown): string[] =>
+  (Array.isArray(value) ? value : []).map(asRecord).flatMap((entry) => {
+    const name = asString(entry?.name) ?? asString(entry?.index);
+    if (!name) return [];
+    const count = asNumber(entry?.hit_count);
+    return [count === undefined ? name : `${name} (${count})`];
+  });
+
+/** IOC Hunt's match totals and where they landed: the narrative quotes each of these counts. */
+const describeIocHits = (tier1: Record<string, unknown> | undefined): string[] => {
+  const total = asNumber(asRecord(tier1?.counts)?.total_hits);
+  const perIndex = namedCounts(tier1?.per_index);
+  const assets = asRecord(tier1?.affected_assets);
+  const hosts = namedCounts(assets?.hosts);
+  const users = namedCounts(assets?.users);
+  const services = namedCounts(assets?.services);
+  return [
+    total !== undefined &&
+      `IOC Hunt matched ${total} document(s)${
+        perIndex.length > 0 ? ` across ${perIndex.length} index(es): ${perIndex.join(', ')}` : ''
+      }`,
+    hosts.length > 0 && `affected hosts: ${hosts.join(', ')}`,
+    users.length > 0 && `affected users: ${users.join(', ')}`,
+    services.length > 0 && `affected services: ${services.join(', ')}`,
+  ].filter((fact): fact is string => typeof fact === 'string');
+};
+
+/**
+ * Pending Proposals split by who raised them. The narrative names the ones another Investigation
+ * raised and this run joined instead of duplicating, so a correct "already awaiting a decision,
+ * raised by another Investigation" needs that attribution, not just the title.
+ */
+const describeSpaceProposals = (artifacts?: HuntArtifacts): string[] => {
+  const ownConversations = new Set(
+    Object.values(artifacts?.reports ?? {}).flatMap(({ conversation }) =>
+      conversation ? [conversation.id] : []
+    )
+  );
+  const own: string[] = [];
+  const other: string[] = [];
+  for (const { title, conversationId } of artifacts?.pendingProposalsInSpace ?? []) {
+    if (title) (ownConversations.has(conversationId) ? own : other).push(`"${title}"`);
+  }
+  return [
+    own.length > 0 && `Pending Proposals raised by this run's Investigation: ${own.join(', ')}.`,
+    other.length > 0 &&
+      `Pending Proposals already raised by other Investigations in the space: ${other.join(', ')}.`,
+  ].filter((fact): fact is string => typeof fact === 'string');
 };
 
 /**
@@ -116,17 +220,26 @@ const describeReportFacts = (actual: HuntReportArtifacts): string[] => {
   const severity = asRecord(doc.severity);
   const extracted = asRecord(doc.extracted);
   const recordedIocs = Array.isArray(extracted?.iocs) ? extracted.iocs : undefined;
-  const iocs = (recordedIocs ?? []).map(asRecord).flatMap((ioc) => {
-    const value = asString(ioc?.value);
-    return value ? [`${asString(ioc?.type) ?? 'indicator'} ${value}`] : [];
-  });
-  const techniques = asStrings(asRecord(extracted?.ttps)?.techniques);
-  const timeRange = asRecord(asRecord(actual.coordinator?.tier1)?.time_range);
+  const iocs = describeIocs(recordedIocs);
+  const tier1 = asRecord(actual.coordinator?.tier1);
+  const searchedIocs = Array.isArray(tier1?.resolved_iocs)
+    ? describeIocs(tier1?.resolved_iocs)
+    : undefined;
+  const recordedTechniques = asRecord(extracted?.ttps)?.techniques;
+  const techniques = asStrings(recordedTechniques);
+  const timeRange = asRecord(tier1?.time_range);
   const from = asString(timeRange?.from);
   const to = asString(timeRange?.to);
   const indices = asStrings(actual.coordinator?.index_patterns);
   const targets = asStrings(actual.coordinator?.tier2_targets);
+  const runId = asString(actual.coordinator?.run_id);
   const behaviors = (actual.hunt?.behaviors ?? []).map(describeBehavior);
+  const gaps = (actual.hunt?.coverage_gaps ?? []).flatMap(
+    ({ reason, technique_id: id, detail }) => {
+      const text = [reason, id, detail].filter(Boolean).join(' ');
+      return text ? [text] : [];
+    }
+  );
 
   const facts = [
     asString(content?.title) && `title "${content?.title}"`,
@@ -134,13 +247,21 @@ const describeReportFacts = (actual: HuntReportArtifacts): string[] => {
     asString(content?.published_at) && `published ${content?.published_at}`,
     asString(severity?.level) && `source severity ${severity?.level}`,
     iocs.length > 0
-      ? `indicators (${iocs.length}): ${iocs.join(', ')}`
+      ? `report indicators (${iocs.length}): ${iocs.join(', ')}`
       : recordedIocs?.length === 0 && 'no indicators',
-    techniques.length > 0 && `ATT&CK techniques: ${techniques.join(', ')}`,
+    searchedIocs && describeSearchedIocs(iocs, searchedIocs),
+    techniques.length > 0
+      ? `ATT&CK techniques: ${techniques.join(', ')}`
+      : Array.isArray(recordedTechniques) && 'ATT&CK techniques: none',
+    runId && `hunt run ${runId}`,
     from && to && `hunt window ${from} to ${to}`,
     indices.length > 0 && `IOC Hunt indices: ${indices.join(', ')}`,
     targets.length > 0 && `Behavior Hunt targets: ${targets.join(', ')}`,
-    behaviors.length > 0 && `Behavior Hunt behaviors: ${behaviors.join(', ')}`,
+    ...describeIocHits(tier1),
+    behaviors.length > 0
+      ? `Behavior Hunt behaviors: ${behaviors.join(' | ')}`
+      : actual.hunt?.behaviors && 'Behavior Hunt derived no behaviors',
+    gaps.length > 0 && `coverage gaps: ${gaps.join(' | ')}`,
   ].filter((fact): fact is string => typeof fact === 'string');
   return facts.length > 0 ? [`Report ${actual.reportId} facts: ${facts.join('; ')}.`] : [];
 };
@@ -173,8 +294,9 @@ export const buildGroundTruth = (
     ...describeOutcome(expected),
     ...expected.reports.flatMap((report) => {
       const actual = artifacts?.reports[report.reportId];
-      return [describeReport(report), ...(actual ? describeReportFacts(actual) : [])];
+      return [describeReport(report, actual), ...(actual ? describeReportFacts(actual) : [])];
     }),
+    ...describeSpaceProposals(artifacts),
     ...(criteria.length > 0 ? ['The narrative must also satisfy:', ...criteria] : []),
   ].join('\n');
 

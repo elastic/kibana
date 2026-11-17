@@ -16,20 +16,20 @@ never part of that gate.
 
 | Name | Kind | What it checks |
 |---|---|---|
-| Outcome Label | CODE | `resolve_run_outcome` is one of the accepted labels, plus `incomplete_stage` when pinned and the run did not complete |
+| Outcome Label | CODE | `resolve_run_outcome` is one of the accepted labels, plus `incomplete_stage` when pinned and the run did not complete; a run that did not complete records where it stopped in `metadata.stoppedAt` (outcome, stage, coordinator completeness, retryable reasons) |
 | Index Scope Gate | CODE | `index_scope_blocked` matches, and a blocked run opens no Investigation |
 | Candidate Selection | CODE | named reports were selected; expected skip reasons (`not_found`) reported |
 | Stage Progression | CODE | find-or-create, hunt, package, conclusion all completed, in order; the explanation names a hunt that stopped `incomplete_retryable` inside a completed stage |
 | Hit Consistency | CODE | hunt `hit`, SSE `has_confirmed_hit`, and `hit_sources` agree with the expectation |
 | Tier 1 Status | CODE | SSE `hunt_result.tier1.status`, falling back to the hunt headline |
 | Tier 2 Execution | CODE | whether any behavior query executed |
-| SSE Attachment | CODE | a `security.significant_security_event` attachment with a `hunt_result` exists iff expected |
+| SSE Attachment | CODE | a `security.significant_security_event` attachment with a `hunt_result` exists iff expected; `N/A` when the hit verdict is wrong (see below) |
 | Evidence Honesty | CODE | report `evidence[]` written iff the coordinator result's `completed_successfully` is true (`complete` or `incomplete_final`, never `incomplete_retryable`), the same flag the hunt child's `write_evidence` step reads |
-| Proposal Presence | CODE | pending Proposals on the Investigation match the exact count or minimum; a row pinned to zero checks the run created no Proposal in any status |
+| Proposal Presence | CODE | pending Proposals on the Investigation match the exact count or minimum; a row pinned to zero checks the run created no Proposal in any status; `N/A` when the hit verdict is wrong (see below) |
 | Proposal Convergence | CODE | multi-candidate only: each actioned subject (target plus criticality level, the key packaging converges on) is pending under one Investigation, and a convergence note or `Also raised by [Investigation]` line is present |
 | Investigation Status | CODE | conversation `metadata.status`, or no conversation at all |
 | Canary Inverted | CODE | 1 iff the hunt reached a verdict with Tier 1 `no_searchable_terms` and the prose-only report produced no hit, no Tier 2 execution, no Proposal, no SSE; a hunt that failed before searching scores 0 |
-| Narrative Rubric | LLM | per-row criteria over the messages the Worker posted to the Investigation; reported, not gated |
+| Narrative Rubric | LLM | per-row criteria over the messages the Worker posted to the Investigation; `N/A` when Hit Consistency scores 0, since the criteria assume the row's verdict; reported, not gated |
 | Factuality | LLM | the judge's verdict on the narrative's claims against a ground truth synthesized from the row's pinned expectations plus the report's recorded metadata, search scope and executed behaviors: 1 for `ACCURATE` or `MINOR_INACCURACIES`, 0 otherwise, with the claim-score mean kept as `claimScore`; reported, not gated |
 | Relevance | LLM | share of narrative claims that answer the hunt question; reported, not gated |
 | Groundedness | LLM | narrative claims against the hunt facts (hunt output, SSE `hunt_result`, packaging, Proposals, evidence); reported, not gated |
@@ -56,6 +56,11 @@ Investigation update exists yet. Outcome Label scores that stop as 0 (so the gat
 Hit Consistency, Tier 2 Execution, SSE Attachment, Proposal Presence and Investigation Status
 return `N/A` naming the retryable reasons instead of each failing for the same cause, and Evidence
 Honesty applies the write rule (no stamp) rather than the row's pin.
+
+A hunt that reached the wrong hit verdict (hunt `hit` differs from the row's `hasConfirmedHit`)
+fails Hit Consistency once. The SSE attachment, the Proposals and the narrative all follow from
+the verdict, so SSE Attachment, Proposal Presence and Narrative Rubric return `N/A` with
+`metadata.cascadeFrom: 'Hit Consistency'` instead of each adding a failure for the same miss.
 
 The gate itself has a positive control. `src/evaluators/dataset_evaluator.test.ts` drives the
 whole seam (stub executor, task, evaluator callbacks, score collector, `assertCodeScoresPass`)

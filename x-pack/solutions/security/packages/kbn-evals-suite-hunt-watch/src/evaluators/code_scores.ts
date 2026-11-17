@@ -21,10 +21,11 @@ export interface CodeScore {
   metadata?: Record<string, unknown>;
 }
 
-const notApplicable = (explanation: string): CodeScore => ({
+const notApplicable = (explanation: string, metadata?: Record<string, unknown>): CodeScore => ({
   score: null,
   label: 'N/A',
   explanation,
+  ...(metadata ? { metadata } : {}),
 });
 
 const missing = (explanation: string): CodeScore => ({
@@ -55,7 +56,14 @@ const foldReports = (
   emptyExplanation: string
 ): CodeScore => {
   const applicable = results.filter((r) => r.result.label !== 'N/A');
-  if (applicable.length === 0) return notApplicable(emptyExplanation);
+  if (applicable.length === 0) {
+    const cascades = results.filter((r) => r.result.metadata?.cascadeFrom);
+    return cascades.length > 0
+      ? notApplicable(cascades.map((c) => `${c.reportId}: ${c.result.explanation}`).join('; '), {
+          cascadeFrom: cascades[0].result.metadata?.cascadeFrom,
+        })
+      : notApplicable(emptyExplanation);
+  }
 
   const failures = applicable.filter((r) => r.result.score === 0);
   if (failures.length > 0) {
@@ -123,6 +131,24 @@ const deferredVerdict = (
   );
 };
 
+/**
+ * The hunt reached the wrong hit verdict. Hit Consistency scores that miss as 0; the SSE
+ * attachment and the Proposals follow from the verdict, so the checks that read them return N/A
+ * naming the one root cause instead of adding a failure each for the same miss.
+ */
+export const hitCascade = (
+  report: HuntReportExpectation,
+  actual: HuntReportArtifacts
+): CodeScore | undefined => {
+  if (!expectsHunt(report) || typeof actual.hunt?.hit !== 'boolean') return undefined;
+  if (actual.hunt.hit === report.hasConfirmedHit) return undefined;
+  return notApplicable(
+    `hit verdict wrong (hunt hit=${actual.hunt.hit}, report ${report.hasConfirmedHit}); ` +
+      'Hit Consistency scores the root cause',
+    { cascadeFrom: 'Hit Consistency' }
+  );
+};
+
 /** `reportScores` for checks that only mean something once the hunt reached a verdict. */
 const verdictScores = (
   expected: HuntExpected,
@@ -152,10 +178,39 @@ const tier2Executed = (actual: HuntReportArtifacts): boolean | undefined => {
   return (actual.hunt.behaviors ?? []).some((b) => b.execution?.executed === true);
 };
 
-export const scoreOutcome = (expected: HuntExpected, artifacts: HuntArtifacts): CodeScore => {
-  const { outcome, incompleteStage } = expected;
-  if (!outcome) return notApplicable('outcome label is not pinned for this row');
+/**
+ * Where each run that did not complete stopped: the `incomplete_stage` label plus the
+ * coordinator's completeness and retryable reasons, so a stop is diagnosable from the score doc.
+ */
+const stoppedAt = (
+  expected: HuntExpected,
+  artifacts: HuntArtifacts
+): Record<string, Record<string, unknown>> =>
+  Object.fromEntries(
+    expected.reports.flatMap(({ reportId }) => {
+      const actual = artifacts.reports[reportId];
+      if (!actual?.outcome || actual.outcome === 'completed') return [];
+      const { completeness, retryable_reasons: reasons } = actual.coordinator ?? {};
+      return [
+        [
+          reportId,
+          {
+            outcome: actual.outcome,
+            stage: actual.incompleteStage ?? null,
+            completeness: typeof completeness === 'string' ? completeness : null,
+            retryableReasons: Array.isArray(reasons) ? reasons : [],
+          },
+        ],
+      ];
+    })
+  );
 
+const scoreOutcomeLabels = (
+  expected: HuntExpected,
+  artifacts: HuntArtifacts,
+  outcome: NonNullable<HuntExpected['outcome']>
+): CodeScore => {
+  const { incompleteStage } = expected;
   return reportScores(
     expected,
     artifacts,
@@ -180,6 +235,17 @@ export const scoreOutcome = (expected: HuntExpected, artifacts: HuntArtifacts): 
     },
     'no expected reports'
   );
+};
+
+export const scoreOutcome = (expected: HuntExpected, artifacts: HuntArtifacts): CodeScore => {
+  const { outcome } = expected;
+  if (!outcome) return notApplicable('outcome label is not pinned for this row');
+
+  const result = scoreOutcomeLabels(expected, artifacts, outcome);
+  const stops = stoppedAt(expected, artifacts);
+  return Object.keys(stops).length > 0
+    ? { ...result, metadata: { ...result.metadata, stoppedAt: stops } }
+    : result;
 };
 
 export const scoreIndexScope = (expected: HuntExpected, artifacts: HuntArtifacts): CodeScore => {
@@ -344,6 +410,8 @@ export const scoreSseAttachment = (expected: HuntExpected, artifacts: HuntArtifa
     expected,
     artifacts,
     (report, actual) => {
+      const cascade = hitCascade(report, actual);
+      if (cascade) return cascade;
       if (!actual.conversation) {
         return report.sseAttachment
           ? missing('no Investigation conversation to read attachments from')
@@ -429,6 +497,8 @@ export const scoreProposalPresence = (
     (report, actual) => {
       const want = report.pendingProposals;
       if (want === undefined) return notApplicable('Proposal count not pinned');
+      const cascade = hitCascade(report, actual);
+      if (cascade) return cascade;
       if (want === 0) {
         // A Proposal the run minted and then executed is `executing` or `succeeded`, never
         // `pending`, so a zero row checks that this run created nothing in any status. Earlier

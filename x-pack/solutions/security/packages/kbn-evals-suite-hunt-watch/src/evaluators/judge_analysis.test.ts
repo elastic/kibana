@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ProposalWithMetadata } from '@kbn/proposals-common';
 import type { HuntArtifacts, HuntReportArtifacts } from '../collect';
 import type { HuntWatchExample } from '../types';
 import {
@@ -107,10 +108,74 @@ describe('judge_analysis', () => {
     );
   });
 
-  it('states that a closed no-hit Investigation was closed as benign', () => {
-    expect(buildGroundTruth(buildOutput({ investigationStatus: 'closed' }))).toContain(
-      'packaging closes the Investigation as benign'
+  it('states both close reasons packaging uses for a closed no-hit Investigation', () => {
+    const groundTruth = buildGroundTruth(buildOutput({ investigationStatus: 'closed' }));
+    expect(groundTruth).toContain('as benign when the whole report was searched');
+    expect(groundTruth).toContain('as other when the report is retired');
+  });
+
+  it("states the Investigation's recorded status and close reason", () => {
+    const groundTruth = buildGroundTruth(
+      buildOutput({ investigationStatus: 'closed' }),
+      buildArtifacts({
+        conversation: { id: 'c', metadata: { status: 'closed', close_reason: 'other' } },
+      })
     );
+    expect(groundTruth).toContain(
+      "The Investigation's recorded state is closed, close_reason other."
+    );
+    expect(
+      buildGroundTruth(
+        buildOutput(),
+        buildArtifacts({ conversation: { id: 'c', metadata: { status: 'open' } } })
+      )
+    ).toContain("The Investigation's recorded state is open.");
+    expect(buildGroundTruth(buildOutput(), buildArtifacts())).not.toContain('recorded state');
+  });
+
+  it('names the indicators IOC Hunt searched and the report indicators it left out', () => {
+    const groundTruth = buildGroundTruth(
+      buildOutput(),
+      buildArtifacts({
+        reportDoc: {
+          extracted: {
+            iocs: [
+              { type: 'ip', value: '192.0.2.30' },
+              { type: 'user', value: 'dev-user' },
+            ],
+          },
+        },
+        coordinator: { tier1: { resolved_iocs: [{ type: 'ip', value: '192.0.2.30' }] } },
+        hunt: {
+          coverage_gaps: [
+            {
+              reason: 'input_truncated',
+              detail: '1 IOC(s) beyond the first 100 were never searched.',
+            },
+            { reason: 'generation_failed', technique_id: 'T1059.001' },
+          ],
+        },
+      })
+    );
+    expect(groundTruth).toContain('report indicators (2): ip 192.0.2.30, user dev-user');
+    expect(groundTruth).toContain('IOC Hunt searched 1 indicator(s); not searched: user dev-user');
+    expect(groundTruth).toContain(
+      'coverage gaps: input_truncated 1 IOC(s) beyond the first 100 were never searched. | ' +
+        'generation_failed T1059.001'
+    );
+  });
+
+  it('states the searched count without a skipped list when every indicator was searched', () => {
+    const iocs = [{ type: 'ip', value: '192.0.2.30' }];
+    const groundTruth = buildGroundTruth(
+      buildOutput(),
+      buildArtifacts({
+        reportDoc: { extracted: { iocs } },
+        coordinator: { tier1: { resolved_iocs: iocs } },
+      })
+    );
+    expect(groundTruth).toContain('IOC Hunt searched 1 indicator(s).');
+    expect(groundTruth).not.toContain('not searched');
   });
 
   it('adds the report metadata, search scope and behaviors the narrative quotes', () => {
@@ -156,6 +221,33 @@ describe('judge_analysis', () => {
     }
   });
 
+  it('names the technique, rating, hosts and users of each executed behavior', () => {
+    const groundTruth = buildGroundTruth(
+      buildOutput(),
+      buildArtifacts({
+        reportDoc: { content: { title: 'A' } },
+        hunt: {
+          behaviors: [
+            {
+              technique_name: 'Cloud Accounts',
+              technique_id: 'T1078.004',
+              severity: 'critical',
+              confidence: 1,
+              execution: { executed: true, hit: true, row_count: 2 },
+              affected_hosts: ['WIN-ANALYST01'],
+              affected_users: ['escalated-role', 'dev-user'],
+            },
+            { technique_name: 'Password Spraying', execution: { executed: false } },
+          ],
+        },
+      })
+    );
+    expect(groundTruth).toContain(
+      'Behavior Hunt behaviors: T1078.004 Cloud Accounts (critical, confidence 100%) executed, ' +
+        '2 row(s), hosts WIN-ANALYST01, users escalated-role, dev-user | Password Spraying not executed'
+    );
+  });
+
   it('states no indicators only when the report recorded an empty indicator list', () => {
     const withReport = (reportDoc: Record<string, unknown>) =>
       buildGroundTruth(buildOutput(), buildArtifacts({ reportDoc }));
@@ -164,6 +256,87 @@ describe('judge_analysis', () => {
     );
     expect(withReport({ content: { title: 'A' } })).not.toContain('no indicators');
     expect(withReport({})).not.toContain('facts:');
+  });
+
+  it('records empty techniques, the run id, IOC hit counts and an empty behavior list', () => {
+    const groundTruth = buildGroundTruth(
+      buildOutput(),
+      buildArtifacts({
+        reportDoc: { content: { title: 'A' }, extracted: { ttps: { techniques: [] } } },
+        coordinator: {
+          run_id: 'run-1',
+          tier1: {
+            counts: { total_hits: 21 },
+            per_index: [
+              { index: 'logs-aws', hit_count: 12 },
+              { index: 'logs-endpoint', hit_count: 9 },
+            ],
+            affected_assets: {
+              hosts: [{ name: 'WIN-ANALYST01', hit_count: 15 }],
+              users: [{ name: 'dev-user', hit_count: 12 }],
+              services: [{ name: 'escalated-role' }],
+            },
+          },
+        },
+        hunt: { behaviors: [] },
+      })
+    );
+    for (const fact of [
+      'ATT&CK techniques: none',
+      'hunt run run-1',
+      'IOC Hunt matched 21 document(s) across 2 index(es): logs-aws (12), logs-endpoint (9)',
+      'affected hosts: WIN-ANALYST01 (15)',
+      'affected users: dev-user (12)',
+      'affected services: escalated-role',
+      'Behavior Hunt derived no behaviors',
+    ]) {
+      expect(groundTruth).toContain(fact);
+    }
+  });
+
+  it('omits techniques, run id, hit counts and behaviors when they were not recorded', () => {
+    const groundTruth = buildGroundTruth(
+      buildOutput(),
+      buildArtifacts({ reportDoc: { content: { title: 'A' } } })
+    );
+    for (const fact of [
+      'ATT&CK techniques',
+      // trailing space: the fixed preamble says "The hunt runs IOC Hunt first"
+      'hunt run ',
+      'IOC Hunt matched',
+      'Behavior Hunt derived',
+      'Behavior Hunt behaviors',
+    ]) {
+      expect(groundTruth).not.toContain(fact);
+    }
+  });
+
+  it('splits pending Proposals in the space by the Investigation that raised them', () => {
+    const proposal = (conversationId: string, title?: string) =>
+      ({
+        id: title ?? 'untitled',
+        status: 'pending',
+        title,
+        conversationId,
+      } as ProposalWithMetadata);
+    const base = buildArtifacts({ conversation: { id: 'own' } });
+    const artifacts: HuntArtifacts = {
+      ...base,
+      pendingProposalsInSpace: [
+        proposal('other', 'Kill aws.exe'),
+        proposal('own', 'Analyst recommendation'),
+        proposal('other', 'Isolate host'),
+        proposal('other'),
+      ],
+    };
+    const groundTruth = buildGroundTruth(buildOutput(), artifacts);
+    expect(groundTruth).toContain(
+      `Pending Proposals raised by this run's Investigation: "Analyst recommendation".`
+    );
+    expect(groundTruth).toContain(
+      'Pending Proposals already raised by other Investigations in the space: "Kill aws.exe", "Isolate host".'
+    );
+    expect(buildGroundTruth(buildOutput(), buildArtifacts())).not.toContain('Pending Proposals');
   });
 
   it('adds no report facts when the report doc was not collected', () => {

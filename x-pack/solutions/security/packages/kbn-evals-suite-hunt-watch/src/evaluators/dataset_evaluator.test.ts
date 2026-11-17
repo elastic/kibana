@@ -13,7 +13,11 @@ import { collectHuntArtifacts, type HuntArtifacts, type HuntReportArtifacts } fr
 import type { HuntWatchClient } from '../hunt_watch_client';
 import { resetHuntReport } from '../seed_hunt_data';
 import type { HuntWatchExample } from '../types';
-import { createCanaryEvaluators, createEvaluateDataset } from './dataset_evaluator';
+import {
+  createCanaryEvaluators,
+  createEvaluateDataset,
+  createNarrativeRubricEvaluator,
+} from './dataset_evaluator';
 
 jest.mock('../collect', () => ({ collectHuntArtifacts: jest.fn() }));
 jest.mock('../seed_hunt_data', () => ({ applyHuntFault: jest.fn(), resetHuntReport: jest.fn() }));
@@ -195,5 +199,59 @@ describe('createEvaluateDataset', () => {
     await expect(
       evaluateDataset({ dataset, evaluatorOverrides: createCanaryEvaluators() })
     ).rejects.toThrow(/Canary Inverted/);
+  });
+});
+
+describe('createNarrativeRubricEvaluator', () => {
+  const criteria = jest.fn(() => judgeStub('criteria'));
+  const rubric = createNarrativeRubricEvaluator({
+    criteria,
+  } as unknown as DefaultEvaluators);
+
+  const hitRow: HuntWatchExample['output'] = {
+    expected: {
+      indexScopeBlocked: false,
+      reports: [
+        {
+          reportId: REPORT_ID,
+          hasConfirmedHit: true,
+          pendingProposals: { min: 1 },
+          evidenceWritten: true,
+          sseAttachment: true,
+        },
+      ],
+    },
+    criteria: ['Names the matched behavior.'],
+  };
+
+  const judgedOutput = (hit: boolean): HuntArtifacts =>
+    blockedArtifacts(
+      { indexScopeBlocked: false },
+      { selected: true, hunt: { hit }, narrative: 'Hunt Watch confirmed a hit' }
+    );
+
+  beforeEach(() => criteria.mockClear());
+
+  it('returns N/A naming Hit Consistency when the hit verdict is wrong', async () => {
+    const result = await rubric.evaluate({
+      input: blockedRow.input,
+      output: judgedOutput(false),
+      expected: hitRow,
+      metadata: null,
+    });
+    expect(result.label).toBe('N/A');
+    expect(result.metadata).toEqual({ cascadeFrom: 'Hit Consistency' });
+    expect(criteria).not.toHaveBeenCalled();
+  });
+
+  it('judges the narrative when the hit verdict matches', async () => {
+    const result = await rubric.evaluate({
+      input: blockedRow.input,
+      output: judgedOutput(true),
+      expected: hitRow,
+      metadata: null,
+    });
+    expect(result.score).toBe(1);
+    expect(criteria).toHaveBeenCalledWith(hitRow.criteria);
   });
 });
