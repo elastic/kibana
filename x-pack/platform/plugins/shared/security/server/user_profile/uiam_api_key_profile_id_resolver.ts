@@ -8,7 +8,6 @@
 import { createHash } from 'crypto';
 
 import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
-import type { AuthenticatedUser } from '@kbn/core-security-common';
 
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 import type { UiamServicePublic } from '../uiam';
@@ -24,7 +23,6 @@ const getCloudUserProfileId = (userId: number) =>
 interface UiamApiKeyProfileIdResolverParams {
   uiam: UiamServicePublic;
   clusterClient: IClusterClient;
-  getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
   logger: Logger;
 }
 
@@ -33,18 +31,17 @@ export type UiamApiKeyProfileIdResolver = (request: KibanaRequest) => Promise<st
 /**
  * Creates a function that resolves the profile ID of the user who created the UIAM API key a
  * request carries, as {@link UiamServicePublic.getApiKeyCreator} reports it. The ID is not
- * available for a key created by another API key or by an organization service account, or for an
- * external (user-created) key. Failures are logged and resolve to `undefined`.
+ * available for a key created by another API key or by an organization service account. Failures
+ * are logged and resolve to `undefined`.
  */
 export const createUiamApiKeyProfileIdResolver = ({
   uiam,
   clusterClient,
-  getCurrentUser,
   logger,
 }: UiamApiKeyProfileIdResolverParams): UiamApiKeyProfileIdResolver => {
   return async (request) => {
     try {
-      const creator = await uiam.getApiKeyCreator({ request, user: getCurrentUser(request) });
+      const creator = await uiam.getApiKeyCreator(request);
       if (creator?.type !== 'user') {
         logger.debug(`UIAM reported no user creator for the API key, cannot retrieve profile id.`);
         return undefined;

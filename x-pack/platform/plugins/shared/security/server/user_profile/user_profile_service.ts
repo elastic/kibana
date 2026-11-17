@@ -158,7 +158,6 @@ export class UserProfileService {
       createUiamApiKeyProfileIdResolver({
         uiam,
         clusterClient,
-        getCurrentUser,
         logger: this.logger,
       });
 

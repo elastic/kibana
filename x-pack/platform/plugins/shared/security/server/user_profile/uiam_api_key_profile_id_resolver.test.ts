@@ -8,14 +8,12 @@
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
-import type { KibanaRequest } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   httpServerMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 
 import { createUiamApiKeyProfileIdResolver } from './uiam_api_key_profile_id_resolver';
@@ -38,27 +36,22 @@ describe('createUiamApiKeyProfileIdResolver', () => {
 
   let uiam: ReturnType<typeof uiamServiceMock.create>;
   let clusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>;
-  let getCurrentUser: jest.Mock<AuthenticatedUser | null, [KibanaRequest]>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let resolve: ReturnType<typeof createUiamApiKeyProfileIdResolver>;
 
   beforeEach(() => {
     uiam = uiamServiceMock.create();
     clusterClient = elasticsearchServiceMock.createClusterClient();
-    getCurrentUser = jest.fn<AuthenticatedUser | null, [KibanaRequest]>().mockReturnValue(null);
     logger = loggingSystemMock.createLogger();
-    resolve = createUiamApiKeyProfileIdResolver({ uiam, clusterClient, getCurrentUser, logger });
+    resolve = createUiamApiKeyProfileIdResolver({ uiam, clusterClient, logger });
   });
 
-  it('resolves the profile id of the user who created the key, for the user the request authenticated as', async () => {
-    const user = securityMock.createMockAuthenticatedUser();
-    getCurrentUser.mockReturnValue(user);
+  it('resolves the profile id of the user who created the key', async () => {
     uiam.getApiKeyCreator.mockResolvedValue({ type: 'user', user_id: 12345 });
 
     await expect(resolve(request)).resolves.toBe(CLOUD_USER_PROFILE_ID);
 
-    // The user tells the service whether the key is external.
-    expect(uiam.getApiKeyCreator).toHaveBeenCalledWith({ request, user });
+    expect(uiam.getApiKeyCreator).toHaveBeenCalledWith(request);
     // The HTTP authentication provider already authenticated the key of a real request.
     expect(clusterClient.asScoped).not.toHaveBeenCalled();
   });

@@ -178,9 +178,9 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
   }
 
   /**
-   * Authenticates an internal UIAM API key as the user who created it, as Elasticsearch API keys
-   * already do. The key still identifies itself through `api_key`. Falls back to the key's own
-   * identity when UIAM reports no user creator or the lookup fails.
+   * Authenticates a UIAM API key as the user who created it, as Elasticsearch API keys already do.
+   * The key still identifies itself through `api_key`. Falls back to the key's own identity when
+   * UIAM reports no user creator or the lookup fails.
    */
   private async withUiamApiKeyCreator(
     request: KibanaRequest,
@@ -192,7 +192,7 @@ export class HTTPAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     try {
-      const creator = await uiam.getApiKeyCreator({ request, user });
+      const creator = await uiam.getApiKeyCreator(request);
       return creator?.type === 'user' ? { ...user, username: String(creator.user_id) } : user;
     } catch (err) {
       this.logger.error(

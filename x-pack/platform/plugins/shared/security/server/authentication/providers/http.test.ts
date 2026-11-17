@@ -766,15 +766,10 @@ describe('HTTPAuthenticationProvider', () => {
           api_key: expect.objectContaining({ id: 'task-key-id' }),
         })
       );
-      // The service skips other credentials and external keys, so it needs both.
-      const [[{ request: lookedUpRequest, user: lookedUpUser }]] = uiam.getApiKeyCreator.mock.calls;
+      const [[lookedUpRequest]] = uiam.getApiKeyCreator.mock.calls;
       expect(HTTPAuthorizationHeader.parseFromRequest(lookedUpRequest)).toEqual(
         new HTTPAuthorizationHeader('ApiKey', 'essu_task_manager_key')
       );
-      expect(lookedUpUser).toEqual({
-        ...keyUser,
-        authentication_provider: { type: 'http', name: 'http' },
-      });
     });
 
     it.each<[string, UiamApiKeyCreator | undefined]>([

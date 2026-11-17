@@ -14,7 +14,6 @@ import { Agent } from 'undici';
 
 import { schema } from '@kbn/config-schema';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { AuthenticatedUser } from '@kbn/core-security-common';
 import {
   deriveInternalCallerAttestation,
   HTTPAuthorizationHeader,
@@ -50,7 +49,6 @@ import {
   getUiamAuthorizationHeaderFromRequest,
   getUiamCredentialsFromRequest,
 } from './get_uiam_credentials';
-import { isExternalApiKey } from './is_external_api_key';
 import { getProtectedResource } from './oauth_protected_resource';
 import type {
   ServiceAccountAssumableBy,
@@ -217,14 +215,6 @@ const apiKeyAuthenticateResponseSchema = lazySchema(() =>
 
 export type UiamApiKeyCreator = z.infer<typeof apiKeyCreatorSchema>;
 
-/** Parameters for {@link UiamServicePublic.getApiKeyCreator}. */
-export interface GetUiamApiKeyCreatorParams {
-  /** The request that carries the API key. */
-  request: KibanaRequest;
-  /** The user the request authenticated as, if known. On a real request it tells an external key. */
-  user: AuthenticatedUser | null;
-}
-
 /**
  * Background tasks use the same key over and over. A key's creator never changes, so `max` is what
  * bounds the cache, and the TTL only keeps idle entries from lingering. The cache says who created
@@ -333,15 +323,16 @@ export interface UiamServicePublic {
   convertApiKeys(keys: string[]): Promise<ConvertUiamApiKeysResponse>;
 
   /**
-   * Returns the principal UIAM records as the creator of the internal UIAM API key a request
-   * carries, or `undefined` when UIAM reports none we support. Any other credential, and an
-   * external (user-created) key, resolves to `undefined` without asking UIAM: the lookup carries
-   * the client authentication the request already has, which UIAM rejects for external keys.
+   * Returns the principal UIAM records as the creator of the UIAM API key a request carries, or
+   * `undefined` when UIAM reports none we support. Any other credential resolves to `undefined`
+   * without asking UIAM. The lookup carries the client authentication the request already has,
+   * which is none for an external (user-created) key, as UIAM rejects it for those.
    * Results are cached per key, so the caller must authenticate the key before it trusts the
-   * creator: a cached creator outlives a revoked or expired key. A failed or slow request is thrown for the caller to log
-   * and is not cached, while a response without a supported creator resolves to `undefined`.
+   * creator: a cached creator outlives a revoked or expired key. A failed or slow request is
+   * thrown for the caller to log and is not cached, while a response without a supported creator
+   * resolves to `undefined`.
    */
-  getApiKeyCreator(params: GetUiamApiKeyCreatorParams): Promise<UiamApiKeyCreator | undefined>;
+  getApiKeyCreator(request: KibanaRequest): Promise<UiamApiKeyCreator | undefined>;
 
   /**
    * Creates a service account via the UIAM service.
@@ -903,21 +894,13 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.getApiKeyCreator}.
    */
-  async getApiKeyCreator({
-    request,
-    user,
-  }: GetUiamApiKeyCreatorParams): Promise<UiamApiKeyCreator | undefined> {
+  async getApiKeyCreator(request: KibanaRequest): Promise<UiamApiKeyCreator | undefined> {
     const authorization = HTTPAuthorizationHeader.parseFromRequest(request);
     if (
       !authorization ||
       authorization.scheme.toLowerCase() !== 'apikey' ||
       !isUiamCredential(authorization)
     ) {
-      return undefined;
-    }
-
-    if (isExternalUiamCredential(request) || isExternalApiKey(user)) {
-      this.#logger.debug('Skipping the creator lookup for an external UIAM API key.');
       return undefined;
     }
 

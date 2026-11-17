@@ -10,7 +10,6 @@ import undici from 'undici';
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import {
   deriveInternalCallerAttestation,
   HTTPAuthorizationHeader,
@@ -1592,12 +1591,11 @@ describe('UiamService', () => {
     const authorization = new HTTPAuthorizationHeader('ApiKey', 'essu_api_key');
     // A background task's fake request, which Kibana's own client authentication speaks for.
     const getCreator = (credential: HTTPAuthorizationHeader = authorization) =>
-      uiamService.getApiKeyCreator({
-        request: httpServerMock.createFakeKibanaRequest({
+      uiamService.getApiKeyCreator(
+        httpServerMock.createFakeKibanaRequest({
           headers: { authorization: credential.toString() },
-        }),
-        user: null,
-      });
+        })
+      );
     const respondWith = (creator?: Record<string, string | number>) =>
       fetchSpy.mockResolvedValue({
         ok: true,
@@ -1636,15 +1634,14 @@ describe('UiamService', () => {
     it("keeps another client's relayed authentication instead of replacing it with Kibana's", async () => {
       respondWith({ type: 'user', user_id: 12345 });
 
-      await uiamService.getApiKeyCreator({
-        request: httpServerMock.createKibanaRequest({
+      await uiamService.getApiKeyCreator(
+        httpServerMock.createKibanaRequest({
           headers: {
             authorization: authorization.toString(),
             [ES_CLIENT_AUTHENTICATION_HEADER]: 'relayed-secret',
           },
-        }),
-        user: null,
-      });
+        })
+      );
 
       expect(fetchSpy.mock.calls[0][1].headers).toEqual(
         expect.objectContaining({ [ES_CLIENT_AUTHENTICATION_HEADER]: 'relayed-secret' })
@@ -1686,28 +1683,44 @@ describe('UiamService', () => {
       expect(fetchSpy).not.toHaveBeenCalled();
     });
 
-    it('does not ask UIAM for an external key, told by the user on a real request or by the mark on a fake one', async () => {
-      await expect(
-        uiamService.getApiKeyCreator({
-          request: httpServerMock.createKibanaRequest({
-            headers: { authorization: authorization.toString() },
-          }),
-          user: mockAuthenticatedUser({
-            authentication_type: 'api_key',
-            api_key: { id: 'key-id', name: 'key', internal: false, managed_by: 'cloud' },
-          }),
-        })
-      ).resolves.toBeUndefined();
+    describe('for an external (user-created) key', () => {
+      // UIAM rejects an external key that is presented with client authentication.
+      const expectNoClientAuthentication = () => {
+        const { headers } = fetchSpy.mock.calls[0][1];
+        expect(headers).toEqual({
+          'Content-Type': 'application/json',
+          'User-Agent': 'Kibana/9.0.0',
+          Authorization: 'ApiKey essu_api_key',
+        });
+        expect(headers).not.toHaveProperty(ES_CLIENT_AUTHENTICATION_HEADER);
+      };
 
-      const fakeRequest = httpServerMock.createFakeKibanaRequest({
-        headers: { authorization: authorization.toString() },
+      it('returns the creator, asking without client authentication, for a fake request marked as external', async () => {
+        respondWith({ type: 'user', user_id: 12345 });
+        const fakeRequest = httpServerMock.createFakeKibanaRequest({
+          headers: { authorization: authorization.toString() },
+        });
+        markExternalUiamCredential(fakeRequest);
+
+        await expect(uiamService.getApiKeyCreator(fakeRequest)).resolves.toEqual({
+          type: 'user',
+          user_id: 12345,
+        });
+        expectNoClientAuthentication();
       });
-      markExternalUiamCredential(fakeRequest);
-      await expect(
-        uiamService.getApiKeyCreator({ request: fakeRequest, user: null })
-      ).resolves.toBeUndefined();
 
-      expect(fetchSpy).not.toHaveBeenCalled();
+      it('returns the creator, asking without client authentication, for a real request that carries none', async () => {
+        respondWith({ type: 'user', user_id: 12345 });
+        const request = httpServerMock.createKibanaRequest({
+          headers: { authorization: authorization.toString() },
+        });
+
+        await expect(uiamService.getApiKeyCreator(request)).resolves.toEqual({
+          type: 'user',
+          user_id: 12345,
+        });
+        expectNoClientAuthentication();
+      });
     });
 
     it('returns an API key creator for a key granted from another API key', async () => {
