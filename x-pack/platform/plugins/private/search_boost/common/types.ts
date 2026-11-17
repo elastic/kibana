@@ -7,6 +7,18 @@
 
 export type BoostProfileType = 'indices' | 'data_streams';
 
+export type ProjectDefaultProfile =
+  | {
+      kind: 'managed';
+      name: string;
+      label: string;
+      description: string;
+    }
+  | {
+      kind: 'custom';
+      name: string;
+    };
+
 /** An index or data stream that a boost rule matches. */
 export interface BoostRuleMatch {
   name: string;
