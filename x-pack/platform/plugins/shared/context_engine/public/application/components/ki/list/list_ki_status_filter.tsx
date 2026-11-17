@@ -21,9 +21,6 @@ const STATUS_FILTER_OPTIONS: ListKiStatusFilterValue[] = [
   'all',
 ];
 
-// WIP: needs list API sort/expired (#305092). Visible but disabled until the API can filter by expiry.
-const WIP_STATUS_FILTER_OPTIONS: ReadonlySet<ListKiStatusFilterValue> = new Set(['expired']);
-
 const isStatusFilterValue = (value: string): value is ListKiStatusFilterValue =>
   STATUS_FILTER_OPTIONS.some((option) => option === value);
 
@@ -41,15 +38,13 @@ export const ListKiStatusFilter = ({
       STATUS_FILTER_OPTIONS.map((value) => ({
         value,
         text: getListKiStatusFilterLabel(value),
-        disabled: WIP_STATUS_FILTER_OPTIONS.has(value),
       })),
     []
   );
 
   const handleChange = useCallback(
     ({ target: { value } }: ChangeEvent<HTMLSelectElement>) => {
-      // WIP: needs list API sort/expired (#305092). Expired is a noop until then.
-      if (!isStatusFilterValue(value) || WIP_STATUS_FILTER_OPTIONS.has(value)) {
+      if (!isStatusFilterValue(value)) {
         return;
       }
       onStatusFilterChange(value);

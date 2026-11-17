@@ -6,47 +6,58 @@
  */
 
 import { EuiSelect, type EuiSelectOption } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
-import type { ListKiSortValue } from './list_ki_helpers';
+import type { ChangeEvent } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import { KI_LIST_SORTS, type KiListSort } from '../../../../../common/ki_list_sort';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../../common/telemetry';
+
+const SORT_LABELS: Record<KiListSort, string> = {
+  updated: i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.sortRecentlyUpdated', {
+    defaultMessage: 'Recently updated',
+  }),
+  title: i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.sortTitle', {
+    defaultMessage: 'Title A to Z',
+  }),
+};
+
+const isKiListSort = (value: string): value is KiListSort =>
+  KI_LIST_SORTS.some((option) => option === value);
 
 interface ListKiSortSelectProps {
-  sort: ListKiSortValue;
+  sort: KiListSort;
+  onSortChange: (sort: KiListSort) => void;
 }
 
-// WIP: needs list API sort/expired (#305092). The list is always "Recently updated" until then.
-const handleSortChange = () => {};
-
-export const ListKiSortSelect = ({ sort }: ListKiSortSelectProps) => {
+export const ListKiSortSelect = ({ sort, onSortChange }: ListKiSortSelectProps) => {
   const options = useMemo(
-    (): EuiSelectOption[] => [
-      {
-        value: 'updated',
-        text: i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.sortRecentlyUpdated', {
-          defaultMessage: 'Recently updated',
-        }),
-      },
-      {
-        value: 'title',
-        text: i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.sortTitle', {
-          defaultMessage: 'Title A to Z',
-        }),
-        // WIP: needs list API sort/expired (#305092).
-        disabled: true,
-      },
-    ],
+    (): EuiSelectOption[] => KI_LIST_SORTS.map((value) => ({ value, text: SORT_LABELS[value] })),
     []
+  );
+
+  const handleChange = useCallback(
+    ({ target: { value } }: ChangeEvent<HTMLSelectElement>) => {
+      if (isKiListSort(value)) {
+        onSortChange(value);
+      }
+    },
+    [onSortChange]
   );
 
   return (
     <EuiSelect
       options={options}
       value={sort}
-      onChange={handleSortChange}
+      onChange={handleChange}
       aria-label={i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.sortLabel', {
         defaultMessage: 'Sort Knowledge documents',
       })}
       data-test-subj="contextListKiSortSelect"
+      {...getEbtProps({
+        element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageListKiPanel,
+        action: CONTEXT_ENGINE_UI_EBT.action.listKi.SORT,
+      })}
     />
   );
 };

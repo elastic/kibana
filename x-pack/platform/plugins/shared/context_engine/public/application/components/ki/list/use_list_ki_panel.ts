@@ -9,12 +9,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DEFAULT_KI_PAGE_SIZE } from '../../../../../common/constants';
 import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
 import type { KiListItem } from '../../../../../common/http_api/knowledge_indicators';
+import { DEFAULT_KI_LIST_SORT, type KiListSort } from '../../../../../common/ki_list_sort';
 import { useListKi } from '../../../hooks/use_list_ki';
 import { useListKiByType } from '../../../hooks/use_list_ki_by_type';
 import { useSelectedKi, type SelectedKi } from '../../../hooks/use_selected_ki';
 import {
   ALL_TYPE_FILTER,
-  DEFAULT_SORT,
   DEFAULT_STATUS_FILTER,
   getStatusesForFilter,
   type ListKiStatusFilterValue,
@@ -30,6 +30,7 @@ const isSameKi = (ki: KiListItem, { kiId, index }: SelectedKi): boolean =>
 export const useListKiPanel = ({ id: aiIndexId }: GetAiIndexResponse) => {
   const [typeFilter, setTypeFilter] = useState<ListKiTypeFilter>(ALL_TYPE_FILTER);
   const [statusFilter, setStatusFilter] = useState<ListKiStatusFilterValue>(DEFAULT_STATUS_FILTER);
+  const [sort, setSort] = useState<KiListSort>(DEFAULT_KI_LIST_SORT);
   // What the search box currently displays, updated on every keystroke.
   const [searchText, setSearchText] = useState('');
   // The last string that was actually fetched; only changes via submitSearch.
@@ -46,6 +47,12 @@ export const useListKiPanel = ({ id: aiIndexId }: GetAiIndexResponse) => {
 
   const onStatusFilterChange = (status: ListKiStatusFilterValue) => {
     setStatusFilter(status);
+    resetGroupSizes();
+  };
+
+  // Sort is not a filter: "Clear filters" keeps it.
+  const onSortChange = (nextSort: KiListSort) => {
+    setSort(nextSort);
     resetGroupSizes();
   };
 
@@ -83,6 +90,7 @@ export const useListKiPanel = ({ id: aiIndexId }: GetAiIndexResponse) => {
     type: typeFilter.kind === 'type' ? typeFilter.value : undefined,
     query,
     status,
+    sort,
   });
 
   const groupResults = useListKiByType({
@@ -90,6 +98,7 @@ export const useListKiPanel = ({ id: aiIndexId }: GetAiIndexResponse) => {
     sizesByType: groupSizes,
     query,
     status,
+    sort,
   });
 
   const groups = useMemo(
@@ -153,8 +162,8 @@ export const useListKiPanel = ({ id: aiIndexId }: GetAiIndexResponse) => {
     onTypeFilterChange,
     statusFilter,
     onStatusFilterChange,
-    // WIP: needs list API sort/expired (#305092). Always "Recently updated" until then.
-    sort: DEFAULT_SORT,
+    sort,
+    onSortChange,
     searchText,
     submittedQuery,
     onSearchTextChange: setSearchText,

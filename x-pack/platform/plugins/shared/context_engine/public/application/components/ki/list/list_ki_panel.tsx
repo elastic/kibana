@@ -29,6 +29,7 @@ export const ListKiPanel = ({ aiIndex, discoverHref }: ListKiPanelProps) => {
     statusFilter,
     onStatusFilterChange,
     sort,
+    onSortChange,
     searchText,
     onSearchTextChange,
     onSearchSubmit,
@@ -56,6 +57,7 @@ export const ListKiPanel = ({ aiIndex, discoverHref }: ListKiPanelProps) => {
         statusFilter={statusFilter}
         onStatusFilterChange={onStatusFilterChange}
         sort={sort}
+        onSortChange={onSortChange}
         typeFilter={typeFilter}
         summary={summary}
         onTypeFilterChange={onTypeFilterChange}

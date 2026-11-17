@@ -66,26 +66,28 @@ describe('ListKiFiltersRow', () => {
     expect(screen.getByTestId('contextListKiFilter-playbook')).toBeInTheDocument();
   });
 
-  it('shows the WIP Expired status and Title sort options as disabled', () => {
+  it('requests expired documents for the Expired status', () => {
     renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
-
-    expect(screen.getByRole('option', { name: 'Expired' })).toBeDisabled();
-    expect(screen.getByRole('option', { name: 'Title A to Z' })).toBeDisabled();
-  });
-
-  it('ignores the WIP Expired status and Title sort (noop)', () => {
-    renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
-
     fireEvent.change(screen.getByTestId('contextListKiStatusFilter'), {
       target: { value: 'expired' },
     });
+
+    expect(screen.getByTestId('contextListKiStatusFilter')).toHaveValue('expired');
+    expect(mockUseListKi).toHaveBeenLastCalledWith(
+      expect.objectContaining({ status: ['expired'] })
+    );
+  });
+
+  it('requests recently updated first by default and title order for Title A to Z', () => {
+    renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
+    expect(mockUseListKi).toHaveBeenLastCalledWith(expect.objectContaining({ sort: 'updated' }));
+
     fireEvent.change(screen.getByTestId('contextListKiSortSelect'), {
       target: { value: 'title' },
     });
 
-    expect(screen.getByTestId('contextListKiStatusFilter')).toHaveValue('active');
-    expect(screen.getByTestId('contextListKiSortSelect')).toHaveValue('updated');
-    expect(mockUseListKi).toHaveBeenLastCalledWith(expect.objectContaining({ status: ['active'] }));
+    expect(screen.getByTestId('contextListKiSortSelect')).toHaveValue('title');
+    expect(mockUseListKi).toHaveBeenLastCalledWith(expect.objectContaining({ sort: 'title' }));
   });
 
   it('requests every status for All statuses', () => {

@@ -8,6 +8,7 @@
 import { useQueries } from '@kbn/react-query';
 import { useMemo, useRef } from 'react';
 import type { KiStatus } from '../../../common/ki_lifecycle_status';
+import type { KiListSort } from '../../../common/ki_list_sort';
 import type { KiListItem, ListKisResponse } from '../../../common/http_api/knowledge_indicators';
 import { listKis } from '../api/knowledge_indicators';
 import { contextEngineQueryKeys } from './query_keys';
@@ -19,6 +20,7 @@ interface UseListKiByTypeArgs {
   sizesByType: Record<string, number>;
   query?: string;
   status: KiStatus[];
+  sort: KiListSort;
 }
 
 export interface ListKiByTypeResult {
@@ -33,6 +35,7 @@ export const useListKiByType = ({
   sizesByType,
   query,
   status,
+  sort,
 }: UseListKiByTypeArgs): Record<string, ListKiByTypeResult | undefined> => {
   const {
     services: { http },
@@ -41,11 +44,11 @@ export const useListKiByType = ({
   // `keepPreviousData` does not work with `useQueries`, so the last rows of each type are kept
   // here. The key includes the filters, so rows from other filters are never reused.
   const lastKisRef = useRef(new Map<string, KiListItem[]>());
-  const filterKey = `${query ?? ''}|${status.join(',')}`;
+  const filterKey = `${query ?? ''}|${status.join(',')}|${sort}`;
 
   const results = useQueries({
     queries: entries.map(([type, size]) => ({
-      queryKey: contextEngineQueryKeys.aiIndex.listKi(aiIndexId, size, type, query, status),
+      queryKey: contextEngineQueryKeys.aiIndex.listKi(aiIndexId, size, type, query, status, sort),
       queryFn: ({ signal }: { signal?: AbortSignal }): Promise<ListKisResponse> =>
         listKis(http, {
           aiIndexId,
@@ -53,6 +56,7 @@ export const useListKiByType = ({
           type,
           ...(query !== undefined ? { query } : {}),
           status: [...status],
+          sort,
           signal,
         }),
     })),

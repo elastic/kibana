@@ -14,22 +14,15 @@ import { formatKiTypeLabel, noneValueLabel } from '../../../utils/ki_display';
 export type ListKiTypeFilter = { kind: 'all'; value: 'all' } | { kind: 'type'; value: string };
 export const ALL_TYPE_FILTER: ListKiTypeFilter = { kind: 'all', value: 'all' };
 
-/** Status filter options. `expired` is WIP: the list API can't filter by expiry yet (#305092). */
+/** Status filter options: one status, or every status. */
 export type ListKiStatusFilterValue = KiStatus | 'all';
 export const DEFAULT_STATUS_FILTER: ListKiStatusFilterValue = 'active';
-
-/** Sort options. `title` is WIP: the list API can't sort by title yet (#305092). */
-export type ListKiSortValue = 'updated' | 'title';
-export const DEFAULT_SORT: ListKiSortValue = 'updated';
 
 /** Statuses the list API is asked for, for one status filter option. */
 export const getStatusesForFilter = (statusFilter: ListKiStatusFilterValue): KiStatus[] => {
   switch (statusFilter) {
     case 'all':
       return [...KI_STATUSES];
-    // WIP: needs list API sort/expired (#305092). Never selected, the option is disabled.
-    case 'expired':
-      return ['active'];
     default:
       return [statusFilter];
   }

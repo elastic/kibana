@@ -9,7 +9,8 @@ import { EuiFilterGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 import type { KiListSummary } from '../../../hooks/use_list_ki';
-import type { ListKiSortValue, ListKiStatusFilterValue, ListKiTypeFilter } from './list_ki_helpers';
+import type { KiListSort } from '../../../../../common/ki_list_sort';
+import type { ListKiStatusFilterValue, ListKiTypeFilter } from './list_ki_helpers';
 import { ListKiSearchBox } from './list_ki_search_box';
 import { ListKiSortSelect } from './list_ki_sort_select';
 import { ListKiStatusFilter } from './list_ki_status_filter';
@@ -25,7 +26,8 @@ interface ListKiFiltersRowProps {
   onSearchSubmit: (value: string) => void;
   statusFilter: ListKiStatusFilterValue;
   onStatusFilterChange: (status: ListKiStatusFilterValue) => void;
-  sort: ListKiSortValue;
+  sort: KiListSort;
+  onSortChange: (sort: KiListSort) => void;
   typeFilter: ListKiTypeFilter;
   summary: KiListSummary;
   onTypeFilterChange: (filter: ListKiTypeFilter) => void;
@@ -39,6 +41,7 @@ export const ListKiFiltersRow = ({
   statusFilter,
   onStatusFilterChange,
   sort,
+  onSortChange,
   typeFilter,
   summary,
   onTypeFilterChange,
@@ -78,7 +81,7 @@ export const ListKiFiltersRow = ({
         />
       </div>
       <div>
-        <ListKiSortSelect sort={sort} />
+        <ListKiSortSelect sort={sort} onSortChange={onSortChange} />
       </div>
       <EuiFilterGroup>
         <ListKiTypeFilterButton
