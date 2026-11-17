@@ -12,9 +12,7 @@ import { inject, injectable } from 'inversify';
 import { AvailabilityService } from '../availability/availability_service';
 import { DetectionSignalStore } from '../signals/signal_store';
 import { wrapReading } from '../signals/wrap_reading';
-import { acquireRunLease } from '../state/run_lease';
-import { StateStore } from '../state/state_store';
-import { advanceGeneratorState, readGeneratorStates } from '../state/generator_states';
+import { DetectionStateClient } from '../state/detection_state_client';
 import { StrategyCatalog } from '../strategies/strategy_catalog';
 import type { GenerateResult } from '../strategies/types';
 import { DetectionEngineDataClient } from './es_client_tokens';
@@ -65,7 +63,7 @@ export class EngineRunner {
     @inject(AvailabilityService)
     private readonly availability: Pick<AvailabilityService, 'isAvailable'>,
     @inject(StrategyCatalog) private readonly catalog: StrategyCatalog,
-    @inject(StateStore) private readonly state: StateStore,
+    @inject(DetectionStateClient) private readonly state: DetectionStateClient,
     @inject(DetectionSignalStore) private readonly signalStore: DetectionSignalStore,
     @inject(EnabledSources) private readonly enabledSources: EnabledSources,
     @inject(DetectionEngineDataClient) private readonly dataClient: ElasticsearchClient,
@@ -103,7 +101,7 @@ export class EngineRunner {
     }
 
     // 2. One run per space at a time.
-    const attempt = await acquireRunLease({ state: this.state, spaceId, now });
+    const attempt = await this.state.acquireLease({ spaceId, now });
     if (!attempt.acquired) {
       return { run_id: runId, status: 'busy', held_by: attempt.held_by, strategies: [] };
     }
@@ -121,8 +119,7 @@ export class EngineRunner {
     try {
       // 3. What is due: the generator state per strategy, then a window per due strategy.
       const strategies = this.catalog.list();
-      const processedUntil = await readGeneratorStates({
-        state: this.state,
+      const processedUntil = await this.state.readGeneratorStates({
         spaceId,
         strategyIds: strategies.map(({ descriptor }) => descriptor.id),
       });
@@ -256,7 +253,7 @@ export class EngineRunner {
       }
 
       assertLeaseHeld(leaseDeadline);
-      await advanceGeneratorState({ state: this.state, spaceId, strategyId, processedUntil: to });
+      await this.state.advanceGeneratorState({ spaceId, strategyId, processedUntil: to });
     } catch (error) {
       result.error = getErrorMessage(error);
       this.logger.warn(`Strategy ${strategyId} failed in space ${spaceId}: ${result.error}`);

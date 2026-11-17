@@ -7,28 +7,31 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { acquireRunLease } from '../state/run_lease';
+import { DetectionStateClient } from '../state/detection_state_client';
 import { StrategyCatalog } from '../strategies/strategy_catalog';
 import type { DetectionStrategy } from '../strategies/detection_strategy';
 import { InMemorySignalStore } from '../../test_utils/in_memory_signal_store';
-import { InMemoryStateStore } from '../../test_utils/in_memory_state_store';
+import { InMemorySavedObjectsRepository } from '../../test_utils/in_memory_saved_objects_repository';
 import { createTestStrategy, TEST_STRATEGY_ID } from '../../test_utils/test_strategy';
 import { EngineRunner } from './run_engine';
-import { readGeneratorStates } from '../state/generator_states';
 
 const SPACE_ID = 'default';
 const NOW = Date.UTC(2026, 10, 13, 12, 0);
 const MINUTE_MS = 60_000;
 
+function createStateClient() {
+  return new DetectionStateClient(new InMemorySavedObjectsRepository().asRepository());
+}
+
 function createRunner({
   strategies = [createTestStrategy()],
   isAvailable = true,
-  state = new InMemoryStateStore(),
+  state = createStateClient(),
   signals = new InMemorySignalStore(),
 }: {
   strategies?: DetectionStrategy[];
   isAvailable?: boolean;
-  state?: InMemoryStateStore;
+  state?: DetectionStateClient;
   signals?: InMemorySignalStore;
 } = {}) {
   const runner = new EngineRunner(
@@ -70,9 +73,9 @@ describe('EngineRunner', () => {
     });
     expect(signals.written).toHaveLength(2);
     expect(
-      (
-        await readGeneratorStates({ state, spaceId: SPACE_ID, strategyIds: [TEST_STRATEGY_ID] })
-      ).get(TEST_STRATEGY_ID)
+      (await state.readGeneratorStates({ spaceId: SPACE_ID, strategyIds: [TEST_STRATEGY_ID] })).get(
+        TEST_STRATEGY_ID
+      )
     ).toBe(NOW);
   });
 
@@ -91,8 +94,7 @@ describe('EngineRunner', () => {
       ],
     });
     expect(signals.written).toHaveLength(2);
-    const processedUntil = await readGeneratorStates({
-      state,
+    const processedUntil = await state.readGeneratorStates({
       spaceId: SPACE_ID,
       strategyIds: ['failing_strategy', TEST_STRATEGY_ID],
     });
@@ -110,13 +112,13 @@ describe('EngineRunner', () => {
       strategies: [{ id: TEST_STRATEGY_ID, signals: 1, error: expect.any(String) }],
     });
     expect(
-      await readGeneratorStates({ state, spaceId: SPACE_ID, strategyIds: [TEST_STRATEGY_ID] })
+      await state.readGeneratorStates({ spaceId: SPACE_ID, strategyIds: [TEST_STRATEGY_ID] })
     ).toEqual(new Map());
   });
 
   it('reports busy and writes nothing while another run holds the lease', async () => {
-    const state = new InMemoryStateStore();
-    const held = await acquireRunLease({ state, spaceId: SPACE_ID, now: NOW });
+    const state = createStateClient();
+    const held = await state.acquireLease({ spaceId: SPACE_ID, now: NOW });
     const { runner, signals } = createRunner({ state });
 
     const result = await runner.run({ now: NOW + MINUTE_MS });
@@ -143,7 +145,7 @@ describe('EngineRunner', () => {
           }),
       },
     };
-    const state = new InMemoryStateStore();
+    const state = createStateClient();
     const { runner } = createRunner({ strategies: [waitsForAbort], state });
     const controller = new AbortController();
 
@@ -157,16 +159,16 @@ describe('EngineRunner', () => {
       strategies: [{ id: 'waits_for_abort', error: 'aborted' }],
     });
     // Released: the next run takes the lease at once.
-    expect((await acquireRunLease({ state, spaceId: SPACE_ID, now: NOW })).acquired).toBe(true);
+    expect((await state.acquireLease({ spaceId: SPACE_ID, now: NOW })).acquired).toBe(true);
   });
 
   it('takes no lease while the engine is unavailable', async () => {
     const { runner, state } = createRunner({ isAvailable: false });
-    const put = jest.spyOn(state, 'put');
+    const acquireLease = jest.spyOn(state, 'acquireLease');
 
     const result = await runner.run({ now: NOW });
 
     expect(result).toMatchObject({ status: 'unavailable', strategies: [] });
-    expect(put).not.toHaveBeenCalled();
+    expect(acquireLease).not.toHaveBeenCalled();
   });
 });

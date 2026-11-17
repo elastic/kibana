@@ -23,10 +23,10 @@ import { DetectionAccountService } from '../lib/service_account/detection_accoun
 import { DetectionSetupService } from '../lib/service_account/setup_service';
 import { DetectionWorkflowInstaller } from '../lib/workflows/detection_workflow_installer';
 import { DetectionSignalStore } from '../lib/signals/signal_store';
-import { StateStore } from '../lib/state/state_store';
+import { DetectionStateClient } from '../lib/state/detection_state_client';
 import { detectionStateSavedObjectType } from '../saved_objects/detection_state_saved_object';
 import { StrategyCatalog } from '../lib/strategies/strategy_catalog';
-import { InMemoryStateStore } from '../test_utils/in_memory_state_store';
+import { InMemorySavedObjectsRepository } from '../test_utils/in_memory_saved_objects_repository';
 import { DETECTION_ENGINE_WORKLOAD_TYPE } from '../lib/service_account/workload';
 
 function createContainer() {
@@ -93,7 +93,7 @@ describe('module', () => {
     container.get(AvailabilityService);
     container.get(StrategyCatalog);
     container.get(DetectionSignalStore);
-    container.get(StateStore);
+    container.get(DetectionStateClient);
     container.get(DetectionAccountService);
     container.get(DetectionSetupService);
     container.get(DetectionWorkflowInstaller);
@@ -120,8 +120,12 @@ describe('module', () => {
   it('runs a tick through a forked scope', async () => {
     const { container } = createContainer();
     jest.spyOn(container.get(AvailabilityService), 'isAvailable').mockResolvedValue(true);
-    await container.unbind(StateStore);
-    container.bind(StateStore).toConstantValue(new InMemoryStateStore());
+    await container.unbind(DetectionStateClient);
+    container
+      .bind(DetectionStateClient)
+      .toConstantValue(
+        new DetectionStateClient(new InMemorySavedObjectsRepository().asRepository())
+      );
 
     const result = await container.get(TickService).run({
       accountRequest: httpServerMock.createKibanaRequest(),
