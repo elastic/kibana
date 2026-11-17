@@ -1340,10 +1340,12 @@ describe('createEvaluatePersonaMatrixDataset PersonaRubric flag', () => {
     client,
     log = buildLog(),
     example = baseExample,
+    response = {},
   }: {
     client: BoundInferenceClient | undefined;
     log?: ToolingLog;
     example?: PersonaMatrixExample;
+    response?: Record<string, unknown>;
   }) => {
     let taskResult: Record<string, unknown> | undefined;
     const runExperiment = jest.fn(async (_experiment: unknown, _evaluators: Evaluator[]) => {
@@ -1358,6 +1360,7 @@ describe('createEvaluatePersonaMatrixDataset PersonaRubric flag', () => {
           steps: [{ type: 'tool_call', tool_id: 'security.alerts', results: [] }],
           errors: [],
           traceId: 'trace-1',
+          ...response,
         })),
       },
       evaluators: {
@@ -1407,6 +1410,28 @@ describe('createEvaluatePersonaMatrixDataset PersonaRubric flag', () => {
     expect(input.expectedTools).toContain('security.alerts');
     expect(input.expectedTools).not.toContain('(none listed');
   });
+
+  it.each([undefined, 'last_assistant_step'])(
+    'shows the delivered workflow YAML to the judge (messageSource %s)',
+    async (messageSource) => {
+      process.env[PERSONA_RUBRIC_JUDGE_ENV] = '1';
+      await runWith({
+        client,
+        response: {
+          messages: [{ message: 'Done. <render_attachment id="wf-7" version="1"/>' }],
+          messageSource,
+          workflowAttachments: [{ id: 'wf-7', version: 1, yaml: 'name: chrysalis-workflow' }],
+        },
+      });
+      expect(executeUntilValidMock).toHaveBeenCalledTimes(1);
+      const { input } = executeUntilValidMock.mock.calls[0][0] as {
+        input: { submission: string };
+      };
+      expect(input.submission).toContain(
+        '--- attachment wf-7 (version 1) ---\nname: chrysalis-workflow'
+      );
+    }
+  );
 
   it('logs a PersonaRubric rejection and keeps the example', async () => {
     process.env[PERSONA_RUBRIC_JUDGE_ENV] = '1';

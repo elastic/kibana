@@ -17,7 +17,6 @@ const MAX_TOOLS_ROW_CHARS = 4000;
 const MAX_EXPECTED_TOOLS_CHARS = 4000;
 const MAX_QUESTION_CHARS = 20_000;
 const MAX_ATTACHMENT_CHARS = 20_000;
-const MAX_PARAMS_CHARS = 2_000;
 const MAX_WORKFLOW_ATTACHMENTS = 5;
 const MAX_WORKFLOW_YAML_CHARS = 20_000;
 const TRUNCATION_MARKER = '…[truncated]';
@@ -212,22 +211,22 @@ interface PersonaRubricToolCall {
 }
 
 /**
- * Shares the budget across results so one huge result cannot crowd out later
- * calls: short results keep their full text and pass their unused share on.
+ * Shares the budget across texts so one huge text cannot crowd out the others:
+ * short texts keep their full length and pass their unused share on.
  */
-const fitResults = (
-  results: Array<string | undefined>,
+const fitTexts = (
+  texts: ReadonlyArray<string | undefined>,
   budget: number
 ): Array<string | undefined> => {
-  const fitted = [...results];
-  const order = results
+  const fitted = [...texts];
+  const order = texts
     .map((text, index) => ({ index, length: text?.length ?? 0 }))
-    .filter(({ index }) => results[index] !== undefined)
+    .filter(({ index }) => texts[index] !== undefined)
     .sort((a, b) => a.length - b.length);
   let remaining = Math.max(0, budget);
   order.forEach(({ index, length }, position) => {
     const share = Math.floor(remaining / (order.length - position));
-    const text = results[index] ?? '';
+    const text: string = texts[index] ?? '';
     fitted[index] =
       length <= share
         ? text
@@ -239,24 +238,30 @@ const fitResults = (
   return fitted;
 };
 
-/** Every call keeps its tool id and params; only the results are shortened to fit `budget`. */
+/**
+ * Every call keeps its tool id. Params are paid for before results, so they stay
+ * whole whenever they fit `budget`; results are shortened first.
+ */
 const formatTrace = (toolCalls: readonly PersonaRubricToolCall[], budget: number): string => {
   if (!toolCalls.length) return '(no tool calls)';
-  const heads = toolCalls.map(
-    ({ tool_id: toolId, params }, index) =>
-      `${index + 1}. ${toolId}\n   params: ${truncate(JSON.stringify(params), MAX_PARAMS_CHARS)}`
+  const labels = toolCalls.map(
+    ({ tool_id: toolId }, index) => `${index + 1}. ${toolId}\n   params: `
   );
+  const params = toolCalls.map(({ params: raw }) => JSON.stringify(raw) ?? '{}');
   const results = toolCalls.map(({ results: raw }) =>
     raw === undefined ? undefined : typeof raw === 'string' ? raw : JSON.stringify(raw)
   );
   const resultPrefix = '\n   result: ';
   const fixedChars =
-    heads.reduce((sum, head) => sum + head.length + 1, 0) +
+    labels.reduce((sum, label) => sum + label.length + 1, 0) +
     results.filter((text) => text !== undefined).length * resultPrefix.length;
-  const fitted = fitResults(results, budget - fixedChars);
-  return heads
-    .map((head, index) => {
-      const result = fitted[index];
+  const fittedParams = fitTexts(params, budget - fixedChars);
+  const paramsChars = fittedParams.reduce((sum, text) => sum + (text?.length ?? 0), 0);
+  const fittedResults = fitTexts(results, budget - fixedChars - paramsChars);
+  return labels
+    .map((label, index) => {
+      const head = `${label}${fittedParams[index]}`;
+      const result = fittedResults[index];
       return result === undefined ? head : `${head}${resultPrefix}${result}`;
     })
     .join('\n');

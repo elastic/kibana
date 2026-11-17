@@ -152,6 +152,37 @@ describe('PersonaRubric prompt assembly', () => {
     expect(submission.endsWith('Final answer:\nEND_ANSWER')).toBe(true);
   });
 
+  it('keeps long params whole when the submission fits and trims results instead', () => {
+    const description = `${'d'.repeat(5_000)}END_DESCRIPTION`;
+    const params = { description, title: 'Side-loading on srv-win-defend-01', severity: 'high' };
+    const { submission } = buildPersonaRubricInput({
+      category: 'alert-analysis',
+      answer: 'END_ANSWER',
+      toolCalls: [
+        { tool_id: 'platform.core.cases.manage', params, results: '{"id":"case-1"}' },
+        { tool_id: 'big.tool', params: {}, results: 'z'.repeat(1_000_000) },
+      ],
+    });
+    expect(submission.length).toBeLessThanOrEqual(PERSONA_RUBRIC_MAX_SUBMISSION_CHARS);
+    expect(submission).toContain(`params: ${JSON.stringify(params)}`);
+    expect(submission).toContain('result: {"id":"case-1"}');
+    expect(submission).toContain('…[truncated]');
+  });
+
+  it('shares the budget across params when params alone overflow it', () => {
+    const { submission } = buildPersonaRubricInput({
+      category: 'alert-analysis',
+      answer: 'END_ANSWER',
+      toolCalls: [
+        { tool_id: 'huge.params', params: { q: 'p'.repeat(1_000_000) } },
+        { tool_id: 'small.params', params: { hash: 'abc' } },
+      ],
+    });
+    expect(submission.length).toBeLessThanOrEqual(PERSONA_RUBRIC_MAX_SUBMISSION_CHARS);
+    expect(submission).toContain('2. small.params\n   params: {"hash":"abc"}');
+    expect(submission.endsWith('Final answer:\nEND_ANSWER')).toBe(true);
+  });
+
   it('splits the budget fairly between several oversized results', () => {
     const { submission } = buildPersonaRubricInput({
       category: 'alert-analysis',
