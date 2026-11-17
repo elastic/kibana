@@ -195,16 +195,16 @@ describe('getCalledCardContent', () => {
     ]);
   });
 
-  it('falls back to the ID when the workflow does not exist', () => {
+  it('falls back to the ID when the workflow is not found', () => {
     const content = getCalledCardContent({
       workflowId: 'missing-id',
-      status: 'breaking',
-      callSites: [callSite()],
-      issues: [issue({ kind: 'childNotFound', field: '' })],
+      status: 'unknown',
+      callSites: [],
+      issues: [issue({ kind: 'childNotFound', severity: 'warning', field: 'missing-id' })],
     });
 
     expect(content.name).toBe('missing-id');
-    expect(content.verdict).toBe('Will fail when it runs');
+    expect(content.verdict).toBe('Can’t check: it doesn’t exist or you can’t access it');
     expect(content.details).toEqual([]);
   });
 

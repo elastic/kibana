@@ -28,10 +28,18 @@ import { useKibana } from '../../../hooks/use_kibana';
 
 const DRAFT_DEBOUNCE_MS = 1000;
 
-// The server reads a draft that doesn't parse as one that runs nothing.
+// The server reads a draft that doesn't parse as one that runs nothing. `toJS` can still throw on a
+// document without errors (an unresolved alias), so that draft is left to the server to check.
 const runsWorkflows = (yaml: string): boolean => {
   const document = parseDocument(yaml);
-  return document.errors.length === 0 && getCalledWorkflowIds(document.toJS()).length > 0;
+  if (document.errors.length > 0) {
+    return false;
+  }
+  try {
+    return getCalledWorkflowIds(document.toJS()).length > 0;
+  } catch {
+    return true;
+  }
 };
 
 // Callers don't depend on the draft, so when the saved version has none and runs nothing, a draft

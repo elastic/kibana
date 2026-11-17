@@ -69,8 +69,8 @@ export const getCompletingOutputBlocks = (definition: unknown): Array<Record<str
 };
 
 /**
- * Names the completing `workflow.output` steps a run might reach set; undefined when one of them is
- * computed. Of every one in the definition when the workflow doesn't compile.
+ * Names the completing `workflow.output` steps a run might reach set; undefined when there is none
+ * or one of them is computed. Of every one in the definition when the workflow doesn't compile.
  */
 export const getReachableOutputStepNames = (definition: unknown): string[] | undefined => {
   const steps = getOutputSteps(definition);
@@ -78,7 +78,7 @@ export const getReachableOutputStepNames = (definition: unknown): string[] | und
     return getOutputStepNames(definition);
   }
   const blocks = steps.filter(isCompletingOutputStep).map(({ with: values }) => values);
-  return blocks.every(isRecord)
+  return blocks.length > 0 && blocks.every(isRecord)
     ? [...new Set(blocks.flatMap((values) => Object.keys(values)))]
     : undefined;
 };

@@ -291,6 +291,11 @@ const getCalledVerdict = (called: CalledWorkflowImpact, childName: string): stri
         defaultMessage: 'Might fail when it runs',
       });
     case 'unknown':
+      if (called.issues.some(({ kind }) => kind === 'childNotFound')) {
+        return i18n.translate('workflows.dependents.verdict.called.notFound', {
+          defaultMessage: 'Can’t check: it doesn’t exist or you can’t access it',
+        });
+      }
       return called.uncheckedRun
         ? getCalledUncheckedRunVerdict(called.uncheckedRun)
         : i18n.translate('workflows.dependents.verdict.called.unknown', {

@@ -121,21 +121,26 @@ export const collectWorkflowOutputBlocks = (
   return blocks;
 };
 
-/** Names the completing `workflow.output` steps set; undefined when one of them is computed. */
+/**
+ * Names the completing `workflow.output` steps set; undefined when there is none or one of them is
+ * computed.
+ */
 export const getOutputStepNames = (definition: unknown): string[] | undefined => {
   const names = new Set<string>();
+  let hasOutputStep = false;
   let isComputed = false;
   walkDefinitionSteps(definition, (step) => {
     if (!isCompletingOutputStep(step)) {
       return;
     }
+    hasOutputStep = true;
     if (isRecord(step.with)) {
       Object.keys(step.with).forEach((name) => names.add(name));
     } else {
       isComputed = true;
     }
   });
-  return isComputed ? undefined : [...names];
+  return hasOutputStep && !isComputed ? [...names] : undefined;
 };
 
 export interface OutputUsage {
