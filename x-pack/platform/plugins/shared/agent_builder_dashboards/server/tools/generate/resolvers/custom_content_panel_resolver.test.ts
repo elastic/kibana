@@ -133,7 +133,7 @@ describe('createCustomContentPanelResolver', () => {
   it('passes no height hint when the builder kept the existing template', async () => {
     mockedBuild.mockResolvedValue({ esqlQueries: [], template: '<div>old</div>' });
 
-    const result = await resolve(addRequest({ hasData: false }));
+    const result = await resolve(addRequest({ removeAllQueries: true }));
 
     expect(result).toMatchObject({ type: 'success', heightHint: undefined });
   });
