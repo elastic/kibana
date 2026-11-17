@@ -6,9 +6,10 @@
  */
 
 import { fireEvent, screen } from '@testing-library/react';
-import React from 'react';
+import React, { useState } from 'react';
 import { listKiTestAiIndex, renderListKiWithProviders } from './test_helpers';
 import { ListKiBody } from './list_ki_body';
+import type { ListKiGroup } from './list_ki_groups_helpers';
 import { ListKiPanel } from './list_ki_panel';
 
 const mockUseListKi = jest.fn();
@@ -93,29 +94,73 @@ describe('ListKiBody', () => {
     );
   });
   describe('with a selected document', () => {
-    const renderEmptyBody = (hasActiveFilters: boolean) =>
+    const group: ListKiGroup = {
+      type: 'playbook',
+      count: 1,
+      kis: [
+        { id: 'ki-1', index: 'idx', type: 'playbook', title: 'Refund playbook', status: 'active' },
+      ],
+      canShowMore: false,
+      isCapReached: false,
+      isLoadingMore: false,
+    };
+
+    /** Stands in for the viewer with an unsaved edit: the draft lives in its own state. */
+    const DraftViewer = () => {
+      const [draft, setDraft] = useState('');
+      return (
+        <input
+          data-test-subj="testDraft"
+          value={draft}
+          onChange={(event) => setDraft(event.target.value)}
+        />
+      );
+    };
+
+    /** The list starts with rows; the button empties it like a filter that matches nothing. */
+    const BodyWithFilter = () => {
+      const [isFiltered, setIsFiltered] = useState(false);
+      return (
+        <>
+          <button data-test-subj="testApplyFilter" onClick={() => setIsFiltered(true)} />
+          <ListKiBody
+            aiIndexId="sample-ki"
+            groups={isFiltered ? [] : [group]}
+            onSelectKi={jest.fn()}
+            onShowMore={jest.fn()}
+            hasActiveFilters={isFiltered}
+            onClearFilters={jest.fn()}
+            isLoading={false}
+            viewer={<DraftViewer />}
+          />
+        </>
+      );
+    };
+
+    it('keeps an unsaved draft when a filter hides every row', () => {
+      renderListKiWithProviders(<BodyWithFilter />);
+      fireEvent.change(screen.getByTestId('testDraft'), { target: { value: 'my draft' } });
+
+      fireEvent.click(screen.getByTestId('testApplyFilter'));
+
+      expect(screen.getByTestId('contextListKiNoResults')).toBeInTheDocument();
+      expect(screen.queryByTestId('contextKiRow')).not.toBeInTheDocument();
+      expect(screen.getByTestId('testDraft')).toHaveValue('my draft');
+    });
+
+    it('keeps the viewer open next to an empty list (a shared link still opens)', () => {
       renderListKiWithProviders(
         <ListKiBody
           aiIndexId="sample-ki"
           groups={[]}
           onSelectKi={jest.fn()}
           onShowMore={jest.fn()}
-          hasActiveFilters={hasActiveFilters}
+          hasActiveFilters={false}
           onClearFilters={jest.fn()}
           isLoading={false}
           viewer={<div data-test-subj="testViewer" />}
         />
       );
-
-    it('keeps the viewer open when filters hide every row (an unsaved edit stays)', () => {
-      renderEmptyBody(true);
-
-      expect(screen.getByTestId('contextListKiNoResults')).toBeInTheDocument();
-      expect(screen.getByTestId('testViewer')).toBeInTheDocument();
-    });
-
-    it('keeps the viewer open next to an empty list (a shared link still opens)', () => {
-      renderEmptyBody(false);
 
       expect(screen.getByTestId('contextListKiEmpty')).toBeInTheDocument();
       expect(screen.getByTestId('testViewer')).toBeInTheDocument();
