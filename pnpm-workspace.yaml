@@ -89,7 +89,6 @@ overrides:
   'cheerio': '1.0.0-rc.12'
   'chokidar': '3.5.3'
   'esbuild': '0.28.1'
-  'fast-xml-parser': '5.5.7'
   'flatted': '3.4.2'
   'globby>fast-glob': '3.3.3'
   'guarded-fetch>undici': '>=7.29.1 <8.0.0'
