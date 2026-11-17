@@ -19,7 +19,7 @@ const AWS_ONBOARDING_CONTENT = [
   '',
   '### How the fully managed setup works',
   '',
-  "The user starts from a small CloudFormation stack, opened through a quick-create link, that IaC Provisioner renders. It creates an IAM user with an access key, a discovery role that can look but not change anything, a provisioning role, and a Secrets Manager secret holding the key and both role ARNs. The user can only assume those two roles and delete the stack's own resources.",
+  "The user starts from a small CloudFormation stack, opened through a quick-create link that IaC Provisioner renders, or, when the provisioner cannot serve it, downloaded from Kibana and uploaded in the CloudFormation console. It creates an IAM user with an access key, a discovery role that can look but not change anything, a provisioning role, and a Secrets Manager secret holding the key and both role ARNs. The user can only assume those two roles and delete the stack's own resources.",
   '',
   'Kibana keeps the key and role ARNs stored in Kibana, and only the secret access key is encrypted. The secret goes from the credentials card to Kibana, not through the conversation. Each operation assumes one of the two roles for its own 15-minute session and keeps nothing afterwards. Verifying assumes both roles through STS and changes nothing. Kibana is built so a future AWS delegated-access feature can replace this stored key.',
   '',

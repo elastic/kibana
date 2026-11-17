@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiSteps, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiLink, EuiSteps, EuiText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
 import { FormattedMessage, FormattedTime } from '@kbn/i18n-react';
@@ -23,6 +23,8 @@ import {
   sendGetAwsOnboardingVerify,
 } from '../../../hooks/use_request/aws_onboarding';
 import { toRequestError } from '../../../hooks/use_request/errors';
+
+import { downloadBootstrapTemplate } from './download_template';
 
 const LAUNCH_QUERY_KEY = 'aws-onboarding-bootstrap-launch';
 
@@ -103,7 +105,7 @@ const getStatusText = ({ kind, accountId }: CardStatus): string => {
 export const AwsOnboardingCredentialsCard: React.FC<{
   data: AwsOnboardingCredentialsAttachmentData;
 }> = ({ data }) => {
-  const { cloud } = useStartServices();
+  const { cloud, notifications } = useStartServices();
   const { isEnabled, isConfigured, isLoading: isCredentialsLoading } = useManagedOnboarding(cloud);
   const status = useCardStatus(data);
 
@@ -126,7 +128,7 @@ export const AwsOnboardingCredentialsCard: React.FC<{
       refetchOnWindowFocus: true,
       // Refresh about a minute before the signed template URL expires, even while the tab keeps focus.
       refetchInterval: (result) =>
-        result
+        result?.kind === 'quick_create'
           ? Math.max(new Date(result.expiresAt).getTime() - Date.now() - 60_000, 30_000)
           : false,
       retry: false,
@@ -135,12 +137,31 @@ export const AwsOnboardingCredentialsCard: React.FC<{
 
   const statusText = getStatusText(status);
 
+  const isDownload = launch.data?.kind === 'download';
+
+  const handleDownload = async () => {
+    try {
+      await downloadBootstrapTemplate();
+    } catch (error) {
+      notifications.toasts.addError(error as Error, {
+        title: i18n.translate('xpack.fleet.awsOnboardingCredentialsCard.downloadError', {
+          defaultMessage: 'Failed to download the bootstrap template',
+        }),
+      });
+    }
+  };
+
   const launchNote = (
     <EuiText size="s">
-      {i18n.translate('xpack.fleet.awsOnboardingCredentialsCard.launchNote', {
-        defaultMessage:
-          'Opens the AWS console with the Elastic bootstrap template pre-loaded. Create the stack, then copy the secret from Secrets Manager.',
-      })}
+      {isDownload
+        ? i18n.translate('xpack.fleet.awsOnboardingCredentialsCard.downloadNote', {
+            defaultMessage:
+              'Download the template, upload it in the CloudFormation console and create the stack, then copy the secret from Secrets Manager.',
+          })
+        : i18n.translate('xpack.fleet.awsOnboardingCredentialsCard.launchNote', {
+            defaultMessage:
+              'Opens the AWS console with the Elastic bootstrap template pre-loaded. Create the stack, then copy the secret from Secrets Manager.',
+          })}
     </EuiText>
   );
 
@@ -166,13 +187,41 @@ export const AwsOnboardingCredentialsCard: React.FC<{
             data-test-subj="awsOnboardingCredentialsCardLaunchError"
             title={(launch.error as Error).message}
           />
+        ) : launch.data?.kind === 'download' ? (
+          <>
+            <EuiButton
+              size="s"
+              iconType="download"
+              onClick={handleDownload}
+              data-test-subj="awsOnboardingCredentialsCardDownload"
+            >
+              {i18n.translate('xpack.fleet.awsOnboardingCredentialsCard.downloadButton', {
+                defaultMessage: 'Download template',
+              })}
+            </EuiButton>
+            <EuiSpacer size="s" />
+            <EuiText size="s">
+              <EuiLink
+                external
+                target="_blank"
+                href={`https://console.aws.amazon.com/cloudformation/home?region=${encodeURIComponent(
+                  data.region
+                )}#/stacks/create`}
+                data-test-subj="awsOnboardingCredentialsCardConsoleLink"
+              >
+                {i18n.translate('xpack.fleet.awsOnboardingCredentialsCard.consoleLink', {
+                  defaultMessage: 'Open CloudFormation console',
+                })}
+              </EuiLink>
+            </EuiText>
+          </>
         ) : (
           <>
             <EuiButton
               fill
               size="s"
               iconType="rocket"
-              href={launch.data?.quickCreateUrl}
+              href={launch.data?.kind === 'quick_create' ? launch.data.quickCreateUrl : undefined}
               target="_blank"
               isLoading={launch.isLoading}
               isDisabled={!launch.data}
@@ -182,15 +231,16 @@ export const AwsOnboardingCredentialsCard: React.FC<{
                 defaultMessage: 'Launch in CloudFormation',
               })}
             </EuiButton>
-            {launch.data && !Number.isNaN(new Date(launch.data.expiresAt).getTime()) && (
-              <EuiText size="xs" data-test-subj="awsOnboardingCredentialsCardLaunchExpiry">
-                <FormattedMessage
-                  id="xpack.fleet.awsOnboardingCredentialsCard.launchExpiry"
-                  defaultMessage="Link expires at {time}"
-                  values={{ time: <FormattedTime value={launch.data.expiresAt} /> }}
-                />
-              </EuiText>
-            )}
+            {launch.data?.kind === 'quick_create' &&
+              !Number.isNaN(new Date(launch.data.expiresAt).getTime()) && (
+                <EuiText size="xs" data-test-subj="awsOnboardingCredentialsCardLaunchExpiry">
+                  <FormattedMessage
+                    id="xpack.fleet.awsOnboardingCredentialsCard.launchExpiry"
+                    defaultMessage="Link expires at {time}"
+                    values={{ time: <FormattedTime value={launch.data.expiresAt} /> }}
+                  />
+                </EuiText>
+              )}
           </>
         )}
       </>
@@ -203,9 +253,13 @@ export const AwsOnboardingCredentialsCard: React.FC<{
         titleSize="xxs"
         steps={[
           {
-            title: i18n.translate('xpack.fleet.awsOnboardingCredentialsCard.launchStep', {
-              defaultMessage: 'Launch in CloudFormation',
-            }),
+            title: isDownload
+              ? i18n.translate('xpack.fleet.awsOnboardingCredentialsCard.downloadStep', {
+                  defaultMessage: 'Create the stack in CloudFormation',
+                })
+              : i18n.translate('xpack.fleet.awsOnboardingCredentialsCard.launchStep', {
+                  defaultMessage: 'Launch in CloudFormation',
+                }),
             status: isConfigured ? 'complete' : undefined,
             children: launchStepContent,
           },

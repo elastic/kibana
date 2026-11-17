@@ -8,6 +8,7 @@
 import React from 'react';
 import { of } from 'rxjs';
 import { act, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -16,6 +17,7 @@ import type { AwsOnboardingCredentialsAttachmentData } from '../../../../common/
 import {
   sendGetAwsOnboardingBootstrapLaunch,
   sendGetAwsOnboardingCredentials,
+  sendGetAwsOnboardingBootstrapTemplate,
   sendGetAwsOnboardingVerify,
 } from '../../../hooks/use_request/aws_onboarding';
 
@@ -23,10 +25,12 @@ import { AwsOnboardingCredentialsCard } from './card';
 
 jest.mock('../../../hooks/use_request/aws_onboarding');
 
+const mockToastsAddError = jest.fn();
+
 const createStartServices = (flagEnabled: boolean) => ({
   featureFlags: { getBooleanValue$: () => of(flagEnabled) },
   cloud: { isCloudEnabled: true },
-  notifications: { toasts: { addError: jest.fn(), addSuccess: jest.fn() } },
+  notifications: { toasts: { addError: mockToastsAddError, addSuccess: jest.fn() } },
 });
 
 const data: AwsOnboardingCredentialsAttachmentData = {
@@ -59,7 +63,12 @@ const EXPIRES_AT = '2026-11-16T10:30:00.000Z';
 const LAUNCH_URL = 'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?x=1';
 const launchResponse = (expiresAt: string) =>
   ({
-    data: { quickCreateUrl: LAUNCH_URL, expiresAt, blueprint: { id: 'bootstrap', version: '1' } },
+    data: {
+      kind: 'quick_create',
+      quickCreateUrl: LAUNCH_URL,
+      expiresAt,
+      blueprint: { id: 'bootstrap', version: '1' },
+    },
     error: null,
   } as never);
 
@@ -254,6 +263,72 @@ describe('AwsOnboardingCredentialsCard', () => {
         jest.advanceTimersByTime(4 * 60_000 + 1000);
       });
       await waitFor(() => expect(sendGetAwsOnboardingBootstrapLaunch).toHaveBeenCalledTimes(2));
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('offers the template download and the console link when the provisioner cannot serve the blueprint', async () => {
+    jest.mocked(sendGetAwsOnboardingCredentials).mockResolvedValue({
+      data: { configured: false },
+      error: null,
+    } as never);
+    jest
+      .mocked(sendGetAwsOnboardingBootstrapLaunch)
+      .mockResolvedValue({ data: { kind: 'download' }, error: null } as never);
+    renderCard();
+
+    expect(await screen.findByTestId('awsOnboardingCredentialsCardDownload')).toBeInTheDocument();
+    expect(screen.getByTestId('awsOnboardingCredentialsCardConsoleLink')).toHaveAttribute(
+      'href',
+      expect.stringContaining('region=eu-west-1')
+    );
+    expect(screen.queryByTestId('awsOnboardingCredentialsCardLaunch')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('awsOnboardingCredentialsCardLaunchExpiry')
+    ).not.toBeInTheDocument();
+  });
+
+  it('toasts when the template download fails', async () => {
+    jest.mocked(sendGetAwsOnboardingCredentials).mockResolvedValue({
+      data: { configured: false },
+      error: null,
+    } as never);
+    jest
+      .mocked(sendGetAwsOnboardingBootstrapLaunch)
+      .mockResolvedValue({ data: { kind: 'download' }, error: null } as never);
+    jest.mocked(sendGetAwsOnboardingBootstrapTemplate).mockResolvedValue({
+      data: null,
+      error: serverError('Bootstrap template unavailable'),
+    } as never);
+    renderCard();
+
+    await userEvent.click(await screen.findByTestId('awsOnboardingCredentialsCardDownload'));
+
+    await waitFor(() => expect(mockToastsAddError).toHaveBeenCalledTimes(1));
+    expect(mockToastsAddError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'Bootstrap template unavailable' }),
+      expect.objectContaining({ title: 'Failed to download the bootstrap template' })
+    );
+  });
+
+  it('does not schedule a refresh for a download answer', async () => {
+    jest.useFakeTimers({ now: new Date('2026-11-16T10:00:00.000Z') });
+    try {
+      jest.mocked(sendGetAwsOnboardingCredentials).mockResolvedValue({
+        data: { configured: false },
+        error: null,
+      } as never);
+      jest
+        .mocked(sendGetAwsOnboardingBootstrapLaunch)
+        .mockResolvedValue({ data: { kind: 'download' }, error: null } as never);
+      renderCard();
+
+      await waitFor(() => expect(sendGetAwsOnboardingBootstrapLaunch).toHaveBeenCalledTimes(1));
+      await act(async () => {
+        jest.advanceTimersByTime(15 * 60_000);
+      });
+      expect(sendGetAwsOnboardingBootstrapLaunch).toHaveBeenCalledTimes(1);
     } finally {
       jest.useRealTimers();
     }
