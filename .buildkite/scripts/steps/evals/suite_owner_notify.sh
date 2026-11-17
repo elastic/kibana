@@ -24,13 +24,6 @@ fi
 suite_key_safe="$(printf '%s' "$EVAL_SUITE_ID" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
 failures_prefix="kbn-evals:suite-failures:${suite_key_safe}:"
 
-all_keys="$(buildkite-agent meta-data keys 2>/dev/null || true)"
-failure_keys="$(printf '%s\n' "${all_keys}" | grep -E "^${failures_prefix}" || true)"
-if [[ -z "${failure_keys}" ]]; then
-  echo "No failures recorded for suite ${EVAL_SUITE_ID}"
-  exit 0
-fi
-
 suite_name="${EVAL_SUITE_NAME:-$EVAL_SUITE_ID}"
 
 if [[ "${KBN_EVALS_WEEKLY:-}" =~ ^(1|true)$ ]]; then
@@ -51,9 +44,75 @@ else
   slack_channel="${EVAL_SLACK_NOTIFICATION_CHANNEL:-}"
 fi
 
+# A daily build on another branch (e.g. refs/pull/<N>/head) keeps its PR comment but must not
+# post that branch's result to the daily channel.
+notify_branch="${BUILDKITE_PIPELINE_DEFAULT_BRANCH:-main}"
+if [[ "${EVAL_NOTIFY_MODE}" == "daily" && "${BUILDKITE_BRANCH:-}" != "${notify_branch}" ]]; then
+  slack_channel=""
+fi
+
 # PR: comment when a PR number was resolved (run_suite.sh derives it from
 # GITHUB_PR_NUMBER, BUILDKITE_PULL_REQUEST, or refs/pull/<N>/head).
 pr_number="${EVAL_PR_NUMBER:-}"
+
+all_keys="$(buildkite-agent meta-data keys 2>/dev/null || true)"
+failure_keys="$(printf '%s\n' "${all_keys}" | grep -E "^${failures_prefix}" || true)"
+if [[ -z "${failure_keys}" ]]; then
+  echo "No failures recorded for suite ${EVAL_SUITE_ID}"
+
+  # Daily runs also report a clean run, so the channel shows the run happened. Weekly and
+  # on-demand runs stay failure-only.
+  if [[ "${EVAL_NOTIFY_MODE}" != "daily" || -z "${slack_channel}" ]]; then
+    exit 0
+  fi
+
+  # A step that timed out or was cancelled can end before its exit trap records a failure, so
+  # only call the run passed when every eval step passed.
+  IFS=, read -r -a eval_step_keys <<<"${EVAL_FANOUT_STEP_KEYS:-}"
+  if [[ ${#eval_step_keys[@]} -eq 0 ]]; then
+    echo "EVAL_FANOUT_STEP_KEYS is unset; cannot confirm the eval steps passed, so not posting"
+    exit 0
+  fi
+  for step_key in "${eval_step_keys[@]}"; do
+    outcome="$(buildkite-agent step get outcome --step "${step_key}" 2>/dev/null || true)"
+    if [[ "${outcome}" != "passed" ]]; then
+      echo "Eval step ${step_key} ended '${outcome:-unknown}' without recording a failure; not posting a passed message"
+      exit 0
+    fi
+  done
+
+  cd "${KIBANA_DIR:-${BUILDKITE_BUILD_CHECKOUT_PATH:-$(pwd)}}"
+
+  if ! node -e "require('yaml')" 2>/dev/null; then
+    echo "--- Bootstrap (required for the Slack notify pipeline)"
+    .buildkite/scripts/bootstrap.sh
+  fi
+
+  models="$(buildkite-agent meta-data get "kbn-evals:connectors:${EVAL_SUITE_ID}" --default '' 2>/dev/null || true)"
+
+  SLACK_FILE="$(mktemp -t kbn-evals-pass-slack.XXXXXX.md)"
+  {
+    printf ':white_check_mark: *Daily LLM evals* — %s (`%s`) passed. Every eval step finished; scores are not checked against a threshold.\n' "$suite_name" "$EVAL_SUITE_ID"
+    if [[ -n "${models}" ]]; then
+      printf '\n*Models:*\n'
+      while IFS= read -r model; do
+        [[ -n "${model}" ]] && printf -- '- `%s`\n' "${model}"
+      done <<<"${models//,/$'\n'}"
+    fi
+  } >"$SLACK_FILE"
+
+  NOTIFY_PIPELINE_FILE="$(mktemp -t kbn-evals-notify-pipeline.XXXXXX.yml)"
+  EVAL_TRIAGE_SUMMARY_PATH="$SLACK_FILE" \
+    EVAL_SUITE_SLACK_CHANNEL="$slack_channel" \
+    EVAL_SUITE_OUTCOME="passed" \
+    node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_suite_notify_pipeline.js \
+    >"$NOTIFY_PIPELINE_FILE"
+
+  echo "--- Uploading suite passed Slack notify pipeline (channel: ${slack_channel})"
+  cat "$NOTIFY_PIPELINE_FILE"
+  buildkite-agent pipeline upload "$NOTIFY_PIPELINE_FILE" || echo "WARNING: failed to upload Slack notify pipeline"
+  exit 0
+fi
 
 if [[ -z "${slack_channel}" && -z "${pr_number}" ]]; then
   echo "No Slack channel and not a PR build; skipping triage for suite ${EVAL_SUITE_ID}"
