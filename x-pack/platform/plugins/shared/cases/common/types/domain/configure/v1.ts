@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { CaseConnectorSchema, ConnectorMappingsSchema } from '../connector/v1';
 import { UserSchema } from '../user/v1';
 import {
@@ -90,37 +90,118 @@ export const TemplateConfigurationSchema = z.object({
 
 export const TemplatesConfigurationSchema = z.array(TemplateConfigurationSchema);
 
-export const ConfigurationBasicWithoutOwnerSchema = z.object({
-  /**
-   * The external connector
-   */
-  connector: CaseConnectorSchema,
-  /**
-   * Whether to close the case after it has been synced with the external system
-   */
-  closure_type: ClosureTypeSchema,
-  /**
-   * The custom fields configured for the case
-   */
-  customFields: CustomFieldsConfigurationSchema,
-  /**
-   * Templates configured for the case
-   */
-  templates: TemplatesConfigurationSchema,
-  /**
-   * Observable types configured for the case
-   */
-  observableTypes: ObservableTypesConfigurationSchema,
-  /**
-   * Whether to extract observables from the case
-   */
-  extractObservables: z.boolean(),
-  /**
-   * Tags used to filter workflows available in Cases workflow selectors.
-   * An empty array shows all workflows.
-   */
-  workflowTags: WorkflowTagsConfigurationSchema,
-});
+export const KpiMetricIndexSchema = lazySchema(() => z.enum(['cases', 'activity', 'attachments']));
+
+export const KpiMetricAggregationTypeSchema = lazySchema(() =>
+  z.enum(['count', 'cardinality', 'sum', 'avg', 'min', 'max', 'median'])
+);
+
+export const KpiMetricDisplaySchema = lazySchema(() => z.enum(['value', 'trend']));
+
+export const KpiMetricThresholdSchema = lazySchema(() =>
+  z.object({
+    comparator: z.enum(['above', 'below']),
+    value: z.number(),
+  })
+);
+
+export const KpiMetricDirectionSchema = lazySchema(() =>
+  z.enum(['lower_is_better', 'higher_is_better'])
+);
+
+const KpiMetricBaseSchema = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    display: KpiMetricDisplaySchema,
+    threshold: KpiMetricThresholdSchema.optional(),
+    /**
+     * Whether a lower or a higher value is good, for the comparison with the previous period
+     */
+    direction: KpiMetricDirectionSchema.optional(),
+  })
+);
+
+export const PredefinedKpiMetricSchema = lazySchema(() =>
+  KpiMetricBaseSchema.extend({
+    kind: z.literal('predefined'),
+    predefinedId: z.string(),
+  })
+);
+
+export const CustomKpiMetricSchema = lazySchema(() =>
+  KpiMetricBaseSchema.extend({
+    kind: z.literal('custom'),
+    label: z.string(),
+    index: KpiMetricIndexSchema,
+    /**
+     * KQL query on the analytics index. Forced space and owner filters are added on the server.
+     */
+    query: z.string(),
+    /**
+     * No aggregation means a count of the matching documents
+     */
+    aggregation: z
+      .object({
+        type: KpiMetricAggregationTypeSchema,
+        field: z.string().optional(),
+      })
+      .optional(),
+    /**
+     * The query selects the numerator. All cases of the owner in the date range are the denominator.
+     */
+    percent: z.boolean().optional(),
+    groupBy: z.object({ field: z.string() }).optional(),
+  })
+);
+
+export const KpiMetricSchema = lazySchema(() =>
+  z.discriminatedUnion('kind', [PredefinedKpiMetricSchema, CustomKpiMetricSchema])
+);
+
+export const KpiMetricsConfigurationSchema = lazySchema(() =>
+  z.object({
+    casesList: z.array(KpiMetricSchema).optional(),
+    caseDetails: z.array(KpiMetricSchema).optional(),
+  })
+);
+
+export const ConfigurationBasicWithoutOwnerSchema = lazySchema(() =>
+  z.object({
+    /**
+     * The external connector
+     */
+    connector: CaseConnectorSchema,
+    /**
+     * Whether to close the case after it has been synced with the external system
+     */
+    closure_type: ClosureTypeSchema,
+    /**
+     * The custom fields configured for the case
+     */
+    customFields: CustomFieldsConfigurationSchema,
+    /**
+     * Templates configured for the case
+     */
+    templates: TemplatesConfigurationSchema,
+    /**
+     * Observable types configured for the case
+     */
+    observableTypes: ObservableTypesConfigurationSchema,
+    /**
+     * Whether to extract observables from the case
+     */
+    extractObservables: z.boolean(),
+    /**
+     * Tags used to filter workflows available in Cases workflow selectors.
+     * An empty array shows all workflows.
+     */
+    workflowTags: WorkflowTagsConfigurationSchema,
+    /**
+     * KPI metrics shown on the case list and on the case details page
+     */
+    metrics: KpiMetricsConfigurationSchema.optional(),
+  })
+);
 
 export const CasesConfigureBasicSchema = ConfigurationBasicWithoutOwnerSchema.extend({
   /**
@@ -161,3 +242,10 @@ export type Configurations = z.infer<typeof ConfigurationsSchema>;
 export type ObservableTypesConfiguration = z.infer<typeof ObservableTypesConfigurationSchema>;
 export type ObservableTypeConfiguration = z.infer<typeof CaseObservableTypeSchema>;
 export type WorkflowTagsConfiguration = z.infer<typeof WorkflowTagsConfigurationSchema>;
+export type KpiMetricAggregationType = z.infer<typeof KpiMetricAggregationTypeSchema>;
+export type KpiMetricThreshold = z.infer<typeof KpiMetricThresholdSchema>;
+export type KpiMetricDirection = z.infer<typeof KpiMetricDirectionSchema>;
+export type PredefinedKpiMetricConfiguration = z.infer<typeof PredefinedKpiMetricSchema>;
+export type CustomKpiMetricConfiguration = z.infer<typeof CustomKpiMetricSchema>;
+export type KpiMetricConfiguration = z.infer<typeof KpiMetricSchema>;
+export type KpiMetricsConfiguration = z.infer<typeof KpiMetricsConfigurationSchema>;

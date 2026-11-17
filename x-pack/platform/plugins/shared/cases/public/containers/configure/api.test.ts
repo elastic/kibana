@@ -70,6 +70,35 @@ describe('Case Configuration API', () => {
       expect(resp).toEqual([casesConfigurationsMock]);
     });
 
+    test('keeps the KPI metrics of the configuration', async () => {
+      const metrics = {
+        casesList: [
+          {
+            id: 'metric-1',
+            kind: 'predefined' as const,
+            predefinedId: 'open_cases',
+            display: 'value' as const,
+          },
+          {
+            id: 'metric-2',
+            kind: 'custom' as const,
+            label: 'Critical cases',
+            index: 'cases' as const,
+            query: 'case.severity: critical',
+            aggregation: { type: 'avg' as const, field: 'case.time_to_resolve' },
+            display: 'value' as const,
+            threshold: { comparator: 'above' as const, value: 3600 },
+            direction: 'lower_is_better' as const,
+          },
+        ],
+      };
+      fetchMock.mockResolvedValue([{ ...caseConfigurationResponseMock, metrics }]);
+
+      const resp = await getCaseConfigure({ signal: abortCtrl.signal });
+
+      expect(resp?.[0].metrics).toEqual(metrics);
+    });
+
     test('return null on empty response', async () => {
       fetchMock.mockResolvedValue({});
       const resp = await getCaseConfigure({

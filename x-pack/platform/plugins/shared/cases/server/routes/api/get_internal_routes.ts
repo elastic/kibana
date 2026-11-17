@@ -22,6 +22,8 @@ import { bulkDeleteFileAttachments } from './internal/bulk_delete_file_attachmen
 import { getCategoriesRoute } from './cases/categories/get_categories';
 import { getCaseMetricRoute } from './internal/get_case_metrics';
 import { getCasesMetricRoute } from './internal/get_cases_metrics';
+import { getKpiMetricsRoute } from './internal/get_kpi_metrics';
+import { previewKpiMetricRoute } from './internal/preview_kpi_metric';
 import { searchCasesRoute } from './internal/search_cases';
 import { replaceCustomFieldRoute } from './internal/replace_custom_field';
 import { postObservableRoute } from './observables/post_observable';
@@ -58,6 +60,8 @@ export const getInternalRoutes = (
     getCategoriesRoute,
     getCaseMetricRoute,
     getCasesMetricRoute,
+    getKpiMetricsRoute,
+    previewKpiMetricRoute,
     searchCasesRoute,
     replaceCustomFieldRoute,
     postObservableRoute,

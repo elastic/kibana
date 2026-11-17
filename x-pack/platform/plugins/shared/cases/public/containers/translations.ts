@@ -74,6 +74,20 @@ export const FILE_DELETE_SUCCESS = i18n.translate('xpack.cases.containers.delete
   defaultMessage: 'File deleted successfully',
 });
 
+export const KPI_METRICS_ERROR_TITLE = i18n.translate(
+  'xpack.cases.containers.kpiMetricsErrorTitle',
+  {
+    defaultMessage: 'Error fetching metrics',
+  }
+);
+
+export const KPI_METRIC_PREVIEW_ERROR_TITLE = i18n.translate(
+  'xpack.cases.containers.kpiMetricPreviewErrorTitle',
+  {
+    defaultMessage: 'Error testing the metric',
+  }
+);
+
 export const CATEGORIES_ERROR_TITLE = i18n.translate(
   'xpack.cases.containers.categoriesErrorTitle',
   {

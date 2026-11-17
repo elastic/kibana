@@ -68,6 +68,7 @@ import { createCasesWorkflowOperations } from './workflows/operations';
 import type {
   CasesActivityV2WriterContract,
   CasesAnalyticsV2DataViewRefresher,
+  CasesAnalyticsV2ReaderContract,
   CasesAnalyticsV2WriterContract,
   CasesAttachmentsV2WriterContract,
 } from '../cases_analytics_v2';
@@ -120,6 +121,11 @@ interface CasesClientFactoryArgs {
    * unconditionally.
    */
   analyticsV2DataViewRefresher: CasesAnalyticsV2DataViewRefresher;
+  /**
+   * Stable proxy returned by `CasesAnalyticsV2Service.getReader()`. Read-only searches on the
+   * analytics indices, used by the KPI metrics.
+   */
+  analyticsV2Reader: CasesAnalyticsV2ReaderContract;
 }
 
 interface CreateCasesClientParams {
@@ -236,6 +242,7 @@ export class CasesClientFactory {
       request,
       closeReasonValidator: boundCloseReasonValidator,
       clientSource,
+      analyticsV2Reader: this.options.analyticsV2Reader,
     };
   }
 

@@ -155,6 +155,13 @@ export const CASE_INDEX_MAPPING: MappingTypeMapping = {
         time_to_acknowledge: { type: 'long', meta: { unit: 's' } },
         time_to_investigate: { type: 'long', meta: { unit: 's' } },
         time_to_resolve: { type: 'long', meta: { unit: 's' } },
+        // Status-history fields, calculated from the status changes of the
+        // case (see `writer/status_history.ts`). `active_time_open` and
+        // `time_to_pickup` are in **seconds**. `time_to_pickup` is absent
+        // when the case was never in progress.
+        active_time_open: { type: 'long', meta: { unit: 's' } },
+        time_to_pickup: { type: 'long', meta: { unit: 's' } },
+        reopen_count: { type: 'integer' },
         // Monotonic per-tenant id. Matches the SO exactly, including
         // the multi-fields: `keyword` for exact-match aggregations,
         // `text` for partial search.

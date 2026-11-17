@@ -7,9 +7,12 @@
 
 import type { SavedObject } from '@kbn/core/server';
 import type { Observable } from '../../../common/types/domain';
+import { CaseStatuses } from '../../../common/types/domain';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import { CasePersistedSeverity, CasePersistedStatus } from '../../common/types/case';
-import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
+import { CONNECTOR_ID_REFERENCE_NAME, STATUS_ESMODEL_TO_EXTERNAL } from '../../common/constants';
+import type { CaseStatusChange, CaseStatusHistoryFields } from './status_history';
+import { calculateStatusHistoryFields } from './status_history';
 
 /**
  * Shape of a single document indexed into `.cases`. Mirrors
@@ -89,6 +92,9 @@ export interface CaseAnalyticsDoc {
     time_to_acknowledge?: number | null;
     time_to_investigate?: number | null;
     time_to_resolve?: number | null;
+    active_time_open?: number;
+    time_to_pickup?: number | null;
+    reopen_count?: number;
     incremental_id?: number | null;
     // Tied 1:1 to the SO field — referencing the SO's type prevents the
     // two from drifting silently if a new sub-field lands on the SO.
@@ -151,8 +157,14 @@ const SEVERITY_TO_STRING: Record<CasePersistedSeverity, CaseSeverityString> = {
  * `@timestamp` is the most recent activity (`updated_at` or, if absent,
  * `created_at`) so a Discover/Lens time-picker filter reads as "show me
  * cases active in the last 24h".
+ *
+ * `statusChanges` adds the status-history fields. Without it, the doc has
+ * no status-history fields.
  */
-export function buildCaseDoc(so: SavedObject<CasePersistedAttributes>): CaseAnalyticsDoc {
+export function buildCaseDoc(
+  so: SavedObject<CasePersistedAttributes>,
+  statusChanges?: CaseStatusChange[]
+): CaseAnalyticsDoc {
   const a = so.attributes;
   const timestamp = a.updated_at ?? a.created_at;
   // The connector id is stored in so.references (under CONNECTOR_ID_REFERENCE_NAME),
@@ -194,6 +206,7 @@ export function buildCaseDoc(so: SavedObject<CasePersistedAttributes>): CaseAnal
       time_to_acknowledge: a.time_to_acknowledge,
       time_to_investigate: a.time_to_investigate,
       time_to_resolve: a.time_to_resolve,
+      ...(statusChanges != null && buildStatusHistory(a, statusChanges)),
       incremental_id: a.incremental_id,
       template: a.template,
       // Rehydrate connector.id from references — the persisted connector
@@ -210,6 +223,25 @@ export function buildCaseDoc(so: SavedObject<CasePersistedAttributes>): CaseAnal
       extended_fields: a.extended_fields ?? undefined,
     },
   };
+}
+
+/**
+ * The case service writes the case before its status user action. When the
+ * newest user action is not indexed yet, the current SO status closes the
+ * history at `updated_at`.
+ */
+function buildStatusHistory(
+  a: CasePersistedAttributes,
+  statusChanges: CaseStatusChange[]
+): CaseStatusHistoryFields {
+  const currentStatus = STATUS_ESMODEL_TO_EXTERNAL[a.status];
+  const lastStatus = statusChanges.at(-1)?.status ?? CaseStatuses.open;
+  const changes =
+    lastStatus === currentStatus
+      ? statusChanges
+      : [...statusChanges, { status: currentStatus, timestamp: a.updated_at ?? a.created_at }];
+
+  return calculateStatusHistoryFields({ createdAt: a.created_at, statusChanges: changes });
 }
 
 /** Null-safe projection of the SO's `*_by` user fields. */
