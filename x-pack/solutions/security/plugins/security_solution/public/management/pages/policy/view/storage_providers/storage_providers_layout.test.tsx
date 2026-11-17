@@ -10,7 +10,10 @@ import { act, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { packagePolicyRouteService } from '@kbn/fleet-plugin/common';
 import { FleetPackagePolicyGenerator } from '../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
-import { setExportProviders } from '../../../../../../common/endpoint/models/export_providers';
+import {
+  getExportProviders,
+  setExportProviders,
+} from '../../../../../../common/endpoint/models/export_providers';
 import { MAX_EXPORT_PROVIDERS_PER_POLICY } from '../../../../../../common/endpoint/service/response_actions/export_providers';
 import type {
   ExportProvider,
@@ -23,6 +26,7 @@ import { useUserPrivileges as _useUserPrivileges } from '../../../../../common/c
 import { getUserPrivilegesMockDefaultValue } from '../../../../../common/components/user_privileges/__mocks__';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../common/components/user_privileges/endpoint/mocks';
 import { fleetPutEndpointPackagePolicyHttpMock } from '../../../../mocks';
+import { getDeferred } from '../../../../mocks/utils';
 import { usePolicyDetailsSelector } from '../policy_hooks';
 import { policyDetails } from '../../store/policy_details/selectors';
 import { StorageProvidersLayout } from './storage_providers_layout';
@@ -459,6 +463,33 @@ describe('When rendering the StorageProvidersLayout', () => {
 
       expect(getSentProviders()).toEqual([first, addedElsewhere, createProvider('azure-3')]);
       expect(getSentPolicyConfig().windows.popup.malware.message).toBe('changed elsewhere');
+    });
+
+    it('should update the store when the save finishes after the tab was left', async () => {
+      const response = getDeferred();
+      apiMocks.responseProvider.updateEndpointPolicy.mockDelay.mockReturnValue(response.promise);
+      const existing = createProvider('azure-1');
+      const added = createProvider('azure-2');
+      render([existing]);
+
+      await fillAddFlyout(added);
+      await userEvent.click(renderResult.getByTestId('storageProviderFlyout-saveButton'));
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.updateEndpointPolicy.mockDelay).toHaveBeenCalled();
+      });
+
+      // The user switches tabs before the server responds
+      renderResult.unmount();
+      await act(async () => {
+        response.resolve();
+      });
+
+      await waitFor(() => {
+        const { policyItem } = mockedContext.store.getState().management.policyDetails;
+        expect(
+          policyItem && getExportProviders(policyItem.inputs[0].config.policy.value)
+        ).toEqual([existing, added]);
+      });
     });
   });
 

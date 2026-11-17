@@ -82,7 +82,7 @@ export const StorageProvidersLayout = memo<StorageProvidersLayoutProps>(({ polic
   const dispatch = useDispatch();
   const { canWritePolicyManagement } = useUserPrivileges().endpointPrivileges;
   const {
-    mutate: sendPolicyUpdate,
+    mutateAsync: sendPolicyUpdate,
     isLoading: isSaving,
     error: saveError,
     reset: resetSaveState,
@@ -107,20 +107,20 @@ export const StorageProvidersLayout = memo<StorageProvidersLayoutProps>(({ polic
         nextProviders
       );
 
-      sendPolicyUpdate(
-        { policy: update },
-        {
-          onSuccess: ({ item: policyItem }) => {
-            toasts.addSuccess({
-              title: successMessage,
-              'data-test-subj': 'storageProvidersSaveSuccessToast',
-            });
-            // The policy details store isn't refreshed by the update itself
-            dispatch({ type: 'serverReturnedPolicyDetailsData', payload: { policyItem } });
-            onSuccess();
-          },
-        }
-      );
+      // Handled on the returned promise, not with `mutate`'s per-call `onSuccess`: that one doesn't
+      // run once this tab unmounts, so the store would keep the old policy (and its `version`)
+      sendPolicyUpdate({ policy: update })
+        .then(({ item: policyItem }) => {
+          toasts.addSuccess({
+            title: successMessage,
+            'data-test-subj': 'storageProvidersSaveSuccessToast',
+          });
+          // The policy details store isn't refreshed by the update itself
+          dispatch({ type: 'serverReturnedPolicyDetailsData', payload: { policyItem } });
+          onSuccess();
+        })
+        // The flyout or delete modal shows the error from the mutation state
+        .catch(() => {});
     },
     [dispatch, policy, sendPolicyUpdate, toasts]
   );
