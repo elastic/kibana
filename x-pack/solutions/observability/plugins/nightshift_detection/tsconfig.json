@@ -6,6 +6,7 @@
   "include": ["common/**/*", "server/**/*", "scripts/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/alerting-v2-schemas",
     "@kbn/cloud-plugin",
     "@kbn/config-schema",
     "@kbn/core",

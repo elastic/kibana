@@ -8,6 +8,7 @@
 import {
   MAX_TEXT_LENGTH,
   SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
+  type Severity,
   type SignificantEvent,
   type SignificantEventStatus,
 } from '@kbn/significant-events-schema';
@@ -17,6 +18,7 @@ import {
 } from '../../../lib/significant_events/events';
 import { isBreachMemberSignal } from '../../../lib/significant_events/events/event_members';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
+import { StatusError } from '../../../lib/errors/status_error';
 
 export const EVENT_SEARCH_DEFAULT_PER_PAGE = 20;
 export const EVENT_SEARCH_MAX_PER_PAGE = 50;
@@ -273,17 +275,22 @@ const toEnvelope = (response: {
 export async function searchEventsToolHandler<V extends EventSearchView = 'compact'>({
   eventSearchClient,
   params,
+  reconcileSeverities,
 }: {
   eventSearchClient: RuleEventsClient;
   params: EventSearchInput & { view?: V };
+  /** Gives the returned events the severity of their investigations, so they agree with the list. */
+  reconcileSeverities?: <T extends { event_id: string; severity: Severity; status?: string }>(
+    hits: T[]
+  ) => Promise<T[]>;
 }): Promise<Extract<EventSearchResponse, { view: V }>> {
   const view = params.view ?? 'compact';
   if (view === 'full' && params.event_ids?.length !== 1) {
-    throw new Error('Full event search requires exactly one event ID');
+    throw new StatusError('Full event search requires exactly one event ID', 400);
   }
 
   const sharedParams = buildSearchParams(view, params);
-  const response = hasEventSearchFilters(params)
+  const found = hasEventSearchFilters(params)
     ? await eventSearchClient.findLatestByCurrentStatePaginated({
         ...sharedParams,
         status: toStatusFilter(params.status),
@@ -292,6 +299,10 @@ export async function searchEventsToolHandler<V extends EventSearchView = 'compa
         topologyFeatureIds: params.topology_feature_ids,
       })
     : await eventSearchClient.findLatestPaginated(sharedParams);
+  const response = {
+    ...found,
+    hits: reconcileSeverities ? await reconcileSeverities(found.hits) : found.hits,
+  };
 
   const envelope = toEnvelope(response);
 

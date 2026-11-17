@@ -73,6 +73,35 @@ apiTest.describe('Create action policy API', { tag: testData.API_ENGINE_TAG }, (
     }
   );
 
+  apiTest(
+    'create: enabled=false creates a disabled policy that _enable turns on',
+    async ({ apiClient, apiServices }) => {
+      const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: { ...buildCreateActionPolicyData({ name: 'created-disabled' }), enabled: false },
+      });
+
+      expect(response).toHaveStatusCode(201);
+      expect(response.body.enabled).toBe(false);
+      expect((await apiServices.alertingV2.actionPolicies.get(response.body.id)).enabled).toBe(
+        false
+      );
+
+      const enabled = await apiServices.alertingV2.actionPolicies.enable(response.body.id);
+      expect(enabled.enabled).toBe(true);
+    }
+  );
+
+  apiTest('create: rejects a non-boolean enabled', async ({ apiClient }) => {
+    const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+      body: { ...buildCreateActionPolicyData({ name: 'bad-enabled' }), enabled: 'false' },
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
+
   apiTest('create: only required fields returns documented defaults', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },

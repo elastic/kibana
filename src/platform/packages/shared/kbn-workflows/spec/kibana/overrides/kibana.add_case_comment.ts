@@ -19,7 +19,7 @@ import { buildParamsSchema } from '../../../common/utils/zod';
 // import all needed request and response schemas generated from the OpenAPI spec
 import type { InternalConnectorContract } from '../../../types/latest';
 
-import { FetcherConfigSchema, KibanaStepMetaSchema } from '../../schema';
+import { KibanaFetcherConfigSchema, KibanaStepMetaSchema } from '../../schema';
 import {
   add_case_comment_default_space_request,
   add_case_comment_default_space_response,
@@ -50,7 +50,7 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
   paramsSchema: buildParamsSchema({
     requestSchema: add_case_comment_default_space_request,
     additionalSchemas: {
-      fetcher: FetcherConfigSchema,
+      fetcher: KibanaFetcherConfigSchema,
       ...KibanaStepMetaSchema,
     },
   }),
