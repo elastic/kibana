@@ -10,6 +10,7 @@ import { useQuery } from '@kbn/react-query';
 import { useEffect } from 'react';
 import { DEFAULT_KI_PAGE_SIZE } from '../../../common/constants';
 import type { KiStatus } from '../../../common/ki_lifecycle_status';
+import type { KiListSort } from '../../../common/ki_list_sort';
 import type { KiTypeCount } from '../../../common/http_api/ai_indices';
 import type { ListKisResponse } from '../../../common/http_api/knowledge_indicators';
 import { listKis } from '../api/knowledge_indicators';
@@ -23,6 +24,7 @@ interface UseListKiArgs {
   type?: string;
   query?: string;
   status?: KiStatus[];
+  sort?: KiListSort;
   enabled?: boolean;
   notifyOnError?: boolean;
 }
@@ -48,6 +50,7 @@ export const useListKi = ({
   type,
   query,
   status,
+  sort,
   enabled = true,
   notifyOnError = false,
 }: UseListKiArgs): UseListKiResult => {
@@ -56,7 +59,14 @@ export const useListKi = ({
   } = useKibana();
 
   const { data, isLoading, isFetching, error, refetch } = useQuery<ListKisResponse, Error>({
-    queryKey: contextEngineQueryKeys.aiIndex.listKi(aiIndexId ?? '', size, type, query, status),
+    queryKey: contextEngineQueryKeys.aiIndex.listKi(
+      aiIndexId ?? '',
+      size,
+      type,
+      query,
+      status,
+      sort
+    ),
     queryFn: ({ signal }) => {
       if (!aiIndexId) {
         throw new Error('AI index id is required');
@@ -67,6 +77,7 @@ export const useListKi = ({
         ...(type !== undefined ? { type } : {}),
         ...(query !== undefined ? { query } : {}),
         ...(status !== undefined ? { status: [...status] } : {}),
+        ...(sort !== undefined ? { sort } : {}),
         signal,
       });
     },
@@ -82,7 +93,7 @@ export const useListKi = ({
     const toastMessage = getErrorMessage(error);
     notifications.toasts.addError(error, {
       title: i18n.translate('xpack.contextEngine.listKi.loadErrorTitle', {
-        defaultMessage: 'Unable to load Knowledge Indicators',
+        defaultMessage: 'Unable to load Knowledge documents',
       }),
       ...(toastMessage ? { toastMessage } : {}),
     });

@@ -42,8 +42,8 @@ import {
   createBulkWriteValidationError,
   getBulkWriteToolErrorCode,
   MAX_BULK_WRITE_ITEMS,
-  trackTelemetryBestEffort,
 } from '../bulk_write';
+import { trackTelemetryBestEffort } from '../../../lib/telemetry/track_telemetry_best_effort';
 import { reportToolFailure, toTelemetryErrorMessage } from '../tool_failure';
 import { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from '../../agents/discovery/discovery';
 import { eventsWriteBulkHandler, type EventsWriteInput } from './handler';
