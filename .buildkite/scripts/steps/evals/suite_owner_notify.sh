@@ -44,10 +44,10 @@ else
   slack_channel="${EVAL_SLACK_NOTIFICATION_CHANNEL:-}"
 fi
 
-# A daily build on another branch (e.g. refs/pull/<N>/head) keeps its PR comment but must not
-# post that branch's result to the daily channel.
+# A weekly or daily build on another branch (e.g. refs/pull/<N>/head) keeps its PR comment but
+# must not post that branch's result to the scheduled run's channel.
 notify_branch="${BUILDKITE_PIPELINE_DEFAULT_BRANCH:-main}"
-if [[ "${EVAL_NOTIFY_MODE}" == "daily" && "${BUILDKITE_BRANCH:-}" != "${notify_branch}" ]]; then
+if [[ "${EVAL_NOTIFY_MODE}" != "on-demand" && "${BUILDKITE_BRANCH:-}" != "${notify_branch}" ]]; then
   slack_channel=""
 fi
 
@@ -60,9 +60,9 @@ failure_keys="$(printf '%s\n' "${all_keys}" | grep -E "^${failures_prefix}" || t
 if [[ -z "${failure_keys}" ]]; then
   echo "No failures recorded for suite ${EVAL_SUITE_ID}"
 
-  # Daily runs also report a clean run, so the channel shows the run happened. Weekly and
-  # on-demand runs stay failure-only.
-  if [[ "${EVAL_NOTIFY_MODE}" != "daily" || -z "${slack_channel}" ]]; then
+  # Weekly and daily runs also report a clean run, so the channel shows the run happened.
+  # On-demand runs stay failure-only.
+  if [[ "${EVAL_NOTIFY_MODE}" == "on-demand" || -z "${slack_channel}" ]]; then
     exit 0
   fi
 
@@ -90,9 +90,15 @@ if [[ -z "${failure_keys}" ]]; then
 
   models="$(buildkite-agent meta-data get "kbn-evals:connectors:${EVAL_SUITE_ID}" --default '' 2>/dev/null || true)"
 
+  if [[ "${EVAL_NOTIFY_MODE}" == "weekly" ]]; then
+    header_label="Weekly LLM evals"
+  else
+    header_label="Daily LLM evals"
+  fi
+
   SLACK_FILE="$(mktemp -t kbn-evals-pass-slack.XXXXXX.md)"
   {
-    printf ':white_check_mark: *Daily LLM evals* — %s (`%s`) passed. Every eval step finished; scores are not checked against a threshold.\n' "$suite_name" "$EVAL_SUITE_ID"
+    printf ':white_check_mark: *%s* — %s (`%s`) passed. Every eval step finished; scores are not checked against a threshold.\n' "$header_label" "$suite_name" "$EVAL_SUITE_ID"
     if [[ -n "${models}" ]]; then
       printf '\n*Models:*\n'
       while IFS= read -r model; do
