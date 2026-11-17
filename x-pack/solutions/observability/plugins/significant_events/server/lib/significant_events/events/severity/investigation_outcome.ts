@@ -192,7 +192,7 @@ export const loadInvestigationOutcomes = async ({
 }: {
   request: KibanaRequest;
   agenticInvestigations: InvestigationsReader | undefined;
-  eventClient: Pick<RuleEventsClient, 'findEpisodeIdsByEventIds'>;
+  eventClient: Pick<RuleEventsClient, 'findEpisodeIdsByEventIds' | 'findEventIdsByEpisodeIds'>;
   eventIds: string[];
   logger: Logger;
   timeoutMs?: number;
@@ -204,22 +204,27 @@ export const loadInvestigationOutcomes = async ({
     logger,
     timeoutMs,
     load: async () => {
+      const episodeIdsByEvent = await eventClient.findEpisodeIdsByEventIds(eventIds);
+      const episodeIds = [...new Set([...episodeIdsByEvent.values()].flat())];
+      // The full episode-to-events map, as the hook reads it: an episode shared with an event
+      // outside `eventIds` is ambiguous here too.
+      // Chunked so one long-lived event cannot push a read past the client's episode-pair cap.
       const eventIdsByEpisode = new Map<string, string[]>();
-      (await eventClient.findEpisodeIdsByEventIds(eventIds)).forEach((episodeIds, eventId) =>
-        episodeIds.forEach((episodeId) => {
-          const mapped = eventIdsByEpisode.get(episodeId);
-          if (mapped) mapped.push(eventId);
-          else eventIdsByEpisode.set(episodeId, [eventId]);
-        })
+      (
+        await Promise.all(
+          chunk(episodeIds, MAX_SUBJECT_KEYS_PER_READ).map((keys) =>
+            eventClient.findEventIdsByEpisodeIds(keys)
+          )
+        )
+      ).forEach((byEpisode) =>
+        byEpisode.forEach((ids, episodeId) => eventIdsByEpisode.set(episodeId, ids))
       );
 
       const subjectsClient = agenticInvestigations.getSubjectsClient(request);
       const conversationIds = (
         await Promise.all(
-          chunk([...eventIdsByEpisode.keys()], MAX_SUBJECT_KEYS_PER_READ).map((episodeIds) =>
-            subjectsClient.findConversationIdsBySubjects(
-              episodeIds.map((id) => ({ type: 'alert', id }))
-            )
+          chunk(episodeIds, MAX_SUBJECT_KEYS_PER_READ).map((keys) =>
+            subjectsClient.findConversationIdsBySubjects(keys.map((id) => ({ type: 'alert', id })))
           )
         )
       ).flat();

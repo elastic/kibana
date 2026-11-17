@@ -362,6 +362,20 @@ describe('eventsWriteBulkHandler, severity resolved from investigations', () => 
     expect(writtenDocs()[0].severity).toBe('medium');
   });
 
+  it('does not hand a closed event to the resolver, so its stored severity is not rewritten', async () => {
+    const resolveSeverities = jest.fn().mockResolvedValue(new Map());
+
+    await eventsWriteBulkHandler({
+      eventSearchClient: clientWith(
+        makeStoredEvent('checkout-stable', { severity: 'low', status: 'inactive' })
+      ),
+      inputs: [{ ...baseInput, event_id: 'checkout-stable', severity: 'high' }],
+      resolveSeverities,
+    });
+
+    expect(resolveSeverities).not.toHaveBeenCalled();
+  });
+
   it("stores the severity a person set on the investigation when the stored copy and the agent's still hold the old one", async () => {
     const [result] = await write(
       clientWith(stored('high')),

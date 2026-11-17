@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import { createSeveritySync } from './sync_severity';
 
 const mockLoadInvestigationOutcomes = jest.fn();
@@ -20,6 +21,7 @@ const request = {} as KibanaRequest;
 interface Row {
   event_id: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
+  status?: string;
 }
 type Outcome = 'updated' | 'unchanged' | 'superseded' | 'not_found' | 'closed';
 
@@ -35,7 +37,11 @@ const staleRows = (prefix: string, count: number): Row[] =>
   }));
 
 const setup = (syncSeverity: jest.Mock = jest.fn().mockResolvedValue('updated' as Outcome)) => {
-  const eventClient = { findEpisodeIdsByEventIds: jest.fn(), syncSeverity };
+  const eventClient = {
+    findEpisodeIdsByEventIds: jest.fn(),
+    findEventIdsByEpisodeIds: jest.fn(),
+    syncSeverity,
+  };
   const severitySync = createSeveritySync({ getAgenticInvestigations: () => undefined, logger });
   return {
     severitySync,
@@ -75,6 +81,26 @@ describe('createSeveritySync', () => {
       expect(syncSeverity).not.toHaveBeenCalled();
     });
 
+    it('keeps the stored severity of a closed event and does not read its investigation', async () => {
+      mockLoadInvestigationOutcomes.mockResolvedValue(
+        available([
+          ['event-1', 'critical'],
+          ['event-2', 'critical'],
+        ])
+      );
+      const { reconcile } = setup();
+
+      const rows = await reconcile([
+        { event_id: 'event-1', severity: 'low', status: ALERT_EPISODE_STATUS.INACTIVE },
+        { event_id: 'event-2', severity: 'low', status: ALERT_EPISODE_STATUS.ACTIVE },
+      ]);
+
+      expect(rows.map(({ severity }) => severity)).toEqual(['low', 'critical']);
+      expect(mockLoadInvestigationOutcomes).toHaveBeenCalledWith(
+        expect.objectContaining({ eventIds: ['event-2'] })
+      );
+    });
+
     it.each(['forbidden', 'timeout', 'error', 'not_installed'])(
       'keeps the stored severities and writes nothing while the investigations are unavailable (%s)',
       async (reason) => {
@@ -109,24 +135,25 @@ describe('createSeveritySync', () => {
 
     it('warns once per reason every 5 minutes, and not for a missing plugin or a forbidden read', async () => {
       const { reconcile } = setup();
+      const openRows: Row[] = [{ event_id: 'event-1', severity: 'low' }];
       mockLoadInvestigationOutcomes.mockResolvedValue(unavailable('error'));
-      await reconcile([]);
-      await reconcile([]);
+      await reconcile(openRows);
+      await reconcile(openRows);
       expect(log.warn).toHaveBeenCalledTimes(1);
 
       // Another reason has its own window.
       mockLoadInvestigationOutcomes.mockResolvedValue(unavailable('timeout'));
-      await reconcile([]);
+      await reconcile(openRows);
       expect(log.warn).toHaveBeenCalledTimes(2);
 
       await jest.advanceTimersByTimeAsync(5 * 60_000 + 1);
       mockLoadInvestigationOutcomes.mockResolvedValue(unavailable('error'));
-      await reconcile([]);
+      await reconcile(openRows);
       expect(log.warn).toHaveBeenCalledTimes(3);
 
       for (const reason of ['not_installed', 'forbidden']) {
         mockLoadInvestigationOutcomes.mockResolvedValue(unavailable(reason));
-        await reconcile([]);
+        await reconcile(openRows);
       }
       expect(log.warn).toHaveBeenCalledTimes(3);
     });

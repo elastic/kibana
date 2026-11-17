@@ -7,6 +7,7 @@
 
 import pLimit from 'p-limit';
 import type { Logger } from '@kbn/core/server';
+import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import {
   operatorFallbackAssessmentNote,
   SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
@@ -152,9 +153,12 @@ export async function eventsWriteBulkHandler({
   });
 
   // Facts are derived once per candidate so the no-op check and the final document agree.
-  // Only an existing event can have an investigation; a new one takes the agent's severity.
+  // Only an existing event can have an investigation; a new one takes the agent's severity. A closed
+  // event keeps its stored severity, as the write-through and the page read leave it alone.
   const existingEvents = held.kept.flatMap(({ eventId, latest }) =>
-    latest ? [{ eventId, storedSeverity: latest.severity }] : []
+    latest && latest.status !== ALERT_EPISODE_STATUS.INACTIVE
+      ? [{ eventId, storedSeverity: latest.severity }]
+      : []
   );
   const resolved = existingEvents.length ? await resolveSeverities?.(existingEvents) : undefined;
   const eventsFacts = held.kept.map((candidate) =>

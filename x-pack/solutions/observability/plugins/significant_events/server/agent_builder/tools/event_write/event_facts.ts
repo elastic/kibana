@@ -213,12 +213,14 @@ export const computeEventFacts = ({
 
   const { status } = candidate;
 
-  const severity = decideSeverity({
-    proposed: candidate.input.severity,
-    storedSeverity: latest?.severity,
-    status,
-    signals,
-  });
+  const severity =
+    resolvedSeverity ??
+    decideSeverity({
+      proposed: candidate.input.severity,
+      storedSeverity: latest?.severity,
+      status,
+      signals,
+    });
 
   // For continuations: if no new rule UUIDs are introduced, freeze title and symptom_hypothesis to prevent identity hijack
   // A rule that now confirms what the event stored as unconfirmed changes what the event is about:

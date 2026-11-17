@@ -279,7 +279,7 @@ export async function searchEventsToolHandler<V extends EventSearchView = 'compa
   eventSearchClient: RuleEventsClient;
   params: EventSearchInput & { view?: V };
   /** Gives the returned events the severity of their investigations, so they agree with the list. */
-  reconcileSeverities?: <T extends { event_id: string; severity: Severity }>(
+  reconcileSeverities?: <T extends { event_id: string; severity: Severity; status?: string }>(
     hits: T[]
   ) => Promise<T[]>;
 }): Promise<Extract<EventSearchResponse, { view: V }>> {

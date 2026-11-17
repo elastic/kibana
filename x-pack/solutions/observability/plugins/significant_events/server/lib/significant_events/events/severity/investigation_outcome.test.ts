@@ -171,18 +171,30 @@ describe('loadInvestigationOutcomes', () => {
     conversationIds = ['inv-1'],
     results = [investigation()],
     list,
+    eventIdsByEpisode,
   }: {
+    eventIdsByEpisode?: Map<string, string[]>;
     episodeIdsByEvent?: Map<string, string[]>;
     conversationIds?: string[];
     results?: InvestigationSummary[];
     list?: jest.Mock;
   } = {}) => {
     const findEpisodeIdsByEventIds = jest.fn(async () => episodeIdsByEvent);
+    const findEventIdsByEpisodeIds = jest.fn(
+      async (_episodeIds: string[]) =>
+        eventIdsByEpisode ??
+        new Map(
+          [...episodeIdsByEvent].flatMap(([eventId, episodeIds]) =>
+            episodeIds.map((episodeId): [string, string[]] => [episodeId, [eventId]])
+          )
+        )
+    );
     const findConversationIdsBySubjects = jest.fn(async () => conversationIds);
     const listInvestigations =
       list ?? jest.fn(async () => ({ results, pagination: { total: results.length } }));
     return {
       findEpisodeIdsByEventIds,
+      findEventIdsByEpisodeIds,
       findConversationIdsBySubjects,
       listInvestigations,
       load: (eventIds: string[] = ['event-1']) =>
@@ -194,7 +206,7 @@ describe('loadInvestigationOutcomes', () => {
             getSubjectsClient: () => ({ findConversationIdsBySubjects } as never),
             getInvestigationsClient: () => ({ list: listInvestigations } as never),
           },
-          eventClient: { findEpisodeIdsByEventIds },
+          eventClient: { findEpisodeIdsByEventIds, findEventIdsByEpisodeIds },
         }),
     };
   };
@@ -232,6 +244,33 @@ describe('loadInvestigationOutcomes', () => {
     expect(outcome.status === 'available' && [...outcome.outcomes.keys()]).toEqual(['event-1']);
   });
 
+  it('leaves an event with no outcome when its episode is shared with an event outside the request', async () => {
+    const { load } = setup({
+      eventIdsByEpisode: new Map([['episode-1', ['event-1', 'event-sibling']]]),
+    });
+
+    const outcome = await load(['event-1']);
+
+    expect(outcome).toEqual({ status: 'available', outcomes: new Map() });
+
+    // Positive control: the same episode, unshared, yields an outcome.
+    const unshared = await setup({
+      eventIdsByEpisode: new Map([['episode-1', ['event-1']]]),
+    }).load(['event-1']);
+    expect(unshared.status === 'available' && [...unshared.outcomes.keys()]).toEqual(['event-1']);
+  });
+
+  it('reads the episode-to-events map in chunks, so a large page stays under the per-read cap', async () => {
+    const episodeIds = Array.from({ length: 120 }, (_, index) => `episode-${index}`);
+    const { load, findEventIdsByEpisodeIds } = setup({
+      episodeIdsByEvent: new Map([['event-1', episodeIds]]),
+    });
+
+    await load(['event-1']);
+
+    expect(findEventIdsByEpisodeIds.mock.calls.map(([ids]) => ids.length)).toEqual([50, 50, 20]);
+  });
+
   it('reads nothing for no events, or for events with no episode', async () => {
     const none = setup();
     expect(await none.load([])).toEqual({ status: 'available', outcomes: new Map() });
@@ -265,7 +304,7 @@ describe('loadInvestigationOutcomes', () => {
       logger,
       eventIds: ['event-1'],
       agenticInvestigations: undefined,
-      eventClient: { findEpisodeIdsByEventIds: jest.fn() },
+      eventClient: { findEpisodeIdsByEventIds: jest.fn(), findEventIdsByEpisodeIds: jest.fn() },
     });
 
     expect(outcome).toEqual({ status: 'unavailable', reason: 'not_installed' });

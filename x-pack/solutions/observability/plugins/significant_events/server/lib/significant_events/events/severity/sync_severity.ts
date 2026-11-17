@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { Severity } from '@kbn/significant-events-schema';
 import type { RuleEventsClient } from '../rule_events_client';
 import {
@@ -14,8 +15,14 @@ import {
   type InvestigationsReader,
 } from './investigation_outcome';
 
-type SeveritySyncEventClient = Pick<RuleEventsClient, 'findEpisodeIdsByEventIds' | 'syncSeverity'>;
-type SeverityReadClient = Pick<RuleEventsClient, 'findEpisodeIdsByEventIds'>;
+type SeverityReadClient = Pick<
+  RuleEventsClient,
+  'findEpisodeIdsByEventIds' | 'findEventIdsByEpisodeIds'
+>;
+type SeveritySyncEventClient = SeverityReadClient & Pick<RuleEventsClient, 'syncSeverity'>;
+
+const isClosed = ({ status }: { status?: string }): boolean =>
+  status === ALERT_EPISODE_STATUS.INACTIVE;
 
 interface SeverityReadArgs {
   request: KibanaRequest;
@@ -38,8 +45,9 @@ export interface SeveritySync {
   /**
    * For display only: returns the rows with the severity their investigations concluded and writes
    * nothing. It never throws. While the investigations cannot be read the rows come back as they are.
+   * Closed events keep their stored severity, as the write-through never rewrites them.
    */
-  reconcileRows: <T extends { event_id: string; severity: Severity }>(
+  reconcileRows: <T extends { event_id: string; severity: Severity; status?: string }>(
     args: SeverityReadArgs & { rows: T[] }
   ) => Promise<T[]>;
   /**
@@ -104,10 +112,13 @@ export const createSeveritySync = ({
 
   return {
     reconcileRows: async ({ rows, request, eventClient }) => {
+      const openRows = rows.filter((row) => !isClosed(row));
+      if (!openRows.length) return rows;
+
       const loaded = await load({
         request,
         eventClient,
-        eventIds: rows.map(({ event_id: eventId }) => eventId),
+        eventIds: openRows.map(({ event_id: eventId }) => eventId),
         timeoutMs: READ_TIMEOUT_MS,
       });
       if (loaded.status === 'unavailable') {
@@ -119,6 +130,7 @@ export const createSeveritySync = ({
         return rows;
       }
       return rows.map((row) => {
+        if (isClosed(row)) return row;
         const concluded = loaded.outcomes.get(row.event_id)?.severity;
         return concluded && concluded !== row.severity ? { ...row, severity: concluded } : row;
       });
