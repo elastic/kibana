@@ -77,7 +77,7 @@ describe('parseDecisionResponse', () => {
     };
 
     expect(() => parseDecisionResponse(body, [choice])).toThrow(
-      'Decision answer [question_1] has no [choice]'
+      /Decision answer \[question_1\] is malformed: .*\n.*at choice/
     );
   });
 
