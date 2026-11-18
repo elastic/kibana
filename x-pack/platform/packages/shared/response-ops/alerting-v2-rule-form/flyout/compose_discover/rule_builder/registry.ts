@@ -118,7 +118,13 @@ const thresholdDefinition = defineBuilder<ThresholdFormValues>({
     // No builder state means the step cannot be valid yet (unlike ES|QL mode, which can proceed
     // on queryCommitted alone before builder state is initialized).
     builderState ? isThresholdFormValid(getValidatedThresholdValues(builderState)) : false,
-  parseState: parseThresholdEsql,
+  parseState: ({ query, recoveryQuery, timeField }) => {
+    const values = parseThresholdEsql(query, recoveryQuery);
+    if (!values) {
+      return null;
+    }
+    return timeField ? { ...values, timeField } : values;
+  },
 });
 
 export const thresholdRuleBuilder: RuleBuilderDefinition = thresholdDefinition;

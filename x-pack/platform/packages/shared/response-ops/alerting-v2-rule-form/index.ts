@@ -22,6 +22,7 @@ export type {
   RuleBuilderCreateCard,
   RuleBuilderDefinition,
   RuleBuilderCreateOption,
+  RuleBuilderParseStateArgs,
   RuleBuilderStepProps,
   RuleBuilderRecoveryStepProps,
   BuilderStateProps,

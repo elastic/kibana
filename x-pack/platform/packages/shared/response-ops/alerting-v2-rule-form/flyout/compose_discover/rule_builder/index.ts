@@ -8,6 +8,7 @@
 export type {
   RuleBuilderDefinition,
   RuleBuilderCreateOption,
+  RuleBuilderParseStateArgs,
   RuleBuilderStepProps,
   RuleBuilderRecoveryStepProps,
   BuilderState,
