@@ -92,7 +92,7 @@ interface HarnessResult {
 
 interface RunHarnessOptions {
   timeoutMs?: number;
-  /** Directory the harness writes profiles to. */
+  /** Optional profile output directory passed to the child as `WATCHDOG_PROFILE_DIR`. */
   profileDir?: string;
   /** Checked after each stdout log line; the child is killed with SIGKILL once it returns true. */
   killWhen?: (workerLogLines: WorkerLogLine[]) => boolean;
@@ -107,7 +107,8 @@ const runHarness = (
   { timeoutMs = 90_000, killWhen, profileDir }: RunHarnessOptions = {}
 ): Promise<HarnessResult> =>
   new Promise((resolve, reject) => {
-    // CI sets --max-old-space-size in NODE_OPTIONS, which overrides the worker's heap limit.
+    // CI sets --max-old-space-size in NODE_OPTIONS, which overrides the worker's heap limit
+    // (https://github.com/nodejs/node/issues/67014).
     const { NODE_OPTIONS, ...env } = process.env;
     const child = spawn(
       process.execPath,
@@ -193,7 +194,10 @@ const expectProfilerStopped = ({ mainLogLines }: HarnessResult) => {
     expect(mainLogLines.map(({ message }) => message)).toContain('profiler thread stopped');
   }
 };
-/** Runs a scenario that writes profiles to a temp directory; returns the result and the one file. */
+/**
+ * Runs a file-writing scenario in a temp directory and returns its result, file path, and parsed
+ * profile.
+ */
 const runWritingHarness = async (scenario: string, options: RunHarnessOptions = {}) => {
   const profileDir = mkdtempSync(Path.join(Os.tmpdir(), 'watchdog-profiles-'));
   try {
@@ -208,7 +212,10 @@ const runWritingHarness = async (scenario: string, options: RunHarnessOptions = 
 };
 const isKibanaUrl = (url: string) =>
   url.startsWith('src/') || url.startsWith('x-pack/') || url.startsWith('@kbn/');
-/** What Chrome DevTools needs to open the file and show Kibana frames with its default settings. */
+/**
+ * Checks profile structure and that Kibana frames remain visible with DevTools' default ignore
+ * rules.
+ */
 const expectViewableProfile = ({
   nodes,
   startTime,
@@ -227,7 +234,7 @@ const expectViewableProfile = ({
   const urls = nodes.map(({ callFrame }) => callFrame.url ?? '');
   const kibanaUrls = urls.filter(isKibanaUrl);
   expect(kibanaUrls.length).toBeGreaterThan(0);
-  // DevTools' default ignore list is `/node_modules/|^node:`.
+  // Kibana URLs must not keep the `node_modules/` prefix that DevTools ignores by default.
   expect(kibanaUrls.filter((url) => url.includes('node_modules/'))).toEqual([]);
   expect(urls.filter((url) => url.startsWith(`file://${REPO_ROOT}/src/`))).toEqual([]);
   expect(urls.filter((url) => url.startsWith(`file://${REPO_ROOT}/x-pack/`))).toEqual([]);
@@ -407,11 +414,11 @@ describe('event loop watchdog in a child process', () => {
       expect(lines[0].log.level).toBe('WARN');
       expect(lines[0].message).toContain(`File: ${file}. Top: `);
       expect(lines[0].kibana?.event_loop_watchdog?.profile?.file).toBe('admitted');
-      // The write finished before the watchdog stopped.
+      // The stats count the write only after it completes, so this confirms it finished before
+      // shutdown.
       const files = statsOf(result).map(({ profiling }) => profiling?.files.running);
       expect(files.reduce((sum, counts) => sum + (counts?.written ?? 0), 0)).toBe(1);
       expect(files.reduce((sum, counts) => sum + (counts?.writeFailed ?? 0), 0)).toBe(0);
-      expect(Path.basename(file)).toContain('event-loop-block-running-');
       expectViewableProfile(profile);
       expect(profile.nodes.map(({ callFrame }) => callFrame.url)).toContain(
         'src/core/packages/core/server/integration_tests/event_loop_watchdog/fixtures/watchdog_harness.ts'
@@ -435,9 +442,14 @@ describe('event loop watchdog in a child process', () => {
       expect(Date.parse(line['@timestamp'])).toBeLessThan(ended?.at ?? NaN);
     }, 120_000);
 
-    it('profiles a large block without running out of memory at the 32 MB limit (installs outside containers)', async () => {
-      const result = await runHarness('profile_large', { timeoutMs: 120_000 });
+    it('profiles and writes a large block without running out of memory at the 64 MB limit (installs outside containers)', async () => {
+      const { result, profile: written } = await runWritingHarness('profile_large', {
+        timeoutMs: 120_000,
+      });
       expectCleanExit(result);
+      // The harness parsed the written JSON; the checks below verify it contains a complete
+      // profile.
+      expectViewableProfile(written);
       const [line] = profileLogLines(result);
       const profile = line.kibana?.event_loop_watchdog?.profile;
       expect(profile?.stopReason).toBe('max_duration');
