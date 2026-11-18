@@ -10,7 +10,7 @@ import { of } from 'rxjs';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { Logger, OnSetup, OnStart, PluginStart } from '@kbn/core-di';
-import { CoreSetup, CoreStart, Request } from '@kbn/core-di-server';
+import { CoreSetup, CoreStart, PluginInitializer, Request } from '@kbn/core-di-server';
 import type { DetectionSignal } from '../../common/detection_signal';
 import { NIGHTSHIFT_DETECTION_TIERED_FEATURES } from '../../common/constants';
 import { module } from '..';
@@ -18,8 +18,13 @@ import { AvailabilityService } from '../lib/availability/availability_service';
 import type { AlertingServerStart } from '@kbn/alerting-v2-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { DetectionEngineSystemClient } from '../lib/engine/es_client_tokens';
+import { SpaceRunLock } from '../lib/engine/space_run_lock';
+import { DetectionStateClient, detectionStateSavedObjectType } from '../lib/state';
 import { DetectionSignalStore } from '../lib/signals/signal_store';
 import { StrategyCatalog } from '../lib/strategies/strategy_catalog';
+import { DetectionAccountService } from '../lib/service_account/detection_account';
+import { DetectionSetupService } from '../lib/service_account/setup_service';
+import { DETECTION_ENGINE_WORKLOAD_TYPE } from '../lib/service_account/workload';
 
 function createContainer() {
   const core = coreMock.createStart();
@@ -29,6 +34,8 @@ function createContainer() {
   // No cloud plugin is bound: the availability service must still resolve (classic deployment).
   const container = new Container({ defaultScope: 'Singleton' });
   container.bind(CoreSetup('pricing')).toConstantValue(coreSetup.pricing);
+  container.bind(CoreSetup('savedObjects')).toConstantValue(coreSetup.savedObjects);
+  container.bind(CoreStart('savedObjects')).toConstantValue(core.savedObjects);
   container.bind(CoreStart('elasticsearch')).toConstantValue(core.elasticsearch);
   container.bind(CoreStart('featureFlags')).toConstantValue(core.featureFlags);
   container.bind(Logger).toConstantValue(loggingSystemMock.createLogger());
@@ -43,6 +50,11 @@ function createContainer() {
   container.bind(PluginStart('alertingVTwo')).toConstantValue(alerting);
   container.bind(PluginStart('spaces')).toConstantValue(spaces);
   container.bind(CoreStart('pricing')).toConstantValue(core.pricing);
+  container.bind(CoreStart('security')).toConstantValue(core.security);
+  container.bind(CoreSetup('security')).toConstantValue(coreSetup.security);
+  container
+    .bind(PluginInitializer('env'))
+    .toConstantValue(coreMock.createPluginInitializerContext().env);
   container.bind(PluginStart('licensing')).toConstantValue(licensingMock.createStart());
   container.load(module);
 
@@ -67,11 +79,20 @@ describe('module', () => {
     container.get(AvailabilityService);
     container.get(StrategyCatalog);
     container.get(DetectionSignalStore);
+    container.get(DetectionStateClient);
+    container.get(SpaceRunLock);
+    container.get(DetectionAccountService);
+    container.get(DetectionSetupService);
     container.getAll(OnStart);
     container.getAll(OnSetup).forEach((onSetup) => onSetup(container));
 
     expect(coreSetup.pricing.registerProductFeatures).toHaveBeenCalledWith(
       NIGHTSHIFT_DETECTION_TIERED_FEATURES
+    );
+    expect(coreSetup.savedObjects.registerType).toHaveBeenCalledWith(detectionStateSavedObjectType);
+    // Without the registration, every `bindWorkload` of the engine is refused at runtime.
+    expect(coreSetup.security.serviceAccounts.registerWorkloadType).toHaveBeenCalledWith(
+      expect.objectContaining({ type: DETECTION_ENGINE_WORKLOAD_TYPE })
     );
     // Engine indices are written as kibana_system, never as the requesting user.
     expect(container.get(DetectionEngineSystemClient)).toBe(

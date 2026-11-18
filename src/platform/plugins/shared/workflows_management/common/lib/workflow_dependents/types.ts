@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { JSONSchema7 } from 'json-schema';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
+
 export type WorkflowExecuteStepType = 'workflow.execute' | 'workflow.executeAsync';
 
 export interface WorkflowCallSite {
@@ -18,6 +21,155 @@ export interface WorkflowCallSite {
   /** True when `with.inputs` is a single template expression that cannot be inspected statically. */
   isDynamicInputs: boolean;
 }
+
+export interface ContractField {
+  name: string;
+  /** JSON type, or a union such as `string | null`; undefined accepts any value. */
+  type?: string;
+  required: boolean;
+  hasDefault: boolean;
+  enumValues?: readonly unknown[];
+  /** The field's JSON schema as declared, used to compare nested shapes and constraints. */
+  schema?: JSONSchema7;
+}
+
+export type OutputsSource = 'declared' | 'inferred' | 'none';
+
+export interface WorkflowContract {
+  /** Disabled workflows fail every `workflow.execute` step that runs them. */
+  enabled: boolean;
+  /** Workflows saved with errors have no definition, and every step that runs them fails. */
+  valid: boolean;
+  inputs: Readonly<Record<string, ContractField>>;
+  /** The values a run fills in for omitted (or `null`) inputs. */
+  inputDefaults: Readonly<Record<string, unknown>>;
+  /** The inputs JSON schema the run validates against; undefined when no inputs are declared. */
+  inputsSchema?: JsonModelSchemaType;
+  /** True when the inputs schema rejects inputs it doesn't declare (`additionalProperties: false`). */
+  rejectsUnknownInputs: boolean;
+  /** What inputs it doesn't declare are checked against, when `additionalProperties` is a schema. */
+  additionalInputs?: ContractField;
+  outputs: Readonly<Record<string, ContractField>>;
+  outputsSource: OutputsSource;
+  /** Declared outputs that no `workflow.output` step sets, so callers always get nothing for them. */
+  unreturnedOutputs: readonly string[];
+  /**
+   * Whether every run ends in a `workflow.output` (or `workflow.fail`) step. Otherwise a run can
+   * complete without one, and callers get the output of the workflow's last step instead.
+   */
+  alwaysReturnsOutput: boolean;
+  /**
+   * Names the `workflow.output` steps set; undefined when a run can complete without one or one
+   * of them is computed.
+   */
+  returnedOutputs?: readonly string[];
+  /**
+   * Names the `workflow.output` steps set, even when a run can complete without one; undefined
+   * when there is none, since every run then returns its last step's output, or one is computed.
+   */
+  outputStepNames?: readonly string[];
+}
+
+export type Severity = 'breaking' | 'warning' | 'info';
+
+export type ContractChangeKind =
+  | 'disabled'
+  | 'invalid'
+  | 'inputAdded'
+  | 'inputRemoved'
+  | 'inputBecameRequired'
+  | 'inputBecameOptional'
+  | 'inputTypeChanged'
+  | 'inputAllowedValuesChanged'
+  | 'inputSchemaChanged'
+  | 'unknownInputsRejected'
+  | 'outputAdded'
+  | 'outputRemoved'
+  | 'outputNoLongerReturned'
+  /** A run can now finish without a `workflow.output` step, so callers can get the last step's output instead. */
+  | 'outputStepRemoved'
+  | 'outputTypeChanged'
+  | 'outputSchemaChanged';
+
+export interface ContractChange {
+  kind: ContractChangeKind;
+  field: string;
+  severity: Severity;
+  from?: string;
+  to?: string;
+  /** For `inputAdded`: whether the new input is required without a default. */
+  required?: boolean;
+}
+
+export type ImpactIssueKind =
+  | 'childNotFound'
+  /** The called workflow is managed, and only a managed workflow can run one. */
+  | 'childManaged'
+  | 'childDisabled'
+  | 'childInvalid'
+  | 'selfCall'
+  | 'missingRequiredInput'
+  /** The caller forwards its own optional input, which runs can leave out, to a required one. */
+  | 'inputMayBeMissing'
+  | 'unknownInput'
+  | 'inputTypeMismatch'
+  | 'inputRendersAsText'
+  | 'inputValueRejected'
+  /** The caller omits the input, and the default value the run fills in fails validation. */
+  | 'defaultValueRejected'
+  | 'inputTypeChanged'
+  | 'inputAllowedValuesChanged'
+  | 'inputSchemaChanged'
+  | 'removedOutput'
+  | 'unreturnedOutput'
+  | 'undeclaredOutput'
+  /** The output is no longer declared, but a `workflow.output` step still sets it. */
+  | 'outputNoLongerDeclared'
+  /** There is no `workflow.output` step, so the caller gets the last step's output instead. */
+  | 'outputFromLastStep'
+  | 'outputTypeChanged';
+
+export interface ImpactIssue {
+  kind: ImpactIssueKind;
+  severity: Exclude<Severity, 'info'>;
+  stepName: string;
+  field: string;
+  from?: string;
+  to?: string;
+  /** For `inputValueRejected`: what the run's validation reports about the value. */
+  detail?: string;
+  /** False when the saved version of the child already had this issue. */
+  isNew: boolean;
+}
+
+export type RowStatus = 'ok' | 'breaking' | 'warning' | 'unknown';
+
+export interface InputRow {
+  name: string;
+  value?: unknown;
+  isProvided: boolean;
+  isRequired: boolean;
+  status: RowStatus;
+  issueKind?: ImpactIssueKind;
+}
+
+export interface OutputRow {
+  /** Output field the caller reads; empty string when it reads the whole output object. */
+  field: string;
+  status: RowStatus;
+  issueKind?: ImpactIssueKind;
+}
+
+export interface CallSiteImpact {
+  stepName: string;
+  stepType: WorkflowExecuteStepType;
+  isDynamicInputs: boolean;
+  inputs: InputRow[];
+  outputs: OutputRow[];
+}
+
+/** `alreadyBroken`: unaffected by the draft, but the saved version already makes it fail. */
+export type ImpactStatus = 'breaking' | 'warning' | 'alreadyBroken' | 'unknown' | 'safe';
 
 /**
  * How a workflow further up the chain is affected. `fails`: the step that runs `viaName` fails and
@@ -34,6 +186,44 @@ export interface UpstreamImpact {
   viaName: string;
   /** For `missingOutput`: the output of `viaName` it reads. */
   field?: string;
+}
+
+export interface DependentImpact {
+  workflowId: string;
+  workflowName: string;
+  enabled: boolean;
+  status: ImpactStatus;
+  callSites: CallSiteImpact[];
+  issues: ImpactIssue[];
+  /** Enabled workflows further up the chain that fail or lose data because this one breaks. */
+  upstream: UpstreamImpact[];
+}
+
+export interface CalledWorkflowImpact {
+  workflowId: string;
+  /** Undefined when no workflow with `workflowId` exists. */
+  workflowName?: string;
+  status: ImpactStatus;
+  callSites: CallSiteImpact[];
+  issues: ImpactIssue[];
+  contract?: WorkflowContract;
+}
+
+export interface DependentsSummary {
+  direct: number;
+  /** Enabled direct callers only: a disabled caller doesn't run, so saving can't break a run of it. */
+  breaking: number;
+  warning: number;
+  /** Enabled direct callers that can't be checked, because they compute their inputs while running. */
+  unknown: number;
+  /** Distinct enabled indirect callers that fail or lose data because a direct caller breaks. */
+  indirectBreaking: number;
+}
+
+export interface DependentsAnalysis {
+  contractChanges: ContractChange[];
+  dependents: DependentImpact[];
+  summary: DependentsSummary;
 }
 
 /** A workflow listed by name, with the ID to link to it. */

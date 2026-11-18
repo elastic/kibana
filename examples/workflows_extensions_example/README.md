@@ -194,5 +194,5 @@ not validate `kibana.request` authentication or automatic startup provisioning.
 
 2. **Handler Function**: The handler receives validated input and the step execution runtime context, and returns output conforming to the output schema.
 
-3. **Metadata Registration**: The public plugin registers UI metadata that helps users understand and use the step in the workflow editor.
+3. **Metadata Registration**: The public plugin registers UI metadata that helps users understand and use the step in the workflow editor. This registration is required: without it the editor rejects the step as an unknown type, even though the server can run it. See [Server and Client Registration Check](../../src/platform/plugins/shared/workflows_extensions/dev_docs/STEPS.md#server-and-client-registration-check).
 

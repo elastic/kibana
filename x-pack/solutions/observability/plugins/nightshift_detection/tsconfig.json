@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "server/**/*", "scripts/**/*"],
+  "include": ["common/**/*", "server/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/alerting-v2-constants",
@@ -16,8 +16,10 @@
     "@kbn/core-di-server",
     "@kbn/core-pricing-common",
     "@kbn/core-plugins-server",
+    "@kbn/core-http-server",
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/licensing-plugin",
+    "@kbn/lock-manager",
     "@kbn/nightshift-shared",
     "@kbn/spaces-plugin",
     "@kbn/zod"

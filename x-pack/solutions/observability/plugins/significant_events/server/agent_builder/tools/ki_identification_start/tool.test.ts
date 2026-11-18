@@ -50,6 +50,7 @@ describe('createKiIdentificationStartTool', () => {
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
       managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
       telemetry: { trackOnboardingScheduled: jest.fn() } as never,
+      logger: loggingSystemMock.createLogger(),
       getSourcesClient,
     });
     const maintenanceService = {

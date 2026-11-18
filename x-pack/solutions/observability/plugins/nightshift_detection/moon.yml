@@ -27,8 +27,10 @@ dependsOn:
   - '@kbn/core-di-server'
   - '@kbn/core-pricing-common'
   - '@kbn/core-plugins-server'
+  - '@kbn/core-http-server'
   - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/licensing-plugin'
+  - '@kbn/lock-manager'
   - '@kbn/nightshift-shared'
   - '@kbn/spaces-plugin'
   - '@kbn/zod'
@@ -43,6 +45,5 @@ fileGroups:
   src:
     - common/**/*
     - server/**/*
-    - scripts/**/*
     - '!target/**/*'
 tasks: {}
