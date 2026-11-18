@@ -16,7 +16,13 @@ import {
   MOCK_IDP_UIAM_COSMOS_DB_URL,
   MOCK_IDP_UIAM_ORG_ADMIN_API_KEY,
 } from '@kbn/mock-idp-utils';
-import type { ApiClientFixture, EsClient, SamlAuth, ScoutTestConfig } from '@kbn/scout';
+import type {
+  ApiClientFixture,
+  EsClient,
+  RequestAuthFixture,
+  SamlAuth,
+  ScoutTestConfig,
+} from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
@@ -53,6 +59,7 @@ ${steps}`;
 /** Builds isolated account and workflow fixtures for one execution-flow suite. */
 export const createServiceAccountSuite = (options: { testWritePermissions?: boolean } = {}) => {
   let headers: Record<string, string>;
+  let sessionHeaders: Record<string, string>;
 
   let accountId: string;
 
@@ -168,22 +175,36 @@ export const createServiceAccountSuite = (options: { testWritePermissions?: bool
   const setup = async ({
     apiClient,
     samlAuth,
+    requestAuth,
     config,
     esClient,
   }: {
     apiClient: ApiClientFixture;
     samlAuth: SamlAuth;
+    requestAuth: RequestAuthFixture;
     config: ScoutTestConfig;
     esClient: EsClient;
   }): Promise<void> => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-    headers = {
+    sessionHeaders = {
       ...cookieHeader,
       'kbn-xsrf': 'true',
       'x-elastic-internal-origin': 'kibana',
       'elastic-api-version': '2023-10-31',
     };
-    const user = await apiClient.get('internal/security/me', { headers, responseType: 'json' });
+    // This config caps Elasticsearch access tokens at 15s. Task Manager grants a key from that
+    // token and retries the same credential, so public workflow calls use a long-lived API key.
+    const admin = await requestAuth.getApiKey('admin');
+    headers = {
+      ...admin.apiKeyHeader,
+      'kbn-xsrf': 'true',
+      'x-elastic-internal-origin': 'kibana',
+      'elastic-api-version': '2023-10-31',
+    };
+    const user = await apiClient.get('internal/security/me', {
+      headers: sessionHeaders,
+      responseType: 'json',
+    });
     expect(user).toHaveStatusCode(200);
     initiatingUser = user.body;
     expect(typeof initiatingUser.username).toBe('string');
@@ -204,7 +225,7 @@ export const createServiceAccountSuite = (options: { testWritePermissions?: bool
               'x-elastic-internal-origin': 'kibana',
               Authorization: `ApiKey ${MOCK_IDP_UIAM_ORG_ADMIN_API_KEY}`,
             }
-          : headers,
+          : sessionHeaders,
         body: {
           name: `cp2-${name}-${Date.now()}`,
           roles:
@@ -405,6 +426,7 @@ export const createServiceAccountSuite = (options: { testWritePermissions?: bool
     cleanupWorkflows,
     getContext: () => ({
       headers,
+      sessionHeaders,
       accountId,
       initiatingUser,
       otherAccountId,
