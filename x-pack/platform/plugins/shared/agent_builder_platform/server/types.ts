@@ -18,6 +18,7 @@ import type { CloudStart, CloudSetup } from '@kbn/cloud-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { FilesSetup, FilesStart } from '@kbn/files-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
 
 export interface PluginSetupDependencies {
@@ -27,6 +28,8 @@ export interface PluginSetupDependencies {
   files: FilesSetup;
   share: SharePluginSetup;
   cloud?: CloudSetup;
+  /** Present only when the Agent Builder Workflows plugin is enabled. */
+  agentBuilderWorkflows?: object;
 }
 
 export interface PluginStartDependencies {
@@ -36,6 +39,7 @@ export interface PluginStartDependencies {
   cloud?: CloudStart;
   llmTasks?: LlmTasksPluginStart;
   spaces?: SpacesPluginStart;
+  security?: SecurityPluginStart;
   files: FilesStart;
 }
 

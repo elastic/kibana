@@ -12,12 +12,20 @@ import { CONNECTORS_SKILLS_BASE_PATH } from '@kbn/agent-builder-server/skills';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_definition';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { getAllConnectorSkills, getConnectorSkillRegistryId } from '@kbn/connector-specs';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { registerConnectorSkills } from './register_connector_skills';
 
-const registerSkillsWith = () => {
+const registerSkillsWith = ({
+  workflowsEnabled = true,
+  security,
+}: { workflowsEnabled?: boolean; security?: SecurityPluginStart } = {}) => {
   const register = jest.fn();
   registerConnectorSkills({ skills: { register } } as unknown as AgentBuilderPluginSetup, {
     getActionsStart: jest.fn() as unknown as () => Promise<ActionsPluginStart>,
+    workflowsEnabled,
+    getSecurity: async () => security,
   });
   return register.mock.calls.map(([skill]) => skill);
 };
@@ -62,5 +70,49 @@ describe('registerConnectorSkills', () => {
       expect(isAllowedSkillRegistration(skill)).toBe(true);
       await expect(validateSkillDefinition(skill)).resolves.toBeDefined();
     }
+  });
+
+  describe('availability', () => {
+    const getAvailability = async (options: Parameters<typeof registerSkillsWith>[0]) => {
+      const [skill] = registerSkillsWith(options);
+      return skill.availability.handler({
+        request: httpServerMock.createKibanaRequest(),
+        uiSettings: uiSettingsServiceMock.createClient(),
+        spaceId: 'default',
+      });
+    };
+    const createSecurity = (hasAllRequested: boolean) =>
+      ({
+        authz: {
+          actions: { api: { get: (action: string) => `api:${action}` } },
+          checkPrivilegesWithRequest: () => ({
+            atSpace: jest.fn().mockResolvedValue({ hasAllRequested }),
+          }),
+        },
+      } as unknown as SecurityPluginStart);
+
+    it('is available when Workflows is enabled and the caller can execute workflows', async () => {
+      await expect(getAvailability({ security: createSecurity(true) })).resolves.toEqual({
+        status: 'available',
+      });
+    });
+
+    it('is available when security is disabled', async () => {
+      await expect(getAvailability({ security: undefined })).resolves.toEqual({
+        status: 'available',
+      });
+    });
+
+    it('is unavailable when Workflows is disabled', async () => {
+      await expect(
+        getAvailability({ workflowsEnabled: false, security: createSecurity(true) })
+      ).resolves.toMatchObject({ status: 'unavailable' });
+    });
+
+    it('is unavailable when the caller lacks the workflows execute privilege', async () => {
+      await expect(getAvailability({ security: createSecurity(false) })).resolves.toMatchObject({
+        status: 'unavailable',
+      });
+    });
   });
 });
