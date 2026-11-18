@@ -32,6 +32,10 @@ import { DashboardRedirect } from '../dashboard_app/types';
 
 export interface DashboardRendererProps {
   onApiAvailable?: (api: DashboardApi) => void;
+  /**
+   * Callback invoked when the dashboard API is destroyed.
+   */
+  onApiCleanup?: () => void;
   savedObjectId?: string;
   showPlainSpinner?: boolean;
   dashboardRedirect?: DashboardRedirect;
@@ -46,6 +50,7 @@ export function DashboardRenderer({
   showPlainSpinner,
   locator,
   onApiAvailable,
+  onApiCleanup,
 }: DashboardRendererProps) {
   const dashboardViewport = useRef(null);
   const dashboardContainerRef = useRef<HTMLElement | null>(null);
@@ -67,7 +72,7 @@ export function DashboardRenderer({
 
     let canceled = false;
     let cleanupDashboardApi: (() => void) | undefined;
-    loadDashboardApi({ getCreationOptions, savedObjectId })
+    loadDashboardApi({ getCreationOptions, onApiCleanup, savedObjectId })
       .then((results) => {
         if (!results) return;
         if (canceled) {

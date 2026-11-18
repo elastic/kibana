@@ -12,7 +12,7 @@ import { loadDashboardApi } from './load_dashboard_api';
 
 jest.mock('./performance/query_performance_tracking', () => {
   return {
-    startQueryPerformanceTracking: () => {},
+    startQueryPerformanceTracking: () => ({ unsubscribe: jest.fn() }),
   };
 });
 
@@ -113,5 +113,25 @@ describe('loadDashboardApi', () => {
         query: queryFromUrl,
       });
     });
+  });
+
+  test('calls onApiCleanup when the dashboard api is cleaned up', async () => {
+    const cleanup = jest.fn();
+    getDashboardApiMock.mockReturnValue({
+      api: {},
+      cleanup,
+      internalApi: {},
+    });
+    const onApiCleanup = jest.fn();
+
+    const result = await loadDashboardApi({
+      onApiCleanup,
+      savedObjectId: '12345',
+    });
+
+    result?.cleanup();
+
+    expect(cleanup).toHaveBeenCalled();
+    expect(onApiCleanup).toHaveBeenCalled();
   });
 });

@@ -7,7 +7,9 @@
 
 import { act, render } from '@testing-library/react';
 import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { ServiceDashboards } from '.';
 
 // Every render of the mocked renderer records the closures it received. Keeping the full history
@@ -61,16 +63,34 @@ jest.mock('../../../hooks/use_adhoc_apm_data_view', () => ({
 
 // Stable references so effects depending on them do not re-run every render.
 const mockAvailableDashboards = [
-  { id: 'dashboard-1', data: { title: 'My dashboard' } },
-  { id: 'dashboard-2', data: { title: 'My other dashboard' } },
+  { id: 'dashboard-1', attributes: { title: 'My dashboard' } },
+  { id: 'dashboard-2', attributes: { title: 'My other dashboard' } },
 ];
 
 jest.mock('../../../hooks/use_dashboards_fetcher', () => ({
   useDashboardFetcher: () => ({ data: mockAvailableDashboards }),
 }));
 
+const mockShare = {
+  url: {
+    locators: {
+      get: () => undefined,
+    },
+  },
+};
+
 jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
-  useApmPluginContext: () => ({ share: undefined }),
+  useApmPluginContext: () => ({
+    share: mockShare,
+    core: {
+      notifications: {
+        toasts: {
+          addSuccess: jest.fn(),
+          addDanger: jest.fn(),
+        },
+      },
+    },
+  }),
 }));
 
 const mockFetcherData = {
@@ -101,6 +121,16 @@ jest.mock('../../../hooks/use_fetcher', () => {
   };
 });
 
+function renderServiceDashboards() {
+  return render(
+    <MemoryRouter>
+      <KibanaContextProvider services={{ share: mockShare }}>
+        <ServiceDashboards />
+      </KibanaContextProvider>
+    </MemoryRouter>
+  );
+}
+
 describe('ServiceDashboards', () => {
   beforeEach(() => {
     capturedOnApiAvailableHistory = [];
@@ -120,7 +150,7 @@ describe('ServiceDashboards', () => {
         setTimeRange: jest.fn(),
       };
 
-      const { rerender } = render(<ServiceDashboards />);
+      const { rerender } = renderServiceDashboards();
 
       expect(capturedOnApiAvailableHistory.at(-1)).toBeDefined();
       expect(capturedOnApiCleanupHistory.at(-1)).toBeDefined();
@@ -146,7 +176,13 @@ describe('ServiceDashboards', () => {
       // guard must short-circuit instead. This is what distinguishes the fix from a no-op cleanup.
       await act(async () => {
         mockQuery = { ...defaultMockQuery, kuery: 'transaction.name: "GET /api"' };
-        rerender(<ServiceDashboards />);
+        rerender(
+          <MemoryRouter>
+            <KibanaContextProvider services={{ share: mockShare }}>
+              <ServiceDashboards />
+            </KibanaContextProvider>
+          </MemoryRouter>
+        );
       });
 
       expect(dashboardApi.setFilters).not.toHaveBeenCalled();
@@ -183,7 +219,7 @@ describe('ServiceDashboards', () => {
       };
 
       // Render dashboard A and publish its API through A's closure.
-      const { rerender } = render(<ServiceDashboards />);
+      const { rerender } = renderServiceDashboards();
       const onApiAvailableA = capturedOnApiAvailableHistory.at(-1)!;
       const onApiCleanupA = capturedOnApiCleanupHistory.at(-1)!;
 
@@ -195,7 +231,13 @@ describe('ServiceDashboards', () => {
       // Switch to dashboard B (new savedObjectId) and publish B's API through B's closure.
       await act(async () => {
         mockQuery = { ...defaultMockQuery, dashboardId: 'dashboard-2' };
-        rerender(<ServiceDashboards />);
+        rerender(
+          <MemoryRouter>
+            <KibanaContextProvider services={{ share: mockShare }}>
+              <ServiceDashboards />
+            </KibanaContextProvider>
+          </MemoryRouter>
+        );
       });
       const onApiAvailableB = capturedOnApiAvailableHistory.at(-1)!;
 
@@ -221,7 +263,13 @@ describe('ServiceDashboards', () => {
       // A change to a search input re-runs the synchronization effect; B must still receive it.
       await act(async () => {
         mockQuery = { ...mockQuery, kuery: 'transaction.name: "GET /api"' };
-        rerender(<ServiceDashboards />);
+        rerender(
+          <MemoryRouter>
+            <KibanaContextProvider services={{ share: mockShare }}>
+              <ServiceDashboards />
+            </KibanaContextProvider>
+          </MemoryRouter>
+        );
       });
 
       expect(dashboardApiB.setFilters).toHaveBeenCalled();
