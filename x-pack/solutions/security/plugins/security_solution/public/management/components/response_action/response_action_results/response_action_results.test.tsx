@@ -275,6 +275,7 @@ describe('ResponseActionResults component', () => {
           '123/upload.zip'
         );
         expect(renderResult.getByTestId(`${exportedTestId}-copyPathButton`)).not.toBeNull();
+        expect(renderResult.queryByTestId(`${exportedTestId}-fileName`)).toBeNull();
         expect(renderResult.getByTestId(`${exportedTestId}-passcodeMessage`)).toHaveTextContent(
           FILE_PASSCODE_INFO_MESSAGE(RESPONSE_ACTIONS_ZIP_PASSCODE.endpoint)
         );
@@ -357,6 +358,9 @@ describe('ResponseActionResults component', () => {
         expect(renderResult.getByTestId(`${exportedTestId}-provider`)).toHaveTextContent('azure-1');
         expect(renderResult.getByTestId(`${exportedTestId}-path`)).toHaveTextContent(
           '123/upload.zip'
+        );
+        expect(renderResult.getByTestId(`${exportedTestId}-fileName`)).toHaveTextContent(
+          'memory-dump.2025-11-03T16:22:05.365Z.zip'
         );
         expect(renderResult.getByTestId(`${exportedTestId}-passcodeMessage`)).toHaveTextContent(
           FILE_PASSCODE_INFO_MESSAGE(RESPONSE_ACTIONS_ZIP_PASSCODE.endpoint)

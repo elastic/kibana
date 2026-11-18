@@ -209,6 +209,7 @@ export const MemoryDumpResponseActionOutputResult = memo<MemoryDumpResponseActio
                     <ExportedFileResult
                       exported={exported}
                       agentType={action.agentType}
+                      fileName={agentActionResult.content.file_name}
                       textSize={textSize}
                       data-test-subj={testId('exportedFileResult')}
                     />

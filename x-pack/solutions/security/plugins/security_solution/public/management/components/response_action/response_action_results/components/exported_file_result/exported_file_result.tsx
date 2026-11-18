@@ -54,6 +54,11 @@ const COPY_PATH_ARIA_LABEL = i18n.translate(
   { defaultMessage: 'Copy path to clipboard' }
 );
 
+const FILE_NAME_LABEL = i18n.translate(
+  'xpack.securitySolution.responseActionResults.exportedFileResult.fileNameLabel',
+  { defaultMessage: 'File name' }
+);
+
 /**
  * Display names for the storage types Endpoint reports in `exported.service`. Types missing
  * here (ex. reported by a newer Endpoint) are shown as is.
@@ -68,6 +73,8 @@ const STORAGE_TYPE_LABELS: Readonly<Record<string, string>> = Object.freeze({
 export interface ExportedFileResultProps {
   exported: ResponseActionExportedOutput;
   agentType: ResponseActionAgentType;
+  /** Name of the file inside the uploaded zip (memory-dump only; older Endpoints don't report it) */
+  fileName?: string;
   textSize?: EuiTextProps['size'];
   'data-test-subj'?: string;
 }
@@ -76,7 +83,7 @@ export interface ExportedFileResultProps {
  * Shows where a response action uploaded its file (`outputs[agentId].content.exported`) and the zip passcode.
  */
 export const ExportedFileResult = memo<ExportedFileResultProps>(
-  ({ exported, agentType, textSize = 's', 'data-test-subj': dataTestSubj }) => {
+  ({ exported, agentType, fileName, textSize = 's', 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const { export: storageProvider, service, account, container, path } = exported;
 
@@ -97,7 +104,7 @@ export const ExportedFileResult = memo<ExportedFileResultProps>(
           name={TYPE_LABEL}
           value={
             <span data-test-subj={getTestId('type')}>
-              {STORAGE_TYPE_LABELS[service] ?? service}
+              {Object.hasOwn(STORAGE_TYPE_LABELS, service) ? STORAGE_TYPE_LABELS[service] : service}
             </span>
           }
         />
@@ -131,6 +138,12 @@ export const ExportedFileResult = memo<ExportedFileResultProps>(
             </>
           }
         />
+        {fileName && (
+          <KeyValueDisplay
+            name={FILE_NAME_LABEL}
+            value={<span data-test-subj={getTestId('fileName')}>{fileName}</span>}
+          />
+        )}
         <EuiSpacer size="xs" />
         <div data-test-subj={getTestId('passcodeMessage')}>
           {FILE_PASSCODE_INFO_MESSAGE(RESPONSE_ACTIONS_ZIP_PASSCODE[agentType])}

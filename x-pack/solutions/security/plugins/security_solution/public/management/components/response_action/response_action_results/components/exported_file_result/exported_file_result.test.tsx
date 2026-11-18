@@ -48,11 +48,27 @@ describe('When using the `ExportedFileResult` component', () => {
     );
   });
 
-  it('should show a storage type it does not know as is', () => {
-    renderProps.exported.service = 'some_new_storage';
+  it.each(['some_new_storage', '__proto__', 'constructor'])(
+    'should show the storage type `%s` it does not know as is',
+    (service) => {
+      renderProps.exported.service = service;
+      const { getByTestId } = render();
+
+      expect(getByTestId('test-type').textContent).toBe(service);
+    }
+  );
+
+  it('should show the file name when it is provided', () => {
+    renderProps.fileName = 'memory-dump.zip';
     const { getByTestId } = render();
 
-    expect(getByTestId('test-type')).toHaveTextContent('some_new_storage');
+    expect(getByTestId('test-fileName')).toHaveTextContent('memory-dump.zip');
+  });
+
+  it('should not show a file name row when no file name is provided', () => {
+    const { queryByTestId } = render();
+
+    expect(queryByTestId('test-fileName')).toBeNull();
   });
 
   it.each(['endpoint', 'sentinel_one'] as const)(
