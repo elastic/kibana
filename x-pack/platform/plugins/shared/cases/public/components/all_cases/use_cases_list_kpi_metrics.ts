@@ -11,7 +11,7 @@ import type { KpiMetricConfiguration } from '../../../common/types/domain';
 import type { KpiMetricResult } from '../../../common/types/api';
 import type { FilterOptions } from '../../../common/ui/types';
 import { useCasesConfig } from '../../common/lib/kibana';
-import { buildCasesSearchFilters } from '../../containers/utils';
+import { buildCasesSearchFilters, getCasesSearchOverrides } from '../../containers/utils';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { useGetKpiMetrics } from '../../containers/use_get_kpi_metrics';
 
@@ -38,7 +38,11 @@ export const useCasesListKpiMetrics = ({
   const kpiMetrics = configuration?.metrics?.casesList;
   const hasAnalyticsMetrics = kpiMetrics?.some(({ kind }) => kind === 'custom') ?? false;
   const filters = useMemo(
-    () => omit(buildCasesSearchFilters(filterOptions), 'owner'),
+    () =>
+      omit(
+        buildCasesSearchFilters({ ...filterOptions, ...getCasesSearchOverrides(filterOptions) }),
+        'owner'
+      ),
     [filterOptions]
   );
   const { data, isFetching } = useGetKpiMetrics({

@@ -13,6 +13,7 @@ import {
   constructReportersFilter,
   constructCustomFieldsFilter,
   getIncrementalIdSearchOverrides,
+  getCasesSearchOverrides,
 } from './utils';
 
 import type { CaseUI } from './types';
@@ -385,6 +386,34 @@ describe('utils', () => {
       expect(parseExtendedFieldSearch('"Effort Level":high some free text')).toEqual({
         extendedFieldFilters: [{ label: 'Effort Level', value: 'high' }],
         freeText: 'some free text',
+      });
+    });
+  });
+
+  describe('getCasesSearchOverrides', () => {
+    it('returns no overrides for plain free text', () => {
+      expect(getCasesSearchOverrides({ search: 'some text' })).toEqual({});
+    });
+
+    it('returns the incremental id overrides', () => {
+      expect(getCasesSearchOverrides({ search: '#123' })).toEqual({
+        search: '123',
+        searchFields: ['cases.incremental_id.text'],
+      });
+    });
+
+    it('moves the label:value tokens to the extended field filters', () => {
+      expect(
+        getCasesSearchOverrides({
+          search: 'Escalate:true some text',
+          extendedFieldFilters: [{ label: 'Region', value: 'emea' }],
+        })
+      ).toEqual({
+        search: 'some text',
+        extendedFieldFilters: [
+          { label: 'Region', value: 'emea' },
+          { label: 'Escalate', value: 'true' },
+        ],
       });
     });
   });

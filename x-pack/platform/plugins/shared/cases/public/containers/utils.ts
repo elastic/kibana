@@ -330,3 +330,41 @@ export const getIncrementalIdSearchOverrides = (search: string) => {
   }
   return overrides;
 };
+
+/**
+ * Returns the filter overrides that the search text gives: an incremental id search, or the
+ * `label:value` extended field filters merged with the picker filters.
+ */
+export const getCasesSearchOverrides = (
+  filterOptions: Partial<FilterOptions> = {}
+): Partial<FilterOptions> => {
+  const rawSearch = filterOptions.search ?? '';
+  const overrides = getIncrementalIdSearchOverrides(rawSearch);
+
+  if (Object.keys(overrides).length > 0) {
+    return overrides;
+  }
+
+  const { extendedFieldFilters: parsedSearchFilters, freeText } =
+    parseExtendedFieldSearch(rawSearch);
+  if (parsedSearchFilters.length === 0) {
+    return {};
+  }
+  const searchFilters = parsedSearchFilters.filter(({ value }) => value.length > 0);
+  const pickerFilters = filterOptions.extendedFieldFilters ?? [];
+  const seen = new Set(
+    pickerFilters.map((entry) => `${entry.label.toLowerCase()}\0${entry.value}`)
+  );
+  const merged = [
+    ...pickerFilters,
+    ...searchFilters.filter((entry) => {
+      const key = `${entry.label.toLowerCase()}\0${entry.value}`;
+      if (seen.has(key)) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    }),
+  ];
+  return { search: freeText, extendedFieldFilters: merged };
+};
