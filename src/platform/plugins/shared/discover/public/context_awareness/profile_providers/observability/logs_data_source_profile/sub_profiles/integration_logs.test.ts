@@ -33,6 +33,18 @@ describe('createIntegrationLogsDataSourceProfileProviders', () => {
     profileProviderServices.uiSettings
   );
 
+  it('inherits the logs parent profile id as a telemetry label', () => {
+    expect(logsDataSourceProfileProvider.telemetryLabels).toBeUndefined();
+    expect(
+      providers.map(({ profileId, telemetryLabels }) => ({ profileId, telemetryLabels }))
+    ).toEqual(
+      providers.map(({ profileId }) => ({
+        profileId,
+        telemetryLabels: ['observability-logs-data-source-profile'],
+      }))
+    );
+  });
+
   // Helper to get the expected columns for each profile
   const expectedColumnsMap: Record<string, Array<{ name: string; width?: number }>> = {
     'observability-apache-error-logs-data-source-profile': [
@@ -147,6 +159,7 @@ describe('createIntegrationLogsDataSourceProfileProviders', () => {
         toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
       });
       expect(getDefaultAppState?.({ dataView: dataViewWithTimefieldMock })).toEqual({
+        breakdownField: 'log.level',
         columns: expectedColumnsMap[provider.profileId],
       });
     });

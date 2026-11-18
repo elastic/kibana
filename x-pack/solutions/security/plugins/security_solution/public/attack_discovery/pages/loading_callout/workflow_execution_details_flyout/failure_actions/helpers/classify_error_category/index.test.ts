@@ -8,6 +8,22 @@
 import { classifyErrorCategory } from '.';
 
 describe('classifyErrorCategory', () => {
+  describe('content_filter', () => {
+    it('returns content_filter for a model refusal wrapped in workflow failure text', () => {
+      expect(
+        classifyErrorCategory(
+          'Generation workflow failed: The model (claude-opus-5-5) refused to complete the response. Details: The model refused to complete the response: The response was stopped by the provider content filter (finish_reason: content_filter).'
+        )
+      ).toBe('content_filter');
+    });
+
+    it('returns content_filter for a raw finish_reason', () => {
+      expect(classifyErrorCategory('stopped with finish_reason: content_filter')).toBe(
+        'content_filter'
+      );
+    });
+  });
+
   describe('workflow_disabled', () => {
     it('returns workflow_disabled for "is not enabled" pattern', () => {
       expect(classifyErrorCategory('Alert retrieval workflow is not enabled: wf-abc')).toBe(

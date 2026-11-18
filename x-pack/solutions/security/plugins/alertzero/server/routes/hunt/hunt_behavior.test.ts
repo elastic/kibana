@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
@@ -19,6 +20,7 @@ import { registerHuntBehaviorRoute } from './hunt_behavior';
 import { resolveScopedModel } from './lib/scoped_model';
 import { huntBehavior } from '../../services/watches/hunt/tier2/hunt_behavior';
 import type { HuntBehaviorResult } from '../../services/watches/hunt/tier2/types';
+import { withLinkedProjectTwins } from '../../services/watches/hunt/common/cps_scope';
 
 jest.mock('./lib/scoped_model', () => ({
   resolveScopedModel: jest.fn(),
@@ -39,15 +41,20 @@ const tier2Result: HuntBehaviorResult = {
   next_step: 'no behaviors to corroborate',
 };
 
-const makeDeps = () => {
+const makeDeps = ({ cpsEnabled = false }: { cpsEnabled?: boolean } = {}) => {
   const addVersion = jest.fn();
   const router = { versioned: { post: jest.fn().mockReturnValue({ addVersion }) } };
   const logger = loggingSystemMock.createLogger();
   const inference = { getDefaultConnector: jest.fn() };
+  const clusterClient = elasticsearchServiceMock.createClusterClient();
+  const scoped = elasticsearchServiceMock.createScopedClusterClient();
+  clusterClient.asScoped.mockReturnValue(scoped);
 
   registerHuntBehaviorRoute({
     router: router as unknown as RouteDependencies['router'],
     logger,
+    getClusterClient: () => clusterClient,
+    isCpsEnabled: () => cpsEnabled,
     getHuntServices: () =>
       ({
         getInference: () => inference,
@@ -56,8 +63,6 @@ const makeDeps = () => {
       } as unknown as ReturnType<RouteDependencies['getHuntServices']>),
   } as unknown as RouteDependencies);
 
-  const asCurrentUser = { search: jest.fn() };
-  const asInternalUser = { search: jest.fn() };
   const uiSettingsClient = { get: jest.fn().mockResolvedValue(true) };
   const context = {
     alertzero: Promise.resolve({
@@ -66,7 +71,6 @@ const makeDeps = () => {
       isSpaceSupported: true,
     }),
     core: Promise.resolve({
-      elasticsearch: { client: { asCurrentUser, asInternalUser } },
       uiSettings: { client: uiSettingsClient },
     }),
   };
@@ -79,8 +83,8 @@ const makeDeps = () => {
       response: ReturnType<typeof httpServerMock.createResponseFactory>
     ) => Promise<unknown>,
     context,
-    asCurrentUser,
-    asInternalUser,
+    clusterClient,
+    scoped,
     logger,
   };
 };
@@ -143,7 +147,7 @@ describe('registerHuntBehaviorRoute', () => {
   });
 
   it('runs as the current user so the caller index privileges bound generated ES|QL', async () => {
-    const { handler, context, asCurrentUser, asInternalUser } = makeDeps();
+    const { handler, context, scoped } = makeDeps();
 
     await handler(context, requestFor(), httpServerMock.createResponseFactory());
 
@@ -151,16 +155,35 @@ describe('registerHuntBehaviorRoute', () => {
       { extraction: model, esql: model },
       expect.anything(),
       expect.anything(),
-      asCurrentUser,
+      scoped.asCurrentUser,
       mitreDataClient
     );
-    expect(huntBehaviorMock).not.toHaveBeenCalledWith(
-      { extraction: model, esql: model },
-      expect.anything(),
-      expect.anything(),
-      asInternalUser,
-      mitreDataClient
-    );
+  });
+
+  it('widens the allowed indices to linked projects only when cross-project search is on', async () => {
+    const allowedIndicesOf = async (cpsEnabled: boolean) => {
+      huntBehaviorMock.mockClear();
+      const { handler, context } = makeDeps({ cpsEnabled });
+      await handler(context, requestFor(), httpServerMock.createResponseFactory());
+      return huntBehaviorMock.mock.calls[0][2].allowed_indices;
+    };
+
+    const local = await allowedIndicesOf(false);
+    const widened = await allowedIndicesOf(true);
+
+    expect(local?.length).toBeGreaterThan(0);
+    expect(widened).toEqual(withLinkedProjectTwins(local ?? []));
+    expect(widened).not.toEqual(local);
+    expect(huntBehaviorMock.mock.calls[0][2].cross_project_search).toBe(true);
+  });
+
+  it('scopes the client to the request with the space project routing', async () => {
+    const { handler, context, clusterClient } = makeDeps();
+    const request = requestFor();
+
+    await handler(context, request, httpServerMock.createResponseFactory());
+
+    expect(clusterClient.asScoped).toHaveBeenCalledWith(request, { projectRouting: 'space' });
   });
 
   it('returns 503 when the inference plugin is absent', async () => {

@@ -629,14 +629,12 @@ describe('FormBased Data Panel', () => {
 
     it('should announce filter in live region', async () => {
       await renderFormBasedDataPanel();
+      const ariaDescription = screen.getByTestId('lnsIndexPattern__ariaDescription');
+      expect(ariaDescription).toHaveAttribute('aria-live', 'off');
       await searchForPhrase('me');
       expect(getFieldNames()).toEqual(['amemory']);
       await expectAriaDescription('1 available field. 1 empty field. 0 meta fields.');
-      await userEvent.click(screen.getByTestId('lnsIndexPatternEmptyFields'));
-
-      expect(screen.getByTestId('lnsIndexPattern__ariaDescription').getAttribute('aria-live')).toBe(
-        'polite'
-      );
+      expect(ariaDescription).toHaveAttribute('aria-live', 'polite');
     });
 
     it('should filter down by type', async () => {

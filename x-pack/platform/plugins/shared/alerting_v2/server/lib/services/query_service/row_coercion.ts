@@ -56,7 +56,7 @@ export const coerceRow = (row: EsqlRow, dateColumns?: ReadonlySet<string>): Esql
  *
  * `normalizeDates` coerces `date` / `date_nanos` columns to integer epoch millis
  * via {@link toEpochMillis}, keeping the JSON and Arrow formats consistent. It
- * defaults to `false` because the `executeQueryRows` callers expect ISO-8601 date
+ * defaults to `false` because the `executeQuery` callers expect ISO-8601 date
  * strings today; only the streaming path, which must match Arrow format, opts in.
  */
 export const toRows = <T = EsqlRow>(

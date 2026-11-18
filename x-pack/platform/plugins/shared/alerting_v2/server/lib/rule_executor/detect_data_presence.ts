@@ -60,7 +60,7 @@ export const detectDataPresence = async ({
   });
 
   try {
-    const rows = await queryService.executeQueryRows({
+    const rows = await queryService.executeQuery({
       query: noDataQuery,
       filter: queryPayload.filter,
       params: queryPayload.params,

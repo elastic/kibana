@@ -9,7 +9,7 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { usePager } from '@kbn/discover-utils';
+import { usePager } from '@kbn/discover-utils/components';
 import { I18nProvider } from '@kbn/i18n-react';
 import { JSONDataTable } from './json_data_table';
 
@@ -51,7 +51,7 @@ jest.mock('../use_formatted_date', () => ({
 const mockChangePageIndex = jest.fn();
 const mockChangePageSize = jest.fn();
 
-jest.mock('@kbn/discover-utils', () => ({
+jest.mock('@kbn/discover-utils/components', () => ({
   usePager: jest.fn(() => ({
     curPageIndex: 0,
     pageSize: 20,

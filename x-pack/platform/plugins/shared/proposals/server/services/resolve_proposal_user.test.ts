@@ -13,7 +13,7 @@ const request = httpServerMock.createKibanaRequest();
 
 const createDeps = () => {
   const userProfile = { getCurrent: jest.fn() };
-  const security = { authc: { getCurrentUser: jest.fn() } };
+  const security = { authc: { getCurrentUser: jest.fn(), getPrincipal: jest.fn() } };
   return {
     userProfile,
     security,
@@ -89,10 +89,30 @@ describe('createProposalUserResolver', () => {
     );
   });
 
+  it('should name the service account behind a request that stores no user', async () => {
+    const { userProfile, security, resolve } = createDeps();
+    // An agent running as a service account creates to-dos directly, with no
+    // gate step to resolve the Worker for it: neither tier above answers, and
+    // the principal is the only source of its id.
+    userProfile.getCurrent.mockResolvedValue(null);
+    security.authc.getCurrentUser.mockReturnValue(null);
+    security.authc.getPrincipal.mockReturnValue({
+      type: 'service_account',
+      serviceAccountId: 'elastic/kibana-nightshift',
+    });
+
+    await expect(resolve(request)).resolves.toEqual({
+      username: 'elastic/kibana-nightshift',
+      fullName: null,
+      email: null,
+    });
+  });
+
   it('should return undefined when there is no identity at all', async () => {
     const { userProfile, security, resolve } = createDeps();
     userProfile.getCurrent.mockResolvedValue(null);
     security.authc.getCurrentUser.mockReturnValue(null);
+    security.authc.getPrincipal.mockReturnValue(undefined);
 
     await expect(resolve(request)).resolves.toBeUndefined();
   });

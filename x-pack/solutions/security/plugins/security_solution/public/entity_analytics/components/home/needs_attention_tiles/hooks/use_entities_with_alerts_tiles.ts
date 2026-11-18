@@ -6,12 +6,10 @@
  */
 
 import { useMemo } from 'react';
-import { lastValueFrom } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
-import { i18n } from '@kbn/i18n';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
-import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
+import { runEsqlQuery } from '../../queries/run_esql_query';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useTileQueryInputs } from './use_tile_query_inputs';
 import { buildAlertBasedTilesQuery } from '../queries/entities_with_alerts_query';
@@ -21,6 +19,7 @@ import {
   type EntityFilters,
   type TimeRange,
 } from '../../entities_grid/common';
+import { isMissingIndexError } from '../../is_missing_index_error';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 import { isTileQueryTimeout, retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
 
@@ -111,14 +110,14 @@ export const useAlertBasedTiles = ({
     async ({ signal }) => {
       if (!query) return EMPTY_RESULT;
       const raw = await runWithTileTimeout(signal, (tileSignal) =>
-        lastValueFrom(
-          data.search.search(
-            { params: { query } },
-            { abortSignal: tileSignal, strategy: 'esql_async' }
-          )
+        runEsqlQuery(
+          data.search,
+          query,
+          { id: 'needs_attention_tile_alerts_count', meta: { timeRange } },
+          tileSignal
         )
       );
-      return parseAlertBasedTilesResponse(raw.rawResponse as unknown as ESQLSearchResponse);
+      return parseAlertBasedTilesResponse(raw);
     },
     {
       enabled: isEnabled && Boolean(query),
@@ -129,22 +128,15 @@ export const useAlertBasedTiles = ({
     }
   );
 
-  const filteredError = (error as SecurityAppError | undefined)?.message?.includes('Unknown index')
-    ? undefined
-    : (error as SecurityAppError | undefined);
+  // A space that has never run a detection rule has no alerts index: the tiles say so, like the
+  // risk tiles do without a risk score index.
+  const isMissingIndex = isMissingIndexError(error);
+  const filteredError = isMissingIndex ? undefined : error;
 
   // The inputs can time out too (the group filter overrides). Either way the tile says so, and a
   // timed-out refetch does not leave the last count on show as if it were current.
   const isTimedOut = isTileQueryTimeout(error) || isTileQueryTimeout(indexError);
   const shownResult = isTimedOut ? undefined : queryResult;
-
-  // A timeout gets one notice for the whole page, and a message on the tile, not a toast per tile.
-  useErrorToast(
-    i18n.translate('xpack.securitySolution.entityAnalytics.home.alertBasedTiles.queryError', {
-      defaultMessage: 'There was an error loading entity alert data',
-    }),
-    isTimedOut ? undefined : filteredError ?? indexError
-  );
 
   return {
     severeAlertsCount: shownResult?.severeAlertsCount ?? 0,
@@ -163,6 +155,7 @@ export const useAlertBasedTiles = ({
     isLoading: isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
     // True while the count is on its way, not when its query can never run (skipped, no index, no job).
     isCountPending: isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
+    isMissingIndex,
     error: filteredError ?? indexError,
     isTimedOut,
   };

@@ -23,13 +23,13 @@ import {
   isReasoningStep,
   isRelevantSkillsStep,
   isSubagentRosterUpdatedStep,
-  isTodosStep,
   isToolCallStep,
 } from '@kbn/agent-builder-common';
 import { isImageResult } from '@kbn/agent-builder-common/tools/tool_result';
 import {
   createToolResultMessage,
   createUserMessage,
+  INTENT_PARAM,
   sanitizeToolId,
   wrapToolResultContent,
 } from '@kbn/agent-builder-genai-utils/langchain';
@@ -44,7 +44,6 @@ import {
 } from '../prompts/utils/notices';
 import { createRelevantSkillsNoticeMessage } from '../prompts/utils/skills';
 import type { CurrentRun } from '../transient_state';
-import { countNonTodosSteps } from '../step_state';
 import { materializeAskUserQuestionToolCall } from './ask_user_question_tool_call';
 import { toModelToolCall } from './dynamic_tool_call';
 import { toolCallKey } from './filestore_substitution';
@@ -318,6 +317,7 @@ const renderToolCallGroup = async (
   const groupId = calls[0].tool_call_group_id;
   const groupReasoning = groupId
     ? joinReasoning(
+        // legacy reasoning bound to a single call (`tool_call_id`) is not rendered anymore
         reasoningSteps.filter((s) => s.tool_call_group_id === groupId && !s.tool_call_id)
       )
     : '';
@@ -325,15 +325,12 @@ const renderToolCallGroup = async (
   const aiMessage = new AIMessage({
     content: groupReasoning,
     tool_calls: calls.map((call) => {
-      const stepReasoning = joinReasoning(
-        reasoningSteps.filter((s) => s.tool_call_id === call.tool_call_id)
-      );
       const { toolId, args } = toModelToolCall(call);
       const name = sanitizeToolId(current?.run.renderState[call.tool_call_id]?.toolName ?? toolId);
       return {
         id: call.tool_call_id,
         name,
-        args: stepReasoning ? { _reasoning: stepReasoning, ...args } : args,
+        args: call.intent ? { [INTENT_PARAM]: call.intent, ...args } : args,
         type: 'tool_call' as const,
       };
     }),
@@ -415,33 +412,28 @@ const renderSteps = async (
 
   // A retry notice sits after the steps that existed when the call failed; the ones placed within
   // the covered steps are covered too, the ones after the last rendered step belong to what follows.
-  const hiddenCount = countNonTodosSteps(steps.slice(0, start));
-  const renderedCount = countNonTodosSteps(steps.slice(0, end + 1));
+  const hiddenCount = start;
+  const renderedCount = end + 1;
   const isLastStep = end === steps.length - 1;
   const pushResearchRetries = (afterCount: number) => {
     if (afterCount < hiddenCount || (afterCount === renderedCount && !isLastStep)) {
       return;
     }
     for (const notice of current?.run.retryNotices ?? []) {
-      if (notice.phase === 'research' && notice.afterNonTodosStepCount === afterCount) {
+      if (notice.phase === 'research' && notice.afterStepCount === afterCount) {
         messages.push(...formatRetryNotice(notice.error));
       }
     }
   };
 
   pushResearchRetries(0);
-  let nonTodosCount = 0;
   let groupIndex = 0;
   for (const [index, step] of steps.entries()) {
-    if (isTodosStep(step)) {
-      continue;
-    }
     if (index < start || index > end) {
       if (isToolCallStep(step) && groups[groupIndex]?.[0] === step) {
         groupIndex++;
       }
-      nonTodosCount++;
-      if (index < start && nonTodosCount === hiddenCount) {
+      if (index === start - 1) {
         pushResearchRetries(hiddenCount);
       }
       continue;
@@ -475,8 +467,7 @@ const renderSteps = async (
       messages.push(...renderAnsweredQuestion({ ...step, answers: step.answers }, context));
     }
     // reasoning steps are rendered as part of their tool call group; compaction steps render nothing
-    nonTodosCount++;
-    pushResearchRetries(nonTodosCount);
+    pushResearchRetries(index + 1);
   }
 
   if (current?.phase === 'answer') {

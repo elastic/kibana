@@ -163,6 +163,7 @@ describe('generateExecutorFunction', () => {
         trigger: jest.fn(),
         listBindings: jest.fn(),
         readMessages: jest.fn(),
+        readThread: jest.fn(),
       };
       const executor = generateExecutorFunction({
         actions: makeActions(),
@@ -185,6 +186,7 @@ describe('generateExecutorFunction', () => {
         trigger: jest.fn(),
         listBindings: jest.fn(),
         readMessages: jest.fn(),
+        readThread: jest.fn(),
       };
       const executor = generateExecutorFunction({
         actions: makeActions(),

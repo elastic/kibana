@@ -1,0 +1,67 @@
+overlay: 1.0.0
+info:
+  title: Azure AKS and Resource Manager API corrections
+  version: 1.0.0
+actions:
+  - target: $.components.schemas['ManagedClusterListResult','AgentPoolListResult'].properties.nextLink
+    description: >-
+      nextLink is an absolute URL: https://learn.microsoft.com/en-us/rest/api/aks/managed-clusters/list?view=rest-aks-2026-06-01
+      documents ManagedClusterListResult.nextLink as "string (uri)", and
+      https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#collections-include-nextlink-for-more-results
+      requires "a nextLink field with an absolute URL".
+    update:
+      format: uri
+  - target: $.components.schemas.ResourceGroupListResult.properties.nextLink
+    description: >-
+      nextLink is an absolute URL, as
+      https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#collections-include-nextlink-for-more-results
+      requires and as the subscriptions spec of the same service already declares
+      (SubscriptionListResult.nextLink has format uri).
+    update:
+      format: uri
+  - target: $.paths['/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters'].get.parameters
+    description: >-
+      The operation is x-ms-pageable, and ARM's nextLink repeats the request with a `$skiptoken`
+      query parameter the spec doesn't declare, e.g. the managedClusters nextLink
+      `?api-version=2025-01-01&$skiptoken=...` logged in https://github.com/Azure/azure-cli/issues/31266.
+      https://github.com/microsoft/api-guidelines/blob/vNext/azure/Guidelines.md#collections-nextlink-includes-all-query-params
+      requires nextLink to carry every query parameter the service needs.
+    update:
+      - in: query
+        name: $skiptoken
+        required: false
+        schema:
+          type: string
+  - target: $.paths['/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/agentPools'].get.parameters
+    description: >-
+      x-ms-pageable; the AKS resource provider's nextLink carries `$skiptoken`, as logged for
+      managedClusters in https://github.com/Azure/azure-cli/issues/31266.
+    update:
+      - in: query
+        name: $skiptoken
+        required: false
+        schema:
+          type: string
+  - target: $.paths['/subscriptions/{subscriptionId}/resourcegroups'].get.parameters
+    description: >-
+      x-ms-pageable; ARM's nextLink for resource groups is
+      `resourceGroups?api-version=2021-04-01&$skipToken=...`
+      (https://cloudwebschool.com/docs/azure/fundamentals/azure-rest-apis/), a parameter the spec
+      doesn't declare.
+    update:
+      - in: query
+        name: $skiptoken
+        required: false
+        schema:
+          type: string
+  - target: $.paths['/subscriptions'].get.parameters
+    description: >-
+      x-ms-pageable; ARM's nextLink carries an opaque `$skiptoken`
+      (https://stackoverflow.com/questions/68297643, "it will have a $skiptoken query string
+      parameter"), which the spec doesn't declare.
+    update:
+      - in: query
+        name: $skiptoken
+        required: false
+        schema:
+          type: string

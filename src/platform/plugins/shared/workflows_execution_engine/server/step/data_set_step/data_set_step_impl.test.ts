@@ -24,7 +24,7 @@ describe('DataSetStepImpl', () => {
 
   let stepContextAbortController: AbortController;
   let mockContextManager: jest.Mocked<
-    Pick<WorkflowContextManager, 'renderValueAccordingToContext'>
+    Pick<WorkflowContextManager, 'renderObjectAccordingToContextAsync'>
   > & {
     abortController: AbortController;
   };
@@ -38,7 +38,7 @@ describe('DataSetStepImpl', () => {
       getDependencies: jest.fn().mockReturnValue({
         config: { maxResponseSize: new ByteSizeValue(10 * 1024 * 1024) },
       }),
-      renderValueAccordingToContext: jest.fn(<T>(value: T): T => value),
+      renderObjectAccordingToContextAsync: jest.fn(async (value: Record<string, unknown>) => value),
       abortController: stepContextAbortController,
     } as any;
 
@@ -95,10 +95,10 @@ describe('DataSetStepImpl', () => {
   });
 
   describe('getInput', () => {
-    it('should render the with configuration', () => {
-      const input = dataSetStep.getInput();
+    it('should render the with configuration', async () => {
+      const input = await dataSetStep.getInput();
 
-      expect(mockContextManager.renderValueAccordingToContext).toHaveBeenCalledWith({
+      expect(mockContextManager.renderObjectAccordingToContextAsync).toHaveBeenCalledWith({
         user_id: '12345',
         email: 'user@example.com',
         is_active: true,
@@ -110,7 +110,7 @@ describe('DataSetStepImpl', () => {
       });
     });
 
-    it('should handle empty with configuration', () => {
+    it('should handle empty with configuration', async () => {
       mockNode.configuration.with = {};
       dataSetStep = new DataSetStepImpl(
         mockNode,
@@ -119,7 +119,7 @@ describe('DataSetStepImpl', () => {
         mockWorkflowLogger
       );
 
-      const input = dataSetStep.getInput();
+      const input = await dataSetStep.getInput();
 
       expect(input).toEqual({});
     });
@@ -315,7 +315,9 @@ describe('DataSetStepImpl', () => {
     });
 
     it('should error when input is not an object', async () => {
-      mockContextManager.renderValueAccordingToContext.mockReturnValue('not an object' as any);
+      mockContextManager.renderObjectAccordingToContextAsync.mockResolvedValue(
+        'not an object' as any
+      );
 
       await dataSetStep.run();
 
@@ -327,7 +329,7 @@ describe('DataSetStepImpl', () => {
     });
 
     it('should error when input is an array', async () => {
-      mockContextManager.renderValueAccordingToContext.mockReturnValue([1, 2, 3] as any);
+      mockContextManager.renderObjectAccordingToContextAsync.mockResolvedValue([1, 2, 3] as any);
 
       await dataSetStep.run();
 
@@ -339,7 +341,7 @@ describe('DataSetStepImpl', () => {
     });
 
     it('should error when input is null', async () => {
-      mockContextManager.renderValueAccordingToContext.mockReturnValue(null as any);
+      mockContextManager.renderObjectAccordingToContextAsync.mockResolvedValue(null as any);
 
       await dataSetStep.run();
 

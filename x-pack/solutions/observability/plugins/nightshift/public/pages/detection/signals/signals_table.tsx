@@ -66,6 +66,7 @@ export const SignalsTable = ({
       {
         field: 'rule_name',
         name: RULE_COLUMN_LABEL,
+        minWidth: '280px',
         render: (_ruleName: string | undefined, signal: Detection) => (
           <EuiLink
             onClick={(event: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
@@ -122,6 +123,9 @@ export const SignalsTable = ({
     <EuiBasicTable<Detection>
       data-test-subj="nightshiftDetectionSignalsTable"
       tableCaption={TABLE_CAPTION}
+      stickyHeader
+      tableLayout="auto"
+      scrollableInline
       itemId="detection_id"
       items={signals}
       columns={columns}

@@ -46,6 +46,18 @@ describe('kibanaContextFn', () => {
     };
   });
 
+  it('preserves now from the input context', async () => {
+    const now = Date.parse('2024-01-02T12:00:00.000Z');
+
+    const result = await kibanaContextFn.fn(
+      { type: 'kibana_context', now },
+      emptyArgs,
+      createExecutionContextMock()
+    );
+
+    expect(result.now).toBe(now);
+  });
+
   it('merges and deduplicates queries from different sources', async () => {
     const { fn } = kibanaContextFn;
     startServicesMock.getSavedSearch.mockResolvedValue(

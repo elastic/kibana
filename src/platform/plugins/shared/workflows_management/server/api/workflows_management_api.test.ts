@@ -9,9 +9,15 @@
 
 import { WORKFLOW_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { coreMock, loggingSystemMock, securityServiceMock } from '@kbn/core/server/mocks';
+import {
+  coreMock,
+  elasticsearchServiceMock,
+  loggingSystemMock,
+  securityServiceMock,
+} from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import {
   ExecutionStatus,
   type WorkflowDetailDto,
@@ -33,6 +39,7 @@ import {
 } from './external_resume/external_resume_service';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
+import { ManagedWorkflowReadForbiddenError } from './managed_workflow_read_error';
 import { preprocessTriggerInputs } from './routes/executions/utils/preprocess_trigger_inputs';
 import { WorkflowForbiddenError } from './workflow_forbidden_error';
 import { WorkflowRequiresDelegatedIdentityError } from './workflow_requires_delegated_identity_error';
@@ -134,6 +141,7 @@ describe('WorkflowsManagementApi', () => {
         .fn()
         .mockResolvedValue({ id: 'run-1', workflowId: 'workflow-123' }),
       getWorkflowExecutions: jest.fn(),
+      getWorkflowExecutionStatusCounts: jest.fn(),
       getExecutionStepExecutions: jest.fn(),
       searchStepExecutions: jest.fn(),
       markStepAsResponded: jest.fn(),
@@ -267,6 +275,29 @@ describe('WorkflowsManagementApi', () => {
       expect(mockWorkflowsService.getHistoryForWorkflow).not.toHaveBeenCalled();
     });
 
+    it('rejects managed workflow history without managed workflow read access', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue({ ...workflow, managed: true });
+
+      await expect(
+        api.getHistoryForWorkflow(workflow.id, 'default', { request: mockRequest })
+      ).rejects.toBeInstanceOf(ManagedWorkflowReadForbiddenError);
+
+      expect(mockWorkflowsService.getHistoryForWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('returns managed workflow history with managed workflow read access', async () => {
+      const historyResponse = { page: 1, perPage: 20, total: 0, items: [] };
+      mockWorkflowsService.getWorkflow.mockResolvedValue({ ...workflow, managed: true });
+      mockWorkflowsService.getHistoryForWorkflow.mockResolvedValue(historyResponse);
+
+      await expect(
+        api.getHistoryForWorkflow(workflow.id, 'default', {
+          request: mockRequest,
+          allowManagedWorkflowRead: true,
+        })
+      ).resolves.toBe(historyResponse);
+    });
+
     it.each(['edit', 'execute'] as const)(
       'still excludes soft-deleted workflows from %s access',
       async (operation) => {
@@ -297,6 +328,26 @@ describe('WorkflowsManagementApi', () => {
       expect(access.assertAccess).not.toHaveBeenCalled();
     });
 
+    it('filters editor history by the current document uid', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue({
+        ...workflow,
+        workflowUid: 'uid-current',
+      });
+      const params = { workflowId: workflow.id, request: mockRequest };
+
+      await api.getWorkflowExecutions(params, 'default');
+      expect(mockWorkflowsService.getWorkflowExecutions).toHaveBeenCalledWith(
+        { ...params, accessControlFilter: undefined, workflowUid: 'uid-current' },
+        'default'
+      );
+
+      await api.searchStepExecutions(params, 'default');
+      expect(mockWorkflowsService.searchStepExecutions).toHaveBeenCalledWith(
+        { ...params, workflowUid: 'uid-current' },
+        'default'
+      );
+    });
+
     it('keeps the space filter for cross-workflow history', async () => {
       const access = await mockWorkflowsService.getAccessControl();
       const filter = { bool: { must_not: [{ terms: { workflowId: ['hidden'] } }] } };
@@ -308,6 +359,21 @@ describe('WorkflowsManagementApi', () => {
       expect(mockWorkflowsService.getWorkflow).not.toHaveBeenCalled();
       expect(mockWorkflowsService.getWorkflowExecutions).toHaveBeenCalledWith(
         { request: mockRequest, accessControlFilter: filter },
+        'default'
+      );
+    });
+
+    it('applies the execution access filter to status counts', async () => {
+      const access = await mockWorkflowsService.getAccessControl();
+      const filter = { bool: { must_not: [{ terms: { workflowId: ['hidden'] } }] } };
+      jest.mocked(access.executionFilter).mockResolvedValue(filter);
+      const params = { workflowIds: [workflow.id], request: mockRequest };
+
+      await api.getWorkflowExecutionStatusCounts(params, 'default');
+
+      expect(access.executionFilter).toHaveBeenCalledWith('default', mockRequest);
+      expect(mockWorkflowsService.getWorkflowExecutionStatusCounts).toHaveBeenCalledWith(
+        { ...params, accessControlFilter: filter },
         'default'
       );
     });
@@ -954,6 +1020,9 @@ steps:
           },
           mockRequest
         );
+        expect(mockWorkflowsExecutionEngine.executeWorkflow.mock.calls[0][0]).not.toHaveProperty(
+          'workflowUid'
+        );
       });
 
       it('should throw error when YAML validation fails', async () => {
@@ -1085,6 +1154,7 @@ steps:
       it('should fetch workflow YAML by ID and execute it', async () => {
         mockWorkflowsService.getWorkflow.mockResolvedValue({
           ...mockWorkflowDetailDto,
+          workflowUid: 'uid-current',
           managed: true,
           managedBy: 'workflowsExtensionsExample',
           originManagedWorkflowId: 'system-example-greeting',
@@ -1108,6 +1178,7 @@ steps:
           expect.objectContaining({
             id: 'existing-workflow-id',
             yaml: mockWorkflowYaml,
+            workflowUid: 'uid-current',
             managed: true,
             managedBy: 'workflowsExtensionsExample',
             originManagedWorkflowId: 'system-example-greeting',
@@ -1121,6 +1192,7 @@ steps:
       it('should preserve managed metadata when testing provided YAML for a saved workflow', async () => {
         mockWorkflowsService.getWorkflow.mockResolvedValue({
           ...mockWorkflowDetailDto,
+          workflowUid: 'uid-current',
           managed: true,
           managedBy: 'workflowsExtensionsExample',
           originManagedWorkflowId: 'system-example-greeting',
@@ -1139,6 +1211,7 @@ steps:
         expect(engine.executeWorkflow).toHaveBeenCalledWith(
           expect.objectContaining({
             id: 'existing-workflow-id',
+            workflowUid: 'uid-current',
             managed: true,
             managedBy: 'workflowsExtensionsExample',
             originManagedWorkflowId: 'system-example-greeting',
@@ -1339,6 +1412,106 @@ steps:
         {},
         mockRequest
       );
+      expect(mockWorkflowsExecutionEngine.executeWorkflowStep.mock.calls[0][0]).not.toHaveProperty(
+        'workflowUid'
+      );
+    });
+
+    it('links a step test of a saved workflow to that document', async () => {
+      mockWorkflowsService.validateWorkflow.mockResolvedValue({
+        valid: true,
+        diagnostics: [],
+        parsedWorkflow: {
+          version: '1',
+          name: 'Test Workflow',
+          enabled: true,
+          triggers: [{ type: 'manual' }],
+          steps: [{ name: 'step1', type: 'console' }],
+        },
+      });
+      mockWorkflowsService.getWorkflow.mockResolvedValue({
+        id: 'existing-workflow-id',
+        workflowUid: 'uid-current',
+      } as WorkflowDetailDto);
+      mockWorkflowsExecutionEngine.executeWorkflowStep.mockResolvedValue({
+        workflowExecutionId: 'test-step-exec-id',
+      });
+
+      await api.testStep(
+        'name: Test Workflow',
+        'step1',
+        'existing-workflow-id',
+        undefined,
+        {},
+        'default',
+        mockRequest
+      );
+
+      expect(mockWorkflowsExecutionEngine.executeWorkflowStep).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'existing-workflow-id',
+          workflowUid: 'uid-current',
+          isTestRun: true,
+        }),
+        'step1',
+        undefined,
+        {},
+        mockRequest
+      );
+    });
+  });
+
+  describe('loadAlertDocuments', () => {
+    const index = '.alerts-security.alerts-default';
+    let elasticsearch: ReturnType<typeof elasticsearchServiceMock.createStart>;
+    let scopedClusterClient: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
+
+    beforeEach(() => {
+      scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      scopedClusterClient.asCurrentUser.search.mockResponseOnce({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { hits: [{ _id: 'a1', _index: index, _source: { 'kibana.alert.uuid': 'a1' } }] },
+      });
+      elasticsearch = elasticsearchServiceMock.createStart();
+      elasticsearch.client.asScoped.mockReturnValue(scopedClusterClient);
+      mockWorkflowsService.getCoreStart = jest
+        .fn()
+        .mockResolvedValue({ ...coreMock.createStart(), elasticsearch });
+    });
+
+    it('reads as the user behind the request and formats with the registered rule types', async () => {
+      const formatAlert = jest.fn((alert: Record<string, unknown>) => ({ ...alert, signal: {} }));
+      mockWorkflowsService.getPluginsStart = jest.fn().mockResolvedValue({
+        alerting: { listTypes: () => new Map([[QUERY_RULE_TYPE_ID, { alerts: { formatAlert } }]]) },
+      });
+
+      const result = await api.loadAlertDocuments({
+        alerts: { ids: ['a1'], index },
+        request: mockRequest,
+      });
+
+      expect(elasticsearch.client.asScoped).toHaveBeenCalledWith(mockRequest);
+      expect(scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
+      expect(formatAlert).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({
+        alerts: [{ _id: 'a1', _index: index, kibana: { alert: { uuid: 'a1' } }, signal: {} }],
+        missingIds: [],
+      });
+    });
+
+    it('loads unformatted documents when the alerting plugin is unavailable', async () => {
+      mockWorkflowsService.getPluginsStart = jest.fn().mockResolvedValue({});
+
+      const result = await api.loadAlertDocuments({
+        alerts: { ids: ['a1'], index },
+        request: mockRequest,
+      });
+
+      expect(result.alerts).toEqual([
+        { _id: 'a1', _index: index, kibana: { alert: { uuid: 'a1' } } },
+      ]);
     });
   });
 
@@ -2014,6 +2187,86 @@ steps:
       ).resolves.toBe(updateResult);
 
       expect(mockWorkflowsService.updateWorkflow).toHaveBeenCalled();
+    });
+  });
+
+  describe('getWorkflowDependentsImpact', () => {
+    it('grades a draft with a YAML syntax error like any draft saved invalid', async () => {
+      const definition = {
+        name: 'Test workflow',
+        triggers: [{ type: 'manual' }],
+        steps: [{ name: 'log', type: 'console', with: { message: 'hi' } }],
+      };
+      mockWorkflowsService.getWorkflow.mockResolvedValue({
+        id: 'workflow-123',
+        name: 'Test workflow',
+        enabled: true,
+        valid: true,
+        definition,
+      } as any);
+      const caller = {
+        id: 'caller',
+        name: 'Caller',
+        enabled: true,
+        definition: {
+          name: 'Caller',
+          steps: [
+            { name: 'run', type: 'workflow.execute', with: { 'workflow-id': 'workflow-123' } },
+          ],
+        },
+      };
+      Object.assign(mockWorkflowsService, {
+        getDefinitionToStore: jest.fn().mockResolvedValue(null),
+        findWorkflowsCalling: jest.fn(async (ids: string[]) =>
+          ids.includes('workflow-123') ? [caller] : []
+        ),
+      });
+
+      const { analysis, calledWorkflows } = await api.getWorkflowDependentsImpact(
+        'workflow-123',
+        'default',
+        mockRequest,
+        'steps: ['
+      );
+
+      expect(analysis.dependents).toEqual([
+        expect.objectContaining({
+          workflowId: 'caller',
+          status: 'breaking',
+          issues: [expect.objectContaining({ kind: 'childInvalid', isNew: true })],
+        }),
+      ]);
+      expect(calledWorkflows).toEqual([]);
+    });
+
+    it('leaves workflows bound to a service account out of the background indexing', async () => {
+      const unindexed = (id: string, settings?: Record<string, unknown>) => ({
+        id,
+        name: id,
+        enabled: true,
+        definition: { name: id, settings, steps: [] },
+      });
+      mockWorkflowsService.getWorkflow.mockResolvedValue({
+        id: 'workflow-123',
+        name: 'Test workflow',
+        enabled: true,
+        valid: true,
+        definition: { name: 'Test workflow', triggers: [{ type: 'manual' }], steps: [] },
+      } as any);
+      const indexCalledWorkflowIds = jest.fn().mockResolvedValue(undefined);
+      Object.assign(mockWorkflowsService, {
+        indexCalledWorkflowIds,
+        findWorkflowsCalling: jest.fn(
+          async (_ids: string[], _spaceId: string, options?: { includeUnindexed?: boolean }) =>
+            options?.includeUnindexed
+              ? [unindexed('bound', { run_as: 'service-account-1' }), unindexed('unbound')]
+              : []
+        ),
+      });
+
+      await api.getWorkflowDependentsImpact('workflow-123', 'default', mockRequest, undefined);
+
+      expect(indexCalledWorkflowIds).toHaveBeenCalledWith(['unbound']);
     });
   });
 

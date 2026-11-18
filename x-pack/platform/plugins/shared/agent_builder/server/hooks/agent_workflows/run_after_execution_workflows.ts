@@ -6,6 +6,7 @@
  */
 
 import type { AfterExecutionHookContext } from '@kbn/agent-builder-server';
+import type { KibanaRequest } from '@kbn/core/server';
 import {
   ConversationRoundStatus,
   isPreExecutionWorkflowStep,
@@ -89,91 +90,101 @@ export const runAfterExecutionWorkflows = async ({
   }
 
   const { spaces, uiSettings, savedObjects } = getInternalServices();
-  const soClient = savedObjects.getScopedClient(context.request);
-  const uiSettingsClient = uiSettings.asScopedToClient(soClient);
-  const isEnabled = (await uiSettingsClient.get<boolean>(WORKFLOWS_UI_SETTING_ID)) ?? true;
-
-  if (!isEnabled) {
-    return;
-  }
-
   const spaceId = getCurrentSpaceId({ request: context.request, spaces });
-  const { round } = context;
 
-  const toolCallSteps = round.steps.filter(isToolCallStep);
-  const toolCalls = toolCallSteps.map((step: ToolCallStep) => ({
-    tool_id: step.tool_id,
-    tool_call_id: step.tool_call_id,
-    params: step.params as Record<string, unknown>,
-  }));
-  const toolResults = toolCallSteps.flatMap(
-    ({ tool_id: toolId, tool_call_id: toolCallId, results }: ToolCallStep) =>
-      results
-        ? [{ tool_id: toolId, tool_call_id: toolCallId, results: results.map(boundToolResult) }]
-        : []
-  );
+  const run = async (request: KibanaRequest): Promise<void> => {
+    const soClient = savedObjects.getScopedClient(request);
+    const uiSettingsClient = uiSettings.asScopedToClient(soClient);
+    const isEnabled = (await uiSettingsClient.get<boolean>(WORKFLOWS_UI_SETTING_ID)) ?? true;
 
-  const roundConnectorId = context.connectorId?.trim() || round.model_usage?.connector_id?.trim();
-  const workflowContext = round.steps.find(isPreExecutionWorkflowStep)?.workflow_context;
+    if (!isEnabled) {
+      return;
+    }
 
-  const workflowParams: AfterExecutionWorkflowParams = {
-    prompt: round.input.message ?? '',
-    response: round.response.message ?? '',
-    round_id: round.id,
-    ...(context.conversationId ? { conversation_id: context.conversationId } : {}),
-    ...(context.agentId ? { agent_id: context.agentId } : {}),
-    tool_calls: toolCalls,
-  };
-  const optionalWorkflowParams: Pick<
-    AfterExecutionWorkflowParams,
-    'round_connector_id' | 'workflow_context' | 'tool_results'
-  > = {
-    round_connector_id:
-      roundConnectorId && roundConnectorId !== 'unknown' ? roundConnectorId : undefined,
-    workflow_context: workflowContext,
-    tool_results: toolResults.length > 0 ? toolResults : undefined,
-  };
+    const { round } = context;
 
-  for (const workflowId of workflowIds) {
-    const workflowParamsWithOptionalInputs = await withDeclaredInputs({
-      workflowId,
-      inputs: workflowParams as unknown as Record<string, unknown>,
-      optionalInputs: optionalWorkflowParams,
-      workflowApi,
-      spaceId,
-      request: context.request,
-      logger,
-    });
-    const result = await otelContext.with(ROOT_CONTEXT, () =>
-      executeWorkflow({
+    const toolCallSteps = round.steps.filter(isToolCallStep);
+    const toolCalls = toolCallSteps.map((step: ToolCallStep) => ({
+      tool_id: step.tool_id,
+      tool_call_id: step.tool_call_id,
+      params: step.params as Record<string, unknown>,
+    }));
+    const toolResults = toolCallSteps.flatMap(
+      ({ tool_id: toolId, tool_call_id: toolCallId, results }: ToolCallStep) =>
+        results
+          ? [{ tool_id: toolId, tool_call_id: toolCallId, results: results.map(boundToolResult) }]
+          : []
+    );
+
+    const roundConnectorId = context.connectorId?.trim() || round.model_usage?.connector_id?.trim();
+    const workflowContext = round.steps.find(isPreExecutionWorkflowStep)?.workflow_context;
+    // A round resumed after human-in-the-loop has one trace per execution; this hook belongs to the latest.
+    const roundTraceId = Array.isArray(round.trace_id) ? round.trace_id.at(-1) : round.trace_id;
+
+    const workflowParams: AfterExecutionWorkflowParams = {
+      prompt: round.input.message ?? '',
+      response: round.response.message ?? '',
+      round_id: round.id,
+      ...(context.conversationId ? { conversation_id: context.conversationId } : {}),
+      ...(context.agentId ? { agent_id: context.agentId } : {}),
+      tool_calls: toolCalls,
+    };
+    const optionalWorkflowParams: Pick<
+      AfterExecutionWorkflowParams,
+      'round_connector_id' | 'round_trace_id' | 'workflow_context' | 'tool_results'
+    > = {
+      round_connector_id:
+        roundConnectorId && roundConnectorId !== 'unknown' ? roundConnectorId : undefined,
+      round_trace_id: roundTraceId || undefined,
+      workflow_context: workflowContext,
+      tool_results: toolResults.length > 0 ? toolResults : undefined,
+    };
+
+    for (const workflowId of workflowIds) {
+      const workflowParamsWithOptionalInputs = await withDeclaredInputs({
         workflowId,
-        workflowParams: workflowParamsWithOptionalInputs,
-        request: context.request,
-        spaceId,
+        inputs: workflowParams as unknown as Record<string, unknown>,
+        optionalInputs: optionalWorkflowParams,
         workflowApi,
-        waitForCompletion: true,
-        triggeredBy: AGENT_BUILDER_HOOK_TRIGGER_SOURCE,
-      })
-    );
-
-    if (!result.success) {
-      logger.error(`Post-execution workflow "${workflowId}" failed to execute: ${result.error}`);
-      continue;
-    }
-
-    const execution = result.execution;
-    if (execution.status === ExecutionStatus.FAILED) {
-      const workflowName = execution.workflow_name ?? execution.workflow_id;
-      logger.error(
-        `Post-execution workflow "${workflowName}" execution failed: ${
-          execution.error_message ?? 'unknown error'
-        }`
+        spaceId,
+        request,
+        logger,
+      });
+      const result = await otelContext.with(ROOT_CONTEXT, () =>
+        executeWorkflow({
+          workflowId,
+          workflowParams: workflowParamsWithOptionalInputs,
+          request,
+          spaceId,
+          workflowApi,
+          waitForCompletion: true,
+          triggeredBy: AGENT_BUILDER_HOOK_TRIGGER_SOURCE,
+        })
       );
-      continue;
-    }
 
-    logger.debug(
-      `Post-execution workflow execution finished: ${execution.workflow_id} (${execution.execution_id})`
-    );
-  }
+      if (!result.success) {
+        logger.error(`Post-execution workflow "${workflowId}" failed to execute: ${result.error}`);
+        continue;
+      }
+
+      const execution = result.execution;
+      if (execution.status === ExecutionStatus.FAILED) {
+        const workflowName = execution.workflow_name ?? execution.workflow_id;
+        logger.error(
+          `Post-execution workflow "${workflowName}" execution failed: ${
+            execution.error_message ?? 'unknown error'
+          }`
+        );
+        continue;
+      }
+
+      logger.debug(
+        `Post-execution workflow execution finished: ${execution.workflow_id} (${execution.execution_id})`
+      );
+    }
+  };
+
+  // The hooks runner hands this non-blocking hook a request for the agent's bound service account
+  // (`requiresServiceAccountRequest`), since the round's own request is released once it settles.
+  await run(context.request);
 };

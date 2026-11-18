@@ -184,12 +184,6 @@ Disallowed changes:
 4. Update writers and readers that need to understand the new field.
 5. Update the relevant README if the field changes the architecture or contributor mental model.
 
-### Mapping changes that cannot be applied in place
-
-Elasticsearch cannot apply some mapping changes to existing backing indices, for example turning a concrete field into an `alias`. For those, set `forceReset: { version }` on the resource definition, where `version` is the last datastream version with the old mapping. On startup, `DatastreamInitializer` installs the current template, then deletes a data stream created from that version or below and recreates it. Installing the template first means that a write from a node still running the previous version recreates the data stream with the current mapping. All of its documents are lost. A field renamed without an alias uses the same reset, so that no document keeps the old name.
-
-`.rule-events` uses `forceReset: { version: 7 }` for the `episode.*` to `alert.*` rename in v8. `.alert-actions` uses `forceReset: { version: 7 }` for the `episode_id` / `episode_status` to `alert_id` / `alert_status` rename in v8, which also covers the `actor` keyword to object change in v7. Keep `forceReset.version` unchanged when bumping the datastream versions later.
-
 ## Example: adding a new optional alert event field
 
 If you add a new optional field to `.rule-events`, the minimum change set is usually:
@@ -209,7 +203,7 @@ Both streams use data stream lifecycle (DSL), not ILM. Rollover follows the Elas
 
 | Setting | Default | Notes |
 | --- | --- | --- |
-| `xpack.alerting_v2.retention.ruleEvents.enabled` | `false` | `config/serverless.oblt.yml` turns it on for Observability Serverless. |
+| `xpack.alerting_v2.retention.ruleEvents.enabled` | `false` | |
 | `xpack.alerting_v2.retention.ruleEvents.dataRetention` | `90d` | Units `d`, `h`, `m`, `s` or `ms` (no `w`). Minimum `30d`. |
 
 `DatastreamInitializer` applies the `.rule-events` lifecycle with `PUT _data_stream/.rule-events/_lifecycle` on every startup (`manageLifecycle: true`), because `@kbn/data-streams` only updates it on a template version bump. Changes take effect on restart, disabling retention removes `data_retention`, and any retention set by hand on `.rule-events` is overwritten. `.alert-actions` is left untouched. A failed update fails the stream's initialization, so a previous, retention is never silently kept.

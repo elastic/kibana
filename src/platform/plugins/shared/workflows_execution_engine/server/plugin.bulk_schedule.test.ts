@@ -26,7 +26,10 @@ jest.mock('./lib/check_license', () => ({
   checkLicense: jest.fn().mockResolvedValue(undefined),
 }));
 jest.mock('./lib/get_user', () => ({
-  getAuthenticatedUser: jest.fn().mockResolvedValue('test-user'),
+  getAuthenticatedUser: jest.fn().mockResolvedValue({
+    executedBy: 'test-user',
+    user: { name: 'Test User', username: 'test-user' },
+  }),
 }));
 
 const mockBulkCreateWorkflowExecutions = jest.fn();
@@ -69,6 +72,20 @@ jest.mock('./concurrency/concurrency_manager', () => ({
     evaluateConcurrencyKey: mockEvaluateConcurrencyKey,
   })),
 }));
+const mockWithConcurrencyGroupLock = jest.fn(
+  (_lock: unknown, _spaceId: string, _key: string | null | undefined, fn: () => Promise<unknown>) =>
+    fn()
+);
+jest.mock('./concurrency/concurrency_group_lock', () => ({
+  setConcurrencyGroupLock: jest.fn(),
+  getConcurrencyGroupLock: jest.fn(),
+  withConcurrencyGroupLock: (
+    lock: unknown,
+    spaceId: string,
+    key: string | null | undefined,
+    fn: () => Promise<unknown>
+  ) => mockWithConcurrencyGroupLock(lock, spaceId, key, fn),
+}));
 
 import { checkLicense } from './lib/check_license';
 import {
@@ -78,6 +95,11 @@ import {
 } from './lib/execution_identity';
 import { getAuthenticatedUser } from './lib/get_user';
 import { WorkflowsExecutionEnginePlugin } from './plugin';
+import { publishFinishedWorkflowExecution } from './topics/publish_finished_workflow_execution';
+
+jest.mock('./topics/publish_finished_workflow_execution', () => ({
+  publishFinishedWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+}));
 
 const makeGate = () => {
   let resolve!: (value: boolean) => void;
@@ -117,6 +139,7 @@ describe('bulkScheduleWorkflow', () => {
     jest.clearAllMocks();
     mockConcurrencyCheckConcurrency.mockResolvedValue(true);
     mockEvaluateConcurrencyKey.mockReturnValue(null);
+    mockWithConcurrencyGroupLock.mockImplementation((_lock, _spaceId, _key, fn) => fn());
     mockGetWorkflowExecutionStates.mockResolvedValue(new Map());
     mockGetWorkflowsSubscribedToTrigger.mockResolvedValue([]);
     mockIsWorkflowEnabled.mockResolvedValue(true);
@@ -704,6 +727,136 @@ describe('bulkScheduleWorkflow', () => {
     expect(mockConcurrencyCheckConcurrency).toHaveBeenCalledTimes(2);
   });
 
+  it('returns an error for each item whose lock times out and still schedules the other items', async () => {
+    const workflowA = createWorkflow('wf-a', {
+      definition: {
+        name: 'wf-a',
+        enabled: true,
+        version: '1',
+        triggers: [{ type: 'manual' }],
+        steps: [],
+        settings: {
+          concurrency: { key: 'group-a', limit: 1, onCollision: 'drop' as const },
+        },
+      } as any,
+    });
+    const workflowB = createWorkflow('wf-b', {
+      definition: {
+        name: 'wf-b',
+        enabled: true,
+        version: '1',
+        triggers: [{ type: 'manual' }],
+        steps: [],
+        settings: {
+          concurrency: { key: 'group-b', limit: 1, onCollision: 'drop' as const },
+        },
+      } as any,
+    });
+    const workflowC = createWorkflow('wf-c');
+    mockGetWorkflowExecutionStates.mockResolvedValue(
+      new Map([
+        ['default:wf-a', { enabled: true }],
+        ['default:wf-b', { enabled: true }],
+        ['default:wf-c', { enabled: true }],
+      ])
+    );
+    mockBulkCreateWorkflowExecutions.mockImplementation(async (executions: Array<{ id: string }>) =>
+      executions.map(({ id }) => ({ id }))
+    );
+    mockEvaluateConcurrencyKey.mockImplementation(
+      (settings?: { key?: string }) => settings?.key ?? null
+    );
+    mockWithConcurrencyGroupLock.mockImplementation(async (_lock, _spaceId, key, fn) => {
+      if (key === 'group-a') {
+        throw new Error('Lock wait timed out');
+      }
+      return fn();
+    });
+
+    const result = await pluginStart.bulkScheduleWorkflow(
+      [
+        { workflow: workflowA, context: { spaceId: 'default' } },
+        { workflow: workflowA, context: { spaceId: 'default' } },
+        { workflow: workflowB, context: { spaceId: 'default' } },
+        { workflow: workflowC, context: { spaceId: 'default' } },
+      ],
+      request
+    );
+
+    expect(result[0]).toEqual({
+      status: 'error',
+      error: { message: 'Lock wait timed out' },
+    });
+    expect(result[1]).toEqual({
+      status: 'error',
+      error: { message: 'Lock wait timed out' },
+    });
+    expect(result[2]).toEqual({
+      status: 'scheduled',
+      workflowExecutionId: expect.any(String),
+    });
+    expect(result[3]).toEqual({
+      status: 'scheduled',
+      workflowExecutionId: expect.any(String),
+    });
+    expect(mockWithConcurrencyGroupLock).toHaveBeenCalledTimes(3);
+    expect(mockCreateWorkflowExecution).toHaveBeenCalledTimes(1);
+    expect(taskManager.bulkSchedule).toHaveBeenCalledTimes(1);
+    const [scheduledTasks] = taskManager.bulkSchedule.mock.calls[0];
+    expect(scheduledTasks).toHaveLength(2);
+  });
+
+  it('keeps a decided execution when the blocked-execution follow-up fails', async () => {
+    const workflow = createWorkflow('wf-a', {
+      definition: {
+        name: 'wf-a',
+        enabled: true,
+        version: '1',
+        triggers: [{ type: 'manual' }],
+        steps: [],
+        settings: {
+          concurrency: { key: 'same-group', limit: 1, onCollision: 'drop' as const },
+        },
+      } as any,
+    });
+    mockGetWorkflowExecutionStates.mockResolvedValue(
+      new Map([['default:wf-a', { enabled: true }]])
+    );
+    mockBulkCreateWorkflowExecutions.mockImplementation(async (executions: Array<{ id: string }>) =>
+      executions.map(({ id }) => ({ id }))
+    );
+    mockEvaluateConcurrencyKey.mockReturnValue('same-group');
+    jest
+      .spyOn(
+        plugin as unknown as { checkConcurrencyIfNeeded: (e: unknown) => Promise<boolean> },
+        'checkConcurrencyIfNeeded'
+      )
+      .mockResolvedValueOnce(false)
+      .mockResolvedValueOnce(true);
+    mockGetWorkflowExecutionById.mockRejectedValueOnce(new Error('execution read failed'));
+
+    const result = await pluginStart.bulkScheduleWorkflow(
+      [
+        { workflow, context: { spaceId: 'default' } },
+        { workflow, context: { spaceId: 'default' } },
+      ],
+      request
+    );
+
+    expect(result[0]).toEqual({
+      status: 'scheduled',
+      workflowExecutionId: expect.any(String),
+    });
+    expect(result[1]).toEqual({
+      status: 'scheduled',
+      workflowExecutionId: expect.any(String),
+    });
+    expect(mockDiscardUnstartedExecution).not.toHaveBeenCalled();
+    expect(taskManager.bulkSchedule).toHaveBeenCalledTimes(1);
+    const [scheduledTasks] = taskManager.bulkSchedule.mock.calls[0];
+    expect(scheduledTasks).toHaveLength(1);
+  });
+
   it('skips bulkCreate and taskManager when no items are enabled', async () => {
     const disabledWorkflow = createWorkflow('wf-bad');
     mockGetWorkflowExecutionStates.mockResolvedValue(
@@ -749,6 +902,127 @@ describe('bulkScheduleWorkflow', () => {
       },
     ]);
   });
+
+  it('stamps the stored workflowUid onto a bulk run when the model omits it', async () => {
+    const workflow = createWorkflow('wf-a');
+    mockGetWorkflowExecutionStates.mockResolvedValue(
+      new Map([['default:wf-a', { enabled: true, workflowUid: 'uid-current' }]])
+    );
+    mockBulkCreateWorkflowExecutions.mockImplementation(async (executions: Array<{ id: string }>) =>
+      executions.map(({ id }) => ({ id }))
+    );
+
+    await pluginStart.bulkScheduleWorkflow(
+      [{ workflow, context: { spaceId: 'default' } }],
+      request
+    );
+
+    expect(workflow.workflowUid).toBeUndefined();
+    expect(mockBulkCreateWorkflowExecutions).toHaveBeenCalledWith(
+      [expect.objectContaining({ workflowId: 'wf-a', workflowUid: 'uid-current' })],
+      { refresh: 'wait_for' }
+    );
+  });
+
+  it('omits workflowUid from a bulk run when the stored document has none', async () => {
+    const workflow = createWorkflow('wf-a', { workflowUid: 'uid-caller' });
+    mockGetWorkflowExecutionStates.mockResolvedValue(
+      new Map([['default:wf-a', { enabled: true }]])
+    );
+    mockBulkCreateWorkflowExecutions.mockImplementation(async (executions: Array<{ id: string }>) =>
+      executions.map(({ id }) => ({ id }))
+    );
+
+    await pluginStart.bulkScheduleWorkflow(
+      [{ workflow, context: { spaceId: 'default' } }],
+      request
+    );
+
+    expect(workflow.workflowUid).toBe('uid-caller');
+    expect(mockBulkCreateWorkflowExecutions).toHaveBeenCalledWith(
+      [
+        expect.not.objectContaining({
+          workflowUid: expect.anything(),
+        }),
+      ],
+      { refresh: 'wait_for' }
+    );
+  });
+
+  it('keeps an ephemeral bulk run uid from the model', async () => {
+    const workflow = createWorkflow('wf-ephemeral', {
+      isEphemeral: true,
+      workflowUid: 'uid-model',
+    });
+    mockGetWorkflowExecutionStates.mockResolvedValue(
+      new Map([['default:wf-ephemeral', { enabled: true, workflowUid: 'uid-stored' }]])
+    );
+    mockBulkCreateWorkflowExecutions.mockImplementation(async (executions: Array<{ id: string }>) =>
+      executions.map(({ id }) => ({ id }))
+    );
+
+    await pluginStart.bulkScheduleWorkflow(
+      [{ workflow, context: { spaceId: 'default' } }],
+      request
+    );
+
+    expect(mockGetWorkflowExecutionStates).toHaveBeenCalledWith([], { includeGlobal: true });
+    expect(mockBulkCreateWorkflowExecutions).toHaveBeenCalledWith(
+      [expect.objectContaining({ workflowId: 'wf-ephemeral', workflowUid: 'uid-model' })],
+      { refresh: 'wait_for' }
+    );
+  });
+
+  it.each(['executeWorkflow', 'scheduleWorkflow'] as const)(
+    '%s stamps the stored workflowUid when the model omits it',
+    async (method) => {
+      const workflow = createWorkflow('wf-a');
+      mockGetWorkflow.mockResolvedValue({ workflowUid: 'uid-current' });
+
+      await pluginStart[method](workflow, { spaceId: 'default' }, request);
+
+      expect(workflow.workflowUid).toBeUndefined();
+      expect(mockCreateWorkflowExecution).toHaveBeenCalledWith(
+        expect.objectContaining({ workflowId: 'wf-a', workflowUid: 'uid-current' }),
+        expect.anything()
+      );
+    }
+  );
+
+  it.each(['executeWorkflow', 'scheduleWorkflow'] as const)(
+    '%s omits workflowUid when the stored document has none',
+    async (method) => {
+      const workflow = createWorkflow('wf-a', { workflowUid: 'uid-caller' });
+      mockGetWorkflow.mockResolvedValue({ enabled: true });
+
+      await pluginStart[method](workflow, { spaceId: 'default' }, request);
+
+      expect(workflow.workflowUid).toBe('uid-caller');
+      expect(mockCreateWorkflowExecution).toHaveBeenCalledWith(
+        expect.not.objectContaining({ workflowUid: expect.anything() }),
+        expect.anything()
+      );
+    }
+  );
+
+  it.each(['executeWorkflow', 'scheduleWorkflow'] as const)(
+    '%s keeps an ephemeral run uid from the model',
+    async (method) => {
+      const workflow = createWorkflow('wf-ephemeral', {
+        isEphemeral: true,
+        workflowUid: 'uid-model',
+      });
+      mockGetWorkflow.mockResolvedValue({ workflowUid: 'uid-stored' });
+
+      await pluginStart[method](workflow, { spaceId: 'default' }, request);
+
+      expect(mockGetWorkflow).not.toHaveBeenCalled();
+      expect(mockCreateWorkflowExecution).toHaveBeenCalledWith(
+        expect.objectContaining({ workflowId: 'wf-ephemeral', workflowUid: 'uid-model' }),
+        expect.anything()
+      );
+    }
+  );
 
   it('skips saved workflow enabled checks for ephemeral workflows', async () => {
     const ephemeralWorkflow = createWorkflow('wf-ephemeral', { isEphemeral: true });
@@ -881,6 +1155,7 @@ describe('bulkScheduleWorkflow', () => {
   });
 
   it('persists bulk executions as failed and does not schedule when no identity is attached', async () => {
+    jest.mocked(publishFinishedWorkflowExecution).mockClear();
     (getAuthenticatedUser as jest.Mock).mockResolvedValueOnce(undefined);
     mockGetWorkflowExecutionStates.mockResolvedValue(
       new Map([['default:wf-a', { enabled: true }]])
@@ -909,6 +1184,13 @@ describe('bulkScheduleWorkflow', () => {
       { refresh: 'wait_for' }
     );
     expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
+    expect(publishFinishedWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflowId: 'wf-a',
+        status: 'failed',
+        isTestRun: false,
+      })
+    );
     expect(result).toEqual([
       {
         status: 'scheduled',

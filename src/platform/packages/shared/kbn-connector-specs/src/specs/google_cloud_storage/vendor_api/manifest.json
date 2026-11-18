@@ -1,0 +1,86 @@
+{
+  "operations": {
+    "downloadObject": [
+      {
+        "method": "get",
+        "path": "/b/{bucket}/o/{object}",
+        "source": "storage_v1"
+      }
+    ],
+    "getObjectMetadata": [
+      {
+        "method": "get",
+        "path": "/b/{bucket}/o/{object}",
+        "source": "storage_v1"
+      }
+    ],
+    "listBuckets": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "pageToken",
+            "sizeParam": "maxResults"
+          },
+          "response": {
+            "itemsPath": "items",
+            "nextPath": "nextPageToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/b",
+        "source": "storage_v1"
+      }
+    ],
+    "listObjects": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "pageToken",
+            "sizeParam": "maxResults"
+          },
+          "response": {
+            "itemsPath": "items",
+            "nextPath": "nextPageToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/b/{bucket}/o",
+        "source": "storage_v1"
+      }
+    ],
+    "listProjects": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "pageToken",
+            "sizeParam": "pageSize"
+          },
+          "response": {
+            "itemsPath": "projects",
+            "nextPath": "nextPageToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/v1/projects",
+        "source": "cloudresourcemanager_v1"
+      }
+    ]
+  },
+  "sources": {
+    "cloudresourcemanager_v1": {
+      "apiVersion": "v1",
+      "fetchedAt": "2026-10-07T20:20:42.193Z",
+      "format": "discovery",
+      "url": "https://cloudresourcemanager.googleapis.com/$discovery/rest?version=v1"
+    },
+    "storage_v1": {
+      "apiVersion": "v1",
+      "fetchedAt": "2026-10-07T20:20:42.193Z",
+      "format": "discovery",
+      "url": "https://storage.googleapis.com/$discovery/rest?version=v1"
+    }
+  }
+}

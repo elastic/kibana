@@ -20,7 +20,6 @@ import { AiIndexManagedRow } from './ai_index_managed_row';
 const buildManagedAiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem => ({
   id: 'elastic',
   managed: true,
-  memory_enabled: false,
   description:
     'Kibana resources available for use in Agent Builder, including dashboards, visualizations, connectors, workflows, alerting rules, action policies, and significant events.',
   dest: { type: 'index', value: 'ai-index-idx-sml-data' },
@@ -73,6 +72,26 @@ describe('AiIndexManagedRow', () => {
     await waitFor(() =>
       expect(screen.getByTestId('contextAiIndexManagedRowKnowledgeIndicators')).toHaveTextContent(
         '9'
+      )
+    );
+  });
+
+  it('counts active and expired knowledge documents', async () => {
+    const core = coreMock.createStart();
+    core.http.get.mockResolvedValue({
+      kis: [],
+      total: 0,
+      summary: { total: 0, counts_by_type: [] },
+    });
+
+    renderWithProviders(core, buildManagedAiIndex());
+
+    await waitFor(() =>
+      expect(core.http.get).toHaveBeenCalledWith(
+        '/internal/context_engine/ai_index/elastic/kis',
+        expect.objectContaining({
+          query: expect.objectContaining({ status: ['active', 'expired'] }),
+        })
       )
     );
   });

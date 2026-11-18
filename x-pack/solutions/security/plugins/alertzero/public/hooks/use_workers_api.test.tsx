@@ -36,6 +36,7 @@ const createWorker = (overrides: Partial<Worker> = {}): Worker => ({
   state: 'paused',
   settingsRevision: 1,
   workflowId: null,
+  workflowOutdated: false,
   blockingReasons: [],
   settings: {
     workerId: TRIAGE,
@@ -73,7 +74,7 @@ describe('notifyWorkerUpdateError', () => {
     const error = httpError(500);
     notifyWorkerUpdateError(toasts, error);
 
-    expect(toasts.addError).toHaveBeenCalledWith(error, { title: 'Unable to update the worker' });
+    expect(toasts.addError).toHaveBeenCalledWith(error, { title: "Couldn't update the Worker" });
     expect(toasts.addWarning).not.toHaveBeenCalled();
     expect(toasts.addDanger).not.toHaveBeenCalled();
   });
@@ -85,7 +86,7 @@ describe('notifyWorkerUpdateError', () => {
     notifyWorkerUpdateError(toasts, error);
 
     expect(toasts.addError).toHaveBeenCalledWith(error, {
-      title: 'Unable to update the worker',
+      title: "Couldn't update the Worker",
       toastMessage: 'Alert Triage cannot be turned on because no AI model is available.',
     });
   });

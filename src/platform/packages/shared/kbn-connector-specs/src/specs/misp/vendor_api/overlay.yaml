@@ -1,0 +1,72 @@
+overlay: 1.0.0
+info:
+  title: MISP Automation API corrections
+  version: 1.0.0
+actions:
+  - target: $.components.schemas.AttributeType.enum
+    description: >-
+      MISP validates attribute types against the list in its describeTypes.json
+      (https://github.com/MISP/MISP/blob/2.5/describeTypes.json). The spec's enum leaves out these
+      seven, and has pattern-filename where describeTypes.json has filename-pattern.
+    update:
+      - dom-hash
+      - filename-pattern
+      - ssh-fingerprint
+      - integer
+      - azure-application-id
+      - uuid
+      - onion-address
+
+  - target: $.components.schemas.AttributeRestSearchFilter.properties.eventid
+    description: >-
+      The spec's EventId only allows numeric ids, but restSearch also filters by event UUID:
+      Event::set_filter_eventid (https://github.com/MISP/MISP/blob/2.5/app/Model/Event.php) matches a
+      UUID against Event.uuid and anything else against Event.id. Removed here and added back below,
+      since an update would merge with the $ref.
+    remove: true
+
+  - target: $.components.schemas.AttributeRestSearchFilter.properties
+    description: Accepts the numeric ids and UUIDs that Event::set_filter_eventid handles.
+    update:
+      eventid:
+        oneOf:
+          - $ref: '#/components/schemas/EventId'
+          - $ref: '#/components/schemas/UUID'
+
+  - target: $.servers[?@.url == 'https://misp.local']
+    description: >-
+      MISP is self-hosted: the API is served by each instance at its own base URL
+      (https://www.circl.lu/doc/misp/automation/), which the connector takes from its config.
+      The spec names the placeholder host https://misp.local.
+    update:
+      url: https://{host}
+      variables:
+        host:
+          default: misp.local
+
+  - target: $.paths
+    description: >-
+      The spec only documents POST /events/addTag/{eventId}/{tagId}/local:{local}. EventsController::addTag
+      (https://github.com/MISP/MISP/blob/2.5/app/Controller/EventsController.php) also takes the event and
+      tag from the request body when they are not in the path, which is what the connector sends.
+    update:
+      /events/addTag:
+        post:
+          requestBody:
+            content:
+              application/json:
+                schema:
+                  type: object
+                  required: [event, tag]
+                  properties:
+                    event:
+                      type: string
+                    tag:
+                      type: string
+          responses:
+            '200':
+              description: Whether the tag was attached
+              content:
+                application/json:
+                  schema:
+                    type: object
