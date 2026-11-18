@@ -15,15 +15,15 @@ const operator = (title: string, processNanos: number, timeReported = true) =>
 
 describe('operatorCategory', () => {
   it('keeps TopN with the aggregate work', () => {
-    expect(operatorCategory('TopN')).toBe('aggregate');
+    expect(operatorCategory('TopN')).toBe('aggregate_and_sort');
   });
 
   it('groups operators by the kind of work they do', () => {
-    expect(operatorCategory('HashAggregation')).toBe('aggregate');
-    expect(operatorCategory('ValuesSourceReader')).toBe('source');
-    expect(operatorCategory('LuceneSource')).toBe('source');
+    expect(operatorCategory('HashAggregation')).toBe('aggregate_and_sort');
+    expect(operatorCategory('ValuesSourceReader')).toBe('read');
+    expect(operatorCategory('LuceneSource')).toBe('read');
     expect(operatorCategory('Eval')).toBe('compute');
-    expect(operatorCategory('Limit')).toBe('filter');
+    expect(operatorCategory('Limit')).toBe('filter_and_limit');
     expect(operatorCategory('ExchangeSink')).toBe('exchange');
     expect(operatorCategory('Output')).toBe('other');
   });
@@ -39,9 +39,9 @@ describe('summarizeCpuByCategory', () => {
     ]);
 
     expect(breakdown).toEqual([
-      { category: 'source', nanos: 5, share: 0.5 },
+      { category: 'read', nanos: 5, share: 0.5 },
       { category: 'compute', nanos: 2, share: 0.2 },
-      { category: 'aggregate', nanos: 3, share: 0.3 },
+      { category: 'aggregate_and_sort', nanos: 3, share: 0.3 },
     ]);
   });
 

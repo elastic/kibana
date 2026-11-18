@@ -24,12 +24,27 @@ const humanize = (name: string): string => {
 /** A name made of plain words, such as `data` or `node_reduce`, unlike `subplan-0.final`. */
 const isPlainName = (name: string): boolean => /^[a-z]+(_[a-z]+)*$/.test(name);
 
-/** What a group of drivers is called: its description, made readable when it is a plain name. */
+/** The kinds of driver that the timeline groups by. Any other name is shown as Elasticsearch writes it. */
+const DRIVER_KIND_LABELS: Record<string, () => string> = {
+  data: () =>
+    i18n.translate('data.inspector.queryProfile.dataDriversLabel', { defaultMessage: 'Data' }),
+  node_reduce: () =>
+    i18n.translate('data.inspector.queryProfile.nodeReduceDriversLabel', {
+      defaultMessage: 'Node reduce',
+    }),
+  final: () =>
+    i18n.translate('data.inspector.queryProfile.finalDriversLabel', { defaultMessage: 'Final' }),
+};
+
+/** What a group of drivers is called: its kind, or its description when that is not a plain kind. */
 export const groupLabel = (description: string): string => {
   if (description === '') {
     return i18n.translate('data.inspector.queryProfile.otherDriversLabel', {
       defaultMessage: 'Other',
     });
+  }
+  if (Object.hasOwn(DRIVER_KIND_LABELS, description)) {
+    return DRIVER_KIND_LABELS[description]();
   }
   return isPlainName(description) ? humanize(description) : description;
 };

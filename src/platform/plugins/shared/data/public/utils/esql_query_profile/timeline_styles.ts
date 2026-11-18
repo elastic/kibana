@@ -33,7 +33,10 @@ export const useTimelineStyles = () => {
       padding: ${euiTheme.size.xs};
       background: ${euiTheme.colors.backgroundBasePlain};
 
-      /* Rows fade out under the ruler, so a row that is half scrolled away is not cut at its line. */
+      /*
+       * Once the lanes have scrolled, rows fade out under the ruler, so a row that is half scrolled
+       * away is not cut at its line. At rest there is nothing under the ruler to fade.
+       */
       &::after {
         content: '';
         position: absolute;
@@ -41,7 +44,13 @@ export const useTimelineStyles = () => {
         top: 100%;
         height: ${euiTheme.size.base};
         background: linear-gradient(${euiTheme.colors.backgroundBasePlain}, transparent);
+        opacity: 0;
         pointer-events: none;
+        transition: opacity ${euiTheme.animation.fast} ease-in;
+      }
+
+      [data-scrolled='true'] > &::after {
+        opacity: 1;
       }
     `,
     rulerTrack: css`

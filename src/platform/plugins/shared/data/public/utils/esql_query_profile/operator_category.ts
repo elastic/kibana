@@ -8,19 +8,46 @@
  */
 
 import { useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { AggregatedOperator } from './types';
 
 /** The kinds of work that the CPU breakdown tells apart, in the order they are shown. */
 const OPERATOR_CATEGORIES = [
-  'source',
-  'filter',
+  'read',
+  'filter_and_limit',
   'compute',
-  'aggregate',
+  'aggregate_and_sort',
   'exchange',
   'other',
 ] as const;
 
 export type OperatorCategory = (typeof OPERATOR_CATEGORIES)[number];
+
+const CATEGORY_LABELS: Record<OperatorCategory, () => string> = {
+  read: () =>
+    i18n.translate('data.inspector.queryProfile.categoryReadLabel', { defaultMessage: 'Read' }),
+  filter_and_limit: () =>
+    i18n.translate('data.inspector.queryProfile.categoryFilterLabel', {
+      defaultMessage: 'Filter and limit',
+    }),
+  compute: () =>
+    i18n.translate('data.inspector.queryProfile.categoryComputeLabel', {
+      defaultMessage: 'Compute',
+    }),
+  aggregate_and_sort: () =>
+    i18n.translate('data.inspector.queryProfile.categoryAggregateLabel', {
+      defaultMessage: 'Aggregate and sort',
+    }),
+  exchange: () =>
+    i18n.translate('data.inspector.queryProfile.categoryExchangeLabel', {
+      defaultMessage: 'Exchange',
+    }),
+  other: () =>
+    i18n.translate('data.inspector.queryProfile.categoryOtherLabel', { defaultMessage: 'Other' }),
+};
+
+export const operatorCategoryLabel = (category: OperatorCategory): string =>
+  CATEGORY_LABELS[category]();
 
 export interface CpuBreakdownEntry {
   category: OperatorCategory;
@@ -37,13 +64,13 @@ export const operatorCategory = (title: string): OperatorCategory => {
     return 'exchange';
   }
   if (name.includes('reader') || name.includes('source') || name.includes('scan')) {
-    return 'source';
+    return 'read';
   }
   if (name.includes('limit') || name.includes('filter')) {
-    return 'filter';
+    return 'filter_and_limit';
   }
   if (name.includes('aggregat') || name.includes('stats') || name.includes('topn')) {
-    return 'aggregate';
+    return 'aggregate_and_sort';
   }
   if (name.includes('eval') || name.includes('project')) {
     return 'compute';
@@ -78,10 +105,10 @@ export const useOperatorCategoryColors = (): Record<OperatorCategory, string> =>
   const { euiTheme } = useEuiTheme();
 
   return {
-    source: euiTheme.colors.vis.euiColorVis0,
-    filter: euiTheme.colors.vis.euiColorVis2,
+    read: euiTheme.colors.vis.euiColorVis0,
+    filter_and_limit: euiTheme.colors.vis.euiColorVis2,
     compute: euiTheme.colors.vis.euiColorVis4,
-    aggregate: euiTheme.colors.vis.euiColorVis6,
+    aggregate_and_sort: euiTheme.colors.vis.euiColorVis6,
     exchange: euiTheme.colors.vis.euiColorVis8,
     other: euiTheme.colors.mediumShade,
   };

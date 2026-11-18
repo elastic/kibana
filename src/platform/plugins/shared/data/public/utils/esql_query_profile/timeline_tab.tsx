@@ -217,6 +217,7 @@ export const TimelineTab = ({ view }: { view: QueryProfileView }) => {
   const styles = useTimelineStyles();
   const [selectedLaneId, setSelectedLaneId] = useState<string | undefined>();
   const [selectedOperatorKey, setSelectedOperatorKey] = useState<string | undefined>();
+  const [isScrolled, setIsScrolled] = useState(false);
   const { timeline } = view;
   const domain = fullDomain(timeline);
   const origin = domain.startMillis;
@@ -233,7 +234,11 @@ export const TimelineTab = ({ view }: { view: QueryProfileView }) => {
 
   return (
     <div data-test-subj="esqlQueryProfileTimeline">
-      <div css={styles.lanes}>
+      <div
+        css={styles.lanes}
+        data-scrolled={isScrolled}
+        onScroll={(event) => setIsScrolled(event.currentTarget.scrollTop > 0)}
+      >
         <TimeRuler durationMillis={spanMillis(domain)} />
         {timeline.planning ? (
           <Lane

@@ -14,41 +14,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { QueryProfileView } from './types';
 import {
+  operatorCategoryLabel,
   summarizeCpuByCategory,
   useOperatorCategoryColors,
-  type OperatorCategory,
 } from './operator_category';
 import { formatDurationMillis, formatShare } from './profile_format';
 import { LegendSwatch } from './legend_swatch';
-
-const categoryLabel = (category: OperatorCategory): string => {
-  switch (category) {
-    case 'source':
-      return i18n.translate('data.inspector.queryProfile.categorySourceLabel', {
-        defaultMessage: 'Read',
-      });
-    case 'filter':
-      return i18n.translate('data.inspector.queryProfile.categoryFilterLabel', {
-        defaultMessage: 'Filter and limit',
-      });
-    case 'compute':
-      return i18n.translate('data.inspector.queryProfile.categoryComputeLabel', {
-        defaultMessage: 'Compute',
-      });
-    case 'aggregate':
-      return i18n.translate('data.inspector.queryProfile.categoryAggregateLabel', {
-        defaultMessage: 'Aggregate and sort',
-      });
-    case 'exchange':
-      return i18n.translate('data.inspector.queryProfile.categoryExchangeLabel', {
-        defaultMessage: 'Exchange',
-      });
-    case 'other':
-      return i18n.translate('data.inspector.queryProfile.categoryOtherLabel', {
-        defaultMessage: 'Other',
-      });
-  }
-};
 
 const useSummaryStyles = () => {
   const { euiTheme } = useEuiTheme();
@@ -165,7 +136,7 @@ const CpuByKind = ({ view }: { view: QueryProfileView }) => {
   const entries = breakdown.map(({ category, share }) => ({
     category,
     share,
-    text: `${categoryLabel(category)} ${formatShare(share)}`,
+    text: `${operatorCategoryLabel(category)} ${formatShare(share)}`,
   }));
 
   return (
