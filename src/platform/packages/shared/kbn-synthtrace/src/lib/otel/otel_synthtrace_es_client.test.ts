@@ -92,10 +92,88 @@ describe('OtelSynthtraceEsClient', () => {
 
     expect(docs.length).toBeGreaterThan(10);
     docs.forEach((doc) => {
-      expect(['logs-generic.otel-default', 'traces-generic.otel-default']).toContain(doc._index);
+      expect(['logs-browser.otel-default', 'traces-browser.otel-default']).toContain(doc._index);
       expect(doc).not.toHaveProperty('processor.event');
       expect(doc).not.toHaveProperty('processor');
     });
     expect(client.getAllIndices()).toEqual(['logs-*.otel-*', 'traces-*.otel-*']);
+  });
+
+  describe('installBrowserIndexTemplates', () => {
+    const createClient = (getIndexTemplate: jest.Mock) => {
+      const putIndexTemplate = jest.fn();
+      const logger = { info: jest.fn(), warning: jest.fn() } as unknown as Logger;
+      const client = new OtelSynthtraceEsClientImpl({
+        client: { indices: { getIndexTemplate, putIndexTemplate } } as unknown as Client,
+        logger,
+      });
+      return { client, putIndexTemplate, logger };
+    };
+
+    it('copies the OTel templates of the cluster, sorted by application, session and time', async () => {
+      const getIndexTemplate = jest.fn(async ({ name }: { name: string }) => ({
+        index_templates: [
+          {
+            name,
+            index_template: {
+              index_patterns: [`${name.split('-')[0]}-*.otel-*`],
+              composed_of: ['otel@mappings', `${name.split('-')[0]}-otel@mappings`],
+              ignore_missing_component_templates: ['logs-otel@custom'],
+              data_stream: { hidden: false, allow_custom_routing: false },
+              template: {
+                mappings: { properties: { 'data_stream.type': { type: 'constant_keyword' } } },
+              },
+            },
+          },
+        ],
+      }));
+      const { client, putIndexTemplate } = createClient(getIndexTemplate);
+
+      await client.installBrowserIndexTemplates();
+
+      expect(getIndexTemplate).toHaveBeenCalledWith({ name: 'logs-otel@template' });
+      expect(getIndexTemplate).toHaveBeenCalledWith({ name: 'traces-otel@template' });
+      expect(putIndexTemplate).toHaveBeenCalledWith({
+        name: 'synthtrace-logs-browser.otel',
+        index_patterns: ['logs-browser.otel-*'],
+        priority: 150,
+        composed_of: ['otel@mappings', 'logs-otel@mappings'],
+        ignore_missing_component_templates: ['logs-otel@custom'],
+        data_stream: { hidden: false, allow_custom_routing: false },
+        template: {
+          settings: {
+            sort: {
+              field: ['resource.attributes.service.name', 'attributes.session.id', '@timestamp'],
+              order: ['asc', 'asc', 'desc'],
+            },
+          },
+          mappings: {
+            properties: {
+              'data_stream.type': { type: 'constant_keyword' },
+              'resource.attributes.service.name': { type: 'keyword', ignore_above: 1024 },
+              'attributes.session.id': { type: 'keyword', ignore_above: 1024 },
+            },
+          },
+        },
+      });
+      expect(putIndexTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'synthtrace-traces-browser.otel',
+          index_patterns: ['traces-browser.otel-*'],
+          composed_of: ['otel@mappings', 'traces-otel@mappings'],
+        })
+      );
+    });
+
+    it('warns instead of failing the run when the OTel templates are missing', async () => {
+      const { client, putIndexTemplate, logger } = createClient(
+        jest.fn().mockRejectedValue(new Error('index_template_missing_exception'))
+      );
+
+      await expect(client.installBrowserIndexTemplates()).resolves.toBeUndefined();
+
+      expect(putIndexTemplate).not.toHaveBeenCalled();
+      expect(logger.warning).toHaveBeenCalledTimes(2);
+    });
   });
 });
