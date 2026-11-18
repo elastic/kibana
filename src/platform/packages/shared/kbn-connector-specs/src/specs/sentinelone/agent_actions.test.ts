@@ -285,6 +285,31 @@ describe('moveAgent', () => {
     expect(request).toHaveBeenCalledTimes(1);
   });
 
+  it.each([
+    ['isolateHost', { agentIds: ['11'] }],
+    ['releaseHost', { agentIds: ['11'] }],
+    ['moveAgent', { agentIds: ['11'], groupId: '301' }],
+  ])(
+    '%s reports a failed agent lookup instead of "found none of the agents"',
+    async (name, input) => {
+      request.mockResolvedValueOnce({
+        status: 200,
+        data: {
+          data: [],
+          pagination: { nextCursor: null, totalItems: 0 },
+          errors: [
+            { code: 5000010, title: 'Internal Error', detail: 'lookup backend unavailable' },
+          ],
+        },
+      });
+      const call = run(name, input);
+      await expect(call).rejects.toThrow(`SentinelOne ${name} could not read the agents`);
+      await expect(call).rejects.toThrow('lookup backend unavailable');
+      await expect(call).rejects.not.toThrow('found none of the agents');
+      expect(request).toHaveBeenCalledTimes(1);
+    }
+  );
+
   it('fails without a release request when none of the ids exist', async () => {
     request.mockResolvedValueOnce({ status: 200, data: listBody([]) });
     await expect(run('releaseHost', { agentIds: ['11'] })).rejects.toThrow(

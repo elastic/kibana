@@ -47,7 +47,7 @@ export const SentinelOne: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['agentBuilder'],
     docsUrl: `https://www.elastic.co/docs/reference/kibana/connectors-kibana/sentinelone-v2-action-type`,
   },
 

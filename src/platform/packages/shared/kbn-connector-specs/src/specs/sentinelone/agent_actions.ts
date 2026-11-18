@@ -10,6 +10,7 @@
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 import {
   assertApplied,
+  describeBody,
   downloadFile,
   redactFields,
   requireIds,
@@ -89,6 +90,14 @@ const partitionAgents = async (
         mutating: false,
       })
     );
+    if (lookup.errors) {
+      // a failed lookup is not "no match": report SentinelOne's error so the operator fixes the lookup, not the ids
+      throw new Error(
+        `SentinelOne ${action} could not read the agents: ${describeBody({
+          errors: lookup.errors,
+        })}`
+      );
+    }
     for (const agent of lookup.data as AgentState[]) {
       agents.set(String(agent.id), agent);
     }

@@ -51,9 +51,7 @@ export const ExecuteScriptInputSchema = lazySchema(() =>
       .string()
       .max(256)
       .optional()
-      .describe(
-        'Results archive password; the value is saved with the workflow step or agent tool call'
-      ),
+      .describe('Results archive password; the value is saved with the agent tool call'),
     passwordFromScope: z
       .object({
         scopeLevel: z.enum(['tenant', 'account', 'site']).describe('Scope level'),
@@ -196,9 +194,7 @@ export const RunScriptAndWaitInputSchema = lazySchema(() =>
       .string()
       .max(256)
       .optional()
-      .describe(
-        'Results archive password; the value is saved with the workflow step or agent tool call'
-      ),
+      .describe('Results archive password; the value is saved with the agent tool call'),
     passwordFromScope: z
       .object({
         scopeLevel: z.enum(['tenant', 'account', 'site']).describe('Scope level'),

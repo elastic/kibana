@@ -67,7 +67,7 @@ export const FetchAgentFilesInputSchema = lazySchema(() =>
       .string()
       .min(10)
       .max(256)
-      .describe('Archive password; the value is saved with the workflow step or agent tool call'),
+      .describe('Archive password; the value is saved with the agent tool call'),
   })
 );
 export type FetchAgentFilesInput = z.infer<typeof FetchAgentFilesInputSchema>;

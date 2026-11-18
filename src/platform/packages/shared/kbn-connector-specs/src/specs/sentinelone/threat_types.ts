@@ -173,7 +173,7 @@ export const FetchThreatFileInputSchema = lazySchema(() =>
       .min(10)
       .max(256)
       .describe(
-        'Password that encrypts the fetched file; the value is saved with the workflow step or agent tool call'
+        'Password that encrypts the fetched file; the value is saved with the agent tool call'
       ),
   })
 );

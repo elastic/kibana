@@ -237,7 +237,7 @@ export const scriptActions: ConnectorSpec['actions'] = {
         link: link.downloadUrl,
         fallbackName: link.fileName ?? '',
       });
-      // the pre-signed link (it embeds a temporary security token) is not returned: the file content is, and workflow history would keep the link
+      // the pre-signed link (it embeds a temporary security token) is not returned: the file content is, and the saved tool call output would keep the link
       return { ...file, taskId: input.taskId };
     },
   },

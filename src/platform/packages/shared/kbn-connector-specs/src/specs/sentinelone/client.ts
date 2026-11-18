@@ -123,8 +123,8 @@ export const toVendorParamName = (key: string): string =>
   key.includes('__') ? key : key.replace(/(Gte|Lte|Contains)$/, (op) => `__${op.toLowerCase()}`);
 
 /**
- * SentinelOne list filters take comma-separated values. Undefined values and blank strings are dropped: a workflow
- * template renders an unset variable as '', and SentinelOne treats an empty filter (ip=) as "match nothing".
+ * SentinelOne list filters take comma-separated values. Undefined values and blank strings are dropped: a caller
+ * may pass an unset variable as '', and SentinelOne treats an empty filter (ip=) as "match nothing".
  */
 export const toQuery = (params: QueryParams = {}): Record<string, string | number | boolean> => {
   const out: Record<string, string | number | boolean> = {};
@@ -155,7 +155,7 @@ const decodeBody = (data: unknown): unknown => {
 const truncate = (text: string, max = 1000): string =>
   text.length > max ? `${text.slice(0, max)}...` : text;
 
-const describeBody = (data: unknown): string => {
+export const describeBody = (data: unknown): string => {
   const body = decodeBody(data);
   if (body === undefined || body === null || body === '') return '';
   if (typeof body === 'string') return truncate(body);
