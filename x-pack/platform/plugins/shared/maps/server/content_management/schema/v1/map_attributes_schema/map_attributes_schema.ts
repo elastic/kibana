@@ -6,6 +6,7 @@
  */
 
 import { z, lazySchema } from '@kbn/zod';
+import { dataViewSpecSchema } from '@kbn/as-code-data-views-schema';
 import { storedFilterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { layersSchema } from '../layer_schemas';
@@ -20,22 +21,16 @@ export const mapCenterSchema = lazySchema(() =>
     .strict()
 );
 
+/**
+ * Ad hoc data views use the as-code inline data view spec.
+ * `id` is added because layers reference ad hoc data views by id (`indexPatternId`).
+ */
 export const adhocDataViewSchema = lazySchema(() =>
-  z
-    .object({
-      allowHidden: z.boolean().optional(),
-      id: z.string(),
-      name: z.string().optional().meta({
-        description: 'Human readable name used to differentiate the data view.',
-      }),
-      timeFieldName: z.string().optional(),
-      title: z.string().meta({
-        description:
-          'Contrary to its name, this property sets the index pattern of the data view. (e.g. `logs-*,metrics-*`)',
-      }),
-      // TODO runtime fields is missing
-    })
-    .strict()
+  dataViewSpecSchema.extend({
+    id: z.string().meta({
+      description: 'Id of the ad hoc data view. Layers reference the data view by this id.',
+    }),
+  })
 );
 
 export const mapAttributesSchema = lazySchema(() =>

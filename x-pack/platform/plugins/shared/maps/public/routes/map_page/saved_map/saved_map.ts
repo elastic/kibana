@@ -15,7 +15,7 @@ import type {
 import type { ScopedHistory } from '@kbn/core/public';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { Writable } from '@kbn/utility-types';
-import type { AdhocDataView, MapAttributes } from '../../../../server';
+import type { LegacyAdhocDataView, MapAttributes } from '../../../../server';
 import {
   APP_ID,
   MAP_PATH,
@@ -63,6 +63,10 @@ import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
 import { createBasemapLayerDescriptor } from '../../../classes/layers/create_basemap_layer_descriptor';
 import { whenLicenseInitialized } from '../../../licensed_features';
 import { setAutoOpenLayerWizardId } from '../../../actions/ui_actions';
+import {
+  transformAdhocDataViewIn,
+  transformAdhocDataViewOut,
+} from '../../../../common/content_management/adhoc_data_view_transforms';
 import { LayerStatsCollector, MapSettingsCollector } from '../../../../common/telemetry';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
 import { getByReferenceState, getByValueState } from '../../../react_embeddable/library_transforms';
@@ -235,7 +239,7 @@ export class SavedMap {
     if (this._attributes?.adHocDataViews?.length) {
       const dataViewService = getIndexPatternService();
       const promises = this._attributes.adHocDataViews.map((spec) => {
-        return dataViewService.create(spec);
+        return dataViewService.create(transformAdhocDataViewIn(spec));
       });
       await Promise.all(promises);
     }
@@ -572,13 +576,13 @@ export class SavedMap {
       })
       .map((dataView) => {
         const { allowHidden, id, name, timeFieldName, title } = dataView.toSpec(false);
-        return {
+        return transformAdhocDataViewOut({
           allowHidden,
           id,
           name,
           timeFieldName,
           title,
-        } as AdhocDataView;
+        } as LegacyAdhocDataView);
       });
   }
 }

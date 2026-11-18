@@ -37,8 +37,13 @@ describe('SavedMap.whenReady adhoc data views', () => {
   });
 
   test('should call dataViewService.create for each adhoc data view spec', async () => {
-    const spec1 = { id: 'adhoc-1', title: 'logstash-*', timeFieldName: '@timestamp' };
-    const spec2 = { id: 'adhoc-2', title: 'metrics-*' };
+    const spec1 = {
+      id: 'adhoc-1',
+      type: 'data_view_spec' as const,
+      index_pattern: 'logstash-*',
+      time_field: '@timestamp',
+    };
+    const spec2 = { id: 'adhoc-2', type: 'data_view_spec' as const, index_pattern: 'metrics-*' };
 
     const mapEmbeddableState: MapByValueState = {
       attributes: {
@@ -51,8 +56,12 @@ describe('SavedMap.whenReady adhoc data views', () => {
     await savedMap.whenReady();
 
     expect(mockDataViewCreate).toHaveBeenCalledTimes(2);
-    expect(mockDataViewCreate).toHaveBeenCalledWith(spec1);
-    expect(mockDataViewCreate).toHaveBeenCalledWith(spec2);
+    expect(mockDataViewCreate).toHaveBeenCalledWith({
+      id: 'adhoc-1',
+      title: 'logstash-*',
+      timeFieldName: '@timestamp',
+    });
+    expect(mockDataViewCreate).toHaveBeenCalledWith({ id: 'adhoc-2', title: 'metrics-*' });
   });
 
   test('should not call dataViewService.create when adHocDataViews is absent', async () => {

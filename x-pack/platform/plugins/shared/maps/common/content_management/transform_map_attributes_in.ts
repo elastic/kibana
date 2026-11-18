@@ -9,6 +9,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { StoredRefreshInterval } from '../../server/saved_objects/types';
 import type { MapAttributes, StoredMapAttributes } from '../../server';
 import { extractReferences } from '../migrations/references';
+import { transformAdhocDataViewIn } from './adhoc_data_view_transforms';
 import { mapStateKeys, uiStateKeys } from './stored_map_attributes';
 
 export function transformMapAttributesIn(mapState: MapAttributes): {
@@ -25,6 +26,9 @@ export function transformMapAttributesIn(mapState: MapAttributes): {
   const mapStateJSON = getJSONString(
     {
       ...mapState,
+      ...(mapState.adHocDataViews
+        ? { adHocDataViews: mapState.adHocDataViews.map(transformAdhocDataViewIn) }
+        : {}),
       ...(mapState.refreshInterval
         ? {
             refreshConfig: {
