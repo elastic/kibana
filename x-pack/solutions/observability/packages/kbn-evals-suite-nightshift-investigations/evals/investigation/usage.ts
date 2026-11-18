@@ -30,17 +30,25 @@ export const countToolCalls = (rounds: Array<Pick<ConversationRound, 'steps'>>):
 
 // The sandbox reaches the internet only through credproxy. It refuses an HTTPS tunnel to a host
 // outside the space's egress rules (`CONNECT tunnel failed, response 403` from git and curl), and
-// answers a refused request it inspected with a `sandbox_egress_denied` body.
-const EGRESS_DENIED = /CONNECT tunnel failed, response 403|sandbox_egress_denied/;
+// answers a refused request it inspected with a `sandbox_egress_denied` body. git drops that body
+// and prints only the status, naming the URL.
+const EGRESS_DENIED =
+  /CONNECT tunnel failed, response 403|sandbox_egress_denied|fatal: unable to access '[^']*': The requested URL returned error: 403/;
+// `curl -f` drops the body too and doesn't name the URL. github.com is the only host whose rules
+// are checked per request, so a 403 elsewhere (a connector's cluster) is the service's own answer.
+const HTTP_403 = /The requested URL returned error: 403/;
+const GITHUB = /github\.com/;
 
-/** Sandbox commands whose output shows the egress firewall refused a connection. */
+/** Sandbox commands whose output shows the egress firewall refused a connection or a request. */
 export const countSandboxEgressDenials = (
   rounds: Array<Pick<ConversationRound, 'steps'>>
 ): number =>
   rounds
     .flatMap(({ steps }) => steps.filter(isToolCallStep))
-    .filter(
-      ({ tool_id: toolId, results }) =>
-        toolId === 'nightshift_sandbox_bash' &&
-        results.some(({ data }) => EGRESS_DENIED.test(JSON.stringify(data)))
-    ).length;
+    .filter(({ tool_id: toolId, params, results }) => {
+      if (toolId !== 'nightshift_sandbox_bash') return false;
+      const output = JSON.stringify(results.map(({ data }) => data));
+      return (
+        EGRESS_DENIED.test(output) || (HTTP_403.test(output) && GITHUB.test(JSON.stringify(params)))
+      );
+    }).length;

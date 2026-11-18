@@ -112,6 +112,37 @@ describe('countSandboxEgressDenials', () => {
     ] as unknown as ConversationRound[];
     expect(countSandboxEgressDenials(rounds)).toBe(3);
   });
+
+  it('counts requests the firewall refused after letting the tunnel through', () => {
+    const http403 = 'The requested URL returned error: 403';
+    const command = (text: string, stderr: string) => ({
+      ...bash([{ type: 'other', data: { stdout: '', stderr, exit_code: 22 } }]),
+      params: { command: text },
+    });
+    const rounds = [
+      {
+        steps: [
+          // git names the refused URL.
+          bash([
+            {
+              type: 'error',
+              data: {
+                message: `Command exited with code 128.\nstderr:\nfatal: unable to access 'https://github.com/elastic/beats/': ${http403}\n`,
+              },
+            },
+          ]),
+          // `curl -f` doesn't, so the command has to target github.com.
+          command('curl -f https://github.com/elastic/kibana/issues/1', `curl: (22) ${http403}`),
+          // A connector's cluster answering 403 is a permission error, not the firewall.
+          command(
+            'curl -f -H "Authorization: $CONNECTOR_HEADER_AUTHORIZATION" "$CONNECTOR_CONFIG_URL/_search"',
+            `curl: (22) ${http403}`
+          ),
+        ],
+      },
+    ] as unknown as ConversationRound[];
+    expect(countSandboxEgressDenials(rounds)).toBe(2);
+  });
 });
 
 describe('efficiency evaluators', () => {
