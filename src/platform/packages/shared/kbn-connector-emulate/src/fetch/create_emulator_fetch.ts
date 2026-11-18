@@ -35,9 +35,9 @@ import type { GraphQLSpec } from '../graphql/graphql_protocol';
 import { createGraphQLProtocol, isGraphQLSpec, toEndpoint } from '../graphql/graphql_protocol';
 import type { McpSpec } from '../mcp/mcp_protocol';
 import { createMcpProtocol, isMcpSpec } from '../mcp/mcp_protocol';
-import type { ContractOperation, OpenApiDocument } from '../openapi';
+import type { ContractOperation, InvalidSchemaFailure, OpenApiDocument } from '../openapi';
 import { serverNamesHost } from '../openapi/names_host';
-import { loadContractOperations } from '../openapi';
+import { loadContractOperations, loadValidContractOperations } from '../openapi';
 import type { OperationMatch } from '../openapi/match_operation';
 import { createOperationMatcher } from '../openapi/match_operation';
 import { createOpenApiAdapter } from '../openapi/openapi_adapter';
@@ -77,8 +77,17 @@ export interface ContractCall {
    * such as GraphQL; and, for named specs, the spec's name.
    */
   readonly matched?: OperationRef | NamedOperationRef;
+  /**
+   * Set for a protocol request that executed no operation, such as GraphQL root fields that all
+   * sit behind `@skip`: the spec's name, for named specs.
+   */
+  readonly source?: string;
   /** Set for named operations: whether the operation only reads, e.g. a GraphQL query. */
   readonly readOnly?: boolean;
+  /** Set for GraphQL: the types the request names, in fragments and variables. */
+  readonly namedTypes?: readonly string[];
+  /** Set for GraphQL: the root fields the request's document mentions, called or not. */
+  readonly namedRootFields?: readonly string[];
   /**
    * Set for protocol messages that call no vendor operation, such as MCP's `initialize`;
    * `operation` names the message.
@@ -120,6 +129,14 @@ export interface ContractCall {
  */
 export type EmulatorSpec = OpenApiDocument | GraphQLSpec | McpSpec | SmithyModel;
 
+/**
+ * What to do with operations whose schemas have defects that break validation: fail to load
+ * (`throw`, the default), or leave them out and list them in `invalidOperations` (`skip`), as a
+ * recorder does so a broken operation no action calls doesn't stop the others. A request for a
+ * left-out operation is answered 404 naming it, not routed to another operation it also fits.
+ */
+export type InvalidSchemasMode = 'throw' | 'skip';
+
 export interface EmulatorOptions extends PaginationOptions {
   /**
    * The vendor specs the connector targets, e.g. both API versions it calls. Named specs (such
@@ -140,8 +157,13 @@ export interface EmulatorOptions extends PaginationOptions {
    * may be promises, and are validated like any other.
    */
   readonly respond?: Responder;
-  /** Called with each call as it is recorded, e.g. to log requests as they arrive. */
-  readonly onCall?: (call: ContractCall) => void;
+  /**
+   * Called with each call as it is recorded, e.g. to log requests as they arrive, and with the
+   * `fetch` input that produced it. Calls are recorded as their request is answered, so several
+   * requests in flight at once finish in any order; the input is what ties a call to its own
+   * request, which their order in `calls` doesn't.
+   */
+  readonly onCall?: (call: ContractCall, request: RequestInfo | URL) => void;
   /**
    * How the default chain samples responses the spec has no example for: `typical` values, or
    * values at the schema's upper bounds (`boundary`), which also skips examples.
@@ -160,6 +182,17 @@ export interface EmulatorOptions extends PaginationOptions {
    * the defaults: the latest 100 calls keep theirs, and bodies are cut at 8 KiB.
    */
   readonly capture?: boolean | CaptureOptions;
+  /** What to do with operations whose schemas are broken; see {@link InvalidSchemasMode}. */
+  readonly invalidSchemas?: InvalidSchemasMode;
+  /**
+   * OpenAPI operations, by source, method and path template, that win over the same method and
+   * path in other sources, e.g. the ones a recorder found before when two specs describe one path.
+   */
+  readonly preferredOperations?: ReadonlyArray<{
+    readonly source?: string;
+    readonly method: string;
+    readonly path: string;
+  }>;
 }
 
 export interface Emulator {
@@ -182,6 +215,8 @@ export interface Emulator {
   readonly operations: readonly EmulatorOperation[];
   /** Fixtures and recordings that aren't served because the spec contradicts them. */
   readonly rejectedResponses: readonly RejectedResponse[];
+  /** With `invalidSchemas: 'skip'`, the operations left out, as their schemas are broken. */
+  readonly invalidOperations: readonly InvalidSchemaFailure[];
   /**
    * Fixtures set while the emulator runs, e.g. for a test or an agent to pick a scenario. They
    * take precedence over `fixtures`, are checked against the spec when set (an undeclared error
@@ -255,14 +290,31 @@ const toNamedSpecs = (
 
 // Loading copies and normalizes the document, which takes seconds and gigabytes for specs such
 // as Microsoft Graph, so mocks created from the same document share its operations.
-const loadedSpecs = new WeakMap<OpenApiDocument, Map<string | undefined, ContractOperation[]>>();
+interface LoadedSpec {
+  readonly operations: ContractOperation[];
+  /** The operations left out, as their schemas have defects; still routed, so answered 404. */
+  readonly broken: ContractOperation[];
+  /** The defects of the broken operations' schemas. */
+  readonly invalid: InvalidSchemaFailure[];
+}
 
-const loadSpec = (document: OpenApiDocument, source?: string): ContractOperation[] => {
-  const bySource = loadedSpecs.get(document) ?? new Map();
-  loadedSpecs.set(document, bySource);
-  const operations = bySource.get(source) ?? loadContractOperations(document, source);
-  bySource.set(source, operations);
-  return operations;
+const loadedSpecs = new WeakMap<OpenApiDocument, Map<string, LoadedSpec>>();
+
+const loadSpec = (
+  document: OpenApiDocument,
+  source: string | undefined,
+  invalidSchemas: InvalidSchemasMode
+): LoadedSpec => {
+  const loaded = loadedSpecs.get(document) ?? new Map<string, LoadedSpec>();
+  loadedSpecs.set(document, loaded);
+  const key = `${invalidSchemas} ${source ?? ''}`;
+  const spec =
+    loaded.get(key) ??
+    (invalidSchemas === 'skip'
+      ? loadValidContractOperations(document, source)
+      : { operations: loadContractOperations(document, source), broken: [], invalid: [] });
+  loaded.set(key, spec);
+  return spec;
 };
 
 // Converted once per model, so that mocks created from it share the loaded operations too.
@@ -291,11 +343,20 @@ const toDocument = (spec: EmulatorSpec): OpenApiDocument | undefined => {
   return isSmithyModel(spec) ? toSmithyDocument(spec) : spec;
 };
 
-const loadSpecs = (specs: EmulatorOptions['specs']): ContractOperation[] =>
-  toNamedSpecs(specs).flatMap(([source, spec]) => {
+const loadSpecs = (
+  specs: EmulatorOptions['specs'],
+  invalidSchemas: InvalidSchemasMode
+): LoadedSpec => {
+  const loaded = toNamedSpecs(specs).flatMap(([source, spec]) => {
     const document = toDocument(spec);
-    return document ? loadSpec(document, source) : [];
+    return document ? [loadSpec(document, source, invalidSchemas)] : [];
   });
+  return {
+    operations: loaded.flatMap(({ operations }) => operations),
+    broken: loaded.flatMap(({ broken }) => broken),
+    invalid: loaded.flatMap(({ invalid }) => invalid),
+  };
+};
 
 // AWS JSON RPC services, from Smithy models or from the documents converted from them.
 const loadAwsJsonServices = (specs: EmulatorOptions['specs']): AwsJsonService[] =>
@@ -369,6 +430,8 @@ export const createEmulatorFetch = ({
   checkScopes = false,
   onCall,
   capture,
+  preferredOperations = [],
+  invalidSchemas = 'throw',
 }: EmulatorOptions): Emulator => {
   const captureOptions = capture === true ? {} : capture || undefined;
   if (captureOptions) {
@@ -376,7 +439,11 @@ export const createEmulatorFetch = ({
   }
   const maxCapturedCalls =
     captureOptions && (captureOptions.maxCalls ?? DEFAULT_MAX_CAPTURED_CALLS);
-  const operations = loadSpecs(specs);
+  const {
+    operations,
+    broken: brokenOperations,
+    invalid: invalidOperations,
+  } = loadSpecs(specs, invalidSchemas);
   // The spec's API key parameters are redacted too, whatever their name.
   const captureExchange =
     captureOptions && createCaptureExchange(captureOptions, toCredentialNames(operations));
@@ -401,8 +468,18 @@ export const createEmulatorFetch = ({
     },
     engine.respond
   );
+  const preferred = new Set(
+    preferredOperations.map(
+      ({ source, method, path }) => `${source ?? ''} ${method.toLowerCase()} ${path}`
+    )
+  );
   const contract = createOpenApiAdapter(operations, respond ?? defaultChain, {
-    checkScopes: checkScopes !== false,
+    securityOptions: { checkScopes: checkScopes !== false },
+    matcherOptions: {
+      isPreferred: ({ spec: { source }, method, path }) =>
+        preferred.has(`${source ?? ''} ${method} ${path}`),
+    },
+    broken: brokenOperations,
   });
   const awsJsonServices = loadAwsJsonServices(specs);
   const state = new Map<unknown, unknown>();
@@ -572,6 +649,7 @@ export const createEmulatorFetch = ({
         response,
         operations: called,
         messages = [],
+        skipped,
         requestViolations,
         responseViolations = [],
       } = await protocol.handle(request);
@@ -582,14 +660,33 @@ export const createEmulatorFetch = ({
         responseViolations,
       };
       if (called.length === 0 && messages.length === 0) {
-        record(base);
+        record({
+          ...base,
+          ...(skipped === undefined
+            ? {}
+            : {
+                ...(skipped.source === undefined ? {} : { source: skipped.source }),
+                readOnly: skipped.readOnly,
+                ...(skipped.namedTypes === undefined ? {} : { namedTypes: skipped.namedTypes }),
+                ...(skipped.namedRootFields === undefined
+                  ? {}
+                  : { namedRootFields: skipped.namedRootFields }),
+              }),
+        });
       }
       for (const message of messages) {
         record({ ...base, operation: message, protocolMessage: true });
       }
-      for (const { name, source, readOnly } of called) {
+      for (const { name, source, readOnly, namedTypes, namedRootFields } of called) {
         const matched = { name, ...(source === undefined ? {} : { source }) };
-        record({ ...base, operation: name, matched, readOnly });
+        record({
+          ...base,
+          operation: name,
+          matched,
+          readOnly,
+          ...(namedTypes === undefined ? {} : { namedTypes }),
+          ...(namedRootFields === undefined ? {} : { namedRootFields }),
+        });
       }
       return response;
     }
@@ -639,14 +736,18 @@ export const createEmulatorFetch = ({
         operation.id === id && (source === undefined || operation.spec.source === source)
     );
 
-  const keep = (recorded: readonly ContractCall[], captured?: CapturedExchange) => {
+  const keep = (
+    recorded: readonly ContractCall[],
+    input: RequestInfo | URL,
+    captured?: CapturedExchange
+  ) => {
     for (const call of recorded) {
       const kept = captured ? { ...call, captured } : call;
       calls.push(kept);
       if (captured) {
         captureWindow?.add(calls.length - 1);
       }
-      onCall?.(kept);
+      onCall?.(kept, input);
     }
   };
 
@@ -660,7 +761,7 @@ export const createEmulatorFetch = ({
       response = await handle(request, (call) => recorded.push(call));
       return toResponse(response);
     } finally {
-      keep(recorded, response && captureExchange?.(request, withoutNullBody(response)));
+      keep(recorded, input, response && captureExchange?.(request, withoutNullBody(response)));
     }
   };
 
@@ -719,6 +820,7 @@ export const createEmulatorFetch = ({
     maxCapturedCalls,
     operations: listOperations(operations, loadedProtocols),
     rejectedResponses,
+    invalidOperations,
     runtimeFixtures: {
       prepare: engine.runtime.prepare,
       set: engine.runtime.set,

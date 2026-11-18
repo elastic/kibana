@@ -20,6 +20,7 @@ jest.mock('@kbn/workflows-execution-engine/server', () => ({
 
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { registerHitlLifecycleAuditor } from '@kbn/workflows-execution-engine/server';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
 
@@ -54,7 +55,7 @@ describe('WorkflowsPlugin', () => {
     jest.restoreAllMocks();
   });
 
-  it('returns an empty start contract and clears the stopping flag', () => {
+  it('returns an empty start contract and clears the stopping flag', async () => {
     const initializerContext = coreMock.createPluginInitializerContext({
       enabled: true,
       logging: { console: false },
@@ -67,11 +68,12 @@ describe('WorkflowsPlugin', () => {
     const coreSetup = coreMock.createSetup();
 
     plugin.setup(coreSetup, {
+      encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
       spaces: { spacesService: { getActiveSpace: jest.fn() } } as any,
       workflowsExtensions: workflowsExtensionsMock.createSetup(),
     });
 
-    const start = plugin.start(coreMock.createStart(), {
+    const start = await plugin.start(coreMock.createStart(), {
       taskManager: {} as any,
       workflowsExecutionEngine: {} as any,
       actions: {} as any,
@@ -79,12 +81,44 @@ describe('WorkflowsPlugin', () => {
       workflowsExtensions: workflowsExtensionsMock.createStart(),
       licensing: {} as any,
       dataViews: {} as any,
+      encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
     });
 
     expect(start).toEqual({});
+    expect(cleanupUnregisteredOrphans).toHaveBeenCalled();
     expect(setStopping).toHaveBeenCalledWith(false);
     expect(mockRegisterHitlLifecycleAuditor).toHaveBeenCalled();
   });
+
+  it.each([
+    [false, 0],
+    [true, 1],
+  ])(
+    'with workflowsManagement.pages.enabled %s, registers the workflow-page type %s times',
+    (pagesEnabled, registrations) => {
+      const initializerContext = coreMock.createPluginInitializerContext({
+        enabled: true,
+        logging: { console: false },
+        available: true,
+        library: { ttlMs: 600_000 },
+        pages: { enabled: pagesEnabled },
+      });
+      const coreSetup = coreMock.createSetup();
+      const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
+
+      new WorkflowsPlugin(initializerContext).setup(coreSetup, {
+        encryptedSavedObjects,
+        spaces: { spacesService: { getActiveSpace: jest.fn() } } as any,
+        workflowsExtensions: workflowsExtensionsMock.createSetup(),
+      });
+
+      const pageTypeCalls = coreSetup.savedObjects.registerType.mock.calls.filter(
+        ([type]) => type.name === 'workflow-page'
+      );
+      expect(pageTypeCalls).toHaveLength(registrations);
+      expect(encryptedSavedObjects.registerType).toHaveBeenCalledTimes(registrations);
+    }
+  );
 
   it('marks the workflows service as stopping on stop()', () => {
     const initializerContext = coreMock.createPluginInitializerContext({
@@ -97,6 +131,7 @@ describe('WorkflowsPlugin', () => {
 
     const plugin = new WorkflowsPlugin(initializerContext);
     plugin.setup(coreMock.createSetup(), {
+      encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
       spaces: { spacesService: { getActiveSpace: jest.fn() } } as any,
       workflowsExtensions: workflowsExtensionsMock.createSetup(),
     });
@@ -108,6 +143,7 @@ describe('WorkflowsPlugin', () => {
       workflowsExtensions: workflowsExtensionsMock.createStart(),
       licensing: {} as any,
       dataViews: {} as any,
+      encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
     });
 
     setStopping.mockClear();
@@ -141,6 +177,7 @@ describe('WorkflowsPlugin', () => {
       .mockImplementation();
 
     plugin.setup(coreSetup, {
+      encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
       spaces: spaces as never,
       workflowsExtensions: workflowsExtensionsMock.createSetup(),
     });
@@ -186,6 +223,7 @@ describe('WorkflowsPlugin', () => {
 
     plugin.setup(coreMock.createSetup(), {
       actions,
+      encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
       spaces: { spacesService: { getActiveSpace: jest.fn() } } as any,
       workflowsExtensions,
     });
@@ -215,6 +253,7 @@ describe('WorkflowsPlugin', () => {
 
     plugin.setup(coreMock.createSetup(), {
       actions,
+      encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
       spaces: { spacesService: { getActiveSpace: jest.fn() } } as any,
       workflowsExtensions,
     });

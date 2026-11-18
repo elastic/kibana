@@ -47,6 +47,10 @@ const alwaysEndsRun = (steps: unknown): boolean =>
         (step.type === 'if' && alwaysEndsRun(step.steps) && alwaysEndsRun(step.else)))
   );
 
+/** Whether every run of a workflow ends in a `workflow.output` or `workflow.fail` step. */
+export const alwaysEndsInOutputStep = (definition: unknown): boolean =>
+  isRecord(definition) && alwaysEndsRun(definition.steps);
+
 /**
  * Returns the output names a workflow's completing `workflow.output` steps set, including those in
  * its `on-failure` fallback. Undefined when a run can complete without one (callers then get its

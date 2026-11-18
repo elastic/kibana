@@ -88,6 +88,26 @@ export interface EventsWriteHeldResult {
   deactivated_at: string;
 }
 
+/** One rule an item holds that another live event already confirms, with that event. */
+export interface HeldRule {
+  rule_uuid: string;
+  event_id: string;
+}
+
+/** An item that would make a rule a confirmed member of a second live event: nothing was written. */
+export interface EventsWriteRuleHeldResult {
+  index: number;
+  event_id: string;
+  /** Status of the event the item targeted; absent when the item would create a new event. */
+  status?: SignificantEvent['status'];
+  written: false;
+  skipped: true;
+  reason: 'rule_held_by_event';
+  existing_event_id: string;
+  /** Every rule of the item that a live event confirms, with its holder. */
+  held_rules: HeldRule[];
+}
+
 export interface EventsWriteNoOpResult {
   index: number;
   event_id: string;
@@ -154,6 +174,7 @@ export type EventsWriteBulkResult =
   | EventsWriteResult
   | EventsWriteDuplicateResult
   | EventsWriteHeldResult
+  | EventsWriteRuleHeldResult
   | EventsWriteNoOpResult
   | EventsWriteFailureResult;
 

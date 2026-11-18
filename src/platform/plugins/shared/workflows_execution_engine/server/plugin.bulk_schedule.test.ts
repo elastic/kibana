@@ -95,6 +95,11 @@ import {
 } from './lib/execution_identity';
 import { getAuthenticatedUser } from './lib/get_user';
 import { WorkflowsExecutionEnginePlugin } from './plugin';
+import { publishFinishedWorkflowExecution } from './topics/publish_finished_workflow_execution';
+
+jest.mock('./topics/publish_finished_workflow_execution', () => ({
+  publishFinishedWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+}));
 
 const makeGate = () => {
   let resolve!: (value: boolean) => void;
@@ -898,6 +903,127 @@ describe('bulkScheduleWorkflow', () => {
     ]);
   });
 
+  it('stamps the stored workflowUid onto a bulk run when the model omits it', async () => {
+    const workflow = createWorkflow('wf-a');
+    mockGetWorkflowExecutionStates.mockResolvedValue(
+      new Map([['default:wf-a', { enabled: true, workflowUid: 'uid-current' }]])
+    );
+    mockBulkCreateWorkflowExecutions.mockImplementation(async (executions: Array<{ id: string }>) =>
+      executions.map(({ id }) => ({ id }))
+    );
+
+    await pluginStart.bulkScheduleWorkflow(
+      [{ workflow, context: { spaceId: 'default' } }],
+      request
+    );
+
+    expect(workflow.workflowUid).toBeUndefined();
+    expect(mockBulkCreateWorkflowExecutions).toHaveBeenCalledWith(
+      [expect.objectContaining({ workflowId: 'wf-a', workflowUid: 'uid-current' })],
+      { refresh: 'wait_for' }
+    );
+  });
+
+  it('omits workflowUid from a bulk run when the stored document has none', async () => {
+    const workflow = createWorkflow('wf-a', { workflowUid: 'uid-caller' });
+    mockGetWorkflowExecutionStates.mockResolvedValue(
+      new Map([['default:wf-a', { enabled: true }]])
+    );
+    mockBulkCreateWorkflowExecutions.mockImplementation(async (executions: Array<{ id: string }>) =>
+      executions.map(({ id }) => ({ id }))
+    );
+
+    await pluginStart.bulkScheduleWorkflow(
+      [{ workflow, context: { spaceId: 'default' } }],
+      request
+    );
+
+    expect(workflow.workflowUid).toBe('uid-caller');
+    expect(mockBulkCreateWorkflowExecutions).toHaveBeenCalledWith(
+      [
+        expect.not.objectContaining({
+          workflowUid: expect.anything(),
+        }),
+      ],
+      { refresh: 'wait_for' }
+    );
+  });
+
+  it('keeps an ephemeral bulk run uid from the model', async () => {
+    const workflow = createWorkflow('wf-ephemeral', {
+      isEphemeral: true,
+      workflowUid: 'uid-model',
+    });
+    mockGetWorkflowExecutionStates.mockResolvedValue(
+      new Map([['default:wf-ephemeral', { enabled: true, workflowUid: 'uid-stored' }]])
+    );
+    mockBulkCreateWorkflowExecutions.mockImplementation(async (executions: Array<{ id: string }>) =>
+      executions.map(({ id }) => ({ id }))
+    );
+
+    await pluginStart.bulkScheduleWorkflow(
+      [{ workflow, context: { spaceId: 'default' } }],
+      request
+    );
+
+    expect(mockGetWorkflowExecutionStates).toHaveBeenCalledWith([], { includeGlobal: true });
+    expect(mockBulkCreateWorkflowExecutions).toHaveBeenCalledWith(
+      [expect.objectContaining({ workflowId: 'wf-ephemeral', workflowUid: 'uid-model' })],
+      { refresh: 'wait_for' }
+    );
+  });
+
+  it.each(['executeWorkflow', 'scheduleWorkflow'] as const)(
+    '%s stamps the stored workflowUid when the model omits it',
+    async (method) => {
+      const workflow = createWorkflow('wf-a');
+      mockGetWorkflow.mockResolvedValue({ workflowUid: 'uid-current' });
+
+      await pluginStart[method](workflow, { spaceId: 'default' }, request);
+
+      expect(workflow.workflowUid).toBeUndefined();
+      expect(mockCreateWorkflowExecution).toHaveBeenCalledWith(
+        expect.objectContaining({ workflowId: 'wf-a', workflowUid: 'uid-current' }),
+        expect.anything()
+      );
+    }
+  );
+
+  it.each(['executeWorkflow', 'scheduleWorkflow'] as const)(
+    '%s omits workflowUid when the stored document has none',
+    async (method) => {
+      const workflow = createWorkflow('wf-a', { workflowUid: 'uid-caller' });
+      mockGetWorkflow.mockResolvedValue({ enabled: true });
+
+      await pluginStart[method](workflow, { spaceId: 'default' }, request);
+
+      expect(workflow.workflowUid).toBe('uid-caller');
+      expect(mockCreateWorkflowExecution).toHaveBeenCalledWith(
+        expect.not.objectContaining({ workflowUid: expect.anything() }),
+        expect.anything()
+      );
+    }
+  );
+
+  it.each(['executeWorkflow', 'scheduleWorkflow'] as const)(
+    '%s keeps an ephemeral run uid from the model',
+    async (method) => {
+      const workflow = createWorkflow('wf-ephemeral', {
+        isEphemeral: true,
+        workflowUid: 'uid-model',
+      });
+      mockGetWorkflow.mockResolvedValue({ workflowUid: 'uid-stored' });
+
+      await pluginStart[method](workflow, { spaceId: 'default' }, request);
+
+      expect(mockGetWorkflow).not.toHaveBeenCalled();
+      expect(mockCreateWorkflowExecution).toHaveBeenCalledWith(
+        expect.objectContaining({ workflowId: 'wf-ephemeral', workflowUid: 'uid-model' }),
+        expect.anything()
+      );
+    }
+  );
+
   it('skips saved workflow enabled checks for ephemeral workflows', async () => {
     const ephemeralWorkflow = createWorkflow('wf-ephemeral', { isEphemeral: true });
     mockBulkCreateWorkflowExecutions.mockImplementation(async (executions: Array<{ id: string }>) =>
@@ -1029,6 +1155,7 @@ describe('bulkScheduleWorkflow', () => {
   });
 
   it('persists bulk executions as failed and does not schedule when no identity is attached', async () => {
+    jest.mocked(publishFinishedWorkflowExecution).mockClear();
     (getAuthenticatedUser as jest.Mock).mockResolvedValueOnce(undefined);
     mockGetWorkflowExecutionStates.mockResolvedValue(
       new Map([['default:wf-a', { enabled: true }]])
@@ -1057,6 +1184,13 @@ describe('bulkScheduleWorkflow', () => {
       { refresh: 'wait_for' }
     );
     expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
+    expect(publishFinishedWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflowId: 'wf-a',
+        status: 'failed',
+        isTestRun: false,
+      })
+    );
     expect(result).toEqual([
       {
         status: 'scheduled',
