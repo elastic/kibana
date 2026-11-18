@@ -142,6 +142,7 @@ toc:
           - file: connectors-kibana/prometheus-action-type.md
           - file: connectors-kibana/rootly-action-type.md
           - file: connectors-kibana/salesforce-action-type.md
+          - file: connectors-kibana/sentinelone-v2-action-type.md
           - file: connectors-kibana/sentry-action-type.md
           - file: connectors-kibana/servicenow-search-action-type.md
           - file: connectors-kibana/sharepoint-online-action-type.md
