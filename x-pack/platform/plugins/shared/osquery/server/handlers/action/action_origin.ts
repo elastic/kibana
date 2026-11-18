@@ -21,20 +21,6 @@ export interface WorkflowActionOrigin {
  */
 export type ActionOrigin = WorkflowActionOrigin;
 
-const MAX_ID_LENGTH = 256;
-
-/**
- * A single execution ID, or `undefined`. Node joins a repeated header into `"a, b"`, and real
- * IDs never contain a comma, so a comma means a repeated header and the value is ignored.
- */
-const executionIdFromHeader = (header: string | string[] | undefined): string | undefined =>
-  typeof header === 'string' &&
-  header.trim().length > 0 &&
-  header.length <= MAX_ID_LENGTH &&
-  !header.includes(',')
-    ? header
-    : undefined;
-
 /**
  * The workflow origin of a request, or `undefined` when it did not come from a workflow run.
  *
@@ -47,6 +33,12 @@ const executionIdFromHeader = (header: string | string[] | undefined): string | 
  * from public API callers, but it is not a hard trust boundary: Kibana cannot yet verify an
  * execution ID, because no plugin contract exposes execution lookup. Treat the value as
  * attribution, not authorization.
+ *
+ * Store execution_id only: there is no public execution-to-workflow lookup contract, and
+ * `x-kibana-event-chain-visited-workflows` is not reliable for workflow attribution. Its caps
+ * are MAX_VISITED_IDS_IN_HEADER (128 IDs) and MAX_VISITED_IDS_HEADER_BYTES (64 KiB); truncation
+ * drops IDs from the end, so the current, last-appended workflow can be dropped and the tail
+ * can name an earlier workflow at the chain-depth cap.
  */
 export const resolveWorkflowOrigin = (
   request: Pick<KibanaRequest, 'headers' | 'isInternalApiRequest'>
@@ -55,9 +47,15 @@ export const resolveWorkflowOrigin = (
     return undefined;
   }
 
-  const executionId = executionIdFromHeader(
-    request.headers[EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]
-  );
+  const executionId = request.headers[EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER];
 
-  return executionId ? { type: 'workflow', execution_id: executionId } : undefined;
+  // Compare the whole match because `$` can also match before a final newline.
+  if (
+    typeof executionId !== 'string' ||
+    executionId.match(/^[A-Za-z0-9._:-]{1,256}$/)?.[0] !== executionId
+  ) {
+    return undefined;
+  }
+
+  return { type: 'workflow', execution_id: executionId };
 };
