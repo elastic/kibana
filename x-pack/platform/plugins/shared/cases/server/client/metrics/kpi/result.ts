@@ -96,6 +96,10 @@ export const mapKpiSearchResponse = (
     return toKpiMetricError(metric.id, response.error.reason ?? 'The metric search failed.');
   }
 
+  if (response.timed_out || response._shards.failed > 0) {
+    return toKpiMetricError(metric.id, 'The metric search returned incomplete results.');
+  }
+
   return {
     id: metric.id,
     type: 'value',

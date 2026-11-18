@@ -90,7 +90,8 @@ export const validateTemplatesCustomFieldsInRequest = ({
 };
 
 /**
- * Throws an error if a custom KPI metric has a KQL syntax error or a field that the catalog does not allow.
+ * Throws an error if a page has duplicated metric ids, or if a custom KPI metric has a KQL syntax error
+ * or a field that the catalog does not allow.
  */
 export const validateKpiMetricsInRequest = ({
   metrics,
@@ -100,6 +101,13 @@ export const validateKpiMetricsInRequest = ({
   if (metrics == null) {
     return;
   }
+
+  (['casesList', 'caseDetails'] as const).forEach((page) => {
+    validateDuplicatedKeysInRequest({
+      requestFields: metrics[page]?.flatMap(({ id }) => (id != null ? [{ key: id }] : [])),
+      fieldName: `metrics.${page}`,
+    });
+  });
 
   const errors = [...(metrics.casesList ?? []), ...(metrics.caseDetails ?? [])].flatMap(
     (metric) => {

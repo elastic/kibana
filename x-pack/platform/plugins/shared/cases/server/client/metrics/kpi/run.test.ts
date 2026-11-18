@@ -114,6 +114,36 @@ describe('runKpiMetrics', () => {
     ]);
   });
 
+  it('gives an error result for a timed-out or a shard-failed item', async () => {
+    const msearch = jest
+      .fn()
+      .mockResolvedValue([
+        { ...createResponse(4), timed_out: true },
+        { ...createResponse(3), _shards: { total: 2, successful: 1, failed: 1 } },
+        createResponse(2),
+      ]);
+
+    const results = await runKpiMetrics({
+      metrics: [
+        createMetric({ id: 'timed-out' }),
+        createMetric({ id: 'shard-failed' }),
+        createMetric({ id: 'valid' }),
+      ],
+      context,
+      reader: { msearch },
+    });
+
+    expect(results).toEqual([
+      { id: 'timed-out', type: 'error', message: 'The metric search returned incomplete results.' },
+      {
+        id: 'shard-failed',
+        type: 'error',
+        message: 'The metric search returned incomplete results.',
+      },
+      { id: 'valid', type: 'value', format: 'number', value: 2 },
+    ]);
+  });
+
   it('gives an error result for every metric when msearch throws', async () => {
     const msearch = jest.fn().mockRejectedValue(new Error('connection error'));
 

@@ -506,5 +506,31 @@ describe('validators', () => {
         })
       ).toThrow(/"First": The KQL query is not valid.*"Second": The field unknown is not allowed/s);
     });
+
+    it('throws for duplicated metric ids in one page', () => {
+      expect(() =>
+        validateKpiMetricsInRequest({
+          metrics: {
+            casesList: [
+              { ...customMetric, id: 'same' },
+              { ...customMetric, id: 'same', label: 'Other' },
+            ],
+          },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid duplicated metrics.casesList keys in request: same"`
+      );
+    });
+
+    it('does not throw for the same metric id in different pages', () => {
+      expect(() =>
+        validateKpiMetricsInRequest({
+          metrics: {
+            casesList: [{ ...customMetric, id: 'same' }],
+            caseDetails: [{ ...customMetric, id: 'same' }],
+          },
+        })
+      ).not.toThrow();
+    });
   });
 });
