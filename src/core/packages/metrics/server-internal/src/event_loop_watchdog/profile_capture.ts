@@ -98,7 +98,10 @@ const fileUrl = (url: string | undefined, root: string): string | undefined => {
   return rel.startsWith('src/') || rel.startsWith('x-pack/') ? rel : url;
 };
 
-/** Trims the cold-start lead-in and the idle tail, prunes unsampled nodes and rewrites Kibana URLs. */
+/**
+ * Trims the cold-start lead-in and the idle tail, prunes unsampled nodes and rewrites Kibana URLs.
+ * Changes the kept nodes in place: a copy doesn't fit in the worker's heap next to the original.
+ */
 export const prepareProfile = (profile: CpuProfile, root: string): CpuProfile => {
   const { nodes, samples = [], timeDeltas = [] } = profile;
   const byId = new Map(nodes.map((node) => [node.id, node]));
@@ -126,12 +129,12 @@ export const prepareProfile = (profile: CpuProfile, root: string): CpuProfile =>
     ...profile,
     nodes: nodes
       .filter(({ id }) => keep.has(id))
-      .map((node) => ({
-        ...node,
-        callFrame: { ...node.callFrame, url: fileUrl(node.callFrame.url, root) },
-        hitCount: hits.get(node.id) ?? 0,
-        children: node.children?.filter((child) => keep.has(child)),
-      })),
+      .map((node) => {
+        node.callFrame.url = fileUrl(node.callFrame.url, root);
+        node.hitCount = hits.get(node.id) ?? 0;
+        node.children = node.children?.filter((child) => keep.has(child));
+        return node;
+      }),
     startTime,
     endTime,
     samples: keptSamples,

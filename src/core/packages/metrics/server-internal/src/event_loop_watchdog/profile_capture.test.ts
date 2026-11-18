@@ -139,10 +139,10 @@ describe('prepareProfile', () => {
     ]);
   });
 
-  it('leaves the input unchanged', () => {
+  it('changes the kept nodes in place instead of copying them', () => {
     const input = fileProfile();
-    prepareProfile(input, ROOT);
-    expect(input).toEqual(fileProfile());
+    const prepared = prepareProfile(input, ROOT);
+    expect(prepared.nodes.filter((kept) => !input.nodes.includes(kept))).toEqual([]);
   });
 
   it('keeps startTime and endTime in order when every sample is idle', () => {

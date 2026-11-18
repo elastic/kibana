@@ -87,11 +87,12 @@ const NO_PROFILING: WatchdogProfilingData = {
   maxDurationMs: perPhase(10_000),
   cooldownMs: perPhase(60_000),
 };
-/** Profiles blocks from 1 s, so the scenarios stay short. */
+/** Profiles blocks from 1 s, so the scenarios stay short. Writes files when the test passes a directory. */
 const PROFILING: WatchdogProfilingData = {
   startAfterMs: perPhase(1_000),
   maxDurationMs: perPhase(10_000),
   cooldownMs: perPhase(1_000),
+  dir: process.env.WATCHDOG_PROFILE_DIR,
 };
 
 const create = (workerEntry?: string, profiling = NO_PROFILING) =>
