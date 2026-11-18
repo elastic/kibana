@@ -164,6 +164,7 @@ const isRetryable = ({ status, error }: estypes.BulkResponseItem): boolean =>
 /**
  * Writes a batch's summaries in one bulk request: on serverless a bulk waits about 0.15 to 0.4s for
  * durability whatever its size, so 5,000 summaries in bulks of 2,000 waited three times as long.
+ * A batch holds at most one ES|QL response's rows (`esqlMaxRows`, 10,000: about 13 MB).
  */
 const writeSessions = async (
   esClient: ElasticsearchClient,
