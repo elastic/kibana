@@ -105,8 +105,8 @@ describe('createRuleAttachmentDefinition', () => {
     });
 
     it('gives an attachment with `origin` set only "View rule"', () => {
-      // `origin` links the card to a saved rule. Update rule depends on the saved rule, so the
-      // card body registers it. The static buttons only offer View rule.
+      // `origin` links the card to a saved rule. "Update rule" depends on the saved rule, so
+      // the card body registers it. The static buttons only offer "View rule".
       expect(
         buildButtons({ text: JSON.stringify(validRule) }, { origin: 'rule-1' }).map((b) => b.label)
       ).toEqual(['View rule']);

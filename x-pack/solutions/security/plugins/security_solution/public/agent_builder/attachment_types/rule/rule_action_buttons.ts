@@ -98,8 +98,9 @@ const buildViewRuleButton = (application: ApplicationStart, ruleId: string): Act
 });
 
 /**
- * Header buttons that depend only on the attachment. A create-intent card gets Create rule and
- * Apply to rule form. An update-intent card gets View rule. Called from `getActionButtons`.
+ * Header buttons that depend only on the attachment. A create-intent card gets "Create rule"
+ * and "Apply to rule form". An update-intent card gets "View rule". Called from
+ * `getActionButtons`.
  */
 export const buildRuleActionButtons = ({
   rule,
@@ -157,10 +158,9 @@ export const buildRuleActionButtons = ({
 };
 
 /**
- * Buttons for a card that proposes changes to a saved rule: Update rule and Apply to rule form.
- * The card body registers them only when it is the latest version and differs from the saved
- * rule. Update rule saves the whole card, so it is the main button only for ES|QL rules. For
- * other rule types it is disabled and Apply to rule form is the main button.
+ * Buttons for a card that proposes changes to a saved rule: "Update rule" and
+ * "Apply to rule form". Saving from chat supports only ES|QL rules. For other rule types,
+ * "Update rule" is disabled and "Apply to rule form" becomes the main button.
  */
 export const buildPendingChangeButtons = ({
   ruleId,

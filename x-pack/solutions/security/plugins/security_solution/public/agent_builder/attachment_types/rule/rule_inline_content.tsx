@@ -160,8 +160,8 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
     return oldSource !== newSource;
   }, [originalRule, rule]);
 
-  // The conversation keeps showing older versions. Saving one would revert later changes to the rule.
   const savedRuleId = getRuleIdFromAttachment(attachment);
+  // Offer save actions only on the latest card version.
   const hasPendingChanges = hasDiff && isLatestAttachmentVersion(attachment);
 
   const pendingChangeButtons = useMemo(
@@ -187,8 +187,9 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
     return () => registerActionButtons([]);
   }, [registerActionButtons, pendingChangeButtons]);
 
-  // The limitations describe the create tool, so they apply only to a rule drafted in chat.
-  const showLimitations = !attachment.origin && !isRuleDraftAttachment(attachment);
+  // The callout lists what AI rule creation doesn't support. Show it only for a new rule the
+  // agent drafts in chat.
+  const showCreationLimitationsCallout = !attachment.origin && !isRuleDraftAttachment(attachment);
 
   if (!rule) {
     return null;
@@ -316,7 +317,7 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
         </>
       )}
 
-      {showLimitations && (
+      {showCreationLimitationsCallout && (
         <>
           <EuiSpacer size="s" />
           <EuiCallOut
