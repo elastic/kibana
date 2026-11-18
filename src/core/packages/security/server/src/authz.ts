@@ -10,6 +10,7 @@
 import type { AllRequiredCondition, AnyRequiredCondition, Privileges } from '@kbn/core-http-server';
 
 import type { CoreOlsService } from './ols';
+import type { CoreUiamAuthorizationService } from './uiam';
 
 /**
  * Core's authorization service contract.
@@ -17,6 +18,8 @@ import type { CoreOlsService } from './ols';
 export interface CoreAuthorizationService {
   /** Object-level security (OLS), or `null` when OLS is disabled. */
   ols: CoreOlsService | null;
+  /** Cloud privileges evaluated by UIAM, or `null` when Kibana isn't configured to use UIAM. */
+  uiam: CoreUiamAuthorizationService | null;
 }
 
 export enum AuthzOptOutReason {

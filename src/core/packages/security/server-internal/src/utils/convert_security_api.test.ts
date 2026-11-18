@@ -44,6 +44,13 @@ describe('convertSecurityApi', () => {
           },
         },
       },
+      authz: {
+        uiam: {
+          canViewBillingDetails: jest.fn(),
+          canInviteOrganizationMembers: jest.fn(),
+        },
+        ols: { asScoped: jest.fn() },
+      },
       audit: {
         asScoped: jest.fn().mockReturnValue(createAuditLoggerMock.create()),
         withoutRequest: createAuditLoggerMock.create(),
@@ -58,7 +65,6 @@ describe('convertSecurityApi', () => {
         getWorkloadServiceAccountSummary: jest.fn(),
         withScopedRequestForWorkload: jest.fn(),
       },
-      authz: { ols: { asScoped: jest.fn() } },
       fakeRequestEnricher: jest.fn(),
     };
   });

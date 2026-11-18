@@ -439,9 +439,9 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     pricing: deps.pricing,
     security: {
       authc: deps.security.authc,
+      authz: deps.security.authz,
       audit: deps.security.audit,
       serviceAccounts: deps.security.serviceAccounts.asScopedToPlugin(plugin.name),
-      authz: deps.security.authz,
     },
     userProfile: deps.userProfile,
     injection: {

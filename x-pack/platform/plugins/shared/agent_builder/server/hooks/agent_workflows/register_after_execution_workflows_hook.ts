@@ -6,7 +6,6 @@
  */
 
 import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-server';
-import type { CoreSetup } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { InternalSetupServices, InternalStartServices } from '../../services';
@@ -16,7 +15,6 @@ export interface RegisterAfterExecutionWorkflowsHookDeps {
   workflowsManagement?: WorkflowsServerPluginSetup;
   logger: Logger;
   getInternalServices: () => InternalStartServices;
-  getStartServices: CoreSetup['getStartServices'];
 }
 
 /**
@@ -41,12 +39,12 @@ export function registerAfterExecutionWorkflowsHook(
     hooks: {
       [HookLifecycle.afterExecution]: {
         mode: HookExecutionMode.nonBlocking,
+        requiresServiceAccountRequest: true,
         handler: (context) =>
           runAfterExecutionWorkflows({
             context,
             workflowApi,
             getInternalServices: deps.getInternalServices,
-            getStartServices: deps.getStartServices,
             logger,
           }),
       },

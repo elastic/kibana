@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { of } from 'rxjs';
 import { loggingSystemMock, securityServiceMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { CustomTriggerSchemaConfig } from '@kbn/workflows';
@@ -72,7 +71,6 @@ const makeDeps = (
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest) as any,
       getCoreStart: () =>
         ({
-          featureFlags: { getBooleanValue$: jest.fn(() => of(false)) },
           elasticsearch: {
             client: { asScoped: jest.fn().mockReturnValue({ asCurrentUser: {} }) },
           },

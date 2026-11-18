@@ -96,9 +96,15 @@ const createStartMock = (): SecurityStartMock => {
       getRedactedSessionId: jest.fn().mockResolvedValue(undefined),
       apiKeys: apiKeysMock.create(),
     }),
+    authz: lazyObject({
+      uiam: lazyObject({
+        canViewBillingDetails: jest.fn().mockResolvedValue(false),
+        canInviteOrganizationMembers: jest.fn().mockResolvedValue(false),
+      }),
+      ols: null,
+    }),
     audit: auditServiceMock.create(),
     serviceAccounts: createServiceAccountsStartMock(),
-    authz: { ols: null },
   });
 
   return mock;
@@ -137,11 +143,17 @@ const createInternalStartMock = (): InternalSecurityStartMock => {
       getRedactedSessionId: jest.fn().mockResolvedValue(undefined),
       apiKeys: apiKeysMock.create(),
     }),
+    authz: lazyObject({
+      uiam: lazyObject({
+        canViewBillingDetails: jest.fn().mockResolvedValue(false),
+        canInviteOrganizationMembers: jest.fn().mockResolvedValue(false),
+      }),
+      ols: null,
+    }),
     audit: auditServiceMock.create(),
     serviceAccounts: lazyObject({
       asScopedToPlugin: jest.fn().mockImplementation(createServiceAccountsStartMock),
     }),
-    authz: { ols: null },
   });
 
   return mock;
@@ -173,6 +185,12 @@ const createRequestHandlerContextMock = () => {
           invalidate: jest.fn(),
           convert: jest.fn(),
         },
+      }),
+    }),
+    authz: lazyObject({
+      uiam: lazyObject({
+        canViewBillingDetails: jest.fn().mockResolvedValue(false),
+        canInviteOrganizationMembers: jest.fn().mockResolvedValue(false),
       }),
     }),
     audit: lazyObject({

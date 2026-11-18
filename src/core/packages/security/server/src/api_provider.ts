@@ -54,9 +54,9 @@ export interface CoreSecurityDelegateContract {
  */
 export type AuthenticationServiceContract = CoreAuthenticationService;
 
-export type AuditServiceContract = CoreAuditService;
-
 export type AuthorizationServiceContract = CoreAuthorizationService;
+
+export type AuditServiceContract = CoreAuditService;
 
 /**
  * The service accounts contract that the security provider must implement: the plugin-agnostic

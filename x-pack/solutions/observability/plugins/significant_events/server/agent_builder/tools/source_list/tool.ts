@@ -51,6 +51,7 @@ export const createSourceListTool = ({
   getScopedClients,
   server,
   logger,
+  telemetry,
 }: SourceToolDeps): BuiltinToolDefinition<typeof sourceListSchema> => ({
   id: NIGHTSHIFT_SOURCE_LIST_TOOL_ID,
   type: ToolType.builtin,
@@ -79,14 +80,17 @@ export const createSourceListTool = ({
   schema: sourceListSchema,
   tags: ['nightshift'],
   availability: createSignificantEventsAvailability({ server, logger }),
-  handler: async ({ search, enabled, page, per_page: perPage }, { request }) =>
+  handler: async ({ search, enabled, page, per_page: perPage }, { request, runContext }) =>
     runSourceTool({
       action: 'list sources',
       privilege: 'read',
+      toolId: NIGHTSHIFT_SOURCE_LIST_TOOL_ID,
       request,
+      runContext,
       getScopedClients,
       server,
       logger,
+      telemetry,
       run: async ({ sourcesClient }) => {
         const { sources, total } = await sourcesClient.list({ page, perPage, search, enabled });
         return { total, page, per_page: perPage, sources: sources.map(toSourceSummary) };

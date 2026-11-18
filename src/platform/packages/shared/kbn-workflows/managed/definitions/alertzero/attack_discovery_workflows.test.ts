@@ -3908,8 +3908,8 @@ describe('Attack Discovery worker chain', () => {
         expect(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.version).toBe(22);
       });
 
-      it('bumps batched generation to version 14 so generation model calls carry token-usage attribution', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW.version).toBe(14);
+      it('bumps batched generation to version 15 so a space with no alerts index yet skips retrieval', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW.version).toBe(15);
       });
 
       it('continues when fingerprint matching fails', () => {

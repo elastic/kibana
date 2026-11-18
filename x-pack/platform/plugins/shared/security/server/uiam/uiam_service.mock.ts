@@ -53,6 +53,7 @@ export const uiamServiceMock = {
       role_assignments: {},
       assumable_by: [],
     }),
+    checkAuthorization: jest.fn().mockResolvedValue({ permitted: false, checks: [] }),
     listServiceAccounts: jest.fn().mockResolvedValue({ service_accounts: [] }),
     getServiceAccount: jest.fn().mockResolvedValue({
       id: 'mock-service-account-id',

@@ -23,8 +23,8 @@ export const convertSecurityApi = (
       getRedactedSessionId: privateApi.authc.getRedactedSessionId,
       apiKeys: privateApi.authc.apiKeys,
     },
-    audit: privateApi.audit,
     authz: privateApi.authz,
+    audit: privateApi.audit,
     // The delegate's workload methods are keyed by plugin id, which only the plugin context knows.
     // They are therefore not exposed directly: each plugin gets a contract scoped to itself.
     serviceAccounts: {

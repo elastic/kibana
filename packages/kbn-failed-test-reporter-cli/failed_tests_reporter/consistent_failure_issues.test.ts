@@ -10,7 +10,10 @@
 import { computeTestID } from '@kbn/scout-reporting';
 import { ToolingLog } from '@kbn/tooling-log';
 import { replacedIssueComment } from '../flaky_test_issues/replace_per_test_issues';
-import { FLAKY_TEST_SUITE_METADATA_PREFIX } from '../flaky_test_issues/issue_body';
+import {
+  FLAKY_TEST_SUITE_METADATA_PREFIX,
+  readFlakySuiteIssueMetadata,
+} from '../flaky_test_issues/issue_body';
 import {
   MAX_NEW_ISSUES_PER_JOB,
   reportConsistentFailureIssues,
@@ -20,7 +23,7 @@ import { failingPostedAt, renderFailingSuiteIssueBody } from './failing_suite_is
 import type { TestFailure } from './get_failures';
 import type { ScoutTestFailureExtended } from './get_scout_failures';
 import type { GithubApi, GithubIssue } from './github_api';
-import { getIssueMetadata } from './issue_metadata';
+import { getIssueMetadata, updateIssueMetadata } from './issue_metadata';
 
 const log = new ToolingLog();
 const build = { pipeline: 'kibana-on-merge', branch: 'main' };
@@ -155,6 +158,7 @@ const mockGithub = (issues: GithubIssue[] = []) => {
     } as unknown as GithubApi,
     listIssues,
     createIssue,
+    getIssue,
     editIssue,
     addIssueComment,
     closeAsDuplicate,
@@ -425,6 +429,49 @@ describe('reportConsistentFailureIssues', () => {
     expect(editIssue).not.toHaveBeenCalled();
   });
 
+  it('adds the tests, branch and pipeline of a break to the issue, so /skip covers that branch too', async () => {
+    const flakySuiteIssue = issue(
+      43,
+      updateIssueMetadata(
+        'Flaky suite issue',
+        {
+          'suite.filePath': SPEC,
+          'suite.title': 'Discover ES|QL mode',
+          'suite.framework': 'playwright',
+          'suite.testIds': ['test-0'],
+          'suite.branches': ['main', '9.5'],
+          'suite.pipelines': ['kibana-on-merge', 'appex-qa-stateful-kibana-scout-tests'],
+          'report.generatedAt': '2026-10-15T11:00:00.000Z',
+          'report.count': 3,
+          'report.history': [],
+        },
+        FLAKY_TEST_SUITE_METADATA_PREFIX
+      )
+    );
+    const { github, editIssue } = mockGithub([flakySuiteIssue]);
+
+    await report({
+      es: mockEs(brokenSince('test-1', 101, 102)).es,
+      github,
+      failures: [scoutFailure('test-1', 'shows results')],
+      build: { pipeline: 'kibana-on-merge', branch: '9.6' },
+      now: NOW,
+    });
+
+    const [[number, { body }]] = editIssue.mock.calls;
+    expect(number).toBe(43);
+    const recorded = readFlakySuiteIssueMetadata(body);
+    expect(recorded?.['suite.branches']).toEqual(['main', '9.5', '9.6']);
+    expect(recorded?.['suite.pipelines']).toEqual([
+      'appex-qa-stateful-kibana-scout-tests',
+      'kibana-on-merge',
+    ]);
+    expect(recorded?.['suite.testIds']).toEqual(['test-0', 'test-1']);
+    // what the daily report recorded is kept
+    expect(recorded?.['report.count']).toBe(3);
+    expect(failingPostedAt(body)).toEqual({ 'kibana-on-merge 9.6': NOW.toISOString() });
+  });
+
   it('reopens an issue about the suite closed lately, but leaves one closed as a duplicate alone', async () => {
     const failures = [scoutFailure('test-1', 'shows results')];
     // closed right after the last post: the reopen does not wait for the next day
@@ -452,6 +499,24 @@ describe('reportConsistentFailureIssues', () => {
     });
     expect(duplicate.editIssue).not.toHaveBeenCalled();
     expect(filed.created).toHaveLength(1);
+  });
+
+  it('waits for the next day on an issue another job reopened since it was listed', async () => {
+    const postedAt = new Date(NOW.getTime() - 2 * HOUR_MS);
+    const closed = failingSuiteIssue(postedAt, { state: 'closed', state_reason: 'completed' });
+    const { github, getIssue, editIssue, addIssueComment } = mockGithub([closed]);
+    getIssue.mockResolvedValue({ ...closed, state: 'open' });
+
+    const summary = await report({
+      es: mockEs(brokenSince('test-1', 101, 102)).es,
+      github,
+      failures: [scoutFailure('test-1', 'shows results')],
+      now: NOW,
+    });
+
+    expect(addIssueComment).not.toHaveBeenCalled();
+    expect(editIssue).not.toHaveBeenCalled();
+    expect(summary.tracked).toEqual([{ filePath: SPEC, url: closed.html_url }]);
   });
 
   it('skips a suite whose every test has a per-test issue, but not one with a test without', async () => {

@@ -23,6 +23,13 @@ import type { OlsService } from './authorization/ols/ols_service';
 import type { ServiceAccountsServiceStart } from './service_accounts';
 import type { Session } from './session_management';
 import { getPrintableSessionId } from './session_management';
+import type { UiamAuthorizationCheck, UiamServicePublic } from './uiam';
+import {
+  UIAM_BILLING_DETAILS_READ_ACTION,
+  UIAM_BILLING_DETAILS_RESOURCE_TYPE,
+  UIAM_ORGANIZATION_INVITATION_CREATE_ACTION,
+  UIAM_ORGANIZATION_INVITATION_RESOURCE_TYPE,
+} from './uiam';
 import type { UserProfileServiceStartInternal } from './user_profile';
 
 export const buildSecurityApi = ({
@@ -30,6 +37,8 @@ export const buildSecurityApi = ({
   getSession,
   getServiceAccounts,
   getOlsService,
+  getUiam,
+  organizationId,
   audit,
   config,
   logger,
@@ -38,6 +47,12 @@ export const buildSecurityApi = ({
   getSession: () => Pick<Session, 'getSID'>;
   getServiceAccounts: () => ServiceAccountsServiceStart | null;
   getOlsService: () => OlsService;
+  getUiam: () => Pick<UiamServicePublic, 'checkAuthorization'>;
+  /**
+   * The Cloud organization this Kibana belongs to, which scopes UIAM's organization resources.
+   * Required for the checks to run when UIAM is enabled.
+   */
+  organizationId?: string;
   audit: AuditServiceSetup;
   config: {
     uiam?: { enabled: boolean };
@@ -47,6 +62,24 @@ export const buildSecurityApi = ({
   logger: Logger;
 }): CoreSecurityDelegateContract => {
   const enrichment = createFakeRequestEnrichment(logger.get('fake-request-enrichment'));
+
+  // `async` so that a missing service or organization surfaces as a rejected promise rather than
+  // a synchronous throw, which callers of a promise-returning API would not expect.
+  const checkUiamAccess = async (request: KibanaRequest, action: string, resourceType: string) => {
+    // Without the organization UIAM would evaluate the check against no organization at all,
+    // which denies every customer role and would hide a misconfiguration behind a plain `false`.
+    if (!organizationId) {
+      throw new Error(
+        'Cloud organization access cannot be checked because Kibana is not configured with a Cloud organization.'
+      );
+    }
+    const check: UiamAuthorizationCheck = {
+      action,
+      resource: { type: resourceType, organization_id: organizationId },
+    };
+    const { permitted } = await getUiam().checkAuthorization(request, [check]);
+    return permitted;
+  };
 
   const requireServiceAccounts = () => {
     const serviceAccounts = getServiceAccounts();
@@ -116,6 +149,28 @@ export const buildSecurityApi = ({
           : null,
       },
     },
+    authz: {
+      uiam: config.uiam?.enabled
+        ? {
+            canViewBillingDetails: (request) =>
+              checkUiamAccess(
+                request,
+                UIAM_BILLING_DETAILS_READ_ACTION,
+                UIAM_BILLING_DETAILS_RESOURCE_TYPE
+              ),
+            canInviteOrganizationMembers: (request) =>
+              checkUiamAccess(
+                request,
+                UIAM_ORGANIZATION_INVITATION_CREATE_ACTION,
+                UIAM_ORGANIZATION_INVITATION_RESOURCE_TYPE
+              ),
+          }
+        : null,
+      // The service exists only after start, while the delegate is registered during setup.
+      ols: config.authz?.ols?.enabled
+        ? { asScoped: (request, options) => getOlsService().asScoped(request, options) }
+        : null,
+    },
     audit: {
       asScoped(request) {
         return audit.asScoped(request);
@@ -143,12 +198,6 @@ export const buildSecurityApi = ({
         requireServiceAccounts().workloads.getServiceAccountSummary(pluginId, params),
       withScopedRequestForWorkload: async (pluginId, params, fn) =>
         requireServiceAccounts().workloads.withScopedRequest(pluginId, params, fn),
-    },
-    authz: {
-      // The service exists only after start, while the delegate is registered during setup.
-      ols: config.authz?.ols?.enabled
-        ? { asScoped: (request, options) => getOlsService().asScoped(request, options) }
-        : null,
     },
     fakeRequestEnricher: enrichment.enrichRequestWithUserProfile,
   };

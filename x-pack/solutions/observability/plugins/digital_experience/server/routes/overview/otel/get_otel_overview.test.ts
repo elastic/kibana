@@ -93,7 +93,12 @@ const setup = ({ logs, spans }: { logs?: unknown; spans?: unknown }) => {
   return esClient;
 };
 
-const PARAMS = { serviceName: 'shop', start: 10, end: 20 };
+const PARAMS = {
+  serviceName: 'shop',
+  start: 10,
+  end: 20,
+  histogram: { interval: { value: 1, unit: 's' as const }, timeZone: 'UTC' },
+};
 
 describe('getOtelOverview', () => {
   it('maps the logs and spans of the application to its Overview', async () => {
@@ -135,6 +140,7 @@ describe('getOtelOverview', () => {
           },
         },
         trend: [],
+        trendHistogram: { interval: { value: 1, unit: 's' }, start: 10, end: 20 },
       },
       environments: ['production'],
       filters: NO_FILTER_VALUES,
@@ -202,6 +208,7 @@ describe('getOtelOverview', () => {
           ttfb: NO_VITAL,
         },
         trend: [],
+        trendHistogram: { interval: { value: 1, unit: 's' }, start: 10, end: 20 },
       },
       environments: [],
       filters: NO_FILTER_VALUES,

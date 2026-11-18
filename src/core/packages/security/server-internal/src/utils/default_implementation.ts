@@ -37,6 +37,10 @@ export const getDefaultSecurityImplementation = (
         uiam: null,
       },
     },
+    authz: {
+      uiam: null,
+      ols: createFailClosedOls(typeRegistry),
+    },
     audit: {
       asScoped: () => {
         return { log: () => undefined, enabled: false, includeSavedObjectNames: false };
@@ -57,7 +61,6 @@ export const getDefaultSecurityImplementation = (
       getWorkloadServiceAccountSummary: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
       withScopedRequestForWorkload: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
     },
-    authz: { ols: createFailClosedOls(typeRegistry) },
     // No security delegate registered, so there are no user profiles to bind.
     fakeRequestEnricher: () => undefined,
   };
