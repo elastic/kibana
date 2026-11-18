@@ -29,8 +29,32 @@ export const ACTION_RESPONSES_INDEX_DEFAULT_NS =
 
 let actionsIndexSetup: Promise<void> | undefined;
 
-const setUpActionsIndex = (esClient: ElasticsearchClient, logger: Logger): Promise<void> => {
-  actionsIndexSetup = createIndexIfNotExists(
+const checkActionsOriginMappings = async (esClient: ElasticsearchClient): Promise<string[]> => {
+  const fields = ['origin.type', 'origin.execution_id'] as const;
+  const mappings = await esClient.indices.getFieldMapping({
+    index: ACTIONS_INDEX_DEFAULT_NS,
+    fields: [...fields],
+  });
+  const indices = Object.values(mappings);
+
+  return fields.filter((field) => {
+    const leaf = field === 'origin.type' ? 'type' : 'execution_id';
+    let missing = indices.length === 0;
+    for (const { mappings: fieldMappings } of indices) {
+      const property = fieldMappings[field]?.mapping[leaf];
+      if (!property) {
+        missing = true;
+      } else if (!('type' in property) || property.type !== 'keyword') {
+        throw new Error(`Expected ${field} to be mapped as keyword`);
+      }
+    }
+
+    return missing;
+  });
+};
+
+const setUpActionsIndex = async (esClient: ElasticsearchClient, logger: Logger): Promise<void> => {
+  await createIndexIfNotExists(
     esClient,
     ACTIONS_INDEX_NAME,
     ACTIONS_INDEX_DEFAULT_NS,
@@ -38,26 +62,42 @@ const setUpActionsIndex = (esClient: ElasticsearchClient, logger: Logger): Promi
     logger
   );
 
-  return actionsIndexSetup;
+  if ((await checkActionsOriginMappings(esClient)).length === 0) {
+    return;
+  }
+
+  await esClient.indices.putMapping({
+    index: ACTIONS_INDEX_DEFAULT_NS,
+    properties: { origin: actionsMapping.properties?.origin },
+  });
+  const missingFields = await checkActionsOriginMappings(esClient);
+  if (missingFields.length > 0) {
+    throw new Error(`Missing keyword mappings for ${missingFields.join(', ')}`);
+  }
 };
 
-/**
- * Resolves once this Kibana process has applied the actions index mappings, running the setup
- * only if startup has not already started it.
- *
- * Write a newly mapped field only after this resolves. Startup applies mappings asynchronously,
- * and the actions mapping does not disable dynamic mapping. A document written first would map
- * the field dynamically (a string becomes `text`), and every later `putMapping` on the index
- * would then fail with a mapper conflict.
- */
+/** Confirms live origin keyword mappings, sharing attempts and caching only success per process. */
 export const ensureActionsIndexMappings = (
   esClient: ElasticsearchClient,
   logger: Logger
-): Promise<void> => actionsIndexSetup ?? setUpActionsIndex(esClient, logger);
+): Promise<void> => {
+  actionsIndexSetup ??= setUpActionsIndex(esClient, logger).catch((error) => {
+    actionsIndexSetup = undefined;
+    throw error;
+  });
+
+  return actionsIndexSetup;
+};
 
 export const initializeTransformsIndices = async (esClient: ElasticsearchClient, logger: Logger) =>
   Promise.all([
-    setUpActionsIndex(esClient, logger),
+    createIndexIfNotExists(
+      esClient,
+      ACTIONS_INDEX_NAME,
+      ACTIONS_INDEX_DEFAULT_NS,
+      actionsMapping,
+      logger
+    ),
     createIndexIfNotExists(
       esClient,
       ACTION_RESPONSES_INDEX_NAME,
