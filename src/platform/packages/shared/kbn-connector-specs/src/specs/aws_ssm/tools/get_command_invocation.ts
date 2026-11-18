@@ -30,7 +30,7 @@ const GetCommandInvocationInputSchema = lazySchema(() =>
       .max(PLUGIN_NAME_MAX_LENGTH)
       .optional()
       .describe(
-        'The name of the document step to read the result of. Omit it for documents with a single step, such as AWS-RunShellScript; it is required when the document has more than one step (read their names with getDocument), otherwise the call fails with InvalidPluginName.'
+        "The name of the document step to read the result of. Omit it for documents with a single step, such as AWS-RunShellScript. For a document with more than one step (read their names with getDocument), pass it to get that step's output and exit code: without it, only the overall status is returned."
       ),
   })
 );
