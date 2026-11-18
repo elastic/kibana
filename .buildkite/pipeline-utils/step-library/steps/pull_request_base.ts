@@ -128,6 +128,14 @@ export const prBaseSteps = (): readonly Step[] => [
     retry: retry.anyOnce,
   }),
   commandStep({
+    command: '.buildkite/scripts/steps/test/vitest.sh',
+    label: 'Vitest Tests',
+    agents: spotAgent('n2-standard-4', spotZones.n2),
+    key: 'vitest',
+    timeout_in_minutes: 30,
+    retry: retry.anyOnce,
+  }),
+  commandStep({
     command: '.buildkite/scripts/steps/ci_stats_ready.sh',
     label: 'Mark CI Stats as ready',
     agents: { ...onDemandAgent('n2-standard-2'), image: minimalImage },

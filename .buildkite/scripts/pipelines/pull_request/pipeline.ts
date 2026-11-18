@@ -214,6 +214,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     registerCancelKeys([
       'pick_test_group_run_order',
       'build_scout_tests',
+      'vitest',
       'report_package_metrics',
     ]);
 
