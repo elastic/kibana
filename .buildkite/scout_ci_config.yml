@@ -67,6 +67,7 @@ plugins:
     - lens
     - license_management
     - links
+    - logs_shared
     - logstash
     - maintenance_windows
     - management

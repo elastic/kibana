@@ -9,6 +9,7 @@ export type { SkillDefinition, DirectoryPath } from './type_definition';
 export {
   validateSkillDefinition,
   skillDefinitionSchema,
+  CONNECTORS_SKILLS_BASE_PATH,
   ELASTIC_SKILLS_BASE_PATH,
 } from './type_definition';
 export type { InternalSkillDefinition } from './internal';
