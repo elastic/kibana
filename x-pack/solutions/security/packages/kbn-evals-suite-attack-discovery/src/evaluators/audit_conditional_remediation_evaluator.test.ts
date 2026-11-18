@@ -259,6 +259,31 @@ describe('findUnconditionalContainment', () => {
     expect(findUnconditionalContainment(markdown)).toEqual([]);
   });
 
+  describe('commas and colons that do not end a clause', () => {
+    it.each([
+      'If alice.dev, ci-runner, or bob.analyst are confirmed compromised, revoke active sessions, rotate access keys, and enforce MFA re-enrollment.',
+      'If {{ user.name alice }}, {{ user.name bob }}, or {{ user.name carol }} is confirmed compromised, revoke active sessions, rotate keys, and enforce MFA.',
+      'Once alice, bob and carol are confirmed unauthorized, disable their keys.',
+      '- **13:18:15 UTC — Defense Evasion first (T1562.008 Impair Defenses: Disable Cloud Logs).** The rule fired twice for {{ user.name deploy-bot }}.',
+    ])('does not flag: %s', (text) => {
+      expect(findUnconditionalContainment(text)).toEqual([]);
+    });
+
+    it.each([
+      'Revoke the keys for alice, bob, or carol.',
+      'Block the IP, the host, and the user.',
+      'Next steps: block the IP, then review T1078 (Valid Accounts: Cloud Accounts) activity.',
+    ])('still flags: %s', (text) => {
+      expect(findUnconditionalContainment(text)).toHaveLength(1);
+    });
+  });
+
+  it('documented limits: a gate with no condition word is flagged', () => {
+    expect(
+      findUnconditionalContainment('For any principal confirmed compromised, revoke its sessions.')
+    ).toHaveLength(1);
+  });
+
   it('documented limits: a conditional split across sentences is flagged', () => {
     expect(findUnconditionalContainment('Verify the login first. Then revoke the key.')).toEqual([
       'Then revoke the key.',

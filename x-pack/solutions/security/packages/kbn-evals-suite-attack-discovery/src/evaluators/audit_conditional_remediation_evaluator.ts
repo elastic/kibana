@@ -252,10 +252,19 @@ const splitSentences = (line: string): string[] =>
     )
     .filter((segment) => segment.length > 0);
 
+/** A list of one-word items ("alice, bob, or carol"); its commas do not end a clause. */
+const SERIAL_LIST = /[\w.@`'/-]+(?:,\s+[\w.@`'/-]+)+,?\s+(?:and|or)\s+[\w.@`'/-]+/g;
+/** The colon in a MITRE technique name ("T1562.008 (Impair Defenses: Disable Cloud Logs)"). */
+const TECHNIQUE_NAME_COLON = /\bT\d{4}(?:\.\d{3})?\)?\s*\(?[^,:;.()]{1,60}:/g;
+const KEPT_COMMA = '\u0001';
+const KEPT_COLON = '\u0002';
+
 const splitClauses = (sentence: string): string[] =>
   sentence
+    .replace(SERIAL_LIST, (list) => list.split(',').join(KEPT_COMMA))
+    .replace(TECHNIQUE_NAME_COLON, (name) => `${name.slice(0, -1)}${KEPT_COLON}`)
     .split(/\s*[,:]\s+|\s*[,:]$/)
-    .map((clause) => clause.trim())
+    .map((clause) => clause.split(KEPT_COMMA).join(',').split(KEPT_COLON).join(':').trim())
     .filter((clause) => clause.length > 0);
 
 const isAnaphoricCue = (clause: string, previousSentence: string): boolean =>
@@ -350,7 +359,8 @@ export const findUnconditionalContainment = (markdown: string): string[] => {
  * governing condition; N/A when nothing is scored.
  *
  * Heuristic, regex based; it does not parse grammar. Each sentence is split into clauses at
- * commas and colons. A clause is an instruction when a containment verb opens it ("Revoke the
+ * commas and colons, except the commas of a one-word list ("If alice, bob, or carol is confirmed
+ * compromised") and the colon in a MITRE technique name. A clause is an instruction when a containment verb opens it ("Revoke the
  * key", "Next steps: revoke the key", "To contain it, isolate the host"), follows a directive
  * (should, must, recommend, prioritize, "critical to", "steps include revoking", "should include
  * isolating"), is joined to an earlier instruction with and/then/or, is a gerund under a
@@ -368,6 +378,7 @@ export const findUnconditionalContainment = (markdown: string): string[] => {
  * and the clauses after it, and the clauses before it when it opens with the cue.
  *
  * Known misses: a conditional split across sentences ("Verify first. Then revoke.") is flagged;
+ * so is a gate with no condition word ("for any principal confirmed compromised, revoke ...");
  * past forms ("the key was revoked") are never flagged; a verb used mid-clause with no
  * directive frame ("the team can disable it") is not flagged; a gerund after before/after
  * ("before revoking it") is never an instruction. Treat it as a screen for review, not a verdict.
