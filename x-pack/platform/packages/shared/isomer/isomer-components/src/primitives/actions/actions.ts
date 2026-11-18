@@ -9,12 +9,19 @@ import { navigationHref, z, type PrimitiveNode } from '@elastic/isomer-sdk';
 import { fromChildren } from '@elastic/isomer-sdk/author';
 import { SLACK_LIMITS } from '@elastic/isomer-sdk/slack';
 
-import { actionEventSchema, componentIcon, definePrimitive, oneLine, plainText } from '../../lib';
+import {
+  actionEventSchema,
+  componentIcon,
+  definePrimitive,
+  eventFallbackSchema,
+  oneLine,
+  plainText,
+} from '../../lib';
 import { appPathSchema, appRouteSchema } from '../link/link_target';
 
 import { actionsReactRenderer } from './actions_react';
 import { actionsSlackRenderer } from './actions_slack';
-import { actionsMarkdownRenderer } from './actions_markdown';
+import { actionsMarkdownRenderer, eventFallback } from './actions_markdown';
 
 /** Requires exactly one of `url`, `app` or `event`, and `path` only with `app`. */
 const refineButtonTarget = (
@@ -61,6 +68,7 @@ const actionsSchema = z.object({
     z.array(buttonSchema).min(1).max(5).describe('Buttons, in order. 1 to 5.'),
     { text: 'label' }
   ),
+  fallback: eventFallbackSchema,
 });
 
 const example: ActionsNode = {
@@ -109,19 +117,21 @@ export const actions = definePrimitive<ActionsNode, typeof actionsSchema>({
         { label: 'Delete', event: { name: 'confirm', context: { allow: true } }, danger: true },
         { label: 'Cancel', event: { name: 'confirm', context: { allow: false } } },
       ],
+      fallback: 'Reply yes or no.',
     },
   ],
   renderers: {
     react: actionsReactRenderer,
-    text: ({ buttons }) =>
-      buttons
-        .flatMap(({ label, url, event }) => {
+    text: ({ buttons, fallback }) =>
+      [
+        ...buttons.flatMap(({ label, url, event }) => {
           if (event) {
             return [oneLine(label)];
           }
           return url ? [`${oneLine(label)}: ${url}`] : [];
-        })
-        .join('\n'),
+        }),
+        ...eventFallback({ buttons, fallback }),
+      ].join('\n'),
     markdown: actionsMarkdownRenderer,
     slack: actionsSlackRenderer,
   },

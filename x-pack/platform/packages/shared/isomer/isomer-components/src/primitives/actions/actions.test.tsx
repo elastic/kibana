@@ -221,6 +221,35 @@ describe('actions', () => {
     });
   });
 
+  describe('fallback', () => {
+    const approve = { label: 'Delete', event: { name: 'confirm', context: { allow: true } } };
+    const cancel = { label: 'Keep', event: { name: 'confirm', context: { allow: false } } };
+    const node: ActionsNode = {
+      type: 'actions',
+      buttons: [approve, cancel],
+      fallback: 'Reply yes or no.',
+    };
+
+    it('follows the buttons in text and Markdown, where nothing can be clicked', () => {
+      expect(surfaces.markdown.renderNode(node)).toBe('Delete · Keep\n\nReply yes or no.');
+      expect(surfaces.text.renderNode(node)).toBe('Delete\nKeep\nReply yes or no.');
+    });
+
+    it('is left out where the buttons work', () => {
+      const markup = renderToStaticMarkup(surfaces.react.renderNode(node));
+
+      expect(JSON.stringify(surfaces.slack.renderNode(node).blocks)).not.toContain('Reply');
+      expect(markup).not.toContain('Reply');
+    });
+
+    it('is left out when no button raises an event', () => {
+      const linksOnly: ActionsNode = { ...node, buttons: [{ label: 'Docs', url: URL }] };
+
+      expect(surfaces.markdown.renderNode(linksOnly)).toBe(`[Docs](${URL})`);
+      expect(surfaces.text.renderNode(linksOnly)).toBe(`Docs: ${URL}`);
+    });
+  });
+
   it('fills the primary button in React', () => {
     const markup = renderToStaticMarkup(
       surfaces.react.renderNode(links({ label: 'Investigate', url: URL, primary: true }))

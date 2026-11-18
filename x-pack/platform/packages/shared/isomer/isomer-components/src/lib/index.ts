@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { actionEventSchema, eventNameSchema } from './action_event';
+export { actionEventSchema, eventFallbackSchema, eventNameSchema } from './action_event';
 export { clampEscapedMrkdwn } from './clamp_escaped_mrkdwn';
 export { definePrimitive, type ComponentsPackTypes, type ComponentsRenderContext } from './define';
 export { componentIcon, type IconPaint } from './icon';

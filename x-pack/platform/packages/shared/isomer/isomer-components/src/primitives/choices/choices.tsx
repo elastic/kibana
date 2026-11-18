@@ -12,7 +12,14 @@ import { fromChildren } from '@elastic/isomer-sdk/author';
 import { md } from '@elastic/isomer-sdk/markdown';
 import { SLACK_LIMITS } from '@elastic/isomer-sdk/slack';
 import { classNames, isomerDistillery } from '@kbn/isomer-theme';
-import { componentIcon, definePrimitive, eventNameSchema, oneLine, plainText } from '../../lib';
+import {
+  componentIcon,
+  definePrimitive,
+  eventFallbackSchema,
+  eventNameSchema,
+  oneLine,
+  plainText,
+} from '../../lib';
 import { choicesSlackRenderer } from './choices_slack';
 
 const optionSchema = z
@@ -42,6 +49,7 @@ const choicesSchema = z.object({
       .describe('Options, in order. 1 to 10.'),
     { text: 'label' }
   ),
+  fallback: eventFallbackSchema,
 });
 
 /** Options the reader chooses from, one or several, for a host that handles the choice. */
@@ -115,6 +123,7 @@ export const choices = definePrimitive<ChoicesNode, typeof choicesSchema>({
         { label: 'checkout', value: 'checkout' },
         { label: 'payments-api', value: 'payments-api' },
       ],
+      fallback: 'Reply with the numbers of the services.',
     },
   ],
   renderers: {
@@ -140,13 +149,18 @@ export const choices = definePrimitive<ChoicesNode, typeof choicesSchema>({
         ))}
       </fieldset>
     ),
-    text: ({ options }) =>
-      options.map((option, index) => `${index + 1}. ${optionLine(option)}`).join('\n'),
-    markdown: ({ options }) =>
+    text: ({ options, fallback }) =>
+      [
+        ...options.map((option, index) => `${index + 1}. ${optionLine(option)}`),
+        ...(fallback ? [oneLine(fallback)] : []),
+      ].join('\n'),
+    markdown: ({ options, fallback }) => [
       md.list(
         options.map((option) => md.paragraph(optionLine(option))),
         { ordered: true }
       ),
+      ...(fallback ? [md.paragraph(oneLine(fallback))] : []),
+    ],
     slack: choicesSlackRenderer,
   },
 });

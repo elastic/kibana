@@ -73,6 +73,19 @@ describe('choices', () => {
     expect(surfaces.markdown.renderNode(node())).toBe('1. Production — Live traffic\n2. Staging');
   });
 
+  it('adds the fallback in text and Markdown only, where nothing can be chosen', () => {
+    const withFallback = node({ fallback: 'Reply with the number of an option.' });
+
+    expect(surfaces.text.renderNode(withFallback)).toBe(
+      '1. Production — Live traffic\n2. Staging\nReply with the number of an option.'
+    );
+    expect(surfaces.markdown.renderNode(withFallback)).toBe(
+      '1. Production — Live traffic\n2. Staging\n\nReply with the number of an option.'
+    );
+    expect(JSON.stringify(surfaces.slack.renderNode(withFallback).blocks)).not.toContain('Reply');
+    expect(renderToStaticMarkup(surfaces.react.renderNode(withFallback))).not.toContain('Reply');
+  });
+
   it('renders radio inputs in React, and checkboxes when several can be chosen', () => {
     const single = renderToStaticMarkup(surfaces.react.renderNode(node()));
     const several = renderToStaticMarkup(surfaces.react.renderNode(node({ multiple: true })));
