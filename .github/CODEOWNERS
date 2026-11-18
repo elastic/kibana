@@ -3034,6 +3034,8 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/security-scout-best-practices-reviewer @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/test-plan-generator @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/test-plan-generator/references/critical-workflows-security-solution.md @elastic/security-engineering-productivity @elastic/security-solution
+/x-pack/solutions/security/plugins/security_solution/.agents/skills/test-plan-triage @elastic/security-engineering-productivity
+/x-pack/solutions/security/plugins/security_solution/.claude/skills @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fixer @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-reproduce @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fix @elastic/security-engineering-productivity
@@ -3161,6 +3163,7 @@ x-pack/platform/plugins/shared/entity_store/common/domain/definitions/dynamic @e
 
 /x-pack/solutions/security/plugins/security_solution/test/scout/agent_builder/ @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ @elastic/security-investigations
+/x-pack/solutions/security/plugins/security_solution/test/scout/onboarding/ @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/test/scout/overview/ @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/test/scout/timelines/ @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ @elastic/security-investigations
@@ -3613,6 +3616,7 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/ @elastic/security-defend-workflows
 /x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/test/scout/edr_artifacts/ @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution/test/scout/edr_endpoints/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/ @elastic/security-defend-workflows

@@ -44,7 +44,7 @@ describe('sessionsSearch', () => {
         histogram: { interval: INTERVAL, timeZone: TIME_ZONE },
       })
     ).toMatchObject({
-      index: 'digital-experience-sessions-*',
+      index: 'digital-experience-sessions-browser-*',
       size: 0,
       track_total_hits: false,
       ignore_unavailable: true,

@@ -428,6 +428,32 @@ describe('WorkflowCrudService', () => {
       ).rejects.toThrow();
     });
 
+    it('reads more ids than one search returns in several searches', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({ hits: { hits: [] } });
+      const ids = Array.from({ length: 10_001 }, (_, index) => `wf-${index}`);
+
+      const service = new WorkflowCrudService(deps);
+      await service.getWorkflowsSourceByIds(ids, 'default', ['name']);
+
+      expect(client.search.mock.calls.map(([params]) => params.size)).toEqual([10_000, 1]);
+      expect(client.search.mock.calls[0][0]).not.toHaveProperty('allow_partial_search_results');
+    });
+
+    it('fails rather than return partial results when asked to', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({ hits: { hits: [] } });
+
+      const service = new WorkflowCrudService(deps);
+      await service.getWorkflowsSourceByIds(['wf-1'], 'default', ['name'], {
+        allowPartialResults: false,
+      });
+
+      expect(client.search).toHaveBeenCalledWith(
+        expect.objectContaining({ allow_partial_search_results: false })
+      );
+    });
+
     it('uses _source: true when no source fields specified', async () => {
       const { deps, client } = makeDeps();
       client.search.mockResolvedValue({ hits: { hits: [] } });
@@ -1388,12 +1414,12 @@ describe('WorkflowCrudService', () => {
       client.search
         .mockResolvedValueOnce({
           hits: {
-            hits: [occSearchHit('wf-1', { version: 4 }, 7, 2)],
+            hits: [occSearchHit('wf-1', { version: 4, workflowUid: 'uid-kept' }, 7, 2)],
           },
         })
         .mockResolvedValueOnce({
           hits: {
-            hits: [occSearchHit('wf-1', { version: 4 }, 7, 2)],
+            hits: [occSearchHit('wf-1', { version: 4, workflowUid: 'uid-kept' }, 7, 2)],
           },
         });
       client.index.mockResolvedValue({ result: 'updated', _seq_no: 8, _primary_term: 2 });
@@ -1418,9 +1444,36 @@ describe('WorkflowCrudService', () => {
           refresh: true,
           if_seq_no: 7,
           if_primary_term: 2,
-          document: expect.objectContaining({ version: 5 }),
+          document: expect.objectContaining({ version: 5, workflowUid: 'uid-kept' }),
         })
       );
+    });
+
+    it('overwrite=true does not assign a workflowUid when the stored document has none', async () => {
+      const { deps, client } = makeDeps();
+      client.search
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [occSearchHit('wf-1', { version: 4 }, 7, 2)],
+          },
+        })
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [occSearchHit('wf-1', { version: 4 }, 7, 2)],
+          },
+        });
+      client.index.mockResolvedValue({ result: 'updated', _seq_no: 8, _primary_term: 2 });
+
+      const service = new WorkflowCrudService(deps);
+      await service.bulkCreateWorkflows(
+        [{ id: 'wf-1', yaml: validYaml('A') }],
+        'default',
+        request,
+        { overwrite: true }
+      );
+
+      const indexed = client.index.mock.calls[0][0].document;
+      expect(indexed.workflowUid).toBeUndefined();
     });
 
     it('overwrite=true resurrects a soft-deleted tombstone in the same space', async () => {
@@ -2959,6 +3012,39 @@ describe('WorkflowCrudService', () => {
         })
       );
 
+      jest.restoreAllMocks();
+    });
+
+    it('previews the same enabled state that saving YAML without top-level enabled stores', async () => {
+      const yamlWithoutTopLevelEnabled = 'name: Parsed Workflow\nsteps: []';
+      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockResolvedValue({
+        updatedDataPatch: {
+          definition: {
+            name: 'Parsed Workflow',
+            enabled: true,
+            version: '1' as const,
+            triggers: [],
+            steps: [],
+          },
+          name: 'Parsed Workflow',
+          enabled: true,
+          triggerTypes: [],
+          valid: true,
+          yaml: yamlWithoutTopLevelEnabled,
+        },
+        validationErrors: [],
+        shouldUpdateScheduler: true,
+      });
+
+      const service = new WorkflowCrudService(makeDeps().deps);
+      const definition = await service.getDefinitionToStore(
+        yamlWithoutTopLevelEnabled,
+        { id: 'wf-1', enabled: false },
+        'default',
+        request
+      );
+
+      expect(definition).toMatchObject({ name: 'Parsed Workflow', enabled: false });
       jest.restoreAllMocks();
     });
 
@@ -4754,7 +4840,7 @@ describe('managed orphan cleanup without a request', () => {
     };
 
     it('deletes the observed revision of a bound orphan and leaves its binding', async () => {
-      const { core, bindings, client, service } = setup();
+      const { core, bindings, client, deps, service } = setup();
 
       await expect(service.deleteManagedOrphan('system-orphan', 'default', ORPHAN)).resolves.toBe(
         true
@@ -4768,6 +4854,8 @@ describe('managed orphan cleanup without a request', () => {
       );
       expectBindingUntouched(bindings);
       expect(core.elasticsearch.client.asScoped).not.toHaveBeenCalled();
+      expect(deps.workflowExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
+      expect(deps.stepExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
     });
 
     it('deletes an unbound orphan', async () => {

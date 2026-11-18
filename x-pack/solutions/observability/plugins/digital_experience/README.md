@@ -86,7 +86,8 @@ change of their status shows up within that time:
 - sessions are set up, the task's last run succeeded, it isn't lagging, and it has caught up since
   sessions were enabled, so a build in progress is never shown as lower numbers;
 - the time range starts within the sessions' 30 day lookback (from the start of that day, in UTC);
-- the user can read `digital-experience-sessions-*`, otherwise the raw events are read quietly;
+- the user can read `digital-experience-sessions-browser-*`, which a `digital-experience-sessions-*`
+  grant covers, otherwise the raw events are read quietly;
 - the sessions hold at least one application, so applications that send no `session.id`, which the
   summaries skip, still appear when no application sends one.
 
@@ -276,12 +277,22 @@ A tab of EDOT Browser applications only, as sessions are built from EDOT Browser
 ## Sessions
 
 A Task Manager task (`digital_experience:sessions-summaries`, every minute) summarizes EDOT Browser
-sessions from `traces-*.otel-*,logs-*.otel-*` into `digital-experience-sessions-<version>` with
+sessions from `traces-*.otel-*,logs-*.otel-*` into `digital-experience-sessions-browser-<version>` with
 ES|QL, one document per `service.name` + `session.id`: start/end time and duration, page views with
 entry/exit page and journey, page loads, clicks, JS errors, HTTP requests and failed requests, p75
 Core Web Vitals with their samples by rating, and environment, user, browser, OS and geo attributes.
 Like the applications list, it only reads browser SDK data (`telemetry.sdk.language: webjs`), and it
 skips events with an empty `service.name` or `session.id`.
+
+The Sessions tab, the session detail and the applications list read `digital-experience-sessions-browser-*`,
+and the index template covers only that pattern, so session summaries of another platform under
+`digital-experience-sessions-*` never mix with the browser ones. The privileges below name
+`digital-experience-sessions-*`, which covers the browser index.
+
+Setups that enabled sessions before the index was named `digital-experience-sessions-browser-<version>`
+keep an unused `digital-experience-sessions-1` index, which can be deleted. Delete their old
+`digital-experience-sessions` index template before enabling sessions again, so it does not conflict
+with the new `digital-experience-sessions-browser` template.
 
 Each run:
 
@@ -386,7 +397,7 @@ After the checks, enabling runs these steps, and a failure answers 500 naming th
 (`attributes.data.step`) with its details in the server log:
 
 1. `credentials`: Kibana can store an API key, so `xpack.encryptedSavedObjects.encryptionKey` is set.
-2. `template`: puts the `digital-experience-sessions` index template, as Kibana's internal user.
+2. `template`: puts the `digital-experience-sessions-browser` index template, as Kibana's internal user.
 3. `index`: creates the sessions index, as the user.
 4. `task`: schedules the summaries task with an API key that Task Manager grants on the user's behalf,
    and runs it right away.

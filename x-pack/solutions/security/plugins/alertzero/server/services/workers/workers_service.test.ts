@@ -23,7 +23,10 @@ import {
   getManagedWorkflowDefinition,
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
-import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
+import type {
+  ManagedWorkflowStatus,
+  PluginScopedManagedWorkflowsApi,
+} from '@kbn/workflows/server/types';
 import { ThreatIntelSupplyService } from '../threat_intel_supply';
 import type { SupplyDocumentStates } from '../threat_intel_supply/keyed_supply_store.mock';
 import {
@@ -123,7 +126,7 @@ const createPersistentHarness = () => {
       managedBy: document ? 'alertzero' : null,
       storedVersion: document ? 1 : null,
       registryVersion: 1,
-      storedHash: document ? 'stored' : null,
+      storedHash: document ? 'registry' : null,
       registryHash: 'registry',
     };
   });
@@ -763,6 +766,54 @@ describe('WorkersService', () => {
     const worker = await service.get(TRIAGE, request, SPACE);
 
     expect(worker?.workflowId).toBeNull();
+  });
+
+  describe('workflowOutdated', () => {
+    const statusReport = (id: string, status: ManagedWorkflowStatus) => ({
+      status,
+      workflowId: reportedWorkflowId(id, SPACE),
+      definitionId: id,
+      spaceId: SPACE,
+      installed: status !== 'missing',
+      enabled: status === 'missing' ? null : status !== 'disabled',
+      valid: status === 'missing' ? null : status !== 'invalid',
+      managedBy: status === 'missing' || status === 'not_managed' ? null : 'alertzero',
+      storedVersion: status === 'missing' ? null : 1,
+      registryVersion: 1,
+      storedHash: status === 'missing' ? null : status === 'drifted' ? 'stored' : 'registry',
+      registryHash: 'registry',
+    });
+
+    it.each([
+      ['drifted', true],
+      ['intact', false],
+      ['disabled', false],
+      ['invalid', false],
+      ['missing', false],
+      ['not_managed', false],
+    ] as const)('reads a %s copy as %s', async (status, expected) => {
+      const harness = createPersistentHarness();
+      (harness.managedWorkflows.getWorkflowStatus as jest.Mock).mockResolvedValue(
+        statusReport(TRIAGE, status)
+      );
+
+      const worker = await harness.createService().get(TRIAGE, request, SPACE);
+
+      expect(worker?.workflowOutdated).toBe(expected);
+    });
+
+    it('lists only the drifted Worker as outdated', async () => {
+      const harness = createPersistentHarness();
+      (harness.managedWorkflows.getWorkflowStatus as jest.Mock).mockImplementation(
+        async (id: string) => statusReport(id, id === TRIAGE ? 'drifted' : 'intact')
+      );
+
+      const { workers } = await harness.createService().list(request, SPACE);
+
+      expect(workers.map(({ id, workflowOutdated }) => [id, workflowOutdated])).toEqual(
+        WORKERS_WITHOUT_FORENSIC_SKILL.map((id) => [id, id === TRIAGE])
+      );
+    });
   });
 
   it('projects skills from the installed workflow definition when the worker is installed', async () => {

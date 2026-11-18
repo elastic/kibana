@@ -10,7 +10,7 @@
     "browser": false,
     "server": true,
     "configPath": ["xpack", "nightshiftDetection"],
-    "requiredPlugins": ["significantEvents", "nightshiftSources", "licensing"],
+    "requiredPlugins": ["significantEvents", "nightshiftSources", "licensing", "spaces"],
     "optionalPlugins": ["cloud"],
     "requiredBundles": []
   }
