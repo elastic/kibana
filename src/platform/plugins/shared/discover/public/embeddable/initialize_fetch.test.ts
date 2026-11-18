@@ -48,6 +48,14 @@ const reportWarnings =
       callback?.(warning, { request: {}, response: {} as SearchResponse, requestId: undefined })
     );
 
+const createDeferred = <T>() => {
+  let resolve: (value: T) => void = () => {};
+  const promise = new Promise<T>((res) => {
+    resolve = res;
+  });
+  return { promise, resolve };
+};
+
 const createWarning = (requestName: string): SearchResponseWarning => ({
   type: 'incomplete',
   requestName,
@@ -199,6 +207,10 @@ describe('initialize fetch', () => {
       await fetchMore?.();
 
       expect(nextPage).toHaveBeenCalledTimes(1);
+      expect(nextPage).toHaveBeenCalledWith({
+        abortSignal: expect.any(AbortSignal),
+        executionContext: expect.any(Object),
+      });
       expect(stateManager.rows.getValue()).toEqual(
         [...firstPage, ...secondPage].map((hit) => buildDataTableRecord(hit, dataViewMock))
       );
@@ -293,6 +305,123 @@ describe('initialize fetch', () => {
 
       expect(showWarnings).not.toHaveBeenCalled();
       expect(mockedApi.fetchWarnings$.getValue()).toEqual([initialWarning]);
+    });
+
+    it('should ignore another request while a page is loading', async () => {
+      const page = createDeferred<unknown>();
+      const nextPage = jest.fn().mockReturnValue(page.promise);
+      discoverServiceMock.data.search.dslPaginated = jest.fn().mockResolvedValue({
+        rawResponse: { hits: { hits: firstPage, total: 2 } },
+        pagination: createPagination(true, nextPage),
+      });
+      mockedApi.savedSearch$.next(savedSearch);
+      await waitOneTick();
+
+      const firstRequest = fetchMore?.();
+      await waitOneTick();
+      await fetchMore?.(); // e.g. a double click
+
+      expect(nextPage).toHaveBeenCalledTimes(1);
+
+      page.resolve({
+        rawResponse: { hits: { hits: secondPage, total: 2 } },
+        pagination: createPagination(false),
+      });
+      await firstRequest;
+
+      expect(stateManager.rows.getValue()).toHaveLength(2);
+      expect(stateManager.isLoadingMore.getValue()).toBe(false);
+    });
+
+    it('should leave the rows, pagination and loading state alone when no page came back', async () => {
+      const pagination = createPagination(true, jest.fn().mockResolvedValue(null));
+      discoverServiceMock.data.search.dslPaginated = jest.fn().mockResolvedValue({
+        rawResponse: { hits: { hits: firstPage, total: 2 } },
+        pagination,
+      });
+      mockedApi.savedSearch$.next(savedSearch);
+      await waitOneTick();
+
+      await fetchMore?.();
+
+      expect(stateManager.rows.getValue()).toHaveLength(1);
+      expect(stateManager.pagination.getValue()).toBe(pagination);
+      expect(stateManager.isLoadingMore.getValue()).toBe(false);
+      expect(mockedApi.dataLoading$.getValue()).toBe(false);
+      expect(mockedApi.searchError$.getValue()).toBeUndefined();
+    });
+
+    it('should do nothing without pagination', async () => {
+      stateManager.pagination.next(undefined); // e.g. an ES|QL panel, or before the first page
+      const dataLoadingBefore = mockedApi.dataLoading$.getValue();
+
+      await fetchMore?.();
+
+      expect(stateManager.isLoadingMore.getValue()).toBe(false);
+      expect(mockedApi.dataLoading$.getValue()).toBe(dataLoadingBefore);
+      expect(mockedApi.searchError$.getValue()).toBeUndefined();
+    });
+
+    it('should leave the loading state to a refetch that replaced the request', async () => {
+      const nextPage = jest.fn().mockImplementation(
+        (options: { abortSignal: AbortSignal }) =>
+          new Promise((_resolve, reject) => {
+            options.abortSignal.addEventListener('abort', () => reject(new Error('aborted')));
+          })
+      );
+      discoverServiceMock.data.search.dslPaginated = jest
+        .fn()
+        .mockResolvedValueOnce({
+          rawResponse: { hits: { hits: firstPage, total: 2 } },
+          pagination: createPagination(true, nextPage),
+        })
+        .mockReturnValue(new Promise(() => {})); // the refetch is still running
+      mockedApi.savedSearch$.next(savedSearch);
+      await waitOneTick();
+
+      const pending = fetchMore?.();
+      await waitOneTick();
+      expect(stateManager.isLoadingMore.getValue()).toBe(true);
+
+      mockedApi.savedSearch$.next(savedSearch); // a refetch replaces the request
+      await waitOneTick();
+      await pending;
+
+      // The refetch cleared the old pagination, and it owns the loading state, not the old request
+      expect(stateManager.pagination.getValue()).toBeUndefined();
+      expect(stateManager.isLoadingMore.getValue()).toBe(false);
+      expect(mockedApi.dataLoading$.getValue()).toBe(true);
+      expect(mockedApi.searchError$.getValue()).toBeUndefined();
+    });
+
+    it('should not append a page that arrives after the data view went away', async () => {
+      const page = createDeferred<unknown>();
+      discoverServiceMock.data.search.dslPaginated = jest.fn().mockResolvedValue({
+        rawResponse: { hits: { hits: firstPage, total: 2 } },
+        pagination: createPagination(true, jest.fn().mockReturnValue(page.promise)),
+      });
+      mockedApi.savedSearch$.next(savedSearch);
+      await waitOneTick();
+
+      // The api is shared by the tests of this file, so the data view is put back afterwards
+      const dataViews = mockedApi.dataSources$.getValue();
+      try {
+        const pending = fetchMore?.();
+        await waitOneTick();
+        mockedApi.dataSources$.next(undefined);
+        await waitOneTick();
+        page.resolve({
+          rawResponse: { hits: { hits: secondPage, total: 2 } },
+          pagination: createPagination(false),
+        });
+        await pending;
+
+        expect(stateManager.rows.getValue()).toHaveLength(1);
+        expect(mockedApi.searchError$.getValue()).toBeUndefined();
+      } finally {
+        mockedApi.dataSources$.next(dataViews);
+        await waitOneTick();
+      }
     });
 
     it('should surface an error from loading the next page and stop loading', async () => {

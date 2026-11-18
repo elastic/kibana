@@ -241,6 +241,95 @@ describe('saved search embeddable', () => {
       });
     });
 
+    describe('load more', () => {
+      const createHits = (ids: number[]) =>
+        ids.map((id) => ({
+          _id: `${id}`,
+          _index: 'the-data-view',
+          _source: { message: `message ${id}` },
+          sort: [id],
+        }));
+
+      const mockPaginatedSearch = ({
+        hasNextPage,
+        nextPage,
+        total,
+      }: {
+        hasNextPage: boolean;
+        nextPage: jest.Mock;
+        total: number;
+      }) => {
+        discoverServiceMock.data.search.dslPaginated = jest.fn().mockResolvedValue({
+          rawResponse: { hits: { hits: createHits([1, 2]), total } },
+          pagination: { hasNextPage: jest.fn().mockReturnValue(hasNextPage), nextPage },
+        }) as unknown as typeof discoverServiceMock.data.search.dslPaginated;
+      };
+
+      const renderPanel = async () => {
+        runtimeState = getInitialRuntimeState();
+        const { Component, api } = await factory.buildEmbeddable({
+          initializeDrilldownsManager: mockInitializeDrilldownsManager,
+          initialState: { ref_id: 'id', overrides: {} },
+          finalizeApi: finalizeApiMock,
+          uuid,
+          parentApi: mockedDashboardApi,
+        });
+        await waitOneTick(); // wait for build to complete
+        const panel = render(<Component />);
+        // the footer shows while fewer rows than hits are loaded
+        await panel.findByTestId('unifiedDataTableFooter');
+        return { panel, api };
+      };
+
+      it('loads the next page from the Load more link', async () => {
+        const nextPage = jest.fn().mockResolvedValue({
+          rawResponse: { hits: { hits: createHits([3]), total: 3 } },
+          pagination: { hasNextPage: jest.fn().mockReturnValue(false), nextPage: jest.fn() },
+        });
+        mockPaginatedSearch({ hasNextPage: true, nextPage, total: 3 });
+        const { panel } = await renderPanel();
+
+        await userEvent.click(await panel.findByTestId('dscGridSampleSizeFetchMoreLink'));
+
+        await waitFor(() => expect(nextPage).toHaveBeenCalledTimes(1));
+        // every hit is loaded now, so there is nothing left to offer
+        await waitFor(() => {
+          expect(panel.queryByTestId('unifiedDataTableFooter')).not.toBeInTheDocument();
+        });
+      });
+
+      it('does not offer Load more when no next page can be loaded', async () => {
+        // The total counts more hits than can be loaded, e.g. hits on a failed shard
+        mockPaginatedSearch({ hasNextPage: false, nextPage: jest.fn(), total: 5 });
+
+        const { panel } = await renderPanel();
+
+        expect(panel.queryByTestId('dscGridSampleSizeFetchMoreLink')).not.toBeInTheDocument();
+      });
+
+      it('aborts the page that is loading when the panel requests are cancelled', async () => {
+        const nextPage = jest.fn().mockImplementation(
+          (options: { abortSignal: AbortSignal }) =>
+            new Promise((_resolve, reject) => {
+              options.abortSignal.addEventListener('abort', () => reject(new Error('aborted')));
+            })
+        );
+        mockPaginatedSearch({ hasNextPage: true, nextPage, total: 3 });
+        const { panel, api } = await renderPanel();
+
+        await userEvent.click(await panel.findByTestId('dscGridSampleSizeFetchMoreLink'));
+        await waitFor(() => expect(nextPage).toHaveBeenCalledTimes(1));
+        expect(api.dataLoading$.getValue()).toBe(true);
+
+        act(() => api.cancelRequests());
+
+        await waitFor(() => {
+          expect(nextPage.mock.calls[0][0].abortSignal.aborted).toBe(true);
+          expect(api.dataLoading$.getValue()).toBe(false);
+        });
+      });
+    });
+
     it('should render field stats table in AGGREGATED_LEVEL view mode and not fetch documents', async () => {
       const { search } = createSearchFnMock(0);
       runtimeState = getInitialRuntimeState({
