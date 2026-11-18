@@ -177,8 +177,8 @@ export function UnifiedDocViewerFlyout({
 
   const onKeyDown = useCallback(
     (ev: React.KeyboardEvent) => {
-      if (ev.target instanceof HTMLElement && ev.target.closest('.euiDataGrid__content')) {
-        // ignore events triggered from the data grid
+      if (ev.target instanceof HTMLElement && ev.target.closest('[role="grid"]')) {
+        // ignore events triggered from a data grid, which uses the arrow keys to move between cells
         return;
       }
 
