@@ -22,7 +22,7 @@ import {
 } from './esql_panels';
 
 /** Bump when the dashboard changes. Installed dashboards with a lower version are overwritten. */
-export const SYSTEM_EVENTS_DASHBOARD_VERSION = 1;
+export const SYSTEM_EVENTS_DASHBOARD_VERSION = 2;
 
 // Pin the dashboard SO past the legacy embeddable migrations, as the Agent Builder and
 // inference dashboards do.
@@ -34,6 +34,7 @@ const SECTION = {
   extraction: 'entity-store-extraction-3d',
   extractionTrend: 'entity-store-extraction-30d',
   snapshotAndMaintainers: 'entity-store-snapshot-maintainers-30d',
+  changes: 'entity-store-engine-changes',
   details: 'entity-store-details',
 } as const;
 
@@ -67,6 +68,12 @@ const TASK_LABEL = `CASE(event.action == "maintainer", CONCAT("maintainer: ", en
 /** The reason (when there is one) and the error of a failed run. */
 const FAILURE_TEXT = `CASE(event.reason IS NOT NULL AND error.message IS NOT NULL, CONCAT(event.reason, ": ", error.message), error.message IS NOT NULL, error.message, event.reason IS NOT NULL, event.reason, "${NO_VALUE}")`;
 
+/** What a lifecycle doc acted on: a maintainer, or an entity type (and process). */
+const LIFECYCLE_TARGET = `COALESCE(entity_store.maintainer_id, CONCAT(entity_store.entity_type, COALESCE(CONCAT(" · ", entity_store.mode), "")))`;
+
+/** A lifecycle doc as a task name, such as "lifecycle: start_process user · nonPriority". */
+const LIFECYCLE_LABEL = `CONCAT("lifecycle: ", event.action, COALESCE(CONCAT(" ", ${LIFECYCLE_TARGET}), ""))`;
+
 const SECONDS = 'event.duration / 1000000000.0';
 
 const gridIn =
@@ -80,10 +87,15 @@ const gridIn =
     sectionId?: string;
   } => ({ x, y, w, h, ...(sectionId ? { sectionId } : {}) });
 
-/** One row per task, with the time of its last failure and last success in the range. */
-const perTaskStatus = (runStreams: string) => `FROM ${runStreams}
-| ${IN_RANGE} AND event.kind == "run"
-| EVAL Task = ${TASK_LABEL}, ok_at = CASE(event.outcome == "success", @timestamp, null), fail_at = CASE(event.outcome == "failure", @timestamp, null), failed = CASE(event.outcome == "failure", 1, 0), failure_text = CASE(event.outcome == "failure", ${FAILURE_TEXT}, null)
+/**
+ * One row per task, with the time of its last failure and last success in the range. With
+ * `includeLifecycle`, engine changes count as tasks too, so a later success clears a failed one.
+ */
+const perTaskStatus = (runStreams: string, { includeLifecycle = false } = {}) => `FROM ${runStreams}
+| ${IN_RANGE} AND ${
+  includeLifecycle ? '(event.kind == "run" OR event.kind == "lifecycle")' : 'event.kind == "run"'
+}
+| EVAL Task = CASE(event.kind == "lifecycle", ${LIFECYCLE_LABEL}, ${TASK_LABEL}), ok_at = CASE(event.outcome == "success", @timestamp, null), fail_at = CASE(event.outcome == "failure", @timestamp, null), failed = CASE(event.outcome == "failure", 1, 0), failure_text = CASE(event.outcome == "failure", ${FAILURE_TEXT}, null)
 | STATS Failures = SUM(failed), last_failure = MAX(fail_at), last_success = MAX(ok_at), last_error = LAST(failure_text, fail_at) BY Task`;
 
 const IS_FAILING =
@@ -169,10 +181,10 @@ const attentionPanels = (extractionRuns: string, events: string) => {
   return [
     tablePanel({
       panelId: 'attention-failing-tasks',
-      title: 'Tasks with failures (failing first)',
+      title: 'Tasks and engine changes with failures (failing first)',
       grid: grid(0, 0, 48, 14),
       index: runStreams,
-      esql: `${perTaskStatus(runStreams)}
+      esql: `${perTaskStatus(runStreams, { includeLifecycle: true })}
 | WHERE Failures > 0
 | EVAL Status = CASE(${IS_FAILING}, "Failing", "Recovered"), \`Last failure\` = ${when(
         'last_failure'
@@ -364,9 +376,38 @@ const snapshotAndMaintainerPanels = (index: string) => {
   ];
 };
 
-const ABOUT = `**About this data.** Task runs of log extraction, history snapshot and entity maintainers in this space.
+const ABOUT = `**About this data.** Task runs of log extraction, history snapshot and entity maintainers in this space, and changes to the engines (start, stop, install, repairs).
 Extraction runs are kept for 3 days (the "last 3 days" panels), then compacted into daily summaries kept for 30 days. Snapshot and maintainer runs are kept for 30 days.
 Panels without a window of their own follow the time picker. Reading this data requires \`read\` on \`.entities.v2.system.*\`.`;
+
+const DATE_TIME = '"yyyy-MM-dd HH:mm"';
+
+const engineChangesPanels = (events: string) => {
+  const grid = gridIn(SECTION.changes);
+  return [
+    tablePanel({
+      panelId: 'changes-lifecycle',
+      title: 'Engine changes (newest first)',
+      grid: grid(0, 0, 48, 12),
+      index: events,
+      esql: `FROM ${events}
+| ${IN_RANGE} AND event.kind == "lifecycle"
+| SORT @timestamp DESC
+| EVAL Time = DATE_FORMAT(${DATE_TIME}, @timestamp), Action = event.action, Outcome = event.outcome, Trigger = entity_store.trigger, Target = COALESCE(${LIFECYCLE_TARGET}, "${NO_VALUE}"), Reason = COALESCE(event.reason, "${NO_VALUE}"), Error = COALESCE(error.message, "${NO_VALUE}")
+| KEEP Time, Action, Outcome, Trigger, Target, Reason, Error
+| LIMIT 100`,
+      columns: [
+        { field: 'Time', type: 'string' },
+        { field: 'Action', type: 'string' },
+        { field: 'Outcome', type: 'string' },
+        { field: 'Trigger', type: 'string' },
+        { field: 'Target', type: 'string' },
+        { field: 'Reason', type: 'string' },
+        { field: 'Error', type: 'string' },
+      ],
+    }),
+  ];
+};
 
 /** Panels for people who dig: the full runs, the per-event failure list and daily counts. */
 const detailsPanels = ({ extractionRuns, events }: { extractionRuns: string; events: string }) => {
@@ -478,6 +519,7 @@ export const buildSystemEventsDashboard = (namespace: string) => {
     ...extractionPanels(extractionRuns),
     ...extractionTrendPanels(events),
     ...snapshotAndMaintainerPanels(events),
+    ...engineChangesPanels(events),
     ...detailsPanels({ extractionRuns, events }),
   ];
   const sections = [
@@ -489,6 +531,7 @@ export const buildSystemEventsDashboard = (namespace: string) => {
       title: 'History snapshot and maintainers (30 days)',
       collapsed: false,
     },
+    { i: SECTION.changes, title: 'Engine changes (30 days)', collapsed: true },
     { i: SECTION.details, title: 'Details', collapsed: true },
   ].map(({ i, title, collapsed }, index) => ({
     collapsed,

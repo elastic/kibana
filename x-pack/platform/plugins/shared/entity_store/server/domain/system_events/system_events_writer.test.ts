@@ -7,7 +7,7 @@
 
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { SystemEventsWriter, buildRunDoc } from './system_events_writer';
+import { SystemEventsWriter, buildLifecycleDoc, buildRunDoc } from './system_events_writer';
 import { resetEnsuredSystemEventsNamespaces } from './ensure_system_events_streams';
 import { SYSTEM_EVENT_ACTION } from './types';
 
@@ -118,4 +118,33 @@ const runInput = () => ({
   startedAt: Date.now(),
   outcome: 'success' as const,
   trigger: 'task' as const,
+});
+
+describe('buildLifecycleDoc', () => {
+  it('records the action, target and error of a lifecycle change', () => {
+    const doc = buildLifecycleDoc(
+      'default',
+      {
+        action: 'start_process',
+        outcome: 'failure',
+        trigger: 'user',
+        entityType: 'user',
+        mode: 'nonPriority',
+        error: new Error('forbidden'),
+      },
+      new Date('2026-11-17T00:00:00.000Z')
+    );
+
+    expect(doc).toEqual({
+      '@timestamp': '2026-11-17T00:00:00.000Z',
+      event: { kind: 'lifecycle', action: 'start_process', outcome: 'failure' },
+      error: { message: 'forbidden' },
+      entity_store: {
+        namespace: 'default',
+        trigger: 'user',
+        entity_type: 'user',
+        mode: 'nonPriority',
+      },
+    });
+  });
 });

@@ -19,6 +19,31 @@ import { hasPriorityExtractionGate } from '../../../common/domain/definitions/re
 import { ENGINE_STATUS } from '../../domain/constants';
 import { EngineDescriptorTypeName, EngineDescriptorClient } from '../../domain/saved_objects';
 import type { EngineDescriptor } from '../../domain/saved_objects';
+import {
+  LIFECYCLE_ACTION,
+  SYSTEM_EVENT_REASON,
+  SystemEventsWriter,
+} from '../../domain/system_events';
+
+const recordNonPriorityToggle = (
+  coreStart: CoreStart,
+  logger: Logger,
+  namespace: string,
+  entityType: EntityType,
+  reason: (typeof SYSTEM_EVENT_REASON)['enabled' | 'disabled']
+) =>
+  new SystemEventsWriter({
+    esClient: coreStart.elasticsearch.client.asInternalUser,
+    logger,
+    namespace,
+  }).writeLifecycle({
+    action: LIFECYCLE_ACTION.nonPriorityToggled,
+    outcome: 'success',
+    trigger: 'system',
+    reason,
+    entityType,
+    mode: 'nonPriority',
+  });
 
 /**
  * Whether the dual-process log extraction architecture is active for this deployment.
@@ -95,6 +120,13 @@ async function teardownNonPriorityTasks({
         nonPriorityLogExtractionState: null,
         nonPriorityError: null,
       });
+      await recordNonPriorityToggle(
+        coreStart,
+        logger,
+        namespace,
+        type,
+        SYSTEM_EVENT_REASON.disabled
+      );
     })
   );
 }
@@ -150,6 +182,13 @@ async function enableNonPriorityTasks({
         true
       );
       await engineDescriptorClient.update(type, { nonPriorityStatus: ENGINE_STATUS.STARTED });
+      await recordNonPriorityToggle(
+        coreStart,
+        logger,
+        namespace,
+        type,
+        SYSTEM_EVENT_REASON.enabled
+      );
     })
   );
 }

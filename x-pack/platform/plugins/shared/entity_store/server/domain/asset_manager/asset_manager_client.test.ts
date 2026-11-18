@@ -92,6 +92,7 @@ const mockStopAndRemoveV1SharedTasks = stopAndRemoveV1SharedTasks as jest.Mocked
 
 describe('AssetManagerClient', () => {
   const namespace = 'default';
+  const writeLifecycle = jest.fn();
 
   let client: AssetManagerClient;
   let mockUserEsClient: jest.Mocked<ElasticsearchClient>;
@@ -177,6 +178,59 @@ describe('AssetManagerClient', () => {
       savedObjectsClient: {
         delete: jest.fn().mockResolvedValue({}),
       } as unknown as SavedObjectsClientContract,
+      systemEventsWriter: {
+        writeLifecycle,
+      } as unknown as import('../system_events').SystemEventsWriter,
+    });
+  });
+
+  describe('lifecycle system events', () => {
+    const actions = () => writeLifecycle.mock.calls.map(([event]) => event.action);
+
+    it('records one install event per type and no start event during init', async () => {
+      await client.init({} as KibanaRequest, ['host', 'user']);
+
+      expect(actions().sort()).toEqual(['install', 'install']);
+      expect(writeLifecycle).toHaveBeenCalledWith(
+        expect.objectContaining({ outcome: 'success', trigger: 'user', entityType: 'host' })
+      );
+    });
+
+    it('records one failure event and rethrows when start fails', async () => {
+      mockScheduleExtractEntityTask.mockRejectedValueOnce(new Error('boom'));
+
+      await expect(client.start({} as KibanaRequest, 'host')).rejects.toThrow('boom');
+
+      expect(writeLifecycle).toHaveBeenCalledTimes(1);
+      expect(writeLifecycle).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: 'start',
+          outcome: 'failure',
+          entityType: 'host',
+          error: new Error('boom'),
+        })
+      );
+    });
+
+    it('records the process mode on per-process actions', async () => {
+      await client.stopProcess('user', EXTRACTION_MODE.nonPriority);
+
+      expect(writeLifecycle).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'stop_process', mode: EXTRACTION_MODE.nonPriority })
+      );
+    });
+
+    it('records uninstall_type without a nested stop event', async () => {
+      mockEngineDescriptorClient.getAll
+        .mockResolvedValueOnce([
+          { type: 'host', status: 'started' },
+          { type: 'user', status: 'started' },
+        ])
+        .mockResolvedValueOnce([{ type: 'user', status: 'started' }]);
+
+      await client.uninstall('host');
+
+      expect(actions()).toEqual(['uninstall_type']);
     });
   });
 
@@ -768,6 +822,7 @@ describe('AssetManagerClient', () => {
 
 describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
   const namespace = 'default';
+  const writeLifecycle = jest.fn();
 
   let client: AssetManagerClient;
   let mockUserEsClient: jest.Mocked<ElasticsearchClient>;
@@ -818,8 +873,24 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
         reportEvent: jest.fn(),
       } as unknown as import('../../telemetry/events').TelemetryReporter,
       savedObjectsClient: {} as SavedObjectsClientContract,
+      systemEventsWriter: {
+        writeLifecycle,
+      } as unknown as import('../system_events').SystemEventsWriter,
     });
   };
+
+  it('records an assets_repaired event only when it repairs something', async () => {
+    buildClient({ metadataExists: false });
+    await client.reinstallSharedAssetsIfMissing();
+    expect(writeLifecycle).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'assets_repaired', outcome: 'success', trigger: 'system' })
+    );
+
+    writeLifecycle.mockClear();
+    buildClient();
+    await client.reinstallSharedAssetsIfMissing();
+    expect(writeLifecycle).not.toHaveBeenCalled();
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();

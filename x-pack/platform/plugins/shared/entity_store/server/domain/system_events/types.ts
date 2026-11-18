@@ -19,7 +19,24 @@ export const SYSTEM_EVENT_ACTION = {
 
 export const SYSTEM_EVENT_REASON = {
   aborted: 'aborted',
+  enabled: 'enabled',
+  disabled: 'disabled',
+  initialized: 'initialized',
 } as const;
+
+export const LIFECYCLE_ACTION = {
+  install: 'install',
+  start: 'start',
+  stop: 'stop',
+  startProcess: 'start_process',
+  stopProcess: 'stop_process',
+  uninstallType: 'uninstall_type',
+  assetsRepaired: 'assets_repaired',
+  nonPriorityToggled: 'non_priority_toggled',
+  maintainerStart: 'maintainer_start',
+  maintainerStop: 'maintainer_stop',
+} as const;
+export type LifecycleAction = (typeof LIFECYCLE_ACTION)[keyof typeof LIFECYCLE_ACTION];
 
 export interface SystemEventDoc {
   '@timestamp': string;
@@ -78,4 +95,16 @@ export interface RunEventInput {
   maintainerId?: string;
   extraction?: NonNullable<SystemEventDoc['entity_store']['extraction']>;
   historySnapshot?: NonNullable<SystemEventDoc['entity_store']['history_snapshot']>;
+}
+
+/** An engine lifecycle change. A failed action is one doc with `outcome: failure`. */
+export interface LifecycleEventInput {
+  action: LifecycleAction;
+  outcome: SystemEventOutcome;
+  trigger: SystemEventTrigger;
+  reason?: string;
+  error?: unknown;
+  entityType?: EntityType;
+  mode?: ExtractionMode;
+  maintainerId?: string;
 }

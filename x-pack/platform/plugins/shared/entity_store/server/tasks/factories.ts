@@ -14,6 +14,7 @@ import { LogsExtractionClient } from '../domain/logs_extraction';
 import { EngineDescriptorClient, EntityStoreGlobalStateClient } from '../domain/saved_objects';
 import type { TelemetryReporter } from '../telemetry/events';
 import { getLegacySecurityAssetsMigrationFlag, isDualProcessEnabled } from '../infra/feature_flags';
+import { SystemEventsWriter } from '../domain/system_events';
 
 export interface LogsExtractionClientFactoryResult {
   logsExtractionClient: LogsExtractionClient;
@@ -116,6 +117,11 @@ export async function createAssetManagerClient({
       isLegacySecurityAssetsMigrationEnabled: () =>
         getLegacySecurityAssetsMigrationFlag(coreStart.featureFlags),
       isDualProcessEnabled: () => isDualProcessEnabled(coreStart.featureFlags),
+      systemEventsWriter: new SystemEventsWriter({
+        esClient: coreStart.elasticsearch.client.asInternalUser,
+        logger,
+        namespace,
+      }),
     }),
   };
 }
