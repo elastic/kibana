@@ -4811,8 +4811,8 @@ importers:
         specifier: 4.6.2
         version: 4.6.2
       papaparse:
-        specifier: 5.5.3
-        version: 5.5.3
+        specifier: 5.7.1
+        version: 5.7.1
       pbf:
         specifier: 3.2.1
         version: 3.2.1
@@ -21885,11 +21885,8 @@ packages:
   pako@2.2.0:
     resolution: {integrity: sha512-zJq6RP/5q+TO2OpFV3FHzlPnFjmkb7Nc99a5SNjJE+uu/PkpChs+NIZSSzbBoD+6kjiISXjfYdwj1ZRQ81dz/w==}
 
-  papaparse@5.5.3:
-    resolution: {integrity: sha512-5QvjGxYVjxO59MGU2lHVYpRWBBtKHnlIAcSe1uNFCkkptUh63NFRj0FJQm7nR67puEruUci/ZkjmEFrjCAyP4A==}
-
-  papaparse@5.7.0:
-    resolution: {integrity: sha512-qBGxg/7Q3Kl9Wfhrz2Z74UnvnHTXLNG6jmKJFeBvP2+y4lV7So+7SR62+Zd47JvdrCkX+nDcnr0ObPzek/+6RA==}
+  papaparse@5.7.1:
+    resolution: {integrity: sha512-qOR+UDWv6D3hMxnWWOk0ZpBdCkd+kw5Yh7aXOaNSQU8A+73EA2bhW7EiUix/hY0yulUi5FRvt7PpYSI2VDvY0g==}
 
   param-case@3.0.4:
     resolution: {integrity: sha512-RXlj7zCYokReqWpOPH9oYivUzLYZ5vAPIfEmCTNViosC78F8F0H9y7T7gG2M39ymgutxF5gcFEsyZQSph9Bp3A==}
@@ -38019,7 +38016,7 @@ snapshots:
       guarded-fetch: 0.1.3
       ini: 6.0.0
       modern-tar: 0.7.7
-      papaparse: 5.7.0
+      papaparse: 5.7.1
       re2js: 1.4.0
       run: 2.1.3(typescript@6.0.3)
       seek-bzip: 2.0.0
@@ -39917,9 +39914,7 @@ snapshots:
 
   pako@2.2.0: {}
 
-  papaparse@5.5.3: {}
-
-  papaparse@5.7.0: {}
+  papaparse@5.7.1: {}
 
   param-case@3.0.4:
     dependencies:
