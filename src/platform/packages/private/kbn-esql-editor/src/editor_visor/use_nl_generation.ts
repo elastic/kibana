@@ -16,6 +16,8 @@ import { nlErrorMessage } from './visor_i18n';
 import type { ESQLEditorDeps, VisorNlResultHandler } from '../types';
 import type { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 
+// The esql service caches the lookup itself; this mirror lets the next visor start with the
+// last known result synchronously instead of flashing the AI button in after the promise resolves
 let hasInferenceConnector: boolean | undefined;
 
 /** Drops the last known connector result so tests can change it. */

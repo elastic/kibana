@@ -11,6 +11,8 @@ import { useEffect, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ESQLEditorDeps } from '../types';
 
+// The esql service caches the lookup itself; this mirror lets the next editor start with the
+// last known result synchronously instead of flashing the feature in after the promise resolves
 let enterpriseLicense: boolean | undefined;
 
 /** Drops the last known license result so tests can change it. */

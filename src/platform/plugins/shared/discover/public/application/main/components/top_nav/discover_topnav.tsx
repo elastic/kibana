@@ -325,7 +325,9 @@ export const DiscoverTopNav = ({
 
   const visorUiState = useCurrentTabSelector((state) => state.uiState.visor);
   const setVisorUiState = useCurrentTabAction(internalStateActions.setVisorUiState);
-  // The visor reports every keystroke of its natural language prompt; debounce so typing doesn't re-render the search bar
+  // The visor reports every keystroke of its natural language prompt. Unlike the search draft above,
+  // this state is passed back into the memoized search bar as a prop, so each dispatch re-renders it;
+  // debounce to keep typing cheap
   const onVisorInitialStateChange = useMemo(
     () =>
       debounce((newVisorUiState: Partial<QuickSearchVisorRestorableState>) => {

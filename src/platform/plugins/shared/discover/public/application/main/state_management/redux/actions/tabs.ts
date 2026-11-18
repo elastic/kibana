@@ -664,9 +664,15 @@ export const openAskInEsqlTab: InternalStateThunkActionCreator<
 > = ({ tabId, dataView, prompt }) =>
   function openAskInEsqlTabThunkFn(dispatch, getState, { services }) {
     const { appState, globalState, uiState } = selectTab(getState(), tabId);
-    // Unsubmitted query edits live in the search draft; app state only has the last submitted query
-    const liveQuery = uiState.searchDraft?.query ?? appState.query;
+    // Unsubmitted edits to the query and the time range live in the search draft, so the new tab
+    // gets what the query bar shows rather than what was last submitted
+    const { searchDraft } = uiState;
+    const liveQuery = searchDraft?.query ?? appState.query;
     const query = isOfQueryType(liveQuery) ? liveQuery : undefined;
+    const draftTimeRange =
+      searchDraft?.dateRangeFrom && searchDraft?.dateRangeTo
+        ? { from: searchDraft.dateRangeFrom, to: searchDraft.dateRangeTo }
+        : undefined;
     const filters = [...(appState.filters ?? []), ...(globalState.filters ?? [])];
     const refreshInterval = globalState.refreshInterval ?? services.timefilter.getRefreshInterval();
 
@@ -674,7 +680,8 @@ export const openAskInEsqlTab: InternalStateThunkActionCreator<
       openInNewTab({
         appState: { query: { esql: getInitialESQLQuery(dataView, query, filters) } },
         globalState: {
-          timeRange: globalState.timeRange ?? services.timefilter.getTime(),
+          timeRange: draftTimeRange ?? globalState.timeRange ?? services.timefilter.getTime(),
+          // The new tab must not fetch until the user asks, so auto-refresh starts paused
           refreshInterval: { ...refreshInterval, pause: true },
         },
         skipInitialFetch: true,

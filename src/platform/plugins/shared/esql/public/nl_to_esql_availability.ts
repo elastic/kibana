@@ -17,7 +17,10 @@ export interface NlToEsqlAvailability {
   hasInferenceConnector: () => Promise<boolean>;
 }
 
-/** Creates the checks that gate natural language to ES|QL, each cached for the session. */
+/**
+ * Creates the checks that gate natural language to ES|QL. Results are cached for the session,
+ * but a failed lookup is not, so a transient error does not hide the feature until a reload.
+ */
 export const createNlToEsqlAvailability = (
   getLicense: () => Promise<ILicense | undefined>,
   http: HttpStart
@@ -31,11 +34,17 @@ export const createNlToEsqlAvailability = (
         .then((license) =>
           Boolean(license && license.status === 'active' && license.hasAtLeast('enterprise'))
         )
-        .catch(() => false)),
+        .catch(() => {
+          enterpriseLicenseRequest = undefined;
+          return false;
+        })),
     hasInferenceConnector: () =>
       (inferenceConnectorRequest ??= http
         .get<{ connectors: unknown[] }>(INFERENCE_CONNECTORS_ROUTE)
         .then((res) => res.connectors.length > 0)
-        .catch(() => false)),
+        .catch(() => {
+          inferenceConnectorRequest = undefined;
+          return false;
+        })),
   };
 };

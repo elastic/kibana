@@ -216,7 +216,7 @@ describe('InternalStateStore', () => {
     expect(selectTab(store.getState(), initialTabId).appState).toEqual(initialTab.appState);
   });
 
-  it('should prefer the unsubmitted search draft query when asking in natural language', async () => {
+  it('should prefer the unsubmitted search draft when asking in natural language', async () => {
     const { store } = await setup();
     const initialTabId = store.getState().tabs.unsafeCurrentId;
     store.dispatch(
@@ -226,9 +226,19 @@ describe('InternalStateStore', () => {
       })
     );
     store.dispatch(
+      internalStateActions.updateGlobalState({
+        tabId: initialTabId,
+        globalState: { timeRange: { from: 'now-15m', to: 'now' } },
+      })
+    );
+    store.dispatch(
       internalStateActions.setSearchDraftUiState({
         tabId: initialTabId,
-        searchDraftUiState: { query: { query: 'response:500', language: 'kuery' } },
+        searchDraftUiState: {
+          query: { query: 'response:500', language: 'kuery' },
+          dateRangeFrom: 'now-7d',
+          dateRangeTo: 'now',
+        },
       })
     );
 
@@ -244,6 +254,7 @@ describe('InternalStateStore', () => {
     expect(byId[unsafeCurrentId].appState.query).toEqual({
       esql: expect.stringMatching(/WHERE KQL\("""response:500"""\)/),
     });
+    expect(byId[unsafeCurrentId].globalState.timeRange).toEqual({ from: 'now-7d', to: 'now' });
   });
 
   it('should copy tab UI state when duplicating a tab', async () => {

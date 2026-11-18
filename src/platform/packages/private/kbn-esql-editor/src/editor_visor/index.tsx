@@ -220,6 +220,8 @@ function NlVisorActions({
 export interface QuickSearchVisorRestorableState {
   // Unset until the user picks a mode
   visorMode?: VisorMode;
+  // The natural language prompt. Reported through onInitialStateChange on every keystroke,
+  // so hosts that store it should debounce
   nlValue?: string;
 }
 

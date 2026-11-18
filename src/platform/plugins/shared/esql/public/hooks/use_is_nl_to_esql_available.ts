@@ -21,10 +21,14 @@ export const useIsNlToEsqlAvailable = (): boolean => {
     }
     let cancelled = false;
     const { esql } = deps;
-    (async () =>
-      (await esql.hasEnterpriseLicense()) && (await esql.hasInferenceConnector()))().then(
-      (available) => !cancelled && setIsAvailable(available)
-    );
+    // The connector lookup is a request, so it is skipped without the license
+    const checkAvailability = async () =>
+      (await esql.hasEnterpriseLicense()) && (await esql.hasInferenceConnector());
+    checkAvailability().then((available) => {
+      if (!cancelled) {
+        setIsAvailable(available);
+      }
+    });
     return () => {
       cancelled = true;
     };

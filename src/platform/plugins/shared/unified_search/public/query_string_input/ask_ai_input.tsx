@@ -22,6 +22,7 @@ import {
   EuiListGroupItem,
   EuiPopoverFooter,
   EuiPopoverTitle,
+  EuiResizeObserver,
   EuiText,
   EuiToolTip,
   keys,
@@ -69,10 +70,14 @@ export interface AskAiInputProps extends AskAiConfig {
 export const AskAiInput = ({ suggestedPrompts, onSubmit, onClose }: AskAiInputProps) => {
   const styles = useMemoCss(askAiInputStyles);
   const inputRef = useRef<HTMLInputElement>(null);
+  const promptRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const [prompt, setPrompt] = useState('');
   const [isPopoverOpen, setIsPopoverOpen] = useState(true);
+  // Measured so the text never runs under the buttons, whatever their rendered width
+  const [actionsWidth, setActionsWidth] = useState<number>();
   const isPopoverShown = isPopoverOpen && !prompt;
   const trimmedPrompt = prompt.trim();
+  const visiblePrompts = suggestedPrompts.slice(0, MAX_SUGGESTED_PROMPTS);
 
   const submit = () => {
     if (trimmedPrompt) {
@@ -80,14 +85,32 @@ export const AskAiInput = ({ suggestedPrompts, onSubmit, onClose }: AskAiInputPr
     }
   };
 
-  const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+  const onInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === keys.ENTER) {
       event.preventDefault();
       submit();
     }
+    if (event.key === keys.ARROW_DOWN && isPopoverShown) {
+      event.preventDefault();
+      promptRefs.current[0]?.focus();
+    }
     // The popover takes the first Escape to hide the suggested prompts, the next one closes the input
     if (event.key === keys.ESCAPE && !isPopoverShown) {
       onClose();
+    }
+  };
+
+  const onPromptsKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    const focusedIndex = promptRefs.current.indexOf(document.activeElement as HTMLButtonElement);
+    if (event.key === keys.ARROW_DOWN) {
+      event.preventDefault();
+      promptRefs.current[focusedIndex + 1]?.focus();
+    } else if (event.key === keys.ARROW_UP) {
+      event.preventDefault();
+      (promptRefs.current[focusedIndex - 1] ?? inputRef.current)?.focus();
+    } else if (event.key === keys.ESCAPE) {
+      // Let the popover close, but keep the focus in the input rather than dropping it
+      inputRef.current?.focus();
     }
   };
 
@@ -114,42 +137,46 @@ export const AskAiInput = ({ suggestedPrompts, onSubmit, onClose }: AskAiInputPr
             value={prompt}
             onChange={(event) => setPrompt(event.target.value)}
             onFocus={() => setIsPopoverOpen(true)}
-            onKeyDown={onKeyDown}
+            onKeyDown={onInputKeyDown}
             placeholder={i18n.translate('unifiedSearch.query.askAi.placeholder', {
               defaultMessage: 'Describe your query in natural language',
             })}
             aria-label={i18n.translate('unifiedSearch.query.askAi.inputAriaLabel', {
               defaultMessage: 'Ask AI',
             })}
-            css={styles.input}
+            style={actionsWidth ? { paddingRight: actionsWidth } : undefined}
             data-test-subj="unifiedSearchAskAiInput"
           />
-          <div css={styles.actions}>
-            <EuiToolTip content={sendLabel} disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType="return"
-                display="fill"
-                color="primary"
-                size="xs"
-                isDisabled={!trimmedPrompt}
-                onClick={submit}
-                aria-label={sendLabel}
-                data-test-subj="unifiedSearchAskAiSend"
-              />
-            </EuiToolTip>
-            <div css={styles.separator}>
-              <EuiToolTip content={closeLabel} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  iconType="cross"
-                  color="text"
-                  size="xs"
-                  onClick={onClose}
-                  aria-label={closeLabel}
-                  data-test-subj="unifiedSearchAskAiClose"
-                />
-              </EuiToolTip>
-            </div>
-          </div>
+          <EuiResizeObserver onResize={({ width }) => setActionsWidth(width)}>
+            {(resizeRef) => (
+              <div ref={resizeRef} css={styles.actions}>
+                <EuiToolTip content={sendLabel} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="return"
+                    display="fill"
+                    color="primary"
+                    size="xs"
+                    isDisabled={!trimmedPrompt}
+                    onClick={submit}
+                    aria-label={sendLabel}
+                    data-test-subj="unifiedSearchAskAiSend"
+                  />
+                </EuiToolTip>
+                <div css={styles.separator}>
+                  <EuiToolTip content={closeLabel} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      iconType="cross"
+                      color="text"
+                      size="xs"
+                      onClick={onClose}
+                      aria-label={closeLabel}
+                      data-test-subj="unifiedSearchAskAiClose"
+                    />
+                  </EuiToolTip>
+                </div>
+              </div>
+            )}
+          </EuiResizeObserver>
         </div>
       }
     >
@@ -158,17 +185,22 @@ export const AskAiInput = ({ suggestedPrompts, onSubmit, onClose }: AskAiInputPr
           defaultMessage: 'Suggested prompts',
         })}
       </EuiPopoverTitle>
-      <EuiListGroup maxWidth={false} css={styles.prompts}>
-        {suggestedPrompts.slice(0, MAX_SUGGESTED_PROMPTS).map((suggestedPrompt) => (
-          <EuiListGroupItem
-            key={suggestedPrompt}
-            label={suggestedPrompt}
-            color="text"
-            onClick={() => selectPrompt(suggestedPrompt)}
-            data-test-subj="unifiedSearchAskAiPrompt"
-          />
-        ))}
-      </EuiListGroup>
+      <div onKeyDown={onPromptsKeyDown}>
+        <EuiListGroup maxWidth={false} css={styles.prompts}>
+          {visiblePrompts.map((suggestedPrompt, index) => (
+            <EuiListGroupItem
+              key={suggestedPrompt}
+              label={suggestedPrompt}
+              color="text"
+              onClick={() => selectPrompt(suggestedPrompt)}
+              buttonRef={(node) => {
+                promptRefs.current[index] = node;
+              }}
+              data-test-subj="unifiedSearchAskAiPrompt"
+            />
+          ))}
+        </EuiListGroup>
+      </div>
       <EuiPopoverFooter paddingSize="s">
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -191,10 +223,6 @@ const askAiInputStyles = {
   inputWrapper: css({
     position: 'relative',
   }),
-  input: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      paddingRight: `calc(${euiTheme.size.xxxxl} + ${euiTheme.size.s})`,
-    }),
   actions: ({ euiTheme }: UseEuiTheme) =>
     css({
       position: 'absolute',

@@ -39,6 +39,17 @@ describe('createNlToEsqlAvailability', () => {
     expect(await hasInferenceConnector()).toBe(expected);
   });
 
+  it('retries the connectors lookup after a failure', async () => {
+    const { http, hasInferenceConnector } = setup();
+    (http.get as jest.Mock)
+      .mockRejectedValueOnce(new Error('network error'))
+      .mockResolvedValueOnce({ connectors: [{ id: 'c1' }] });
+
+    expect(await hasInferenceConnector()).toBe(false);
+    expect(await hasInferenceConnector()).toBe(true);
+    expect(http.get).toHaveBeenCalledTimes(2);
+  });
+
   it('requests the license and the connectors only once', async () => {
     const { http, getLicense, hasEnterpriseLicense, hasInferenceConnector } = setup();
     getLicense.mockResolvedValue({ status: 'active', hasAtLeast: () => true });

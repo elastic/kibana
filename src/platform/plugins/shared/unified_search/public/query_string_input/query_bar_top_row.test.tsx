@@ -763,6 +763,23 @@ describe('QueryBarTopRowTopRow', () => {
       expect(screen.getByTestId('unifiedSearchAskAiButton')).toHaveFocus();
     });
 
+    it('should navigate the suggested prompts with the arrow keys', async () => {
+      render(wrapQueryBarTopRowInContext({ ...getTestProps(jest.fn()), query: kqlQuery }));
+
+      await userEvent.click(await screen.findByTestId('unifiedSearchAskAiButton'));
+      const prompts = await screen.findAllByTestId('unifiedSearchAskAiPrompt');
+
+      await userEvent.keyboard('{ArrowDown}{ArrowDown}');
+      expect(prompts[1]).toHaveFocus();
+
+      await userEvent.keyboard('{ArrowUp}{ArrowUp}');
+      expect(screen.getByTestId('unifiedSearchAskAiInput')).toHaveFocus();
+
+      await userEvent.keyboard('{ArrowDown}{Enter}');
+      expect(screen.getByTestId('unifiedSearchAskAiInput')).toHaveValue('prompt 1');
+      expect(screen.getByTestId('unifiedSearchAskAiInput')).toHaveFocus();
+    });
+
     it('should leave Ask AI mode when switching to ES|QL', async () => {
       const testProps = getTestProps(jest.fn());
       const { rerender } = render(wrapQueryBarTopRowInContext({ ...testProps, query: kqlQuery }));
