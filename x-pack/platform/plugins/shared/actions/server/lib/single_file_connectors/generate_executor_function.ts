@@ -28,7 +28,7 @@ import { getErrorSource, isUserError } from '@kbn/task-manager-plugin/server/tas
 import type { ExecutorParams } from '../../sub_action_framework/types';
 import type {
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
-  ActionTypeExecutorResult as ConnectorTypeExecutorResult,
+  ActionTypeExecutorRawResult as ConnectorTypeExecutorRawResult,
 } from '../../types';
 import type { GetAxiosInstanceWithAuthFn, GetCredentialFn } from '../get_axios_instance';
 import type { LeasePool } from '../lease_pool';
@@ -176,7 +176,7 @@ export const generateExecutorFunction = ({
 }) =>
   async function (
     execOptions: ConnectorTypeExecutorOptions<RecordUnknown, RecordUnknown, RecordUnknown>
-  ): Promise<ConnectorTypeExecutorResult<unknown>> {
+  ): Promise<ConnectorTypeExecutorRawResult<unknown>> {
     const {
       actionId: connectorId,
       config,
@@ -351,8 +351,9 @@ export const generateExecutorFunction = ({
       const retryDate = getRetryDate(error);
       const vendorStatusCode = getVendorStatus(error);
       // Splits a `handler` failure that crashed on the data (a TypeError on a field that
-      // wasn't there) from one the connector raised deliberately.
-      const errorName = error instanceof Error ? error.name : undefined;
+      // wasn't there) from one the connector raised deliberately. Kept separate from the
+      // public `errorName`, which callers branch on and which carries its own `errorMeta`.
+      const failureErrorName = error instanceof Error ? error.name : undefined;
       logger.error(`error on ${connectorId} event: ${errorMessage}`);
       return {
         status: 'error',
@@ -360,7 +361,7 @@ export const generateExecutorFunction = ({
         actionId: connectorId,
         failureClass: classifyConnectorFailure(error),
         ...(vendorStatusCode !== undefined ? { vendorStatusCode } : {}),
-        ...(errorName ? { errorName } : {}),
+        ...(failureErrorName ? { failureErrorName } : {}),
         ...(errorMeta ? { errorMeta } : {}),
         ...(errorSource === TaskErrorSource.USER
           ? { retry: false, errorSource: TaskErrorSource.USER }

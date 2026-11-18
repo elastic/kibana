@@ -55,10 +55,16 @@ type ActionTypeExecutorResultStatus = (typeof ActionTypeExecutorResultStatusValu
 
 /**
  * Why a connector's action failed: the vendor rejected the request, the vendor failed, the
- * vendor couldn't be reached, or the connector's own code threw. Reported as telemetry so a
- * bug in a connector can be told apart from a user, configuration or vendor problem.
+ * vendor couldn't be reached, Kibana's own egress policy refused the call, or the connector's
+ * own code threw. Reported as telemetry so a bug in a connector can be told apart from a user,
+ * configuration or vendor problem.
  */
-export type ConnectorExecuteFailureClass = 'vendor_4xx' | 'vendor_5xx' | 'network' | 'handler';
+export type ConnectorExecuteFailureClass =
+  | 'vendor_4xx'
+  | 'vendor_5xx'
+  | 'network'
+  | 'denied'
+  | 'handler';
 
 export interface ActionTypeExecutorResult<Data> {
   actionId: string;
@@ -70,13 +76,20 @@ export interface ActionTypeExecutorResult<Data> {
   errorSource?: TaskErrorSource;
   errorName?: string;
   errorMeta?: Record<string, unknown>;
+}
+
+/**
+ * What the executor returns internally. The fields below are read by the action executor to
+ * label telemetry and are stripped before the result reaches any caller, so they stay out of
+ * the `_execute` response and out of the contract Agent Builder and Workflows consume.
+ */
+export type ActionTypeExecutorRawResult<Data> = ActionTypeExecutorResult<Data> & {
+  error?: Error;
   failureClass?: ConnectorExecuteFailureClass;
   /** The HTTP status the vendor answered with, over whichever transport the connector used. */
   vendorStatusCode?: number;
-}
-
-export type ActionTypeExecutorRawResult<Data> = ActionTypeExecutorResult<Data> & {
-  error?: Error;
+  /** The thrown error's name. Separate from the public `errorName`, which callers branch on. */
+  failureErrorName?: string;
 };
 
 export function isActionTypeExecutorResult(

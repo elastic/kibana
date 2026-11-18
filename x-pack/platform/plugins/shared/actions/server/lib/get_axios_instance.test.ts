@@ -596,8 +596,8 @@ describe('getAxiosInstance', () => {
       return { data: {}, status: 200, statusText: 'OK', headers: {}, config };
     };
 
-    // Typed, so a denied egress is classified as a network failure rather than a bug in the
-    // connector's code; the original error is kept as the cause.
+    // Typed, so a denied egress is classified as `denied` rather than a bug in the connector's
+    // code; the original error is kept as the cause.
     const rejection = await result.request({ url: 'https://denied.example.com/api' }).then(
       () => undefined,
       (err) => err
@@ -605,7 +605,7 @@ describe('getAxiosInstance', () => {
     expect(rejection).toBeInstanceOf(AllowlistDeniedError);
     expect(rejection.message).toBe(allowlistError.message);
     expect(rejection.cause).toBe(allowlistError);
-    expect(classifyConnectorFailure(rejection)).toBe('network');
+    expect(classifyConnectorFailure(rejection)).toBe('denied');
     expect(adapterCalled).toBe(false);
   });
 

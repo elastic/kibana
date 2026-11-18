@@ -64,10 +64,6 @@ const hasResponse = (error: unknown): boolean => {
 };
 
 const isNetworkError = (error: unknown): boolean => {
-  // An allowlist denial never leaves Kibana, but like a refused connection it means the
-  // request didn't reach the vendor, and it is not a bug in the connector's code.
-  if (error instanceof AllowlistDeniedError) return true;
-
   const { code, request } = (error ?? {}) as AxiosLikeError;
   if (typeof code === 'string' && NETWORK_ERROR_CODES.has(code)) return true;
 
@@ -76,13 +72,19 @@ const isNetworkError = (error: unknown): boolean => {
 };
 
 /**
- * Tells a vendor's rejection apart from a vendor outage, an unreachable vendor, and a bug in
- * the connector's own code, so a rise in connector bugs can be seen in telemetry.
+ * Tells a vendor's rejection apart from a vendor outage, an unreachable vendor, a call Kibana's
+ * own egress policy refused, and a bug in the connector's own code, so a rise in connector bugs
+ * can be seen in telemetry.
  *
  * Only called for failures the connector returns; failures the framework handles itself
  * (authorization, rate limiting, disabled connectors, invalid config) never reach here.
  */
 export const classifyConnectorFailure = (error: unknown): ConnectorExecuteFailureClass => {
+  // Checked first: the request never left Kibana, so it carries no status and no transport
+  // code. An admin has to widen `xpack.actions.allowedHosts`; neither the connector nor the
+  // vendor is at fault.
+  if (error instanceof AllowlistDeniedError) return 'denied';
+
   const status = getVendorStatus(error);
 
   if (status !== undefined) {

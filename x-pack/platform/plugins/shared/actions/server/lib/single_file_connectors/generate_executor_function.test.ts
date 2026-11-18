@@ -819,7 +819,7 @@ describe('generateExecutorFunction', () => {
         message: 'direct handler failure',
         actionId: connectorId,
         failureClass: 'handler',
-        errorName: 'Error',
+        failureErrorName: 'Error',
       });
     });
 
@@ -1279,7 +1279,7 @@ describe('generateExecutorFunction', () => {
         message: 'handler failed',
         actionId: connectorId,
         failureClass: 'handler',
-        errorName: 'Error',
+        failureErrorName: 'Error',
       });
     });
 
@@ -1301,7 +1301,7 @@ describe('generateExecutorFunction', () => {
         message: 'maxContentLength size of 1048576 exceeded',
         actionId: connectorId,
         failureClass: 'handler',
-        errorName: 'Error',
+        failureErrorName: 'Error',
         errorMeta: { contentLengthBytes: 10 * 1024 * 1024 },
       });
     });
@@ -1339,7 +1339,7 @@ describe('generateExecutorFunction', () => {
         message: 'maxContentLength size of 1048576 exceeded',
         actionId: connectorId,
         failureClass: 'handler',
-        errorName: 'Error',
+        failureErrorName: 'Error',
         errorMeta: { contentLengthBytes: 2048 },
       });
     });
@@ -1366,7 +1366,7 @@ describe('generateExecutorFunction', () => {
         message: 'maxContentLength size of 1048576 exceeded',
         actionId: connectorId,
         failureClass: 'handler',
-        errorName: 'Error',
+        failureErrorName: 'Error',
         errorMeta: {
           contentLengthBytes: 20 * 1024 * 1024,
           estimatedOutputBytes: 28 * 1024 * 1024,
@@ -1410,7 +1410,7 @@ describe('generateExecutorFunction', () => {
           actionId: connectorId,
           failureClass: 'vendor_4xx',
           vendorStatusCode: 429,
-          errorName: 'Error',
+          failureErrorName: 'Error',
           errorMeta: { statusCode: 429 },
           retry: inSeconds(30),
         });
@@ -1550,13 +1550,13 @@ describe('generateExecutorFunction', () => {
 
         const result = await executeWithError(thrown);
 
-        expect(result).toMatchObject({ failureClass: 'handler', errorName: 'TypeError' });
+        expect(result).toMatchObject({ failureClass: 'handler', failureErrorName: 'TypeError' });
       });
 
       it('names a failure the connector raised deliberately', async () => {
         const result = await executeWithError(new Error('no document id in the response'));
 
-        expect(result).toMatchObject({ failureClass: 'handler', errorName: 'Error' });
+        expect(result).toMatchObject({ failureClass: 'handler', failureErrorName: 'Error' });
       });
 
       it('carries the vendor status alongside the class', async () => {
@@ -1590,10 +1590,10 @@ describe('generateExecutorFunction', () => {
         expect(result).toMatchObject({ status: 'error', failureClass: 'network' });
       });
 
-      it('classifies an allowlist denial as network, since the vendor was never reached', async () => {
+      it('classifies an allowlist denial as denied, since the call never left Kibana', async () => {
         const result = await executeWithError(new AllowlistDeniedError('target url is not added'));
 
-        expect(result).toMatchObject({ status: 'error', failureClass: 'network' });
+        expect(result).toMatchObject({ status: 'error', failureClass: 'denied' });
       });
 
       it('adds neither to errors without a response status', async () => {
@@ -1608,7 +1608,7 @@ describe('generateExecutorFunction', () => {
           message: 'socket hang up',
           actionId: connectorId,
           failureClass: 'handler',
-          errorName: 'Error',
+          failureErrorName: 'Error',
         });
       });
     });
@@ -1673,8 +1673,8 @@ describe('generateExecutorFunction', () => {
         status: 'error',
         message: policyMessage,
         actionId: connectorId,
-        failureClass: 'network',
-        errorName: 'AllowlistDeniedError',
+        failureClass: 'denied',
+        failureErrorName: 'AllowlistDeniedError',
       });
       expect(result).not.toHaveProperty('retry');
     });
@@ -1741,7 +1741,7 @@ describe('generateExecutorFunction', () => {
         message: 'connection failed',
         actionId: connectorId,
         failureClass: 'handler',
-        errorName: 'Error',
+        failureErrorName: 'Error',
       });
     });
   });

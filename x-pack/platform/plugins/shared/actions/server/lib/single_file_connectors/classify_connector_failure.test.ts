@@ -69,11 +69,23 @@ describe('classifyConnectorFailure', () => {
 
       expect(classifyConnectorFailure(error)).toBe('handler');
     });
+  });
 
-    it('classifies an allowlist denial, which never reaches the vendor', () => {
+  describe('denied', () => {
+    it('classifies an allowlist denial, which never leaves Kibana', () => {
       expect(classifyConnectorFailure(new AllowlistDeniedError('target url is not allowed'))).toBe(
-        'network'
+        'denied'
       );
+    });
+
+    it('prefers denied over any status or code the error happens to carry', () => {
+      const error = Object.assign(new AllowlistDeniedError('denied'), {
+        code: 'ECONNREFUSED',
+        request: {},
+        response: { status: 503 },
+      });
+
+      expect(classifyConnectorFailure(error)).toBe('denied');
     });
   });
 
