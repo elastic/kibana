@@ -256,7 +256,10 @@ export async function fetchSampleDocuments({
       () =>
         `Sampled ${documents.length} documents (${
           bucketCounts['entity-filtered']
-        } entity-filtered, ${bucketCounts.diverse} diverse, ${bucketCounts.random} random). ${
+        } entity-filtered, ${bucketCounts.diverse} diverse of which ${Math.max(
+          0,
+          bucketCounts.diverse - diverseSize
+        )} backfilled unused entity-filtered slots, ${bucketCounts.random} random). ${
           entityFilters.length
         } entity filters applied (${
           features.length - entityFilters.length
@@ -355,17 +358,18 @@ function mergeDocuments(
   const result: Array<SearchHit<Record<string, unknown>>> = [];
   const bucketCounts = { 'entity-filtered': 0, diverse: 0, random: 0 };
 
-  for (let i = 0; i < prioritizedHits.length; i++) {
-    const { hits, cap, label } = prioritizedHits[i];
-    let added = 0;
+  // Cumulative: a bucket's unused slots carry to the next.
+  let limit = 0;
+  for (const { hits, cap, label } of prioritizedHits) {
+    limit = Math.min(limit + cap, totalSize);
+    const countBefore = result.length;
     for (const hit of hits) {
-      if (added >= cap || result.length >= totalSize) break;
+      if (result.length >= limit) break;
       if (hit._id && seen.has(hit._id)) continue;
       if (hit._id) seen.add(hit._id);
       result.push(hit);
-      added++;
     }
-    bucketCounts[label] = added;
+    bucketCounts[label] = result.length - countBefore;
   }
 
   return { documents: result, bucketCounts };

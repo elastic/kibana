@@ -291,10 +291,6 @@ steps:
       # dropped by the bulk create's version conflict, so it never comes back out
       # of `fetch_discoveries`. Same local-accumulator shape as `alerts_analyzed`,
       # for the same reason.
-      #
-      # The TS definition's version was bumped alongside this output as a deliberate
-      # rollout signal; the YAML change alone already rolls out through
-      # `definitionHash`.
       discoveries_generated: |-
         {%- assign generated = 0 -%}
         {%- for result in steps.generate_batches.output.results -%}
