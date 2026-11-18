@@ -7,6 +7,7 @@
 
 import type {
   EntryList,
+  EntryMatch,
   EntryMatchAny,
   ExceptionListItemSchema,
   ListItemSchema,
@@ -1227,9 +1228,92 @@ describe('build_exceptions_filter', () => {
         },
       });
     });
+
+    test.each(['date', 'date_nanos'] as const)(
+      'it should test a value on a %s column as a range from the value to itself',
+      (columnType) => {
+        const booleanFilter = buildMatchClause({
+          ...getEntryMatchMock(),
+          column_type: columnType,
+          field: 'c_date',
+          value: '2026-09-30',
+        } as EntryMatch);
+
+        expect(booleanFilter).toEqual({
+          bool: {
+            minimum_should_match: 1,
+            should: [{ range: { c_date: { gte: '2026-09-30', lte: '2026-09-30' } } }],
+          },
+        });
+      }
+    );
+
+    test('it should keep match_phrase for a column type that is not a date', () => {
+      const booleanFilter = buildMatchClause({
+        ...getEntryMatchMock(),
+        column_type: 'long',
+        value: '4',
+      } as EntryMatch);
+
+      expect(booleanFilter).toEqual({
+        bool: {
+          minimum_should_match: 1,
+          should: [{ match_phrase: { 'host.name': '4' } }],
+        },
+      });
+    });
+
+    test('it should negate the range when operator is "excluded"', () => {
+      const booleanFilter = buildMatchClause({
+        ...getEntryMatchExcludeMock(),
+        column_type: 'date',
+        field: 'c_date',
+        value: '2026-09-30',
+      } as EntryMatch);
+
+      expect(booleanFilter).toEqual({
+        bool: {
+          must_not: {
+            bool: {
+              minimum_should_match: 1,
+              should: [{ range: { c_date: { gte: '2026-09-30', lte: '2026-09-30' } } }],
+            },
+          },
+        },
+      });
+    });
   });
 
   describe('buildMatchAnyClause', () => {
+    test('it should test each value on a date column as a range from the value to itself', () => {
+      const booleanFilter = buildMatchAnyClause({
+        ...modifiedGetEntryMatchAnyMock(),
+        column_type: 'date',
+        field: 'c_date',
+        value: ['2026-09-30', '2026-09-15'],
+      } as EntryMatchAny);
+
+      expect(booleanFilter).toEqual({
+        bool: {
+          minimum_should_match: 1,
+          should: [
+            {
+              bool: {
+                minimum_should_match: 1,
+                should: [{ range: { c_date: { gte: '2026-09-30', lte: '2026-09-30' } } }],
+              },
+            },
+            {
+              bool: {
+                minimum_should_match: 1,
+                should: [{ range: { c_date: { gte: '2026-09-15', lte: '2026-09-15' } } }],
+              },
+            },
+          ],
+        },
+      });
+    });
+
     test('it should build boolean filter when operator is "included"', () => {
       const booleanFilter = buildMatchAnyClause(modifiedGetEntryMatchAnyMock());
 

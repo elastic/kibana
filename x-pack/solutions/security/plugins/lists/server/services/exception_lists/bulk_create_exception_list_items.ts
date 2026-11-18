@@ -38,6 +38,7 @@ export const bulkCreateExceptionListItems = async ({
 
     return {
       attributes: {
+        applies_to: item.applies_to,
         comments: [],
         created_at: dateNow,
         created_by: user,

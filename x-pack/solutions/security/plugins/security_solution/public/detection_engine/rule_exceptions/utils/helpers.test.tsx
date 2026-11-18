@@ -364,6 +364,24 @@ describe('Exception helpers', () => {
       expect(result).toEqual(expected);
     });
 
+    test("should not update entry fields that start with 'event.' on an item that applies to computed columns", () => {
+      const payload = [
+        {
+          ...getExceptionListItemSchemaMock(),
+          applies_to: 'esql_output_columns' as const,
+          entries: [
+            {
+              ...getEntryMatchMock(),
+              column_type: 'long',
+              field: 'event.total',
+            },
+          ],
+        },
+      ] as ExceptionListItemSchema[];
+      const result = prepareExceptionItemsForBulkClose(payload);
+      expect(result[0].entries[0]).toEqual(payload[0].entries[0]);
+    });
+
     test("should strip out any comments in the exceptions for bulk close'", () => {
       const exceptionItemWithComment = {
         ...getExceptionListItemSchemaMock(),

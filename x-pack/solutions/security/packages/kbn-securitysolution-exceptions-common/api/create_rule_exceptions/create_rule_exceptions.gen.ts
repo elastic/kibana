@@ -26,6 +26,7 @@ import {
   ExceptionNamespaceType,
   ExceptionListItemOsTypeArray,
   ExceptionListItemTags,
+  ExceptionListItemAppliesTo,
   ExceptionListItemMeta,
 } from '../model/exception_list_common.gen';
 import { ExceptionListItemEntryArray } from '../model/exception_list_item_entry.gen';
@@ -57,6 +58,7 @@ export const CreateRuleExceptionListItemProps = lazySchema(() =>
     namespace_type: ExceptionNamespaceType.optional().default('single'),
     os_types: ExceptionListItemOsTypeArray.optional().default([]),
     tags: ExceptionListItemTags.optional().default([]),
+    applies_to: ExceptionListItemAppliesTo.optional(),
     meta: ExceptionListItemMeta.optional(),
     expire_time: isoDateTime().optional(),
     comments: CreateRuleExceptionListItemCommentArray.optional().default([]),

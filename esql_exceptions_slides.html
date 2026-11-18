@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exceptions for computed fields in ES|QL rules</title>
+<style>
+  :root {
+    --ink: #101c3f;
+    --text: #1d2a3e;
+    --muted: #69707d;
+    --bg: #f7f8fc;
+    --card: #ffffff;
+    --border: #d3dae6;
+    --blue: #0b64dd;
+    --blue-bg: #e6f1ff;
+    --pink: #f04e98;
+    --pink-bg: #fde8f2;
+    --teal: #00a69b;
+    --teal-bg: #ddf7f3;
+    --yellow: #fec514;
+    --yellow-bg: #fff5d6;
+    --red: #bd271e;
+    --red-bg: #fbe9e7;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Roboto Mono", monospace;
+    --sans: Inter, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: #0a1230; overflow: hidden; font-family: var(--sans); color: var(--text); }
+
+  #stage {
+    position: absolute; left: 50%; top: 50%;
+    width: 1280px; height: 720px;
+    transform-origin: center center;
+    background: var(--bg);
+    overflow: hidden;
+  }
+  .slide { position: absolute; inset: 0; display: none; padding: 48px 64px 56px; }
+  .slide.active { display: block; animation: fade .25s ease; }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+  .slide::before { content: ""; position: absolute; left: 0; top: 0; width: 100%; height: 8px;
+    background: linear-gradient(90deg, var(--blue) 0 25%, var(--teal) 25% 50%, var(--pink) 50% 75%, var(--yellow) 75% 100%); }
+  h1 { font-size: 42px; line-height: 1.15; color: var(--ink); font-weight: 700; letter-spacing: -0.01em; }
+  h1 small { display: block; font-size: 22px; font-weight: 500; color: var(--muted); margin-top: 6px; letter-spacing: 0; }
+  .footer { position: absolute; left: 64px; right: 64px; bottom: 18px; display: flex; justify-content: space-between;
+    font-size: 13px; color: var(--muted); }
+  .body { position: absolute; left: 64px; right: 64px; top: 130px; bottom: 56px; display: flex; flex-direction: column; justify-content: center; }
+  .body.tall { top: 120px; }
+
+  /* title slides */
+  .slide.title { background: var(--ink); display: none; }
+  .slide.title.active { display: flex; align-items: center; justify-content: center; }
+  .slide.title::before { background: linear-gradient(90deg, var(--blue) 0 25%, var(--teal) 25% 50%, var(--pink) 50% 75%, var(--yellow) 75% 100%); }
+  .slide.title h1 { color: #fff; font-size: 84px; text-align: center; }
+  .slide.title .footer { color: #8c97b5; }
+
+  /* code */
+  pre, code { font-family: var(--mono); }
+  pre.code { background: var(--ink); color: #e9edf7; border-radius: 10px; padding: 20px 24px; font-size: 21px; line-height: 1.55; white-space: pre; }
+  pre.code.sm { font-size: 17px; line-height: 1.5; padding: 16px 20px; }
+  pre.code.xs { font-size: 15px; line-height: 1.45; padding: 14px 18px; }
+  .k { color: #ff7eb6; font-weight: 600; }
+  .s { color: #6ee7d3; }
+  .f { color: #8fc2ff; }
+  .n { color: #ffd866; }
+  .c { color: #8c97b5; }
+  .hl { background: rgba(0, 191, 179, .28); border-radius: 3px; padding: 0 3px; margin: 0 -3px; }
+  .hl-pink { background: rgba(240, 78, 152, .28); box-shadow: -4px 0 0 rgba(240, 78, 152, .28), 4px 0 0 rgba(240, 78, 152, .28); border-radius: 3px; }
+  .line-hl { display: block; background: rgba(0, 191, 179, .22); margin: 0 -24px; padding: 0 24px; border-left: 4px solid var(--teal); padding-left: 20px; }
+
+  /* chips for field / operator / value */
+  .entry { display: flex; gap: 8px; align-items: center; }
+  .chip { font-family: var(--mono); font-size: 20px; padding: 7px 14px; border-radius: 8px; font-weight: 600; white-space: nowrap; }
+  .chip.field { background: var(--blue-bg); color: var(--blue); }
+  .chip.op { background: var(--pink-bg); color: #c2185b; }
+  .chip.val { background: var(--teal-bg); color: #00796f; }
+  .chip.sm { font-size: 17px; padding: 5px 11px; }
+  .join { font-weight: 800; font-size: 15px; letter-spacing: .08em; color: var(--muted); text-align: center; }
+
+  .card { background: var(--card); border: 2px solid var(--border); border-radius: 14px; padding: 20px 24px; }
+  .label { font-size: 14px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+  .arrow { font-size: 44px; color: var(--blue); font-weight: 300; align-self: center; }
+
+  /* slide 1 */
+  .list { border: 3px solid var(--blue); background: #fff; border-radius: 18px; padding: 18px 26px 22px; width: 780px; position: relative; }
+  .list > .tag { position: absolute; top: -17px; left: 22px; background: var(--blue); color: #fff; font-weight: 700; padding: 3px 14px; border-radius: 8px; font-size: 16px; }
+  .item { border: 2px solid var(--teal); background: var(--teal-bg); border-radius: 14px; padding: 22px 20px 14px; position: relative; margin-top: 8px; }
+  .item > .tag { position: absolute; top: -14px; left: 16px; background: var(--teal); color: #fff; font-weight: 700; padding: 2px 12px; border-radius: 7px; font-size: 14px; }
+  .item .entry-box { background: #fff; border: 2px solid var(--border); border-radius: 10px; padding: 10px 12px; position: relative; }
+  .item .entry-box + .join { margin: 4px 0; }
+  .item .entry-box .tag { position: absolute; right: 10px; top: -11px; background: var(--muted); color: #fff; font-size: 12px; font-weight: 700; padding: 1px 9px; border-radius: 6px; }
+  .join.or { margin: 12px 0 4px; font-size: 17px; color: var(--teal); }
+  .legend { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 330px; display: flex; flex-direction: column; gap: 22px; }
+  .legend .row { display: flex; gap: 14px; align-items: center; font-size: 20px; }
+  .legend .big { font-size: 22px; font-weight: 700; color: var(--ink); }
+
+  /* slide 2 */
+  .two { display: flex; gap: 28px; align-items: stretch; }
+  .two > .col { flex: 1; display: flex; flex-direction: column; }
+  .strip { margin-top: 64px; display: flex; align-items: center; justify-content: center; gap: 14px; font-size: 22px; font-weight: 600; color: var(--ink); }
+  .box { padding: 10px 18px; border-radius: 10px; border: 2px solid var(--border); background: #fff; font-weight: 600; }
+  .box.blue { border-color: var(--blue); background: var(--blue-bg); color: var(--blue); }
+  .box.pink { border-color: var(--pink); background: var(--pink-bg); color: #b0155c; }
+  .box.teal { border-color: var(--teal); background: var(--teal-bg); color: #00796f; }
+  .box.red { border-color: var(--red); background: var(--red-bg); color: var(--red); }
+
+  /* slide 3 */
+  .pipe { display: flex; align-items: stretch; gap: 14px; height: 400px; }
+  .stagebox { flex: 1; border-radius: 14px; border: 2px solid var(--border); background: #fff; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; }
+  .stagebox h3 { font-size: 16px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+  .stagebox.filter { border-color: var(--pink); background: var(--pink-bg); flex: .8; }
+  .stagebox.pipeline { border-color: var(--blue); background: var(--blue-bg); flex: 1.5; }
+  .stagebox .fld { font-family: var(--mono); font-size: 18px; font-weight: 600; padding: 5px 11px; border-radius: 8px; background: #fff; border: 2px solid var(--border); align-self: flex-start; }
+  .stagebox .fld.src { border-color: var(--blue); color: var(--blue); }
+  .stagebox .fld.calc { border-color: var(--yellow); background: var(--yellow-bg); color: #8a6300; }
+  .stagebox .fld.missing { border-style: dashed; border-color: var(--red); color: var(--red); background: #fff; text-decoration: line-through; }
+  .verdict { margin-top: auto; font-weight: 700; font-size: 18px; }
+  .verdict.bad { color: var(--red); }
+  .verdict.ok { color: #00796f; }
+  .pipe-arrow { align-self: center; font-size: 34px; color: var(--muted); }
+
+  /* slide 4 */
+  .annot { position: relative; }
+  .tagline { display: inline-block; font-family: var(--sans); font-size: 15px; font-weight: 700; padding: 3px 10px; border-radius: 6px; background: var(--yellow); color: #4d3800; }
+  .pointers { display: flex; flex-direction: column; gap: 14px; margin-top: 16px; }
+  .pointers .p { display: flex; align-items: center; gap: 12px; font-size: 20px; }
+  .pointers code { background: var(--yellow-bg); color: #8a6300; padding: 3px 9px; border-radius: 6px; font-weight: 700; }
+  .bubble { border: 3px dashed var(--pink); border-radius: 20px; background: #fff; padding: 22px 26px; position: relative; }
+  .bubble .q { position: absolute; right: -16px; top: -26px; width: 56px; height: 56px; border-radius: 50%; background: var(--pink); color: #fff; font-size: 38px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+
+  /* slide 5 */
+  .checks { display: flex; gap: 12px; align-items: center; }
+  .check { display: flex; align-items: center; gap: 10px; background: #fff; border: 2px solid var(--teal); border-radius: 12px; padding: 10px 16px; font-weight: 600; font-size: 19px; color: var(--ink); }
+  .check .tick { width: 26px; height: 26px; border-radius: 50%; background: var(--teal); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 800; }
+  .plus { font-weight: 800; color: var(--muted); font-size: 22px; }
+
+  /* slide 6 */
+  .lanes { display: flex; flex-direction: column; gap: 16px; }
+  .lane { display: flex; align-items: center; gap: 12px; font-size: 22px; font-weight: 600; }
+  .lane .box { font-size: 21px; }
+  .why { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 8px; }
+  .why .card { padding: 16px 18px; }
+  .why .ex { font-family: var(--mono); font-size: 17px; font-weight: 700; color: var(--blue); background: var(--blue-bg); padding: 6px 10px; border-radius: 8px; display: inline-block; margin-bottom: 12px; }
+  .why .cmp { display: grid; grid-template-columns: 62px 1fr; gap: 10px 10px; font-size: 19px; align-items: start; }
+  .why .cmp b { font-size: 13px; letter-spacing: .06em; text-transform: uppercase; padding-top: 3px; }
+  .why .cmp .good { color: #00796f; font-weight: 600; }
+  .why .cmp .bad { color: var(--red); font-weight: 600; }
+  .why .cmp code { font-size: 15px; }
+  .bottomline { margin-top: 28px; text-align: center; font-size: 24px; font-weight: 700; color: var(--ink); }
+
+  /* slide 9 matrix */
+  table.matrix { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 15px; background: #fff; border: 2px solid var(--border); border-radius: 12px; overflow: hidden; }
+  table.matrix th { background: var(--ink); color: #fff; font-size: 17px; padding: 10px 12px; text-align: left; }
+  table.matrix th code { font-family: var(--mono); color: #6ee7d3; font-size: 17px; }
+  table.matrix td { padding: 9px 12px; border-top: 1px solid var(--border); vertical-align: middle; }
+  table.matrix td.type { background: var(--blue-bg); font-weight: 700; color: var(--blue); font-size: 15px; width: 150px; }
+  table.matrix td.type span { display: block; font-family: var(--mono); font-size: 15px; line-height: 1.25; }
+  table.matrix td code { font-size: 14.5px; color: var(--text); line-height: 1.3; display: block; }
+  table.matrix td:last-child code { white-space: nowrap; }
+  table.matrix td.na { color: #a0a7b5; text-align: center; font-size: 15px; background: #fafbfd; }
+  table.matrix td.only { background: var(--yellow-bg); }
+  .matrix-note { margin-top: 14px; display: flex; gap: 28px; font-size: 16px; color: var(--ink); font-weight: 600; }
+  .matrix-note code { background: var(--blue-bg); color: var(--blue); padding: 2px 8px; border-radius: 6px; font-size: 15px; }
+
+  /* slide 10 limits */
+  .limits { display: flex; flex-direction: column; gap: 24px; margin-top: 10px; }
+  .lim { display: grid; grid-template-columns: 250px 1fr; gap: 20px; align-items: center; }
+  .lim .name { font-size: 24px; font-weight: 700; color: var(--ink); line-height: 1.15; }
+  .lim .name small { display: block; font-size: 14px; font-weight: 500; color: var(--muted); margin-top: 3px; }
+  .track { position: relative; height: 52px; border-radius: 10px; background: var(--blue-bg); border: 2px solid var(--blue); }
+  .track .ours { position: absolute; left: 0; top: 0; bottom: 0; background: var(--pink); border-radius: 7px 0 0 7px; display: flex; align-items: center; padding-left: 14px; color: #fff; font-weight: 700; font-size: 18px; white-space: nowrap; }
+  .track .max { position: absolute; right: 12px; top: 0; bottom: 0; display: flex; align-items: center; font-weight: 700; color: var(--blue); font-size: 18px; }
+  .ours-badge { display: flex; align-items: center; gap: 22px; margin-top: 34px; background: var(--pink-bg); border: 3px solid var(--pink); border-radius: 16px; padding: 14px 24px; }
+  .ours-badge .num { font-size: 52px; font-weight: 800; color: #b0155c; line-height: 1; }
+  .ours-badge .what { font-size: 22px; font-weight: 600; color: var(--ink); }
+  .ours-badge .what small { display: block; font-size: 16px; font-weight: 500; color: var(--muted); }
+  .legendrow { display: flex; gap: 22px; font-size: 15px; color: var(--muted); font-weight: 600; margin-bottom: 4px; }
+  .legendrow i { display: inline-block; width: 14px; height: 14px; border-radius: 4px; margin-right: 7px; vertical-align: -2px; }
+
+  /* when an item cannot be applied */
+  .flow3 { display: flex; align-items: center; gap: 26px; }
+  .flow3 .start { font-size: 24px; line-height: 1.25; padding: 22px 22px; width: 230px; text-align: center; border-width: 3px; }
+  .branches { flex: 1; display: flex; flex-direction: column; gap: 22px; }
+  .br { display: grid; grid-template-columns: 1fr 44px 1fr; align-items: center; }
+  .br .cond { background: #fff; border: 2px solid var(--border); border-radius: 14px; padding: 16px 20px; font-size: 22px; font-weight: 700; color: var(--ink); line-height: 1.25; }
+  .br .cond small { display: block; margin-top: 8px; font-size: 16px; font-weight: 500; color: var(--muted); }
+  .br .cond code { font-size: 15px; background: var(--blue-bg); color: var(--blue); padding: 1px 7px; border-radius: 6px; font-weight: 700; }
+  .br .go { text-align: center; font-size: 34px; color: var(--muted); }
+  .br .out { border-radius: 14px; padding: 16px 20px; font-size: 24px; font-weight: 800; border: 3px solid; line-height: 1.2; }
+  .br .out small { display: block; margin-top: 6px; font-size: 17px; font-weight: 600; }
+  .br .out.warn { background: var(--yellow-bg); border-color: var(--yellow); color: #6b4e00; }
+  .br .out.fail { background: var(--red-bg); border-color: var(--red); color: var(--red); }
+  .failnote { margin-top: 26px; text-align: center; font-size: 22px; font-weight: 700; color: var(--ink); }
+
+  /* chrome */
+  #bar { position: fixed; left: 0; bottom: 0; height: 4px; background: var(--pink); width: 0; transition: width .2s; z-index: 5; }
+  #count { position: fixed; right: 14px; bottom: 10px; color: #8c97b5; font: 600 13px var(--sans); z-index: 5; }
+
+  @media print {
+    @page { size: 1280px 720px; margin: 0; }
+    html, body { overflow: visible; height: auto; background: #fff; }
+    #stage { position: static; transform: none !important; width: auto; height: auto; overflow: visible; }
+    .slide { display: block !important; position: relative; width: 1280px; height: 720px; page-break-after: always; animation: none; }
+    .slide.title { display: flex !important; }
+    #bar, #count { display: none; }
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+
+<!-- 1. what exceptions are -->
+<section class="slide">
+  <h1>Exceptions: lists, items and entries</h1>
+  <div class="body">
+    <div class="list">
+      <span class="tag">Exception list</span>
+      <div class="item">
+        <span class="tag">Item</span>
+        <div class="entry-box"><span class="tag">entry</span>
+          <div class="entry"><span class="chip field">host.name</span><span class="chip op">is</span><span class="chip val">dc-01</span></div>
+        </div>
+        <div class="join">AND</div>
+        <div class="entry-box"><span class="tag">entry</span>
+          <div class="entry"><span class="chip field">user.name</span><span class="chip op">is one of</span><span class="chip val">svc-backup, svc-scan</span></div>
+        </div>
+      </div>
+      <div class="join or">OR</div>
+      <div class="item">
+        <span class="tag">Item</span>
+        <div class="entry-box"><span class="tag">entry</span>
+          <div class="entry"><span class="chip field">process.name</span><span class="chip op">matches</span><span class="chip val">ping*</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="legend">
+      <div class="row"><span class="chip field">field</span></div>
+      <div class="row"><span class="chip op">operator</span></div>
+      <div class="row"><span class="chip val">value</span></div>
+      <div class="big">An item excludes an alert when all its entries match</div>
+    </div>
+  </div>
+  <div class="footer"><span>Exceptions for computed fields in ES|QL rules</span><span></span></div>
+</section>
+
+<!-- 2. today -->
+<section class="slide">
+  <h1>Today: an exception becomes a DSL filter</h1>
+  <div class="body">
+    <div class="two">
+      <div class="col" style="flex: .8">
+        <div class="label">Exception item</div>
+        <div class="card" style="display:flex; flex-direction:column; gap:10px;">
+          <div class="entry"><span class="chip field">user.name</span><span class="chip op">is</span><span class="chip val">vuln-scanner</span></div>
+          <div class="join" style="text-align:left">AND</div>
+          <div class="entry"><span class="chip field">host.name</span><span class="chip op">is</span><span class="chip val">dc-01</span></div>
+        </div>
+      </div>
+      <div class="arrow">&rarr;</div>
+      <div class="col" style="flex: 1.35">
+        <div class="label">DSL filter in the _query request (simplified)</div>
+<pre class="code sm"><span class="s">"filter"</span>: {
+  <span class="s">"bool"</span>: { <span class="k">"must_not"</span>: { <span class="s">"bool"</span>: { <span class="s">"filter"</span>: [
+    { <span class="s">"match_phrase"</span>: { <span class="f">"user.name"</span>: <span class="n">"vuln-scanner"</span> } },
+    { <span class="s">"match_phrase"</span>: { <span class="f">"host.name"</span>: <span class="n">"dc-01"</span> } }
+  ] } } }
+}</pre>
+      </div>
+    </div>
+    <div class="strip">
+      <span class="box blue">Source documents</span><span>&rarr;</span>
+      <span class="box pink">DSL filter excludes matches</span><span>&rarr;</span>
+      <span class="box blue">ES|QL query</span>
+    </div>
+  </div>
+  <div class="footer"><span>Exceptions for computed fields in ES|QL rules</span><span></span></div>
+</section>
+
+<!-- 3. the problem -->
+<section class="slide">
+  <h1>The problem: the filter only sees source fields</h1>
+  <div class="body">
+    <div class="pipe">
+      <div class="stagebox">
+        <h3>Source documents</h3>
+        <span class="fld src">user.name</span>
+        <span class="fld src">host.name</span>
+        <span class="verdict" style="color: var(--blue)">Fields exist</span>
+      </div>
+      <div class="pipe-arrow">&rarr;</div>
+      <div class="stagebox filter">
+        <h3>DSL filter</h3>
+        <span class="fld src">user.name</span>
+        <span class="fld missing">user_count</span>
+        <span class="fld missing">target_host</span>
+        <span class="verdict bad">Cannot see computed fields</span>
+      </div>
+      <div class="pipe-arrow">&rarr;</div>
+      <div class="stagebox pipeline">
+        <h3>ES|QL query</h3>
+<pre class="code xs" style="padding: 14px 16px; font-size: 16px;"><span class="k">FROM</span> logs-*
+| <span class="k">STATS</span> <span class="hl">user_count</span> = <span class="f">COUNT_DISTINCT</span>(user.name)
+    <span class="k">BY</span> host.name
+| <span class="k">RENAME</span> host.name <span class="k">AS</span> <span class="hl">target_host</span></pre>
+        <div style="display:flex; gap:10px;">
+          <span class="fld calc">user_count</span><span class="fld calc">target_host</span>
+        </div>
+        <span class="verdict ok">Computed fields appear here</span>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>Exceptions for computed fields in ES|QL rules</span><span></span></div>
+</section>
+
+<!-- 4. users want -->
+<section class="slide">
+  <h1>Users want exceptions on computed fields</h1>
+  <div class="body">
+    <div class="two" style="gap: 40px;">
+      <div class="col" style="flex: 1.35">
+        <div class="label">A rule that flags hosts reached by many users</div>
+<pre class="code"><span class="k">FROM</span> logs-*
+| <span class="k">STATS</span> <span class="hl">user_count</span> = <span class="f">COUNT_DISTINCT</span>(user.name)
+    <span class="k">BY</span> host.name
+| <span class="k">WHERE</span> user_count &gt; <span class="n">50</span>
+| <span class="k">RENAME</span> host.name <span class="k">AS</span> <span class="hl">target_host</span></pre>
+        <div class="pointers">
+          <div class="p"><code>user_count</code> computed by <b>STATS</b></div>
+          <div class="p"><code>target_host</code> computed by <b>RENAME</b></div>
+        </div>
+      </div>
+      <div class="col" style="flex: .9; justify-content: center;">
+        <div class="bubble">
+          <span class="q">?</span>
+          <div class="label">Exception the user wants</div>
+          <div class="entry"><span class="chip field">target_host</span><span class="chip op">is</span><span class="chip val">dc-01</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>Exceptions for computed fields in ES|QL rules</span><span></span></div>
+</section>
+
+<!-- 5. proposal -->
+<section class="slide">
+  <h1>Proposal: append the exception in a WHERE stage</h1>
+  <div class="body">
+    <div class="checks">
+      <div class="check"><span class="tick">&#10003;</span>Matches a computed field</div>
+      <span class="plus">+</span>
+      <div class="check"><span class="tick">&#10003;</span>Value is valid</div>
+      <span class="plus">+</span>
+      <div class="check"><span class="tick">&#10003;</span>Type is supported</div>
+      <span class="arrow" style="font-size:34px">&rarr;</span>
+      <div class="box teal" style="font-size:19px;">append at the end</div>
+    </div>
+    <div class="two" style="margin-top: 40px; gap: 30px;">
+      <div class="col" style="flex: .75">
+        <div class="label">1 item, 1 entry</div>
+        <div class="card"><div class="entry"><span class="chip field sm">target_host</span><span class="chip op sm">is</span><span class="chip val sm">dc-01</span></div></div>
+      </div>
+      <div class="arrow">&rarr;</div>
+      <div class="col" style="flex: 1.6">
+        <div class="label">The rule query</div>
+<pre class="code" style="font-size: 20px;"><span class="k">FROM</span> logs-*
+| <span class="k">STATS</span> user_count = <span class="f">COUNT_DISTINCT</span>(user.name) <span class="k">BY</span> host.name
+| <span class="k">WHERE</span> user_count &gt; <span class="n">50</span>
+| <span class="k">RENAME</span> host.name <span class="k">AS</span> target_host
+<span class="line-hl">| <span class="k">WHERE NOT</span> (<span class="f">MV_CONTAINS</span>(target_host, <span class="s">"dc-01"</span>))</span></pre>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>Exceptions for computed fields in ES|QL rules</span><span></span></div>
+</section>
+
+<!-- 6. source fields stay in the DSL -->
+<section class="slide">
+  <h1>Exceptions on source fields stay in the DSL</h1>
+  <div class="body tall" style="top: 120px;">
+    <div class="lanes">
+      <div class="lane"><span class="box blue">Source field</span><span>&rarr;</span><span class="box pink">DSL filter</span><span style="color:var(--muted); font-weight:500;">as today</span></div>
+      <div class="lane"><span class="box blue" style="border-color: var(--yellow); background: var(--yellow-bg); color:#8a6300;">Computed column</span><span>&rarr;</span><span class="box teal">WHERE at the end</span><span style="color:var(--muted); font-weight:500;">new</span></div>
+    </div>
+    <div class="label" style="margin-top: 22px;">Why: the same exception can behave differently in ES|QL</div>
+    <div class="why">
+      <div class="card">
+        <span class="ex">message matches GOOD*</span>
+        <div class="cmp">
+          <b>DSL</b><span>excludes nothing (<code>text</code> is split in words)</span>
+          <b>ES|QL</b><span class="bad">excludes "GOOD morning"</span>
+        </div>
+        <div style="margin-top:12px; font-weight:700; color: var(--red);">Other alerts, no error</div>
+      </div>
+      <div class="card">
+        <span class="ex">flattened key, nested, ip_range</span>
+        <div class="cmp">
+          <b>DSL</b><span class="good">works</span>
+          <b>ES|QL</b><span class="bad">Unknown column, unsupported type</span>
+        </div>
+        <div style="margin-top:12px; font-weight:700; color: var(--red);">The rule fails</div>
+      </div>
+      <div class="card">
+        <span class="ex">keyword here, long there</span>
+        <div class="cmp">
+          <b>DSL</b><span class="good">runs on each index</span>
+          <b>ES|QL</b><span class="bad">ambiguous types</span>
+        </div>
+        <div style="margin-top:12px; font-weight:700; color: var(--red);">The rule fails</div>
+      </div>
+    </div>
+    <div class="bottomline">Moving them would change the alerts of existing rules</div>
+  </div>
+  <div class="footer"><span>Exceptions for computed fields in ES|QL rules</span><span></span></div>
+</section>
+
+<!-- 7. demo -->
+<section class="slide title"><h1>Demo time</h1></section>
+
+<!-- 8. execution flow -->
+<section class="slide title"><h1>Execution flow</h1></section>
+
+<!-- 9. supported types -->
+<section class="slide">
+  <h1 style="font-size: 36px;">Supported types: column type &times; operator = ES|QL</h1>
+  <div class="body" style="top: 100px; bottom: 44px;">
+    <table class="matrix">
+      <thead>
+        <tr><th>Column type</th><th><code>is</code></th><th><code>is one of</code></th><th><code>matches</code></th><th><code>exists</code></th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="type"><span>keyword</span><span>text</span></td>
+          <td><code>MV_CONTAINS(col, "v")</code></td>
+          <td><code>MV_INTERSECTS(col, ["a", "b"])</code></td>
+          <td><code>COALESCE(MV_LIKE(col, "p*"), false)</code></td>
+          <td><code>col IS NOT NULL</code></td></tr>
+        <tr><td class="type"><span>integer</span><span>long</span><span>unsigned_long</span></td>
+          <td><code>MV_CONTAINS(col, 42::long)</code></td>
+          <td><code>MV_INTERSECTS(col, TO_LONG(["42", "7"]))</code></td>
+          <td class="na">not supported</td>
+          <td><code>col IS NOT NULL</code></td></tr>
+        <tr><td class="type"><span>double</span></td>
+          <td class="na only">not supported</td><td class="na only">not supported</td><td class="na only">not supported</td>
+          <td class="only"><code>col IS NOT NULL</code></td></tr>
+        <tr><td class="type"><span>boolean</span></td>
+          <td><code>MV_CONTAINS(col, true)</code></td>
+          <td><code>MV_INTERSECTS(col, [true, false])</code></td>
+          <td class="na">not supported</td>
+          <td><code>col IS NOT NULL</code></td></tr>
+        <tr><td class="type"><span>ip</span></td>
+          <td><code>MV_CONTAINS(col, "10.0.0.1"::ip)</code></td>
+          <td><code>MV_INTERSECTS(col, TO_IP(["10.0.0.1", "10.0.0.2"]))</code><code>CIDR: COALESCE(MV_IN_RANGE(col, first::ip, last::ip), false)</code></td>
+          <td class="na">not supported</td>
+          <td><code>col IS NOT NULL</code></td></tr>
+        <tr><td class="type"><span>version</span></td>
+          <td><code>MV_CONTAINS(col, "1.2.3"::version)</code></td>
+          <td><code>MV_INTERSECTS(col, TO_VERSION(["1.2.3", "2.0.0"]))</code></td>
+          <td class="na">not supported</td>
+          <td><code>col IS NOT NULL</code></td></tr>
+        <tr><td class="type"><span>date</span><span>date_nanos</span></td>
+          <td><code>COALESCE(MV_IN_RANGE(col, day_start::date, day_end::date), false)</code></td>
+          <td><code>one range per value, joined with OR</code></td>
+          <td class="na">not supported</td>
+          <td><code>col IS NOT NULL</code></td></tr>
+      </tbody>
+    </table>
+    <div class="matrix-note">
+      <span>Each item is written as <code>WHERE NOT (...)</code></span>
+      <span>Exclusive operators (<code>is not</code>...) drop the <code>NOT</code></span>
+    </div>
+  </div>
+  <div class="footer"><span>Exceptions for computed fields in ES|QL rules</span><span></span></div>
+</section>
+
+<!-- 10. when an item cannot be applied -->
+<section class="slide">
+  <h1>When an exception cannot be applied</h1>
+  <div class="body">
+    <div class="flow3">
+      <div class="box blue start">Item with a computed column</div>
+      <div class="branches">
+        <div class="br">
+          <div class="cond">Cannot be evaluated at the end of the query<small>an <code>is</code> on a <code>double</code>, a value list, a field the query does not output</small></div>
+          <div class="go">&rarr;</div>
+          <div class="out warn">Not applied<small>Logged with a reason. The rule runs.</small></div>
+        </div>
+        <div class="br">
+          <div class="cond">A value does not fit the column type<small><code>bogus</code> for an <code>ip</code>, <code>1e3</code> for a <code>long</code></small></div>
+          <div class="go">&rarr;</div>
+          <div class="out fail">Rule fails<small>Before the query runs. The message names the value.</small></div>
+        </div>
+        <div class="br">
+          <div class="cond">Too many exceptions<small>more than 200 comparisons, or a query over 1,000,000 characters</small></div>
+          <div class="go">&rarr;</div>
+          <div class="out fail">Rule fails<small>Before the query runs. The message names the items to reduce.</small></div>
+        </div>
+      </div>
+    </div>
+    <div class="failnote">The two failures prevent alerts that the exceptions were meant to exclude</div>
+  </div>
+  <div class="footer"><span>Exceptions for computed fields in ES|QL rules</span><span></span></div>
+</section>
+
+<!-- 11. limits -->
+<section class="slide">
+  <h1>Limits</h1>
+  <div class="body tall" style="top: 104px;">
+    <div class="legendrow"><span><i style="background: var(--blue-bg); border: 2px solid var(--blue)"></i>Elasticsearch limit</span><span><i style="background: var(--pink)"></i>Worst case of our stage</span></div>
+    <div class="limits">
+      <div class="lim">
+        <div class="name">Expression depth<small>nesting levels in one expression</small></div>
+        <div class="track"><div class="ours" style="width: 71.3%;">214</div><div class="max">300</div></div>
+      </div>
+      <div class="lim">
+        <div class="name">Query clauses<small>smallest limit of a node</small></div>
+        <div class="track"><div class="ours" style="width: 39%;">400</div><div class="max">1,024</div></div>
+      </div>
+      <div class="lim">
+        <div class="name">Statement length<small>characters in the query</small></div>
+        <div class="track"><div class="ours" style="background: transparent; color: #b0155c; padding-left: 14px;">&#10003; checked before the query runs</div><div class="max">1,000,000</div></div>
+      </div>
+    </div>
+    <div class="ours-badge">
+      <div class="num">200</div>
+      <div class="what">comparisons in the stage, our own limit
+        <small>one test on a column, and each CIDR value or date of an "is one of" counts as one</small></div>
+    </div>
+    <div class="bottomline" style="font-size: 21px; margin-top: 24px;">Above a limit the rule fails with a message that names the items to reduce</div>
+  </div>
+  <div class="footer"><span>Exceptions for computed fields in ES|QL rules</span><span></span></div>
+</section>
+
+</div>
+<div id="bar"></div>
+<div id="count"></div>
+
+<script>
+  const stage = document.getElementById('stage');
+  const slides = [...document.querySelectorAll('.slide')];
+  const bar = document.getElementById('bar');
+  const count = document.getElementById('count');
+  let current = Math.max(0, Math.min(slides.length - 1, parseInt(location.hash.slice(1), 10) - 1 || 0));
+
+  const fit = () => {
+    const scale = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
+    stage.style.transform = `translate(-50%, -50%) scale(${scale})`;
+  };
+  const show = (index) => {
+    current = Math.max(0, Math.min(slides.length - 1, index));
+    slides.forEach((slide, i) => slide.classList.toggle('active', i === current));
+    bar.style.width = `${((current + 1) / slides.length) * 100}%`;
+    count.textContent = `${current + 1} / ${slides.length}`;
+    history.replaceState(null, '', `#${current + 1}`);
+  };
+  document.addEventListener('keydown', (event) => {
+    if (['ArrowRight', 'ArrowDown', 'PageDown', ' ', 'Enter'].includes(event.key)) { event.preventDefault(); show(current + 1); }
+    else if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace'].includes(event.key)) { event.preventDefault(); show(current - 1); }
+    else if (event.key === 'Home') show(0);
+    else if (event.key === 'End') show(slides.length - 1);
+    else if (event.key === 'f' || event.key === 'F') {
+      if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen();
+    }
+  });
+  document.addEventListener('click', (event) => show(current + (event.clientX < window.innerWidth / 3 ? -1 : 1)));
+  window.addEventListener('resize', fit);
+  fit();
+  show(current);
+</script>
+</body>
+</html>

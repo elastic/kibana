@@ -7,6 +7,7 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type {
+  AppliesTo,
   DescriptionOrUndefined,
   EntriesArray,
   ExceptionListItemSchema,
@@ -26,6 +27,7 @@ import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 
 import type { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
+import { assertAppliesToIsNotChanged, validateItemForList } from './utils/esql_output_columns';
 import {
   transformSavedObjectUpdateToExceptionListItem,
   transformUpdateCommentsToComments,
@@ -34,6 +36,8 @@ import { getExceptionListItem } from './get_exception_list_item';
 
 export interface UpdateExceptionListItemOptions {
   id: IdOrUndefined;
+  /** what the item applies to. When it is not set, the item keeps what it applies to. It cannot be changed. */
+  appliesTo?: AppliesTo;
   comments: UpdateCommentsArrayOrUndefined;
   _version: _VersionOrUndefined;
   name: NameOrUndefined;
@@ -53,6 +57,7 @@ export interface UpdateExceptionListItemOptions {
 
 export const updateExceptionListItem = async ({
   _version,
+  appliesTo,
   comments,
   entries,
   expireTime,
@@ -78,6 +83,18 @@ export const updateExceptionListItem = async ({
   if (exceptionListItem == null) {
     return null;
   } else {
+    // This update changes only the attributes that are passed in: an item without `appliesTo` keeps what it applies to
+    if (appliesTo != null) {
+      assertAppliesToIsNotChanged({ requested: appliesTo, stored: exceptionListItem.applies_to });
+    }
+    await validateItemForList({
+      appliesTo: exceptionListItem.applies_to,
+      entries,
+      listId: exceptionListItem.list_id,
+      namespaceType,
+      osTypes,
+      savedObjectsClient,
+    });
     const transformedComments = transformUpdateCommentsToComments({
       comments,
       existingComments: exceptionListItem.comments,

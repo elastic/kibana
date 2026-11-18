@@ -19,6 +19,7 @@ import type {
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
   NamespaceType,
+  ColumnType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   EXCEPTION_LIST_NAMESPACE_AWARE,
@@ -48,6 +49,8 @@ export interface FormattedBuilderEntry {
 }
 
 export interface EmptyEntry {
+  /** The type of the column that an item that applies to the ES|QL output columns tests */
+  column_type?: ColumnType;
   id: string;
   field: string | undefined;
   operator: OperatorEnum;

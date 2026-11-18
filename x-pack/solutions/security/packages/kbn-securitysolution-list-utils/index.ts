@@ -6,6 +6,7 @@
  */
 
 export * from './src/autocomplete_operators';
+export * from './src/esql_output_columns';
 export * from './src/get_exception_list_type';
 export * from './src/get_filters';
 export * from './src/get_general_filters';

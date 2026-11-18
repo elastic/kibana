@@ -15,6 +15,8 @@ import type {
   ExceptionsBuilderReturnExceptionItem,
 } from '@kbn/securitysolution-list-utils';
 import { getOperatorType } from '@kbn/securitysolution-list-utils';
+import type { EsqlOutputColumnType } from '@kbn/securitysolution-exceptions-common/esql_output_columns';
+import { isEsqlOutputColumnType } from '@kbn/securitysolution-exceptions-common/esql_output_columns';
 import type { RuntimeFieldType } from '../../../../../../common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
 import { RuntimeFieldTypeEnum } from '../../../../../../common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
 
@@ -166,6 +168,46 @@ export const mapDataViewFieldToRuntimeType = (field: DataViewFieldBase): Runtime
 };
 
 /**
+ * Map the ES|QL type that an entry on a computed column declares to the runtime field type that bulk-close
+ * accepts. The alerts index does not map a computed column, and the source data view does not have it, so the
+ * type that the entry declares is the only type that is known. The runtime field reads the value from the
+ * `_source` of the alert. A `date` or `date_nanos` column is a `date` runtime field. A value such as `2026-09-30`
+ * then matches the whole day, as it does in the DSL filter and at the end of the query (the server parses the
+ * ISO-8601 text of `_source`, and a `date` runtime field keeps milliseconds, which makes `date_nanos` lose its
+ * last digits). An `unsigned_long` column is a `keyword` runtime field, because `long` cannot hold the whole
+ * range and `double` loses digits, and the server writes its number as text.
+ */
+export const mapColumnTypeToRuntimeType = (columnType: EsqlOutputColumnType): RuntimeFieldType => {
+  switch (columnType) {
+    case 'ip':
+      return RuntimeFieldTypeEnum.ip;
+    case 'boolean':
+      return RuntimeFieldTypeEnum.boolean;
+    case 'integer':
+    case 'long':
+      return RuntimeFieldTypeEnum.long;
+    case 'double':
+      return RuntimeFieldTypeEnum.double;
+    case 'date':
+    case 'date_nanos':
+      return RuntimeFieldTypeEnum.date;
+    case 'keyword':
+    case 'text':
+    case 'version':
+    case 'unsigned_long':
+      return RuntimeFieldTypeEnum.keyword;
+  }
+};
+
+/** The column type that an entry on a computed column declares, which the entries on source fields do not have. */
+const getDeclaredColumnType = (
+  entry: Entry | EmptyListEntry | EmptyEntry
+): EsqlOutputColumnType | undefined =>
+  'column_type' in entry && isEsqlOutputColumnType(entry.column_type)
+    ? entry.column_type
+    : undefined;
+
+/**
  * Build the `runtimeFields` map the bulk-close endpoint expects.
  *
  * For each exception entry whose field is **not** present on the alerts
@@ -177,6 +219,10 @@ export const mapDataViewFieldToRuntimeType = (field: DataViewFieldBase): Runtime
  * flag — callers surface a "best-effort string matching" warning when
  * that's true (typical case: rule has been reconfigured since the alerts
  * were created and the field is no longer on the current source indices).
+ *
+ * An entry on a computed column of an ES|QL rule declares its type in
+ * `column_type`: the field is not on the source indices, so that declared
+ * type is used and the field is not counted as untyped.
  *
  * ECS fields (those already present on the alerts index) are skipped —
  * they don't need synthesis on the server side.
@@ -195,6 +241,11 @@ export const collectRuntimeFieldTypes = (
   const visit = (entry: Entry | EmptyListEntry | EmptyEntry) => {
     if (!entry.field || alertsFieldNames.has(entry.field)) return;
     if (entry.field in runtimeFields) return;
+    const declaredColumnType = getDeclaredColumnType(entry);
+    if (declaredColumnType != null) {
+      runtimeFields[entry.field] = mapColumnTypeToRuntimeType(declaredColumnType);
+      return;
+    }
     const sourceField = sourceFieldByName.get(entry.field);
     if (sourceField) {
       runtimeFields[entry.field] = mapDataViewFieldToRuntimeType(sourceField);

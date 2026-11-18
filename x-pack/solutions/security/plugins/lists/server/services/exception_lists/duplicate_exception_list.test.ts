@@ -17,6 +17,7 @@ import { findExceptionListsItemPointInTimeFinder } from './find_exception_list_i
 import { duplicateExceptionListAndItems } from './duplicate_exception_list';
 import { getExceptionList } from './get_exception_list';
 import { createExceptionList } from './create_exception_list';
+import { bulkCreateExceptionListItems } from './bulk_create_exception_list_items';
 
 jest.mock('./get_exception_list');
 jest.mock('./create_exception_list');
@@ -117,5 +118,48 @@ describe('duplicateExceptionListAndItems', () => {
       sortField: undefined,
       sortOrder: undefined,
     });
+  });
+  test('should duplicate what each item applies to, and not add it to the items that do not say it', async () => {
+    (getExceptionList as jest.Mock).mockResolvedValue(getDetectionsExceptionListSchemaMock());
+    (createExceptionList as jest.Mock).mockResolvedValue({
+      ...getDetectionsExceptionListSchemaMock(),
+      list_id: 'exception_list_id_dupe',
+      name: 'Test [Duplicate]',
+    });
+    (findExceptionListsItemPointInTimeFinder as jest.Mock).mockImplementationOnce(
+      ({ executeFunctionOnStream }) => {
+        executeFunctionOnStream({
+          data: [
+            getExceptionListItemSchemaMock(),
+            getExceptionListItemSchemaMock({
+              applies_to: 'esql_output_columns',
+              entries: [
+                {
+                  column_type: 'keyword',
+                  field: 'target_host',
+                  operator: 'included',
+                  type: 'match',
+                  value: 'dc-01',
+                },
+              ],
+              item_id: 'esql-item',
+            }),
+          ],
+        });
+      }
+    );
+
+    await duplicateExceptionListAndItems({
+      includeExpiredExceptions: true,
+      list: getDetectionsExceptionListSchemaMock(),
+      namespaceType: 'single',
+      savedObjectsClient: savedObjectsClientMock.create(),
+      user: 'test-user',
+    });
+
+    const [[{ items }]] = (bulkCreateExceptionListItems as jest.Mock).mock.calls;
+    expect(items[0]).not.toHaveProperty('applies_to');
+    expect(items[1].applies_to).toBe('esql_output_columns');
+    expect(items[1].entries).toEqual([expect.objectContaining({ column_type: 'keyword' })]);
   });
 });

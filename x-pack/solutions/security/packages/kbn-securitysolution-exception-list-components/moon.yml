@@ -17,6 +17,7 @@ project:
   owner: '@elastic/security-detection-engineering'
   sourceRoot: x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components
 dependsOn:
+  - '@kbn/securitysolution-exceptions-common'
   - '@kbn/securitysolution-io-ts-list-types'
   - '@kbn/securitysolution-autocomplete'
   - '@kbn/i18n'

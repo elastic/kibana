@@ -212304,6 +212304,23 @@ components:
           type: object
     Security_Endpoint_Exceptions_API_EndpointListItem:
       $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
+    Security_Endpoint_Exceptions_API_EsqlOutputColumnType:
+      description: |
+        The ES|QL type of the output column that the entry is tested on. Only used, and then required, in the entries of an
+        item whose `applies_to` is `esql_output_columns`.
+      enum:
+        - keyword
+        - text
+        - integer
+        - long
+        - unsigned_long
+        - double
+        - boolean
+        - ip
+        - version
+        - date
+        - date_nanos
+      type: string
     Security_Endpoint_Exceptions_API_ExceptionList:
       type: object
       properties:
@@ -212395,6 +212412,8 @@ components:
         _version:
           description: The version id, normally returned by the API when the item was retrieved. Use it ensure updates are done against the latest version.
           type: string
+        applies_to:
+          $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemAppliesTo'
         comments:
           $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemCommentArray'
         created_at:
@@ -212453,6 +212472,15 @@ components:
         - created_by
         - updated_at
         - updated_by
+    Security_Endpoint_Exceptions_API_ExceptionListItemAppliesTo:
+      description: |
+        What the exception item applies to:
+        * `source_documents`: the documents of the source indices, before the query of the rule runs. This is how every exception works, and an item without `applies_to` has this value.
+        * `esql_output_columns`: the rows that the query of an ES|QL rule outputs, tested on the output columns of the query. Every entry of such an item needs a `column_type`. Only ES|QL rules apply these items, and no other rule type does.
+      enum:
+        - source_documents
+        - esql_output_columns
+      type: string
     Security_Endpoint_Exceptions_API_ExceptionListItemComment:
       type: object
       properties:
@@ -212505,6 +212533,8 @@ components:
     Security_Endpoint_Exceptions_API_ExceptionListItemEntryExists:
       type: object
       properties:
+        column_type:
+          $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EsqlOutputColumnType'
         field:
           $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
         operator:
@@ -212546,6 +212576,8 @@ components:
     Security_Endpoint_Exceptions_API_ExceptionListItemEntryMatch:
       type: object
       properties:
+        column_type:
+          $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EsqlOutputColumnType'
         field:
           $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
         operator:
@@ -212564,6 +212596,8 @@ components:
     Security_Endpoint_Exceptions_API_ExceptionListItemEntryMatchAny:
       type: object
       properties:
+        column_type:
+          $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EsqlOutputColumnType'
         field:
           $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
         operator:
@@ -212585,6 +212619,8 @@ components:
     Security_Endpoint_Exceptions_API_ExceptionListItemEntryMatchWildcard:
       type: object
       properties:
+        column_type:
+          $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EsqlOutputColumnType'
         field:
           $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
         operator:
@@ -216175,6 +216211,8 @@ components:
             type: simple
           type: object
           properties:
+            applies_to:
+              $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemAppliesTo'
             entries:
               $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemEntryArray'
             list_id:
@@ -216230,6 +216268,8 @@ components:
     Security_Exceptions_API_CreateRuleExceptionListItemProps:
       type: object
       properties:
+        applies_to:
+          $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemAppliesTo'
         comments:
           $ref: '#/components/schemas/Security_Exceptions_API_CreateRuleExceptionListItemCommentArray'
           default: []
@@ -216293,6 +216333,23 @@ components:
           $ref: '#/components/schemas/Security_Exceptions_API_EndpointArtifactTags'
       required:
         - list_id
+    Security_Exceptions_API_EsqlOutputColumnType:
+      description: |
+        The ES|QL type of the output column that the entry is tested on. Only used, and then required, in the entries of an
+        item whose `applies_to` is `esql_output_columns`.
+      enum:
+        - keyword
+        - text
+        - integer
+        - long
+        - unsigned_long
+        - double
+        - boolean
+        - ip
+        - version
+        - date
+        - date_nanos
+      type: string
     Security_Exceptions_API_EventFiltersProperties:
       description: Event filters list item properties.
       type: object
@@ -216408,6 +216465,8 @@ components:
         _version:
           description: The version id, normally returned by the API when the item was retrieved. Use it ensure updates are done against the latest version.
           type: string
+        applies_to:
+          $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemAppliesTo'
         comments:
           $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemCommentArray'
         created_at:
@@ -216466,6 +216525,15 @@ components:
         - created_by
         - updated_at
         - updated_by
+    Security_Exceptions_API_ExceptionListItemAppliesTo:
+      description: |
+        What the exception item applies to:
+        * `source_documents`: the documents of the source indices, before the query of the rule runs. This is how every exception works, and an item without `applies_to` has this value.
+        * `esql_output_columns`: the rows that the query of an ES|QL rule outputs, tested on the output columns of the query. Every entry of such an item needs a `column_type`. Only ES|QL rules apply these items, and no other rule type does.
+      enum:
+        - source_documents
+        - esql_output_columns
+      type: string
     Security_Exceptions_API_ExceptionListItemComment:
       type: object
       properties:
@@ -216518,6 +216586,8 @@ components:
     Security_Exceptions_API_ExceptionListItemEntryExists:
       type: object
       properties:
+        column_type:
+          $ref: '#/components/schemas/Security_Exceptions_API_EsqlOutputColumnType'
         field:
           $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
         operator:
@@ -216559,6 +216629,8 @@ components:
     Security_Exceptions_API_ExceptionListItemEntryMatch:
       type: object
       properties:
+        column_type:
+          $ref: '#/components/schemas/Security_Exceptions_API_EsqlOutputColumnType'
         field:
           $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
         operator:
@@ -216577,6 +216649,8 @@ components:
     Security_Exceptions_API_ExceptionListItemEntryMatchAny:
       type: object
       properties:
+        column_type:
+          $ref: '#/components/schemas/Security_Exceptions_API_EsqlOutputColumnType'
         field:
           $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
         operator:
@@ -216598,6 +216672,8 @@ components:
     Security_Exceptions_API_ExceptionListItemEntryMatchWildcard:
       type: object
       properties:
+        column_type:
+          $ref: '#/components/schemas/Security_Exceptions_API_EsqlOutputColumnType'
         field:
           $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
         operator:
@@ -217454,6 +217530,8 @@ components:
             type: simple
           type: object
           properties:
+            applies_to:
+              $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemAppliesTo'
             entries:
               $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemEntryArray'
             list_id:

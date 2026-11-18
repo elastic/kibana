@@ -70,6 +70,8 @@ export const duplicateExceptionListAndItems = async ({
       const newItemId = uuidv4();
 
       return {
+        // an item without it applies to the source documents
+        ...(item.applies_to != null ? { applies_to: item.applies_to } : {}),
         comments: [],
         description: item.description,
         entries: item.entries,

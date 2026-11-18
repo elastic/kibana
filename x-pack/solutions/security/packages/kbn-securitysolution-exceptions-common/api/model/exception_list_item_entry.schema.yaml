@@ -10,6 +10,24 @@ components:
       type: string
       enum: [excluded, included]
 
+    EsqlOutputColumnType:
+      type: string
+      description: |
+        The ES|QL type of the output column that the entry is tested on. Only used, and then required, in the entries of an
+        item whose `applies_to` is `esql_output_columns`.
+      enum:
+        - keyword
+        - text
+        - integer
+        - long
+        - unsigned_long
+        - double
+        - boolean
+        - ip
+        - version
+        - date
+        - date_nanos
+
     ExceptionListItemEntryMatch:
       type: object
       properties:
@@ -22,6 +40,8 @@ components:
           $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
         operator:
           $ref: '#/components/schemas/ExceptionListItemEntryOperator'
+        column_type:
+          $ref: '#/components/schemas/EsqlOutputColumnType'
       required:
         - type
         - field
@@ -43,6 +63,8 @@ components:
           minItems: 1
         operator:
           $ref: '#/components/schemas/ExceptionListItemEntryOperator'
+        column_type:
+          $ref: '#/components/schemas/EsqlOutputColumnType'
       required:
         - type
         - field
@@ -83,6 +105,8 @@ components:
           $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
         operator:
           $ref: '#/components/schemas/ExceptionListItemEntryOperator'
+        column_type:
+          $ref: '#/components/schemas/EsqlOutputColumnType'
       required:
         - type
         - field
@@ -124,6 +148,8 @@ components:
           $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
         operator:
           $ref: '#/components/schemas/ExceptionListItemEntryOperator'
+        column_type:
+          $ref: '#/components/schemas/EsqlOutputColumnType'
       required:
         - type
         - field

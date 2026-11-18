@@ -9,13 +9,17 @@ import * as t from 'io-ts';
 
 import { NonEmptyString, nonEmptyOrNullableStringArray } from '@kbn/securitysolution-io-ts-types';
 import { listOperator as operator } from '../list_operator';
+import { columnType } from '../column_type';
 
 export const entriesMatchAny = t.exact(
-  t.type({
-    field: NonEmptyString,
-    operator,
-    type: t.keyof({ match_any: null }),
-    value: nonEmptyOrNullableStringArray,
-  })
+  t.intersection([
+    t.type({
+      field: NonEmptyString,
+      operator,
+      type: t.keyof({ match_any: null }),
+      value: nonEmptyOrNullableStringArray,
+    }),
+    t.partial({ column_type: columnType }),
+  ])
 );
 export type EntryMatchAny = t.TypeOf<typeof entriesMatchAny>;

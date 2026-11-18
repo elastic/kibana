@@ -6,7 +6,8 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiToolTip } from '@elastic/eui';
+import { isEsqlOutputColumnsItem } from '@kbn/securitysolution-exceptions-common/esql_output_columns';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { HeaderMenu } from '../../header_menu';
 import * as i18n from '../../translations';
@@ -23,9 +24,26 @@ export const ExceptionItemCardHeader = memo<ExceptionItemCardHeaderProps>(
     return (
       <EuiFlexGroup responsive data-test-subj={dataTestSubj} justifyContent="spaceBetween">
         <EuiFlexItem grow={9}>
-          <EuiTitle size="xs" textTransform="uppercase" data-test-subj={`${dataTestSubj}Title`}>
-            <h3>{item.name}</h3>
-          </EuiTitle>
+          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s" wrap>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs" textTransform="uppercase" data-test-subj={`${dataTestSubj}Title`}>
+                <h3>{item.name}</h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            {isEsqlOutputColumnsItem(item) && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={i18n.EXCEPTION_ITEM_CARD_COMPUTED_COLUMNS_BADGE_TOOLTIP}>
+                  <EuiBadge
+                    color="hollow"
+                    tabIndex={0}
+                    data-test-subj={`${dataTestSubj}ComputedColumnsBadge`}
+                  >
+                    {i18n.EXCEPTION_ITEM_CARD_COMPUTED_COLUMNS_BADGE}
+                  </EuiBadge>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <HeaderMenu

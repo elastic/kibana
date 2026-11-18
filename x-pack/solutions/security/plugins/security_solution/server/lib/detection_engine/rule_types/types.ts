@@ -103,6 +103,17 @@ export interface SecuritySharedParams<TParams extends RuleParams = RuleParams> {
   aggregatableTimestampField: string;
   unprocessedExceptions: ExceptionListItemSchema[];
   exceptionFilter: Filter | undefined;
+  /**
+   * The exception items of the rule that apply to the output columns of an ES|QL query, expired ones included. They are
+   * not in `exceptionFilter`, which only has the items on the source documents. Only the ES|QL executor applies them, and
+   * the other rule types have none.
+   */
+  outputColumnExceptionItems?: ExceptionListItemSchema[];
+  /**
+   * When the execution started. The ES|QL executor decides with it which exception items have expired, as the
+   * common wrapper does when it builds `exceptionFilter`, whatever the end of the time range of the tuple is.
+   */
+  startedAt?: Date;
   alertTimestampOverride: Date | undefined;
   refreshOnIndexingAlerts: RefreshTypes;
   publicBaseUrl: string | undefined;

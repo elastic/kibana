@@ -18,6 +18,8 @@ export * from './description';
 export * from './deserializer';
 export * from './endpoint';
 export * from './entries';
+export * from './applies_to';
+export * from './column_type';
 export * from './entries_exist';
 export * from './entries_list';
 export * from './entry_match';
