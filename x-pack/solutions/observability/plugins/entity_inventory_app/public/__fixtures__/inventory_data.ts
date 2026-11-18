@@ -50,13 +50,26 @@ const K8S_DEPLOYMENT_LIST_COLUMNS: InventoryTypeColumn[] = [
   { name: 'last_seen', kind: 'last_seen' },
 ];
 
+// The `types` route labels the columns; the `_list` route does not. `entity.id` and `last_seen` have
+// built-in labels, the rest come from the definition's display labels.
+const DEFAULT_COLUMN_LABELS: Record<string, string> = { 'entity.id': 'ID', last_seen: 'Last seen' };
+
+const withLabels = (
+  columns: InventoryTypeColumn[],
+  displayLabels: Record<string, string> = {}
+): InventoryTypeColumn[] =>
+  columns.map((column) => {
+    const label = displayLabels[column.name] ?? DEFAULT_COLUMN_LABELS[column.name];
+    return label === undefined ? column : { ...column, label };
+  });
+
 export const HOST_TYPE_FIXTURE: InventoryType = {
   type: 'host',
   name: 'Host',
   description:
     'A physical or virtual machine that runs workloads. Identified by host.id, falling back to host.name, then host.hostname.',
   identityFields: ['host.id', 'host.name', 'host.hostname'],
-  columns: HOST_LIST_COLUMNS,
+  columns: withLabels(HOST_LIST_COLUMNS),
   sources: [
     { indexPattern: 'metrics-system.*-*' },
     { indexPattern: 'metrics-hostmetricsreceiver.otel-*' },
@@ -68,7 +81,10 @@ export const K8S_DEPLOYMENT_TYPE_FIXTURE: InventoryType = {
   name: 'K8s Deployment',
   description: 'A Kubernetes deployment, identified by namespace/name.',
   identityFields: ['kubernetes.namespace', 'kubernetes.deployment.name'],
-  columns: K8S_DEPLOYMENT_LIST_COLUMNS,
+  columns: withLabels(K8S_DEPLOYMENT_LIST_COLUMNS, {
+    'kubernetes.namespace': 'Namespace',
+    'k8s.cluster.name': 'Cluster',
+  }),
   sources: [
     { indexPattern: 'metrics-kubernetes.state_deployment-*' },
     { indexPattern: 'metrics-k8sclusterreceiver.otel-*' },
