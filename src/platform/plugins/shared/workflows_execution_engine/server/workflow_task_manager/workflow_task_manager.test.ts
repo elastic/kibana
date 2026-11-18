@@ -1355,6 +1355,40 @@ describe('WorkflowTaskManager', () => {
     });
   });
 
+  describe('hasActiveExecutionTask', () => {
+    it('is true when a task for the execution is running or claiming', async () => {
+      mockTaskManager.fetch.mockResolvedValue({
+        docs: [{ id: 'running-1', status: TaskStatus.Running }],
+      } as any);
+
+      await expect(workflowTaskManager.hasActiveExecutionTask('exec-1')).resolves.toBe(true);
+      expect(mockTaskManager.fetch).toHaveBeenCalledWith({
+        query: {
+          bool: {
+            must: [
+              {
+                term: {
+                  'task.scope': 'workflow:execution:exec-1',
+                },
+              },
+              {
+                terms: {
+                  'task.status': [TaskStatus.Running, TaskStatus.Claiming],
+                },
+              },
+            ],
+          },
+        },
+      });
+    });
+
+    it('is false when no task is running or claiming', async () => {
+      mockTaskManager.fetch.mockResolvedValue({ docs: [] } as any);
+
+      await expect(workflowTaskManager.hasActiveExecutionTask('exec-1')).resolves.toBe(false);
+    });
+  });
+
   describe('forceRunIdleTasks', () => {
     const workflowExecutionId = 'test-execution-id';
 

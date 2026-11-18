@@ -8,10 +8,9 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { ExecutionType } from '@kbn/workflows';
+import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import type {
   EsWorkflowStepExecution,
-  ExecutionStatus,
   WorkflowExecutionDto,
   WorkflowExecutionListDto,
 } from '@kbn/workflows';
@@ -36,6 +35,7 @@ import { WORKFLOWS_INDEX } from '../../common';
 import { buildTimeRangeFilter } from '../api/lib/build_time_range_filter';
 import {
   buildManagedWorkflowExecutionsFilter,
+  buildWorkflowDocumentFilter,
   buildWorkflowExecutionsSpaceFilter,
 } from '../api/lib/build_workflow_executions_search_query';
 import { isIndexNotFoundError } from '../api/lib/es_error_helpers';
@@ -127,6 +127,27 @@ export interface WorkflowExecutionStatusItem {
   status: ExecutionStatus;
 }
 
+export interface WorkflowExecutionStatusCountsParams {
+  workflowIds: string[];
+  startedAfter?: string;
+  startedBefore?: string;
+  executionIds?: string[];
+  accessControlFilter?: estypes.QueryDslQueryContainer;
+}
+
+export type WorkflowExecutionStatusCounts = Record<
+  string,
+  Partial<Record<ExecutionStatus, number>>
+>;
+
+interface StatusCountsAggs {
+  byWorkflow: estypes.AggregationsMultiBucketAggregateBase<
+    estypes.AggregationsStringTermsBucketKeys & {
+      byStatus: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringTermsBucketKeys>;
+    }
+  >;
+}
+
 export class WorkflowExecutionQueryService {
   constructor(private readonly deps: WorkflowExecutionQueryDeps) {}
 
@@ -196,8 +217,9 @@ export class WorkflowExecutionQueryService {
     params: SearchWorkflowExecutionsParams,
     spaceId: string
   ): Promise<WorkflowExecutionListDto> {
+    const documentFilter = buildWorkflowDocumentFilter(params);
     const must: estypes.QueryDslQueryContainer[] = [
-      ...(params.workflowId ? [{ term: { workflowId: params.workflowId } }] : []),
+      ...(documentFilter ? [documentFilter] : []),
       buildWorkflowExecutionsSpaceFilter(spaceId),
       ...(params.accessControlFilter ? [params.accessControlFilter] : []),
     ];
@@ -282,12 +304,14 @@ export class WorkflowExecutionQueryService {
       searchAfter: params.searchAfter,
       collapse: params.collapse ? { field: params.collapse } : undefined,
       // First page only. Later pages reuse this flag. List filters stay off this query.
+      // The name column follows the same document as the list, so a previous install's
+      // named runs cannot turn it on for an empty history.
       namedExecutionQuery:
-        params.workflowId && !params.searchAfter?.length
+        documentFilter && !params.searchAfter?.length
           ? {
               bool: {
                 must: [
-                  { term: { workflowId: params.workflowId } },
+                  documentFilter,
                   buildWorkflowExecutionsSpaceFilter(spaceId),
                   ...(params.accessControlFilter ? [params.accessControlFilter] : []),
                   { wildcard: { runName: { value: '?*' } } },
@@ -297,6 +321,70 @@ export class WorkflowExecutionQueryService {
             }
           : undefined,
     });
+  }
+
+  async getWorkflowExecutionStatusCounts(
+    {
+      workflowIds,
+      startedAfter,
+      startedBefore,
+      executionIds,
+      accessControlFilter,
+    }: WorkflowExecutionStatusCountsParams,
+    spaceId: string
+  ): Promise<WorkflowExecutionStatusCounts> {
+    if (workflowIds.length === 0) {
+      return {};
+    }
+    const startedAtRange = buildTimeRangeFilter('startedAt', startedAfter, startedBefore);
+    try {
+      const response = (await this.deps.workflowExecutionsDataClient.search({
+        size: 0,
+        track_total_hits: false,
+        query: {
+          bool: {
+            must: [
+              { terms: { workflowId: workflowIds } },
+              buildWorkflowExecutionsSpaceFilter(spaceId),
+              ...(accessControlFilter ? [accessControlFilter] : []),
+              ...(startedAtRange ? [startedAtRange] : []),
+              ...(executionIds ? [{ terms: { id: executionIds } }] : []),
+            ],
+            must_not: [{ exists: { field: 'stepId' } }],
+          },
+        },
+        aggs: {
+          byWorkflow: {
+            terms: { field: 'workflowId', size: workflowIds.length },
+            aggs: {
+              byStatus: { terms: { field: 'status', size: Object.values(ExecutionStatus).length } },
+            },
+          },
+        },
+      })) as unknown as estypes.SearchResponse<unknown, StatusCountsAggs>;
+
+      const workflowBuckets = response.aggregations?.byWorkflow.buckets ?? [];
+      return Object.fromEntries(
+        (Array.isArray(workflowBuckets) ? workflowBuckets : []).map((workflowBucket) => {
+          const statusBuckets = workflowBucket.byStatus.buckets;
+          return [
+            String(workflowBucket.key),
+            Object.fromEntries(
+              (Array.isArray(statusBuckets) ? statusBuckets : []).map((statusBucket) => [
+                String(statusBucket.key),
+                statusBucket.doc_count,
+              ])
+            ),
+          ];
+        })
+      );
+    } catch (error) {
+      if (isIndexNotFoundError(error)) {
+        return {};
+      }
+      this.deps.logger.error(`Failed to count workflow executions by status: ${error}`);
+      throw error;
+    }
   }
 
   async searchExecutionsView(
@@ -407,7 +495,8 @@ export class WorkflowExecutionQueryService {
     return searchStepExecutions({
       stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
       logger: this.deps.logger,
-      workflowId: params.workflowId,
+      workflowId: params.workflowUid ? undefined : params.workflowId,
+      workflowUid: params.workflowUid,
       stepId: params.stepId,
       stepType: params.stepType,
       additionalQuery: workflowRunFilter || undefined,

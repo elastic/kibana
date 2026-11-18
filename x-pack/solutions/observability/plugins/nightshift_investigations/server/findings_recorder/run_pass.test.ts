@@ -994,6 +994,7 @@ describe('runFindingsPass with workspace files', () => {
       expect(prompt).toContain('noun phrase of at most eight words');
       expect(prompt).toContain('**Tested:**');
       expect(prompt).toContain('**Result:**');
+      expect(prompt).toContain('**Settled by:**');
       expect(prompt).toContain('never "I checked..."');
     }
     expect(final).toContain('At most 70 words of Markdown');
