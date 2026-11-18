@@ -18,6 +18,7 @@ import type {
 import type { SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart } from './types';
 import { ApiBodyRegistry, SavedObjectsManagement } from './services';
 import { registerRoutes } from './routes';
+import { exportReferencedObjects, importReferencedObjects } from './services/referenced_objects';
 import { capabilitiesProvider } from './capabilities_provider';
 
 export class SavedObjectsManagementPlugin
@@ -52,6 +53,20 @@ export class SavedObjectsManagementPlugin
 
     return {
       getApiBodyEntry: (type) => this.apiBodyRegistry.get(type),
+      exportReferencedObjects: ({ request, client, roots }) =>
+        exportReferencedObjects({
+          exporter: core.savedObjects.createExporter(client),
+          registry: this.apiBodyRegistry,
+          request,
+          roots,
+        }),
+      importReferencedObjects: ({ client, objects, mode }) =>
+        importReferencedObjects({
+          importer: core.savedObjects.createImporter(client),
+          registry: this.apiBodyRegistry,
+          objects,
+          mode,
+        }),
     };
   }
 }

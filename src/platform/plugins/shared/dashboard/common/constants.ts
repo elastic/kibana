@@ -38,3 +38,9 @@ export const DEFAULT_DASHBOARD_OPTIONS = {
 } as const;
 
 export const DASHBOARD_CHANGE_HISTORY_API_PATH = '/internal/dashboard/change_history' as const;
+
+/**
+ * Feature flag gating export and import with referenced objects: the `_export` and `_import`
+ * routes, which return 404 while it's off, and their UI entries. Off by default.
+ */
+export const EXPORT_REFERENCED_OBJECTS_ENABLED_FLAG = 'dashboard.exportReferencedObjectsEnabled';

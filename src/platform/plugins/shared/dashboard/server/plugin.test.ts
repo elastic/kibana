@@ -76,6 +76,7 @@ describe('DashboardPlugin', () => {
       dashboardPlugin.start(mockCoreStart, {
         embeddable: mockEmbeddable,
         taskManager: mockTaskManager,
+        savedObjectsManagement: savedObjectsManagementPluginMock.createStartContract(),
       });
       expect(scheduleDashboardTelemetry).toHaveBeenCalledTimes(1);
       expect(await mockTaskManager.runSoon).toHaveBeenCalledTimes(1);
@@ -88,6 +89,7 @@ describe('DashboardPlugin', () => {
       const response = dashboardPlugin.start(mockCoreStart, {
         embeddable: mockEmbeddable,
         taskManager: mockTaskManager,
+        savedObjectsManagement: savedObjectsManagementPluginMock.createStartContract(),
       });
       expect(scheduleDashboardTelemetry).toHaveBeenCalledTimes(1);
       expect(await mockTaskManager.runSoon).toHaveBeenCalledTimes(1);
@@ -102,6 +104,7 @@ describe('DashboardPlugin', () => {
       const { client } = new DashboardPlugin(initContext).start(mockCoreStart, {
         embeddable: mockEmbeddable,
         taskManager: mockTaskManager,
+        savedObjectsManagement: savedObjectsManagementPluginMock.createStartContract(),
       });
 
       await client.read(savedObjectsClient, 'dashboard-1', { isDashboardAppRequest: true });

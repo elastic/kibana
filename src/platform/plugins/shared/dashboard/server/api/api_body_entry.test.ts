@@ -16,7 +16,10 @@ import {
   createEmbeddableSetupMock,
   createEmbeddableStartMock,
 } from '@kbn/embeddable-plugin/server/mocks';
-import { expectApiBodyEntryRoundTrip } from '@kbn/saved-objects-management-plugin/server/mocks';
+import {
+  expectApiBodyEntryRoundTrip,
+  savedObjectsManagementPluginMock,
+} from '@kbn/saved-objects-management-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
 import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
@@ -171,6 +174,7 @@ describe('dashboard API body entry', () => {
           }),
         },
         taskManager: taskManagerMock.createStart(),
+        savedObjectsManagement: savedObjectsManagementPluginMock.createStartContract(),
       },
       coreMock.createPluginInitializerContext().logger.get()
     );

@@ -12,4 +12,5 @@ export type {
   ImportJsonFlyoutServices,
   SanitizeImportJson,
 } from './src/import_json/types';
+export { getClientErrorMessage } from './src/import_json/use_import_json_flyout_state';
 export { ImportJsonFlyoutContent } from './src/import_json/import_json_flyout_content';

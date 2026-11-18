@@ -28,7 +28,10 @@ describe('Legacy config', () => {
           requestTimeout: duration(30, 's'),
         },
         path: { data: fromRoot('data') },
-        savedObjects: { maxImportPayloadBytes: new ByteSizeValue(26214400) },
+        savedObjects: {
+          maxImportPayloadBytes: new ByteSizeValue(26214400),
+          maxImportExportSize: 10000,
+        },
       });
     });
   });
@@ -45,7 +48,10 @@ describe('Legacy config', () => {
           requestTimeout: duration(30, 's'),
         },
         path: { data: fromRoot('data') },
-        savedObjects: { maxImportPayloadBytes: new ByteSizeValue(26214400) },
+        savedObjects: {
+          maxImportPayloadBytes: new ByteSizeValue(26214400),
+          maxImportExportSize: 10000,
+        },
       });
     });
   });

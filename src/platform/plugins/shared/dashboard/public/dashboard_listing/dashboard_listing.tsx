@@ -29,6 +29,9 @@ import { getDashboardListingTabs, toContentListPageTabs } from './get_dashboard_
 import type { DashboardListingProps } from './types';
 import { openImportDashboardJsonFlyout } from './import_json/open_import_dashboard_json_flyout';
 import { importDashboardJsonStrings } from './import_json/_import_dashboard_json_strings';
+import { openImportReferencedObjectsFlyout } from './import_referenced_objects/open_import_referenced_objects_flyout';
+import { importReferencedObjectsStrings } from './import_referenced_objects/_import_referenced_objects_strings';
+import { EXPORT_REFERENCED_OBJECTS_ENABLED_FLAG } from '../../common/constants';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { confirmCreateWithUnsaved } from './confirm_overlays';
 import { getDashboardBackupService } from '../services/dashboard_api_services';
@@ -171,6 +174,18 @@ export const DashboardListing = ({
     [activeTabId]
   );
 
+  const isExportReferencedObjectsEnabled = coreServices.featureFlags.useBooleanValue(
+    EXPORT_REFERENCED_OBJECTS_ENABLED_FLAG,
+    false
+  );
+
+  const onImportReferencedObjectsComplete = useCallback(() => {
+    // Only refresh the Dashboards table: importing should not affect other registered tabs.
+    if (activeTabId === DASHBOARD_APP_ID) {
+      setRefreshListBouncer((b) => !b);
+    }
+  }, [activeTabId]);
+
   const createDashboardAction = useCallback(() => {
     if (useSessionStorageIntegration && getDashboardBackupService().dashboardHasUnsavedEdits()) {
       confirmCreateWithUnsaved(() => {
@@ -239,10 +254,33 @@ export const DashboardListing = ({
                 });
               },
             },
+            ...(isExportReferencedObjectsEnabled
+              ? [
+                  {
+                    id: 'importReferencedObjects',
+                    order: 1,
+                    label: importReferencedObjectsStrings.getMenuItemLabel(),
+                    iconType: 'download',
+                    testId: 'dashboardListingImportReferencedObjectsButton',
+                    run: (params?: { returnFocus?: () => void }) => {
+                      openImportReferencedObjectsFlyout({
+                        onImportComplete: onImportReferencedObjectsComplete,
+                        returnFocus: params?.returnFocus,
+                      });
+                    },
+                  },
+                ]
+              : []),
           ]
         : [],
     };
-  }, [onImportSuccess, createDashboardAction, getTabs]);
+  }, [
+    onImportSuccess,
+    createDashboardAction,
+    getTabs,
+    isExportReferencedObjectsEnabled,
+    onImportReferencedObjectsComplete,
+  ]);
 
   const sectionLabel = activeTabTitle ?? dashboardListingTitle;
 

@@ -11,5 +11,5 @@ export const SharedGlobalConfigKeys = {
   // We can add more if really needed
   elasticsearch: ['shardTimeout', 'requestTimeout'] as const,
   path: ['data'] as const,
-  savedObjects: ['maxImportPayloadBytes'] as const,
+  savedObjects: ['maxImportPayloadBytes', 'maxImportExportSize'] as const,
 };

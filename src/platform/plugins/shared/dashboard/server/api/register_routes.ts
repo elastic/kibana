@@ -20,11 +20,13 @@ import { registerSanitizeRoute } from './sanitize';
 import { registerSearchRoute } from './search';
 import { registerUpdateRoute } from './update';
 import { registerChangeHistoryRoutes } from '../change_history/register_routes';
+import { registerExportRoute, registerImportRoute } from './referenced_objects';
 
 export function registerRoutes(
   core: CoreSetup<StartDeps, DashboardPluginStart>,
   usageCounter: UsageCounter | undefined,
-  logger: Logger
+  logger: Logger,
+  importExportLimits: { maxImportExportSize: number; maxImportPayloadBytes: number }
 ) {
   const { versioned: versionedRouter } = core.http.createRouter<RequestHandlerContext>();
 
@@ -39,6 +41,20 @@ export function registerRoutes(
   registerDeleteRoute(versionedRouter, usageCounter, logger);
   registerSearchRoute(versionedRouter, usageCounter, logger);
   registerSanitizeRoute(versionedRouter, logger);
+  registerExportRoute(
+    versionedRouter,
+    core.getStartServices,
+    usageCounter,
+    importExportLimits.maxImportExportSize,
+    logger
+  );
+  registerImportRoute(
+    versionedRouter,
+    core.getStartServices,
+    usageCounter,
+    importExportLimits,
+    logger
+  );
 
   //
   // Dashboard application specific routes

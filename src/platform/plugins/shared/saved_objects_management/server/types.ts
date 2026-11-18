@@ -7,8 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
+import type {
+  KibanaRequest,
+  SavedObject,
+  SavedObjectReference,
+  SavedObjectsClientContract,
+  SavedObjectTypeIdTuple,
+} from '@kbn/core/server';
 import type { z } from '@kbn/zod';
+import type {
+  ExportReferencedObjectsResponse,
+  ImportReferencedObjectsRequest,
+  ImportReferencedObjectsResponse,
+} from '../common/referenced_objects_schemas';
 
 /** Content that `toApi` dropped because the API body can't represent it. */
 export interface ApiBodyWarning {
@@ -40,6 +51,19 @@ export interface SavedObjectsManagementPluginSetup {
 export interface SavedObjectsManagementPluginStart {
   /** Returns the API body entry registered for a saved object type, if any. */
   getApiBodyEntry: (type: string) => ApiBodyEntry | undefined;
+  /**
+   * Exports root objects as the bodies their public APIs accept on PUT, with the caller's privileges.
+   * Throws core's export errors, such as `object-fetch-error` for a missing or unreadable root.
+   */
+  exportReferencedObjects: (options: {
+    request: KibanaRequest;
+    client: SavedObjectsClientContract;
+    roots: SavedObjectTypeIdTuple[];
+  }) => Promise<ExportReferencedObjectsResponse>;
+  /** Imports exported API bodies through core's importer, with one result per object. */
+  importReferencedObjects: (
+    options: ImportReferencedObjectsRequest & { client: SavedObjectsClientContract }
+  ) => Promise<ImportReferencedObjectsResponse>;
 }
 
 export type {

@@ -27,7 +27,11 @@ export const createCoreContextConfigServiceMock = (): IConfigService => {
       case 'path':
         return { data: fromRoot('data'), someOtherProps: 'unused' };
       case 'savedObjects':
-        return { maxImportPayloadBytes: new ByteSizeValue(26214400), someOtherProps: 'unused' };
+        return {
+          maxImportPayloadBytes: new ByteSizeValue(26214400),
+          maxImportExportSize: 10000,
+          someOtherProps: 'unused',
+        };
       default:
         return {};
     }

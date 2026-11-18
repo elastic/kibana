@@ -16,6 +16,7 @@ import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { topNavStrings } from '../../_dashboard_app_strings';
 import type { useShareOptions } from './use_share_options';
 import { shareService } from '../../../services/kibana_services';
+import { exportReferencedObjectsStrings } from './export_referenced_objects/_export_referenced_objects_strings';
 
 export const useDashboardExportItems = (
   shareOptions: ReturnType<typeof useShareOptions>
@@ -110,6 +111,15 @@ export const getExportItemMeta = (integrationId: string) => {
       testId: 'exportMenuItem-JSON',
       iconType: 'code',
       order: 0,
+    };
+  }
+
+  if (integrationId === 'exportReferencedObjects') {
+    return {
+      label: exportReferencedObjectsStrings.getMenuItemLabel(),
+      testId: 'exportMenuItem-exportReferencedObjects',
+      iconType: 'upload',
+      order: 0.5,
     };
   }
 

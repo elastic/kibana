@@ -16,3 +16,8 @@ export type {
   SavedObjectManagementTypeInfo,
   v1,
 } from './types';
+export type {
+  ExportReferencedObjectsResponse,
+  ImportReferencedObjectsRequest,
+  ImportReferencedObjectsResponse,
+} from './referenced_objects_schemas';

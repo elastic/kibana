@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/server/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { createEmbeddableStartMock } from '@kbn/embeddable-plugin/server/mocks';
 import { savedObjectsTaggingMock } from '@kbn/saved-objects-tagging-plugin/server/mocks';
@@ -21,6 +22,7 @@ export const setStubKibanaServices = () => {
       embeddable: createEmbeddableStartMock(),
       savedObjectsTagging: savedObjectsTaggingMock.createStartContract(),
       taskManager: taskManagerMock.createStart(),
+      savedObjectsManagement: savedObjectsManagementPluginMock.createStartContract(),
     },
     coreMock.createPluginInitializerContext().logger.get()
   );

@@ -17,8 +17,8 @@ import type { CreateFromJson, ImportJsonFlyoutServices, SanitizeImportJson } fro
 /** Client-side import limit; deployments may configure `server.maxPayload` differently. */
 const MAX_IMPORT_JSON_FILE_BYTES = 1_048_576;
 
-// Only 4xx messages describe user-fixable input; 5xx details stay in server logs.
-const getClientErrorMessage = (error: unknown): string | undefined => {
+/** Returns the server's message for a 4xx response; 5xx details stay in server logs. */
+export const getClientErrorMessage = (error: unknown): string | undefined => {
   if (!isHttpFetchError(error)) return;
   const status = error.response?.status ?? 0;
   if (status < 400 || status > 499) return;

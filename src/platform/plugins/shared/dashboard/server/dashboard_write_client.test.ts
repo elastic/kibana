@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/server/mocks';
 import { z, ZodError } from '@kbn/zod';
 import { coreMock, securityServiceMock } from '@kbn/core/server/mocks';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
@@ -64,6 +65,7 @@ describe('dashboard server client writes', () => {
       embeddable,
       taskManager: taskManagerMock.createStart(),
       spaces,
+      savedObjectsManagement: savedObjectsManagementPluginMock.createStartContract(),
     }).client;
   };
 

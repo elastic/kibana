@@ -69,6 +69,7 @@ import type {
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
+import { EXPORT_REFERENCED_OBJECTS_ENABLED_FLAG } from '../common/constants';
 import type { DashboardMountContextProps } from './dashboard_app/types';
 import type { DashboardListingTab } from './dashboard_listing/types';
 import {
@@ -162,6 +163,8 @@ export class DashboardPlugin
   }
 
   private appStateSubscription?: Subscription;
+  private exportReferencedObjectsSubscription?: Subscription;
+  private isExportReferencedObjectsEnabled = false;
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private urlUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private deepLinksUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
@@ -213,6 +216,17 @@ export class DashboardPlugin
         getShareIntegrationConfig: async () => {
           const { exportJsonConfig } = await import('./dashboard_renderer/dashboard_module');
           return exportJsonConfig;
+        },
+      });
+      share.registerShareIntegration<ExportShareDerivatives>('dashboard', {
+        id: 'exportReferencedObjects',
+        groupId: 'exportDerivatives',
+        prerequisiteCheck: () => this.isExportReferencedObjectsEnabled,
+        getShareIntegrationConfig: async () => {
+          const { exportReferencedObjectsConfig } = await import(
+            './dashboard_renderer/dashboard_module'
+          );
+          return exportReferencedObjectsConfig;
         },
       });
     }
@@ -359,6 +373,12 @@ export class DashboardPlugin
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
     setKibanaServices(core, plugins);
 
+    this.exportReferencedObjectsSubscription = core.featureFlags
+      .getBooleanValue$(EXPORT_REFERENCED_OBJECTS_ENABLED_FLAG, false)
+      .subscribe((enabled) => {
+        this.isExportReferencedObjectsEnabled = enabled;
+      });
+
     registerActions(plugins);
 
     plugins.navigation.registerNavigationLinks({
@@ -425,5 +445,6 @@ export class DashboardPlugin
       this.stopUrlTracking();
     }
     this.appStateSubscription?.unsubscribe();
+    this.exportReferencedObjectsSubscription?.unsubscribe();
   }
 }

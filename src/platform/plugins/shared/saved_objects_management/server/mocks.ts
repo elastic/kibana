@@ -20,6 +20,8 @@ const createSetupContract = (): jest.Mocked<SavedObjectsManagementPluginSetup> =
 
 const createStartContract = (): jest.Mocked<SavedObjectsManagementPluginStart> => ({
   getApiBodyEntry: jest.fn(),
+  exportReferencedObjects: jest.fn(),
+  importReferencedObjects: jest.fn(),
 });
 
 export const savedObjectsManagementPluginMock = {

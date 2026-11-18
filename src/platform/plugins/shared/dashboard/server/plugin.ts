@@ -18,7 +18,10 @@ import type {
 } from '@kbn/usage-collection-plugin/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
-import type { SavedObjectsManagementPluginSetup } from '@kbn/saved-objects-management-plugin/server';
+import type {
+  SavedObjectsManagementPluginSetup,
+  SavedObjectsManagementPluginStart,
+} from '@kbn/saved-objects-management-plugin/server';
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -78,6 +81,7 @@ export interface StartDeps {
   share?: SharePluginStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStartApi;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
 }
 
 export class DashboardPlugin
@@ -87,8 +91,10 @@ export class DashboardPlugin
   private apiUsageCounter?: UsageCounter;
   private readonly currentKibanaVersion: string;
   private changeHistoryClient: ChangeHistoryClient | undefined;
+  private readonly initializerContext: PluginInitializerContext;
 
   constructor(initializerContext: PluginInitializerContext) {
+    this.initializerContext = initializerContext;
     this.logger = initializerContext.logger.get();
     this.currentKibanaVersion = initializerContext.env.packageInfo.version;
   }
@@ -164,7 +170,12 @@ export class DashboardPlugin
       },
     };
     core.uiSettings.register(dashboardUiSettings);
-    registerRoutes(core, this.apiUsageCounter, this.logger);
+    const { maxImportExportSize, maxImportPayloadBytes } =
+      this.initializerContext.config.legacy.get().savedObjects;
+    registerRoutes(core, this.apiUsageCounter, this.logger, {
+      maxImportExportSize,
+      maxImportPayloadBytes: maxImportPayloadBytes.getValueInBytes(),
+    });
 
     void registerAccessControl({
       http: core.http,

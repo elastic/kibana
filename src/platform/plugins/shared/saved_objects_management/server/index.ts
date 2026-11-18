@@ -22,3 +22,8 @@ export type {
   SavedObjectMetadata,
   SavedObjectWithMetadata,
 } from './types';
+export {
+  exportReferencedObjectsResponseSchema,
+  getImportReferencedObjectsRequestSchema,
+  importReferencedObjectsResponseSchema,
+} from '../common/referenced_objects_schemas';
