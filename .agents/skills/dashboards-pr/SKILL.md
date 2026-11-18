@@ -56,8 +56,8 @@ Before drafting, say which issue you picked and where it came from, e.g. "Using 
    Done when you can state the user-visible problem, the user-visible change, and how to observe it. Ask for whatever is missing instead of guessing.
 4. **Draft.** Read [kibana.md](kibana.md) and [examples.md](examples.md), then write the title, the body and the suggested labels following them and the rules below. In Update mode, carry over from the existing body (see "Carry over in Update mode").
 5. **Self-check** the draft against "Before showing the draft" and fix every miss.
-6. **Write** the body to `/tmp/pr-body-<branch>.md` (replace `/` in the branch name with `-`). Show in chat: the title (and the old title in Update mode), the body, the labels, the checklist ticks you inferred, any test steps you inferred but didn't verify, and what you dropped from the old body.
-7. **Revise** on feedback by editing the same file, then show only what changed.
+6. **Write** the body to `/tmp/pr-body-<branch>.md` (replace `/` in the branch name with `-`). Inside an editor (Cursor, VS Code), open it there with `cursor <path>` or `code <path>` and keep the body out of chat; in a terminal-only session, or if the command fails, show the body in chat. Either way, show in chat: the file path, the title (and the old title in Update mode), the labels, the checklist ticks you inferred, any test steps you inferred but didn't verify, and what you dropped from the old body.
+7. **Revise** on feedback by editing the same file, then summarize what changed. The user may also edit the file directly: re-read it before approval and before any `gh` command.
 8. **Write mode** stops here.
 9. **Create mode:** run the branch checks, wait for explicit approval of the title, body and labels, then open the PR (see "Creating the PR").
 10. **Update mode:** after explicit approval, run `gh pr edit <n> -R elastic/kibana --title "<title>" --body-file /tmp/pr-body-<branch>.md`. Change labels only if they were approved too. Read it back with `gh pr view` and report the URL.
