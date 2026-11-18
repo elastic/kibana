@@ -149,6 +149,13 @@
         "source": "ssm"
       }
     ],
+    "putParameter": [
+      {
+        "method": "post",
+        "path": "/PutParameter",
+        "source": "ssm"
+      }
+    ],
     "sendCommand": [
       {
         "method": "post",

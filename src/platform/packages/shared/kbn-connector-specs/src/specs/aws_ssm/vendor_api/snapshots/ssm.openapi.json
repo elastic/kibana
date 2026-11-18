@@ -1404,12 +1404,45 @@
         },
         "type": "object"
       },
+      "HierarchyLevelLimitExceededExceptionResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "HierarchyTypeMismatchExceptionResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "IdempotentParameterMismatchResponseContent": {
         "properties": {
           "Message": {
             "type": "string"
           },
           "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IncompatiblePolicyExceptionResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
             "type": "string"
           }
         },
@@ -1600,6 +1633,17 @@
         },
         "type": "object"
       },
+      "InvalidAllowedPatternExceptionResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "InvalidAutomationExecutionParametersExceptionResponseContent": {
         "properties": {
           "Message": {
@@ -1770,6 +1814,28 @@
       "InvalidPluginNameResponseContent": {
         "properties": {
           "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidPolicyAttributeExceptionResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidPolicyTypeExceptionResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
             "type": "string"
           }
         },
@@ -2222,6 +2288,39 @@
         },
         "type": "object"
       },
+      "ParameterAlreadyExistsResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ParameterLimitExceededResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ParameterMaxVersionLimitExceededResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "ParameterNotFoundResponseContent": {
         "properties": {
           "__type": {
@@ -2232,6 +2331,25 @@
           }
         },
         "type": "object"
+      },
+      "ParameterPatternMismatchExceptionResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ParameterTier": {
+        "enum": [
+          "Standard",
+          "Advanced",
+          "Intelligent-Tiering"
+        ],
+        "type": "string"
       },
       "ParameterType": {
         "enum": [
@@ -2290,6 +2408,17 @@
         ],
         "type": "string"
       },
+      "PoliciesLimitExceededExceptionResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "ProgressCounters": {
         "properties": {
           "CancelledSteps": {
@@ -2315,6 +2444,80 @@
           "TotalSteps": {
             "default": 0,
             "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PutParameterRequestContent": {
+        "properties": {
+          "AllowedPattern": {
+            "maxLength": 1024,
+            "minLength": 0,
+            "type": "string"
+          },
+          "DataType": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "Description": {
+            "maxLength": 1024,
+            "minLength": 0,
+            "type": "string"
+          },
+          "KeyId": {
+            "maxLength": 256,
+            "minLength": 1,
+            "pattern": "^([a-zA-Z0-9:/_-]+)$",
+            "type": "string"
+          },
+          "Name": {
+            "maxLength": 2048,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Overwrite": {
+            "type": "boolean"
+          },
+          "Policies": {
+            "maxLength": 4096,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Tags": {
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            },
+            "maxItems": 1000,
+            "minItems": 0,
+            "type": "array"
+          },
+          "Tier": {
+            "$ref": "#/components/schemas/ParameterTier"
+          },
+          "Type": {
+            "$ref": "#/components/schemas/ParameterType"
+          },
+          "Value": {
+            "format": "password",
+            "type": "string"
+          }
+        },
+        "required": [
+          "Name",
+          "Value"
+        ],
+        "type": "object"
+      },
+      "PutParameterResponseContent": {
+        "properties": {
+          "Tier": {
+            "$ref": "#/components/schemas/ParameterTier"
+          },
+          "Version": {
+            "default": 0,
+            "format": "int64",
             "type": "integer"
           }
         },
@@ -2982,6 +3185,28 @@
             "default": 0,
             "format": "int32",
             "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "TooManyUpdatesResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UnsupportedParameterTypeResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
           }
         },
         "type": "object"
@@ -3922,6 +4147,156 @@
                     },
                     {
                       "$ref": "#/components/schemas/InvalidTypeNameExceptionResponseContent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/PutParameter": {
+      "post": {
+        "operationId": "PutParameter",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PutParameterRequestContent"
+              }
+            },
+            "application/x-amz-json-1.1": {
+              "schema": {
+                "$ref": "#/components/schemas/PutParameterRequestContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PutParameterResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/PutParameterResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/HierarchyLevelLimitExceededExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/HierarchyTypeMismatchExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/IncompatiblePolicyExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidAllowedPatternExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidKeyIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidPolicyAttributeExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidPolicyTypeExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ParameterAlreadyExistsResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ParameterLimitExceededResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ParameterMaxVersionLimitExceededResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ParameterPatternMismatchExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PoliciesLimitExceededExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/TooManyUpdatesResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/UnsupportedParameterTypeResponseContent"
+                    }
+                  ]
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/HierarchyLevelLimitExceededExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/HierarchyTypeMismatchExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/IncompatiblePolicyExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidAllowedPatternExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidKeyIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidPolicyAttributeExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidPolicyTypeExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ParameterAlreadyExistsResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ParameterLimitExceededResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ParameterMaxVersionLimitExceededResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ParameterPatternMismatchExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PoliciesLimitExceededExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/TooManyUpdatesResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/UnsupportedParameterTypeResponseContent"
                     }
                   ]
                 }

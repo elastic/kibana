@@ -10,9 +10,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionDefinition } from '../../../connector_spec';
 import { callSsmApi } from '../aws_ssm_api';
-import { toIsoDate } from './shared';
-
-const PARAMETER_NAME_MAX_LENGTH = 2048;
+import { PARAMETER_NAME_MAX_LENGTH, toIsoDate } from './shared';
 
 const GetParameterInputSchema = lazySchema(() =>
   z.object({

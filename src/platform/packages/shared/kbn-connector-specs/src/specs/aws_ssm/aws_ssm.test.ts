@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { AxiosResponse } from 'axios';
+import { AxiosError } from 'axios';
 import type { ActionContext } from '../../connector_spec';
 import { AwsSsmConnector } from './aws_ssm';
 
@@ -59,6 +61,12 @@ describe('AwsSsmConnector', () => {
       'startAutomationExecution',
       { documentName: 'AWS-RestartEC2Instance', parameters: parametersWithKeys(200) },
       { documentName: 'AWS-RestartEC2Instance', parameters: parametersWithKeys(201) },
+    ],
+    [
+      'putParameter of a SecureString',
+      'putParameter',
+      { name: '/myapp/flag', value: 'on', type: 'String' },
+      { name: '/myapp/flag', value: 'on', type: 'SecureString' },
     ],
   ])('rejects %s', (_case, action, validInput, invalidInput) => {
     const { input } = AwsSsmConnector.actions[action];
@@ -314,6 +322,49 @@ describe('AwsSsmConnector', () => {
       });
       expect(secret).toMatchObject({ type: 'SecureString', value: null });
       expect(plain).toMatchObject({ type: 'String', value: 'db.internal' });
+    });
+  });
+
+  describe('putParameter', () => {
+    it('overwrites a parameter that does not exist yet, sending the type and overwrite flag', async () => {
+      mockClient.post
+        .mockRejectedValueOnce(
+          new AxiosError('Request failed with status code 400', 'ERR_BAD_REQUEST', undefined, {}, {
+            status: 400,
+            headers: {},
+            data: { __type: 'ParameterNotFound' },
+          } as AxiosResponse)
+        )
+        .mockResolvedValueOnce({ data: { Version: 4, Tier: 'Standard' } });
+
+      const result = await AwsSsmConnector.actions.putParameter.handler(mockContext, {
+        name: '/myapp/prod/hosts',
+        value: 'a.example.com,b.example.com',
+        type: 'StringList',
+        overwrite: true,
+      });
+
+      expect(JSON.parse(mockClient.post.mock.calls[1][1])).toEqual({
+        Name: '/myapp/prod/hosts',
+        Value: 'a.example.com,b.example.com',
+        Type: 'StringList',
+        Overwrite: true,
+      });
+      expect(result).toEqual({ name: '/myapp/prod/hosts', version: 4, tier: 'Standard' });
+    });
+
+    it('refuses to overwrite a SecureString', async () => {
+      mockClient.post.mockResolvedValue({ data: { Parameter: { Type: 'SecureString' } } });
+
+      await expect(
+        AwsSsmConnector.actions.putParameter.handler(mockContext, {
+          name: '/myapp/prod/db-password',
+          value: 'plain',
+          type: 'String',
+          overwrite: true,
+        })
+      ).rejects.toThrow('/myapp/prod/db-password is a SecureString parameter');
+      expect(mockClient.post).toHaveBeenCalledTimes(1);
     });
   });
 

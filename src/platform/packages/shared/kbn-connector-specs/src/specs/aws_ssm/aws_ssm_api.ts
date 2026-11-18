@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { AxiosError } from 'axios';
 import { isAxiosError } from 'axios';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionContext } from '../../connector_spec';
@@ -25,6 +26,7 @@ type SsmOperation =
   | 'ListCommands'
   | 'ListDocuments'
   | 'ListInventoryEntries'
+  | 'PutParameter'
   | 'SendCommand'
   | 'StartAutomationExecution'
   | 'StopAutomationExecution';
@@ -49,17 +51,29 @@ const getRegion = (ctx: ActionContext): string => {
   return parsed.data.region;
 };
 
-const toAwsJsonError = ({ target, error }: { target: string; error: unknown }): unknown => {
-  if (!isAxiosError<unknown>(error)) {
-    return error;
-  }
+const parseAwsJsonError = (
+  error: AxiosError<unknown>
+): { code: string | undefined; message: string | undefined } => {
   const parsed = awsJsonErrorSchema.safeParse(error.response?.data);
   const headerType = error.response?.headers['x-amzn-errortype'];
   const type =
     (typeof headerType === 'string' ? headerType : undefined) ??
     (parsed.success ? parsed.data.__type : undefined);
-  const code = type?.split(':')[0].split('#').pop();
-  const message = parsed.success ? parsed.data.message ?? parsed.data.Message : undefined;
+  return {
+    code: type?.split(':')[0].split('#').pop(),
+    message: parsed.success ? parsed.data.message ?? parsed.data.Message : undefined,
+  };
+};
+
+/** Whether an error thrown by `callSsmApi` is the AWS error with this code, e.g. ParameterNotFound. */
+export const isAwsError = (error: unknown, code: string): boolean =>
+  isAxiosError<unknown>(error) && parseAwsJsonError(error).code === code;
+
+const toAwsJsonError = ({ target, error }: { target: string; error: unknown }): unknown => {
+  if (!isAxiosError<unknown>(error)) {
+    return error;
+  }
+  const { code, message } = parseAwsJsonError(error);
   // The action executor reads the HTTP status and Retry-After from the Axios error, so reword it in place.
   error.message = `${target} failed${code ? ` (${code})` : ''}: ${message ?? error.message}`;
   return error;

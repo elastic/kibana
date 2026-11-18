@@ -23,6 +23,7 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{
 const UUID_LENGTH = 36;
 // SSM's model only fixes the length of an automation execution ID, not its format.
 const AUTOMATION_EXECUTION_ID_LENGTH = 36;
+export const PARAMETER_NAME_MAX_LENGTH = 2048;
 // SSM documents no length limit for NextToken; this only guards against unbounded input.
 const NEXT_TOKEN_MAX_LENGTH = 4096;
 // The pattern SSM's model gives an inventory type name.

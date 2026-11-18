@@ -22,6 +22,7 @@ import { getParameter } from './tools/get_parameter';
 import { listAutomationExecutions } from './tools/list_automation_executions';
 import { listCommands } from './tools/list_commands';
 import { listDocuments } from './tools/list_documents';
+import { putParameter } from './tools/put_parameter';
 import { sendCommand } from './tools/send_command';
 import { startAutomationExecution } from './tools/start_automation_execution';
 import { stopAutomationExecution } from './tools/stop_automation_execution';
@@ -84,6 +85,7 @@ export const AwsSsmConnector: ConnectorSpec = {
     listAutomationExecutions,
     stopAutomationExecution,
     getParameter,
+    putParameter,
   },
 
   skill: [
