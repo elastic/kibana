@@ -2479,6 +2479,8 @@ x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kiban
 /src/platform/plugins/private/kibana_usage_collection/server/collectors/application_usage/schema.ts
 /src/platform/plugins/private/kibana_usage_collection/server/collectors/management/schema.ts
 /src/platform/plugins/private/kibana_usage_collection/server/collectors/management/types.ts
+# Exclude the event loop watchdog CPU profile fixture from @elastic/kibana-core ownership: it embeds plugin source paths, so plugin relocations update it
+/src/core/packages/metrics/server-internal/src/event_loop_watchdog/__fixtures__/plugin_setup_window.json
 
 # Kibana Telemetry
 /.telemetryrc.json @elastic/kibana-core
