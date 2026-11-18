@@ -288,5 +288,5 @@ mapped_pages:
 | [urlDrilldown](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/drilldowns/url_drilldown/README.md) | NOTE: This plugin contains implementation of URL drilldown. |
 | [usageApi](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/usage_api/README.md) | This plugin is used to report Usage metrics to our Cloud internal Usage API. |
 | [ux](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/ux/readme.md) | https://docs.elastic.dev/kibana-dev-docs/welcome |
-| [vectorProjection](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/vector_projection/README.md) | Dashboard panel that projects a dense_vector field to 2D or 3D with UMAP and draws the result with WebGPU, using @kbn/umap-webgpu. |
+| [vectorProjection](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/vector_projection/README.md) | Dashboard panel that projects document embeddings to 2D or 3D with UMAP and draws the result with WebGPU, using @kbn/umap-webgpu. |
 | [watcher](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/watcher/README.md) | This plugins adopts some conventions in addition to or in place of conventions in Kibana (at the time of the plugin's creation): |
