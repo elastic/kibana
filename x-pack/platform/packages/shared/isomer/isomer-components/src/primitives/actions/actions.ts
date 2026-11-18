@@ -32,7 +32,7 @@ const buttonSchema = z
     path: appPathSchema.optional().describe('A path inside `app`, such as "/manage/skills".'),
     event: actionEventSchema
       .optional()
-      .describe('An event the host handles on click, instead of a link. Only for hosts that do.'),
+      .describe('An event raised on click, for the host to handle, instead of opening a link.'),
     primary: z.boolean().optional().describe('Marks the one action the reader should take.'),
     danger: z.boolean().optional().describe('Marks an action that destroys or cannot be undone.'),
   })
