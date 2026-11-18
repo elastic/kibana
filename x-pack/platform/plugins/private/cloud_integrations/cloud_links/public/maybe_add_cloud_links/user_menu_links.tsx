@@ -19,17 +19,20 @@ export const createUserMenuLinks = async ({
   cloud,
   security,
   isServerless,
+  isEce,
 }: {
   core: CoreStart;
   cloud: CloudStart;
   security: SecurityPluginStart;
   isServerless: boolean;
+  isEce?: boolean;
 }): Promise<UserMenuLink[]> => {
   const { profileUrl, organizationUrl } = cloud;
 
   const userMenuLinks = [] as UserMenuLink[];
 
-  if (profileUrl) {
+  // Profile and Organization point to Cloud UI pages that don't exist on ECE (they 404).
+  if (profileUrl && !isEce) {
     userMenuLinks.push({
       label: i18n.translate('xpack.cloudLinks.userMenuLinks.profileLinkText', {
         defaultMessage: 'Profile',
@@ -57,7 +60,7 @@ export const createUserMenuLinks = async ({
     });
   }
 
-  if (organizationUrl) {
+  if (organizationUrl && !isEce) {
     userMenuLinks.push({
       label: i18n.translate('xpack.cloudLinks.userMenuLinks.organizationLinkText', {
         defaultMessage: 'Organization',

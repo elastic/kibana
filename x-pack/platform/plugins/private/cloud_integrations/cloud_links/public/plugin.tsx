@@ -29,12 +29,15 @@ export class CloudLinksPlugin
   implements Plugin<void, void, CloudLinksDepsSetup, CloudLinksDepsStart>
 {
   public offering: BuildFlavor;
+  private isEce?: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.offering = initializerContext.env.packageInfo.buildFlavor;
   }
 
-  public setup({ analytics }: CoreSetup) {
+  public setup({ analytics }: CoreSetup, { cloud }: CloudLinksDepsSetup) {
+    this.isEce = cloud?.isEce;
+
     analytics.registerEventType({
       eventType: 'connection_details_learn_more_clicked',
       schema: {},
@@ -108,6 +111,7 @@ export class CloudLinksPlugin
           cloud,
           share,
           isServerless: this.offering === 'serverless',
+          isEce: this.isEce,
         });
       }
     }

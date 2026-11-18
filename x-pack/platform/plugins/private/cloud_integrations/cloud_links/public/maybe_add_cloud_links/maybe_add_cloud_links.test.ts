@@ -123,6 +123,35 @@ describe('maybeAddCloudLinks', () => {
     `);
   });
 
+  it('when running on ECE, it does not add the Profile and Organization links', async () => {
+    const security = securityMock.createStart();
+    security.authc.getCurrentUser.mockResolvedValue(
+      securityMock.createMockAuthenticatedUser({ elastic_cloud_user: true })
+    );
+    const core = coreMock.createStart();
+    const cloud = {
+      ...cloudMock.createStart(),
+      isCloudEnabled: true,
+      getPrivilegedUrls: jest.fn().mockResolvedValue({}),
+    };
+    maybeAddCloudLinks({
+      security,
+      core,
+      share: sharePluginMock.createStartContract(),
+      cloud,
+      isServerless: false,
+      isEce: true,
+    });
+    await new Promise((resolve) => process.nextTick(resolve));
+
+    expect(security.navControlService.addUserMenuLinks).toHaveBeenCalledTimes(1);
+    const labels = security.navControlService.addUserMenuLinks.mock.calls[0][0].map(
+      ({ label }) => label
+    );
+    expect(labels).not.toContain('Profile');
+    expect(labels).not.toContain('Organization');
+  });
+
   it('when cloud enabled and it fails to fetch the user, it sets the links', async () => {
     const security = securityMock.createStart();
     security.authc.getCurrentUser.mockRejectedValue(new Error('Something went terribly wrong'));

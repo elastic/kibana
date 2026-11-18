@@ -21,6 +21,7 @@ export interface MaybeAddCloudLinksDeps {
   cloud: CloudStart;
   share: SharePluginStart;
   isServerless: boolean;
+  isEce?: boolean;
 }
 
 export function maybeAddCloudLinks({
@@ -28,6 +29,7 @@ export function maybeAddCloudLinks({
   security,
   cloud,
   isServerless,
+  isEce,
 }: MaybeAddCloudLinksDeps): void {
   const userObservable = defer(() => security.authc.getCurrentUser()).pipe(
     // Check if user is a cloud user.
@@ -53,6 +55,7 @@ export function maybeAddCloudLinks({
           cloud,
           security,
           isServerless,
+          isEce,
         })
       ).pipe(
         map((userMenuLinks) => {
