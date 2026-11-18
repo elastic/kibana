@@ -6,15 +6,29 @@
  */
 
 import React from 'react';
+import { waitFor } from '@testing-library/react';
 import type { ActionDetails, MaybeImmutable } from '../../../../../common/endpoint/types';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { EndpointActionGenerator } from '../../../../../common/endpoint/data_generators/endpoint_action_generator';
 import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
-import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
+import {
+  RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
+  RESPONSE_ACTIONS_ZIP_PASSCODE,
+} from '../../../../../common/endpoint/service/response_actions/constants';
+import { useUserPrivileges as _useUserPrivileges } from '../../../../common/components/user_privileges';
+import { responseActionsHttpMocks } from '../../../mocks/response_actions_http_mocks';
 import { OUTPUT_MESSAGES } from '../../endpoint_response_actions_list/translations';
+import {
+  FILE_NO_LONGER_AVAILABLE_MESSAGE,
+  FILE_PASSCODE_INFO_MESSAGE,
+} from './components/response_action_file_download_link/response_action_file_download_link';
 import { ResponseActionResults } from './response_action_results';
 import type { ResponseActionResultsProps } from './types';
+
+jest.mock('../../../../common/components/user_privileges');
+
+const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
 describe('ResponseActionResults component', () => {
   const testPrefix = 'test';
@@ -214,6 +228,164 @@ describe('ResponseActionResults component', () => {
       render();
 
       expect(renderResult.queryByTestId(`${testPrefix}-killSuspendProcessResults`)).toBeNull();
+    });
+  });
+
+  describe('and the file was exported to external storage', () => {
+    const hostDumpPath = '/home/user/agent-a/tmp/memory-dump.2025-11-03T16:22:05.365Z.zip';
+
+    let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
+    let setUserPrivileges: ReturnType<AppContextTestRender['getUserPrivilegesMockSetter']>;
+
+    beforeEach(() => {
+      apiMocks = responseActionsHttpMocks(appTestContext.coreStart.http);
+      setUserPrivileges = appTestContext.getUserPrivilegesMockSetter(useUserPrivilegesMock);
+      setUserPrivileges.set({ canWriteFileOperations: true, canWriteExecuteOperations: true });
+    });
+
+    afterEach(() => {
+      setUserPrivileges.reset();
+    });
+
+    describe('for a `get-file` action', () => {
+      const getFileTestId = `${testPrefix}-getFileResults`;
+      const exportedTestId = `${getFileTestId}-exportedFileResult`;
+      const downloadLinkTestId = `${getFileTestId}-getFileDownloadLink`;
+
+      beforeEach(() => {
+        action = generateAction({
+          command: 'get-file',
+          agents: ['agent-a'],
+          parameters: { path: '/some/file', export: 'azure-1' },
+        });
+      });
+
+      it('should show where the file was uploaded to instead of a download link', async () => {
+        render();
+
+        expect(renderResult.getByTestId(`${exportedTestId}-provider`)).toHaveTextContent('azure-1');
+        expect(renderResult.getByTestId(`${exportedTestId}-type`)).toHaveTextContent(
+          'Azure Blob Storage'
+        );
+        expect(renderResult.getByTestId(`${exportedTestId}-account`)).toHaveTextContent('acct');
+        expect(renderResult.getByTestId(`${exportedTestId}-container`)).toHaveTextContent(
+          'response-actions'
+        );
+        expect(renderResult.getByTestId(`${exportedTestId}-path`)).toHaveTextContent(
+          '123/upload.zip'
+        );
+        expect(renderResult.getByTestId(`${exportedTestId}-copyPathButton`)).not.toBeNull();
+        expect(renderResult.getByTestId(`${exportedTestId}-passcodeMessage`)).toHaveTextContent(
+          FILE_PASSCODE_INFO_MESSAGE(RESPONSE_ACTIONS_ZIP_PASSCODE.endpoint)
+        );
+
+        await apiMocks.waitForApi();
+
+        expect(renderResult.queryByTestId(downloadLinkTestId)).toBeNull();
+        expect(renderResult.queryByText(FILE_NO_LONGER_AVAILABLE_MESSAGE)).toBeNull();
+        expect(apiMocks.responseProvider.fileInfo).not.toHaveBeenCalled();
+      });
+
+      it('should show nothing below the status without the file operations privilege', async () => {
+        setUserPrivileges.set({ canWriteFileOperations: false });
+        render();
+        await apiMocks.waitForApi();
+
+        expect(renderResult.getByTestId(getFileTestId)).toBeEmptyDOMElement();
+        expect(apiMocks.responseProvider.fileInfo).not.toHaveBeenCalled();
+      });
+
+      it('should show the download link when the file was not exported', async () => {
+        action = generateAction({ command: 'get-file', agents: ['agent-a'] });
+        render();
+
+        await waitFor(() => {
+          expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
+        });
+
+        expect(
+          await renderResult.findByTestId(`${downloadLinkTestId}-downloadButton`)
+        ).not.toBeNull();
+        expect(renderResult.queryByTestId(exportedTestId)).toBeNull();
+      });
+
+      it('should not fail when the agent output is missing', () => {
+        action = { ...action, outputs: {} };
+        render();
+
+        expect(renderResult.getByTestId(getFileTestId)).not.toBeNull();
+        expect(renderResult.queryByTestId(exportedTestId)).toBeNull();
+      });
+
+      it('should not fail when the agent output content is a string', () => {
+        const textOutputAction = generateAction({
+          command: 'get-file',
+          agents: ['agent-a'],
+          parameters: { path: '/some/file', export: 'azure-1' },
+        });
+        // `text` outputs have a string `content` at runtime, despite the type
+        Object.assign(textOutputAction.outputs?.['agent-a'] ?? {}, {
+          type: 'text',
+          content: 'some text',
+        });
+        action = textOutputAction;
+        render();
+
+        expect(renderResult.getByTestId(getFileTestId)).not.toBeNull();
+        expect(renderResult.queryByTestId(exportedTestId)).toBeNull();
+      });
+    });
+
+    describe('for a `memory-dump` action', () => {
+      const memoryDumpTestId = `${testPrefix}-memoryDumpResults`;
+      const exportedTestId = `${memoryDumpTestId}-exportedFileResult`;
+
+      beforeEach(() => {
+        action = generateAction({
+          command: 'memory-dump',
+          agents: ['agent-a'],
+          parameters: { type: 'kernel', export: 'azure-1' },
+        });
+      });
+
+      it('should show the path on the host and where the file was uploaded to', () => {
+        render();
+
+        expect(renderResult.getByTestId(`${memoryDumpTestId}-success`)).toHaveTextContent(
+          hostDumpPath
+        );
+        expect(renderResult.getByTestId(`${exportedTestId}-provider`)).toHaveTextContent('azure-1');
+        expect(renderResult.getByTestId(`${exportedTestId}-path`)).toHaveTextContent(
+          '123/upload.zip'
+        );
+        expect(renderResult.getByTestId(`${exportedTestId}-passcodeMessage`)).toHaveTextContent(
+          FILE_PASSCODE_INFO_MESSAGE(RESPONSE_ACTIONS_ZIP_PASSCODE.endpoint)
+        );
+      });
+
+      it('should only show the path on the host without the execute operations privilege', () => {
+        setUserPrivileges.set({ canWriteExecuteOperations: false });
+        render();
+
+        expect(renderResult.getByTestId(`${memoryDumpTestId}-success`)).toHaveTextContent(
+          hostDumpPath
+        );
+        expect(renderResult.queryByTestId(exportedTestId)).toBeNull();
+      });
+
+      it('should only show the path on the host when the file was not exported', () => {
+        action = generateAction({
+          command: 'memory-dump',
+          agents: ['agent-a'],
+          parameters: { type: 'kernel' },
+        });
+        render();
+
+        expect(renderResult.getByTestId(`${memoryDumpTestId}-success`)).toHaveTextContent(
+          hostDumpPath
+        );
+        expect(renderResult.queryByTestId(exportedTestId)).toBeNull();
+      });
     });
   });
 

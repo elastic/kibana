@@ -7,7 +7,7 @@
 
 import type { ActionDetails } from '../../../../../common/endpoint/types';
 import { EndpointActionGenerator } from '../../../../../common/endpoint/data_generators/endpoint_action_generator';
-import { getAgentActionState } from './utils';
+import { getAgentActionState, getExportedOutput } from './utils';
 
 describe('getAgentActionState()', () => {
   let actionGenerator: EndpointActionGenerator;
@@ -51,5 +51,72 @@ describe('getAgentActionState()', () => {
     expect(() => getAgentActionState(action, 'not-a-real-agent')).toThrow(
       'Agent ID [not-a-real-agent] is invalid for response action [123]'
     );
+  });
+});
+
+describe('getExportedOutput()', () => {
+  let actionGenerator: EndpointActionGenerator;
+  let exportedGetFileAction: ActionDetails;
+
+  beforeEach(() => {
+    actionGenerator = new EndpointActionGenerator('test');
+    exportedGetFileAction = actionGenerator.generateActionDetails({
+      command: 'get-file',
+      agents: ['agent-a'],
+      parameters: { path: '/some/file', export: 'azure-1' },
+    });
+  });
+
+  it.each([
+    ['get-file', { path: '/some/file', export: 'azure-1' }],
+    ['memory-dump', { type: 'kernel', export: 'azure-1' }],
+  ] as const)('should return the exported output of a `%s` action', (command, parameters) => {
+    const action = actionGenerator.generateActionDetails({
+      command,
+      agents: ['agent-a'],
+      parameters,
+    });
+
+    expect(getExportedOutput(action, 'agent-a')).toEqual({
+      export: 'azure-1',
+      service: 'azure_blob',
+      account: 'acct',
+      container: 'response-actions',
+      path: '123/upload.zip',
+    });
+  });
+
+  it('should return `undefined` when the file was not exported', () => {
+    const action = actionGenerator.generateActionDetails({
+      command: 'get-file',
+      agents: ['agent-a'],
+    });
+
+    expect(getExportedOutput(action, 'agent-a')).toBeUndefined();
+  });
+
+  it('should return `undefined` when the action has no output for the agent', () => {
+    expect(getExportedOutput(exportedGetFileAction, 'agent-b')).toBeUndefined();
+    expect(
+      getExportedOutput({ ...exportedGetFileAction, outputs: undefined }, 'agent-a')
+    ).toBeUndefined();
+  });
+
+  it('should return `undefined` without throwing when the output content is a string', () => {
+    // `text` outputs have a string `content` at runtime, despite the type
+    Object.assign(exportedGetFileAction.outputs?.['agent-a'] ?? {}, {
+      type: 'text',
+      content: 'some text',
+    });
+
+    expect(exportedGetFileAction.outputs?.['agent-a']?.content).toBe('some text');
+    expect(getExportedOutput(exportedGetFileAction, 'agent-a')).toBeUndefined();
+  });
+
+  it('should return `undefined` when `exported` is not an object', () => {
+    Object.assign(exportedGetFileAction.outputs?.['agent-a']?.content ?? {}, { exported: null });
+
+    expect(exportedGetFileAction.outputs?.['agent-a']?.content).toHaveProperty('exported', null);
+    expect(getExportedOutput(exportedGetFileAction, 'agent-a')).toBeUndefined();
   });
 });

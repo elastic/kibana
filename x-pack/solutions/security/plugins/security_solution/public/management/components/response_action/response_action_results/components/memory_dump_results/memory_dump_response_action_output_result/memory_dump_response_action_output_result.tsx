@@ -35,7 +35,9 @@ import type {
   ResponseActionMemoryDumpParameters,
 } from '../../../../../../../../common/endpoint/types';
 import { EndpointActionFailureMessage } from '../../endpoint_action_failure_message';
-import { getAgentActionState } from '../../../utils';
+import { ExportedFileResult } from '../../exported_file_result';
+import { useUserPrivileges } from '../../../../../../../common/components/user_privileges';
+import { getAgentActionState, getExportedOutput } from '../../../utils';
 
 export interface MemoryDumpResponseActionOutputResultProps {
   action: MaybeImmutable<
@@ -63,6 +65,12 @@ export const MemoryDumpResponseActionOutputResult = memo<MemoryDumpResponseActio
       [action, agentId]
     );
     const agentActionResult = action.outputs?.[agentId];
+    const { canWriteExecuteOperations } = useUserPrivileges().endpointPrivileges;
+    // Where the file was exported to. Shown only with the privilege the memory-dump action requires
+    const exported = useMemo(
+      () => (canWriteExecuteOperations ? getExportedOutput(action, agentId) : undefined),
+      [action, agentId, canWriteExecuteOperations]
+    );
 
     return useMemo(() => {
       if (!agentActionState) {
@@ -195,6 +203,17 @@ export const MemoryDumpResponseActionOutputResult = memo<MemoryDumpResponseActio
                     </EuiFlexGroup>
                   </>
                 )}
+                {exported && (
+                  <>
+                    <EuiSpacer size="s" />
+                    <ExportedFileResult
+                      exported={exported}
+                      agentType={action.agentType}
+                      textSize={textSize}
+                      data-test-subj={testId('exportedFileResult')}
+                    />
+                  </>
+                )}
               </div>
             ) : (
               <span data-test-subj={testId('agentResultMissing')}>
@@ -210,7 +229,7 @@ export const MemoryDumpResponseActionOutputResult = memo<MemoryDumpResponseActio
           {result}
         </EuiText>
       );
-    }, [action, agentActionResult?.content, agentActionState, agentId, testId, textSize]);
+    }, [action, agentActionResult?.content, agentActionState, agentId, exported, testId, textSize]);
   }
 );
 MemoryDumpResponseActionOutputResult.displayName = 'MemoryDumpResponseActionOutputResult';
