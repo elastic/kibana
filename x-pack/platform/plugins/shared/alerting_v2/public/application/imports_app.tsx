@@ -12,6 +12,7 @@ import { Redirect, useRouteMatch } from 'react-router-dom';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { areAlertingV2ImportsEnabled } from '@kbn/alerting-v2-utils';
 import { ImportsPage } from '../pages/imports_page/imports_page';
+import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { RequireAlertingPrivilege } from '../components/require_alerting_privilege';
 import { RequiredPrivilegesPrompt } from '../components/required_privileges_prompt';
 
@@ -20,6 +21,8 @@ import { RequiredPrivilegesPrompt } from '../components/required_privileges_prom
  * `alerting:v2:experimentalFeatures` setting on.
  */
 export const ImportsApp = () => {
+  // Set here, above the privilege gates, so the interstitials show the page's breadcrumbs too.
+  useBreadcrumbs('imports_list');
   const { path } = useRouteMatch();
   const settings = useService(CoreStart('settings'));
   const { capabilities } = useService(CoreStart('application'));

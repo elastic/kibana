@@ -53,6 +53,11 @@ jest.mock('@kbn/core-di-browser', () => {
   };
 });
 
+const mockUseBreadcrumbs = jest.fn();
+jest.mock('../hooks/use_breadcrumbs', () => ({
+  useBreadcrumbs: (...args: unknown[]) => mockUseBreadcrumbs(...args),
+}));
+
 jest.mock('../pages/rules_list_page/rules_list_page', () => ({
   RulesListPage: () => <div data-test-subj="rulesListPage">rules</div>,
 }));
@@ -364,6 +369,7 @@ describe('composable pages', () => {
 
       expect(screen.queryByTestId('importsPage')).not.toBeInTheDocument();
       expect(screen.getByTestId('alertingRequiredPrivilege-actions')).toBeInTheDocument();
+      expect(mockUseBreadcrumbs).toHaveBeenCalledWith('imports_list');
       mockCanReadConnectors = true;
     });
 
