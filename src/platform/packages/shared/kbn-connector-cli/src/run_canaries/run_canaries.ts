@@ -222,9 +222,11 @@ export const runCanaries = async ({
   const fixtures = allFixtures.filter(
     (fixture) => wanted.size === 0 || wanted.has(normalizeSpecId(fixture.spec_id))
   );
-  if (only.length > 0 && fixtures.length === 0) {
+  const available = new Set(allFixtures.map((f) => normalizeSpecId(f.spec_id)));
+  const unknown = [...wanted].filter((id) => !available.has(id));
+  if (unknown.length > 0) {
     throw new Error(
-      `No fixtures match --only ${only.join(', ')}. Available: ${allFixtures
+      `No fixtures match --only ${unknown.join(', ')}. Available: ${allFixtures
         .map((f) => f.spec_id)
         .join(', ')}`
     );

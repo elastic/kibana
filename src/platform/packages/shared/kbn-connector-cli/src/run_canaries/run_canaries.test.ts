@@ -534,4 +534,13 @@ describe('runCanaries', () => {
       /No fixtures match/
     );
   });
+
+  it('throws when any --only value matches no fixture, even if others do', async () => {
+    loadFixturesMock.mockReturnValue([fixtureFile([caseFor()])]);
+
+    await expect(runCanaries({ log, dryRun: false, only: ['.fake', '.typo'] })).rejects.toThrow(
+      /No fixtures match --only \.typo/
+    );
+    expect(executeConnectorMock).not.toHaveBeenCalled();
+  });
 });
