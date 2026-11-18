@@ -312,11 +312,8 @@ Each run:
    applications sharing an id.
 3. Rebuilds the sessions, 5,000 at a time, from their events of the last 24 hours, the longest a
    session lasts, with their ids as a literal `IN` list, which Elasticsearch looks up in the index:
-   an `IN (subquery)` scanned the whole lookback. One query aggregates per session and page URL,
-   then per session, for the counts, times, latest attributes, web vitals and journey. It keeps the
-   raw attribute fields of each group's latest event and cleans them into attributes once per
-   session, after the aggregation: cleaning every event's fields first took about 40% of the
-   query, and the same 5,000 sessions now take about 22% less time with identical rows.
+   an `IN (subquery)` scanned the whole lookback. One query returns the counts, times, latest
+   attributes, web vitals and journey of each session (see [Summary query](#summary-query)).
 4. Turns the rows into summaries 500 at a time, letting the event loop run between chunks, as a
    whole batch at once blocked a small Kibana for about half a second. Writes one summary per
    session, keyed by a hash of `service.name` + `session.id`, and moves the checkpoint past the
@@ -364,6 +361,52 @@ per recorded segment to `logs-rum.replay.otel-*`, which the task already reads a
 `logs-*.otel-*`, so it can set the field without a `SESSIONS_VERSION` bump and the rebuild one
 would cost. It is absent rather than `false` until something sets it, and readers expose it as
 `hasReplay`.
+
+### Summary query
+
+`sessionSummaryQuery` (`server/services/sessions/summary_queries.ts`) rebuilds a batch of sessions
+in one ES|QL query. Its shape, with the aggregations elided:
+
+```esql
+FROM traces-*.otel-*, logs-*.otel-*
+| WHERE <window> AND <browser SDK> AND attributes.session.id IN (<5,000 ids>)
+| EVAL <event flags>, seen_<group> = <timestamp of events with any field of the group>,
+       lcp = CASE(vital == "lcp", vital_value, null), ...
+| FORK (STATS <counts>, start_time, end_time,
+              raw_<field> = LAST(TO_STRING(<field>), seen_<group>),
+              lcp_p75 = PERCENTILE(lcp, 75), lcp_samples = COUNT(lcp), ...
+          BY service, session)
+       (WHERE event_name IN (<page views>) OR name IN (<page views>)
+        | STATS first_view = MIN(@timestamp), last_view = MAX(@timestamp)
+            BY service, session, page_url = attributes.url.full)
+| STATS <every session column> = MAX(<column>),
+        pages = TOP(first_view, 30, "asc", page_url) WHERE page_url IS NOT NULL,
+        exit = LAST(page_url, last_view) WHERE page_url IS NOT NULL
+  BY service, session
+| EVAL attribute_<name> = COALESCE(<cleaned raw_<field>>, ...)
+| DROP raw_*
+```
+
+- **The journey is its own branch.** Grouping every aggregation by page URL as well was the main
+  cost of the query. The second branch reads only page views and runs alongside the session stats;
+  the last `STATS` merges them, taking each session column from the one row that has it. Its filter
+  is on the source fields, as `is_page_view` wraps them in `COALESCE`, which keeps Lucene from
+  applying it.
+- **A column per web vital**, so its p75 and sample count need no filter, and the thresholds
+  compare a number instead of the vital's name.
+- **Attributes are cleaned once per session.** The query keeps the raw fields of each group's
+  latest event and cleans them (trimmed, `""` and `"null"` as missing) after the last stage:
+  cleaning every event's fields first took about 40% of the query. Coalescing a group's fields per
+  event, before the aggregation, would save another 5% to 9% but isn't equivalent: a blank value
+  in a higher-priority field would win over a real value in a lower one, and then be cleaned to
+  null.
+- `FORK` needs Elasticsearch 9.4 or later, where its branches have no implicit `LIMIT 1000`.
+
+On 5,000 sessions of synthtrace data, the `FORK` version takes 10% to 27% less time and 5% to 15%
+less data-node CPU than aggregating per page URL first, depending on the segment layout, with
+identical rows ([#306059](https://github.com/elastic/kibana/issues/306059)). A change to the query
+should be checked the same way: run the old and new query on the same session ids and compare
+every column of every row.
 
 ### Enabling sessions
 

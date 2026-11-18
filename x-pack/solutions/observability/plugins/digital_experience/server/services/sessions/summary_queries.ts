@@ -260,7 +260,8 @@ const renderStats = (stats: readonly Stat[], indent: string): string =>
  * One row per session of `sessionIds`, rebuilt from its events since `?rebuild_from`: its counts,
  * times, latest attributes and web vitals, and its journey. One branch aggregates per session, the
  * other the first and last view of each page, which the last stage merges per session. Counts what
- * the applications list counts, with the same event names and request outcomes.
+ * the applications list counts, with the same event names and request outcomes. Design and
+ * measurements: "Summary query" in the plugin README.
  */
 export const sessionSummaryQuery = (
   { changedTo, rebuildFrom }: { changedTo: string; rebuildFrom: string },
