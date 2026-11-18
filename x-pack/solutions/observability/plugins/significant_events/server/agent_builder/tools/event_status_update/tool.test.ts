@@ -105,7 +105,8 @@ describe('event_status_update tool', () => {
       expect.objectContaining({ request: expect.anything() })
     );
     expect(telemetry.trackAgentToolEventStatusUpdate).toHaveBeenCalledWith(
-      expect.objectContaining({ workflow_execution_id: 'workflow-run-1' })
+      expect.objectContaining({ workflow_execution_id: 'workflow-run-1' }),
+      expect.anything()
     );
   });
 
@@ -165,7 +166,6 @@ describe('event_status_update tool', () => {
     });
 
     it.each([
-      ['not_found', false],
       ['already_in_state', true],
       ['not_a_breach', true],
       ['superseded', false],
@@ -185,6 +185,30 @@ describe('event_status_update tool', () => {
         success,
         event_id: 'event-1',
         status: 'inactive',
+      });
+    });
+
+    it('reports an unmatched id as unknown with the not_found cause', async () => {
+      (updateEventStatusToolHandler as jest.Mock).mockResolvedValue({
+        event_id: 'event-1',
+        updated: 0,
+        ignored: 1,
+        status: 'inactive',
+        reason: 'not_found',
+      });
+
+      const { payload, result } = await run();
+
+      expect(payload).toEqual({
+        ...identity,
+        fingerprint: 'unknown',
+        success: false,
+        event_id: 'unknown',
+        status: 'inactive',
+        error_message: 'not_found',
+      });
+      expect(result).toMatchObject({
+        results: [{ type: 'other', data: { event_id: 'event-1', reason: 'not_found' } }],
       });
     });
 

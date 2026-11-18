@@ -10,6 +10,7 @@ import { lazySchema, z } from '@kbn/zod/v4';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import {
   MAX_RUN_LIMIT,
+  MIN_RUN_LIMIT,
   NIGHTSHIFT_API_PRIVILEGES,
   NIGHTSHIFT_ENABLED_FLAG,
   NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
@@ -24,9 +25,8 @@ const assertNightshiftEnabled = async (context: RequestHandlerContext): Promise<
   }
 };
 
-// A limit of 0 would deny every start, so `null` is the only way to remove a limit.
 const limitUpdateSchema = lazySchema(() =>
-  z.number().int().min(1).max(MAX_RUN_LIMIT).nullable().optional()
+  z.number().int().min(MIN_RUN_LIMIT).max(MAX_RUN_LIMIT).nullable().optional()
 );
 
 export const investigationQuotasUpdateBodySchema = lazySchema(() =>

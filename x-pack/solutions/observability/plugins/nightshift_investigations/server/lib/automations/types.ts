@@ -29,7 +29,7 @@ export type NightshiftTriggerRow =
       alertSources?: string[];
       alertSourceMode?: AlertSourceMode;
     }
-  | (PresetSchedule & { kind: 'schedule'; scopeQuery?: string })
+  | (PresetSchedule & { kind: 'schedule' })
   | {
       kind: 'slack';
       event: SlackTriggerEvent;

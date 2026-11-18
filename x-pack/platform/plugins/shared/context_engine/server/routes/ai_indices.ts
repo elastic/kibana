@@ -31,6 +31,7 @@ import {
   AI_INDEX_DREAMING_PATH,
   AI_INDEX_FEEDBACK_ANALYSIS_PATH,
   AI_INDEX_KI_BY_ID_PATH,
+  AI_INDEX_KI_GROUPS_PATH,
   AI_INDEX_KI_RESTORE_PATH,
   AI_INDEX_KI_LIST_PATH,
   AI_INDEX_PATH,
@@ -50,6 +51,7 @@ import type {
 import type {
   DeleteKiResponse,
   GetKiResponse,
+  ListKiGroupsResponse,
   ListKisResponse,
   RestoreKiResponse,
   UpdateKiResponse,
@@ -85,7 +87,7 @@ import type { AiIndexChangeField, AiIndexChangeNotifier } from '../ai_indices/ch
 import type { ImprovementsServiceApi } from '../improvements/service';
 import type { GetAiIndexDataReadServiceParams } from '../types';
 import { getKi } from '../ai_indices/ki_get';
-import { getKis } from '../ai_indices/ki_list';
+import { getKiGroups, getKis } from '../ai_indices/ki_list';
 import { buildKiApiWriter, restoreKi, softDeleteKi, updateKi } from '../ai_indices/ki_write';
 import { validateConnectorSources } from '../ai_indices/validate_connector_sources';
 import { validateEsqlSources } from '../ai_indices/validate_esql_sources';
@@ -100,12 +102,14 @@ import {
   createAiIndexResponseSchema,
   deleteAiIndexQuerySchema,
   deleteAiIndexResponseSchema,
+  describeAiIndexQuerySchema,
   describeAiIndexResponseSchema,
   errorResponseSchema,
   feedbackAnalysisSchema,
   getKiQuerySchema,
   kiIdParamsSchema,
   listAiIndexResponseSchema,
+  listKiGroupsQuerySchema,
   listKisQuerySchema,
   putAiIndexBodySchema,
   queryAiIndicesBodySchema,
@@ -588,7 +592,7 @@ export const registerAiIndexRoutes = ({
       access: 'public',
       summary: 'Query AI Indices',
       description: [
-        `Runs an ES|QL query as the current user. The server applies a space filter and limits the response to at most ${MAX_AI_INDEX_QUERY_LIMIT} rows.`,
+        `Runs an ES|QL query as the current user. The server applies a space filter and limits the response to at most ${MAX_AI_INDEX_QUERY_LIMIT} rows. When the body carries \`user_id\`, rows are also limited to documents with that \`user_id\` or no \`user_id\`.`,
         'The query determines which indices it reads. Elasticsearch index privileges limit which indices the current user can access.',
         'The space comes from the request URL (`/s/{spaceId}/…`) or defaults to the default space. The request body cannot change the space or replace the space filter.',
         CONTEXT_ENGINE_DISABLED_NOTE,
@@ -652,7 +656,7 @@ export const registerAiIndexRoutes = ({
       summary: 'Describe an AI Index',
       description: [
         `Returns a free-form text context block for an agent. The block describes the AI Index and its ES|QL target. It also includes up to ${MAX_AI_INDEX_DESCRIBE_FIELDS} fields exposed by the backing indices, identifies which fields are semantic, provides knowledge item type and tag counts for the current space, and includes example ES|QL queries.`,
-        'The API reads data as the current user. Elasticsearch index privileges limit which indices the current user can access. A caller who cannot read the backing indices gets a 403 response.',
+        'The API reads data as the current user. Elasticsearch index privileges limit which indices the current user can access. A caller who cannot read the backing indices gets a 403 response. When `user_id` is given, the counts are limited to documents with that `user_id` or no `user_id`.',
         'The space comes from the request URL (`/s/{spaceId}/…`) or defaults to the default space. It cannot be specified in any other way.',
         CONTEXT_ENGINE_DISABLED_NOTE,
         CONTEXT_ENGINE_DOCS_NOTE,
@@ -668,6 +672,7 @@ export const registerAiIndexRoutes = ({
         validate: {
           request: {
             params: aiIndexIdParamsSchema,
+            query: describeAiIndexQuerySchema,
           },
           response: {
             200: {
@@ -697,8 +702,11 @@ export const registerAiIndexRoutes = ({
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
         const { aiIndexId } = request.params;
+        const { user_id: userId } = request.query;
         try {
-          const body = await getAiIndexDataReadService({ esClient, request }).describe(aiIndexId);
+          const body = await getAiIndexDataReadService({ esClient, request }).describe(aiIndexId, {
+            userId,
+          });
           return response.ok({ body });
         } catch (error) {
           return handleReadError(error, response, logger);
@@ -729,9 +737,9 @@ export const registerAiIndexRoutes = ({
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         const auditLogger = (await ctx.core).security.audit.logger;
         const { aiIndexId } = request.params;
-        const { size, type, lifecycle_status: lifecycleStatus, query } = request.query;
-        const lifecycleStatuses =
-          lifecycleStatus !== undefined ? [lifecycleStatus].flat() : undefined;
+        const { size, type, exclude_types: excludeType, status, query, sort } = request.query;
+        const statuses = status !== undefined ? [status].flat() : undefined;
+        const excludeTypes = excludeType !== undefined ? [excludeType].flat() : undefined;
         const spaceId = resolveSpaceId(await getSpaces(), request);
         try {
           const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
@@ -740,8 +748,64 @@ export const registerAiIndexRoutes = ({
             dest: aiIndex.dest,
             size,
             ...(type !== undefined ? { type } : {}),
-            ...(lifecycleStatuses !== undefined ? { lifecycleStatuses } : {}),
+            ...(excludeTypes !== undefined ? { excludeTypes } : {}),
+            ...(statuses !== undefined ? { statuses } : {}),
             ...(query !== undefined ? { query } : {}),
+            sort,
+          });
+          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.LIST, id: aiIndexId }));
+          return response.ok({ body });
+        } catch (error) {
+          auditLogger.log(
+            aiIndexAuditEvent({ action: AiIndexAuditAction.LIST, id: aiIndexId, error })
+          );
+          return handleAiIndexError(error, response, logger);
+        }
+      })
+    );
+
+  // Group Knowledge Indicators by type. A static segment wins over `{kiId}` in hapi routing.
+  router.versioned
+    .get({
+      path: AI_INDEX_KI_GROUPS_PATH,
+      security: READ_SECURITY,
+      access: 'internal',
+      summary: 'Group Knowledge Indicators by type',
+      description:
+        'Returns the biggest Knowledge Indicator types with their counts and first KIs, the total, and `total_other`: the KIs that match the filters but are in none of the returned groups. Counts and rows are read in two steps, so they can differ by a few KIs while KIs are written.',
+    })
+    .addVersion(
+      {
+        version: AI_INDEX_INTERNAL_API_VERSION,
+        validate: {
+          request: {
+            params: aiIndexIdParamsSchema,
+            query: listKiGroupsQuerySchema,
+          },
+        },
+      },
+      withContextEngineFeatureFlag(async (ctx, request, response) => {
+        const auditLogger = (await ctx.core).security.audit.logger;
+        const { aiIndexId } = request.params;
+        const {
+          max_groups: maxGroups,
+          preview_size: previewSize,
+          status,
+          query,
+          sort,
+        } = request.query;
+        const statuses = status !== undefined ? [status].flat() : undefined;
+        const spaceId = resolveSpaceId(await getSpaces(), request);
+        try {
+          const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
+          const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+          const body: ListKiGroupsResponse = await getKiGroups(esClient, {
+            dest: aiIndex.dest,
+            maxGroups,
+            previewSize,
+            ...(statuses !== undefined ? { statuses } : {}),
+            ...(query !== undefined ? { query } : {}),
+            sort,
           });
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.LIST, id: aiIndexId }));
           return response.ok({ body });

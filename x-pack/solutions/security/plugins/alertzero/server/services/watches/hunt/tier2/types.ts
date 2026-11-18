@@ -40,7 +40,7 @@ export interface HuntBehaviorParams {
   report_id?: string;
   llm_confidence_threshold?: number;
   iocs?: HuntBehaviorIoc[];
-  /** Adjudicated-out IOCs the run must not search. */
+  /** IOCs the run must not search: adjudicated out, deferred, or a non-routable `ip` / `cidr`. */
   excluded_iocs?: HuntBehaviorIoc[];
   article_context?: HuntBehaviorArticleContext;
   /**

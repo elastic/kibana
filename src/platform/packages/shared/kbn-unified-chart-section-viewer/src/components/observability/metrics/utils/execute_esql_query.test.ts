@@ -61,7 +61,7 @@ describe('executeEsqlQuery', () => {
     mockGetTime.mockReturnValue(undefined);
   });
 
-  it('calls getESQLResults with the given esqlQuery, search, signal, timeFieldName, timeRange, and variables', async () => {
+  it('calls getESQLResults with the given esqlQuery, search, sessionId, signal, timeFieldName, timeRange, and variables', async () => {
     const signal = new AbortController().signal;
     const timeRange = { from: 'now-15m', to: 'now' };
     const variables = [{ key: 'x', value: 'y', type: ESQLVariableType.VALUES }];
@@ -69,6 +69,7 @@ describe('executeEsqlQuery', () => {
     await executeEsqlQuery({
       esqlQuery: 'TS metrics-* | METRICS_INFO',
       search: mockSearch,
+      sessionId: 'cached-session',
       signal,
       timeFieldName: '@timestamp',
       timeRange,
@@ -83,6 +84,7 @@ describe('executeEsqlQuery', () => {
       expect.objectContaining({
         esqlQuery: 'TS metrics-* | METRICS_INFO',
         search: mockSearch,
+        sessionId: 'cached-session',
         signal,
         timeRange,
         variables,

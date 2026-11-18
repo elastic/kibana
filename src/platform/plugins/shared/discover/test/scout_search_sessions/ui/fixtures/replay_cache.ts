@@ -9,6 +9,7 @@
 
 import type { NetworkFixture, PageObjects, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import { ListingTable } from '@kbn/content-list-scout';
 import type { DiscoverPage } from '../../../scout/common/ui/fixtures';
 
 type SearchRequests = Parameters<NetworkFixture['trackMatchingRequests']>[0];
@@ -44,6 +45,18 @@ export const goToDashboards = async (
 ) => {
   await collapsibleNav.clickItem('Dashboards');
   await expect(page.testSubj.locator('dashboardLandingPage')).toBeVisible();
+};
+
+/** Leaves Discover for the Dashboards app and opens the dashboard titled `title` from the listing. */
+export const openDashboard = async (
+  page: ScoutPage,
+  collapsibleNav: PageObjects['collapsibleNav'],
+  title: string
+) => {
+  await goToDashboards(page, collapsibleNav);
+  const listingTable = new ListingTable(page);
+  await listingTable.waitUntilTableIsLoaded();
+  await listingTable.clickItemByName(title);
 };
 
 /** Runs an action that refetches Discover and waits until its documents and chart are rendered. */
