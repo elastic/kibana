@@ -72,7 +72,7 @@ export function DashboardRenderer({
 
     let canceled = false;
     let cleanupDashboardApi: (() => void) | undefined;
-    loadDashboardApi({ getCreationOptions, onApiCleanup, savedObjectId })
+    loadDashboardApi({ getCreationOptions, savedObjectId })
       .then((results) => {
         if (!results) return;
         if (canceled) {
@@ -80,7 +80,12 @@ export function DashboardRenderer({
           return;
         }
 
-        cleanupDashboardApi = results.cleanup;
+        // Only a published API gets a consumer cleanup. A canceled load never called
+        // onApiAvailable, so notifying here would let a late A→B→A resolution clear the live API.
+        cleanupDashboardApi = () => {
+          results.cleanup();
+          onApiCleanup?.();
+        };
         setDashboardApi(results.api);
         setDashboardInternalApi(results.internalApi);
         onApiAvailable?.(results.api);

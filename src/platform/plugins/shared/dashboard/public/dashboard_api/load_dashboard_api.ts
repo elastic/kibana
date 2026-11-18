@@ -20,11 +20,9 @@ import { DashboardCreationOptions } from './types';
 
 export async function loadDashboardApi({
   getCreationOptions,
-  onApiCleanup,
   savedObjectId,
 }: {
   getCreationOptions?: () => Promise<DashboardCreationOptions>;
-  onApiCleanup?: () => void;
   savedObjectId?: string;
 }) {
   const creationStartTime = performance.now();
@@ -109,7 +107,6 @@ export async function loadDashboardApi({
     cleanup: () => {
       cleanup();
       performanceSubscription.unsubscribe();
-      onApiCleanup?.();
     },
     internalApi,
   };
