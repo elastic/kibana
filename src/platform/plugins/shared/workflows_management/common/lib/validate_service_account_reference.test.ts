@@ -55,6 +55,21 @@ describe('validateServiceAccountReference', () => {
     expect(lookup).toHaveBeenCalledWith('runner ');
   });
 
+  it.each([
+    ['a stripped literal block', '|-\n    missing-sa', 'missing-sa'],
+    ['a literal block, keeping its trailing newline', '|\n    missing-sa', 'missing-sa\n'],
+    ['a quoted value that spans lines', '"missing\n    -sa"', 'missing -sa'],
+  ])('looks up the parsed ID of %s, as runtime does', async (_, runAs, expectedId) => {
+    const lookup = jest.fn<ReturnType<ServiceAccountLookup>, [string]>(async () => ({
+      status: 'not_found',
+    }));
+
+    const results = await validate(workflowYaml(runAs), lookup);
+
+    expect(lookup).toHaveBeenCalledWith(expectedId);
+    expect(results).toEqual([expect.objectContaining({ ruleId: 'serviceAccountNotFound' })]);
+  });
+
   it('reports nothing for an existing, usable service account', async () => {
     const results = await validate(workflowYaml('runner'), async () => ({
       status: 'found',
@@ -92,9 +107,6 @@ describe('validateServiceAccountReference', () => {
     ['an empty run_as', workflowYaml('""')],
     ['a null run_as', workflowYaml('')],
     ['a non-string run_as', workflowYaml('42')],
-    ['a literal block run_as', workflowYaml('|\n    runner')],
-    ['a folded block run_as', workflowYaml('>\n    runner')],
-    ['a quoted run_as that spans lines', workflowYaml('"run\n    ner"')],
   ])('skips the lookup for %s', async (_, yaml) => {
     const lookup = jest.fn<ReturnType<ServiceAccountLookup>, [string]>();
 
