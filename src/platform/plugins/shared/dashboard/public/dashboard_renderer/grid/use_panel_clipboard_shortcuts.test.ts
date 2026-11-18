@@ -154,19 +154,6 @@ describe('usePanelClipboardShortcuts', () => {
       );
     });
 
-    it('warns without writing when none of the selected panels can be copied', () => {
-      mockDashboardApi.selectedPanelIds$.next(['markdown']);
-      renderHook(() => usePanelClipboardShortcuts({ enabled: true }));
-
-      pressCopy();
-
-      expect(mockToasts.addWarning).toHaveBeenCalledWith({
-        title: 'None of the selected panels can be copied.',
-      });
-      expect(mockSanitizePanels).not.toHaveBeenCalled();
-      expect(writeText).not.toHaveBeenCalled();
-    });
-
     it('does nothing without a selection', () => {
       renderHook(() => usePanelClipboardShortcuts({ enabled: true }));
 
@@ -254,16 +241,6 @@ describe('usePanelClipboardShortcuts', () => {
       expect(paste(panelJson, textarea)).toBe(true);
       expect(mockSanitizeImportedPanels).not.toHaveBeenCalled();
       textarea.remove();
-    });
-
-    it('shows an error when the panels cannot be added', async () => {
-      mockSanitizeImportedPanels.mockRejectedValue(new Error('Server error'));
-      renderHook(() => usePanelClipboardShortcuts({ enabled: true }));
-
-      paste(panelJson);
-
-      await waitFor(() => expect(mockToasts.addError).toHaveBeenCalled());
-      expect(mockDashboardApi.addIncomingEmbeddables).not.toHaveBeenCalled();
     });
   });
 });

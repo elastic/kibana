@@ -11,7 +11,7 @@ import { clamp } from 'lodash';
 import type { GridData } from '@kbn/as-code-dashboard-schema';
 import { ImportJsonValidationError } from '@kbn/as-code-import-flyout-component';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../common/constants';
-import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/page_bundle_constants';
+import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-constants';
 import { panelJsonStrings } from './_panel_json_strings';
 import type { PanelJsonEntry } from './types';
 

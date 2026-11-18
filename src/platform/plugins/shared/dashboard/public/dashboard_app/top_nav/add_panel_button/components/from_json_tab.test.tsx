@@ -84,26 +84,18 @@ describe('FromJsonTab', () => {
     respondWithSanitizedPanels();
   });
 
-  it('tells the user what is needed to continue', async () => {
-    renderTab();
-    const footerStatus = screen.getByTestId('dashboardPanelJsonFooterStatus');
-    expect(footerStatus).toHaveTextContent('Add JSON to continue');
-
-    paste('not json');
-    await waitFor(() => expect(footerStatus).toHaveTextContent('Fix the JSON to continue'));
-
-    paste(lensPanel);
-    expect(footerStatus).toHaveTextContent('Checking JSON…');
-    await waitFor(() => expect(footerStatus).toBeEmptyDOMElement());
-  });
-
   it('adds a pasted panel to the dashboard', async () => {
     const dashboardApi = renderTab();
-    expect(screen.getByTestId('dashboardPanelJsonAddButton')).toBeDisabled();
+    expect(screen.getByTestId('dashboardPanelJsonAddButton')).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
 
     paste(lensPanel);
 
-    await waitFor(() => expect(screen.getByTestId('dashboardPanelJsonAddButton')).toBeEnabled());
+    await waitFor(() =>
+      expect(screen.getByTestId('dashboardPanelJsonAddButton')).not.toHaveAttribute('aria-disabled')
+    );
     await userEvent.click(screen.getByTestId('dashboardPanelJsonAddButton'));
 
     await waitFor(() =>
@@ -136,7 +128,7 @@ describe('FromJsonTab', () => {
         'This panel uses a data view that doesn’t exist in this space.'
       )
     );
-    expect(screen.getByTestId('dashboardPanelJsonAddButton')).toBeEnabled();
+    expect(screen.getByTestId('dashboardPanelJsonAddButton')).not.toHaveAttribute('aria-disabled');
   });
 
   it('explains what is missing when only the panel config is pasted', async () => {
@@ -148,6 +140,9 @@ describe('FromJsonTab', () => {
       expect(screen.getByText(/The JSON doesn’t describe a dashboard panel/)).toBeInTheDocument()
     );
     expect(mockPost).not.toHaveBeenCalled();
-    expect(screen.getByTestId('dashboardPanelJsonAddButton')).toBeDisabled();
+    expect(screen.getByTestId('dashboardPanelJsonAddButton')).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
   });
 });

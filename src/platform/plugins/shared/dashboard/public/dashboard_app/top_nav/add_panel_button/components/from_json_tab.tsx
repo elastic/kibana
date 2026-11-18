@@ -18,6 +18,7 @@ import {
   EuiFlyoutFooter,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import {
   ImportJsonEditor,
@@ -35,7 +36,8 @@ import { getPanelAddedSuccessString } from '../../../_dashboard_app_strings';
 
 const DATA_TEST_SUBJ_PREFIX = 'dashboardPanelJson';
 
-const getFooterStatus = ({
+/** Why the Add button is disabled, shown in its tooltip */
+const getAddDisabledReason = ({
   jsonText,
   hasError,
   isValid,
@@ -95,7 +97,7 @@ export const FromJsonTab = ({ dashboardApi }: { dashboardApi: DashboardApi }) =>
     onImportSuccess,
   });
 
-  const footerStatus = getFooterStatus({
+  const disabledReason = getAddDisabledReason({
     jsonText,
     hasError: Boolean(inputError || serverError),
     isValid: Boolean(sanitizedState) && !isValidating,
@@ -148,29 +150,21 @@ export const FromJsonTab = ({ dashboardApi }: { dashboardApi: DashboardApi }) =>
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiText
-                  size="s"
-                  color="subdued"
-                  aria-live="polite"
-                  data-test-subj={`${DATA_TEST_SUBJ_PREFIX}FooterStatus`}
-                >
-                  {footerStatus}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  isDisabled={!canImport}
-                  isLoading={isImporting}
-                  onClick={onImport}
-                  data-test-subj={`${DATA_TEST_SUBJ_PREFIX}AddButton`}
-                >
-                  {panelJsonStrings.getAddButtonLabel(sanitizedState?.panels.length ?? 1)}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiToolTip
+              content={isImporting ? undefined : disabledReason}
+              data-test-subj={`${DATA_TEST_SUBJ_PREFIX}AddButtonTooltip`}
+            >
+              <EuiButton
+                fill
+                isDisabled={!canImport}
+                hasAriaDisabled
+                isLoading={isImporting}
+                onClick={onImport}
+                data-test-subj={`${DATA_TEST_SUBJ_PREFIX}AddButton`}
+              >
+                {panelJsonStrings.getAddButtonLabel(sanitizedState?.panels.length ?? 1)}
+              </EuiButton>
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
