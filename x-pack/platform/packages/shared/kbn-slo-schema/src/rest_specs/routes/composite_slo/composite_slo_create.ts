@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
+import { z, displayName, description } from '@kbn/zod';
 import {
   compositeSloIdSchema,
   compositeTagsSchema,
@@ -16,8 +16,8 @@ import {
 } from '../../../schema/composite_slo';
 
 const createCompositeSLOBodySchema = z.object({
-  name: z.string(),
-  description: z.string(),
+  name: displayName(),
+  description: description(),
   members: compositeSloMembersSchema,
   compositeMethod: compositeMethodSchema,
   timeWindow: compositeRollingTimeWindowSchema,

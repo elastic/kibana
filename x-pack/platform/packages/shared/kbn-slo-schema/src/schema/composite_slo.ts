@@ -6,6 +6,7 @@
  */
 
 import { z, lazySchema } from '@kbn/zod';
+import { MAX_DURATION_STRING_LENGTH } from './limits';
 
 const COMPOSITE_SLO_MIN_MEMBERS = 2;
 const COMPOSITE_SLO_MAX_MEMBERS = 25;
@@ -28,7 +29,7 @@ const compositeTargetSchema = z.object({ target: z.number() });
 const compositeOccurrencesBudgetingMethodSchema = z.literal('occurrences');
 
 const compositeRollingTimeWindowSchema = z.object({
-  duration: z.string(),
+  duration: z.string().max(MAX_DURATION_STRING_LENGTH),
   type: z.literal('rolling'),
 });
 
