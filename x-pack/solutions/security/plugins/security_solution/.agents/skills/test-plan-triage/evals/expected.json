@@ -377,6 +377,6 @@
     "labeled": [],
     "comments": [],
     "proposed_comment": true,
-    "answer": {"contains": ["standalone"]}
+    "answer": {"suggested_level_text": "none — standalone"}
   }
 }

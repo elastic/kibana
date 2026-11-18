@@ -157,6 +157,13 @@ class CheckTest(unittest.TestCase):
             ["answer language 'en', expected 'es'", "answer does not contain '2026-10-01'", "answer has no **Question:** line"],
         )
 
+    def test_suggested_level_text(self):
+        expected = {**EXPECTED_YES, "answer": {"suggested_level_text": "one functionality"}}
+        self.assertEqual(score.check(expected, "with", write_run(self.work, YES_ANSWER)), [])
+        answer = YES_ANSWER.replace("— one functionality;", "— a feature;").replace("**Hierarchy:**", "**Hierarchy:** one functionality")
+        failures = score.check(expected, "with", write_run(self.work, answer))
+        self.assertEqual(failures, ["suggested level line does not contain 'one functionality'"])
+
     def test_untouched(self):
         expected = {**EXPECTED_YES, "untouched": ["elastic/kibana#999"]}
         failures = score.check(expected, "with", write_run(self.work, YES_ANSWER, requests="api repos/elastic/kibana/issues/999\n"))
