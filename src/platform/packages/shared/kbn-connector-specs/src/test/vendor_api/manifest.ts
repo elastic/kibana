@@ -19,6 +19,14 @@ export const isMarkdownFormat = (
 ): format is z.infer<typeof markdownSourceFormatSchema> =>
   markdownSourceFormatSchema.safeParse(format).success;
 
+/** API references published as one Aglio page (static HTML), by the vendor whose template it is. */
+export const aglioSourceFormatSchema = z.enum(['threatq-html']);
+
+export const isAglioFormat = (
+  format: string | undefined
+): format is z.infer<typeof aglioSourceFormatSchema> =>
+  aglioSourceFormatSchema.safeParse(format).success;
+
 /** Protocols whose operations go by name, with snapshots of their own format. */
 export const protocolSourceFormatSchema = z.enum(['graphql', 'mcp']);
 
@@ -36,11 +44,13 @@ const sourceSchema = z
     format: z.union([
       z.enum(['openapi', 'swagger', 'discovery', 'smithy']),
       markdownSourceFormatSchema,
+      aglioSourceFormatSchema,
       protocolSourceFormatSchema,
     ]),
     /**
-     * The spec, or for Markdown references, their `llms.txt` index. For GraphQL, a document with
-     * SDL or an introspection result; for MCP, one with a `tools/list` result.
+     * The spec, or for Markdown references, their `llms.txt` index, or for an Aglio reference, its
+     * page. For GraphQL, a document with SDL or an introspection result; for MCP, one with a
+     * `tools/list` result.
      */
     url: z.url(),
     /** GraphQL and MCP only: the URLs the connector calls, as the spec's URL can't tell. */
@@ -199,6 +209,7 @@ export type ManifestNamedOperation = z.infer<typeof namedOperationSchema>;
 export type ManifestCall = ManifestOperation | ManifestNamedOperation;
 export type ManifestSource = z.infer<typeof sourceSchema>;
 export type MarkdownSourceFormat = z.infer<typeof markdownSourceFormatSchema>;
+export type AglioSourceFormat = z.infer<typeof aglioSourceFormatSchema>;
 export type ProtocolFormat = z.infer<typeof protocolSourceFormatSchema>;
 export type UnmatchedRequest = z.infer<typeof unmatchedSchema>;
 export type ManifestPagination = NonNullable<ManifestOperation['pagination']>;

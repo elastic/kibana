@@ -88,4 +88,31 @@ describe('loadVendorSpec', () => {
     expect(apiVersion).toBeUndefined();
     expect(Object.keys(document.paths ?? {})).toEqual(['/v1/search']);
   });
+
+  it('converts an Aglio reference, and takes its version from the file name', async () => {
+    const html =
+      '<div id="items-list-get" class="action get"><h4 class="action-heading">' +
+      '<div class="name">List</div><a class="method get">GET</a>' +
+      '<code class="uri">/items{?limit}</code></h4></div>';
+    const url = 'https://docs.example.com/api/Reference_v6.16.0.html';
+
+    const { format, apiVersion, document } = await loadVendorSpec(url, async () => html, {
+      format: 'threatq-html',
+    });
+
+    expect(format).toBe('threatq-html');
+    expect(apiVersion).toBe('6.16.0');
+    expect(document.info).toMatchObject({ version: '6.16.0' });
+    expect(Object.keys(document.paths ?? {})).toEqual(['/items']);
+  });
+
+  it('leaves out the version of an Aglio reference whose file name has none', async () => {
+    const { apiVersion } = await loadVendorSpec(
+      'https://docs.example.com/api/reference.html',
+      async () => '<html></html>',
+      { format: 'threatq-html' }
+    );
+
+    expect(apiVersion).toBeUndefined();
+  });
 });

@@ -748,6 +748,14 @@ node scripts/connector_vendor_api --connector databricks --source docs=https://d
 
 The pages are converted to OpenAPI with `convertMarkdownReference`, and recorded, projected and snapshotted like any other source. A prefix that selects no page fails the run, as the vendor may have moved the group. `--inspect` takes `--format` and `--pages` too, and adds them to the manifest with the source.
 
+A reference published as one static page rendered by Aglio (`threatq-html`) takes `--format` the same way, and the source's URL is the page, which is converted with `convertAglioReference`:
+
+```sh
+node scripts/connector_vendor_api --connector threatq --source rest_api=https://helpcenter.threatq.com/assets/HTML/api/ThreatQ_REST_API_Reference_v6.16.0.html --format rest_api=threatq-html
+```
+
+Such a page lists no schemas, so the snapshot's request and response schemas are inferred from its examples (see the `@kbn/connector-emulate` README) and may need an overlay. The vendor publishes a file per release, so the source follows a release until its URL is moved to the next; `--drift` can only see what a URL serves.
+
 The folder holds:
 
 - `manifest.json`: the sources and the operations each action calls.
@@ -817,7 +825,7 @@ Other handler errors, auth types that can't be used against the contract mock, a
 }
 ```
 
-- `sources`: one entry per vendor spec. `format` is what the vendor publishes (`openapi`, `swagger`, `discovery` or `smithy`, or the template of a Markdown reference, whose `url` is its `llms.txt` index and `pages` the URL prefixes fetched). `apiVersion` is the spec's `info.version`; Markdown references have none. `fetchedAt` only changes when the snapshot changes. An optional `note`, written by hand and kept on updates, explains an unusual source, such as a vendor test fixture.
+- `sources`: one entry per vendor spec. `format` is what the vendor publishes (`openapi`, `swagger`, `discovery` or `smithy`, or the template of a Markdown reference, whose `url` is its `llms.txt` index and `pages` the URL prefixes fetched, or of an Aglio page, whose `url` is that page). `apiVersion` is the spec's `info.version`; Markdown references have none, and an Aglio page has the version in its file name. `fetchedAt` only changes when the snapshot changes. An optional `note`, written by hand and kept on updates, explains an unusual source, such as a vendor test fixture.
 - `operations`: per action, the operations its runs matched, by source, lowercase method and path template, sorted.
 - `pagination`: how an operation pages, as the contract mock takes it (see the `@kbn/connector-emulate` README), or `"none"` for one that returns everything at once. Operations look like they return a collection when they take a cursor, offset or page parameter, a page size next to an array in the response, or return a bare array. For those without one, the script proposes a descriptor from `x-speakeasy-pagination`, `x-ms-pageable` or parameter and field names, and warns so it gets reviewed; when it can't, it fails until one is declared. Declared descriptors are kept on every run.
 - `unmatched`: per action, requests that match no operation in any source, with the reason that's expected. A `{name}` path segment matches any value, as the generated inputs vary. A request that matches nothing and isn't listed fails the script.

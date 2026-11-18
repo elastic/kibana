@@ -9,6 +9,7 @@
 
 import type { OpenApiDocument } from '@kbn/connector-emulate';
 import {
+  convertAglioReference,
   convertDiscovery,
   convertSmithy,
   convertSwagger2,
@@ -19,7 +20,7 @@ import { bundleSpec } from './bundle_spec';
 import { isJsonObject } from '../json_pointer';
 import { loadMarkdownReference } from './load_markdown_reference';
 import type { ManifestSource } from '../manifest';
-import { isMarkdownFormat } from '../manifest';
+import { isAglioFormat, isMarkdownFormat } from '../manifest';
 import { parseSpecText } from './parse_spec_text';
 
 export interface LoadedVendorSpec {
@@ -55,6 +56,19 @@ export const loadVendorSpec = async (
     return {
       format: declaredFormat,
       document: await loadMarkdownReference({ format: declaredFormat, url, pages, fetchText }),
+    };
+  }
+  if (isAglioFormat(declaredFormat)) {
+    // The page states no version of its own; vendors put it in the file's name (`…_v6.16.0.html`).
+    const apiVersion = /[_/-]v(\d+(?:\.\d+)+)/.exec(url)?.[1];
+    return {
+      format: declaredFormat,
+      ...(apiVersion ? { apiVersion } : {}),
+      document: convertAglioReference({
+        format: declaredFormat,
+        html: await fetchText(url),
+        version: apiVersion,
+      }),
     };
   }
   const parsed = parseSpecText(await fetchText(url)) as OpenApiDocument;
