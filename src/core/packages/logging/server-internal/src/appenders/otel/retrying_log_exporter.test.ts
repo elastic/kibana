@@ -246,6 +246,8 @@ describe('RetryingLogRecordExporter', () => {
 
     expect(callback).toHaveBeenCalledWith(inFlightFailure);
     expect(jest.getTimerCount()).toBe(0);
+    expect(finishExport).toHaveBeenCalledTimes(1);
+    expect(finishExport).toHaveBeenCalledWith(inFlightFailure.error);
   });
 
   it('fast-forwards pending retries on forceFlush', async () => {
@@ -263,5 +265,7 @@ describe('RetryingLogRecordExporter', () => {
     expect(delegate.forceFlush).toHaveBeenCalledTimes(1);
     expect(callback).toHaveBeenCalledWith(SUCCESS);
     expect(jest.getTimerCount()).toBe(0);
+    expect(finishExport).toHaveBeenCalledTimes(1);
+    expect(finishExport).toHaveBeenCalledWith(undefined);
   });
 });
