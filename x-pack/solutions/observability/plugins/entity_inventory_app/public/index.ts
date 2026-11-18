@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { PluginInitializer } from '@kbn/core/public';
+import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import { EntityInventoryAppPlugin } from './plugin';
 import type {
+  EntityInventoryAppPublicConfig,
   EntityInventoryAppPublicSetup,
   EntityInventoryAppPublicStart,
   EntityInventoryAppSetupDependencies,
@@ -21,4 +22,5 @@ export const plugin: PluginInitializer<
   EntityInventoryAppPublicStart,
   EntityInventoryAppSetupDependencies,
   EntityInventoryAppStartDependencies
-> = () => new EntityInventoryAppPlugin();
+> = (initializerContext: PluginInitializerContext<EntityInventoryAppPublicConfig>) =>
+  new EntityInventoryAppPlugin(initializerContext);
