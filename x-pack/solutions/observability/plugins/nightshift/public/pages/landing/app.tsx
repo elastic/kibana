@@ -96,7 +96,13 @@ export function NightshiftApp({
 
   // Read filter state from URL so it survives navigation and is shareable.
   const searchQuery = useMemo(() => getNightshiftSearchQueryFromSearch(search), [search]);
-  const debouncedSearchQuery = useDebouncedValue(searchQuery, INVESTIGATIONS_SEARCH_DEBOUNCE_MS);
+  // The input keeps the raw term so spaces can be typed, but the API rejects a whitespace-only
+  // query, so only the trimmed term filters.
+  const trimmedSearchQuery = searchQuery?.trim() || undefined;
+  const debouncedSearchQuery = useDebouncedValue(
+    trimmedSearchQuery,
+    INVESTIGATIONS_SEARCH_DEBOUNCE_MS
+  );
   const rawSeverity = useMemo(() => getNightshiftSeverityFromSearch(search), [search]);
   const activeSeverity: Severity | undefined = useMemo(
     () => (isSeverity(rawSeverity) ? rawSeverity : undefined),
@@ -345,7 +351,7 @@ export function NightshiftApp({
   // Searching is typing, not clicking. Reported once the debounced term's results have landed,
   // so an empty result set is distinguishable from a hit. The term itself is never reported.
   useEffect(() => {
-    const query = debouncedSearchQuery?.trim();
+    const query = debouncedSearchQuery;
     if (!query) {
       reportedSearchQuery.current = undefined;
       return;
@@ -498,7 +504,7 @@ export function NightshiftApp({
           onInvestigationClick={handleInvestigationClick}
           onStartInvestigation={onStartInvestigation}
           onCreateAutomation={onCreateAutomation}
-          hasActiveSearch={Boolean(searchQuery)}
+          hasActiveSearch={Boolean(trimmedSearchQuery)}
         />
       </div>
     </EuiFlexGroup>
