@@ -6,4 +6,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('./backdate_demo_cases');
+require('./backdate_demo_cases/main');

@@ -136,7 +136,7 @@ export const runBackdate = async (): Promise<void> => {
   let searchAfter: estypes.SortResults | undefined;
   let updatedCases = 0;
   let missingAnalyticsDocs = 0;
-  const { id: pitId } = await esClient.openPointInTime({
+  let { id: pitId } = await esClient.openPointInTime({
     index: ALERTING_CASES_SAVED_OBJECT_INDEX,
     keep_alive: PIT_KEEP_ALIVE,
   });
@@ -151,6 +151,7 @@ export const runBackdate = async (): Promise<void> => {
         _source: ['cases.created_by', 'namespaces'],
         ...(searchAfter != null && { search_after: searchAfter }),
       });
+      pitId = page.pit_id ?? pitId;
       const { hits } = page.hits;
 
       if (hits.length === 0) {
