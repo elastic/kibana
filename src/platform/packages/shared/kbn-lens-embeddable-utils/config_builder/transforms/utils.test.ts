@@ -839,6 +839,49 @@ describe('filtersAndQueryToLensState', () => {
     ]);
   });
 
+  test.each([
+    ['kql', 'kuery'],
+    ['lucene', 'lucene'],
+  ] as const)('stores a non-empty %s query', (language, stateLanguage) => {
+    const apiState: LensApiConfig = {
+      type: 'metric',
+      title: 'test metric',
+      data_source: {
+        type: 'esql',
+        query: 'from test | limit 10',
+      },
+      metrics: [{ type: 'primary', label: 'test', column: 'test' }],
+      styling: { primary: { value: { sizing: 'auto' } } },
+      sampling: 1,
+      ignore_global_filters: false,
+      query: { language, expression: 'category: shoes' },
+    };
+
+    const result = filtersAndQueryToLensState(apiState, []);
+
+    expect(result.query).toEqual({ language: stateLanguage, query: 'category: shoes' });
+  });
+
+  test.each(['kql', 'lucene'] as const)('does not store an empty %s query', (language) => {
+    const apiState: LensApiConfig = {
+      type: 'metric',
+      title: 'test metric',
+      data_source: {
+        type: 'esql',
+        query: 'from test | limit 10',
+      },
+      metrics: [{ type: 'primary', label: 'test', column: 'test' }],
+      styling: { primary: { value: { sizing: 'auto' } } },
+      sampling: 1,
+      ignore_global_filters: false,
+      query: { language, expression: '' },
+    };
+
+    const result = filtersAndQueryToLensState(apiState, []);
+
+    expect(result.query).toBeUndefined();
+  });
+
   test('handles missing filters and query gracefully', () => {
     const apiState: LensApiConfig = {
       type: 'metric',

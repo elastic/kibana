@@ -17,6 +17,7 @@ import {
 } from '@kbn/workflows/spec/lib/field_conversion';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { WorkflowTemplatingEngine } from '../templating_engine';
+import { publishFinishedWorkflowExecution } from '../topics/publish_finished_workflow_execution';
 import {
   buildInputDefaultRenderContext,
   type WorkflowExecutionForInputRendering,
@@ -46,7 +47,13 @@ export const validateWorkflowInputs = async (
   }
   const normalizedSchema = getInputsFromDefinition(workflowExecution.workflowDefinition);
   const validator = buildFieldsZodValidator(normalizedSchema);
-  if (!normalizedSchema?.properties) {
+  const additionalProperties = normalizedSchema?.additionalProperties;
+  // A typed `additionalProperties` alone still checks undeclared inputs and the keys it requires.
+  const hasTypedAdditionalProperties =
+    typeof additionalProperties === 'object' &&
+    additionalProperties !== null &&
+    !Array.isArray(additionalProperties);
+  if (!normalizedSchema?.properties && !hasTypedAdditionalProperties) {
     return true;
   }
   const renderContext = buildInputDefaultRenderContext(workflowExecution, coreStart, dependencies);
@@ -78,19 +85,28 @@ export const validateWorkflowInputs = async (
     return value;
   };
 
-  const markInputValidationFailed = (message: string): Promise<void> => {
+  const markInputValidationFailed = async (message: string): Promise<void> => {
+    const error = {
+      type: 'InputValidationError',
+      message,
+    };
+    const finishedAt = new Date().toISOString();
     const update = {
       id: workflowExecution.id,
       status: ExecutionStatus.FAILED,
-      error: {
-        type: 'InputValidationError',
-        message,
-      },
+      error,
+      finishedAt,
     };
     if (workflowExecution.concurrencyGroupKey) {
-      return workflowExecutionRepository.updateWorkflowExecution(update, { refresh: true });
+      await workflowExecutionRepository.updateWorkflowExecution(update, { refresh: true });
+    } else {
+      await workflowExecutionRepository.updateWorkflowExecution(update);
     }
-    return workflowExecutionRepository.updateWorkflowExecution(update);
+    await publishFinishedWorkflowExecution(workflowExecution, {
+      status: ExecutionStatus.FAILED,
+      error,
+      finishedAt,
+    });
   };
 
   let inputsWithDefaults: Record<string, unknown> | undefined;
