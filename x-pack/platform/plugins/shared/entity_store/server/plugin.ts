@@ -154,16 +154,6 @@ export class EntityStorePlugin
     this.entityDefinitionRegistry.closeSetupRegistration();
     this.logger.info('Initializing plugin');
 
-    plugins.taskManager.registerEncryptedSavedObjectsClient(
-      plugins.encryptedSavedObjects.getClient({
-        includedHiddenTypes: ['task', 'api_key_to_invalidate'],
-      })
-    );
-
-    plugins.taskManager.registerApiKeyInvalidateFn(
-      plugins.security?.authc.apiKeys.invalidateAsInternalUser
-    );
-
     subscribeToLegacySecurityAssetsMigrationFlag({
       coreStart: core,
       logger: this.logger,

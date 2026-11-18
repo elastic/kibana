@@ -22,7 +22,7 @@ import { createAttackDiscoveryBasicEvaluator } from './evaluators/attack_discove
 import { createAttackDiscoveryRubricEvaluator } from './evaluators/attack_discovery_rubric_evaluator';
 import { createAttackDiscoveryCriteriaEvaluator } from './evaluators/attack_discovery_criteria_evaluator';
 
-const resolveConcurrency = (): number | undefined => {
+export const resolveConcurrency = (): number | undefined => {
   const raw = process.env.ATTACK_DISCOVERY_EVAL_CONCURRENCY;
   if (!raw) return undefined;
   const parsed = Number(raw);

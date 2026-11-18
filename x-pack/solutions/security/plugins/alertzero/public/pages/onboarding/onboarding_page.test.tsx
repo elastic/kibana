@@ -25,7 +25,7 @@ import {
 } from '@kbn/alertzero-common';
 import { SECURITY_APP_ID, SecurityPageName } from '@kbn/deeplinks-security';
 import { queryKeys } from '../../query_keys';
-import { ONBOARDING_READ_MORE_URL_PLACEHOLDER } from './constants';
+import { ONBOARDING_READ_MORE_URL } from './constants';
 import { OnboardingPage } from './onboarding_page';
 
 jest.mock('../../components/scan_failure_callout/scan_failure_callout', () => ({
@@ -84,6 +84,7 @@ const NO_MODEL_WORKERS_RESPONSE = {
 };
 
 const FEATURE_SETTINGS_URL = '/app/management/modelManagement/model_settings';
+const INFERENCE_ENDPOINTS_URL = '/app/management/modelManagement/inference_endpoints';
 
 const enabledWorkerBody = JSON.stringify({
   enabled: true,
@@ -117,9 +118,11 @@ const renderPage = ({
   // coreMock.createStart() does not populate feature capabilities; set the
   // alertzero.write capability so the component can branch on it.
   (coreStart.application.capabilities as Record<string, unknown>).alertzero = { write: canWrite };
-  coreStart.application.getUrlForApp.mockImplementation((appId, options) =>
-    options?.deepLinkId === 'model_settings' ? FEATURE_SETTINGS_URL : `/app/${appId}`
-  );
+  coreStart.application.getUrlForApp.mockImplementation((appId, options) => {
+    if (options?.deepLinkId === 'model_settings') return FEATURE_SETTINGS_URL;
+    if (options?.deepLinkId === 'inference_endpoints') return INFERENCE_ENDPOINTS_URL;
+    return `/app/${appId}${options?.path ?? ''}`;
+  });
   // Mock http.get so useWorkers() always returns the configured server response
   // (including on background refetches), and http.patch so mutation calls are
   // interceptable per-test.
@@ -180,7 +183,7 @@ describe('OnboardingPage', () => {
 
       expect(screen.getByTestId('alertZeroOnboardingContinueButton')).toBeDisabled();
       expect(screen.getByTestId('alertZeroOnboardingContinueDisabledReason')).toHaveTextContent(
-        'You need the AlertZero All privilege'
+        'You need the All privilege for AlertZero'
       );
 
       fireEvent.click(screen.getByTestId('alertZeroOnboardingContinueButton'));
@@ -198,20 +201,13 @@ describe('OnboardingPage', () => {
       ).not.toBeInTheDocument();
     });
 
-    it('shows a disabled video placeholder', () => {
-      renderPage({ canWrite: true, skipIntro: false });
-
-      expect(screen.getByTestId('alertZeroOnboardingVideoPlaceholder')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /video placeholder/ })).toBeDisabled();
-    });
-
     it('switches the preview section when a dot is selected', () => {
       renderPage({ canWrite: true, skipIntro: false });
 
       fireEvent.click(screen.getByTestId('alertZeroOnboardingPreviewDot-investigate'));
 
       expect(
-        screen.getByText('Run investigations end to end and close what I can')
+        screen.getByText('Run investigations end to end and propose next steps')
       ).toBeInTheDocument();
       expect(screen.getByText('Named-pipe backdoor — eng-ws-19')).toBeInTheDocument();
     });
@@ -232,7 +228,7 @@ describe('OnboardingPage', () => {
 
       expect(screen.getByTestId('alertZeroOnboardingReadMoreLink')).toHaveAttribute(
         'href',
-        ONBOARDING_READ_MORE_URL_PLACEHOLDER
+        ONBOARDING_READ_MORE_URL
       );
     });
 
@@ -251,7 +247,7 @@ describe('OnboardingPage', () => {
 
       fireEvent.click(screen.getByTestId('alertZeroOnboardingContinueButton'));
 
-      expect(screen.getByText("Let's turn on the Watches?")).toBeInTheDocument();
+      expect(screen.getByText("Let's get AlertZero working for you!")).toBeInTheDocument();
       expect(screen.getAllByRole('switch').length).toBeGreaterThan(0);
     });
   });
@@ -277,13 +273,21 @@ describe('OnboardingPage', () => {
   });
 
   describe('when the space has no AI model', () => {
-    it('explains the missing models, links to Feature settings and disables the controls', () => {
+    it('explains the missing models, links to inference endpoints and Feature settings, and disables the controls', () => {
       const httpPatch = jest.fn();
       renderPage({ httpPatch, serverWorkers: NO_MODEL_WORKERS_RESPONSE });
 
       const callout = screen.getByTestId('alertZeroOnboardingNoModelCallout');
-      expect(callout).toHaveTextContent("AI models aren't set up for this space");
-      expect(callout).toHaveTextContent('Workers need AI models to run.');
+      expect(callout).toHaveTextContent('Workers need an AI model');
+      expect(callout).toHaveTextContent(
+        'Add an AI model as an inference endpoint, then come back to finish setting up your Workers. To choose which model each tier uses, open Feature settings.'
+      );
+      const addEndpoint = screen.getByTestId(
+        'alertZeroOnboardingNoModelAddInferenceEndpointButton'
+      );
+      expect(addEndpoint).toHaveTextContent('Add inference endpoint');
+      expect(addEndpoint).toHaveAttribute('href', INFERENCE_ENDPOINTS_URL);
+      expect(addEndpoint).toHaveAttribute('target', '_blank');
       const action = screen.getByTestId('alertZeroOnboardingNoModelFeatureSettingsButton');
       expect(action).toHaveTextContent('Open Feature settings');
       expect(action).toHaveAttribute('href', FEATURE_SETTINGS_URL);
@@ -304,7 +308,7 @@ describe('OnboardingPage', () => {
       renderPage({ serverWorkers: NO_MODEL_WORKERS_RESPONSE });
 
       const callout = screen.getByTestId('alertZeroOnboardingNoModelCallout');
-      const intro = screen.getByText(/A Watch is a small team of Workers/);
+      const intro = screen.getByText(/To start using AlertZero/);
       const firstToggle = screen.getAllByRole('switch')[0];
       expect(intro.compareDocumentPosition(callout)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
       expect(callout.compareDocumentPosition(firstToggle)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
@@ -329,21 +333,17 @@ describe('OnboardingPage', () => {
         `alertZeroOnboardingWorkerToggle-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
       )
     ).toBeEnabled();
-    expect(screen.getByTestId('alertZeroOnboardingFeatureSettingsLink')).toHaveAttribute(
-      'href',
-      FEATURE_SETTINGS_URL
-    );
   });
 
   it('renders the title', () => {
     renderPage({ canWrite: true });
-    expect(screen.getByText("Let's turn on the Watches?")).toBeInTheDocument();
+    expect(screen.getByText("Let's get AlertZero working for you!")).toBeInTheDocument();
   });
 
   describe('with write capability', () => {
     it('renders the subtitle', () => {
       renderPage({ canWrite: true });
-      expect(screen.getByText(/A Watch is a small team of Workers/)).toBeInTheDocument();
+      expect(screen.getByText(/To start using AlertZero/)).toBeInTheDocument();
     });
 
     it('renders worker toggle rows', () => {
@@ -355,8 +355,8 @@ describe('OnboardingPage', () => {
     it('renders a Read more link pointing at the placeholder docs URL', () => {
       renderPage({ canWrite: true });
       const link = screen.getByTestId('alertZeroOnboardingReadMoreLink');
-      expect(link).toHaveTextContent('Read more about Watches in the documentation');
-      expect(link).toHaveAttribute('href', ONBOARDING_READ_MORE_URL_PLACEHOLDER);
+      expect(link).toHaveTextContent('Read more about Watches and Workers');
+      expect(link).toHaveAttribute('href', ONBOARDING_READ_MORE_URL);
     });
 
     it('links to Watch settings from the intro', () => {
@@ -484,9 +484,9 @@ describe('OnboardingPage', () => {
       );
     });
 
-    it('recommends keeping all Watches enabled', () => {
+    it('recommends keeping all Workers on', () => {
       renderPage({ canWrite: true });
-      expect(screen.getByText(/We recommend keeping all Watches enabled/)).toBeInTheDocument();
+      expect(screen.getByText(/we recommend keeping them all on/)).toBeInTheDocument();
     });
 
     it('shows the watch and trigger badges for each worker', () => {
@@ -500,22 +500,22 @@ describe('OnboardingPage', () => {
         screen.getByTestId(
           `alertZeroOnboardingWorkerTrigger-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
         )
-      ).toHaveTextContent('On new alerts');
+      ).toHaveTextContent('Runs on new alerts');
       expect(
         screen.getByTestId(
           `alertZeroOnboardingWorkerTrigger-${SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID}`
         )
-      ).toHaveTextContent('Every 4 hours');
+      ).toHaveTextContent('Runs every 4 hours');
     });
 
     it('shows how many workers are selected', () => {
       renderPage({ canWrite: true });
       expect(screen.getByTestId('alertZeroOnboardingSelectedCount')).toHaveTextContent(
-        '6 of 6 Workers selected'
+        '6 of 6 Workers on'
       );
       fireEvent.click(screen.getAllByRole('switch')[1]);
       expect(screen.getByTestId('alertZeroOnboardingSelectedCount')).toHaveTextContent(
-        '5 of 6 Workers selected'
+        '5 of 6 Workers on'
       );
     });
 

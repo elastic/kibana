@@ -21,6 +21,7 @@ interface ParsedStep {
   name: string;
   type: string;
   'branch-timeout'?: string;
+  'on-failure'?: { continue?: boolean | string };
   concurrency?: number;
   foreach?: string;
   if?: string;
@@ -144,6 +145,89 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
     const retrieve = () => step('retrieve_alert_ids');
     const query = () => String(retrieve().with?.query);
 
+    describe('in a space with no alerts index yet', () => {
+      const check = () => step('check_alerts_index');
+
+      it('checks that the space alerts index exists before querying it', () => {
+        expect(check().with?.index).toBe('.alerts-security.alerts-{{ workflow.spaceId }}');
+        expect(parsed.steps?.findIndex((s) => s.name === 'check_alerts_index')).toBeLessThan(
+          parsed.steps?.findIndex((s) => s.name === 'retrieve_alert_ids') ?? -1
+        );
+      });
+
+      const evalExpression = (expression: unknown, context: Record<string, unknown>) =>
+        createWorkflowLiquidEngine().evalValueSync(
+          String(expression)
+            .replace(/^\$\{\{/, '')
+            .replace(/\}\}$/, '')
+            .trim(),
+          context
+        );
+
+      it('skips retrieve_alert_ids only when the probe failed', () => {
+        expect(retrieve().type).toBe('elasticsearch.esql.query');
+        expect(evalExpression(retrieve().if, { steps: { check_alerts_index: {} } })).toBe(true);
+        expect(
+          evalExpression(retrieve().if, {
+            steps: { check_alerts_index: { error: { type: 'ResponseError' } } },
+          })
+        ).toBe(false);
+      });
+
+      // `elasticsearch.indices.exists` needs `view_index_metadata`, which a principal that
+      // can read the alerts alias may not hold. A size-0 search needs only `read`.
+      it('probes with a read-only search, not an index-metadata call', () => {
+        expect(check().type).toBe('elasticsearch.search');
+        expect(check().with).toEqual({
+          index: '.alerts-security.alerts-{{ workflow.spaceId }}',
+          size: 0,
+          track_total_hits: false,
+        });
+      });
+
+      // The ES client names a response error `ResponseError` and puts the ES error type
+      // first in its message.
+      it.each([
+        [
+          'continues past a missing alerts index',
+          {
+            type: 'ResponseError',
+            message:
+              'index_not_found_exception\n\tRoot causes:\n\t\tindex_not_found_exception: no such index',
+          },
+          true,
+        ],
+        [
+          'fails when the caller cannot read the alerts index',
+          {
+            type: 'ResponseError',
+            message:
+              'security_exception\n\tRoot causes:\n\t\tsecurity_exception: action is unauthorized',
+          },
+          false,
+        ],
+        ['fails on any other error', { type: 'Error', message: 'socket hang up' }, false],
+      ] as const)('%s', (_label, error, continues) => {
+        expect(evalExpression(check()['on-failure']?.continue, { error })).toBe(continues);
+      });
+
+      it('does not loosen the query, so a genuine ES|QL error still fails the run', () => {
+        expect(retrieve()).not.toHaveProperty('on-failure');
+        expect(retrieve()).not.toHaveProperty('continue');
+        expect(JSON.stringify(retrieve().with)).not.toContain('ignore_unavailable');
+      });
+
+      it('runs no batch when the skipped retrieval left no ids', async () => {
+        const engine = createWorkflowLiquidEngine({ strictFilters: true });
+        const rendered = await engine.parseAndRender(String(step('generate_batches').foreach), {
+          inputs: { batch_size: 100 },
+          steps: { retrieve_alert_ids: {} },
+        });
+
+        expect(JSON.parse(rendered as string)).toEqual([]);
+      });
+    });
+
     it('retrieves ids only, leaving anonymization to each batch', () => {
       expect(retrieve().type).toBe('elasticsearch.esql.query');
       expect(query()).toMatch(/\| KEEP _id$/);
@@ -179,12 +263,19 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       );
     });
 
-    // A true-positive or inconclusive review retires its alerts with this tag, so
-    // correlating them again would only persist a near-duplicate attack.
-    it('excludes alerts the review tagged az:ad_correlated', () => {
+    // A true-positive or inconclusive review retires its alerts with
+    // `az:ad_correlated`, and a false positive retires them with `az:ad_fp_chain`.
+    // Correlating either again would only persist a near-duplicate attack.
+    it('excludes alerts tagged az:ad_correlated or az:ad_fp_chain', () => {
       expect(retrieve().with?.filter).toEqual({
         bool: {
-          must_not: [{ terms: { 'kibana.alert.workflow_tags': ['az:ad_correlated'] } }],
+          must_not: [
+            {
+              terms: {
+                'kibana.alert.workflow_tags': ['az:ad_correlated', 'az:ad_fp_chain'],
+              },
+            },
+          ],
         },
       });
     });

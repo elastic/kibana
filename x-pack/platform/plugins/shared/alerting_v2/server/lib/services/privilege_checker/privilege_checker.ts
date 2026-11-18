@@ -9,6 +9,7 @@ import { PluginStart } from '@kbn/core-di';
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 import { inject, injectable } from 'inversify';
 import {
   ALERTING_V2_API_PRIVILEGES,
@@ -33,6 +34,24 @@ export class PrivilegeChecker {
 
   public async canWrite(feature: WritableAlertingV2Feature): Promise<boolean> {
     return this.hasApiPrivileges(ALERTING_V2_API_PRIVILEGES[feature].write);
+  }
+
+  /** Whether the user can read workflows and whether they can run them, checked independently. */
+  public async getWorkflowPrivileges(): Promise<{ read: boolean; execute: boolean }> {
+    const toActions = (privileges: readonly string[]) =>
+      privileges.map((privilege) => this.security.authz.actions.api.get(privilege));
+    const read = toActions(WorkflowsManagementOperationPrivileges.read);
+    const execute = toActions(WorkflowsManagementOperationPrivileges.execute);
+
+    const { privileges } = await this.security.authz
+      .checkPrivilegesWithRequest(this.request)
+      .atSpace(this.spaceId, { kibana: [...read, ...execute] });
+    const authorized = new Set(
+      privileges.kibana.filter((entry) => entry.authorized).map((entry) => entry.privilege)
+    );
+    const hasAll = (actions: string[]) => actions.every((action) => authorized.has(action));
+
+    return { read: hasAll(read), execute: hasAll(execute) };
   }
 
   private async hasApiPrivileges(...actions: string[]): Promise<boolean> {

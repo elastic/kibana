@@ -6,14 +6,14 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
+import type { AuditedSandboxSession, NightshiftSandboxStart } from '../sandbox_audit';
 import { obtainSandboxStepDefinition } from './obtain_sandbox';
 
 describe('obtainSandboxStepDefinition', () => {
   const statFiles = jest.fn();
-  const mockSession = { statFiles } as unknown as SandboxSession;
+  const mockSession = { statFiles } as unknown as AuditedSandboxSession;
 
-  const makeSandboxStart = (): SandboxPluginStart => ({
+  const makeSandboxStart = (): NightshiftSandboxStart => ({
     getSession: jest.fn(),
     getSessionForSpace: jest.fn().mockReturnValue(mockSession),
   });
@@ -56,7 +56,11 @@ describe('obtainSandboxStepDefinition', () => {
 
     const result = await definition.handler(createContext('conv-1', 'default', {}, workflowLogger));
 
-    expect(sandboxStart.getSessionForSpace).toHaveBeenCalledWith('default', 'conv-1');
+    expect(sandboxStart.getSessionForSpace).toHaveBeenCalledWith(
+      'default',
+      'conv-1',
+      expect.objectContaining({ type: 'workflow_step' })
+    );
     expect(statFiles).toHaveBeenCalledWith(['/workspace']);
     expect(pluginLogger.info).toHaveBeenCalledWith('Obtained sandbox default__conv-1');
     expect(workflowLogger.info).not.toHaveBeenCalled();
@@ -96,7 +100,11 @@ describe('obtainSandboxStepDefinition', () => {
 
     const result = await definition.handler(createContext('conv-1', 'marketing'));
 
-    expect(sandboxStart.getSessionForSpace).toHaveBeenCalledWith('marketing', 'conv-1');
+    expect(sandboxStart.getSessionForSpace).toHaveBeenCalledWith(
+      'marketing',
+      'conv-1',
+      expect.objectContaining({ type: 'workflow_step' })
+    );
     expect(result).toEqual({
       output: { sandbox_id: 'marketing__conv-1', conversation_id: 'conv-1' },
     });
@@ -143,7 +151,7 @@ describe('obtainSandboxStepDefinition', () => {
           getSessionForSpace: jest.fn(() => {
             throw new Error('sandbox is not configured');
           }),
-        } as unknown as SandboxPluginStart),
+        } as unknown as NightshiftSandboxStart),
     ],
     [
       'workspace allocation',
@@ -178,7 +186,7 @@ describe('obtainSandboxStepDefinition', () => {
           getSessionForSpace: jest.fn(() => {
             throw new Error('session failed');
           }),
-        } as unknown as SandboxPluginStart),
+        } as unknown as NightshiftSandboxStart),
     ],
     [
       'workspace allocation',

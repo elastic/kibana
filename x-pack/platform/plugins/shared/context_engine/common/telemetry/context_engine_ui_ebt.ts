@@ -22,6 +22,7 @@ const ebtElement = {
   aiIndexCreateModal: 'contextEngine.aiIndexCreateModal',
   aiIndexCreatePageTraceSelector: 'contextEngine.aiIndexCreatePage.traceSelector',
   aiIndexDetailPage: 'contextEngine.aiIndexDetailPage',
+  aiIndexDetailPageOnboardingPanel: 'contextEngine.aiIndexDetailPage.onboardingPanel',
   aiIndexDetailPageDescriptionPanel: 'contextEngine.aiIndexDetailPage.descriptionPanel',
   aiIndexDetailPageTracesPanel: 'contextEngine.aiIndexDetailPage.tracesPanel',
   aiIndexDetailPageSourcesPanel: 'contextEngine.aiIndexDetailPage.sourcesPanel',
@@ -29,7 +30,6 @@ const ebtElement = {
   aiIndexDetailPageSignalsPanel: 'contextEngine.aiIndexDetailPage.signalsPanel',
   aiIndexDetailPageListKiPanel: 'contextEngine.aiIndexDetailPage.listKiPanel',
   viewKiPage: 'contextEngine.viewKiPage',
-  aiIndexEditFlyoutSourcePicker: 'contextEngine.aiIndexEditFlyout.sourcePicker',
   aiIndexDetailFlyout: 'contextEngine.aiIndexDetailFlyout',
   aiIndexDetailFlyoutSignalGroup: 'contextEngine.aiIndexDetailFlyout.signalGroup',
   aiIndexDetailFlyoutSignalDetail: 'contextEngine.aiIndexDetailFlyout.signalDetail',
@@ -60,6 +60,9 @@ const ebtAction = {
     TAB_SOURCES: 'tab_sources',
     TAB_KNOWLEDGE_INDICATORS: 'tab_knowledge_indicators',
   },
+  onboarding: {
+    COPY_PROMPT: 'copy_prompt',
+  },
   description: {
     EDIT: 'edit_description',
     SAVE: 'save_description',
@@ -77,7 +80,6 @@ const ebtAction = {
   sources: {
     SAVE: 'save_sources',
     CANCEL: 'cancel_sources',
-    ADD_ESQL: 'add_esql',
     CREATE_CONNECTOR: 'create_connector',
     TOGGLE_CONNECTOR: 'toggle_connector',
     REMOVE_SOURCE: 'remove_source',
@@ -107,6 +109,7 @@ const ebtAction = {
     DISCOVER_LINK: 'open_ki_discover',
     FILTER_TYPE: 'filter_type',
     FILTER_STATUS: 'filter_status',
+    SORT: 'sort_ki',
     SEARCH: 'search_ki',
     LOAD_MORE: 'load_more_ki',
     DISCOVER_CAP_REACHED: 'open_ki_discover_cap_reached',

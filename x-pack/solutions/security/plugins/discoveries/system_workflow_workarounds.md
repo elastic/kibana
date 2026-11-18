@@ -32,9 +32,9 @@ At plugin `start()`, `installStatic` ([`server/managed_workflows/install_static.
 
 ```ts
 const client = await workflowsExtensions.initManagedWorkflowsClient('discoveries');
-for (const id of AD_WORKFLOW_IDS) {
-  await client.install(id, { spaceId: GLOBAL_WORKFLOW_SPACE_ID });
-}
+const { failed } = await client.installMany(
+  AD_WORKFLOW_IDS.map((id) => ({ id, spaceId: GLOBAL_WORKFLOW_SPACE_ID }))
+);
 await client.ready();
 ```
 

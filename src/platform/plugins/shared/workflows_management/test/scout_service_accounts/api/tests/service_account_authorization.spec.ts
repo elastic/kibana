@@ -161,14 +161,23 @@ apiTest.describe(
     apiTest(
       'allows an executor to run but prevents definition edits without manage_security',
       async ({ apiClient, samlAuth }) => {
-        const { headers, accountId, workflowIds, create, run, wait, expectAccount } = getContext();
+        const {
+          headers,
+          sessionHeaders,
+          accountId,
+          workflowIds,
+          create,
+          run,
+          wait,
+          expectAccount,
+        } = getContext();
 
         const id = await create(apiClient, workflowYaml(accountId));
         const { cookieHeader } = await samlAuth.asInteractiveUser({
           elasticsearch: { cluster: [], indices: [] },
           kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
         });
-        const executorHeaders = { ...headers, ...cookieHeader };
+        const executorHeaders = { ...sessionHeaders, ...cookieHeader };
         const executor = await apiClient.get('internal/security/me', {
           headers: executorHeaders,
           responseType: 'json',

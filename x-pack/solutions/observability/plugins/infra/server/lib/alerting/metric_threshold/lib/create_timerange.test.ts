@@ -162,5 +162,45 @@ describe('createTimerange(interval, aggType, timeframe)', () => {
       );
       expect(subject.end - subject.start).toEqual(60000);
     });
+    it('should extend the range to the lastPeriodEnd when the schedule is more than 3x the execution window', () => {
+      const subject = createTimerange(
+        60000,
+        Aggregators.COUNT,
+        timeframe,
+        end.clone().subtract(5, 'minutes').valueOf(),
+        5 * 60000
+      );
+      expect(subject.end - subject.start).toEqual(6 * 60000);
+    });
+    it('should not extend the range when the lastPeriodEnd is more than 3x the schedule interval', () => {
+      const subject = createTimerange(
+        60000,
+        Aggregators.COUNT,
+        timeframe,
+        end.clone().subtract(20, 'minutes').valueOf(),
+        5 * 60000
+      );
+      expect(subject.end - subject.start).toEqual(60000);
+    });
+    it('should extend the range to the lastPeriodEnd for rate aggregations when the schedule is more than 3x the execution window', () => {
+      const subject = createTimerange(
+        60000,
+        Aggregators.RATE,
+        timeframe,
+        end.clone().subtract(10, 'minutes').valueOf(),
+        10 * 60000
+      );
+      expect(subject.end - subject.start).toEqual(12 * 60000);
+    });
+    it('should extend the range to the lastPeriodEnd when the execution window is larger than the schedule', () => {
+      const subject = createTimerange(
+        5 * 60000,
+        Aggregators.COUNT,
+        timeframe,
+        end.clone().subtract(1, 'minute').valueOf(),
+        60000
+      );
+      expect(subject.end - subject.start).toEqual(6 * 60000);
+    });
   });
 });

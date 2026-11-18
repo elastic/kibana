@@ -31,6 +31,8 @@ dependsOn:
   - '@kbn/connector-emulate'
   - '@kbn/dev-cli-runner'
   - '@kbn/dev-cli-errors'
+  - '@kbn/tooling-log'
+  - '@kbn/code-owners'
 tags:
   - shared-common
   - package
