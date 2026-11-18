@@ -16,10 +16,9 @@ describe('attachmentToolsInstructions', () => {
     const text = attachmentToolsInstructions();
 
     expect(text).toContain('MUST use the attachment tools');
-    expect(text).toContain('attachments.read');
-    expect(text).toContain('{"attachment_id": "<id copied from the attachment metadata>"}');
-    expect(text).toContain('attachments.list');
-    expect(text).toContain('attachments.diff');
+    expect(text).toContain('attachment_read');
+    expect(text).toContain('attachment_list');
+    expect(text).toContain('attachment_diff');
     // No conversation-specific data.
     expect(text).not.toMatch(/attachment_id="/);
     expect(text).not.toMatch(/\d+ attachment\(s\)/);
