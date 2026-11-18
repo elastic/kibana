@@ -10,7 +10,7 @@ import type {
   SurfacePayload,
   VersionedAttachment,
 } from '@kbn/agent-builder-common';
-import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
+import type { PromptRequest, PromptResponse } from '@kbn/agent-builder-common/agents/prompts';
 import type { AttachmentFormatContext } from '@kbn/agent-builder-server/attachments';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { IBasePath } from '@kbn/core/server';
@@ -19,7 +19,7 @@ import type { Logger } from '@kbn/logging';
 import type { AttachmentServiceStart } from '../attachments';
 import { getPublicKibanaUrl } from '../../utils/get_kibana_url';
 import { buildComposition } from './composition';
-import { promptsToNodes } from './prompts';
+import { promptsToNodes, resolvedPromptsToNodes } from './prompts';
 import { slackSurface } from './slack';
 import type { SurfaceRenderer } from './types';
 
@@ -29,6 +29,8 @@ export interface SurfaceResponse {
   attachments: VersionedAttachment[];
   /** Prompts the round is waiting on, asked after the message. */
   prompts?: PromptRequest[];
+  /** The answers to `prompts`, by prompt id. When given, the prompts are shown as answered. */
+  promptResponses?: Record<string, PromptResponse>;
 }
 
 export interface SurfacesService {
@@ -68,7 +70,7 @@ export class SurfacesServiceImpl implements SurfacesService {
   }
 
   async renderPayload(
-    { message, attachments, prompts = [] }: SurfaceResponse,
+    { message, attachments, prompts = [], promptResponses }: SurfaceResponse,
     {
       originType,
       agentId,
@@ -95,7 +97,10 @@ export class SurfacesServiceImpl implements SurfacesService {
         runtime,
       });
 
-      const body = [...composition.body, ...promptsToNodes(prompts, runtime)];
+      const promptNodes = promptResponses
+        ? resolvedPromptsToNodes(prompts, promptResponses)
+        : promptsToNodes(prompts, runtime);
+      const body = [...composition.body, ...promptNodes];
 
       return body.length > 0
         ? renderer.render({ ...composition, body }, runtime, { baseUrl: kibanaUrl })

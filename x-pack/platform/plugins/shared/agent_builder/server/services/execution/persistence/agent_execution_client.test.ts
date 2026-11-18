@@ -22,9 +22,10 @@ import { createAgentExecutionClient } from './agent_execution_client';
 import { agentExecutionIndexName } from './agent_execution_storage';
 
 describe('AgentExecutionClient', () => {
+  const searchClient = elasticsearchServiceMock.createElasticsearchClient();
   const client = createAgentExecutionClient({
     logger: loggerMock.create(),
-    esClient: elasticsearchServiceMock.createElasticsearchClient(),
+    esClient: searchClient,
   });
 
   const createParams = {
@@ -83,6 +84,26 @@ describe('AgentExecutionClient', () => {
       expect(execution.owner).toBeUndefined();
     });
 
+    it('stores the conversation the execution runs in, which its executions are found by', async () => {
+      await client.create({
+        ...createParams,
+        agentParams: { ...createParams.agentParams, conversationId: 'conversation-1' },
+      });
+
+      expect(mockStorageClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({ conversation_id: 'conversation-1' }),
+        })
+      );
+    });
+
+    it('omits the conversation when the execution has none', async () => {
+      await client.create(createParams);
+
+      const [{ document }] = mockStorageClient.index.mock.calls[0];
+      expect(document).not.toHaveProperty('conversation_id');
+    });
+
     it('propagates document conflicts to the caller', async () => {
       const conflict = Object.assign(new Error('version conflict'), {
         meta: { statusCode: 409 },
@@ -90,6 +111,27 @@ describe('AgentExecutionClient', () => {
       mockStorageClient.index.mockRejectedValueOnce(conflict);
 
       await expect(client.create(createParams)).rejects.toBe(conflict);
+    });
+  });
+
+  describe('find', () => {
+    it('filters by conversation, within the space', async () => {
+      searchClient.search.mockResolvedValueOnce({ hits: { hits: [] } } as never);
+
+      await client.find({ spaceId: 'default', filter: { conversationId: 'conversation-1' } });
+
+      expect(searchClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              must: [
+                { term: { space_id: 'default' } },
+                { term: { conversation_id: 'conversation-1' } },
+              ],
+            },
+          },
+        })
+      );
     });
   });
 
