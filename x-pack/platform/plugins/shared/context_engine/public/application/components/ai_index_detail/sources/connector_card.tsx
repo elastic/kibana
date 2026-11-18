@@ -23,7 +23,6 @@ interface ConnectorCardLabelProps {
   typeLabel: string;
 }
 
-/** Same title/description typography and icon-to-text spacing as `AddSourceCard`. */
 const ConnectorCardLabel = ({ icon, name, typeLabel }: ConnectorCardLabelProps) => (
   <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
     <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
@@ -47,7 +46,6 @@ interface SelectableConnectorCardProps extends ConnectorCardLabelProps {
   'data-test-subj'?: string;
 }
 
-/** Whole card toggles the checkbox; EUI provides the hover, checked and disabled styles. */
 export const SelectableConnectorCard = ({
   id,
   icon,

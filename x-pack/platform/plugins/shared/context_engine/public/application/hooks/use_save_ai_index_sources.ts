@@ -19,12 +19,10 @@ const buildProperties = (
   sources: toAiIndexSources(selectedSources),
 });
 
-interface UseSaveAiIndexSourcesResult {
+export const useSaveAiIndexSources = (): {
   saveSources: (aiIndex: GetAiIndexResponse, sources: SelectedSource[]) => Promise<boolean>;
   isSaving: boolean;
-}
-
-export const useSaveAiIndexSources = (): UseSaveAiIndexSourcesResult => {
+} => {
   const { save, isSaving } = useSaveAiIndexField<SelectedSource[]>({
     errorTitle: i18n.translate('xpack.contextEngine.saveAiIndexSources.errorTitle', {
       defaultMessage: 'Unable to update sources',
