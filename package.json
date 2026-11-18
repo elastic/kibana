@@ -2152,7 +2152,7 @@
     "@types/nodemailer": "8.0.2",
     "@types/normalize-path": "3.0.2",
     "@types/object-hash": "3.0.6",
-    "@types/papaparse": "5.3.16",
+    "@types/papaparse": "5.5.2",
     "@types/pbf": "3.0.2",
     "@types/pdfmake": "0.2.12",
     "@types/picomatch": "4.0.3",
