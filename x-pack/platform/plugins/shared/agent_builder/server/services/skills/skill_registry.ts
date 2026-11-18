@@ -101,12 +101,16 @@ export const createSkillRegistry = ({
   };
 
   // `get` throws when the tool is not registered (Workflows disabled) or unavailable to the
-  // caller (no execute privilege).
-  const canExecuteWorkflows = (): Promise<boolean> =>
-    toolRegistry.get(platformCoreTools.executeWorkflow).then(
+  // caller (no execute privilege). The registry serves one request, so the lookup is shared by
+  // every skill that needs it.
+  let workflowsCheck: Promise<boolean> | undefined;
+  const canExecuteWorkflows = (): Promise<boolean> => {
+    workflowsCheck ??= toolRegistry.get(platformCoreTools.executeWorkflow).then(
       () => true,
       () => false
     );
+    return workflowsCheck;
+  };
 
   const isAvailable = async (skill: InternalSkillDefinition): Promise<boolean> => {
     if (!isVisible(skill)) {

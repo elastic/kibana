@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, ToolHandlerContext } from '@kbn/agent-builder-server';
+import type { Logger } from '@kbn/logging';
 import { i18n } from '@kbn/i18n';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
@@ -200,9 +201,11 @@ const confirmRun = ({
 export const executeWorkflowTool = ({
   workflowsManagement,
   getSecurity,
+  logger,
 }: {
   workflowsManagement: WorkflowsServerPluginSetup;
   getSecurity: () => SecurityPluginStart | undefined;
+  logger: Logger;
 }): BuiltinToolDefinition<typeof executeWorkflowSchema> => {
   const { management: workflowApi } = workflowsManagement;
 
@@ -245,14 +248,32 @@ If set to false, or if the workflow does not complete within the timeout, the to
 - Workflows API: https://www.elastic.co/docs/api/doc/kibana/group/endpoint-workflows
 `),
     schema: executeWorkflowSchema,
-    // Hides the tool from callers who could not run a workflow anyway. The privilege is per user,
-    // so the result cannot be cached.
+    // Hides the tool when Workflows is unavailable or the caller could not run a workflow anyway.
+    // The privilege is per user, so the result cannot be cached.
     availability: {
       cacheMode: 'none',
-      handler: async ({ request, spaceId }) =>
-        (await hasWorkflowExecutePrivilege({ security: getSecurity(), request, spaceId }))
-          ? { status: 'available' }
-          : { status: 'unavailable', reason: 'The workflows execute privilege is missing.' },
+      handler: async ({ request, spaceId }) => {
+        if (!workflowApi.isWorkflowsAvailable) {
+          return { status: 'unavailable', reason: 'Workflows is not available.' };
+        }
+        try {
+          const canExecute = await hasWorkflowExecutePrivilege({
+            security: getSecurity(),
+            request,
+            spaceId,
+          });
+          return canExecute
+            ? { status: 'available' }
+            : { status: 'unavailable', reason: 'The workflows execute privilege is missing.' };
+        } catch (error) {
+          // A failed lookup must hide only this tool, not break discovery of every tool. The
+          // handler still checks the privilege when the tool runs.
+          logger.warn(
+            `Could not check the workflows execute privilege: ${(error as Error).message}`
+          );
+          return { status: 'unavailable', reason: 'The workflows execute privilege check failed.' };
+        }
+      },
     },
     annotations: {
       title: 'Execute Workflow',

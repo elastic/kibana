@@ -32,6 +32,5 @@ response to what is useful, so prefer them over calling the connector directly f
 For anything else (reading an issue's body or comments, commits, files, or creating and updating issues and
 pull requests), use the connector's own guide and actions.
 `.trim(),
-  usesWorkflows: true,
   resources: buildGithubResources({ bt, fence }),
 }));

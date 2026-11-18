@@ -33,6 +33,5 @@ response to what is useful, so prefer them over calling the connector directly f
 For anything else (who is on call right now, teams, creating or updating incidents), use the connector's own
 guide and actions.
 `.trim(),
-  usesWorkflows: true,
   resources: buildPagerdutyResources({ bt, fence }),
 }));

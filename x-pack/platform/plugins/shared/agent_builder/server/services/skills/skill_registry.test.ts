@@ -91,9 +91,13 @@ const createMockPersistedProvider = (
   };
 };
 
-const createMockToolRegistry = (toolIds: string[] = []): ToolRegistry =>
+const createMockToolRegistry = (
+  toolIds: string[] = [],
+  unavailableToolIds: string[] = []
+): ToolRegistry =>
   ({
-    has: jest.fn(async (id: string) => toolIds.includes(id)),
+    // Like the real registry, `has` ignores availability and `get` throws for an unavailable tool.
+    has: jest.fn(async (id: string) => toolIds.includes(id) || unavailableToolIds.includes(id)),
     get: jest.fn(async (id: string) => {
       if (!toolIds.includes(id)) throw new Error(`Tool ${id} is not available`);
       return { id };
@@ -908,11 +912,11 @@ describe('createSkillRegistry', () => {
       name: 'plain-skill',
     });
 
-    const createRegistry = (toolIds: string[]) =>
+    const createRegistry = (toolIds: string[], unavailableToolIds: string[] = []) =>
       createSkillRegistry({
         builtinProvider: createMockBuiltinProvider([workflowSkill, plainSkill]),
         persistedProvider: createMockPersistedProvider([]),
-        toolRegistry: createMockToolRegistry(toolIds),
+        toolRegistry: createMockToolRegistry(toolIds, unavailableToolIds),
         experimentalFeaturesEnabled: false,
       });
 
@@ -924,13 +928,39 @@ describe('createSkillRegistry', () => {
       expect([...(await registry.bulkGet(['workflow-skill'])).keys()]).toEqual(['workflow-skill']);
     });
 
-    it('drops the skill when execute_workflow is not usable (disabled or no privilege)', async () => {
+    it('drops the skill when execute_workflow is not registered (Workflows disabled)', async () => {
       const registry = createRegistry([]);
 
       expect(await registry.has('workflow-skill')).toBe(false);
       expect(await registry.get('workflow-skill')).toBeUndefined();
       expect((await registry.bulkGet(['workflow-skill'])).size).toBe(0);
       expect((await registry.list()).map(({ id }) => id)).toEqual(['plain-skill']);
+    });
+
+    it('drops the skill when execute_workflow is registered but unavailable (no privilege)', async () => {
+      const registry = createRegistry([], [platformCoreTools.executeWorkflow]);
+
+      expect(await registry.has('workflow-skill')).toBe(false);
+      expect(await registry.get('workflow-skill')).toBeUndefined();
+      expect((await registry.list()).map(({ id }) => id)).toEqual(['plain-skill']);
+    });
+
+    it('checks the executor once for all flagged skills in a request', async () => {
+      const toolRegistry = createMockToolRegistry([platformCoreTools.executeWorkflow]);
+      const secondWorkflowSkill = createMockInternalSkillDefinition({
+        id: 'workflow-skill-2',
+        name: 'workflow-skill-2',
+        requiresWorkflows: true,
+      });
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([workflowSkill, secondWorkflowSkill]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry,
+        experimentalFeaturesEnabled: false,
+      });
+
+      expect((await registry.bulkGet(['workflow-skill', 'workflow-skill-2'])).size).toBe(2);
+      expect(toolRegistry.get).toHaveBeenCalledTimes(1);
     });
 
     it('does not affect skills without the flag', async () => {

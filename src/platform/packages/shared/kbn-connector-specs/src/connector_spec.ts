@@ -452,11 +452,6 @@ export interface ConnectorSkillSpec {
   content: string;
   /** Supplemental reference files co-located with the skill. */
   resources?: ConnectorSkillResource[];
-  /**
-   * Set when the skill tells the model to run workflows. The skill is then only offered to callers
-   * who can run workflows. Defaults to false.
-   */
-  usesWorkflows?: boolean;
 }
 
 export interface ConnectorSkillResource {

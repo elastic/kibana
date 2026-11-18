@@ -13,6 +13,7 @@ import { platformCoreTools } from '@kbn/agent-builder-common';
 import {
   getAllConnectorSkills,
   getConnectorSkillRegistryId,
+  type ConnectorSkillSpec,
   type ConnectorTypeSkill,
 } from '@kbn/connector-specs';
 import { createListConnectorsTool } from '../connector_discovery/list_connectors_tool';
@@ -20,6 +21,12 @@ import { createListConnectorsTool } from '../connector_discovery/list_connectors
 interface ConnectorSkillsDeps {
   getActionsStart: () => Promise<ActionsPluginStart>;
 }
+
+/** A skill uses workflows when its text tells the model to call the workflow executor. */
+const usesWorkflows = ({ content, resources = [] }: ConnectorSkillSpec): boolean =>
+  [content, ...resources.map((resource) => resource.content)].some((text) =>
+    text.includes(platformCoreTools.executeWorkflow)
+  );
 
 /** Builds the built-in skill definition for a skill defined by a connector spec. */
 export const createConnectorSkillDefinition = (
@@ -39,10 +46,10 @@ export const createConnectorSkillDefinition = (
   // Granted per agent at run time from the agent's connectors, so they stay out of the skills
   // library and out of the default capabilities.
   // A skill that tells the model to run workflows is left out when the caller cannot.
-  requiresWorkflows: skill.usesWorkflows ?? false,
+  requiresWorkflows: usesWorkflows(skill),
   hidden: true,
   excludeFromElasticCapabilities: true,
-  getRegistryTools: () => (skill.usesWorkflows ? [platformCoreTools.executeWorkflow] : []),
+  getRegistryTools: () => (usesWorkflows(skill) ? [platformCoreTools.executeWorkflow] : []),
   // Lets the agent find the connector id to run the workflows with, without loading the connector
   // discovery skill first.
   getInlineTools: () => [createListConnectorsTool({ getActionsStart })],

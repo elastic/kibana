@@ -68,16 +68,33 @@ describe('registerConnectorSkills', () => {
     }
   });
 
-  it('only requires workflows, and grants the executor, for skills that use them', async () => {
+  describe('workflow detection', () => {
     const deps = { getActionsStart: jest.fn() as unknown as () => Promise<ActionsPluginStart> };
-    const base = { id: 'plain', name: 'connector-plain', description: 'd', content: 'c' };
+    const base = { id: 'test', name: 'connector-test', description: 'd' };
+    const resource = (content: string) => ({ name: 'r', relativePath: './resources', content });
+    const run = `Run it with ${platformCoreTools.executeWorkflow}.`;
 
-    const plain = createConnectorSkillDefinition(base, deps);
-    expect(plain.requiresWorkflows).toBe(false);
-    expect(await plain.getRegistryTools?.()).toEqual([]);
+    it.each([
+      ['the skill content names the executor', { content: run }, true],
+      ['a resource names the executor', { content: 'c', resources: [resource(run)] }, true],
+      [
+        'one of several resources names the executor',
+        { content: 'c', resources: [resource('lookup'), resource(run)] },
+        true,
+      ],
+      [
+        'the text only mentions workflows in prose',
+        { content: 'This skill does not use workflows.', resources: [resource('a workflow')] },
+        false,
+      ],
+      ['the skill has no resources and does not name the executor', { content: 'c' }, false],
+    ])('when %s', async (_case, spec, expected) => {
+      const skill = createConnectorSkillDefinition({ ...base, ...spec }, deps);
 
-    const withWorkflows = createConnectorSkillDefinition({ ...base, usesWorkflows: true }, deps);
-    expect(withWorkflows.requiresWorkflows).toBe(true);
-    expect(await withWorkflows.getRegistryTools?.()).toEqual([platformCoreTools.executeWorkflow]);
+      expect(skill.requiresWorkflows).toBe(expected);
+      expect(await skill.getRegistryTools?.()).toEqual(
+        expected ? [platformCoreTools.executeWorkflow] : []
+      );
+    });
   });
 });
