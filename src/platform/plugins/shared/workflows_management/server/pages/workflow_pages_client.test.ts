@@ -147,6 +147,22 @@ describe('WorkflowPagesClient', () => {
       await expect(client.getSecret(key)).resolves.toBe(rotated);
     });
 
+    it('cannot decrypt a secret written without the AAD attributes', async () => {
+      const { client, scopedClient } = await setup();
+
+      await scopedClient.update(
+        WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
+        getWorkflowPageSavedObjectId(ref),
+        {
+          secret: 'partial',
+        }
+      );
+
+      await expect(client.getSecret(key)).rejects.toThrow('Unable to decrypt');
+      await client.rotateSecret(key);
+      await expect(client.getSecret(key)).resolves.toEqual(expect.any(String));
+    });
+
     it('serves the same link after an invalid save, a fix, and a new publish', async () => {
       const { client, systemClient } = await setup();
       await client.setAccess(key, { level: 'secret_link' });

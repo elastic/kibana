@@ -71,7 +71,7 @@ export interface WorkflowPageAttributes {
 
 const ATTRIBUTES_TO_ENCRYPT = ['secret'] as const;
 // Only attributes that never change. Others stay out, so they change without a re-encryption.
-const ATTRIBUTES_INCLUDED_IN_AAD = ['workflowId', 'pageId'] as const;
+export const ATTRIBUTES_INCLUDED_IN_AAD = ['workflowId', 'pageId'] as const;
 
 /** The only attributes a partial update may change: neither encrypted nor in AAD. */
 export type PartiallyUpdatableWorkflowPageAttributes = Partial<

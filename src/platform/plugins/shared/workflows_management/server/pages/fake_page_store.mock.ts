@@ -12,7 +12,11 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowPageAttributes } from './page_saved_object';
-import { getWorkflowPageSavedObjectId, WORKFLOW_PAGE_SAVED_OBJECT_TYPE } from './page_saved_object';
+import {
+  ATTRIBUTES_INCLUDED_IN_AAD,
+  getWorkflowPageSavedObjectId,
+  WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
+} from './page_saved_object';
 import type { WorkflowPageRef } from './page_secret';
 import type { WorkflowPageAuditLog } from './types';
 
@@ -20,10 +24,12 @@ type StoredPage = SavedObject<WorkflowPageAttributes> & { namespace?: string };
 
 /**
  * An in-memory store with the saved objects behavior the service relies on:
- * namespaces, `overwrite: false` conflicts, `version` checks, and `updated_by`.
+ * namespaces, `overwrite: false` conflicts, `version` checks, `updated_by`, and the ESO AAD rule.
  */
 export const createFakeStore = () => {
   const docs = new Map<string, StoredPage>();
+  // ESO builds the AAD from the attributes of the write, so a secret written without them never decrypts.
+  const undecryptable = new Set<string>();
   let versionCounter = 0;
   const nextVersion = () => `v${++versionCounter}`;
   const key = (id: string, namespace?: string) => `${namespace ?? 'default'}:${id}`;
@@ -86,6 +92,7 @@ export const createFakeStore = () => {
             updated_by: user,
           };
           docs.set(k, doc);
+          undecryptable.delete(k);
           return strip(doc);
         }
       ),
@@ -102,6 +109,13 @@ export const createFakeStore = () => {
           if (!doc) throw notFound(id);
           if (options?.version && options.version !== doc.version) {
             throw SavedObjectsErrorHelpers.createConflictError(WORKFLOW_PAGE_SAVED_OBJECT_TYPE, id);
+          }
+          if ('secret' in attributes) {
+            if (ATTRIBUTES_INCLUDED_IN_AAD.every((name) => name in attributes)) {
+              undecryptable.delete(k);
+            } else {
+              undecryptable.add(k);
+            }
           }
           const version = nextVersion();
           docs.set(k, {
@@ -157,8 +171,10 @@ export const createFakeStore = () => {
   const encryptedClient = {
     getDecryptedAsInternalUser: jest.fn(
       async (_type: string, id: string, options?: { namespace?: string }) => {
-        const doc = docs.get(key(id, options?.namespace));
+        const k = key(id, options?.namespace);
+        const doc = docs.get(k);
         if (!doc) throw notFound(id);
+        if (undecryptable.has(k)) throw new Error('Unable to decrypt attribute "secret"');
         return { ...doc };
       }
     ),
