@@ -38,6 +38,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     };
 
+    const expectTourToBeAbsent = async () => {
+      await testSubjects.existOrFail('spacesNavSelector');
+      await retry.waitFor('solution tour state to resolve as closed', async () => {
+        return (
+          (await testSubjects.getAttribute('spacesNavSelector', 'data-tour-state')) === 'closed'
+        );
+      });
+      await testSubjects.missingOrFail('spaceSolutionTour', { timeout: 3000 });
+    };
+
     const removeGlobalSettings = async () => {
       version = version ?? (await kibanaServer.version.get());
       version = version.replace(/-SNAPSHOT$/, '');
@@ -86,6 +96,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       before(async () => {
         _defaultSpace = await spacesService.get('default');
+        await updateSolutionDefaultSpace('classic');
         await removeGlobalSettings(); // Make sure we start from a clean state
 
         await PageObjects.common.navigateToUrl('management', 'kibana/spaces', {
@@ -100,7 +111,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('does not show the solution tour for the classic space', async () => {
-        await testSubjects.missingOrFail('spaceSolutionTour', { timeout: 3000 });
+        await expectTourToBeAbsent();
       });
 
       it('does show the solution tour if the default space has a solution set', async () => {
@@ -114,7 +125,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await waitForTourToBeDismissed();
 
         await browser.refresh();
-        await testSubjects.missingOrFail('spaceSolutionTour', { timeout: 3000 }); // The tour does not appear after refresh
+        await expectTourToBeAbsent(); // The tour does not appear after refresh
       });
 
       it('does not show the solution tour after updating the default space from classic to solution', async () => {
@@ -122,33 +133,40 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await browser.refresh();
 
         // The tour does not appear after refresh, even with the default space with a solution set
-        await testSubjects.missingOrFail('spaceSolutionTour', { timeout: 3000 });
+        await expectTourToBeAbsent();
       });
 
       it('does not show the solution tour after deleting spaces and leave only the default', async () => {
         await updateSolutionDefaultSpace('es'); // set a solution
 
-        await spacesService.create({
-          id: 'foo-space',
-          name: 'Foo Space',
-          disabledFeatures: [],
-          color: '#AABBCC',
-        });
+        try {
+          await spacesService.create({
+            id: 'foo-space',
+            name: 'Foo Space',
+            disabledFeatures: [],
+            color: '#AABBCC',
+          });
 
-        const allSpaces = await spacesService.getAll();
-        expect(allSpaces).to.have.length(2); // Make sure we have 2 spaces
+          const allSpaces = await spacesService.getAll();
+          expect(allSpaces).to.have.length(2); // Make sure we have 2 spaces
 
-        await removeGlobalSettings(); // Make sure we start from a clean state
-        await browser.refresh();
+          await removeGlobalSettings(); // Make sure we start from a clean state
+          await browser.refresh();
 
-        await testSubjects.missingOrFail('spaceSolutionTour', { timeout: 3000 });
-        await waitForTourToBeDismissed();
+          await expectTourToBeAbsent();
+          await waitForTourToBeDismissed();
 
-        await spacesService.delete('foo-space');
-        await browser.refresh();
+          await spacesService.delete('foo-space');
+          await browser.refresh();
 
-        // The tour still does not appear after refresh, even with 1 space with a solution set
-        await testSubjects.missingOrFail('spaceSolutionTour', { timeout: 3000 });
+          // The tour still does not appear after refresh, even with 1 space with a solution set
+          await expectTourToBeAbsent();
+        } finally {
+          const remainingSpaces = await spacesService.getAll();
+          if (remainingSpaces.some(({ id }) => id === 'foo-space')) {
+            await spacesService.delete('foo-space');
+          }
+        }
       });
     });
   });
