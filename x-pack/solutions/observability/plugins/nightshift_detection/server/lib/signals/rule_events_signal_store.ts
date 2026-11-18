@@ -18,6 +18,7 @@ import {
   type DetectionSignal,
 } from '../../../common/detection_signal';
 import { DetectionEngineSystemClient } from '../engine/es_client_tokens';
+import { getSeriesKey, type SeriesId } from '../strategies/series_key';
 import type { DetectionSignalReading } from '../strategies/types';
 import type { DetectionSignalStore, WriteSignalsResult } from './signal_store';
 import { getSeriesFingerprint } from './wrap_reading';
@@ -115,12 +116,12 @@ export class RuleEventsSignalStore implements DetectionSignalStore {
     return { written: signals.length - failures.length, failures };
   }
 
-  /** Reads one strategy's readings back, grouped by fingerprint, oldest first. */
+  /** Reads one strategy's readings back, keyed by series, oldest first. */
   public async readHistory({
     spaceId,
     strategy,
     strategyVersion,
-    fingerprints,
+    series,
     from,
     to,
     abortSignal,
@@ -128,15 +129,18 @@ export class RuleEventsSignalStore implements DetectionSignalStore {
     spaceId: string;
     strategy: string;
     strategyVersion: number;
-    fingerprints: string[];
+    series: SeriesId[];
     from: number;
     to: number;
     abortSignal?: AbortSignal;
   }): Promise<Map<string, DetectionSignalReading[]>> {
     const history = new Map<string, DetectionSignalReading[]>();
-    if (fingerprints.length === 0) {
+    if (series.length === 0) {
       return history;
     }
+
+    const requestedSeries = new Set(series.map(getSeriesKey));
+    const fingerprints = [...new Set(series.map(({ fingerprint }) => fingerprint))];
 
     // `data` is `flattened`, so the bucket start is read from `_source` by a runtime field, the
     // approach of the metric series reader in `significant_events`.
@@ -156,6 +160,7 @@ export class RuleEventsSignalStore implements DetectionSignalStore {
               { range: { scheduled_timestamp: { gte: from, format: 'epoch_millis' } } },
               { term: { 'data.strategy': strategy } },
               { term: { 'data.strategy_version': strategyVersion } },
+              // A fingerprint can match the series of another source; those are dropped below.
               { terms: { 'data.fingerprint': fingerprints } },
               { range: { [BUCKET_START_FIELD]: { gte: from, lt: to, format: 'epoch_millis' } } },
             ],
@@ -207,16 +212,21 @@ export class RuleEventsSignalStore implements DetectionSignalStore {
         ...reading
       } = parsed.data.data;
 
+      const seriesKey = getSeriesKey(reading);
+      if (!requestedSeries.has(seriesKey)) {
+        continue;
+      }
+
       const key = `${parsed.data.group_hash}:${reading.bucket_start}`;
       if (seen.has(key)) {
         continue;
       }
       seen.add(key);
 
-      const readings = history.get(reading.fingerprint) ?? [];
+      const readings = history.get(seriesKey) ?? [];
       const { status, severity } = parsed.data;
       readings.push({ status, ...(severity !== undefined ? { severity } : {}), ...reading });
-      history.set(reading.fingerprint, readings);
+      history.set(seriesKey, readings);
     }
 
     if (skipped.length > 0) {

@@ -14,6 +14,7 @@ import type {
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { z } from '@kbn/zod/v4';
 import type { detectionSignalReadingSchema } from '../../../common/detection_signal';
+import type { SeriesId } from './series_key';
 
 /** What a strategy declares about itself; the engine reads it to schedule the strategy. */
 export interface DetectionStrategyDescriptor {
@@ -53,11 +54,11 @@ export type DetectionSignalReading = z.infer<typeof detectionSignalReadingSchema
 export interface SignalHistoryReader {
   /**
    * Readings of the calling strategy only, for the given series, whose bucket starts in
-   * `[from, to)` (epoch milliseconds), grouped by fingerprint. A fingerprint without readings is
-   * absent from the result.
+   * `[from, to)` (epoch milliseconds), keyed by `getSeriesKey`. A series without readings
+   * is absent from the result.
    */
   readHistory(params: {
-    fingerprints: string[];
+    series: SeriesId[];
     from: number;
     to: number;
     /** Stops the search when the run is out of time or cancelled. */

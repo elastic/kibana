@@ -7,6 +7,7 @@
 
 import { createToken } from '@kbn/core-di';
 import type { DetectionSignal } from '../../../common/detection_signal';
+import type { SeriesId } from '../strategies/series_key';
 import type { DetectionSignalReading } from '../strategies/types';
 
 /** The result of writing a batch of signals. */
@@ -27,7 +28,7 @@ export interface DetectionSignalStore {
 
   /**
    * The readings of one strategy at one version in one space for the given series, whose bucket
-   * starts in `[from, to)` (epoch milliseconds), grouped by fingerprint, oldest first. Readings of
+   * starts in `[from, to)` (epoch milliseconds), keyed by `getSeriesKey`, oldest first. Readings of
    * another version are left out: a version is bumped when what a reading means changes, so they
    * are not a baseline. Filtered on the bucket start, never on `@timestamp`, because a reading is
    * written after its bucket ends. A reading stored twice is returned once.
@@ -37,7 +38,7 @@ export interface DetectionSignalStore {
     spaceId: string;
     strategy: string;
     strategyVersion: number;
-    fingerprints: string[];
+    series: SeriesId[];
     from: number;
     to: number;
     /** Stops the search when the run is out of time or cancelled. */

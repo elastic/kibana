@@ -14,6 +14,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import type { DetectionSignal } from '../../../../common/detection_signal';
+import { getSeriesKey } from '../../strategies/series_key';
 import type { DetectionSignalReading } from '../../strategies/types';
 import { RuleEventsSignalStore } from '../rule_events_signal_store';
 import { wrapReading } from '../wrap_reading';
@@ -90,7 +91,7 @@ describe('RuleEventsSignalStore reading from .rule-events', () => {
       spaceId: 'default',
       strategy: 'error_rate',
       strategyVersion,
-      fingerprints: ['history-a', 'history-b', 'history-missing'],
+      series: ['history-a', 'history-b', 'history-missing'].map((fingerprint) => ({ fingerprint })),
       from: WINDOW_START,
       to: WINDOW_START + 2 * MINUTE_MS,
     });
@@ -136,12 +137,14 @@ describe('RuleEventsSignalStore reading from .rule-events', () => {
 
     const history = await read();
 
-    expect([...history.keys()].sort()).toEqual(['history-a', 'history-b']);
-    expect(history.get('history-a')?.map(({ value }) => value)).toEqual([1.5, 2.5]);
-    expect(history.get('history-b')?.map(({ value }) => value)).toEqual([7]);
-    expect(
-      (await read({ strategyVersion: 2 })).get('history-a')?.map(({ value }) => value)
-    ).toEqual([300]);
+    const seriesA = getSeriesKey({ fingerprint: 'history-a' });
+    const seriesB = getSeriesKey({ fingerprint: 'history-b' });
+    expect([...history.keys()].sort()).toEqual([seriesA, seriesB].sort());
+    expect(history.get(seriesA)?.map(({ value }) => value)).toEqual([1.5, 2.5]);
+    expect(history.get(seriesB)?.map(({ value }) => value)).toEqual([7]);
+    expect((await read({ strategyVersion: 2 })).get(seriesA)?.map(({ value }) => value)).toEqual([
+      300,
+    ]);
   });
 
   it('returns a signal written twice once', async () => {
@@ -152,11 +155,11 @@ describe('RuleEventsSignalStore reading from .rule-events', () => {
       spaceId: 'default',
       strategy: 'error_rate',
       strategyVersion: 1,
-      fingerprints: ['twice'],
+      series: [{ fingerprint: 'twice' }],
       from: WINDOW_START,
       to: WINDOW_START + MINUTE_MS,
     });
 
-    expect(history.get('twice')).toHaveLength(1);
+    expect(history.get(getSeriesKey({ fingerprint: 'twice' }))).toHaveLength(1);
   });
 });

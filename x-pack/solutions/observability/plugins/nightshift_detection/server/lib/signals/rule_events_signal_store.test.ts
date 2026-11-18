@@ -14,6 +14,7 @@ import {
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { RuleEventsSignalStore } from './rule_events_signal_store';
 import { getSeriesFingerprint, wrapReading } from './wrap_reading';
+import { getSeriesKey } from '../strategies/series_key';
 import type { DetectionSignalReading } from '../strategies/types';
 import type { DetectionSignal } from '../../../common/detection_signal';
 
@@ -46,6 +47,18 @@ function createSignal(reading: DetectionSignalReading = READING): DetectionSigna
     throw new Error(result.note);
   }
   return result.signal;
+}
+
+function searchResponse(signals: DetectionSignal[]) {
+  return {
+    took: 1,
+    timed_out: false,
+    _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+    hits: {
+      total: { value: signals.length, relation: 'eq' as const },
+      hits: signals.map((signal) => ({ _index: '.rule-events', _source: signal })),
+    },
+  };
 }
 
 function createStore({ requestSpaceId = 'default' }: { requestSpaceId?: string } = {}) {
@@ -151,29 +164,47 @@ describe('RuleEventsSignalStore', () => {
         value: 2,
       });
       // The search is newest first; the second window was also written a second time.
-      esClient.search.mockResolvedValue({
-        took: 1,
-        timed_out: false,
-        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-        hits: {
-          total: { value: 3, relation: 'eq' },
-          hits: [second, second, first].map((signal) => ({
-            _index: '.rule-events',
-            _source: signal,
-          })),
-        },
-      });
+      esClient.search.mockResolvedValue(searchResponse([second, second, first]));
 
       const history = await store.readHistory({
         spaceId: 'default',
         strategy: 'error_rate',
         strategyVersion: 1,
-        fingerprints: ['checkout'],
+        series: [{ fingerprint: 'checkout' }],
         from: 0,
         to: 180_000,
       });
 
-      expect(history.get('checkout')?.map(({ value }) => value)).toEqual([1, 2]);
+      expect(
+        history.get(getSeriesKey({ fingerprint: 'checkout' }))?.map(({ value }) => value)
+      ).toEqual([1, 2]);
+    });
+
+    it('keeps two sources that report the same fingerprint in separate series', async () => {
+      const { store, esClient } = createStore();
+      const fromA = createSignal({ ...READING, source_id: 'source-a', value: 1 });
+      const fromB = createSignal({ ...READING, source_id: 'source-b', value: 2 });
+      const fromC = createSignal({ ...READING, source_id: 'source-c', value: 3 });
+      esClient.search.mockResolvedValue(searchResponse([fromC, fromB, fromA]));
+
+      const history = await store.readHistory({
+        spaceId: 'default',
+        strategy: 'error_rate',
+        strategyVersion: 1,
+        series: [
+          { fingerprint: 'checkout', source_id: 'source-a' },
+          { fingerprint: 'checkout', source_id: 'source-b' },
+        ],
+        from: 0,
+        to: 180_000,
+      });
+
+      expect(
+        [...history.entries()].map(([key, readings]) => [key, readings.map(({ value }) => value)])
+      ).toEqual([
+        [getSeriesKey({ fingerprint: 'checkout', source_id: 'source-a' }), [1]],
+        [getSeriesKey({ fingerprint: 'checkout', source_id: 'source-b' }), [2]],
+      ]);
     });
 
     it('skips a stored document that does not parse instead of failing the read', async () => {
@@ -195,12 +226,12 @@ describe('RuleEventsSignalStore', () => {
         spaceId: 'default',
         strategy: 'error_rate',
         strategyVersion: 1,
-        fingerprints: ['checkout'],
+        series: [{ fingerprint: 'checkout' }],
         from: 0,
         to: 180_000,
       });
 
-      expect(history.get('checkout')).toHaveLength(1);
+      expect(history.get(getSeriesKey({ fingerprint: 'checkout' }))).toHaveLength(1);
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('1 stored signals'));
     });
   });
