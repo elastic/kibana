@@ -15,6 +15,8 @@ import { NIGHTSHIFT_DETECTION_TIERED_FEATURES } from '../../common/constants';
 import { module } from '..';
 import { AvailabilityService } from '../lib/availability/availability_service';
 import { DetectionEngineSystemClient } from '../lib/engine/es_client_tokens';
+import { SpaceRunLock } from '../lib/engine/space_run_lock';
+import { DetectionStateClient, detectionStateSavedObjectType } from '../lib/state';
 import { StrategyCatalog } from '../lib/strategies/strategy_catalog';
 import { DetectionAccountService } from '../lib/service_account/detection_account';
 import { DetectionSetupService } from '../lib/service_account/setup_service';
@@ -28,6 +30,8 @@ function createContainer() {
   // No cloud plugin is bound: the availability service must still resolve (classic deployment).
   const container = new Container({ defaultScope: 'Singleton' });
   container.bind(CoreSetup('pricing')).toConstantValue(coreSetup.pricing);
+  container.bind(CoreSetup('savedObjects')).toConstantValue(coreSetup.savedObjects);
+  container.bind(CoreStart('savedObjects')).toConstantValue(core.savedObjects);
   container.bind(CoreStart('elasticsearch')).toConstantValue(core.elasticsearch);
   container.bind(CoreStart('featureFlags')).toConstantValue(core.featureFlags);
   container.bind(CoreStart('pricing')).toConstantValue(core.pricing);
@@ -52,6 +56,8 @@ describe('module', () => {
 
     container.get(AvailabilityService);
     container.get(StrategyCatalog);
+    container.get(DetectionStateClient);
+    container.get(SpaceRunLock);
     container.get(DetectionAccountService);
     container.get(DetectionSetupService);
     container.getAll(OnStart);
@@ -60,6 +66,7 @@ describe('module', () => {
     expect(coreSetup.pricing.registerProductFeatures).toHaveBeenCalledWith(
       NIGHTSHIFT_DETECTION_TIERED_FEATURES
     );
+    expect(coreSetup.savedObjects.registerType).toHaveBeenCalledWith(detectionStateSavedObjectType);
     // Without the registration, every `bindWorkload` of the engine is refused at runtime.
     expect(coreSetup.security.serviceAccounts.registerWorkloadType).toHaveBeenCalledWith(
       expect.objectContaining({ type: DETECTION_ENGINE_WORKLOAD_TYPE })
