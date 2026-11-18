@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/core-security-server';
 import type {
-  AiIndexHttpItem,
+  AiIndexItem,
   DescribeAiIndexResponse,
   QueryAiIndicesRequest,
   QueryAiIndicesResponse,
@@ -30,7 +30,7 @@ export interface AiIndexDataReadServiceApi {
    * backing index still counts. Left out when the caller cannot read it, or when the check itself
    * failed. `ids` limits which entries are checked.
    */
-  list(ids?: string[]): Promise<AiIndexHttpItem[]>;
+  list(ids?: string[]): Promise<AiIndexItem[]>;
 }
 
 export class AiIndexDataReadService implements AiIndexDataReadServiceApi {
@@ -59,7 +59,7 @@ export class AiIndexDataReadService implements AiIndexDataReadServiceApi {
   }
 
   /** Throws unless the caller can read the backing index. */
-  private async assertReadable(aiIndex: AiIndexHttpItem): Promise<void> {
+  private async assertReadable(aiIndex: AiIndexItem): Promise<void> {
     const { esClient, logger } = this.deps;
     const [{ failure }] = await probeAiIndices({ esClient, aiIndices: [aiIndex], logger });
     if (failure === undefined) {
@@ -88,7 +88,7 @@ export class AiIndexDataReadService implements AiIndexDataReadServiceApi {
     }
   }
 
-  async list(ids?: string[]): Promise<AiIndexHttpItem[]> {
+  async list(ids?: string[]): Promise<AiIndexItem[]> {
     const { esClient, spaceId, auditLogger, aiIndexService, logger } = this.deps;
     try {
       const registry = await aiIndexService.list(spaceId);

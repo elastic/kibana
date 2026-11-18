@@ -40,6 +40,17 @@ const mockUseWorkflowsBreadcrumbs = jest.fn();
 const mockUseWorkflowUrlState = jest.fn();
 const mockUseGlobalExecutionsViewEnabled = jest.fn();
 const mockUseWorkflowsExperimentalUiSetting = jest.fn();
+const mockReportWorkflowCreateOpened = jest.fn();
+// One stable object, like the real hook's module-level singleton: the page lists `telemetry` as
+// an effect dependency, so a new object per render would re-run the load effect.
+const mockTelemetry = {
+  reportWorkflowCreateOpened: mockReportWorkflowCreateOpened,
+  reportWorkflowDetailViewed: jest.fn(),
+};
+
+jest.mock('../../../hooks/use_telemetry', () => ({
+  useTelemetry: () => mockTelemetry,
+}));
 
 let mockLoadConnectors = jest.fn();
 let mockLoadWorkflow = jest.fn();
@@ -351,16 +362,25 @@ describe('WorkflowDetailPage', () => {
       expect(screen.queryByTestId('newWorkflowPage')).not.toBeInTheDocument();
     });
 
-    it('skips the landing on /create when the visual editor is enabled', () => {
+    it.each([true, false])(
+      'shows the landing on a plain /create with the visual editor enabled=%s',
+      (enabled) => {
+        mockUseWorkflowsExperimentalUiSetting.mockReturnValue(enabled);
+
+        renderWithProviders({ id: undefined }, () => createMockStore(), ['/create']);
+
+        expect(screen.getByTestId('newWorkflowPage')).toBeInTheDocument();
+        expect(screen.queryByTestId('workflow-detail-editor')).not.toBeInTheDocument();
+      }
+    );
+
+    it('skips the landing with ?startBlank=true, with the visual editor on', () => {
       mockUseWorkflowsExperimentalUiSetting.mockReturnValue(true);
 
-      renderWithProviders({ id: undefined }, () => createMockStore(), ['/create']);
+      renderWithProviders({ id: undefined }, () => createMockStore(), ['/create?startBlank=true']);
 
       expect(screen.queryByTestId('newWorkflowPage')).not.toBeInTheDocument();
-      expect(screen.getByTestId('workflow-detail-editor')).toHaveAttribute(
-        'data-auto-open-agent-chat',
-        'false'
-      );
+      expect(screen.getByTestId('workflow-detail-editor')).toBeInTheDocument();
     });
 
     it('opens the editor without the agent chat on "Start manually"', () => {
@@ -381,6 +401,53 @@ describe('WorkflowDetailPage', () => {
       renderWithProviders({ id: undefined }, () => store, ['/create']);
 
       expect(getSeededYaml(store)).toContain('name: New workflow');
+    });
+
+    it('seeds the runnable hello-world sample when the visual editor is off', () => {
+      mockUseWorkflowsExperimentalUiSetting.mockReturnValue(false);
+      const store = createMockStore();
+
+      renderWithProviders({ id: undefined }, () => store, ['/create']);
+
+      expect(getSeededYaml(store)).toContain('hello_world_step');
+    });
+
+    it('seeds the empty structure the canvas starts from when the visual editor is on', () => {
+      mockUseWorkflowsExperimentalUiSetting.mockReturnValue(true);
+      const store = createMockStore();
+
+      renderWithProviders({ id: undefined }, () => store, ['/create']);
+
+      expect(getSeededYaml(store)).toContain('steps: []');
+      expect(getSeededYaml(store)).not.toContain('hello_world_step');
+    });
+
+    describe('create-opened telemetry', () => {
+      const withEditorView = (editorView: 'graph' | 'yaml') =>
+        mockUseWorkflowUrlState.mockReturnValue({
+          activeTab: 'workflow' as const,
+          selectedExecutionId: undefined,
+          setSelectedExecution: jest.fn(),
+          setActiveTab: jest.fn(),
+          editorView,
+        });
+
+      it.each([
+        { enabled: false, editorView: 'graph' as const, expected: 'yaml' },
+        { enabled: false, editorView: 'yaml' as const, expected: 'yaml' },
+        { enabled: true, editorView: 'graph' as const, expected: 'visual' },
+        { enabled: true, editorView: 'yaml' as const, expected: 'yaml' },
+      ])(
+        'reports $expected with the visual editor enabled=$enabled and view=$editorView',
+        ({ enabled, editorView, expected }) => {
+          mockUseWorkflowsExperimentalUiSetting.mockReturnValue(enabled);
+          withEditorView(editorView);
+
+          renderWithProviders({ id: undefined }, undefined, ['/create']);
+
+          expect(mockReportWorkflowCreateOpened).toHaveBeenCalledWith({ editorType: expected });
+        }
+      );
     });
   });
 

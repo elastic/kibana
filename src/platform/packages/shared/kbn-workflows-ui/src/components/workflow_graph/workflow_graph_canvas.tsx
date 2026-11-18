@@ -26,10 +26,6 @@ import type {
   WorkflowYaml,
 } from '@kbn/workflows';
 import '@xyflow/react/dist/style.css';
-import {
-  buildWorkflowSettingsNodes,
-  type WorkflowSettingsNodesInput,
-} from './build_settings_nodes';
 import { CanvasMinimap, CanvasZoomControls, chromeAppearCss } from './canvas_chrome';
 import { computeInsertionPoints } from './compute_insertion_points';
 import { ensureWorkflowGraphEuiIcons } from './ensure_eui_icons';
@@ -48,7 +44,6 @@ import {
   type WorkflowGraphActions,
   WorkflowGraphActionsContext,
   type WorkflowGraphEditActions,
-  type WorkflowSettingsNodeKind,
 } from './workflow_graph_actions_context';
 import { WorkflowGraphBypassLaneNode } from './workflow_graph_bypass_lane_node';
 import { WorkflowGraphEdge } from './workflow_graph_edge';
@@ -59,14 +54,10 @@ import {
 import { WorkflowGraphForeachGroupNode } from './workflow_graph_foreach_group_node';
 import { WorkflowGraphNode } from './workflow_graph_node';
 import { WorkflowGraphPendingNode } from './workflow_graph_pending_node';
-import { WorkflowGraphSettingsGroupNode } from './workflow_graph_settings_group_node';
-import { WorkflowGraphSettingsNode } from './workflow_graph_settings_node';
 
 const NODE_TYPES: NodeTypes = {
   step: WorkflowGraphNode,
   trigger: WorkflowGraphNode,
-  settings: WorkflowGraphSettingsNode,
-  settingsGroup: WorkflowGraphSettingsGroupNode,
   foreachGroup: WorkflowGraphForeachGroupNode,
   bypassLane: WorkflowGraphBypassLaneNode,
 };
@@ -176,13 +167,6 @@ export interface WorkflowGraphCanvasProps {
    * in edit mode. When omitted, the default "Add trigger" card is shown.
    */
   readonly emptyState?: React.ReactNode;
-  /**
-   * When set, injects info / constants / outputs settings nodes one rank above
-   * the triggers (same footprint and spacing as step/trigger nodes).
-   */
-  readonly settingsNodes?: WorkflowSettingsNodesInput;
-  /** Opens / closes the settings panel when a settings node is activated. */
-  readonly onSettingsNodeSelect?: (kind: WorkflowSettingsNodeKind | undefined) => void;
 }
 
 function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
@@ -224,8 +208,6 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     pendingInsert,
     suppressInsertionControls,
     emptyState,
-    settingsNodes,
-    onSettingsNodeSelect,
   } = props;
 
   const defaultEdgeOptions = useMemo(
@@ -242,7 +224,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
   const backgroundDotColor = transparentize(euiTheme.colors.borderBaseProminent, 0.4);
 
   const {
-    nodes: layoutNodes,
+    nodes,
     edges: layoutEdges,
     transformed: graphTransform,
   } = useWorkflowLayout({
@@ -253,12 +235,6 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     onPerfMark,
     onLayoutFailed,
   });
-
-  const nodes = useMemo(() => {
-    if (!settingsNodes) return layoutNodes;
-    const settingsRfNodes = buildWorkflowSettingsNodes(layoutNodes, direction, settingsNodes);
-    return settingsRfNodes.length > 0 ? [...settingsRfNodes, ...layoutNodes] : layoutNodes;
-  }, [layoutNodes, direction, settingsNodes]);
 
   // Node-anchored connection-point targets (edit mode mounts ports from these).
   const insertionPoints = useMemo(
@@ -274,10 +250,9 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
       canRunSteps,
       renderStepIcon,
       onStepSelect,
-      onSettingsNodeSelect,
       edit,
     }),
-    [onStepRun, canRunSteps, renderStepIcon, onStepSelect, onSettingsNodeSelect, edit]
+    [onStepRun, canRunSteps, renderStepIcon, onStepSelect, edit]
   );
 
   // First-paint mark: time from component mount, not from navigation start.
@@ -297,7 +272,6 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     insertionPoints,
     isEditMode: edit !== undefined,
     selectedStepId,
-    selectedSettingsKind: settingsNodes?.selectedKind,
     nodeConfigWarnings,
     pendingInsert,
   });
@@ -313,24 +287,16 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
       _evt: React.MouseEvent,
       node: { id: string; type?: string; data: Record<string, unknown> }
     ) => {
-      if (node.type === 'settings') {
-        const kind = node.data?.kind;
-        if (kind === 'info' || kind === 'constants' || kind === 'outputs') {
-          onSettingsNodeSelect?.(kind);
-        }
-        return;
-      }
       const stepType = typeof node.data?.stepType === 'string' ? node.data.stepType : '';
       onStepSelect(node.id);
       onNodeClick?.(node.id, stepType);
     },
-    [onStepSelect, onNodeClick, onSettingsNodeSelect]
+    [onStepSelect, onNodeClick]
   );
 
   const handlePaneClick = useCallback(() => {
     if (selectedStepId) onStepSelect(undefined);
-    if (settingsNodes?.selectedKind) onSettingsNodeSelect?.(undefined);
-  }, [selectedStepId, onStepSelect, settingsNodes?.selectedKind, onSettingsNodeSelect]);
+  }, [selectedStepId, onStepSelect]);
 
   const handleMoveEnd = useCallback(
     (_event: MouseEvent | TouchEvent | null, viewport: Viewport) => onViewportChange?.(viewport),
@@ -340,9 +306,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
   const hasWorkflowStructure =
     (workflow?.triggers?.length ?? 0) > 0 || (workflow?.steps?.length ?? 0) > 0;
 
-  const panelFocusNodeId =
-    selectedStepId ??
-    (settingsNodes?.selectedKind ? `settings:${settingsNodes.selectedKind}` : undefined);
+  const panelFocusNodeId = selectedStepId;
   const { wrapperRef, handleInit, handleResetView, handleFitView } = useCanvasViewport({
     nodes,
     direction,

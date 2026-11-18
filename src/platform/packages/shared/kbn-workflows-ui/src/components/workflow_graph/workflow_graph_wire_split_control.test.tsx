@@ -15,7 +15,13 @@ import type {
   WorkflowGraphEditActions,
   WorkflowGraphInsertionContext,
 } from './workflow_graph_actions_context';
-import { WorkflowGraphWireSplitControl } from './workflow_graph_wire_split_control';
+import {
+  WIRE_HIT_FLOW_PX,
+  WIRE_HIT_MIN_SCREEN_PX,
+  WIRE_HIT_VAR,
+  wireHitFlowPx,
+  WorkflowGraphWireSplitControl,
+} from './workflow_graph_wire_split_control';
 
 const makeControl = (overrides: Partial<WireInsertionControl> = {}): WireInsertionControl => ({
   id: 'wire:a->b',
@@ -51,12 +57,14 @@ describe('WorkflowGraphWireSplitControl', () => {
       expect(button).toHaveStyle({ borderStyle: 'dashed' });
     });
 
-    it('reveals a mid-wire control on hover and hides it again on leave', () => {
+    it('reveals a mid-wire control as a dashed ghost on hover and hides it again on leave', () => {
       const { root, button } = renderControl();
 
       fireEvent.mouseEnter(root);
       expect(root).toHaveStyle({ opacity: '1' });
-      expect(button).toHaveStyle({ borderStyle: 'solid' });
+      // Only hovering the button itself turns it primary (CSS :hover rule), not the wire.
+      expect(button).toHaveStyle({ borderStyle: 'dashed' });
+      expect(button).not.toHaveStyle({ borderStyle: 'solid' });
 
       fireEvent.mouseLeave(root);
       expect(root).toHaveStyle({ opacity: '0' });
@@ -70,6 +78,7 @@ describe('WorkflowGraphWireSplitControl', () => {
       await user.tab();
       expect(button).toHaveFocus();
       expect(root).toHaveStyle({ opacity: '1' });
+      // Keyboard focus on the button itself is the "primary" state (:focus-visible rule).
       expect(button).toHaveStyle({ borderStyle: 'solid' });
 
       await user.tab();
@@ -95,10 +104,28 @@ describe('WorkflowGraphWireSplitControl', () => {
   });
 
   describe('hover zone geometry', () => {
-    it('spans the full segment length and a 44px strip across it for a vertical wire', () => {
+    // jsdom drops `var()` from inline styles and cannot resolve it, so the cross-axis size is
+    // asserted on the generated rule instead (the live gate checks it in a real browser).
+    const cssTextOf = (el: HTMLElement): string =>
+      Array.from(document.styleSheets)
+        .flatMap((sheet) => Array.from(sheet.cssRules))
+        .filter(
+          (rule): rule is CSSStyleRule =>
+            rule instanceof CSSStyleRule &&
+            rule.selectorText
+              .split(',')
+              .some((selector) => el.classList.contains(selector.slice(1)))
+        )
+        .map((rule) => rule.cssText.replace(/\s+/g, ''))
+        .join('');
+    const hitSize = `var(${WIRE_HIT_VAR},${WIRE_HIT_FLOW_PX}px)`;
+
+    it('spans the full segment length, centred on the wire, with a zoom-aware strip across it', () => {
       const { root } = renderControl();
 
-      expect(root).toHaveStyle({ left: '78px', top: '100px', width: '44px', height: '100px' });
+      expect(root).toHaveStyle({ left: '100px', top: '100px', height: '100px' });
+      expect(cssTextOf(root)).toContain(`width:${hitSize}`);
+      expect(cssTextOf(root)).toContain('translateX(-50%)');
     });
 
     it('swaps the axes for a horizontal (LR) wire', () => {
@@ -111,8 +138,44 @@ describe('WorkflowGraphWireSplitControl', () => {
         })
       );
 
-      expect(root).toHaveStyle({ left: '100px', top: '78px', width: '100px', height: '44px' });
+      expect(root).toHaveStyle({ left: '100px', top: '100px', width: '100px' });
+      expect(cssTextOf(root)).toContain(`height:${hitSize}`);
+      expect(cssTextOf(root)).toContain('translateY(-50%)');
       expect(root).toHaveAttribute('data-direction', 'LR');
+    });
+
+    it('keeps the button on the control centre when it is off the strip midline', () => {
+      const { button } = renderControl(
+        makeControl({
+          centre: { x: 130, y: 120 },
+          segmentStart: { x: 100, y: 100 },
+          segmentEnd: { x: 100, y: 200 },
+        })
+      );
+
+      // Cross-axis offset from the strip's own x (100) is +30; main axis is 20 below its start.
+      const placement = button.closest('div') as HTMLElement;
+      expect(placement).toHaveStyle({ marginLeft: '30px', top: '20px' });
+      expect(cssTextOf(placement)).toContain('left:50%');
+    });
+  });
+
+  describe('wireHitFlowPx', () => {
+    it('keeps the 44 flow px strip while it is already at least the screen floor wide', () => {
+      expect(wireHitFlowPx(1)).toBe(WIRE_HIT_FLOW_PX);
+      expect(wireHitFlowPx(0.6)).toBe(WIRE_HIT_FLOW_PX);
+    });
+
+    it('widens the strip so it stays at least the screen floor wide when zoomed out', () => {
+      [0.5, 0.4, 0.2, 0.1].forEach((zoom) => {
+        expect(wireHitFlowPx(zoom)).toBeGreaterThan(WIRE_HIT_FLOW_PX);
+        expect(wireHitFlowPx(zoom) * zoom).toBeGreaterThanOrEqual(WIRE_HIT_MIN_SCREEN_PX - 1e-9);
+      });
+    });
+
+    it('falls back to the flow size for a non-positive or non-finite zoom', () => {
+      expect(wireHitFlowPx(0)).toBe(WIRE_HIT_FLOW_PX);
+      expect(wireHitFlowPx(Number.NaN)).toBe(WIRE_HIT_FLOW_PX);
     });
   });
 

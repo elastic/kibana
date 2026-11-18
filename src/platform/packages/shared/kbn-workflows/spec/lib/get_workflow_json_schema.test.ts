@@ -11,6 +11,7 @@ import { stringify } from 'yaml';
 import { isoDateTime, z } from '@kbn/zod/v4';
 import { getWorkflowJsonSchema } from './get_workflow_json_schema';
 import { getValidateWithYamlLsp } from './test_utils/validate_with_yaml_lsp';
+import { DataSetStepInputSchema, MaxIterationsSchema } from '../schema';
 
 describe('getWorkflowJsonSchema', () => {
   it('should set `additionalProperties: {}` for loose objects', () => {
@@ -337,5 +338,19 @@ describe('ZodPipe unwrapping for Monaco YAML', () => {
       );
       expect(enabledIssue).toBeDefined();
     }
+  });
+
+  describe('labels the step form shows', () => {
+    // `title` is what the YAML editor shows on hover and in its messages; these labels are only
+    // for the form, so they use a key the JSON schema does not read.
+    it('are not emitted as JSON schema titles', () => {
+      const json = JSON.stringify(
+        getWorkflowJsonSchema(z.object({ cap: MaxIterationsSchema, vars: DataSetStepInputSchema }))
+      );
+
+      ['Limit + behavior', 'Number', 'Variables'].forEach((label) => {
+        expect(json).not.toContain(`"title":"${label}"`);
+      });
+    });
   });
 });

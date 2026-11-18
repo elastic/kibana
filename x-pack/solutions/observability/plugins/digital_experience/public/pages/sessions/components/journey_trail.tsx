@@ -7,9 +7,32 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiBadge, EuiIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
+
+const componentStyles = {
+  trail: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      display: 'flex',
+      alignItems: 'center',
+      gap: euiTheme.size.xs,
+      minWidth: 0,
+      overflow: 'hidden',
+      whiteSpace: 'nowrap',
+    }),
+  page: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      minWidth: 0,
+      maxWidth: '14em',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      fontFamily: euiTheme.font.familyCode,
+      fontSize: euiTheme.size.m,
+    }),
+};
 
 /**
  * A session's pages in one line: entry page → number of other pages → exit page, with every page
@@ -25,7 +48,7 @@ export function JourneyTrail({
   entryPage: string | null;
   exitPage: string | null;
 }) {
-  const { euiTheme } = useEuiTheme();
+  const styles = useMemoCss(componentStyles);
 
   const entry = entryPage ?? journey[0];
   const exit = exitPage ?? journey[journey.length - 1];
@@ -40,33 +63,17 @@ export function JourneyTrail({
     values: { pages: pages.join(' → '), exit: exit ?? entry },
   });
 
-  const trailCss = css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: euiTheme.size.xs,
-    minWidth: 0,
-    overflow: 'hidden',
-    whiteSpace: 'nowrap',
-  });
-  const pageCss = css({
-    minWidth: 0,
-    maxWidth: '14em',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    fontFamily: euiTheme.font.familyCode,
-    fontSize: euiTheme.size.m,
-  });
   const arrow = <EuiIcon type="sortRight" size="s" color="subdued" aria-hidden={true} />;
 
   return (
     <EuiToolTip content={tooltip}>
       <span
-        css={trailCss}
+        css={styles.trail}
         tabIndex={0}
         aria-label={tooltip}
         data-test-subj="digitalExperienceSessionJourney"
       >
-        <span css={pageCss}>{entry}</span>
+        <span css={styles.page}>{entry}</span>
         {others > 0 && (
           <>
             {arrow}
@@ -81,7 +88,7 @@ export function JourneyTrail({
         {showExit && (
           <>
             {arrow}
-            <span css={pageCss}>{exit}</span>
+            <span css={styles.page}>{exit}</span>
           </>
         )}
       </span>

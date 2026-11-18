@@ -37,6 +37,7 @@ import {
   resolveNodeChipStyle,
   workflowsEditorChromeOverrides,
 } from '@kbn/workflows-ui';
+import { detectIndent } from '@kbn/workflows-yaml';
 import { FlyoutMonacoFrame, getFlyoutMonacoEditorOptions } from './flyout_monaco_frame';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
@@ -59,6 +60,10 @@ export interface TriggerConfigPanelProps {
   readonly workflowYaml?: string;
   readonly onCancel: () => void;
   readonly onSave: (fragment: string) => void;
+  /** Shows the trigger without letting the user change it; the footer only offers Close. */
+  readonly readOnly?: boolean;
+  /** Read-only footer action: show this trigger in the workflow's YAML. */
+  readonly onOpenInYaml?: () => void;
 }
 
 type ParametersMode = 'form' | 'yaml' | 'preview';
@@ -66,14 +71,6 @@ type ParametersMode = 'form' | 'yaml' | 'preview';
 /** Triggers whose `inputs` is a JSON Schema the Inputs builder can edit. */
 const hasInputsSchema = (triggerType: string): boolean =>
   triggerType === 'manual' || triggerType === 'page';
-
-const detectIndent = (yaml: string): number => {
-  for (const line of yaml.split('\n')) {
-    const match = line.match(/^( +)\S/);
-    if (match) return match[1].length;
-  }
-  return 2;
-};
 
 /**
  * Write JSON-Schema-shaped `inputs` onto the trigger fragment.
@@ -126,6 +123,8 @@ export function TriggerConfigPanel({
   workflowYaml = '',
   onCancel,
   onSave,
+  readOnly = false,
+  onOpenInYaml,
 }: TriggerConfigPanelProps) {
   const { euiTheme } = useEuiTheme();
   const [parametersMode, setParametersMode] = useState<ParametersMode>('form');
@@ -490,7 +489,10 @@ export function TriggerConfigPanel({
                 aria-label={i18n.translate('workflows.triggerConfigPanel.yamlAriaLabel', {
                   defaultMessage: 'Trigger YAML',
                 })}
-                options={getFlyoutMonacoEditorOptions(euiTheme, { tabSize: indent })}
+                options={{
+                  ...getFlyoutMonacoEditorOptions(euiTheme, { tabSize: indent }),
+                  readOnly,
+                }}
                 dataTestSubj="workflowTriggerConfigPanelYaml"
               />
             </FlyoutMonacoFrame>
@@ -536,7 +538,10 @@ export function TriggerConfigPanel({
                             'workflows.triggerConfigPanel.inputsSchemaAriaLabel',
                             { defaultMessage: 'Inputs JSON Schema' }
                           )}
-                          options={getFlyoutMonacoEditorOptions(euiTheme, { tabSize: indent })}
+                          options={{
+                            ...getFlyoutMonacoEditorOptions(euiTheme, { tabSize: indent }),
+                            readOnly,
+                          }}
                           dataTestSubj="workflowTriggerConfigPanelInputsSchema"
                         />
                       </FlyoutMonacoFrame>
@@ -547,6 +552,7 @@ export function TriggerConfigPanel({
                         findReferencingSteps={findReferencingSteps}
                         referencePrefix={inputsReferencePrefix}
                         dataTestSubjPrefix="workflowTriggerConfigInput"
+                        readOnly={readOnly}
                       />
                     )}
                   </div>
@@ -581,6 +587,7 @@ export function TriggerConfigPanel({
                           compressed
                           fullWidth
                           value={everyDraft}
+                          disabled={readOnly}
                           onChange={(e) => handleEveryChange(e.target.value)}
                           data-test-subj="workflowTriggerConfigPanelEvery"
                         />
@@ -625,23 +632,42 @@ export function TriggerConfigPanel({
         }}
       >
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" responsive={false}>
+          {readOnly && onOpenInYaml ? (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                iconType="code"
+                onClick={onOpenInYaml}
+                data-test-subj="workflowTriggerConfigPanelOpenInYaml"
+              >
+                {i18n.translate('workflows.triggerConfigPanel.openInYaml', {
+                  defaultMessage: 'Open in YAML',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          ) : null}
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={onCancel} data-test-subj="workflowTriggerConfigPanelCancel">
-              {i18n.translate('workflows.triggerConfigPanel.cancel', { defaultMessage: 'Cancel' })}
+              {readOnly
+                ? i18n.translate('workflows.triggerConfigPanel.close', { defaultMessage: 'Close' })
+                : i18n.translate('workflows.triggerConfigPanel.cancel', {
+                    defaultMessage: 'Cancel',
+                  })}
             </EuiButtonEmpty>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              onClick={handleSave}
-              isDisabled={!parsed.valid}
-              data-test-subj="workflowTriggerConfigPanelSave"
-            >
-              {i18n.translate('workflows.triggerConfigPanel.save', {
-                defaultMessage: 'Save trigger',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
+          {readOnly ? null : (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                onClick={handleSave}
+                isDisabled={!parsed.valid}
+                data-test-subj="workflowTriggerConfigPanelSave"
+              >
+                {i18n.translate('workflows.triggerConfigPanel.save', {
+                  defaultMessage: 'Save trigger',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </div>
     </div>

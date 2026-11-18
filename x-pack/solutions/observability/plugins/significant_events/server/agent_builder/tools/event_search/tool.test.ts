@@ -6,6 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { setWorkflowEventChainContext } from '@kbn/workflows-extensions/server';
 import {
   createMockToolContext,
   createSignificantEventsServer,
@@ -119,6 +120,11 @@ describe('event_search tool', () => {
       telemetry: telemetry as never,
     });
 
+    const context = createMockToolContext();
+    setWorkflowEventChainContext(context.request, {
+      depth: 0,
+      sourceExecutionId: 'workflow-run-1',
+    });
     const result = await invokeHandler(
       tool as never,
       {
@@ -127,7 +133,7 @@ describe('event_search tool', () => {
         rule_uuids: ['rule-uuid-1'],
         status: 'active',
       },
-      createMockToolContext()
+      context
     );
 
     if (!('results' in result) || result.results[0].type !== 'other') {
@@ -145,15 +151,19 @@ describe('event_search tool', () => {
         ],
       })
     );
-    expect(telemetry.trackAgentToolEventSearch).toHaveBeenCalledWith({
-      success: true,
-      result_count: 1,
-      has_query: false,
-      has_source_filter: true,
-      status_filter: 'active',
-      view: 'compact',
-      page: 1,
-    });
+    expect(telemetry.trackAgentToolEventSearch).toHaveBeenCalledWith(
+      {
+        workflow_execution_id: 'workflow-run-1',
+        success: true,
+        result_count: 1,
+        has_query: false,
+        has_source_filter: true,
+        status_filter: 'active',
+        view: 'compact',
+        page: 1,
+      },
+      expect.anything()
+    );
     expect(searchEventsToolHandler).toHaveBeenCalledWith(
       expect.objectContaining({
         params: expect.objectContaining({

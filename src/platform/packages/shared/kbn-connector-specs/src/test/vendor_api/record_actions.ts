@@ -55,6 +55,14 @@ export type RecordingFinding =
       readonly request: string;
       readonly violations: readonly Violation[];
     }
+  /** The OAuth scopes the auth type requests don't cover an operation the action calls. */
+  | {
+      readonly kind: 'insufficient-scope';
+      readonly action: string;
+      readonly authType: string;
+      readonly operation: string;
+      readonly violations: readonly Violation[];
+    }
   /** A `read` scoped action sent a request that may change state and isn't a listed query. */
   | { readonly kind: 'read-scope'; readonly action: string; readonly request: string }
   /** A fixture query the action never called, or listed for an action that isn't `read`. */
@@ -162,6 +170,7 @@ export const recordActions = async ({
   fixtures = {},
   config,
   authType,
+  checkScopes = 'report',
   ...contextOptions
 }: RecordActionsOptions): Promise<ActionsRecording> => {
   const connectorConfig = config ?? (await sampleConfig(connector));
@@ -205,6 +214,7 @@ export const recordActions = async ({
         try {
           context = await createContractContext({
             ...contextOptions,
+            checkScopes,
             connector,
             authType: id,
             config: { ...connectorConfig, ...fixture.config },
@@ -226,6 +236,22 @@ export const recordActions = async ({
         const vendorCalls = mock.calls.filter(({ token }) => !token);
         worked ||= vendorCalls.length > 0;
         calls.push(...vendorCalls);
+        for (const { request, matched, scopeViolations: violations = [] } of vendorCalls) {
+          if (violations.length > 0) {
+            // Named by operation, so the runs of one action report each shortfall once.
+            const operation =
+              matched && 'method' in matched
+                ? `${matched.method.toUpperCase()} ${matched.path}`
+                : request;
+            findings.push({
+              kind: 'insufficient-scope',
+              action,
+              authType: id,
+              operation,
+              violations,
+            });
+          }
+        }
         if (ran.length === 0 && input === inputs[0]) {
           for (const { operation, violations } of mock.rejectedResponses) {
             findings.push({ kind: 'rejected-response', action, operation, violations });

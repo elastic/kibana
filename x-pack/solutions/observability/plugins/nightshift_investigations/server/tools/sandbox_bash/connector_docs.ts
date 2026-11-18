@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import elasticDoc from './connector_docs/elastic.md.text';
 import githubDoc from './connector_docs/github.md.text';
 import newRelicDoc from './connector_docs/newrelic.md.text';
 
@@ -21,6 +22,7 @@ export interface ConnectorDoc {
 
 /** Service usage guides, seeded regardless of which connectors are assigned. */
 export const CONNECTOR_DOCS: readonly ConnectorDoc[] = [
+  { service: 'Elasticsearch', path: ELASTIC_MANIFEST_PATH, content: elasticDoc },
   { service: 'GitHub', path: `${CONNECTOR_DOCS_ROOT}/github.md`, content: githubDoc },
   { service: 'New Relic', path: `${CONNECTOR_DOCS_ROOT}/newrelic.md`, content: newRelicDoc },
 ];

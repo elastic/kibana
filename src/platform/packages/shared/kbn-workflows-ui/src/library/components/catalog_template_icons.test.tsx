@@ -23,10 +23,9 @@ jest.mock('../../components/step_icons', () => ({
 }));
 
 describe('CatalogTemplateIcons', () => {
-  it('shows a +N badge when icons exceed maxVisible', () => {
+  it('shows a +N badge when icons exceed the cap', () => {
     render(
       <CatalogTemplateIcons
-        maxVisible={4}
         triggerTypes={['alert', 'scheduled']}
         stepTypes={['slack.postMessage', 'elasticsearch.search', 'http.request', 'case.create']}
       />
@@ -43,7 +42,6 @@ describe('CatalogTemplateIcons', () => {
   it('does not show overflow when within the cap', () => {
     render(
       <CatalogTemplateIcons
-        maxVisible={4}
         triggerTypes={['manual']}
         stepTypes={['slack.postMessage', 'elasticsearch.search']}
       />

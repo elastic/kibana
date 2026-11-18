@@ -12,8 +12,9 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { CopyToDashboardAPI } from './copy_to_dashboard_action';
+import type { CopyToDashboardParentApi } from './copy_to_dashboard_action';
 import { CopyToDashboardModal } from './copy_to_dashboard_modal';
+import { coreServices } from '../services/kibana_services';
 import type { DashboardPickerProps } from '@kbn/presentation-util-plugin/public/components/dashboard_picker/dashboard_picker';
 
 jest.mock('../utils/get_dashboard_capabilities', () => ({
@@ -41,21 +42,28 @@ jest.mock('@kbn/presentation-util-plugin/public', () => ({
 }));
 
 describe('CopyToDashboardModal', () => {
-  const api: CopyToDashboardAPI = {
-    type: 'testPanelType',
-    uuid: 'panelOne',
-    parentApi: {
-      type: 'dashboard',
-      savedObjectId$: new BehaviorSubject<string | undefined>('dashboardOne'),
-      getDashboardPanelFromId: () => ({
-        type: 'testPanelType',
-        grid: { w: 1, h: 1, x: 0, y: 0, i: 'panelOne' },
-        serializedState: {
-          title: 'Panel One',
-        },
-      }),
+  const panels: Record<string, ReturnType<CopyToDashboardParentApi['getDashboardPanelFromId']>> = {
+    panelOne: {
+      type: 'testPanelType',
+      grid: { w: 1, h: 1, x: 0, y: 0 },
+      serializedState: {
+        title: 'Panel One',
+      },
+    },
+    panelTwo: {
+      type: 'otherPanelType',
+      grid: { w: 2, h: 3, x: 1, y: 0 },
+      serializedState: {
+        title: 'Panel Two',
+      },
     },
   };
+  const parentApi: CopyToDashboardParentApi = {
+    type: 'dashboard',
+    savedObjectId$: new BehaviorSubject<string | undefined>('dashboardOne'),
+    getDashboardPanelFromId: (id: string) => panels[id],
+  };
+  const panelIds = ['panelOne'];
   const closeModalMock = jest.fn();
   const navigateToWithEmbeddablePackagesMock = jest.fn();
 
@@ -72,7 +80,13 @@ describe('CopyToDashboardModal', () => {
 
   describe('"New dashboard" option', () => {
     test('should be enabled when parent is saved dashboard', async () => {
-      const result = render(<CopyToDashboardModal api={api} closeModal={closeModalMock} />);
+      const result = render(
+        <CopyToDashboardModal
+          parentApi={parentApi}
+          panelIds={panelIds}
+          closeModal={closeModalMock}
+        />
+      );
 
       await waitFor(() =>
         expect(result.container.querySelector('#new-dashboard-option')).toBeEnabled()
@@ -80,15 +94,16 @@ describe('CopyToDashboardModal', () => {
     });
 
     test('should be disabled when parent is new dashboard', async () => {
-      const newDashboardApi = {
-        ...api,
-        parentApi: {
-          ...api.parentApi,
-          savedObjectId$: new BehaviorSubject<string | undefined>(undefined),
-        },
+      const newDashboardParentApi = {
+        ...parentApi,
+        savedObjectId$: new BehaviorSubject<string | undefined>(undefined),
       };
       const result = render(
-        <CopyToDashboardModal api={newDashboardApi} closeModal={closeModalMock} />
+        <CopyToDashboardModal
+          parentApi={newDashboardParentApi}
+          panelIds={panelIds}
+          closeModal={closeModalMock}
+        />
       );
 
       await waitFor(() =>
@@ -97,7 +112,13 @@ describe('CopyToDashboardModal', () => {
     });
 
     test('should navigate to new dashboard on submit', async () => {
-      const result = render(<CopyToDashboardModal api={api} closeModal={closeModalMock} />);
+      const result = render(
+        <CopyToDashboardModal
+          parentApi={parentApi}
+          panelIds={panelIds}
+          closeModal={closeModalMock}
+        />
+      );
 
       await waitFor(() => {
         // select new dashboard radio
@@ -134,7 +155,13 @@ describe('CopyToDashboardModal', () => {
 
   describe('"Existing dashboard" option', () => {
     test('does not show the current dashboard in the dashboard picker', async () => {
-      render(<CopyToDashboardModal api={api} closeModal={closeModalMock} />);
+      render(
+        <CopyToDashboardModal
+          parentApi={parentApi}
+          panelIds={panelIds}
+          closeModal={closeModalMock}
+        />
+      );
 
       await waitFor(() =>
         expect(screen.queryByText('mockDashboardPicker idsToOmit:dashboardOne')).toBeInTheDocument()
@@ -142,7 +169,13 @@ describe('CopyToDashboardModal', () => {
     });
 
     test('should navigate to selected dashboard on submit', async () => {
-      const result = render(<CopyToDashboardModal api={api} closeModal={closeModalMock} />);
+      const result = render(
+        <CopyToDashboardModal
+          parentApi={parentApi}
+          panelIds={panelIds}
+          closeModal={closeModalMock}
+        />
+      );
 
       await waitFor(() => {
         // select a dashboard
@@ -174,6 +207,79 @@ describe('CopyToDashboardModal', () => {
           ],
         })
       );
+    });
+  });
+
+  describe('multiple panels', () => {
+    test('should copy all panels in a single navigation', async () => {
+      const result = render(
+        <CopyToDashboardModal
+          parentApi={parentApi}
+          panelIds={['panelOne', 'panelTwo']}
+          closeModal={closeModalMock}
+        />
+      );
+
+      await waitFor(() => {
+        const newDashboardRadio = result.container.querySelector('#new-dashboard-option');
+        expect(newDashboardRadio).not.toBeNull();
+        userEvent.click(newDashboardRadio!);
+
+        const submitButton = result.container.querySelector('[data-test-subj=confirmCopyToButton]');
+        expect(submitButton).not.toBeNull();
+        userEvent.click(submitButton!);
+      });
+
+      await waitFor(() =>
+        expect(navigateToWithEmbeddablePackagesMock).toHaveBeenCalledWith('dashboards', {
+          path: '#/create',
+          state: [
+            {
+              serializedState: { title: 'Panel One' },
+              size: { height: 1, width: 1 },
+              type: 'testPanelType',
+            },
+            {
+              serializedState: { title: 'Panel Two' },
+              size: { height: 3, width: 2 },
+              type: 'otherPanelType',
+            },
+          ],
+        })
+      );
+    });
+
+    test('should not navigate when one of the panels cannot be found', async () => {
+      const result = render(
+        <CopyToDashboardModal
+          parentApi={{
+            ...parentApi,
+            getDashboardPanelFromId: (id: string) => {
+              if (id === 'missingPanel') throw new Error('not found');
+              return panels[id];
+            },
+          }}
+          panelIds={['panelOne', 'missingPanel']}
+          closeModal={closeModalMock}
+        />
+      );
+
+      await waitFor(() => {
+        const newDashboardRadio = result.container.querySelector('#new-dashboard-option');
+        expect(newDashboardRadio).not.toBeNull();
+        userEvent.click(newDashboardRadio!);
+
+        const submitButton = result.container.querySelector('[data-test-subj=confirmCopyToButton]');
+        expect(submitButton).not.toBeNull();
+        userEvent.click(submitButton!);
+      });
+
+      await waitFor(() => expect(closeModalMock).toHaveBeenCalled());
+      expect(navigateToWithEmbeddablePackagesMock).not.toHaveBeenCalled();
+      expect(coreServices.notifications.toasts.addDanger).toHaveBeenCalledWith({
+        title: 'Unable to copy panel, no panel with id missingPanel found',
+        'data-test-subj': 'copyToDashboardPanelNotFound',
+      });
     });
   });
 });

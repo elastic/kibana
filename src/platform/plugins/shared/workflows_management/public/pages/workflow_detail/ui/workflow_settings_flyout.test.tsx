@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import React from 'react';
 import { WorkflowSettingsFlyout } from './workflow_settings_flyout';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
@@ -20,7 +20,14 @@ import {
 import { TestWrapper } from '../../../shared/test_utils/test_wrapper';
 
 jest.mock('../../../entities/workflows/model/use_workflow_stats', () => ({
-  useWorkflowFiltersOptions: () => ({ data: { tags: [{ label: 'shared', key: 'shared' }] } }),
+  useWorkflowFiltersOptions: () => ({
+    data: {
+      tags: [
+        { label: 'shared', key: 'shared' },
+        { label: 'shared-team', key: 'shared-team' },
+      ],
+    },
+  }),
   useWorkflowStats: () => ({ data: undefined }),
 }));
 
@@ -41,7 +48,7 @@ steps:
 `;
 
 describe('WorkflowSettingsFlyout', () => {
-  const renderFlyout = (yaml = BASE_YAML) => {
+  const renderFlyout = (yaml = BASE_YAML, readOnly = false) => {
     const store = createMockStore();
     store.dispatch(
       setWorkflow({
@@ -73,7 +80,9 @@ describe('WorkflowSettingsFlyout', () => {
 
     return {
       store,
-      ...render(<WorkflowSettingsFlyout isOpen onClose={jest.fn()} />, { wrapper }),
+      ...render(<WorkflowSettingsFlyout isOpen onClose={jest.fn()} readOnly={readOnly} />, {
+        wrapper,
+      }),
     };
   };
 
@@ -92,6 +101,44 @@ describe('WorkflowSettingsFlyout', () => {
       'A short description'
     );
     expect(screen.getByTestId('workflowSettingsTagsInput')).toBeInTheDocument();
+  });
+
+  it('adds a typed tag that is also part of another suggestion', () => {
+    const { store } = renderFlyout();
+    const input = within(screen.getByTestId('workflowSettingsTagsInput')).getByTestId(
+      'comboBoxSearchInput'
+    );
+
+    // "shared" is an existing tag and a part of "shared-team", so two suggestions match it.
+    fireEvent.change(input, { target: { value: 'shared' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(selectYamlString(store.getState())).toMatch(/tags:\n\s+- alpha\n\s+- shared\n/);
+  });
+
+  it('adds a typed tag that matches no suggestion', () => {
+    const { store } = renderFlyout();
+    const input = within(screen.getByTestId('workflowSettingsTagsInput')).getByTestId(
+      'comboBoxSearchInput'
+    );
+
+    fireEvent.change(input, { target: { value: 'brand-new' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(selectYamlString(store.getState())).toMatch(/- alpha\n\s+- brand-new\n/);
+  });
+
+  it('does not add a tag twice, whatever its case', () => {
+    const { store } = renderFlyout();
+    const input = within(screen.getByTestId('workflowSettingsTagsInput')).getByTestId(
+      'comboBoxSearchInput'
+    );
+
+    fireEvent.change(input, { target: { value: 'ALPHA' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(selectYamlString(store.getState())).not.toMatch(/ALPHA/);
+    expect(selectYamlString(store.getState()).match(/- alpha/g)).toHaveLength(1);
   });
 
   it('updates the draft YAML when the name changes', () => {
@@ -142,6 +189,62 @@ describe('WorkflowSettingsFlyout', () => {
     fireEvent.click(screen.getByTestId('workflowSettingsOutputAdd'));
     expect(screen.queryByTestId('workflowSettingsOutputEmpty')).not.toBeInTheDocument();
     // The output fields load lazily.
-    expect(await screen.findByTestId(/workflowSettingsOutputValue-/)).toBeInTheDocument();
+    expect(await screen.findByTestId(/workflowSettingsOutputFallback-/)).toBeInTheDocument();
+  });
+
+  describe('when read-only', () => {
+    const YAML_WITH_OUTPUT = `${BASE_YAML}outputs:
+  - name: summary
+    type: string
+    default: n/a
+`;
+
+    it('shows the general settings but cannot change them', () => {
+      const { store } = renderFlyout(BASE_YAML, true);
+
+      expect(screen.getByTestId('workflowSettingsNameInput')).toBeDisabled();
+      expect(screen.getByTestId('workflowSettingsDescriptionInput')).toBeDisabled();
+      expect(
+        within(screen.getByTestId('workflowSettingsTagsInput')).getByRole('combobox')
+      ).toBeDisabled();
+      expect(selectYamlString(store.getState())).toBe(BASE_YAML);
+    });
+
+    it('offers Close but not Done', () => {
+      renderFlyout(BASE_YAML, true);
+
+      expect(screen.getByTestId('workflowSettingsFlyoutClose')).toBeInTheDocument();
+      expect(screen.queryByTestId('workflowSettingsFlyoutDone')).not.toBeInTheDocument();
+    });
+
+    it('lists the constants without add or remove controls', () => {
+      renderFlyout(BASE_YAML, true);
+
+      fireEvent.click(screen.getByTestId('workflowSettingsTab-constants'));
+
+      expect(screen.getByText('region')).toBeInTheDocument();
+      expect(screen.queryByTestId('workflowSettingsConstAdd')).not.toBeInTheDocument();
+      expect(screen.queryByLabelText('Remove constant')).not.toBeInTheDocument();
+    });
+
+    it('lists the outputs with disabled fields and no add or remove controls', async () => {
+      renderFlyout(YAML_WITH_OUTPUT, true);
+
+      fireEvent.click(screen.getByTestId('workflowSettingsTab-outputs'));
+
+      expect(await screen.findByTestId(/workflowSettingsOutputFallback-/)).toBeDisabled();
+      expect(screen.queryByTestId('workflowSettingsOutputAdd')).not.toBeInTheDocument();
+      expect(screen.queryByLabelText('Remove output')).not.toBeInTheDocument();
+    });
+
+    it('keeps the editable flyout editable (positive control)', async () => {
+      renderFlyout(YAML_WITH_OUTPUT, false);
+
+      expect(screen.getByTestId('workflowSettingsNameInput')).toBeEnabled();
+      expect(screen.getByTestId('workflowSettingsFlyoutDone')).toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('workflowSettingsTab-outputs'));
+      expect(await screen.findByTestId(/workflowSettingsOutputFallback-/)).toBeEnabled();
+      expect(screen.getByTestId('workflowSettingsOutputAdd')).toBeInTheDocument();
+    });
   });
 });

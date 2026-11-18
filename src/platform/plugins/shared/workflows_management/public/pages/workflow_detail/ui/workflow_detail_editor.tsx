@@ -218,8 +218,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props
 
   const { editorView, setEditorView, graphDirection, setGraphDirection } = useWorkflowUrlState();
   const showGraph = isVisualEditorEnabled && editorView === 'graph';
-  // Creation state: hide the floating bottom bar until the workflow has
-  // structure or the user is in YAML (reached via "Edit as YAML").
+  // The floating bottom bar belongs to the visual editor: it is hidden when that is off.
   const showBottomBar = isVisualEditorEnabled;
 
   const focusedStepId = useSelector(selectFocusedStepId);
@@ -358,7 +357,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props
                 }}
               >
                 {documentationLabel}
-                <EuiIcon type="popout" size="s" aria-hidden />
+                <EuiIcon type="external" size="s" aria-hidden />
               </span>
             }
             disableScreenReaderOutput
@@ -450,7 +449,8 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props
             >
               <React.Suspense fallback={null}>
                 <WorkflowVisualEditor
-                  onStepRun={handleStepRun}
+                  // Without the permission to test a step the visual editor offers no Run controls.
+                  onStepRun={canTestStep ? handleStepRun : undefined}
                   onRunWorkflow={handleRunWorkflowInEditor}
                   canRunStepDirectly={canRunStepDirectly}
                   direction={graphDirection}

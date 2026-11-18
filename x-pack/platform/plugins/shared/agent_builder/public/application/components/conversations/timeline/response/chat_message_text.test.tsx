@@ -16,6 +16,7 @@ import {
 } from '@kbn/agent-builder-common/tools/tool_result';
 import { cloneDeep } from 'lodash';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { ConversationRoundStepType } from '@kbn/agent-builder-common';
 import unified from 'unified';
 import remarkParse from 'remark-parse-no-trim';
@@ -32,6 +33,24 @@ import type { AgentBuilderStartDependencies } from '../../../../../types';
 import { setWith } from '@kbn/safer-lodash-set';
 import { ChartType } from '@kbn/visualization-utils';
 import dedent from 'dedent';
+
+jest.mock('./attachments/inline_attachment_with_actions', () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const _React = require('react');
+  return {
+    InlineAttachmentWithActions: () =>
+      _React.createElement('div', { 'data-test-subj': 'inline-attachment-card' }),
+  };
+});
+
+jest.mock('./attachments/attachment_loading_skeleton', () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const _React = require('react');
+  return {
+    AttachmentLoadingSkeleton: () =>
+      _React.createElement('div', { 'data-test-subj': 'attachment-loading-skeleton' }),
+  };
+});
 
 jest.mock('@kbn/agent-builder-visualizations', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -548,6 +567,153 @@ Area Chart
         // are correctly passed down in the customized `th` and `td` render functions.
         expect(screen.getByText('Column 2').closest('th')).toHaveStyle('text-align: right');
         expect(screen.getByText('ipsum').closest('td')).toHaveStyle('text-align: right');
+      });
+    });
+
+    describe('inline attachments', () => {
+      const attachment = {
+        id: 'a1',
+        type: 'dashboard',
+        versions: [
+          {
+            version: 1,
+            created_at: '2024-01-01T10:00:00.000Z',
+            data: {},
+            content_hash: 'hash',
+          },
+        ],
+        current_version: 1,
+        active: true,
+      } as VersionedAttachment;
+
+      const renderReply = (content: string, isStreaming = false) =>
+        render(
+          <ChatMessageText
+            content={content}
+            steps={[toolCallStep]}
+            conversationAttachments={[attachment]}
+            conversationId="conversation-1"
+            isStreaming={isStreaming}
+          />
+        );
+
+      it('renders an attachment card outside the reply text styles', () => {
+        renderReply('Here is the table.\n\n<render_attachment id="a1" />\n\nAnything else?');
+
+        const card = screen.getByTestId('inline-attachment-card');
+        expect(card.closest('.euiText')).toBeNull();
+        expect(screen.getByText('Here is the table.').closest('.euiText')).not.toBeNull();
+        expect(screen.getByText('Anything else?').closest('.euiText')).not.toBeNull();
+        expect(screen.getAllByText(/Here is the table\./)).toHaveLength(1);
+        expect(screen.getAllByText(/Anything else\?/)).toHaveLength(1);
+      });
+
+      it('leaves a tag inside a code block as text', () => {
+        renderReply('```\n<render_attachment id="a1" />\n```');
+
+        expect(screen.queryByTestId('inline-attachment-card')).not.toBeInTheDocument();
+        expect(screen.getByText('<render_attachment id="a1" />')).toBeInTheDocument();
+      });
+
+      it('keeps a numbered list whole and renders the card after it', () => {
+        renderReply('1. First\n2. See <render_attachment id="a1" /> here\n3. Third');
+
+        const card = screen.getByTestId('inline-attachment-card');
+        const list = screen.getByRole('list');
+        const prose = list.closest('.euiText');
+        expect(list).toHaveTextContent('First');
+        expect(list).toHaveTextContent('See here');
+        expect(list).toHaveTextContent('Third');
+        expect(list.contains(card)).toBe(false);
+        expect(card.previousElementSibling).toBe(prose?.parentElement);
+        expect(card.previousElementSibling).toContainElement(list);
+      });
+
+      it('keeps the first markdown block mounted when the first attachment tag arrives', () => {
+        const prose = 'Here is a visualization:\n<visualization tool-result-id="6K4K" />';
+        const { rerender } = render(
+          <ChatMessageText
+            content={prose}
+            steps={[toolCallStep]}
+            conversationAttachments={[attachment]}
+            conversationId="conversation-1"
+          />
+        );
+
+        const markdownBlock = screen
+          .getByTestId('visualize-esql')
+          .closest('.euiText')?.parentElement;
+
+        rerender(
+          <ChatMessageText
+            content={`${prose}\n\n<render_attachment id="a1" />`}
+            steps={[toolCallStep]}
+            conversationAttachments={[attachment]}
+            conversationId="conversation-1"
+          />
+        );
+
+        const card = screen.getByTestId('inline-attachment-card');
+        const currentMarkdownBlock = screen
+          .getByTestId('visualize-esql')
+          .closest('.euiText')?.parentElement;
+        expect(currentMarkdownBlock).toBe(markdownBlock);
+        expect(card.previousElementSibling).toBe(markdownBlock);
+      });
+
+      it('keeps a visualization inside the reply text when an attachment is also present', () => {
+        renderReply(
+          'Here is a visualization:\n<visualization tool-result-id="6K4K" />\n\n<render_attachment id="a1" />'
+        );
+
+        const visualization = screen.getByTestId('visualize-esql');
+        const card = screen.getByTestId('inline-attachment-card');
+        expect(visualization.closest('.euiText')).not.toBeNull();
+        expect(card.closest('.euiText')).toBeNull();
+      });
+
+      it('renders a loading skeleton outside the reply text while streaming', () => {
+        renderReply('Before <render_attachment id="a1" /> after', true);
+
+        const skeleton = screen.getByTestId('attachment-loading-skeleton');
+        expect(skeleton.closest('.euiText')).toBeNull();
+        expect(screen.queryByTestId('inline-attachment-card')).not.toBeInTheDocument();
+        expect(screen.getAllByText(/Before/)).toHaveLength(1);
+        expect(screen.getAllByText(/after/)).toHaveLength(1);
+      });
+
+      it('leaves an unfinished tag in the reply text', () => {
+        renderReply('Before <render_attachment id="a1"');
+
+        expect(screen.queryByTestId('attachment-loading-skeleton')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('inline-attachment-card')).not.toBeInTheDocument();
+        expect(screen.getByText(/Before <render_attachment id="a1"/)).toBeInTheDocument();
+      });
+
+      it('renders no card or empty slot for a tag without an id', () => {
+        renderReply('Hello <render_attachment version="1" />');
+
+        expect(screen.queryByTestId('inline-attachment-card')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('attachment-loading-skeleton')).not.toBeInTheDocument();
+        const prose = screen.getByText('Hello').closest('.euiText');
+        const messageContainer = prose?.parentElement?.parentElement;
+        expect(messageContainer?.childElementCount).toBe(1);
+      });
+
+      it('renders no card or empty slot when the attachment cannot be resolved', () => {
+        render(
+          <ChatMessageText
+            content={'Hello <render_attachment id="a1" />'}
+            steps={[]}
+            conversationAttachments={[attachment]}
+          />
+        );
+
+        expect(screen.queryByTestId('inline-attachment-card')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('attachment-loading-skeleton')).not.toBeInTheDocument();
+        const prose = screen.getByText('Hello').closest('.euiText');
+        const messageContainer = prose?.parentElement?.parentElement;
+        expect(messageContainer?.childElementCount).toBe(1);
       });
     });
   });

@@ -6,7 +6,7 @@
  */
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
-import { merge, EMPTY } from 'rxjs';
+import { merge } from 'rxjs';
 import { Comparators } from '@elastic/eui';
 import { useUrlState } from '@kbn/ml-url-state';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
@@ -84,7 +84,7 @@ export const useESQLDataVisualizerData = (
 ) => {
   const [lastRefresh, setLastRefresh] = useState(0);
   const { services } = useDataVisualizerKibana();
-  const { uiSettings, executionContext, data, cps } = services;
+  const { uiSettings, executionContext, data } = services;
 
   const parentExecutionContext = useObservable(executionContext?.context$);
 
@@ -301,8 +301,7 @@ export const useESQLDataVisualizerData = (
       const timeUpdateSubscription = merge(
         timefilter.getTimeUpdate$(),
         timefilter.getAutoRefreshFetch$(),
-        mlTimefilterRefresh$,
-        cps?.cpsManager?.getProjectRouting$() ?? EMPTY
+        mlTimefilterRefresh$
       ).subscribe(() => {
         setGlobalState({
           time: timefilter.getTime(),

@@ -10,7 +10,8 @@
 import { Document, isMap, isPair, isScalar, isSeq, parseDocument } from 'yaml';
 import type { Node, Scalar, YAMLMap, YAMLSeq } from 'yaml';
 import type { BranchSlot } from '@kbn/workflows';
-import { isNestedStepKey } from '@kbn/workflows-yaml';
+import { STEP_CHILD_CONTAINER_KEYS } from '@kbn/workflows';
+import { detectIndent } from '@kbn/workflows-yaml';
 
 /**
  * Canvas edit-mode mutations. Every function takes the full workflow YAML,
@@ -41,14 +42,6 @@ const asBlockSeq = (seq: YAMLSeq): YAMLSeq => {
   return seq;
 };
 
-const detectIndent = (yaml: string): number => {
-  for (const line of yaml.split('\n')) {
-    const match = line.match(/^( +)\S/);
-    if (match) return match[1].length;
-  }
-  return 2;
-};
-
 const serialize = (doc: Document, indent: number): string => doc.toString({ indent, lineWidth: 0 });
 
 const parse = (yaml: string): { doc: Document; error?: string } => {
@@ -72,6 +65,20 @@ const parseStepFragment = (fragment: string): { node?: YAMLMap; error?: string }
     return { error: 'Step YAML must be a mapping' };
   }
   return { node: doc.contents };
+};
+
+const STEP_CHILD_CONTAINER_KEY_SET: ReadonlySet<string> = new Set(STEP_CHILD_CONTAINER_KEYS);
+
+/**
+ * The step sequences held under a child-container key. `cases` / `branches`
+ * hold wrapper maps (`{ match, steps }` / `{ name, steps }`), so only each
+ * wrapper's `steps` list is returned and a wrapper's own `name` is never read
+ * as a step name. Every other container key is itself a step sequence.
+ */
+const stepListsUnder = (key: string, value: unknown): unknown[] => {
+  if (key !== 'cases' && key !== 'branches') return [value];
+  if (!isSeq(value)) return [];
+  return value.items.filter(isMap).map((wrapper) => wrapper.get('steps'));
 };
 
 interface StepLocation {
@@ -100,16 +107,21 @@ const findStepInNode = (
   }
   if (isMap(node)) {
     const nestedPairs = node.items.filter(
-      (pair) => isPair(pair) && isScalar(pair.key) && isNestedStepKey(pair.key.value)
+      (pair) =>
+        isPair(pair) &&
+        isScalar(pair.key) &&
+        STEP_CHILD_CONTAINER_KEY_SET.has(pair.key.value as string)
     );
     for (const pair of nestedPairs) {
       const key = (pair.key as Scalar).value as string;
       const isFailureBlock = key === 'on-failure' || key === 'iteration-on-failure';
       const owner = isFailureBlock && isMap(pair.value) ? pair.value : undefined;
-      const found = isFailureBlock
-        ? findStepInNode(owner?.get('fallback'), stepName, owner)
-        : findStepInNode(pair.value, stepName, key === 'fallback' ? node : undefined);
-      if (found) return found;
+      const lists = isFailureBlock ? [owner?.get('fallback')] : stepListsUnder(key, pair.value);
+      const fallbackOwner = isFailureBlock ? owner : key === 'fallback' ? node : undefined;
+      for (const list of lists) {
+        const found = findStepInNode(list, stepName, fallbackOwner);
+        if (found) return found;
+      }
     }
   }
   return null;
@@ -133,7 +145,9 @@ export const collectStepNames = (yaml: string): Set<string> => {
     const name = node.get('name');
     if (typeof name === 'string') names.add(name);
     for (const pair of node.items) {
-      if (isPair(pair) && isScalar(pair.key) && isNestedStepKey(pair.key.value)) walk(pair.value);
+      const key = isPair(pair) && isScalar(pair.key) ? (pair.key.value as string) : undefined;
+      if (key && STEP_CHILD_CONTAINER_KEY_SET.has(key))
+        stepListsUnder(key, pair.value).forEach(walk);
     }
   };
   if (isMap(doc.contents)) walk(doc.contents.get('steps'));
@@ -159,68 +173,6 @@ const ensureTopLevelSeq = (doc: Document, key: 'steps' | 'triggers'): YAMLSeq =>
   const seq = doc.createNode([]) as YAMLSeq;
   root.set(key, seq);
   return seq;
-};
-
-/**
- * Path from the root `steps` array into a nested branch. Each segment selects
- * `steps[stepIndex]` then opens that step's `steps` (then) or `else` array.
- * An empty path targets the top-level `steps` array.
- */
-export type StepInsertPath = ReadonlyArray<{
-  readonly stepIndex: number;
-  readonly branch: 'steps' | 'else';
-}>;
-
-const ensureNestedSeq = (
-  doc: Document,
-  path: StepInsertPath
-): { seq?: YAMLSeq; error?: string } => {
-  let seq = ensureTopLevelSeq(doc, 'steps');
-  for (const segment of path) {
-    const owner = seq.items[segment.stepIndex];
-    if (!isMap(owner)) {
-      return { error: `Step at index ${segment.stepIndex} not found along insert path` };
-    }
-    const existing = owner.get(segment.branch);
-    if (isSeq(existing)) {
-      seq = asBlockSeq(existing);
-      continue;
-    }
-    const created = doc.createNode([]) as YAMLSeq;
-    owner.set(segment.branch, created);
-    seq = created;
-  }
-  return { seq };
-};
-
-/** Splices a step (YAML fragment) into the top-level `steps` array at `index`. */
-export const insertStepAtIndex = (
-  yaml: string,
-  stepFragment: string,
-  index: number
-): MutationResult => insertStepAtPath(yaml, stepFragment, [], index);
-
-/**
- * Splices a step into the steps array reached by `path` (empty = top-level
- * `steps`) at `index`. Creates missing `steps` / `else` sequences along the way.
- */
-export const insertStepAtPath = (
-  yaml: string,
-  stepFragment: string,
-  path: StepInsertPath,
-  index: number
-): MutationResult => {
-  const { doc, error } = parse(yaml);
-  if (error) return fail(yaml, error);
-  const { node, error: fragmentError } = parseStepFragment(stepFragment);
-  if (!node) return fail(yaml, fragmentError ?? 'Invalid step');
-
-  const { seq, error: pathError } = ensureNestedSeq(doc, path);
-  if (!seq) return fail(yaml, pathError ?? 'Invalid insert path');
-
-  const clamped = Math.max(0, Math.min(index, seq.items.length));
-  seq.items.splice(clamped, 0, node);
-  return { success: true, yaml: serialize(doc, detectIndent(yaml)) };
 };
 
 /**
@@ -423,32 +375,6 @@ export const setStepFallback = (
 };
 
 /**
- * Sets `on-failure.fallback` on a single step YAML fragment (panel-local),
- * keeping sibling `on-failure` keys intact.
- */
-export const applyFallbackToStepFragment = (
-  stepFragment: string,
-  fallbackStepFragment: string
-): { success: true; fragment: string } | { success: false; error: string } => {
-  const { node: fallbackStep, error: fragmentError } = parseStepFragment(fallbackStepFragment);
-  if (!fallbackStep) {
-    return { success: false, error: fragmentError ?? 'Invalid fallback step' };
-  }
-  const doc = parseDocument(stepFragment);
-  if (doc.errors.length > 0 || !isMap(doc.contents)) {
-    return { success: false, error: 'Step YAML must be a mapping' };
-  }
-  const existing = doc.contents.get('on-failure');
-  const onFailure = isMap(existing) ? existing : (doc.createNode({}) as YAMLMap);
-  onFailure.set('fallback', doc.createNode([fallbackStep]));
-  if (!isMap(existing)) doc.setIn(['on-failure'], onFailure);
-  return {
-    success: true,
-    fragment: doc.toString({ indent: detectIndent(stepFragment), lineWidth: 0 }),
-  };
-};
-
-/**
  * Deletes a step by name. A step's own `on-failure` branch goes with it. When
  * the step is a fallback step, its parent's error route is cleared instead.
  */
@@ -483,24 +409,6 @@ const removeChildMap = (doc: Document, target: YAMLMap): void => {
     return node.items.some((p) => isPair(p) && visit(p.value));
   };
   visit(doc.contents);
-};
-
-/** Inserts a copy of `stepName` directly below it, named `<name> copy` (made unique). */
-export const duplicateStep = (
-  yaml: string,
-  stepName: string
-): MutationResult & { newName?: string } => {
-  const { doc, error } = parse(yaml);
-  if (error) return fail(yaml, error);
-  const location = locateStep(doc, stepName);
-  if (!location) return fail(yaml, `Step "${stepName}" not found`);
-
-  const copy = location.node.clone() as YAMLMap;
-  const taken = collectStepNames(yaml);
-  const newName = uniqueStepName(`${stepName} copy`, taken);
-  copy.set('name', newName);
-  location.seq.items.splice(location.index + 1, 0, copy);
-  return { success: true, yaml: serialize(doc, detectIndent(yaml)), newName };
 };
 
 /**

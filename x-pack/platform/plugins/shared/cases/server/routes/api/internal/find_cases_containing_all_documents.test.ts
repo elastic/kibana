@@ -54,7 +54,7 @@ describe('findCasesContainingAllDocuments', () => {
       expect(filter).not.toContain('cases-attachments.attributes.type');
     });
 
-    it('includes the security.entity unified type so entity attachments participate', async () => {
+    it('includes the security.entity and security.attack unified types so they participate', async () => {
       const casesClient = buildCasesClient({ documents: [{ id: 'alert-id' }] });
 
       await processCase(casesClient, 'case-id', new Set(['alert-id']));
@@ -63,7 +63,23 @@ describe('findCasesContainingAllDocuments', () => {
         calls: [params],
       } = jest.mocked(casesClient.attachments.getAllDocumentsAttachedToCase).mock;
 
-      expect(params[0].unifiedAttachmentTypes).toEqual(['security.entity']);
+      expect(params[0].unifiedAttachmentTypes).toEqual(['security.entity', 'security.attack']);
+    });
+
+    it('returns case id when the attack and its alerts are present', async () => {
+      const casesClient = buildCasesClient({
+        documents: [{ id: 'attack-id' }, { id: 'alert-id' }],
+      });
+
+      const result = await processCase(casesClient, 'case-id', new Set(['attack-id', 'alert-id']));
+      expect(result).toBe('case-id');
+    });
+
+    it('returns null when the attack is present but one of its alerts is not', async () => {
+      const casesClient = buildCasesClient({ documents: [{ id: 'attack-id' }] });
+
+      const result = await processCase(casesClient, 'case-id', new Set(['attack-id', 'alert-id']));
+      expect(result).toBeNull();
     });
 
     it('returns case id when an entity attachment id is present', async () => {

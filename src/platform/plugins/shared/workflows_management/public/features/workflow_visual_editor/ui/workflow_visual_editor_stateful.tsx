@@ -7,13 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiEmptyPrompt,
-  EuiFocusTrap,
-  EuiLoadingSpinner,
-  useEuiShadow,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import type { ColorMode, Viewport } from '@xyflow/react';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
@@ -24,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { monaco } from '@kbn/monaco';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
+import { assertNever } from '@kbn/std';
 import {
   isTriggerType,
   type LayoutDirection,
@@ -39,7 +34,6 @@ import {
   WorkflowGraphCanvasWithoutProvider,
   type WorkflowGraphEditActions,
   type WorkflowGraphInsertionContext,
-  WORKFLOWS_SURFACE_RADIUS,
 } from '@kbn/workflows-ui';
 import {
   CANVAS_CONFIG_PANEL_MARGIN,
@@ -54,45 +48,24 @@ import type { DataReferenceRunControls } from './data_reference_catalog_tree';
 import { LastRunWorkflowIdProvider } from './last_run_hint';
 import { StepConfigPanel } from './step_config_panel';
 import { TriggerConfigPanel } from './trigger_config_panel';
-import { useCreationAgentChat } from './use_creation_agent_chat';
+import { useCanvasUndo } from './use_canvas_undo';
 import { useStepFragmentYamlSupport } from './use_step_fragment_yaml_support';
-import {
-  getShowCreationEmptyState,
-  subscribeShowCreationEmptyState,
-} from './workflow_creation_empty_state_prototype';
-import { WorkflowCreationPanel } from './workflow_creation_panel';
-import {
-  WorkflowSettingsBPanel,
-  type WorkflowSettingsBPanelKind,
-} from './workflow_settings_b_panel';
-import { WorkflowSettingsCSurface } from './workflow_settings_c_surface';
-import {
-  getWorkflowSettingsBNodeLayout,
-  getWorkflowSettingsSurfaceVariant,
-  subscribeWorkflowSettingsSurfaceVariant,
-  type WorkflowSettingsBNodeLayout,
-  type WorkflowSettingsSurfaceVariant,
-} from './workflow_settings_surface_variant';
-import { type FlyoutTarget, WorkflowVisualEditorFlyout } from './workflow_visual_editor_flyout';
-import { PLUGIN_ID } from '../../../../common';
 import { createWorkflowContextRegistry } from '../../../../common/lib/create_workflow_context_registry';
 import { getAllConnectorsWithDynamic } from '../../../../common/schema';
-import { flushWorkflowComputation } from '../../../entities/workflows/store/workflow_detail/middleware';
 import {
   selectConnectors,
   selectEditorWorkflowDefinition,
   selectEditorWorkflowGraph,
-  selectEditorWorkflowLookup,
   selectEditorYaml,
   selectIsExecutionsTab,
   selectIsYamlSyntaxValid,
   selectStepExecutions,
   selectTreeRuns,
   selectWorkflowId,
-  selectWorkflowName,
   selectYamlString,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import {
+  applyYamlEdit,
   HIGHLIGHTED_STEP_TRIGGER,
   setHighlightedStepId,
   setYamlString,
@@ -100,10 +73,6 @@ import {
 import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowEditorReadOnly } from '../../../hooks/use_workflow_editor_read_only';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
-import {
-  parseConstsToFields,
-  parseOutputsToFields,
-} from '../../../pages/workflow_detail/ui/workflow_settings_fields_model';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { triggerSchemas } from '../../../trigger_schemas';
 import { generateTriggerSnippet } from '../../../widgets/workflow_yaml_editor/lib/snippets/generate_trigger_snippet';
@@ -114,6 +83,8 @@ import {
 } from '../../actions_menu_popover';
 import { collectStepsByName } from '../lib/collect_steps';
 import { getStepScope } from '../lib/get_step_scope';
+import { isStructuralFragmentChange } from '../lib/is_structural_fragment_change';
+import { resolveExternalStepFragment } from '../lib/resolve_external_step_fragment';
 import { buildDefaultStep, getStepConfigWarningReason } from '../lib/step_form_schema';
 import {
   appendTrigger,
@@ -282,9 +253,8 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   onViewportChange,
   editorRef,
 }) => {
-  const { colorMode, euiTheme } = useEuiTheme();
-  const floatingShadow = useEuiShadow('m');
-  const { notifications, application, workflowsExtensions } = useKibana().services;
+  const { colorMode } = useEuiTheme();
+  const { notifications, workflowsExtensions } = useKibana().services;
   // Persisted preferred width from manual resize only — not the temporary
   // bump used while the advanced field editor is open.
   // No initial value, so nothing is saved until the user drags the panel edge.
@@ -319,25 +289,16 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   // not be the mutation source. Always mutate from `yamlString` (the live draft).
   const yamlString = useSelector(selectYamlString) ?? '';
   const workflowId = useSelector(selectWorkflowId);
-  const workflowName = useSelector(selectWorkflowName);
-  const workflowLookup = useSelector(selectEditorWorkflowLookup);
   const loadedConnectors = useSelector(selectConnectors);
   const { canExecuteWorkflow, canUpdateWorkflow } = useWorkflowsCapabilities();
   const { selectedStepId, setSelectedStep, setEditorView } = useWorkflowUrlState();
   const dispatch = useDispatch();
   const wrapperRef = useRef<HTMLDivElement | null>(null);
-  const flyoutPanelRef = useRef<HTMLDivElement | null>(null);
   const isEditorReadOnly = useWorkflowEditorReadOnly();
 
   // Mirrors the YAML editor's read-only gate (managed workflows, per-workflow edit
   // permission, executions tab) so graph authoring never outpaces what YAML allows.
   const canEdit = Boolean(canUpdateWorkflow) && !isExecutionsTab && !isEditorReadOnly;
-
-  const { isAgentBuilderAvailable, openAgentChat } = useCreationAgentChat({
-    yaml: editorYaml,
-    workflowId,
-    workflowName,
-  });
 
   // Same contract set that generates the YAML schema, including dynamic connector types.
   const connectors = useMemo(
@@ -354,16 +315,6 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   const [pendingInsert, setPendingInsert] = useState<PendingInsertVisual | null>(null);
   /** After a trigger insert's Done: clear the ghost on the next definition update (not eagerly). */
   const clearPendingAfterDefinitionRef = useRef(false);
-  const [settingsSurfaceVariant, setSettingsSurfaceVariantState] =
-    useState<WorkflowSettingsSurfaceVariant>(() => getWorkflowSettingsSurfaceVariant());
-  const [settingsBNodeLayout, setSettingsBNodeLayoutState] = useState<WorkflowSettingsBNodeLayout>(
-    () => getWorkflowSettingsBNodeLayout()
-  );
-  const [settingsBKind, setSettingsBKind] = useState<WorkflowSettingsBPanelKind | null>(null);
-  const [canvasHeight, setCanvasHeight] = useState(0);
-  const [showCreationEmptyState, setShowCreationEmptyStateLocal] = useState(() =>
-    getShowCreationEmptyState()
-  );
   // Refs so the live-apply callback (passed to StepConfigPanel, which calls
   // it on every draft keystroke) always reads fresh state without the
   // identity churn a useCallback dependency on yamlString/panel would cause.
@@ -378,37 +329,10 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   const lastAppliedYamlRef = useRef<string | null>(null);
   /** Counter backing each step panel's `sessionId` (see PanelState). */
   const nextStepPanelSessionIdRef = useRef(0);
-
-  useEffect(
-    () =>
-      subscribeWorkflowSettingsSurfaceVariant(() => {
-        setSettingsSurfaceVariantState(getWorkflowSettingsSurfaceVariant());
-        setSettingsBNodeLayoutState(getWorkflowSettingsBNodeLayout());
-      }),
-    []
-  );
-
-  useEffect(
-    () =>
-      subscribeShowCreationEmptyState(() => {
-        setShowCreationEmptyStateLocal(getShowCreationEmptyState());
-      }),
-    []
-  );
-
-  const openSettingsBPanel = useCallback(
-    (kind: WorkflowSettingsBPanelKind) => {
-      setPanel(null);
-      setPendingInsert(null);
-      setSelectedStep(null);
-      setSettingsBKind(kind);
-    },
-    [setSelectedStep]
-  );
-
-  const closeSettingsBPanel = useCallback(() => {
-    setSettingsBKind(null);
-  }, []);
+  /** The open step as the YAML last had it after a change from outside the panel, for its session. */
+  const [syncedStepFragment, setSyncedStepFragment] = useState<
+    { readonly sessionId: number; readonly fragment: string } | undefined
+  >();
 
   // POC pattern: cache the last valid WorkflowYaml so the canvas can stay
   // up while the user fixes a YAML syntax error.
@@ -432,14 +356,6 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     setPendingInsert(null);
   }, [definition]);
 
-  // Focus the flyout panel when a step becomes selected so keyboard users
-  // land inside the panel rather than remaining on the canvas node.
-  useEffect(() => {
-    if (selectedStepId) {
-      flyoutPanelRef.current?.focus();
-    }
-  }, [selectedStepId]);
-
   // Track canvas region width/height so floating panels stay canvas-bounded
   // (including when the push-type execution flyout shrinks this wrapper).
   useEffect(() => {
@@ -447,7 +363,6 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     if (!el || typeof ResizeObserver === 'undefined') return;
     const update = () => {
       setCanvasWidth(el.clientWidth);
-      setCanvasHeight(el.clientHeight);
     };
     update();
     const observer = new ResizeObserver(update);
@@ -485,46 +400,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     [contextRegistry, workflow, editorGraph]
   );
 
-  const settingsCounts = useMemo(() => {
-    try {
-      const doc = parseDocument(editorYaml);
-      const js = doc.toJS() as Record<string, unknown> | null;
-      return {
-        constants: parseConstsToFields(js?.consts ?? workflow?.consts).length,
-        outputs: parseOutputsToFields(js?.outputs ?? workflow?.outputs).length,
-      };
-    } catch {
-      return {
-        constants: parseConstsToFields(workflow?.consts).length,
-        outputs: parseOutputsToFields(workflow?.outputs).length,
-      };
-    }
-  }, [editorYaml, workflow?.consts, workflow?.outputs]);
-
-  const floatingPanelOpen = panel != null || settingsBKind != null;
-
-  const settingsNodesProp = useMemo(
-    () =>
-      canEdit && settingsSurfaceVariant === 'b'
-        ? {
-            workflowName: workflowName ?? workflow?.name ?? '',
-            constantsCount: settingsCounts.constants,
-            outputsCount: settingsCounts.outputs,
-            selectedKind: settingsBKind ?? undefined,
-            cardLayout: settingsBNodeLayout,
-          }
-        : undefined,
-    [
-      canEdit,
-      settingsSurfaceVariant,
-      workflowName,
-      workflow?.name,
-      settingsCounts.constants,
-      settingsCounts.outputs,
-      settingsBKind,
-      settingsBNodeLayout,
-    ]
-  );
+  const floatingPanelOpen = panel != null;
 
   const disabledTriggerIds = useMemo(() => {
     const hasManual = workflow?.triggers?.some((t) => t.type === 'manual');
@@ -573,6 +449,17 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     [transformed.nodeRefs]
   );
 
+  /** Ids of the nodes inside a fallback (error route) lane, from the lane stamp on node data. */
+  const fallbackNodeIds = useMemo(
+    () =>
+      new Set(
+        transformed.nodes
+          .filter((n) => n.type !== 'trigger' && n.data.fallbackOf !== undefined)
+          .map((n) => n.id)
+      ),
+    [transformed.nodes]
+  );
+
   // Node ids are a slugified form of the step name (spaces/underscores become
   // hyphens — see IdAllocator), not the step name itself, and `transformed`
   // only reflects a just-inserted/renamed step on the render after the one
@@ -589,8 +476,20 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     setSelectedStep(nodeId);
   }, [nodeIdForStepName, setSelectedStep]);
 
+  // Same lookup for the insert flash: it needs the real (slugified) node id, which only exists
+  // once `transformed` reflects the inserted step.
+  const pendingFlashStepNameRef = useRef<string | null>(null);
+  useEffect(() => {
+    const name = pendingFlashStepNameRef.current;
+    if (!name) return;
+    const nodeId = nodeIdForStepName(name);
+    if (!nodeId) return;
+    pendingFlashStepNameRef.current = null;
+    setFlashNodeId(nodeId);
+  }, [nodeIdForStepName]);
+
   const applyMutation = useCallback(
-    (result: MutationResult): boolean => {
+    (result: MutationResult, options?: { flush?: boolean }): boolean => {
       if (!result.success) {
         notifications.toasts.addDanger({
           title: i18n.translate('workflows.visualEditor.mutationFailed', {
@@ -600,11 +499,16 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
         });
         return false;
       }
-      dispatch(setYamlString(result.yaml));
       // Visual mutations must update the graph in the same tick as the YAML
       // write — the middleware's typing debounce would otherwise leave the
       // canvas empty for ~250ms after Done (draft cleared, structure not yet).
-      flushWorkflowComputation();
+      // `applyYamlEdit` computes synchronously (ADR-0002). Edits that cannot change
+      // the graph pass `flush: false` and ride the typing debounce via `setYamlString`.
+      if (options?.flush ?? true) {
+        dispatch(applyYamlEdit(result.yaml));
+      } else {
+        dispatch(setYamlString(result.yaml));
+      }
       return true;
     },
     [dispatch, notifications.toasts]
@@ -640,11 +544,12 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
         case 'fallback':
           result = setStepFallback(yamlString, context.stepName, fragment);
           break;
+        default:
+          return assertNever(context);
       }
       const ok = applyMutation(result);
       if (ok && newName) {
-        // Node ids follow step names for non-colliding names.
-        setFlashNodeId(newName);
+        pendingFlashStepNameRef.current = newName;
       }
       return result;
     },
@@ -737,15 +642,17 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       if (!newName) return;
       const isRename = newName !== current.stepName;
       if (isRename && collectStepNames(yamlStringRef.current).has(newName)) return;
+      // Edits to the step's own settings (`with`, `if`, `timeout`, ...) leave the graph as it is, so
+      // they wait for the computation debounce instead of recomputing on every keystroke.
+      const isStructural = isStructuralFragmentChange(lastAppliedStepFragmentRef.current, fragment);
       const result = replaceStepFragment(yamlStringRef.current, current.stepName, fragment);
-      if (!applyMutation(result)) return;
+      // Node ids follow step names — a rename must recompute in this same tick so nodeRefs
+      // carries the new id (the selection effect below would otherwise miss the step for
+      // the rest of the 250ms computation debounce window).
+      if (!applyMutation(result, { flush: isStructural || isRename })) return;
       lastAppliedStepFragmentRef.current = fragment;
       lastAppliedYamlRef.current = result.yaml;
       if (isRename) {
-        // Node ids follow step names — flush so nodeRefs carries the new id
-        // in this same tick (the selection effect below would otherwise miss
-        // the step for the rest of the 250ms computation debounce window).
-        flushWorkflowComputation();
         setPanel((prev) =>
           prev?.mode === 'edit' && prev.stepName === current.stepName
             ? { ...prev, stepName: newName }
@@ -758,6 +665,24 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     },
     [applyMutation]
   );
+
+  // The YAML changed under the open step (an undo, an edit in the YAML tab): hand the panel the
+  // step as it now is, so its next edit builds on that instead of writing its old draft back.
+  useEffect(() => {
+    const current = panelRef.current;
+    if (current?.mode !== 'edit') return;
+    const fragment = resolveExternalStepFragment({
+      editorYaml: yamlString,
+      stepName: current.stepName,
+      lastAppliedYaml: lastAppliedYamlRef.current,
+      lastAppliedFragment: lastAppliedStepFragmentRef.current,
+    });
+    if (fragment === undefined) return;
+    // Adopted: the panel will report it back, and that echo must not be written again.
+    lastAppliedStepFragmentRef.current = fragment;
+    lastAppliedYamlRef.current = yamlString;
+    setSyncedStepFragment({ sessionId: current.sessionId, fragment });
+  }, [yamlString]);
 
   /**
    * Footer button: undoes the insert, restoring the pre-flyout graph (origin
@@ -830,7 +755,6 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       clearPendingAfterDefinitionRef.current = false;
     }
     setPanel(null);
-    setSettingsBKind(null);
     setPendingInsert(null);
     setSelectedStep(null);
   }, [panel, applyMutation, editorYaml, setSelectedStep]);
@@ -838,7 +762,6 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   /** Steps live-apply, so switching the canvas/URL selection never loses anything. */
   const requestStepSelect = useCallback(
     (id: string | undefined) => {
-      setSettingsBKind(null);
       setSelectedStep(id ?? null);
     },
     [setSelectedStep]
@@ -846,11 +769,9 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
 
   const panelIsFallbackStep = useMemo(() => {
     if (panel?.mode !== 'edit') return false;
-    const ref = Object.values(transformed.nodeRefs).find(
-      (r) => r.kind === 'step' && r.stepName === panel.stepName
-    );
-    return Boolean(ref && ref.kind === 'step' && ref.fallbackOf);
-  }, [panel, transformed.nodeRefs]);
+    const nodeId = nodeIdForStepName(panel.stepName);
+    return nodeId !== undefined && fallbackNodeIds.has(nodeId);
+  }, [panel, nodeIdForStepName, fallbackNodeIds]);
 
   const openEditPanel = useCallback(
     (stepName: string) => {
@@ -872,10 +793,10 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       if (current?.mode === 'edit' && current.stepName === stepName) return;
       setInsertion(null);
       setPendingInsert(null);
-      setSettingsBKind(null);
       // Baseline the live-apply dedup to the fragment we're opening with, so
       // the panel's first onFragmentChange (its own mount value) is a no-op.
       lastAppliedStepFragmentRef.current = fragment;
+      lastAppliedYamlRef.current = yamlStringRef.current;
       setPanel({
         mode: 'edit',
         origin: 'edit',
@@ -900,7 +821,6 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       const triggerLabel = triggerSchemas.getTriggerName(triggerType);
       setInsertion(null);
       setPendingInsert(null);
-      setSettingsBKind(null);
       setPanel((current) => {
         if (current?.mode === 'insert-trigger') return current;
         if (
@@ -928,7 +848,6 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   const nodeRefsRef = useRef(transformed.nodeRefs);
   nodeRefsRef.current = transformed.nodeRefs;
   useEffect(() => {
-    if (!canEdit) return;
     if (!selectedStepId) {
       setPanel((current) =>
         current?.mode === 'edit' || current?.mode === 'edit-trigger' ? null : current
@@ -948,48 +867,79 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
       return;
     }
     openEditPanelRef.current(stepName);
-  }, [canEdit, selectedStepId]);
+  }, [selectedStepId]);
+
+  // The canvas hands these actions to every node through a context, so a new object re-renders
+  // every node. They must not change on a keystroke (the step form rewrites the YAML on each one):
+  // they read the latest state from this ref instead of closing over it.
+  const editStateRef = useRef({
+    yamlString,
+    panel,
+    selectedStepId,
+    nodeRefs: transformed.nodeRefs,
+    fallbackNodeIds,
+    nodeIdForStepName,
+    requestStepSelect,
+    setSelectedStep,
+    applyMutation,
+  });
+  editStateRef.current = {
+    yamlString,
+    panel,
+    selectedStepId,
+    nodeRefs: transformed.nodeRefs,
+    fallbackNodeIds,
+    nodeIdForStepName,
+    requestStepSelect,
+    setSelectedStep,
+    applyMutation,
+  };
 
   const editActions = useMemo<WorkflowGraphEditActions | undefined>(() => {
     if (!canEdit) return undefined;
     return {
       onInsert: (context, anchor) => {
+        const { setSelectedStep: clearSelection, nodeIdForStepName: idForName } =
+          editStateRef.current;
         setPanel(null);
-        setSettingsBKind(null);
-        setSelectedStep(null);
+        clearSelection(null);
         setInsertion({ context, anchor });
-        const pendingContext = toPendingContext(context, nodeIdForStepName);
+        const pendingContext = toPendingContext(context, idForName);
         setPendingInsert(pendingContext ? { phase: 'choosing', context: pendingContext } : null);
       },
       onEditStep: (nodeId) => {
-        requestStepSelect(nodeId);
+        editStateRef.current.requestStepSelect(nodeId);
       },
       onDeleteNode: (nodeId) => {
-        const ref = transformed.nodeRefs[nodeId];
+        const {
+          nodeRefs,
+          fallbackNodeIds: fallbackIds,
+          yamlString: yamlBeforeDelete,
+          selectedStepId: currentSelectedStepId,
+          panel: currentPanel,
+          setSelectedStep: clearSelection,
+          applyMutation: apply,
+        } = editStateRef.current;
+        const ref = nodeRefs[nodeId];
         if (!ref) return;
-        const isFallback =
-          ref.kind === 'step' &&
-          Boolean(
-            (
-              transformed.nodes.find((n) => n.id === nodeId)?.data as
-                | { fallbackOf?: string }
-                | undefined
-            )?.fallbackOf
-          );
-        const yamlBeforeDelete = yamlString;
+        const isFallback = ref.kind === 'step' && fallbackIds.has(nodeId);
         const result =
           ref.kind === 'trigger'
-            ? deleteTrigger(yamlString, ref.triggerIndex)
-            : deleteStepByName(yamlString, ref.stepName);
-        if (!applyMutation(result)) return;
-        if (selectedStepId === nodeId) setSelectedStep(null);
-        if (panel?.mode === 'edit' && ref.kind === 'step' && panel.stepName === ref.stepName) {
+            ? deleteTrigger(yamlBeforeDelete, ref.triggerIndex)
+            : deleteStepByName(yamlBeforeDelete, ref.stepName);
+        if (!apply(result)) return;
+        if (currentSelectedStepId === nodeId) clearSelection(null);
+        if (
+          currentPanel?.mode === 'edit' &&
+          ref.kind === 'step' &&
+          currentPanel.stepName === ref.stepName
+        ) {
           setPanel(null);
         }
         if (
-          panel?.mode === 'edit-trigger' &&
+          currentPanel?.mode === 'edit-trigger' &&
           ref.kind === 'trigger' &&
-          panel.triggerIndex === ref.triggerIndex
+          currentPanel.triggerIndex === ref.triggerIndex
         ) {
           setPanel(null);
         }
@@ -1018,7 +968,21 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
                 }),
                 onClick: () => {
                   notifications.toasts.remove(toast);
-                  dispatch(setYamlString(yamlBeforeDelete));
+                  // Restoring the pre-delete YAML would silently discard anything edited since
+                  // (the toast stays up for 10s), so only restore an untouched document.
+                  if (yamlStringRef.current === result.yaml) {
+                    apply({ success: true, yaml: yamlBeforeDelete });
+                    return;
+                  }
+                  notifications.toasts.addWarning({
+                    title: i18n.translate('workflows.visualEditor.undoDeleteStale', {
+                      defaultMessage: 'Could not restore the deleted item',
+                    }),
+                    text: i18n.translate('workflows.visualEditor.undoDeleteStaleText', {
+                      defaultMessage:
+                        'The workflow was edited after the deletion. Use undo in the YAML editor instead.',
+                    }),
+                  });
                 },
               },
             },
@@ -1028,49 +992,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
         );
       },
     };
-  }, [
-    canEdit,
-    requestStepSelect,
-    setSelectedStep,
-    yamlString,
-    applyMutation,
-    transformed.nodeRefs,
-    transformed.nodes,
-    selectedStepId,
-    panel,
-    notifications.toasts,
-    dispatch,
-    nodeIdForStepName,
-  ]);
-
-  const flyoutTarget = useMemo<FlyoutTarget | null>(() => {
-    if (!selectedStepId) return null;
-    const ref = transformed.nodeRefs[selectedStepId];
-    if (!ref) return null;
-    // Edit mode opens config panels for steps and triggers instead of the
-    // read-only YAML flyout.
-    if (canEdit) return null;
-    if (ref.kind === 'step') {
-      return {
-        kind: 'step',
-        stepName: ref.stepName,
-        stepInfo: workflowLookup?.steps[ref.stepName],
-      };
-    }
-    // kind === 'trigger' — use the exact declaration-order index so two
-    // triggers of the same type are distinguished correctly.
-    const trigger = workflow?.triggers?.[ref.triggerIndex];
-    if (trigger) {
-      const yamlSnippet = stringifyYaml({ triggers: [trigger] });
-      return {
-        kind: 'trigger',
-        triggerType: trigger.type,
-        triggerLabel: triggerSchemas.getTriggerName(trigger.type),
-        yamlSnippet,
-      };
-    }
-    return null;
-  }, [selectedStepId, transformed.nodeRefs, workflowLookup, workflow, canEdit]);
+  }, [canEdit, notifications.toasts]);
 
   const renderStepIcon = useCallback<RenderStepIcon>(
     ({ stepType, isTrigger: _isTrigger, color }) => (
@@ -1080,21 +1002,21 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   );
 
   const handleRunStep = useCallback(() => {
-    if (!flyoutTarget || flyoutTarget.kind !== 'step') return;
-    onStepRun?.({ stepId: flyoutTarget.stepName, actionType: 'run' });
-  }, [onStepRun, flyoutTarget]);
+    if (panel?.mode !== 'edit') return;
+    onStepRun?.({ stepId: panel.stepName, actionType: 'run' });
+  }, [onStepRun, panel]);
 
   const handleOpenInYaml = useCallback(() => {
     // Tell the YAML editor which step to reveal — it watches the
     // `highlightedStepId` slice and calls `revealLineInCenter` on the
     // matching line when it changes.
-    if (flyoutTarget?.kind === 'step') {
-      dispatch(setHighlightedStepId({ stepId: flyoutTarget.stepName }));
-    } else if (flyoutTarget?.kind === 'trigger') {
+    if (panel?.mode === 'edit') {
+      dispatch(setHighlightedStepId({ stepId: panel.stepName }));
+    } else if (panel?.mode === 'edit-trigger') {
       dispatch(setHighlightedStepId({ stepId: HIGHLIGHTED_STEP_TRIGGER }));
     }
     setEditorView('yaml');
-  }, [dispatch, flyoutTarget, setEditorView]);
+  }, [dispatch, panel, setEditorView]);
 
   const handleStepSelect = useCallback(
     (id: string | undefined) => {
@@ -1103,23 +1025,15 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     [requestStepSelect]
   );
 
-  const handleSettingsNodeSelect = useCallback(
-    (kind: WorkflowSettingsBPanelKind | undefined) => {
-      if (kind == null) {
-        setSettingsBKind(null);
-        return;
-      }
-      openSettingsBPanel(kind);
-    },
-    [openSettingsBPanel]
-  );
-
   const handleStepRun = useCallback(
     (stepName: string) => onStepRun?.({ stepId: stepName, actionType: 'run' }),
     [onStepRun]
   );
 
-  const canRunSteps = Boolean(canExecuteWorkflow) && isYamlValid && !isExecutionsTab;
+  // The parent passes `onStepRun` only when the user may test a step in this workflow (its own
+  // permissions, not just the global capability), so no handler means no Run controls.
+  const canRunSteps =
+    Boolean(canExecuteWorkflow) && Boolean(onStepRun) && isYamlValid && !isExecutionsTab;
   const referenceTreeRunControls = useMemo(
     (): DataReferenceRunControls => ({
       workflowId,
@@ -1136,110 +1050,12 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     [workflowId, treeRuns, canRunSteps, onStepRun, canRunStepDirectly, onRunWorkflow]
   );
 
-  const handleFlyoutKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.stopPropagation();
-        setSelectedStep(null);
-      }
-    },
-    [setSelectedStep]
-  );
-
-  const handleFlyoutClose = useCallback(() => setSelectedStep(null), [setSelectedStep]);
-
   const closeInsertion = useCallback(() => {
     setInsertion(null);
     setPendingInsert((current) => (current?.phase === 'choosing' ? null : current));
   }, []);
 
-  // ⌘Z / Ctrl+Z on the canvas delegates to Monaco's undo stack (ADR-0005).
-  useEffect(() => {
-    if (!editorRef) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== 'z') return;
-      // Let Monaco handle it when focus is already inside the editor.
-      const target = event.target;
-      if (target instanceof HTMLElement && target.closest('.monaco-editor')) {
-        return;
-      }
-      event.preventDefault();
-      editorRef.current?.trigger('graph-gesture', 'undo', null);
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [editorRef]);
-
-  const handleCreationPickTrigger = useCallback((triggerType: 'manual' | 'alert' | 'scheduled') => {
-    const triggerLabel = triggerSchemas.getTriggerName(triggerType);
-    setPendingInsert({
-      phase: 'configuring',
-      context: { mode: 'trigger' },
-      stepType: triggerType,
-      label: triggerLabel,
-    });
-    setPanel({
-      mode: 'insert-trigger',
-      triggerType,
-      triggerLabel,
-      fragment: triggerFragmentFor(triggerType),
-    });
-  }, []);
-
-  const handleCreationPickAction = useCallback((anchor: DOMRect) => {
-    const context = { mode: 'step' as const, index: 0 };
-    setInsertion({
-      context,
-      anchor: {
-        left: anchor.left,
-        top: anchor.top,
-        width: anchor.width,
-        height: anchor.height,
-      },
-    });
-  }, []);
-
-  const handleBrowseTemplates = useCallback(() => {
-    void application.navigateToApp(PLUGIN_ID, { deepLinkId: 'library' });
-  }, [application]);
-
-  const handleGenerateWithAi = useCallback(
-    (prompt: string) => {
-      openAgentChat({ initialMessage: prompt, autoSendInitialMessage: true });
-    },
-    [openAgentChat]
-  );
-
-  const handleApplyTemplateYaml = useCallback(
-    (yaml: string) => {
-      dispatch(setYamlString(yaml));
-    },
-    [dispatch]
-  );
-
-  const creationEmptyState = useMemo(
-    () =>
-      canEdit && showCreationEmptyState ? (
-        <WorkflowCreationPanel
-          isAiAvailable={isAgentBuilderAvailable}
-          onGenerateWithAi={handleGenerateWithAi}
-          onPickTrigger={handleCreationPickTrigger}
-          onPickAction={handleCreationPickAction}
-          onBrowseTemplates={handleBrowseTemplates}
-          onApplyTemplateYaml={handleApplyTemplateYaml}
-        />
-      ) : undefined,
-    [
-      canEdit,
-      showCreationEmptyState,
-      isAgentBuilderAvailable,
-      handleGenerateWithAi,
-      handleCreationPickTrigger,
-      handleCreationPickAction,
-      handleBrowseTemplates,
-      handleApplyTemplateYaml,
-    ]
-  );
+  useCanvasUndo(editorRef, yamlStringRef);
 
   if (!workflow) {
     return (
@@ -1281,21 +1097,9 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
         edit={editActions}
         nodeConfigWarnings={nodeConfigWarnings}
         flashNodeId={flashNodeId}
-        emptyState={creationEmptyState}
         pendingInsert={pendingInsert ?? undefined}
         suppressInsertionControls={insertion != null}
-        settingsNodes={settingsNodesProp}
-        onSettingsNodeSelect={
-          canEdit && settingsSurfaceVariant === 'b' ? handleSettingsNodeSelect : undefined
-        }
       />
-      {canEdit && settingsSurfaceVariant === 'c' ? (
-        <WorkflowSettingsCSurface
-          workflowId={workflowId}
-          readOnly={!canEdit}
-          canvasHeight={canvasHeight || 600}
-        />
-      ) : null}
       {insertion && (
         <ActionsMenuPopover
           isOpen
@@ -1326,8 +1130,12 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
               <StepConfigPanel
                 mode={panel.origin}
                 stepType={panel.stepType}
+                stepName={panel.stepName}
                 actionLabel={panel.actionLabel}
                 initialFragment={panel.fragment}
+                syncedFragment={
+                  syncedStepFragment?.sessionId === panel.sessionId ? syncedStepFragment : undefined
+                }
                 connectors={connectors}
                 workflowDefinition={workflow}
                 resolveStepScope={resolveStepScope}
@@ -1338,6 +1146,9 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
                 onFragmentChange={handleStepDraftChange}
                 onYamlEditorMount={stepYamlEditorMount}
                 runControls={referenceTreeRunControls}
+                readOnly={!canEdit}
+                onRunStep={canRunSteps ? handleRunStep : undefined}
+                onOpenInYaml={handleOpenInYaml}
               />
             </LastRunWorkflowIdProvider>
           </KibanaSectionErrorBoundary>
@@ -1362,59 +1173,10 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
             workflowYaml={editorYaml}
             onCancel={handlePanelCancel}
             onSave={handlePanelSave}
-          />
-        </CanvasConfigPanelShell>
-      )}
-      {settingsBKind && settingsSurfaceVariant === 'b' && (
-        <CanvasConfigPanelShell
-          width={panelWidth}
-          onWidthChange={setStoredPanelWidth}
-          canvasWidth={canvasWidth}
-          data-test-subj="workflowSettingsBPanelContainer"
-        >
-          <WorkflowSettingsBPanel
-            key={settingsBKind}
-            kind={settingsBKind}
             readOnly={!canEdit}
-            onClose={closeSettingsBPanel}
+            onOpenInYaml={handleOpenInYaml}
           />
         </CanvasConfigPanelShell>
-      )}
-      {flyoutTarget && !panel && !settingsBKind && (
-        <EuiFocusTrap returnFocus>
-          <div
-            ref={flyoutPanelRef}
-            // tabIndex={-1} makes the panel div programmatically focusable
-            // (so the useEffect above can call .focus()) without adding it to
-            // the natural tab order — EuiFocusTrap handles tab cycling inside.
-            tabIndex={-1}
-            onKeyDown={handleFlyoutKeyDown}
-            css={[
-              {
-                position: 'absolute',
-                top: PANEL_MARGIN,
-                right: PANEL_MARGIN,
-                bottom: PANEL_MARGIN,
-                width: 420,
-                zIndex: euiTheme.levels.flyout,
-                borderRadius: WORKFLOWS_SURFACE_RADIUS,
-                overflow: 'hidden',
-                outline: 'none',
-              },
-              floatingShadow,
-            ]}
-          >
-            <WorkflowVisualEditorFlyout
-              target={flyoutTarget}
-              editorYaml={editorYaml}
-              canExecuteWorkflow={Boolean(canExecuteWorkflow) && !isExecutionsTab}
-              isYamlValid={isYamlValid}
-              onClose={handleFlyoutClose}
-              onOpenInYaml={handleOpenInYaml}
-              onRunStep={handleRunStep}
-            />
-          </div>
-        </EuiFocusTrap>
       )}
     </div>
   );

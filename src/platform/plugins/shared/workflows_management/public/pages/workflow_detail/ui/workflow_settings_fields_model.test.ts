@@ -13,6 +13,7 @@ import {
   outputsToJsonSchema,
   parseConstsToFields,
   parseOutputsToFields,
+  writeRootYamlMapping,
 } from './workflow_settings_fields_model';
 
 describe('workflow_settings_fields_model', () => {
@@ -38,22 +39,57 @@ describe('workflow_settings_fields_model', () => {
     });
   });
 
-  it('serializes outputs with x-kibana-value and fallback default', () => {
-    const fields = parseOutputsToFields([
-      {
-        name: 'summary',
-        type: 'string',
-        value: '{{ steps.log.output }}',
-        default: 'n/a',
-      },
-    ]);
-    expect(fields[0].value).toBe('{{ steps.log.output }}');
+  it('serializes an output fallback as the JSON Schema default and nothing the engine does not know', () => {
+    const fields = parseOutputsToFields([{ name: 'summary', type: 'string', default: 'n/a' }]);
     expect(fields[0].fallback).toBe('n/a');
+
     const schema = outputsToJsonSchema(fields);
-    expect(schema?.properties?.summary).toMatchObject({
-      type: 'string',
-      default: 'n/a',
-      'x-kibana-value': '{{ steps.log.output }}',
+
+    expect(schema?.properties?.summary).toEqual({ type: 'string', default: 'n/a' });
+  });
+
+  it('ignores an unsupported `value` on a legacy output instead of carrying it along', () => {
+    const fields = parseOutputsToFields([
+      { name: 'summary', type: 'string', value: '{{ steps.log.output }}' },
+    ]);
+
+    expect(fields[0]).not.toHaveProperty('value');
+    expect(JSON.stringify(outputsToJsonSchema(fields))).not.toContain('steps.log.output');
+  });
+
+  it('round-trips JSON Schema outputs without adding custom keys', () => {
+    const outputs = { properties: { total: { type: 'number', description: 'Sum' } } };
+
+    const schema = outputsToJsonSchema(parseOutputsToFields(outputs));
+
+    expect(schema?.properties?.total).toMatchObject({ type: 'number', description: 'Sum' });
+    expect(Object.keys(schema?.properties?.total ?? {}).some((key) => key.startsWith('x-'))).toBe(
+      false
+    );
+  });
+
+  describe('writeRootYamlMapping', () => {
+    const TWO_SPACES = 'name: demo\ntriggers:\n  - type: manual\nsteps: []\n';
+    const FOUR_SPACES = 'name: demo\ntriggers:\n    - type: manual\nsteps: []\n';
+
+    it('adds the mapping at the document root', () => {
+      const next = writeRootYamlMapping(TWO_SPACES, 'consts', { limit: 5 });
+
+      expect(next).toContain('consts:\n  limit: 5');
+      expect(next).toContain('name: demo');
+    });
+
+    it('removes the mapping when the value is undefined', () => {
+      const withConsts = writeRootYamlMapping(TWO_SPACES, 'consts', { limit: 5 });
+
+      expect(writeRootYamlMapping(withConsts, 'consts', undefined)).toBe(TWO_SPACES);
+    });
+
+    it('keeps a four-space document at four spaces', () => {
+      const next = writeRootYamlMapping(FOUR_SPACES, 'consts', { limit: 5 });
+
+      expect(next).toContain('consts:\n    limit: 5');
+      expect(next).toContain('triggers:\n    - type: manual');
     });
   });
 });

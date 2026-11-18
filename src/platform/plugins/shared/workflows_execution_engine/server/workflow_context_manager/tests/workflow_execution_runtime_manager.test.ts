@@ -648,6 +648,40 @@ describe('WorkflowExecutionRuntimeManager', () => {
       );
     });
 
+    it('should finalize the terminal state only once when saved again after completion', async () => {
+      workflowExecutionCursor.setCurrentNodeId(undefined);
+      await underTest.saveState();
+
+      expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          status: ExecutionStatus.COMPLETED,
+          finishedAt: '2025-08-06T00:00:04.000Z',
+          duration: 14404000,
+        })
+      );
+
+      // The execution loop saves once more after the flow loop exits, with the status already stored.
+      jest.mocked(workflowExecutionState.getWorkflowExecution).mockReturnValue({
+        ...workflowExecution,
+        status: ExecutionStatus.COMPLETED,
+        finishedAt: '2025-08-06T00:00:04.000Z',
+        duration: 14404000,
+      });
+      mockDateNow = new Date('2025-08-06T00:00:05.000Z');
+      await underTest.saveState();
+
+      const secondUpdate = jest.mocked(workflowExecutionState.updateWorkflowExecution).mock
+        .lastCall?.[0];
+      expect(secondUpdate).toEqual(expect.objectContaining({ status: ExecutionStatus.COMPLETED }));
+      expect(secondUpdate).not.toHaveProperty('finishedAt');
+      expect(secondUpdate).not.toHaveProperty('duration');
+      expect(workflowLogger.logInfo).toHaveBeenCalledTimes(1);
+      expect(workflowLogger.logInfo).toHaveBeenCalledWith(
+        'Workflow execution completed successfully',
+        expect.anything()
+      );
+    });
+
     it('should log workflow completion', async () => {
       workflowExecutionCursor.setCurrentNodeId(undefined);
 

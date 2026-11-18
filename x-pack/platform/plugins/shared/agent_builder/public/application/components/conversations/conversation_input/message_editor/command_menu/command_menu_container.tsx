@@ -22,6 +22,7 @@ interface CommandMenuContainerProps {
   commandMatch: CommandMatchResult;
   editorRef: React.RefObject<HTMLDivElement>;
   onSelect: (selection: CommandBadgeData) => void;
+  onReplaceText?: (text: string) => void;
   onContentChange: (hasVisibleContent: boolean, forQuery: string) => void;
   commandMenuRef: React.RefObject<CommandMenuHandle>;
   children: React.ReactNode;
@@ -32,6 +33,7 @@ export const CommandMenuContainer: React.FC<CommandMenuContainerProps> = ({
   commandMatch,
   editorRef,
   onSelect,
+  onReplaceText,
   onContentChange,
   commandMenuRef,
   children,
@@ -51,6 +53,7 @@ export const CommandMenuContainer: React.FC<CommandMenuContainerProps> = ({
         commandMatch={commandMatch}
         anchorPosition={anchorPosition}
         onSelect={onSelect}
+        onReplaceText={onReplaceText}
         onContentChange={onContentChange}
         commandMenuRef={commandMenuRef}
       />

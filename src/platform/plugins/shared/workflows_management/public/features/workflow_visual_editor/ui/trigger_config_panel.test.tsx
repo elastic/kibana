@@ -177,4 +177,54 @@ describe('TriggerConfigPanel', () => {
     fireEvent.click(screen.getByTestId('workflowTriggerConfigPanelSave'));
     expect(onSave.mock.calls[0][0]).toContain('dry_run');
   });
+
+  describe('read-only', () => {
+    const MANUAL_WITH_INPUT =
+      'type: manual\ninputs:\n  properties:\n    environment:\n      type: string\n';
+
+    it('lists the manual inputs without add or remove controls and with inert fields', () => {
+      renderPanel({ readOnly: true, initialFragment: MANUAL_WITH_INPUT });
+
+      expect(screen.getByTestId(/workflowTriggerConfigInput-name-/)).toHaveValue('environment');
+      expect(screen.getByTestId(/workflowTriggerConfigInput-name-/)).toBeDisabled();
+      expect(screen.queryByTestId('workflowTriggerConfigInput-add')).not.toBeInTheDocument();
+      expect(screen.queryByTestId(/workflowTriggerConfigInput-remove-/)).not.toBeInTheDocument();
+    });
+
+    it('offers no add control for a trigger with no inputs', () => {
+      renderPanel({ readOnly: true });
+
+      expect(screen.getByTestId('workflowTriggerConfigInput-empty')).toBeInTheDocument();
+      expect(screen.queryByTestId('workflowTriggerConfigInput-add')).not.toBeInTheDocument();
+    });
+
+    it('disables the scheduled interval', () => {
+      renderPanel({
+        readOnly: true,
+        triggerType: 'scheduled',
+        triggerLabel: 'Scheduled',
+        initialFragment: 'type: scheduled\nwith:\n  every: 5m\n',
+      });
+
+      expect(screen.getByTestId('workflowTriggerConfigPanelEvery')).toBeDisabled();
+    });
+
+    it('offers only Close in the footer', () => {
+      const { onCancel, onSave } = renderPanel({ readOnly: true });
+
+      expect(screen.queryByTestId('workflowTriggerConfigPanelSave')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('workflowTriggerConfigPanelCancel'));
+
+      expect(screen.getByTestId('workflowTriggerConfigPanelCancel')).toHaveTextContent('Close');
+      expect(onCancel).toHaveBeenCalledTimes(1);
+      expect(onSave).not.toHaveBeenCalled();
+    });
+
+    it('stays editable by default (positive control)', () => {
+      renderPanel();
+
+      expect(screen.getByTestId('workflowTriggerConfigInput-add')).toBeInTheDocument();
+      expect(screen.getByTestId('workflowTriggerConfigPanelSave')).toBeInTheDocument();
+    });
+  });
 });

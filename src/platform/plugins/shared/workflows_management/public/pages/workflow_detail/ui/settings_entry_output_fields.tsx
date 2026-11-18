@@ -20,8 +20,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { settingsEntryNameErrorMessage } from './settings_entry_row_shared';
 import type { OutputField } from './workflow_settings_fields_model';
-import type { DataReferenceCatalog } from '../../../features/workflow_visual_editor/lib/build_data_reference_catalog';
-import { ReferenceCapableField } from '../../../features/workflow_visual_editor/ui/reference_capable_field';
 import {
   SCHEMA_PROPERTY_TYPE_OPTIONS,
   type SchemaPropertyField,
@@ -37,13 +35,11 @@ export const SETTINGS_ENTRY_OUTPUT_TYPE_OPTIONS = SCHEMA_PROPERTY_TYPE_OPTIONS.f
 export const SettingsEntryOutputFields = ({
   field,
   siblings,
-  catalog,
   readOnly,
   onUpdate,
 }: {
   readonly field: OutputField;
   readonly siblings: readonly OutputField[];
-  readonly catalog: DataReferenceCatalog;
   readonly readOnly?: boolean;
   readonly onUpdate: (next: OutputField) => void;
 }) => {
@@ -119,41 +115,6 @@ export const SettingsEntryOutputFields = ({
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiFormRow
-        label={i18n.translate('workflows.workflowSettingsFlyout.outputValue', {
-          defaultMessage: 'Value',
-        })}
-        helpText={i18n.translate('workflows.workflowSettingsFlyout.outputValueHelp', {
-          defaultMessage: 'Expression evaluated when the workflow finishes.',
-        })}
-        fullWidth
-        compressed
-      >
-        <ReferenceCapableField
-          catalog={catalog}
-          value={field.value}
-          onChange={(next) => onUpdate({ ...field, value: next })}
-          data-test-subj={`workflowSettingsOutputValueRef-${field.id}`}
-        >
-          {(bind) => (
-            <EuiFieldText
-              compressed
-              fullWidth
-              value={bind.value}
-              disabled={readOnly}
-              placeholder={bind.teachingPlaceholder}
-              inputRef={bind.attachInputRef}
-              append={bind.appendControls}
-              onChange={(e) => {
-                const el = e.target;
-                bind.reportChange(el.value, el.selectionStart ?? el.value.length);
-              }}
-              data-test-subj={`workflowSettingsOutputValue-${field.id}`}
-            />
-          )}
-        </ReferenceCapableField>
-      </EuiFormRow>
-      <EuiSpacer size="s" />
-      <EuiFormRow
         label={i18n.translate('workflows.workflowSettingsFlyout.outputFallback', {
           defaultMessage: 'Fallback',
         })}
@@ -192,6 +153,7 @@ export const SettingsEntryOutputFields = ({
               addButtonLabel={i18n.translate('workflows.workflowSettingsFlyout.addOutputProperty', {
                 defaultMessage: 'Add property',
               })}
+              readOnly={readOnly}
             />
           </EuiPanel>
         </>
@@ -245,6 +207,7 @@ export const SettingsEntryOutputFields = ({
                     'workflows.workflowSettingsFlyout.addOutputItemProperty',
                     { defaultMessage: 'Add property' }
                   )}
+                  readOnly={readOnly}
                 />
               </EuiPanel>
             </>

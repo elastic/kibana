@@ -25,13 +25,22 @@ describe('generateTriggerSnippet', () => {
   });
 
   describe('page trigger', () => {
-    it('starts a page with a title and one required input, without on.condition', () => {
-      const snippet = generateTriggerSnippet('page', { full: true });
-      expect(snippet).toContain('type: page');
-      expect(snippet).toContain('title: New page');
-      expect(snippet).toContain('message:');
-      expect(snippet).toContain('required:');
-      expect(snippet).not.toContain('condition:');
+    it('includes a title, a description, and an example input', () => {
+      expect(generateTriggerSnippet('page', { full: true })).toBe(
+        [
+          '- type: page',
+          '  title: Report an incident',
+          '  description: Tell us what happened',
+          '  inputs:',
+          '    properties:',
+          '      summary:',
+          '        type: string',
+          '        description: What happened',
+          '    required:',
+          '      - summary',
+          '',
+        ].join('\n')
+      );
     });
   });
 

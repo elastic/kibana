@@ -10,13 +10,40 @@
 import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useStableCallback } from '@kbn/react-hooks';
+import type { TypeaheadKeyEvent } from './data_reference_picker';
 import { DataReferencePicker } from './data_reference_picker';
 import {
   clearActiveDataReferenceInsertTarget,
   setActiveDataReferenceInsertTarget,
 } from '../../../shared/lib/active_data_reference_insert_target';
 import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
+import type { TriggerSession } from '../lib/reference_trigger';
+import {
+  caretInTrigger,
+  keepTrigger,
+  openTrigger,
+  triggerQuery,
+  triggerRange,
+} from '../lib/reference_trigger';
 import { tokenForInsert } from '../lib/reference_value';
+
+/** A key press an editor hands to the field, with the means to keep it from the editor. */
+export type EditorKeyEvent = TypeaheadKeyEvent & { readonly stopPropagation?: () => void };
+
+/** What an editor tells the field while a reference is being typed. */
+export interface EditorEvents {
+  readonly onKeyDown: (event: EditorKeyEvent) => void;
+  readonly onCaretChange: (offset: number) => void;
+  readonly onBlur: () => void;
+}
+
+/** Where a character is drawn, in viewport coordinates. */
+export interface CaretRect {
+  readonly top: number;
+  readonly left: number;
+  readonly height: number;
+}
 
 export interface ReferenceSelectionBridge {
   readonly focus: () => void;
@@ -27,32 +54,53 @@ export interface ReferenceSelectionBridge {
    * Returns true when the edit was applied.
    */
   readonly replaceText?: (start: number, end: number, text: string) => boolean;
+  /** Where `offset` is drawn; undefined when the editor cannot say, as outside its viewport. */
+  readonly getCaretRect?: (offset: number) => CaretRect | undefined;
+  /** Sends the editor's keys, caret moves and blur to `events`; returns the way to stop. */
+  readonly listen?: (events: EditorEvents) => () => void;
 }
 
 export interface ReferenceCapableBind {
   readonly value: string;
+  /** A reference is being typed, or was asked for with the button. */
   readonly isOpen: boolean;
   readonly teachingPlaceholder: string;
   readonly atButton: React.ReactElement;
   /** Expand control for the field-editor sub-flyout; omitted when `onExpand` is unset. */
   readonly expandButton: React.ReactElement | null;
-  /** @ and expand controls for `EuiFieldText` / similar `append` slots. */
+  /** Insert and expand controls for `EuiFieldText` / similar `append` slots. */
   readonly appendControls: React.ReactElement;
-  /** Report a text edit; opens the picker when `@` or `{{` was typed at the caret. */
-  readonly reportChange: (next: string, caret: number) => void;
+  /**
+   * Report a text edit. `typed` is the one character the user just typed, if that is what the
+   * edit was: only a typed `{` starts a reference, never a deletion, a paste or an undo.
+   */
+  readonly reportChange: (next: string, caret: number, typed?: string) => void;
+  /** Send a key press of a host that is not a Monaco editor (a plain input) to the dropdown. */
+  readonly handleTypeaheadKey: (event: EditorKeyEvent) => void;
   readonly togglePicker: () => void;
   readonly closePicker: () => void;
-  /** Open the picker so the pick replaces [start, end), e.g. to swap an existing chip. */
+  /** Open the dropdown so the pick replaces [start, end), e.g. to swap an existing chip. */
   readonly openPickerAtRange: (start: number, end: number) => void;
   readonly attachInputRef: (el: HTMLInputElement | HTMLTextAreaElement | null) => void;
   /** Pass `null` when the editor behind the bridge goes away. */
   readonly registerSelection: (bridge: ReferenceSelectionBridge | null) => void;
+  /**
+   * For a host that shows the text until it is focused: how to start editing, so the insert
+   * button can have an editor to type into. Pass `null` when the host goes away.
+   */
+  readonly registerEditRequester: (request: (() => void) | null) => void;
+}
+
+interface OpenReference {
+  readonly session: TriggerSession;
+  /** Set when the reference swaps an existing one: a pick replaces [session.start, swapEnd). */
+  readonly swapEnd?: number;
 }
 
 /**
- * Shared reference affordance for every templatable field control: `{}` button,
- * typed `@` / `{{` triggers (plus a single `{` for plain text), teaching placeholder,
- * and picker chrome.
+ * Shared reference affordance for every templatable field control: the insert button, a dropdown
+ * of references that opens under a typed `{{` (or a single `{` for plain text) and filters as the
+ * variable is typed, and the teaching placeholder. The editor keeps the focus throughout.
  */
 export function ReferenceCapableField({
   catalog,
@@ -60,6 +108,7 @@ export function ReferenceCapableField({
   onChange,
   onExpand,
   fillHeight = false,
+  anchorAtCaret = false,
   openOnBrace = false,
   valueFormWhenWhole = false,
   children,
@@ -73,8 +122,13 @@ export function ReferenceCapableField({
   /** Stretch the anchor to fill the parent (expanded field-editor pane). */
   readonly fillHeight?: boolean;
   /**
-   * Also open the picker on a single typed `{`. For plain text only: in JSON, KQL and ES|QL
-   * `{` is syntax.
+   * Open the dropdown under the line the reference is typed on, instead of under the control. For a
+   * multi-line editor, where the bottom of the control is far from the cursor.
+   */
+  readonly anchorAtCaret?: boolean;
+  /**
+   * Also open the dropdown on a single typed `{`. For plain text only: in JSON, KQL and ES|QL
+   * `{` is syntax, and only `{{` opens it.
    */
   readonly openOnBrace?: boolean;
   /**
@@ -89,10 +143,19 @@ export function ReferenceCapableField({
   const { euiTheme } = useEuiTheme();
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
   const selectionBridgeRef = useRef<ReferenceSelectionBridge | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
+  const stopListeningRef = useRef<(() => void) | undefined>(undefined);
+  const editRequesterRef = useRef<(() => void) | null>(null);
+  const openOnEditorRef = useRef(false);
+  const keyHandlerRef = useRef<((event: TypeaheadKeyEvent) => boolean) | null>(null);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const [open, setOpen] = useState<OpenReference | null>(null);
+  const [anchor, setAnchor] = useState<{ top: number; left: number } | undefined>(undefined);
+  const [caret, setCaret] = useState(0);
   const [isDragOver, setIsDragOver] = useState(false);
-  const replaceRangeRef = useRef<{ start: number; end: number } | null>(null);
-  const caretOnOpenRef = useRef(0);
+  const openRef = useRef(open);
+  openRef.current = open;
+  const valueRef = useRef(value);
+  valueRef.current = value;
 
   const insertLabel = i18n.translate('workflows.stepConfigPanel.insertDataReference', {
     defaultMessage: 'Insert data from a prior step',
@@ -102,8 +165,9 @@ export function ReferenceCapableField({
         defaultMessage: 'Type {brace} to insert data',
         values: { brace: '{' },
       })
-    : i18n.translate('workflows.stepConfigPanel.typeAtToInsert', {
-        defaultMessage: 'Type @ to insert data',
+    : i18n.translate('workflows.stepConfigPanel.typeBracesToInsert', {
+        defaultMessage: 'Type {braces} to insert data',
+        values: { braces: '{{' },
       });
 
   const focusAndSetCaret = useCallback((offset: number) => {
@@ -119,56 +183,152 @@ export function ReferenceCapableField({
     input.setSelectionRange(offset, offset);
   }, []);
 
-  const closePicker = useCallback(() => {
-    setIsOpen(false);
-    replaceRangeRef.current = null;
-    focusAndSetCaret(caretOnOpenRef.current);
-  }, [focusAndSetCaret]);
+  const closeTypeahead = useCallback(() => setOpen(null), []);
 
-  const openPicker = useCallback(
-    (replaceRange: { start: number; end: number } | null) => {
-      const bridge = selectionBridgeRef.current;
-      caretOnOpenRef.current =
-        bridge?.getCaret() ?? inputRef.current?.selectionStart ?? value.length;
-      replaceRangeRef.current = replaceRange;
-      setIsOpen(true);
+  // Where the dropdown opens, under the line `offset` is on and relative to this field. It is
+  // measured when the reference starts and kept while it is typed: the popover reads its anchor
+  // as it opens, so the right position has to be there in the same render.
+  const measureAnchor = useCallback(
+    (offset: number): { top: number; left: number } | undefined => {
+      const rect = anchorAtCaret ? selectionBridgeRef.current?.getCaretRect?.(offset) : undefined;
+      const root = rootRef.current;
+      if (!rect || !root) return undefined;
+      const { top, left } = root.getBoundingClientRect();
+      return { top: rect.top + rect.height - top, left: rect.left - left };
     },
-    [value.length]
+    [anchorAtCaret]
   );
 
-  const handleInsert = useCallback(
-    (picked: string) => {
-      const bridge = selectionBridgeRef.current;
-      const input = inputRef.current;
-      const caret = bridge?.getCaret() ?? input?.selectionStart ?? value.length;
-      const range = replaceRangeRef.current ?? { start: caret, end: caret };
-      const token = tokenForInsert(picked, value, range.start, range.end, valueFormWhenWhole);
+  const currentCaret = (): number =>
+    selectionBridgeRef.current?.getCaret() ??
+    inputRef.current?.selectionStart ??
+    valueRef.current.length;
 
-      setIsOpen(false);
-      replaceRangeRef.current = null;
+  const openAtCaret = (offset: number) => {
+    setCaret(offset);
+    setAnchor(measureAnchor(offset));
+    setOpen({ session: { start: offset, triggerLength: 0 } });
+  };
 
-      // Prefer undo-aware edits so Cmd/Ctrl+Z reverts the insertion.
-      if (bridge?.replaceText?.(range.start, range.end, token)) {
+  const reportChange = useCallback(
+    (next: string, nextCaret: number, typed?: string) => {
+      onChange(next);
+      setCaret(nextCaret);
+      const current = openRef.current;
+      // A swap is over as soon as the text changes; any other reference goes on while it holds.
+      const kept =
+        current && current.swapEnd === undefined
+          ? keepTrigger(current.session, { text: next, caret: nextCaret, typed })
+          : undefined;
+      const session = kept ?? openTrigger({ text: next, caret: nextCaret, typed, openOnBrace });
+      // A reference that goes on, even with its second brace typed, keeps where it opened.
+      if (session && session.start !== current?.session.start) {
+        setAnchor(measureAnchor(session.start));
+      }
+      openRef.current = session ? { session } : null;
+      setOpen(openRef.current);
+    },
+    [measureAnchor, onChange, openOnBrace]
+  );
+
+  const handleCaretChange = useStableCallback((offset: number) => {
+    setCaret(offset);
+    setOpen((current) => {
+      if (!current) return null;
+      const { session, swapEnd } = current;
+      if (swapEnd !== undefined) return offset < session.start || offset > swapEnd ? null : current;
+      return caretInTrigger(session, valueRef.current, offset) ? current : null;
+    });
+  });
+
+  const handleEditorKey = useStableCallback((event: EditorKeyEvent) => {
+    if (keyHandlerRef.current?.(event)) event.stopPropagation?.();
+  });
+
+  const registerSelection = useStableCallback((bridge: ReferenceSelectionBridge | null) => {
+    stopListeningRef.current?.();
+    stopListeningRef.current = undefined;
+    selectionBridgeRef.current = bridge;
+    if (!bridge) {
+      setOpen(null);
+      return;
+    }
+    stopListeningRef.current = bridge.listen?.({
+      onKeyDown: handleEditorKey,
+      onCaretChange: handleCaretChange,
+      onBlur: closeTypeahead,
+    });
+    // The button was pressed on a field that showed text: now there is an editor to type into.
+    if (openOnEditorRef.current) {
+      openOnEditorRef.current = false;
+      openAtCaret(valueRef.current.length);
+    }
+  });
+
+  const togglePicker = useStableCallback(() => {
+    if (openRef.current) {
+      setOpen(null);
+      return;
+    }
+    const hasEditor = selectionBridgeRef.current !== null || inputRef.current !== null;
+    if (!hasEditor && editRequesterRef.current) {
+      openOnEditorRef.current = true;
+      editRequesterRef.current();
+      return;
+    }
+    openAtCaret(currentCaret());
+  });
+
+  const registerEditRequester = useCallback((request: (() => void) | null) => {
+    editRequesterRef.current = request;
+  }, []);
+
+  const openPickerAtRange = useCallback(
+    (start: number, end: number) => {
+      setCaret(end);
+      setAnchor(measureAnchor(start));
+      setOpen({ session: { start, triggerLength: 0 }, swapEnd: end });
+    },
+    [measureAnchor]
+  );
+
+  const handleInsert = useStableCallback((picked: string) => {
+    const bridge = selectionBridgeRef.current;
+    const input = inputRef.current;
+    const text = valueRef.current;
+    const at = currentCaret();
+    const reference = openRef.current;
+    let range = { start: at, end: at };
+    if (reference) {
+      range =
+        reference.swapEnd === undefined
+          ? triggerRange(reference.session, text, at)
+          : { start: reference.session.start, end: reference.swapEnd };
+    }
+    const token = tokenForInsert(picked, text, range.start, range.end, valueFormWhenWhole);
+
+    setOpen(null);
+
+    // Prefer undo-aware edits so Cmd/Ctrl+Z reverts the insertion.
+    if (bridge?.replaceText?.(range.start, range.end, token)) {
+      return;
+    }
+
+    if (input) {
+      input.focus();
+      input.setSelectionRange(range.start, range.end);
+      // insertText participates in the browser undo stack (unlike setting value).
+      if (document.execCommand('insertText', false, token)) {
         return;
       }
+    }
 
-      if (input) {
-        input.focus();
-        input.setSelectionRange(range.start, range.end);
-        // insertText participates in the browser undo stack (unlike setting value).
-        if (document.execCommand('insertText', false, token)) {
-          return;
-        }
-      }
-
-      const next = `${value.slice(0, range.start)}${token}${value.slice(range.end)}`;
-      onChange(next);
-      window.requestAnimationFrame(() => {
-        focusAndSetCaret(range.start + token.length);
-      });
-    },
-    [focusAndSetCaret, onChange, value, valueFormWhenWhole]
-  );
+    const next = `${text.slice(0, range.start)}${token}${text.slice(range.end)}`;
+    onChange(next);
+    window.requestAnimationFrame(() => {
+      focusAndSetCaret(range.start + token.length);
+    });
+  });
 
   // Stay registered across blur so click-to-insert from the execution flyout
   // (which steals focus) still targets the last-edited templatable field.
@@ -182,42 +342,14 @@ export function ReferenceCapableField({
     setActiveDataReferenceInsertTarget(handleInsert);
   }, [handleInsert]);
 
-  const reportChange = useCallback(
-    (next: string, caret: number) => {
-      onChange(next);
-      const before = next.slice(0, caret);
-      if (before.endsWith('{{')) {
-        openPicker({ start: caret - 2, end: caret });
-      } else if (before.endsWith('@') || (openOnBrace && before.endsWith('{'))) {
-        openPicker({ start: caret - 1, end: caret });
-      }
-    },
-    [onChange, openOnBrace, openPicker]
-  );
-
-  const togglePicker = useCallback(() => {
-    if (isOpen) {
-      closePicker();
-      return;
-    }
-    const bridge = selectionBridgeRef.current;
-    const caret = bridge?.getCaret() ?? inputRef.current?.selectionStart ?? value.length;
-    openPicker({ start: caret, end: caret });
-  }, [closePicker, isOpen, openPicker, value.length]);
-
-  const openPickerAtRange = useCallback(
-    (start: number, end: number) => openPicker({ start, end }),
-    [openPicker]
-  );
-
   const atButton = (
     <EuiToolTip content={insertLabel} disableScreenReaderOutput>
       <EuiButtonIcon
         iconType="tokenObject"
-        color={isOpen ? 'primary' : 'text'}
+        color={open ? 'primary' : 'text'}
         size="xs"
         aria-label={insertLabel}
-        aria-pressed={isOpen}
+        aria-pressed={open !== null}
         onClick={togglePicker}
         data-test-subj={dataTestSubj}
       />
@@ -242,7 +374,13 @@ export function ReferenceCapableField({
   ) : null;
 
   const appendControls = (
-    <span css={{ display: 'inline-flex', alignItems: 'center', gap: 0 }}>
+    <span
+      role="presentation"
+      // Pressing a control must not take the focus from the editor: it would blur, and the
+      // reference being typed would lose its caret.
+      onMouseDown={(event) => event.preventDefault()}
+      css={{ display: 'inline-flex', alignItems: 'center', gap: 0 }}
+    >
       {atButton}
       {expandButton}
     </span>
@@ -250,22 +388,24 @@ export function ReferenceCapableField({
 
   const bind: ReferenceCapableBind = {
     value,
-    isOpen,
+    isOpen: open !== null,
     teachingPlaceholder,
     atButton,
     expandButton,
     appendControls,
     reportChange,
+    handleTypeaheadKey: handleEditorKey,
     togglePicker,
-    closePicker,
+    closePicker: closeTypeahead,
     openPickerAtRange,
     attachInputRef: (el) => {
       inputRef.current = el;
     },
-    registerSelection: (bridge) => {
-      selectionBridgeRef.current = bridge;
-    },
+    registerSelection,
+    registerEditRequester,
   };
+
+  const query = open && open.swapEnd === undefined ? triggerQuery(open.session, value, caret) : '';
 
   // Expanded field editor owns pointer-aware drop; inline fields drop here.
   const dropHandlers = fillHeight
@@ -290,6 +430,7 @@ export function ReferenceCapableField({
 
   return (
     <div
+      ref={rootRef}
       onFocusCapture={claimInsertTarget}
       {...dropHandlers}
       data-test-subj={`${dataTestSubj}DropTarget`}
@@ -313,10 +454,11 @@ export function ReferenceCapableField({
     >
       <DataReferencePicker
         catalog={catalog}
-        isOpen={isOpen}
-        onClose={closePicker}
+        isOpen={open !== null}
+        onClose={closeTypeahead}
         onInsert={handleInsert}
         fillHeight={fillHeight}
+        typeahead={{ query, keyHandlerRef, anchor }}
         input={children(bind)}
       />
     </div>

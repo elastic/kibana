@@ -16,8 +16,10 @@ import { useFetchConnector } from '../../../entities/connectors/model/use_availa
 import type { LineColumnPosition } from '../../../entities/workflows/store';
 import {
   closeConnectorFlyout,
+  connectorCreated,
   selectConnectorFlyoutConnectorToEdit,
   selectConnectorFlyoutInsertPosition,
+  selectConnectorFlyoutRequestId,
   selectConnectorFlyoutType,
   selectIsConnectorFlyoutOpen,
 } from '../../../entities/workflows/store';
@@ -37,6 +39,7 @@ export const WorkflowDetailConnectorFlyout = React.memo(
     const connectorType = useSelector(selectConnectorFlyoutType);
     const connectorIdToEdit = useSelector(selectConnectorFlyoutConnectorToEdit);
     const insertPosition = useSelector(selectConnectorFlyoutInsertPosition);
+    const requestId = useSelector(selectConnectorFlyoutRequestId);
     const { data: connector, isLoading: isLoadingConnector } = useFetchConnector(connectorIdToEdit);
     const dispatch = useDispatch();
 
@@ -70,6 +73,10 @@ export const WorkflowDetailConnectorFlyout = React.memo(
             if (insertPosition) {
               insertConnectorId(createdConnector.id, insertPosition, editorRef.current);
             }
+            // A form field asked for this connector: hand its id back to that field.
+            if (requestId) {
+              dispatch(connectorCreated({ requestId, id: createdConnector.id }));
+            }
             loadConnectors();
             // Inbound-only create stays open so the one-time ingest token can be copied.
             // Dual create stays open only when inbound events were turned on.
@@ -95,6 +102,7 @@ export const WorkflowDetailConnectorFlyout = React.memo(
       connector,
       isLoadingConnector,
       insertPosition,
+      requestId,
       editorRef,
     ]);
 

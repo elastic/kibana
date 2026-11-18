@@ -27,7 +27,6 @@ interface UseDecoratedNodesParams {
   readonly insertionPoints: InsertionPoints;
   readonly isEditMode: boolean;
   readonly selectedStepId: string | undefined;
-  readonly selectedSettingsKind: string | undefined;
   readonly nodeConfigWarnings: ReadonlyMap<string, NodeConfigWarningReason> | undefined;
   readonly pendingInsert: PendingInsertVisual | undefined;
 }
@@ -42,7 +41,6 @@ export const useDecoratedNodes = ({
   insertionPoints,
   isEditMode,
   selectedStepId,
-  selectedSettingsKind,
   nodeConfigWarnings,
   pendingInsert,
 }: UseDecoratedNodesParams): Node[] => {
@@ -66,21 +64,16 @@ export const useDecoratedNodes = ({
 
   // Decorate nodes with selection / flash.
   const decoratedNodes = useMemo(() => {
-    const settingsSelectedId = selectedSettingsKind
-      ? `settings:${selectedSettingsKind}`
-      : undefined;
-    if (!selectedStepId && !settingsSelectedId) return nodes;
+    if (!selectedStepId) return nodes;
     return nodes.map((n) => {
-      const selected =
-        (selectedStepId != null && n.id === selectedStepId) ||
-        (settingsSelectedId != null && n.id === settingsSelectedId);
+      const selected = n.id === selectedStepId;
       if (!selected && !n.selected) return n;
       return {
         ...n,
         selected,
       };
     });
-  }, [nodes, selectedStepId, selectedSettingsKind]);
+  }, [nodes, selectedStepId]);
 
   // Writes each node's own port targets / config warning / pending error-path
   // flag onto its `data`. Node and output-array identity is preserved whenever

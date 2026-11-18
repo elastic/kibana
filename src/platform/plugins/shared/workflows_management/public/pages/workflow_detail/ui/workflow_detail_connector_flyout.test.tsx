@@ -285,6 +285,50 @@ describe('WorkflowDetailConnectorFlyout', () => {
       expect(editorModel?.pushEditOperations).not.toHaveBeenCalled();
     });
 
+    it('hands the created connector id back to the form field that asked for it', () => {
+      let onConnectorCreatedCallback: ((connector: ActionConnector) => void) | undefined;
+      mockGetAddConnectorFlyout.mockImplementation((config: any) => {
+        onConnectorCreatedCallback = config.onConnectorCreated;
+        return <div data-test-subj="add-connector-flyout" />;
+      });
+
+      const { store } = renderComponent();
+      act(() => {
+        store.dispatch(
+          openCreateConnectorFlyout({ connectorType: 'test-action-type', requestId: 'field-1' })
+        );
+      });
+      act(() => {
+        onConnectorCreatedCallback!(mockConnector);
+      });
+
+      expect(store.getState().detail.lastCreatedConnector).toEqual({
+        requestId: 'field-1',
+        id: 'connector-123',
+      });
+      expect(mockLoadConnectors).toHaveBeenCalled();
+      expect(store.getState().detail.connectorFlyout.isOpen).toBe(false);
+      expect(mockEditorRef.current?.getModel()?.pushEditOperations).not.toHaveBeenCalled();
+    });
+
+    it('reports no created connector when no form field asked for it', () => {
+      let onConnectorCreatedCallback: ((connector: ActionConnector) => void) | undefined;
+      mockGetAddConnectorFlyout.mockImplementation((config: any) => {
+        onConnectorCreatedCallback = config.onConnectorCreated;
+        return <div data-test-subj="add-connector-flyout" />;
+      });
+
+      const { store } = renderComponent();
+      act(() => {
+        store.dispatch(openCreateConnectorFlyout({ connectorType: 'test-action-type' }));
+      });
+      act(() => {
+        onConnectorCreatedCallback!(mockConnector);
+      });
+
+      expect(store.getState().detail.lastCreatedConnector).toBeUndefined();
+    });
+
     it('keeps the flyout open after creating an inbound webhook so the ingest token remains visible', () => {
       let onConnectorCreatedCallback: ((connector: ActionConnector) => void) | undefined;
       mockGetAddConnectorFlyout.mockImplementation((config: any) => {

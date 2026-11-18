@@ -16,7 +16,7 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { ViewportPortal } from '@xyflow/react';
+import { useStore, ViewportPortal } from '@xyflow/react';
 import type { Edge, Node } from '@xyflow/react';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -25,7 +25,11 @@ import type { InsertionPoints } from './compute_insertion_points';
 import { computeWireInsertionControls } from './compute_wire_insertion_controls';
 import type { WorkflowGraphEditActions } from './workflow_graph_actions_context';
 import { toAnchorRect } from './workflow_graph_insert_control';
-import { WorkflowGraphWireSplitControl } from './workflow_graph_wire_split_control';
+import {
+  WIRE_HIT_VAR,
+  wireHitFlowPx,
+  WorkflowGraphWireSplitControl,
+} from './workflow_graph_wire_split_control';
 
 /** Gap between the trigger row and the ghost "add trigger" button. */
 const TRIGGER_GHOST_GAP = 12;
@@ -93,6 +97,14 @@ export function WorkflowGraphEditOverlays({
   // Unique per mount: SVG `url(#id)` resolves document-wide, so a fixed id would
   // let a second canvas on the page pick up this canvas's marker.
   const terminalArrowId = useGeneratedHtmlId({ prefix: 'workflowGraphTerminalArrow' });
+
+  // One zoom read for every wire hover strip: they size themselves from a CSS variable, so a
+  // zoom change re-renders this component only, not the (memoised) controls.
+  const zoom = useStore((state) => state.transform[2]);
+  const wireHitStyle = {
+    display: 'contents',
+    [WIRE_HIT_VAR]: `${Math.round(wireHitFlowPx(zoom) * 100) / 100}px`,
+  } as React.CSSProperties;
 
   const triggerIds = useMemo(
     () => nodes.filter((n) => n.type === 'trigger').map((n) => n.id),
@@ -177,9 +189,11 @@ export function WorkflowGraphEditOverlays({
         </svg>
       ) : null}
 
-      {wireControls.map((control) => (
-        <WorkflowGraphWireSplitControl key={control.id} control={control} edit={edit} />
-      ))}
+      <div data-test-subj="workflowGraphWireHitScope" style={wireHitStyle}>
+        {wireControls.map((control) => (
+          <WorkflowGraphWireSplitControl key={control.id} control={control} edit={edit} />
+        ))}
+      </div>
 
       {triggerBounds ? (
         <div

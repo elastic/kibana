@@ -13,8 +13,8 @@ import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { getBaseConnectorType, TypeIcon } from '../../components/step_icons';
 
-/** Default cap for the combined trigger + step icon strip (overflow shows +N). */
-const DEFAULT_MAX_VISIBLE_ICONS = 4;
+/** Cap for the combined trigger + step icon strip (overflow shows +N). */
+const MAX_VISIBLE_ICONS = 4;
 
 /** Shared slot so outline icons, brand logos, and the +N badge share one midline. */
 const ICON_SLOT_PX = 20;
@@ -58,11 +58,6 @@ export const getVisibleStepCount = (
 export interface CatalogTemplateIconsProps {
   stepTypes: string[];
   triggerTypes: string[];
-  /**
-   * Max icons to show before collapsing the rest into a `+N` badge.
-   * Counts triggers and unique step connector types together.
-   */
-  maxVisible?: number;
 }
 
 type IconItem =
@@ -74,10 +69,11 @@ type IconItem =
  * row's `stepTypes` / `triggerTypes` string arrays (`@kbn/workflows-library`
  * `TemplateSchema`). Step types are deduped by base connector type so e.g.
  * `elasticsearch.search` and `elasticsearch.index` render a single icon.
- * Excess icons beyond {@link maxVisible} collapse into a `+N` badge.
+ * Icons beyond {@link MAX_VISIBLE_ICONS} (triggers and unique step types together)
+ * collapse into a `+N` badge.
  */
 export const CatalogTemplateIcons = React.memo<CatalogTemplateIconsProps>(
-  ({ stepTypes, triggerTypes, maxVisible = DEFAULT_MAX_VISIBLE_ICONS }) => {
+  ({ stepTypes, triggerTypes }) => {
     const { euiTheme } = useEuiTheme();
     const [rowElement, setRowElement] = useState<HTMLDivElement | null>(null);
     const { width: rowWidth } = useResizeObserver(rowElement, 'width');
@@ -119,7 +115,7 @@ export const CatalogTemplateIcons = React.memo<CatalogTemplateIconsProps>(
         divider: 1 + 2 * (parseFloat(euiTheme.size.xs) - parseFloat(euiTheme.size.m)),
       }
     );
-    const visibleCount = Math.min(maxVisible, triggerTypes.length + visibleStepCount);
+    const visibleCount = Math.min(MAX_VISIBLE_ICONS, triggerTypes.length + visibleStepCount);
 
     const visibleItems = useMemo(() => items.slice(0, visibleCount), [items, visibleCount]);
     const overflowCount = items.length - visibleItems.length;

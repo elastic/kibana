@@ -57,6 +57,7 @@ describe('getClassicApplications', () => {
           source: 'classic',
           environments: ['production'],
           pageLoads: { count: 40 },
+          sessions: null,
           webVitals: {
             lcp: { p75Ms: 2412.5, sampleCount: 38, ratings: ALL_GOOD },
             inp: { p75Ms: null, sampleCount: 0, ratings: null },
@@ -71,6 +72,7 @@ describe('getClassicApplications', () => {
       ],
       environments: ['production', 'staging'],
       pageLoadsOverTime: [],
+      sessionsOverTime: null,
     });
   });
 

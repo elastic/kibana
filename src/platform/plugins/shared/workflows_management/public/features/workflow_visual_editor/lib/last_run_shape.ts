@@ -8,6 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { isRecord } from '@kbn/workflows-yaml';
 
 export interface StepOutputReference {
   readonly stepName: string;
@@ -24,9 +25,6 @@ export const parseStepOutputReference = (expression: string): StepOutputReferenc
   const [, stepName, rest] = match;
   return { stepName, path: rest ? rest.slice(1).split('.') : [] };
 };
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const resolvePath = (output: unknown, path: readonly string[]): { value: unknown } | undefined => {
   let current = output;

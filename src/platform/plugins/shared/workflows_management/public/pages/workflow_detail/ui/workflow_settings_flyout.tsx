@@ -29,7 +29,7 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { parseDocument } from 'yaml';
 import { i18n } from '@kbn/i18n';
@@ -46,10 +46,8 @@ import {
   writeRootYamlMapping,
 } from './workflow_settings_fields_model';
 import { updateWorkflowYamlFields } from '../../../../common/lib/yaml/update_workflow_yaml_fields';
-import { getAllConnectorsWithDynamic } from '../../../../common/schema';
 import { useWorkflowFiltersOptions } from '../../../entities/workflows/model/use_workflow_stats';
 import {
-  selectConnectors,
   selectEditorWorkflowDefinition,
   selectYamlString,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
@@ -95,12 +93,6 @@ export const WorkflowSettingsFlyout = ({
   const dispatch = useDispatch();
   const yamlString = useSelector(selectYamlString) ?? '';
   const definition = useSelector(selectEditorWorkflowDefinition);
-  const loadedConnectors = useSelector(selectConnectors);
-  // Same unwrap as the visual editor — store holds ConnectorsResponse, not an array.
-  const connectors = useMemo(
-    () => getAllConnectorsWithDynamic(loadedConnectors?.connectorTypes),
-    [loadedConnectors?.connectorTypes]
-  );
 
   const [selectedTabId, setSelectedTabId] = useState<SettingsTabId>('general');
   const [name, setName] = useState('');
@@ -127,6 +119,10 @@ export const WorkflowSettingsFlyout = ({
       .map((label) => ({ label }));
   }, [tagSuggestions, tagOptions]);
 
+  // The latest document, read when the flyout opens (below) without re-running on every write.
+  const documentRef = useRef({ yamlString, definition });
+  documentRef.current = { yamlString, definition };
+
   useEffect(() => {
     if (!isOpen) {
       return;
@@ -135,16 +131,16 @@ export const WorkflowSettingsFlyout = ({
     // Hydrate consts/outputs only when the flyout opens — not on every YAML
     // write-through (that remounted accordion cards). Prefer the live YAML
     // document so we don't depend on a stale parsed definition.
+    const { yamlString: openedYaml, definition: openedDefinition } = documentRef.current;
     try {
-      const doc = parseDocument(yamlString);
+      const doc = parseDocument(openedYaml);
       const js = doc.toJS() as Record<string, unknown> | null;
-      setConstantFields(parseConstsToFields(js?.consts ?? definition?.consts));
-      setOutputFields(parseOutputsToFields(js?.outputs ?? definition?.outputs));
+      setConstantFields(parseConstsToFields(js?.consts ?? openedDefinition?.consts));
+      setOutputFields(parseOutputsToFields(js?.outputs ?? openedDefinition?.outputs));
     } catch {
-      setConstantFields(parseConstsToFields(definition?.consts));
-      setOutputFields(parseOutputsToFields(definition?.outputs));
+      setConstantFields(parseConstsToFields(openedDefinition?.consts));
+      setOutputFields(parseOutputsToFields(openedDefinition?.outputs));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- open-once hydrate
   }, [isOpen]);
 
   useEffect(() => {
@@ -213,15 +209,13 @@ export const WorkflowSettingsFlyout = ({
   );
 
   const handleCreateTag = useCallback(
-    (searchValue: string, flattenedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+    (searchValue: string) => {
       const normalized = searchValue.trim();
       if (!normalized) {
         return;
       }
-      const exists = flattenedOptions.some((option) => option.label === normalized);
-      if (exists) {
-        return;
-      }
+      // The combo box already refuses a tag that is selected. A tag that equals a suggestion is
+      // created here too when other suggestions contain it, so it must not be skipped.
       const next = [...tagOptions, { label: normalized }];
       setTagOptions(next);
       applyYamlPatch({ tags: next.map((option) => option.label) });
@@ -231,8 +225,8 @@ export const WorkflowSettingsFlyout = ({
 
   const handleConstantsChange = useCallback(
     (next: readonly ConstantField[]) => {
-      setConstantFields([...next]);
       if (readOnly) return;
+      setConstantFields([...next]);
       const record = constantsToYamlRecord(next);
       const nextYaml = writeRootYamlMapping(yamlString, 'consts', record);
       if (nextYaml !== yamlString) {
@@ -244,8 +238,8 @@ export const WorkflowSettingsFlyout = ({
 
   const handleOutputsChange = useCallback(
     (next: readonly OutputField[]) => {
-      setOutputFields([...next]);
       if (readOnly) return;
+      setOutputFields([...next]);
       const schema = outputsToJsonSchema(next);
       const nextYaml = writeRootYamlMapping(yamlString, 'outputs', schema);
       if (nextYaml !== yamlString) {
@@ -411,8 +405,6 @@ export const WorkflowSettingsFlyout = ({
           <WorkflowOutputsEditor
             fields={outputFields}
             onChange={handleOutputsChange}
-            workflowDefinition={definition}
-            connectors={connectors}
             findReferencingSteps={findOutputRefs}
             readOnly={readOnly}
           />
@@ -429,11 +421,16 @@ export const WorkflowSettingsFlyout = ({
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton onClick={onClose} fill data-test-subj="workflowSettingsFlyoutDone">
-              <FormattedMessage id="workflows.workflowSettingsFlyout.done" defaultMessage="Done" />
-            </EuiButton>
-          </EuiFlexItem>
+          {readOnly ? null : (
+            <EuiFlexItem grow={false}>
+              <EuiButton onClick={onClose} fill data-test-subj="workflowSettingsFlyoutDone">
+                <FormattedMessage
+                  id="workflows.workflowSettingsFlyout.done"
+                  defaultMessage="Done"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>

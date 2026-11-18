@@ -9,6 +9,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBasicTable,
+  EuiCallOut,
+  EuiCode,
   EuiFieldSearch,
   EuiFilterGroup,
   EuiFlexGroup,
@@ -49,6 +51,7 @@ import {
 } from '../../stream_list_view/translations';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useTimeRange } from '../../../hooks/use_time_range';
+import { useUnitId } from '../../../hooks/use_unit_id';
 import { SourceFilter, type SourceFilterOption } from '../sources/source_filter';
 import {
   buildDestinationIndexRows,
@@ -59,7 +62,10 @@ import {
 } from './destination_index_stats';
 import { useDestinationIndexStats } from './destinations_context';
 import type { DestinationDetailActorRef } from './state_machines/destination_detail_state_machine';
-import type { ResolvedIndicesStatus } from './state_machines/destinations_state_machine';
+import type {
+  ResolvedIndicesError,
+  ResolvedIndicesStatus,
+} from './state_machines/destinations_state_machine';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 // The index name takes the spare width; stat columns keep a fixed width and never wrap.
@@ -140,7 +146,7 @@ interface DestinationIndicesTableProps {
   destinationId: string;
   indices: ResolvedDestinationIndex[];
   indicesStatus: ResolvedIndicesStatus;
-  indicesError?: string;
+  indicesError?: ResolvedIndicesError;
   destinationDetailRef?: DestinationDetailActorRef;
   /** Called on mount; the details then follow the page time range and the indices. */
   onShowDestinationDetail: (destinationId: string, viewerId: string) => void;
@@ -166,6 +172,7 @@ export const DestinationIndicesTable = ({
 }: DestinationIndicesTableProps) => {
   const router = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
+  const unitId = useUnitId();
   const viewerId = useGeneratedHtmlId({ prefix: 'destinationIndicesTable' });
   const { stats, status: statsStatus } = useDestinationIndexStats(destinationDetailRef);
   const [query, setQuery] = useState('');
@@ -206,9 +213,9 @@ export const DestinationIndicesTable = ({
 
   const columns = useMemo<Array<EuiBasicTableColumn<DestinationIndexRow>>>(() => {
     const indexLinkProps = (indexName: string, tab: 'overview' | 'quality') => ({
-      href: router.link('/new-experience/indices/{indexName}/{tab}', {
+      href: router.link('/v2/indices/{indexName}/{tab}', {
         path: { indexName, tab },
-        query: { rangeFrom, rangeTo },
+        query: { rangeFrom, rangeTo, unitId },
       }),
       onClick: (event: React.MouseEvent) => {
         if (isModifiedClick(event)) {
@@ -219,9 +226,9 @@ export const DestinationIndicesTable = ({
           onIndexClick(indexName);
           return;
         }
-        router.push('/new-experience/indices/{indexName}/{tab}', {
+        router.push('/v2/indices/{indexName}/{tab}', {
           path: { indexName, tab },
-          query: { rangeFrom, rangeTo },
+          query: { rangeFrom, rangeTo, unitId },
         });
       },
     });
@@ -388,7 +395,7 @@ export const DestinationIndicesTable = ({
           ),
       },
     ];
-  }, [isStatsFailed, isStatsLoading, onIndexClick, rangeFrom, rangeTo, router]);
+  }, [isStatsFailed, isStatsLoading, onIndexClick, rangeFrom, rangeTo, router, unitId]);
 
   const onTableChange = ({ sort: nextSort, page }: CriteriaWithPagination<DestinationIndexRow>) => {
     if (nextSort) {
@@ -419,16 +426,43 @@ export const DestinationIndicesTable = ({
     );
   }
 
+  if (indicesStatus === 'unavailable' && indicesError?.forbidden) {
+    return (
+      <EuiCallOut
+        announceOnMount
+        size="s"
+        color="warning"
+        iconType="lock"
+        title={i18n.translate('xpack.streams.destinations.indices.forbiddenTitle', {
+          defaultMessage: "You don't have permission to view this destination's indices",
+        })}
+        data-test-subj="streamsDestinationIndicesForbidden"
+      >
+        <p>
+          <FormattedMessage
+            id="xpack.streams.destinations.indices.forbiddenDescription"
+            defaultMessage="Listing indices requires the {privilege} index privilege on the indices this destination writes to. Ask your administrator to grant it."
+            values={{ privilege: <EuiCode>view_index_metadata</EuiCode> }}
+          />
+        </p>
+      </EuiCallOut>
+    );
+  }
+
   if (indicesStatus === 'unavailable') {
     return (
-      <EuiText size="s" color="danger" data-test-subj="streamsDestinationIndicesError">
-        <p>
-          {indicesError ??
-            i18n.translate('xpack.streams.destinations.indices.loadFailedDescription', {
-              defaultMessage: 'Could not load indices for this destination.',
-            })}
-        </p>
-      </EuiText>
+      <EuiCallOut
+        announceOnMount
+        size="s"
+        color="danger"
+        iconType="error"
+        title={i18n.translate('xpack.streams.destinations.indices.loadFailedTitle', {
+          defaultMessage: 'Could not load indices for this destination',
+        })}
+        data-test-subj="streamsDestinationIndicesError"
+      >
+        {indicesError && <p>{indicesError.message}</p>}
+      </EuiCallOut>
     );
   }
 

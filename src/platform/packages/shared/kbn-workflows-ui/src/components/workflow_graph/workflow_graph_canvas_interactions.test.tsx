@@ -258,8 +258,6 @@ describe('WorkflowGraphCanvas pane click', () => {
     act(() => onPaneClick({}));
   };
 
-  const settingsNodes = { workflowName: 'wf', constantsCount: 0, outputsCount: 0 } as const;
-
   it('clears the step selection when a step is selected', () => {
     const onStepSelect = jest.fn();
     render(
@@ -283,69 +281,5 @@ describe('WorkflowGraphCanvas pane click', () => {
     clickPane();
 
     expect(onStepSelect).not.toHaveBeenCalled();
-  });
-
-  it('clears the settings selection when a settings node is selected', () => {
-    const onStepSelect = jest.fn();
-    const onSettingsNodeSelect = jest.fn();
-    render(
-      <WorkflowGraphCanvasWithoutProvider
-        {...baseProps}
-        onStepSelect={onStepSelect}
-        onSettingsNodeSelect={onSettingsNodeSelect}
-        settingsNodes={{ ...settingsNodes, selectedKind: 'constants' }}
-      />
-    );
-
-    clickPane();
-
-    expect(onSettingsNodeSelect).toHaveBeenCalledTimes(1);
-    expect(onSettingsNodeSelect).toHaveBeenCalledWith(undefined);
-    expect(onStepSelect).not.toHaveBeenCalled();
-  });
-
-  it('does not touch the settings selection when none is selected', () => {
-    const onSettingsNodeSelect = jest.fn();
-    render(
-      <WorkflowGraphCanvasWithoutProvider
-        {...baseProps}
-        onSettingsNodeSelect={onSettingsNodeSelect}
-        settingsNodes={settingsNodes}
-      />
-    );
-
-    clickPane();
-
-    expect(onSettingsNodeSelect).not.toHaveBeenCalled();
-  });
-
-  it('clears both selections when a step and a settings node are selected', () => {
-    const onStepSelect = jest.fn();
-    const onSettingsNodeSelect = jest.fn();
-    render(
-      <WorkflowGraphCanvasWithoutProvider
-        {...baseProps}
-        onStepSelect={onStepSelect}
-        onSettingsNodeSelect={onSettingsNodeSelect}
-        selectedStepId="step1"
-        settingsNodes={{ ...settingsNodes, selectedKind: 'info' }}
-      />
-    );
-
-    clickPane();
-
-    expect(onStepSelect).toHaveBeenCalledWith(undefined);
-    expect(onSettingsNodeSelect).toHaveBeenCalledWith(undefined);
-  });
-
-  it('tolerates a missing onSettingsNodeSelect while a settings kind is selected', () => {
-    render(
-      <WorkflowGraphCanvasWithoutProvider
-        {...baseProps}
-        settingsNodes={{ ...settingsNodes, selectedKind: 'outputs' }}
-      />
-    );
-
-    expect(() => clickPane()).not.toThrow();
   });
 });

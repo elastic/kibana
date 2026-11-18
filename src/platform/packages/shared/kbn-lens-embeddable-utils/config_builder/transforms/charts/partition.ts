@@ -295,19 +295,12 @@ function convertAPIStaticColorToLensState(config: PartitionConfig) {
 function convertCollapseAPItoCollapseFns<P extends 'group_by' | 'group_breakdown_by'>(
   config: Partial<Record<P, { collapse_by?: CollapseBySchema }[]>>,
   prop: P
-) {
-  if (!(prop in config) || config[prop] == null) {
-    return [];
-  }
-  return config[prop]
-    .filter(
-      (
-        groupBy
-      ): groupBy is {
-        collapse_by: CollapseBySchema;
-      } => groupBy.collapse_by != null
-    )
-    .map(({ collapse_by }, index) => [getAccessorName(prop, index), collapse_by]);
+): Array<[string, CollapseBySchema]> {
+  // Key by the group's position in the request, as the group columns are, not by its position
+  // among the collapsed groups.
+  return (config[prop] ?? []).flatMap(({ collapse_by }, index) =>
+    collapse_by != null ? [[getAccessorName(prop, index), collapse_by]] : []
+  );
 }
 
 function computeSharedPartitionLayerState(config: PartitionConfig) {

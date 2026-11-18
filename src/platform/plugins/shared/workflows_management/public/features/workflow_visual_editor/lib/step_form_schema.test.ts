@@ -8,6 +8,22 @@
  */
 
 import type { ConnectorContractUnion } from '@kbn/workflows';
+import {
+  BaseConnectorStepSchema,
+  DataSetStepSchema,
+  ForEachStepSchema,
+  IfStepSchema,
+  LoopBreakStepSchema,
+  LoopContinueStepSchema,
+  MergeStepSchema,
+  ParallelStepObjectSchema,
+  WaitStepSchema,
+  WhileStepSchema,
+  WorkflowExecuteAsyncStepSchema,
+  WorkflowExecuteStepSchema,
+  WorkflowOutputStepSchema,
+} from '@kbn/workflows';
+import { INDEX_CONTRACT } from '@kbn/workflows/spec/elasticsearch/overrides/elasticsearch.index';
 import { SET_ALERTS_STATUS_CONTRACT } from '@kbn/workflows/spec/kibana/overrides/kibana.set_alerts_status';
 import { z } from '@kbn/zod/v4';
 import {
@@ -71,6 +87,170 @@ describe('step_form_schema', () => {
       const items = getStepFormSchema('data.map', [mapLike])?.fields.find((f) => f.key === 'items');
       expect(items).toMatchObject({ path: ['items'], advanced: false });
       expect(items?.templatable).toBeUndefined();
+    });
+
+    describe('a root `source` of a data step', () => {
+      const dataStep = (type: string, source: z.ZodType): ConnectorContractUnion =>
+        ({
+          type,
+          paramsSchema: z.object({}),
+          configSchema: z.object({ source }),
+          outputSchema: z.unknown(),
+          summary: null,
+          description: null,
+        } as unknown as ConnectorContractUnion);
+
+      it('is a JSON + Liquid code field that stays a string, promoted out of Advanced', () => {
+        const source = getStepFormSchema('data.parseJson', [
+          dataStep(
+            'data.parseJson',
+            z.unknown().meta({ language: 'json-liquid', advanced: false })
+          ),
+        ])?.fields.find((f) => f.key === 'source');
+        expect(source).toMatchObject({
+          path: ['source'],
+          kind: 'code',
+          language: 'json-liquid',
+          advanced: false,
+          valueFormWhenWhole: true,
+        });
+      });
+
+      it('opens on Data for a plaintext or JSON source that usually holds a reference', () => {
+        const meta = { preferData: true, advanced: false };
+        const [regex, stringify] = [
+          getStepFormSchema('data.regexExtract', [
+            dataStep('data.regexExtract', z.unknown().meta({ ...meta, language: 'plaintext' })),
+          ])?.fields.find((f) => f.key === 'source'),
+          getStepFormSchema('data.stringifyJson', [
+            dataStep('data.stringifyJson', z.unknown().meta(meta)),
+          ])?.fields.find((f) => f.key === 'source'),
+        ];
+        expect(regex).toMatchObject({ kind: 'code', language: 'plaintext', preferData: true });
+        expect(regex?.valueFormWhenWhole).toBeUndefined();
+        expect(stringify).toMatchObject({ kind: 'code', language: 'json', preferData: true });
+      });
+
+      it('still hides the transport-only `with.source` / `with.pretty` of a connector', () => {
+        const esLike = {
+          type: 'elasticsearch.search',
+          paramsSchema: z.object({
+            index: z.string().optional(),
+            source: z.string().optional(),
+            pretty: z.boolean().optional(),
+          }),
+          outputSchema: z.unknown(),
+          summary: null,
+          description: null,
+        } as unknown as ConnectorContractUnion;
+        const keys = getStepFormSchema('elasticsearch.search', [esLike])?.fields.map((f) => f.key);
+        expect(keys).toEqual(['index']);
+      });
+    });
+
+    describe('the step-level `if`', () => {
+      it('is a KQL condition written as a value, for a connector step and a built-in one', () => {
+        const expected = {
+          path: ['if'],
+          kind: 'code',
+          language: 'kuery',
+          required: false,
+          valueFormWhenWhole: true,
+        };
+        expect(getStepFormSchema('slack', connectors)?.condition).toMatchObject(expected);
+        expect(getStepFormSchema('foreach', [])?.condition).toMatchObject(expected);
+      });
+
+      it('is left out for the `if` step, whose config rules it out and gates on `condition`', () => {
+        const schema = getStepFormSchema('if', []);
+        expect(schema?.condition).toBeUndefined();
+        expect(schema?.fields.some((field) => field.key === 'condition')).toBe(true);
+      });
+
+      it('never adds `if` to the fields of the Inputs form', () => {
+        expect(getStepFormSchema('slack', connectors)?.fields.some((f) => f.key === 'if')).toBe(
+          false
+        );
+      });
+    });
+
+    describe('the step-level `timeout`', () => {
+      it('is a duration text field for a connector step, which also takes a template', () => {
+        const timeout = getStepFormSchema('slack', connectors)?.timeout;
+        expect(timeout).toMatchObject({
+          path: ['timeout'],
+          kind: 'text',
+          format: 'duration',
+          required: false,
+          deleteWhenEmpty: true,
+        });
+        expect(timeout?.templatable).toBeUndefined();
+        expect(
+          getStepFormSchema('slack', connectors)?.fields.some((f) => f.key === 'timeout')
+        ).toBe(false);
+        expect(getStepFormSchema('waitForApproval', [])?.timeout?.templatable).toBeUndefined();
+      });
+
+      it.each(['foreach', 'while', 'parallel'])('is a literal duration only for %s', (type) => {
+        expect(getStepFormSchema(type, [])?.timeout).toMatchObject({
+          path: ['timeout'],
+          format: 'duration',
+          templatable: false,
+        });
+      });
+
+      it.each([
+        'if',
+        'switch',
+        'merge',
+        'wait',
+        'data.set',
+        'loop.break',
+        'loop.continue',
+        'workflow.execute',
+        'workflow.executeAsync',
+        'workflow.output',
+      ])('is left out for %s', (type) => {
+        expect(getStepFormSchema(type, [])?.timeout).toBeUndefined();
+      });
+
+      // The form's rule is a list, so keep it honest against the step schemas it mirrors.
+      it('follows the step schemas: those without it take no `timeout`, the others do', () => {
+        [
+          WaitStepSchema,
+          DataSetStepSchema,
+          MergeStepSchema,
+          IfStepSchema,
+          LoopBreakStepSchema,
+          LoopContinueStepSchema,
+          WorkflowExecuteStepSchema,
+          WorkflowExecuteAsyncStepSchema,
+          WorkflowOutputStepSchema,
+        ].forEach((stepSchema) => {
+          expect(stepSchema.shape).not.toHaveProperty('timeout');
+        });
+        [ForEachStepSchema, WhileStepSchema, ParallelStepObjectSchema].forEach((stepSchema) => {
+          const { timeout } = stepSchema.shape;
+          expect(timeout.safeParse('30s').success).toBe(true);
+          expect(timeout.safeParse('{{ inputs.limit }}').success).toBe(false);
+        });
+        expect(BaseConnectorStepSchema.shape.timeout.safeParse('{{ inputs.limit }}').success).toBe(
+          true
+        );
+      });
+    });
+
+    it('offers an optional `id` on elasticsearch.index, not a choice between writing it with or without one', () => {
+      const fields = getStepFormSchema('elasticsearch.index', [
+        INDEX_CONTRACT as unknown as ConnectorContractUnion,
+      ])?.fields;
+      expect(fields?.some((field) => field.kind === 'variants')).toBe(false);
+      expect(fields?.find((field) => field.key === 'id')).toMatchObject({
+        path: ['with', 'id'],
+        kind: 'text',
+        required: false,
+        advanced: false,
+      });
     });
 
     it('gives a map-valued `with` (data.set) one required key-value field', () => {
@@ -240,6 +420,35 @@ describe('step_form_schema', () => {
       ]);
     });
 
+    it('names the variants of a union keyed on a literal `type` by that `type`', () => {
+      const targetConnector = {
+        type: 'target',
+        hasConnectorId: false,
+        paramsSchema: z.discriminatedUnion('type', [
+          z.object({ type: z.literal('host'), host: z.string() }),
+          z.object({ type: z.literal('webproperty'), hostname: z.string(), port: z.number() }),
+        ]),
+        outputSchema: z.unknown(),
+        summary: null,
+        description: null,
+      } as unknown as ConnectorContractUnion;
+      const field = getStepFormSchema('target', [targetConnector])?.fields.find(
+        (f) => f.key === 'with'
+      );
+      expect(field?.variants?.map((v) => v.label)).toEqual(['host', 'webproperty']);
+      expect(field?.variants?.map((v) => v.discriminator)).toEqual([
+        { key: 'type', value: 'host' },
+        { key: 'type', value: 'webproperty' },
+      ]);
+    });
+
+    it('does not invent a discriminator when no key is a different literal in every variant', () => {
+      const field = getStepFormSchema('kibana.SetAlertsStatus', [
+        SET_ALERTS_STATUS_CONTRACT as unknown as ConnectorContractUnion,
+      ])?.fields.find((f) => f.key === 'with');
+      expect(field?.variants?.every((v) => v.discriminator === undefined)).toBe(true);
+    });
+
     it('leaves nullable objects, lists and maps alone: they are not a choice of shape', () => {
       const oddConnectors = [
         {
@@ -278,6 +487,19 @@ describe('step_form_schema', () => {
       );
     });
 
+    it('makes an optional connector-id a connector-id field too, and gives none to a step without one', () => {
+      const optional = getStepFormSchema('slack', [
+        { ...connectors[0], hasConnectorId: 'optional' },
+      ]);
+      expect(optional?.fields.find((f) => f.key === 'connector-id')).toMatchObject({
+        kind: 'connector-id',
+        required: false,
+        stepType: 'slack',
+      });
+      const none = getStepFormSchema('slack', [{ ...connectors[0], hasConnectorId: false }]);
+      expect(none?.fields.some((f) => f.key === 'connector-id')).toBe(false);
+    });
+
     it('derives connector fields from paramsSchema under `with` plus connector-id', () => {
       const schema = getStepFormSchema('slack', connectors);
       expect(schema).toBeDefined();
@@ -286,6 +508,8 @@ describe('step_form_schema', () => {
         path: ['connector-id'],
         required: true,
         label: 'Connector id',
+        kind: 'connector-id',
+        stepType: 'slack',
       });
       expect(byKey.message).toMatchObject({
         path: ['with', 'message'],
@@ -828,6 +1052,82 @@ describe('step_form_schema', () => {
       expect(findUnclosedTemplateExpression('Hello {{ inputs.x')).toBe(true);
       expect(findUnclosedTemplateExpression('Hello {{ inputs.x }}')).toBe(false);
       expect(validateStepField(requiredText, 'Hi {{ inputs.user')).toBe('Unclosed {{ expression');
+    });
+
+    describe('duration', () => {
+      const timeout = (templatable: boolean): StepFormField => ({
+        key: 'timeout',
+        path: ['timeout'],
+        label: 'Duration',
+        required: false,
+        kind: 'text',
+        format: 'duration',
+        ...(templatable ? {} : { templatable: false as const }),
+      });
+
+      it.each(['30s', '5m', '1h30m', '1w2d3h4m5s6ms'])('accepts %s', (text) => {
+        expect(validateStepField(timeout(true), text)).toBeUndefined();
+        expect(validateStepField(timeout(false), text)).toBeUndefined();
+      });
+
+      it.each(['5 minutes', '1m1h', '30', '-5s'])('rejects %s', (text) => {
+        expect(validateStepField(timeout(true), text)).toBe(
+          'Must be a duration (e.g. 30s or 1h30m) or a {{ }} template'
+        );
+        expect(validateStepField(timeout(false), text)).toBe(
+          'Must be a duration, e.g. 30s or 1h30m'
+        );
+      });
+
+      it('takes a template where the step takes Liquid, and not where it takes a literal', () => {
+        expect(validateStepField(timeout(true), '{{ inputs.limit }}')).toBeUndefined();
+        expect(
+          validateStepField(timeout(true), "{{ inputs.limit | default: '5m' }}")
+        ).toBeUndefined();
+        expect(validateStepField(timeout(false), '{{ inputs.limit }}')).toBe(
+          'Must be a duration, e.g. 30s or 1h30m'
+        );
+      });
+    });
+
+    describe('JSON + Liquid', () => {
+      const jsonLiquid: StepFormField = {
+        key: 'source',
+        path: ['source'],
+        label: 'Source',
+        required: false,
+        kind: 'code',
+        language: 'json-liquid',
+      };
+
+      it.each([
+        [
+          'variables as bare values and inside strings',
+          '{"id": {{ inputs.id }}, "n": "{{ a.b }}"}',
+        ],
+        ['a variable filtered to JSON text', '{"tags": {{ inputs.tags | json }}}'],
+        ['a Liquid tag, whose output is not predictable', '{% if true %}{"a": 1}{% endif %}'],
+        ['a whole reference', '${{ steps.a.output }}'],
+        ['a whole variable', '{{ steps.a.output | json }}'],
+        ['plain JSON', '{"a": [1, 2, {"b": null}]}'],
+      ])('accepts %s', (_name, text) => {
+        expect(validateStepField(jsonLiquid, text)).toBeUndefined();
+      });
+
+      it('reports an unclosed expression, bad Liquid syntax, and broken JSON', () => {
+        expect(validateStepField(jsonLiquid, '{"a": {{ inputs.id }')).toBe(
+          'Unclosed {{ expression'
+        );
+        expect(validateStepField(jsonLiquid, '{"a": {{ inputs.id | nosuchfilter }}}')).toBe(
+          'undefined filter: nosuchfilter'
+        );
+        expect(validateStepField(jsonLiquid, '{% if x %}{"a": 1}')).toBe(
+          'tag {% if x %} not closed'
+        );
+        expect(validateStepField(jsonLiquid, '{"a": }')).toBe(
+          'Must be valid JSON (ignoring variables)'
+        );
+      });
     });
   });
 });

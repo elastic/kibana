@@ -12,10 +12,6 @@ import type { useEuiTheme } from '@elastic/eui';
 
 type EuiTheme = ReturnType<typeof useEuiTheme>['euiTheme'];
 
-/** Outer step/trigger card corner radius. */
-export const NODE_BORDER_RADIUS = 8;
-/** Icon tile corner radius inside the card. */
-export const CHIP_BORDER_RADIUS = 4;
 export const CHIP_SIZE = 32;
 
 /**

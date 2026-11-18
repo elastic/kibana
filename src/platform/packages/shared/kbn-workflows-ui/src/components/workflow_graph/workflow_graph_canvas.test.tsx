@@ -674,13 +674,11 @@ describe('WorkflowGraphCanvas node click routing', () => {
   it('selects a step once and reports its type', () => {
     const onStepSelect = jest.fn();
     const onNodeClick = jest.fn();
-    const onSettingsNodeSelect = jest.fn();
     render(
       <WorkflowGraphCanvasWithoutProvider
         {...baseProps}
         onStepSelect={onStepSelect}
         onNodeClick={onNodeClick}
-        onSettingsNodeSelect={onSettingsNodeSelect}
       />
     );
 
@@ -689,28 +687,6 @@ describe('WorkflowGraphCanvas node click routing', () => {
     expect(onStepSelect).toHaveBeenCalledTimes(1);
     expect(onStepSelect).toHaveBeenCalledWith('step1');
     expect(onNodeClick).toHaveBeenCalledWith('step1', 'http');
-    expect(onSettingsNodeSelect).not.toHaveBeenCalled();
-  });
-
-  it('routes a settings node click to onSettingsNodeSelect without selecting a step', () => {
-    const onStepSelect = jest.fn();
-    const onNodeClick = jest.fn();
-    const onSettingsNodeSelect = jest.fn();
-    render(
-      <WorkflowGraphCanvasWithoutProvider
-        {...baseProps}
-        onStepSelect={onStepSelect}
-        onNodeClick={onNodeClick}
-        onSettingsNodeSelect={onSettingsNodeSelect}
-      />
-    );
-
-    clickNode({ id: 'settings:outputs', type: 'settings', data: { kind: 'outputs' } });
-
-    expect(onSettingsNodeSelect).toHaveBeenCalledTimes(1);
-    expect(onSettingsNodeSelect).toHaveBeenCalledWith('outputs');
-    expect(onStepSelect).not.toHaveBeenCalled();
-    expect(onNodeClick).not.toHaveBeenCalled();
   });
 });
 

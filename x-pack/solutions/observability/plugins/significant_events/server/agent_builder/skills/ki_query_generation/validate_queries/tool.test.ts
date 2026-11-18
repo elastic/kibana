@@ -91,7 +91,7 @@ describe('ki_queries_validate tool', () => {
     });
     createQueryValidationContextMock.mockResolvedValue({
       targetSources: ['logs.test'],
-      validationLookback: 'now-10m',
+      validationLookbackMinutes: 10,
       conflictingFields: new Set(),
       normalizedStoredEsqls: new Set(),
     });

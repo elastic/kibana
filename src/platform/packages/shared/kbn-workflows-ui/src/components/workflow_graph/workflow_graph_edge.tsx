@@ -126,7 +126,16 @@ function WorkflowGraphEdgeInner(props: WorkflowEdgeProps) {
       <path
         id={id}
         pathLength={drawIn ? 1 : undefined}
-        style={{ ...style, stroke, strokeWidth, fill: 'none', strokeDasharray }}
+        // Edges are display-only: a hit-testable 1px stroke (React Flow lifts edges inside containers
+        // above the add-step hover strips) would un-hover the strip on the wire's centre line.
+        style={{
+          ...style,
+          stroke,
+          strokeWidth,
+          fill: 'none',
+          strokeDasharray,
+          pointerEvents: 'none',
+        }}
         css={
           drawIn
             ? {

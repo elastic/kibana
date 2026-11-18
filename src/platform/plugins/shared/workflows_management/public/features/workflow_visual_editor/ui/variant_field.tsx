@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { blankVariantValue, inferVariant } from '../lib/form_variants';
+import { blankVariantValue, inferVariant, isBlankVariantValue } from '../lib/form_variants';
 import type { FormVariant, StepFormField } from '../lib/step_form_schema';
 import { isEmptyFieldValue } from '../lib/step_form_schema';
 
@@ -57,7 +57,7 @@ export function VariantField({
   const modalTitleId = useGeneratedHtmlId({ prefix: 'workflowStepConfigVariantConfirm' });
   const variants: readonly FormVariant[] = field.variants ?? [];
   const inferred = inferVariant(variants, value);
-  const valueIsEmpty = isEmptyFieldValue(value);
+  const valueIsEmpty = isEmptyFieldValue(value) || isBlankVariantValue(variants, value);
   const [selectedId, setSelectedId] = useState(inferred.id);
   const [pending, setPending] = useState<FormVariant | undefined>();
 
@@ -70,11 +70,14 @@ export function VariantField({
 
   const requestSwitch = (id: string) => {
     const target = variants.find((variant) => variant.id === id);
-    if (!target || target.id === active.id) return;
+    if (!target) return;
     if (valueIsEmpty) {
       setSelectedId(target.id);
+      // Choosing a way that is named by a `type` writes it, so the value says which way it is.
+      if (target.discriminator) onChange(blankVariantValue(target));
       return;
     }
+    if (target.id === active.id) return;
     setPending(target);
   };
 

@@ -112,6 +112,7 @@ export function getWorkflowContextSchema(
   const normalizedOutputs = normalizeFieldsToJsonSchema(outputs);
 
   const eventSchema = buildEventSchemaFromTriggers(registry, triggers ?? [], inputsZodSchema);
+  const pageTrigger = (triggers ?? []).find(isPageTrigger);
 
   const pageTrigger = (triggers ?? []).find(isPageTrigger);
 

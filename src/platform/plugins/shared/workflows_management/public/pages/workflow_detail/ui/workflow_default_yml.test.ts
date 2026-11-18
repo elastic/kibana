@@ -7,11 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  isStructurallyEmptyWorkflowYaml,
-  workflowDefaultYaml,
-  workflowYamlEditorSeedYaml,
-} from './workflow_default_yml';
+import { workflowDefaultYaml, workflowYamlEditorSeedYaml } from './workflow_default_yml';
+import { isStructurallyEmptyWorkflowYaml } from '../../../entities/workflows/store/workflow_detail/utils/is_structurally_empty_workflow_yaml';
 
 describe('workflow default yaml helpers', () => {
   it('keeps create seed structurally empty', () => {

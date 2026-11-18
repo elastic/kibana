@@ -7,55 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ReferenceCapableBind } from './reference_capable_field';
 import { ReferenceTextInput } from './reference_text_input';
 import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
 
-jest.mock('@kbn/workflows-ui', () => ({
-  workflowsEditorChromeOverrides: {},
-  loadTypeIconMasks: () => Promise.resolve({}),
-}));
+jest.mock('@kbn/workflows-ui', () =>
+  jest.requireActual('../test_utils/mock_workflows_ui').createWorkflowsUiModuleMock()
+);
 
-/** Like Monaco: `editorDidMount` runs once, and listeners keep the closures they were given. */
-jest.mock('@kbn/code-editor', () => {
-  const MockReact = jest.requireActual('react');
-  return {
-    CodeEditor: (props: {
-      value: string;
-      dataTestSubj?: string;
-      editorDidMount?: (editor: unknown) => void;
-    }) => {
-      const blurListener = MockReact.useRef(null);
-      const mount = MockReact.useRef(props.editorDidMount);
-      MockReact.useEffect(() => {
-        mount.current?.({
-          getModel: () => null,
-          getPosition: () => null,
-          focus: () => undefined,
-          onKeyDown: () => undefined,
-          onDidBlurEditorText: (listener: () => void) => {
-            blurListener.current = listener;
-          },
-        });
-      }, []);
-      return (
-        <textarea
-          data-test-subj={props.dataTestSubj}
-          value={props.value}
-          readOnly
-          onBlur={() => blurListener.current?.()}
-        />
-      );
-    },
-  };
-});
+jest.mock('@kbn/code-editor', () =>
+  jest.requireActual('../test_utils/mock_code_editor').createCodeEditorModuleMock()
+);
 
 const catalog: DataReferenceCatalog = { groups: [] };
 
-const bind = (value: string): ReferenceCapableBind =>
+const bind = (value: string, overrides: Partial<ReferenceCapableBind> = {}): ReferenceCapableBind =>
   ({
     value,
     isOpen: false,
@@ -64,17 +33,26 @@ const bind = (value: string): ReferenceCapableBind =>
     reportChange: () => undefined,
     openPickerAtRange: () => undefined,
     registerSelection: () => undefined,
+    registerEditRequester: () => undefined,
+    ...overrides,
   } as unknown as ReferenceCapableBind);
 
-const renderInput = (onBlur: () => void, value: string) => (
+const renderInput = (
+  onBlur: () => void,
+  value: string,
+  {
+    onChange = () => undefined,
+    ...overrides
+  }: Partial<ReferenceCapableBind> & { onChange?: (...args: unknown[]) => void } = {}
+) => (
   <I18nProvider>
     <ReferenceTextInput
-      bind={bind(value)}
+      bind={bind(value, overrides)}
       catalog={catalog}
       ariaLabel="Value"
       isInvalid={false}
       onBlur={onBlur}
-      onChange={() => undefined}
+      onChange={onChange}
       testSubj="field"
       warnContainersInSentence={false}
     />
@@ -93,5 +71,57 @@ describe('ReferenceTextInput', () => {
     fireEvent.blur(screen.getByTestId('field'));
     expect(latest).toHaveBeenCalledTimes(1);
     expect(first).not.toHaveBeenCalled();
+  });
+
+  describe('what it reports to the field', () => {
+    it('passes the character the user typed, so a typed { can start a reference', () => {
+      const onChange = jest.fn();
+      render(renderInput(jest.fn(), 'Hi ', { onChange }));
+      fireEvent.focusIn(screen.getByTestId('field'));
+
+      fireEvent.change(screen.getByTestId('field'), { target: { value: 'Hi {' } });
+
+      expect(onChange).toHaveBeenCalledWith('Hi {', 4, '{');
+    });
+
+    it('passes no typed character for a deletion', () => {
+      const onChange = jest.fn();
+      render(renderInput(jest.fn(), 'Hi {{', { onChange }));
+      fireEvent.focusIn(screen.getByTestId('field'));
+
+      fireEvent.change(screen.getByTestId('field'), { target: { value: 'Hi {' } });
+
+      expect(onChange).toHaveBeenCalledWith('Hi {', 4, undefined);
+    });
+
+    it('passes no typed character for a paste', () => {
+      const onChange = jest.fn();
+      render(renderInput(jest.fn(), 'Hi ', { onChange }));
+      fireEvent.focusIn(screen.getByTestId('field'));
+
+      fireEvent.change(screen.getByTestId('field'), { target: { value: 'Hi {{' } });
+
+      expect(onChange).toHaveBeenCalledWith('Hi {{', 5, undefined);
+    });
+  });
+
+  it('lets the field start editing, for the insert button pressed on text that is only shown', () => {
+    const registerEditRequester = jest.fn();
+    render(renderInput(jest.fn(), 'abc', { registerEditRequester }));
+    expect(screen.getByTestId('field')).toHaveAttribute('data-mode', 'read');
+    const [[requestEdit]] = registerEditRequester.mock.calls;
+
+    act(() => requestEdit());
+
+    expect(screen.getByTestId('field').tagName).toBe('TEXTAREA');
+  });
+
+  it('takes the field back when it goes away', () => {
+    const registerEditRequester = jest.fn();
+    const { unmount } = render(renderInput(jest.fn(), 'abc', { registerEditRequester }));
+
+    unmount();
+
+    expect(registerEditRequester).toHaveBeenLastCalledWith(null);
   });
 });

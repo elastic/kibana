@@ -86,7 +86,13 @@ export class WorkflowsPlugin
 
     this.logger.debug('Workflows Management: Creating workflows service');
 
-    const workflowsService = new WorkflowsService(core, plugins, this.logger, this.kibanaVersion);
+    const workflowsService = new WorkflowsService(
+      core,
+      plugins,
+      this.logger,
+      this.kibanaVersion,
+      this.config.pages.enabled
+    );
     this.workflowsService = workflowsService;
 
     const api = new WorkflowsManagementApi(workflowsService, this.config.available, this.logger);
@@ -109,7 +115,7 @@ export class WorkflowsPlugin
     }
 
     plugins.workflowsExtensions.registerWorkflowsClientProvider(
-      createWorkflowsClientProvider(workflowsService, this.config, this.logger)
+      createWorkflowsClientProvider(workflowsService, this.config, this.logger, api)
     );
     plugins.workflowsExtensions.registerManagedWorkflowsSystemApiProvider(
       createManagedWorkflowsSystemApiProvider(workflowsService, this.config, this.logger)

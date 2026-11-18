@@ -26,6 +26,8 @@ export interface VendorApiLog {
   readonly warning: (message: string) => void;
 }
 
+export const SILENT_LOG: VendorApiLog = { info: () => {}, warning: () => {} };
+
 /** Reads a file that may not exist yet. */
 export const readOptional = async (file: string): Promise<string | undefined> => {
   try {
@@ -38,7 +40,11 @@ export const readOptional = async (file: string): Promise<string | undefined> =>
   }
 };
 
-/** Applies the overlay to every source; an action only needs to match in one of them. */
+/**
+ * Applies the overlay to every source; an action only needs to match in one of them.
+ * Pass `SILENT_LOG` unless `raw` holds every source as fetched from the vendor: a snapshot only has
+ * the operations the connector calls, so an action matching nothing there may still be needed.
+ */
 export const applyOverlayToSources = (
   raw: Readonly<Record<string, OpenApiDocument>>,
   overlay: OverlayDocument | undefined,
@@ -115,6 +121,7 @@ export const loadVendorSpecs = async ({
   const overlay = overlayText ? (parseSpecText(overlayText) as OverlayDocument) : undefined;
 
   const raw: Record<string, OpenApiDocument> = {};
+  let fetchedEverySource = true;
   for (const [name, source] of Object.entries(manifest.sources)) {
     const { url } = source;
     const snapshot = latest ? undefined : await read(snapshotFile(name));
@@ -123,11 +130,12 @@ export const loadVendorSpecs = async ({
       raw[name] = (await loadVendorSpec(url, fetchText, source)).document;
     } else {
       raw[name] = JSON.parse(snapshot);
+      fetchedEverySource = false;
     }
   }
   return {
     manifest,
-    specs: applyOverlayToSources(raw, overlay, log),
+    specs: applyOverlayToSources(raw, overlay, fetchedEverySource ? log : SILENT_LOG),
     pagination: toMockPagination(manifest),
   };
 };

@@ -11,7 +11,7 @@ import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import {
-  assertCanManageSignificantEvents,
+  assertCanChangeSources,
   assertCanReadSignificantEvents,
 } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
@@ -20,7 +20,7 @@ import { formatSourceToolError } from './source_tool_error';
 
 const PRIVILEGE_ASSERTIONS = {
   read: assertCanReadSignificantEvents,
-  manage: assertCanManageSignificantEvents,
+  changeSources: assertCanChangeSources,
 };
 
 /** Runs `run` after the access and privilege checks, turning any failure into an error result for the agent. */

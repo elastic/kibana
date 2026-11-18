@@ -95,7 +95,8 @@ function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNod
     : isFailed
     ? colors.danger
     : colors.borderBasePlain;
-  const borderRadius = euiTheme.border.radius.small;
+  const borderRadius = euiTheme.border.radius.panel;
+  const chipBorderRadius = euiTheme.border.radius.control;
   const iconType = getStepIconType(stepType);
 
   const cardLabel = execStatus
@@ -180,7 +181,7 @@ function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNod
           <NodeIconChip
             background={chip.background}
             border={chip.border}
-            borderRadius={borderRadius}
+            borderRadius={chipBorderRadius}
             size={28}
             data-test-subj="workflowGraphForeachGroupChip"
           >

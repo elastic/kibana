@@ -73,9 +73,8 @@ const configSchema = schema.object({
    */
   library: librarySchema,
   /**
-   * Workflow pages (proof of concept): hosted forms for the `page` trigger. The
-   * unauthenticated routes are mounted only while `enabled` is true. A page runs as
-   * its workflow's `settings.run_as` service account.
+   * Workflow pages: the `page` trigger and the hosted form. Off by default while the feature
+   * is in development. Enable with `workflowsManagement.pages.enabled: true` in `kibana.yml`.
    */
   pages: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
@@ -88,4 +87,6 @@ export const config: PluginConfigDescriptor<WorkflowsManagementConfig> = {
   schema: configSchema,
   // Pages now run as the workflow's bound service account, so the POC key is ignored.
   deprecations: ({ unused }) => [unused('pages.runAsApiKey', { level: 'warning' })],
+  // The editor builds the YAML schema in the browser, so it needs the pages switch.
+  exposeToBrowser: { pages: true },
 };

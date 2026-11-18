@@ -13,7 +13,7 @@ import {
   EuiIcon,
   EuiPanel,
   type EuiPanelProps,
-  EuiSkeletonTitle,
+  EuiSkeletonRectangle,
   EuiText,
   EuiTitle,
   euiShadowHover,
@@ -26,6 +26,11 @@ import type { Severity, SeverityCounts } from '@kbn/nightshift-investigations-pl
 import { getSeverityLabel, SEVERITY_OPTIONS } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { SEVERITY_TILE_ICON, SEVERITY_TILE_ICON_COLORS } from '../../../common/severity';
+
+const LOADING_COUNT_ARIA_LABEL = i18n.translate(
+  'xpack.nightshift.investigations.severityTileCountLoadingAriaLabel',
+  { defaultMessage: 'Loading count' }
+);
 
 /** A muted tier has no section to scroll to, so its tile reads as a figure rather than a control. */
 type SeverityTileState = 'muted' | 'interactive';
@@ -184,25 +189,37 @@ export const InvestigationSeverityTiles = ({
                         />
                       </span>
                     </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiSkeletonTitle
-                        size="l"
-                        isLoading={isLoading}
-                        contentAriaLabel={i18n.translate(
-                          'xpack.nightshift.investigations.severityTileCountAriaLabel',
-                          {
-                            defaultMessage: '{severityLabel} investigation count',
-                            values: { severityLabel: getSeverityLabel(severity) },
-                          }
-                        )}
-                      >
+                    {isLoading ? (
+                      <EuiFlexItem>
+                        {/* As tall as the icon so the tile does not change height when the count
+                            lands. The icon stays: it does not depend on the counts. */}
+                        <EuiSkeletonRectangle
+                          width="100%"
+                          height={euiThemeContext.euiTheme.size.xxl}
+                          borderRadius="m"
+                          isLoading
+                          contentAriaLabel={LOADING_COUNT_ARIA_LABEL}
+                          data-test-subj={`nightshiftSeverityTileLoading-${severity}`}
+                        />
+                      </EuiFlexItem>
+                    ) : (
+                      <EuiFlexItem grow={false}>
                         <EuiTitle size="l" css={[styles.count, stateStyles.count]}>
-                          <span data-test-subj={`nightshiftSeverityTileCount-${severity}`}>
+                          <span
+                            aria-label={i18n.translate(
+                              'xpack.nightshift.investigations.severityTileCountAriaLabel',
+                              {
+                                defaultMessage: '{severityLabel} investigation count: {count}',
+                                values: { severityLabel: getSeverityLabel(severity), count },
+                              }
+                            )}
+                            data-test-subj={`nightshiftSeverityTileCount-${severity}`}
+                          >
                             {count}
                           </span>
                         </EuiTitle>
-                      </EuiSkeletonTitle>
-                    </EuiFlexItem>
+                      </EuiFlexItem>
+                    )}
                   </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>

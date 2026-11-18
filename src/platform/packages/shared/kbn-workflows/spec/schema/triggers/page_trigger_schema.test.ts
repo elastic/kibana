@@ -7,14 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getTriggerSchema } from '.';
 import {
+  DEFAULT_PAGE_TRIGGER_ID,
   MULTIPLE_PAGE_TRIGGERS_ERROR,
-  PAGE_INPUT_RULES_MAX,
-  PAGE_UI_FIELDS_MAX,
-  PAGE_UI_TEXT_MAX_LENGTH,
+  PAGE_TRIGGER_ID_ERROR,
   PageTriggerSchema,
 } from './page_trigger_schema';
+import { generateLightweightYamlSchema } from '../../lib/generate_yaml_schema_from_connectors';
 import { WorkflowSchema } from '../../schema';
+
+const pageInputs = {
+  properties: { summary: { type: 'string' } },
+  required: ['summary'],
+};
 
 const workflowWith = (triggers: unknown[]) => ({
   name: 'page workflow',
@@ -23,137 +29,116 @@ const workflowWith = (triggers: unknown[]) => ({
 });
 
 describe('PageTriggerSchema', () => {
-  it('does not accept a page-id: the page URL is not part of the YAML', () => {
-    const result = PageTriggerSchema.strict().safeParse({ type: 'page', 'page-id': 'abc' });
+  it('accepts a page trigger with a title, description, id, and inputs', () => {
+    const result = PageTriggerSchema.safeParse({
+      type: 'page',
+      id: 'report-incident',
+      title: 'Report an incident',
+      description: 'Tell us what happened',
+      inputs: pageInputs,
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('sets the default page id when the id is omitted', () => {
+    expect(PageTriggerSchema.parse({ type: 'page', title: 'Page' }).id).toBe(
+      DEFAULT_PAGE_TRIGGER_ID
+    );
+    expect(PageTriggerSchema.parse({ type: 'page', title: 'Page', id: 'intake' }).id).toBe(
+      'intake'
+    );
+  });
+
+  it('requires a non-empty title', () => {
+    expect(PageTriggerSchema.safeParse({ type: 'page' }).success).toBe(false);
+    expect(PageTriggerSchema.safeParse({ type: 'page', title: '   ' }).success).toBe(false);
+  });
+
+  it.each(['Default', '-page', 'my page', 'a'.repeat(65)])('rejects the page id "%s"', (id) => {
+    const result = PageTriggerSchema.safeParse({ type: 'page', title: 'Page', id });
+
     expect(result.success).toBe(false);
   });
 
-  describe('inputs', () => {
-    const conditionalInputs = {
-      type: 'object',
-      properties: { kind: { type: 'string', enum: ['a', 'b'] } },
-      required: ['kind'],
-      allOf: [
-        {
-          if: { properties: { kind: { const: 'a' } }, required: ['kind'] },
-          then: { properties: { details: { type: 'string' } }, required: ['details'] },
-          else: { properties: { reason: { type: 'string' } } },
-        },
-      ],
-    };
+  it('explains the allowed page id characters', () => {
+    const result = PageTriggerSchema.safeParse({ type: 'page', title: 'Page', id: 'My Page' });
 
-    it('accepts a root allOf of if/then/else rules', () => {
-      const result = PageTriggerSchema.safeParse({ type: 'page', inputs: conditionalInputs });
-      expect(result.success).toBe(true);
-      expect(result.data?.inputs).toEqual(conditionalInputs);
-    });
-
-    it('rejects a rule without if', () => {
-      const result = PageTriggerSchema.safeParse({
-        type: 'page',
-        inputs: { ...conditionalInputs, allOf: [{ then: { required: ['kind'] } }] },
-      });
-      expect(result.success).toBe(false);
-    });
-
-    it('rejects unknown keywords in a rule', () => {
-      const result = PageTriggerSchema.safeParse({
-        type: 'page',
-        inputs: { ...conditionalInputs, allOf: [{ if: {}, not: {} }] },
-      });
-      expect(result.success).toBe(false);
-    });
-
-    it(`rejects more than ${PAGE_INPUT_RULES_MAX} rules`, () => {
-      const rule = conditionalInputs.allOf[0];
-      const result = PageTriggerSchema.safeParse({
-        type: 'page',
-        inputs: { ...conditionalInputs, allOf: Array(PAGE_INPUT_RULES_MAX + 1).fill(rule) },
-      });
-      expect(result.success).toBe(false);
-    });
-
-    it('still checks that root required fields exist in properties', () => {
-      const result = PageTriggerSchema.safeParse({
-        type: 'page',
-        inputs: { ...conditionalInputs, required: ['details'] },
-      });
-      expect(result.success).toBe(false);
-    });
-
-    it('still accepts legacy array inputs', () => {
-      const result = PageTriggerSchema.safeParse({
-        type: 'page',
-        inputs: [{ name: 'note', type: 'string' }],
-      });
-      expect(result.success).toBe(true);
-    });
+    expect(result.error?.issues).toEqual([
+      expect.objectContaining({ message: PAGE_TRIGGER_ID_ERROR, path: ['id'] }),
+    ]);
   });
 
-  describe('ui', () => {
-    it('accepts the supported uiSchema subset', () => {
-      const ui = {
-        'ui:order': ['kind', 'details', '*'],
-        'ui:submitButtonOptions': { submitText: 'Send report' },
-        kind: { 'ui:widget': 'radio' },
-        details: {
-          'ui:widget': 'textarea',
-          'ui:placeholder': 'Tell us more',
-          'ui:options': { rows: 6 },
-        },
-        notify: { 'ui:widget': 'toggle', 'ui:help': 'We only email you about this report.' },
-      };
-      const result = PageTriggerSchema.safeParse({ type: 'page', ui });
-      expect(result.success).toBe(true);
-      expect(result.data?.ui).toEqual(ui);
+  it('rejects legacy array inputs', () => {
+    const result = PageTriggerSchema.safeParse({
+      type: 'page',
+      title: 'Page',
+      inputs: [{ name: 'summary', type: 'string' }],
     });
 
-    it('rejects an unknown widget', () => {
-      const result = PageTriggerSchema.safeParse({
-        type: 'page',
-        ui: { kind: { 'ui:widget': 'MyCustomWidget' } },
-      });
-      expect(result.success).toBe(false);
-    });
-
-    it('rejects custom fields and templates', () => {
-      const result = PageTriggerSchema.safeParse({
-        type: 'page',
-        ui: { kind: { 'ui:field': 'SectionField' } },
-      });
-      expect(result.success).toBe(false);
-    });
-
-    it('rejects text over the length limit', () => {
-      const result = PageTriggerSchema.safeParse({
-        type: 'page',
-        ui: { kind: { 'ui:help': 'x'.repeat(PAGE_UI_TEXT_MAX_LENGTH + 1) } },
-      });
-      expect(result.success).toBe(false);
-    });
-
-    it(`rejects more than ${PAGE_UI_FIELDS_MAX} fields`, () => {
-      const ui = Object.fromEntries(
-        Array.from({ length: PAGE_UI_FIELDS_MAX + 3 }, (_, index) => [
-          `field_${index}`,
-          { 'ui:widget': 'text' },
-        ])
-      );
-      const result = PageTriggerSchema.safeParse({ type: 'page', ui });
-      expect(result.success).toBe(false);
-    });
+    expect(result.success).toBe(false);
   });
 });
 
-describe('page triggers per workflow', () => {
+describe('page trigger switch (workflowsManagement.pages.enabled)', () => {
+  const pageWorkflow = workflowWith([{ type: 'page', title: 'Page' }]);
+
+  it('leaves the page trigger out of a generated schema by default', () => {
+    expect(getTriggerSchema().safeParse({ type: 'page', title: 'Page' }).success).toBe(false);
+    expect(generateLightweightYamlSchema().safeParse(pageWorkflow).success).toBe(false);
+  });
+
+  it('includes the page trigger with includePageTrigger', () => {
+    const options = { includePageTrigger: true };
+
+    expect(getTriggerSchema([], options).safeParse({ type: 'page', title: 'Page' }).success).toBe(
+      true
+    );
+    expect(
+      getTriggerSchema(['cases.updated'], options).safeParse({ type: 'page', title: 'Page' })
+        .success
+    ).toBe(true);
+    expect(generateLightweightYamlSchema([], options).safeParse(pageWorkflow).success).toBe(true);
+  });
+});
+
+describe.each([
+  ['WorkflowSchema', WorkflowSchema],
+  [
+    'generateLightweightYamlSchema',
+    generateLightweightYamlSchema([], { includePageTrigger: true }),
+  ],
+])('page triggers in %s', (_name, schema) => {
   it('accepts one page trigger next to other triggers', () => {
-    const result = WorkflowSchema.safeParse(workflowWith([{ type: 'manual' }, { type: 'page' }]));
+    const result = schema.safeParse(
+      workflowWith([{ type: 'manual' }, { type: 'page', title: 'Page', inputs: pageInputs }])
+    );
+
     expect(result.success).toBe(true);
   });
 
   it('rejects a second page trigger', () => {
-    const result = WorkflowSchema.safeParse(workflowWith([{ type: 'page' }, { type: 'page' }]));
+    const result = schema.safeParse(
+      workflowWith([
+        { type: 'page', title: 'First' },
+        { type: 'page', title: 'Second', id: 'second' },
+      ])
+    );
+
     expect(result.success).toBe(false);
-    expect(JSON.stringify(result.error?.issues)).toContain(MULTIPLE_PAGE_TRIGGERS_ERROR);
+    expect(result.error?.issues).toEqual([
+      expect.objectContaining({ message: MULTIPLE_PAGE_TRIGGERS_ERROR, path: ['triggers', 1] }),
+    ]);
+  });
+
+  it('accepts separate inputs on the page and the manual trigger', () => {
+    const result = schema.safeParse(
+      workflowWith([
+        { type: 'manual', inputs: { properties: { priority: { type: 'string' } } } },
+        { type: 'page', title: 'Page', inputs: pageInputs },
+      ])
+    );
+
+    expect(result.success).toBe(true);
   });
 });

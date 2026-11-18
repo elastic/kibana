@@ -1,5 +1,5 @@
 {
-  "sha1": "dcccf1812a9f9b316ca6111a7faf768f325ec391",
+  "sha1": "488d68a62b660e197bde908def7783dc3627b1f6",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -449,8 +449,8 @@
       }
     },
     {
-      "id": "bd47170adc03761-c4c083e0976f05e",
-      "title": "Sanity tests for workflows should render \"console\" step type icon styled via mask-image",
+      "id": "bd47170adc03761-0c2219b52cabf23",
+      "title": "Sanity tests for workflows should render step type icons styled via mask-image",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -462,98 +462,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 99,
-        "column": 5
-      }
-    },
-    {
-      "id": "bd47170adc03761-18a9b2ea0bd01f9",
-      "title": "Sanity tests for workflows should render \"if\" step type icon styled via mask-image",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 99,
-        "column": 5
-      }
-    },
-    {
-      "id": "bd47170adc03761-deaf864c8e913aa",
-      "title": "Sanity tests for workflows should render \"foreach\" step type icon styled via mask-image",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 99,
-        "column": 5
-      }
-    },
-    {
-      "id": "bd47170adc03761-e01ca91455c1a7b",
-      "title": "Sanity tests for workflows should render \"http\" step type icon styled via mask-image",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 99,
-        "column": 5
-      }
-    },
-    {
-      "id": "bd47170adc03761-6b35c868f86ce6c",
-      "title": "Sanity tests for workflows should render \"loop.continue\" step type icon styled via mask-image",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 99,
-        "column": 5
-      }
-    },
-    {
-      "id": "bd47170adc03761-c8e4185679b827e",
-      "title": "Sanity tests for workflows should render \"workflow.fail\" step type icon styled via mask-image",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 99,
-        "column": 5
+        "line": 91,
+        "column": 7
       }
     },
     {
@@ -571,7 +481,7 @@
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
         "line": 108,
-        "column": 9
+        "column": 25
       }
     },
     {
@@ -588,8 +498,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 134,
-        "column": 20
+        "line": 142,
+        "column": 29
       }
     },
     {
@@ -606,8 +516,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 152,
-        "column": 27
+        "line": 160,
+        "column": 25
       }
     },
     {
@@ -1194,6 +1104,20 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_list/filter_sort_search.spec.ts",
         "line": 64,
         "column": 23
+      }
+    },
+    {
+      "id": "41c034019daea35-426ba8b5bfd4825",
+      "title": "WorkflowsList/FilterSortSearch should rank the exact hyphenated name first",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_list/filter_sort_search.spec.ts",
+        "line": 116,
+        "column": 18
       }
     },
     {

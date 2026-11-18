@@ -30,7 +30,7 @@ jest.mock('../../../features/workflow_visual_editor/ui/reference_capable_field',
   }) =>
     children({
       value,
-      teachingPlaceholder: 'Type @',
+      teachingPlaceholder: 'Type {{',
       appendControls: null,
       reportChange: (next) => onChange(next),
       attachInputRef: () => undefined,

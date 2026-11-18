@@ -8,7 +8,10 @@
  */
 
 import { createSelector } from 'redux-toolkit-v1';
-import { isStructurallyEmptyWorkflowYaml } from './utils/is_structurally_empty_workflow_yaml';
+import {
+  isSameOutsideStructure,
+  isStructurallyEmptyWorkflowYaml,
+} from './utils/is_structurally_empty_workflow_yaml';
 import type { RootState } from '../types';
 
 // Selectors
@@ -32,8 +35,9 @@ export const selectWorkflowTags = createSelector(
 /**
  * Document dirtiness for leave-confirm + header badge.
  * Saved workflows: YAML differs from last saved. Never-saved: differs from create
- * baseline, except structurally empty (no triggers/steps) stays clean — visual
- * add-then-delete drops keys and would otherwise false-positive vs the scaffold.
+ * baseline, except structurally empty (no triggers/steps) with everything else unchanged
+ * stays clean — visual add-then-delete drops keys and would otherwise false-positive vs the
+ * scaffold. Editing the name, description, consts or outputs is still a change.
  */
 export const selectHasChanges = createSelector(selectDetail, (detail) => {
   if (detail.workflow?.yaml != null) {
@@ -42,7 +46,10 @@ export const selectHasChanges = createSelector(selectDetail, (detail) => {
   if (detail.yamlString === detail.baselineYaml) {
     return false;
   }
-  return !isStructurallyEmptyWorkflowYaml(detail.yamlString);
+  return !(
+    isStructurallyEmptyWorkflowYaml(detail.yamlString) &&
+    isSameOutsideStructure(detail.yamlString, detail.baselineYaml)
+  );
 });
 
 export const selectIsYamlSynced = createSelector(selectDetail, (detail) => detail.isYamlSynced);
@@ -271,4 +278,12 @@ export const selectConnectorFlyoutConnectorToEdit = createSelector(
 export const selectConnectorFlyoutInsertPosition = createSelector(
   selectConnectorFlyout,
   (flyout) => flyout.insertPosition
+);
+export const selectConnectorFlyoutRequestId = createSelector(
+  selectConnectorFlyout,
+  (flyout) => flyout.requestId
+);
+export const selectLastCreatedConnector = createSelector(
+  selectDetail,
+  (detail) => detail.lastCreatedConnector
 );

@@ -7,17 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import ATTACK_DISCOVERY_ATTACH_YAML from './attack_discovery_attach.yaml';
-import ATTACK_DISCOVERY_BATCHED_GENERATION_YAML from './attack_discovery_batched_generation.yaml';
-import ATTACK_DISCOVERY_FP_TP_ANALYSIS_YAML from './attack_discovery_fp_tp_analysis.yaml';
-import ATTACK_DISCOVERY_REVIEW_YAML from './attack_discovery_review.yaml';
-import ATTACK_DISCOVERY_RUNNER_YAML from './attack_discovery_runner.yaml';
 import {
   ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
 } from './constants';
 import type { ManagedWorkflowDefinition } from '../../types';
+import { readManagedWorkflowYaml } from '../read_managed_workflow_yaml';
 
 // `system-attack-discovery-generation` is already taken by the discoveries plugin,
 // so these mirror the `system-security-rule-tuning-worker` / `-review` pair instead.
@@ -56,7 +52,9 @@ export const ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW = {
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 22,
-  yaml: ATTACK_DISCOVERY_RUNNER_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'attack_discovery_runner.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;
 
 /**
@@ -74,8 +72,10 @@ export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
   id: ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 25,
-  yaml: ATTACK_DISCOVERY_REVIEW_YAML,
+  version: 26,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'attack_discovery_review.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;
 
 /**
@@ -94,7 +94,9 @@ export const ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW = {
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 20,
-  yaml: ATTACK_DISCOVERY_ATTACH_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'attack_discovery_attach.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;
 
 /**
@@ -106,15 +108,18 @@ export const ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW = {
  * Retrieves the open alerts for `lookback`, plus one minute, in batches. Skips
  * alerts tagged `az:ad_correlated` or `az:ad_fp_chain`. Passes
  * `generation_source` so these attacks do not dedupe against a manual run by
- * the same user.
+ * the same user. Tags the run step's generation model calls for token-usage
+ * attribution under the AlertZero parent feature.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW = {
   billable: true,
   id: ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 13,
-  yaml: ATTACK_DISCOVERY_BATCHED_GENERATION_YAML,
+  version: 14,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'attack_discovery_batched_generation.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;
 
 /**
@@ -133,5 +138,7 @@ export const ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW = {
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 3,
-  yaml: ATTACK_DISCOVERY_FP_TP_ANALYSIS_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'attack_discovery_fp_tp_analysis.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;

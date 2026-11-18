@@ -120,7 +120,8 @@ export const useWorkflowChangeHistoryPreviewValidation = ({
     () =>
       getWorkflowZodSchema(
         connectorsData?.connectorTypes ?? {},
-        triggerSchemas.getRegisteredTriggersForSchema()
+        triggerSchemas.getRegisteredTriggersForSchema(),
+        triggerSchemas.getTriggerSchemaOptions()
       ),
     [connectorsData?.connectorTypes]
   );

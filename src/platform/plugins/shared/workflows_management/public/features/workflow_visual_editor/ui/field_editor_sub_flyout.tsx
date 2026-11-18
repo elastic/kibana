@@ -19,27 +19,24 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import type { monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { XJSON_LANG_ID } from '@kbn/monaco';
 import { workflowsEditorChromeOverrides } from '@kbn/workflows-ui';
 import { createMonacoSelectionBridge } from './create_monaco_selection_bridge';
 import type { DataReferenceRunControls } from './data_reference_catalog_tree';
 import { DataReferenceCatalogTree } from './data_reference_catalog_tree';
+import { monacoLanguageFor } from './monaco_language';
 import { ReferenceCapableField } from './reference_capable_field';
 import type { ReferenceSelectionBridge } from './reference_capable_field';
 import { ContainerInSentenceCallout } from './reference_container_callout';
-import {
-  getReferenceChipEditorCss,
-  useReferenceDecorations,
-  useReferenceIconMasks,
-} from './use_reference_decorations';
+import { caretAfterChange, typedCharacter, useReferenceEditor } from './use_reference_editor';
 import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
-import { findReferenceTokens, insertTokenAsJsonText } from '../lib/reference_tokens';
+import { insertTokenAsJsonText } from '../lib/reference_tokens';
 import { tokenForInsert } from '../lib/reference_value';
+import type { StepFieldLanguage } from '../lib/step_form_schema';
 
 type Editor = monaco.editor.IStandaloneCodeEditor;
 
@@ -51,7 +48,7 @@ export interface FieldEditorSubFlyoutProps {
   /** Run controls and data for the step rows of the reference tree; omit to hide them. */
   readonly runControls?: DataReferenceRunControls;
   /** Monaco language when using the code editor; omit for plain text. */
-  readonly language?: 'json' | 'esql' | 'kuery' | 'plaintext' | 'yaml';
+  readonly language?: StepFieldLanguage;
   /** A pick that fills the whole editor is inserted as a value (`${{ }}`); see `ReferenceCapableField`. */
   readonly valueFormWhenWhole?: boolean;
   /** Close this panel only (Back / Escape / history pop). */
@@ -107,13 +104,10 @@ export function FieldEditorSubFlyout({
   onBack,
   onCloseStack,
 }: FieldEditorSubFlyoutProps) {
-  const { euiTheme, colorMode } = useEuiTheme();
-  const masks = useReferenceIconMasks();
+  const { euiTheme } = useEuiTheme();
   const titleId = useGeneratedHtmlId({ prefix: 'workflowFieldEditorTitle' });
   const valueLabelId = useGeneratedHtmlId({ prefix: 'workflowFieldEditorValue' });
   const [draft, setDraft] = useState(value);
-  const [editor, setEditor] = useState<Editor | null>(null);
-  const [dismissed, setDismissed] = useState<ReadonlySet<string>>(() => new Set());
   const [isDragOver, setIsDragOver] = useState(false);
   const isDragOverRef = useRef(false);
   const bridgeRef = useRef<ReferenceSelectionBridge | null>(null);
@@ -126,19 +120,12 @@ export function FieldEditorSubFlyout({
   // `{` is syntax in JSON and KQL, so only free text gets the `{` trigger and the "list inside a
   // sentence" warning (same rule as the inline fields).
   const isFreeText = language === undefined || language === 'plaintext';
-  const tokens = useMemo(
-    () =>
-      findReferenceTokens(draft, {
-        catalog,
-        warnContainersInSentence: isFreeText,
-        quotedStringsAreValues: language === 'json',
-      }),
-    [catalog, draft, isFreeText, language]
-  );
-  useReferenceDecorations(editor, draft, tokens);
-  const warning = tokens.find(
-    (token) => token.isContainerInSentence && !dismissed.has(token.expression)
-  );
+  const { chipCss, editor, captureEditor, warning, dismissWarning } = useReferenceEditor({
+    text: draft,
+    catalog,
+    warnContainersInSentence: isFreeText || language === 'json-liquid',
+    quotedStringsAreValues: language === 'json',
+  });
 
   // Same kbd chip style as the inline data-reference picker footer.
   const keyChipCss = {
@@ -201,11 +188,11 @@ export function FieldEditorSubFlyout({
       const bridge = createMonacoSelectionBridge(mounted, () => draftRef.current.length);
       bridgeRef.current = bridge;
       registerSelection(bridge);
-      setEditor((current) => current ?? mounted);
+      captureEditor(mounted);
       // Open focused, with the caret at the end.
       bridge.setCaret(draftRef.current.length);
     },
-    []
+    [captureEditor]
   );
 
   const offsetAtPointer = useCallback(
@@ -253,11 +240,7 @@ export function FieldEditorSubFlyout({
     }`,
     borderRadius: euiTheme.border.radius.small,
     background: euiTheme.colors.backgroundBaseSubdued,
-    // Transparent so the box (border, background) shows through.
-    '.monaco-editor, .monaco-editor-background, .monaco-editor .margin': {
-      backgroundColor: 'transparent',
-    },
-    ...getReferenceChipEditorCss(euiTheme, masks, colorMode),
+    ...chipCss,
   } as const;
   const editorPaddingPx = parseInt(String(euiTheme.size.m), 10) || 12;
 
@@ -435,14 +418,22 @@ export function FieldEditorSubFlyout({
                 data-test-subj="workflowFieldEditorSubFlyoutValueDescription"
                 css={{ '& kbd': keyChipCss }}
               >
-                <FormattedMessage
-                  id="workflows.fieldEditorSubFlyout.valueDescription"
-                  defaultMessage="Drag a reference in, or type {at} / {braces}"
-                  values={{
-                    at: <kbd>@</kbd>,
-                    braces: <kbd>{'{{'}</kbd>,
-                  }}
-                />
+                {isFreeText ? (
+                  <FormattedMessage
+                    id="workflows.fieldEditorSubFlyout.valueDescription"
+                    defaultMessage="Drag a reference in, or type {brace} / {braces}"
+                    values={{
+                      brace: <kbd>{'{'}</kbd>,
+                      braces: <kbd>{'{{'}</kbd>,
+                    }}
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="workflows.fieldEditorSubFlyout.valueDescriptionBraces"
+                    defaultMessage="Drag a reference in, or type {braces}"
+                    values={{ braces: <kbd>{'{{'}</kbd> }}
+                  />
+                )}
               </EuiText>
             </div>
 
@@ -465,6 +456,7 @@ export function FieldEditorSubFlyout({
                 value={draft}
                 onChange={applyDraft}
                 fillHeight
+                anchorAtCaret
                 openOnBrace={isFreeText}
                 valueFormWhenWhole={valueFormWhenWhole}
               >
@@ -490,13 +482,13 @@ export function FieldEditorSubFlyout({
                     </div>
                     <div css={editorBoxCss}>
                       <CodeEditor
-                        languageId={language === 'json' ? XJSON_LANG_ID : 'plaintext'}
+                        languageId={monacoLanguageFor(language)}
                         chromeOverrides={workflowsEditorChromeOverrides}
+                        // Transparent so the box (border, background) shows through.
+                        transparentBackground
                         value={draft}
                         onChange={(text, event) => {
-                          const last = event?.changes?.[event.changes.length - 1];
-                          const caret = last ? last.rangeOffset + last.text.length : text.length;
-                          reportChange(text, Math.min(caret, text.length));
+                          reportChange(text, caretAfterChange(text, event), typedCharacter(event));
                         }}
                         height="100%"
                         aria-label={fieldLabel}
@@ -519,9 +511,7 @@ export function FieldEditorSubFlyout({
                 <ContainerInSentenceCallout
                   token={warning}
                   onFix={() => applyDraft(insertTokenAsJsonText(draft, warning))}
-                  onDismiss={() =>
-                    setDismissed((current) => new Set(current).add(warning.expression))
-                  }
+                  onDismiss={dismissWarning}
                   testSubj="workflowFieldEditorSubFlyout"
                 />
               </div>

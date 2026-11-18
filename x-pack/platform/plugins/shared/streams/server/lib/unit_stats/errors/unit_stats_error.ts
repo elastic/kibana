@@ -48,7 +48,7 @@ export class UnitStatsError extends StatusError {
   }
 
   /** From the unit config alone. */
-  static notFound(kind: 'destination' | 'processor') {
+  static notFound(kind: 'destination' | 'processor' | 'source') {
     return new UnitStatsError(
       `No ${kind} with this id in the unit.`,
       404,

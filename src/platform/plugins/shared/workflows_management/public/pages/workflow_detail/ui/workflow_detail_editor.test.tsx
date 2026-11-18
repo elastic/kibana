@@ -119,6 +119,7 @@ jest.mock('../../../features/workflow_visual_editor', () => ({
       <div data-test-subj="visual-editor-can-run-directly">
         {String(canRunStepDirectly?.('test-step'))}
       </div>
+      <div data-test-subj="visual-editor-has-run-step-handler">{String(Boolean(onStepRun))}</div>
       <button
         type="button"
         data-test-subj="visual-editor-run-step-in-editor"
@@ -532,6 +533,55 @@ describe('WorkflowDetailEditor', () => {
         new Error('Failed to run step'),
         { title: 'Failed to run step' }
       );
+    });
+
+    describe('Run controls in the visual editor follow the workflow permissions', () => {
+      const renderGraphEditorWithWorkflow = (workflow: Record<string, unknown>) => {
+        (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(true);
+        mockUseWorkflowUrlState.mockReturnValue({
+          ...mockUseWorkflowUrlState(),
+          editorView: 'graph',
+        });
+        mockUseSelector.mockImplementation((selector: any) =>
+          selector === selectWorkflow ? workflow : baseUseSelectorImpl(selector)
+        );
+        return renderEditor();
+      };
+
+      it('hands the editor a run handler when the user may test steps', async () => {
+        const { findByTestId } = renderGraphEditorWithWorkflow({
+          managed: false,
+          permissions: { edit: true, execute: true },
+        });
+
+        expect(await findByTestId('visual-editor-has-run-step-handler')).toHaveTextContent('true');
+      });
+
+      it.each([
+        ['execute is denied on the workflow', { edit: true, execute: false }],
+        [
+          'edit is denied on the workflow (an executor cannot test a draft step)',
+          { edit: false, execute: true },
+        ],
+        ['both are denied (a viewer)', { edit: false, execute: false }],
+      ])('hands the editor no run handler when %s', async (_label, permissions) => {
+        const { findByTestId } = renderGraphEditorWithWorkflow({ managed: false, permissions });
+
+        expect(await findByTestId('visual-editor-has-run-step-handler')).toHaveTextContent('false');
+      });
+
+      it('hands the editor no run handler without the global execute capability', async () => {
+        mockUseWorkflowsCapabilities.mockReturnValue({
+          ...mockWorkflowsManagementCapabilities,
+          canExecuteWorkflow: false,
+        });
+        const { findByTestId } = renderGraphEditorWithWorkflow({
+          managed: false,
+          permissions: { edit: true, execute: true },
+        });
+
+        expect(await findByTestId('visual-editor-has-run-step-handler')).toHaveTextContent('false');
+      });
     });
 
     describe('from the graph reference tree (stayInEditor)', () => {

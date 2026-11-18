@@ -10,6 +10,7 @@
 import { useQuery } from '@kbn/react-query';
 import { ExecutionStatus } from '@kbn/workflows';
 import { useWorkflowsApi } from '@kbn/workflows-ui';
+import { fetchStepLatestExecution, stepLatestExecutionKey } from './step_latest_execution';
 
 const LAST_RUN_STALE_TIME_MS = 30_000;
 
@@ -23,13 +24,8 @@ export const useLastRunOutput = (
 ): { readonly output?: unknown } => {
   const api = useWorkflowsApi();
   const { data } = useQuery({
-    queryKey: ['workflows', workflowId, 'step-executions', stepName, 'last-run-output'],
-    queryFn: () =>
-      api.getWorkflowStepExecutions(workflowId ?? '', {
-        stepId: stepName,
-        size: 1,
-        includeOutput: true,
-      }),
+    queryKey: stepLatestExecutionKey(workflowId, stepName),
+    queryFn: () => fetchStepLatestExecution(api, workflowId, stepName),
     enabled: Boolean(workflowId && stepName),
     staleTime: LAST_RUN_STALE_TIME_MS,
   });

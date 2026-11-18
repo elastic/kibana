@@ -25,10 +25,6 @@ import {
   setYamlString,
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { saveYamlThunk } from '../../../entities/workflows/store/workflow_detail/thunks/save_yaml_thunk';
-import {
-  resetWorkflowSettingsSurfaceVariantForTests,
-  setWorkflowSettingsSurfaceVariant,
-} from '../../../features/workflow_visual_editor/ui/workflow_settings_surface_variant';
 import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 import { TestWrapper } from '../../../shared/test_utils/test_wrapper';
 
@@ -163,7 +159,6 @@ describe('WorkflowDetailHeader', () => {
     jest.clearAllMocks();
     (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(false);
     localStorage.clear();
-    resetWorkflowSettingsSurfaceVariantForTests();
     mockNavigateToApp = jest.fn();
     mockUseKibana.mockReturnValue({
       services: {
@@ -249,24 +244,39 @@ describe('WorkflowDetailHeader', () => {
     expect(getAllByText('Test Workflow').length).toBeGreaterThan(0);
   });
 
-  it('opens the workflow settings flyout from the header gear', () => {
-    // The settings gear only renders behind the experimental visual-editor flag.
-    (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(true);
-    const { getByTestId } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
+  describe('workflow settings flyout', () => {
+    it('opens from the header gear and is editable with the visual editor on', () => {
+      (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(true);
+      const { getByTestId } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
 
-    expect(screen.queryByTestId('workflowSettingsFlyout')).not.toBeInTheDocument();
-    fireEvent.click(getByTestId('workflowSettingsButton'));
-    expect(getByTestId('workflowSettingsFlyout')).toBeInTheDocument();
+      expect(screen.queryByTestId('workflowSettingsFlyout')).not.toBeInTheDocument();
+      fireEvent.click(getByTestId('workflowSettingsButton'));
+      expect(getByTestId('workflowSettingsFlyout')).toBeInTheDocument();
+      expect(getByTestId('workflowSettingsNameInput')).toBeEnabled();
+    });
+
+    it('is still reachable, but read-only, with the visual editor off', () => {
+      (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(false);
+      const { getByTestId } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
+
+      fireEvent.click(getByTestId('workflowSettingsButton'));
+
+      expect(getByTestId('workflowSettingsFlyout')).toBeInTheDocument();
+      expect(getByTestId('workflowSettingsNameInput')).toBeDisabled();
+      expect(screen.queryByTestId('workflowSettingsFlyoutDone')).not.toBeInTheDocument();
+    });
+
+    it('is read-only for a workflow the user cannot edit, even with the visual editor on', () => {
+      (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(true);
+      const { getByTestId } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+        isManaged: true,
+      });
+
+      fireEvent.click(getByTestId('workflowSettingsButton'));
+
+      expect(getByTestId('workflowSettingsNameInput')).toBeDisabled();
+    });
   });
-
-  it.each(['b', 'c'] as const)(
-    'hides the header gear for canvas settings surface %s',
-    (variant) => {
-      setWorkflowSettingsSurfaceVariant(variant);
-      const { queryByTestId } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
-      expect(queryByTestId('workflowSettingsButton')).not.toBeInTheDocument();
-    }
-  );
 
   it('links to connector management from the overflow menu', async () => {
     const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);

@@ -19,10 +19,13 @@ export const getBucketSizeSeconds = (start: number, end: number): number =>
     1
   );
 
-/** Counts over the time range, empty buckets included, so every source returns the same ones. */
-export const dateHistogram = (start: number, end: number) => ({
+/**
+ * Counts over the time range, empty buckets included, so every source returns the same ones. The
+ * documents are bucketed by `field`, the event time unless a source says otherwise.
+ */
+export const dateHistogram = (start: number, end: number, field = '@timestamp') => ({
   date_histogram: {
-    field: '@timestamp',
+    field,
     fixed_interval: `${getBucketSizeSeconds(start, end)}s`,
     min_doc_count: 0,
     extended_bounds: { min: start, max: end },

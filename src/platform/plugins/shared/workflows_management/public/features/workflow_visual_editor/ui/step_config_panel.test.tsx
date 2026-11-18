@@ -9,117 +9,19 @@
 
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import React from 'react';
+import { Provider } from 'react-redux-v7';
+import { parseDocument } from 'yaml';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ConnectorContractUnion, WorkflowYaml } from '@kbn/workflows';
 import { SET_ALERTS_STATUS_CONTRACT } from '@kbn/workflows/spec/kibana/overrides/kibana.set_alerts_status';
 import { z } from '@kbn/zod/v4';
 import { resetStepConfigPanelSessionStateForTests, StepConfigPanel } from './step_config_panel';
+import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import { insertIntoActiveDataReferenceTarget } from '../../../shared/lib/active_data_reference_insert_target';
 
-jest.mock('@kbn/code-editor', () => {
-  const MockReact = jest.requireActual('react');
-  return {
-    CodeEditor: (props: {
-      value: string;
-      languageId: string;
-      onChange?: (
-        v: string,
-        event?: { changes: Array<{ rangeOffset: number; text: string }> }
-      ) => void;
-      dataTestSubj?: string;
-      'aria-label'?: string;
-      placeholder?: string;
-      editorDidMount?: (editor: {
-        focus: () => void;
-        onKeyDown: (cb: (event: unknown) => void) => void;
-        onDidBlurEditorText: (cb: () => void) => void;
-        setSelection: (range: unknown) => void;
-        executeEdits: (
-          source: string,
-          edits: Array<{ range: { startColumn: number; endColumn: number }; text: string }>
-        ) => void;
-        getModel: () => {
-          getOffsetAt: (pos: { lineNumber: number; column: number }) => number;
-          getPositionAt: (offset: number) => { lineNumber: number; column: number };
-          getValueLength: () => number;
-        };
-        getPosition: () => { lineNumber: number; column: number };
-        setPosition: (pos: { lineNumber: number; column: number }) => void;
-        revealPosition: (pos: { lineNumber: number; column: number }) => void;
-        getValue: () => string;
-      }) => void;
-    }) => {
-      const textareaRef = (
-        MockReact.useRef as <T>(val: T | null) => React.MutableRefObject<T | null>
-      )<HTMLTextAreaElement>(null);
-      const blurRef = (MockReact.useRef as <T>(val: T | null) => React.MutableRefObject<T | null>)<
-        () => void
-      >(null);
-      MockReact.useEffect(() => {
-        props.editorDidMount?.({
-          focus: () => textareaRef.current?.focus(),
-          onKeyDown: () => undefined,
-          onDidBlurEditorText: (cb: () => void) => {
-            blurRef.current = cb;
-          },
-          setSelection: () => undefined,
-          // Like Monaco: apply the edit to the (single-line) text and report it as a change.
-          executeEdits: (
-            _source: string,
-            edits: Array<{
-              range: { startColumn: number; endColumn: number };
-              text: string;
-            }>
-          ) => {
-            const [{ range, text }] = edits;
-            const start = range.startColumn - 1;
-            const end = range.endColumn - 1;
-            const next = `${props.value.slice(0, start)}${text}${props.value.slice(end)}`;
-            props.onChange?.(next, { changes: [{ rangeOffset: start, text }] });
-          },
-          getValue: () => props.value,
-          getModel: () => ({
-            getOffsetAt: () => textareaRef.current?.selectionStart ?? props.value.length,
-            getPositionAt: (offset: number) => ({ lineNumber: 1, column: offset + 1 }),
-            getValueLength: () => props.value.length,
-          }),
-          getPosition: () => ({
-            lineNumber: 1,
-            column: (textareaRef.current?.selectionStart ?? props.value.length) + 1,
-          }),
-          setPosition: (pos: { lineNumber: number; column: number }) => {
-            const offset = Math.max(0, pos.column - 1);
-            textareaRef.current?.setSelectionRange(offset, offset);
-          },
-          revealPosition: () => undefined,
-        });
-      }, [props]);
-      return (
-        <textarea
-          ref={textareaRef}
-          data-test-subj={props.dataTestSubj ?? 'mocked-code-editor'}
-          data-language={props.languageId}
-          aria-label={props['aria-label']}
-          placeholder={props.placeholder}
-          value={props.value}
-          onBlur={() => blurRef.current?.()}
-          onChange={(e) => {
-            const next = e.target.value;
-            const caret = e.target.selectionStart ?? next.length;
-            props.onChange?.(next, {
-              changes: [
-                {
-                  rangeOffset: caret - (next.length - props.value.length),
-                  text: next.slice(Math.max(0, caret - 1), caret),
-                },
-              ],
-            });
-          }}
-        />
-      );
-    },
-  };
-});
+jest.mock('@kbn/code-editor', () =>
+  jest.requireActual('../test_utils/mock_code_editor').createCodeEditorModuleMock()
+);
 
 jest.mock('@kbn/monaco', () => ({
   XJSON_LANG_ID: 'xjson',
@@ -146,21 +48,9 @@ jest.mock('@kbn/esql-editor', () => {
       }),
   };
 });
-jest.mock('@kbn/workflows-ui', () => ({
-  workflowsEditorChromeOverrides: {},
-  ensureWorkflowGraphEuiIcons: jest.fn(),
-  loadTypeIconMasks: () => Promise.resolve({}),
-  resolveNodeChipStyle: () => ({
-    background: 'bg',
-    border: 'border',
-    iconColor: 'icon',
-    isBrand: false,
-  }),
-  stepSupportsErrorHandling: (stepType: string | undefined) =>
-    Boolean(
-      stepType && !['if', 'foreach', 'parallel', 'while', 'merge', 'atomic'].includes(stepType)
-    ),
-}));
+jest.mock('@kbn/workflows-ui', () =>
+  jest.requireActual('../test_utils/mock_workflows_ui').createWorkflowsUiModuleMock()
+);
 jest.mock('../model/use_step_output_samples', () => ({
   useStepOutputSamples: () => ({ byStep: {}, isFullRunInProgress: false }),
 }));
@@ -207,18 +97,20 @@ const renderPanel = (overrides: Partial<React.ComponentProps<typeof StepConfigPa
   const onRevert = jest.fn();
   const onFragmentChange = jest.fn();
   const view = render(
-    <I18nProvider>
-      <StepConfigPanel
-        mode="edit"
-        stepType="slack"
-        initialFragment={FRAGMENT}
-        connectors={connectors}
-        onClose={onClose}
-        onRevert={onRevert}
-        onFragmentChange={onFragmentChange}
-        {...overrides}
-      />
-    </I18nProvider>
+    <Provider store={createMockStore()}>
+      <I18nProvider>
+        <StepConfigPanel
+          mode="edit"
+          stepType="slack"
+          initialFragment={FRAGMENT}
+          connectors={connectors}
+          onClose={onClose}
+          onRevert={onRevert}
+          onFragmentChange={onFragmentChange}
+          {...overrides}
+        />
+      </I18nProvider>
+    </Provider>
   );
   return { onClose, onRevert, onFragmentChange, unmount: view.unmount };
 };
@@ -298,6 +190,101 @@ describe('StepConfigPanel', () => {
     });
     expect(screen.getByTestId('workflowStepConfigPanelTitle')).toHaveTextContent('Slack Message');
     expect(screen.getByTestId('workflowStepConfigPanelTypeSubtitle')).toHaveTextContent(/^slack$/);
+  });
+
+  describe('read-only', () => {
+    it('shows the step without any way to add, remove, rename or reset', () => {
+      renderPanel({ readOnly: true });
+
+      expect(screen.getByTestId('workflowStepConfigPanelTitle')).toHaveTextContent('notify');
+      expect(screen.getByTestId('workflowStepConfigField-with.message')).toBeInTheDocument();
+      expect(screen.queryByTestId('workflowStepConfigAddOptionalField')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workflowStepConfigPanelEditName')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workflowStepConfigPanelResetNode')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workflowStepConfigPanelRemoveNode')).not.toBeInTheDocument();
+    });
+
+    it('does not remove an optional field that already has a value', () => {
+      renderPanel({
+        readOnly: true,
+        initialFragment: `${FRAGMENT}`.replace('with:', 'with:\n  query:\n    a: 1'),
+      });
+
+      expect(screen.getByTestId('workflowStepConfigField-with.query')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('workflowStepConfigRemoveOptional-with.query')
+      ).not.toBeInTheDocument();
+    });
+
+    it('keeps a text field a preview: focusing it never mounts the editor', () => {
+      renderPanel({ readOnly: true });
+
+      const field = screen.getByTestId('workflowStepConfigField-with.message');
+      expect(field).toHaveAttribute('data-mode', 'read');
+      fireEvent.focusIn(field);
+      fireEvent.click(field);
+
+      expect(screen.getByTestId('workflowStepConfigField-with.message')).toHaveAttribute(
+        'data-mode',
+        'read'
+      );
+      expect(screen.getByTestId('workflowStepConfigField-with.message')).toHaveAttribute(
+        'aria-readonly',
+        'true'
+      );
+    });
+
+    it('disables the Advanced settings but still lets them be opened and read', () => {
+      renderPanel({ readOnly: true });
+
+      expandSettingsAccordion();
+
+      expect(screen.getByTestId('workflowStepConfigPanelSettings')).toBeDisabled();
+      expect(screen.getByTestId('workflowStepConfigErrorHandlingSection')).toBeInTheDocument();
+    });
+
+    it('never reports a fragment change', () => {
+      const { onFragmentChange } = renderPanel({ readOnly: true });
+
+      expect(onFragmentChange).not.toHaveBeenCalled();
+    });
+
+    it('offers Open in YAML and Run step in place of Reset, when given', () => {
+      const onOpenInYaml = jest.fn();
+      const onRunStep = jest.fn();
+      renderPanel({ readOnly: true, onOpenInYaml, onRunStep });
+
+      fireEvent.click(screen.getByTestId('workflowStepConfigPanelOpenInYaml'));
+      fireEvent.click(screen.getByTestId('workflowStepConfigPanelRunStep'));
+
+      expect(onOpenInYaml).toHaveBeenCalledTimes(1);
+      expect(onRunStep).toHaveBeenCalledTimes(1);
+    });
+
+    it('omits Run step when the user cannot run it', () => {
+      renderPanel({ readOnly: true, onOpenInYaml: jest.fn() });
+
+      expect(screen.getByTestId('workflowStepConfigPanelOpenInYaml')).toBeInTheDocument();
+      expect(screen.queryByTestId('workflowStepConfigPanelRunStep')).not.toBeInTheDocument();
+    });
+
+    it('closes without a discard prompt', () => {
+      const { onClose } = renderPanel({ readOnly: true });
+
+      fireEvent.click(screen.getByTestId('workflowStepConfigPanelClose'));
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(screen.queryByTestId('workflowStepConfigPanelDiscardModal')).not.toBeInTheDocument();
+    });
+
+    it('stays editable by default (positive control)', () => {
+      const { onFragmentChange } = renderPanel();
+
+      expect(screen.getByTestId('workflowStepConfigAddOptionalField')).toBeInTheDocument();
+      expect(screen.getByTestId('workflowStepConfigPanelEditName')).toBeInTheDocument();
+      expect(screen.getByTestId('workflowStepConfigPanelResetNode')).toBeInTheDocument();
+      expect(onFragmentChange).toHaveBeenCalled();
+    });
   });
 
   describe('field descriptions', () => {
@@ -473,7 +460,10 @@ describe('StepConfigPanel', () => {
     });
 
     it('shows the id of a type the catalog does not know', () => {
-      renderPanel({ stepType: 'acme.doSomethingOdd' });
+      renderPanel({
+        stepType: 'acme.doSomethingOdd',
+        initialFragment: 'name: notify\ntype: acme.doSomethingOdd\n',
+      });
       expect(subtitle()).toHaveTextContent(/^acme\.doSomethingOdd$/);
     });
 
@@ -713,6 +703,226 @@ with:
     expect(screen.getByTestId('workflowStepConfigPanelSettings')).toBeInTheDocument();
   });
 
+  describe('step condition (`if`) in Advanced', () => {
+    const baseFragment = 'name: n\ntype: slack\nconnector-id: a\nwith:\n  message: hi\n';
+    const lastFragment = (spy: jest.Mock) => spy.mock.calls[spy.mock.calls.length - 1][0] as string;
+
+    it('sits above Error handling, with a Condition control', () => {
+      renderPanel({ initialFragment: baseFragment });
+      expandSettingsAccordion();
+      const section = screen.getByTestId('workflowStepConfigConditionSection');
+      expect(
+        within(section).getByRole('heading', { name: 'Conditional execution' })
+      ).toBeInTheDocument();
+      expect(within(section).getByTestId('workflowStepConfigField-if')).toBeInTheDocument();
+      expect(within(section).getByText('Condition')).toBeInTheDocument();
+      const errorHandling = screen.getByTestId('workflowStepConfigErrorHandlingSection');
+      expect(section.compareDocumentPosition(errorHandling)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+
+    it('writes the condition as the step-level `if`, and removes the key when cleared', () => {
+      const { onFragmentChange } = renderPanel({ initialFragment: baseFragment });
+      expandSettingsAccordion();
+      fireEvent.change(activateField('workflowStepConfigField-if'), {
+        target: { value: 'steps.a.output.ok : true' },
+      });
+      const written = parseDocument(lastFragment(onFragmentChange));
+      expect(written.get('if')).toBe('steps.a.output.ok : true');
+      expect(written.getIn(['with', 'if'])).toBeUndefined();
+
+      fireEvent.change(activateField('workflowStepConfigField-if'), { target: { value: '' } });
+      expect(parseDocument(lastFragment(onFragmentChange)).has('if')).toBe(false);
+    });
+
+    it('writes a pick into the empty condition as a whole value', () => {
+      const { onFragmentChange } = renderPanel({ initialFragment: baseFragment });
+      expandSettingsAccordion();
+      fireEvent.focusIn(activateField('workflowStepConfigField-if'));
+      act(() => {
+        insertIntoActiveDataReferenceTarget('{{ steps.a.output.ok }}');
+      });
+      expect(lastFragment(onFragmentChange)).toMatch(
+        /\nif: ["']?\$\{\{ steps\.a\.output\.ok \}\}["']?/
+      );
+    });
+
+    it('is not offered by the `if` step, which gates on its own condition', () => {
+      renderPanel({
+        stepType: 'if',
+        initialFragment: 'name: branch\ntype: if\ncondition: "true"\n',
+        connectors: [],
+      });
+      expandSettingsAccordion();
+      expect(screen.queryByTestId('workflowStepConfigConditionSection')).not.toBeInTheDocument();
+    });
+
+    it('is offered next to the note when a step has no error handling', () => {
+      renderPanel({ initialFragment: baseFragment, isFallbackStep: true });
+      expandSettingsAccordion();
+      expect(screen.getByTestId('workflowStepConfigConditionSection')).toBeInTheDocument();
+      expect(
+        screen.getByText('Error handling is not available for this step.')
+      ).toBeInTheDocument();
+    });
+  });
+
+  describe('step timeout in Advanced', () => {
+    const baseFragment = 'name: n\ntype: slack\nconnector-id: a\nwith:\n  message: hi\n';
+    const lastFragment = (spy: jest.Mock) => spy.mock.calls[spy.mock.calls.length - 1][0] as string;
+
+    it('sits between the Condition and Error handling, with a Duration control', () => {
+      renderPanel({ initialFragment: baseFragment });
+      expandSettingsAccordion();
+      const condition = screen.getByTestId('workflowStepConfigConditionSection');
+      const timeout = screen.getByTestId('workflowStepConfigTimeoutSection');
+      const errorHandling = screen.getByTestId('workflowStepConfigErrorHandlingSection');
+      expect(within(timeout).getByRole('heading', { name: 'Timeout' })).toBeInTheDocument();
+      expect(within(timeout).getByTestId('workflowStepConfigField-timeout')).toBeInTheDocument();
+      expect(within(timeout).getByText('Duration')).toBeInTheDocument();
+      expect(condition.compareDocumentPosition(timeout)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+      expect(timeout.compareDocumentPosition(errorHandling)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+
+    it('writes the duration as the step-level `timeout`, and removes the key when cleared', () => {
+      const { onFragmentChange } = renderPanel({ initialFragment: baseFragment });
+      expandSettingsAccordion();
+      fireEvent.change(activateField('workflowStepConfigField-timeout'), {
+        target: { value: '30s' },
+      });
+      const written = parseDocument(lastFragment(onFragmentChange));
+      expect(written.get('timeout')).toBe('30s');
+      expect(written.getIn(['with', 'timeout'])).toBeUndefined();
+
+      fireEvent.change(activateField('workflowStepConfigField-timeout'), { target: { value: '' } });
+      expect(parseDocument(lastFragment(onFragmentChange)).has('timeout')).toBe(false);
+    });
+
+    it('reports a value that is not a duration once the field is left', () => {
+      renderPanel({ initialFragment: baseFragment });
+      expandSettingsAccordion();
+      const input = activateField('workflowStepConfigField-timeout');
+      fireEvent.change(input, { target: { value: '5 minutes' } });
+      fireEvent.blur(input);
+      expect(
+        screen.getByText('Must be a duration (e.g. 30s or 1h30m) or a {{ }} template')
+      ).toBeInTheDocument();
+    });
+
+    it('is a literal duration, with no picker, for a loop', () => {
+      renderPanel({
+        stepType: 'foreach',
+        connectors: [],
+        initialFragment:
+          'name: loop\ntype: foreach\nforeach: "{{ x }}"\nsteps:\n  - name: a\n    type: console\n    with:\n      message: hi\n',
+      });
+      expandSettingsAccordion();
+      const section = screen.getByTestId('workflowStepConfigTimeoutSection');
+      expect(within(section).getByTestId('workflowStepConfigField-timeout')).toBeInTheDocument();
+      expect(
+        section.querySelector('[data-test-subj="workflowStepConfigDataReference"]')
+      ).toBeNull();
+    });
+
+    it('is not offered by a step that takes none, which still gets the Condition', () => {
+      renderPanel({
+        stepType: 'wait',
+        connectors: [],
+        initialFragment: 'name: w\ntype: wait\nwith:\n  duration: 1s\n',
+      });
+      expandSettingsAccordion();
+      expect(screen.queryByTestId('workflowStepConfigTimeoutSection')).not.toBeInTheDocument();
+      expect(screen.getByTestId('workflowStepConfigConditionSection')).toBeInTheDocument();
+    });
+
+    it('is not offered, nor is the Condition, for a step inside a parallel branch', () => {
+      const definition = {
+        version: '1',
+        name: 'demo',
+        enabled: true,
+        triggers: [{ type: 'manual' }],
+        steps: [
+          {
+            name: 'fan',
+            type: 'parallel',
+            branches: [
+              { name: 'a', steps: [{ name: 'n', type: 'slack', 'connector-id': 'a', with: {} }] },
+              { name: 'b', steps: [{ name: 'other', type: 'console', with: { message: 'x' } }] },
+            ],
+          },
+        ],
+      } as unknown as WorkflowYaml;
+      renderPanel({ initialFragment: baseFragment, workflowDefinition: definition });
+      expandSettingsAccordion();
+      expect(screen.queryByTestId('workflowStepConfigTimeoutSection')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workflowStepConfigConditionSection')).not.toBeInTheDocument();
+      expect(screen.getByTestId('workflowStepConfigErrorHandlingSection')).toBeInTheDocument();
+    });
+  });
+
+  describe('error handling for loops', () => {
+    const body = 'steps:\n  - name: a\n    type: console\n    with:\n      message: hi\n';
+    const loopFragments = {
+      foreach: `name: loop\ntype: foreach\nforeach: "{{ x }}"\n${body}`,
+      while: `name: loop\ntype: while\ncondition: "x"\n${body}`,
+    };
+
+    it.each(['foreach', 'while'] as const)(
+      'offers retry and continue on a %s, worded for the whole loop',
+      (stepType) => {
+        renderPanel({ stepType, connectors: [], initialFragment: loopFragments[stepType] });
+        expandSettingsAccordion();
+        const section = screen.getByTestId('workflowStepConfigErrorHandlingSection');
+        expect(within(section).getByTestId('workflowStepConfigErrorRetry')).toBeInTheDocument();
+        expect(within(section).getByTestId('workflowStepConfigErrorContinue')).toBeInTheDocument();
+        expect(
+          within(section).getByText('Re-run the whole loop automatically when it fails')
+        ).toBeInTheDocument();
+        expect(within(section).getByText(/A failing iteration stops the loop/)).toBeInTheDocument();
+        expect(
+          screen.queryByText('Error handling is not available for this step.')
+        ).not.toBeInTheDocument();
+      }
+    );
+
+    it('writes continue as the loop step-level on-failure, not an iteration one', () => {
+      const { onFragmentChange } = renderPanel({
+        stepType: 'foreach',
+        connectors: [],
+        initialFragment: loopFragments.foreach,
+      });
+      expandSettingsAccordion();
+      fireEvent.click(screen.getByTestId('workflowStepConfigErrorContinue'));
+      const written = parseDocument(
+        onFragmentChange.mock.calls[onFragmentChange.mock.calls.length - 1][0] as string
+      ).toJS() as Record<string, unknown>;
+      expect(written['on-failure']).toEqual({ continue: true });
+      expect(written).not.toHaveProperty('iteration-on-failure');
+    });
+
+    it('keeps the plain wording for a step that is not a loop', () => {
+      renderPanel({
+        initialFragment: 'name: n\ntype: slack\nconnector-id: a\nwith:\n  message: hi\n',
+      });
+      expandSettingsAccordion();
+      expect(screen.getByText('Re-run this step automatically when it fails')).toBeInTheDocument();
+    });
+
+    it('still says error handling is not available for an `if` step', () => {
+      renderPanel({
+        stepType: 'if',
+        connectors: [],
+        initialFragment: 'name: branch\ntype: if\ncondition: "true"\n',
+      });
+      expandSettingsAccordion();
+      expect(
+        screen.queryByTestId('workflowStepConfigErrorHandlingSection')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByText('Error handling is not available for this step.')
+      ).toBeInTheDocument();
+    });
+  });
+
   it('writes retry and continue through on-failure and clears keys when toggled off', () => {
     renderPanel({
       initialFragment: 'name: n\ntype: slack\nconnector-id: a\nwith:\n  message: hi\n',
@@ -739,17 +949,19 @@ with:
 
   it('hides Error handling for fallback steps', () => {
     const { unmount } = render(
-      <I18nProvider>
-        <StepConfigPanel
-          mode="edit"
-          stepType="slack"
-          initialFragment="name: n\ntype: slack\nconnector-id: a\nwith:\n  message: hi\n"
-          connectors={connectors}
-          onClose={jest.fn()}
-          onRevert={jest.fn()}
-          isFallbackStep
-        />
-      </I18nProvider>
+      <Provider store={createMockStore()}>
+        <I18nProvider>
+          <StepConfigPanel
+            mode="edit"
+            stepType="slack"
+            initialFragment={'name: n\ntype: slack\nconnector-id: a\nwith:\n  message: hi\n'}
+            connectors={connectors}
+            onClose={jest.fn()}
+            onRevert={jest.fn()}
+            isFallbackStep
+          />
+        </I18nProvider>
+      </Provider>
     );
     expandSettingsAccordion();
     expect(screen.queryByTestId('workflowStepConfigErrorHandlingSection')).not.toBeInTheDocument();
@@ -1093,16 +1305,59 @@ with:
     expect(screen.queryByTestId('workflowStepConfigPanelEmpty')).not.toBeInTheDocument();
   });
 
-  it('opens the picker from a Slack message body on typed @', () => {
-    renderPanel();
-    const message = activateField('workflowStepConfigField-with.message') as HTMLTextAreaElement;
-    const affordance = message
-      .closest('.euiFormRow')
-      ?.querySelector('[data-test-subj="workflowStepConfigDataReference"]');
-    expect(affordance).not.toBeNull();
-    expect(affordance).toBeEnabled();
-    fireEvent.change(message, { target: { value: 'Hi @', selectionStart: 4, selectionEnd: 4 } });
-    expect(screen.getByTestId('workflowDataReferenceSearch')).toBeInTheDocument();
+  describe('the reference dropdown of a Slack message body', () => {
+    const typeInMessage = (...texts: string[]) => {
+      const message = activateField('workflowStepConfigField-with.message') as HTMLTextAreaElement;
+      texts.forEach((value) =>
+        fireEvent.change(message, {
+          target: { value, selectionStart: value.length, selectionEnd: value.length },
+        })
+      );
+      return message;
+    };
+
+    it('has an insert control', () => {
+      renderPanel();
+      const message = activateField('workflowStepConfigField-with.message');
+      const affordance = message
+        .closest('.euiFormRow')
+        ?.querySelector('[data-test-subj="workflowStepConfigDataReference"]');
+      expect(affordance).not.toBeNull();
+      expect(affordance).toBeEnabled();
+    });
+
+    it('opens under a typed {{ without a search box, and the field keeps what was typed', () => {
+      renderPanel({
+        initialFragment: 'name: n\ntype: slack\nconnector-id: abc\nwith:\n  message: "Hi "\n',
+      });
+
+      const message = typeInMessage('Hi {', 'Hi {{', 'Hi {{ ');
+
+      expect(screen.getByTestId('workflowDataReferenceTypeahead')).toBeInTheDocument();
+      expect(screen.queryByTestId('workflowDataReferenceSearch')).not.toBeInTheDocument();
+      expect(message).toHaveValue('Hi {{ ');
+    });
+
+    it('does not open under a typed @', () => {
+      renderPanel({
+        initialFragment: 'name: n\ntype: slack\nconnector-id: abc\nwith:\n  message: "Hi "\n',
+      });
+
+      typeInMessage('Hi @');
+
+      expect(screen.queryByTestId('workflowDataReferenceTypeahead')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workflowDataReferenceSearch')).not.toBeInTheDocument();
+    });
+
+    it('does not open again when the text is deleted back to {{', () => {
+      renderPanel({
+        initialFragment: 'name: n\ntype: slack\nconnector-id: abc\nwith:\n  message: "{{a"\n',
+      });
+
+      typeInMessage('{{');
+
+      expect(screen.queryByTestId('workflowDataReferenceTypeahead')).not.toBeInTheDocument();
+    });
   });
 
   it('lets ES|QL query fields accept Liquid references without JSON parsing', () => {
@@ -1161,6 +1416,132 @@ with:
     expect(saved).not.toMatch(/Must be valid JSON/);
   });
 
+  describe('a JSON + Liquid source (data.parseJson)', () => {
+    const parseJsonConnectors: ConnectorContractUnion[] = [
+      {
+        type: 'data.parseJson',
+        hasConnectorId: false,
+        paramsSchema: z.object({}),
+        configSchema: z.object({
+          source: z.unknown().meta({ language: 'json-liquid', advanced: false }),
+        }),
+        outputSchema: z.unknown(),
+        summary: 'Parse JSON',
+        description: null,
+      } as unknown as ConnectorContractUnion,
+    ];
+    const definition = {
+      version: '1',
+      name: 'demo',
+      enabled: true,
+      triggers: [{ type: 'manual' }],
+      consts: { tags: ['a', 'b'] },
+      steps: [{ name: 'parse', type: 'data.parseJson', source: '' }],
+    } as unknown as WorkflowYaml;
+
+    const renderParseJson = (source: string) => {
+      const onFragmentChange = jest.fn();
+      render(
+        <I18nProvider>
+          <StepConfigPanel
+            mode="edit"
+            stepType="data.parseJson"
+            initialFragment={`name: parse\ntype: data.parseJson\nsource: ${JSON.stringify(
+              source
+            )}\n`}
+            connectors={parseJsonConnectors}
+            workflowDefinition={definition}
+            onClose={jest.fn()}
+            onRevert={jest.fn()}
+            onFragmentChange={onFragmentChange}
+          />
+        </I18nProvider>
+      );
+      const lastSource = () =>
+        parseDocument(
+          onFragmentChange.mock.calls[onFragmentChange.mock.calls.length - 1][0] as string
+        ).get('source');
+      return { lastSource };
+    };
+
+    it('is an inline JSON + Liquid editor in Configuration, with a picker and an expand control', () => {
+      renderParseJson('');
+      const field = screen.getByTestId('workflowStepConfigField-source');
+      expect(field).toHaveAttribute('data-language', 'json-liquid');
+      expect(within(field).getByTestId('mocked-code-editor')).toHaveAttribute(
+        'data-language',
+        'workflows-json-liquid'
+      );
+      expect(
+        field.querySelector('[data-test-subj="workflowStepConfigDataReference"]')
+      ).not.toBeNull();
+      expect(
+        field.querySelector('[data-test-subj="workflowStepConfigDataReferenceExpand"]')
+      ).not.toBeNull();
+    });
+
+    it('keeps JSON with Liquid in it as the exact string, without a JSON parse error', () => {
+      const { lastSource } = renderParseJson('');
+      const text = '{"id": {{ inputs.id }}, "name": "{{ steps.build.output.name }}"}';
+      fireEvent.change(
+        within(screen.getByTestId('workflowStepConfigField-source')).getByTestId(
+          'mocked-code-editor'
+        ),
+        { target: { value: text } }
+      );
+      expect(lastSource()).toBe(text);
+      expect(screen.queryByText('Must be valid JSON')).not.toBeInTheDocument();
+    });
+
+    it('reports JSON that is broken once the variables are filled in', () => {
+      renderParseJson('');
+      const editor = within(screen.getByTestId('workflowStepConfigField-source')).getByTestId(
+        'mocked-code-editor'
+      );
+      fireEvent.change(editor, { target: { value: '{"a": }' } });
+      fireEvent.blur(editor);
+      expect(screen.getByText('Must be valid JSON (ignoring variables)')).toBeInTheDocument();
+    });
+
+    it('shows a structured value written as a map in YAML as JSON text', () => {
+      const onFragmentChange = jest.fn();
+      render(
+        <I18nProvider>
+          <StepConfigPanel
+            mode="edit"
+            stepType="data.parseJson"
+            initialFragment={'name: parse\ntype: data.parseJson\nsource:\n  a: 1\n'}
+            connectors={parseJsonConnectors}
+            onClose={jest.fn()}
+            onRevert={jest.fn()}
+            onFragmentChange={onFragmentChange}
+          />
+        </I18nProvider>
+      );
+      expect(
+        (
+          within(screen.getByTestId('workflowStepConfigField-source')).getByTestId(
+            'mocked-code-editor'
+          ) as HTMLTextAreaElement
+        ).value
+      ).toBe(JSON.stringify({ a: 1 }, null, 2));
+    });
+
+    it('offers to insert a list in the middle of the text as JSON text', () => {
+      const { lastSource } = renderParseJson('{"tags": {{ consts.tags }}}');
+      expect(screen.getByTestId('workflowStepConfigField-source-containerCallout')).toBeVisible();
+      fireEvent.click(screen.getByTestId('workflowStepConfigField-source-insertAsJson'));
+      expect(lastSource()).toBe('{"tags": {{ consts.tags | json }}}');
+    });
+
+    it('does not warn about a list that is the whole value', () => {
+      renderParseJson('${{ consts.tags }}');
+      expect(
+        screen.queryByTestId('workflowStepConfigField-source-containerCallout')
+      ).not.toBeInTheDocument();
+    });
+  });
+
   it('opens the field-editor sub-flyout from ⤢ and writes through live', () => {
     const { onFragmentChange } = renderPanel();
 
@@ -1210,13 +1591,13 @@ with:
       within(messageRow).getByTestId('workflowStepConfigDataReferenceExpand')
     ).toBeInTheDocument();
 
-    // connector-id is a required text field — also expandable
+    // connector-id is picked from a list (Fixed | Data), so like a select it has no expand control
     const connectorRow = screen
       .getByTestId('workflowStepConfigField-connector-id')
       .closest('.euiFormRow') as HTMLElement;
     expect(
-      within(connectorRow).getByTestId('workflowStepConfigDataReferenceExpand')
-    ).toBeInTheDocument();
+      within(connectorRow).queryByTestId('workflowStepConfigDataReferenceExpand')
+    ).not.toBeInTheDocument();
   });
 
   it('renders JSON code Inputs as a single-line field with collapsed display; expand keeps formatting', () => {
@@ -1363,6 +1744,112 @@ with:
       );
     });
 
+    describe('expanded editor from the Data side', () => {
+      const openExpanded = (field: string) => {
+        fireEvent.click(screen.getByTestId(`workflowStepConfigField-with.${field}-source-data`));
+        fireEvent.click(screen.getByTestId(`workflowStepConfigField-with.${field}-expand`));
+        return screen.getByTestId('workflowFieldEditorSubFlyoutTextarea') as HTMLTextAreaElement;
+      };
+
+      it('is offered on Data for numbers, yes/no and dropdowns, never on Fixed', () => {
+        renderSwitchy(
+          'name: s\ntype: switchy\nwith:\n  retries: 3\n  debug: true\n  method: GET\n'
+        );
+        for (const field of ['retries', 'debug', 'method']) {
+          expect(
+            screen.queryByTestId(`workflowStepConfigField-with.${field}-expand`)
+          ).not.toBeInTheDocument();
+          fireEvent.click(screen.getByTestId(`workflowStepConfigField-with.${field}-source-data`));
+          expect(
+            screen.getByTestId(`workflowStepConfigField-with.${field}-expand`)
+          ).toBeInTheDocument();
+        }
+      });
+
+      it('shows the reference and writes a changed one in the value form for a number', () => {
+        const { onFragmentChange } = renderSwitchy(
+          'name: s\ntype: switchy\nwith:\n  retries: ${{ consts.limit }}\n'
+        );
+        fireEvent.click(screen.getByTestId('workflowStepConfigField-with.retries-expand'));
+        const textarea = screen.getByTestId(
+          'workflowFieldEditorSubFlyoutTextarea'
+        ) as HTMLTextAreaElement;
+        expect(screen.getByTestId('workflowFieldEditorSubFlyoutTitle')).toHaveTextContent(
+          'Retries'
+        );
+        expect(textarea).toHaveValue('${{ consts.limit }}');
+
+        fireEvent.change(textarea, { target: { value: '${{ consts.other }}' } });
+        expect(savedFragments(onFragmentChange).pop()).toMatch(
+          /retries: ["']?\$\{\{ consts\.other \}\}["']?/
+        );
+
+        fireEvent.click(screen.getByTestId('workflowFieldEditorSubFlyoutBack'));
+        expect(screen.getByTestId('workflowStepConfigField-with.retries-chip')).toHaveTextContent(
+          'consts.other'
+        );
+      });
+
+      it('starts empty when the typed value kept on Data is not a reference', () => {
+        const { onFragmentChange } = renderSwitchy(
+          'name: s\ntype: switchy\nwith:\n  retries: 3\n  debug: false\n'
+        );
+        for (const field of ['retries', 'debug']) {
+          fireEvent.click(screen.getByTestId(`workflowStepConfigField-with.${field}-source-data`));
+          fireEvent.click(screen.getByTestId(`workflowStepConfigField-with.${field}-expand`));
+          expect(screen.getByTestId('workflowFieldEditorSubFlyoutTextarea')).toHaveValue('');
+          fireEvent.click(screen.getByTestId('workflowFieldEditorSubFlyoutBack'));
+        }
+        // Opening the editor alone changes nothing.
+        expect(savedFragments(onFragmentChange).every((f) => /retries: 3/.test(f))).toBe(true);
+        expect(savedFragments(onFragmentChange).every((f) => /debug: false/.test(f))).toBe(true);
+      });
+
+      it('does not write a typed or half-written draft into a number or yes/no field', () => {
+        const { onFragmentChange } = renderSwitchy(
+          'name: s\ntype: switchy\nwith:\n  debug: ${{ consts.flag }}\n'
+        );
+        fireEvent.click(screen.getByTestId('workflowStepConfigField-with.debug-expand'));
+        const textarea = screen.getByTestId(
+          'workflowFieldEditorSubFlyoutTextarea'
+        ) as HTMLTextAreaElement;
+        const before = savedFragments(onFragmentChange).length;
+
+        fireEvent.change(textarea, { target: { value: 'yes' } });
+        fireEvent.change(textarea, { target: { value: '${{ consts.fl' } });
+        expect(savedFragments(onFragmentChange).slice(before).join('')).not.toMatch(
+          /yes|consts\.fl\b/
+        );
+        expect(savedFragments(onFragmentChange).pop()).toMatch(/consts\.flag/);
+      });
+
+      it('clearing the editor removes the key and stays on Data', () => {
+        const { onFragmentChange } = renderSwitchy(
+          'name: s\ntype: switchy\nwith:\n  retries: ${{ consts.limit }}\n'
+        );
+        fireEvent.click(screen.getByTestId('workflowStepConfigField-with.retries-expand'));
+        fireEvent.change(screen.getByTestId('workflowFieldEditorSubFlyoutTextarea'), {
+          target: { value: '' },
+        });
+        expect(savedFragments(onFragmentChange).pop()).not.toMatch(/retries/);
+        fireEvent.click(screen.getByTestId('workflowFieldEditorSubFlyoutBack'));
+        expect(screen.getByTestId('workflowStepConfigField-with.retries')).toHaveTextContent(
+          'Select data from an earlier step'
+        );
+      });
+
+      it('keeps a dropdown reference in the text form', () => {
+        const { onFragmentChange } = renderSwitchy(
+          'name: s\ntype: switchy\nwith:\n  method: GET\n'
+        );
+        const textarea = openExpanded('method');
+        fireEvent.change(textarea, { target: { value: '{{ inputs.method }}' } });
+        expect(savedFragments(onFragmentChange).pop()).toMatch(
+          /method: ["']?\{\{ inputs\.method \}\}["']?/
+        );
+      });
+    });
+
     it('offers no references or switch for a fixed-only loop cap', () => {
       renderPanel({
         stepType: 'while',
@@ -1447,13 +1934,14 @@ with:
       expect(chip).toHaveAttribute('data-tone', 'neutral');
     });
 
-    it('opens the picker on the chip to swap it when a chip is clicked', () => {
+    it('opens the dropdown on the chip to swap it when a chip is clicked', () => {
       renderPanel();
       const chip = within(screen.getByTestId('workflowStepConfigField-with.message')).getByTestId(
         'workflowReferenceChip'
       );
       fireEvent.click(chip);
-      expect(screen.getByTestId('workflowDataReferenceSearch')).toBeInTheDocument();
+      expect(screen.getByTestId('workflowDataReferenceTypeahead')).toBeInTheDocument();
+      expect(screen.queryByTestId('workflowDataReferenceSearch')).not.toBeInTheDocument();
     });
 
     it('teaches { as the trigger in an empty plain text field', () => {
@@ -1465,14 +1953,15 @@ with:
       );
     });
 
-    it('opens the picker on a single typed { in plain text', () => {
+    it('opens the dropdown on a single typed { in plain text', () => {
       renderPanel({
         initialFragment: 'name: n\ntype: slack\nconnector-id: abc\nwith:\n  message: "Hi "\n',
       });
       fireEvent.change(activateField('workflowStepConfigField-with.message'), {
         target: { value: 'Hi {', selectionStart: 4, selectionEnd: 4 },
       });
-      expect(screen.getByTestId('workflowDataReferenceSearch')).toBeInTheDocument();
+      expect(screen.getByTestId('workflowDataReferenceTypeahead')).toBeInTheDocument();
+      expect(screen.queryByTestId('workflowDataReferenceSearch')).not.toBeInTheDocument();
     });
 
     it('does not treat { as a trigger inside a JSON field', () => {
@@ -1484,6 +1973,7 @@ with:
         target: { value: '{ "a": 1 }{', selectionStart: 11, selectionEnd: 11 },
       });
       expect(screen.queryByTestId('workflowDataReferenceSearch')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workflowDataReferenceTypeahead')).not.toBeInTheDocument();
     });
 
     it('warns about a list inside a sentence and rewrites it as JSON text', () => {
@@ -1590,6 +2080,102 @@ with:
       expect(lastFragment(onFragmentChange)).toMatch(/alpha: "2"/);
     });
 
+    describe('a single word typed as a value', () => {
+      const typeValue = (word: string) => {
+        const view = renderPanel(setStep(' {}'));
+        fireEvent.click(screen.getByTestId('workflowStepConfigField-with-add'));
+        fireEvent.change(screen.getByTestId('workflowStepConfigField-with-key-0'), {
+          target: { value: 'flag' },
+        });
+        const cell = activateField('workflowStepConfigField-with-value-0');
+        fireEvent.change(cell, { target: { value: word } });
+        fireEvent.blur(cell);
+        return lastFragment(view.onFragmentChange);
+      };
+
+      it.each([
+        ['true', 'flag: true\n'],
+        ['True', 'flag: true\n'],
+        ['false', 'flag: false\n'],
+        ['null', 'flag: null\n'],
+        ['~', 'flag: null\n'],
+        ['0', 'flag: 0\n'],
+        ['1', 'flag: 1\n'],
+        ['-1', 'flag: -1\n'],
+        ['1.1', 'flag: 1.1\n'],
+        ['-1.1', 'flag: -1.1\n'],
+        ['[]', 'flag: []\n'],
+        ['["a","b"]', 'flag:\n    - a\n    - b\n'],
+        ['["a", "b c"]', 'flag:\n    - a\n    - b c\n'],
+        ['[{"a":1}]', 'flag:\n    - a: 1\n'],
+      ])('%s is written as a YAML value of its own type', (word, line) => {
+        expect(typeValue(word)).toContain(line);
+      });
+
+      it.each([
+        ['undefined', 'flag: undefined\n'],
+        ['true_false', 'flag: true_false\n'],
+        ['1N', 'flag: 1N\n'],
+        ['yes', 'flag: yes\n'],
+        ['true false', 'flag: true false\n'],
+        ['007', 'flag: "007"\n'],
+        ['1.10', 'flag: "1.10"\n'],
+        ['1e3', 'flag: "1e3"\n'],
+        ['12345678901234567890', 'flag: "12345678901234567890"\n'],
+        ['[a]', 'flag: "[a]"\n'],
+        ['#c', 'flag: "#c"\n'],
+        ['[1.0]', 'flag: "[1.0]"\n'],
+      ])('%s stays text', (word, line) => {
+        expect(typeValue(word)).toContain(line);
+      });
+
+      // A whole reference keeps its type, so on blur it is written in the value form.
+      it.each([
+        ['{{x}}', 'flag: ${{ x }}\n'],
+        ['{{ x }}', 'flag: ${{ x }}\n'],
+      ])('%s is written as a value reference', (word, line) => {
+        expect(typeValue(word)).toContain(line);
+      });
+
+      it('keeps what was typed as text until the cell loses focus', () => {
+        const { onFragmentChange } = renderPanel(setStep(' {}'));
+        fireEvent.click(screen.getByTestId('workflowStepConfigField-with-add'));
+        fireEvent.change(screen.getByTestId('workflowStepConfigField-with-key-0'), {
+          target: { value: 'flag' },
+        });
+        const cell = activateField('workflowStepConfigField-with-value-0');
+        fireEvent.change(cell, { target: { value: 'true' } });
+        expect(lastFragment(onFragmentChange)).toContain('flag: "true"\n');
+        fireEvent.blur(cell);
+        expect(lastFragment(onFragmentChange)).toContain('flag: true\n');
+      });
+
+      it('leaves a stored string alone, whether or not another row is edited', () => {
+        const { onFragmentChange } = renderPanel(setStep('\n  quoted: "true"\n  other: x'));
+        // Into the cell and out again, with no change.
+        const quoted = activateField('workflowStepConfigField-with-value-0');
+        fireEvent.blur(quoted);
+        expect(lastFragment(onFragmentChange)).toContain('quoted: "true"');
+
+        const other = activateField('workflowStepConfigField-with-value-1');
+        fireEvent.change(other, { target: { value: 'false' } });
+        fireEvent.blur(other);
+        expect(lastFragment(onFragmentChange)).toContain('quoted: "true"');
+        expect(lastFragment(onFragmentChange)).toContain('other: false');
+      });
+
+      it.each(['true', '[]', '["a","b"]'])(
+        'shows %s as JSON, like any value that is not text',
+        (word) => {
+          typeValue(word);
+          expect(screen.getByTestId('workflowStepConfigField-with-value-0')).toHaveAttribute(
+            'data-language',
+            'json'
+          );
+        }
+      );
+    });
+
     it('shows a value that is not text as JSON and keeps its type', () => {
       const { onFragmentChange } = renderPanel(setStep('\n  retries: 5'));
       const cell = screen.getByTestId('workflowStepConfigField-with-value-0');
@@ -1685,6 +2271,8 @@ with:
         initialFragment: `name: l\ntype: lister\nwith:${withBlock}\n`,
       });
     const lastFragment = (spy: jest.Mock) => spy.mock.calls[spy.mock.calls.length - 1][0] as string;
+    const savedTags = (spy: jest.Mock): unknown =>
+      parseDocument(lastFragment(spy)).toJS().with.tags;
     const searchInput = (testId: string) =>
       within(screen.getByTestId(testId)).getByTestId('comboBoxSearchInput');
     const addTag = (testId: string, text: string) => {
@@ -1709,8 +2297,7 @@ with:
       const { onFragmentChange } = renderLister('\n  tags: [a, b]');
       const field = 'workflowStepConfigField-with.tags';
       fireEvent.keyDown(searchInput(field), { key: 'Backspace' });
-      expect(lastFragment(onFragmentChange)).toMatch(/tags:\s*\n\s+- a/);
-      expect(lastFragment(onFragmentChange)).not.toMatch(/tags: a/);
+      expect(savedTags(onFragmentChange)).toEqual(['a']);
     });
 
     it('offers only the fixed choices for an enum list', () => {
@@ -1800,7 +2387,7 @@ with:
         const { onFragmentChange } = renderEntries('\n  tags: [a, b]');
         pickEntry('tags', '{{ consts.owner }}');
         const saved = lastFragment(onFragmentChange);
-        expect(saved).toMatch(/- a\n\s+- b\n\s+- "\{\{ consts\.owner \}\}"/);
+        expect(savedTags(onFragmentChange)).toEqual(['a', 'b', '{{ consts.owner }}']);
         expect(saved).not.toContain('${{');
         expect(within(screen.getByTestId(testId('tags'))).getByText('consts.owner')).toBeVisible();
         expect(screen.getByTestId(`${testId('tags')}-source-fixed`)).toHaveAttribute(
@@ -1812,7 +2399,7 @@ with:
       it('adds a reference of unknown type as an entry too', () => {
         const { onFragmentChange } = renderEntries('\n  tags: [a]');
         pickEntry('tags', '{{ inputs.unknown }}');
-        expect(lastFragment(onFragmentChange)).toMatch(/- a\n\s+- "\{\{ inputs\.unknown \}\}"/);
+        expect(savedTags(onFragmentChange)).toEqual(['a', '{{ inputs.unknown }}']);
       });
 
       it('does not add an entry that is already there', () => {
@@ -1910,7 +2497,7 @@ with:
           '{{ consts.owner }}'
         );
         const saved = lastFragment(onFragmentChange);
-        expect(saved).toMatch(/- a\n\s+- b\n\s+- "\{\{ consts\.owner \}\}"/);
+        expect(savedTags(onFragmentChange)).toEqual(['a', 'b', '{{ consts.owner }}']);
         expect(saved).not.toContain('${{');
         // Back on the entries, where the reference reads as a pill.
         expect(within(screen.getByTestId(testId)).getByText('consts.owner')).toBeInTheDocument();
@@ -2094,6 +2681,73 @@ with:
       );
     });
 
+    it('keeps a typed word as text, because the values of this map are text', () => {
+      const { onFragmentChange } = renderMapper(
+        'name: mapper\ntype: data.map\nitems: ""\nwith:\n  fields:\n    id: x\n'
+      );
+      const cell = activateField('workflowStepConfigField-with.fields-value-0');
+      fireEvent.change(cell, { target: { value: 'true' } });
+      fireEvent.blur(cell);
+      expect(lastFragment(onFragmentChange)).toContain('id: "true"');
+
+      const again = activateField('workflowStepConfigField-with.fields-value-0');
+      fireEvent.change(again, { target: { value: '["a"]' } });
+      fireEvent.blur(again);
+      expect(lastFragment(onFragmentChange)).toContain('id: \'["a"]\'');
+    });
+
+    describe('a field that uses $map', () => {
+      const withMap =
+        'name: mapper\ntype: data.map\nitems: ""\nwith:\n  fields:\n    tags:\n      $map:\n        items: "${{ item.tags }}"\n        item: tag\n      name: "${{ tag.name }}"\n    owner:\n      a: x\n    id: "{{ item.id }}"\n';
+
+      it('shows its YAML read-only, with a pointer to the YAML tab, instead of a JSON editor', () => {
+        renderMapper(withMap);
+        const cell = screen.getByTestId('workflowStepConfigField-with.fields-value-0');
+        expect(cell).toHaveAttribute('readonly');
+        expect(cell).not.toHaveAttribute('data-language');
+        expect((cell as HTMLTextAreaElement).value).toContain('$map:');
+        expect((cell as HTMLTextAreaElement).value).toContain('items: ${{ item.tags }}');
+        expect(
+          screen.getByTestId('workflowStepConfigField-with.fields-value-0-yamlHint')
+        ).toHaveTextContent('Uses $map, which the form cannot edit. Edit it in the YAML tab.');
+      });
+
+      it('leaves the other rows as they are', () => {
+        renderMapper(withMap);
+        expect(screen.getByTestId('workflowStepConfigField-with.fields-value-1')).toHaveAttribute(
+          'data-language',
+          'json'
+        );
+        expect(
+          screen.queryByTestId('workflowStepConfigField-with.fields-value-1-yamlHint')
+        ).not.toBeInTheDocument();
+      });
+
+      it('does not change it when another row is edited, and lets the row be removed', () => {
+        const { onFragmentChange } = renderMapper(withMap);
+        const cell = activateField('workflowStepConfigField-with.fields-value-2');
+        fireEvent.change(cell, { target: { value: '{{ item.key }}' } });
+        fireEvent.blur(cell);
+        const edited = lastFragment(onFragmentChange);
+        expect(edited).toContain('$map:');
+        expect(edited).toContain('items: ${{ item.tags }}');
+        expect(edited).toContain('item: tag');
+        expect(edited).toContain('name: ${{ tag.name }}');
+
+        fireEvent.click(screen.getByTestId('workflowStepConfigField-with.fields-remove-0'));
+        expect(lastFragment(onFragmentChange)).not.toContain('$map');
+      });
+
+      it('is found deeper in a value', () => {
+        renderMapper(
+          'name: mapper\ntype: data.map\nitems: ""\nwith:\n  fields:\n    deep:\n      a:\n        b:\n          $map:\n            items: "${{ x }}"\n'
+        );
+        expect(
+          screen.getByTestId('workflowStepConfigField-with.fields-value-0-yamlHint')
+        ).toBeInTheDocument();
+      });
+    });
+
     it('opens Items on earlier data when it is empty, and offers Fixed too', () => {
       renderMapper('name: mapper\ntype: data.map\nitems: ""\nwith:\n  fields:\n    id: x\n');
       expect(screen.getByTestId('workflowStepConfigField-items-pick')).toBeInTheDocument();
@@ -2225,6 +2879,59 @@ with:
       );
       expect(screen.queryByTestId('workflowStepConfigField-with.query')).not.toBeInTheDocument();
       expect(screen.getByText('Query')).toBeInTheDocument();
+    });
+
+    describe('when each way is named by a `type`', () => {
+      // Shaped like the Censys targets: the `type` of a way is a literal only that way accepts.
+      const targetConnector = {
+        type: 'target',
+        hasConnectorId: false,
+        paramsSchema: z.discriminatedUnion('type', [
+          z.object({ type: z.literal('host'), host: z.string() }),
+          z.object({ type: z.literal('webproperty'), hostname: z.string(), port: z.number() }),
+          z.object({ type: z.literal('certificate'), certificate: z.string() }),
+        ]),
+        outputSchema: z.unknown(),
+        summary: null,
+        description: null,
+      } as unknown as ConnectorContractUnion;
+      const target = (extra = '') =>
+        renderPanel({
+          stepType: 'target',
+          connectors: [targetConnector],
+          initialFragment: `name: t\ntype: target\n${extra}`,
+        });
+      const targetGroup = 'workflowStepConfigField-with-variantGroup';
+      const targetWay = (index: number) =>
+        screen.getByTestId(`${targetGroup}-variant-variant-${index}`);
+
+      it('labels the ways by their `type`', () => {
+        target();
+        expect([0, 1, 2].map((index) => targetWay(index).textContent?.trim())).toEqual([
+          'host',
+          'webproperty',
+          'certificate',
+        ]);
+      });
+
+      it('writes the `type` when a way is chosen, without asking to replace anything', () => {
+        const { onFragmentChange } = target();
+        fireEvent.click(targetWay(2));
+        expect(screen.queryByTestId(`${targetGroup}-confirm`)).not.toBeInTheDocument();
+        expect(lastFragment(onFragmentChange)).toMatch(/type: certificate/);
+        expect(targetWay(2).getAttribute('aria-pressed')).toBe('true');
+        expect(screen.getByTestId('workflowStepConfigField-with.certificate')).toBeInTheDocument();
+      });
+
+      it('stays on the chosen way once its `type` is the only thing written', () => {
+        target('with:\n  type: webproperty\n');
+        expect(targetWay(1).getAttribute('aria-pressed')).toBe('true');
+        expect(screen.getByTestId('workflowStepConfigField-with.hostname')).toBeInTheDocument();
+        // Only the `type` is there, so switching has nothing to replace.
+        fireEvent.click(targetWay(0));
+        expect(screen.queryByTestId(`${targetGroup}-confirm`)).not.toBeInTheDocument();
+        expect(targetWay(0).getAttribute('aria-pressed')).toBe('true');
+      });
     });
   });
 });

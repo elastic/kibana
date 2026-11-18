@@ -9,16 +9,19 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  DYNAMIC_TIMEOUT_TEMPLATE_MAX_LENGTH,
   getBuiltInStepDefinition,
   getStepDeprecationInfo,
   LoopStepPropsSchema,
   resolveKibanaStepTypeAlias,
 } from '@kbn/workflows';
 import type { ConnectorContractUnion } from '@kbn/workflows';
+import { isValidDuration } from '@kbn/workflows/common/utils/duration/duration';
 import { unwrapSchema } from '@kbn/workflows/common/utils/zod';
-import { isReferenceValue } from '@kbn/workflows-yaml';
+import { isReferenceValue, parseTemplateString } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
 import { inferVariant } from './form_variants';
+import { rewriteReferenceSpans, scanReferenceSpans } from './reference_grammar';
 import { prettifyCatalogKey } from '../../../shared/utils/catalog_display_name';
 
 /**
@@ -30,13 +33,18 @@ export type StepFieldKind =
   | 'number'
   | 'boolean'
   | 'select'
+  | 'connector-id'
   | 'code'
   | 'key-value'
   | 'list'
   | 'variants'
   | 'switch-cases'
   | 'parallel-branches';
-export type StepFieldLanguage = 'json' | 'kuery' | 'plaintext' | 'esql';
+/**
+ * `json-liquid` is JSON text that may hold Liquid (`{{ }}` / `{% %}`): it is stored as a string,
+ * never parsed into an object, because it is only valid JSON once the engine has rendered it.
+ */
+export type StepFieldLanguage = 'json' | 'kuery' | 'plaintext' | 'esql' | 'json-liquid';
 
 /**
  * One way a value can be written, for a field whose schema is a union of scalars and objects
@@ -50,6 +58,8 @@ export interface FormVariant {
   readonly schema: z.ZodType;
   /** An object variant's keys (with their real paths), or the one control of a scalar variant. */
   readonly fields: readonly StepFormField[];
+  /** The key every variant fixes to its own literal (`type: 'host'`): choosing the variant sets it. */
+  readonly discriminator?: { readonly key: string; readonly value: string };
 }
 
 export interface StepFormField {
@@ -68,6 +78,8 @@ export interface StepFormField {
    */
   readonly advanced?: boolean;
   readonly kind: StepFieldKind;
+  /** `connector-id` fields: the step type the connectors are picked for. */
+  readonly stepType?: string;
   readonly language?: StepFieldLanguage;
   readonly options?: readonly string[];
   /** Schema default (from `.default()`), used to pre-fill new steps. */
@@ -93,11 +105,24 @@ export interface StepFormField {
    * `while`; once the field holds KQL a pick stays the safe text form (`{{ }}`).
    */
   readonly valueFormWhenWhole?: true;
+  /** Clearing the field removes its key, instead of keeping an empty string (a step-level `if`). */
+  readonly deleteWhenEmpty?: true;
+  /** A text field that holds a duration (`30s`, `1h30m`), or a `{{ }}` template where it is templatable. */
+  readonly format?: 'duration';
+  /**
+   * A map whose values may be of any type (`data.set`): a single word typed in a row is read as
+   * YAML reads it, so `true` is a boolean and `1` a number. See `coerceSingleWord`.
+   */
+  readonly typedValues?: true;
 }
 
 export interface StepFormSchema {
   readonly stepType: string;
   readonly fields: readonly StepFormField[];
+  /** The step-level `if`; absent for a step whose own config rules it out (the `if` step). */
+  readonly condition?: StepFormField;
+  /** The step-level `timeout`; absent for a step that takes none. */
+  readonly timeout?: StepFormField;
 }
 
 /** Field-label alias for the shared catalog key prettifier. */
@@ -130,32 +155,34 @@ const STRING_CODE_LANGUAGE_BY_STEP: Readonly<
   'elasticsearch.esql.query': { query: 'esql' },
 };
 
-/** Transport-only params that would only add noise to the form. */
+/**
+ * Transport-only params that would only add noise to the form. They are query parameters of the
+ * Elasticsearch / Kibana APIs, so they only apply under `with`: a step's own root config may
+ * legitimately use the same name (`data.parseJson`'s `source`).
+ */
 const HIDDEN_KEYS = new Set(['pretty', 'human', 'error_trace', 'source', 'filter_path']);
 
 const isRequired = (schema: z.ZodType): boolean => !schema.safeParse(undefined).success;
 
-/** Prefer schema meta title/label; otherwise prettify the key. */
-const resolveFieldLabel = (key: string, schema: z.ZodType): string => {
+/**
+ * The label a schema's meta asks for. `label` is for the form alone; `title` is also what the
+ * YAML editor shows on hover, so a label that is only about the form should not use it.
+ */
+const readMetaLabel = (schema: z.ZodType): string | undefined => {
   const meta = readFieldMeta(schema);
-  if (meta) {
-    if (typeof meta.title === 'string' && meta.title.trim()) return meta.title.trim();
-    if (typeof meta.label === 'string' && meta.label.trim()) return meta.label.trim();
-  }
-  return prettifyFieldKey(key);
+  const found = [meta?.title, meta?.label].find(
+    (value): value is string => typeof value === 'string' && value.trim() !== ''
+  );
+  return found?.trim();
 };
 
+/** Prefer schema meta title/label; otherwise prettify the key. */
+const resolveFieldLabel = (key: string, schema: z.ZodType): string =>
+  readMetaLabel(schema) ?? prettifyFieldKey(key);
+
 const readFieldMeta = (schema: z.ZodType): Record<string, unknown> | undefined => {
-  const readMeta = (s: z.ZodType): Record<string, unknown> | undefined => {
-    const metaFn = (s as { meta?: () => Record<string, unknown> }).meta;
-    if (typeof metaFn === 'function') {
-      const meta = metaFn.call(s);
-      if (meta && typeof meta === 'object') return meta;
-    }
-    return undefined;
-  };
   for (const candidate of [schema, unwrapSchema(schema)]) {
-    const meta = readMeta(candidate as z.ZodType);
+    const meta = candidate.meta();
     if (meta) return meta;
   }
   return undefined;
@@ -233,10 +260,7 @@ const getDefault = (schema: z.ZodType): unknown => {
     current instanceof z.ZodDefault ||
     current instanceof z.ZodNullable
   ) {
-    if (current instanceof z.ZodDefault) {
-      const def = (current as unknown as { def: { defaultValue: unknown } }).def.defaultValue;
-      return typeof def === 'function' ? (def as () => unknown)() : def;
-    }
+    if (current instanceof z.ZodDefault) return current.def.defaultValue;
     current = current.unwrap() as z.ZodType;
   }
   return undefined;
@@ -265,6 +289,12 @@ const isStringLikeSchema = (schema: z.ZodType): boolean => {
     return members.every((m) => m instanceof z.ZodString || m instanceof z.ZodLiteral);
   }
   return false;
+};
+
+/** The map's values may be of any type (`z.unknown()`), so a value is not bound to being text. */
+const isAnyValueSchema = (schema: z.ZodType): boolean => {
+  const inner = unwrapSchema(schema);
+  return inner instanceof z.ZodUnknown || inner instanceof z.ZodAny;
 };
 
 /** A map's value type is a single scalar, so each entry fits one text cell (e.g. HTTP headers). */
@@ -347,7 +377,8 @@ const resolveKind = (
     metaLanguage === 'json' ||
     metaLanguage === 'kuery' ||
     metaLanguage === 'plaintext' ||
-    metaLanguage === 'esql'
+    metaLanguage === 'esql' ||
+    metaLanguage === 'json-liquid'
   ) {
     return { kind: 'code', language: metaLanguage };
   }
@@ -451,6 +482,30 @@ const SCALAR_LABELS: Readonly<Record<ScalarClass, string>> = {
   }),
 };
 
+const literalOfKey = (member: z.ZodObject, key: string): string | undefined => {
+  const field = (member.shape as Record<string, z.ZodType | undefined>)[key];
+  const inner = field ? unwrapSchema(field) : undefined;
+  return inner instanceof z.ZodLiteral && typeof inner.value === 'string' ? inner.value : undefined;
+};
+
+/**
+ * The key that every object variant fixes to a different string literal (`type: 'host'`, `type:
+ * 'webproperty'`), when each variant is one member and there is such a key.
+ */
+const findDiscriminatorKey = (
+  groups: readonly z.ZodType[][],
+  objectGroups: readonly z.ZodType[][]
+): string | undefined => {
+  const members = objectGroups.map((group) => group[0]);
+  if (objectGroups.length !== groups.length || members.length === 0) return undefined;
+  if (!objectGroups.every((group) => group.length === 1)) return undefined;
+  const [first] = members as z.ZodObject[];
+  return Object.keys(first.shape).find((key) => {
+    const values = (members as z.ZodObject[]).map((member) => literalOfKey(member, key));
+    return values.every((value) => value !== undefined) && new Set(values).size === values.length;
+  });
+};
+
 /**
  * The variants of a union field, or undefined when it isn't one. Object members that require the
  * same keys are one variant (their fields combined), so "close by IDs" and "set status by IDs"
@@ -480,11 +535,11 @@ const buildVariants = (
   const requiredOfGroup = (group: z.ZodType[]): string[] =>
     group[0] instanceof z.ZodObject ? requiredKeysOf(group[0]) : [];
   const objectGroups = grouped.filter((group) => group[0] instanceof z.ZodObject);
+  const discriminatorKey = findDiscriminatorKey(grouped, objectGroups);
 
   return grouped.map((group, index): FormVariant => {
     const [first] = group;
-    const meta = readFieldMeta(first);
-    const title = typeof meta?.title === 'string' && meta.title.trim() ? meta.title : undefined;
+    const title = readMetaLabel(first);
     const variantSchema =
       group.length === 1 ? first : z.union(group as [z.ZodType, z.ZodType, ...z.ZodType[]]);
 
@@ -503,12 +558,18 @@ const buildVariants = (
         )
       );
       const keys = distinguishing.length > 0 ? distinguishing : mine;
+      const discriminatorValue = discriminatorKey
+        ? literalOfKey(first, discriminatorKey)
+        : undefined;
       return {
         id: `variant-${index}`,
-        label: title ?? keys.map(prettifyFieldKey).join(' + '),
+        label: title ?? discriminatorValue ?? keys.map(prettifyFieldKey).join(' + '),
         kind: 'object',
         schema: variantSchema,
         fields: Array.from(merged.values()),
+        ...(discriminatorKey && discriminatorValue !== undefined
+          ? { discriminator: { key: discriminatorKey, value: discriminatorValue } }
+          : {}),
       };
     }
 
@@ -560,7 +621,7 @@ const fieldsFromObject = (
     basePath[0] === 'with'
   ) {
     const label =
-      (readFieldMeta(schema)?.title as string | undefined) ??
+      readMetaLabel(schema) ??
       i18n.translate('workflows.stepConfigPanel.recordWithLabel', { defaultMessage: 'Fields' });
     const required = isRequired(schema);
     const variants = buildVariants(stepType, 'with', schema, basePath, required);
@@ -583,11 +644,12 @@ const fieldsFromObject = (
       key: 'with',
       path: basePath,
       label:
-        (readFieldMeta(schema)?.title as string | undefined) ??
+        readMetaLabel(schema) ??
         i18n.translate('workflows.stepConfigPanel.recordWithLabel', { defaultMessage: 'Fields' }),
       description: describe(schema),
       required: isRequired(schema),
       kind: 'key-value',
+      ...(isAnyValueSchema(inner.valueType as z.ZodType) ? { typedValues: true as const } : {}),
     };
     return [withField];
   }
@@ -597,10 +659,11 @@ const fieldsFromObject = (
   // check to root keys avoids misreading an array-of-union/array-of-object
   // `with.*` field (e.g. `elasticsearch.bulk`'s `operations`) as structural.
   const isRootLevel = basePath.length === 0;
+  const isWithLevel = basePath[0] === 'with';
   return Object.entries(inner.shape as Record<string, z.ZodType>)
     .filter(
       ([key, fieldSchema]) =>
-        !HIDDEN_KEYS.has(key) &&
+        !(isWithLevel && HIDDEN_KEYS.has(key)) &&
         !(isRootLevel && isNestedStepsSchema(fieldSchema)) &&
         !isNeverSchema(fieldSchema)
     )
@@ -651,7 +714,8 @@ const fieldsFromObject = (
         ...(startsOnData ? { preferData: true } : {}),
         defaultValue: getDefault(fieldSchema),
         ...(fixedOnly ? { templatable: false as const } : {}),
-        ...(isRootLevel && key === 'condition' && VALUE_FORM_CONDITION_STEP_TYPES.has(stepType)
+        ...((isRootLevel && key === 'condition' && VALUE_FORM_CONDITION_STEP_TYPES.has(stepType)) ||
+        language === 'json-liquid'
           ? { valueFormWhenWhole: true as const }
           : {}),
       };
@@ -679,11 +743,98 @@ const connectorTypeCandidates = (stepType: string): readonly string[] => {
 };
 
 /**
+ * The step-level `if`: a KQL condition that gates the step, which the engine runs as an `if` step
+ * around it, so it is written like that step's `condition` (a whole `${{ }}` is evaluated).
+ */
+const STEP_CONDITION_FIELD: StepFormField = {
+  key: 'if',
+  path: ['if'],
+  label: i18n.translate('workflows.stepConfigPanel.conditionLabel', {
+    defaultMessage: 'Condition',
+  }),
+  description: i18n.translate('workflows.stepConfigPanel.conditionDescription', {
+    defaultMessage: 'Run this step only when this condition is true.',
+  }),
+  required: false,
+  kind: 'code',
+  language: 'kuery',
+  valueFormWhenWhole: true,
+  deleteWhenEmpty: true,
+};
+
+/** Every step takes `if`, unless its own config declares it `never` (the `if` step gates on `condition`). */
+const getStepCondition = (configSchema: z.ZodType | undefined): StepFormField | undefined => {
+  const root = configSchema && unwrapSchema(configSchema);
+  const shape = root instanceof z.ZodObject ? (root.shape as Record<string, z.ZodType>) : undefined;
+  return shape?.if && isNeverSchema(shape.if) ? undefined : STEP_CONDITION_FIELD;
+};
+
+/**
+ * Step types with no step-level `timeout`: their YAML schema does not take it, except `switch`,
+ * which the schema takes but the engine never applies. Kept in step with the step schemas by a test.
+ */
+const STEP_TYPES_WITHOUT_TIMEOUT: ReadonlySet<string> = new Set([
+  'if',
+  'switch',
+  'merge',
+  'wait',
+  'data.set',
+  'loop.break',
+  'loop.continue',
+  'workflow.execute',
+  'workflow.executeAsync',
+  'workflow.fail',
+  'workflow.output',
+]);
+
+/** Their YAML schema takes a literal duration; every other step also takes Liquid that renders to one. */
+const STATIC_TIMEOUT_STEP_TYPES: ReadonlySet<string> = new Set(['foreach', 'while', 'parallel']);
+
+const STEP_TIMEOUT_FIELD: StepFormField = {
+  key: 'timeout',
+  path: ['timeout'],
+  label: i18n.translate('workflows.stepConfigPanel.timeoutLabel', { defaultMessage: 'Duration' }),
+  description: i18n.translate('workflows.stepConfigPanel.timeoutDescription', {
+    defaultMessage:
+      'Fail the step if it runs longer than this, e.g. 30s, 5m or 1h30m. A {template} template that renders to a duration also works.',
+    values: { template: '{{ }}' },
+  }),
+  required: false,
+  kind: 'text',
+  format: 'duration',
+  deleteWhenEmpty: true,
+};
+
+const STATIC_STEP_TIMEOUT_FIELD: StepFormField = {
+  ...STEP_TIMEOUT_FIELD,
+  description: i18n.translate('workflows.stepConfigPanel.timeoutStaticDescription', {
+    defaultMessage: 'Fail the step if it runs longer than this, e.g. 30s, 5m or 1h30m.',
+  }),
+  templatable: false,
+};
+
+const getStepTimeout = (stepType: string): StepFormField | undefined => {
+  if (STEP_TYPES_WITHOUT_TIMEOUT.has(stepType)) return undefined;
+  return STATIC_TIMEOUT_STEP_TYPES.has(stepType) ? STATIC_STEP_TIMEOUT_FIELD : STEP_TIMEOUT_FIELD;
+};
+
+/**
  * Builds the configuration form for a step type from the same schemas that
  * power the Actions menu: built-in step definitions (`inputSchema` → `with`,
  * `configSchema` → root keys) or a connector contract (`paramsSchema` → `with`,
  * plus `connector-id` when the contract requires one).
  */
+/**
+ * A root-level `connector-id` is chosen among the connectors that fit the step (or typed, or
+ * referenced), so it gets its own kind and knows its step type.
+ */
+const withConnectorIdKind = (stepType: string, fields: readonly StepFormField[]): StepFormField[] =>
+  fields.map((field) =>
+    field.key === 'connector-id' && field.path.length === 1 && field.kind === 'text'
+      ? { ...field, kind: 'connector-id', stepType }
+      : field
+  );
+
 export const getStepFormSchema = (
   stepType: string,
   connectors: readonly ConnectorContractUnion[]
@@ -692,13 +843,15 @@ export const getStepFormSchema = (
   if (builtIn) {
     return {
       stepType,
-      fields: [
+      fields: withConnectorIdKind(stepType, [
         ...fieldsFromObject(stepType, builtIn.configSchema, []),
         ...(LOOP_STEP_TYPES.has(stepType)
           ? fieldsFromObject(stepType, LOOP_ROOT_PROPS_SCHEMA, [])
           : []),
         ...fieldsFromObject(stepType, builtIn.inputSchema, ['with']),
-      ],
+      ]),
+      condition: getStepCondition(builtIn.configSchema),
+      timeout: getStepTimeout(stepType),
     };
   }
 
@@ -723,10 +876,18 @@ export const getStepFormSchema = (
   // through aliases so deprecated YAML types still get a usable form.
   fields.push(...fieldsFromObject(stepType, connector.configSchema, []));
   fields.push(...fieldsFromObject(stepType, connector.paramsSchema, ['with']));
-  return { stepType, fields };
+  return {
+    stepType,
+    fields: withConnectorIdKind(stepType, fields),
+    condition: getStepCondition(connector.configSchema),
+    timeout: getStepTimeout(stepType),
+  };
 };
 
-const readPath = (step: Record<string, unknown>, path: readonly string[]): unknown =>
+/** Stable id for field rows and draft-error maps. */
+export const fieldId = (field: StepFormField): string => field.path.join('.');
+
+export const readPath = (step: Record<string, unknown>, path: readonly string[]): unknown =>
   path.reduce<unknown>(
     (acc, key) =>
       acc !== null && typeof acc === 'object' ? (acc as Record<string, unknown>)[key] : undefined,
@@ -751,6 +912,55 @@ export const findUnclosedTemplateExpression = (value: string): boolean => {
     index = close + 2;
   }
   return false;
+};
+
+/** Longer text is not checked: this runs on every render and a huge template is slow to parse. */
+const MAX_VALIDATED_JSON_LIQUID_CHARS = 100_000;
+
+/**
+ * JSON text with Liquid in it: the Liquid must parse, and, unless a `{% %}` tag can reshape the
+ * text, the JSON must hold once each `{{ }}` is stood in for by a value (`0` fits as a bare value
+ * and inside a string alike, and a whole `${{ }}` reference is a value too).
+ */
+const validateJsonLiquid = (text: string): string | undefined => {
+  if (text.length > MAX_VALIDATED_JSON_LIQUID_CHARS) return undefined;
+  try {
+    parseTemplateString(text);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : '';
+    return (
+      message.replace(/, line:\d+, col:\d+/g, '') ||
+      i18n.translate('workflows.stepConfigPanel.validation.invalidLiquid', {
+        defaultMessage: 'Invalid Liquid syntax',
+      })
+    );
+  }
+  if (text.includes('{%')) return undefined;
+  try {
+    JSON.parse(rewriteReferenceSpans(text, () => '0'));
+  } catch {
+    return i18n.translate('workflows.stepConfigPanel.validation.mustBeJsonIgnoringVariables', {
+      defaultMessage: 'Must be valid JSON (ignoring variables)',
+    });
+  }
+  return undefined;
+};
+
+/** A duration, or (where the step takes Liquid) a `{{ }}` template that renders to one. */
+const validateDuration = (text: string, templatable: boolean): string | undefined => {
+  const isTemplate =
+    templatable &&
+    text.length <= DYNAMIC_TIMEOUT_TEMPLATE_MAX_LENGTH &&
+    scanReferenceSpans(text).length > 0;
+  if (isTemplate || isValidDuration(text)) return undefined;
+  return templatable
+    ? i18n.translate('workflows.stepConfigPanel.validation.mustBeDurationOrTemplate', {
+        defaultMessage: 'Must be a duration (e.g. 30s or 1h30m) or a {template} template',
+        values: { template: '{{ }}' },
+      })
+    : i18n.translate('workflows.stepConfigPanel.validation.mustBeDuration', {
+        defaultMessage: 'Must be a duration, e.g. 30s or 1h30m',
+      });
 };
 
 /**
@@ -801,6 +1011,14 @@ export const validateStepField = (field: StepFormField, value: unknown): string 
       defaultMessage: 'Unclosed {open} expression',
       values: { open: '{{' },
     });
+  }
+
+  if (field.language === 'json-liquid' && typeof value === 'string') {
+    return validateJsonLiquid(value);
+  }
+
+  if (field.format === 'duration' && typeof value === 'string') {
+    return validateDuration(value, field.templatable !== false);
   }
 
   if (field.kind === 'boolean' && typeof value !== 'boolean' && !isReference) {

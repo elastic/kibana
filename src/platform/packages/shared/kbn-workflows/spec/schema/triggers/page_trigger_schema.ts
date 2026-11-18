@@ -7,22 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 
 import { LegacyWorkflowInputSchema } from './manual_trigger_schema';
-import { BaseEventSchema } from '../common/base_event';
 import { withJsonModelRootRefinements } from '../common/json_model_schema';
 import { JsonModelRootShapeSchema, JsonModelShapeSchema } from '../common/json_model_shape_schema';
 
+const PAGE_TRIGGER_TYPE = 'page';
+const PAGE_TRIGGER_ID_MAX_LENGTH = 64;
 export const PAGE_TITLE_MAX_LENGTH = 200;
 export const PAGE_DESCRIPTION_MAX_LENGTH = 1000;
+export const DEFAULT_PAGE_TRIGGER_ID = 'default';
+// POC: limits for the rjsf rules and layout hints below.
 export const PAGE_INPUT_RULES_MAX = 50;
 export const PAGE_UI_FIELDS_MAX = 100;
 export const PAGE_UI_TEXT_MAX_LENGTH = 1000;
 export const PAGE_UI_KEY_MAX_LENGTH = 256;
 
+export const PAGE_TRIGGER_ID_ERROR =
+  'Page id must start with a lowercase letter or digit and contain only lowercase letters, digits, "-" and "_"';
+export const MULTIPLE_PAGE_TRIGGERS_ERROR = 'A workflow can define at most one page trigger';
+
 /**
- * One conditional rule of a page form. When the visitor's values match `if`, `then`
+ * POC: one conditional rule of a page form. When the visitor's values match `if`, `then`
  * applies; otherwise `else` applies. A branch can add fields and make fields required,
  * so a field declared only in a branch shows up only while its branch applies.
  */
@@ -35,7 +42,7 @@ export const PageInputRuleSchema = z
   .strict();
 export type PageInputRule = z.infer<typeof PageInputRuleSchema>;
 
-/** Page inputs are JSON Schema with an optional root `allOf` of `if`/`then`/`else` rules. */
+/** POC: page inputs are JSON Schema with an optional root `allOf` of `if`/`then`/`else` rules. */
 export const PageInputsSchema = withJsonModelRootRefinements(
   JsonModelRootShapeSchema.extend({
     allOf: z.array(PageInputRuleSchema).max(PAGE_INPUT_RULES_MAX).optional(),
@@ -43,7 +50,7 @@ export const PageInputsSchema = withJsonModelRootRefinements(
 );
 export type PageInputs = z.infer<typeof PageInputsSchema>;
 
-/** Widgets the page renderer knows. Any other `ui:widget` value is rejected. */
+/** POC: widgets the page renderer knows. Any other `ui:widget` value is rejected. */
 export const PAGE_UI_WIDGETS = [
   'text',
   'textarea',
@@ -57,7 +64,7 @@ export const PAGE_UI_WIDGETS = [
 
 const pageUiText = z.string().max(PAGE_UI_TEXT_MAX_LENGTH);
 
-/** Presentation hints for one field: a bounded subset of the RJSF uiSchema. */
+/** POC: presentation hints for one field: a bounded subset of the RJSF uiSchema. */
 export const PageUiFieldSchema = z
   .object({
     'ui:widget': z.enum(PAGE_UI_WIDGETS).optional(),
@@ -78,9 +85,8 @@ export const PageUiFieldSchema = z
 export type PageUiField = z.infer<typeof PageUiFieldSchema>;
 
 /**
- * Form layout for a page: a bounded subset of the RJSF uiSchema. Keys other than
- * `ui:order` and `ui:submitButtonOptions` name a field. Custom fields and templates are
- * not accepted, so the YAML can only pick from the widgets the page ships.
+ * POC: form layout for a page: a bounded subset of the RJSF uiSchema. Keys other than
+ * `ui:order` and `ui:submitButtonOptions` name a field.
  */
 export const PageUiSchema = z
   .object({
@@ -100,41 +106,42 @@ export const PageUiSchema = z
 export type PageUi = z.infer<typeof PageUiSchema>;
 
 /**
- * Declares that a workflow is page-addressable: its inputs can be rendered as a
- * hosted form and submitted by someone who is not a Kibana user.
+ * Runs a workflow from a hosted form built from `inputs`. Steps read the submitted values as
+ * `page.inputs.*`, apart from `inputs.*`, because page visitors are not trusted.
+ * The access level, URL secret, and run identity live on the page saved object, not in the YAML.
  *
- * Deployment concerns (slug, access level, token rotation, run identity, theme)
- * deliberately live outside the YAML so an admin can change them without
- * producing a new workflow version. The trigger owns only the input contract.
+ * POC: `inputs` also accepts root `allOf` rules, and `ui` adds layout hints for the form.
  */
-export const PageTriggerSchema = z.object({
-  type: z.literal('page'),
-  title: z.string().max(PAGE_TITLE_MAX_LENGTH).optional(),
-  description: z.string().max(PAGE_DESCRIPTION_MAX_LENGTH).optional(),
-  inputs: z.union([PageInputsSchema, z.array(LegacyWorkflowInputSchema)]).optional(),
-  ui: PageUiSchema.optional(),
-});
+export const PageTriggerSchema = lazySchema(() =>
+  z.object({
+    type: z.literal(PAGE_TRIGGER_TYPE),
+    /** Stable page id. Room for several pages per workflow later. Parsing sets `default` when omitted. */
+    id: z
+      .string()
+      .max(PAGE_TRIGGER_ID_MAX_LENGTH)
+      .regex(/^[a-z0-9][a-z0-9_-]*$/, PAGE_TRIGGER_ID_ERROR)
+      .default(DEFAULT_PAGE_TRIGGER_ID),
+    title: z.string().trim().min(1).max(PAGE_TITLE_MAX_LENGTH),
+    description: z.string().max(PAGE_DESCRIPTION_MAX_LENGTH).optional(),
+    inputs: z.union([PageInputsSchema, z.array(LegacyWorkflowInputSchema)]).optional(),
+    ui: PageUiSchema.optional(),
+  })
+);
 export type PageTrigger = z.infer<typeof PageTriggerSchema>;
 
-export const PageTriggerEventSchema = BaseEventSchema.extend({
-  inputs: z.unknown().optional(),
-});
-export type PageTriggerEvent = z.infer<typeof PageTriggerEventSchema>;
-
 export const isPageTrigger = (trigger: { type?: string }): trigger is PageTrigger =>
-  trigger.type === 'page';
+  trigger.type === PAGE_TRIGGER_TYPE;
 
-export const MULTIPLE_PAGE_TRIGGERS_ERROR = 'A workflow can define at most one page trigger';
-
-/**
- * A workflow has at most one page: the workflow document holds a single page key, so a
- * second page trigger would have no address of its own.
- */
-export const hasAtMostOnePageTrigger = (triggers: readonly unknown[]): boolean =>
-  triggers.filter(
-    (trigger) =>
-      typeof trigger === 'object' &&
-      trigger !== null &&
-      'type' in trigger &&
-      trigger.type === 'page'
-  ).length <= 1;
+/** At most one page trigger per workflow. Use in `superRefine` on the `triggers` array. */
+export const validatePageTriggers = (triggers: readonly unknown[], ctx: z.RefinementCtx): void => {
+  let seenPageTrigger = false;
+  triggers.forEach((trigger, index) => {
+    if ((trigger as { type?: unknown } | null)?.type !== PAGE_TRIGGER_TYPE) {
+      return;
+    }
+    if (seenPageTrigger) {
+      ctx.addIssue({ code: 'custom', message: MULTIPLE_PAGE_TRIGGERS_ERROR, path: [index] });
+    }
+    seenPageTrigger = true;
+  });
+};

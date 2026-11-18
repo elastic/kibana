@@ -36,11 +36,12 @@ import {
   WorkflowSchemaForAutocompleteBase,
   WorkflowSettingsSchema,
 } from '../schema';
-import { type CustomTriggerSchemaInput, getTriggerSchema } from '../schema/triggers';
 import {
-  hasAtMostOnePageTrigger,
-  MULTIPLE_PAGE_TRIGGERS_ERROR,
-} from '../schema/triggers/page_trigger_schema';
+  type CustomTriggerSchemaInput,
+  getTriggerSchema,
+  type TriggerSchemaOptions,
+  validatePageTriggers,
+} from '../schema/triggers';
 
 export function getStepId(stepName: string): string {
   // Using step name as is, don't do any escaping to match the workflow engine behavior
@@ -55,7 +56,8 @@ export function generateYamlSchemaFromConnectors(
   /**
    * @deprecated use WorkflowSchemaForAutocomplete instead
    */
-  loose: boolean = false
+  loose: boolean = false,
+  triggerSchemaOptions: TriggerSchemaOptions = {}
 ): z.ZodType {
   // Zod v4's `z.toJSONSchema({ reused: 'ref' })` names shared definitions
   // `__schema0…__schemaN` in traversal (encounter) order. Any reordering of
@@ -85,12 +87,9 @@ export function generateYamlSchemaFromConnectors(
     }));
   }
 
-  const triggerSchema = getTriggerSchema(sortedTriggers);
+  const triggerSchema = getTriggerSchema(sortedTriggers, triggerSchemaOptions);
   const workflowBaseWithTriggers = WorkflowSchemaBase.extend({
-    triggers: z
-      .array(triggerSchema)
-      .min(1)
-      .refine(hasAtMostOnePageTrigger, { message: MULTIPLE_PAGE_TRIGGERS_ERROR }),
+    triggers: z.array(triggerSchema).min(1).superRefine(validatePageTriggers),
   });
 
   return workflowBaseWithTriggers.extend({
@@ -104,16 +103,14 @@ export function generateYamlSchemaFromConnectors(
  * validation without materializing the connector-expanded step union.
  */
 export function generateLightweightYamlSchema(
-  triggers: CustomTriggerSchemaInput[] = []
+  triggers: CustomTriggerSchemaInput[] = [],
+  triggerSchemaOptions: TriggerSchemaOptions = {}
 ): z.ZodType {
   // Trigger schemas are lightweight: custom IDs add literal trigger variants and do
   // not materialize connector or step-definition schemas.
-  const triggerSchema = getTriggerSchema(triggers);
+  const triggerSchema = getTriggerSchema(triggers, triggerSchemaOptions);
   const workflowBaseWithTriggers = WorkflowSchemaBase.extend({
-    triggers: z
-      .array(triggerSchema)
-      .min(1)
-      .refine(hasAtMostOnePageTrigger, { message: MULTIPLE_PAGE_TRIGGERS_ERROR }),
+    triggers: z.array(triggerSchema).min(1).superRefine(validatePageTriggers),
   });
 
   return workflowBaseWithTriggers.extend({

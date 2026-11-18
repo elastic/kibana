@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useStableCallback } from '@kbn/react-hooks';
 import { isReferenceValue } from '@kbn/workflows-yaml';
 import { DataReferencePicker } from './data_reference_picker';
 import { ReferenceChip } from './reference_chip';
@@ -50,6 +51,7 @@ export function ReferenceValueBox({
   onBlur,
   ariaLabel,
   keepTypeFor = 'any',
+  onExpand,
   'data-test-subj': dataTestSubj,
 }: {
   readonly catalog: DataReferenceCatalog;
@@ -65,6 +67,8 @@ export function ReferenceValueBox({
    * reference known to be a list or record is flagged.
    */
   readonly keepTypeFor?: 'any' | 'containers';
+  /** When set, shows a control that opens the expanded field editor (reference tree + run data). */
+  readonly onExpand?: () => void;
   readonly 'data-test-subj': string;
 }) {
   const { euiTheme } = useEuiTheme();
@@ -86,22 +90,19 @@ export function ReferenceValueBox({
     pickButtonRef.current?.focus();
   }, []);
 
-  const handleInsert = useCallback(
-    (token: string) => {
-      const picked = parseWholeReference(token);
-      setIsOpen(false);
-      if (!picked) {
-        onChange(token);
-        return;
-      }
-      onChange(
-        form === 'value'
-          ? formatValueReferenceToken(picked.expression)
-          : formatDataReferenceToken(picked.expression)
-      );
-    },
-    [form, onChange]
-  );
+  const handleInsert = useStableCallback((token: string) => {
+    const picked = parseWholeReference(token);
+    setIsOpen(false);
+    if (!picked) {
+      onChange(token);
+      return;
+    }
+    onChange(
+      form === 'value'
+        ? formatValueReferenceToken(picked.expression)
+        : formatDataReferenceToken(picked.expression)
+    );
+  });
 
   useEffect(() => () => clearActiveDataReferenceInsertTarget(handleInsert), [handleInsert]);
 
@@ -111,6 +112,11 @@ export function ReferenceValueBox({
   });
   const clearLabel = i18n.translate('workflows.stepConfigPanel.referenceBox.clear', {
     defaultMessage: 'Clear data reference for {field}',
+    values: { field: ariaLabel },
+  });
+
+  const expandLabel = i18n.translate('workflows.stepConfigPanel.referenceBox.expand', {
+    defaultMessage: 'Open expanded editor for {field}',
     values: { field: ariaLabel },
   });
 
@@ -206,6 +212,18 @@ export function ReferenceValueBox({
           data-test-subj={`${dataTestSubj}-pick`}
         />
       </EuiToolTip>
+      {onExpand ? (
+        <EuiToolTip content={expandLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="fullScreen"
+            size="xs"
+            color="text"
+            aria-label={expandLabel}
+            onClick={onExpand}
+            data-test-subj={`${dataTestSubj}-expand`}
+          />
+        </EuiToolTip>
+      ) : null}
     </div>
   );
 

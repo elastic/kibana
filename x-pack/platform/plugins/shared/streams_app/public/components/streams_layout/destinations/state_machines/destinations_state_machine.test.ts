@@ -6,13 +6,21 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
+import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
 import type { TimeState } from '@kbn/es-query';
 import { Subject, type ObservedValueOf } from 'rxjs';
 import { createActor, waitFor, type Actor, type AnyActorRef } from 'xstate';
 import { createDefaultUnit } from '../../../../services/unit_repository';
 import type { DestinationApiKeyGenerationDeps } from '../destination_api_keys';
 import type { UnitDestination } from '@kbn/streams-schema';
-import { EMPTY_DESTINATION_CREATION_FORM, type DestinationCreationFormData } from '../types';
+import {
+  EMPTY_DESTINATION_CREATION_FORM,
+  EMPTY_ELASTICSEARCH_DESTINATION_FORM,
+  REMOTE_ELASTICSEARCH_TYPE,
+  type DestinationCreationFormData,
+  type ElasticsearchDestinationFormData,
+} from '../types';
+import { composeStaticIndexesForAll } from '../destination_models';
 import {
   createDestinationsMachineImplementations,
   destinationsStateMachine,
@@ -23,7 +31,13 @@ import {
 
 type DestinationsActor = Actor<typeof destinationsStateMachine>;
 
-const apiKeyResponse = { id: 'k', name: 'k', createdAt: 'now', encodedApiKey: 'enc' };
+const apiKeyResponse = {
+  id: 'k',
+  name: 'k',
+  createdAt: 'now',
+  encodedApiKey: 'encoded-secret-value',
+};
+const REMOTE_KEY = 'remote-key-value-1';
 
 describe('destinationsStateMachine', () => {
   const unitDefinition = createDefaultUnit();
@@ -62,6 +76,35 @@ describe('destinationsStateMachine', () => {
     actor.send({ type: 'destination.create', formData: s3FormData });
   };
 
+  const remoteFormData = (apiKey = REMOTE_KEY): DestinationCreationFormData => ({
+    ...EMPTY_DESTINATION_CREATION_FORM,
+    storageKind: 'remote_elasticsearch',
+    destinationName: 'Central',
+    remoteElasticsearch: {
+      ...EMPTY_DESTINATION_CREATION_FORM.remoteElasticsearch,
+      endpoint: 'https://es.example.com:443',
+      apiKey,
+    },
+  });
+
+  const failLocalMint = async () => {
+    await waitFor(actor, (snapshot) => snapshot.matches({ resolvedIndices: 'ready' }));
+    fetch.mockImplementationOnce(async () => {
+      throw new Error('mint failed');
+    });
+    actor.send({ type: 'modal.openCreate' });
+    actor.send({
+      type: 'destination.create',
+      formData: { ...EMPTY_DESTINATION_CREATION_FORM, destinationName: 'Logs' },
+    });
+    await waitFor(
+      actor,
+      (snapshot) =>
+        snapshot.matches({ configuring: 'supplyingConfiguration' }) &&
+        Boolean(snapshot.context.apiKeyError)
+    );
+  };
+
   beforeEach(() => {
     fetch = jest.fn(async (endpoint: string) =>
       endpoint.startsWith('GET /internal/streams/unit/') ? { destinations: {} } : apiKeyResponse
@@ -79,6 +122,7 @@ describe('destinationsStateMachine', () => {
           toasts: coreMock.createStart().notifications.toasts,
           apiKeyGenerationDeps: {
             streamsRepositoryClient: { fetch },
+            unitId: STREAMS_DEFAULT_UNIT_ID,
           } as unknown as DestinationApiKeyGenerationDeps,
           timeState,
           timeState$,
@@ -91,6 +135,30 @@ describe('destinationsStateMachine', () => {
 
   afterEach(() => {
     actor.stop();
+  });
+
+  it('resolves indices for the unit in apiKeyGenerationDeps', async () => {
+    const unitActor = createActor(
+      destinationsStateMachine.provide(
+        createDestinationsMachineImplementations({
+          toasts: coreMock.createStart().notifications.toasts,
+          apiKeyGenerationDeps: {
+            streamsRepositoryClient: { fetch },
+            unitId: 'edge',
+          } as unknown as DestinationApiKeyGenerationDeps,
+          timeState,
+          timeState$,
+        })
+      ),
+      { input: { unitDefinition, parentRef: { send: jest.fn() } as unknown as AnyActorRef } }
+    ).start();
+    await waitFor(unitActor, (snapshot) => snapshot.matches({ resolvedIndices: 'ready' }));
+
+    expect(fetch).toHaveBeenCalledWith(
+      'GET /internal/streams/unit/{id}/_resolve_indices',
+      expect.objectContaining({ params: { path: { id: 'edge' } } })
+    );
+    unitActor.stop();
   });
 
   it('ignores an invalid form', () => {
@@ -206,21 +274,7 @@ describe('destinationsStateMachine', () => {
   );
 
   it('does not revoke stale Elasticsearch pending ids when an S3 persist fails after a failed mint', async () => {
-    await waitFor(actor, (snapshot) => snapshot.matches({ resolvedIndices: 'ready' }));
-    fetch.mockImplementationOnce(async () => {
-      throw new Error('mint failed');
-    });
-    actor.send({ type: 'modal.openCreate' });
-    actor.send({
-      type: 'destination.create',
-      formData: { ...EMPTY_DESTINATION_CREATION_FORM, destinationName: 'Logs' },
-    });
-    await waitFor(
-      actor,
-      (snapshot) =>
-        snapshot.matches({ configuring: 'supplyingConfiguration' }) &&
-        Boolean(snapshot.context.apiKeyError)
-    );
+    await failLocalMint();
     actor.send({ type: 'destination.create', formData: s3FormData });
     actor.send({
       type: 'unit.persistenceFailed',
@@ -232,6 +286,53 @@ describe('destinationsStateMachine', () => {
     expect(apiKeyCalls().filter(([endpoint]: [string]) => endpoint.startsWith('DELETE'))).toEqual(
       []
     );
+  });
+
+  it.each<[string, Partial<ElasticsearchDestinationFormData>, string[]]>([
+    [
+      'Auto default',
+      {},
+      ['logs-*-*', 'metrics-*-*', 'traces-*-*', 'logs-*', 'metrics-*', 'traces-*'],
+    ],
+    [
+      'Auto custom logs and docs',
+      {
+        useCustomWritePatterns: true,
+        customSignals: ['logs', 'docs'],
+        logsIndex: 'logs-billing-*',
+        docsWritePatterns: ['logs-orders-*', 'metrics-orders-*'],
+      },
+      ['logs-billing-*', 'logs-orders-*', 'metrics-orders-*'],
+    ],
+    [
+      'Fixed shared name plus a docs index',
+      {
+        auto: false,
+        ...composeStaticIndexesForAll('billing-default'),
+        docsIndex: 'accounting-2026',
+      },
+      [
+        'logs-billing-default',
+        'metrics-billing-default',
+        'traces-billing-default',
+        'accounting-2026',
+      ],
+    ],
+    ['Fixed docs only', { auto: false, docsIndex: 'accounting-2026' }, ['accounting-2026']],
+  ])('scopes the destination key to the docs targets (%s)', async (_, elasticsearch, patterns) => {
+    await waitFor(actor, (snapshot) => snapshot.matches({ resolvedIndices: 'ready' }));
+    actor.send({ type: 'modal.openCreate' });
+    actor.send({
+      type: 'destination.create',
+      formData: {
+        ...EMPTY_DESTINATION_CREATION_FORM,
+        destinationName: 'Central',
+        elasticsearch: { ...EMPTY_ELASTICSEARCH_DESTINATION_FORM, ...elasticsearch },
+      },
+    });
+    await waitFor(actor, (snapshot) => snapshot.matches({ configuring: 'persisting' }));
+
+    expect(apiKeyCalls()[0][1].params.body.patterns).toEqual(patterns);
   });
 
   it('keeps a unit loaded from outside when a destination is deleted afterwards', async () => {
@@ -265,6 +366,7 @@ describe('destinationsStateMachine', () => {
           toasts,
           apiKeyGenerationDeps: {
             streamsRepositoryClient: { fetch },
+            unitId: STREAMS_DEFAULT_UNIT_ID,
           } as unknown as DestinationApiKeyGenerationDeps,
           timeState,
           timeState$,
@@ -370,5 +472,161 @@ describe('destinationsStateMachine', () => {
     actor.send({ type: 'destinationDetail.hide', destinationId: 'es-1', viewerId: 'row' });
 
     expect(actor.getSnapshot().context.destinationDetailRefs).toBe(context.destinationDetailRefs);
+  });
+
+  it('mints a key for a local Elasticsearch create and sends it only as a secret', async () => {
+    actor.send({ type: 'modal.openCreate' });
+    actor.send({
+      type: 'destination.create',
+      formData: { ...EMPTY_DESTINATION_CREATION_FORM, destinationName: 'Logs' },
+    });
+    await waitFor(actor, (snapshot) => snapshot.matches({ configuring: 'persisting' }));
+    expect(apiKeyCalls().map(([endpoint]: [string]) => endpoint)).toEqual([
+      'POST /internal/streams/destinations/api_key',
+    ]);
+    expect(parentSend).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'unit.changed',
+        intent: 'create',
+        secrets: { 'logs-api-key': 'encoded-secret-value' },
+      })
+    );
+    const [[sent]] = parentSend.mock.calls;
+    const node = sent.unitDefinition.unit.destinations?.find(
+      ({ id }: UnitDestination) => id === 'logs'
+    );
+    expect(node?.config).toEqual(
+      expect.arrayContaining([{ name: 'api_key', value: { credential: 'logs-api-key' } }])
+    );
+    expect(JSON.stringify(sent.unitDefinition)).not.toContain('encoded-secret-value');
+
+    actor.send({
+      type: 'unit.persisted',
+      destinationIds: ['logs'],
+      unitDefinition: sent.unitDefinition,
+    });
+    expect(JSON.stringify(actor.getSnapshot().context)).not.toContain('encoded-secret-value');
+  });
+
+  it('revokes only the minted key when a local Elasticsearch create fails to save', async () => {
+    actor.send({ type: 'modal.openCreate' });
+    actor.send({
+      type: 'destination.create',
+      formData: { ...EMPTY_DESTINATION_CREATION_FORM, destinationName: 'Logs' },
+    });
+    await waitFor(actor, (snapshot) => snapshot.matches({ configuring: 'persisting' }));
+    const [[{ destinationIds }]] = parentSend.mock.calls;
+    actor.send({
+      type: 'unit.persistenceFailed',
+      destinationIds,
+      unitDefinition,
+      message: 'nope',
+      intent: 'create',
+    });
+
+    const deletes = apiKeyCalls().filter(([endpoint]: [string]) => endpoint.startsWith('DELETE'));
+    expect(deletes).toEqual([
+      [
+        'DELETE /internal/streams/destinations/api_key',
+        expect.objectContaining({
+          params: { body: { destinationId: destinationIds[0], apiKeyId: 'k', unitId: 'default' } },
+        }),
+      ],
+    ]);
+    expect(JSON.stringify(actor.getSnapshot().context)).not.toContain('encoded-secret-value');
+  });
+
+  describe('remote Elasticsearch', () => {
+    const createRemoteDestination = (formData = remoteFormData()) => {
+      actor.send({ type: 'modal.openCreate' });
+      actor.send({ type: 'destination.create', formData });
+    };
+
+    it('creates the destination without minting an API key and sends the key only as a secret', () => {
+      createRemoteDestination(remoteFormData(`  ${REMOTE_KEY}  `));
+      expect(apiKeyCalls()).toEqual([]);
+      expect(actor.getSnapshot().matches({ configuring: 'persisting' })).toBe(true);
+      expect(parentSend).toHaveBeenCalledTimes(1);
+      const [[sent]] = parentSend.mock.calls;
+      expect(sent).toEqual(
+        expect.objectContaining({
+          type: 'unit.changed',
+          intent: 'create',
+          destinationIds: ['central'],
+          secrets: { 'central-api-key': REMOTE_KEY },
+        })
+      );
+      const node = sent.unitDefinition.unit.destinations?.find(
+        ({ id }: UnitDestination) => id === 'central'
+      );
+      expect(node).toEqual(
+        expect.objectContaining({
+          type: REMOTE_ELASTICSEARCH_TYPE,
+          config: expect.arrayContaining([
+            { name: 'api_key', value: { credential: 'central-api-key' } },
+          ]),
+        })
+      );
+      expect(JSON.stringify(sent.unitDefinition)).not.toContain(REMOTE_KEY);
+    });
+
+    it('ignores an incomplete remote form', () => {
+      createRemoteDestination(remoteFormData(''));
+      expect(apiKeyCalls()).toEqual([]);
+      expect(parentSend).not.toHaveBeenCalled();
+      expect(actor.getSnapshot().matches({ configuring: 'supplyingConfiguration' })).toBe(true);
+    });
+
+    it('keeps a key typed on the remote card out of an S3 create', () => {
+      actor.send({ type: 'modal.openCreate' });
+      actor.send({
+        type: 'destination.create',
+        formData: { ...s3FormData, remoteElasticsearch: remoteFormData().remoteElasticsearch },
+      });
+      expect(parentSend).toHaveBeenCalledTimes(1);
+      const [[sent]] = parentSend.mock.calls;
+      expect(sent.secrets).toEqual({
+        's3-archive-access-key-id': 'AKIA',
+        's3-archive-secret-access-key': 'shh',
+      });
+      expect(JSON.stringify(sent)).not.toContain(REMOTE_KEY);
+    });
+
+    it.each(['unit.persisted', 'unit.persistenceFailed'] as const)(
+      'drops the key from context after %s',
+      (type) => {
+        createRemoteDestination();
+        expect(parentSend).toHaveBeenCalledTimes(1);
+        const [[{ unitDefinition: persisted }]] = parentSend.mock.calls;
+        actor.send(
+          type === 'unit.persisted'
+            ? { type, destinationIds: ['central'], unitDefinition: persisted }
+            : {
+                type,
+                destinationIds: ['central'],
+                unitDefinition,
+                message: 'nope',
+                intent: 'create',
+              }
+        );
+        expect(JSON.stringify(actor.getSnapshot().context)).not.toContain(REMOTE_KEY);
+      }
+    );
+
+    it('does not revoke stale Elasticsearch pending ids when a remote persist fails after a failed mint', async () => {
+      await failLocalMint();
+      actor.send({ type: 'destination.create', formData: remoteFormData() });
+      actor.send({
+        type: 'unit.persistenceFailed',
+        destinationIds: ['central'],
+        unitDefinition,
+        message: 'nope',
+        intent: 'create',
+      });
+      expect(actor.getSnapshot().matches({ configuring: 'failed' })).toBe(true);
+      expect(apiKeyCalls().filter(([endpoint]: [string]) => endpoint.startsWith('DELETE'))).toEqual(
+        []
+      );
+    });
   });
 });

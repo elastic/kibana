@@ -7,6 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { StepFormField } from './step_form_schema';
+
+/** The field as a JSON editor, for a list whose value is not tags (the tag editor cannot hold it). */
+export const asJsonField = (field: StepFormField): StepFormField => ({
+  ...field,
+  kind: 'code',
+  language: 'json',
+});
+
 /** True when a list field's stored value fits tags: nothing, one string, or a list of strings. */
 export const isTagValue = (value: unknown): boolean =>
   value === undefined ||

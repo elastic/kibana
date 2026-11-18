@@ -15,8 +15,9 @@ jest.mock('@kbn/data-plugin/public', () => ({ getEsQueryConfig: jest.fn() }));
 import type { HttpStart } from '@kbn/core/public';
 import {
   fetchEsqlData,
+  fetchEsqlDatasets,
   getLinkBasePath,
-  fillTemplate,
+  fillTemplateDatasets,
   sanitizeHtml,
   applyHtmlTheme,
 } from '@kbn/custom-content-renderer';
@@ -24,7 +25,9 @@ import { getServices } from '../services';
 import { useEditFlyoutState } from './use_edit_flyout_state';
 
 const mockFetchEsqlData = fetchEsqlData as jest.MockedFunction<typeof fetchEsqlData>;
-const mockFillTemplate = fillTemplate as jest.MockedFunction<typeof fillTemplate>;
+const mockFetchEsqlDatasets = fetchEsqlDatasets as jest.MockedFunction<typeof fetchEsqlDatasets>;
+const noData = { datasets: [{ columns: [], rows: [] }], approximationApplied: undefined };
+const mockFillTemplate = fillTemplateDatasets as jest.MockedFunction<typeof fillTemplateDatasets>;
 const mockSanitizeHtml = sanitizeHtml as jest.MockedFunction<typeof sanitizeHtml>;
 const mockApplyHtmlTheme = applyHtmlTheme as jest.MockedFunction<typeof applyHtmlTheme>;
 
@@ -40,6 +43,7 @@ beforeEach(() => {
     agentBuilder: undefined,
   });
   mockFetchEsqlData.mockResolvedValue({ columns: [], values: [], all_columns: [] });
+  mockFetchEsqlDatasets.mockResolvedValue(noData);
   mockFillTemplate.mockResolvedValue('<p>filled</p>');
   (getLinkBasePath as jest.Mock).mockReturnValue(mockLinkBasePath);
   mockSanitizeHtml.mockImplementation((h) => h);
@@ -51,7 +55,7 @@ const mockOnRunPreview = jest.fn();
 const mockEuiTheme = {} as unknown as EuiThemeComputed;
 
 const baseParams = {
-  esqlQuery: 'FROM logs | LIMIT 10',
+  esqlQueries: ['FROM logs | LIMIT 10'],
   template: 'hello',
   timeRange: undefined,
   colorMode: 'LIGHT' as const,
@@ -75,7 +79,7 @@ describe('useEditFlyoutState', () => {
     it('initializes draft state to empty strings when props are undefined', () => {
       const { result } = renderHook(() =>
         useEditFlyoutState({
-          esqlQuery: undefined,
+          esqlQueries: [],
           template: undefined,
           timeRange: undefined,
           colorMode: 'LIGHT' as const,
@@ -145,7 +149,7 @@ describe('useEditFlyoutState', () => {
     it('does nothing when draftEsqlQuery is empty', async () => {
       const { result } = renderHook(() =>
         useEditFlyoutState({
-          esqlQuery: undefined,
+          esqlQueries: [],
           template: undefined,
           timeRange: undefined,
           colorMode: 'LIGHT' as const,
@@ -177,23 +181,92 @@ describe('useEditFlyoutState', () => {
         await result.current.handleRender();
       });
 
-      expect(mockFetchEsqlData).toHaveBeenCalled();
+      expect(mockFetchEsqlDatasets).toHaveBeenCalled();
       expect(mockFillTemplate).toHaveBeenCalled();
       expect(mockSanitizeHtml).toHaveBeenCalledWith('<p>filled</p>', mockLinkBasePath);
       expect(mockApplyHtmlTheme).toHaveBeenCalledWith('<p>filled</p>', 'LIGHT', mockEuiTheme);
       expect(mockOnRunPreview).toHaveBeenCalledWith('<html>prepared</html>');
     });
 
-    it('skips fetch and uses draft template directly when no esql query', async () => {
+    // The preview has to show what applying the template will: a panel with several queries has
+    // sections that read `queries[1]`, which an unchanged first-query-only preview would blank.
+    it('fetches every query of the panel and fills the template with one dataset per query', async () => {
+      const columns = [{ name: 'n', type: 'long' }];
+      const datasets = [
+        { columns, rows: [[1]] },
+        { columns, rows: [[2]] },
+      ];
+      mockFetchEsqlDatasets.mockResolvedValueOnce({
+        datasets,
+        approximationApplied: undefined,
+      });
+
       const { result } = renderHook(() =>
-        useEditFlyoutState({ ...baseParams, esqlQuery: undefined })
+        useEditFlyoutState({
+          ...baseParams,
+          esqlQueries: [...baseParams.esqlQueries, 'FROM metrics | LIMIT 5'],
+        })
       );
 
       await act(async () => {
         await result.current.handleRender();
       });
 
-      expect(mockFetchEsqlData).not.toHaveBeenCalled();
+      expect(mockFetchEsqlDatasets).toHaveBeenCalledWith(
+        mockSearch,
+        mockHttp,
+        ['FROM logs | LIMIT 10', 'FROM metrics | LIMIT 5'],
+        undefined,
+        expect.any(AbortSignal),
+        expect.anything()
+      );
+      expect(mockFillTemplate).toHaveBeenCalledWith('hello', datasets);
+      expect(mockOnRunPreview).toHaveBeenCalledWith('<html>prepared</html>');
+    });
+
+    it('fetches only the first query for a single-query panel, as before', async () => {
+      const { result } = renderHook(() => useEditFlyoutState(baseParams));
+
+      await act(async () => {
+        await result.current.handleRender();
+      });
+
+      expect(mockFetchEsqlDatasets).toHaveBeenCalledWith(
+        mockSearch,
+        mockHttp,
+        ['FROM logs | LIMIT 10'],
+        undefined,
+        expect.any(AbortSignal),
+        expect.anything()
+      );
+      expect(mockFillTemplate).toHaveBeenCalledWith('hello', [{ columns: [], rows: [] }]);
+    });
+
+    it('does not fetch the other queries once the first query is cleared in the editor', async () => {
+      const { result } = renderHook(() =>
+        useEditFlyoutState({
+          ...baseParams,
+          esqlQueries: ['FROM logs', 'FROM metrics'],
+        })
+      );
+      act(() => result.current.setDraftEsqlQuery(''));
+
+      await act(async () => {
+        await result.current.handleRender();
+      });
+
+      expect(mockFetchEsqlDatasets).not.toHaveBeenCalled();
+      expect(mockOnRunPreview).toHaveBeenCalledWith('<html>prepared</html>');
+    });
+
+    it('skips fetch and uses draft template directly when no esql query', async () => {
+      const { result } = renderHook(() => useEditFlyoutState({ ...baseParams, esqlQueries: [] }));
+
+      await act(async () => {
+        await result.current.handleRender();
+      });
+
+      expect(mockFetchEsqlDatasets).not.toHaveBeenCalled();
       expect(mockFillTemplate).not.toHaveBeenCalled();
       expect(mockSanitizeHtml).toHaveBeenCalledWith('hello', mockLinkBasePath);
       expect(mockApplyHtmlTheme).toHaveBeenCalledWith('hello', 'LIGHT', mockEuiTheme);
@@ -201,7 +274,7 @@ describe('useEditFlyoutState', () => {
     });
 
     it('sets esqlDataError and does not call onRunPreview on fetch failure', async () => {
-      mockFetchEsqlData.mockRejectedValue(new Error('fetch failed'));
+      mockFetchEsqlDatasets.mockRejectedValue(new Error('fetch failed'));
       const { result } = renderHook(() => useEditFlyoutState(baseParams));
 
       await act(async () => {
@@ -213,7 +286,7 @@ describe('useEditFlyoutState', () => {
     });
 
     it('clears a stale esqlDataError when a subsequent render succeeds', async () => {
-      mockFetchEsqlData.mockRejectedValueOnce(new Error('fetch failed'));
+      mockFetchEsqlDatasets.mockRejectedValueOnce(new Error('fetch failed'));
       const { result } = renderHook(() => useEditFlyoutState(baseParams));
 
       await act(async () => {
@@ -221,7 +294,7 @@ describe('useEditFlyoutState', () => {
       });
       expect(result.current.esqlDataError).toBe('fetch failed');
 
-      mockFetchEsqlData.mockResolvedValueOnce({ columns: [], values: [], all_columns: [] });
+      mockFetchEsqlDatasets.mockResolvedValueOnce(noData);
 
       await act(async () => {
         await result.current.handleRender();
@@ -233,9 +306,9 @@ describe('useEditFlyoutState', () => {
 
     it('does not call onRunPreview when the draft changed mid-flight', async () => {
       let resolveRender!: () => void;
-      mockFetchEsqlData.mockReturnValue(
+      mockFetchEsqlDatasets.mockReturnValue(
         new Promise((resolve) => {
-          resolveRender = () => resolve({ columns: [], values: [], all_columns: [] });
+          resolveRender = () => resolve(noData);
         })
       );
 
@@ -260,9 +333,9 @@ describe('useEditFlyoutState', () => {
 
     it('shows loading state while rendering', async () => {
       let resolvePromise!: () => void;
-      mockFetchEsqlData.mockReturnValue(
+      mockFetchEsqlDatasets.mockReturnValue(
         new Promise((resolve) => {
-          resolvePromise = () => resolve({ columns: [], values: [], all_columns: [] });
+          resolvePromise = () => resolve(noData);
         })
       );
 

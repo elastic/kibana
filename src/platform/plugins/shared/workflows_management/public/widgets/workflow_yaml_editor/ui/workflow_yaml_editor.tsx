@@ -48,7 +48,6 @@ import { StepActions } from './step_actions';
 import { WorkflowStepMinimap } from './workflow_step_minimap';
 import { WorkflowYamlValidationAccordion } from './workflow_yaml_validation_accordion';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
-import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import type { StepInfo } from '../../../entities/workflows/store';
 import {
   selectEditorFocusedStepInfo,
@@ -83,6 +82,8 @@ import type {
   EditorCommand,
   JumpToStepEntry,
 } from '../../../features/actions_menu_popover/types';
+import { useDisableWorkflowsConfirmation } from '../../../features/linked_rules/model/use_disable_workflows_confirmation';
+import { useSaveYamlWithConfirmation } from '../../../features/linked_rules/model/use_save_yaml_with_confirmation';
 import { useMonacoMarkersChangedInterceptor } from '../../../features/validate_workflow_yaml/lib/use_monaco_markers_changed_interceptor';
 import { useYamlValidation } from '../../../features/validate_workflow_yaml/lib/use_yaml_validation';
 import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/model/use_workflow_json_schema';
@@ -114,6 +115,7 @@ import { registerWorkflowDefinitionProvider } from '../lib/monaco_providers/work
 import { insertStepSnippet } from '../lib/snippets/insert_step_snippet';
 import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import { STEP_FRAGMENT_SCHEMA_FILE_MATCH_EXCLUSION } from '../lib/step_fragment/step_fragment_models';
+import { useInactiveDebouncedValue } from '../lib/use_inactive_debounced_value';
 import { useRegisterHoverCommands } from '../lib/use_register_hover_commands';
 import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
 import { navigateToErrorPosition } from '../lib/utils';
@@ -127,6 +129,10 @@ import {
 
 // Monaco's default `scrollbar.verticalScrollbarSize`.
 const MONACO_VERTICAL_SCROLLBAR_SIZE = 14;
+
+// While the graph is showing, this editor is hidden and only mirrors the store. Pushing the whole
+// document into it on every graph edit costs time and memory, so it catches up after this much quiet.
+const HIDDEN_EDITOR_SYNC_DEBOUNCE_MS = 300;
 
 const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   ...WORKFLOW_MONACO_LAYOUT_OPTIONS,
@@ -235,7 +241,8 @@ export const WorkflowYAMLEditor = ({
     setStabilityBadgeThemeContext(euiThemeContext);
   }, [euiThemeContext]);
 
-  const saveYaml = useSaveYaml();
+  const { confirmDisable, confirmModal: disableConfirmModal } = useDisableWorkflowsConfirmation();
+  const saveYaml = useSaveYamlWithConfirmation(confirmDisable);
   const isSaving = useSelector(selectIsSavingYaml);
   const dispatch = useDispatch();
   const workflow = useSelector(selectWorkflow);
@@ -262,6 +269,11 @@ export const WorkflowYAMLEditor = ({
   );
 
   const workflowYaml = useSelector(selectEditorYaml) ?? '';
+  const editorValue = useInactiveDebouncedValue(
+    workflowYaml,
+    isActive,
+    HIDDEN_EDITOR_SYNC_DEBOUNCE_MS
+  );
   const hasChanges = useSelector(selectHasChanges);
 
   const originalValue = workflow?.yaml ?? '';
@@ -492,7 +504,7 @@ export const WorkflowYAMLEditor = ({
           if (isSavingRef.current || isReadOnlyYamlRef.current) {
             return;
           }
-          saveYaml().then(() => dispatch(setIsTestModalOpen(true)));
+          saveYaml().then((confirmed) => confirmed && dispatch(setIsTestModalOpen(true)));
         },
       };
     },
@@ -971,6 +983,7 @@ export const WorkflowYAMLEditor = ({
         }
       />
       <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} shouldPromptOnNavigation={true} />
+      {disableConfirmModal}
       {/* Floating Elasticsearch step actions — anchored to the focused
           step's line in the Monaco editor, so they're meaningless (and
           visually orphaned) when the graph view replaces the editor body. */}
@@ -1013,7 +1026,7 @@ export const WorkflowYAMLEditor = ({
             options={options}
             chromeOverrides={workflowsEditorChromeOverrides}
             schemas={schemas}
-            value={workflowYaml}
+            value={editorValue}
             enableFindAction={true}
             dataTestSubj="workflowYamlEditor"
           />

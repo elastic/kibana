@@ -36,6 +36,7 @@ export {
   TEMPLATE_VALUE_DEF_NAME,
 } from './common/json_schema/build_template_tolerant_json_schema';
 export { validateLiquidTemplate } from './common/liquid/validate_liquid_template';
+export { parseTemplateString } from './common/liquid/liquid_parse_cache';
 export { updateYamlField } from './common/yaml/update_yaml_field';
 export {
   buildWorkflowLookup,
@@ -92,6 +93,7 @@ export type {
 
 // Workflow context schema (variable/step/foreach context used by validation and autocomplete)
 export type {
+  CalledWorkflowOutputs,
   RegisteredStepOutput,
   WorkflowContextRegistry,
 } from './common/validation/context/registry';
@@ -119,6 +121,7 @@ export {
   modifyStepProperty,
   modifyWorkflowProperty,
   deleteStep,
+  detectIndent,
   WORKFLOW_PROPERTY_KEYS,
 } from './lib/yaml_edit';
 export type { StepDefinition } from './lib/yaml_edit';

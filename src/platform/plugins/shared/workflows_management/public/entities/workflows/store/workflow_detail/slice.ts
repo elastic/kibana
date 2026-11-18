@@ -60,7 +60,11 @@ const initialState: WorkflowDetailState = {
   connectors: undefined,
   connectorsLoadState: { status: 'loading' },
   workflows: initialWorkflowsState,
-  schema: getWorkflowZodSchema({}, triggerSchemas.getRegisteredTriggersForSchema()),
+  schema: getWorkflowZodSchema(
+    {},
+    triggerSchemas.getRegisteredTriggersForSchema(),
+    triggerSchemas.getTriggerSchemaOptions()
+  ),
   cursorPosition: undefined,
   focusedStepId: undefined,
   focusedTriggerId: undefined,
@@ -79,7 +83,9 @@ const initialState: WorkflowDetailState = {
     connectorType: undefined,
     connectorIdToEdit: undefined,
     insertPosition: undefined,
+    requestId: undefined,
   },
+  lastCreatedConnector: undefined,
 };
 
 // Slice
@@ -242,7 +248,9 @@ const workflowDetailSlice = createSlice({
     // Connector flyout actions
     openCreateConnectorFlyout: (
       state,
-      action: { payload: { connectorType: string; insertPosition?: LineColumnPosition } }
+      action: {
+        payload: { connectorType: string; insertPosition?: LineColumnPosition; requestId?: string };
+      }
     ) => {
       state.connectorFlyout = { isOpen: true, ...action.payload };
     },
@@ -253,7 +261,13 @@ const workflowDetailSlice = createSlice({
       state.connectorFlyout = { isOpen: true, ...action.payload };
     },
     closeConnectorFlyout: (state) => {
-      state.connectorFlyout = { isOpen: false }; // connectorType, connectorToEdit, and insertPosition are undefined
+      state.connectorFlyout = { isOpen: false }; // connectorType, connectorToEdit, insertPosition and requestId are undefined
+    },
+    connectorCreated: (state, action: { payload: { requestId: string; id: string } }) => {
+      state.lastCreatedConnector = action.payload;
+    },
+    clearCreatedConnector: (state) => {
+      state.lastCreatedConnector = undefined;
     },
 
     // Internal actions - these are not for components usage
@@ -385,6 +399,8 @@ export const {
   openCreateConnectorFlyout,
   openEditConnectorFlyout,
   closeConnectorFlyout,
+  connectorCreated,
+  clearCreatedConnector,
 
   // Internal action creators for middleware use only
   _setComputedDataInternal,

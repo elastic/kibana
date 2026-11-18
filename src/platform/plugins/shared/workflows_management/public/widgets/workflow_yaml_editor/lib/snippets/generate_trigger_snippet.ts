@@ -86,13 +86,14 @@ export function generateTriggerSnippet(
       break;
 
     case 'page':
-      // A starter form: one required field, so the Inputs builder and the preview show something.
       parameters = {
-        title: 'New page',
+        title: monacoSuggestionFormat ? '${1:Report an incident}' : 'Report an incident',
+        description: monacoSuggestionFormat
+          ? '${2:Tell us what happened}'
+          : 'Tell us what happened',
         inputs: {
-          type: 'object',
-          properties: { message: { type: 'string', title: 'Message' } },
-          required: ['message'],
+          properties: { summary: { type: 'string', description: 'What happened' } },
+          required: ['summary'],
         },
       };
       break;

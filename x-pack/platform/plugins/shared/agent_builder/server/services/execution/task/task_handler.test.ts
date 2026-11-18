@@ -23,11 +23,13 @@ import { collectAndWriteEvents, handleAgentExecution } from '../execution_runner
 import { serializeExecutionError } from '../utils/serialize_execution_error';
 import { createAgentExecutionClient } from '../persistence';
 import { createConversationClientMock } from '../../../test_utils/conversations';
+import { reportToParent, wakeParent } from '../utils/wake_parent';
 
 jest.mock('../execution_runner');
 jest.mock('../utils/serialize_execution_error');
 jest.mock('../persistence');
 jest.mock('../callback/deliver_callback_events');
+jest.mock('../utils/wake_parent');
 
 const handleAgentExecutionMock = handleAgentExecution as jest.MockedFunction<
   typeof handleAgentExecution
@@ -44,6 +46,8 @@ const createAgentExecutionClientMock = createAgentExecutionClient as jest.Mocked
 const deliverCallbackEventsMock = deliverCallbackEvents as jest.MockedFunction<
   typeof deliverCallbackEvents
 >;
+const wakeParentMock = wakeParent as jest.MockedFunction<typeof wakeParent>;
+const reportToParentMock = reportToParent as jest.MockedFunction<typeof reportToParent>;
 
 describe('TaskHandler event streaming and finalization', () => {
   const events: ChatEvent[] = [
@@ -138,6 +142,8 @@ describe('TaskHandler event streaming and finalization', () => {
       callbackDeliveryService,
       surfacesService,
       conversationService,
+      taskManager: {},
+      getExecutionService: () => ({}),
     } as never);
 
   const fakeRequest = httpServerMock.createKibanaRequest();
@@ -173,6 +179,23 @@ describe('TaskHandler event streaming and finalization', () => {
       getError: () => error,
     };
   };
+
+  it('reports to the parent once the run settled, whether it completed or failed', async () => {
+    await run();
+
+    expect(reportToParentMock).toHaveBeenCalledWith(
+      expect.objectContaining({ execution, request: fakeRequest })
+    );
+    expect(reportToParentMock.mock.invocationCallOrder[0]).toBeGreaterThan(
+      executionClient.updateStatus.mock.invocationCallOrder.at(-1)!
+    );
+
+    reportToParentMock.mockClear();
+    collectAndWriteEventsMock.mockRejectedValue(new Error('persist failed'));
+    await run();
+
+    expect(reportToParentMock).toHaveBeenCalledTimes(1);
+  });
 
   it('records a task_manager abort reason when Task Manager cancels the task', async () => {
     await createHandler().cancel({ executionId: 'execution-1' });
@@ -365,6 +388,17 @@ describe('TaskHandler event streaming and finalization', () => {
       );
     });
 
+    it('reports the aborted execution to its parent, so a pending entry does not wait for the next message', async () => {
+      await runAborted();
+
+      expect(reportToParentMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          execution: expect.objectContaining({ status: ExecutionStatus.aborted }),
+          request: fakeRequest,
+        })
+      );
+    });
+
     it('releases nothing when the execution stores no conversation', async () => {
       await runAborted({
         agentParams: { ...execution.agentParams, storeConversation: false },
@@ -534,5 +568,56 @@ describe('TaskHandler running as a bound service account', () => {
       ExecutionStatus.failed,
       { error: expect.objectContaining({ message: expect.stringContaining('sa-1') }) }
     );
+  });
+});
+
+describe('TaskHandler retrying a wake of a busy parent', () => {
+  const fakeRequest = httpServerMock.createKibanaRequest();
+  const executeAgent = jest.fn();
+  const conversationService = { getScopedClient: jest.fn() };
+  const uiSettings = { asScopedToClient: jest.fn() };
+  const savedObjects = { getScopedClient: jest.fn() };
+  const { signal } = new AbortController();
+
+  const wake = () =>
+    createTaskHandler({
+      logger: loggingSystemMock.createLogger(),
+      elasticsearch: { client: { asInternalUser: {} } },
+      conversationService,
+      uiSettings,
+      savedObjects,
+      getExecutionService: () => ({ executeAgent }),
+    } as never).wakeParent({ childExecutionId: 'child-1', fakeRequest, signal });
+
+  beforeEach(() => {
+    wakeParentMock.mockReset();
+  });
+
+  it('wakes the parent with the task credential and signal', async () => {
+    wakeParentMock.mockResolvedValue('woken');
+
+    await expect(wake()).resolves.toEqual({ done: true });
+    expect(wakeParentMock).toHaveBeenCalledWith({
+      request: fakeRequest,
+      childExecutionId: 'child-1',
+      executionClient: expect.anything(),
+      conversationService,
+      executionService: { executeAgent },
+      uiSettings,
+      savedObjects,
+      signal,
+    });
+  });
+
+  it('is done when the parent already reported the result', async () => {
+    wakeParentMock.mockResolvedValue('skipped');
+
+    await expect(wake()).resolves.toEqual({ done: true });
+  });
+
+  it('asks to be run again while the parent is busy', async () => {
+    wakeParentMock.mockResolvedValue('busy');
+
+    await expect(wake()).resolves.toEqual({ done: false });
   });
 });

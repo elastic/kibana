@@ -581,6 +581,18 @@ For complete examples of conditional async registration on both sides, see `exam
 
 All custom step definitions must be approved by the workflows-eng team. See the [Step Definition Approval Process](#step-definition-approval-process) section below.
 
+### Step 6: Cover the Step in the Graph Builder Tests
+
+The workflow visual builder (graph view) authors a step through its form, built from your step's schemas. A Scout suite rebuilds fixture workflows through that form, saves them, reads them back and fails when what was saved differs from the fixture. A new step goes into that suite, so a schema the form cannot author is found in CI and not by a user.
+
+Everything is in `src/platform/plugins/shared/workflows_management/test/scout/ui/fixtures/graph_rebuild/` (see its `README.md`).
+
+1. **Append the step to the fixture that fits it** in `workflows/`: `data_transforms` (`data.*`), `flow_control` (steps with bodies), `error_handling`, `references_editors` (Elasticsearch/Kibana requests, code editors, key/value rows, references to earlier steps), `connectors` (steps with a `connector-id`). Use every `config` key and every `with` field of the step once, with realistic values, and one reference to an earlier step's output.
+2. **Add a new fixture instead** when the step needs its own setup (a connector, an index, a setting), or when the fixture has about 15 steps already. A new fixture is a YAML file in `workflows/`, an entry in `fixtures.ts` and a spec in `parallel_tests/workflow_graph_rebuild/` copied from an existing one.
+3. **Run the spec** (the command is in the README). It must pass.
+4. **If the form cannot author a value, fix the form.** If that is out of scope for the PR, add a `knownGaps` entry to the fixture with the problem's key and the reason. A gap that no longer occurs fails the test until it is removed.
+5. The form writes schema defaults (for example `order: asc`). State such a default in the fixture, so the saved workflow matches it.
+
 ### Example Implementation
 
 See `examples/workflows_extensions_example` for a complete working example of a custom step type implementation.

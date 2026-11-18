@@ -6,4 +6,4 @@
  */
 
 export const EDIT_SUBMIT_BUTTON = '[data-test-subj="ruleEditSubmitButton"]';
-export const BACK_TO_RULE_DETAILS = '[data-test-subj="ruleEditBackToRuleDetails"]';
+export const BACK_TO_RULE_DETAILS = '[data-test-subj="appHeaderBack"]';

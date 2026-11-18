@@ -6,7 +6,10 @@
  */
 
 import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { LocalElasticsearchFields } from './local_elasticsearch_fields';
+import { RemoteElasticsearchConnectionFields } from './remote_elasticsearch_connection_fields';
+import { RemoteElasticsearchRoutingFields } from './remote_elasticsearch_routing_fields';
 import { S3Fields } from './s3_fields';
 import type { DestinationCreationFormErrors, DestinationStorageKind } from './types';
 
@@ -29,6 +32,14 @@ export const DestinationTypeFields = ({
   switch (storageKind) {
     case 'local_elasticsearch':
       return <LocalElasticsearchFields errors={errors} disabled={disabled} />;
+    case 'remote_elasticsearch':
+      return (
+        <>
+          <RemoteElasticsearchRoutingFields errors={errors} disabled={disabled} />
+          <EuiSpacer size="m" />
+          <RemoteElasticsearchConnectionFields errors={errors} disabled={disabled} />
+        </>
+      );
     case 'external_storage':
       return <S3Fields errors={errors} disabled={disabled} />;
   }

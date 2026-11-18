@@ -17,6 +17,7 @@ import type {
 } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { useWorkflowsApi } from '@kbn/workflows-ui';
+import { fetchStepLatestExecution, stepLatestExecutionKey } from './step_latest_execution';
 import type { TreeRun } from '../../../entities/workflows/store/workflow_detail/types';
 import { STEP_EXECUTION_POLL_INTERVAL_MS } from '../../../hooks/polling_constants';
 
@@ -114,13 +115,8 @@ export const useStepOutputSamples = ({
 
   const historyQueries = useQueries({
     queries: stepNames.map((stepName) => ({
-      queryKey: ['workflows', workflowId, 'step-executions', stepName, 'latest-output'],
-      queryFn: () =>
-        api.getWorkflowStepExecutions(workflowId ?? '', {
-          stepId: stepName,
-          size: 1,
-          includeOutput: true,
-        }),
+      queryKey: stepLatestExecutionKey(workflowId, stepName),
+      queryFn: () => fetchStepLatestExecution(api, workflowId, stepName),
       enabled: Boolean(workflowId),
       refetchInterval: (data: WorkflowStepExecutionListDto | undefined) => {
         const latest = data?.results[0];

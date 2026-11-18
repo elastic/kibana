@@ -454,12 +454,17 @@ describe('getWorkflowContextSchema - Dynamic event schema based on triggers', ()
     ).toBeDefined();
   });
 
-  it('should expose inputs declared on a page trigger', () => {
+  it('should expose page trigger inputs as page.inputs, apart from inputs', () => {
     const workflow = {
       ...baseWorkflow,
       triggers: [
         {
+          type: 'manual',
+          inputs: { properties: { priority: { type: 'string' } } },
+        },
+        {
           type: 'page',
+          title: 'Report an incident',
           inputs: {
             properties: { summary: { type: 'string' }, severity: { type: 'string' } },
             required: ['summary'],
@@ -470,9 +475,19 @@ describe('getWorkflowContextSchema - Dynamic event schema based on triggers', ()
 
     const contextSchema = getWorkflowContextSchema(emptyRegistry, workflow);
 
-    expect(getSchemaAtPath(contextSchema, 'inputs.summary').schema).toBeDefined();
-    expect(getSchemaAtPath(contextSchema, 'inputs.severity').schema).toBeDefined();
-    expect(getSchemaAtPath(contextSchema, 'inputs.unknown').schema).toBeNull();
+    expect(getSchemaAtPath(contextSchema, 'page.inputs.summary').schema).toBeDefined();
+    expect(getSchemaAtPath(contextSchema, 'page.inputs.severity').schema).toBeDefined();
+    expect(getSchemaAtPath(contextSchema, 'page.inputs.priority').schema).toBeNull();
+    expect(getSchemaAtPath(contextSchema, 'inputs.priority').schema).toBeDefined();
+    expect(getSchemaAtPath(contextSchema, 'inputs.summary').schema).toBeNull();
+  });
+
+  it('should not expose page.inputs without a page trigger', () => {
+    const workflow = { ...baseWorkflow, triggers: [{ type: 'manual' }] } as WorkflowYaml;
+
+    const contextSchema = getWorkflowContextSchema(emptyRegistry, workflow);
+
+    expect(getSchemaAtPath(contextSchema, 'page.inputs.summary').schema).toBeNull();
   });
 
   it('should allow accessing event.rule and event.spaceId when alert trigger is present', () => {

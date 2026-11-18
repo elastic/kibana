@@ -202,6 +202,12 @@ When adding a new step:
    - [ ] Ran the printed `echo` command(s) from the kibana directory to create/update the per-step approval file(s)
    - [ ] PR description requests review from `@elastic/workflows-eng`
 
+7. **Graph builder coverage** — see [STEPS.md Step 6](../../dev_docs/STEPS.md#step-6-cover-the-step-in-the-graph-builder-tests)
+   - [ ] The step is in a fixture under `workflows_management/test/scout/ui/fixtures/graph_rebuild/workflows/`: appended to the fixture that fits it, or in a new fixture with its entry in `fixtures.ts` and its own spec
+   - [ ] The step uses every `config` key and every `with` field once
+   - [ ] The spec for that fixture passed locally (command in the fixtures' `README.md`)
+   - [ ] Every `knownGaps` entry added has a reason
+
 ## Reviewer checklist
 
 When reviewing a PR that adds or modifies a custom step:
@@ -223,6 +229,7 @@ When reviewing a PR that adds or modifies a custom step:
 - [ ] Public registration uses an async loader unless the step module is trivially small
 - [ ] Conditional registration paths return `undefined`, not `null` or a rejected promise
 - [ ] No `registerStepDefinition` call moved into `start()`
+- [ ] A new or changed step is covered by a graph rebuild fixture (STEPS.md Step 6), and a new `knownGaps` entry has a reason
 - [ ] Per-step approval file `approved_step_definitions/<step.id>.txt` is added or updated with the new `definitionHash`; workflows-eng review requested
 
 ## Reference implementations

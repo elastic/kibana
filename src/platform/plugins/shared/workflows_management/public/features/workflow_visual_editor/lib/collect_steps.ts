@@ -7,33 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowYaml } from '@kbn/workflows';
-
-const isStepLike = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' &&
-  value !== null &&
-  typeof (value as Record<string, unknown>).name === 'string' &&
-  typeof (value as Record<string, unknown>).type === 'string';
+import type { Step, WorkflowYaml } from '@kbn/workflows';
+import { walkStepTree } from '@kbn/workflows';
 
 /**
  * Every step in the definition keyed by name — top-level, branch bodies,
- * foreach frames and `on-failure.fallback` alike.
+ * foreach frames and `on-failure.fallback` alike. Only real child-step slots are
+ * walked, so objects inside a step's `with` payload that happen to carry a `name`
+ * and a `type` are never mistaken for steps.
  */
 export const collectStepsByName = (
   workflow: WorkflowYaml | undefined
-): ReadonlyMap<string, Record<string, unknown>> => {
-  const byName = new Map<string, Record<string, unknown>>();
-  const walk = (value: unknown): void => {
-    if (Array.isArray(value)) {
-      value.forEach(walk);
-      return;
-    }
-    if (typeof value !== 'object' || value === null) return;
-    if (isStepLike(value)) {
-      byName.set(value.name as string, value);
-    }
-    Object.values(value).forEach(walk);
-  };
-  walk(workflow?.steps ?? []);
+): ReadonlyMap<string, Step> => {
+  const byName = new Map<string, Step>();
+  walkStepTree(workflow?.steps ?? [], (step) => {
+    byName.set(step.name, step);
+  });
   return byName;
 };

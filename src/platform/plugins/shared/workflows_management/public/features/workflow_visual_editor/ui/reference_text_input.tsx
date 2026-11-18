@@ -8,7 +8,7 @@
  */
 
 import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import type { monaco } from '@kbn/code-editor';
 import { workflowsEditorChromeOverrides } from '@kbn/workflows-ui';
@@ -16,14 +16,11 @@ import { createMonacoSelectionBridge } from './create_monaco_selection_bridge';
 import type { ReferenceCapableBind } from './reference_capable_field';
 import { ReferenceChip } from './reference_chip';
 import { ContainerInSentenceCallout } from './reference_container_callout';
-import {
-  getReferenceChipEditorCss,
-  useReferenceDecorations,
-  useReferenceIconMasks,
-} from './use_reference_decorations';
+import { useStepFormReadOnly } from './step_form_read_only_context';
+import { caretAfterChange, typedCharacter, useReferenceEditor } from './use_reference_editor';
 import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
 import type { ReferenceToken } from '../lib/reference_tokens';
-import { findReferenceTokens, insertTokenAsJsonText } from '../lib/reference_tokens';
+import { insertTokenAsJsonText } from '../lib/reference_tokens';
 
 type Editor = monaco.editor.IStandaloneCodeEditor;
 
@@ -94,58 +91,75 @@ export function ReferenceTextInput({
   testSubj,
   warnContainersInSentence,
   language,
+  onEditRequest,
 }: {
   readonly bind: ReferenceCapableBind;
   readonly catalog: DataReferenceCatalog;
   readonly ariaLabel: string;
   readonly isInvalid: boolean;
   readonly onBlur: () => void;
-  /** Text edits; wired to `bind.reportChange` so typed triggers open the picker. */
-  readonly onChange: (next: string, caret: number) => void;
+  /** Text edits; wired to `bind.reportChange` so a typed trigger opens the dropdown. */
+  readonly onChange: (next: string, caret: number, typed?: string) => void;
   readonly testSubj: string;
   /** Flag a known list or record inside a sentence (free text only). */
   readonly warnContainersInSentence: boolean;
   /** Reflected as `data-language` so the field's kind stays inspectable. */
   readonly language?: string;
+  /**
+   * When set, the field is a preview: a click, Enter or Space calls this instead of mounting the
+   * editor. For a value the single-line editor cannot hold as it is.
+   */
+  readonly onEditRequest?: () => void;
 }) {
-  const { euiTheme, colorMode } = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
   const { fontSize } = useEuiFontSize('xs');
-  const masks = useReferenceIconMasks();
-  const { value, isOpen, appendControls, registerSelection, openPickerAtRange } = bind;
+  const readOnly = useStepFormReadOnly();
+  const { value, appendControls, registerSelection, openPickerAtRange, registerEditRequester } =
+    bind;
   const [isEditing, setIsEditing] = useState(false);
-  const [editor, setEditor] = useState<Editor | null>(null);
-  const [dismissed, setDismissed] = useState<ReadonlySet<string>>(() => new Set());
   const pendingRef = useRef<Pending | undefined>({ kind: 'end' });
   const heightPx = parseInt(String(euiTheme.size.xl), 10) || 32;
-  const isOpenRef = useRef(isOpen);
-  isOpenRef.current = isOpen;
   const valueRef = useRef(value);
   valueRef.current = value;
   // The editor registers its blur listener once, at mount; it must still call the latest handler.
   const onBlurRef = useRef(onBlur);
   onBlurRef.current = onBlur;
 
-  const tokens = useMemo(
-    () =>
-      findReferenceTokens(value, {
-        catalog,
-        warnContainersInSentence,
-        quotedStringsAreValues: language === 'json',
-      }),
-    [catalog, language, value, warnContainersInSentence]
-  );
-  useReferenceDecorations(editor, value, tokens);
+  const { tokens, chipCss, captureEditor, releaseEditor, warning, dismissWarning } =
+    useReferenceEditor({
+      text: value,
+      catalog,
+      warnContainersInSentence,
+      quotedStringsAreValues: language === 'json',
+    });
 
-  const startEditing = useCallback((pending: Pending) => {
-    pendingRef.current = pending;
-    setIsEditing(true);
-  }, []);
+  const startEditing = useCallback(
+    (pending: Pending) => {
+      // A read-only field stays a preview: it never mounts the editor.
+      if (readOnly) return;
+      pendingRef.current = pending;
+      setIsEditing(true);
+    },
+    [readOnly]
+  );
+
+  const requestEdit = (pending: Pending) => {
+    if (readOnly) return;
+    if (onEditRequest) onEditRequest();
+    else startEditing(pending);
+  };
 
   const stopEditing = useCallback(() => {
     setIsEditing(false);
-    setEditor(null);
+    releaseEditor();
     registerSelection(null);
-  }, [registerSelection]);
+  }, [registerSelection, releaseEditor]);
+
+  // The insert button on a field that shows text needs an editor to type into: it asks for one.
+  useEffect(() => {
+    registerEditRequester(() => startEditing({ kind: 'end' }));
+    return () => registerEditRequester(null);
+  }, [registerEditRequester, startEditing]);
 
   // Mousedown only keeps focus on the read view; the action runs on click, once the pointer is
   // released. Opening the picker earlier lets the trailing click count as an "outside click"
@@ -161,7 +175,7 @@ export function ReferenceTextInput({
     if (target.closest('button, a')) return;
     const chip = target.closest<HTMLElement>('[data-ref-start]');
     if (chip) {
-      startEditing({
+      requestEdit({
         kind: 'token',
         start: Number(chip.dataset.refStart),
         end: Number(chip.dataset.refEnd),
@@ -172,7 +186,7 @@ export function ReferenceTextInput({
     const run = position
       ? (position.node.parentElement ?? undefined)?.closest<HTMLElement>('[data-run-offset]')
       : undefined;
-    startEditing(
+    requestEdit(
       position && run
         ? { kind: 'caret', offset: Number(run.dataset.runOffset) + position.offset }
         : { kind: 'end' }
@@ -193,11 +207,10 @@ export function ReferenceTextInput({
         }
       });
       mounted.onDidBlurEditorText(() => {
-        if (isOpenRef.current) return;
         onBlurRef.current();
         stopEditing();
       });
-      setEditor((current) => current ?? mounted);
+      captureEditor(mounted);
 
       // Position the caret once, for the interaction that mounted the editor.
       const pending = pendingRef.current;
@@ -220,7 +233,7 @@ export function ReferenceTextInput({
       }
       bridge.setCaret(pending.kind === 'caret' ? pending.offset : valueRef.current.length);
     },
-    [openPickerAtRange, registerSelection, stopEditing]
+    [captureEditor, openPickerAtRange, registerSelection, stopEditing]
   );
 
   const boxCss = {
@@ -242,16 +255,20 @@ export function ReferenceTextInput({
       role="textbox"
       aria-label={ariaLabel}
       aria-invalid={isInvalid}
+      aria-readonly={readOnly || undefined}
       tabIndex={0}
       onMouseDown={handleMouseDown}
       onClick={handleClick}
       onKeyDown={(event) => {
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
-          startEditing({ kind: 'end' });
+          requestEdit({ kind: 'end' });
         }
       }}
-      onFocus={() => startEditing({ kind: 'end' })}
+      // A preview must not act on focus: the panel that closes returns focus here.
+      onFocus={() => {
+        if (!onEditRequest) startEditing({ kind: 'end' });
+      }}
       css={{
         flex: '1 1 auto',
         minWidth: 0,
@@ -263,7 +280,7 @@ export function ReferenceTextInput({
         overflow: 'hidden',
         whiteSpace: 'pre',
         fontSize,
-        cursor: 'text',
+        cursor: readOnly ? 'default' : 'text',
         outline: 'none',
       }}
       data-test-subj={testSubj}
@@ -285,23 +302,19 @@ export function ReferenceTextInput({
         minWidth: 0,
         // Line up with the read view's text.
         paddingInlineStart: euiTheme.size.s,
-        // Transparent so the field box (border, background) shows through.
-        '.monaco-editor, .monaco-editor-background, .monaco-editor .margin': {
-          backgroundColor: 'transparent',
-        },
-        ...getReferenceChipEditorCss(euiTheme, masks, colorMode),
+        ...chipCss,
       }}
       data-mode="edit"
     >
       <CodeEditor
         languageId="plaintext"
         chromeOverrides={workflowsEditorChromeOverrides}
+        // Transparent so the field box (border, background) shows through.
+        transparentBackground
         value={value}
         onChange={(text, event) => {
           const single = text.replace(/\r?\n/g, ' ');
-          const last = event?.changes?.[event.changes.length - 1];
-          const caret = last ? last.rangeOffset + last.text.length : single.length;
-          onChange(single, Math.min(caret, single.length));
+          onChange(single, caretAfterChange(single, event), typedCharacter(event));
         }}
         height={heightPx}
         aria-label={ariaLabel}
@@ -315,10 +328,6 @@ export function ReferenceTextInput({
     </div>
   );
 
-  const warning = tokens.find(
-    (token) => token.isContainerInSentence && !dismissed.has(token.expression)
-  );
-
   return (
     <>
       <div css={boxCss}>
@@ -329,7 +338,7 @@ export function ReferenceTextInput({
         <ContainerInSentenceCallout
           token={warning}
           onFix={() => onChange(insertTokenAsJsonText(value, warning), value.length)}
-          onDismiss={() => setDismissed((current) => new Set(current).add(warning.expression))}
+          onDismiss={dismissWarning}
           testSubj={testSubj}
         />
       ) : null}

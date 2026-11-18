@@ -21,7 +21,7 @@ import type {
   IndexField,
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
-} from '@kbn/timelines-plugin/common/search_strategy';
+} from '@kbn/securitysolution-timeline-search-strategy';
 import type { StartPlugins } from '../../../../plugin_contract';
 import { parseOptions } from './parse_options';
 

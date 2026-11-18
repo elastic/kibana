@@ -193,6 +193,28 @@ describe('validateWorkflowInputs', () => {
     });
   });
 
+  it('refreshes a failed concurrency-group execution so the next admission does not count it', async () => {
+    setInputsSchema({
+      properties: {
+        name: { type: 'string' },
+      },
+      required: ['name'],
+    });
+
+    const result = await callValidate(
+      createWorkflowExecution({ inputs: {} }, { concurrencyGroupKey: 'group-a' })
+    );
+
+    expect(result).toBe(false);
+    expect(mockRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: executionId,
+        status: ExecutionStatus.FAILED,
+      }),
+      { refresh: true }
+    );
+  });
+
   it('should return false and mark execution as FAILED on type mismatch', async () => {
     setInputsSchema({
       properties: {
@@ -325,6 +347,7 @@ describe('validateWorkflowInputs', () => {
     const workflowExecution = createWorkflowExecution(
       { inputs: { severity: '${{ consts.default_severity }}' } },
       {
+        triggeredBy: 'manual',
         workflowDefinition: {
           ...stubWorkflowExecution.workflowDefinition,
           consts: {
@@ -344,48 +367,81 @@ describe('validateWorkflowInputs', () => {
     });
   });
 
-  it('should not evaluate expressions in inputs from an untrusted caller', async () => {
-    setInputsSchema({
-      properties: { summary: { type: 'string' } },
-      required: ['summary'],
+  describe('provided expression rule', () => {
+    const expressionInputs = {
+      summary: '${{ consts.api_token }}',
+      nested: [{ value: '${{ consts.api_token }}' }],
+    };
+
+    const validateWithTriggeredBy = async (triggeredBy: string | undefined) => {
+      setInputsSchema({
+        properties: {
+          summary: { type: 'string' },
+          nested: { type: 'array', items: { type: 'object', additionalProperties: true } },
+        },
+      });
+      const workflowExecution = createWorkflowExecution(
+        { inputs: structuredClone(expressionInputs) },
+        {
+          triggeredBy,
+          workflowDefinition: {
+            ...stubWorkflowExecution.workflowDefinition,
+            consts: { api_token: 'secret-value' },
+          },
+        }
+      );
+      const result = await callValidate(workflowExecution);
+      return { result, inputs: workflowExecution.context.inputs };
+    };
+
+    it('evaluates a provided expression for a manual run', async () => {
+      const { result, inputs } = await validateWithTriggeredBy('manual');
+
+      expect(result).toBe(true);
+      expect(inputs).toEqual({ summary: 'secret-value', nested: [{ value: 'secret-value' }] });
     });
 
-    const inputs = { summary: '${{ consts.api_token }}' };
-    const workflowExecution = createWorkflowExecution(
-      { inputs },
-      {
-        metadata: { submittedVia: 'page', untrustedInputs: true },
-        workflowDefinition: {
-          ...stubWorkflowExecution.workflowDefinition,
-          consts: { api_token: 'secret-value' },
+    it.each([
+      'page',
+      'workflow-step',
+      'scheduled',
+      'alert',
+      'agent-builder-hook',
+      'cases.caseCreated',
+      undefined,
+    ])('keeps a provided expression as a literal string for triggeredBy %s', async (source) => {
+      const { result, inputs } = await validateWithTriggeredBy(source);
+
+      expect(result).toBe(true);
+      expect(inputs).toEqual(expressionInputs);
+      expect(mockRepository.updateWorkflowExecution).not.toHaveBeenCalled();
+    });
+
+    it('renders author defaults for a child run', async () => {
+      setInputsSchema({
+        properties: {
+          summary: { type: 'string' },
+          label: { type: 'string', default: '{{ consts.label }}' },
         },
-      }
-    );
+      });
+      const workflowExecution = createWorkflowExecution(
+        { inputs: { summary: '${{ consts.label }}' } },
+        {
+          triggeredBy: 'workflow-step',
+          workflowDefinition: {
+            ...stubWorkflowExecution.workflowDefinition,
+            consts: { label: 'from-author' },
+          },
+        }
+      );
 
-    const result = await callValidate(workflowExecution);
+      await callValidate(workflowExecution);
 
-    expect(result).toBe(true);
-    expect(workflowExecution.context.inputs).toEqual(inputs);
-    expect(mockRepository.updateWorkflowExecution).not.toHaveBeenCalled();
-  });
-
-  it('should keep evaluating expressions when the untrusted flag is not exactly true', async () => {
-    setInputsSchema({ properties: { summary: { type: 'string' } } });
-
-    const workflowExecution = createWorkflowExecution(
-      { inputs: { summary: '${{ consts.label }}' } },
-      {
-        metadata: { untrustedInputs: 'false' },
-        workflowDefinition: {
-          ...stubWorkflowExecution.workflowDefinition,
-          consts: { label: 'evaluated' },
-        },
-      }
-    );
-
-    await callValidate(workflowExecution);
-
-    expect(workflowExecution.context.inputs).toEqual({ summary: 'evaluated' });
+      expect(mockRepository.updateWorkflowExecution).toHaveBeenCalledWith({
+        id: executionId,
+        context: { inputs: { summary: '${{ consts.label }}', label: 'from-author' } },
+      });
+    });
   });
 
   it('should preserve provided values that resemble Liquid templates', async () => {
@@ -435,6 +491,7 @@ describe('validateWorkflowInputs', () => {
         },
       },
       {
+        triggeredBy: 'manual',
         workflowDefinition: {
           ...stubWorkflowExecution.workflowDefinition,
           consts: {

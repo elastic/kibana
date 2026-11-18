@@ -22,12 +22,7 @@ import type { NodeKind, NodeMenuState } from './node_action_menu';
 import { NodeConfigWarningIndicator, NodeFailureBadge, NodeStatusIcon } from './node_badges';
 import { NodeIconChip, NodeStepIcon } from './node_icon_chip';
 import { NodeSourceHandles } from './node_source_handles';
-import {
-  CHIP_BORDER_RADIUS,
-  NODE_BORDER_RADIUS,
-  nodeLabelTypography,
-  selectionRingStyle,
-} from './node_styles';
+import { nodeLabelTypography, selectionRingStyle } from './node_styles';
 import { errorHandleStyle } from './port_geometry';
 import { resolveExecutionState, resolveNodeColors } from './resolve_node_colors';
 import {
@@ -129,8 +124,8 @@ function NodePreviewCard({
   chipIconColor: string | undefined;
   chipUseAiGradient?: boolean;
   panelBorder: string;
-  borderRadius: string | number;
-  chipBorderRadius: string | number;
+  borderRadius: React.CSSProperties['borderRadius'];
+  chipBorderRadius: React.CSSProperties['borderRadius'];
   nodeShadow: string;
   renderStepIcon?: RenderStepIcon;
   targetHandlePos: Position;
@@ -254,8 +249,8 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
 
   const execState = resolveExecutionState(stepExecution?.status);
   const colors = resolveNodeColors(euiTheme, stepType, isTriggerNode, execState);
-  const borderRadius = NODE_BORDER_RADIUS;
-  const chipBorderRadius = CHIP_BORDER_RADIUS;
+  const borderRadius = euiTheme.border.radius.panel;
+  const chipBorderRadius = euiTheme.border.radius.control;
 
   const canShowRun = Boolean(canRunSteps && onStepRun) && !isTrigger && !colors.hasStatusIcon;
   const isFallback = Boolean(fallbackOf);

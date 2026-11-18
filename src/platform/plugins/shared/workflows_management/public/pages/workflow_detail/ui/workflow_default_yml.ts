@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { isStructurallyEmptyWorkflowYaml } from '../../../entities/workflows/store/workflow_detail/utils/is_structurally_empty_workflow_yaml';
-
 /** Seed YAML for `/create` — empty structure for the visual builder canvas. */
 export const workflowDefaultYaml = `version: "1"
 name: New workflow

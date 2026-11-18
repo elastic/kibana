@@ -12,6 +12,7 @@ import type {
   InvestigationSeverityCounts,
   InvestigationSummary,
 } from '@kbn/agentic-investigations-plugin/common';
+import { useStatusSignal } from '@kbn/agentic-investigations-plugin/public';
 import {
   SHARED_INVESTIGATIONS_API_VERSION,
   SHARED_INVESTIGATIONS_SEVERITY_COUNTS_URL,
@@ -46,7 +47,13 @@ export interface InvestigationSectionsResult {
   severityCounts: SeverityCounts;
   /** The counts query is separate from the sections, so it settles on its own schedule. */
   areSeverityCountsLoading: boolean;
+  /** New filters are loading while the counts still show the previous ones. */
+  areSeverityCountsStale: boolean;
+  /** True when the finished open counts could not be loaded — do not treat zeros as a clear backlog. */
+  hasSeverityCountsError: boolean;
   hasActiveInvestigations: boolean;
+  /** Running investigations per the API total (not capped by the in-progress page size). */
+  activeInvestigationCount: number;
   isInitialLoading: boolean;
   isFetching: boolean;
   /** Investigations matching the current filters, each counted once: the sections are disjoint. */
@@ -83,35 +90,67 @@ const toSectionState = ({
 
 export const useInvestigationSections = ({
   query,
+  updatedAfter,
+  updatedBefore,
 }: {
   query?: string;
+  /** Only investigations last modified within this window (ISO 8601). */
+  updatedAfter?: string;
+  updatedBefore?: string;
 } = {}): InvestigationSectionsResult => {
+  const updatedWindow = { updatedAfter, updatedBefore };
+  // Changing any filter starts a different list, so it is not a finished investigation.
+  const filterKey = JSON.stringify([query, updatedAfter, updatedBefore]);
   const { http, agenticInvestigations } = useKibana().services;
 
+  // A running investigation's `updated_at` does not move with tool calls, so a window ending at
+  // now would hide work that is happening right now. Treat it as modified "now": only a range that
+  // ended in the past filters the in-progress section.
+  const inProgressWindow = updatedBefore ? updatedWindow : {};
   const inProgress = useFetchInvestigations({
     inProgress: true,
     query,
+    ...inProgressWindow,
     refetchInterval: IN_PROGRESS_REFETCH_INTERVAL_MS,
   });
 
-  // Every item in the in-progress section is being worked on by construction.
-  const hasActiveInvestigations = inProgress.total > 0;
+  // Use the API total so the hero is not capped by the in-progress page size.
+  const activeInvestigationCount = inProgress.matchTotal;
+  const hasActiveInvestigations = activeInvestigationCount > 0;
 
-  const critical = useFetchInvestigations({ ...tierSection('critical'), query });
-  const high = useFetchInvestigations({ ...tierSection('high'), query });
-  const medium = useFetchInvestigations({ ...tierSection('medium'), query });
-  const low = useFetchInvestigations({ ...tierSection('low'), query });
-  const notRated = useFetchInvestigations({ inProgress: false, severities: ['none'], query });
+  const critical = useFetchInvestigations({ ...tierSection('critical'), query, ...updatedWindow });
+  const high = useFetchInvestigations({ ...tierSection('high'), query, ...updatedWindow });
+  const medium = useFetchInvestigations({ ...tierSection('medium'), query, ...updatedWindow });
+  const low = useFetchInvestigations({ ...tierSection('low'), query, ...updatedWindow });
+  const notRated = useFetchInvestigations({
+    inProgress: false,
+    severities: ['none'],
+    query,
+    ...updatedWindow,
+  });
 
   // A running investigation starts at medium and its severity can still change, so it is not
-  // counted under a tier until it finishes — same as the sections below.
+  // counted under a tier until it finishes — same as the sections below. Open-only so tiles,
+  // section lists, and the hero "needs you" / status dot stay aligned.
   const severityCountsQuery = useQuery({
-    queryKey: [...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY, 'severityCounts', query],
+    queryKey: [
+      ...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY,
+      'severityCounts',
+      query,
+      updatedAfter,
+      updatedBefore,
+    ],
     enabled: agenticInvestigations != null,
     queryFn: ({ signal }) =>
       http.get<InvestigationSeverityCounts>(SHARED_INVESTIGATIONS_SEVERITY_COUNTS_URL, {
         version: SHARED_INVESTIGATIONS_API_VERSION,
-        query: { in_progress: false, ...(query ? { query } : {}) },
+        query: {
+          in_progress: false,
+          status: 'open',
+          ...(query ? { query } : {}),
+          ...(updatedAfter ? { updated_after: updatedAfter } : {}),
+          ...(updatedBefore ? { updated_before: updatedBefore } : {}),
+        },
         signal,
       }),
     keepPreviousData: true,
@@ -130,8 +169,8 @@ export const useInvestigationSections = ({
   // shrinking total catches one finishing past the loaded window, where the loaded ids never move.
   const inProgressInvestigations = inProgress.investigations;
   const previousInProgress = useRef({
-    query,
-    total: inProgress.total,
+    query: filterKey,
+    total: inProgress.matchTotal,
     ids: toInvestigationIds(inProgressInvestigations),
   });
 
@@ -142,14 +181,14 @@ export const useInvestigationSections = ({
 
     const ids = toInvestigationIds(inProgressInvestigations);
     const previous = previousInProgress.current;
-    previousInProgress.current = { query, total: inProgress.total, ids };
+    previousInProgress.current = { query: filterKey, total: inProgress.matchTotal, ids };
 
-    if (previous.query !== query) {
+    if (previous.query !== filterKey) {
       return;
     }
 
     const hasFinished =
-      inProgress.total < previous.total || [...previous.ids].some((id) => !ids.has(id));
+      inProgress.matchTotal < previous.total || [...previous.ids].some((id) => !ids.has(id));
 
     if (!hasFinished) {
       return;
@@ -162,8 +201,8 @@ export const useInvestigationSections = ({
     refetchNotRated();
     void refetchSeverityCounts();
   }, [
-    query,
-    inProgress.total,
+    filterKey,
+    inProgress.matchTotal,
     inProgress.isPreviousData,
     inProgressInvestigations,
     refetchCritical,
@@ -198,11 +237,18 @@ export const useInvestigationSections = ({
     void refetchSeverityCounts();
   }, [sections, refetchSeverityCounts]);
 
+  // Status toggles in the investigation flyout run on an isolated QueryClient, so closing a
+  // finished investigation would not invalidate this page's open-only lists/counts otherwise.
+  useStatusSignal(refetchAll);
+
   return {
     sections,
     severityCounts,
     areSeverityCountsLoading: severityCountsQuery.isInitialLoading,
+    areSeverityCountsStale: severityCountsQuery.isPreviousData,
+    hasSeverityCountsError: severityCountsQuery.isError,
     hasActiveInvestigations,
+    activeInvestigationCount,
     isInitialLoading: sections.some((section) => section.isInitialLoading),
     isFetching: sections.some((section) => section.isFetching),
     totalCount: sections.reduce((sum, section) => sum + section.total, 0),

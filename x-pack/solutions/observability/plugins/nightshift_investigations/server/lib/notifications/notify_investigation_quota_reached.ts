@@ -11,18 +11,53 @@ import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/cor
 import type { NightshiftSettingsLocator } from '../../../common/locators';
 import { consumeAutomationBudget } from '../automations/automation_budget';
 import { ELASTIC_APPS_SLACK_CONNECTOR_ID } from '../automations/generate_workflow_yaml';
+import type { InvestigationQuotaLimit } from '../../types';
 
-/** One marker per Slack channel and UTC day, kept in the automation budget saved object. */
-export const getQuotaNoticeId = (channel: string): string =>
-  `investigation-quota-notice:${channel}`;
+/**
+ * One marker per Slack channel, limit and UTC day, kept in the automation budget saved object. The
+ * automatic limit keeps the id it had before there were other limits.
+ */
+export const getQuotaNoticeId = (
+  channel: string,
+  deniedBy: InvestigationQuotaLimit = 'automatic'
+): string =>
+  deniedBy === 'automatic'
+    ? `investigation-quota-notice:${channel}`
+    : `investigation-quota-notice:${deniedBy}:${channel}`;
 
-const QUOTA_REACHED = 'The daily limit for automatic investigations has been reached.';
+const countOf = (limit: number, noun: string): string =>
+  `${limit} ${noun}${limit === 1 ? '' : 's'}`;
+
+const QUOTA_REACHED: Record<InvestigationQuotaLimit, (limit?: number) => string> = {
+  automatic: (limit) =>
+    limit === undefined
+      ? "today's limit for automatic investigations across all automations"
+      : `today's limit of ${countOf(limit, 'automatic investigation')} across all automations`,
+  manual: (limit) =>
+    limit === undefined
+      ? "today's limit for manual investigations"
+      : `today's limit of ${countOf(limit, 'manual investigation')}`,
+  all: (limit) =>
+    limit === undefined
+      ? "today's limit for all investigations"
+      : `today's limit of ${countOf(limit, 'investigation')} in total`,
+};
 
 /** Readers may lack the privilege to change settings, so the text addresses an admin. */
-export const getInvestigationQuotaReachedMessage = (settingsUrl?: string): string =>
-  settingsUrl
-    ? `${QUOTA_REACHED} An admin can raise the limit in <${settingsUrl}|Nightshift settings>.`
-    : `${QUOTA_REACHED} An admin can raise the limit in the Nightshift settings.`;
+export const getInvestigationQuotaReachedMessage = ({
+  settingsUrl,
+  limit,
+  deniedBy = 'automatic',
+}: {
+  settingsUrl?: string;
+  limit?: number;
+  deniedBy?: InvestigationQuotaLimit;
+} = {}): string => {
+  const settings = settingsUrl !== undefined ? `<${settingsUrl}|settings>` : 'settings';
+  return `Elastic nightshift has reached ${QUOTA_REACHED[deniedBy](
+    limit
+  )}. New investigations resume at 00:00 UTC, or an admin can raise the limit in ${settings}.`;
+};
 
 /** Absolute settings URL in the workflow's space, or undefined when it can't be built. */
 export const getNightshiftSettingsUrl = ({
@@ -55,8 +90,10 @@ export const notifyInvestigationQuotaReached = async ({
   request,
   spaceId,
   slackThread,
+  deniedBy = 'automatic',
   settingsLocator,
   kibanaUrl,
+  limit,
   signal,
   logger,
 }: {
@@ -65,8 +102,11 @@ export const notifyInvestigationQuotaReached = async ({
   request: KibanaRequest;
   spaceId: string;
   slackThread: { channel: string; thread_ts: string };
+  /** The limit that denied the start. */
+  deniedBy?: InvestigationQuotaLimit;
   settingsLocator: Pick<NightshiftSettingsLocator, 'getRedirectUrl'>;
   kibanaUrl?: string;
+  limit?: number;
   signal: AbortSignal;
   logger: Pick<Logger, 'warn'>;
 }): Promise<void> => {
@@ -74,7 +114,7 @@ export const notifyInvestigationQuotaReached = async ({
     // Claimed before posting, so a failed post is not retried.
     const claimed = await consumeAutomationBudget(
       getSoClient(),
-      getQuotaNoticeId(slackThread.channel),
+      getQuotaNoticeId(slackThread.channel, deniedBy),
       1
     );
     if (!claimed) return;
@@ -94,9 +134,11 @@ export const notifyInvestigationQuotaReached = async ({
         subAction: 'sendMessage',
         subActionParams: {
           channel: slackThread.channel,
-          text: getInvestigationQuotaReachedMessage(
-            getNightshiftSettingsUrl({ locator: settingsLocator, spaceId, kibanaUrl })
-          ),
+          text: getInvestigationQuotaReachedMessage({
+            settingsUrl: getNightshiftSettingsUrl({ locator: settingsLocator, spaceId, kibanaUrl }),
+            limit,
+            deniedBy,
+          }),
           threadTs: slackThread.thread_ts,
         },
       },

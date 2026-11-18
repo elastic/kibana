@@ -10,10 +10,16 @@ import type { PluginConfigDescriptor } from '@kbn/core/server';
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
+  timeRangeLimit: schema.object({
+    disabled: schema.boolean({ defaultValue: false }),
+  }),
 });
 
 export type EntityInventoryAppConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<EntityInventoryAppConfig> = {
   schema: configSchema,
+  exposeToBrowser: {
+    timeRangeLimit: true,
+  },
 };

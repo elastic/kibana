@@ -17,30 +17,32 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { isMap, parseDocument, type YAMLMap } from 'yaml';
 import { i18n } from '@kbn/i18n';
+import { isRecord } from '@kbn/workflows-yaml';
+import { parseStepFragment } from '../lib/parse_step_fragment';
 
 export interface FallbackStepChip {
   readonly name: string;
 }
 
 export interface StepErrorHandlingSectionProps {
+  /** The step's text, which every change is written back into. */
   readonly fragment: string;
+  /** The step's `on-failure` as plain data (already parsed from `fragment`), for what is shown. */
+  readonly onFailureValue: unknown;
   readonly indent: number;
   readonly onFragmentChange: (next: string) => void;
+  /** The step is a loop: the engine runs retry / continue around the whole loop, not per iteration. */
+  readonly isLoop?: boolean;
 }
 
 const DEFAULT_MAX_ATTEMPTS = 3;
 const DEFAULT_DELAY = '5s';
 
-const toJs = (value: unknown): unknown =>
-  value !== null && typeof value === 'object' && 'toJSON' in (value as object)
-    ? (value as { toJSON: () => unknown }).toJSON()
-    : value;
-
 const readOnFailure = (
-  fragment: string
+  onFailure: unknown
 ): {
   retryEnabled: boolean;
   maxAttempts: number;
@@ -49,10 +51,8 @@ const readOnFailure = (
   fallbacks: FallbackStepChip[];
   configured: boolean;
 } => {
-  const doc = parseDocument(fragment);
-  const raw = isMap(doc.contents) ? doc.getIn(['on-failure'], false) : undefined;
-  const js = toJs(raw) as Record<string, unknown> | undefined;
-  if (!js || typeof js !== 'object') {
+  const js = isRecord(onFailure) ? onFailure : undefined;
+  if (!js) {
     return {
       retryEnabled: false,
       maxAttempts: DEFAULT_MAX_ATTEMPTS,
@@ -91,7 +91,7 @@ const readOnFailure = (
 
 /** True when any on-failure setting is present on the fragment. */
 export const hasOnFailureConfigured = (fragment: string): boolean =>
-  readOnFailure(fragment).configured;
+  readOnFailure(parseStepFragment(fragment).read(['on-failure'])).configured;
 
 const mutateOnFailure = (
   fragment: string,
@@ -116,18 +116,32 @@ const mutateOnFailure = (
 };
 
 /**
+ * What the user is typing into a field whose stored value is always valid: the text may be empty or
+ * half-written for a while. The stored value comes back when the field is left, or changes elsewhere.
+ */
+const useTypedText = (stored: string) => {
+  const [typed, setTyped] = useState(stored);
+  useEffect(() => setTyped(stored), [stored]);
+  return { typed, setTyped, restore: () => setTyped(stored) };
+};
+
+/**
  * Form controls for step `on-failure` retry / continue. Fallback creation and
  * removal live on the canvas only.
  */
 export function StepErrorHandlingSection({
   fragment,
+  onFailureValue,
   indent,
   onFragmentChange,
+  isLoop = false,
 }: StepErrorHandlingSectionProps) {
   const { euiTheme } = useEuiTheme();
   const retrySwitchId = useGeneratedHtmlId({ prefix: 'workflowStepErrorRetry' });
   const continueSwitchId = useGeneratedHtmlId({ prefix: 'workflowStepErrorContinue' });
-  const state = useMemo(() => readOnFailure(fragment), [fragment]);
+  const state = useMemo(() => readOnFailure(onFailureValue), [onFailureValue]);
+  const maxAttemptsText = useTypedText(String(state.maxAttempts));
+  const delayText = useTypedText(state.delay);
 
   const setRetryEnabled = useCallback(
     (enabled: boolean) => {
@@ -172,8 +186,7 @@ export function StepErrorHandlingSection({
           if (!isMap(onFailure)) return;
           const retry = onFailure.get('retry');
           if (!isMap(retry)) return;
-          if (value.trim().length === 0) retry.set('delay', DEFAULT_DELAY);
-          else retry.set('delay', value);
+          retry.set('delay', value);
         })
       );
     },
@@ -237,9 +250,13 @@ export function StepErrorHandlingSection({
           />
         </div>
         <EuiText size="xs" color="subdued">
-          {i18n.translate('workflows.stepConfigPanel.errorHandling.retryHelp', {
-            defaultMessage: 'Re-run this step automatically when it fails',
-          })}
+          {isLoop
+            ? i18n.translate('workflows.stepConfigPanel.errorHandling.loopRetryHelp', {
+                defaultMessage: 'Re-run the whole loop automatically when it fails',
+              })
+            : i18n.translate('workflows.stepConfigPanel.errorHandling.retryHelp', {
+                defaultMessage: 'Re-run this step automatically when it fails',
+              })}
         </EuiText>
         {state.retryEnabled ? (
           <div
@@ -263,11 +280,15 @@ export function StepErrorHandlingSection({
                   compressed
                   fullWidth
                   min={1}
-                  value={state.maxAttempts}
+                  value={maxAttemptsText.typed}
                   onChange={(e) => {
+                    maxAttemptsText.setTyped(e.target.value);
                     const next = Number(e.target.value);
-                    if (Number.isFinite(next) && next >= 1) setMaxAttempts(Math.floor(next));
+                    if (e.target.value !== '' && Number.isFinite(next) && next >= 1) {
+                      setMaxAttempts(Math.floor(next));
+                    }
                   }}
+                  onBlur={maxAttemptsText.restore}
                   data-test-subj="workflowStepConfigErrorMaxAttempts"
                 />
               </EuiFormRow>
@@ -283,8 +304,12 @@ export function StepErrorHandlingSection({
                 <EuiFieldText
                   compressed
                   fullWidth
-                  value={state.delay}
-                  onChange={(e) => setDelay(e.target.value)}
+                  value={delayText.typed}
+                  onChange={(e) => {
+                    delayText.setTyped(e.target.value);
+                    if (e.target.value.trim() !== '') setDelay(e.target.value);
+                  }}
+                  onBlur={delayText.restore}
                   data-test-subj="workflowStepConfigErrorDelay"
                 />
               </EuiFormRow>
@@ -319,9 +344,15 @@ export function StepErrorHandlingSection({
           />
         </div>
         <EuiText size="xs" color="subdued">
-          {i18n.translate('workflows.stepConfigPanel.errorHandling.continueHelp', {
-            defaultMessage: 'The workflow keeps running even if this step (and its retries) fail',
-          })}
+          {isLoop
+            ? i18n.translate('workflows.stepConfigPanel.errorHandling.loopContinueHelp', {
+                defaultMessage:
+                  'The workflow keeps running after the loop even if it (and its retries) fail. A failing iteration stops the loop.',
+              })
+            : i18n.translate('workflows.stepConfigPanel.errorHandling.continueHelp', {
+                defaultMessage:
+                  'The workflow keeps running even if this step (and its retries) fail',
+              })}
         </EuiText>
       </div>
     </div>

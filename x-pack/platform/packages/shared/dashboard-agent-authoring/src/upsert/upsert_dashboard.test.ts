@@ -409,6 +409,38 @@ describe('executeDashboardUpsert', () => {
     );
   });
 
+  it('fails only the panel with an invalid ML config and leaves the rest applied', async () => {
+    const existingConfig = { job_ids: ['job-1'], swimlane_type: 'overall' };
+    const existing = createPanel('swimlane', 'ml_anomaly_swimlane', existingConfig);
+
+    const result = await executeDashboardUpsert({
+      dashboardData: { title: 'Test', panels: [existing] },
+      upsert: {
+        panels: [
+          {
+            id: 'swimlane',
+            content: {
+              source: 'config',
+              type: 'ml_anomaly_swimlane',
+              config: { job_ids: 'job-1', swimlane_type: 'overall' },
+            },
+          },
+          { id: 'notes', content: markdownContent('Notes') },
+        ],
+      },
+      logger,
+    });
+
+    expect(result.failures).toEqual([
+      panelFailure(
+        'swimlane',
+        expect.stringMatching(/^Panel "swimlane": Invalid anomaly swim lane config\./)
+      ),
+    ]);
+    expect(findPanel(result.dashboardData, 'swimlane')).toEqual(existing);
+    expect(findPanel(result.dashboardData, 'notes')).toBeDefined();
+  });
+
   it('places new panels below existing panels, which keep their place, until the layout step', async () => {
     const result = await executeDashboardUpsert({
       dashboardData: { title: 'Test', panels: [createLensPanel('existing', 0)] },
@@ -605,6 +637,29 @@ describe('executeDashboardUpsert', () => {
         kind: 'panel',
         identifier: 'panel-1',
         error: `Panel "panel-1" is a Lens panel that is not backed by ES|QL, so it cannot be edited. Tell the user it cannot be edited, and replace it only after they confirm: then remove "panel-1" and add the new panel with a new id in the same call.`,
+      },
+      {
+        name: 'a request edit of a Vega panel that reads Query DSL',
+        panels: [
+          createPanel('vega-dsl', VEGA_VIS_TYPE, {
+            spec: `{
+              // Kibana stores Vega specs as HJSON
+              data: {
+                url: {
+                  index: logs
+                  body: { size: 0 }
+                }
+              }
+              mark: bar
+            }`,
+          }),
+        ],
+        upsert: {
+          panels: [{ id: 'vega-dsl', content: { source: 'request', query: 'make the bars blue' } }],
+        },
+        kind: 'panel',
+        identifier: 'vega-dsl',
+        error: `Panel "vega-dsl" is a Vega panel that reads data other than one top-level ES|QL query (such as an Elasticsearch query, a map file, inline values, or several sources), so it cannot be edited. Tell the user it cannot be edited, and replace it only after they confirm: then remove "vega-dsl" and add the new panel with a new id in the same call.`,
       },
       {
         name: 'markdown content on a Lens panel',
@@ -1807,6 +1862,24 @@ describe('executeDashboardUpsert', () => {
           expect.objectContaining({ renderer: 'vega', existingPanel: vegaPanel })
         );
         expect(result.dashboardData.panels).toEqual([{ ...vegaPanel, config: { updated: true } }]);
+      });
+
+      it('edits a vega panel that reads ES|QL', async () => {
+        const esqlVegaPanel = createPanel('vega-esql', VEGA_VIS_TYPE, {
+          spec: JSON.stringify({
+            data: { url: { '%type%': 'esql', query: 'FROM logs | STATS c = COUNT(*)' } },
+            mark: 'bar',
+          }),
+        });
+        const { result, resolvePanelContent } = await editWith(esqlVegaPanel, {
+          source: 'request',
+          query: 'make the bars blue',
+        });
+
+        expect(resolvePanelContent).toHaveBeenCalledWith(
+          expect.objectContaining({ renderer: 'vega', existingPanel: esqlVegaPanel })
+        );
+        expect(result.failures).toEqual([]);
       });
 
       it('drops applyChartRules when renderer is omitted on a vega panel', async () => {
@@ -3142,7 +3215,7 @@ describe('executeDashboardUpsert attachment-source panels', () => {
 
   // The point of the source: the model places a visualization it already created without
   // copying its payload back through the tool call.
-  it('keeps the section when an attachment inside it cannot be resolved', async () => {
+  it('does not add a new section when none of its panels can be resolved', async () => {
     const resolveAttachmentPanel = jest.fn<PanelContentAttempt, [string]>(() =>
       failedAttempt('not found')
     );
@@ -3165,9 +3238,63 @@ describe('executeDashboardUpsert attachment-source panels', () => {
 
     expect(result.failures).toEqual([
       expect.objectContaining({ type: UPSERT_FAILURE, identifier: 'chart' }),
+      {
+        type: UPSERT_FAILURE,
+        kind: 'section',
+        identifier: 'overview',
+        error: 'Section "Overview" was not added because none of its panels could be created.',
+      },
     ]);
+    expect(getSections(result.dashboardData.panels)).toEqual([]);
+  });
+
+  it('does not add a new section when all of its panels are rejected while planning', async () => {
+    const result = await executeDashboardUpsert({
+      dashboardData: { title: 'Test', panels: [] },
+      upsert: {
+        sections: [{ id: 'overview', title: 'Overview' }],
+        panels: [
+          {
+            id: '0b3f6c2e-8a1d-4c5e-9f7a-1234567890ab',
+            section: 'overview',
+            content: attachmentContent('att-1'),
+          },
+        ],
+      },
+      logger,
+      resolveAttachmentPanel: jest.fn(() => lnsXYAttempt),
+    });
+
+    expect(result.failures).toEqual(
+      expect.arrayContaining([expect.objectContaining({ kind: 'section', identifier: 'overview' })])
+    );
+    expect(getSections(result.dashboardData.panels)).toEqual([]);
+  });
+
+  it('adds a new section when some of its panels resolve', async () => {
+    const resolveAttachmentPanel = jest.fn<PanelContentAttempt, [string]>((attachmentId) =>
+      attachmentId === 'att-missing' ? failedAttempt('not found') : lnsXYAttempt
+    );
+
+    const result = await executeDashboardUpsert({
+      dashboardData: { title: 'Test', panels: [] },
+      upsert: {
+        sections: [{ id: 'overview', title: 'Overview' }],
+        panels: [
+          { id: 'chart', section: 'overview', content: attachmentContent('att-1') },
+          { id: 'missing-chart', section: 'overview', content: attachmentContent('att-missing') },
+        ],
+      },
+      logger,
+      resolveAttachmentPanel,
+    });
+
+    expect(result.failures).toEqual([panelFailure('missing-chart', 'not found')]);
     expect(getSections(result.dashboardData.panels)).toEqual([
-      expect.objectContaining({ id: 'overview', panels: [] }),
+      expect.objectContaining({
+        id: 'overview',
+        panels: [expect.objectContaining({ id: 'chart' })],
+      }),
     ]);
   });
 

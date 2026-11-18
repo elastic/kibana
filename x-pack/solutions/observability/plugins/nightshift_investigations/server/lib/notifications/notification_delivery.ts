@@ -7,6 +7,7 @@
 
 import type { JsonObject } from '@kbn/utility-types';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import type { KibanaIsomerRuntime } from '@kbn/isomer-plugin/server';
 import { investigationNotificationDestinationSchema } from '../../../common';
 import type { InvestigationNotificationDestination, Severity } from '../../../common';
 import { InvalidNotificationDestinationError } from '../../client/errors';
@@ -56,6 +57,7 @@ export interface NotificationDeliveryContext {
   reason?: string;
   /** A message this run already posted, which the delivery edits instead of posting a new one. */
   messageTs?: string;
+  runtime: KibanaIsomerRuntime;
 }
 
 export interface NotificationHandler {

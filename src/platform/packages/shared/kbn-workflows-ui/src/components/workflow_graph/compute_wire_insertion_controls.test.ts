@@ -10,7 +10,12 @@
 import type { Edge, Node } from '@xyflow/react';
 import type { InsertionPoints } from './compute_insertion_points';
 import { computeWireInsertionControls, segmentMidpoint } from './compute_wire_insertion_controls';
-import { FORK_BUS_LABEL_OFFSET, FORK_BUS_TRUNK, TERMINAL_STUB_PX } from './workflow_graph_geometry';
+import {
+  FORK_BUS_LABEL_OFFSET,
+  FORK_BUS_TRUNK,
+  MERGE_BUS_TRUNK,
+  TERMINAL_STUB_PX,
+} from './workflow_graph_geometry';
 
 describe('segmentMidpoint', () => {
   it('returns the geometric midpoint on both axes', () => {
@@ -403,7 +408,171 @@ describe('computeWireInsertionControls', () => {
     expect(ctrl!.centre.x).toBeCloseTo(chipX + chipHalfWidth + 14 + 11);
     expect(ctrl!.centre.y).toBe(24);
     expect(ctrl!.segmentStart.y).toBe(24);
-    expect(ctrl!.segmentEnd).toEqual(ctrl!.centre);
+    // The hit strip owns the whole wire down to the branch head (entry = left edge, mid height),
+    // not just the stub up to the +.
+    expect(ctrl!.segmentEnd).toEqual({ x: 400, y: 24 });
+    expect(ctrl!.centre.x).toBeLessThan(ctrl!.segmentEnd.x);
+  });
+
+  it('TB: the fork-head hit strip runs from the chip edge to the branch head entry', () => {
+    const tbNodes: Node[] = [
+      {
+        id: 'gate',
+        type: 'step',
+        position: { x: 0, y: 0 },
+        width: 200,
+        height: 48,
+        data: { stepType: 'if', label: 'gate' },
+      },
+      {
+        id: 'thenStep',
+        type: 'step',
+        position: { x: 0, y: 300 },
+        width: 200,
+        height: 48,
+        data: { stepType: 'slack', label: 'then' },
+      },
+    ];
+    const tbInsertion: InsertionPoints = {
+      byNodeId: new Map([
+        [
+          'gate',
+          {
+            branches: new Map([
+              [
+                'steps',
+                { slot: { kind: 'steps' as const }, ownerStepName: 'gate', isTerminal: false },
+              ],
+            ]),
+          },
+        ],
+      ]),
+      topLevelStepNodeIds: ['gate', 'thenStep'],
+    };
+    const controls = computeWireInsertionControls({
+      nodes: tbNodes,
+      edges: [
+        {
+          id: 'gate-then',
+          source: 'gate',
+          target: 'thenStep',
+          sourceHandle: 'then',
+          data: { branchType: 'then', label: 'true' },
+        },
+      ],
+      insertionPoints: tbInsertion,
+      direction: 'TB',
+    });
+    const ctrl = controls.find((c) => c.id === 'terminal:fork:gate-then');
+    expect(ctrl!.segmentEnd).toEqual({ x: 100, y: 300 });
+    expect(ctrl!.segmentStart.y).toBeLessThan(ctrl!.centre.y);
+    expect(ctrl!.centre.y).toBeLessThan(ctrl!.segmentEnd.y);
+  });
+
+  it('TB: an empty branch keeps one strip from the chip edge down to the merge bus', () => {
+    // else branch has no steps: the layout draws a bypass lane that rejoins at the join node.
+    const emptyNodes: Node[] = [
+      {
+        id: 'gate',
+        type: 'step',
+        position: { x: 0, y: 0 },
+        width: 200,
+        height: 48,
+        data: { stepType: 'if', label: 'gate' },
+      },
+      {
+        id: 'lane',
+        type: 'bypassLane',
+        position: { x: 20, y: 120 },
+        width: 160,
+        height: 2,
+        data: {},
+      },
+      {
+        id: 'join',
+        type: 'bypassLane',
+        position: { x: 20, y: 400 },
+        width: 160,
+        height: 2,
+        data: {},
+      },
+    ];
+    const emptyInsertion: InsertionPoints = {
+      byNodeId: new Map([
+        [
+          'gate',
+          {
+            branches: new Map([
+              [
+                'else',
+                { slot: { kind: 'else' as const }, ownerStepName: 'gate', isTerminal: true },
+              ],
+            ]),
+          },
+        ],
+      ]),
+      topLevelStepNodeIds: ['gate'],
+    };
+    const controls = computeWireInsertionControls({
+      nodes: emptyNodes,
+      edges: [
+        {
+          id: 'gate-lane',
+          source: 'gate',
+          target: 'lane',
+          sourceHandle: 'else',
+          data: { branchType: 'else', label: 'false' },
+        },
+        { id: 'lane-join', source: 'lane', target: 'join', data: { isMerge: true } },
+      ],
+      insertionPoints: emptyInsertion,
+      direction: 'TB',
+    });
+    const ctrl = controls.find((c) => c.id === 'terminal:fork:gate-lane');
+    // join entry y = 400; the bus is MERGE_BUS_TRUNK above it.
+    expect(ctrl!.segmentEnd).toEqual({ x: 100, y: 400 - MERGE_BUS_TRUNK });
+    expect(ctrl!.insertContext).toMatchObject({ mode: 'branch', position: 'start' });
+    // The lane has no ports, so no second control competes for the same wire.
+    expect(controls.filter((c) => c.kind === 'wire')).toHaveLength(1);
+  });
+
+  it('TB: the branch-tail hit strip runs from the leaf exit down to the merge bus', () => {
+    const tailNodes: Node[] = [
+      {
+        id: 'leaf',
+        type: 'step',
+        position: { x: 0, y: 0 },
+        width: 200,
+        height: 48,
+        data: { stepType: 'slack', label: 'leaf' },
+      },
+      {
+        id: 'join',
+        type: 'step',
+        position: { x: 0, y: 300 },
+        width: 200,
+        height: 48,
+        data: { stepType: 'slack', label: 'join' },
+      },
+    ];
+    const tailInsertion: InsertionPoints = {
+      byNodeId: new Map([
+        ['leaf', { step: { sourceNodeId: 'leaf', stepName: 'leaf-step' } }],
+        ['join', { step: { sourceNodeId: 'join', stepName: 'join-step', isTerminal: true } }],
+      ]),
+      topLevelStepNodeIds: ['leaf', 'join'],
+    };
+    const controls = computeWireInsertionControls({
+      nodes: tailNodes,
+      edges: [{ id: 'leaf-join', source: 'leaf', target: 'join', data: { isMerge: true } }],
+      insertionPoints: tailInsertion,
+      direction: 'TB',
+    });
+    const ctrl = controls.find((c) => c.id === 'terminal:branch-tail:leaf-join');
+    // leaf exit y = 48; the + sits one stub below it; the strip ends on the bus.
+    expect(ctrl!.segmentStart).toEqual({ x: 100, y: 48 });
+    expect(ctrl!.centre).toEqual({ x: 100, y: 48 + TERMINAL_STUB_PX });
+    expect(ctrl!.segmentEnd).toEqual({ x: 100, y: 300 - MERGE_BUS_TRUNK });
   });
 
   it('LR: centres the fork-head + in the free space when the gap is too tight for full clearance', () => {
