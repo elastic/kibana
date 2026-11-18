@@ -60,7 +60,7 @@ describe('ProjectDefaults', () => {
       '2 indices'
     );
     expect(screen.getByTestId('searchBoostProjectDefaultCount-data_streams')).toHaveTextContent(
-      '3 data streams'
+      '2 data streams'
     );
   });
 

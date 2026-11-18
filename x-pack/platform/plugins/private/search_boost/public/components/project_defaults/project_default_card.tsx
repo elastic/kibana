@@ -73,7 +73,8 @@ export const ProjectDefaultCard = ({
   const title = managedMessage?.label ?? profile.name;
   const description = isCustom ? CUSTOM_PROFILE_DESCRIPTION : managedMessage?.description;
   const viewProfileLabel = isCustom ? getViewProfileLabel(profile.name) : undefined;
-  const countLabel = formatTargetCount(type, matches.length);
+  const appliedCount = matches.filter(({ outrankedByRuleName }) => !outrankedByRuleName).length;
+  const countLabel = formatTargetCount(type, appliedCount);
   const countTestSubj = `searchBoostProjectDefaultCount-${type}`;
 
   return (
@@ -157,7 +158,7 @@ export const ProjectDefaultCard = ({
                   <EuiBadge
                     color="hollow"
                     onClick={() => setIsMatchesOpen((open) => !open)}
-                    onClickAriaLabel={getShowDefaultMatchesA11yLabel(type, matches.length)}
+                    onClickAriaLabel={getShowDefaultMatchesA11yLabel(type, appliedCount)}
                     data-test-subj={countTestSubj}
                   >
                     {countLabel}

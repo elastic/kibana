@@ -42,6 +42,23 @@ describe('ProjectDefaultCard', () => {
     );
   });
 
+  it('counts only the matches the rule applies to, leaving out outranked ones', () => {
+    render(
+      <ProjectDefaultCard
+        {...defaultProps}
+        matches={[
+          { name: 'products', isHidden: false },
+          { name: 'users', isHidden: false },
+          { name: 'archive', isHidden: false, outrankedByRuleName: 'Product catalog' },
+        ]}
+      />
+    );
+
+    expect(
+      screen.getByRole('button', { name: '2 indices. Show what the default for indices matches' })
+    ).toBeInTheDocument();
+  });
+
   it('shows the name without a description for a built-in profile with no managed text', () => {
     render(
       <ProjectDefaultCard
