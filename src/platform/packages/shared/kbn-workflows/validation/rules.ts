@@ -200,6 +200,26 @@ export interface WorkflowValidationRules {
     values: Record<string, never>;
   };
 
+  // -- await executions ---------------------------------------------------------
+  /** A `from-steps` entry naming a step that does not exist. */
+  unknownAwaitedStep: {
+    owner: 'await-executions-validation';
+    defaultSeverity: 'error';
+    values: { stepName: string };
+  };
+  /** A `from-steps` entry naming a step that has not finished when the await runs. */
+  awaitedStepNotFinished: {
+    owner: 'await-executions-validation';
+    defaultSeverity: 'error';
+    values: { stepName: string };
+  };
+  /** A `from-steps` entry naming a step with no `workflow.executeAsync` step in it. */
+  awaitedStepStartsNoExecutions: {
+    owner: 'await-executions-validation';
+    defaultSeverity: 'error';
+    values: { stepName: string };
+  };
+
   // -- deprecations -------------------------------------------------------------
   deprecatedStepType: {
     owner: 'deprecated-step-validation';
@@ -296,6 +316,13 @@ export const WORKFLOW_VALIDATION_RULES: {
     defaultSeverity: 'warning',
   },
   invalidParallelMode: { owner: 'parallel-mode-validation', defaultSeverity: 'error' },
+
+  unknownAwaitedStep: { owner: 'await-executions-validation', defaultSeverity: 'error' },
+  awaitedStepNotFinished: { owner: 'await-executions-validation', defaultSeverity: 'error' },
+  awaitedStepStartsNoExecutions: {
+    owner: 'await-executions-validation',
+    defaultSeverity: 'error',
+  },
 
   deprecatedStepType: { owner: 'deprecated-step-validation', defaultSeverity: 'warning' },
   ignoredFetcherSetting: { owner: 'deprecated-step-validation', defaultSeverity: 'warning' },

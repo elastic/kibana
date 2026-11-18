@@ -165,6 +165,10 @@ export class WorkflowRuntimeGraph {
     return [...visited].map((id) => this.requireNode(id));
   }
 
+  public hasStep(stepId: string): boolean {
+    return this.compiledGraph.hasStep(stepId);
+  }
+
   /** Step ids nested inside a compound step (foreach body, if branch, and so on). */
   public getInnerStepIds(compoundStepId: string): Set<string> {
     return this.compiledGraph.getInnerStepIds(compoundStepId);

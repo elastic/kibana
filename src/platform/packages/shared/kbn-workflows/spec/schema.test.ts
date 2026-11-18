@@ -10,6 +10,7 @@
 import { z } from '@kbn/zod/v4';
 import type { CollisionStrategy, ConcurrencySettings } from './schema';
 import {
+  AWAIT_EXECUTIONS_SOURCE_MESSAGE,
   BaseConnectorStepSchema,
   CollisionStrategySchema,
   ConcurrencySettingsSchema,
@@ -35,6 +36,8 @@ import {
   WaitForInputChannelsSchema,
   WaitForInputStepSchema,
   WaitStepSchema,
+  WORKFLOW_AWAIT_EXECUTIONS_MAX_IDS,
+  WorkflowAwaitExecutionsStepSchema,
   WorkflowExecuteAsyncStepSchema,
   WorkflowExecuteStepSchema,
   WorkflowFailStepSchema,
@@ -1687,5 +1690,58 @@ describe('workflow child identity allowlist', () => {
         schema.safeParse({ ...step, with: { ...step.with, [field]: allowedIds } }).success
       ).toBe(false);
     }
+  });
+});
+
+describe('WorkflowAwaitExecutionsStepSchema', () => {
+  const baseStep = { name: 'join', type: 'workflow.awaitExecutions' };
+
+  it.each([
+    ['a single ID', { 'execution-ids': '{{ steps.run.output.executionId }}' }],
+    ['a list of IDs', { 'execution-ids': ['a', 'b'] }],
+    ['settled mode', { 'execution-ids': 'a', mode: 'settled' }],
+    ['step references', { 'from-steps': ['fan_out', 'enrich'] }],
+  ])('accepts %s', (_label, withConfig) => {
+    expect(
+      WorkflowAwaitExecutionsStepSchema.safeParse({ ...baseStep, with: withConfig }).success
+    ).toBe(true);
+  });
+
+  it('accepts a step-level timeout', () => {
+    expect(
+      WorkflowAwaitExecutionsStepSchema.safeParse({
+        ...baseStep,
+        timeout: '10m',
+        with: { 'execution-ids': 'a' },
+      }).success
+    ).toBe(true);
+  });
+
+  it.each([
+    ['neither from-steps nor execution-ids', {}],
+    ['both from-steps and execution-ids', { 'from-steps': ['fan_out'], 'execution-ids': 'a' }],
+    ['an empty from-steps list', { 'from-steps': [] }],
+    ['a templated step name', { 'from-steps': ['{{ inputs.step }}'] }],
+    ['an empty ID', { 'execution-ids': '' }],
+    ['an empty list', { 'execution-ids': [] }],
+    [
+      'more IDs than the limit',
+      {
+        'execution-ids': Array.from(
+          { length: WORKFLOW_AWAIT_EXECUTIONS_MAX_IDS + 1 },
+          (_, i) => `e${i}`
+        ),
+      },
+    ],
+    ['an unknown mode', { 'execution-ids': 'a', mode: 'all' }],
+  ])('rejects %s', (_label, withConfig) => {
+    expect(
+      WorkflowAwaitExecutionsStepSchema.safeParse({ ...baseStep, with: withConfig }).success
+    ).toBe(false);
+  });
+
+  it('explains the either/or rule', () => {
+    const result = WorkflowAwaitExecutionsStepSchema.safeParse({ ...baseStep, with: {} });
+    expect(result.error?.issues[0].message).toBe(AWAIT_EXECUTIONS_SOURCE_MESSAGE);
   });
 });

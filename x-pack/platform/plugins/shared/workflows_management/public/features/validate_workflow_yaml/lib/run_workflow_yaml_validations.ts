@@ -16,6 +16,7 @@ import {
   validateLiquidYamlScalars,
   validateVariables as validateVariablesInternal,
 } from '@kbn/workflows-yaml';
+import { validateAwaitExecutionsReferences } from './validate_await_executions_references';
 import { validateDeprecatedStepTypes } from './validate_deprecated_step_types';
 import { validateIfConditions } from './validate_if_conditions';
 import { validateIgnoredFetcherSetting } from './validate_ignored_fetcher_setting';
@@ -78,7 +79,8 @@ export function runWorkflowYamlValidations({
       ...validateIgnoredFetcherSetting(workflowLookup, lineCounter),
       ...validateIfConditions(workflowLookup, lineCounter),
       ...validateParallelMode(workflowLookup, lineCounter),
-      ...validateParallelFanOut(workflowLookup, lineCounter)
+      ...validateParallelFanOut(workflowLookup, lineCounter),
+      ...validateAwaitExecutionsReferences(workflowLookup, lineCounter)
     );
   }
 

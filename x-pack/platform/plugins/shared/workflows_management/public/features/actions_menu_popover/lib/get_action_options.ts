@@ -69,7 +69,14 @@ function firstSentence(text: string | undefined): string | undefined {
 function getBuiltInNestedFlowControlStepOptions(
   euiTheme: UseEuiTheme['euiTheme']
 ): ActionOptionData[] {
-  return (['waitForApproval', 'workflow.execute', 'workflow.executeAsync'] as const)
+  return (
+    [
+      'waitForApproval',
+      'workflow.execute',
+      'workflow.executeAsync',
+      'workflow.awaitExecutions',
+    ] as const
+  )
     .map((stepId) => getBuiltInStepDefinition(stepId))
     .filter((def): def is NonNullable<typeof def> => def !== undefined)
     .map((def) => ({

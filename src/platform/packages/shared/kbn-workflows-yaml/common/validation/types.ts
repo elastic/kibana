@@ -158,6 +158,10 @@ interface YamlValidationResultGraphBuild extends YamlValidationDiagnosticBase {
   owner: 'graph-build-validation';
 }
 
+interface YamlValidationResultAwaitExecutions extends YamlValidationDiagnosticBase {
+  owner: 'await-executions-validation';
+}
+
 export type StepPropertyValidationResult =
   | YamlValidationResultStepPropertyError
   | YamlValidationResultStepPropertyValid;
@@ -182,6 +186,7 @@ export const CUSTOM_YAML_VALIDATION_MARKER_OWNERS = [
   'parallel-fan-out-validation',
   'parallel-mode-validation',
   'graph-build-validation',
+  'await-executions-validation',
 ] as const;
 
 export const BATCHED_CUSTOM_MARKER_OWNER = 'custom-yaml-validation';
@@ -210,7 +215,8 @@ export type YamlValidationDiagnostic =
   | YamlValidationResultEsql
   | YamlValidationResultParallelFanOut
   | YamlValidationResultParallelMode
-  | YamlValidationResultGraphBuild;
+  | YamlValidationResultGraphBuild
+  | YamlValidationResultAwaitExecutions;
 
 export type YamlValidationDecoration =
   | YamlValidationResultVariableValid

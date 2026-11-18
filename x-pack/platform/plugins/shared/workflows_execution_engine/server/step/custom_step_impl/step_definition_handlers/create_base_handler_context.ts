@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
+import type { CustomStepGraphNode } from '../types';
 
 export function createBaseHandlerContext(
   input: unknown,
   rawInput: unknown,
   config: Record<string, unknown>,
-  node: AtomicGraphNode,
+  node: CustomStepGraphNode,
   stepExecutionRuntime: StepExecutionRuntime,
   workflowLogger: IWorkflowEventLogger
 ): StepHandlerContext {

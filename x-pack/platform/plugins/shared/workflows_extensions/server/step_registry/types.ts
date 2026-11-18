@@ -68,9 +68,12 @@ export type PollContinueResult<State extends z.ZodObject = z.ZodObject> =
     }
   | undefined;
 
-/** Failure outcome — same shape as the existing single-handler result. */
-export interface PhaseErrorResult {
-  output?: undefined;
+/**
+ * Failure outcome — same shape as the existing single-handler result. An optional partial
+ * `output` is persisted with the failure.
+ */
+export interface PhaseErrorResult<Output extends z.ZodType = z.ZodType> {
+  output?: z.infer<Output>;
   state?: undefined;
   error: Error;
 }
@@ -78,7 +81,7 @@ export interface PhaseErrorResult {
 export type DurablePhaseResult<
   Output extends z.ZodType = z.ZodType,
   State extends z.ZodObject = z.ZodObject
-> = PhaseDoneResult<Output> | PollContinueResult<State> | PhaseErrorResult;
+> = PhaseDoneResult<Output> | PollContinueResult<State> | PhaseErrorResult<Output>;
 
 /**
  * Handler for a `start` phase that hands off to a `poll` phase.

@@ -1278,6 +1278,98 @@ export const WorkflowExecuteAsyncStepOutputSchema = z.object({
   startedAt: z.string().optional(),
 });
 
+export const WORKFLOW_AWAIT_EXECUTIONS_MAX_IDS = 100;
+
+const AwaitedExecutionIdSchema = lazySchema(() => z.string().min(1).max(1024));
+
+export const WorkflowAwaitExecutionsModeSchema = lazySchema(() =>
+  z
+    .enum(['fail-fast', 'settled'])
+    .describe(
+      'fail-fast (default): fail as soon as one execution ends in any status other than completed. ' +
+        'The remaining executions keep running; they are not cancelled. ' +
+        'settled: wait for every execution to reach a terminal status and report each result.'
+    )
+);
+export type WorkflowAwaitExecutionsMode = z.infer<typeof WorkflowAwaitExecutionsModeSchema>;
+
+export const AWAIT_EXECUTIONS_SOURCE_MESSAGE =
+  'Provide exactly one of `from-steps` or `execution-ids`.';
+
+export const WorkflowAwaitExecutionsStepInputSchema = lazySchema(() =>
+  z
+    .object({
+      'from-steps': z
+        .array(
+          z
+            .string()
+            .min(1)
+            .max(1024)
+            .regex(/^(?![\s\S]*\{[{%])[\s\S]+$/, 'Step names in from-steps must be literal names')
+        )
+        .min(1)
+        .max(WORKFLOW_AWAIT_EXECUTIONS_MAX_IDS)
+        .optional()
+        .describe(
+          'Names of earlier steps whose workflow.executeAsync executions to await. A step that ' +
+            'contains others (parallel, foreach, if) covers every workflow.executeAsync run inside it, ' +
+            'including each loop iteration. When the await is inside the same loop or retry as the ' +
+            'referenced step, only executions from its current iteration or attempt are awaited; ' +
+            'place the await after the loop to collect every iteration.'
+        ),
+      'execution-ids': z
+        .union([
+          AwaitedExecutionIdSchema,
+          z.array(AwaitedExecutionIdSchema).min(1).max(WORKFLOW_AWAIT_EXECUTIONS_MAX_IDS),
+        ])
+        .optional()
+        .describe(
+          'Execution IDs to await, for example IDs returned by a sub-workflow that started them. ' +
+            'Prefer `from-steps` for workflow.executeAsync steps in this workflow. Only executions ' +
+            'started by this run or by one of its sub-workflows can be awaited; any other ID fails ' +
+            'the step as not found.'
+        ),
+      mode: WorkflowAwaitExecutionsModeSchema.optional(),
+    })
+    .refine(
+      (input) => (input['from-steps'] === undefined) !== (input['execution-ids'] === undefined),
+      { message: AWAIT_EXECUTIONS_SOURCE_MESSAGE }
+    )
+);
+
+export const WorkflowAwaitExecutionsStepSchema = lazySchema(() =>
+  BaseStepSchema.extend({
+    type: z.literal('workflow.awaitExecutions'),
+    with: WorkflowAwaitExecutionsStepInputSchema,
+    ...TimeoutPropSchema.shape,
+  }).merge(StepWithOnFailureSchema)
+);
+export type WorkflowAwaitExecutionsStep = z.infer<typeof WorkflowAwaitExecutionsStepSchema>;
+
+export const AwaitedExecutionResultSchema = lazySchema(() =>
+  z.object({
+    executionId: z.string(),
+    workflowId: z.string(),
+    status: z.string(),
+    output: z.unknown().optional(),
+    error: z.object({ type: z.string(), message: z.string() }).optional(),
+    startedAt: z.string().optional(),
+    finishedAt: z.string().optional(),
+  })
+);
+export type AwaitedExecutionResult = z.infer<typeof AwaitedExecutionResultSchema>;
+
+export const WorkflowAwaitExecutionsStepOutputSchema = lazySchema(() =>
+  z.object({
+    results: z
+      .array(AwaitedExecutionResultSchema)
+      .describe('One entry per awaited execution, in the order the IDs were given.'),
+  })
+);
+export type WorkflowAwaitExecutionsStepOutput = z.infer<
+  typeof WorkflowAwaitExecutionsStepOutputSchema
+>;
+
 export const WorkflowOutputStepInputSchema = lazySchema(() => z.record(z.string(), z.any()));
 export const WorkflowOutputStepConfigSchema = lazySchema(() =>
   z.object({
@@ -1341,6 +1433,7 @@ const StepSchema = z.lazy(() =>
     ParallelStepSchema,
     WorkflowExecuteStepSchema,
     WorkflowExecuteAsyncStepSchema,
+    WorkflowAwaitExecutionsStepSchema,
     WorkflowOutputStepSchema,
     WorkflowFailStepSchema,
     LoopBreakStepSchema,
@@ -1367,6 +1460,7 @@ export const BuiltInStepTypes = [
   WaitForApprovalStepSchema.shape.type.value,
   WorkflowExecuteStepSchema.shape.type.value,
   WorkflowExecuteAsyncStepSchema.shape.type.value,
+  WorkflowAwaitExecutionsStepSchema.shape.type.value,
   WorkflowOutputStepSchema.shape.type.value,
   WorkflowFailStepSchema.shape.type.value,
   LoopBreakStepSchema.shape.type.value,

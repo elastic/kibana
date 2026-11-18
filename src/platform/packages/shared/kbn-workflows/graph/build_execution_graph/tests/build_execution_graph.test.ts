@@ -595,6 +595,10 @@ describe('convertToWorkflowGraph', () => {
           name: 'workflow.executeAsync',
           step: { type: 'workflow.executeAsync', with: { 'workflow-id': 'child' } },
         },
+        {
+          name: 'workflow.awaitExecutions',
+          step: { type: 'workflow.awaitExecutions', with: { 'execution-ids': 'exec-1' } },
+        },
       ];
 
       it.each(ifEnabledSteps)('wraps a $name step carrying `if` in an if zone', ({ step }) => {

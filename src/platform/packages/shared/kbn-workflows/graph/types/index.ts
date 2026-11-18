@@ -26,6 +26,8 @@ export type {
   WorkflowExecuteGraphNodeSchema,
   WorkflowExecuteAsyncGraphNode,
   WorkflowExecuteAsyncGraphNodeSchema,
+  WorkflowAwaitExecutionsGraphNode,
+  WorkflowAwaitExecutionsGraphNodeSchema,
   WorkflowOutputGraphNode,
   WorkflowOutputGraphNodeSchema,
   SyntheticGraphNode,

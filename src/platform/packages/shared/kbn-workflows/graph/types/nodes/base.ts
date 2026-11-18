@@ -16,6 +16,7 @@ import {
   WaitForApprovalStepSchema,
   WaitForInputStepSchema,
   WaitStepSchema,
+  WorkflowAwaitExecutionsStepSchema,
   WorkflowExecuteAsyncStepSchema,
   WorkflowExecuteStepSchema,
   WorkflowOutputStepSchema,
@@ -103,6 +104,15 @@ export const WorkflowExecuteAsyncGraphNodeSchema = GraphNodeSchema.extend({
   configuration: WorkflowExecuteAsyncStepSchema,
 });
 export type WorkflowExecuteAsyncGraphNode = z.infer<typeof WorkflowExecuteAsyncGraphNodeSchema>;
+
+export const WorkflowAwaitExecutionsGraphNodeSchema = GraphNodeSchema.extend({
+  id: z.string(),
+  type: z.literal('workflow.awaitExecutions'),
+  configuration: WorkflowAwaitExecutionsStepSchema,
+});
+export type WorkflowAwaitExecutionsGraphNode = z.infer<
+  typeof WorkflowAwaitExecutionsGraphNodeSchema
+>;
 
 export const WorkflowOutputGraphNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
