@@ -9,17 +9,39 @@
 
 /**
  * Verifies that saving a Discover table that has ES|QL controls onto a dashboard
- * carries the control and its current selection across, and that adding a new
- * Discover panel whose control matches an existing dashboard control updates that
- * control instead of duplicating it.
+ * carries the control and its current selection across, and that a control for a
+ * variable the dashboard already has updates that control instead of duplicating it.
  */
 
 import { expect } from '@kbn/scout/ui';
+import type { DiscoverWorkerFixtures } from '../fixtures';
 import { spaceTest, testData } from '../fixtures';
 
 const INITIAL_SELECTION = 'AE';
 const UPDATED_SELECTION = 'CN';
 const BY_VALUE_TABLE_TITLE = 'ESQL control by-value table';
+const EXISTING_DASHBOARD_TABLE_TITLE = 'ESQL control saved onto existing dashboard';
+/** Title of the dashboard in {@link testData.ESQL_CONTROLS_BY_VALUE_DASHBOARD_KBN_ARCHIVE}. */
+const EXISTING_DASHBOARD_TITLE = 'ESQL control unlink test dashboard';
+const PANEL_VISIBLE_TIMEOUT = 30_000;
+
+/** Id of a freshly imported copy of the by-value ES|QL control dashboard. */
+const loadExistingDashboardId = async (
+  discoverScoutSpace: DiscoverWorkerFixtures['discoverScoutSpace']
+) => {
+  // Imported with `createNewCopies`, so the id is read back from the response rather
+  // than taken from the fixture file.
+  const imported = await discoverScoutSpace.savedObjects.load(
+    testData.ESQL_CONTROLS_BY_VALUE_DASHBOARD_KBN_ARCHIVE
+  );
+  const savedDashboard = imported.find(({ type }) => type === 'dashboard');
+  if (!savedDashboard) {
+    throw new Error(
+      `No dashboard found in ${testData.ESQL_CONTROLS_BY_VALUE_DASHBOARD_KBN_ARCHIVE}`
+    );
+  }
+  return savedDashboard.id;
+};
 
 spaceTest.describe(
   'Discover ES|QL controls - saving to a dashboard',
@@ -84,7 +106,7 @@ spaceTest.describe(
         // never arrived as a missing panel rather than a missing viewport.
         await expect(
           pageObjects.dashboard.getPanelHoverActionsLocator(BY_VALUE_TABLE_TITLE)
-        ).toBeVisible({ timeout: 30_000 });
+        ).toBeVisible({ timeout: PANEL_VISIBLE_TIMEOUT });
         await pageObjects.dashboard.waitForRenderComplete();
 
         await expect(page.testSubj.locator('embeddableError')).toHaveCount(0);
@@ -151,6 +173,67 @@ spaceTest.describe(
         await expect(
           pageObjects.controls.optionsList.getSelectionsLocator(updatedDashboardControlId)
         ).toHaveText(UPDATED_SELECTION);
+      }
+    );
+
+    // Discover is opened on its own, so it has no record of the dashboard's controls and sends
+    // the control without an id. The dashboard has to recognize the matching variable itself.
+    spaceTest(
+      'should update the existing control when saving from Discover to a dashboard that already has it',
+      async ({ discoverScoutSpace, page, pageObjects }) => {
+        const { controls, dashboard, discover } = pageObjects;
+
+        const initialControlId = await spaceTest.step(
+          'open a saved dashboard that already has the control',
+          async () => {
+            await dashboard.openDashboardWithId(await loadExistingDashboardId(discoverScoutSpace));
+            await expect(dashboard.getDashboardControlsLocator()).toHaveCount(1);
+            const controlId = await dashboard.getDashboardControlId();
+            await expect(controls.optionsList.getSelectionsLocator(controlId)).toHaveText(
+              INITIAL_SELECTION
+            );
+            return controlId;
+          }
+        );
+
+        await spaceTest.step('create the same control in standalone Discover', async () => {
+          await discover.goto({ queryMode: 'esql' });
+          await discover.waitUntilTabIsLoaded();
+          await discover.createEsqlControl('FROM logstash-* | WHERE geo.dest == ', {
+            variableName: '?geo_dest',
+          });
+          await discover.waitUntilTabIsLoaded();
+
+          const discoverControlId = await controls.getOnlyControlId();
+          await controls.optionsList.openPopover(discoverControlId);
+          await controls.optionsList.selectOption(UPDATED_SELECTION);
+          await controls.optionsList.ensurePopoverIsClosed();
+          await discover.waitUntilTabIsLoaded();
+          await expect(controls.optionsList.getSelectionsLocator(discoverControlId)).toHaveText(
+            UPDATED_SELECTION
+          );
+        });
+
+        await spaceTest.step('save the table onto the existing dashboard', async () => {
+          await discover.saveTableToExistingDashboard(
+            EXISTING_DASHBOARD_TABLE_TITLE,
+            EXISTING_DASHBOARD_TITLE
+          );
+
+          // Checked before `waitForRenderComplete()` for the same reason as in the first test.
+          await expect(
+            dashboard.getPanelHoverActionsLocator(EXISTING_DASHBOARD_TABLE_TITLE)
+          ).toBeVisible({ timeout: PANEL_VISIBLE_TIMEOUT });
+          await dashboard.waitForRenderComplete();
+
+          await expect(page.testSubj.locator('embeddableError')).toHaveCount(0);
+          await expect(dashboard.getDashboardControlsLocator()).toHaveCount(1);
+          const controlId = await dashboard.getDashboardControlId();
+          expect(controlId).toBe(initialControlId);
+          await expect(controls.optionsList.getSelectionsLocator(controlId)).toHaveText(
+            UPDATED_SELECTION
+          );
+        });
       }
     );
   }

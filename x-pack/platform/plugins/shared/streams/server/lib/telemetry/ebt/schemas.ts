@@ -10,7 +10,6 @@ import type {
   StreamEndpointLatencyProps,
   StreamsStateErrorProps,
   StreamsProcessingPipelineSuggestedProps,
-  StreamsAgentToolEventCreateProps,
 } from './types';
 
 const streamsEndpointLatencySchema: RootSchema<StreamEndpointLatencyProps> = {
@@ -100,37 +99,8 @@ const streamsProcessingPipelineSuggestedSchema: RootSchema<StreamsProcessingPipe
     },
   };
 
-const streamsAgentToolEventCreateSchema: RootSchema<StreamsAgentToolEventCreateProps> = {
-  success: {
-    type: 'boolean',
-    _meta: {
-      description: 'Whether the event creation succeeded',
-    },
-  },
-  stream_names: {
-    type: 'array',
-    items: {
-      type: 'keyword',
-      _meta: {
-        description: 'A stream name',
-      },
-    },
-    _meta: {
-      description: 'The names of the Streams associated with the event',
-    },
-  },
-  error_message: {
-    type: 'text',
-    _meta: {
-      description: 'Error message when event creation fails',
-      optional: true,
-    },
-  },
-};
-
 export {
   streamsEndpointLatencySchema,
   streamsStateErrorSchema,
   streamsProcessingPipelineSuggestedSchema,
-  streamsAgentToolEventCreateSchema,
 };

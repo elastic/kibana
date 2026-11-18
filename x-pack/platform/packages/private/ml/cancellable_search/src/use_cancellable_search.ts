@@ -14,6 +14,7 @@ import type {
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import { tap } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { RequestCancellationManager } from './request_cancellation_manager';
 
 export interface UseCancellableSearch {
   runRequest: <
@@ -28,7 +29,10 @@ export interface UseCancellableSearch {
 }
 
 // Similar to aiops/hooks/use_cancellable_search.ts
-export function useCancellableSearch(data: DataPublicPluginStart) {
+export function useCancellableSearch(
+  data: DataPublicPluginStart,
+  requestCancellationManager?: RequestCancellationManager
+) {
   const abortController = useRef(new AbortController());
   const [isLoading, setIsFetching] = useState<boolean>(false);
 
@@ -38,9 +42,12 @@ export function useCancellableSearch(data: DataPublicPluginStart) {
       options = {}
     ): Promise<ResponseType | null> => {
       return new Promise((resolve, reject) => {
+        const signal = requestCancellationManager
+          ? AbortSignal.any([abortController.current.signal, requestCancellationManager.signal])
+          : abortController.current.signal;
         data.search
           .search<RequestBody, ResponseType>(requestBody, {
-            abortSignal: abortController.current.signal,
+            abortSignal: signal,
             ...options,
           })
           .pipe(
@@ -50,6 +57,10 @@ export function useCancellableSearch(data: DataPublicPluginStart) {
           )
           .subscribe({
             next: (result) => {
+              // Don't hand a result that arrived after cancellation to callers as a completed one.
+              if (signal.aborted) {
+                return resolve(null);
+              }
               if (!isRunningResponse(result)) {
                 setIsFetching(false);
                 resolve(result);
@@ -60,7 +71,8 @@ export function useCancellableSearch(data: DataPublicPluginStart) {
               }
             },
             error: (error) => {
-              if (error.name === 'AbortError') {
+              // Aborting with a custom reason may surface as a different error than AbortError.
+              if (signal.aborted || error.name === 'AbortError') {
                 return resolve(null);
               }
               setIsFetching(false);
@@ -69,7 +81,7 @@ export function useCancellableSearch(data: DataPublicPluginStart) {
           });
       });
     },
-    [data.search]
+    [data.search, requestCancellationManager]
   );
 
   const cancelRequest = useCallback(() => {

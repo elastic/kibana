@@ -903,7 +903,9 @@ NIGHTSHIFT_DATASETS=orcabench NIGHTSHIFT_ORCA_TELEMETRY_VARIANT=no-flags \
 The Nightshift Vault config must hold a `nightshiftOrcaEs` block (see
 [`vault/config.example.json`](vault/config.example.json)) with the ORCA cluster's `url` and the
 `username` and `password` of the eval user above. The Scout hook refuses an ORCA run without them,
-and exports them only to the ORCA shard.
+and exports them only to the ORCA shard. The block also holds `apiKey`, the read-only ORCA key that
+the [local dev setup](../../plugins/nightshift_investigations/scripts/local_dev/) reads; the evals
+themselves don't use it.
 
 - The dataset's ID, case count and content digest are pinned in
   [`orca_dataset.ts`](evals/investigation/orca_dataset.ts). A changed release fails before any
@@ -958,9 +960,11 @@ as `nightshift-investigations`.
   ([`kibana-evals-daily-llm-evals`](https://buildkite.com/elastic/kibana-evals-daily-llm-evals))
   runs every shard against Sonnet 5.5, the production investigation model, at 02:00 UTC on
   weekdays.
-- **Failures** are posted to `#nightshift-alerts`, resolved from `slackChannel` in the suite entry
-  (weekly) or `EVAL_SLACK_NOTIFICATION_CHANNEL` (daily). Both only post from `main`; a weekly or
-  daily build started on another branch runs the evals but skips the notification.
+- **Slack:** weekly and daily runs post to `#nightshift-alerts`, resolved from `slackChannel` in
+  the suite entry (weekly) or `EVAL_SLACK_NOTIFICATION_CHANNEL` (daily). A failure posts a triage
+  summary. A run where every eval step passed posts a short passed message, so the channel shows
+  the run happened; scores have no pass threshold. Both only post from `main`; a weekly or daily
+  build started on another branch runs the evals but skips the Slack post.
 - **Scores** reach the golden cluster automatically, through `EVAL_KBN_URL` in CI.
 
 ## Validation
