@@ -10,7 +10,7 @@ import type {
   PackageReportBehavior,
   PackageReportCoverageGap,
   PackageReportMintPayload,
-} from '../../../../../common/step_types/package_report';
+} from '../../../../../common/workers/continuous_threat_hunt/package_report';
 import type { CapabilitiesSource } from '../../../fleet/resolve_host_enrollment';
 
 /** One host observed on the current-run SSE, with enrollment resolution applied. */

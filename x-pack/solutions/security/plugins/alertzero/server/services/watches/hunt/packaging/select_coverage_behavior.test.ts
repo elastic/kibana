@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PackageReportBehavior } from '../../../../../common/step_types/package_report';
+import type { PackageReportBehavior } from '../../../../../common/workers/continuous_threat_hunt/package_report';
 import {
   MAX_VALIDATED_ESQL_CHARS,
   selectCoverageBehavior,

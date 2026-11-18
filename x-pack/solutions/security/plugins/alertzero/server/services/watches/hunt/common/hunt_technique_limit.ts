@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { MAX_HUNT_TECHNIQUE_IDS } from '../../../../../common/hunt_technique_limit';
+export { MAX_HUNT_TECHNIQUE_IDS } from '../../../../../common/workers/continuous_threat_hunt/hunt_technique_limit';

@@ -11,7 +11,7 @@ import type { VersionedAttachment } from '@kbn/agent-builder-common';
 import type {
   PackageReportInput,
   PackageReportOutput,
-} from '../../../../../common/step_types/package_report';
+} from '../../../../../common/workers/continuous_threat_hunt/package_report';
 import type { ResolveHostEnrollment } from '../../../fleet/resolve_host_enrollment';
 import {
   resolveProposals,

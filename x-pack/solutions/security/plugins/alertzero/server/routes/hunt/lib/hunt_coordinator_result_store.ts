@@ -15,7 +15,7 @@ import { ALERTZERO_ATTACHMENT_TYPES } from '../../../../common/constants';
 import type {
   HuntCoordinatorResultAttachment,
   HuntCoordinatorResultTerminalAttachment,
-} from '../../../../common/hunt_coordinator_result_attachment_schema';
+} from '../../../../common/workers/continuous_threat_hunt/hunt_coordinator_result_attachment_schema';
 
 export const HUNT_COORDINATOR_RESULT_ATTACHMENT_DESCRIPTION = 'Hunt coordinator result (internal)';
 

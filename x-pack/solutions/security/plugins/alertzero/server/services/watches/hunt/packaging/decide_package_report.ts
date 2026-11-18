@@ -11,7 +11,7 @@ import type { JsonSchema } from '@kbn/workflows';
 import {
   MAX_SUMMARY_BULLETS_CHARS,
   MAX_SUMMARY_PROPOSAL_BULLETS,
-} from '../../../../../common/step_types/package_report';
+} from '../../../../../common/workers/continuous_threat_hunt/package_report';
 import { buildProposalSubjectKey, PROPOSAL_SUBJECT_UUID_NAMESPACE } from '../../../proposals/dedup';
 import {
   buildProposalComment,

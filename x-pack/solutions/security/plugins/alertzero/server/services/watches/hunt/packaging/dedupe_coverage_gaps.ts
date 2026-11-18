@@ -6,7 +6,7 @@
  */
 
 import type { HuntIncompleteReason } from '@kbn/alertzero-common';
-import type { PackageReportCoverageGap } from '../../../../../common/step_types/package_report';
+import type { PackageReportCoverageGap } from '../../../../../common/workers/continuous_threat_hunt/package_report';
 import { MAX_HUNT_TECHNIQUE_IDS } from '../common/hunt_technique_limit';
 import { MAX_UNSEARCHED_DETAIL_CHARS } from '../common/unsearched_patterns';
 import { truncateAtWord } from './coverage_text';

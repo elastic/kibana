@@ -22,7 +22,7 @@ import {
   HUNT_INTERNAL_ROUTE_BASE,
   buildHuntCoordinatorResultAttachmentId,
 } from '../../../common/constants';
-import type { HuntCoordinatorResultTerminalAttachment } from '../../../common/hunt_coordinator_result_attachment_schema';
+import type { HuntCoordinatorResultTerminalAttachment } from '../../../common/workers/continuous_threat_hunt/hunt_coordinator_result_attachment_schema';
 import { InvalidHuntWindowError } from '../../services/watches/hunt/common/assert_hunt_window';
 import type {
   HuntCoordinatorClients,
