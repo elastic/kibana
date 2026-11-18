@@ -425,6 +425,37 @@ describe('getSession', () => {
     expect(detail?.timelineTruncated).toBe(true);
   });
 
+  describe('with a timeline cut off at its size', () => {
+    const lateRequest: OtelEventFields = {
+      '@timestamp': [at(20_000)],
+      event_name: ['browser.resource_timing'],
+      'attributes.url.full': ['https://shop.example.com/api/late'],
+      'attributes.browser.resource_timing.initiator_type': ['fetch'],
+      'attributes.browser.resource_timing.fetch_start': [100],
+      'attributes.browser.resource_timing.response_end': [300],
+    };
+    const urlsOf = (detail: Awaited<ReturnType<typeof getSession>>) =>
+      detail?.requests.map(({ url }) => url) ?? [];
+
+    const run = async (timelineTotal: number) => {
+      client.search
+        .mockResolvedValueOnce(
+          summaryResponse(sessionSource({ start_time: START, end_time: at(10_000) }))
+        )
+        .mockResolvedValueOnce(eventsResponse(events.slice(0, 5), timelineTotal))
+        .mockResolvedValueOnce(eventsResponse([lateRequest]));
+      return getSession(client, { serviceName: 'web', sessionId: 'abc' });
+    };
+
+    it('leaves out the requests after its last event, which no visit it holds made', async () => {
+      expect(urlsOf(await run(SESSION_TIMELINE_SIZE + 1))).toEqual([]);
+    });
+
+    it('keeps them when the timeline is complete', async () => {
+      expect(urlsOf(await run(5))).toEqual(['https://shop.example.com/api/late']);
+    });
+  });
+
   it('skips hits without fields', async () => {
     client.search
       .mockResolvedValueOnce(

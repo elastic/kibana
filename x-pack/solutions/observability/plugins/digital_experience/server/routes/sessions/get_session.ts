@@ -390,7 +390,15 @@ export const getSession = async (
   const fieldsOf = (response: SearchResponse): OtelEventFields[] =>
     response.hits.hits.flatMap(({ fields }) => (fields ? [fields] : []));
   const events = fieldsOf(eventsResponse);
-  const requestEvents = fieldsOf(requestsResponse);
+  const timelineTruncated = totalHitsOf(eventsResponse.hits.total) > events.length;
+  const allRequestEvents = fieldsOf(requestsResponse);
+  // A cut-off timeline has visits up to its last event only: a request after it would fall back
+  // to the last visit, and show on a page it was not made from.
+  const lastEventMs = events.length > 0 ? timestampMsOf(events[events.length - 1]) : null;
+  const requestEvents =
+    timelineTruncated && lastEventMs !== null
+      ? allRequestEvents.filter((event) => (timestampMsOf(event) ?? 0) <= lastEventMs)
+      : allRequestEvents;
   const sessionStartMs = sessionStartOf(startMs, events);
   const latestRequestMs = Math.max(
     ...requestEvents.map((event) => timestampMsOf(event) ?? -Infinity)
@@ -406,9 +414,9 @@ export const getSession = async (
   return {
     session,
     timeline: buildTimeline(events, sessionStartMs),
-    timelineTruncated: totalHitsOf(eventsResponse.hits.total) > events.length,
+    timelineTruncated,
     pageVisits: pageVisits.map((visit, index) => ({ ...visit, load: loads.get(index) ?? null })),
     requests,
-    requestsTruncated: totalHitsOf(requestsResponse.hits.total) > requestEvents.length,
+    requestsTruncated: totalHitsOf(requestsResponse.hits.total) > allRequestEvents.length,
   };
 };

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AT_TIMESTAMP } from '@kbn/apm-types';
 import { attributeField, resourceAttributeField } from '../../../common/otel_data';
 
 /** A raw event as the `fields` option returns it: each field's values, by its dotted name. */
@@ -37,7 +38,7 @@ export const attributeNumber = (event: OtelEventFields, name: string): number | 
 
 /** The event's `@timestamp` in epoch milliseconds, if it has a valid one. */
 export const timestampMsOf = (event: OtelEventFields): number | null => {
-  const timestamp = fieldString(event, '@timestamp');
+  const timestamp = fieldString(event, AT_TIMESTAMP);
   const ms = timestamp ? Date.parse(timestamp) : NaN;
   return Number.isFinite(ms) ? ms : null;
 };

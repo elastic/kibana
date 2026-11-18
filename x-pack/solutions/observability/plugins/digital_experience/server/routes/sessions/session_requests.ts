@@ -7,6 +7,8 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import {
+  AT_TIMESTAMP,
+  DURATION,
   HTTP_REQUEST_METHOD,
   HTTP_RESPONSE_STATUS_CODE,
   KIND,
@@ -101,12 +103,12 @@ const REQUEST_ATTRIBUTES = [
 
 /** Only the fields the requests use. */
 export const REQUEST_FIELDS = [
-  '@timestamp',
+  AT_TIMESTAMP,
   OTEL_EVENT_NAME,
   KIND,
   STATUS_CODE,
   SCOPE_NAME,
-  'duration',
+  DURATION,
   'trace_id',
   'span_id',
   ...REQUEST_ATTRIBUTES.map(attributeField),
@@ -235,7 +237,7 @@ const initiatorTypeOfScope = (scope: string | null): string =>
 const toClientSpan = (event: OtelEventFields): ClientSpan | null => {
   const startMs = timestampMsOf(event);
   const url = attributeString(event, URL_FULL);
-  const duration = fieldNumber(event, 'duration');
+  const duration = fieldNumber(event, DURATION);
   if (fieldString(event, OTEL_EVENT_NAME) !== null || startMs === null || !url) {
     return null;
   }

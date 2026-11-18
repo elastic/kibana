@@ -15,8 +15,8 @@ import type {
 } from '../../../../common/sessions';
 
 /** What the journey can be filtered to. */
-export type ActivityKind = 'request' | 'click' | 'error' | 'web_vital';
-export const ACTIVITY_KINDS: readonly ActivityKind[] = ['request', 'click', 'error', 'web_vital'];
+export const ACTIVITY_KINDS = ['request', 'click', 'error', 'web_vital'] as const;
+export type ActivityKind = (typeof ACTIVITY_KINDS)[number];
 
 export interface ActivityFilters {
   kinds: ReadonlySet<ActivityKind>;

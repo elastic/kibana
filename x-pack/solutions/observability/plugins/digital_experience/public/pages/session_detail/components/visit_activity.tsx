@@ -123,11 +123,14 @@ const webVitalOf = ({ kind, name, detail }: SessionTimelineEvent) => {
     : null;
 };
 
+/** The width of the first column, the time offset, which a row's expanded details sit past. */
+const OFFSET_COLUMN_PX = 56;
+
 const GRID_COLUMNS = (rowGap: string) =>
   css({
     display: 'grid',
     // The label column is capped, so that on wide screens the waterfall gets the extra width.
-    gridTemplateColumns: '56px minmax(160px, 32%) minmax(200px, 1fr) 112px',
+    gridTemplateColumns: `${OFFSET_COLUMN_PX}px minmax(160px, 32%) minmax(200px, 1fr) 112px`,
     columnGap: rowGap,
     alignItems: 'center',
   });
@@ -329,7 +332,11 @@ function Row({
         <div css={rowCss}>{content}</div>
       )}
       {expanded && children && (
-        <div css={css({ margin: `${euiTheme.size.xxs} 0 ${euiTheme.size.s} 64px` })}>
+        <div
+          css={css({
+            margin: `${euiTheme.size.xxs} 0 ${euiTheme.size.s} calc(${OFFSET_COLUMN_PX}px + ${euiTheme.size.s})`,
+          })}
+        >
           {children}
         </div>
       )}
