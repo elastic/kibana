@@ -38,6 +38,7 @@ import { EntityFlyoutAnomaliesPage } from './entity_flyout_anomalies_page';
 import { CoverageOverviewPage } from './coverage_overview';
 import { SecurityOverviewPage } from './security_overview_page';
 import { RuleEditPage } from './rule_edit_page';
+import { OnboardingPage } from './onboarding_page';
 
 export type { RuleCreateWizardPage } from './rule_create_wizard';
 export type { RuleDetailsPage } from './rule_details_page';
@@ -97,6 +98,8 @@ export interface SecurityPageObjects extends PageObjects {
   securityOverviewPage: SecurityOverviewPage;
   /** Detection rule edit page — save flow and the save-with-warnings confirmation modal. */
   ruleEditPage: RuleEditPage;
+  /** Get started page — the "Add data with integrations" card: grid, collection tiles and chooser. */
+  onboardingPage: OnboardingPage;
 }
 
 export function extendPageObjects(
@@ -141,5 +144,6 @@ export function extendPageObjects(
     coverageOverviewPage: createLazyPageObject(CoverageOverviewPage, page),
     securityOverviewPage: createLazyPageObject(SecurityOverviewPage, page),
     ruleEditPage: createLazyPageObject(RuleEditPage, page),
+    onboardingPage: createLazyPageObject(OnboardingPage, page),
   };
 }
