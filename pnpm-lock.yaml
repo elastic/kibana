@@ -4690,8 +4690,8 @@ importers:
         specifier: 3.0.5
         version: 3.0.5
       semver:
-        specifier: 7.8.5
-        version: 7.8.5
+        specifier: 7.8.6
+        version: 7.8.6
       simple-statistics:
         specifier: 7.8.8
         version: 7.8.8
@@ -23412,6 +23412,11 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
+  semver@7.8.6:
+    resolution: {integrity: sha512-9lpSSU4Mly3mrtruwLs1eLK6+gzbzqeBFwRNjIjE+9LuDpWdYctrQlQ3ej1Ilgi7gknpsTRnPoLP8DpCHqHIJw==}
+    engines: {node: '>=10'}
+    hasBin: true
+
   send@0.19.2:
     resolution: {integrity: sha512-VMbMxbDeehAxpOtWJXlcUS5E8iXh6QmN+BkRX1GARS3wRaXEEgzCcB10gTQazO42tpNIya8xIyNx8fll1OFPrg==}
     engines: {node: '>= 0.8.0'}
@@ -29095,7 +29100,7 @@ snapshots:
       indent-string: 4.0.0
       lilconfig: 3.1.3
       minimatch: 10.2.6
-      semver: 7.8.5
+      semver: 7.8.6
       string-width: 4.2.3
       supports-color: 8.1.1
       tinyglobby: 0.2.17
@@ -30453,7 +30458,7 @@ snapshots:
       es-toolkit: 1.52.0
       filesize: 11.0.23
       fs-extra: 11.4.0
-      semver: 7.8.5
+      semver: 7.8.6
       source-map: 0.7.6
     transitivePeerDependencies:
       - '@emnapi/core'
@@ -30847,7 +30852,7 @@ snapshots:
       '@types/semver': 7.8.0
       archy: 1.0.0
       jora: 1.0.0-beta.8
-      semver: 7.8.5
+      semver: 7.8.6
 
   '@statoscope/report-writer@5.28.1':
     dependencies:
@@ -31108,7 +31113,7 @@ snapshots:
       magic-string: 0.30.21
       path-browserify: 1.0.1
       process: 0.11.10
-      semver: 7.8.5
+      semver: 7.8.6
       storybook: 8.6.19(prettier@2.8.8)(supports-color@10.2.2)
       style-loader: 3.3.4(webpack@5.96.1)
       terser-webpack-plugin: 5.3.17(@swc/core@1.15.40(@swc/helpers@0.5.19))(esbuild@0.28.1)(uglify-js@3.19.3)(webpack@5.96.1)
@@ -31152,7 +31157,7 @@ snapshots:
       jsdoc-type-pratt-parser: 4.8.0
       process: 0.11.10
       recast: 0.23.21
-      semver: 7.8.5
+      semver: 7.8.6
       util: 0.12.5
       ws: 8.21.3
     optionalDependencies:
@@ -31197,7 +31202,7 @@ snapshots:
       react-docgen: 7.1.1(supports-color@10.2.2)
       react-dom: 18.2.0(react@18.2.0)
       resolve: 1.22.8
-      semver: 7.8.5
+      semver: 7.8.6
       storybook: 8.6.19(prettier@2.8.8)(supports-color@10.2.2)
       tsconfig-paths: 4.2.0
       webpack: 5.96.1(@swc/core@1.15.40(@swc/helpers@0.5.19))(esbuild@0.28.1)(uglify-js@3.19.3)(webpack-cli@5.1.4)
@@ -32370,7 +32375,7 @@ snapshots:
       '@typescript-eslint/visitor-keys': 8.60.0
       debug: 4.4.3(supports-color@10.2.2)
       minimatch: 10.2.6
-      semver: 7.8.5
+      semver: 7.8.6
       tinyglobby: 0.2.17
       ts-api-utils: 2.5.0(typescript@6.0.3)
       typescript: 6.0.3
@@ -34294,7 +34299,7 @@ snapshots:
       postcss-modules-scope: 3.2.1(postcss@8.5.26)
       postcss-modules-values: 4.0.0(postcss@8.5.26)
       postcss-value-parser: 4.2.0
-      semver: 7.8.5
+      semver: 7.8.6
     optionalDependencies:
       '@rspack/core': 2.1.8(@swc/helpers@0.5.19)
       webpack: 5.96.1(@swc/core@1.15.40(@swc/helpers@0.5.19))(esbuild@0.28.1)(uglify-js@3.19.3)(webpack-cli@5.1.4)
@@ -34308,7 +34313,7 @@ snapshots:
       postcss-modules-scope: 3.2.1(postcss@8.5.26)
       postcss-modules-values: 4.0.0(postcss@8.5.26)
       postcss-value-parser: 4.2.0
-      semver: 7.8.5
+      semver: 7.8.6
     optionalDependencies:
       '@rspack/core': 2.1.8(@swc/helpers@0.5.19)
       webpack: 5.96.1(@swc/core@1.15.40(@swc/helpers@0.5.19))(esbuild@0.28.1)(uglify-js@3.19.3)(webpack-cli@5.1.4)
@@ -34413,7 +34418,7 @@ snapshots:
       debug: 4.4.3(supports-color@10.2.2)
       lodash: 4.18.1
       mocha: 11.3.0
-      semver: 7.8.5
+      semver: 7.8.6
     transitivePeerDependencies:
       - supports-color
 
@@ -34891,7 +34896,7 @@ snapshots:
       prompts: 2.4.2
       rechoir: 0.8.0
       safe-regex: 2.1.1
-      semver: 7.8.5
+      semver: 7.8.6
       tsconfig-paths-webpack-plugin: 4.2.0
       watskeburt: 4.2.3
 
@@ -35179,7 +35184,7 @@ snapshots:
       readable-stream: 3.6.2
       relative-microtime: 2.0.0
       require-in-the-middle: 8.0.1(supports-color@10.2.2)
-      semver: 7.8.5
+      semver: 7.8.6
       shallow-clone-shim: 2.0.0
       source-map: 0.8.0
       sql-summary: 1.0.1
@@ -35547,7 +35552,7 @@ snapshots:
     dependencies:
       fd-package-json: 1.2.0
       module-replacements: 2.3.2
-      semver: 7.8.5
+      semver: 7.8.6
 
   eslint-plugin-es@3.0.1(eslint@8.57.0(supports-color@10.2.2)):
     dependencies:
@@ -36289,7 +36294,7 @@ snapshots:
       minimatch: 3.1.5
       node-abort-controller: 3.1.1
       schema-utils: 3.3.0
-      semver: 7.8.5
+      semver: 7.8.6
       tapable: 2.3.3
       typescript: 6.0.3
       webpack: 5.96.1(@swc/core@1.15.40(@swc/helpers@0.5.19))(esbuild@0.28.1)(uglify-js@3.19.3)(webpack-cli@5.1.4)
@@ -37700,7 +37705,7 @@ snapshots:
       '@babel/parser': 7.29.8
       '@istanbuljs/schema': 0.1.6
       istanbul-lib-coverage: 3.2.2
-      semver: 7.8.5
+      semver: 7.8.6
     transitivePeerDependencies:
       - supports-color
 
@@ -38025,7 +38030,7 @@ snapshots:
       jest-util: 29.7.0
       natural-compare: 1.4.0
       pretty-format: 29.7.0
-      semver: 7.8.5
+      semver: 7.8.6
     transitivePeerDependencies:
       - supports-color
 
@@ -38265,7 +38270,7 @@ snapshots:
       lodash.isstring: 4.0.1
       lodash.once: 4.1.1
       ms: 2.1.3
-      semver: 7.8.5
+      semver: 7.8.6
 
   jsprim@2.0.2:
     dependencies:
@@ -38768,7 +38773,7 @@ snapshots:
 
   make-dir@4.0.0:
     dependencies:
-      semver: 7.8.5
+      semver: 7.8.6
 
   makeerror@1.0.12:
     dependencies:
@@ -39649,7 +39654,7 @@ snapshots:
 
   node-abi@3.96.0:
     dependencies:
-      semver: 7.8.5
+      semver: 7.8.6
     optional: true
 
   node-abort-controller@3.1.1: {}
@@ -39769,7 +39774,7 @@ snapshots:
     dependencies:
       hosted-git-info: 4.1.0
       is-core-module: 2.16.2
-      semver: 7.8.5
+      semver: 7.8.6
       validate-npm-package-license: 3.0.4
 
   normalize-path@3.0.0: {}
@@ -42018,7 +42023,7 @@ snapshots:
       loader-utils: 2.0.4
       neo-async: 2.6.2
       schema-utils: 3.3.0
-      semver: 7.8.5
+      semver: 7.8.6
       webpack: 5.96.1(@swc/core@1.15.40(@swc/helpers@0.5.19))(esbuild@0.28.1)(uglify-js@3.19.3)(webpack-cli@5.1.4)
 
   sass-lookup@6.1.2:
@@ -42089,6 +42094,8 @@ snapshots:
   semver@7.7.3: {}
 
   semver@7.8.5: {}
+
+  semver@7.8.6: {}
 
   send@0.19.2(supports-color@10.2.2):
     dependencies:
@@ -42196,7 +42203,7 @@ snapshots:
     dependencies:
       '@img/colour': 1.1.0
       detect-libc: 2.1.2
-      semver: 7.8.5
+      semver: 7.8.6
     optionalDependencies:
       '@img/sharp-darwin-arm64': 0.35.5
       '@img/sharp-darwin-x64': 0.35.5
