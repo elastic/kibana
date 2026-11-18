@@ -131,20 +131,21 @@ export class SearchMethodsService implements ISearchMethods {
     try {
       const response = await this.executeSearch(request, searchOptions);
 
-      if (!dropEntryIfAborted()) {
-        requestResponder?.stats(getEsqlInspectorStats(response.rawResponse));
-        requestResponder?.ok({
-          json: { rawResponse: response.rawResponse },
-          requestParams: response.requestParams,
-        });
-      }
-
       // An all-empty `values` (e.g. every column dropped) is reported as no rows
       const rawResponse: IEsqlSearchResult['rawResponse'] = response.rawResponse.values?.every(
         (row: unknown) => Array.isArray(row) && row.length === 0
       )
         ? { ...response.rawResponse, values: [] }
         : response.rawResponse;
+
+      if (!dropEntryIfAborted()) {
+        // Stats use the normalized rows so Inspector agrees with what the caller receives
+        requestResponder?.stats(getEsqlInspectorStats(rawResponse));
+        requestResponder?.ok({
+          json: { rawResponse: response.rawResponse },
+          requestParams: response.requestParams,
+        });
+      }
 
       const datatable = options?.includeDataTable
         ? mapEsqlResponseToDatatable(rawResponse, {

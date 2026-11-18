@@ -442,6 +442,23 @@ describe('SearchMethodsService', () => {
 
         expect(requestResponder.error).toHaveBeenCalledWith({ json });
       });
+      it('reports all-empty rows as zero hits in the inspector stats', async () => {
+        mockSearch.mockReturnValue(
+          createMockResponse({
+            columns: [{ name: 'a', type: 'keyword' }],
+            values: [[], []],
+            took: 5,
+          })
+        );
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.esql({ query: 'FROM logs' }, { inspector });
+
+        expect(requestResponder.stats).toHaveBeenCalledWith(
+          expect.objectContaining({ hits: expect.objectContaining({ value: '0' }) })
+        );
+      });
       it('calls requestResponder.stats with getEsqlInspectorStats result on success', async () => {
         const mockResponse = {
           columns: [{ name: 'status', type: 'integer' }],
