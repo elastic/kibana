@@ -110,6 +110,8 @@ export const EditCustomContentFlyout = ({
   });
 
   const queriesToSave = useMemo(() => getRunnableQueries(draftQueries), [draftQueries]);
+  // Same notion of "a query" as the ES|QL section, so exactly one of the two starts open.
+  const hasQuery = draftQueries.some(({ text }) => text.trim().length > 0);
 
   const handleGenerateWithChat = useCallback(() => {
     getTelemetry().trackGenerateWithChatClicked({
@@ -245,7 +247,7 @@ export const EditCustomContentFlyout = ({
         <EuiAccordion
           id={templateAccordionId}
           data-test-subj="customContentTemplateSection"
-          initialIsOpen={false}
+          initialIsOpen={!hasQuery}
           paddingSize="none"
           buttonContent={
             <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>

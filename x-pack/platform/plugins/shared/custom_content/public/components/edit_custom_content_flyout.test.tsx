@@ -91,14 +91,23 @@ beforeEach(() => {
 });
 
 describe('EditCustomContentFlyout', () => {
-  it('starts with the template section collapsed', () => {
-    render(<EditCustomContentFlyout {...defaultProps} />);
+  const templateToggle = () =>
+    within(screen.getByTestId('customContentTemplateSection')).getByRole('button', {
+      name: /Template \(HTML\)/,
+    });
 
-    expect(
-      within(screen.getByTestId('customContentTemplateSection')).getByRole('button', {
-        name: /Template \(HTML\)/,
-      })
-    ).toHaveAttribute('aria-expanded', 'false');
+  it('starts with the template section open when there is no query', () => {
+    render(<EditCustomContentFlyout {...defaultProps} />);
+    expect(templateToggle()).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('starts with the template section collapsed when a query exists', () => {
+    mockUseEditFlyoutState.mockReturnValue({
+      ...baseFlyoutState,
+      draftQueries: drafts('FROM logs'),
+    });
+    render(<EditCustomContentFlyout {...defaultProps} esqlQueries={['FROM logs']} />);
+    expect(templateToggle()).toHaveAttribute('aria-expanded', 'false');
   });
 
   describe('Apply and close', () => {
