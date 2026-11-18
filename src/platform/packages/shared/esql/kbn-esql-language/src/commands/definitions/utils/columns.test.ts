@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { synth } from '@elastic/esql';
+import { columnsAfter as columnsAfterDrop } from '../../registry/drop/columns_after';
 import type { ESQLColumnData } from '../../registry/types';
-import { escapeEsqlColumnName, getFlattenedKeyColumn } from './columns';
+import { columnsWithFlattenedKeys, escapeEsqlColumnName, getFlattenedKeyColumn } from './columns';
 
 describe('escapeEsqlColumnName', () => {
   it.each([
@@ -80,5 +82,32 @@ describe('getFlattenedKeyColumn', () => {
 
   it('ignores wildcard names', () => {
     expect(getFlattenedKeyColumn('labels.*', columns)).toBeUndefined();
+  });
+});
+
+describe('columnsWithFlattenedKeys', () => {
+  const previousColumns: ESQLColumnData[] = [
+    { name: 'flattenedField', type: 'flattened', userDefined: false },
+    { name: 'keywordField', type: 'keyword', userDefined: false },
+  ];
+
+  it('does not leak a flattened key named only inside an IN subquery', () => {
+    const afterWhere = columnsWithFlattenedKeys(
+      synth.cmd`WHERE keywordField IN (FROM other_index | KEEP flattenedField.env)`,
+      previousColumns
+    );
+    const afterDrop = columnsAfterDrop(synth.cmd`DROP flattenedField`, afterWhere);
+
+    expect(afterDrop.map((column) => column.name)).toEqual(['keywordField']);
+  });
+
+  it('keeps a flattened key named beside an IN subquery', () => {
+    const afterWhere = columnsWithFlattenedKeys(
+      synth.cmd`WHERE keywordField IN (FROM other_index | KEEP flattenedField.env) AND flattenedField.team == "prod"`,
+      previousColumns
+    );
+
+    expect(afterWhere.map((column) => column.name)).toContain('flattenedField.team');
+    expect(afterWhere.map((column) => column.name)).not.toContain('flattenedField.env');
   });
 });
