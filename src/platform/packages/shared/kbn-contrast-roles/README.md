@@ -8,7 +8,7 @@ APCA Lc target against the surface it's drawn on, so they work in both light and
   names, and `rolesAt` (to be ported back). `test/check_palettes.snap.json` is the workbench's snapshot and proves the
   copy matches.
 - `borealis.ts`: the Borealis input (surfaces from `@kbn/ui-theme`, hues from `@elastic/eui-theme-borealis`).
-- `match.ts`: which hue to solve a color's roles at and where a color sits along a ramp (`rampPosition`).
+- `match.ts`: a color as the base of its own hue
 
 TODO before shipping: check the APCA license. APCA contrast comes from colorjs.io (`contrastAPCA`), an implementation
 of Myndex's APCA, whose terms have changed across versions; confirm it can be used in Kibana.

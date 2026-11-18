@@ -14,7 +14,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { metricVisFunction } from '../common';
-import { setFormatService, setPaletteService } from './services';
+import { setFeatureFlagsService, setFormatService, setPaletteService } from './services';
 import { getMetricVisRenderer } from './expression_renderers';
 import { setThemeService } from './services/theme_service';
 import { setUiSettingsService } from './services/ui_settings';
@@ -56,5 +56,6 @@ export class ExpressionMetricPlugin implements Plugin {
 
   public start(core: CoreStart, { fieldFormats }: ExpressionMetricPluginStart) {
     setFormatService(fieldFormats);
+    setFeatureFlagsService(core.featureFlags);
   }
 }

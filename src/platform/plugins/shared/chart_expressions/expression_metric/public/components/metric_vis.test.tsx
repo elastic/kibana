@@ -18,7 +18,7 @@ import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { CustomPaletteState } from '@kbn/charts-plugin/common/expressions/palette/types';
 import type { MetricVisParam } from '../../common';
-import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
+import { DEFAULT_TRENDLINE_NAME, METRIC_SUBDUED_TILES_FLAG } from '../../common/constants';
 import type { PaletteOutput } from '@kbn/coloring';
 import { faker } from '@faker-js/faker';
 import {
@@ -32,6 +32,7 @@ import {
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import * as secondaryMetricInfoModule from './secondary_metric_info';
+import { metricTileColors, metricValueColor } from './metric_tile_colors';
 
 const mockDeserialize = jest.fn(({ id }: { id: string }) => {
   const convertFn = (v: unknown) => `${id}-${v === null ? NaN : v}`;
@@ -44,6 +45,7 @@ const CURRENCY_DEFAULT_FORMAT = '$0.0';
 
 const mockFormatSettingLookup = jest.fn(() => CURRENCY_DEFAULT_FORMAT);
 const mockIsOverridden = jest.fn();
+const mockFeatureFlag = jest.fn((_flag: string, fallback: boolean) => fallback);
 
 jest.mock('../services', () => ({
   getFormatService: () => {
@@ -65,6 +67,9 @@ jest.mock('../services', () => ({
       isOverridden: mockIsOverridden,
     };
   },
+  getFeatureFlagsService: () => ({
+    useBooleanValue: (flag: string, fallback: boolean) => mockFeatureFlag(flag, fallback),
+  }),
 }));
 
 jest.mock('@kbn/field-formats-plugin/common', () => ({
@@ -1003,7 +1008,13 @@ describe('MetricVisComponent', function () {
           },
         });
 
-        expect(screen.getByRole('figure')).toHaveStyle({ backgroundColor: colorFromPalette });
+        const subdued = metricTileColors(colorFromPalette, 'light', {
+          ramp: false,
+          hasTrend: false,
+        });
+        expect(screen.getByRole('figure')).toHaveStyle({
+          backgroundColor: subdued?.fill ?? colorFromPalette,
+        });
       });
 
       it('applies no value color when applyColorTo is "value" and the value is outside the palette range', async () => {
@@ -1152,8 +1163,74 @@ describe('MetricVisComponent', function () {
           },
         });
 
-        expect(screen.getByRole('figure')).toHaveStyle({ backgroundColor: staticColor });
+        const subdued = metricTileColors(staticColor, 'light', {
+          ramp: false,
+          hasTrend: false,
+        });
+        expect(screen.getByRole('figure')).toHaveStyle({
+          backgroundColor: subdued?.fill ?? staticColor,
+        });
         expect(mockGetColorForValue).not.toHaveBeenCalled();
+      });
+
+      it('subdues a background color to its faint fill, with the value in ink', async () => {
+        const blue = '#61A2FF';
+        const subdued = metricTileColors(blue, 'light', { ramp: false, hasTrend: false })!;
+
+        const { container } = await renderMetricChart({
+          config: {
+            dimensions: { metric: basePriceColumnId },
+            metric: { ...defaultMetricParams, color: blue, palette: undefined },
+          },
+        });
+
+        expect(screen.getByRole('figure')).toHaveStyle({ backgroundColor: subdued.fill });
+        expect(container.querySelector<HTMLElement>('.echMetricText__value')).toHaveStyle({
+          color: subdued.ink,
+        });
+      });
+
+      it('paints the full color as the background when the subdued tiles flag is off', async () => {
+        const blue = '#61A2FF';
+        mockFeatureFlag.mockImplementation((flag, fallback) =>
+          flag === METRIC_SUBDUED_TILES_FLAG ? false : fallback
+        );
+
+        await renderMetricChart({
+          config: {
+            dimensions: { metric: basePriceColumnId },
+            metric: { ...defaultMetricParams, color: blue, palette: undefined },
+          },
+        });
+
+        expect(screen.getByRole('figure')).toHaveStyle({ backgroundColor: blue });
+        mockFeatureFlag.mockImplementation((_flag, fallback) => fallback);
+      });
+
+      it('colors the value with its hue ink on the surface when applyColorTo is "value"', async () => {
+        const blue = '#61A2FF';
+        const ink = metricValueColor(blue, 'light', false);
+
+        const { container } = await renderMetricChart({
+          config: {
+            dimensions: { metric: basePriceColumnId },
+            metric: {
+              ...defaultMetricParams,
+              applyColorTo: 'value',
+              color: blue,
+              palette: undefined,
+            },
+          },
+        });
+
+        expect(screen.getByRole('figure')).toHaveStyle({
+          backgroundColor: euiThemeVars.euiColorEmptyShade,
+        });
+        expect(ink).toBeDefined();
+        expect(ink).not.toBe(blue);
+        expect(container.querySelector<HTMLElement>('.echMetricText__value')).toHaveStyle({
+          color: ink,
+        });
       });
 
       it('defaults if no static color', async () => {

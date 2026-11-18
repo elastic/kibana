@@ -10,7 +10,7 @@
 // Borealis: the input contrast roles are built for here, read from the same @elastic/eui-theme-borealis Kibana ships.
 import { colorVisLight } from '@elastic/eui-theme-borealis';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
-import { createContrastRoles, hexToOklch, type Hex, type Theme } from './src';
+import { createContrastRoles, type Hex, type Theme } from './src';
 
 export type Mode = 'light' | 'dark';
 
@@ -45,21 +45,3 @@ export const BOREALIS_THEME: Theme = {
 };
 
 export const borealis = createContrastRoles(BOREALIS_THEME);
-
-// EUI's status palette stops, in order. Only their hue angles are used: the tokens' lightness varies (warning1 is a
-// pale yellow), so their bases are modelled.
-const STATUS_TOKENS = {
-  success: 'euiColorVisSuccess0',
-  warning: 'euiColorVisWarning1',
-  danger: 'euiColorVisDanger0',
-} as const;
-
-// Success, warning and danger, for the status and positive palettes. The vis hues have no green.
-export const borealisStatus = createContrastRoles({
-  surfaces: SURFACES,
-  hues: Object.entries(STATUS_TOKENS).map(([name, token]) => ({
-    name,
-    angle: hexToOklch(visLight[token]).h,
-  })),
-  neutralTint: VIS_BASE0,
-});

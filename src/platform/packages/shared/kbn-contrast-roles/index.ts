@@ -8,6 +8,6 @@
  */
 
 export type { ContrastRoles, Hex, Params, Role } from './src';
-export { DEFAULT_PARAMS, ROLES } from './src';
-export { SURFACES, borealis, borealisStatus, type Mode } from './borealis';
-export { matchHue, rampPosition, type HueMatch, type HueSnap } from './match';
+export { DEFAULT_PARAMS, ROLES, apcaLc } from './src';
+export { SURFACES, borealis, type Mode } from './borealis';
+export { anchorHue, isSingleHueRamp, rampPosition, type AnchoredHue } from './match';

@@ -14,6 +14,11 @@ export const EXPRESSION_METRIC_TRENDLINE_NAME = 'metricTrendline';
 
 export const DEFAULT_TRENDLINE_NAME = 'default';
 
+/** Feature flag: subdued metric tiles (faint fill, value in ink) instead of the full color as the background. */
+export const METRIC_SUBDUED_TILES_FLAG = 'lens.metric.subdued';
+/** Feature flag: a top border in the hue's base on subdued metric tiles. */
+export const METRIC_SUBDUED_TOP_BORDER_FLAG = 'lens.metric.subdued.border';
+
 export const LabelPosition = {
   BOTTOM: 'bottom',
   TOP: 'top',

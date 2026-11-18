@@ -8,23 +8,26 @@
  */
 
 import { formatHex, parse } from 'culori';
-import { borealis, borealisStatus, SURFACES, type Mode } from './borealis';
-import { DEFAULT_PARAMS, ROLES, apcaLc, hexToOklch, type ContrastRoles, type Hex } from './src';
+import { BOREALIS_THEME, SURFACES, type Mode } from './borealis';
+import {
+  DEFAULT_PARAMS,
+  apcaLc,
+  createContrastRoles,
+  hexToOklch,
+  type ContrastRoles,
+  type Hex,
+} from './src';
 
-/** A hue to solve role colors at, and the model that solves them. */
-export interface HueMatch {
+/** A color as the base of its own hue: the model that solves its roles, and the angle to solve them at. */
+export interface AnchoredHue {
   model: ContrastRoles;
   angle: number;
 }
 
-/**
- * 'exact': a role color's own theme hue, otherwise the color's own hue (a picker color keeps its hue).
- * 'nearest': the closest theme hue (palette colors).
- */
-export type HueSnap = 'exact' | 'nearest';
-
-// Below this chroma a color has no hue to match.
+// Below this chroma a color has no hue to anchor.
 const MIN_HUE_CHROMA = 0.02;
+// Most a single-hue ramp's colors spread in hue.
+const MAX_RAMP_HUE_SPREAD = 20;
 
 const hueDistance = (a: number, b: number) => Math.abs(((a - b + 540) % 360) - 180);
 const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
@@ -34,46 +37,32 @@ const toHex = (color: string): Hex | undefined => {
   return parsed && formatHex(parsed).toUpperCase();
 };
 
-interface HueEntry extends HueMatch {
-  colors: Set<string>;
-}
-
-let hueEntries: HueEntry[] | undefined;
-
-// Every theme hue of borealis and borealisStatus, with its role colors in both modes.
-const getHueEntries = (): HueEntry[] => {
-  if (hueEntries) return hueEntries;
-  hueEntries = [borealis, borealisStatus].flatMap((model) =>
-    model.hues.map(({ angle }) => {
-      const colors = new Set<string>();
-      for (const surface of Object.values(SURFACES)) {
-        const roles = model.rolesAt(angle, surface, DEFAULT_PARAMS);
-        ROLES.forEach((k) => colors.add(roles[k].toUpperCase()));
-      }
-      return { model, angle, colors };
-    })
-  );
-  return hueEntries;
-};
-
-/** The hue to solve a color's roles at, or undefined for colors with no hue or that can't be parsed. */
-export const matchHue = (color: string, snap: HueSnap): HueMatch | undefined => {
+const hueOf = (color: string): number | undefined => {
   const hex = toHex(color);
   if (!hex) return undefined;
-  const entries = getHueEntries();
-
-  // Before the chroma check: some faints are below it.
-  const exact = snap === 'exact' && entries.find(({ colors }) => colors.has(hex));
-  if (exact) return { model: exact.model, angle: exact.angle };
-
   const { C, h } = hexToOklch(hex);
-  if (C < MIN_HUE_CHROMA) return undefined;
-  if (snap === 'exact') return { model: borealis, angle: h };
+  return C < MIN_HUE_CHROMA ? undefined : h;
+};
 
-  const { model, angle } = entries.reduce((best, entry) =>
-    hueDistance(entry.angle, h) < hueDistance(best.angle, h) ? entry : best
-  );
-  return { model, angle };
+const anchors = new Map<Hex, AnchoredHue>();
+
+/** The color as the base of its own hue on Borealis's surfaces, or undefined for colors with no hue or that can't be parsed. */
+export const anchorHue = (color: string): AnchoredHue | undefined => {
+  const hex = toHex(color);
+  if (!hex || hueOf(hex) === undefined) return undefined;
+  const cached = anchors.get(hex);
+  if (cached) return cached;
+  const model = createContrastRoles({ ...BOREALIS_THEME, hues: [{ name: hex, base: hex }] });
+  const anchored = { model, angle: model.hues[0].angle };
+  anchors.set(hex, anchored);
+  return anchored;
+};
+
+/** Whether colors are one hue's ramp: every color with a hue sits within a few degrees of the others. */
+export const isSingleHueRamp = (colors: string[]): boolean => {
+  const hues = colors.map(hueOf).filter((h): h is number => h !== undefined);
+  if (!hues.length) return false;
+  return hues.every((a) => hues.every((b) => hueDistance(a, b) <= MAX_RAMP_HUE_SPREAD));
 };
 
 /** A color's position along the ramp, 0 to 1: its APCA Lc against the mode's surface, between `ramp.from` and `ramp.to`. */
