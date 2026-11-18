@@ -3287,47 +3287,34 @@ x-pack/solutions/security/plugins/security_solution/common/workflows/alert_analy
 /x-pack/solutions/security/packages/kbn-alertzero-common/impl/ip_ranges.ts @elastic/alertzero-common-layer @elastic/security-investigations
 /x-pack/solutions/security/packages/kbn-alertzero-common/impl/ip_ranges.test.ts @elastic/alertzero-common-layer @elastic/security-investigations
 /x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/hunt @elastic/security-investigations
-/x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/components/hunt.schema.yaml @elastic/security-investigations
-/x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/components/hunt.gen.ts @elastic/security-investigations
+/x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/components/hunt.* @elastic/security-investigations
 /x-pack/solutions/security/packages/kbn-alertzero-common/impl/worker_settings/continuous_threat_hunt.ts @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/common/hunt_coordinator_result_attachment_schema.ts @elastic/security-investigations
-/x-pack/solutions/security/plugins/alertzero/common/step_types/package_report.ts @elastic/security-investigations
-/x-pack/solutions/security/plugins/alertzero/common/step_types/package_report.test.ts @elastic/security-investigations
-/x-pack/solutions/security/plugins/alertzero/common/telemetry/workers/continuous_threat_hunt.ts @elastic/security-investigations
-/x-pack/solutions/security/plugins/alertzero/common/telemetry/workers/continuous_threat_hunt.fixture.ts @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/common/step_types/package_report.* @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/common/telemetry/workers/continuous_threat_hunt.* @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/public/hooks/hunt @elastic/security-investigations
-/x-pack/solutions/security/plugins/alertzero/public/pages/watches/components/threat_intel_supply_section.tsx @elastic/security-investigations
-/x-pack/solutions/security/plugins/alertzero/public/pages/watches/components/threat_intel_supply_section.test.tsx @elastic/security-investigations
-/x-pack/solutions/security/plugins/alertzero/server/agent_builder/attachments/hunt_coordinator_result.ts @elastic/security-investigations
-/x-pack/solutions/security/plugins/alertzero/server/agent_builder/attachments/hunt_coordinator_result.test.ts @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/public/pages/watches/components/threat_intel_supply_section.* @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/server/agent_builder/attachments/hunt_coordinator_result.* @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/server/managed_workflows/hunt @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/server/routes/hunt @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/server/services/threat_intel_supply @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/server/services/watches/hunt @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/server/step_types/package_report @elastic/security-investigations
-/x-pack/solutions/security/plugins/alertzero/server/step_types/report_worker_outcome/shipped_yaml_contract.continuous_threat_hunt.fixture.ts @elastic/security-investigations
-/x-pack/solutions/security/plugins/alertzero/server/step_types/report_worker_outcome/shipped_yaml_contract.continuous_threat_hunt.test.ts @elastic/security-investigations
-/x-pack/solutions/security/plugins/alertzero/server/telemetry/workers/continuous_threat_hunt.md @elastic/security-investigations
-/x-pack/solutions/security/plugins/alertzero/server/telemetry/workers/continuous_threat_hunt.ts @elastic/security-investigations
-/x-pack/solutions/security/plugins/alertzero/server/telemetry/workers/continuous_threat_hunt.fixture.ts @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/server/step_types/report_worker_outcome/shipped_yaml_contract.continuous_threat_hunt.* @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/server/telemetry/workers/continuous_threat_hunt.* @elastic/security-investigations
 x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management_ui/pages/alert_analysis_workflow @elastic/security-investigations
 x-pack/solutions/security/plugins/security_solution/server/workflows/alert_analysis_workflow @elastic/security-investigations
 
 # AlertZero Alert Triage Worker
 /src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/alert_triage @elastic/security-investigations
-/x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/components/alert_triage_settings.gen.ts @elastic/security-investigations
-/x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/components/alert_triage_settings.schema.yaml @elastic/security-investigations
+/x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/components/alert_triage_settings.* @elastic/security-investigations
 /x-pack/solutions/security/packages/kbn-alertzero-common/impl/worker_settings/alert_triage.ts @elastic/security-investigations
-/x-pack/solutions/security/plugins/alertzero/common/telemetry/workers/alert_triage.ts @elastic/security-investigations
-/x-pack/solutions/security/plugins/alertzero/common/telemetry/workers/alert_triage.fixture.ts @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/common/telemetry/workers/alert_triage.* @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/common/workers/alert_triage @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/public/workers/alert_triage @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/scripts/alert_triage @elastic/security-investigations
-/x-pack/solutions/security/plugins/alertzero/server/step_types/report_worker_outcome/shipped_yaml_contract.alert_triage.fixture.ts @elastic/security-investigations
-/x-pack/solutions/security/plugins/alertzero/server/step_types/report_worker_outcome/shipped_yaml_contract.alert_triage.test.ts @elastic/security-investigations
-/x-pack/solutions/security/plugins/alertzero/server/telemetry/workers/alert_triage.md @elastic/security-investigations
-/x-pack/solutions/security/plugins/alertzero/server/telemetry/workers/alert_triage.ts @elastic/security-investigations
-/x-pack/solutions/security/plugins/alertzero/server/telemetry/workers/alert_triage.fixture.ts @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/server/step_types/report_worker_outcome/shipped_yaml_contract.alert_triage.* @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/server/telemetry/workers/alert_triage.* @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/server/workers/alert_triage @elastic/security-investigations
 
 # AlertZero Worker settings contract
