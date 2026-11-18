@@ -11,9 +11,15 @@ import Boom from '@hapi/boom';
 import type { KibanaRequest } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { TaskAlreadyRunningError, TaskPriority, TaskStatus } from '@kbn/task-manager-plugin/server';
+import {
+  isUnrecoverableError,
+  TaskAlreadyRunningError,
+  TaskPriority,
+  TaskStatus,
+} from '@kbn/task-manager-plugin/server';
 import type { ConcreteTaskInstance, TaskRegisterDefinition } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
 jest.mock('./repositories/data_access_layer', () => {
   const actual = jest.requireActual('./repositories/data_access_layer');
@@ -66,11 +72,13 @@ jest.mock('./execution_functions/complete_identity_failure_cleanup', () => ({
 }));
 
 const mockResumeWorkflow = jest.fn();
+const mockRunWorkflow = jest.fn();
 jest.mock('./execution_functions', () => {
   const actual = jest.requireActual('./execution_functions');
   return {
     ...actual,
     resumeWorkflow: (...args: unknown[]) => mockResumeWorkflow(...args),
+    runWorkflow: (...args: unknown[]) => mockRunWorkflow(...args),
   };
 });
 
@@ -81,6 +89,7 @@ jest.mock('./repositories/workflow_execution_repository', () => ({
   })),
 }));
 
+import { toWorkflowIdentityTaskError } from './lib/workflow_identity_task_error';
 import { WorkflowsExecutionEnginePlugin } from './plugin';
 import { WORKFLOW_RESUME_TASK_TYPE, WORKFLOW_RUN_TASK_TYPE } from './workflow_task_manager/types';
 import {
@@ -136,6 +145,7 @@ describe('workflow:resume task runner event fields', () => {
     mockResolveExhaustedWorkflowRunTask.mockResolvedValue(undefined);
     mockFailExecutionMissingIdentity.mockResolvedValue(undefined);
     mockResumeWorkflow.mockResolvedValue({});
+    mockRunWorkflow.mockResolvedValue({});
     mockGetWorkflowExecutionById.mockResolvedValue(null);
   });
 
@@ -653,6 +663,132 @@ describe('workflow:resume task runner event fields', () => {
       workflow_id: workflowId,
       space_id: 'default',
       outcome: 'interrupted',
+    });
+  });
+
+  describe('identity-failure retry suppression', () => {
+    const buildTaskInstance = (
+      workflowRunId: string,
+      taskType: string,
+      id: string
+    ): ConcreteTaskInstance =>
+      ({
+        id,
+        taskType,
+        params: { workflowRunId, spaceId: 'default' },
+        state: {},
+        attempts: 1,
+        runAt: new Date('2024-01-01T10:00:00Z'),
+        scheduledAt: new Date('2024-01-01T09:55:00Z'),
+        startedAt: new Date('2024-01-01T10:00:00Z'),
+        retryAt: null,
+        status: TaskStatus.Running,
+        ownerId: 'kibana-instance-id',
+      } as ConcreteTaskInstance);
+
+    const createRunnerFor = (taskType: string, workflowRunId: string, id: string) =>
+      taskDefinitions[taskType]!.createTaskRunner(
+        taskManagerMock.createRunContext({
+          taskInstance: buildTaskInstance(workflowRunId, taskType, id),
+          fakeRequest: {} as KibanaRequest,
+          setCustomTaskRunEventFields: jest.fn(),
+        })
+      );
+
+    beforeEach(() => {
+      setupPlugin();
+    });
+
+    it('rethrows a finalized resume identity failure as an unrecoverable user error', async () => {
+      const workflowRunId = 'exec-resume-identity';
+      const identityError = toWorkflowIdentityTaskError(Boom.forbidden('binding rebound'));
+      mockResumeWorkflow.mockRejectedValue(identityError);
+      mockGetWorkflowExecutionById.mockResolvedValue({
+        id: workflowRunId,
+        workflowId: 'wf-resume-identity',
+        spaceId: 'default',
+        status: 'failed',
+      });
+      const runner = createRunnerFor(
+        WORKFLOW_RESUME_TASK_TYPE,
+        workflowRunId,
+        getWorkflowImmediateResumeTaskId(workflowRunId)
+      );
+
+      const thrown = await runner.run().then(
+        () => undefined,
+        (error: Error) => error
+      );
+
+      expect(thrown).toBe(identityError);
+      expect(isUnrecoverableError(thrown as Error)).toBe(true);
+      expect(getErrorSource(thrown as Error)).toBe(TaskErrorSource.USER);
+    });
+
+    it('keeps a non-identity resume failure recoverable', async () => {
+      const workflowRunId = 'exec-resume-recoverable';
+      mockResumeWorkflow.mockRejectedValue(new Error('es unavailable'));
+      mockGetWorkflowExecutionById.mockResolvedValue({
+        id: workflowRunId,
+        workflowId: 'wf-resume-recoverable',
+        spaceId: 'default',
+        status: 'failed',
+      });
+      const runner = createRunnerFor(
+        WORKFLOW_RESUME_TASK_TYPE,
+        workflowRunId,
+        getWorkflowImmediateResumeTaskId(workflowRunId)
+      );
+
+      const thrown = await runner.run().then(
+        () => undefined,
+        (error: Error) => error
+      );
+
+      expect(thrown).toBeInstanceOf(Error);
+      expect(isUnrecoverableError(thrown as Error)).toBe(false);
+    });
+
+    it('rethrows a finalized run identity failure as an unrecoverable user error', async () => {
+      const workflowRunId = 'exec-run-identity';
+      const identityError = toWorkflowIdentityTaskError(Boom.forbidden('binding rebound'));
+      mockRunWorkflow.mockRejectedValue(identityError);
+      mockGetWorkflowExecutionById.mockResolvedValue({
+        id: workflowRunId,
+        workflowId: 'wf-run-identity',
+        spaceId: 'default',
+        status: 'failed',
+      });
+      const runner = createRunnerFor(WORKFLOW_RUN_TASK_TYPE, workflowRunId, 'task-run-identity');
+
+      const thrown = await runner.run().then(
+        () => undefined,
+        (error: Error) => error
+      );
+
+      expect(thrown).toBe(identityError);
+      expect(isUnrecoverableError(thrown as Error)).toBe(true);
+      expect(getErrorSource(thrown as Error)).toBe(TaskErrorSource.USER);
+    });
+
+    it('keeps a non-identity run failure recoverable', async () => {
+      const workflowRunId = 'exec-run-recoverable';
+      mockRunWorkflow.mockRejectedValue(new Error('es unavailable'));
+      mockGetWorkflowExecutionById.mockResolvedValue({
+        id: workflowRunId,
+        workflowId: 'wf-run-recoverable',
+        spaceId: 'default',
+        status: 'failed',
+      });
+      const runner = createRunnerFor(WORKFLOW_RUN_TASK_TYPE, workflowRunId, 'task-run-recoverable');
+
+      const thrown = await runner.run().then(
+        () => undefined,
+        (error: Error) => error
+      );
+
+      expect(thrown).toBeInstanceOf(Error);
+      expect(isUnrecoverableError(thrown as Error)).toBe(false);
     });
   });
 
