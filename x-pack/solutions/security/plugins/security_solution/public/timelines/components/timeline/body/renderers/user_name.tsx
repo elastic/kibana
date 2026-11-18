@@ -19,7 +19,6 @@ import { useEntityFromStore } from '../../../../../flyout/entity_details/shared/
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 
 interface Props {
-  contextId: string;
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   isButton?: boolean;
   onClick?: () => void;

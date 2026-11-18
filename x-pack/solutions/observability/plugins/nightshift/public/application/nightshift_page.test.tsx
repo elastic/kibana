@@ -309,7 +309,7 @@ describe('NightshiftPage', () => {
     renderPage();
     expect(navigateToApp).not.toHaveBeenCalled();
     await waitFor(() =>
-      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Nightshift')
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('nightshift')
     );
     expect(await screen.findByTestId('nightshiftAppStub')).toBeInTheDocument();
   });
@@ -514,6 +514,25 @@ describe('NightshiftPage', () => {
       expect(screen.queryByTestId('nightshiftTabAutomations')).not.toBeInTheDocument();
     });
 
+    it('shows Settings and marks Automations as the Settings origin', async () => {
+      withServices({ nightshiftInvestigations: { investigationsClient: { fetch: jest.fn() } } });
+      renderPage('/automations');
+
+      expect(await screen.findByTestId('automationsPageStub')).toBeInTheDocument();
+
+      const settingsLink = screen.getByTestId('nightshiftSettingsLink');
+      expect(settingsLink).toBeVisible();
+      expect(settingsLink).toHaveAttribute(
+        'href',
+        '/app/nightshift/settings/investigations?origin=automations'
+      );
+
+      await act(async () => fireEvent.click(settingsLink));
+      expect(navigateToUrl).toHaveBeenLastCalledWith(
+        '/app/nightshift/settings/investigations?origin=automations'
+      );
+    });
+
     it('keeps the automations page mounted for a detail route', async () => {
       withServices({ nightshiftInvestigations: { investigationsClient: { fetch: jest.fn() } } });
       renderPage('/automations/automation-1');
@@ -549,6 +568,31 @@ describe('NightshiftPage', () => {
           forceOnboarding: false,
         })
       );
+    });
+
+    it('replaces early header actions through First automation when onboarding ends', async () => {
+      withInvestigationsClient();
+      mockUseOnboardingVisibility.mockReturnValue({
+        isLoading: false,
+        showOnboarding: true,
+        latestInvestigation: { id: 'inv-1' },
+        dismiss: jest.fn(),
+      });
+      const { history, rerender } = renderPage();
+      expect(await screen.findByTestId('nightshiftOnboardingStub')).toBeInTheDocument();
+      expect(screen.queryByTestId('nightshiftAutomationsPrimaryAction')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('nightshiftDetectionsPrimaryAction')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('o11yNightshiftAppStartInvestigationButton')
+      ).not.toBeInTheDocument();
+
+      mockUseOnboardingVisibility.mockReturnValue({
+        isLoading: false,
+        showOnboarding: false,
+        dismiss: jest.fn(),
+      });
+      rerender(renderPageContent(history));
+      expect(await screen.findByTestId('nightshiftAutomationsPrimaryAction')).toBeInTheDocument();
     });
 
     it('hides the detection setup banner across app remounts in the same space', async () => {

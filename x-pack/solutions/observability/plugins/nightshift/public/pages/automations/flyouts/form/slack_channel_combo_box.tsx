@@ -57,7 +57,13 @@ const labels = {
     }),
 };
 
-const ConnectChannelsLink = ({ testSubject }: { testSubject: string }) => {
+const ConnectChannelsLink = ({
+  testSubject,
+  children,
+}: {
+  testSubject: string;
+  children: React.ReactNode;
+}) => {
   const { application } = useKibana().services;
   return (
     <EuiLink
@@ -68,10 +74,7 @@ const ConnectChannelsLink = ({ testSubject }: { testSubject: string }) => {
         element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_FORM,
       })}
     >
-      <FormattedMessage
-        id="xpack.nightshift.automations.flyout.slackChannelsConnectLink"
-        defaultMessage="Connect channels in Settings"
-      />
+      {children}
     </EuiLink>
   );
 };
@@ -149,6 +152,27 @@ export const SlackChannelComboBox = ({
         customOptionText={labels.customOption}
         data-test-subj={testSubject}
       />
+      {!isEmpty && (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiText size="xs" color="subdued" data-test-subj={`${testSubject}Scope`}>
+            <FormattedMessage
+              id="xpack.nightshift.automations.flyout.slackChannelsScope"
+              defaultMessage="Only channels where @Elastic is a member and that are connected are listed. To add one, invite @Elastic, then connect the channel in {settingsLink}."
+              values={{
+                settingsLink: (
+                  <ConnectChannelsLink testSubject={`${testSubject}Scope`}>
+                    <FormattedMessage
+                      id="xpack.nightshift.automations.flyout.slackChannelsScopeLink"
+                      defaultMessage="Slack settings"
+                    />
+                  </ConnectChannelsLink>
+                ),
+              }}
+            />
+          </EuiText>
+        </>
+      )}
       {(isError || isEmpty || isTruncated || unconnected.length > 0) && (
         <>
           <EuiSpacer size="xs" />
@@ -163,7 +187,16 @@ export const SlackChannelComboBox = ({
               <FormattedMessage
                 id="xpack.nightshift.automations.flyout.slackChannelsEmpty"
                 defaultMessage="No Slack channels are connected. {connectLink}"
-                values={{ connectLink: <ConnectChannelsLink testSubject={testSubject} /> }}
+                values={{
+                  connectLink: (
+                    <ConnectChannelsLink testSubject={testSubject}>
+                      <FormattedMessage
+                        id="xpack.nightshift.automations.flyout.slackChannelsConnectLink"
+                        defaultMessage="Connect channels in Settings"
+                      />
+                    </ConnectChannelsLink>
+                  ),
+                }}
               />
             )}
             {unconnected.length > 0 &&

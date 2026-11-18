@@ -162,7 +162,7 @@ export const createInvestigatorServiceAccountService = ({
       const id = state?.templateValues?.[AUTOMATIONS_SERVICE_ACCOUNT_ID_VALUE];
       return typeof id === 'string' && id.length > 0 ? id : undefined;
     } catch (error) {
-      logger.debug(`Could not read the Nightshift setup of space [${spaceId}]: ${error}`);
+      logger.debug(`Could not read the nightshift setup of space [${spaceId}]: ${error}`);
       return undefined;
     }
   };
@@ -249,7 +249,7 @@ export const createInvestigatorServiceAccountService = ({
   const assertCanModifyBoundAutomations = async (request: KibanaRequest): Promise<void> => {
     if (!(await canManageSecurity(request))) {
       throw Boom.forbidden(
-        'Automations run as the Nightshift automations service account, so changing them requires the manage_security cluster privilege.'
+        'Automations run as the nightshift automations service account, so changing them requires the manage_security cluster privilege.'
       );
     }
   };
@@ -523,7 +523,7 @@ export const createInvestigatorServiceAccountService = ({
     if (installed.length === 0) return;
     if (!core.security.serviceAccounts.isEnabled()) {
       throw Boom.badRequest(
-        'Service accounts are disabled, so the Nightshift agents cannot be unbound. Set xpack.security.serviceAccounts.enabled: true, then remove the setup.'
+        'Service accounts are disabled, so the nightshift agents cannot be unbound. Set xpack.security.serviceAccounts.enabled: true, then remove the setup.'
       );
     }
     for (const agentId of installed) {
@@ -545,7 +545,7 @@ export const createInvestigatorServiceAccountService = ({
       return;
     }
     await removeSourceVolumeTask();
-    logger.info('No space has Nightshift set up; removed the source volume telemetry task');
+    logger.info('No space has nightshift set up; removed the source volume telemetry task');
   };
 
   const runEnable = async (
@@ -562,7 +562,7 @@ export const createInvestigatorServiceAccountService = ({
     assertNightshiftSpace(spaceId);
     if (!(await canManageSecurity(request))) {
       throw Boom.forbidden(
-        'Setting up the Nightshift service accounts requires the manage_security cluster privilege.'
+        'Setting up the nightshift service accounts requires the manage_security cluster privilege.'
       );
     }
     await assertSpaceExists(request, spaceId);
@@ -637,7 +637,7 @@ export const createInvestigatorServiceAccountService = ({
     await assertSpaceExists(request, spaceId);
     if (!(await canManageSecurity(request))) {
       throw Boom.forbidden(
-        'Removing the Nightshift service account setup requires the manage_security cluster privilege.'
+        'Removing the nightshift service account setup requires the manage_security cluster privilege.'
       );
     }
     // The agent goes first: a failure after it leaves the space reading as not set up, never a

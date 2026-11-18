@@ -88,6 +88,7 @@ export const importPluginOverrides: OxlintOverride[] = [
       'x-pack/solutions/*/test/api_integration_deployment_agnostic/*configs/**/*',
       'x-pack/solutions/*/test/alerting_api_integration/**/*',
       'x-pack/solutions/*/test/serverless/*/configs/**/*',
+      'x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/{apps,configs}/**/*',
       'x-pack/platform/test/saved_object_api_integration/*/apis/**/*',
       'x-pack/platform/test/ui_capabilities/*/tests/**/*',
       'x-pack/platform/test/upgrade_assistant_integration/**/*',
@@ -170,6 +171,7 @@ export const importPluginOverrides: OxlintOverride[] = [
     files: inDirs([
       'x-pack/solutions/security/packages/test-api-clients',
       'x-pack/solutions/security/packages/kbn-security-evals-matrix',
+      'x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint',
     ]),
     rules: {
       'import/no-nodejs-modules': 'off',
@@ -217,11 +219,11 @@ export const importPluginOverrides: OxlintOverride[] = [
     },
   },
   {
-    // ESLint fixes the generated API client bundles with this rule and `no_unused_imports` in one
-    // pass, as the OpenAPI generator expects. See the matching override in `.eslintrc.js`.
+    // The OpenAPI generator writes these API client bundles with duplicate and unused imports and
+    // relies on this rule and `@kbn/imports/no_unused_imports` to clean them up.
     files: ['x-pack/solutions/security/packages/test-api-clients/{supertest,scout}/*.gen.ts'],
     rules: {
-      'import/no-duplicates': 'off',
+      'import/no-duplicates': 'error',
     },
   },
   {

@@ -96,11 +96,7 @@ const aiIndexDocument: AiIndexDocument = {
 
 const toHttpItem = (document: AiIndexDocument) => {
   const { space: _space, ...item } = document;
-  return {
-    ...item,
-    memory_enabled:
-      document.memory_enabled !== undefined ? document.memory_enabled : document.managed !== true,
-  };
+  return item;
 };
 
 const storedHit = (
@@ -190,16 +186,6 @@ describe('AiIndexService', () => {
       });
       expect(storageClient.index.mock.calls[0][0]).not.toHaveProperty('id');
       expect(storageClient.index.mock.calls[0][0]).not.toHaveProperty('op_type');
-    });
-
-    it('defaults memory_enabled to true', async () => {
-      await service.create('customer_support', DEFAULT_SPACE, properties);
-
-      expect(storageClient.index).toHaveBeenCalledWith(
-        expect.objectContaining({
-          document: expect.objectContaining({ memory_enabled: true }),
-        })
-      );
     });
 
     it('throws AiIndexAlreadyExistsError when the id already exists', async () => {
@@ -310,17 +296,6 @@ describe('AiIndexService', () => {
         enabled: true,
         agent_id: 'my-analysis-agent',
       });
-    });
-
-    it('persists memory_enabled when updating an existing AI index', async () => {
-      mockSearchHits(storedHit(aiIndexDocument, { seqNo: 7, primaryTerm: 2 }));
-
-      await expect(
-        service.put('customer_support', DEFAULT_SPACE, { ...properties, memory_enabled: true })
-      ).resolves.toBe('updated');
-
-      const [indexArgs] = storageClient.index.mock.calls[0];
-      expect(indexArgs.document?.memory_enabled).toBe(true);
     });
 
     it('throws AiIndexConflictError when a concurrent create wins (409)', async () => {
@@ -643,7 +618,6 @@ describe('AiIndexService', () => {
           id: 'elastic',
           space: DEFAULT_SPACE,
           managed: true,
-          memory_enabled: false,
         }),
       });
     });
@@ -653,14 +627,12 @@ describe('AiIndexService', () => {
 
       await service.putManaged('elastic', DEFAULT_SPACE, {
         ...managedProperties,
-        memory_enabled: true,
       });
 
       expect(storageClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
           document: expect.objectContaining({
             managed: true,
-            memory_enabled: true,
           }),
         })
       );
@@ -798,15 +770,6 @@ describe('AiIndexService', () => {
       expect(indexArgs.document?.managed).toBe(true);
     });
 
-    it('preserves the disabled fallback for a legacy managed AI index', async () => {
-      mockStored({ ...aiIndexDocument, managed: true });
-
-      await service.setFeedbackAnalysis('customer_support', DEFAULT_SPACE, feedbackAnalysis);
-
-      const [indexArgs] = storageClient.index.mock.calls[0];
-      expect(indexArgs.document?.memory_enabled).toBe(false);
-    });
-
     it('replaces the previous block rather than merging into it', async () => {
       mockStored({
         ...aiIndexDocument,
@@ -844,6 +807,111 @@ describe('AiIndexService', () => {
     });
   });
 
+  describe('dreaming', () => {
+    const dreaming = {
+      enabled: true,
+      instructions: 'Remember what customers prefer.',
+      facts: [{ type: 'preference', description: 'Something a customer wants.' }],
+    };
+
+    it('keeps the stored config when the AI index is replaced', async () => {
+      mockSearchHits(storedHit({ ...aiIndexDocument, dreaming }));
+
+      await service.put('customer_support', DEFAULT_SPACE, properties);
+
+      expect(storageClient.index.mock.calls[0][0].document?.dreaming).toEqual(dreaming);
+    });
+
+    it('keeps the stored config when a managed AI index is registered again', async () => {
+      mockSearchHits(storedHit({ ...aiIndexDocument, managed: true, dreaming }));
+
+      await service.putManaged('customer_support', DEFAULT_SPACE, properties);
+
+      expect(storageClient.index.mock.calls[0][0].document?.dreaming).toEqual(dreaming);
+    });
+
+    it('returns the stored config on read', async () => {
+      mockSearchHits(storedHit({ ...aiIndexDocument, dreaming }));
+
+      await expect(service.get('customer_support', DEFAULT_SPACE)).resolves.toEqual(
+        expect.objectContaining({ dreaming })
+      );
+    });
+
+    it.each([[[{ type: 'buys', source: 'customer', target: 'product' }]], [null]])(
+      'drops the relationship types configs carried before relationships left dreaming: %j',
+      async (edges) => {
+        const entities = { nodes: [{ type: 'customer' }, { type: 'product' }] };
+        mockSearchHits(
+          storedHit({
+            ...aiIndexDocument,
+            dreaming: { ...dreaming, entities: { ...entities, edges } },
+          })
+        );
+
+        await expect(service.get('customer_support', DEFAULT_SPACE)).resolves.toEqual(
+          expect.objectContaining({ dreaming: { ...dreaming, entities } })
+        );
+      }
+    );
+
+    describe('setDreaming', () => {
+      it('writes the config and leaves the rest of the entry untouched', async () => {
+        mockSearchHits(storedHit(aiIndexDocument));
+
+        await expect(
+          service.setDreaming('customer_support', DEFAULT_SPACE, dreaming)
+        ).resolves.toEqual(dreaming);
+
+        const [indexArgs] = storageClient.index.mock.calls[0];
+        expect(indexArgs.document).toEqual(
+          expect.objectContaining({
+            dreaming,
+            description: aiIndexDocument.description,
+            dest: aiIndexDocument.dest,
+            automations: aiIndexDocument.automations,
+            date_created: aiIndexDocument.date_created,
+          })
+        );
+        expect(indexArgs.if_seq_no).toBe(7);
+        expect(indexArgs.if_primary_term).toBe(2);
+      });
+
+      it('replaces the previous config rather than merging into it', async () => {
+        mockSearchHits(storedHit({ ...aiIndexDocument, dreaming }));
+
+        await service.setDreaming('customer_support', DEFAULT_SPACE, { enabled: false });
+
+        const [indexArgs] = storageClient.index.mock.calls[0];
+        expect(indexArgs.document?.dreaming).toEqual({ enabled: false });
+      });
+
+      it('is permitted on managed AI indices, and keeps them managed', async () => {
+        mockSearchHits(storedHit({ ...aiIndexDocument, managed: true }));
+
+        await service.setDreaming('customer_support', DEFAULT_SPACE, dreaming);
+
+        const [indexArgs] = storageClient.index.mock.calls[0];
+        expect(indexArgs.document?.managed).toBe(true);
+      });
+
+      it('throws AiIndexNotFoundError when the AI index does not exist', async () => {
+        await expect(
+          service.setDreaming('missing', DEFAULT_SPACE, dreaming)
+        ).rejects.toBeInstanceOf(AiIndexNotFoundError);
+      });
+
+      it('throws AiIndexConflictError when a concurrent write wins (409)', async () => {
+        mockSearchHits(storedHit(aiIndexDocument));
+        storageClient.index.mockRejectedValue(createConflictError());
+
+        await expect(
+          service.setDreaming('customer_support', DEFAULT_SPACE, dreaming)
+        ).rejects.toBeInstanceOf(AiIndexConflictError);
+      });
+    });
+  });
+
   describe('get', () => {
     it('returns the AI index with its id', async () => {
       mockSearchHits(storedHit(aiIndexDocument));
@@ -853,28 +921,31 @@ describe('AiIndexService', () => {
       );
     });
 
-    it('defaults memory_enabled to true for legacy user-created documents', async () => {
-      mockSearchHits(storedHit(aiIndexDocument));
+    it('ignores the deprecated memory_enabled from callers and managed registrations', async () => {
+      await service.create('customer_support', DEFAULT_SPACE, {
+        ...properties,
+        memory_enabled: true,
+      });
+      await service.put('customer_support', DEFAULT_SPACE, { ...properties, memory_enabled: true });
+      await service.putManaged('elastic', DEFAULT_SPACE, { ...properties, memory_enabled: false });
 
-      await expect(service.get('customer_support', DEFAULT_SPACE)).resolves.toEqual(
-        expect.objectContaining({ id: 'customer_support', memory_enabled: true })
-      );
+      for (const [indexArgs] of storageClient.index.mock.calls) {
+        expect(indexArgs.document).not.toHaveProperty('memory_enabled');
+      }
     });
 
-    it('defaults memory_enabled to false for legacy managed documents', async () => {
-      mockSearchHits(storedHit({ ...aiIndexDocument, managed: true }));
+    it('keeps the memory_enabled a document was saved with, on read and through writes', async () => {
+      mockSearchHits(storedHit({ ...aiIndexDocument, memory_enabled: false }));
 
       await expect(service.get('customer_support', DEFAULT_SPACE)).resolves.toEqual(
-        expect.objectContaining({ id: 'customer_support', memory_enabled: false })
+        expect.objectContaining({ memory_enabled: false })
       );
-    });
 
-    it('round-trips memory_enabled from the stored document to the item', async () => {
-      mockSearchHits(storedHit({ ...aiIndexDocument, memory_enabled: true }));
-
-      await expect(service.get('customer_support', DEFAULT_SPACE)).resolves.toEqual(
-        expect.objectContaining({ id: 'customer_support', memory_enabled: true })
-      );
+      await service.setDreaming('customer_support', DEFAULT_SPACE, { enabled: false });
+      await service.put('customer_support', DEFAULT_SPACE, { ...properties, memory_enabled: true });
+      for (const [indexArgs] of storageClient.index.mock.calls) {
+        expect(indexArgs.document?.memory_enabled).toBe(false);
+      }
     });
 
     it('defaults managed to false for legacy documents without the field', async () => {
@@ -1028,6 +1099,29 @@ describe('AiIndexService', () => {
           ...staleDocument,
           dest: { type: 'index', value: '.ai-index-idx-elastic-index' },
         })
+      );
+    });
+
+    it('reads memory_enabled from the registration for a managed AI index', async () => {
+      mockSearchHits(
+        storedHit(
+          { ...aiIndexDocument, id: 'elastic', managed: true },
+          { id: buildManagedAiIndexDocId(DEFAULT_SPACE, 'elastic') }
+        )
+      );
+      service = new AiIndexService({
+        esClient,
+        logger: loggingSystemMock.createLogger(),
+        managedBootstrap: {
+          isManaged: (id) => id === 'elastic',
+          getManagedIds: () => ['elastic'],
+          getRegistration: () => ({ ...properties, memory_enabled: false }),
+          ensure: jest.fn(),
+        },
+      });
+
+      await expect(service.get('elastic', DEFAULT_SPACE)).resolves.toEqual(
+        expect.objectContaining({ managed: true, memory_enabled: false })
       );
     });
 
@@ -1507,6 +1601,42 @@ describe('AiIndexService', () => {
           value: 'wf-new',
         })
       ).rejects.toThrow(/maximum number of automations/);
+    });
+  });
+
+  describe('removeAutomation', () => {
+    const automation = { type: 'workflow' as const, value: 'nightly-refresh' };
+
+    it('detaches the workflow automation and keeps the others', async () => {
+      mockSearchHits(
+        storedHit({
+          ...aiIndexDocument,
+          automations: [automation, { type: 'workflow', value: 'other' }],
+        })
+      );
+
+      await expect(
+        service.removeAutomation('customer_support', DEFAULT_SPACE, automation)
+      ).resolves.toBe('removed');
+
+      const [indexArgs] = storageClient.index.mock.calls[0];
+      expect(indexArgs.document?.automations).toEqual([{ type: 'workflow', value: 'other' }]);
+      expect(indexArgs.if_seq_no).toBe(7);
+    });
+
+    it('writes nothing when the workflow is not attached', async () => {
+      mockSearchHits(storedHit({ ...aiIndexDocument, automations: [] }));
+
+      await expect(
+        service.removeAutomation('customer_support', DEFAULT_SPACE, automation)
+      ).resolves.toBe('not_attached');
+      expect(storageClient.index).not.toHaveBeenCalled();
+    });
+
+    it('throws AiIndexNotFoundError when the AI index does not exist', async () => {
+      await expect(
+        service.removeAutomation('missing', DEFAULT_SPACE, automation)
+      ).rejects.toBeInstanceOf(AiIndexNotFoundError);
     });
   });
 

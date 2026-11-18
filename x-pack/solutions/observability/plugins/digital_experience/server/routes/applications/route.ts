@@ -9,12 +9,16 @@ import { lazySchema, z } from '@kbn/zod/v4';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import type { ApplicationsResponse } from '../../../common/types/applications';
 import { APM_API_PRIVILEGE, DIGITAL_EXPERIENCE_API_PRIVILEGES } from '../../../common/feature';
+import { OTEL_LOGS_INDEX, OTEL_TRACES_INDEX } from '../../../common/otel_data';
 import { getApplications } from './get_applications';
+import { hasPartialReadAccess } from './get_partial_access';
+import type { ApmIndices } from './classic/create_apm_event_client';
 import { createApmEventClient } from './classic/create_apm_event_client';
 import { getClassicApplications } from './classic/get_classic_applications';
-import { getOtelApplications } from './otel/get_otel_applications';
+import { getOtelApplicationsFromBestSource } from './otel/get_otel_applications_source';
+import { getHistogramInterval } from '../../lib/helpers/time_series';
 import { createDigitalExperienceServerRoute } from '../create_digital_experience_server_route';
-import { timeRangeQuery } from '../params';
+import { START_AFTER_END_ISSUE, isStartBeforeEnd, timeRangeShape, timeZoneShape } from '../params';
 
 export const APPLICATIONS_ENDPOINT = 'GET /internal/digital_experience/applications';
 
@@ -25,7 +29,13 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
   security: {
     authz: { requiredPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.read, APM_API_PRIVILEGE] },
   },
-  params: lazySchema(() => z.object({ query: timeRangeQuery() })),
+  params: lazySchema(() =>
+    z.object({
+      query: z
+        .object({ ...timeRangeShape(), ...timeZoneShape() })
+        .refine(isStartBeforeEnd, START_AFTER_END_ISSUE),
+    })
+  ),
   handler: async ({
     params,
     context,
@@ -33,40 +43,93 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
     plugins,
     isServerless,
     isUxEnabled,
+    sessionsSettings,
+    getSessionsServices,
     logger,
   }): Promise<ApplicationsResponse> => {
-    const { environment } = params.query;
+    const { environment, timeZone } = params.query;
     const start = Date.parse(params.query.start);
     const end = Date.parse(params.query.end);
+    // The same buckets for every source and the response, which the chart reads them from.
+    const histogram = { interval: getHistogramInterval(start, end), timeZone };
 
     const { elasticsearch, savedObjects, uiSettings } = await context.core;
     const esClient = elasticsearch.client.asCurrentUser;
-    // APMEventClient cancels its own searches; the OTel ones get this signal.
+    const internalEsClient = elasticsearch.client.asInternalUser;
+    // APMEventClient cancels its own searches; the OTel ones and the access checks get this signal.
     const signal = getRequestAbortedSignal(request.events.aborted$);
 
     const { apmDataAccess } = plugins;
     // Classic RUM is APM data shown with the ux plugin: stateful only, with both plugins enabled, as
-    // the browser only offers the source with ux.
-    const getClassic =
+    // the browser only offers the source with ux. Its fetch and access check share one read of the
+    // space's APM indices.
+    let apmIndicesPromise: Promise<ApmIndices> | undefined;
+    const getApmIndices =
       isServerless || !isUxEnabled || !apmDataAccess
         ? undefined
-        : async () =>
-            getClassicApplications({
-              apmEventClient: await createApmEventClient({
-                apmDataAccess,
-                esClient,
-                savedObjectsClient: savedObjects.client,
-                uiSettingsClient: uiSettings.client,
-                request,
-              }),
-              start,
-              end,
-              environment,
-            });
+        : () => {
+            apmIndicesPromise ??= apmDataAccess.getApmIndices(savedObjects.client);
+            return apmIndicesPromise;
+          };
 
+    const getClassic = getApmIndices
+      ? async () =>
+          getClassicApplications({
+            apmEventClient: await createApmEventClient({
+              indices: await getApmIndices(),
+              esClient,
+              uiSettingsClient: uiSettings.client,
+              request,
+            }),
+            start,
+            end,
+            environment,
+            histogram,
+          })
+      : undefined;
+
+    const hasPartialClassicAccess = getApmIndices
+      ? () =>
+          hasPartialReadAccess({
+            esClient,
+            internalEsClient,
+            getIndices: async () => {
+              const { transaction, error, span } = await getApmIndices();
+              return [transaction, error, span];
+            },
+            // The default APM indices include the EDOT ones, which hold no Classic RUM data.
+            ignoredPatterns: [OTEL_LOGS_INDEX, OTEL_TRACES_INDEX],
+            signal,
+            logger,
+          })
+      : undefined;
+
+    const { taskManager, sessionsReadable } = await getSessionsServices();
     return getApplications({
-      getOtelApplications: () => getOtelApplications({ esClient, start, end, environment, signal }),
+      histogram: { interval: histogram.interval, start, end },
+      getOtelApplications: () =>
+        getOtelApplicationsFromBestSource({
+          esClient,
+          taskManager,
+          sessionsSettings,
+          sessionsReadable,
+          start,
+          end,
+          environment,
+          histogram,
+          signal,
+          logger,
+        }),
       getClassicApplications: getClassic,
+      hasPartialOtelAccess: () =>
+        hasPartialReadAccess({
+          esClient,
+          internalEsClient,
+          getIndices: async () => [OTEL_LOGS_INDEX, OTEL_TRACES_INDEX],
+          signal,
+          logger,
+        }),
+      hasPartialClassicAccess,
       logger,
     });
   },

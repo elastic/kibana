@@ -66,7 +66,11 @@ import { useVisibleColumns } from '../../hooks/use_visible_columns';
 import { APPLICATIONS_LABEL, LAST_SEEN_LABEL, SOURCE_LABELS } from '../../labels';
 import type { ApplicationRow } from './utils/filter_applications';
 import { applicationsMatching, filterApplications } from './utils/filter_applications';
-import { pageLoadsOfSources, summarizeApplications } from './utils/summarize_applications';
+import {
+  pageLoadsOfSources,
+  sessionsOfSource,
+  summarizeApplications,
+} from './utils/summarize_applications';
 import { EDOT_BROWSER_DOCS_URL } from '../../utils/doc_links';
 import { toTimeRangeQuery } from '../../utils/time_range_query';
 import {
@@ -341,6 +345,18 @@ const UnavailableSourcesCallOut = ({ sources }: { sources: ApplicationSource[] }
   />
 );
 
+const PartiallyAvailableSourcesCallOut = ({ sources }: { sources: ApplicationSource[] }) => (
+  <KbnWarningCallout
+    data-test-subj="digitalExperiencePartiallyAvailableSources"
+    size="s"
+    title={i18n.translate('xpack.digitalExperience.applications.partiallyAvailableSources', {
+      defaultMessage:
+        "You can't read all of the {sources} indices, so the applications, totals and chart may be incomplete. Ask an administrator for read access to them.",
+      values: { sources: sources.map((source) => SOURCE_LABELS[source]).join(', ') },
+    })}
+  />
+);
+
 const FETCH_ERROR_TITLE = i18n.translate('xpack.digitalExperience.applications.fetchError', {
   defaultMessage: 'Could not load the applications',
 });
@@ -380,7 +396,7 @@ const HIDDEN_BY_DEFAULT: OptionalColumnId[] = ['fcp', 'ttfb', 'jsErrors'];
 
 const HIDDEN_COLUMNS_STORAGE_KEY = 'xpack.digitalExperience.applications.hiddenColumns';
 
-const NO_PAGE_LOADS: PageLoadsOverTime = { otel: [], classic: [] };
+const NO_PAGE_LOADS: Pick<PageLoadsOverTime, ApplicationSource> = { otel: [], classic: [] };
 
 export function ApplicationsListPage() {
   const { application, ux } = useKibanaServices();
@@ -395,18 +411,21 @@ export function ApplicationsListPage() {
 
   const apiClient = useApiClient();
 
+  const { timeZone } = formatters;
+
   const {
     value: response,
     loading,
     error,
     refresh,
   } = useAbortableAsync(
-    async ({ signal }) =>
-      apiClient.fetch('GET /internal/digital_experience/applications', {
+    async ({ signal }) => {
+      return apiClient.fetch('GET /internal/digital_experience/applications', {
         signal,
-        params: { query: toTimeRangeQuery(timeRange, environment) },
-      }),
-    [apiClient, timeRange, environment],
+        params: { query: toTimeRangeQuery(timeRange, environment, timeZone) },
+      });
+    },
+    [apiClient, timeRange, environment, timeZone],
     { unsetValueOnError: true }
   );
   // Nothing has been fetched before the first request starts.
@@ -441,11 +460,17 @@ export function ApplicationsListPage() {
       ),
     [response, selectedSource]
   );
+  const pageLoadsOfResponse = response?.pageLoadsOverTime ?? NO_PAGE_LOADS;
   const pageLoadsOverTime = useMemo(
-    () => pageLoadsOfSources(response?.pageLoadsOverTime ?? NO_PAGE_LOADS, selectedSource),
+    () => pageLoadsOfSources(pageLoadsOfResponse, selectedSource),
+    [pageLoadsOfResponse, selectedSource]
+  );
+  const sessionsOverTime = useMemo(
+    () => sessionsOfSource(response?.sessionsOverTime ?? null, selectedSource),
     [response, selectedSource]
   );
   const unavailableSources = response?.unavailableSources ?? [];
+  const partiallyAvailableSources = response?.partiallyAvailableSources ?? [];
 
   const { visibleColumns, setVisibleColumns } = useVisibleColumns({
     storageKey: HIDDEN_COLUMNS_STORAGE_KEY,
@@ -639,10 +664,18 @@ export function ApplicationsListPage() {
             <EuiSpacer size="m" />
           </>
         )}
+        {partiallyAvailableSources.length > 0 && (
+          <>
+            <PartiallyAvailableSourcesCallOut sources={partiallyAvailableSources} />
+            <EuiSpacer size="m" />
+          </>
+        )}
         <ApplicationsSummaryPanel summary={summary} isLoading={isLoading} />
         <EuiSpacer size="m" />
         <PageLoadsChart
-          points={pageLoadsOverTime}
+          pageLoads={pageLoadsOverTime}
+          sessions={sessionsOverTime}
+          histogram={response?.pageLoadsOverTime.histogram}
           isLoading={isLoading}
           onTimeRangeSelect={setTimeRange}
         />

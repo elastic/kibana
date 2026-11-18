@@ -479,6 +479,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       attackDiscovery: `${ELASTIC_DOCS}solutions/security/ai/attack-discovery`,
       mitreCoverage: `${ELASTIC_DOCS}solutions/security/detect-and-alert/mitre-attack-coverage`,
       remapMitreAttack: `${ELASTIC_DOCS}solutions/security/detect-and-alert/remap-mitre-attack`,
+      valueReport: `${ELASTIC_DOCS}solutions/security/ai/ease/ease-value-report`,
     },
     server: {
       protocol: `${ELASTIC_DOCS}reference/kibana/configuration-reference/general-settings#server-protocol`,
@@ -997,6 +998,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       installElasticAgentStandalone: `${ELASTIC_DOCS}reference/fleet/install-standalone-elastic-agent`,
       grantESAccessToStandaloneAgents: `${ELASTIC_DOCS}reference/fleet/grant-access-to-elasticsearch`,
       upgradeElasticAgent: `${ELASTIC_DOCS}reference/fleet/upgrade-elastic-agent`,
+      unenrollElasticAgent: `${ELASTIC_DOCS}reference/fleet/unenroll-elastic-agent`,
       learnMoreBlog: `https://www.elastic.co/blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic`,
       apiKeysLearnMore: isServerless
         ? `${ELASTIC_DOCS}deploy-manage/api-keys/serverless-project-api-keys`
@@ -1186,6 +1188,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       limitationsKnownIssues: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/limitations-known-issues`,
       learnMore: `${ELASTIC_DOCS}explore-analyze/ai-features/ai-chat-experiences/ai-agent-or-ai-assistant`,
       aiAssistant: `${ELASTIC_DOCS}explore-analyze/ai-features/ai-chat-experiences/ai-assistant`,
+      replaceKnowledgeBaseContent: `${ELASTIC_DOCS}explore-analyze/ai-features/ai-chat-experiences/ai-agent-or-ai-assistant#replace-knowledge-base-content`,
     },
     applicationConnections: {
       oauthClients: `${ELASTIC_DOCS}deploy-manage/app-connections/oauth-clients`,
