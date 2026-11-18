@@ -128,9 +128,27 @@ describe('buildInfrastructureConceptDescription', () => {
       breakdownFields: ['orchestrator.cluster.name', 'kubernetes.node.name'],
     });
 
-    expect(description).toContain('188 nodes across 3 clusters seen in the last hour');
+    expect(description).toContain('188 nodes seen in the last hour across 3 clusters');
     expect(description).toContain('orchestrator.cluster.name and kubernetes.node.name');
     expect(description).not.toContain('Members');
+    expect(
+      buildInfrastructureConceptDescription({
+        concept: 'deployments',
+        memberCount: 5,
+        clusterCount: 0,
+        unclusteredCount: 5,
+        breakdownFields: ['kubernetes.namespace'],
+      })
+    ).toContain('5 deployments seen in the last hour, with no cluster name reported');
+    expect(
+      buildInfrastructureConceptDescription({
+        concept: 'deployments',
+        memberCount: 5,
+        clusterCount: 2,
+        unclusteredCount: 1,
+        breakdownFields: ['kubernetes.namespace'],
+      })
+    ).toContain('across 2 clusters, 1 with no cluster name reported');
   });
 });
 
@@ -159,7 +177,7 @@ describe('Kubernetes type KIs', () => {
         type: 'infrastructure',
         subtype: 'k8s.deployment',
         title: 'Kubernetes deployments',
-        evidence: ['61 deployments across 2 clusters seen in the last hour'],
+        evidence: ['61 deployments seen in the last hour across 2 clusters'],
         properties: expect.objectContaining({
           breakdown: [
             'orchestrator.cluster.name',
@@ -432,7 +450,7 @@ describe('identifyMetricsEntities', () => {
       'k8s.daemonsets:kubernetes-source',
     ]);
     expect(byId.get('k8s.nodes:kubernetes-source')?.evidence).toEqual([
-      '3 nodes across 2 clusters seen in the last hour',
+      '3 nodes seen in the last hour across 2 clusters',
       'data_stream.dataset: kubernetes.node',
     ]);
     expect(byId.get('hosts:kubernetes-source')?.evidence).toEqual([

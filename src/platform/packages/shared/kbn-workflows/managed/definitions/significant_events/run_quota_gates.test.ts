@@ -122,11 +122,32 @@ describe('Significant Events run quota workflow contracts', () => {
   });
 
   it('runs detection and KI extraction gates only for workers whose root origin is scheduled', () => {
-    expect(quotaSteps.map((step) => step.with?.body?.group).sort()).toEqual(
+    expect([...new Set(quotaSteps.map((step) => step.with?.body?.group))].sort()).toEqual(
       ['detection', 'ki_extraction'].sort()
     );
 
     const onboardingGate = findStep(definitions.onboarding, 'check_budget');
+    const fallbackGate = findStep(definitions.onboarding, 'check_fallback_budget');
+    expect(fallbackGate.if).toBe(
+      '${{ inputs.rootTriggeredBy == "scheduled" and variables.metricsEntitiesHandled == false }}'
+    );
+    expect(
+      evaluateExpression(fallbackGate.if as string, {
+        inputs: { rootTriggeredBy: 'scheduled' },
+        variables: { metricsEntitiesHandled: false },
+      })
+    ).toBe(true);
+    expect(
+      evaluateExpression(fallbackGate.if as string, {
+        inputs: { rootTriggeredBy: 'scheduled' },
+        variables: { metricsEntitiesHandled: true },
+      })
+    ).toBe(false);
+    expect(
+      evaluateStepCondition(findStep(definitions.onboarding, 'exit_if_fallback_budget_denied'), {
+        steps: { check_fallback_budget: { output: { allowed: false } } },
+      })
+    ).toBe(true);
     expect(onboardingGate.if).toBe(
       '${{ inputs.rootTriggeredBy == "scheduled" and inputs.sourceType != "metrics" }}'
     );
@@ -141,7 +162,9 @@ describe('Significant Events run quota workflow contracts', () => {
       })
     ).toBe(false);
 
-    for (const step of quotaSteps.filter((quotaStep) => quotaStep !== onboardingGate)) {
+    for (const step of quotaSteps.filter(
+      (quotaStep) => quotaStep !== onboardingGate && quotaStep !== fallbackGate
+    )) {
       expect(step.if).toBe('${{ inputs.rootTriggeredBy == "scheduled" }}');
       expect(
         evaluateExpression(step.if as string, { inputs: { rootTriggeredBy: 'scheduled' } })

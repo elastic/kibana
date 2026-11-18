@@ -124,6 +124,7 @@ ${WORKLOAD_OWNER_DERIVATION}
 | STATS replicas = COUNT_DISTINCT(kubernetes.pod.uid), last_seen = MAX(@timestamp)
   BY orchestrator.cluster.name, kubernetes.namespace, kind, workload
 | STATS member_count = COUNT(*), cluster_count = COUNT_DISTINCT(orchestrator.cluster.name),
+        unclustered_count = COUNT(*) WHERE orchestrator.cluster.name IS NULL,
         activity = SUM(replicas), last_seen = MAX(last_seen)
   BY kind
 | SORT activity DESC
@@ -172,6 +173,7 @@ export const foldWorkloadRows = (
     }
     const memberCount = typeof row.member_count === 'number' ? row.member_count : 0;
     const clusterCount = typeof row.cluster_count === 'number' ? row.cluster_count : 0;
+    const unclusteredCount = typeof row.unclustered_count === 'number' ? row.unclustered_count : 0;
     const breakdown = getWorkloadBreakdown(kind);
     const entityStoreType = getKubernetesEntityStoreType(kind);
     return [
@@ -184,9 +186,12 @@ export const foldWorkloadRows = (
           concept: plural,
           memberCount,
           clusterCount,
+          unclusteredCount,
           breakdownFields: breakdown,
         }),
-        evidence: [buildConceptCountLine({ concept: plural, memberCount, clusterCount })],
+        evidence: [
+          buildConceptCountLine({ concept: plural, memberCount, clusterCount, unclusteredCount }),
+        ],
         filter: buildTypeFilter(
           buildDatasetFilter(KUBERNETES_POD_DATASETS),
           WORKLOAD_TYPE_FILTERS[kind]

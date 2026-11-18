@@ -114,7 +114,7 @@ triggers:
         required: false
         description: "Root workflow trigger type propagated by a managed driver."
 steps:
-  # Metrics onboarding calls no LLM, so it does not spend the KI extraction budget.
+  # Metrics sources are gated later, only when they fall back to the LLM path.
   - name: check_budget
     type: kibana.request
     if: '${{ inputs.rootTriggeredBy == "scheduled" and inputs.sourceType != "metrics" }}'
@@ -207,6 +207,45 @@ steps:
             ${{ steps.run_metrics_entities.error != null
               or steps.run_metrics_entities.output.handled != false }}
           metricsEntitiesSkipReason: "${{ steps.run_metrics_entities.output.skipReason | default: '' }}"
+      # A metrics source the entity-key table can't read falls back to the LLM path, which spends the budget.
+      - name: check_fallback_budget
+        type: kibana.request
+        if: '${{ inputs.rootTriggeredBy == "scheduled" and variables.metricsEntitiesHandled == false }}'
+        with:
+          method: POST
+          path: '/s/{{ workflow.spaceId }}/internal/significant_events/run_quotas/_consume'
+          body:
+            group: 'ki_extraction'
+          headers:
+            x-elastic-internal-origin: 'kibana'
+            x-nightshift-source-revision: "{{ inputs.sourceRevision }}"
+        timeout: '10s'
+        on-failure:
+          continue: true
+      - name: exit_if_fallback_budget_denied
+        type: if
+        condition: '${{ steps.check_fallback_budget.output.allowed == false }}'
+        steps:
+          - name: output_fallback_budget_denied
+            type: workflow.output
+            status: cancelled
+            with:
+              sourceId: '${{ inputs.sourceId }}'
+              featuresSkipped: true
+              featuresConnectorUsed: ''
+              discoveredFeatures: []
+              featuresTokensUsed: { prompt: 0, completion: 0, total: 0 }
+              queriesSkipped: true
+              queriesConnectorUsed: ''
+              persistedQueries: []
+              queriesTokensUsed: { prompt: 0, completion: 0, total: 0 }
+              metricsEntitiesCount: '${{ variables.metricsEntitiesCount }}'
+              metricsEntitiesUncoveredDatasetsCount: '${{ variables.metricsEntitiesUncoveredDatasetsCount }}'
+              metricsEntitiesExcludedSkipped: '${{ variables.metricsEntitiesExcludedSkipped }}'
+              metricsEntitiesDroppedOverflow: '${{ variables.metricsEntitiesDroppedOverflow }}'
+              metricsEntitiesHandled: false
+              metricsEntitiesSkipReason: '${{ variables.metricsEntitiesSkipReason }}'
+              keepAliveRefreshed: 0
       - name: set_metrics_skips
         type: if
         condition: "${{ variables.metricsEntitiesHandled == true }}"
