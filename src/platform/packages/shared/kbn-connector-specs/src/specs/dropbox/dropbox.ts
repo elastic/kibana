@@ -185,8 +185,9 @@ export const Dropbox: ConnectorSpec = {
       input: CreateSharedLinkInputSchema,
       handler: async (ctx, input: CreateSharedLinkInput) => {
         return callToolJson(ctx, 'create_shared_link', {
-          path: input.path,
-          visibility: input.visibility,
+          path_or_file_id: input.path,
+          // The tool takes a Dropbox link audience, which is what visibility chooses between.
+          audience: input.visibility === 'team_only' ? 'team' : 'public',
         });
       },
     },
