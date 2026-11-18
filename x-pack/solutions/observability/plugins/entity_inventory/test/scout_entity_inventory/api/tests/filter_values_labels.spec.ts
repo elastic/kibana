@@ -16,6 +16,7 @@ import {
   planSources,
 } from '../../../../server/inventory/generator';
 import type { AttributeSelections } from '../../../../server/inventory/generator';
+import { MAX_FILTER_VALUE_LENGTH } from '../../../../common';
 import type { QueryEngine } from '../../../../common';
 
 // Unlike the other specs, this one does not call the route: no registered definition labels an
@@ -94,6 +95,13 @@ apiTest.describe(
       const documents = [
         { 'host.name': 'multi', 'host.architecture': ['aarch64', 'arm'], 'host.os.type': 'linux' },
         { 'host.name': 'other', 'host.architecture': 'x86', 'host.os.type': 'windows' },
+        // Values the route could not take back as a selection: empty, and over the length limit.
+        { 'host.name': 'empty', 'host.architecture': '', 'host.os.type': 'macos' },
+        {
+          'host.name': 'long',
+          'host.architecture': 'x'.repeat(MAX_FILTER_VALUE_LENGTH + 1),
+          'host.os.type': 'macos',
+        },
       ];
       await esClient.bulk({
         refresh: 'wait_for',
@@ -163,6 +171,18 @@ apiTest.describe(
           expect(
             await valuesOf(esClient, engine, { attribute: 'arch', selections: { os: ['linux'] } })
           ).toStrictEqual(['arm64']);
+        }
+      );
+
+      apiTest(
+        `through the ${engine} plan: does not offer an empty value or one the route would reject`,
+        async ({ esClient }) => {
+          const values = await valuesOf(esClient, engine, { attribute: 'arch', limit: 100 });
+
+          expect(values).not.toContain('');
+          expect(values.every((value) => String(value).length <= MAX_FILTER_VALUE_LENGTH)).toBe(
+            true
+          );
         }
       );
 

@@ -89,7 +89,7 @@ describe('buildAttributeValuesQuery', () => {
       `| WHERE ${WINDOW_PREDICATE}`,
       `    AND ${identity.presenceFilter}`,
       '| STATS `last_seen` = MAX(`@timestamp`) BY `value` = TO_STRING(`orchestrator.cluster.name`)',
-      '| WHERE `value` IS NOT NULL',
+      '| WHERE `value` IS NOT NULL AND LENGTH(`value`) > 0 AND LENGTH(`value`) <= 256',
       '| KEEP `value`, `last_seen`',
       '| SORT `value` ASC',
       `| LIMIT ${LIMIT}`,
@@ -159,7 +159,7 @@ describe('buildAttributeValuesQuery', () => {
         '| STATS `last_seen` = MAX(`@timestamp`) BY `value` = TO_STRING(`orchestrator.cluster.name`)',
         '| EVAL `value` = CASE(`value` == ?lk0, ?lv0, `value` == ?lk1, ?lv1, `value`)',
         '| STATS `last_seen` = MAX(`last_seen`) BY `value`',
-        '| WHERE `value` IS NOT NULL',
+        '| WHERE `value` IS NOT NULL AND LENGTH(`value`) > 0 AND LENGTH(`value`) <= 256',
       ]);
       expect(query?.params).toEqual([
         { from: window.from },

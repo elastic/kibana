@@ -6,6 +6,7 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
+import { MAX_FILTER_VALUE_LENGTH } from '../../../common';
 import type { AttributeValuesResponse } from '../../../common';
 import { createEntityInventoryServerRoute } from '../create_server_route';
 import { INTERIM_AUTHZ } from '../interim_authz';
@@ -22,9 +23,8 @@ import { createAbortSignal } from '../utils/create_abort_signal';
 const MAX_TYPES = 32;
 const MAX_FILTERS = 16;
 const MAX_VALUES = 100;
-const MAX_TEXT_LENGTH = 256;
 
-const textParam = lazySchema(() => z.string().min(1).max(MAX_TEXT_LENGTH));
+const textParam = lazySchema(() => z.string().min(1).max(MAX_FILTER_VALUE_LENGTH));
 
 export const filterValuesRoute = createEntityInventoryServerRoute({
   endpoint: 'POST /internal/entity_inventory/filters/_values',

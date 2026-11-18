@@ -16,6 +16,7 @@ import { resolveIdentityPlan } from './identity';
 import { assertParses } from './parse_guard';
 import { CONTINUATION, INDEX_MODE, TIMESTAMP } from './constants';
 import { assertValidLimit, sourceCommandOf } from './utils';
+import { MAX_FILTER_VALUE_LENGTH } from '../../../common';
 import type { NamedParams } from '../../../common';
 import type { GeneratedQuery, QueryPlan, TimeWindow } from './types';
 
@@ -102,7 +103,7 @@ export const buildAttributeValuesQuery = ({
     `| WHERE ${predicates.join(`${CONTINUATION}AND `)}`,
     `| STATS ${LAST_SEEN} = MAX(${TIMESTAMP}) BY ${VALUE} = TO_STRING(${quoteIdentifier(field)})`,
     ...labelled.steps,
-    `| WHERE ${VALUE} IS NOT NULL`,
+    `| WHERE ${VALUE} IS NOT NULL AND LENGTH(${VALUE}) > 0 AND LENGTH(${VALUE}) <= ${MAX_FILTER_VALUE_LENGTH}`,
     `| KEEP ${VALUE}, ${LAST_SEEN}`,
     `| SORT ${VALUE} ASC`,
     `| LIMIT ${limit}`,

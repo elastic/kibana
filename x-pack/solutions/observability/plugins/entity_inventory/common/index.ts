@@ -10,6 +10,9 @@ import type { estypes } from '@elastic/elasticsearch';
 /** The most rows one list request may ask for, and the route's default `limit`. */
 export const MAX_LIST_LIMIT = 9_999;
 
+/** The longest text the values route accepts as a filter value, and so the longest it offers. */
+export const MAX_FILTER_VALUE_LENGTH = 256;
+
 /** One ES|QL cell: a scalar, or an array when the column is multi-valued. */
 export type ESQLValue = estypes.FieldValue | estypes.FieldValue[];
 
