@@ -7,7 +7,7 @@
 
 import type { ErrorType } from 'eventsource-parser';
 import { each, find, get, keyBy, map, reduce, sortBy } from 'lodash';
-import { extent, max, min } from 'd3';
+import { extent, max, min } from 'd3-array';
 
 import type { estypes } from '@elastic/elasticsearch';
 
@@ -75,7 +75,7 @@ export function chartLimits(data: ChartPoint[] = []) {
     }
     return metricValue;
   });
-  const limits = { max: domain[1], min: domain[0] };
+  const limits = { max: domain[1] as number, min: domain[0] as number };
 
   if (limits.max === limits.min) {
     // @ts-ignore
