@@ -60,7 +60,6 @@ export const MIN_WINDOW_MS = MINUTE_MS;
 export const MAX_WINDOW_MS = DAY_MS;
 /** The first window of a backfill; it then grows or shrinks with the sessions found. */
 export const INITIAL_WINDOW_MS = HOUR_MS;
-const BULK_SIZE = 2000;
 /**
  * Summary rows turned into documents per tick. Mapping a full batch at once blocked a small Kibana's
  * event loop for about half a second, delaying its other requests and tasks.
@@ -162,41 +161,46 @@ const DOCUMENT_ERRORS = new Set([
 const isRetryable = ({ status, error }: estypes.BulkResponseItem): boolean =>
   status !== 400 || !DOCUMENT_ERRORS.has(error?.type ?? '');
 
+/**
+ * Writes a batch's summaries in one bulk request: on serverless a bulk waits about 0.15 to 0.4s for
+ * durability whatever its size, so 5,000 summaries in bulks of 2,000 waited three times as long.
+ */
 const writeSessions = async (
   esClient: ElasticsearchClient,
   documents: SessionDocument[],
   signal: AbortSignal,
   logger: Logger
 ): Promise<void> => {
-  for (let start = 0; start < documents.length; start += BULK_SIZE) {
-    const operations = documents.slice(start, start + BULK_SIZE).flatMap((document) => [
-      {
-        index: {
-          _index: SESSIONS_INDEX,
-          _id: sessionDocumentId(document.service.name, document.session.id),
-        },
+  if (documents.length === 0) {
+    return;
+  }
+  const operations = documents.flatMap((document) => [
+    {
+      index: {
+        _index: SESSIONS_INDEX,
+        _id: sessionDocumentId(document.service.name, document.session.id),
       },
-      document,
-    ]);
-    const response = await esClient.bulk({ operations }, { signal });
-    if (!response.errors) {
-      continue;
-    }
-    const failures = response.items.flatMap((item) => (item.index?.error ? [item.index] : []));
-    const retryable = failures.find(isRetryable);
-    if (retryable) {
-      const { type, reason } = retryable.error ?? {};
-      throw new Error(`Writing session summaries failed: ${type ?? 'unknown'}: ${reason ?? ''}`);
-    }
-    const [rejected] = failures;
-    if (rejected) {
-      const { type, reason } = rejected.error ?? {};
-      logger.warn(
-        `Elasticsearch rejected ${failures.length} session ${
-          failures.length === 1 ? 'summary, which is' : 'summaries, which are'
-        } left out: ${type ?? 'unknown'}: ${reason ?? ''}`
-      );
-    }
+    },
+    document,
+  ]);
+  const response = await esClient.bulk({ operations }, { signal });
+  if (!response.errors) {
+    return;
+  }
+  const failures = response.items.flatMap((item) => (item.index?.error ? [item.index] : []));
+  const retryable = failures.find(isRetryable);
+  if (retryable) {
+    const { type, reason } = retryable.error ?? {};
+    throw new Error(`Writing session summaries failed: ${type ?? 'unknown'}: ${reason ?? ''}`);
+  }
+  const [rejected] = failures;
+  if (rejected) {
+    const { type, reason } = rejected.error ?? {};
+    logger.warn(
+      `Elasticsearch rejected ${failures.length} session ${
+        failures.length === 1 ? 'summary, which is' : 'summaries, which are'
+      } left out: ${type ?? 'unknown'}: ${reason ?? ''}`
+    );
   }
 };
 

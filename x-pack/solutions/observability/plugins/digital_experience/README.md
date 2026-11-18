@@ -316,8 +316,10 @@ Each run:
    attributes, web vitals and journey of each session (see [Summary query](#summary-query)).
 4. Turns the rows into summaries 500 at a time, letting the event loop run between chunks, as a
    whole batch at once blocked a small Kibana for about half a second. Writes one summary per
-   session, keyed by a hash of `service.name` + `session.id`, and moves the checkpoint past the
-   window.
+   session, keyed by a hash of `service.name` + `session.id`, in one bulk request per batch, and
+   moves the checkpoint past the window. On serverless a bulk waits about 0.15 to 0.4 seconds for
+   durability whatever its size: 8,000 summaries took 2.3 s in four sequential bulks and 1.4 s in
+   one.
 
 A run starts no window after 45 seconds, and runs again right away while it is behind. On the first
 run after sessions are enabled, it starts from 30 days ago, at the start of that day in UTC, so it
