@@ -162,7 +162,9 @@ describe('resumeSyncParentIfNeeded', () => {
       expect.objectContaining({
         type: TASK_RECOVERY_ERROR_TYPE,
         message: expect.stringContaining('had no authenticated resume task to wake'),
-      })
+      }),
+      {},
+      expect.objectContaining({ id: parentExecId, status: ExecutionStatus.WAITING_FOR_CHILD })
     );
     expect(logger.error).toHaveBeenCalledWith(
       expect.stringContaining(`Marked parent workflow ${parentExecId} FAILED`)
@@ -202,7 +204,12 @@ describe('resumeSyncParentIfNeeded', () => {
       workflowExecutionRepository,
       repos.stepExecutionRepository,
       parentExecId,
-      expect.anything()
+      expect.anything(),
+      {},
+      expect.objectContaining({
+        id: parentExecId,
+        context: expect.objectContaining({ parentWorkflowExecutionId: grandparentExecId }),
+      })
     );
     expect(internalResumeWorkflowExecution).toHaveBeenCalledWith(
       grandparentExecId,

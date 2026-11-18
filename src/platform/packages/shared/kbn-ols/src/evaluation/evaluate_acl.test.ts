@@ -14,7 +14,7 @@ import {
   type FixtureProbe,
 } from '../__fixtures__';
 import { normalizeAclSource, type StoredAcl } from '../acl';
-import { compareLevels, type EntryLevel } from '../levels';
+import { compareLevels, type EntryAccess } from '../levels';
 import {
   evaluateAcl,
   generalAccessPermits,
@@ -27,7 +27,7 @@ import {
  * The levels each expectation is checked at, and the operation that stands for each of them in
  * the fixture policy. Access management stands for `manage`.
  */
-const LEVEL_OPERATIONS: Array<[EntryLevel, string]> = [
+const LEVEL_OPERATIONS: Array<[EntryAccess, string]> = [
   ['view', 'view'],
   ['use', 'use'],
   ['edit', 'edit'],
@@ -36,7 +36,7 @@ const LEVEL_OPERATIONS: Array<[EntryLevel, string]> = [
 
 const PROBES = Object.keys(FIXTURE_PROBES) as FixtureProbe[];
 
-const reaches = (probeLevel: EntryLevel | undefined, level: EntryLevel) =>
+const reaches = (probeLevel: EntryAccess | undefined, level: EntryAccess) =>
   !!probeLevel && compareLevels(probeLevel, level) >= 0;
 
 const OWNER = FIXTURE_PROBES.owner;
@@ -45,7 +45,7 @@ const GRANTEE = FIXTURE_PROBES.grantee;
 const acl = (overrides: Partial<StoredAcl> = {}): StoredAcl => ({
   version: [1],
   owner: { type: ['user'], id: [OWNER.id] },
-  general_access: ['none'],
+  general: { access: ['none'] },
   entries: [],
   ...overrides,
 });
@@ -104,7 +104,7 @@ describe('evaluateAcl', () => {
   it('gives the owner every operation, access management, and transfer', () => {
     const decision = evaluateAcl({ policy: FIXTURE_POLICY, acl: acl(), principal: OWNER });
 
-    expect(decision).toMatchObject({ state: 'valid', level: 'none', isOwner: true });
+    expect(decision).toMatchObject({ state: 'valid', access: 'none', isOwner: true });
     expect(sorted(decision.operations)).toEqual([
       'delete',
       'edit',
@@ -125,20 +125,20 @@ describe('evaluateAcl', () => {
       principal: GRANTEE,
     });
 
-    expect(decision).toMatchObject({ level: 'use', isOwner: false, restricted: true });
+    expect(decision).toMatchObject({ access: 'use', isOwner: false, restricted: true });
     expect(sorted(decision.operations)).toEqual(['use', 'view']);
   });
 
   it('gives an entry at manage access management, but not transfer', () => {
     const decision = evaluateAcl({
-      policy: { ...FIXTURE_POLICY, entryLevels: ['use', 'manage'] },
+      policy: { ...FIXTURE_POLICY, entryAccess: ['use', 'manage'] },
       acl: acl({
         entries: [{ type: ['user'], id: [GRANTEE.id], access: ['manage'], added_at: [] }],
       }),
       principal: GRANTEE,
     });
 
-    expect(decision.level).toBe('manage');
+    expect(decision.access).toBe('manage');
     expect(decision.operations.has('manage_access')).toBe(true);
     expect(decision.operations.has('transfer')).toBe(false);
   });
@@ -163,7 +163,7 @@ describe('evaluateAcl', () => {
       recovery: true,
     });
 
-    expect(decision).toMatchObject({ state: 'invalid', level: 'none', isOwner: false });
+    expect(decision).toMatchObject({ state: 'invalid', access: 'none', isOwner: false });
     expect(sorted(decision.operations)).toEqual(['manage_access', 'transfer', 'view']);
   });
 
@@ -171,8 +171,8 @@ describe('evaluateAcl', () => {
     const decision = evaluateAcl({
       policy: {
         ...FIXTURE_POLICY,
-        generalAccessLevels: ['none'],
-        defaultGeneralAccessLevel: 'none',
+        generalAccess: ['none'],
+        defaultGeneralAccess: 'none',
       },
       principal: GRANTEE,
       recovery: true,
@@ -199,7 +199,7 @@ describe('generalAccessPermits', () => {
     (_, { source, policy = FIXTURE_POLICY, access }) => {
       const stored = normalizeAclSource(source);
       for (const operation of Object.keys(policy.operations)) {
-        const level = policy.operations[operation].level;
+        const level = policy.operations[operation].access;
         expect({ operation, permits: generalAccessPermits(policy, stored, operation) }).toEqual({
           operation,
           permits: reaches(access.anonymous, level),
@@ -217,13 +217,13 @@ describe('generalAccessPermits', () => {
 describe('isRestricted', () => {
   it('is true only for a valid ACL with lower general access or an entry', () => {
     expect(isRestricted(FIXTURE_POLICY, undefined)).toBe(false);
-    expect(isRestricted(FIXTURE_POLICY, acl({ general_access: ['edit'] }))).toBe(false);
-    expect(isRestricted(FIXTURE_POLICY, acl({ general_access: ['use'] }))).toBe(true);
+    expect(isRestricted(FIXTURE_POLICY, acl({ general: { access: ['edit'] } }))).toBe(false);
+    expect(isRestricted(FIXTURE_POLICY, acl({ general: { access: ['use'] } }))).toBe(true);
     expect(
       isRestricted(
         FIXTURE_POLICY,
         acl({
-          general_access: ['edit'],
+          general: { access: ['edit'] },
           entries: [{ type: ['user'], id: [GRANTEE.id], access: ['use'], added_at: [] }],
         })
       )
@@ -239,7 +239,7 @@ describe('isRestricted', () => {
       { type: ['user'], id: [], access: ['use'], added_at: [] },
     ]) {
       expect(
-        isRestricted(FIXTURE_POLICY, acl({ general_access: ['edit'], entries: [entry] }))
+        isRestricted(FIXTURE_POLICY, acl({ general: { access: ['edit'] }, entries: [entry] }))
       ).toBe(false);
     }
   });
@@ -248,7 +248,7 @@ describe('isRestricted', () => {
 describe('toObjectDecision', () => {
   const decision = (operations: string[]): AclDecision => ({
     state: 'valid',
-    level: 'none',
+    access: 'none',
     isOwner: false,
     restricted: true,
     operations: new Set(operations),
