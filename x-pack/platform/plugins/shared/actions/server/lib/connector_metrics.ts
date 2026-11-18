@@ -7,6 +7,7 @@
 
 import type { Attributes } from '@opentelemetry/api';
 import { metrics, ValueType } from '@opentelemetry/api';
+import type { ConnectorExecuteFailureClass } from '../../common';
 import { ActionExecutionSourceType } from './action_execution_source';
 
 const meter = metrics.getMeter('kibana.actions');
@@ -182,6 +183,8 @@ export interface RecordConnectorExecuteOpts {
   subAction?: string;
   errorType?: ConnectorExecuteErrorType;
   errorSource?: ConnectorErrorSource;
+  /** Why a connector's own handler failed, when the failure came from one. */
+  failureClass?: ConnectorExecuteFailureClass;
   durationMs?: number;
 }
 
@@ -192,6 +195,7 @@ export const recordConnectorExecute = ({
   subAction,
   errorType,
   errorSource,
+  failureClass,
   durationMs,
 }: RecordConnectorExecuteOpts): void => {
   const attributes: Attributes = {
@@ -206,6 +210,7 @@ export const recordConnectorExecute = ({
   connectorExecuteCounter.add(1, {
     ...attributes,
     ...(errorType && errorSource ? { 'error.source': errorSource } : {}),
+    ...(errorType && failureClass ? { 'error.failure_class': failureClass } : {}),
   });
 
   if (durationMs !== undefined) {

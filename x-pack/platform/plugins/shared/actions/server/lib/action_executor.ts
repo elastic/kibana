@@ -711,6 +711,7 @@ export class ActionExecutor {
             : {
                 errorType,
                 errorSource: result.errorSource === TaskErrorSource.USER ? 'user' : 'framework',
+                failureClass: result.failureClass,
               }),
           durationMs: Date.now() - executionStartedAt,
         });

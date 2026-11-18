@@ -167,6 +167,54 @@ describe('connector metrics', () => {
       });
     });
 
+    it('records the failure class on the counter, not on the duration', () => {
+      recordConnectorExecute({
+        connectorType: '.sharepoint',
+        specBased: true,
+        origin: 'agent_builder',
+        subAction: 'search',
+        errorType: 'other',
+        errorSource: 'user',
+        failureClass: 'vendor_4xx',
+        durationMs: 8,
+      });
+
+      expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
+        'connector.type': '.sharepoint',
+        'connector.spec_based': true,
+        'connector.origin': 'agent_builder',
+        'connector.sub_action': 'search',
+        success: false,
+        'error.type': 'other',
+        'error.source': 'user',
+        'error.failure_class': 'vendor_4xx',
+      });
+      expect(connectorExecuteDuration.record).toHaveBeenCalledWith(8, {
+        'connector.type': '.sharepoint',
+        'connector.spec_based': true,
+        'connector.origin': 'agent_builder',
+        'connector.sub_action': 'search',
+        success: false,
+        'error.type': 'other',
+      });
+    });
+
+    it('leaves out the failure class when the execution succeeded', () => {
+      recordConnectorExecute({
+        connectorType: '.sharepoint',
+        specBased: true,
+        origin: 'saved_object',
+        failureClass: 'handler',
+      });
+
+      expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
+        'connector.type': '.sharepoint',
+        'connector.spec_based': true,
+        'connector.origin': 'saved_object',
+        success: true,
+      });
+    });
+
     it('omits the sub-action and the duration when they are not known', () => {
       recordConnectorExecute({
         connectorType: '.sharepoint',
