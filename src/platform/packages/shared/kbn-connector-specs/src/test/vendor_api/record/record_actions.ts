@@ -18,10 +18,10 @@ import type {
 } from '@kbn/connector-emulate';
 import { InvalidSchemaError } from '@kbn/connector-emulate';
 import type { ActionDefinition, ConnectorSpec } from '../../../connector_spec';
-import type { ContractContext, ContractContextOptions } from '../../create_contract_context';
-import { createContractContext } from '../../create_contract_context';
-import type { FieldUse } from '../../field_use';
-import { createFieldUse } from '../../field_use';
+import type { ContractContext, ContractContextOptions } from '../create_contract_context';
+import { createContractContext } from '../create_contract_context';
+import type { FieldUse } from '../field_use';
+import { createFieldUse } from '../field_use';
 import type { ActionFixture, QueryOperation, VendorApiFixtures } from './fixtures';
 import { toResponseFixtures } from './fixtures';
 import type { GeneratedInputs, RejectedInput } from './generate_action_inputs';

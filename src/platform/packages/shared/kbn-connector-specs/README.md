@@ -690,10 +690,10 @@ import type {
 
 ## Contract Tests
 
-`createContractContext` (in `src/test`) runs actions offline against the vendor's OpenAPI spec, using [`@kbn/connector-emulate`](../kbn-connector-emulate/README.md). The handler gets a real axios client, authenticated by the connector's own auth type, whose requests are validated and answered by the mock:
+`createContractContext` (in `src/test/vendor_api`) runs actions offline against the vendor's OpenAPI spec, using [`@kbn/connector-emulate`](../kbn-connector-emulate/README.md). The handler gets a real axios client, authenticated by the connector's own auth type, whose requests are validated and answered by the mock:
 
 ```typescript
-import { createContractContext } from '../../test/create_contract_context';
+import { createContractContext } from '../../test/vendor_api/create_contract_context';
 
 const { runAction, mock } = await createContractContext({
   connector: FirecrawlConnector,

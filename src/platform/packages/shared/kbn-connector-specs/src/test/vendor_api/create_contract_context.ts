@@ -19,14 +19,14 @@ import type {
 import { createEmulatorFetch, issueAccessToken } from '@kbn/connector-emulate';
 import type { Logger } from '@kbn/logging';
 import { z } from '@kbn/zod/v4';
-import { authTypeSpecs } from '../../server';
+import { authTypeSpecs } from '../../../server';
 import type {
   ActionContext,
   AuthContext,
   ConnectorSpec,
   NormalizedAuthType,
-} from '../connector_spec';
-import { getSchemaForAuthType } from '../lib';
+} from '../../connector_spec';
+import { getSchemaForAuthType } from '../../lib';
 import type { FieldUse } from './field_use';
 import { markReturned, recordSentFields, trackFieldUse } from './field_use';
 

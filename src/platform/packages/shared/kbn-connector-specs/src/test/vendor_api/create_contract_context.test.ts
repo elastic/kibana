@@ -10,10 +10,10 @@
 import { Readable } from 'stream';
 import { issueAccessToken } from '@kbn/connector-emulate';
 import { z } from '@kbn/zod/v4';
-import { getGcpIdToken, parseServiceAccountKey } from '../auth_types/gcp_jwt_helpers';
-import type { ConnectorSpec } from '../connector_spec';
-import { FirecrawlConnector } from '../specs/firecrawl/firecrawl';
-import { FigmaConnector } from '../specs/figma/figma';
+import { getGcpIdToken, parseServiceAccountKey } from '../../auth_types/gcp_jwt_helpers';
+import type { ConnectorSpec } from '../../connector_spec';
+import { FirecrawlConnector } from '../../specs/firecrawl/firecrawl';
+import { FigmaConnector } from '../../specs/figma/figma';
 import { createContractContext } from './create_contract_context';
 import type { FieldUse } from './field_use';
 import { createFieldUse } from './field_use';

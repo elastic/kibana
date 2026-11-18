@@ -10,7 +10,7 @@
 import path from 'path';
 import type { ResponseFixture } from '@kbn/connector-emulate';
 import { FirecrawlConnector } from '../../../specs/firecrawl/firecrawl';
-import { createContractContext } from '../../create_contract_context';
+import { createContractContext } from '../create_contract_context';
 import { loadVendorSpecs, SILENT_LOG } from '../spec/load_vendor_specs';
 
 const JOB_ID = '3c90c3cc-0d44-4b50-8888-8dd25736052a';
