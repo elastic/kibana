@@ -410,11 +410,14 @@ describe('DefaultAlertService', () => {
       it('refreshDefaultRuleActions only updates existing, enabled rules', async () => {
         const { context, server } = setUpUpdateTest();
         const service = new DefaultRuleService(context as any, server as any, {} as any);
-        service.settings = { defaultStatusRuleEnabled: true, defaultTLSRuleEnabled: false } as any;
         service.getExistingAlert = jest.fn().mockResolvedValue({ id: 'existing' }) as any;
         service.upsertDefaultRule = jest.fn();
 
-        await service.refreshDefaultRuleActions(['old']);
+        const nextSettings = {
+          defaultStatusRuleEnabled: true,
+          defaultTLSRuleEnabled: false,
+        } as any;
+        await service.refreshDefaultRuleActions(nextSettings, ['old']);
 
         expect(service.upsertDefaultRule).toHaveBeenCalledTimes(1);
         expect(service.upsertDefaultRule).toHaveBeenCalledWith(
@@ -426,7 +429,7 @@ describe('DefaultAlertService', () => {
 
         service.getExistingAlert = jest.fn().mockResolvedValue(undefined);
         (service.upsertDefaultRule as jest.Mock).mockClear();
-        await service.refreshDefaultRuleActions(['old']);
+        await service.refreshDefaultRuleActions(nextSettings, ['old']);
         expect(service.upsertDefaultRule).not.toHaveBeenCalled();
       });
 

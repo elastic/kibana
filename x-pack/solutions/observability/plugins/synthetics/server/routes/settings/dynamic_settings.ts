@@ -90,27 +90,24 @@ export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
     const { rebalancePrivateLocationShardsEnabled: _ignoredRebalance, ...prevWithoutRebalance } =
       prevSettings;
 
-    const attr = await setSyntheticsDynamicSettings(savedObjectsClient, {
+    const nextSettings = {
       ...prevWithoutRebalance,
       ...otherSettings,
-    } as DynamicSettingsAttributes);
+    } as DynamicSettingsAttributes;
 
-    const { defaultConnectors, defaultEmail } = attr as DynamicSettingsAttributes;
+    // Rules are refreshed before persisting so a failure leaves the previous connectors
+    // intact in the stored settings and the save can be retried.
     if (
-      !isEqual(prevSettings.defaultConnectors, defaultConnectors) ||
-      !isEqual(prevSettings.defaultEmail, defaultEmail)
+      !isEqual(prevSettings.defaultConnectors, nextSettings.defaultConnectors) ||
+      !isEqual(prevSettings.defaultEmail, nextSettings.defaultEmail)
     ) {
-      // Best-effort: callers may lack rule privileges, which must not fail the settings save.
-      try {
-        await new DefaultRuleService(context, server, savedObjectsClient).refreshDefaultRuleActions(
-          prevSettings.defaultConnectors ?? []
-        );
-      } catch (error) {
-        server.logger.error(`Error refreshing default rule actions, Error: ${error.message}`, {
-          error,
-        });
-      }
+      await new DefaultRuleService(context, server, savedObjectsClient).refreshDefaultRuleActions(
+        nextSettings,
+        prevSettings.defaultConnectors ?? []
+      );
     }
+
+    const attr = await setSyntheticsDynamicSettings(savedObjectsClient, nextSettings);
 
     let persistedRebalance = true;
     if (rebalanceChanged) {

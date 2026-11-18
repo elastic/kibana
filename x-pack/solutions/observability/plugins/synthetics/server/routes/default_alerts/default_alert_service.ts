@@ -183,9 +183,12 @@ export class DefaultRuleService {
     }
   }
 
-  /** Rebuilds settings-managed actions of default rules that already exist; never creates or deletes rules. */
-  async refreshDefaultRuleActions(previousDefaultConnectors: string[]) {
-    const settings = await this.getSettings();
+  /** Rebuilds settings-managed actions of existing default rules from `settings` (not yet persisted); never creates or deletes rules. */
+  async refreshDefaultRuleActions(
+    settings: DynamicSettingsAttributes,
+    previousDefaultConnectors: string[]
+  ) {
+    this.settings = settings;
     const interval = this.getMinimumRuleInterval();
     const refreshIfExists = async (ruleType: DefaultRuleType, name: string) => {
       if (await this.getExistingAlert(ruleType)) {

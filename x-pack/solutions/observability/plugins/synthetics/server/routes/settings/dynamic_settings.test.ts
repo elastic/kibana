@@ -150,7 +150,10 @@ describe('dynamic settings routes', () => {
 
         await createPostDynamicSettingsRoute().handler(setUp({ defaultConnectors: ['new'] }));
 
-        expect(refresh).toHaveBeenCalledWith(['old']);
+        expect(refresh).toHaveBeenCalledWith(
+          expect.objectContaining({ defaultConnectors: ['new'] }),
+          ['old']
+        );
       });
 
       it('does not refresh default rules when connectors and email are unchanged', async () => {
@@ -163,16 +166,16 @@ describe('dynamic settings routes', () => {
         expect(refresh).not.toHaveBeenCalled();
       });
 
-      it('still saves settings when refreshing rules fails', async () => {
+      it('does not persist settings when refreshing rules fails so the save can be retried', async () => {
         jest
           .spyOn(DefaultRuleService.prototype, 'refreshDefaultRuleActions')
           .mockRejectedValue(new Error('forbidden'));
         const routeContext = setUp({ defaultConnectors: ['new'] });
 
-        const result = await createPostDynamicSettingsRoute().handler(routeContext);
-
-        expect(result).toMatchObject({ defaultConnectors: ['new'] });
-        expect(routeContext.server.logger.error).toHaveBeenCalled();
+        await expect(createPostDynamicSettingsRoute().handler(routeContext)).rejects.toThrow(
+          'forbidden'
+        );
+        expect(syntheticsSettingsModule.setSyntheticsDynamicSettings).not.toHaveBeenCalled();
       });
     });
 
