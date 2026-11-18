@@ -30,11 +30,13 @@ import {
   MAX_AI_INDEX_TRACES,
   MAX_AI_INDEX_TRACE_INDEX_EXPRESSIONS,
   MAX_AI_INDEX_TRACE_VALUE_LENGTH,
+  MAX_AI_INDEX_USER_ID_LENGTH,
   MAX_FEEDBACK_ANALYSIS_INTERVAL_LENGTH,
   MAX_FEEDBACK_ANALYSIS_SIGNAL_FILTER_LENGTH,
   MAX_FEEDBACK_ANALYSIS_TIME_RANGE_FROM_LENGTH,
   MAX_INDEX_NAME_BYTES,
   MAX_KI_CONTENT_LENGTH,
+  MAX_KI_EXCLUDE_TYPES,
   MAX_KI_GROUP_PREVIEW_SIZE,
   MAX_KI_GROUPS,
   MAX_KI_PAGE_SIZE,
@@ -69,6 +71,21 @@ const aiIndexIdSchema = schema.string({
 
 export const aiIndexIdParamsSchema = schema.object({
   aiIndexId: aiIndexIdSchema,
+});
+
+const userIdFilterSchema = schema.maybe(
+  schema.string({
+    minLength: 1,
+    maxLength: MAX_AI_INDEX_USER_ID_LENGTH,
+    meta: {
+      description:
+        'When set, limits reads to documents with this `user_id` and documents with no `user_id`. When omitted, no user filter is applied.',
+    },
+  })
+);
+
+export const describeAiIndexQuerySchema = schema.object({
+  user_id: userIdFilterSchema,
 });
 
 const signalTimeRangeSchema = schema.oneOf(
@@ -370,7 +387,18 @@ const kiTypeQuerySchema = (description: string) =>
     meta: { description },
   });
 
-const kiExcludeTypesQuerySchema = schema.oneOf(
+const kiExcludeTypesQuerySchema = (description: string) =>
+  schema.oneOf(
+    [
+      kiTypeQuerySchema('A Knowledge Indicator type.'),
+      schema.arrayOf(kiTypeQuerySchema('A Knowledge Indicator type.'), {
+        maxSize: MAX_KI_EXCLUDE_TYPES,
+      }),
+    ],
+    { meta: { description } }
+  );
+
+const kiGroupTypesQuerySchema = schema.oneOf(
   [
     kiTypeQuerySchema('A Knowledge Indicator type.'),
     schema.arrayOf(kiTypeQuerySchema('A Knowledge Indicator type.'), { maxSize: MAX_KI_GROUPS }),
@@ -378,7 +406,7 @@ const kiExcludeTypesQuerySchema = schema.oneOf(
   {
     meta: {
       description:
-        'When set, leave out KIs of these types. KIs without a type are kept. `total` follows this filter, `summary` does not.',
+        'When set, exactly these types are the groups (types without a match are left out) and `max_groups` is ignored. `total_other` counts all other KIs.',
     },
   }
 );
@@ -410,7 +438,11 @@ export const listKisQuerySchema = schema.object({
     validate: validateInteger,
   }),
   type: schema.maybe(kiTypeQuerySchema('When set, return only KIs of this type.')),
-  exclude_types: schema.maybe(kiExcludeTypesQuerySchema),
+  exclude_types: schema.maybe(
+    kiExcludeTypesQuerySchema(
+      'When set, leave out KIs of these types. KIs without a type are kept. `total` follows this filter, `summary` does not.'
+    )
+  ),
   status: schema.maybe(kiListStatusesQuerySchema),
   sort: kiListSortQuerySchema,
   query: kiSearchQuerySchema,
@@ -424,6 +456,12 @@ export const listKiGroupsQuerySchema = schema.object({
     validate: validateInteger,
     meta: { description: 'The most type groups to return, biggest first.' },
   }),
+  types: schema.maybe(kiGroupTypesQuerySchema),
+  exclude_types: schema.maybe(
+    kiExcludeTypesQuerySchema(
+      'When set, KIs of these types are left out before grouping: `total`, the groups and `total_other` cover only the other KIs. KIs without a type are kept.'
+    )
+  ),
   preview_size: schema.number({
     min: 1,
     max: MAX_KI_GROUP_PREVIEW_SIZE,
@@ -503,6 +541,7 @@ export const queryAiIndicesBodySchema = schema.object({
       },
     })
   ),
+  user_id: userIdFilterSchema,
 });
 
 export const deleteAiIndexQuerySchema = schema.object({

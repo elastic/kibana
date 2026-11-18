@@ -52,7 +52,8 @@ const MONITOR_COUNT = 2;
  */
 // Stateful-only: this Docker Elastic Agent + Fleet Server setup is not configured on
 // serverless (the `synthetics_agent_e2e` server config set only has a stateful variant).
-apiTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/306067
+apiTest.describe.skip(
   'Synthetics real-agent shard rebalance',
   { tag: tags.local.stateful.classic },
   () => {
