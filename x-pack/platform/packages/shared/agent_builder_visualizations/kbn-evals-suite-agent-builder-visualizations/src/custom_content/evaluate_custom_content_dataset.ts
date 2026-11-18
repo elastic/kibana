@@ -22,6 +22,7 @@ import { createEsqlExecutionEvaluator } from '../evaluators/esql_execution';
 import { createEsqlQueryRunner } from '../evaluators/esql_query_runner';
 import {
   findStoredPanel,
+  getCustomContentToolArgs,
   getOtherRenderers,
   getToolErrors,
   toLoggedVisualizations,
@@ -29,9 +30,11 @@ import {
 } from './custom_content_output';
 import { createDataExpectationEvaluator } from './evaluators/data_expectation';
 import { createEditEvaluator } from './evaluators/edit';
+import { createDataEditAppliedEvaluator } from './evaluators/edit_applied';
 import { createQueryContentsEvaluator } from './evaluators/query_contents';
 import { createRowLimitEvaluator } from './evaluators/row_limit';
 import { createRowOrderEvaluator } from './evaluators/row_order';
+import { createStyleEditJudge } from './evaluators/style_edit_judge';
 import { createTemplateColumnsEvaluator } from './evaluators/template_columns';
 import { createTemplateValidityEvaluator } from './evaluators/template_validity';
 import { getToolIds } from '../extract_visualization';
@@ -143,12 +146,16 @@ export function createEvaluateCustomContentDataset({
 
       const toolIds = getToolIds({ steps });
       const followUpToolIds = followUp ? getToolIds({ steps: last.steps ?? [] }) : undefined;
+      const followUpToolArgs = followUp ? getCustomContentToolArgs(last.steps) : undefined;
       const otherRenderers = getOtherRenderers(steps);
       log.info(
         `[custom content eval] "${(input?.question ?? '').slice(0, 60)}": stored in ${storedIn}` +
           `${otherRenderers.length > 0 ? `, also created ${otherRenderers.join('/')}` : ''}; ` +
           `tools: ${getToolIds({ steps: first.steps ?? [] }).join(' > ') || '(none)'}` +
           `${followUpToolIds ? ` | follow-up: ${followUpToolIds.join(' > ') || '(none)'}` : ''}`
+      );
+      followUpToolArgs?.forEach((args) =>
+        log.info(`[custom content eval]   follow-up args: ${args}`)
       );
       getToolErrors(steps).forEach((error) =>
         log.info(`[custom content eval]   tool error: ${error}`)
@@ -160,6 +167,7 @@ export function createEvaluateCustomContentDataset({
         steps,
         toolIds,
         followUpToolIds,
+        followUpToolArgs,
         visualizations: toLoggedVisualizations(stored?.content, stored?.attachmentId),
         otherRenderers,
         after: stored?.content,
@@ -190,6 +198,8 @@ export function createEvaluateCustomContentDataset({
       createRowOrderEvaluator({ runQuery }),
       createTemplateColumnsEvaluator({ runQuery }),
       createEditEvaluator(),
+      createDataEditAppliedEvaluator({ runQuery }),
+      createStyleEditJudge({ criteria: evaluators.criteria }),
     ].map((evaluator) => withLowScoreLogging(evaluator as CustomContentEvaluator, log));
 
     await executorClient.runExperiment({ datasets: [dataset], task }, [

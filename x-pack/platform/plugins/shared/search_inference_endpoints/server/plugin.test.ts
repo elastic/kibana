@@ -141,8 +141,8 @@ describe('SearchInferenceEndpointsPlugin', () => {
         getFeature.mockReturnValue({ featureId: 'my_feature', taskType: 'chat_completion' });
         getForFeature.mockResolvedValue({
           endpoints: [
-            { connectorId: 'top', parameters: { temperature: 0.2, reasoning: { effort: 'low' } } },
-            { connectorId: 'second', parameters: { temperature: 0.7 } },
+            { connectorId: 'top', parameters: { reasoning: { effort: 'low' } } },
+            { connectorId: 'second', parameters: { reasoning: { effort: 'high' } } },
           ],
           soEntryFound: true,
         });
@@ -150,7 +150,6 @@ describe('SearchInferenceEndpointsPlugin', () => {
 
         await expect(resolver('my_feature', request)).resolves.toEqual({
           connectorId: 'top',
-          temperature: 0.2,
           reasoning: { effort: 'low' },
         });
         expect(getForFeature).toHaveBeenCalledWith('my_feature', request);
@@ -166,7 +165,6 @@ describe('SearchInferenceEndpointsPlugin', () => {
 
         await expect(resolver('my_feature', request)).resolves.toEqual({
           connectorId: 'recommended',
-          temperature: undefined,
           reasoning: undefined,
         });
       });
@@ -183,7 +181,6 @@ describe('SearchInferenceEndpointsPlugin', () => {
 
         await expect(resolver('my_feature', request)).resolves.toEqual({
           connectorId: 'global-default',
-          temperature: undefined,
           reasoning: undefined,
         });
         expect(getUiSetting).toHaveBeenCalledWith(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
@@ -202,7 +199,6 @@ describe('SearchInferenceEndpointsPlugin', () => {
 
         await expect(resolver('my_feature', request)).resolves.toEqual({
           connectorId: 'my-inference-endpoint',
-          temperature: undefined,
           reasoning: undefined,
         });
       });

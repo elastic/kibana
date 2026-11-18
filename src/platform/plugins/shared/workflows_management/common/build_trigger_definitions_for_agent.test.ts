@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { builtInTriggerDefinitions } from '@kbn/workflows';
+import { getBuiltInTriggerDefinitions } from '@kbn/workflows';
 import { commonWorkflowExecutionFailedTriggerDefinition } from '@kbn/workflows-extensions/common';
 import { z } from '@kbn/zod/v4';
 import {
@@ -46,9 +46,28 @@ describe('lookupTriggerDefinitionsForAgent', () => {
       return;
     }
 
-    expect(result.count).toBe(builtInTriggerDefinitions.length + 1);
+    expect(result.count).toBe(getBuiltInTriggerDefinitions().length + 1);
     expect(result.triggerTypes.map((t) => t.id)).toContain('cases.caseUpdated');
     expect(result.triggerTypes.map((t) => t.id)).toContain('manual');
+  });
+
+  it('returns jsonSchema and examples for the page trigger', () => {
+    const result = lookupTriggerDefinitionsForAgent({
+      registeredTriggers: [],
+      triggerSchemaOptions: { includePageTrigger: true },
+      triggerType: 'page',
+    });
+
+    expect(result).toEqual({
+      count: 1,
+      triggerTypes: [
+        expect.objectContaining({
+          id: 'page',
+          jsonSchema: expect.objectContaining({ required: expect.arrayContaining(['title']) }),
+          examples: [expect.stringContaining('page.inputs.summary')],
+        }),
+      ],
+    });
   });
 
   it('returns jsonSchema and examples for built-in triggers', () => {
@@ -62,7 +81,7 @@ describe('lookupTriggerDefinitionsForAgent', () => {
     }
 
     const builtInTriggers = result.triggerTypes.filter((trigger) =>
-      builtInTriggerDefinitions.some((def) => def.id === trigger.id)
+      getBuiltInTriggerDefinitions().some((def) => def.id === trigger.id)
     );
     for (const trigger of builtInTriggers) {
       expect(trigger.jsonSchema).toBeDefined();

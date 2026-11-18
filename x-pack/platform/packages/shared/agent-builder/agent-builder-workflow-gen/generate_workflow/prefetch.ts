@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { BaseStepDefinition, ConnectorContractUnion } from '@kbn/workflows';
-import { builtInStepDefinitions, builtInTriggerDefinitions } from '@kbn/workflows';
+import { builtInStepDefinitions, getBuiltInTriggerDefinitions } from '@kbn/workflows';
 import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
 import { getAllConnectors } from '@kbn/workflows-management-plugin/common/schema';
 import { pickLabelAndDescription } from './tools/lookup_helpers';
@@ -125,8 +125,10 @@ export const prefetchStepDefinitions = async ({
   return [...builtIns, ...allConnectorSummaries, ...dynamicSummaries];
 };
 
-export const prefetchTriggerDefinitions = async (): Promise<TriggerDefinitionSummary[]> =>
-  builtInTriggerDefinitions.map((t) => ({
+export const prefetchTriggerDefinitions = async ({
+  api,
+}: Pick<DepsBase, 'api'>): Promise<TriggerDefinitionSummary[]> =>
+  getBuiltInTriggerDefinitions(api.getTriggerSchemaOptions()).map((t) => ({
     id: t.id,
     label: t.label,
     description: t.description,

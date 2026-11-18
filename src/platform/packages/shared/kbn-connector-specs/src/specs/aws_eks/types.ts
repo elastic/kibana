@@ -189,6 +189,10 @@ const taint = () =>
 const tagsMap = () =>
   z
     .record(z.string().min(1).max(128), z.string().max(256))
+    // EKS rejects an empty tag map; leave `tags` out instead.
+    .refine((value) => Object.keys(value).length >= 1, {
+      message: 'At least 1 tag is required; omit tags instead',
+    })
     .refine((value) => Object.keys(value).length <= 50, {
       message: 'At most 50 tags are allowed',
     });

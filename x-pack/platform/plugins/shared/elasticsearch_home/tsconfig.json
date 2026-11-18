@@ -26,11 +26,14 @@
     "@kbn/cloud-plugin",
     "@kbn/agent-builder-plugin",
     "@kbn/agent-builder-server",
+    "@kbn/ai-assistant-common",
+    "@kbn/management-settings-ids",
     "@kbn/search-agent",
     "@kbn/react-query",
     "@kbn/shared-components",
     "@kbn/shared-ux-ai-components",
     "@kbn/shared-ux-utility",
+    "@kbn/shared-ux-page-kibana-template",
     "@kbn/announcement-banner",
     "@kbn/custom-icons",
     "@kbn/deeplinks-analytics",
@@ -41,6 +44,7 @@
     "@kbn/core-doc-links-browser-mocks",
     "@kbn/core-http-browser-mocks",
     "@kbn/core-security-browser-mocks",
+    "@kbn/core-ui-settings-browser-mocks",
     "@kbn/core-user-profile-browser-mocks"
   ]
 }

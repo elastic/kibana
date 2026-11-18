@@ -21,6 +21,9 @@ exports[`DeleteSLO happy path removes all resources associated to the slo 2`] = 
   "calls": Array [
     Array [
       "slo-summary-irrelevant-1",
+      Object {
+        "signal": AbortSignal {},
+      },
     ],
   ],
   "results": Array [
@@ -37,6 +40,9 @@ exports[`DeleteSLO happy path removes all resources associated to the slo 3`] = 
   "calls": Array [
     Array [
       "slo-irrelevant-1",
+      Object {
+        "signal": AbortSignal {},
+      },
     ],
   ],
   "results": Array [

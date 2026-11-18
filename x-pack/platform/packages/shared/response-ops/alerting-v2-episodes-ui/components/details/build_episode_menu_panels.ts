@@ -12,7 +12,7 @@ import type { EpisodeAction } from '../../actions/types';
 import * as i18n from './translations';
 
 /**
- * Episode workflow actions, grouped together right below "View details". Every other
+ * Episode workflow actions, grouped together right below the navigation group. Every other
  * action (edit tags, open in Discover) is grouped after them.
  */
 const WORKFLOW_ACTION_IDS: ReadonlySet<string> = new Set([
@@ -49,8 +49,12 @@ export const buildEpisodeMenuPanels = ({
   viewDetailsHref,
   onSuccess,
 }: BuildEpisodeMenuPanelsParams): FlyoutFooterMenuPanel[] => {
-  const [workflowActions, otherActions] = partition(
+  const [navigationActions, nonNavigationActions] = partition(
     actions,
+    (action) => action.isNavigationAction === true
+  );
+  const [workflowActions, otherActions] = partition(
+    nonNavigationActions,
     (action) => WORKFLOW_ACTION_IDS.has(action.id) || action.isWorkflowAction === true
   );
 
@@ -88,7 +92,7 @@ export const buildEpisodeMenuPanels = ({
     };
   };
 
-  const viewDetailsGroup: FlyoutFooterMenuItem[] = viewDetailsHref
+  const viewDetailsItems: FlyoutFooterMenuItem[] = viewDetailsHref
     ? [
         {
           name: i18n.FLYOUT_VIEW_DETAILS,
@@ -98,8 +102,9 @@ export const buildEpisodeMenuPanels = ({
         },
       ]
     : [];
+  const navigationGroup = [...viewDetailsItems, ...navigationActions.map(toMenuItem)];
 
-  const items = [viewDetailsGroup, workflowActions.map(toMenuItem), otherActions.map(toMenuItem)]
+  const items = [navigationGroup, workflowActions.map(toMenuItem), otherActions.map(toMenuItem)]
     .filter((group) => group.length > 0)
     .reduce<FlyoutFooterMenuItem[]>(
       (acc, group, index) =>

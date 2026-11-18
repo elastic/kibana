@@ -103,7 +103,7 @@ Object {
               ],
               "index": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
               "query": Object {
-                "esql": "FROM kibana_sample_data_flights | keep Dest, AvgTicketPrice",
+                "esql": "from logstash | stats avg(bytes) by extension.keyword",
               },
               "table": Object {
                 "columns": Array [
@@ -284,7 +284,7 @@ Object {
               ],
               "index": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
               "query": Object {
-                "esql": "FROM kibana_sample_data_flights | keep Dest, AvgTicketPrice",
+                "esql": "from logstash | stats avg(bytes) by extension.keyword",
               },
               "timeField": "timestamp",
             },

@@ -8,7 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
-import { registerYaraLanguage, YARA_LANG_ID, YARA_THEME_ID } from '../../yara_language';
+import { registerYaraLanguage, YARA_LANG_ID } from '../../yara_language';
 
 registerYaraLanguage();
 
@@ -43,7 +43,6 @@ export const YaraCodeEditor = memo<YaraCodeEditorProps>(
 
     const options = useMemo<CodeEditorProps['options']>(
       () => ({
-        theme: YARA_THEME_ID,
         readOnly,
         domReadOnly: readOnly,
         automaticLayout: true,

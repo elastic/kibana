@@ -50,6 +50,12 @@ export const servers: ScoutServerConfig = {
       // for CPS fan-out (stock ES API keys don't carry x-client-authentication).
       '--xpack.task_manager.api_key_type=uiam',
       '--xpack.task_manager.grant_uiam_api_keys=true',
+      // AlertZero Hunt routes (index scope, coverage, hunts) need these; all default off on
+      // Serverless and alertzero answers 503 without them.
+      '--xpack.alertzero.enabled=true',
+      '--xpack.agenticInvestigations.enabled=true',
+      '--xpack.proposals.enabled=true',
+      '--xpack.security.serviceAccounts.enabled=true',
     ],
   },
 };

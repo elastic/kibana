@@ -9,6 +9,7 @@
 
 /**
  * Clears MyST inline directives that can be found in documentation strings.
+ * A `$` before `{` is a capture reference such as `${name}`, not a directive.
  * @param docString
  * @returns
  */
@@ -16,6 +17,15 @@ export function clearDocumentationDirectives(docString: string): string {
   return (
     docString
       // MyST directives have the following format {name}`content`
-      .replace(/\{([a-zA-Z_]+)\}`([^`]*)`/g, '')
+      .replace(/(?<!\$)\{([a-zA-Z_]+)\}`([^`]*)`/g, '')
+  );
+}
+
+/** Builds a JSON string literal for an i18n defaultMessage from upstream documentation. */
+export function toDefaultMessage(text: string): string {
+  // `{` `}` are placeholders. `<` starts a tag only when a letter or `/` follows,
+  // so comparison operators such as `>` and `>=` stay unquoted.
+  return JSON.stringify(
+    clearDocumentationDirectives(text).replace(/[{}]|<(?=[A-Za-z/])/g, (token) => `'${token}'`)
   );
 }

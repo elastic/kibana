@@ -6,6 +6,7 @@
  */
 
 export { InvestigationNotFoundError } from './investigation_not_found_error';
+export { InvestigationFailureContextError } from './investigation_failure_context_error';
 export { InvestigationQuotaDeniedError } from './investigation_quota_denied_error';
 export { InvalidInvestigationContextError } from './invalid_investigation_context_error';
 export { InvestigationUnavailableError } from './investigation_unavailable_error';

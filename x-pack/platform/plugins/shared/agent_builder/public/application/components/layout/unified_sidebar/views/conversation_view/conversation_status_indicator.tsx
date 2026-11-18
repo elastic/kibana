@@ -6,30 +6,32 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import { EuiIconTip, EuiLoadingSpinner, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ConversationDisplayStatus } from '@kbn/agent-builder-common';
 
 const labels = {
   inProgress: i18n.translate(
     'xpack.agentBuilder.sidebar.conversationList.statusIndicator.inProgress',
-    { defaultMessage: 'In progress' }
+    { defaultMessage: 'Working' }
   ),
   awaitingPrompt: i18n.translate(
     'xpack.agentBuilder.sidebar.conversationList.statusIndicator.awaitingPrompt',
-    { defaultMessage: 'Awaiting your input' }
+    { defaultMessage: 'Waiting for input' }
   ),
   error: i18n.translate('xpack.agentBuilder.sidebar.conversationList.statusIndicator.error', {
     defaultMessage: 'Error',
   }),
   unread: i18n.translate('xpack.agentBuilder.sidebar.conversationList.statusIndicator.unread', {
-    defaultMessage: 'Unread',
+    defaultMessage: 'New',
   }),
 };
 
 interface ConversationStatusIndicatorProps {
   status: ConversationDisplayStatus;
 }
+
+const iconProps = { tabIndex: -1 };
 
 export const ConversationStatusIndicator: React.FC<ConversationStatusIndicatorProps> = ({
   status,
@@ -38,24 +40,46 @@ export const ConversationStatusIndicator: React.FC<ConversationStatusIndicatorPr
 
   switch (status) {
     case ConversationDisplayStatus.inProgress:
-      return <EuiLoadingSpinner size="m" aria-label={labels.inProgress} />;
+      return (
+        <EuiToolTip content={labels.inProgress} disableScreenReaderOutput>
+          <EuiLoadingSpinner size="m" aria-label={labels.inProgress} />
+        </EuiToolTip>
+      );
 
     case ConversationDisplayStatus.awaitingPrompt:
       return (
-        <EuiIcon
-          type="if"
-          size="m"
+        <EuiIconTip
+          type="pause"
           color={euiTheme.colors.textWarning}
+          content={labels.awaitingPrompt}
           aria-label={labels.awaitingPrompt}
+          iconProps={iconProps}
+          disableScreenReaderOutput
         />
       );
 
     case ConversationDisplayStatus.error:
-      return <EuiIcon type="warningFill" size="m" color="danger" aria-label={labels.error} />;
+      return (
+        <EuiIconTip
+          type="warning"
+          color="danger"
+          content={labels.error}
+          aria-label={labels.error}
+          iconProps={iconProps}
+          disableScreenReaderOutput
+        />
+      );
 
     case ConversationDisplayStatus.unread:
       return (
-        <EuiIcon type="dot" size="m" color={euiTheme.colors.primary} aria-label={labels.unread} />
+        <EuiIconTip
+          type="dot"
+          color={euiTheme.colors.vis.euiColorVis2}
+          content={labels.unread}
+          aria-label={labels.unread}
+          iconProps={iconProps}
+          disableScreenReaderOutput
+        />
       );
 
     case ConversationDisplayStatus.read:

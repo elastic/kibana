@@ -177,7 +177,7 @@ export const RepairRunInputSchema = lazySchema(() =>
     })
     .refine(
       (v) =>
-        (v.rerunTasks !== undefined && v.rerunAllFailedTasks === undefined) ||
+        (v.rerunTasks !== undefined && v.rerunAllFailedTasks !== true) ||
         (v.rerunTasks === undefined && v.rerunAllFailedTasks === true),
       {
         message:
@@ -191,7 +191,24 @@ export type RepairRunInput = z.infer<typeof RepairRunInputSchema>;
 // Clusters REST API
 // =============================================================================
 
-export const ListClustersInputSchema = lazySchema(() => z.object({}));
+export const ListClustersInputSchema = lazySchema(() =>
+  z.object({
+    pageSize: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .optional()
+      .describe('Maximum number of clusters to return (default 20, max 100).'),
+    pageToken: z
+      .string()
+      .max(200)
+      .optional()
+      .describe(
+        'next_page_token or prev_page_token from a previous listClusters response, to list that page.'
+      ),
+  })
+);
 export type ListClustersInput = z.infer<typeof ListClustersInputSchema>;
 
 export const ClusterIdInputSchema = lazySchema(() =>

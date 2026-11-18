@@ -34,6 +34,8 @@ import {
   TEAMS_CONTENT_MAX_LENGTH,
   teamsHtmlLink,
 } from './hitl_connector_helpers';
+import type { HitlSlackInteractiveResumeContext } from './hitl_slack_interactive_blocks';
+import { buildHitlSlackApprovalBlocks } from './hitl_slack_interactive_blocks';
 import type { ConnectorExecutor } from '../../connector_executor';
 
 type WaitForApprovalChannels = NonNullable<NonNullable<WaitForApprovalStep['with']>['channels']>;
@@ -198,6 +200,7 @@ export async function sendWaitForApprovalNotifications({
   approveLabel,
   rejectLabel,
   resumeLinks,
+  slackInteractiveResume,
   spaceId,
   workflowId,
   executionId,
@@ -210,6 +213,8 @@ export async function sendWaitForApprovalNotifications({
   approveLabel: string;
   rejectLabel: string;
   resumeLinks: WaitForApprovalResumeLinks;
+  /** Required when `channels.slack2.interactive` is true. */
+  slackInteractiveResume?: HitlSlackInteractiveResumeContext;
   spaceId: string;
   workflowId: string;
   executionId: string;
@@ -283,12 +288,29 @@ export async function sendWaitForApprovalNotifications({
   const slack2ConnectorId = slack2Config?.['connector-id'];
   const slack2Channels = slack2Config?.channels;
   if (slack2ConnectorId && slack2Channels?.length) {
-    const text = buildSlackMessage(linkParams);
+    const interactive = slack2Config.interactive === true;
+    if (interactive && !slackInteractiveResume) {
+      throw new Error('Slack interactive HITL approval requires resume correlation context');
+    }
+    const text = interactive
+      ? message.length > 0
+        ? message
+        : `${approveLabel} / ${rejectLabel}`
+      : buildSlackMessage(linkParams);
+    const blocks =
+      interactive && slackInteractiveResume
+        ? buildHitlSlackApprovalBlocks({
+            message,
+            approveLabel,
+            rejectLabel,
+            resume: slackInteractiveResume,
+          })
+        : undefined;
     for (const channel of slack2Channels) {
       const result = await connectorExecutor.execute({
         connectorType: 'slack2',
         connectorNameOrId: slack2ConnectorId,
-        input: buildSlack2SendMessageInput(channel, text),
+        input: buildSlack2SendMessageInput(channel, text, blocks),
         abortController,
       });
       assertConnectorSucceeded(result);

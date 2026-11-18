@@ -29,7 +29,6 @@ import { getConfiguration } from '../../risk_engine/utils/saved_object_configura
 import { scoreBaseEntities } from '../maintainer/steps/score_base_entities';
 import { runResolutionScoringStep } from '../maintainer/steps/run_resolution_scoring_step';
 import { fetchWatchlistConfigs } from '../maintainer/utils/fetch_watchlist_configs';
-import { getIsIdBasedRiskScoringEnabled } from '../is_id_based_risk_scoring_enabled';
 import { buildAlertFilters } from '../maintainer/steps/build_alert_filters';
 
 const entityId = 'host:test-host-name';
@@ -52,7 +51,6 @@ jest.mock('../../risk_engine/utils/saved_object_configuration');
 jest.mock('../maintainer/steps/score_base_entities');
 jest.mock('../maintainer/steps/run_resolution_scoring_step');
 jest.mock('../maintainer/utils/fetch_watchlist_configs');
-jest.mock('../is_id_based_risk_scoring_enabled');
 jest.mock('../maintainer/steps/build_alert_filters');
 
 const defaultEngineConfig = {
@@ -111,7 +109,6 @@ describe('entity risk score V2 calculation route', () => {
     (getRiskInputsIndex as jest.Mock).mockResolvedValue({ index: 'default-alerts-index' });
     (buildAlertFilters as jest.Mock).mockReturnValue([]);
     (fetchWatchlistConfigs as jest.Mock).mockResolvedValue(new Map());
-    (getIsIdBasedRiskScoringEnabled as jest.Mock).mockResolvedValue(false);
     (scoreBaseEntities as jest.Mock).mockResolvedValue({ scores: {}, scoresWritten: 0 });
     (runResolutionScoringStep as jest.Mock).mockResolvedValue({ scores: {}, scoresWritten: 0 });
 
@@ -141,6 +138,64 @@ describe('entity risk score V2 calculation route', () => {
 
     expect(response.status).toEqual(200);
   });
+
+  it.each([true, false])(
+    'passes configured profiling to each scoring stage (enabled: %s)',
+    async (profile) => {
+      const config = configMock.withExperimentalFeature(
+        clients.config,
+        'entityAnalyticsEntityStoreV2'
+      );
+      context.securitySolution.getConfig.mockReturnValue({
+        ...config,
+        entityAnalytics: {
+          ...config.entityAnalytics,
+          riskEngine: {
+            ...config.entityAnalytics.riskEngine,
+            esqlProfiling: profile,
+            esqlProfilingInterval: 3,
+          },
+        },
+      });
+      const sampled: boolean[] = [];
+      jest.mocked(scoreBaseEntities).mockImplementationOnce(async ({ pageTimings }) => {
+        [1, 2, 3, 4].forEach(() => {
+          pageTimings.startPage();
+          sampled.push(pageTimings.shouldProfile());
+        });
+        return {
+          scores: {},
+          scoresCalculated: 0,
+          scoresWrittenRiskIndex: 0,
+          scoresWrittenEntityStore: 0,
+          scoresFailed: 0,
+          pagesProcessed: 0,
+          scoresDroppedNotInStore: 0,
+          scoresMissingFromStore: 0,
+          entitiesCreated: 0,
+          entityCreationsSkipped: 0,
+          entityCreationsFailed: 0,
+        };
+      });
+      jest.mocked(runResolutionScoringStep).mockImplementationOnce(async ({ pageTimings }) => {
+        pageTimings.startPage();
+        sampled.push(pageTimings.shouldProfile());
+        return {
+          scores: {},
+          scoresWrittenRiskIndex: 0,
+          scoresWrittenEntityStore: 0,
+          scoresFailed: 0,
+          pagesProcessed: 0,
+        };
+      });
+      const response = await server.inject(
+        buildRequest(),
+        requestContextMock.convertContext(context)
+      );
+      expect(response.status).toEqual(200);
+      expect(sampled).toEqual([profile, false, false, profile, profile]);
+    }
+  );
 
   it('only checks the index privileges the calculation needs, not cluster privileges', async () => {
     const security = riskEnginePrivilegesMock.createMockSecurityStartWithFullRiskEngineAccess();
@@ -202,25 +257,6 @@ describe('entity risk score V2 calculation route', () => {
 
     expect(response.status).toEqual(400);
     expect(response.body.message).toEqual('Entity ID is required');
-  });
-
-  it('throws an error when Entity Store V2 feature flag is disabled', async () => {
-    const defaultConfig = configMock.createDefault();
-    context.securitySolution.getConfig.mockReturnValue({
-      ...defaultConfig,
-      experimentalFeatures: {
-        ...defaultConfig.experimentalFeatures,
-        entityAnalyticsEntityStoreV2: false,
-      },
-    });
-
-    const response = await server.inject(
-      buildRequest(),
-      requestContextMock.convertContext(context)
-    );
-
-    expect(response.status).toEqual(400);
-    expect(response.body.message).toEqual('Entity Store V2 is not enabled');
   });
 
   it('throws an error when no risk engine configuration is found', async () => {

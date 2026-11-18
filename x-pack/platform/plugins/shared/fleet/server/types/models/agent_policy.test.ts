@@ -10,7 +10,11 @@ import { set } from '@kbn/safer-lodash-set';
 import type { AgentlessAgentPolicyConfig, GlobalDataTag } from '../../../common/types';
 import { getSettings } from '../../services/form_settings';
 
-import { AgentPolicyBaseSchema, FullAgentPolicyResponseSchema } from './agent_policy';
+import {
+  AgentPolicyBaseSchema,
+  FullAgentPolicyResponseSchema,
+  NewAgentPolicySchema,
+} from './agent_policy';
 
 describe('AgentPolicyBaseSchema', () => {
   describe('global_data_tags validations', () => {
@@ -206,5 +210,43 @@ describe('FullAgentPolicySchema', () => {
 
       FullAgentPolicyResponseSchema.validate(policyData);
     }).not.toThrow();
+  });
+});
+
+describe('NewAgentPolicySchema reporting mode string fields', () => {
+  // These fields use the string helpers' warn() mode: overlong input is recorded in the
+  // kibana.schema.string_length_violation.length histogram instead of being rejected.
+  const policy = (overrides: Record<string, unknown>) => ({
+    name: 'policy',
+    namespace: 'default',
+    ...overrides,
+  });
+
+  it('accepts an overlong name, description and IDs', () => {
+    expect(() =>
+      NewAgentPolicySchema.validate(
+        policy({
+          id: 'a'.repeat(1000),
+          name: 'a'.repeat(1000),
+          description: 'a'.repeat(20_000),
+          data_output_id: 'a'.repeat(1000),
+          monitoring_output_id: 'a'.repeat(1000),
+          fleet_server_host_id: 'a'.repeat(1000),
+          space_ids: ['a'.repeat(1000)],
+          global_data_tags: [{ name: 'a'.repeat(1000), value: 'value' }],
+        })
+      )
+    ).not.toThrow();
+  });
+
+  it('still requires a non-empty policy name', () => {
+    expect(() => NewAgentPolicySchema.validate(policy({ name: '' }))).toThrow();
+    expect(() => NewAgentPolicySchema.validate(policy({ name: '   ' }))).toThrow();
+  });
+
+  it('still accepts null for nullable IDs', () => {
+    expect(() =>
+      NewAgentPolicySchema.validate(policy({ data_output_id: null, download_source_id: null }))
+    ).not.toThrow();
   });
 });

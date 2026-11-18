@@ -29,6 +29,7 @@ import { registerErrorBudgetEmbeddable } from './lib/embeddables/register_error_
 import { registerOverviewEmbeddable } from './lib/embeddables/register_overview_embeddable';
 import { getScopedClusterClientWithInspect } from './lib/inspect/create_inspectable_scoped_cluster_client';
 import { registerBurnRateRule } from './lib/rules/register_burn_rate_rule';
+import { registerSloEbtEvents, SloTelemetryService, toEventOrigin } from './lib/telemetry';
 import { getSloServerRouteRepository } from './routes/utils/get_slo_server_route_repository';
 import { registerServerRoutes } from './routes/utils/register_routes';
 import type { SLORoutesDependencies } from './routes/utils/types';
@@ -58,6 +59,7 @@ import { OrphanSummaryCleanupTask } from './services/tasks/orphan_summary_cleanu
 import { StaleInstancesCleanupTask } from './services/tasks/stale_instances_cleanup_task/stale_instances_cleanup_task';
 import { TempSummaryCleanupTask } from './services/tasks/temp_summary_cleanup_task/temp_summary_cleanup_task';
 import { createTransformGenerators } from './services/transform_generators';
+import { REQUEST_RETRY_OPTIONS } from './utils/retry';
 import type {
   SLOConfig,
   SLOPluginSetupDependencies,
@@ -162,6 +164,8 @@ export class SLOPlugin
 
     registerBurnRateRule(plugins.alerting, core.http.basePath, this.isCpsEnabled);
     registerSloUsageCollector(plugins.usageCollection);
+    registerSloEbtEvents(core.analytics);
+    const telemetryService = new SloTelemetryService(core.analytics, this.logger.get('telemetry'));
 
     const mappedPlugins = mapValues(plugins, (value, key) => {
       return {
@@ -244,12 +248,14 @@ export class SLOPlugin
           const transformManager = new DefaultTransformManager(
             createTransformGenerators(spaceId, dataViewsService, this.isServerless, isCpsAvailable),
             scopedClusterClient,
-            logger
+            logger,
+            { retryOptions: REQUEST_RETRY_OPTIONS }
           );
           const summaryTransformManager = new DefaultSummaryTransformManager(
             new DefaultSummaryTransformGenerator(this.isServerless, isCpsAvailable),
             scopedClusterClient,
-            logger
+            logger,
+            { retryOptions: REQUEST_RETRY_OPTIONS }
           );
 
           return {
@@ -267,6 +273,7 @@ export class SLOPlugin
             transformManager,
             summaryTransformManager,
             racClient,
+            telemetry: telemetryService.getReporter(toEventOrigin(request)),
           };
         },
       },
@@ -309,6 +316,7 @@ export class SLOPlugin
       core,
       taskManager: plugins.taskManager,
       logFactory: this.initContext.logger,
+      telemetryService,
     });
 
     new HealthScanTask({

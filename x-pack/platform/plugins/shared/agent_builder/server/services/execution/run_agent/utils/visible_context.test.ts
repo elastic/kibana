@@ -15,6 +15,7 @@ import type {
   Conversation,
   ConversationRoundStep,
   ConverseInput,
+  DynamicToolDefinition,
   RoundCompleteEvent,
   TimelineEvent,
   ToolCallStep,
@@ -322,6 +323,90 @@ describe('renderVisibleContext', () => {
     expect(rendered).not.toContain('FIRST_INPUT');
     expect(rendered).not.toContain('COVERED_TEXT');
     expect(rendered.indexOf('VISIBLE_TEXT')).toBeLessThan(rendered.indexOf('SECOND_INPUT'));
+  });
+
+  describe('dynamic tool definitions', () => {
+    const definition = (id: string): DynamicToolDefinition => ({
+      tool_id: id,
+      description: `${id} description`,
+      parameters: { type: 'object', properties: {} },
+    });
+
+    const runWithSnapshot = (dynamicTools?: DynamicToolDefinition[]): CurrentRun => {
+      const current = run([], { cursor: { round_id: 'a', tool_call_id: 'a1' } });
+      return {
+        ...current,
+        compactionSummary: { ...current.compactionSummary!, dynamic_tools: dynamicTools },
+      };
+    };
+
+    it('re-injects the summary snapshot right after the summary', async () => {
+      const messages = await renderVisibleContext(
+        {
+          conversation: conversation(twoRoundTimeline()),
+          run: runWithSnapshot([definition('dynamic-1')]),
+          phase: 'research',
+        },
+        deps()
+      );
+      const rendered = text(messages);
+
+      expect(rendered.indexOf('SUMMARY_TEXT')).toBeLessThan(rendered.indexOf('<dynamic_tools>'));
+      expect(rendered.indexOf('<dynamic_tools>')).toBeLessThan(rendered.indexOf('FIRST_INPUT'));
+      // `text` JSON-encodes the messages, so match on the content rather than the quoting
+      expect(rendered).toContain('tool_id');
+      expect(rendered).toContain('dynamic-1 description');
+    });
+
+    it('renders the same notice when tools are loaded after the compaction', async () => {
+      const snapshot = runWithSnapshot([definition('dynamic-1')]);
+      const before = await renderVisibleContext(
+        { conversation: conversation(twoRoundTimeline()), run: snapshot, phase: 'research' },
+        deps()
+      );
+      // a skill loaded after the compaction adds a tool call to the run, not to the snapshot
+      const after = await renderVisibleContext(
+        {
+          conversation: conversation(twoRoundTimeline()),
+          run: { ...snapshot, steps: [...snapshot.steps, call('late-load')] },
+          phase: 'research',
+        },
+        deps()
+      );
+
+      const notice = (messages: BaseMessage[]) =>
+        messages.find((message) => String(message.content).startsWith('<dynamic_tools>'))?.content;
+      expect(notice(after)).toEqual(notice(before));
+      expect(text(after)).not.toContain('late-load description');
+    });
+
+    it('renders nothing for a summary without a snapshot', async () => {
+      const messages = await renderVisibleContext(
+        {
+          conversation: conversation(twoRoundTimeline()),
+          run: runWithSnapshot(undefined),
+          phase: 'research',
+        },
+        deps()
+      );
+
+      expect(text(messages)).toContain('SUMMARY_TEXT');
+      expect(text(messages)).not.toContain('<dynamic_tools>');
+    });
+
+    it('renders nothing in the answer phase, which has no tools', async () => {
+      const messages = await renderVisibleContext(
+        {
+          conversation: conversation(twoRoundTimeline()),
+          run: runWithSnapshot([definition('dynamic-1')]),
+          phase: 'answer',
+        },
+        deps()
+      );
+
+      expect(text(messages)).toContain('SUMMARY_TEXT');
+      expect(text(messages)).not.toContain('<dynamic_tools>');
+    });
   });
 });
 
@@ -891,6 +976,7 @@ describe('prompt-cache stability through persistence and reload', () => {
         conversation: received,
         conversationClient: store.client,
         roundCompletedEvents$: of(roundComplete),
+        releaseExecutionId: 'exec-1',
       })
     );
     const later = await renderNextTurn(store.read());
@@ -1028,6 +1114,7 @@ describe('prompt-cache stability through persistence and reload', () => {
         roundCompletedEvents$: of(roundComplete),
         input: resumeInput,
         author,
+        releaseExecutionId: 'exec-1',
       })
     );
     const reloaded = store.read();

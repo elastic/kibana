@@ -163,7 +163,9 @@ export const NewRelic: ConnectorSpec = {
       {
         type: 'api_key_header',
         isRecommended: true,
-        supportsSandbox: true,
+        // Sandbox use is turned off until Night Shift has evals for this connector.
+        // Set back to true to re-enable it (elastic/nightshift-program#2256).
+        supportsSandbox: false,
         defaults: { headerField: 'API-Key' },
         overrides: {
           meta: {
@@ -180,6 +182,10 @@ export const NewRelic: ConnectorSpec = {
         },
       },
     ],
+  },
+
+  sandbox: {
+    hosts: ['api.newrelic.com', 'api.eu.newrelic.com', 'api.jp.newrelic.com'],
   },
 
   schema: lazySchema(() =>

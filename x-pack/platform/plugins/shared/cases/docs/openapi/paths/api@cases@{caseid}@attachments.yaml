@@ -27,8 +27,9 @@ post:
   responses:
     '201':
       description: >
-        Indicates a successful call. Returns the new attachment, or the existing one if the alert
-        or event was already attached.
+        Indicates a successful call. Returns the new attachment. If some of the alert or event IDs
+        are already attached to the case, they are skipped and the new attachment holds only the
+        remaining IDs.
       content:
         application/json:
           schema:
@@ -77,6 +78,15 @@ post:
           examples:
             response404:
               $ref: '../components/examples/response_404.yaml'
+    '409':
+      description: Every alert or event ID in the request is already attached to the case.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response409:
+              $ref: '../components/examples/response_409_attachment_already_attached.yaml'
 
 get:
   summary: Find case attachments

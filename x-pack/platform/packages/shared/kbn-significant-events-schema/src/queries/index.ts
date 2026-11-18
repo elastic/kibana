@@ -129,11 +129,6 @@ export interface QueriesGetResponse {
   total: number;
 }
 
-export interface QueriesOccurrencesGetResponse {
-  occurrences_histogram: Array<{ x: string; y: number }>;
-  total_occurrences: number;
-}
-
 export interface QueryLink {
   query: StreamQuery;
   source_id: string;
