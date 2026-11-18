@@ -561,7 +561,7 @@ describe('AwsSsmConnector', () => {
   });
 
   describe('findNodesByInventory', () => {
-    it('returns each matching node with its instance information', async () => {
+    it('asks for the instance information only, and returns it for each matching node', async () => {
       mockClient.post.mockResolvedValue({
         data: {
           Entities: [
@@ -589,6 +589,10 @@ describe('AwsSsmConnector', () => {
         filters: [{ key: 'AWS:Application.Name', values: ['openssl'] }],
       });
 
+      expect(JSON.parse(mockClient.post.mock.calls[0][1])).toEqual({
+        Filters: [{ Key: 'AWS:Application.Name', Values: ['openssl'] }],
+        ResultAttributes: [{ TypeName: 'AWS:InstanceInformation' }],
+      });
       expect(result).toEqual({
         nodes: [
           {

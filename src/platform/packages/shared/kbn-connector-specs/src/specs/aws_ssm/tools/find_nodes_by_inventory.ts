@@ -65,6 +65,8 @@ export const findNodesByInventory: ActionDefinition<FindNodesByInventoryInput> =
       operation: 'GetInventory',
       body: {
         Filters: toInventoryFilters(filters),
+        // AWS does not document which inventory types it returns for each node without it.
+        ResultAttributes: [{ TypeName: INSTANCE_INFORMATION_TYPE }],
         MaxResults: maxResults,
         NextToken: nextToken || undefined,
       },
