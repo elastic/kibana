@@ -43,6 +43,20 @@ export interface SnoozeActionDeps {
   >;
 }
 
+const isSnoozable = (
+  episode: AlertEpisode,
+  extension?: EpisodeActionExtension<EpisodeSnoozePayload>
+): boolean =>
+  episode.source_id == null ? episode.series_id != null : extension?.isCompatible(episode) ?? false;
+
+const isCurrentlySnoozed = (episode: AlertEpisode): boolean =>
+  isEpisodeSnoozed(episode.last_snooze_action, episode.snoozed_until);
+
+const countReplacedSnoozes = (
+  episodes: AlertEpisode[],
+  extension?: EpisodeActionExtension<EpisodeSnoozePayload>
+): number => episodes.filter((ep) => isSnoozable(ep, extension) && isCurrentlySnoozed(ep)).length;
+
 const supportsConditions = (episodes: AlertEpisode[], sourceSupports: boolean): boolean =>
   episodes.every((ep) =>
     ep.source_id == null ? NATIVE_EPISODES_SUPPORT_CONDITIONAL_SNOOZE : sourceSupports
@@ -71,11 +85,7 @@ export const createSnoozeAction = (
   displayName: i18n.SNOOZE,
   iconType: 'bellSlash',
   isCompatible: ({ episodes }: EpisodeActionContext) =>
-    episodes.some(
-      (ep) =>
-        !isEpisodeSnoozed(ep.last_snooze_action, ep.snoozed_until) &&
-        (ep.source_id == null ? ep.series_id != null : extension?.isCompatible(ep) ?? false)
-    ),
+    episodes.some((ep) => isSnoozable(ep, extension) && !isCurrentlySnoozed(ep)),
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
     const { additionalDataSource } = deps;
 
@@ -88,6 +98,7 @@ export const createSnoozeAction = (
         episodes,
         additionalDataSource?.supportsConditionalSnooze ?? false
       ),
+      replacedSnoozeCount: countReplacedSnoozes(episodes, extension),
     });
     if (payload === undefined) return;
 

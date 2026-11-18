@@ -27,6 +27,7 @@ import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { QueryClient } from '@kbn/react-query';
 import { QueryClientProvider } from '@kbn/react-query';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import {
   PANEL_TITLE,
   QUICK_SNOOZE_POPOVER_APPLY,
@@ -54,6 +55,7 @@ export interface SnoozeModalOptions {
   dataSource?: ConditionFieldsSource;
   ruleTypeIds?: string[];
   conditionalTabDisabledReason?: string;
+  replacedSnoozeCount?: number;
 }
 
 interface SnoozeModalProps extends SnoozeModalOptions {
@@ -79,6 +81,7 @@ const SnoozeModal = ({
   dataSource,
   ruleTypeIds,
   conditionalTabDisabledReason,
+  replacedSnoozeCount = 0,
   onConfirm,
   onCancel,
 }: SnoozeModalProps) => {
@@ -114,6 +117,17 @@ const SnoozeModal = ({
         <EuiText size="xs" color="subdued">
           <p>{QUICK_SNOOZE_POPOVER_SUBTITLE}</p>
         </EuiText>
+        {replacedSnoozeCount > 0 && (
+          <>
+            <EuiSpacer size="s" />
+            <KbnWarningCallout
+              announceOnMount
+              data-test-subj="snoozeModalReplacedSnoozeWarning"
+              size="s"
+              title={i18n.getReplacedSnoozeWarning(replacedSnoozeCount)}
+            />
+          </>
+        )}
         <EuiHorizontalRule margin="m" />
         <EuiSpacer size="xs" />
         <SnoozeFormBody
@@ -159,6 +173,7 @@ export const openSnoozeModal = (
             dataSource={options.dataSource}
             ruleTypeIds={options.ruleTypeIds}
             conditionalTabDisabledReason={options.conditionalTabDisabledReason}
+            replacedSnoozeCount={options.replacedSnoozeCount}
             onConfirm={(payload) => {
               ref.close();
               resolve(payload);

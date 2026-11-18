@@ -230,6 +230,26 @@ describe('openSnoozeModal', () => {
     });
   });
 
+  it('warns that applying replaces the snooze of the rows that already have one', async () => {
+    openSnoozeModal(makeDeps(), { replacedSnoozeCount: 2 });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('snoozeModalReplacedSnoozeWarning')).toHaveTextContent(
+        '2 selected alerts are already snoozed'
+      );
+    });
+  });
+
+  it('omits the warning when no snooze would be replaced', async () => {
+    openSnoozeModal(makeDeps(), { replacedSnoozeCount: 0 });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('snoozeModal')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByTestId('snoozeModalReplacedSnoozeWarning')).not.toBeInTheDocument();
+  });
+
   it("loads the field_change options from the data source's searchable fields", async () => {
     const fetchSearchFields = jest.fn().mockResolvedValue([
       {

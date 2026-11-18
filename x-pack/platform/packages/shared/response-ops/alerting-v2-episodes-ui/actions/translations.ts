@@ -53,6 +53,13 @@ export const CONDITIONAL_SNOOZE_ACTIVE_ONLY = i18n.translate(
   }
 );
 
+export const getReplacedSnoozeWarning = (count: number): string =>
+  i18n.translate('xpack.alertingV2EpisodesUi.episodesUi.snoozeAction.replacedSnoozeWarning', {
+    defaultMessage:
+      '{count, plural, one {# selected alert is already snoozed. The new period and conditions replace the existing ones.} other {# selected alerts are already snoozed. The new period and conditions replace the existing ones.}}',
+    values: { count },
+  });
+
 export const RESOLVE = i18n.translate(
   'xpack.alertingV2EpisodesUi.episodesUi.resolveAction.deactivate',
   {

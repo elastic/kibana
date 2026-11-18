@@ -327,6 +327,39 @@ describe('createSnoozeAction', () => {
       ]);
     });
 
+    it('counts the rows whose existing snooze would be replaced', async () => {
+      const deps = makeDeps(conditionalSource);
+      const open = mockModal({ snoozedUntil: null });
+
+      await createSnoozeAction(deps, makeExtension()).execute({
+        episodes: [
+          makeSourceEpisode({
+            last_snooze_action: 'snooze',
+            snoozed_until: '2099-01-01T00:00:00.000Z',
+          }),
+          makeSourceEpisode({ 'episode.id': 'e2' }),
+        ],
+      });
+
+      expect(open).toHaveBeenCalledWith(deps, expect.objectContaining({ replacedSnoozeCount: 1 }));
+    });
+
+    it('reports no replacement when the selected snoozes have expired', async () => {
+      const deps = makeDeps(conditionalSource);
+      const open = mockModal({ snoozedUntil: null });
+
+      await createSnoozeAction(deps, makeExtension()).execute({
+        episodes: [
+          makeSourceEpisode({
+            last_snooze_action: 'snooze',
+            snoozed_until: '2020-01-01T00:00:00.000Z',
+          }),
+        ],
+      });
+
+      expect(open).toHaveBeenCalledWith(deps, expect.objectContaining({ replacedSnoozeCount: 0 }));
+    });
+
     it('scopes the condition fields to the rule types of the selected source rows', async () => {
       const getRuleTypeIds = jest.fn().mockReturnValue(['observability.rules.custom_threshold']);
       const deps = makeDeps({ ...conditionalSource, getRuleTypeIds });
