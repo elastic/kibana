@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/core-spaces-common'
   - '@kbn/resource-bootstrap-server'
+  - '@kbn/test'
 tags:
   - plugin
   - prod
