@@ -16,6 +16,24 @@ const { default: BaseJSDOMEnvironment } = require('@jest/environment-jsdom-abstr
 class JSDOMEnvironment extends BaseJSDOMEnvironment {
   constructor(config, context) {
     super(config, context, JSDOM);
+    this.initialGlobalKeys = new Set(Reflect.ownKeys(this.global));
+  }
+
+  async teardown() {
+    const { global, initialGlobalKeys } = this;
+    await super.teardown();
+
+    // V8 keeps a closed jsdom window's context alive. Jest 30 hangs closures over the test file's
+    // Runtime (and so its whole module registry) off the window, so every file leaked hundreds of
+    // MB in band. Dropping what was added after setup releases them; jsdom's own keys stay because
+    // pending jsdom callbacks still read them after teardown.
+    if (global) {
+      for (const key of Reflect.ownKeys(global)) {
+        if (!initialGlobalKeys.has(key)) {
+          Reflect.deleteProperty(global, key);
+        }
+      }
+    }
   }
 }
 
