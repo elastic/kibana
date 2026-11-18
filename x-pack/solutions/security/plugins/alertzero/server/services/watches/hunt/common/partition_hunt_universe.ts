@@ -6,7 +6,7 @@
  */
 
 import type { HuntScope } from '@kbn/alertzero-common';
-import { clusterCovers } from './index_glob';
+import { clusterCovers, exclusionReachesCluster } from './index_glob';
 import {
   isDotPrefixedIndex,
   isIndexExclusion,
@@ -53,7 +53,7 @@ const isDotPrefixedEntry = (entry: string): boolean => {
  * A whole-cluster exclusion (`-archive:*`) that policy left without anything to exclude:
  * Elasticsearch rejects one for a cluster no positive entry includes. It is orphaned only when
  * a skipped entry reached that cluster and no retained positive entry still does. A retained
- * entry reaches it through a cluster glob (`arch*:logs-*`), or, under cross-project search,
+ * entry reaches it through a cluster glob that may overlap it (`arch*:logs-*`, `*:logs-*`), or, under cross-project search,
  * through any unqualified pattern, which spans every routed project.
  */
 const isOrphanedClusterExclusion = ({
@@ -72,7 +72,8 @@ const isOrphanedClusterExclusion = ({
   if (!skippedClusters.some((skipped) => clusterCovers(skipped, cluster))) return false;
   return !positives.some((positive) => {
     const { cluster: included } = parseIndexScopeEntry(positive);
-    return included === undefined ? crossProjectSearch : clusterCovers(included, cluster);
+    // Dropping an exclusion is the unsafe direction, so any possible overlap keeps it.
+    return included === undefined ? crossProjectSearch : exclusionReachesCluster(cluster, included);
   });
 };
 

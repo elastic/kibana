@@ -131,6 +131,11 @@ describe('partitionHuntUniverse', () => {
       ]);
     });
 
+    it('keeps a glob-cluster exclusion while a wildcard cluster entry may reach it', () => {
+      const entries = ['*:logs-*', 'arch*:.alerts-*', '-arch*:*'];
+      expect(partitionHuntUniverse(entries, false).patterns).toEqual(['*:logs-*', '-arch*:*']);
+    });
+
     it('keeps it under cross-project search while an unqualified pattern remains', () => {
       const entries = ['logs-*', 'archive:.alerts-*', '-archive:*'];
       expect(partitionHuntUniverse(entries, true).patterns).toEqual(['logs-*', '-archive:*']);
