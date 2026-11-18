@@ -53,6 +53,13 @@ export interface ValidatedEmail {
 const ActionTypeExecutorResultStatusValues = ['ok', 'error'] as const;
 type ActionTypeExecutorResultStatus = (typeof ActionTypeExecutorResultStatusValues)[number];
 
+/**
+ * Why a connector's action failed: the vendor rejected the request, the vendor failed, the
+ * vendor couldn't be reached, or the connector's own code threw. Reported as telemetry so a
+ * bug in a connector can be told apart from a user, configuration or vendor problem.
+ */
+export type ConnectorExecuteFailureClass = 'vendor_4xx' | 'vendor_5xx' | 'network' | 'handler';
+
 export interface ActionTypeExecutorResult<Data> {
   actionId: string;
   status: ActionTypeExecutorResultStatus;
@@ -63,6 +70,7 @@ export interface ActionTypeExecutorResult<Data> {
   errorSource?: TaskErrorSource;
   errorName?: string;
   errorMeta?: Record<string, unknown>;
+  failureClass?: ConnectorExecuteFailureClass;
 }
 
 export type ActionTypeExecutorRawResult<Data> = ActionTypeExecutorResult<Data> & {

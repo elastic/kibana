@@ -31,7 +31,11 @@ import type { PluginSetupContract, PluginStartContract } from './plugin';
 import type { SubActionConnector } from './sub_action_framework/sub_action_connector';
 import type { ServiceParams } from './sub_action_framework/types';
 
-export type { ActionTypeExecutorRawResult, ActionTypeExecutorResult } from '../common';
+export type {
+  ActionTypeExecutorRawResult,
+  ActionTypeExecutorResult,
+  ConnectorExecuteFailureClass,
+} from '../common';
 export { ActionExecutionSourceType } from './lib';
 export { ConnectorUsageCollector } from './usage';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;

@@ -34,6 +34,7 @@ import type { GetAxiosInstanceWithAuthFn, GetCredentialFn } from '../get_axios_i
 import type { LeasePool } from '../lease_pool';
 import { buildClientLeaseKey } from './build_client_lease_key';
 import { AllowlistDeniedError } from './connector_network_errors';
+import { classifyConnectorFailure, getHttpStatus } from './classify_connector_failure';
 
 type RecordUnknown = Record<string, unknown>;
 interface FetchOptions {
@@ -73,11 +74,6 @@ const getResponseSizeHeaderBytes = ({
   error: unknown;
   headerName: string;
 }): number | undefined => getFinitePositiveNumber(getErrorHeaderValue({ error, headerName }));
-
-const getHttpStatus = (error: unknown): number | undefined => {
-  const status = (error as AxiosLikeError | undefined)?.response?.status;
-  return typeof status === 'number' ? status : undefined;
-};
 
 // A time in the past means the service can be called again now. Dates beyond the JS range are
 // dropped: they would make `retry.toISOString()` throw downstream.
@@ -354,6 +350,7 @@ export const generateExecutorFunction = ({
         status: 'error',
         message: errorMessage,
         actionId: connectorId,
+        failureClass: classifyConnectorFailure(error),
         ...(errorMeta ? { errorMeta } : {}),
         ...(errorSource === TaskErrorSource.USER
           ? { retry: false, errorSource: TaskErrorSource.USER }

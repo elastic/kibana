@@ -8,6 +8,7 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { generateExecutorFunction } from './generate_executor_function';
+import { AllowlistDeniedError } from './connector_network_errors';
 import { setConnectorActionErrorMeta, TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
 import type {
   ActionContext,
@@ -816,6 +817,7 @@ describe('generateExecutorFunction', () => {
         status: 'error',
         message: 'direct handler failure',
         actionId: connectorId,
+        failureClass: 'handler',
       });
     });
 
@@ -1274,6 +1276,7 @@ describe('generateExecutorFunction', () => {
         status: 'error',
         message: 'handler failed',
         actionId: connectorId,
+        failureClass: 'handler',
       });
     });
 
@@ -1294,6 +1297,7 @@ describe('generateExecutorFunction', () => {
         status: 'error',
         message: 'maxContentLength size of 1048576 exceeded',
         actionId: connectorId,
+        failureClass: 'handler',
         errorMeta: { contentLengthBytes: 10 * 1024 * 1024 },
       });
     });
@@ -1330,6 +1334,7 @@ describe('generateExecutorFunction', () => {
         status: 'error',
         message: 'maxContentLength size of 1048576 exceeded',
         actionId: connectorId,
+        failureClass: 'handler',
         errorMeta: { contentLengthBytes: 2048 },
       });
     });
@@ -1355,6 +1360,7 @@ describe('generateExecutorFunction', () => {
         status: 'error',
         message: 'maxContentLength size of 1048576 exceeded',
         actionId: connectorId,
+        failureClass: 'handler',
         errorMeta: {
           contentLengthBytes: 20 * 1024 * 1024,
           estimatedOutputBytes: 28 * 1024 * 1024,
@@ -1396,6 +1402,7 @@ describe('generateExecutorFunction', () => {
           status: 'error',
           message: 'Request failed with status code 429',
           actionId: connectorId,
+          failureClass: 'vendor_4xx',
           errorMeta: { statusCode: 429 },
           retry: inSeconds(30),
         });
@@ -1517,6 +1524,29 @@ describe('generateExecutorFunction', () => {
         });
       });
 
+      it('classifies a vendor 5xx so an outage is not read as a connector bug', async () => {
+        const result = await executeWithError(makeHttpError(503));
+
+        expect(result).toMatchObject({ status: 'error', failureClass: 'vendor_5xx' });
+      });
+
+      it('classifies a transport failure as network', async () => {
+        const error = Object.assign(new Error('connect ECONNREFUSED'), {
+          request: {},
+          code: 'ECONNREFUSED',
+        });
+
+        const result = await executeWithError(error);
+
+        expect(result).toMatchObject({ status: 'error', failureClass: 'network' });
+      });
+
+      it('classifies an allowlist denial as network, since the vendor was never reached', async () => {
+        const result = await executeWithError(new AllowlistDeniedError('target url is not added'));
+
+        expect(result).toMatchObject({ status: 'error', failureClass: 'network' });
+      });
+
       it('adds neither to errors without a response status', async () => {
         const error = Object.assign(new Error('socket hang up'), {
           response: { headers: { 'retry-after': '30' } },
@@ -1528,6 +1558,7 @@ describe('generateExecutorFunction', () => {
           status: 'error',
           message: 'socket hang up',
           actionId: connectorId,
+          failureClass: 'handler',
         });
       });
     });
@@ -1555,6 +1586,7 @@ describe('generateExecutorFunction', () => {
         status: 'error',
         message: 'string error',
         actionId: connectorId,
+        failureClass: 'handler',
       });
     });
 
@@ -1590,6 +1622,7 @@ describe('generateExecutorFunction', () => {
         status: 'error',
         message: policyMessage,
         actionId: connectorId,
+        failureClass: 'handler',
       });
       expect(result).not.toHaveProperty('retry');
     });
@@ -1655,6 +1688,7 @@ describe('generateExecutorFunction', () => {
         status: 'error',
         message: 'connection failed',
         actionId: connectorId,
+        failureClass: 'handler',
       });
     });
   });
