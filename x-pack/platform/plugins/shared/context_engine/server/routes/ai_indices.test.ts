@@ -34,7 +34,9 @@ import {
   MAX_AI_INDICES,
   MAX_AI_INDEX_TRACES,
   MAX_AI_INDEX_TRACE_INDEX_EXPRESSIONS,
+  MAX_AI_INDEX_USER_ID_LENGTH,
   MAX_KI_GROUP_PREVIEW_SIZE,
+  MAX_KI_EXCLUDE_TYPES,
   MAX_KI_GROUPS,
   MAX_KI_SEARCH_QUERY_LENGTH,
   MAX_KI_TYPE_FILTER_LENGTH,
@@ -946,8 +948,20 @@ describe('ai indices routes', () => {
 
       it('accepts a full body', () => {
         expect(() =>
-          validateBody({ query: 'FROM a', params: { s: 'x', n: 1, b: true }, limit: 5 })
+          validateBody({
+            query: 'FROM a',
+            params: { s: 'x', n: 1, b: true },
+            limit: 5,
+            user_id: 'alice',
+          })
         ).not.toThrow();
+      });
+
+      it('bounds user_id', () => {
+        expect(() => validateBody({ query: 'FROM a', user_id: '' })).toThrow(/user_id/);
+        expect(() =>
+          validateBody({ query: 'FROM a', user_id: 'u'.repeat(MAX_AI_INDEX_USER_ID_LENGTH + 1) })
+        ).toThrow(/user_id/);
       });
 
       it('requires a non-empty query', () => {
@@ -1013,8 +1027,19 @@ describe('ai indices routes', () => {
       expect(readServiceParams).toHaveLength(1);
       expect(readServiceParams[0].request).toBe(request);
       expect(readServiceParams[0].esClient).toMatchObject({ search: esSearch, get: esGet });
-      expect(readService.describe).toHaveBeenCalledWith('a');
+      expect(readService.describe).toHaveBeenCalledWith('a', { userId: undefined });
       expect(response.ok).toHaveBeenCalledWith({ body: description });
+    });
+
+    it('passes user_id from the query string to the read service', async () => {
+      readService.describe.mockResolvedValue(description);
+
+      await callRoute('GET', AI_INDEX_DESCRIBE_PATH, {
+        params: { aiIndexId: 'a' },
+        query: { user_id: 'alice' },
+      });
+
+      expect(readService.describe).toHaveBeenCalledWith('a', { userId: 'alice' });
     });
 
     it('returns 404 when the AI Index does not exist', async () => {
@@ -1300,7 +1325,7 @@ describe('ai indices routes', () => {
         expect(validateQuery({ exclude_types: ['faq', 'policy'] })).toEqual(
           expect.objectContaining({ exclude_types: ['faq', 'policy'] })
         );
-        const maxTypes = Array.from({ length: MAX_KI_GROUPS }, (_, i) => `t${i}`);
+        const maxTypes = Array.from({ length: MAX_KI_EXCLUDE_TYPES }, (_, i) => `t${i}`);
         expect(() => validateQuery({ exclude_types: maxTypes })).not.toThrow();
         expect(() => validateQuery({ exclude_types: [...maxTypes, 'one-more'] })).toThrow(
           '[exclude_types]'
@@ -1427,7 +1452,69 @@ describe('ai indices routes', () => {
         '[query]'
       );
       expect(() => validateQuery({ type: 'faq' })).toThrow();
-      expect(() => validateQuery({ exclude_types: 'faq' })).toThrow();
+    });
+
+    it('accepts exclude_types as a string or a bounded array of bounded strings', () => {
+      expect(validateQuery({ exclude_types: 'faq' })).toEqual(
+        expect.objectContaining({ exclude_types: 'faq' })
+      );
+      const maxTypes = Array.from({ length: MAX_KI_EXCLUDE_TYPES }, (_, i) => `t${i}`);
+      expect(() => validateQuery({ exclude_types: maxTypes })).not.toThrow();
+      expect(() => validateQuery({ exclude_types: [...maxTypes, 'one-more'] })).toThrow(
+        '[exclude_types]'
+      );
+      expect(() => validateQuery({ exclude_types: '' })).toThrow('[exclude_types]');
+      expect(() =>
+        validateQuery({ exclude_types: 'a'.repeat(MAX_KI_TYPE_FILTER_LENGTH + 1) })
+      ).toThrow('[exclude_types]');
+    });
+
+    it('passes exclude_types to the buckets query as params, a single value as a list', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      esEsqlQuery
+        .mockResolvedValueOnce(probe)
+        .mockResolvedValueOnce(groupBuckets([[2, 'policy', 3, false]]))
+        .mockResolvedValueOnce(rows([]));
+
+      await callRoute('GET', AI_INDEX_KI_GROUPS_PATH, {
+        params: { aiIndexId: 'customer_support' },
+        query: { max_groups: 10, preview_size: 1, exclude_types: 'faq', sort: 'updated' },
+      });
+
+      expect(esEsqlQuery.mock.calls[1][0]).toEqual({
+        query: expect.stringContaining('WHERE (type IS NULL OR type NOT IN (?excludeType0))'),
+        params: [{ excludeType0: 'faq' }],
+      });
+    });
+
+    it('accepts types as a string or a bounded array of bounded strings', () => {
+      expect(validateQuery({ types: 'faq' })).toEqual(expect.objectContaining({ types: 'faq' }));
+      expect(() =>
+        validateQuery({ types: Array.from({ length: MAX_KI_GROUPS }, (_, i) => `t${i}`) })
+      ).not.toThrow();
+      expect(() =>
+        validateQuery({ types: Array.from({ length: MAX_KI_GROUPS + 1 }, (_, i) => `t${i}`) })
+      ).toThrow('[types]');
+      expect(() => validateQuery({ types: '' })).toThrow('[types]');
+      expect(() => validateQuery({ types: 'a'.repeat(257) })).toThrow('[types]');
+    });
+
+    it('passes the given types to the buckets query as params', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      esEsqlQuery
+        .mockResolvedValueOnce(probe)
+        .mockResolvedValueOnce(groupBuckets([[2, 'faq', 3, false]]))
+        .mockResolvedValueOnce(rows([]));
+
+      await callRoute('GET', AI_INDEX_KI_GROUPS_PATH, {
+        params: { aiIndexId: 'customer_support' },
+        query: { max_groups: 5, preview_size: 1, types: 'faq', sort: 'updated' },
+      });
+
+      expect(esEsqlQuery.mock.calls[1][0]).toEqual({
+        query: expect.stringContaining('type IN (?groupType0)'),
+        params: [{ groupType0: 'faq' }],
+      });
     });
 
     it('returns the groups, reads as the current user and audits the read', async () => {
@@ -1750,6 +1837,9 @@ describe('ai indices routes', () => {
       expect(() =>
         bodySchema.validate({ ki: { content: 'Updated content', title: 'Updated title' } })
       ).toThrow();
+      expect(() =>
+        bodySchema.validate({ ki: { content: 'Updated content', user_id: 'alice' } })
+      ).toThrow(/user_id/);
     });
 
     it('passes the index query param as backingIndex to updateKi', async () => {

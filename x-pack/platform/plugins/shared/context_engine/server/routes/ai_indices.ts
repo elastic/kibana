@@ -102,6 +102,7 @@ import {
   createAiIndexResponseSchema,
   deleteAiIndexQuerySchema,
   deleteAiIndexResponseSchema,
+  describeAiIndexQuerySchema,
   describeAiIndexResponseSchema,
   errorResponseSchema,
   feedbackAnalysisSchema,
@@ -591,7 +592,7 @@ export const registerAiIndexRoutes = ({
       access: 'public',
       summary: 'Query AI Indices',
       description: [
-        `Runs an ES|QL query as the current user. The server applies a space filter and limits the response to at most ${MAX_AI_INDEX_QUERY_LIMIT} rows.`,
+        `Runs an ES|QL query as the current user. The server applies a space filter and limits the response to at most ${MAX_AI_INDEX_QUERY_LIMIT} rows. When the body carries \`user_id\`, rows are also limited to documents with that \`user_id\` or no \`user_id\`.`,
         'The query determines which indices it reads. Elasticsearch index privileges limit which indices the current user can access.',
         'The space comes from the request URL (`/s/{spaceId}/…`) or defaults to the default space. The request body cannot change the space or replace the space filter.',
         CONTEXT_ENGINE_DISABLED_NOTE,
@@ -655,7 +656,7 @@ export const registerAiIndexRoutes = ({
       summary: 'Describe an AI Index',
       description: [
         `Returns a free-form text context block for an agent. The block describes the AI Index and its ES|QL target. It also includes up to ${MAX_AI_INDEX_DESCRIBE_FIELDS} fields exposed by the backing indices, identifies which fields are semantic, provides knowledge item type and tag counts for the current space, and includes example ES|QL queries.`,
-        'The API reads data as the current user. Elasticsearch index privileges limit which indices the current user can access. A caller who cannot read the backing indices gets a 403 response.',
+        'The API reads data as the current user. Elasticsearch index privileges limit which indices the current user can access. A caller who cannot read the backing indices gets a 403 response. When `user_id` is given, the counts are limited to documents with that `user_id` or no `user_id`.',
         'The space comes from the request URL (`/s/{spaceId}/…`) or defaults to the default space. It cannot be specified in any other way.',
         CONTEXT_ENGINE_DISABLED_NOTE,
         CONTEXT_ENGINE_DOCS_NOTE,
@@ -671,6 +672,7 @@ export const registerAiIndexRoutes = ({
         validate: {
           request: {
             params: aiIndexIdParamsSchema,
+            query: describeAiIndexQuerySchema,
           },
           response: {
             200: {
@@ -700,8 +702,11 @@ export const registerAiIndexRoutes = ({
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
         const { aiIndexId } = request.params;
+        const { user_id: userId } = request.query;
         try {
-          const body = await getAiIndexDataReadService({ esClient, request }).describe(aiIndexId);
+          const body = await getAiIndexDataReadService({ esClient, request }).describe(aiIndexId, {
+            userId,
+          });
           return response.ok({ body });
         } catch (error) {
           return handleReadError(error, response, logger);
@@ -784,12 +789,16 @@ export const registerAiIndexRoutes = ({
         const { aiIndexId } = request.params;
         const {
           max_groups: maxGroups,
+          types: type,
+          exclude_types: excludeType,
           preview_size: previewSize,
           status,
           query,
           sort,
         } = request.query;
         const statuses = status !== undefined ? [status].flat() : undefined;
+        const types = type !== undefined ? [type].flat() : undefined;
+        const excludeTypes = excludeType !== undefined ? [excludeType].flat() : undefined;
         const spaceId = resolveSpaceId(await getSpaces(), request);
         try {
           const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
@@ -797,6 +806,8 @@ export const registerAiIndexRoutes = ({
           const body: ListKiGroupsResponse = await getKiGroups(esClient, {
             dest: aiIndex.dest,
             maxGroups,
+            ...(types !== undefined ? { types } : {}),
+            ...(excludeTypes !== undefined ? { excludeTypes } : {}),
             previewSize,
             ...(statuses !== undefined ? { statuses } : {}),
             ...(query !== undefined ? { query } : {}),

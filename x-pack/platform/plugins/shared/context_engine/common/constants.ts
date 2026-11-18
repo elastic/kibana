@@ -33,12 +33,14 @@ export const MAX_KI_PAGE_SIZE = 100;
 /** Page size for summary-only KI list requests, no rows. */
 export const KI_SUMMARY_PAGE_SIZE = 0;
 
-/** Default and maximum number of type groups in a KI groups response. Also the `exclude_types` max size. */
+/** Default and maximum number of type groups in a KI groups response. */
 export const DEFAULT_KI_GROUPS = 5;
 export const MAX_KI_GROUPS = 10;
+/** The most types an `exclude_types` filter takes: the tile types plus the "Other" groups. */
+export const MAX_KI_EXCLUDE_TYPES = DEFAULT_KI_GROUPS + MAX_KI_GROUPS;
 /** Default and maximum number of preview rows per KI type group. */
 export const DEFAULT_KI_GROUP_PREVIEW_SIZE = 3;
-export const MAX_KI_GROUP_PREVIEW_SIZE = 25;
+export const MAX_KI_GROUP_PREVIEW_SIZE = 50;
 
 /** Also the longest type that can form a group, since the client must be able to send it back. */
 export const MAX_KI_TYPE_FILTER_LENGTH = 256;
@@ -114,6 +116,7 @@ export const MAX_AI_INDEX_QUERY_LENGTH = 10000;
 export const MAX_AI_INDEX_QUERY_PARAMS = 100;
 export const MAX_AI_INDEX_QUERY_PARAM_KEY_LENGTH = 256;
 export const MAX_AI_INDEX_QUERY_PARAM_VALUE_LENGTH = 4096;
+export const MAX_AI_INDEX_USER_ID_LENGTH = 256;
 
 /** Row limit the server always enforces; a larger trailing `LIMIT` in the query is capped to it. */
 export const DEFAULT_AI_INDEX_QUERY_LIMIT = 100;

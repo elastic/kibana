@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { EDITED_AT_ATTRIBUTE, EDITED_BY_ATTRIBUTE, isDreamedKiType } from '../../common/dreaming';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import type { KiLifecycleStatus, KiPartialFields } from '../../common/step_types/ki';
-import { KiDeletedError, KiNotFoundError } from './errors';
+import { KiDeletedError, KiNotFoundError, KiValidationError } from './errors';
 import { findLinkingRelationshipIds } from './ki_relationships';
 import {
   getKiRevision,
@@ -60,6 +60,24 @@ const isNoopUpdate = (
   return Object.entries(ki).every(([key, value]) => isEqual(source[key], value));
 };
 
+/**
+ * The engine hands step handlers unparsed input, so a `user_id` the schema omits can still arrive
+ * here. A null or missing one leaves the stored value alone.
+ */
+export const assertSameUserId = (
+  aiIndexId: string,
+  kiId: string,
+  source: StoredKi,
+  ki: Record<string, unknown>
+): void => {
+  const userId = ki.user_id ?? undefined;
+  if (userId !== undefined && userId !== source.user_id) {
+    throw new KiValidationError(
+      `KI '${kiId}' in AI index '${aiIndexId}' cannot change its user_id`
+    );
+  }
+};
+
 export interface UpdateKiOptions {
   aiIndexId: string;
   dest: AiIndexDest;
@@ -107,18 +125,20 @@ export const updateKi = async (
   if (isKiDeleted(revision.source) && !force) {
     throw new KiDeletedError(aiIndexId, kiId, 'restore the deleted KI before updating it');
   }
+  assertSameUserId(aiIndexId, kiId, revision.source, ki);
+  const fields = omit(ki, 'user_id');
 
-  if (isNoopUpdate(revision.source, ki, lifecycle)) {
+  if (isNoopUpdate(revision.source, fields, lifecycle)) {
     return { id: kiId, result: 'noop' };
   }
 
   const now = new Date().toISOString();
-  const edited = personEdit && changesWhatItSays(revision.source, ki);
+  const edited = personEdit && changesWhatItSays(revision.source, fields);
   const changes = {
-    ...ki,
+    ...fields,
     ...(edited && {
       attributes: {
-        ...ki.attributes,
+        ...fields.attributes,
         [EDITED_BY_ATTRIBUTE]: writer.uri,
         [EDITED_AT_ATTRIBUTE]: now,
       },
