@@ -1471,7 +1471,6 @@ describe('EsServiceAccounts', () => {
       ).resolves.toEqual({ status: 'present', credentialCreatedAt: '2026-09-21T00:00:00.000Z' });
 
       expect(clusterClient.asInternalUser.transport.request).toHaveBeenCalledWith(READ_ACCOUNT, {
-        ignore: [404],
         signal,
       });
       expect(clusterClient.asScoped).not.toHaveBeenCalled();
@@ -1501,6 +1500,29 @@ describe('EsServiceAccounts', () => {
         () =>
           clusterClient.asInternalUser.transport.request.mockRejectedValue(
             new Error('unavailable')
+          ),
+      ],
+      [
+        'Elasticsearch, or a proxy in front of it, answers 404',
+        () => clusterClient.asInternalUser.transport.request.mockRejectedValue(esError(404)),
+      ],
+      [
+        'the answer is not an object',
+        () =>
+          clusterClient.asInternalUser.transport.request.mockResolvedValueOnce('Unknown resource.'),
+      ],
+      [
+        'the account is not reported as user-managed',
+        () =>
+          clusterClient.asInternalUser.transport.request.mockResolvedValueOnce(
+            accountEntry({ type: 'something_new' })
+          ),
+      ],
+      [
+        'the lookup is aborted',
+        () =>
+          clusterClient.asInternalUser.transport.request.mockRejectedValue(
+            new errors.RequestAbortedError('Request aborted')
           ),
       ],
       [
@@ -1837,9 +1859,7 @@ describe('EsServiceAccounts', () => {
         assumable: true,
       });
       expect(clusterClient.asInternalUser.transport.request).toHaveBeenCalledTimes(1);
-      expect(clusterClient.asInternalUser.transport.request).toHaveBeenCalledWith(READ_ACCOUNT, {
-        ignore: [404],
-      });
+      expect(clusterClient.asInternalUser.transport.request).toHaveBeenCalledWith(READ_ACCOUNT, {});
       expect(credentialStore.findExisting).toHaveBeenCalledWith([ACCOUNT_ID]);
     });
 
@@ -1878,12 +1898,22 @@ describe('EsServiceAccounts', () => {
       expect(credentialStore.findExisting).not.toHaveBeenCalled();
     });
 
-    it('resolves `null` for an account Elasticsearch reports as not user-managed', async () => {
+    it('rejects with a 502 for an account Elasticsearch reports as not user-managed', async () => {
       clusterClient.asInternalUser.transport.request.mockResolvedValueOnce({
         [ACCOUNT_ID]: { type: 'built_in', role_descriptor: {} },
       });
 
-      await expect(serviceAccounts.getSummary(ACCOUNT_ID)).resolves.toBeNull();
+      await expect(serviceAccounts.getSummary(ACCOUNT_ID)).rejects.toMatchObject({
+        output: { statusCode: 502 },
+      });
+    });
+
+    it('rejects on a 404, which may not come from Elasticsearch', async () => {
+      clusterClient.asInternalUser.transport.request.mockRejectedValueOnce(esError(404));
+
+      await expect(serviceAccounts.getSummary(ACCOUNT_ID)).rejects.toMatchObject({
+        meta: { statusCode: 404 },
+      });
     });
 
     it('resolves `null` for an id Kibana could never run as, without reaching Elasticsearch', async () => {

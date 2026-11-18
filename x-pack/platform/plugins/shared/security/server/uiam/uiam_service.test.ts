@@ -1988,6 +1988,20 @@ describe('UiamService', () => {
       );
     });
 
+    it('rejects a 404 that carries no UIAM error code, which may come from a gateway', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 404,
+        headers: new Headers(),
+        json: async () => ({ ok: false, message: 'Unknown resource.' }),
+      });
+
+      await expect(uiamService.getServiceAccount('service-account-id')).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+      expect(uiamServiceLogger.error).toHaveBeenCalled();
+    });
+
     it('resolves `null` for the 403 UIAM sends for an unknown account, logging it at debug only', async () => {
       fetchSpy.mockResolvedValue({
         ok: false,

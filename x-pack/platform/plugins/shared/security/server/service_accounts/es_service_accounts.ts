@@ -1209,6 +1209,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
    * Reads an account as `kibana_system`, for the callers that have no user request. Resolves
    * `undefined` when there is no such account. An ID Kibana could never run as names no account a
    * workload can be bound to, so it is missing too, the same as the exchange refusing it for good.
+   * The read is strict, so an answer that does not clearly leave the account out throws.
    */
   private async readAccountAsInternalUser(
     id: string,
@@ -1229,7 +1230,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       this.clusterClient.asInternalUser,
       principal.namespace,
       principal.name,
-      { signal }
+      { signal, strict: true }
     );
   }
 
@@ -1244,12 +1245,21 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
    *
    * `withCreator` reads the account's creator too, and asks Elasticsearch for the creator's user
    * profile, which costs it a profile lookup. Only reads that show the creator ask for it.
+   *
+   * `strict` resolves `undefined` only for an answer from Elasticsearch that leaves the account out.
+   * A 404, which a proxy in front of Elasticsearch can send too, and an entry that is not
+   * user-managed both throw instead. It is for callers that remove bindings when an account is
+   * absent, where a wrong "absent" is the costly mistake.
    */
   private async readAccount(
     esClient: ElasticsearchClient,
     namespace: string,
     name: string,
-    { withCreator = false, signal }: { withCreator?: boolean; signal?: AbortSignal } = {}
+    {
+      withCreator = false,
+      signal,
+      strict = false,
+    }: { withCreator?: boolean; signal?: AbortSignal; strict?: boolean } = {}
   ): Promise<ElasticsearchServiceAccount | undefined> {
     const principal = `${namespace}/${name}`;
 
@@ -1263,12 +1273,19 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
           querystring: { type: 'user_managed', ...(withProfileUid && { with_profile_uid: true }) },
         },
         // An unknown principal is an empty 200 rather than a 404. Ignore 404 as well, so a future
-        // tightening upstream does not turn "no such account" into an error.
-        { ignore: [404], ...(signal ? { signal } : {}) }
+        // tightening upstream does not turn "no such account" into an error. A strict read does
+        // not, because it cannot tell that 404 from one a proxy sent.
+        { ...(strict ? {} : { ignore: [404] }), ...(signal ? { signal } : {}) }
       );
     const response = withCreator
       ? await this.withCreatorProfileUids(`read service account [${principal}]`, send)
       : await send(false);
+
+    if (strict && (typeof response !== 'object' || response === null)) {
+      throw Boom.badGateway(
+        `Cannot determine the state of service account [${name}]: Elasticsearch did not answer with an object.`
+      );
+    }
 
     const entry = response?.[principal];
     if (entry === undefined) {
@@ -1277,8 +1294,13 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
 
     // The type filter above should keep built-in accounts out of the response. This is what holds
     // if it does not, and what makes a future third account type read as "not Kibana's" rather
-    // than as unreadable.
+    // than as unreadable. A strict read cannot take that view, because "not Kibana's" is absent.
     if (!userManagedEntrySchema.safeParse(entry).success) {
+      if (strict) {
+        throw Boom.badGateway(
+          `Cannot determine the state of service account [${name}]: Elasticsearch did not report it as user-managed.`
+        );
+      }
       this.logger.debug(`Service account [${principal}] is not a user-managed account`);
       return undefined;
     }
