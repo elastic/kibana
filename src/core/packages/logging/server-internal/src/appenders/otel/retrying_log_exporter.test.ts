@@ -147,6 +147,15 @@ describe('RetryingLogRecordExporter', () => {
     expect(finishExport).toHaveBeenCalledWith(undefined);
   });
 
+  it('records a failure that carries no error as export_failed', () => {
+    const exporter = new RetryingLogRecordExporter(makeDelegate(failure()), 120_000, metrics);
+
+    exporter.export(logs, jest.fn());
+
+    expect(finishExport).toHaveBeenCalledTimes(1);
+    expect(finishExport).toHaveBeenCalledWith('export_failed');
+  });
+
   it('always passes the same batch of records to the delegate', () => {
     const delegate = makeDelegate(failure(networkError()), SUCCESS);
     const exporter = new RetryingLogRecordExporter(delegate, 120_000, metrics);

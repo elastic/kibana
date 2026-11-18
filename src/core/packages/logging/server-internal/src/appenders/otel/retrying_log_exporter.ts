@@ -103,7 +103,10 @@ export class RetryingLogRecordExporter implements LogRecordExporter {
     let nextBackoffMs = INITIAL_BACKOFF_MS;
     const finishExport = this.metrics.startExport(logs);
     const finish: ExportResultCallback = (result) => {
-      finishExport(result.error);
+      // Like the SDK's delegate, a failure without an error is recorded as `export_failed`.
+      finishExport(
+        result.code === EXPORT_RESULT_SUCCESS ? undefined : result.error ?? 'export_failed'
+      );
       resultCallback(result);
     };
 

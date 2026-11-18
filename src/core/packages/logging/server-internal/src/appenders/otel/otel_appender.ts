@@ -37,7 +37,10 @@ import {
 } from '@opentelemetry/sdk-logs';
 import type { ExporterMetrics } from '@opentelemetry/otlp-exporter-base';
 import { createOtlpHttpExporterMetrics } from '@opentelemetry/otlp-exporter-base/node-http';
-import { createOtlpGrpcExporterMetrics } from '@opentelemetry/otlp-grpc-exporter-base';
+import {
+  convertLegacyOtlpGrpcOptions,
+  createOtlpGrpcExporterMetrics,
+} from '@opentelemetry/otlp-grpc-exporter-base';
 import { LogsExporterMetricsHelper } from '@opentelemetry/otlp-transformer';
 import {
   OTEL_COMPONENT_TYPE_VALUE_OTLP_GRPC_LOG_EXPORTER,
@@ -340,15 +343,10 @@ export class OtelAppender implements DisposableAppender {
   constructor(config: OtelAppenderPluginConfig) {
     const meterProvider = metrics.getMeterProvider();
     const maxElapsedTimeMs = config.maxElapsedTime?.asMilliseconds();
-    // The SDK's built-in retry gives up after ~13s; the retry layer extends it to the budget, and
-    // records the exporter metrics in place of the SDK exporter so each batch is counted once.
+    // The SDK's built-in retry gives up after ~13s; the retry layer extends it to the budget.
     const exporter =
       maxElapsedTimeMs !== undefined
-        ? new RetryingLogRecordExporter(
-            createExporter(config, undefined),
-            maxElapsedTimeMs,
-            createExporterMetrics(config, meterProvider)
-          )
+        ? createRetryingExporter(config, meterProvider, maxElapsedTimeMs)
         : createExporter(config, meterProvider);
     // Layer the resource from three sources (each overriding the previous):
     //   1. Auto-detected: host, OS, process, env-var OTel attributes
@@ -483,6 +481,24 @@ const omitDeepNilValues = (obj: Ecs) => {
   return result;
 };
 
+/**
+ * Wraps the SDK exporter in the retry layer, which records the `otel.sdk.exporter.*` metrics in
+ * its place so each batch is counted once, after its final attempt.
+ */
+const createRetryingExporter = (
+  config: OtelAppenderConfig,
+  meterProvider: MeterProvider,
+  maxElapsedTimeMs: number
+): RetryingLogRecordExporter => {
+  // Created before the SDK exporter so it takes the `otel.component.name` that exporter would get.
+  const exporterMetrics = createExporterMetrics(config, meterProvider);
+  return new RetryingLogRecordExporter(
+    createExporter(config, undefined),
+    maxElapsedTimeMs,
+    exporterMetrics
+  );
+};
+
 /** The `otel.sdk.exporter.*` metrics recorder the SDK exporter for `config.protocol` would use. */
 const createExporterMetrics = (
   config: OtelAppenderConfig,
@@ -501,7 +517,8 @@ const createExporterMetrics = (
       return createOtlpGrpcExporterMetrics(
         OTEL_COMPONENT_TYPE_VALUE_OTLP_GRPC_LOG_EXPORTER,
         LogsExporterMetricsHelper,
-        config.url,
+        // The SDK exporter records the normalized `host[:port]`, not the configured URL.
+        convertLegacyOtlpGrpcOptions({ url: config.url }, 'LOGS').url,
         meterProvider
       );
   }
