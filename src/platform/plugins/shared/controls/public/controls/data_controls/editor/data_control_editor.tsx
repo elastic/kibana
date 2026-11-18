@@ -108,9 +108,13 @@ const useControlActionRegistry = (): ControlActionRegistry => {
 const CompatibleControlTypesComponent = ({
   data_view_id,
   field_name,
+  values_source,
+  esql_query,
+  parentApi,
   selectedControlType: selectedAction,
   setSelectedControlType: setSelectedAction,
 }: Partial<DataControlEditorState> & {
+  parentApi?: unknown;
   selectedControlType?: string;
   setSelectedControlType: (type: string) => void;
 }) => {
@@ -120,10 +124,10 @@ const CompatibleControlTypesComponent = ({
   const controlTypeContext = useMemo(
     () => ({
       trigger: triggers[CONTROL_MENU_TRIGGER],
-      embeddable: undefined, // parentApi isn't necessary for this
-      state: { data_view_id, field_name },
+      embeddable: parentApi, // used to resolve ES|QL variables
+      state: { data_view_id, field_name, values_source, esql_query },
     }),
-    [data_view_id, field_name]
+    [data_view_id, field_name, values_source, esql_query, parentApi]
   );
 
   const sortedActionArray: CreateControlTypeAction[] = useMemo(() => {
@@ -220,6 +224,10 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
   const [panelTitle, setPanelTitle] = useState<string>(initialState.title ?? defaultPanelTitle);
   const [selectedControlType, setSelectedControlType] = useState<string | undefined>(controlType);
   const [controlOptionsValid, setControlOptionsValid] = useState<boolean>(true);
+  // the last ES|QL query that was successfully run, i.e. not the one currently being typed
+  const [submittedESQLQuery, setSubmittedESQLQuery] = useState<string | undefined>(
+    isEdit ? initialState.esql_query : undefined
+  );
 
   const editorConfig = useMemo<ControlGroupEditorConfig | undefined>(() => {
     return apiHasEditorConfig(parentApi) ? parentApi.getEditorConfig() : undefined;
@@ -314,11 +322,17 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
   );
 
   const onChangeField = useCallback(
-    async (nextFieldName: string, nextFieldDisplayName?: string) => {
+    async (nextFieldName: string, nextFieldDisplayName?: string, nextESQLQuery?: string) => {
       const controlContext = {
         trigger: triggers[CONTROL_MENU_TRIGGER],
-        embeddable: undefined,
-        state: { field_name: nextFieldName, data_view_id: editorState.data_view_id },
+        embeddable: parentApi,
+        state: {
+          field_name: nextFieldName,
+          data_view_id: editorState.data_view_id,
+          ...(nextESQLQuery
+            ? { values_source: ControlValuesSource.ESQL, esql_query: nextESQLQuery }
+            : {}),
+        },
       };
 
       /**
@@ -348,7 +362,13 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
         setPanelTitle(newDefaultTitle);
       }
     },
-    [controlActionRegistry, editorState.data_view_id, editorState.title, selectedControlType]
+    [
+      controlActionRegistry,
+      editorState.data_view_id,
+      editorState.title,
+      selectedControlType,
+      parentApi,
+    ]
   );
 
   return (
@@ -457,7 +477,11 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
               // ConfigureValuesQuery only touches base DataControlEditorState fields
               updateEditorState={(state) => {
                 updateEditorState(state as Partial<State>);
-                if (state.field_name) onChangeField(state.field_name);
+                // `field_name` is only set once a query has been successfully run
+                if (state.field_name) {
+                  setSubmittedESQLQuery(state.esql_query);
+                  onChangeField(state.field_name, undefined, state.esql_query);
+                }
               }}
               setESQLQueryValidation={setESQLQueryValidation}
               isEdit={isEdit}
@@ -484,6 +508,9 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
               <CompatibleControlTypesComponent
                 data_view_id={editorState.data_view_id}
                 field_name={editorState.field_name}
+                values_source={editorState.values_source}
+                esql_query={isESQLValuesSource ? submittedESQLQuery : undefined}
+                parentApi={parentApi}
                 selectedControlType={selectedControlType}
                 setSelectedControlType={setSelectedControlType}
               />

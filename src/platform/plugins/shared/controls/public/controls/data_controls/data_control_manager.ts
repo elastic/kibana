@@ -173,7 +173,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
         filtersLoading$.next(true);
       })
     )
-    .subscribe(([nextDataViews, nextFieldName]) => {
+    .subscribe(([nextDataViews, nextFieldName, nextValuesSource]) => {
       const dataView = nextDataViews
         ? nextDataViews.find(({ id }) => dataControlStateManager.api.dataViewId$.value === id)
         : undefined;
@@ -182,7 +182,9 @@ export const initializeDataControlManager = async <EditorState extends object = 
       }
 
       const field = dataView.getFieldByName(nextFieldName ?? '');
-      if (!field) {
+      // ES|QL columns can be computed by the query (e.g. `EVAL`, `RENAME`, `LOOKUP JOIN`), so they may legitimately
+      // not exist as a field in the data view
+      if (!field && nextValuesSource !== ControlValuesSource.ESQL) {
         setBlockingError(
           new Error(
             i18n.translate('controls.dataControl.fieldNotFound', {
@@ -196,7 +198,12 @@ export const initializeDataControlManager = async <EditorState extends object = 
       }
 
       field$.next(field);
-      if (field) defaultFieldLabel$.next(field.displayName);
+      if (field) {
+        defaultFieldLabel$.next(field.displayName);
+      } else if (nextValuesSource === ControlValuesSource.ESQL) {
+        // computed ES|QL columns have no data view field, so fall back to the column name
+        defaultFieldLabel$.next(nextFieldName ?? '');
+      }
       const spec = field?.toSpec();
       if (spec) {
         const formatter = dataView.getFormatterForField(spec);
