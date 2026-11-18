@@ -166,15 +166,24 @@ describe('getCompositeChangedFields', () => {
   });
 
   it.each([
-    ['a member is added', (members: CompositeSLODefinition['members']) => [...members, { sloId: 'new', weight: 1 }]],
+    [
+      'a member is added',
+      (members: CompositeSLODefinition['members']) => [...members, { sloId: 'new', weight: 1 }],
+    ],
     ['a member is removed', (members: CompositeSLODefinition['members']) => members.slice(1)],
     [
       'a member weight changes',
-      (members: CompositeSLODefinition['members']) => [{ ...members[0], weight: 99 }, ...members.slice(1)],
+      (members: CompositeSLODefinition['members']) => [
+        { ...members[0], weight: 99 },
+        ...members.slice(1),
+      ],
     ],
     [
       'a member instanceId changes',
-      (members: CompositeSLODefinition['members']) => [{ ...members[0], instanceId: 'host-1' }, ...members.slice(1)],
+      (members: CompositeSLODefinition['members']) => [
+        { ...members[0], instanceId: 'host-1' },
+        ...members.slice(1),
+      ],
     ],
   ])('reports members when %s', (_, change) => {
     const composite = createCompositeSlo();
