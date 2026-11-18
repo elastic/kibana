@@ -264,7 +264,7 @@ describe('createDashboardAttachmentType', () => {
           columns: [{ label: 'Panel' }, { label: 'Type' }],
           rows: [
             ['CPU Usage', LENS_EMBEDDABLE_TYPE],
-            [null, LENS_EMBEDDABLE_TYPE],
+            ['—', LENS_EMBEDDABLE_TYPE],
           ],
         },
         {
@@ -278,6 +278,7 @@ describe('createDashboardAttachmentType', () => {
       expect(errors).toEqual([]);
       expect(valid).toBe(true);
       expect(slack).toContain('CPU Usage');
+      expect(slack).not.toContain('"text":""');
       expect(slack).toContain(`${SURFACE_BASE_URL}/app/dashboards#/view/dashboard%201`);
     });
 
@@ -302,7 +303,7 @@ describe('createDashboardAttachmentType', () => {
           type: 'table',
           columns: [{ label: 'Panel' }, { label: 'Type' }, { label: 'Section' }],
           rows: [
-            ['Overview', LENS_EMBEDDABLE_TYPE, null],
+            ['Overview', LENS_EMBEDDABLE_TYPE, '—'],
             ['Memory', LENS_EMBEDDABLE_TYPE, 'Hosts'],
           ],
         },

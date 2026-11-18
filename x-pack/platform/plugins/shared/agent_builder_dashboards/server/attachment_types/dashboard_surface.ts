@@ -17,6 +17,9 @@ import { DASHBOARD_APP_ID } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
 import type { ComponentsNode } from '@kbn/isomer-components';
 
+/** Shown in a table cell with no value: Slack takes no cell with empty text. */
+const EMPTY_CELL = '—';
+
 interface PanelRow {
   title: string;
   type: string;
@@ -66,9 +69,9 @@ const toPanelsTable = (rows: PanelRow[]): ComponentsNode[] => {
       type: 'table',
       columns: columns.map((label) => ({ label })),
       rows: rows.map(({ title, type, section }) => [
-        title || null,
+        title || EMPTY_CELL,
         type,
-        ...(hasSections ? [section ?? null] : []),
+        ...(hasSections ? [section ?? EMPTY_CELL] : []),
       ]),
     },
   ];
