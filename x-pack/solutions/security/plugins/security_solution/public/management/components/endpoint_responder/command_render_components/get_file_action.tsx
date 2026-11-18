@@ -14,15 +14,18 @@ import type { ActionRequestComponentProps } from '../types';
 export const GetFileActionResult = memo<
   ActionRequestComponentProps<{
     path: string[];
+    export: string;
   }>
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
   const actionCreator = useSendGetFileRequest();
 
   const actionRequestBody = useMemo<undefined | ResponseActionGetFileRequestBody>(() => {
     const { agentType, endpointId } = command.commandDefinition?.meta ?? {};
-    const { path, comment } = command.args.args;
+    const { path, comment, export: exportArg } = command.args.args;
     // `force` is a bare boolean flag; it is only ever defined for the `endpoint` agent type
     const force = command.args.hasArg('force');
+    // `export` (a storage provider id) is only ever defined for the `endpoint` agent type
+    const exportId = exportArg?.[0];
 
     return endpointId
       ? {
@@ -34,6 +37,7 @@ export const GetFileActionResult = memo<
             // allowed for the Endpoint agent type) are sent as `paths`
             ...(path.length > 1 ? { paths: path } : { path: path[0] }),
             ...(force ? { force: true } : {}),
+            ...(exportId ? { export: exportId } : {}),
           },
         }
       : undefined;

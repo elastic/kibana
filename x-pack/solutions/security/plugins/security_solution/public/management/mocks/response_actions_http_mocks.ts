@@ -16,6 +16,7 @@ import {
   CANCEL_ROUTE,
   CUSTOM_SCRIPTS_ROUTE,
   EXECUTE_ROUTE,
+  EXPORT_PROVIDERS_ROUTE,
   GET_FILE_ROUTE,
   GET_PROCESSES_ROUTE,
   ISOLATE_HOST_ROUTE_V2,
@@ -54,6 +55,7 @@ import type {
   ResponseActionCancelOutputContent,
   ResponseActionMemoryDumpOutputContent,
   ResponseActionMemoryDumpParameters,
+  ExportProvidersApiResponse,
 } from '../../../common/endpoint/types';
 
 export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
@@ -99,6 +101,9 @@ export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
     ResponseActionMemoryDumpOutputContent,
     ResponseActionMemoryDumpParameters
   >;
+
+  /** API call to the list of export (storage) providers in the host's Elastic Defend policy */
+  exportProviders: () => ExportProvidersApiResponse;
 }>;
 
 export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHttpMocksInterface>([
@@ -385,6 +390,19 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
           ResponseActionMemoryDumpOutputContent,
           ResponseActionMemoryDumpParameters
         >(actionDetails),
+      };
+    },
+  },
+  {
+    id: 'exportProviders',
+    path: EXPORT_PROVIDERS_ROUTE,
+    method: 'get',
+    handler: (): ExportProvidersApiResponse => {
+      return {
+        data: [
+          { id: 'azure-1', type: 'azure_blob', account_name: 'acct1', container: 'dumps' },
+          { id: 'azure-2', type: 'azure_blob', account_name: 'acct2', container: 'files' },
+        ],
       };
     },
   },

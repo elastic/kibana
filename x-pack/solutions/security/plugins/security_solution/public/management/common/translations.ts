@@ -299,6 +299,15 @@ export const CONSOLE_COMMANDS = {
           }
         ),
       },
+      export: {
+        about: i18n.translate(
+          'xpack.securitySolution.endpointConsoleCommands.getFile.export.about',
+          {
+            defaultMessage:
+              "Export the file to a storage provider from the host's Elastic Defend policy instead of downloading it through Elastic Security",
+          }
+        ),
+      },
     },
   },
   execute: {
@@ -411,6 +420,13 @@ export const CONSOLE_COMMANDS = {
     rawArgAbout: i18n.translate('xpack.securitySolution.translations.memoryDump.rawArgAbout', {
       defaultMessage: 'Generates a raw memory dump',
     }),
+    exportArgAbout: i18n.translate(
+      'xpack.securitySolution.translations.memoryDump.exportArgAbout',
+      {
+        defaultMessage:
+          "Export the memory dump to a storage provider from the host's Elastic Defend policy",
+      }
+    ),
     agentResultMissing: i18n.translate(
       'xpack.securitySolution.translations.memoryDump.agentResultMissing',
       { defaultMessage: 'Agent result missing' }

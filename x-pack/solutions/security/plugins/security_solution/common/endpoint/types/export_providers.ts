@@ -31,3 +31,16 @@ export interface PolicyResponseActionsConfig {
    */
   export_providers?: readonly ExportProvider[];
 }
+
+/** What the console may see about a provider. Never credentials or service_url. */
+export interface ExportProviderSummary {
+  id: string;
+  type: ExportProviderType;
+  account_name: string;
+  container: string;
+}
+
+/** Response of the internal `EXPORT_PROVIDERS_ROUTE` API. */
+export interface ExportProvidersApiResponse {
+  data: ExportProviderSummary[];
+}

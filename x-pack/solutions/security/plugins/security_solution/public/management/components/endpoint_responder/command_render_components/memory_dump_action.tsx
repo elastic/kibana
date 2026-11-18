@@ -22,6 +22,7 @@ export interface MemoryDumpActionConsoleArguments extends SupportedArguments {
   raw: boolean;
   pid: number;
   entityId: string;
+  export: string;
 }
 
 export const MemoryDumpActionResult = memo<
@@ -35,7 +36,8 @@ export const MemoryDumpActionResult = memo<
   const { agentType, endpointId } = command.commandDefinition?.meta ?? {};
 
   const actionRequestBody = useMemo<undefined | MemoryDumpActionRequestBody>(() => {
-    const { comment, kernel, raw, pid, entityId } = command.args.args;
+    const { comment, kernel, raw, pid, entityId, export: exportArg } = command.args.args;
+    const exportId = exportArg?.[0];
 
     if (!endpointId) {
       return;
@@ -49,6 +51,7 @@ export const MemoryDumpActionResult = memo<
         type: kernel?.[0] ? 'kernel' : raw?.[0] ? 'raw' : 'process',
         ...(pid ? { pid: pid[0] } : {}),
         ...(entityId ? { entity_id: entityId[0] } : {}),
+        ...(exportId ? { export: exportId } : {}),
       },
     };
 
