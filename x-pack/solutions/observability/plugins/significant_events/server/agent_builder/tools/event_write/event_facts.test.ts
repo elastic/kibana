@@ -154,17 +154,17 @@ describe('computeEventFacts', () => {
     signals,
     candidateOverrides,
     stored,
-    source,
+    resolvedSeverity,
   }: {
     signals: SignalEntry[];
     candidateOverrides?: Partial<EventsWriteInput>;
     stored?: SignificantEvent;
-    source?: 'discovery';
+    resolvedSeverity?: Severity;
   }) => {
     return computeEventFacts({
       candidate: makeCandidate(signals, candidateOverrides, stored),
       timestamp: TS_NOW,
-      source,
+      resolvedSeverity,
     });
   };
 
@@ -176,13 +176,33 @@ describe('computeEventFacts', () => {
     }
   });
 
-  it('floors an inactive event to low', () => {
+  it('rates a new inactive event on its evidence', () => {
     expect(
       facts({
         signals: [makeSignal()],
         candidateOverrides: { status: 'inactive', severity: 'high' },
       }).severity
-    ).toBe('low');
+    ).toBe('high');
+  });
+
+  it('preserves the stored severity when closing an existing event', () => {
+    expect(
+      facts({
+        signals: [makeSignal({ verdict: 'refutes' })],
+        candidateOverrides: { status: 'inactive', severity: 'low' },
+        stored: makeStored([makeSignal()], { severity: 'critical' }),
+      }).severity
+    ).toBe('critical');
+  });
+
+  it('rates a reopened episode from its new evidence', () => {
+    expect(
+      facts({
+        signals: [makeSignal()],
+        candidateOverrides: { severity: 'medium' },
+        stored: makeStored([makeSignal()], { status: 'inactive', severity: 'high' }),
+      }).severity
+    ).toBe('medium');
   });
 
   it('judges the merged member-union of stored and submitted signals', () => {
@@ -198,6 +218,38 @@ describe('computeEventFacts', () => {
     expect(result.signals).toHaveLength(2);
   });
 
+  describe('escalating a stored verdict', () => {
+    it('frees the title and hypothesis when an off-topic rule is confirmed', () => {
+      const stored = makeStored([makeSignal({ verdict: 'off_topic' })]);
+
+      const result = facts({ signals: [makeSignal({ verdict: 'confirms' })], stored });
+
+      expect(result.frozenNarrative).toBeUndefined();
+    });
+
+    it('keeps the narrative frozen when the stored signal already confirmed the rule', () => {
+      const stored = makeStored([makeSignal({ verdict: 'confirms' })]);
+
+      const result = facts({ signals: [makeSignal({ verdict: 'confirms' })], stored });
+
+      expect(result.frozenNarrative).toMatchObject({
+        title: 'Checkout latency',
+        narrativePreserved: true,
+      });
+    });
+
+    it('keeps the narrative frozen when a confirmed rule comes back as off-topic', () => {
+      const stored = makeStored([makeSignal({ verdict: 'confirms' })]);
+
+      const result = facts({ signals: [makeSignal({ verdict: 'off_topic' })], stored });
+
+      expect(result.frozenNarrative).toMatchObject({
+        title: 'Checkout latency',
+        narrativePreserved: true,
+      });
+    });
+  });
+
   it('keeps an explicit severity on a signal-less write, and defaults it to low', () => {
     expect(facts({ signals: [], candidateOverrides: { severity: 'critical' } }).severity).toBe(
       'critical'
@@ -207,10 +259,60 @@ describe('computeEventFacts', () => {
     );
   });
 
+  describe('confidence', () => {
+    const stored = makeStored([makeSignal()], { confidence: 0.6 });
+
+    it.each(['refutes', 'inconclusive', 'off_topic'] as const)(
+      'keeps the stored score on a continuation whose write carries only %s signals',
+      (verdict) => {
+        expect(
+          facts({
+            signals: [makeSignal({ verdict })],
+            candidateOverrides: { confidence: 0.9 },
+            stored,
+          }).confidence
+        ).toBe(0.6);
+      }
+    );
+
+    it('stores the submitted score on a continuation with a confirming signal', () => {
+      expect(
+        facts({ signals: [makeSignal()], candidateOverrides: { confidence: 0.9 }, stored })
+          .confidence
+      ).toBe(0.9);
+    });
+
+    it('stores the submitted score when a closed series reopens', () => {
+      const closed = makeStored([makeSignal()], { confidence: 0.6, status: 'inactive' });
+
+      expect(
+        facts({
+          signals: [makeSignal({ verdict: 'inconclusive' })],
+          candidateOverrides: { confidence: 0.9, status: 'active' },
+          stored: closed,
+        }).confidence
+      ).toBe(0.9);
+    });
+
+    it('stores the submitted score, unclamped, on a new event with no confirming signal', () => {
+      expect(
+        facts({
+          signals: [makeSignal({ verdict: 'inconclusive' })],
+          candidateOverrides: { event_id: undefined, confidence: 0.6 },
+        }).confidence
+      ).toBe(0.6);
+    });
+  });
+
   it('refuses signals without a proposed severity rather than guessing one', () => {
     expect(() =>
       facts({ signals: [makeSignal()], candidateOverrides: { severity: undefined } })
-    ).toThrow('needs a proposed severity');
+    ).toThrow(
+      expect.objectContaining({
+        code: 'validation_error',
+        message: expect.stringContaining('needs a proposed severity'),
+      })
+    );
   });
 
   it('is unchanged however many topology entities the event lists', () => {
@@ -233,26 +335,17 @@ describe('computeEventFacts', () => {
     expect(result.severity).toBe('medium');
   });
 
-  describe('investigation lock', () => {
-    const investigated = (signals: SignalEntry[]) =>
-      makeStored(signals, {
-        severity: 'medium',
-        investigations: [
-          { workflow_execution_id: 'wf-1', started_at: TS_EARLIER, completed_at: TS_EARLIER },
-        ],
-      });
+  it('keeps a resolved severity on a resolution, which would otherwise floor to low', () => {
+    const resolved: Severity = 'medium';
+    const signal = makeSignal();
 
-    it('keeps the stored tier of a completed investigation over the proposal', () => {
-      const signal = makeSignal();
-
-      const result = facts({
+    expect(
+      facts({
         signals: [signal],
-        candidateOverrides: { severity: 'high' },
-        stored: investigated([signal]),
-        source: 'discovery',
-      });
-
-      expect(result.severity).toBe('medium');
-    });
+        candidateOverrides: { status: 'inactive' },
+        stored: makeStored([signal], { severity: resolved }),
+        resolvedSeverity: resolved,
+      }).severity
+    ).toBe(resolved);
   });
 });

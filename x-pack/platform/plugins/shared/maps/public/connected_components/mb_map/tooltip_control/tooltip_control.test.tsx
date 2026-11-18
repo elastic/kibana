@@ -270,7 +270,7 @@ describe('TooltipControl', () => {
           id: mbLayerId,
         },
         properties: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
+          // eslint-disable-next-line @kbn/compat/typescript-naming-convention
           __kbn__feature_id__: 1,
         },
       } as unknown as MapGeoJSONFeature;

@@ -332,7 +332,10 @@ async function getWorkflowIds(
   let agentWorkflowIds: string[] = [];
   if (context.agentId) {
     const registry = await agents.getRegistry({ request: context.request });
-    const agent = await registry.get(context.agentId);
+    const agent = await registry.get(
+      context.agentId,
+      context.runAs !== undefined ? { runAs: context.runAs } : undefined
+    );
     const configuration = await agents.resolveAgentConfiguration({
       agent,
       request: context.request,

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const openInNewTabAriaLabel = (title: string) =>
-  i18n.translate('xpack.alertzero.groupedAttachments.openInNewTabAriaLabel', {
+  i18n.translate('xpack.agenticInvestigations.groupedAttachments.openInNewTabAriaLabel', {
     defaultMessage: '{title}, opens in a new tab',
     values: { title },
   });

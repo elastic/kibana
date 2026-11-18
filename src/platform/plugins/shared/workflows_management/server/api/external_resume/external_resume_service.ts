@@ -7,19 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { timingSafeEqual } from 'node:crypto';
-import {
-  ExecutionStatus,
-  HITL_TOKEN_EXPIRES_AT_INPUT_FIELD,
-  HITL_TOKEN_HASH_INPUT_FIELD,
-  isHitlWaitStepType,
-} from '@kbn/workflows';
+import { computeTokenHmac, timingSafeEqualHex } from '@kbn/crypto';
+import { ExecutionStatus, isHitlWaitStepType, readHitlExternalResumeToken } from '@kbn/workflows';
 import type { ResumeWorkflowExecutionResponseDto, WorkflowStepExecutionDto } from '@kbn/workflows';
 import {
   WorkflowExecutionInvalidStatusError,
   WorkflowExecutionNotFoundError,
 } from '@kbn/workflows/common/errors';
-import { computeTokenHmac, EXTERNAL_RESUME_API_PATH } from '@kbn/workflows/server';
+import { EXTERNAL_RESUME_API_PATH } from '@kbn/workflows/server';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { ExternalResumeError } from './external_resume_error';
 import {
@@ -116,6 +111,19 @@ export async function resumeWorkflowExecutionExternallyWithInput(
     stepId,
     spaceId,
   });
+
+  if (stepExecution.stepType === 'waitForApproval') {
+    if (typeof input.approved !== 'boolean') {
+      throw new ExternalResumeError('approved boolean is required', 400, true);
+    }
+
+    return resumeWorkflowExecutionWithResolvedContext(workflowsService, {
+      stepExecutionId: stepExecution.id,
+      executionId,
+      spaceId,
+      input: { approved: input.approved },
+    });
+  }
 
   if (stepExecution.stepType !== 'waitForInput') {
     throw new ExternalResumeError(
@@ -232,24 +240,14 @@ async function resolveExternalResumeContext(
     throw new ExternalResumeError('This workflow response link is no longer valid', 409);
   }
 
-  const stepInput = getStepInputRecord(stepExecution.input);
-  const expiresAt = stepInput[HITL_TOKEN_EXPIRES_AT_INPUT_FIELD];
-  const expiresAtMs = typeof expiresAt === 'string' ? Date.parse(expiresAt) : NaN;
-  if (!Number.isFinite(expiresAtMs) || expiresAtMs <= Date.now()) {
+  const storedToken = readHitlExternalResumeToken(stepExecution);
+  const expiresAtMs = storedToken ? Date.parse(storedToken.expiresAt) : NaN;
+  if (!storedToken || !Number.isFinite(expiresAtMs) || expiresAtMs <= Date.now()) {
     throw new ExternalResumeError('Link expired or already used', 401);
   }
 
-  const storedHash = stepInput[HITL_TOKEN_HASH_INPUT_FIELD];
-  if (typeof storedHash !== 'string') {
-    throw new ExternalResumeError('Invalid resume token', 401);
-  }
-
-  const computed = Buffer.from(
-    computeTokenHmac(token, executionId, stepId, String(expiresAt)),
-    'hex'
-  );
-  const stored = Buffer.from(storedHash, 'hex');
-  if (computed.length !== stored.length || !timingSafeEqual(computed, stored)) {
+  const computed = computeTokenHmac(token, executionId, stepId, storedToken.expiresAt);
+  if (!timingSafeEqualHex(computed, storedToken.hash)) {
     throw new ExternalResumeError('Invalid resume token', 401);
   }
 

@@ -2211,6 +2211,39 @@ describe('getFullAgentPolicy', () => {
       });
     });
 
+    it('should keep the CA of the policy output set in its Advanced YAML next to the CA of its proxy', async () => {
+      const agentPolicy = await getFleetServerPolicy(
+        {
+          ...baseFleetServerHost,
+          ssl: { es_certificate_authorities: ['/tmp/ssl/es-ca.crt'] },
+        },
+        {
+          output: {
+            ...policyOutput,
+            proxy_id: 'proxy-id',
+            config_yaml: 'ssl.certificate_authorities:\n  - /tmp/ssl/output-ca.crt\n',
+          } as Output,
+          proxies: [
+            {
+              id: 'proxy-id',
+              name: 'proxy',
+              url: 'https://proxy.fr',
+              certificate_authorities: '/tmp/ssl/proxy-ca.crt',
+              is_preconfigured: false,
+            },
+          ],
+        }
+      );
+
+      const bootstrapOutput =
+        agentPolicy?.outputs['fleetserver-output-93f74c0-e876-11ea-b7d3-8b2acec6f75c'];
+      expect(bootstrapOutput).toMatchObject({
+        hosts: ['http://127.0.0.1:9201'],
+        ssl: { certificate_authorities: ['/tmp/ssl/output-ca.crt', '/tmp/ssl/proxy-ca.crt'] },
+      });
+      expect(bootstrapOutput).not.toHaveProperty(['ssl.certificate_authorities']);
+    });
+
     it('should add the CA of the proxy of the policy output to the CA of the host in the bootstrap output', async () => {
       const agentPolicy = await getFleetServerPolicy(
         {
@@ -2780,6 +2813,27 @@ describe('getFullAgentPolicy', () => {
       const callArgs = mockedGenerateOtelcolConfig.mock.calls[0][0];
       expect(callArgs.packageOutputs).toBeInstanceOf(Map);
       expect((callArgs.packageOutputs as Map<string, Output>).size).toBe(0);
+    });
+  });
+
+  describe('overrides', () => {
+    it('ignores stored overrides with denied keys and keeps the allowed ones', async () => {
+      mockAgentPolicy({
+        revision: 1,
+        overrides: {
+          receivers: { 'filelog/x': { include: ['/etc/hosts'] } },
+          'extensions.pprof.save_to_file': '/tmp/x',
+          service: { pipelines: {} },
+          'agent.logging.level': 'debug',
+        },
+      });
+      const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      expect(agentPolicy).not.toHaveProperty('receivers');
+      expect(agentPolicy).not.toHaveProperty('service');
+      expect(agentPolicy).not.toHaveProperty('extensions.pprof.save_to_file');
+      expect(agentPolicy).not.toHaveProperty(['extensions.pprof.save_to_file']);
+      expect(agentPolicy).toHaveProperty(['agent.logging.level'], 'debug');
     });
   });
 
@@ -4277,6 +4331,43 @@ describe('generateFleetServerOutputSSLConfig', () => {
         });
       });
 
+      it('should keep the CA of the output set with a dotted key (Advanced YAML) next to the CA of the proxy', () => {
+        const res = generateFleetServerOutputSSLConfig(
+          {
+            ...baseFleetServerHost,
+            ssl: { es_certificate_authorities: ['/tmp/ssl/es-ca.crt'] },
+          },
+          // as built by transformOutputToFullPolicyOutput: the nested list was created with the proxy CA only
+          {
+            ...baseOutput,
+            'ssl.certificate_authorities': ['/tmp/ssl/output-ca.crt'],
+            ssl: { certificate_authorities: ['/tmp/ssl/proxy-ca.crt'] },
+          } as any,
+          proxy
+        );
+        expect(res?.[fleetServerOutputId].ssl).toEqual({
+          certificate_authorities: ['/tmp/ssl/output-ca.crt', '/tmp/ssl/proxy-ca.crt'],
+        });
+        expect(res?.[fleetServerOutputId]).not.toHaveProperty(['ssl.certificate_authorities']);
+      });
+
+      it('should combine the dotted and the nested CA of the output when there is no proxy', () => {
+        const res = generateFleetServerOutputSSLConfig(
+          {
+            ...baseFleetServerHost,
+            ssl: { es_certificate_authorities: ['/tmp/ssl/es-ca.crt'] },
+          },
+          {
+            ...baseOutput,
+            'ssl.certificate_authorities': ['/tmp/ssl/dotted-ca.crt'],
+            ssl: { certificate_authorities: ['/tmp/ssl/nested-ca.crt'] },
+          } as any
+        );
+        expect(res?.[fleetServerOutputId].ssl).toEqual({
+          certificate_authorities: ['/tmp/ssl/dotted-ca.crt', '/tmp/ssl/nested-ca.crt'],
+        });
+      });
+
       it('should not add the CA of the proxy if the base output is not an elasticsearch output', () => {
         const res = generateFleetServerOutputSSLConfig(
           {
@@ -4333,6 +4424,37 @@ describe('getBinarySourceSettings', () => {
     expect(getBinarySourceSettings([downloadSource], undefined)).toEqual({
       sourceURI: 'http://custom-registry-test',
       sources: ['http://custom-registry-test'],
+    });
+  });
+
+  it.each([true, false])(
+    'should return agent download config with reserve_diskspace.enabled %s if set',
+    (reserveDiskspace) => {
+      expect(
+        getBinarySourceSettings(
+          [{ ...downloadSource, reserve_diskspace: reserveDiskspace }],
+          undefined
+        )
+      ).toEqual({
+        sourceURI: 'http://custom-registry-test',
+        sources: ['http://custom-registry-test'],
+        reserve_diskspace: { enabled: reserveDiskspace },
+      });
+    }
+  );
+
+  it('should use reserve_diskspace of the primary download source only', () => {
+    expect(
+      getBinarySourceSettings(
+        [
+          downloadSource,
+          { ...downloadSource, id: 'test-ds-2', host: 'http://other', reserve_diskspace: false },
+        ],
+        undefined
+      )
+    ).toEqual({
+      sourceURI: 'http://custom-registry-test',
+      sources: ['http://custom-registry-test', 'http://other'],
     });
   });
 

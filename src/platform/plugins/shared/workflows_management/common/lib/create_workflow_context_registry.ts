@@ -9,8 +9,27 @@
 
 import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
 import type { ServerStepDefinition } from '@kbn/workflows-extensions/server';
-import type { RegisteredStepOutput, WorkflowContextRegistry } from '@kbn/workflows-yaml';
+import type {
+  CalledWorkflowOutputs,
+  RegisteredStepOutput,
+  WorkflowContextRegistry,
+} from '@kbn/workflows-yaml';
+import { isRecord } from '@kbn/workflows-yaml';
+import { getReturnedOutputNames } from './get_returned_output_names';
 import { stepSchemas, type WorkflowsExtensions } from '../step_schemas';
+
+/** What a caller can read from the output of a workflow, given its stored definition. */
+export const toCalledWorkflowOutputs = ({
+  name,
+  definition,
+}: {
+  name: string;
+  definition: unknown;
+}): CalledWorkflowOutputs => ({
+  name,
+  outputs: isRecord(definition) ? definition.outputs : undefined,
+  returnedOutputNames: getReturnedOutputNames(definition),
+});
 
 /** Output-schema contributions of a registered step. */
 export function toRegisteredStepOutput(
@@ -32,12 +51,14 @@ export function toRegisteredStepOutput(
  * connector-loading thunk fills. The server composes its own per request.
  */
 export function createWorkflowContextRegistry(
-  workflowsExtensions: WorkflowsExtensions
+  workflowsExtensions: WorkflowsExtensions,
+  getCalledWorkflowOutputs?: WorkflowContextRegistry['getCalledWorkflowOutputs']
 ): WorkflowContextRegistry {
   return {
     getStepOutput: (stepTypeId) =>
       toRegisteredStepOutput(workflowsExtensions.getStepDefinition(stepTypeId)),
     getConnector: (stepTypeId) => stepSchemas.getAllConnectorsMapCache()?.get(stepTypeId),
     getTriggerDefinition: (triggerType) => workflowsExtensions.getTriggerDefinition(triggerType),
+    getCalledWorkflowOutputs,
   };
 }

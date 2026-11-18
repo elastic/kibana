@@ -25,6 +25,10 @@ import {
 } from '../../../entities/workflows/store';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import { saveYamlThunk } from '../../../entities/workflows/store/workflow_detail/thunks/save_yaml_thunk';
+import {
+  useYamlValidation,
+  type UseYamlValidationResult,
+} from '../../../features/validate_workflow_yaml/lib/use_yaml_validation';
 import { mockWorkflowsManagementCapabilities } from '../../../hooks/__mocks__/use_workflows_capabilities';
 import { createStartServicesMock } from '../../../mocks';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
@@ -40,9 +44,9 @@ let mockYamlEditorOptions: { scrollbar?: { vertical?: string } } | undefined;
 // viewport-tracking code path is exercised without needing the real Monaco environment.
 jest.mock('../../../shared/ui/yaml_editor', () => {
   // require() is mandatory here: jest.mock factories run before ES-import transforms.
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   const { createMockMonacoEditor } = require('../../../shared/test_utils/mock_monaco');
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   const { createElement } = require('react');
   return {
     YamlEditor: ({ value, onChange, editorDidMount, options }: any) => {
@@ -73,11 +77,11 @@ jest.mock('../../../shared/ui/yaml_editor', () => {
 
 // Mock the validation hook
 jest.mock('../../../features/validate_workflow_yaml/lib/use_yaml_validation', () => ({
-  useYamlValidation: () => ({
+  useYamlValidation: jest.fn(() => ({
     error: null,
     isLoading: false,
     validationResults: [],
-  }),
+  })),
 }));
 
 // Mock the UnsavedChangesPrompt
@@ -179,6 +183,7 @@ jest.mock('./decorations', () => ({
   useFocusedStepDecoration: jest.fn(),
   useLineDifferencesDecorations: jest.fn(),
   useStepDecorationsInExecution: jest.fn(() => ({ styles: {} })),
+  useStepDurationDecorations: jest.fn(() => ({ styles: {} })),
   useTriggerTypeDecorations: jest.fn(),
   useWorkflowEventsOnDecorations: jest.fn(),
   useWorkflowIdDecorations: jest.fn(),
@@ -191,7 +196,6 @@ jest.mock('../styles/use_workflow_editor_styles', () => ({
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
   useWorkflowsCapabilities: jest.fn(),
-  useWorkflowsMonacoTheme: jest.fn(),
 }));
 
 const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
@@ -284,7 +288,6 @@ jest.mock('@kbn/monaco', () => {
         }),
       },
     },
-    defaultThemesResolvers: {},
     initializeSupportedLanguages: jest.fn(),
   };
 });
@@ -317,6 +320,11 @@ describe('WorkflowYAMLEditor', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(useYamlValidation).mockReturnValue({
+      error: null,
+      isLoading: false,
+      validationResults: [],
+    });
     capturedKeyboardHandlers = {};
     mockCloseActionsPopover = undefined;
     defaultProps.editorRef.current = null;
@@ -465,10 +473,10 @@ describe('WorkflowYAMLEditor', () => {
     });
   });
 
-  it('renders workflow YAML as read-only on the executions tab without a selection', async () => {
+  it('keeps workflow YAML editable on the executions tab without a selection', async () => {
     const store = createMockStore();
     store.dispatch(setWorkflow(mockWorkflow));
-    store.dispatch(setActiveTab('executions'));
+    store.dispatch(setActiveTab('workflow'));
 
     renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store, ['/?tab=executions']);
 
@@ -476,8 +484,40 @@ describe('WorkflowYAMLEditor', () => {
       const textarea = document.querySelector(
         '[data-testid="yaml-textarea"]'
       ) as HTMLTextAreaElement;
-      expect(textarea.readOnly).toBe(true);
+      expect(textarea.readOnly).toBe(false);
     });
+  });
+
+  it('keeps saved workflow validation errors when an execution is opened', async () => {
+    jest.mocked(useYamlValidation).mockReturnValue({
+      error: null,
+      isLoading: false,
+      validationResults: [
+        {
+          severity: 'error',
+        } as UseYamlValidationResult['validationResults'][number],
+      ],
+    });
+    const store = createMockStore();
+    store.dispatch(setWorkflow(mockWorkflow));
+    store.dispatch(setActiveTab('workflow'));
+
+    const view = renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
+    await waitFor(() => {
+      expect(store.getState().detail.hasYamlSchemaValidationErrors).toBe(true);
+    });
+
+    jest.mocked(useYamlValidation).mockReturnValue({
+      error: null,
+      isLoading: false,
+      validationResults: [],
+    });
+    act(() => {
+      store.dispatch(setActiveTab('executions'));
+      view.rerender(<WorkflowYAMLEditor {...defaultProps} />);
+    });
+
+    expect(store.getState().detail.hasYamlSchemaValidationErrors).toBe(true);
   });
 
   it('keeps cached execution YAML read-only while the selection is cleared', async () => {
@@ -816,8 +856,9 @@ steps:
       capturedKeyboardHandlers.save!();
       expect(mockSaveYaml).toHaveBeenCalledTimes(1);
 
-      // Clear the mock call count and simulate save completing (still not loading)
+      // Clear the mock call count and let the save complete (still not loading)
       mockSaveYaml.mockClear();
+      await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
 
       // Second save should also work since isSaving is false
       capturedKeyboardHandlers.save!();

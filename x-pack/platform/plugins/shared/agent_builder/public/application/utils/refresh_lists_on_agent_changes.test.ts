@@ -57,7 +57,7 @@ describe('refreshListsOnAgentChanges', () => {
     listRefresh?.unsubscribe();
   });
 
-  const agentsList = { queryKey: queryKeys.agentProfiles.all, exact: true };
+  const agentsList = { queryKey: queryKeys.agentProfiles.allLists, exact: false };
   const toolsList = { queryKey: queryKeys.tools.all, exact: true };
   const skillsList = { queryKey: queryKeys.skills.list, exact: true };
   const skillsByAgent = { queryKey: queryKeys.skills.allByAgent, exact: false };
@@ -108,9 +108,15 @@ describe('refreshListsOnAgentChanges', () => {
     expect(queryClient.getQueryState(queryKeys.skills.byId('my-skill'))?.isInvalidated).toBe(false);
   });
 
-  it('leaves the detail query behind an open edit form untouched', async () => {
+  it('refreshes every agents list but leaves the detail query behind an open edit form untouched', async () => {
+    const visibleAgentsList = queryKeys.agentProfiles.list({ includeHidden: false });
+    const allAgentsList = queryKeys.agentProfiles.list({ includeHidden: true });
     await queryClient.prefetchQuery({
-      queryKey: queryKeys.agentProfiles.all,
+      queryKey: visibleAgentsList,
+      queryFn: jest.fn().mockResolvedValue([]),
+    });
+    await queryClient.prefetchQuery({
+      queryKey: allAgentsList,
       queryFn: jest.fn().mockResolvedValue([]),
     });
     await queryClient.prefetchQuery({
@@ -121,7 +127,8 @@ describe('refreshListsOnAgentChanges', () => {
 
     reportChange(kibanaChange('agent-builder.put-agent-builder-agents-id'));
 
-    expect(queryClient.getQueryState(queryKeys.agentProfiles.all)?.isInvalidated).toBe(true);
+    expect(queryClient.getQueryState(visibleAgentsList)?.isInvalidated).toBe(true);
+    expect(queryClient.getQueryState(allAgentsList)?.isInvalidated).toBe(true);
     expect(queryClient.getQueryState(queryKeys.agentProfiles.byId('my-agent'))?.isInvalidated).toBe(
       false
     );

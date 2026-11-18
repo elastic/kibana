@@ -77,10 +77,10 @@ node scripts/edot_collector
 
 | Mode | Loads |
 | --- | --- |
-| `runtime` | Only what other plugins need to run evaluators in-process. No HTTP routes, `evals` feature or privileges, data streams, app, management section, or `ai.evals.*` workflow steps. |
-| `full` (default) | Also everything runtime mode leaves out: the evals UI and API that the `@kbn/evals` CLI, in-tool experiments, and the Agent Builder evals skills use. |
+| `runtime` (default) | Only what other plugins need to run evaluators in-process. No HTTP routes, `evals` feature or privileges, data streams, app, management section, or `ai.evals.*` workflow steps. |
+| `full` | Also everything runtime mode leaves out: the evals UI and API that the `@kbn/evals` CLI, in-tool experiments, and the Agent Builder evals skills use. |
 
-Runtime mode is for deployments that run evaluators in the background without exposing evals to users. The default will move to `runtime`, so anything that uses the evals UI or API, including local development, Scout and FTR configs, and the golden cluster, sets `xpack.evals.mode: full` explicitly. Against a runtime-mode Kibana, the `@kbn/evals` CLI reports that the evals API is not available.
+Runtime mode is for deployments that run evaluators in the background without exposing evals to users. Anything that uses the evals UI or API, including local development, Scout and FTR configs, and the golden cluster, sets `xpack.evals.mode: full` explicitly. Against a runtime-mode Kibana, the `@kbn/evals` CLI reports that the evals API is not available.
 
 ### Prerequisite data
 
@@ -247,6 +247,33 @@ const results = await evals.evaluate?.({
 - Traces are read as the request's current user, and judges call their connector on behalf of the request. Whenever a trace is read, that identity needs read access to `traces-*` and `logs-*`. For a workflow step, it is the identity behind the step's fake request.
 - Invalid input, an unknown evaluator, a trace that is not ready, or missing privileges to read the trace throws `EvaluationExecutionError`. A failing evaluator does not throw; it is returned as an `error` result next to the others.
 - A caller with read access to only some of the matching indices gets no privilege error, because Elasticsearch narrows wildcard searches to the indices it can read. Its trace can then look not ready instead (see [Reading normalized trace evidence](#reading-normalized-trace-evidence)).
+
+A caller that already holds the round can pass it as `evidence` instead of `subject`. Nothing is polled or read from traces, so this works whether or not content capture is on, and as soon as the round is complete.
+
+```ts
+const results = await evals.evaluate?.({
+  request,
+  evidence: {
+    round: {
+      input: { message: userQuery },
+      steps: toolCalls.map(({ id, toolId, params, result }) => ({
+        tool_call_id: id,
+        tool_id: toolId,
+        arguments: params,
+        result,
+      })),
+      response: { message: finalResponse },
+    },
+    reference_data: { expected: groundTruth },
+  },
+  evaluators: [{ name: 'correctness', connector_id: judgeConnectorId }],
+});
+```
+
+- The round uses the same normalized shape evaluators read from a trace (see [Reading normalized trace evidence](#reading-normalized-trace-evidence)), with up to 200 tool calls. Every evaluator receives it, including the built-in and user-defined judges.
+- `reference_data` (optional) carries everything else the selected evaluators read: ground truth, or other inputs such as a transcript or a decision tree. An evaluator that declares a `referenceDataSchema` receives only what its schema accepts, and a mismatch is refused before any evaluator runs. Content isn't length-capped, so a judge is responsible for keeping its prompt within its model's context window.
+- Evaluators that read the trace itself, such as `latency`, `input_tokens`, `output_tokens` and `tool_calls`, return an `error` result for evidence, without failing the others.
+- Passing both `subject` and `evidence` throws `EvaluationExecutionError`.
 
 ## Dataset tags and maturity
 

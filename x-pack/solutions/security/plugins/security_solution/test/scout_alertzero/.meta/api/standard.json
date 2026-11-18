@@ -1,5 +1,5 @@
 {
-  "sha1": "b0d5d7a9372a6dfd25642c36417847e1a0ea565d",
+  "sha1": "83eca0703e68d77ecd754926e27735318e8b63b9",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 98,
+        "line": 100,
         "column": 9
       }
     },
@@ -28,7 +28,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 107,
+        "line": 109,
         "column": 25
       }
     },
@@ -42,7 +42,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 123,
+        "line": 125,
         "column": 6
       }
     },
@@ -56,7 +56,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 129,
+        "line": 131,
         "column": 25
       }
     },
@@ -70,7 +70,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 144,
+        "line": 146,
         "column": 24
       }
     },
@@ -84,7 +84,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 152,
+        "line": 154,
         "column": 6
       }
     },
@@ -98,7 +98,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 162,
+        "line": 164,
         "column": 33
       }
     },
@@ -112,7 +112,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 179,
+        "line": 181,
         "column": 17
       }
     },
@@ -152,8 +152,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
-        "line": 154,
-        "column": 11
+        "line": 178,
+        "column": 24
       }
     },
     {
@@ -166,8 +166,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
-        "line": 189,
-        "column": 24
+        "line": 213,
+        "column": 20
       }
     },
     {
@@ -180,8 +180,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
-        "line": 227,
-        "column": 15
+        "line": 251,
+        "column": 31
       }
     },
     {
@@ -194,8 +194,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
-        "line": 247,
-        "column": 21
+        "line": 271,
+        "column": 51
       }
     },
     {
@@ -208,8 +208,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
-        "line": 266,
-        "column": 22
+        "line": 290,
+        "column": 18
       }
     },
     {
@@ -222,7 +222,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_worker_index_coverage_role.spec.ts",
-        "line": 70,
+        "line": 71,
         "column": 31
       }
     },
@@ -236,7 +236,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_worker_index_coverage_role.spec.ts",
-        "line": 84,
+        "line": 85,
         "column": 20
       }
     },
@@ -250,7 +250,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_worker_index_coverage_role.spec.ts",
-        "line": 98,
+        "line": 99,
         "column": 25
       }
     },
@@ -265,7 +265,7 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_worker_index_coverage_role.spec.ts",
         "line": 113,
-        "column": 26
+        "column": 49
       }
     },
     {
@@ -278,8 +278,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_worker_index_coverage_role.spec.ts",
-        "line": 130,
-        "column": 26
+        "line": 132,
+        "column": 24
       }
     },
     {
@@ -292,8 +292,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_worker_index_coverage_sweep.spec.ts",
-        "line": 83,
-        "column": 60
+        "line": 118,
+        "column": 9
       }
     },
     {
@@ -336,6 +336,118 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/report_ingest.spec.ts",
         "line": 86,
         "column": 74
+      }
+    },
+    {
+      "id": "a69e576b394b908-a542a371a6543c7",
+      "title": "Rule Tuning sweep - candidate rules starts a review only for enabled rules with enough unreviewed false positives at a high enough rate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning_sweep_candidates.spec.ts",
+        "line": 298,
+        "column": 9
+      }
+    },
+    {
+      "id": "a69e576b394b908-e2bbcaf00b5a721",
+      "title": "Rule Tuning sweep - candidate rules 20 deleted rules with more false positives than two enabled rules do not crowd them out",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning_sweep_candidates.spec.ts",
+        "line": 537,
+        "column": 48
+      }
+    },
+    {
+      "id": "a69e576b394b908-06a4d8f795f42f6",
+      "title": "Rule Tuning sweep - candidate rules 20 disabled rules with more false positives than two enabled rules do not crowd them out",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning_sweep_candidates.spec.ts",
+        "line": 550,
+        "column": 15
+      }
+    },
+    {
+      "id": "a69e576b394b908-7296a72b5116b1b",
+      "title": "Rule Tuning sweep - candidate rules 20 already reviewed rules with 150 false positives each do not crowd out two unreviewed rules",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning_sweep_candidates.spec.ts",
+        "line": 575,
+        "column": 15
+      }
+    },
+    {
+      "id": "a69e576b394b908-642bd95e304f16e",
+      "title": "Rule Tuning sweep - candidate rules launches at most max_rules_per_sweep reviews, noisiest rules first",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning_sweep_candidates.spec.ts",
+        "line": 605,
+        "column": 63
+      }
+    },
+    {
+      "id": "a69e576b394b908-71208108ef1abd7",
+      "title": "Rule Tuning sweep - candidate rules applies the thresholds passed as inputs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning_sweep_candidates.spec.ts",
+        "line": 654,
+        "column": 15
+      }
+    },
+    {
+      "id": "a69e576b394b908-422537f06edb047",
+      "title": "Rule Tuning sweep - candidate rules looks only at alerts inside the analysis window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning_sweep_candidates.spec.ts",
+        "line": 710,
+        "column": 9
+      }
+    },
+    {
+      "id": "a69e576b394b908-e0e52c5176a3c08",
+      "title": "Rule Tuning sweep - candidate rules leaves EQL sequence members and building blocks out of the count",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning_sweep_candidates.spec.ts",
+        "line": 747,
+        "column": 18
       }
     },
     {

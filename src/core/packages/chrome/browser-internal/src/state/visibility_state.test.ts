@@ -10,24 +10,32 @@
 import { renderHook, act } from '@testing-library/react';
 import { BehaviorSubject, EMPTY, of } from 'rxjs';
 import { useObservable } from '@kbn/use-observable';
-import { createVisibilityState } from './visibility_state';
+import { createVisibilityState, type VisibilityState } from './visibility_state';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 
 const createMockApplication = ({
   chromeless = false,
+  hideChrome = false,
   appNotFound = false,
   currentAppId = 'testApp' as string | undefined,
 }: {
   chromeless?: boolean;
+  hideChrome?: boolean;
   appNotFound?: boolean;
   currentAppId?: string | undefined;
 } = {}): Pick<InternalApplicationStart, 'currentAppId$' | 'applications$' | 'appNotFound$'> => {
-  const apps = new Map(currentAppId ? [['testApp', { chromeless }]] : []);
+  const apps = new Map(currentAppId ? [['testApp', { chromeless, hideChrome }]] : []);
   return {
     currentAppId$: currentAppId ? of(currentAppId) : EMPTY,
     applications$: of(apps as any),
     appNotFound$: new BehaviorSubject(appNotFound),
   };
+};
+
+const subscribeValues = (isVisible$: VisibilityState['isVisible$']): boolean[] => {
+  const values: boolean[] = [];
+  isVisible$.subscribe((value) => values.push(value));
+  return values;
 };
 
 describe('createVisibilityState', () => {
@@ -56,6 +64,63 @@ describe('createVisibilityState', () => {
       });
 
       expect(value).toBe(false);
+    });
+  });
+
+  describe('App.hideChrome', () => {
+    it('emits false when app has hideChrome', () => {
+      const { isVisible$ } = createVisibilityState({
+        application: createMockApplication({ hideChrome: true }) as InternalApplicationStart,
+      });
+
+      expect(subscribeValues(isVisible$)).toEqual([false]);
+    });
+
+    it('stays hidden when setIsVisible(true) is called', () => {
+      const { isVisible$, setIsVisible } = createVisibilityState({
+        application: createMockApplication({ hideChrome: true }) as InternalApplicationStart,
+      });
+
+      const values = subscribeValues(isVisible$);
+      setIsVisible(true);
+      expect(values).toEqual([false]);
+    });
+
+    it('follows hideChrome updates on applications$', () => {
+      const applications$ = new BehaviorSubject(new Map([['testApp', { hideChrome: true }]]));
+      const { isVisible$ } = createVisibilityState({
+        application: {
+          currentAppId$: of('testApp'),
+          applications$,
+          appNotFound$: new BehaviorSubject(false),
+        } as unknown as InternalApplicationStart,
+      });
+
+      const values = subscribeValues(isVisible$);
+      applications$.next(new Map([['testApp', { hideChrome: false }]]));
+      expect(values).toEqual([false, true]);
+    });
+
+    it('ignores hideChrome of apps that are no longer current', () => {
+      const currentAppId$ = new BehaviorSubject('hidingApp');
+      const applications$ = new BehaviorSubject(
+        new Map([
+          ['hidingApp', { hideChrome: true }],
+          ['otherApp', {}],
+        ])
+      );
+      const { isVisible$ } = createVisibilityState({
+        application: {
+          currentAppId$,
+          applications$,
+          appNotFound$: new BehaviorSubject(false),
+        } as unknown as InternalApplicationStart,
+      });
+
+      const values = subscribeValues(isVisible$);
+      currentAppId$.next('otherApp');
+      applications$.next(applications$.value);
+      expect(values).toEqual([false, true]);
     });
   });
 

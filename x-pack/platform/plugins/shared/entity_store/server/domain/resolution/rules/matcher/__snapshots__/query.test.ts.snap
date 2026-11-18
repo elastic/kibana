@@ -1,6 +1,101 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ES|QL matcher query builder buildMatchGroupsQuery emits a valid query for UPN cross-field 1`] = `
+exports[
+  `ES|QL matcher query builder buildCandidateValuesQuery emits a valid query for UPN cross-field 1`
+] = `
+"SET unmapped_fields=\\"nullify\\";
+FROM \\".entities.v2.latest.default\\"
+| WHERE entity.EngineMetadata.Type == \\"user\\"
+    AND MV_COUNT(CASE(entity.namespace == \\"microsoft_365\\", user.id, entity.namespace == \\"entra_id\\", user.name)) == 1
+    AND entity.namespace IN (\\"microsoft_365\\", \\"entra_id\\")
+| EVAL match_value = TO_LOWER(CASE(entity.namespace == \\"microsoft_365\\", user.id, entity.namespace == \\"entra_id\\", user.name))
+| WHERE match_value IS NOT NULL
+    AND match_value != \\"\\"
+    AND match_value RLIKE \\"[^@]+@[^@]+\\"
+| STATS total_n = COUNT(*) BY match_value
+| WHERE total_n >= 2
+| KEEP match_value
+| SORT match_value ASC
+| LIMIT 5000"
+`;
+
+exports[
+  `ES|QL matcher query builder buildCandidateValuesQuery emits a valid query for crowdstrike SID 1`
+] = `
+"SET unmapped_fields=\\"nullify\\";
+FROM \\".entities.v2.latest.default\\"
+| WHERE entity.EngineMetadata.Type == \\"user\\"
+    AND MV_COUNT(user.id) == 1
+    AND entity.namespace IN (\\"crowdstrike\\", \\"active_directory\\")
+| EVAL match_value = user.id
+| WHERE match_value IS NOT NULL
+    AND match_value != \\"\\"
+    AND match_value RLIKE \\"S-1-5-21-.*\\"
+    AND NOT match_value RLIKE \\"(S-1-5-18|S-1-5-19|S-1-5-20|S-1-5-32-54[4-9]|S-1-5-32-55[0-4])\\"
+| STATS total_n = COUNT(*) BY match_value
+| WHERE total_n >= 2
+| KEEP match_value
+| SORT match_value ASC
+| LIMIT 5000"
+`;
+
+exports[`ES|QL matcher query builder buildCandidateValuesQuery emits a valid query for email 1`] = `
+"SET unmapped_fields=\\"nullify\\";
+FROM \\".entities.v2.latest.default\\"
+| WHERE entity.EngineMetadata.Type == \\"user\\"
+    AND MV_COUNT(user.email) == 1
+| EVAL match_value = TO_LOWER(user.email)
+| WHERE match_value IS NOT NULL
+    AND match_value != \\"\\"
+| STATS total_n = COUNT(*) BY match_value
+| WHERE total_n >= 2
+| KEEP match_value
+| SORT match_value ASC
+| LIMIT 5000"
+`;
+
+exports[
+  `ES|QL matcher query builder buildCandidateValuesQuery emits a valid query for entra GUID 1`
+] = `
+"SET unmapped_fields=\\"nullify\\";
+FROM \\".entities.v2.latest.default\\"
+| WHERE entity.EngineMetadata.Type == \\"user\\"
+    AND MV_COUNT(user.id) == 1
+    AND entity.namespace IN (\\"m365_defender\\", \\"entra_id\\")
+| EVAL match_value = user.id
+| WHERE match_value IS NOT NULL
+    AND match_value != \\"\\"
+    AND match_value RLIKE \\"[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}\\"
+| STATS total_n = COUNT(*) BY match_value
+| WHERE total_n >= 2
+| KEEP match_value
+| SORT match_value ASC
+| LIMIT 5000"
+`;
+
+exports[
+  `ES|QL matcher query builder buildCandidateValuesQuery emits a valid query for windows SID 1`
+] = `
+"SET unmapped_fields=\\"nullify\\";
+FROM \\".entities.v2.latest.default\\"
+| WHERE entity.EngineMetadata.Type == \\"user\\"
+    AND MV_COUNT(user.id) == 1
+    AND entity.namespace IN (\\"local\\", \\"system\\", \\"windows\\", \\"active_directory\\")
+| EVAL match_value = user.id
+| WHERE match_value IS NOT NULL
+    AND match_value != \\"\\"
+    AND match_value RLIKE \\"S-1-5-21-.*\\"
+    AND NOT match_value RLIKE \\"(S-1-5-18|S-1-5-19|S-1-5-20|S-1-5-32-54[4-9]|S-1-5-32-55[0-4])\\"
+| STATS total_n = COUNT(*) BY match_value
+| WHERE total_n >= 2
+| KEEP match_value
+| SORT match_value ASC
+| LIMIT 5000"
+`;
+
+exports[
+  `ES|QL matcher query builder buildMatchGroupsQuery emits a valid query for UPN cross-field 1`
+] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM \\".entities.v2.latest.default\\"
 | WHERE entity.EngineMetadata.Type == \\"user\\"
@@ -28,7 +123,9 @@ FROM \\".entities.v2.latest.default\\"
 | LIMIT 5000"
 `;
 
-exports[`ES|QL matcher query builder buildMatchGroupsQuery emits a valid query for crowdstrike SID 1`] = `
+exports[
+  `ES|QL matcher query builder buildMatchGroupsQuery emits a valid query for crowdstrike SID 1`
+] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM \\".entities.v2.latest.default\\"
 | WHERE entity.EngineMetadata.Type == \\"user\\"
@@ -83,7 +180,9 @@ FROM \\".entities.v2.latest.default\\"
 | LIMIT 5000"
 `;
 
-exports[`ES|QL matcher query builder buildMatchGroupsQuery emits a valid query for entra GUID 1`] = `
+exports[
+  `ES|QL matcher query builder buildMatchGroupsQuery emits a valid query for entra GUID 1`
+] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM \\".entities.v2.latest.default\\"
 | WHERE entity.EngineMetadata.Type == \\"user\\"
@@ -111,7 +210,9 @@ FROM \\".entities.v2.latest.default\\"
 | LIMIT 5000"
 `;
 
-exports[`ES|QL matcher query builder buildMatchGroupsQuery emits a valid query for windows SID 1`] = `
+exports[
+  `ES|QL matcher query builder buildMatchGroupsQuery emits a valid query for windows SID 1`
+] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM \\".entities.v2.latest.default\\"
 | WHERE entity.EngineMetadata.Type == \\"user\\"
@@ -140,7 +241,9 @@ FROM \\".entities.v2.latest.default\\"
 | LIMIT 5000"
 `;
 
-exports[`ES|QL matcher query builder buildMatchGroupsQuery pages with an exclusive keyset on match_value 1`] = `
+exports[
+  `ES|QL matcher query builder buildMatchGroupsQuery pages with an exclusive keyset on match_value 1`
+] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM \\".entities.v2.latest.default\\"
 | WHERE entity.EngineMetadata.Type == \\"user\\"

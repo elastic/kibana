@@ -50,6 +50,7 @@ export {
   isPackageUnverified,
   isVerificationError,
   isAssetVerificationError,
+  isBreakingChangesNotAcknowledgedError,
   getMissingAssetsFromError,
 } from './package_verification';
 export { isPackageUpdatable } from './is_package_updatable';

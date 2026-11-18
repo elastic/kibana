@@ -180,6 +180,7 @@ const handleConversationExecution = async ({
   const {
     agentId = agentBuilderDefaultAgentId,
     connectorId,
+    inferenceFeatureId,
     conversationId,
     structuredOutput,
     outputSchema,
@@ -188,6 +189,7 @@ const handleConversationExecution = async ({
     readOnly,
     origin,
     author: requestAuthor,
+    actor,
     nextInput,
     browserApiTools,
     configurationOverrides,
@@ -215,6 +217,7 @@ const handleConversationExecution = async ({
   const conversationClient = await deps.conversationService.getScopedClientAsUser({
     request,
     user: { ...owner, isAdmin: false },
+    runAs: execution.runAs?.serviceAccountId,
   });
 
   const author = conversationClient.getAuthor(origin?.author, requestAuthor);
@@ -269,15 +272,12 @@ const handleConversationExecution = async ({
       workflowExecutionId,
     });
 
-    const {
-      modelProvider,
-      selectedConnectorId,
-      reasoningLevel: resolvedReasoningLevel,
-    } = await resolveServices({
+    const { modelProvider, defaultModel } = await resolveServices({
       agentId,
       connectorId,
-      reasoningLevel,
+      inferenceFeatureId,
       telemetryMetadata: roundTelemetryMetadata,
+      runAs: execution.runAs?.serviceAccountId,
       request,
       ...deps,
     });
@@ -290,14 +290,17 @@ const handleConversationExecution = async ({
       nextInput,
       origin,
       author,
+      actor,
       structuredOutput,
       outputSchema,
       abortSignal,
       conversation,
-      defaultConnectorId: selectedConnectorId,
+      // Only a bound run swaps credentials; an unbound run's request already is the owner.
+      ...(execution.runAs ? { owner, runAs: execution.runAs } : {}),
+      defaultModel,
       telemetryMetadata: roundTelemetryMetadata,
       maxContentLength,
-      reasoningLevel: resolvedReasoningLevel,
+      reasoningLevel,
       runAgent,
       browserApiTools,
       configurationOverrides,
@@ -320,7 +323,14 @@ const handleConversationExecution = async ({
           ? modelProvider.selectModel({ effortLevel: 'low' }).then((model) => model.chatModel)
           : undefined,
         modelProvider.getDefaultModel(),
-        agentService.getRegistry({ request }).then((registry) => registry.get(agentId)),
+        agentService
+          .getRegistry({ request })
+          .then((registry) =>
+            registry.get(
+              agentId,
+              execution.runAs ? { runAs: execution.runAs.serviceAccountId } : undefined
+            )
+          ),
         loadTracingPrivacySettings({
           uiSettingsClient: deps.uiSettings.asScopedToClient(
             deps.savedObjects.getScopedClient(request)
@@ -657,6 +667,8 @@ const handleStandaloneExecution = async ({
   const agentId = execution.agentId;
   const { logger, runAgent } = deps;
   const {
+    connectorId,
+    inferenceFeatureId,
     telemetryMetadata,
     maxContentLength,
     reasoningLevel,
@@ -676,11 +688,12 @@ const handleStandaloneExecution = async ({
     workflowExecutionId,
   });
 
-  const { selectedConnectorId, reasoningLevel: resolvedReasoningLevel } = await resolveServices({
+  const { defaultModel } = await resolveServices({
     agentId,
-    connectorId: execution.agentParams.connectorId,
-    reasoningLevel,
+    connectorId,
+    inferenceFeatureId,
     telemetryMetadata: roundTelemetryMetadata,
+    runAs: execution.runAs?.serviceAccountId,
     request,
     ...deps,
   });
@@ -692,12 +705,14 @@ const handleStandaloneExecution = async ({
     nextInput: execution.agentParams.nextInput,
     structuredOutput,
     outputSchema,
+    // Only a bound run swaps credentials; an unbound run's request already is the owner.
+    ...(execution.runAs ? { owner: execution.owner, runAs: execution.runAs } : {}),
     abortSignal,
     conversation: undefined,
-    defaultConnectorId: selectedConnectorId,
+    defaultModel,
     telemetryMetadata: roundTelemetryMetadata,
     maxContentLength,
-    reasoningLevel: resolvedReasoningLevel,
+    reasoningLevel,
     runAgent,
     projectRouting,
     executionMode: AgentExecutionMode.standalone,

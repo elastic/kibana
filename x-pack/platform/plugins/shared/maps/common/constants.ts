@@ -172,13 +172,6 @@ export enum RENDER_AS {
   HEX = 'hex',
 }
 
-export enum GRID_RESOLUTION {
-  COARSE = 'COARSE',
-  FINE = 'FINE',
-  MOST_FINE = 'MOST_FINE',
-  SUPER_FINE = 'SUPER_FINE',
-}
-
 export const GEOTILE_GRID_AGG_NAME = 'gridSplit';
 export const GEOCENTROID_AGG_NAME = 'gridCentroid';
 

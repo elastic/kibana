@@ -33,13 +33,13 @@ export const createNavigationTree = async (
   return {
     body: [
       // With AlertZero off, keep the original order: Context Engine stays at the top without Agents, and
-      // Agents and Context Engine follow Workflows. With AlertZero on, Agents and Context Engine sit
-      // between Escalations and Watches, and Context Engine follows Workflows without Agents.
+      // Agents and Context Engine follow Workflows. With AlertZero on, Agents sits between Escalations
+      // and Watches, and Context Engine follows Workflows.
       ...(!alertZeroEnabled && !showAgentBuilder ? [contextEngineLink] : []),
       ...(alertZeroEnabled
         ? [
             ...defaultNavigationTree.alertZero(),
-            ...(showAgentBuilder ? [agentBuilderLink, contextEngineLink] : []),
+            ...(showAgentBuilder ? [agentBuilderLink] : []),
             ...defaultNavigationTree.alertZeroSecondary(),
           ]
         : []),
@@ -61,8 +61,8 @@ export const createNavigationTree = async (
             link: securityLink(SecurityPageName.alerts),
           },
       ...getWorkflowsNavPanel(services),
-      ...(!alertZeroEnabled && showAgentBuilder ? [agentBuilderLink, contextEngineLink] : []),
-      ...(alertZeroEnabled && !showAgentBuilder ? [contextEngineLink] : []),
+      ...(!alertZeroEnabled && showAgentBuilder ? [agentBuilderLink] : []),
+      ...(alertZeroEnabled || showAgentBuilder ? [contextEngineLink] : []),
       {
         id: SecurityPageName.attackDiscovery,
         icon: 'bolt',

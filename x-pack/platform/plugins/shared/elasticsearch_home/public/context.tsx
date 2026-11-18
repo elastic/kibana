@@ -46,7 +46,7 @@ export const ElasticsearchHomeProvider = ({
 }: PropsWithChildren<ElasticsearchHomeProviderProps>) => {
   const { docLinks } = services;
   const defaultDocsLink = useMemo(
-    () => ({ href: docLinks.links.elasticsearch.gettingStarted, label: DEFAULT_DOCS_LINK_LABEL }),
+    () => ({ href: docLinks.links.elasticsearch.docsBase, label: DEFAULT_DOCS_LINK_LABEL }),
     [docLinks]
   );
 

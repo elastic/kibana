@@ -30,6 +30,8 @@ interface AlertBasedTilesSeriesOptions {
   /** The live counts, which replace the newest dot so the line ends on the number shown. */
   severeAlertsCount: number;
   watchlistedCount: number;
+  /** True when the count came back: a failed, timed-out or skipped count has no line to draw. */
+  hasCount: boolean;
   /** From the alert tiles' delta hook (their `previous` counts): the deltas' baselines, which start the lines. */
   severeAlertsBaseline: number | undefined;
   watchlistedBaseline: number | undefined;
@@ -52,6 +54,7 @@ export const useAlertBasedTilesSeries = ({
   reachesBack,
   severeAlertsCount,
   watchlistedCount,
+  hasCount,
   severeAlertsBaseline,
   watchlistedBaseline,
 }: AlertBasedTilesSeriesOptions): {
@@ -74,8 +77,8 @@ export const useAlertBasedTilesSeries = ({
     [index, spaceId, timeRange, entityFilterClauses]
   );
 
-  const severeGate = getSeriesGate({ isReady, reachesBack, count: severeAlertsCount });
-  const watchlistedGate = getSeriesGate({ isReady, reachesBack, count: watchlistedCount });
+  const severeGate = getSeriesGate({ isReady, reachesBack, hasCount });
+  const watchlistedGate = getSeriesGate({ isReady, reachesBack, hasCount });
   const { series, isFetching, isError } = useTileSeriesQuery({
     tileKey: 'alertBasedTilesSeries',
     query,

@@ -6,6 +6,8 @@
  */
 
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { AlertDocumentsTooLargeError } from '@kbn/workflows-management-plugin/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import {
@@ -15,6 +17,7 @@ import {
   triageRetagProposalAlertsStepCommonDefinition,
   triageTagPatternKeysStepCommonDefinition,
 } from '../../../common/step_types/alert_triage';
+import { LOADED_ALERT_FIELDS } from '../../alert_triage/loaded_alert_fields';
 import { TAG_CHUNK_SIZE } from '../../alert_triage/constants';
 import { readHeadroom } from '../../alert_triage/headroom';
 import { planKeyTags } from '../../alert_triage/key_tags';
@@ -30,17 +33,28 @@ import {
   tagAlerts,
 } from './ports';
 
+// Matches the engine's 10 MB step output cap, with headroom.
+const MAX_LOADED_ALERT_BYTES = 9 * 1024 * 1024;
+
 export interface AlertTriageStepDependencies {
   getTaskManager: () => Pick<TaskManagerStartContract, 'aggregate'>;
 }
 
-const toApiError = (error: unknown, action: string): ExecutionError =>
-  error instanceof ExecutionError
-    ? error
-    : new ExecutionError({
-        type: 'ApiError',
-        message: error instanceof Error ? error.message : `Failed to ${action}`,
-      });
+export interface LoadAlertsStepDependencies {
+  getWorkflowsManagement: () => Pick<
+    WorkflowsServerPluginSetup['management'],
+    'loadAlertDocuments'
+  >;
+}
+
+const toApiError = (error: unknown, action: string): ExecutionError => {
+  if (error instanceof ExecutionError) return error;
+  const message = error instanceof Error ? error.message : `Failed to ${action}`;
+  // The engine's error class is not exported to steps, so it is matched by name. Reporting it with
+  // the type the output size check uses lets a workflow stop retrying a size error.
+  const isTooLarge = error instanceof Error && error.name === 'CallKibanaApiResponseTooLargeError';
+  return new ExecutionError({ type: isTooLarge ? 'StepSizeLimitExceeded' : 'ApiError', message });
+};
 
 export const getTriageHeadroomStepDefinition = ({ getTaskManager }: AlertTriageStepDependencies) =>
   createServerStepDefinition({
@@ -150,14 +164,27 @@ export const getTriagePlanSweepStepDefinition = () =>
     },
   });
 
-export const getTriageLoadAlertsStepDefinition = () =>
+export const getTriageLoadAlertsStepDefinition = ({
+  getWorkflowsManagement,
+}: LoadAlertsStepDependencies) =>
   createServerStepDefinition({
     ...triageLoadAlertsStepCommonDefinition,
     handler: async ({ input, contextManager }) => {
       try {
-        const { alerts, missingAlertIds } = await loadAlertsByIds(contextManager, input.alert_ids);
-        return { output: { alerts, missing_alert_ids: missingAlertIds } };
+        // The loader reads the index as the user and checks no space access, so the space is the
+        // execution's own and never comes from the input.
+        const { spaceId } = contextManager.getContext().workflow;
+        const { alerts, missingIds } = await getWorkflowsManagement().loadAlertDocuments({
+          request: contextManager.getFakeRequest(),
+          alerts: { ids: input.alert_ids, index: `.alerts-security.alerts-${spaceId}` },
+          sourceIncludes: LOADED_ALERT_FIELDS,
+          maxBytes: MAX_LOADED_ALERT_BYTES,
+        });
+        return { output: { alerts, missing_alert_ids: missingIds } };
       } catch (error) {
+        if (error instanceof AlertDocumentsTooLargeError) {
+          throw new ExecutionError({ type: 'StepSizeLimitExceeded', message: error.message });
+        }
         throw toApiError(error, 'load triage batch alerts');
       }
     },

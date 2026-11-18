@@ -14,10 +14,6 @@ jest.mock('../../../flyout_v2/shared/components/flyout_provider', () => ({
   flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
-jest.mock('../../../flyout', () => ({
-  SecuritySolutionFlyout: () => null,
-}));
-
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useDarkMode: () => false,
 }));

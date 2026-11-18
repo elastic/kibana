@@ -287,6 +287,10 @@ export const CANCEL = i18n.translate('xpack.maintenanceWindows.createForm.cancel
   defaultMessage: 'Cancel',
 });
 
+export const BACK = i18n.translate('xpack.maintenanceWindows.createForm.back', {
+  defaultMessage: 'Back',
+});
+
 export const TABLE_ALERTS = i18n.translate('xpack.maintenanceWindows.table.alerts', {
   defaultMessage: 'Alerts',
 });
@@ -564,6 +568,10 @@ export const APPLY_TO_ALL_ALERTS_MODAL_CONFIRM = i18n.translate(
     defaultMessage: 'Apply to all alerts',
   }
 );
+
+export const TABLE_ACTIONS = i18n.translate('xpack.maintenanceWindows.table.actions', {
+  defaultMessage: 'Actions',
+});
 
 export const TABLE_ACTIONS_POPOVER_ARIA_LABEL = i18n.translate(
   'xpack.maintenanceWindows.tableActionsPopover.ariaLabel',

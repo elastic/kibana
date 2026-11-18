@@ -287,7 +287,17 @@ describe('entity_maintainer task', () => {
 
     it('should trigger the correct run method upon registration and scheduling', async () => {
       const { logger, taskManagerSetup, core, analytics } = createMockDeps();
-      const run = jest.fn().mockResolvedValue({ key: 'value' });
+      const setCustomTaskRunEventFields = jest.fn();
+      const run = jest
+        .fn()
+        .mockImplementation(
+          async ({
+            setCustomTaskRunEventFields: setFields,
+          }: Parameters<RegisterEntityMaintainerConfig['run']>[0]) => {
+            setFields?.({ calculationRunId: 'risk-calculation-1' });
+            return { key: 'value' };
+          }
+        );
       const config = createMockConfig({ run, minLicense: 'enterprise' });
 
       registerEntityMaintainerTask({
@@ -311,6 +321,7 @@ describe('entity_maintainer task', () => {
       const createTaskRunner = defs[taskType].createTaskRunner;
       const runner = createTaskRunner(
         taskManagerMock.createRunContext({
+          setCustomTaskRunEventFields,
           taskInstance: { id: 'test-maintainer:default', state: { namespace: 'default' } } as any,
           fakeRequest: { headers: {} } as KibanaRequest,
         })
@@ -321,6 +332,9 @@ describe('entity_maintainer task', () => {
       expect(mockGetLicense).toHaveBeenCalled();
       expect(mockLicenseCheck).toHaveBeenCalledWith('entityStore', 'enterprise');
       expect(run).toHaveBeenCalledTimes(1);
+      expect(setCustomTaskRunEventFields).toHaveBeenCalledWith({
+        calculationRunId: 'risk-calculation-1',
+      });
       expect(run).toHaveBeenCalledWith(
         expect.objectContaining({
           status: expect.objectContaining({

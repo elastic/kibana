@@ -54,12 +54,13 @@ describe('WorkflowsPlugin', () => {
     jest.restoreAllMocks();
   });
 
-  it('returns an empty start contract and clears the stopping flag', () => {
+  it('returns an empty start contract and clears the stopping flag', async () => {
     const initializerContext = coreMock.createPluginInitializerContext({
       enabled: true,
       logging: { console: false },
       available: true,
       library: { ttlMs: 600_000 },
+      pages: { enabled: false },
     });
 
     const plugin = new WorkflowsPlugin(initializerContext);
@@ -70,7 +71,7 @@ describe('WorkflowsPlugin', () => {
       workflowsExtensions: workflowsExtensionsMock.createSetup(),
     });
 
-    const start = plugin.start(coreMock.createStart(), {
+    const start = await plugin.start(coreMock.createStart(), {
       taskManager: {} as any,
       workflowsExecutionEngine: {} as any,
       actions: {} as any,
@@ -81,6 +82,7 @@ describe('WorkflowsPlugin', () => {
     });
 
     expect(start).toEqual({});
+    expect(cleanupUnregisteredOrphans).toHaveBeenCalled();
     expect(setStopping).toHaveBeenCalledWith(false);
     expect(mockRegisterHitlLifecycleAuditor).toHaveBeenCalled();
   });
@@ -91,6 +93,7 @@ describe('WorkflowsPlugin', () => {
       logging: { console: false },
       available: true,
       library: { ttlMs: 600_000 },
+      pages: { enabled: false },
     });
 
     const plugin = new WorkflowsPlugin(initializerContext);
@@ -121,6 +124,7 @@ describe('WorkflowsPlugin', () => {
       logging: { console: false },
       available: true,
       library: { ttlMs: 600_000 },
+      pages: { enabled: false },
     });
     const plugin = new WorkflowsPlugin(initializerContext);
     const coreSetup = coreMock.createSetup();
@@ -177,6 +181,7 @@ describe('WorkflowsPlugin', () => {
         logging: { console: false },
         available: true,
         library: { ttlMs: 600_000 },
+        pages: { enabled: false },
       })
     );
 
@@ -205,6 +210,7 @@ describe('WorkflowsPlugin', () => {
         logging: { console: false },
         available: true,
         library: { ttlMs: 600_000 },
+        pages: { enabled: false },
       })
     );
 
