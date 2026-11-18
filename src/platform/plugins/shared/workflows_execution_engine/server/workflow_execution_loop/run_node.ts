@@ -144,7 +144,7 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     // Load this node's context once. Drop the snapshot on every exit, including failure.
     // This must happen before getContext() is called (which is synchronous).
     contextStarted = true;
-    await stepExecutionRuntime.contextManager.beforeNodeStart();
+    await stepExecutionRuntime.contextManager.prepareContext();
 
     monitorAbortController = new AbortController();
 
@@ -198,7 +198,7 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     }
 
     if (contextStarted && stepExecutionRuntime) {
-      stepExecutionRuntime.contextManager.afterNodeEnd();
+      stepExecutionRuntime.contextManager.releaseContext();
     }
 
     nodeSpan?.end();

@@ -124,8 +124,8 @@ describe('EnterParallelNodeImpl', () => {
         return {
           abortController: new AbortController(),
           contextManager: {
-            beforeNodeStart: jest.fn().mockResolvedValue(undefined),
-            afterNodeEnd: jest.fn(),
+            prepareContext: jest.fn().mockResolvedValue(undefined),
+            releaseContext: jest.fn(),
           },
           stepExecutionId: `exec_branch_${index}`,
           get stepExecution() {
@@ -296,8 +296,8 @@ describe('EnterParallelNodeImpl', () => {
       const index = Number(scopeId ?? 0);
       return {
         contextManager: {
-          beforeNodeStart: jest.fn().mockResolvedValue(undefined),
-          afterNodeEnd: jest.fn(),
+          prepareContext: jest.fn().mockResolvedValue(undefined),
+          releaseContext: jest.fn(),
         },
         get stepExecution() {
           return { status: ExecutionStatus.COMPLETED, state: {} };
@@ -379,8 +379,8 @@ describe('EnterParallelNodeImpl', () => {
       return {
         abortController,
         contextManager: {
-          beforeNodeStart: jest.fn().mockResolvedValue(undefined),
-          afterNodeEnd: jest.fn(),
+          prepareContext: jest.fn().mockResolvedValue(undefined),
+          releaseContext: jest.fn(),
         },
         get stepExecution() {
           // Never settles on its own; only the timeout abort ends it.
@@ -465,8 +465,8 @@ describe('EnterParallelNodeImpl', () => {
       return {
         abortController: new AbortController(),
         contextManager: {
-          beforeNodeStart: jest.fn().mockResolvedValue(undefined),
-          afterNodeEnd: jest.fn(),
+          prepareContext: jest.fn().mockResolvedValue(undefined),
+          releaseContext: jest.fn(),
         },
         stepExecutionId,
         get stepExecution() {
@@ -557,8 +557,8 @@ describe('EnterParallelNodeImpl', () => {
       return {
         abortController: new AbortController(),
         contextManager: {
-          beforeNodeStart: jest.fn().mockResolvedValue(undefined),
-          afterNodeEnd: jest.fn(),
+          prepareContext: jest.fn().mockResolvedValue(undefined),
+          releaseContext: jest.fn(),
         },
         stepExecutionId,
         get stepExecution() {
@@ -716,8 +716,8 @@ describe('EnterParallelNodeImpl', () => {
           ({
             abortController: new AbortController(),
             contextManager: {
-              beforeNodeStart: jest.fn().mockResolvedValue(undefined),
-              afterNodeEnd: jest.fn(),
+              prepareContext: jest.fn().mockResolvedValue(undefined),
+              releaseContext: jest.fn(),
             },
             stepExecutionId: 'exec_branch_0',
             get stepExecution() {
@@ -754,8 +754,8 @@ describe('EnterParallelNodeImpl', () => {
           ({
             abortController: new AbortController(),
             contextManager: {
-              beforeNodeStart: jest.fn().mockResolvedValue(undefined),
-              afterNodeEnd: jest.fn(),
+              prepareContext: jest.fn().mockResolvedValue(undefined),
+              releaseContext: jest.fn(),
             },
             stepExecutionId: 'exec_branch_0',
             workflowExecution: { startedAt: new Date(nowMs).toISOString() },
@@ -829,8 +829,8 @@ describe('EnterParallelNodeImpl', () => {
         return {
           abortController: new AbortController(),
           contextManager: {
-            beforeNodeStart: jest.fn().mockResolvedValue(undefined),
-            afterNodeEnd: jest.fn(),
+            prepareContext: jest.fn().mockResolvedValue(undefined),
+            releaseContext: jest.fn(),
           },
           get stepExecution() {
             // Parks in a durable wait and never settles on its own.
@@ -879,8 +879,8 @@ describe('EnterParallelNodeImpl', () => {
         return {
           abortController: new AbortController(),
           contextManager: {
-            beforeNodeStart: jest.fn().mockResolvedValue(undefined),
-            afterNodeEnd: jest.fn(),
+            prepareContext: jest.fn().mockResolvedValue(undefined),
+            releaseContext: jest.fn(),
           },
           get stepExecution() {
             return { status: ExecutionStatus.WAITING, state: {} };
@@ -919,8 +919,8 @@ describe('EnterParallelNodeImpl', () => {
         return {
           abortController: new AbortController(),
           contextManager: {
-            beforeNodeStart: jest.fn().mockResolvedValue(undefined),
-            afterNodeEnd: jest.fn(),
+            prepareContext: jest.fn().mockResolvedValue(undefined),
+            releaseContext: jest.fn(),
           },
           get stepExecution() {
             return { status: ExecutionStatus.WAITING, state: {} };
@@ -1018,8 +1018,8 @@ describe('EnterParallelNodeImpl', () => {
         startedNodes.push(nodeId);
         return {
           contextManager: {
-            beforeNodeStart: jest.fn().mockResolvedValue(undefined),
-            afterNodeEnd: jest.fn(),
+            prepareContext: jest.fn().mockResolvedValue(undefined),
+            releaseContext: jest.fn(),
           },
           get stepExecution() {
             return { status: ExecutionStatus.COMPLETED, state: {} };
@@ -1069,8 +1069,8 @@ describe('EnterParallelNodeImpl', () => {
         const failed = nodeId === 'bad_step';
         return {
           contextManager: {
-            beforeNodeStart: jest.fn().mockResolvedValue(undefined),
-            afterNodeEnd: jest.fn(),
+            prepareContext: jest.fn().mockResolvedValue(undefined),
+            releaseContext: jest.fn(),
           },
           get stepExecution() {
             return {
@@ -1108,15 +1108,15 @@ describe('EnterParallelNodeImpl', () => {
     });
   });
 
-  describe('beforeNodeStart is called on every branch exit path', () => {
+  describe('prepareContext and releaseContext are called on every branch exit path', () => {
     // Captures every StepExecutionRuntime created by the factory. Note that
     // finish() and computeResumeAt() also call createStepExecutionRuntime for
-    // read-only lookups — those runtimes never have beforeNodeStart called.
-    // Only runtimes that went through runBranchNode have beforeNodeStart
-    // called. We filter on beforeNodeStart call count to distinguish the two
+    // read-only lookups — those runtimes never have prepareContext called.
+    // Only runtimes that went through runBranchNode have prepareContext
+    // called. We filter on prepareContext call count to distinguish the two
     // populations.
     interface CapturedRuntime {
-      contextManager: { beforeNodeStart: jest.Mock; afterNodeEnd: jest.Mock };
+      contextManager: { prepareContext: jest.Mock; releaseContext: jest.Mock };
     }
     let createdRuntimes: CapturedRuntime[];
 
@@ -1128,8 +1128,8 @@ describe('EnterParallelNodeImpl', () => {
         const runtime = {
           abortController: new AbortController(),
           contextManager: {
-            beforeNodeStart: jest.fn().mockResolvedValue(undefined),
-            afterNodeEnd: jest.fn(),
+            prepareContext: jest.fn().mockResolvedValue(undefined),
+            releaseContext: jest.fn(),
           },
           get stepExecution() {
             return { status: branchStatus(index), state: {} };
@@ -1147,10 +1147,10 @@ describe('EnterParallelNodeImpl', () => {
     });
 
     // Returns the subset of captured runtimes that went through runBranchNode —
-    // identified by beforeNodeStart having been called on them. Runtimes
-    // created by finish() or computeResumeAt() never call beforeNodeStart.
+    // identified by prepareContext having been called on them. Runtimes
+    // created by finish() or computeResumeAt() never call prepareContext.
     const branchNodeRuntimes = (): CapturedRuntime[] =>
-      createdRuntimes.filter((rt) => rt.contextManager.beforeNodeStart.mock.calls.length > 0);
+      createdRuntimes.filter((rt) => rt.contextManager.prepareContext.mock.calls.length > 0);
 
     it('prepares the context once per branch runtime when branches complete', async () => {
       makeCapturingFactory(() => ExecutionStatus.COMPLETED);
@@ -1160,8 +1160,8 @@ describe('EnterParallelNodeImpl', () => {
       const runRuntimes = branchNodeRuntimes();
       expect(runRuntimes.length).toBe(3); // one per branch
       for (const rt of runRuntimes) {
-        expect(rt.contextManager.beforeNodeStart).toHaveBeenCalledTimes(1);
-        expect(rt.contextManager.afterNodeEnd).toHaveBeenCalledTimes(1);
+        expect(rt.contextManager.prepareContext).toHaveBeenCalledTimes(1);
+        expect(rt.contextManager.releaseContext).toHaveBeenCalledTimes(1);
       }
     });
 
@@ -1173,8 +1173,8 @@ describe('EnterParallelNodeImpl', () => {
       const runRuntimes = branchNodeRuntimes();
       expect(runRuntimes.length).toBe(3); // one per branch
       for (const rt of runRuntimes) {
-        expect(rt.contextManager.beforeNodeStart).toHaveBeenCalledTimes(1);
-        expect(rt.contextManager.afterNodeEnd).toHaveBeenCalledTimes(1);
+        expect(rt.contextManager.prepareContext).toHaveBeenCalledTimes(1);
+        expect(rt.contextManager.releaseContext).toHaveBeenCalledTimes(1);
       }
     });
 
@@ -1186,8 +1186,8 @@ describe('EnterParallelNodeImpl', () => {
       const runRuntimes = branchNodeRuntimes();
       expect(runRuntimes.length).toBe(3); // one per branch
       for (const rt of runRuntimes) {
-        expect(rt.contextManager.beforeNodeStart).toHaveBeenCalledTimes(1);
-        expect(rt.contextManager.afterNodeEnd).toHaveBeenCalledTimes(1);
+        expect(rt.contextManager.prepareContext).toHaveBeenCalledTimes(1);
+        expect(rt.contextManager.releaseContext).toHaveBeenCalledTimes(1);
       }
     });
 
@@ -1211,8 +1211,8 @@ describe('EnterParallelNodeImpl', () => {
       const runRuntimes = branchNodeRuntimes();
       expect(runRuntimes.length).toBe(3); // one per branch
       for (const rt of runRuntimes) {
-        expect(rt.contextManager.beforeNodeStart).toHaveBeenCalledTimes(1);
-        expect(rt.contextManager.afterNodeEnd).toHaveBeenCalledTimes(1);
+        expect(rt.contextManager.prepareContext).toHaveBeenCalledTimes(1);
+        expect(rt.contextManager.releaseContext).toHaveBeenCalledTimes(1);
       }
     });
   });

@@ -44,7 +44,7 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
     }
 
     if (condition) {
-      await failedContext.contextManager.beforeNodeStart(condition);
+      await failedContext.contextManager.prepareContext(condition);
     }
 
     if (

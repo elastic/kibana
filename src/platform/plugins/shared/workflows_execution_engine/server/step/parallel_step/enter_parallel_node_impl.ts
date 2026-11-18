@@ -529,7 +529,7 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
     const timedOut = await this.runWithDeadline(
       async () => {
         try {
-          await branchRuntime.contextManager.beforeNodeStart();
+          await branchRuntime.contextManager.prepareContext();
           // Start the node with the branch's scope installed. The scope only needs
           // to be correct for this synchronous prefix; we restore it immediately so
           // concurrent siblings are unaffected. Template rendering (getInput) reads
@@ -539,7 +539,7 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
           );
           await runPromise;
         } finally {
-          branchRuntime.contextManager.afterNodeEnd();
+          branchRuntime.contextManager.releaseContext();
         }
       },
       deadline,

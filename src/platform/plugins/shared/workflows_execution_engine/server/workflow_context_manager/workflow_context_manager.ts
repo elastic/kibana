@@ -170,7 +170,7 @@ export class WorkflowContextManager {
   /** Memoised `getVariables()` aggregate, keyed by data.set count and step IO version. */
   private variablesCache: { version: string; value: Record<string, unknown> } | undefined;
 
-  /** Context built by `beforeNodeStart` and served until `afterNodeEnd`. */
+  /** Context built by `prepareContext` and served until `releaseContext`. */
   private snapshot: StepContext | undefined;
 
   /**
@@ -206,11 +206,11 @@ export class WorkflowContextManager {
   }
 
   /**
-   * Fetches the outputs and inputs this node reads, then freezes the context
-   * for the node run. `condition` is included when a handler evaluates that
-   * string on this context. Pair with `afterNodeEnd`.
+   * Loads the step IO this context reads and freezes the snapshot.
+   * `condition` is included when a handler evaluates that string here.
+   * Pair with `releaseContext`.
    */
-  public async beforeNodeStart(condition?: string): Promise<void> {
+  public async prepareContext(condition?: string): Promise<void> {
     const neededIds = resolveRehydrationTargets(
       this.node,
       this.predecessors,
@@ -241,8 +241,8 @@ export class WorkflowContextManager {
     }
   }
 
-  /** Drops the node snapshot. Fitting outputs remain in the shared LRU. */
-  public afterNodeEnd(): void {
+  /** Drops the snapshot. Fitting outputs remain in the shared LRU. */
+  public releaseContext(): void {
     this.snapshot = undefined;
   }
 

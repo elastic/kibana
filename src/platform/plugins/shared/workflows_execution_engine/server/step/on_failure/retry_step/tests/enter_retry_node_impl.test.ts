@@ -63,7 +63,7 @@ describe('EnterRetryNodeImpl', () => {
     };
 
     fakeFailedContextManager = jest.mocked({
-      beforeNodeStart: jest.fn().mockResolvedValue(undefined),
+      prepareContext: jest.fn().mockResolvedValue(undefined),
       evaluateBooleanExpressionInContext: jest.fn(),
     } as unknown as StepExecutionRuntime['contextManager']);
     fakeFailedContextManager.evaluateBooleanExpressionInContext.mockReturnValue(true);
@@ -353,7 +353,7 @@ describe('EnterRetryNodeImpl', () => {
             message: 'Failed to connect to server',
           });
           fakeStepExecutionDoc.error = fakeError;
-          expect(fakeFailedContextManager.beforeNodeStart).toHaveBeenCalledWith(
+          expect(fakeFailedContextManager.prepareContext).toHaveBeenCalledWith(
             node.configuration.condition
           );
           expect(fakeFailedContextManager.evaluateBooleanExpressionInContext).toHaveBeenCalledWith(
@@ -401,7 +401,7 @@ describe('EnterRetryNodeImpl', () => {
         expect(workflowRuntime.navigateToNode).not.toHaveBeenCalled();
         expect(workflowRuntime.setWorkflowError).not.toHaveBeenCalled();
         expect(stepExecutionRuntime.failStep).not.toHaveBeenCalled();
-        expect(fakeFailedContextManager.beforeNodeStart).not.toHaveBeenCalled();
+        expect(fakeFailedContextManager.prepareContext).not.toHaveBeenCalled();
         expect(fakeFailedContextManager.evaluateBooleanExpressionInContext).not.toHaveBeenCalled();
         expect(workflowLogger.logDebug).toHaveBeenCalledWith(
           'Error "StepSizeLimitExceeded" is not retryable, propagating error.'

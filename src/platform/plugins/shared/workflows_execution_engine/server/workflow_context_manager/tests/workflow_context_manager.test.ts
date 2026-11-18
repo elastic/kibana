@@ -2188,7 +2188,7 @@ describe('WorkflowContextManager', () => {
     });
   });
 
-  describe('beforeNodeStart', () => {
+  describe('prepareContext', () => {
     const workflow: WorkflowYaml = {
       name: 'Test Workflow',
       version: '1',
@@ -2214,11 +2214,11 @@ describe('WorkflowContextManager', () => {
       testContainer = createTestContainer(workflow);
     });
 
-    // beforeNodeStart resolves rehydration targets (via resolveRehydrationTargets)
+    // prepareContext resolves rehydration targets (via resolveRehydrationTargets)
     // and then fetches them with readBatch. Full coverage of the static-analysis
     // branches lives in the resolveRehydrationTargets unit tests.
     it('fetches the resolved output and input ids with readBatch', async () => {
-      await testContainer.underTest.beforeNodeStart();
+      await testContainer.underTest.prepareContext();
 
       // step_a has no predecessors and no scope-stack frames → empty output and input ID sets.
       expect(testContainer.stepIoService.readBatch).toHaveBeenCalledWith([], 'output');
@@ -2226,14 +2226,14 @@ describe('WorkflowContextManager', () => {
     });
 
     it('serves the same context until the node ends', async () => {
-      await testContainer.underTest.beforeNodeStart();
+      await testContainer.underTest.prepareContext();
 
       const first = testContainer.underTest.getContext();
       const second = testContainer.underTest.getContext();
 
       expect(second).toBe(first);
 
-      testContainer.underTest.afterNodeEnd();
+      testContainer.underTest.releaseContext();
 
       expect(testContainer.underTest.getContext()).not.toBe(first);
     });
@@ -2286,7 +2286,7 @@ describe('WorkflowContextManager', () => {
         coreStart: {} as CoreStart,
       });
 
-      await underTest.beforeNodeStart();
+      await underTest.prepareContext();
 
       expect(stepIoService.readBatch).toHaveBeenCalledWith(['exec-step-a'], 'output');
       expect(underTest.renderValueAccordingToContext('{{ steps.step_a.output }}')).toBe(output);
@@ -2335,7 +2335,7 @@ describe('WorkflowContextManager', () => {
         coreStart: {} as CoreStart,
       });
 
-      await underTest.beforeNodeStart('{{ steps.producer.output }} == {{ variables.flag }}');
+      await underTest.prepareContext('{{ steps.producer.output }} == {{ variables.flag }}');
 
       expect(stepIoService.readBatch).toHaveBeenCalledWith(
         expect.arrayContaining(['exec-producer', 'exec-set']),
