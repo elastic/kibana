@@ -70,7 +70,7 @@ const setNightshiftEnabled = (apiServices: ApiServicesFixture, enabled: boolean 
  */
 apiTest.describe(
   'Nightshift investigations on Agent Builder conversations',
-  { tag: tags.stateful.classic },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let cookieHeader: Record<string, string>;
     let llm: Awaited<ReturnType<typeof startUnresponsiveLlm>>;

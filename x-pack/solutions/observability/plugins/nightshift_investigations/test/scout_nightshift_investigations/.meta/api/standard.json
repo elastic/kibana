@@ -1,5 +1,5 @@
 {
-  "sha1": "487734817402ed9e3a410f5173e6260b2fa48adf",
+  "sha1": "69937170240957d078498eb9a6c372e219a90841",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -344,12 +344,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_write_path.spec.ts",
-        "line": 102,
-        "column": 7
+        "line": 107,
+        "column": 16
       }
     },
     {
@@ -358,12 +360,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_write_path.spec.ts",
-        "line": 132,
-        "column": 15
+        "line": 136,
+        "column": 11
       }
     },
     {
@@ -372,12 +376,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_write_path.spec.ts",
         "line": 183,
-        "column": 20
+        "column": 52
       }
     },
     {
@@ -386,12 +392,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_write_path.spec.ts",
-        "line": 236,
-        "column": 11
+        "line": 240,
+        "column": 67
       }
     },
     {
@@ -400,12 +408,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_write_path.spec.ts",
-        "line": 259,
-        "column": 19
+        "line": 263,
+        "column": 28
       }
     },
     {
@@ -470,12 +480,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/online_evals.spec.ts",
-        "line": 123,
-        "column": 47
+        "line": 132,
+        "column": 10
       }
     },
     {
@@ -484,12 +496,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/online_evals.spec.ts",
-        "line": 141,
-        "column": 14
+        "line": 152,
+        "column": 11
       }
     },
     {
@@ -498,12 +512,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/online_evals.spec.ts",
-        "line": 162,
-        "column": 15
+        "line": 173,
+        "column": 31
       }
     },
     {
@@ -512,12 +528,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/online_evals.spec.ts",
-        "line": 186,
-        "column": 71
+        "line": 198,
+        "column": 28
       }
     },
     {

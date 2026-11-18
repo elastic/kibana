@@ -144,8 +144,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/feature_controls/infrastructure_spaces.spec.ts",
-        "line": 46,
-        "column": 5
+        "line": 47,
+        "column": 23
       }
     },
     {
@@ -158,8 +158,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/feature_controls/infrastructure_spaces.spec.ts",
-        "line": 60,
-        "column": 13
+        "line": 61,
+        "column": 11
       }
     },
     {
@@ -172,8 +172,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/feature_controls/infrastructure_spaces.spec.ts",
-        "line": 69,
-        "column": 11
+        "line": 70,
+        "column": 9
       }
     },
     {
@@ -228,8 +228,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/feature_controls/logs_spaces.spec.ts",
-        "line": 31,
-        "column": 26
+        "line": 33,
+        "column": 8
       }
     },
     {
@@ -242,8 +242,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/feature_controls/logs_spaces.spec.ts",
-        "line": 36,
-        "column": 41
+        "line": 38,
+        "column": 20
       }
     },
     {

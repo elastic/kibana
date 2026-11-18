@@ -135,6 +135,8 @@ const expectAlertingItemsForRole = async (
   await expect(heading).toBeVisible();
 };
 
+// Stateful-only: covers the `classic` space solution view. Serverless has no solution views
+// (`xpack.spaces.allowSolutionVisibility: false` in config/serverless.yml).
 test.describe(
   'Classic Observability nav — Alerting section',
   { tag: tags.stateful.classic },

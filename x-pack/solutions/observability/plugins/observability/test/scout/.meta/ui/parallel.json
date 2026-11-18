@@ -286,7 +286,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_footer.spec.ts",
-        "line": 19,
+        "line": 21,
         "column": 43
       }
     },
@@ -300,7 +300,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_footer.spec.ts",
-        "line": 40,
+        "line": 42,
         "column": 9
       }
     },
@@ -314,7 +314,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_footer.spec.ts",
-        "line": 59,
+        "line": 61,
         "column": 22
       }
     },
@@ -328,7 +328,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_footer.spec.ts",
-        "line": 76,
+        "line": 78,
         "column": 38
       }
     },
@@ -342,7 +342,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_footer.spec.ts",
-        "line": 86,
+        "line": 88,
         "column": 22
       }
     },
@@ -356,8 +356,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
-        "line": 25,
-        "column": 41
+        "line": 27,
+        "column": 10
       }
     },
     {
@@ -371,7 +371,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
         "line": 85,
-        "column": 13
+        "column": 31
       }
     },
     {
@@ -384,8 +384,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
-        "line": 132,
-        "column": 91
+        "line": 134,
+        "column": 73
       }
     },
     {
@@ -398,8 +398,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
-        "line": 176,
-        "column": 24
+        "line": 175,
+        "column": 22
       }
     },
     {
@@ -412,8 +412,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/navigation/navigation_sidebar.spec.ts",
-        "line": 200,
-        "column": 32
+        "line": 201,
+        "column": 13
       }
     },
     {

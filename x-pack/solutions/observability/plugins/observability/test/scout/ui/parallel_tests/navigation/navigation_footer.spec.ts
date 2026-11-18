@@ -8,6 +8,8 @@
 import { spaceTest as test, tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 
+// Stateful-only: covers the stateful Observability solution navigation. Serverless has its own
+// navigation, covered in `serverless_observability/test/scout`.
 test.describe(
   'Stateful Observability Navigation - Footer',
   { tag: [...tags.stateful.classic] },

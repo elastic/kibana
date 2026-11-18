@@ -852,8 +852,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
-        "line": 150,
-        "column": 38
+        "line": 152,
+        "column": 10
       }
     },
     {
@@ -866,8 +866,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
-        "line": 164,
-        "column": 9
+        "line": 165,
+        "column": 18
       }
     },
     {
@@ -880,8 +880,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
-        "line": 180,
-        "column": 11
+        "line": 179,
+        "column": 31
       }
     },
     {
@@ -894,8 +894,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
-        "line": 180,
-        "column": 11
+        "line": 179,
+        "column": 31
       }
     },
     {
@@ -908,8 +908,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
-        "line": 180,
-        "column": 11
+        "line": 179,
+        "column": 31
       }
     },
     {
@@ -922,8 +922,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
-        "line": 180,
-        "column": 11
+        "line": 179,
+        "column": 31
       }
     },
     {
@@ -936,8 +936,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
-        "line": 192,
-        "column": 27
+        "line": 193,
+        "column": 13
       }
     },
     {
@@ -950,8 +950,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
-        "line": 205,
-        "column": 16
+        "line": 206,
+        "column": 11
       }
     },
     {
@@ -964,8 +964,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
-        "line": 216,
-        "column": 18
+        "line": 217,
+        "column": 20
       }
     },
     {
@@ -978,8 +978,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
-        "line": 226,
-        "column": 16
+        "line": 227,
+        "column": 11
       }
     },
     {
@@ -992,8 +992,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
-        "line": 242,
-        "column": 11
+        "line": 243,
+        "column": 18
       }
     },
     {
@@ -1006,8 +1006,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
-        "line": 256,
-        "column": 16
+        "line": 257,
+        "column": 11
       }
     },
     {
@@ -1020,8 +1020,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
-        "line": 271,
-        "column": 11
+        "line": 272,
+        "column": 7
       }
     },
     {
@@ -1034,8 +1034,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
-        "line": 285,
-        "column": 13
+        "line": 286,
+        "column": 11
       }
     },
     {
@@ -1048,8 +1048,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
-        "line": 296,
-        "column": 16
+        "line": 297,
+        "column": 11
       }
     },
     {
@@ -1063,7 +1063,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
         "line": 307,
-        "column": 10
+        "column": 7
       }
     },
     {
@@ -1077,7 +1077,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
         "line": 318,
-        "column": 7
+        "column": 20
       }
     },
     {
