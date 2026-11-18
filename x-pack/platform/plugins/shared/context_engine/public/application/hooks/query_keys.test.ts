@@ -120,6 +120,24 @@ describe('contextEngineQueryKeys.aiIndex.listKiGroups', () => {
       contextEngineQueryKeys.aiIndex.listKiGroups('idx', 5, 10, 'refund', ['active'], 'updated')
     );
   });
+
+  it('keeps exclude types apart from types, in any order', () => {
+    const groups = (types?: string[], excludeTypes?: string[]) =>
+      contextEngineQueryKeys.aiIndex.listKiGroups(
+        'idx',
+        10,
+        50,
+        undefined,
+        ['active'],
+        'updated',
+        types,
+        excludeTypes
+      );
+    expect(groups(undefined, ['b', 'a'])).toEqual(groups(undefined, ['a', 'b']));
+    expect(groups(undefined, ['a'])).not.toEqual(groups(['a']));
+    // Type names may contain commas: an array, not a joined string.
+    expect(groups(undefined, ['a,b'])).not.toEqual(groups(undefined, ['a', 'b']));
+  });
 });
 
 describe('contextEngineQueryKeys.aiIndex.viewKi', () => {

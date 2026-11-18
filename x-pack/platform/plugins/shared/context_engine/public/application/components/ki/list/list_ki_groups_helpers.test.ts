@@ -75,6 +75,50 @@ describe('buildListKiSections', () => {
     expect(sections[1]).toMatchObject({ kind: 'other', type: '', count: 3, canShowMore: false });
   });
 
+  it('splits "Other" by type, with "Show more" rows, and puts the rest last', () => {
+    const sections = buildListKiSections({
+      groups,
+      totalOther: 9,
+      groupResults: { gamma: { kis: rows(6, 'gamma'), isFetching: false } },
+      other: {
+        byType: {
+          groups: [
+            { type: 'gamma', count: 6, kis: rows(2, 'gamma') },
+            { type: 'delta', count: 1, kis: rows(1, 'delta') },
+          ],
+          restCount: 2,
+        },
+        kis: rows(2),
+        total: undefined,
+        isFetching: false,
+      },
+      selection: { types: new Set(), other: true },
+    });
+
+    expect(sections.map(({ key, kind, count, kis }) => [key, kind, count, kis.length])).toEqual([
+      ['type:gamma', 'type', 6, 6],
+      ['type:delta', 'type', 1, 1],
+      ['other', 'other', 2, 2],
+    ]);
+  });
+
+  it('has no flat "Other" section when the "Other" groups cover all of it', () => {
+    const sections = buildListKiSections({
+      groups,
+      totalOther: 1,
+      groupResults: {},
+      other: {
+        byType: { groups: [{ type: 'delta', count: 1, kis: rows(1, 'delta') }], restCount: 0 },
+        kis: [],
+        total: undefined,
+        isFetching: false,
+      },
+      selection: { types: new Set(), other: true },
+    });
+
+    expect(sections.map(({ key }) => key)).toEqual(['type:delta']);
+  });
+
   it('uses the groups count for "Other" until its own request answers', () => {
     const [otherSection] = buildListKiSections({
       groups,

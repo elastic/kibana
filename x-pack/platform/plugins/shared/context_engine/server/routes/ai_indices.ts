@@ -785,6 +785,7 @@ export const registerAiIndexRoutes = ({
         const {
           max_groups: maxGroups,
           types: type,
+          exclude_types: excludeType,
           preview_size: previewSize,
           status,
           query,
@@ -792,6 +793,7 @@ export const registerAiIndexRoutes = ({
         } = request.query;
         const statuses = status !== undefined ? [status].flat() : undefined;
         const types = type !== undefined ? [type].flat() : undefined;
+        const excludeTypes = excludeType !== undefined ? [excludeType].flat() : undefined;
         const spaceId = resolveSpaceId(await getSpaces(), request);
         try {
           const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
@@ -800,6 +802,7 @@ export const registerAiIndexRoutes = ({
             dest: aiIndex.dest,
             maxGroups,
             ...(types !== undefined ? { types } : {}),
+            ...(excludeTypes !== undefined ? { excludeTypes } : {}),
             previewSize,
             ...(statuses !== undefined ? { statuses } : {}),
             ...(query !== undefined ? { query } : {}),

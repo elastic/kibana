@@ -18,6 +18,8 @@ interface UseListKiGroupsArgs {
   maxGroups: number;
   /** Exactly these types as groups, instead of the biggest ones. */
   types?: readonly string[];
+  /** Leaves these types out before grouping. */
+  excludeTypes?: readonly string[];
   previewSize: number;
   query?: string;
   status: readonly KiStatus[];
@@ -43,6 +45,7 @@ export const useListKiGroups = ({
   aiIndexId,
   maxGroups,
   types,
+  excludeTypes,
   previewSize,
   query,
   status,
@@ -64,13 +67,15 @@ export const useListKiGroups = ({
       query,
       status,
       sort,
-      types
+      types,
+      excludeTypes
     ),
     queryFn: ({ signal }) =>
       listKiGroups(http, {
         aiIndexId,
         maxGroups,
         ...(types !== undefined ? { types: [...types] } : {}),
+        ...(excludeTypes !== undefined ? { excludeTypes: [...excludeTypes] } : {}),
         previewSize,
         ...(query !== undefined ? { query } : {}),
         status: [...status],

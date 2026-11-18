@@ -62,6 +62,8 @@ interface ListKiGroupsArgs {
   maxGroups: number;
   /** Exactly these types as groups (keeps the groups stable while the search changes). */
   types?: string[];
+  /** Leaves these types out before grouping (the "Other" groups leave out the tile types). */
+  excludeTypes?: string[];
   previewSize: number;
   query?: string;
   status: KiStatus[];
@@ -71,13 +73,26 @@ interface ListKiGroupsArgs {
 
 export const listKiGroups = (
   http: HttpStart,
-  { aiIndexId, maxGroups, types, previewSize, query, status, sort, signal }: ListKiGroupsArgs
+  {
+    aiIndexId,
+    maxGroups,
+    types,
+    excludeTypes,
+    previewSize,
+    query,
+    status,
+    sort,
+    signal,
+  }: ListKiGroupsArgs
 ): Promise<ListKiGroupsResponse> =>
   http.get<ListKiGroupsResponse>(buildPath(AI_INDEX_KI_GROUPS_PATH, { aiIndexId }), {
     version: AI_INDEX_INTERNAL_API_VERSION,
     query: {
       max_groups: maxGroups,
       ...(types !== undefined && types.length > 0 ? { types } : {}),
+      ...(excludeTypes !== undefined && excludeTypes.length > 0
+        ? { exclude_types: excludeTypes }
+        : {}),
       preview_size: previewSize,
       ...(query !== undefined ? { query } : {}),
       status,

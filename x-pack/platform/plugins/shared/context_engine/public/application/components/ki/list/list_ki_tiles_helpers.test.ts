@@ -12,6 +12,7 @@ import {
   getEffectiveSelection,
   getSelectionKey,
   getTileGrow,
+  getTileWidthCount,
   toggleTile,
 } from './list_ki_tiles_helpers';
 
@@ -57,6 +58,25 @@ describe('getTileGrow', () => {
     expect(getTileGrow(100)).toBeGreaterThan(getTileGrow(10));
     expect(getTileGrow(100) / getTileGrow(1)).toBeLessThan(100);
     expect(getTileGrow(0)).toBe(1);
+  });
+});
+
+describe('getTileWidthCount', () => {
+  it('uses the count without the search for type tiles', () => {
+    const tiles = buildTiles(groups, 99, { groups: [group('alpha', 4)], totalOther: 1 });
+    expect(getTileWidthCount(tiles[1], tiles)).toBe(20);
+  });
+
+  it('never makes "Other" wider than the biggest type tile', () => {
+    const big = buildTiles(groups, 99);
+    expect(getTileWidthCount(big[3], big)).toBe(30);
+    const small = buildTiles(groups, 3);
+    expect(getTileWidthCount(small[3], small)).toBe(3);
+  });
+
+  it('keeps the "Other" count when there is no type tile', () => {
+    const tiles = buildTiles([], 7);
+    expect(getTileWidthCount(tiles[0], tiles)).toBe(7);
   });
 });
 

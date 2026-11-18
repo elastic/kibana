@@ -50,20 +50,31 @@ const PLAYBOOK: KiGroup = {
   kis: [ki('play-1', 'playbook', { status: 'deleted' })],
 };
 
-const mockGroups = ({ totalOther = 0 }: { totalOther?: number } = {}) =>
-  mockUseListKiGroups.mockImplementation(({ status }: { status: string[] }) => {
-    const onlyDeleted = status.length === 1 && status[0] === 'deleted';
-    const groups = onlyDeleted ? [PLAYBOOK] : [FAQ, PLAYBOOK];
-    return {
-      groups,
-      total: groups.reduce((sum, { count }) => sum + count, 0) + totalOther,
-      totalOther,
-      isLoading: false,
-      isFetching: false,
-      isPreviousData: false,
-      error: undefined,
-    };
-  });
+const groupsResult = (groups: KiGroup[], totalOther: number) => ({
+  groups,
+  total: groups.reduce((sum, { count }) => sum + count, 0) + totalOther,
+  totalOther,
+  isLoading: false,
+  isFetching: false,
+  isPreviousData: false,
+  error: undefined,
+});
+
+/** `otherGroups`: the biggest types inside "Other" (the `_groups` call with `excludeTypes`). */
+const mockGroups = ({
+  totalOther = 0,
+  otherGroups = [],
+}: { totalOther?: number; otherGroups?: KiGroup[] } = {}) =>
+  mockUseListKiGroups.mockImplementation(
+    ({ status, excludeTypes }: { status: string[]; excludeTypes?: readonly string[] }) => {
+      if (excludeTypes !== undefined) {
+        const inGroups = otherGroups.reduce((sum, { count }) => sum + count, 0);
+        return groupsResult(otherGroups, totalOther - inGroups);
+      }
+      const onlyDeleted = status.length === 1 && status[0] === 'deleted';
+      return groupsResult(onlyDeleted ? [PLAYBOOK] : [FAQ, PLAYBOOK], totalOther);
+    }
+  );
 
 const mockOther = (kis: KiListItem[] = [], total = kis.length) =>
   mockUseListKi.mockImplementation(({ enabled }: { enabled: boolean }) => ({
@@ -144,9 +155,13 @@ describe('ListKiGroups', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('shows header, tiles and only the selected sections, with "Other" as one flat section', () => {
-    mockGroups({ totalOther: 3 });
-    mockOther([ki('o-1', 'zeta'), ki('o-2', undefined), ki('o-3', 'eta')]);
+  it('shows header, tiles and only the selected sections, with "Other" split by type', () => {
+    mockGroups({
+      totalOther: 3,
+      otherGroups: [{ type: 'zeta', count: 1, kis: [ki('o-1', 'zeta')] }],
+    });
+    // The rest of "Other": types past its groups and documents without a type.
+    mockOther([ki('o-2', undefined), ki('o-3', 'eta')]);
     renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
 
     expect(screen.getByTestId('contextListKiHeaderCount')).toHaveTextContent(
@@ -157,16 +172,20 @@ describe('ListKiGroups', () => {
     fireEvent.click(screen.getByTestId('contextListKiTileOther'));
     expect(screen.getByTestId('contextListKiTileOther')).toHaveAttribute('aria-pressed', 'true');
     expect(screen.queryByTestId('contextListKiGroup-faq')).not.toBeInTheDocument();
-    const otherSection = screen.getByTestId('contextListKiGroupOther');
-    expect(within(otherSection).getByTestId('contextListKiGroupHeader')).toHaveTextContent(
-      'Other3'
-    );
-    expect(within(otherSection).getAllByTestId('contextKiRow')).toHaveLength(3);
+    expect(
+      screen.getAllByTestId('contextListKiGroupHeader').map((header) => header.textContent)
+    ).toEqual(['zeta1', 'Other2']);
+    expect(
+      within(screen.getByTestId('contextListKiGroup-zeta')).getAllByTestId('contextKiRow')
+    ).toHaveLength(1);
+    expect(
+      within(screen.getByTestId('contextListKiGroupOther')).getAllByTestId('contextKiRow')
+    ).toHaveLength(2);
 
     fireEvent.click(screen.getByTestId('contextListKiTile-faq'));
     expect(
       screen.getAllByTestId('contextListKiGroupHeader').map((header) => header.textContent)
-    ).toEqual(['faq30', 'Other3']);
+    ).toEqual(['faq30', 'zeta1', 'Other2']);
 
     // A second click deselects; with nothing selected every group is back, "Other" hides.
     fireEvent.click(screen.getByTestId('contextListKiTile-faq'));

@@ -110,11 +110,16 @@ export const useListKiTypeTilesStyles = () => {
           padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
         },
       }),
-      // No border: a stronger background and a wider bar. (An outline ring got lost on the last
-      // clicked tile, because EUI removes the outline of a button that keeps focus after a click.)
+      // A ring, a stronger background and a wider bar: the ring shows the state without color
+      // (WCAG 1.4.1). It is a box-shadow, not an outline: EUI removes the outline of a button
+      // that keeps focus after a click, so an outline ring got lost on the last clicked tile.
+      // The bar comes first, so it is drawn over the ring.
       selected: css({
         backgroundColor: `var(${TILE_STRONG_BG_VAR})`,
-        boxShadow: `inset ${TILE_BAR_WIDTH_SELECTED} 0 0 var(${TILE_BAR_COLOR_VAR})`,
+        boxShadow: [
+          `inset ${TILE_BAR_WIDTH_SELECTED} 0 0 var(${TILE_BAR_COLOR_VAR})`,
+          `inset 0 0 0 ${euiTheme.border.width.thick} ${euiTheme.colors.borderStrongText}`,
+        ].join(', '),
       }),
       dimmed: css({
         opacity: 0.5,

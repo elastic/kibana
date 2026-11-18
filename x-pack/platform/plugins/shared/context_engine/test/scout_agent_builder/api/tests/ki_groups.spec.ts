@@ -215,6 +215,28 @@ apiTest.describe('context engine KI groups', { tag: tags.stateful.classic }, () 
     ).toStrictEqual(TOP_5);
   });
 
+  apiTest('groups "Other" by type with exclude_types', async ({ apiClient }) => {
+    const response = await apiClient.get(
+      groupsPath(AI_INDEX_ID, { status: 'active', max_groups: 10, exclude_types: TOP_5 }),
+      { headers: adminInternalHeaders, responseType: 'json' }
+    );
+
+    expect(response).toHaveStatusCode(200);
+    const body = response.body as GroupsResponse;
+    // Only "Other" (4 KIs): zeta is a group; no type, "" and the 300-char type stay other.
+    expect(counts(body)).toBe('zeta=1');
+    expect(body.total).toBe(4);
+    expect(body.total_other).toBe(3);
+
+    // The rest matches the "Other" list without the tile types and the "Other" groups.
+    const rest = await apiClient.get(
+      listPath({ status: 'active', size: 0, exclude_types: [...TOP_5, 'zeta'] }),
+      { headers: adminInternalHeaders, responseType: 'json' }
+    );
+    expect(rest).toHaveStatusCode(200);
+    expect(rest.body.total).toBe(body.total_other);
+  });
+
   for (const [name, params] of [
     ['search', { status: 'active', query: 'refund' }],
     ['status=expired', { status: 'expired' }],

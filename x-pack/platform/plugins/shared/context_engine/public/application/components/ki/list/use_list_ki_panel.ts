@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { DEFAULT_KI_GROUPS } from '../../../../../common/constants';
+import { DEFAULT_KI_GROUPS, MAX_KI_GROUPS } from '../../../../../common/constants';
 import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
 import type { KiGroup, KiListItem } from '../../../../../common/http_api/knowledge_indicators';
 import { DEFAULT_KI_LIST_SORT, type KiListSort } from '../../../../../common/ki_list_sort';
@@ -39,7 +39,6 @@ import {
 } from './list_ki_tiles_helpers';
 
 const EMPTY_GROUP_SIZES: Record<string, number> = {};
-
 /** The groups part of a `_groups` answer, as the list uses it. */
 interface ListKiGroupsSnapshot {
   groups: KiGroup[];
@@ -166,18 +165,53 @@ export const useListKiPanel = ({ id: aiIndexId }: GetAiIndexResponse) => {
   // "Other" = everything outside the tile types (with or without the search).
   const showOther = isOtherSectionShown(groups, totalOther, selection);
   // "Other" waits for fresh tiles: with the previous ones it would exclude the wrong types.
-  const otherQuery = useListKi({
+  const isOtherReady = showOther && !isLoading && !tileGroupsQuery.isPreviousData;
+  // "Other" keeps the real types: its biggest types come as groups of their own.
+  const otherGroupsQuery = useListKiGroups({
     aiIndexId,
-    size: otherSize,
+    maxGroups: MAX_KI_GROUPS,
     excludeTypes: tileTypes,
+    previewSize: LIST_KI_PAGE_SIZE,
     query,
     status,
     sort,
-    enabled: showOther && !isLoading && !tileGroupsQuery.isPreviousData,
+    enabled: isOtherReady,
+  });
+  const areOtherGroupsFresh =
+    isOtherReady && !otherGroupsQuery.isLoading && !otherGroupsQuery.isPreviousData;
+  // The previous groups stay while new ones load, also while the tiles reload (the query is then
+  // disabled but keeps its data). After an error "Other" is one flat section.
+  const otherGroups =
+    showOther && !otherGroupsQuery.isLoading && !otherGroupsQuery.error
+      ? otherGroupsQuery.groups
+      : undefined;
+  const otherRestCount = otherGroups ? otherGroupsQuery.totalOther : totalOther;
+  const otherExcludeTypes = useMemo(
+    () => [...tileTypes, ...(otherGroups ?? []).map(({ type }) => type)],
+    [otherGroups, tileTypes]
+  );
+  // The rest of "Other" (types past the "Other" groups, no type) waits for fresh groups too.
+  const otherQuery = useListKi({
+    aiIndexId,
+    size: otherSize,
+    excludeTypes: otherExcludeTypes,
+    query,
+    status,
+    sort,
+    enabled: areOtherGroupsFresh && otherRestCount > 0,
     // A failed "Other" page shows a toast; its "Show more" then asks again.
     notifyOnError: true,
   });
-  const isFetchingOther = showOther && otherQuery.isFetching;
+  const isFetchingOther = showOther && (otherGroupsQuery.isFetching || otherQuery.isFetching);
+  // Previous rows stay while the next page loads ("Show more", a filter change). Rows of types
+  // that are now groups of their own are dropped, so no row shows twice.
+  const otherKis = useMemo(() => {
+    if (!otherQuery.isPreviousData) {
+      return otherQuery.kis;
+    }
+    const excluded = new Set(otherExcludeTypes);
+    return otherQuery.kis.filter(({ type }) => type === undefined || !excluded.has(type));
+  }, [otherExcludeTypes, otherQuery.isPreviousData, otherQuery.kis]);
 
   // The preview is already a full page, so a tile click loads nothing extra.
   const onToggleTile = useCallback((tile: ListKiTile) => {
@@ -204,7 +238,8 @@ export const useListKiPanel = ({ id: aiIndexId }: GetAiIndexResponse) => {
         totalOther,
         groupResults,
         other: {
-          kis: otherQuery.kis,
+          ...(otherGroups ? { byType: { groups: otherGroups, restCount: otherRestCount } } : {}),
+          kis: otherKis,
           // Unknown while loading or after an error: the count from the groups is used instead,
           // so "Other" keeps its "Show more" (which retries after an error).
           total:
@@ -220,11 +255,13 @@ export const useListKiPanel = ({ id: aiIndexId }: GetAiIndexResponse) => {
       groupResults,
       groups,
       isFetchingOther,
+      otherGroups,
+      otherKis,
       otherQuery.error,
       otherQuery.isLoading,
       otherQuery.isPreviousData,
-      otherQuery.kis,
       otherQuery.total,
+      otherRestCount,
       selection,
       tileTypes,
       totalOther,
@@ -262,7 +299,7 @@ export const useListKiPanel = ({ id: aiIndexId }: GetAiIndexResponse) => {
 
   // Rows in the order the list shows them. The first one opens when nothing is selected.
   const visibleKis = useMemo(() => sections.flatMap((section) => section.kis), [sections]);
-  const { selectedKi, selectKi } = useSelectedKi();
+  const { selectedKi, selectKi, clearSelectedKi } = useSelectedKi();
 
   // A filter or tile change re-checks the selection once the new list has loaded.
   const filterKey = `${statusFilter}|${submittedQuery}|${getSelectionKey(selection)}`;
@@ -278,6 +315,11 @@ export const useListKiPanel = ({ id: aiIndexId }: GetAiIndexResponse) => {
     checkedFilterKeyRef.current = filterKey;
 
     if (!firstKi) {
+      // A filter that leaves the list empty also closes the open document. A failed request
+      // is not an empty list: the document stays.
+      if (filtersChanged && selectedKi && !error && !otherError) {
+        clearSelectedKi();
+      }
       return;
     }
     if (!selectedKi) {
@@ -288,7 +330,18 @@ export const useListKiPanel = ({ id: aiIndexId }: GetAiIndexResponse) => {
     if (filtersChanged && !visibleKis.some((ki) => isSameKi(ki, selectedKi))) {
       selectKi(firstKi, { replace: true });
     }
-  }, [filterKey, isFetchingGroups, isFetchingOther, isLoading, selectKi, selectedKi, visibleKis]);
+  }, [
+    clearSelectedKi,
+    error,
+    filterKey,
+    isFetchingGroups,
+    isFetchingOther,
+    isLoading,
+    otherError,
+    selectKi,
+    selectedKi,
+    visibleKis,
+  ]);
 
   // Old links may miss the backing index. Take it from the list when the document is there.
   const resolvedSelectedKi = useMemo((): SelectedKi | undefined => {

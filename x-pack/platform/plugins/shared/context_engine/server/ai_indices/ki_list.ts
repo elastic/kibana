@@ -59,6 +59,8 @@ export interface GetKiGroupsOptions {
    * `maxGroups` is ignored. Lets a client keep the same groups while the search changes.
    */
   types?: string[];
+  /** Leaves out KIs of these types before grouping. KIs without a type stay in. */
+  excludeTypes?: string[];
   previewSize: number;
   query?: string;
   statuses?: KiStatus[];
@@ -442,6 +444,7 @@ export const getKiGroups = async (
     dest,
     maxGroups,
     types,
+    excludeTypes = [],
     previewSize,
     query,
     statuses,
@@ -463,8 +466,11 @@ export const getKiGroups = async (
     : GROUPABLE_TYPE_CONDITION;
   // Total and top buckets in one query. KIs that can't be a group share the null bucket,
   // sorted last, so the total survives even when no KI has a groupable type.
+  // The excluded types are not part of this answer at all: not in the total, not in "Other".
+  // The group rows below need no such filter: an excluded type can't be a group.
   const bucketsQuery = [
     base,
+    ...(excludeTypes.length > 0 ? [`WHERE ${otherTypesCondition(excludeTypes)}`] : []),
     `EVAL group_type = CASE(${groupCondition}, type, NULL)`,
     'STATS count = COUNT(*) BY group_type',
     'INLINE STATS total = SUM(count)',
@@ -473,7 +479,7 @@ export const getKiGroups = async (
     `LIMIT ${fixedTypes ? fixedTypes.length : maxGroups}`,
   ].join('\n| ');
   const bucketsParams = [
-    ...(listQueryParams({ query }).params ?? []),
+    ...(listQueryParams({ query, excludeTypes }).params ?? []),
     ...(fixedTypes ?? []).map((type, i) => ({ [groupTypeParam(i)]: type })),
   ];
   const buckets = toRecords(

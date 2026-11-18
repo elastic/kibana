@@ -52,8 +52,19 @@ export interface ListKiTileSelection {
 export const EMPTY_TILE_SELECTION: ListKiTileSelection = { types: new Set(), other: false };
 
 export interface ListKiOtherResult {
+  /**
+   * "Other" split by type. Undefined until it loads (or after an error): then "Other" is one
+   * flat section.
+   */
+  byType?: {
+    /** The biggest types outside the tiles, each shown as its own section. */
+    groups: KiGroup[];
+    /** Documents outside the tiles and outside `groups`: the last, flat "Other" section. */
+    restCount: number;
+  };
+  /** Rows of the flat "Other" section. */
   kis: KiListItem[];
-  /** Total of the "Other" request, undefined until it answers. */
+  /** Total of the flat "Other" request, undefined until it answers. */
   total: number | undefined;
   isFetching: boolean;
 }
@@ -109,6 +120,8 @@ export const isOtherSectionShown = (
 
 /**
  * The list sections: the type groups (all, or only the selected ones), then "Other" when shown.
+ * "Other" keeps the real types: its biggest types are sections of their own, the rest is one
+ * flat "Other" section at the end.
  * A type section shows the rows loaded for it, or the preview rows from the groups response.
  */
 export const buildListKiSections = ({
@@ -127,34 +140,40 @@ export const buildListKiSections = ({
   const orderedGroups = typeOrder
     ? [...groups].sort((a, b) => position(a.type) - position(b.type))
     : groups;
+  const toTypeSection = ({ type, count, kis }: KiGroup): ListKiGroup => {
+    const groupResult = getOwnValue(groupResults, type);
+    return toSection({
+      key: getTypeSectionKey(type),
+      kind: 'type',
+      type,
+      count,
+      kis: groupResult?.kis ?? kis,
+      isLoadingMore: groupResult?.isFetching ?? false,
+    });
+  };
   const typeSections = orderedGroups
     .filter(({ type }) => showAllTypes || selection.types.has(type))
-    .map(({ type, count, kis }) => {
-      const groupResult = getOwnValue(groupResults, type);
-      return toSection({
-        key: getTypeSectionKey(type),
-        kind: 'type',
-        type,
-        count,
-        kis: groupResult?.kis ?? kis,
-        isLoadingMore: groupResult?.isFetching ?? false,
-      });
-    });
+    .map(toTypeSection);
 
   if (!isOtherSectionShown(groups, totalOther, selection)) {
     return typeSections;
   }
 
+  const otherTypeSections = (other.byType?.groups ?? []).map(toTypeSection);
+  const restCount = other.byType ? other.byType.restCount : totalOther;
+  if (restCount <= 0) {
+    return [...typeSections, ...otherTypeSections];
+  }
   const otherSection = toSection({
     key: OTHER_SECTION_KEY,
     kind: 'other',
     type: '',
     // The "Other" response knows the exact count; until it answers, the groups response does.
-    count: other.total ?? totalOther,
+    count: other.total ?? restCount,
     kis: other.kis,
     isLoadingMore: other.isFetching,
   });
-  return [...typeSections, otherSection];
+  return [...typeSections, ...otherTypeSections, otherSection];
 };
 
 /** Size for the next "Show more" request of a section. */

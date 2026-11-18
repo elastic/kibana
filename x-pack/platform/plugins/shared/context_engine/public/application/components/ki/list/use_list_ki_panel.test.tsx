@@ -16,6 +16,8 @@ import { useListKiPanel } from './use_list_ki_panel';
 const mockUseListKi = jest.fn();
 const mockUseListKiByType = jest.fn();
 const mockUseListKiGroups = jest.fn();
+// The "Other" groups: the `_groups` call that leaves out the tile types.
+const mockUseOtherKiGroups = jest.fn();
 
 jest.mock('../../../hooks/use_list_ki', () => ({
   useListKi: (...args: unknown[]) => mockUseListKi(...args),
@@ -26,10 +28,12 @@ jest.mock('../../../hooks/use_list_ki_by_type', () => ({
 }));
 
 jest.mock('../../../hooks/use_list_ki_groups', () => ({
-  useListKiGroups: (...args: unknown[]) => mockUseListKiGroups(...args),
+  useListKiGroups: (args: { excludeTypes?: readonly string[] }) =>
+    args.excludeTypes !== undefined ? mockUseOtherKiGroups(args) : mockUseListKiGroups(args),
 }));
 
 const groupsQuery = () => mockUseListKiGroups.mock.calls.at(-1)?.[0];
+const otherGroupsQuery = () => mockUseOtherKiGroups.mock.calls.at(-1)?.[0];
 const otherQuery = () => mockUseListKi.mock.calls.at(-1)?.[0];
 const byTypeQuery = () => mockUseListKiByType.mock.calls.at(-1)?.[0];
 
@@ -90,6 +94,8 @@ const tile = (result: { current: ReturnType<typeof useListKiPanel> }, key: strin
 describe('useListKiPanel', () => {
   beforeEach(() => {
     mockUseListKiGroups.mockReturnValue(groupsResult());
+    // By default "Other" has no type big enough for a group: all of it is the flat rest.
+    mockUseOtherKiGroups.mockReturnValue(groupsResult({ groups: [], total: 5, totalOther: 5 }));
     mockUseListKi.mockReturnValue(otherResult());
     mockUseListKiByType.mockReturnValue({});
   });
@@ -250,6 +256,180 @@ describe('useListKiPanel', () => {
     );
     expect(result.current.groups.map(({ key }) => key)).toEqual(['other']);
     expect(result.current.selection.other).toBe(true);
+  });
+
+  it('splits "Other" by type: its biggest types as groups, the rest as one flat section', () => {
+    mockUseOtherKiGroups.mockReturnValue(
+      groupsResult({
+        groups: [{ type: 'zeta', count: 3, kis: rows(3, 'zeta') }],
+        total: 5,
+        totalOther: 2,
+      })
+    );
+    mockUseListKi.mockReturnValue(otherResult({ kis: [ki('no-type')], total: 2 }));
+    const { result } = renderPanelHook();
+    expect(otherGroupsQuery()).toEqual(expect.objectContaining({ enabled: false }));
+
+    act(() => {
+      result.current.onToggleTile(tile(result, 'other'));
+    });
+    expect(otherGroupsQuery()).toEqual(
+      expect.objectContaining({
+        enabled: true,
+        excludeTypes: ['faq', 'playbook'],
+        maxGroups: 10,
+        previewSize: 50,
+      })
+    );
+    // The rest leaves out the tile types and the "Other" groups.
+    expect(otherQuery()).toEqual(
+      expect.objectContaining({ enabled: true, excludeTypes: ['faq', 'playbook', 'zeta'] })
+    );
+    expect(result.current.groups.map(({ key, count }) => [key, count])).toEqual([
+      ['type:zeta', 3],
+      ['other', 2],
+    ]);
+  });
+
+  it('does not ask for the rest of "Other" when its groups cover all of it', () => {
+    mockUseOtherKiGroups.mockReturnValue(
+      groupsResult({ groups: [{ type: 'zeta', count: 5, kis: rows(5, 'zeta') }], totalOther: 0 })
+    );
+    const { result } = renderPanelHook();
+
+    act(() => {
+      result.current.onToggleTile(tile(result, 'other'));
+    });
+    expect(otherQuery()).toEqual(expect.objectContaining({ enabled: false }));
+    expect(result.current.groups.map(({ key }) => key)).toEqual(['type:zeta']);
+  });
+
+  it('shows "Other" as one flat section when its groups fail', () => {
+    mockUseOtherKiGroups.mockReturnValue(
+      groupsResult({ groups: [], totalOther: 0, error: new Error('boom') })
+    );
+    mockUseListKi.mockReturnValue(otherResult({ kis: rows(5, 'zeta'), total: 5 }));
+    const { result } = renderPanelHook();
+
+    act(() => {
+      result.current.onToggleTile(tile(result, 'other'));
+    });
+    expect(otherQuery()).toEqual(
+      expect.objectContaining({ enabled: true, excludeTypes: ['faq', 'playbook'] })
+    );
+    expect(result.current.groups.map(({ key, count }) => [key, count])).toEqual([['other', 5]]);
+  });
+
+  it('closes the open document when a filter leaves the list empty', () => {
+    mockUseListKiGroups.mockImplementation(({ status }: { status: string[] }) =>
+      status.includes('deleted')
+        ? groupsResult({ groups: [], total: 0, totalOther: 0 })
+        : groupsResult()
+    );
+    const { result, history } = renderPanelHook(
+      '/ai_index/sample-ki/knowledge_documents/ai-index-idx-sample-ki?doc=faq-0'
+    );
+
+    act(() => {
+      result.current.onStatusFilterChange('deleted');
+    });
+    expect(history.location.search).toBe('');
+    expect(history.location.pathname).toBe('/ai_index/sample-ki/knowledge_documents');
+  });
+
+  it('keeps the open document when a filter change fails (an error is not an empty list)', () => {
+    mockUseListKiGroups.mockImplementation(({ status }: { status: string[] }) =>
+      status.includes('deleted')
+        ? groupsResult({ groups: [], total: 0, totalOther: 0, error: new Error('boom') })
+        : groupsResult()
+    );
+    const { result, history } = renderPanelHook(
+      '/ai_index/sample-ki/knowledge_documents/ai-index-idx-sample-ki?doc=faq-0'
+    );
+
+    act(() => {
+      result.current.onStatusFilterChange('deleted');
+    });
+    expect(history.location.search).toBe('?doc=faq-0');
+  });
+
+  it('loads more rows of a type inside "Other" and shows them', () => {
+    mockUseOtherKiGroups.mockReturnValue(
+      groupsResult({ groups: [{ type: 'zeta', count: 80, kis: rows(50, 'zeta') }], totalOther: 0 })
+    );
+    const { result } = renderPanelHook();
+    act(() => {
+      result.current.onToggleTile(tile(result, 'other'));
+    });
+
+    // The page that "Show more" loads.
+    mockUseListKiByType.mockReturnValue({
+      zeta: { kis: rows(80, 'zeta'), isFetching: false, isError: false, retry: jest.fn() },
+    });
+    act(() => {
+      result.current.showMore('type:zeta', 50);
+    });
+    expect(byTypeQuery()).toEqual(expect.objectContaining({ sizesByType: { zeta: 100 } }));
+    expect(result.current.groups.map(({ key, kis }) => [key, kis.length])).toEqual([
+      ['type:zeta', 80],
+    ]);
+  });
+
+  it('keeps the flat "Other" rows while its next page loads, without rows of "Other" groups', () => {
+    mockUseOtherKiGroups.mockReturnValue(
+      groupsResult({ groups: [{ type: 'zeta', count: 1, kis: rows(1, 'zeta') }], totalOther: 3 })
+    );
+    // The previous page: one row of a type that is now a group of its own, two that are not.
+    mockUseListKi.mockReturnValue(
+      otherResult({
+        kis: [ki('zeta-old', 'zeta'), ki('no-type'), ki('eta-1', 'eta')],
+        total: 3,
+        isPreviousData: true,
+        isFetching: true,
+      })
+    );
+    const { result } = renderPanelHook();
+    act(() => {
+      result.current.onToggleTile(tile(result, 'other'));
+    });
+
+    const other = result.current.groups.find(({ key }) => key === 'other');
+    expect(other?.kis.map(({ id }) => id)).toEqual(['no-type', 'eta-1']);
+    expect(other?.isLoadingMore).toBe(true);
+  });
+
+  it('keeps the "Other" groups while the tiles reload after a status change', () => {
+    mockUseOtherKiGroups.mockReturnValue(
+      groupsResult({ groups: [{ type: 'zeta', count: 3, kis: rows(3, 'zeta') }], totalOther: 2 })
+    );
+    const { result } = renderPanelHook();
+    act(() => {
+      result.current.onToggleTile(tile(result, 'other'));
+    });
+    expect(result.current.groups.map(({ key }) => key)).toEqual(['type:zeta', 'other']);
+
+    // The tiles reload: the "Other" groups query is disabled but keeps its previous data.
+    mockUseListKiGroups.mockReturnValue(groupsResult({ isPreviousData: true, isFetching: true }));
+    mockUseOtherKiGroups.mockReturnValue(
+      groupsResult({
+        groups: [{ type: 'zeta', count: 3, kis: rows(3, 'zeta') }],
+        totalOther: 2,
+        isPreviousData: true,
+      })
+    );
+    act(() => {
+      result.current.onStatusFilterChange('deleted');
+    });
+    expect(otherGroupsQuery()).toEqual(expect.objectContaining({ enabled: false }));
+    expect(result.current.groups.map(({ key }) => key)).toEqual(['type:zeta', 'other']);
+  });
+
+  it('keeps a deep-linked document when the list is empty without a filter change', () => {
+    mockUseListKiGroups.mockReturnValue(groupsResult({ groups: [], total: 0, totalOther: 0 }));
+    const { history } = renderPanelHook(
+      '/ai_index/sample-ki/knowledge_documents/ai-index-idx-sample-ki?doc=faq-0'
+    );
+    expect(history.location.search).toBe('?doc=faq-0');
   });
 
   it('waits for fresh groups before asking for "Other"', () => {

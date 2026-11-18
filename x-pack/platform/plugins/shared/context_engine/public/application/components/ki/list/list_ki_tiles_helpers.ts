@@ -86,6 +86,18 @@ export const buildTiles = (
 /** Tile width weight: grows with the count, but big types do not crush small ones. */
 export const getTileGrow = (count: number): number => Math.max(count, 1) ** 0.7;
 
+/**
+ * The count a tile's width follows. "Other" is many small types together, so it is never wider
+ * than the biggest type tile.
+ */
+export const getTileWidthCount = (tile: ListKiTile, tiles: readonly ListKiTile[]): number => {
+  if (tile.kind !== 'other') {
+    return tile.baseCount;
+  }
+  const typeCounts = tiles.flatMap((other) => (other.kind === 'type' ? [other.baseCount] : []));
+  return typeCounts.length > 0 ? Math.min(tile.baseCount, Math.max(...typeCounts)) : tile.baseCount;
+};
+
 export const isTileSelected = (tile: ListKiTile, selection: ListKiTileSelection): boolean =>
   tile.kind === 'other' ? selection.other : selection.types.has(tile.type);
 

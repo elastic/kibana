@@ -14,7 +14,12 @@ import { CONTEXT_ENGINE_UI_EBT } from '../../../../../common/telemetry';
 import { kiLabelCapitalizeCss } from '../shared/ki_type_display';
 import type { ListKiTileSelection } from './list_ki_groups_helpers';
 import { hasTileSelection } from './list_ki_groups_helpers';
-import { getTileGrow, isTileSelected, type ListKiTile } from './list_ki_tiles_helpers';
+import {
+  getTileGrow,
+  getTileWidthCount,
+  isTileSelected,
+  type ListKiTile,
+} from './list_ki_tiles_helpers';
 import {
   TILE_GROW_VAR,
   TILE_STRIP_HEIGHT,
@@ -100,7 +105,9 @@ export const ListKiTypeTiles = ({
               anchorProps={{
                 css: styles.tileAnchor,
                 // The count without the search, so the tiles do not jump while the user types.
-                style: { [TILE_GROW_VAR]: getTileGrow(tile.baseCount) } as React.CSSProperties,
+                style: {
+                  [TILE_GROW_VAR]: getTileGrow(getTileWidthCount(tile, tiles)),
+                } as React.CSSProperties,
               }}
             >
               <button

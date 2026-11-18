@@ -13,8 +13,20 @@ import { LIST_KI_SEARCH_DEBOUNCE_MS } from './list_ki_search_box';
 
 const mockUseListKiGroups = jest.fn();
 
+// The "Other" groups (the call with `excludeTypes`) are not part of these tests.
 jest.mock('../../../hooks/use_list_ki_groups', () => ({
-  useListKiGroups: (...args: unknown[]) => mockUseListKiGroups(...args),
+  useListKiGroups: (args: { excludeTypes?: readonly string[] }) =>
+    args.excludeTypes !== undefined
+      ? {
+          groups: [],
+          total: 0,
+          totalOther: 0,
+          isLoading: true,
+          isFetching: false,
+          isPreviousData: false,
+          error: undefined,
+        }
+      : mockUseListKiGroups(args),
 }));
 
 describe('ListKiFiltersRow', () => {

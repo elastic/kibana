@@ -44,7 +44,8 @@ export const contextEngineQueryKeys = {
       query: string | undefined,
       status: readonly KiStatus[],
       sort: KiListSort,
-      types?: readonly string[]
+      types?: readonly string[],
+      excludeTypes?: readonly string[]
     ) =>
       [
         'context_engine',
@@ -57,8 +58,9 @@ export const contextEngineQueryKeys = {
         query ?? '',
         status.join(','),
         sort,
-        // An array, not a joined string: type names may contain commas.
+        // Arrays, not joined strings: type names may contain commas.
         types !== undefined ? [...types] : [],
+        excludeTypes !== undefined ? [...excludeTypes].sort() : [],
       ] as const,
     viewKi: (
       aiIndexId: string,

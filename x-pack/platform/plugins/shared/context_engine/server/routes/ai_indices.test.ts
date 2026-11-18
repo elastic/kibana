@@ -35,6 +35,7 @@ import {
   MAX_AI_INDEX_TRACES,
   MAX_AI_INDEX_TRACE_INDEX_EXPRESSIONS,
   MAX_KI_GROUP_PREVIEW_SIZE,
+  MAX_KI_EXCLUDE_TYPES,
   MAX_KI_GROUPS,
   MAX_KI_SEARCH_QUERY_LENGTH,
   MAX_KI_TYPE_FILTER_LENGTH,
@@ -1300,7 +1301,7 @@ describe('ai indices routes', () => {
         expect(validateQuery({ exclude_types: ['faq', 'policy'] })).toEqual(
           expect.objectContaining({ exclude_types: ['faq', 'policy'] })
         );
-        const maxTypes = Array.from({ length: MAX_KI_GROUPS }, (_, i) => `t${i}`);
+        const maxTypes = Array.from({ length: MAX_KI_EXCLUDE_TYPES }, (_, i) => `t${i}`);
         expect(() => validateQuery({ exclude_types: maxTypes })).not.toThrow();
         expect(() => validateQuery({ exclude_types: [...maxTypes, 'one-more'] })).toThrow(
           '[exclude_types]'
@@ -1427,7 +1428,39 @@ describe('ai indices routes', () => {
         '[query]'
       );
       expect(() => validateQuery({ type: 'faq' })).toThrow();
-      expect(() => validateQuery({ exclude_types: 'faq' })).toThrow();
+    });
+
+    it('accepts exclude_types as a string or a bounded array of bounded strings', () => {
+      expect(validateQuery({ exclude_types: 'faq' })).toEqual(
+        expect.objectContaining({ exclude_types: 'faq' })
+      );
+      const maxTypes = Array.from({ length: MAX_KI_EXCLUDE_TYPES }, (_, i) => `t${i}`);
+      expect(() => validateQuery({ exclude_types: maxTypes })).not.toThrow();
+      expect(() => validateQuery({ exclude_types: [...maxTypes, 'one-more'] })).toThrow(
+        '[exclude_types]'
+      );
+      expect(() => validateQuery({ exclude_types: '' })).toThrow('[exclude_types]');
+      expect(() =>
+        validateQuery({ exclude_types: 'a'.repeat(MAX_KI_TYPE_FILTER_LENGTH + 1) })
+      ).toThrow('[exclude_types]');
+    });
+
+    it('passes exclude_types to the buckets query as params, a single value as a list', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      esEsqlQuery
+        .mockResolvedValueOnce(probe)
+        .mockResolvedValueOnce(groupBuckets([[2, 'policy', 3, false]]))
+        .mockResolvedValueOnce(rows([]));
+
+      await callRoute('GET', AI_INDEX_KI_GROUPS_PATH, {
+        params: { aiIndexId: 'customer_support' },
+        query: { max_groups: 10, preview_size: 1, exclude_types: 'faq', sort: 'updated' },
+      });
+
+      expect(esEsqlQuery.mock.calls[1][0]).toEqual({
+        query: expect.stringContaining('WHERE (type IS NULL OR type NOT IN (?excludeType0))'),
+        params: [{ excludeType0: 'faq' }],
+      });
     });
 
     it('accepts types as a string or a bounded array of bounded strings', () => {
