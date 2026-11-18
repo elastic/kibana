@@ -6,6 +6,7 @@
  */
 
 import type {
+  IngestPipeline,
   IngestProcessorContainer,
   IngestPutPipelineRequest,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -31,6 +32,12 @@ export const getSLIRoutingProcessor = (version: number): IngestProcessorContaine
     name: getSLIRoutingPipelineName(version),
   },
 });
+
+/** Tells whether an installed routing pipeline matches the current template of its resources version. */
+export const isSLIRoutingPipelineCurrent = (
+  { _meta: meta }: IngestPipeline,
+  version: number
+): boolean => meta?.version === version && meta?.template_version === SLO_RESOURCES_VERSION;
 
 /** Returns the shared routing pipeline of a resources version, routing SLI documents to time-based indices. */
 export const getSLIRoutingPipelineTemplate = (

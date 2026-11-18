@@ -20,7 +20,6 @@ import {
   SLI_DESTINATION_INDEX_NAME,
   SLI_DESTINATION_INDEX_PATTERN,
   SLI_ROUTED_VERSIONS,
-  SLO_RESOURCES_VERSION,
   SUMMARY_DESTINATION_INDEX_NAME,
   SUMMARY_TEMP_INDEX_NAME,
 } from '../../common/constants';
@@ -33,7 +32,10 @@ import { COMPOSITE_SUMMARY_INDEX_TEMPLATE } from '../assets/index_templates/comp
 import { HEALTH_INDEX_TEMPLATE } from '../assets/index_templates/health_index_template';
 import { SLI_INDEX_TEMPLATE } from '../assets/index_templates/sli_index_template';
 import { SUMMARY_INDEX_TEMPLATE } from '../assets/index_templates/summary_index_template';
-import { getSLIRoutingPipelineTemplate } from '../assets/ingest_templates/sli_routing_pipeline_template';
+import {
+  getSLIRoutingPipelineTemplate,
+  isSLIRoutingPipelineCurrent,
+} from '../assets/ingest_templates/sli_routing_pipeline_template';
 import { SLOResourcesNotInstalled } from '../errors';
 import { retryTransientEsErrors } from '../utils/retry';
 import type { Rounding } from './sli_routing_state';
@@ -130,7 +132,7 @@ export class DefaultResourceInstaller implements ResourceInstaller {
       );
     }
 
-    if (current && existing && this.isRoutingPipelineCurrent(current, version)) {
+    if (current && existing && isSLIRoutingPipelineCurrent(current, version)) {
       this.logger.debug(`SLO routing pipeline [${name}] is up to date`);
       return;
     }
@@ -147,10 +149,6 @@ export class DefaultResourceInstaller implements ResourceInstaller {
     await this.execute(() =>
       this.esClient.ingest.putPipeline(getSLIRoutingPipelineTemplate(version, routing))
     );
-  }
-
-  private isRoutingPipelineCurrent({ _meta: meta }: IngestPipeline, version: number): boolean {
-    return meta?.version === version && meta?.template_version === SLO_RESOURCES_VERSION;
   }
 
   private async fetchRoutingPipeline(version: number): Promise<IngestPipeline | undefined> {
