@@ -19,6 +19,8 @@ export const awsOnboardingCredentialsOutputSchema = lazySchema(() =>
     configured: z.boolean(),
     mode: z.enum(['fully-managed', 'partially-managed']).optional(),
     account_id: z.string().optional(),
+    /** The region of the stored credentials, which discovery also uses. */
+    region: z.string().optional(),
     discovery_ok: z.boolean().optional(),
     provisioning_ok: z.boolean().optional(),
     error: z.string().optional(),

@@ -27,7 +27,7 @@ export const awsOnboardingCredentialsStepDefinition = createServerStepDefinition
       };
     }
 
-    const { configured, mode } = await awsOnboardingCredentialsService.getPublic();
+    const { configured, mode, region } = await awsOnboardingCredentialsService.getPublic();
     if (!configured) {
       return { output: { configured: false } };
     }
@@ -44,6 +44,7 @@ export const awsOnboardingCredentialsStepDefinition = createServerStepDefinition
         output: {
           configured: true,
           mode,
+          region,
           account_id: accountId,
           discovery_ok: discovery.ok,
           ...(provisioning ? { provisioning_ok: provisioning.ok } : {}),
@@ -55,6 +56,7 @@ export const awsOnboardingCredentialsStepDefinition = createServerStepDefinition
         output: {
           configured: true,
           mode,
+          region,
           error: error instanceof Error ? error.message : String(error),
         },
       };

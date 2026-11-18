@@ -65,6 +65,15 @@ describe('awsOnboardingCredentialsStepDefinition', () => {
     });
   });
 
+  it('reports the region of the stored credentials', async () => {
+    getPublic.mockResolvedValue({ configured: true, mode: 'fully-managed', region: 'eu-west-1' });
+    verify.mockResolvedValue({ accountId: '123456789012', discovery: { ok: true } });
+
+    const result = await run();
+
+    expect(result).toEqual({ output: expect.objectContaining({ region: 'eu-west-1' }) });
+  });
+
   it('returns error text instead of throwing when verify rejects', async () => {
     getPublic.mockResolvedValue({ configured: true, mode: 'partially-managed' });
     verify.mockRejectedValue(new Error('decrypt failed'));
