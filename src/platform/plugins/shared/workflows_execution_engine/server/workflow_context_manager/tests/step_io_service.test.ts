@@ -269,31 +269,38 @@ describe('StepIoService', () => {
     });
 
     it('keeps an output a sibling cached during the fetch when this batch evicts it', async () => {
-      const { service, state, stepExecutionRepository } = buildHarness({ maxBytes: 100 });
+      // 9 bytes is 20% of a 45-byte budget, so the sibling copy is admitted.
+      // Five more 9-byte inserts then push it out of the cache.
+      const { service, state, stepExecutionRepository } = buildHarness({ maxBytes: 45 });
+      const others = ['b', 'c', 'd', 'e', 'f'].map(
+        (id) => ({ id, output: { v: 'b' } } as unknown as EsWorkflowStepExecution)
+      );
       stepExecutionRepository.getStepExecutionsByIds.mockImplementation(async () => {
-        service.write('a', 'output', { v: 'cached' }, 95);
+        service.write('a', 'output', { v: 'cached' }, 9);
         state.clearFlushedOutputs(['a']);
         return [
           { id: 'a', output: { v: 'from-es' } } as unknown as EsWorkflowStepExecution,
-          { id: 'b', output: { v: 'b' } } as unknown as EsWorkflowStepExecution,
+          ...others,
         ];
       });
 
-      const batch = await service.readBatch(['a', 'b'], 'output');
+      const batch = await service.readBatch(['a', 'b', 'c', 'd', 'e', 'f'], 'output');
 
       expect(batch.get('a')).toEqual({ v: 'cached' });
       expect(batch.get('b')).toEqual({ v: 'b' });
     });
 
     it('keeps a resident output in the returned map when the same batch evicts it', async () => {
-      const { service, state, stepExecutionRepository } = buildHarness({ maxBytes: 100 });
-      service.write('a', 'output', { v: 'a' }, 95);
+      const { service, state, stepExecutionRepository } = buildHarness({ maxBytes: 45 });
+      service.write('a', 'output', { v: 'a' }, 9);
       state.clearFlushedOutputs(['a']);
-      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
-        { id: 'b', output: { v: 'b' } } as unknown as EsWorkflowStepExecution,
-      ]);
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue(
+        ['b', 'c', 'd', 'e', 'f'].map(
+          (id) => ({ id, output: { v: 'b' } } as unknown as EsWorkflowStepExecution)
+        )
+      );
 
-      const batch = await service.readBatch(['a', 'b'], 'output');
+      const batch = await service.readBatch(['a', 'b', 'c', 'd', 'e', 'f'], 'output');
 
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledTimes(1);
       expect(batch.get('a')).toEqual({ v: 'a' });
