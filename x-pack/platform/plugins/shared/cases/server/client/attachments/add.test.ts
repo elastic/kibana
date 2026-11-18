@@ -201,7 +201,6 @@ describe('addComment', () => {
     attachmentService.create.mockResolvedValue({
       ...mockCaseUnifiedAttachments[0],
       id: 'mock-saved-object-id',
-      score: 0,
     });
 
     await addComment(
