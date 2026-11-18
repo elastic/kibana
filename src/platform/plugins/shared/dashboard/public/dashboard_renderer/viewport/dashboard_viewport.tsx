@@ -19,6 +19,7 @@ import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_inter
 import { DashboardGrid } from '../grid';
 import { SelectedPanelsToolbar } from '../selected_panels_toolbar';
 import { DashboardEmptyScreen } from './empty_screen/dashboard_empty_screen';
+import { AwaitingFiltersScreen } from './empty_screen/awaiting_filters_screen';
 
 export const DashboardViewport = () => {
   const dashboardApi = useDashboardApi();
@@ -92,7 +93,7 @@ export const DashboardViewport = () => {
         {panelCount === 0 && sectionCount === 0 ? (
           <DashboardEmptyScreen />
         ) : awaitingRequired ? (
-          <>here</>
+          <AwaitingFiltersScreen />
         ) : (
           <DashboardGrid />
         )}
@@ -119,9 +120,7 @@ const dashboardViewportStyles = {
   }),
   viewport: {
     width: '100%',
-    '&.dshDashboardViewport--empty': {
-      height: '100%',
-    },
+    height: '100%',
     '&.dshDashboardViewport--panelExpanded': {
       flex: 1,
     },
