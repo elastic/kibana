@@ -22,13 +22,13 @@ import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { first, range, xor } from 'lodash';
-import React, { useState } from 'react';
+import React from 'react';
 import { Controller, useFieldArray, useFormContext, useFormState, useWatch } from 'react-hook-form';
 import {
   aggValueToLabel,
   CUSTOM_METRIC_AGGREGATION_OPTIONS,
 } from '../../../helpers/aggregation_options';
-import { useSearchableFieldOptions } from '../../../hooks/use_searchable_field_options';
+import { createOptionsFromFields } from '../../../helpers/create_options';
 import type { CreateSLOForm } from '../../../types';
 import { QueryBuilder } from '../../common/query_builder';
 
@@ -93,8 +93,7 @@ export function MetricIndicator({
 }: MetricIndicatorProps) {
   const { control, setValue, register, getFieldState, getValues } = useFormContext<CreateSLOForm>();
   const formState = useFormState({ control, name: `indicator.params.${type}.metrics` });
-  const { options, onSearchChange } = useSearchableFieldOptions(metricFields);
-  const [aggregationOptions, setAggregationOptions] = useState(CUSTOM_METRIC_AGGREGATION_OPTIONS);
+  const options = createOptionsFromFields(metricFields);
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -163,7 +162,6 @@ export function MetricIndicator({
                       render={({ field: { ref, ...field }, fieldState }) => (
                         <EuiComboBox
                           {...field}
-                          async
                           fullWidth
                           singleSelection={{ asPlainText: true }}
                           placeholder={i18n.translate(
@@ -198,14 +196,7 @@ export function MetricIndicator({
                                 ]
                               : []
                           }
-                          onSearchChange={(searchValue: string) => {
-                            setAggregationOptions(
-                              CUSTOM_METRIC_AGGREGATION_OPTIONS.filter(({ value }) =>
-                                value.includes(searchValue)
-                              )
-                            );
-                          }}
-                          options={aggregationOptions}
+                          options={CUSTOM_METRIC_AGGREGATION_OPTIONS}
                         />
                       )}
                     />
@@ -235,7 +226,6 @@ export function MetricIndicator({
                         render={({ field: { ref, ...field }, fieldState }) => (
                           <EuiComboBox
                             {...field}
-                            async
                             fullWidth
                             singleSelection={{ asPlainText: true }}
                             placeholder={i18n.translate(
@@ -268,7 +258,6 @@ export function MetricIndicator({
                                   ]
                                 : []
                             }
-                            onSearchChange={onSearchChange}
                             options={options}
                           />
                         )}

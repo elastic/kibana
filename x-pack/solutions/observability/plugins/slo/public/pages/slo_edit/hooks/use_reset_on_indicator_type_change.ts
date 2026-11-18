@@ -16,7 +16,7 @@ import type { CreateSLOForm } from '../types';
  * Runs after the commit that unmounts the previous type's fields: resetting earlier (e.g. in the
  * select onChange) clears react-hook-form's field registry before their unmount cleanup runs.
  */
-export function useResetOnIndicatorTypeChange({ isEditMode }: { isEditMode: boolean }) {
+export function useResetOnIndicatorTypeChange({ isEditMode }: { isEditMode: boolean }): void {
   const {
     data: { metric: apmIndex },
   } = useFetchApmIndices();

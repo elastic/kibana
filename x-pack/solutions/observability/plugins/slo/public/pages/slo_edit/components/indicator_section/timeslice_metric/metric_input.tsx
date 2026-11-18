@@ -8,11 +8,11 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFieldNumber, EuiFlexItem, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { AGGREGATION_OPTIONS, aggValueToLabel } from '../../../helpers/aggregation_options';
+import { createOptionsFromFields } from '../../../helpers/create_options';
 import { useFormValues } from '../../../hooks/use_form_values';
-import { useSearchableFieldOptions } from '../../../hooks/use_searchable_field_options';
 import type { CreateSLOForm } from '../../../types';
 import { HISTOGRAM_FIELD_TYPES } from '../../../constants';
 
@@ -61,9 +61,7 @@ export function MetricInput({
       ? CARDINALITY_FIELD_TYPES.includes(field.type)
       : NUMERIC_FIELD_TYPES.includes(field.type)
   );
-  const [aggregationOptions, setAggregationOptions] = useState(AGGREGATION_OPTIONS);
-  const { options: fieldOptions, onSearchChange: onFieldSearchChange } =
-    useSearchableFieldOptions(metricFields);
+  const fieldOptions = createOptionsFromFields(metricFields);
 
   return (
     <>
@@ -85,7 +83,6 @@ export function MetricInput({
             >
               <EuiComboBox
                 {...field}
-                async
                 fullWidth
                 isClearable={false}
                 singleSelection={{ asPlainText: true }}
@@ -118,12 +115,7 @@ export function MetricInput({
                       ]
                     : []
                 }
-                onSearchChange={(searchValue: string) => {
-                  setAggregationOptions(
-                    AGGREGATION_OPTIONS.filter(({ value }) => value.includes(searchValue))
-                  );
-                }}
-                options={aggregationOptions}
+                options={AGGREGATION_OPTIONS}
               />
             </EuiFormRow>
           )}
@@ -193,7 +185,6 @@ export function MetricInput({
               >
                 <EuiComboBox
                   {...field}
-                  async
                   fullWidth
                   singleSelection={{ asPlainText: true }}
                   placeholder={i18n.translate(
@@ -225,7 +216,6 @@ export function MetricInput({
                         ]
                       : []
                   }
-                  onSearchChange={onFieldSearchChange}
                   options={fieldOptions}
                 />
               </EuiFormRow>

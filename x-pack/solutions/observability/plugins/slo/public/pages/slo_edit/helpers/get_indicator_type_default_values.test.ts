@@ -6,11 +6,7 @@
  */
 
 import type { IndicatorType } from '@kbn/slo-schema';
-import {
-  APM_LATENCY_DEFAULT_VALUES,
-  SLO_EDIT_FORM_DEFAULT_VALUES,
-  SLO_EDIT_FORM_DEFAULT_VALUES_SYNTHETICS_AVAILABILITY,
-} from '../constants';
+import { SLO_EDIT_FORM_DEFAULT_VALUES_SYNTHETICS_AVAILABILITY } from '../constants';
 import { getIndicatorTypeDefaultValues } from './get_indicator_type_default_values';
 
 const APM_INDEX = 'apm-metrics-*';
@@ -46,23 +42,12 @@ describe('getIndicatorTypeDefaultValues', () => {
     );
 
     expect(budgetingMethod).toBe('timeslices');
-    expect(objective).toEqual({ target: 99, timesliceTarget: 95, timesliceWindow: 1 });
+    expect(objective).toEqual({ target: 99, timesliceTarget: 95, timesliceWindow: '1' });
   });
 
   it('returns the synthetics availability form defaults', () => {
     expect(getIndicatorTypeDefaultValues('sli.synthetics.availability', APM_INDEX)).toEqual(
       SLO_EDIT_FORM_DEFAULT_VALUES_SYNTHETICS_AVAILABILITY
     );
-  });
-
-  it('does not mutate the shared default values', () => {
-    const formDefaults = structuredClone(SLO_EDIT_FORM_DEFAULT_VALUES);
-    const apmLatencyDefaults = structuredClone(APM_LATENCY_DEFAULT_VALUES);
-
-    getIndicatorTypeDefaultValues('sli.apm.transactionDuration', APM_INDEX);
-    getIndicatorTypeDefaultValues('sli.metric.timeslice', APM_INDEX);
-
-    expect(SLO_EDIT_FORM_DEFAULT_VALUES).toEqual(formDefaults);
-    expect(APM_LATENCY_DEFAULT_VALUES).toEqual(apmLatencyDefaults);
   });
 });

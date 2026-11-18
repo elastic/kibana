@@ -11,7 +11,7 @@ import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Controller, useFormContext, useFormState } from 'react-hook-form';
-import { useSearchableFieldOptions } from '../../hooks/use_searchable_field_options';
+import { createOptionsFromFields } from '../../helpers/create_options';
 import type { CreateSLOForm } from '../../types';
 
 interface Props {
@@ -27,7 +27,7 @@ const placeholder = i18n.translate('xpack.slo.sloEdit.timestampField.placeholder
 export function TimestampFieldSelector({ fields, isDisabled, isLoading }: Props) {
   const { control, getFieldState } = useFormContext<CreateSLOForm>();
   const formState = useFormState({ control, name: 'indicator.params.timestampField' });
-  const { options, onSearchChange } = useSearchableFieldOptions(fields);
+  const options = createOptionsFromFields(fields);
 
   return (
     <EuiFormRow
@@ -47,7 +47,6 @@ export function TimestampFieldSelector({ fields, isDisabled, isLoading }: Props)
               {...field}
               fullWidth
               compressed
-              async
               placeholder={placeholder}
               aria-label={placeholder}
               isClearable
@@ -63,7 +62,6 @@ export function TimestampFieldSelector({ fields, isDisabled, isLoading }: Props)
               }}
               singleSelection={{ asPlainText: true }}
               options={options}
-              onSearchChange={onSearchChange}
               selectedOptions={
                 !!fields && !!field.value ? [{ value: field.value, label: field.value }] : []
               }

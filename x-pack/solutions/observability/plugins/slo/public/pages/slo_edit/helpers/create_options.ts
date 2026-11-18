@@ -12,17 +12,8 @@ export interface Option {
   value: string;
 }
 
-export function createOptionsFromFields(
-  fields: FieldSpec[],
-  filterFn?: (option: Option) => boolean
-): Option[] {
-  const options = fields
+export function createOptionsFromFields(fields: FieldSpec[]): Option[] {
+  return fields
     .map((field) => ({ label: field.name, value: field.name }))
     .sort((a, b) => String(a.label).localeCompare(b.label));
-
-  if (filterFn) {
-    return options.filter(filterFn);
-  }
-
-  return options;
 }

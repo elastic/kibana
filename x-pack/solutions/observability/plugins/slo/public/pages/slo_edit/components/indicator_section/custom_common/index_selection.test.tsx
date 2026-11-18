@@ -71,9 +71,9 @@ describe('<IndexSelection />', () => {
       await form.current?.trigger();
     });
 
-    await waitFor(() => expect(form.current?.getValues(DATA_VIEW_FIELD)).toBe('dv-id'));
-    await waitFor(() =>
-      expect(screen.getByTestId('indexSelection')).toHaveAttribute('data-color', 'primary')
-    );
+    await waitFor(() => {
+      expect(form.current?.getValues(DATA_VIEW_FIELD)).toBe('dv-id');
+      expect(screen.getByTestId('indexSelection')).toHaveAttribute('data-color', 'primary');
+    });
   });
 });
