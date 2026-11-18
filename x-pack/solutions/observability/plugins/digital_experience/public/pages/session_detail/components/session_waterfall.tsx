@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import type { SessionPageVisit } from '../../../../common/sessions';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../../ebt_constants';
+import { UNKNOWN_PAGE } from '../../../labels';
 import { formatSessionDuration } from '../../../utils/format_session_duration';
 import type { SessionWaterfallLayout } from '../utils/session_timeline';
 import { formatOffset } from '../utils/session_timeline';
@@ -82,8 +83,10 @@ export const pageColors = (pageVisits: SessionPageVisit[]): Map<string, string> 
   const palette = euiPaletteColorBlind({ rotations: 2 });
   const colors = new Map<string, string>();
   for (const { page } of pageVisits) {
-    if (!colors.has(page)) {
-      colors.set(page, palette[colors.size % palette.length]);
+    // Every visit with no page shares one colour, as the waterfall gives them one label.
+    const key = page ?? UNKNOWN_PAGE;
+    if (!colors.has(key)) {
+      colors.set(key, palette[colors.size % palette.length]);
     }
   }
   return colors;

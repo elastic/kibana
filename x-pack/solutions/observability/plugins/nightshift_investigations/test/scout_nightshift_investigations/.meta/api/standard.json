@@ -1,5 +1,5 @@
 {
-  "sha1": "48fa9b42fdc13c3694765a6f672914cf47dd625e",
+  "sha1": "69937170240957d078498eb9a6c372e219a90841",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -18,6 +18,22 @@
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/global.setup.ts",
         "line": 5,
         "column": 1
+      }
+    },
+    {
+      "id": "5602c2c568d9f5e-f2ddca345953e00",
+      "title": "Automation backing workflow repair recreates a deleted workflow paused, then allows enabling and editing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/automation_workflow_recovery.spec.ts",
+        "line": 75,
+        "column": 42
       }
     },
     {
@@ -211,6 +227,118 @@
       }
     },
     {
+      "id": "9fd4a47c6cf5135-e002dcb23e36457",
+      "title": "/internal/nightshift/investigation_quotas returns the limits, today’s counts and the window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_quotas.spec.ts",
+        "line": 58,
+        "column": 63
+      }
+    },
+    {
+      "id": "9fd4a47c6cf5135-b069ccefc795059",
+      "title": "/internal/nightshift/investigation_quotas changes limits, removes one with null and keeps them while enforcement is off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_quotas.spec.ts",
+        "line": 71,
+        "column": 9
+      }
+    },
+    {
+      "id": "9fd4a47c6cf5135-60cc47e0814c8e3",
+      "title": "/internal/nightshift/investigation_quotas rejects invalid updates",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_quotas.spec.ts",
+        "line": 103,
+        "column": 16
+      }
+    },
+    {
+      "id": "9fd4a47c6cf5135-55a8c91c5e944d7",
+      "title": "/internal/nightshift/investigation_quotas lets read-only users see the limits but not change them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_quotas.spec.ts",
+        "line": 126,
+        "column": 19
+      }
+    },
+    {
+      "id": "9fd4a47c6cf5135-5b1161e9d2c2903",
+      "title": "/internal/nightshift/investigation_quotas requires the configure privilege as well as manage to change the limits",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_quotas.spec.ts",
+        "line": 131,
+        "column": 26
+      }
+    },
+    {
+      "id": "9fd4a47c6cf5135-e6bb5996ae26539",
+      "title": "/internal/nightshift/investigation_quotas rejects users without any Nightshift privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_quotas.spec.ts",
+        "line": 138,
+        "column": 42
+      }
+    },
+    {
+      "id": "9fd4a47c6cf5135-160c0ee36012d76",
+      "title": "/internal/nightshift/investigation_quotas returns 404 while Nightshift is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_quotas.spec.ts",
+        "line": 145,
+        "column": 30
+      }
+    },
+    {
       "id": "630943ff7e82a22-6348ef67781d494",
       "title": "Nightshift investigations on Agent Builder conversations a manual start returns an investigation the shared API reads with its subject, in progress",
       "expectedStatus": "passed",
@@ -346,8 +474,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/online_evals.spec.ts",
-        "line": 123,
-        "column": 47
+        "line": 128,
+        "column": 29
       }
     },
     {
@@ -360,7 +488,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/online_evals.spec.ts",
-        "line": 141,
+        "line": 146,
         "column": 14
       }
     },
@@ -374,8 +502,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/online_evals.spec.ts",
-        "line": 162,
-        "column": 15
+        "line": 167,
+        "column": 41
       }
     },
     {
@@ -388,13 +516,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/online_evals.spec.ts",
-        "line": 186,
+        "line": 192,
         "column": 71
       }
     },
     {
-      "id": "63a66063df79f9e-4086e916e3d62e9",
-      "title": "Scheduled Nightshift automations an edited schedule starts a scoped investigation and stops it at the configured timeout",
+      "id": "63a66063df79f9e-ce3f009945d7bf5",
+      "title": "Scheduled Nightshift automations an edited schedule starts an investigation and stops it at the configured timeout",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -402,8 +530,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/scheduled_automations.spec.ts",
-        "line": 77,
+        "line": 79,
         "column": 23
+      }
+    },
+    {
+      "id": "63a66063df79f9e-c21e28721b65d40",
+      "title": "Scheduled Nightshift automations runs an enabled scheduled automation manually without changing its configuration or schedule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/scheduled_automations.spec.ts",
+        "line": 219,
+        "column": 15
       }
     },
     {
@@ -416,8 +558,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/scheduled_automations.spec.ts",
-        "line": 222,
-        "column": 20
+        "line": 377,
+        "column": 66
       }
     },
     {

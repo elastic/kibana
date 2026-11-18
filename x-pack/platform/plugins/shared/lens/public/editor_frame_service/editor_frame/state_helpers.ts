@@ -46,6 +46,7 @@ import {
   loadIndexPatterns,
   ensureESQLTimeFieldOnAdHocDataViews,
 } from '../../data_views_service/loader';
+import { withEsqlLayerDataViewSpecs } from '../../data_views_service/esql_layer_data_view_specs';
 import { getDatasourceLayers } from '../../state_management/utils';
 import { applyStateHydration } from '../../state_hydration';
 
@@ -239,6 +240,7 @@ export async function initializeSources(
     storage,
     defaultIndexPatternId,
     references,
+    internalReferences,
     initialContext,
     adHocDataViews,
     http,
@@ -252,7 +254,10 @@ export async function initializeSources(
     datasourceStates: DatasourceStates;
     defaultIndexPatternId: string;
     storage: IStorageWrapper;
+    /** References to saved objects. Only these tell a saved data view from an ES|QL dataset. */
     references?: Reference[];
+    /** References of the ad hoc data views of the chart, kept apart from the saved ones. */
+    internalReferences?: Reference[];
     initialContext?: VisualizeFieldContext | VisualizeEditorContext;
     adHocDataViews?: Record<string, DataViewSpec>;
     http?: HttpStart;
@@ -260,9 +265,12 @@ export async function initializeSources(
   },
   options?: InitializationOptions
 ) {
+  const allReferences = internalReferences
+    ? [...(references ?? []), ...internalReferences]
+    : references;
   const annotationGroups = await initializeEventAnnotationGroups(
     eventAnnotationService,
-    references
+    allReferences
   );
 
   // Regenerate ESQL ad-hoc DataViews once at editor initialization.
@@ -270,7 +278,7 @@ export async function initializeSources(
   // from the actual ES|QL queries, including time field detection via http.
   const textBasedState = datasourceStates.textBased?.state as TextBasedPersistedState | undefined;
   const refreshedAdHocDataViews = await ensureESQLTimeFieldOnAdHocDataViews({
-    adHocDataViews: adHocDataViews ?? {},
+    adHocDataViews: withEsqlLayerDataViewSpecs(adHocDataViews, textBasedState?.layers, references),
     textBasedState,
     dataViewsService: dataViews,
     http,
@@ -285,7 +293,7 @@ export async function initializeSources(
       dataViews,
       storage,
       defaultIndexPatternId,
-      references,
+      references: allReferences,
       adHocDataViews: refreshedAdHocDataViews,
       annotationGroups,
     },
@@ -298,14 +306,14 @@ export async function initializeSources(
     initialContext,
     indexPatternRefs,
     indexPatterns,
-    references,
+    references: allReferences,
   });
 
   const initializedVisualizationState = initializeVisualization({
     visualizationMap,
     visualizationState,
     datasourceStates,
-    references,
+    references: allReferences,
     initialContext,
     annotationGroups,
   });
@@ -446,7 +454,7 @@ export async function persistedStateToExpression(
     | TextBasedPersistedState
     | undefined;
   const refreshedAdHocDataViews = await ensureESQLTimeFieldOnAdHocDataViews({
-    adHocDataViews: adHocDataViews ?? {},
+    adHocDataViews: withEsqlLayerDataViewSpecs(adHocDataViews, textBasedState?.layers, references),
     textBasedState,
     dataViewsService: services.dataViews,
     http: services.http,

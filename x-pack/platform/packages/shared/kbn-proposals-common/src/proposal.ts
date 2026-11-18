@@ -214,6 +214,13 @@ export const proposalSchema = lazySchema(() =>
      * on a proposal that carries no action.
      */
     category: proposalCategorySchema.optional(),
+    /**
+     * Whether declining this proposal can be recorded without a reason. Stored rather than
+     * re-derived by each reader, so the producer owns the question "is declining this a
+     * judgement that has to be justified?" — a to-do is work the analyst does themselves, so
+     * dropping one is not. Absent on documents written before the flag existed, read as `false`.
+     */
+    skipDiscardReason: z.boolean().optional(),
     origin: proposalOriginSchema,
     /** Decision deadline, evaluated on read rather than swept into a status. */
     expiresAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
@@ -269,56 +276,64 @@ export interface ProposalWithMetadata extends Proposal {
   action?: ActionMetadata;
 }
 
-export const createProposalRequestSchema = z.object({
-  conversationId: z.string().max(MAX_ID_LENGTH),
-  /**
-   * Short plain-text label. Same precedence as `category` — the caller wins,
-   * because it knows the situation the proposal came out of, which the action's
-   * own metadata cannot. Optional here only: omitting it stores the action's
-   * name, or `DEFAULT_PROPOSAL_TITLE` when the action has none either.
-   */
-  title: z.string().max(MAX_TITLE_LENGTH).optional(),
-  comment: z.string().max(MAX_COMMENT_LENGTH),
-  actionWorkflowId: z.string().max(MAX_ID_LENGTH).optional(),
-  actionInput: boundedActionInput.optional(),
-  /**
-   * Optional rather than defaulted so "the caller omitted it" stays
-   * distinguishable from "the caller said low": a supplied impact takes
-   * precedence over the action's own, and only a genuine omission falls back.
-   */
-  impact: proposalImpactSchema.optional(),
-  /**
-   * Overrides the action's own declared category, and is the only way a
-   * proposal carrying no action gets one at all — consumers group the queue by
-   * category, so without it a non-action proposal has nowhere to appear.
-   */
-  category: proposalCategorySchema.optional(),
-  confidence: proposalConfidenceSchema.default('medium'),
-  /**
-   * Required, and undefaulted on purpose: a default would attribute every
-   * caller that forgot it to whichever system the default named, and the queue
-   * filtering on it would show another solution's proposals as its own.
-   */
-  origin: proposalOriginSchema,
-  expiresAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
-  workflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
-  /**
-   * The id to create the proposal under, instead of a random one. For a caller
-   * that derives the id from what it is proposing, so that two calls for the same
-   * thing meet at the same id and Elasticsearch's `op_type: 'create'` — not a
-   * check-then-create in application code — decides which one creates it.
-   *
-   * An id that already exists is refused with `ProposalAlreadyExistsError`; the
-   * service reads and returns nothing. What a duplicate means, and whether a
-   * settled proposal should be followed by a new one under another id, is the
-   * caller's to decide.
-   *
-   * The index is shared across spaces and the service does not scope the id, so
-   * the caller must put the space (and its own producer) into whatever the id is
-   * derived from. Omitting `id` mints a random one, exactly as before.
-   */
-  id: z.uuid().optional(),
-});
+export const createProposalRequestSchema = lazySchema(() =>
+  z.object({
+    conversationId: z.string().max(MAX_ID_LENGTH),
+    /**
+     * Short plain-text label. Same precedence as `category` — the caller wins,
+     * because it knows the situation the proposal came out of, which the action's
+     * own metadata cannot. Optional here only: omitting it stores the action's
+     * name, or `DEFAULT_PROPOSAL_TITLE` when the action has none either.
+     */
+    title: z.string().max(MAX_TITLE_LENGTH).optional(),
+    comment: z.string().max(MAX_COMMENT_LENGTH),
+    actionWorkflowId: z.string().max(MAX_ID_LENGTH).optional(),
+    actionInput: boundedActionInput.optional(),
+    /**
+     * Optional rather than defaulted so "the caller omitted it" stays
+     * distinguishable from "the caller said low": a supplied impact takes
+     * precedence over the action's own, and only a genuine omission falls back.
+     */
+    impact: proposalImpactSchema.optional(),
+    /**
+     * Overrides the action's own declared category, and is the only way a
+     * proposal carrying no action gets one at all — consumers group the queue by
+     * category, so without it a non-action proposal has nowhere to appear.
+     */
+    category: proposalCategorySchema.optional(),
+    /**
+     * Waives the discard reason: declining the proposal is recorded without asking why, and a
+     * close that drops only such proposals asks nothing at all. Defaults to whether the proposal
+     * is a to-do, which the analyst carries out themselves.
+     */
+    skipDiscardReason: z.boolean().optional(),
+    confidence: proposalConfidenceSchema.default('medium'),
+    /**
+     * Required, and undefaulted on purpose: a default would attribute every
+     * caller that forgot it to whichever system the default named, and the queue
+     * filtering on it would show another solution's proposals as its own.
+     */
+    origin: proposalOriginSchema,
+    expiresAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
+    workflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
+    /**
+     * The id to create the proposal under, instead of a random one. For a caller
+     * that derives the id from what it is proposing, so that two calls for the same
+     * thing meet at the same id and Elasticsearch's `op_type: 'create'` — not a
+     * check-then-create in application code — decides which one creates it.
+     *
+     * An id that already exists is refused with `ProposalAlreadyExistsError`; the
+     * service reads and returns nothing. What a duplicate means, and whether a
+     * settled proposal should be followed by a new one under another id, is the
+     * caller's to decide.
+     *
+     * The index is shared across spaces and the service does not scope the id, so
+     * the caller must put the space (and its own producer) into whatever the id is
+     * derived from. Omitting `id` mints a random one, exactly as before.
+     */
+    id: z.uuid().optional(),
+  })
+);
 export type CreateProposalRequest = z.infer<typeof createProposalRequestSchema>;
 
 export const approveProposalRequestSchema = z.object({

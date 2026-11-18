@@ -11,6 +11,7 @@ import { isValidNamespace, validateNoPathTraversalIdSchema } from '../../service
 import {
   MAX_REUSABLE_AGENT_POLICIES_PER_PACKAGE_POLICY,
   PACKAGE_POLICY_CONDITION_MAX_LENGTH,
+  VALIDATE_DATASTREAMS_PERMISSION_REGEX,
 } from '../../constants/package_policy';
 
 const PACKAGE_POLICY_ID_MAX_LENGTH = 255;
@@ -21,7 +22,8 @@ const PACKAGE_POLICY_PACKAGE_VERSION_MAX_LENGTH = 50;
 const PACKAGE_POLICY_DATA_STREAM_MAX_LENGTH = 1024;
 const PACKAGE_POLICY_DATA_STREAM_PERMISSION_MAX_LENGTH = 256;
 const PACKAGE_POLICY_VARIABLE_NAME_MAX_LENGTH = 1024;
-const PACKAGE_POLICY_VARIABLE_VALUE_MAX_LENGTH = 10000;
+const PACKAGE_POLICY_VARIABLE_VALUE_UNBOUNDED_REASON =
+  'Variable values (SQL queries, scripts, YAML) have no natural size; the request body is already bounded by server.maxPayload, and the legacy inputs format has never had a per-value limit';
 const PACKAGE_POLICY_DEPRECATION_DESCRIPTION_MAX_LENGTH = 4096;
 
 export const PackagePolicyNamespaceSchema = schema.string({
@@ -554,12 +556,13 @@ export const SimplifiedVarsSchema = schema.recordOf(
   schema.string({ maxLength: PACKAGE_POLICY_VARIABLE_NAME_MAX_LENGTH }),
   schema.nullable(
     schema.oneOf([
-      schema.string({ maxLength: PACKAGE_POLICY_VARIABLE_VALUE_MAX_LENGTH }),
+      schema.unboundedString({ reason: PACKAGE_POLICY_VARIABLE_VALUE_UNBOUNDED_REASON }),
       schema.number(),
       schema.boolean(),
-      schema.arrayOf(schema.string({ maxLength: PACKAGE_POLICY_VARIABLE_VALUE_MAX_LENGTH }), {
-        maxSize: 100,
-      }),
+      schema.arrayOf(
+        schema.unboundedString({ reason: PACKAGE_POLICY_VARIABLE_VALUE_UNBOUNDED_REASON }),
+        { maxSize: 100 }
+      ),
       schema.arrayOf(schema.number(), { maxSize: 100 }),
       // Secrets
       schema.object({
@@ -644,8 +647,6 @@ export const SimplifiedPackagePolicyInputRecordSchema = schema.recordOf(
 export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
   SimplifiedPackagePolicyInputRecordSchema
 );
-
-const VALIDATE_DATASTREAMS_PERMISSION_REGEX = /^(logs|metrics|traces|synthetics|profiles)-(.+)$/;
 
 function validateAdditionalDatastreamsPermissions(values: string[]) {
   for (const val of values) {

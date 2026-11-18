@@ -14,6 +14,7 @@ const NONE = {
   runInvestigations: false,
   runConnectorProbes: false,
   runWikiOptimize: false,
+  runReinforcement: false,
   storedDatasetIds: [],
 };
 
@@ -182,6 +183,63 @@ describe('stored dataset selection', () => {
       ).toThrow('NIGHTSHIFT_DATASETS=golden queries Customer-0 live and requires');
     }
   );
+});
+
+describe('reinforcement selection', () => {
+  it('runs only the reinforcement micro-eval and requires sandbox credentials', () => {
+    expect(resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: 'reinforcement' })).toEqual(
+      { ...NONE, runReinforcement: true }
+    );
+    expect(() => resolveEvalSelection({ NIGHTSHIFT_DATASETS: 'reinforcement' })).toThrow(
+      'NIGHTSHIFT_DATASETS=reinforcement selects reinforcement, which runs the Nightshift agents in the sandbox, but SANDBOX_API_KEY is required'
+    );
+  });
+
+  it.each(['trace-only, reinforcement', 'reinforcement,wiki-optimize', 'all,reinforcement'])(
+    'rejects reinforcement combined with another dataset (%s)',
+    (value) => {
+      expect(() => resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: value })).toThrow(
+        'Run reinforcement on its own Scout server'
+      );
+    }
+  );
+
+  it.each([undefined, 'trace-only'])(
+    'runs only the reinforcement micro-eval on the reinforcement shard (NIGHTSHIFT_DATASETS=%s)',
+    (datasets) => {
+      expect(
+        resolveEvalSelection({
+          ...WITH_SANDBOX,
+          EVAL_SHARD_ID: 'reinforcement',
+          ...(datasets ? { NIGHTSHIFT_DATASETS: datasets } : {}),
+        })
+      ).toEqual({ ...NONE, runReinforcement: true });
+    }
+  );
+
+  it('requires sandbox credentials on the reinforcement shard', () => {
+    expect(() => resolveEvalSelection({ EVAL_SHARD_ID: 'reinforcement' })).toThrow(
+      'SANDBOX_API_KEY is required'
+    );
+  });
+
+  it.each([{ NIGHTSHIFT_DATASETS: 'reinforcement' }, { EVAL_SHARD_ID: 'reinforcement' }])(
+    'rejects knowledge switches alongside reinforcement (%o)',
+    (selection) => {
+      expect(() =>
+        resolveEvalSelection({ ...selection, ...WITH_SANDBOX, NIGHTSHIFT_KNOWLEDGE: 'wiki' })
+      ).toThrow('Run reinforcement without NIGHTSHIFT_KNOWLEDGE');
+    }
+  );
+
+  it.each([undefined, 'all'])('never selects reinforcement for %s', (datasets) => {
+    expect(
+      resolveEvalSelection({
+        ...WITH_SANDBOX,
+        ...(datasets ? { NIGHTSHIFT_DATASETS: datasets } : {}),
+      }).runReinforcement
+    ).toBe(false);
+  });
 });
 
 describe('ORCA selection', () => {

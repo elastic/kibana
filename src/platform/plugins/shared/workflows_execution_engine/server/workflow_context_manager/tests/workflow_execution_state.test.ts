@@ -153,6 +153,35 @@ describe('WorkflowExecutionState', () => {
     expect(stepExecutionRepository.bulkUpsert).not.toHaveBeenCalled();
   });
 
+  it('copies workflowUid onto a new step and omits it when the run has none', () => {
+    const executionWithUid = {
+      id: 'test-workflow-execution-id',
+      workflowId: 'test-workflow-id',
+      workflowUid: 'uid-current',
+      status: ExecutionStatus.RUNNING,
+      startedAt: '2025-08-05T20:00:00.000Z',
+      isTestRun: false,
+    } as EsWorkflowExecution;
+    const state = new WorkflowExecutionState(executionWithUid, workflowExecutionRepository);
+
+    state.upsertStep({
+      id: 'step-1',
+      stepId: 'step',
+      status: ExecutionStatus.RUNNING,
+      startedAt: '2025-08-05T20:00:00.000Z',
+    } as EsWorkflowStepExecution);
+
+    expect(state.getLatestStepExecution('step')?.workflowUid).toBe('uid-current');
+
+    underTest.upsertStep({
+      id: 'step-without-uid',
+      stepId: 'plain',
+      status: ExecutionStatus.RUNNING,
+      startedAt: '2025-08-05T20:00:00.000Z',
+    } as EsWorkflowStepExecution);
+    expect(underTest.getLatestStepExecution('plain')?.workflowUid).toBeUndefined();
+  });
+
   it('should set isTestRun on step execution from workflow execution', () => {
     const workflowExecutionWithTestRun = {
       id: 'test-workflow-execution-id',
