@@ -58,7 +58,7 @@ const canReadRules = (application: ApplicationStart): boolean =>
   hasCapabilities(application.capabilities, RULES_UI_READ_PRIVILEGE);
 
 // Editing actions also need ES|QL turned on in Advanced Settings when the rule is ES|QL.
-const canEditRule = ({
+const canChangeRuleFromChat = ({
   application,
   uiSettings,
   rule,
@@ -99,8 +99,7 @@ const buildViewRuleButton = (application: ApplicationStart, ruleId: string): Act
 
 /**
  * Header buttons that depend only on the attachment. A create-intent card gets "Create rule"
- * and "Apply to rule form". An update-intent card gets "View rule". Called from
- * `getActionButtons`.
+ * and "Apply to rule form". An update-intent card gets "View rule".
  */
 export const buildRuleActionButtons = ({
   rule,
@@ -127,7 +126,7 @@ export const buildRuleActionButtons = ({
     uiSettings,
     attachmentId,
   };
-  if (!canEditRule(context)) {
+  if (!canChangeRuleFromChat(context)) {
     return [];
   }
 
@@ -143,7 +142,8 @@ export const buildRuleActionButtons = ({
       disabled: rule.type !== 'esql',
       disabledReason: getDisabledReason(rule),
       handler: () => {
-        // getActionButtons is not reactive to saving$, so guard against double-submit here.
+        // The button stays enabled while the save runs. Ignore repeat clicks so the rule is
+        // created once.
         if (aiRuleCreation.getIsSaving(attachmentId)) {
           return;
         }
@@ -166,7 +166,7 @@ export const buildPendingChangeButtons = ({
   ruleId,
   ...context
 }: BuildPendingChangeButtonsParams): ActionButton[] => {
-  if (!canEditRule(context)) {
+  if (!canChangeRuleFromChat(context)) {
     return [];
   }
 
