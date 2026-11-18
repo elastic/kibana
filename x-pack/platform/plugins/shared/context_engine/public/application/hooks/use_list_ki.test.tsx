@@ -45,7 +45,7 @@ describe('useListKi', () => {
       expect(core.notifications.toasts.addError).toHaveBeenCalledWith(
         requestError,
         expect.objectContaining({
-          title: 'Unable to load Knowledge Indicators',
+          title: 'Unable to load Knowledge documents',
           toastMessage: 'Request timed out',
         })
       );
@@ -114,19 +114,19 @@ describe('useListKi', () => {
       expect.any(String),
       expect.objectContaining({
         query: expect.not.objectContaining({
-          lifecycle_status: expect.anything(),
+          status: expect.anything(),
         }),
       })
     );
   });
 
-  it('passes lifecycleStatus through to the list endpoint when set', async () => {
+  it('passes status through to the list endpoint when set', async () => {
     const core = coreMock.createStart();
     (core.http.get as jest.Mock).mockResolvedValue({ kis: [], total: 0 });
 
     renderUseListKi(core, {
       aiIndexId: 'my-ai-index',
-      lifecycleStatus: ['deleted'],
+      status: ['deleted'],
     });
 
     await waitFor(() => {
@@ -134,11 +134,33 @@ describe('useListKi', () => {
         '/internal/context_engine/ai_index/my-ai-index/kis',
         expect.objectContaining({
           query: expect.objectContaining({
-            lifecycle_status: ['deleted'],
+            status: ['deleted'],
           }),
         })
       );
     });
+  });
+
+  it('sends exclude_types when types are excluded, and leaves it out for an empty list', async () => {
+    const core = coreMock.createStart();
+    (core.http.get as jest.Mock).mockResolvedValue({ kis: [], total: 0 });
+
+    renderUseListKi(core, { aiIndexId: 'my-ai-index', excludeTypes: ['alpha', 'beta'] });
+    await waitFor(() => {
+      expect(core.http.get).toHaveBeenCalledWith(
+        '/internal/context_engine/ai_index/my-ai-index/kis',
+        expect.objectContaining({
+          query: expect.objectContaining({ exclude_types: ['alpha', 'beta'] }),
+        })
+      );
+    });
+
+    (core.http.get as jest.Mock).mockClear();
+    renderUseListKi(core, { aiIndexId: 'my-ai-index', excludeTypes: [] });
+    await waitFor(() => {
+      expect(core.http.get).toHaveBeenCalled();
+    });
+    expect((core.http.get as jest.Mock).mock.calls[0][1].query).not.toHaveProperty('exclude_types');
   });
 
   it('uses the default page size when size is omitted', async () => {

@@ -21,6 +21,7 @@ export {
   EXTERNAL_ALERT_SOURCE,
   MAX_AUTOMATION_INSTRUCTIONS_LENGTH,
 } from './automation_limits';
+export { isScheduleOnlyAutomation } from './automation_run';
 export { parsePresetSchedule, presetScheduleSchema } from './automation_schedule';
 export type { PresetSchedule } from './automation_schedule';
 
@@ -81,11 +82,6 @@ export interface StartInvestigationRequest {
   instructions?: string;
   /** Optional upper bound for this investigation workflow run, in seconds. */
   timeout_seconds?: number;
-  /**
-   * Nightshift source ids the investigation should scope its queries to. The
-   * investigation workflow resolves them to slug and ES|QL view.
-   */
-  source_ids?: string[];
   /** Optional chat model connector or inference endpoint id for this run. */
   connector_id?: string;
   context?: InvestigationContext | AlertInvestigationContext;
@@ -139,6 +135,8 @@ export interface StartInvestigationResponse {
    * after a first start the id may not resolve yet.
    */
   investigation_id: string;
+  /** The execution started for an automation, used to follow its investigation after dispatch. */
+  execution_id?: string;
 }
 
 export const NIGHTSHIFT_INVESTIGATION_AGENT_ID = 'nightshift.investigation';
@@ -236,6 +234,7 @@ export {
 export {
   DECISION_TREE_AI_INDEX_ID,
   DECISION_TREE_AI_INDEX_DEST,
+  DECISION_TREE_TAG,
   DECISION_TREE_DOC_TYPES,
   type DecisionTreeDocType,
   type DecisionTreeStatus,
@@ -302,3 +301,16 @@ export {
   type KnowledgePurgeResult,
   type KnowledgePurgeScope,
 } from './purge';
+
+export {
+  DEFAULT_INVESTIGATION_QUOTA_LIMITS,
+  DEFAULT_INVESTIGATION_QUOTA_SETTINGS,
+  INVESTIGATION_QUOTA_GROUPS,
+  isInvestigationQuotaReached,
+  type InvestigationQuotaCounts,
+  type InvestigationQuotaGroup,
+  type InvestigationQuotaLimits,
+  type InvestigationQuotaSettings,
+  type InvestigationQuotasResponse,
+  type InvestigationQuotasUpdate,
+} from './investigation_quotas';

@@ -201,6 +201,19 @@ const usersLabel = (count: number): string =>
     values: { count },
   });
 
+/** "{count}+ hosts": the producer capped the names it kept, so the count is a floor. */
+const atLeastHostsLabel = (count: number): string =>
+  i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.detectionScopeAtLeastHosts', {
+    defaultMessage: '{count}+ hosts',
+    values: { count },
+  });
+
+const atLeastUsersLabel = (count: number): string =>
+  i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.detectionScopeAtLeastUsers', {
+    defaultMessage: '{count}+ users',
+    values: { count },
+  });
+
 const eventsLabel = (count: number): string =>
   i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.detectionEvents', {
     defaultMessage: '{count, plural, one {# event} other {# events}}',
@@ -618,10 +631,18 @@ const SAMPLE_ENTITY_LIMIT = 3;
 const DetectionScope: React.FC<{ detection: SseDetection }> = ({ detection }) => {
   const parts = [eventsLabel(detection.total)];
   if (detection.host_count != null) {
-    parts.push(hostsLabel(detection.host_count));
+    parts.push(
+      detection.hosts_truncated
+        ? atLeastHostsLabel(detection.host_count)
+        : hostsLabel(detection.host_count)
+    );
   }
   if (detection.user_count != null) {
-    parts.push(usersLabel(detection.user_count));
+    parts.push(
+      detection.users_truncated
+        ? atLeastUsersLabel(detection.user_count)
+        : usersLabel(detection.user_count)
+    );
   }
 
   const sampleHosts = (detection.hosts ?? []).slice(0, SAMPLE_ENTITY_LIMIT);

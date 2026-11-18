@@ -31,6 +31,16 @@ describe('BlockDetector', () => {
     expect(detector.poll(1010, 1000, running)).toBeUndefined();
   });
 
+  it('exposes the block in progress until it ends', () => {
+    const detector = new BlockDetector();
+    detector.poll(150, 0, running);
+    expect(detector.current).toBeUndefined();
+    detector.poll(250, 0, running);
+    expect(detector.current).toEqual({ startedAt: 0, phase: 'running' });
+    detector.poll(1000, 950, running);
+    expect(detector.current).toBeUndefined();
+  });
+
   it('treats a stale heartbeat of exactly the threshold as a block', () => {
     const detector = new BlockDetector();
     detector.poll(199, 0, running);

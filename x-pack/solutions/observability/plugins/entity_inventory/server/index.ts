@@ -22,6 +22,7 @@ export type {
   EntityInventorySetupDependencies,
   EntityInventoryStartDependencies,
 } from './types';
+export type { EntityInventoryRouteRepository } from './routes';
 
 export const plugin: PluginInitializer<
   EntityInventoryPluginSetup,

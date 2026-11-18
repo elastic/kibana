@@ -38,7 +38,7 @@ const getOutputPlaceholder = (type: string | undefined): unknown => {
 
 /**
  * Generates a YAML snippet for a built-in workflow step based on the specified type.
- * @param stepType - The type of built-in step ('foreach', 'if', 'parallel', 'merge', 'http', 'wait', 'workflow.output', 'workflow.fail', etc.)
+ * @param stepType - The type of built-in step ('foreach', 'if', 'parallel', 'http', 'wait', 'workflow.output', 'workflow.fail', etc.)
  * @param options - Configuration options for snippet generation
  * @param options.full - Whether to include the full YAML structure with step name and type prefix
  * @param options.withStepsSection - Whether to include the "steps:" section
@@ -101,12 +101,6 @@ export function generateBuiltInStepSnippet(
           { name: 'branch-1', steps: [{ name: 'step-1', type: '# Add step type here' }] },
           { name: 'branch-2', steps: [{ name: 'step-2', type: '# Add step type here' }] },
         ],
-      };
-      break;
-    case 'merge':
-      parameters = {
-        sources: ['branch-1', 'branch-2'],
-        steps: [{ name: 'merge-step', type: '# Add step type here' }],
       };
       break;
     case 'data.set':

@@ -105,7 +105,7 @@ export function CoreVitalItem({
   const visibleRanks = loading ? undefined : ranks;
 
   if (!value && !loading) {
-    return <EuiCard title={title} isDisabled={true} description={NO_DATA} />;
+    return <EuiCard title={title} description={NO_DATA} />;
   }
 
   return (

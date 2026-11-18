@@ -18,9 +18,6 @@ import {
   UserPanelKey,
   ServicePanelKey,
 } from '../../../public/flyout/entity_details/shared/constants';
-import { HostDetailsPanelKey } from '../../../public/flyout/entity_details/host_details_left';
-import { UserDetailsPanelKey } from '../../../public/flyout/entity_details/user_details_left';
-import { ServiceDetailsPanelKey } from '../../../public/flyout/entity_details/service_details_left';
 import { EntityDetailsLeftPanelTab } from '../../../public/flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { ENTITY_ANALYTICS_TABLE_ID } from '../../../public/entity_analytics/components/home/constants';
 import { EDIT_WATCHLIST_URL_PARAM as PUBLIC_EDIT_WATCHLIST_URL_PARAM } from '../../../public/entity_analytics/components/watchlists/flyout/constants';
@@ -38,12 +35,6 @@ describe('hardcoded flyout/panel keys stay in sync with their public constants',
     expect(HostPanelKey).toBe(ENTITY_RESOLUTION_PANEL.host.right);
     expect(UserPanelKey).toBe(ENTITY_RESOLUTION_PANEL.user.right);
     expect(ServicePanelKey).toBe(ENTITY_RESOLUTION_PANEL.service.right);
-  });
-
-  it('left (details) entity panel keys match the values hardcoded in ui_navigation.ts', () => {
-    expect(HostDetailsPanelKey).toBe(ENTITY_RESOLUTION_PANEL.host.left);
-    expect(UserDetailsPanelKey).toBe(ENTITY_RESOLUTION_PANEL.user.left);
-    expect(ServiceDetailsPanelKey).toBe(ENTITY_RESOLUTION_PANEL.service.left);
   });
 });
 

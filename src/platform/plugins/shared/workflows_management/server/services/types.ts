@@ -29,6 +29,7 @@ import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extens
 import type { IWorkflowChangeHistoryService } from './workflow_change_history_types';
 import type { WorkflowExecutionQueryService } from './workflow_execution_query_service';
 import type { WorkflowValidationService } from './workflow_validation_service';
+import type { WorkflowPagesSystemClient } from '../pages/workflow_pages_system_client';
 import type { WorkflowStorage } from '../storage/workflow_storage';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 
@@ -52,6 +53,8 @@ export interface WorkflowCrudDeps extends WorkflowStorageDeps {
   changeHistoryService: IWorkflowChangeHistoryService;
   workflowExecutionsDataClient: WorkflowExecutionsDataClient;
   stepExecutionsDataClient: StepExecutionsDataClient;
+  /** Keeps the `workflow-page` saved objects in step with the page triggers. */
+  pagesSystemClient?: WorkflowPagesSystemClient;
 }
 
 /** Deps for WorkflowSearchService. */
@@ -78,4 +81,12 @@ export interface WorkflowValidationDeps {
   getCoreStart: () => CoreStart;
   licensing: LicensingPluginStart;
   logger: Logger;
+  /** Reads the workflows with these ids that the request may see, for their outputs. */
+  getWorkflowsForOutputs: (
+    ids: string[],
+    spaceId: string,
+    request: KibanaRequest
+  ) => Promise<Array<{ id: string; name?: string; definition?: unknown }>>;
+  /** `workflowsManagement.pages.enabled`. Without it, `type: page` fails like an unknown trigger. */
+  pagesEnabled: boolean;
 }
