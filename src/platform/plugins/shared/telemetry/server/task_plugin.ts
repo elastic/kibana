@@ -20,6 +20,7 @@ import { getTaskProcessContext } from '@kbn/task-manager-plugin/server/task_proc
 import { reviveSettings } from '@kbn/task-manager-plugin/server/task_process/settings';
 import { registerCloudDeploymentMetadataAnalyticsContext } from '@kbn/cloud-plugin/common/register_cloud_deployment_id_analytics_context';
 import { registerAnalyticsContextProvider as registerLicenseAnalyticsContext } from '@kbn/licensing-plugin/common/register_analytics_context_provider';
+import { dynamicCjsExport } from '@kbn/std';
 import { buildShipperHeaders, createBuildShipperUrl } from '../common/ebt_v3_endpoint';
 import type { TelemetryTaskProcessSettings } from './task_process_settings';
 
@@ -58,7 +59,9 @@ const plugin: TaskPluginInitializer<void, void> = async (initializerContext) => 
         logger.debug('Analytics events are not shipped: Kibana is not opted in to telemetry');
         return;
       }
-      const { ElasticV3ServerShipper } = await import('@elastic/ebt/shippers/elastic_v3/server');
+      const ElasticV3ServerShipper = dynamicCjsExport<
+        typeof import('@elastic/ebt/shippers/elastic_v3/server').ElasticV3ServerShipper
+      >(await import('@elastic/ebt/shippers/elastic_v3/server'), 'ElasticV3ServerShipper');
       analytics.optIn({ global: { enabled: true } });
 
       // The shipper of the client, kept to flush it: Core's analytics does not expose `flush`.

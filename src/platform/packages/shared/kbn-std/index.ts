@@ -35,6 +35,7 @@ export { Semaphore } from './src/semaphore';
 export { stripVersionQualifier } from './src/strip_version_qualifier';
 export { matchWildcardPattern } from './src/match_wildcard_pattern';
 
+export { dynamicCjsExport } from './src/dynamic_cjs_export';
 export { safeJsonParse } from './src/safe_json_parse';
 export { safeJsonStringify } from './src/safe_json_stringify';
 export { stableStringify, type StableStringifyOptions } from './src/stable_stringify';

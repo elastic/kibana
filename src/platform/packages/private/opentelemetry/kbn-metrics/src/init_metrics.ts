@@ -18,7 +18,7 @@ import {
 } from '@opentelemetry/sdk-metrics';
 import { castArray } from 'lodash';
 import type { MetricsConfig, MonitoringCollectionConfig } from '@kbn/metrics-config';
-import { fromExternalVariant } from '@kbn/std';
+import { dynamicCjsExport, fromExternalVariant } from '@kbn/std';
 import { cleanupBeforeExit } from '@kbn/cleanup-before-exit';
 import { duration } from 'moment';
 import { PrometheusExporter } from './prometheus_exporter';
@@ -115,11 +115,21 @@ export async function initMetrics(initMetricsOptions: InitMetricsOptions): Promi
         let exporter: PushMetricExporter;
         switch (variant.type) {
           case 'grpc': {
-            const [{ Metadata }, { OTLPMetricExporter: OTLPMetricExporterGrpc }] =
-              await Promise.all([
-                import('@grpc/grpc-js'),
-                import('@opentelemetry/exporter-metrics-otlp-grpc'),
-              ]);
+            const [grpcJsModule, otlpGrpcModule] = await Promise.all([
+              import('@grpc/grpc-js'),
+              import('@opentelemetry/exporter-metrics-otlp-grpc'),
+            ]);
+            // Dynamically imported so a worker that never configures a grpc exporter never pays
+            // for `@grpc/grpc-js`; `dynamicCjsExport` is needed because esbuild's code splitting
+            // for the task process bundle can drop the named export these CJS packages would
+            // otherwise synthesize when reached only through this dynamic import (see its doc).
+            const Metadata = dynamicCjsExport<typeof import('@grpc/grpc-js').Metadata>(
+              grpcJsModule,
+              'Metadata'
+            );
+            const OTLPMetricExporterGrpc = dynamicCjsExport<
+              typeof import('@opentelemetry/exporter-metrics-otlp-grpc').OTLPMetricExporter
+            >(otlpGrpcModule, 'OTLPMetricExporter');
             const metadata = new Metadata();
             Object.entries(variant.value.headers || {}).forEach(([key, value]) => {
               metadata.add(key, value);
@@ -132,9 +142,10 @@ export async function initMetrics(initMetricsOptions: InitMetricsOptions): Promi
             break;
           }
           case 'http': {
-            const { OTLPMetricExporter: OTLPMetricExporterHttp } = await import(
-              '@opentelemetry/exporter-metrics-otlp-http'
-            );
+            // See the `dynamicCjsExport` comment above.
+            const OTLPMetricExporterHttp = dynamicCjsExport<
+              typeof import('@opentelemetry/exporter-metrics-otlp-http').OTLPMetricExporter
+            >(await import('@opentelemetry/exporter-metrics-otlp-http'), 'OTLPMetricExporter');
             exporter = new OTLPMetricExporterHttp({
               ...commonConfig,
               headers: variant.value.headers,
@@ -143,9 +154,10 @@ export async function initMetrics(initMetricsOptions: InitMetricsOptions): Promi
             break;
           }
           case 'proto': {
-            const { OTLPMetricExporter: OTLPMetricExporterProto } = await import(
-              '@opentelemetry/exporter-metrics-otlp-proto'
-            );
+            // See the `dynamicCjsExport` comment above.
+            const OTLPMetricExporterProto = dynamicCjsExport<
+              typeof import('@opentelemetry/exporter-metrics-otlp-proto').OTLPMetricExporter
+            >(await import('@opentelemetry/exporter-metrics-otlp-proto'), 'OTLPMetricExporter');
             exporter = new OTLPMetricExporterProto({
               ...commonConfig,
               headers: variant.value.headers,
