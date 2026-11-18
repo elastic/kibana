@@ -9,3 +9,4 @@
 
 export * from './filter_utils';
 export * from './esql_source_queries';
+export * from './values_source_fetch_plan';

@@ -41,7 +41,7 @@ import type { DataControlApi, DataControlFieldFormatter } from './types';
 import { initializeLabelManager, defaultControlLabelComparators } from '../control_labels';
 import { getESQLSingleColumnValues } from '../../../common/options_list';
 import { getControlsTimezone } from '../utils';
-import { resolveValuesSourceFetchPlan, type ValuesSourceFetchPlan } from './utils';
+import { getValuesSourceFetchPlan, type ValuesSourceFetchPlan } from './utils';
 import { getDataViewIdFromESQLQuery } from '../utils/get_data_view_id_from_esql_query';
 
 export const defaultDataControlComparators: StateComparators<DataControlState> = {
@@ -313,7 +313,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
   ])
     .pipe(
       map(([valuesSource, esqlQuery, nextDataSources, field]) =>
-        resolveValuesSourceFetchPlan({
+        getValuesSourceFetchPlan({
           valuesSource,
           esqlQuery,
           dataSource: nextDataSources?.[0],
