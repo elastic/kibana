@@ -10,10 +10,13 @@
 import {
   createSeededRandom,
   edotReactNative,
+  MOBILE_PLATFORM,
+  MOBILE_PLATFORMS,
   type DeviceProfileId,
   type EdotReactNativeAppModel,
   type EdotReactNativeDocument,
   type HealthProfileName,
+  type MobileHealthProfile,
   type MobilePlatform,
   type NetworkConnection,
   type SynthtraceGenerator,
@@ -36,6 +39,13 @@ export interface DigitalExperienceMobileAppVersion {
   share: number;
   /** Crashes only this version has, on top of the app's. */
   crashes?: EdotReactNativeAppModel['crashes'];
+  /** Overrides the app's health profile for this version, e.g. its crash rate or launch time. */
+  health?: Partial<Omit<MobileHealthProfile, 'name'>>;
+  /**
+   * Rolls the version out from the start of the run: `initialAdoption` of its installations run it
+   * from the start, and all of them `hours` later. The others stay on an older version until then.
+   */
+  rollout?: { initialAdoption: number; hours: number };
 }
 
 export interface DigitalExperienceMobileApp {
@@ -57,7 +67,15 @@ export interface DigitalExperienceMobileApp {
   manualSpans?: { launch?: boolean; screens?: boolean };
 }
 
-export type MobilePlatformOpt = MobilePlatform | 'both';
+/** The `platform` option that generates sessions of every platform. */
+export const ALL_MOBILE_PLATFORMS = 'both';
+
+export type MobilePlatformOpt = MobilePlatform | typeof ALL_MOBILE_PLATFORMS;
+
+const MOBILE_PLATFORM_OPTS: readonly MobilePlatformOpt[] = [
+  ...MOBILE_PLATFORMS,
+  ALL_MOBILE_PLATFORMS,
+];
 
 export interface DigitalExperienceMobileScenarioOpts {
   /**
@@ -75,7 +93,7 @@ export interface DigitalExperienceMobileScenarioOpts {
 
 const DEFAULT_MOBILE_SCENARIO_OPTS: Omit<DigitalExperienceMobileScenarioOpts, 'seed'> = {
   scale: 1,
-  platform: 'both',
+  platform: ALL_MOBILE_PLATFORMS,
   withManualSpans: true,
 };
 
@@ -86,11 +104,16 @@ const NEWS_API = 'https://api.example-news.com';
 const NEWS_CDN = 'https://media.example-news.com';
 const FIELD_API = 'https://field.example-utilities.com';
 
-const ANDROID_ONLY: Partial<Record<DeviceProfileId, number>> = {
-  iphone15ProIos18: 0,
-  iphone12Ios17: 0,
-  ipadAirIpados18: 0,
-};
+/** Device weights that leave out every device of the other platforms. */
+const onlyOn = (platform: MobilePlatform): Partial<Record<DeviceProfileId, number>> =>
+  Object.fromEntries(
+    Object.values(edotReactNative.deviceProfiles)
+      .filter((profile) => profile.platform !== platform)
+      .map(({ id }) => [id, 0])
+  );
+
+const ANDROID_ONLY = onlyOn(MOBILE_PLATFORM.ANDROID);
+const IOS_ONLY = onlyOn(MOBILE_PLATFORM.IOS);
 
 const forecastWidget = (city: string, failing = false) => ({
   id: 'show-forecast',
@@ -357,15 +380,279 @@ export const DIGITAL_EXPERIENCE_MOBILE_APPS: readonly DigitalExperienceMobileApp
   },
 ];
 
+// The newest native versions reach a third of their installations at the start of the run
+const NEWEST_ROLLOUT = { initialAdoption: 0.35, hours: 6 };
+
+const TRAILS_API = 'https://api.trailmap.example.com';
+const RIDES_API = 'https://api.example-rides.com';
+const TRANSIT_API = 'https://api.example-transit.com';
+
+/**
+ * Apps built with the native SDKs, for the proposed signals: no JavaScript runtime, so their
+ * crashes are native and every iOS screen has its own title. The newest version of each app crashes
+ * more and starts slower than the one before it.
+ */
+export const DIGITAL_EXPERIENCE_NATIVE_APPS: readonly DigitalExperienceMobileApp[] = [
+  {
+    serviceName: 'trailmap-android',
+    versions: [
+      {
+        serviceVersion: '4.2.0',
+        buildNumber: 420,
+        share: 0.4,
+        rollout: NEWEST_ROLLOUT,
+        health: { crashRate: 0.14, anrRate: 0.08, coldLaunch: { median: 2600, sigma: 0.35 } },
+        crashes: {
+          android: [
+            {
+              type: 'java.lang.NullPointerException',
+              message: 'Attempt to invoke virtual method on a null object reference: TrackRecorder',
+            },
+          ],
+        },
+      },
+      {
+        serviceVersion: '4.1.2',
+        buildNumber: 412,
+        share: 0.4,
+        health: { crashRate: 0.05, anrRate: 0.02, coldLaunch: { median: 1400, sigma: 0.3 } },
+      },
+      {
+        serviceVersion: '4.1.0',
+        buildNumber: 410,
+        share: 0.2,
+        health: { crashRate: 0.06, anrRate: 0.02, coldLaunch: { median: 1500, sigma: 0.3 } },
+      },
+    ],
+    appId: 'com.example.trailmap',
+    health: 'healthy',
+    sessionsPerMinute: 4,
+    deviceWeights: ANDROID_ONLY,
+    model: {
+      native: true,
+      screens: [
+        {
+          name: 'Map',
+          iosTitle: 'Map',
+          requests: [
+            { method: 'GET', url: `${TRAILS_API}/v2/trails?near=me`, backend: 'trails-api' },
+          ],
+          widgets: [{ id: 'locate-me', name: 'Locate me' }, { id: 'filter-trails' }],
+        },
+        {
+          name: 'TrailDetail',
+          iosTitle: 'Trail',
+          requests: [{ method: 'GET', url: `${TRAILS_API}/v2/trails/731`, backend: 'trails-api' }],
+          widgets: [
+            {
+              id: 'start-recording',
+              name: 'Start recording',
+              request: {
+                method: 'POST',
+                url: `${TRAILS_API}/v2/recordings`,
+                backend: 'recordings-service',
+                errorLog: 'Could not start recording',
+              },
+            },
+          ],
+        },
+        {
+          name: 'Recordings',
+          iosTitle: 'Recordings',
+          requests: [
+            {
+              method: 'GET',
+              url: `${TRAILS_API}/v2/recordings?limit=20`,
+              backend: 'recordings-service',
+            },
+          ],
+        },
+      ],
+      errorLogs: ['GPS signal lost', 'Offline map tile missing'],
+      crashes: {
+        android: [
+          {
+            type: 'android.database.sqlite.SQLiteException',
+            message: 'database is locked (code 5 SQLITE_BUSY)',
+          },
+        ],
+      },
+    },
+  },
+  {
+    serviceName: 'ride-ios',
+    versions: [
+      {
+        serviceVersion: '8.5.0',
+        buildNumber: 850,
+        share: 0.4,
+        rollout: NEWEST_ROLLOUT,
+        health: { crashRate: 0.14, hangRate: 0.08, coldLaunch: { median: 2800, sigma: 0.35 } },
+        crashes: { ios: [{ type: 'SIGTRAP', message: 'TRAP_BRKPT' }] },
+      },
+      {
+        serviceVersion: '8.4.1',
+        buildNumber: 841,
+        share: 0.4,
+        health: { crashRate: 0.05, hangRate: 0.02, coldLaunch: { median: 1300, sigma: 0.3 } },
+      },
+      {
+        serviceVersion: '8.4.0',
+        buildNumber: 840,
+        share: 0.2,
+        health: { crashRate: 0.06, hangRate: 0.02, coldLaunch: { median: 1400, sigma: 0.3 } },
+      },
+    ],
+    appId: 'com.example.rides',
+    health: 'healthy',
+    sessionsPerMinute: 4,
+    deviceWeights: IOS_ONLY,
+    model: {
+      native: true,
+      screens: [
+        {
+          name: 'Home',
+          iosTitle: 'Where to?',
+          requests: [
+            { method: 'GET', url: `${RIDES_API}/v1/nearby-drivers`, backend: 'dispatch-api' },
+          ],
+          widgets: [{ id: 'destination-field', name: 'Destination' }],
+        },
+        {
+          name: 'Quote',
+          iosTitle: 'Choose a ride',
+          requests: [{ method: 'GET', url: `${RIDES_API}/v1/quotes`, backend: 'pricing-service' }],
+          widgets: [
+            {
+              id: 'request-ride',
+              name: 'Request ride',
+              request: {
+                method: 'POST',
+                url: `${RIDES_API}/v1/rides`,
+                backend: 'dispatch-api',
+                errorLog: 'Ride request failed',
+              },
+            },
+          ],
+        },
+        {
+          name: 'Trip',
+          iosTitle: 'Your trip',
+          requests: [
+            { method: 'GET', url: `${RIDES_API}/v1/rides/current`, backend: 'dispatch-api' },
+          ],
+        },
+      ],
+      errorLogs: ['Location permission revoked', 'Payment method declined'],
+    },
+  },
+  {
+    serviceName: 'transit-companion',
+    versions: [
+      {
+        serviceVersion: '2.3.0',
+        buildNumber: 230,
+        share: 0.4,
+        rollout: NEWEST_ROLLOUT,
+        health: {
+          crashRate: 0.12,
+          anrRate: 0.06,
+          hangRate: 0.06,
+          coldLaunch: { median: 2400, sigma: 0.35 },
+        },
+        crashes: {
+          android: [
+            { type: 'java.lang.IllegalArgumentException', message: 'Invalid route id: null' },
+          ],
+          ios: [{ type: 'SIGTRAP', message: 'TRAP_BRKPT' }],
+        },
+      },
+      {
+        serviceVersion: '2.2.1',
+        buildNumber: 221,
+        share: 0.4,
+        health: {
+          crashRate: 0.04,
+          anrRate: 0.015,
+          hangRate: 0.015,
+          coldLaunch: { median: 1200, sigma: 0.3 },
+        },
+      },
+      {
+        serviceVersion: '2.2.0',
+        buildNumber: 220,
+        share: 0.2,
+        health: {
+          crashRate: 0.05,
+          anrRate: 0.015,
+          hangRate: 0.015,
+          coldLaunch: { median: 1300, sigma: 0.3 },
+        },
+      },
+    ],
+    appId: 'com.example.transit',
+    health: 'healthy',
+    sessionsPerMinute: 6,
+    model: {
+      native: true,
+      screens: [
+        {
+          name: 'Departures',
+          iosTitle: 'Departures',
+          requests: [
+            {
+              method: 'GET',
+              url: `${TRANSIT_API}/v1/departures?stop=2201`,
+              backend: 'journeys-api',
+            },
+          ],
+          widgets: [{ id: 'favorite-stop', name: 'Favorite' }],
+        },
+        {
+          name: 'Journey',
+          iosTitle: 'Journey',
+          requests: [
+            {
+              method: 'GET',
+              url: `${TRANSIT_API}/v1/journeys?from=2201&to=3310`,
+              backend: 'journeys-api',
+            },
+          ],
+          widgets: [{ id: 'swap-stops', name: 'Swap' }],
+        },
+        {
+          name: 'Tickets',
+          iosTitle: 'Tickets',
+          requests: [{ method: 'GET', url: `${TRANSIT_API}/v1/tickets`, backend: 'tickets-api' }],
+          widgets: [
+            {
+              id: 'buy-ticket',
+              name: 'Buy ticket',
+              request: {
+                method: 'POST',
+                url: `${TRANSIT_API}/v1/tickets`,
+                backend: 'tickets-api',
+                errorLog: 'Ticket purchase failed',
+              },
+            },
+          ],
+        },
+      ],
+      errorLogs: ['Timetable cache is stale'],
+    },
+  },
+];
+
 const parsePlatform = (value: unknown): MobilePlatformOpt => {
   if (value === undefined) {
     return DEFAULT_MOBILE_SCENARIO_OPTS.platform;
   }
   const normalized = typeof value === 'string' ? value.trim().toLowerCase() : value;
-  if (normalized === 'android' || normalized === 'ios' || normalized === 'both') {
-    return normalized;
+  const platform = MOBILE_PLATFORM_OPTS.find((option) => option === normalized);
+  if (platform === undefined) {
+    throw new Error(`platform must be ${MOBILE_PLATFORMS.join(', ')} or ${ALL_MOBILE_PLATFORMS}`);
   }
-  throw new Error('platform must be android, ios or both');
+  return platform;
 };
 
 /**
@@ -393,6 +680,29 @@ export const parseDigitalExperienceMobileScenarioOpts = (
       DEFAULT_MOBILE_SCENARIO_OPTS.withManualSpans
     ),
   };
+};
+
+const NATIVE_SCENARIO_OPT_KEYS: ReadonlyArray<keyof DigitalExperienceMobileScenarioOpts> = [
+  'scale',
+  'seed',
+  'platform',
+];
+
+/**
+ * Parses `--scenarioOpts` for `digital_experience_mobile_native`, which takes `platform`, `scale`
+ * and `seed`, and defaults the seed to the run's `from`.
+ */
+export const parseDigitalExperienceNativeScenarioOpts = (
+  opts: Record<string, unknown> | undefined,
+  from: number
+): DigitalExperienceMobileScenarioOpts => {
+  const unknownKeys = Object.keys(opts ?? {}).filter(
+    (key) => !NATIVE_SCENARIO_OPT_KEYS.some((allowed) => allowed === key)
+  );
+  if (unknownKeys.length) {
+    throw new Error(`Unknown scenarioOpts: ${unknownKeys.join(', ')}`);
+  }
+  return { ...parseDigitalExperienceMobileScenarioOpts(opts, from), withManualSpans: false };
 };
 
 /**
@@ -456,8 +766,59 @@ const pickVersion = (
   return index === -1 ? versions.length - 1 : index;
 };
 
+const HOUR_MS = 60 * 60_000;
+
+/**
+ * The index of the version an installation runs `elapsed` milliseconds into the run. An
+ * installation waits for its turn in a version's rollout on an older version, and draws the same
+ * turn on every session, so it only ever upgrades.
+ */
+const pickInstalledVersion = (
+  random: () => number,
+  versions: readonly DigitalExperienceMobileAppVersion[],
+  elapsed: number
+): number => {
+  const index = pickVersion(random, versions);
+  const { rollout } = versions[index];
+  if (!rollout || index === versions.length - 1) {
+    return index;
+  }
+  const { initialAdoption, hours } = rollout;
+  const progress = Math.min(
+    initialAdoption + ((1 - initialAdoption) * Math.max(elapsed, 0)) / (hours * HOUR_MS),
+    1
+  );
+  if (random() < progress) {
+    return index;
+  }
+  return index + 1 + pickVersion(random, versions.slice(index + 1));
+};
+
+type GenerateSessionsOpts = DigitalExperienceMobileScenarioOpts & {
+  environment: string;
+  from: number;
+  apps?: readonly DigitalExperienceMobileApp[];
+};
+
 /** One generator of EDOT React Native sessions per app, ending at their tick and cut off at `from`. */
 export const generateEdotReactNativeSessions = (
+  range: Timerange,
+  opts: GenerateSessionsOpts
+): Array<SynthtraceGenerator<EdotReactNativeDocument>> =>
+  generateSessions(range, { apps: DIGITAL_EXPERIENCE_MOBILE_APPS, ...opts }, false);
+
+/**
+ * Like {@link generateEdotReactNativeSessions} for the native apps, with every session written
+ * with the proposed signals. A session that began before `from` is left out whole, so that every
+ * session has its `session.start`.
+ */
+export const generateEdotNativeSessions = (
+  range: Timerange,
+  opts: GenerateSessionsOpts
+): Array<SynthtraceGenerator<EdotReactNativeDocument>> =>
+  generateSessions(range, { apps: DIGITAL_EXPERIENCE_NATIVE_APPS, ...opts }, true);
+
+const generateSessions = (
   range: Timerange,
   {
     environment,
@@ -467,14 +828,11 @@ export const generateEdotReactNativeSessions = (
     platform,
     withManualSpans,
     apps = DIGITAL_EXPERIENCE_MOBILE_APPS,
-  }: DigitalExperienceMobileScenarioOpts & {
-    environment: string;
-    from: number;
-    apps?: readonly DigitalExperienceMobileApp[];
-  }
+  }: GenerateSessionsOpts,
+  proposedSignals: boolean
 ): Array<SynthtraceGenerator<EdotReactNativeDocument>> => {
   const platforms: readonly MobilePlatform[] =
-    platform === 'both' ? ['android', 'ios'] : [platform];
+    platform === ALL_MOBILE_PLATFORMS ? MOBILE_PLATFORMS : [platform];
 
   return apps.map(
     ({
@@ -489,17 +847,20 @@ export const generateEdotReactNativeSessions = (
       model,
       manualSpans = {},
     }) => {
-      const versionApps = versions.map(({ serviceVersion, buildNumber, crashes = {} }) => ({
-        app: edotReactNative.app({
-          serviceName,
-          serviceVersion,
-          appId,
-          buildNumber,
-          environment: withoutEnvironment ? undefined : environment,
-        }),
-        model: withVersionCrashes(model, crashes),
-      }));
       const healthProfile = edotReactNative.healthProfiles[health];
+      const versionApps = versions.map(
+        ({ serviceVersion, buildNumber, crashes = {}, health: versionHealth }) => ({
+          app: edotReactNative.app({
+            serviceName,
+            serviceVersion,
+            appId,
+            buildNumber,
+            environment: withoutEnvironment ? undefined : environment,
+          }),
+          model: withVersionCrashes(model, crashes),
+          health: { ...healthProfile, ...versionHealth },
+        })
+      );
       const perMinute = sessionsPerMinute * scale;
       // Sessions take turns among the installations, so that each opens the app at a fixed interval
       const installations =
@@ -519,7 +880,11 @@ export const generateEdotReactNativeSessions = (
         const [installationId, deviceId] = Array.from({ length: 2 }, () =>
           randomUuid(installationRandom)
         );
-        const { app, model: versionModel } = versionApps[pickVersion(installationRandom, versions)];
+        const {
+          app,
+          model: versionModel,
+          health: versionHealth,
+        } = versionApps[pickInstalledVersion(installationRandom, versions, time - from)];
 
         const random = createSeededRandom(`${seed}:${serviceName}:${index}`);
         // Everything below is drawn even when it isn't used, so that options don't change the
@@ -538,16 +903,26 @@ export const generateEdotReactNativeSessions = (
         const network: NetworkConnection = onCellular
           ? networks[Math.floor(networkPick * networks.length)]
           : { type: 'wifi' };
+        // The session before this one on the same installation
+        const previousSessionId =
+          proposedSignals && index >= installations
+            ? randomUuid(createSeededRandom(`${seed}:${serviceName}:${index - installations}`))
+            : undefined;
         const events = edotReactNative.session({
           client: app.client(profile, { installationId, sessionId, deviceId, network }),
           app: versionModel,
-          health: healthProfile,
+          health: versionHealth,
           screenViews,
           visits,
           manualSpans: withManualSpans ? manualSpans : {},
+          proposedSignals,
+          previousSessionId,
           random,
           end: time,
         });
+        if (proposedSignals) {
+          return events.every((event) => getTimestamp(event) >= from) ? events : [];
+        }
         return events.filter((event) => getTimestamp(event) >= from);
       });
     }

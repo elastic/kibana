@@ -920,7 +920,7 @@ The data is written through the `otelEsClient`, which indexes documents as-is. I
 - `environments` (boolean, default `false`): spreads every app over its own environments, with their share of the traffic, instead of the single `Synthtrace: <scenario>` environment. See `digital_experience_browser` for the environments of each app. In `digital_experience_mixed`, the classic RUM app then runs in `production`.
 - `edgeCases` (boolean, default `false`): adds what is far from the usual to the browser apps, to see how the views cope with it: URLs of thousands of characters, stack traces of dozens of frames and one over 8,191 characters, errors with no type, with no stack trace and with an empty one, more than 100 distinct stack traces for one app, browsers that EDOT Browser can't identify, and clicks with no selector. The mobile apps of `digital_experience_mixed` don't have any.
 - `scale` (number, default `1`): multiplies the number of sessions per minute of every app. Fractions of a session add up over time, so a scale below 1 thins out every app in proportion.
-- `seed` (string or number, default the start of the run, `--from` in milliseconds): makes the data reproducible. Every session, with its session, trace and span IDs, browser, page views and events, derives from the seed, its app and its number since the epoch, so the same seed generates the same sessions at the same times, however the time range is split into batches, workers or live batches. The scenarios log the seed they use. Without a seed, runs that start at a different time generate different data, while runs with the same absolute `--from` generate the same sessions. `digital_experience_mixed` generates the browser and mobile apps from the same default seed, so don't run it together with `digital_experience_browser` or `digital_experience_mobile` in one synthtrace invocation. Sessions are spread evenly over time. The classic RUM page loads of `digital_experience_mixed` take their timings from the seed too, but not their document IDs.
+- `seed` (string or number, default the start of the run, `--from` in milliseconds): makes the data reproducible. Every session, with its session, trace and span IDs, browser, page views and events, derives from the seed, its app and its number since the epoch, so the same seed generates the same sessions at the same times, however the time range is split into batches, workers or live batches. The scenarios log the seed they use. Without a seed, runs that start at a different time generate different data, while runs with the same absolute `--from` generate the same sessions. `digital_experience_mixed` generates the browser and mobile apps from the same default seed, so don't run it together with `digital_experience_browser`, `digital_experience_mobile` or `digital_experience_mobile_native` in one synthtrace invocation. Sessions are spread evenly over time. The classic RUM page loads of `digital_experience_mixed` take their timings from the seed too, but not their document IDs.
 
 #### `digital_experience_browser`
 
@@ -962,9 +962,9 @@ node scripts/synthtrace digital_experience_browser --from=2026-10-16T12:00:00Z -
 
 #### `digital_experience_mixed`
 
-Generates the `digital_experience_browser` and `digital_experience_mobile` apps plus a classic Elastic APM RUM (`rum-js`) app in `traces-apm.rum-default`. The mobile apps run on Android and iOS (`field-service-mobile` on Android only), with the `app.launch` and screen spans that some of them create themselves, so it doesn't take the `platform` and `withManualSpans` options of `digital_experience_mobile`. The classic app is named `storefront-web` like one of the OTel apps, so that lists that match classic and OTel apps by name can show them together. Use it to test lists that show both OTel and classic browser apps. The classic RUM data is minimal: page-load transactions with one XHR span each, and no marks or experience metrics. Page loads end within the time range, so the first ones of a run may start a few seconds before `--from`.
+Generates the `digital_experience_browser`, `digital_experience_mobile` and `digital_experience_mobile_native` apps plus a classic Elastic APM RUM (`rum-js`) app in `traces-apm.rum-default`. The mobile apps run on Android and iOS (`field-service-mobile` and `trailmap-android` on Android only, `ride-ios` on iOS only), the React Native ones with the `app.launch` and screen spans that some of them create themselves, so it doesn't take the `platform` and `withManualSpans` options of the mobile scenarios. The classic app is named `storefront-web` like one of the OTel apps, so that lists that match classic and OTel apps by name can show them together. Use it to test lists that show both OTel and classic browser apps. The classic RUM data is minimal: page-load transactions with one XHR span each, and no marks or experience metrics. Page loads end within the time range, so the first ones of a run may start a few seconds before `--from`.
 
-It already includes the browser and mobile apps, so don't run it together with `digital_experience_browser` or `digital_experience_mobile` in one synthtrace invocation: with the same `--from`, they share their default seed and index the same sessions twice.
+It already includes the browser and mobile apps, so don't run it together with `digital_experience_browser`, `digital_experience_mobile` or `digital_experience_mobile_native` in one synthtrace invocation: with the same `--from`, they share their default seed and index the same sessions twice.
 
 **Usage:**
 
@@ -1005,6 +1005,15 @@ Some sessions have a second visit: the user leaves the app and comes back within
 node scripts/synthtrace digital_experience_mobile --from=now-30m --to=now
 node scripts/synthtrace digital_experience_mobile --live --scenarioOpts platform=ios
 node scripts/synthtrace digital_experience_mobile --from=now-1h --to=now --scenarioOpts withManualSpans=false,seed=my-seed
+```
+
+#### `digital_experience_mobile_native`
+
+Generates EDOT Android and EDOT iOS data of three native apps (`trailmap-android`, `ride-ios` and `transit-companion`, on both platforms) with the signal names proposed for the SDKs: `session.start`/`session.end`, `elastic.app.start`, `elastic.screen.load` spans, `app.screen.click`, ANR and hang logs (`elastic.error.kind`), handled `exception` events, crashes reported on the next launch, and backend SERVER spans. Each app has three versions, and the newest crashes more, starts slower and rolls out over the first hours of the run. Takes `platform`, `scale` and `seed`, as `digital_experience_mobile` does.
+
+```sh
+node scripts/synthtrace digital_experience_mobile_native --from=now-30m --to=now
+node scripts/synthtrace digital_experience_mobile_native --live --scenarioOpts platform=ios
 ```
 
 #### Smaller `digital_experience_mobile` scenarios

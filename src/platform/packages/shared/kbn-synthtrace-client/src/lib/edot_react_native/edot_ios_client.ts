@@ -8,21 +8,29 @@
  */
 
 import type { OtelScope } from '../otel_logs';
-import { SEVERITY_FATAL } from '../edot_shared/constants';
+import { EVENT_APP_CRASH, SEVERITY_FATAL } from '../edot_shared/constants';
+import { ERROR_KIND_HANG } from '../edot_shared/proposed_signals';
 import type { EdotLog } from '../edot_shared/edot_log';
 import {
   EdotReactNativeClientBase,
   type CrashOptions,
+  type FreezeOptions,
   type HttpExceptionEventOptions,
   type HttpRequestOptions,
 } from './edot_react_native_client';
-import type { EdotReactNativeSpan } from './edot_react_native_span';
+import { MOBILE_PLATFORM } from './device_profiles';
+import {
+  MOBILE_SPAN_KIND,
+  MOBILE_SPAN_STATUS,
+  type EdotReactNativeSpan,
+} from './edot_react_native_span';
 import { iosCrashReport, type IosCrashReport } from './ios_crash_report';
 
 const HTTP_SCOPE: OtelScope = { name: 'NSURLSession', version: '1.0.0' };
 const CRASH_SCOPE: OtelScope = { name: 'PLCrashReporter', version: '0.0.3' };
 const VIEW_CONTROLLER_SCOPE: OtelScope = { name: 'UIViewController', version: '0.0.3' };
 const LIFECYCLE_SCOPE: OtelScope = { name: 'ApplicationLifecycle' };
+const HANG_SCOPE: OtelScope = { name: 'AppHangs', version: '0.0.3' };
 
 // `HTTPURLResponse.localizedString(forStatusCode:)`, which EDOT iOS writes on HTTP errors
 const STATUS_TEXT: Readonly<Record<number, string>> = {
@@ -46,7 +54,7 @@ export type IosAppState = 'active' | 'inactive' | 'background' | 'foreground' | 
 
 /** One installation of an EDOT React Native app on an iOS device, recorded by EDOT iOS. */
 export class EdotIosClient extends EdotReactNativeClientBase {
-  public readonly platform = 'ios' as const;
+  public readonly platform = MOBILE_PLATFORM.IOS;
   // EDOT iOS only adds the cellular details to HTTP spans, and never to logs
   protected readonly cellularOnAllSpans = false;
 
@@ -68,6 +76,7 @@ export class EdotIosClient extends EdotReactNativeClientBase {
     responseBodySize,
     traceId,
     spanId,
+    parentSpanId,
   }: HttpRequestOptions): EdotReactNativeSpan {
     const parsedUrl = new URL(url);
     const isError =
@@ -75,11 +84,12 @@ export class EdotIosClient extends EdotReactNativeClientBase {
     return this.span({
       traceId,
       spanId,
+      parentSpanId,
       // EDOT iOS names HTTP spans after the host, without the port
       name: `${method} ${parsedUrl.hostname}`,
-      kind: 'Client',
+      kind: MOBILE_SPAN_KIND.CLIENT,
       scope: HTTP_SCOPE,
-      status: isError ? 'Error' : 'Unset',
+      status: isError ? MOBILE_SPAN_STATUS.ERROR : MOBILE_SPAN_STATUS.UNSET,
       attributes: {
         'http.request.method': method,
         'url.full': parsedUrl.href,
@@ -142,8 +152,25 @@ export class EdotIosClient extends EdotReactNativeClientBase {
         'exception.stacktrace': stacktrace,
         ...this.logAttributes,
       },
-      { eventName: 'app.crash', severityNumber: SEVERITY_FATAL }
+      { eventName: EVENT_APP_CRASH, severityNumber: SEVERITY_FATAL }
     );
+  }
+
+  /** A hang: the main thread was blocked for longer than the hang threshold. */
+  freeze({ durationMs }: FreezeOptions): EdotLog {
+    const message = `Main thread blocked for ${(durationMs / 1_000).toFixed(1)} seconds`;
+    return this.freezeLog(HANG_SCOPE, ERROR_KIND_HANG, {
+      type: 'AppHang',
+      message,
+      stacktrace: [
+        'Thread 0 (main thread):',
+        '0   libsystem_kernel.dylib      0x00000001f2a3c8b4 mach_msg2_trap + 8',
+        '1   libsystem_kernel.dylib      0x00000001f2a4f0d0 mach_msg2_internal + 76',
+        '2   CoreFoundation              0x00000001a1b6a5b0 __CFRunLoopServiceMachPort + 160',
+        '3   CoreFoundation              0x00000001a1b68e2c __CFRunLoopRun + 1208',
+        '4   UIKitCore                   0x00000001a4c8b2a4 UIApplicationMain + 340',
+      ].join('\n'),
+    });
   }
 
   /**
@@ -204,9 +231,9 @@ export class EdotIosClient extends EdotReactNativeClientBase {
   }): EdotReactNativeSpan {
     return this.span({
       name: `${title} - view appearing`,
-      kind: 'Client',
+      kind: MOBILE_SPAN_KIND.CLIENT,
       scope: VIEW_CONTROLLER_SCOPE,
-      status: 'Ok',
+      status: MOBILE_SPAN_STATUS.OK,
       attributes: this.spanAttributes(),
       traceId,
       spanId,

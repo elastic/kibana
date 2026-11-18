@@ -9,16 +9,56 @@
 
 import type { OtelScope } from '../otel_logs';
 import { generateLongId, generateShortId } from '../utils/generate_id';
-import { LOGS_INDEX, SEVERITY_ERROR, SEVERITY_FATAL, TRACES_INDEX } from '../edot_shared/constants';
+import {
+  LOGS_INDEX,
+  SEVERITY_ERROR,
+  SEVERITY_FATAL,
+  SEVERITY_WARN,
+  TRACES_INDEX,
+} from '../edot_shared/constants';
 import { EdotLog } from '../edot_shared/edot_log';
 import { EdotSpan } from '../edot_shared/edot_span';
+import {
+  ATTR_APP_START_DURATION,
+  ATTR_ERROR_KIND,
+  ATTR_SCREEN_NAME,
+  ATTR_SESSION_PREVIOUS_ID,
+  ATTR_START_TYPE,
+  EVENT_APP_START,
+  EVENT_EXCEPTION,
+  EVENT_SCREEN_CLICK,
+  EVENT_SESSION_END,
+  EVENT_SESSION_START,
+  EVENT_WIDGET_CLICK,
+  SPAN_SCREEN_LOAD,
+  type AppStartType,
+  type FreezeKind,
+} from '../edot_shared/proposed_signals';
+import { asFloat } from '../edot_browser/as_float';
 import type { MobilePlatform } from './device_profiles';
 import type { EdotAndroidClient } from './edot_android_client';
 import type { EdotIosClient } from './edot_ios_client';
-import type { EdotReactNativeSpan, EdotReactNativeSpanDocument } from './edot_react_native_span';
+import {
+  MOBILE_SPAN_KIND,
+  MOBILE_SPAN_STATUS,
+  type EdotReactNativeSpan,
+  type EdotReactNativeSpanDocument,
+  type EdotReactNativeSpanKind,
+  type EdotReactNativeSpanStatus,
+} from './edot_react_native_span';
 
 const BRIDGE_SCOPE: OtelScope = { name: '@elastic/otel-react-native' };
 const INTERACTIONS_SCOPE: OtelScope = { name: '@elastic/otel-react-native.interactions' };
+const SESSION_SCOPE: OtelScope = { name: 'io.opentelemetry.sessions' };
+const APP_START_SCOPE: OtelScope = { name: 'co.elastic.otel.mobile.startup' };
+const SCREEN_SCOPE: OtelScope = { name: 'co.elastic.otel.mobile.screen' };
+const BACKEND_SCOPE: OtelScope = { name: 'io.opentelemetry.http-server' };
+const ERRORS_SCOPE: OtelScope = { name: 'co.elastic.otel.mobile.errors' };
+const SEVERITY_TEXT: Readonly<Record<number, string>> = {
+  [SEVERITY_WARN]: 'WARN',
+  [SEVERITY_ERROR]: 'ERROR',
+  [SEVERITY_FATAL]: 'FATAL',
+};
 
 export type NetworkConnectionType = 'wifi' | 'cell' | 'unavailable' | 'unknown';
 
@@ -60,6 +100,25 @@ export interface HttpRequestOptions {
   responseBodySize?: number;
   traceId?: string;
   spanId?: string;
+  /** The span the request is a child of, e.g. the screen load span. */
+  parentSpanId?: string;
+}
+
+export interface FreezeOptions {
+  /** How long the main thread was blocked, in milliseconds. */
+  durationMs: number;
+}
+
+export interface BackendSpanOptions {
+  /** The `service.name` of the backend. */
+  service: string;
+  method: string;
+  url: string;
+  statusCode: number;
+  traceId: string;
+  /** The span id of the client span that called the backend. */
+  parentSpanId: string;
+  spanId?: string;
 }
 
 export interface HttpExceptionEventOptions {
@@ -78,12 +137,15 @@ export interface CrashOptions {
 
 export interface SpanOptions {
   name: string;
-  kind: 'Client' | 'Internal';
+  kind: EdotReactNativeSpanKind;
   scope: OtelScope;
-  status?: 'Unset' | 'Ok' | 'Error';
+  status?: EdotReactNativeSpanStatus;
   attributes: Record<string, unknown>;
   traceId?: string;
   spanId?: string;
+  parentSpanId?: string;
+  /** Replaces the app's resource attributes, for spans of other services. */
+  resourceAttributes?: Record<string, unknown>;
 }
 
 /** The builders both platforms share; `EdotAndroidClient` and `EdotIosClient` follow their SDK. */
@@ -112,6 +174,9 @@ export abstract class EdotReactNativeClientBase {
 
   /** A crash as the platform's crash reporter records it. */
   abstract crash(options: CrashOptions): EdotLog;
+
+  /** The ERROR log of a frozen main thread: an ANR on Android, a hang on iOS. */
+  abstract freeze(options: FreezeOptions): EdotLog;
 
   /** The device resource attributes the SDK adds itself. */
   protected deviceAttributes(): Record<string, string> {
@@ -191,7 +256,7 @@ export abstract class EdotReactNativeClientBase {
       log.eventName(eventName);
     }
     if (severityNumber !== undefined) {
-      log.severity(severityNumber, severityNumber === SEVERITY_FATAL ? 'FATAL' : 'ERROR');
+      log.severity(severityNumber, SEVERITY_TEXT[severityNumber] ?? 'ERROR');
     }
     return log;
   }
@@ -202,28 +267,150 @@ export abstract class EdotReactNativeClientBase {
     exception: Record<string, string>,
     { traceId, spanId }: { traceId: string; spanId: string }
   ): EdotLog {
-    return this.log(scope, exception, { eventName: 'exception' }).traceContext({ traceId, spanId });
+    return this.log(scope, exception, { eventName: EVENT_EXCEPTION }).traceContext({
+      traceId,
+      spanId,
+    });
+  }
+
+  /** An exception the app caught and reported, as a WARN `exception` event without a span. */
+  handledError({ type, message, stacktrace }: CrashOptions): EdotLog {
+    return this.log(
+      ERRORS_SCOPE,
+      {
+        'exception.type': type,
+        'exception.message': message,
+        'exception.stacktrace': stacktrace,
+        ...this.logAttributes,
+      },
+      { eventName: EVENT_EXCEPTION, severityNumber: SEVERITY_WARN }
+    );
   }
 
   protected span({
     name,
     kind,
     scope,
-    status = 'Unset',
+    status = MOBILE_SPAN_STATUS.UNSET,
     attributes,
     traceId = generateLongId(),
     spanId = generateShortId(),
+    parentSpanId,
+    resourceAttributes = this.resourceAttributes,
   }: SpanOptions): EdotReactNativeSpan {
     return new EdotSpan<EdotReactNativeSpanDocument>({
       _index: TRACES_INDEX,
       trace_id: traceId,
       span_id: spanId,
+      ...(parentSpanId !== undefined ? { parent_span_id: parentSpanId } : {}),
       name,
       kind,
       status: { code: status },
       scope,
-      resource: { attributes: { ...this.resourceAttributes } },
+      resource: { attributes: { ...resourceAttributes } },
       attributes,
+    });
+  }
+
+  /** The `exception.*` attributes of a frozen main thread, which each SDK words its own way. */
+  protected freezeLog(
+    scope: OtelScope,
+    kind: FreezeKind,
+    exception: { type: string; message: string; stacktrace: string }
+  ): EdotLog {
+    return this.log(
+      scope,
+      {
+        'exception.type': exception.type,
+        'exception.message': exception.message,
+        'exception.stacktrace': exception.stacktrace,
+        [ATTR_ERROR_KIND]: kind,
+        ...this.logAttributes,
+      },
+      { severityNumber: SEVERITY_ERROR }
+    );
+  }
+
+  /** A log event with the `otel.event.name` attribute and the event name. */
+  private event(scope: OtelScope, name: string, attributes: Record<string, unknown> = {}): EdotLog {
+    return this.log(
+      scope,
+      { 'otel.event.name': name, ...attributes, ...this.logAttributes },
+      { eventName: name }
+    );
+  }
+
+  /** The start of the session, with the previous session of the installation when there is one. */
+  sessionStart({ previousSessionId }: { previousSessionId?: string } = {}): EdotLog {
+    return this.event(
+      SESSION_SCOPE,
+      EVENT_SESSION_START,
+      previousSessionId ? { [ATTR_SESSION_PREVIOUS_ID]: this.formatUuid(previousSessionId) } : {}
+    );
+  }
+
+  sessionEnd(): EdotLog {
+    return this.event(SESSION_SCOPE, EVENT_SESSION_END);
+  }
+
+  /** A launch of the app, with the time it took until the first screen, in milliseconds. */
+  appStart({ type, durationMs }: { type: AppStartType; durationMs: number }): EdotLog {
+    return this.event(APP_START_SCOPE, EVENT_APP_START, {
+      [ATTR_START_TYPE]: type,
+      [ATTR_APP_START_DURATION]: asFloat(durationMs),
+    });
+  }
+
+  /** A tap that hit no widget. */
+  screenClick(): EdotLog {
+    return this.event(INTERACTIONS_SCOPE, EVENT_SCREEN_CLICK);
+  }
+
+  /** A screen loading, from the start of the view until it has appeared. */
+  screenLoad({
+    screenName,
+    traceId,
+    spanId,
+  }: {
+    screenName: string;
+    traceId?: string;
+    spanId?: string;
+  }): EdotReactNativeSpan {
+    return this.span({
+      name: SPAN_SCREEN_LOAD,
+      kind: MOBILE_SPAN_KIND.INTERNAL,
+      scope: SCREEN_SCOPE,
+      attributes: { ...this.spanAttributes(), [ATTR_SCREEN_NAME]: screenName },
+      traceId,
+      spanId,
+    });
+  }
+
+  /** The SERVER span of a backend that answered a request of the app. */
+  backendSpan({
+    service,
+    method,
+    url,
+    statusCode,
+    traceId,
+    parentSpanId,
+    spanId,
+  }: BackendSpanOptions): EdotReactNativeSpan {
+    const { pathname } = new URL(url);
+    return this.span({
+      name: `${method} ${pathname}`,
+      kind: MOBILE_SPAN_KIND.SERVER,
+      scope: BACKEND_SCOPE,
+      status: statusCode >= 500 ? MOBILE_SPAN_STATUS.ERROR : MOBILE_SPAN_STATUS.UNSET,
+      attributes: {
+        'http.request.method': method,
+        'url.path': pathname,
+        'http.response.status_code': statusCode,
+      },
+      traceId,
+      spanId,
+      parentSpanId,
+      resourceAttributes: { 'service.name': service },
     });
   }
 
@@ -239,7 +426,7 @@ export abstract class EdotReactNativeClientBase {
   }): EdotReactNativeSpan {
     return this.span({
       name,
-      kind: 'Internal',
+      kind: MOBILE_SPAN_KIND.INTERNAL,
       scope: BRIDGE_SCOPE,
       attributes: this.spanAttributes(),
       traceId,
@@ -256,16 +443,10 @@ export abstract class EdotReactNativeClientBase {
 
   /** A tap recorded by the Babel plugin of `@elastic/otel-react-native`, or `recordWidgetClick()`. */
   widgetClick({ id, name }: { id: string; name?: string }): EdotLog {
-    return this.log(
-      INTERACTIONS_SCOPE,
-      {
-        'otel.event.name': 'app.widget.click',
-        'app.widget.id': id,
-        ...(name ? { 'app.widget.name': name } : {}),
-        ...this.logAttributes,
-      },
-      { eventName: 'app.widget.click' }
-    );
+    return this.event(INTERACTIONS_SCOPE, EVENT_WIDGET_CLICK, {
+      'app.widget.id': id,
+      ...(name ? { 'app.widget.name': name } : {}),
+    });
   }
 }
 

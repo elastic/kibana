@@ -10,10 +10,15 @@
 import type { OtelLogDocument } from '../otel_logs';
 import type { Serializable } from '../serializable';
 import { sample, type Distribution } from '../edot_shared/health_profiles';
+import {
+  ATTR_SCREEN_NAME,
+  START_TYPE_COLD,
+  START_TYPE_WARM,
+} from '../edot_shared/proposed_signals';
 import { between, pick, randomHex } from '../edot_shared/random';
-import type { MobilePlatform } from './device_profiles';
+import { MOBILE_PLATFORM, type MobilePlatform } from './device_profiles';
 import type { EdotReactNativeClient } from './edot_react_native_client';
-import type { EdotReactNativeSpanDocument } from './edot_react_native_span';
+import { MOBILE_SPAN_KIND, type EdotReactNativeSpanDocument } from './edot_react_native_span';
 import type { MobileHealthProfile } from './health_profiles';
 
 export interface EdotReactNativeRequest {
@@ -29,6 +34,8 @@ export interface EdotReactNativeRequest {
   bodySizeBytes?: number;
   /** The message the app logs with `emitLog(message, 'error')` when the request fails. */
   errorLog?: string;
+  /** The `service.name` of the backend that answers, which gets a SERVER span with proposed signals. */
+  backend?: string;
 }
 
 export interface EdotReactNativeWidget {
@@ -64,6 +71,10 @@ export interface EdotReactNativeAppModel {
   errorLogs?: readonly string[];
   /** Crashes specific to this app per platform, on top of common ones. */
   crashes?: Partial<Record<MobilePlatform, readonly EdotReactNativeCrashTemplate[]>>;
+  /** Exceptions the app catches and reports per platform, on top of common ones. */
+  handledErrors?: Partial<Record<MobilePlatform, readonly EdotReactNativeCrashTemplate[]>>;
+  /** A native app has no JavaScript runtime, so it has no JavaScript crashes and no `RNSScreen`. */
+  native?: boolean;
 }
 
 /** Spans the app creates itself, as the SDKs don't record launches or React Native screens. */
@@ -87,6 +98,13 @@ export type EdotReactNativeSessionOptions = SessionAnchor & {
   /** How long the user stays on a screen once it has appeared, in milliseconds. */
   dwell?: Distribution;
   manualSpans?: ManualSpanOptions;
+  /**
+   * Writes the signals proposed for the SDKs: session, app start and screen events, screen load
+   * spans, freezes, backend spans, and crashes reported on the next launch on both platforms.
+   */
+  proposedSignals?: boolean;
+  /** The previous session of the installation, written as `session.previous_id`. */
+  previousSessionId?: string;
   random?: () => number;
 };
 
@@ -103,6 +121,12 @@ const MIN_DWELL_MS = 1_000;
 // A return to the app takes much less than a cold launch
 const WARM_LAUNCH_FACTOR = 0.25;
 const MAX_TAPS_PER_SCREEN = 2;
+// How long the main thread stays blocked: Android reports an ANR after 5 seconds
+const FREEZE_DURATION_MS: Readonly<Record<MobilePlatform, { min: number; max: number }>> = {
+  android: { min: 5_000, max: 12_000 },
+  ios: { min: 2_000, max: 6_000 },
+};
+const JAVASCRIPT_EXCEPTION = 'com.facebook.react.common.JavascriptException';
 const DEFAULT_FAILURE_STATUS_CODES = [500, 502, 503, 504] as const;
 // How often the SDKs' batch processors export what has ended since, in milliseconds. A crash loses
 // what still waits in their queues: EDOT Android exports spans every second and flushes only logs
@@ -110,6 +134,22 @@ const DEFAULT_FAILURE_STATUS_CODES = [500, 502, 503, 504] as const;
 const EXPORT_DELAY_MS: Readonly<Record<MobilePlatform, { spans: number; logs: number }>> = {
   android: { spans: 1_000, logs: 0 },
   ios: { spans: 5_000, logs: 5_000 },
+};
+
+const COMMON_HANDLED_ERRORS: Readonly<
+  Record<MobilePlatform, readonly EdotReactNativeCrashTemplate[]>
+> = {
+  android: [
+    { type: 'java.io.IOException', message: 'Failed to read the disk cache' },
+    {
+      type: 'org.json.JSONException',
+      message: 'Value null of type org.json.JSONObject$1 cannot be converted to JSONObject',
+    },
+  ],
+  ios: [
+    { type: 'Swift.DecodingError', message: 'The data couldn’t be read because it is missing.' },
+    { type: 'NSCocoaErrorDomain', message: 'The file couldn’t be opened.' },
+  ],
 };
 
 const COMMON_ERROR_LOGS: readonly string[] = [
@@ -121,7 +161,7 @@ const COMMON_ERROR_LOGS: readonly string[] = [
 const COMMON_CRASHES: Readonly<Record<MobilePlatform, readonly EdotReactNativeCrashTemplate[]>> = {
   android: [
     {
-      type: 'com.facebook.react.common.JavascriptException',
+      type: JAVASCRIPT_EXCEPTION,
       message: "TypeError: Cannot read property 'map' of undefined, js engine: hermes",
     },
     {
@@ -183,6 +223,11 @@ const TRANSPORT_ERRORS: Readonly<Record<MobilePlatform, readonly TransportError[
  *   crash, and what ended since the last export, up to 1 second (Android spans) or 5 seconds
  *   (iOS spans and logs) before the crash.
  *
+ * With `proposedSignals`, the session also writes `session.start` and `session.end`, an app start
+ * per launch, a screen load span per screen view that parents the screen's requests, screen taps,
+ * freezes, handled errors, and backend spans; it stamps the screen's name on what it writes, and both platforms
+ * report a crash on the next launch, with the crash time.
+ *
  * Planning and simulation draw from the same `random` source, so a seed reproduces a session.
  */
 
@@ -191,7 +236,13 @@ interface SessionContext {
   app: EdotReactNativeAppModel;
   health: MobileHealthProfile;
   manualSpans: ManualSpanOptions;
+  proposedSignals: boolean;
   random: () => number;
+}
+
+interface TraceContext {
+  traceId: string;
+  spanId: string;
 }
 
 interface ScreenViewPlan {
@@ -213,7 +264,20 @@ interface VisitPlan {
   crashedAt?: number;
 }
 
-const iosViewTitle = ({ iosTitle }: EdotReactNativeScreen) => iosTitle ?? 'RNSScreen';
+const iosViewTitle = (
+  { iosTitle, name }: EdotReactNativeScreen,
+  { native }: EdotReactNativeAppModel
+) => iosTitle ?? (native ? name : 'RNSScreen');
+
+/** Marks what happens while a screen is shown with its name. Backend spans are not the app's. */
+const stampScreen = (events: EdotReactNativeEvent[], screenName: string): void => {
+  events.forEach(({ fields }) => {
+    if ('kind' in fields && fields.kind === MOBILE_SPAN_KIND.SERVER) {
+      return;
+    }
+    fields.attributes = { ...fields.attributes, [ATTR_SCREEN_NAME]: screenName };
+  });
+};
 
 const shiftVisit = (visit: VisitPlan, offset: number): VisitPlan => ({
   ...visit,
@@ -282,7 +346,7 @@ const planVisits = (
       ...(crashes ? { crashedAt: end } : {}),
     };
     if (
-      client.platform === 'android' &&
+      client.platform === MOBILE_PLATFORM.ANDROID &&
       plans.length > 0 &&
       plan.end - plans[0].start > ANDROID_MAX_SESSION_MS
     ) {
@@ -302,10 +366,11 @@ const newTraceContext = (random: () => number) => ({
 
 /** A request and what follows from it: its span, its exception event and the app's error log. */
 const sendRequest = (
-  { client, health, random }: SessionContext,
+  { client, health, proposedSignals, random }: SessionContext,
   request: EdotReactNativeRequest,
   requestedTime: number,
-  latestEnd: number
+  latestEnd: number,
+  parent?: TraceContext
 ): EdotReactNativeEvent[] => {
   // The request, and with it its 1ms minimum duration, must end by latestEnd: the end of the visit,
   // or never on a visit that crashes, whose requests may even start after the crash
@@ -318,6 +383,7 @@ const sendRequest = (
     latencyFactor = 1,
     bodySizeBytes,
     errorLog,
+    backend,
   } = request;
   const duration = Math.max(
     Math.min(sample(health.httpLatency, random) * latencyFactor, latestEnd - time),
@@ -338,7 +404,8 @@ const sendRequest = (
   const requestBodySize =
     bodySizeBytes ?? (hasBody ? Math.round(between(random, 120, 2_000)) : undefined);
   const responseBodySize = Math.round(between(random, 200, 20_000));
-  const ids = newTraceContext(random);
+  const drawnIds = newTraceContext(random);
+  const ids = parent ? { traceId: parent.traceId, spanId: drawnIds.spanId } : drawnIds;
   const endTime = Math.floor(time + duration);
 
   const events: EdotReactNativeEvent[] = [
@@ -351,10 +418,30 @@ const sendRequest = (
         requestBodySize,
         responseBodySize,
         ...ids,
+        parentSpanId: parent?.spanId,
       })
       .timestamp(time)
       .duration(duration),
   ];
+  // A request that got no response never reached the backend
+  if (proposedSignals && backend && statusCode !== undefined) {
+    const serverDuration = duration * between(random, 0.5, 0.9);
+    const networkTime = (duration - serverDuration) / 2;
+    events.push(
+      client
+        .backendSpan({
+          service: backend,
+          method,
+          url,
+          statusCode,
+          traceId: ids.traceId,
+          parentSpanId: ids.spanId,
+          spanId: randomHex(random, 16),
+        })
+        .timestamp(Math.floor(time + networkTime))
+        .duration(serverDuration)
+    );
+  }
   const exceptionEvent = client.httpExceptionEvent({
     ...ids,
     statusCode,
@@ -375,11 +462,35 @@ const sendRequest = (
   return events;
 };
 
-const androidStacktraceOf = ({ type, message }: EdotReactNativeCrashTemplate): string =>
+/** Where the app caught the exception it reports. */
+const handledStacktraceOf = (
+  platform: MobilePlatform,
+  { type, message }: EdotReactNativeCrashTemplate
+): string =>
+  platform === MOBILE_PLATFORM.ANDROID
+    ? [
+        `${type}: ${message}`,
+        '\tat com.example.app.data.Repository.load(Repository.kt:57)',
+        '\tat com.example.app.ui.MainViewModel$refresh$1.invokeSuspend(MainViewModel.kt:31)',
+      ].join('\n')
+    : [
+        `${type}: ${message}`,
+        '0   App                         0x0000000100e4c2a8 Repository.load() + 212',
+        '1   App                         0x0000000100e4b9f0 MainViewModel.refresh() + 96',
+      ].join('\n');
+
+const androidStacktraceOf = (
+  { type, message }: EdotReactNativeCrashTemplate,
+  native: boolean
+): string =>
   [
     `${type}: ${message}`,
-    '\tat com.facebook.react.modules.core.ExceptionsManagerModule.reportException(ExceptionsManagerModule.java:65)',
-    '\tat com.facebook.jni.NativeRunnable.run(Native Method)',
+    native
+      ? '\tat com.example.app.ui.MainActivity.onResume(MainActivity.kt:88)'
+      : '\tat com.facebook.react.modules.core.ExceptionsManagerModule.reportException(ExceptionsManagerModule.java:65)',
+    native
+      ? '\tat android.app.Instrumentation.callActivityOnResume(Instrumentation.java:1456)'
+      : '\tat com.facebook.jni.NativeRunnable.run(Native Method)',
     '\tat android.os.Handler.handleCallback(Handler.java:958)',
     '\tat android.os.Looper.loop(Looper.java:294)',
   ].join('\n');
@@ -393,14 +504,20 @@ interface CrashReport {
 interface PendingCrash {
   crashedAt: number;
   crash: CrashReport;
+  /** The screen the app crashed on. */
+  screenName: string;
 }
 
 /** The crash a visit ends with, described as the platform's crash reporter does. */
 const describeCrash = ({ client, app, random }: SessionContext, crashedAt: number): CrashReport => {
-  const templates = [...(app.crashes?.[client.platform] ?? []), ...COMMON_CRASHES[client.platform]];
+  const { native = false } = app;
+  const common = COMMON_CRASHES[client.platform].filter(
+    ({ type }) => !native || type !== JAVASCRIPT_EXCEPTION
+  );
+  const templates = [...(app.crashes?.[client.platform] ?? []), ...common];
   const template = pick(random, templates);
-  if (client.platform === 'android') {
-    return { ...template, stacktrace: androidStacktraceOf(template) };
+  if (client.platform === MOBILE_PLATFORM.ANDROID) {
+    return { ...template, stacktrace: androidStacktraceOf(template, native) };
   }
   const { address, excerpt } = client.crashReport({
     signal: template.type,
@@ -433,7 +550,8 @@ const exportedBeforeCrash = (
   const logsExportedUntil = crashedAt - random() * delays.logs;
   const exportedSpanIds = new Set(
     events.flatMap(({ fields }) => {
-      if (!('kind' in fields)) {
+      // Backend spans don't go through the app's processors
+      if (!('kind' in fields) || fields.kind === MOBILE_SPAN_KIND.SERVER) {
         return [];
       }
       const { '@timestamp': time = 0, duration = 0, span_id: spanId } = fields;
@@ -442,7 +560,10 @@ const exportedBeforeCrash = (
   );
   return events.filter(({ fields }) => {
     if ('kind' in fields) {
-      return exportedSpanIds.has(fields.span_id);
+      // A backend span is kept along with the request it answers
+      return exportedSpanIds.has(
+        fields.kind === MOBILE_SPAN_KIND.SERVER ? fields.parent_span_id ?? '' : fields.span_id
+      );
     }
     const { '@timestamp': time = 0, span_id: spanId } = fields;
     if (spanId !== undefined) {
@@ -462,16 +583,16 @@ const viewScreen = (
   latestRequestEnd: number,
   crashedAt?: number
 ): EdotReactNativeEvent[] => {
-  const { client, app, health, manualSpans, random } = ctx;
+  const { client, app, health, manualSpans, proposedSignals, random } = ctx;
   const { screen, start, appeared, end } = view;
   const events: EdotReactNativeEvent[] = [];
 
   // Drawn on both platforms, so that the platform doesn't change the rest of the draws
   const viewContext = newTraceContext(random);
-  if (client.platform === 'ios') {
+  if (client.platform === MOBILE_PLATFORM.IOS) {
     events.push(
       client
-        .viewAppearing({ title: iosViewTitle(screen), ...viewContext })
+        .viewAppearing({ title: iosViewTitle(screen, app), ...viewContext })
         .timestamp(start)
         .duration(Math.max(appeared - start, 1))
     );
@@ -488,10 +609,22 @@ const viewScreen = (
     );
   }
 
+  // Proposed signals: the screen load span parents the requests the screen makes when shown
+  const screenLoadContext = proposedSignals ? newTraceContext(random) : undefined;
+  if (screenLoadContext) {
+    events.push(
+      client
+        .screenLoad({ screenName: screen.name, ...screenLoadContext })
+        .timestamp(start)
+        .duration(Math.max(appeared - start, 1))
+    );
+  }
+
   (screen.requests ?? []).forEach((request) => {
-    // The SDKs never make an HTTP span a child of a view or JS span: requests are their own traces
+    // Without proposed signals, the SDKs never make an HTTP span a child of a view or JS span:
+    // requests are their own traces
     const time = Math.round(between(random, start, Math.max(appeared, start + 1)));
-    events.push(...sendRequest(ctx, request, time, latestRequestEnd));
+    events.push(...sendRequest(ctx, request, time, latestRequestEnd, screenLoadContext));
   });
 
   const widgets = screen.widgets ?? [];
@@ -511,8 +644,43 @@ const viewScreen = (
     events.push(client.errorLog(pick(random, messages)).timestamp(time));
   }
 
+  if (proposedSignals) {
+    // Taps on the screen itself, next to the taps on its widgets
+    const screenTaps = Math.floor(random() * (MAX_TAPS_PER_SCREEN + 1));
+    for (let i = 0; i < screenTaps; i++) {
+      const time = Math.round(between(random, appeared, end - 1));
+      events.push(client.screenClick().timestamp(time));
+    }
+
+    const freezeRate =
+      client.platform === MOBILE_PLATFORM.ANDROID ? health.anrRate : health.hangRate;
+    if (random() < freezeRate) {
+      const { min, max } = FREEZE_DURATION_MS[client.platform];
+      const time = Math.round(between(random, appeared, end));
+      events.push(client.freeze({ durationMs: between(random, min, max) }).timestamp(time));
+    }
+
+    if (random() < health.handledErrorRate) {
+      const template = pick(random, [
+        ...(app.handledErrors?.[client.platform] ?? []),
+        ...COMMON_HANDLED_ERRORS[client.platform],
+      ]);
+      const time = Math.round(between(random, appeared, end));
+      events.push(
+        client
+          .handledError({ ...template, stacktrace: handledStacktraceOf(client.platform, template) })
+          .timestamp(time)
+      );
+    }
+    stampScreen(events, screen.name);
+  }
+
   return events;
 };
+
+/** EDOT iOS reports a crash on the next launch, and EDOT Android does with proposed signals. */
+const reportsCrashOnRelaunch = ({ client, proposedSignals }: SessionContext): boolean =>
+  client.platform === MOBILE_PLATFORM.IOS || proposedSignals;
 
 /** Everything that happens during one visit, with the crash of the previous visit if any. */
 const simulateVisit = (
@@ -520,21 +688,34 @@ const simulateVisit = (
   visit: VisitPlan,
   pendingCrash?: PendingCrash
 ): { events: EdotReactNativeEvent[]; crash?: PendingCrash } => {
-  const { client, manualSpans, random } = ctx;
+  const { client, manualSpans, proposedSignals, random } = ctx;
   const { start, cold, launched, screenViews, end, crashedAt } = visit;
   const events: EdotReactNativeEvent[] = [];
 
   if (pendingCrash) {
-    // EDOT iOS reports the previous launch's crash once it has started again
+    // The previous launch's crash is reported once the app has started again
+    const crashLog = client.crash(pendingCrash.crash);
+    if (proposedSignals) {
+      crashLog.timestamp(pendingCrash.crashedAt);
+      stampScreen([crashLog], pendingCrash.screenName);
+    } else {
+      crashLog.timestamp(start + 1).observedAt(pendingCrash.crashedAt);
+    }
+    events.push(crashLog);
+  }
+
+  if (proposedSignals) {
     events.push(
       client
-        .crash(pendingCrash.crash)
-        .timestamp(start + 1)
-        .observedAt(pendingCrash.crashedAt)
+        .appStart({
+          type: cold ? START_TYPE_COLD : START_TYPE_WARM,
+          durationMs: launched - start,
+        })
+        .timestamp(launched)
     );
   }
 
-  if (client.platform === 'ios') {
+  if (client.platform === MOBILE_PLATFORM.IOS) {
     if (!cold) {
       events.push(client.lifecycle('foreground').timestamp(start));
     }
@@ -573,14 +754,15 @@ const simulateVisit = (
   if (crashedAt !== undefined) {
     const crash = describeCrash(ctx, crashedAt);
     const exported = exportedBeforeCrash(ctx, events, crashedAt);
-    if (client.platform === 'ios') {
-      return { events: exported, crash: { crashedAt, crash } };
+    if (reportsCrashOnRelaunch(ctx)) {
+      const { screen } = screenViews[lastView];
+      return { events: exported, crash: { crashedAt, crash, screenName: screen.name } };
     }
     exported.push(client.crash(crash).timestamp(crashedAt));
     return { events: exported };
   }
 
-  if (client.platform === 'ios') {
+  if (client.platform === MOBILE_PLATFORM.IOS) {
     // The user leaves the app at the end of the visit, which the session doesn't outlast
     events.push(
       client.lifecycle('inactive').timestamp(end - 1),
@@ -600,17 +782,19 @@ export const session = (options: EdotReactNativeSessionOptions): EdotReactNative
     visits = 1,
     dwell = DEFAULT_DWELL,
     manualSpans = {},
+    proposedSignals = false,
+    previousSessionId,
     random = Math.random,
   } = options;
   if (app.screens.length === 0) {
     throw new Error('An app must have at least one screen to simulate a session');
   }
-  const ctx: SessionContext = { client, app, health, manualSpans, random };
+  const ctx: SessionContext = { client, app, health, manualSpans, proposedSignals, random };
   const plans = planVisits(ctx, { screenViews: Math.max(screenViews, 1), visits, dwell });
 
-  // An iOS crash at the end of the session is reported when the user relaunches the app
+  // A crash at the end of the session is reported when the user relaunches the app
   const last = plans[plans.length - 1];
-  if (client.platform === 'ios' && last.crashedAt !== undefined) {
+  if (reportsCrashOnRelaunch(ctx) && last.crashedAt !== undefined) {
     const relaunchAt = last.end + Math.round(between(random, 0.05, 0.5) * SESSION_IDLE_TIMEOUT_MS);
     // The relaunch only reports the crash, so it doesn't crash again
     const relaunchCtx = { ...ctx, health: { ...health, crashRate: 0 } };
@@ -622,11 +806,18 @@ export const session = (options: EdotReactNativeSessionOptions): EdotReactNative
   const start = options.start !== undefined ? options.start : options.end - duration;
 
   let pendingCrash: PendingCrash | undefined;
-  return plans
-    .map((plan) => shiftVisit(plan, start))
-    .flatMap((plan) => {
-      const { events, crash } = simulateVisit(ctx, plan, pendingCrash);
-      pendingCrash = crash;
-      return events;
-    });
+  const shifted = plans.map((plan) => shiftVisit(plan, start));
+  const events = shifted.flatMap((plan) => {
+    const { events: visitEvents, crash } = simulateVisit(ctx, plan, pendingCrash);
+    pendingCrash = crash;
+    return visitEvents;
+  });
+  if (!proposedSignals) {
+    return events;
+  }
+  return [
+    client.sessionStart({ previousSessionId }).timestamp(shifted[0].start),
+    ...events,
+    client.sessionEnd().timestamp(shifted[shifted.length - 1].end),
+  ];
 };

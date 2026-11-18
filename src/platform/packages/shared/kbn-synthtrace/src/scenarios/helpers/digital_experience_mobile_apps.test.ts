@@ -8,7 +8,12 @@
  */
 
 import {
+  EVENT_APP_START,
+  EVENT_SESSION_START,
+  SPAN_SCREEN_LOAD,
+  edotReactNative,
   timerange,
+  type DeviceProfileId,
   type EdotReactNativeDocument,
   type EdotReactNativeSpanDocument,
   type OtelLogDocument,
@@ -17,8 +22,11 @@ import {
 import { getDefaultSeed } from './digital_experience_apps';
 import {
   DIGITAL_EXPERIENCE_MOBILE_APPS,
+  DIGITAL_EXPERIENCE_NATIVE_APPS,
+  generateEdotNativeSessions,
   generateEdotReactNativeSessions,
   parseDigitalExperienceMobileScenarioOpts,
+  parseDigitalExperienceNativeScenarioOpts,
   type DigitalExperienceMobileApp,
   type DigitalExperienceMobileScenarioOpts,
 } from './digital_experience_mobile_apps';
@@ -347,6 +355,119 @@ describe('digital experience mobile apps', () => {
       ];
       const sortKey = (doc: EdotReactNativeDocument) => JSON.stringify(doc);
       expect(split.map(sortKey).sort()).toEqual(whole.map(sortKey).sort());
+    });
+  });
+
+  describe('native apps', () => {
+    const collectNative = (timeRange: Timerange = range, scale = 1) =>
+      generateEdotNativeSessions(timeRange, {
+        environment: 'test',
+        from: timeRange.from.getTime(),
+        scale,
+        platform: 'both',
+        withManualSpans: false,
+        seed: 'digital-experience-native-test',
+      }).flatMap((generator) =>
+        Array.from(generator).flatMap((event): EdotReactNativeDocument[] => event.serialize())
+      );
+
+    it('has an Android app, an iOS app and an app on both platforms, with three versions each', () => {
+      const platformsOf = ({ deviceWeights = {} }: DigitalExperienceMobileApp) => {
+        const left = Object.entries(deviceWeights)
+          .filter(([, weight]) => weight === 0)
+          .map(([id]) => edotReactNative.deviceProfiles[id as DeviceProfileId].platform);
+        return { android: !left.includes('android'), ios: !left.includes('ios') };
+      };
+      const platforms = DIGITAL_EXPERIENCE_NATIVE_APPS.map(platformsOf);
+      expect(platforms).toContainEqual({ android: true, ios: false });
+      expect(platforms).toContainEqual({ android: false, ios: true });
+      expect(platforms).toContainEqual({ android: true, ios: true });
+
+      DIGITAL_EXPERIENCE_NATIVE_APPS.forEach(({ versions, model }) => {
+        expect(model.native).toBe(true);
+        expect(versions.length).toBeGreaterThanOrEqual(3);
+        const [newest, previous] = versions;
+        expect(Number(newest.health?.crashRate)).toBeGreaterThan(
+          Number(previous.health?.crashRate)
+        );
+        expect(Number(newest.health?.coldLaunch?.median)).toBeGreaterThan(
+          Number(previous.health?.coldLaunch?.median)
+        );
+      });
+    });
+
+    it('names a backend for the requests of every app', () => {
+      DIGITAL_EXPERIENCE_NATIVE_APPS.forEach(({ model }) => {
+        const requests = model.screens.flatMap(
+          ({ requests: screenRequests = [], widgets = [] }) => [
+            ...screenRequests,
+            ...widgets.flatMap(({ request }) => (request ? [request] : [])),
+          ]
+        );
+        expect(requests.length).toBeGreaterThan(0);
+        requests.forEach(({ backend }) => expect(backend).toEqual(expect.any(String)));
+      });
+    });
+
+    it('only writes the proposed signals for the native apps', () => {
+      const nativeDocs = collectNative();
+      const eventNames = new Set(logsOf(nativeDocs).map(({ event_name: eventName }) => eventName));
+      expect(eventNames).toContain(EVENT_SESSION_START);
+      expect(eventNames).toContain(EVENT_APP_START);
+
+      const json = JSON.stringify(docs);
+      expect(json).not.toContain(EVENT_SESSION_START);
+      expect(json).not.toContain(SPAN_SCREEN_LOAD);
+    });
+
+    it('rolls the newest version of every app out over the run, without downgrades', () => {
+      const hours = 6;
+      const sixHours = timerange(range.from, new Date(FROM + hours * 60 * 60_000));
+      const starts = logsOf(collectNative(sixHours, 0.25)).filter(
+        ({ event_name: eventName }) => eventName === EVENT_SESSION_START
+      );
+      DIGITAL_EXPERIENCE_NATIVE_APPS.forEach(({ serviceName, versions }) => {
+        const [newest] = versions;
+        const ofApp = starts.filter((doc) => serviceOf(doc) === serviceName);
+        const newestShare = (fromHour: number, toHour: number) => {
+          const inWindow = ofApp.filter((doc) => {
+            const hour = (Number(doc['@timestamp']) - FROM) / (60 * 60_000);
+            return hour >= fromHour && hour < toHour;
+          });
+          const onNewest = inWindow.filter(
+            ({ resource }) => resource?.attributes?.['service.version'] === newest.serviceVersion
+          );
+          return onNewest.length / inWindow.length;
+        };
+        expect(newestShare(4, hours)).toBeGreaterThan(newestShare(0, 2));
+
+        // An installation never goes back to an older version
+        const versionsByInstallation = new Map<unknown, string[]>();
+        [...ofApp]
+          .sort((a, b) => Number(a['@timestamp']) - Number(b['@timestamp']))
+          .forEach(({ resource }) => {
+            const installationId = resource?.attributes?.['app.installation.id'];
+            const seen = versionsByInstallation.get(installationId) ?? [];
+            versionsByInstallation.set(installationId, [
+              ...seen,
+              String(resource?.attributes?.['service.version']),
+            ]);
+          });
+        const order = versions.map(({ serviceVersion }) => serviceVersion);
+        versionsByInstallation.forEach((installed) => {
+          const indexes = installed.map((version) => order.indexOf(version));
+          indexes.slice(1).forEach((index, i) => expect(index).toBeLessThanOrEqual(indexes[i]));
+        });
+      });
+    });
+
+    it('parses platform, scale and seed only', () => {
+      expect(
+        parseDigitalExperienceNativeScenarioOpts({ platform: 'ios', scale: '2', seed: 7 }, FROM)
+      ).toMatchObject({ platform: 'ios', scale: 2, seed: '7' });
+      expect(() =>
+        parseDigitalExperienceNativeScenarioOpts({ withManualSpans: true }, FROM)
+      ).toThrow('Unknown scenarioOpts: withManualSpans');
     });
   });
 });

@@ -12,7 +12,14 @@ import { EdotReactNativeApp, type EdotReactNativeAppOptions } from './edot_react
 import { session } from './edot_react_native_session';
 import { MOBILE_HEALTH_PROFILES } from './health_profiles';
 
-export type { DeviceProfile, DeviceProfileId, MobilePlatform } from './device_profiles';
+export {
+  MOBILE_PLATFORM,
+  MOBILE_PLATFORMS,
+  type DeviceProfile,
+  type DeviceProfileId,
+  type MobilePlatform,
+} from './device_profiles';
+export { MOBILE_SPAN_KIND } from './edot_react_native_span';
 export type { MobileHealthProfile } from './health_profiles';
 export type { EdotAndroidClient } from './edot_android_client';
 export type { EdotIosClient, IosAppState } from './edot_ios_client';
