@@ -11,6 +11,7 @@ import type {
   SavedObject,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 import { parse } from 'yaml';
 
 import { ElasticsearchAssetType } from '../../../../common';
@@ -40,6 +41,7 @@ import { getPackageSavedObjects } from './get';
 const UPLOAD_PACKAGE_NAME_MIN_LENGTH = 2;
 const UPLOAD_PACKAGE_NAME_MAX_LENGTH = 150;
 const UPLOAD_PACKAGE_NAME_PATTERN = /^[a-z][a-z0-9_]*$/;
+const UPLOAD_DOCS_URL = 'https://www.elastic.co/docs/extend/integrations/upload-new-integration';
 
 interface UploadDataStream {
   dataset: string;
@@ -482,6 +484,15 @@ async function assertNoUnownedLiveDataStreams(
   esClient: ElasticsearchClient,
   installedPkg?: SavedObject<Installation>
 ): Promise<void> {
+  // Data streams created before the package was installed carry no `_meta.package.name`
+  // (Elasticsearch copies template `_meta` only at creation), so a stream whose current
+  // index template was installed by this package is also treated as owned.
+  const installedTemplateIds = new Set(
+    (installedPkg?.attributes.installed_es ?? [])
+      .filter((asset) => asset.type === ElasticsearchAssetType.indexTemplate)
+      .map((asset) => asset.id)
+  );
+
   for (const dataStream of packageInfo.data_streams ?? []) {
     const matching = await fetchMatchingLiveDataStreams(
       esClient,
@@ -494,33 +505,72 @@ async function assertNoUnownedLiveDataStreams(
     }
 
     if (!installedPkg) {
-      throw existingLiveDataStreamError(dataStream.dataset, matching[0].name);
+      throw unownedLiveDataStreamError({
+        dataset: dataStream.dataset,
+        dataStreamName: matching[0].name,
+        packageName: packageInfo.name,
+        reason: i18n.translate('xpack.fleet.packageUpload.unownedDataStreamReason.firstInstall', {
+          defaultMessage: 'the package is not installed yet, so it did not create this data stream',
+        }),
+      });
     }
 
-    const unowned = matching.find(
-      (liveStream) => ownedPackageName(liveStream) !== installedPkg.attributes.name
-    );
+    for (const liveStream of matching) {
+      const owner = ownedPackageName(liveStream);
 
-    if (!unowned) {
-      continue;
+      if (owner === installedPkg.attributes.name) {
+        continue;
+      }
+
+      if (owner !== undefined) {
+        throw unownedLiveDataStreamError({
+          dataset: dataStream.dataset,
+          dataStreamName: liveStream.name,
+          packageName: installedPkg.attributes.name,
+          reason: i18n.translate('xpack.fleet.packageUpload.unownedDataStreamReason.otherOwner', {
+            defaultMessage: 'its _meta.package.name is "{owner}"',
+            values: { owner },
+          }),
+        });
+      }
+
+      if (liveStream.template && installedTemplateIds.has(liveStream.template)) {
+        continue;
+      }
+
+      throw unownedLiveDataStreamError({
+        dataset: dataStream.dataset,
+        dataStreamName: liveStream.name,
+        packageName: installedPkg.attributes.name,
+        reason: i18n.translate(
+          'xpack.fleet.packageUpload.unownedDataStreamReason.foreignTemplate',
+          {
+            defaultMessage:
+              'it has no _meta.package.name and uses index template "{template}", which this package did not install',
+            values: { template: liveStream.template },
+          }
+        ),
+      });
     }
-
-    throw existingLiveDataStreamError(dataStream.dataset, unowned.name);
   }
 }
 
-function existingLiveDataStreamError(
-  dataset: string,
-  dataStreamName: string
-): PackageInvalidArchiveError {
+function unownedLiveDataStreamError({
+  dataset,
+  dataStreamName,
+  packageName,
+  reason,
+}: {
+  dataset: string;
+  dataStreamName: string;
+  packageName: string;
+  reason: string;
+}): PackageInvalidArchiveError {
   return new PackageInvalidArchiveError(
-    i18n.translate('xpack.fleet.packageUpload.existingDataStream', {
+    i18n.translate('xpack.fleet.packageUpload.unownedDataStream', {
       defaultMessage:
-        'A matching live data stream "{dataStreamName}" already exists for dataset "{dataset}" and must be migrated or removed before uploading a new package.',
-      values: {
-        dataset,
-        dataStreamName,
-      },
+        'Data stream "{dataStreamName}" matches dataset "{dataset}" but is not owned by package "{packageName}": {reason}. Uploaded packages cannot take over existing data streams. To learn about the supported options, refer to {docsUrl}.',
+      values: { dataStreamName, dataset, packageName, reason, docsUrl: UPLOAD_DOCS_URL },
     })
   );
 }
@@ -577,7 +627,7 @@ async function fetchMatchingLiveDataStreams(
   esClient: ElasticsearchClient,
   pattern: string,
   dataset: string
-): Promise<Array<{ name: string; _meta?: Record<string, unknown> }>> {
+): Promise<IndicesDataStream[]> {
   try {
     const body = await esClient.indices.getDataStream({
       name: pattern,
