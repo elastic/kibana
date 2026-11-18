@@ -24,13 +24,6 @@ const slackButtonHref = ({ url, app, path }: ActionsButton, baseUrl: string | un
   return app === undefined ? null : slackAppHref({ app, path }, baseUrl);
 };
 
-const slackButtonStyle = ({ primary, danger }: ActionsButton) => {
-  if (danger) {
-    return { style: 'danger' as const };
-  }
-  return primary ? { style: 'primary' as const } : {};
-};
-
 /** The event as `action_id` and `value`, or nothing when its context is past Slack's value limit. */
 const slackButtonEvent = (
   { name, context }: NonNullable<ActionsButton['event']>,
@@ -75,7 +68,7 @@ const slackButton = (
         emoji: true,
       },
       ...target,
-      ...slackButtonStyle(button),
+      ...(button.style ? { style: button.style } : {}),
     },
   ];
 };

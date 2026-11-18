@@ -66,8 +66,8 @@ export const actionsReactRenderer = (
 ) => (
   <p {...nodeAnchor(context, node)} className={classNames(context, handles.root)}>
     {node.buttons.map((button, index) => {
-      const { label, primary, danger, event } = button;
-      const tone = danger ? handles.danger : primary ? handles.primary : undefined;
+      const { label, style, event } = button;
+      const tone = style && handles[style];
 
       if (event) {
         return (

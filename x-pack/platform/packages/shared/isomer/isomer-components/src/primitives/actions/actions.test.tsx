@@ -9,6 +9,7 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { fireEvent, render } from '@testing-library/react';
 import { createIsomerRuntime } from '@elastic/isomer-runtime';
+import type { PrimitiveNode } from '@elastic/isomer-sdk';
 import { buildJsxShim } from '@elastic/isomer-sdk/author';
 import { componentsPack, componentsPrimitives } from '../../pack';
 import type { ComponentsRenderContext } from '../../lib';
@@ -37,7 +38,7 @@ describe('actions', () => {
     expect(
       surfaces.slack.renderNode(
         links(
-          { label: 'View Full Investigation', url: URL, primary: true },
+          { label: 'View Full Investigation', url: URL, style: 'primary' },
           { label: 'Docs', url: URL }
         )
       ).blocks
@@ -134,7 +135,7 @@ describe('actions', () => {
 
   describe('buttons that raise an event', () => {
     const confirm = { name: 'confirm', context: { allow: true } };
-    const approve = { label: 'Delete', event: confirm, danger: true };
+    const approve = { label: 'Delete', event: confirm, style: 'danger' as const };
     const cancel = { label: 'Cancel', event: { name: 'confirm', context: { allow: false } } };
 
     it('take an event instead of a link, but not both', () => {
@@ -250,9 +251,20 @@ describe('actions', () => {
     });
   });
 
+  it('takes no style other than primary and danger', () => {
+    const view = (style: string) =>
+      validate({
+        type: 'view',
+        body: [{ type: 'actions', buttons: [{ label: 'Go', url: URL, style }] } as PrimitiveNode],
+      });
+
+    expect(view('danger').valid).toBe(true);
+    expect(view('normal').valid).toBe(false);
+  });
+
   it('fills the primary button in React', () => {
     const markup = renderToStaticMarkup(
-      surfaces.react.renderNode(links({ label: 'Investigate', url: URL, primary: true }))
+      surfaces.react.renderNode(links({ label: 'Investigate', url: URL, style: 'primary' }))
     );
 
     expect(markup).toContain('class="componentsActions-button componentsActions-primary"');
@@ -263,13 +275,13 @@ describe('actions', () => {
       toComposition(
         <Composition>
           <Actions>
-            <Actions.Button url={URL} primary>
+            <Actions.Button url={URL} style="primary">
               View Full Investigation
             </Actions.Button>
           </Actions>
         </Composition>
       ).body
-    ).toEqual([links({ label: 'View Full Investigation', url: URL, primary: true })]);
+    ).toEqual([links({ label: 'View Full Investigation', url: URL, style: 'primary' })]);
   });
 
   // The envelope's section rhythm adds a divider before each later header and before actions.
@@ -288,7 +300,7 @@ describe('actions', () => {
           <Header level={3}>Conclusion</Header>
           <Quote>The 14:05 deploy of payments-api caused the regression.</Quote>
           <Actions>
-            <Actions.Button url={URL} primary>
+            <Actions.Button url={URL} style="primary">
               View Full Investigation
             </Actions.Button>
           </Actions>

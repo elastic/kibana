@@ -55,8 +55,12 @@ const buttonSchema = z
     event: actionEventSchema
       .optional()
       .describe('An event raised on click, for the host to handle, instead of opening a link.'),
-    primary: z.boolean().optional().describe('Marks the one action the reader should take.'),
-    danger: z.boolean().optional().describe('Marks an action that destroys or cannot be undone.'),
+    style: z
+      .enum(['primary', 'danger'])
+      .optional()
+      .describe(
+        '`primary` marks the one action the reader should take, and `danger` one that destroys or cannot be undone.'
+      ),
   })
   .strict()
   .superRefine(refineButtonTarget);
@@ -77,7 +81,7 @@ const example: ActionsNode = {
     {
       label: 'View Full Investigation',
       url: 'https://kibana.example.com/app/investigations/1',
-      primary: true,
+      style: 'primary',
     },
   ],
 };
@@ -114,7 +118,11 @@ export const actions = definePrimitive<ActionsNode, typeof actionsSchema>({
     {
       type: 'actions',
       buttons: [
-        { label: 'Delete', event: { name: 'confirm', context: { allow: true } }, danger: true },
+        {
+          label: 'Delete',
+          event: { name: 'confirm', context: { allow: true } },
+          style: 'danger',
+        },
         { label: 'Cancel', event: { name: 'confirm', context: { allow: false } } },
       ],
       fallback: 'Reply yes or no.',
