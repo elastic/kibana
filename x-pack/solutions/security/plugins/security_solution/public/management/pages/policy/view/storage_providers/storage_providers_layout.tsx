@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useDispatch } from 'react-redux-v7';
-import { cloneDeep, isObject } from 'lodash';
+import { cloneDeep, isEqual, isObject } from 'lodash';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useToasts } from '../../../../../common/lib/kibana';
 import { useUpdateEndpointPolicy } from '../../../../hooks/policy/use_update_endpoint_policy';
@@ -194,7 +194,14 @@ export const StorageProvidersLayout = memo<StorageProvidersLayoutProps>(({ polic
       if (flyoutState?.provider) {
         // Matched by the saved id: a rename changes `id` in place, keeping the provider's position
         const { id: savedId } = flyoutState.provider;
-        if (!providers.some(({ id }) => id === savedId)) {
+        // Saving over a provider changed since the flyout opened (e.g. by an earlier save that
+        // finished after the tab was left) would silently undo that change
+        if (
+          !isEqual(
+            providers.find(({ id }) => id === savedId),
+            flyoutState.provider
+          )
+        ) {
           setIsProviderGone(true);
           return;
         }

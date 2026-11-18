@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import type { ChangeEvent } from 'react';
+import type { ChangeEvent, ReactNode } from 'react';
 import {
   EuiAccordion,
   EuiButton,
@@ -22,7 +22,6 @@ import {
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
-  EuiText,
   EuiTextColor,
   EuiTitle,
   useGeneratedHtmlId,
@@ -92,6 +91,23 @@ const toExportProvider = ({
   ...(serviceUrl !== '' ? { service_url: serviceUrl } : {}),
 });
 
+/** A field's help text, followed by `warning` (if any) on its own line in the warning colour */
+const withWarning = (
+  helpText: string | undefined,
+  warning: string | undefined,
+  warningTestSubj: string
+): ReactNode => {
+  if (!warning) {
+    return helpText;
+  }
+  const warningLine = (
+    <EuiTextColor key="warning" color="warning" data-test-subj={warningTestSubj}>
+      {warning}
+    </EuiTextColor>
+  );
+  return helpText ? [helpText, warningLine] : warningLine;
+};
+
 export interface StorageProviderFlyoutProps {
   /** The provider to edit; omitted when adding one */
   provider?: ExportProvider;
@@ -127,12 +143,11 @@ export const StorageProviderFlyout = memo<StorageProviderFlyoutProps>(
     const isChanged = !isEdit || !isEqual(updatedProvider, provider);
     const canSave = isValid && isChanged && !isSaving;
     const isRenamed = isEdit && values.id !== provider.id;
-    // Where exports to this name go; changing it redirects pending exports too
-    const isDestinationChanged =
-      isEdit &&
-      (values.account_name !== provider.account_name ||
-        values.container !== provider.container ||
-        values.service_url !== (provider.service_url ?? ''));
+    // Account, container and service URL are where exports to this name go; a change also
+    // redirects exports that haven't reached a host yet
+    const isAccountNameChanged = isEdit && values.account_name !== provider.account_name;
+    const isContainerChanged = isEdit && values.container !== provider.container;
+    const isServiceUrlChanged = isEdit && values.service_url !== (provider.service_url ?? '');
 
     const getVisibleError = (field: ExportProviderFieldName): string | undefined => {
       const error = fieldErrors[field];
@@ -227,20 +242,11 @@ export const StorageProviderFlyout = memo<StorageProviderFlyoutProps>(
             </EuiFormRow>
             <EuiFormRow
               label={NAME_FIELD_LABEL}
-              helpText={
-                isRenamed
-                  ? [
-                      NAME_FIELD_HELP_TEXT,
-                      <EuiTextColor
-                        key="nameChangedWarning"
-                        color="warning"
-                        data-test-subj="storageProviderFlyout-nameChangedWarning"
-                      >
-                        {NAME_CHANGED_WARNING}
-                      </EuiTextColor>,
-                    ]
-                  : NAME_FIELD_HELP_TEXT
-              }
+              helpText={withWarning(
+                NAME_FIELD_HELP_TEXT,
+                isRenamed ? NAME_CHANGED_WARNING : undefined,
+                'storageProviderFlyout-nameChangedWarning'
+              )}
               isInvalid={Boolean(nameError)}
               error={nameError}
               fullWidth
@@ -256,7 +262,13 @@ export const StorageProviderFlyout = memo<StorageProviderFlyoutProps>(
               />
             </EuiFormRow>
             <EuiFormRow
+              data-test-subj="storageProviderFlyout-accountNameRow"
               label={ACCOUNT_NAME_FIELD_LABEL}
+              helpText={withWarning(
+                undefined,
+                isAccountNameChanged ? DESTINATION_CHANGED_WARNING : undefined,
+                'storageProviderFlyout-destinationChangedWarning'
+              )}
               isInvalid={Boolean(accountNameError)}
               error={accountNameError}
               fullWidth
@@ -272,7 +284,13 @@ export const StorageProviderFlyout = memo<StorageProviderFlyoutProps>(
               />
             </EuiFormRow>
             <EuiFormRow
+              data-test-subj="storageProviderFlyout-containerRow"
               label={CONTAINER_FIELD_LABEL}
+              helpText={withWarning(
+                undefined,
+                isContainerChanged ? DESTINATION_CHANGED_WARNING : undefined,
+                'storageProviderFlyout-destinationChangedWarning'
+              )}
               isInvalid={Boolean(containerError)}
               error={containerError}
               fullWidth
@@ -298,8 +316,13 @@ export const StorageProviderFlyout = memo<StorageProviderFlyoutProps>(
             >
               <EuiSpacer size="s" />
               <EuiFormRow
+                data-test-subj="storageProviderFlyout-serviceUrlRow"
                 label={SERVICE_URL_FIELD_LABEL}
-                helpText={SERVICE_URL_FIELD_HELP_TEXT}
+                helpText={withWarning(
+                  SERVICE_URL_FIELD_HELP_TEXT,
+                  isServiceUrlChanged ? DESTINATION_CHANGED_WARNING : undefined,
+                  'storageProviderFlyout-destinationChangedWarning'
+                )}
                 isInvalid={Boolean(serviceUrlError)}
                 error={serviceUrlError}
                 fullWidth
@@ -316,18 +339,6 @@ export const StorageProviderFlyout = memo<StorageProviderFlyoutProps>(
                 />
               </EuiFormRow>
             </EuiAccordion>
-            {isDestinationChanged && (
-              <>
-                <EuiSpacer size="m" />
-                <EuiText
-                  size="xs"
-                  color="warning"
-                  data-test-subj="storageProviderFlyout-destinationChangedWarning"
-                >
-                  <p>{DESTINATION_CHANGED_WARNING}</p>
-                </EuiText>
-              </>
-            )}
           </EuiForm>
         </EuiFlyoutBody>
         <EuiFlyoutFooter>

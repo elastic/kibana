@@ -348,30 +348,44 @@ describe('When rendering the StorageProvidersLayout', () => {
       ).not.toBeInTheDocument();
     });
 
-    it('should warn that exports will go to the new destination only while it is changed', async () => {
+    it('should warn under a destination field that exports will go to the new destination only while it is changed', async () => {
       await render([createProvider('azure-1', { service_url: 'https://acct1.blob.example.com' })]);
-      const warningTestSubj = 'storageProviderFlyout-destinationChangedWarning';
+      const warning =
+        "Exports to this provider, including ones that haven't reached a host yet, will go to the new destination.";
+      const destinationFields = {
+        accountName: ['storageProviderFlyout-accountNameInput', 'acct2', 'acct1'],
+        container: ['storageProviderFlyout-containerInput', 'other-dumps', 'dumps'],
+        serviceUrl: ['storageProviderFlyout-serviceUrlInput', '', 'https://acct1.blob.example.com'],
+      } as const;
+      type DestinationField = keyof typeof destinationFields;
+      /** The warning shows in the help text of `warnedField`'s row only */
+      const expectWarningOn = (warnedField?: DestinationField) => {
+        for (const field of Object.keys(destinationFields) as DestinationField[]) {
+          const fieldWarning = within(
+            renderResult.getByTestId(`storageProviderFlyout-${field}Row`)
+          ).queryByTestId('storageProviderFlyout-destinationChangedWarning');
+          if (field === warnedField) {
+            expect(fieldWarning).toHaveTextContent(warning);
+          } else {
+            expect(fieldWarning).not.toBeInTheDocument();
+          }
+        }
+      };
 
       await clickRowAction('azure-1', 'storageProvidersEditAction');
       await renderResult.findByTestId('storageProviderFlyout');
-      expect(renderResult.queryByTestId(warningTestSubj)).not.toBeInTheDocument();
+      expectWarningOn(undefined);
 
       // The name isn't part of the destination
       await setFieldValue('storageProviderFlyout-nameInput', 'azure-renamed');
-      expect(renderResult.queryByTestId(warningTestSubj)).not.toBeInTheDocument();
+      expectWarningOn(undefined);
 
-      for (const [testSubj, changed, saved] of [
-        ['storageProviderFlyout-accountNameInput', 'acct2', 'acct1'],
-        ['storageProviderFlyout-containerInput', 'other-dumps', 'dumps'],
-        ['storageProviderFlyout-serviceUrlInput', '', 'https://acct1.blob.example.com'],
-      ]) {
-        await setFieldValue(testSubj, changed);
-        expect(renderResult.getByTestId(warningTestSubj)).toHaveTextContent(
-          "Exports to this provider, including ones that haven't reached a host yet, will go to the new destination."
-        );
+      for (const [field, [input, changed, saved]] of Object.entries(destinationFields)) {
+        await setFieldValue(input, changed);
+        expectWarningOn(field as DestinationField);
 
-        await setFieldValue(testSubj, saved);
-        expect(renderResult.queryByTestId(warningTestSubj)).not.toBeInTheDocument();
+        await setFieldValue(input, saved);
+        expectWarningOn(undefined);
       }
     });
 
@@ -390,6 +404,22 @@ describe('When rendering the StorageProvidersLayout', () => {
       );
       expect(apiMocks.responseProvider.updateEndpointPolicy).not.toHaveBeenCalled();
       expect(mockedContext.coreStart.notifications.toasts.addSuccess).not.toHaveBeenCalled();
+    });
+
+    it('should not save an edit over a provider whose settings changed since the flyout opened', async () => {
+      const first = createProvider('azure-1');
+      await render([first]);
+      await clickRowAction('azure-1', 'storageProvidersEditAction');
+      await setFieldValue('storageProviderFlyout-accountNameInput', 'acct2');
+
+      // An earlier save of this provider (same name, other container) finishes now
+      setStorePolicy(createPolicy(policy.id, [{ ...first, container: 'changed-elsewhere' }]));
+      await userEvent.click(renderResult.getByTestId('storageProviderFlyout-saveButton'));
+
+      expect(renderResult.getByTestId('storageProviderFlyout-saveError')).toHaveTextContent(
+        'This storage provider was changed or removed. Close and reopen it.'
+      );
+      expect(apiMocks.responseProvider.updateEndpointPolicy).not.toHaveBeenCalled();
     });
 
     it('should not delete when the provider was changed since the modal opened', async () => {
