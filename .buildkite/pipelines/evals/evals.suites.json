@@ -178,11 +178,6 @@
           "specFiles": ["evals/investigation/orcabench.spec.ts"]
         },
         {
-          "id": "writeup",
-          "judge": "eis-openai-gpt-6-sol",
-          "specFiles": ["evals/writeup/writeup.spec.ts"]
-        },
-        {
           "id": "reinforcement",
           "judge": "eis-openai-gpt-6-sol",
           "specFiles": ["evals/reinforcement/reinforcement.spec.ts"]
@@ -193,12 +188,7 @@
       "id": "nightshift-writeup",
       "name": "Nightshift Investigations: reply writeup",
       "slackChannel": "#nightshift-alerts",
-      "configPath": "x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/playwright.config.ts",
-      "serverConfigSet": "evals_nightshift_investigations",
-      "scoutArch": "serverless",
-      "scoutDomain": "observability_complete",
-      "scoutHook": "x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/scout/scout_hook.sh",
-      "vaultSecret": "nightshift",
+      "configPath": "x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/writeup.playwright.config.ts",
       "tags": [
         "observability",
         "nightshift-investigations"

@@ -168,14 +168,13 @@ describe('evals.suites.json weeklyEisModelGroups', () => {
 });
 
 describe('Nightshift CI coverage', () => {
-  it('runs the Customer-0 stored datasets alongside isolated ORCA, writeup and reinforcement specs', () => {
+  it('runs the Customer-0 stored datasets alongside isolated ORCA and reinforcement specs', () => {
     const suite = suites.find(({ id }) => id === 'nightshift-investigations');
     expect(suite?.ciLabels).toEqual(['evals:nightshift-investigations']);
     expect(suite?.shards?.map(({ id }) => id)).toEqual([
       'customer0-golden',
       'customer0-connector-probes',
       'orcabench',
-      'writeup',
       'reinforcement',
     ]);
     const files = suite?.shards?.flatMap(({ specFiles }) => specFiles) ?? [];
@@ -183,7 +182,6 @@ describe('Nightshift CI coverage', () => {
       'evals/investigation/stored.spec.ts',
       'evals/connector_probe/stored.spec.ts',
       'evals/investigation/orcabench.spec.ts',
-      'evals/writeup/writeup.spec.ts',
       'evals/reinforcement/reinforcement.spec.ts',
     ]);
     const configPath = suite?.configPath;
@@ -197,6 +195,14 @@ describe('Nightshift CI coverage', () => {
     const suite = suites.find(({ id }) => id === 'nightshift-writeup');
     expect(suite?.ciLabels).toEqual(['evals:nightshift-writeup']);
     expect(suite?.defaultModelGroups?.length).toBeGreaterThan(0);
+    // Replay needs model and judge connectors only: no Nightshift Vault secret, hook or server.
+    expect(suite?.configPath).toMatch(/\/writeup\.playwright\.config\.ts$/);
+    expect(suite).not.toHaveProperty('vaultSecret');
+    expect(suite).not.toHaveProperty('scoutHook');
+    expect(suite).not.toHaveProperty('serverConfigSet');
+    // One results identity: the daily run publishes under the same suite id the PR run compares to.
+    const daily = Fs.readFileSync(Path.resolve(__dirname, 'daily_evals.yml'), 'utf8');
+    expect(daily).toContain("EVAL_SUITE_ID: 'nightshift-writeup'");
     expect(suite?.shards?.map(({ id, specFiles }) => [id, specFiles])).toEqual([
       ['writeup', ['evals/writeup/writeup.spec.ts']],
     ]);

@@ -87,7 +87,9 @@ evaluate.describe('Nightshift investigations: writeup', { tag: suiteTags }, () =
           name: 'Nightshift writeup',
           datasets: [dataset],
           // A stored dataset runs as stored; only a conversations file is upserted.
-          trustUpstreamDataset: !isWriteupDatasetFile(process.env.NIGHTSHIFT_DATASET_NAME ?? ''),
+          trustUpstreamDataset: !isWriteupDatasetFile(
+            process.env.NIGHTSHIFT_DATASET_NAME?.trim() ?? ''
+          ),
           concurrency,
           metadata: {
             concurrency,

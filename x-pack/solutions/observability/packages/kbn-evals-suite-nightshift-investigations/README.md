@@ -623,13 +623,16 @@ The reply rules live in their own file,
 [`response_style.md.text`](../../plugins/nightshift_investigations/server/agents/investigation/instructions/response_style.md.text),
 which the investigator prompt pulls in at `{{response_style_section}}`. A PR that changes that file
 (or this eval) gets the `evals:nightshift-writeup` label from `.github/paths-labeller.yml`, and the
-label runs the `nightshift-writeup` suite: this eval alone, on Sonnet 5.5, judged by GPT 6 Sol. A
+label runs the `nightshift-writeup` suite: this eval alone, on Sonnet 5.5, judged by GPT 6 Sol.
+`node scripts/evals run --suite nightshift-writeup` runs it the same way locally. A
 change that only touches how the agent replies needs nothing else. A change to the method, the
 tools or the recorder can change how the agent investigates, which this eval can't see, so it
 needs the end-to-end evals too. To skip the run on a PR, add `evals:skip-nightshift-writeup`.
 
-In CI it is also the `nightshift-investigations` suite's `writeup` shard, judged by GPT 6 Sol, so it runs on `main` with every
-daily and weekly run of the suite and publishes to the golden cluster. That's the history to
+The same suite runs on `main` every day and publishes to the golden cluster, so PR runs and
+the daily history share one suite id. It has its own Playwright config
+(`writeup.playwright.config.ts`) and runs on the plain evals server, without the Nightshift Vault
+secret or Scout hook: replay never touches the sandbox or a live target. That's the history to
 watch `main` over time. A prompt change is still measured against a baseline in the same run
 (below), not against an old run: the head to head needs both replies in front of one judge, and an
 old run used whatever harness, judge and dataset it had then.
