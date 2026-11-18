@@ -34,7 +34,7 @@ export interface EdotReactNativeRequest {
   bodySizeBytes?: number;
   /** The message the app logs with `emitLog(message, 'error')` when the request fails. */
   errorLog?: string;
-  /** The `service.name` of the backend that answers, which gets a SERVER span with proposed signals. */
+  /** The `service.name` of the backend that answers, with a SERVER span under proposed signals. */
   backend?: string;
 }
 
@@ -211,8 +211,8 @@ const TRANSPORT_ERRORS: Readonly<Record<MobilePlatform, readonly TransportError[
  * - Plans start at time 0. `session()` then moves them to the requested `start` or `end`.
  *
  * Simulation (`simulateVisit`) turns each visit into events:
- * - the launch: iOS lifecycle events, the React Native root view controller appearing on iOS, and the opt-in
- *   manual `app.launch` span
+ * - the launch: iOS lifecycle events, the React Native root view controller appearing on iOS,
+ *   and the opt-in manual `app.launch` span
  * - each screen view: the iOS view span, the opt-in manual screen span, the screen's requests,
  *   taps and the requests they fire, and error logs
  * - the crash: EDOT Android writes it right away, EDOT iOS on the next launch. When the session
