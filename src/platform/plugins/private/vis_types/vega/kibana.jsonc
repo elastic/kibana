@@ -22,6 +22,7 @@
       "uiActions",
       "unifiedSearch",
       "presentationUtil",
+      "savedObjectsManagement",
       "usageCollection"
     ],
     "optionalPlugins": [

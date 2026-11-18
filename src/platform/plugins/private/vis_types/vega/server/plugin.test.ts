@@ -11,8 +11,14 @@ import { of } from 'rxjs';
 import { coreMock } from '@kbn/core/server/mocks';
 import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
 import { mockGetDrilldownsSchema } from '@kbn/embeddable-plugin/server/mocks';
+import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/server/mocks';
 import { VisTypeVegaPlugin } from './plugin';
-import { VEGA_AS_CODE_ENABLED_FLAG, VEGA_EMBEDDABLE_TYPE } from '../common/constants';
+import {
+  VEGA_AS_CODE_ENABLED_FLAG,
+  VEGA_EMBEDDABLE_TYPE,
+  VEGA_SAVED_OBJECT_TYPE,
+} from '../common/constants';
+import { vegaApiBodyEntry } from './api/api_body_entry';
 
 describe('VisTypeVegaPlugin (server)', () => {
   test('registers a server definition for vega', async () => {
@@ -21,9 +27,10 @@ describe('VisTypeVegaPlugin (server)', () => {
     const coreStart = coreMock.createStart();
     coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}]);
     const embeddable = createEmbeddableSetupMock();
+    const savedObjectsManagement = savedObjectsManagementPluginMock.createSetupContract();
 
     const plugin = new VisTypeVegaPlugin(initializerContext);
-    plugin.setup(coreSetup, { embeddable });
+    plugin.setup(coreSetup, { embeddable, savedObjectsManagement });
     await new Promise(process.nextTick);
 
     expect(embeddable.registerEmbeddableServerDefinition).toHaveBeenCalledTimes(1);
@@ -43,12 +50,14 @@ describe('VisTypeVegaPlugin (server)', () => {
     coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}]);
 
     const embeddable = createEmbeddableSetupMock();
+    const savedObjectsManagement = savedObjectsManagementPluginMock.createSetupContract();
     const plugin = new VisTypeVegaPlugin(initializerContext);
-    plugin.setup(coreSetup, { embeddable });
+    plugin.setup(coreSetup, { embeddable, savedObjectsManagement });
     await new Promise(process.nextTick);
 
     const [, serverDefinition] = embeddable.registerEmbeddableServerDefinition.mock.calls[0];
     expect(serverDefinition.getSchema(mockGetDrilldownsSchema)).toBeUndefined();
+    expect(savedObjectsManagement.registerApiBodyEntry).not.toHaveBeenCalled();
   });
 
   test('exposes a by-value and by-reference schema when vega.asCodeEnabled is enabled', async () => {
@@ -61,8 +70,9 @@ describe('VisTypeVegaPlugin (server)', () => {
     coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}]);
 
     const embeddable = createEmbeddableSetupMock();
+    const savedObjectsManagement = savedObjectsManagementPluginMock.createSetupContract();
     const plugin = new VisTypeVegaPlugin(initializerContext);
-    plugin.setup(coreSetup, { embeddable });
+    plugin.setup(coreSetup, { embeddable, savedObjectsManagement });
     await new Promise(process.nextTick);
 
     const [, serverDefinition] = embeddable.registerEmbeddableServerDefinition.mock.calls[0];
@@ -83,5 +93,10 @@ describe('VisTypeVegaPlugin (server)', () => {
     // The library item owns the query and filters.
     const query = { language: 'kql', expression: 'bytes > 1000' };
     expect(schema!.parse({ ref_id: 'library-item', query })).toEqual({ ref_id: 'library-item' });
+
+    expect(savedObjectsManagement.registerApiBodyEntry).toHaveBeenCalledWith(
+      VEGA_SAVED_OBJECT_TYPE,
+      vegaApiBodyEntry
+    );
   });
 });

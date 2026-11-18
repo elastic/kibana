@@ -15,11 +15,16 @@ import type {
   VisTypeVegaPluginSetup,
   VisTypeVegaPluginStart,
 } from './types';
-import { VEGA_AS_CODE_ENABLED_FLAG, VEGA_EMBEDDABLE_TYPE } from '../common/constants';
+import {
+  VEGA_AS_CODE_ENABLED_FLAG,
+  VEGA_EMBEDDABLE_TYPE,
+  VEGA_SAVED_OBJECT_TYPE,
+} from '../common/constants';
 import { getVegaEmbeddableSchema } from './embeddable/schema';
 import { getTransforms } from './embeddable/transforms';
 import { vegaLibraryItemSavedObjectType } from './vega_saved_object';
 import { registerRoutes } from './api/register_routes';
+import { vegaApiBodyEntry } from './api/api_body_entry';
 
 export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisTypeVegaPluginStart> {
   private readonly logger: Logger;
@@ -31,7 +36,7 @@ export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisType
 
   public setup(
     core: CoreSetup,
-    { embeddable, usageCollection }: VisTypeVegaPluginSetupDependencies
+    { embeddable, savedObjectsManagement, usageCollection }: VisTypeVegaPluginSetupDependencies
   ) {
     // Startup-only: public API/OpenAPI contract should not hot-swap mid-process.
     // The embeddable definition is registered only once the flag is known, so
@@ -48,9 +53,13 @@ export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisType
           getSchema: (getDrilldownsSchema) =>
             asCodeEnabled ? getVegaEmbeddableSchema(getDrilldownsSchema) : undefined,
         });
+        // Without the flag there's no public API, so Vega library items are export problems.
+        if (asCodeEnabled) {
+          savedObjectsManagement.registerApiBodyEntry(VEGA_SAVED_OBJECT_TYPE, vegaApiBodyEntry);
+        }
       })
       .catch((error) => {
-        this.logger.error(`Failed to register the Vega embeddable: ${error}`);
+        this.logger.error(`Failed to register the Vega embeddable or API body entry: ${error}`);
       });
 
     core.savedObjects.registerType(vegaLibraryItemSavedObjectType);

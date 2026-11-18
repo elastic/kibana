@@ -9,11 +9,13 @@
 
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type { SavedObjectsManagementPluginSetup } from '@kbn/saved-objects-management-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 export interface SetupDeps {
   embeddable: EmbeddableSetup;
   contentManagement: ContentManagementServerSetup;
+  savedObjectsManagement: SavedObjectsManagementPluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
 

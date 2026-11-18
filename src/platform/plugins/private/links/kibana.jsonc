@@ -15,6 +15,7 @@
       "embeddable",
       "kibanaReact",
       "kibanaUtils",
+      "savedObjectsManagement",
       "uiActions",
       "visualizations"
     ],

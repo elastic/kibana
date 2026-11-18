@@ -8,11 +8,21 @@
  */
 
 import { getMeta } from '@kbn/as-code-shared-schemas';
-import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
+import type {
+  SavedObject,
+  SavedObjectReference,
+  SavedObjectsUpdateResponse,
+} from '@kbn/core/server';
 import { prettifyError } from '@kbn/zod';
 import type { StoredVegaLibraryItemState } from '../vega_saved_object';
 import { vegaLibraryItemSchema } from './schema';
 import { transformVegaOut } from './transforms/transform_vega_out';
+
+/** Converts stored attributes to the API state the GET returns, with schema defaults applied. */
+export const parseVegaApiState = (
+  attributes: Partial<StoredVegaLibraryItemState>,
+  references?: SavedObjectReference[]
+) => vegaLibraryItemSchema.safeParse(transformVegaOut(attributes, references));
 
 // CRU is Create, Read, Update
 export const getVegaCRUResponseBody = (
@@ -22,8 +32,9 @@ export const getVegaCRUResponseBody = (
 ) => {
   // Route does not apply defaults to response
   // Instead, call parse to ensure defaults are applied to response
-  const { success, data, error } = vegaLibraryItemSchema.safeParse(
-    transformVegaOut(savedObject.attributes, savedObject.references)
+  const { success, data, error } = parseVegaApiState(
+    savedObject.attributes,
+    savedObject.references
   );
   if (!success) {
     // The stored item is the problem, not the request. A plain error results in a 500 response.

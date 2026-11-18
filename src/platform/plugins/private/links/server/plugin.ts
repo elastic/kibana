@@ -16,11 +16,13 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type { SavedObjectsManagementPluginSetup } from '@kbn/saved-objects-management-plugin/server';
 import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 
-import { LINKS_EMBEDDABLE_TYPE } from '../common';
+import { LINKS_EMBEDDABLE_TYPE, LINKS_LIBRARY_TYPE } from '../common';
 import { transforms } from '../common/embeddable/transforms/transforms';
 import { registerRoutes } from './api';
+import { linksApiBodyEntry } from './api/api_body_entry';
 import { linksEmbeddableSchema } from './api/schemas';
 import { linksSavedObjectDefinition } from './links_saved_object';
 import type { LinksByValueState } from './types';
@@ -38,6 +40,7 @@ export class LinksServerPlugin implements Plugin<object, object> {
     plugins: {
       contentManagement: ContentManagementServerSetup;
       embeddable: EmbeddableSetup;
+      savedObjectsManagement: SavedObjectsManagementPluginSetup;
       usageCollection?: UsageCollectionSetup;
     }
   ) {
@@ -47,6 +50,7 @@ export class LinksServerPlugin implements Plugin<object, object> {
       getTransforms: () => transforms,
       getSchema: () => linksEmbeddableSchema,
     });
+    plugins.savedObjectsManagement.registerApiBodyEntry(LINKS_LIBRARY_TYPE, linksApiBodyEntry);
 
     if (plugins.usageCollection) {
       this.apiUsageCounter = plugins.usageCollection.createUsageCounter('links_api');

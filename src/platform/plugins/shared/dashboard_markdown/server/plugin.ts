@@ -17,7 +17,8 @@ import type {
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { registerRoutes } from './api/register_routes';
-import { MARKDOWN_EMBEDDABLE_TYPE } from '../common/constants';
+import { MARKDOWN_EMBEDDABLE_TYPE, MARKDOWN_SAVED_OBJECT_TYPE } from '../common/constants';
+import { markdownApiBodyEntry } from './api/api_body_entry';
 import { markdownEmbeddableSchema } from './embeddable/schemas';
 import { markdownSavedObjectType, type StoredMarkdownState } from './markdown_saved_object';
 import type { SetupDeps, StartDeps } from './types';
@@ -39,6 +40,10 @@ export class MarkdownPlugin implements Plugin<void, void, SetupDeps, StartDeps> 
     });
 
     core.savedObjects.registerType<StoredMarkdownState>(markdownSavedObjectType);
+    plugins.savedObjectsManagement.registerApiBodyEntry(
+      MARKDOWN_SAVED_OBJECT_TYPE,
+      markdownApiBodyEntry
+    );
 
     if (plugins.usageCollection) {
       this.apiUsageCounter = plugins.usageCollection.createUsageCounter('markdowns_api');

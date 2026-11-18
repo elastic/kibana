@@ -30,7 +30,8 @@
     "@kbn/usage-collection-plugin",
     "@kbn/as-code-shared-telemetry",
     "@kbn/dashboard-markdown-schemas",
-    "@kbn/visualizations-components"
+    "@kbn/visualizations-components",
+    "@kbn/saved-objects-management-plugin"
   ],
   "exclude": ["target/**/*"]
 }
