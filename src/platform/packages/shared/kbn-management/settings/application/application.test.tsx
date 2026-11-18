@@ -18,7 +18,6 @@ import {
   SettingsApplication,
   DATA_TEST_SUBJ_SETTINGS_TITLE,
   DATA_TEST_SUBJ_SETTINGS_LOAD_ERROR,
-  DATA_TEST_SUBJ_SETTINGS_LOAD_RETRY,
   DATA_TEST_SUBJ_SETTINGS_LOADING,
   SPACE_SETTINGS_TAB_ID,
   GLOBAL_SETTINGS_TAB_ID,
@@ -40,6 +39,7 @@ import { getSettingsCapabilitiesMock } from '@kbn/management-settings-utilities/
 import { wrap, createSettingsApplicationServicesMock } from './mocks';
 import type { SettingsApplicationServices } from './services';
 import { SettingsApplicationKibanaProvider, SettingsApplicationProvider } from './services';
+import { DATA_TEST_SUBJ_SETTING_DEFINITIONS_RETRY } from '@kbn/management-settings-hooks';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import type { SolutionView, Space } from '@kbn/spaces-plugin/common';
@@ -201,7 +201,12 @@ describe('Settings application', () => {
   it('fetches the failed settings again when retrying from the error callout', async () => {
     const client = uiSettingsServiceMock.createStartContract();
     client.getAll.mockReturnValue({
-      'test:setting': { name: 'Test setting', type: 'string', value: 'default', userValue: 'saved' },
+      'test:setting': {
+        name: 'Test setting',
+        type: 'string',
+        value: 'default',
+        userValue: 'saved',
+      },
     });
     let namespaceAttempts = 0;
     let resolveRetry: () => void = () => {};
@@ -235,7 +240,7 @@ describe('Settings application', () => {
     expect(loadError).toHaveTextContent('Internal Server Error');
 
     act(() => {
-      fireEvent.click(getByTestId(DATA_TEST_SUBJ_SETTINGS_LOAD_RETRY));
+      fireEvent.click(getByTestId(DATA_TEST_SUBJ_SETTING_DEFINITIONS_RETRY));
     });
 
     expect(queryByTestId(DATA_TEST_SUBJ_SETTINGS_LOAD_ERROR)).toBeNull();
@@ -383,20 +388,26 @@ describe('Settings application', () => {
   it("doesn't refetch the settings or lose unsaved changes when the Kibana provider re-renders", async () => {
     const client = uiSettingsServiceMock.createStartContract();
     client.getAll.mockReturnValue({
-      'test:setting': { name: 'Test setting', type: 'string', value: 'default', userValue: 'saved' },
+      'test:setting': {
+        name: 'Test setting',
+        type: 'string',
+        value: 'default',
+        userValue: 'saved',
+      },
     });
     const metadata = {
-      getAll: jest.fn(async (scope: UiSettingsScope): Promise<UiSettingsMetadataState> =>
-        scope === 'namespace'
-          ? {
-              'test:setting': {
-                name: 'Test setting',
-                type: 'string',
-                value: 'default',
-                userValue: 'saved',
-              },
-            }
-          : {}
+      getAll: jest.fn(
+        async (scope: UiSettingsScope): Promise<UiSettingsMetadataState> =>
+          scope === 'namespace'
+            ? {
+                'test:setting': {
+                  name: 'Test setting',
+                  type: 'string',
+                  value: 'default',
+                  userValue: 'saved',
+                },
+              }
+            : {}
       ),
     };
 

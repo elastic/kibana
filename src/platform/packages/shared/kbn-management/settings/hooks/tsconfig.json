@@ -5,11 +5,13 @@
     "types": [
       "jest",
       "node",
-      "react"
+      "react",
+      "@testing-library/jest-dom"
     ]
   },
   "include": [
     "**/*.ts",
+    "**/*.tsx",
   ],
   "exclude": [
     "target/**/*"
@@ -22,5 +24,6 @@
     "@kbn/management-settings-field-definition",
     "@kbn/management-settings-types",
     "@kbn/management-settings-utilities",
+    "@kbn/ui-callout",
   ]
 }

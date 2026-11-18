@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/management-settings-field-definition'
   - '@kbn/management-settings-types'
   - '@kbn/management-settings-utilities'
+  - '@kbn/ui-callout'
 tags:
   - shared-browser
   - package
@@ -34,5 +35,6 @@ tags:
 fileGroups:
   src:
     - '**/*.ts'
+    - '**/*.tsx'
     - '!target/**/*'
 tasks: {}

@@ -18,7 +18,8 @@ import {
   Query,
   EuiTabs,
 } from '@elastic/eui';
-import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
+import { KbnInfoCallout } from '@kbn/ui-callout';
+import { SettingDefinitionsLoadError } from '@kbn/management-settings-hooks';
 import { getCategoryCounts } from '@kbn/management-settings-utilities';
 import { Form } from '@kbn/management-settings-components-form';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
@@ -34,7 +35,6 @@ import { useServices } from './services';
 
 export const DATA_TEST_SUBJ_SETTINGS_TITLE = 'managementSettingsTitle';
 export const DATA_TEST_SUBJ_SETTINGS_LOAD_ERROR = 'managementSettingsLoadError';
-export const DATA_TEST_SUBJ_SETTINGS_LOAD_RETRY = 'managementSettingsLoadRetry';
 export const DATA_TEST_SUBJ_SETTINGS_LOADING = 'managementSettingsLoading';
 export const SPACE_SETTINGS_TAB_ID = 'space-settings';
 export const GLOBAL_SETTINGS_TAB_ID = 'global-settings';
@@ -199,16 +199,10 @@ export const SettingsApplication = () => {
       <div>
         {title}
         <EuiSpacer size="m" />
-        <KbnDangerCallout
+        <SettingDefinitionsLoadError
+          error={loadError}
+          onRetry={retry}
           title={i18nTexts.loadErrorTitle}
-          text={loadError.message}
-          actionProps={{
-            primary: {
-              children: i18nTexts.loadErrorRetryButton,
-              onClick: retry,
-              'data-test-subj': DATA_TEST_SUBJ_SETTINGS_LOAD_RETRY,
-            },
-          }}
           data-test-subj={DATA_TEST_SUBJ_SETTINGS_LOAD_ERROR}
         />
       </div>

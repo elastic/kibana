@@ -79,7 +79,15 @@ export const useSettings = (scope: UiSettingsScope, isEnabled: boolean = true) =
     },
     // The client is mutable, so `settingsVersion` stands in for its values changing.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [scope, solutionView, definitions, isLoading, loadError, getAllowlistedSettings, settingsVersion]
+    [
+      scope,
+      solutionView,
+      definitions,
+      isLoading,
+      loadError,
+      getAllowlistedSettings,
+      settingsVersion,
+    ]
   );
 
   return { settings, isLoading, error: loadError, retry };
