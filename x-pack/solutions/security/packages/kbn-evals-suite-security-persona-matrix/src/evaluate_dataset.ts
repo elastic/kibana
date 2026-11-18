@@ -22,6 +22,7 @@ import {
   type Evaluator,
   type TaskOutput,
 } from '@kbn/evals';
+import { createSecurityRelevanceEvaluator } from '@kbn/security-evals-matrix';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type {
   PersonaMatrixExample,
@@ -756,6 +757,16 @@ export const reportingIdentity = (
     ? { datasetName, suite: PERSONA_MATRIX_SUITE_IDS.default }
     : { datasetName: `${datasetName} (${profile})`, suite: PERSONA_MATRIX_SUITE_IDS[profile] };
 
+/**
+ * Platform Factuality / Sequence Accuracy plus the security-owned `Relevance` (code-derived label,
+ * empty response scores 0). The security entry replaces the platform one under the same evaluator
+ * name so the golden formula and dashboards keep resolving it.
+ */
+export const createPersonaMatrixQuantitativeEvaluators = (): Evaluator[] =>
+  createQuantitativeCorrectnessEvaluators().map((evaluator) =>
+    evaluator.name === 'Relevance' ? createSecurityRelevanceEvaluator() : evaluator
+  );
+
 export function createEvaluatePersonaMatrixDataset({
   chatClient,
   evaluators,
@@ -882,7 +893,7 @@ export function createEvaluatePersonaMatrixDataset({
       createUnrequestedSideEffectsEvaluator(),
       createStalledAfterLoadSkillEvaluator(),
       createRubricCapNoToolCallEvaluator(),
-      ...createQuantitativeCorrectnessEvaluators(),
+      ...createPersonaMatrixQuantitativeEvaluators(),
       createQuantitativeGroundednessEvaluator(),
       precomputedCriteriaEvaluator,
       ...(rubricJudgeClient
