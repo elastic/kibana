@@ -41,7 +41,9 @@ The payload contains:
 
 The live report document is fetched space-projected at render time; the captured fields above
 are only a fallback used when the live document cannot be resolved. Quote the captured fields
-verbatim when discussing this attachment rather than restating the full report from memory.`;
+verbatim when discussing this attachment rather than restating the full report from memory.
+
+Rendering this attachment inline displays the threat report as a card: title, severity and source, indicators of compromise grouped by type with their hunt status, tactics, techniques, regions and categories, and the Diamond model.`;
 
 export const createThreatAttachmentType = (): AttachmentTypeDefinition =>
   createReadonlyAttachmentType({
@@ -50,7 +52,6 @@ export const createThreatAttachmentType = (): AttachmentTypeDefinition =>
     readSchema: threatAttachmentReadSchema,
     formatForAgent: formatThreatForAgent,
     describePayload,
-    renderNoun: 'threat pill',
     // Worst case observed at the schema's max sizes: ~1.2K characters.
     maxContentLength: 10_000,
   });

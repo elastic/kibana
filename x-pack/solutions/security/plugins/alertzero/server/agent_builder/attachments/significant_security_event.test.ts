@@ -349,7 +349,7 @@ describe('createSignificantSecurityEventAttachmentType', () => {
   });
 
   describe('getAgentDescription', () => {
-    it('documents the payload shape and the render_attachment contract', () => {
+    it('documents the payload shape and what the rendered card shows', () => {
       const description = attachmentType.getAgentDescription?.();
 
       expect(description).toContain('Significant Security Event');
@@ -357,7 +357,9 @@ describe('createSignificantSecurityEventAttachmentType', () => {
       expect(description).toContain('hypothesis_tested');
       expect(description).toContain('{ field, value }');
       expect(description).toContain('NOT Discover IOCs');
-      expect(description).toContain('<render_attachment id="ATTACHMENT_ID" version="VERSION" />');
+      expect(description).toContain(
+        'Rendering this attachment inline displays the finding as a card: the headline with its basis, what matched and where, the hosts and users involved, related events with links to Discover, and the hypothesis with its evidence for and against.'
+      );
     });
   });
 

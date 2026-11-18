@@ -235,6 +235,12 @@ describe('system-security-hunt-execute', () => {
     expect(update.with?.conversation_id).toBe(add.with?.conversation_id);
   });
 
+  // The agent no longer renders this card, so `render_inline` is what shows it in the thread.
+  it('shows the SSE card inline on both the add and the update', () => {
+    expect(stepNamed(workflow, 'add_sse_attachment').with?.render_inline).toBe(true);
+    expect(stepNamed(workflow, 'update_sse_attachment').with?.render_inline).toBe(true);
+  });
+
   // `fallback` alone does not rescue the step: the engine's `ExitTryBlockNodeImpl` re-throws
   // the stored add error after the fallback path completes, so without `continue` the rerun
   // still fails at `attach_sse` even though the update landed (fallback_step/README.md,
