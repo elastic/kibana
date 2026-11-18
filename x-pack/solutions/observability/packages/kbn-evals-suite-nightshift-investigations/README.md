@@ -624,8 +624,14 @@ The reply rules live in their own file,
 which the investigator prompt pulls in at `{{response_style_section}}`. A PR that changes that file
 (or this eval) gets the `evals:nightshift-writeup` label from `.github/paths-labeller.yml`, and the
 label runs the `nightshift-writeup` suite: this eval alone, on Sonnet 5.5, judged by GPT 6 Sol.
-`node scripts/evals run --suite nightshift-writeup` runs it the same way locally. A
-change that only touches how the agent replies needs nothing else. A change to the method, the
+To reproduce that run locally:
+
+```bash
+node scripts/evals start --suite nightshift-writeup --profile dev-vault \
+  --model eis-anthropic-claude-5-5-sonnet --judge eis-openai-gpt-6-sol
+```
+
+A change that only touches how the agent replies needs nothing else. A change to the method, the
 tools or the recorder can change how the agent investigates, which this eval can't see, so it
 needs the end-to-end evals too. To skip the run on a PR, add `evals:skip-nightshift-writeup`.
 

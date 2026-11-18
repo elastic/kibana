@@ -196,6 +196,7 @@
       "ciLabels": [
         "evals:nightshift-writeup"
       ],
+      "defaultJudge": "eis-openai-gpt-6-sol",
       "defaultModelGroups": [
         "eis/anthropic-claude-5.5-sonnet"
       ],
