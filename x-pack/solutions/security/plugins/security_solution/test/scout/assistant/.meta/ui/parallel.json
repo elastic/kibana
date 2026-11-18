@@ -1,0 +1,24 @@
+{
+  "sha1": "a8c3d18cf2566b65bf5c4ba74e976d175a08183d",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "20941d97ae94f8b-00ec208b03ea35c",
+      "title": "AI Assistant - send a KQL query from a message to Timeline a KQL query in a message can be sent to Timeline only from pages that show Timeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/assistant/ui/parallel_tests/assistant_send_to_timeline.spec.ts",
+        "line": 112,
+        "column": 23
+      }
+    }
+  ]
+}

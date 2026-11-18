@@ -142,6 +142,7 @@ These skills describe test file conventions, runner commands, authentication pat
 | Unit | `plugins/security_solution/public/assistant/**/*.test.ts` |
 | Unit | `plugins/security_solution/public/attack_discovery/**/*.test.ts` |
 | Cypress E2E | `test/security_solution_cypress/cypress/e2e/ai_assistant/` |
+| Scout UI | `plugins/security_solution/test/scout/assistant/ui/` |
 | API integration | `test/security_solution_api_integration/test_suites/genai/attack_discovery/` |
 | API integration | `test/security_solution_api_integration/test_suites/genai/conversations/` |
 | API integration | `test/security_solution_api_integration/test_suites/genai/knowledge_base/` |
