@@ -72,23 +72,27 @@ function validateCPU(s: string) {
 export const AgentPolicyOverridesRequestSchema = schema.maybe(
   schema.oneOf([
     schema.literal(null),
-    schema.recordOf(schema.string(), schema.any(), {
-      validate: (val) => {
-        if (Object.keys(val).some((key) => key.match(/^inputs(\.)?/))) {
-          return 'inputs overrides is not allowed';
-        }
-        for (const key of Object.keys(val)) {
-          const denied = getDeniedAgentPolicyOverrideKey(key);
-          if (denied) {
-            return `${denied} overrides is not allowed`;
+    schema.recordOf(
+      schema.querySortField.warn({ label: 'fleet.agent_policies.overrides.key' }),
+      schema.any(),
+      {
+        validate: (val) => {
+          if (Object.keys(val).some((key) => key.match(/^inputs(\.)?/))) {
+            return 'inputs overrides is not allowed';
           }
-        }
-      },
-      meta: {
-        description:
-          'Override settings that are defined in the agent policy. Input, output permissions and OpenTelemetry collector settings (receivers, exporters, processors, connectors, extensions, service) cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.',
-      },
-    }),
+          for (const key of Object.keys(val)) {
+            const denied = getDeniedAgentPolicyOverrideKey(key);
+            if (denied) {
+              return `${denied} overrides is not allowed`;
+            }
+          }
+        },
+        meta: {
+          description:
+            'Override settings that are defined in the agent policy. Input, output permissions and OpenTelemetry collector settings (receivers, exporters, processors, connectors, extensions, service) cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.',
+        },
+      }
+    ),
   ])
 );
 

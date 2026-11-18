@@ -232,6 +232,13 @@ describe('AgentPolicyOverridesRequestSchema', () => {
     expect(() => AgentPolicyOverridesRequestSchema.validate(null)).not.toThrow();
     expect(() => AgentPolicyOverridesRequestSchema.validate(undefined)).not.toThrow();
   });
+
+  // Keys are bounded in reporting mode only: an overlong key is recorded, not rejected.
+  it('should not reject a key longer than the reporting bound', () => {
+    expect(() =>
+      AgentPolicyOverridesRequestSchema.validate({ [`agent.${'a'.repeat(300)}`]: 'x' })
+    ).not.toThrow();
+  });
 });
 
 describe('agent policy overrides with OpenTelemetry collector keys', () => {
