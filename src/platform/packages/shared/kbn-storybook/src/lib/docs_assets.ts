@@ -16,6 +16,7 @@ import webpack from 'webpack';
 import type { Configuration, StatsError, Watching } from 'webpack';
 import { default as WebpackConfig } from '../webpack.config';
 import { EMBEDDABLE_STORYBOOK_TAG } from './embeddable';
+import { withNodeSchemeFallbacks } from './node_scheme_fallbacks';
 
 export interface StorybookIndexEntry {
   id?: string;
@@ -239,7 +240,7 @@ export const createInlineRegistryWebpackConfig = ({
   docsDir,
 }: CreateInlineRegistryWebpackConfigOptions): Configuration =>
   WebpackConfig({
-    config: {
+    config: withNodeSchemeFallbacks({
       mode: 'production',
       target: 'web',
       entry: {
@@ -357,7 +358,7 @@ export const createInlineRegistryWebpackConfig = ({
         runtimeChunk: false,
       },
       stats: 'errors-only',
-    },
+    }),
   });
 
 const formatWebpackError = (error: StatsError): string => {
