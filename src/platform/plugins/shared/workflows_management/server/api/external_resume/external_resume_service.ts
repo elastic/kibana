@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { timingSafeEqual } from 'node:crypto';
+import { computeTokenHmac, timingSafeEqualHex } from '@kbn/crypto';
 import { ExecutionStatus, isHitlWaitStepType, readHitlExternalResumeToken } from '@kbn/workflows';
 import type { ResumeWorkflowExecutionResponseDto, WorkflowStepExecutionDto } from '@kbn/workflows';
 import {
   WorkflowExecutionInvalidStatusError,
   WorkflowExecutionNotFoundError,
 } from '@kbn/workflows/common/errors';
-import { computeTokenHmac, EXTERNAL_RESUME_API_PATH } from '@kbn/workflows/server';
+import { EXTERNAL_RESUME_API_PATH } from '@kbn/workflows/server';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { ExternalResumeError } from './external_resume_error';
 import {
@@ -246,12 +246,8 @@ async function resolveExternalResumeContext(
     throw new ExternalResumeError('Link expired or already used', 401);
   }
 
-  const computed = Buffer.from(
-    computeTokenHmac(token, executionId, stepId, storedToken.expiresAt),
-    'hex'
-  );
-  const stored = Buffer.from(storedToken.hash, 'hex');
-  if (computed.length !== stored.length || !timingSafeEqual(computed, stored)) {
+  const computed = computeTokenHmac(token, executionId, stepId, storedToken.expiresAt);
+  if (!timingSafeEqualHex(computed, storedToken.hash)) {
     throw new ExternalResumeError('Invalid resume token', 401);
   }
 

@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { spaceTest, tags } from '@kbn/scout';
+import { findImportedSavedObjectId, spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { DASHBOARD_SAVED_SEARCH_ARCHIVE, FEW_PANELS_DASHBOARD_TITLE } from '../constants';
-import { findImportedSavedObjectId } from '../../utils/migration_smoke_helpers';
 
 let fewPanelsDashboardId = '';
 
