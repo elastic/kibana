@@ -12,7 +12,7 @@ import {
   k8sDeploymentOtelAndAgentFixture,
   k8sNodeFixture,
 } from '../inventory/__fixtures__/definitions';
-import { buildColumns } from '../inventory/generator';
+import { buildColumns, getDynamicBlock } from '../inventory/generator';
 import { InventoryService } from './inventory_service';
 
 jest.mock('../inventory/generator', () => {
@@ -82,7 +82,7 @@ describe('InventoryService.listTypes', () => {
     const labelled = {
       ...k8sDeploymentOtelAndAgentFixture,
       dynamic: {
-        ...k8sDeploymentOtelAndAgentFixture.dynamic,
+        ...getDynamicBlock(k8sDeploymentOtelAndAgentFixture),
         displayLabels: [
           { name: 'kubernetes.namespace', label: 'Namespace' },
           { name: 'available_replicas', label: 'Available replicas' },
