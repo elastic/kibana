@@ -21,7 +21,7 @@ import {
   getSLIRoutingProcessor,
   isSLIRoutingPipelineCurrent,
 } from '../../../assets/ingest_templates/sli_routing_pipeline_template';
-import { isAbortError } from '../orphan_summary_cleanup_task/types';
+import { isAbortError } from '../../../utils/with_deadline';
 import type { TaskState } from './types';
 
 const SLI_PIPELINE_PATTERN = '.slo-observability.sli.pipeline-*';

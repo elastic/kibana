@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { chunk } from 'lodash';
 import { SLI_DESTINATION_INDEX_PATTERN, SLO_RESOURCES_VERSION } from '../../../../common/constants';
-import { isAbortError } from '../orphan_summary_cleanup_task/types';
+import { isAbortError } from '../../../utils/with_deadline';
 import { planSliRetention } from './plan_sli_retention';
 
 const DELETE_CHUNK_SIZE = 50;

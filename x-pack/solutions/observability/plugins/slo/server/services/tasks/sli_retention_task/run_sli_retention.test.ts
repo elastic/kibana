@@ -159,6 +159,16 @@ describe('runSliRetention', () => {
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('1 of 10001'));
   });
 
+  it('deletes an empty old base index when no SLO transform exists', async () => {
+    mockIndices([['.slo-observability.sli-v3.5', '0']]);
+    // filter_path drops the transforms key when no transform matches.
+    esClient.transform.getTransform.mockResolvedValue({
+      count: 0,
+    } as TransformGetTransformResponse);
+
+    await expect(run()).resolves.toEqual(['.slo-observability.sli-v3.5']);
+  });
+
   it('keeps an old base index a transform writes to', async () => {
     mockIndices([['.slo-observability.sli-v3.5', '0']]);
     esClient.transform.getTransform.mockResolvedValue(

@@ -173,6 +173,8 @@ The `slo:sli-retention-task` task runs daily and deletes, for every `v3.x` versi
 
 The rounding of an index cannot be told from its name, so a day `01` index is kept one month after its date, and any other index 7 days after its date. Set `xpack.slo.sliRetentionTaskEnabled: false` to keep SLI data forever. A retention period shorter than 180 days truncates the history charts of 90 days SLOs.
 
+The task replaces ES-native lifecycle management: ILM is not available on serverless, data stream lifecycle needs data streams, which reject the transforms' overwrites of documents by `_id`, and ILM ages an index from its creation date, which a backfilled index does not reflect.
+
 ### Troubleshooting
 
 ```
