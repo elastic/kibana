@@ -23,6 +23,7 @@ import type {
 } from '@kbn/core/server';
 import { LockManagerService } from '@kbn/lock-manager';
 import type { TaskRegisterDefinition } from '@kbn/task-manager-plugin/server';
+import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import {
   ExecutionStatus,
   isTerminalStatus,
@@ -83,6 +84,7 @@ import {
 } from './lib/task_recovery';
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
 import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
+import { isWorkflowIdentityTaskError } from './lib/workflow_identity_task_error';
 import {
   getExecutionForTaskRunEvent,
   mapExecutionStatusToOutcome,
@@ -698,6 +700,11 @@ export class WorkflowsExecutionEnginePlugin
                   space_id: spaceId,
                   outcome: isExhausted ? 'interrupted' : 'failed',
                 });
+                // The execution is already finalized FAILED and cleaned up; a retry could
+                // only fail again or pollute metrics with 'Workflow execution not found'.
+                if (isWorkflowIdentityTaskError(error)) {
+                  throwUnrecoverableError(error);
+                }
                 throw error;
               }
             },
@@ -987,6 +994,11 @@ export class WorkflowsExecutionEnginePlugin
                   space_id: spaceId,
                   outcome: isExhausted ? 'interrupted' : 'failed',
                 });
+                // The execution is already finalized FAILED and cleaned up; a retry could
+                // only fail again or pollute metrics with 'Workflow execution not found'.
+                if (isWorkflowIdentityTaskError(error)) {
+                  throwUnrecoverableError(error);
+                }
                 throw error;
               }
             },
