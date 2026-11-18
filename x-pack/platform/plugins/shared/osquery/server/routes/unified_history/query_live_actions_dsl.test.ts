@@ -294,12 +294,12 @@ describe('buildLiveActionsQuery', () => {
 
   describe('activeFilters (source type filtering)', () => {
     const sources = ['live', 'rule', 'workflow'] as const;
-    const documents = [undefined, 'workflow', 'other'].flatMap((dispatchSource) =>
+    const documents = [undefined, 'workflow', 'other'].flatMap((originType) =>
       [undefined, [], ['alert-1'], ['alert-1', 'alert-2']].map((alertIds) => ({
         type: 'INPUT_ACTION',
         input_type: 'osquery',
         space_id: 'default',
-        dispatch_source: dispatchSource,
+        'origin.type': originType,
         alert_ids: alertIds,
       }))
     );
@@ -317,7 +317,7 @@ describe('buildLiveActionsQuery', () => {
 
           return filters.every((clause) => matchesClause(clause, document));
         });
-        expect(matching).toEqual([resolveSource({ _source: document }).toLowerCase()]);
+        expect(matching).toEqual([resolveSource({ fields: document }).toLowerCase()]);
       }
     });
 
@@ -332,7 +332,7 @@ describe('buildLiveActionsQuery', () => {
       ) as TestClause[];
       for (const document of documents) {
         expect(filters.every((clause) => matchesClause(clause, document))).toBe(
-          selected.some((source) => source === resolveSource({ _source: document }).toLowerCase())
+          selected.some((source) => source === resolveSource({ fields: document }).toLowerCase())
         );
       }
 

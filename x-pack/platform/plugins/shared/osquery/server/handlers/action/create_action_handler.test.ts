@@ -13,6 +13,7 @@ import { getInternalSavedObjectsClientForSpaceId } from '../../utils/get_interna
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { packSavedObjectType } from '../../../common/types';
 import { PACK_LOOKUP_FAILED, PACK_NOT_FOUND } from '../../../common/translations/errors';
+import { ensureActionsIndexMappings } from '../../create_indices/create_transforms_indices';
 
 jest.mock('./create_queries', () => ({
   ...jest.requireActual('./create_queries'),
@@ -20,6 +21,13 @@ jest.mock('./create_queries', () => ({
 }));
 jest.mock('../../lib/parse_agent_groups');
 jest.mock('../../utils/get_internal_saved_object_client');
+jest.mock('../../create_indices/create_transforms_indices', () => ({
+  ensureActionsIndexMappings: jest.fn().mockResolvedValue(undefined),
+}));
+
+const mockedEnsureActionsIndexMappings = ensureActionsIndexMappings as jest.MockedFunction<
+  typeof ensureActionsIndexMappings
+>;
 
 const mockedBuildQueries = buildQueries as jest.MockedFunction<typeof buildQueries>;
 const mockedParseAgentSelection = parseAgentSelection as jest.MockedFunction<
@@ -58,6 +66,7 @@ const buildOsqueryContext = ({
       getFleetActionsClient: () => ({ bulkCreate }),
     },
     telemetryEventsSender: { reportEvent },
+    logFactory: { get: jest.fn(() => ({ debug: jest.fn(), error: jest.fn() })) },
   } as unknown as OsqueryAppContext;
 
   return { context, bulkCreate, bulk, indicesExists, reportEvent };
@@ -78,82 +87,66 @@ describe('createActionHandler', () => {
     ]);
   });
 
-  describe('workflow dispatch metadata', () => {
-    const fieldNames = ['dispatch_source', 'dispatch_workflow_id', 'dispatch_execution_id'];
+  describe('origin', () => {
+    const workflowOrigin = { type: 'workflow' as const, execution_id: 'exec-1' };
+    const liveDispatch = {
+      entryPoint: 'live_query' as const,
+      source: { kind: 'caller' as const },
+    };
 
-    it.each([
-      {
-        name: 'source and both trace IDs',
-        metadata: {
-          dispatchSource: 'workflow' as const,
-          dispatchWorkflowId: 'wf-1',
-          dispatchExecutionId: 'exec-1',
-        },
-        expected: {
-          dispatch_source: 'workflow',
-          dispatch_workflow_id: 'wf-1',
-          dispatch_execution_id: 'exec-1',
-        },
-      },
-      {
-        name: 'source only',
-        metadata: { dispatchSource: 'workflow' as const },
-        expected: { dispatch_source: 'workflow' },
-      },
-      {
-        name: 'source and workflow ID only',
-        metadata: { dispatchSource: 'workflow' as const, dispatchWorkflowId: 'wf-1' },
-        expected: { dispatch_source: 'workflow', dispatch_workflow_id: 'wf-1' },
-      },
-      {
-        name: 'source and execution ID only',
-        metadata: { dispatchSource: 'workflow' as const, dispatchExecutionId: 'exec-1' },
-        expected: { dispatch_source: 'workflow', dispatch_execution_id: 'exec-1' },
-      },
-      { name: 'no metadata', metadata: {}, expected: {} },
-      {
-        name: 'trace IDs without a source',
-        metadata: { dispatchWorkflowId: 'wf-1', dispatchExecutionId: 'exec-1' },
-        expected: {},
-      },
-    ])('indexes only the supplied fields for $name', async ({ metadata, expected }) => {
+    it('writes the origin object on the action document', async () => {
+      const { context, bulk } = buildOsqueryContext();
+
+      const result = await createActionHandler(
+        context,
+        { query: 'SELECT 1;', agent_ids: [TEST_AGENT] },
+        { dispatch: liveDispatch, origin: workflowOrigin }
+      );
+
+      expect(bulk).toHaveBeenCalledTimes(1);
+      expect(bulk.mock.calls[0][0].operations[1]).toMatchObject({ origin: workflowOrigin });
+      expect(result.response.origin).toEqual(workflowOrigin);
+    });
+
+    it('applies the actions index mappings before writing a document with an origin', async () => {
       const { context, bulk } = buildOsqueryContext();
 
       await createActionHandler(
         context,
         { query: 'SELECT 1;', agent_ids: [TEST_AGENT] },
-        {
-          dispatch: { entryPoint: 'live_query', source: { kind: 'caller' } },
-          ...metadata,
-        }
+        { dispatch: liveDispatch, origin: workflowOrigin }
       );
 
-      expect(bulk).toHaveBeenCalledTimes(1);
-      const document = bulk.mock.calls[0][0].operations[1];
-      expect(document).toMatchObject(expected);
-      for (const field of fieldNames) {
-        if (!Object.hasOwn(expected, field)) {
-          expect(document).not.toHaveProperty(field);
-        }
-      }
+      expect(mockedEnsureActionsIndexMappings).toHaveBeenCalledTimes(1);
+      expect(mockedEnsureActionsIndexMappings.mock.invocationCallOrder[0]).toBeLessThan(
+        bulk.mock.invocationCallOrder[0]
+      );
     });
 
-    it('omits dispatch metadata from live query telemetry', async () => {
-      const { context, reportEvent } = buildOsqueryContext();
-      const options = {
-        dispatch: { entryPoint: 'live_query' as const, source: { kind: 'caller' as const } },
-        dispatchSource: 'workflow' as const,
-        dispatchWorkflowId: 'wf-1',
-        dispatchExecutionId: 'exec-1',
-      };
+    it('writes no origin and skips the mapping check for a dispatch without one', async () => {
+      const { context, bulk } = buildOsqueryContext();
 
-      await createActionHandler(context, { query: 'SELECT 1;', agent_ids: [TEST_AGENT] }, options);
+      await createActionHandler(
+        context,
+        { query: 'SELECT 1;', agent_ids: [TEST_AGENT] },
+        { dispatch: liveDispatch }
+      );
+
+      expect(bulk.mock.calls[0][0].operations[1]).not.toHaveProperty('origin');
+      expect(mockedEnsureActionsIndexMappings).not.toHaveBeenCalled();
+    });
+
+    it('omits the origin from live query telemetry', async () => {
+      const { context, reportEvent } = buildOsqueryContext();
+
+      await createActionHandler(
+        context,
+        { query: 'SELECT 1;', agent_ids: [TEST_AGENT] },
+        { dispatch: liveDispatch, origin: workflowOrigin }
+      );
 
       expect(reportEvent).toHaveBeenCalledTimes(1);
-      const payload = reportEvent.mock.calls[0][1];
-      for (const field of fieldNames) {
-        expect(payload).not.toHaveProperty(field);
-      }
+      expect(reportEvent.mock.calls[0][1]).not.toHaveProperty('origin');
     });
   });
 

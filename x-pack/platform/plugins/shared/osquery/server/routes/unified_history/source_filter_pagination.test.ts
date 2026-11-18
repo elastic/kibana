@@ -59,7 +59,7 @@ const createHit = (
       space_id: 'default',
       queries: [{ id: `q-${id}`, query: 'SELECT 1;', agents: ['agent-1'] }],
       ...(opts.alertIds ? { alert_ids: opts.alertIds } : {}),
-      ...(opts.workflow ? { dispatch_source: 'workflow' } : {}),
+      ...(opts.workflow ? { origin: { type: 'workflow' } } : {}),
     },
     fields: { action_id: [id] },
     sort: [ts, 1],
@@ -135,7 +135,7 @@ const simulateEsSearch = (
         input_type: 'osquery',
         space_id: 'default',
         alert_ids: hit._source?.alert_ids,
-        dispatch_source: hit._source?.dispatch_source,
+        'origin.type': hit._source?.origin?.type,
       })
     )
   );

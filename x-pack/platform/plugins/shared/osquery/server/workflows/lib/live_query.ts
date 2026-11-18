@@ -13,7 +13,7 @@ import {
 import { OutputErrorCode } from '../../../common/workflows/contract/error_codes';
 import type { OutputErrorCodeValue } from '../../../common/workflows/contract/error_codes';
 import type { StepStatus, TargetInput } from '../../../common/workflows/contract/schemas';
-import { getDispatchApiHeaders, PUBLIC_API_HEADERS } from './api_headers';
+import { DISPATCH_API_HEADERS, PUBLIC_API_HEADERS } from './api_headers';
 import { collectResults, countIndexedResults } from './collect_results';
 import type { OutputBudget } from './collect_results';
 import type { ResultRow } from './build_rows';
@@ -113,13 +113,11 @@ export const dispatchLiveQuery = async ({
   logger,
   fields,
   target,
-  workflowId,
 }: {
   contextManager: KibanaApiCaller;
   logger: StepLogger;
   fields: Record<string, unknown>;
   target: TargetInput;
-  workflowId: string;
 }): Promise<DispatchOutcome> => {
   let body: DispatchResponse;
   try {
@@ -127,7 +125,7 @@ export const dispatchLiveQuery = async ({
       method: 'POST',
       path: '/api/osquery/live_queries',
       body: { ...fields, ...targetFields(target) },
-      headers: getDispatchApiHeaders(workflowId),
+      headers: DISPATCH_API_HEADERS,
     }));
   } catch (error) {
     const rejection = toDispatchRejection(error);

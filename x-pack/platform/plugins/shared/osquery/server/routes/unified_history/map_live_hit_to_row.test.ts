@@ -141,7 +141,7 @@ describe('mapLiveHitToRow', () => {
   test.each([undefined, ['alert-1']])('detects Workflow source with alert_ids %p', (alertIds) => {
     expect(
       mapLiveHitToRow({
-        _source: { dispatch_source: 'workflow', alert_ids: alertIds },
+        _source: { origin: { type: 'workflow' }, alert_ids: alertIds },
       }).source
     ).toBe('Workflow');
   });
@@ -149,7 +149,7 @@ describe('mapLiveHitToRow', () => {
   test('detects Workflow source from fields ahead of alerts', () => {
     expect(
       mapLiveHitToRow({
-        fields: { dispatch_source: ['workflow'] },
+        fields: { 'origin.type': ['workflow'] },
         _source: { alert_ids: ['alert-1'] },
       }).source
     ).toBe('Workflow');

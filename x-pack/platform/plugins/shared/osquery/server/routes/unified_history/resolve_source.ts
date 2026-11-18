@@ -13,11 +13,9 @@ export const resolveSource = ({
   fields = {},
   _source = {},
 }: LiveActionHit): LiveHistoryRow['source'] => {
-  const dispatchSourceRaw = fields.dispatch_source ?? _source.dispatch_source;
-  const dispatchSource = Array.isArray(dispatchSourceRaw)
-    ? dispatchSourceRaw[0]
-    : dispatchSourceRaw;
-  if (dispatchSource === 'workflow') {
+  const originTypeRaw = fields['origin.type'] ?? _source.origin?.type;
+  const originType = Array.isArray(originTypeRaw) ? originTypeRaw[0] : originTypeRaw;
+  if (originType === 'workflow') {
     return 'Workflow';
   }
 
@@ -30,7 +28,9 @@ export const resolveSource = ({
 export const buildSourceClause = (
   source: Exclude<SourceFilter, 'scheduled'>
 ): estypes.QueryDslQueryContainer => {
-  const workflowClause = { term: { dispatch_source: 'workflow' } };
+  // Older actions have no `origin`: `term` skips them and `must_not` keeps them, so they still
+  // resolve to Live or Rule without a reindex.
+  const workflowClause = { term: { 'origin.type': 'workflow' } };
   if (source === 'workflow') {
     return workflowClause;
   }

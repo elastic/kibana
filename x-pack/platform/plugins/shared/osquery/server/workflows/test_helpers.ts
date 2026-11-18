@@ -32,12 +32,7 @@ export const createContextManager = (routes: Record<string, Handler>) => {
     return { status: 200, body: result };
   }) as unknown as jest.MockedFunction<KibanaApiCaller['callKibanaApi']>;
 
-  const getContext = jest.fn(() => ({
-    workflow: { id: 'workflow-1' },
-    execution: { id: 'execution-1' },
-  }));
-
-  return { callKibanaApi, getContext };
+  return { callKibanaApi };
 };
 
 export const createLogger = () => ({ warn: jest.fn() });

@@ -27,15 +27,37 @@ export const ACTION_RESPONSES_INDEX_NAME = 'osquery_manager.action.responses';
 export const ACTION_RESPONSES_INDEX_DEFAULT_NS =
   '.logs-' + ACTION_RESPONSES_INDEX_NAME + '-default';
 
+let actionsIndexSetup: Promise<void> | undefined;
+
+const setUpActionsIndex = (esClient: ElasticsearchClient, logger: Logger): Promise<void> => {
+  actionsIndexSetup = createIndexIfNotExists(
+    esClient,
+    ACTIONS_INDEX_NAME,
+    ACTIONS_INDEX_DEFAULT_NS,
+    actionsMapping,
+    logger
+  );
+
+  return actionsIndexSetup;
+};
+
+/**
+ * Resolves once this Kibana process has applied the actions index mappings, running the setup
+ * only if startup has not already started it.
+ *
+ * Write a newly mapped field only after this resolves. Startup applies mappings asynchronously,
+ * and the actions mapping does not disable dynamic mapping. A document written first would map
+ * the field dynamically (a string becomes `text`), and every later `putMapping` on the index
+ * would then fail with a mapper conflict.
+ */
+export const ensureActionsIndexMappings = (
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<void> => actionsIndexSetup ?? setUpActionsIndex(esClient, logger);
+
 export const initializeTransformsIndices = async (esClient: ElasticsearchClient, logger: Logger) =>
   Promise.all([
-    createIndexIfNotExists(
-      esClient,
-      ACTIONS_INDEX_NAME,
-      ACTIONS_INDEX_DEFAULT_NS,
-      actionsMapping,
-      logger
-    ),
+    setUpActionsIndex(esClient, logger),
     createIndexIfNotExists(
       esClient,
       ACTION_RESPONSES_INDEX_NAME,

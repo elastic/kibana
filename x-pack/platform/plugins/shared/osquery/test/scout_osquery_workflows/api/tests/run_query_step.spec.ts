@@ -6,7 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type { KibanaRole } from '@kbn/scout';
+import type { KbnClient, KibanaRole } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import {
   answerQuery,
@@ -59,6 +59,26 @@ const runQueryStep = (target: string, extra = '') => `  - name: q
       saved_query: ${SAVED_QUERY}
       ${target}
 ${extra}`;
+
+const actionIdsOf = (action: { action_id: string; queries: Array<{ action_id: string }> }) => [
+  action.action_id,
+  ...action.queries.map(({ action_id: queryActionId }) => queryActionId),
+];
+
+/** The history rows for one action, optionally narrowed by source filters. */
+const historyRows = async (kbnClient: KbnClient, actionId: string, sourceFilters?: string) => {
+  const { data } = await kbnClient.request<{
+    data: Array<{ actionId?: string; source: string }>;
+  }>({
+    method: 'GET',
+    path: `/api/osquery/history?pageSize=100${
+      sourceFilters ? `&sourceFilters=${sourceFilters}` : ''
+    }`,
+    headers: { 'elastic-api-version': '2023-10-31' },
+  });
+
+  return data.data.filter((row) => row.actionId === actionId);
+};
 
 const osqueryRole = (osquery: string[]): KibanaRole => ({
   elasticsearch: { cluster: [], indices: [] },
@@ -200,6 +220,74 @@ apiTest.describe('osquery.runQuery workflow step', { tag: ['@local-stateful-clas
       expect(await history('workflow,rule')).toMatchObject([{ source: 'Workflow' }]);
       expect(await history('live,rule')).toHaveLength(0);
       await workflows.delete(workflowId);
+    }
+  );
+
+  apiTest(
+    'history: a generic kibana.request call to the live query API is listed with source Workflow',
+    async ({ apiClient, kbnClient }) => {
+      const workflows = workflowsClient(apiClient, adminHeaders);
+      // No osquery step and no osquery headers: the engine's own call headers identify the run.
+      const workflowId = await workflows.create(
+        'osq-wf-kibana-request-source',
+        `  - name: dispatch
+    type: kibana.request
+    with:
+      method: POST
+      path: /api/osquery/live_queries
+      headers:
+        elastic-api-version: "2023-10-31"
+      body:
+        saved_query_id: ${SAVED_QUERY}
+        agent_ids: ["${AGENT_A.id}"]
+`
+      );
+      const executionId = await workflows.run(workflowId);
+      const execution = await workflows.waitForEnd(executionId);
+      expect(execution.status).toBe('completed');
+
+      // `kibana.request` returns the response body as the step output.
+      const { data: action } = stepOf(execution, 'dispatch').output as {
+        data: { action_id: string; queries: Array<{ action_id: string }> };
+      };
+      try {
+        expect(await historyRows(kbnClient, action.action_id, 'workflow')).toMatchObject([
+          { source: 'Workflow' },
+        ]);
+      } finally {
+        await deleteDispatchedActions(systemEs, actionIdsOf(action));
+      }
+
+      await workflows.delete(workflowId);
+    }
+  );
+
+  apiTest(
+    'history: a public API call cannot claim a workflow origin with the execution header',
+    async ({ apiClient, kbnClient }) => {
+      // `apiClient` sends no `x-elastic-internal-origin`, unlike `kbnClient`, so this is what an
+      // external caller can do.
+      const response = await apiClient.post('api/osquery/live_queries', {
+        headers: {
+          ...adminHeaders,
+          'kbn-xsrf': 'true',
+          'elastic-api-version': '2023-10-31',
+          'x-kibana-workflow-execution-id': 'forged-execution',
+        },
+        body: { saved_query_id: SAVED_QUERY, agent_ids: [AGENT_A.id] },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(200);
+      const action = response.body.data as {
+        action_id: string;
+        queries: Array<{ action_id: string }>;
+      };
+
+      try {
+        expect(await historyRows(kbnClient, action.action_id)).toMatchObject([{ source: 'Live' }]);
+      } finally {
+        await deleteDispatchedActions(systemEs, actionIdsOf(action));
+      }
     }
   );
 

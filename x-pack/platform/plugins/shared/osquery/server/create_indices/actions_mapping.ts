@@ -34,18 +34,6 @@ export const actionsMapping: MappingTypeMapping = {
         },
       },
     },
-    dispatch_source: {
-      type: 'keyword',
-      ignore_above: 256,
-    },
-    dispatch_workflow_id: {
-      type: 'keyword',
-      ignore_above: 256,
-    },
-    dispatch_execution_id: {
-      type: 'keyword',
-      ignore_above: 256,
-    },
     event: {
       properties: {
         agent_id_status: {
@@ -80,6 +68,20 @@ export const actionsMapping: MappingTypeMapping = {
     metadata: {
       type: 'object',
       enabled: false,
+    },
+    // What started the action (see `ActionOrigin`). Mapped explicitly so the first write cannot
+    // map it dynamically as `text`; new origin types add fields here.
+    origin: {
+      properties: {
+        type: {
+          type: 'keyword',
+          ignore_above: 256,
+        },
+        execution_id: {
+          type: 'keyword',
+          ignore_above: 256,
+        },
+      },
     },
     pack_id: {
       type: 'keyword',

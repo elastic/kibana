@@ -128,7 +128,7 @@ describe('getUnifiedHistoryRoute', () => {
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
     expect(mockEsClient.search.mock.calls[0][0].index).toContain(ACTIONS_INDEX);
     expect(mockEsClient.search.mock.calls[0][0].body.query.bool.filter).toContainEqual({
-      bool: { should: [{ term: { dispatch_source: 'workflow' } }], minimum_should_match: 1 },
+      bool: { should: [{ term: { 'origin.type': 'workflow' } }], minimum_should_match: 1 },
     });
   });
 

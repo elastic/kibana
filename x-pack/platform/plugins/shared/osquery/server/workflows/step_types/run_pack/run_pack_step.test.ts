@@ -6,11 +6,7 @@
  */
 
 import type { ExecutionError } from '@kbn/workflows/server';
-import {
-  OSQUERY_MAX_AGENTS_HEADER,
-  OSQUERY_DISPATCH_SOURCE_HEADER,
-  OSQUERY_DISPATCH_WORKFLOW_ID_HEADER,
-} from '../../../../common/constants';
+import { OSQUERY_MAX_AGENTS_HEADER } from '../../../../common/constants';
 import {
   DEADLINE_READ_GRACE_POLLS,
   OUTPUT_BUDGET_BYTES,
@@ -141,11 +137,7 @@ describe('osquery.runPack step', () => {
       expect(posts).toHaveLength(1);
       expect(posts[0][0]).toMatchObject({
         path: '/api/osquery/live_queries',
-        headers: {
-          [OSQUERY_MAX_AGENTS_HEADER]: String(TARGET_AGENT_LIMIT),
-          [OSQUERY_DISPATCH_SOURCE_HEADER]: 'workflow',
-          [OSQUERY_DISPATCH_WORKFLOW_ID_HEADER]: 'workflow-1',
-        },
+        headers: { [OSQUERY_MAX_AGENTS_HEADER]: String(TARGET_AGENT_LIMIT) },
       });
       expect((posts[0][0] as { body: object }).body).toEqual({
         pack_id: 'pack-so-id',

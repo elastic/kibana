@@ -12,16 +12,9 @@ import { some, filter } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import type { ECSMappingOrUndefined } from '@kbn/osquery-io-ts-types';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
-import { EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER } from '@kbn/workflows-extensions/server';
 import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
 import { createLiveQueryRequestBodySchema } from '../../../common/api';
-import {
-  API_VERSIONS,
-  OSQUERY_MAX_AGENTS_HEADER,
-  OSQUERY_DISPATCH_SOURCE_HEADER,
-  OSQUERY_DISPATCH_WORKFLOW_ID_HEADER,
-  OSQUERY_DISPATCH_SOURCES,
-} from '../../../common/constants';
+import { API_VERSIONS, OSQUERY_MAX_AGENTS_HEADER } from '../../../common/constants';
 import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
 import { replaceParamsQuery } from '../../../common/utils/replace_params_query';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
@@ -39,6 +32,7 @@ import {
 import { createLiveQueryResponseSchema } from './response_schemas';
 import { toEcsMappingRecord } from '../../lib/resolve_query_reference';
 import type { DispatchSource } from '../../handlers/action/dispatch_source';
+import { resolveWorkflowOrigin } from '../../handlers/action/action_origin';
 
 export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -234,24 +228,11 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
             });
           }
 
-          const dispatchSource = osqueryContext.experimentalFeatures.workflowsExtensionsEnabled
-            ? OSQUERY_DISPATCH_SOURCES.find(
-                (source) => source === request.headers[OSQUERY_DISPATCH_SOURCE_HEADER]
-              )
+          // Any workflow run that calls this route is recorded, whether it comes from an osquery
+          // step or a generic `kibana.request` step. Callers cannot set the origin themselves.
+          const origin = osqueryContext.experimentalFeatures.workflowsExtensionsEnabled
+            ? resolveWorkflowOrigin(request)
             : undefined;
-          const dispatchMetadata = dispatchSource
-            ? {
-                dispatchSource,
-                dispatchWorkflowId: traceIdFromHeader(
-                  request.headers[OSQUERY_DISPATCH_WORKFLOW_ID_HEADER]
-                ),
-                // The workflow engine's `callKibanaApi` sets this on every call and drops any
-                // value a step tries to supply, so the step does not send its own copy.
-                dispatchExecutionId: traceIdFromHeader(
-                  request.headers[EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]
-                ),
-              }
-            : {};
 
           const { response: osqueryAction, fleetActionsCount } = await createActionHandler(
             osqueryContext,
@@ -262,7 +243,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
               space,
               dispatch: { entryPoint: 'live_query', source: liveDispatchSource },
               maxAgents,
-              ...dispatchMetadata,
+              ...(origin ? { origin } : {}),
             }
           );
 
@@ -316,15 +297,3 @@ export const maxAgentsFromHeader = (
 
   return Math.min(...values.map(Number));
 };
-
-/**
- * A single workflow or execution ID, or `undefined`. Node joins a repeated header into `"a, b"`,
- * and real IDs never contain a comma, so a comma means a repeated header and the value is ignored.
- */
-const traceIdFromHeader = (header: string | string[] | undefined): string | undefined =>
-  typeof header === 'string' &&
-  header.trim().length > 0 &&
-  header.length <= 256 &&
-  !header.includes(',')
-    ? header
-    : undefined;

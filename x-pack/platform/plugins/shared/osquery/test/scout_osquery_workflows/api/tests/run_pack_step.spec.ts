@@ -251,7 +251,7 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
   );
 
   apiTest(
-    'history: a pack dispatch records the workflow and execution IDs and is listed with source Workflow',
+    'history: a pack dispatch records the workflow origin and is listed with source Workflow',
     async ({ apiClient, esClient, kbnClient }) => {
       const workflows = workflowsClient(apiClient, adminHeaders);
       const workflowId = await workflows.create(
@@ -273,9 +273,7 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
       // The execution ID comes from the engine's `x-kibana-workflow-execution-id`, not the step.
       const [action] = await findPackActionDocs(systemEs, packId, state.action_id);
       expect(action).toMatchObject({
-        dispatch_source: 'workflow',
-        dispatch_workflow_id: workflowId,
-        dispatch_execution_id: executionId,
+        origin: { type: 'workflow', execution_id: executionId },
       });
 
       const history = async (sourceFilters?: string) => {

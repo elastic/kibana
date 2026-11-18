@@ -24,37 +24,37 @@ describe('resolveSource', () => {
     },
     {
       name: 'workflow source',
-      hit: { _source: { dispatch_source: 'workflow' } },
+      hit: { _source: { origin: { type: 'workflow' } } },
       expected: 'Workflow',
     },
     {
       name: 'workflow wins over source alerts',
-      hit: { _source: { dispatch_source: 'workflow', alert_ids: ['alert-1'] } },
+      hit: { _source: { origin: { type: 'workflow' }, alert_ids: ['alert-1'] } },
       expected: 'Workflow',
     },
     {
       name: 'workflow wins over field alerts',
-      hit: { fields: { dispatch_source: ['workflow'], alert_ids: ['alert-1'] } },
+      hit: { fields: { 'origin.type': ['workflow'], alert_ids: ['alert-1'] } },
       expected: 'Workflow',
     },
     {
       name: 'scalar workflow field',
-      hit: { fields: { dispatch_source: 'workflow' } },
+      hit: { fields: { 'origin.type': 'workflow' } },
       expected: 'Workflow',
     },
     {
       name: 'fields override source marker',
-      hit: { fields: { dispatch_source: ['other'] }, _source: { dispatch_source: 'workflow' } },
+      hit: { fields: { 'origin.type': ['other'] }, _source: { origin: { type: 'workflow' } } },
       expected: 'Live',
     },
     {
       name: 'unknown marker falls back to alerts',
-      hit: { _source: { dispatch_source: 'other', alert_ids: ['alert-1'] } },
+      hit: { _source: { origin: { type: 'other' }, alert_ids: ['alert-1'] } },
       expected: 'Rule',
     },
     {
       name: 'unknown marker without alerts',
-      hit: { _source: { dispatch_source: 'other' } },
+      hit: { _source: { origin: { type: 'other' } } },
       expected: 'Live',
     },
   ])('$name resolves to $expected', ({ hit, expected }) => {
@@ -64,14 +64,14 @@ describe('resolveSource', () => {
 
 describe('buildSourceClause', () => {
   test('workflow matches the persisted marker', () => {
-    expect(buildSourceClause('workflow')).toEqual({ term: { dispatch_source: 'workflow' } });
+    expect(buildSourceClause('workflow')).toEqual({ term: { 'origin.type': 'workflow' } });
   });
 
   test('rule requires alerts and excludes workflow actions', () => {
     expect(buildSourceClause('rule')).toEqual({
       bool: {
         filter: [{ exists: { field: 'alert_ids' } }],
-        must_not: [{ term: { dispatch_source: 'workflow' } }],
+        must_not: [{ term: { 'origin.type': 'workflow' } }],
       },
     });
   });
@@ -79,7 +79,7 @@ describe('buildSourceClause', () => {
   test('live excludes both alerts and workflow actions', () => {
     expect(buildSourceClause('live')).toEqual({
       bool: {
-        must_not: [{ exists: { field: 'alert_ids' } }, { term: { dispatch_source: 'workflow' } }],
+        must_not: [{ exists: { field: 'alert_ids' } }, { term: { 'origin.type': 'workflow' } }],
       },
     });
   });

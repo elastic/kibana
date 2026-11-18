@@ -124,9 +124,12 @@ function makeEsIndexMappings(
       },
       agent_ids: { ignore_above: 1024, type: 'keyword' },
       tags: { ignore_above: 256, type: 'keyword' },
-      dispatch_source: { ignore_above: 256, type: 'keyword' },
-      dispatch_workflow_id: { ignore_above: 256, type: 'keyword' },
-      dispatch_execution_id: { ignore_above: 256, type: 'keyword' },
+      origin: {
+        properties: {
+          type: { ignore_above: 256, type: 'keyword' },
+          execution_id: { ignore_above: 256, type: 'keyword' },
+        },
+      },
       ...overrides,
     },
   };
@@ -407,13 +410,10 @@ describe('createTransformIndices', () => {
       );
     });
 
-    it('should update the actions template and index mapping when workflow dispatch fields are missing', async () => {
-      const dispatchFields = ['dispatch_source', 'dispatch_workflow_id', 'dispatch_execution_id'];
+    it('should update the actions template and index mapping when the origin field is missing', async () => {
       const currentMappings = {
         properties: Object.fromEntries(
-          Object.entries(actionsMapping.properties ?? {}).filter(
-            ([field]) => !dispatchFields.includes(field)
-          )
+          Object.entries(actionsMapping.properties ?? {}).filter(([field]) => field !== 'origin')
         ),
       };
 
@@ -445,13 +445,12 @@ describe('createTransformIndices', () => {
         index: ACTIONS_INDEX_DEFAULT_NS,
         body: { properties: actionsMapping.properties },
       });
-      expect(actionsMapping.properties).toEqual(
-        expect.objectContaining({
-          dispatch_source: { type: 'keyword', ignore_above: 256 },
-          dispatch_workflow_id: { type: 'keyword', ignore_above: 256 },
-          dispatch_execution_id: { type: 'keyword', ignore_above: 256 },
-        })
-      );
+      expect(actionsMapping.properties?.origin).toEqual({
+        properties: {
+          type: { type: 'keyword', ignore_above: 256 },
+          execution_id: { type: 'keyword', ignore_above: 256 },
+        },
+      });
       expect(mockEsClient.indices.create).not.toHaveBeenCalled();
     });
 
@@ -523,6 +522,54 @@ describe('createTransformIndices', () => {
       expect(logger.error).toHaveBeenCalledWith(
         'Failed to create the index template: osquery_manager.actions'
       );
+    });
+  });
+
+  describe('ensureActionsIndexMappings', () => {
+    // The setup promise is module state, so each test loads a fresh copy of the module.
+    const loadModule = () => {
+      let mod: typeof import('./create_transforms_indices') | undefined;
+      jest.isolateModules(() => {
+        mod = jest.requireActual('./create_transforms_indices');
+      });
+
+      return mod!;
+    };
+
+    beforeEach(() => {
+      mockEsClient = createMockEsClient();
+      jest.clearAllMocks();
+    });
+
+    it('should set up the actions index once when startup has not run', async () => {
+      const { ensureActionsIndexMappings } = loadModule();
+      const esClient = mockEsClient as unknown as ElasticsearchClient;
+
+      await Promise.all([
+        ensureActionsIndexMappings(esClient, logger),
+        ensureActionsIndexMappings(esClient, logger),
+      ]);
+
+      expect(mockEsClient.indices.exists).toHaveBeenCalledTimes(1);
+      expect(mockEsClient.indices.exists).toHaveBeenCalledWith({ index: ACTIONS_INDEX_DEFAULT_NS });
+      expect(mockEsClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: ACTIONS_INDEX_NAME,
+          template: { mappings: actionsMapping },
+        })
+      );
+    });
+
+    it('should reuse the startup setup instead of running it again', async () => {
+      const mod = loadModule();
+      const esClient = mockEsClient as unknown as ElasticsearchClient;
+
+      await mod.initializeTransformsIndices(esClient, logger);
+      mockEsClient.indices.exists.mockClear();
+
+      await mod.ensureActionsIndexMappings(esClient, logger);
+
+      expect(mockEsClient.indices.exists).not.toHaveBeenCalled();
     });
   });
 });

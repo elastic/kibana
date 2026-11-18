@@ -56,7 +56,7 @@ interface ActionSource {
   agent_platforms?: string[];
   agent_policy_ids?: string[];
   alert_ids?: string[];
-  dispatch_source?: string;
+  origin?: { type?: string; execution_id?: string };
   tags?: string[];
   queries?: ActionQuery[];
 }

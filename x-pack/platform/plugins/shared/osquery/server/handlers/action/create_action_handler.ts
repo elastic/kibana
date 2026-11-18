@@ -17,7 +17,8 @@ import { parseAgentSelection } from '../../lib/parse_agent_groups';
 import { packSavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { ACTIONS_INDEX, ACTION_EXPIRATION_WEEKS, QUERY_TIMEOUT } from '../../../common/constants';
-import type { OSQUERY_DISPATCH_SOURCES } from '../../../common/constants';
+import { ensureActionsIndexMappings } from '../../create_indices/create_transforms_indices';
+import type { ActionOrigin } from './action_origin';
 import { TELEMETRY_EBT_LIVE_QUERY_EVENT } from '../../lib/telemetry/constants';
 import type { PackSavedObject } from '../../common/types';
 import { CustomHttpRequestError } from '../../common/error';
@@ -60,9 +61,8 @@ interface CreateActionHandlerOptions {
   dispatch: DispatchEntryPoint;
   /** When set, reject before any Fleet action is written if the selection is larger. */
   maxAgents?: number;
-  dispatchSource?: (typeof OSQUERY_DISPATCH_SOURCES)[number];
-  dispatchWorkflowId?: string;
-  dispatchExecutionId?: string;
+  /** What started the action, resolved by the server. Absent for manual and rule dispatches. */
+  origin?: ActionOrigin;
 }
 
 export const createActionHandler = async (
@@ -79,15 +79,7 @@ export const createActionHandler = async (
     actionSpaceId
   );
 
-  const {
-    metadata,
-    alertData,
-    error,
-    dispatch,
-    dispatchSource: origin,
-    dispatchWorkflowId,
-    dispatchExecutionId,
-  } = options;
+  const { metadata, alertData, error, dispatch, origin } = options;
   const elasticsearchClient = coreStartServices.elasticsearch.client.asInternalUser;
   const {
     agent_all: agentAll,
@@ -217,13 +209,7 @@ export const createActionHandler = async (
     tags: [],
     space_id: actionSpaceId,
     queries: queriesWithEmptySqlFixed,
-    ...(origin
-      ? {
-          dispatch_source: origin,
-          ...(dispatchWorkflowId ? { dispatch_workflow_id: dispatchWorkflowId } : {}),
-          ...(dispatchExecutionId ? { dispatch_execution_id: dispatchExecutionId } : {}),
-        }
-      : {}),
+    ...(origin ? { origin } : {}),
   };
 
   const actionQueries = osqueryAction.queries as OsqueryActionQuery[];
@@ -259,6 +245,12 @@ export const createActionHandler = async (
   });
 
   if (actionsComponentTemplateExists) {
+    if (origin) {
+      // `origin` is the newest mapped field. Make sure its mapping exists before the first
+      // document carrying it is written, so it is never mapped dynamically.
+      await ensureActionsIndexMappings(esClientInternal, osqueryContext.logFactory.get('osquery'));
+    }
+
     const bulkResponse = await esClientInternal.bulk({
       refresh: 'wait_for',
       operations: [{ index: { _index: `${ACTIONS_INDEX}-default` } }, osqueryAction],
@@ -281,9 +273,7 @@ export const createActionHandler = async (
       'user_id',
       'user_profile_uid',
       'error',
-      'dispatch_source',
-      'dispatch_workflow_id',
-      'dispatch_execution_id',
+      'origin',
     ]),
     agents: osqueryAction.agents.length,
   });
