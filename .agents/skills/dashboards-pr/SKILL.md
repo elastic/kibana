@@ -46,7 +46,7 @@ Before drafting, say which issue you picked and where it came from, e.g. "Using 
 ## Workflow
 
 1. **Check the repo.** Find the remote whose URL points to elastic/kibana (usually `upstream`, sometimes `origin`); call it `<upstream>` below. If there is none, say this skill doesn't cover the repo and stop.
-2. **Find the PR.** In Update mode, use the given number, or `gh pr view --json number` for the current branch. In Write and Create modes, run `gh pr list -R elastic/kibana --head <branch> --state open --json number,url,headRepositoryOwner` and keep only PRs whose `headRepositoryOwner.login` owns an `origin` push URL (`git remote get-url --push --all origin`), since `--head` matches the branch name in every fork. If one remains, say so and switch to Update mode.
+2. **Find the PR.** In Update mode, use the given number, or `gh pr view --json number` for the current branch. In Write and Create modes, run `gh pr list -R elastic/kibana --head <branch> --state open --json number,url,headRepositoryOwner` and keep only PRs whose `headRepositoryOwner.login` owns an `origin` push URL (`git remote get-url --push --all origin`), since `--head` matches the branch name in every fork. If one remains, say so and switch to Update mode. If several remain, list them and ask which one to update; don't create a new PR.
 3. **Gather context:**
    - the issue(s), in the repository resolved above: `gh issue view <n> -R <owner>/<repo> --comments`;
    - Write and Create modes: `git fetch <upstream> main`, then the commits and diff from `git merge-base HEAD <upstream>/main`;
