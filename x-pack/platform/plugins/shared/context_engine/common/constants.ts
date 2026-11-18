@@ -39,6 +39,18 @@ export const MAX_SESSION_MEMORY_ATTRIBUTES = 50;
 export const MAX_SESSION_MEMORY_ATTRIBUTE_KEY_LENGTH = 256;
 export const MAX_SESSION_MEMORY_ATTRIBUTE_VALUE_LENGTH = 1024;
 
+export const SESSION_EVENTS_SAVE_PATH = `${PUBLIC_API_PATH}/memory/_save_event`;
+
+export const MAX_SESSION_EVENTS_BODY_BYTES = 10 * 1024 * 1024;
+export const MAX_SESSION_EVENTS_PER_REQUEST = 1000;
+export const MAX_SESSION_EVENT_ID_LENGTH = 256;
+export const MAX_SESSION_EVENT_USER_ID_LENGTH = 1024;
+export const MAX_SESSION_EVENT_TOOL_NAME_LENGTH = 256;
+export const MAX_SESSION_EVENT_TOOL_CALLS = 128;
+export const MAX_SESSION_EVENT_AI_INDEX_IDS = 100;
+export const MAX_SESSION_EVENT_TIMESTAMP_LENGTH = 64;
+export const MAX_SESSION_EVENT_TEXT_LENGTH = 1024 * 1024;
+
 /** Default and maximum page size when listing Knowledge Indicators for an AI index. */
 export const DEFAULT_KI_PAGE_SIZE = 25;
 export const MAX_KI_PAGE_SIZE = 100;

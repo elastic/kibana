@@ -124,7 +124,7 @@ import {
 import { dreamingConfigSchema, dreamingResponseSchema } from './schemas/dreaming_schema';
 import type { ContextEngineAnalyticsService } from '../telemetry';
 import { withKiWriteTelemetry } from '../step_types/helpers';
-import { withContextEngineFeatureFlag } from './with_feature_flag';
+import { MEMORY_DISABLED_MESSAGE, withContextEngineFeatureFlag } from './with_feature_flag';
 
 const READ_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [apiPrivileges.readContextEngine] },
@@ -153,8 +153,6 @@ const hasWorkflowDeletePrivilege = (request: KibanaRequest): boolean =>
   WorkflowsManagementOperationPrivileges.delete.every(
     (privilege) => request.authzResult?.[privilege] === true
   );
-
-const MEMORY_DISABLED_MESSAGE = 'Context Engine memory is turned off.';
 
 const toPublicAiIndex = ({
   dreaming: _dreaming,
