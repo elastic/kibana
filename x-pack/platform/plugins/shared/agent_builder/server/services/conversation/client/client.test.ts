@@ -95,6 +95,7 @@ const mockRawEsClient: MockRawEsClient = {
 };
 
 const TEST_CONVERSATION_INDEX = '.kibana_agent_builder_conversations';
+const CONVERSATION_UPDATED_AT = '2025-08-04T06:44:19.123Z';
 
 const mockConversationEvents: ConversationEventsServiceStart = {
   getDefinition: jest.fn(),
@@ -170,7 +171,7 @@ describe('ConversationClient', () => {
         ...(hasSpace ? { space } : {}),
         title,
         created_at: '2024-09-04T06:44:17.944Z',
-        updated_at: '2025-08-04T06:44:19.123Z',
+        updated_at: CONVERSATION_UPDATED_AT,
         read,
         ...(hasReadBy ? { read_by: readBy } : {}),
         pinned_by: pinnedBy,
@@ -1541,6 +1542,21 @@ describe('ConversationClient', () => {
       expect(result.title).toBe('Renamed');
     });
 
+    it('bumps updated_at when the conversation content changes', async () => {
+      mockGetDocumentResponse(createConversationDocument());
+
+      await client.update(
+        { id: 'conversation-1', title: 'Renamed' },
+        { access: 'rename', source: 'http_api' }
+      );
+
+      const { document } = mockEsClient.index.mock.calls[0][0];
+      expect(document.updated_at).not.toBe(CONVERSATION_UPDATED_AT);
+      expect(new Date(document.updated_at).getTime()).toBeGreaterThan(
+        new Date(CONVERSATION_UPDATED_AT).getTime()
+      );
+    });
+
     it('preserves legacy owner read state when renaming before read_by exists', async () => {
       mockGetDocumentResponse(createConversationDocument({ read: true, hasReadBy: false }));
 
@@ -1737,6 +1753,21 @@ describe('ConversationClient', () => {
       expect(result.read).toBe(true);
     });
 
+    it('keeps updated_at when marking read or unread', async () => {
+      mockGetDocumentResponse(createConversationDocument({ readBy: [] }));
+
+      await client.markRead('conversation-1', true);
+
+      mockGetDocumentResponse(createConversationDocument({ readBy: [{ userId: 'user-1' }] }));
+
+      await client.markRead('conversation-1', false);
+
+      const [{ document: markedRead }, { document: markedUnread }] =
+        mockEsClient.index.mock.calls.map(([params]) => params);
+      expect(markedRead.updated_at).toBe(CONVERSATION_UPDATED_AT);
+      expect(markedUnread.updated_at).toBe(CONVERSATION_UPDATED_AT);
+    });
+
     it('does not clobber read_by entries written by another user', async () => {
       mockGetDocumentResponseOnce(createConversationDocument());
       // another user marked it read concurrently
@@ -1814,6 +1845,22 @@ describe('ConversationClient', () => {
       expect(document.pinned_by).toEqual([{ userId: 'user-1' }]);
       expectNoReadBy(result);
       expect(result.pinned).toBe(true);
+    });
+
+    it('keeps updated_at when pinning or unpinning', async () => {
+      mockGetDocumentResponse(createConversationDocument({ pinnedBy: [] }));
+
+      await client.setPinned('conversation-1', true);
+
+      mockGetDocumentResponse(createConversationDocument({ pinnedBy: [{ userId: 'user-1' }] }));
+
+      await client.setPinned('conversation-1', false);
+
+      const [{ document: pinned }, { document: unpinned }] = mockEsClient.index.mock.calls.map(
+        ([params]) => params
+      );
+      expect(pinned.updated_at).toBe(CONVERSATION_UPDATED_AT);
+      expect(unpinned.updated_at).toBe(CONVERSATION_UPDATED_AT);
     });
 
     it('does not clobber pinned_by entries written by another user', async () => {

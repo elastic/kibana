@@ -1301,8 +1301,9 @@ class ConversationClientImpl implements ConversationClient {
     return this.writeConversation({
       conversationId,
       access: 'converse',
-      // Per-user state only: never reported to `ai.conversation.updated`.
+      // Per-user state only: never reported to `ai.conversation.updated`, and not a content update.
       emit: false,
+      preserveUpdatedAt: true,
       fields: (current) =>
         updateReadBy({
           userId: this.getUser().id,
@@ -1317,8 +1318,9 @@ class ConversationClientImpl implements ConversationClient {
     return this.writeConversation({
       conversationId,
       access: 'converse',
-      // Per-user state only: never reported to `ai.conversation.updated`.
+      // Per-user state only: never reported to `ai.conversation.updated`, and not a content update.
       emit: false,
+      preserveUpdatedAt: true,
       fields: (current) =>
         updatePinnedBy({
           userId: this.getUser().id,
@@ -1860,6 +1862,7 @@ class ConversationClientImpl implements ConversationClient {
     refresh,
     activeExecution,
     peekHeld,
+    preserveUpdatedAt = false,
     ...emission
   }: {
     conversationId: string;
@@ -1869,6 +1872,8 @@ class ConversationClientImpl implements ConversationClient {
     refresh?: Refresh;
     activeExecution?: ActiveExecutionUpdate;
     peekHeld?: boolean;
+    /** Keeps the stored `updated_at`, for writes that only change per-user state (read, pinned). */
+    preserveUpdatedAt?: boolean;
   } & ConversationWriteEmission): Promise<Conversation> {
     const writer = this.createWriter({ access, maxRetries, refresh, activeExecution, peekHeld });
     // `mutate` may run more than once on OCC retry; the last run is the one that was written.
@@ -1887,7 +1892,7 @@ class ConversationClientImpl implements ConversationClient {
               ...fields(current),
               ...(activeExecution && applyActiveExecutionUpdate(current, activeExecution)),
             },
-            updateDate: new Date(),
+            updateDate: preserveUpdatedAt ? new Date(current.updated_at) : new Date(),
             space: this.space,
           });
         },
