@@ -8,16 +8,7 @@
  */
 
 import { ADMISSION_LIMITS, ROLLING_HOUR_MS } from './constants';
-import type { Phase } from './types';
-
-export interface AdmissionLimits {
-  /** Files allowed in the phase's rolling hour before a capture must be a record to be written. */
-  perHour: number;
-  /** Factor by which a block must exceed the longest its phase wrote to be a record. */
-  minGrowth: number;
-  /** Upper limit on files the phase writes over the worker's lifetime. */
-  maxFiles: number;
-}
+import type { AdmissionLimits, Phase } from './types';
 
 export type AdmissionOutcome = 'admitted' | 'in_window' | 'file_limit';
 

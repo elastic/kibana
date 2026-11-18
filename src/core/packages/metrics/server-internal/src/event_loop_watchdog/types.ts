@@ -15,6 +15,15 @@ import type { ProfileSummary } from './profile_summary';
 /** Startup is noisier than steady state, so blocks are counted per phase. */
 export type Phase = 'starting' | 'running';
 
+export interface AdmissionLimits {
+  /** Files allowed in the phase's rolling hour before a capture must be a record to be written. */
+  perHour: number;
+  /** Factor by which a block must exceed the longest its phase wrote to be a record. */
+  minGrowth: number;
+  /** Upper limit on files the phase writes over the worker's lifetime. */
+  maxFiles: number;
+}
+
 export interface WatchdogProfilingData {
   startAfterMs: Readonly<Record<Phase, number>>;
   maxDurationMs: Readonly<Record<Phase, number>>;

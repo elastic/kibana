@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AdmissionLimits } from './admission';
-import type { Phase } from './types';
+import type { AdmissionLimits, Phase } from './types';
 
 export const WATCHDOG_WORKER_NAME = 'event-loop-watchdog';
 
