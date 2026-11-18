@@ -89,10 +89,6 @@ const noCaptures = (): ProfilingStats => ({
   maxStopHeartbeatGapMs: 0,
   files: { starting: noFiles(), running: noFiles() },
 });
-const FILE_COUNT_KEYS: Partial<Record<ProfileFileOutcome, keyof FileCounts>> = {
-  in_window: 'inWindow',
-  file_limit: 'fileLimit',
-};
 const errorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
@@ -354,11 +350,11 @@ export const runWatchdogWorker = (
       file = admission.admit(phase, blockedMs, nowMs);
       if (file === 'admitted') {
         path = Path.join(profiling.dir, fileName(phase, blockedMs, new Date()));
+      } else if (file === 'in_window') {
+        counts.files[phase].inWindow++;
+      } else {
+        counts.files[phase].fileLimit++;
       }
-    }
-    const countKey = FILE_COUNT_KEYS[file];
-    if (countKey) {
-      counts.files[phase][countKey]++;
     }
     captureNumber++;
     const frameLists = formatFrameLists(summary);
