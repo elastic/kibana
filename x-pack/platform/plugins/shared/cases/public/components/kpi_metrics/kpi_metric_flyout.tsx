@@ -21,6 +21,7 @@ import {
   EuiFlyoutHeader,
   EuiFormRow,
   EuiSelect,
+  EuiSpacer,
   EuiSwitch,
   EuiText,
   EuiTextArea,
@@ -515,12 +516,16 @@ const KpiMetricFlyoutComponent: React.FC<KpiMetricFlyoutProps> = ({
         )}
 
         {!isBreakdown && (
-          <KpiMetricThresholdRows
-            state={state}
-            errors={errors}
-            showErrors={showErrors}
-            update={update}
-          />
+          <>
+            <EuiSpacer size="m" />
+            <KpiMetricThresholdRows
+              state={state}
+              errors={errors}
+              showErrors={showErrors}
+              update={update}
+            />
+            <EuiSpacer size="m" />
+          </>
         )}
 
         {state.kind === 'custom' && (
