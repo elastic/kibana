@@ -106,7 +106,6 @@ export async function renderTemplates({
     vfs.src(['**/*'], {
       dot: true,
       buffer: true,
-      nodir: true,
       cwd: Path.resolve(__dirname, '../template'),
       encoding: false,
     }),

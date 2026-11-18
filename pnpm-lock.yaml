@@ -271,8 +271,7 @@ overrides:
   '@types/babel__traverse': 7.20.6
   '@types/cheerio': 0.22.35
   '@types/eslint>@types/estree': 1.0.9
-  '@types/glob-stream': 6.1.0
-  '@types/glob-stream>@types/glob': 7.2.0
+  '@types/glob-stream': 8.0.3
   '@types/hast>@types/unist': 2.0.3
   '@types/mdast>@types/unist': 2.0.3
   '@types/mdast@^3': 3.0.3
@@ -15025,8 +15024,8 @@ packages:
   '@types/getos@3.0.4':
     resolution: {integrity: sha512-OsNVsuGEBd5QoeXTgjPmA89a465hjQithLMImsiJlIi0aYP8axKWtWrsmEMfm50w6EL2oRzCz+cLkZmp9/LfZw==}
 
-  '@types/glob-stream@6.1.0':
-    resolution: {integrity: sha512-RHv6ZQjcTncXo3thYZrsbAVwoy4vSKosSWhuhuQxLOTv74OJuFQxXkmUuZCr3q9uNBEVCvIzmZL/FeRNbHZGUg==}
+  '@types/glob-stream@8.0.3':
+    resolution: {integrity: sha512-vctgrT9AH/GK3TRaIbRUU0TZn12GBU4kzelZdPyJp1Sc8L/6Wrq21UrtN4+x4saqTg6COUIUtFV6JSYcVln/EQ==}
 
   '@types/glob@7.2.0':
     resolution: {integrity: sha512-ZUxbzKl0IfJILTS6t7ip5fQQM/J3TJYubDm3nMbgubNNYS62eXeUpoLUC8/7fJNiFYHTrGPQn7hspDUzIHX3UA==}
@@ -15338,6 +15337,9 @@ packages:
 
   '@types/statuses@2.0.6':
     resolution: {integrity: sha512-xMAgYwceFhRA2zY+XbEA7mxYbA093wdiW8Vu6gZPGWy9cmOyU9XesH1tNcEWsKFd5Vzrqx5T3D38PWx1FIIXkA==}
+
+  '@types/streamx@2.9.5':
+    resolution: {integrity: sha512-IHYsa6jYrck8VEdSwpY141FTTf6D7boPeMq9jy4qazNrFMA4VbRz/sw5LSsfR7jwdDcx0QKWkUexZvsWBC2eIQ==}
 
   '@types/styled-components@5.1.36':
     resolution: {integrity: sha512-pGMRNY5G2rNDKEv2DOiFYa7Ft1r0jrhmgBwHhOMzPTgCjO76bCot0/4uEfqj7K0Jf1KdQmDtAuaDk9EAs9foSw==}
@@ -31773,10 +31775,11 @@ snapshots:
 
   '@types/getos@3.0.4': {}
 
-  '@types/glob-stream@6.1.0':
+  '@types/glob-stream@8.0.3':
     dependencies:
-      '@types/glob': 7.2.0
       '@types/node': 24.10.13
+      '@types/picomatch': 4.0.3
+      '@types/streamx': 2.9.5
 
   '@types/glob@7.2.0':
     dependencies:
@@ -32129,6 +32132,10 @@ snapshots:
 
   '@types/statuses@2.0.6': {}
 
+  '@types/streamx@2.9.5':
+    dependencies:
+      '@types/node': 24.10.13
+
   '@types/styled-components@5.1.36':
     dependencies:
       '@types/hoist-non-react-statics': 3.3.7(@types/react@18.2.79)
@@ -32185,7 +32192,7 @@ snapshots:
 
   '@types/vinyl-fs@3.0.8':
     dependencies:
-      '@types/glob-stream': 6.1.0
+      '@types/glob-stream': 8.0.3
       '@types/node': 24.10.13
       '@types/vinyl': 2.0.12
 

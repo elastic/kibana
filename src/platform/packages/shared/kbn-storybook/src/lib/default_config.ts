@@ -195,11 +195,21 @@ export const defaultConfig: StorybookConfig = {
       );
     }
 
+    // Jest 30's jest-util (pulled in by the preview's jest-mock) requires `node:` builtins; strip the
+    // scheme so the bare-name browser fallbacks apply.
+    config.plugins?.push(
+      new webpack.NormalModuleReplacementPlugin(/^node:/, (resource: { request: string }) => {
+        resource.request = resource.request.slice('node:'.length);
+      })
+    );
+
     config.resolve = {
       ...config.resolve,
       fallback: {
         ...config?.resolve?.fallback,
         fs: false,
+        // jest-util only reads `util/types` in `isError`, when the browser lacks `Error.isError`.
+        'util/types': false,
       },
     };
 

@@ -130,10 +130,9 @@ overrides:
   # drops the `cheerio` namespace; pin to the 0.22 line (matches yarn).
   '@types/cheerio': '0.22.35'
   '@types/eslint>@types/estree': '1.0.9'
-  '@types/glob-stream': '6.1.0'
-  # @types/glob-stream depends on @types/glob@*, which floats to the empty v9
-  # deprecation stub; pin to v7 so SrcOptions keeps cwd/dot/nodir (matches yarn).
-  '@types/glob-stream>@types/glob': '7.2.0'
+  # Matches the runtime glob-stream 8 (vinyl-fs 4). The 6.x types extend glob@7's
+  # IOptions and lose cwd/dot once glob@10 (no IOptions) is the hoisted copy.
+  '@types/glob-stream': '8.0.3'
   '@types/hast>@types/unist': '2.0.3'
   '@types/mdast>@types/unist': '2.0.3'
   '@types/mdast@^3': '3.0.3'
