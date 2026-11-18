@@ -115,39 +115,31 @@ export const runPanelPlacementStrategy = (
         }
       });
 
+      const isSpaceEmpty = (x: number, y: number) => {
+        if (x + width > DASHBOARD_GRID_COLUMN_COUNT) return false;
+        // If the panel is taller than any other panel in the current grid, it can still fit in the space, hence
+        // we only check the rows up to maxY.
+        for (let h = y; h < Math.min(y + height, maxY); h++) {
+          for (let w = x; w < x + width; w++) {
+            if (grid[h][w] === 1) return false;
+          }
+        }
+        return true;
+      };
+
       for (let y = targetPanel?.grid.y ?? 0; y < maxY; y++) {
         for (let x = 0; x < DASHBOARD_GRID_COLUMN_COUNT; x++) {
-          if (grid[y][x] === 1) {
-            // Space is filled
-            continue;
-          } else {
-            for (let h = y; h < Math.min(y + height, maxY); h++) {
-              for (let w = x; w < Math.min(x + width, DASHBOARD_GRID_COLUMN_COUNT); w++) {
-                const spaceIsEmpty = grid[h][w] === 0;
-                const fitsPanelWidth = w === x + width - 1;
-                // If the panel is taller than any other panel in the current grid, it can still fit in the space, hence
-                // we check the minimum of maxY and the panel height.
-                const fitsPanelHeight = h === Math.min(y + height - 1, maxY - 1);
-
-                if (spaceIsEmpty && fitsPanelWidth && fitsPanelHeight) {
-                  // Found space
-
-                  return {
-                    ...currentLayout,
-                    panels: {
-                      ...currentPanels,
-                      [newPanel.uuid]: {
-                        type: newPanel.type,
-                        grid: { x, y, w: width, h: height, ...(sectionId && { sectionId }) },
-                      },
-                    },
-                  };
-                } else if (grid[h][w] === 1) {
-                  // x, y spot doesn't work, break.
-                  break;
-                }
-              }
-            }
+          if (isSpaceEmpty(x, y)) {
+            return {
+              ...currentLayout,
+              panels: {
+                ...currentPanels,
+                [newPanel.uuid]: {
+                  type: newPanel.type,
+                  grid: { x, y, w: width, h: height, ...(sectionId && { sectionId }) },
+                },
+              },
+            };
           }
         }
       }

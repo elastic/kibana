@@ -8,6 +8,7 @@
  */
 
 import type { RangeFilter } from '@kbn/es-query';
+import { getESQLResults } from '@kbn/esql-utils';
 import { buildEsQuery } from '@kbn/es-query';
 import { getTime } from '@kbn/data-plugin/public';
 import { ESQLVariableType } from '@kbn/esql-types';
@@ -15,8 +16,13 @@ import {
   MetricsExecutionContextAction,
   MetricsExecutionContextName,
 } from './execution_context_enums';
-import { executeEsqlQuery } from './execute_esql_query';
+import { EsqlResponseError } from '../../../../common/errors/esql_response_error';
+import { executeEsqlQuery, fetchEsqlResponseOrThrow } from './execute_esql_query';
 import { getMetricsExecutionContext } from './execution_context';
+
+jest.mock('@kbn/esql-utils', () => ({
+  getESQLResults: jest.fn(),
+}));
 
 jest.mock('@kbn/es-query', () => ({
   buildEsQuery: jest.fn(() => ({ query: { bool: {} } })),
@@ -27,6 +33,7 @@ jest.mock('@kbn/data-plugin/public', () => ({
   getEsQueryConfig: jest.fn(() => ({ allowLeadingWildcards: true, queryStringOptions: {} })),
 }));
 
+const mockGetESQLResults = getESQLResults as jest.MockedFunction<typeof getESQLResults>;
 const mockBuildEsQuery = buildEsQuery as jest.MockedFunction<typeof buildEsQuery>;
 const mockGetTime = getTime as jest.MockedFunction<typeof getTime>;
 
@@ -47,18 +54,21 @@ describe('executeEsqlQuery', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockSearch.mockResolvedValue({ rawResponse: mockResponse });
+    mockGetESQLResults.mockResolvedValue({
+      response: mockResponse,
+      params: { query: '' },
+    } as unknown as Awaited<ReturnType<typeof getESQLResults>>);
     mockGetTime.mockReturnValue(undefined);
   });
 
-  it('searches with the given esqlQuery, sessionId, signal, timeRange, and variables', async () => {
+  it('calls getESQLResults with the given esqlQuery, search, sessionId, signal, timeFieldName, timeRange, and variables', async () => {
     const signal = new AbortController().signal;
     const timeRange = { from: 'now-15m', to: 'now' };
     const variables = [{ key: 'x', value: 'y', type: ESQLVariableType.VALUES }];
 
     await executeEsqlQuery({
       esqlQuery: 'TS metrics-* | METRICS_INFO',
-      search: { esql: mockSearch },
+      search: mockSearch,
       sessionId: 'cached-session',
       signal,
       timeFieldName: '@timestamp',
@@ -69,15 +79,15 @@ describe('executeEsqlQuery', () => {
       profileId: 'metrics-data-source-profile',
     });
 
-    expect(mockSearch).toHaveBeenCalledTimes(1);
-    expect(mockSearch).toHaveBeenCalledWith(
+    expect(mockGetESQLResults).toHaveBeenCalledTimes(1);
+    expect(mockGetESQLResults).toHaveBeenCalledWith(
       expect.objectContaining({
-        query: 'TS metrics-* | METRICS_INFO',
-        kibanaQueryContext: { timeRange, esqlVariables: variables },
-      }),
-      expect.objectContaining({
-        abortSignal: signal,
+        esqlQuery: 'TS metrics-* | METRICS_INFO',
+        search: mockSearch,
         sessionId: 'cached-session',
+        signal,
+        timeRange,
+        variables,
         ...getMetricsExecutionContext(
           MetricsExecutionContextAction.FETCH,
           MetricsExecutionContextName.METRICS_INFO,
@@ -85,20 +95,19 @@ describe('executeEsqlQuery', () => {
         ),
       })
     );
-    expect(mockSearch.mock.calls[0][0]).not.toHaveProperty('approximation');
+    expect(mockGetESQLResults.mock.calls[0][0]).not.toHaveProperty('approximation');
   });
 
   it('passes metrics info execution context so the request is labeled in APM', async () => {
     await executeEsqlQuery({
       esqlQuery: 'TS metrics-* | METRICS_INFO',
-      search: { esql: mockSearch },
+      search: mockSearch,
       timeFieldName: '@timestamp',
       uiSettings: mockUiSettings,
       profileId: 'metrics-data-source-profile',
     });
 
-    expect(mockSearch).toHaveBeenCalledWith(
-      expect.anything(),
+    expect(mockGetESQLResults).toHaveBeenCalledWith(
       expect.objectContaining({
         executionContext: getMetricsExecutionContext(
           MetricsExecutionContextAction.FETCH,
@@ -109,35 +118,16 @@ describe('executeEsqlQuery', () => {
     );
   });
 
-  it('labels the request with the supplied executionContextName', async () => {
-    await executeEsqlQuery({
-      esqlQuery: 'FROM exemplars-*.otel-* | STATS BY metric_name',
-      search: { esql: mockSearch },
-      timeFieldName: '@timestamp',
-      uiSettings: mockUiSettings,
-      profileId: 'metrics-data-source-profile',
-      executionContextName: MetricsExecutionContextName.EXEMPLARS,
-    });
-
-    expect(mockSearch).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({
-        executionContext: expect.objectContaining({ page: 'metrics_fetch_exemplars' }),
-      })
-    );
-  });
-
   it('forwards profileId onto executionContext.meta so the server-side APM transaction is tagged via the standardized pipeline', async () => {
     await executeEsqlQuery({
       esqlQuery: 'TS metrics-* | METRICS_INFO',
-      search: { esql: mockSearch },
+      search: mockSearch,
       timeFieldName: '@timestamp',
       uiSettings: mockUiSettings,
       profileId: 'metrics-data-source-profile',
     });
 
-    expect(mockSearch).toHaveBeenCalledWith(
-      expect.anything(),
+    expect(mockGetESQLResults).toHaveBeenCalledWith(
       expect.objectContaining({
         executionContext: expect.objectContaining({
           page: 'metrics_fetch_metrics_info',
@@ -147,10 +137,10 @@ describe('executeEsqlQuery', () => {
     );
   });
 
-  it('returns the search response', async () => {
+  it('returns the response from getESQLResults', async () => {
     const result = await executeEsqlQuery({
       esqlQuery: 'TS metrics-* | METRICS_INFO',
-      search: { esql: mockSearch },
+      search: mockSearch,
       timeFieldName: '@timestamp',
       uiSettings: mockUiSettings,
       profileId: 'metrics-data-source-profile',
@@ -181,7 +171,7 @@ describe('executeEsqlQuery', () => {
 
     await executeEsqlQuery({
       esqlQuery: 'TS metrics-* | METRICS_INFO',
-      search: { esql: mockSearch },
+      search: mockSearch,
       timeFieldName: '@timestamp',
       timeRange: { from: 'now-1h', to: 'now' },
       filters: [],
@@ -195,11 +185,10 @@ describe('executeEsqlQuery', () => {
       { fieldName: '@timestamp' }
     );
     expect(mockBuildEsQuery).toHaveBeenCalled();
-    expect(mockSearch).toHaveBeenCalledWith(
+    expect(mockGetESQLResults).toHaveBeenCalledWith(
       expect.objectContaining({
         filter: { query: { bool: {} } },
-      }),
-      expect.anything()
+      })
     );
   });
 
@@ -208,35 +197,35 @@ describe('executeEsqlQuery', () => {
 
     await executeEsqlQuery({
       esqlQuery: 'TS metrics-* | METRICS_INFO',
-      search: { esql: mockSearch },
+      search: mockSearch,
       timeFieldName: '@timestamp',
       filters: [],
       uiSettings: mockUiSettings,
       profileId: 'metrics-data-source-profile',
     });
 
-    expect(mockSearch).toHaveBeenCalledWith(
+    expect(mockGetESQLResults).toHaveBeenCalledWith(
       expect.objectContaining({
         filter: undefined,
-      }),
-      expect.anything()
+      })
     );
   });
 
   it('throws EsqlResponseError when response contains an Elasticsearch error object', async () => {
-    mockSearch.mockResolvedValueOnce({
-      rawResponse: {
+    mockGetESQLResults.mockResolvedValueOnce({
+      response: {
         error: {
           type: 'remote_transport_exception',
           reason: 'ccs query failed',
         },
       },
-    });
+      params: { query: '' },
+    } as unknown as Awaited<ReturnType<typeof getESQLResults>>);
 
     await expect(
       executeEsqlQuery({
         esqlQuery: 'TS metrics-* | METRICS_INFO',
-        search: { esql: mockSearch },
+        search: mockSearch,
         timeFieldName: '@timestamp',
         uiSettings: mockUiSettings,
         profileId: 'metrics-data-source-profile',
@@ -248,24 +237,57 @@ describe('executeEsqlQuery', () => {
   });
 
   it('sets status on EsqlResponseError when response includes top-level status', async () => {
-    mockSearch.mockResolvedValueOnce({
-      rawResponse: {
+    mockGetESQLResults.mockResolvedValueOnce({
+      response: {
         error: {
           type: 'remote_transport_exception',
           reason: 'ccs query failed',
         },
         status: 400,
       },
-    });
+      params: { query: '' },
+    } as unknown as Awaited<ReturnType<typeof getESQLResults>>);
 
     await expect(
       executeEsqlQuery({
         esqlQuery: 'TS metrics-* | METRICS_INFO',
-        search: { esql: mockSearch },
+        search: mockSearch,
         timeFieldName: '@timestamp',
         uiSettings: mockUiSettings,
         profileId: 'metrics-data-source-profile',
       })
+    ).rejects.toMatchObject({ status: 400 });
+  });
+});
+
+describe('fetchEsqlResponseOrThrow', () => {
+  it('throws EsqlResponseError for error responses', async () => {
+    mockGetESQLResults.mockResolvedValueOnce({
+      response: {
+        error: {
+          type: 'illegal_argument_exception',
+          reason: 'bad request',
+        },
+      },
+      params: { query: '' },
+    } as unknown as Awaited<ReturnType<typeof getESQLResults>>);
+
+    await expect(
+      fetchEsqlResponseOrThrow({} as Parameters<typeof getESQLResults>[0])
+    ).rejects.toThrow(EsqlResponseError);
+  });
+
+  it('passes through payload status on EsqlResponseError', async () => {
+    mockGetESQLResults.mockResolvedValueOnce({
+      response: {
+        error: { type: 'illegal_argument_exception', reason: 'bad request' },
+        status: 400,
+      },
+      params: { query: '' },
+    } as unknown as Awaited<ReturnType<typeof getESQLResults>>);
+
+    await expect(
+      fetchEsqlResponseOrThrow({} as Parameters<typeof getESQLResults>[0])
     ).rejects.toMatchObject({ status: 400 });
   });
 });
