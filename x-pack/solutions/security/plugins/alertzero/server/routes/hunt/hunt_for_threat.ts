@@ -107,7 +107,10 @@ export const registerHuntForThreatRoute = ({
 
           // A name the scope dropped was never searched. The coordinator records that as a gap;
           // this route has no coordinator, so it goes on the IOC Hunt result itself.
-          const incomplete = [...unsearchedGaps(scope), ...(wireResult.incomplete ?? [])];
+          const incomplete = [
+            ...unsearchedGaps(scope, indexPatterns),
+            ...(wireResult.incomplete ?? []),
+          ];
 
           const body: HuntForThreatResponse = {
             scope,

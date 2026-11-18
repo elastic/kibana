@@ -167,7 +167,7 @@ export const registerHuntBehaviorRoute = ({
 
           // A name the scope dropped was never offered to the generated queries. The coordinator
           // records that as a gap; this route has no coordinator, so it goes on the result.
-          const scopeGaps = unsearchedGaps(scope);
+          const scopeGaps = unsearchedGaps(scope, indexPatterns);
           const body: HuntBehaviorResponse =
             scopeGaps.length > 0
               ? { ...result, incomplete: [...scopeGaps, ...(result.incomplete ?? [])] }

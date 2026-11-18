@@ -91,7 +91,7 @@ export const registerHuntIndexScopeRoute = ({
             );
           }
           if (scope.status !== 'blocked') {
-            const unsearched = unsearchedPatterns(scope);
+            const unsearched = unsearchedPatterns(scope, indexPatterns);
             if (unsearched.length > 0) {
               logger.debug(
                 `Hunt index scope for space ${spaceId} left ${

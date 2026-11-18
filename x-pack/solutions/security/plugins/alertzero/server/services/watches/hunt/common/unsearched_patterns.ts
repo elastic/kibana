@@ -6,7 +6,11 @@
  */
 
 import type { HuntIncompleteness, HuntScope } from '@kbn/alertzero-common';
-import { isIndexExclusion, stripBackingPrefix } from '../../../../../common/remote_cluster';
+import {
+  joinRemoteCluster,
+  parseIndexScopeEntry,
+  stripBackingPrefix,
+} from '../../../../../common/remote_cluster';
 import { codeList } from './build_hunt_narrative';
 import { buildMatchesRequired } from './matches_required';
 
@@ -38,25 +42,39 @@ export const describeUnsearched = (names: string[]): string => {
 };
 
 /**
+ * Whether Elasticsearch would search `name` for this ordered list of entries: each entry that
+ * matches it either includes it or, for an exclusion, removes it again, so the last matching
+ * entry decides (`['logs-*', '-custom-*', 'custom-1']` searches `custom-1`, and
+ * `['custom-1', '-custom-*']` does not).
+ */
+const isIncludedByUniverse = (name: string, universe: string[]): boolean => {
+  // The name comes from the list's own positive entries, so it starts out included.
+  let included = true;
+  for (const entry of universe) {
+    const { exclude, ...target } = parseIndexScopeEntry(entry);
+    if (buildMatchesRequired([stripBackingPrefix(joinRemoteCluster(target))])(name)) {
+      included = !exclude;
+    }
+  }
+  return included;
+};
+
+/**
  * The names a scope dropped from the search: entries of `missing` that are absent from
- * `index_patterns` and that no exclusion entry of the data view covers (a name the data view
- * excludes itself resolved nothing by design). Meaningful only for a scope that is not blocked.
- *
- * A dropped name is always local, so cross-project search does not change the answer. Entry
- * order is not kept on the scope, so an exclusion counts wherever it sits: a name listed again
- * after the exclusion that covers it (which Elasticsearch would search) is not reported.
+ * `index_patterns` and that the data view still asks to search once its exclusions are applied
+ * in order (a name the data view excludes itself resolved nothing by design). `universe` is the
+ * ordered default data view the scope was resolved from. Meaningful only for a scope that is
+ * not blocked. A dropped name is always local, so cross-project search does not change the
+ * answer.
  */
 export const unsearchedPatterns = (
-  scope: Pick<HuntScope, 'index_patterns' | 'missing'>
+  scope: Pick<HuntScope, 'index_patterns' | 'missing'>,
+  universe: string[]
 ): string[] => {
-  const exclusionEntries = scope.index_patterns.filter(isIndexExclusion);
   const kept = new Set(scope.index_patterns);
-  const dropped = Array.from(new Set(scope.missing)).filter((entry) => !kept.has(entry));
-  return dropped.filter((entry) => {
-    const bare = stripBackingPrefix(entry);
-    // Still matched once the exclusions are applied means nothing excludes it.
-    return buildMatchesRequired([bare, ...exclusionEntries])(bare);
-  });
+  return Array.from(new Set(scope.missing))
+    .filter((entry) => !kept.has(entry))
+    .filter((entry) => isIncludedByUniverse(stripBackingPrefix(entry), universe));
 };
 
 /**
@@ -64,9 +82,10 @@ export const unsearchedPatterns = (
  * naming them, or nothing when the scope dropped none.
  */
 export const unsearchedGaps = (
-  scope: Pick<HuntScope, 'index_patterns' | 'missing'>
+  scope: Pick<HuntScope, 'index_patterns' | 'missing'>,
+  universe: string[]
 ): HuntIncompleteness[] => {
-  const unsearched = unsearchedPatterns(scope);
+  const unsearched = unsearchedPatterns(scope, universe);
   return unsearched.length > 0
     ? [{ reason: 'index_not_searched', detail: describeUnsearched(unsearched) }]
     : [];

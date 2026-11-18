@@ -255,7 +255,7 @@ steps:
               - **Report:** `{{ foreach.item }}`
               - **Hunt:** {{ steps.hunt.output.headline }}.{% if steps.hunt.output.status == 'retired_incomplete' %} {{ steps.hunt.output.reason }}{% endif %}
               - **Packaging:** did not complete. {{ steps.package_report.output.reason }}.
-              - **What this means:** no proposals were created from this run. The hunt evidence was recorded, so the report will not be re-hunted automatically; the Investigation stays open for a manual rerun or review.
+              - **What this means:** packaging stopped early, so some or all proposals from this run may be missing. The hunt evidence was recorded, so the report will not be re-hunted automatically; the Investigation stays open for a manual rerun or review.
               {% else -%}
               ### Hunt Watch run failed: the hunt did not complete
               - **Report:** `{{ foreach.item }}`

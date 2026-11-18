@@ -784,7 +784,7 @@ const huntCoordinatorCore = async (
 
   // Names the scope dropped from the search: the run never looked there, so it is not a clean
   // search, and the same data view reproduces it. One final gap carries them.
-  const scopeGaps = unsearchedGaps(scope);
+  const scopeGaps = unsearchedGaps(scope, indexPatterns);
   // No `message` below names the dropped index on its own. The hunt child quotes `message` as
   // the gap that retired the report, so the scope gap goes on it, as a sentence of its own.
   const withScopeGap = (message: string): string => {

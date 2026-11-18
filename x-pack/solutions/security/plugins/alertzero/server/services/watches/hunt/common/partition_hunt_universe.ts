@@ -6,7 +6,11 @@
  */
 
 import type { HuntScope } from '@kbn/alertzero-common';
-import { isDotPrefixedIndex, isIndexExclusion } from '../../../../../common/remote_cluster';
+import {
+  isDotPrefixedIndex,
+  isIndexExclusion,
+  parseIndexScopeEntry,
+} from '../../../../../common/remote_cluster';
 
 /** Why a hunt refuses a data view whose every positive entry was skipped by policy. */
 export const NO_SEARCHABLE_PATTERN_MESSAGE =
@@ -45,6 +49,26 @@ const isDotPrefixedEntry = (entry: string): boolean => {
 };
 
 /**
+ * A whole-cluster exclusion (`-archive:*`) the data view still needs: Elasticsearch rejects one
+ * for a cluster no positive entry includes. An entry whose cluster is a wildcard (`*:logs-*`)
+ * may include any cluster, so it keeps every such exclusion.
+ */
+const isOrphanedClusterExclusion = (
+  entry: string,
+  positives: string[],
+  skippedClusters: Set<string>
+): boolean => {
+  const { exclude, cluster, index } = parseIndexScopeEntry(entry);
+  if (!exclude || cluster === undefined || index !== '*' || !skippedClusters.has(cluster)) {
+    return false;
+  }
+  return !positives.some((positive) => {
+    const { cluster: included } = parseIndexScopeEntry(positive);
+    return included === cluster || included?.includes('*');
+  });
+};
+
+/**
  * Hidden and alerts indices are never hunted: the worker cannot read them and hit handling
  * already treats a leading dot as "not a telemetry source". Exclusions always stay in
  * `patterns`, since removing one would widen the search.
@@ -56,5 +80,15 @@ export const partitionHuntUniverse = (entries: string[]): HuntUniverse => {
     if (!isIndexExclusion(entry) && isDotPrefixedEntry(entry)) policySkipped.push(entry);
     else patterns.push(entry);
   }
-  return { patterns, policySkipped };
+  // Skipping a cluster's only positive entry can strand its whole-cluster exclusion.
+  const skippedClusters = new Set(
+    policySkipped.flatMap((entry) => parseIndexScopeEntry(entry).cluster ?? [])
+  );
+  const positives = patterns.filter((entry) => !isIndexExclusion(entry));
+  return {
+    patterns: patterns.filter(
+      (entry) => !isOrphanedClusterExclusion(entry, positives, skippedClusters)
+    ),
+    policySkipped,
+  };
 };

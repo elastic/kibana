@@ -39,6 +39,8 @@ interface WorkerRow {
 }
 
 const document = () => ({ '@timestamp': new Date().toISOString(), message: 'scout' });
+/** The IOC the standalone hunt searches for, seeded in the readable stream so it can hit. */
+const HUNT_IOC_IP = '203.0.113.7';
 const sorted = (values: unknown): string[] =>
   Array.isArray(values) ? [...(values as string[])].sort() : [];
 
@@ -112,7 +114,11 @@ export const setupBlock = async ({
   const headers = withHuntHeaders(cookieHeader);
   if (withLogsStream) {
     // A fresh Scout cluster has no `logs-*` data stream; the name matches the `logs-*-*` template.
-    await esClient.index({ index: names.logsStream, document: document(), refresh: true });
+    await esClient.index({
+      index: names.logsStream,
+      document: { ...document(), source: { ip: HUNT_IOC_IP } },
+      refresh: true,
+    });
   }
   await esClient.index({ index: names.customIndex, document: document(), refresh: true });
   if (withLogsStream) {
@@ -179,20 +185,25 @@ export const teardownBlock = async ({
           name: 'restore deployment supply rows',
           run: async () => {
             const after = await readSupplyStatus(apiClient, state.headers, names.space);
+            if (after.statusCode !== 200) {
+              throw new Error(`reading the supply rows answered ${after.statusCode}`);
+            }
+            const failures: string[] = [];
             for (const key of DEPLOYMENT_SUPPLY_KEYS) {
               const initial = state.initialSupply[key];
-              const current =
-                after.statusCode === 200
-                  ? after.body.workflows.find((row) => row.key === key)
-                  : undefined;
+              const current = after.body.workflows.find((row) => row.key === key);
               if (initial !== undefined && current?.installed && current.enabled !== initial) {
-                await setSupplyWorkflowEnabled({
+                const { statusCode } = await setSupplyWorkflowEnabled({
                   apiClient,
                   headers: state.headers,
                   key,
                   enabled: initial,
                 });
+                if (statusCode !== 200) failures.push(`${key} answered ${statusCode}`);
               }
+            }
+            if (failures.length > 0) {
+              throw new Error(`restoring the supply rows failed: ${failures.join(', ')}`);
             }
           },
         },
@@ -310,7 +321,7 @@ const verifyHumanCaller = async ({
     headers,
     responseType: 'json',
     body: {
-      iocs: [{ type: 'ip', value: '203.0.113.7' }],
+      iocs: [{ type: 'ip', value: HUNT_IOC_IP }],
       time_range: { from: 'now-1h', to: 'now' },
     },
   });
@@ -321,6 +332,15 @@ const verifyHumanCaller = async ({
     (hunt.body as HuntForThreatResponse).scope?.policy_skipped,
     [names.hiddenAlias]
   );
+  const hits = (hunt.body as HuntForThreatResponse).result;
+  if (
+    hits?.status !== 'environment_hits_found' ||
+    !hits.per_index.some(({ index }) => index.includes(names.logsStream))
+  ) {
+    mismatches.push(
+      `hunt_for_threat did not find the seeded IOC in ${names.logsStream}: status ${hits?.status}`
+    );
+  }
   const scopeGap = (hunt.body as HuntForThreatResponse).result?.incomplete?.find(
     ({ reason }) => reason === 'index_not_searched'
   );
@@ -412,11 +432,13 @@ export const verifyBlocked = async ({
     ?.index_scope_blocked;
   compare(mismatches, 'index_scope_blocked', String(blocked), 'true');
   const select = gate?.selectCandidates;
-  if (select && select.output != null) {
+  // A step skipped by its `if:` is absent or reported skipped. Anything else ran, and a failed
+  // request runs on with no output, so the output alone cannot show it did not run.
+  if (select && !select.status.toLowerCase().includes('skipped')) {
     mismatches.push(
-      `select_candidate_reports ran: status ${select.status}, output ${JSON.stringify(
-        select.output
-      )}`
+      `select_candidate_reports ran: status ${select.status}, error ${JSON.stringify(
+        select.error
+      )}, output ${JSON.stringify(select.output)}`
     );
   }
 

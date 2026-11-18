@@ -15,26 +15,45 @@ import {
 describe('unsearchedPatterns', () => {
   it('returns names in missing that are absent from index_patterns, once each', () => {
     expect(
-      unsearchedPatterns({
-        index_patterns: ['logs-*'],
-        missing: ['custom-1', 'custom-1', 'logs-*', 'winlogbeat-*'],
-      })
+      unsearchedPatterns(
+        {
+          index_patterns: ['logs-*'],
+          missing: ['custom-1', 'custom-1', 'logs-*', 'winlogbeat-*'],
+        },
+        ['logs-*', 'custom-1', 'winlogbeat-*']
+      )
     ).toEqual(['custom-1', 'winlogbeat-*']);
   });
 
   it('returns nothing for a name an exclusion entry covers', () => {
+    const universe = ['logs-*', 'logs-foo-1', '-logs-foo*'];
     expect(
-      unsearchedPatterns({ index_patterns: ['logs-*', '-logs-foo*'], missing: ['logs-foo-1'] })
+      unsearchedPatterns(
+        { index_patterns: ['logs-*', '-logs-foo*'], missing: ['logs-foo-1'] },
+        universe
+      )
     ).toEqual([]);
   });
 
-  it('returns a .ds- name that no exclusion covers', () => {
+  it('returns a name the data view lists again after the exclusion that covers it', () => {
+    const universe = ['logs-*', '-custom-*', 'custom-edr-1'];
     expect(
-      unsearchedPatterns({
-        index_patterns: ['logs-*', '-other*'],
-        missing: ['.ds-custom-1-2026.09.30-000001'],
-      })
-    ).toEqual(['.ds-custom-1-2026.09.30-000001']);
+      unsearchedPatterns(
+        { index_patterns: ['logs-*', '-custom-*'], missing: ['custom-edr-1'] },
+        universe
+      )
+    ).toEqual(['custom-edr-1']);
+  });
+
+  it('returns a .ds- name that no exclusion covers', () => {
+    const name = '.ds-custom-1-2026.09.30-000001';
+    expect(
+      unsearchedPatterns({ index_patterns: ['logs-*', '-other*'], missing: [name] }, [
+        'logs-*',
+        name,
+        '-other*',
+      ])
+    ).toEqual([name]);
   });
 });
 
@@ -77,14 +96,17 @@ describe('unsearchedGaps', () => {
     ['one dropped name', ['custom-edr-1']],
     ['two dropped names', ['custom-edr-1', 'custom-edr-2']],
   ])('is one final gap for %s', (_label, missing) => {
-    expect(unsearchedGaps({ index_patterns: ['logs-*'], missing })).toEqual([
-      { reason: 'index_not_searched', detail: describeUnsearched(missing) },
-    ]);
+    expect(unsearchedGaps({ index_patterns: ['logs-*'], missing }, ['logs-*', ...missing])).toEqual(
+      [{ reason: 'index_not_searched', detail: describeUnsearched(missing) }]
+    );
   });
 
   it('is empty when the scope dropped nothing', () => {
     expect(
-      unsearchedGaps({ index_patterns: ['logs-*', 'winlogbeat-*'], missing: ['winlogbeat-*'] })
+      unsearchedGaps({ index_patterns: ['logs-*', 'winlogbeat-*'], missing: ['winlogbeat-*'] }, [
+        'logs-*',
+        'winlogbeat-*',
+      ])
     ).toEqual([]);
   });
 });
