@@ -64,7 +64,10 @@ describe('isAgentResponseEmpty', () => {
   it('trusts judgedAnswerEmpty over a stored transcript the judge never saw', () => {
     // The judge got an empty answer, but the stored messages keep the last reasoning step.
     expect(
-      isAgentResponseEmpty({ messages: [{ message: 'Let me check that rule.' }], judgedAnswerEmpty: true })
+      isAgentResponseEmpty({
+        messages: [{ message: 'Let me check that rule.' }],
+        judgedAnswerEmpty: true,
+      })
     ).toBe(true);
     expect(isAgentResponseEmpty({ messages: [{ message: '' }], judgedAnswerEmpty: false })).toBe(
       false
