@@ -145,19 +145,13 @@ export const SettingsApplication = () => {
   }
 
   const {
-    spaceFields: spaceAllFields,
-    globalFields: globalAllFields,
-    isLoading: allFieldsLoading,
-    error: allFieldsError,
-  } = useScopeFields({ includeGlobal: canShowGlobalSettings });
-  const {
-    spaceFields: spaceFilteredFields,
-    globalFields: globalFilteredFields,
-    isLoading: filteredFieldsLoading,
-    error: filteredFieldsError,
+    spaceAllFields,
+    spaceFilteredFields,
+    globalAllFields,
+    globalFilteredFields,
+    isLoading,
+    error: loadError,
   } = useScopeFields({ query, includeGlobal: canShowGlobalSettings });
-  const isLoading = allFieldsLoading || filteredFieldsLoading;
-  const loadError = allFieldsError ?? filteredFieldsError;
 
   const [requestedTabId, setRequestedTabId] = useState(SPACE_SETTINGS_TAB_ID);
 

@@ -13,12 +13,13 @@ import { useFields } from './use_fields';
 
 /**
  * React hook which retrieves the fields for each scope (`namespace` and `global`)
- * and returns two collections of {@link FieldDefinition} objects.
+ * and returns every {@link FieldDefinition} in each scope along with the subset that matches the
+ * query.
  * @param options.query The {@link Query} to execute for filtering the fields.
- * @param options.includeGlobal When false, global settings are not fetched, and `globalFields` is
- * empty.
- * @returns An object with two arrays of {@link FieldDefinition} objects, a loading flag, and the
- * error if either scope failed to load.
+ * @param options.includeGlobal When false, global settings are not fetched, and the global field
+ * collections are empty.
+ * @returns An object with the all and filtered {@link FieldDefinition} arrays for each scope, a
+ * loading flag, and the error if either scope failed to load.
  */
 export const useScopeFields = ({
   query,
@@ -27,24 +28,30 @@ export const useScopeFields = ({
   query?: Query;
   includeGlobal: boolean;
 }): {
-  spaceFields: FieldDefinition[];
-  globalFields: FieldDefinition[];
+  spaceAllFields: FieldDefinition[];
+  spaceFilteredFields: FieldDefinition[];
+  globalAllFields: FieldDefinition[];
+  globalFilteredFields: FieldDefinition[];
   isLoading: boolean;
   error?: Error;
 } => {
   const {
-    fields: spaceFields,
+    allFields: spaceAllFields,
+    filteredFields: spaceFilteredFields,
     isLoading: spaceLoading,
     error: spaceError,
   } = useFields('namespace', query);
   const {
-    fields: globalFields,
+    allFields: globalAllFields,
+    filteredFields: globalFilteredFields,
     isLoading: globalLoading,
     error: globalError,
   } = useFields('global', query, includeGlobal);
   return {
-    spaceFields,
-    globalFields,
+    spaceAllFields,
+    spaceFilteredFields,
+    globalAllFields,
+    globalFilteredFields,
     isLoading: spaceLoading || globalLoading,
     error: spaceError ?? globalError,
   };

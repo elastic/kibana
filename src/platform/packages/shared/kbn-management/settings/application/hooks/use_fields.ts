@@ -18,45 +18,55 @@ import { CATEGORY_FIELD } from '../query_input';
 import { useSettings } from './use_settings';
 
 /**
- * React hook which retrieves settings and returns an observed collection of
+ * React hook which retrieves settings and returns observed collections of
  * {@link FieldDefinition} objects derived from those settings.
  * @param scope The {@link UiSettingsScope} of the settings to be retrieved.
  * @param query The {@link Query} to execute for filtering the fields.
  * @param isEnabled When false, no settings are fetched, and there are no fields.
- * @returns An object with an array of {@link FieldDefinition} objects, a loading flag, and the
- * error if the settings failed to load.
+ * @returns An object with every {@link FieldDefinition} in the scope, the subset that matches the
+ * query, a loading flag, and the error if the settings failed to load.
  */
 export const useFields = (
   scope: UiSettingsScope,
   query?: Query,
   isEnabled: boolean = true
-): { fields: FieldDefinition[]; isLoading: boolean; error?: Error } => {
+): {
+  allFields: FieldDefinition[];
+  filteredFields: FieldDefinition[];
+  isLoading: boolean;
+  error?: Error;
+} => {
   const { isCustomSetting, isOverriddenSetting } = useServices();
   const { settings, isLoading, error } = useSettings(scope, isEnabled);
 
-  const fields = useMemo(() => {
-    const allFields = getFieldDefinitions(settings, {
-      isCustom: (key) => isCustomSetting(key, scope),
-      isOverridden: (key) => isOverriddenSetting(key, scope),
-    });
+  const allFields = useMemo(
+    () =>
+      getFieldDefinitions(settings, {
+        isCustom: (key) => isCustomSetting(key, scope),
+        isOverridden: (key) => isOverriddenSetting(key, scope),
+      }),
+    [settings, isCustomSetting, isOverriddenSetting, scope]
+  );
 
-    if (query) {
-      // Non-category `field:value` clauses become term clauses so that setting
-      // IDs containing `:` can be searched without being parsed as field queries.
-      const clauses: Clause[] = query.ast.clauses.map((clause) =>
-        clause.type === 'field' && clause.field !== CATEGORY_FIELD
-          ? {
-              type: 'term',
-              match: 'must',
-              value: `${clause.field}:${clause.value}`,
-            }
-          : clause
-      );
-
-      return Query.execute(new Query(Ast.create(clauses), undefined, query.text), allFields);
+  const filteredFields = useMemo(() => {
+    if (!query) {
+      return allFields;
     }
-    return allFields;
-  }, [settings, query, isCustomSetting, isOverriddenSetting, scope]);
 
-  return { fields, isLoading, error };
+    // Non-category `field:value` clauses become term clauses so that setting
+    // IDs containing `:` can be searched without being parsed as field queries.
+    const clauses: Clause[] = query.ast.clauses.map((clause) =>
+      clause.type === 'field' && clause.field !== CATEGORY_FIELD
+        ? {
+            type: 'term',
+            match: 'must',
+            value: `${clause.field}:${clause.value}`,
+          }
+        : clause
+    );
+
+    return Query.execute(new Query(Ast.create(clauses), undefined, query.text), allFields);
+  }, [allFields, query]);
+
+  return { allFields, filteredFields, isLoading, error };
 };
