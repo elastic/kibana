@@ -46,7 +46,7 @@ Before drafting, say which issue you picked and where it came from, e.g. "Using 
 ## Workflow
 
 1. **Check the repo.** Find the remote whose URL points to elastic/kibana (usually `upstream`, sometimes `origin`); call it `<upstream>` below. If there is none, say this skill doesn't cover the repo and stop.
-2. **Find the PR.** In Update mode, use the given number, or `gh pr view --json number` for the current branch. In Write and Create modes, run `gh pr list -R elastic/kibana --head <branch> --state open --json number,url,headRepositoryOwner` and keep only PRs whose `headRepositoryOwner.login` is the owner of the `origin` push URL, since `--head` matches the branch name in every fork. If one remains, say so and switch to Update mode.
+2. **Find the PR.** In Update mode, use the given number, or `gh pr view --json number` for the current branch. In Write and Create modes, run `gh pr list -R elastic/kibana --head <branch> --state open --json number,url,headRepositoryOwner` and keep only PRs whose `headRepositoryOwner.login` owns an `origin` push URL (`git remote get-url --push --all origin`), since `--head` matches the branch name in every fork. If one remains, say so and switch to Update mode.
 3. **Gather context:**
    - the issue(s), in the repository resolved above: `gh issue view <n> -R <owner>/<repo> --comments`;
    - Write and Create modes: `git fetch <upstream> main`, then the commits and diff from `git merge-base HEAD <upstream>/main`;
@@ -62,7 +62,7 @@ Before drafting, say which issue you picked and where it came from, e.g. "Using 
 9. **Create mode:** run the branch checks, wait for explicit approval of the title, body and labels, then open the PR (see "Creating the PR").
 10. **Update mode:** after explicit approval, run `gh pr edit <n> -R elastic/kibana --title "$(cat <title-file>)" --body-file <body-file>`. Change labels only if they were approved too. Read it back with `gh pr view` and report the URL.
 
-Approval covers the exact files you last showed. Right before any `gh` or `git push` command, re-read both files; if either changed since, show what changed and ask again. Never put the title, or any other text read from GitHub, directly into a shell command: pass it through the title file as above.
+Approval covers the exact files you last showed. Right before the approved `git push`, `gh pr create` or `gh pr edit` command, re-read both files; if either changed since, show what changed and ask again. Never put the title, or any other text read from GitHub, directly into a shell command: pass it through the title file as above.
 
 ## Carry over in Update mode
 
@@ -82,7 +82,7 @@ Branch checks, before asking for approval:
 - **Current branch:** must not be `main` or a release branch (`8.x`, `9.x`, `x.y`).
 - **Uncommitted changes:** if any, ask whether to continue without them. Never commit on the user's behalf.
 - **Behind `<upstream>/main`:** mention it, but don't rebase.
-- **Push destination:** `git remote get-url --push origin` must point to the user's fork (`<fork-owner>/kibana`, where `<fork-owner>` isn't `elastic`). If it points to elastic/kibana or anywhere else, stop and ask which remote to push to.
+- **Push destination:** every URL that `git remote get-url --push --all origin` prints must point to the user's fork (`<fork-owner>/kibana`, where `<fork-owner>` isn't `elastic`), because `git push origin` pushes to all of them. If any points to elastic/kibana or anywhere else, stop and ask which remote to push to.
 
 After approval:
 
