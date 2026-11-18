@@ -23,7 +23,6 @@ import type { StateManager } from '@kbn/presentation-publishing/state_manager/ty
 
 import type { initializeLabelManager } from '../control_labels';
 import type { HasCustomPrepend } from '../types';
-import type { ValuesSourceFetchPlan } from './utils';
 
 export type DataControlFieldFormatter = TextContextTypeConvert | ((toFormat: any) => string);
 
@@ -31,6 +30,16 @@ export interface PublishesField {
   field$: PublishingSubject<FilterableField | undefined>;
   fieldFormatter: PublishingSubject<DataControlFieldFormatter>;
 }
+
+/**
+ * How the values of a control are actually fetched, once the configured `ControlValuesSource`
+ * and the type of the data source are both taken into account.
+ * - `esql`: fetched with an ES|QL query, which is
+ *   - the user supplied query of a `ControlValuesSource.ESQL` control, undefined until one is set
+ *   - a generated query for a `ControlValuesSource.FIELD` control on an ES|QL data source
+ * - `dsl`: fetched with a DSL request on the field of a data view.
+ */
+export type ValuesSourceFetchPlan = { fetchMode: 'esql'; query?: string } | { fetchMode: 'dsl' };
 
 export interface PublishesValuesSourceFetchPlan {
   valuesSourceFetchPlan$: PublishingSubject<ValuesSourceFetchPlan>;

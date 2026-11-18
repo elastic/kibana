@@ -37,11 +37,11 @@ import type { StateManager, WithAllKeys } from '@kbn/presentation-publishing/sta
 
 import { dataService, dataViewsService } from '../../services/kibana_services';
 import { openDataControlEditor } from './open_data_control_editor';
-import type { DataControlApi, DataControlFieldFormatter } from './types';
+import type { DataControlApi, DataControlFieldFormatter, ValuesSourceFetchPlan } from './types';
 import { initializeLabelManager, defaultControlLabelComparators } from '../control_labels';
 import { getESQLSingleColumnValues } from '../../../common/options_list';
 import { getControlsTimezone } from '../utils';
-import { getValuesSourceFetchPlan, type ValuesSourceFetchPlan } from './utils';
+import { getEsqlSourceFieldQuery } from './utils';
 import { getDataViewIdFromESQLQuery } from '../utils/get_data_view_id_from_esql_query';
 
 export const defaultDataControlComparators: StateComparators<DataControlState> = {
@@ -312,14 +312,15 @@ export const initializeDataControlManager = async <EditorState extends object = 
     field$,
   ])
     .pipe(
-      map(([valuesSource, esqlQuery, nextDataSources, field]) =>
-        getValuesSourceFetchPlan({
-          valuesSource,
-          esqlQuery,
-          dataSource: nextDataSources?.[0],
-          field,
-        })
-      ),
+      map(([valuesSource, esqlQuery, nextDataSources, field]): ValuesSourceFetchPlan => {
+        // A `ControlValuesSource.ESQL` control already has its own user supplied query.
+        if (valuesSource === ControlValuesSource.ESQL) {
+          return { fetchMode: 'esql', query: esqlQuery };
+        }
+        // A field control on an ES|QL source has no data view to search, so it runs a generated query.
+        const generatedQuery = getEsqlSourceFieldQuery(nextDataSources?.[0], field);
+        return generatedQuery ? { fetchMode: 'esql', query: generatedQuery } : { fetchMode: 'dsl' };
+      }),
       distinctUntilChanged(isEqual)
     )
     .subscribe((resolved) => valuesSourceFetchPlan$.next(resolved));

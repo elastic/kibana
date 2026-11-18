@@ -21,12 +21,8 @@ import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
 import { max, min } from 'lodash';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { dataService, dataViewsService } from '../../../services/kibana_services';
-import {
-  buildESQLPreFilter,
-  getFetchContextFilters,
-  getFetchContextTimeRange,
-  type ValuesSourceFetchPlan,
-} from '../utils';
+import { buildESQLPreFilter, getFetchContextFilters, getFetchContextTimeRange } from '../utils';
+import type { ValuesSourceFetchPlan } from '../types';
 import { getESQLSingleColumnValues } from '../../../../common/options_list';
 import { getControlsTimezone } from '../../utils';
 
