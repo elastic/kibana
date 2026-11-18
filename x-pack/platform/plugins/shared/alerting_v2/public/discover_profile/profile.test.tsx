@@ -234,6 +234,7 @@ describe('createDiscoverProfile', () => {
     });
 
     const mockTableRender = jest.fn(() => <div />);
+    const mockSetExpandedDoc = jest.fn();
     const createMockRegistry = () =>
       new DocViewsRegistry([
         { id: 'doc_view_table', title: 'Table', order: 10, render: mockTableRender },
@@ -242,10 +243,9 @@ describe('createDiscoverProfile', () => {
 
     const getExtension = (record = mockRecord) => {
       const provider = createDiscoverProfile();
-      return provider.profile.getDocViewer!(
-        mockPrev,
-        {} as any
-      )({
+      return provider.profile.getDocViewer!(mockPrev, {
+        toolkit: { actions: { setExpandedDoc: mockSetExpandedDoc } },
+      } as any)({
         record,
         actions: {} as any,
       });

@@ -65,6 +65,7 @@ import {
   type EpisodeRuleCellWithFetchProps,
 } from './rule_cell_with_fetch';
 import { EpisodeDocViewerHeader } from './episode_doc_viewer_header';
+import { EpisodeDocViewerFooter } from './episode_doc_viewer_footer';
 import { EpisodeTableDocView, type EpisodeTableDocViewProps } from './episode_table_doc_view';
 import { untilPluginStartServicesReady, type AlertingV2KibanaServices } from '../kibana_services';
 import type { AlertingV2DiscoverProfileProvider } from '../types';
@@ -414,6 +415,23 @@ export const createDiscoverProfile = (): AlertingV2DiscoverProfileProvider => {
             </EpisodeServicesProvider>
           );
 
+          const { setExpandedDoc } = toolkit.actions;
+          const FooterSection: React.FC = () => (
+            <EpisodeServicesProvider queryClient={queryClient}>
+              {(services) => (
+                <EpisodeDocViewerFooter
+                  episodeId={episodeId}
+                  groupHash={groupHash}
+                  services={services}
+                  actions={resolvedEpisodeActions}
+                  viewDetailsHref={services.locators.episodesLocators.getRedirectUrl({ episodeId })}
+                  onActionSuccess={onActionSuccess}
+                  onClose={setExpandedDoc ? () => setExpandedDoc(undefined) : undefined}
+                />
+              )}
+            </EpisodeServicesProvider>
+          );
+
           const OverviewSection: React.FC = () => (
             <EpisodeServicesProvider queryClient={queryClient}>
               {(services) => {
@@ -453,6 +471,7 @@ export const createDiscoverProfile = (): AlertingV2DiscoverProfileProvider => {
             // Like the alerts page flyout menu. The rule name is the header title.
             title: FLYOUT_ARIA_LABEL,
             renderHeader: () => <HeaderSection />,
+            renderFooter: () => <FooterSection />,
 
             docViewsRegistry: (registry: DocViewsRegistry) => {
               // The row holds the last event data as one JSON string, so Discover's table
