@@ -24,6 +24,9 @@ import type { AiIndexProperties } from '../common/http_api/ai_indices';
 import type { AiIndexDataReadServiceApi } from './ai_indices/data_read_service';
 import type { AiIndexService } from './ai_indices/service';
 import type { ImprovementsServiceApi } from './improvements/service';
+import type { SessionMemoryService } from './session_memory/types';
+import type { SessionEventsService } from './session_events/types';
+import type { RecallRequest, RecallResponse } from '../common/http_api/memory_recall';
 import type { SignalsServiceApi } from './signals/service';
 
 export interface ContextEnginePluginSetup {
@@ -51,6 +54,25 @@ export interface ContextEnginePluginStart {
     esClient: ElasticsearchClient,
     spaceId: string
   ) => ImprovementsServiceApi;
+  /**
+   * Reads and writes as the internal user, so callers check privileges before using it. The
+   * user in each call is the end user the memory is about, and is never checked against the
+   * authenticated user.
+   */
+  getSessionMemoryService: () => SessionMemoryService;
+  /**
+   * Writes as the internal user, so callers check privileges before using it. The user in each
+   * call is the end user the events belong to, and is never checked against the authenticated user.
+   */
+  getSessionEventsService: () => SessionEventsService;
+  /**
+   * Demo only: runs Recall for a request, as `POST /api/context_engine/memory/_recall` does. The
+   * caller checks privileges and sets `user_id`, since the session stores are read as the internal user.
+   */
+  recallMemory: (params: {
+    request: KibanaRequest;
+    body: RecallRequest;
+  }) => Promise<RecallResponse>;
 }
 
 /** Duck-typed so Context Engine does not depend on `@kbn/workflows-management-plugin` (Moon cycle). */

@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import type {
   ContextEngineAgentBuilderPluginSetup,
   ContextEngineAgentBuilderPluginStart,
@@ -14,6 +20,7 @@ import type {
 } from './types';
 import { registerContextEngineAgentBuilderIntegration } from './register_agent_builder_integration';
 import { registerContextEngineInferenceFeatures } from './register_inference_features';
+import { registerSessionEventsRecorder } from './session_events_recorder/register_session_events_recorder';
 
 export class ContextEngineAgentBuilderPlugin
   implements
@@ -24,7 +31,11 @@ export class ContextEngineAgentBuilderPlugin
       ContextEngineAgentBuilderStartDependencies
     >
 {
-  constructor(_initializerContext: PluginInitializerContext) {}
+  private readonly logger: Logger;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
+  }
 
   setup(
     coreSetup: CoreSetup<
@@ -37,6 +48,12 @@ export class ContextEngineAgentBuilderPlugin
       coreSetup,
       agentBuilder: setupDeps.agentBuilder,
       workflowsManagement: setupDeps.workflowsManagement.management,
+    });
+
+    registerSessionEventsRecorder({
+      agentBuilder: setupDeps.agentBuilder,
+      coreSetup,
+      logger: this.logger.get('session_events_recorder'),
     });
 
     if (setupDeps.searchInferenceEndpoints) {

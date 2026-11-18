@@ -32,6 +32,10 @@ import type {
 import type { KiVerifierWorkflowRunner } from './ki_verification';
 import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
+import { registerSessionMemoryRoutes } from './routes/session_memory';
+import { registerSessionEventsRoutes } from './routes/session_events';
+import { registerMemoryRecallRoutes } from './routes/memory_recall';
+import { recallForRequest } from './memory_recall/recall_for_request';
 import { registerSignalRoutes } from './routes/signals';
 import type {
   FeedbackAnalysisScheduleService,
@@ -48,6 +52,8 @@ import { AiIndexService } from './ai_indices/service';
 import { AiIndexRegistry } from './ai_indices/registry';
 import { ImprovementsService } from './improvements/service';
 import { installImprovementsIndexTemplate } from './improvements/storage';
+import { createSessionMemoryService } from './session_memory/service';
+import { createSessionEventsService } from './session_events/service';
 import { SignalsService } from './signals/service';
 import type { SignalsServiceApi } from './signals/service';
 import { registerSignalGeneratorTaskDefinition, scheduleSignalGenerator } from './tasks';
@@ -261,6 +267,12 @@ export class ContextEnginePlugin
       isGlobalSettingEnabled(request, CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID);
 
     const router = coreSetup.http.createRouter();
+    const getAiIndexDataReadService = (params: GetAiIndexDataReadServiceParams) => {
+      if (!this.createAiIndexDataReadService) {
+        throw new Error('AI index read service not available — plugin has not started');
+      }
+      return this.createAiIndexDataReadService(params);
+    };
     registerAiIndexRoutes({
       router,
       logger: this.logger.get('routes'),
@@ -268,12 +280,7 @@ export class ContextEnginePlugin
       getImprovementsService,
       aiIndexChanges: this.aiIndexChanges,
       isMemoryEnabled,
-      getAiIndexDataReadService: (params) => {
-        if (!this.createAiIndexDataReadService) {
-          throw new Error('AI index read service not available — plugin has not started');
-        }
-        return this.createAiIndexDataReadService(params);
-      },
+      getAiIndexDataReadService,
       getActions: async () => {
         const [, startDeps] = await coreSetup.getStartServices();
         return startDeps.actions;
@@ -339,6 +346,16 @@ export class ContextEnginePlugin
       },
     });
 
+    registerMemoryRecallRoutes({
+      router,
+      getAiIndexDataReadService,
+      analyticsService,
+      getSpaces: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.spaces;
+      },
+    });
+
     // Read-only Signals routes (reads run as the current user, scoped to the active space).
     registerSignalRoutes({
       router,
@@ -348,6 +365,35 @@ export class ContextEnginePlugin
       },
       // Reads the current value at request time (assigned in start(), after this setup() runs).
       getFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
+    });
+
+    registerSessionMemoryRoutes({
+      router,
+      getSpaces: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.spaces;
+      },
+      getSessionMemoryService: async () => {
+        const [, , contextEngineStart] = await coreSetup.getStartServices();
+        return contextEngineStart.getSessionMemoryService();
+      },
+      getAiIndexService,
+      isMemoryEnabled,
+      logger: this.logger.get('session_memory'),
+    });
+
+    registerSessionEventsRoutes({
+      router,
+      getSpaces: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.spaces;
+      },
+      getSessionEventsService: async () => {
+        const [, , contextEngineStart] = await coreSetup.getStartServices();
+        return contextEngineStart.getSessionEventsService();
+      },
+      getAiIndexService,
+      isMemoryEnabled,
     });
 
     return {
@@ -419,6 +465,9 @@ export class ContextEnginePlugin
       logger: this.logger.get('signals'),
     });
     const signalsService = this.signalsService;
+
+    const sessionMemoryService = createSessionMemoryService(this.esClient);
+    const sessionEventsService = createSessionEventsService(this.esClient);
 
     const improvementsLogger = this.logger.get('improvements');
     this.createImprovementsService = (esClient: ElasticsearchClient, spaceId: string) =>
@@ -493,6 +542,22 @@ export class ContextEnginePlugin
       getAiIndexDataReadService: (params) => createAiIndexDataReadService(params),
       getSignalsService: () => signalsService,
       getImprovementsService: (esClient, spaceId) => createImprovementsService(esClient, spaceId),
+      getSessionMemoryService: () => sessionMemoryService,
+      getSessionEventsService: () => sessionEventsService,
+      recallMemory: ({ request, body }) => {
+        if (!this.analyticsService) {
+          throw new Error('Analytics service not available — plugin has not set up');
+        }
+        return recallForRequest({
+          request,
+          body,
+          esClient: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
+          internalEsClient: coreStart.elasticsearch.client.asInternalUser,
+          space: resolveSpaceId(startDeps.spaces, request),
+          getAiIndexDataReadService: createAiIndexDataReadService,
+          analyticsService: this.analyticsService,
+        });
+      },
     };
   }
 
