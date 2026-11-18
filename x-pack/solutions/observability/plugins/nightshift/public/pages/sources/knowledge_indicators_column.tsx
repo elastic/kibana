@@ -11,6 +11,8 @@ import type { SignificantEventsWorkflowStatusResult } from '@kbn/significant-eve
 import React from 'react';
 import { useStreamFeatures } from '../../data/knowledge_indicators/use_stream_features';
 
+const KI_COUNT_POLL_INTERVAL_MS = 10_000;
+
 interface KnowledgeIndicatorsColumnProps {
   sourceId: string;
   streamOnboardingResult?: SignificantEventsWorkflowStatusResult;
@@ -23,7 +25,9 @@ export function KnowledgeIndicatorsColumn({
   streamOnboardingResult,
   isAwaitingRun,
 }: KnowledgeIndicatorsColumnProps) {
-  const { features } = useStreamFeatures(sourceId, [streamOnboardingResult]);
+  const { features } = useStreamFeatures(sourceId, [streamOnboardingResult], {
+    refetchInterval: KI_COUNT_POLL_INTERVAL_MS,
+  });
 
   return (
     <EuiText

@@ -16,7 +16,10 @@ import { FEATURES_QUERY_KEY } from '../query_keys';
 export const useStreamFeatures = (
   sourceId: string,
   deps: unknown[] = [],
-  { enabled = true }: { enabled?: boolean } = {}
+  {
+    enabled = true,
+    refetchInterval = false,
+  }: { enabled?: boolean; refetchInterval?: number | false } = {}
 ) => {
   const { significantEventsRepositoryClient } = useKibana().services.significantEvents;
   const showFetchErrorToast = useFetchErrorToast();
@@ -40,6 +43,8 @@ export const useStreamFeatures = (
     queryFn: fetchFeatures,
     onError: showFetchErrorToast,
     enabled,
+    refetchInterval: (_data, query) => (query.state.status === 'error' ? false : refetchInterval),
+    refetchIntervalInBackground: false,
   });
 
   const allFeatures = useMemo(
