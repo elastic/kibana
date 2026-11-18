@@ -320,7 +320,8 @@ const StackRow: React.FC<{
           ))}
         </>
       )}
-      {phase === 'complete' && stack.stack_id && (
+      {/* A failed stack must be read and deleted in the console before a retry. */}
+      {(phase === 'complete' || phase === 'failed') && stack.stack_id && (
         <EuiButtonEmpty
           size="xs"
           flush="left"

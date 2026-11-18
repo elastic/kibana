@@ -183,6 +183,10 @@ describe('AwsOnboardingRunCard', () => {
     const stackRow = screen.getByTestId('awsOnboardingRunCardStack');
     expect(stackRow).toHaveTextContent('Failed: WiiOidcProvider: Could not connect to the issuer');
     expect(within(stackRow).getAllByLabelText('Failed').length).toBeGreaterThan(0);
+    expect(within(stackRow).getByTestId('awsOnboardingRunCardConsoleLink')).toHaveAttribute(
+      'href',
+      expect.stringMatching(/^https:\/\/eu-west-1\.console\.aws\.amazon\.com\//)
+    );
   });
 
   it('shows an update of a reused identity and what it adds', async () => {
