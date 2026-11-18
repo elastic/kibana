@@ -171,8 +171,6 @@ export function SearchEmbeddableGridComponent({
   const savedSearchFilters = apiFilters;
 
   const isEsql = useMemo(() => isEsqlMode(savedSearch), [savedSearch]);
-  // Only offer "Load more" while another page can be loaded, as the Discover app does. A short page
-  // (e.g. hits on a failed shard) never has one, however many hits the total counts.
   const canFetchMoreRecords = !isEsql && Boolean(pagination?.hasNextPage());
   const renderMode = getDataGridRenderMode(viewMode);
 
