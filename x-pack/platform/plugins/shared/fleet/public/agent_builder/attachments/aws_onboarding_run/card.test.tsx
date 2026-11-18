@@ -141,7 +141,7 @@ describe('AwsOnboardingRunCard', () => {
     );
   });
 
-  it('shows the dashboard link and stops polling once the run completed', async () => {
+  it('shows the dashboard link once the run completed', async () => {
     respondWith(
       progress({
         status: 'completed',
@@ -152,14 +152,58 @@ describe('AwsOnboardingRunCard', () => {
     );
     renderCard();
 
-    expect(await screen.findByTestId('awsOnboardingRunCardBadge')).toHaveTextContent('Done');
+    expect(await screen.findByTestId('awsOnboardingRunCardBadge')).toHaveTextContent(/^Done$/);
     expect(screen.getByTestId('awsOnboardingRunCardDashboardLink')).toHaveAttribute(
       'href',
       '/s/team/app/dashboards#/view/aws'
     );
+  });
 
+  it.each(['completed', 'failed', 'cancelled', 'timed_out'] as const)(
+    'stops polling once the run is %s',
+    async (status) => {
+      respondWith(progress({ status }));
+      renderCard();
+
+      await screen.findByTestId('awsOnboardingRunCardBadge');
+      await advancePastPollingInterval();
+      expect(sendGetAwsOnboardingRun).toHaveBeenCalledTimes(1);
+    }
+  );
+
+  it('keeps polling when the first read fails', async () => {
+    jest
+      .mocked(sendGetAwsOnboardingRun)
+      .mockRejectedValueOnce(new Error('network blip'))
+      .mockResolvedValue({ data: progress({}), error: null } as never);
+    renderCard();
+
+    await screen.findByTestId('awsOnboardingRunCardError');
     await advancePastPollingInterval();
-    expect(sendGetAwsOnboardingRun).toHaveBeenCalledTimes(1);
+    expect(sendGetAwsOnboardingRun).toHaveBeenCalledTimes(2);
+    expect(await screen.findByTestId('awsOnboardingRunCardBadge')).toHaveTextContent('Running');
+  });
+
+  it('shows a reused identity that needed no stack change', async () => {
+    respondWith(
+      progress({
+        stack: {
+          phase: 'skipped',
+          stack_id: STACK_ID,
+          stack_name: 'elastic-onboarding-ab12',
+          resources: [],
+        },
+        connector: { phase: 'reused', name: 'elastic-identity-ab12', cloud_connector_id: 'cc-1' },
+      })
+    );
+    renderCard({ ...createData, stack_action: 'none' });
+
+    expect(await screen.findByTestId('awsOnboardingRunCardStack')).toHaveTextContent(
+      'No change needed'
+    );
+    expect(screen.getByTestId('awsOnboardingRunCardConnector')).toHaveTextContent(
+      'Reusing elastic-identity-ab12'
+    );
   });
 
   it('shows the reason when the run failed', async () => {
@@ -258,6 +302,26 @@ describe('AwsOnboardingRunCard', () => {
       `https://us-east-2.console.aws.amazon.com/cloudformation/home?region=us-east-2#/stacks/stackinfo?stackId=${encodeURIComponent(
         otherRegionStack
       )}`
+    );
+  });
+
+  it("links the console to the run's region when the stack id has no valid region", async () => {
+    const malformedStack = 'arn:aws:cloudformation:evil.example/x:123456789012:stack/ab12/0f1e';
+    respondWith(
+      progress({
+        stack: {
+          phase: 'complete',
+          stack_id: malformedStack,
+          stack_name: 'elastic-onboarding-ab12',
+          resources: [],
+        },
+      })
+    );
+    renderCard();
+
+    expect(await screen.findByTestId('awsOnboardingRunCardConsoleLink')).toHaveAttribute(
+      'href',
+      expect.stringMatching(/^https:\/\/eu-west-1\.console\.aws\.amazon\.com\//)
     );
   });
 });

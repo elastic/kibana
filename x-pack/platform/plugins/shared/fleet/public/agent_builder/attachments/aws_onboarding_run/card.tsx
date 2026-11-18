@@ -30,6 +30,7 @@ import type {
   AwsOnboardingRunStackResource,
   AwsOnboardingRunStatus,
 } from '../../../../common/types/rest_spec/aws_onboarding_run';
+import { AWS_REGION_PATTERN } from '../../../../common/services/cloud_connectors/iac_deployment';
 import { useStartServices } from '../../../hooks';
 import { sendGetAwsOnboardingRun } from '../../../hooks/use_request/aws_onboarding';
 import { toRequestError } from '../../../hooks/use_request/errors';
@@ -229,9 +230,14 @@ const useElapsed = (startedAt: string, running: boolean): string | undefined => 
   return running && !Number.isNaN(started) ? formatDuration((now - started) / 1000) : undefined;
 };
 
-/** A reused identity's stack can live in another region than the run, so its ARN decides. */
-const getStackRegion = (stackId: string, fallback: string): string =>
-  stackId.split(':')[3] || fallback;
+/**
+ * A reused identity's stack can live in another region than the run, so its ARN decides.
+ * The segment becomes the console host, so anything that is not a region falls back.
+ */
+const getStackRegion = (stackId: string, fallback: string): string => {
+  const region = stackId.split(':')[3];
+  return region && AWS_REGION_PATTERN.test(region) ? region : fallback;
+};
 
 const getConsoleUrl = (region: string, stackId: string): string =>
   `https://${region}.console.aws.amazon.com/cloudformation/home?region=${region}#/stacks/stackinfo?stackId=${encodeURIComponent(
@@ -489,8 +495,10 @@ export const AwsOnboardingRunCard: React.FC<{ data: AwsOnboardingRunAttachmentDa
       return result;
     },
     {
-      // Poll only while the run can still move; an ended run never changes.
-      refetchInterval: (result) => (isRunning(result?.status) ? POLL_INTERVAL_MS : false),
+      // Poll only while the run can still move; an ended run never changes. Until a first
+      // read succeeds there is nothing to judge, so a failed first read is retried.
+      refetchInterval: (result) =>
+        result === undefined || isRunning(result.status) ? POLL_INTERVAL_MS : false,
       refetchOnWindowFocus: false,
       retry: false,
     }
