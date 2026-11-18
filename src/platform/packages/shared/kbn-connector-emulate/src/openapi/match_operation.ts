@@ -33,8 +33,15 @@ interface ServerPrefix {
 interface Route {
   readonly operation: ContractOperation;
   readonly servers: readonly ServerPrefix[];
+  /** Matches the path with or without a trailing slash. */
   readonly path: RegExp;
+  /** Matches the path only as the template spells it. */
+  readonly exactPath: RegExp;
   readonly parameterNames: readonly string[];
+  /** The path template, without the fixed query parameters of an `x-ms-paths` key. */
+  readonly template: string;
+  /** How many of its parameters span segments, as `x-ms-skip-url-encoding` ones do. */
+  readonly multiSegmentCount: number;
   /** The length of the template's text outside parameters. */
   readonly literalLength: number;
 }
@@ -104,15 +111,22 @@ const compileRoute = (operation: ContractOperation): Route => {
   );
   // `x-ms-paths` keys end in the operation's fixed query parameters.
   const [template] = operation.path.split('?');
-  const source = compileTemplate(template, (name) => {
+  // Vendors' docs and specs often disagree on a trailing slash, which their servers accept either
+  // way, so it is optional; `/items/` and `/items` both match `/items`. The slash is taken off the
+  // template, as `compileServerTemplate` does, rather than off the pattern compiled from it.
+  const trailingSlash = template.length > 1 && template.endsWith('/');
+  const source = compileTemplate(trailingSlash ? template.slice(0, -1) : template, (name) => {
     parameterNames.push(name);
     return multiSegment.has(name) ? '(.+?)' : '([^/]+)';
   });
   return {
     operation,
     servers: operation.servers.map(compileServer),
-    path: new RegExp(`^${source}$`),
+    path: new RegExp(`^${source}/?$`),
+    exactPath: new RegExp(`^${source}${trailingSlash ? '/' : ''}$`),
     parameterNames,
+    template,
+    multiSegmentCount: parameterNames.filter((name) => multiSegment.has(name)).length,
     literalLength: template.replace(new RegExp(TEMPLATE_PARAMETER, 'g'), '').length,
   };
 };
@@ -267,11 +281,31 @@ const decodePathSegment = (segment: string): string => {
   }
 };
 
+// The operation's path, with its parameters unnamed, as two specs of one API may name them apart.
+const samePath = ({ operation: { path } }: Route): string =>
+  path.replace(new RegExp(TEMPLATE_PARAMETER, 'g'), '{}');
+
+// Orders specificity keys by their first differing element, so the key can grow without the
+// comparison having to spell out every element.
+const bySpecificity = (a: readonly number[], b: readonly number[]): number =>
+  a.reduce((order, value, index) => order || value - b[index], 0);
+
+export interface OperationMatcherOptions {
+  /**
+   * Breaks ties between sources: of the operations several specs describe with the same method and
+   * path, those it returns true for win.
+   */
+  readonly isPreferred?: (operation: ContractOperation) => boolean;
+}
+
 /**
  * Creates a router that finds the operation for a request. When several path templates match,
- * the one with the fewest parameters wins, so `/items/new` takes precedence over `/items/{id}`,
- * then the one with the most literal text, so `/items/{id}:archive` takes precedence over
- * `/items/{id}`. Operations on that template, as `x-ms-paths` declares them, are told apart by
+ * the one with the fewest parameters spanning segments wins, so Azure's
+ * `/subscriptions/{subscriptionId}/…/managedClusters/{resourceName}` takes precedence over the
+ * catch-all `/{resourceId}`, then the one with the fewest parameters, so `/items/new` takes
+ * precedence over `/items/{id}`, then the one that matches the trailing slash as spelled (it is
+ * optional otherwise), then the one with the most literal text, so `/items/{id}:archive` takes
+ * precedence over `/items/{id}`. Operations on that template, as `x-ms-paths` declares them, are told apart by
  * the query parameters their keys fix and their required parameters with one allowed value:
  * those the request sends with another value are left out, unless every operation is, then the
  * one with the most fixed query parameters wins, then the one that declares the most of the query
@@ -279,8 +313,20 @@ const decodePathSegment = (segment: string): string => {
  * missing. So `/?restype=service&comp=properties` takes precedence over `/?comp=properties`, and
  * a lease request goes to the operation whose `x-ms-lease-action` it sends.
  */
-export const createOperationMatcher = (operations: readonly ContractOperation[]) => {
+export const createOperationMatcher = (
+  operations: readonly ContractOperation[],
+  { isPreferred = () => false }: OperationMatcherOptions = {}
+) => {
   const routes = operations.map(compileRoute);
+  const preferred = new Set(routes.filter(({ operation }) => isPreferred(operation)));
+  // Operations on one template may mark its parameters differently, so they rank the same.
+  const multiSegmentByTemplate = new Map<string, number>();
+  for (const { template, multiSegmentCount } of routes) {
+    multiSegmentByTemplate.set(
+      template,
+      Math.max(multiSegmentByTemplate.get(template) ?? 0, multiSegmentCount)
+    );
+  }
 
   return (
     method: string,
@@ -289,8 +335,11 @@ export const createOperationMatcher = (operations: readonly ContractOperation[])
   ): OperationMatch | OperationMismatch => {
     const pathMatches = routes.flatMap((route) => {
       const path = getOperationPath(route, url);
-      const match = path === undefined ? null : route.path.exec(path);
-      return match ? [{ route, values: match.slice(1) }] : [];
+      if (path === undefined) {
+        return [];
+      }
+      const match = route.path.exec(path);
+      return match ? [{ route, values: match.slice(1), exact: route.exactPath.test(path) }] : [];
     });
     if (pathMatches.length === 0) {
       return { status: 404, message: 'No operation matches the path' };
@@ -309,28 +358,42 @@ export const createOperationMatcher = (operations: readonly ContractOperation[])
       ({ route }) => route.operation.method === method.toLowerCase()
     );
     // The most specific path template wins first, so `/items/new` takes precedence over
-    // `/items/{id}` whatever the request's parameters; discriminators only tell apart operations
-    // on that template, as `x-ms-paths` declares them.
-    const specificity = ({ route }: (typeof forMethod)[number]) =>
-      [route.parameterNames.length, -route.literalLength] as const;
-    const [mostSpecific] = forMethod.map(specificity).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    // `/items/{id}`, and both over a catch-all `/{resourceId}`, whatever the request's parameters;
+    // discriminators only tell apart operations on that template, as `x-ms-paths` declares them.
+    // A template that matches without dropping or adding a trailing slash wins among as specific
+    // ones, so a spec with both `/items` and `/items/` answers each from its own.
+    const specificity = ({ route, exact }: (typeof forMethod)[number]) =>
+      [
+        multiSegmentByTemplate.get(route.template) ?? 0,
+        route.parameterNames.length,
+        exact ? 0 : 1,
+        -route.literalLength,
+      ] as const;
+    const [mostSpecific] = forMethod.map(specificity).sort(bySpecificity);
     const onTemplate = forMethod
-      .filter((candidate) => {
-        const [parameters, literal] = specificity(candidate);
-        return parameters === mostSpecific[0] && literal === mostSpecific[1];
-      })
+      .filter((candidate) =>
+        specificity(candidate).every((value, index) => value === mostSpecific[index])
+      )
       .map((candidate) => ({ ...candidate, ...discriminate(candidate.route, { url, headers }) }));
     // A conflicting discriminator rules an operation out only when another is left, so a request
     // to a single operation still reaches validation, which names the wrong value.
     const consistent = onTemplate.filter(({ conflicts }) => !conflicts);
-    const [best] = (consistent.length > 0 ? consistent : onTemplate).sort(
-      (a, b) =>
-        fixedQueryCount(b.route, url) - fixedQueryCount(a.route, url) ||
-        missingQueryCount(a.route, url) - missingQueryCount(b.route, url) ||
-        declaredQueryCount(b.route, url) - declaredQueryCount(a.route, url) ||
-        b.matched - a.matched ||
-        a.missing - b.missing
+    const remaining = consistent.length > 0 ? consistent : onTemplate;
+    // A preferred operation only rules out the same operation as other sources describe it;
+    // operations on its template that the query tells apart still compete on their discriminators.
+    const preferredPaths = new Set(
+      remaining.filter(({ route }) => preferred.has(route)).map(({ route }) => samePath(route))
     );
+    const [best] = remaining
+      .filter(({ route }) => preferred.has(route) || !preferredPaths.has(samePath(route)))
+      .sort(
+        (a, b) =>
+          fixedQueryCount(b.route, url) - fixedQueryCount(a.route, url) ||
+          missingQueryCount(a.route, url) - missingQueryCount(b.route, url) ||
+          declaredQueryCount(b.route, url) - declaredQueryCount(a.route, url) ||
+          b.matched - a.matched ||
+          a.missing - b.missing
+      );
     if (!best) {
       const allowed = [...new Set(candidates.map(({ route }) => route.operation.method))];
       return {

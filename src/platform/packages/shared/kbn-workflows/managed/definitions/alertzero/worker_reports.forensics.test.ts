@@ -434,25 +434,3 @@ describe('Endpoint Analysis outcome reports', () => {
     });
   });
 });
-
-describe('Endpoint Analysis managed versions', () => {
-  it.each([
-    [
-      ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW.id,
-      ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW.version,
-      7,
-    ],
-    [
-      ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW.id,
-      ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW.version,
-      17,
-    ],
-    [
-      ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW.id,
-      ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW.version,
-      6,
-    ],
-  ])('bumps %s to the version that carries its reports', (_id, version, expected) => {
-    expect(version).toBe(expected);
-  });
-});

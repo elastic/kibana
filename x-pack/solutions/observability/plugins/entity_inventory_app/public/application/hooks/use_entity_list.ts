@@ -33,7 +33,7 @@ export const useEntityList = (entityType: string): EntityListResult => {
     services: { inventoryApi },
   } = useKibana();
   // The query and filters are not applied until search lands (#6327).
-  const { dateRange } = useEntityInventorySearch();
+  const { dateRange, refreshToken } = useEntityInventorySearch();
 
   const state = useAbortableAsync(
     ({ signal }) => {
@@ -44,7 +44,10 @@ export const useEntityList = (entityType: string): EntityListResult => {
       }
       return inventoryApi.getEntities(entityType, range, { signal });
     },
-    [inventoryApi, entityType, dateRange],
+    // `refreshToken` is intentionally included to fetch again when the same relative range is
+    // submitted again.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [inventoryApi, entityType, dateRange, refreshToken],
     FETCH_OPTIONS
   );
 
