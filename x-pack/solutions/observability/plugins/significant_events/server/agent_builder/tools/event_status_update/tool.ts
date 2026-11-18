@@ -25,7 +25,7 @@ import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_c
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import { existingAlertIdentity } from '../alert_identity_telemetry';
-import { trackTelemetryBestEffort } from '../bulk_write';
+import { trackTelemetryBestEffort } from '../../../lib/telemetry/track_telemetry_best_effort';
 import { reportToolFailure, toTelemetryErrorMessage } from '../tool_failure';
 import { updateEventStatusToolHandler } from './handler';
 
