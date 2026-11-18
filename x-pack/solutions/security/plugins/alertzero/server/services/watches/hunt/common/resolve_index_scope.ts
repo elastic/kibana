@@ -168,7 +168,8 @@ const boundReportMatches = (
  * that the caller may not read; it is skipped when the universe names none. The report's vendor
  * and product are then matched deterministically against those datasets, and one
  * `_field_caps` call names the `actionable_indices`. Nothing here picks what Tier 1 may
- * read: Tier 1 searches the universe minus the local concrete names in `missing`.
+ * read: Tier 1 searches the universe minus the local concrete names in `missing`
+ * (under cross-project search nothing is removed, since a miss may be a linked project that did not answer).
  * The model matcher is not called here; it runs in stage 2, after Tier 1, only when the
  * deterministic signals found nothing.
  *

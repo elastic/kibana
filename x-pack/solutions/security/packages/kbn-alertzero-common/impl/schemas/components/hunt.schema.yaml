@@ -148,7 +148,8 @@ components:
           type: array
           description: >-
             The universe as searched by IOC Hunt, with policy-skipped entries and the
-            local concrete names in `missing` removed. Empty when the scope is blocked.
+            local concrete names in `missing` removed (under cross-project search none is
+            removed, so a name can be in both lists). Empty when the scope is blocked.
           items:
             type: string
         missing:

@@ -42,12 +42,12 @@ export const HuntCoordinatorResult = lazySchema(() =>
     report_id: z.string().optional(),
     run_id: z.string(),
     /**
-     * What IOC Hunt searched: the space's Security Solution default data view patterns, exclusions included, with policy-skipped entries (hidden and alerts names) and unresolved local concrete names removed. Empty when the scope was blocked or resolution failed.
+     * What IOC Hunt searched: the space's Security Solution default data view patterns, exclusions included, with policy-skipped entries (hidden and alerts names) and unresolved local concrete names removed (under cross-project search no concrete name is removed). Empty when the scope was blocked or resolution failed.
      */
     index_patterns: z
       .array(z.string())
       .describe(
-        "What IOC Hunt searched: the space's Security Solution default data view patterns, exclusions included, with policy-skipped entries (hidden and alerts names) and unresolved local concrete names removed. Empty when the scope was blocked or resolution failed."
+        "What IOC Hunt searched: the space's Security Solution default data view patterns, exclusions included, with policy-skipped entries (hidden and alerts names) and unresolved local concrete names removed (under cross-project search no concrete name is removed). Empty when the scope was blocked or resolution failed."
       ),
     /**
      * What Behavior Hunt was allowed to read, target, and count as a hit, chosen after the report was read and IOC Hunt ran: the union of the datasets the report's vendor or product matched, the indices IOC Hunt hit, the model's matches (only when neither of those found anything), and `actionable_indices`, each `*`-suffixed. `tier2_target_sources` says which signals contributed. Empty when the scope was blocked, resolution failed, or no signal named a target.

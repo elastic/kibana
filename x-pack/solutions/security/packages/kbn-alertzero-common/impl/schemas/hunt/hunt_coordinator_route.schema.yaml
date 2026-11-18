@@ -160,7 +160,7 @@ components:
             What IOC Hunt searched: the space's Security Solution default
             data view patterns, exclusions included, with policy-skipped entries
             (hidden and alerts names) and unresolved local concrete names
-            removed. Empty when the scope was blocked or resolution failed.
+            removed (under cross-project search no concrete name is removed). Empty when the scope was blocked or resolution failed.
           items:
             type: string
         tier2_targets:

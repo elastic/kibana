@@ -121,12 +121,12 @@ export const HuntScope = lazySchema(() =>
     status: IndexScopeStatus,
     resolution: HuntScopeResolution,
     /**
-     * The universe as searched by IOC Hunt, with policy-skipped entries and the local concrete names in `missing` removed. Empty when the scope is blocked.
+     * The universe as searched by IOC Hunt, with policy-skipped entries and the local concrete names in `missing` removed (under cross-project search none is removed, so a name can be in both lists). Empty when the scope is blocked.
      */
     index_patterns: z
       .array(z.string())
       .describe(
-        'The universe as searched by IOC Hunt, with policy-skipped entries and the local concrete names in `missing` removed. Empty when the scope is blocked.'
+        'The universe as searched by IOC Hunt, with policy-skipped entries and the local concrete names in `missing` removed (under cross-project search none is removed, so a name can be in both lists). Empty when the scope is blocked.'
       ),
     /**
      * Universe patterns the caller cannot search: not found, closed, not readable (a concrete name that resolves without read access counts), or on a remote cluster or linked project that did not answer.
