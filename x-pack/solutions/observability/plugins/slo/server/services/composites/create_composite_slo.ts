@@ -8,6 +8,11 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { CompositeSLODefinitionResponse, CreateCompositeSLOInput } from '@kbn/slo-schema';
 import { v4 as uuidv4 } from 'uuid';
+import type { SloTelemetryReporter } from '../../lib/telemetry';
+import {
+  COMPOSITE_SLO_CREATED_EBT_EVENT_TYPE,
+  toCompositeSloDefinitionEbtData,
+} from '../../lib/telemetry';
 import type { SLODefinitionRepository } from '../slo_definition_repository';
 import type { SummaryClient } from '../summary_client';
 import type { CompositeSLORepository } from './composite_slo_repository';
@@ -24,11 +29,12 @@ interface Dependencies {
   repository: SLODefinitionRepository;
   summaryClient: SummaryClient;
   logger: Logger;
+  telemetry: SloTelemetryReporter;
 }
 
 export async function createCompositeSlo(
   params: CreateCompositeSloParams,
-  { esClient, compositeRepository, repository, summaryClient, logger }: Dependencies
+  { esClient, compositeRepository, repository, summaryClient, logger, telemetry }: Dependencies
 ): Promise<CompositeSLODefinitionResponse> {
   const { spaceId, userId, ...body } = params;
   const now = new Date().toISOString();
@@ -45,6 +51,10 @@ export async function createCompositeSlo(
   };
 
   const created = await compositeRepository.create(compositeSlo);
+
+  telemetry.report(COMPOSITE_SLO_CREATED_EBT_EVENT_TYPE, () =>
+    toCompositeSloDefinitionEbtData(created)
+  );
 
   await computeAndPersistCompositeSummaryDoc(created, {
     esClient,

@@ -8,6 +8,7 @@
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../common/constants';
+import { createSloTelemetryReporterMock } from '../../lib/telemetry/slo_telemetry_service.mock';
 import { createCompositeSLORepositoryMock } from '../mocks';
 import { deleteCompositeSlo } from './delete_composite_slo';
 
@@ -21,7 +22,7 @@ describe('deleteCompositeSlo', () => {
     const compositeRepository = createCompositeSLORepositoryMock();
     const logger = loggerMock.create();
 
-    await deleteCompositeSlo({ id, spaceId }, { esClient, compositeRepository, logger });
+    await deleteCompositeSlo({ id, spaceId }, { esClient, compositeRepository, logger, telemetry: createSloTelemetryReporterMock() });
 
     expect(compositeRepository.deleteById).toHaveBeenCalledWith(id);
     expect(esClient.delete).toHaveBeenCalledWith({
@@ -39,7 +40,7 @@ describe('deleteCompositeSlo', () => {
     esClient.delete.mockRejectedValueOnce({ statusCode: 404 });
 
     await expect(
-      deleteCompositeSlo({ id, spaceId }, { esClient, compositeRepository, logger })
+      deleteCompositeSlo({ id, spaceId }, { esClient, compositeRepository, logger, telemetry: createSloTelemetryReporterMock() })
     ).resolves.toBeUndefined();
     expect(logger.error).not.toHaveBeenCalled();
   });
@@ -51,7 +52,7 @@ describe('deleteCompositeSlo', () => {
     esClient.delete.mockRejectedValueOnce({ statusCode: 503, message: 'service unavailable' });
 
     await expect(
-      deleteCompositeSlo({ id, spaceId }, { esClient, compositeRepository, logger })
+      deleteCompositeSlo({ id, spaceId }, { esClient, compositeRepository, logger, telemetry: createSloTelemetryReporterMock() })
     ).resolves.toBeUndefined();
     expect(logger.debug).toHaveBeenCalledWith(
       expect.stringContaining(`Failed to delete composite summary doc [${docId}]`)
