@@ -592,8 +592,9 @@ export const fetchBranchCounts = async (
 /**
  * One row per build of the given tests of one execution model, per branch and setup (pipeline,
  * config file and Scout target): whether the test failed in the build, a failure that passed on
- * a retry included. Over the same executions as the per-branch counts. Only setups where the test
- * failed at least once: the others have no breakage, and they are most of the rows.
+ * a retry included, and whether it passed in it, on a retry included. Over the same executions as
+ * the per-branch counts. Only setups where the test failed at least once: the others have no
+ * breakage, and they are most of the rows.
  */
 export const buildSetupBuildsQuery = (
   scope: FlakyTestQueryScope,
@@ -612,10 +613,11 @@ export const buildSetupBuildsQuery = (
     ].join(' AND ')}`,
     `EVAL ${[
       `failed = ${model.failedExpression}`,
+      `passed = ${model.passedExpression}`,
       `setup = ${SETUP_EXPRESSION}`,
       ...judged.eval,
     ].join(', ')}`,
-    'STATS failed = MAX(failed), ran_at = MIN(@timestamp),' +
+    'STATS failed = MAX(failed), passed = MAX(passed), ran_at = MIN(@timestamp),' +
       ' failed_at = MAX(CASE(failed == 1, @timestamp, NULL))' +
       ` BY test.id, ${judged.by}, setup, buildkite.build.id, buildkite.build.number`,
     'INLINE STATS setup_failed = MAX(failed) BY test.id, buildkite.branch, setup',
@@ -668,6 +670,7 @@ export const fetchSetupBuilds = async (
           build_id: string | null;
           build_number: number | null;
           failed: number;
+          passed: number;
           ran_at: string;
           failed_at: string | null;
         }>(es, buildSetupBuildsQuery(scope, frameworks, batch)),
@@ -704,6 +707,7 @@ export const fetchSetupBuilds = async (
         buildId: record.build_id,
         buildNumber: record.build_number,
         failed: record.failed === 1,
+        passed: record.passed === 1,
         ranAt: new Date(record.ran_at),
         failedAt: record.failed_at === null ? undefined : new Date(record.failed_at),
       });

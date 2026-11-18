@@ -26,6 +26,7 @@ const setupBuilds = (
       buildId: `build-${first + index}`,
       buildNumber: first + index,
       failed: outcome === 'x',
+      passed: outcome !== 'x',
       ranAt,
       failedAt: outcome === 'x' ? ranAt : undefined,
     };

@@ -16,6 +16,8 @@ export interface SetupBuild {
   buildNumber: number;
   /** Whether the test failed in the build, a failure that passed on a retry included. */
   failed: boolean;
+  /** Whether the test passed in the build, a pass on a retry included. */
+  passed: boolean;
   /** When the build first ran the test in the setup. */
   ranAt: Date;
   /** When the test last failed in the build in the setup: a later retry can be well after `ranAt`. */
@@ -31,7 +33,10 @@ export interface SetupBuilds extends JudgedScope {
   builds: SetupBuild[];
 }
 
-/** Failed builds in a row, one after the other in a setup, too many to be chance. */
+/**
+ * Builds in a row that the test failed every attempt of, one after the other in a setup, too many
+ * to be chance. A build where a retry passed ends the run: the test still works there, it is flaky.
+ */
 export interface Breakage extends JudgedScope {
   setup: string;
   builds: SetupBuild[];
@@ -39,11 +44,14 @@ export interface Breakage extends JudgedScope {
   ongoing: boolean;
 }
 
-/** A breakage is at least this many failed builds in a row. */
+/** A breakage is at least this many builds in a row failing every attempt. */
 export const MIN_BREAKAGE_BUILDS = 3;
 
 /** The most likely a run of failed builds may be, for a test failing at random, to be a breakage. */
 export const MAX_BREAKAGE_CHANCE = 0.01;
+
+/** Whether the test failed every attempt of the build: no retry passed. */
+const failedEveryAttempt = ({ failed, passed }: SetupBuild): boolean => failed && !passed;
 
 /**
  * The chance that a test failing a share `rate` of its `builds` builds at random, each build
@@ -54,17 +62,18 @@ export const chanceOfFailingInARow = (builds: number, rate: number, length: numb
   Math.min(1, (builds * (1 - rate) + 1) * rate ** length);
 
 /**
- * The breakages in a test's builds in one setup: runs of at least `MIN_BREAKAGE_BUILDS` failed
- * builds that a test failing at random as often would show less than `MAX_BREAKAGE_CHANCE` of
- * the time. A test that failed in every build is broken whatever the chance.
+ * The breakages in a test's builds in one setup: runs of at least `MIN_BREAKAGE_BUILDS` builds
+ * failing every attempt that a test failing every attempt at random as often would show less than
+ * `MAX_BREAKAGE_CHANCE` of the time. A test that failed every attempt of every build is broken
+ * whatever the chance. These are the failures the consistently failing check reports.
  */
 export const findBreakages = ({ branch, pipeline, setup, builds }: SetupBuilds): Breakage[] => {
-  const rate = builds.filter((build) => build.failed).length / builds.length;
+  const rate = builds.filter(failedEveryAttempt).length / builds.length;
   const breakages: Breakage[] = [];
   let start = 0;
   while (start < builds.length) {
     let end = start;
-    while (end < builds.length && builds[end].failed) {
+    while (end < builds.length && failedEveryAttempt(builds[end])) {
       end += 1;
     }
     const length = end - start;
@@ -118,7 +127,7 @@ export const branchCountsWithout = <T extends BranchCounts>(
   });
 };
 
-/** `12 failed builds in a row on main (#113410 to #113421) in kibana-on-merge a.config.ts …` */
+/** `12 builds in a row failing every attempt on main (#113410 to #113421) in kibana-on-merge …` */
 export const describeBreakage = ({ branch, setup, builds }: Breakage): string =>
-  `${builds.length} failed builds in a row on ${branch} (#${builds[0].buildNumber} to ` +
-  `#${builds[builds.length - 1].buildNumber}) in ${setup}`;
+  `${builds.length} builds in a row failing every attempt on ${branch} ` +
+  `(#${builds[0].buildNumber} to #${builds[builds.length - 1].buildNumber}) in ${setup}`;
