@@ -13,7 +13,6 @@
  */
 
 import Fs from 'node:fs/promises';
-import Os from 'node:os';
 import Path from 'node:path';
 import { getHeapStatistics } from 'node:v8';
 import { isMainThread, workerData } from 'node:worker_threads';
@@ -26,10 +25,10 @@ import { BlockStats } from './block_stats';
 import {
   ProfileCapture,
   createInspectorSession,
-  prepareProfile,
   type CpuProfile,
   type InspectorSession,
 } from './profile_capture';
+import { fileName, prepareProfile } from './profile_file';
 import { summarizeProfile, type CallerSummary, type ProfileSummary } from './profile_summary';
 import type {
   BlockLogMeta,
@@ -95,12 +94,6 @@ const errorMessage = (error: unknown): string =>
 /** Time from the first sample to the block's end (`block_ended`) or to the stop (`max_duration`). */
 const sampledMs = ({ startTime, endTime, timeDeltas }: CpuProfile, untilUs = endTime): number =>
   timeDeltas?.length ? Math.max(0, toMs(untilUs - (startTime + timeDeltas[0]))) : 0;
-
-/** Leads with the phase and the zero-padded block duration, so sorted listings surface the worst. */
-export const fileName = (phase: Phase, blockedMs: number, date: Date) =>
-  `event-loop-block-${phase}-${String(Math.round(blockedMs)).padStart(6, '0')}ms-${date
-    .toISOString()
-    .replace(/[:.]/g, '-')}-${Os.hostname()}-${process.pid}.cpuprofile`;
 
 const formatFrame = ({ name, location }: CallerSummary): string =>
   location === undefined ? name : `${name} (${location})`;
@@ -342,23 +335,23 @@ export const runWatchdogWorker = (
       stopHeartbeatGapMs = Math.max(current.stopHeartbeatGapMs, heartbeatGapMs(nowMs));
       counts.maxStopHeartbeatGapMs = Math.max(counts.maxStopHeartbeatGapMs, stopHeartbeatGapMs);
     }
-    let file: ProfileFileOutcome = 'no_directory';
-    let path: string | undefined;
-    if (summary.samples === 0) {
-      file = 'empty';
-    } else if (profiling.diagnosticDir !== undefined) {
-      file = admission.admit(phase, blockedMs, nowMs);
-      if (file === 'admitted') {
-        path = Path.join(profiling.diagnosticDir, fileName(phase, blockedMs, new Date()));
-      } else if (file === 'in_window') {
-        counts.files[phase].inWindow++;
-      } else {
-        counts.files[phase].fileLimit++;
-      }
-    }
+    const { diagnosticDir } = profiling;
+    const file: ProfileFileOutcome =
+      summary.samples === 0
+        ? 'empty'
+        : diagnosticDir === undefined
+        ? 'no_directory'
+        : admission.admit(phase, blockedMs, nowMs);
+    const path =
+      diagnosticDir && file === 'admitted'
+        ? Path.join(diagnosticDir, fileName(phase, blockedMs, new Date()))
+        : undefined;
+    if (file === 'in_window') counts.files[phase].inWindow++;
+    if (file === 'file_limit') counts.files[phase].fileLimit++;
     captureNumber++;
     const frameLists = formatFrameLists(summary);
-    // Written profiles are the ones to look at; the others still show where blocks come from.
+    // Highlight captures selected for file output; keep other captures at info so their frame
+    // diagnostics remain available.
     logger[file === 'admitted' ? 'warn' : 'info']<ProfileLogMeta>(
       `Event loop block profile #${captureNumber}: block ~${blockedMs}ms${
         stopReason === 'block_ended' ? '' : ' so far'

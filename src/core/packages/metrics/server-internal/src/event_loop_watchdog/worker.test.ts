@@ -14,15 +14,12 @@ import path from 'node:path';
 import type * as WorkerThreads from 'node:worker_threads';
 import { loggerMock } from '@kbn/logging-mocks';
 import { createWorkerLogger, type WorkerLogger } from '@kbn/core-threads-server-internal';
+import { MAX_MESSAGE_FRAMES_LENGTH, runWatchdogWorker, type WatchdogWorkerDeps } from './worker';
+import type { FileCounts, Phase, ProfileLogMeta, StatsLogMeta, WatchdogWorkerData } from './types';
+import type { CpuProfile, InspectorSession } from './profile_capture';
+import { prepareProfile } from './profile_file';
 import {
-  MAX_MESSAGE_FRAMES_LENGTH,
-  fileName,
-  runWatchdogWorker,
-  type WatchdogWorkerDeps,
-} from './worker';
-import type { FileCounts, ProfileLogMeta, StatsLogMeta, WatchdogWorkerData } from './types';
-import { prepareProfile, type CpuProfile, type InspectorSession } from './profile_capture';
-import {
+  ADMISSION_LIMITS,
   ONGOING_REPORT_AFTER_MS,
   REPORT_REFILL_MS,
   SLOT_COUNT,
@@ -30,6 +27,7 @@ import {
   WATCHDOG_WORKER_NAME,
 } from './constants';
 import { MAX_LOCATION_LENGTH, MAX_NAME_LENGTH } from './sanitize';
+import { PROFILING_DIR_MAX_LENGTH } from '../ops_config';
 
 jest.mock('node:worker_threads', () => ({ isMainThread: true, threadId: 99 }));
 const workerThreads = jest.requireMock<typeof WorkerThreads>('node:worker_threads');
@@ -185,16 +183,15 @@ describe('runWatchdogWorker', () => {
     return session;
   };
   const posted = (session = 0) => sessions[session].post.mock.calls.map(([method]) => method);
-  /** Lets the fake session's replies settle. */
+  /** Runs enough microtask hops for the fake Inspector replies and capture pipeline to finish. */
   const settle = async () => {
     for (let i = 0; i < 20; i++) {
       await Promise.resolve();
     }
   };
-  const profileLines = () =>
-    logger.info.mock.calls.filter(([message]) =>
-      String(message).startsWith('Event loop block profile #')
-    );
+  const isCaptureLine = ([message]: unknown[]) =>
+    String(message).startsWith('Event loop block profile #');
+  const profileLines = () => logger.info.mock.calls.filter(isCaptureLine);
   const allStats = () =>
     logger.info.mock.calls
       .filter(([message]) => String(message).startsWith('Event loop watchdog stats'))
@@ -1070,8 +1067,11 @@ describe('runWatchdogWorker', () => {
       expect(profileMeta().captureDurationMs).toBe(525);
     });
 
+    const LONGEST_DIR = `/${'d'.repeat(PROFILING_DIR_MAX_LENGTH - 1)}`;
+    const MAX_HOSTNAME_LENGTH = 63;
+    const MAX_PID_DIGITS = 7;
+
     /** Logs one capture with every name built from `noisyName`, through a real worker logger. */
-    const LONGEST_DIR = `/${'d'.repeat(63)}`;
     const logCaptureLine = async (
       noisyName: string
     ): Promise<{ line: string; droppedLogLines: number }> => {
@@ -1134,9 +1134,9 @@ describe('runWatchdogWorker', () => {
 
       jest.replaceProperty(workerThreads, 'isMainThread', false);
       jest.spyOn(process, 'uptime').mockReturnValue(999_999.999_999_999);
-      // The longest file path: a 64-character directory and a 63-character hostname.
       jest.spyOn(Fs, 'writeFile').mockResolvedValue();
-      jest.spyOn(os, 'hostname').mockReturnValue('h'.repeat(63));
+      // Pair the longest supported directory and hostname to exercise the maximum output path.
+      jest.spyOn(os, 'hostname').mockReturnValue('h'.repeat(MAX_HOSTNAME_LENGTH));
 
       const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'watchdog-line-size-'));
       const logFile = path.join(tmpDir, 'worker.log');
@@ -1205,14 +1205,17 @@ describe('runWatchdogWorker', () => {
       // every name and location in the line is at its cap. Kibana names and paths are ASCII.
       const { line, droppedLogLines } = await logCaptureLine('a_long_function_name_'.repeat(4));
       expect(droppedLogLines).toBe(0);
-      // `process.pid` is read-only, so the digits a 7-digit pid would add are counted here.
-      const lineBytes = Buffer.byteLength(line, 'utf8') + 7 - String(process.pid).length;
+      // Account for the longest PID width without trying to replace the read-only `process.pid`.
+      const lineBytes =
+        Buffer.byteLength(line, 'utf8') + MAX_PID_DIGITS - String(process.pid).length;
       expect(lineBytes).toBeLessThanOrEqual(4_094);
 
       const parsed = JSON.parse(line);
-      expect(parsed.message).not.toMatch(/\[truncated\]$/);
+      expect(parsed.message.endsWith(' [truncated]')).toBe(false);
       expect(parsed.message).toContain(`File: ${LONGEST_DIR}/event-loop-block-starting-100000ms-`);
-      expect(parsed.message).toContain(`-${'h'.repeat(63)}-${process.pid}.cpuprofile. Top: `);
+      expect(parsed.message).toContain(
+        `-${'h'.repeat(MAX_HOSTNAME_LENGTH)}-${process.pid}.cpuprofile. Top: `
+      );
       expect(parsed.kibana.event_loop_watchdog.profile.file).toBe('admitted');
       expect(parsed.message).toContain('Kibana code: 45.5% ');
       // The frame lists are cut at their cap; the full lists are in `profile`.
@@ -1249,7 +1252,7 @@ describe('runWatchdogWorker', () => {
       expect(Buffer.byteLength(line, 'utf8')).toBeLessThanOrEqual(4_094);
       const parsed = JSON.parse(line);
       expect(parsed.kibana?.event_loop_watchdog).toBeUndefined();
-      expect(parsed.message).toMatch(/\[truncated\]$/);
+      expect(parsed.message.endsWith(' [truncated]')).toBe(true);
       expect(parsed.message).toContain('Event loop block profile #1: block ~100000ms ');
       expect(parsed.message).toContain('stopped: block_ended. File: ');
       expect(parsed.message).toContain('.cpuprofile. Top: ');
@@ -1269,35 +1272,23 @@ describe('runWatchdogWorker', () => {
         start({ profiling: { ...profilingData, diagnosticDir: DIR } });
         setSlot(Slot.profiling, 1);
       };
-      const warnLines = () =>
-        logger.warn.mock.calls.filter(([message]) =>
-          String(message).startsWith('Event loop block profile #')
-        );
+      const warnLines = () => logger.warn.mock.calls.filter(isCaptureLine);
       const warnLineOrder = () =>
-        logger.warn.mock.invocationCallOrder[
-          logger.warn.mock.calls.findIndex(([message]) =>
-            String(message).startsWith('Event loop block profile #')
-          )
-        ];
+        logger.warn.mock.invocationCallOrder[logger.warn.mock.calls.findIndex(isCaptureLine)];
       const fileCounts = () => {
         idle(STATS_INTERVAL_MS);
         return lastStats().profiling.files;
       };
-      /** A starting-phase file count summed over every stats period so far. */
-      const totalFiles = (key: keyof FileCounts) => {
+      /**
+       * Sums a phase's file-outcome counter across stats periods, which reset after each period.
+       */
+      const summedFiles = (phase: Phase, key: keyof FileCounts) => {
         idle(STATS_INTERVAL_MS);
-        return allStats().reduce((sum, { profiling }) => sum + profiling.files.starting[key], 0);
+        return allStats().reduce((sum, { profiling }) => sum + profiling.files[phase][key], 0);
       };
+      const { perHour, maxFiles } = ADMISSION_LIMITS.starting;
 
       afterEach(() => jest.restoreAllMocks());
-
-      it('names a file by phase, zero-padded block length, time, host and pid', () => {
-        expect(fileName('running', 1234.6, new Date('2026-11-17T10:20:30.456Z'))).toBe(
-          `event-loop-block-running-001235ms-2026-11-17T10-20-30-456Z-${os.hostname()}-${
-            process.pid
-          }.cpuprofile`
-        );
-      });
 
       it('logs the capture at warn with the file path, then writes the prepared profile', async () => {
         const writeFile = jest.spyOn(Fs, 'writeFile').mockResolvedValue();
@@ -1374,19 +1365,59 @@ describe('runWatchdogWorker', () => {
       it('logs a capture admission refuses at info, without writing it', async () => {
         const writeFile = jest.spyOn(Fs, 'writeFile').mockResolvedValue();
         startWriting();
-        // Starting phase: 5 files in the rolling hour, then a block no longer than the longest.
-        for (let i = 0; i < 6; i++) {
+        // Fill the rolling-hour allowance, then submit an equally long block that is not a record.
+        for (let i = 0; i <= perHour; i++) {
           await profiledBlock(2_000);
           idle(profilingData.cooldownMs.starting);
         }
 
-        expect(writeFile).toHaveBeenCalledTimes(5);
-        expect(warnLines()).toHaveLength(5);
+        expect(writeFile).toHaveBeenCalledTimes(perHour);
+        expect(warnLines()).toHaveLength(perHour);
         expect(profileLines()).toHaveLength(1);
         expect(profileLines()[0][0]).not.toContain('File: ');
         expect(profileMeta().file).toBe('in_window');
-        expect(totalFiles('written')).toBe(5);
-        expect(totalFiles('inWindow')).toBe(1);
+        expect(summedFiles('starting', 'written')).toBe(perHour);
+        expect(summedFiles('starting', 'inWindow')).toBe(1);
+      });
+
+      it('counts a failed write toward the rolling hour', async () => {
+        jest.spyOn(Fs, 'writeFile').mockRejectedValue(new Error('ENOSPC'));
+        startWriting();
+        for (let i = 0; i <= perHour; i++) {
+          await profiledBlock(2_000);
+          idle(profilingData.cooldownMs.starting);
+        }
+
+        expect(profileMeta().file).toBe('in_window');
+        expect(summedFiles('starting', 'writeFailed')).toBe(perHour);
+        expect(summedFiles('starting', 'inWindow')).toBe(1);
+      });
+
+      it('refuses a record once the phase has written maxFiles', async () => {
+        const writeFile = jest.spyOn(Fs, 'writeFile').mockResolvedValue();
+        startWriting();
+        // Each block exceeds the previous longest, so the lifetime file cap is the only rejection.
+        for (let i = 0; i <= maxFiles; i++) {
+          await profiledBlock(2_000 + i * 100);
+          idle(profilingData.cooldownMs.starting);
+        }
+
+        expect(writeFile).toHaveBeenCalledTimes(maxFiles);
+        expect(profileMeta().file).toBe('file_limit');
+        expect(summedFiles('starting', 'written')).toBe(maxFiles);
+        expect(summedFiles('starting', 'fileLimit')).toBe(1);
+      });
+
+      it('writes a running-phase capture under its own phase', async () => {
+        const writeFile = jest.spyOn(Fs, 'writeFile').mockResolvedValue();
+        startWriting();
+        setSlot(Slot.runningSince, nowUs);
+        await profiledBlock(2_000, profilingData.startAfterMs.running);
+
+        expect(path.basename(String(writeFile.mock.calls[0][0]))).toContain(
+          'event-loop-block-running-002000ms-'
+        );
+        expect(fileCounts()).toMatchObject({ starting: { written: 0 }, running: { written: 1 } });
       });
     });
 
