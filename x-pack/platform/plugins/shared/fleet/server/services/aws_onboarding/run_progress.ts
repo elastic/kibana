@@ -218,15 +218,15 @@ const readData = (
   if (execution.status === ExecutionStatus.COMPLETED) {
     return { phase: 'partial' };
   }
+  // A check without a start time adds no wait time.
   const firstCheck = Math.min(
     ...execution.stepExecutions
       .filter((s) => s.stepId === 'has_data')
       .map((s) => Date.parse(s.startedAt))
+      .filter((startedAt) => !Number.isNaN(startedAt))
   );
-  return {
-    phase: 'waiting',
-    waited_seconds: Math.max(0, Math.floor((Date.now() - firstCheck) / 1000)),
-  };
+  const waited = Number.isFinite(firstCheck) ? Math.floor((Date.now() - firstCheck) / 1000) : 0;
+  return { phase: 'waiting', waited_seconds: Math.max(0, waited) };
 };
 
 /**

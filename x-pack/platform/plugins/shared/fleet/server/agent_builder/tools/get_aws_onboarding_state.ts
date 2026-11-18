@@ -8,7 +8,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { toWorkflowExecutionState } from '@kbn/agent-builder-tools-base/workflows';
-import { otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
+import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
@@ -48,14 +48,62 @@ import type { AwsOnboardingToolDeps } from './common';
 const stateSchema = lazySchema(() =>
   z.object({
     execution_id: z.string().describe('Execution id returned by start_aws_onboarding.'),
+    service: z
+      .string()
+      .optional()
+      .describe(
+        'Catalog id of the service whose settings to return, for example guardduty. Omit for the run state without settings.'
+      ),
   })
 );
 
-/** The requirement without the suggested name, which the result carries at the top level. */
-const requirementWithoutSuggestion = ({
-  suggested_identity_name: _suggestedIdentityName,
-  ...requirement
-}: AwsOnboardingSettingsRequirementOutput): AwsOnboardingSettingsRequirement => requirement;
+/**
+ * The requirement for one service, without the suggested name the result carries at the top
+ * level. One service at a time keeps the result small enough for the agent to read in full.
+ */
+const requirementForService = (
+  {
+    suggested_identity_name: _suggestedIdentityName,
+    ...requirement
+  }: AwsOnboardingSettingsRequirementOutput,
+  service: AwsOnboardingSettingsRequirement['services'][number]
+): AwsOnboardingSettingsRequirement => ({ ...requirement, services: [service] });
+
+/** Only what the agent shows and decides on for each identity: no covered integrations. */
+const summarizeIdentity = ({
+  id,
+  name,
+  created_at: createdAt,
+  stack_region: stackRegion,
+  updatable,
+  not_updatable_reason: notUpdatableReason,
+  covered_policy_templates: coveredPolicyTemplates,
+}: AwsOnboardingListIdentitiesOutput['identities'][number]) => ({
+  id,
+  name,
+  created_at: createdAt,
+  ...(stackRegion && { stack_region: stackRegion }),
+  updatable,
+  ...(notUpdatableReason && { not_updatable_reason: notUpdatableReason }),
+  covered_policy_templates: coveredPolicyTemplates,
+});
+
+/** The discover result the selection pause needs: matched services and the unmatched names. */
+const summarizeDiscovery = ({ services }: AwsOnboardingDiscoverOutput) => ({
+  discovered_services: services
+    .filter(({ matched }) => matched)
+    .map(({ id, name, agentless }) => ({ id, name, agentless })),
+  unmatched_services: services.filter(({ matched }) => !matched).map(({ name }) => name),
+});
+
+const discoveredEntry = (discover: AwsOnboardingDiscoverOutput, service: string) => {
+  const entry = discover.services.find(({ id }) => id === service);
+  if (!entry) {
+    return undefined;
+  }
+  const { id, name, matched, agentless, detector_ids: detectorIds } = entry;
+  return { id, name, matched, agentless, ...(detectorIds && { detector_ids: detectorIds }) };
+};
 
 /** The stack the run created or updated, from the shared run progress; none before it starts. */
 const readStackBlock = async (execution: WorkflowExecutionDto) => {
@@ -243,7 +291,10 @@ export const createGetAwsOnboardingStateTool = ({
     'Get the progress of an AWS onboarding run: its status, the step it is waiting on (with the message to relay and the answer schema), and the outputs of the steps completed so far.',
   schema: stateSchema,
   confirmation: { askUser: 'never' },
-  handler: async ({ execution_id: executionId }, { request, spaceId, attachments }) => {
+  handler: async (
+    { execution_id: executionId, service: serviceId },
+    { request, spaceId, attachments }
+  ) => {
     const denied = await checkOnboardingAccess(request, 'read');
     if (denied) {
       return { results: [denied] };
@@ -285,6 +336,22 @@ export const createGetAwsOnboardingStateTool = ({
       execution,
       'settings_requirement'
     );
+    const requirementService =
+      serviceId !== undefined && settingsRequirement
+        ? settingsRequirement.services.find(({ id }) => id === serviceId)
+        : undefined;
+    if (serviceId !== undefined && settingsRequirement && !requirementService) {
+      const validIds = settingsRequirement.services.map(({ id }) => id).join(', ');
+      return {
+        results: [
+          errorResult(
+            `The service '${serviceId}' is not in this run's settings. Valid ids: ${validIds}.`
+          ),
+        ],
+      };
+    }
+    const discoveredService =
+      serviceId !== undefined && discover ? discoveredEntry(discover, serviceId) : undefined;
     let cardId: string | undefined;
     let stackCardId: string | undefined;
     if (attachments) {
@@ -336,21 +403,25 @@ export const createGetAwsOnboardingStateTool = ({
             waitingStep?.stepId === 'ask_credentials' && {
               credentials_card_attachment_id: cardId,
             }),
-          // The requirement belongs to the plan pause only; the suggested name stays available
-          // for every later pause.
+          // A requirement is returned for one asked-for service only; the service list and the
+          // suggested name stay available for every later pause.
           ...(settingsRequirement && {
+            settings_services: settingsRequirement.services.map(({ id, name }) => ({ id, name })),
             suggested_identity_name: settingsRequirement.suggested_identity_name,
           }),
-          ...(waitingStep?.stepId === 'ask_plan' &&
-            settingsRequirement && {
-              settings_requirement: requirementWithoutSuggestion(settingsRequirement),
+          ...(settingsRequirement &&
+            requirementService && {
+              settings_requirement: requirementForService(settingsRequirement, requirementService),
             }),
-          ...(discover && { region: discover.region, discovered_services: discover.services }),
-          ...(listIdentities && { identities: listIdentities.identities }),
+          ...(discoveredService && { discovered_service: discoveredService }),
+          ...(discover && { region: discover.region }),
+          ...(discover &&
+            waitingStep?.stepId === 'select_services' &&
+            summarizeDiscovery(discover)),
+          ...(listIdentities && { identities: listIdentities.identities.map(summarizeIdentity) }),
           ...(resolve && {
             resolved: {
               policies: resolve.policies.map(({ service, name }) => ({ service, name })),
-              integrations: resolve.integrations,
               permissions_summary: resolve.permissions_summary,
               identity_name: resolve.identity_name,
               stack_action: resolve.stack_action,

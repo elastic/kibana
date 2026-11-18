@@ -399,6 +399,16 @@ describe('readAwsOnboardingRunProgress', () => {
       expect(progress.data).toEqual({ phase: 'waiting', waited_seconds: 250 });
     });
 
+    it('is waiting with no wait time when the data check has no start time', async () => {
+      const { startedAt: _startedAt, ...unstarted } = hasDataStep(6, noData);
+
+      const progress = await readAwsOnboardingRunProgress(
+        execution([...throughPolicies(), unstarted], { status: 'waiting' })
+      );
+
+      expect(progress.data).toEqual({ phase: 'waiting', waited_seconds: 0 });
+    });
+
     it('is complete once every policy has data', async () => {
       const progress = await readAwsOnboardingRunProgress(
         execution([...throughPolicies(), hasDataStep(6, noData), hasDataStep(8, allData)])
@@ -485,6 +495,32 @@ describe('readAwsOnboardingRunProgress', () => {
         phase: 'reused',
         name: 'my-identity',
         cloud_connector_id: 'cc-1',
+      });
+    });
+
+    it('reads the update poll when the update stack ran after a created stack', async () => {
+      const progress = await readAwsOnboardingRunProgress(
+        execution([
+          reuseResolveStep('update'),
+          createStackStep(),
+          stackComplete(),
+          stepRun('update_stack', 5, {
+            output: { stack_id: STACK_ID, stack_name: 'elastic-onboarding-ab', no_changes: false },
+          }),
+          stepRun('stack_status_update', 6, {
+            output: {
+              status: 'failed',
+              stack_status: 'UPDATE_ROLLBACK_COMPLETE',
+              reason: 'role policy too large',
+            },
+          }),
+        ])
+      );
+
+      expect(progress.stack).toMatchObject({
+        phase: 'failed',
+        stack_status: 'UPDATE_ROLLBACK_COMPLETE',
+        reason: 'role policy too large',
       });
     });
 

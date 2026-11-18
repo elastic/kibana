@@ -47,13 +47,15 @@ const step = (stepId: string, index: number, extra: Record<string, unknown> = {}
   ...extra,
 });
 
-const run = async (execution: unknown) => {
+const run = async (execution: unknown, input: { service?: string } = {}) => {
   const workflowApi = { getWorkflowExecution: jest.fn().mockResolvedValue(execution) } as any;
   const returned = await createGetAwsOnboardingStateTool({ workflowApi }).handler(
-    { execution_id: 'exec-1' },
+    { execution_id: 'exec-1', ...input },
     { request, spaceId: 'default' } as any
   );
-  return returned as unknown as { results: Array<{ data: Record<string, unknown> }> };
+  return returned as unknown as {
+    results: Array<{ type: string; data: Record<string, unknown> }>;
+  };
 };
 
 const createAttachments = (active: unknown[] = []) => ({
@@ -175,7 +177,6 @@ describe('get_aws_onboarding_state', () => {
       status: 'waiting_for_input',
       waiting: { step_name: 'approve_plan', message: 'Approve the integration settings?' },
       region: 'us-west-2',
-      discovered_services: [{ id: 'guardduty', name: 'GuardDuty', matched: true }],
       has_data: false,
       policies_with_data: ['p1'],
       policies_without_data: ['p2'],
@@ -190,6 +191,7 @@ describe('get_aws_onboarding_state', () => {
       },
     });
     expect(JSON.stringify(data)).not.toContain('must-not-leak');
+    expect(data.resolved).not.toHaveProperty('integrations');
   });
 
   it('returns only output and status for a completed run', async () => {
@@ -369,48 +371,128 @@ describe('get_aws_onboarding_state', () => {
       package_name: 'aws',
       package_version: '8.18.1',
       region: 'us-east-1',
-      services: [],
+      services: [
+        { id: 'guardduty', name: 'Amazon GuardDuty', policy_template: 'guardduty' },
+        { id: 'ec2', name: 'Amazon EC2', policy_template: 'ec2' },
+      ],
     };
     const requirementStep = () =>
       step('settings_requirement', 2, {
         status: 'completed',
         output: { ...requirement, suggested_identity_name: 'aws-1-federated-identity-ab12cd34' },
       });
+    const discoverStep = () =>
+      step('discover', 1, {
+        status: 'completed',
+        output: {
+          region: 'us-east-1',
+          services: [
+            {
+              id: 'guardduty',
+              name: 'Amazon GuardDuty',
+              billing_name: 'Amazon GuardDuty',
+              matched: true,
+              agentless: true,
+              detector_ids: ['det-1'],
+            },
+          ],
+          errors: [],
+        },
+      });
 
-    it('returns settings_requirement and suggested_identity_name at ask_plan without creating a card', async () => {
+    it('lists the selected services and the suggested name at ask_plan without a requirement or a card', async () => {
       const attachments = createAttachments();
       const { results } = await runWithAttachments(
         waitingExecution('ask_plan', [requirementStep()]),
         attachments
       );
 
-      expect(results[0].data.settings_requirement).toEqual(requirement);
+      expect(results[0].data.settings_services).toEqual([
+        { id: 'guardduty', name: 'Amazon GuardDuty' },
+        { id: 'ec2', name: 'Amazon EC2' },
+      ]);
+      expect(results[0].data).not.toHaveProperty('settings_requirement');
       expect(results[0].data.suggested_identity_name).toBe('aws-1-federated-identity-ab12cd34');
-      expect(results[0].data.settings_card_attachment_id).toBeUndefined();
       expect(attachments.add).not.toHaveBeenCalled();
     });
 
-    it('keeps suggested_identity_name but not settings_requirement at later pauses', async () => {
-      const { results } = await runWithAttachments(
-        waitingExecution('approve_plan', [requirementStep()]),
-        createAttachments()
+    it("returns one service's requirement and discover entry when asked for that service", async () => {
+      const { results } = await run(
+        waitingExecution('ask_plan', [discoverStep(), requirementStep()]),
+        { service: 'guardduty' }
       );
 
-      expect(results[0].data).not.toHaveProperty('settings_requirement');
-      expect(results[0].data.suggested_identity_name).toBe('aws-1-federated-identity-ab12cd34');
+      expect(results[0].data.settings_requirement).toEqual({
+        ...requirement,
+        services: [requirement.services[0]],
+      });
+      expect(results[0].data.discovered_service).toEqual({
+        id: 'guardduty',
+        name: 'Amazon GuardDuty',
+        matched: true,
+        agentless: true,
+        detector_ids: ['det-1'],
+      });
+    });
+
+    it('returns an error naming the valid ids for a service outside the requirement', async () => {
+      const { results } = await run(waitingExecution('ask_plan', [requirementStep()]), {
+        service: 's3',
+      });
+
+      expect(results[0].type).toBe('error');
+      expect(JSON.stringify(results[0].data)).toContain('guardduty, ec2');
     });
   });
 
-  it('returns the identities the run listed for the plan', async () => {
+  it('returns the discovered services as matched entries and unmatched names while selecting', async () => {
+    const { results } = await run(
+      waitingExecution('select_services', [
+        step('discover', 1, {
+          status: 'completed',
+          output: {
+            region: 'us-east-1',
+            services: [
+              {
+                id: 'guardduty',
+                name: 'Amazon GuardDuty',
+                billing_name: 'Amazon GuardDuty',
+                matched: true,
+                agentless: true,
+                detector_ids: ['det-1'],
+              },
+              { id: 'ec2', name: 'Amazon EC2', matched: true, agentless: false },
+              { id: 'textract', name: 'Amazon Textract', matched: false, agentless: false },
+            ],
+            errors: [],
+          },
+        }),
+      ])
+    );
+
+    expect(results[0].data).toMatchObject({
+      region: 'us-east-1',
+      unmatched_services: ['Amazon Textract'],
+    });
+    expect(results[0].data.discovered_services).toEqual([
+      { id: 'guardduty', name: 'Amazon GuardDuty', agentless: true },
+      { id: 'ec2', name: 'Amazon EC2', agentless: false },
+    ]);
+  });
+
+  it('returns the identities the run listed for the plan without their integrations or template hash', async () => {
     const identities = [
       {
         id: 'cc-1',
         name: 'existing-identity',
+        stack_id: 'arn:aws:cloudformation:us-east-1:1:stack/s/1',
+        stack_region: 'us-east-1',
+        template_sha: 'abc123',
         created_at: '2026-11-17T10:00:00.000Z',
         updatable: false,
         not_updatable_reason: 'no_stack',
-        covered_integrations: [],
-        covered_policy_templates: [],
+        covered_integrations: [{ name: 'aws', policyTemplates: ['guardduty'] }],
+        covered_policy_templates: ['guardduty'],
       },
     ];
 
@@ -420,7 +502,134 @@ describe('get_aws_onboarding_state', () => {
       ])
     );
 
-    expect(results[0].data.identities).toEqual(identities);
+    expect(results[0].data.identities).toEqual([
+      {
+        id: 'cc-1',
+        name: 'existing-identity',
+        created_at: '2026-11-17T10:00:00.000Z',
+        stack_region: 'us-east-1',
+        updatable: false,
+        not_updatable_reason: 'no_stack',
+        covered_policy_templates: ['guardduty'],
+      },
+    ]);
+  });
+
+  describe('result budget', () => {
+    const SERVICE_IDS = ['guardduty', 'ec2', 'lambda'];
+    const field = (n: number) => ({
+      name: `field_${n}`,
+      title: `Field ${n}`,
+      description:
+        'A setting the aws package manifest describes for this input, shown to the user.',
+      type: 'text',
+      required: false,
+      advanced: true,
+      default: `value-${n}`,
+    });
+    /** A requirement entry grown to about 11,000 characters, like a real multi-stream service. */
+    const largeService = (id: string) => {
+      const fields: Array<ReturnType<typeof field>> = [];
+      const service = {
+        id,
+        name: `Amazon ${id}`,
+        policy_template: id,
+        readme_notes: 'Note: collect from S3 with SQS notifications for large accounts.',
+        data_streams: [
+          {
+            id,
+            dataset: `aws.${id}`,
+            type: 'logs',
+            title: `${id} logs`,
+            choice: 'one_of',
+            default_input: 'aws-s3',
+            inputs: [
+              {
+                input: 'aws-s3',
+                ingestion_method: 'S3',
+                title: 'Collect from S3',
+                description: 'Read the logs from an S3 bucket.',
+                fields,
+                var_groups: [],
+              },
+            ],
+          },
+        ],
+      };
+      while (JSON.stringify(service).length < 11_000) {
+        fields.push(field(fields.length));
+      }
+      return service;
+    };
+    const discovered = Array.from({ length: 40 }, (_, n) =>
+      n < SERVICE_IDS.length
+        ? { id: SERVICE_IDS[n], name: `Amazon ${SERVICE_IDS[n]}`, matched: true, agentless: true }
+        : {
+            id: `service-${n}`,
+            name: `AWS billed service number ${n}`,
+            billing_name: `AWS billed service number ${n}`,
+            matched: n % 2 === 0,
+            agentless: n % 4 === 0,
+          }
+    );
+    const planSteps = () => [
+      step('discover', 1, {
+        status: 'completed',
+        output: { region: 'us-east-1', services: discovered, errors: [] },
+      }),
+      step('list_identities', 2, {
+        status: 'completed',
+        output: {
+          identities: [
+            {
+              id: 'cc-1',
+              name: 'existing-identity',
+              stack_id: 'arn:aws:cloudformation:us-east-1:1:stack/s/1',
+              stack_region: 'us-east-1',
+              template_sha: 'a'.repeat(64),
+              created_at: '2026-11-17T10:00:00.000Z',
+              updatable: true,
+              covered_integrations: [
+                { name: 'aws', policyTemplates: ['guardduty', 'ec2'], inputs: ['aws-s3'] },
+              ],
+              covered_policy_templates: ['guardduty', 'ec2'],
+            },
+          ],
+        },
+      }),
+      step('settings_requirement', 3, {
+        status: 'completed',
+        output: {
+          package_name: 'aws',
+          package_version: '8.18.1',
+          region: 'us-east-1',
+          services: SERVICE_IDS.map(largeService),
+          suggested_identity_name: 'aws-1-federated-identity-ab12cd34',
+        },
+      }),
+    ];
+    const size = (results: Array<{ data: Record<string, unknown> }>) =>
+      JSON.stringify(results[0]).length;
+
+    it('keeps the plan pause without a service under 4,000 characters', async () => {
+      const { results } = await run(waitingExecution('ask_plan', planSteps()));
+
+      expect(size(results)).toBeLessThan(4_000);
+    });
+
+    it('keeps the plan pause for one service under 20,000 characters', async () => {
+      const { results } = await run(waitingExecution('ask_plan', planSteps()), {
+        service: 'guardduty',
+      });
+
+      expect(size(results)).toBeLessThan(20_000);
+    });
+
+    it('keeps the service selection pause under 4,000 characters', async () => {
+      const { results } = await run(waitingExecution('select_services', planSteps().slice(0, 1)));
+
+      expect(size(results)).toBeLessThan(4_000);
+    });
   });
 
   describe('stack', () => {
