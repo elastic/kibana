@@ -124,6 +124,14 @@ describe('buildBranchStatsQuery', () => {
     expect(query).toContain(
       'builds = COUNT_DISTINCT(CASE(is_execution == 1, buildkite.build.id, NULL))'
     );
+    // days are counted back from the end of the window, 0 being its last 24 hours
+    expect(query).toContain(
+      'days_ago = DATE_DIFF("day", @timestamp, TO_DATETIME("2026-09-07T00:00:00.000Z"))'
+    );
+    expect(query).toContain(
+      'failed_days_ago = VALUES(CASE(failed == 1, days_ago, NULL)), ' +
+        'ran_days_ago = VALUES(CASE(is_execution == 1, days_ago, NULL))'
+    );
     expect(query).toContain(
       'last_failed_at = MAX(CASE(failed == 1, @timestamp, NULL)), ' +
         'last_failed_build_url = LAST(buildkite.build.url, @timestamp) WHERE failed == 1, ' +
@@ -244,6 +252,9 @@ describe('fetchBranchStats', () => {
         last_failed_job_id: 'job-1',
         ...latest('flaky', '2026-09-06T00:00:00.000Z', 'https://b/1'),
         latest_job_id: 'job-1',
+        // VALUES gives a single value as itself
+        failed_days_ago: 0,
+        ran_days_ago: [3, 0, 1],
       },
     ];
     const setupRows = [
@@ -355,6 +366,8 @@ describe('fetchBranchStats', () => {
           jobId: 'job-1',
         },
         skipped: false,
+        failedDaysAgo: [0],
+        ranDaysAgo: [0, 1, 3],
       },
     ]);
     expect(stats.has('f1')).toBe(false);

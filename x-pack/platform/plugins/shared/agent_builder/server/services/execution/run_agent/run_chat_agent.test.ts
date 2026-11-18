@@ -22,6 +22,7 @@ import {
   HookLifecycle,
   ToolOrigin,
   createAskUserQuestionStep,
+  platformCoreTools,
 } from '@kbn/agent-builder-common';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
@@ -395,6 +396,75 @@ describe('runDefaultAgentMode', () => {
         expect.objectContaining({ additionalSkillIds: [] })
       );
     });
+
+    it("resolves connector skills from the agent's connector ids", async () => {
+      const context = createAgentHandlerContextMock();
+      await setupBase(context);
+
+      context.connectorSkills.resolveSkillIds.mockResolvedValue(['platform.connectors.github']);
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { message: 'hello' },
+          agentConfiguration: { tools: [], connector_ids: ['gh-1', 'pd-1'] } as any,
+        },
+        context
+      );
+
+      expect(context.connectorSkills.resolveSkillIds).toHaveBeenCalledWith(['gh-1', 'pd-1']);
+      expect(selectSkillsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ additionalSkillIds: ['platform.connectors.github'] })
+      );
+    });
+
+    it('passes plugin and connector skill ids together', async () => {
+      const context = createAgentHandlerContextMock();
+      await setupBase(context);
+
+      context.plugins.resolveSkillIds.mockResolvedValue(['skill-a']);
+      context.connectorSkills.resolveSkillIds.mockResolvedValue(['platform.connectors.github']);
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { message: 'hello' },
+          agentConfiguration: {
+            tools: [],
+            plugin_ids: ['plugin-1'],
+            connector_ids: ['gh-1'],
+          } as any,
+        },
+        context
+      );
+
+      expect(selectSkillsMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          additionalSkillIds: ['skill-a', 'platform.connectors.github'],
+        })
+      );
+    });
+
+    it('filters connector skill ids to the override list when skill_ids override is set', async () => {
+      const context = createAgentHandlerContextMock();
+      await setupBase(context);
+
+      context.connectorSkills.resolveSkillIds.mockResolvedValue([
+        'platform.connectors.github',
+        'platform.connectors.pagerduty',
+      ]);
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { message: 'hello' },
+          agentConfiguration: { tools: [], connector_ids: ['gh-1', 'pd-1'] } as any,
+          configurationOverrides: { skill_ids: ['platform.connectors.pagerduty'] },
+        },
+        context
+      );
+
+      expect(selectSkillsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ additionalSkillIds: ['platform.connectors.pagerduty'] })
+      );
+    });
   });
 
   describe('attachment_tools capability', () => {
@@ -450,6 +520,65 @@ describe('runDefaultAgentMode', () => {
       expect(selectToolsMock).toHaveBeenCalledWith(
         expect.objectContaining({ capabilities: { attachmentTools: true, apiTools: true } })
       );
+    });
+  });
+
+  describe('connector prompt flags', () => {
+    const run = async ({
+      connectorIds,
+      staticToolIds,
+    }: {
+      connectorIds?: string[];
+      staticToolIds: string[];
+    }) => {
+      const context = createAgentHandlerContextMock();
+      jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
+        connector: { name: 'test-connector' },
+        chatModel: {} as any,
+      } as any);
+      context.toolManager.getToolIdMapping.mockReturnValue(new Map());
+      context.toolManager.getDynamicToolIds.mockReturnValue([]);
+      getPendingTurnMock.mockReturnValue(undefined);
+      selectToolsMock.mockResolvedValue({
+        staticTools: staticToolIds.map((id) => ({ id })),
+        dynamicTools: [],
+      } as any);
+      prepareConversationMock.mockResolvedValue({
+        timeline: [],
+        nextInput: { message: 'hello', attachments: [] },
+        attachments: [],
+        attachmentTypes: [],
+        attachmentStateManager: context.attachmentStateManager,
+      } as any);
+      extractRoundMock.mockResolvedValue(createRound({ id: 'round-1' }));
+      createAgentGraphMock.mockReturnValue({ streamEvents: jest.fn(() => []) } as any);
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { message: 'hello' },
+          agentConfiguration: { tools: [], connector_ids: connectorIds },
+        },
+        context
+      );
+
+      return createPromptFactoryMock.mock.calls[0][0];
+    };
+
+    it('reports assigned connectors and a selected sml_search', async () => {
+      const params = await run({
+        connectorIds: ['c1'],
+        staticToolIds: [platformCoreTools.smlSearch],
+      });
+
+      expect(params.connectorsAssigned).toBe(true);
+      expect(params.smlSearchSelected).toBe(true);
+    });
+
+    it('reports no connectors when connector_ids is missing and no sml_search when it is not selected', async () => {
+      const params = await run({ staticToolIds: [] });
+
+      expect(params.connectorsAssigned).toBe(false);
+      expect(params.smlSearchSelected).toBe(false);
     });
   });
 

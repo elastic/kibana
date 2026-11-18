@@ -45,7 +45,7 @@ jest.mock('../../../../content_framework/lazy_content_framework_section', () => 
   ),
 }));
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 const mockUseFetchSpanLinks = require('./use_fetch_span_links').useFetchSpanLinks;
 
 describe('SpanLinks', () => {

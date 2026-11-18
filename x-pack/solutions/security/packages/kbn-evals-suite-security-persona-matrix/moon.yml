@@ -28,6 +28,9 @@ dependsOn:
   - '@kbn/kbn-client'
   - '@kbn/evals-common'
   - '@kbn/workflows'
+  - '@kbn/inference-common'
+  - '@kbn/inference-prompt-utils'
+  - '@kbn/zod'
 tags:
   - functional-tests
   - package

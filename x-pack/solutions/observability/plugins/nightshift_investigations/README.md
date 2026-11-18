@@ -2,6 +2,23 @@
 
 This plugin provides the domain API for starting and reading investigations, independent of which entity (significant event, alert, etc.) triggers them.
 
+## Local development
+
+To run investigations on a local Kibana against the ORCA-bench telemetry cluster, with the shared
+eval sandbox, start Elasticsearch with EIS (`pnpm es snapshot --eis`) and Kibana (`pnpm start`),
+then run:
+
+```bash
+node x-pack/solutions/observability/plugins/nightshift_investigations/scripts/setup_local_dev.js
+```
+
+It needs only dev Vault access. It writes a managed block to `config/kibana.dev.yml`, binds the
+default space to the Nightshift service accounts, saves the ORCA connector on the investigator, and
+gives the space the ORCA evals' source code context with the `github.com` egress it needs.
+`--remove` undoes it. See the
+[`nightshift-local-dev` skill](.agents/skills/nightshift-local-dev/SKILL.md) for
+what it changes, running ORCA questions, troubleshooting and rotating the shared credential.
+
 ## Automation instructions
 
 After choosing a trigger, its panel shows an instructions field limited to 5,000 characters.
@@ -90,11 +107,9 @@ back either slot. The limit is at least 1, and an omitted limit allows unlimited
 To stop automatic investigation starts, disable the automation. Changing the limit takes effect on
 the next attempt.
 
-The API-only `scopeQuery` field is forwarded as `scope_query` guidance in the investigation context.
-It guides the agent's telemetry filters; it is not an enforced data-access boundary. The optional
-`runtime.timeoutSeconds` bounds the investigation workflow started by that run. When set, the generated
-automation workflow gets an additional 60 seconds for setup and returning the investigation result.
-The stored managed investigation definition and its default timeout are unchanged.
+The optional `runtime.timeoutSeconds` bounds the investigation workflow started by that run. When set,
+the generated automation workflow gets an additional 60 seconds for setup and returning the
+investigation result. The stored managed investigation definition and its default timeout are unchanged.
 
 Only one schedule row is supported per automation. It can coexist with alert rows; each source has a
 separate guarded investigation step. Alert publication opt-in and alert snapshot resolution are
@@ -121,6 +136,33 @@ events about the same alert must derive `fingerprint` with the exported `toAlert
 Volume is bounded with deterministic 10% sampling by fingerprint. Every episode in the same alert
 series therefore makes the same sampling decision, and consumers can use `sampling_probability` to
 weight sampled counts.
+
+## Alert identity on investigation telemetry
+
+The `nightshift-investigation-started` and `nightshift-investigation-skipped` EBT events identify
+the alert that triggered the run, so runs can be counted per alert source and joined back to the
+alert. The triggering alert is the subject of the run, or the only alert it carries. All four fields
+are absent when no alert triggered the run:
+
+- `alert_version`: `v1` for a classic alert, `v2` for an Alerting v2 episode. Classic alerts carry
+  none of the fields below.
+- `alert_source`: the episode's `source`: `elastic.significant_events`, `internal` for
+  Elastic-configured rules, or the sender-provided integration identifier for external alerts.
+- `source_kind`: `significant_events`, `elastic_configured` when the alert has a rule, otherwise
+  `external`. An external sender may also use `internal` as its source, so use this field to split
+  rule alerts from external ones.
+- `fingerprint`: for Significant Events, the `event_id`, which joins to the `significant-events-*`
+  events. Otherwise `sha256(space_id:source:rule_id:group_hash)` from `toAlertFingerprint`, with an
+  empty `rule_id` for external alerts, because a rule's `group_hash` is only unique within the rule.
+  Any other event about the same alert series must derive it with the same function.
+
+`trigger_type` on the started event separates automatic from manual runs. No alert title, message,
+tag, or other customer alert content is sent. The skipped event also carries `event_id`, the
+Significant Event behind the run, whether it is the subject or the source of the triggering alert.
+
+Completion is reported by `nightshift-investigation-ended`: join the started event's
+`workflow_execution_id` to its `parent_workflow_execution_id`. A timed-out or cancelled run sends no
+ended event.
 
 ## Requirements
 
@@ -261,7 +303,7 @@ If none match, the start claims the subjects for a new investigation id. That wa
 
 #### Daily investigation limits
 
-The global investigation quota is registered by Significant Events and set on the Nightshift settings page. It has three deployment-wide limits per UTC day, each of which can be turned off:
+The investigation quota is kept by this plugin in two hidden saved objects (the settings and a daily ledger) and set on the Nightshift settings page, through `GET` and `PUT /internal/nightshift/investigation_quotas`. Changing the limits takes the manage and configure privileges in all spaces. It has three deployment-wide limits per UTC day. A limit of `null` is unlimited, and one switch turns enforcement of all three off and on without losing their values (runs are still counted while it is off):
 
 - automatic investigations (`trigger_type: automatic`, all automations combined), default 5;
 - manual investigations (`trigger_type: manual`: the start API behind the homepage and the CLI, and Slack mentions), default 5;

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiPanel, EuiSkeletonText } from '@elastic/eui';
+import { EuiFlexGroup, EuiSkeletonText } from '@elastic/eui';
 import React from 'react';
 import type { KiDocument } from '../../../../../../common/http_api/knowledge_indicators';
-import { viewKiLoadingPanelCss } from '../view_ki_constants';
 import { EditKiContentPanel, type EditKiContentPanelSaveFields } from './edit_ki_content_panel';
 import { ViewKiContentPanel } from './view_ki_content_panel';
 
@@ -41,14 +40,7 @@ export const KiContentPanel = ({
         responsive={false}
         data-test-subj="contextViewKiContentPanel"
       >
-        <EuiPanel
-          hasBorder
-          paddingSize="l"
-          css={viewKiLoadingPanelCss}
-          data-test-subj="contextViewKiContentLoading"
-        >
-          <EuiSkeletonText lines={3} />
-        </EuiPanel>
+        <EuiSkeletonText lines={3} data-test-subj="contextViewKiContentLoading" />
       </EuiFlexGroup>
     );
   }

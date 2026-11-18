@@ -7,6 +7,7 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
+import type { BoundInferenceClient } from '@kbn/inference-common';
 import { isValidTraceId } from '@opentelemetry/api';
 import {
   createQuantitativeCorrectnessEvaluators,
@@ -32,6 +33,11 @@ import {
   createConnectorInvokedEvaluator,
 } from './evaluators/connector_invoked_evaluator';
 import { createEicarTrapEvaluator } from './evaluators/eicar_trap_evaluator';
+import {
+  createPersonaRubricEvaluator,
+  isPersonaRubricJudgeEnabled,
+  runPersonaRubricJudge,
+} from './evaluators/persona_rubric_evaluator';
 import { createRubricCapNoToolCallEvaluator } from './evaluators/rubric_cap_no_tool_call_evaluator';
 import { createSimulationAwarenessEvaluator } from './evaluators/simulation_awareness_evaluator';
 import { createStalledAfterLoadSkillEvaluator } from './evaluators/stalled_after_load_skill_evaluator';
@@ -46,7 +52,7 @@ import {
   createPersonaMatrixOutputTokensEvaluator,
   createPersonaMatrixToolCallsEvaluator,
 } from './evaluators/trace_evaluators';
-import type { PersonaMatrixChatClient } from './chat_client';
+import type { PersonaMatrixChatClient, WorkflowAttachmentYaml } from './chat_client';
 import { UNANSWERED_PROMPT_MARKER } from './chat_client';
 import {
   agentProfile as envAgentProfile,
@@ -75,6 +81,104 @@ export interface PersonaMatrixDatasetExpected {
 
 export type PersonaMatrixDatasetExample = PersonaMatrixExample & {
   output: PersonaMatrixDatasetExpected;
+};
+
+/**
+ * The submission the judges grade. A 'last_assistant_step' message is interior
+ * narration, not a closing answer, so grading it would let Factuality/Relevance
+ * credit a run that never answered. Judge the same submission FinalAnswerPresent
+ * accepts: the delivered artifact's YAML/payload when the run ends on one
+ * (hasRenderedArtifact), else an empty answer. The narration stays on the stored
+ * output for the trace card. The Criteria judge serializes the whole output, so
+ * the submission keeps only the answer and the tool-call steps: the narration
+ * step, messageSource and workflowAttachments would otherwise reach it.
+ */
+const buildJudgedOutput = <T extends { messageSource?: unknown; steps?: unknown }>(
+  taskOutput: T
+): T | { steps: unknown[]; messages: Array<{ message: string }> } => {
+  if (taskOutput.messageSource !== 'last_assistant_step') return taskOutput;
+  const fallbackAnswer = renderedArtifactPayload(taskOutput) ?? '';
+  return {
+    steps: (Array.isArray(taskOutput.steps) ? taskOutput.steps : []).filter(
+      (step: unknown) => isRecord(step) && step.type === 'tool_call'
+    ),
+    messages: [
+      {
+        message:
+          typeof fallbackAnswer === 'string' ? fallbackAnswer : JSON.stringify(fallbackAnswer),
+      },
+    ],
+  };
+};
+
+const logJudgePayloadTrim = (
+  log: ToolingLog,
+  label: string,
+  report: ReturnType<typeof capJudgePayload>['report']
+): void => {
+  if (!report.trimmed.length && !report.overBudget) return;
+  log.info(
+    `[persona-matrix][judge-cap] ${label}: judge payload ${report.charsBefore} -> ${
+      report.charsAfter
+    } chars, trimmed ${report.trimmed.length} tool result(s)${
+      report.overBudget ? ' (STILL OVER BUDGET: non-result fields alone exceed it)' : ''
+    }`
+  );
+};
+
+type JudgeOutcome = PromiseSettledResult<EvaluationResult | undefined>;
+
+/**
+ * Runs the four judges that share one judged submission concurrently. The
+ * `PersonaRubric` slot resolves to `undefined` when that judge is off.
+ */
+const runPrecomputedJudges = ({
+  evaluators,
+  criteriaJudge,
+  rubricJudgeClient,
+  log,
+  input,
+  expected,
+  judgeOutput,
+  workflowAttachments,
+  metadata,
+  category,
+}: {
+  evaluators: DefaultEvaluators;
+  criteriaJudge: Evaluator;
+  rubricJudgeClient: BoundInferenceClient | undefined;
+  log: ToolingLog;
+  input: PersonaMatrixExampleInput;
+  expected: PersonaMatrixDatasetExpected;
+  judgeOutput: unknown;
+  workflowAttachments: readonly WorkflowAttachmentYaml[] | undefined;
+  metadata: PersonaMatrixExample['metadata'] | undefined;
+  category: string | undefined;
+}): Promise<[JudgeOutcome, JudgeOutcome, JudgeOutcome, JudgeOutcome]> => {
+  const args = { input, expected, output: judgeOutput, metadata };
+  return Promise.allSettled([
+    withEvaluatorSpan('CorrectnessAnalysis', {}, () =>
+      evaluators.correctnessAnalysis().evaluate(args)
+    ),
+    withEvaluatorSpan('GroundednessAnalysis', {}, () =>
+      evaluators.groundednessAnalysis().evaluate(args)
+    ),
+    withEvaluatorSpan('Criteria', {}, () => criteriaJudge.evaluate(args)),
+    rubricJudgeClient
+      ? withEvaluatorSpan('PersonaRubric', {}, () =>
+          runPersonaRubricJudge({
+            inferenceClient: rubricJudgeClient,
+            category,
+            expectedTools: metadata?.expectedTools,
+            question: input?.question,
+            attachment: input?.attachment,
+            judgeOutput,
+            workflowAttachments,
+            log,
+          })
+        )
+      : Promise.resolve(undefined),
+  ]);
 };
 
 /**
@@ -660,6 +764,7 @@ export function createEvaluatePersonaMatrixDataset({
   log,
   fetch,
   agentProfile = envAgentProfile,
+  evaluationInferenceClient,
 }: {
   chatClient: PersonaMatrixChatClient;
   evaluators: DefaultEvaluators;
@@ -670,6 +775,8 @@ export function createEvaluatePersonaMatrixDataset({
   fetch: HttpHandler;
   /** Agent the chat client converses with; defaults to the `AGENT_PROFILE` env. */
   agentProfile?: AgentProfile;
+  /** Judge-model client for `PersonaRubric`; the judge only runs when this and the env flag are set. */
+  evaluationInferenceClient?: BoundInferenceClient;
 }) {
   const identity = (datasetName: string) => reportingIdentity(datasetName, agentProfile);
   return async function evaluateDataset({
@@ -748,6 +855,11 @@ export function createEvaluatePersonaMatrixDataset({
         },
     };
 
+    const rubricJudgeClient = isPersonaRubricJudgeEnabled() ? evaluationInferenceClient : undefined;
+    if (isPersonaRubricJudgeEnabled() && !evaluationInferenceClient) {
+      log.warning('[persona-matrix] PERSONA_MATRIX_RUBRIC_JUDGE=1 but no judge client; skipping.');
+    }
+
     // Quantitative correctness/groundedness evaluators are pure functions of
     // the precomputed analyses attached to task output below — no LLM calls
     // at evaluate time. Mirrors `buildAlertsRagEvaluators`.
@@ -773,6 +885,9 @@ export function createEvaluatePersonaMatrixDataset({
       ...createQuantitativeCorrectnessEvaluators(),
       createQuantitativeGroundednessEvaluator(),
       precomputedCriteriaEvaluator,
+      ...(rubricJudgeClient
+        ? [createPersonaRubricEvaluator({ getModel: criteriaJudge.getModel })]
+        : []),
       inputTokens,
       outputTokens,
       toolCalls,
@@ -869,23 +984,7 @@ export function createEvaluatePersonaMatrixDataset({
           // serializes the whole output, so the submission keeps only the
           // answer and the tool-call steps: the narration step, messageSource
           // and workflowAttachments would otherwise reach it.
-          const fallbackAnswer = renderedArtifactPayload(taskOutput) ?? '';
-          const judgedOutput: TaskOutput =
-            taskOutput.messageSource === 'last_assistant_step'
-              ? {
-                  steps: (Array.isArray(taskOutput.steps) ? taskOutput.steps : []).filter(
-                    (step: unknown) => isRecord(step) && step.type === 'tool_call'
-                  ),
-                  messages: [
-                    {
-                      message:
-                        typeof fallbackAnswer === 'string'
-                          ? fallbackAnswer
-                          : JSON.stringify(fallbackAnswer),
-                    },
-                  ],
-                }
-              : taskOutput;
+          const judgedOutput = buildJudgedOutput(taskOutput);
 
           // The judges read a size-capped copy; `taskOutput` itself (the golden transcript) stays
           // verbatim, and anything trimmed is reported on the returned output.
@@ -893,56 +992,31 @@ export function createEvaluatePersonaMatrixDataset({
             judgedOutput,
             judgeCapOptions
           );
-          if (judgePayloadTrim.trimmed.length || judgePayloadTrim.overBudget) {
-            log.info(
-              `[persona-matrix][judge-cap] ${example.id ?? question}: judge payload ${
-                judgePayloadTrim.charsBefore
-              } -> ${judgePayloadTrim.charsAfter} chars, trimmed ${
-                judgePayloadTrim.trimmed.length
-              } tool result(s)${
-                judgePayloadTrim.overBudget
-                  ? ' (STILL OVER BUDGET: non-result fields alone exceed it)'
-                  : ''
-              }`
-            );
-          }
+          logJudgePayloadTrim(log, example.id ?? question, judgePayloadTrim);
 
           // The judges already retry internally; if they still fail, degrade this
           // example's qualitative scores to "unavailable" (the quantitative
           // evaluators handle a missing analysis) rather than discarding the
           // agent's real trajectory, which the deterministic evaluators can score.
-          const [correctnessSettled, groundednessSettled, criteriaSettled] =
-            await Promise.allSettled([
-              withEvaluatorSpan('CorrectnessAnalysis', {}, () =>
-                evaluators.correctnessAnalysis().evaluate({
-                  input,
-                  expected,
-                  output: judgeOutput,
-                  metadata: example.metadata,
-                })
-              ),
-              withEvaluatorSpan('GroundednessAnalysis', {}, () =>
-                evaluators.groundednessAnalysis().evaluate({
-                  input,
-                  expected,
-                  output: judgeOutput,
-                  metadata: example.metadata,
-                })
-              ),
-              withEvaluatorSpan('Criteria', {}, () =>
-                criteriaJudge.evaluate({
-                  input,
-                  expected,
-                  output: judgeOutput,
-                  metadata: example.metadata,
-                })
-              ),
-            ]);
+          const [correctnessSettled, groundednessSettled, criteriaSettled, rubricResult] =
+            await runPrecomputedJudges({
+              evaluators,
+              criteriaJudge,
+              rubricJudgeClient,
+              log,
+              input,
+              expected,
+              judgeOutput,
+              workflowAttachments: taskOutput.workflowAttachments,
+              metadata: example.metadata,
+              category: example.category,
+            });
 
           for (const [name, settled] of [
             ['CorrectnessAnalysis', correctnessSettled],
             ['GroundednessAnalysis', groundednessSettled],
             ['Criteria', criteriaSettled],
+            ['PersonaRubric', rubricResult],
           ] as const) {
             if (settled.status === 'rejected') {
               const reason = settled.reason;
@@ -965,6 +1039,9 @@ export function createEvaluatePersonaMatrixDataset({
             groundednessAnalysis: groundednessResult?.metadata,
             criteriaAnalysis:
               criteriaSettled.status === 'fulfilled' ? criteriaSettled.value : undefined,
+            ...(rubricResult.status === 'fulfilled' && rubricResult.value
+              ? { personaRubricAnalysis: rubricResult.value }
+              : {}),
             ...(judgePayloadTrim.trimmed.length || judgePayloadTrim.overBudget
               ? { judgePayloadTrim }
               : {}),
