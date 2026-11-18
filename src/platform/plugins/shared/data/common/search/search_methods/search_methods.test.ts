@@ -409,6 +409,25 @@ describe('SearchMethodsService', () => {
         );
       });
 
+      it('logs the effective project_routing resolved by the getProjectRouting dependency', async () => {
+        const getProjectRouting = jest.fn((override?: string) => override ?? '_alias:*');
+        service = new SearchMethodsService(mockSearch, { getEsQueryConfig, getProjectRouting });
+        mockSearch.mockReturnValue(createMockResponse({ columns: [], values: [] }));
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+
+        await service.esql({ query: 'FROM logs' }, { inspector });
+        expect(getProjectRouting).toHaveBeenLastCalledWith(undefined);
+        expect(requestResponder.json).toHaveBeenLastCalledWith(
+          expect.objectContaining({ project_routing: '_alias:*' })
+        );
+
+        await service.esql({ query: 'FROM logs', projectRouting: '_alias:_origin' }, { inspector });
+        expect(requestResponder.json).toHaveBeenLastCalledWith(
+          expect.objectContaining({ project_routing: '_alias:_origin' })
+        );
+      });
+
       it('omits project_routing from the request params when it is not set', async () => {
         mockSearch.mockReturnValue(createMockResponse({ columns: [], values: [] }));
         const requestResponder = createMockRequestResponder();

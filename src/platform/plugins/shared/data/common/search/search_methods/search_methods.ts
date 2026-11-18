@@ -76,6 +76,13 @@ export interface SearchMethodsServiceDependencies {
    * Resolves the locale sent with ES|QL requests when the caller does not provide one
    */
   getLocale?: () => string;
+  /**
+   * Resolves the project routing a request is actually sent with, given the caller's override.
+   * Used to log the effective routing to Inspector. Omit where cross-project search doesn't apply.
+   */
+  getProjectRouting?: (
+    override: IEsqlSearchParams['projectRouting']
+  ) => IEsqlSearchParams['projectRouting'];
 }
 
 /**
@@ -122,10 +129,14 @@ export class SearchMethodsService implements ISearchMethods {
       return true;
     };
 
+    // The search interceptor falls back to the default routing when the caller gives none, so
+    // log the routing the request is sent with rather than only the caller's override.
+    const projectRouting =
+      this.deps.getProjectRouting?.(params.projectRouting) ?? params.projectRouting;
     requestResponder?.json({
       ...((request.params ?? {}) as Record<string, unknown>),
       ...(params.approximation !== undefined && { approximation: params.approximation }),
-      ...(params.projectRouting !== undefined && { project_routing: params.projectRouting }),
+      ...(projectRouting !== undefined && { project_routing: projectRouting }),
     });
 
     try {

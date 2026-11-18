@@ -247,6 +247,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         getEsQueryConfig: async () => getEsQueryConfig(uiSettings),
         getRequestPreference: () => getEsPreference(uiSettings.get.bind(uiSettings)),
         getLocale: () => i18n.getLocale(),
+        // Read lazily: the CPS manager is only set once the plugin has started
+        getProjectRouting: (override) => this.cpsManager?.getProjectRouting(override),
       }
     );
 
