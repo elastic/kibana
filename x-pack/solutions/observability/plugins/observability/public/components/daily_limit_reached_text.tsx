@@ -47,7 +47,7 @@ export function DailyLimitReachedText({
           {blockedUntilChanged ? (
             <FormattedMessage
               id="xpack.observability.alerts.investigationLimitBlockedUntilChanged"
-              defaultMessage="New investigations stay blocked until the limit is changed or enforcement is turned off."
+              defaultMessage="New investigations stay blocked until the limit is changed."
             />
           ) : (
             <FormattedMessage
