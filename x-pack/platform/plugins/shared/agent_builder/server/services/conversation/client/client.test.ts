@@ -124,6 +124,7 @@ describe('ConversationClient', () => {
     // ES omits both fields entirely when `seq_no_primary_term` is not requested
     versioned = true,
     title = 'Conversation 1',
+    updatedAt = '2025-08-04T06:44:19.123Z',
     rounds = [],
     attachments,
     workspaceId,
@@ -147,6 +148,7 @@ describe('ConversationClient', () => {
     primaryTerm?: number;
     versioned?: boolean;
     title?: string;
+    updatedAt?: string;
     rounds?: unknown[];
     attachments?: unknown[];
     workspaceId?: string;
@@ -170,7 +172,7 @@ describe('ConversationClient', () => {
         ...(hasSpace ? { space } : {}),
         title,
         created_at: '2024-09-04T06:44:17.944Z',
-        updated_at: '2025-08-04T06:44:19.123Z',
+        updated_at: updatedAt,
         read,
         ...(hasReadBy ? { read_by: readBy } : {}),
         pinned_by: pinnedBy,
@@ -1525,6 +1527,7 @@ describe('ConversationClient', () => {
 
     it('allows the owner to rename with rename access', async () => {
       mockGetDocumentResponse(createConversationDocument());
+      const beforeUpdate = Date.now();
 
       const result = await client.update(
         { id: 'conversation-1', title: 'Renamed' },
@@ -1539,6 +1542,10 @@ describe('ConversationClient', () => {
       );
       expectNoReadBy(result);
       expect(result.title).toBe('Renamed');
+      const { document } = mockEsClient.index.mock.calls[0][0];
+      expect(Date.parse(document.updated_at)).toBeGreaterThanOrEqual(beforeUpdate);
+      expect(Date.parse(document.updated_at)).toBeLessThanOrEqual(Date.now());
+      expect(result.updated_at).toBe(document.updated_at);
     });
 
     it('preserves legacy owner read state when renaming before read_by exists', async () => {
@@ -1692,11 +1699,13 @@ describe('ConversationClient', () => {
     });
 
     it('re-applies the requested read state over the fresh document when retrying after conflict', async () => {
+      const updatedAt = '2026-11-18T09:07:02Z';
       mockGetDocumentResponseOnce(createConversationDocument());
       // a round landed first, adding a round and marking the conversation unread
       mockGetDocumentResponse(
         createConversationDocument({
           seqNo: 2,
+          updatedAt,
           read: false,
           readBy: [],
           rounds: [createRound({ id: 'round-concurrent' })],
@@ -1713,12 +1722,30 @@ describe('ConversationClient', () => {
       expect(document.read_by).toEqual([{ userId: 'user-1' }]);
       // the concurrently written round is preserved
       expect(document.conversation_rounds).toHaveLength(1);
+      expect(document.updated_at).toBe(updatedAt);
       expectNoReadBy(result);
       expect(result.read).toBe(true);
+      expect(result.updated_at).toBe(updatedAt);
     });
   });
 
   describe('markRead', () => {
+    it.each([true, false])('preserves updated_at when setting read to %s', async (read) => {
+      const updatedAt = '2026-11-18T09:07:02Z';
+      mockGetDocumentResponse(
+        createConversationDocument({
+          updatedAt,
+          readBy: read ? [] : [{ userId: 'user-1' }],
+        })
+      );
+
+      const result = await client.markRead('conversation-1', read);
+
+      const { document } = mockEsClient.index.mock.calls[0][0];
+      expect(document.updated_at).toBe(updatedAt);
+      expect(result).toMatchObject({ read, updated_at: updatedAt });
+    });
+
     it('adds only the calling user to read_by', async () => {
       mockGetDocumentResponse(
         createConversationDocument({
@@ -1798,6 +1825,22 @@ describe('ConversationClient', () => {
   });
 
   describe('setPinned', () => {
+    it.each([true, false])('preserves updated_at when setting pinned to %s', async (pinned) => {
+      const updatedAt = '2026-11-18T09:07:02Z';
+      mockGetDocumentResponse(
+        createConversationDocument({
+          updatedAt,
+          pinnedBy: pinned ? [] : [{ userId: 'user-1' }],
+        })
+      );
+
+      const result = await client.setPinned('conversation-1', pinned);
+
+      const { document } = mockEsClient.index.mock.calls[0][0];
+      expect(document.updated_at).toBe(updatedAt);
+      expect(result).toMatchObject({ pinned, updated_at: updatedAt });
+    });
+
     it('adds only the calling user to pinned_by', async () => {
       mockGetDocumentResponse(
         createConversationDocument({

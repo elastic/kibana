@@ -1303,6 +1303,7 @@ class ConversationClientImpl implements ConversationClient {
       access: 'converse',
       // Per-user state only: never reported to `ai.conversation.updated`.
       emit: false,
+      preserveUpdatedAt: true,
       fields: (current) =>
         updateReadBy({
           userId: this.getUser().id,
@@ -1319,6 +1320,7 @@ class ConversationClientImpl implements ConversationClient {
       access: 'converse',
       // Per-user state only: never reported to `ai.conversation.updated`.
       emit: false,
+      preserveUpdatedAt: true,
       fields: (current) =>
         updatePinnedBy({
           userId: this.getUser().id,
@@ -1860,6 +1862,7 @@ class ConversationClientImpl implements ConversationClient {
     refresh,
     activeExecution,
     peekHeld,
+    preserveUpdatedAt = false,
     ...emission
   }: {
     conversationId: string;
@@ -1869,6 +1872,7 @@ class ConversationClientImpl implements ConversationClient {
     refresh?: Refresh;
     activeExecution?: ActiveExecutionUpdate;
     peekHeld?: boolean;
+    preserveUpdatedAt?: boolean;
   } & ConversationWriteEmission): Promise<Conversation> {
     const writer = this.createWriter({ access, maxRetries, refresh, activeExecution, peekHeld });
     // `mutate` may run more than once on OCC retry; the last run is the one that was written.
@@ -1880,7 +1884,7 @@ class ConversationClientImpl implements ConversationClient {
         id: conversationId,
         mutate: (current) => {
           before = current;
-          return updateConversation({
+          const updated = updateConversation({
             conversation: current,
             update: {
               id: conversationId,
@@ -1890,6 +1894,7 @@ class ConversationClientImpl implements ConversationClient {
             updateDate: new Date(),
             space: this.space,
           });
+          return preserveUpdatedAt ? { ...updated, updated_at: current.updated_at } : updated;
         },
       });
 
