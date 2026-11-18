@@ -268,6 +268,23 @@ describe('StepIoService', () => {
       );
     });
 
+    it('keeps an output a sibling cached during the fetch when this batch evicts it', async () => {
+      const { service, state, stepExecutionRepository } = buildHarness({ maxBytes: 100 });
+      stepExecutionRepository.getStepExecutionsByIds.mockImplementation(async () => {
+        service.write('a', 'output', { v: 'cached' }, 95);
+        state.clearFlushedOutputs(['a']);
+        return [
+          { id: 'a', output: { v: 'from-es' } } as unknown as EsWorkflowStepExecution,
+          { id: 'b', output: { v: 'b' } } as unknown as EsWorkflowStepExecution,
+        ];
+      });
+
+      const batch = await service.readBatch(['a', 'b'], 'output');
+
+      expect(batch.get('a')).toEqual({ v: 'cached' });
+      expect(batch.get('b')).toEqual({ v: 'b' });
+    });
+
     it('keeps a resident output in the returned map when the same batch evicts it', async () => {
       const { service, state, stepExecutionRepository } = buildHarness({ maxBytes: 100 });
       service.write('a', 'output', { v: 'a' }, 95);

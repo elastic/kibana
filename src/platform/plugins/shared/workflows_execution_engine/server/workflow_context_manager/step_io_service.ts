@@ -176,21 +176,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     // Values already in the map stay there even if this fetch evicts them.
     const captured = new Map(result);
     const docs = await this.stepRepository.getStepExecutionsByIds(missing, ['id', 'output']);
-    const fetched = new Map<string, JsonValue | null>();
-    for (const doc of docs) {
-      const outputAlreadyWritten = this.state.getStepIo(doc.id, 'output') !== undefined;
-      const alreadyCached = this.cache.has(doc.id, 'output');
-      if (!outputAlreadyWritten && !alreadyCached) {
-        const output = doc.output ?? null;
-        const size = safeOutputSize(output) ?? undefined;
-        if (size !== undefined && !this.measuredSizes.has(doc.id)) {
-          this.measuredSizes.set(doc.id, size);
-          this.measuredTotalBytes += size;
-        }
-        this.cache.set(doc.id, 'output', output, size);
-        fetched.set(doc.id, output);
-      }
-    }
+    const fetched = this.retainFetchedOutputs(docs);
 
     for (const id of ids) {
       const live = this.state.getStepIo(id, 'output');
@@ -208,6 +194,38 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       }
     }
     return result;
+  }
+
+  /**
+   * Values to return for this fetch. A sibling cache hit is copied before any
+   * insert, so a later insert cannot drop it. That copy wins over the document:
+   * a flush may already have removed a newer write from state.
+   */
+  private retainFetchedOutputs(
+    docs: ReadonlyArray<{ id: string; output?: JsonValue | null }>
+  ): Map<string, JsonValue | null> {
+    const fetched = new Map<string, JsonValue | null>();
+    for (const doc of docs) {
+      if (this.state.getStepIo(doc.id, 'output') === undefined) {
+        const cached = this.cache.get(doc.id, 'output');
+        if (cached !== undefined) {
+          fetched.set(doc.id, cached);
+        }
+      }
+    }
+    for (const doc of docs) {
+      if (this.state.getStepIo(doc.id, 'output') === undefined && !fetched.has(doc.id)) {
+        const output = doc.output ?? null;
+        const size = safeOutputSize(output) ?? undefined;
+        if (size !== undefined && !this.measuredSizes.has(doc.id)) {
+          this.measuredSizes.set(doc.id, size);
+          this.measuredTotalBytes += size;
+        }
+        this.cache.set(doc.id, 'output', output, size);
+        fetched.set(doc.id, output);
+      }
+    }
+    return fetched;
   }
 
   /** Fetches inputs that state dropped after flush (finished steps). */
