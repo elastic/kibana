@@ -146,6 +146,7 @@
     "@kbn/shared-ux-router",
     "@kbn/charts-plugin",
     "@kbn/alerts-as-data-utils",
+    "@kbn/es-index-migration",
     "@kbn/cloud-defend-plugin",
     "@kbn/expandable-flyout",
     "@kbn/grouping",
