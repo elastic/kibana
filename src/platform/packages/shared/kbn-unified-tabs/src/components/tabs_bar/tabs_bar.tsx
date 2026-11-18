@@ -69,6 +69,8 @@ export type TabsBarProps = Pick<
   selectedItem: TabItem | null;
   recentlyClosedItems: RecentlyClosedTabItem[];
   unsavedItemIds?: string[];
+  /** Items that are visually highlighted as selected together with the selected item, e.g. a split view */
+  groupedItemIds?: string[];
   maxItemsCount?: number;
   services: TabsServices;
   onAdd: () => Promise<void>;
@@ -92,6 +94,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
       selectedItem,
       recentlyClosedItems,
       unsavedItemIds,
+      groupedItemIds,
       maxItemsCount,
       tabContentId,
       getTabMenuItems,
@@ -314,9 +317,15 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
                   {/* Render each tab, optionally wrapped with drag functionality */}
                   {items.map((item, index) => {
                     const nextItem = items[index + 1];
+                    const isGrouped = Boolean(groupedItemIds?.includes(item.id));
+                    const isNextGrouped = Boolean(
+                      nextItem && groupedItemIds?.includes(nextItem.id)
+                    );
                     const hideRightSeparator =
                       item.id === hoveredTabId || // hide own separator if hovered
                       item.id === selectedItem?.id || // hide own separator if selected
+                      isGrouped || // hide own separator if highlighted with the selected item
+                      isNextGrouped || // hide left sibling separator if next is highlighted
                       nextItem?.id === selectedItem?.id || // hide left sibling separator if next is selected
                       nextItem?.id === hoveredTabId; // hide left sibling separator if next is hovered
 
@@ -335,6 +344,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
                           <Tab
                             item={item}
                             isSelected={selectedItem?.id === item.id}
+                            isGrouped={isGrouped}
                             selectedItemId={selectedItem?.id}
                             isUnsaved={unsavedItemIds?.includes(item.id)}
                             isDragging={isDragging}
