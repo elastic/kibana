@@ -198,12 +198,17 @@ describe('RuleEventsSignalStore', () => {
         to: 180_000,
       });
 
+      expect(history.size).toBe(2);
       expect(
-        [...history.entries()].map(([key, readings]) => [key, readings.map(({ value }) => value)])
-      ).toEqual([
-        [getSeriesKey({ fingerprint: 'checkout', source_id: 'source-a' }), [1]],
-        [getSeriesKey({ fingerprint: 'checkout', source_id: 'source-b' }), [2]],
-      ]);
+        history
+          .get(getSeriesKey({ fingerprint: 'checkout', source_id: 'source-a' }))
+          ?.map(({ value }) => value)
+      ).toEqual([1]);
+      expect(
+        history
+          .get(getSeriesKey({ fingerprint: 'checkout', source_id: 'source-b' }))
+          ?.map(({ value }) => value)
+      ).toEqual([2]);
     });
 
     it('skips a stored document that does not parse instead of failing the read', async () => {
