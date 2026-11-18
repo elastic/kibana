@@ -96,6 +96,12 @@ describe('applyHtmlTheme', () => {
     expect(result.indexOf('--cc-space-l')).toBeLessThan(result.indexOf('body{padding:0}'));
   });
 
+  it('gives the document a definite height so a template can fill the frame', () => {
+    const result = applyHtmlTheme('<p>hello</p>', 'LIGHT', euiTheme);
+
+    expect(result).toContain('html,body{height:100%}');
+  });
+
   // Everything else in the baseline is a floor the template can override. These two are not, so
   // the count is pinned: a third `!important` should be a deliberate decision, not a drive-by.
   it('locks the body background and the reduced-motion guard, and nothing else', () => {

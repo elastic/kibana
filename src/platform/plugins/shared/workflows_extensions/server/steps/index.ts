@@ -25,6 +25,7 @@ import {
   createRemoteHostRunCommandStepDefinition,
   createRemoteHostUploadFileStepDefinition,
 } from './remote_host';
+import { getLastRunStepDefinition } from './workflow';
 import type { ServerStepRegistry } from '../step_registry/step_registry';
 
 export const registerInternalStepDefinitions = (
@@ -41,8 +42,8 @@ export const registerInternalStepDefinitions = (
   serverStepRegistry.register(dataConcatStepDefinition);
   serverStepRegistry.register(dataParseJsonStepDefinition);
   serverStepRegistry.register(dataStringifyJsonStepDefinition);
-
   serverStepRegistry.register(createRemoteHostRunCommandStepDefinition({ getActionsStart }));
   serverStepRegistry.register(createRemoteHostUploadFileStepDefinition({ getActionsStart }));
   serverStepRegistry.register(createRemoteHostDownloadFileStepDefinition({ getActionsStart }));
+  serverStepRegistry.register(getLastRunStepDefinition);
 };

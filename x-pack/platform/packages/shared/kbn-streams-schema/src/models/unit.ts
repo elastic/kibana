@@ -198,50 +198,63 @@ export const MAX_STREAMS_UNIT_STATS_COMPONENTS = 100;
  * Stats request. A component ref is a discriminated union on `kind`. Adding a kind is
  * adding a member.
  */
-export const streamsUnitStatsComponentRefSchema = z.discriminatedUnion('kind', [
-  z.strictObject({ kind: z.literal('destination'), id: streamsUnitIdentifierSchema }),
-  z.strictObject({ kind: z.literal('processor'), id: streamsUnitIdentifierSchema }),
-]);
+export const streamsUnitStatsComponentRefSchema = lazySchema(() =>
+  z.discriminatedUnion('kind', [
+    z.strictObject({ kind: z.literal('destination'), id: streamsUnitIdentifierSchema }),
+    z.strictObject({ kind: z.literal('processor'), id: streamsUnitIdentifierSchema }),
+    z.strictObject({ kind: z.literal('source'), id: streamsUnitIdentifierSchema }),
+  ])
+);
 
-export const streamsUnitStatsFilterSchema = z.strictObject({
-  /**
-   * Omit to read every config hash in the window, with no hash filter. The distributor
-   * generates a 64-character lowercase SHA-256 hex and only requires a non-empty value,
-   * so the 128 cap is headroom, not a format check.
-   */
-  config_hash: z.string().min(1).max(128).optional(),
-  /**
-   * Absolute range, ISO 8601. Both fields are required when present. It applies to every
-   * component. A processor instance is a route position, so a range that spans a change of routes
-   * can mix routes: keep it short for processors.
-   */
-  time_range: z
-    .strictObject({ start: z.iso.datetime(), end: z.iso.datetime() })
-    .refine(({ start, end }) => Date.parse(start) < Date.parse(end), {
-      message: 'time_range.start must be before time_range.end',
-    })
-    .optional(),
-});
+export const streamsUnitStatsFilterSchema = lazySchema(() =>
+  z.strictObject({
+    /**
+     * Omit to read every config hash in the window, with no hash filter. The distributor
+     * generates a 64-character lowercase SHA-256 hex and only requires a non-empty value,
+     * so the 128 cap is headroom, not a format check. Sources ignore it: their metrics come
+     * from the ingest collector, which has no config hash.
+     */
+    config_hash: z.string().min(1).max(128).optional(),
+    /**
+     * Absolute range, ISO 8601. Both fields are required when present. It applies to every
+     * component. A processor instance is a route position, so a range that spans a change of routes
+     * can mix routes: keep it short for processors.
+     */
+    time_range: z
+      .strictObject({ start: z.iso.datetime(), end: z.iso.datetime() })
+      .refine(({ start, end }) => Date.parse(start) < Date.parse(end), {
+        message: 'time_range.start must be before time_range.end',
+      })
+      .optional(),
+  })
+);
 
-export const streamsUnitStatsRequestSchema = z.strictObject({
-  filter: streamsUnitStatsFilterSchema.optional(),
-  /**
-   * Lists the unit components to receive stats on, destinations and processors together, with
-   * no duplicates.
-   * - Omitted: every destination and processor in the unit. This fails with a 400 when the unit
-   *   has more than `MAX_STREAMS_UNIT_STATS_COMPONENTS` of them, so name the components instead.
-   * - An empty array: no components.
-   * - A list: only those components, and nothing from the rest of the unit.
-   */
-  components: z
-    .array(streamsUnitStatsComponentRefSchema)
-    .max(MAX_STREAMS_UNIT_STATS_COMPONENTS)
-    .refine((refs) => new Set(refs.map(({ kind, id }) => `${kind}:${id}`)).size === refs.length, {
-      message: 'components must not contain duplicates',
-    })
-    .optional(),
-});
+export const streamsUnitStatsRequestSchema = lazySchema(() =>
+  z.strictObject({
+    filter: streamsUnitStatsFilterSchema.optional(),
+    /**
+     * Lists the unit components to receive stats on, destinations, processors and sources together,
+     * with no duplicates.
+     * - Omitted: every destination, processor and source in the unit. This fails with a 400 when the
+     *   unit has more than `MAX_STREAMS_UNIT_STATS_COMPONENTS` of them, so name the components instead.
+     * - An empty array: no components.
+     * - A list: only those components, and nothing from the rest of the unit.
+     */
+    components: z
+      .array(streamsUnitStatsComponentRefSchema)
+      .max(MAX_STREAMS_UNIT_STATS_COMPONENTS)
+      .refine((refs) => new Set(refs.map(({ kind, id }) => `${kind}:${id}`)).size === refs.length, {
+        message: 'components must not contain duplicates',
+      })
+      .optional(),
+  })
+);
 
+/**
+ * Why the stats of a component could not be read. The other fields of the component can still hold
+ * real values, because an error can cover only a part of them, for example the failure rates of a
+ * destination. A value that could not be read is no data: `null`.
+ */
 export const streamsUnitStatsErrorSchema = z.object({
   code: z.string(),
   reason: z.string(),
@@ -252,27 +265,80 @@ const statsValueSchema = z.object({ value: z.number().nullable(), unit: z.string
 /** A rate is always per unit of time. `time_unit` is always set: the UCUM time unit, for example `s`. */
 const statsRateSchema = statsValueSchema.extend({ time_unit: z.string() });
 
+/**
+ * What share of the destination's attempts failed, in percent (`unit` is `%`, 100 is all of them).
+ * `value` is null when there is no data, or no attempt to take a share of. The attempts are counted
+ * in the unit of the rate beside it, so an S3 percentage is of upload attempts, not of items.
+ */
+const statsPercentageSchema = statsValueSchema;
+
+/**
+ * One cause of failures: the reason the destination gave (its own error type) on the collection
+ * that it wrote to (an Elasticsearch data stream or index). Either can be null, when the
+ * destination did not report it: a failure of a whole request has no collection. `percentage` is
+ * the share of all the destination's attempts that failed for this cause, not the share of its
+ * class.
+ */
+const statsFailureBreakdownEntrySchema = lazySchema(() =>
+  z.object({
+    collection: z.string().nullable(),
+    reason: z.string().nullable(),
+    rate: statsRateSchema,
+    percentage: statsPercentageSchema,
+  })
+);
+
+/**
+ * What failed for one class of reason, per second, counted in the unit of its `rate` (items for
+ * Elasticsearch, upload attempts for S3). `rate` is the whole class, and
+ * `percentage` is the share of all the destination's attempts that it is. `breakdown` splits it by
+ * cause, highest rate first and limited to the highest ones. It leaves out a cause with neither a
+ * collection nor a reason, so it can cover less than `rate`, and it is missing when it has no
+ * entries.
+ */
+const statsFailureRateSchema = lazySchema(() =>
+  z.object({
+    rate: statsRateSchema,
+    percentage: statsPercentageSchema,
+    breakdown: z.array(statsFailureBreakdownEntrySchema).optional(),
+  })
+);
+
 export const streamsUnitStatsSeriesSchema = z.object({
   bucket_ms: z.number(),
   points: z.array(z.object({ start: z.string(), value: z.number() })),
 });
 
-export const streamsUnitStatsDestinationResultSchema = z.object({
-  error: streamsUnitStatsErrorSchema.optional(),
-  latency: z.object({ average: statsValueSchema }),
-  events: z.object({
-    incoming: z.object({
-      total: statsValueSchema,
-      rate: statsRateSchema,
-      series: streamsUnitStatsSeriesSchema,
+export const streamsUnitStatsDestinationResultSchema = lazySchema(() =>
+  z.object({
+    error: streamsUnitStatsErrorSchema.optional(),
+    latency: z.object({ average: statsValueSchema }),
+    events: z.object({
+      incoming: z.object({
+        total: statsValueSchema,
+        rate: statsRateSchema,
+        series: streamsUnitStatsSeriesSchema,
+      }),
+      /**
+       * What failed in this destination. For Elasticsearch it is items, per second: every outcome
+       * other than "success". The destination is the last hop, so each of them is its own failure.
+       * `authentication` (HTTP 401) and `authorization` (HTTP 403) are parts of it, picked by
+       * status code, not by outcome. `percentage` is the share of the incoming items that failed.
+       *
+       * A destination type that reports its failures another way says so in the `unit` of the rates,
+       * and the percentages are of the same thing. S3 reports upload attempts (`{request}`), because
+       * it counts a failed item only after its retries, so the items would show the failure late or
+       * never. Do not add or compare a rate of requests to a rate of items.
+       */
+      failed: z.object({
+        rate: statsRateSchema,
+        percentage: statsPercentageSchema,
+        authentication: statsFailureRateSchema,
+        authorization: statsFailureRateSchema,
+      }),
     }),
-    /**
-     * Items that failed in this destination, per second: every outcome other than "success".
-     * The destination is the last hop, so each of them is its own failure.
-     */
-    failed: z.object({ rate: statsRateSchema }),
-  }),
-});
+  })
+);
 
 export const streamsUnitStatsProcessorInstanceSchema = z.object({
   pipeline_id: z.string(),
@@ -303,20 +369,41 @@ export const streamsUnitStatsProcessorResultSchema = z.object({
   instances: z.array(streamsUnitStatsProcessorInstanceSchema),
 });
 
-export const streamsUnitStatsMetaSchema = z.object({
-  window: z.object({ start: z.string(), end: z.string() }),
-  /** Config hash that the server filtered on. Absent when the request had no `config_hash`. */
-  config_hash: z.string().optional(),
-});
+export const streamsUnitStatsSourceResultSchema = lazySchema(() =>
+  z.object({
+    error: streamsUnitStatsErrorSchema.optional(),
+    events: z.object({
+      /**
+       * Items the source accepted, per second: outcome "success". `value` is null when the source
+       * reported nothing in the window, and 0 when it reported only refused or failed items.
+       */
+      accepted: z.object({ rate: statsRateSchema }),
+    }),
+  })
+);
 
-export const streamsUnitStatsResponseSchema = z.object({
-  components: z.object({
-    /** Component references by their IDs. */
-    destinations: z.record(z.string(), streamsUnitStatsDestinationResultSchema),
-    processors: z.record(z.string(), streamsUnitStatsProcessorResultSchema),
-  }),
-  meta: streamsUnitStatsMetaSchema,
-});
+export const streamsUnitStatsMetaSchema = lazySchema(() =>
+  z.object({
+    window: z.object({ start: z.string(), end: z.string() }),
+    /**
+     * Config hash that the server filtered on. Absent when the request had no `config_hash`. It
+     * applies to destinations and processors, not to sources.
+     */
+    config_hash: z.string().optional(),
+  })
+);
+
+export const streamsUnitStatsResponseSchema = lazySchema(() =>
+  z.object({
+    components: z.object({
+      /** Component references by their IDs. */
+      destinations: z.record(z.string(), streamsUnitStatsDestinationResultSchema),
+      processors: z.record(z.string(), streamsUnitStatsProcessorResultSchema),
+      sources: z.record(z.string(), streamsUnitStatsSourceResultSchema),
+    }),
+    meta: streamsUnitStatsMetaSchema,
+  })
+);
 
 export const collectUnitComponentIds = (unit: StreamsUnit.Configuration): string[] => {
   const components: ReadonlyArray<{ id?: unknown }> = [
@@ -363,6 +450,7 @@ export namespace StreamsUnit {
   export type StatsDestinationResult = z.infer<typeof streamsUnitStatsDestinationResultSchema>;
   export type StatsProcessorInstance = z.infer<typeof streamsUnitStatsProcessorInstanceSchema>;
   export type StatsProcessorResult = z.infer<typeof streamsUnitStatsProcessorResultSchema>;
+  export type StatsSourceResult = z.infer<typeof streamsUnitStatsSourceResultSchema>;
   export type StatsMeta = z.infer<typeof streamsUnitStatsMetaSchema>;
   export type StatsResponse = z.infer<typeof streamsUnitStatsResponseSchema>;
   export type ComponentValidationRequest = z.infer<typeof streamsComponentValidationRequestSchema>;

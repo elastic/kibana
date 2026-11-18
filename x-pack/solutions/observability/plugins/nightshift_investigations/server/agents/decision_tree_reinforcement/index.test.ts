@@ -71,6 +71,11 @@ describe('Nightshift decision tree reinforcement agent type', () => {
     for (const toolId of DECISION_TREE_LEARNING_TOOL_IDS) {
       expect(toolIds).not.toContain(toolId);
     }
+    // Agent Builder's attachment and API tools are not part of its job either.
+    expect((await baseFor()).capabilities).toEqual({
+      attachment_tools: { enabled: false },
+      api_tools: { enabled: false },
+    });
   });
 
   it("hydrates through the space's bound hook entry point", async () => {

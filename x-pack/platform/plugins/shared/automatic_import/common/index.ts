@@ -15,6 +15,18 @@ export {
 
 export type { NormalizeLogSamplesResult } from './upload_samples_limits';
 
+export {
+  LOG_SAMPLE_SIGNATURE_BYTES,
+  validateLogSampleContent,
+  validateLogSampleFileName,
+  validateLogSampleFileSignature,
+} from './log_sample_validation';
+
+export type {
+  LogSampleContentValidationResult,
+  LogSampleValidationResult,
+} from './log_sample_validation';
+
 export type {
   ApproveIntegrationRequest,
   CreateAutoImportIntegrationResponse,

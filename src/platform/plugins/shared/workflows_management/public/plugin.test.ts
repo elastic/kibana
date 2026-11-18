@@ -56,6 +56,7 @@ const createPlugin = () =>
       enabled: true,
       logging: { console: false },
       available: true,
+      pages: { enabled: false },
     })
   );
 
@@ -187,7 +188,9 @@ describe('WorkflowsPlugin', () => {
       plugin.start(coreStart, startDeps as any);
 
       expect(stepSchemas.initialize).toHaveBeenCalledWith(startDeps.workflowsExtensions);
-      expect(triggerSchemas.initialize).toHaveBeenCalledWith(startDeps.workflowsExtensions);
+      expect(triggerSchemas.initialize).toHaveBeenCalledWith(startDeps.workflowsExtensions, {
+        pagesEnabled: false,
+      });
     });
 
     describe('disabling workflows from Advanced Settings', () => {

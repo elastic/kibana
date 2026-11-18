@@ -24,7 +24,6 @@ import type {
 export enum ActionButtonType {
   PRIMARY = 'primary',
   SECONDARY = 'secondary',
-  OVERFLOW = 'overflow',
 }
 
 export type AttachmentPreviewState = 'none' | 'preview_available' | 'previewing';

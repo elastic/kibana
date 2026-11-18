@@ -9,6 +9,7 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { WorkflowsExtensionsPublicPlugin } from './plugin';
+import type { PublicStepDefinition } from './step_registry/types';
 
 jest.mock('./steps', () => ({
   registerInternalStepDefinitions: jest.fn(),
@@ -26,6 +27,10 @@ const createPlugin = () => {
 describe('WorkflowsExtensionsPublicPlugin', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    delete window.__workflowsExtensionsTestBridge;
   });
 
   describe('setup', () => {
@@ -130,6 +135,37 @@ describe('WorkflowsExtensionsPublicPlugin', () => {
 
       expect(ready).toBe(true);
       expect(start.hasStepDefinition('async.step')).toBe(true);
+    });
+  });
+
+  describe('test bridge', () => {
+    it('exposes the ids of sync and async registered steps once loaders have settled', async () => {
+      const plugin = createPlugin();
+      const setup = plugin.setup(coreMock.createSetup(), {});
+      setup.registerStepDefinition({ id: 'sync.step' } as PublicStepDefinition);
+      setup.registerStepDefinition(
+        () =>
+          new Promise<PublicStepDefinition>((resolve) => {
+            setTimeout(() => resolve({ id: 'async.step' } as PublicStepDefinition), 0);
+          })
+      );
+      setup.registerStepDefinition(() => Promise.resolve(undefined));
+
+      plugin.start(coreMock.createStart(), {});
+
+      const stepIds = await window.__workflowsExtensionsTestBridge?.getStepDefinitionIds();
+      expect(stepIds).toEqual(['sync.step', 'async.step']);
+    });
+
+    it('is removed on stop', () => {
+      const plugin = createPlugin();
+      plugin.setup(coreMock.createSetup(), {});
+      plugin.start(coreMock.createStart(), {});
+      expect(window.__workflowsExtensionsTestBridge).toBeDefined();
+
+      plugin.stop();
+
+      expect(window.__workflowsExtensionsTestBridge).toBeUndefined();
     });
   });
 

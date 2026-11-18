@@ -247,6 +247,23 @@ components:
           type: string
           maxLength: 64
           description: Document `@timestamp` when present on the hit.
+        host:
+          type: string
+          maxLength: 512
+          description: Host name from the hit when present (`host.name`).
+        user:
+          type: string
+          maxLength: 512
+          description: User name from the hit when present (`user.name`).
+        fields:
+          type: object
+          description: >-
+            Bounded evidence values from the hit (allowlisted ECS keys, at most
+            8, each value at most 256 characters). The SSE schema enforces the
+            allowlist and key cap; producers must write only those keys.
+          additionalProperties:
+            type: string
+            maxLength: 256
         matched:
           type: object
           description: >-
@@ -266,10 +283,57 @@ components:
                   type: string
                 value:
                   type: string
+            iocs:
+              type: array
+              maxItems: 10
+              description: >-
+                Every IOC that matched this hit. `ioc` and `field` stay as the
+                primary (first) match for older readers.
+              items:
+                type: object
+                required: [type, value, field]
+                properties:
+                  type:
+                    type: string
+                  value:
+                    type: string
+                  field:
+                    type: string
             technique_id:
               type: string
             field:
               type: string
+
+    HuntForThreatPerIoc:
+      type: object
+      required: [type, value, field, count]
+      description: >-
+        Per-IOC hit counts from Tier 1's filters aggregation. Optional host,
+        user and time span fields come from sub-aggregations when measured, or
+        stay absent when derived later from the sampled hits.
+      properties:
+        type:
+          type: string
+        value:
+          type: string
+        field:
+          type: string
+          description: The ECS field of the first named clause that matched.
+        count:
+          type: integer
+          minimum: 0
+        host_count:
+          type: integer
+          minimum: 0
+        user_count:
+          type: integer
+          minimum: 0
+        first_seen:
+          type: string
+          maxLength: 64
+        last_seen:
+          type: string
+          maxLength: 64
 
     HuntForThreatResult:
       type: object
@@ -370,5 +434,24 @@ components:
                   Always true: every searched index counts towards the hit bar,
                   because the hunt searches one universe and no bucket is
                   non-confirming. The field predates that and stays for the SSE.
+        per_ioc:
+          type: array
+          maxItems: 30
+          description: >-
+            Non-zero per-IOC hit buckets from Tier 1, count descending. One
+            event can match several IOCs, so a sum of counts can exceed
+            total_hits; each count alone must not.
+          items:
+            $ref: '#/components/schemas/HuntForThreatPerIoc'
+        per_ioc_truncated:
+          type: boolean
+          description: >-
+            Set when Tier 1 produced more non-zero IOC buckets than this array
+            holds.
+        searched_ioc_count:
+          type: integer
+          minimum: 0
+          description: >-
+            Deduped searchable IOCs Tier 1 queried (whether or not they hit).
         message:
           type: string

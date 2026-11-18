@@ -17,6 +17,10 @@ import {
 
 const SETUP = 'kibana-on-merge a.config.ts stateful-classic local';
 
+/** Builds run an hour apart, build 0 on Oct 1, 2026. */
+const FIRST_BUILD_AT = Date.UTC(2026, 9, 1);
+const HOUR_MS = 60 * 60 * 1000;
+
 /** Builds numbered from `first` on, oldest first: `x` failed, `.` passed. */
 const setupBuilds = (pattern: string, first = 1, branch = 'main'): SetupBuilds => ({
   branch,
@@ -25,6 +29,7 @@ const setupBuilds = (pattern: string, first = 1, branch = 'main'): SetupBuilds =
     buildId: `build-${first + index}`,
     buildNumber: first + index,
     failed: outcome === 'x',
+    ranAt: new Date(FIRST_BUILD_AT + (first + index) * HOUR_MS),
   })),
 });
 
@@ -114,6 +119,25 @@ describe('branchCountsWithout', () => {
       builds: 43,
       failedBuilds: 2,
     });
+  });
+
+  it('takes a breakage in a pipeline judged on its own off that pipeline’s counts only', () => {
+    const fipsCounts = [
+      ...counts,
+      { branch: 'main', pipeline: 'kibana-fips', builds: 40, failedBuilds: 8 },
+    ];
+    const breakages = findBreakages({
+      ...setupBuilds(`${'.'.repeat(30)}xxxxxx`),
+      pipeline: 'kibana-fips',
+      setup: 'kibana-fips a.config.ts stateful-classic local',
+    });
+
+    expect(breakages).toEqual([expect.objectContaining({ pipeline: 'kibana-fips' })]);
+    expect(branchCountsWithout(fipsCounts, breakages)).toEqual([
+      { branch: 'main', builds: 53, failedBuilds: 12 },
+      { branch: '9.5', builds: 20, failedBuilds: 2 },
+      { branch: 'main', pipeline: 'kibana-fips', builds: 34, failedBuilds: 2 },
+    ]);
   });
 });
 

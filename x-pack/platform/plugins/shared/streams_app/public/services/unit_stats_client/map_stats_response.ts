@@ -11,6 +11,7 @@ import type {
   MappedComponentStats,
   MappedStatsResponse,
   ProcessorStatsView,
+  SourceStatsView,
 } from './types';
 
 const NOT_FOUND_ERROR_CODE = 'not_found';
@@ -27,6 +28,8 @@ const EMPTY_DESTINATION_STATS: DestinationStatsView = {
 };
 
 const EMPTY_PROCESSOR_STATS: ProcessorStatsView = { instances: [] };
+
+const EMPTY_SOURCE_STATS: SourceStatsView = { acceptedRate: null };
 
 const toDestinationStats = ({
   events,
@@ -52,6 +55,10 @@ const toProcessorStats = ({ instances }: StreamsUnit.StatsProcessorResult): Proc
   })),
 });
 
+const toSourceStats = ({ events }: StreamsUnit.StatsSourceResult): SourceStatsView => ({
+  acceptedRate: events.accepted.rate.value,
+});
+
 const hasDestinationData = ({
   eventsRate,
   eventsTotal,
@@ -62,19 +69,31 @@ const hasDestinationData = ({
 
 const hasProcessorData = ({ instances }: ProcessorStatsView): boolean => instances.length > 0;
 
+const hasSourceData = ({ acceptedRate }: SourceStatsView): boolean => acceptedRate !== null;
+
 /**
  * The one place that decides what a result means. A component error is an error, except
  * `not_found`, which is no data. A `0` is data. `null` is never data.
+ *
+ * An error next to real values means only a part of the stats could not be read, for example the
+ * failure rates of a destination. That component is `ready`, and keeps its error for the UI to show.
  */
 const classify = <TStats>(
   stats: TStats,
   hasData: (stats: TStats) => boolean,
   error?: StreamsUnit.StatsError
 ): MappedComponentStats<TStats> => {
-  if (error && error.code !== NOT_FOUND_ERROR_CODE) {
-    return { status: 'error', stats, error };
+  // `not_found` is no data, so it is not a failure.
+  const failure = error?.code === NOT_FOUND_ERROR_CODE ? undefined : error;
+
+  if (failure && !hasData(stats)) {
+    return { status: 'error', stats, error: failure };
   }
-  return { status: hasData(stats) ? 'ready' : 'noData', stats };
+  return {
+    status: hasData(stats) ? 'ready' : 'noData',
+    stats,
+    ...(failure ? { error: failure } : {}),
+  };
 };
 
 /** A destination that the response leaves out shows as no data. */
@@ -93,6 +112,14 @@ const mapProcessorResult = (
     ? classify(toProcessorStats(result), hasProcessorData, result.error)
     : classify(EMPTY_PROCESSOR_STATS, hasProcessorData);
 
+/** A source that the response leaves out shows as no data. */
+const mapSourceResult = (
+  result: StreamsUnit.StatsSourceResult | undefined
+): MappedComponentStats<SourceStatsView> =>
+  result
+    ? classify(toSourceStats(result), hasSourceData, result.error)
+    : classify(EMPTY_SOURCE_STATS, hasSourceData);
+
 /** An id is user-defined, so `constructor` must not be read from `Object.prototype` as a result. */
 const getOwnResult = <TResult>(results: Record<string, TResult>, id: string): TResult | undefined =>
   Object.hasOwn(results, id) ? results[id] : undefined;
@@ -101,10 +128,11 @@ const getOwnResult = <TResult>(results: Record<string, TResult>, id: string): TR
 export const mapFailedRequest = (
   requested: StreamsUnit.StatsComponentRef[],
   reason: string
-): Pick<MappedStatsResponse, 'destinations' | 'processors'> => {
+): Pick<MappedStatsResponse, 'destinations' | 'processors' | 'sources'> => {
   const error: StreamsUnit.StatsError = { code: STATS_REQUEST_FAILED_ERROR_CODE, reason };
   const destinations: MappedStatsResponse['destinations'] = {};
   const processors: MappedStatsResponse['processors'] = {};
+  const sources: MappedStatsResponse['sources'] = {};
 
   for (const { kind, id } of requested) {
     switch (kind) {
@@ -114,12 +142,15 @@ export const mapFailedRequest = (
       case 'processor':
         processors[id] = { status: 'error', stats: EMPTY_PROCESSOR_STATS, error };
         break;
+      case 'source':
+        sources[id] = { status: 'error', stats: EMPTY_SOURCE_STATS, error };
+        break;
       default:
         break;
     }
   }
 
-  return { destinations, processors };
+  return { destinations, processors, sources };
 };
 
 /**
@@ -132,6 +163,7 @@ export const mapStatsResponse = (
 ): MappedStatsResponse => {
   const destinations: MappedStatsResponse['destinations'] = {};
   const processors: MappedStatsResponse['processors'] = {};
+  const sources: MappedStatsResponse['sources'] = {};
 
   for (const { kind, id } of requested) {
     switch (kind) {
@@ -141,11 +173,14 @@ export const mapStatsResponse = (
       case 'processor':
         processors[id] = mapProcessorResult(getOwnResult(components.processors, id));
         break;
+      case 'source':
+        sources[id] = mapSourceResult(getOwnResult(components.sources, id));
+        break;
       default:
         // A kind this UI does not know is dropped, so a new kind in the schema never breaks a node.
         break;
     }
   }
 
-  return { destinations, processors, window: meta.window };
+  return { destinations, processors, sources, window: meta.window };
 };

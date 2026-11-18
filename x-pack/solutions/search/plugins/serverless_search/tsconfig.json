@@ -45,7 +45,6 @@
     "@kbn/react-kibana-context-render",
     "@kbn/search-inference-endpoints",
     "@kbn/security-plugin-types-common",
-    "@kbn/search-homepage",
     "@kbn/core-http-server",
     "@kbn/logging",
     "@kbn/security-plugin-types-public",

@@ -101,6 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
         logs: 0,
         monitoring: 0,
         apm: 0,
+        digital_experience: 0,
         enterpriseSearch: 0,
         enterpriseSearchApplications: 0,
         enterpriseSearchAnalytics: 0,
