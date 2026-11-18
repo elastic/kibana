@@ -1,0 +1,98 @@
+openapi: 3.0.0
+info:
+  title: Watchlist Manual Entities List Schema
+  version: '1'
+paths:
+  /internal/entity_analytics/watchlists/{watchlist_id}/entities/manual:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: ListManualWatchlistEntities
+      summary: List the entities manually assigned to a watchlist
+      description: |
+        Lists the entities that were assigned to the watchlist by hand, one page at a time.
+        An entity that is only on the watchlist through a rule or a CSV upload is not listed.
+        An entity assigned by hand that also matches a rule is listed, and its `sources` say so.
+      parameters:
+        - name: watchlist_id
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 256
+          description: The ID of the watchlist whose manually assigned entities to list
+          example: 'high-risk-vendors'
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+          description: The page number to return, from 1 to 100. Defaults to 1.
+        - name: per_page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+          description: The number of entities to return per page. Defaults to 10.
+      responses:
+        '200':
+          description: The manually assigned entities of the watchlist
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  entities:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WatchlistManualEntity'
+                  total:
+                    type: integer
+                    description: The number of manually assigned entities in the watchlist
+                    example: 12
+                  page:
+                    type: integer
+                    description: The page returned
+                    example: 1
+                  per_page:
+                    type: integer
+                    description: The page size used
+                    example: 10
+                required:
+                  - entities
+                  - total
+                  - page
+                  - per_page
+        '404':
+          description: The watchlist does not exist
+
+components:
+  schemas:
+    WatchlistManualEntity:
+      type: object
+      properties:
+        euid:
+          type: string
+          description: The EUID of the entity
+          example: 'user:john.doe'
+        name:
+          type: string
+          description: The name of the entity, when it has one
+          example: 'john.doe'
+        type:
+          type: string
+          description: The type of the entity
+          example: 'user'
+        sources:
+          type: array
+          items:
+            type: string
+          description: Every source that puts the entity on the watchlist, `manual` among them
+          example: ['manual']
+      required:
+        - euid
+        - sources

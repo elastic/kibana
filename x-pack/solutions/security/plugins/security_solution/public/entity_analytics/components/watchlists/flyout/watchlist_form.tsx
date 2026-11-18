@@ -34,6 +34,8 @@ import { RuleBasedSourceInput } from './rule_based_source_input';
 import type { useRuleBasedSourceState } from './hooks/use_rule_based_source_state';
 import { WatchlistCsvUpload } from './csv_upload';
 import { ManagedWatchlistSourceInput } from './managed_watchlist_source_input';
+import { ManualEntitiesSection } from './manual_entities_section';
+import { useWatchlistManualEntitiesEnabled } from '../../../hooks/use_watchlist_manual_entities_enabled';
 import {
   MAX_WATCHLIST_DESCRIPTION_LENGTH,
   MAX_WATCHLIST_NAME_LENGTH,
@@ -75,6 +77,7 @@ export const WatchlistForm = ({
   onFieldChange,
   ruleBasedSource,
 }: WatchlistFormProps) => {
+  const isManualEntitiesEnabled = useWatchlistManualEntitiesEnabled();
   const isManaged = watchlist.managed === true;
   const isNameDisabled = isEditMode && !canUpdateWatchlistField('name', isManaged);
   const isDescriptionDisabled = isEditMode && !canUpdateWatchlistField('description', isManaged);
@@ -169,6 +172,9 @@ export const WatchlistForm = ({
         indexSourceWithMissingApiKey={indexSourceWithMissingApiKey}
         ruleBasedSource={ruleBasedSource}
       />
+      {isEditMode && watchlistId && isManualEntitiesEnabled && (
+        <ManualEntitiesSection watchlistId={watchlistId} watchlistName={watchlist.name} />
+      )}
     </EuiForm>
   );
 };

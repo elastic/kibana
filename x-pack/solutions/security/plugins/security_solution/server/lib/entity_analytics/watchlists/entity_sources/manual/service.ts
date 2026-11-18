@@ -238,6 +238,57 @@ const findManualWatchlistDocs = async (
   });
 };
 
+/**
+ * One page of the entities assigned to a watchlist by hand, by name. An entity that is also on the
+ * watchlist through a rule is listed with both sources; one that is only there through a rule or a
+ * CSV upload has no `manual` source and is not listed. A watchlist index that does not exist yet
+ * lists nothing.
+ */
+export const listManualWatchlistEntities = async (
+  esClient: ElasticsearchClient,
+  watchlist: { id: string; index: string },
+  { page, perPage }: { page: number; perPage: number }
+) => {
+  const response = await esClient.search<WatchlistEntityDoc>({
+    index: watchlist.index,
+    ignore_unavailable: true,
+    from: (page - 1) * perPage,
+    size: perPage,
+    track_total_hits: true,
+    query: {
+      bool: {
+        filter: [
+          { term: { 'watchlist.id': watchlist.id } },
+          { term: { 'labels.source_ids': MANUAL_SOURCE_ID } },
+        ],
+      },
+    },
+    sort: [
+      { 'entity.name': { order: 'asc', unmapped_type: 'keyword' } },
+      { 'entity.id': { order: 'asc', unmapped_type: 'keyword' } },
+    ],
+    _source: ['entity.id', 'entity.name', 'entity.type', 'labels.sources'],
+  });
+
+  const total =
+    typeof response.hits.total === 'number' ? response.hits.total : response.hits.total?.value ?? 0;
+
+  const entities = response.hits.hits.flatMap((hit) => {
+    const entity = hit._source?.entity;
+    if (!entity?.id) return [];
+    return [
+      {
+        euid: entity.id,
+        ...(entity.name ? { name: entity.name } : {}),
+        ...(entity.type ? { type: entity.type } : {}),
+        sources: hit._source?.labels?.sources ?? [],
+      },
+    ];
+  });
+
+  return { entities, total, page, per_page: perPage };
+};
+
 const toErrorMessage = (err: unknown): string => (err instanceof Error ? err.message : String(err));
 
 const normalizeWatchlists = (raw: unknown): string[] =>
