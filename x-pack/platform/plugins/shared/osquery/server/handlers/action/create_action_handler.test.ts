@@ -45,11 +45,13 @@ const buildOsqueryContext = ({
   indicesExists = jest.fn().mockResolvedValue(true),
   bulk = jest.fn().mockResolvedValue({ errors: false, items: [] }),
   reportEvent = jest.fn(),
+  warn = jest.fn(),
 }: {
   bulkCreate?: jest.Mock;
   indicesExists?: jest.Mock;
   bulk?: jest.Mock;
   reportEvent?: jest.Mock;
+  warn?: jest.Mock;
 } = {}) => {
   const esClient = {
     indices: { exists: indicesExists },
@@ -66,10 +68,10 @@ const buildOsqueryContext = ({
       getFleetActionsClient: () => ({ bulkCreate }),
     },
     telemetryEventsSender: { reportEvent },
-    logFactory: { get: jest.fn(() => ({ debug: jest.fn(), error: jest.fn() })) },
+    logFactory: { get: jest.fn(() => ({ debug: jest.fn(), error: jest.fn(), warn })) },
   } as unknown as OsqueryAppContext;
 
-  return { context, bulkCreate, bulk, indicesExists, reportEvent };
+  return { context, bulkCreate, bulk, indicesExists, reportEvent, warn };
 };
 
 describe('createActionHandler', () => {
@@ -148,6 +150,29 @@ describe('createActionHandler', () => {
       expect(reportEvent).toHaveBeenCalledTimes(1);
       expect(reportEvent.mock.calls[0][1]).not.toHaveProperty('origin');
     });
+
+    it.each([new Error('mapping unavailable'), 'mapping unavailable'])(
+      'writes and returns the action without origin when the mapping check rejects with %p',
+      async (mappingError) => {
+        const { context, bulk, reportEvent, warn } = buildOsqueryContext();
+        mockedEnsureActionsIndexMappings.mockRejectedValueOnce(mappingError);
+
+        const result = await createActionHandler(
+          context,
+          { query: 'SELECT 1;', agent_ids: [TEST_AGENT] },
+          { dispatch: liveDispatch, origin: workflowOrigin }
+        );
+
+        expect(bulk).toHaveBeenCalledTimes(1);
+        expect(bulk.mock.calls[0][0].operations[1]).not.toHaveProperty('origin');
+        expect(result.response).not.toHaveProperty('origin');
+        expect(warn).toHaveBeenCalledTimes(1);
+        expect(warn).toHaveBeenCalledWith(expect.stringContaining(result.response.action_id));
+        expect(warn).toHaveBeenCalledWith(expect.stringContaining('mapping unavailable'));
+        expect(reportEvent).toHaveBeenCalledTimes(1);
+        expect(reportEvent.mock.calls[0][1]).not.toHaveProperty('origin');
+      }
+    );
   });
 
   it('rejects a live query whose selected agents exceed maxAgents before writing actions', async () => {

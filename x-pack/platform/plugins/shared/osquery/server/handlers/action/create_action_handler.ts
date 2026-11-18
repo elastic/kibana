@@ -248,7 +248,18 @@ export const createActionHandler = async (
     if (origin) {
       // `origin` is the newest mapped field. Make sure its mapping exists before the first
       // document carrying it is written, so it is never mapped dynamically.
-      await ensureActionsIndexMappings(esClientInternal, osqueryContext.logFactory.get('osquery'));
+      const logger = osqueryContext.logFactory.get('osquery');
+      try {
+        await ensureActionsIndexMappings(esClientInternal, logger);
+      } catch (mappingError) {
+        // Fleet actions are already dispatched, so keep the action readable without risking
+        // dynamically mapped origin fields. The response must match the stored document.
+        delete osqueryAction.origin;
+        const reason = mappingError instanceof Error ? mappingError.message : String(mappingError);
+        logger.warn(
+          `Osquery action ${osqueryAction.action_id}: origin mapping unavailable (${reason}); storing without origin`
+        );
+      }
     }
 
     const bulkResponse = await esClientInternal.bulk({
