@@ -6,7 +6,7 @@
  */
 
 import { createHash } from 'crypto';
-import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
+import { ALERT_EPISODE_STATUS, MAX_BULK_ITEMS } from '@kbn/alerting-v2-schemas';
 import { AlertEventsClient, getGroupHash, getValueByDottedPath } from './alert_events_client';
 import { createMockStorageServiceContract } from '../services/storage_service/storage_service.mock';
 import type { QueryServiceContract } from '../services/query_service/query_service';
@@ -590,6 +590,158 @@ describe('AlertEventsClient.createSignalEvent', () => {
 
     await expect(client.createSignalEvent({ source: 'datadog' })).rejects.toThrow(
       'Failed to persist signal event: boom'
+    );
+  });
+});
+
+describe('AlertEventsClient.bulkCreateSignalEvents', () => {
+  it('stores the batch in one write and returns one created item per event, in input order', async () => {
+    const { client, storageService, resourceManager, queryService, publisher } = createClient([]);
+
+    const result = await client.bulkCreateSignalEvents([
+      { source: 'datadog', fingerprint: 'fp-1' },
+      { source: 'pagerduty' },
+      { source: 'datadog', fingerprint: 'fp-2', status: 'recovered' },
+    ]);
+
+    expect(result.items).toEqual([
+      { status: 'created', group_hash: sha256('default:datadog:fp-1') },
+      { status: 'created', group_hash: sha256('default:pagerduty') },
+      { status: 'created', group_hash: sha256('default:datadog:fp-2') },
+    ]);
+    expect(resourceManager.ensureResourceReady).toHaveBeenCalledTimes(1);
+    expect(resourceManager.ensureResourceReady).toHaveBeenCalledWith(ALERT_EVENTS_RESOURCE_KEY);
+    expect(storageService.bulkIndexDocs).toHaveBeenCalledTimes(1);
+
+    const [call] = storageService.bulkIndexDocs.mock.calls[0];
+    expect(call.docs).toHaveLength(3);
+    expect(call.docs.map((doc) => doc.status)).toEqual(['breached', 'breached', 'recovered']);
+    expect(call.docs.every((doc) => doc.type === 'signal')).toBe(true);
+    expect(call).not.toHaveProperty('refresh');
+    expect(queryService.executeQuery).not.toHaveBeenCalled();
+    expect(publisher.publishAlertStatusChanges).not.toHaveBeenCalled();
+  });
+
+  it('reports an event that Elasticsearch rejects as failed at its position', async () => {
+    const { client, storageService } = createClient([]);
+    storageService.bulkIndexDocs.mockImplementationOnce(async ({ docs }) => ({
+      attempted: docs.length,
+      docs: [docs[0], docs[2]],
+      errors: [
+        {
+          code: 'mapper_parsing_exception',
+          message: 'boom',
+          details: { statusCode: 400 },
+          index: '.rule-events',
+          document: docs[1],
+        },
+      ],
+    }));
+
+    const result = await client.bulkCreateSignalEvents([
+      { source: 'datadog', fingerprint: 'fp-1' },
+      { source: 'datadog', fingerprint: 'fp-2' },
+      { source: 'datadog', fingerprint: 'fp-3' },
+    ]);
+
+    expect(result.items).toEqual([
+      { status: 'created', group_hash: sha256('default:datadog:fp-1') },
+      { status: 'failed', error: { code: 'mapper_parsing_exception', message: 'boom' } },
+      { status: 'created', group_hash: sha256('default:datadog:fp-3') },
+    ]);
+  });
+
+  it('reports an invalid event as failed without blocking the valid ones', async () => {
+    const { client, storageService } = createClient([]);
+
+    const withRuleId = { source: 'datadog', rule_id: 'rule-1' };
+    const result = await client.bulkCreateSignalEvents([
+      { source: 'datadog', fingerprint: 'fp-1' },
+      withRuleId,
+      { source: 'datadog', fingerprint: 'fp-3' },
+    ]);
+
+    expect(result.items.map((item) => item.status)).toEqual(['created', 'failed', 'created']);
+    expect(result.items[1]).toEqual({
+      status: 'failed',
+      error: { code: 'invalid_signal_event', message: expect.any(String) },
+    });
+
+    const [call] = storageService.bulkIndexDocs.mock.calls[0];
+    expect(call.docs).toHaveLength(2);
+  });
+
+  it('does not write when every event is invalid', async () => {
+    const { client, storageService, resourceManager } = createClient([]);
+
+    const emptySource = { source: '' };
+    const result = await client.bulkCreateSignalEvents([emptySource]);
+
+    expect(result.items).toEqual([
+      { status: 'failed', error: { code: 'invalid_signal_event', message: expect.any(String) } },
+    ]);
+    expect(storageService.bulkIndexDocs).not.toHaveBeenCalled();
+    expect(resourceManager.ensureResourceReady).not.toHaveBeenCalled();
+  });
+
+  it('rejects an empty batch and a batch over the limit without writing', async () => {
+    const { client, storageService } = createClient([]);
+    const tooMany = Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, index) => ({
+      source: 'datadog',
+      fingerprint: `fp-${index}`,
+    }));
+
+    await expect(client.bulkCreateSignalEvents([])).rejects.toThrow('expected between 1 and');
+    await expect(client.bulkCreateSignalEvents(tooMany)).rejects.toThrow('expected between 1 and');
+    expect(storageService.bulkIndexDocs).not.toHaveBeenCalled();
+  });
+
+  it('accepts a batch of exactly the limit', async () => {
+    const { client } = createClient([]);
+    const atLimit = Array.from({ length: MAX_BULK_ITEMS }, (_, index) => ({
+      source: 'datadog',
+      fingerprint: `fp-${index}`,
+    }));
+
+    const result = await client.bulkCreateSignalEvents(atLimit);
+
+    expect(result.items).toHaveLength(MAX_BULK_ITEMS);
+  });
+
+  it('stores several signals of one series in the same batch', async () => {
+    const { client, storageService } = createClient([]);
+
+    const result = await client.bulkCreateSignalEvents([
+      { source: 'datadog', fingerprint: 'fp-1', status: 'breached' },
+      { source: 'datadog', fingerprint: 'fp-1', status: 'recovered' },
+    ]);
+
+    expect(result.items).toEqual([
+      { status: 'created', group_hash: sha256('default:datadog:fp-1') },
+      { status: 'created', group_hash: sha256('default:datadog:fp-1') },
+    ]);
+    const [call] = storageService.bulkIndexDocs.mock.calls[0];
+    expect(call.docs).toHaveLength(2);
+  });
+
+  it('accepts a source under the reserved elastic prefix from an internal caller', async () => {
+    const { client } = createClient([]);
+
+    const result = await client.bulkCreateSignalEvents([
+      { source: 'elastic.nightshift_detection' },
+    ]);
+
+    expect(result.items).toEqual([
+      { status: 'created', group_hash: sha256('default:elastic.nightshift_detection') },
+    ]);
+  });
+
+  it('throws when the whole write fails', async () => {
+    const { client, storageService } = createClient([]);
+    storageService.bulkIndexDocs.mockRejectedValueOnce(new Error('es unavailable'));
+
+    await expect(client.bulkCreateSignalEvents([{ source: 'datadog' }])).rejects.toThrow(
+      'es unavailable'
     );
   });
 });
