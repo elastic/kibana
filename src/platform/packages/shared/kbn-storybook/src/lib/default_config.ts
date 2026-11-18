@@ -16,6 +16,7 @@ import { resolve } from 'path';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
+import nodeStdlibBrowser from 'node-stdlib-browser';
 import { REPO_ROOT } from './constants';
 import { default as WebpackConfig } from '../webpack.config';
 
@@ -136,6 +137,26 @@ export const defaultConfig: StorybookConfig = {
 
     return config;
   },
+  // Unlike webpackFinal, which some storybooks replace, this hook applies to every storybook.
+  // Jest 30's jest-util (pulled in by the preview's jest-mock) requires `node:` builtins.
+  webpack: (config) => ({
+    ...config,
+    plugins: [
+      ...(config.plugins ?? []),
+      new webpack.NormalModuleReplacementPlugin(/^node:/, (resource: { request: string }) => {
+        const request = resource.request as keyof typeof nodeStdlibBrowser;
+        resource.request = nodeStdlibBrowser[request] ?? resource.request.slice('node:'.length);
+      }),
+    ],
+    resolve: {
+      ...config.resolve,
+      fallback: {
+        ...config.resolve?.fallback,
+        // jest-util only reads `util/types` in `isError`, when the browser lacks `Error.isError`.
+        'util/types': false,
+      },
+    },
+  }),
   webpackFinal: (config, options) => {
     if (process.env.CI) {
       config.parallelism = 4;
@@ -195,21 +216,11 @@ export const defaultConfig: StorybookConfig = {
       );
     }
 
-    // Jest 30's jest-util (pulled in by the preview's jest-mock) requires `node:` builtins; strip the
-    // scheme so the bare-name browser fallbacks apply.
-    config.plugins?.push(
-      new webpack.NormalModuleReplacementPlugin(/^node:/, (resource: { request: string }) => {
-        resource.request = resource.request.slice('node:'.length);
-      })
-    );
-
     config.resolve = {
       ...config.resolve,
       fallback: {
         ...config?.resolve?.fallback,
         fs: false,
-        // jest-util only reads `util/types` in `isError`, when the browser lacks `Error.isError`.
-        'util/types': false,
       },
     };
 
