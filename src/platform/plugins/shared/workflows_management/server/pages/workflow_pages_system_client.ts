@@ -226,18 +226,16 @@ export class WorkflowPagesSystemClientImpl implements WorkflowPagesSystemClient 
   }
 
   async verifyPageSecret(ref: WorkflowPageRef, secret: string): Promise<VerifyPageSecretResult> {
-    if (!this.deps.canEncrypt) {
-      return { reason: 'page_offline' };
-    }
     const page = await getPageOrUndefined(this.deps.savedObjectsClient, ref);
     if (page?.attributes.workflowId !== ref.workflowId || page.attributes.pageId !== ref.pageId) {
       return { reason: 'page_not_found' };
     }
-    if (!isPageOnline(page.attributes, this.deps.canEncrypt)) {
-      return { reason: 'page_offline' };
-    }
+    // The secret goes first, so the audit log tells a leaked secret from a guess on an offline page.
     if (!isPageSecretValid(ref, secret, page.attributes.secretHash)) {
       return { reason: 'secret_mismatch' };
+    }
+    if (!isPageOnline(page.attributes, this.deps.canEncrypt)) {
+      return { reason: 'page_offline' };
     }
     return { workflowCreatedAt: page.attributes.workflowCreatedAt };
   }

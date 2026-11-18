@@ -415,12 +415,24 @@ describe('WorkflowPagesSystemClient', () => {
       await expect(client.verifyPageSecret(ref, 'the-secret')).resolves.toEqual({
         reason: 'page_offline',
       });
+      await expect(client.verifyPageSecret(ref, 'wrong')).resolves.toEqual({
+        reason: 'secret_mismatch',
+      });
     });
 
-    it('rejects every secret without an encryption key', async () => {
-      const { client } = setup({ canEncrypt: false });
-      await expect(client.verifyPageSecret(ref, 'anything')).resolves.toEqual({
+    it('rejects every secret without an encryption key, checking the secret first', async () => {
+      const { savedObjectsClient, logger, audit } = await onlinePage();
+      const client = new WorkflowPagesSystemClientImpl({
+        logger,
+        canEncrypt: false,
+        savedObjectsClient,
+        audit,
+      });
+      await expect(client.verifyPageSecret(ref, 'the-secret')).resolves.toEqual({
         reason: 'page_offline',
+      });
+      await expect(client.verifyPageSecret(ref, 'wrong')).resolves.toEqual({
+        reason: 'secret_mismatch',
       });
     });
   });
