@@ -9,6 +9,7 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 
 export type { MitreAttackServerSetup, MitreAttackServerStart } from './types';
 export type { MitreAttackDataClient } from './services/mitre_attack_data_client/mitre_attack_data_client_interface';
+export type { MitreDataStatus } from './services/mitre_attack_data_service';
 export type { MitreListParams } from '@kbn/security-mitre-attack-common';
 export { config } from './config';
 

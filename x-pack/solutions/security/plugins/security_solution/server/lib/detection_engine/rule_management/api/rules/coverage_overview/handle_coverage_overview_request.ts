@@ -79,19 +79,27 @@ export async function handleCoverageOverviewRequest({
       referencedFrameworks.add(framework);
     }
   }
+  // Both reads are needed: the snapshot before guards a repair finishing mid-read, and the read
+  // after catches a population that list() itself started and that ended degraded (partial data).
+  const wasDegradedBefore = mitreDataClient?.getStatus().status === 'degraded';
   const bucketsByFramework = await resolveMitreBucketsByFramework(
     mitreDataClient,
     Array.from(referencedFrameworks),
     logger
   );
+  const isDegraded = wasDegradedBefore || mitreDataClient?.getStatus().status === 'degraded';
   const validIdsByFramework: ValidMitreIdSetsByFramework = {};
   for (const framework of referencedFrameworks) {
     const buckets = bucketsByFramework[framework];
-    if (buckets) {
+    if (buckets && !isDegraded) {
       validIdsByFramework[framework] = buildValidMitreIdsFromBuckets(buckets);
-    } else {
+    } else if (!buckets) {
       logger?.debug(
         `MITRE buckets unavailable for framework "${framework}"; invalid-ID detection will be skipped for it`
+      );
+    } else {
+      logger?.debug(
+        `MITRE data is degraded for framework "${framework}"; invalid-ID detection will be skipped to avoid false positives`
       );
     }
   }

@@ -11,7 +11,10 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { MitreTactic, MitreTechnique } from '@kbn/security-mitre-attack-common';
 import { getMockMitreTactic, getMockMitreTechnique } from '../../mocks/mitre_entities.mock';
 import { createMitreAttackDataClient } from './mitre_attack_data_client';
-import { MITRE_ATTACK_ENTITY_SO_TYPE } from '@kbn/security-mitre-attack-common';
+import {
+  MITRE_ATTACK_ENTITY_SO_TYPE,
+  MitreDataUnavailableError,
+} from '@kbn/security-mitre-attack-common';
 import { mitreAttackDataServiceMock } from '../__mocks__/mitre_attack_data_service';
 
 describe('MitreAttackDataClient.getById', () => {
@@ -234,12 +237,10 @@ describe('MitreAttackDataClient.getById', () => {
     expect(savedObjectsRepository.get).not.toHaveBeenCalled();
   });
 
-  it('returns undefined and issues no repository call when ensureInitialized() resolves false', async () => {
+  it('throws MitreDataUnavailableError and issues no repository call when ensureInitialized() resolves false', async () => {
     dataService.ensureInitialized.mockResolvedValueOnce(false);
 
-    const result = await buildClient().getById('T1003');
-
-    expect(result).toBeUndefined();
+    await expect(buildClient().getById('T1003')).rejects.toThrow(MitreDataUnavailableError);
     expect(savedObjectsRepository.find).not.toHaveBeenCalled();
     expect(savedObjectsRepository.get).not.toHaveBeenCalled();
   });

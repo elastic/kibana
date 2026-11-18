@@ -40,6 +40,7 @@ export const HuntIncompleteReason = lazySchema(() =>
     'quote_ungrounded',
     'unknown_technique_id',
     'catalog_unavailable',
+    'catalog_disabled',
     'rows_unclassifiable',
     'refs_unavailable',
     'nothing_searched',
