@@ -227,6 +227,29 @@ describe('renderInvestigationSlackMessage', () => {
     expect(details).not.toContain('retries stay flat');
   });
 
+  it('lists every pending proposal in the details, not in the leads', () => {
+    const message = render({
+      investigation: completed({
+        recommendations: [
+          {
+            title: 'Roll back payments-api to v1.41',
+            impact: 'low',
+            confidence: 'high',
+          },
+          { title: 'Raise the pool limit' },
+        ],
+      }),
+    });
+    const details = detailsOf(message);
+
+    expect(details).toContain('Proposed actions');
+    expect(details.indexOf('Roll back payments-api to v1.41')).toBeLessThan(
+      details.indexOf('Raise the pool limit')
+    );
+    expect(details).toContain('(Low impact · High confidence)');
+    expect(leadsOf(message)).not.toContain('Roll back');
+  });
+
   it('keeps the affected entities when the impact text is long', () => {
     const summary = `Checkout failed. ${'Orders were rejected after the deploy. '.repeat(60)}`;
     const message = render({
