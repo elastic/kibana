@@ -433,10 +433,6 @@ const renderSteps = async (
   let groupIndex = 0;
   for (const [index, step] of steps.entries()) {
     if (index < start || index > end) {
-      // A steer is pinned: it is re-rendered verbatim even when a summary covers its cycle.
-      if (index < start && current && isDeliveredMessageStep(step)) {
-        messages.push(createUserMessage(formatDeliveredMessageNotice(step)));
-      }
       if (isToolCallStep(step) && groups[groupIndex]?.[0] === step) {
         groupIndex++;
       }
