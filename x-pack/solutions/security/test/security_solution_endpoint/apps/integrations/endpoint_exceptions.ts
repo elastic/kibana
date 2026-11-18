@@ -86,10 +86,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     }) => {
       await setLastFieldsValue({ testSubj: 'fieldAutocompleteComboBox', value: field });
       await setLastFieldsValue({ testSubj: 'operatorAutocompleteComboBox', value: operator });
-      await setLastFieldsValue({
-        testSubj: operator === 'matches' ? 'valuesAutocompleteWildcard' : 'valuesAutocompleteMatch',
-        value,
-      });
+      const valueFields = await find.allByCssSelector(
+        `[data-test-subj="${
+          operator === 'matches' ? 'valuesAutocompleteWildcard' : 'valuesAutocompleteMatch'
+        }"]`
+      );
+      await comboBox.setFilterValue(valueFields[valueFields.length - 1], value);
+      await pageObjects.common.pressEnterKey();
     };
 
     const checkArtifact = (expectedArtifact: object) => {
