@@ -135,11 +135,11 @@ export function RoutingRuleList({
               unmatchedSignals.length === handledSignals.length
                 ? i18n.translate('xpack.streams.routingFlyout.unmatchedDataWarning', {
                     defaultMessage:
-                      'Some data doesn’t match any of these conditions and will be dropped. To keep it, add a rule with no condition',
+                      'The conditions are not guaranteed to match all data. Unmatched data will be dropped.',
                   })
                 : i18n.translate('xpack.streams.routingFlyout.unmatchedSignalsWarning', {
                     defaultMessage:
-                      'Some {signals} data doesn’t match any of these conditions and will be dropped. To keep it, add a rule with no condition that handles {signals}',
+                      "Some {signals} data doesn't match any of these conditions. Unmatched {signals} data will be dropped.",
                     values: {
                       signals: unmatchedSignals
                         .map((signal) => ROUTING_SIGNAL_LABELS[signal])

@@ -14,6 +14,7 @@ import {
 } from '@kbn/significant-events-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { setWorkflowEventChainContext } from '@kbn/workflows-extensions/server';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
@@ -64,14 +65,15 @@ const input: Partial<SignificantEvent> & { slugs: string[] } = {
 const getFeatures = jest.fn().mockResolvedValue({ hits: [] });
 
 const createTool = (
-  telemetry: { trackAgentToolEventsWrite: jest.Mock },
-  logger = loggingSystemMock.createLogger()
+  telemetry: { trackAgentToolEventsWrite: jest.Mock; trackAgentToolFailed?: jest.Mock },
+  logger = loggingSystemMock.createLogger(),
+  storedDetections: Array<SignalEntry['metadata'] & { workflow_execution_id?: string }> = []
 ) => {
   const getScopedClients = jest.fn().mockResolvedValue({
     getEventSearchClient: jest.fn().mockReturnValue({}),
     getDetectionClient: jest
       .fn()
-      .mockResolvedValue({ findByIds: jest.fn().mockResolvedValue({ hits: [] }) }),
+      .mockResolvedValue({ findByIds: jest.fn().mockResolvedValue({ hits: storedDetections }) }),
     getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getFeatures }),
     getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
     sourcesClient: mockSourcesClient(['logs.test', 'logs.batch', 'logs.web']),
@@ -120,6 +122,15 @@ describe('events_write tool', () => {
     expect(
       eventsWriteSchema.safeParse({ items: [{ ...input, reopen_deactivated: true }] }).success
     ).toBe(true);
+  });
+
+  it('does not expose workflow provenance as model input', () => {
+    const parsed = eventsWriteItemSchema.parse({
+      ...input,
+      workflow_execution_id: 'model-supplied',
+    });
+
+    expect(parsed).not.toHaveProperty('workflow_execution_id');
   });
 
   it('rejects input without an items array', () => {
@@ -383,13 +394,6 @@ describe('events_write tool', () => {
     expect(result.items[0].event_id).toBeUndefined();
   });
 
-  it('accepts only discovery as the optional caller source', () => {
-    expect(eventsWriteSchema.safeParse({ source: 'discovery', items: [input] }).success).toBe(true);
-    expect(eventsWriteSchema.safeParse({ source: 'investigation', items: [input] }).success).toBe(
-      false
-    );
-  });
-
   it.each<{
     label: string;
     stack: RunContextStackEntry[];
@@ -423,12 +427,12 @@ describe('events_write tool', () => {
 
       await invokeHandler(
         createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
-        { source: 'discovery', items: [input] },
+        { items: [input] },
         context
       );
 
       expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
-        expect.objectContaining({ source: 'discovery', rejectUnknownEventIds: expected })
+        expect.objectContaining({ rejectUnknownEventIds: expected })
       );
     }
   );
@@ -470,7 +474,6 @@ describe('events_write tool', () => {
     await invokeHandler(
       createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
       {
-        source: 'discovery',
         items: [
           {
             ...input,
@@ -508,7 +511,6 @@ describe('events_write tool', () => {
     expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
       expect.objectContaining({
         eventSearchClient: {},
-        source: 'discovery',
         inputs: [
           expect.objectContaining({
             causal_features: [
@@ -787,7 +789,66 @@ describe('events_write tool', () => {
     );
     expect(telemetry.trackAgentToolEventsWrite).toHaveBeenCalledTimes(2);
     expect(telemetry.trackAgentToolEventsWrite).toHaveBeenLastCalledWith(
-      expect.objectContaining({ success: false, written: false, error_message: 'busy' })
+      expect.objectContaining({ success: false, written: false, error_message: 'busy' }),
+      expect.anything()
+    );
+  });
+
+  it('stamps the invoking workflow run on the written items and the telemetry', async () => {
+    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+      { index: 0, event_id: 'event-1', status: 'active', written: true },
+    ]);
+    const telemetry = { trackAgentToolEventsWrite: jest.fn() };
+    const context = createMockToolContext();
+    setWorkflowEventChainContext(context.request, { depth: 0, sourceExecutionId: 'discovery-run' });
+
+    await invokeHandler(createTool(telemetry) as never, { items: [input] }, context);
+
+    expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        inputs: [expect.objectContaining({ workflow_execution_id: 'discovery-run' })],
+      })
+    );
+    expect(telemetry.trackAgentToolEventsWrite).toHaveBeenCalledWith(
+      expect.objectContaining({ workflow_execution_id: 'discovery-run' }),
+      expect.anything()
+    );
+  });
+
+  it('reports the distinct detection runs behind the signals', async () => {
+    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+      { index: 0, event_id: 'event-1', status: 'active', written: true, severity: 'high' },
+    ]);
+    const telemetry = { trackAgentToolEventsWrite: jest.fn() };
+    const detection = (rule: string, run?: string) => ({
+      ...confirmingSignal.metadata,
+      rule_uuid: rule,
+      detection_id: `detection-${rule}`,
+      ...(run ? { workflow_execution_id: run } : {}),
+    });
+    const signalFor = (rule: string): SignalEntry => ({
+      ...confirmingSignal,
+      metadata: {
+        ...confirmingSignal.metadata,
+        rule_uuid: rule,
+        detection_id: `detection-${rule}`,
+      },
+    });
+
+    await invokeHandler(
+      createTool(telemetry, undefined, [
+        detection('a', 'run-1'),
+        detection('b', 'run-1'),
+        detection('c', 'run-2'),
+        detection('d'),
+      ]) as never,
+      { items: [{ ...input, signals: ['a', 'b', 'c', 'd'].map(signalFor) }] },
+      createMockToolContext()
+    );
+
+    expect(telemetry.trackAgentToolEventsWrite).toHaveBeenCalledWith(
+      expect.objectContaining({ detection_workflow_execution_ids: ['run-1', 'run-2'] }),
+      expect.anything()
     );
   });
 
@@ -908,6 +969,67 @@ describe('events_write tool', () => {
           }),
         ],
       })
+    );
+  });
+});
+
+describe('events_write tool failure reporting', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
+    (assertCanManageSignificantEvents as jest.Mock).mockResolvedValue(undefined);
+  });
+
+  it('reports an unresolved feature_id as a refused batch and keeps the id out of the log and telemetry', async () => {
+    getFeatures.mockImplementation((_sourceIds, options) =>
+      Promise.resolve({
+        hits:
+          options && ('featureIds' in options || 'id' in options)
+            ? []
+            : [
+                {
+                  id: 'checkout-api',
+                  uuid: 'uuid-checkout',
+                  source_id: 'logs.test',
+                  type: 'entity',
+                  subtype: 'service',
+                },
+              ],
+      })
+    );
+    const telemetry = { trackAgentToolEventsWrite: jest.fn(), trackAgentToolFailed: jest.fn() };
+    const logger = loggingSystemMock.createLogger();
+    const item = {
+      ...input,
+      blast_radius: [{ feature_id: 'topolvm-lvmvg-storage', name: 'TopoLVM' }],
+    };
+
+    const result = await invokeHandler(
+      createTool(telemetry, logger) as never,
+      { items: [item, { ...item, event_id: 'event-2' }] },
+      createMockToolContext()
+    );
+
+    expect(JSON.stringify(result)).toContain('topolvm-lvmvg-storage');
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(telemetry.trackAgentToolFailed).toHaveBeenCalledTimes(1);
+    expect(telemetry.trackAgentToolFailed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tool_id: 'platform.sig_events.events_write',
+        error_code: 'unresolved_feature_reference',
+        input_rejected: true,
+        item_count: 2,
+        unresolved_count: 1,
+      }),
+      expect.anything()
+    );
+    expect(telemetry.trackAgentToolEventsWrite).toHaveBeenCalledTimes(2);
+    expect(telemetry.trackAgentToolEventsWrite).toHaveBeenCalledWith(
+      expect.objectContaining({ success: false, error_message: 'unresolved_feature_reference' }),
+      expect.anything()
+    );
+    expect(JSON.stringify(telemetry.trackAgentToolEventsWrite.mock.calls)).not.toContain(
+      'topolvm-lvmvg-storage'
     );
   });
 });

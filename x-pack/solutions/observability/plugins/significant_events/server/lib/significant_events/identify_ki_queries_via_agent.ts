@@ -34,8 +34,20 @@ import {
   type AcceptedQuery,
 } from '../../agent_builder/skills/ki_query_generation';
 import { chatTokenCountFromModelUsage } from './features/chat_token_count';
+import { getWorkflowExecutionIdFromRequest } from '../telemetry/ebt/workflow_execution_id';
 
 const QUERY_GENERATION_MAX_DURATION_MS = 300_000;
+
+/** The agent run ended without a usable result; `reason` names which way, for telemetry. */
+export class KIQueryGenerationAgentError extends Error {
+  constructor(
+    public readonly reason: 'agent_did_not_finalize' | 'unexpected_source',
+    message: string
+  ) {
+    // The name stays `Error` so the line the route logs for this failure does not change.
+    super(message);
+  }
+}
 
 interface FinalizedValidationData {
   slug: string;
@@ -113,6 +125,7 @@ export async function executeKIQueryGenerationAgent({
           productFeature: NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
           interactionId,
         },
+        workflowExecutionId: getWorkflowExecutionIdFromRequest(request),
       },
     });
 
@@ -127,10 +140,14 @@ export async function executeKIQueryGenerationAgent({
       .find(isFinalizedValidationData);
 
     if (!finalizedData) {
-      throw new Error('KI query generation agent did not finalize validate_queries');
+      throw new KIQueryGenerationAgentError(
+        'agent_did_not_finalize',
+        'KI query generation agent did not finalize validate_queries'
+      );
     }
     if (finalizedData.slug !== source.slug) {
-      throw new Error(
+      throw new KIQueryGenerationAgentError(
+        'unexpected_source',
         `KI query generation agent finalized for unexpected source "${finalizedData.slug}"`
       );
     }

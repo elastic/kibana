@@ -1,5 +1,5 @@
 {
-  "sha1": "ab8aea212649faefa310627bb378882b02db68c5",
+  "sha1": "6e705f342c260481473bebdfe276286cf541979b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -55,8 +55,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/management/test/scout/ui/parallel_tests/data_section.spec.ts",
-        "line": 121,
-        "column": 26
+        "line": 123,
+        "column": 11
       }
     },
     {

@@ -370,6 +370,186 @@ describe('nightshift_submit_optimizer_result', () => {
     expect(drainLearnings).toHaveBeenCalledWith('default__conv-1');
   });
 
+  describe('write telemetry', () => {
+    const createTelemetry = () => ({ reportLoaded: jest.fn(), reportWritten: jest.fn() });
+
+    const runWithTelemetry = async ({
+      store,
+      markdown,
+      telemetry,
+      getTelemetry = () => telemetry,
+      getProvenance,
+    }: {
+      store: jest.Mocked<DecisionTreeStore>;
+      markdown: string;
+      telemetry: { reportLoaded: jest.Mock; reportWritten: jest.Mock };
+      getTelemetry?: jest.Mock | (() => typeof telemetry);
+      getProvenance?: () => { conversationId?: string; roundId?: string };
+    }) => {
+      const tool = createSubmitOptimizerResultTool({
+        getSandboxStart: createSandboxStart(markdown).getSandboxStart as never,
+        getStore: () => store,
+        getSpaceId: () => 'default',
+        getTelemetry: getTelemetry as never,
+        getProvenance,
+        logger: loggerMock.create(),
+      });
+      return tool.handler(
+        {
+          symptom_trees: [
+            {
+              tree_id: TREE_ID,
+              file_path: FILE_PATH,
+              evidence_gatherer_metadata: [],
+              merged_nodes: [],
+            },
+          ],
+          traversals: [],
+          summary: 'Merged this run.',
+        },
+        createContext() as never
+      );
+    };
+
+    it("binds telemetry to the investigator's conversation and round, not the reinforcement one", async () => {
+      const telemetry = createTelemetry();
+      const getTelemetry = jest.fn().mockReturnValue(telemetry);
+
+      await runWithTelemetry({
+        store: createStore(),
+        markdown: markdownFor(FULL_TREE),
+        telemetry,
+        getTelemetry,
+        getProvenance: () => ({ conversationId: 'investigator-conv', roundId: 'round-1' }),
+      });
+
+      expect(getTelemetry).toHaveBeenCalledWith('investigator-conv', 'round-1');
+    });
+
+    it('reports a create for a brand new tree', async () => {
+      const telemetry = createTelemetry();
+
+      await runWithTelemetry({
+        store: createStore(),
+        markdown: markdownFor(FULL_TREE),
+        telemetry,
+      });
+
+      expect(telemetry.reportWritten).toHaveBeenCalledWith(['create']);
+    });
+
+    it('reports a reinforce when the edit adds a newly taken edge', async () => {
+      const telemetry = createTelemetry();
+
+      await runWithTelemetry({
+        store: createStore(stored(FULL_TREE)),
+        markdown: markdownFor(FULL_TREE.replace('-->|yes|', '-->|✅ yes|')),
+        telemetry,
+      });
+
+      expect(telemetry.reportWritten).toHaveBeenCalledWith(['reinforce']);
+    });
+
+    it('reports a rejected write when the submission fails guardrails', async () => {
+      const telemetry = createTelemetry();
+
+      await runWithTelemetry({
+        store: createStore(stored(FULL_TREE)),
+        markdown: markdownFor('flowchart TD\n    S1([Checkout latency]) --> E1[Query logs]'),
+        telemetry,
+      });
+
+      expect(telemetry.reportWritten).toHaveBeenCalledWith(['rejected']);
+    });
+
+    describe('rejected counts', () => {
+      const submitOnce = (
+        tool: ReturnType<typeof createSubmitOptimizerResultTool>,
+        symptomTrees: string[]
+      ) =>
+        tool.handler(
+          {
+            symptom_trees: symptomTrees.map((treeId) => ({
+              tree_id: treeId,
+              file_path: FILE_PATH,
+              evidence_gatherer_metadata: [],
+              merged_nodes: [],
+            })),
+            traversals: [],
+            summary: 'Merged this run.',
+          },
+          createContext() as never
+        );
+
+      const createTool = (store: jest.Mocked<DecisionTreeStore>, telemetry: object) =>
+        createSubmitOptimizerResultTool({
+          getSandboxStart: createSandboxStart(markdownFor(FULL_TREE)).getSandboxStart as never,
+          getStore: () => store,
+          getSpaceId: () => 'default',
+          getTelemetry: () => telemetry as never,
+          logger: loggerMock.create(),
+        });
+
+      it('counts each tree of a duplicate submission once', async () => {
+        const telemetry = createTelemetry();
+
+        await submitOnce(createTool(createStore(), telemetry), [TREE_ID, TREE_ID]);
+
+        expect(telemetry.reportWritten).toHaveBeenCalledWith(['rejected']);
+      });
+
+      it('counts a tree that keeps failing once across retries', async () => {
+        const telemetry = createTelemetry();
+        const tool = createTool(createStore(), telemetry);
+
+        await submitOnce(tool, [TREE_ID, TREE_ID]);
+        await submitOnce(tool, [TREE_ID, TREE_ID]);
+
+        expect(telemetry.reportWritten).toHaveBeenNthCalledWith(1, ['rejected']);
+        expect(telemetry.reportWritten).toHaveBeenNthCalledWith(2, []);
+      });
+
+      it('reports a write, not a rejection, when the head was saved but its version is owed', async () => {
+        const telemetry = createTelemetry();
+        const store = createStore();
+        store.commit.mockRejectedValue(versionWriteError());
+
+        await submitOnce(createTool(store, telemetry), [TREE_ID]);
+
+        expect(telemetry.reportWritten).toHaveBeenCalledWith(['create']);
+      });
+    });
+
+    it('reports learnings_only when learnings attach without a structural edit', async () => {
+      const telemetry = createTelemetry();
+      const buffered = [
+        {
+          kind: 'system' as const,
+          tree_id: TREE_ID,
+          category: 'architecture',
+          content: 'Checkout writes through a pool.',
+          keywords: [],
+        },
+      ];
+      const tool = createSubmitOptimizerResultTool({
+        getSandboxStart: createSandboxStart('').getSandboxStart as never,
+        getStore: () => createStore(stored(FULL_TREE)),
+        getSpaceId: () => 'default',
+        getTelemetry: () => telemetry,
+        peekLearnings: jest.fn().mockReturnValue(buffered),
+        drainLearnings: jest.fn().mockReturnValue([]),
+        logger: loggerMock.create(),
+      });
+
+      await tool.handler(
+        { symptom_trees: [], traversals: [], summary: 'Learnings only.' },
+        createContext() as never
+      );
+
+      expect(telemetry.reportWritten).toHaveBeenCalledWith(['learnings_only']);
+    });
+  });
+
   describe('rejections', () => {
     const expectRejected = (result: unknown, reason: RegExp) => {
       const results = (result as { results: Array<{ type: string; data: { message: string } }> })

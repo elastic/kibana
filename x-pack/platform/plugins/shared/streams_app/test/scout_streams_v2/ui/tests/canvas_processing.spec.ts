@@ -24,7 +24,7 @@ const elasticsearchDestination = (id: string) => ({
   name: id,
   type: 'elasticsearch',
   supported_telemetry: ['logs'],
-  config: [{ name: 'index', value: `logs-${id}` }],
+  config: [{ name: 'index', value: `logs-${id.replaceAll('-', '_')}.otel-default` }],
 });
 
 /**

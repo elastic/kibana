@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { applyWikiEdits } from '../wiki/optimize';
 import { createWikiPageStore } from '../wiki/page_store';
@@ -234,6 +235,7 @@ describe('PR 3b write provenance, reinforcementSessionRegistry, and applied_writ
       connectorNames: ['elasticsearch'],
       getSpaceId: () => 'space-1',
       getUsername: () => 'jdoe',
+      analytics: coreMock.createSetup().analytics,
       logger: loggerMock.create(),
     });
     const recordSysTool = tools.find((t) => t.id === 'nightshift_record_system_learning')!;

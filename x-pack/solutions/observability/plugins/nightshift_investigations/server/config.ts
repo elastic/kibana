@@ -74,7 +74,7 @@ export const config: PluginConfigDescriptor<NightshiftInvestigationsConfig> = {
     unused('sandbox', {
       level: 'warning',
       message:
-        '"xpack.nightshift_investigations.sandbox" is no longer used. Save the Elasticsearch connector on the Nightshift investigator agent instead.',
+        '"xpack.nightshift_investigations.sandbox" is no longer used. Save the Elasticsearch connector on the nightshift investigator agent instead.',
     }),
   ],
 };

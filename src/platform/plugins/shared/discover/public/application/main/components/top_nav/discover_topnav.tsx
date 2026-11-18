@@ -87,7 +87,9 @@ export const DiscoverTopNav = ({
   const query = useAppStateSelector((state) => state.query);
   const esqlApproximation = useAppStateSelector((state) => state.esqlApproximation ?? false);
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
-  const { timeRangeAbsolute } = useCurrentTabSelector((tab) => tab.dataRequestParams);
+  const { timeRangeAbsolute, replayCacheLastFetched } = useCurrentTabSelector(
+    (tab) => tab.dataRequestParams
+  );
   const refreshInterval = useCurrentTabSelector((state) => state.globalState.refreshInterval);
   const timeRangeRelative = useCurrentTabSelector((state) => state.globalState.timeRange);
   const filters = useCurrentTabSelector(selectTabCombinedFilters);
@@ -394,6 +396,7 @@ export const DiscoverTopNav = ({
           services.data.search.isBackgroundSearchEnabled &&
           !!services.capabilities.discover_v2.storeSearchSession
         }
+        cachedResultsLoadedAt={replayCacheLastFetched}
         appName="discover"
         indexPatterns={[dataView]}
         onQuerySubmit={onQuerySubmit}

@@ -803,6 +803,7 @@ describe('WorkflowExecutionTelemetryClient', () => {
         eventChainDepth: 2,
         isTestRun: false,
         isManaged: false,
+        runAs: 'user',
         logTriggerEventsEnabled: true,
       });
     });
@@ -1047,6 +1048,34 @@ describe('WorkflowExecutionTelemetryClient', () => {
         hasRetries: true, // Same step ID executed twice
         uniqueStepIdsExecuted: 1,
       });
+    });
+
+    it('should report runAs user without runAsInherited for an execution with no service account', () => {
+      client.reportWorkflowExecutionCompleted({
+        workflowExecution: createMockWorkflowExecution(),
+        stepExecutions: [],
+      });
+
+      const [, eventData] = telemetry.reportEvent.mock.calls[0];
+      expect(eventData).toMatchObject({ runAs: 'user' });
+      expect(eventData).not.toHaveProperty('runAsInherited');
+    });
+
+    it("should report runAs service_account for an execution bound by the workflow's own settings.run_as", () => {
+      client.reportWorkflowExecutionFailed({
+        workflowExecution: createMockWorkflowExecution({
+          status: ExecutionStatus.FAILED,
+          workflowDefinition: {
+            steps: [],
+            settings: { run_as: 'sa-1' },
+          } as Partial<WorkflowYaml> as WorkflowYaml,
+          effectiveIdentity: { type: 'service_account', id: 'sa-1' },
+        }),
+        stepExecutions: [],
+      });
+
+      const [, eventData] = telemetry.reportEvent.mock.calls[0];
+      expect(eventData).toMatchObject({ runAs: 'service_account', runAsInherited: false });
     });
   });
 

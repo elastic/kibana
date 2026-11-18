@@ -22,29 +22,44 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import nightshiftPromoPoster from './nightshift_promo_poster.jpg';
+import nightshiftPromoPosterDark from './nightshift_promo_poster_dark.jpg';
 
-/** Vidyard share id for the Nightshift home-page promo video. */
+/** Vidyard share id for the Nightshift home-page promo video (light mode). */
 export const NIGHTSHIFT_PROMO_VIDEO_ID = 'EU8nJMgSQEZUpkv6Eg9Wck';
+
+/** Vidyard share id for the dark-themed cut of the Nightshift promo video. */
+export const NIGHTSHIFT_PROMO_VIDEO_ID_DARK = 'v3Q5MMmV3p2Mk95PhhT8WM';
 
 const VIDYARD_PLAYER_ORIGIN = 'https://play.vidyard.com';
 
 /** The expanded 16:9 player fills up to this share of the viewport width and height. */
 const EXPANDED_MAX_VIEWPORT_PERCENT = 90;
 
-function buildVidyardPlayerUrl(query: Record<string, string>): string {
+function buildVidyardPlayerUrl(videoId: string, query: Record<string, string>): string {
   const params = new URLSearchParams(query);
-  return `${VIDYARD_PLAYER_ORIGIN}/${NIGHTSHIFT_PROMO_VIDEO_ID}.html?${params.toString()}`;
+  return `${VIDYARD_PLAYER_ORIGIN}/${videoId}.html?${params.toString()}`;
 }
 
-const previewPlayerSrc = buildVidyardPlayerUrl({
-  autoplay: '1',
-  muted: '1',
-  hidden_controls: '1',
+const buildPromoVideoSources = (videoId: string, poster: string) => ({
+  poster,
+  previewSrc: buildVidyardPlayerUrl(videoId, {
+    autoplay: '1',
+    muted: '1',
+    hidden_controls: '1',
+  }),
+  expandedSrc: buildVidyardPlayerUrl(videoId, {
+    autoplay: '1',
+  }),
 });
 
-const expandedPlayerSrc = buildVidyardPlayerUrl({
-  autoplay: '1',
-});
+const lightPromoVideoSources = buildPromoVideoSources(
+  NIGHTSHIFT_PROMO_VIDEO_ID,
+  nightshiftPromoPoster
+);
+const darkPromoVideoSources = buildPromoVideoSources(
+  NIGHTSHIFT_PROMO_VIDEO_ID_DARK,
+  nightshiftPromoPosterDark
+);
 
 const previewAriaLabel = i18n.translate('xpack.nightshift.onboarding.introVideoPreviewAriaLabel', {
   defaultMessage: 'Nightshift introduction video. Click to open video player.',
@@ -66,7 +81,12 @@ const iframeTitle = i18n.translate('xpack.nightshift.onboarding.introVideoIframe
  * click opens an expanded Vidyard player in a modal.
  */
 export function IntroBannerVideo(): React.ReactElement {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, colorMode } = useEuiTheme();
+  const {
+    poster,
+    previewSrc: previewPlayerSrc,
+    expandedSrc: expandedPlayerSrc,
+  } = colorMode === 'DARK' ? darkPromoVideoSources : lightPromoVideoSources;
   const expandedShadow = useEuiShadow('xl');
   const mediaRootRef = useRef<HTMLDivElement>(null);
   const maskRef = useRef<HTMLDivElement>(null);
@@ -157,7 +177,10 @@ export function IntroBannerVideo(): React.ReactElement {
     pointer-events: none;
   `;
 
+  // Match the Vidyard document's (light) color scheme: on a mismatch, browsers paint the
+  // iframe opaque white, which shows as white letterbox bars in Kibana's dark mode.
   const previewIframeStyles = css`
+    color-scheme: light;
     position: absolute;
     inset: 0;
     width: 100%;
@@ -269,7 +292,7 @@ export function IntroBannerVideo(): React.ReactElement {
           }
         }}
       >
-        <img css={posterStyles} src={nightshiftPromoPoster} alt="" aria-hidden={true} />
+        <img css={posterStyles} src={poster} alt="" aria-hidden={true} />
         {showInlinePreview ? (
           <iframe
             css={previewIframeStyles}

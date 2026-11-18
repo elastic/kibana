@@ -26,8 +26,7 @@ export { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 
 /**
  * Default cap on the response body size (bytes) when no per-step limit is supplied.
- * Matches the workflows execution engine default for `max-step-size` to keep behavior
- * consistent across the engine's two HTTP paths (this helper and the `kibana.request` step).
+ * Matches the workflows execution engine default for `max-step-size`.
  */
 const DEFAULT_MAX_RESPONSE_BYTES = 10 * 1024 * 1024;
 

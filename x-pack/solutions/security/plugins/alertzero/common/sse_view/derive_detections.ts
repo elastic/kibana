@@ -330,8 +330,11 @@ const detectionFromIocGroup = <T extends { host?: string; user?: string; timesta
   hasBehaviorHit: boolean
 ): SseDetection => {
   const { first, last } = firstAndLastTimestamp(group.items.map((item) => item.timestamp));
-  const hosts = dedupeDefined(group.items.map((item) => item.host)).slice(0, MAX_NAMES);
-  const users = dedupeDefined(group.items.map((item) => item.user)).slice(0, MAX_NAMES);
+  // Every sampled item is in hand, so the counts are exact even when the name lists are capped.
+  const allHosts = dedupeDefined(group.items.map((item) => item.host));
+  const allUsers = dedupeDefined(group.items.map((item) => item.user));
+  const hosts = allHosts.slice(0, MAX_NAMES);
+  const users = allUsers.slice(0, MAX_NAMES);
   const iocType = asHuntIocType(group.type);
   return {
     id: buildIocDetectionId(group.type, group.value),
@@ -340,8 +343,8 @@ const detectionFromIocGroup = <T extends { host?: string; user?: string; timesta
     field: group.field,
     basis: classifyBasis([{ type: group.type, value: group.value }], hasBehaviorHit),
     matched_on: [{ field: group.field, value: group.value }],
-    ...(hosts.length > 0 ? { hosts, host_count: hosts.length } : {}),
-    ...(users.length > 0 ? { users, user_count: users.length } : {}),
+    ...(hosts.length > 0 ? { hosts, host_count: allHosts.length } : {}),
+    ...(users.length > 0 ? { users, user_count: allUsers.length } : {}),
     total: group.items.length,
     ...(first ? { first_seen: first } : {}),
     ...(last ? { last_seen: last } : {}),
@@ -390,7 +393,12 @@ const buildIocDetections = (
   };
 };
 
-/** One behavior detection per Tier 2 behavior whose execution actually hit. */
+/**
+ * One behavior detection per Tier 2 behavior whose execution actually hit. Tier 2
+ * retains only the first names it saw (`affected_hosts` / `affected_users` are capped)
+ * and flags the cap with `affected_*_truncated`; the detection carries that flag so
+ * the retained list length reads as a lower bound ("20+ hosts"), not an exact count.
+ */
 const detectionsFromBehaviors = (
   behaviors: readonly SseTier2Behavior[],
   iocsForBasis: readonly ClassifyBasisIoc[],
@@ -410,7 +418,9 @@ const detectionsFromBehaviors = (
         basis: classifyBasis(iocsForBasis, true),
         matched_on: [],
         ...(hosts.length > 0 ? { hosts, host_count: hosts.length } : {}),
+        ...(hosts.length > 0 && behavior.affected_hosts_truncated ? { hosts_truncated: true } : {}),
         ...(users.length > 0 ? { users, user_count: users.length } : {}),
+        ...(users.length > 0 && behavior.affected_users_truncated ? { users_truncated: true } : {}),
         total: behavior.execution?.row_count ?? 0,
       };
     });

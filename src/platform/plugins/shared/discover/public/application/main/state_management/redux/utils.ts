@@ -25,6 +25,7 @@ import type {
   TabActionPayload,
 } from './internal_state';
 import type { DiscoverInternalState, TabState } from './types';
+import type { RuntimeStateManager } from './runtime_state';
 
 // For some reason if this is not explicitly typed, TypeScript fails with the following error:
 // TS7056: The inferred type of this node exceeds the maximum length the compiler will serialize. An explicit type annotation is needed.
@@ -173,4 +174,22 @@ export const extractEsqlVariables = (
   }, []);
 
   return variables;
+};
+
+/** Starts a request once per Discover instance and returns the same promise to later callers. */
+export const getMemoizedRequest = <T>(
+  requests: WeakMap<RuntimeStateManager, Promise<T>>,
+  runtimeStateManager: RuntimeStateManager,
+  startRequest: () => Promise<T>
+): Promise<T> => {
+  const existingRequest = requests.get(runtimeStateManager);
+
+  if (existingRequest) {
+    return existingRequest;
+  }
+
+  const request = startRequest();
+  requests.set(runtimeStateManager, request);
+
+  return request;
 };

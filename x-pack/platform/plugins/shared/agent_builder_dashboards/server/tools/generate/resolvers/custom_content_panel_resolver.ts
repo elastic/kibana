@@ -8,7 +8,6 @@
 import { buildCustomContentConfig } from '@kbn/agent-builder-visualizations-server';
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
-  readEsqlQuery,
   toEsqlQueryState,
   type CustomContentState,
 } from '@kbn/custom-content-common';
@@ -17,6 +16,7 @@ import {
   type CustomContentPanelResolutionRequest,
   type PanelContentAttempt,
 } from '@kbn/dashboard-agent-authoring';
+
 import type { VisPanelResolverDeps } from './vis_panel_resolver';
 
 /**
@@ -32,18 +32,15 @@ export const createCustomContentPanelResolver = ({
   esClient,
 }: VisPanelResolverDeps) => {
   return async (request: CustomContentPanelResolutionRequest): Promise<PanelContentAttempt> => {
-    const { nlQuery, index, esql, hasData, existingPanel, resolveEsqlVariables } = request;
-    const regenerateESQL = request.existingPanel ? request.regenerateESQL : undefined;
+    const { nlQuery, dataQueries, removeAllQueries, existingPanel, resolveEsqlVariables } = request;
     try {
       const existing = existingPanel?.config as CustomContentState | undefined;
-      const { esqlQuery, template } = await buildCustomContentConfig({
+      const { esqlQueries, template, height } = await buildCustomContentConfig({
         nlQuery,
-        index,
-        esql,
-        hasData,
-        regenerateESQL,
+        dataQueries,
+        removeAllQueries,
         resolveEsqlVariables,
-        existing: existing && { esqlQuery: readEsqlQuery(existing), template: existing.template },
+        existing: existing && { esqlQueries: existing.esql_query, template: existing.template },
         modelProvider,
         logger,
         events,
@@ -53,8 +50,13 @@ export const createCustomContentPanelResolver = ({
         type: 'success',
         panelContent: {
           type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
-          config: { ...existing, esql_query: toEsqlQueryState(esqlQuery), template },
+          config: {
+            ...existing,
+            esql_query: toEsqlQueryState(esqlQueries),
+            template,
+          },
         },
+        heightHint: height,
       };
     } catch (error) {
       return { type: 'failure', error: getErrorMessage(error) };

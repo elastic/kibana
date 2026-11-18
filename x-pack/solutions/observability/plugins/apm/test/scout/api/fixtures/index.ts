@@ -12,11 +12,22 @@ export const apiTest = mergeTests(baseApiTest, synthtraceFixture);
 
 export { testData } from '../../shared';
 export {
-  serviceMapStats,
+  COMMON_HEADERS,
+  SERVICE_GROUPING_MIN_SERVICES,
+  SERVICE_MAP_GROUPING_END_DATE,
+  SERVICE_MAP_GROUPING_ENVIRONMENT,
+  SERVICE_MAP_GROUPING_NOT_CONNECTED,
+  SERVICE_MAP_GROUPING_SERVICES,
+  SERVICE_MAP_GROUPING_SHARED,
+  SERVICE_MAP_GROUPING_START_DATE,
+  SERVICE_MAP_GROUPING_TEAMS,
   SERVICE_MAP_STATS_BACKEND,
   SERVICE_MAP_STATS_DATA,
   SERVICE_MAP_STATS_END_DATE,
   SERVICE_MAP_STATS_FRONTEND,
   SERVICE_MAP_STATS_START_DATE,
   SERVICE_MAP_STATS_WORKER,
-} from './synthtrace/service_map_stats';
+} from './constants';
+export { getServiceMap, toSourceQuery } from './helpers';
+export { serviceMapGrouping } from './synthtrace/service_map_grouping';
+export { serviceMapStats } from './synthtrace/service_map_stats';

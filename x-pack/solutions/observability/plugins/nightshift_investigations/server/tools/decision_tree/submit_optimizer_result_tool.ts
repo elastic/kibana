@@ -49,6 +49,7 @@ import {
   type StoredTreeCounts,
 } from '../../decision_trees/store';
 import type { AppliedWriteRecord, WriteProvenance } from '../../investigation_round';
+import type { DecisionTreeTelemetry, DecisionTreeWriteAction } from '../../telemetry';
 import {
   getConversationId,
   getSandboxCaller,
@@ -191,6 +192,20 @@ interface SubmissionOutcome {
   createdTree?: boolean;
 }
 
+/** Maps an applied write onto the event's action; writes the event does not describe map to none. */
+const toWriteAction = ({
+  store,
+  action,
+}: AppliedWriteRecord): DecisionTreeWriteAction | undefined => {
+  if (store !== 'decision_tree' && store !== 'decision_tree_learning') {
+    return undefined;
+  }
+  if (action === 'attach_learnings') {
+    return 'learnings_only';
+  }
+  return action === 'create' || action === 'update' || action === 'reinforce' ? action : undefined;
+};
+
 /** Which parts of a traversal this conversation has not counted yet. */
 interface TraversalCounting {
   visit: boolean;
@@ -213,6 +228,8 @@ interface RetryState {
   pendingVersions: Map<string, PendingVersionWrite>;
   /** Tree slugs an earlier attempt created; they stay tentative for the rest of the turn. */
   created: Set<string>;
+  /** Tree slugs already reported as rejected, so retries of the same tree count once. */
+  reportedRejections: Set<string>;
 }
 
 /** A conversation that has not retried for this long is not coming back. */
@@ -227,6 +244,7 @@ const freshRetryState = (): RetryState => ({
   persistedLearnings: new Map(),
   pendingVersions: new Map(),
   created: new Set(),
+  reportedRejections: new Set(),
 });
 
 const provenanceFieldsOf = (
@@ -278,6 +296,7 @@ export const createSubmitOptimizerResultTool = ({
   getUsername,
   peekLearnings,
   drainLearnings,
+  getTelemetry,
   getProvenance,
   onAppliedWrite,
   logger,
@@ -291,6 +310,8 @@ export const createSubmitOptimizerResultTool = ({
   peekLearnings?: (conversationId: string) => LearningRecord[];
   /** Takes and clears the learnings this conversation recorded this turn. */
   drainLearnings?: (conversationId: string) => LearningRecord[];
+  /** Binds the write events to the investigator's conversation and round, not the reinforcement one. */
+  getTelemetry?: (conversationId?: string, roundId?: string) => DecisionTreeTelemetry;
   getProvenance?: (conversationId: string) => WriteProvenance | undefined;
   onAppliedWrite?: (conversationId: string, write: AppliedWriteRecord) => void;
   logger: Logger;
@@ -365,9 +386,19 @@ export const createSubmitOptimizerResultTool = ({
       const store = getStore(context.esClient.asCurrentUser, context.request);
       const author = getUsername?.(context.request) || 'system';
       const provenance = getProvenance?.(conversationId);
-      const recordWrite = onAppliedWrite
-        ? (write: AppliedWriteRecord) => onAppliedWrite(conversationId, write)
-        : undefined;
+      // `rawConversationId` is the throwaway reinforcement conversation; the provenance carries the
+      // investigator's ids, which are the ones the event must join back to.
+      const telemetry = getTelemetry?.(provenance?.conversationId, provenance?.roundId);
+      // Every applied write passes through here, retries included, so the events count what was
+      // actually written rather than what each attempt tried.
+      const writeActions: DecisionTreeWriteAction[] = [];
+      const recordWrite = (write: AppliedWriteRecord): void => {
+        const action = toWriteAction(write);
+        if (action) {
+          writeActions.push(action);
+        }
+        onAppliedWrite?.(conversationId, write);
+      };
       // Peek until every submission is accepted. Draining first would drop this turn's learnings
       // when the agent has to fix a rejected file and call submit again.
       // A slot is pending until the head holds the turn's latest learning for it: a retry that
@@ -641,6 +672,22 @@ export const createSubmitOptimizerResultTool = ({
 
       const rejected = outcomes.filter((outcome) => outcome.status === 'rejected');
       const persisted = outcomes.filter((outcome) => outcome.status === 'persisted');
+      // A rejection names trees, not attempts: a duplicate-submission outcome lists several, a retry
+      // repeats one, and a tree whose head was saved but whose version is still owed was written.
+      const newlyRejected = new Set<string>();
+      for (const outcome of rejected) {
+        for (const treeId of outcome.tree_id.split(', ')) {
+          const slug = symptomSlugFromTreeId(treeId);
+          if (!state.pendingVersions.has(slug) && !state.reportedRejections.has(slug)) {
+            newlyRejected.add(slug);
+          }
+        }
+      }
+      newlyRejected.forEach((slug) => state.reportedRejections.add(slug));
+      telemetry?.reportWritten([
+        ...writeActions,
+        ...Array.from(newlyRejected, (): DecisionTreeWriteAction => 'rejected'),
+      ]);
       retryStates.delete(conversationId);
       if (rejected.length > 0) {
         retryStates.set(conversationId, { ...state, updatedAt: Date.now() });

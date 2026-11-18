@@ -30,6 +30,7 @@ import { DisabledPrompt } from '../../components/app/service_map/disabled_prompt
 import { TimeoutPrompt } from '../../components/app/service_map/timeout_prompt';
 import { useServiceMap } from '../../components/app/service_map/use_service_map';
 import { useServiceMapBadges } from '../../components/app/service_map/use_service_map_badges';
+import { useServiceMapClosedGroups } from '../../components/app/service_map/use_service_map_closed_groups';
 import { ServiceMapGraph } from '../../components/app/service_map/graph';
 import { ContextualServiceMapGraph } from '../../components/app/service_map/contextual_map/contextual_service_map_graph';
 import {
@@ -320,13 +321,23 @@ export function ServiceMapEmbeddable({
     onEmptyStateChange(data.nodes.length === 0);
   }, [onEmptyStateChange, status, data.nodes.length]);
 
-  const { nodes: nodesForGraph, status: badgesStatus } = useServiceMapBadges({
+  const { nodes: nodesWithBadges, status: badgesStatus } = useServiceMapBadges({
     environment,
     start: badgesStart,
     end: badgesEnd,
     kuery: badgesKuery ?? kuery,
     nodes: data.nodes,
     nodesStatus: status,
+  });
+
+  const {
+    nodes: nodesForGraph,
+    edges: edgesForGraph,
+    countLine: groupingCountLine,
+  } = useServiceMapClosedGroups({
+    nodes: nodesWithBadges,
+    edges: data.edges,
+    serviceGrouping: useContextualMap ? undefined : data.serviceGrouping,
   });
 
   // Strip badge-dependent filters (alert/SLO/anomaly) until badge data resolves. On failure,
@@ -507,9 +518,11 @@ export function ServiceMapEmbeddable({
           />
         )}
         {useContextualMap ? (
+          // Focused hop map stays one node per service. Closed groups would hide the focal
+          // service and break expand/collapse, which keys off service ids.
           <ContextualServiceMapGraph
             height="100%"
-            nodes={isLoading ? [] : nodesForGraph}
+            nodes={isLoading ? [] : nodesWithBadges}
             edges={isLoading ? [] : data.edges}
             focalServiceId={serviceName!}
             baseMaxHops={baseMaxHops}
@@ -535,7 +548,7 @@ export function ServiceMapEmbeddable({
           <ServiceMapGraph
             height="100%"
             nodes={isLoading ? [] : nodesForGraph}
-            edges={isLoading ? [] : data.edges}
+            edges={isLoading ? [] : edgesForGraph}
             serviceName={serviceName}
             highlightedServiceNames={highlightedServiceNames}
             environment={environment}
@@ -555,6 +568,7 @@ export function ServiceMapEmbeddable({
             viewFilters={viewFiltersForGraph}
             onViewFiltersChange={onViewFiltersChange}
             flyoutOptions={flyoutOptions}
+            groupingCountLine={isLoading ? undefined : groupingCountLine}
           />
         )}
       </div>

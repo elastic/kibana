@@ -12,6 +12,7 @@ import type {
   AgentTypeDefinition,
 } from '@kbn/agent-builder-server/agents';
 import { platformSignificantEventsTools } from '@kbn/agent-builder-common';
+import type { AgentCapabilities } from '@kbn/agent-builder-common';
 import type { Logger } from '@kbn/core/server';
 import {
   SET_HYPOTHESES_TOOL_ID,
@@ -44,13 +45,22 @@ export const SANDBOX_TOOL_IDS = [
   SANDBOX_WRITE_FILE_TOOL_ID,
 ] as const;
 
+/**
+ * Built-in Agent Builder features every Nightshift agent type turns off. The agents reach data
+ * through the sandbox and their own tools, so the API tools (`describe_api`, `describe_api_type`,
+ * `execute_api` and `discover_apis`) only add tool definitions.
+ */
+export const NIGHTSHIFT_AGENT_CAPABILITIES: AgentCapabilities = {
+  api_tools: { enabled: false },
+};
+
 /** The agentic investigations tools earlier versions of the agent recorded findings with. */
 export const INVESTIGATION_TOOL_IDS = [SET_IMPACT_TOOL_ID, SET_HYPOTHESES_TOOL_ID] as const;
 
 export const INVESTIGATION_AGENT_NAME = 'Nightshift Investigator';
 export const INVESTIGATION_AGENT_DESCRIPTION =
   'Answers an arbitrary investigation question by reasoning from cluster telemetry it queries ' +
-  'inside a sandbox and, when Wiki is enabled, records what it learns in the Nightshift Wiki.';
+  'inside a sandbox and, when Wiki is enabled, records what it learns in the nightshift Wiki.';
 
 const SEMANTIC_MEMORY_SECTION = `
 **USING MEMORIES**
@@ -174,7 +184,8 @@ export type NightshiftAgentTypeOptions = Omit<
  * Memory hooks and the space's custom context. Only the instructions differ between types.
  * With `standalone`, the agent lists only its own tools, the significant event search tool and
  * the Slack read tool.
- * Agent Builder's own prompt and internal tools still apply to it.
+ * Agent Builder's own prompt and internal tools still apply to it, except the API tools, which
+ * `NIGHTSHIFT_AGENT_CAPABILITIES` turns off.
  */
 export const buildNightshiftAgentConfiguration = ({
   instructions: agentInstructions,
@@ -225,6 +236,7 @@ export const buildNightshiftAgentConfiguration = ({
         },
       ],
       enable_elastic_capabilities: false,
+      capabilities: NIGHTSHIFT_AGENT_CAPABILITIES,
       connector_ids: [],
       ...(() => {
         // Decision trees are no longer a separate before-agent hook: they hydrate as a third

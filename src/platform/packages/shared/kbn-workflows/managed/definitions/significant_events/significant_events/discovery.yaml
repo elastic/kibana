@@ -8,6 +8,28 @@ settings:
     key: significant-events-discovery
     strategy: drop
     max: 1
+  # Reports the failed run for telemetry (nightshift-program#1956); the engine restores the error
+  # afterwards, so the workflow still fails. Never reached by a step that declares its own
+  # `on-failure`, a cancelled run, or the workflow timeout. The engine leaves `error` empty in a
+  # fallback, so the error is read from the steps that can fail the run; at most one has failed.
+  on-failure:
+    fallback:
+      - name: report_discovery_failed
+        type: kibana.request
+        with:
+          method: POST
+          path: '/s/{{ workflow.spaceId }}/internal/streams/significant_events/discovery/_completed'
+          body:
+            workflow_execution_id: '{{ execution.id }}'
+            parent_workflow_execution_id: '{{ parent.executionId }}'
+            outcome: failed
+            error_type: '{{ steps.run_discovery_agent.error.type }}'
+            error_message: '${{ steps.run_discovery_agent.error.message | default: steps.get_written_rules_backlog.error.message | default: steps.resolve_model.error.message | default: steps.classify_detections.error.message | default: "" | truncate: 1024, "" }}'
+          headers:
+            x-elastic-internal-origin: 'kibana'
+        timeout: '10s'
+        on-failure:
+          continue: true
 tags:
   - observability
   - streams
@@ -122,6 +144,21 @@ consts:
   DETECTIONS_INDEX: '.significant_events-detections'
 
 steps:
+  # `discovery-triggered` only covers manual runs: scheduled review calls this workflow directly.
+  - name: report_discovery_started
+    type: kibana.request
+    with:
+      method: POST
+      path: '/s/{{ workflow.spaceId }}/internal/streams/significant_events/discovery/_started'
+      body:
+        workflow_execution_id: '{{ execution.id }}'
+        parent_workflow_execution_id: '{{ parent.executionId }}'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+    timeout: '10s'
+    on-failure:
+      continue: true
+
   - name: bootstrap_cleanup_workflow
     type: kibana.request
     with:
@@ -150,6 +187,23 @@ steps:
     type: if
     condition: '${{ steps.check_budget.output.allowed == false }}'
     steps:
+      - name: report_discovery_budget_denied
+        type: kibana.request
+        with:
+          method: POST
+          path: '/s/{{ workflow.spaceId }}/internal/streams/significant_events/discovery/_completed'
+          body:
+            workflow_execution_id: '{{ execution.id }}'
+            parent_workflow_execution_id: '{{ parent.executionId }}'
+            outcome: completed
+            has_work: false
+            processed_count: 0
+            budget_denied: true
+          headers:
+            x-elastic-internal-origin: 'kibana'
+        timeout: '10s'
+        on-failure:
+          continue: true
       - name: output_budget_denied
         type: workflow.output
         with:
@@ -329,6 +383,26 @@ steps:
     type: if
     condition: '${{ steps.compute_has_work.output.hasWork == false }}'
     steps:
+      - name: report_discovery_no_work
+        type: kibana.request
+        with:
+          method: POST
+          path: '/s/{{ workflow.spaceId }}/internal/streams/significant_events/discovery/_completed'
+          body:
+            workflow_execution_id: '{{ execution.id }}'
+            parent_workflow_execution_id: '{{ parent.executionId }}'
+            outcome: completed
+            has_work: false
+            processed_count: '${{ steps.compute_batch_size.output.processedCount | default: 0 }}'
+            skipped_count: '${{ steps.classify_detections.output.skipped_count | default: 0 }}'
+            held_back_count: '${{ steps.classify_detections.output.held_back_count | default: 0 }}'
+            needs_agent_count: '${{ steps.classify_detections.output.needs_agent_count | default: 0 }}'
+            classifier_failed: '${{ steps.classify_detections.error != null or steps.classify_detections.output.failed == true }}'
+          headers:
+            x-elastic-internal-origin: 'kibana'
+        timeout: '10s'
+        on-failure:
+          continue: true
       - name: output_no_detections
         type: workflow.output
         with:
@@ -361,6 +435,8 @@ steps:
     product-feature: 'nightshift'
     create-conversation: true
     public-conversation: true
+    # Below the workflow timeout: only a step timeout reaches the failure report.
+    timeout: '40m'
     with:
       message: |
         ## Detection batch
@@ -385,8 +461,6 @@ steps:
               get stamped as processed. Full discovery data is written via the
               events_write tool — this is a compact summary only.
         required: [written_rule_uuids]
-    on-failure:
-      continue: false
 
   - name: compute_written_rule_uuids
     # Normalise the agent's self-reported summary into a plain array for the stamping gate below.
@@ -439,8 +513,6 @@ steps:
                 - range:
                     '@timestamp':
                       gte: '{{ inputs.detectionLookback }}'
-        on-failure:
-          continue: false
 
       - name: foreach_stamp_processed
         type: foreach
@@ -463,6 +535,27 @@ steps:
             on-failure:
               continue: true
 
+  - name: report_discovery_completed
+    type: kibana.request
+    with:
+      method: POST
+      path: '/s/{{ workflow.spaceId }}/internal/streams/significant_events/discovery/_completed'
+      body:
+        workflow_execution_id: '{{ execution.id }}'
+        parent_workflow_execution_id: '{{ parent.executionId }}'
+        outcome: completed
+        has_work: true
+        processed_count: '${{ steps.compute_batch_size.output.processedCount | default: 0 }}'
+        skipped_count: '${{ steps.classify_detections.output.skipped_count | default: 0 }}'
+        held_back_count: '${{ steps.classify_detections.output.held_back_count | default: 0 }}'
+        needs_agent_count: '${{ steps.classify_detections.output.needs_agent_count | default: 0 }}'
+        written_rule_count: '${{ steps.count_written_rules.output.writtenCount | default: 0 }}'
+        classifier_failed: '${{ steps.classify_detections.error != null or steps.classify_detections.output.failed == true }}'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+    timeout: '10s'
+    on-failure:
+      continue: true
   - name: output_result
     type: workflow.output
     with:
