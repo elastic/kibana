@@ -1669,6 +1669,35 @@ describe('actions schemas', () => {
         }).toThrow(`[parameters.export]: is not valid with agent type of ${agentType}`);
       }
     );
+
+    it('should reject `export` together with `paths`', () => {
+      expect(() => {
+        EndpointActionGetFileSchema.body.validate({
+          agent_type: 'endpoint',
+          endpoint_ids: ['endpoint_id'],
+          parameters: { paths: ['/one', '/two'], export: 'azure-1' },
+        });
+      }).toThrow('[parameters.export]: export supports a single path');
+    });
+
+    it('should reject `export` together with a single-entry `paths`', () => {
+      expect(() => {
+        EndpointActionGetFileSchema.body.validate({
+          endpoint_ids: ['endpoint_id'],
+          parameters: { paths: ['/one'], export: 'azure-1' },
+        });
+      }).toThrow('[parameters.export]: export supports a single path');
+    });
+
+    it('should accept `export` together with `path`', () => {
+      expect(() => {
+        EndpointActionGetFileSchema.body.validate({
+          agent_type: 'endpoint',
+          endpoint_ids: ['endpoint_id'],
+          parameters: { path: '/one', export: 'azure-1' },
+        });
+      }).not.toThrow();
+    });
   });
 
   describe('maxLength bounds', () => {
