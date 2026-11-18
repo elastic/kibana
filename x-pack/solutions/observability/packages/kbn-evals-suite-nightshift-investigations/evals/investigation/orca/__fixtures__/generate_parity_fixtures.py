@@ -11,15 +11,17 @@ fixtures were generated).
 --synthetic renders the hand-written rubrics in `synthetic_rubrics.json` and writes `parity.json`
 next to this script, which `check_prediction.test.ts` reads. No ORCA ground truth is committed.
 
---harbor renders ORCA's real rubrics: one task per rubric set, plus three real controls, and writes
-the fixture to <out.json>. Keep it outside the repo and point the test at it:
+--harbor renders ORCA's real rubrics: one task per rubric set, plus every control, and writes the
+fixture to <out.json>. Keep it outside the repo and point the test at it:
   ORCA_PARITY_FIXTURES=<out.json> node scripts/jest <path to check_prediction.test.ts>
 """
 
+import asyncio
 import hashlib
 import importlib.util
 import json
 import sys
+import types
 from pathlib import Path
 
 import tabulate
@@ -56,16 +58,25 @@ Checkout fails → users cannot pay.
 """
 
 
-def control_prompt(expected):
-    """`_judge_control`'s prompt, without the LLM call."""
-    margin = cp.timedelta(minutes=cp.CONTROL_QUIET_WINDOW_MARGIN_MIN)
-    qstart, qend = expected.get("quiet_window_start"), expected.get("quiet_window_end")
-    return cp.JUDGE_PROMPT_CONTROL.format(
-        current_time=expected["current"],
-        quiet_window_start=(cp.datetime.fromisoformat(qstart) + margin).isoformat() if qstart else "null",
-        quiet_window_end=(cp.datetime.fromisoformat(qend) - margin).isoformat() if qend else "null",
-        predictions=REPORT,
-    )
+class StubClient:
+    """Answers the verifier's one LLM call with a fixed judge answer, so `cp.judge` runs as is."""
+
+    def __init__(self, answer=None):
+        self.responses = self
+        self.answer = answer
+
+    async def create(self, **_):
+        assert self.answer is not None, "the verifier called the judge where no call was expected"
+        return types.SimpleNamespace(output_text=json.dumps(self.answer), usage=None)
+
+
+def judged(expected, report, rubrics=(), answer=None):
+    """`cp.judge`'s result: its prompt, mode and verdicts, with the judge answering `answer`."""
+    return asyncio.run(cp.judge(StubClient(answer), expected, report, list(rubrics)))
+
+
+def control_answer(claims):
+    return {"claims_incident_in_quiet_window": claims, "reasoning": "stub"}
 
 
 def verdict(flag, score, match=False, metrics=(), logs=(), traces=()):
@@ -88,23 +99,42 @@ NESTED_CASES = [
     ("llm_judge", {"rubrics": [verdict("a", 3, True), verdict("b", 1, False, (), ((False, True),))]}),
     ("llm_judge", {"rubrics": [verdict("a", 2, True), verdict("b", 2, True, (True,))]}),
     ("llm_judge", {"rubrics": [verdict("a", 0), verdict("b", 1)]}),
-    ("empty_report", {"rubrics": [verdict("a", 0), verdict("b", 0)]}),
-    ("no_incident_llm_judge", {"rubrics": [verdict("(no_incident)", 3)]}),
+    # Matches that ignore the schema: Python's truthiness reads empty containers as false.
+    ("llm_judge", {"rubrics": [verdict("a", " 2 ", [], ([], {}), (({"x": 1}, [0]),), (([1], ""),)) | {"feature_flag_match": [0]}]}),
 ]
 
 
 def fixture(rubrics, sets, controls, keep_prompt):
     incident = []
+    cases = list(NESTED_CASES)
     for ids in sets:
         # The verifier loads `sorted(rubrics_dir.glob("*.json"))`, so the order is by file name.
-        prompt = cp.build_judge_prompt([rubrics[i] for i in sorted(ids, key=lambda i: i + ".json")], REPORT)
-        entry = {"event_ids": list(ids), "sha256": hashlib.sha256(prompt.encode("utf-8")).hexdigest()}
+        ordered = [rubrics[i] for i in sorted(ids, key=lambda i: i + ".json")]
+        prompt = cp.build_judge_prompt(ordered, REPORT)
+        empty = judged({"events": [{"event_id": i} for i in ids]}, " \n", ordered)
+        entry = {
+            "event_ids": list(ids),
+            "sha256": hashlib.sha256(prompt.encode("utf-8")).hexdigest(),
+            "empty_report": empty["nested"],
+        }
         if keep_prompt(ids):
             entry["prompt"] = prompt
         incident.append(entry)
+        cases.append((empty["mode"], empty["nested"]))
+    control = []
+    for expected in controls:
+        result = judged(expected, REPORT, answer=control_answer(False))
+        control.append({"expected": expected, "prompt": result["judge_prompt"]})
+    verdicts = {
+        "clear": judged(controls[0], REPORT, answer=control_answer(False)),
+        "claims": judged(controls[0], REPORT, answer=control_answer(True)),
+        "empty": judged(controls[0], " \n"),
+    }
+    cases += [(verdict["mode"], verdict["nested"]) for verdict in verdicts.values()]
     aggregates = []
-    for mode, nested in NESTED_CASES:
+    for mode, nested in cases:
         agg = cp.aggregate_judge_response(nested, mode=mode)
+        # The verifier's `main` computes the reward inline, from the same aggregate.
         reward = (agg["rca_depth"] or 0.0) / 3.0
         aggregates.append({"mode": mode, "nested": nested, "aggregate": agg, "rewards": cp.build_rewards(agg, reward)})
     return {
@@ -116,7 +146,8 @@ def fixture(rubrics, sets, controls, keep_prompt):
         "incident_schema": cp.build_judge_output_schema([]),
         "control_schema": cp.CONTROL_OUTPUT_SCHEMA,
         "incident": incident,
-        "control": [{"expected": expected, "prompt": control_prompt(expected)} for expected in controls],
+        "control": control,
+        "control_verdicts": {name: verdict["nested"] for name, verdict in verdicts.items()},
         "aggregates": aggregates,
     }
 
@@ -153,8 +184,7 @@ elif mode == "--harbor":
             data = json.loads(path.read_text())
             assert rubrics.setdefault(path.stem, data) == data, path
         sets.setdefault(tuple(path.stem for path in paths), task.name)
-    picked = [next(c for c in controls if "quiet_window_start" in c), next(c for c in controls if "quiet_window_start" not in c)]
-    write(out, fixture(rubrics, sorted(sets), picked, lambda _: False))
+    write(out, fixture(rubrics, sorted(sets), controls, lambda _: False))
     print(f"{len(rubrics)} rubrics, {len(sets)} rubric sets, {len(controls)} controls -> {out}")
 else:
     sys.exit(__doc__)

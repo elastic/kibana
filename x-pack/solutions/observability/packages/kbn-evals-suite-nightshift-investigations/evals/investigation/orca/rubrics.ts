@@ -7,22 +7,33 @@
 
 import assert from 'assert';
 import { createHash } from 'crypto';
-import stringify from 'safe-stable-stringify';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { EvalsClient } from '@kbn/evals';
 import type { InvestigationExample } from '../types';
 import type { OrcaExpected, OrcaRubric } from './check_prediction';
 
+/** A Golden dataset of ORCA rubrics, pinned by identity, size and content. */
+export interface OrcaRubricsRelease {
+  readonly id: string;
+  readonly name: string;
+  readonly examples: number;
+  readonly sha256: string;
+}
+
 /**
  * ORCA's 32 rubric files (CC BY 4.0, the ORCA-bench authors), one example per event id: input
  * `{event_id}`, output `{rubric}`. Tasks reference them through `orca_expected.events[].event_id`.
+ *
+ * The port renders only the rubric shapes these 32 hold, so bump `sha256` only after the parity
+ * test passes against the new rubrics with `ORCA_PARITY_FIXTURES` set (see
+ * `__fixtures__/generate_parity_fixtures.py`): that run checks the fixture's rubrics hash to it.
  */
-export const ORCA_RUBRICS_RELEASE = {
+export const ORCA_RUBRICS_RELEASE: OrcaRubricsRelease = {
   id: '61ed5e46-7734-53a3-8396-f01ab4c47454',
   name: 'nightshift/orca-bench-rubrics-v1',
   examples: 32,
-  sha256: '64182e05c8e58756b23e3b2a7d00574ca6c763ce13d59bc9c1b9c3814247be28',
-} as const;
+  sha256: '6f02f19ae6ec61dfd92d5a5e838737d9eaa4fc3421e149e65c15fda4050ee6d6',
+};
 
 const rubricExamplesSchema = lazySchema(() =>
   z.array(
@@ -33,20 +44,21 @@ const rubricExamplesSchema = lazySchema(() =>
   )
 );
 
-/** Identifies the rubric set's content, independent of example order and object-key order. */
+/**
+ * Identifies the rubric set's content, independent of example order. Object-key order counts: the
+ * judge prompt renders labels and attributes in the order the rubric file lists them.
+ */
 export const getOrcaRubricsHash = (rubrics: ReadonlyMap<string, OrcaRubric>): string => {
   const rows = [...rubrics]
     .map(([eventId, rubric]) => ({ event_id: eventId, rubric }))
     .sort((left, right) => (left.event_id < right.event_id ? -1 : 1));
-  const serialized = stringify(rows);
-  assert(serialized, 'Cannot serialize the ORCA rubrics');
-  return createHash('sha256').update(serialized).digest('hex');
+  return createHash('sha256').update(JSON.stringify(rows)).digest('hex');
 };
 
 /** Fetches the pinned rubric release from Golden, keyed by event id, and checks its content. */
 export const loadOrcaRubrics = async (
   client: Pick<EvalsClient, 'getDatasetByName'>,
-  release: typeof ORCA_RUBRICS_RELEASE = ORCA_RUBRICS_RELEASE
+  release: OrcaRubricsRelease = ORCA_RUBRICS_RELEASE
 ): Promise<ReadonlyMap<string, OrcaRubric>> => {
   const dataset = await client.getDatasetByName(release.name);
   assert(dataset, `ORCA rubrics ${release.name} are missing from Golden`);
@@ -82,13 +94,21 @@ const expectedSchema = lazySchema(() =>
 
 /**
  * ORCA's ground truth for an example, its `tests/expected.json` as `metadata.orca_expected`.
- * Undefined for a task without one (the private medium tasks in the sampled 50).
+ * Undefined for a task without one (the private medium tasks in the sampled 50); throws on one that
+ * is malformed, so a broken task is never graded as a private one.
  */
 export const getOrcaExpected = (
   metadata: InvestigationExample['metadata']
 ): OrcaExpected | undefined => {
-  const parsed = expectedSchema.safeParse(metadata.orca_expected);
-  return parsed.success ? parsed.data : undefined;
+  const { orca_expected: expected } = metadata;
+  if (expected === undefined) return undefined;
+  const parsed = expectedSchema.safeParse(expected);
+  if (!parsed.success) {
+    throw new Error(
+      `ORCA task ${String(metadata.case_id)} has malformed orca_expected: ${parsed.error.message}`
+    );
+  }
+  return parsed.data;
 };
 
 /**

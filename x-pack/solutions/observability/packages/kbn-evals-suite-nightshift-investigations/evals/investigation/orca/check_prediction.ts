@@ -7,24 +7,21 @@
 
 /* @notice
  * The ORCA grader port in @kbn/evals-suite-nightshift-investigations (`orca/check_prediction.ts`)
- * and its report instructions (`orca/report_prompt/orca_instructions.text`) are adapted from the
- * ORCA benchmark's public Harbor dataset `orca-bench/orca-bench`
- * (https://hub.harborframework.com/datasets/orca-bench/orca-bench): the verifier
- * `tests/check_prediction.py` and the task instructions `instruction.md`, from "ORCA: How Ready Are
- * Language Model Agents for Oncall?" by Albert Gong, Kyuseong Choi, Abhineet Agarwal, Jason
- * Schechner, Ryan Huang, Raj Agrawal, Anish Agarwal and Raaz Dwivedi (arXiv:2607.28545).
- * Licensed under the Creative Commons Attribution 4.0 International License,
- * https://creativecommons.org/licenses/by/4.0/
- * Changes: the verifier is ported from Python to TypeScript with its prompts, schemas and scoring
- * unchanged; the instructions ask for the report to be returned rather than written to
- * /app/report.md.
+ * is adapted from the ORCA benchmark's verifier `check_prediction.py`
+ * (https://github.com/ORCA-bench/ORCA-bench), from "ORCA: How Ready Are Language Model Agents for
+ * Oncall?" by Albert Gong, Kyuseong Choi, Abhineet Agarwal, Jason Schechner, Ryan Huang, Raj
+ * Agrawal, Anish Agarwal and Raaz Dwivedi (arXiv:2607.28545).
+ * Copyright 2026 Traversal, Inc.
+ * Licensed under the Apache License, Version 2.0, https://www.apache.org/licenses/LICENSE-2.0
+ * Changes: ported from Python to TypeScript with its prompts, schemas and scoring unchanged.
  */
 
 /**
- * ORCA's verifier, `tests/check_prediction.py` of every task in the public Harbor dataset
- * `orca-bench/orca-bench` (CC BY 4.0, the ORCA-bench authors), ported to TypeScript: the judge
- * prompts and output schemas byte for byte, and the score maths. `check_prediction.test.ts` holds
- * the port to the Python's own output (`__fixtures__/generate_parity_fixtures.py`).
+ * ORCA's verifier, `check_prediction.py` from ORCA-bench/ORCA-bench (Apache-2.0), which every task
+ * of the public Harbor dataset `orca-bench/orca-bench` carries as `tests/check_prediction.py`,
+ * ported to TypeScript: the judge prompts and output schemas byte for byte, and the score maths.
+ * `check_prediction.test.ts` holds the port to the Python's own output
+ * (`__fixtures__/generate_parity_fixtures.py`).
  *
  * Python's semantics are kept where the rubric data can reach them: `dict.get` defaults apply
  * only to a missing key, truthiness treats empty lists and objects as false, and values are
@@ -182,8 +179,17 @@ const str = (value: JsonValue | undefined): string => {
 
 const codePoints = (value: string): number => [...value].length;
 
+// The whitespace `int(str)` strips. JavaScript's `\s` also matches U+FEFF and misses U+0085.
+const INT_WHITESPACE =
+  '\\t\\n\\v\\f\\r\\x20\\x85\\xa0\\u1680\\u2000-\\u200a\\u2028\\u2029\\u202f\\u205f\\u3000';
+// `str.isspace()` also accepts U+001C-U+001F, which `int(str)` rejects.
+const PYTHON_WHITESPACE = `\\x1c-\\x1f${INT_WHITESPACE}`;
+const edgeWhitespace = (chars: string) => new RegExp(`^[${chars}]+|[${chars}]+$`, 'gu');
+const EDGE_WHITESPACE = edgeWhitespace(PYTHON_WHITESPACE);
+const INT_EDGE_WHITESPACE = edgeWhitespace(INT_WHITESPACE);
+
 /** `str.strip()`. */
-const strip = (value: string): string => value.replace(/^[\s\x1c-\x1f]+|[\s\x1c-\x1f]+$/gu, '');
+const strip = (value: string): string => value.replace(EDGE_WHITESPACE, '');
 
 // Built from a string: a regex literal holding U+2028 does not survive transpiling.
 const LINE_BREAKS = new RegExp('\\r\\n|[\\n\\r\\v\\f\\x1c\\x1d\\x1e\\x85\\u2028\\u2029]', 'u');
@@ -553,8 +559,15 @@ export const buildControlPrompt = (expected: OrcaExpected, predictions: string):
   if (!current) throw new Error('An ORCA control needs expected.current');
   return format(JUDGE_PROMPT_CONTROL, {
     current_time: current,
-    quiet_window_start: start ? shiftIsoMinutes(start, CONTROL_QUIET_WINDOW_MARGIN_MIN) : 'null',
-    quiet_window_end: end ? shiftIsoMinutes(end, -CONTROL_QUIET_WINDOW_MARGIN_MIN) : 'null',
+    // `is not None`, as the verifier checks: an empty bound fails to parse, not reads as open.
+    quiet_window_start:
+      start === undefined || start === null
+        ? 'null'
+        : shiftIsoMinutes(start, CONTROL_QUIET_WINDOW_MARGIN_MIN),
+    quiet_window_end:
+      end === undefined || end === null
+        ? 'null'
+        : shiftIsoMinutes(end, -CONTROL_QUIET_WINDOW_MARGIN_MIN),
     predictions,
   });
 };
@@ -638,26 +651,35 @@ export interface OrcaJudgeResponse {
   rubrics: JsonObject[];
 }
 
+/** What `int(str)` accepts once trimmed: a sign, then digits with single `_` between them. */
+const INT_LITERAL = /^[+-]?\d+(?:_\d+)*$/;
+
 /** Python's `int(value)` for the values a judge can return as a score. */
 const toInt = (value: JsonValue | undefined): number => {
   if (typeof value === 'boolean') return value ? 1 : 0;
-  const number = typeof value === 'string' ? Number(value.trim()) : value;
-  if (typeof number !== 'number' || !Number.isFinite(number)) {
+  if (typeof value === 'string') {
+    const literal = value.replace(INT_EDGE_WHITESPACE, '');
+    if (!INT_LITERAL.test(literal)) throw new Error(`Per-rubric score ${value} is not an integer`);
+    return Number(literal.replaceAll('_', '')) || 0;
+  }
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
     throw new Error(`Per-rubric score ${String(value)} is not an integer`);
   }
-  if (typeof value === 'string' && !Number.isInteger(number)) {
-    throw new Error(`Per-rubric score ${value} is not an integer`);
-  }
-  return Math.trunc(number);
+  return Math.trunc(value) || 0;
 };
 
 /**
  * `parse_judge_response`, on the judge's already-decoded answer: range-checks every per-rubric
- * score. Throws on an answer that is not an object with a `rubrics` list.
+ * score. Throws on an answer that is not an object, or whose `rubrics` is set but not a list, where
+ * the verifier fails iterating it.
  */
 export const parseJudgeResponse = (parsed: JsonValue): OrcaJudgeResponse => {
   if (!isObject(parsed)) throw new Error('ORCA judge response is not an object');
-  const rubrics = asList(get(parsed, 'rubrics', []) || []);
+  const value = get(parsed, 'rubrics', []);
+  if (truthy(value) && !Array.isArray(value)) {
+    throw new Error('ORCA judge response rubrics is not a list');
+  }
+  const rubrics = asList(value);
   return {
     rubrics: rubrics.map((verdict) => {
       if (!isObject(verdict)) throw new Error('ORCA judge verdict is not an object');
@@ -706,19 +728,19 @@ const defined = (values: Array<boolean | null>): boolean[] =>
 const aggregateOneRubric = (verdict: JsonObject): OrcaRubricRollup => {
   const symptoms = get(verdict, 'symptoms', {}) || {};
   const metricHits = getList(symptoms, 'metrics').map((metric) =>
-    Boolean(get(metric, 'family_match'))
+    truthy(get(metric, 'family_match'))
   );
   const logHits = getList(symptoms, 'logs').map(
-    (log) => Boolean(get(log, 'body_match')) && Boolean(get(log, 'service_name_match'))
+    (log) => truthy(get(log, 'body_match')) && truthy(get(log, 'service_name_match'))
   );
   const traceHits = getList(symptoms, 'traces').map(
-    (trace) => Boolean(get(trace, 'call_chain_match')) && Boolean(get(trace, 'smoking_gun_match'))
+    (trace) => truthy(get(trace, 'call_chain_match')) && truthy(get(trace, 'smoking_gun_match'))
   );
   return {
     feature_flag: str(get(verdict, 'feature_flag', '')),
-    incident_time_within_10min: Boolean(get(verdict, 'incident_time_within_10min')),
-    feature_flag_match: Boolean(get(verdict, 'feature_flag_match')),
-    mechanism_match: Boolean(get(verdict, 'mechanism_match')),
+    incident_time_within_10min: truthy(get(verdict, 'incident_time_within_10min')),
+    feature_flag_match: truthy(get(verdict, 'feature_flag_match')),
+    mechanism_match: truthy(get(verdict, 'mechanism_match')),
     metrics_all_match: all(metricHits),
     metrics_any_match: any(metricHits),
     logs_all_match: all(logHits),

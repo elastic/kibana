@@ -15,6 +15,7 @@ import {
   buildJudgePrompt,
   buildRewards,
   CONTROL_OUTPUT_SCHEMA,
+  controlResponse,
   emptyReportResponse,
   isEmptyReport,
   JUDGE_OUTPUT_SCHEMA,
@@ -23,8 +24,8 @@ import {
   shiftIsoMinutes,
   tabulateGithub,
 } from './check_prediction';
-import type { OrcaRubric } from './check_prediction';
-import { getOrcaRubrics } from './rubrics';
+import type { OrcaJudgeResponse, OrcaRubric } from './check_prediction';
+import { getOrcaRubrics, getOrcaRubricsHash, ORCA_RUBRICS_RELEASE } from './rubrics';
 
 /**
  * What `__fixtures__/generate_parity_fixtures.py` recorded from ORCA's own `check_prediction.py`.
@@ -36,8 +37,15 @@ interface ParityFixtures {
   rubrics: Record<string, OrcaRubric>;
   incident_schema: JsonValue;
   control_schema: JsonValue;
-  incident: Array<{ event_ids: string[]; sha256: string; prompt?: string }>;
+  incident: Array<{
+    event_ids: string[];
+    sha256: string;
+    prompt?: string;
+    empty_report: OrcaJudgeResponse;
+  }>;
   control: Array<{ expected: OrcaExpected; prompt: string }>;
+  /** `judge`'s control verdicts: no incident in the window, one claimed there, an empty report. */
+  control_verdicts: Record<'clear' | 'claims' | 'empty', OrcaJudgeResponse>;
   aggregates: Array<{
     mode: OrcaJudgeMode;
     nested: { rubrics: Array<Record<string, JsonValue>> };
@@ -46,11 +54,9 @@ interface ParityFixtures {
   }>;
 }
 
+const realRubricsFixture = process.env.ORCA_PARITY_FIXTURES;
 const fixtures: ParityFixtures = JSON.parse(
-  readFileSync(
-    process.env.ORCA_PARITY_FIXTURES ?? join(__dirname, '__fixtures__', 'parity.json'),
-    'utf8'
-  )
+  readFileSync(realRubricsFixture ?? join(__dirname, '__fixtures__', 'parity.json'), 'utf8')
 );
 const rubricsById = new Map(Object.entries(fixtures.rubrics));
 
@@ -85,6 +91,21 @@ describe('ORCA check_prediction port', () => {
     ).toEqual({ missing: ['missing'] });
   });
 
+  // Ties the pinned Golden release to the rubrics parity was checked on: bump the pin with this run.
+  (realRubricsFixture ? it : it.skip)('was checked on the pinned rubric release', () => {
+    expect(getOrcaRubricsHash(rubricsById)).toBe(ORCA_RUBRICS_RELEASE.sha256);
+  });
+
+  it('synthesizes the empty-report and control verdicts as the verifier does', () => {
+    for (const { event_ids: eventIds, empty_report: expected } of fixtures.incident) {
+      expect(emptyReportResponse(rubricsFor(eventIds))).toEqual(expected);
+    }
+    const { clear, claims, empty } = fixtures.control_verdicts;
+    expect(controlResponse(false)).toEqual(clear);
+    expect(controlResponse(true)).toEqual(claims);
+    expect(controlResponse(false)).toEqual(empty);
+  });
+
   it('renders the control prompt byte for byte', () => {
     for (const { expected, prompt } of fixtures.control) {
       expect(buildControlPrompt(expected, fixtures.report)).toBe(prompt);
@@ -114,12 +135,40 @@ describe('ORCA check_prediction port', () => {
   it('rejects an out-of-range or missing score', () => {
     expect(() => parseJudgeResponse({ rubrics: [{ score: 4 }] })).toThrow('out of range');
     expect(() => parseJudgeResponse({ rubrics: [{}] })).toThrow('not an integer');
+    expect(() => parseJudgeResponse({ rubrics: { score: 3 } })).toThrow('not a list');
+    expect(parseJudgeResponse({ rubrics: null }).rubrics).toEqual([]);
     expect(parseJudgeResponse({ rubrics: [{ score: 2.7 }] }).rubrics[0].score).toBe(2);
   });
 
-  it('treats a whitespace-only report as empty', () => {
+  it('reads a string score as int() does', () => {
+    const score = (value: string) => parseJudgeResponse({ rubrics: [{ score: value }] }).rubrics[0];
+    // int() raises on these, so the judge call retries rather than recording a score.
+    // U+001C-U+001F are str.strip() whitespace, but int() rejects them.
+    for (const rejected of ['', ' ', '3.0', '0x3', '3e0', '1__0', '_1', '3_', '\x1c3', '3\x1f']) {
+      expect(() => score(rejected)).toThrow('not an integer');
+    }
+    expect([' 3 ', '+3', '0_3', '-0', '\x853\u3000'].map((value) => score(value).score)).toEqual([
+      3, 3, 3, 0, 3,
+    ]);
+    expect(() => score('1_0')).toThrow('out of range');
+  });
+
+  it("treats a whitespace-only report as empty, with str.strip()'s whitespace", () => {
     expect(isEmptyReport(' \n\t')).toBe(true);
+    expect(isEmptyReport('\x85\x1c\u3000')).toBe(true);
+    expect(isEmptyReport('\ufeff')).toBe(false);
+    expect(isEmptyReport('\u200b')).toBe(false);
     expect(isEmptyReport('x')).toBe(false);
+  });
+
+  it('throws on an empty quiet-window bound, as the verifier does', () => {
+    const control = { events: [], current: '2026-04-20T01:00:00Z' };
+    expect(() => buildControlPrompt({ ...control, quiet_window_start: '' }, 'x')).toThrow(
+      'Not an ISO 8601 time'
+    );
+    expect(buildControlPrompt({ ...control, quiet_window_end: null }, 'x')).toContain(
+      'quiet_window_end   = null'
+    );
   });
 
   it('shifts times as datetime.isoformat prints them', () => {
