@@ -10,11 +10,10 @@
 import type { HttpStart } from '@kbn/core/public';
 import type { OptimizeQueryResponse } from '@kbn/esql-types';
 import { OPTIMIZE_QUERY_ROUTE } from '@kbn/esql-types';
-import { isNoAiConnectorError } from '@kbn/esql-utils';
+import { toAiRequestFailure } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import type { QueryProfileView } from './types';
 import { buildProfileContext } from './profile_prompt_context';
-import { readErrorMessage } from './read_error_message';
 
 export interface FasterQuerySuggestion {
   /** A rewritten query, or undefined when the AI found no safe improvement. */
@@ -41,26 +40,11 @@ export async function suggestFasterQuery({
     });
     return { query: response.query ?? undefined, reason: response.reason };
   } catch (caught: unknown) {
-    throw new SuggestFasterQueryFailure(readFailureMessage(caught), isNoAiConnectorError(caught));
+    throw toAiRequestFailure(
+      caught,
+      i18n.translate('data.inspector.queryProfile.suggestFailedMessage', {
+        defaultMessage: 'The AI could not suggest a faster query.',
+      })
+    );
   }
-}
-
-export class SuggestFasterQueryFailure extends Error {
-  constructor(message: string, public readonly isNoConnector: boolean) {
-    super(message);
-  }
-}
-
-/** The message the server sent with a failed request, or the one of the error itself. */
-function readFailureMessage(caught: unknown): string {
-  const body = (caught as { body?: { message?: unknown } } | undefined)?.body;
-  if (typeof body?.message === 'string' && body.message.length > 0) {
-    return body.message;
-  }
-  return readErrorMessage(
-    caught,
-    i18n.translate('data.inspector.queryProfile.suggestFailedMessage', {
-      defaultMessage: 'The AI could not suggest a faster query.',
-    })
-  );
 }

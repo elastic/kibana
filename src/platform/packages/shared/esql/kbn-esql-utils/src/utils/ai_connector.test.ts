@@ -9,7 +9,13 @@
 
 import type { ApplicationStart } from '@kbn/core/public';
 import { NO_AI_CONNECTOR_ERROR_CODE } from '@kbn/esql-types';
-import { getConnectorsUrl, isNoAiConnectorError } from './ai_connector';
+import {
+  AiRequestFailure,
+  getConnectorsUrl,
+  isNoAiConnectorError,
+  readRequestErrorMessage,
+  toAiRequestFailure,
+} from './ai_connector';
 
 describe('isNoAiConnectorError', () => {
   it('recognizes the code the AI routes answer with when no connector is set up', () => {
@@ -23,6 +29,39 @@ describe('isNoAiConnectorError', () => {
     expect(isNoAiConnectorError({ body: { attributes: { code: 'other' } } })).toBe(false);
     expect(isNoAiConnectorError(new Error('boom'))).toBe(false);
     expect(isNoAiConnectorError(undefined)).toBe(false);
+  });
+});
+
+describe('readRequestErrorMessage', () => {
+  it('prefers the message the server sent, then the one of the error, then the fallback', () => {
+    expect(readRequestErrorMessage({ body: { message: 'from server' } }, 'fallback')).toBe(
+      'from server'
+    );
+    expect(readRequestErrorMessage(new Error('from error'), 'fallback')).toBe('from error');
+    expect(readRequestErrorMessage({ body: { message: '' } }, 'fallback')).toBe('fallback');
+    expect(readRequestErrorMessage('boom', 'fallback')).toBe('fallback');
+  });
+});
+
+describe('toAiRequestFailure', () => {
+  it('keeps the message and says whether no connector is set up', () => {
+    const noConnector = toAiRequestFailure(
+      {
+        body: {
+          message: 'No AI connector available.',
+          attributes: { code: NO_AI_CONNECTOR_ERROR_CODE },
+        },
+      },
+      'fallback'
+    );
+    const other = toAiRequestFailure(new Error('boom'), 'fallback');
+
+    expect(noConnector).toBeInstanceOf(AiRequestFailure);
+    expect(noConnector).toMatchObject({
+      message: 'No AI connector available.',
+      isNoConnector: true,
+    });
+    expect(other).toMatchObject({ message: 'boom', isNoConnector: false });
   });
 });
 

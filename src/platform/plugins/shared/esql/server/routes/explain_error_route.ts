@@ -12,11 +12,16 @@ import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { CoreSetup, IRouter, PluginInitializerContext } from '@kbn/core/server';
-import { EXPLAIN_ERROR_ROUTE, NO_AI_CONNECTOR_ERROR_CODE } from '@kbn/esql-types';
+import { EXPLAIN_ERROR_ROUTE } from '@kbn/esql-types';
 import type { DeploymentInfo } from '../deployment_info';
 import { describeDeployment } from '../deployment_info';
 import type { EsqlServerPluginStart } from '../types';
-import { resolveConnectorId } from './helpers';
+import {
+  failureResponse,
+  getChatModelForRequest,
+  noConnectorResponse,
+  toUsableQuery,
+} from './ai_route_utils';
 
 const ExplainErrorSchema = lazySchema(() =>
   z
@@ -93,8 +98,6 @@ const buildMessages = (
   ],
 ];
 
-const normalize = (query: string): string => query.replace(/\s+/g, ' ').trim();
-
 export interface ExplainErrorRouteOptions {
   deployment?: DeploymentInfo;
 }
@@ -127,55 +130,32 @@ export const registerExplainErrorRoute = (
         const { queryString, errorMessage } = request.body;
         const [, { inference, searchInferenceEndpoints }] = await getStartServices();
 
-        const connectorId = await resolveConnectorId({
+        const chatModel = await getChatModelForRequest({
           inference,
           request,
           searchInferenceEndpoints,
         });
 
-        if (!connectorId) {
-          return response.badRequest({
-            body: {
-              message: 'No AI connector available.',
-              attributes: { code: NO_AI_CONNECTOR_ERROR_CODE },
-            },
-          });
+        if (!chatModel) {
+          return noConnectorResponse(response);
         }
 
-        const chatModel = await inference.getChatModel({
-          request,
-          connectorId,
-          chatModelOptions: {},
-        });
         const result = await chatModel
           .withStructuredOutput(ExplainErrorSchema, { name: 'explain_esql_error' })
           .invoke(buildMessages(queryString, errorMessage, deployment), {
             signal: getRequestAbortedSignal(request.events.aborted$),
           });
 
-        const fixedQuery = result.query.trim();
-        const isUsable = fixedQuery.length > 0 && normalize(fixedQuery) !== normalize(queryString);
-
         return response.ok({
           body: {
             cause: result.cause,
             summary: result.summary.trim(),
             suggestions: result.suggestions.map((suggestion) => suggestion.trim()).filter(Boolean),
-            query: isUsable ? fixedQuery : null,
+            query: toUsableQuery(result.query, queryString),
           },
         });
       } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        logger.error(`ES|QL error explanation failed: ${message}`);
-        if (
-          error instanceof Error &&
-          'reason' in error &&
-          typeof (error as { reason: string }).reason === 'string' &&
-          (error as { reason: string }).reason.startsWith('license_')
-        ) {
-          return response.forbidden({ body: { message } });
-        }
-        return response.customError({ statusCode: 500, body: { message } });
+        return failureResponse({ error, action: 'error explanation', logger, response });
       }
     }
   );

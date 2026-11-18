@@ -13,9 +13,14 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { CoreSetup, IRouter, PluginInitializerContext } from '@kbn/core/server';
 import type { OptimizeQueryResponse } from '@kbn/esql-types';
-import { NO_AI_CONNECTOR_ERROR_CODE, OPTIMIZE_QUERY_ROUTE } from '@kbn/esql-types';
+import { OPTIMIZE_QUERY_ROUTE } from '@kbn/esql-types';
 import type { EsqlServerPluginStart } from '../types';
-import { resolveConnectorId } from './helpers';
+import {
+  failureResponse,
+  getChatModelForRequest,
+  noConnectorResponse,
+  toUsableQuery,
+} from './ai_route_utils';
 
 const OptimizeQuerySchema = lazySchema(() =>
   z
@@ -89,8 +94,6 @@ const buildMessages = (queryString: string, profileContext: string): BaseMessage
   ],
 ];
 
-const normalize = (query: string): string => query.replace(/\s+/g, ' ').trim();
-
 export const registerOptimizeQueryRoute = (
   router: IRouter,
   getStartServices: CoreSetup<EsqlServerPluginStart>['getStartServices'],
@@ -118,26 +121,16 @@ export const registerOptimizeQueryRoute = (
         const { queryString, profileContext } = request.body;
         const [, { inference, searchInferenceEndpoints }] = await getStartServices();
 
-        const connectorId = await resolveConnectorId({
+        const chatModel = await getChatModelForRequest({
           inference,
           request,
           searchInferenceEndpoints,
         });
 
-        if (!connectorId) {
-          return response.badRequest({
-            body: {
-              message: 'No AI connector available.',
-              attributes: { code: NO_AI_CONNECTOR_ERROR_CODE },
-            },
-          });
+        if (!chatModel) {
+          return noConnectorResponse(response);
         }
 
-        const chatModel = await inference.getChatModel({
-          request,
-          connectorId,
-          chatModelOptions: {},
-        });
         const result = await chatModel
           .withStructuredOutput(OptimizeQuerySchema, { name: 'suggest_faster_query' })
           // The UI aborts its request when the profile changes, so the model stops with it.
@@ -145,34 +138,13 @@ export const registerOptimizeQueryRoute = (
             signal: getRequestAbortedSignal(request.events.aborted$),
           });
 
-        const suggestion = result.query.trim();
-        const isUsable =
-          result.canImprove &&
-          suggestion.length > 0 &&
-          normalize(suggestion) !== normalize(queryString);
-
         const body: OptimizeQueryResponse = {
-          query: isUsable ? suggestion : null,
+          query: result.canImprove ? toUsableQuery(result.query, queryString) : null,
           reason: result.reason.trim(),
         };
         return response.ok({ body });
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        logger.error(`ES|QL query optimization failed: ${errorMessage}`);
-        if (
-          error instanceof Error &&
-          'reason' in error &&
-          typeof (error as { reason: string }).reason === 'string' &&
-          (error as { reason: string }).reason.startsWith('license_')
-        ) {
-          return response.forbidden({
-            body: { message: errorMessage },
-          });
-        }
-        return response.customError({
-          statusCode: 500,
-          body: { message: errorMessage },
-        });
+        return failureResponse({ error, action: 'query optimization', logger, response });
       }
     }
   );

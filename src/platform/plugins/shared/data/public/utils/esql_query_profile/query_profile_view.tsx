@@ -24,7 +24,7 @@ import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ApplicationStart, HttpStart } from '@kbn/core/public';
-import { getConnectorsUrl } from '@kbn/esql-utils';
+import { getConnectorsUrl, readRequestErrorMessage } from '@kbn/esql-utils';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { Adapters, Request } from '@kbn/inspector-plugin/public';
 import type { ISearchStart } from '../../search';
@@ -37,7 +37,6 @@ import { FasterQuerySuggestion } from './faster_query_suggestion';
 import { loadEsqlQueryProfile } from './load_esql_query_profile';
 import { ProfileSummary } from './profile_summary';
 import { readRequestQuery } from './json_helpers';
-import { readErrorMessage } from './read_error_message';
 import { useHasEnterpriseLicense } from './use_has_enterprise_license';
 import { TimelineTab } from './timeline_tab';
 
@@ -108,7 +107,7 @@ const useQueryProfile = (
         setLoaded({
           requestJson,
           reloadKey,
-          error: readErrorMessage(
+          error: readRequestErrorMessage(
             caught,
             i18n.translate('data.inspector.queryProfile.unknownErrorMessage', {
               defaultMessage: 'The query profile failed.',

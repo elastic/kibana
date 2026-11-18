@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core/public';
 import { KbnDangerCallout } from '@kbn/ui-callout';
+import { AiRequestFailure, readRequestErrorMessage } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ISearchStart } from '../../search';
@@ -28,9 +29,8 @@ import type { QueryProfileView } from './types';
 import { compareResults } from './compare_results';
 import type { ResultsVerdict } from './compare_results';
 import { loadEsqlQueryProfile } from './load_esql_query_profile';
-import { readErrorMessage } from './read_error_message';
 import { formatChange, formatDurationMillis } from './profile_format';
-import { SuggestFasterQueryFailure, suggestFasterQuery } from './suggest_faster_query';
+import { suggestFasterQuery } from './suggest_faster_query';
 
 type Stage =
   | { kind: 'idle' }
@@ -43,13 +43,13 @@ type Stage =
 
 const failedWith = (caught: unknown): Stage => ({
   kind: 'error',
-  message: readErrorMessage(
+  message: readRequestErrorMessage(
     caught,
     i18n.translate('data.inspector.queryProfile.suggestionFailedMessage', {
       defaultMessage: 'Something went wrong while checking the suggested query.',
     })
   ),
-  isNoConnector: caught instanceof SuggestFasterQueryFailure && caught.isNoConnector,
+  isNoConnector: caught instanceof AiRequestFailure && caught.isNoConnector,
 });
 
 /** Flush left aligns a lone button with the text above it. Next to another button it needs its padding. */
