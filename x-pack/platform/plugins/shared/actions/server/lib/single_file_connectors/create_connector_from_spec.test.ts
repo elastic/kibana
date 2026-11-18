@@ -133,6 +133,30 @@ describe('createConnectorTypeFromSpec', () => {
     expect(connectorType.isExperimental).toBe(true);
   });
 
+  it('sets isCompatibilityMode from metadata.isCompatibilityMode and keeps the executor', () => {
+    const spec = createMockSpec({
+      metadata: {
+        id: 'compat-connector',
+        displayName: 'Compat',
+        description: 'd',
+        minimumLicense: 'basic',
+        supportedFeatureIds: ['alerting'],
+        isCompatibilityMode: true,
+      },
+    });
+    const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+
+    expect(connectorType.isCompatibilityMode).toBe(true);
+    expect(connectorType.executor).toBeDefined();
+    expect(connectorType.validate.params).toBeDefined();
+  });
+
+  it('defaults isCompatibilityMode to false', () => {
+    const connectorType = createConnectorTypeFromSpec(createMockSpec(), mockActionsPlugin);
+
+    expect(connectorType.isCompatibilityMode).toBe(false);
+  });
+
   it('sets sandboxSupportedAuthTypes from auth type defs with supportsSandbox', () => {
     const spec = createMockSpec({
       auth: {

@@ -40,6 +40,7 @@ interface ListOpts {
   featureId?: string;
   exposeValidation?: boolean;
   sandboxCapableOnly?: boolean;
+  includeCompatibilityMode?: boolean;
 }
 
 export class ActionTypeRegistry {
@@ -303,11 +304,18 @@ export class ActionTypeRegistry {
 
   /**
    * Returns a list of registered action types [{ id, name, enabled }], filtered by featureId if provided.
+   * Compatibility-mode types are excluded unless includeCompatibilityMode is true.
    */
   public list(
-    { featureId, exposeValidation, sandboxCapableOnly }: ListOpts = { exposeValidation: false }
+    {
+      featureId,
+      exposeValidation,
+      sandboxCapableOnly,
+      includeCompatibilityMode = false,
+    }: ListOpts = { exposeValidation: false }
   ): CommonActionType[] {
     return Array.from(this.actionTypes)
+      .filter(([_, actionType]) => includeCompatibilityMode || !actionType.isCompatibilityMode)
       .filter(([_, actionType]) => {
         return featureId ? actionType.supportedFeatureIds.includes(featureId) : true;
       })
@@ -348,11 +356,15 @@ export class ActionTypeRegistry {
   }
 
   public getAllTypes(): string[] {
-    return [...this.list().map(({ id }) => id)];
+    return [...this.list({ includeCompatibilityMode: true }).map(({ id }) => id)];
   }
 
   isDeprecated(actionTypeId: string): boolean {
     return Boolean(this.actionTypes.get(actionTypeId)?.isDeprecated);
+  }
+
+  isCompatibilityMode(actionTypeId: string): boolean {
+    return Boolean(this.actionTypes.get(actionTypeId)?.isCompatibilityMode);
   }
 
   /**

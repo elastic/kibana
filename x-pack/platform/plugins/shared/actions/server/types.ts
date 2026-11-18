@@ -247,6 +247,10 @@ export interface ActionTypeCoreFields<
   subFeature?: SubFeature;
   isDeprecated?: boolean;
   /**
+   * Registered and executable, but hidden from type discovery and new connectors cannot be created.
+   */
+  isCompatibilityMode?: boolean;
+  /**
    * Allows multiple instances of the same system action in a single rule.
    * By default, system actions can only be used once per rule.
    * Set to true to allow the same system action connector to be used multiple times.

@@ -11,4 +11,5 @@ export const listTypesParamsSchema = schema.object({
   featureId: schema.maybe(schema.string()),
   includeSystemActionTypes: schema.maybe(schema.boolean()),
   sandboxCapableOnly: schema.maybe(schema.boolean()),
+  includeCompatibilityMode: schema.maybe(schema.boolean()),
 });

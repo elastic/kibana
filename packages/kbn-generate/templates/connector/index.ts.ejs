@@ -10,6 +10,8 @@ export const <%= connector.className %>: ConnectorSpec = {
     // the actions plugin enforces is gold; raise this only, never lower it below gold.
     minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows', 'agentBuilder'],
+    // Remove in a follow-up PR once this release is the serverless rollback target.
+    isCompatibilityMode: true,
   },
   schema: lazySchema(() => z.object({})),
   actions: {},

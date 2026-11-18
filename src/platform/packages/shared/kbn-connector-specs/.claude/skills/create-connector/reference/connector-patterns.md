@@ -95,10 +95,10 @@ export const YourConnector: ConnectorSpec = {
       defaultMessage: 'Search items, list collections, and retrieve details from Your Service',
     }),
     minimumLicense: 'enterprise',
-    // A new connector type must reach Production-NonCanary before it can declare
-    // user-facing features. Ship ['agentBuilder'] first, then add 'workflows'
-    // and others in a follow-up PR.
-    supportedFeatureIds: ['agentBuilder'],
+    // Ship the final feature IDs. A new connector type ships in compatibility mode;
+    // remove the flag in a follow-up PR once this release is the serverless rollback target.
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    isCompatibilityMode: true,
   },
 
   auth: {
@@ -168,10 +168,10 @@ The package README's [Inbound events](../../../../README.md#inbound-events) sect
 This section is the file layout.
 
 Omit `events` when the connector only calls the vendor. On the first PR for a new connector type, omit
-them even when the vendor pushes webhooks. Triggers are registered from `events.definitions` without
-reading `supportedFeatureIds`, and the workflows connector list includes event types that do not
-declare `'workflows'`. Add this file in the follow-up that adds `'workflows'`, once the type is
-registered in every Production-NonCanary version. Record the event keys in the first PR's description.
+them even when the vendor pushes webhooks. Compatibility mode does not hide triggers: they are
+registered from `events.definitions` without reading `isCompatibilityMode` or `supportedFeatureIds`.
+Add this file in a follow-up, once the type is registered in every Production-NonCanary version.
+Record the event keys in the first PR's description.
 
 ```
 {connector}/
@@ -273,10 +273,10 @@ export const YourMcpConnector: ConnectorSpec = {
     displayName: 'Your MCP Connector',
     description: 'Search and retrieve data via Your Service MCP server',
     minimumLicense: 'enterprise',
-    // A new connector type must reach Production-NonCanary before it can declare
-    // user-facing features. Ship ['agentBuilder'] first, then add 'workflows'
-    // and others in a follow-up PR.
-    supportedFeatureIds: ['agentBuilder'],
+    // Ship the final feature IDs. A new connector type ships in compatibility mode;
+    // remove the flag in a follow-up PR once this release is the serverless rollback target.
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    isCompatibilityMode: true,
   },
 
   auth: {
@@ -779,8 +779,8 @@ Set `isTool: true` on actions that should be discoverable by AI agents in Agent 
 
 Set `isTool: false` (or omit it) for actions that exist for completeness but should not be invoked by an agent autonomously — for example, destructive operations, admin-only actions, or low-level helpers that are only useful as building blocks for other actions.
 
-On a first-PR connector with `supportedFeatureIds: ['agentBuilder']`, an `isTool: false` action is not
-reachable from any UI: agents cannot see it and workflows are not enabled yet. It can only be called
+On a connector with `supportedFeatureIds: ['agentBuilder']`, an `isTool: false` action is not
+reachable from any UI: agents cannot see it and workflows are not enabled. It can only be called
 through the `_execute` API. Say so on the docs page rather than listing it alongside the agent actions,
 as the GKE docs did for `createCluster` and `deleteCluster`.
 

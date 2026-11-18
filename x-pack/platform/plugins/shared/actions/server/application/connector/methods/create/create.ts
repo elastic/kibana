@@ -133,6 +133,15 @@ async function createConnector({
   });
 
   const actionType = context.actionTypeRegistry.get(actionTypeId);
+  if (context.actionTypeRegistry.isCompatibilityMode(actionTypeId)) {
+    throw Boom.badRequest(
+      i18n.translate('xpack.actions.serverSideErrors.compatibilityModeConnectorCreationForbidden', {
+        defaultMessage:
+          'Connector type {actionTypeId} is in compatibility mode and cannot be used to create new connectors.',
+        values: { actionTypeId },
+      })
+    );
+  }
   const configurationUtilities = context.actionTypeRegistry.getUtils();
   const validatedActionTypeConfig = validateConfig(actionType, config, {
     configurationUtilities,

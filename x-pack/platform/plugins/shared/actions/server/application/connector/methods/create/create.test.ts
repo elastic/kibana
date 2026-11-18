@@ -84,6 +84,7 @@ const actionTypeRegistry: ActionTypeRegistry = {
   isSystemActionType: jest.fn().mockReturnValue(false),
   ensureActionTypeEnabled: jest.fn(),
   isDeprecated: jest.fn().mockReturnValue(false),
+  isCompatibilityMode: jest.fn().mockReturnValue(false),
   getUtils: jest.fn().mockReturnValue({
     isHostnameAllowed: jest.fn().mockReturnValue(true),
     isUriAllowed: jest.fn().mockReturnValue(true),
@@ -129,6 +130,7 @@ describe('create()', () => {
       })
     );
     (actionTypeRegistry.isDeprecated as jest.Mock).mockReturnValue(false);
+    (actionTypeRegistry.isCompatibilityMode as jest.Mock).mockReturnValue(false);
     (actionTypeRegistry.isSystemActionType as jest.Mock).mockReturnValue(false);
     authorization.ensureAuthorized.mockResolvedValue(undefined);
   });
@@ -1406,6 +1408,31 @@ describe('create()', () => {
           },
         })
       ).rejects.toThrow(/error validating connector type secrets/);
+    });
+  });
+
+  describe('compatibility mode connector types', () => {
+    test('rejects creating a connector of a type in compatibility mode', async () => {
+      (actionTypeRegistry.isCompatibilityMode as jest.Mock).mockReturnValue(true);
+
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: 'my-connector-type',
+            config: {},
+            secrets: {},
+          },
+        })
+      ).rejects.toMatchObject({
+        message:
+          'Connector type my-connector-type is in compatibility mode and cannot be used to create new connectors.',
+        output: { statusCode: 400 },
+      });
+
+      expect(actionTypeRegistry.isCompatibilityMode).toHaveBeenCalledWith('my-connector-type');
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     });
   });
 

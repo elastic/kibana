@@ -63,20 +63,18 @@ vendor occurrence a workflow, case, or alert will actually use (created, updated
 comment), and leave the rest of the vendor catalog out. Say which occurrences you are not modeling.
 A connector that only calls the vendor gets no `events`; say that explicitly in the report.
 
-Do not declare `events` on the first PR that introduces the connector type. Record the agreed event
-keys in that PR's description as the required follow-up. Add `events` only in the follow-up that also
-adds `'workflows'`, once the type is registered in every Production-NonCanary version (Step 2).
+Do not declare `events` on the first PR that introduces the connector type, even with
+`isCompatibilityMode: true`. Record the agreed event keys in that PR's description as the required
+follow-up. Add `events` once the type is registered in every Production-NonCanary version.
 
 `getConnectorEventTriggerDefinitions()` publishes a trigger for every definition without reading
-`supportedFeatureIds`, and `getAvailableConnectors()` includes event connector types even when
-`'workflows'` is absent. Keeping `['agentBuilder']` and writing the docs as "not available yet" does
-not hide the triggers. A workflow saved against the new event id breaks on a rollout or rollback node
-that does not have the type.
+`isCompatibilityMode` or `supportedFeatureIds`. A workflow saved against the new event id breaks on a
+rollback to a release that does not have the type.
 
-An inbound-only connector uses the same split. The first PR registers the type with no `events`. The
-follow-up adds `events` and `supportedFeatureIds: ['workflows']` (see `.inboundWebhook`). An existing
-connector that is already on every Production-NonCanary version can take `events` in the PR that adds
-them.
+An inbound-only connector uses the same split: the first PR registers the type with
+`supportedFeatureIds: ['workflows']`, `isCompatibilityMode: true`, and no `events` (see
+`.inboundWebhook`). An existing connector that is already on every Production-NonCanary version can
+take `events` in the PR that adds them.
 
 ### Research the vendor API before writing schemas or handlers
 
@@ -124,22 +122,21 @@ Follow the patterns in [reference/connector-patterns.md](reference/connector-pat
 
 Register in `src/platform/packages/shared/kbn-connector-specs/src/all_specs.ts` and `connector_icons_map.ts`.
 
-### `supportedFeatureIds` on a brand-new connector: two-step release
+### A brand-new connector ships in compatibility mode
 
-A new connector type must reach Production-NonCanary before it can declare user-facing features.
-Serverless rollouts and rollbacks leave nodes on different Kibana versions for a while, and a user action
-referencing a connector type that a node does not have breaks on that node. So the first PR ships
-`supportedFeatureIds: ['agentBuilder']`.
+A serverless rollback goes back one release. If the older release does not register the type,
+connectors created with it on the newer release break. Rolling upgrades are not the problem, because
+old nodes skip unknown task types.
 
-Do not put `'workflows'` or any other user-facing feature ID in the first PR. Do not declare `events`
-either. Workflow triggers come from `events.definitions` with no `supportedFeatureIds` check, and the
-workflows connector list adds event connector types back in when `'workflows'` is missing, so the
-feature id does not gate them. Both land in the follow-up PR once the connector is registered in every
-Production-NonCanary version.
+So the first PR ships the connector with its final `supportedFeatureIds` and
+`metadata.isCompatibilityMode: true`, and no `events` (see Step 1). The type is registered and
+executable, but it is left out of the connector type list and new connectors of it cannot be created.
+See [Compatibility mode](../../../README.md#compatibility-mode) for the known limits.
 
 Mention the required follow-up PR, including the agreed event keys, in the first PR's description so
-it is not forgotten. When this invocation is that follow-up, or the connector type is already on every
-Production-NonCanary version, add `'workflows'` and `events` together.
+it is not forgotten. The follow-up removes `isCompatibilityMode` once that release is the serverless
+rollback target (Production-NonCanary). `events` land once the type is on every Production-NonCanary
+version.
 
 **MCP connectors**: Use [reference/mcp-connector-setup.md](reference/mcp-connector-setup.md) as the direct starting template for the spec — it has concrete, copy-ready examples with the correct `lazySchema`, `callToolJson`/`callToolContent`, and test-mock patterns already in place. Do not reverse-engineer from existing connectors.
 
@@ -453,10 +450,10 @@ Then, before treating the connector as done, re-read the whole diff once, end to
   `input`, that is not wrapped in `lazySchema(() => ...)`
 - `test.enabled` missing or set to `false` on a connector that has outbound actions. An inbound-only
   spec keeps `test.enabled: false`
-- `events` on the first PR for a new connector type. They belong in the follow-up that adds
-  `'workflows'`, once the type is on every Production-NonCanary version
-- `events` missing on that follow-up when the first PR recorded event keys, or `events` present
-  while `metadata.id` is absent from `SPECS_ALLOWED_EVENTS`
+- A new connector type without `isCompatibilityMode: true`, or with `supportedFeatureIds` that are
+  not final
+- `events` on the first PR for a new connector type. Compatibility mode does not hide triggers
+- `events` present while `metadata.id` is absent from `SPECS_ALLOWED_EVENTS`
 - an `eventId` that is not `buildEventId(metadata.id, definitionKey)`, a payload with secrets, or
   `events.headers` containing `authorization`, `cookie`, or a mixed-case name
 - `handleEvents` logging `rawBody` at info, or `ingestTokenHash` declared on the connector schema
@@ -510,8 +507,7 @@ This step requires documentation skills from https://github.com/elastic/elastic-
    Three things a template page will not teach you:
 
    - **State what the connector can be used with**, right after the intro paragraph, matching
-     `supportedFeatureIds`. A first-PR connector ships `supportedFeatureIds: ['agentBuilder']` (see
-     Step 2) — follow `gitlab-action-type.md`:
+     `supportedFeatureIds`. For an Agent Builder-only connector, follow `gitlab-action-type.md`:
 
      ```
      ::::{note}
@@ -537,7 +533,7 @@ This step requires documentation skills from https://github.com/elastic/elastic-
      actions to confirm the table is still contiguous.
 
    The first PR for a new connector type has no `events`, so its page does not document an ingest URL.
-   The follow-up that adds `events` and `'workflows'` documents, in that same page:
+   The follow-up that adds `events` documents, in that same page:
 
    - the ingest URL for this type id
      (`POST {publicBaseUrl}/s/{spaceId}/api/actions/events/{connector_type_id}/{connector_id}`,
@@ -547,7 +543,7 @@ This step requires documentation skills from https://github.com/elastic/elastic-
    - that Receive events is turned on per connector instance, and the token comes from rotate
 
    An inbound-only connector documents them as available in Workflows, matching
-   `supportedFeatureIds: ['workflows']`, on that same follow-up.
+   `supportedFeatureIds: ['workflows']`.
 
 3. Run these skills on the new file and fix any issues:
    - `frontmatter-description` — generate the `description` frontmatter field

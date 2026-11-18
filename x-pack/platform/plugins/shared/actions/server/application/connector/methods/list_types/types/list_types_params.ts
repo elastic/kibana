@@ -14,4 +14,5 @@ export interface ListTypesParams {
   featureId?: ListTypesParamsType['featureId'];
   includeSystemActionTypes?: ListTypesParamsType['includeSystemActionTypes'];
   sandboxCapableOnly?: ListTypesParamsType['sandboxCapableOnly'];
+  includeCompatibilityMode?: ListTypesParamsType['includeCompatibilityMode'];
 }
