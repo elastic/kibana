@@ -13,6 +13,7 @@ interface AddSourceCardProps {
   title: string;
   description: string;
   onClick: () => void;
+  isDisabled?: boolean;
   'data-test-subj'?: string;
   ebtProps?: ReturnType<typeof getEbtProps>;
 }
@@ -21,6 +22,7 @@ export const AddSourceCard = ({
   title,
   description,
   onClick,
+  isDisabled = false,
   'data-test-subj': dataTestSubj,
   ebtProps,
 }: AddSourceCardProps) => {
@@ -47,6 +49,7 @@ export const AddSourceCard = ({
       title={title}
       description={description}
       onClick={onClick}
+      isDisabled={isDisabled}
       data-test-subj={dataTestSubj}
       {...ebtProps}
     />

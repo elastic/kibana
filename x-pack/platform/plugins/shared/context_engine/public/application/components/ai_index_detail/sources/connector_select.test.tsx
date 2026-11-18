@@ -11,7 +11,7 @@ import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mo
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 import { ConnectorSelect } from './connector_select';
 import {
@@ -252,5 +252,34 @@ describe('ConnectorSelect', () => {
     await waitFor(() => expectConnectorQueriesLoaded(queryClient));
 
     expect(getConnectorCheckbox('connector-github')).toBeDisabled();
+  });
+
+  it('disables the create connector card when disabled is true', async () => {
+    const { onOpenCreateConnector, queryClient } = renderConnectorSelect({ disabled: true });
+
+    await waitFor(() => expectConnectorQueriesLoaded(queryClient));
+
+    const createCard = screen.getByTestId('contextCreateConnectorCard');
+    expect(within(createCard).getByRole('button')).toBeDisabled();
+    fireEvent.click(createCard);
+    expect(onOpenCreateConnector).not.toHaveBeenCalled();
+  });
+
+  it('shows all-added empty copy and hides the select hint when every connector is already saved', async () => {
+    const { queryClient } = renderConnectorSelect({
+      savedConnectorIds: MOCK_RAW_CONNECTORS.map((connector) => connector.id),
+      canCreateConnector: false,
+    });
+
+    await waitFor(() => expectConnectorQueriesLoaded(queryClient));
+
+    expect(await screen.findByTestId('contextConnectorsEmpty')).toBeInTheDocument();
+    expect(
+      await screen.findByText('All installed connectors are already added.')
+    ).toBeInTheDocument();
+    expect(screen.queryByText('Select one or more.')).not.toBeInTheDocument();
+    MOCK_RAW_CONNECTORS.forEach((connector) => {
+      expect(screen.queryByTestId(`contextConnectorCard-${connector.id}`)).not.toBeInTheDocument();
+    });
   });
 });

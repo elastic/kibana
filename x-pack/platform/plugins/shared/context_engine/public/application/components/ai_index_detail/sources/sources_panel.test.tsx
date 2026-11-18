@@ -655,4 +655,57 @@ describe('SourcesPanel', () => {
       expect(screen.getByTestId('contextIndexSearch')).toBeDisabled();
     });
   });
+
+  it('keeps remaining remove buttons disabled until onSaved resolves after a remove', async () => {
+    const testServices = createServices();
+    testServices.http.put.mockResolvedValue({ status: 'updated' });
+
+    let resolveOnSaved: (() => void) | undefined;
+    const onSaved = jest.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveOnSaved = resolve;
+        })
+    );
+
+    renderWithProviders(
+      <SourcesPanel
+        isLoading={false}
+        aiIndex={{
+          ...baseAiIndex,
+          sources: [
+            { type: 'esql', value: 'FROM a' },
+            { type: 'esql', value: 'FROM b' },
+            { type: 'esql', value: 'FROM c' },
+          ],
+        }}
+        onSaved={onSaved}
+        isManaged={false}
+      />,
+      testServices
+    );
+
+    const firstRow = screen.getByTestId('contextSelectedSource-esql-0');
+    fireEvent.click(within(firstRow).getByTestId('contextRemoveSourceButton'));
+
+    await waitFor(() => {
+      expect(testServices.http.put).toHaveBeenCalled();
+      expect(onSaved).toHaveBeenCalledTimes(1);
+    });
+
+    const assertRemoveButtonsDisabled = () => {
+      screen.getAllByTestId('contextRemoveSourceButton').forEach((button) => {
+        expect(button).toBeDisabled();
+      });
+    };
+
+    await waitFor(assertRemoveButtonsDisabled);
+
+    resolveOnSaved?.();
+    await waitFor(() => {
+      screen.getAllByTestId('contextRemoveSourceButton').forEach((button) => {
+        expect(button).toBeEnabled();
+      });
+    });
+  });
 });

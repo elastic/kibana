@@ -62,7 +62,11 @@ export const ConnectorSelect = ({
   const showCreateActions = canCreateConnector && canReadConnectors;
 
   const showEmptyPrompt =
-    canReadConnectors && !isLoading && !isError && connectors.length === 0 && !showCreateActions;
+    canReadConnectors &&
+    !isLoading &&
+    !isError &&
+    availableConnectors.length === 0 &&
+    !showCreateActions;
 
   const createCardEbtProps = getEbtProps({
     element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageSourcesPanel,
@@ -175,19 +179,24 @@ export const ConnectorSelect = ({
                         { defaultMessage: 'Not installed yet? Set one up.' }
                       )}
                       onClick={onOpenCreateConnector}
+                      isDisabled={disabled}
                       data-test-subj="contextCreateConnectorCard"
                       ebtProps={createCardEbtProps}
                     />
                   </EuiFlexItem>
                 ) : null}
               </EuiFlexGrid>
-              <EuiSpacer size="s" />
-              <EuiText size="xs" color="subdued">
-                <FormattedMessage
-                  id="xpack.contextEngine.aiIndexDetail.sources.selectOneOrMoreConnectors"
-                  defaultMessage="Select one or more."
-                />
-              </EuiText>
+              {availableConnectors.length > 0 ? (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiText size="xs" color="subdued">
+                    <FormattedMessage
+                      id="xpack.contextEngine.aiIndexDetail.sources.selectOneOrMoreConnectors"
+                      defaultMessage="Select one or more."
+                    />
+                  </EuiText>
+                </>
+              ) : null}
             </>
           )}
         </>
@@ -200,10 +209,17 @@ export const ConnectorSelect = ({
             iconType="plugs"
             dataTestSubj="contextConnectorsEmpty"
             message={
-              <FormattedMessage
-                id="xpack.contextEngine.sourcePicker.connectors.emptyBodyNoAccess"
-                defaultMessage="No connectors yet. Ask your administrator to create one."
-              />
+              connectors.length === 0 ? (
+                <FormattedMessage
+                  id="xpack.contextEngine.sourcePicker.connectors.emptyBodyNoAccess"
+                  defaultMessage="No connectors yet. Ask your administrator to create one."
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.contextEngine.sourcePicker.connectors.allAdded"
+                  defaultMessage="All installed connectors are already added."
+                />
+              )
             }
           />
         </>

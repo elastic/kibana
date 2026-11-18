@@ -28,12 +28,15 @@ type SourcesAddingKind = 'elasticsearch' | 'connector';
 interface SourcesPanelProps {
   isLoading: boolean;
   aiIndex: GetAiIndexResponse | undefined;
-  onSaved: () => void;
+  onSaved: () => void | Promise<unknown>;
   isManaged: boolean;
 }
 
 export const SourcesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: SourcesPanelProps) => {
-  const { saveSources, isSaving } = useSaveAiIndexSources();
+  const { saveSources, isSaving: isSavingRequest } = useSaveAiIndexSources();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  // Controls stay disabled until the refetch lands, so the next edit never builds from a stale list.
+  const isSaving = isSavingRequest || isRefreshing;
   const [addingKind, setAddingKind] = useState<SourcesAddingKind | undefined>();
 
   const savedSources = useMemo(() => toSelectedSources(aiIndex?.sources ?? []), [aiIndex?.sources]);
@@ -57,10 +60,16 @@ export const SourcesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: Sources
         return false;
       }
       const saved = await saveSources(aiIndex, next);
-      if (saved) {
-        onSaved();
+      if (!saved) {
+        return false;
       }
-      return saved;
+      setIsRefreshing(true);
+      try {
+        await onSaved();
+      } finally {
+        setIsRefreshing(false);
+      }
+      return true;
     },
     [aiIndex, onSaved, saveSources]
   );
