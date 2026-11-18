@@ -6,9 +6,11 @@
   "include": [
     "kibana.d.ts",
     "package.json",
+    "vitest.config.ts",
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/vitest",
   ],
   "exclude": [
     "target/**/*",

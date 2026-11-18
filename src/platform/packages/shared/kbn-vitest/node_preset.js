@@ -17,7 +17,9 @@ const KBN_JEST_DIR = Path.dirname(require.resolve('@kbn/jest/package.json'));
  * Vitest counterpart of the `@kbn/jest/jest_node` preset. Merge it into a package's
  * `vitest.config.ts` with `mergeConfig` and set `test.root` to the package directory.
  *
- * @type {import('vitest/config').ViteUserConfig}
+ * @type {import('vitest/config').ViteUserConfig & {
+ *   test: NonNullable<import('vitest/config').ViteUserConfig['test']>
+ * }}
  */
 module.exports = {
   resolve: {

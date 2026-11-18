@@ -2007,6 +2007,16 @@
       "enabled": true
     },
     {
+      "groupName": "vitest",
+      "matchDepNames": ["@fast-check/vitest", "vite", "vitest"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:Operations"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
       "groupName": "storybook",
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main", "8.19"],
