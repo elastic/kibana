@@ -103,3 +103,35 @@ export interface ListResponse {
   errors: SourceError[];
   unavailableColumns: UnavailableColumn[];
 }
+
+/** The body the inventory sends to Elasticsearch's `POST /_query` for one query. */
+export interface EsqlRequestBody {
+  query: string;
+  params: NamedParams;
+  include_execution_metadata: true;
+}
+
+/** One probe the planning ran, and what it decided. */
+export interface PlanProbe {
+  indexPattern: string;
+  request: EsqlRequestBody;
+  /** Whether the probe found a readable time-series index; null when the probe failed (see `errors`). */
+  hasTimeSeries: boolean | null;
+}
+
+/** One list query `_list` would send for the same request. */
+export interface PlanQuery {
+  indexPattern: string;
+  engine: QueryEngine;
+  request: EsqlRequestBody;
+}
+
+/** The probes the planning ran and the list queries `_list` would send; only the probes are executed. */
+export interface PlanResponse {
+  /** One entry per distinct source pattern, in source order. */
+  probes: PlanProbe[];
+  /** One entry per plan query `_list` would send, in plan order; a source whose probe failed has none. */
+  queries: PlanQuery[];
+  /** One entry per source whose probe failed. */
+  errors: SourceError[];
+}
