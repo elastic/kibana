@@ -6,7 +6,11 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { AlertEventStatus, CreateRuleData } from '@kbn/alerting-v2-schemas';
+import type {
+  AlertEventSeverity,
+  AlertEventStatus,
+  CreateRuleData,
+} from '@kbn/alerting-v2-schemas';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { z } from '@kbn/zod/v4';
 import type { detectionSignalReadingSchema } from '../../../common/detection_signal';
@@ -38,6 +42,8 @@ export interface DetectionStrategyDescriptor {
 export type DetectionSignalReading = z.infer<typeof detectionSignalReadingSchema> & {
   /** `recovered` and `no_data` are reported as readings too, not only `breached`. */
   status: AlertEventStatus;
+  /** A severity decided outside the engine, such as an external alert's; most strategies omit it. */
+  severity?: AlertEventSeverity;
 };
 
 /** Reads back the readings a strategy wrote before, so a generator can compare with its history. */
