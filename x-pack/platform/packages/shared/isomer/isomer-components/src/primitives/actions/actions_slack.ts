@@ -8,10 +8,14 @@
 import type { SlackActionsBlock, SlackBlock, SlackButtonElement } from '@elastic/isomer-sdk/slack';
 import { SLACK_LIMITS, clampSlackText, slackLinkUrl } from '@elastic/isomer-sdk/slack';
 import type { ActionsNode } from './actions';
-import { oneLine, slackActionId } from '../../lib';
+import { oneLine } from '../../lib';
 import { slackAppHref } from '../link/resolve_link';
 
 type ActionsButton = ActionsNode['buttons'][number];
+
+/** The Slack `action_id` of the element at `index` of its block that raises the event `name`: `{name}:{index}`. */
+export const slackActionId = (name: string, index: number): string =>
+  `${name}:${index}`.slice(0, SLACK_LIMITS.actionIdChars);
 
 const slackButtonHref = ({ url, app, path }: ActionsButton, baseUrl: string | undefined) => {
   if (url !== undefined) {

@@ -11,7 +11,8 @@ import type {
   SlackPlainTextObject,
 } from '@elastic/isomer-sdk/slack';
 import { SLACK_LIMITS, clampSlackText } from '@elastic/isomer-sdk/slack';
-import { oneLine, slackActionId } from '../../lib';
+import { oneLine } from '../../lib';
+import { slackActionId } from '../actions/actions_slack';
 import type { ChoicesNode } from './choices';
 
 const plain = (text: string): SlackPlainTextObject => ({
