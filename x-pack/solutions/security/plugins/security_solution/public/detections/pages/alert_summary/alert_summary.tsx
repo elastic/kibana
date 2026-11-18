@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingLogo, EuiSpacer } from '@elastic/eui';
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { ALERT_SUMMARY } from '../../../app/translations';
+import { SecurityAppHeader } from '../../../common/components/app_header';
+import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
+import { useKibana } from '../../../common/lib/kibana';
 import { useFetchIntegrations } from '../../hooks/alert_summary/use_fetch_integrations';
 import { LandingPage } from '../../components/alert_summary/landing_page/landing_page';
 import { Wrapper } from '../../components/alert_summary/wrapper';
@@ -24,27 +28,43 @@ const LOADING_INTEGRATIONS = i18n.translate('xpack.securitySolution.alertSummary
  * It fetches all the packages (integration) to pass them down to the rest of the page.
  */
 export const AlertSummaryPage = memo(() => {
+  const { docLinks } = useKibana().services;
   const {
     availablePackages,
     installedPackages,
     isLoading: integrationIsLoading,
   } = useFetchIntegrations();
 
-  if (integrationIsLoading) {
-    return (
-      <EuiEmptyPrompt
-        data-test-subj={LOADING_INTEGRATIONS_TEST_ID}
-        icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
-        title={<h2>{LOADING_INTEGRATIONS}</h2>}
+  const renderContent = () => {
+    if (integrationIsLoading) {
+      return (
+        <EuiEmptyPrompt
+          data-test-subj={LOADING_INTEGRATIONS_TEST_ID}
+          icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
+          title={<h2>{LOADING_INTEGRATIONS}</h2>}
+        />
+      );
+    }
+
+    if (installedPackages.length === 0) {
+      return <LandingPage packages={availablePackages} />;
+    }
+
+    return <Wrapper packages={installedPackages} />;
+  };
+
+  return (
+    <SecuritySolutionPageWrapper>
+      {/* The header must be a direct child of the wrapper, otherwise it does not stay sticky. */}
+      <SecurityAppHeader
+        title={ALERT_SUMMARY}
+        spacing="largeBleed"
+        docLink={docLinks.links.siem.alertSummaryPage}
       />
-    );
-  }
-
-  if (installedPackages.length === 0) {
-    return <LandingPage packages={availablePackages} />;
-  }
-
-  return <Wrapper packages={installedPackages} />;
+      <EuiSpacer size="m" />
+      {renderContent()}
+    </SecuritySolutionPageWrapper>
+  );
 });
 
 AlertSummaryPage.displayName = 'AlertSummaryPage';

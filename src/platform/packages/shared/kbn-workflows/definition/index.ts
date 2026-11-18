@@ -8,3 +8,4 @@
  */
 
 export * from './definition_utils';
+export * from './requires_delegated_identity';

@@ -87,7 +87,7 @@ describe('useFetchMoreRecords', () => {
     dataStateContainer.data$.documents$.next({
       fetchStatus: FetchStatus.COMPLETE,
       result: records.slice(0, 3),
-      pagination: { hasNextPage: true, nextPage: jest.fn() },
+      pagination: { hasNextPage: () => true, nextPage: jest.fn() },
     });
     dataStateContainer.data$.totalHits$.next({
       fetchStatus: FetchStatus.COMPLETE,
@@ -131,7 +131,7 @@ describe('useFetchMoreRecords', () => {
     dataStateContainer.data$.documents$.next({
       fetchStatus: FetchStatus.LOADING_MORE,
       result: records.slice(0, 3),
-      pagination: { hasNextPage: true, nextPage: jest.fn() },
+      pagination: { hasNextPage: () => true, nextPage: jest.fn() },
     });
     dataStateContainer.data$.totalHits$.next({
       fetchStatus: FetchStatus.COMPLETE,
@@ -181,7 +181,7 @@ describe('useFetchMoreRecords', () => {
     dataStateContainer.data$.documents$.next({
       fetchStatus: FetchStatus.COMPLETE,
       result: records.slice(0, 3),
-      pagination: { hasNextPage: true, nextPage: jest.fn() },
+      pagination: { hasNextPage: () => true, nextPage: jest.fn() },
     });
     dataStateContainer.data$.totalHits$.next({
       fetchStatus: FetchStatus.COMPLETE,
@@ -208,7 +208,7 @@ describe('useFetchMoreRecords', () => {
     dataStateContainer.data$.documents$.next({
       fetchStatus: FetchStatus.COMPLETE,
       result: records.slice(0, 3),
-      pagination: { hasNextPage: false, nextPage: jest.fn() },
+      pagination: { hasNextPage: () => false, nextPage: jest.fn() },
     });
     dataStateContainer.data$.totalHits$.next({
       fetchStatus: FetchStatus.COMPLETE,
@@ -234,31 +234,6 @@ describe('useFetchMoreRecords', () => {
     dataStateContainer.data$.documents$.next({
       fetchStatus: FetchStatus.COMPLETE,
       result: records.slice(0, 3),
-    });
-    dataStateContainer.data$.totalHits$.next({
-      fetchStatus: FetchStatus.COMPLETE,
-      result: 5,
-    });
-
-    const { result } = renderHook(() => useFetchMoreRecords(), {
-      wrapper: ({ children }) => (
-        <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
-      ),
-    });
-
-    expect(result.current.onFetchMoreRecords).toBeUndefined();
-  });
-
-  it('should not be allowed when rows are empty even with hasNextPage true', async () => {
-    const toolkit = await setup();
-    const { dataStateContainer } = await toolkit.initializeSingleTab({
-      tabId: toolkit.getCurrentTab().id,
-    });
-
-    dataStateContainer.data$.documents$.next({
-      fetchStatus: FetchStatus.COMPLETE,
-      result: [],
-      pagination: { hasNextPage: true, nextPage: jest.fn() },
     });
     dataStateContainer.data$.totalHits$.next({
       fetchStatus: FetchStatus.COMPLETE,

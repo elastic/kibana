@@ -43,7 +43,6 @@
       "matchDepNames": [
         "clean-webpack-plugin",
         "css-loader",
-        "mini-css-extract-plugin",
         "sass-loader",
         "style-loader",
         "val-loader",
@@ -164,10 +163,8 @@
         "playwright",
         "pngjs",
         "rxjs-marbles",
-        "sharp",
         "superagent",
-        "supertest",
-        "xmlbuilder"
+        "supertest"
       ],
       "reviewers": ["team:appex-qa"],
       "matchBaseBranches": ["main"],
@@ -326,7 +323,8 @@
         "@types/react",
         "@types/react-dom",
         "@types/react-test-renderer",
-        "csstype"
+        "csstype",
+        "react-element-to-jsx-string"
       ],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
@@ -343,14 +341,6 @@
     },
     {
       "matchDepNames": ["react-fast-compare"],
-      "reviewers": ["team:appex-sharedux"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:SharedUX"],
-      "enabled": true,
-      "minimumReleaseAge": "14 days"
-    },
-    {
-      "matchDepNames": ["react-element-to-jsx-string"],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:SharedUX"],
@@ -552,7 +542,7 @@
         "msw",
         "@xterm/xterm"
       ],
-      "reviewers": ["team:contextual-security-apps"],
+      "reviewers": ["team:contextual-security-apps", "team:siem-beacon"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Cloud Security"],
       "enabled": true,
@@ -764,8 +754,6 @@
     {
       "groupName": "LaunchDarkly",
       "matchDepNames": [
-        "@openfeature/launchdarkly-client-provider",
-        "@launchdarkly/js-client-sdk",
         "@launchdarkly/node-server-sdk",
         "@launchdarkly/openfeature-node-server"
       ],
@@ -787,7 +775,12 @@
     },
     {
       "groupName": "OpenFeature",
-      "matchDepNames": ["@openfeature/core", "@openfeature/server-sdk", "@openfeature/web-sdk"],
+      "matchDepNames": [
+        "@openfeature/core",
+        "@openfeature/ofrep-web-provider",
+        "@openfeature/server-sdk",
+        "@openfeature/web-sdk"
+      ],
       "reviewers": ["team:kibana-security", "team:kibana-core"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:skip", "Team:Security", "Team:Core"],
@@ -1095,6 +1088,11 @@
       "enabled": true
     },
     {
+      "description": "openapi-ts >= 0.91 is ESM-only and drops combined *_request schemas; the workflow connector codegen needs migrating first",
+      "matchDepNames": ["@hey-api/openapi-ts"],
+      "allowedVersions": "<0.91.0"
+    },
+    {
       "groupName": "jszip",
       "matchDepNames": ["jszip"],
       "reviewers": ["team:workflows-eng"],
@@ -1357,15 +1355,6 @@
       "enabled": true
     },
     {
-      "groupName": "package.json/pnpm-lock.yaml utils",
-      "matchDepNames": ["sort-package-json"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "cbor2",
       "matchDepNames": ["cbor2"],
       "reviewers": ["team:kibana-operations"],
@@ -1581,15 +1570,6 @@
       "enabled": true
     },
     {
-      "groupName": "lmdb",
-      "matchDepNames": ["lmdb"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "pirates",
       "matchDepNames": ["pirates"],
       "reviewers": ["team:kibana-operations"],
@@ -1783,7 +1763,7 @@
     {
       "groupName": "i18n-iso-countries",
       "matchDepNames": ["i18n-iso-countries"],
-      "reviewers": ["team:security-entity-analytics", "team:contextual-security-apps"],
+      "reviewers": ["team:security-entity-analytics", "team:contextual-security-apps", "team:siem-beacon"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Entity Analytics", "Team:Cloud Security"],
       "minimumReleaseAge": "14 days",
@@ -1981,15 +1961,6 @@
       "enabled": true
     },
     {
-      "groupName": "minify",
-      "matchDepNames": ["terser-webpack-plugin"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "@testing-library",
       "matchDepNames": [
         "@testing-library/dom",
@@ -2052,6 +2023,7 @@
       "reviewers": [
         "team:response-ops",
         "team:contextual-security-apps",
+        "team:siem-beacon",
         "team:security-asset-management",
         "team:streams-ui",
         "team:awp-platform",
@@ -2366,7 +2338,6 @@
       "reviewers": [
         "team:search-ml-ux",
         "team:kibana-core",
-        "team:kibana-security",
         "team:stack-monitoring"
       ],
       "matchBaseBranches": ["main"],
@@ -2375,8 +2346,7 @@
         "backport:skip",
         "Team:AI Infra",
         "Team:Monitoring",
-        "Team:Core",
-        "Team:Security"
+        "Team:Core"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -2482,7 +2452,7 @@
     {
       "groupName": "@xyflow/react",
       "matchPackageNames": ["@xyflow/react"],
-      "reviewers": ["team:contextual-security-apps"],
+      "reviewers": ["team:contextual-security-apps", "team:siem-beacon"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Cloud Security"],
       "minimumReleaseAge": "14 days",
@@ -2491,7 +2461,7 @@
     {
       "groupName": "@dagrejs/dagre",
       "matchPackageNames": ["@dagrejs/dagre"],
-      "reviewers": ["team:contextual-security-apps"],
+      "reviewers": ["team:contextual-security-apps", "team:siem-beacon"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Cloud Security"],
       "minimumReleaseAge": "14 days",

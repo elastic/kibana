@@ -14,3 +14,7 @@ export {
   type InvestigationLocatorParams,
   type InvestigationLocator,
 } from './investigation_locator';
+export {
+  NightshiftSettingsLocatorDefinition,
+  type NightshiftSettingsLocator,
+} from './settings_locator';

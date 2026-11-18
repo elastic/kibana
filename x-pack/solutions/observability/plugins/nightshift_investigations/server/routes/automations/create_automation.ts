@@ -28,11 +28,16 @@ const executionSchema = z.object({
 });
 
 const runtimeSchema = z.object({
-  dailyDispatchLimit: z.number().int().min(0).optional(),
+  dailyDispatchLimit: z.number().int().min(1).optional(),
   timeoutSeconds: z.number().int().min(1).optional(),
   dedupeWindowSeconds: z.number().int().min(0).optional(),
   overlapPolicy: z.enum(['drop', 'cancel_in_progress', 'queue']).optional(),
 });
+
+// A username can be an opaque id (for example on Cloud), so prefer a name a person recognizes.
+const getAuthorName = (
+  user: { username: string; full_name?: string; email?: string } | null
+): string | undefined => user?.full_name?.trim() || user?.email?.trim() || user?.username;
 
 export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'POST /internal/nightshift/automations',
@@ -57,7 +62,15 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
       runtime: runtimeSchema,
     }),
   }),
-  handler: async ({ request, params, getAutomationsSoClient, getWorkflowsManagement, context }) => {
+  handler: async ({
+    request,
+    params,
+    getAutomationsSoClient,
+    getWorkflowsManagement,
+    isUniversalAlertingAvailable,
+    getInvestigatorServiceAccountService,
+    context,
+  }) => {
     const workflowsManagement = getWorkflowsManagement();
     if (!workflowsManagement) {
       throw serverUnavailable('Workflows management is not available');
@@ -66,13 +79,18 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
     const coreContext = await context.core;
     const spaceId = coreContext.savedObjects.client.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
     const soClient = getAutomationsSoClient(request, spaceId);
+    // Before any write: refuses callers who could not write the bound workflow.
+    const serviceAccountId = await getInvestigatorServiceAccountService().resolveAutomationRunAs(
+      request,
+      spaceId
+    );
 
     const now = new Date().toISOString();
     const attributes: NightshiftAutomationAttributes = {
       name: params.body.name,
       description: params.body.description,
       tags: params.body.tags,
-      author: coreContext.security.authc.getCurrentUser()?.username,
+      author: getAuthorName(coreContext.security.authc.getCurrentUser()),
       automationType: params.body.automationType ?? 'custom',
       isEnabled: params.body.isEnabled ?? false,
       trigger: params.body.trigger,
@@ -92,7 +110,12 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
 
     let workflowId: string;
     try {
-      const yaml = generateWorkflowYaml({ automationId: created.id, automation: attributes });
+      const yaml = generateWorkflowYaml({
+        automationId: created.id,
+        automation: attributes,
+        serviceAccountId,
+        universalAlerts: isUniversalAlertingAvailable(),
+      });
       const workflow = await workflowsManagement.management.createWorkflow(
         { yaml },
         spaceId,

@@ -21,7 +21,7 @@ import {
   tableDefaults,
 } from '@kbn/securitysolution-data-table';
 import { type DataView } from '@kbn/data-views-plugin/public';
-import type { DeprecatedRowRenderer } from '@kbn/timelines-plugin/common';
+import type { DeprecatedRowRenderer } from '@kbn/securitysolution-timeline-common';
 import React, { type FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 

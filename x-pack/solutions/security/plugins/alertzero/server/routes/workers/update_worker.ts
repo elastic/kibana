@@ -19,6 +19,7 @@ import {
 } from '@kbn/alertzero-common';
 import { ALERTZERO_API_PRIVILEGE_WRITE } from '../../../common/constants';
 import { workerName } from '../../../common/worker_names';
+import { resolveHuntUniverse } from '../hunt/resolve_hunt_universe';
 import type { RouteDependencies } from '../register_routes';
 import type { WorkerEnableBlockedReason } from '../../services/workers/workers_service';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
@@ -122,7 +123,8 @@ export const registerUpdateWorkerRoute = ({
             workerId,
             request.body,
             getSpaceId(request),
-            request
+            request,
+            () => resolveHuntUniverse(context, logger)
           );
 
           switch (result.outcome) {

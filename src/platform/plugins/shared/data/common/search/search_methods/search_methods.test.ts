@@ -105,6 +105,26 @@ describe('SearchMethodsService', () => {
       );
     });
 
+    it('defaults locale from the getLocale dependency and lets params override it', async () => {
+      mockSearch.mockReturnValue(createMockResponse({ columns: [], values: [] }));
+      service = new SearchMethodsService(mockSearch, {
+        getEsQueryConfig,
+        getLocale: () => 'fr-FR',
+      });
+
+      await service.esql({ query: 'FROM logs' });
+      expect(mockSearch).toHaveBeenLastCalledWith(
+        { params: expect.objectContaining({ locale: 'fr-FR' }) },
+        expect.anything()
+      );
+
+      await service.esql({ query: 'FROM logs', locale: 'en-US' });
+      expect(mockSearch).toHaveBeenLastCalledWith(
+        { params: expect.objectContaining({ locale: 'en-US' }) },
+        expect.anything()
+      );
+    });
+
     it('passes options correctly', async () => {
       const mockResponse = { columns: [], values: [] };
       mockSearch.mockReturnValue(createMockResponse(mockResponse));
@@ -317,6 +337,70 @@ describe('SearchMethodsService', () => {
       });
     });
 
+    it('nextPage() reports no further page once every hit has been loaded', async () => {
+      const page = (ids: string[]) => ({
+        hits: {
+          hits: ids.map((id) => ({ _id: id, sort: [Number(id)] })),
+          total: { value: 5 },
+        },
+      });
+      mockSearch
+        .mockReturnValueOnce(createMockResponse(page(['1', '2'])))
+        .mockReturnValueOnce(createMockResponse(page(['3', '4'])))
+        .mockReturnValueOnce(createMockResponse(page(['5'])));
+
+      const first = await service.dslPaginated({
+        index: 'logs-*',
+        sort: [{ timestamp: 'desc' }],
+      });
+      const second = await first.pagination.nextPage();
+      const third = await second?.pagination.nextPage();
+
+      expect(second?.pagination.hasNextPage()).toBe(true);
+      expect(third?.pagination.hasNextPage()).toBe(false);
+    });
+
+    it('sets expand_wildcards for data views that allow hidden indices', async () => {
+      mockSearch.mockReturnValue(createMockResponse({ hits: { hits: [], total: 0 } }));
+
+      const hiddenDataView = {
+        getIndexPattern: () => 'logs-*',
+        getAllowHidden: () => true,
+      } as AbstractDataView;
+
+      await service.dsl({ index: hiddenDataView });
+
+      expect(mockSearch.mock.calls[0][0].params).toEqual(
+        expect.objectContaining({ index: 'logs-*', expand_wildcards: 'all' })
+      );
+    });
+
+    it('sends the request preference and keeps it for later pages', async () => {
+      const getRequestPreference = jest.fn().mockReturnValue('my-preference');
+      service = new SearchMethodsService(mockSearch, { getEsQueryConfig, getRequestPreference });
+      mockSearch.mockReturnValue(
+        createMockResponse({
+          hits: { hits: [{ sort: [1] }], total: { value: 2, relation: 'eq' } },
+        })
+      );
+
+      const result = await service.dslPaginated({ index: 'logs-*', size: 1, sort: [{ a: 'asc' }] });
+      await result.pagination.nextPage();
+
+      expect(mockSearch).toHaveBeenCalledTimes(2);
+      mockSearch.mock.calls.forEach(([request]) => {
+        expect(request.params.preference).toBe('my-preference');
+      });
+    });
+
+    it('omits preference when none is configured', async () => {
+      mockSearch.mockReturnValue(createMockResponse({ hits: { hits: [], total: 0 } }));
+
+      await service.dsl({ index: 'logs-*' });
+
+      expect(mockSearch.mock.calls[0][0].params).not.toHaveProperty('preference');
+    });
+
     describe('search context', () => {
       const phraseFilter: Filter = {
         meta: { alias: null, disabled: false, negate: false },
@@ -497,6 +581,7 @@ describe('SearchMethodsService', () => {
       const mockDataView = {
         id: '1',
         getIndexPattern: () => 'logs-*',
+        getAllowHidden: () => false,
       } as AbstractDataView;
 
       await service.dsl({
@@ -687,7 +772,6 @@ describe('SearchMethodsService', () => {
           _source: undefined,
           runtime_mappings: undefined,
           highlight: undefined,
-          track_total_hits: true,
         });
       });
 
@@ -799,9 +883,7 @@ describe('SearchMethodsService', () => {
       expect(mockSearch).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
-            body: expect.objectContaining({
-              track_total_hits: true,
-            }),
+            track_total_hits: true,
           }),
         }),
         expect.anything()
@@ -830,7 +912,7 @@ describe('SearchMethodsService', () => {
         sort: [{ timestamp: 'desc' }],
       });
 
-      expect(result.pagination.hasNextPage).toBe(true);
+      expect(result.pagination.hasNextPage()).toBe(true);
     });
 
     it('hasNextPage is false when no more results', async () => {
@@ -851,7 +933,117 @@ describe('SearchMethodsService', () => {
         sort: [{ timestamp: 'desc' }],
       });
 
-      expect(result.pagination.hasNextPage).toBe(false);
+      expect(result.pagination.hasNextPage()).toBe(false);
+    });
+
+    describe('with a short page', () => {
+      const twoHits = [
+        { _id: '1', _source: { message: 'test' }, sort: [1000] },
+        { _id: '2', _source: { message: 'test2' }, sort: [2000] },
+      ];
+
+      it('hasNextPage is false when fewer hits than size came back, even if the total is higher', async () => {
+        // e.g. the total counts a document on a shard that failed and can never be loaded
+        mockSearch.mockReturnValue(
+          createMockResponse({ hits: { hits: twoHits, total: { value: 100 } } })
+        );
+
+        const result = await service.dslPaginated({
+          index: 'logs-*',
+          size: 10,
+          sort: [{ timestamp: 'desc' }],
+        });
+
+        expect(result.pagination.hasNextPage()).toBe(false);
+        expect(result.pagination.hasNextPage(100)).toBe(false);
+      });
+
+      it('hasNextPage is true when a full page came back and hits remain', async () => {
+        mockSearch.mockReturnValue(
+          createMockResponse({ hits: { hits: twoHits, total: { value: 100 } } })
+        );
+
+        const result = await service.dslPaginated({
+          index: 'logs-*',
+          size: 2,
+          sort: [{ timestamp: 'desc' }],
+        });
+
+        expect(result.pagination.hasNextPage()).toBe(true);
+      });
+
+      it('hasNextPage is false on a short later page', async () => {
+        mockSearch
+          .mockReturnValueOnce(createMockResponse({ hits: { hits: twoHits, total: { value: 5 } } }))
+          .mockReturnValueOnce(
+            createMockResponse({ hits: { hits: twoHits.slice(0, 1), total: { value: 5 } } })
+          );
+
+        const first = await service.dslPaginated({
+          index: 'logs-*',
+          size: 2,
+          sort: [{ timestamp: 'desc' }],
+        });
+        const second = await first.pagination.nextPage();
+
+        expect(first.pagination.hasNextPage()).toBe(true);
+        expect(second?.pagination.hasNextPage(5)).toBe(false);
+      });
+    });
+
+    describe('with trackTotalHits: false', () => {
+      const untrackedParams = {
+        index: 'logs-*',
+        query: { match_all: {} },
+        sort: [{ timestamp: 'desc' as const }],
+        trackTotalHits: false as const,
+      };
+      const twoHitsWithoutTotal = {
+        hits: {
+          hits: [
+            { _id: '1', _source: { message: 'test' }, sort: [1000] },
+            { _id: '2', _source: { message: 'test2' }, sort: [2000] },
+          ],
+        },
+      };
+
+      it('does not ask Elasticsearch to count total hits', async () => {
+        mockSearch.mockReturnValue(createMockResponse(twoHitsWithoutTotal));
+
+        await service.dslPaginated(untrackedParams);
+
+        expect(mockSearch.mock.calls[0][0].params.track_total_hits).toBe(false);
+      });
+
+      it('sends track_total_hits as a request param', async () => {
+        mockSearch.mockReturnValue(createMockResponse(twoHitsWithoutTotal));
+
+        const { pagination } = await service.dslPaginated(untrackedParams);
+        await pagination.nextPage();
+
+        expect(mockSearch.mock.calls[0][0].params.track_total_hits).toBe(false);
+        expect(mockSearch.mock.calls[1][0].params.track_total_hits).toBe(false);
+      });
+
+      it('derives hasNextPage from the total the caller supplies', async () => {
+        mockSearch.mockReturnValue(createMockResponse(twoHitsWithoutTotal));
+
+        const { pagination } = await service.dslPaginated(untrackedParams);
+
+        expect(pagination.hasNextPage(100)).toBe(true);
+        expect(pagination.hasNextPage(2)).toBe(false);
+      });
+
+      it('compares the supplied total with everything loaded so far on later pages', async () => {
+        mockSearch.mockReturnValue(createMockResponse(twoHitsWithoutTotal));
+
+        const first = await service.dslPaginated(untrackedParams);
+        const second = await first.pagination.nextPage();
+
+        expect(mockSearch.mock.calls[1][0].params.track_total_hits).toBe(false);
+        expect(second?.pagination.hasNextPage(4)).toBe(false);
+        expect(second?.pagination.hasNextPage(5)).toBe(true);
+      });
     });
 
     it('hasNextPage is false when no sort values', async () => {
@@ -872,7 +1064,7 @@ describe('SearchMethodsService', () => {
         sort: [{ '@timestamp': 'desc' }],
       });
 
-      expect(result.pagination.hasNextPage).toBe(false);
+      expect(result.pagination.hasNextPage()).toBe(false);
     });
 
     it('nextPage() uses search_after from last hit sort', async () => {
@@ -942,7 +1134,7 @@ describe('SearchMethodsService', () => {
       await second?.pagination.nextPage();
 
       [0, 1, 2].forEach((call) => {
-        expect(mockSearch.mock.calls[call][0].params.body.track_total_hits).toBe(true);
+        expect(mockSearch.mock.calls[call][0].params.track_total_hits).toBe(true);
       });
     });
 
@@ -1043,7 +1235,7 @@ describe('SearchMethodsService', () => {
           kibanaQueryContext: { kibanaFilters: [phraseFilter] },
         });
 
-        expect(getBody(0).track_total_hits).toBe(true);
+        expect(mockSearch.mock.calls[0][0].params.track_total_hits).toBe(true);
       });
 
       it('reuses the same merged query on nextPage() without re-reading the config', async () => {
@@ -1245,6 +1437,21 @@ describe('SearchMethodsService', () => {
         expect(requestResponder.ok).toHaveBeenCalled();
       });
 
+      it('logs request stats before the request body so the Inspector opens on Statistics', async () => {
+        mockTwoPages();
+        const requestResponder = createMockRequestResponder();
+        const inspector = createMockInspector(requestResponder);
+        const getRequestStats = jest.fn().mockReturnValue({});
+
+        await service.dslPaginated(paginatedParams, {
+          inspector: { ...inspector, getRequestStats },
+        });
+
+        const [statsOrder] = requestResponder.stats.mock.invocationCallOrder;
+        const [jsonOrder] = requestResponder.json.mock.invocationCallOrder;
+        expect(statsOrder).toBeLessThan(jsonOrder);
+      });
+
       it('logs each page with the same adapter, without the session id after the first', async () => {
         mockTwoPages();
         const requestResponder = createMockRequestResponder();
@@ -1292,18 +1499,6 @@ describe('SearchMethodsService', () => {
           description: 'Test description',
           searchSessionId: undefined,
         });
-      });
-
-      it('does not log requests when no adapter is provided', async () => {
-        mockTwoPages();
-
-        const result = await service.dslPaginated(paginatedParams, {
-          inspector: { title: 'No adapter' },
-        });
-        const nextPage = await result.pagination.nextPage();
-
-        expect(nextPage).not.toBeNull();
-        expect(mockSearch).toHaveBeenCalledTimes(2);
       });
 
       it('logs an error when a page fails', async () => {

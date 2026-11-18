@@ -109,8 +109,6 @@ describe('WorkflowExecutionList', () => {
     overrides: Partial<WorkflowExecutionListProps> = {},
     services: StartServicesMock = createStartServicesMock()
   ) => {
-    services.userProfile.bulkGet.mockResolvedValue([]);
-
     return render(<WorkflowExecutionList {...defaultProps} {...overrides} />, {
       wrapper: getTestProvider({ services }),
     });

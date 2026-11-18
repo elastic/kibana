@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
 import React, { useEffect } from 'react';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { getNodeName, NodeType } from '../../../../../common/connections';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';

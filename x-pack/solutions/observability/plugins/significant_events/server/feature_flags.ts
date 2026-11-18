@@ -389,7 +389,7 @@ export function registerFeatureFlags(
               'xpack.significantEvents.nightshiftDeveloperModeDescription',
               {
                 defaultMessage:
-                  'When enabled, Nightshift shows extra developer-only UI and configuration options in this Kibana space.',
+                  'When enabled, nightshift shows extra developer-only UI and configuration options in this Kibana space.',
               }
             ),
             type: 'boolean',

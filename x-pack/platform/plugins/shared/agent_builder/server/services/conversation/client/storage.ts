@@ -71,8 +71,6 @@ const storageSettings = {
         dynamic: false,
         properties: {
           execution_id: types.keyword({}),
-          trigger_event_id: types.keyword({}),
-          started_at: types.date({}),
         },
       }),
       schema_version: types.long({}),

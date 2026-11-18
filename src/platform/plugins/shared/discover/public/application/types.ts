@@ -26,7 +26,7 @@ export interface RecordsFetchResponse {
   dataSource?: EsqlSource;
   esqlHeaderWarning?: string;
   interceptedWarnings?: SearchResponseWarning[];
-  pagination?: IDslPagination;
+  pagination?: IDslPagination<true>;
   approximationApplied?: boolean;
 }
 

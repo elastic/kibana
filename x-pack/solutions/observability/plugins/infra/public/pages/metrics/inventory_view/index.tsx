@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { Suspense } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPageSection, EuiSwitch, useEuiTheme } from '@elastic/eui';
+import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiPageSection, useEuiTheme } from '@elastic/eui';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { AppHeader } from '@kbn/app-header';
@@ -15,13 +15,7 @@ import { InfraPageTemplate } from '../../../components/shared/templates/infra_pa
 import { InfraOnboardingPage } from '../../../components/shared/templates/infra_onboarding_page';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useInfraHasData } from '../../../hooks/use_infra_has_data';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { useInfraEntitiesInventoryExperience } from '../../../hooks/use_infra_entities_inventory_experience';
-import {
-  entityInventoryTitle,
-  inventoryTitle,
-  entityInventoryToggleLabel,
-} from '../../../translations';
+import { inventoryTitle } from '../../../translations';
 import { SnapshotContainer } from './components/snapshot_container';
 import { WaffleTimeProvider } from './hooks/use_waffle_time';
 import { WaffleFiltersProvider } from './hooks/use_waffle_filters';
@@ -32,22 +26,17 @@ import { useMetricsAppHeaderMenu } from '../header/use_metrics_app_header_menu';
 
 export const SnapshotPage = (): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
-  const { services } = useKibanaContextForPlugin();
-  const [isEntityInventoryEnabled, setEntityInventoryEnabled] =
-    useInfraEntitiesInventoryExperience();
-  const isEntityInventoryActive = isEntityInventoryEnabled && !!services.entityInventoryApp;
 
   useTrackPageview({ app: 'infra_metrics', path: 'inventory' });
   useTrackPageview({ app: 'infra_metrics', path: 'inventory', delay: 15000 });
 
-  useMetricsBreadcrumbs(isEntityInventoryActive ? [] : [{ text: inventoryTitle }], {
+  useMetricsBreadcrumbs([{ text: inventoryTitle }], {
     parent: 'app',
   });
 
   const { menu, flyouts } = useMetricsAppHeaderMenu();
   const { showOnboarding } = useInfraHasData();
 
-  // Template noDataConfig ignores children; Inventory renders onboarding as body instead.
   return (
     <InventoryViewsProvider>
       <WaffleOptionsProvider>
@@ -59,11 +48,7 @@ export const SnapshotPage = (): React.ReactElement => {
                   hasDataOverride={!showOnboarding}
                   header={
                     <>
-                      <AppHeader
-                        title={isEntityInventoryActive ? entityInventoryTitle : inventoryTitle}
-                        menu={isEntityInventoryActive ? undefined : menu}
-                        spacing="standard"
-                      />
+                      <AppHeader title={inventoryTitle} menu={menu} spacing="standard" />
                       {flyouts}
                     </>
                   }
@@ -82,32 +67,7 @@ export const SnapshotPage = (): React.ReactElement => {
                     },
                   }}
                 >
-                  {services.entityInventoryApp && (
-                    <EuiFlexGroup
-                      justifyContent="flexEnd"
-                      alignItems="center"
-                      gutterSize="none"
-                      css={css`
-                        padding: ${euiTheme.size.m} ${euiTheme.size.m} 0 ${euiTheme.size.m};
-                        flex: 0 0 auto;
-                      `}
-                    >
-                      <EuiFlexItem grow={false}>
-                        <EuiSwitch
-                          compressed
-                          data-test-subj="entityInventoryExperienceToggle"
-                          label={entityInventoryToggleLabel}
-                          checked={isEntityInventoryEnabled}
-                          onChange={(e) => setEntityInventoryEnabled(e.target.checked)}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  )}
-                  {isEntityInventoryActive ? (
-                    <Suspense fallback={null}>
-                      {React.createElement(services.entityInventoryApp!.getAppComponent())}
-                    </Suspense>
-                  ) : showOnboarding ? (
+                  {showOnboarding ? (
                     <InfraOnboardingPage />
                   ) : (
                     <EuiPageSection

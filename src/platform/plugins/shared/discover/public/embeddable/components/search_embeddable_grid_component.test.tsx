@@ -608,6 +608,41 @@ describe('SearchEmbeddableGridComponent', () => {
     });
   });
 
+  it("passes renderMode='print' to the embeddable grid in print mode", async () => {
+    const savedSearch = createSavedSearch({ isEsql: false });
+    const api = createApi(savedSearch);
+    const stateManager = createStateManager();
+    stateManager.rows.next(rows);
+    stateManager.totalHitCount.next(rows.length);
+    (api.viewMode$ as unknown as BehaviorSubject<ViewMode>).next('print');
+
+    render(
+      <DiscoverTestProvider services={services}>
+        <SearchEmbeddableGridComponent
+          api={api}
+          dataView={dataViewMock}
+          stateManager={stateManager}
+          enableDocumentViewer={true}
+          inlineEditing={{
+            isActive: false,
+            hasPendingChanges: false,
+            onApply: jest.fn(),
+            onCancel: jest.fn(),
+          }}
+          docViewerRef={React.createRef<DocViewerApi>()}
+          expandedDoc={undefined}
+          initialDocViewerTabId={undefined}
+        />
+      </DiscoverTestProvider>
+    );
+
+    await waitFor(() => {
+      expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
+    });
+
+    expect(getLastGridProps().renderMode).toBe('print');
+  });
+
   describe('share direct link', () => {
     const expandedDoc = rows[0];
     const expandedDocRef = { id: esHitsMock[0]._id, index: esHitsMock[0]._index };
@@ -712,8 +747,8 @@ describe('SearchEmbeddableGridComponent', () => {
     });
   });
 
-  describe('isInteractive', () => {
-    it('should pass isInteractive=false to DiscoverGridEmbeddable when viewMode is non-interactive', async () => {
+  describe('renderMode', () => {
+    it("should pass renderMode='non-interactive' to DiscoverGridEmbeddable when viewMode is non-interactive", async () => {
       const savedSearch = createSavedSearch({ isEsql: false });
       const api = createApi(savedSearch);
       const stateManager = createStateManager();
@@ -747,7 +782,7 @@ describe('SearchEmbeddableGridComponent', () => {
         expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
       });
 
-      expect(getLastGridProps().isInteractive).toBe(false);
+      expect(getLastGridProps().renderMode).toBe('non-interactive');
     });
   });
 });

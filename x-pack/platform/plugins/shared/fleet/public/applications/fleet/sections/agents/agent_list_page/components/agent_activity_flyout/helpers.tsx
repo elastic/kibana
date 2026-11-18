@@ -9,6 +9,7 @@ import React from 'react';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 import { EuiIconTip, EuiFlexGroup } from '@elastic/eui';
 
+import { SCHEDULED_UNENROLL_ACTION_ID_PREFIX } from '../../../../../../../../common/constants';
 import type { ActionStatus } from '../../../../../types';
 
 const actionNames: {
@@ -35,7 +36,7 @@ const actionNames: {
     completedText: 'force unenrolled',
     cancelledText: 'force unenrollment',
   },
-  AUTOMATIC_FORCE_UNENROLL: {
+  AUTOMATIC_UNENROLL: {
     inProgressText: 'Automatic unenrolling',
     completedText: 'automatically unenrolled',
     cancelledText: 'automatic unenrollment',
@@ -90,10 +91,10 @@ const actionNames: {
 };
 
 export const getAction = (type?: string, actionId?: string) => {
-  // handling a special case of force unenrollment coming from an automatic task
+  // handling a special case of unenrollment scheduled by an automatic task
   // we know what kind of action is from the actionId prefix
-  if (actionId?.includes('UnenrollInactiveAgentsTask-'))
-    return actionNames.AUTOMATIC_FORCE_UNENROLL;
+  if (actionId?.startsWith(SCHEDULED_UNENROLL_ACTION_ID_PREFIX))
+    return actionNames.AUTOMATIC_UNENROLL;
   return actionNames[type ?? 'ACTION'] ?? actionNames.ACTION;
 };
 

@@ -159,13 +159,12 @@ describe('useWorkflowEditorReadOnly', () => {
     expect(result.current).toBe(true);
   });
 
-  it('is read-only on the executions tab with no execution selected', () => {
+  it('stays editable on the executions tab with no execution selected', () => {
     const { result } = renderReadOnlyHook({
       search: '?tab=executions',
-      activeTab: 'executions',
     });
 
-    expect(result.current).toBe(true);
+    expect(result.current).toBe(false);
   });
 
   it('is read-only for a managed workflow', () => {
@@ -206,13 +205,21 @@ describe('useWorkflowEditorReadOnlyReason', () => {
     expect(result.current).toBeUndefined();
   });
 
-  it('returns executions_tab on the executions tab', () => {
+  it('returns executions_tab when an execution is selected on the executions tab', () => {
     const { result } = renderWithStore(useWorkflowEditorReadOnlyReason, {
-      search: '?tab=executions',
+      search: `?tab=executions&executionId=${EXECUTION_ID}`,
       activeTab: 'executions',
     });
 
     expect(result.current).toBe('executions_tab');
+  });
+
+  it('returns undefined on the executions tab with no execution selected', () => {
+    const { result } = renderWithStore(useWorkflowEditorReadOnlyReason, {
+      search: '?tab=executions',
+    });
+
+    expect(result.current).toBeUndefined();
   });
 
   it('returns managed on the executions tab, because the Workflow tab is read-only too', () => {

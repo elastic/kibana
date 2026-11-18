@@ -186,7 +186,7 @@ const result = await data.search.dslPaginated({
 });
 
 // Fetch next page
-if (result.pagination.hasNextPage) {
+if (result.pagination.hasNextPage()) {
   const nextPage = await result.pagination.nextPage();
 }
 ```

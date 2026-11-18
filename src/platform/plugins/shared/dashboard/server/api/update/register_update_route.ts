@@ -21,7 +21,7 @@ import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getRouteConfig } from '../get_route_config';
 import { TransformPanelsInError } from '../transforms/in/transform_panels_in_error';
 import { getUpdateResponseBodySchema } from './schemas';
-import { update } from './update';
+import { InvalidDashboardIdError, update } from './update';
 import { spacesService } from '../../kibana_services';
 
 export function registerUpdateRoute(
@@ -91,8 +91,9 @@ export function registerUpdateRoute(
     async (ctx, req, res) =>
       telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         try {
+          const { core } = await ctx.resolve(['core']);
           const { body, operation } = await update(
-            ctx,
+            core,
             getCachedDashboardStateSchema(),
             req.params.id,
             req.body,
@@ -104,16 +105,19 @@ export function registerUpdateRoute(
           );
           if (operation === 'create') {
             // do not await tracking actions
-            void trackCreateDashboardAction(body, req).catch(); // do nothing on throw
+            void trackCreateDashboardAction(body, req).catch(() => {}); // do nothing on throw
             return res.created({ body });
           } else {
-            void trackUpdateDashboardAction(body, req).catch();
+            void trackUpdateDashboardAction(body, req).catch(() => {}); // do nothing on throw
             return res.ok({ body });
           }
         } catch (e) {
           if (e instanceof TransformPanelsInError) {
             logRequest(logger, req, 'warn', e.message);
             return res.custom(e.getCustomResponse());
+          }
+          if (e instanceof InvalidDashboardIdError) {
+            return writeErrorHandler(e.zodError, res, logger, req);
           }
           return writeErrorHandler(e, res, logger, req);
         }

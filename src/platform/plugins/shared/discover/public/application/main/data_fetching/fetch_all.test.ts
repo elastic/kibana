@@ -14,6 +14,7 @@ import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { reduce } from 'rxjs';
 import type { SearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { fetchAll, fetchMoreDocuments } from './fetch_all';
 import type {
@@ -95,6 +96,12 @@ describe('test fetchAll', () => {
     mockFetchDocuments.mockReset().mockResolvedValue({ records: [] });
     mockfetchEsql.mockReset().mockResolvedValue({ records: [] });
   });
+
+  const setEsqlQuery = (query: { esql: string }) => {
+    deps.internalState.dispatch(
+      internalStateActions.updateAppState({ tabId: deps.getCurrentTab().id, appState: { query } })
+    );
+  };
 
   test('changes of fetchStatus when starting with FetchStatus.UNINITIALIZED', async () => {
     const stateArr: FetchStatus[] = [];
@@ -255,12 +262,7 @@ describe('test fetchAll', () => {
     ];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     const query = { esql: 'from foo' };
-    deps.internalState.dispatch(
-      internalStateActions.updateAppState({
-        tabId: deps.getCurrentTab().id,
-        appState: { query },
-      })
-    );
+    setEsqlQuery(query);
     const mockEsqlSource = createMockEsqlSource([], [], '@timestamp');
     mockfetchEsql.mockResolvedValue({ records: documents, dataSource: mockEsqlSource });
     fetchAll({
@@ -286,6 +288,45 @@ describe('test fetchAll', () => {
     ]);
   });
 
+  test('finishes loading when ES|QL is canceled before returning results', async () => {
+    const query = { esql: 'from foo' };
+    setEsqlQuery(query);
+    mockfetchEsql.mockRejectedValue(new Error('The query was canceled'));
+    const onFetchRecordsComplete = jest.fn();
+
+    const fetching = fetchAll({ ...deps, onFetchRecordsComplete });
+    deps.abortController.abort(AbortReason.CANCELED);
+    await fetching;
+
+    expect(subjects.documents$.getValue()).toEqual({
+      fetchStatus: FetchStatus.COMPLETE,
+      query,
+    });
+    expect(subjects.totalHits$.getValue()).toEqual({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: undefined,
+    });
+    expect(subjects.main$.getValue().fetchStatus).toBe(FetchStatus.COMPLETE);
+    expect(onFetchRecordsComplete).not.toHaveBeenCalled();
+  });
+
+  test('does not finish loading when the ES|QL search is replaced', async () => {
+    const query = { esql: 'from foo' };
+    setEsqlQuery(query);
+    mockfetchEsql.mockRejectedValue(new Error('The query was replaced'));
+
+    fetchAll(deps);
+    deps.abortController.abort(AbortReason.REPLACED);
+    await waitForNextTick();
+
+    expect(subjects.documents$.getValue()).toEqual({
+      fetchStatus: FetchStatus.LOADING,
+      query,
+    });
+    expect(subjects.totalHits$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
+    expect(subjects.main$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
+  });
+
   describe('fetchMoreDocuments', () => {
     const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
     const initialRecords = [records[0], records[1]];
@@ -296,13 +337,13 @@ describe('test fetchAll', () => {
       const collectMain = subjectCollector(subjects.main$);
 
       const nextPagination = {
-        hasNextPage: false,
+        hasNextPage: () => false,
         nextPage: jest.fn(),
         getAllPages: jest.fn(),
       };
 
       const mockPagination = {
-        hasNextPage: true,
+        hasNextPage: () => true,
         nextPage: jest.fn().mockResolvedValue({
           rawResponse: {
             hits: {
@@ -322,6 +363,8 @@ describe('test fetchAll', () => {
       fetchMoreDocuments(deps);
       await waitForNextTick();
 
+      // later pages continue the first request, so they keep its (absolute) time range
+      expect(mockPagination.nextPage).toHaveBeenCalledTimes(1);
       expect(await collectDocuments()).toEqual([
         { fetchStatus: FetchStatus.UNINITIALIZED },
         {
@@ -353,7 +396,7 @@ describe('test fetchAll', () => {
       const collectMain = subjectCollector(subjects.main$);
 
       const mockPagination = {
-        hasNextPage: true,
+        hasNextPage: () => true,
         nextPage: jest.fn().mockRejectedValue({ msg: 'This query failed' }),
         getAllPages: jest.fn(),
       };
@@ -401,13 +444,7 @@ describe('test fetchAll', () => {
     test('should swallow abort errors', async () => {
       const collect = subjectCollector(subjects.documents$);
       mockfetchEsql.mockRejectedValue({ msg: 'The query was aborted' });
-      const query = { esql: 'from foo' };
-      deps.internalState.dispatch(
-        internalStateActions.updateAppState({
-          tabId: deps.getCurrentTab().id,
-          appState: { query },
-        })
-      );
+      setEsqlQuery({ esql: 'from foo' });
       fetchAll(deps);
       deps.abortController.abort();
       await waitForNextTick();

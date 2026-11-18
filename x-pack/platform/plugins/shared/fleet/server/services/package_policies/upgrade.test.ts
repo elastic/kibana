@@ -555,7 +555,7 @@ describe('Upgrade', () => {
         },
       ]);
 
-      expect(soClient.update).toBeCalledWith(
+      expect(soClient.update).toHaveBeenCalledWith(
         'ingest-package-policies',
         'package-policy-id-test-var-groups',
         expect.objectContaining({
@@ -598,7 +598,7 @@ describe('Upgrade', () => {
         id: 'package-policy-id-test-var-groups-saved',
       });
 
-      expect(soClient.update).toBeCalledWith(
+      expect(soClient.update).toHaveBeenCalledWith(
         'ingest-package-policies',
         'package-policy-id-test-var-groups-saved',
         expect.objectContaining({

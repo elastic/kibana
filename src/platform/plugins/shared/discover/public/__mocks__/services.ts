@@ -14,9 +14,9 @@ import { InitialTabStateService } from '../plugin_imports/initial_tab_state_serv
 import { DataSourceService } from '@kbn/data-source';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { searchSessionsManagementMock } from '@kbn/search-sessions-management-plugin/public/mocks';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
+import { alertingV2PluginMock } from '@kbn/alerting-v2-plugin/public/mocks';
 import type { SaveDiscoverSessionParams } from '@kbn/saved-search-plugin/public';
 import {
   analyticsServiceMock,
@@ -117,7 +117,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
 
   dataPlugin.search.dslPaginated = jest.fn().mockResolvedValue({
     rawResponse: { hits: { total: 2, hits: [] } },
-    pagination: { hasNextPage: false, nextPage: jest.fn() },
+    pagination: { hasNextPage: jest.fn().mockReturnValue(false), nextPage: jest.fn() },
   });
 
   dataPlugin.search.searchSource.createEmpty = jest.fn(() => createSearchSourceWithDeps());
@@ -134,43 +134,8 @@ export function createDiscoverServicesMock(): DiscoverServices {
     return createSearchSourceWithDeps(fields);
   });
 
-  dataPlugin.search.dslPaginated = jest.fn(async (params, options) => {
-    return {
-      rawResponse: {
-        took: 0,
-        timed_out: false,
-        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-        hits: { hits: [], total: 0 },
-      },
-      requestParams: undefined,
-      pagination: {
-        hasNextPage: false,
-        nextPage: jest.fn(async () => null),
-        getAllPages: jest.fn(),
-      },
-    };
-  });
-
-  const expressionsPlugin = expressionsPluginMock.createStartContract();
-
-  expressionsPlugin.run = jest.fn(() =>
-    of({
-      partial: false,
-      result: {
-        rows: [],
-      },
-    })
-  ) as unknown as typeof expressionsPlugin.run;
-
-  expressionsPlugin.execute = jest.fn(() => ({
-    getData: jest.fn(() =>
-      of({
-        result: { type: 'datatable', rows: [], columns: [] },
-      })
-    ),
-  })) as unknown as typeof expressionsPlugin.execute;
-
   const corePluginMock = coreMock.createStart();
+  corePluginMock.http.get.mockResolvedValue(undefined);
 
   const uiSettingsMock: Partial<typeof corePluginMock.uiSettings> = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -327,7 +292,6 @@ export function createDiscoverServicesMock(): DiscoverServices {
     notifications: {
       toasts: notificationServiceMock.createStartContract().toasts,
     },
-    expressions: expressionsPlugin,
     savedObjectsTagging: {
       ui: {
         getTagIdsFromReferences: jest.fn().mockResolvedValue([]),
@@ -378,15 +342,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       getOriginatingPath: jest.fn(() => undefined),
       clearEditorState: jest.fn(),
     },
-    alertingVTwo: {
-      CreateRuleOptionsFlyout: jest.fn(() => null),
-      RulesPage: jest.fn(() => null),
-      RuleLibraryPage: jest.fn(() => null),
-      EpisodesPage: jest.fn(() => null),
-      ActionPoliciesPage: jest.fn(() => null),
-      ExecutionHistoryPage: jest.fn(() => null),
-      createAlertingV2HostApp: jest.fn(),
-    },
+    alertingVTwo: alertingV2PluginMock.createStartContract(),
     trackUiMetric: jest.fn(),
     logger: { get: jest.fn(() => loggerMock.create()) },
   } as unknown as DiscoverServices;

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { BehaviorSubject } from 'rxjs';
 import { combineLatest, debounceTime, switchMap, tap } from 'rxjs';
 
@@ -25,7 +26,7 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type {
   FetchContext,
   HasParentApi,
-  PublishesDataViews,
+  PublishesDataSources,
   PublishesTitle,
   PublishesSavedObjectId,
   PublishesDataLoading,
@@ -51,7 +52,7 @@ import { isFieldStatsMode } from './utils/is_field_stats_mode';
 type SavedSearchPartialFetchApi = PublishesSavedSearch &
   PublishesSavedObjectId &
   PublishesDataLoading &
-  PublishesDataViews &
+  PublishesDataSources<DataView> &
   PublishesTitle &
   PublishesWritableTimeRange & {
     fetchContext$: BehaviorSubject<FetchContext | undefined>;
@@ -172,7 +173,7 @@ export function initializeFetch({
   let abortController: AbortController | undefined;
   let cachedEsqlSource: { identity: string; source: EsqlSource } | undefined;
 
-  const observables = [fetch$(api), api.savedSearch$, api.dataViews$, refreshTrigger$] as const;
+  const observables = [fetch$(api), api.savedSearch$, api.dataSources$, refreshTrigger$] as const;
 
   const fetchSubscription = combineLatest(observables)
     .pipe(
@@ -246,7 +247,7 @@ export function initializeFetch({
             });
             const publishedSource = esqlSource$?.getValue();
             // The panel already resolved this query before fetch. Resolving again and
-            // publishing a new data view emits dataViews$, which aborts this request.
+            // publishing a new data view emits dataSources$, which aborts this request.
             if (
               !cachedEsqlSource &&
               publishedSource &&
@@ -285,7 +286,6 @@ export function initializeFetch({
               abortSignal: currentAbortController.signal,
               inspectorAdapters,
               data: discoverServices.data,
-              expressions: discoverServices.expressions,
               scopedProfilesManager,
               searchSessionId,
               esqlVariables,
@@ -390,7 +390,7 @@ export function initializeFetch({
         abortSignal: moreAbortController.signal,
         executionContext,
       });
-      const dataView = api.dataViews$.getValue()?.[0];
+      const dataView = api.dataSources$.getValue()?.[0];
 
       if (!nextPageResult || !dataView) {
         return;

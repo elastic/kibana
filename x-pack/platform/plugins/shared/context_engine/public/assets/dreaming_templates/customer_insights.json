@@ -1,0 +1,108 @@
+{
+  "summary": "Customer support for a loyalty program. Content includes member conversations with the support agent and the agent's queries over member, loyalty and flight data. Support agents use it to spot recurring customer problems, follow up on open ones, and answer questions about the program with figures it already confirmed.",
+  "rationale": "Support conversations carry two kinds of knowledge: what went wrong for a member, and what the data says about members as a whole. Tying problems to customers, tiers, routes and regions lets the agent see when a problem repeats and who it hits. Keeping program figures as metrics, segment insights and trends, each with its numbers and period, lets it answer “how is this tier doing?” without querying again.",
+  "dreaming": {
+    "instructions": "Record two kinds of knowledge.\n\nCustomer problems: what a customer reported, what it affected, and whether and how it was resolved, from what the customer says and what the data or the support agent confirms. Link each problem to the customer, their tier, and the route or region it concerns. When another customer reports the same kind of problem, add to that problem instead of recording a new one, so recurring problems stand out. Record a customer's service preferences and any sign that they may leave.\n\nCustomer insights: the figures the agent's queries returned about the program as a whole, such as tiers, churn, lifetime value, flights over time, enrollment, regions and member demographics. Record each with its numbers, the period, and the members it covers. When a later result measures the same thing, update that fact instead of adding another.\n\nSkip:\n- A customer's address or postal code, phone number, email address, payment details, salary, gender, marital status and education. Record these only as counts or averages across members.\n- Figures the agent stated without a query result behind them.\n- Small talk, and the agent's own plans and reasoning.",
+    "facts": [
+      {
+        "type": "customer_problem",
+        "description": "A problem one customer reported, with what happened, when, and whether it is open or resolved, such as \"points from a March trip never posted\"."
+      },
+      {
+        "type": "recurring_problem",
+        "description": "A problem several customers reported, with how often and who it hits, such as \"cancelled flights lose the member's upgrade, reported by three Star members\"."
+      },
+      {
+        "type": "resolution",
+        "description": "What fixed a problem, or the next step agreed with the customer, such as \"missing points are credited once the partner flight posts\"."
+      },
+      {
+        "type": "churn_risk",
+        "description": "A sign a customer may leave, and why, such as \"thinking of cancelling if their status does not improve\"."
+      },
+      {
+        "type": "service_preference",
+        "description": "How a customer wants to be served, such as an aisle seat, a vegetarian meal, early morning departures, or contact by email only."
+      },
+      {
+        "type": "program_metric",
+        "description": "A measured figure about the program, with its value, period and scope, such as \"churn rate is 13.1% for Aurora, 12.6% for Nova and 11.8% for Star\"."
+      },
+      {
+        "type": "segment_insight",
+        "description": "How one group of members differs from others, by tier, region, enrollment type, education or salary band, such as \"Ontario has the most members, 5,404\"."
+      },
+      {
+        "type": "trend",
+        "description": "A change or pattern over time, such as \"flights grew 27.9% from 2017 to 2018\" or \"July is the busiest month\"."
+      }
+    ],
+    "entities": {
+      "nodes": [
+        {
+          "type": "customer",
+          "description": "A loyalty program member, identified by their loyalty number. Keep only what support needs to serve them: their card, where they live by city and province, how they enrolled, and whether they are still a member.",
+          "attributes": [
+            "loyalty_number",
+            "loyalty_card",
+            "city",
+            "province",
+            "enrollment_type",
+            "status"
+          ]
+        },
+        {
+          "type": "loyalty_tier",
+          "description": "A loyalty card tier, such as Star, Nova or Aurora.",
+          "attributes": [
+            "member_count",
+            "churn_rate",
+            "average_clv"
+          ]
+        },
+        {
+          "type": "problem",
+          "description": "A kind of problem customers run into, such as missing points, a double charge or a lost upgrade.",
+          "attributes": [
+            "category",
+            "status"
+          ]
+        },
+        {
+          "type": "route",
+          "description": "A flight route or destination, such as Toronto to Vancouver.",
+          "attributes": [
+            "origin",
+            "destination"
+          ]
+        },
+        {
+          "type": "region",
+          "description": "A province or city members live in.",
+          "attributes": [
+            "country",
+            "member_count"
+          ]
+        }
+      ]
+    },
+    "relationships": [
+      {
+        "type": "has_tier",
+        "description": "A customer holds a loyalty tier."
+      },
+      {
+        "type": "experienced",
+        "description": "A customer ran into a problem."
+      },
+      {
+        "type": "lives_in",
+        "description": "A customer lives in a region."
+      },
+      {
+        "type": "affects",
+        "description": "A problem hits a tier, route or region."
+      }
+    ]
+  }
+}

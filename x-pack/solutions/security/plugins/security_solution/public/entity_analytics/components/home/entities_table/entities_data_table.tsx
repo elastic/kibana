@@ -40,7 +40,6 @@ import { type AddFieldFilterHandler } from '@kbn/unified-field-list';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { type DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import type { inputsModel } from '../../../../common/store';
@@ -50,11 +49,6 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 import { EmptyComponent } from '../../../../common/lib/cell_actions/helpers';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { useKibana } from '../../../../common/lib/kibana';
-import {
-  EntityPanelKeyByType,
-  EntityPanelParamByType,
-} from '../../../../flyout/entity_details/shared/constants';
-import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import {
@@ -196,8 +190,6 @@ export const EntitiesDataTable = ({
     setUrlQuery,
   } = state;
 
-  const { closeFlyout, openFlyout } = useExpandableFlyoutApi();
-  const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openEntityFlyout } = useFlyoutApi();
   const {
     timelinePrivileges: { read: canUseTimeline },
@@ -210,36 +202,21 @@ export const EntitiesDataTable = ({
 
   const openTableFlyout = useCallback(
     (doc?: DataTableRecord | undefined) => {
-      if (!doc) {
-        closeFlyout();
-        return;
-      }
+      if (!doc) return;
 
       const { entityType, entityName, entityId } = getEntityFields(doc);
       if (!entityType || !entityName || !entityId) return;
 
-      const sharedParams = { entityId, contextID: tableId, scopeId: tableId };
-
-      if (enableNewFlyout) {
-        openEntityFlyout({
-          engineType: entityType,
-          entityName,
-          origin: FLYOUT_ORIGIN.ENTITIES_TABLE,
-          ...sharedParams,
-        });
-        return;
-      }
-
-      // Generic entities have no dedicated panel in the legacy flyout.
-      const panelKey = EntityPanelKeyByType[entityType];
-      const paramName = EntityPanelParamByType[entityType];
-      if (panelKey && paramName) {
-        openFlyout({
-          right: { id: panelKey, params: { [paramName]: entityName, ...sharedParams } },
-        });
-      }
+      openEntityFlyout({
+        engineType: entityType,
+        entityName,
+        origin: FLYOUT_ORIGIN.ENTITIES_TABLE,
+        entityId,
+        contextID: tableId,
+        scopeId: tableId,
+      });
     },
-    [enableNewFlyout, openFlyout, openEntityFlyout, closeFlyout, tableId]
+    [openEntityFlyout, tableId]
   );
 
   const {

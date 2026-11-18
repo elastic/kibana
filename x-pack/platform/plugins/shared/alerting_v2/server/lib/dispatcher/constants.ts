@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { parseDurationToMs } from '../duration';
+
 /**
  * How far behind the persisted watermark each scan re-reads. Re-reads are
  * free: the INLINE STATS dedup in `getDispatchableAlertEventsQuery`
@@ -52,29 +54,31 @@ export const PRE_FETCH_STUCK_ADVANCE_LAG_MS = MAX_WINDOW_MINUTES * 60_000;
  */
 export const DEFAULT_GROUPING = { mode: 'per_alert' } as const;
 
-/** Task Manager timeout for one dispatcher tick. Also consumed by task_definition.ts. */
+/**
+ * Default Task Manager timeout for one dispatcher tick, overridable with
+ * `xpack.alerting_v2.dispatcher.run.timeout`. Also consumed by task_definition.ts.
+ */
 export const DISPATCHER_TASK_TIMEOUT = '1m' as const;
 
 /**
- * Millisecond equivalent of DISPATCHER_TASK_TIMEOUT. Keep in sync with the
- * string above; both must be updated together when changing the task timeout.
- * Used to derive TICK_DEADLINE_MS so the relationship is enforced in code
- * rather than just a comment.
+ * Time a tick keeps between its soft deadline and the task timeout. Must cover
+ * the slowest step that cannot yield to the abort signal, e.g. one
+ * DISPATCH_CHUNK_SIZE workflow schedule and its `.alert-actions` commit.
  */
-export const DISPATCHER_TASK_TIMEOUT_MS = 60_000;
+export const TICK_DEADLINE_MARGIN_MS = 15_000;
 
 /**
- * Self-imposed stop at 70 % of DISPATCHER_TASK_TIMEOUT_MS. The margin is
- * load-bearing: past the TM timeout `isExpired` is already true and the
+ * Self-imposed stop TICK_DEADLINE_MARGIN_MS before the task timeout. The margin
+ * is load-bearing: past the TM timeout `isExpired` is already true and the
  * returned state is discarded (task_manager task_runner.ts:764), so the
- * watermark would freeze. A safe margin must account for the time the current
- * step takes to yield after the signal fires.
+ * watermark would freeze.
  */
-export const TICK_DEADLINE_MS = Math.round(DISPATCHER_TASK_TIMEOUT_MS * 0.7);
+export const getTickDeadlineMs = (timeout: string): number =>
+  parseDurationToMs(timeout) - TICK_DEADLINE_MARGIN_MS;
 
 /**
  * Max workflow schedule items per `bulkScheduleWorkflow` call. Sized so a tick
- * can abort between chunks before `TICK_DEADLINE_MS`. A chunk holds whole groups
+ * can abort between chunks before the tick deadline (`getTickDeadlineMs`). A chunk holds whole groups
  * and is followed by one `.alert-actions` commit.
  */
 export const DISPATCH_CHUNK_SIZE = 250;

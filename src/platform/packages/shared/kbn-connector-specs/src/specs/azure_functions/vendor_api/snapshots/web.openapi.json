@@ -1,0 +1,2410 @@
+{
+  "components": {
+    "schemas": {
+      "ApiDefinitionInfo": {
+        "properties": {
+          "url": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ApiManagementConfig": {
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutoHealActions": {
+        "properties": {
+          "actionType": {
+            "enum": [
+              "Recycle",
+              "LogEvent",
+              "CustomAction"
+            ],
+            "type": "string"
+          },
+          "customAction": {
+            "$ref": "#/components/schemas/AutoHealCustomAction"
+          },
+          "minProcessExecutionTime": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutoHealCustomAction": {
+        "properties": {
+          "exe": {
+            "type": "string"
+          },
+          "parameters": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutoHealRules": {
+        "properties": {
+          "actions": {
+            "$ref": "#/components/schemas/AutoHealActions"
+          },
+          "triggers": {
+            "$ref": "#/components/schemas/AutoHealTriggers"
+          }
+        },
+        "type": "object"
+      },
+      "AutoHealTriggers": {
+        "properties": {
+          "privateBytesInKB": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "requests": {
+            "$ref": "#/components/schemas/RequestsBasedTrigger"
+          },
+          "slowRequests": {
+            "$ref": "#/components/schemas/SlowRequestsBasedTrigger"
+          },
+          "slowRequestsWithPath": {
+            "items": {
+              "$ref": "#/components/schemas/SlowRequestsBasedTrigger"
+            },
+            "type": "array"
+          },
+          "statusCodes": {
+            "items": {
+              "$ref": "#/components/schemas/StatusCodesBasedTrigger"
+            },
+            "type": "array"
+          },
+          "statusCodesRange": {
+            "items": {
+              "$ref": "#/components/schemas/StatusCodesRangeBasedTrigger"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AzureStorageInfoValue": {
+        "properties": {
+          "accessKey": {
+            "type": "string"
+          },
+          "accountName": {
+            "type": "string"
+          },
+          "mountPath": {
+            "type": "string"
+          },
+          "protocol": {
+            "enum": [
+              "Smb",
+              "Http",
+              "Nfs"
+            ],
+            "type": "string"
+          },
+          "shareName": {
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "Ok",
+              "InvalidCredentials",
+              "InvalidShare",
+              "NotValidated"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "AzureFiles",
+              "AzureBlob"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CloningInfo": {
+        "properties": {
+          "appSettingsOverrides": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "cloneCustomHostNames": {
+            "type": "boolean"
+          },
+          "cloneSourceControl": {
+            "type": "boolean"
+          },
+          "configureLoadBalancing": {
+            "type": "boolean"
+          },
+          "correlationId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "hostingEnvironment": {
+            "type": "string"
+          },
+          "overwrite": {
+            "type": "boolean"
+          },
+          "sourceWebAppId": {
+            "type": "string"
+          },
+          "sourceWebAppLocation": {
+            "type": "string"
+          },
+          "trafficManagerProfileId": {
+            "type": "string"
+          },
+          "trafficManagerProfileName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "sourceWebAppId"
+        ],
+        "type": "object"
+      },
+      "ConnStringInfo": {
+        "properties": {
+          "connectionString": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "MySql",
+              "SQLServer",
+              "SQLAzure",
+              "Custom",
+              "NotificationHub",
+              "ServiceBus",
+              "EventHub",
+              "ApiHub",
+              "DocDb",
+              "RedisCache",
+              "PostgreSQL"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CorsSettings": {
+        "properties": {
+          "allowedOrigins": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "supportCredentials": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "DaprConfig": {
+        "properties": {
+          "appId": {
+            "type": "string"
+          },
+          "appPort": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "enableApiLogging": {
+            "type": "boolean"
+          },
+          "enabled": {
+            "default": false,
+            "type": "boolean"
+          },
+          "httpMaxRequestSize": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "httpReadBufferSize": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "logLevel": {
+            "enum": [
+              "info",
+              "debug",
+              "warn",
+              "error"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DefaultErrorResponse": {
+        "properties": {
+          "error": {
+            "properties": {
+              "code": {
+                "readOnly": true,
+                "type": "string"
+              },
+              "details": {
+                "items": {
+                  "properties": {
+                    "code": {
+                      "readOnly": true,
+                      "type": "string"
+                    },
+                    "message": {
+                      "readOnly": true,
+                      "type": "string"
+                    },
+                    "target": {
+                      "readOnly": true,
+                      "type": "string"
+                    }
+                  },
+                  "readOnly": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "innererror": {
+                "readOnly": true,
+                "type": "string"
+              },
+              "message": {
+                "readOnly": true,
+                "type": "string"
+              },
+              "target": {
+                "readOnly": true,
+                "type": "string"
+              }
+            },
+            "readOnly": true,
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "Experiments": {
+        "properties": {
+          "rampUpRules": {
+            "items": {
+              "$ref": "#/components/schemas/RampUpRule"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ExtendedLocation": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FunctionAppConfig": {
+        "properties": {
+          "deployment": {
+            "$ref": "#/components/schemas/FunctionsDeployment"
+          },
+          "runtime": {
+            "$ref": "#/components/schemas/FunctionsRuntime"
+          },
+          "scaleAndConcurrency": {
+            "$ref": "#/components/schemas/FunctionsScaleAndConcurrency"
+          }
+        },
+        "type": "object"
+      },
+      "FunctionEnvelope": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ProxyOnlyResource"
+          }
+        ],
+        "properties": {
+          "properties": {
+            "properties": {
+              "config": {
+                "type": "object"
+              },
+              "config_href": {
+                "type": "string"
+              },
+              "files": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              "function_app_id": {
+                "type": "string"
+              },
+              "href": {
+                "type": "string"
+              },
+              "invoke_url_template": {
+                "type": "string"
+              },
+              "isDisabled": {
+                "type": "boolean"
+              },
+              "language": {
+                "type": "string"
+              },
+              "script_href": {
+                "type": "string"
+              },
+              "script_root_path_href": {
+                "type": "string"
+              },
+              "secrets_file_href": {
+                "type": "string"
+              },
+              "test_data": {
+                "type": "string"
+              },
+              "test_data_href": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "FunctionEnvelopeCollection": {
+        "properties": {
+          "nextLink": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "value": {
+            "items": {
+              "$ref": "#/components/schemas/FunctionEnvelope"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "type": "object"
+      },
+      "FunctionSecrets": {
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "trigger_url": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FunctionsAlwaysReadyConfig": {
+        "properties": {
+          "instanceCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FunctionsDeployment": {
+        "properties": {
+          "storage": {
+            "properties": {
+              "authentication": {
+                "properties": {
+                  "storageAccountConnectionStringName": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "enum": [
+                      "SystemAssignedIdentity",
+                      "UserAssignedIdentity",
+                      "StorageAccountConnectionString"
+                    ],
+                    "type": "string"
+                  },
+                  "userAssignedIdentityResourceId": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "type": {
+                "enum": [
+                  "blobContainer"
+                ],
+                "type": "string"
+              },
+              "value": {
+                "format": "uri",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "FunctionsRuntime": {
+        "properties": {
+          "name": {
+            "enum": [
+              "dotnet-isolated",
+              "node",
+              "java",
+              "powershell",
+              "python",
+              "custom"
+            ],
+            "type": "string"
+          },
+          "version": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FunctionsScaleAndConcurrency": {
+        "properties": {
+          "alwaysReady": {
+            "items": {
+              "$ref": "#/components/schemas/FunctionsAlwaysReadyConfig"
+            },
+            "type": "array"
+          },
+          "instanceMemoryMB": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "maximumInstanceCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "triggers": {
+            "properties": {
+              "http": {
+                "properties": {
+                  "perInstanceConcurrency": {
+                    "format": "int32",
+                    "type": "integer"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "HandlerMapping": {
+        "properties": {
+          "arguments": {
+            "type": "string"
+          },
+          "extension": {
+            "type": "string"
+          },
+          "scriptProcessor": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "HostKeys": {
+        "properties": {
+          "functionKeys": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "masterKey": {
+            "type": "string"
+          },
+          "systemKeys": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "HostNameSslState": {
+        "properties": {
+          "hostType": {
+            "enum": [
+              "Standard",
+              "Repository"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "sslState": {
+            "enum": [
+              "Disabled",
+              "SniEnabled",
+              "IpBasedEnabled"
+            ],
+            "type": "string"
+          },
+          "thumbprint": {
+            "type": "string"
+          },
+          "toUpdate": {
+            "type": "boolean"
+          },
+          "virtualIP": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "HostingEnvironmentProfile": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "type": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IpSecurityRestriction": {
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "headers": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "ipAddress": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "priority": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "subnetMask": {
+            "type": "string"
+          },
+          "subnetTrafficTag": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "tag": {
+            "enum": [
+              "Default",
+              "XffProxy",
+              "ServiceTag"
+            ],
+            "type": "string"
+          },
+          "vnetSubnetResourceId": {
+            "type": "string"
+          },
+          "vnetTrafficTag": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ManagedServiceIdentity": {
+        "properties": {
+          "principalId": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "tenantId": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "SystemAssigned",
+              "UserAssigned",
+              "SystemAssigned, UserAssigned",
+              "None"
+            ],
+            "type": "string"
+          },
+          "userAssignedIdentities": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/userAssignedIdentity"
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "NameValuePair": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "OutboundVnetRouting": {
+        "properties": {
+          "allTraffic": {
+            "type": "boolean"
+          },
+          "applicationTraffic": {
+            "type": "boolean"
+          },
+          "backupRestoreTraffic": {
+            "type": "boolean"
+          },
+          "contentShareTraffic": {
+            "type": "boolean"
+          },
+          "imagePullTraffic": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ProxyOnlyResource": {
+        "properties": {
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "name": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "type": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PushSettings": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ProxyOnlyResource"
+          }
+        ],
+        "properties": {
+          "properties": {
+            "properties": {
+              "dynamicTagsJson": {
+                "type": "string"
+              },
+              "isPushEnabled": {
+                "type": "boolean"
+              },
+              "tagWhitelistJson": {
+                "type": "string"
+              },
+              "tagsRequiringAuth": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "isPushEnabled"
+            ],
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "RampUpRule": {
+        "properties": {
+          "actionHostName": {
+            "type": "string"
+          },
+          "changeDecisionCallbackUrl": {
+            "type": "string"
+          },
+          "changeIntervalInMinutes": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "changeStep": {
+            "format": "double",
+            "type": "number"
+          },
+          "maxReroutePercentage": {
+            "format": "double",
+            "type": "number"
+          },
+          "minReroutePercentage": {
+            "format": "double",
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "reroutePercentage": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "RequestsBasedTrigger": {
+        "properties": {
+          "count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "timeInterval": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Resource": {
+        "properties": {
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "name": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "tags": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "type": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "location"
+        ],
+        "type": "object"
+      },
+      "ResourceConfig": {
+        "properties": {
+          "cpu": {
+            "format": "double",
+            "type": "number"
+          },
+          "memory": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Site": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Resource"
+          }
+        ],
+        "properties": {
+          "extendedLocation": {
+            "$ref": "#/components/schemas/ExtendedLocation"
+          },
+          "identity": {
+            "$ref": "#/components/schemas/ManagedServiceIdentity"
+          },
+          "properties": {
+            "properties": {
+              "autoGeneratedDomainNameLabelScope": {
+                "enum": [
+                  "TenantReuse",
+                  "SubscriptionReuse",
+                  "ResourceGroupReuse",
+                  "NoReuse"
+                ],
+                "type": "string"
+              },
+              "availabilityState": {
+                "enum": [
+                  "Normal",
+                  "Limited",
+                  "DisasterRecoveryMode"
+                ],
+                "readOnly": true,
+                "type": "string"
+              },
+              "clientAffinityEnabled": {
+                "type": "boolean"
+              },
+              "clientAffinityPartitioningEnabled": {
+                "type": "boolean"
+              },
+              "clientAffinityProxyEnabled": {
+                "type": "boolean"
+              },
+              "clientCertEnabled": {
+                "type": "boolean"
+              },
+              "clientCertExclusionPaths": {
+                "type": "string"
+              },
+              "clientCertMode": {
+                "enum": [
+                  "Required",
+                  "Optional",
+                  "OptionalInteractiveUser"
+                ],
+                "type": "string"
+              },
+              "cloningInfo": {
+                "$ref": "#/components/schemas/CloningInfo"
+              },
+              "containerSize": {
+                "format": "int32",
+                "type": "integer"
+              },
+              "customDomainVerificationId": {
+                "type": "string"
+              },
+              "dailyMemoryTimeQuota": {
+                "format": "int32",
+                "type": "integer"
+              },
+              "daprConfig": {
+                "$ref": "#/components/schemas/DaprConfig"
+              },
+              "defaultHostName": {
+                "readOnly": true,
+                "type": "string"
+              },
+              "dnsConfiguration": {
+                "$ref": "#/components/schemas/SiteDnsConfig"
+              },
+              "enabled": {
+                "type": "boolean"
+              },
+              "enabledHostNames": {
+                "items": {
+                  "type": "string"
+                },
+                "readOnly": true,
+                "type": "array"
+              },
+              "endToEndEncryptionEnabled": {
+                "type": "boolean"
+              },
+              "functionAppConfig": {
+                "$ref": "#/components/schemas/FunctionAppConfig"
+              },
+              "hostNameSslStates": {
+                "items": {
+                  "$ref": "#/components/schemas/HostNameSslState"
+                },
+                "type": "array"
+              },
+              "hostNames": {
+                "items": {
+                  "type": "string"
+                },
+                "readOnly": true,
+                "type": "array"
+              },
+              "hostNamesDisabled": {
+                "type": "boolean"
+              },
+              "hostingEnvironmentProfile": {
+                "$ref": "#/components/schemas/HostingEnvironmentProfile"
+              },
+              "httpsOnly": {
+                "type": "boolean"
+              },
+              "hyperV": {
+                "default": false,
+                "type": "boolean"
+              },
+              "inProgressOperationId": {
+                "format": "uuid",
+                "readOnly": true,
+                "type": "string"
+              },
+              "ipMode": {
+                "enum": [
+                  "IPv4",
+                  "IPv6",
+                  "IPv4AndIPv6"
+                ],
+                "type": "string"
+              },
+              "isDefaultContainer": {
+                "readOnly": true,
+                "type": "boolean"
+              },
+              "isXenon": {
+                "default": false,
+                "type": "boolean"
+              },
+              "keyVaultReferenceIdentity": {
+                "type": "string"
+              },
+              "lastModifiedTimeUtc": {
+                "format": "date-time",
+                "readOnly": true,
+                "type": "string"
+              },
+              "managedEnvironmentId": {
+                "type": "string"
+              },
+              "maxNumberOfWorkers": {
+                "format": "int32",
+                "readOnly": true,
+                "type": "integer"
+              },
+              "outboundIpAddresses": {
+                "readOnly": true,
+                "type": "string"
+              },
+              "outboundVnetRouting": {
+                "$ref": "#/components/schemas/OutboundVnetRouting"
+              },
+              "possibleOutboundIpAddresses": {
+                "readOnly": true,
+                "type": "string"
+              },
+              "publicNetworkAccess": {
+                "type": "string"
+              },
+              "redundancyMode": {
+                "enum": [
+                  "None",
+                  "Manual",
+                  "Failover",
+                  "ActiveActive",
+                  "GeoRedundant"
+                ],
+                "type": "string"
+              },
+              "repositorySiteName": {
+                "readOnly": true,
+                "type": "string"
+              },
+              "reserved": {
+                "default": false,
+                "type": "boolean"
+              },
+              "resourceConfig": {
+                "$ref": "#/components/schemas/ResourceConfig"
+              },
+              "resourceGroup": {
+                "readOnly": true,
+                "type": "string"
+              },
+              "scmSiteAlsoStopped": {
+                "default": false,
+                "type": "boolean"
+              },
+              "serverFarmId": {
+                "type": "string"
+              },
+              "siteConfig": {
+                "$ref": "#/components/schemas/SiteConfig"
+              },
+              "sku": {
+                "readOnly": true,
+                "type": "string"
+              },
+              "slotSwapStatus": {
+                "$ref": "#/components/schemas/SlotSwapStatus",
+                "readOnly": true
+              },
+              "sshEnabled": {
+                "type": "boolean"
+              },
+              "state": {
+                "readOnly": true,
+                "type": "string"
+              },
+              "storageAccountRequired": {
+                "type": "boolean"
+              },
+              "suspendedTill": {
+                "format": "date-time",
+                "readOnly": true,
+                "type": "string"
+              },
+              "targetSwapSlot": {
+                "readOnly": true,
+                "type": "string"
+              },
+              "trafficManagerHostNames": {
+                "items": {
+                  "type": "string"
+                },
+                "readOnly": true,
+                "type": "array"
+              },
+              "usageState": {
+                "enum": [
+                  "Normal",
+                  "Exceeded"
+                ],
+                "readOnly": true,
+                "type": "string"
+              },
+              "virtualNetworkSubnetId": {
+                "type": "string"
+              },
+              "workloadProfileName": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "SiteConfig": {
+        "properties": {
+          "acrUseManagedIdentityCreds": {
+            "type": "boolean"
+          },
+          "acrUserManagedIdentityID": {
+            "type": "string"
+          },
+          "alwaysOn": {
+            "type": "boolean"
+          },
+          "apiDefinition": {
+            "$ref": "#/components/schemas/ApiDefinitionInfo"
+          },
+          "apiManagementConfig": {
+            "$ref": "#/components/schemas/ApiManagementConfig"
+          },
+          "appCommandLine": {
+            "type": "string"
+          },
+          "appSettings": {
+            "items": {
+              "$ref": "#/components/schemas/NameValuePair"
+            },
+            "type": "array"
+          },
+          "autoHealEnabled": {
+            "type": "boolean"
+          },
+          "autoHealRules": {
+            "$ref": "#/components/schemas/AutoHealRules"
+          },
+          "autoSwapSlotName": {
+            "type": "string"
+          },
+          "azureStorageAccounts": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AzureStorageInfoValue"
+            },
+            "type": "object"
+          },
+          "connectionStrings": {
+            "items": {
+              "$ref": "#/components/schemas/ConnStringInfo"
+            },
+            "type": "array"
+          },
+          "cors": {
+            "$ref": "#/components/schemas/CorsSettings"
+          },
+          "defaultDocuments": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "detailedErrorLoggingEnabled": {
+            "type": "boolean"
+          },
+          "documentRoot": {
+            "type": "string"
+          },
+          "elasticWebAppScaleLimit": {
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "experiments": {
+            "$ref": "#/components/schemas/Experiments"
+          },
+          "ftpsState": {
+            "enum": [
+              "AllAllowed",
+              "FtpsOnly",
+              "Disabled"
+            ],
+            "type": "string"
+          },
+          "functionAppScaleLimit": {
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "functionsRuntimeScaleMonitoringEnabled": {
+            "type": "boolean"
+          },
+          "handlerMappings": {
+            "items": {
+              "$ref": "#/components/schemas/HandlerMapping"
+            },
+            "type": "array"
+          },
+          "healthCheckPath": {
+            "type": "string"
+          },
+          "http20Enabled": {
+            "default": true,
+            "type": "boolean"
+          },
+          "http20ProxyFlag": {
+            "default": 0,
+            "format": "int32",
+            "type": "integer"
+          },
+          "httpLoggingEnabled": {
+            "type": "boolean"
+          },
+          "ipSecurityRestrictions": {
+            "items": {
+              "$ref": "#/components/schemas/IpSecurityRestriction"
+            },
+            "type": "array"
+          },
+          "ipSecurityRestrictionsDefaultAction": {
+            "enum": [
+              "Allow",
+              "Deny"
+            ],
+            "type": "string"
+          },
+          "javaContainer": {
+            "type": "string"
+          },
+          "javaContainerVersion": {
+            "type": "string"
+          },
+          "javaVersion": {
+            "type": "string"
+          },
+          "keyVaultReferenceIdentity": {
+            "type": "string"
+          },
+          "limits": {
+            "$ref": "#/components/schemas/SiteLimits"
+          },
+          "linuxFxVersion": {
+            "type": "string"
+          },
+          "loadBalancing": {
+            "enum": [
+              "WeightedRoundRobin",
+              "LeastRequests",
+              "LeastResponseTime",
+              "WeightedTotalTraffic",
+              "RequestHash",
+              "PerSiteRoundRobin",
+              "LeastRequestsWithTieBreaker"
+            ],
+            "type": "string"
+          },
+          "localMySqlEnabled": {
+            "default": false,
+            "type": "boolean"
+          },
+          "logsDirectorySizeLimit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "machineKey": {
+            "$ref": "#/components/schemas/SiteMachineKey",
+            "readOnly": true
+          },
+          "managedPipelineMode": {
+            "enum": [
+              "Integrated",
+              "Classic"
+            ],
+            "type": "string"
+          },
+          "managedServiceIdentityId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "metadata": {
+            "items": {
+              "$ref": "#/components/schemas/NameValuePair"
+            },
+            "type": "array"
+          },
+          "minTlsCipherSuite": {
+            "enum": [
+              "TLS_AES_256_GCM_SHA384",
+              "TLS_AES_128_GCM_SHA256",
+              "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+              "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
+              "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+              "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+              "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+              "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384",
+              "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256",
+              "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
+              "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
+              "TLS_RSA_WITH_AES_256_GCM_SHA384",
+              "TLS_RSA_WITH_AES_128_GCM_SHA256",
+              "TLS_RSA_WITH_AES_256_CBC_SHA256",
+              "TLS_RSA_WITH_AES_128_CBC_SHA256",
+              "TLS_RSA_WITH_AES_256_CBC_SHA",
+              "TLS_RSA_WITH_AES_128_CBC_SHA"
+            ],
+            "type": "string"
+          },
+          "minTlsVersion": {
+            "enum": [
+              "1.0",
+              "1.1",
+              "1.2",
+              "1.3"
+            ],
+            "type": "string"
+          },
+          "minimumElasticInstanceCount": {
+            "format": "int32",
+            "maximum": 20,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "netFrameworkVersion": {
+            "default": "v4.6",
+            "type": "string"
+          },
+          "nodeVersion": {
+            "type": "string"
+          },
+          "numberOfWorkers": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "phpVersion": {
+            "type": "string"
+          },
+          "powerShellVersion": {
+            "type": "string"
+          },
+          "preWarmedInstanceCount": {
+            "format": "int32",
+            "maximum": 10,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "publicNetworkAccess": {
+            "type": "string"
+          },
+          "publishingUsername": {
+            "type": "string"
+          },
+          "push": {
+            "$ref": "#/components/schemas/PushSettings"
+          },
+          "pythonVersion": {
+            "type": "string"
+          },
+          "remoteDebuggingEnabled": {
+            "type": "boolean"
+          },
+          "remoteDebuggingVersion": {
+            "type": "string"
+          },
+          "requestTracingEnabled": {
+            "type": "boolean"
+          },
+          "requestTracingExpirationTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "scmIpSecurityRestrictions": {
+            "items": {
+              "$ref": "#/components/schemas/IpSecurityRestriction"
+            },
+            "type": "array"
+          },
+          "scmIpSecurityRestrictionsDefaultAction": {
+            "enum": [
+              "Allow",
+              "Deny"
+            ],
+            "type": "string"
+          },
+          "scmIpSecurityRestrictionsUseMain": {
+            "type": "boolean"
+          },
+          "scmMinTlsVersion": {
+            "enum": [
+              "1.0",
+              "1.1",
+              "1.2",
+              "1.3"
+            ],
+            "type": "string"
+          },
+          "scmType": {
+            "enum": [
+              "None",
+              "Dropbox",
+              "Tfs",
+              "LocalGit",
+              "GitHub",
+              "CodePlexGit",
+              "CodePlexHg",
+              "BitbucketGit",
+              "BitbucketHg",
+              "ExternalGit",
+              "ExternalHg",
+              "OneDrive",
+              "VSO",
+              "VSTSRM"
+            ],
+            "type": "string"
+          },
+          "tracingOptions": {
+            "type": "string"
+          },
+          "use32BitWorkerProcess": {
+            "type": "boolean"
+          },
+          "virtualApplications": {
+            "items": {
+              "$ref": "#/components/schemas/VirtualApplication"
+            },
+            "type": "array"
+          },
+          "vnetName": {
+            "type": "string"
+          },
+          "vnetPrivatePortsCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "vnetRouteAllEnabled": {
+            "type": "boolean"
+          },
+          "webSocketsEnabled": {
+            "type": "boolean"
+          },
+          "websiteTimeZone": {
+            "type": "string"
+          },
+          "windowsFxVersion": {
+            "type": "string"
+          },
+          "xManagedServiceIdentityId": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "SiteDnsConfig": {
+        "properties": {
+          "dnsAltServer": {
+            "type": "string"
+          },
+          "dnsLegacySortOrder": {
+            "readOnly": true,
+            "type": "boolean"
+          },
+          "dnsMaxCacheTimeout": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "dnsRetryAttemptCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "dnsRetryAttemptTimeout": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "dnsServers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "SiteLimits": {
+        "properties": {
+          "maxDiskSizeInMb": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "maxMemoryInMb": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "maxPercentageCpu": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "SiteMachineKey": {
+        "properties": {
+          "decryption": {
+            "type": "string"
+          },
+          "decryptionKey": {
+            "type": "string"
+          },
+          "validation": {
+            "type": "string"
+          },
+          "validationKey": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SlotSwapStatus": {
+        "properties": {
+          "destinationSlotName": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "sourceSlotName": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "timestampUtc": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SlowRequestsBasedTrigger": {
+        "properties": {
+          "count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "path": {
+            "type": "string"
+          },
+          "timeInterval": {
+            "type": "string"
+          },
+          "timeTaken": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StatusCodesBasedTrigger": {
+        "properties": {
+          "count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "path": {
+            "type": "string"
+          },
+          "status": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "subStatus": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "timeInterval": {
+            "type": "string"
+          },
+          "win32Status": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "StatusCodesRangeBasedTrigger": {
+        "properties": {
+          "count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "path": {
+            "type": "string"
+          },
+          "statusCodes": {
+            "type": "string"
+          },
+          "timeInterval": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StringDictionary": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ProxyOnlyResource"
+          }
+        ],
+        "properties": {
+          "properties": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "VirtualApplication": {
+        "properties": {
+          "physicalPath": {
+            "type": "string"
+          },
+          "preloadEnabled": {
+            "type": "boolean"
+          },
+          "virtualDirectories": {
+            "items": {
+              "$ref": "#/components/schemas/VirtualDirectory"
+            },
+            "type": "array"
+          },
+          "virtualPath": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "VirtualDirectory": {
+        "properties": {
+          "physicalPath": {
+            "type": "string"
+          },
+          "virtualPath": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "WebAppCollection": {
+        "properties": {
+          "nextLink": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "value": {
+            "items": {
+              "$ref": "#/components/schemas/Site"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "type": "object"
+      },
+      "userAssignedIdentity": {
+        "properties": {
+          "clientId": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "principalId": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "azure_auth": {
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://login.microsoftonline.com/common/oauth2/authorize",
+            "scopes": {
+              "user_impersonation": "impersonate your user account"
+            }
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "title": "WebApps API Client"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/subscriptions/{subscriptionId}/providers/Microsoft.Web/sites": {
+      "get": {
+        "operationId": "WebApps_List",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebAppCollection"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-ms-pageable": {
+          "nextLinkName": "nextLink"
+        }
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites": {
+      "get": {
+        "operationId": "WebApps_ListByResourceGroup",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "resourceGroupName",
+            "required": true,
+            "schema": {
+              "maxLength": 90,
+              "minLength": 1,
+              "pattern": "^[-\\w\\._\\(\\)]+[^\\.]$",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "includeSlots",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebAppCollection"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-ms-pageable": {
+          "nextLinkName": "nextLink"
+        }
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}": {
+      "get": {
+        "operationId": "WebApps_Get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "resourceGroupName",
+            "required": true,
+            "schema": {
+              "maxLength": 90,
+              "minLength": 1,
+              "pattern": "^[-\\w\\._\\(\\)]+[^\\.]$",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Site"
+                }
+              }
+            }
+          },
+          "404": {},
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/functions": {
+      "get": {
+        "operationId": "WebApps_ListFunctions",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "resourceGroupName",
+            "required": true,
+            "schema": {
+              "maxLength": 90,
+              "minLength": 1,
+              "pattern": "^[-\\w\\._\\(\\)]+[^\\.]$",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FunctionEnvelopeCollection"
+                }
+              }
+            }
+          },
+          "404": {},
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-ms-pageable": {
+          "nextLinkName": "nextLink"
+        }
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/functions/{functionName}": {
+      "get": {
+        "operationId": "WebApps_GetFunction",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "resourceGroupName",
+            "required": true,
+            "schema": {
+              "maxLength": 90,
+              "minLength": 1,
+              "pattern": "^[-\\w\\._\\(\\)]+[^\\.]$",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "functionName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FunctionEnvelope"
+                }
+              }
+            }
+          },
+          "404": {},
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/functions/{functionName}/listkeys": {
+      "post": {
+        "operationId": "WebApps_ListFunctionKeys",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "resourceGroupName",
+            "required": true,
+            "schema": {
+              "maxLength": 90,
+              "minLength": 1,
+              "pattern": "^[-\\w\\._\\(\\)]+[^\\.]$",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "functionName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StringDictionary"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/host/default/listkeys": {
+      "post": {
+        "operationId": "WebApps_ListHostKeys",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "resourceGroupName",
+            "required": true,
+            "schema": {
+              "maxLength": 90,
+              "minLength": 1,
+              "pattern": "^[-\\w\\._\\(\\)]+[^\\.]$",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HostKeys"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/listsyncfunctiontriggerstatus": {
+      "post": {
+        "operationId": "WebApps_ListSyncFunctionTriggers",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "resourceGroupName",
+            "required": true,
+            "schema": {
+              "maxLength": 90,
+              "minLength": 1,
+              "pattern": "^[-\\w\\._\\(\\)]+[^\\.]$",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FunctionSecrets"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/restart": {
+      "post": {
+        "operationId": "WebApps_Restart",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "resourceGroupName",
+            "required": true,
+            "schema": {
+              "maxLength": 90,
+              "minLength": 1,
+              "pattern": "^[-\\w\\._\\(\\)]+[^\\.]$",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "softRestart",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "synchronous",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {},
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/start": {
+      "post": {
+        "operationId": "WebApps_Start",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "resourceGroupName",
+            "required": true,
+            "schema": {
+              "maxLength": 90,
+              "minLength": 1,
+              "pattern": "^[-\\w\\._\\(\\)]+[^\\.]$",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {},
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Web/sites/{name}/stop": {
+      "post": {
+        "operationId": "WebApps_Stop",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "resourceGroupName",
+            "required": true,
+            "schema": {
+              "maxLength": 90,
+              "minLength": 1,
+              "pattern": "^[-\\w\\._\\(\\)]+[^\\.]$",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {},
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefaultErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "azure_auth": [
+        "user_impersonation"
+      ]
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://management.azure.com"
+    }
+  ]
+}

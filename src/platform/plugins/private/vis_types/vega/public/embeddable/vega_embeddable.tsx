@@ -10,7 +10,7 @@
 import React, { Suspense, lazy, useEffect, useRef } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
-import { fromStoredFilters, toStoredFilters } from '@kbn/as-code-filters-transforms';
+import { fromStoredFilters } from '@kbn/as-code-filters-transforms';
 import { toAsCodeQuery, toStoredQuery } from '@kbn/as-code-shared-transforms';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
@@ -24,7 +24,9 @@ import type {
 import {
   BehaviorSubject,
   combineLatest,
+  distinctUntilChanged,
   EMPTY,
+  filter,
   firstValueFrom,
   map,
   merge,
@@ -32,14 +34,8 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
-import {
-  FilterStateStore,
-  isOfQueryType,
-  type AggregateQuery,
-  type Filter,
-  type Query,
-} from '@kbn/es-query';
-import { parse } from 'hjson';
+import { isOfQueryType, type AggregateQuery, type Filter, type Query } from '@kbn/es-query';
+import { isEqual } from 'lodash';
 import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
   apiHasExecutionContext,
@@ -53,10 +49,11 @@ import {
   initializeTitleManager,
   type CanCancelRequests,
   type HasEditCapabilities,
+  type HasLibraryTransforms,
   type ProjectRoutingOverrides,
   type PublishesBlockingError,
   type PublishesDataLoading,
-  type PublishesDataViews,
+  type PublishesDataSources,
   type PublishesWritableDescription,
   type PublishesWritableTitle,
   type PublishesEsql,
@@ -71,20 +68,32 @@ import {
 } from '@kbn/presentation-publishing';
 import {
   VEGA_EMBEDDABLE_TYPE,
-  VEGA_STANDALONE_EMBEDDABLE_FLAG,
+  VEGA_AS_CODE_ENABLED_FLAG,
   VEGA_SUPPORTED_TRIGGERS,
 } from '../../common/constants';
 import { VEGA_EVENT_APPLY_FILTER } from '../constants';
 import type { VegaEvent } from '../types';
 import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from '../plugin';
 import type { VegaRenderDescriptor } from '../data_model/types';
+import { parseSpec } from '../lib/editor_spec';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
+import { getDefaultDataView } from '../lib/get_default_data_view';
+import { isVegaByReferenceState } from '../../common/utils';
+import { toPanelFilters, type VegaEditableState } from '../lib/editable_state';
+import {
+  createVegaLibraryClient,
+  hasVegaLibraryItemWithTitle,
+} from '../library/vega_library_client';
 import { extractProjectRoutingOverrides } from '../lib/extract_project_routing_overrides';
 import { getEsqlQueriesFromSpec } from '../lib/spec_uses_esql';
 import { reportVegaRender } from '../lib/vega_render_telemetry';
 import { getDataViews } from '../services';
 import { createInspectorAdapters } from '../vega_inspector';
-import type { VegaByValueState } from '../../server';
+import type {
+  VegaByReferenceState,
+  VegaByValueState,
+  VegaEmbeddableState,
+} from '../../server/embeddable/schema';
 // Frame only. The spec editor stays a separate lazy chunk inside this module, so Edit does not
 // wait on `vega_editor_flyout` before the flyout can render.
 import { VegaEditorFlyout } from './vega_editor_flyout';
@@ -105,12 +114,14 @@ interface VegaRenderInput {
 }
 
 /**
- * By-value state for the dedicated Dashboard Vega panel.
+ * API of the dedicated Dashboard Vega panel. The panel stores its spec by value, or references a
+ * Vega library item.
  *
- * When `vega.standaloneEmbeddable` is enabled, the server registers a schema for this type so it
+ * When `vega.asCodeEnabled` is enabled, the server registers a schema for this type so it
  * participates in public dashboards-as-code validation and OpenAPI generation.
  */
-export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaByValueState> &
+export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaEmbeddableState> &
+  Partial<HasLibraryTransforms<VegaByReferenceState, VegaByValueState>> &
   CanCancelRequests &
   HasDrilldowns &
   HasEditCapabilities &
@@ -124,7 +135,7 @@ export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaByValueState> &
   PublishesEsql &
   PublishesWritableUnifiedSearch &
   PublishesProjectRoutingOverrides &
-  PublishesDataViews &
+  PublishesDataSources<DataView> &
   PublishesRendered & {
     /** Returns the editor panel content for an already-open flyout. */
     getEditPanel?: (options: {
@@ -134,22 +145,29 @@ export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaByValueState> &
     }) => Promise<JSX.Element | undefined>;
   };
 
-// `toStoredFilters` drops `$state`, and the filter editor ignores edits to filters without one.
-const toPanelFilters = (filters: VegaByValueState['filters']): Filter[] | undefined =>
-  (toStoredFilters(filters) as Filter[] | undefined)?.map((filter) =>
-    filter.$state?.store ? filter : { ...filter, $state: { store: FilterStateStore.APP_STATE } }
-  );
+// The library item owns the query and filters of a by-reference panel.
+const getPanelSearch = (
+  state: VegaEmbeddableState
+): { query?: Query | AggregateQuery; filters?: Filter[] } =>
+  isVegaByReferenceState(state)
+    ? {}
+    : { query: toStoredQuery(state.query), filters: toPanelFilters(state.filters) };
 
 interface VegaEmbeddableDependencies {
   uiActions: Pick<VegaPluginStartDependencies['uiActions'], 'executeTriggerActions'>;
   SearchBar: VegaPluginStartDependencies['unifiedSearch']['ui']['SearchBar'];
   visualizationDependencies: VegaVisualizationDependencies;
+  /** Used to edit the library item of a by-reference panel. */
+  libraryEditorDependencies: Pick<
+    VegaPluginStartDependencies,
+    'dataViews' | 'unifiedSearch' | 'savedObjectsTaggingOss'
+  >;
 }
 
 export const vegaEmbeddableFactory = (
   core: CoreStart,
   deps: VegaEmbeddableDependencies
-): EmbeddablePublicDefinition<VegaByValueState, VegaEmbeddableApi> => ({
+): EmbeddablePublicDefinition<VegaEmbeddableState, VegaEmbeddableApi> => ({
   type: VEGA_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({
     initializeDrilldownsManager,
@@ -158,18 +176,42 @@ export const vegaEmbeddableFactory = (
     parentApi,
     uuid,
   }) => {
+    // Read once per panel, so its library actions and JSON export match the server schema.
+    const asCodeEnabled = await firstValueFrom(
+      core.featureFlags.getBooleanValue$(VEGA_AS_CODE_ENABLED_FLAG, false)
+    );
+    const libraryClient = createVegaLibraryClient(core.http);
+    // Linking and unlinking replace the panel, so a panel stays by value or by reference.
+    const libraryId = isVegaByReferenceState(initialState) ? initialState.ref_id : undefined;
+    const isByReference = libraryId !== undefined;
+    // Throws `SavedObjectNotFound` for a missing item, which the panel shows as an error.
+    const libraryItem$ = new BehaviorSubject(
+      isByReference ? (await libraryClient.get(libraryId)).data : undefined
+    );
+    const initialLibraryItem = libraryItem$.getValue();
+
     const titleManager = initializeTitleManager(initialState);
     const timeRangeManager = initializeTimeRangeManager(initialState);
     const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
-    const spec$ = new BehaviorSubject(initialState.spec);
+    // The spec of a by-value panel. A by-reference panel renders `libraryItem$` instead.
+    const spec$ = new BehaviorSubject(
+      initialLibraryItem ? initialLibraryItem.spec : (initialState as VegaByValueState).spec
+    );
+    // What the panel renders, as one stream so each change starts one fetch. Only a by-reference
+    // panel's content has a query and filters: the library item's.
+    const content$ = isByReference
+      ? libraryItem$.pipe(
+          filter((item): item is NonNullable<typeof item> => item !== undefined),
+          map(({ spec, query, filters }): VegaEditableState => ({ spec, query, filters }))
+        )
+      : spec$.pipe(map((spec): VegaEditableState => ({ spec })));
+    const defaultTitle$ = new BehaviorSubject(initialLibraryItem?.title);
+    const defaultDescription$ = new BehaviorSubject(initialLibraryItem?.description);
     const panelSearchStateManager = initializeStateManager<{
       query?: Query | AggregateQuery;
       filters?: Filter[];
     }>(
-      {
-        query: toStoredQuery(initialState.query),
-        filters: toPanelFilters(initialState.filters),
-      },
+      getPanelSearch(initialState),
       {
         query: undefined,
         filters: undefined,
@@ -182,27 +224,23 @@ export const vegaEmbeddableFactory = (
     const esql$ = new BehaviorSubject<AggregateQuery[]>([]);
     const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
     const projectRoutingOverrides$ = new BehaviorSubject<ProjectRoutingOverrides>(undefined);
-    const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
+    const dataSources$ = new BehaviorSubject<DataView[] | undefined>(undefined);
 
     // A spec change is parsed once for all derived subjects. `switchMap` is used instead
-    // of `tap` for dataViews$ because `extractIndexPatternsFromSpec` is async.
-    const specSubscription = spec$
+    // of `tap` for dataSources$ because `extractIndexPatternsFromSpec` is async.
+    const specSubscription = content$
       .pipe(
-        map((spec) => {
-          if (spec.format === 'json') return spec.value;
-          try {
-            return parse(spec.value, { legacyRoot: false, keepWsc: true });
-          } catch {
-            return undefined;
-          }
-        }),
+        map(({ spec }) => spec),
+        // Query and filter previews keep the spec, so it isn't parsed again.
+        distinctUntilChanged(isEqual),
+        map(parseSpec),
         tap((spec) => {
           esql$.next(spec ? getEsqlQueriesFromSpec(spec).map((esql) => ({ esql })) : []);
           projectRoutingOverrides$.next(spec ? extractProjectRoutingOverrides(spec) : undefined);
         }),
         switchMap((spec) => (spec ? extractIndexPatternsFromSpec(spec) : EMPTY))
       )
-      .subscribe((dataViews) => dataViews$.next(dataViews));
+      .subscribe((dataViews) => dataSources$.next(dataViews));
 
     const renderInput$ = new BehaviorSubject<VegaRenderInput | undefined>(undefined);
     const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
@@ -211,21 +249,46 @@ export const vegaEmbeddableFactory = (
     const inspectorAdapters = createInspectorAdapters();
     let abortController = new AbortController();
 
-    const stateApi = initializeStateApi<VegaByValueState>({
+    const serializePanelOwnedState = () => ({
+      ...titleManager.getLatestState(),
+      ...timeRangeManager.getLatestState(),
+      ...drilldownsManager.getLatestState(),
+    });
+
+    const serializePanelSearch = () => {
+      const panelQuery = panelSearchStateManager.api.query$.getValue();
+      return {
+        query: isOfQueryType(panelQuery) ? toAsCodeQuery(panelQuery) : undefined,
+        filters: fromStoredFilters(panelSearchStateManager.api.filters$.getValue()),
+      };
+    };
+
+    // A by-value panel's state, with its own spec, query and filters.
+    const serializeOwnByValueState = (): VegaByValueState => ({
+      ...serializePanelOwnedState(),
+      ...serializePanelSearch(),
+      spec: spec$.getValue(),
+    });
+
+    // Unlinking copies the library item's spec, query, and filters into the panel.
+    const serializeByValue = (): VegaByValueState => {
+      const libraryItem = libraryItem$.getValue();
+      if (!libraryItem) return serializeOwnByValueState();
+      const { spec, query, filters } = libraryItem;
+      return { ...serializePanelOwnedState(), query, filters, spec };
+    };
+
+    // Linking moves the panel query and filters to the new library item.
+    const serializeByReference = (refId: string): VegaByReferenceState => ({
+      ...serializePanelOwnedState(),
+      ref_id: refId,
+    });
+
+    const stateApi = initializeStateApi<VegaEmbeddableState>({
       uuid,
       parentApi,
-      serializeState: () => {
-        const panelQuery = panelSearchStateManager.api.query$.getValue();
-
-        return {
-          ...titleManager.getLatestState(),
-          ...timeRangeManager.getLatestState(),
-          ...drilldownsManager.getLatestState(),
-          query: isOfQueryType(panelQuery) ? toAsCodeQuery(panelQuery) : undefined,
-          filters: fromStoredFilters(panelSearchStateManager.api.filters$.getValue()),
-          spec: spec$.getValue(),
-        };
-      },
+      serializeState: () =>
+        isByReference ? serializeByReference(libraryId) : serializeOwnByValueState(),
       anyStateChange$: merge(
         titleManager.anyStateChange$,
         timeRangeManager.anyStateChange$,
@@ -242,19 +305,49 @@ export const vegaEmbeddableFactory = (
         ...drilldownsManager.comparators,
         query: 'deepEquality',
         filters: 'deepEquality',
-        spec: 'deepEquality',
+        // The library item's spec is saved by its editor, not with the dashboard.
+        spec: isByReference ? 'skip' : 'deepEquality',
+        ref_id: 'skip',
       }),
       applySerializedState: (nextState) => {
         titleManager.reinitializeState(nextState);
         timeRangeManager.reinitializeState(nextState);
         drilldownsManager.reinitializeState(nextState);
-        panelSearchStateManager.reinitializeState({
-          query: toStoredQuery(nextState.query),
-          filters: toPanelFilters(nextState.filters),
-        });
-        spec$.next(nextState.spec);
+        panelSearchStateManager.reinitializeState(getPanelSearch(nextState));
+        if ('spec' in nextState) spec$.next(nextState.spec);
       },
     });
+
+    const reloadLibraryItem = async (refId: string) => {
+      try {
+        const { data } = await libraryClient.get(refId);
+        defaultTitle$.next(data.title);
+        defaultDescription$.next(data.description);
+        libraryItem$.next(data);
+        blockingError$.next(undefined);
+      } catch (error) {
+        blockingError$.next(error);
+      }
+    };
+
+    const libraryTransforms: HasLibraryTransforms<VegaByReferenceState, VegaByValueState> = {
+      canLinkToLibrary: async () => !isByReference,
+      canUnlinkFromLibrary: async () => isByReference,
+      hasLibraryItemWithTitle: (title) => hasVegaLibraryItemWithTitle(libraryClient, title),
+      saveToLibrary: async (title) => {
+        const { query, filters } = serializePanelSearch();
+        const { id } = await libraryClient.create({
+          title,
+          description: titleManager.getLatestState().description,
+          spec: spec$.getValue(),
+          query,
+          filters,
+        });
+        return id;
+      },
+      getSerializedStateByReference: serializeByReference,
+      getSerializedStateByValue: serializeByValue,
+    };
 
     const getEditPanel = async ({
       ariaLabelledBy,
@@ -267,11 +360,7 @@ export const vegaEmbeddableFactory = (
     }) => {
       const initialSpec = spec$.getValue();
       const initialSearch = panelSearchStateManager.getLatestState();
-      // A missing default data view shouldn't block editing.
-      const defaultDataView =
-        (await getDataViews()
-          .getDefault()
-          .catch((): null => null)) ?? undefined;
+      const defaultDataView = await getDefaultDataView(getDataViews());
       return (
         <VegaEditorFlyout
           api={api}
@@ -307,13 +396,37 @@ export const vegaEmbeddableFactory = (
       esql$,
       approximationApplied$,
       projectRoutingOverrides$,
-      dataViews$,
+      dataSources$,
       cancelRequests: (reason) => abortController.abort(reason),
       supportedTriggers: () => VEGA_SUPPORTED_TRIGGERS,
       getTypeDisplayName: () => 'Vega',
       isEditingEnabled: () => true,
+      defaultTitle$,
+      defaultDescription$,
+      ...(asCodeEnabled && libraryTransforms),
       getEditPanel,
       onEdit: async ({ isNewPanel = false, returnFocus } = {}) => {
+        if (isByReference) {
+          const { openVegaLibraryEditor } = await import('../library/open_vega_library_editor');
+          await openVegaLibraryEditor({
+            core,
+            deps: deps.libraryEditorDependencies,
+            id: libraryId,
+            panel: {
+              parentApi,
+              uuid,
+              onPreview: ({ spec, query, filters }) => {
+                const libraryItem = libraryItem$.getValue();
+                if (!libraryItem) return;
+                libraryItem$.next({ ...libraryItem, spec, query, filters });
+              },
+            },
+          });
+          // Shows the saved item again, which also reverts a preview that wasn't saved.
+          await reloadLibraryItem(libraryId);
+          returnFocus?.();
+          return;
+        }
         openVegaEditor({
           core,
           parentApi,
@@ -326,9 +439,7 @@ export const vegaEmbeddableFactory = (
       getInspectorAdapters: () => inspectorAdapters,
       // Only when the flag is on: the public dashboards-as-code schema is registered then, so
       // exported JSON can be round-tripped through the REST API.
-      supportsJsonExport: await firstValueFrom(
-        core.featureFlags.getBooleanValue$(VEGA_STANDALONE_EMBEDDABLE_FLAG, false)
-      ),
+      supportsJsonExport: asCodeEnabled,
     });
 
     // Identities must be stable: `VegaVisComponent` rebuilds its Vega view whenever `fireEvent`
@@ -360,13 +471,14 @@ export const vegaEmbeddableFactory = (
     };
 
     const fetchSubscription = combineLatest([
-      spec$,
+      content$,
       fetch$(api),
       panelSearchStateManager.api.query$,
       panelSearchStateManager.api.filters$,
     ])
       .pipe(
-        switchMap(async ([spec, data, panelQuery, panelFilters]) => {
+        switchMap(async ([content, data, panelQuery, panelFilters]) => {
+          const { spec, query: libraryQuery, filters: libraryFilters } = content;
           abortController.abort();
           abortController = new AbortController();
           const { signal } = abortController;
@@ -402,8 +514,12 @@ export const vegaEmbeddableFactory = (
             const visData = await requestHandler({
               timeRange,
               // buildEsQuery ANDs these and ignores empty and ES|QL queries.
-              query: [data.query, panelQuery].filter(isOfQueryType),
-              filters: [...(data.filters ?? []), ...(panelFilters ?? [])],
+              query: [data.query, toStoredQuery(libraryQuery), panelQuery].filter(isOfQueryType),
+              filters: [
+                ...(data.filters ?? []),
+                ...(toPanelFilters(libraryFilters) ?? []),
+                ...(panelFilters ?? []),
+              ],
               visParams: {
                 spec: spec.format === 'json' ? JSON.stringify(spec.value) : spec.value,
               },

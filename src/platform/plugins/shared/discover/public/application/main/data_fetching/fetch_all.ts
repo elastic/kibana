@@ -18,6 +18,7 @@ import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { i18n } from '@kbn/i18n';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { DataViewSource, type EsqlSource } from '@kbn/data-source';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { updateVolatileSearchSource } from './update_search_source';
 import {
   checkHitCount,
@@ -40,6 +41,7 @@ import type { RecordsFetchResponse } from '../../types';
 import type { DiscoverServices } from '../../../build_services';
 import { fetchEsql } from './fetch_esql';
 import type { InternalStateStore, TabState } from '../state_management/redux';
+import { isReplayedLoad } from '../state_management/utils/is_replayed_load';
 import type { ScopedProfilesManager } from '../../../context_awareness';
 import type { ScopedDiscoverEBTManager } from '../../../ebt_manager';
 
@@ -85,7 +87,7 @@ export function fetchAll(
     onFetchRecordsComplete,
     esqlSource,
   } = params;
-  const { data, expressions } = services;
+  const { data } = services;
 
   try {
     const searchSource = originalSearchSource.createChild();
@@ -131,7 +133,6 @@ export function fetchAll(
           abortSignal: abortController.signal,
           inspectorAdapters,
           data,
-          expressions,
           scopedProfilesManager,
           timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
           esqlVariables: currentTab.esqlVariables,
@@ -160,6 +161,7 @@ export function fetchAll(
           fetchAllRequestsOnlyTracker.reportEvent({
             requestAdapter: inspectorAdapters.requests,
             approximationApplied,
+            isReplayedLoad: isReplayedLoad(currentTab.dataRequestParams),
           });
 
           if (isEsqlQuery) {
@@ -219,6 +221,23 @@ export function fetchAll(
       // In the case that the request was aborted (e.g. a refresh), swallow the abort error
       .catch((e) => {
         if (!abortController.signal.aborted) throw e;
+
+        // Without this, Discover keeps loading forever after the user clicks Cancel: a replaced
+        // fetch is finished by the newer one, but nothing else finishes a canceled one.
+        if (abortController.signal.reason === AbortReason.CANCELED) {
+          dataSubjects.documents$.next({
+            ...dataSubjects.documents$.getValue(),
+            fetchStatus: FetchStatus.COMPLETE,
+          });
+
+          // ES|QL returns the hit count with the documents, classic mode loads it with the chart.
+          if (isEsqlQuery) {
+            dataSubjects.totalHits$.next({
+              ...dataSubjects.totalHits$.getValue(),
+              fetchStatus: FetchStatus.COMPLETE,
+            });
+          }
+        }
       })
       // Only the document query should send its errors to main$, to cause the full Discover app
       // to get into an error state. The other queries will not cause all of Discover to error out
@@ -233,7 +252,13 @@ export function fetchAll(
       race(
         combineLatest([
           isComplete(dataSubjects.documents$).pipe(
-            switchMap(async () => onFetchRecordsComplete?.())
+            switchMap(async () => {
+              if (abortController.signal.aborted) {
+                return;
+              }
+
+              return onFetchRecordsComplete?.();
+            })
           ),
           isComplete(dataSubjects.totalHits$),
         ]),
@@ -271,7 +296,7 @@ export async function fetchMoreDocuments(params: CommonFetchParams): Promise<voi
     const currentDocs = dataSubjects.documents$.getValue();
     const pagination = currentDocs.pagination;
 
-    if (!pagination?.hasNextPage) {
+    if (!pagination?.hasNextPage(dataSubjects.totalHits$.getValue().result ?? 0)) {
       return; // No more pages available
     }
 

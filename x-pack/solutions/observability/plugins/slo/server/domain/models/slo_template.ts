@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { sloTemplateSchemaZod, storedSloTemplateSchemaZod } from '@kbn/slo-schema';
+import type { sloTemplateSchema, storedSloTemplateSchema } from '@kbn/slo-schema';
 import type { z } from '@kbn/zod';
 
-type SLOTemplate = z.output<typeof sloTemplateSchemaZod>;
-type StoredSLOTemplate = z.output<typeof storedSloTemplateSchemaZod>;
+type SLOTemplate = z.output<typeof sloTemplateSchema>;
+type StoredSLOTemplate = z.output<typeof storedSloTemplateSchema>;
 
 export type { SLOTemplate, StoredSLOTemplate };

@@ -12,6 +12,10 @@ import {
   WorkflowManagementAuditActions,
   WorkflowManagementAuditLog,
 } from './workflow_audit_logging';
+import {
+  getWorkflowPageSavedObjectId,
+  WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
+} from '../../../pages/page_saved_object';
 import type { WorkflowsService } from '../../workflows_management_service';
 
 async function createAuditHarness() {
@@ -430,7 +434,25 @@ describe('WorkflowManagementAuditLog', () => {
         error: err,
       });
       expect(l2.mock.calls[0][0].event.outcome).toBe('failure');
+      expect(l2.mock.calls[0][0].message).not.toContain('[claimReleased=');
     });
+
+    it.each([true, false])(
+      'logExecutionResumed reports claimReleased=%s on failure',
+      async (claimReleased) => {
+        const { audit, request, log } = await createAuditHarness();
+        audit.logExecutionResumed(request, {
+          executionId: 'r-1',
+          channel: 'inbox',
+          error: err,
+          claimReleased,
+        });
+        expect(log.mock.calls[0][0].event.outcome).toBe('failure');
+        expect(log.mock.calls[0][0].message).toContain(
+          `[channel=inbox] [claimReleased=${claimReleased}]`
+        );
+      }
+    );
 
     it('logHitlWaiting and logHitlTimedOut use System actor without a request', async () => {
       const { audit, systemLog } = await createAuditHarness();
@@ -452,6 +474,68 @@ describe('WorkflowManagementAuditLog', () => {
       });
       expect(l2.mock.calls[0][0].event.action).toBe(WorkflowManagementAuditActions.HITL_TIMED_OUT);
       expect(l2.mock.calls[0][0].message).toContain('System timed out HITL wait');
+    });
+  });
+
+  describe('page events', () => {
+    const ref = { workflowId: 'w-1', pageId: 'default', spaceId: 'default' };
+    const savedObject = {
+      type: WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
+      id: getWorkflowPageSavedObjectId(ref),
+    };
+
+    it.each([
+      ['logPageLinkRead', WorkflowManagementAuditActions.PAGE_LINK_READ, {}],
+      ['logPageSecretRotated', WorkflowManagementAuditActions.PAGE_SECRET_ROTATE, {}],
+      [
+        'logPageAccessChanged',
+        WorkflowManagementAuditActions.PAGE_ACCESS_CHANGE,
+        { access: { level: 'secret_link' } },
+      ],
+      [
+        'logPageEnabledChanged',
+        WorkflowManagementAuditActions.PAGE_ENABLED_CHANGE,
+        { enabled: false },
+      ],
+      ['logPageCreated', WorkflowManagementAuditActions.PAGE_CREATE, {}],
+      ['logPageRetired', WorkflowManagementAuditActions.PAGE_RETIRE, { reason: 'trigger_removed' }],
+    ] as const)('%s records the page saved object', async (method, action, extra) => {
+      const { audit, request, log } = await createAuditHarness();
+      audit[method](request, { ...ref, ...extra } as never);
+      expect(log.mock.calls[0][0]).toEqual(
+        expect.objectContaining({
+          event: expect.objectContaining({ action, outcome: 'success' }),
+          kibana: { saved_object: savedObject },
+        })
+      );
+    });
+
+    it('records the lifecycle as a creation and a deletion, with the retire reason', async () => {
+      const { audit, request, log } = await createAuditHarness();
+      audit.logPageCreated(request, ref);
+      audit.logPageRetired(request, { ...ref, reason: 'workflow_moved' });
+
+      expect(log.mock.calls[0][0].event.type).toEqual(['creation']);
+      expect(log.mock.calls[1][0].event.type).toEqual(['deletion']);
+      expect(log.mock.calls[1][0].message).toContain('[reason=workflow_moved]');
+    });
+
+    it('logs the system as the actor of a lifecycle event without a request', async () => {
+      const { audit, systemLog } = await createAuditHarness();
+      audit.logPageRetired(undefined, { ...ref, reason: 'workflow_deleted' });
+
+      expect(systemLog.mock.calls[0][0].message).toContain('System retired workflow page');
+    });
+
+    it('records the page saved object on a failure', async () => {
+      const { audit, request, log } = await createAuditHarness();
+      audit.logPageLinkRead(request, { ...ref, error: new Error('denied') });
+      expect(log.mock.calls[0][0]).toEqual(
+        expect.objectContaining({
+          event: expect.objectContaining({ outcome: 'failure' }),
+          kibana: { saved_object: savedObject },
+        })
+      );
     });
   });
 

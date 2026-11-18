@@ -121,7 +121,9 @@ function compareRoleAccessMaps(
 // Failing: See https://github.com/elastic/kibana/issues/297590
 apiTest.describe.skip(
   'Built-in roles Kibana access validation',
-  { tag: tags.stateful.classic },
+  {
+    tag: tags.stateful.classic,
+  },
   () => {
     apiTest(
       'should have expected Kibana access for all built-in roles',

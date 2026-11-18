@@ -15,9 +15,9 @@ import {
   contextEngineAutomationTools,
 } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
-import { chatAgentTypeId } from '@kbn/agent-builder-common';
+import { chatAgentTypeId, relevantSkillsHookId } from '@kbn/agent-builder-common';
 import type { SkillDefinition } from './skills/type_definition';
-import { ELASTIC_SKILLS_BASE_PATH } from './skills/type_definition';
+import { CONNECTORS_SKILLS_BASE_PATH, ELASTIC_SKILLS_BASE_PATH } from './skills/type_definition';
 
 /**
  * This is a manually maintained list of all built-in tools registered in Agent Builder.
@@ -35,6 +35,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
 
   // Alerting
   `${internalNamespaces.platformAlerting}.manage_rule`,
+  `${internalNamespaces.platformAlerting}.link_rule_and_action_policy`,
 
   // Proposals
   'platform.proposals.revise',
@@ -144,6 +145,10 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   'nightshift_sandbox_str_replace',
   'nightshift_sandbox_write_file',
 
+  // Nightshift – Investigation
+  'nightshift_time_converter_tool',
+  `${internalNamespaces.platformNightshift}.slack_read`,
+
   // Nightshift – Decision trees
   'nightshift_submit_optimizer_result',
   'nightshift_record_system_learning',
@@ -232,6 +237,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   // Platform – Alerting
   'rule-authoring',
   'action-policy-authoring',
+  'universal-alerting-failure-diagnosis',
 
   // Platform – Dashboard
   'dashboards',
@@ -333,7 +339,11 @@ export const isAllowedBuiltinSkill = (skillId: string): skillId is AgentBuilderB
 export const isAllowedSkillRegistration = (
   skill: Pick<SkillDefinition, 'id' | 'basePath'>
 ): boolean => {
-  return isAllowedBuiltinSkill(skill.id) || skill.basePath === ELASTIC_SKILLS_BASE_PATH;
+  return (
+    isAllowedBuiltinSkill(skill.id) ||
+    skill.basePath === ELASTIC_SKILLS_BASE_PATH ||
+    skill.basePath === CONNECTORS_SKILLS_BASE_PATH
+  );
 };
 
 /**
@@ -472,7 +482,12 @@ export const isAllowedBuiltinAttachment = (
  * This is a manually maintained list of all cycle hooks registered in Agent Builder.
  * The intention is to force a code review from the Agent Builder team when any team adds a new cycle hook.
  */
-export const AGENT_BUILDER_CYCLE_HOOKS = [] as const;
+export const AGENT_BUILDER_CYCLE_HOOKS = [
+  // Platform
+  relevantSkillsHookId,
+  // Nightshift
+  'nightshift.findings_recorder',
+] as const;
 
 export type AgentBuilderCycleHook = (typeof AGENT_BUILDER_CYCLE_HOOKS)[number];
 

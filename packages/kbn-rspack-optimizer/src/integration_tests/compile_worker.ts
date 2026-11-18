@@ -39,6 +39,7 @@ export interface CompileWorkerOptions {
   pluginId: string;
   outputDir: string;
   dist: boolean;
+  dllManifestPath: string;
 }
 
 export interface CompileWorkerResult {
@@ -55,6 +56,7 @@ async function compilePlugin(options: CompileWorkerOptions): Promise<CompileWork
     dist: options.dist,
     watch: false,
     cache: false,
+    dllManifestPath: options.dllManifestPath,
   });
 
   const compiler = rspack(config);

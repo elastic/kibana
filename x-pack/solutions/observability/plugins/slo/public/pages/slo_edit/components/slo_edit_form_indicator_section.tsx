@@ -9,7 +9,7 @@ import { EuiFormRow, EuiPanel, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { assertNever } from '@kbn/std';
 import React, { useMemo } from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { SLI_OPTIONS } from '../constants';
 import { useUnregisterFields } from '../hooks/use_unregister_fields';
 import type { CreateSLOForm, FormSettings } from '../types';
@@ -29,10 +29,10 @@ interface SloEditFormIndicatorSectionProps {
 
 export function SloEditFormIndicatorSection({ formSettings }: SloEditFormIndicatorSectionProps) {
   const { isEditMode = false, allowedIndicatorTypes = [] } = formSettings;
-  const { control, watch } = useFormContext<CreateSLOForm>();
+  const { control } = useFormContext<CreateSLOForm>();
   useUnregisterFields({ isEditMode });
 
-  const indicatorType = watch('indicator.type');
+  const indicatorType = useWatch({ control, name: 'indicator.type' });
 
   const filteredSliOptions = useMemo(() => {
     if (allowedIndicatorTypes.length === 0) {

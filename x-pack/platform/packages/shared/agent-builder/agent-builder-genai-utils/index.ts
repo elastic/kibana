@@ -11,6 +11,7 @@ export {
   cleanupMapping,
   getIndexMappings,
   executeEsql,
+  buildEsqlParams,
   isCcsTarget,
   partitionByCcs,
   getFieldsFromFieldCaps,

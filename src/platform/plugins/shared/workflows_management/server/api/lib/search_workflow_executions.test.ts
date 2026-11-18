@@ -28,7 +28,7 @@ describe('searchWorkflowExecutions', () => {
   });
 
   describe('response transformation', () => {
-    it('should include concurrencyGroupKey in list results when present', async () => {
+    it('should include execution names and concurrencyGroupKey in list results when present', async () => {
       mockWorkflowDataClient.search.mockResolvedValue({
         hits: {
           total: { value: 1 },
@@ -44,6 +44,7 @@ describe('searchWorkflowExecutions', () => {
                 finishedAt: '2024-01-01T00:00:03Z',
                 duration: 3000,
                 workflowId: 'workflow-1',
+                runName: 'Report for October',
                 workflowDefinition: {
                   name: 'Example Workflow',
                   tags: ['reporting'],
@@ -70,6 +71,7 @@ describe('searchWorkflowExecutions', () => {
         expect.objectContaining({
           id: 'exec-1',
           workflowName: 'Example Workflow',
+          runName: 'Report for October',
           tags: ['reporting'],
           managed: true,
           concurrencyGroupKey: 'streams-ki-onboarding-my-stream',
@@ -284,6 +286,34 @@ describe('searchWorkflowExecutions', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to search workflow executions')
       );
+    });
+
+    it('rethrows result window errors unchanged so the route maps them to a sanitized 400', async () => {
+      const resultWindowError = new errors.ResponseError({
+        statusCode: 400,
+        body: {
+          error: {
+            type: 'search_phase_execution_exception',
+            reason:
+              'Result window is too large, from + size must be less than or equal to: [10000]',
+          },
+        },
+        headers: {},
+        meta: {} as any,
+        warnings: [],
+      });
+
+      mockWorkflowDataClient.search.mockRejectedValue(resultWindowError);
+
+      await expect(
+        searchWorkflowExecutions({
+          workflowExecutionsDataClient: mockWorkflowDataClient,
+          logger: mockLogger,
+          query: { term: { workflowId: 'workflow-1' } },
+          page: 101,
+          size: 100,
+        })
+      ).rejects.toBe(resultWindowError);
     });
 
     it('should log error and throw for non-ResponseError exceptions', async () => {

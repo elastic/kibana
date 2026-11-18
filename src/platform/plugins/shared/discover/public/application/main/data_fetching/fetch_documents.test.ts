@@ -68,7 +68,7 @@ describe('test fetchDocuments', () => {
 
     // Mock services.data.search.dslPaginated()
     const mockPagination = {
-      hasNextPage: true,
+      hasNextPage: () => true,
       nextPage: jest.fn(),
       getAllPages: jest.fn(),
     };
@@ -125,7 +125,7 @@ describe('test fetchDocuments', () => {
     }));
 
     const mockPagination = {
-      hasNextPage: true,
+      hasNextPage: () => true,
       nextPage: jest.fn(),
       getAllPages: jest.fn(),
     };

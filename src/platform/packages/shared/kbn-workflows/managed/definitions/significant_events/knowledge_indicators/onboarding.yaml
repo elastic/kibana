@@ -57,11 +57,9 @@ triggers:
         description: "End timestamp (epoch ms) for feature sampling window. Defaults to now."
       - name: featuresMaxIterations
         type: number
-        default: 5
         description: "Maximum number of LLM sampling iterations for features identification."
       - name: featuresConvergencePatience
         type: number
-        default: 2
         description: "Stop features identification after this many healthy-successful passes without a new feature (degraded iterations are neutral and not counted)."
       - name: featuresSampleSize
         type: number
@@ -81,6 +79,12 @@ triggers:
       - name: featuresMaxEntityFilters
         type: number
         description: "Max entity filters applied during features identification sampling."
+      - name: featuresSamplingTimeoutMs
+        type: number
+        description: "Deadline (ms) per ES|QL sampling query during features identification sampling."
+      - name: featuresComputedTimeoutMs
+        type: number
+        description: "Deadline (ms) for the whole computed-feature generation pass during features identification."
       - name: featuresMaxPreviouslyIdentified
         type: number
         description: "Max previously identified features sent in LLM prompt during features identification."
@@ -199,6 +203,8 @@ steps:
             diverseRatio: "${{ inputs.featuresDiverseRatio }}"
             maxExcludedFeaturesInPrompt: "${{ inputs.featuresMaxExcludedInPrompt }}"
             maxEntityFilters: "${{ inputs.featuresMaxEntityFilters }}"
+            samplingTimeoutMs: "${{ inputs.featuresSamplingTimeoutMs }}"
+            computedFeaturesTimeoutMs: "${{ inputs.featuresComputedTimeoutMs }}"
             maxPreviouslyIdentifiedFeatures: "${{ inputs.featuresMaxPreviouslyIdentified }}"
       - name: save_features_output
         type: data.set

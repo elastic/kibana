@@ -7,32 +7,48 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { of } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { CustomTriggerSchemaConfig } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { WorkflowValidationDeps } from './types';
-import { WorkflowValidationService } from './workflow_validation_service';
+import {
+  MAX_CONCURRENT_ESQL_COLUMNS_REQUESTS,
+  MAX_ESQL_COLUMNS_REQUESTS,
+  MAX_VALIDATED_ESQL_STEPS,
+  WorkflowValidationService,
+} from './workflow_validation_service';
 
 const mockGetSources = jest.fn();
+const mockGetColumnsFor = jest.fn();
 jest.mock('@kbn/esql-server-utils', () => ({
   buildServerESQLCallbacks: () => ({
     getSources: mockGetSources,
-    getColumnsFor: async () => [{ name: 'host.name', type: 'keyword', userDefined: false }],
+    getColumnsFor: mockGetColumnsFor,
   }),
 }));
 
+const hostNameColumns = [{ name: 'host.name', type: 'keyword', userDefined: false }];
+
 interface MakeDepsOptions {
+  /** Value of `workflowsManagement.pages.enabled`. */
+  pagesEnabled?: boolean;
   /** Connector types the request can see, as `listTypes` returns them. */
   listedConnectorTypes?: Array<Record<string, unknown>>;
   /** Registered step definitions, keyed by step type. */
   stepDefinitions?: Record<string, { outputSchema?: z.ZodType }>;
+  /** Workflows the request can see, as `getWorkflowsForOutputs` returns them. */
+  workflows?: Array<{ id: string; name: string; definition: unknown }>;
 }
 
 const makeDeps = (
   listedTriggers: CustomTriggerSchemaConfig[] = [],
-  { listedConnectorTypes = [], stepDefinitions = {} }: MakeDepsOptions = {}
+  {
+    listedConnectorTypes = [],
+    stepDefinitions = {},
+    workflows = [],
+    pagesEnabled = false,
+  }: MakeDepsOptions = {}
 ): {
   deps: WorkflowValidationDeps;
   actionsClient: { getAll: jest.Mock };
@@ -55,15 +71,16 @@ const makeDeps = (
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest) as any,
       getCoreStart: () =>
         ({
-          featureFlags: {
-            getBooleanValue$: jest.fn().mockReturnValue(of(false)),
-          },
           elasticsearch: {
             client: { asScoped: jest.fn().mockReturnValue({ asCurrentUser: {} }) },
           },
         } as any),
       licensing: licensingMock.createStart(),
       logger: loggingSystemMock.createLogger(),
+      getWorkflowsForOutputs: jest.fn(async (ids: string[]) =>
+        workflows.filter(({ id }) => ids.includes(id))
+      ),
+      pagesEnabled,
     },
     actionsClient,
     actionsClientWithRequest,
@@ -243,6 +260,106 @@ describe('WorkflowValidationService', () => {
       expect(result.diagnostics.filter(({ source }) => source === 'variable')).toEqual([]);
     });
 
+    it('checks references to the outputs of a called workflow', async () => {
+      const { deps } = makeDeps([], {
+        workflows: [
+          {
+            id: 'alert-context',
+            name: 'Alert context',
+            definition: {
+              outputs: [
+                { name: 'severity', type: 'string' },
+                { name: 'summary', type: 'string' },
+              ],
+              steps: [
+                {
+                  name: 'done',
+                  type: 'workflow.output',
+                  with: { severity: 'high', summary: 'ok', legacy_score: 1 },
+                },
+              ],
+            },
+          },
+        ],
+      });
+      const service = new WorkflowValidationService(deps);
+      const callerYaml = (reference: string) =>
+        [
+          'name: caller',
+          'enabled: true',
+          'triggers:',
+          '  - type: manual',
+          'steps:',
+          '  - name: ctx',
+          '    type: workflow.execute',
+          '    with:',
+          '      workflow-id: alert-context',
+          '  - name: log',
+          '    type: console',
+          '    with:',
+          `      message: "${reference}"`,
+          '',
+        ].join('\n');
+      const variableDiagnostics = async (reference: string) =>
+        (
+          await service.validateWorkflow(callerYaml(reference), 'default', {} as any, {
+            includeVariableRules: true,
+            includeEsqlRules: false,
+          })
+        ).diagnostics.filter(({ source }) => source === 'variable');
+
+      expect(await variableDiagnostics('{{ steps.ctx.output.sumary }}')).toEqual([
+        expect.objectContaining({
+          severity: 'error',
+          ruleId: 'invalidVariableReference',
+          message:
+            'Workflow "Alert context" doesn’t return an output named "sumary". It returns: severity, summary, legacy_score',
+        }),
+      ]);
+      expect(await variableDiagnostics('{{ steps.ctx.output.legacy_score }}')).toEqual([]);
+      expect(deps.getWorkflowsForOutputs).toHaveBeenCalledWith(
+        ['alert-context'],
+        'default',
+        expect.anything()
+      );
+    });
+
+    it('checks the other variables when the called workflows fail to load', async () => {
+      const { deps } = makeDeps();
+      deps.getWorkflowsForOutputs = jest.fn().mockRejectedValue(new Error('search failed'));
+      const service = new WorkflowValidationService(deps);
+      const yaml = [
+        'name: caller',
+        'enabled: true',
+        'triggers:',
+        '  - type: manual',
+        'steps:',
+        '  - name: ctx',
+        '    type: workflow.execute',
+        '    with:',
+        '      workflow-id: alert-context',
+        '  - name: log',
+        '    type: console',
+        '    with:',
+        '      message: "{{ steps.ctx.output.sumary }} {{ steps.missing.output }}"',
+        '',
+      ].join('\n');
+
+      const result = await service.validateWorkflow(yaml, 'default', {} as any, {
+        includeVariableRules: true,
+        includeEsqlRules: false,
+      });
+
+      expect(
+        result.diagnostics.filter(
+          ({ source, severity }) => source === 'variable' && severity === 'error'
+        )
+      ).toEqual([expect.objectContaining({ message: 'Variable steps.missing.output is invalid' })]);
+      expect(result.notChecked).toEqual([
+        'References to the outputs of called workflows: the called workflows could not be loaded.',
+      ]);
+    });
+
     it('resolves a reference against a registered step output', async () => {
       // The registered definition must win over the connector contract for the
       // same step type: `known` exists only on the definition, `channel` only on
@@ -391,6 +508,48 @@ describe('WorkflowValidationService', () => {
     });
   });
 
+  describe('page trigger feature flag', () => {
+    const pageWorkflowYaml = [
+      'name: page',
+      'triggers:',
+      '  - type: page',
+      '    title: Report an incident',
+      'steps:',
+      '  - name: step-one',
+      '    type: console',
+      '    with:',
+      '      message: "hello"',
+      '',
+    ].join('\n');
+
+    it.each([
+      [false, false],
+      [true, true],
+    ])(
+      'with workflowsManagement.pages.enabled %s, a page trigger is valid: %s',
+      async (pagesEnabled, valid) => {
+        const { deps } = makeDeps([], { pagesEnabled });
+        const service = new WorkflowValidationService(deps);
+        const request = {} as any;
+
+        const result = await service.validateWorkflow(pageWorkflowYaml, 'default', request, {
+          includeVariableRules: false,
+          includeEsqlRules: false,
+        });
+        const schema = await service.getWorkflowZodSchema({ loose: false }, 'default', request);
+
+        expect(result.valid).toBe(valid);
+        expect(
+          schema.safeParse({
+            name: 'page',
+            triggers: [{ type: 'page', title: 'Report an incident' }],
+            steps: [{ name: 'step-one', type: 'console', with: { message: 'hello' } }],
+          }).success
+        ).toBe(valid);
+      }
+    );
+  });
+
   describe('validateWorkflow ES|QL rules', () => {
     const esqlWorkflowYaml = (query: string) =>
       [
@@ -409,7 +568,25 @@ describe('WorkflowValidationService', () => {
     beforeEach(() => {
       mockGetSources.mockReset();
       mockGetSources.mockResolvedValue([{ name: 'logs-app', hidden: false }]);
+      mockGetColumnsFor.mockReset();
+      mockGetColumnsFor.mockResolvedValue(hostNameColumns);
     });
+
+    const esqlSteps = (queries: string[]) =>
+      [
+        'name: esql',
+        'enabled: true',
+        'triggers:',
+        '  - type: manual',
+        'steps:',
+        ...queries.flatMap((query, index) => [
+          `  - name: search_${index}`,
+          '    type: elasticsearch.esql.query',
+          '    with:',
+          `      query: "${query}"`,
+        ]),
+        '',
+      ].join('\n');
 
     it('reports an unknown field as an esql error and marks the result invalid', async () => {
       const { deps } = makeDeps();
@@ -504,6 +681,108 @@ describe('WorkflowValidationService', () => {
       });
 
       expect(mockGetSources).toHaveBeenCalledTimes(1);
+    });
+
+    it('requests columns once for many steps that read the same index', async () => {
+      const service = new WorkflowValidationService(makeDeps().deps);
+      const queries = Array.from({ length: 50 }, (_, i) => `FROM logs-app | LIMIT ${i + 1}`);
+
+      await service.validateWorkflow(esqlSteps(queries), 'default', {} as any, {
+        includeVariableRules: true,
+        includeEsqlRules: true,
+      });
+
+      expect(mockGetColumnsFor).toHaveBeenCalledTimes(1);
+    });
+
+    it('requests columns again for the next validation', async () => {
+      const service = new WorkflowValidationService(makeDeps().deps);
+      const yaml = esqlWorkflowYaml('FROM logs-app | LIMIT 1');
+      const options = { includeVariableRules: true, includeEsqlRules: true };
+
+      await service.validateWorkflow(yaml, 'default', {} as any, options);
+      await service.validateWorkflow(yaml, 'default', {} as any, options);
+
+      expect(mockGetColumnsFor).toHaveBeenCalledTimes(2);
+    });
+
+    it(`sends at most ${MAX_CONCURRENT_ESQL_COLUMNS_REQUESTS} column requests at a time`, async () => {
+      const indices = Array.from({ length: 20 }, (_, i) => `logs-${i}`);
+      mockGetSources.mockResolvedValue(indices.map((name) => ({ name, hidden: false })));
+      let inFlight = 0;
+      let maxInFlight = 0;
+      mockGetColumnsFor.mockImplementation(async () => {
+        inFlight++;
+        maxInFlight = Math.max(maxInFlight, inFlight);
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        inFlight--;
+        return hostNameColumns;
+      });
+      const service = new WorkflowValidationService(makeDeps().deps);
+
+      await service.validateWorkflow(
+        esqlSteps(indices.map((index) => `FROM ${index} | LIMIT 1`)),
+        'default',
+        {} as any,
+        { includeVariableRules: true, includeEsqlRules: true }
+      );
+
+      expect(mockGetColumnsFor).toHaveBeenCalledTimes(indices.length);
+      expect(maxInFlight).toBe(MAX_CONCURRENT_ESQL_COLUMNS_REQUESTS);
+    });
+
+    it(`validates only the first ${MAX_VALIDATED_ESQL_STEPS} ES|QL steps`, async () => {
+      const service = new WorkflowValidationService(makeDeps().deps);
+      const queries = Array.from(
+        { length: MAX_VALIDATED_ESQL_STEPS + 1 },
+        (_, i) =>
+          `FROM logs-app | KEEP ${i === MAX_VALIDATED_ESQL_STEPS ? 'hostname' : 'host.name'}`
+      );
+
+      const result = await service.validateWorkflow(esqlSteps(queries), 'default', {} as any, {
+        includeVariableRules: false,
+        includeEsqlRules: true,
+      });
+
+      expect(result.diagnostics.filter(({ source }) => source === 'esql')).toEqual([]);
+      expect(result.notChecked).toContain(
+        `ES|QL queries of 1 steps: only the first ${MAX_VALIDATED_ESQL_STEPS} ES|QL steps are validated.`
+      );
+    });
+
+    it(`fetches columns for at most ${MAX_ESQL_COLUMNS_REQUESTS} sources`, async () => {
+      const joinsPerStep = 3;
+      const lookups = Array.from(
+        { length: MAX_VALIDATED_ESQL_STEPS * joinsPerStep },
+        (_, i) => `lookup-${i}`
+      );
+      mockGetSources.mockResolvedValue(
+        ['logs-joins', ...lookups].map((name) => ({ name, hidden: false }))
+      );
+      const queries = Array.from({ length: MAX_VALIDATED_ESQL_STEPS }, (_, step) =>
+        [
+          'FROM logs-joins',
+          ...Array.from(
+            { length: joinsPerStep },
+            (__, join) => `LOOKUP JOIN ${lookups[step * joinsPerStep + join]} ON host.name`
+          ),
+          'KEEP host.name',
+        ].join(' | ')
+      );
+      const service = new WorkflowValidationService(makeDeps().deps);
+
+      const result = await service.validateWorkflow(esqlSteps(queries), 'default', {} as any, {
+        includeVariableRules: false,
+        includeEsqlRules: true,
+      });
+
+      const sourceCount = 1 + lookups.length;
+      expect(mockGetColumnsFor).toHaveBeenCalledTimes(MAX_ESQL_COLUMNS_REQUESTS);
+      expect(result.notChecked).toContain(
+        `ES|QL: fields of ${
+          sourceCount - MAX_ESQL_COLUMNS_REQUESTS
+        } sources were not checked: one validation fetches columns for at most ${MAX_ESQL_COLUMNS_REQUESTS} sources.`
+      );
     });
   });
 });

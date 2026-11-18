@@ -56,6 +56,7 @@ describe('getDeleteKiStepDefinition', () => {
     const { handler } = getDeleteKiStepDefinition({
       getAiIndexService: () => service,
       isContextEngineEnabled: async () => false,
+      isDreamingAvailable: async () => false,
       checkWritePrivilege: allowed,
       ...telemetry,
     });
@@ -78,6 +79,7 @@ describe('getDeleteKiStepDefinition', () => {
     const { handler } = getDeleteKiStepDefinition({
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
+      isDreamingAvailable: enabled,
       checkWritePrivilege: async () => false,
       ...mockKiStepTelemetry(),
     });
@@ -102,6 +104,7 @@ describe('getDeleteKiStepDefinition', () => {
     const { handler } = getDeleteKiStepDefinition({
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
+      isDreamingAvailable: enabled,
       checkWritePrivilege: allowed,
       ...mockKiStepTelemetry(),
     });
@@ -140,6 +143,7 @@ describe('getDeleteKiStepDefinition', () => {
     const { handler } = getDeleteKiStepDefinition({
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
+      isDreamingAvailable: enabled,
       checkWritePrivilege: allowed,
       ...mockKiStepTelemetry(),
     });
@@ -165,6 +169,7 @@ describe('getDeleteKiStepDefinition', () => {
     const { handler } = getDeleteKiStepDefinition({
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
+      isDreamingAvailable: enabled,
       checkWritePrivilege: allowed,
       ...mockKiStepTelemetry(),
     });
@@ -205,6 +210,7 @@ describe('getDeleteKiStepDefinition', () => {
     const { handler } = getDeleteKiStepDefinition({
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
+      isDreamingAvailable: enabled,
       checkWritePrivilege: allowed,
       ...mockKiStepTelemetry(),
     });
@@ -240,6 +246,7 @@ describe('getDeleteKiStepDefinition', () => {
     const { handler } = getDeleteKiStepDefinition({
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
+      isDreamingAvailable: enabled,
       checkWritePrivilege: allowed,
       ...mockKiStepTelemetry(),
     });
@@ -276,6 +283,7 @@ describe('getDeleteKiStepDefinition', () => {
     const { handler } = getDeleteKiStepDefinition({
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
+      isDreamingAvailable: enabled,
       checkWritePrivilege: allowed,
       ...mockKiStepTelemetry(),
     });
@@ -310,6 +318,7 @@ describe('getDeleteKiStepDefinition', () => {
     const { handler } = getDeleteKiStepDefinition({
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
+      isDreamingAvailable: enabled,
       checkWritePrivilege: allowed,
       ...mockKiStepTelemetry(),
     });
@@ -334,6 +343,7 @@ describe('getDeleteKiStepDefinition', () => {
     const { handler } = getDeleteKiStepDefinition({
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
+      isDreamingAvailable: enabled,
       checkWritePrivilege: allowed,
       ...mockKiStepTelemetry(),
     });
@@ -358,6 +368,7 @@ describe('getDeleteKiStepDefinition', () => {
     const { handler } = getDeleteKiStepDefinition({
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
+      isDreamingAvailable: enabled,
       checkWritePrivilege: allowed,
       ...mockKiStepTelemetry(),
     });
@@ -382,6 +393,7 @@ describe('getDeleteKiStepDefinition', () => {
     const { handler } = getDeleteKiStepDefinition({
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
+      isDreamingAvailable: enabled,
       checkWritePrivilege: allowed,
       ...telemetry,
     });
@@ -414,6 +426,7 @@ describe('getDeleteKiStepDefinition', () => {
     const { handler } = getDeleteKiStepDefinition({
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
+      isDreamingAvailable: enabled,
       checkWritePrivilege: allowed,
       ...telemetry,
     });
@@ -452,6 +465,7 @@ describe('getDeleteKiStepDefinition', () => {
     const { handler } = getDeleteKiStepDefinition({
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
+      isDreamingAvailable: enabled,
       checkWritePrivilege: allowed,
       ...telemetry,
     });
@@ -482,6 +496,7 @@ describe('getDeleteKiStepDefinition', () => {
     const { handler } = getDeleteKiStepDefinition({
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
+      isDreamingAvailable: enabled,
       checkWritePrivilege: allowed,
       ...mockKiStepTelemetry(),
     });

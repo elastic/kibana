@@ -49,7 +49,11 @@ export async function create(params: ConnectorCreateParams): Promise<Connector> 
 
   try {
     const connector = await createConnector(params);
-    recordConnectorCreate({ connectorType: actionTypeId, authType });
+    recordConnectorCreate({
+      connectorType: actionTypeId,
+      authType,
+      specBased: params.context.actionTypeRegistry.isSpecActionType(actionTypeId),
+    });
     return connector;
   } catch (error) {
     // A failed request can carry values that were never validated, so unregistered ones are not used as labels.
@@ -57,6 +61,7 @@ export async function create(params: ConnectorCreateParams): Promise<Connector> 
     recordConnectorCreate({
       connectorType: toBoundedLabel(actionTypeId, actionTypeRegistry.has(actionTypeId)),
       authType: toBoundedLabel(authType, authType === 'none' || authTypeRegistry.has(authType)),
+      specBased: actionTypeRegistry.isSpecActionType(actionTypeId),
       errorType: getConnectorCreateErrorType(error),
     });
     throw error;

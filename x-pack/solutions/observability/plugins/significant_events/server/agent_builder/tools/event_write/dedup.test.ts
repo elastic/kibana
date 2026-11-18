@@ -8,12 +8,18 @@
 import type { SignalEntry, SignificantEvent } from '@kbn/significant-events-schema';
 import {
   buildWriteCandidates,
-  fetchActiveEventsForDedup,
+  fetchInactiveEventsForReuse,
+  fetchLiveEventsForDedup,
+  findRulesHeldByOtherEvents,
   markDuplicateKeys,
+  reopenMatchingInactiveSeries,
   resolveDedupSkips,
 } from './dedup';
-import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
-import type { BulkResults, DedupCandidate, EventsWriteInput } from './types';
+import type {
+  InactiveSeriesHead,
+  RuleEventsClient,
+} from '../../../lib/significant_events/events/rule_events_client';
+import type { BulkResults, DedupCandidate, EventsWriteInput, LoadedCandidate } from './types';
 
 type DetectionSignal = Extract<SignalEntry, { type: 'detection' }>;
 type ChangePointType = DetectionSignal['metadata']['change_point_type'];
@@ -73,8 +79,8 @@ const makeActiveEvent = (overrides: Partial<SignificantEvent> = {}): Significant
 
 const makeClient = (
   hits: SignificantEvent[] = []
-): jest.Mocked<Pick<RuleEventsClient, 'findLatestActive'>> & RuleEventsClient =>
-  ({ findLatestActive: jest.fn().mockResolvedValue({ hits }) } as never);
+): jest.Mocked<Pick<RuleEventsClient, 'findLatestLive'>> & RuleEventsClient =>
+  ({ findLatestLive: jest.fn().mockResolvedValue({ hits }) } as never);
 
 const dedupCandidates = (inputs: EventsWriteInput[]): DedupCandidate[] =>
   buildWriteCandidates(inputs).filter((c): c is DedupCandidate => c.mode === 'dedup');
@@ -181,19 +187,19 @@ describe('markDuplicateKeys', () => {
   });
 });
 
-describe('fetchActiveEventsForDedup', () => {
+describe('fetchLiveEventsForDedup', () => {
   it('does not scan when there are no dedup candidates', async () => {
     const client = makeClient();
 
-    await expect(fetchActiveEventsForDedup(client, [])).resolves.toEqual([]);
-    expect(client.findLatestActive).not.toHaveBeenCalled();
+    await expect(fetchLiveEventsForDedup(client, [])).resolves.toEqual([]);
+    expect(client.findLatestLive).not.toHaveBeenCalled();
   });
 
   it('runs one scan over the union of every candidate stream and rule', async () => {
     const hit = makeActiveEvent();
     const client = makeClient([hit]);
 
-    const events = await fetchActiveEventsForDedup(
+    const events = await fetchLiveEventsForDedup(
       client,
       dedupCandidates([
         makeInput(),
@@ -202,8 +208,8 @@ describe('fetchActiveEventsForDedup', () => {
     );
 
     expect(events).toEqual([hit]);
-    expect(client.findLatestActive).toHaveBeenCalledTimes(1);
-    expect(client.findLatestActive).toHaveBeenCalledWith({
+    expect(client.findLatestLive).toHaveBeenCalledTimes(1);
+    expect(client.findLatestLive).toHaveBeenCalledWith({
       sourceIds: ['logs.checkout', 'logs.payments'],
       ruleUuids: ['rule-abc', 'rule-xyz'],
     });
@@ -215,9 +221,9 @@ describe('fetchActiveEventsForDedup', () => {
   ])('omits $field from the scan when any candidate has none', async ({ field, override }) => {
     const client = makeClient();
 
-    await fetchActiveEventsForDedup(client, dedupCandidates([makeInput(), makeInput(override)]));
+    await fetchLiveEventsForDedup(client, dedupCandidates([makeInput(), makeInput(override)]));
 
-    expect(client.findLatestActive).toHaveBeenCalledWith(
+    expect(client.findLatestLive).toHaveBeenCalledWith(
       expect.objectContaining({ [field]: undefined })
     );
   });
@@ -409,5 +415,391 @@ describe('resolveDedupSkips', () => {
         ])
       ).toBe('event-b');
     });
+  });
+});
+
+const makeInactiveClient = (
+  hits: SignificantEvent[] = []
+): jest.Mocked<Pick<RuleEventsClient, 'findLatestInactiveByIdentity'>> & RuleEventsClient =>
+  ({ findLatestInactiveByIdentity: jest.fn().mockResolvedValue({ hits, heads: [] }) } as never);
+
+describe('fetchInactiveEventsForReuse', () => {
+  const now = Date.parse('2026-10-28T12:00:00.000Z');
+
+  it('bounds the read by the lookback it is given, not a fixed window', async () => {
+    const client = makeInactiveClient();
+
+    await fetchInactiveEventsForReuse({
+      eventSearchClient: client,
+      dedupCandidates: dedupCandidates([makeInput()]),
+      inactiveLookbackMs: 6 * 60 * 60 * 1000,
+      now,
+    });
+
+    expect(client.findLatestInactiveByIdentity).toHaveBeenCalledWith({
+      sourceIds: ['logs.checkout'],
+      ruleUuids: ['rule-abc'],
+      inactiveSince: '2026-10-28T06:00:00.000Z',
+    });
+  });
+});
+
+describe('reopenMatchingInactiveSeries', () => {
+  const makeInactiveEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent =>
+    makeActiveEvent({ status: 'inactive', event_id: 'closed-event-id', ...overrides });
+
+  const headsOf = (events: SignificantEvent[]): InactiveSeriesHead[] =>
+    events.flatMap(({ event_id: eventId }) =>
+      eventId === undefined
+        ? []
+        : [{ eventId, groupHash: `group-${eventId}`, episodeId: `episode-${eventId}` }]
+    );
+  const reopen = (
+    inputs: EventsWriteInput[],
+    events: SignificantEvent[],
+    heads: InactiveSeriesHead[] = headsOf(events),
+    deactivatedGroupHashes: ReadonlySet<string> = new Set()
+  ) =>
+    reopenMatchingInactiveSeries({
+      candidates: buildWriteCandidates(inputs),
+      inactive: { events, heads },
+      deactivatedGroupHashes,
+    });
+
+  it('reuses the event_id of a closed series with the exact same identity, and records its head for the deactivation check', () => {
+    const [candidate] = reopen([makeInput()], [makeInactiveEvent()]);
+
+    expect(candidate).toMatchObject({
+      mode: 'snapshot',
+      index: 0,
+      eventId: 'closed-event-id',
+      input: { event_id: 'closed-event-id', title: 'Checkout latency' },
+      reopensSeries: {
+        groupHash: 'group-closed-event-id',
+        episodeId: 'episode-closed-event-id',
+      },
+    });
+  });
+
+  it('reuses a series closed while recovering, which holds the rule only as refuted', () => {
+    const [candidate] = reopen(
+      [makeInput()],
+      [makeInactiveEvent({ signals: [makeSignal('rule-abc', 'refutes')] })]
+    );
+
+    expect(candidate).toMatchObject({ mode: 'snapshot', eventId: 'closed-event-id' });
+  });
+
+  it('does not reuse a series for a rule it only refuted while it still confirms another rule', () => {
+    const [candidate] = reopen(
+      [makeInput({ signals: [makeSignal('rule-def')] })],
+      [makeInactiveEvent({ signals: [makeSignal('rule-abc'), makeSignal('rule-def', 'refutes')] })]
+    );
+
+    expect(candidate.mode).toBe('dedup');
+  });
+
+  it('leaves the batch a new event when the closed series has no known latest episode', () => {
+    const [candidate] = reopen([makeInput()], [makeInactiveEvent()], []);
+
+    expect(candidate.mode).toBe('dedup');
+  });
+
+  it('does not reopen a series that lacks one of the batch rules', () => {
+    const [candidate] = reopen(
+      [makeInput({ signals: [makeSignal('rule-abc'), makeSignal('rule-def')] })],
+      [makeInactiveEvent()]
+    );
+
+    expect(candidate.mode).toBe('dedup');
+  });
+
+  it('requires a shared source', () => {
+    const [candidate] = reopen([makeInput()], [makeInactiveEvent({ source_ids: ['logs.cart'] })]);
+
+    expect(candidate.mode).toBe('dedup');
+  });
+
+  it('reopens the series an operator deactivated, even when a newer one also matches', () => {
+    const older = makeInactiveEvent({
+      event_id: 'older',
+      '@timestamp': '2026-10-27T01:00:00.000Z',
+    });
+    const newer = makeInactiveEvent({
+      event_id: 'newer',
+      '@timestamp': '2026-10-28T01:00:00.000Z',
+    });
+
+    const [candidate] = reopen([makeInput()], [older, newer], undefined, new Set(['group-older']));
+
+    expect(candidate).toMatchObject({
+      eventId: 'older',
+      reopensSeries: { groupHash: 'group-older' },
+    });
+  });
+
+  it('prefers the closest fit over a broader series, even a newer one', () => {
+    const exact = makeInactiveEvent({
+      event_id: 'exact',
+      '@timestamp': '2026-10-27T01:00:00.000Z',
+    });
+    const broad = makeInactiveEvent({
+      event_id: 'broad',
+      '@timestamp': '2026-10-28T01:00:00.000Z',
+      signals: [makeSignal('rule-abc'), makeSignal('rule-def'), makeSignal('rule-ghi')],
+    });
+
+    const [candidate] = reopen([makeInput()], [exact, broad]);
+
+    expect(candidate.eventId).toBe('exact');
+  });
+
+  it('prefers the closest fit over a broader series an operator deactivated', () => {
+    const exact = makeInactiveEvent({ event_id: 'exact' });
+    const broad = makeInactiveEvent({
+      event_id: 'broad',
+      signals: [makeSignal('rule-abc'), makeSignal('rule-def')],
+    });
+
+    const [candidate] = reopen([makeInput()], [exact, broad], undefined, new Set(['group-broad']));
+
+    expect(candidate.eventId).toBe('exact');
+  });
+
+  it('reopens the newest matching series when no match was deactivated', () => {
+    const older = makeInactiveEvent({
+      event_id: 'older',
+      '@timestamp': '2026-10-27T01:00:00.000Z',
+    });
+    const newer = makeInactiveEvent({
+      event_id: 'newer',
+      '@timestamp': '2026-10-28T01:00:00.000Z',
+    });
+
+    const [candidate] = reopen([makeInput()], [older, newer], undefined, new Set(['group-other']));
+
+    expect(candidate.eventId).toBe('newer');
+  });
+
+  it('compares confirmed rules only when the candidate has confirmed rules', () => {
+    const [candidate] = reopen(
+      [makeInput({ signals: [makeSignal('rule-abc'), makeSignal('rule-def', 'refutes')] })],
+      [makeInactiveEvent()]
+    );
+
+    expect(candidate).toMatchObject({ mode: 'snapshot', eventId: 'closed-event-id' });
+  });
+
+  it('leaves snapshot candidates and candidates without rules untouched', () => {
+    const results = reopen(
+      [makeInput({ event_id: 'explicit-id' }), makeInput({ signals: [] })],
+      [makeInactiveEvent()]
+    );
+
+    expect(results.map((c) => c.mode)).toEqual(['snapshot', 'dedup']);
+    expect(results[0].eventId).toBe('explicit-id');
+  });
+});
+
+describe('findRulesHeldByOtherEvents', () => {
+  const liveEvent = (
+    eventId: string,
+    signals: SignalEntry[],
+    overrides: Partial<SignificantEvent> = {}
+  ): SignificantEvent =>
+    ({
+      '@timestamp': '2024-01-01T00:00:00.000Z',
+      event_id: eventId,
+      status: 'active',
+      source_ids: ['logs.other'],
+      signals,
+      ...overrides,
+    } as SignificantEvent);
+  const candidateFor = ({
+    eventId = 'target',
+    ruleUuids,
+    latest,
+    verdict = 'confirms',
+  }: {
+    eventId?: string;
+    ruleUuids: string[];
+    latest?: SignificantEvent;
+    verdict?: DetectionSignal['verdict'];
+  }): LoadedCandidate => ({
+    mode: 'snapshot',
+    index: 0,
+    eventId,
+    input: makeInput({
+      event_id: eventId,
+      signals: ruleUuids.map((uuid) => makeSignal(uuid, verdict)),
+    }),
+    latest,
+    priorDocs: latest ? [latest] : [],
+  });
+
+  it('returns the rules another live event confirms, with the holder', () => {
+    const holder = liveEvent('holder', [makeSignal('rule-a')]);
+
+    expect(
+      findRulesHeldByOtherEvents({
+        candidate: candidateFor({ ruleUuids: ['rule-a', 'rule-free'] }),
+        liveEvents: [holder],
+      })
+    ).toEqual({ holder, heldRules: [{ rule_uuid: 'rule-a', event_id: 'holder' }] });
+  });
+
+  it.each<DetectionSignal['verdict']>(['refutes', 'off_topic', 'inconclusive'])(
+    'ignores a holder whose latest verdict for the rule is %s',
+    (verdict) => {
+      expect(
+        findRulesHeldByOtherEvents({
+          candidate: candidateFor({ ruleUuids: ['rule-a'] }),
+          liveEvents: [liveEvent('holder', [makeSignal('rule-a', verdict)])],
+        })
+      ).toBeUndefined();
+    }
+  );
+
+  it("ignores an inactive event and the item's own event", () => {
+    expect(
+      findRulesHeldByOtherEvents({
+        candidate: candidateFor({ ruleUuids: ['rule-a'] }),
+        liveEvents: [
+          liveEvent('closed', [makeSignal('rule-a')], { status: 'inactive' }),
+          liveEvent('target', [makeSignal('rule-a')]),
+        ],
+      })
+    ).toBeUndefined();
+  });
+
+  it('checks every incoming verdict, not only confirms rows', () => {
+    expect(
+      findRulesHeldByOtherEvents({
+        candidate: candidateFor({ ruleUuids: ['rule-a'], verdict: 'refutes' }),
+        liveEvents: [liveEvent('holder', [makeSignal('rule-a')])],
+      })?.heldRules
+    ).toEqual([{ rule_uuid: 'rule-a', event_id: 'holder' }]);
+  });
+
+  it('exempts a rule the live target already confirms, so an existing duplicate can still write', () => {
+    const latest = liveEvent('target', [makeSignal('rule-a')]);
+
+    expect(
+      findRulesHeldByOtherEvents({
+        candidate: candidateFor({ ruleUuids: ['rule-a'], latest }),
+        liveEvents: [liveEvent('holder', [makeSignal('rule-a')])],
+      })
+    ).toBeUndefined();
+  });
+
+  it.each<[DetectionSignal['verdict'], DetectionSignal['verdict']]>([
+    ['refutes', 'refutes'],
+    ['refutes', 'off_topic'],
+    ['off_topic', 'inconclusive'],
+    ['inconclusive', 'refutes'],
+  ])(
+    'exempts a rule the live target holds as %s for a write whose verdict is %s',
+    (targetVerdict, incomingVerdict) => {
+      const latest = liveEvent('target', [makeSignal('rule-a', targetVerdict)], {
+        status: 'recovering',
+      });
+
+      expect(
+        findRulesHeldByOtherEvents({
+          candidate: candidateFor({ ruleUuids: ['rule-a'], latest, verdict: incomingVerdict }),
+          liveEvents: [liveEvent('holder', [makeSignal('rule-a')])],
+        })
+      ).toBeUndefined();
+    }
+  );
+
+  it('holds a write that carries a confirming and a refuting row for a rule the target holds as refutes', () => {
+    const latest = liveEvent('target', [makeSignal('rule-a', 'refutes')], {
+      status: 'recovering',
+    });
+    const candidate = candidateFor({ ruleUuids: ['rule-a'], latest });
+
+    expect(
+      findRulesHeldByOtherEvents({
+        candidate: {
+          ...candidate,
+          input: {
+            ...candidate.input,
+            signals: [makeSignal('rule-a', 'refutes'), makeSignal('rule-a', 'confirms')],
+          },
+        },
+        liveEvents: [liveEvent('holder', [makeSignal('rule-a')])],
+      })?.heldRules
+    ).toEqual([{ rule_uuid: 'rule-a', event_id: 'holder' }]);
+  });
+
+  it.each<DetectionSignal['verdict']>(['refutes', 'off_topic', 'inconclusive'])(
+    'holds a write that confirms a rule the live target holds as %s while another event confirms it',
+    (verdict) => {
+      const latest = liveEvent('target', [makeSignal('rule-a', verdict)], {
+        status: 'recovering',
+      });
+
+      expect(
+        findRulesHeldByOtherEvents({
+          candidate: candidateFor({ ruleUuids: ['rule-a'], latest }),
+          liveEvents: [liveEvent('holder', [makeSignal('rule-a')])],
+        })?.heldRules
+      ).toEqual([{ rule_uuid: 'rule-a', event_id: 'holder' }]);
+    }
+  );
+
+  it('gives a closed series no exemption for the rules it holds', () => {
+    const latest = liveEvent('target', [makeSignal('rule-a')], { status: 'inactive' });
+
+    expect(
+      findRulesHeldByOtherEvents({
+        candidate: candidateFor({ ruleUuids: ['rule-a'], latest }),
+        liveEvents: [liveEvent('holder', [makeSignal('rule-a')])],
+      })?.holder.event_id
+    ).toBe('holder');
+  });
+
+  it('names the newest holder and lists each rule with its own holder, in incoming order', () => {
+    const older = liveEvent('older', [makeSignal('rule-1')]);
+    const newer = liveEvent('newer', [makeSignal('rule-2')], {
+      '@timestamp': '2024-02-01T00:00:00.000Z',
+    });
+
+    expect(
+      findRulesHeldByOtherEvents({
+        candidate: candidateFor({ ruleUuids: ['rule-1', 'rule-2'] }),
+        liveEvents: [older, newer],
+      })
+    ).toEqual({
+      holder: newer,
+      heldRules: [
+        { rule_uuid: 'rule-1', event_id: 'older' },
+        { rule_uuid: 'rule-2', event_id: 'newer' },
+      ],
+    });
+  });
+
+  it('picks the newest event for a rule that several events confirm', () => {
+    const older = liveEvent('older', [makeSignal('rule-a')]);
+    const newer = liveEvent('newer', [makeSignal('rule-a')], {
+      '@timestamp': '2024-02-01T00:00:00.000Z',
+    });
+
+    expect(
+      findRulesHeldByOtherEvents({
+        candidate: candidateFor({ ruleUuids: ['rule-a'] }),
+        liveEvents: [older, newer],
+      })?.heldRules
+    ).toEqual([{ rule_uuid: 'rule-a', event_id: 'newer' }]);
+  });
+
+  it('returns undefined for an item with no rules', () => {
+    expect(
+      findRulesHeldByOtherEvents({
+        candidate: candidateFor({ ruleUuids: [] }),
+        liveEvents: [liveEvent('holder', [makeSignal('rule-a')])],
+      })
+    ).toBeUndefined();
   });
 });

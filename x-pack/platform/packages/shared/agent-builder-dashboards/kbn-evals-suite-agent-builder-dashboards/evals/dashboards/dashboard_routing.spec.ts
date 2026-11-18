@@ -15,13 +15,13 @@ evaluate.describe('Agent Builder Dashboards - Routing', { tag: tags.serverless.s
   });
 
   evaluate(
-    'keeps non-dashboard requests out of the dashboard skill',
+    'writes no dashboard for requests that must not become one',
     async ({ evaluateDataset }) => {
       await evaluateDataset({
         dataset: {
           name: 'agent builder dashboards: routing',
           description:
-            'Standalone chart, ES|QL help, and field discovery requests. Scored by Dashboard Skill Routing; dashboard evaluators skip.',
+            'Standalone chart, ES|QL help, and field discovery requests, kept out of the dashboard skill, and a dashboard over an index that does not exist, which must end without one. Scored by Dashboard Skill Routing and Dashboard Unavailable Requests; dashboard evaluators skip.',
           examples: DASHBOARD_ROUTING_EXAMPLES,
         },
       });
