@@ -73,8 +73,13 @@ export const getAgentPoliciesRoute = (router: IRouter, osqueryContext: OsqueryAp
 
           return {
             ...agentPolicy,
-            package_policy_id: integrations[0]?.id,
-            package_policy_name: integrations[0]?.name,
+            // The singular fields are only unambiguous with exactly one osquery
+            // integration; with several, consumers must read `osquery_package_policies`
+            // rather than get an arbitrary one picked by package-policy iteration order.
+            ...(integrations.length === 1 && {
+              package_policy_id: integrations[0].id,
+              package_policy_name: integrations[0].name,
+            }),
             osquery_package_policies: integrations,
           };
         });

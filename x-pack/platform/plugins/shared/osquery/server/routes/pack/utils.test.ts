@@ -2465,15 +2465,32 @@ describe('computeEffectivePolicyIds', () => {
     expect(getByIds.mock.calls[0][1]).toHaveLength(4);
   });
 
-  test('recognizes legacy bare keys and space-prefixed keys without double-counting owners', async () => {
+  test('recognizes legacy bare keys and space-prefixed keys in the default space without double-counting owners', async () => {
+    expect(
+      await computeEffectivePolicyIds(
+        ['legacy'],
+        'default',
+        [
+          targetingPackagePolicy('bare', ['B', 'A'], { legacy: {} }),
+          targetingPackagePolicy('prefixed', ['A', 'C'], { 'default--legacy': {} }),
+        ],
+        lookup
+      )
+    ).toEqual(new Map([['legacy', ['A', 'B', 'C']]]));
+  });
+
+  test('does not credit a legacy bare key to a same-named pack in a non-default space', async () => {
     expect(
       await computeEffectivePolicyIds(
         ['legacy'],
         'space',
-        [targetingPackagePolicy('legacy', ['B', 'A'], { legacy: {}, 'space--legacy': {} })],
+        [
+          targetingPackagePolicy('bare', ['B'], { legacy: {} }),
+          targetingPackagePolicy('prefixed', ['A'], { 'space--legacy': {} }),
+        ],
         lookup
       )
-    ).toEqual(new Map([['legacy', ['A', 'B']]]));
+    ).toEqual(new Map([['legacy', ['A']]]));
   });
 
   test('returns an empty list for a disabled pack with no wire block', async () => {

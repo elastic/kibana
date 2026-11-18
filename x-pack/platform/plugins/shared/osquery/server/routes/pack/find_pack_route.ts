@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-
 import { filter, map } from 'lodash';
 
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
@@ -27,9 +25,8 @@ import {
   buildScheduleResponseSlice,
   buildExecutionDefaultsResponseSlice,
   stripPerQueryRruleFields,
-  computeEffectivePolicyIds,
-  fetchAllPackagePolicies,
 } from './utils';
+import { getEffectivePolicyIdsForPacks } from './effective_policy_ids';
 import { findPackResponseSchema } from './response_schemas';
 
 export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
@@ -94,34 +91,12 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           ...(filters.length && { filter: filters.join(' AND ') }),
         });
 
-        let effectivePolicyIds: Map<string, string[]> | undefined;
-        try {
-          const spaceId = osqueryContext?.service?.getActiveSpace
-            ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
-            : DEFAULT_SPACE_ID;
-          const packagePolicies = await fetchAllPackagePolicies(
-            osqueryContext.service.getPackagePolicyService(),
-            spaceScopedClient
-          );
-          const agentPolicyService = osqueryContext.service.getAgentPolicyService();
-          if (!agentPolicyService) {
-            throw new Error('Agent policy service is unavailable');
-          }
-
-          effectivePolicyIds = await computeEffectivePolicyIds(
-            soClientResponse.saved_objects.map(({ attributes }) => attributes.name),
-            spaceId,
-            packagePolicies,
-            {
-              soClient: spaceScopedClient,
-              agentPolicyService,
-            }
-          );
-        } catch (error) {
-          osqueryContext.logFactory
-            .get('pack')
-            .warn(`Failed to compute effective pack policy ids: ${error.message}`);
-        }
+        const effectivePolicyIds = await getEffectivePolicyIdsForPacks({
+          osqueryContext,
+          request,
+          soClient: spaceScopedClient,
+          packNames: soClientResponse.saved_objects.map(({ attributes }) => attributes.name),
+        });
 
         const isRruleFeatureEnabled = osqueryContext.experimentalFeatures.rruleScheduling;
 

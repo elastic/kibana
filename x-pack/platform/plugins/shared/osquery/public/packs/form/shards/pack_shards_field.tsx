@@ -82,8 +82,12 @@ const PackShardsFieldComponent = ({ options, isDisabled = false }: PackShardsFie
     if (!shardsArrayState.isDirty) {
       reset({ shardsArray: initialShardsArray });
       const normalizedShards = convertShardsToObject(initialShardsArray, groupsByPackagePolicyId);
+      // Collapsing per-policy shards of a shared integration to one row is a
+      // display normalization, not a user edit: the server already writes the
+      // max shard per integration (resolveSharedPackagePolicyShard), so keep the
+      // form pristine instead of flagging unsaved changes on open.
       if (!deepEqual(normalizedShards, rootShards)) {
-        setValueRoot('shards', normalizedShards, { shouldDirty: true });
+        setValueRoot('shards', normalizedShards, { shouldDirty: false });
       }
     }
   }, [

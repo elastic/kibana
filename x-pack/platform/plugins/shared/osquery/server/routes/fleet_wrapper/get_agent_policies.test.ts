@@ -147,8 +147,6 @@ describe('getAgentPoliciesRoute integration ownership', () => {
       body: [
         expect.objectContaining({
           id: 'A',
-          package_policy_id: 'pp1',
-          package_policy_name: 'Integration pp1',
           osquery_package_policies: [
             { id: 'pp1', name: 'Integration pp1' },
             { id: 'pp2', name: 'Integration pp2' },
@@ -164,6 +162,10 @@ describe('getAgentPoliciesRoute integration ownership', () => {
         }),
       ],
     });
+    // Ambiguous with two integrations, so the singular fields are omitted.
+    const [policyA] = response.ok.mock.calls[0][0]?.body as Array<Record<string, unknown>>;
+    expect(policyA).not.toHaveProperty('package_policy_id');
+    expect(policyA).not.toHaveProperty('package_policy_name');
   });
 
   it('excludes integrations below 0.6.0 while including the supported boundary', async () => {

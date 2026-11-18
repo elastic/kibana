@@ -26,6 +26,7 @@ import {
 import moment from 'moment-timezone';
 import { satisfies } from 'semver';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { AgentPolicyServiceInterface, PackagePolicyClient } from '@kbn/fleet-plugin/server';
@@ -1072,10 +1073,14 @@ export const computeEffectivePolicyIds = async (
     agentPolicyService: Pick<AgentPolicyServiceInterface, 'getByIds'>;
   }
 ): Promise<Map<string, string[]>> => {
+  // A legacy bare (unprefixed) wire key belongs to the default space — the same
+  // rule `reconcileScheduleIdsToWire` applies — so only match it there. Matching
+  // it in every space would credit another space's same-named pack with its owners.
+  const matchesBareKey = spaceId === DEFAULT_SPACE_ID;
   const policyIdsByPackKey = new Map<string, Set<string>>();
   for (const packName of packNames) {
     policyIdsByPackKey.set(makePackKey(packName, spaceId), new Set());
-    policyIdsByPackKey.set(packName, new Set());
+    if (matchesBareKey) policyIdsByPackKey.set(packName, new Set());
   }
 
   for (const packagePolicy of packagePolicies) {
@@ -1101,7 +1106,7 @@ export const computeEffectivePolicyIds = async (
     packNames.map((packName) => {
       const owners = new Set([
         ...(policyIdsByPackKey.get(makePackKey(packName, spaceId)) ?? []),
-        ...(policyIdsByPackKey.get(packName) ?? []),
+        ...((matchesBareKey && policyIdsByPackKey.get(packName)) || []),
       ]);
 
       return [packName, [...owners].filter((id) => visiblePolicyIds.has(id)).sort()];

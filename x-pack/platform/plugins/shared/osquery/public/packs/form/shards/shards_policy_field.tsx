@@ -63,7 +63,11 @@ const ShardsPolicyFieldComponent = ({
   );
 
   useEffect(() => {
-    setSelected(value?.key ? [{ ...value, value: value.key }] : []);
+    // Fall back to the key so a deleted policy (or a row converted before the
+    // policy list loaded) still shows a selection instead of an empty combobox.
+    setSelected(
+      value?.key ? [{ ...value, label: value.label || value.key, value: value.key }] : []
+    );
   }, [value]);
 
   const singleSelectionConfig = useMemo(() => ({ asPlainText: true }), []);

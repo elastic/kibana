@@ -334,11 +334,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         };
 
         const warnings = attributes.enabled
-          ? resolveSharedIntegrationOverdelivery(
-              packSO.references.map(({ id }) => id),
-              packagePolicies,
-              shards
-            )
+          ? resolveSharedIntegrationOverdelivery(data.policy_ids ?? [], packagePolicies, shards)
           : [];
 
         return response.ok({
