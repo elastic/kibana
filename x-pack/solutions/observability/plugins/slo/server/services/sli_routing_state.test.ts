@@ -26,22 +26,15 @@ describe('startOfNextUtcMonth', () => {
 });
 
 describe('computeInitialRoutingState', () => {
-  it('guards the daily history until the next UTC month start', () => {
-    expect(
-      computeInitialRoutingState({ configured: 'M', now: NOV_17, hasDailyHistory: true })
-    ).toEqual({ rounding: 'M', cutover: DEC_1 });
-  });
-
-  it('does not guard without daily history', () => {
-    expect(
-      computeInitialRoutingState({ configured: 'w', now: NOV_17, hasDailyHistory: false })
-    ).toEqual({ rounding: 'w', cutover: null });
-  });
-
-  it('does not guard the daily history when daily indices are configured', () => {
-    expect(
-      computeInitialRoutingState({ configured: 'd', now: NOV_17, hasDailyHistory: true })
-    ).toEqual({ rounding: 'd', cutover: null });
+  it.each([
+    ['guards the daily history until the next UTC month start', 'M', true, DEC_1],
+    ['does not guard without daily history', 'w', false, null],
+    ['does not guard the daily history when daily indices are configured', 'd', true, null],
+  ] as const)('%s', (_, configured, hasDailyHistory, cutover) => {
+    expect(computeInitialRoutingState({ configured, now: NOV_17, hasDailyHistory })).toEqual({
+      rounding: configured,
+      cutover,
+    });
   });
 });
 

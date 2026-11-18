@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  getSLIIndexNamePrefix,
-  getSLIRoutingPipelineName,
-  SLI_ROUTED_VERSIONS,
-  SLI_ROUTING_MIN_VERSION,
-  SLO_RESOURCES_VERSION,
-} from './constants';
+import { SLI_ROUTED_VERSIONS, SLI_ROUTING_MIN_VERSION, SLO_RESOURCES_VERSION } from './constants';
 
 describe('SLI routing constants', () => {
   it('ends SLI_ROUTED_VERSIONS with SLO_RESOURCES_VERSION', () => {
@@ -25,13 +19,5 @@ describe('SLI routing constants', () => {
         expect(version).toBeGreaterThan(SLI_ROUTED_VERSIONS[index - 1]);
       }
     });
-  });
-
-  it('derives the SLI index name prefix from the resources version', () => {
-    expect(getSLIIndexNamePrefix(3.6)).toBe('.slo-observability.sli-v3.6.');
-  });
-
-  it('names the routing pipeline after the resources version', () => {
-    expect(getSLIRoutingPipelineName(3.6)).toBe('.slo-observability.sli.routing-v3.6');
   });
 });

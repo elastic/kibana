@@ -30,27 +30,17 @@ describe('ResourceInstallState', () => {
     jest.useRealTimers();
   });
 
-  it('installs under the resource installer lock', async () => {
+  it('installs once under the resource installer lock and memoizes the success', async () => {
     const { installer, lockManager, state } = setup();
     installer.install.mockResolvedValue();
 
+    await state.ensureInstalled();
     await state.ensureInstalled();
 
     expect(lockManager.withLock).toHaveBeenCalledWith(
       LOCK_ID_RESOURCE_INSTALLER,
       expect.any(Function)
     );
-    expect(installer.install).toHaveBeenCalledTimes(1);
-  });
-
-  it('memoizes a successful install', async () => {
-    const { installer, state } = setup();
-    installer.install.mockResolvedValue();
-
-    await state.ensureInstalled();
-    await state.ensureInstalled();
-    await state.ensureInstalled();
-
     expect(installer.install).toHaveBeenCalledTimes(1);
   });
 
@@ -76,25 +66,16 @@ describe('ResourceInstallState', () => {
     expect(installer.install).toHaveBeenCalledTimes(1);
   });
 
-  it('retries on the next call after a failure', async () => {
+  it('wraps a failure in SLOResourcesNotInstalled and retries on the next call', async () => {
     const { installer, state } = setup();
-    installer.install
-      .mockRejectedValueOnce(new SLOResourcesNotInstalled('Failed to install SLO resources: [x]'))
-      .mockResolvedValueOnce();
-
-    await expect(state.ensureInstalled()).rejects.toThrow(SLOResourcesNotInstalled);
-    await expect(state.ensureInstalled()).resolves.toBeUndefined();
-
-    expect(installer.install).toHaveBeenCalledTimes(2);
-  });
-
-  it('wraps unexpected errors in SLOResourcesNotInstalled', async () => {
-    const { installer, state } = setup();
-    installer.install.mockRejectedValue(new Error('boom'));
+    installer.install.mockRejectedValueOnce(new Error('boom')).mockResolvedValueOnce();
 
     await expect(state.ensureInstalled()).rejects.toThrow(
       new SLOResourcesNotInstalled('Failed to install SLO resources: boom')
     );
+    await expect(state.ensureInstalled()).resolves.toBeUndefined();
+
+    expect(installer.install).toHaveBeenCalledTimes(2);
   });
 
   it('installs once another process releases the lock', async () => {

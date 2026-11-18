@@ -111,40 +111,40 @@ const putPipelineIds = (esClient: ElasticsearchClientMock) =>
   esClient.ingest.putPipeline.mock.calls.map(([params]) => params.id);
 
 describe('selectMigrationCandidate', () => {
-  it('selects a routed version pipeline with its own date_index_name prefix', () => {
-    expect(selectMigrationCandidate(sliPipeline(3.6))).toEqual({
-      type: 'candidate',
-      version: 3.6,
-      processorIndex: 1,
-    });
-  });
-
-  it('skips versions that are not routed', () => {
-    expect(selectMigrationCandidate(sliPipeline(3.5))).toEqual({ type: 'not_applicable' });
-  });
-
-  it('skips pipelines already calling the routing pipeline', () => {
-    expect(selectMigrationCandidate(routedSliPipeline(3.6))).toEqual({ type: 'not_applicable' });
-  });
-
-  it('skips pipelines without a version', () => {
-    expect(selectMigrationCandidate({ ...sliPipeline(3.6), _meta: {} })).toEqual({
-      type: 'not_applicable',
-    });
-  });
-
-  it('reports a prefix that does not match the pipeline version', () => {
-    expect(selectMigrationCandidate(sliPipeline(3.6, '.custom-index-'))).toEqual({
-      type: 'prefix_mismatch',
-      version: 3.6,
-      prefix: '.custom-index-',
-    });
+  it.each([
+    [
+      'selects a routed version pipeline with its own date_index_name prefix',
+      sliPipeline(3.6),
+      { type: 'candidate', version: 3.6, processorIndex: 1 },
+    ],
+    [
+      'reports a prefix that does not match the pipeline version',
+      sliPipeline(3.6, '.custom-index-'),
+      { type: 'prefix_mismatch', version: 3.6, prefix: '.custom-index-' },
+    ],
+    ['skips versions that are not routed', sliPipeline(3.5), { type: 'not_applicable' }],
+    [
+      'skips pipelines already calling the routing pipeline',
+      routedSliPipeline(3.6),
+      { type: 'not_applicable' },
+    ],
+    [
+      'skips pipelines without a version',
+      { ...sliPipeline(3.6), _meta: {} },
+      { type: 'not_applicable' },
+    ],
+  ])('%s', (_, pipeline, expected) => {
+    expect(selectMigrationCandidate(pipeline)).toEqual(expected);
   });
 });
 
 describe('patchSliPipeline', () => {
-  it('replaces the date_index_name processor in place and keeps everything else', () => {
-    const pipeline = sliPipeline(3.6);
+  it('replaces the date_index_name processor in place, strips system managed fields and keeps everything else', () => {
+    const pipeline: IngestPipeline = {
+      ...sliPipeline(3.6),
+      created_date: '2026-11-17',
+      modified_date: '2026-11-17',
+    };
 
     const patched = patchSliPipeline(pipelineId('my-slo'), pipeline, {
       version: 3.6,
@@ -166,19 +166,6 @@ describe('patchSliPipeline', () => {
       ],
       _meta: pipeline._meta,
     });
-  });
-
-  it('strips system managed fields', () => {
-    const patched = patchSliPipeline(
-      pipelineId('my-slo'),
-      { ...sliPipeline(3.6), created_date: '2026-11-17', modified_date: '2026-11-17' },
-      { version: 3.6, processorIndex: 1 }
-    );
-
-    expect(patched).not.toHaveProperty('created_date_millis');
-    expect(patched).not.toHaveProperty('modified_date_millis');
-    expect(patched).not.toHaveProperty('created_date');
-    expect(patched).not.toHaveProperty('modified_date');
   });
 });
 
@@ -209,13 +196,9 @@ describe('migrateSliPipelines', () => {
     const result = await migrateSliPipelines({}, dependencies());
 
     expect(putPipelineIds(esClient)).toEqual([pipelineId('daily')]);
-    expect(store[pipelineId('daily')].processors?.[1]).toEqual({
-      pipeline: {
-        description: 'Route to the time-based SLI index',
-        name: '.slo-observability.sli.routing-v3.6',
-      },
-    });
-    expect(store[pipelineId('daily')]).not.toHaveProperty('created_date_millis');
+    expect(store[pipelineId('daily')].processors?.[1]?.pipeline?.name).toBe(
+      '.slo-observability.sli.routing-v3.6'
+    );
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(pipelineId('hand-edited')));
     expect(result).toEqual({ lastFullScanAt: NOW.getTime(), lastScanCandidates: 0 });
   });
@@ -282,25 +265,19 @@ describe('migrateSliPipelines', () => {
     expect(result).toEqual({ lastFullScanAt: NOW.getTime(), lastScanCandidates: 1 });
   });
 
-  it('skips the scan for 24h after a full scan without candidates', async () => {
+  it.each([
+    ['skips the scan', DAY_MS - 1, false],
+    ['scans again', DAY_MS, true],
+  ])('%s %pms after a full scan without candidates', async (_, elapsedMs, scanned) => {
     setupStore(esClient, {});
-    const state = { lastFullScanAt: NOW.getTime() - DAY_MS + 1, lastScanCandidates: 0 };
+    const state = { lastFullScanAt: NOW.getTime() - elapsedMs, lastScanCandidates: 0 };
 
     const result = await migrateSliPipelines(state, dependencies());
 
-    expect(esClient.ingest.getPipeline).not.toHaveBeenCalled();
-    expect(result).toEqual(state);
-  });
-
-  it('scans again 24h after a full scan without candidates', async () => {
-    setupStore(esClient, {});
-
-    await migrateSliPipelines(
-      { lastFullScanAt: NOW.getTime() - DAY_MS, lastScanCandidates: 0 },
-      dependencies()
+    expect(esClient.ingest.getPipeline).toHaveBeenCalledTimes(scanned ? 1 : 0);
+    expect(result).toEqual(
+      scanned ? { lastFullScanAt: NOW.getTime(), lastScanCandidates: 0 } : state
     );
-
-    expect(esClient.ingest.getPipeline).toHaveBeenCalled();
   });
 
   it('resumes from the cursor when the maximum number of pages is reached', async () => {

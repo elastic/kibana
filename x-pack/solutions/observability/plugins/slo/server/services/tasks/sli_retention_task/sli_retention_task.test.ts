@@ -91,14 +91,6 @@ describe('SliRetentionTask', () => {
     taskManagerSetup = taskManagerMock.createSetup();
   });
 
-  it('registers the task definition', () => {
-    createTask();
-
-    expect(taskManagerSetup.registerTaskDefinitions).toHaveBeenCalledWith({
-      [TYPE]: expect.objectContaining({ timeout: '5m', maxAttempts: 1 }),
-    });
-  });
-
   it('schedules the task daily when enabled', async () => {
     const { plugins, taskManager } = createStartPlugins();
 

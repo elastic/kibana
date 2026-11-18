@@ -60,35 +60,26 @@ describe('runSliRetention', () => {
     esClient.indices.delete.mockResolvedValue({ acknowledged: true });
   });
 
-  it('lists the SLI indices with their doc count, including hidden indices', async () => {
-    mockIndices([]);
-
-    await run();
-
-    expect(esClient.cat.indices).toHaveBeenCalledWith(
-      {
-        index: '.slo-observability.sli-v3*',
-        expand_wildcards: 'all',
-        h: ['index', 'docs.count'],
-        format: 'json',
-      },
-      expect.anything()
-    );
-    expect(esClient.indices.delete).not.toHaveBeenCalled();
-  });
-
   it('deletes aged out, empty and old base indices, keeping the others', async () => {
+    esClient.transform.getTransform.mockResolvedValue(
+      transformsResponse(['.slo-observability.sli-v3.6', '.slo-observability.sli-v3.4'])
+    );
     mockIndices([
       ['.slo-observability.sli-v3.6.2026-01-02', '100'],
       ['.slo-observability.sli-v3.6.2026-08-01', '0'],
       ['.slo-observability.sli-v3.6.2026-11-17', '0'],
       ['.slo-observability.sli-v3.5', '0'],
+      ['.slo-observability.sli-v3.4', '0'],
       ['.slo-observability.sli-v3.6', '0'],
       ['.slo-observability.sli-v3.6.2026-07-02', '0'],
     ]);
 
     const deleted = await run();
 
+    expect(esClient.cat.indices).toHaveBeenCalledWith(
+      expect.objectContaining({ index: '.slo-observability.sli-v3*', expand_wildcards: 'all' }),
+      expect.anything()
+    );
     expect(deleted).toEqual([
       '.slo-observability.sli-v3.6.2026-01-02',
       '.slo-observability.sli-v3.6.2026-07-02',
@@ -135,28 +126,32 @@ describe('runSliRetention', () => {
     expect(esClient.indices.delete).not.toHaveBeenCalled();
   });
 
-  it('keeps old base indices when the transforms cannot be listed', async () => {
+  it.each([
+    [
+      'cannot be listed',
+      () => esClient.transform.getTransform.mockRejectedValue(new Error('forbidden')),
+      'forbidden',
+    ],
+    [
+      'list is truncated',
+      () =>
+        esClient.transform.getTransform.mockResolvedValue({
+          ...transformsResponse(['.slo-observability.sli-v3.6']),
+          count: 10001,
+        }),
+      '1 of 10001',
+    ],
+  ])('keeps old base indices when the transforms %s', async (_, arrange, warning) => {
     mockIndices([
       ['.slo-observability.sli-v3.5', '0'],
       ['.slo-observability.sli-v3.6.2026-01-02', '1'],
     ]);
-    esClient.transform.getTransform.mockRejectedValue(new Error('forbidden'));
+    arrange();
 
     const deleted = await run();
 
     expect(deleted).toEqual(['.slo-observability.sli-v3.6.2026-01-02']);
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('forbidden'));
-  });
-
-  it('keeps old base indices when the transforms list is truncated', async () => {
-    mockIndices([['.slo-observability.sli-v3.5', '0']]);
-    esClient.transform.getTransform.mockResolvedValue({
-      ...transformsResponse(['.slo-observability.sli-v3.6']),
-      count: 10001,
-    });
-
-    await expect(run()).resolves.toEqual([]);
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('1 of 10001'));
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(warning));
   });
 
   it('deletes an empty old base index when no SLO transform exists', async () => {
@@ -167,14 +162,5 @@ describe('runSliRetention', () => {
     } as TransformGetTransformResponse);
 
     await expect(run()).resolves.toEqual(['.slo-observability.sli-v3.5']);
-  });
-
-  it('keeps an old base index a transform writes to', async () => {
-    mockIndices([['.slo-observability.sli-v3.5', '0']]);
-    esClient.transform.getTransform.mockResolvedValue(
-      transformsResponse(['.slo-observability.sli-v3.5'])
-    );
-
-    await expect(run()).resolves.toEqual([]);
   });
 });

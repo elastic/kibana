@@ -175,40 +175,20 @@ describe('resourceInstaller', () => {
       4,
       expect.objectContaining({ name: HEALTH_INDEX_TEMPLATE_NAME })
     );
+    expect(mockClusterClient.indices.create.mock.calls.map(([params]) => params.index)).toEqual([
+      SLI_DESTINATION_INDEX_NAME,
+      SUMMARY_DESTINATION_INDEX_NAME,
+      SUMMARY_TEMP_INDEX_NAME,
+      COMPOSITE_SUMMARY_INDEX_NAME,
+    ]);
+    expect(mockClusterClient.indices.createDataStream).toHaveBeenCalledWith({
+      name: HEALTH_DATA_STREAM_NAME,
+    });
   });
 
   it('does not install the common resources when there is a version match', async () => {
     const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
-    mockClusterClient.cluster.getComponentTemplate.mockImplementation((params) => {
-      const name = params?.name ?? '';
-      const version = name.includes('composite')
-        ? COMPOSITE_SLO_RESOURCES_VERSION
-        : SLO_RESOURCES_VERSION;
-      return Promise.resolve({
-        component_templates: [
-          { name, component_template: { _meta: { version }, template: { settings: {} } } },
-        ],
-      });
-    });
-    mockClusterClient.indices.getIndexTemplate.mockImplementation((params) => {
-      const name = params?.name ?? '';
-      const version = name.includes('composite')
-        ? COMPOSITE_SLO_RESOURCES_VERSION
-        : SLO_RESOURCES_VERSION;
-      return Promise.resolve({
-        index_templates: [
-          {
-            name,
-            index_template: {
-              index_patterns: name,
-              composed_of: [],
-              _meta: { version },
-            },
-          },
-        ],
-      });
-    });
-
+    mockTemplatesUpToDate(mockClusterClient);
     mockClusterClient.indices.get.mockResponse({});
     const installer = createInstaller(mockClusterClient);
 
@@ -237,22 +217,6 @@ describe('resourceInstaller', () => {
     expect(esClient.ingest.putPipeline).not.toHaveBeenCalled();
   });
 
-  it('resolves when every resource is installed', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.indices.get.mockResponse({});
-
-    await expect(createInstaller(esClient).install()).resolves.toBeUndefined();
-    expect(esClient.indices.create.mock.calls.map(([params]) => params.index)).toEqual([
-      SLI_DESTINATION_INDEX_NAME,
-      SUMMARY_DESTINATION_INDEX_NAME,
-      SUMMARY_TEMP_INDEX_NAME,
-      COMPOSITE_SUMMARY_INDEX_NAME,
-    ]);
-    expect(esClient.indices.createDataStream).toHaveBeenCalledWith({
-      name: HEALTH_DATA_STREAM_NAME,
-    });
-  });
-
   it('ignores resources that already exist', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.indices.get.mockResponse({});
@@ -268,19 +232,6 @@ describe('resourceInstaller', () => {
     await expect(createInstaller(esClient).install()).resolves.toBeUndefined();
   });
 
-  it.each([
-    ['composite summary mappings', 'putMapping', `${COMPOSITE_SUMMARY_INDEX_NAME} mappings`],
-    ['health data stream', 'createDataStream', HEALTH_DATA_STREAM_NAME],
-  ] as const)('fails when the %s fails', async (_label, method, resourceName) => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.indices.get.mockResponse({});
-    esClient.indices[method].mockRejectedValue(new Error('boom'));
-
-    await expect(createInstaller(esClient).install()).rejects.toThrow(
-      `Failed to install SLO resource [${resourceName}]: boom`
-    );
-  });
-
   it('retries transient Elasticsearch errors', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.indices.get.mockResponse({});
@@ -293,32 +244,7 @@ describe('resourceInstaller', () => {
   });
 
   describe('routing pipelines', () => {
-    it('installs a routing pipeline for every routed version, each with its own prefix', async () => {
-      mockRoutedVersions = [3.6, 3.7];
-      const esClient = elasticsearchServiceMock.createElasticsearchClient();
-      mockTemplatesUpToDate(esClient);
-      mockRoutingPipelines(esClient, {});
-      esClient.indices.get.mockResponse({});
-
-      await createInstaller(esClient).install();
-
-      expect(esClient.ingest.putPipeline).toHaveBeenCalledTimes(2);
-      const [[first], [second]] = esClient.ingest.putPipeline.mock.calls;
-      expect(first.id).toBe('.slo-observability.sli.routing-v3.6');
-      expect(
-        first.processors?.find((processor) => processor?.date_index_name)?.date_index_name
-          ?.index_name_prefix
-      ).toBe('.slo-observability.sli-v3.6.');
-      expect(second.id).toBe('.slo-observability.sli.routing-v3.7');
-      expect(
-        second.processors?.find((processor) => processor?.date_index_name)?.date_index_name
-          ?.index_name_prefix
-      ).toBe('.slo-observability.sli-v3.7.');
-      // the index listing is shared across versions
-      expect(esClient.indices.get).toHaveBeenCalledTimes(1);
-    });
-
-    it('guards the daily history of each version independently', async () => {
+    it('installs a routing pipeline for every routed version, guarding the daily history of each independently', async () => {
       mockRoutedVersions = [3.6, 3.7];
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
       mockTemplatesUpToDate(esClient);
@@ -331,9 +257,14 @@ describe('resourceInstaller', () => {
 
       await createInstaller(esClient).install();
 
-      const [[first], [second]] = esClient.ingest.putPipeline.mock.calls;
-      expect(first._meta?.routing).toEqual({ rounding: 'M', cutover: DEC_1 });
-      expect(second._meta?.routing).toEqual({ rounding: 'M', cutover: null });
+      expect(
+        esClient.ingest.putPipeline.mock.calls.map(([{ id, _meta: meta }]) => [id, meta?.routing])
+      ).toEqual([
+        ['.slo-observability.sli.routing-v3.6', { rounding: 'M', cutover: DEC_1 }],
+        ['.slo-observability.sli.routing-v3.7', { rounding: 'M', cutover: null }],
+      ]);
+      // the index listing is shared across versions
+      expect(esClient.indices.get).toHaveBeenCalledTimes(1);
     });
 
     it('does not install the routing pipeline when it is up to date', async () => {

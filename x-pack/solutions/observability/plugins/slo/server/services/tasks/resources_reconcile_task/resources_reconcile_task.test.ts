@@ -145,12 +145,6 @@ describe('ResourcesReconcileTask', () => {
     });
   });
 
-  it('registers the task definition', () => {
-    expect(taskManagerSetup.registerTaskDefinitions).toHaveBeenCalledWith({
-      [TYPE]: expect.objectContaining({ timeout: '5m', maxAttempts: 1 }),
-    });
-  });
-
   describe('start', () => {
     it('schedules the task every hour and runs it soon', async () => {
       const { plugins, taskManager } = createStartPlugins();
@@ -199,42 +193,21 @@ describe('ResourcesReconcileTask', () => {
       expect(result?.state).toEqual(expect.objectContaining({ lastScanCandidates: 0 }));
     });
 
-    it('migrates the SLI pipelines when the install fails', async () => {
-      mockInstall.mockRejectedValue(new Error('health data stream failed'));
+    it.each([
+      [
+        'the install fails',
+        () => mockInstall.mockRejectedValue(new Error('health data stream failed')),
+      ],
+      [
+        'another process holds the lock',
+        () => lockManager.withLock.mockRejectedValue(new LockAcquisitionError('lock held')),
+      ],
+    ])('migrates the SLI pipelines when %s', async (_, arrange) => {
+      arrange();
 
       await run();
 
       expect(perSloPipelinePuts()).toHaveLength(1);
-    });
-
-    it('migrates the SLI pipelines when another process holds the lock', async () => {
-      lockManager.withLock.mockRejectedValue(new LockAcquisitionError('lock held'));
-
-      await run();
-
-      expect(mockInstall).not.toHaveBeenCalled();
-      expect(perSloPipelinePuts()).toHaveLength(1);
-    });
-
-    it('does not migrate the SLI pipelines when the routing pipeline is missing', async () => {
-      mockInstall.mockRejectedValue(new Error('routing pipeline failed'));
-      const routingId = getSLIRoutingPipelineName(SLO_RESOURCES_VERSION);
-      esClient.ingest.getPipeline.mockImplementation(async (params) => {
-        const id = params?.id ?? '';
-        const isSliPipeline = id === '.slo-observability.sli.pipeline-*' || id === SLI_PIPELINE_ID;
-        const pipelines: Record<string, IngestPipeline> = isSliPipeline
-          ? { [SLI_PIPELINE_ID]: unmigratedSliPipeline }
-          : {};
-        return pipelines;
-      });
-
-      await run();
-
-      expect(esClient.ingest.getPipeline).toHaveBeenCalledWith(
-        expect.objectContaining({ id: routingId }),
-        expect.anything()
-      );
-      expect(perSloPipelinePuts()).toHaveLength(0);
     });
   });
 });

@@ -30,23 +30,16 @@ const plan = (
 
 describe('planSliRetention', () => {
   describe('aged out dated indices', () => {
-    it('deletes a daily index once its period ended before the retention cutoff', () => {
+    it('deletes an index once its period ended before the retention cutoff, treating day-01 indices as monthly', () => {
       const result = plan([
         [dated('2026-05-13'), 10], // period end 2026-05-20
         [dated('2026-05-14'), 10], // period end 2026-05-21, exactly the cutoff
         [dated('2026-05-15'), 10],
-      ]);
-
-      expect(result.agedOut).toEqual([dated('2026-05-13')]);
-    });
-
-    it('treats a day-01 index as monthly', () => {
-      const result = plan([
         [dated('2026-04-01'), 10], // period end 2026-05-01
         [dated('2026-05-01'), 10], // period end 2026-06-01
       ]);
 
-      expect(result.agedOut).toEqual([dated('2026-04-01')]);
+      expect(result.agedOut).toEqual([dated('2026-05-13'), dated('2026-04-01')]);
     });
 
     it('deletes aged out indices of older versions', () => {
@@ -65,16 +58,17 @@ describe('planSliRetention', () => {
   });
 
   describe('empty dated indices', () => {
-    it('deletes an empty index once its period ended more than 91 days ago', () => {
+    it('deletes an empty index once its period ended more than 91 days ago, listing an aged out one once', () => {
       const result = plan([
         [dated('2026-08-10'), 0], // period end 2026-08-17
         [dated('2026-08-11'), 0], // period end 2026-08-18, exactly 91 days ago
         [dated('2026-07-01'), 0], // period end 2026-08-01
         [dated('2026-08-01'), 0], // period end 2026-09-01
+        [dated('2026-01-02'), 0], // aged out
       ]);
 
       expect(result.emptyDated).toEqual([dated('2026-08-10'), dated('2026-07-01')]);
-      expect(result.agedOut).toEqual([]);
+      expect(result.agedOut).toEqual([dated('2026-01-02')]);
     });
 
     it('keeps non empty indices and indices with an unknown doc count', () => {
@@ -83,13 +77,6 @@ describe('planSliRetention', () => {
         [dated('2026-07-03'), undefined],
       ]);
 
-      expect(result.emptyDated).toEqual([]);
-    });
-
-    it('lists an empty aged out index once', () => {
-      const result = plan([[dated('2026-01-02'), 0]]);
-
-      expect(result.agedOut).toEqual([dated('2026-01-02')]);
       expect(result.emptyDated).toEqual([]);
     });
   });
@@ -108,6 +95,7 @@ describe('planSliRetention', () => {
     it('deletes empty base indices of older versions that no transform writes to', () => {
       const result = plan(
         [
+          ['.slo-observability.sli-v3.6', 0],
           ['.slo-observability.sli-v3.5', 0],
           ['.slo-observability.sli-v3.4', 0],
           ['.slo-observability.sli-v3.3', 5],
@@ -120,12 +108,6 @@ describe('planSliRetention', () => {
         '.slo-observability.sli-v3.5',
         '.slo-observability.sli-v3',
       ]);
-    });
-
-    it('never deletes the current version base index', () => {
-      const result = plan([['.slo-observability.sli-v3.6', 0]]);
-
-      expect(result.emptyOldBase).toEqual([]);
     });
 
     it('keeps old base indices when the transform destinations are unknown', () => {
