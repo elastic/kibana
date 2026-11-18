@@ -3786,8 +3786,8 @@ importers:
         specifier: 4.6.2
         version: 4.6.2
       papaparse:
-        specifier: 5.5.3
-        version: 5.5.3
+        specifier: 5.7.1
+        version: 5.7.1
       pbf:
         specifier: 3.2.1
         version: 3.2.1
@@ -19629,8 +19629,8 @@ packages:
   pako@2.1.0:
     resolution: {integrity: sha512-w+eufiZ1WuJYgPXbV/PO3NCMEc3xqylkKHzp8bxp1uW4qaSNQUkwmLLEc3kKsfz8lpV1F8Ht3U1Cm+9Srog2ug==}
 
-  papaparse@5.5.3:
-    resolution: {integrity: sha512-5QvjGxYVjxO59MGU2lHVYpRWBBtKHnlIAcSe1uNFCkkptUh63NFRj0FJQm7nR67puEruUci/ZkjmEFrjCAyP4A==}
+  papaparse@5.7.1:
+    resolution: {integrity: sha512-qOR+UDWv6D3hMxnWWOk0ZpBdCkd+kw5Yh7aXOaNSQU8A+73EA2bhW7EiUix/hY0yulUi5FRvt7PpYSI2VDvY0g==}
 
   param-case@3.0.4:
     resolution: {integrity: sha512-RXlj7zCYokReqWpOPH9oYivUzLYZ5vAPIfEmCTNViosC78F8F0H9y7T7gG2M39ymgutxF5gcFEsyZQSph9Bp3A==}
@@ -37333,7 +37333,7 @@ snapshots:
 
   pako@2.1.0: {}
 
-  papaparse@5.5.3: {}
+  papaparse@5.7.1: {}
 
   param-case@3.0.4:
     dependencies:
