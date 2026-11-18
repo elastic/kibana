@@ -3,11 +3,11 @@
     "surface": "#FFFFFF",
     "hues": {
       "teal": {
-        "faint": { "hex": "#D7FEFB", "lc": 0, "wcag": 1.1 },
-        "muted": { "hex": "#7AE2DD", "lc": 24, "wcag": 1.5 },
+        "faint": { "hex": "#E5FAF9", "lc": 0, "wcag": 1.1 },
+        "muted": { "hex": "#88DFDB", "lc": 25, "wcag": 1.5 },
         "base": { "hex": "#16C5C0", "lc": 42, "wcag": 2.1 },
         "strong": { "hex": "#00938F", "lc": 65, "wcag": 3.8 },
-        "ink": { "hex": "#006D6B", "lc": 75, "wcag": 5.7 }
+        "ink": { "hex": "#006C6A", "lc": 75, "wcag": 5.8 }
       },
       "blue": {
         "faint": { "hex": "#EDF4FF", "lc": 0, "wcag": 1.1 },
@@ -32,7 +32,7 @@
       },
       "yellow": {
         "faint": { "hex": "#FFF6E4", "lc": 0, "wcag": 1.1 },
-        "muted": { "hex": "#FDCE71", "lc": 22, "wcag": 1.5 },
+        "muted": { "hex": "#F8D080", "lc": 22, "wcag": 1.5 },
         "base": { "hex": "#EAAE01", "lc": 38, "wcag": 2 },
         "strong": { "hex": "#C07800", "lc": 63, "wcag": 3.5 },
         "ink": { "hex": "#8D5600", "lc": 75, "wcag": 5.6 }
@@ -53,8 +53,8 @@
         "faint": { "hex": "#003F3D", "lc": 0, "wcag": 1.5 },
         "muted": { "hex": "#009390", "lc": 36, "wcag": 4.5 },
         "base": { "hex": "#16C5C0", "lc": 59, "wcag": 8 },
-        "strong": { "hex": "#76E0DB", "lc": 76, "wcag": 11 },
-        "ink": { "hex": "#9AEDE9", "lc": 79, "wcag": 8.8 }
+        "strong": { "hex": "#83DED9", "lc": 76, "wcag": 10.9 },
+        "ink": { "hex": "#A9EAE6", "lc": 79, "wcag": 8.8 }
       },
       "blue": {
         "faint": { "hex": "#153460", "lc": 0, "wcag": 1.4 },
@@ -79,10 +79,10 @@
       },
       "yellow": {
         "faint": { "hex": "#4A341B", "lc": 0, "wcag": 1.5 },
-        "muted": { "hex": "#FDCE71", "lc": 79, "wcag": 11.6 },
+        "muted": { "hex": "#F8D080", "lc": 80, "wcag": 11.7 },
         "base": { "hex": "#E1B14D", "lc": 63, "wcag": 8.6 },
-        "strong": { "hex": "#F4CF85", "lc": 79, "wcag": 11.5 },
-        "ink": { "hex": "#FCDDA2", "lc": 81, "wcag": 8.9 }
+        "strong": { "hex": "#F0D090", "lc": 79, "wcag": 11.5 },
+        "ink": { "hex": "#F7DEAF", "lc": 81, "wcag": 8.9 }
       },
       "purple": {
         "faint": { "hex": "#3E275E", "lc": 0, "wcag": 1.4 },

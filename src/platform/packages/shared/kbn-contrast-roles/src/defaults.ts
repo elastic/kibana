@@ -25,7 +25,7 @@ export const DEFAULT_PARAMS: Params = {
   chroma: {
     ceiling: 0.165, // most chroma base can carry (EUI's vis colors top out near 0.165)
     mode: 'cap', // 'cap' (cap from base, tapers) or 'even' (one chroma per role across hues, as Harmonizer does)
-    taper: 0.5, // 'cap': how fast chroma fades for colors lighter than base (against neon teal and yellow pastels)
+    taper: 0.75, // 'cap': how fast chroma fades for colors lighter than base (against neon teal and yellow pastels)
     taperDark: 0.25, // 'cap': the same for colors darker than base. Softer: dark yellow with little chroma reads as olive
   },
   ramp: {
