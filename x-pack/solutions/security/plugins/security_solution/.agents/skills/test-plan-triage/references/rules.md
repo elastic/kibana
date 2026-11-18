@@ -9,7 +9,7 @@ Apply the rules **in this order** and stop at the first one that matches. Quote 
 | Order | ID | Matches when | Decision |
 |---|---|---|---|
 | 1 | N1 | It is a bug: type `Bug`, a `bug` label, `[Bug]` in the title, or a body that reports broken behavior (steps, current vs expected) | No |
-| 2 | N3 | The issue is itself the testing work: "Test plan for …", "Create test plan", upgrade testing, a manual test pass | No |
+| 2 | N3 | The issue is itself the testing work: "Test plan for …", "Create test plan", upgrade testing, a manual test pass | No. Suggest a level with `hierarchy.md`. |
 | 3 | N5 | It only adds, flips or removes a feature flag; the behavior behind the flag is tracked elsewhere | No |
 | 4 | N2 | It is not a functionality: refactor, technical debt, telemetry, CI, automated test coverage (Scout, Cypress, Jest), cleanup, dependency bump, CODEOWNERS, docs or a docs request, research, spike, "discuss", design-only work | No |
 | 5 | A5 | The issue is itself an umbrella, with the signals in `hierarchy.md` (a bucket title such as "Meta Task" or "roadmap", type `Initiative`, or sub-issues that are different functionalities) | Need your input: say a plan belongs to one functionality, list the sub-issues that look like one, and ask which to triage |

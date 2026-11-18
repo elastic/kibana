@@ -36,7 +36,6 @@ An entry with `unreadable: true` is a parent the user's `gh` cannot read (privat
 | No (N4) | an ancestor | only the ancestor |
 | A small slice with no suggested level (the parent is already an umbrella, not a functionality, closed or unreadable) | none | none; this is A2, not N4: answer Need your input, record nothing, and ask whether the target gets its own plan or is covered elsewhere |
 | No (N3, the issue is the testing work) | an ancestor | only the ancestor: the plan belongs to the work being tested |
-| No (N1, N2, N5) | none (SKILL.md step 4 is skipped) | none; a bug, a chore or a flag says nothing about whether its parent needs a plan |
 | Need your input | any | none until the question is answered |
 
 In **Hierarchy**, show every ancestor from the root down to the target, mark umbrellas with "(umbrella)", ancestors that are not a functionality with "(not a functionality)", closed ones with "(closed)", labeled ones with "(labeled)", and unreadable ones with "(unreadable)".
