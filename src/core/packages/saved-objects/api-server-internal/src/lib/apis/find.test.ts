@@ -236,7 +236,7 @@ describe('find', () => {
         };
 
         await expect(repository.find(findOpts)).rejects.toMatchInlineSnapshot(`
-                          [Error: KQLSyntaxError: Expected "(", "{", value, whitespace but "<" found.
+                          [Error: KQLSyntaxError: Expected "(", "{", NOT, value, whitespace but "<" found.
                           dashboard.attributes.otherField:<
                           --------------------------------^: Bad Request]
                       `);

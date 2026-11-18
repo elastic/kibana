@@ -44,7 +44,7 @@ spaceTest.describe('Discover session panel interactions', { tag: tags.deployment
 
     await expect(page.testSubj.locator('embeddableError')).toBeVisible();
     await expect(page.testSubj.locator('errorMessageMarkdown')).toContainText(
-      /NOT is only supported at the start of a clause/
+      /Expected .* but ":" found/
     );
   });
 

@@ -100,12 +100,33 @@ describe('kuery AST API', () => {
       }
     );
 
-    test.each(['foo: error not timeout', 'error not timeout', 'foo: not bar', 'foo: not (a or b)'])(
-      'should throw for a standalone "not" that is not at the start of a clause: %p',
-      (query) => {
-        expect(() => fromKueryExpression(query)).toThrow();
+    test.each(['definitely not the flaky test monster', 'definitely NOT the flaky test monster'])(
+      'should treat a standalone "not" inside an unquoted value as plain text: %p',
+      (value) => {
+        expect(fromKueryExpression(`foo: ${value}`)).toEqual(
+          nodeTypes.function.buildNode('is', 'foo', value)
+        );
+        expect(fromKueryExpression(value)).toEqual(nodeTypes.function.buildNode('is', null, value));
       }
     );
+
+    test('should support "not" at the start of a field value', () => {
+      expect(fromKueryExpression('foo: not the flaky test monster')).toEqual(
+        nodeTypes.function.buildNode(
+          'not',
+          nodeTypes.function.buildNode('is', 'foo', 'the flaky test monster')
+        )
+      );
+      expect(fromKueryExpression('foo: not (the flaky test monster or a bug)')).toEqual(
+        nodeTypes.function.buildNode(
+          'not',
+          nodeTypes.function.buildNode('or', [
+            nodeTypes.function.buildNode('is', 'foo', 'the flaky test monster'),
+            nodeTypes.function.buildNode('is', 'foo', 'a bug'),
+          ])
+        )
+      );
+    });
 
     test('should still support "not" at the start of a clause in a list of values', () => {
       const expected = nodeTypes.function.buildNode('or', [

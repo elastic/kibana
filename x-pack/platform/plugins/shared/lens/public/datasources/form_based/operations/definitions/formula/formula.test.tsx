@@ -1057,7 +1057,7 @@ describe('[Lens] formula', () => {
           operationDefinitionMap
         ).map((e) => e.message)
       ).toEqual([
-        `Expected "(", "{", value, whitespace but """ found.
+        `Expected "(", "{", NOT, value, whitespace but """ found.
 invalid: "
 ---------^`,
       ]);
