@@ -47,8 +47,8 @@ Before drafting, say which issue you picked and where it came from, e.g. "Using 
 2. **Find the PR.** In Update mode, use the given number, or `gh pr view --json number` for the current branch. In Write and Create modes, run `gh pr list -R elastic/kibana --head <branch> --state open`; if one exists, say so and switch to Update mode.
 3. **Gather context:**
    - the issue(s): `gh issue view <n> -R elastic/kibana --comments`;
-   - local branch: `git fetch upstream main`, then the commits and diff from `git merge-base HEAD upstream/main`;
-   - Update mode: `gh pr view <n> -R elastic/kibana --json title,body,labels,headRefName,files,commits`, plus `gh pr diff <n>` when the branch isn't checked out locally;
+   - Write and Create modes, or Update mode with the PR's branch checked out: `git fetch upstream main`, then the commits and diff from `git merge-base HEAD upstream/main`;
+   - Update mode: `gh pr view <n> -R elastic/kibana --json title,body,labels,headRefName,files,commits`. When the current branch isn't the PR's `headRefName`, take the diff from `gh pr diff <n>` only;
    - the files touched, for the title area and labels.
 
    Done when you can state the user-visible problem, the user-visible change, and how to observe it. Ask for whatever is missing instead of guessing.
