@@ -49,7 +49,11 @@ export interface AwsOnboardingRunProgress {
     phase: AwsOnboardingRunPoliciesPhase;
     items: Array<{ service: string; name?: string; policy_id?: string; has_data?: boolean }>;
   };
-  data: {
+  /**
+   * Data arriving. Named `ingest`, not `data`: Fleet's shared request helper unwraps a top-level
+   * `data` key of any response body, which would hand the browser this phase alone.
+   */
+  ingest: {
     phase: AwsOnboardingRunDataPhase;
     waited_seconds?: number;
   };

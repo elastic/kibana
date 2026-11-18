@@ -46,7 +46,7 @@ const progress = (overrides: Partial<AwsOnboardingRunProgress>): AwsOnboardingRu
   },
   connector: { phase: 'complete', name: 'elastic-identity-ab12', cloud_connector_id: 'cc-1' },
   policies: { phase: 'complete', items: POLICIES },
-  data: { phase: 'pending' },
+  ingest: { phase: 'pending' },
   ...overrides,
 });
 
@@ -123,7 +123,7 @@ describe('AwsOnboardingRunCard', () => {
       'Waiting for the stack'
     );
 
-    respondWith(progress({ data: { phase: 'waiting', waited_seconds: 65 } }));
+    respondWith(progress({ ingest: { phase: 'waiting', waited_seconds: 65 } }));
     await advancePastPollingInterval();
 
     expect(screen.queryAllByTestId(/^awsOnboardingRunCardResource-/)).toHaveLength(0);
@@ -146,7 +146,7 @@ describe('AwsOnboardingRunCard', () => {
       progress({
         status: 'completed',
         policies: { phase: 'complete', items: POLICIES.map((p) => ({ ...p, has_data: true })) },
-        data: { phase: 'complete' },
+        ingest: { phase: 'complete' },
         dashboard_path: '/app/dashboards#/view/aws',
       })
     );
@@ -267,7 +267,7 @@ describe('AwsOnboardingRunCard', () => {
             { ...POLICIES[1], has_data: false },
           ],
         },
-        data: { phase: 'partial' },
+        ingest: { phase: 'partial' },
         dashboard_path: '/app/dashboards#/view/aws',
       })
     );

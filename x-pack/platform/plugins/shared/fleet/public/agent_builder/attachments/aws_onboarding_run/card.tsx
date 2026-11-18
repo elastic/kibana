@@ -198,7 +198,7 @@ const getBadge = (
       }),
     };
   }
-  return progress.data.phase === 'partial'
+  return progress.ingest.phase === 'partial'
     ? {
         color: 'warning',
         label: i18n.translate('xpack.fleet.awsOnboardingRunCard.badge.donePartial', {
@@ -416,15 +416,15 @@ const PoliciesRow: React.FC<{ policies: AwsOnboardingRunProgress['policies']; er
 };
 
 const DataRow: React.FC<{
-  data: AwsOnboardingRunProgress['data'];
+  ingest: AwsOnboardingRunProgress['ingest'];
   items: AwsOnboardingRunProgress['policies']['items'];
-}> = ({ data, items }) => {
-  const { phase } = data;
+}> = ({ ingest, items }) => {
+  const { phase } = ingest;
   let text: string;
   if (phase === 'waiting') {
     text = i18n.translate('xpack.fleet.awsOnboardingRunCard.data.waiting', {
       defaultMessage: 'Waiting · {waited} of up to 20m',
-      values: { waited: formatDuration(data.waited_seconds ?? 0) },
+      values: { waited: formatDuration(ingest.waited_seconds ?? 0) },
     });
   } else if (phase === 'complete') {
     text = i18n.translate('xpack.fleet.awsOnboardingRunCard.data.arriving', {
@@ -559,7 +559,7 @@ export const AwsOnboardingRunCard: React.FC<{ data: AwsOnboardingRunAttachmentDa
             <StackRow stack={progress.stack} error={progress.error} data={data} />
             <ConnectorRow connector={progress.connector} />
             <PoliciesRow policies={progress.policies} error={progress.error} />
-            <DataRow data={progress.data} items={progress.policies.items} />
+            <DataRow ingest={progress.ingest} items={progress.policies.items} />
             {progress.dashboard_path && (
               <EuiFlexItem>
                 <EuiText size="s">

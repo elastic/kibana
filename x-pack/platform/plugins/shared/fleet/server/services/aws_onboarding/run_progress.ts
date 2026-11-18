@@ -208,7 +208,7 @@ const readPolicies = (
 const readData = (
   execution: WorkflowExecutionDto,
   hasData: AwsOnboardingHasDataOutput | undefined
-): RunProgress['data'] => {
+): RunProgress['ingest'] => {
   if (!hasData) {
     return { phase: 'pending' };
   }
@@ -246,8 +246,8 @@ const failUnfinishedRow = (
     progress.connector.phase = 'failed';
     return;
   }
-  const { stack, connector, policies, data } = progress;
-  const unfinished = [stack, connector, policies, data].find(
+  const { stack, connector, policies, ingest } = progress;
+  const unfinished = [stack, connector, policies, ingest].find(
     ({ phase }) => !SETTLED_PHASES.has(phase)
   );
   if (!unfinished || unfinished.phase === 'failed') {
@@ -274,7 +274,7 @@ export const readAwsOnboardingRunProgress = async (
     stack: await readStack(execution, resolve, deps.stackClient),
     connector: readConnector(execution, resolve),
     policies: readPolicies(execution, resolve, hasData),
-    data: readData(execution, hasData),
+    ingest: readData(execution, hasData),
     ...(dashboardPath && { dashboard_path: dashboardPath }),
     ...(error && { error }),
   };

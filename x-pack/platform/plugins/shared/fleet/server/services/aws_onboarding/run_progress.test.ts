@@ -379,7 +379,7 @@ describe('readAwsOnboardingRunProgress', () => {
     it('is pending until has_data has output', async () => {
       const progress = await readAwsOnboardingRunProgress(execution(throughPolicies()));
 
-      expect(progress.data).toEqual({ phase: 'pending' });
+      expect(progress.ingest).toEqual({ phase: 'pending' });
     });
 
     it('is waiting with the seconds since the first data check started', async () => {
@@ -396,7 +396,7 @@ describe('readAwsOnboardingRunProgress', () => {
         )
       );
 
-      expect(progress.data).toEqual({ phase: 'waiting', waited_seconds: 250 });
+      expect(progress.ingest).toEqual({ phase: 'waiting', waited_seconds: 250 });
     });
 
     it('is waiting with no wait time when the data check has no start time', async () => {
@@ -406,7 +406,7 @@ describe('readAwsOnboardingRunProgress', () => {
         execution([...throughPolicies(), unstarted], { status: 'waiting' })
       );
 
-      expect(progress.data).toEqual({ phase: 'waiting', waited_seconds: 0 });
+      expect(progress.ingest).toEqual({ phase: 'waiting', waited_seconds: 0 });
     });
 
     it('is complete once every policy has data', async () => {
@@ -414,7 +414,7 @@ describe('readAwsOnboardingRunProgress', () => {
         execution([...throughPolicies(), hasDataStep(6, noData), hasDataStep(8, allData)])
       );
 
-      expect(progress.data).toEqual({ phase: 'complete' });
+      expect(progress.ingest).toEqual({ phase: 'complete' });
     });
 
     it('is partial when the run completed with some policies without data', async () => {
@@ -424,7 +424,7 @@ describe('readAwsOnboardingRunProgress', () => {
         })
       );
 
-      expect(progress.data).toEqual({ phase: 'partial' });
+      expect(progress.ingest).toEqual({ phase: 'partial' });
     });
   });
 
@@ -457,7 +457,7 @@ describe('readAwsOnboardingRunProgress', () => {
           stack: { phase: 'complete' },
           connector: { phase: 'complete' },
           policies: { phase: 'failed' },
-          data: { phase: 'pending' },
+          ingest: { phase: 'pending' },
         });
       }
     );
@@ -543,7 +543,7 @@ describe('readAwsOnboardingRunProgress', () => {
 
       expect(progress).toMatchObject({
         status: 'completed',
-        data: { phase: 'partial' },
+        ingest: { phase: 'partial' },
         dashboard_path: '/app/dashboards#/view/aws',
         policies: {
           items: [
