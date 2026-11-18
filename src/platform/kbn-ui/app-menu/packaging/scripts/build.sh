@@ -26,7 +26,9 @@ KBN_BIN="$KIBANA_ROOT/node_modules/.bin"
 echo "==> Step 0: Dependencies"
 if [[ ! -f "$KBN_UI_ROOT/chrome-layout/target/index.js" ]]; then
   echo "    Building @kbn/ui-chrome-layout (missing target)..."
-  bash "$KBN_UI_ROOT/chrome-layout/packaging/scripts/build.sh"
+  # Clear BUILD_OUTPUT_DIR so chrome-layout builds into its default target/,
+  # which is where the app-menu bundle resolves it from.
+  BUILD_OUTPUT_DIR= bash "$KBN_UI_ROOT/chrome-layout/packaging/scripts/build.sh"
 else
   echo "    @kbn/ui-chrome-layout target OK"
 fi
