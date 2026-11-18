@@ -21,6 +21,8 @@ export function MachineLearningJobManagementProvider(
   return {
     async navigateToNewJobSourceSelection() {
       await testSubjects.clickWhenNotDisabledWithoutRetry('mlCreateNewJobButton');
+      await testSubjects.existOrFail('mlPageDataSourceTypeSelection');
+      await testSubjects.click('mlDataSourceTypeDataViewButton');
       await testSubjects.existOrFail('mlPageSourceSelection');
     },
 

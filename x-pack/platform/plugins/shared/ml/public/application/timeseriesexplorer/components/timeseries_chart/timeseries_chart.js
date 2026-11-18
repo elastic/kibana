@@ -619,7 +619,10 @@ class TimeseriesChartIntl extends Component {
 
     // Create the elements for the metric value line and model bounds area.
     fcsGroup.append('path').attr('class', 'area bounds');
-    fcsGroup.append('path').attr('class', 'values-line');
+    fcsGroup
+      .append('path')
+      .attr('class', 'values-line')
+      .attr('data-test-subj', 'mlSingleMetricViewerFocusValuesLine');
     fcsGroup.append('g').attr('class', 'focus-chart-markers');
 
     // Create the path elements for the forecast value line and bounds area.
@@ -1249,7 +1252,12 @@ class TimeseriesChartIntl extends Component {
       })
       .defined((d) => d.value !== null);
 
-    cxtGroup.append('path').datum(data).attr('class', 'values-line').attr('d', contextValuesLine);
+    cxtGroup
+      .append('path')
+      .datum(data)
+      .attr('class', 'values-line')
+      .attr('data-test-subj', 'mlSingleMetricViewerContextValuesLine')
+      .attr('d', contextValuesLine);
     drawLineChartDots(data, cxtGroup, contextValuesLine, 1);
 
     // Add annotation markers to the context area

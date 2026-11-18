@@ -10,11 +10,13 @@ import { createLazyPageObject } from '@kbn/scout';
 import { AnomalyChartsEmbeddablePage } from './anomaly_charts_embeddable';
 import { MlDataVisualizerActions } from './ml_data_visualizer_actions';
 import { MlJobWizard } from './ml_job_wizard';
+import { SingleMetricViewerPage } from './single_metric_viewer';
 
 export interface MlUiPageObjects extends PageObjects {
   anomalyChartsEmbeddable: AnomalyChartsEmbeddablePage;
   mlDataVisualizerActions: MlDataVisualizerActions;
   mlJobWizard: MlJobWizard;
+  singleMetricViewer: SingleMetricViewerPage;
 }
 
 export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): MlUiPageObjects {
@@ -23,8 +25,10 @@ export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): Ml
     anomalyChartsEmbeddable: createLazyPageObject(AnomalyChartsEmbeddablePage, page),
     mlDataVisualizerActions: createLazyPageObject(MlDataVisualizerActions, page),
     mlJobWizard: createLazyPageObject(MlJobWizard, page),
+    singleMetricViewer: createLazyPageObject(SingleMetricViewerPage, page),
   };
 }
 
 export { MlDataVisualizerActions } from './ml_data_visualizer_actions';
 export { MlJobWizard } from './ml_job_wizard';
+export { SingleMetricViewerPage } from './single_metric_viewer';

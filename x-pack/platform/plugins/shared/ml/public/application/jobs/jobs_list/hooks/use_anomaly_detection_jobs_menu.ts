@@ -41,7 +41,7 @@ export const useAnomalyDetectionJobsMenu = ({
     'ad_settings'
   );
   const navigateToCreateJob = useCreateAndNavigateToManagementMlLink(
-    ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX,
+    ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_DATA_SOURCE,
     'anomaly_detection'
   );
   const { isADEnabled, isDFAEnabled } = useEnabledFeatures();

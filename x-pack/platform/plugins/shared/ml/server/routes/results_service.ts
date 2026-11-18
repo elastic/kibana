@@ -18,7 +18,9 @@ import {
   anomalySearchSchema,
   getAnomalyChartsSchema,
   getAnomalyRecordsSchema,
+  getEsqlMetricDataSchema,
 } from './schemas/results_service_schema';
+import { getEsqlMetricDataForJob } from '../models/results_service/esql_metric_data';
 import { resultsServiceProvider } from '../models/results_service';
 import { jobIdSchema } from './schemas/anomaly_detectors_schema';
 import {
@@ -460,6 +462,41 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
           }
         }
       )
+    );
+
+  router.versioned
+    .post({
+      path: `${ML_INTERNAL_BASE_PATH}/results/esql_metric_data`,
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
+      },
+      summary: 'Get source data for a job with an ES|QL datafeed',
+      description:
+        "Runs the job's ES|QL datafeed query for a time range and returns the metric values bucketed by the chart interval.",
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: getEsqlMetricDataSchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+        try {
+          const resp = await getEsqlMetricDataForJob(client, mlClient, request.body);
+
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
     );
 
   router.versioned
