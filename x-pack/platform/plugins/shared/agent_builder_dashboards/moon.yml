@@ -55,6 +55,9 @@ dependsOn:
   - '@kbn/ui-actions-plugin'
   - '@kbn/ftr-llm-proxy'
   - '@kbn/ui-callout'
+  - '@kbn/isomer-components'
+  - '@kbn/isomer-plugin'
+  - '@kbn/core-http-server-mocks'
 tags:
   - plugin
   - prod
