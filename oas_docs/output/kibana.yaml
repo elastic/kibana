@@ -159788,7 +159788,7 @@ components:
         overrides:
           additionalProperties:
             nullable: true
-          description: Override settings that are defined in the agent policy. Input, output permissions and OpenTelemetry collector settings (receivers, exporters, processors, connectors, extensions, service) cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
+          description: Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
           nullable: true
           type: object
         package_agent_version_conditions:
