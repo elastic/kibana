@@ -130,7 +130,7 @@ interface RuleInlineContentProps extends AttachmentRenderProps<RuleAttachment> {
   aiRuleCreation: AiRuleCreationService;
   application: ApplicationStart;
   uiSettings: IUiSettingsClient;
-  /** Absent when the card renders outside the chat timeline. */
+  /** Absent when the card renders outside the conversation. */
   registerActionButtons?: InlineRenderCallbacks['registerActionButtons'];
 }
 
@@ -160,7 +160,7 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
     return oldSource !== newSource;
   }, [originalRule, rule]);
 
-  // Older versions stay in the timeline; saving one would revert later changes to the rule.
+  // The conversation keeps showing older versions. Saving one would revert later changes to the rule.
   const savedRuleId = getRuleIdFromAttachment(attachment);
   const hasPendingChanges = hasDiff && isLatestAttachmentVersion(attachment);
 

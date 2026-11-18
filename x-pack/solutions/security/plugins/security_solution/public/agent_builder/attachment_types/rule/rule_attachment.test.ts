@@ -34,7 +34,7 @@ const mockAttachments: AttachmentServiceStartContract = {
   addAttachmentType: mockAddAttachmentType,
 } as unknown as AttachmentServiceStartContract;
 
-const makeApplication = (canEdit: boolean, canRead = false) =>
+const makeApplication = (canEdit: boolean, canRead = canEdit) =>
   ({
     capabilities: {
       [RULES_FEATURE_LATEST]: { edit_rules: canEdit, read_rules: canRead },
@@ -106,7 +106,7 @@ describe('createRuleAttachmentDefinition', () => {
 
     it('gives an attachment with `origin` set only "View rule"', () => {
       // `origin` links the card to a saved rule. Update rule depends on the saved rule, so the
-      // card body registers it; the static buttons only offer View rule.
+      // card body registers it. The static buttons only offer View rule.
       expect(
         buildButtons({ text: JSON.stringify(validRule) }, { origin: 'rule-1' }).map((b) => b.label)
       ).toEqual(['View rule']);

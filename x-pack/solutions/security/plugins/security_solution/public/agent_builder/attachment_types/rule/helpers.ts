@@ -51,7 +51,6 @@ export const isRuleDraftAttachment = (attachment: Pick<RuleAttachment, 'id'>): b
 export const getRuleAttachmentIntent = (attachment: RuleAttachment): RuleAttachmentIntent =>
   attachment.origin ? 'update' : 'create';
 
-/** Whether this card renders the latest version of its attachment. Older versions stay in the timeline. */
 export const isLatestAttachmentVersion = (
   attachment: Pick<RuleAttachment, 'versionData'>
 ): boolean => {
