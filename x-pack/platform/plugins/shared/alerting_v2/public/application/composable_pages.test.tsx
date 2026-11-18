@@ -365,6 +365,7 @@ describe('composable pages', () => {
 
     it('ImportsPage asks for connector access when the user cannot read connectors', () => {
       mockCanReadConnectors = false;
+      mockUseBreadcrumbs.mockClear();
       renderAtRoute('/imports', '/imports', <AlertingV2ImportsPage {...defaultProps()} />);
 
       expect(screen.queryByTestId('importsPage')).not.toBeInTheDocument();
