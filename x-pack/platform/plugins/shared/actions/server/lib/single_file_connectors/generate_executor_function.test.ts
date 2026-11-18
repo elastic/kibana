@@ -819,6 +819,7 @@ describe('generateExecutorFunction', () => {
         message: 'direct handler failure',
         actionId: connectorId,
         failureClass: 'handler',
+        errorName: 'Error',
       });
     });
 
@@ -1278,6 +1279,7 @@ describe('generateExecutorFunction', () => {
         message: 'handler failed',
         actionId: connectorId,
         failureClass: 'handler',
+        errorName: 'Error',
       });
     });
 
@@ -1299,6 +1301,7 @@ describe('generateExecutorFunction', () => {
         message: 'maxContentLength size of 1048576 exceeded',
         actionId: connectorId,
         failureClass: 'handler',
+        errorName: 'Error',
         errorMeta: { contentLengthBytes: 10 * 1024 * 1024 },
       });
     });
@@ -1336,6 +1339,7 @@ describe('generateExecutorFunction', () => {
         message: 'maxContentLength size of 1048576 exceeded',
         actionId: connectorId,
         failureClass: 'handler',
+        errorName: 'Error',
         errorMeta: { contentLengthBytes: 2048 },
       });
     });
@@ -1362,6 +1366,7 @@ describe('generateExecutorFunction', () => {
         message: 'maxContentLength size of 1048576 exceeded',
         actionId: connectorId,
         failureClass: 'handler',
+        errorName: 'Error',
         errorMeta: {
           contentLengthBytes: 20 * 1024 * 1024,
           estimatedOutputBytes: 28 * 1024 * 1024,
@@ -1405,6 +1410,7 @@ describe('generateExecutorFunction', () => {
           actionId: connectorId,
           failureClass: 'vendor_4xx',
           vendorStatusCode: 429,
+          errorName: 'Error',
           errorMeta: { statusCode: 429 },
           retry: inSeconds(30),
         });
@@ -1532,6 +1538,27 @@ describe('generateExecutorFunction', () => {
         expect(result).toMatchObject({ status: 'error', failureClass: 'vendor_5xx' });
       });
 
+      it('names a crash on the response, which is what a changed vendor looks like', async () => {
+        let thrown: unknown;
+        try {
+          const response = { data: undefined } as { data?: { items: string[] } };
+          // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+          response.data!.items.length;
+        } catch (err) {
+          thrown = err;
+        }
+
+        const result = await executeWithError(thrown);
+
+        expect(result).toMatchObject({ failureClass: 'handler', errorName: 'TypeError' });
+      });
+
+      it('names a failure the connector raised deliberately', async () => {
+        const result = await executeWithError(new Error('no document id in the response'));
+
+        expect(result).toMatchObject({ failureClass: 'handler', errorName: 'Error' });
+      });
+
       it('carries the vendor status alongside the class', async () => {
         const result = await executeWithError(makeHttpError(429));
 
@@ -1581,6 +1608,7 @@ describe('generateExecutorFunction', () => {
           message: 'socket hang up',
           actionId: connectorId,
           failureClass: 'handler',
+          errorName: 'Error',
         });
       });
     });
@@ -1646,6 +1674,7 @@ describe('generateExecutorFunction', () => {
         message: policyMessage,
         actionId: connectorId,
         failureClass: 'network',
+        errorName: 'AllowlistDeniedError',
       });
       expect(result).not.toHaveProperty('retry');
     });
@@ -1712,6 +1741,7 @@ describe('generateExecutorFunction', () => {
         message: 'connection failed',
         actionId: connectorId,
         failureClass: 'handler',
+        errorName: 'Error',
       });
     });
   });

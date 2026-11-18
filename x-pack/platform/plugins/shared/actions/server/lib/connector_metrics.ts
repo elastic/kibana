@@ -87,6 +87,23 @@ const REPORTED_STATUS_CODES = new Set([
   400, 401, 403, 404, 408, 409, 413, 422, 429, 500, 502, 503, 504,
 ]);
 
+/**
+ * Error names reported as themselves. A `TypeError` or `SyntaxError` means the handler crashed
+ * on the data it got, which is what a vendor changing a response looks like; a plain `Error`
+ * means the connector rejected something deliberately. Anything else is `unknown`.
+ */
+const REPORTED_ERROR_NAMES = new Set([
+  'AllowlistDeniedError',
+  'AxiosError',
+  'ConnectorAuthorizationError',
+  'Error',
+  'RangeError',
+  'ReferenceError',
+  'RelayRequestError',
+  'SyntaxError',
+  'TypeError',
+]);
+
 const NO_AUTH_TYPE = 'none';
 /** Sub-action reported for connectors that have a single operation and no sub-actions. */
 export const DEFAULT_SUB_ACTION = 'default';
@@ -196,6 +213,8 @@ export interface RecordConnectorExecuteOpts {
   failureClass?: ConnectorExecuteFailureClass;
   /** The HTTP status the vendor answered with, reported bounded. */
   statusCode?: number;
+  /** The thrown error's name, reported bounded. */
+  errorName?: string;
   durationMs?: number;
 }
 
@@ -208,6 +227,7 @@ export const recordConnectorExecute = ({
   errorSource,
   failureClass,
   statusCode,
+  errorName,
   durationMs,
 }: RecordConnectorExecuteOpts): void => {
   const attributes: Attributes = {
@@ -230,6 +250,9 @@ export const recordConnectorExecute = ({
             REPORTED_STATUS_CODES.has(statusCode)
           ),
         }
+      : {}),
+    ...(errorType && errorName
+      ? { 'error.name': toBoundedLabel(errorName, REPORTED_ERROR_NAMES.has(errorName)) }
       : {}),
   });
 

@@ -713,6 +713,7 @@ export class ActionExecutor {
                 errorSource: result.errorSource === TaskErrorSource.USER ? 'user' : 'framework',
                 failureClass: result.failureClass,
                 statusCode: result.vendorStatusCode,
+                errorName: result.errorName,
               }),
           durationMs: Date.now() - executionStartedAt,
         });

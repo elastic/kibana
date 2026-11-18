@@ -350,6 +350,9 @@ export const generateExecutorFunction = ({
       const errorMeta = getErrorMeta({ error, contentLengthBytes });
       const retryDate = getRetryDate(error);
       const vendorStatusCode = getVendorStatus(error);
+      // Splits a `handler` failure that crashed on the data (a TypeError on a field that
+      // wasn't there) from one the connector raised deliberately.
+      const errorName = error instanceof Error ? error.name : undefined;
       logger.error(`error on ${connectorId} event: ${errorMessage}`);
       return {
         status: 'error',
@@ -357,6 +360,7 @@ export const generateExecutorFunction = ({
         actionId: connectorId,
         failureClass: classifyConnectorFailure(error),
         ...(vendorStatusCode !== undefined ? { vendorStatusCode } : {}),
+        ...(errorName ? { errorName } : {}),
         ...(errorMeta ? { errorMeta } : {}),
         ...(errorSource === TaskErrorSource.USER
           ? { retry: false, errorSource: TaskErrorSource.USER }

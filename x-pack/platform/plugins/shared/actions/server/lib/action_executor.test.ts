@@ -2220,6 +2220,7 @@ describe('Connector metrics', () => {
       success: false,
       'error.type': 'auth_failed',
       'error.source': 'user',
+      'error.name': 'ConnectorAuthorizationError',
     });
   });
 });

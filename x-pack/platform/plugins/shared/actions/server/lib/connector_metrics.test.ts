@@ -247,6 +247,40 @@ describe('connector metrics', () => {
       );
     });
 
+    it('reports a known error name as itself', () => {
+      recordConnectorExecute({
+        connectorType: '.slack',
+        specBased: true,
+        origin: 'saved_object',
+        errorType: 'other',
+        errorSource: 'user',
+        failureClass: 'handler',
+        errorName: 'TypeError',
+      });
+
+      expect(connectorExecuteCounter.add).toHaveBeenCalledWith(
+        1,
+        expect.objectContaining({ 'error.name': 'TypeError', 'error.failure_class': 'handler' })
+      );
+    });
+
+    it('reports an error name outside the allowlist as unknown', () => {
+      recordConnectorExecute({
+        connectorType: '.slack',
+        specBased: true,
+        origin: 'saved_object',
+        errorType: 'other',
+        errorSource: 'user',
+        failureClass: 'handler',
+        errorName: 'SomeVendorSdkError',
+      });
+
+      expect(connectorExecuteCounter.add).toHaveBeenCalledWith(
+        1,
+        expect.objectContaining({ 'error.name': 'unknown' })
+      );
+    });
+
     it('leaves out the failure class when the execution succeeded', () => {
       recordConnectorExecute({
         connectorType: '.sharepoint',
