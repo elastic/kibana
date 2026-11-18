@@ -8,9 +8,9 @@
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import {
   ALERTING_V2_ENABLED_SETTING_ID,
+  ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
   ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID,
 } from '@kbn/alerting-v2-constants';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 
 /**
  * Feature ids from `@kbn/alerting-v2-plugin/common/feature_privileges`.
@@ -116,9 +116,8 @@ export const canAccessAlertingV2Rules = (core: CoreStart): boolean => {
 
 /**
  * Returns whether the settings turn on the Import alerts page: `alerting:v2:enabled` plus the
- * space-scoped Agent Builder experimental features setting. Privileges are checked separately.
+ * space-scoped `alerting:v2:experimentalFeatures` setting. Privileges are checked separately.
  */
 export const areAlertingV2ImportsEnabled = (settings: CoreStart['settings']): boolean =>
   isAlertingV2EnabledSetting(settings) &&
-  // Agent Builder registers this setting; the default covers deployments without it.
-  settings.client.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID, false) === true;
+  settings.client.get<boolean>(ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID, false) === true;

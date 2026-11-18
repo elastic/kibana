@@ -7,7 +7,7 @@
 
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { coreMock } from '@kbn/core/public/mocks';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/alerting-v2-constants';
 import {
   areAlertingV2ImportsEnabled,
   canAccessAlertingV2Rules,
@@ -274,7 +274,7 @@ describe('areAlertingV2ImportsEnabled', () => {
 
   const setExperimentalFeatures = (value: boolean | undefined) => {
     core.settings.client.get = <T>(key: string, defaultOverride?: T) =>
-      (key === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID && value !== undefined
+      (key === ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID && value !== undefined
         ? value
         : defaultOverride) as T;
   };

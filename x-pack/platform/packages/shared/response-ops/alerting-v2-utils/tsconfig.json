@@ -18,7 +18,6 @@
     "@kbn/alerting-v2-schemas",
     "@kbn/core",
     "@kbn/core-lifecycle-browser",
-    "@kbn/i18n",
-    "@kbn/management-settings-ids"
+    "@kbn/i18n"
   ]
 }
