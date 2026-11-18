@@ -145,6 +145,17 @@ describe('actions', () => {
       expect(view(links({ ...approve, url: URL })).valid).toBe(false);
       expect(view(links({ ...approve, app: 'discover' })).valid).toBe(false);
       expect(view(links({ label: 'Go', event: { name: 'not a name' } })).valid).toBe(false);
+      expect(view(links({ ...approve, path: '/manage/skills' })).valid).toBe(false);
+    });
+
+    it('names the three targets when a button has none, or more than one', () => {
+      const errors = (node: ActionsNode) =>
+        JSON.stringify(validate({ type: 'view', body: [node] }));
+
+      expect(errors(links({ label: 'Go' }))).toContain('give exactly one of url, app or event');
+      expect(errors(links({ ...approve, url: URL }))).toContain(
+        'give exactly one of url, app or event'
+      );
     });
 
     it('carry the event to Slack as action_id and value', () => {

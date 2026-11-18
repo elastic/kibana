@@ -10,11 +10,26 @@ import { fromChildren } from '@elastic/isomer-sdk/author';
 import { SLACK_LIMITS } from '@elastic/isomer-sdk/slack';
 
 import { actionEventSchema, componentIcon, definePrimitive, oneLine, plainText } from '../../lib';
-import { appPathSchema, appRouteSchema, refineAppOrUrl } from '../link/link_target';
+import { appPathSchema, appRouteSchema } from '../link/link_target';
 
 import { actionsReactRenderer } from './actions_react';
 import { actionsSlackRenderer } from './actions_slack';
 import { actionsMarkdownRenderer } from './actions_markdown';
+
+/** Requires exactly one of `url`, `app` or `event`, and `path` only with `app`. */
+const refineButtonTarget = (
+  { url, app, path, event }: { url?: string; app?: string; path?: string; event?: object },
+  context: z.RefinementCtx
+) => {
+  const targets = [url, app, event].filter((target) => target !== undefined);
+
+  if (targets.length !== 1) {
+    context.addIssue({ code: 'custom', message: 'give exactly one of url, app or event' });
+  }
+  if (path !== undefined && app === undefined) {
+    context.addIssue({ code: 'custom', message: 'needs app', path: ['path'] });
+  }
+};
 
 const buttonSchema = z
   .object({
@@ -37,18 +52,7 @@ const buttonSchema = z
     danger: z.boolean().optional().describe('Marks an action that destroys or cannot be undone.'),
   })
   .strict()
-  .superRefine((button, context) => {
-    if (button.event === undefined) {
-      refineAppOrUrl(button, context);
-      return;
-    }
-
-    (['url', 'app', 'path'] as const)
-      .filter((key) => button[key] !== undefined)
-      .forEach((key) =>
-        context.addIssue({ code: 'custom', message: 'not with event', path: [key] })
-      );
-  });
+  .superRefine(refineButtonTarget);
 
 const actionsSchema = z.object({
   type: z.literal('actions'),
