@@ -19,8 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
 
-  // Failing: See https://github.com/elastic/kibana/issues/204082
-  describe.skip('space solution tour', () => {
+  describe('space solution tour', () => {
     let version: string | undefined;
 
     const getGlobalSettings = async () => {
@@ -28,8 +27,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         { id: `config-global:${version}`, index: '.kibana' },
         { headers: { 'kbn-xsrf': 'spaces' }, ignore: [404] }
       );
-      const value = (doc?._source as any)?.['config-global'] || null;
-      return value;
+      const source = doc?._source as { 'config-global'?: Record<string, unknown> } | undefined;
+      return source?.['config-global'] ?? null;
+    };
+
+    const waitForTourToBeDismissed = async () => {
+      await retry.waitFor('solution tour setting to be saved', async () => {
+        const settings = await getGlobalSettings();
+        return settings?.showSpaceSolutionTour === false;
+      });
     };
 
     const removeGlobalSettings = async () => {
@@ -48,9 +54,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           throw error;
         });
 
-      await retry.tryForTime(3000, async () => {
-        const value = await getGlobalSettings();
-        return value === null;
+      await retry.waitFor('global settings to be removed', async () => {
+        const settings = await getGlobalSettings();
+        return settings === null;
       });
     };
 
@@ -86,7 +92,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           shouldUseHashForSubUrl: false,
         });
 
-        await PageObjects.common.sleep(1000); // wait to save the setting
+        await waitForTourToBeDismissed();
       });
 
       afterEach(async () => {
@@ -99,14 +105,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('does show the solution tour if the default space has a solution set', async () => {
         await updateSolutionDefaultSpace('es'); // set a solution
-        await PageObjects.common.sleep(500);
         await removeGlobalSettings(); // Make sure we start from a clean state
         await browser.refresh();
 
         await testSubjects.existOrFail('spaceSolutionTour', { timeout: 3000 });
 
         await testSubjects.click('closeTourBtn'); // close the tour
-        await PageObjects.common.sleep(1000); // wait to save the setting
+        await waitForTourToBeDismissed();
 
         await browser.refresh();
         await testSubjects.missingOrFail('spaceSolutionTour', { timeout: 3000 }); // The tour does not appear after refresh
@@ -114,7 +119,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('does not show the solution tour after updating the default space from classic to solution', async () => {
         await updateSolutionDefaultSpace('es'); // set a solution
-        await PageObjects.common.sleep(500);
         await browser.refresh();
 
         // The tour does not appear after refresh, even with the default space with a solution set
@@ -138,6 +142,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await browser.refresh();
 
         await testSubjects.missingOrFail('spaceSolutionTour', { timeout: 3000 });
+        await waitForTourToBeDismissed();
 
         await spacesService.delete('foo-space');
         await browser.refresh();
