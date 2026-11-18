@@ -18,7 +18,7 @@ import {
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import { spacesServiceMock } from '@kbn/spaces-plugin/server/spaces_service/spaces_service.mock';
-import type { ActionType as ConnectorType } from '../types';
+import type { ActionType as ConnectorType, ActionTypeExecutorRawResult } from '../types';
 import { ConnectorUsageCollector } from '../types';
 import { actionsAuthorizationMock, actionsMock } from '../mocks';
 import {
@@ -2097,6 +2097,43 @@ describe('Connector metrics', () => {
       'connector.origin': 'http_request',
       'connector.sub_action': 'default',
       success: true,
+    });
+  });
+
+  test('reports the failure class, vendor status and error name, and keeps them off the result', async () => {
+    mockConnector();
+    connectorTypeRegistry.isSpecActionType.mockReturnValueOnce(true);
+    (
+      connectorType.executor as jest.MockedFunction<NonNullable<ConnectorType['executor']>>
+    ).mockResolvedValueOnce({
+      actionId: CONNECTOR_ID,
+      status: 'error',
+      message: 'Request failed with status code 429',
+      // What the spec executor returns: `ConnectorType['executor']` is declared with the
+      // public result, which deliberately has no room for these.
+      failureClass: 'vendor_4xx',
+      vendorStatusCode: 429,
+      failureErrorName: 'AxiosError',
+    } as ActionTypeExecutorRawResult<void>);
+
+    const result = await actionExecutor.execute(executeParams);
+
+    expect(connectorExecuteCounter.add).toHaveBeenCalledWith(
+      1,
+      expect.objectContaining({
+        'error.failure_class': 'vendor_4xx',
+        'error.status_code': '429',
+        'error.name': 'AxiosError',
+      })
+    );
+
+    // Telemetry only: these must not reach the `_execute` response, Agent Builder or Workflows.
+    expect(result).not.toHaveProperty('failureClass');
+    expect(result).not.toHaveProperty('vendorStatusCode');
+    expect(result).not.toHaveProperty('failureErrorName');
+    expect(result).toMatchObject({
+      status: 'error',
+      message: 'Request failed with status code 429',
     });
   });
 
