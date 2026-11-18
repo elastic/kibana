@@ -98,6 +98,7 @@ Some steps exist only to support the managed workflows your plugin installs. The
 | Managed workflows | Valid | Valid | Valid |
 | Other workflows | Valid | Valid, with a warning | Error: the workflow can't be enabled |
 | Actions menu and autocomplete | Suggested | Not suggested | Not suggested |
+| Editor hover | Step documentation | "Internal" badge and a note, then the step documentation | "Internal" badge and a note, then the step documentation |
 | AI authoring tools | Returned | Returned | Not returned |
 
 ```typescript

@@ -150,11 +150,18 @@ export abstract class BaseMonacoConnectorHandler implements MonacoConnectorHandl
     stability: StabilityLevel | undefined,
     bodyLines: string[]
   ): string {
-    const badge = getStabilityBadgeHtml(stability);
-    if (!badge) {
+    return this.prependBadgesToContent([getStabilityBadgeHtml(stability)], bodyLines);
+  }
+
+  /**
+   * Prepends badges to hover body lines, side by side on the first line. Empty badges are skipped.
+   */
+  protected prependBadgesToContent(badges: string[], bodyLines: string[]): string {
+    const badgeLine = badges.filter(Boolean).join(' ');
+    if (!badgeLine) {
       return bodyLines.join('\n');
     }
-    return [badge, '', ...bodyLines].join('\n');
+    return [badgeLine, '', ...bodyLines].join('\n');
   }
 
   protected getConnectorStabilityFromCache(connectorType: string): StabilityLevel | undefined {

@@ -11,8 +11,12 @@ import type { monaco } from '@kbn/monaco';
 import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';
 import { stepSchemas } from '../../../../../common/step_schemas';
-import { getExtensionStability } from '../get_stability_note';
+import { getExtensionStability, getStabilityBadgeHtml } from '../get_stability_note';
 import type { ConnectorExamples, HoverContext } from '../monaco_providers/provider_interfaces';
+import {
+  getStepExposureBadgeHtml,
+  getStepExposureDescription,
+} from '../step_exposure/get_step_exposure_badge_html';
 
 /**
  * Generic Monaco connector handler for unknown/unsupported connector types
@@ -52,7 +56,9 @@ export class CustomMonacoStepHandler extends BaseMonacoConnectorHandler {
         return null;
       }
 
+      const exposureDescription = getStepExposureDescription(stepDefinition.exposure);
       const bodyLines = [
+        ...(exposureDescription ? [`_${exposureDescription}_`, ''] : []),
         `**Workflow step**: \`${stepDefinition.label}\``,
         '',
         `**Type**: \`${stepDefinition.id}\``,
@@ -72,7 +78,13 @@ export class CustomMonacoStepHandler extends BaseMonacoConnectorHandler {
       bodyLines.push('', '_💡 Tip: Check the step documentation for specific parameter details_');
 
       return this.createMarkdownContent(
-        this.prependStabilityBadgeToContent(getExtensionStability(stepDefinition), bodyLines)
+        this.prependBadgesToContent(
+          [
+            getStabilityBadgeHtml(getExtensionStability(stepDefinition)),
+            getStepExposureBadgeHtml(stepDefinition.exposure),
+          ],
+          bodyLines
+        )
       );
     } catch (error) {
       // console.warn('GenericMonacoConnectorHandler: Error generating hover content', error);
