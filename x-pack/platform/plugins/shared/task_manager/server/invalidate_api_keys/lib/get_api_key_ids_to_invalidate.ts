@@ -6,15 +6,12 @@
  */
 
 import type { SavedObjectsFindResponse, SavedObjectsClientContract } from '@kbn/core/server';
-import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 import type { AggregationsStringTermsBucketKeys } from '@elastic/elasticsearch/lib/api/types';
 import type { ApiKeyToInvalidate } from '../../saved_objects/schemas/api_key_to_invalidate';
-import { TASK_SO_NAME } from '../../saved_objects';
-import type { SerializedConcreteTaskInstance } from '../../task';
-import { TaskStatus } from '../../task';
 import type { SavedObjectTypesToQuery } from './run_invalidate';
 import { queryForApiKeysInUse } from './query_for_api_keys_in_use';
+import { getLiveRunStartedAtByTaskId } from './running_task_api_keys';
 
 export interface ApiKeyIdAndSOId {
   id: string;
@@ -183,31 +180,13 @@ async function getSOIdsUsedByRunningTasks(
     return soIds;
   }
 
-  const allTaskIds = Array.from(runningTasksBySOId.values(), (runningTask) => runningTask.taskId);
-  const taskIds = [...new Set(allTaskIds)];
-  const { saved_objects: tasks } = await savedObjectsClient.bulkGet<
-    Pick<SerializedConcreteTaskInstance, 'status' | 'startedAt' | 'retryAt'>
-  >(taskIds.map((id) => ({ type: TASK_SO_NAME, id })));
-
-  const now = Date.now();
-  const runningTasks = new Map<string, string>();
-  for (const task of tasks) {
-    if (isSavedObjectErrorResult(task)) {
-      continue;
-    }
-    const { id, attributes } = task;
-    if (attributes.status !== TaskStatus.Running || !attributes.startedAt) {
-      continue;
-    }
-    // A run that outlived its retryAt is presumed dead (e.g. its Kibana node crashed).
-    if (!attributes.retryAt || Date.parse(attributes.retryAt) <= now) {
-      continue;
-    }
-    runningTasks.set(id, attributes.startedAt);
-  }
+  const startedAtByTaskId = await getLiveRunStartedAtByTaskId(
+    [...runningTasksBySOId.values()].map((runningTask) => runningTask.taskId),
+    savedObjectsClient
+  );
 
   for (const [soId, { taskId, taskStartedAt }] of runningTasksBySOId) {
-    const startedAt = runningTasks.get(taskId);
+    const startedAt = startedAtByTaskId.get(taskId);
     if (startedAt && Date.parse(startedAt) === Date.parse(taskStartedAt)) {
       soIds.add(soId);
     }
