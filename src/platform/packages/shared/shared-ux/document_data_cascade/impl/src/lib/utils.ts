@@ -69,6 +69,21 @@ export function getCascadeRowLeafDataCacheKey(
 }
 
 /**
+ * @description The id of the cell that renders the leaf content of a row, which is also the key that its
+ * leaf data is cached with.
+ */
+export function getCascadeRowCellId<G extends GroupNode>(
+  currentGroupByColumns: string[],
+  row: CascadeTableRow<G>
+) {
+  return getCascadeRowLeafDataCacheKey(
+    getCascadeRowNodePath(currentGroupByColumns, row),
+    getCascadeRowNodePathValueRecord(currentGroupByColumns, row),
+    row.id
+  );
+}
+
+/**
  * Returns the leaf ID from a leaf cache key.
  */
 export function getLeafIdFromCacheKey(cacheKey: string) {

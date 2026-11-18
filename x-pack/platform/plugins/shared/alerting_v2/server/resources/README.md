@@ -184,12 +184,6 @@ Disallowed changes:
 4. Update writers and readers that need to understand the new field.
 5. Update the relevant README if the field changes the architecture or contributor mental model.
 
-### Mapping changes that cannot be applied in place
-
-Elasticsearch cannot apply some mapping changes to existing backing indices, for example turning a concrete field into an `alias`. For those, set `forceReset: { version }` on the resource definition, where `version` is the last datastream version with the old mapping. On startup, `DatastreamInitializer` installs the current template, then deletes a data stream created from that version or below and recreates it. Installing the template first means that a write from a node still running the previous version recreates the data stream with the current mapping. All of its documents are lost. A field renamed without an alias uses the same reset, so that no document keeps the old name.
-
-`.rule-events` uses `forceReset: { version: 7 }` for the `episode.*` to `alert.*` rename in v8. `.alert-actions` uses `forceReset: { version: 7 }` for the `episode_id` / `episode_status` to `alert_id` / `alert_status` rename in v8, which also covers the `actor` keyword to object change in v7. Keep `forceReset.version` unchanged when bumping the datastream versions later.
-
 ## Example: adding a new optional alert event field
 
 If you add a new optional field to `.rule-events`, the minimum change set is usually:

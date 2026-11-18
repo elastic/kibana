@@ -14,7 +14,6 @@ import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../.
 
 jest.mock('../../hooks/use_registered_features');
 jest.mock('../../hooks/use_inference_settings');
-
 const mockUseRegisteredFeatures = useRegisteredFeatures as jest.Mock;
 const mockUseInferenceSettings = useInferenceSettings as jest.Mock;
 const mockUseSaveInferenceSettings = useSaveInferenceSettings as jest.Mock;
@@ -270,6 +269,7 @@ describe('useModelSettingsForm', () => {
 
       act(() => {
         result.current.updateEndpoints('child_1', ['endpoint-a', 'endpoint-b']);
+        result.current.updateEfforts('child_1', {});
       });
       act(() => {
         result.current.save();
@@ -297,6 +297,177 @@ describe('useModelSettingsForm', () => {
           { feature_id: 'child_1', endpoints: [{ id: 'endpoint-b' }] },
           { feature_id: 'child_2', endpoints: [{ id: 'ep-1' }] },
         ],
+      });
+    });
+
+    it('initializes efforts from saved parameters', () => {
+      mockUseInferenceSettings.mockReturnValue(savedWithParameters);
+      const { result } = renderHook(() => useModelSettingsForm());
+
+      expect(result.current.efforts.child_1).toEqual({ 'endpoint-a': 'high' });
+    });
+
+    it('saves an effort set on recommended endpoints', () => {
+      const { result } = renderHook(() => useModelSettingsForm());
+
+      act(() => {
+        result.current.updateEfforts('child_1', { 'endpoint-b': 'none' });
+      });
+      expect(result.current.dirtyFeatureIds.has('child_1')).toBe(true);
+      act(() => {
+        result.current.save();
+      });
+
+      expect(mockSaveSettings).toHaveBeenCalledWith({
+        features: [
+          {
+            feature_id: 'child_1',
+            endpoints: [
+              { id: 'endpoint-a' },
+              { id: 'endpoint-b', parameters: { reasoning: { effort: 'none' } } },
+            ],
+          },
+        ],
+      });
+    });
+
+    it('drops the override when its only saved effort is removed', () => {
+      mockUseInferenceSettings.mockReturnValue(savedWithParameters);
+      const { result } = renderHook(() => useModelSettingsForm());
+
+      act(() => {
+        result.current.updateEfforts('child_1', {});
+      });
+      act(() => {
+        result.current.save();
+      });
+
+      expect(mockSaveSettings).toHaveBeenCalledWith({ features: [] });
+    });
+  });
+
+  describe('recommended efforts', () => {
+    const featuresWithRecommendedEffort: InferenceFeatureConfig[] = [
+      parentFeature,
+      {
+        ...childFeature1,
+        recommendedEndpointParameters: {
+          'endpoint-a': { reasoning: { effort: 'low' } },
+          'endpoint-b': { reasoning: { effort: 'high' } },
+        },
+      },
+      childFeature2,
+    ];
+
+    beforeEach(() => {
+      mockUseRegisteredFeatures.mockReturnValue({
+        features: featuresWithRecommendedEffort,
+        isLoading: false,
+      });
+    });
+
+    it('starts from the recommended efforts', () => {
+      const { result } = renderHook(() => useModelSettingsForm());
+
+      expect(result.current.effectiveRecommendedEfforts.child_1).toEqual({
+        'endpoint-a': 'low',
+        'endpoint-b': 'high',
+      });
+      expect(result.current.efforts.child_1).toEqual({ 'endpoint-a': 'low', 'endpoint-b': 'high' });
+      expect(result.current.isDirty).toBe(false);
+    });
+
+    it('excludes a feature from the payload when efforts match the recommended ones', () => {
+      const { result } = renderHook(() => useModelSettingsForm());
+
+      act(() => {
+        result.current.updateEndpoints('child_2', ['ep-1']);
+      });
+      act(() => {
+        result.current.save();
+      });
+
+      expect(mockSaveSettings).toHaveBeenCalledWith({
+        features: [{ feature_id: 'child_2', endpoints: [{ id: 'ep-1' }] }],
+      });
+    });
+
+    it('keeps a saved override that removes a recommended effort when another feature is saved', () => {
+      mockUseInferenceSettings.mockReturnValue({
+        data: {
+          data: {
+            features: [
+              {
+                feature_id: 'child_1',
+                endpoints: [
+                  { id: 'endpoint-a', parameters: { reasoning: { effort: 'low' } } },
+                  { id: 'endpoint-b' },
+                ],
+              },
+            ],
+          },
+        },
+        isLoading: false,
+      });
+      const { result } = renderHook(() => useModelSettingsForm());
+
+      act(() => {
+        result.current.updateEndpoints('child_2', ['ep-1']);
+      });
+      act(() => {
+        result.current.save();
+      });
+
+      expect(mockSaveSettings).toHaveBeenCalledWith({
+        features: [
+          {
+            feature_id: 'child_1',
+            endpoints: [
+              { id: 'endpoint-a', parameters: { reasoning: { effort: 'low' } } },
+              { id: 'endpoint-b' },
+            ],
+          },
+          { feature_id: 'child_2', endpoints: [{ id: 'ep-1' }] },
+        ],
+      });
+    });
+
+    it('includes recommended efforts when the feature endpoints are customized', () => {
+      const { result } = renderHook(() => useModelSettingsForm());
+
+      act(() => {
+        result.current.updateEndpoints('child_1', ['endpoint-a']);
+      });
+      act(() => {
+        result.current.save();
+      });
+
+      expect(mockSaveSettings).toHaveBeenCalledWith({
+        features: [
+          {
+            feature_id: 'child_1',
+            endpoints: [{ id: 'endpoint-a', parameters: { reasoning: { effort: 'low' } } }],
+          },
+        ],
+      });
+    });
+
+    it('uses parent recommended efforts when the child has no recommendations', () => {
+      mockUseRegisteredFeatures.mockReturnValue({
+        features: [
+          {
+            ...parentFeature,
+            recommendedEndpoints: ['endpoint-a'],
+            recommendedEndpointParameters: { 'endpoint-a': { reasoning: { effort: 'medium' } } },
+          },
+          { ...childFeature1, recommendedEndpoints: [] },
+        ],
+        isLoading: false,
+      });
+      const { result } = renderHook(() => useModelSettingsForm());
+
+      expect(result.current.effectiveRecommendedEfforts.child_1).toEqual({
+        'endpoint-a': 'medium',
       });
     });
   });

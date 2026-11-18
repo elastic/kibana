@@ -247,6 +247,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
       />
       {expandedRule ? (
         <RuleSummaryFlyout
+          ruleId={expandedRule.id}
           rule={expandedRule}
           canWrite={canWrite}
           isToggleLoading={

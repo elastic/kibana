@@ -1,0 +1,168 @@
+version: '1'
+name: __NAME__
+description: 'Extracts long-term facts and entities from the agent conversations the trace sources of a Context Engine AI index record, as the AI index dreaming config describes.'
+enabled: false
+tags:
+  - context-engine
+  - memory
+  - dreaming
+  - traces
+  - scheduled
+settings:
+  timeout: '30m'
+  concurrency:
+    key: __CONCURRENCY_KEY__
+    strategy: drop
+    max: 1
+consts:
+  ai_index_id: __AI_INDEX_ID__
+  batch_workflow_id: __BATCH_WORKFLOW_ID__
+outputs:
+  - name: rounds
+    type: number
+  - name: created
+    type: number
+  - name: updated
+    type: number
+  - name: deleted
+    type: number
+  - name: rejected
+    type: number
+  - name: resume_from
+    type: string
+  - name: resume_after
+    type: string
+triggers:
+  - type: scheduled
+    with:
+      every: '__INTERVAL_MINUTES__m'
+  - type: manual
+    inputs:
+      additionalProperties: false
+      properties:
+        dry_run:
+          type: boolean
+          default: false
+          description: Report what dreaming would write and reject, and write nothing. The run ends cancelled, so the next run reads the same rounds.
+        since:
+          type: string
+          maxLength: 64
+          description: Read the rounds that ended since this ISO 8601 time, instead of since where the last successful run stopped.
+steps:
+  - name: status
+    type: context-engine.getDreamingStatus
+    with:
+      ai_index_id: '{{ consts.ai_index_id }}'
+      source: traces
+
+  - name: paused
+    type: if
+    condition: '${{ steps.status.output.dream != true }}'
+    steps:
+      - name: skip
+        type: workflow.output
+        status: cancelled
+        with:
+          rounds: 0
+          reason: '{{ steps.status.output.reason }}'
+
+  - name: last_run
+    type: workflow.getLastRun
+    with:
+      default_hours: 168
+      max_hours: 720
+
+  - name: resume
+    type: if
+    condition: '${{ inputs.since == blank and steps.last_run.output.last_success.execution_id != blank }}'
+    steps:
+      - name: last_output
+        type: kibana.request
+        with:
+          method: GET
+          path: '/s/{{ workflow.spaceId }}/api/workflows/executions/{{ steps.last_run.output.last_success.execution_id }}'
+          query:
+            includeOutput: true
+            omitStepExecutions: true
+
+  - name: read_traces
+    type: context-engine.readTraceTranscripts
+    with:
+      ai_index_id: '{{ consts.ai_index_id }}'
+      since: '{{ inputs.since | default: steps.last_output.output.context.output.resume_from | default: steps.last_run.output.since }}'
+      after: '{% if inputs.since == blank %}{{ steps.last_output.output.context.output.resume_after }}{% endif %}'
+      size: 1000
+      max_tokens: 600000
+      batch_tokens: 50000
+
+  - name: active
+    type: data.set
+    with:
+      memories: '${{ steps.read_traces.output.memories }}'
+      batches: '${{ steps.read_traces.output.batches }}'
+      resume_from: '{{ steps.read_traces.output.resume_from }}'
+      resume_after: '{{ steps.read_traces.output.resume_after }}'
+      created: 0
+      updated: 0
+      deleted: 0
+      rejected: 0
+      would_write: []
+
+  - name: dream
+    type: if
+    condition: '${{ variables.memories.size > 0 }}'
+    steps:
+      - name: batches
+        type: parallel
+        foreach: '{{ variables.batches | json }}'
+        concurrency: 4
+        steps:
+          # A batch's steps run in a workflow of their own: a parallel branch can hold only
+          # straight-line steps, and a batch retries its model call.
+          - name: dream_batch
+            type: workflow.execute
+            with:
+              workflow-id: '{{ consts.batch_workflow_id }}'
+              inputs:
+                memories: '${{ foreach.item }}'
+                dry_run: '${{ inputs.dry_run == true }}'
+
+      - name: tally
+        type: foreach
+        foreach: '{{ steps.batches.output.results | json }}'
+        steps:
+          - name: add_batch
+            type: data.set
+            with:
+              created: '${{ variables.created | plus: foreach.item.output.created }}'
+              updated: '${{ variables.updated | plus: foreach.item.output.updated }}'
+              deleted: '${{ variables.deleted | plus: foreach.item.output.deleted }}'
+              rejected: '${{ variables.rejected | plus: foreach.item.output.rejected }}'
+              would_write: '${{ variables.would_write | concat: foreach.item.output.would_write }}'
+
+  - name: dry_run_result
+    type: if
+    condition: '${{ inputs.dry_run == true }}'
+    steps:
+      - name: dry_run_output
+        type: workflow.output
+        status: cancelled
+        with:
+          rounds: '${{ variables.memories | size | default: 0 }}'
+          created: '${{ variables.created | default: 0 }}'
+          updated: '${{ variables.updated | default: 0 }}'
+          deleted: '${{ variables.deleted | default: 0 }}'
+          rejected: '${{ variables.rejected | default: 0 }}'
+          would_write: '${{ variables.would_write }}'
+          reason: 'Dry run: nothing was written.'
+
+  - name: output_result
+    type: workflow.output
+    with:
+      rounds: '${{ variables.memories | size | default: 0 }}'
+      created: '${{ variables.created | default: 0 }}'
+      updated: '${{ variables.updated | default: 0 }}'
+      deleted: '${{ variables.deleted | default: 0 }}'
+      rejected: '${{ variables.rejected | default: 0 }}'
+      resume_from: '{{ variables.resume_from }}'
+      resume_after: '{{ variables.resume_after }}'

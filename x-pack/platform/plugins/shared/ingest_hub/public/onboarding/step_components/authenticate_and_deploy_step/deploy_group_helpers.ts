@@ -7,6 +7,7 @@
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { getEffectiveNamespace } from '../../common/effective_namespace';
+import { getCreateDatasetTemplates as getDatasetTemplatesFlag } from '../service_settings_step/dataset_templates';
 import type { ServiceInstance, ServiceVars } from '../service_settings_step/use_service_settings';
 import type { DeployGroup } from './deploy_groups';
 import { extractErrorMessage } from './deploy_errors';
@@ -255,4 +256,12 @@ export function collectDeployResults<G extends { instanceIds: string[] }>(
   }
 
   return { policyIdsByInstance, failedInstances, errorsByInstance };
+}
+
+/** The `create_dataset_templates` value for a group's policy; see `getDatasetTemplatesFlag`. */
+export function getCreateDatasetTemplates(
+  group: DeployGroup,
+  storedServiceVars: Record<string, ServiceVars>
+): boolean | undefined {
+  return getDatasetTemplatesFlag(group.members, storedServiceVars);
 }

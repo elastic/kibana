@@ -62,6 +62,7 @@ describe('workflow execution log flush', () => {
       workflowExecutionCursor,
       workflowRuntime: {
         saveState: jest.fn().mockResolvedValue(undefined),
+        takeJustFinalizedTerminalState: jest.fn().mockReturnValue(false),
         getWorkflowExecution: jest.fn().mockReturnValue({
           id: 'exec-1',
           status: ExecutionStatus.RUNNING,
