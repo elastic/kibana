@@ -289,5 +289,15 @@ describe('CasesAnalyticsV2Writer', () => {
       const { document } = (esClient.index as unknown as jest.Mock).mock.calls[0][0];
       expect(document.case).not.toHaveProperty('reopen_count');
     });
+
+    it('throws and writes nothing on the awaited path when the status history read fails', async () => {
+      const { writer, esClient, savedObjectsClient } = buildWriterWithSavedObjectsClient();
+      savedObjectsClient.createPointInTimeFinder.mockImplementation(() => {
+        throw new Error('so down');
+      });
+
+      await expect(writer.bulkUpsertCasesAwait([makeCase('case-A')])).rejects.toThrow('so down');
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
   });
 });

@@ -128,8 +128,9 @@ export class CasesAnalyticsV2Writer implements CasesAnalyticsV2WriterContract {
    * for the reconciliation runner so a 50k-case backfill awaits between
    * pages instead of firing hundreds of concurrent bulks at the ES pool.
    *
-   * Throws on bulk-level failure or after retries exhaust on bulks with
-   * retryable per-item failures (429 / 503 / etc.). Reconciliation
+   * Throws on bulk-level failure, on a status-history read failure, or after
+   * retries exhaust on bulks with retryable per-item failures (429 / 503 /
+   * etc.). Reconciliation
    * relies on this to keep its cursor pinned: advancing past a tick with
    * a transient blip would mean the affected cases never get re-walked
    * (their `updated_at` doesn't change). Permanent per-item failures
@@ -143,7 +144,11 @@ export class CasesAnalyticsV2Writer implements CasesAnalyticsV2WriterContract {
     if (sos.length === 0) return;
     try {
       await withRetry({
-        op: () => this.doBulkUpsertCases(sos, { throwOnRetryableItemFailures: true }),
+        op: () =>
+          this.doBulkUpsertCases(sos, {
+            throwOnRetryableItemFailures: true,
+            throwOnStatusHistoryReadFailure: true,
+          }),
         maxRetries: this.maxRetries,
         initialDelayMs: this.retryInitialDelayMs,
       });
@@ -194,13 +199,16 @@ export class CasesAnalyticsV2Writer implements CasesAnalyticsV2WriterContract {
    */
   private async doBulkUpsertCases(
     sos: Array<SavedObject<CasePersistedAttributes>>,
-    opts?: { throwOnRetryableItemFailures?: boolean }
+    opts?: { throwOnRetryableItemFailures?: boolean; throwOnStatusHistoryReadFailure?: boolean }
   ): Promise<void> {
     // The ES `_bulk` API takes a flat array alternating between operation
     // headers and document bodies. `operations` accepts arbitrary header
     // shapes; plain object literals avoid pulling in estypes for one line
     // each.
-    const statusChanges = await this.loadStatusChanges(sos.map(({ id }) => id));
+    const statusChanges = await this.loadStatusChanges(
+      sos.map(({ id }) => id),
+      opts?.throwOnStatusHistoryReadFailure
+    );
     const operations: object[] = [];
     for (const so of sos) {
       operations.push({ index: { _index: CASE_INDEX_NAME, _id: so.id } });
@@ -221,16 +229,21 @@ export class CasesAnalyticsV2Writer implements CasesAnalyticsV2WriterContract {
   }
 
   /**
-   * A failed read must not block the case doc, so it logs and returns
-   * `undefined`. The docs are then written without the status-history fields.
+   * On the fire-and-forget path, a failed read must not block the case doc,
+   * so it logs and returns `undefined`. The docs are then written without the
+   * status-history fields. On the awaited path, the read failure throws: the
+   * `index` op would replace the stored history fields, and reconciliation
+   * would advance its cursor past cases it cannot re-walk.
    */
   private async loadStatusChanges(
-    caseIds: string[]
+    caseIds: string[],
+    throwOnFailure = false
   ): Promise<Map<string, CaseStatusChange[]> | undefined> {
     if (this.savedObjectsClient == null) return undefined;
     try {
       return await findCaseStatusChanges({ savedObjectsClient: this.savedObjectsClient, caseIds });
     } catch (err) {
+      if (throwOnFailure) throw err;
       const message = err instanceof Error ? err.message : String(err);
       this.logger.warn(
         `cases-analyticsV2: status history read failed [count=${caseIds.length}]: ${message}. Writing case docs without status-history fields.`,
