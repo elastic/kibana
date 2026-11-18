@@ -187,7 +187,8 @@ export class EngineRunner {
           window: { from, to },
           esClient: this.dataClient,
           history: {
-            readHistory: ({ series, from: historyFrom, to: historyTo }) =>
+            // The read stops with the strategy, even when the generator passes no signal of its own.
+            readHistory: ({ series, from: historyFrom, to: historyTo, abortSignal }) =>
               this.signalStore.readHistory({
                 spaceId,
                 strategy: strategyId,
@@ -195,6 +196,9 @@ export class EngineRunner {
                 series,
                 from: historyFrom,
                 to: historyTo,
+                abortSignal: abortSignal
+                  ? AbortSignal.any([controller.signal, abortSignal])
+                  : controller.signal,
               }),
           },
           abortSignal: controller.signal,
