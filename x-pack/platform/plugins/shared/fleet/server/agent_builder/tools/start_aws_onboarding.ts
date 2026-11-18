@@ -15,6 +15,10 @@ import { FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/manag
 import { checkOnboardingAccess } from './common';
 import type { AwsOnboardingToolDeps } from './common';
 
+// Any value other than `manual` keeps a `${{ }}` that the model puts in the inputs as a literal
+// string instead of letting the engine evaluate it.
+export const AWS_ONBOARDING_TOOL_TRIGGER_SOURCE = 'agent-builder-tool';
+
 const startSchema = lazySchema(() =>
   z.object({
     region: z
@@ -63,6 +67,7 @@ export const createStartAwsOnboardingTool = ({
       spaceId,
       workflowApi,
       waitForCompletion: false,
+      triggeredBy: AWS_ONBOARDING_TOOL_TRIGGER_SOURCE,
     });
 
     if (!result.success) {

@@ -130,7 +130,7 @@ steps:
   - name: list_identities
     type: fleet.awsOnboardingListIdentities
     with:
-      account_id: "{{ steps.discover.output.account_id | default: steps.credentials.output.account_id }}"
+      account_id: "{{ steps.discover.output.account_id | default: steps.credentials_recheck.output.account_id | default: steps.credentials.output.account_id }}"
 
   - name: settings_requirement
     type: fleet.awsOnboardingSettingsRequirement
@@ -138,7 +138,7 @@ steps:
       selected_services: "${{ steps.select_services.output.response.services }}"
       services: "${{ inputs.services }}"
       region: "{{ steps.select_services.output.response.region | default: inputs.region | default: steps.discover.output.region | default: steps.credentials_recheck.output.region | default: steps.credentials.output.region }}"
-      account_id: "{{ steps.discover.output.account_id | default: steps.credentials.output.account_id }}"
+      account_id: "{{ steps.discover.output.account_id | default: steps.credentials_recheck.output.account_id | default: steps.credentials.output.account_id }}"
       run_suffix: "{{ execution.id | slice: 0, 8 }}"
 
   - name: ask_plan
@@ -163,7 +163,7 @@ steps:
       selected_services: "${{ steps.select_services.output.response.services }}"
       services: "${{ inputs.services }}"
       region: "{{ steps.select_services.output.response.region | default: inputs.region | default: steps.discover.output.region | default: steps.credentials_recheck.output.region | default: steps.credentials.output.region }}"
-      account_id: "{{ steps.discover.output.account_id | default: steps.credentials.output.account_id }}"
+      account_id: "{{ steps.discover.output.account_id | default: steps.credentials_recheck.output.account_id | default: steps.credentials.output.account_id }}"
       run_suffix: "{{ execution.id | slice: 0, 8 }}"
       namespace: "${{ inputs.namespace }}"
       settings:

@@ -42,8 +42,8 @@ const connector = (id: string, extra: Record<string, unknown> = {}) => ({
   ...extra,
 });
 
-const stackArn = (region: string, name: string) =>
-  `arn:aws:cloudformation:${region}:${ACCOUNT}:stack/${name}/0a1b2c3d`;
+const stackArn = (region: string, name: string, account = ACCOUNT) =>
+  `arn:aws:cloudformation:${region}:${account}:stack/${name}/0a1b2c3d`;
 
 const packagePolicy = (
   packageName: string,
@@ -97,6 +97,20 @@ describe('awsOnboardingListIdentitiesStepDefinition', () => {
         updatable: false,
         not_updatable_reason: 'other_region',
       })
+    );
+  });
+
+  it('marks a connector whose stack is in another account as not updatable', async () => {
+    getList.mockResolvedValue([
+      connector('foreign-stack', {
+        iac_deployment_id: stackArn('us-east-1', 'elastic-onboarding-ab12', '999999999999'),
+      }),
+    ]);
+
+    const [identity] = await runStep();
+
+    expect(identity).toEqual(
+      expect.objectContaining({ updatable: false, not_updatable_reason: 'other_account' })
     );
   });
 

@@ -12,7 +12,10 @@ import { FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/manag
 import { getAuthzFromRequest } from '../../services/security/security';
 import { isAgenticAwsOnboardingEnabled } from '../../services/utils/agentic_aws_onboarding';
 
-import { createStartAwsOnboardingTool } from './start_aws_onboarding';
+import {
+  AWS_ONBOARDING_TOOL_TRIGGER_SOURCE,
+  createStartAwsOnboardingTool,
+} from './start_aws_onboarding';
 
 jest.mock('@kbn/agent-builder-tools-base/workflows');
 jest.mock('../../services/security/security');
@@ -56,7 +59,7 @@ describe('start_aws_onboarding', () => {
     expect(executeWorkflow).not.toHaveBeenCalled();
   });
 
-  it('starts the managed workflow without waiting and returns the execution id', async () => {
+  it('starts the managed workflow without waiting, as a non-manual run, and returns the execution id', async () => {
     jest.mocked(executeWorkflow).mockResolvedValue({
       success: true,
       execution: { execution_id: 'exec-1', workflow_id: 'wf-1' },
@@ -71,7 +74,9 @@ describe('start_aws_onboarding', () => {
       spaceId: 'default',
       workflowApi,
       waitForCompletion: false,
+      triggeredBy: AWS_ONBOARDING_TOOL_TRIGGER_SOURCE,
     });
+    expect(AWS_ONBOARDING_TOOL_TRIGGER_SOURCE).not.toBe('manual');
     expect(results[0].data).toEqual({ execution_id: 'exec-1', workflow_id: 'wf-1' });
   });
 

@@ -68,17 +68,21 @@ const toIacIntegration = (policy: PackagePolicy): RenderIacTemplateIntegration |
 };
 
 /**
- * The run can update a stack only when it exists, lives in the credentials' region (the
- * CloudFormation client is built for that region) and carries the managed name prefix, the only
- * names the provisioning role may update.
+ * The run can update a stack only when it exists, lives in the credentials' account and region (the
+ * CloudFormation client is built for that account and region) and carries the managed name prefix,
+ * the only names the provisioning role may update. A missing account id never matches.
  */
 const updatability = (
   stackId: string | undefined,
+  credentialsAccountId: string | undefined,
   credentialsRegion: string | undefined,
   stackNamePrefix: string
 ): Pick<AwsOnboardingIdentity, 'updatable' | 'not_updatable_reason'> => {
   if (!stackId) {
     return { updatable: false, not_updatable_reason: 'no_stack' };
+  }
+  if (!credentialsAccountId || arnField(stackId, 4) !== credentialsAccountId) {
+    return { updatable: false, not_updatable_reason: 'other_account' };
   }
   if (arnField(stackId, 3) !== credentialsRegion) {
     return { updatable: false, not_updatable_reason: 'other_region' };
@@ -151,7 +155,7 @@ export const awsOnboardingListIdentitiesStepDefinition = createServerStepDefinit
           ...(stackId && { stack_id: stackId, stack_region: arnField(stackId, 3) }),
           ...(connector.iac_key && { template_sha: connector.iac_key }),
           created_at: connector.created_at,
-          ...updatability(stackId, credentials.region, stackNamePrefix),
+          ...updatability(stackId, accountId, credentials.region, stackNamePrefix),
           covered_integrations: covered,
           covered_policy_templates: covered.flatMap(({ policyTemplates }) =>
             policyTemplates.map(({ name }) => name)

@@ -7,7 +7,7 @@
 
 // Charset guard, not AWS region grammar (which changes): rejects whitespace and every URL/HTML
 // metacharacter so a stored ARN can never inject into a console deep link.
-const AWS_REGION_PATTERN = /^[a-z0-9-]{1,64}$/;
+export const AWS_REGION_PATTERN = /^[a-z0-9-]{1,64}$/;
 
 /**
  * A CloudFormation stack ARN: `arn:<partition>:cloudformation:<region>:<account>:stack/<name>/<id>`.

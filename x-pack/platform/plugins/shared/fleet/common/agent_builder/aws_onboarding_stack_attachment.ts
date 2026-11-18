@@ -7,6 +7,8 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+import { AWS_REGION_PATTERN } from '../services/cloud_connectors/iac_deployment';
+
 export const AWS_ONBOARDING_STACK_ATTACHMENT_TYPE = 'fleet_aws_onboarding_stack';
 
 export interface AwsOnboardingStackAttachmentData {
@@ -30,7 +32,8 @@ export const awsOnboardingStackAttachmentDataSchema = lazySchema(() =>
       execution_id: z.string(),
       stack_id: z.string(),
       stack_name: z.string(),
-      region: z.string(),
+      // The card builds the console link host from the region.
+      region: z.string().regex(AWS_REGION_PATTERN),
       action: z.enum(['create', 'update']),
       for_services: z.array(z.string()),
       adding: z.array(z.string()).optional(),

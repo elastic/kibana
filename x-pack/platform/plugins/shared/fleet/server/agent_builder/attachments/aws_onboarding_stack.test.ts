@@ -26,6 +26,12 @@ describe('aws onboarding stack attachment type', () => {
     });
   });
 
+  it('rejects a region that could change the console link host', () => {
+    expect(
+      createAwsOnboardingStackAttachmentType().validate({ ...data, region: 'evil.example.com/x' })
+    ).toMatchObject({ valid: false });
+  });
+
   it('rejects an extra key', () => {
     expect(
       createAwsOnboardingStackAttachmentType().validate({ ...data, role_arn: 'x' })

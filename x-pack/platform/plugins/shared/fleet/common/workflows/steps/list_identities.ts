@@ -31,7 +31,9 @@ export const awsOnboardingIdentitySchema = lazySchema(() =>
     created_at: z.string(),
     /** Whether the run can update the identity's CloudFormation stack. */
     updatable: z.boolean(),
-    not_updatable_reason: z.enum(['no_stack', 'other_region', 'not_managed_prefix']).optional(),
+    not_updatable_reason: z
+      .enum(['no_stack', 'other_account', 'other_region', 'not_managed_prefix'])
+      .optional(),
     /** What the identity's role serves today: every package policy attached to it. */
     covered_integrations: z.array(awsOnboardingIacIntegrationSchema),
     covered_policy_templates: z.array(z.string()),

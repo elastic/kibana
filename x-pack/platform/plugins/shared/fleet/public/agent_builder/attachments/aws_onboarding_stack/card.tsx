@@ -198,7 +198,12 @@ export const AwsOnboardingStackCard: React.FC<{ data: AwsOnboardingStackAttachme
     async () => {
       const { data: result, error } = await sendGetAwsOnboardingStack(stackId);
       if (error || !result) {
-        throw toRequestError(error, 'Failed to read the stack status');
+        throw toRequestError(
+          error,
+          i18n.translate('xpack.fleet.awsOnboardingStackCard.readStatusError', {
+            defaultMessage: 'Failed to read the stack status',
+          })
+        );
       }
       return result;
     },
