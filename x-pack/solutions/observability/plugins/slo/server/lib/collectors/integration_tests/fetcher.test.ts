@@ -231,7 +231,11 @@ describe('SLO usage collector fetcher', () => {
         namespaces: ['*'],
       });
       const realClose = finder.close.bind(finder);
-      finder.close = jest.fn().mockRejectedValue(new Error('close boom'));
+      // The finder closes itself when the iteration ends (first call); the fetcher's `finally` is the second
+      finder.close = jest
+        .fn()
+        .mockResolvedValueOnce(undefined)
+        .mockRejectedValue(new Error('close boom'));
       const createFinderSpy = jest
         .spyOn(compositeSoClient, 'createPointInTimeFinder')
         .mockReturnValue(finder);
