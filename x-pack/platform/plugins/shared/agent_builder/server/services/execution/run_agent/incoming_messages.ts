@@ -30,6 +30,7 @@ export const createIncomingMessages = ({
   conversationClient,
   conversationId,
   executionId,
+  timelineExecutionId,
   runOwnerId,
   logger,
 }: {
@@ -37,6 +38,8 @@ export const createIncomingMessages = ({
   conversationId: string;
   /** The lock holder; a document held by another execution stops delivery for this run. */
   executionId: string;
+  /** The timeline id this run writes under, which its steers are stamped with. */
+  timelineExecutionId: string;
   /** The actor id of the run owner, whose credentials the run reads with. */
   runOwnerId: string;
   logger: Logger;
@@ -68,7 +71,7 @@ export const createIncomingMessages = ({
         return [];
       }
 
-      const undelivered = steersToDeliver(conversation.events ?? [], executionId).filter(
+      const undelivered = steersToDeliver(conversation.events ?? [], timelineExecutionId).filter(
         (event) => !deliveredThisExecution.has(event.id)
       );
       const candidates = undelivered.slice(0, STEERS_PER_CHECK_MAX);

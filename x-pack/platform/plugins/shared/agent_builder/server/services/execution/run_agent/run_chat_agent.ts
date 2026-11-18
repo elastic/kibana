@@ -23,7 +23,6 @@ import {
   ChatEventType,
   AgentExecutionMode,
   EventActorType,
-  timelineExecutionId,
   unreadSettledSteerIds,
 } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
@@ -52,7 +51,10 @@ import type { PreviousRoundInfo } from './utils/context_management';
 import { createSummarizationTransformer } from './utils/tool_summarization';
 import { buildResumeAnchors, pausedItems, type PausedItem } from './utils/attachment_placement';
 import { sourceEvents } from '../../conversation/client/source_events';
-import { nextResumeIndex, userMessageActor } from '../../conversation/client/rounds_to_events';
+import {
+  runTimelineExecutionId,
+  userMessageActor,
+} from '../../conversation/client/rounds_to_events';
 import { createAgentGraph } from './graph';
 import {
   RunAttachmentEvents,
@@ -163,15 +165,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     resumeAnchors.set(triggerEventId, pausedItems(pendingTurn.terminated));
   }
   const agentIdForEvents = agentId ?? conversation?.agent_id ?? 'unknown';
-  // Use raw persisted executions: the model-context timeline folds multiple resumes into one.
-  // Legacy rounds cannot recover exact history, but a pending turn is at least the first resume.
-  const roundExecutionIndex = pendingTurn
-    ? Math.max(1, nextResumeIndex({ events: conversation?.events }, pendingTurn.id))
-    : 0;
-  // The timeline id of this execution, which every event written for it carries. A resume mints
-  // its own round id but is persisted to the paused round. `executionId` names the execution
-  // record and is never persisted on conversation events.
-  const roundExecutionId = timelineExecutionId(pendingTurn?.id ?? roundId, roundExecutionIndex);
+  // The timeline id of this execution, which every event written for it carries, computed as the
+  // lock was. A resume mints its own round id but is persisted to the paused round. `executionId`
+  // names the execution record and is never persisted on conversation events.
+  const roundExecutionId = runTimelineExecutionId({
+    events: conversation?.events,
+    pausedRoundId: pendingTurn?.id,
+    roundId,
+  });
 
   // Create background execution service from conversation state
   const backgroundExecutionService = new BackgroundExecutionService({
@@ -439,6 +440,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
             conversationClient,
             conversationId,
             executionId,
+            timelineExecutionId: roundExecutionId,
             runOwnerId: currentUserActor(conversationClient.getUser()).id,
             logger,
           })

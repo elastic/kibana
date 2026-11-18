@@ -53,28 +53,39 @@ export interface SteerStatus {
 
 export const analyzeSteers = (events: ReadonlyArray<ConversationEvent>): SteerStatus => {
   const status: SteerStatus = { read: new Set(), over: new Set(), paused: new Set() };
-  const pausedBy = new Map<string, string>();
+  /** The paused execution, by the id of its pause terminal, then by the id of the answer to it. */
+  const pausedByTerminal = new Map<string, string>();
+  const pausedByAnswer = new Map<string, string>();
   const resumedBy = new Map<string, string>();
   for (const event of events) {
+    if (event.type === TimelineEventType.promptResponse) {
+      // The answer carries no execution id; the resume's events point at it as their trigger.
+      const paused = pausedByTerminal.get(
+        (event as PromptResponseEvent).data.prompt_requested_event_id
+      );
+      if (paused) {
+        pausedByAnswer.set(event.id, paused);
+      }
+      continue;
+    }
     if (!event.execution_id) {
       continue;
+    }
+    const resumed = event.trigger_event_id ? pausedByAnswer.get(event.trigger_event_id) : undefined;
+    if (resumed && resumed !== event.execution_id) {
+      resumedBy.set(resumed, event.execution_id);
     }
     if (event.type === TimelineEventType.executionStep) {
       const { step } = (event as ExecutionStepEvent).data;
       if (isDeliveredMessageStep(step)) {
         status.read.add(step.event_id);
       }
-    } else if (event.type === TimelineEventType.promptResponse) {
-      const paused = pausedBy.get((event as PromptResponseEvent).data.prompt_requested_event_id);
-      if (paused) {
-        resumedBy.set(paused, event.execution_id);
-      }
     } else if (isExecutionTerminalEvent(event)) {
       if (
         event.type === TimelineEventType.executionTerminated &&
         event.data.outcome.type === 'prompt_requested'
       ) {
-        pausedBy.set(event.id, event.execution_id);
+        pausedByTerminal.set(event.id, event.execution_id);
         status.paused.add(event.execution_id);
       } else {
         status.over.add(event.execution_id);
@@ -129,9 +140,9 @@ export const pendingSteersFor = (
   pendingSteers(events).filter((event) => event.data.steer.execution_id === executionId);
 
 /**
- * Pending steers this execution reads: its own, and those of the paused executions it resumes. A
- * paused chain is the only one a conversation can hold while a run is live, so every paused
- * execution is in it.
+ * Pending steers this execution reads: its own, and those of the paused executions it resumes
+ * that they did not read before pausing. A paused chain is the only one a conversation can hold
+ * while a run is live, so every paused execution is in it.
  */
 export const steersToDeliver = (
   events: ReadonlyArray<ConversationEvent>,
@@ -139,6 +150,7 @@ export const steersToDeliver = (
   status: SteerStatus = analyzeSteers(events)
 ): SteerMessageEvent[] =>
   pendingSteers(events, status).filter(
-    ({ data: { steer } }) =>
-      steer.execution_id === executionId || status.paused.has(steer.execution_id)
+    ({ id, data: { steer } }) =>
+      !status.read.has(id) &&
+      (steer.execution_id === executionId || status.paused.has(steer.execution_id))
   );

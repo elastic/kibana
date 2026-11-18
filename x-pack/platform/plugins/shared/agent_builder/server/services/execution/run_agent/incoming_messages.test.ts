@@ -53,7 +53,7 @@ const terminal = (
 
 const document = (
   events: ConversationEvent[],
-  activeExecutionId: string | undefined = 'exec-1'
+  activeExecutionId: string | undefined = 'record-1'
 ): Conversation =>
   ({
     id: 'conv-1',
@@ -67,7 +67,8 @@ describe('createIncomingMessages', () => {
     const incoming = createIncomingMessages({
       conversationClient: client,
       conversationId: 'conv-1',
-      executionId: 'exec-1',
+      executionId: 'record-1',
+      timelineExecutionId: 'exec-1',
       runOwnerId: 'owner',
       logger: loggerMock.create(),
     });

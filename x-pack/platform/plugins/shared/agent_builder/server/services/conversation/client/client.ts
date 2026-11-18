@@ -904,7 +904,9 @@ class ConversationClientImpl implements ConversationClient {
           }
           // A live holder is checked first: a resume holds the lock while the stored events still
           // end in the pause it answers. The lock is free only while a round waits on a prompt.
-          const held = current.active_execution?.execution_id;
+          // The stamp is the holder's timeline id, the one its events carry, so settlement can
+          // join the two.
+          const held = current.active_execution?.timeline_execution_id;
           if (!held || isExecutionStale(current.execution)) {
             throw new SteerSignal({
               kind:

@@ -74,15 +74,25 @@ const terminal = (
       : { error: { code: 'x', message: 'x' } },
 });
 
-const promptResponse = (pausedExecutionId: string, resumeExecutionId: string): ConversationEvent =>
-  ({
-    id: `${resumeExecutionId}::prompt_response`,
+/** The stored answer carries no execution id; the resume's first event names it as its trigger. */
+const resume = (pausedExecutionId: string, resumeExecutionId: string): ConversationEvent[] => [
+  {
+    id: `${pausedExecutionId}::answer`,
     type: TimelineEventType.promptResponse,
-    execution_id: resumeExecutionId,
     created_at: '2026-01-01T00:00:30.000Z',
     actor,
-    data: { prompt_requested_event_id: `${pausedExecutionId}::terminal`, responses: [] },
-  } as unknown as ConversationEvent);
+    data: { prompt_requested_event_id: `${pausedExecutionId}::terminal`, responses: {} },
+  } as unknown as ConversationEvent,
+  {
+    id: `${resumeExecutionId}::started`,
+    type: TimelineEventType.executionStarted,
+    execution_id: resumeExecutionId,
+    trigger_event_id: `${pausedExecutionId}::answer`,
+    created_at: '2026-01-01T00:00:31.000Z',
+    actor,
+    data: { trigger_type: 'prompt_response' },
+  } as unknown as ConversationEvent,
+];
 
 describe('steering predicates', () => {
   it('settles the steers of a run that responded, read or not', () => {
@@ -130,9 +140,9 @@ describe('steering predicates', () => {
     const events = [
       userMessage('s1', '2026-01-01T00:00:01.000Z', { execution_id: 'e1' }),
       terminal('e1', TimelineEventType.executionTerminated, 'prompt_requested'),
-      promptResponse('e1', 'e2'),
+      ...resume('e1', 'e2'),
       terminal('e2', TimelineEventType.executionTerminated, 'prompt_requested'),
-      promptResponse('e2', 'e3'),
+      ...resume('e2', 'e3'),
       terminal('e3', TimelineEventType.executionFailed),
     ];
     const status = analyzeSteers(events);
@@ -159,6 +169,27 @@ describe('steering predicates', () => {
     ];
     expect(pendingSteers(events).map((e) => e.id)).toEqual(['s1', 's2']);
     expect(pendingSteersFor(events, 'e1').map((e) => e.id)).toEqual(['s1']);
+  });
+
+  it('keeps a paused chain open while its last resume runs', () => {
+    const events = [
+      userMessage('s1', '2026-01-01T00:00:01.000Z', { execution_id: 'e1' }),
+      terminal('e1', TimelineEventType.executionTerminated, 'prompt_requested'),
+      ...resume('e1', 'e2'),
+    ];
+    const status = analyzeSteers(events);
+    expect(status.paused).toEqual(new Set(['e1']));
+    expect(steersToDeliver(events, 'e2', status).map((e) => e.id)).toEqual(['s1']);
+  });
+
+  it('does not deliver again a steer the paused run read before pausing', () => {
+    const events = [
+      userMessage('read', '2026-01-01T00:00:01.000Z', { execution_id: 'e1' }),
+      userMessage('unread', '2026-01-01T00:00:02.000Z', { execution_id: 'e1' }),
+      deliveredStep('e1', 'read'),
+      terminal('e1', TimelineEventType.executionTerminated, 'prompt_requested'),
+    ];
+    expect(steersToDeliver(events, 'e2').map((e) => e.id)).toEqual(['unread']);
   });
 
   it('delivers to a run only its own steers and those of the pause it resumes', () => {

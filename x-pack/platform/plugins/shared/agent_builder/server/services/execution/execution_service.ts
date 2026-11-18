@@ -96,7 +96,7 @@ import {
   createConversationIdSetEvent,
   createConversationUpdatedEvent,
 } from './utils/events';
-import { userMessageActor } from '../conversation/client/rounds_to_events';
+import { runTimelineExecutionId, userMessageActor } from '../conversation/client/rounds_to_events';
 
 /** The still-recorded parent execution that spawned a sub-agent execution. */
 interface ParentExecution {
@@ -316,7 +316,15 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
     if (conversationParams && conversation && conversationParams.storeConversation !== false) {
       const pendingResumeRound = getPendingResumeRound(conversation);
-      const activeExecution: AcquireActiveExecution = { action: 'acquire', executionId };
+      const activeExecution: AcquireActiveExecution = {
+        action: 'acquire',
+        executionId,
+        timelineExecutionId: runTimelineExecutionId({
+          events: conversation.events,
+          pausedRoundId: pendingResumeRound?.id,
+          roundId,
+        }),
+      };
 
       try {
         if (pendingResumeRound) {

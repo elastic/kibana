@@ -59,6 +59,8 @@ export type ConversationCreateRequest = Omit<
 export interface AcquireActiveExecution {
   action: 'acquire';
   executionId: string;
+  /** The timeline id the execution writes its events under; steers sent to it are stamped with it. */
+  timelineExecutionId: string;
 }
 
 /** Clears the conversation's active execution when this execution still holds it. */

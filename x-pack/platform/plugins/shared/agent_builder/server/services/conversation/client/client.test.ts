@@ -4270,7 +4270,11 @@ describe('ConversationClient', () => {
         {
           source: 'execution',
           access: 'converse',
-          activeExecution: { action: 'acquire', executionId: 'e1' },
+          activeExecution: {
+            action: 'acquire',
+            executionId: 'e1',
+            timelineExecutionId: 'e1::execution',
+          },
         }
       );
 
@@ -4286,7 +4290,11 @@ describe('ConversationClient', () => {
         {
           source: 'http_api',
           access: 'converse',
-          activeExecution: { action: 'acquire', executionId: 'e1' },
+          activeExecution: {
+            action: 'acquire',
+            executionId: 'e1',
+            timelineExecutionId: 'e1::execution',
+          },
         }
       );
 
@@ -6118,7 +6126,12 @@ describe('ConversationClient', () => {
       data: { message: 'hello' },
     } as ConversationEvent;
 
-    const activeExecution = (executionId: string) => ({ execution_id: executionId });
+    // The lock names the record and the timeline id its events carry; steers are stamped with the latter.
+    const timelineOf = (executionId: string) => `${executionId}::execution`;
+    const activeExecution = (executionId: string) => ({
+      execution_id: executionId,
+      timeline_execution_id: timelineOf(executionId),
+    });
 
     const documentWithHolder = (
       executionId?: string,
@@ -6144,6 +6157,7 @@ describe('ConversationClient', () => {
     const setActiveExecution = (executionId: string) => ({
       action: 'acquire' as const,
       executionId,
+      timelineExecutionId: timelineOf(executionId),
     });
 
     const indexedSource = (call = 0) =>
@@ -6172,9 +6186,7 @@ describe('ConversationClient', () => {
       mockGetDocumentResponse(documentWithHolder());
       await appendSettingActiveExecution(setActiveExecution('e2'));
 
-      expect(indexedSource().active_execution).toEqual({
-        execution_id: 'e2',
-      });
+      expect(indexedSource().active_execution).toEqual(activeExecution('e2'));
     });
 
     it('appendEvents setting the active execution throws conversationBusy while a live one holds it', async () => {
@@ -6197,7 +6209,7 @@ describe('ConversationClient', () => {
 
       const result = await appendSettingActiveExecution(setActiveExecution('e2'));
 
-      expect(indexedSource().active_execution).toEqual({ execution_id: 'e2' });
+      expect(indexedSource().active_execution).toEqual(activeExecution('e2'));
       expect(indexedSource()).not.toHaveProperty('execution');
       expect(result).not.toHaveProperty('execution');
     });
@@ -6208,7 +6220,7 @@ describe('ConversationClient', () => {
 
       await appendSettingActiveExecution(setActiveExecution('e2'));
 
-      expect(indexedSource().active_execution).toEqual({ execution_id: 'e2' });
+      expect(indexedSource().active_execution).toEqual(activeExecution('e2'));
     });
 
     const documentWithPendingChild = (childIds: string[]): Document => {
@@ -6247,7 +6259,7 @@ describe('ConversationClient', () => {
       expect(indexedSource().state?.background_executions).toEqual({
         'child-2': { execution_id: 'child-2', status: ExecutionStatus.running },
       });
-      expect(indexedSource().active_execution).toEqual({ execution_id: 'e2' });
+      expect(indexedSource().active_execution).toEqual(activeExecution('e2'));
 
       mockGetDocumentResponse(documentWithPendingChild(['child-2']));
       const gone = await appendConsuming('child-1').catch((caught: unknown) => caught);
@@ -6271,7 +6283,7 @@ describe('ConversationClient', () => {
       expect(isConversationBusyError(busyWithoutRun)).toBe(true);
       staleHolder();
       await appendConsuming('child-1', false);
-      expect(indexedSource(1).active_execution).toEqual({ execution_id: 'e1' });
+      expect(indexedSource(1).active_execution).toEqual(activeExecution('e1'));
       expect(mockEsClient.index).toHaveBeenCalledTimes(2);
     });
 
@@ -6340,9 +6352,7 @@ describe('ConversationClient', () => {
       );
 
       const indexed = indexedSource();
-      expect(indexed.active_execution).toEqual({
-        execution_id: 'e2',
-      });
+      expect(indexed.active_execution).toEqual(activeExecution('e2'));
       expect(indexed).not.toHaveProperty('activeExecution');
       expect(result.active_execution).toMatchObject({ execution_id: 'e2' });
     });
@@ -6472,7 +6482,7 @@ describe('ConversationClient', () => {
         type: TimelineEventType.userMessage,
         created_at: '2026-10-26T10:00:05.000Z',
         actor,
-        data: { message: 'use a table', steer: { execution_id: 'e1' } },
+        data: { message: 'use a table', steer: { execution_id: timelineOf('e1') } },
       } as ConversationEvent;
 
       const appendSteer = () =>
@@ -6493,7 +6503,7 @@ describe('ConversationClient', () => {
             type: TimelineEventType.userMessage,
             created_at: expect.any(String),
             actor,
-            data: { message: 'use a table', steer: { execution_id: 'e1' } },
+            data: { message: 'use a table', steer: { execution_id: timelineOf('e1') } },
           },
           alreadyStored: false,
         });
@@ -6575,7 +6585,7 @@ describe('ConversationClient', () => {
         expect(result.alreadyStored).toBe(false);
         expect(result.event.data).toEqual({
           message: 'use a table',
-          steer: { execution_id: 'e2' },
+          steer: { execution_id: timelineOf('e2') },
         });
       });
 

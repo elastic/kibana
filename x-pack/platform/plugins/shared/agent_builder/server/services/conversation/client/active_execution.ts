@@ -36,8 +36,12 @@ export const isReleaseActiveExecution = (
   update?: ActiveExecutionUpdate
 ): update is ReleaseActiveExecution => update?.action === 'release';
 
-export const toActiveExecution = ({ executionId }: AcquireActiveExecution): ActiveExecution => ({
+export const toActiveExecution = ({
+  executionId,
+  timelineExecutionId,
+}: AcquireActiveExecution): ActiveExecution => ({
   execution_id: executionId,
+  timeline_execution_id: timelineExecutionId,
 });
 
 /** True when `update` would leave the stored active execution as it is, including no update. */

@@ -2814,7 +2814,11 @@ describe('AgentExecutionService', () => {
       await converse();
 
       const [{ executionId }] = mockExecutionClient.create.mock.calls[0];
-      expect(appendedActiveExecution()).toEqual({ action: 'acquire', executionId });
+      expect(appendedActiveExecution()).toEqual({
+        action: 'acquire',
+        executionId,
+        timelineExecutionId: expect.stringMatching(/::execution$/),
+      });
     });
 
     it('sets the active execution with an update without fields on a HITL resume', async () => {
@@ -2832,7 +2836,11 @@ describe('AgentExecutionService', () => {
           source: 'execution',
           access: 'converse',
           retryOnConflict: true,
-          activeExecution: { action: 'acquire', executionId },
+          activeExecution: {
+            action: 'acquire',
+            executionId,
+            timelineExecutionId: 'round-1::execution::1',
+          },
         }
       );
       expect(conversationClient.appendEvents).not.toHaveBeenCalled();

@@ -177,9 +177,10 @@ export interface UserMessageEventData {
   /** @deprecated Written before attachment events became the source of truth; read-only. */
   attachment_context?: string;
   /**
-   * Set only by the steer endpoint: the message was sent while `execution_id` held the
-   * conversation lock, for the running agent to read at its next check. The id is informational
-   * (telemetry, the per-run cap); a later execution claims a pending steer whatever id it carries.
+   * Set only by the steer endpoint: the message was sent while the execution with this timeline
+   * id (see `timelineExecutionId`) held the conversation lock, for that run, or the resume of its
+   * pause, to read at its next check. No other execution reads it; once that run is over the
+   * message is settled, read or not.
    */
   steer?: { execution_id: string };
 }
@@ -636,7 +637,10 @@ export type TimelineEventInput =
  * The run lock held on a conversation while an execution is active.
  */
 export interface ActiveExecution {
+  /** The execution record holding the lock; never written on events. */
   execution_id: string;
+  /** The timeline id the holder writes its events under (see `timelineExecutionId`); steers are stamped with it. */
+  timeline_execution_id?: string;
 }
 
 /**

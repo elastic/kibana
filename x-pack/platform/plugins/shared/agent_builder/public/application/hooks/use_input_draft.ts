@@ -99,7 +99,8 @@ export const useInputDraft = ({
         target.conversationId
       );
       if (getFromStorage(targetKey)) return;
-      writeToStorage(targetKey, content);
+      // The image data is not kept with the draft, so its link would restore a phantom placeholder.
+      writeToStorage(targetKey, content.replace(IMAGE_LINK_RE, ''));
     },
     [spaceId, sessionTag, username]
   );
