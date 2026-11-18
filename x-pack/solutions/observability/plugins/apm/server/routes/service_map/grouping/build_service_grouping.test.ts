@@ -5,34 +5,12 @@
  * 2.0.
  */
 
-import { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';
-import type { ServiceMapSpan, ServicesResponse } from '../../../../common/service_map/types';
 import type { ServiceCallGraph } from '../get_service_call_graph';
 import { buildServiceGrouping } from './build_service_grouping';
 import { SERVICE_GROUPING_MIN_SERVICES } from './constants';
 import { groupServicesByCalls } from './group_services_by_calls';
 import { syntheticEstate } from './test_helpers';
 import { compareNames } from './utils';
-
-function servicesData(names: readonly string[]): ServicesResponse[] {
-  return names.map((name) => ({
-    [SERVICE_NAME]: name,
-    [AGENT_NAME]: 'java',
-    [SERVICE_ENVIRONMENT]: null,
-  }));
-}
-
-function span(serviceName: string, destinationServiceName: string): ServiceMapSpan {
-  return {
-    serviceName,
-    agentName: 'java',
-    spanId: `${serviceName}-${destinationServiceName}`,
-    spanType: 'external',
-    spanSubtype: 'http',
-    spanDestinationServiceResource: `${destinationServiceName}:8080`,
-    destinationService: { serviceName: destinationServiceName, agentName: 'java' },
-  };
-}
 
 const names = (count: number) =>
   Array.from({ length: count }, (_, index) => `svc-${String(index).padStart(3, '0')}`);
@@ -43,35 +21,23 @@ describe('buildServiceGrouping', () => {
       buildServiceGrouping({
         callGraph: {},
         spans: [],
-        servicesData: servicesData(names(SERVICE_GROUPING_MIN_SERVICES - 1)),
+        services: names(SERVICE_GROUPING_MIN_SERVICES - 1),
       })
     ).toBeUndefined();
     expect(
       buildServiceGrouping({
         callGraph: {},
         spans: [],
-        servicesData: servicesData(names(SERVICE_GROUPING_MIN_SERVICES)),
+        services: names(SERVICE_GROUPING_MIN_SERVICES),
       })
     ).toBeDefined();
-  });
-
-  it('groups the services the map draws, from the services query and the sample of traces, sorted', () => {
-    const grouping = buildServiceGrouping({
-      callGraph: {},
-      spans: [span('from-sample', 'constructor')],
-      servicesData: servicesData(names(SERVICE_GROUPING_MIN_SERVICES - 2)),
-    });
-
-    expect(grouping?.services).toEqual(
-      [...names(SERVICE_GROUPING_MIN_SERVICES - 2), 'constructor', 'from-sample'].sort(compareNames)
-    );
   });
 
   it('puts every service in the not connected group when there are no calls between them', () => {
     const grouping = buildServiceGrouping({
       callGraph: {},
       spans: [],
-      servicesData: servicesData(names(SERVICE_GROUPING_MIN_SERVICES)),
+      services: names(SERVICE_GROUPING_MIN_SERVICES),
     });
 
     expect(grouping?.strategies).toEqual([
@@ -98,11 +64,10 @@ describe('buildServiceGrouping', () => {
     const grouping = buildServiceGrouping({
       callGraph,
       spans: [],
-      servicesData: servicesData(estate.services),
+      services,
     });
 
     expect(grouping).toEqual({
-      services,
       automatic: 'calls',
       strategies: [
         {

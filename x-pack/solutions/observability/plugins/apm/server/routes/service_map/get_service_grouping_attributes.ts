@@ -7,7 +7,7 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { ApmDocumentType } from '@kbn/apm-data-access-plugin/common';
-import { kqlQuery, rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { SavedServiceGroup } from '../../../common/service_groups';
 import {
@@ -20,11 +20,6 @@ import type { IEnvOptions } from './get_service_map';
 import type { ServiceStatsSource } from './get_enhanced_service_stats';
 import { extractEsQueryFilters } from './extract_es_query_filters';
 import { recordByService } from './record_by_service';
-
-/** Services per page. Each page holds two nested terms buckets per service. */
-const PAGE_SIZE = 1000;
-/** At most this many pages: 50,000 services. */
-const MAX_PAGES = 50;
 
 export interface ServiceGroupingSavedGroup {
   id: string;
@@ -41,14 +36,9 @@ export interface ServiceGroupingAttributeValues {
 export type ServiceGroupingAttributes = Record<string, ServiceGroupingAttributeValues>;
 
 interface ServiceAttributeBucket {
-  key: { service?: string | number | null };
+  key?: string | number | null;
   service_namespace?: { buckets?: Array<{ key?: string | number }> };
   kubernetes_namespace?: { buckets?: Array<{ key?: string | number }> };
-}
-
-interface ServiceAttributeAggregate {
-  buckets?: ServiceAttributeBucket[];
-  after_key?: Record<string, string | number | null>;
 }
 
 interface SavedGroupServicesBucket {
@@ -56,20 +46,19 @@ interface SavedGroupServicesBucket {
 }
 
 type GetServiceGroupingAttributesOptions = IEnvOptions & {
+  /** The services the map draws, from `getMapServices`. Labels are read for these only. */
+  services: readonly string[];
   maxNumberOfServices: number;
   /** Client-picked document type and rollup for the map when grouping is on. */
   source: ServiceStatsSource;
   /** Saved groups to match. Empty or omitted skips that lookup (also when already on a group map). */
-  savedServiceGroups?: SavedServiceGroup[];
+  savedServiceGroups?: readonly SavedServiceGroup[];
 };
 
 /**
- * Reads each service's `service.namespace` and Kubernetes namespace from transaction
- * events, and which saved service groups match it. Metric rollups do not carry the
- * namespace fields. One value per namespace field per service. A service with neither
- * namespace is still listed. Services are read in pages so a large estate does not pass
- * Elasticsearch's bucket limit. Saved groups use one filters aggregation on the
- * client-picked map data source.
+ * Reads the `service.namespace` and `kubernetes.namespace` of each service the map draws, and which
+ * saved service groups match it. Only drawn services are listed. A drawn service the namespace
+ * query does not find, and no saved group matches, has no labels.
  */
 export async function getServiceGroupingAttributes(
   options: GetServiceGroupingAttributesOptions
@@ -79,114 +68,75 @@ export async function getServiceGroupingAttributes(
     getSavedGroupMembership(options),
   ]);
 
-  // Merge saved groups onto namespace rows. New services from membership only are
-  // added while under maxNumberOfServices so the record stays within the map cap.
+  // Membership is not scoped to the drawn services, so members that are not on the map are dropped.
+  const drawn = new Set(options.services);
   for (const [serviceName, savedGroups] of savedGroupsByService) {
-    const current = namespaces.get(serviceName);
-    if (current) {
-      namespaces.set(serviceName, { ...current, savedGroups });
+    if (!drawn.has(serviceName)) {
       continue;
     }
-    if (namespaces.size >= options.maxNumberOfServices) {
-      continue;
-    }
-    namespaces.set(serviceName, { savedGroups });
+    namespaces.set(serviceName, { ...namespaces.get(serviceName), savedGroups });
   }
 
   return recordByService(namespaces);
 }
 
+/**
+ * Reads both namespaces of the given services from transaction events, as metric rollups do not
+ * carry them. One value per field per service. A service with neither namespace is still listed.
+ *
+ * The names stand in for the map's environment, search bar and filters, which already chose them.
+ * Applying those filters again would miss services the map's sample of traces adds. The map's own
+ * time range is kept rather than the call graph's day: every drawn service was seen in it, and a
+ * namespace does not change with the window. A service with no transaction events in the range,
+ * for example under tail-based sampling, is not found.
+ */
 async function getNamespaceAttributes({
-  environment,
   apmEventClient,
   start,
   end,
-  maxNumberOfServices,
-  serviceGroupKuery,
-  serviceName,
-  kuery,
-  esQuery,
-  logger,
+  services,
 }: GetServiceGroupingAttributesOptions): Promise<Map<string, ServiceGroupingAttributeValues>> {
-  const { filter: esQueryFilters, mustNot: esQueryMustNot } = extractEsQueryFilters(esQuery);
   const attributes = new Map<string, ServiceGroupingAttributeValues>();
-  let after: Record<string, string | number | null> | undefined;
-  let stoppedAtPageLimit = false;
-
-  for (let page = 0; page < MAX_PAGES; page++) {
-    const response = await apmEventClient.search(
-      'get_service_grouping_attributes_for_service_map',
-      {
-        apm: { events: [ProcessorEvent.transaction] },
-        track_total_hits: false,
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...rangeQuery(start, end),
-              ...environmentQuery(environment),
-              ...termsQuery(SERVICE_NAME, serviceName),
-              ...kqlQuery(serviceGroupKuery),
-              ...kqlQuery(kuery),
-              ...esQueryFilters,
-            ],
-            ...(esQueryMustNot.length > 0 ? { must_not: esQueryMustNot } : {}),
-          },
-        },
-        aggs: {
-          services: {
-            composite: {
-              size: PAGE_SIZE,
-              sources: [{ service: { terms: { field: SERVICE_NAME } } }],
-              ...(after ? { after } : {}),
-            },
-            aggs: {
-              service_namespace: { terms: { field: SERVICE_NAMESPACE, size: 1 } },
-              kubernetes_namespace: { terms: { field: KUBERNETES_NAMESPACE, size: 1 } },
-            },
-          },
-        },
-      }
-    );
-
-    const services = (response.aggregations as { services?: ServiceAttributeAggregate } | undefined)
-      ?.services;
-
-    for (const bucket of services?.buckets ?? []) {
-      if (attributes.size >= maxNumberOfServices) {
-        break;
-      }
-      const name = bucket.key.service;
-      if (name == null) {
-        continue;
-      }
-      const serviceNamespace = bucket.service_namespace?.buckets?.[0]?.key;
-      const kubernetesNamespace = bucket.kubernetes_namespace?.buckets?.[0]?.key;
-      attributes.set(String(name), {
-        ...(serviceNamespace != null ? { serviceNamespace: String(serviceNamespace) } : {}),
-        ...(kubernetesNamespace != null
-          ? { kubernetesNamespace: String(kubernetesNamespace) }
-          : {}),
-      });
-    }
-
-    if (attributes.size >= maxNumberOfServices) {
-      break;
-    }
-
-    const buckets = services?.buckets ?? [];
-    if (buckets.length < PAGE_SIZE || !services?.after_key) {
-      break;
-    }
-    if (page === MAX_PAGES - 1) {
-      stoppedAtPageLimit = true;
-      break;
-    }
-    after = services.after_key;
+  if (services.length === 0) {
+    return attributes;
   }
 
-  if (stoppedAtPageLimit) {
-    logger.debug(`Service grouping attributes stopped after ${MAX_PAGES} pages.`);
+  // Each service takes at most 3 buckets: its own, and one for each namespace it sets. Under
+  // Elasticsearch's default `search.max_buckets` of 65,536, that supports about 21,800 services.
+  const response = await apmEventClient.search('get_service_grouping_attributes_for_service_map', {
+    apm: { events: [ProcessorEvent.transaction] },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [...rangeQuery(start, end), { terms: { [SERVICE_NAME]: [...services] } }],
+      },
+    },
+    aggs: {
+      services: {
+        terms: { field: SERVICE_NAME, size: services.length },
+        aggs: {
+          service_namespace: { terms: { field: SERVICE_NAMESPACE, size: 1 } },
+          kubernetes_namespace: { terms: { field: KUBERNETES_NAMESPACE, size: 1 } },
+        },
+      },
+    },
+  });
+
+  const buckets =
+    (response.aggregations as { services?: { buckets?: ServiceAttributeBucket[] } } | undefined)
+      ?.services?.buckets ?? [];
+
+  for (const bucket of buckets) {
+    if (bucket.key == null) {
+      continue;
+    }
+    const serviceNamespace = bucket.service_namespace?.buckets?.[0]?.key;
+    const kubernetesNamespace = bucket.kubernetes_namespace?.buckets?.[0]?.key;
+    attributes.set(String(bucket.key), {
+      ...(serviceNamespace != null ? { serviceNamespace: String(serviceNamespace) } : {}),
+      ...(kubernetesNamespace != null ? { kubernetesNamespace: String(kubernetesNamespace) } : {}),
+    });
   }
 
   return attributes;
