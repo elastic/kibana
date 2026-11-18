@@ -9,7 +9,12 @@
 import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { inferenceTracingExportConfigSchema } from '@kbn/inference-tracing-config';
-import type { TracingConfig, TracingExporterConfig, OTLPExportConfig } from './types';
+import type {
+  TracingConfig,
+  TracingExporterConfig,
+  OTLPExportConfig,
+  BrowserTracingConfig,
+} from './types';
 
 const scheduledDelay = schema.conditional(
   schema.contextRef('dev'),
@@ -40,6 +45,14 @@ const tracingExportConfigSchema: Type<TracingExporterConfig> = schema.oneOf([
 /**
  * The tracing config schema that is exposed by the Telemetry plugin.
  */
+const browserTracingConfigSchema: Type<BrowserTracingConfig> = schema.object({
+  enabled: schema.boolean({ defaultValue: false }),
+  url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+  headers: schema.maybe(
+    schema.recordOf(schema.string({ maxLength: 256 }), schema.string({ maxLength: 4096 }))
+  ),
+});
+
 export const tracingConfigSchema: Type<TracingConfig> = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
   sample_rate: schema.number({ defaultValue: 1, min: 0, max: 1 }),
@@ -47,4 +60,5 @@ export const tracingConfigSchema: Type<TracingConfig> = schema.object({
     [tracingExportConfigSchema, schema.arrayOf(tracingExportConfigSchema, { maxSize: 25 })],
     { defaultValue: [] }
   ),
+  browser: browserTracingConfigSchema,
 });

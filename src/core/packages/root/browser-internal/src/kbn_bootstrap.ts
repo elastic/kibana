@@ -12,6 +12,7 @@ import type { InjectedMetadata } from '@kbn/core-injected-metadata-common-intern
 import { KBN_LOAD_MARKS } from './events';
 import { CoreSystem } from './core_system';
 import { ApmSystem } from './apm_system';
+import { EdotBrowserSystem } from './edot_browser_system';
 
 import { LOAD_BOOTSTRAP_START } from './events';
 
@@ -33,9 +34,16 @@ export async function __kbnBootstrap__() {
     injectedMetadata.basePath
   );
 
+  const edotBrowserSystem = new EdotBrowserSystem(
+    injectedMetadata.edotBrowserConfig,
+    injectedMetadata.version
+  );
+
   await Promise.all([
     // eslint-disable-next-line no-console
     apmSystem.setup().catch(console.warn),
+    // eslint-disable-next-line no-console
+    edotBrowserSystem.setup().catch(console.warn),
     i18n.getIsInitialized()
       ? Promise.resolve()
       : injectedMetadata.i18n.translationsUrl === null
