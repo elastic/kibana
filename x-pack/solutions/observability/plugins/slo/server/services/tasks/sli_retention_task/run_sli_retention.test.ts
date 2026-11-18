@@ -135,11 +135,13 @@ describe('runSliRetention', () => {
     [
       'list is truncated',
       () =>
-        esClient.transform.getTransform.mockResolvedValue({
-          ...transformsResponse(['.slo-observability.sli-v3.6']),
-          count: 10001,
-        }),
-      '1 of 10001',
+        esClient.transform.getTransform
+          .mockResolvedValueOnce({
+            ...transformsResponse(['.slo-observability.sli-v3.6']),
+            count: 3,
+          })
+          .mockResolvedValueOnce({ count: 3 } as TransformGetTransformResponse),
+      '1 of 3',
     ],
   ])('keeps old base indices when the transforms %s', async (_, arrange, warning) => {
     mockIndices([
@@ -152,6 +154,27 @@ describe('runSliRetention', () => {
 
     expect(deleted).toEqual(['.slo-observability.sli-v3.6.2026-01-02']);
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(warning));
+  });
+
+  it('lists the SLO transforms page by page', async () => {
+    mockIndices([['.slo-observability.sli-v3.5', '0']]);
+    esClient.transform.getTransform
+      .mockResolvedValueOnce({
+        ...transformsResponse(Array(1000).fill('.slo-observability.sli-v3.6')),
+        count: 1001,
+      })
+      .mockResolvedValueOnce({
+        ...transformsResponse(['.slo-observability.sli-v3.5']),
+        count: 1001,
+      });
+
+    await expect(run()).resolves.toEqual([]);
+    expect(
+      esClient.transform.getTransform.mock.calls.map(([params]) => [params?.from, params?.size])
+    ).toEqual([
+      [0, 1000],
+      [1000, 1000],
+    ]);
   });
 
   it('deletes an empty old base index when no SLO transform exists', async () => {

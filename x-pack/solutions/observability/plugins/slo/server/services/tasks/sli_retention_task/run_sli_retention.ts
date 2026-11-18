@@ -12,7 +12,8 @@ import { isAbortError } from '../../../utils/with_deadline';
 import { planSliRetention } from './plan_sli_retention';
 
 const DELETE_CHUNK_SIZE = 50;
-const TRANSFORMS_PAGE_SIZE = 10_000;
+// Maximum `size` accepted by the get transforms API.
+const TRANSFORMS_PAGE_SIZE = 1_000;
 
 interface Dependencies {
   esClient: ElasticsearchClient;
@@ -98,23 +99,35 @@ const fetchTransformDestIndices = async ({
   signal,
 }: Pick<Dependencies, 'esClient' | 'logger' | 'signal'>): Promise<Set<string> | undefined> => {
   try {
-    const { count, transforms = [] } = await esClient.transform.getTransform(
-      {
-        transform_id: 'slo-*',
-        size: TRANSFORMS_PAGE_SIZE,
-        allow_no_match: true,
-        // Only the destination indices are read: skip the multi-KB transform configs.
-        filter_path: 'count,transforms.dest.index',
-      },
-      { signal }
-    );
-    if (count > transforms.length) {
-      logger.warn(
-        `Listed ${transforms.length} of ${count} SLO transforms, keeping old SLI base indices`
+    const destIndices = new Set<string>();
+    let listed = 0;
+    let total = 0;
+    do {
+      const { count, transforms = [] } = await esClient.transform.getTransform(
+        {
+          transform_id: 'slo-*',
+          from: listed,
+          size: TRANSFORMS_PAGE_SIZE,
+          allow_no_match: true,
+          // Only the destination indices are read: skip the multi-KB transform configs.
+          filter_path: 'count,transforms.dest.index',
+        },
+        { signal }
       );
+      if (transforms.length === 0) {
+        total = count;
+        break;
+      }
+      transforms.forEach(({ dest }) => dest.index && destIndices.add(dest.index));
+      listed += transforms.length;
+      total = count;
+    } while (listed < total);
+
+    if (listed < total) {
+      logger.warn(`Listed ${listed} of ${total} SLO transforms, keeping old SLI base indices`);
       return undefined;
     }
-    return new Set(transforms.flatMap(({ dest }) => (dest.index ? [dest.index] : [])));
+    return destIndices;
   } catch (error) {
     if (isAbortError(error, signal)) {
       throw error;
