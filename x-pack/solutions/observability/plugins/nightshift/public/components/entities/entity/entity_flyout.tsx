@@ -165,7 +165,7 @@ export function EntityFlyout({
           id: feature.uuid,
           type: KI_FEATURE_ATTACHMENT_TYPE,
           origin: encodeFeatureAttachmentOrigin(feature.source_id, feature.id),
-          description: formatChatAttachmentDescription('Entity', title),
+          description: formatChatAttachmentDescription('entity', title),
           data: feature,
         },
       ],

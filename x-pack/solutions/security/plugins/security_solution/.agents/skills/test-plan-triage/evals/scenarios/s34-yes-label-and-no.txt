@@ -1,0 +1,17 @@
+(Context: earlier in this conversation the user asked whether elastic/kibana#910404 needs a test plan. You ran `context` and the `comment-no` dry run, and you showed this decision and stopped:
+
+**Issue:** [elastic/kibana#910404](https://github.com/elastic/kibana/issues/910404) — [Cases][Templates][Editor] Mark a custom field as required
+**Decision:** No — N4: one toggle with two acceptance criteria, a small part of the template editor
+**Hierarchy:** [elastic/security-team#910400](https://github.com/elastic/security-team/issues/910400) (umbrella) › [elastic/kibana#910401](https://github.com/elastic/kibana/issues/910401) › [elastic/kibana#910402](https://github.com/elastic/kibana/issues/910402) › [elastic/kibana#910403](https://github.com/elastic/kibana/issues/910403) › **[elastic/kibana#910404](https://github.com/elastic/kibana/issues/910404)**
+**Suggested level for a test plan:** [elastic/kibana#910401](https://github.com/elastic/kibana/issues/910401) — one functionality: case templates; its plan covers this issue
+**Proposed label changes:**
+- add `Needs Test Plan` to [elastic/kibana#910401](https://github.com/elastic/kibana/issues/910401)
+**Proposed comment:** on [elastic/kibana#910404](https://github.com/elastic/kibana/issues/910404)
+> **Test plan triage:** no test plan needed (N4: one toggle with two acceptance criteria, a small part of the template editor). Suggested level for a test plan: [elastic/kibana#910401](https://github.com/elastic/kibana/issues/910401).
+>
+> _Decided on 2026-11-13 with the `test-plan-triage` skill._
+
+Reply "yes" to apply the changes above, or tell me which ones to apply.)
+
+The user's new message is:
+go ahead with both

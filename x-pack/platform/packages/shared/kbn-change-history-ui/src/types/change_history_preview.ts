@@ -6,6 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
+import type { ChangeHistoryCompareMode } from './change_history_compare_mode';
 import type { ChangeHistoryCompareSpec } from './change_history_compare';
 import type { ChangeHistoryDiffTelemetry } from './change_history_diff_telemetry';
 import type { ChangeHistoryDetail } from './change_history_detail';
@@ -16,7 +17,7 @@ export type ChangeHistoryPreviewRenderFn<ExtendedProps extends object = {}> = (
     change: ChangeHistoryDetail;
     objectId: string;
     compareSpec?: ChangeHistoryCompareSpec;
-    isLoadingCompareContext?: boolean;
+    compareMode?: ChangeHistoryCompareMode; // the comparison the user asked for, if any
     diffTelemetry?: ChangeHistoryDiffTelemetry;
   } & ExtendedProps
 ) => ReactNode;

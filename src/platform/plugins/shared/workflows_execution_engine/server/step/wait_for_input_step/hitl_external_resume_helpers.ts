@@ -8,12 +8,12 @@
  */
 
 import { randomBytes } from 'node:crypto';
+import { computeTokenHmac } from '@kbn/crypto';
 import {
   HITL_TOKEN_EXPIRES_AT_INPUT_FIELD,
   HITL_TOKEN_HASH_INPUT_FIELD,
   readHitlExternalResumeToken,
 } from '@kbn/workflows';
-import { computeTokenHmac } from '@kbn/workflows/server';
 import { computeHitlWaitDeadlineMs } from './hitl_timeout_helpers';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
@@ -45,6 +45,7 @@ export function mintHitlExternalResumeToken({
   const expiresAt = new Date(deadlineMs).toISOString();
   return {
     token,
+    // Bind execution id, step id, and expiry so the stored hash cannot be retargeted or extended.
     tokenHash: computeTokenHmac(
       token,
       execution.id,

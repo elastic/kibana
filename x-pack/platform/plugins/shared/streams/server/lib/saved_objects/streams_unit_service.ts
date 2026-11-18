@@ -34,6 +34,10 @@ import type {
   ValidateUnitConfig,
 } from '../unit_config/types';
 import {
+  describeInvalidFixedIndex,
+  findInvalidFixedIndices,
+} from '../unit_config/fixed_index_names';
+import {
   credentialReferenceName,
   selectRemoteDestinationsToProbe,
 } from '../unit_config/remote_destinations_to_probe';
@@ -328,6 +332,14 @@ export class StreamsUnitService {
         `Streams unit references credentials that have no secret: ${unresolvedNames.join(', ')}`,
         400
       );
+    }
+
+    const invalidFixedIndices = findInvalidFixedIndices({
+      unit,
+      previousUnit: existingConfiguration?.attributes.unit,
+    });
+    if (invalidFixedIndices.length > 0) {
+      throw new StatusError(invalidFixedIndices.map(describeInvalidFixedIndex).join(' '), 400);
     }
 
     const remoteDestinationsUnverified = await this.checkRemoteDestinations({
