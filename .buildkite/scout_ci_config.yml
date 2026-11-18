@@ -13,6 +13,7 @@ plugins:
     - observability_onboarding
     - painless_lab
     - profiling
+    - security
     - security_solution
     - slo
     - spaces
