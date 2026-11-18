@@ -54,14 +54,25 @@ interface OperatorName {
   detail?: string;
 }
 
-/** The part of an operator in one driver that is needed to attribute it to a query. */
+/** One operator as it ran in one driver. */
 export interface AggregatedOperatorDriver {
-  /** Position of the driver in the profile. Drivers that belong together are listed together. */
+  /** Position of the driver in the profile. */
   driverIndex: number;
-  /** What the driver is for, such as data, final or subplan-0.final. */
-  description: string;
+  /** The node the driver ran on. Plan node ids only mean something together with it. */
+  nodeName?: string;
+  /** The id of the plan node the operator was built from, when ES reports it. */
+  planNodeId?: string;
   processNanos: number;
   timeReported: boolean;
+}
+
+/** Where in the query a plan node came from. */
+export interface PlanNodeSource {
+  /** Line and column of the command in the query, counting from 1. */
+  line: number;
+  column: number;
+  /** The command as ES saw it. */
+  text: string;
 }
 
 /** One kind of operator, summed over all the drivers it ran in. */
@@ -114,6 +125,8 @@ export interface QueryProfileView {
   driverCount: number;
   operators: AggregatedOperator[];
   plans: EsqlProfilePlan[];
+  /** The source of each plan node that has one, by `planNodeKey` of its node and id. */
+  planNodeSources: Record<string, PlanNodeSource>;
   /** True when at least one driver has a usable start and stop. */
   hasTimeline: boolean;
   timeline: QueryProfileTimeline;

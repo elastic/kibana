@@ -15,6 +15,10 @@ export interface QueryCommand {
   name: string;
   /** The command as written, from its name to its last token, without the comments around it. */
   text: string;
+  /** Where the command starts in the query, as an index into the query string. */
+  start: number;
+  /** Where the command ends in the query, as an index just past its last character. */
+  end: number;
   /**
    * The queries inside the parentheses of a FROM or FORK command, in the order they are written.
    * Each is a list of commands. Only one level is looked at.
@@ -29,6 +33,8 @@ const toQueryCommand = (query: string, command: ESQLAstCommand): QueryCommand =>
   name: command.name.toUpperCase(),
   // The parser's location includes its last character.
   text: query.slice(command.location.min, command.location.max + 1),
+  start: command.location.min,
+  end: command.location.max + 1,
 });
 
 /** The queries in parentheses of a command, such as the subqueries of a FROM. */

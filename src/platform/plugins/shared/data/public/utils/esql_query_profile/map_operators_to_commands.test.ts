@@ -11,238 +11,234 @@ import { aggregateEsqlProfile } from './aggregate_esql_profile';
 import { mapOperatorsToCommands } from './map_operators_to_commands';
 import { splitQueryCommands } from './query_commands';
 
-const operators = (list: Array<[string, Record<string, unknown>]>) =>
-  aggregateEsqlProfile({
+/** Where a piece of text is in a query, as ES reports the source of a plan node. */
+const sourceOf = (query: string, text: string, from = 0) => {
+  const lines = query.slice(0, query.indexOf(text, from)).split('\n');
+  return { line: lines.length, column: lines[lines.length - 1].length + 1, text, view: null };
+};
+
+const NO_SOURCE = { line: null, column: null, text: null, view: null };
+
+interface Step {
+  operator: string;
+  /** The plan node the operator was built from, and the text of the command that node came from. */
+  node?: {
+    id: string;
+    text?: string;
+    /** Look for the text from here, for a repeated one. */ from?: number;
+  };
+  nanos: number;
+}
+
+interface Options {
+  /** The query that ES planned, when it is not the one that is shown. */
+  plannedQuery?: string;
+  /** The node that planned the query, and the node that ran the drivers. */
+  planningNode?: string;
+  runningNode?: string;
+}
+
+/** Runs the whole path: a profile with plan nodes and operators, then the attribution to commands. */
+const heatOf = (
+  query: string,
+  steps: Step[],
+  { plannedQuery = query, planningNode = 'node-a', runningNode = 'node-a' }: Options = {}
+) => {
+  const view = aggregateEsqlProfile({
     drivers: [
       {
         description: 'data',
-        operators: list.map(([operator, status]) => ({ operator, status })),
+        node_name: runningNode,
+        operators: steps.map(({ operator, node, nanos }) => ({
+          operator,
+          plan_node_id: node?.id,
+          status: { process_nanos: nanos },
+        })),
       },
     ],
-  }).operators;
+    plans: [
+      {
+        description: 'data',
+        node_name: planningNode,
+        plan: 'plan',
+        plan_json: {
+          id: 'root',
+          source: NO_SOURCE,
+          children: steps.flatMap(({ node }) =>
+            node
+              ? [
+                  {
+                    id: node.id,
+                    source: node.text ? sourceOf(plannedQuery, node.text, node.from) : NO_SOURCE,
+                  },
+                ]
+              : []
+          ),
+        },
+      },
+    ],
+  });
+
+  return mapOperatorsToCommands({
+    query,
+    commands: splitQueryCommands(query),
+    operators: view.operators,
+    planNodeSources: view.planNodeSources,
+  });
+};
+
+const sharesByCommand = (heat: ReturnType<typeof heatOf>) =>
+  heat.commands.map(({ command, share }) => [command.text, Number(share.toFixed(2))]);
 
 describe('mapOperatorsToCommands', () => {
-  it('attributes each operator to the command it implements', () => {
-    const commands = splitQueryCommands(
-      'FROM logs | WHERE a > 1 | EVAL b = a * 2 | STATS c = COUNT(*) BY b | SORT c DESC | KEEP c'
-    );
-    const heat = mapOperatorsToCommands(
-      commands,
-      operators([
-        ['LuceneSourceOperator', { process_nanos: 50_000_000 }],
-        ['ValuesSourceReaderOperator[fields = [a]]', { process_nanos: 20_000_000 }],
-        ['FilterOperator', { process_nanos: 5_000_000 }],
-        ['EvalOperator', { process_nanos: 5_000_000 }],
-        ['HashAggregationOperator[mode=INITIAL]', { hash_nanos: 15_000_000 }],
-        ['TopNOperator', { receive_nanos: 3_000_000 }],
-        ['ProjectOperator', { process_nanos: 2_000_000 }],
-        ['ExchangeSinkOperator', {}],
-      ])
-    );
+  const QUERY = 'FROM logs\n| WHERE a > 1\n| STATS c = COUNT(*) BY a\n| SORT c DESC';
 
-    const byName = Object.fromEntries(heat.commands.map((entry) => [entry.command.name, entry]));
-    expect(byName.FROM.share).toBeCloseTo(0.7);
-    expect(byName.FROM.operators).toEqual(['LuceneSource', 'ValuesSourceReader']);
-    expect(byName.WHERE.share).toBeCloseTo(0.05);
-    expect(byName.STATS.share).toBeCloseTo(0.15);
-    expect(byName.SORT.share).toBeCloseTo(0.03);
-    expect(byName.KEEP.share).toBeCloseTo(0.02);
-    expect(heat.commands.every((entry) => !entry.isApproximate)).toBe(true);
-    expect(heat.unattributedShare).toBe(0);
-  });
-
-  it('shares the time of an operator between commands it could belong to', () => {
-    const commands = splitQueryCommands(
-      'FROM logs | STATS r = COUNT(*) BY a, b | STATS t = SUM(r) BY a | SORT t DESC'
-    );
-    const heat = mapOperatorsToCommands(
-      commands,
-      operators([
-        ['LuceneSourceOperator', { process_nanos: 10_000_000 }],
-        ['HashAggregationOperator[mode=INITIAL]', { hash_nanos: 60_000_000 }],
-        ['HashAggregationOperator[mode=FINAL]', { hash_nanos: 20_000_000 }],
-        ['TopNOperator', { receive_nanos: 10_000_000 }],
-      ])
-    );
-
-    const [, firstStats, secondStats, sort] = heat.commands;
-    expect(firstStats.share).toBeCloseTo(0.8);
-    expect(firstStats.isApproximate).toBe(true);
-    expect(secondStats.share).toBeCloseTo(0.8);
-    expect(secondStats.isApproximate).toBe(true);
-    expect(sort.share).toBeCloseTo(0.1);
-    expect(sort.isApproximate).toBe(false);
-  });
-
-  it('puts operators with no command, and operators that report no time, aside', () => {
-    const commands = splitQueryCommands('FROM logs | LIMIT 10');
-    const heat = mapOperatorsToCommands(
-      commands,
-      operators([
-        ['LuceneSourceOperator', { process_nanos: 8_000_000 }],
-        ['MvExpandOperator', { process_nanos: 2_000_000 }],
-        ['ExchangeSourceOperator', { rows_emitted: 10 }],
-      ])
-    );
-
-    expect(heat.unattributedShare).toBeCloseTo(0.2);
-    expect(heat.commands[1].share).toBe(0);
-  });
-
-  it('matches operators named after their command', () => {
-    const commands = splitQueryCommands('FROM logs | MV_EXPAND tags | DISSECT msg "%{a}"');
-    const heat = mapOperatorsToCommands(
-      commands,
-      operators([
-        ['MvExpandOperator', { process_nanos: 4_000_000 }],
-        ['DissectOperator', { process_nanos: 6_000_000 }],
-      ])
-    );
-
-    expect(heat.commands[1].share).toBeCloseTo(0.4);
-    expect(heat.commands[2].share).toBeCloseTo(0.6);
-  });
-
-  it('matches commands that the parser names with a space or a subtype, such as INLINE STATS', () => {
-    const commands = splitQueryCommands(
-      'FROM logs | INLINE STATS c = COUNT(*) BY a | LOOKUP JOIN idx ON a'
-    );
-    const heat = mapOperatorsToCommands(
-      commands,
-      operators([
-        ['HashAggregationOperator[mode=INITIAL]', { hash_nanos: 6_000_000 }],
-        ['StreamingLookupOperator[index=idx]', { process_nanos: 4_000_000 }],
-      ])
-    );
-
-    expect(heat.commands.map(({ command }) => command.name)).toEqual([
-      'FROM',
-      'INLINE STATS',
-      'JOIN',
+  it('gives each command the operators built from its plan nodes, and leaves out steps with no source', () => {
+    const heat = heatOf(QUERY, [
+      { operator: 'LuceneSourceOperator', node: { id: '1', text: 'FROM logs' }, nanos: 40 },
+      {
+        operator: 'ValuesSourceReaderOperator[fields = [a]]',
+        node: { id: '2', text: 'STATS c = COUNT(*) BY a' },
+        nanos: 20,
+      },
+      {
+        operator: 'HashAggregationOperator',
+        node: { id: '3', text: 'STATS c = COUNT(*) BY a' },
+        nanos: 20,
+      },
+      { operator: 'TopNOperator', node: { id: '4', text: 'SORT c DESC' }, nanos: 10 },
+      { operator: 'OutputOperator', node: { id: '5' }, nanos: 10 },
     ]);
-    expect(heat.commands[1].share).toBeCloseTo(0.6);
-    expect(heat.commands[2].share).toBeCloseTo(0.4);
+
+    expect(sharesByCommand(heat)).toEqual([
+      ['FROM logs', 0.4],
+      ['WHERE a > 1', 0],
+      ['STATS c = COUNT(*) BY a', 0.4],
+      ['SORT c DESC', 0.1],
+    ]);
+    expect(heat.commands[2].operators).toEqual(['ValuesSourceReader', 'HashAggregation']);
+    expect(heat.unattributedShare).toBeCloseTo(0.1);
+  });
+
+  it('tells apart two commands of the same kind by where they are in the query', () => {
+    const query = 'FROM logs | STATS r = COUNT(*) BY a, b | STATS t = SUM(r) BY a';
+    const heat = heatOf(query, [
+      {
+        operator: 'HashAggregationOperator',
+        node: { id: '1', text: 'STATS r = COUNT(*) BY a, b' },
+        nanos: 60,
+      },
+      {
+        operator: 'HashAggregationOperator',
+        node: { id: '2', text: 'STATS t = SUM(r) BY a' },
+        nanos: 40,
+      },
+    ]);
+
+    expect(sharesByCommand(heat)).toEqual([
+      ['FROM logs', 0],
+      ['STATS r = COUNT(*) BY a, b', 0.6],
+      ['STATS t = SUM(r) BY a', 0.4],
+    ]);
+  });
+
+  it('does not believe a position whose text is not what the query has there', () => {
+    const steps = [{ operator: 'LimitOperator', node: { id: '1', text: 'LIMIT 10' }, nanos: 50 }];
+
+    const planned = heatOf('FROM logs | LIMIT 10', steps);
+    const edited = heatOf('FROM logs | LIMIT 99', steps, { plannedQuery: 'FROM logs | LIMIT 10' });
+
+    expect(planned.commands[1].share).toBe(1);
+    expect(edited.commands[1].share).toBe(0);
+    expect(edited.unattributedShare).toBe(1);
+  });
+
+  it('counts a plan node id on its own node only', () => {
+    const steps = [{ operator: 'LimitOperator', node: { id: '1', text: 'LIMIT 10' }, nanos: 50 }];
+
+    const sameNode = heatOf('FROM logs | LIMIT 10', steps);
+    const otherNode = heatOf('FROM logs | LIMIT 10', steps, { runningNode: 'node-b' });
+
+    expect(sameNode.commands[1].share).toBe(1);
+    expect(otherNode.commands[1].share).toBe(0);
+  });
+
+  it('has nothing to attribute when the profile has no plan nodes, as with older Elasticsearch', () => {
+    const heat = heatOf(QUERY, [{ operator: 'LuceneSourceOperator', nanos: 40 }]);
+
+    expect(heat.commands.every(({ share }) => share === 0)).toBe(true);
+    expect(heat.unattributedShare).toBe(1);
   });
 
   it('returns zero shares when nothing reports a time', () => {
-    const heat = mapOperatorsToCommands(
-      splitQueryCommands('FROM logs'),
-      operators([['ExchangeSinkOperator', {}]])
-    );
+    const view = aggregateEsqlProfile({
+      drivers: [{ operators: [{ operator: 'LimitOperator', plan_node_id: '1', status: {} }] }],
+    });
+    const heat = mapOperatorsToCommands({
+      query: 'FROM logs | LIMIT 10',
+      commands: splitQueryCommands('FROM logs | LIMIT 10'),
+      operators: view.operators,
+      planNodeSources: {},
+    });
 
-    expect(heat.commands[0].share).toBe(0);
+    expect(heat.commands.every(({ share }) => share === 0)).toBe(true);
     expect(heat.unattributedShare).toBe(0);
   });
 });
 
 describe('mapOperatorsToCommands with subqueries', () => {
-  const query = [
-    'FROM',
-    '  (FROM logs | STATS requests = COUNT(*) BY clientip, os | STATS total = SUM(requests) BY os),',
-    '  (FROM logs | WHERE os == "ios" | STATS total = COUNT(*) BY os)',
-    '| SORT total DESC',
-  ].join('\n');
+  const FIRST = 'FROM logs | WHERE a > 1 | STATS c = COUNT(*) BY a';
+  const SECOND = 'FROM logs | STATS c = COUNT(*) BY a';
+  const MERGE = `(${FIRST}), (${SECOND})`;
+  const QUERY = `FROM ${MERGE}\n| SORT c DESC`;
 
-  const driver = (description: string, ops: Array<[string, Record<string, unknown>]>) => ({
-    description,
-    operators: ops.map(([operator, status]) => ({ operator, status })),
-  });
+  const heat = heatOf(QUERY, [
+    // The same command text appears in both subqueries, and only the position tells them apart.
+    {
+      operator: 'HashAggregationOperator',
+      node: { id: '1', text: 'STATS c = COUNT(*) BY a' },
+      nanos: 30,
+    },
+    {
+      operator: 'HashAggregationOperator',
+      node: { id: '2', text: 'STATS c = COUNT(*) BY a', from: QUERY.indexOf(SECOND) },
+      nanos: 50,
+    },
+    { operator: 'ExchangeSourceOperator', node: { id: '3', text: MERGE }, nanos: 5 },
+    { operator: 'TopNOperator', node: { id: '4', text: 'SORT c DESC' }, nanos: 15 },
+  ]);
 
-  // The order and the names of the drivers follow a real profile of a query like this one:
-  // the data drivers of a subquery come right before its final driver.
-  const labeled = aggregateEsqlProfile({
-    drivers: [
-      driver('data', [
-        ['LuceneSourceOperator', { process_nanos: 2_000_000 }],
-        ['ValuesSourceReaderOperator[fields = [os]]', { process_nanos: 1_000_000 }],
-        ['HashAggregationOperator[mode=INITIAL]', { hash_nanos: 1_000_000 }],
-      ]),
-      driver('subplan-1.final', [
-        ['ExchangeSourceOperator', {}],
-        ['HashAggregationOperator[mode=FINAL]', { hash_nanos: 1_000_000 }],
-      ]),
-      driver('data', [
-        ['LuceneSourceOperator', { process_nanos: 20_000_000 }],
-        ['ValuesSourceReaderOperator[fields = [clientip, os]]', { process_nanos: 60_000_000 }],
-        ['HashAggregationOperator[mode=INITIAL]', { hash_nanos: 10_000_000 }],
-      ]),
-      driver('subplan-0.final', [
-        ['HashAggregationOperator[mode=FINAL]', { hash_nanos: 4_000_000 }],
-        ['HashAggregationOperator[mode=SINGLE]', { hash_nanos: 1_000_000 }],
-      ]),
-      driver('main.final', [
-        ['ExchangeSourceOperator', {}],
-        ['TopNOperator', { receive_nanos: 1_000_000 }],
-      ]),
-    ],
-  }).operators;
-
-  it('gives the commands of each subquery the operators of that subquery', () => {
-    const heat = mapOperatorsToCommands(splitQueryCommands(query), labeled);
-
+  it('gives the commands of each subquery the operators built from them', () => {
     expect(heat.hasSubqueries).toBe(true);
-    expect(heat.commands.map(({ command, subquery }) => [command.name, subquery])).toEqual([
-      ['FROM', 0],
-      ['STATS', 0],
-      ['STATS', 0],
-      ['FROM', 1],
-      ['WHERE', 1],
-      ['STATS', 1],
-      ['SORT', undefined],
+    expect(
+      heat.commands.map(({ command, subquery, share }) => [
+        command.name,
+        subquery,
+        Number(share.toFixed(2)),
+      ])
+    ).toEqual([
+      ['FROM', 0, 0],
+      ['WHERE', 0, 0],
+      ['STATS', 0, 0.3],
+      ['FROM', 1, 0],
+      ['STATS', 1, 0.5],
+      ['FROM', undefined, 0.05],
+      ['SORT', undefined, 0.15],
+    ]);
+  });
+
+  it('leaves out the row of the FROM that holds the subqueries when it did no work of its own', () => {
+    const idle = heatOf(QUERY, [
+      { operator: 'TopNOperator', node: { id: '4', text: 'SORT c DESC' }, nanos: 15 },
     ]);
 
-    const [firstFrom, firstStats, secondStats, secondFrom, where, lastStats, sort] = heat.commands;
-    const total = 2 + 1 + 1 + 1 + 20 + 60 + 10 + 4 + 1 + 1;
-    // The first subquery reads two fields and the data comes from its own drivers.
-    expect(firstFrom.share).toBeCloseTo(80 / total);
-    // Two aggregations in one subquery cannot be told apart, so they share the time.
-    expect(firstStats.share).toBeCloseTo(15 / total);
-    expect(secondStats.share).toBeCloseTo(15 / total);
-    expect(firstStats.isApproximate).toBe(true);
-    // The second subquery has one aggregation, so its time is exact.
-    expect(secondFrom.share).toBeCloseTo(3 / total);
-    expect(where.share).toBe(0);
-    expect(lastStats.share).toBeCloseTo(2 / total);
-    expect(lastStats.isApproximate).toBe(false);
-    expect(sort.share).toBeCloseTo(1 / total);
-    expect(heat.unattributedShare).toBe(0);
-  });
-
-  it('treats every command as a candidate when the profile does not name the subplans', () => {
-    const unlabeled = aggregateEsqlProfile({
-      drivers: [
-        driver('data', [['LuceneSourceOperator', { process_nanos: 10_000_000 }]]),
-        driver('data', [['HashAggregationOperator[mode=INITIAL]', { hash_nanos: 6_000_000 }]]),
-        driver('final', [['TopNOperator', { receive_nanos: 4_000_000 }]]),
-      ],
-    }).operators;
-
-    const heat = mapOperatorsToCommands(splitQueryCommands(query), unlabeled);
-
-    // Without the names the time goes to the first source command, and to all aggregations.
-    expect(heat.commands[0].share).toBeCloseTo(0.5);
-    const aggregations = heat.commands.filter(({ command }) => command.name === 'STATS');
-    expect(aggregations.map(({ share }) => share)).toEqual([
-      expect.closeTo(0.3),
-      expect.closeTo(0.3),
-      expect.closeTo(0.3),
+    expect(idle.commands.map(({ command }) => command.name)).toEqual([
+      'FROM',
+      'WHERE',
+      'STATS',
+      'FROM',
+      'STATS',
+      'SORT',
     ]);
-    expect(heat.commands.at(-1)?.share).toBeCloseTo(0.2);
-  });
-
-  it('ignores the driver names for a query without subqueries', () => {
-    const plain = splitQueryCommands('FROM logs | STATS c = COUNT(*) BY a | SORT c DESC');
-    const heat = mapOperatorsToCommands(plain, labeled);
-
-    expect(heat.hasSubqueries).toBe(false);
-    expect(heat.commands.every(({ subquery }) => subquery === undefined)).toBe(true);
-  });
-
-  it('leaves out the time of a subquery that the query does not have', () => {
-    const single = splitQueryCommands('FROM (FROM logs | STATS c = COUNT(*) BY a) | SORT c DESC');
-    const heat = mapOperatorsToCommands(single, labeled);
-
-    // subplan-1 does not exist in this query, so its operators belong to nothing.
-    expect(heat.unattributedShare).toBeCloseTo(5 / 101);
   });
 });

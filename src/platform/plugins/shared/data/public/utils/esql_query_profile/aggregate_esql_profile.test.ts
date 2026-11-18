@@ -100,6 +100,7 @@ describe('aggregateEsqlProfile', () => {
       driverCount: 0,
       operators: [],
       plans: [],
+      planNodeSources: {},
       hasTimeline: false,
       timeline: { drivers: [] },
     });

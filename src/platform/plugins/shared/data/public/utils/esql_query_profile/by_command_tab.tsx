@@ -23,6 +23,14 @@ const MAX_COMMAND_LENGTH = 90;
 /** Time in steps that belong to no command is only mentioned when it is at least this share. */
 const MIN_UNATTRIBUTED_SHARE = 0.01;
 
+const heatOf = (view: QueryProfileView, query: string) =>
+  mapOperatorsToCommands({
+    query,
+    commands: splitQueryCommands(query),
+    operators: view.operators,
+    planNodeSources: view.planNodeSources,
+  });
+
 const oneLine = (text: string): string => text.replace(/\s+/g, ' ').trim();
 
 /** Whether the tab has anything to show for this query and profile. */
@@ -30,29 +38,27 @@ export const hasCommandBreakdown = (view: QueryProfileView, query: string | unde
   if (!query) {
     return false;
   }
-  const { commands } = mapOperatorsToCommands(splitQueryCommands(query), view.operators);
+  const { commands } = heatOf(view, query);
   return commands.some((entry) => entry.share > 0);
 };
 
 const CommandRow = ({ entry, isNested }: { entry: CommandHeat; isNested: boolean }) => {
   const { euiTheme } = useEuiTheme();
   const text = oneLine(entry.command.text);
-  const isPushedIntoRead = entry.command.name === 'WHERE' && entry.operators.length === 0;
   const color =
     entry.share >= HOT_SHARE
       ? euiTheme.colors.danger
       : entry.share >= WARM_SHARE
       ? euiTheme.colors.warning
       : euiTheme.colors.primary;
-  const share = `${entry.isApproximate ? '~' : ''}${formatShare(entry.share)}`;
+  const share = formatShare(entry.share);
   const note =
     entry.operators.length > 0
       ? entry.operators.join(', ')
-      : isPushedIntoRead
-      ? i18n.translate('data.inspector.queryProfile.pushedIntoReadNote', {
-          defaultMessage: 'No operator of its own. It was likely pushed into the search.',
-        })
-      : undefined;
+      : i18n.translate('data.inspector.queryProfile.noOperatorOfItsOwnNote', {
+          defaultMessage:
+            'No operator of its own. The planner may have merged it into another step, such as the search.',
+        });
   const { fontSize: small } = useEuiFontSize('xs');
 
   const styles = {
@@ -129,12 +135,9 @@ const GroupHeading = ({ subquery, isFirst }: { subquery?: number; isFirst: boole
   </>
 );
 
-/**
- * The query, one command per row, with the share of the operator CPU time that belongs to it.
- * Operators are matched to commands by type, so it is an approximation.
- */
+/** The query, one command per row, with the share of the operator CPU time that belongs to it. */
 export const ByCommandTab = ({ view, query }: { view: QueryProfileView; query: string }) => {
-  const heat = mapOperatorsToCommands(splitQueryCommands(query), view.operators);
+  const heat = heatOf(view, query);
 
   return (
     <div data-test-subj="esqlQueryProfileByCommand">
@@ -142,7 +145,7 @@ export const ByCommandTab = ({ view, query }: { view: QueryProfileView; query: s
         <p>
           <FormattedMessage
             id="data.inspector.queryProfile.byCommandDescription"
-            defaultMessage="CPU time matched to each command by operator type. This is approximate, because the planner rewrites queries. A ~ marks time shared between similar commands."
+            defaultMessage="CPU time of the operators that Elasticsearch built for each command. The planner can merge a command into another step, such as a filter into the search, so a command can show little time."
           />
         </p>
       </EuiText>

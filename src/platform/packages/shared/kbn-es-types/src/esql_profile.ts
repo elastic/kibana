@@ -20,14 +20,18 @@ type DeepPartial<T> = T extends ReadonlyArray<infer Item>
 /** What the schema describes, with every property optional. */
 type ProfileFromSchema = DeepPartial<FromSchema<typeof esqlProfileResponseSchema>>;
 
+type SchemaOperator = NonNullable<
+  NonNullable<ProfileFromSchema['drivers']>[number]['operators']
+>[number];
+
 /**
  * One operator inside an ES|QL profile driver. Its `status` fields depend on the kind of operator,
  * and the readers look at them by name, so they are not narrowed here.
  */
-interface EsqlProfileOperator {
+type EsqlProfileOperator = Omit<SchemaOperator, 'operator' | 'status'> & {
   operator: string;
   status?: Record<string, unknown>;
-}
+};
 
 /** One slice of ES|QL execution, usually one task on a node. */
 export type EsqlProfileDriver = Omit<

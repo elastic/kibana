@@ -31,6 +31,17 @@ describe('splitQueryCommands', () => {
     expect(commands[1].text).toBe('WHERE x == "a|b" AND y IN (1, 2)');
   });
 
+  it('tells where each command is in the query', () => {
+    const query = 'FROM a\n| WHERE b > 1 // c\n| LIMIT 5';
+    const commands = splitQueryCommands(query);
+
+    expect(commands.map(({ start, end }) => query.slice(start, end))).toEqual([
+      'FROM a',
+      'WHERE b > 1',
+      'LIMIT 5',
+    ]);
+  });
+
   it('has no commands for an empty query', () => {
     expect(splitQueryCommands('   ')).toEqual([]);
   });

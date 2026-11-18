@@ -21,6 +21,7 @@ import type {
 } from './types';
 import { PHASE_NANOS_FIELDS, PLANNING_PHASE_IDS, PROCESS_NANOS_FIELD } from './profile_schema';
 import { isRecord } from './json_helpers';
+import { readPlanNodeSources } from './plan_node_sources';
 
 interface OperatorAccumulator extends OperatorMeasures {
   operator: string;
@@ -66,6 +67,7 @@ export function aggregateEsqlProfile(profile: unknown): QueryProfileView {
     plans: (parsed?.plans ?? []).filter(
       (plan) => typeof plan.plan === 'string' && plan.plan.length > 0
     ),
+    planNodeSources: readPlanNodeSources(parsed?.plans ?? []),
     hasTimeline: timeline.drivers.length > 0,
     timeline,
   };
@@ -97,6 +99,7 @@ function readPlanningPhases(profile: EsqlQueryProfile | undefined): PlanningPhas
 /** What one operator of a driver reported, with its time and rows read out of its status. */
 interface OperatorReading extends OperatorMeasures {
   operator: string;
+  planNodeId?: string;
   rawStatus: Record<string, unknown>;
 }
 
@@ -111,6 +114,7 @@ function readOperatorReadings(driver: EsqlProfileDriver): OperatorReading[] {
     return [
       {
         operator: entry.operator,
+        planNodeId: entry.plan_node_id,
         processNanos: reportedNanos ?? 0,
         timeReported: reportedNanos !== undefined,
         rowsReceived: readFinite(status.rows_received) ?? 0,
@@ -150,7 +154,8 @@ function aggregateOperators(drivers: EsqlProfileDriver[]): AggregatedOperator[] 
       current.rowsEmitted += reading.rowsEmitted;
       current.drivers.push({
         driverIndex: index,
-        description: driver.description ?? '',
+        nodeName: driver.node_name,
+        planNodeId: reading.planNodeId,
         processNanos: reading.processNanos,
         timeReported: reading.timeReported,
       });
