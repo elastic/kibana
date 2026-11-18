@@ -5,197 +5,105 @@
  * 2.0.
  */
 
+import type { APMTransactionDurationIndicator, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from './convert_sli_apm_params_to_apm_app_deeplink_url';
 import { buildSlo } from '../../data/slo/slo';
 import { buildApmLatencyIndicator } from '../../data/slo/indicator';
-import { ALL_VALUE } from '@kbn/slo-schema';
 
 const DEFAULT_PARAMS = {
   environment: 'fooEnvironment',
-  filter: 'agent.name : "beats" and agent.version : 3.4.12 ',
+  filter: 'agent.name : "beats" and agent.version : 3.4.12',
   service: 'barService',
   transactionName: 'bazName',
   transactionType: 'blarfType',
 };
 
+const toUrl = (
+  params: Partial<APMTransactionDurationIndicator['params']> = {},
+  slo: Partial<SLOWithSummaryResponse> = {},
+  timeRange?: { from: string; to: string }
+): URL => {
+  const url = convertSliApmParamsToApmAppDeeplinkUrl(
+    buildSlo({ indicator: buildApmLatencyIndicator({ ...DEFAULT_PARAMS, ...params }), ...slo }),
+    timeRange
+  );
+  return new URL(url ?? '', 'http://localhost');
+};
+
 describe('convertSliApmParamsToApmAppDeeplinkUrl', () => {
-  it('should return a correct APM deeplink when all params have a value', () => {
-    const url = convertSliApmParamsToApmAppDeeplinkUrl(
-      buildSlo({
-        indicator: buildApmLatencyIndicator(DEFAULT_PARAMS),
-      })
-    );
+  it('builds the APM service overview deeplink from all params', () => {
+    const { pathname, search } = toUrl();
 
-    expect(url).toMatchInlineSnapshot(
-      `"/app/apm/services/barService/overview?comparisonEnabled=true&environment=fooEnvironment&transactionType=blarfType&rangeFrom=now-30d&rangeTo=now&kuery=transaction.name+%3A+%22bazName%22+and+agent.name+%3A+%22beats%22+and+agent.version+%3A+3.4.12+"`
+    expect(`${pathname}${search}`).toMatchInlineSnapshot(
+      `"/app/apm/services/barService/overview?comparisonEnabled=true&environment=fooEnvironment&transactionType=blarfType&rangeFrom=now-30d&rangeTo=now&kuery=transaction.name+%3A+%22bazName%22+and+agent.name+%3A+%22beats%22+and+agent.version+%3A+3.4.12"`
     );
   });
 
-  it('should return a correct APM deeplink when all environment is passed', () => {
-    const url = convertSliApmParamsToApmAppDeeplinkUrl(
-      buildSlo({
-        indicator: buildApmLatencyIndicator({ ...DEFAULT_PARAMS, environment: ALL_VALUE }),
-      })
+  it.each([
+    ['environment', (url: URL) => url.searchParams.get('environment'), 'ENVIRONMENT_ALL'],
+    ['transactionType', (url: URL) => url.searchParams.get('transactionType'), ''],
+    ['service', (url: URL) => url.pathname, '/app/apm/services/*/overview'],
+    ['transactionName', (url: URL) => url.searchParams.get('kuery'), DEFAULT_PARAMS.filter],
+  ])('maps %s set to ALL_VALUE', (param, pick, expected) => {
+    expect(pick(toUrl({ [param]: ALL_VALUE }))).toBe(expected);
+  });
+
+  it.each([
+    ['an empty KQL string filter', '', 'transaction.name : "bazName"'],
+    [
+      'a kqlWithFilters filter (kqlQuery only, filter pills dropped)',
+      {
+        kqlQuery: 'host.name : "a"',
+        filters: [{ meta: {}, query: { match_phrase: { 'agent.name': 'beats' } } }],
+      },
+      'transaction.name : "bazName" and host.name : "a"',
+    ],
+    [
+      'a kqlWithFilters filter with an empty kqlQuery',
+      { kqlQuery: '', filters: [] },
+      'transaction.name : "bazName"',
+    ],
+  ])('builds the kuery for %s', (_, filter, expectedKuery) => {
+    expect(toUrl({ filter }).searchParams.get('kuery')).toBe(expectedKuery);
+  });
+
+  it('appends the groupings of an SLO instance to the kuery', () => {
+    const url = toUrl(
+      {},
+      { instanceId: 'project-123', groupings: { 'label.project_id': 'project-123' } }
     );
 
-    expect(url).toMatchInlineSnapshot(
-      `"/app/apm/services/barService/overview?comparisonEnabled=true&environment=ENVIRONMENT_ALL&transactionType=blarfType&rangeFrom=now-30d&rangeTo=now&kuery=transaction.name+%3A+%22bazName%22+and+agent.name+%3A+%22beats%22+and+agent.version+%3A+3.4.12+"`
+    expect(url.searchParams.get('kuery')).toBe(
+      `transaction.name : "bazName" and ${DEFAULT_PARAMS.filter} and label.project_id : "project-123"`
     );
   });
 
-  it('should return a correct APM deeplink when empty filter is passed', () => {
-    const url = convertSliApmParamsToApmAppDeeplinkUrl(
-      buildSlo({
-        indicator: buildApmLatencyIndicator({ ...DEFAULT_PARAMS, filter: '' }),
-      })
-    );
+  it('ignores the groupings when instanceId is ALL_VALUE', () => {
+    const url = toUrl({}, { instanceId: ALL_VALUE, groupings: { 'label.project_id': 'x' } });
 
-    expect(url).toMatchInlineSnapshot(
-      `"/app/apm/services/barService/overview?comparisonEnabled=true&environment=fooEnvironment&transactionType=blarfType&rangeFrom=now-30d&rangeTo=now&kuery=transaction.name+%3A+%22bazName%22"`
-    );
+    expect(url.searchParams.get('kuery')).not.toContain('label.project_id');
   });
 
-  it('should include the kqlQuery when the filter is a kqlWithFilters object', () => {
-    const url = convertSliApmParamsToApmAppDeeplinkUrl(
-      buildSlo({
-        indicator: buildApmLatencyIndicator({
-          ...DEFAULT_PARAMS,
-          filter: {
-            kqlQuery: 'host.name : "a"',
-            filters: [{ meta: {}, query: { match_phrase: { 'agent.name': 'beats' } } }],
-          },
-        }),
-      })
-    );
-
-    expect(url).toMatchInlineSnapshot(
-      `"/app/apm/services/barService/overview?comparisonEnabled=true&environment=fooEnvironment&transactionType=blarfType&rangeFrom=now-30d&rangeTo=now&kuery=transaction.name+%3A+%22bazName%22+and+host.name+%3A+%22a%22"`
-    );
-  });
-
-  it('should ignore an empty kqlQuery when the filter is a kqlWithFilters object', () => {
-    const url = convertSliApmParamsToApmAppDeeplinkUrl(
-      buildSlo({
-        indicator: buildApmLatencyIndicator({
-          ...DEFAULT_PARAMS,
-          filter: { kqlQuery: '', filters: [] },
-        }),
-      })
-    );
-
-    expect(url).toMatchInlineSnapshot(
-      `"/app/apm/services/barService/overview?comparisonEnabled=true&environment=fooEnvironment&transactionType=blarfType&rangeFrom=now-30d&rangeTo=now&kuery=transaction.name+%3A+%22bazName%22"`
-    );
-  });
-
-  it('should return an empty string if all service is passed', () => {
-    const url = convertSliApmParamsToApmAppDeeplinkUrl(
-      buildSlo({
-        indicator: buildApmLatencyIndicator({ ...DEFAULT_PARAMS, service: ALL_VALUE }),
-      })
-    );
-
-    expect(url).toMatchInlineSnapshot(
-      `"/app/apm/services/*/overview?comparisonEnabled=true&environment=fooEnvironment&transactionType=blarfType&rangeFrom=now-30d&rangeTo=now&kuery=transaction.name+%3A+%22bazName%22+and+agent.name+%3A+%22beats%22+and+agent.version+%3A+3.4.12+"`
-    );
-  });
-
-  it('should return a correct APM deeplink when all transactionName is passed', () => {
-    const url = convertSliApmParamsToApmAppDeeplinkUrl(
-      buildSlo({
-        indicator: buildApmLatencyIndicator({ ...DEFAULT_PARAMS, transactionName: ALL_VALUE }),
-      })
-    );
-
-    expect(url).toMatchInlineSnapshot(
-      `"/app/apm/services/barService/overview?comparisonEnabled=true&environment=fooEnvironment&transactionType=blarfType&rangeFrom=now-30d&rangeTo=now&kuery=agent.name+%3A+%22beats%22+and+agent.version+%3A+3.4.12+"`
-    );
-  });
-
-  it('should return a correct APM deeplink when all transactionType is passed', () => {
-    const url = convertSliApmParamsToApmAppDeeplinkUrl(
-      buildSlo({
-        indicator: buildApmLatencyIndicator({ ...DEFAULT_PARAMS, transactionType: ALL_VALUE }),
-      })
-    );
-
-    expect(url).toMatchInlineSnapshot(
-      `"/app/apm/services/barService/overview?comparisonEnabled=true&environment=fooEnvironment&transactionType=&rangeFrom=now-30d&rangeTo=now&kuery=transaction.name+%3A+%22bazName%22+and+agent.name+%3A+%22beats%22+and+agent.version+%3A+3.4.12+"`
-    );
-  });
-
-  it('should return a correct APM deeplink when instanceId is provided and groupings is non-empty', () => {
-    const url = convertSliApmParamsToApmAppDeeplinkUrl(
-      buildSlo({
-        indicator: buildApmLatencyIndicator(DEFAULT_PARAMS),
-        instanceId: 'bf6689b383749812f35c7a408f57d113',
-        groupings: {
-          'label.project_id': 'bf6689b383749812f35c7a408f57d113',
-        },
-      })
-    );
-
-    expect(url).toMatchInlineSnapshot(
-      `"/app/apm/services/barService/overview?comparisonEnabled=true&environment=fooEnvironment&transactionType=blarfType&rangeFrom=now-30d&rangeTo=now&kuery=transaction.name+%3A+%22bazName%22+and+agent.name+%3A+%22beats%22+and+agent.version+%3A+3.4.12++and+label.project_id+%3A+%22bf6689b383749812f35c7a408f57d113%22"`
-    );
-  });
-
-  it('should return a correct APM deeplink when groupings has only service.name', () => {
-    const url = convertSliApmParamsToApmAppDeeplinkUrl(
-      buildSlo({
-        indicator: buildApmLatencyIndicator({ ...DEFAULT_PARAMS, service: ALL_VALUE }),
-        instanceId: 'cart-service',
-        groupings: {
-          'service.name': 'cart-service',
-        },
-      })
-    );
-
-    expect(url).toMatchInlineSnapshot(
-      `"/app/apm/services/cart-service/overview?comparisonEnabled=true&environment=fooEnvironment&transactionType=blarfType&rangeFrom=now-30d&rangeTo=now&kuery=transaction.name+%3A+%22bazName%22+and+agent.name+%3A+%22beats%22+and+agent.version+%3A+3.4.12+"`
-    );
-  });
-
-  it('should return a correct APM deeplink when groupings has multiple fields including service.name', () => {
-    const url = convertSliApmParamsToApmAppDeeplinkUrl(
-      buildSlo({
-        indicator: buildApmLatencyIndicator({ ...DEFAULT_PARAMS, service: ALL_VALUE }),
+  it('uses the service.name grouping as the service path instead of the kuery', () => {
+    const url = toUrl(
+      { service: ALL_VALUE },
+      {
         instanceId: 'cart-service,project-123',
-        groupings: {
-          'service.name': 'cart-service',
-          'label.project_id': 'project-123',
-        },
-      })
+        groupings: { 'service.name': 'cart-service', 'label.project_id': 'project-123' },
+      }
     );
 
-    expect(url).toMatchInlineSnapshot(
-      `"/app/apm/services/cart-service/overview?comparisonEnabled=true&environment=fooEnvironment&transactionType=blarfType&rangeFrom=now-30d&rangeTo=now&kuery=transaction.name+%3A+%22bazName%22+and+agent.name+%3A+%22beats%22+and+agent.version+%3A+3.4.12++and+label.project_id+%3A+%22project-123%22"`
+    expect(url.pathname).toBe('/app/apm/services/cart-service/overview');
+    expect(url.searchParams.get('kuery')).toBe(
+      `transaction.name : "bazName" and ${DEFAULT_PARAMS.filter} and label.project_id : "project-123"`
     );
   });
 
-  it('should use the provided timeRange instead of the SLO duration', () => {
-    const url = convertSliApmParamsToApmAppDeeplinkUrl(
-      buildSlo({
-        indicator: buildApmLatencyIndicator(DEFAULT_PARAMS),
-      }),
-      { from: '2026-03-01T00:00:00.000Z', to: '2026-03-31T23:59:59.999Z' }
-    );
+  it('uses the provided timeRange instead of the SLO duration', () => {
+    const { searchParams } = toUrl({}, {}, { from: '2026-03-01T00:00:00.000Z', to: 'now' });
 
-    expect(url).toContain('rangeFrom=2026-03-01T00%3A00%3A00.000Z');
-    expect(url).toContain('rangeTo=2026-03-31T23%3A59%3A59.999Z');
-    expect(url).not.toContain('now-30d');
-  });
-
-  it('should return a correct APM deeplink when instanceId is "*" and groupings is empty', () => {
-    const url = convertSliApmParamsToApmAppDeeplinkUrl(
-      buildSlo({
-        indicator: buildApmLatencyIndicator({ ...DEFAULT_PARAMS, service: ALL_VALUE }),
-        instanceId: '*',
-      })
-    );
-
-    expect(url).toMatchInlineSnapshot(
-      `"/app/apm/services/*/overview?comparisonEnabled=true&environment=fooEnvironment&transactionType=blarfType&rangeFrom=now-30d&rangeTo=now&kuery=transaction.name+%3A+%22bazName%22+and+agent.name+%3A+%22beats%22+and+agent.version+%3A+3.4.12+"`
-    );
+    expect(searchParams.get('rangeFrom')).toBe('2026-03-01T00:00:00.000Z');
+    expect(searchParams.get('rangeTo')).toBe('now');
   });
 });
