@@ -260,11 +260,25 @@ steps:
     with:
       drifted: '${{ steps.resolve_drift.output.read_ok == true and steps.resolve_drift.output.score_count > 0 and steps.resolve_drift.output.mean_score < consts.DRIFT_THRESHOLD }}'
 
+  # The KI read below must name the index that stores the KI. The AI index's
+  # dest is that index, whether createKi derived it or someone else created it.
+  - name: get_ai_index
+    type: kibana.request
+    if: '${{ steps.resolve_drifted.output.drifted == true }}'
+    timeout: '30s'
+    with:
+      method: GET
+      path: '/s/{{ workflow.spaceId }}/api/context_engine/ai_index/{{ consts.AI_INDEX_ID }}'
+      headers:
+        elastic-api-version: '2023-10-31'
+    on-failure:
+      continue: true
+
   # The content AESOP stored when it replaced the skill. A skill AESOP created
   # has none (nothing to roll back to), and a failed read skips the proposal.
   - name: get_prior_content
     type: kibana.request
-    if: '${{ steps.resolve_drifted.output.drifted == true }}'
+    if: '${{ steps.resolve_drifted.output.drifted == true and steps.get_ai_index.error == null and steps.get_ai_index.output.dest.value != blank }}'
     timeout: '30s'
     with:
       method: GET
@@ -272,6 +286,8 @@ steps:
       headers:
         elastic-api-version: '1'
         x-elastic-internal-origin: 'Kibana'
+      query:
+        index: '{{ steps.get_ai_index.output.dest.value }}'
     on-failure:
       continue: true
 
