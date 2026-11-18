@@ -205,8 +205,8 @@ apiTest.describe(
         expect(meta).toMatchObject({
           version: SLO_RESOURCES_VERSION,
           template_version: SLO_RESOURCES_VERSION,
-          routing: { after: 'M' },
         });
+        expect(meta?.routing?.segments?.at(-1)).toMatchObject({ rounding: 'M' });
       }
     );
 
