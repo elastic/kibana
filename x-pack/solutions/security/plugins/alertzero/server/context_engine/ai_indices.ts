@@ -13,8 +13,10 @@ export interface AlertZeroAiIndex {
   description: string;
   /**
    * Set when Context Engine has to scope the index's documents by space. AlertZero then installs
-   * an index template that maps `permissions.kibana.privileges` as `nested`, and refuses writes to
-   * the index until that template is installed.
+   * an index template that maps `permissions.kibana.privileges` as `nested`, and records a write
+   * gate that stays closed until that template is installed. The plugin does not block writes
+   * itself: the index's writer must check the gate, or it can auto-create the index from the base
+   * template before the nested one exists.
    */
   spaceScopedTemplate?: {
     /** Must never change once shipped. */
