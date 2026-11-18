@@ -38,6 +38,9 @@ export const toCaseAttachmentData = (theCase: Case, url?: string | null): CaseAt
   total_observables: theCase.total_observables ?? null,
   url: url ?? null,
   connector_name: theCase.connector?.name ?? null,
+  // Same count the UI sets on "Add to chat". Only known when the case was loaded with its
+  // comments (attachment write steps); otherwise `emitCaseAttachment` keeps the stored value.
+  ...(theCase.comments && { totalAttachments: theCase.comments.length }),
 });
 
 /**

@@ -215,6 +215,25 @@ describe('emitCaseAttachment', () => {
     });
   });
 
+  it('refreshes totalAttachments from the case comments after an attachment write step', async () => {
+    const attachments = buildRealManager();
+    const events = buildEvents();
+    await attachments.add({
+      type: CASE_ATTACHMENT_TYPE,
+      data: { ...toCaseAttachmentData(buildCase('c1')), totalAttachments: 3 },
+    });
+    const withFourComments = {
+      ...buildCase('c1'),
+      comments: [{ id: 'a' }, { id: 'b' }, { id: 'c' }, { id: 'd' }],
+    } as unknown as Case;
+
+    await emitFromStepResult({ attachments, events } as never, {
+      results: [{ data: { case: withFourComments } }],
+    });
+
+    expect(attachments.getActive()[0].versions[1].data).toMatchObject({ totalAttachments: 4 });
+  });
+
   it('lets a fresh totalAttachments override the stored one', async () => {
     const attachments = buildRealManager();
     await attachments.add({
@@ -372,6 +391,18 @@ describe('toCaseAttachmentData', () => {
     expect(data.title).toBe('Case abc');
     expect(data.status).toBe(CaseStatuses.open);
     expect(data.url).toBe('https://example.com/case/abc');
+  });
+
+  it('sets totalAttachments from comments only when the case includes them', () => {
+    const withComments = {
+      ...buildCase(),
+      comments: [{ id: 'a' }, { id: 'b' }],
+    } as unknown as Case;
+    const withEmptyComments = { ...buildCase(), comments: [] } as unknown as Case;
+
+    expect(toCaseAttachmentData(withComments).totalAttachments).toBe(2);
+    expect(toCaseAttachmentData(withEmptyComments).totalAttachments).toBe(0);
+    expect(toCaseAttachmentData(buildCase())).not.toHaveProperty('totalAttachments');
   });
 
   it('sets url to null when not provided', () => {
