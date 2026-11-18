@@ -741,6 +741,37 @@ describe('Both modes', () => {
 
         expect(mlHeader).toBeInTheDocument();
       });
+
+      /**
+       * GIVEN the "More" popover was opened by a click
+       * WHEN the navigation publishes a new primary item set
+       * THEN the popover stays open across the remeasure it triggers
+       */
+      it('should keep the popover open when the primary item set changes', async () => {
+        // Security mock has exactly 13 primary menu items
+        const { rerender } = render(<TestComponent items={securityMock.navItems} />);
+
+        const moreButton = await screen.findByTestId(moreMenuId);
+
+        await user.click(moreButton);
+
+        expect(screen.getByTestId(morePopoverId)).toBeInTheDocument();
+
+        const itemsWithLateDeepLink: NavigationStructure = {
+          ...securityMock.navItems,
+          primaryItems: [
+            ...securityMock.navItems.primaryItems,
+            { id: 'late-deep-link', label: 'Late deep link', href: '/late-deep-link' },
+          ],
+        };
+
+        await act(async () => {
+          rerender(<TestComponent items={itemsWithLateDeepLink} />);
+        });
+
+        expect(screen.getByTestId(moreMenuId)).toHaveAttribute('aria-expanded', 'true');
+        expect(screen.getByTestId(morePopoverId)).toBeInTheDocument();
+      });
     });
   });
 
