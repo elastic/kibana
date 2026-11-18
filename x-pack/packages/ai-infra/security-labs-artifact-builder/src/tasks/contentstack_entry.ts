@@ -9,60 +9,91 @@ import { load } from 'cheerio';
 import type { IndexedSecurityLabsDocument } from '../types';
 
 /**
- * Contentstack field UIDs read from each Security Labs entry. `title`, `url`, `created_at`
- * and `publish_details` are Contentstack system fields and are always present.
+ * Path prefix of every Security Labs page on elastic.co. Document slugs are relative to it
+ * (e.g. `blog/foo`, `threat-command/bar`) because Kibana builds citation links as
+ * `https://www.elastic.co/security-labs/{slug}`.
  */
-export const CONTENTSTACK_ENTRY_FIELDS = {
-  slug: 'slug',
-  date: 'date',
-  description: 'description',
-  authors: 'author',
-  categories: 'category',
-  body: 'body',
-} as const;
+export const SECURITY_LABS_PATH_PREFIX = '/security-labs/';
 
-/** Reference fields resolved via `include[]` so authors/categories carry their slugs. */
-export const CONTENTSTACK_REFERENCE_FIELDS: readonly string[] = [
-  CONTENTSTACK_ENTRY_FIELDS.authors,
-  CONTENTSTACK_ENTRY_FIELDS.categories,
+/** Contentstack content types that hold Security Labs articles. */
+export const SECURITY_LABS_CONTENT_TYPES: readonly string[] = [
+  'blog_v3',
+  'threat_command',
+  'reports',
 ];
 
-interface ContentstackPublishDetails {
-  time?: string;
+/**
+ * Entry queries that scope content types shared across the Elastic Labs sites to Security Labs.
+ * `blog_v3` also holds Search Labs and Observability Labs posts.
+ */
+export const CONTENTSTACK_CONTENT_TYPE_QUERIES: Readonly<Record<string, object>> = {
+  blog_v3: { blog_sources: { $in_query: { title: 'Security Labs' } } },
+};
+
+/** Reference fields resolved via `include[]` so authors/categories carry their titles and URLs. */
+export const CONTENTSTACK_REFERENCE_FIELDS: readonly string[] = ['author', 'categories'];
+
+interface ContentstackReference {
+  uid?: string;
+  title?: string;
+  url?: string | null;
+}
+
+interface JsonRteAttrs {
+  code?: string;
+  content?: string;
+  alt?: string;
+}
+
+export interface JsonRteNode {
+  type?: string;
+  text?: string;
+  attrs?: JsonRteAttrs;
+  children?: JsonRteNode[];
 }
 
 export interface ContentstackEntry {
   uid: string;
   title?: string;
+  title_l10n?: string;
   url?: string;
-  created_at?: string;
-  publish_details?: ContentstackPublishDetails | ContentstackPublishDetails[];
-  [field: string]: unknown;
+  date?: string;
+  summary_l10n?: string;
+  author?: ContentstackReference[];
+  categories?: ContentstackReference[];
+  main_content?: {
+    markdown_l10n?: string;
+    body?: { content_l10n?: JsonRteNode };
+  };
 }
 
-interface JsonRteNode {
-  type?: string;
-  text?: string;
-  children?: JsonRteNode[];
-}
-
-const HTML_BLOCK_ELEMENTS = 'p, h1, h2, h3, h4, h5, h6, li, pre, blockquote, tr, div';
-const HTML_TAG = /<\/?[a-z][^>]*>/i;
+const MARKDOWN_IMAGE = /!\[((?:[^[\]]|\[[^\]]*\])*)\](?:\([^)]*\)|\[[^\]]*\])/g;
+const CONTENTSTACK_ASSET_HOST = String.raw`https?://(?:images|assets)\.contentstack\.io/`;
+const ASSET_LINK = new RegExp(
+  String.raw`\[((?:[^[\]]|\[[^\]]*\])*)\]\(${CONTENTSTACK_ASSET_HOST}[^)]*\)`,
+  'g'
+);
+const ASSET_LINK_DEFINITION = new RegExp(
+  String.raw`^[ \t]*\[[^\]]+\]:[ \t]*${CONTENTSTACK_ASSET_HOST}.*$`,
+  'gm'
+);
+const HTML_EMBED = /<(iframe|video)\b[\s\S]*?<\/\1>|<img\b[^>]*>/gi;
+const HTML_LINE_BREAK = /<br\s*\/?>/gi;
+const HTML_FORMATTING_TAG = /<\/?(?:b|center|code|div|em|i|span|strong|sub|sup|u)\b[^>]*>/gi;
+const CODE_FENCE = /(^[ \t]*```[^`\n]*\n[\s\S]*?^[ \t]*```[ \t]*$)/m;
+const NON_BREAKING_SPACE = /\u00a0|&nbsp;/g;
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}/;
 const JSON_RTE_INLINE_TYPES = new Set(['a', 'span', 'inlineCode']);
+const JSON_RTE_HEADING = /^h([1-6])$/;
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
-
-const getString = (value: unknown): string | undefined => {
-  if (typeof value !== 'string') {
-    return undefined;
-  }
-  const trimmed = value.trim();
-  return trimmed === '' ? undefined : trimmed;
+const getString = (value: string | null | undefined): string | undefined => {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : undefined;
 };
 
 const collapseBlankLines = (text: string): string =>
   text
+    .replace(NON_BREAKING_SPACE, ' ')
     .split('\n')
     .map((line) => line.trimEnd())
     .join('\n')
@@ -72,68 +103,170 @@ const collapseBlankLines = (text: string): string =>
 const htmlToText = (html: string): string => {
   const $ = load(html);
   $('br').replaceWith('\n');
-  $(HTML_BLOCK_ELEMENTS).append('\n');
+  $('p, li, div').append('\n');
   return collapseBlankLines($.root().text());
 };
 
-const jsonRteToText = (node: JsonRteNode): string => {
+/**
+ * Removes image, asset, and embed markup from markdown prose (keeping image alt and link text)
+ * while leaving fenced code untouched. Asset URLs only add noise to the embedded text.
+ */
+export const cleanMarkdown = (markdown: string): string =>
+  collapseBlankLines(
+    markdown
+      .split(CODE_FENCE)
+      .map((part, index) =>
+        index % 2 === 1
+          ? part
+          : part
+              .replace(MARKDOWN_IMAGE, (_match, alt: string) => alt.trim())
+              .replace(ASSET_LINK, (_match, text: string) => text.trim())
+              .replace(ASSET_LINK_DEFINITION, '')
+              .replace(HTML_EMBED, '')
+              .replace(HTML_LINE_BREAK, ' ')
+              .replace(HTML_FORMATTING_TAG, '')
+      )
+      .join('')
+  );
+
+const renderInline = (node: JsonRteNode): string =>
+  typeof node.text === 'string' ? node.text : (node.children ?? []).map(renderInline).join('');
+
+const indent = (text: string, prefix: string): string =>
+  text
+    .split('\n')
+    .map((line, index) => (index === 0 ? line : `${' '.repeat(prefix.length)}${line}`))
+    .join('\n');
+
+const renderList = (node: JsonRteNode, ordered: boolean): string =>
+  (node.children ?? [])
+    .map((item, index) => {
+      const marker = ordered ? `${index + 1}. ` : '- ';
+      return `${marker}${indent(renderContainer(item, '\n'), marker)}`;
+    })
+    .join('\n');
+
+const renderTable = (node: JsonRteNode): string => {
+  const rows: string[] = [];
+  const collectRows = (current: JsonRteNode) => {
+    if (current.type === 'tr') {
+      const cells = (current.children ?? []).map((cell) =>
+        renderInline(cell).replace(/\s+/g, ' ').trim()
+      );
+      rows.push(`| ${cells.join(' | ')} |`);
+      return;
+    }
+    (current.children ?? []).forEach(collectRows);
+  };
+  collectRows(node);
+  return rows.join('\n');
+};
+
+function renderChildren(node: JsonRteNode, separator: string): string {
+  return (node.children ?? [])
+    .map(renderNode)
+    .filter((text) => text.trim() !== '')
+    .join(separator);
+}
+
+/** Renders block children on separate lines, or inline children as a single run of text. */
+function renderContainer(node: JsonRteNode, blockSeparator: string): string {
+  const hasBlockChildren = (node.children ?? []).some(
+    ({ type }) => type !== undefined && !JSON_RTE_INLINE_TYPES.has(type)
+  );
+  return hasBlockChildren ? renderChildren(node, blockSeparator) : renderInline(node);
+}
+
+function renderNode(node: JsonRteNode): string {
   if (typeof node.text === 'string') {
     return node.text;
   }
-  const inner = (node.children ?? []).map(jsonRteToText).join('');
-  return node.type && JSON_RTE_INLINE_TYPES.has(node.type) ? inner : `${inner}\n`;
-};
+
+  const type = node.type ?? '';
+  const heading = JSON_RTE_HEADING.exec(type);
+  if (heading) {
+    return `${'#'.repeat(Number(heading[1]))} ${renderInline(node).trim()}`;
+  }
+
+  switch (type) {
+    case 'p':
+      return renderInline(node);
+    case 'code':
+      return `\`\`\`\n${renderInline(node).replace(/\n+$/, '')}\n\`\`\``;
+    case 'esqlSnippet':
+      return `\`\`\`esql\n${(node.attrs?.code ?? '').trim()}\n\`\`\``;
+    case 'infoPanel':
+      return htmlToText(node.attrs?.content ?? '');
+    case 'blockquote':
+      return renderChildren(node, '\n\n')
+        .split('\n')
+        .map((line) => `> ${line}`)
+        .join('\n');
+    case 'ul':
+      return renderList(node, false);
+    case 'ol':
+      return renderList(node, true);
+    case 'table':
+      return renderTable(node);
+    case 'image':
+      return node.attrs?.alt?.trim() ?? '';
+    case 'video':
+      return '';
+    default:
+      return renderContainer(node, '\n\n');
+  }
+}
 
 /**
- * Converts an entry body to plain text for embedding. Supports Markdown strings, HTML
- * (rich text editor) strings, and JSON Rich Text Editor documents.
+ * Converts a JSON Rich Text Editor document to markdown-flavored text, so entries authored in
+ * the rich text editor embed the same way as entries authored in markdown.
  */
-export const getBodyText = (body: unknown): string | undefined => {
-  if (typeof body === 'string') {
-    const text = HTML_TAG.test(body) ? htmlToText(body) : collapseBlankLines(body);
-    return text === '' ? undefined : text;
+export const jsonRteToMarkdown = (doc: JsonRteNode): string => collapseBlankLines(renderNode(doc));
+
+const getBodyText = ({ main_content: mainContent }: ContentstackEntry): string | undefined => {
+  const markdown = getString(mainContent?.markdown_l10n);
+  if (markdown) {
+    return getString(cleanMarkdown(markdown));
   }
-  if (isRecord(body) && Array.isArray(body.children)) {
-    const text = collapseBlankLines(jsonRteToText(body as JsonRteNode));
-    return text === '' ? undefined : text;
-  }
-  return undefined;
+  const richText = mainContent?.body?.content_l10n;
+  return richText ? getString(jsonRteToMarkdown(richText)) : undefined;
 };
 
-const getSlug = (entry: ContentstackEntry): string | undefined =>
-  getString(entry[CONTENTSTACK_ENTRY_FIELDS.slug]) ??
-  getString(entry.url)?.split('/').filter(Boolean).pop();
-
-const getPublishTime = ({ publish_details: details }: ContentstackEntry): string | undefined =>
-  Array.isArray(details) ? getString(details[0]?.time) : getString(details?.time);
-
-const getReferenceNames = (value: unknown): string[] => {
-  if (!Array.isArray(value)) {
-    return [];
+const getSlug = ({ url }: ContentstackEntry): string | undefined => {
+  const path = getString(url);
+  if (!path?.startsWith(SECURITY_LABS_PATH_PREFIX)) {
+    return undefined;
   }
-  return value.flatMap((reference: unknown) => {
-    if (typeof reference === 'string') {
-      return [reference];
-    }
-    if (!isRecord(reference)) {
-      return [];
-    }
-    const name =
-      getString(reference.slug) ?? getString(reference.title) ?? getString(reference.uid);
+  return getString(path.slice(SECURITY_LABS_PATH_PREFIX.length).replace(/\/+$/, ''));
+};
+
+const getDate = ({ date }: ContentstackEntry): string | undefined => {
+  const value = getString(date);
+  return value && ISO_DATE.test(value) ? value.slice(0, 10) : value;
+};
+
+const getReferenceTitles = (references: ContentstackReference[] = []): string[] =>
+  references.flatMap(({ title }) => {
+    const name = getString(title);
     return name ? [name] : [];
   });
-};
+
+const getCategorySlugs = (references: ContentstackReference[] = []): string[] =>
+  references.flatMap(({ title, url }) => {
+    const slug = getString(url)?.split('/').filter(Boolean).pop() ?? getString(title);
+    return slug ? [slug] : [];
+  });
 
 /**
- * Maps a published Contentstack entry to the indexed document shape. Returns `null` for
- * entries missing a title, slug, or body so they can be logged and skipped.
+ * Maps a published Security Labs entry to the indexed document shape. Returns `null` for
+ * entries missing a title, a `/security-labs/` URL, or a body so they can be logged and skipped.
  */
 export const contentstackEntryToDocument = (
   entry: ContentstackEntry
 ): IndexedSecurityLabsDocument | null => {
-  const title = getString(entry.title);
+  const title = getString(entry.title_l10n) ?? getString(entry.title);
   const slug = getSlug(entry);
-  const content = getBodyText(entry[CONTENTSTACK_ENTRY_FIELDS.body]);
+  const content = getBodyText(entry);
 
   if (!title || !slug || !content) {
     return null;
@@ -142,14 +275,10 @@ export const contentstackEntryToDocument = (
   return {
     title,
     slug,
-    date:
-      getString(entry[CONTENTSTACK_ENTRY_FIELDS.date]) ??
-      getPublishTime(entry) ??
-      getString(entry.created_at) ??
-      new Date().toISOString(),
-    description: getString(entry[CONTENTSTACK_ENTRY_FIELDS.description]) ?? '',
-    authors: getReferenceNames(entry[CONTENTSTACK_ENTRY_FIELDS.authors]).join(', '),
-    categories: getReferenceNames(entry[CONTENTSTACK_ENTRY_FIELDS.categories]),
+    date: getDate(entry) ?? new Date().toISOString().slice(0, 10),
+    description: getString(entry.summary_l10n) ?? '',
+    authors: getReferenceTitles(entry.author).join(', '),
+    categories: getCategorySlugs(entry.categories),
     content,
     resource_type: 'security_labs',
   };

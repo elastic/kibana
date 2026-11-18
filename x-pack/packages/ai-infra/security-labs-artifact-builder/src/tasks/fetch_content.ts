@@ -10,7 +10,11 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { IndexedSecurityLabsDocument, TaskConfig } from '../types';
 import { parseMarkdownFiles } from './parse_markdown';
 import type { ContentstackEntry } from './contentstack_entry';
-import { CONTENTSTACK_REFERENCE_FIELDS, contentstackEntryToDocument } from './contentstack_entry';
+import {
+  CONTENTSTACK_CONTENT_TYPE_QUERIES,
+  CONTENTSTACK_REFERENCE_FIELDS,
+  contentstackEntryToDocument,
+} from './contentstack_entry';
 
 /** Maximum page size supported by the Contentstack Content Delivery API. */
 export const CONTENTSTACK_PAGE_SIZE = 100;
@@ -62,6 +66,10 @@ const fetchEntriesPage = async ({
   url.searchParams.set('limit', String(CONTENTSTACK_PAGE_SIZE));
   url.searchParams.set('skip', String(skip));
   url.searchParams.set('include_count', 'true');
+  const query = CONTENTSTACK_CONTENT_TYPE_QUERIES[contentType];
+  if (query) {
+    url.searchParams.set('query', JSON.stringify(query));
+  }
   for (const field of CONTENTSTACK_REFERENCE_FIELDS) {
     url.searchParams.append('include[]', field);
   }
@@ -203,7 +211,7 @@ export const fetchContent = async ({
       } else {
         skipped++;
         log.warning(
-          `Skipping Contentstack entry [${entry.uid}] of type [${contentType}] without a title, slug, or body`
+          `Skipping Contentstack entry [${entry.uid}] of type [${contentType}] without a title, Security Labs URL, or body`
         );
       }
     }

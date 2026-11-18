@@ -10,6 +10,7 @@ import yargs from 'yargs';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getSecurityLabsUtcTimestampVersion } from '@kbn/product-doc-common';
 import { DEFAULT_ELSER } from './tasks/create_index';
+import { SECURITY_LABS_CONTENT_TYPES } from './tasks/contentstack_entry';
 import type { TaskConfig } from './types';
 import { buildArtifact } from './build_artifact';
 
@@ -96,7 +97,9 @@ function options(y: yargs.Argv) {
       describe:
         'Comma-separated Contentstack content type UIDs whose published entries are indexed',
       string: true,
-      default: process.env.SECURITY_LABS_CONTENTSTACK_CONTENT_TYPES ?? '',
+      default:
+        process.env.SECURITY_LABS_CONTENTSTACK_CONTENT_TYPES ??
+        SECURITY_LABS_CONTENT_TYPES.join(','),
     })
     .option('localContentPath', {
       describe:
@@ -112,7 +115,7 @@ function options(y: yargs.Argv) {
     })
     .locale('en')
     .example(
-      'SECURITY_LABS_CONTENTSTACK_API_KEY=xxx SECURITY_LABS_CONTENTSTACK_DELIVERY_TOKEN=xxx $0 --contentstackContentTypes blog,report',
+      'SECURITY_LABS_CONTENTSTACK_API_KEY=xxx SECURITY_LABS_CONTENTSTACK_DELIVERY_TOKEN=xxx $0',
       'Build artifact from published Contentstack entries'
     )
     .example(

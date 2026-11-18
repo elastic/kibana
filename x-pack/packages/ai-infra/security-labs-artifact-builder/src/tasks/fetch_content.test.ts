@@ -26,16 +26,16 @@ const createConfig = (overrides: Partial<TaskConfig> = {}): TaskConfig => ({
   contentstackDeliveryToken: 'cs-delivery-token',
   contentstackEnvironment: 'production',
   contentstackLocale: 'en-us',
-  contentstackContentTypes: ['blog'],
+  contentstackContentTypes: ['threat_command'],
   inferenceId: '.elser-2-elasticsearch',
   ...overrides,
 });
 
 const createEntry = (index: number): ContentstackEntry => ({
   uid: `blt${index}`,
-  title: `Article ${index}`,
-  slug: `article-${index}`,
-  body: `Body ${index}`,
+  title_l10n: `Article ${index}`,
+  url: `/security-labs/threat-command/article-${index}`,
+  main_content: { markdown_l10n: `Body ${index}` },
 });
 
 const jsonResponse = (body: object, status = 200): Response =>
@@ -81,17 +81,29 @@ describe('fetchContent', () => {
 
     const documents = await fetchContent({ config: createConfig(), log });
 
-    expect(documents.map(({ slug }) => slug)).toEqual(['article-1']);
+    expect(documents.map(({ slug }) => slug)).toEqual(['threat-command/article-1']);
     expect(fetchMock).toHaveBeenCalledTimes(1);
 
     const [url, init] = fetchMock.mock.calls[0] as [URL, RequestInit];
     expect(url.origin).toBe('https://cdn.contentstack.io');
-    expect(url.pathname).toBe('/v3/content_types/blog/entries');
+    expect(url.pathname).toBe('/v3/content_types/threat_command/entries');
     expect(url.searchParams.get('environment')).toBe('production');
     expect(url.searchParams.get('locale')).toBe('en-us');
     expect(url.searchParams.get('include_count')).toBe('true');
-    expect(url.searchParams.getAll('include[]')).toEqual(['author', 'category']);
+    expect(url.searchParams.getAll('include[]')).toEqual(['author', 'categories']);
+    expect(url.searchParams.has('query')).toBe(false);
     expect(init.headers).toEqual({ api_key: 'blt-stack-key', access_token: 'cs-delivery-token' });
+  });
+
+  it('scopes the shared blog_v3 content type to Security Labs posts', async () => {
+    fetchMock.mockResolvedValueOnce(jsonResponse({ entries: [], count: 0 }));
+
+    await fetchContent({ config: createConfig({ contentstackContentTypes: ['blog_v3'] }), log });
+
+    const [url] = fetchMock.mock.calls[0] as [URL];
+    expect(JSON.parse(url.searchParams.get('query') ?? '')).toEqual({
+      blog_sources: { $in_query: { title: 'Security Labs' } },
+    });
   });
 
   it('pages through every entry of each content type', async () => {
@@ -109,7 +121,7 @@ describe('fetchContent', () => {
       .mockResolvedValueOnce(jsonResponse({ entries: [createEntry(500)], count: 1 }));
 
     const documents = await fetchContent({
-      config: createConfig({ contentstackContentTypes: ['blog', 'report'] }),
+      config: createConfig({ contentstackContentTypes: ['threat_command', 'reports'] }),
       log,
     });
 
@@ -119,20 +131,23 @@ describe('fetchContent', () => {
       return `${pathname}?skip=${searchParams.get('skip')}`;
     });
     expect(requested).toEqual([
-      '/v3/content_types/blog/entries?skip=0',
-      `/v3/content_types/blog/entries?skip=${CONTENTSTACK_PAGE_SIZE}`,
-      '/v3/content_types/report/entries?skip=0',
+      '/v3/content_types/threat_command/entries?skip=0',
+      `/v3/content_types/threat_command/entries?skip=${CONTENTSTACK_PAGE_SIZE}`,
+      '/v3/content_types/reports/entries?skip=0',
     ]);
   });
 
   it('skips entries that cannot be mapped to a document', async () => {
     fetchMock.mockResolvedValueOnce(
-      jsonResponse({ entries: [createEntry(1), { uid: 'blt-empty', title: 'No body' }], count: 2 })
+      jsonResponse({
+        entries: [createEntry(1), { uid: 'blt-empty', title_l10n: 'No body' }],
+        count: 2,
+      })
     );
 
     const documents = await fetchContent({ config: createConfig(), log });
 
-    expect(documents.map(({ slug }) => slug)).toEqual(['article-1']);
+    expect(documents.map(({ slug }) => slug)).toEqual(['threat-command/article-1']);
   });
 
   it('surfaces Contentstack API errors', async () => {
@@ -141,7 +156,7 @@ describe('fetchContent', () => {
     );
 
     await expect(fetchContent({ config: createConfig(), log })).rejects.toThrow(
-      'Contentstack request for content type [blog] failed with HTTP 412: The Delivery Token is invalid.'
+      'Contentstack request for content type [threat_command] failed with HTTP 412: The Delivery Token is invalid.'
     );
   });
 
@@ -166,7 +181,7 @@ describe('fetchContent', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it('does not send the delivery token to a non-Contentstack host', async () => {
+  it('does not send the credentials to a non-Contentstack host', async () => {
     await expect(
       fetchContent({ config: createConfig({ contentstackHost: 'example.com' }), log })
     ).rejects.toThrow(/Refusing to fetch/);

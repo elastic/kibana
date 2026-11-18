@@ -29,10 +29,12 @@ Security Labs articles are published from [Contentstack](https://www.contentstac
 ```bash
 SECURITY_LABS_CONTENTSTACK_API_KEY=blt_xxx \
 SECURITY_LABS_CONTENTSTACK_DELIVERY_TOKEN=cs_xxx \
-  node scripts/build_security_labs_artifact.js --contentstackContentTypes blog,report
+  node scripts/build_security_labs_artifact.js
 ```
 
-The fetch pages through the [Content Delivery API](https://www.contentstack.com/docs/developers/apis/content-delivery-api) for each content type, reading the published `--contentstackEnvironment` entries in `--contentstackLocale`. Entry bodies may be Markdown, HTML, or JSON Rich Text; all are converted to plain text before embedding.
+The fetch pages through the [Content Delivery API](https://www.contentstack.com/docs/developers/apis/content-delivery-api) for each content type (`blog_v3`, `threat_command`, and `reports` by default), reading the published `--contentstackEnvironment` entries in `--contentstackLocale`. `blog_v3` is shared with Search Labs and Observability Labs, so it is scoped to entries whose `blog_sources` reference is `Security Labs`.
+
+Older entries keep their body as Markdown (`main_content.markdown_l10n`) and newer ones as JSON Rich Text (`main_content.body.content_l10n`). Markdown is cleaned (images are replaced by their alt text, and Contentstack asset links and video embeds are removed, outside fenced code) and JSON Rich Text is rendered to the same Markdown-flavored text, so both embed alike.
 
 To build a Jina v5 variant (requires an EIS-backed `.jina-embeddings-v5-text-small` endpoint on the embedding cluster):
 
@@ -75,9 +77,9 @@ The inference endpoint used to generate the `semantic_text` embeddings. Recogniz
 
 ### `--contentstackContentTypes`
 
-Comma-separated Contentstack content type UIDs whose published entries are indexed. Required when `--localContentPath` is not set.
+Comma-separated Contentstack content type UIDs whose published entries are indexed. Entries of `blog_v3` are limited to Security Labs posts; entries whose URL is not under `/security-labs/` are skipped with a warning.
 
-**Default**: none
+**Default**: `blog_v3,threat_command,reports`
 
 ### `--contentstackDeliveryToken`
 
@@ -171,7 +173,7 @@ All CLI parameters can also be set via environment variables:
 | `KIBANA_EMBEDDING_CLUSTER_PASSWORD` | Embedding cluster password |
 | `SECURITY_LABS_VERSION` | Artifact version (`YYYY.MM.DD-HHMMSS` UTC) |
 | `SECURITY_LABS_CONTENT_PATH` | Path to local content |
-| `SECURITY_LABS_CONTENTSTACK_CONTENT_TYPES` | Comma-separated Contentstack content type UIDs to index |
+| `SECURITY_LABS_CONTENTSTACK_CONTENT_TYPES` | Comma-separated Contentstack content type UIDs to index (default `blog_v3,threat_command,reports`) |
 | `SECURITY_LABS_CONTENTSTACK_DELIVERY_TOKEN` | Read-only Contentstack delivery token |
 | `SECURITY_LABS_CONTENTSTACK_API_KEY` | Contentstack stack API key |
 | `SECURITY_LABS_CONTENTSTACK_ENVIRONMENT` | Contentstack publishing environment (default `production`) |
@@ -223,10 +225,10 @@ Each document in the NDJSON files contains:
 | Field | Type | Description |
 |-------|------|-------------|
 | `title` | text | Article title |
-| `slug` | keyword | URL-friendly identifier |
+| `slug` | keyword | Page path under `https://www.elastic.co/security-labs/` (e.g. `blog/foo`, `threat-command/bar`); Kibana builds citation links by appending it to that base URL. Local markdown builds use the frontmatter slug |
 | `date` | date | Publication date |
 | `description` | semantic_text | Article description (with ELSER embeddings) |
-| `authors` | text | Comma-separated author slugs |
+| `authors` | text | Comma-separated author names (author slugs for local markdown builds) |
 | `categories` | keyword[] | Category slugs |
 | `content` | semantic_text | Full article content (with ELSER embeddings) |
 | `resource_type` | keyword | Always `security_labs` |
