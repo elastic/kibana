@@ -113,6 +113,7 @@ import {
   ruleDisabledError,
   ruleRunningError,
   rotationFailedError,
+  ruleSnapshotFieldsSchema,
   toBulkError,
   bulkErrorCodeForStatus,
   transformCreateRuleBodyToRuleSoAttributes,
@@ -1974,6 +1975,7 @@ export class RulesClient {
       eventId: changeId,
     });
 
+    this.parseRuleData(ruleSnapshotFieldsSchema, snapshot, 'restore');
     const parsed = this.parseRuleData(putRuleDataSchema, toRestoreRuleData(snapshot), 'restore');
     this.artifactTypeRegistry.validate(parsed.artifacts);
 

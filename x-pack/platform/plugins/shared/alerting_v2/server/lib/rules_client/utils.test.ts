@@ -16,7 +16,6 @@ import {
   ROUTING_TAGS_SIGNAL_RULE_MESSAGE,
   ruleResponseSchema,
 } from '@kbn/alerting-v2-schemas';
-import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import { createRuleSoAttributes } from '../test_utils';
 import type { RotationCandidate } from './types';
 import {
@@ -33,6 +32,7 @@ import {
   ruleDisabledError,
   ruleRunningError,
   rotationFailedError,
+  ruleSnapshotFieldsSchema,
   toRestoreRuleData,
 } from './utils';
 
@@ -1459,18 +1459,33 @@ describe('toRestoreRuleData', () => {
     expect(result).not.toHaveProperty('grouping');
     expect(result).not.toHaveProperty('artifacts');
   });
+});
 
-  it('throws INVALID_RULE_DATA listing top-level fields the rule schema does not know', () => {
-    const snapshotWithFutureFields = { ...snapshot, future_field: true, other_field: 'x' };
+describe('ruleSnapshotFieldsSchema', () => {
+  it('accepts a snapshot with only rule response fields, whatever their values', () => {
+    const result = ruleSnapshotFieldsSchema.safeParse({
+      id: 'rule-1',
+      kind: 'alert',
+      enabled: true,
+      created_by: 'legacy-profile-uid',
+    });
 
-    expect(() => toRestoreRuleData(snapshotWithFutureFields)).toThrow(
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a snapshot with top-level fields the rule response schema does not know', () => {
+    const result = ruleSnapshotFieldsSchema.safeParse({
+      id: 'rule-1',
+      future_field: true,
+      other_field: 'x',
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.error?.issues).toEqual([
       expect.objectContaining({
-        output: expect.objectContaining({ statusCode: 400 }),
-        data: {
-          code: ALERTING_ERROR_CODES.INVALID_RULE_DATA,
-          details: { context: 'restore', unknown_fields: ['future_field', 'other_field'] },
-        },
-      })
-    );
+        code: 'unrecognized_keys',
+        keys: ['future_field', 'other_field'],
+      }),
+    ]);
   });
 });

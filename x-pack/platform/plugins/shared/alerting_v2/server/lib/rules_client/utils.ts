@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { isEqual, pick } from 'lodash';
+import { isEqual, mapValues, pick } from 'lodash';
 import type {
   CreateRuleData,
   CreateRuleDataInput,
@@ -15,7 +15,7 @@ import type {
   RuleResponse,
   UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
-import { treeifyError } from '@kbn/zod/v4';
+import { lazySchema, treeifyError, z } from '@kbn/zod/v4';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import {
   createRuleDataBaseSchema,
@@ -504,23 +504,13 @@ export function transformRuleSoAttributesToRuleApiResponse(
 }
 
 /** Returns the configuration part of a change-history snapshot, shaped as a PUT rule body. */
-export const toRestoreRuleData = (snapshot: RuleChangeHistorySnapshot): PutRuleData => {
-  // A field this version does not know would otherwise be dropped from the restored rule.
-  const knownFields = new Set<string>(ruleResponseSchema.keyof().options);
-  const unknownFields = Object.keys(snapshot).filter((field) => !knownFields.has(field));
+export const toRestoreRuleData = (snapshot: RuleChangeHistorySnapshot): PutRuleData =>
+  pick(snapshot, putRuleDataSchema.keyof().options);
 
-  if (unknownFields.length > 0) {
-    throw Boom.badRequest(
-      getInvalidRuleDataMessage(
-        'restore',
-        `Unrecognized keys: ${unknownFields.map((field) => `"${field}"`).join(', ')}`
-      ),
-      {
-        code: ALERTING_ERROR_CODES.INVALID_RULE_DATA,
-        details: { context: 'restore', unknown_fields: unknownFields },
-      }
-    );
-  }
-
-  return pick(snapshot, putRuleDataSchema.keyof().options);
-};
+/**
+ * Rejects a change-history snapshot with a top-level field that is not a rule response field,
+ * which a restore would otherwise drop. Field values are not checked.
+ */
+export const ruleSnapshotFieldsSchema = lazySchema(() =>
+  z.strictObject(mapValues(ruleResponseSchema.shape, () => z.unknown().optional()))
+);
