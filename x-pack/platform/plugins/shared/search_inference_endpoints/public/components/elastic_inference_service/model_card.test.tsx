@@ -19,7 +19,7 @@ describe('ModelCard', () => {
     modelCreator: 'OpenAI',
     modelStatus: EisModelStatus.GA,
     taskTypes: ['text_embedding', 'chat_completion'],
-    categories: ['Embedding', 'LLM'],
+    categories: ['Embedding', 'Generative'],
     endpoints: [],
   };
 
@@ -32,7 +32,7 @@ describe('ModelCard', () => {
     expect(getByTestId('eisModelCardProvider-my-model')).toHaveTextContent('OpenAI');
     expect(getByTestId('eisModelCardName-my-model')).toHaveTextContent('my-model');
     expect(getByTestId('eisModelCardCategory-my-model-Embedding')).toBeInTheDocument();
-    expect(getByTestId('eisModelCardCategory-my-model-LLM')).toBeInTheDocument();
+    expect(getByTestId('eisModelCardCategory-my-model-Generative')).toHaveTextContent('Generative');
     expect(getByTestId('eisModelCardProviderIcon-my-model')).toBeInTheDocument();
     expect(queryByTestId('eisModelCardMeta-my-model')).not.toBeInTheDocument();
   });

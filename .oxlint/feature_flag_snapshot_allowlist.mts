@@ -48,7 +48,6 @@ export const featureFlagSnapshotAllowlist: readonly string[] = [
   'x-pack/solutions/observability/plugins/nightshift_investigations/server/sandbox_secrets/sandbox_secrets_client.ts',
   'x-pack/solutions/observability/plugins/nightshift_investigations/server/tools/sandbox_bash/sandbox_tool_availability.ts',
   'x-pack/solutions/observability/plugins/significant_events/server/lib/feature_flags/is_significant_events_feature_flag_enabled.ts',
-  'x-pack/solutions/observability/plugins/significant_events/server/lib/semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled.ts',
   'x-pack/solutions/observability/plugins/slo/server/utils/is_composite_slo_enabled.ts',
   'x-pack/solutions/observability/plugins/synthetics/public/plugin.ts',
   'x-pack/solutions/security/packages/kbn-discoveries/impl/lib/helpers/is_workflows_enabled/index.ts',

@@ -5,35 +5,52 @@
  * 2.0.
  */
 
+import type { NotificationsStart } from '@kbn/core/public';
 import { attachmentDataToDashboardState } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
-import type { DashboardApi, DashboardRendererProps } from '@kbn/dashboard-plugin/public';
+import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { previewAttachmentInDashboard } from './dashboard_integration/preview_attachment';
+import {
+  toDashboardLocatorParams,
+  type DashboardLocator,
+} from './dashboard_integration/open_in_dashboard_app';
+import { APPLY_AGENT_CHANGES_ERROR_TITLE } from './dashboard_integration/apply_agent_changes';
 import { handleEditInDashboard } from './handle_edit_in_dashboard';
 
-export const handlePreview = async ({
+interface HandlePreviewParams {
+  attachment: DashboardAttachment;
+  dashboardApi?: DashboardApi;
+  canWriteDashboards: boolean;
+  isSidebar: boolean;
+  dashboardLocator?: DashboardLocator;
+  toasts: NotificationsStart['toasts'];
+  checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
+  openCanvas?: () => void;
+}
+
+/** Previews the attachment, showing an error toast when it can't be opened. */
+export const handlePreview = (params: HandlePreviewParams): Promise<void> =>
+  openPreview(params).catch((error: Error) => {
+    params.toasts.addError(error, { title: APPLY_AGENT_CHANGES_ERROR_TITLE });
+  });
+
+const openPreview = async ({
   attachment,
   dashboardApi,
   canWriteDashboards,
   isSidebar,
   dashboardLocator,
+  toasts,
   checkSavedDashboardExist,
   openCanvas,
-}: {
-  attachment: DashboardAttachment;
-  dashboardApi?: DashboardApi;
-  canWriteDashboards: boolean;
-  isSidebar: boolean;
-  dashboardLocator?: DashboardRendererProps['locator'];
-  checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
-  openCanvas?: () => void;
-}) => {
+}: HandlePreviewParams): Promise<void> => {
   // sidebar in dashboard experience - synchronize dashboard app to attachment
   if (dashboardApi && canWriteDashboards) {
     return previewAttachmentInDashboard({
       attachment,
       dashboardApi,
       dashboardLocator,
+      toasts,
       checkSavedDashboardExist,
     });
   }
@@ -51,10 +68,7 @@ export const handlePreview = async ({
         const exists = await checkSavedDashboardExist(attachment.origin);
         return exists ? attachment.origin : undefined;
       },
-      dashboardLocatorParams: {
-        ...dashboardState,
-        viewMode: 'edit',
-      },
+      dashboardLocatorParams: toDashboardLocatorParams(dashboardState),
     });
   }
 

@@ -11,6 +11,7 @@ import type SuperTest from 'supertest';
 import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/common';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { routeWithNamespace } from '@kbn/detections-response-ftr-services';
+import { RISK_ENGINE_CLEANUP_URL } from '@kbn/security-solution-plugin/common/constants';
 
 const ENTITY_STORE_INTERNAL_API_VERSION = '2';
 
@@ -321,47 +322,28 @@ export const waitForMaintainerRun = async ({
 };
 
 export const cleanUpRiskScoreMaintainer = async ({
-  es,
+  supertest,
   log,
   namespace = 'default',
 }: {
-  es: Client;
+  supertest: SuperTest.Agent;
   log: ToolingLog;
   namespace?: string;
+  /** @deprecated Cleanup goes through the risk score cleanup API. */
+  es?: Client;
 }) => {
-  const errors: Error[] = [];
-  const addError = (e: Error) => errors.push(e);
-
-  // Remove the Task Manager task document so the runs counter resets to 0
-  // and setup() will re-run on next install. This is the most reliable way
-  // to ensure clean state regardless of whether the uninstall API succeeded.
-  const taskDocId = `task:risk-score:${namespace}`;
-  await es
-    .delete({ index: '.kibana_task_manager', id: taskDocId, refresh: true }, { ignore: [404] })
-    .catch(addError);
-
-  const alias = `risk-score.risk-score-${namespace}`;
-  const template = `.risk-score.risk-score-${namespace}-index-template`;
-
-  await es.indices.deleteDataStream({ name: alias }, { ignore: [404] }).catch(addError);
-  // Also delete any regular index with the same name — a partially-failed
-  // cleanup can orphan a backing index that blocks data stream re-creation
-  // ("data stream [X] conflicts with index").
-  await es.indices.delete({ index: alias }, { ignore: [404] }).catch(addError);
-  await es.indices.deleteIndexTemplate({ name: template }, { ignore: [404] }).catch(addError);
-  await es.cluster
-    .deleteComponentTemplate({ name: `.risk-score-mappings-${namespace}` }, { ignore: [404] })
-    .catch(addError);
-  await es.ingest
-    .deletePipeline(
-      { id: `entity_analytics_create_eventIngest_from_timestamp-pipeline-${namespace}` },
-      { ignore: [404] }
+  const response = await supertest
+    .delete(
+      routeWithNamespace(RISK_ENGINE_CLEANUP_URL, namespace === 'default' ? undefined : namespace)
     )
-    .catch(addError);
+    .set('kbn-xsrf', 'true')
+    .set('elastic-api-version', '2023-10-31')
+    .send();
 
-  if (errors.length > 0) {
+  if (response.status !== 200 || response.body?.cleanup_successful !== true) {
     log.error(
-      `Errors cleaning up risk score maintainer: ${errors.map((e) => e.message).join(', ')}`
+      `Risk score cleanup API failed (${response.status}): ${JSON.stringify(response.body)}`
     );
+    throw new Error(`Risk score cleanup API failed with status ${response.status}`);
   }
 };

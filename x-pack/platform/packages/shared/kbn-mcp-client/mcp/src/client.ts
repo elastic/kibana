@@ -126,12 +126,14 @@ export class McpClient {
         this.logger.error(
           `Error connecting to MCP server ${this.name}, ${this.version}: ${errorMessage}`
         );
+        // Keep the original error as `cause` so callers can classify connect-phase failures
+        // (for example an SDK RequestTimeout during the initialize handshake).
         if (error instanceof StreamableHTTPError) {
-          throw new Error(errorMessage);
+          throw new Error(errorMessage, { cause: error });
         } else if (error instanceof UnauthorizedError) {
-          throw new Error(`Unauthorized error: ${errorMessage}`);
+          throw new Error(`Unauthorized error: ${errorMessage}`, { cause: error });
         } else {
-          throw new Error(`Error connecting to MCP server: ${errorMessage}`);
+          throw new Error(`Error connecting to MCP server: ${errorMessage}`, { cause: error });
         }
       }
     }

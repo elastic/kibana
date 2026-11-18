@@ -6,13 +6,10 @@
  */
 
 import { useMemo } from 'react';
-import { lastValueFrom } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
-import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
-import { i18n } from '@kbn/i18n';
+import { runEsqlQuery } from '../../queries/run_esql_query';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { isMissingIndexError } from '../../is_missing_index_error';
 import { useTileQueryInputs } from './use_tile_query_inputs';
 import { EMPTY_ENTITY_IDS } from '../data';
@@ -24,7 +21,6 @@ import {
 } from '../../entities_grid/common';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 import { isTileQueryTimeout, retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
-import { TILE_PROJECT_ROUTING } from './tile_project_routing';
 
 export const useRiskMoversCount = ({
   spaceId,
@@ -69,19 +65,14 @@ export const useRiskMoversCount = ({
     ['riskMoversCount', query],
     async ({ signal }) => {
       if (!query) return { count: 0, entityIds: [] };
-      const raw = await runWithTileTimeout(signal, (tileSignal) =>
-        lastValueFrom(
-          data.search.search(
-            { params: { query } },
-            {
-              abortSignal: tileSignal,
-              strategy: 'esql_async',
-              projectRouting: TILE_PROJECT_ROUTING,
-            }
-          )
+      const response = await runWithTileTimeout(signal, (tileSignal) =>
+        runEsqlQuery(
+          data.search,
+          query,
+          { id: 'needs_attention_tile_risk_movers_count', meta: { timeRange } },
+          tileSignal
         )
       );
-      const response = raw.rawResponse as unknown as ESQLSearchResponse;
       const row = response.values?.[0];
       const valueIndex = response.columns?.findIndex((c) => c.name === 'value') ?? 0;
       const entityIdsIndex = response.columns?.findIndex((c) => c.name === 'entity_ids') ?? -1;
@@ -112,14 +103,6 @@ export const useRiskMoversCount = ({
   // timed-out refetch does not leave the last count on show as if it were current.
   const isTimedOut = isTileQueryTimeout(error) || isTileQueryTimeout(indexError);
   const shownResult = isTimedOut ? undefined : queryResult;
-
-  useErrorToast(
-    i18n.translate('xpack.securitySolution.entityAnalytics.home.riskMovers.queryError', {
-      defaultMessage: 'There was an error loading risk movers data',
-    }),
-    // A timeout gets one notice for the whole page, and a message on the tile, not a toast per tile.
-    isTimedOut ? undefined : filteredError ?? indexError
-  );
 
   return {
     count: shownResult?.count ?? 0,

@@ -28,7 +28,7 @@ describe('searchWorkflowExecutions', () => {
   });
 
   describe('response transformation', () => {
-    it('should include concurrencyGroupKey in list results when present', async () => {
+    it('should include execution names and concurrencyGroupKey in list results when present', async () => {
       mockWorkflowDataClient.search.mockResolvedValue({
         hits: {
           total: { value: 1 },
@@ -44,6 +44,7 @@ describe('searchWorkflowExecutions', () => {
                 finishedAt: '2024-01-01T00:00:03Z',
                 duration: 3000,
                 workflowId: 'workflow-1',
+                runName: 'Report for October',
                 workflowDefinition: {
                   name: 'Example Workflow',
                   tags: ['reporting'],
@@ -70,6 +71,7 @@ describe('searchWorkflowExecutions', () => {
         expect.objectContaining({
           id: 'exec-1',
           workflowName: 'Example Workflow',
+          runName: 'Report for October',
           tags: ['reporting'],
           managed: true,
           concurrencyGroupKey: 'streams-ki-onboarding-my-stream',

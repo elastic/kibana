@@ -174,17 +174,20 @@ describe('getTileTrend', () => {
 });
 
 describe('getSeriesGate', () => {
-  const ready = { isReady: true, reachesBack: true, count: 5 };
+  const ready = { isReady: true, reachesBack: true, hasCount: true };
 
-  it('runs when everything has settled, the history reaches back and the count is above 0', () => {
+  it('runs when everything has settled and the history reaches back, whatever the count', () => {
     expect(getSeriesGate(ready)).toEqual({ canRun: true, isHidden: false });
   });
 
-  it('hides the line once settled when the history is too short, unknown or the count is 0', () => {
+  it('hides the line once settled when the history is too short or unknown', () => {
     const hidden = { canRun: false, isHidden: true };
     expect(getSeriesGate({ ...ready, reachesBack: false })).toEqual(hidden);
     expect(getSeriesGate({ ...ready, reachesBack: undefined })).toEqual(hidden);
-    expect(getSeriesGate({ ...ready, count: 0 })).toEqual(hidden);
+  });
+
+  it('hides the line when the count did not come back, even if a cached history reaches back', () => {
+    expect(getSeriesGate({ ...ready, hasCount: false })).toEqual({ canRun: false, isHidden: true });
   });
 
   it('neither runs nor hides while the counts and the delta are still loading', () => {

@@ -37,6 +37,7 @@ jest.mock('../../../hooks', () => ({
   sendGetAgentTagsForRq: jest.fn().mockResolvedValue({ items: [] }),
   useAgentlessResources: jest.fn().mockReturnValue({ showAgentless: true }),
   useGetInfoOutputsForPolicy: jest.fn().mockReturnValue({ data: undefined }),
+  useRestartAgentAction: jest.fn().mockReturnValue({ isRestartAgentActionEnabled: true }),
 }));
 jest.mock('./components', () => ({
   AgentLogs: () => <div>{'AgentLogs'}</div>,

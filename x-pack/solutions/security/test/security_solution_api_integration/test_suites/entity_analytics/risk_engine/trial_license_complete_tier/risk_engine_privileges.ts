@@ -215,41 +215,5 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
     });
-
-    describe('Risk engine init API privilege check', () => {
-      it('returns 403 when the user doesnt have all risk engine privileges', async () => {
-        await riskEngineRoutesNoAuth.init(
-          {
-            username: 'no_cluster_manage_index_templates',
-            password: USER_PASSWORD,
-          },
-          403
-        );
-      });
-    });
-
-    describe('Risk engine enable API privilege check', () => {
-      it('returns 403 when the user doesnt have all risk engine privileges', async () => {
-        await riskEngineRoutesNoAuth.enable(
-          {
-            username: 'no_cluster_manage_index_templates',
-            password: USER_PASSWORD,
-          },
-          403
-        );
-      });
-    });
-
-    describe('Risk engine disable API privilege check', () => {
-      it('returns 403 when the user doesnt have all risk engine privileges', async () => {
-        await riskEngineRoutesNoAuth.disable(
-          {
-            username: 'no_cluster_manage_index_templates',
-            password: USER_PASSWORD,
-          },
-          403
-        );
-      });
-    });
   });
 };

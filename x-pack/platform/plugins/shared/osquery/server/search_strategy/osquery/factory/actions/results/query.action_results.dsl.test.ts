@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import { EXACT_RESPONDING_AGENTS_LIMIT } from '../../../../../../common/constants';
 import { buildActionResultsQuery } from './query.action_results.dsl';
 
 // The agent-carried space only speaks for documents Kibana never stamped, so the
@@ -641,6 +642,51 @@ describe('buildActionResultsQuery', () => {
       const result = buildActionResultsQuery(options);
 
       expect(result.index).toEqual([expectedIndex]);
+    });
+  });
+
+  describe('distinct responding agents', () => {
+    const baseOptions: ActionResultsRequestOptions = {
+      actionId: 'action-123',
+      spaceId: 'default',
+      pagination: { activePage: 0, querySize: 50, cursorStart: 0 },
+      sort: { field: 'started_at', direction: Direction.desc },
+      componentTemplateExists: false,
+      useNewDataStream: false,
+    };
+
+    const getResponseAggs = (result: ReturnType<typeof buildActionResultsQuery>) =>
+      (result.aggs as any).aggs.aggs.responses_by_action_id.aggs;
+
+    it('counts the responders exactly with a terms agg sized to the targeted agents', () => {
+      const aggs = getResponseAggs(buildActionResultsQuery({ ...baseOptions, agentsCount: 1000 }));
+
+      expect(aggs.responding_agent_ids).toEqual({
+        terms: { field: 'agent_id', size: 1000 },
+      });
+      expect(aggs.responding_agents).toBeUndefined();
+    });
+
+    it('sizes the terms agg up to the bucket limit', () => {
+      const aggs = getResponseAggs(
+        buildActionResultsQuery({ ...baseOptions, agentsCount: EXACT_RESPONDING_AGENTS_LIMIT })
+      );
+
+      expect(aggs.responding_agent_ids).toEqual({
+        terms: { field: 'agent_id', size: EXACT_RESPONDING_AGENTS_LIMIT },
+      });
+      expect(aggs.responding_agents).toBeUndefined();
+    });
+
+    it.each([
+      ['the targeted count is unknown', undefined],
+      ['the targeted count is zero', 0],
+      ['the targeted count is past the bucket limit', EXACT_RESPONDING_AGENTS_LIMIT + 1],
+    ])('adds no responder aggregation when %s, so documents are counted', (_name, agentsCount) => {
+      const aggs = getResponseAggs(buildActionResultsQuery({ ...baseOptions, agentsCount }));
+
+      expect(aggs.responding_agent_ids).toBeUndefined();
+      expect(aggs.responding_agents).toBeUndefined();
     });
   });
 

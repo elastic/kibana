@@ -71,6 +71,14 @@ export const EntityGridRowsContext = createContext<EntityGridRows>({
   isEnriching: false,
 });
 
+/** Columns whose loaded cell is right-aligned, so their placeholder is too. */
+const END_ALIGNED_COLUMNS: ReadonlySet<string> = new Set([
+  'group_size',
+  'risk_score_change',
+  'anomaly_count',
+  'case_count',
+]);
+
 /** Shaped like "—", so a cell holds still when its value arrives. */
 const cellLoadingPlaceholderCss = css`
   inline-size: 1em;
@@ -78,8 +86,8 @@ const cellLoadingPlaceholderCss = css`
   border-radius: 1px;
 `;
 
-// The alerts flyout has no service case yet, and the anomalies flyout takes only hosts and users.
-const ALERTS_FLYOUT_TYPES: ReadonlySet<string> = new Set(['host', 'user', 'generic']);
+const ALERTS_FLYOUT_TYPES: ReadonlySet<string> = new Set(['host', 'user', 'service', 'generic']);
+// The anomalies flyout takes only hosts and users.
 const ANOMALIES_FLYOUT_TYPES: ReadonlySet<string> = new Set(['host', 'user']);
 
 const opensFor = <T,>(handler: T | undefined, types: ReadonlySet<string>, row: Row) =>
@@ -173,11 +181,16 @@ export const renderEntityCell = (
   // Enrichers set every field they own (null or 0 when empty), so `undefined` here
   // means "not loaded yet", not "no value". Show a placeholder rather than "—".
   if (isEnriching && value === undefined && ENRICHED_FIELDS.has(columnId)) {
-    return (
+    const placeholder = (
       <span
         css={[loadingPlaceholderCss, cellLoadingPlaceholderCss]}
         style={{ background: euiTheme.colors.lightShade }}
       />
+    );
+    return END_ALIGNED_COLUMNS.has(columnId) ? (
+      <div css={alignEndCss}>{placeholder}</div>
+    ) : (
+      placeholder
     );
   }
   if (!isGridColumnId(columnId)) {

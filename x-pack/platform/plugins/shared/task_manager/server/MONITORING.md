@@ -45,6 +45,8 @@ An `Error` status in any section will cause the whole system to display as `Erro
 A `Warning` status in any section will cause the whole system to display as `Warning`.
 An `OK` status will only be displayed when all sections are marked as `OK`.
 
+While Task Manager is applying Elasticsearch-driven backpressure (`es_backpressure_active` is `1` in the utilization stats), stale "Hot" or "Cold" stats do not cause an `Error` status, as Task Manager slows its own polling on purpose. The root `status` stays `OK` and its `reason` explains that backpressure is active. "Unhealthy" capacity estimation messages are also logged at `debug` instead of `warn` during this time. Once backpressure clears, the normal freshness checks apply again.
+
 The root `timestamp` is the time in which the summary was exposed (either to the DEBUG logger or the http api) and the `last_update` is the last time any one of the sections was updated.
 
 Follow this step-by-step guide to make sense of the stats: https://www.elastic.co/guide/en/kibana/master/task-manager-troubleshooting.html#task-manager-diagnosing-root-cause

@@ -15,13 +15,17 @@ jest.mock('./run_node', () => ({
   runNode: jest.fn().mockResolvedValue(undefined),
 }));
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 const { runNode } = require('./run_node');
 
 describe('executionFlowLoop', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (runNode as jest.Mock).mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('calls runNode while the execution cursor is executing', async () => {
@@ -95,6 +99,36 @@ describe('executionFlowLoop', () => {
     expect(workflowExecutionCursor.currentNode).toEqual(
       expect.objectContaining({ id: 'wait-node' })
     );
+  });
+
+  it('yields to the event loop between nodes once the time budget has passed', async () => {
+    let now = 1e12;
+    jest.spyOn(performance, 'now').mockImplementation(() => now);
+    const setImmediateSpy = jest.spyOn(global, 'setImmediate');
+    const workflowExecutionCursor = createMockWorkflowExecutionCursor({
+      currentNode: { id: 'node1' } as GraphNodeUnion,
+    });
+    let iterations = 0;
+    workflowExecutionCursor.commitPendingNavigation.mockImplementation(() => {
+      iterations += 1;
+      now += 30;
+      if (iterations >= 3) {
+        workflowExecutionCursor.setMockCurrentNode(null);
+        workflowExecutionCursor.setMockIsExecuting(false);
+      }
+    });
+
+    const params = {
+      workflowExecutionCursor,
+      workflowRuntime: {
+        executionCursor: workflowExecutionCursor,
+        saveState: jest.fn().mockResolvedValue(undefined),
+      },
+    } as any;
+
+    await executionFlowLoop(params);
+
+    expect(setImmediateSpy).toHaveBeenCalledTimes(3);
   });
 
   it('does not call runNode when execution cursor is not executing', async () => {

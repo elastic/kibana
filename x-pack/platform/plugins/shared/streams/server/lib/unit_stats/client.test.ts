@@ -16,7 +16,7 @@ import {
 import { UnitStatsClient } from './client';
 
 const unit: StreamsUnit.Configuration = {
-  sources: [],
+  sources: [{ id: 'otlp-input', type: 'otlp', supported_telemetry: ['logs'] }],
   destinations: [
     { id: 'es-prod', type: 'elasticsearch', supported_telemetry: ['logs'] },
     { id: 'es-dev', type: 'elasticsearch', supported_telemetry: ['logs'] },
@@ -44,7 +44,40 @@ const responses = {
     ],
     values: [
       [4.6, 0, 0.18, 'es-prod'],
-      [4.2, 0, 0.17, 'es-dev'],
+      [4.2, 2.4, 0.17, 'es-dev'],
+    ],
+  },
+  destinationAuthRates: {
+    columns: [
+      { name: 'id', type: 'keyword' },
+      { name: 'authentication_rate', type: 'double' },
+      { name: 'authorization_rate', type: 'double' },
+    ],
+    // Only `es-dev` fails in the totals, so it is the only destination the query is asked about.
+    values: [['es-dev', 0.5, 1.9]],
+  },
+  destinationAuthBreakdown: {
+    columns: [
+      { name: 'id', type: 'keyword' },
+      { name: 'collection', type: 'keyword' },
+      { name: 'reason', type: 'keyword' },
+      { name: 'authentication_rate', type: 'double' },
+      { name: 'authorization_rate', type: 'double' },
+    ],
+    values: [['es-dev', 'logs-generic.otel-default', 'security_exception', null, 1.9]],
+  },
+  s3FailedUploadRates: {
+    columns: [
+      { name: 'id', type: 'keyword' },
+      { name: 'reason', type: 'keyword' },
+      { name: 'failed_rate', type: 'double' },
+      { name: 'attempts_rate', type: 'double' },
+    ],
+    values: [
+      ['s3-test', null, 0, 1],
+      ['s3-test', 'SignatureDoesNotMatch', 0.146, 1],
+      ['s3-test', 'InvalidAccessKeyId', 0.061, 1],
+      ['s3-test', 'NoSuchBucket', 0.3, 1],
     ],
   },
   destinationSums: {
@@ -72,24 +105,49 @@ const responses = {
       ['uppercase-message', 'main', null, 1.2, 4.1e-6],
     ],
   },
+  sourceRate: {
+    columns: [
+      { name: 'id', type: 'keyword' },
+      { name: 'accepted_rate', type: 'double' },
+    ],
+    values: [['otlp-input', 1.2]],
+  },
 };
 
 type QueryName = keyof typeof responses;
 
 const isProbe = (query: string) => query.endsWith('| LIMIT 0');
-/** Only the per-destination aggregate divides by the window, the series query does not. */
-const isDestinationRateQuery = (query: string) => query.includes('window_seconds');
+/** The per-destination totals are the only destination query with the incoming rate. */
+const isDestinationRateQuery = (query: string) =>
+  query.includes('incoming_rate') && query.includes('scope.attributes.streams.destination.id');
+
+/** The series query is the only one that buckets by time. */
+const isDestinationSumsQuery = (query: string) =>
+  query.includes('BUCKET(') && query.includes('scope.attributes.streams.destination.id');
 
 const queryName = (query: string): QueryName => {
+  if (query.includes('metrics.streams.source.items')) return 'sourceRate';
   if (!query.includes('scope.attributes.streams.destination.id')) return 'processor';
+  // The S3 query is the only one with a failed rate and no incoming rate or class rates.
+  if (
+    query.includes('failed_rate') &&
+    !query.includes('incoming_rate') &&
+    !query.includes('authentication_rate')
+  ) {
+    return 's3FailedUploadRates';
+  }
+  // The breakdown query is the only other one with `INLINE STATS`.
+  if (query.includes('INLINE STATS')) return 'destinationAuthBreakdown';
+  if (isDestinationRateQuery(query)) return 'destinationRate';
+  if (query.includes('authentication_rate')) return 'destinationAuthRates';
 
-  return isDestinationRateQuery(query) ? 'destinationRate' : 'destinationSums';
+  return 'destinationSums';
 };
 
 /**
  * Answers each `esql.query` by what the query asks for: the probe, or the stats query of
- * destinations (rates, or the series) or of processors. An override replaces the answer, and can
- * throw.
+ * destinations (rates, or the series), of processors or of sources. An override replaces the
+ * answer, and can throw.
  */
 const makeEsql = (overrides: Partial<Record<QueryName, () => EsqlResponse>> = {}) =>
   jest.fn(async ({ query }: { query: string }) => {
@@ -165,9 +223,28 @@ describe('UnitStatsClient.getStats', () => {
             ],
           },
         },
-        failed: { rate: { value: 0, unit: '{item}', time_unit: 's' } },
+        failed: {
+          rate: { value: 0, unit: '{item}', time_unit: 's' },
+          percentage: { value: 0, unit: '%' },
+          authentication: {
+            rate: { value: 0, unit: '{item}', time_unit: 's' },
+            percentage: { value: 0, unit: '%' },
+          },
+          authorization: {
+            rate: { value: 0, unit: '{item}', time_unit: 's' },
+            percentage: { value: 0, unit: '%' },
+          },
+        },
       },
     });
+    // `es-dev` has 4.2 items a second coming in, and its failures are shares of them.
+    const { failed } = response.components.destinations['es-dev'].events;
+    expect(failed.rate.value).toBe(2.4);
+    expect(failed.percentage).toEqual({ value: (2.4 / 4.2) * 100, unit: '%' });
+    expect(failed.authentication.rate.value).toBe(0.5);
+    expect(failed.authentication.percentage).toEqual({ value: (0.5 / 4.2) * 100, unit: '%' });
+    expect(failed.authorization.rate.value).toBe(1.9);
+    expect(failed.authorization.percentage).toEqual({ value: (1.9 / 4.2) * 100, unit: '%' });
     expect(response.components.processors['uppercase-message']).toEqual({
       instances: [
         {
@@ -199,6 +276,7 @@ describe('UnitStatsClient.getStats', () => {
 
       expect(Object.keys(response.components.destinations)).toEqual(['es-prod', 'es-dev', 'dbg']);
       expect(Object.keys(response.components.processors)).toEqual(['uppercase-message']);
+      expect(Object.keys(response.components.sources)).toEqual(['otlp-input']);
       expect(streamsUnitStatsResponseSchema.parse(response)).toEqual(response);
     });
 
@@ -207,7 +285,7 @@ describe('UnitStatsClient.getStats', () => {
 
       const response = await run(esql, { components: [] });
 
-      expect(response.components).toEqual({ destinations: {}, processors: {} });
+      expect(response.components).toEqual({ destinations: {}, processors: {}, sources: {} });
       expect(esql).not.toHaveBeenCalled();
       expect(streamsUnitStatsResponseSchema.parse(response)).toEqual(response);
     });
@@ -235,6 +313,36 @@ describe('UnitStatsClient.getStats', () => {
       );
     });
 
+    it('answers a source of the unit with its accepted rate, and nothing for the other kinds', async () => {
+      const esql = makeEsql();
+
+      const response = await run(esql, { components: [{ kind: 'source', id: 'otlp-input' }] });
+
+      expect(response.components.destinations).toEqual({});
+      expect(response.components.processors).toEqual({});
+      expect(response.components.sources).toEqual({
+        'otlp-input': {
+          events: { accepted: { rate: { value: 1.2, unit: '{item}', time_unit: 's' } } },
+        },
+      });
+      statsQueries(esql).forEach((query) =>
+        expect(query).toContain('metrics.streams.source.items')
+      );
+      expect(streamsUnitStatsResponseSchema.parse(response)).toEqual(response);
+    });
+
+    it('answers a source with no row as no data', async () => {
+      const noRows = () => ({ ...responses.sourceRate, values: [] });
+
+      const response = await run(makeEsql({ sourceRate: noRows }), {
+        components: [{ kind: 'source', id: 'otlp-input' }],
+      });
+
+      expect(response.components.sources['otlp-input']).toEqual({
+        events: { accepted: { rate: { value: null, unit: '{item}', time_unit: 's' } } },
+      });
+    });
+
     it('answers not_found from the config without querying', async () => {
       const esql = makeEsql();
 
@@ -242,12 +350,14 @@ describe('UnitStatsClient.getStats', () => {
         components: [
           { kind: 'destination', id: 'nope' },
           { kind: 'processor', id: 'nope' },
+          { kind: 'source', id: 'nope' },
         ],
       });
 
       expect(esql).not.toHaveBeenCalled();
       expect(response.components.destinations.nope.error?.code).toBe('not_found');
       expect(response.components.processors.nope.error?.code).toBe('not_found');
+      expect(response.components.sources.nope.error?.code).toBe('not_found');
     });
   });
 
@@ -279,21 +389,31 @@ describe('UnitStatsClient.getStats', () => {
 
       const unpinnedQueries = statsQueries(unpinned);
       const pinnedQueries = statsQueries(pinned);
-      expect(unpinnedQueries).toHaveLength(3);
+      const isSourceQuery = (query: string) => query.includes('metrics.streams.source.items');
+      // Rates, sums, the auth failure rates and the collections of the destinations that have
+      // failures, then processors and sources.
+      expect(unpinnedQueries).toHaveLength(6);
       unpinnedQueries.forEach((query) => {
         expect(query).toContain('resource.attributes.unit.id == "default"');
         expect(query).toContain(`@timestamp >= "${timeRange.start}"`);
         expect(query).toContain(`@timestamp < "${timeRange.end}"`);
         expect(query).not.toContain('config.hash');
       });
-      pinnedQueries.forEach((query) =>
-        expect(query).toContain('resource.attributes.streams.config.hash == "h1"')
-      );
+      pinnedQueries
+        .filter((query) => !isSourceQuery(query))
+        .forEach((query) =>
+          expect(query).toContain('resource.attributes.streams.config.hash == "h1"')
+        );
+      // The ingest collector's source metrics have no config hash, so a pinned one does not apply.
+      pinnedQueries
+        .filter(isSourceQuery)
+        .forEach((query) => expect(query).not.toContain('config.hash'));
     });
 
     describe('with the most destinations one request allows', () => {
       const destinationsOf = (count: number): StreamsUnit.Configuration => ({
         ...unit,
+        sources: [],
         processors: [],
         destinations: Array.from({ length: count }, (_, index) => ({
           id: `destination-${index}`,
@@ -302,10 +422,7 @@ describe('UnitStatsClient.getStats', () => {
         })),
       });
       const maxDestinations = destinationsOf(MAX_STREAMS_UNIT_STATS_COMPONENTS);
-      const sumsQueries = (esql: jest.Mock) =>
-        statsQueries(esql).filter(
-          (query) => !isDestinationRateQuery(query) && query.includes('destination')
-        );
+      const sumsQueries = (esql: jest.Mock) => statsQueries(esql).filter(isDestinationSumsQuery);
 
       it('asks for the sums once and the rates once', async () => {
         const esql = makeEsql();
@@ -336,6 +453,15 @@ describe('UnitStatsClient.getStats', () => {
 
         await expect(
           run(esql, {}, destinationsOf(MAX_STREAMS_UNIT_STATS_COMPONENTS + 1))
+        ).rejects.toMatchObject({ statusCode: 400 });
+        expect(esql).not.toHaveBeenCalled();
+      });
+
+      it('counts the sources toward that limit', async () => {
+        const esql = makeEsql();
+
+        await expect(
+          run(esql, {}, { ...maxDestinations, sources: unit.sources })
         ).rejects.toMatchObject({ statusCode: 400 });
         expect(esql).not.toHaveBeenCalled();
       });
@@ -392,6 +518,388 @@ describe('UnitStatsClient.getStats', () => {
     });
   });
 
+  describe('authentication and authorization failures', () => {
+    const rate = (value: number | null) => ({ value, unit: '{item}', time_unit: 's' });
+    /** The share of the 4.2 items a second that `es-dev` receives. */
+    const share = (part: number) => ({ value: (part / 4.2) * 100, unit: '%' });
+    const percentage = (value: number | null) => ({ value, unit: '%' });
+    const breakdownQueries = (esql: jest.Mock) =>
+      statsQueries(esql).filter((query) => query.includes('INLINE STATS'));
+    const authRatesQueries = (esql: jest.Mock) =>
+      statsQueries(esql).filter(
+        (query) =>
+          query.includes('authentication_rate') &&
+          !query.includes('INLINE STATS') &&
+          !isDestinationRateQuery(query)
+      );
+
+    it('puts the failures of each destination in its result, with the breakdown of one that has failures', async () => {
+      const response = await run(makeEsql());
+
+      expect(response.components.destinations['es-dev'].events.failed).toEqual({
+        rate: rate(2.4),
+        percentage: share(2.4),
+        authentication: { rate: rate(0.5), percentage: share(0.5) },
+        authorization: {
+          rate: rate(1.9),
+          percentage: share(1.9),
+          breakdown: [
+            {
+              collection: 'logs-generic.otel-default',
+              reason: 'security_exception',
+              rate: rate(1.9),
+              percentage: share(1.9),
+            },
+          ],
+        },
+      });
+      expect(response.components.destinations['es-prod'].events.failed.authentication).toEqual({
+        rate: rate(0),
+        percentage: percentage(0),
+      });
+      expect(response.components.destinations['es-prod'].events.failed.authorization).toEqual({
+        rate: rate(0),
+        percentage: percentage(0),
+      });
+      expect(streamsUnitStatsResponseSchema.safeParse(response).success).toBe(true);
+    });
+
+    it('asks for the breakdown of the destinations that have failures only', async () => {
+      const esql = makeEsql();
+
+      await run(esql);
+
+      const [breakdownQuery] = breakdownQueries(esql);
+      expect(breakdownQueries(esql)).toHaveLength(1);
+      expect(breakdownQuery).toContain('destination.id IN ("es-dev")');
+      expect(breakdownQuery).not.toContain('"es-prod"');
+    });
+
+    it('asks for no failure queries when no destination fails, and gives them no failures', async () => {
+      const esql = makeEsql({
+        destinationRate: () => ({
+          columns: responses.destinationRate.columns,
+          values: [
+            [4.6, 0, 0.18, 'es-prod'],
+            [4.2, 0, 0.17, 'es-dev'],
+          ],
+        }),
+      });
+
+      const response = await run(esql);
+
+      expect(authRatesQueries(esql)).toHaveLength(0);
+      expect(breakdownQueries(esql)).toHaveLength(0);
+      ['es-prod', 'es-dev'].forEach((id) => {
+        const { failed } = response.components.destinations[id].events;
+        expect(failed.authentication).toEqual({ rate: rate(0), percentage: percentage(0) });
+        expect(failed.authorization).toEqual({ rate: rate(0), percentage: percentage(0) });
+      });
+    });
+
+    it('leaves a destination of a type with no failure queries without failure rates', async () => {
+      const esql = makeEsql();
+
+      const response = await run(esql);
+
+      const { failed } = response.components.destinations.dbg.events;
+      expect(failed.authentication).toEqual({ rate: rate(null), percentage: percentage(null) });
+      expect(failed.authorization).toEqual({ rate: rate(null), percentage: percentage(null) });
+      [...authRatesQueries(esql), ...breakdownQueries(esql)].forEach((query) =>
+        expect(query).not.toContain('"dbg"')
+      );
+    });
+
+    it('asks the Elasticsearch failure queries for a remote Elasticsearch destination that fails', async () => {
+      const esql = makeEsql({
+        destinationRate: () => ({
+          columns: responses.destinationRate.columns,
+          values: [[1.5, 1.5, 0.1, 'remote']],
+        }),
+        // The provider only asks about a destination whose result has a failed rate above zero. The
+        // totals row above gives it one, and this sums row is what puts the destination in the
+        // results at all.
+        destinationSums: () => ({
+          columns: responses.destinationSums.columns,
+          values: [[90, 'remote', '2026-10-19T11:46:00.000Z']],
+        }),
+      });
+      const remoteUnit: StreamsUnit.Configuration = {
+        ...unit,
+        destinations: [
+          { id: 'remote', type: 'remote_elasticsearch', supported_telemetry: ['logs'] },
+        ],
+      };
+
+      await run(esql, {}, remoteUnit);
+
+      expect(authRatesQueries(esql)).toHaveLength(1);
+      expect(authRatesQueries(esql)[0]).toContain('destination.id IN ("remote")');
+    });
+
+    it('keeps the other stats, puts the error on the destinations of the type, and logs once, when the breakdown query fails', async () => {
+      const logger = loggingSystemMock.createLogger();
+
+      const response = await run(
+        makeEsql({ destinationAuthBreakdown: failWith(responseError(500)) }),
+        {},
+        unit,
+        logger
+      );
+
+      const { 'es-dev': esDev, 'es-prod': esProd, dbg } = response.components.destinations;
+      // The totals and the series are still there.
+      expect(esDev.events.incoming.rate.value).toBe(4.2);
+      expect(esDev.events.failed.rate).toEqual(rate(2.4));
+      expect(esDev.events.incoming.series.points).not.toHaveLength(0);
+      // The failure rates are no data, beside the error.
+      expect(esDev.error).toEqual({ code: 'error', reason: expect.any(String) });
+      expect(esDev.events.failed.authorization).toEqual({
+        rate: rate(null),
+        percentage: percentage(null),
+      });
+      // `es-prod` needed no failure query, and shares the failed provider, so it has the error too.
+      expect(esProd.error).toEqual(esDev.error);
+      // A destination of a type with no failure queries is not affected.
+      expect(dbg.error).toBeUndefined();
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('destination elasticsearch authentication and authorization')
+      );
+      expect(streamsUnitStatsResponseSchema.safeParse(response).success).toBe(true);
+    });
+
+    it('keeps the other stats, puts the error on the destinations of the type, and logs once, when the failure rates query fails', async () => {
+      const logger = loggingSystemMock.createLogger();
+      const esql = makeEsql({ destinationAuthRates: failWith(responseError(500)) });
+
+      const response = await run(esql, {}, unit, logger);
+
+      const esDev = response.components.destinations['es-dev'];
+      expect(esDev.error).toEqual({ code: 'error', reason: expect.any(String) });
+      expect(esDev.events.incoming.rate.value).toBe(4.2);
+      expect(esDev.events.failed.rate).toEqual(rate(2.4));
+      expect(esDev.events.failed.authentication).toEqual({
+        rate: rate(null),
+        percentage: percentage(null),
+      });
+      expect(esDev.events.failed.authorization).toEqual({
+        rate: rate(null),
+        percentage: percentage(null),
+      });
+      expect(breakdownQueries(esql)).toHaveLength(0);
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('destination elasticsearch authentication and authorization')
+      );
+    });
+
+    it('reports an expected cluster state of the failure query like the other queries, at debug', async () => {
+      const logger = loggingSystemMock.createLogger();
+
+      const response = await run(
+        makeEsql({ destinationAuthRates: failWith(responseError(429)) }),
+        {},
+        unit,
+        logger
+      );
+
+      expect(response.components.destinations['es-dev'].error?.code).toBe('unavailable');
+      expect(logger.warn).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('destination elasticsearch authentication and authorization')
+      );
+    });
+
+    it('keeps a destination type that works when another type fails', async () => {
+      const mixedUnit: StreamsUnit.Configuration = {
+        ...unit,
+        destinations: [
+          ...unit.destinations,
+          { id: 's3-test', type: 's3', supported_telemetry: ['logs'] },
+        ],
+      };
+      const esql = makeEsql({
+        destinationRate: () => ({
+          columns: responses.destinationRate.columns,
+          values: [
+            [4.6, 0, 0.18, 'es-prod'],
+            [4.2, 2.4, 0.17, 'es-dev'],
+            [1.0, 0, 0.2, 's3-test'],
+          ],
+        }),
+        destinationSums: () => ({
+          columns: responses.destinationSums.columns,
+          values: [
+            ...responses.destinationSums.values,
+            [60, 's3-test', '2026-10-19T11:46:00.000Z'],
+          ],
+        }),
+        s3FailedUploadRates: failWith(responseError(500)),
+      });
+
+      const response = await run(esql, {}, mixedUnit);
+
+      const { 'es-dev': esDev, 's3-test': s3 } = response.components.destinations;
+      expect(s3.error).toEqual({ code: 'error', reason: expect.any(String) });
+      expect(esDev.error).toBeUndefined();
+      expect(esDev.events.failed.authorization.rate).toEqual(rate(1.9));
+    });
+  });
+
+  describe('authentication and authorization failures of an S3 destination', () => {
+    const requestRate = (value: number | null) => ({ value, unit: '{request}', time_unit: 's' });
+    const noS3Failed = {
+      rate: requestRate(null),
+      percentage: { value: null, unit: '%' },
+      authentication: { rate: requestRate(null), percentage: { value: null, unit: '%' } },
+      authorization: { rate: requestRate(null), percentage: { value: null, unit: '%' } },
+    };
+    const s3Unit: StreamsUnit.Configuration = {
+      ...unit,
+      destinations: [
+        ...unit.destinations,
+        { id: 's3-test', type: 's3', supported_telemetry: ['logs'] },
+      ],
+    };
+    // The items of S3 have no failed rate yet, which the Elasticsearch gate would read as no failures.
+    const s3Esql = (overrides: Partial<Record<QueryName, () => EsqlResponse>> = {}) =>
+      makeEsql({
+        destinationRate: () => ({
+          columns: responses.destinationRate.columns,
+          values: [
+            [4.6, 0, 0.18, 'es-prod'],
+            [4.2, 2.4, 0.17, 'es-dev'],
+            [1.0, 0, 0.2, 's3-test'],
+          ],
+        }),
+        destinationSums: () => ({
+          columns: responses.destinationSums.columns,
+          values: [
+            ...responses.destinationSums.values,
+            [60, 's3-test', '2026-10-19T11:46:00.000Z'],
+          ],
+        }),
+        ...overrides,
+      });
+    const s3Queries = (esql: jest.Mock) =>
+      statsQueries(esql).filter(
+        (query) =>
+          query.includes('metrics.streams.destination.duration') &&
+          query.includes('failed = COUNT(')
+      );
+
+    it('puts the class rates of the upload attempts in its result, in requests', async () => {
+      const response = await run(s3Esql(), {}, s3Unit);
+
+      // The attempts rate is 1 a second, so a share is the rate times 100.
+      const { failed, incoming } = response.components.destinations['s3-test'].events;
+      expect(failed.authentication).toEqual({
+        rate: requestRate(0.146 + 0.061),
+        percentage: { value: (0.146 + 0.061) * 100, unit: '%' },
+        breakdown: [
+          {
+            collection: null,
+            reason: 'SignatureDoesNotMatch',
+            rate: requestRate(0.146),
+            percentage: { value: 0.146 * 100, unit: '%' },
+          },
+          {
+            collection: null,
+            reason: 'InvalidAccessKeyId',
+            rate: requestRate(0.061),
+            percentage: { value: 0.061 * 100, unit: '%' },
+          },
+        ],
+      });
+      expect(failed.authorization).toEqual({
+        rate: requestRate(0),
+        percentage: { value: 0, unit: '%' },
+      });
+      // The total of failures is the upload attempts too, with the codes that have no class, so it
+      // agrees with its percentage and the classes. The incoming rate stays in items.
+      expect(failed.rate).toEqual(requestRate(0.146 + 0.061 + 0.3));
+      expect(failed.percentage).toEqual({ value: (0.146 + 0.061 + 0.3) * 100, unit: '%' });
+      expect(incoming.rate.unit).toBe('{item}');
+      expect(streamsUnitStatsResponseSchema.safeParse(response).success).toBe(true);
+    });
+
+    it('asks once for the S3 destinations only, whatever their failed rate, and the Elasticsearch ones keep theirs', async () => {
+      const esql = s3Esql();
+
+      const response = await run(esql, {}, s3Unit);
+
+      expect(s3Queries(esql)).toHaveLength(1);
+      expect(s3Queries(esql)[0]).toContain('destination.id IN ("s3-test")');
+      expect(response.components.destinations['es-dev'].events.failed.authorization.rate).toEqual({
+        value: 1.9,
+        unit: '{item}',
+        time_unit: 's',
+      });
+    });
+
+    it('keeps the latency of an S3 destination that has no items in the window', async () => {
+      const response = await run(
+        s3Esql({
+          destinationRate: () => ({
+            columns: responses.destinationRate.columns,
+            values: [[null, null, 0.2, 's3-test']],
+          }),
+          destinationSums: () => ({ columns: responses.destinationSums.columns, values: [] }),
+        }),
+        {},
+        s3Unit
+      );
+
+      const s3 = response.components.destinations['s3-test'];
+      expect(s3.error).toBeUndefined();
+      expect(s3.latency.average.value).toBe(0.2);
+      expect(s3.events.incoming.rate.value).toBeNull();
+      expect(s3.events.incoming.total.value).toBeNull();
+      expect(s3.events.incoming.series.points).toEqual([]);
+      expect(s3.events.failed.authentication.rate.value).toBe(0.146 + 0.061);
+    });
+
+    it('leaves an S3 destination with no rows without failure rates', async () => {
+      const response = await run(
+        s3Esql({
+          s3FailedUploadRates: () => ({
+            columns: responses.s3FailedUploadRates.columns,
+            values: [],
+          }),
+        }),
+        {},
+        s3Unit
+      );
+
+      // The totals query has an items-based failed rate for it, and it must not stand in for the
+      // upload attempts that were not found.
+      expect(response.components.destinations['s3-test'].events.failed).toEqual(noS3Failed);
+    });
+
+    it('keeps the other stats, puts the error on the destination, and logs a warn, when the S3 query fails', async () => {
+      const logger = loggingSystemMock.createLogger();
+
+      const response = await run(
+        s3Esql({ s3FailedUploadRates: failWith(responseError(500)) }),
+        {},
+        s3Unit,
+        logger
+      );
+
+      const s3 = response.components.destinations['s3-test'];
+      expect(s3.error).toEqual({ code: 'error', reason: expect.any(String) });
+      expect(s3.events.incoming.rate.value).toBe(1);
+      expect(s3.latency.average.value).toBe(0.2);
+      // Its failures are no data in requests, not the late items-based rate of the totals query.
+      expect(s3.events.failed).toEqual(noS3Failed);
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('destination s3 authentication and authorization')
+      );
+    });
+  });
+
   describe('failures', () => {
     it('puts the same error on every destination when a destination query fails', async () => {
       const response = await run(makeEsql({ destinationRate: failWith(responseError(429)) }));
@@ -411,6 +919,14 @@ describe('UnitStatsClient.getStats', () => {
       expect(response.components.processors['uppercase-message'].error?.code).toBe('error');
       expect(response.components.destinations['es-prod'].error).toBeUndefined();
       expect(response.components.destinations['es-prod'].events.incoming.rate.value).toBe(4.6);
+    });
+
+    it('puts the same error on every source when a source query fails', async () => {
+      const response = await run(makeEsql({ sourceRate: failWith(responseError(500)) }));
+
+      expect(response.components.sources['otlp-input'].error?.code).toBe('error');
+      expect(response.components.destinations['es-prod'].error).toBeUndefined();
+      expect(response.components.processors['uppercase-message'].error).toBeUndefined();
     });
 
     it('logs a query that fails or times out at warn, and an expected cluster state at debug', async () => {
@@ -445,9 +961,23 @@ describe('UnitStatsClient.getStats', () => {
           makeEsql({
             destinationSums: failWith(responseError(429)),
             processor: failWith(responseError(429)),
+            sourceRate: failWith(responseError(429)),
           })
         )
       ).rejects.toMatchObject({ code: 'unavailable', statusCode: 503 });
+    });
+
+    it('returns the kinds that worked when only some kinds failed', async () => {
+      const response = await run(
+        makeEsql({
+          destinationSums: failWith(responseError(429)),
+          processor: failWith(responseError(429)),
+        })
+      );
+
+      expect(response.components.destinations['es-prod'].error?.code).toBe('unavailable');
+      expect(response.components.sources['otlp-input'].error).toBeUndefined();
+      expect(response.components.sources['otlp-input'].events.accepted.rate.value).toBe(1.2);
     });
 
     it('fails the request with the most actionable error when every kind failed with a different code', async () => {
@@ -456,6 +986,7 @@ describe('UnitStatsClient.getStats', () => {
           makeEsql({
             destinationRate: failWith(responseError(429)),
             processor: failWith(responseError(403)),
+            sourceRate: failWith(responseError(429)),
           })
         )
       ).rejects.toMatchObject({ code: 'forbidden', statusCode: 403 });
@@ -464,6 +995,7 @@ describe('UnitStatsClient.getStats', () => {
           makeEsql({
             destinationRate: failWith(responseError(429)),
             processor: failWith(new errors.TimeoutError('timeout', {} as never)),
+            sourceRate: failWith(responseError(429)),
           })
         )
       ).rejects.toMatchObject({ code: 'timeout', statusCode: 503 });
@@ -475,6 +1007,11 @@ describe('UnitStatsClient.getStats', () => {
           components: [{ kind: 'destination', id: 'es-prod' }],
         })
       ).rejects.toMatchObject({ code: 'forbidden', statusCode: 403 });
+      await expect(
+        run(makeEsql({ sourceRate: failWith(responseError(403)) }), {
+          components: [{ kind: 'source', id: 'otlp-input' }],
+        })
+      ).rejects.toMatchObject({ code: 'forbidden', statusCode: 403 });
     });
 
     it('fails the request with a 500 when every kind failed with an unexpected error', async () => {
@@ -483,6 +1020,7 @@ describe('UnitStatsClient.getStats', () => {
           makeEsql({
             destinationRate: failWith(responseError(500)),
             processor: failWith(responseError(500)),
+            sourceRate: failWith(responseError(500)),
           })
         )
       ).rejects.toMatchObject({ code: 'error', statusCode: 500 });

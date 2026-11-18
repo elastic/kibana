@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { lastValueFrom } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
+import { runEsqlQuery } from '../../queries/run_esql_query';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 import { retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
-import { TILE_PROJECT_ROUTING } from './tile_project_routing';
 
 interface TileSeriesQueryOptions<T> {
   /** Identifies the tile in the query cache. */
@@ -43,18 +42,9 @@ export const useTileSeriesQuery = <T>({
     async ({ signal }) => {
       if (!query) return undefined;
       const result = await runWithTileTimeout(signal, (tileSignal) =>
-        lastValueFrom(
-          data.search.search(
-            { params: { query } },
-            {
-              abortSignal: tileSignal,
-              strategy: 'esql_async',
-              projectRouting: TILE_PROJECT_ROUTING,
-            }
-          )
-        )
+        runEsqlQuery(data.search, query, `needs_attention_tile_${tileKey}`, tileSignal)
       );
-      return parse(result.rawResponse as unknown as ESQLSearchResponse);
+      return parse(result);
     },
     {
       enabled: enabled && Boolean(query),
@@ -72,20 +62,24 @@ export const useTileSeriesQuery = <T>({
 
 /**
  * Whether a tile's series may run: the same rule as its delta. It needs the page's counts and the
- * delta to have settled, a history that reaches back twice the range, and a count above 0. Once
- * those have settled and it may not run, the tile has no line (`isHidden`) and no spinner.
+ * delta to have settled, a count that came back (also a count of 0) and a history that reaches back
+ * twice the range. The count is checked here and not only through the delta: the history check is
+ * cached independently of the entity filters, so a count that timed out after a filter change can
+ * still see `reachesBack` from an earlier load. Once those have settled and it may not run, the tile
+ * has no line (`isHidden`) and no spinner.
  */
 export const getSeriesGate = ({
   isReady,
   reachesBack,
-  count,
+  hasCount,
 }: {
   isReady: boolean;
+  /** True when the tile's count came back; a failed or timed-out count has no line to draw. */
+  hasCount: boolean;
   /** From the tile's delta hook; undefined until its history check settles, or after it failed. */
   reachesBack: boolean | undefined;
-  count: number;
 }): { canRun: boolean; isHidden: boolean } => {
-  const canRun = isReady && reachesBack === true && count > 0;
+  const canRun = isReady && hasCount && reachesBack === true;
   return { canRun, isHidden: isReady && !canRun };
 };
 

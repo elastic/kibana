@@ -229,7 +229,7 @@ describe('AwsLambdaConnector', () => {
       };
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        expect.stringContaining('lambda.us-east-1.amazonaws.com/2015-03-31/functions/'),
+        expect.stringMatching(/lambda\.us-east-1\.amazonaws\.com\/2015-03-31\/functions(\?|$)/),
         expect.any(Object)
       );
 
@@ -430,7 +430,7 @@ describe('AwsLambdaConnector', () => {
       const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        expect.stringContaining('/2015-03-31/functions/'),
+        expect.stringMatching(/\/2015-03-31\/functions(\?|$)/),
         expect.any(Object)
       );
       expect(result).toEqual({});

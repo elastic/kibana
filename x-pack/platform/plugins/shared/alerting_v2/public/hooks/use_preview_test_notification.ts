@@ -12,17 +12,19 @@ import { ActionPoliciesApi } from '../services/action_policies_api';
 import { actionPolicyKeys } from './query_key_factory';
 
 /**
- * Builds the synthetic test notification of an action policy once. The server picks the seed, and
- * sending reuses it, so the payload sent is the one previewed.
+ * Builds the synthetic test notification of an action policy once, with a seed the server picks.
+ * The previewed payload seeds the payload editor and is kept for every send from the flyout.
  */
 export const usePreviewTestNotification = (policyId: string) => {
   const actionPoliciesApi = useService(ActionPoliciesApi);
 
-  return useQuery<ActionPolicyTestPreviewResponse, Error>({
+  const { data, isLoading, error } = useQuery<ActionPolicyTestPreviewResponse, Error>({
     queryKey: actionPolicyKeys.testPreview(policyId),
     queryFn: () => actionPoliciesApi.previewTestNotification(policyId),
     refetchOnWindowFocus: false,
     staleTime: Infinity,
     cacheTime: 0,
   });
+
+  return { data, isLoading, error };
 };

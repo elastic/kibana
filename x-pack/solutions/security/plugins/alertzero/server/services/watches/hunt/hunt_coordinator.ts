@@ -23,6 +23,7 @@ import {
   huntCompletenessOf,
   retryableReasonsOf,
 } from './common/completeness';
+import { tier2AllowedIndices, unqualifiedExclusions } from './common/cps_scope';
 import { resolveHuntScope } from './common/resolve_index_scope';
 import { needsModelDatasetMatch, resolveTier2Targets } from './common/resolve_tier2_targets';
 import type { Tier2TargetSource } from './common/resolve_tier2_targets';
@@ -85,6 +86,8 @@ export interface HuntCoordinatorParams {
    * `securitySolution:defaultIndex` setting.
    */
   indexPatterns: string[];
+  /** Cross-project search is on: unqualified patterns in the universe reach linked projects. */
+  crossProjectSearch?: boolean;
   text?: string;
   iocs?: HuntIoc[];
   techniques?: string[];
@@ -199,7 +202,8 @@ export interface HuntCoordinatorCoreResult {
    */
   incomplete?: HuntIncompleteness[];
   /**
-   * Report IOCs excluded by adjudication and not searched by this run. Present only when
+   * Report IOCs excluded as ineligible (adjudicated out, deferred, or a non-routable
+   * `ip` / `cidr`) and not searched by this run. Present only when
    * the run used the report's IOC list (not a caller-supplied override) and at least one
    * searchable IOC was ineligible. This is not an `incomplete` gap: the run is complete,
    * it chose not to search those values.
@@ -323,7 +327,9 @@ const sampleTier2TargetEvents = async ({
     );
   } catch (err) {
     logger.warn(
-      `hunt_coordinator: could not sample Tier 2 targets for grounding — ${(err as Error).message}`
+      `hunt_coordinator: could not sample Behavior Hunt targets for grounding — ${
+        (err as Error).message
+      }`
     );
     return [];
   }
@@ -484,9 +490,9 @@ const coordinatorGaps = ({
     gaps.push({
       reason: 'generation_failed',
       detail:
-        `Tier 2 was requested but could not run (${skipReason}${
+        `Behavior Hunt was requested but could not run (${skipReason}${
           skipDetail ? `: ${skipDetail}` : ''
-        }), so this report's behavioral techniques were never hunted. Tier 1's result covers its ` +
+        }), so this report's behavioral techniques were never hunted. IOC Hunt's result covers its ` +
         `IOCs only.`,
     });
   }
@@ -495,7 +501,7 @@ const coordinatorGaps = ({
     gaps.push({
       reason: 'nothing_searched',
       detail:
-        `Tier 1 mapped no searchable term from this report and Tier 2 executed no query, so ` +
+        `IOC Hunt mapped no searchable term from this report and Behavior Hunt executed no query, so ` +
         `nothing reached the environment. The absence of hits says nothing about whether the ` +
         `environment is clean.`,
     });
@@ -579,6 +585,7 @@ const huntCoordinatorCore = async (
     text: callerText,
     run_id,
     indexPatterns,
+    crossProjectSearch = false,
     trigger,
   } = params;
 
@@ -619,7 +626,7 @@ const huntCoordinatorCore = async (
       gap: {
         reason: 'extraction_pending',
         detail:
-          'This report has not been enriched yet, so neither Tier 1 nor Tier 2 ran against it. It is not marked as hunted, so a later sweep can pick it up once enrichment finishes.',
+          'This report has not been enriched yet, so neither IOC Hunt nor Behavior Hunt ran against it. It is not marked as hunted, so a later sweep can pick it up once enrichment finishes.',
       },
     });
   }
@@ -629,8 +636,8 @@ const huntCoordinatorCore = async (
   // alone — still searched the report's IOCs and could confirm a hit on them.
   const iocs = callerIocs ?? reportContext?.iocs ?? [];
   const techniques = callerTechniques ?? reportContext?.techniques ?? [];
-  // Caller-supplied IOCs replace the report's list, so adjudication exclusions from the
-  // report are not coverage this run chose to skip (same gating as `truncated` below).
+  // Caller-supplied IOCs replace the report's list, so the report's ineligible-IOC exclusions
+  // are not coverage this run chose to skip (same gating as `truncated` below).
   const excludedIocs = callerIocs === undefined ? reportContext?.excluded_iocs : undefined;
   // Clamp after merge: request schema bounds caller `text`, but report-loaded
   // `content.body_text` has no such bound and must not exceed the Tier 2 contract.
@@ -712,6 +719,7 @@ const huntCoordinatorCore = async (
       esClient,
       spaceId,
       indexPatterns,
+      crossProjectSearch,
       report: scopeReport,
       logger,
     });
@@ -859,6 +867,7 @@ const huntCoordinatorCore = async (
     report: scopeReport,
     model: datasetMatchModel,
     messagesFallback: models.efficient,
+    crossProjectSearch,
     logger,
   });
 
@@ -927,10 +936,10 @@ const huntCoordinatorCore = async (
   if (gatedSkipReason) {
     return tier1Only({
       reason: gatedSkipReason,
-      message: `Tier 1: ${tier1Raw.status}. Tier 2 skipped (${gatedSkipReason}).`,
+      message: `IOC Hunt: ${tier1Raw.status}. Behavior Hunt skipped (${gatedSkipReason}).`,
       nextStep:
         tier1Raw.status === 'environment_hits_found'
-          ? 'Tier 1 matched. Re-run with tier2_when: "always" for behavioral rule proposals.'
+          ? 'IOC Hunt matched. Re-run with tier2_when: "always" for behavioral rule proposals.'
           : 'No environment matches. Consider widening time_range.',
     });
   }
@@ -939,8 +948,8 @@ const huntCoordinatorCore = async (
     const missingTiers = describeModelTiers(unavailableModelTiers(models, TIER2_MODEL_TIERS));
     return tier1Only({
       reason: 'no_inference',
-      message: `Tier 1: ${tier1Raw.status}. Tier 2 skipped (no model available for the ${missingTiers}).`,
-      nextStep: `Tier 2 needs a model for the ${missingTiers}. Create a GenAI connector if there is none, then pick it for the tier in Stack Management → Feature Settings.`,
+      message: `IOC Hunt: ${tier1Raw.status}. Behavior Hunt skipped (no model available for the ${missingTiers}).`,
+      nextStep: `Behavior Hunt needs a model for the ${missingTiers}. Create a GenAI connector if there is none, then pick it for the tier in Stack Management → Feature Settings.`,
     });
   }
 
@@ -965,9 +974,9 @@ const huntCoordinatorCore = async (
       actionable_indices: scope.actionable_indices,
       tier1,
       tier2_skipped_reason: 'no_report_text',
-      message: `Tier 1: ${tier1Raw.status}. Tier 2 skipped (no report text).`,
+      message: `IOC Hunt: ${tier1Raw.status}. Behavior Hunt skipped (no report text).`,
       next_step:
-        'Tier 2 needs report text. Pass `text` explicitly or use a `report_id` whose `content.body_text` has been ingested.',
+        'Behavior Hunt needs report text. Pass `text` explicitly or use a `report_id` whose `content.body_text` has been ingested.',
       has_confirmed_hit: tier1Raw.has_confirmed_hit,
       completeness,
       completed_successfully: completedSuccessfully(completeness),
@@ -995,9 +1004,9 @@ const huntCoordinatorCore = async (
       const failure = targets.dataset_match.message ?? 'the model call failed';
       return tier1Only({
         reason: 'no_inference',
-        message: `Tier 1: ${tier1Raw.status}. Tier 2 skipped (the dataset-match model call failed: ${failure}).`,
+        message: `IOC Hunt: ${tier1Raw.status}. Behavior Hunt skipped (the dataset-match model call failed: ${failure}).`,
         nextStep:
-          'Tier 2 could not choose where to hunt because the dataset-match model call failed. Check the connector for the model that tier uses; the next sweep retries.',
+          'Behavior Hunt could not choose where to hunt because the dataset-match model call failed. Check the connector for the model that tier uses; the next sweep retries.',
         skipDetail: failure,
         surfaceSkipDetail: true,
       });
@@ -1009,15 +1018,15 @@ const huntCoordinatorCore = async (
       const missingTier = describeModelTiers(['efficient']);
       return tier1Only({
         reason: 'no_inference',
-        message: `Tier 1: ${tier1Raw.status}. Tier 2 skipped (no model available for the ${missingTier} to choose where to hunt).`,
-        nextStep: `Tier 2 could not choose where to hunt because the ${missingTier} has no model. Create a GenAI connector if there is none, then pick it for the tier in Stack Management → Feature Settings.`,
+        message: `IOC Hunt: ${tier1Raw.status}. Behavior Hunt skipped (no model available for the ${missingTier} to choose where to hunt).`,
+        nextStep: `Behavior Hunt could not choose where to hunt because the ${missingTier} has no model. Create a GenAI connector if there is none, then pick it for the tier in Stack Management → Feature Settings.`,
       });
     }
     return tier1Only({
       reason: 'no_tier2_targets',
-      message: `Tier 1: ${tier1Raw.status}. Tier 2 skipped (no_tier2_targets).`,
+      message: `IOC Hunt: ${tier1Raw.status}. Behavior Hunt skipped (no_tier2_targets).`,
       nextStep:
-        "The report matched no dataset, Tier 1 hit no index, and no index in the default data view carries process telemetry, so Tier 2 had no safe target. Install an integration for the report's vendor to hunt its behaviors.",
+        "The report matched no dataset, IOC Hunt hit no index, and no index in the default data view carries process telemetry, so Behavior Hunt had no safe target. Install an integration for the report's vendor to hunt its behaviors.",
     });
   }
 
@@ -1061,7 +1070,15 @@ const huntCoordinatorCore = async (
         row_limit: scope.row_limit,
         // Every reader downstream (the allowlist, the schema probe, the publish/execute
         // gates, the hit bar) treats this as the set Tier 2 may read.
-        allowed_indices: targets.tier2_targets,
+        allowed_indices: tier2AllowedIndices({
+          targets: targets.tier2_targets,
+          universe: scope.index_patterns,
+          crossProjectSearch,
+        }),
+        cross_project_search: crossProjectSearch,
+        ...(crossProjectSearch
+          ? { excluded_indices: unqualifiedExclusions(scope.index_patterns) }
+          : {}),
         ...(continuation
           ? {
               already_searched_technique_ids: continuation.already_searched_technique_ids,
@@ -1076,8 +1093,8 @@ const huntCoordinatorCore = async (
     logger.warn(`hunt_coordinator: tier2 huntBehavior failed — ${(err as Error).message}`);
     return tier1Only({
       reason: 'tier2_failed',
-      message: `Tier 1: ${tier1Raw.status}. Tier 2 failed: ${(err as Error).message}`,
-      nextStep: 'Tier 2 LLM call failed. Check connector configuration and retry.',
+      message: `IOC Hunt: ${tier1Raw.status}. Behavior Hunt failed: ${(err as Error).message}`,
+      nextStep: 'Behavior Hunt LLM call failed. Check connector configuration and retry.',
       skipDetail: (err as Error).message,
       // Tier 2 had the text and failed on it, so the prefix it read is what it failed on.
       readReportText: true,
@@ -1156,7 +1173,7 @@ const huntCoordinatorCore = async (
     tier1,
     tier2,
     message:
-      `Tier 1: ${tier1Raw.status}. Tier 2: ${tier2Raw.status} ` +
+      `IOC Hunt: ${tier1Raw.status}. Behavior Hunt: ${tier2Raw.status} ` +
       `(${tier2Raw.behaviors.length} proposed` +
       `${gaps.length > 0 ? `, ${gaps.length} coverage gap(s)` : ''}).`,
     next_step:

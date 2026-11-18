@@ -132,7 +132,6 @@ export const Content: FC<ContentProps> = memo(({ ip, flowTarget }: ContentProps)
       indexPatterns={selectedPatterns}
       jobNameById={jobNameById}
       scopeId={PageScope.default}
-      isFlyoutOpen={true}
     />
   ) : (
     <EmptyPrompt />

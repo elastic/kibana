@@ -216,12 +216,51 @@ describe('initialize edit api', () => {
         path: '/mock-url-for-onedit',
         state: {
           embeddableId: 'test',
-          valueInput: undefined,
+          valueInput: {
+            discoverSessionTab: undefined,
+            dashboardControlGroupState: {},
+          },
           searchSessionId: undefined,
           originatingApp: 'dashboard',
           originatingPath: '/current-parent-path',
         },
       });
+    });
+
+    it('should pass the dashboard controls to Discover for by-reference embeddables', async () => {
+      const { type: _type, ...controlState } = mockControlState.panel1;
+      const dashboardControlState = {
+        ...controlState,
+        variable_name: 'host.name',
+        title: 'Host name',
+      };
+      mockedParentApi.children$.next({
+        panel1: createEsqlControlApi('panel1', dashboardControlState),
+      });
+      const editApi = initializeEditApi({
+        uuid: 'test',
+        parentApi: mockedParentApi,
+        partialApi: { ...mockedApi, getSelectedTabId: () => undefined },
+        isEditable: () => true,
+        discoverServices: discoverServiceMock,
+        getTitle: () => 'test-title',
+      });
+
+      await editApi?.onEdit();
+
+      expect(mockedNavigate).toHaveBeenCalledWith(
+        'discover',
+        expect.objectContaining({
+          state: expect.objectContaining({
+            valueInput: {
+              discoverSessionTab: undefined,
+              dashboardControlGroupState: {
+                panel1: { ...dashboardControlState, type: ESQL_CONTROL },
+              },
+            },
+          }),
+        })
+      );
     });
 
     it('should pass the selected tab id to the locator for by-reference embeddables', async () => {

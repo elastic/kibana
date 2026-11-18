@@ -11,7 +11,7 @@ import { OBSERVABILITY_STREAMS_ENABLE_CANVAS } from '@kbn/management-settings-id
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { z } from '@kbn/zod/v4';
 import type { IndexMetadataResponse } from '../../../../common';
-import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import { STREAMS_V2_API_PRIVILEGES } from '../../../../common/constants';
 import { getDataStreamLifecycle, getFailureStore } from '../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../create_server_route';
 
@@ -54,7 +54,7 @@ export const indexMetadataRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_V2_API_PRIVILEGES.read],
     },
   },
   params: z.object({
