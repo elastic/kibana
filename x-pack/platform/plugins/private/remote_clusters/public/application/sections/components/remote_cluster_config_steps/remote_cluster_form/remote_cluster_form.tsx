@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useState, useContext, useCallback, useEffect } from 'react';
+import React, { useState, useContext, useCallback, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
+import { flushSync } from 'react-dom';
 import { merge } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -18,12 +19,10 @@ import {
   EuiForm,
   EuiFormRow,
   EuiLink,
+  EuiLiveAnnouncer,
   EuiSpacer,
   EuiSwitch,
   EuiTitle,
-  EuiDelayRender,
-  EuiScreenReaderOnly,
-  htmlIdGenerator,
   useEuiTheme,
   EuiText,
 } from '@elastic/eui';
@@ -51,8 +50,8 @@ const defaultClusterValues: ClusterPayload = {
   proxySocketConnections: 18,
   serverName: '',
 };
-const ERROR_TITLE_ID = 'removeClustersErrorTitle';
-const ERROR_LIST_ID = 'removeClustersErrorList';
+const FIRST_INVALID_CONTROL_SELECTOR =
+  'input[aria-invalid="true"]:not(:disabled), textarea[aria-invalid="true"]:not(:disabled)';
 interface Props {
   confirmFormAction: (cluster: ClusterPayload) => void;
   onBack?: () => void;
@@ -97,7 +96,15 @@ export const RemoteClusterForm: React.FC<Props> = ({
   );
   const [areErrorsVisible, setAreErrorsVisible] = useState(false);
   const [formHasBeenSubmited, setFormHasBeenSubmited] = useState(false);
-  const generateId = htmlIdGenerator();
+  const [errorAnnouncement, setErrorAnnouncement] = useState<{
+    key: number;
+    message: ReactNode;
+  }>();
+  const formRef = useRef<HTMLDivElement>(null);
+  const errorSectionRef = useRef<HTMLDivElement>(null);
+  const errorTitle = i18n.translate('xpack.remoteClusters.remoteClusterForm.errorTitle', {
+    defaultMessage: 'Some fields require your attention.',
+  });
   const getCluster = useCallback((): ClusterPayload => {
     const {
       name,
@@ -133,7 +140,37 @@ export const RemoteClusterForm: React.FC<Props> = ({
 
   const handleNext = () => {
     if (hasErrors()) {
-      setAreErrorsVisible(true);
+      const firstFieldError =
+        fieldsErrors.name ??
+        fieldsErrors.cloudRemoteAddress ??
+        fieldsErrors.seeds ??
+        fieldsErrors.proxyAddress ??
+        fieldsErrors.nodeConnections;
+      // Snapshot the message so later field edits don't re-fire the assertive live region.
+      flushSync(() => {
+        setAreErrorsVisible(true);
+        setErrorAnnouncement((previous) => ({
+          key: (previous?.key ?? 0) + 1,
+          message: (
+            <>
+              {errorTitle} {firstFieldError}
+            </>
+          ),
+        }));
+      });
+      const firstInvalidField = formRef.current?.querySelector<HTMLElement>(
+        FIRST_INVALID_CONTROL_SELECTOR
+      );
+      // Focusing an EuiComboBox makes VoiceOver read its "Combo box. Selected..." instructions
+      // instead of the error, so the callout takes focus when the first invalid field is one.
+      if (firstInvalidField?.getAttribute('role') !== 'combobox') {
+        firstInvalidField?.focus();
+      }
+      if (!firstInvalidField || document.activeElement !== firstInvalidField) {
+        errorSectionRef.current
+          ?.querySelector<HTMLElement>('[data-test-subj="remoteClusterFormGlobalError"]')
+          ?.focus();
+      }
       return;
     }
     setFormHasBeenSubmited(true);
@@ -284,69 +321,18 @@ export const RemoteClusterForm: React.FC<Props> = ({
   };
 
   const renderErrors = () => {
-    const {
-      name: errorClusterName,
-      seeds: errorsSeeds,
-      proxyAddress: errorProxyAddress,
-    } = fieldsErrors;
     if (!areErrorsVisible || !hasErrors()) {
       return null;
     }
-    const errorExplanations = [];
-    if (errorClusterName) {
-      errorExplanations.push({
-        key: 'nameExplanation',
-        field: i18n.translate('xpack.remoteClusters.remoteClusterForm.inputNameErrorMessage', {
-          defaultMessage: 'The "Name" field is invalid.',
-        }),
-        error: errorClusterName,
-      });
-    }
-    if (errorsSeeds) {
-      errorExplanations.push({
-        key: 'seedsExplanation',
-        field: i18n.translate('xpack.remoteClusters.remoteClusterForm.inputSeedsErrorMessage', {
-          defaultMessage: 'The "Seed nodes" field is invalid.',
-        }),
-        error: errorsSeeds,
-      });
-    }
-    if (errorProxyAddress) {
-      errorExplanations.push({
-        key: 'proxyAddressExplanation',
-        field: i18n.translate('xpack.remoteClusters.remoteClusterForm.inputProxyErrorMessage', {
-          defaultMessage: 'The "Proxy address" field is invalid.',
-        }),
-        error: errorProxyAddress,
-      });
-    }
-    const messagesToBeRendered = errorExplanations.length && (
-      <EuiScreenReaderOnly>
-        <dl id={generateId(ERROR_LIST_ID)} aria-labelledby={generateId(ERROR_TITLE_ID)}>
-          {errorExplanations.map(({ key, field, error }) => (
-            <div key={key}>
-              <dt>{field}</dt>
-              <dd>{error}</dd>
-            </div>
-          ))}
-        </dl>
-      </EuiScreenReaderOnly>
-    );
     return (
-      <>
+      <div ref={errorSectionRef}>
         <KbnDangerCallout
-          title={
-            <span id={generateId(ERROR_TITLE_ID)}>
-              <FormattedMessage
-                id="xpack.remoteClusters.remoteClusterForm.errorTitle"
-                defaultMessage="Some fields require your attention."
-              />
-            </span>
-          }
+          tabIndex={-1}
+          title={errorTitle}
+          data-test-subj="remoteClusterFormGlobalError"
         />
-        <EuiDelayRender>{messagesToBeRendered}</EuiDelayRender>
-        <EuiSpacer size="m" data-test-subj="remoteClusterFormGlobalError" />
-      </>
+        <EuiSpacer size="m" />
+      </div>
     );
   };
   const isNew = !cluster;
@@ -354,7 +340,17 @@ export const RemoteClusterForm: React.FC<Props> = ({
     <>
       {saveError && <SaveError saveError={saveError} />}
       {renderErrors()}
-      <EuiForm data-test-subj="remoteClusterForm">
+      {errorAnnouncement && (
+        <EuiLiveAnnouncer
+          key={errorAnnouncement.key}
+          role="alert"
+          aria-live="assertive"
+          data-test-subj="remoteClusterFormErrorAnnouncement"
+        >
+          {errorAnnouncement.message}
+        </EuiLiveAnnouncer>
+      )}
+      <EuiForm ref={formRef} data-test-subj="remoteClusterForm">
         <EuiDescribedFormGroup
           title={
             <EuiTitle size="s">

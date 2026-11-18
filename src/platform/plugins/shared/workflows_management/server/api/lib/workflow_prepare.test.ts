@@ -14,6 +14,7 @@ import {
   applyFieldUpdates,
   applyYamlUpdate,
   getTriggerTypesFromDefinition,
+  keepEnabledUnlessDeclared,
   prepareWorkflowDocumentFromYaml,
   workflowYamlDeclaresTopLevelEnabled,
 } from './workflow_prepare';
@@ -337,7 +338,7 @@ describe('applyYamlUpdate', () => {
     expect(result.updatedDataPatch).not.toHaveProperty('tags');
   });
 
-  it('logs kibana.request fetcher on YAML updates when the self-client path is on', async () => {
+  it('logs kibana.request fetcher on YAML updates', async () => {
     const zodSchema = getWorkflowZodSchema({});
     const logger = { warn: jest.fn() } as unknown as import('@kbn/logging').Logger;
     const yaml = [
@@ -361,7 +362,6 @@ describe('applyYamlUpdate', () => {
       zodSchema,
       triggerDefinitions: [],
       logger,
-      warnIgnoredKibanaFetcher: true,
       workflowId: 'wf-1',
     });
 
@@ -372,34 +372,48 @@ describe('applyYamlUpdate', () => {
       })
     );
   });
+});
 
-  it('does not log kibana.request fetcher on YAML updates when the self-client path is off', async () => {
-    const zodSchema = getWorkflowZodSchema({});
-    const logger = { warn: jest.fn() } as unknown as import('@kbn/logging').Logger;
-    const yaml = [
-      "version: '1'",
-      'name: kibana-fetcher',
-      'enabled: true',
+describe('keepEnabledUnlessDeclared', () => {
+  const zodSchema = getWorkflowZodSchema({});
+  const workflowYaml = (enabledLine?: string) =>
+    [
+      'version: "1"',
+      'name: Alert context',
+      ...(enabledLine ? [enabledLine] : []),
       'triggers:',
       '  - type: manual',
       'steps:',
-      '  - name: status',
-      '    type: kibana.request',
+      '  - name: log',
+      '    type: console',
       '    with:',
-      '      method: GET',
-      '      path: /api/status',
-      '      fetcher:',
-      '        skip_ssl_verification: true',
+      '      message: hello',
     ].join('\n');
+  const prepare = async (yaml: string, enabled: boolean) =>
+    keepEnabledUnlessDeclared(
+      yaml,
+      await applyYamlUpdate({ workflowYaml: yaml, zodSchema, triggerDefinitions: [] }),
+      enabled
+    );
 
-    await applyYamlUpdate({
-      workflowYaml: yaml,
-      zodSchema,
-      triggerDefinitions: [],
-      logger,
-    });
+  it('keeps the current enabled state when the YAML does not set one', async () => {
+    const patch = await prepare(workflowYaml(), false);
 
-    expect(logger.warn).not.toHaveBeenCalled();
+    expect(patch.enabled).toBe(false);
+    expect(patch.definition?.enabled).toBe(false);
+  });
+
+  it('uses the enabled state the YAML declares', async () => {
+    const patch = await prepare(workflowYaml('enabled: true'), false);
+
+    expect(patch.enabled).toBe(true);
+    expect(patch.definition?.enabled).toBe(true);
+  });
+
+  it('leaves invalid YAML stored as disabled', async () => {
+    const patch = await prepare('name: Broken\nsteps: oops', true);
+
+    expect(patch).toMatchObject({ valid: false, enabled: false, definition: null });
   });
 });
 
@@ -525,6 +539,37 @@ describe('prepareWorkflowDocumentFromYaml', () => {
     expect(result.workflowData.name).toBe('From YAML');
   });
 
+  it('assigns a workflowUid when the caller does not pass one', async () => {
+    const zodSchema = getWorkflowZodSchema({});
+
+    const result = await prepareWorkflowDocumentFromYaml({
+      yaml: 'name: New document\nenabled: true',
+      zodSchema,
+      authenticatedUser: 'user1',
+      now,
+      spaceId: 'default',
+    });
+
+    expect(result.workflowData.workflowUid).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    );
+  });
+
+  it('preserves a caller-supplied workflowUid', async () => {
+    const zodSchema = getWorkflowZodSchema({});
+
+    const result = await prepareWorkflowDocumentFromYaml({
+      yaml: 'name: Existing document\nenabled: true',
+      zodSchema,
+      authenticatedUser: 'user1',
+      now,
+      spaceId: 'default',
+      workflowUid: 'uid-kept',
+    });
+
+    expect(result.workflowData.workflowUid).toBe('uid-kept');
+  });
+
   it('logs once when kibana YAML still includes fetcher', async () => {
     const zodSchema = getWorkflowZodSchema({});
     const logger = { warn: jest.fn() } as unknown as import('@kbn/logging').Logger;
@@ -551,7 +596,6 @@ describe('prepareWorkflowDocumentFromYaml', () => {
       now,
       spaceId: 'default',
       logger,
-      warnIgnoredKibanaFetcher: true,
     });
 
     expect(logger.warn).toHaveBeenCalledTimes(1);
@@ -564,38 +608,7 @@ describe('prepareWorkflowDocumentFromYaml', () => {
     );
   });
 
-  it('does not log kibana fetcher when the self-client path is off', async () => {
-    const zodSchema = getWorkflowZodSchema({});
-    const logger = { warn: jest.fn() } as unknown as import('@kbn/logging').Logger;
-    const yaml = [
-      "version: '1'",
-      'name: kibana-fetcher',
-      'enabled: true',
-      'triggers:',
-      '  - type: manual',
-      'steps:',
-      '  - name: status',
-      '    type: kibana.request',
-      '    with:',
-      '      method: GET',
-      '      path: /api/status',
-      '      fetcher:',
-      '        skip_ssl_verification: true',
-    ].join('\n');
-
-    await prepareWorkflowDocumentFromYaml({
-      yaml,
-      zodSchema,
-      authenticatedUser: 'user1',
-      now,
-      spaceId: 'default',
-      logger,
-    });
-
-    expect(logger.warn).not.toHaveBeenCalled();
-  });
-
-  it('does not log generated kibana.* fetcher when the self-client flag is off', async () => {
+  it('logs generated kibana.* fetcher', async () => {
     const zodSchema = getWorkflowZodSchema({});
     const logger = { warn: jest.fn() } as unknown as import('@kbn/logging').Logger;
     const yaml = [
@@ -622,6 +635,11 @@ describe('prepareWorkflowDocumentFromYaml', () => {
       logger,
     });
 
-    expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('fetcher'),
+      expect.objectContaining({
+        labels: expect.objectContaining({ step_names: 'get-case' }),
+      })
+    );
   });
 });

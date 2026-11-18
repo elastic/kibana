@@ -107,6 +107,7 @@ export class WorkflowRepository {
           : undefined;
       const managedVersion =
         typeof source.managedVersion === 'number' ? source.managedVersion : undefined;
+      const workflowUid = typeof source.workflowUid === 'string' ? source.workflowUid : undefined;
       return {
         id: workflowId,
         ...(source.owner_id ? { owner_id: source.owner_id as string } : {}),
@@ -128,6 +129,7 @@ export class WorkflowRepository {
         ...(billable !== undefined ? { billable } : {}),
         ...(originManagedWorkflowId !== undefined ? { originManagedWorkflowId } : {}),
         ...(managedVersion !== undefined ? { managedVersion } : {}),
+        ...(workflowUid !== undefined ? { workflowUid } : {}),
         ...pickWorkflowDocumentVersion(source),
       };
     } catch (error) {
@@ -222,12 +224,17 @@ export class WorkflowRepository {
     return new Map([...states].map(([key, state]) => [key, state.enabled]));
   }
 
-  /** Loads current enabled state and ACLs in one query, with missing and deleted workflows disabled. */
+  /** Loads enabled state, workflowUid, and ACLs in one query, with missing and deleted workflows disabled. */
   async getWorkflowExecutionStates(
     refs: Array<{ workflowId: string; spaceId: string }>,
     options?: WorkflowLookupOptions
-  ): Promise<Map<string, Pick<EsWorkflow, 'enabled' | 'owner_id' | 'access_control'>>> {
-    const result = new Map<string, Pick<EsWorkflow, 'enabled' | 'owner_id' | 'access_control'>>();
+  ): Promise<
+    Map<string, Pick<EsWorkflow, 'enabled' | 'owner_id' | 'access_control' | 'workflowUid'>>
+  > {
+    const result = new Map<
+      string,
+      Pick<EsWorkflow, 'enabled' | 'owner_id' | 'access_control' | 'workflowUid'>
+    >();
     if (refs.length === 0) {
       return result;
     }
@@ -265,7 +272,7 @@ export class WorkflowRepository {
     try {
       const response = await this.options.esClient.search({
         index: this.options.indexName,
-        _source: ['enabled', 'spaceId', 'owner_id', 'access_control'],
+        _source: ['enabled', 'spaceId', 'owner_id', 'access_control', 'workflowUid'],
         allow_partial_search_results: false,
         size: uniqueKeys.size,
         track_total_hits: false,
@@ -290,13 +297,18 @@ export class WorkflowRepository {
 
       for (const hit of response.hits.hits) {
         const source = hit._source as
-          | (Pick<EsWorkflow, 'enabled' | 'owner_id' | 'access_control'> & { spaceId?: string })
+          | (Pick<EsWorkflow, 'enabled' | 'owner_id' | 'access_control' | 'workflowUid'> & {
+              spaceId?: string;
+            })
           | undefined;
         if (source) {
+          const workflowUid =
+            typeof source.workflowUid === 'string' ? source.workflowUid : undefined;
           const state = {
             enabled: source.enabled ?? false,
             owner_id: source.owner_id,
             access_control: storedWorkflowAccessControlSchema.parse(source.access_control),
+            ...(workflowUid ? { workflowUid } : {}),
           };
           if (source.spaceId === GLOBAL_WORKFLOW_SPACE_ID && options?.includeGlobal) {
             const requestedSpaces = requestedSpacesByWorkflowId.get(hit._id ?? '');
@@ -470,6 +482,7 @@ export class WorkflowRepository {
       'managedBy',
       'originManagedWorkflowId',
       'managedVersion',
+      'workflowUid',
       'version',
     ];
 
@@ -546,6 +559,7 @@ export class WorkflowRepository {
         ...(typeof source.managedVersion === 'number'
           ? { managedVersion: source.managedVersion }
           : {}),
+        ...(typeof source.workflowUid === 'string' ? { workflowUid: source.workflowUid } : {}),
         ...pickWorkflowDocumentVersion(source),
       }));
     } finally {

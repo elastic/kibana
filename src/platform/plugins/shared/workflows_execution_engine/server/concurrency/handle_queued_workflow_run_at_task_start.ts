@@ -14,6 +14,7 @@ import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { getConcurrencyGroupLock, withConcurrencyGroupLock } from './concurrency_group_lock';
 import { getQueueWaitDeadlineMs, resolveQueueTtlSetting } from './queue_concurrency_utils';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { publishFinishedWorkflowExecution } from '../topics/publish_finished_workflow_execution';
 
 export const QUEUE_RUN_INVARIANT_ERROR_TYPE = 'QueueRunInvariantError' as const;
 
@@ -72,11 +73,20 @@ const expireOrFailQueuedRun = async (
 
   if (nowMs >= deadlineMs) {
     const cancelledAt = new Date().toISOString();
+    const cancellationReason = `Queue wait exceeded (queue-ttl: ${ttlSetting})`;
     await workflowExecutionRepository.updateWorkflowExecution({
       id: workflowRunId,
       status: ExecutionStatus.SKIPPED,
       cancelRequested: true,
-      cancellationReason: `Queue wait exceeded (queue-ttl: ${ttlSetting})`,
+      cancellationReason,
+      cancelledAt,
+      cancelledBy: 'system',
+    });
+    await publishFinishedWorkflowExecution(execution, {
+      id: workflowRunId,
+      status: ExecutionStatus.SKIPPED,
+      cancelRequested: true,
+      cancellationReason,
       cancelledAt,
       cancelledBy: 'system',
     });
@@ -89,13 +99,20 @@ const expireOrFailQueuedRun = async (
   const finishedAt = new Date().toISOString();
   const message =
     'Queue run task started before the execution was promoted from queued to pending; no recovery path exists for this state';
+  const error = {
+    type: QUEUE_RUN_INVARIANT_ERROR_TYPE,
+    message,
+  };
   await workflowExecutionRepository.updateWorkflowExecution({
     id: workflowRunId,
     status: ExecutionStatus.FAILED,
-    error: {
-      type: QUEUE_RUN_INVARIANT_ERROR_TYPE,
-      message,
-    },
+    error,
+    finishedAt,
+  });
+  await publishFinishedWorkflowExecution(execution, {
+    id: workflowRunId,
+    status: ExecutionStatus.FAILED,
+    error,
     finishedAt,
   });
   logger.error(`Workflow execution ${workflowRunId} failed: ${message}`);

@@ -960,9 +960,11 @@ as `nightshift-investigations`.
   ([`kibana-evals-daily-llm-evals`](https://buildkite.com/elastic/kibana-evals-daily-llm-evals))
   runs every shard against Sonnet 5.5, the production investigation model, at 02:00 UTC on
   weekdays.
-- **Failures** are posted to `#nightshift-alerts`, resolved from `slackChannel` in the suite entry
-  (weekly) or `EVAL_SLACK_NOTIFICATION_CHANNEL` (daily). Both only post from `main`; a weekly or
-  daily build started on another branch runs the evals but skips the notification.
+- **Slack:** weekly and daily runs post to `#nightshift-alerts`, resolved from `slackChannel` in
+  the suite entry (weekly) or `EVAL_SLACK_NOTIFICATION_CHANNEL` (daily). A failure posts a triage
+  summary. A run where every eval step passed posts a short passed message, so the channel shows
+  the run happened; scores have no pass threshold. Both only post from `main`; a weekly or daily
+  build started on another branch runs the evals but skips the Slack post.
 - **Scores** reach the golden cluster automatically, through `EVAL_KBN_URL` in CI.
 
 ## Validation

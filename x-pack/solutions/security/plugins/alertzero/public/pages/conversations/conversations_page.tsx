@@ -54,6 +54,7 @@ import { useAppHeadingDocLink, useAppHeadingTitle } from '../../components/app_c
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useConversationsUrlParams } from './conversations_url_params';
 import { useInvestigationDetails } from './use_investigation_details';
+import { useInvestigationFlyoutBrowserHistory } from './use_investigation_flyout_browser_history';
 import { useCopyInvestigationLink } from './use_copy_investigation_link';
 import {
   AGENT_BUILDER_PRIVILEGE_REQUIRED,
@@ -382,6 +383,7 @@ const ConversationsPageContent: React.FC = () => {
     onClose: clearSelectedConversation,
     onCopyLink: copyInvestigationLinkFromFlyout,
   });
+  useInvestigationFlyoutBrowserHistory(canAccessAgentBuilder ? selectedConversationId : undefined);
   useEffect(() => {
     if (selectedConversationId && !canAccessAgentBuilder) {
       notifications?.toasts.addWarning(AGENT_BUILDER_PRIVILEGE_REQUIRED.toast);
