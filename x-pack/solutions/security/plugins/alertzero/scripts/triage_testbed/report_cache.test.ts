@@ -302,6 +302,49 @@ describe('buildCacheSection', () => {
       });
     });
 
+    it('reports what the novelty guard would do: how many wrong reuses it catches, how many right ones it stops, and the variants by type', () => {
+      const guard = (field: string): string => `az:guard_hit:novelty:${field}`;
+      const truth: Truth = new Map([
+        ['caught', { verdict: 'true_positive', variant: 'new_hash' }],
+        ['missed', { verdict: 'true_positive', variant: 'different_script' }],
+        ['false-alarm', { verdict: 'false_positive', benign: 'hash_update' }],
+        ['quiet', { verdict: 'false_positive' }],
+      ]);
+
+      const { guards } = build({
+        records: [active],
+        alerts: [
+          alert('caught', tagOf(active), guard('hash'), guard('trusted')),
+          alert('missed', tagOf(active)),
+          alert('false-alarm', tagOf(active), guard('hash')),
+          alert('quiet', tagOf(active)),
+        ],
+        truth,
+      });
+
+      expect(guards).toEqual({
+        alertsWithHit: 2,
+        shareWithHit: 0.5,
+        byField: { hash: 2, trusted: 1 },
+        wrongReuse: { total: 2, caught: 1, missed: 1, caughtShare: 0.5 },
+        rightReuse: { total: 2, fired: 1, firedShare: 0.5 },
+        byVariant: {
+          new_hash: { tagged: 1, caught: 1 },
+          different_script: { tagged: 1, caught: 0 },
+        },
+        harmlessHashUpdates: { tagged: 1, fired: 1 },
+      });
+    });
+
+    it('has no shares when nothing was tagged', () => {
+      expect(build().guards).toMatchObject({
+        alertsWithHit: 0,
+        shareWithHit: null,
+        wrongReuse: { total: 0, caughtShare: null },
+        rightReuse: { total: 0, firedShare: null },
+      });
+    });
+
     it('ignores the other az tags of an alert', () => {
       const section = build({
         records: [active],
@@ -327,7 +370,7 @@ describe('cacheNote', () => {
     );
 
     expect(note).toBe(
-      'Verdict cache (shadow): 2 records (1 active, 1 unstable), 1 alerts tagged would-reuse (25.0% of the analyzed alerts), 4 hits compared with fresh verdicts (75.0% agree), against the truth 1 of 1 tagged alerts would get a wrong reused verdict (1 of them a true positive covered by a false positive record). Of the tagged alerts, 0 are building blocks and 100.0% came within one hour of their record.'
+      'Verdict cache (shadow): 2 records (1 active, 1 unstable), 1 alerts tagged would-reuse (25.0% of the analyzed alerts), 4 hits compared with fresh verdicts (75.0% agree), against the truth 1 of 1 tagged alerts would get a wrong reused verdict (1 of them a true positive covered by a false positive record). Of the tagged alerts, 0 are building blocks and 100.0% came within one hour of their record. The novelty guard fired on 0.0% of the tagged alerts and caught 0 of 1 wrong reuses (0 of 0 right reuses fired).'
     );
   });
 

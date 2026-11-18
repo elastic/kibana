@@ -18,6 +18,7 @@
  */
 
 import { TRIAGE_DECISIONS_AI_INDEX_DEST } from '../../common/step_types/triage_decisions_index';
+import { GUARD_HIT_TAG_PREFIX, NOVELTY_GUARD } from '../../server/alert_triage/novelty_guard';
 import { describePatternKey } from '../../server/alert_triage/pattern_key';
 import {
   TRIAGE_WOULD_REUSE_TAG_PREFIX,
@@ -90,6 +91,26 @@ export interface CacheSection {
     /** Tagged alerts as a share of the alerts analyzed in the run. */
     shareOfAnalyzed: number | null;
   };
+  /**
+   * The novelty guard on the alerts tagged would-reuse. In shadow mode it changes no outcome, so this is what it would have
+   * done: which alerts it would send back to analysis, and whether those are the wrong reuses or the right ones.
+   */
+  guards: {
+    /** Tagged alerts with at least one `az:guard_hit:novelty:<field>` tag. */
+    alertsWithHit: number;
+    /** Share of the tagged alerts that the guard would send back to analysis. What is left is the saving. */
+    shareWithHit: number | null;
+    /** Tagged alerts by field that fired. An alert can fire on more than one field. */
+    byField: Record<string, number>;
+    /** Wrong reuses (the truth differs from the record), and how many the guard caught. The rest is what it misses. */
+    wrongReuse: { total: number; caught: number; missed: number; caughtShare: number | null };
+    /** Reuses that are right. A hit here costs analysis work and saves nothing. */
+    rightReuse: { total: number; fired: number; firedShare: number | null };
+    /** Planted variants among the tagged alerts, by type. */
+    byVariant: Record<string, { tagged: number; caught: number }>;
+    /** Harmless hash updates among the tagged alerts: a guard hit on them is a false alarm. */
+    harmlessHashUpdates: { tagged: number; fired: number };
+  };
   agreement: {
     /** Of the hits that the batch compared, the share where the fresh verdict equals the verdict of the record. */
     withFresh: number | null;
@@ -159,6 +180,13 @@ export const buildCacheSection = ({
   let checked = 0;
   let wrong = 0;
   let falsePositiveRecordOnTruePositive = 0;
+  const guardTagPrefix = `${GUARD_HIT_TAG_PREFIX}${NOVELTY_GUARD}:`;
+  const firedByField: Record<string, number> = {};
+  const byVariant: CacheSection['guards']['byVariant'] = {};
+  const harmless = { tagged: 0, fired: 0 };
+  const wrongReuse = { total: 0, caught: 0 };
+  const rightReuse = { total: 0, fired: 0 };
+  let alertsWithHit = 0;
   for (const alert of alerts) {
     const tag = alert.tags.find((candidate) => candidate.startsWith(TRIAGE_WOULD_REUSE_TAG_PREFIX));
     if (tag === undefined) continue;
@@ -170,12 +198,35 @@ export const buildCacheSection = ({
     count(bySeverity, alert.severity ?? 'unknown');
     if (alert.buildingBlock === true) buildingBlocks++;
     if (Date.parse(alert.timestamp) - Date.parse(record.createdAt) <= HOUR_MS) withinOneHour++;
+    const firedFields = alert.tags
+      .filter((candidate) => candidate.startsWith(guardTagPrefix))
+      .map((candidate) => candidate.slice(guardTagPrefix.length));
+    const fired = firedFields.length > 0;
+    if (fired) alertsWithHit++;
+    firedFields.forEach((field) => count(firedByField, field));
     const known = truth.get(alert.id);
     if (known === undefined) continue;
+    if (known.variant) {
+      const entry = (byVariant[known.variant] = byVariant[known.variant] ?? {
+        tagged: 0,
+        caught: 0,
+      });
+      entry.tagged++;
+      if (fired) entry.caught++;
+    }
+    if (known.benign === 'hash_update') {
+      harmless.tagged++;
+      if (fired) harmless.fired++;
+    }
     checked++;
     if (known.verdict !== record.verdict) {
       wrong++;
+      wrongReuse.total++;
+      if (fired) wrongReuse.caught++;
       if (record.verdict === 'false_positive') falsePositiveRecordOnTruePositive++;
+    } else {
+      rightReuse.total++;
+      if (fired) rightReuse.fired++;
     }
   }
 
@@ -226,6 +277,22 @@ export const buildCacheSection = ({
       ),
       shareOfAnalyzed: share(taggedAnalyzed, analyzedAlerts),
     },
+    guards: {
+      alertsWithHit,
+      shareWithHit: share(
+        alertsWithHit,
+        Object.values(byKind).reduce((a, b) => a + b, 0)
+      ),
+      byField: firedByField,
+      wrongReuse: {
+        ...wrongReuse,
+        missed: wrongReuse.total - wrongReuse.caught,
+        caughtShare: share(wrongReuse.caught, wrongReuse.total),
+      },
+      rightReuse: { ...rightReuse, firedShare: share(rightReuse.fired, rightReuse.total) },
+      byVariant,
+      harmlessHashUpdates: harmless,
+    },
     agreement: {
       withFresh: share(agreements, hitAlerts),
       againstTruth: {
@@ -242,7 +309,7 @@ export const buildCacheSection = ({
 export const cacheNote = (section: CacheSection): string => {
   const percent = (value: number | null): string =>
     value === null ? 'n/a' : `${(value * 100).toFixed(1)}%`;
-  const { records, taggedAlerts, agreement, writeStep } = section;
+  const { records, taggedAlerts, agreement, writeStep, guards } = section;
   return `Verdict cache (shadow): ${records.total} records (${
     records.byState.active ?? 0
   } active, ${records.byState.unstable ?? 0} unstable), ${
@@ -257,7 +324,11 @@ export const cacheNote = (section: CacheSection): string => {
     taggedAlerts.buildingBlocks
   } are building blocks and ${percent(
     taggedAlerts.withinOneHourShare
-  )} came within one hour of their record.`;
+  )} came within one hour of their record. The novelty guard fired on ${percent(
+    guards.shareWithHit
+  )} of the tagged alerts and caught ${guards.wrongReuse.caught} of ${
+    guards.wrongReuse.total
+  } wrong reuses (${guards.rightReuse.fired} of ${guards.rightReuse.total} right reuses fired).`;
 };
 
 interface Hit<T> {
