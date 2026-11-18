@@ -17,8 +17,12 @@ import {
   TRIAGE_SKIPPED_BY_DECISION_TAG_PREFIX,
   VERDICT_INCONCLUSIVE_TAG,
 } from '../../alert_triage/constants';
-import { FP_DECISION_ID_PREFIX } from '../../alert_triage/fp_decisions';
+import {
+  FP_DECISION_ID_PREFIX,
+  FP_DO_NOT_PROPOSE_ID_PREFIX,
+} from '../../alert_triage/fp_decisions';
 import { tagInChunks } from '../../alert_triage/plan_sweep';
+import { verdictCacheId } from '../../alert_triage/verdict_cache';
 import {
   findAlertIdsByTag,
   reopenFalsePositiveClosedAlerts,
@@ -45,6 +49,11 @@ import {
  * run, so no alert of another space is touched. The decision is deleted whatever the
  * state of the Context Engine setting, because a decision left active would close the alerts again
  * once the setting is back on.
+ *
+ * The verdict cache keeps a record for the same key (`verdict-cache-<hash>`, the hash is the one of the decision id). Once the decision
+ * is deleted, that record is soft-deleted too, so that a revoked pattern is not reused. The worker's role has no `delete` on the
+ * index, so the record gets the lifecycle `deleted`, like the decision. A missing record is fine, and a record that could not be
+ * deleted is only logged: the cache runs in shadow and acts on nothing.
  *
  * The caller needs write access to the decisions index, which the worker's role has and users do
  * not. Without it the step reports `denied` and touches nothing, because a user cannot tell a hidden
@@ -100,6 +109,31 @@ export const getTriageRevokeFpDecisionStepDefinition = () =>
           logger.warn(
             `Could not delete decision ${id}: ${error instanceof Error ? error.message : error}`
           );
+        }
+      }
+
+      if (status === 'ok' && failures === 0) {
+        const keyHash = id.slice(
+          (isApproval ? FP_DECISION_ID_PREFIX : FP_DO_NOT_PROPOSE_ID_PREFIX).length
+        );
+        try {
+          await es.update({
+            index: TRIAGE_DECISIONS_AI_INDEX_DEST.value,
+            id: verdictCacheId(keyHash),
+            doc: {
+              updated_at: new Date().toISOString(),
+              governance: { lifecycle: { status: 'deleted' } },
+            },
+            refresh: true,
+          });
+        } catch (error) {
+          if (statusCodeOf(error) !== 404) {
+            logger.warn(
+              `Could not delete the verdict cache record of decision ${id}: ${
+                error instanceof Error ? error.message : error
+              }`
+            );
+          }
         }
       }
 

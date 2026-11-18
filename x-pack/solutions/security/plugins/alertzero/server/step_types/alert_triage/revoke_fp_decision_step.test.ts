@@ -73,7 +73,7 @@ const setup = ({
     if (getError) throw getError;
     return { _source: { attributes: { space_id: storedSpace } } };
   });
-  const update = jest.fn(async () => {
+  const update = jest.fn(async (_params: { index: string; id: string; doc?: object }) => {
     if (updateError) throw updateError;
     return {};
   });
@@ -304,5 +304,87 @@ describe('triage revoke decision step', () => {
 
     expect(output).toEqual(expect.objectContaining({ alerts_reopened: 0, failures: 0 }));
     expect(calls('/signals/status')).toEqual([]);
+  });
+
+  describe('verdict cache record of the same key', () => {
+    const CACHE_ID = 'verdict-cache-0123456789abcdef';
+    const cacheUpdates = (
+      update: jest.Mock<Promise<object>, [{ index: string; id: string; doc?: object }]>
+    ) => update.mock.calls.filter(([{ id }]) => id === CACHE_ID).map(([params]) => params);
+
+    it.each([
+      ['an approval', APPROVAL],
+      ['a dismissal', DISMISSAL],
+    ])(
+      'soft-deletes the cache record of the key after the decision of %s is deleted',
+      async (_name, decisionId) => {
+        const { run, update } = setup({ decisionId });
+
+        await run();
+
+        expect(cacheUpdates(update)).toEqual([
+          expect.objectContaining({
+            index: TRIAGE_DECISIONS_AI_INDEX_DEST.value,
+            doc: expect.objectContaining({ governance: { lifecycle: { status: 'deleted' } } }),
+          }),
+        ]);
+        // The decision is deleted first.
+        expect(update.mock.calls[0][0].id).toBe(decisionId);
+      }
+    );
+
+    it('touches no cache record when the decision belongs to another space', async () => {
+      const { run, update } = setup({ storedSpace: 'other' });
+
+      const { output } = await run();
+
+      expect(output).toMatchObject({ status: 'not_found' });
+      expect(cacheUpdates(update)).toEqual([]);
+    });
+
+    it('touches no cache record when the caller cannot write the decisions index', async () => {
+      const { run, update } = setup({
+        getError: Object.assign(new Error('nope'), { statusCode: 404 }),
+        canWriteDecisions: false,
+      });
+
+      const { output } = await run();
+
+      expect(output).toMatchObject({ status: 'denied' });
+      expect(cacheUpdates(update)).toEqual([]);
+    });
+
+    it('touches no cache record when the decision could not be deleted, because the revoke has not happened', async () => {
+      const { run, update } = setup({ updateError: new Error('boom') });
+
+      const { output } = await run();
+
+      expect(output).toMatchObject({ failures: 1 });
+      expect(cacheUpdates(update)).toEqual([]);
+    });
+
+    it('does not fail the revoke when there is no cache record (404)', async () => {
+      const { run, update } = setup({});
+      update.mockImplementation(async ({ id }) => {
+        if (id === CACHE_ID) throw Object.assign(new Error('missing'), { statusCode: 404 });
+        return {};
+      });
+
+      const { output } = await run();
+
+      expect(output).toMatchObject({ status: 'ok', failures: 0, alerts_reopened: 2 });
+    });
+
+    it('does not fail the revoke when the cache record cannot be deleted: it only logs, and the alerts are put back', async () => {
+      const { run, update } = setup({});
+      update.mockImplementation(async ({ id }) => {
+        if (id === CACHE_ID) throw Object.assign(new Error('forbidden'), { statusCode: 403 });
+        return {};
+      });
+
+      const { output } = await run();
+
+      expect(output).toMatchObject({ status: 'ok', failures: 0, alerts_reopened: 2 });
+    });
   });
 });
