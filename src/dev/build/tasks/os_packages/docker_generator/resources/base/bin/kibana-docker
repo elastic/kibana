@@ -415,6 +415,16 @@ kibana_vars=(
     xpack.reporting.queue.timeout
     xpack.reporting.roles.allow
     xpack.reporting.roles.enabled
+    xpack.resourceBootstrap.enabled
+    xpack.resourceBootstrap.managed
+    xpack.resourceBootstrap.maxAttempts
+    xpack.resourceBootstrap.maxFileSize
+    xpack.resourceBootstrap.maxFiles
+    xpack.resourceBootstrap.maxTotalSize
+    xpack.resourceBootstrap.path
+    xpack.resourceBootstrap.prune
+    xpack.resourceBootstrap.reapplyOnStart
+    xpack.resourceBootstrap.timeout
     xpack.ruleRegistry.write.enabled
     xpack.screenshotting.browser.chromium.disableSandbox
     xpack.security.accessAgreement.message
