@@ -8,9 +8,9 @@
  */
 
 import { Session } from 'node:inspector/promises';
-import { relative, sep } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { SAMPLING_INTERVAL_US } from './constants';
+import { isKibanaPath } from './profile_summary';
+import { relativeLocation } from './sanitize';
 
 /** The parts of a V8 CPU profile (`Profiler.Profile`) the watchdog reads. */
 export interface CpuProfile {
@@ -91,11 +91,9 @@ export class ProfileCapture {
 
 // Chrome DevTools' default ignore list (`/node_modules/|^node:`) would hide every Kibana frame.
 const fileUrl = (url: string | undefined, root: string): string | undefined => {
-  if (!url || url.startsWith('node:')) return url;
-  const path = url.startsWith('file://') ? fileURLToPath(url) : url;
-  const rel = relative(root, path).split(sep).join('/');
-  if (rel.startsWith('node_modules/@kbn/')) return rel.slice('node_modules/'.length);
-  return rel.startsWith('src/') || rel.startsWith('x-pack/') ? rel : url;
+  const rel = url && relativeLocation(url, root);
+  if (!rel || !isKibanaPath(rel)) return url;
+  return rel.startsWith('node_modules/') ? rel.slice('node_modules/'.length) : rel;
 };
 
 /**

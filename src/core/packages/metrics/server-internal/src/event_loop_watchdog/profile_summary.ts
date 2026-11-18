@@ -54,7 +54,7 @@ const bump = <T>(counts: Map<string, Counted<T>>, key: string, value: T): void =
   }
 };
 
-const isKibanaPath = (rel: string | undefined): boolean =>
+export const isKibanaPath = (rel: string | undefined): boolean =>
   rel !== undefined &&
   (rel.startsWith('src/') || rel.startsWith('x-pack/') || rel.startsWith('node_modules/@kbn/'));
 
