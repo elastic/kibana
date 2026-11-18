@@ -432,7 +432,7 @@ describe('registerHuntBehaviorRoute', () => {
       expect(huntBehaviorMock.mock.calls[0][2].allowed_indices).toEqual(SEARCHED);
     });
 
-    it('takes the cross-project exclusions from what the scope kept', async () => {
+    it('puts the unqualified exclusions on the query under cross-project search', async () => {
       resolveHuntScopeMock.mockResolvedValue(droppedScope);
       const { handler, context } = withUniverse({ cpsEnabled: true });
 
@@ -467,6 +467,38 @@ describe('registerHuntBehaviorRoute', () => {
       });
     });
 
+    it('still hunts on a degraded scope', async () => {
+      resolveHuntScopeMock.mockResolvedValue({ ...droppedScope, status: 'degraded' });
+      const { handler, context } = withUniverse();
+      const response = httpServerMock.createResponseFactory();
+
+      await handler(context, requestFor(), response);
+
+      expect(huntBehaviorMock).toHaveBeenCalledTimes(1);
+      expect(response.ok).toHaveBeenCalledTimes(1);
+    });
+
+    it('says the resolve failed when the scope is blocked on discovery_failed', async () => {
+      resolveHuntScopeMock.mockResolvedValue({
+        ...okScope,
+        status: 'blocked',
+        resolution: 'blocked:discovery_failed',
+      });
+      const { handler, context } = withUniverse();
+      const response = httpServerMock.createResponseFactory();
+
+      await handler(context, requestFor(), response);
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 409,
+        body: {
+          message:
+            'Hunt scope is blocked (blocked:discovery_failed): Hunt scope resolution failed, so no index was searched (checked: logs-*, custom-edr-1, -logs-elastic_agent*).',
+        },
+      });
+      expect(huntBehaviorMock).not.toHaveBeenCalled();
+    });
+
     it('adds no gap when the scope dropped nothing', async () => {
       const { handler, context } = withUniverse();
       const response = httpServerMock.createResponseFactory();
@@ -492,7 +524,7 @@ describe('registerHuntBehaviorRoute', () => {
         statusCode: 409,
         body: {
           message:
-            'Hunt scope is blocked (blocked:empty_universe): nothing in the default data view is visible to this hunt (checked: logs-*, custom-edr-1, -logs-elastic_agent*)',
+            "Hunt scope is blocked (blocked:empty_universe): No index in the space's default data view is visible to this hunt (checked: logs-*, custom-edr-1, -logs-elastic_agent*).",
         },
       });
       expect(huntBehaviorMock).not.toHaveBeenCalled();
@@ -522,23 +554,35 @@ describe('registerHuntBehaviorRoute', () => {
       expect(allowed.join(',')).not.toContain('.alerts-security');
     });
 
+    // A data view with no positive entry is blocked by the scope check itself, before any
+    // Elasticsearch call, so these two run the real one.
+    const useRealScopeCheck = () =>
+      resolveHuntScopeMock.mockImplementation(
+        jest.requireActual('../../services/watches/hunt/common/resolve_index_scope')
+          .resolveHuntScope
+      );
+
     it('refuses with 409 before resolving any model when nothing searchable remains', async () => {
-      resolveScopedModelMock.mockResolvedValue({ ok: false, reason: 'no_connector' } as never);
-      const { handler, context } = withSetting(['.siem-signals-infosec-detections']);
+      useRealScopeCheck();
+      const { handler, context, scoped } = withSetting(['.siem-signals-infosec-detections']);
       const response = httpServerMock.createResponseFactory();
 
       await handler(context, requestFor(), response);
 
       expect(response.customError).toHaveBeenCalledWith({
         statusCode: 409,
-        body: { message: expect.stringContaining('no pattern this hunt may search') },
+        body: {
+          message:
+            'Hunt scope is blocked (blocked:empty_universe): The default data view has no pattern this hunt may search: hidden and alerts indices are never searched.',
+        },
       });
       expect(huntBehaviorMock).not.toHaveBeenCalled();
       expect(resolveScopedModelMock).not.toHaveBeenCalled();
-      expect(resolveHuntScopeMock).not.toHaveBeenCalled();
+      expect(scoped.asCurrentUser.indices.resolveIndex).not.toHaveBeenCalled();
     });
 
     it('does not blame hidden indices when the data view holds only exclusions', async () => {
+      useRealScopeCheck();
       const { handler, context } = withSetting(['-logs-elastic_agent*']);
       const response = httpServerMock.createResponseFactory();
 
@@ -548,7 +592,7 @@ describe('registerHuntBehaviorRoute', () => {
         statusCode: 409,
         body: {
           message:
-            'The default data view has no pattern this hunt may search: it holds only exclusions.',
+            'Hunt scope is blocked (blocked:empty_universe): The default data view has no pattern this hunt may search: it holds only exclusions.',
         },
       });
       expect(huntBehaviorMock).not.toHaveBeenCalled();

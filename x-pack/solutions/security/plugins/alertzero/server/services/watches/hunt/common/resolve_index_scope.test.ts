@@ -38,17 +38,30 @@ const resolveResponse = ({
 const createEsClient = ({
   resolved = resolveResponse({ dataStreams: ['logs-okta.system-default'] }),
   fieldCaps = { indices: [], fields: {} },
+  unreadable = [],
 }: {
   resolved?: ReturnType<typeof resolveResponse>;
   fieldCaps?: { indices: string[]; fields: Record<string, unknown> };
+  /** Names the caller resolves but holds no `read` on. */
+  unreadable?: string[];
 } = {}) => {
   const resolveIndex = jest.fn().mockResolvedValue(resolved);
   const fieldCapsFn = jest.fn().mockResolvedValue(fieldCaps);
+  const hasPrivileges = jest.fn(
+    async ({ index }: { index: Array<{ names: string[]; privileges: string[] }> }) => ({
+      index: Object.fromEntries(
+        index
+          .flatMap(({ names }) => names)
+          .map((name) => [name, { read: !unreadable.includes(name) }])
+      ),
+    })
+  );
   const esClient = {
     indices: { resolveIndex },
     fieldCaps: fieldCapsFn,
+    security: { hasPrivileges },
   } as unknown as ElasticsearchClient;
-  return { esClient, resolveIndex, fieldCapsFn };
+  return { esClient, resolveIndex, fieldCapsFn, hasPrivileges };
 };
 
 describe('resolveHuntScope', () => {
@@ -551,6 +564,148 @@ describe('resolveHuntScope', () => {
         expect(result.resolution).toBe('blocked:discovery_failed');
       }
     );
+
+    describe('a concrete name that resolves but cannot be searched', () => {
+      const logger = loggerMock.create();
+      const resolved = resolveResponse({
+        dataStreams: ['logs-okta.system-default'],
+        indices: ['custom-meta-1', 'custom-read-1'],
+      });
+      const indexPatterns = ['logs-*', 'custom-meta-1', 'custom-read-1', '-logs-x*'];
+
+      beforeEach(() => logger.warn.mockClear());
+
+      it('drops a name the caller holds no read on and keeps it in missing', async () => {
+        const { esClient, hasPrivileges } = createEsClient({
+          resolved,
+          unreadable: ['custom-meta-1'],
+        });
+
+        const scope = await resolveHuntScope({ esClient, spaceId: SPACE_ID, indexPatterns });
+
+        expect(scope.status).toBe('ok');
+        expect(scope.index_patterns).toEqual(['logs-*', 'custom-read-1', '-logs-x*']);
+        expect(scope.missing).toEqual(['custom-meta-1']);
+        // One call, for the resolved concrete names only: no wildcard, no exclusion.
+        expect(hasPrivileges).toHaveBeenCalledTimes(1);
+        expect(hasPrivileges).toHaveBeenCalledWith({
+          index: [{ names: ['custom-meta-1', 'custom-read-1'], privileges: ['read'] }],
+        });
+      });
+
+      it('drops a closed index, which resolves by name and cannot be read', async () => {
+        const { esClient } = createEsClient({
+          resolved: {
+            ...resolved,
+            indices: [
+              { name: 'custom-meta-1', attributes: ['closed'] },
+              { name: 'custom-read-1', attributes: ['open'] },
+            ],
+          },
+        });
+
+        const scope = await resolveHuntScope({ esClient, spaceId: SPACE_ID, indexPatterns });
+
+        expect(scope.index_patterns).toEqual(['logs-*', 'custom-read-1', '-logs-x*']);
+        expect(scope.missing).toEqual(['custom-meta-1']);
+      });
+
+      it('lists unresolved and unreadable names in data view order', async () => {
+        const { esClient } = createEsClient({ resolved, unreadable: ['custom-meta-1'] });
+
+        const scope = await resolveHuntScope({
+          esClient,
+          spaceId: SPACE_ID,
+          indexPatterns: ['custom-meta-1', 'logs-*', 'custom-absent-1'],
+        });
+
+        expect(scope.missing).toEqual(['custom-meta-1', 'custom-absent-1']);
+        expect(scope.index_patterns).toEqual(['logs-*']);
+      });
+
+      it('asks nothing when the universe names no resolved concrete name', async () => {
+        const { esClient, hasPrivileges } = createEsClient({ resolved });
+
+        await resolveHuntScope({
+          esClient,
+          spaceId: SPACE_ID,
+          indexPatterns: ['logs-*', 'custom-absent-1', 'remote:custom-meta-1'],
+        });
+
+        expect(hasPrivileges).not.toHaveBeenCalled();
+      });
+
+      it('does not check a .ds- backing index, which is readable through its data stream', async () => {
+        const backing = '.ds-logs-okta.system-default-2026.09.30-000001';
+        const { esClient, hasPrivileges } = createEsClient({ resolved, unreadable: [backing] });
+
+        const scope = await resolveHuntScope({
+          esClient,
+          spaceId: SPACE_ID,
+          indexPatterns: [backing],
+        });
+
+        expect(hasPrivileges).not.toHaveBeenCalled();
+        expect(scope.index_patterns).toEqual([backing]);
+      });
+
+      it('does not check under cross-project search, where the local answer is not the whole one', async () => {
+        const { esClient, hasPrivileges } = createEsClient({
+          resolved,
+          unreadable: ['custom-meta-1'],
+        });
+
+        const scope = await resolveHuntScope({
+          esClient,
+          spaceId: SPACE_ID,
+          indexPatterns,
+          crossProjectSearch: true,
+        });
+
+        expect(hasPrivileges).not.toHaveBeenCalled();
+        expect(scope.missing).toEqual([]);
+      });
+
+      it('drops nothing and warns when the privilege check fails', async () => {
+        const { esClient, hasPrivileges } = createEsClient({ resolved });
+        hasPrivileges.mockRejectedValue(new Error('security is off'));
+
+        const scope = await resolveHuntScope({
+          esClient,
+          spaceId: SPACE_ID,
+          indexPatterns,
+          logger,
+        });
+
+        expect(scope.status).toBe('ok');
+        expect(scope.index_patterns).toEqual(indexPatterns);
+        expect(scope.missing).toEqual([]);
+        expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('security is off'));
+      });
+
+      it('is blocked:empty_universe when the only positive entry is unreadable', async () => {
+        const { esClient, fieldCapsFn } = createEsClient({
+          resolved: resolveResponse({ indices: ['custom-meta-1'] }),
+          unreadable: ['custom-meta-1'],
+        });
+
+        const scope = await resolveHuntScope({
+          esClient,
+          spaceId: SPACE_ID,
+          indexPatterns: ['custom-meta-1', '-logs-x*'],
+        });
+
+        expect(scope).toEqual(
+          expect.objectContaining({
+            status: 'blocked',
+            resolution: 'blocked:empty_universe',
+            index_patterns: [],
+            missing: ['custom-meta-1'],
+          })
+        );
+        expect(fieldCapsFn).not.toHaveBeenCalled();
+      });
+    });
 
     it('keeps exclusions through the pruning', async () => {
       const result = await run(

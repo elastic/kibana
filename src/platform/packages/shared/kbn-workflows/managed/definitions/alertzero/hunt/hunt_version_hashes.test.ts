@@ -35,6 +35,6 @@ describe('Hunt Watch version hashes', () => {
           CONTINUOUS_THREAT_HUNT_WORKER_SETTINGS_DEFAULTS
         )
       )}`
-    ).toBe('9:6bf0abdb');
+    ).toBe('9:1d2b95d3');
   });
 });

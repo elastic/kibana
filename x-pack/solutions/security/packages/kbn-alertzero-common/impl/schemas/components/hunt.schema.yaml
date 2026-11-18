@@ -61,8 +61,9 @@ components:
         technique's own behavior was not. The same report and quotes reproduce it.
         `input_truncated` means the report carried more IOCs, techniques or text
         than a hunt accepts, so only a prefix of it was hunted. `index_not_searched`
-        is a default data view name the hunt could not resolve (not readable, or not
-        found), so the index was never searched; the same data view reproduces it.
+        is a default data view name the hunt could not read (no read access, not
+        found, or closed), so the index was never searched; the same data view
+        reproduces it.
 
     HuntIncompleteness:
       type: object
@@ -134,9 +135,10 @@ components:
       description: >-
         What a hunt searches and where an action could land. `index_patterns` is the
         universe IOC Hunt searches: the space's Security Solution default data view
-        patterns as searched, exclusions included; dot-prefixed names are never
-        included. `blocked` scopes carry
-        an empty `index_patterns`.
+        patterns as searched, exclusions included. Hidden and alerts names
+        (dot-prefixed, apart from a `.ds-` backing index) are never included.
+        `blocked` scopes carry an empty `index_patterns`. The lists are not bounded
+        here: they echo a user-edited setting, and a stored scope is parsed whole.
       properties:
         status:
           $ref: '#/components/schemas/IndexScopeStatus'
@@ -144,50 +146,41 @@ components:
           $ref: '#/components/schemas/HuntScopeResolution'
         index_patterns:
           type: array
-          maxItems: 500
           description: >-
-            The universe as searched by IOC Hunt, with policy-skipped entries and
-            unresolved local concrete names removed. Empty when the scope is blocked.
+            The universe as searched by IOC Hunt, with policy-skipped entries and the
+            local concrete names in `missing` removed. Empty when the scope is blocked.
           items:
             type: string
-            maxLength: 512
         missing:
           type: array
-          maxItems: 500
           description: >-
-            Universe patterns that resolved to nothing for the caller: not readable,
-            not found, or on a remote cluster or linked project that did not answer.
+            Universe patterns the caller cannot search: not found, closed, not
+            readable (a concrete name that resolves without read access counts), or on
+            a remote cluster or linked project that did not answer.
           items:
             type: string
-            maxLength: 512
         policy_skipped:
           type: array
-          maxItems: 500
           description: >-
             Default data view entries the hunt never searches because their index name is
             dot-prefixed (hidden or alerts indices).
           items:
             type: string
-            maxLength: 512
         report_matches:
           type: array
-          maxItems: 500
           description: >-
             `*`-suffixed patterns of datasets the report's vendor or product matched
             deterministically. Empty when no report was supplied or nothing matched.
           items:
             type: string
-            maxLength: 512
         actionable_indices:
           type: array
-          maxItems: 500
           description: >-
             `*`-suffixed streams and indices whose mapping carries `process.entity_id`
             or `process.pid`: where a hit can become a Defend response action. Whether
             the host is enrolled is decided later, at packaging.
           items:
             type: string
-            maxLength: 512
         window:
           $ref: '#/components/schemas/IndexScopeWindow'
         row_limit:
@@ -393,7 +386,9 @@ components:
             Gaps in what the search actually covered. Absent or empty means the
             search ran over the whole scope, so `status: no_environment_hits` is a
             statement about the environment. Present means it is not: shards failed,
-            the search timed out, or every searched pattern resolved to no index.
+            the search timed out, or every searched pattern resolved to no index. The
+            standalone route also lists a default data view name the scope dropped
+            from the search, first, as `index_not_searched`.
           items:
             $ref: '#/components/schemas/HuntIncompleteness'
         searched_iocs:

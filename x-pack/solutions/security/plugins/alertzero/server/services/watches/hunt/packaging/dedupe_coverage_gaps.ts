@@ -106,13 +106,19 @@ export const describeGap = ({
  * The gap list as one line of prose, or undefined when nothing was reported. Identical phrases
  * collapse (several techniques can each carry `input truncated`; the count says how many gaps
  * there were). With `maxChars` the list is cut at an item boundary and the rest counted, so a
- * long list never ends mid-phrase.
+ * long list never ends mid-phrase. An `index_not_searched` gap goes first: it is the only item
+ * that names what was missed, so it is the last one a cut should cost.
  */
 export const describeGaps = (
   deduped: DedupedCoverageGaps,
   maxChars?: number
 ): string | undefined => {
-  const items = [...new Set(deduped.gaps.map(describeGap))];
+  const isIndexGap = ({ reason }: PackageReportCoverageGap) => reason === 'index_not_searched';
+  const ordered = [
+    ...deduped.gaps.filter(isIndexGap),
+    ...deduped.gaps.filter((gap) => !isIndexGap(gap)),
+  ];
+  const items = [...new Set(ordered.map(describeGap))];
   if (items.length === 0) return undefined;
   if (maxChars === undefined) return items.join(', ');
   const kept: string[] = [];

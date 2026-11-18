@@ -730,13 +730,16 @@ describe('Hunt Watch worker chain', () => {
       expect(status(completed, undefined, true)).toBe('partial');
     });
 
+    // What the coordinator writes when both tiers ran and the scope dropped an index.
+    const BOTH_TIERS_MESSAGE =
+      'IOC Hunt: environment_hits_found. Behavior Hunt: behaviors_proposed (3 proposed, 1 coverage gap(s)). The default data view names `custom-edr-1`, which this hunt could not read (no read access, not found, or closed), so the hunt never searched there.';
     const incompleteFinal = (hasConfirmedHit: boolean) => ({
       data: {
         state: 'completed',
         result: {
           completeness: 'incomplete_final',
           has_confirmed_hit: hasConfirmedHit,
-          message: 'T9999 is not in the catalog',
+          message: BOTH_TIERS_MESSAGE,
         },
       },
     });
@@ -753,7 +756,7 @@ describe('Hunt Watch worker chain', () => {
       // The write records `hit` for this run, so the no-hit wording about evidence "marked
       // incomplete rather than clean" would be false here.
       expect(reason(incompleteFinal(true))).toBe(
-        'The confirmed hit was recorded on the report, but the hunt left a gap a later run could not close (T9999 is not in the catalog), so the report is retired without having been fully searched; its executed searches are recorded.'
+        `The confirmed hit was recorded on the report, but the hunt left a gap a later run could not close (${BOTH_TIERS_MESSAGE}), so the report is retired without having been fully searched; its executed searches are recorded.`
       );
     });
 

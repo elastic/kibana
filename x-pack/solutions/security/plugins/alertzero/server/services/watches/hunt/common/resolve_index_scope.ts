@@ -47,8 +47,9 @@ const defaultWindow = (): IndexScopeWindow => ({
 });
 
 /**
- * The universe patterns no resolved name globs to. A name counts whether it resolved as an
- * index, an alias, a data stream, or a data stream's backing index.
+ * The universe patterns no searchable resolved name globs to. A name counts whether it resolved
+ * as an index, an alias, a data stream, or a data stream's backing index. A closed index does
+ * not count: it resolves when named, and no search can read it.
  */
 export const unresolvedPatterns = (
   patterns: string[],
@@ -56,7 +57,9 @@ export const unresolvedPatterns = (
   crossProjectSearch = false
 ): string[] => {
   const names = [
-    ...resolved.indices.map(({ name }) => name),
+    ...resolved.indices
+      .filter(({ attributes }) => !attributes?.includes('closed'))
+      .map(({ name }) => name),
     ...resolved.aliases.map(({ name }) => name),
     ...resolved.data_streams.flatMap(({ name, backing_indices: backing }) => [name, ...backing]),
   ];
@@ -69,7 +72,7 @@ export const unresolvedPatterns = (
 };
 
 /**
- * Whether an unresolved entry may leave the searched list: a local concrete name. Wildcards,
+ * Whether an entry in `missing` may leave the searched list: a local concrete name. Wildcards,
  * `_all`, remote-qualified names, date math, selectors and comma lists stay, because a miss for
  * one of those does not show the name is unreadable (a remote that is down resolves nothing
  * too). `_all` is a wildcard by another spelling: no resolved name ever equals it.
@@ -84,6 +87,50 @@ const isPrunableConcreteName = (entry: string): boolean => {
     !entry.includes('::') &&
     !entry.includes(',')
   );
+};
+
+/**
+ * The resolved local concrete names the caller may not read. Resolving a name needs only
+ * `view_index_metadata`, so such a name resolves, a search with `ignore_unavailable` then
+ * skips it without a word, and an ES|QL `FROM` naming it fails whole. Privileges are checked
+ * by name, so a `.ds-` backing index (readable through a grant on its data stream) is left
+ * out, and so is every name under cross-project search, where the local answer does not
+ * speak for a linked project. A failed check drops nothing.
+ */
+const unreadableConcreteNames = async ({
+  esClient,
+  resolvedPatterns,
+  crossProjectSearch,
+  spaceId,
+  logger,
+}: {
+  esClient: ElasticsearchClient;
+  /** Positive universe entries that resolved. */
+  resolvedPatterns: string[];
+  crossProjectSearch: boolean;
+  spaceId: string;
+  logger?: Logger;
+}): Promise<string[]> => {
+  if (crossProjectSearch) return [];
+  const names = uniq(
+    resolvedPatterns.filter(
+      (pattern) => isPrunableConcreteName(pattern) && stripBackingPrefix(pattern) === pattern
+    )
+  );
+  if (names.length === 0) return [];
+  try {
+    const { index } = await esClient.security.hasPrivileges({
+      index: [{ names, privileges: ['read'] }],
+    });
+    return names.filter((name) => index[name]?.read === false);
+  } catch (err) {
+    logger?.warn(
+      `Checking read access to the concrete names of the hunt universe failed for space ${spaceId}; none is dropped: ${
+        err instanceof Error ? err.message : String(err)
+      }`
+    );
+    return [];
+  }
 };
 
 /**
@@ -116,10 +163,12 @@ const boundReportMatches = (
  *
  * One `_resolve/index` call over the universe answers whether anything is visible
  * (`blocked:empty_universe` when nothing is), which patterns resolved nothing
- * (`missing`), and which data streams discovery parses into datasets. The report's vendor
+ * (`missing`), and which data streams discovery parses into datasets. One
+ * `_has_privileges` call then adds to `missing` the concrete names that resolved but
+ * that the caller may not read; it is skipped when the universe names none. The report's vendor
  * and product are then matched deterministically against those datasets, and one
  * `_field_caps` call names the `actionable_indices`. Nothing here picks what Tier 1 may
- * read: Tier 1 searches the universe minus the local concrete names that resolved nothing.
+ * read: Tier 1 searches the universe minus the local concrete names in `missing`.
  * The model matcher is not called here; it runs in stage 2, after Tier 1, only when the
  * deterministic signals found nothing.
  *
@@ -190,18 +239,28 @@ export const resolveHuntScope = async ({
     return blocked('blocked:discovery_failed', []);
   }
 
-  const missing = unresolvedPatterns(positivePatterns, resolved, crossProjectSearch);
+  const unresolved = unresolvedPatterns(positivePatterns, resolved, crossProjectSearch);
   if (
     resolved.indices.length === 0 &&
     resolved.data_streams.length === 0 &&
     resolved.aliases.length === 0
   ) {
-    return blocked('blocked:empty_universe', missing);
+    return blocked('blocked:empty_universe', unresolved);
   }
 
-  // A local concrete name that resolved nothing is dropped from the list (it stays in
-  // `missing`), so no search names it. A name that resolves but cannot be searched (closed, or
-  // metadata-only privileges) is not caught here; the search skips it.
+  const notSearchable = new Set(unresolved);
+  const unreadable = await unreadableConcreteNames({
+    esClient,
+    resolvedPatterns: positivePatterns.filter((pattern) => !notSearchable.has(pattern)),
+    crossProjectSearch,
+    spaceId,
+    logger,
+  });
+  unreadable.forEach((name) => notSearchable.add(name));
+  const missing = positivePatterns.filter((pattern) => notSearchable.has(pattern));
+
+  // A local concrete name the caller cannot search (it resolved nothing, is closed, or is not
+  // readable) is dropped from the list and stays in `missing`, so no search names it.
   const dropped = new Set(missing.filter(isPrunableConcreteName));
   const searched = indexPatterns.filter((pattern) => !dropped.has(pattern));
   if (!searched.some((pattern) => !isIndexExclusion(pattern))) {

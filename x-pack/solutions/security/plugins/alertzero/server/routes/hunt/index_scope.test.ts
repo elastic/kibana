@@ -270,7 +270,7 @@ describe('registerHuntIndexScopeRoute', () => {
       );
     });
 
-    it('logs one info line naming the skipped entries and nothing when none were skipped', async () => {
+    it('logs one debug line naming the skipped entries and nothing when none were skipped', async () => {
       resolveHuntScopeMock.mockResolvedValue({
         ...okScope,
         policy_skipped: ['.alerts-security.alerts-default'],
@@ -281,8 +281,8 @@ describe('registerHuntIndexScopeRoute', () => {
         httpServerMock.createKibanaRequest(),
         httpServerMock.createResponseFactory()
       );
-      expect(skipped.logger.info).toHaveBeenCalledTimes(1);
-      expect(skipped.logger.info).toHaveBeenCalledWith(
+      expect(skipped.logger.debug).toHaveBeenCalledTimes(1);
+      expect(skipped.logger.debug).toHaveBeenCalledWith(
         expect.stringContaining('.alerts-security.alerts-default')
       );
 
@@ -293,7 +293,7 @@ describe('registerHuntIndexScopeRoute', () => {
         httpServerMock.createKibanaRequest(),
         httpServerMock.createResponseFactory()
       );
-      expect(none.logger.info).not.toHaveBeenCalled();
+      expect(none.logger.debug).not.toHaveBeenCalled();
       expect(none.logger.warn).not.toHaveBeenCalled();
     });
 
@@ -328,7 +328,7 @@ describe('registerHuntIndexScopeRoute', () => {
   });
 
   describe('names dropped from the search', () => {
-    const warnedWith = async (scope: Partial<ResolvedHuntScope>) => {
+    const loggedWith = async (scope: Partial<ResolvedHuntScope>) => {
       resolveHuntScopeMock.mockResolvedValue({ ...okScope, ...scope });
       const { handler, context, logger } = makeDeps();
       await handler(
@@ -336,26 +336,26 @@ describe('registerHuntIndexScopeRoute', () => {
         httpServerMock.createKibanaRequest(),
         httpServerMock.createResponseFactory()
       );
-      return logger.warn as jest.Mock;
+      return logger.debug as jest.Mock;
     };
 
-    it('warns once with the names for a scope that dropped one', async () => {
-      const warn = await warnedWith({ index_patterns: ['logs-*'], missing: ['custom-edr-1'] });
+    it('logs one debug line with the names for a scope that dropped one', async () => {
+      const debug = await loggedWith({ index_patterns: ['logs-*'], missing: ['custom-edr-1'] });
 
-      expect(warn).toHaveBeenCalledTimes(1);
-      expect(warn).toHaveBeenCalledWith(
+      expect(debug).toHaveBeenCalledTimes(1);
+      expect(debug).toHaveBeenCalledWith(
         expect.stringContaining('left 1 default data view name(s) out of the search')
       );
-      expect(warn).toHaveBeenCalledWith(expect.stringContaining('custom-edr-1'));
+      expect(debug).toHaveBeenCalledWith(expect.stringContaining('custom-edr-1'));
     });
 
-    it('does not warn for an unresolved wildcard that stayed in the search', async () => {
-      const warn = await warnedWith({
+    it('logs nothing for an unresolved wildcard that stayed in the search', async () => {
+      const debug = await loggedWith({
         index_patterns: ['logs-*', 'winlogbeat-*'],
         missing: ['winlogbeat-*'],
       });
 
-      expect(warn).not.toHaveBeenCalled();
+      expect(debug).not.toHaveBeenCalled();
     });
   });
 });

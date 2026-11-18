@@ -229,6 +229,7 @@ apiTest.describe.serial(
             responseType: 'json',
           });
 
+          expect(response.statusCode).toBe(200);
           const scope = response.body as HuntIndexScopeResponse;
           expect(scope.status).not.toBe('blocked');
           expect(scope.index_patterns).toContain(LINKED_ONLY_STREAM);
@@ -260,6 +261,7 @@ apiTest.describe.serial(
             responseType: 'json',
           });
 
+          expect(response.statusCode).toBe(200);
           const scope = response.body as HuntIndexScopeResponse;
           expect(scope.status).not.toBe('blocked');
           expect(scope.missing).toContain(absent);

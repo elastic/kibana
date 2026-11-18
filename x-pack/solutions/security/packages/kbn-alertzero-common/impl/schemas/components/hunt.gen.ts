@@ -25,7 +25,7 @@ export type IndexScopeStatusEnum = typeof IndexScopeStatus.enum;
 export const IndexScopeStatusEnum = IndexScopeStatus.enum;
 
 /**
- * Why a hunt could not corroborate part of what it was asked to look at, or could not show what it found. Ten are transient, named rather than counted so this list stays honest as reasons are added: `search_partial`, `index_unavailable`, `generation_failed`, `execute_failed`, `generation_budget` (the run's budget of generated queries ran out before this technique; a later run skips the techniques already searched, so the budget reaches it), `extraction_pending` (the report's enrichment has not finished, so a later sweep will have terms this one did not), `catalog_unavailable` (the managed ATT&CK data was unavailable, so a later run can extract and verify the report's techniques), and the three that mean a model's output was refused — `query_out_of_scope`, `query_ungrounded`, `quote_ungrounded`. Those three are transient because generation and extraction vary between runs, so a technique refused once is still unsearched and a later run may produce a usable query or quote. The rest are deterministic: repeating the run produces the same gap, so retrying only re-spends it. `collapsed` is the generation budget's gap for a technique whose evidence names the same report artifacts as another technique's: the other one generated first, its query was seen to filter on those artifacts and executed conclusively, and the budget ran out before this one got a query of its own. The artifacts were searched; this technique's own behavior was not. The same report and quotes reproduce it. `input_truncated` means the report carried more IOCs, techniques or text than a hunt accepts, so only a prefix of it was hunted. `index_not_searched` is a default data view name the hunt could not resolve (not readable, or not found), so the index was never searched; the same data view reproduces it.
+ * Why a hunt could not corroborate part of what it was asked to look at, or could not show what it found. Ten are transient, named rather than counted so this list stays honest as reasons are added: `search_partial`, `index_unavailable`, `generation_failed`, `execute_failed`, `generation_budget` (the run's budget of generated queries ran out before this technique; a later run skips the techniques already searched, so the budget reaches it), `extraction_pending` (the report's enrichment has not finished, so a later sweep will have terms this one did not), `catalog_unavailable` (the managed ATT&CK data was unavailable, so a later run can extract and verify the report's techniques), and the three that mean a model's output was refused — `query_out_of_scope`, `query_ungrounded`, `quote_ungrounded`. Those three are transient because generation and extraction vary between runs, so a technique refused once is still unsearched and a later run may produce a usable query or quote. The rest are deterministic: repeating the run produces the same gap, so retrying only re-spends it. `collapsed` is the generation budget's gap for a technique whose evidence names the same report artifacts as another technique's: the other one generated first, its query was seen to filter on those artifacts and executed conclusively, and the budget ran out before this one got a query of its own. The artifacts were searched; this technique's own behavior was not. The same report and quotes reproduce it. `input_truncated` means the report carried more IOCs, techniques or text than a hunt accepts, so only a prefix of it was hunted. `index_not_searched` is a default data view name the hunt could not read (no read access, not found, or closed), so the index was never searched; the same data view reproduces it.
  */
 export const HuntIncompleteReason = lazySchema(() =>
   z.enum([
@@ -114,36 +114,33 @@ export type HuntScopeResolutionEnum = typeof HuntScopeResolution.enum;
 export const HuntScopeResolutionEnum = HuntScopeResolution.enum;
 
 /**
- * What a hunt searches and where an action could land. `index_patterns` is the universe IOC Hunt searches: the space's Security Solution default data view patterns as searched, exclusions included; dot-prefixed names are never included. `blocked` scopes carry an empty `index_patterns`.
+ * What a hunt searches and where an action could land. `index_patterns` is the universe IOC Hunt searches: the space's Security Solution default data view patterns as searched, exclusions included. Hidden and alerts names (dot-prefixed, apart from a `.ds-` backing index) are never included. `blocked` scopes carry an empty `index_patterns`. The lists are not bounded here: they echo a user-edited setting, and a stored scope is parsed whole.
  */
 export const HuntScope = lazySchema(() =>
   z.object({
     status: IndexScopeStatus,
     resolution: HuntScopeResolution,
     /**
-     * The universe as searched by IOC Hunt, with policy-skipped entries and unresolved local concrete names removed. Empty when the scope is blocked.
+     * The universe as searched by IOC Hunt, with policy-skipped entries and the local concrete names in `missing` removed. Empty when the scope is blocked.
      */
     index_patterns: z
-      .array(z.string().max(512))
-      .max(500)
+      .array(z.string())
       .describe(
-        'The universe as searched by IOC Hunt, with policy-skipped entries and unresolved local concrete names removed. Empty when the scope is blocked.'
+        'The universe as searched by IOC Hunt, with policy-skipped entries and the local concrete names in `missing` removed. Empty when the scope is blocked.'
       ),
     /**
-     * Universe patterns that resolved to nothing for the caller: not readable, not found, or on a remote cluster or linked project that did not answer.
+     * Universe patterns the caller cannot search: not found, closed, not readable (a concrete name that resolves without read access counts), or on a remote cluster or linked project that did not answer.
      */
     missing: z
-      .array(z.string().max(512))
-      .max(500)
+      .array(z.string())
       .describe(
-        'Universe patterns that resolved to nothing for the caller: not readable, not found, or on a remote cluster or linked project that did not answer.'
+        'Universe patterns the caller cannot search: not found, closed, not readable (a concrete name that resolves without read access counts), or on a remote cluster or linked project that did not answer.'
       ),
     /**
      * Default data view entries the hunt never searches because their index name is dot-prefixed (hidden or alerts indices).
      */
     policy_skipped: z
-      .array(z.string().max(512))
-      .max(500)
+      .array(z.string())
       .optional()
       .describe(
         'Default data view entries the hunt never searches because their index name is dot-prefixed (hidden or alerts indices).'
@@ -152,8 +149,7 @@ export const HuntScope = lazySchema(() =>
      * `*`-suffixed patterns of datasets the report's vendor or product matched deterministically. Empty when no report was supplied or nothing matched.
      */
     report_matches: z
-      .array(z.string().max(512))
-      .max(500)
+      .array(z.string())
       .describe(
         "`*`-suffixed patterns of datasets the report's vendor or product matched deterministically. Empty when no report was supplied or nothing matched."
       ),
@@ -161,8 +157,7 @@ export const HuntScope = lazySchema(() =>
      * `*`-suffixed streams and indices whose mapping carries `process.entity_id` or `process.pid`: where a hit can become a Defend response action. Whether the host is enrolled is decided later, at packaging.
      */
     actionable_indices: z
-      .array(z.string().max(512))
-      .max(500)
+      .array(z.string())
       .describe(
         '`*`-suffixed streams and indices whose mapping carries `process.entity_id` or `process.pid`: where a hit can become a Defend response action. Whether the host is enrolled is decided later, at packaging.'
       ),
@@ -344,13 +339,13 @@ export const HuntForThreatResult = lazySchema(() =>
         'A confirmed event match in the searched universe inside the window. Never set by an out-of-window match.'
       ),
     /**
-     * Gaps in what the search actually covered. Absent or empty means the search ran over the whole scope, so `status: no_environment_hits` is a statement about the environment. Present means it is not: shards failed, the search timed out, or every searched pattern resolved to no index.
+     * Gaps in what the search actually covered. Absent or empty means the search ran over the whole scope, so `status: no_environment_hits` is a statement about the environment. Present means it is not: shards failed, the search timed out, or every searched pattern resolved to no index. The standalone route also lists a default data view name the scope dropped from the search, first, as `index_not_searched`.
      */
     incomplete: z
       .array(HuntIncompleteness)
       .optional()
       .describe(
-        'Gaps in what the search actually covered. Absent or empty means the search ran over the whole scope, so `status: no_environment_hits` is a statement about the environment. Present means it is not: shards failed, the search timed out, or every searched pattern resolved to no index.'
+        'Gaps in what the search actually covered. Absent or empty means the search ran over the whole scope, so `status: no_environment_hits` is a statement about the environment. Present means it is not: shards failed, the search timed out, or every searched pattern resolved to no index. The standalone route also lists a default data view name the scope dropped from the search, first, as `index_not_searched`.'
       ),
     searched_iocs: z.number().int(),
     searched_techniques: z.number().int(),

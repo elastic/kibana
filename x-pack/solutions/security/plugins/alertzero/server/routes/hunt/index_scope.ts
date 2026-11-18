@@ -70,7 +70,7 @@ export const registerHuntIndexScopeRoute = ({
           });
           const policySkippedList = scope.policy_skipped ?? [];
           if (policySkippedList.length > 0) {
-            logger.info(
+            logger.debug(
               `Hunt index scope for space ${spaceId} does not search hidden or alerts indices: ${policySkippedList.join(
                 ', '
               )}`
@@ -93,10 +93,10 @@ export const registerHuntIndexScopeRoute = ({
           if (scope.status !== 'blocked') {
             const unsearched = unsearchedPatterns(scope);
             if (unsearched.length > 0) {
-              logger.warn(
+              logger.debug(
                 `Hunt index scope for space ${spaceId} left ${
                   unsearched.length
-                } default data view name(s) out of the search because the caller could not resolve them (not readable, or not found): ${unsearched.join(
+                } default data view name(s) out of the search because the caller could not read them (no read access, not found, or closed): ${unsearched.join(
                   ', '
                 )}`
               );

@@ -224,10 +224,17 @@ describe('registerHuntForThreatRoute', () => {
     });
   });
 
+  const NOTHING_VISIBLE =
+    "No index in the space's default data view is visible to this hunt (checked: logs-*, filebeat-*, -*elastic-cloud-logs-*).";
   it.each([
-    ['only skipped entries', ['.siem-signals-x'], [], 'no pattern this hunt may search'],
-    ['skipped and missing', ['.siem-signals-x'], ['custom-1'], 'nothing in the default data view'],
-    ['nothing skipped', [], ['custom-1'], 'nothing in the default data view'],
+    [
+      'only skipped entries',
+      ['.siem-signals-x'],
+      [],
+      'The default data view has no pattern this hunt may search: hidden and alerts indices are never searched.',
+    ],
+    ['skipped and missing', ['.siem-signals-x'], ['custom-1'], NOTHING_VISIBLE],
+    ['nothing skipped', [], ['custom-1'], NOTHING_VISIBLE],
   ])('words the 409 for a blocked scope with %s', async (_label, policySkipped, missing, text) => {
     resolveHuntScopeMock.mockResolvedValue({
       ...okScope,
@@ -244,11 +251,33 @@ describe('registerHuntForThreatRoute', () => {
 
     expect(response.customError).toHaveBeenCalledWith({
       statusCode: 409,
-      body: { message: expect.stringContaining(text) },
+      body: { message: `Hunt scope is blocked (blocked:empty_universe): ${text}` },
     });
   });
 
-  it('does not use the policy-only 409 wording for discovery_failed', async () => {
+  it('says a data view of only exclusions holds only exclusions', async () => {
+    resolveHuntScopeMock.mockResolvedValue({
+      ...okScope,
+      status: 'blocked',
+      resolution: 'blocked:empty_universe',
+      index_patterns: [],
+      missing: [],
+    });
+    const { handler, context } = makeDeps({ indexPatterns: ['-logs-elastic_agent*'] });
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(context, requestFor(), response);
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 409,
+      body: {
+        message:
+          'Hunt scope is blocked (blocked:empty_universe): The default data view has no pattern this hunt may search: it holds only exclusions.',
+      },
+    });
+  });
+
+  it('says the resolve failed for discovery_failed, whatever was skipped', async () => {
     resolveHuntScopeMock.mockResolvedValue({
       ...okScope,
       status: 'blocked',
@@ -265,14 +294,9 @@ describe('registerHuntForThreatRoute', () => {
     expect(response.customError).toHaveBeenCalledWith({
       statusCode: 409,
       body: {
-        message: expect.stringMatching(
-          /blocked:discovery_failed.*nothing in the default data view/s
-        ),
+        message:
+          'Hunt scope is blocked (blocked:discovery_failed): Hunt scope resolution failed, so no index was searched (checked: logs-*, filebeat-*, -*elastic-cloud-logs-*).',
       },
-    });
-    expect(response.customError).toHaveBeenCalledWith({
-      statusCode: 409,
-      body: { message: expect.not.stringContaining('no pattern this hunt may search') },
     });
   });
 
@@ -314,11 +338,13 @@ describe('registerHuntForThreatRoute', () => {
       missing: ['custom-edr-1'],
     });
     huntForThreatMock.mockResolvedValue({ ...tier1Result, incomplete: [searchGap] });
-    const { handler, context } = makeDeps();
+    const { handler, context } = makeDeps({ indexPatterns: ['logs-*', 'custom-edr-1'] });
     const response = httpServerMock.createResponseFactory();
 
     await handler(context, requestFor(), response);
 
+    // The search gets what the scope kept, not the data view that still names the dropped index.
+    expect(huntForThreatMock.mock.calls[0][1].scope.search_patterns).toEqual(['logs-*']);
     const { body } = response.ok.mock.calls[0][0] as {
       body: { result: { incomplete?: unknown[] } };
     };
@@ -326,7 +352,7 @@ describe('registerHuntForThreatRoute', () => {
       {
         reason: 'index_not_searched',
         detail:
-          'The default data view names `custom-edr-1`, which this hunt could not resolve (not readable, or not found), so the hunt never searched there.',
+          'The default data view names `custom-edr-1`, which this hunt could not read (no read access, not found, or closed), so the hunt never searched there.',
       },
       searchGap,
     ]);

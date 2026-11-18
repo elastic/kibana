@@ -127,6 +127,25 @@ describe('describeGap', () => {
     expect(describeGaps(deduped, 800)).toBe(`${detail} (index not searched)`);
   });
 
+  it('lists an index_not_searched gap first, so a cut never costs the index names', () => {
+    const detail = describeUnsearched(
+      Array.from({ length: 10 }, (_value, index) => `${'x'.repeat(30)}-${index}`)
+    );
+    const deduped = dedupeCoverageGaps([
+      { reason: 'input_truncated', detail: 'only the first 50 IOCs were hunted' },
+      ...Array.from({ length: 30 }, (_value, index) => ({
+        reason: 'unknown_technique_id',
+        detail: `T${9000 + index}`,
+      })),
+      { reason: 'index_not_searched', detail },
+    ]);
+
+    const described = describeGaps(deduped, 500) ?? '';
+    expect(described.startsWith(`${detail} (index not searched), input truncated`)).toBe(true);
+    expect(described.length).toBeLessThanOrEqual(500);
+    expect(described).toMatch(/\(\+\d+ more\)$/);
+  });
+
   it('falls back to the raw reason for one it does not know', () => {
     expect(describeGap({ reason: 'brand_new_reason', detail: 'x' })).toBe('brand new reason');
   });

@@ -158,8 +158,9 @@ components:
           type: array
           description: >-
             What IOC Hunt searched: the space's Security Solution default
-            data view patterns, exclusions included; dot-prefixed names are
-            never included. Empty when the scope was blocked or resolution failed.
+            data view patterns, exclusions included, with policy-skipped entries
+            (hidden and alerts names) and unresolved local concrete names
+            removed. Empty when the scope was blocked or resolution failed.
           items:
             type: string
         tier2_targets:

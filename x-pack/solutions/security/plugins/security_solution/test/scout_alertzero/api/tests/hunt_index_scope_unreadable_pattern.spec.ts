@@ -40,6 +40,7 @@ apiTest.describe(
       NAMES.customIndex,
       NAMES.customAlias,
       NAMES.absent,
+      NAMES.closedIndex,
       NAMES.hiddenAlias,
     ];
 
@@ -71,12 +72,12 @@ apiTest.describe(
           state,
           budgetMs: FAN_OUT_BUDGET_MS,
         });
-        const coverage = (
-          await apiClient.get(spaceUrl(HUNT_WORKER_INDEX_COVERAGE_URL, NAMES.space), {
-            headers: state.headers,
-            responseType: 'json',
-          })
-        ).body as HuntWorkerIndexCoverageResponse;
+        const coverageResponse = await apiClient.get(
+          spaceUrl(HUNT_WORKER_INDEX_COVERAGE_URL, NAMES.space),
+          { headers: state.headers, responseType: 'json' }
+        );
+        expect(coverageResponse.statusCode).toBe(200);
+        const coverage = coverageResponse.body as HuntWorkerIndexCoverageResponse;
 
         const mismatches = await verifyPartial({
           names: NAMES,

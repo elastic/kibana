@@ -16,7 +16,6 @@ import type {
   HuntIncompleteReason,
   HuntIoc,
 } from '@kbn/alertzero-common';
-import type { HuntScopeResolution } from '@kbn/alertzero-common';
 import {
   completedSuccessfully,
   FINAL_WHEN_NOTHING_SEARCHABLE,
@@ -30,11 +29,8 @@ import type { Tier2TargetSource } from './common/resolve_tier2_targets';
 import { generateRecommendations } from './common/build_recommendations';
 import { selectHuntCallModel } from './common/select_hunt_call_model';
 import { buildHuntHeadline, buildHuntNarrative } from './common/build_hunt_narrative';
-import { describeUnsearched, unsearchedPatterns } from './common/unsearched_patterns';
-import {
-  NO_SEARCHABLE_PATTERN_MESSAGE,
-  isBlockedByPolicyOnly,
-} from './common/partition_hunt_universe';
+import { unsearchedGaps } from './common/unsearched_patterns';
+import { blockedScopeGuidance } from './common/blocked_scope_guidance';
 import type { HuntNarrativeContext } from './common/build_hunt_narrative';
 import { isTier1SearchableIoc } from './tier1/attribute_hits';
 import { loadReportHuntContext, MAX_HUNT_REPORT_TEXT_CHARS } from './common/load_report_context';
@@ -382,43 +378,6 @@ const buildArticleContext = (
   }
   if (tier1.time_range) context.time_range = tier1.time_range;
   return Object.keys(context).length === 0 ? undefined : context;
-};
-
-/**
- * What to tell the caller when the scope is blocked, keyed on why. `_resolve/index` is
- * cluster-wide and privilege-scoped, so the wording talks about what is visible to this
- * hunt rather than what exists in a space.
- */
-const blockedScopeGuidance = ({
-  resolution,
-  indexPatterns,
-  policyOnly,
-}: {
-  resolution: HuntScopeResolution;
-  indexPatterns: string[];
-  /** The data view held only hidden or alerts indices. */
-  policyOnly: boolean;
-}): { message: string; nextStep: string } => {
-  const checked = indexPatterns.join(', ');
-  if (resolution === 'blocked:discovery_failed') {
-    return {
-      message: `Hunt scope resolution failed, so no index was searched (checked: ${checked}).`,
-      nextStep:
-        "Check Elasticsearch connectivity and the calling user's index privileges, then retry.",
-    };
-  }
-  if (policyOnly) {
-    return {
-      message: NO_SEARCHABLE_PATTERN_MESSAGE,
-      nextStep:
-        'Add a pattern for the data to hunt to the `securitySolution:defaultIndex` setting.',
-    };
-  }
-  return {
-    message: `No index in the space's default data view is visible to this hunt (checked: ${checked}).`,
-    nextStep:
-      "Ingest data into an index the space's Security Solution default data view covers, or adjust the `securitySolution:defaultIndex` setting.",
-  };
 };
 
 /**
@@ -788,11 +747,7 @@ const huntCoordinatorCore = async (
   // visible to this hunt, so there is nothing to search and the caller must not write
   // hunt evidence.
   if (scope.status === 'blocked') {
-    const { message, nextStep } = blockedScopeGuidance({
-      resolution: scope.resolution,
-      indexPatterns,
-      policyOnly: isBlockedByPolicyOnly(scope),
-    });
+    const { message, nextStep } = blockedScopeGuidance(scope, indexPatterns);
     return {
       status: 'blocked',
       report_id: reportId,
@@ -828,15 +783,13 @@ const huntCoordinatorCore = async (
 
   // Names the scope dropped from the search: the run never looked there, so it is not a clean
   // search, and the same data view reproduces it. One final gap carries them.
-  const unsearched = unsearchedPatterns(scope);
-  const scopeGaps: HuntIncompleteness[] =
-    unsearched.length > 0
-      ? [{ reason: 'index_not_searched', detail: describeUnsearched(unsearched) }]
-      : [];
-  // The paths below with a fixed `message` name only why Behavior Hunt was skipped. The hunt
-  // child quotes `message` as the gap that retired the report, so the scope gap goes on it too.
-  const withScopeGap = (message: string): string =>
-    scopeGaps.length > 0 ? `${message} ${scopeGaps[0].detail}` : message;
+  const scopeGaps = unsearchedGaps(scope);
+  // No `message` below names the dropped index on its own. The hunt child quotes `message` as
+  // the gap that retired the report, so the scope gap goes on it, as a sentence of its own.
+  const withScopeGap = (message: string): string => {
+    if (scopeGaps.length === 0) return message;
+    return `${/[.!?]$/.test(message) ? message : `${message}.`} ${scopeGaps[0].detail}`;
+  };
 
   const tier1Raw = await huntForThreat(esClient, {
     scope: {
@@ -1208,10 +1161,11 @@ const huntCoordinatorCore = async (
     actionable_indices: scope.actionable_indices,
     tier1,
     tier2,
-    message:
+    message: withScopeGap(
       `IOC Hunt: ${tier1Raw.status}. Behavior Hunt: ${tier2Raw.status} ` +
-      `(${tier2Raw.behaviors.length} proposed` +
-      `${gaps.length > 0 ? `, ${gaps.length} coverage gap(s)` : ''}).`,
+        `(${tier2Raw.behaviors.length} proposed` +
+        `${gaps.length > 0 ? `, ${gaps.length} coverage gap(s)` : ''}).`
+    ),
     next_step:
       tier2Raw.status === 'behaviors_proposed'
         ? gaps.length > 0

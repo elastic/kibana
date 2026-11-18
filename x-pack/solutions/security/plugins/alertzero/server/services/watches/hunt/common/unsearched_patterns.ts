@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HuntScope } from '@kbn/alertzero-common';
+import type { HuntIncompleteness, HuntScope } from '@kbn/alertzero-common';
 import { isIndexExclusion, stripBackingPrefix } from '../../../../../common/remote_cluster';
 import { codeList } from './build_hunt_narrative';
 import { buildMatchesRequired } from './matches_required';
@@ -31,7 +31,7 @@ export const describeUnsearched = (names: string[]): string => {
     `The default data view names ${codeList(
       shownNames,
       shown
-    )}, which this hunt could not resolve (not readable, or not found), so the hunt never searched there.`;
+    )}, which this hunt could not read (no read access, not found, or closed), so the hunt never searched there.`;
   let shown = Math.min(names.length, MAX_UNSEARCHED_NAMES);
   while (shown > 1 && sentence(shown).length > MAX_UNSEARCHED_DETAIL_CHARS) shown -= 1;
   return sentence(shown);
@@ -57,4 +57,17 @@ export const unsearchedPatterns = (
     // Still matched once the exclusions are applied means nothing excludes it.
     return buildMatchesRequired([bare, ...exclusionEntries])(bare);
   });
+};
+
+/**
+ * The gap a run reports for the names its scope dropped: one final `index_not_searched` entry
+ * naming them, or nothing when the scope dropped none.
+ */
+export const unsearchedGaps = (
+  scope: Pick<HuntScope, 'index_patterns' | 'missing'>
+): HuntIncompleteness[] => {
+  const unsearched = unsearchedPatterns(scope);
+  return unsearched.length > 0
+    ? [{ reason: 'index_not_searched', detail: describeUnsearched(unsearched) }]
+    : [];
 };

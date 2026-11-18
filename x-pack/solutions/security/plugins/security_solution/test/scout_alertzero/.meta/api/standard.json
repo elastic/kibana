@@ -1,5 +1,5 @@
 {
-  "sha1": "83eca0703e68d77ecd754926e27735318e8b63b9",
+  "sha1": "54490a3b64b1cfd4aebd8adce1c58d4c5bc6d627",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -126,7 +126,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_index_scope_nothing_searchable.spec.ts",
-        "line": 47,
+        "line": 48,
         "column": 32
       }
     },
@@ -140,7 +140,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_index_scope_unreadable_pattern.spec.ts",
-        "line": 56,
+        "line": 57,
         "column": 55
       }
     },

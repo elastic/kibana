@@ -489,6 +489,25 @@ describe('buildHuntNarrative', () => {
     expect(narrative).not.toContain('Still to be searched');
   });
 
+  it('does not call a final gap a question of whether the environment is clean when there is a hit', () => {
+    const final = (hasConfirmedHit: boolean) =>
+      buildHuntNarrative(
+        result({
+          completeness: 'incomplete_final',
+          has_confirmed_hit: hasConfirmedHit,
+          ...(hasConfirmedHit ? { tier1: hitTier1() } : {}),
+          incomplete: [{ reason: 'index_not_searched', detail: 'custom-edr-1 was not searched' }],
+        }),
+        ctx
+      );
+
+    expect(final(true)).toContain(
+      '**Coverage: incomplete.** The confirmed hit stands, but part of the search did not run, and repeating the run is not expected to change that; the report is retired without a full search.'
+    );
+    expect(final(true)).not.toContain('not a statement that the environment is clean');
+    expect(final(false)).toContain('this run is not a statement that the environment is clean');
+  });
+
   it('carries the Behavior Hunt failure message when Behavior Hunt threw', () => {
     const narrative = buildHuntNarrative(
       result({

@@ -14,13 +14,8 @@ import {
 } from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_WRITE, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
-import { isIndexExclusion } from '../../../common/remote_cluster';
-import { NO_SEARCHABLE_PATTERN_MESSAGE } from '../../services/watches/hunt/common/partition_hunt_universe';
 import { resolveHuntScope } from '../../services/watches/hunt/common/resolve_index_scope';
-import {
-  describeUnsearched,
-  unsearchedPatterns,
-} from '../../services/watches/hunt/common/unsearched_patterns';
+import { unsearchedGaps } from '../../services/watches/hunt/common/unsearched_patterns';
 import { huntBehavior } from '../../services/watches/hunt/tier2/hunt_behavior';
 import { TIER2_MODEL_TIERS } from '../../services/watches/hunt/common/hunt_model_tiers';
 import {
@@ -75,22 +70,12 @@ export const registerHuntBehaviorRoute = ({
         try {
           const core = await context.core;
           const { patterns: universe, policySkipped } = await resolveHuntUniverse(context, logger);
-          if (!universe.some((pattern) => !isIndexExclusion(pattern))) {
-            return response.customError({
-              statusCode: 409,
-              body: {
-                message:
-                  policySkipped.length > 0
-                    ? NO_SEARCHABLE_PATTERN_MESSAGE
-                    : 'The default data view has no pattern this hunt may search: it holds only exclusions.',
-              },
-            });
-          }
           const esClient = huntEsClient({ getClusterClient, request });
           const crossProjectSearch = isCpsEnabled();
           // What the generated query may read: the default data view minus the policy-skipped
           // entries and the concrete names that resolved nothing. A generated `FROM` naming one
-          // index the caller cannot read fails whole, so those names are dropped up front.
+          // index the caller cannot read fails whole, so those names are dropped up front. A
+          // blocked scope is refused before any model is resolved.
           const scope = await resolveHuntScope({
             esClient,
             spaceId: getSpaceId(request),
@@ -182,19 +167,10 @@ export const registerHuntBehaviorRoute = ({
 
           // A name the scope dropped was never offered to the generated queries. The coordinator
           // records that as a gap; this route has no coordinator, so it goes on the result.
-          const unsearched = unsearchedPatterns(scope);
+          const scopeGaps = unsearchedGaps(scope);
           const body: HuntBehaviorResponse =
-            unsearched.length > 0
-              ? {
-                  ...result,
-                  incomplete: [
-                    {
-                      reason: 'index_not_searched',
-                      detail: describeUnsearched(unsearched),
-                    },
-                    ...(result.incomplete ?? []),
-                  ],
-                }
+            scopeGaps.length > 0
+              ? { ...result, incomplete: [...scopeGaps, ...(result.incomplete ?? [])] }
               : result;
 
           return response.ok({ body });

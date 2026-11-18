@@ -56,13 +56,13 @@ export const HuntWorkerIndexCoverageResponse = lazySchema(() =>
         ),
       source: z.enum(['last_sweep', 'role', 'unavailable']),
       /**
-       * Why `source` is `unavailable`. `caller_unreadable`: the caller may not resolve indices at all. `empty_universe`: the default data view has no pattern a hunt may search.
+       * Why `source` is `unavailable`. `role_unreadable`: the Worker's role could not be read. `discovery_failed`: resolving the default data view failed. `caller_unreadable`: the caller may not resolve indices at all. `empty_universe`: the default data view has no pattern a hunt may search.
        */
       unavailable_reason: z
         .enum(['role_unreadable', 'discovery_failed', 'caller_unreadable', 'empty_universe'])
         .optional()
         .describe(
-          'Why `source` is `unavailable`. `caller_unreadable`: the caller may not resolve indices at all. `empty_universe`: the default data view has no pattern a hunt may search.'
+          "Why `source` is `unavailable`. `role_unreadable`: the Worker's role could not be read. `discovery_failed`: resolving the default data view failed. `caller_unreadable`: the caller may not resolve indices at all. `empty_universe`: the default data view has no pattern a hunt may search."
         ),
       checked_at: z.string().max(64).nullable(),
       service_account_id: z.string().max(1024).nullable(),

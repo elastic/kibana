@@ -14,10 +14,7 @@ import { resolveHuntScope } from '../../services/watches/hunt/common/resolve_ind
 import { huntForThreat } from '../../services/watches/hunt/tier1/hunt_for_threat';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
-import {
-  describeUnsearched,
-  unsearchedPatterns,
-} from '../../services/watches/hunt/common/unsearched_patterns';
+import { unsearchedGaps } from '../../services/watches/hunt/common/unsearched_patterns';
 import { blockedScopeMessage } from './blocked_scope_message';
 import { huntEsClient } from './hunt_es_client';
 import { resolveHuntUniverse } from './resolve_hunt_universe';
@@ -110,18 +107,7 @@ export const registerHuntForThreatRoute = ({
 
           // A name the scope dropped was never searched. The coordinator records that as a gap;
           // this route has no coordinator, so it goes on the IOC Hunt result itself.
-          const unsearched = unsearchedPatterns(scope);
-          const incomplete = [
-            ...(unsearched.length > 0
-              ? [
-                  {
-                    reason: 'index_not_searched' as const,
-                    detail: describeUnsearched(unsearched),
-                  },
-                ]
-              : []),
-            ...(wireResult.incomplete ?? []),
-          ];
+          const incomplete = [...unsearchedGaps(scope), ...(wireResult.incomplete ?? [])];
 
           const body: HuntForThreatResponse = {
             scope,

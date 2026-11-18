@@ -55,12 +55,12 @@ apiTest.describe(
     apiTest('still blocks the sweep at the gate', async ({ apiClient }) => {
       apiTest.setTimeout(SWEEP_TEST_TIMEOUT_MS);
       const { gate, workerState } = await sweepUntilGate({ apiClient, names: NAMES, state });
-      const coverage = (
-        await apiClient.get(spaceUrl(HUNT_WORKER_INDEX_COVERAGE_URL, NAMES.space), {
-          headers: state.headers,
-          responseType: 'json',
-        })
-      ).body as HuntWorkerIndexCoverageResponse;
+      const coverageResponse = await apiClient.get(
+        spaceUrl(HUNT_WORKER_INDEX_COVERAGE_URL, NAMES.space),
+        { headers: state.headers, responseType: 'json' }
+      );
+      expect(coverageResponse.statusCode).toBe(200);
+      const coverage = coverageResponse.body as HuntWorkerIndexCoverageResponse;
 
       const mismatches = await verifyBlocked({
         names: NAMES,

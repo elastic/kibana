@@ -42,13 +42,15 @@ const document = () => ({ '@timestamp': new Date().toISOString(), message: 'scou
 const sorted = (values: unknown): string[] =>
   Array.isArray(values) ? [...(values as string[])].sort() : [];
 
-export interface BlockNames {
+interface BlockNames {
   space: string;
   logsPattern: string;
   logsStream: string;
   customIndex: string;
   customAlias: string;
   absent: string;
+  /** Exists and is closed: it resolves by name, and nobody can search it. */
+  closedIndex: string;
   hiddenIndex: string;
   hiddenAlias: string;
 }
@@ -60,11 +62,12 @@ export const namesFor = (suffix: string, run: number): BlockNames => ({
   customIndex: `custom-edr-c-${suffix}${run}-1`,
   customAlias: `custom-edr-alias-${suffix}${run}`,
   absent: `custom-edr-absent-${suffix}${run}`,
+  closedIndex: `custom-edr-closed-${suffix}${run}`,
   hiddenIndex: `.siem-signals-scout-${suffix}${run}-000001`,
   hiddenAlias: `.siem-signals-scout-${suffix}${run}`,
 });
 
-export const readHuntWorker = async (
+const readHuntWorker = async (
   apiClient: ApiClientFixture,
   headers: Record<string, string>,
   spaceId: string
@@ -114,6 +117,8 @@ export const setupBlock = async ({
   await esClient.index({ index: names.customIndex, document: document(), refresh: true });
   if (withLogsStream) {
     await esClient.indices.putAlias({ index: names.customIndex, name: names.customAlias });
+    await esClient.index({ index: names.closedIndex, document: document(), refresh: true });
+    await esClient.indices.close({ index: names.closedIndex });
   }
   await esClient.indices.create({
     index: names.hiddenIndex,
@@ -153,18 +158,22 @@ export const teardownBlock = async ({
   withLogsStream: boolean;
   /** Undefined when `setupBlock` threw: the indices and the space are still removed. */
   state: BlockState | undefined;
-}) => {
+}): Promise<void> => {
   const stateSteps = state
     ? [
         {
           name: 'disable the hunt worker',
-          run: () =>
-            setHuntEnabled({
+          run: async () => {
+            const { statusCode } = await setHuntEnabled({
               apiClient,
               headers: state.headers,
               spaceId: names.space,
               enabled: false,
-            }),
+            });
+            if (statusCode !== 200) {
+              throw new Error(`disabling the hunt worker answered ${statusCode}`);
+            }
+          },
         },
         {
           name: 'restore deployment supply rows',
@@ -205,6 +214,10 @@ export const teardownBlock = async ({
       run: () => esClient.indices.delete({ index: names.customIndex, ignore_unavailable: true }),
     },
     {
+      name: 'delete the closed index',
+      run: () => esClient.indices.delete({ index: names.closedIndex, ignore_unavailable: true }),
+    },
+    {
       name: 'delete the hidden index',
       run: () => esClient.indices.delete({ index: names.hiddenIndex, ignore_unavailable: true }),
     },
@@ -223,7 +236,7 @@ export const sweepUntilGate = async ({
   names: BlockNames;
   state: BlockState;
   budgetMs?: number;
-}) => {
+}): Promise<{ gate: FinishedSweepGate | undefined; workerState: WorkerRow | undefined }> => {
   const enabled = await setHuntEnabled({
     apiClient,
     headers: state.headers,
@@ -248,7 +261,7 @@ export const sweepUntilGate = async ({
 export const SWEEP_TEST_TIMEOUT_MS = 240_000;
 export const FAN_OUT_BUDGET_MS = 180_000;
 
-export interface VerifyContext {
+interface VerifyContext {
   names: BlockNames;
   gate: FinishedSweepGate | undefined;
   apiClient: ApiClientFixture;
@@ -264,69 +277,15 @@ const compare = (mismatches: string[], label: string, actual: unknown, expected:
   }
 };
 
-export const verifyPartial = async ({
+/** What a caller who can read everything sees: the scope route, and the standalone IOC Hunt. */
+const verifyHumanCaller = async ({
   names,
-  gate,
   apiClient,
   headers,
-  workerState,
-  coverage,
-}: VerifyContext) => {
-  const mismatches: string[] = [];
-  const scopeOutput = (gate?.output ?? {}) as Partial<HuntIndexScopeResponse>;
-  const custom = [names.customIndex, names.customAlias, names.absent];
-
-  // 1. gate output
-  compare(mismatches, 'gate status', scopeOutput.status, 'ok');
-  compare(mismatches, 'gate resolution', scopeOutput.resolution, 'universe');
-  compare(mismatches, 'gate index_patterns', scopeOutput.index_patterns, [names.logsPattern]);
-  compare(mismatches, 'gate missing', sorted(scopeOutput.missing), [...custom].sort());
-  compare(mismatches, 'gate policy_skipped', scopeOutput.policy_skipped, [names.hiddenAlias]);
-
-  // 2. the gate step let the sweep through
-  const blocked = (gate?.resolveGate?.output as { index_scope_blocked?: unknown } | undefined)
-    ?.index_scope_blocked;
-  compare(mismatches, 'index_scope_blocked', String(blocked), 'false');
-
-  // 3. candidate selection ran as the service account
-  const select = gate?.selectCandidates;
-  const selectRan = select?.status === 'completed' && select.output !== undefined;
-  if (!selectRan) {
-    mismatches.push(
-      `select_candidate_reports did not complete: status ${select?.status}, error ${JSON.stringify(
-        select?.error
-      )}`
-    );
-  }
-
-  // 4. no eligible reports, so no fan-out against the fake connector
-  if (selectRan) {
-    const ids = (select?.output as { ids?: unknown[] } | undefined)?.ids;
-    if (!Array.isArray(ids) || ids.length !== 0) {
-      mismatches.push(
-        'select_candidate_reports returned ids: the Scout stack holds hunt-eligible reports and the sweep entered a fan-out against the fake connector'
-      );
-    }
-  }
-
-  // 5. coverage from the last sweep
-  compare(mismatches, 'coverage source', coverage.source, 'last_sweep');
-  compare(
-    mismatches,
-    'coverage unreadable_by_worker',
-    sorted(coverage.unreadable_by_worker),
-    [names.customIndex, names.customAlias].sort()
-  );
-  compare(mismatches, 'coverage missing_for_everyone', coverage.missing_for_everyone, [
-    names.absent,
-  ]);
-  compare(mismatches, 'coverage policy_skipped', coverage.policy_skipped, [names.hiddenAlias]);
-
-  // 6. the worker is healthy
-  compare(mismatches, 'worker state', workerState?.state, 'ok');
-  compare(mismatches, 'worker stateReason', workerState?.stateReason, undefined);
-
-  // 7. a human caller
+  mismatches,
+}: Pick<VerifyContext, 'names' | 'apiClient' | 'headers'> & {
+  mismatches: string[];
+}): Promise<void> => {
   const humanResponse = await apiClient.get(spaceUrl(HUNT_INDEX_SCOPE_URL, names.space), {
     headers,
     responseType: 'json',
@@ -335,8 +294,12 @@ export const verifyPartial = async ({
   const humanScope = (humanResponse.body ?? {}) as Partial<HuntIndexScopeResponse>;
   const humanPatterns = humanScope.index_patterns ?? [];
   compare(mismatches, 'caller policy_skipped', humanScope.policy_skipped, [names.hiddenAlias]);
-  compare(mismatches, 'caller missing', humanScope.missing, [names.absent]);
-  if (humanPatterns.includes(names.absent) || humanPatterns.includes(names.hiddenAlias)) {
+  compare(mismatches, 'caller missing', humanScope.missing, [names.absent, names.closedIndex]);
+  if (
+    humanPatterns.includes(names.absent) ||
+    humanPatterns.includes(names.closedIndex) ||
+    humanPatterns.includes(names.hiddenAlias)
+  ) {
     mismatches.push(
       `caller index_patterns still names a dropped or hidden entry: ${JSON.stringify(
         humanPatterns
@@ -358,15 +321,90 @@ export const verifyPartial = async ({
     (hunt.body as HuntForThreatResponse).scope?.policy_skipped,
     [names.hiddenAlias]
   );
+  const scopeGap = (hunt.body as HuntForThreatResponse).result?.incomplete?.find(
+    ({ reason }) => reason === 'index_not_searched'
+  );
+  const unreported = [names.absent, names.closedIndex].filter(
+    (name) => !scopeGap?.detail.includes(`\`${name}\``)
+  );
+  if (unreported.length > 0) {
+    mismatches.push(
+      `hunt_for_threat did not report ${unreported.join(
+        ', '
+      )} as index_not_searched: ${JSON.stringify(scopeGap)}`
+    );
+  }
+};
+
+export const verifyPartial = async ({
+  names,
+  gate,
+  apiClient,
+  headers,
+  workerState,
+  coverage,
+}: VerifyContext): Promise<string[]> => {
+  const mismatches: string[] = [];
+  const scopeOutput = (gate?.output ?? {}) as Partial<HuntIndexScopeResponse>;
+  const custom = [names.customIndex, names.customAlias, names.absent, names.closedIndex];
+
+  // 1. gate output
+  compare(mismatches, 'gate status', scopeOutput.status, 'ok');
+  compare(mismatches, 'gate resolution', scopeOutput.resolution, 'universe');
+  compare(mismatches, 'gate index_patterns', scopeOutput.index_patterns, [names.logsPattern]);
+  compare(mismatches, 'gate missing', sorted(scopeOutput.missing), [...custom].sort());
+  compare(mismatches, 'gate policy_skipped', scopeOutput.policy_skipped, [names.hiddenAlias]);
+
+  // 2. the gate step let the sweep through
+  const blocked = (gate?.resolveGate?.output as { index_scope_blocked?: unknown } | undefined)
+    ?.index_scope_blocked;
+  compare(mismatches, 'index_scope_blocked', String(blocked), 'false');
+
+  // 3. candidate selection ran as the service account
+  const select = gate?.selectCandidates;
+  if (select?.status !== 'completed' || select.output === undefined) {
+    mismatches.push(
+      `select_candidate_reports did not complete: status ${select?.status}, error ${JSON.stringify(
+        select?.error
+      )}`
+    );
+  }
+
+  // 4. coverage from the last sweep
+  compare(mismatches, 'coverage source', coverage.source, 'last_sweep');
+  compare(
+    mismatches,
+    'coverage unreadable_by_worker',
+    sorted(coverage.unreadable_by_worker),
+    [names.customIndex, names.customAlias].sort()
+  );
+  compare(mismatches, 'coverage missing_for_everyone', coverage.missing_for_everyone, [
+    names.absent,
+    names.closedIndex,
+  ]);
+  compare(mismatches, 'coverage policy_skipped', coverage.policy_skipped, [names.hiddenAlias]);
+
+  // 5. the worker is healthy
+  compare(mismatches, 'worker state', workerState?.state, 'ok');
+  compare(mismatches, 'worker stateReason', workerState?.stateReason, undefined);
+
+  // 6. a human caller
+  await verifyHumanCaller({ names, apiClient, headers, mismatches });
   return mismatches;
 };
 
-export const verifyBlocked = async ({ names, gate, workerState, coverage }: VerifyContext) => {
+export const verifyBlocked = async ({
+  names,
+  gate,
+  workerState,
+  coverage,
+}: VerifyContext): Promise<string[]> => {
   const mismatches: string[] = [];
   const scopeOutput = (gate?.output ?? {}) as Partial<HuntIndexScopeResponse>;
 
   compare(mismatches, 'gate status', scopeOutput.status, 'blocked');
   compare(mismatches, 'gate resolution', scopeOutput.resolution, 'blocked:empty_universe');
+  compare(mismatches, 'gate index_patterns', scopeOutput.index_patterns, []);
   compare(mismatches, 'gate missing', scopeOutput.missing, [names.customIndex]);
   compare(mismatches, 'gate policy_skipped', scopeOutput.policy_skipped, [names.hiddenAlias]);
 
@@ -386,6 +424,16 @@ export const verifyBlocked = async ({ names, gate, workerState, coverage }: Veri
   compare(mismatches, 'coverage unreadable_by_worker', coverage.unreadable_by_worker, [
     names.customIndex,
   ]);
+  compare(mismatches, 'coverage missing_for_everyone', coverage.missing_for_everyone, []);
+  compare(mismatches, 'coverage policy_skipped', coverage.policy_skipped, [names.hiddenAlias]);
   compare(mismatches, 'worker state', workerState?.state, 'degraded');
+  const sawNothing = "could not see any index in this space's default data view";
+  if (!workerState?.stateReason?.includes(sawNothing)) {
+    mismatches.push(
+      `worker stateReason does not say the sweep saw nothing: ${JSON.stringify(
+        workerState?.stateReason
+      )}`
+    );
+  }
   return mismatches;
 };

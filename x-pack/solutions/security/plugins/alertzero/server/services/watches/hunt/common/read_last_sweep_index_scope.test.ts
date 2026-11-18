@@ -91,15 +91,12 @@ describe('readLastSweepIndexScope', () => {
     await expect(readLastSweepIndexScope(params)).resolves.toBeUndefined();
   });
 
-  it('ignores a scope past the schema bounds and warns, instead of failing silently', async () => {
+  it('ignores a scope of the wrong shape and warns, instead of failing silently', async () => {
     const { params } = setup({
       stepId: 'check_index_scope',
       startedAt: 's',
       finishedAt: 'f',
-      output: {
-        ...scope,
-        missing: Array.from({ length: 501 }, (_value, index) => `custom-${index}`),
-      },
+      output: { ...scope, missing: 'custom-1' },
     });
 
     await expect(readLastSweepIndexScope(params)).resolves.toMatchObject({ scope: undefined });
@@ -107,6 +104,22 @@ describe('readLastSweepIndexScope', () => {
     expect(params.logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('does not match the HuntScope schema and is ignored: missing')
     );
+  });
+
+  it('reads a scope from a long data view whole, so a blocked sweep still shows as blocked', async () => {
+    const missing = [
+      ...Array.from({ length: 600 }, (_value, index) => `custom-${index}`),
+      'x'.repeat(600),
+    ];
+    const { params } = setup({
+      stepId: 'check_index_scope',
+      startedAt: 's',
+      finishedAt: 'f',
+      output: { ...scope, missing },
+    });
+
+    await expect(readLastSweepIndexScope(params)).resolves.toMatchObject({ scope: { missing } });
+    expect(params.logger.warn).not.toHaveBeenCalled();
   });
 
   it('does not warn for a scope that parses', async () => {

@@ -8,6 +8,7 @@
 import {
   MAX_UNSEARCHED_DETAIL_CHARS,
   describeUnsearched,
+  unsearchedGaps,
   unsearchedPatterns,
 } from './unsearched_patterns';
 
@@ -40,7 +41,7 @@ describe('unsearchedPatterns', () => {
 describe('describeUnsearched', () => {
   it('names one index', () => {
     expect(describeUnsearched(['custom-edr-1'])).toBe(
-      'The default data view names `custom-edr-1`, which this hunt could not resolve (not readable, or not found), so the hunt never searched there.'
+      'The default data view names `custom-edr-1`, which this hunt could not read (no read access, not found, or closed), so the hunt never searched there.'
     );
   });
 
@@ -68,5 +69,22 @@ describe('describeUnsearched', () => {
 
     expect(detail.length).toBeLessThanOrEqual(MAX_UNSEARCHED_DETAIL_CHARS);
     expect(detail).toContain(`\`${'y'.repeat(254)}…\` and \`z-1\``);
+  });
+});
+
+describe('unsearchedGaps', () => {
+  it.each([
+    ['one dropped name', ['custom-edr-1']],
+    ['two dropped names', ['custom-edr-1', 'custom-edr-2']],
+  ])('is one final gap for %s', (_label, missing) => {
+    expect(unsearchedGaps({ index_patterns: ['logs-*'], missing })).toEqual([
+      { reason: 'index_not_searched', detail: describeUnsearched(missing) },
+    ]);
+  });
+
+  it('is empty when the scope dropped nothing', () => {
+    expect(
+      unsearchedGaps({ index_patterns: ['logs-*', 'winlogbeat-*'], missing: ['winlogbeat-*'] })
+    ).toEqual([]);
   });
 });

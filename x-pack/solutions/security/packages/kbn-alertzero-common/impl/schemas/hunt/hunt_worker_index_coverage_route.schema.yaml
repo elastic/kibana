@@ -76,9 +76,10 @@ paths:
                     type: string
                     enum: [role_unreadable, discovery_failed, caller_unreadable, empty_universe]
                     description: >-
-                      Why `source` is `unavailable`. `caller_unreadable`: the caller may not
-                      resolve indices at all. `empty_universe`: the default data view has no
-                      pattern a hunt may search.
+                      Why `source` is `unavailable`. `role_unreadable`: the Worker's role
+                      could not be read. `discovery_failed`: resolving the default data view
+                      failed. `caller_unreadable`: the caller may not resolve indices at all.
+                      `empty_universe`: the default data view has no pattern a hunt may search.
                   checked_at:
                     type: string
                     nullable: true

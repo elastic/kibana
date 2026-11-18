@@ -76,6 +76,8 @@ describe('partitionHuntUniverse', () => {
     '-<.alerts-{now/d}>',
     '.ds-logs-okta.system-default-2026.09.30-000001',
     '-.alerts-*',
+    '-remote:.alerts-*',
+    '-remote:<.alerts-{now/d}>',
     'logs-*',
   ])('keeps %s', (entry) => {
     expect(partitionHuntUniverse([entry])).toEqual({ patterns: [entry], policySkipped: [] });

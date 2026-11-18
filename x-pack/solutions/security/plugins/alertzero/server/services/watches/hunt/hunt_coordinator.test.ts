@@ -3327,7 +3327,7 @@ describe('huntCoordinator', () => {
         {
           reason: 'index_not_searched',
           detail:
-            'The default data view names `custom-edr-1`, which this hunt could not resolve (not readable, or not found), so the hunt never searched there.',
+            'The default data view names `custom-edr-1`, which this hunt could not read (no read access, not found, or closed), so the hunt never searched there.',
         },
       ]);
       expect(result.index_patterns).toEqual(['logs-*']);
@@ -3337,7 +3337,7 @@ describe('huntCoordinator', () => {
 
     // The hunt child quotes `message` as the gap that retired the report, so it has to name it.
     const GAP_SENTENCE =
-      'The default data view names `custom-edr-1`, which this hunt could not resolve (not readable, or not found), so the hunt never searched there.';
+      'The default data view names `custom-edr-1`, which this hunt could not read (no read access, not found, or closed), so the hunt never searched there.';
 
     it('records the gap on the tier1_only shape', async () => {
       mockScope.mockResolvedValueOnce(droppedScope(['custom-edr-1']));
@@ -3374,6 +3374,29 @@ describe('huntCoordinator', () => {
       );
       expect(result.status).toBe('tier1_and_tier2');
       expectRecorded(result);
+      // The Worker runs both tiers, so this is the message its hunt reason quotes.
+      expect(result.message).toMatch(
+        new RegExp(
+          `^IOC Hunt: .*Behavior Hunt: .*coverage gap\\(s\\)\\)\\. ${GAP_SENTENCE.replace(
+            /[.*+?^${}()|[\]\\]/g,
+            '\\$&'
+          )}$`
+        )
+      );
+    });
+
+    it('ends a message with no full stop before adding the gap sentence', async () => {
+      const { huntBehavior: mockTier2 } = jest.requireMock('./tier2/hunt_behavior');
+      mockScope.mockResolvedValueOnce(droppedScope(['custom-edr-1']));
+      mockTier2.mockRejectedValueOnce(new Error('Request timed out'));
+      const result = await run(
+        { tier2_when: 'always', text: 'report text' },
+        allTiers({} as ScopedModel)
+      );
+      expect(result.tier2_skipped_reason).toBe('tier2_failed');
+      expect(result.message).toBe(
+        `IOC Hunt: ${result.tier1.status}. Behavior Hunt failed: Request timed out. ${GAP_SENTENCE}`
+      );
     });
 
     it('words the detail for two names and caps it at ten names', async () => {
