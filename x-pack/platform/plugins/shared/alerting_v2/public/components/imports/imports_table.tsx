@@ -9,6 +9,7 @@ import React, { useMemo, useState } from 'react';
 import { EuiFieldSearch, EuiInMemoryTable, EuiSpacer } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { ImportListItem } from '../../hooks/use_fetch_imports';
 
 const CONNECTOR_TYPE_LABELS: Readonly<Record<string, string>> = {
@@ -20,7 +21,17 @@ const CONNECTOR_TYPE_LABELS: Readonly<Record<string, string>> = {
 const getConnectorTypeLabel = (connectorTypeId: string): string =>
   CONNECTOR_TYPE_LABELS[connectorTypeId] ?? connectorTypeId;
 
-const columns: Array<EuiBasicTableColumn<ImportListItem>> = [
+const MANAGE_LABEL = i18n.translate('xpack.alertingV2.imports.list.action.manage', {
+  defaultMessage: 'Manage',
+});
+
+const MANAGE_DESCRIPTION = i18n.translate('xpack.alertingV2.imports.list.action.manageDescription', {
+  defaultMessage: 'Manage this connector',
+});
+
+const getColumns = (
+  getConnectorUrl: (connectorId: string) => string
+): Array<EuiBasicTableColumn<ImportListItem>> => [
   {
     field: 'name',
     name: i18n.translate('xpack.alertingV2.imports.list.column.name', {
@@ -37,6 +48,22 @@ const columns: Array<EuiBasicTableColumn<ImportListItem>> = [
     sortable: ({ connectorTypeId }: ImportListItem) => getConnectorTypeLabel(connectorTypeId),
     render: (connectorTypeId: ImportListItem['connectorTypeId']) =>
       getConnectorTypeLabel(connectorTypeId),
+  },
+  {
+    name: i18n.translate('xpack.alertingV2.imports.list.column.actions', {
+      defaultMessage: 'Actions',
+    }),
+    actions: [
+      {
+        name: MANAGE_LABEL,
+        description: MANAGE_DESCRIPTION,
+        icon: 'gear',
+        type: 'icon',
+        href: ({ connectorId }: ImportListItem) => getConnectorUrl(connectorId),
+        target: '_blank',
+        'data-test-subj': 'importsManageAction',
+      },
+    ],
   },
 ];
 
@@ -63,7 +90,18 @@ interface ImportsTableProps {
 
 /** The imports of the current space, searched by name, sorted and paged in the browser. */
 export const ImportsTable = ({ items, isLoading, error }: ImportsTableProps) => {
+  const { getUrlForApp } = useService(CoreStart('application'));
   const [searchText, setSearchText] = useState('');
+  const columns = useMemo(
+    () =>
+      getColumns((connectorId) =>
+        getUrlForApp('management', {
+          deepLinkId: 'triggersActionsConnectors',
+          path: `/connectors/${encodeURIComponent(connectorId)}`,
+        })
+      ),
+    [getUrlForApp]
+  );
   const rows = useMemo(() => filterImportsByName(items, searchText), [items, searchText]);
 
   return (
