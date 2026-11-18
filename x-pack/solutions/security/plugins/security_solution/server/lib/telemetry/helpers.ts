@@ -293,8 +293,11 @@ export const extractEndpointPolicyConfig = (policyData: PolicyData | null) => {
     return null;
   }
 
-  // Export providers name the customer's storage accounts and containers, so they are never sent
-  return { ...epPolicyConfig, value: removeExportProviders(epPolicyConfig.value) };
+  // Export providers name the customer's storage accounts and containers, so they are never sent.
+  // `value` is checked too: a stored policy can lack it.
+  return epPolicyConfig.value
+    ? { ...epPolicyConfig, value: removeExportProviders(epPolicyConfig.value) }
+    : { ...epPolicyConfig };
 };
 
 export const addDefaultAdvancedPolicyConfigSettings = (policyConfig: PolicyConfig) => {

@@ -11,7 +11,7 @@ export type ExportProviderType = (typeof EXPORT_PROVIDER_TYPES)[number];
 
 /** An export provider backed by an Azure Blob Storage container. */
 export interface AzureBlobExportProvider {
-  /** Name the admin chose; what `--export <id>` uses. Fixed after creation (UI rule) */
+  /** Name the admin chose; what `--export <id>` uses. Renaming a provider changes it in place */
   id: string;
   type: 'azure_blob';
   account_name: string;

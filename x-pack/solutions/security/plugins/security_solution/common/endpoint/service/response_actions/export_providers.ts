@@ -107,10 +107,11 @@ const getServiceUrlFieldError = (serviceUrl: unknown): ExportProviderFieldError 
   if (serviceUrl.length > EXPORT_PROVIDER_SERVICE_URL_MAX_LENGTH) {
     return 'too_long';
   }
-  // Endpoint gets the raw string, so it is checked as written: WHATWG parsing would accept an
-  // empty `?` or `#`, and normalize `\` and forms like `https:/host` or `https:///host`. `@` would
-  // be user info.
-  if (/[\s?#@\\]/.test(serviceUrl)) {
+  // Endpoint gets the raw string, so it is checked as written. Printable ASCII only: no whitespace,
+  // control characters, soft hyphens or look-alike Unicode hosts. WHATWG parsing would also accept
+  // an empty `?` or `#`, and normalize `\` and forms like `https:/host` or `https:///host`. `@`
+  // would be user info.
+  if (!/^[\x21-\x7E]+$/.test(serviceUrl) || /[?#@\\]/.test(serviceUrl)) {
     return 'invalid_format';
   }
 

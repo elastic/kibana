@@ -327,17 +327,6 @@ export const getPackagePolicyUpdateCallback = (
         );
       }
 
-      // Export providers are only configurable behind their flag, so deployments with it off never
-      // persist them via the API (and never get a product-feature or license error about them).
-      if (
-        !experimentalFeatures.responseActionsEndpointFileExport &&
-        endpointIntegrationData.inputs?.[0]?.config?.policy?.value
-      ) {
-        endpointIntegrationData.inputs[0].config.policy.value = removeExportProviders(
-          endpointIntegrationData.inputs[0].config.policy.value as PolicyConfig
-        );
-      }
-
       // Validate that Endpoint Security policy uses only enabled App Features
       validatePolicyAgainstProductFeatures(endpointIntegrationData.inputs, productFeatures);
 
@@ -362,6 +351,17 @@ export const getPackagePolicyUpdateCallback = (
         endpointIntegrationData.inputs?.[0]?.config?.policy?.value
       ) {
         endpointIntegrationData.inputs[0].config.policy.value = removeRegistryCredentialHardening(
+          endpointIntegrationData.inputs[0].config.policy.value as PolicyConfig
+        );
+      }
+
+      // Stripped before license validation for the same reason as custom YARA signatures above.
+      if (
+        (!productFeatures.isEnabled(ProductFeatureSecurityKey.endpointResponseActions) ||
+          !experimentalFeatures.responseActionsEndpointFileExport) &&
+        endpointIntegrationData.inputs?.[0]?.config?.policy?.value
+      ) {
+        endpointIntegrationData.inputs[0].config.policy.value = removeExportProviders(
           endpointIntegrationData.inputs[0].config.policy.value as PolicyConfig
         );
       }

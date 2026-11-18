@@ -153,50 +153,21 @@ describe('validatePolicyAgainstProductFeatures', () => {
     });
   });
 
-  describe('export providers gating', () => {
-    const withoutResponseActions = createProductFeaturesServiceMock(
-      ALL_PRODUCT_FEATURE_KEYS.filter(
-        (key) => key !== ProductFeatureSecurityKey.endpointResponseActions
-      )
-    );
+  // The update callback strips them instead, so a create or a later update is never rejected
+  it('does not reject export providers when endpointResponseActions is disabled', () => {
     const policyWithProviders = setExportProviders(policyFactory(), [
       { id: 'azure-1', type: 'azure_blob', account_name: 'acct', container: 'dumps' },
     ]);
 
-    it('throws 403 for export providers when endpointResponseActions is disabled', () => {
-      let thrown: (Error & { statusCode?: number; apiPassThrough?: boolean }) | undefined;
-      try {
-        validatePolicyAgainstProductFeatures(
-          makeInput(policyWithProviders),
-          withoutResponseActions
-        );
-      } catch (e) {
-        thrown = e;
-      }
-
-      expect(thrown?.message).toBe(
-        'To configure export providers, you must add Endpoint Complete to your project.'
-      );
-      expect(thrown?.statusCode).toBe(403);
-      expect(thrown?.apiPassThrough).toBe(true);
-    });
-
-    it('passes for export providers when endpointResponseActions is enabled', () => {
-      expect(() =>
-        validatePolicyAgainstProductFeatures(
-          makeInput(policyWithProviders),
-          createProductFeaturesServiceMock()
+    expect(() =>
+      validatePolicyAgainstProductFeatures(
+        makeInput(policyWithProviders),
+        createProductFeaturesServiceMock(
+          ALL_PRODUCT_FEATURE_KEYS.filter(
+            (key) => key !== ProductFeatureSecurityKey.endpointResponseActions
+          )
         )
-      ).not.toThrow();
-    });
-
-    it('passes without export providers when endpointResponseActions is disabled', () => {
-      expect(() =>
-        validatePolicyAgainstProductFeatures(
-          makeInput(setExportProviders(policyFactory(), [])),
-          withoutResponseActions
-        )
-      ).not.toThrow();
-    });
+      )
+    ).not.toThrow();
   });
 });

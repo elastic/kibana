@@ -2034,12 +2034,27 @@ describe('Fleet integrations', () => {
         experimentalFeatures = { ...experimentalFeatures, responseActionsEndpointFileExport: true };
       });
 
-      describe('when the feature flag is off', () => {
+      describe.each<[string, () => void]>([
+        [
+          'the feature flag is off',
+          () => {
+            experimentalFeatures = {
+              ...experimentalFeatures,
+              responseActionsEndpointFileExport: false,
+            };
+          },
+        ],
+        [
+          'the endpointResponseActions product feature is disabled',
+          () => {
+            productFeaturesService = createProductFeaturesServiceMock(
+              ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_response_actions')
+            );
+          },
+        ],
+      ])('when %s', (_, setUp) => {
         beforeEach(() => {
-          experimentalFeatures = {
-            ...experimentalFeatures,
-            responseActionsEndpointFileExport: false,
-          };
+          setUp();
         });
 
         it('should remove export providers from every OS and keep the rest of the policy', async () => {
@@ -2105,19 +2120,6 @@ describe('Fleet integrations', () => {
         ).rejects.toMatchObject({
           statusCode: 403,
           message: 'Platinum license does not support this action. Please upgrade your license.',
-        });
-      });
-
-      it('should reject export providers when the endpointResponseActions product feature is disabled', async () => {
-        productFeaturesService = createProductFeaturesServiceMock(
-          ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_response_actions')
-        );
-
-        await expect(
-          runUpdate(setExportProviders(policyFactory(), [provider]))
-        ).rejects.toMatchObject({
-          statusCode: 403,
-          message: 'To configure export providers, you must add Endpoint Complete to your project.',
         });
       });
     });

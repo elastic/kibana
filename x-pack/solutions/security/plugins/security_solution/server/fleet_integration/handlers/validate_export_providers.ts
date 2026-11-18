@@ -71,18 +71,18 @@ const getFieldErrorMessage = (
   }
 };
 
-const getProviderLabel = (index: number, id: unknown): string => {
-  if (typeof id !== 'string' || id === '') {
-    return `export_providers[${index}]`;
-  }
+/** Quoted (escapes control characters) and bounded, since the value comes from the request */
+const quoteForMessage = (value: string): string =>
+  JSON.stringify(
+    value.length > EXPORT_PROVIDER_ID_MAX_LENGTH
+      ? `${value.slice(0, EXPORT_PROVIDER_ID_MAX_LENGTH)}...`
+      : value
+  );
 
-  const displayId =
-    id.length > EXPORT_PROVIDER_ID_MAX_LENGTH
-      ? `${id.slice(0, EXPORT_PROVIDER_ID_MAX_LENGTH)}...`
-      : id;
-
-  return `export_providers[${index}] ${JSON.stringify(displayId)}`;
-};
+const getProviderLabel = (index: number, id: unknown): string =>
+  typeof id === 'string' && id !== ''
+    ? `export_providers[${index}] ${quoteForMessage(id)}`
+    : `export_providers[${index}]`;
 
 const getProviderErrors = (
   provider: Record<string, unknown>,
@@ -97,7 +97,7 @@ const getProviderErrors = (
       // Own-property check: keys such as `constructor` or `__proto__` must not hit the prototype
       const message = Object.hasOwn(NOT_YET_SUPPORTED_KEY_MESSAGES, key)
         ? NOT_YET_SUPPORTED_KEY_MESSAGES[key]
-        : `${key} is not supported`;
+        : `${quoteForMessage(key)} is not supported`;
       errors.push(`${label}: ${message}`);
     }
   }

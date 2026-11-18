@@ -91,8 +91,8 @@ export const turnOffPolicyProtectionsIfNotSupported = async (
         !isRegistryCredentialHardeningFeatureEnabled &&
         policySettings.windows.attack_surface_reduction.registry_credential_hardening?.enabled ===
           true;
-      // Policy updates with export providers are rejected without the product feature, which
-      // would also block every other change below
+      // Export providers need the response actions product feature. The update callback would only
+      // strip them on the next update; this removes them on the downgrade itself.
       const shouldRemoveExportProviders =
         !isResponseActionsEnabled && hasExportProviders(policySettings);
 

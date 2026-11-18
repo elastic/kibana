@@ -138,7 +138,21 @@ describe('validateExportProviders()', () => {
     it('should reject an unknown key', () => {
       const policy = buildPolicy([{ ...buildProvider(), foo: 'bar' }]);
 
-      expect(getError(policy).message).toBe('export_providers[0] "azure-1": foo is not supported');
+      expect(getError(policy).message).toBe(
+        'export_providers[0] "azure-1": "foo" is not supported'
+      );
+    });
+
+    it('should quote and shorten a long unknown key with control characters', () => {
+      const key = `x\n${'a'.repeat(100)}`;
+      const policy = buildPolicy([{ ...buildProvider(), [key]: true }]);
+
+      const { message } = getError(policy);
+
+      expect(message).toBe(
+        `export_providers[0] "azure-1": "x\\n${'a'.repeat(62)}..." is not supported`
+      );
+      expect(message).not.toContain('\n');
     });
 
     it.each(['constructor', '__proto__'])(
@@ -151,7 +165,7 @@ describe('validateExportProviders()', () => {
         expect(Object.keys(provider)).toContain(key);
 
         expect(getError(buildPolicy([provider])).message).toBe(
-          `export_providers[0] "azure-1": ${key} is not supported`
+          `export_providers[0] "azure-1": "${key}" is not supported`
         );
       }
     );

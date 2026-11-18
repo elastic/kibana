@@ -5,26 +5,49 @@
  * 2.0.
  */
 
-import { isObject, omit } from 'lodash';
+import { isEmpty, isObject, isPlainObject, omit } from 'lodash';
 import type { ExportProvider, PolicyConfig } from '../types';
+
+type PolicyOsConfig = PolicyConfig['windows'] | PolicyConfig['mac'] | PolicyConfig['linux'];
 
 /** The providers of a policy; the three OS lists are always identical, so this reads from `windows`. */
 export const getExportProviders = (policy: PolicyConfig): ExportProvider[] => [
   ...(policy.windows?.response_actions?.export_providers ?? []),
 ];
 
-/** Returns a copy of `policy` without `response_actions` on any OS (feature flag / license strip). */
+/**
+ * `os` without `response_actions.export_providers`. `response_actions` is dropped too once nothing
+ * else is left in it, or when it isn't an object. The policy may come from an unvalidated API
+ * payload, so a malformed OS branch is left as is.
+ */
+const withoutExportProviders = <OsConfig extends PolicyOsConfig>(os: OsConfig): OsConfig => {
+  if (!isObject(os) || !('response_actions' in os)) {
+    return os;
+  }
+
+  const responseActions = isPlainObject(os.response_actions)
+    ? omit(os.response_actions, 'export_providers')
+    : {};
+
+  return isEmpty(responseActions)
+    ? (omit(os, 'response_actions') as OsConfig)
+    : { ...os, response_actions: responseActions };
+};
+
+/**
+ * Returns a copy of `policy` without `export_providers` on any OS (feature flag / license strip).
+ * Other `response_actions` settings are kept; an empty `response_actions` is removed.
+ */
 export const removeExportProviders = (policy: PolicyConfig): PolicyConfig => ({
   ...policy,
-  // The policy may come from an unvalidated API payload, so a malformed OS branch is left as is
-  windows: isObject(policy.windows) ? omit(policy.windows, 'response_actions') : policy.windows,
-  mac: isObject(policy.mac) ? omit(policy.mac, 'response_actions') : policy.mac,
-  linux: isObject(policy.linux) ? omit(policy.linux, 'response_actions') : policy.linux,
+  windows: withoutExportProviders(policy.windows),
+  mac: withoutExportProviders(policy.mac),
+  linux: withoutExportProviders(policy.linux),
 });
 
 /**
  * Returns a copy of `policy` with `providers` written to windows, mac and linux.
- * An empty list removes `response_actions` from every OS, like `removeExportProviders`.
+ * An empty list removes them like `removeExportProviders`.
  */
 export const setExportProviders = (
   policy: PolicyConfig,
@@ -52,9 +75,7 @@ export const setExportProviders = (
 };
 
 /** `os` may come from an unvalidated API payload, so tolerate a malformed branch or field. */
-const hasNonEmptyExportProvidersArray = (
-  os: PolicyConfig['windows'] | PolicyConfig['mac'] | PolicyConfig['linux']
-): boolean => {
+const hasNonEmptyExportProvidersArray = (os: PolicyOsConfig): boolean => {
   if (!isObject(os)) {
     return false;
   }

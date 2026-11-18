@@ -273,7 +273,7 @@ describe('getExportProviderFieldErrors', () => {
       ).toEqual({ service_url: 'invalid_format' });
     });
 
-    // WHATWG `new URL()` accepts or normalizes all of these, but Endpoint gets the raw string
+    // WHATWG `new URL()` accepts or normalizes most of these, but Endpoint gets the raw string
     it.each([
       ['an empty query', 'https://myaccount.blob.core.windows.net/?'],
       ['an empty fragment', 'https://myaccount.blob.core.windows.net/#'],
@@ -282,6 +282,12 @@ describe('getExportProviderFieldErrors', () => {
       ['three slashes after the scheme', 'https:///myaccount.blob.core.windows.net'],
       ['backslashes', 'https:\\\\myaccount.blob.core.windows.net'],
       ['an uppercase scheme', 'HTTPS://myaccount.blob.core.windows.net'],
+      ['a C0 control character', 'https://myaccount.blob.core.windows.net/\u0001'],
+      ['a NUL character', 'https://myaccount\u0000.blob.core.windows.net'],
+      ['a DEL character', 'https://myaccount.blob.core.windows.net/\u007F'],
+      ['a soft hyphen', 'https://my\u00ADaccount.blob.core.windows.net'],
+      // Cyrillic `а` (U+0430) instead of a Latin `a`
+      ['an IDN homograph', 'https://my\u0430ccount.blob.core.windows.net'],
     ])('is invalid_format for %s', (_desc, serviceUrl) => {
       expect(
         getExportProviderFieldErrors({ ...validProvider, service_url: serviceUrl }, [])

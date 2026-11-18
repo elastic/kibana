@@ -68,6 +68,16 @@ describe('setExportProviders', () => {
     expect(result.mac).not.toHaveProperty('response_actions');
     expect(result.linux).not.toHaveProperty('response_actions');
   });
+
+  it('keeps other response_actions settings when given an empty list', () => {
+    const policy = setExportProviders(policyFactory(), [AZURE_PROVIDER]);
+    set(policy, 'mac.response_actions.other_setting', true);
+
+    const result = setExportProviders(policy, []);
+
+    expect(result.windows).not.toHaveProperty('response_actions');
+    expect(result.mac.response_actions).toEqual({ other_setting: true });
+  });
 });
 
 describe('removeExportProviders', () => {
@@ -111,6 +121,25 @@ describe('removeExportProviders', () => {
     expect(result.windows).not.toBe(policy.windows);
     expect(result.mac).not.toBe(policy.mac);
     expect(result.linux).not.toBe(policy.linux);
+  });
+
+  it.each(['windows', 'mac', 'linux'] as const)(
+    'keeps other response_actions settings on %s',
+    (os) => {
+      set(policy, `${os}.response_actions.other_setting`, true);
+
+      const result = removeExportProviders(policy);
+
+      expect(result[os].response_actions).toEqual({ other_setting: true });
+    }
+  );
+
+  it('removes a response_actions that is not an object', () => {
+    set(policy, 'windows.response_actions', 'not-an-object');
+
+    const result = removeExportProviders(policy);
+
+    expect(result.windows).not.toHaveProperty('response_actions');
   });
 
   it('tolerates a linux branch that is missing', () => {

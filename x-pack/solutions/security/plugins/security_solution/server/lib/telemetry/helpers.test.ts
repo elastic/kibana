@@ -331,6 +331,12 @@ describe('test endpoint policy data config extraction', () => {
     expect(policyData.inputs[0].config.policy.value).toBe(policyValue);
     expect(policyValue.windows.response_actions?.export_providers).toHaveLength(1);
   });
+
+  test('can succeed when the policy has no value', async () => {
+    const policyData = set(cloneDeep(stubPolicyData), 'inputs[0].config', { policy: {} });
+
+    expect(extractEndpointPolicyConfig(policyData)).toEqual({});
+  });
 });
 
 describe('test advanced policy config overlap ', () => {
