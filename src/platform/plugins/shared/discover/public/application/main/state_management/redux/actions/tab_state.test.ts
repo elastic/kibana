@@ -165,6 +165,17 @@ describe('tab_state actions', () => {
       expect(selectTab(internalState.getState(), tabId).expandedDoc).toBe(stored);
     });
 
+    it('should resolve a raw record once, so a redispatch converges on the same instance', async () => {
+      const { internalState, tabId } = await setup();
+
+      // The expanded-doc sync redispatches its record until the store holds it: a fresh
+      // proxy per dispatch would never match and loop forever.
+      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
+      const first = selectTab(internalState.getState(), tabId).expandedDoc;
+      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
+      expect(selectTab(internalState.getState(), tabId).expandedDoc).toBe(first);
+    });
+
     it('should clear the expanded doc reference when the flyout is closed', async () => {
       const { internalState, tabId } = await setup();
 

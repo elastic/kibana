@@ -135,6 +135,15 @@ type ExpandedDocPayload = TabActionPayload<{
   shouldUpdateUrl?: boolean;
 }>;
 
+/**
+ * Resolution must be idempotent: the expanded-doc sync redispatches its record until the
+ * store holds it, and a fresh proxy per dispatch would never let the identities converge.
+ */
+const resolvedExpandedDocs = new WeakMap<
+  DataTableRecord,
+  { scope: unknown; resolved: DataTableRecord }
+>();
+
 /** Sets the expanded document and synchronizes its URL reference. */
 export const setExpandedDoc: InternalStateThunkActionCreator<[ExpandedDocPayload]> = (payload) =>
   function setExpandedDocThunkFn(dispatch, getState, { runtimeStateManager }) {
@@ -150,7 +159,13 @@ export const setExpandedDoc: InternalStateThunkActionCreator<[ExpandedDocPayload
         runtimeStateManager,
         payload.tabId
       ).scopedProfilesManager$.getValue();
-      expandedDocPayload.expandedDoc = scopedProfilesManager.resolveDocumentProfile({ record });
+      const cached = resolvedExpandedDocs.get(record);
+      const resolved =
+        cached?.scope === scopedProfilesManager
+          ? cached.resolved
+          : scopedProfilesManager.resolveDocumentProfile({ record });
+      resolvedExpandedDocs.set(record, { scope: scopedProfilesManager, resolved });
+      expandedDocPayload.expandedDoc = resolved;
     }
 
     dispatch(internalStateSlice.actions.setExpandedDoc(expandedDocPayload));
