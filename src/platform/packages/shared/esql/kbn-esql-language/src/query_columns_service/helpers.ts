@@ -17,7 +17,7 @@ import {
 } from '../commands/registry/types';
 import type { IAdditionalFields } from '../commands/registry/registry';
 import { enrichFieldsWithECSInfo } from './enrich_fields_with_ecs';
-import { columnIsPresent } from '../commands/definitions/utils/columns';
+import { columnIsPresent, getFlattenedKeyColumn } from '../commands/definitions/utils/columns';
 import { getUnmappedFieldType } from '../commands/definitions/utils/settings';
 import { getLookupJoinSource } from '../commands/definitions/utils/sources';
 import { getIndexFromPromQLParams } from '../commands/definitions/utils/promql';
@@ -160,6 +160,33 @@ export function getUnmappedFields(
   return unmappedFields;
 }
 
+function getFlattenedKeyFields(
+  command: ESQLAstCommand,
+  previousPipeFields: ESQLColumnData[]
+): ESQLColumnData[] {
+  const columns = new Map(previousPipeFields.map((field) => [field.name, field]));
+  const flattenedKeys: ESQLColumnData[] = [];
+
+  Walker.walk(command, {
+    visitColumn: (node) => {
+      const name = node.parts.join('.');
+      if (columns.has(name)) {
+        return;
+      }
+
+      const keyColumn = getFlattenedKeyColumn(name, columns);
+      if (!keyColumn) {
+        return;
+      }
+
+      columns.set(name, keyColumn);
+      flattenedKeys.push(keyColumn);
+    },
+  });
+
+  return flattenedKeys;
+}
+
 /**
  * @param query, the ES|QL query
  * @param commands, the AST commands
@@ -197,14 +224,16 @@ export async function getCurrentQueryAvailableColumns(
   };
 
   const previousCommands = commands.slice(0, -1);
+  const flattenedKeyFields = getFlattenedKeyFields(lastCommand, previousPipeFields);
+  const fieldsBeforeUnmapped = [...previousPipeFields, ...flattenedKeyFields];
   const unmappedFields = getUnmappedFields(
     lastCommand,
     previousCommands,
-    previousPipeFields,
+    fieldsBeforeUnmapped,
     unmappedFieldsStrategy
   );
 
-  const fields = [...previousPipeFields, ...unmappedFields];
+  const fields = [...fieldsBeforeUnmapped, ...unmappedFields];
 
   const columns = commandDef?.methods.columnsAfter
     ? await commandDef.methods.columnsAfter(
