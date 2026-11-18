@@ -10,7 +10,7 @@
 import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 import { createBrowserConfig } from './create_browser_config';
 import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
 
 describe('createBrowserConfig', () => {
   it('picks nothing by default', () => {
@@ -188,6 +188,32 @@ describe('createBrowserConfig', () => {
         'deeply.nested.structure.exposed4': 'string',
         // notExposed5, notExposed6, notExposed7, and notExposed8 are not present
       },
+    });
+  });
+
+  it('lists keys nested inside offering-based schemas', () => {
+    const configSchema = schema.object({
+      offering: offeringBasedSchema({
+        serverless: schema.object({
+          exposed1: schema.boolean({ defaultValue: false }),
+          notExposed2: schema.maybe(schema.string()),
+        }),
+      }),
+    });
+    const descriptor: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {
+      schema: configSchema,
+      exposeToBrowser: {
+        offering: { exposed1: true },
+      },
+    };
+
+    const result = createBrowserConfig(
+      { offering: { exposed1: true, notExposed2: '2' } },
+      descriptor
+    );
+    expect(result).toEqual({
+      browserConfig: { offering: { exposed1: true } },
+      exposedConfigKeys: { 'offering.exposed1': 'boolean?|never' },
     });
   });
 });

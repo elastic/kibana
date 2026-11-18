@@ -40,10 +40,10 @@ const recursiveCreateConfig = <T = unknown>(
 
 /**
  * Given a plugin descriptor, this function returns an object that contains a flattened list of exposed config keys. This is used for a CI
- * check to ensure that consumers don't accidentally expose more config settings to the browser than intended.
+ * check (`exposed_config_keys.test.ts`) to ensure that consumers don't accidentally expose more config settings to the browser than intended.
  */
 function getExposedConfigKeys<T = unknown>(descriptor: PluginConfigDescriptor<T>) {
-  const schemaStructure = descriptor.schema.getSchemaStructure();
+  const schemaStructure = descriptor.schema.getSchemaStructure({ expandConditionals: true });
   const flattenedConfigSchema: Record<string, string> = {};
   for (const { path, type } of schemaStructure) {
     if (checkIsPathExposed(path, descriptor.exposeToBrowser!)) {

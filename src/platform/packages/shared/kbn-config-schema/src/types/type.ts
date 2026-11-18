@@ -78,6 +78,14 @@ export interface SchemaStructureEntry {
   type: string;
 }
 
+export interface GetSchemaStructureOptions {
+  /**
+   * List the nested keys inside conditional schemas (`schema.conditional`, `offeringBasedSchema`)
+   * instead of reporting the conditional as a single leaf.
+   */
+  expandConditionals?: boolean;
+}
+
 /**
  * Global validation Options to be provided when calling the `schema.validate()` method.
  */
@@ -262,8 +270,8 @@ export abstract class Type<V> {
     return this.meta;
   }
 
-  public getSchemaStructure() {
-    return recursiveGetSchemaStructure(this.internalSchema);
+  public getSchemaStructure(options: GetSchemaStructureOptions = {}) {
+    return recursiveGetSchemaStructure(this.internalSchema, [], options);
   }
 
   protected handleError(
@@ -310,13 +318,21 @@ export abstract class Type<V> {
   }
 }
 
-function recursiveGetSchemaStructure(internalSchema: Schema, path: string[] = []) {
+function recursiveGetSchemaStructure(
+  internalSchema: Schema,
+  path: string[],
+  options: GetSchemaStructureOptions
+): SchemaStructureEntry[] {
   const array: SchemaStructureEntry[] = [];
   // Note: we are relying on Joi internals to obtain the schema structure (recursive keys).
   // This is not ideal, but it works for now and we only need it for some integration test assertions.
   // If it breaks in the future, we'll need to update our tests.
   for (const [key, val] of (internalSchema as any)._ids._byKey.entries()) {
-    array.push(...recursiveGetSchemaStructure(val.schema, [...path, key]));
+    array.push(...recursiveGetSchemaStructure(val.schema, [...path, key], options));
+  }
+
+  if (!array.length && options.expandConditionals) {
+    array.push(...getConditionalBranchesStructure(internalSchema, path, options));
   }
 
   if (!array.length) {
@@ -334,6 +350,57 @@ function recursiveGetSchemaStructure(internalSchema: Schema, path: string[] = []
     });
   }
   return array;
+}
+
+/**
+ * Merges the nested keys of every branch of a conditional schema (`schema.conditional`, `offeringBasedSchema`).
+ *
+ * Returns an empty array when no branch has nested keys, so the caller falls back to a single leaf entry.
+ * A key gets `never` added to its type when one of the branches cannot hold it.
+ */
+function getConditionalBranchesStructure(
+  internalSchema: Schema,
+  path: string[],
+  options: GetSchemaStructureOptions
+): SchemaStructureEntry[] {
+  const whens: WhenOptions[] = (internalSchema as any).$_terms?.whens ?? [];
+  const branches = whens
+    .flatMap(({ then, otherwise }) => [then, otherwise])
+    .filter((branch): branch is Schema => isSchema(branch));
+
+  const objectBranches: SchemaStructureEntry[][] = [];
+  const leafTypes: string[] = [];
+  for (const branch of branches) {
+    const entries = recursiveGetSchemaStructure(branch, path, options);
+    const [firstEntry] = entries;
+    if (entries.length === 1 && firstEntry.path.length === path.length) {
+      leafTypes.push(firstEntry.type);
+    } else {
+      objectBranches.push(entries);
+    }
+  }
+
+  if (!objectBranches.length) {
+    return [];
+  }
+
+  const typesByPath = new Map<string, { path: string[]; types: string[] }>();
+  for (const entries of objectBranches) {
+    for (const { path: entryPath, type } of entries) {
+      const pathKey = entryPath.join('.');
+      const existing = typesByPath.get(pathKey) ?? { path: entryPath, types: [] };
+      existing.types.push(type);
+      typesByPath.set(pathKey, existing);
+    }
+  }
+
+  return [...typesByPath.values()].map(({ path: entryPath, types }) => {
+    const missingFromBranch = types.length < objectBranches.length ? ['never'] : [];
+    const allTypes = [...types, ...missingFromBranch, ...leafTypes].flatMap((type) =>
+      type.split('|')
+    );
+    return { path: entryPath, type: [...new Set(allTypes)].join('|') };
+  });
 }
 
 /**

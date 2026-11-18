@@ -989,6 +989,48 @@ test('returns schema structure', () => {
   ]);
 });
 
+describe('schema structure with expandConditionals', () => {
+  const objSchema = schema.object({
+    plain: schema.boolean({ defaultValue: true }),
+    serverlessOnly: offeringBasedSchema({
+      serverless: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+        nested: schema.object({ url: schema.maybe(schema.string()) }),
+      }),
+    }),
+    differentKeys: schema.conditional(
+      schema.contextRef('dev'),
+      true,
+      schema.object({ shared: schema.string(), devOnly: schema.number() }),
+      schema.object({ shared: schema.boolean() })
+    ),
+    leafConditional: offeringBasedSchema({
+      serverless: schema.literal('serverless'),
+      traditional: schema.literal('stateful'),
+    }),
+  });
+
+  test('reports conditional objects as a single leaf by default', () => {
+    expect(objSchema.getSchemaStructure()).toEqual([
+      { path: ['plain'], type: 'boolean?' },
+      { path: ['serverlessOnly'], type: 'object?|never' },
+      { path: ['differentKeys'], type: 'object?' },
+      { path: ['leafConditional'], type: 'serverless|stateful' },
+    ]);
+  });
+
+  test('lists the nested keys of every conditional branch', () => {
+    expect(objSchema.getSchemaStructure({ expandConditionals: true })).toEqual([
+      { path: ['plain'], type: 'boolean?' },
+      { path: ['serverlessOnly', 'enabled'], type: 'boolean?|never' },
+      { path: ['serverlessOnly', 'nested', 'url'], type: 'string?|never' },
+      { path: ['differentKeys', 'shared'], type: 'string|boolean' },
+      { path: ['differentKeys', 'devOnly'], type: 'number|never' },
+      { path: ['leafConditional'], type: 'serverless|stateful' },
+    ]);
+  });
+});
+
 describe('#extendsDeep', () => {
   const type = schema.object({ test: schema.object({ foo: schema.string() }) });
 
