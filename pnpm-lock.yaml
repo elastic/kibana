@@ -238,7 +238,6 @@ overrides:
   chokidar: 3.5.3
   dompurify: 3.4.17
   esbuild: 0.28.1
-  fast-xml-parser: 5.5.7
   flatted: 3.4.2
   globby>fast-glob: 3.3.3
   guarded-fetch>undici: '>=7.29.1 <8.0.0'
@@ -258,11 +257,11 @@ overrides:
   '@babel/plugin-transform-typescript': 7.24.7
   '@bufbuild/protobuf': 2.5.2
   '@elastic/elasticsearch@9>@elastic/transport': 9.4.0
-  '@elastic/esql-definitions': 4.38.0
-  '@elastic/esql-grammar': 4.38.0
-  '@elastic/esql-promql-grammar': 4.38.0
-  '@elastic/esql-types': 4.38.0
-  '@elastic/pretty-printer': 4.38.0
+  '@elastic/esql-definitions': 4.40.0
+  '@elastic/esql-grammar': 4.40.0
+  '@elastic/esql-promql-grammar': 4.40.0
+  '@elastic/esql-types': 4.40.0
+  '@elastic/pretty-printer': 4.40.0
   '@emnapi/core': 1.11.1
   '@emnapi/runtime': 1.11.1
   '@paulirish/trace_engine>legacy-javascript': 0.0.3
@@ -399,11 +398,11 @@ importers:
         specifier: 8.8.1
         version: 8.8.1
       '@elastic/esql':
-        specifier: 4.38.0
-        version: 4.38.0
+        specifier: 4.40.0
+        version: 4.40.0
       '@elastic/esql-definitions':
-        specifier: 4.38.0
-        version: 4.38.0
+        specifier: 4.40.0
+        version: 4.40.0
       '@elastic/eui':
         specifier: 123.4.0
         version: 123.4.0(@elastic/datemath@5.0.3(moment@2.31.0))(@elastic/eui-theme-borealis@8.2.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)
@@ -1808,6 +1807,9 @@ importers:
       '@kbn/dashboard-agent-authoring':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/dashboard-agent-authoring
+      '@kbn/dashboard-constants':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/dashboards/dashboard-constants
       '@kbn/dashboard-markdown':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/dashboard_markdown
@@ -4202,12 +4204,18 @@ importers:
       '@kbn/workflows-extensions-example':
         specifier: workspace:*
         version: link:examples/workflows_extensions_example
+      '@kbn/workflows-inbound-hub-test-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/test/workflows_inbound_hub/plugins/inbound_hub_connector
       '@kbn/workflows-library':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-workflows-library
       '@kbn/workflows-management-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/workflows_management
+      '@kbn/workflows-topics':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-workflows-topics
       '@kbn/workflows-ui':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-workflows-ui
@@ -4437,8 +4445,8 @@ importers:
         specifier: 6.0.0
         version: 6.0.0
       '@xyflow/react':
-        specifier: 12.12.0
-        version: 12.12.0(@types/react-dom@18.2.25)(@types/react@18.2.79)(immer@11.1.8)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: 12.12.1
+        version: 12.12.1(@types/react-dom@18.2.25)(@types/react@18.2.79)(immer@11.1.8)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       adm-zip:
         specifier: 0.6.1
         version: 0.6.1
@@ -4674,8 +4682,8 @@ importers:
         specifier: 3.1.1
         version: 3.1.1
       jsondiffpatch:
-        specifier: 0.7.6
-        version: 0.7.6
+        specifier: 0.7.7
+        version: 0.7.7
       jsonwebtoken:
         specifier: 9.0.2
         version: 9.0.2
@@ -4752,8 +4760,8 @@ importers:
         specifier: 3.0.2
         version: 3.0.2
       mssql:
-        specifier: 12.7.2
-        version: 12.7.2(supports-color@10.2.2)
+        specifier: 12.7.13
+        version: 12.7.13(supports-color@10.2.2)
       murmurhash:
         specifier: 2.0.1
         version: 2.0.1
@@ -4773,8 +4781,8 @@ importers:
         specifier: 1.4.2
         version: 1.4.2
       nodemailer:
-        specifier: 10.3.0
-        version: 10.3.0
+        specifier: 10.3.1
+        version: 10.3.1
       normalize-path:
         specifier: 3.0.0
         version: 3.0.0
@@ -5244,6 +5252,9 @@ importers:
       '@kbn/check-saved-objects-cli':
         specifier: workspace:*
         version: link:packages/kbn-check-saved-objects-cli
+      '@kbn/check-server-import-graph-cli':
+        specifier: workspace:*
+        version: link:packages/kbn-check-server-import-graph-cli
       '@kbn/ci-stats-core':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-ci-stats-core
@@ -5813,7 +5824,7 @@ importers:
         version: link:src/platform/packages/private/kbn-optimizer-webpack-helpers
       '@kbn/osquery-plugin-cypress':
         specifier: workspace:*
-        version: link:x-pack/platform/plugins/shared/osquery/cypress
+        version: link:x-pack/platform/packages/private/osquery-plugin-cypress
       '@kbn/otel-demo':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-otel-demo
@@ -6053,7 +6064,7 @@ importers:
         version: link:x-pack/solutions/security/test
       '@kbn/test-suites-xpack-security-endpoint':
         specifier: workspace:*
-        version: link:x-pack/solutions/security/test/security_solution_endpoint
+        version: link:x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint
       '@kbn/test-suites-xpack-vectordb':
         specifier: workspace:*
         version: link:x-pack/solutions/vectordb/test
@@ -7042,6 +7053,8 @@ importers:
 
   packages/kbn-check-saved-objects-cli: {}
 
+  packages/kbn-check-server-import-graph-cli: {}
+
   packages/kbn-ci-stats-performance-metrics: {}
 
   packages/kbn-ci-stats-shipper-cli: {}
@@ -7966,6 +7979,8 @@ importers:
 
   src/platform/packages/shared/dashboard-markdown-schemas: {}
 
+  src/platform/packages/shared/dashboards/dashboard-constants: {}
+
   src/platform/packages/shared/dashboards/dashboards-selector: {}
 
   src/platform/packages/shared/deeplinks/agent_builder: {}
@@ -8501,6 +8516,8 @@ importers:
   src/platform/packages/shared/kbn-workflows: {}
 
   src/platform/packages/shared/kbn-workflows-library: {}
+
+  src/platform/packages/shared/kbn-workflows-topics: {}
 
   src/platform/packages/shared/kbn-workflows-ui: {}
 
@@ -9044,6 +9061,8 @@ importers:
 
   x-pack/platform/packages/private/ml/validators: {}
 
+  x-pack/platform/packages/private/osquery-plugin-cypress: {}
+
   x-pack/platform/packages/private/rollup: {}
 
   x-pack/platform/packages/private/security/authorization_core: {}
@@ -9580,8 +9599,6 @@ importers:
 
   x-pack/platform/plugins/shared/osquery: {}
 
-  x-pack/platform/plugins/shared/osquery/cypress: {}
-
   x-pack/platform/plugins/shared/proposals: {}
 
   x-pack/platform/plugins/shared/query_activity: {}
@@ -9623,6 +9640,8 @@ importers:
   x-pack/platform/plugins/shared/usage_api: {}
 
   x-pack/platform/test: {}
+
+  x-pack/platform/test/workflows_inbound_hub/plugins/inbound_hub_connector: {}
 
   x-pack/platform/test_plugins/agent_builder_sml_test_types: {}
 
@@ -9942,6 +9961,8 @@ importers:
 
   x-pack/solutions/security/packages/kbn-securitysolution-utils: {}
 
+  x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint: {}
+
   x-pack/solutions/security/packages/navigation: {}
 
   x-pack/solutions/security/packages/security-ai-prompts: {}
@@ -10003,8 +10024,6 @@ importers:
   x-pack/solutions/security/test/security_solution_api_integration: {}
 
   x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response: {}
-
-  x-pack/solutions/security/test/security_solution_endpoint: {}
 
   x-pack/solutions/security/test_plugins/resolver_test: {}
 
@@ -11234,29 +11253,29 @@ packages:
       eslint: ^8.57.0 || ^9.0.0
       typescript: 6.0.3
 
-  '@elastic/esql-ast@4.38.0':
-    resolution: {integrity: sha512-FmDI4o9K2vSG/uXsVmU9kVaCP0hlSAz7zgeNdVf7lpdgs5Mdh2Rav4KClICt7Lcy8qNSMK4QorKsNaqMbRebPw==}
+  '@elastic/esql-ast@4.40.0':
+    resolution: {integrity: sha512-tKmV6R1NPlaqWyfl2dzl3HekaYwOIf0qA9Lv/y4Mm5igosFqeyNdRnu8m+fwBlwjB7eX1/M31TVhetUcfGBlMQ==}
 
-  '@elastic/esql-definitions@4.38.0':
-    resolution: {integrity: sha512-Q891U0Z3j8OZEZ/KiDYR2ft7kmL0BZicz1Hy+HGYbnZat7r2LXGV3ZgIwTOiPPsy0GtGtY2i/5BwxswyGRjLIA==}
+  '@elastic/esql-definitions@4.40.0':
+    resolution: {integrity: sha512-pz9/Db61RQKG3cnFjSR6ystvya9BFrFU3BSx/fau+gln6yacTjiSrxIerrzcVmjB+wmUZ8+e3Y12kduTY7EUaA==}
 
-  '@elastic/esql-grammar@4.38.0':
-    resolution: {integrity: sha512-KY1YsOQ9H5ZWI363EGCaPQXS+iU6el8R23Gp188GZVjjJ/EmkiXH1hS8wmKDSjVdE5OF/FjZ1+3gwq/WpSMO4Q==}
+  '@elastic/esql-grammar@4.40.0':
+    resolution: {integrity: sha512-uKNY3kqXBexiwXYS7OM1gM4mAqC2Tt9cEVysdtIIFBEMvSWOXrHzEure3XSvr6n/QidXDRN1aEuN39GyUnATGA==}
 
-  '@elastic/esql-parser@4.38.0':
-    resolution: {integrity: sha512-9OpUJshtUQgcj/gKsGLL7FeMdhuUPkXmYg5CbB9pEqmlyzQlUbuJaRMtpCJHkPQjiBADi9+bIOC4FpMep1Wqyw==}
+  '@elastic/esql-parser@4.40.0':
+    resolution: {integrity: sha512-3cXjZ8ujkfs/n3fQ8jxFBigPBvGAbgKHfaQCDPuZ4E13ha6bkifEFEUHJ7v9hLXruXpl542A9ZeY4Nw5OWwe/A==}
 
-  '@elastic/esql-promql-grammar@4.38.0':
-    resolution: {integrity: sha512-xW+Ik+3C7+c2bxd0ZLCqe1F0Aeuv5mCcaL301S0ykjZJTIEz2ANdzXbBw+pzCjaAOzVNTb6alIx6H32LsniIkg==}
+  '@elastic/esql-promql-grammar@4.40.0':
+    resolution: {integrity: sha512-uUe/nnBbTNEffqNpPNmbaorbSm5LD53U0z6pbEYu33G64VKKmAGsk40uT2rdtXPJWGTdoWn07Pltr76/58D/Hg==}
 
-  '@elastic/esql-traversal@4.38.0':
-    resolution: {integrity: sha512-cCLIyuHQAK9E52ep/mnOzbP86po74oyD3tXrVFXcTsNdxzyLu+hMtRyhTEWpJAot6JtSgaqO316UDk71MPPj8w==}
+  '@elastic/esql-traversal@4.40.0':
+    resolution: {integrity: sha512-bzEPQZkdcJVQF2QNutMb0mSGP8QG7Cub4/dGW4KqtosT4oYay5v+EMsi3LaLCMSHjDN+PFM5RMFBacyuRKLfhw==}
 
-  '@elastic/esql-types@4.38.0':
-    resolution: {integrity: sha512-eS4Nrw4PD+v5DABvKdjfTaA8qTAWujA/h8Dn5hiyknNb6UwXt5fHLCXnDDXRf6XX7ec3ay8KgyQBhmnLJFQtgw==}
+  '@elastic/esql-types@4.40.0':
+    resolution: {integrity: sha512-kOBsy5MIaTpguJ3Q382tRN0tXzO0tkeQYC/e1htv+bGj4D7ykCyBzYoL91+fLEMFAS8W7wsoy2sZ27Cet4sCwg==}
 
-  '@elastic/esql@4.38.0':
-    resolution: {integrity: sha512-SnGBlDGS4eGlhVE+ZOHhZ4shbB132DcbByKcvvUGLYlzB76Xj8wunPoQbVY9snJ7wtxG8y383bO5YWEIeK2/jA==}
+  '@elastic/esql@4.40.0':
+    resolution: {integrity: sha512-WCs6/L7yE7jRjsFiY1keYDnfGHYXoAtyyZ8XmC8Oq9XPai8hCcVL7gGqcNgslkZliyVWz6zvKsQO/vyEBQIVPQ==}
 
   '@elastic/eui-illustrations@1.1.0':
     resolution: {integrity: sha512-xqOf5dcFmB0WylGy7w2aTJfHMIOjGxW1xops2WkxsfWEpqSFz4r0y4QCpGW+zEhRBVemWcB/lr3S+GoFqm+AFQ==}
@@ -11348,8 +11367,8 @@ packages:
     resolution: {integrity: sha512-/WCA7YiM855/QVxJIcNSiqw4/U5t0TFmPktbelcpT4e1NEosHRS7soQ7k7YMV21MlS2cnFcmvTq9fob59gs/Qw==}
     engines: {node: ^18.19.0 || >=20.6.0}
 
-  '@elastic/pretty-printer@4.38.0':
-    resolution: {integrity: sha512-vgQR/z09mIa0J6HOTVNXdQgFTi2wfqJDEF7QS1WjzektV+gIM+f0ugwLKQzqyyJNdzZUmFjhxIl7CWKcRFUuaA==}
+  '@elastic/pretty-printer@4.40.0':
+    resolution: {integrity: sha512-FSvaRtoWa+OAAEGE1BqryXtLjeQbsA/fRm2/VGCifalL+cuodmSronHM9s9FPDY5HoAhitthd9x5Lj6gCPRmgA==}
 
   '@elastic/prismjs-esql@4.28.0':
     resolution: {integrity: sha512-nl0x5VIZu1/duqOpcAYofBJBuqzuBJL3szSIytHtiNCDl4xgndnV5FR5D37r8OZmGY4M1nOYhKk2rZ/Iwl7XPA==}
@@ -11973,8 +11992,8 @@ packages:
   '@hey-api/types@0.1.2':
     resolution: {integrity: sha512-uNNtiVAWL7XNrV/tFXx7GLY9lwaaDazx1173cGW3+UEaw4RUPsHEmiB4DSpcjNxMIcrctfz2sGKLnVx5PBG2RA==}
 
-  '@hono/node-server@2.1.5':
-    resolution: {integrity: sha512-MgP/I06GdvsilDspMk/qmRzpk8LOUStP6jFAbSRi40W09DhoyUn+Mj7eyKICPqeYKybOjVFLVIAQzvu1bfIa7Q==}
+  '@hono/node-server@2.1.8':
+    resolution: {integrity: sha512-jdf7FHh6A1lzjpHHQUgxsg2GeER2vMetnAOfeActzcoli6jamlK+NAwL6Dsr5Fl3BS3tYUQzCdtZjU8Qxv7bEA==}
     engines: {node: '>=20'}
     peerDependencies:
       hono: ^4 || ^5.0.0-0
@@ -12724,6 +12743,9 @@ packages:
   '@noble/hashes@1.8.0':
     resolution: {integrity: sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A==}
     engines: {node: ^14.21.3 || >=16}
+
+  '@nodable/entities@3.1.0':
+    resolution: {integrity: sha512-LsS/DjHr+uDM647Gru/cA8+J3a3HfhttwCKLyuoyN7yXTFCxKBtSgMQBvrW9yNPa2/zDRUNuGPaH5QUFoa4arQ==}
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -15731,8 +15753,8 @@ packages:
   '@xtuc/long@4.2.2':
     resolution: {integrity: sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==}
 
-  '@xyflow/react@12.12.0':
-    resolution: {integrity: sha512-74oXI0Rgm1Eu33cHQAd74J6oVgCH9mbFyTVQbsGgp2kmWwh0HdtBr2VP04z8mbPD+M/xO69nqG5dDEt7/EN2rQ==}
+  '@xyflow/react@12.12.1':
+    resolution: {integrity: sha512-g41OHmP+GL5wDBQKpgYt8AF6RlB4CrABtiStXhCMqdItK6gPdSpsuDk8V0YtdyvIvMPTjDJvkuLkz0JbSYu5Cw==}
     peerDependencies:
       '@types/react': 18.2.79
       '@types/react-dom': 18.2.25
@@ -15744,8 +15766,8 @@ packages:
       '@types/react-dom':
         optional: true
 
-  '@xyflow/system@0.0.83':
-    resolution: {integrity: sha512-a//eDjez3WZF47aaPTfVUDD0OINOq+WVwBZCRTqG+m0a5euX8EwlJ4jMY1Wxz0Ocj4xOeekJ70V22Pq0ll8RJw==}
+  '@xyflow/system@0.0.84':
+    resolution: {integrity: sha512-96zfGFjH3oZ3T0MRdH4gJ0SlXuCIxbBuHVevZ4xry5UTxqjzjt010+LRdholgepq7jhrcaz1JNtzrETscwnkEA==}
 
   '@zip.js/zip.js@2.22.0':
     resolution: {integrity: sha512-QgkA+BSEPNR0C2l6xbSu5HDXieUxiuDK+Jx4ZeZlp22QO/qRUIF6JRXdxh4WlLiQUmnE/9aaGerlni+OY81wqg==}
@@ -18557,11 +18579,11 @@ packages:
   fast-wrap-ansi@0.2.2:
     resolution: {integrity: sha512-7F2Fl+TjRSenLqlU3UjSH0iyqopqoZIu7eZVpEirP2g1GtWa2G/ecEmBdgz31+Mxr+ELclgg6sokpSFIQiZ02Q==}
 
-  fast-xml-builder@1.3.1:
-    resolution: {integrity: sha512-pIM/1n3ntFXKYrUZwW7QCK0gAW7XY+wzj1YMIV3tLDvPj/V+zTGJK5e3/4WJfwj0qWw2ElNXiTixda/R+3YSug==}
+  fast-xml-builder@1.3.2:
+    resolution: {integrity: sha512-OX91VSlShLPDgRZV7tk/YQ4l8tT75QziF5Ixg8g4PFbCVPjuTWwN+yQfAxLJ0dufJpprdOd6HlM74Jhd39TcBQ==}
 
-  fast-xml-parser@5.5.7:
-    resolution: {integrity: sha512-LteOsISQ2GEiDHZch6L9hB0+MLoYVLToR7xotrzU0opCICBkxOPgHAy1HxAvtxfJNXDJpgAsQN30mkrfpO2Prg==}
+  fast-xml-parser@5.12.1:
+    resolution: {integrity: sha512-wR8dO/fx+z8C5exuem1e7BKOWvjsuzvjS/tvA/Xu3Z1zQqJGcXrPzXbcAiaMgp2KjreEROcTkmnnisrcmJ2hYQ==}
     hasBin: true
 
   fastest-levenshtein@1.0.16:
@@ -19249,8 +19271,8 @@ packages:
   hoist-non-react-statics@3.3.2:
     resolution: {integrity: sha512-/gGivxi8JPKWNm/W0jSmzcMPpfpPLc3dY/6GxhX2hQ9iGj3aDfklV4ET7NjKpSinLpJ5vafa9iiGIEZg10SfBw==}
 
-  hono@4.13.13:
-    resolution: {integrity: sha512-CQ46U0ZkAGmbT/4UxdzzGJpacP2IeKgY4a5/tOI9AABbpOMfK739wfDXmv1usCk+3RkKj1hQy4/fjhiwa2xlrA==}
+  hono@4.13.19:
+    resolution: {integrity: sha512-KmXvQAXwcAHV+muzbIwoJ23niEB5nMoDVr9WcRkU8mvjUECm/1+7v4Jgp7P7a+H6MLFrh+vXrGonGrGS+RQfkA==}
     engines: {node: '>=16.9.0'}
 
   hookified@1.15.1:
@@ -19895,6 +19917,9 @@ packages:
     resolution: {integrity: sha512-mE00Gnza5EEB3Ds0HfMyllZzbBrmLOX3vfWoj9A9PEnTfratQ/BcaJOuMhnkhjXvb2+FkY3VuHqtAGpTPmglFQ==}
     engines: {node: '>=18'}
 
+  is-unsafe@2.0.3:
+    resolution: {integrity: sha512-ZBllczCCO267vgdFb6Tq3pv+LhHaCiGMdr+ZsuL+OopruAg7S+3ZDs1vD0RPC0uSrkjzbraxaGjtX1YBxjPeFQ==}
+
   is-url-superb@4.0.0:
     resolution: {integrity: sha512-GI+WjezhPPcbM+tqE9LnmsY5qqjwHzTvjJ36wxYX5ujNXefSUJ/T17r5bqDV8yLhcgB59KTPNOc9O9cmHTPWsA==}
     engines: {node: '>=10'}
@@ -20288,8 +20313,8 @@ packages:
   jsonc-parser@3.3.1:
     resolution: {integrity: sha512-HUgH65KyejrUFPvHFPbqOY0rsFip3Bo5wb4ngvdi1EpCYWUQDC5V+Y7mZws+DLkr4M//zQJoanu1SP+87Dv1oQ==}
 
-  jsondiffpatch@0.7.6:
-    resolution: {integrity: sha512-zE9+AXFq+MkTolDor2Cw1nJzLC0aleqPkYf52Kb4Kn4mJcka/gFHpGI2JBVEJCfWOvBl0OoxZS+wuLdislQcqg==}
+  jsondiffpatch@0.7.7:
+    resolution: {integrity: sha512-C3375q+xluwQYS6Je613YqXpZhW9uSi2YFRR+8QTJVYhdk0GZiDr7HD9bXNrdV9PJCpmwsCgJM9ZXXESSZPCzA==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
 
@@ -21314,8 +21339,8 @@ packages:
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
-  mssql@12.7.2:
-    resolution: {integrity: sha512-zhpPw+WXBWLw7d7J6Y0aWgQy0EV8HKDGNSvmkAjP8bSM4H41X0fweAeKWI+bg9Ri+JHCbsf/QScjmACBFcEo8A==}
+  mssql@12.7.13:
+    resolution: {integrity: sha512-RwNhOEU1A7vCbKmkZapbfLk31fKFByrEnK2eDPIw/rlloLUxNhuCcWj4CmXvyHiyjIjI0TMZWid20PAGoRX4xA==}
     engines: {node: '>=18.19.0'}
     hasBin: true
 
@@ -21479,8 +21504,8 @@ packages:
     resolution: {integrity: sha512-X75ZN8DCLftGM5iKwoYLA3rjnrAEs97MkzvSd4q2746Tgpg8b8XWiBGiBG4ZpgcAqBgtgPHTiAc8ZMCvZuikDw==}
     engines: {node: '>=10'}
 
-  nodemailer@10.3.0:
-    resolution: {integrity: sha512-LsqM+Sxjap8BMgxQuVvABoEcm9ed2f3h2e0ohB7kV3sl9+4IaXlxC0DT8CQelg/S0he38gT4yT0RH1pvZxHf+A==}
+  nodemailer@10.3.1:
+    resolution: {integrity: sha512-uF0AFsJC07Y1vdW7p580DKAnh7rAO+4UPSSB3mDCPNDufoiaOebV6JmrzpxB14OjEEEiBsNdYoM2Y+fN8M7BBA==}
     engines: {node: '>=20.0.0'}
 
   nopt@4.0.3:
@@ -23981,8 +24006,8 @@ packages:
     resolution: {integrity: sha512-1tB5mhVo7U+ETBKNf92xT4hrQa3pm0MZ0PQvuDnWgAAGHDsfp4lPSpiS6psrSiet87wyGPh9ft6wmhOMQ0hDiw==}
     engines: {node: '>=14.16'}
 
-  strnum@2.4.2:
-    resolution: {integrity: sha512-rDG3Ah4TV0k1hWvLSzkZtMmLN9+eS+h3knq4MP6A42Y3Yh5qGNnOUs1jJkoSr8FG5dsL28c7KgkIBzSEykqtuw==}
+  strnum@2.5.1:
+    resolution: {integrity: sha512-UM4nTLWzQiDBseVxUGxN0wJzIk0UU89Qi7pKXz9qISo+lhviJikTuikBsK/oFRlpvYHvSdz0TVoLyQ+sEpYwxA==}
 
   strtok3@10.3.5:
     resolution: {integrity: sha512-ki4hZQfh5rX0QDLLkOCj+h+CVNkqmp/CMf8v8kZpkNVK6jGQooMytqzLZYUVYIZcFZ6yDB70EfD8POcFXiF5oA==}
@@ -24603,8 +24628,8 @@ packages:
     resolution: {integrity: sha512-mLyPQnHwUxaM/rideoK/+KL8DaAJLRl4aBCfmX444aCSLnIaomqPLtNRe2jdCYcsk5wZzXrDIQC8ZeYNRAYyIA==}
     engines: {node: '>=20.18.1'}
 
-  undici@8.11.2:
-    resolution: {integrity: sha512-u4UB2/IrKdU6lFxumHmmo1a3fCQO5tzQllRorfoRS63txhrB7xTpSn1PftwC4qEHkOaqP95fCWW4lJzwErwzhQ==}
+  undici@8.12.4:
+    resolution: {integrity: sha512-8Mx+uNKKER2bA4AdtedkqRbwUCIJFr2nJckXRe5yrDqzePqwLP7VNcctN8/XdmDSbF7mS+jJKIszlL+vbam1VA==}
     engines: {node: '>=22.19.0'}
 
   unherit@1.1.3:
@@ -25564,7 +25589,7 @@ snapshots:
     dependencies:
       '@types/json-schema': 7.0.15
       js-yaml: 5.4.2
-      undici: 8.11.2
+      undici: 8.12.4
 
   '@apidevtools/openapi-schemas@2.1.0': {}
 
@@ -27196,56 +27221,56 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@elastic/esql-ast@4.38.0':
+  '@elastic/esql-ast@4.40.0':
     dependencies:
-      '@elastic/esql-definitions': 4.38.0
-      '@elastic/esql-grammar': 4.38.0
-      '@elastic/esql-promql-grammar': 4.38.0
-      '@elastic/esql-types': 4.38.0
+      '@elastic/esql-definitions': 4.40.0
+      '@elastic/esql-grammar': 4.40.0
+      '@elastic/esql-promql-grammar': 4.40.0
+      '@elastic/esql-types': 4.40.0
       tslib: 2.8.1
 
-  '@elastic/esql-definitions@4.38.0': {}
+  '@elastic/esql-definitions@4.40.0': {}
 
-  '@elastic/esql-grammar@4.38.0':
+  '@elastic/esql-grammar@4.40.0':
     dependencies:
       antlr4: 4.13.2
       tslib: 2.8.1
 
-  '@elastic/esql-parser@4.38.0':
+  '@elastic/esql-parser@4.40.0':
     dependencies:
-      '@elastic/esql-ast': 4.38.0
-      '@elastic/esql-definitions': 4.38.0
-      '@elastic/esql-grammar': 4.38.0
-      '@elastic/esql-promql-grammar': 4.38.0
-      '@elastic/esql-traversal': 4.38.0
-      '@elastic/esql-types': 4.38.0
+      '@elastic/esql-ast': 4.40.0
+      '@elastic/esql-definitions': 4.40.0
+      '@elastic/esql-grammar': 4.40.0
+      '@elastic/esql-promql-grammar': 4.40.0
+      '@elastic/esql-traversal': 4.40.0
+      '@elastic/esql-types': 4.40.0
       antlr4: 4.13.2
       tslib: 2.8.1
 
-  '@elastic/esql-promql-grammar@4.38.0':
+  '@elastic/esql-promql-grammar@4.40.0':
     dependencies:
       antlr4: 4.13.2
       tslib: 2.8.1
 
-  '@elastic/esql-traversal@4.38.0':
+  '@elastic/esql-traversal@4.40.0':
     dependencies:
-      '@elastic/esql-ast': 4.38.0
-      '@elastic/esql-types': 4.38.0
+      '@elastic/esql-ast': 4.40.0
+      '@elastic/esql-types': 4.40.0
       tree-dump: 1.1.0(tslib@2.8.1)
       tslib: 2.8.1
 
-  '@elastic/esql-types@4.38.0': {}
+  '@elastic/esql-types@4.40.0': {}
 
-  '@elastic/esql@4.38.0':
+  '@elastic/esql@4.40.0':
     dependencies:
-      '@elastic/esql-ast': 4.38.0
-      '@elastic/esql-definitions': 4.38.0
-      '@elastic/esql-grammar': 4.38.0
-      '@elastic/esql-parser': 4.38.0
-      '@elastic/esql-promql-grammar': 4.38.0
-      '@elastic/esql-traversal': 4.38.0
-      '@elastic/esql-types': 4.38.0
-      '@elastic/pretty-printer': 4.38.0
+      '@elastic/esql-ast': 4.40.0
+      '@elastic/esql-definitions': 4.40.0
+      '@elastic/esql-grammar': 4.40.0
+      '@elastic/esql-parser': 4.40.0
+      '@elastic/esql-promql-grammar': 4.40.0
+      '@elastic/esql-traversal': 4.40.0
+      '@elastic/esql-types': 4.40.0
+      '@elastic/pretty-printer': 4.40.0
       antlr4: 4.13.2
       tree-dump: 1.1.0(tslib@2.8.1)
       tslib: 2.8.1
@@ -27364,7 +27389,7 @@ snapshots:
 
   '@elastic/monaco-esql@4.39.0(monaco-editor@0.56.0)':
     dependencies:
-      '@elastic/esql-definitions': 4.38.0
+      '@elastic/esql-definitions': 4.40.0
       monaco-editor: 0.56.0
 
   '@elastic/node-crypto@1.2.3': {}
@@ -27445,14 +27470,14 @@ snapshots:
       - encoding
       - supports-color
 
-  '@elastic/pretty-printer@4.38.0':
+  '@elastic/pretty-printer@4.40.0':
     dependencies:
       tree-dump: 1.1.0(tslib@2.8.1)
       tslib: 2.8.1
 
   '@elastic/prismjs-esql@4.28.0':
     dependencies:
-      '@elastic/esql-definitions': 4.38.0
+      '@elastic/esql-definitions': 4.40.0
 
   '@elastic/react-search-ui-views@1.24.2(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)':
     dependencies:
@@ -28255,9 +28280,9 @@ snapshots:
 
   '@hey-api/types@0.1.2': {}
 
-  '@hono/node-server@2.1.5(hono@4.13.13)':
+  '@hono/node-server@2.1.8(hono@4.13.19)':
     dependencies:
-      hono: 4.13.13
+      hono: 4.13.19
 
   '@humanwhocodes/config-array@0.11.14(supports-color@10.2.2)':
     dependencies:
@@ -28988,7 +29013,7 @@ snapshots:
 
   '@modelcontextprotocol/sdk@1.32.1(@cfworker/json-schema@4.1.1)(supports-color@10.2.2)(zod@4.6.5)':
     dependencies:
-      '@hono/node-server': 2.1.5(hono@4.13.13)
+      '@hono/node-server': 2.1.8(hono@4.13.19)
       ajv: 8.20.0
       ajv-formats: 3.0.1(ajv@8.20.0)
       content-type: 1.0.5
@@ -28998,7 +29023,7 @@ snapshots:
       eventsource-parser: 3.0.6
       express: 5.2.1(supports-color@10.2.2)
       express-rate-limit: 8.7.0(express@5.2.1(supports-color@10.2.2))(supports-color@10.2.2)
-      hono: 4.13.13
+      hono: 4.13.19
       jose: 6.2.12
       json-schema-typed: 8.0.2
       pkce-challenge: 5.0.1
@@ -29161,6 +29186,8 @@ snapshots:
       eslint-scope: 5.1.1
 
   '@noble/hashes@1.8.0': {}
+
+  '@nodable/entities@3.1.0': {}
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
@@ -32421,9 +32448,9 @@ snapshots:
 
   '@xtuc/long@4.2.2': {}
 
-  '@xyflow/react@12.12.0(@types/react-dom@18.2.25)(@types/react@18.2.79)(immer@11.1.8)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@xyflow/react@12.12.1(@types/react-dom@18.2.25)(@types/react@18.2.79)(immer@11.1.8)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
-      '@xyflow/system': 0.0.83
+      '@xyflow/system': 0.0.84
       classcat: 5.0.5
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
@@ -32434,7 +32461,7 @@ snapshots:
     transitivePeerDependencies:
       - immer
 
-  '@xyflow/system@0.0.83':
+  '@xyflow/system@0.0.84':
     dependencies:
       '@types/d3-drag': 3.0.7
       '@types/d3-interpolate': 3.0.4
@@ -35726,16 +35753,19 @@ snapshots:
     dependencies:
       fast-string-width: 3.0.2
 
-  fast-xml-builder@1.3.1:
+  fast-xml-builder@1.3.2:
     dependencies:
       path-expression-matcher: 1.6.2
       xml-naming: 0.3.0
 
-  fast-xml-parser@5.5.7:
+  fast-xml-parser@5.12.1:
     dependencies:
-      fast-xml-builder: 1.3.1
+      '@nodable/entities': 3.1.0
+      fast-xml-builder: 1.3.2
+      is-unsafe: 2.0.3
       path-expression-matcher: 1.6.2
-      strnum: 2.4.2
+      strnum: 2.5.1
+      xml-naming: 0.3.0
 
   fastest-levenshtein@1.0.16: {}
 
@@ -36678,7 +36708,7 @@ snapshots:
     dependencies:
       react-is: 16.13.1
 
-  hono@4.13.13: {}
+  hono@4.13.19: {}
 
   hookified@1.15.1: {}
 
@@ -37326,6 +37356,8 @@ snapshots:
 
   is-unicode-supported@2.1.0: {}
 
+  is-unsafe@2.0.3: {}
+
   is-url-superb@4.0.0: {}
 
   is-url@1.2.4: {}
@@ -37917,7 +37949,7 @@ snapshots:
 
   jsonc-parser@3.3.1: {}
 
-  jsondiffpatch@0.7.6:
+  jsondiffpatch@0.7.7:
     dependencies:
       '@dmsnell/diff-match-patch': 1.1.0
 
@@ -37972,7 +38004,7 @@ snapshots:
   just-bash@3.6.0(supports-color@10.2.2):
     dependencies:
       diff: 8.0.4
-      fast-xml-parser: 5.5.7
+      fast-xml-parser: 5.12.1
       file-type: 21.3.4(supports-color@10.2.2)
       guarded-fetch: 0.1.3
       ini: 6.0.0
@@ -39217,7 +39249,7 @@ snapshots:
 
   ms@2.1.3: {}
 
-  mssql@12.7.2(supports-color@10.2.2):
+  mssql@12.7.13(supports-color@10.2.2):
     dependencies:
       '@tediousjs/connection-string': 1.1.0
       commander: 11.1.0
@@ -39423,7 +39455,7 @@ snapshots:
       util: 0.12.5
       vm-browserify: 1.1.2
 
-  nodemailer@10.3.0: {}
+  nodemailer@10.3.1: {}
 
   nopt@4.0.3:
     dependencies:
@@ -42301,7 +42333,7 @@ snapshots:
 
   strip-json-comments@5.0.3: {}
 
-  strnum@2.4.2:
+  strnum@2.5.1:
     dependencies:
       anynum: 1.0.1
 
@@ -43014,7 +43046,7 @@ snapshots:
 
   undici@7.30.2: {}
 
-  undici@8.11.2: {}
+  undici@8.12.4: {}
 
   unherit@1.1.3:
     dependencies:

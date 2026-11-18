@@ -83,7 +83,7 @@ describe('renderFailingSuiteIssueBody', () => {
     );
     expect(body).toContain(
       'Consistently failing tests:\n' +
-        '- `Discover ES|QL mode shows results` · [history](https://appex-qa.kb.europe-west1.gcp.cloud.es.io/s/scout/app/dashboards'
+        '- `Discover ES|QL mode shows results` · [history](https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history?'
     );
     expect(body).toContain('- `Discover ES|QL mode switches back to the data view` · [history](');
     expect(body).toContain('| **Framework** | Scout (Playwright) |');

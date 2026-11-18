@@ -27,7 +27,6 @@ export type {
 } from './src/types';
 
 export {
-  DASHBOARD_GRID_COLUMN_COUNT,
   DEFAULT_PANEL_WIDTH,
   DEFAULT_PANEL_HEIGHT,
   DEFAULT_DASHBOARD_OPTIONS,
