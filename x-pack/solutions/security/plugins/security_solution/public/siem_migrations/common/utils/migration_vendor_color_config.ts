@@ -14,3 +14,6 @@ export const MIGRATION_VENDOR_COLOR_CONFIG: Record<SiemMigrationVendor, string> 
   'microsoft-sentinel': '#E6F1E8', // bgLightSuccess (Azure green)
   tines: '#ECE2FE', // bgLightAssistance (Tines purple)
 };
+
+// Tines is only used by the workflows migration prototype, so it isn't a SiemMigrationVendor yet
+export const TINES_VENDOR_COLOR = '#FDF3D8'; // bgLightWarning
