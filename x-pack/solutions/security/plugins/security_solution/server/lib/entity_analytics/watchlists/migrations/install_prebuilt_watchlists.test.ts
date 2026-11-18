@@ -521,4 +521,62 @@ describe('installPrebuiltWatchlists', function () {
       })
     );
   });
+
+  describe('watchlist backing index', () => {
+    const createdIndices = () =>
+      mockEsClient.indices.create.mock.calls.map(([params]) => (params as { index: string }).index);
+
+    beforeEach(() => {
+      mockEsClient.indices.exists.mockReset();
+      mockEsClient.indices.create.mockReset();
+      mockEsClient.indices.get.mockReset();
+      mockEsClient.indices.putMapping.mockReset();
+      mockWatchlistGet.mockRejectedValue(new Error('Saved object not found'));
+    });
+
+    it('creates the index in every space that does not have one yet', async () => {
+      mockSoClient.find.mockResolvedValue(buildSpacesResponse(['default', 'custom-space']));
+      mockEsClient.indices.exists.mockResolvedValue(false);
+
+      await callInstall();
+
+      expect(createdIndices()).toEqual(
+        expect.arrayContaining([
+          '.entity_analytics.watchlists.default',
+          '.entity_analytics.watchlists.custom-space',
+        ])
+      );
+    });
+
+    it('updates the mappings of an index that already exists instead of recreating it', async () => {
+      mockSoClient.find.mockResolvedValue(buildSpacesResponse(['default']));
+      mockEsClient.indices.exists.mockResolvedValue(true);
+      mockEsClient.indices.get.mockResolvedValue({
+        '.entity_analytics.watchlists.default': {},
+      } as never);
+
+      await callInstall();
+
+      expect(mockEsClient.indices.create).not.toHaveBeenCalled();
+      expect(mockEsClient.indices.putMapping).toHaveBeenCalledWith(
+        expect.objectContaining({ index: '.entity_analytics.watchlists.default' })
+      );
+    });
+
+    it('still installs the remaining spaces when the index cannot be created in one of them', async () => {
+      mockSoClient.find.mockResolvedValue(buildSpacesResponse(['default', 'custom-space']));
+      mockEsClient.indices.exists.mockResolvedValue(false);
+      mockEsClient.indices.create.mockImplementation(async (params) => {
+        if ((params as { index: string }).index.endsWith('.default')) {
+          throw new Error('security_exception');
+        }
+        return { acknowledged: true } as never;
+      });
+
+      await callInstall();
+
+      expect(createdIndices()).toContain('.entity_analytics.watchlists.custom-space');
+      expect(mockWatchlistCreate).toHaveBeenCalledTimes(2);
+    });
+  });
 });

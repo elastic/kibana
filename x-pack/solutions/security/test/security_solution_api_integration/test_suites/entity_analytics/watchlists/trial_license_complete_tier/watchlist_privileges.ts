@@ -11,6 +11,7 @@ import { ROLES as SERVERLESS_ROLES } from '@kbn/security-solution-plugin/common/
 import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
 import {
   cleanUpWatchlists,
+  entityAnalyticsRouteHelpersFactory,
   watchlistRouteHelpersFactory,
   watchlistRouteHelpersFactoryNoAuth,
 } from '../../utils';
@@ -18,6 +19,7 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { usersAndRolesFactory } from '../../utils/users_and_roles';
 
 const USER_PASSWORD = 'changeme';
+const WATCHLIST_INDEX = '.entity_analytics.watchlists.default';
 const ALL_USER = 'watchlist_security_all';
 const READ_USER = 'watchlist_security_read';
 const USERS = [ALL_USER, READ_USER];
@@ -50,6 +52,8 @@ const ROLES = [
 export default ({ getService }: FtrProviderContext) => {
   const userHelper = usersAndRolesFactory(getService('security'));
   const supertest = getService('supertest');
+  const es = getService('es');
+  const log = getService('log');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const config = getService('config');
   const isServerless = config.get('serverless');
@@ -108,6 +112,25 @@ export default ({ getService }: FtrProviderContext) => {
           200
         );
         expect(response.body.name).to.eql(watchlistName);
+      });
+
+      it('does not create the backing index on behalf of a user without Elasticsearch privileges', async function () {
+        await es.indices.delete(
+          { index: WATCHLIST_INDEX, expand_wildcards: 'all' },
+          { ignore: [404] }
+        );
+        try {
+          await watchlistRoutesNoAuth.create(
+            allCreds,
+            { name: 'privileges-create-no-index', riskModifier: 1 },
+            200
+          );
+
+          expect(await es.indices.exists({ index: WATCHLIST_INDEX })).to.be(false);
+        } finally {
+          // Restore the index through the migration so the remaining tests start from a normal state.
+          await entityAnalyticsRouteHelpersFactory(supertest, log).runMigrations();
+        }
       });
 
       it('forbids Security:read from creating a watchlist', async () => {
