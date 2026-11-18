@@ -133,6 +133,43 @@ export const buildDemoTimeline = ({
   return { scenario, createdAt: new Date(createdAtMs).toISOString(), statusChanges };
 };
 
+export interface DemoAlertTimes {
+  attachedAt: string;
+  startedAt: string;
+}
+
+/**
+ * Builds the attach time and the start time of each demo alert of one case, in attach order.
+ * The first alert is attached in the first 2 minutes. No attach time is later than now.
+ */
+export const buildDemoAlertTimes = ({
+  createdAt,
+  count,
+  now,
+  random,
+}: {
+  createdAt: string;
+  count: number;
+  now: Date;
+  random: () => number;
+}): DemoAlertTimes[] => {
+  const createdAtMs = Date.parse(createdAt);
+
+  return Array.from({ length: count }, (_, position) => {
+    const attachDelayMs =
+      position === 0
+        ? between(random, 0, 2 * MINUTE_MS)
+        : between(random, 10 * MINUTE_MS, 2 * DAY_MS);
+    const attachedAtMs = Math.min(createdAtMs + attachDelayMs, now.getTime());
+    const startedAtMs = attachedAtMs - between(random, MINUTE_MS, 12 * HOUR_MS);
+
+    return {
+      attachedAt: new Date(attachedAtMs).toISOString(),
+      startedAt: new Date(startedAtMs).toISOString(),
+    };
+  });
+};
+
 const secondsBetween = (end: string, start: string): number =>
   Math.floor((Date.parse(end) - Date.parse(start)) / 1000);
 

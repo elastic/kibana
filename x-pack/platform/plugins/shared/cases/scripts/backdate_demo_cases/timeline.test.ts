@@ -8,7 +8,12 @@
 import { CaseStatuses } from '../../common/types/domain';
 import { CasePersistedStatus } from '../../server/common/types/case';
 import type { DemoTimeline } from './timeline';
-import { buildDemoTimeline, getDemoCaseTimeFields, pickDemoScenario } from './timeline';
+import {
+  buildDemoAlertTimes,
+  buildDemoTimeline,
+  getDemoCaseTimeFields,
+  pickDemoScenario,
+} from './timeline';
 
 const now = new Date('2026-11-17T12:00:00.000Z');
 const HOUR_MS = 60 * 60 * 1000;
@@ -116,5 +121,62 @@ describe('getDemoCaseTimeFields', () => {
         time_to_resolve: null,
       })
     );
+  });
+});
+
+describe('buildDemoAlertTimes', () => {
+  const MINUTE_MS = 60 * 1000;
+
+  it('attaches the first alert in the first 2 minutes and the others later', () => {
+    for (let run = 0; run < 50; run++) {
+      const [first, ...others] = buildDemoAlertTimes({
+        createdAt,
+        count: 3,
+        now,
+        random: Math.random,
+      });
+      const createdAtMs = Date.parse(createdAt);
+
+      expect(Date.parse(first.attachedAt) - createdAtMs).toBeGreaterThanOrEqual(0);
+      expect(Date.parse(first.attachedAt) - createdAtMs).toBeLessThan(2 * MINUTE_MS);
+      others.forEach(({ attachedAt }) => {
+        expect(Date.parse(attachedAt) - createdAtMs).toBeGreaterThanOrEqual(10 * MINUTE_MS);
+        expect(Date.parse(attachedAt) - createdAtMs).toBeLessThan(48 * HOUR_MS);
+      });
+    }
+  });
+
+  it('starts each alert 1 minute to 12 hours before its attach time', () => {
+    for (let run = 0; run < 50; run++) {
+      buildDemoAlertTimes({ createdAt, count: 3, now, random: Math.random }).forEach(
+        ({ attachedAt, startedAt }) => {
+          const delayMs = Date.parse(attachedAt) - Date.parse(startedAt);
+
+          expect(delayMs).toBeGreaterThanOrEqual(MINUTE_MS);
+          expect(delayMs).toBeLessThan(12 * HOUR_MS);
+        }
+      );
+    }
+  });
+
+  it('never attaches an alert later than now', () => {
+    const recentCreatedAt = new Date(now.getTime() - 30 * MINUTE_MS).toISOString();
+
+    const times = buildDemoAlertTimes({
+      createdAt: recentCreatedAt,
+      count: 2,
+      now,
+      random: () => 0.99,
+    });
+
+    expect(times[1].attachedAt).toBe(now.toISOString());
+  });
+
+  it('gives one entry for each alert', () => {
+    expect(buildDemoAlertTimes({ createdAt, count: 0, now, random: Math.random })).toEqual([]);
+    expect(buildDemoAlertTimes({ createdAt, count: 2, now, random: () => 0 })).toEqual([
+      { attachedAt: createdAt, startedAt: at(-MINUTE_MS) },
+      { attachedAt: at(10 * MINUTE_MS), startedAt: at(9 * MINUTE_MS) },
+    ]);
   });
 });
