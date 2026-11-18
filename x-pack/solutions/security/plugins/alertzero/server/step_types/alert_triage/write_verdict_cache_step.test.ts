@@ -392,6 +392,36 @@ describe('triage write verdict cache step', () => {
     });
   });
 
+  describe('novelty lists', () => {
+    const withHash = (id: string, hash: string) =>
+      alert(id, 'a.exe', {
+        process: {
+          executable: 'a.exe',
+          code_signature: { subject_name: 'Acme' },
+          hash: { sha256: hash },
+        },
+      });
+    const hashesOf = (store: Map<string, StoredDoc>): string[] | undefined =>
+      readCacheRecord(
+        store.get(verdictCacheId(keyHashOf('a.exe')))?._source
+      )?.novelty.hash?.slice();
+
+    it('seeds the lists from run 1, adds an agreeing run 2, and adds the values of an agreeing later alert only', async () => {
+      const { run, store, setAlerts } = setup({ alerts: [withHash('a-1', 'AA')] });
+      await run([verdict('a-1')]);
+      expect(hashesOf(store)).toEqual(['aa']);
+
+      setAlerts([withHash('a-2', 'BB')]);
+      await run([verdict('a-2')]);
+      expect(hashesOf(store)).toEqual(['aa', 'bb']);
+
+      setAlerts([withHash('a-3', 'CC'), withHash('a-4', 'DD')]);
+      await run([verdict('a-3'), verdict('a-4', 'true_positive', 0.9)]);
+      // a-3 agrees with the record and widens the list. a-4 is a bad variant that the model caught: it adds nothing.
+      expect(hashesOf(store)).toEqual(['aa', 'bb', 'cc']);
+    });
+  });
+
   describe('failures', () => {
     it('counts a new record that another batch wrote first as a conflict, and does not overwrite it', async () => {
       const id = verdictCacheId(keyHashOf('a.exe'));

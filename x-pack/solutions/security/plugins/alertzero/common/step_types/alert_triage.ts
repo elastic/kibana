@@ -311,6 +311,16 @@ const matchVerdictCacheOutputSchema = lazySchema(() =>
     would_reuse: z.number().describe('Pending alerts that an active record would cover.'),
     would_reuse_false_positive: z.number(),
     would_reuse_true_positive: z.number(),
+    guard_hits: z
+      .number()
+      .describe(
+        'Alerts that the novelty guard fired on. They carry `az:guard_hit:novelty:<field>` tags.'
+      ),
+    guard_not_checked: z
+      .number()
+      .describe(
+        'Alert and field pairs not checked, because the list of the record for that field is full.'
+      ),
     tag_failures: z.number(),
     deferred: z.number().describe('Records left for the next sweep because time ran out.'),
     out_of_time: z.boolean(),

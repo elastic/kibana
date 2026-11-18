@@ -21,13 +21,20 @@ import {
 } from '../../alert_triage/verdict_cache';
 import { getTriageMatchVerdictCacheStepDefinition } from './match_verdict_cache_step';
 
-const source = (executable: string) => ({
+const source = (executable: string, extra: Record<string, unknown> = {}) => ({
   'kibana.alert.rule.uuid': 'rule-1',
   'kibana.alert.rule.revision': 3,
   'kibana.alert.severity': 'low',
   host: { os: { type: 'windows' } },
   process: { executable, code_signature: { subject_name: 'Acme' } },
+  ...extra,
 });
+
+/** An alert of the key of `a.exe` that differs from the others only in a field outside the key. */
+const withProcess = (fields: Record<string, unknown>) =>
+  source('a.exe', {
+    process: { executable: 'a.exe', code_signature: { subject_name: 'Acme' }, ...fields },
+  });
 
 const strictOf = (executable: string): string => {
   const { strict } = buildPatternKeys(source(executable));
@@ -52,7 +59,8 @@ const recordOf = (
   executable: string,
   state: 'pending' | 'active' | 'unstable',
   verdict = 'false_positive',
-  now = new Date()
+  now = new Date(),
+  noveltyValues: Record<string, string[]> = {}
 ): VerdictCacheRecord => {
   const base = {
     keyHash: hashOf(executable),
@@ -61,13 +69,19 @@ const recordOf = (
     now,
   };
   const run1 = written(
-    nextCacheAction({ existing: undefined, fresh: fresh('first', verdict), ...base })
+    nextCacheAction({
+      existing: undefined,
+      fresh: fresh('first', verdict),
+      noveltyValues,
+      ...base,
+    })
   );
   if (state === 'pending') return run1;
   return written(
     nextCacheAction({
       existing: run1,
       fresh: fresh('second', state === 'active' ? verdict : 'true_positive'),
+      noveltyValues,
       ...base,
     })
   );
@@ -239,6 +253,120 @@ describe('triage match verdict cache step', () => {
       expect(tagCalls()).toEqual([]);
     }
   );
+
+  describe('the novelty guard', () => {
+    const SEEN = { hash: ['aa'], trusted: ['true'], command_line_shape: ['1234567890abcdef'] };
+    const guardTags = (tagCalls: Array<{ ids: string[]; tags: { tags_to_add: string[] } }>) =>
+      tagCalls
+        .filter(({ tags }) => tags.tags_to_add[0].startsWith('az:guard_hit:'))
+        .map(({ ids, tags }) => [tags.tags_to_add[0], ids]);
+
+    it('tags an alert with a new hash, and only that alert, per field that fired, besides the would-reuse tag', async () => {
+      const { run, tagCalls } = setup({
+        alerts: [
+          ['seen', withProcess({ hash: { sha256: 'AA' } })],
+          ['new-hash', withProcess({ hash: { sha256: 'BB' } })],
+        ],
+        records: [recordOf('a.exe', 'active', 'false_positive', new Date(), SEEN)],
+      });
+
+      const { output } = await run();
+
+      expect(output).toMatchObject({ would_reuse: 2, guard_hits: 1, guard_not_checked: 0 });
+      expect(guardTags(tagCalls())).toEqual([['az:guard_hit:novelty:hash', ['new-hash']]]);
+      expect(tagCalls()[0].ids).toEqual(['seen', 'new-hash']);
+    });
+
+    it('fires on a new trusted value and a new command line shape, each under its own tag', async () => {
+      const { run, tagCalls } = setup({
+        alerts: [
+          [
+            'variant',
+            withProcess({
+              hash: { sha256: 'AA' },
+              command_line: 'a.exe -enc JABzAD0ATgBlAHcALQBPAGIAagBlAGMAdAAgAFMAeQBzAHQAZQBtAC4A',
+            }),
+          ],
+        ],
+        records: [recordOf('a.exe', 'active', 'false_positive', new Date(), SEEN)],
+      });
+
+      const { output } = await run();
+
+      expect(output).toMatchObject({ guard_hits: 1 });
+      expect(guardTags(tagCalls())).toEqual([
+        ['az:guard_hit:novelty:command_line_shape', ['variant']],
+      ]);
+    });
+
+    it('does not fire on a new host or user, and tags no guard hit for an alert with values it has seen', async () => {
+      const { run, tagCalls } = setup({
+        alerts: [
+          [
+            'elsewhere',
+            source('a.exe', {
+              host: { os: { type: 'windows' }, name: 'other-host' },
+              user: { name: 'bob' },
+              process: {
+                executable: 'a.exe',
+                code_signature: { subject_name: 'Acme' },
+                hash: { sha256: 'AA' },
+              },
+            }),
+          ],
+        ],
+        records: [recordOf('a.exe', 'active', 'false_positive', new Date(), SEEN)],
+      });
+
+      const { output } = await run();
+
+      expect(output).toMatchObject({ would_reuse: 1, guard_hits: 0 });
+      expect(guardTags(tagCalls())).toEqual([]);
+    });
+
+    it('does not check a field whose list is full, and counts it', async () => {
+      const full = Array.from({ length: 50 }, (_unused, i) => `h${i}`);
+      const { run, tagCalls } = setup({
+        alerts: [['new-hash', withProcess({ hash: { sha256: 'BB' } })]],
+        records: [recordOf('a.exe', 'active', 'false_positive', new Date(), { hash: full })],
+      });
+
+      const { output } = await run();
+
+      expect(output).toMatchObject({ would_reuse: 1, guard_hits: 0, guard_not_checked: 1 });
+      expect(guardTags(tagCalls())).toEqual([]);
+    });
+
+    it('keeps the would-reuse tag and counts a failure when the guard tag cannot be written', async () => {
+      const { run, callKibanaApi, warn } = setup({
+        alerts: [['new-hash', withProcess({ hash: { sha256: 'BB' } })]],
+        records: [recordOf('a.exe', 'active', 'false_positive', new Date(), SEEN)],
+      });
+      const original = callKibanaApi.getMockImplementation();
+      callKibanaApi.mockImplementation(async (args) => {
+        if (args.body?.tags?.tags_to_add[0].startsWith('az:guard_hit:')) throw new Error('nope');
+        return original!(args);
+      });
+
+      const { output } = await run();
+
+      expect(output).toMatchObject({ status: 'ok', would_reuse: 1, tag_failures: 1 });
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('guard hits'));
+    });
+
+    it('asks for the fields that the guard reads, so a new value outside the key can be seen', async () => {
+      const { run, callKibanaApi } = setup({ alerts: [] });
+
+      await run();
+
+      const search = callKibanaApi.mock.calls.find(([{ path }]) =>
+        path.endsWith('/signals/search')
+      );
+      expect(search?.[0].body?._source).toEqual(
+        expect.arrayContaining(['process.command_line', 'destination.ip', 'process.hash.sha256'])
+      );
+    });
+  });
 
   it('does not count or tag an alert without a strict key', async () => {
     const { run, tagCalls } = setup({

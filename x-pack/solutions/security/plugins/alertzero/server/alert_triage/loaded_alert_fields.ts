@@ -6,6 +6,7 @@
  */
 
 import { ALERT_ANALYSIS_FIELDS } from '@kbn/workflows/managed';
+import { NOVELTY_SOURCE_FIELDS } from './novelty_guard';
 import { PATTERN_KEY_FIELDS } from './pattern_key';
 
 /**
@@ -17,6 +18,7 @@ export const LOADED_ALERT_FIELDS: readonly string[] = [
   ...new Set([
     ...ALERT_ANALYSIS_FIELDS,
     ...PATTERN_KEY_FIELDS,
+    ...NOVELTY_SOURCE_FIELDS,
     'host.id',
     'host.name',
     'user.name',

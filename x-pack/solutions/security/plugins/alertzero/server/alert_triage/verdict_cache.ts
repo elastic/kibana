@@ -139,6 +139,7 @@ export const nextCacheAction = ({
   floor,
   now,
   jev,
+  noveltyValues = {},
 }: {
   existing: VerdictCacheRecord | undefined;
   fresh: FreshVerdict;
@@ -147,6 +148,8 @@ export const nextCacheAction = ({
   floor: number;
   now: Date;
   jev?: JevInput;
+  /** The values of the alert in the novelty fields. They seed the lists with run 1, and join them with an agreeing run 2. */
+  noveltyValues?: Readonly<Record<string, readonly string[]>>;
 }): CacheAction => {
   const nowMs = now.getTime();
   const verdict = toCacheVerdict(fresh, floor);
@@ -163,7 +166,12 @@ export const nextCacheAction = ({
       return {
         type: 'write',
         transition: 'activated',
-        record: { ...live, state: 'active', run2 },
+        record: {
+          ...live,
+          state: 'active',
+          run2,
+          novelty: mergeNovelty(live.novelty, noveltyValues),
+        },
       };
     }
     return {
@@ -192,7 +200,7 @@ export const nextCacheAction = ({
       ...(jev?.score === undefined
         ? { jevSkipReason: jev?.skipReason ?? 'not_used' }
         : { jevScore: jev.score }),
-      novelty: {},
+      novelty: mergeNovelty({}, noveltyValues),
       createdAt: now.toISOString(),
       expiresAt: new Date(nowMs + VERDICT_CACHE_TTL_MS).toISOString(),
       hits: NO_HITS,

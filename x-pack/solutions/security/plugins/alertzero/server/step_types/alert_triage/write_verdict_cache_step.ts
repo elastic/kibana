@@ -13,6 +13,7 @@ import {
   type WriteVerdictCacheSkipReason,
 } from '../../../common/step_types/alert_triage';
 import { hashKey } from '../../alert_triage/key_tags';
+import { noveltyValuesOfAlert } from '../../alert_triage/novelty_guard';
 import { buildPatternKeys, getField } from '../../alert_triage/pattern_key';
 import {
   buildCacheDocument,
@@ -135,6 +136,7 @@ export const getTriageWriteVerdictCacheStepDefinition = ({
             strictKey,
             floor: input.confidence_floor,
             now,
+            noveltyValues: noveltyValuesOfAlert(alert.doc),
           });
           if (action.type === 'none') {
             leftAlone++;
@@ -180,6 +182,7 @@ export const getTriageWriteVerdictCacheStepDefinition = ({
                   classification: alert.classification,
                   confidenceScore: alert.confidenceScore,
                 },
+                noveltyValues: noveltyValuesOfAlert(alert.doc),
               }),
             record
           );

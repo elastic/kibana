@@ -13,6 +13,13 @@ import {
 } from '../../../common/step_types/alert_triage';
 import { DECISION_MATCH_WORK_BUDGET_MS } from '../../alert_triage/constants';
 import { hashCandidates } from '../../alert_triage/fp_decisions';
+import {
+  NOVELTY_GUARD,
+  NOVELTY_SOURCE_FIELDS,
+  checkNovelty,
+  guardHitTag,
+  noveltyValuesOfAlert,
+} from '../../alert_triage/novelty_guard';
 import { tagInChunks } from '../../alert_triage/plan_sweep';
 import {
   TRIAGE_WOULD_REUSE_TAG_PREFIX,
@@ -41,6 +48,8 @@ const NOTHING = {
   would_reuse: 0,
   would_reuse_false_positive: 0,
   would_reuse_true_positive: 0,
+  guard_hits: 0,
+  guard_not_checked: 0,
   tag_failures: 0,
   deferred: 0,
   out_of_time: false,
@@ -105,7 +114,11 @@ export const getTriageMatchVerdictCacheStepDefinition = ({
               input.analysis_tag_prefix,
               now.getTime() - input.lookback_hours * HOUR_MS,
               filters,
-              { after, excludeTagPrefixes: [TRIAGE_WOULD_REUSE_TAG_PREFIX] }
+              {
+                after,
+                excludeTagPrefixes: [TRIAGE_WOULD_REUSE_TAG_PREFIX],
+                extraSourceFields: NOVELTY_SOURCE_FIELDS,
+              }
             );
             const hashes = hashCandidates(found.candidates, input.space_id);
             const stored = await readCacheRecords({
@@ -117,6 +130,44 @@ export const getTriageMatchVerdictCacheStepDefinition = ({
               if (record !== undefined) recordsByHash.set(hash, record);
             }
             const matches = matchReusableRecords({ hashes, recordsByHash, now });
+            const docById = new Map(found.candidates.map(({ id, doc }) => [id, doc]));
+            // The alert is tagged would-reuse first, then this adds one tag per field that the novelty guard fired on. A failed
+            // guard tag is counted and does not undo the would-reuse tag.
+            const tagGuardHits = async (alertIds: readonly string[]): Promise<void> => {
+              const firedBy = new Map<string, string[]>();
+              const alertsFired = new Set<string>();
+              for (const alertId of alertIds) {
+                const doc = docById.get(alertId);
+                const hash = hashes.get(alertId);
+                const record = hash === undefined ? undefined : recordsByHash.get(hash);
+                if (doc === undefined || record === undefined) continue;
+                const { fired, notChecked } = checkNovelty({
+                  lists: record.novelty,
+                  values: noveltyValuesOfAlert(doc),
+                });
+                totals.guard_not_checked += notChecked.length;
+                for (const field of fired)
+                  firedBy.set(field, [...(firedBy.get(field) ?? []), alertId]);
+                if (fired.length > 0) alertsFired.add(alertId);
+              }
+              for (const [field, ids] of firedBy) {
+                try {
+                  await tagInChunks(write, {
+                    alertIds: ids,
+                    add: [guardHitTag(NOVELTY_GUARD, field)],
+                    remove: [],
+                  });
+                } catch (error) {
+                  totals.tag_failures++;
+                  logger.warn(
+                    `Could not tag the guard hits on ${field}: ${
+                      error instanceof Error ? error.message : error
+                    }`
+                  );
+                }
+              }
+              totals.guard_hits += alertsFired.size;
+            };
 
             for (const [recordId, { verdict, alertIds }] of matches) {
               if (outOfTime()) {
@@ -131,6 +182,7 @@ export const getTriageMatchVerdictCacheStepDefinition = ({
                 });
                 recordsMatched.add(recordId);
                 totals.would_reuse += alertIds.length;
+                await tagGuardHits(alertIds);
                 if (verdict === 'false_positive')
                   totals.would_reuse_false_positive += alertIds.length;
                 else totals.would_reuse_true_positive += alertIds.length;

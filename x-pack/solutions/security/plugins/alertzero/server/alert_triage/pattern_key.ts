@@ -35,6 +35,9 @@ export interface PatternKeys {
 type PathKind = 'library' | 'registry' | 'file' | 'process';
 export type Kind = PathKind | 'cloud';
 
+export type PatternKeyKind = Kind;
+export type PatternKeyPathKind = PathKind;
+
 /** Most specific first, process last: file, library and registry events also carry `process.executable`. */
 const KINDS: readonly PathKind[] = ['library', 'registry', 'file', 'process'];
 
@@ -160,8 +163,8 @@ const normalizeRegistry = (value: string): string =>
     .replace(GUID, '<guid>')
     .replace(SID, '<sid>');
 
-/** One rule per kind of value, chosen by field, never by rule. */
-const normalize = (field: string, value: string, osType: unknown): string => {
+/** One rule per kind of value, chosen by field, never by rule. The novelty guard uses it for the fields outside the key. */
+export const normalizeKeyValue = (field: string, value: string, osType: unknown): string => {
   if (field.endsWith('.sha256')) return value.toLowerCase();
   if (field === 'registry.path') return normalizeRegistry(value);
   if (!field.endsWith('path') && !field.endsWith('executable')) return value;
@@ -222,7 +225,7 @@ const buildCondition = (doc: AlertDocument): Condition | undefined => {
       .filter((field) => isPresent(getField(doc, field)))
       .map((field): [string, string] => [
         field,
-        normalize(field, String(getField(doc, field)), osType),
+        normalizeKeyValue(field, String(getField(doc, field)), osType),
       ])
       .sort(byField);
   const values = read(wanted);

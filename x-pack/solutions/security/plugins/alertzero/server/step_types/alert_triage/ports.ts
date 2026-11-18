@@ -854,7 +854,13 @@ export const fetchDecisionCandidates = async (
   {
     after,
     excludeTagPrefixes = [],
-  }: { after?: DecisionCursor; excludeTagPrefixes?: readonly string[] } = {}
+    extraSourceFields = [],
+  }: {
+    after?: DecisionCursor;
+    excludeTagPrefixes?: readonly string[];
+    /** Fields to fetch on top of the pattern key fields, for a caller that reads more of the alert (the novelty guard). */
+    extraSourceFields?: readonly string[];
+  } = {}
 ): Promise<DecisionCandidatesPage> => {
   const { body } = await callKibanaApi<
     SearchCompleteness & { hits?: { hits?: Array<AlertHit & { sort?: unknown[] }> } }
@@ -865,6 +871,7 @@ export const fetchDecisionCandidates = async (
       size: ALERT_FETCH_LIMIT,
       _source: [
         ...PATTERN_KEY_FIELDS,
+        ...extraSourceFields,
         SEVERITY_FIELD,
         ...Object.values(DECISION_SIGNER_TRUST_FIELDS),
       ],

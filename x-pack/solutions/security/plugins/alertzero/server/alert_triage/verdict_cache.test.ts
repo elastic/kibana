@@ -180,6 +180,36 @@ describe('nextCacheAction: run 2', () => {
   });
 });
 
+describe('nextCacheAction: novelty lists', () => {
+  const seen = (hash: string) => ({ hash: [hash], host_name: ['h-1'] });
+
+  it('seeds the novelty lists with the values of the alert of run 1', () => {
+    const record = written(act(undefined, fresh('alert-1'), { noveltyValues: seen('aa') }));
+
+    expect(record.novelty).toEqual(seen('aa'));
+  });
+
+  it('adds the values of run 2 when it agrees, so that a record sees both alerts before it can fire', () => {
+    const first = written(act(undefined, fresh('alert-1'), { noveltyValues: seen('aa') }));
+
+    const active = written(act(first, fresh('alert-2'), { noveltyValues: seen('bb') }));
+
+    expect(active.state).toBe('active');
+    expect(active.novelty.hash).toEqual(['aa', 'bb']);
+  });
+
+  it('keeps the lists as they were when run 2 disagrees, so a bad variant does not widen them', () => {
+    const first = written(act(undefined, fresh('alert-1'), { noveltyValues: seen('aa') }));
+
+    const unstable = written(
+      act(first, fresh('alert-2', 'true_positive'), { noveltyValues: seen('bb') })
+    );
+
+    expect(unstable.state).toBe('unstable');
+    expect(unstable.novelty.hash).toEqual(['aa']);
+  });
+});
+
 describe('nextCacheAction: unstable, active and expired records', () => {
   it('gives an unstable key no new record until the block ends, and a new one after', () => {
     const unstable = written(act(pending(), fresh('alert-2', 'true_positive')));
