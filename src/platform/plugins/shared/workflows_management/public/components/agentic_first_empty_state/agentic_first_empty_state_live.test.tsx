@@ -10,8 +10,8 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { AUTO_MIGRATION_HREF } from './auto_migration_panel';
 import { AgenticFirstEmptyStateLive } from './agentic_first_empty_state_live';
+import { AUTO_MIGRATION_HREF } from './auto_migration_panel';
 
 const mockNavigateToApp = jest.fn();
 const mockGetAgentBuilderAccess = jest.fn();

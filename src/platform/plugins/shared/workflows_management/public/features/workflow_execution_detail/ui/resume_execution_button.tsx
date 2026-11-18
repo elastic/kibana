@@ -29,10 +29,10 @@ import {
   ResumeExecutionModal,
   useWorkflowsApi,
 } from '@kbn/workflows-ui';
-import { useExecutionsPageCapabilities } from '../../../pages/executions/use_executions_page_capabilities';
 
 import { useTelemetry } from '../../../hooks/use_telemetry';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
+import { useExecutionsPageCapabilities } from '../../../pages/executions/use_executions_page_capabilities';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 
 export interface ApprovalLabels {

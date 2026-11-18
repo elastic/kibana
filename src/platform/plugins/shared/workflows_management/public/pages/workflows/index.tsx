@@ -36,22 +36,22 @@ import {
   serializeWorkflowsUrlSearchParams,
 } from './url_search_params';
 import { PLUGIN_ID, WORKFLOWS_DOCUMENTATION_URL } from '../../../common';
+import { ManagedWorkflowsOffCallout } from '../../components/managed_workflows_off_callout/managed_workflows_off_callout';
 import { useWorkflowFiltersOptions } from '../../entities/workflows/model/use_workflow_stats';
 import { ImportWorkflowsFlyout } from '../../features/import_workflows/ui/import_workflows_flyout';
 import { WorkflowExecutionStatsBar } from '../../features/workflow_executions_stats/ui';
-import { ManagedWorkflowsOffCallout } from '../../components/managed_workflows_off_callout/managed_workflows_off_callout';
 import { WorkflowList } from '../../features/workflow_list';
 import { useKibana } from '../../hooks/use_kibana';
-import {
-  MANAGED_OFF_NO_CUSTOM,
-  NO_RESULTS_SEARCH_OR_FILTERS,
-  READ_ONLY_NO_MANAGE,
-  isPrototypeEmptyWorkflow,
-  useWorkflowPrototypeScenario,
-} from '../../shared/workflow_prototype_scenario';
 import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { getAddConnectorsMenuItem } from '../../shared/ui/get_add_connectors_menu_item';
 import { shouldShowWorkflowsEmptyState } from '../../shared/utils/workflow_utils';
+import {
+  isPrototypeEmptyWorkflow,
+  MANAGED_OFF_NO_CUSTOM,
+  NO_RESULTS_SEARCH_OR_FILTERS,
+  READ_ONLY_NO_MANAGE,
+  useWorkflowPrototypeScenario,
+} from '../../shared/workflow_prototype_scenario';
 import { WorkflowsFilterPopover } from '../../widgets/workflow_filter_popover/workflow_filter_popover';
 import { WorkflowSearchField } from '../../widgets/workflow_search_field/ui/workflow_search_field';
 
@@ -184,9 +184,7 @@ export function WorkflowsPage() {
   useWorkflowsBreadcrumbs();
 
   /** Import uses bulk APIs that require both create and update; gate UI to match server authz. */
-  const canImportWorkflows = Boolean(
-    canCreateWorkflow && canUpdateWorkflow && !forceReadOnlyEmpty
-  );
+  const canImportWorkflows = Boolean(canCreateWorkflow && canUpdateWorkflow && !forceReadOnlyEmpty);
   const addConnectorsMenuItem = useMemo(() => getAddConnectorsMenuItem(application), [application]);
   const isExecutionStatsBarEnabled = featureFlags.useBooleanValue(
     WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID,
@@ -204,8 +202,7 @@ export function WorkflowsPage() {
     !showingExampleWorkflows &&
     (forceManagedOffEmpty ||
       (!isManagedWorkflowsSettingEnabled && !listHasConstraints && workflows?.total === 0));
-  const managedOffNoMatches =
-    forceManagedOffEmpty && listHasConstraints && workflows?.total === 0;
+  const managedOffNoMatches = forceManagedOffEmpty && listHasConstraints && workflows?.total === 0;
 
   // A read-only user with nothing to list sees the table, not the first-use landing.
   const showReadOnlyTable =
@@ -318,18 +315,19 @@ export function WorkflowsPage() {
     }
 
     return {
-      primaryActionItem: forceEmptyScenario || forceManagedOffEmpty
-        ? undefined
-        : {
-            id: 'createWorkflow',
-            label: i18n.translate('workflows.createWorkflowButton', {
-              defaultMessage: 'Create workflow',
-            }),
-            iconType: 'plus',
-            disableButton: !canCreateWorkflow || forceReadOnlyEmpty,
-            run: navigateToCreateWorkflow,
-            testId: 'createWorkflowButton',
-          },
+      primaryActionItem:
+        forceEmptyScenario || forceManagedOffEmpty
+          ? undefined
+          : {
+              id: 'createWorkflow',
+              label: i18n.translate('workflows.createWorkflowButton', {
+                defaultMessage: 'Create workflow',
+              }),
+              iconType: 'plus',
+              disableButton: !canCreateWorkflow || forceReadOnlyEmpty,
+              run: navigateToCreateWorkflow,
+              testId: 'createWorkflowButton',
+            },
       items,
     };
   }, [
@@ -390,8 +388,8 @@ export function WorkflowsPage() {
                       filtersData?.enabled?.length
                         ? filtersData.enabled
                         : showDemoNoResults
-                          ? [{ label: 'Enabled', key: 'true' }]
-                          : []
+                        ? [{ label: 'Enabled', key: 'true' }]
+                        : []
                     }
                     selectedValues={displayedEnabledFilter}
                     onSelectedValuesChanged={(newValues) => {
@@ -480,8 +478,8 @@ export function WorkflowsPage() {
               showDemoNoResults
                 ? clearSearchAndFilters
                 : managedOffNoMatches
-                  ? clearManagedOffSearch
-                  : undefined
+                ? clearManagedOffSearch
+                : undefined
             }
           />
         </div>

@@ -368,22 +368,21 @@ export const WorkflowListTable = ({
 
     return viewOnly ? nextColumns.filter((column) => !('actions' in column)) : nextColumns;
   }, [
-      viewOnly,
-      canReadWorkflow,
-      canReadWorkflowExecution,
-      canUpdateWorkflow,
-      canExecuteWorkflow,
-      canCreateWorkflow,
-      canDeleteWorkflow,
-      onEditWorkflow,
-      workflowsListSearch,
-      onToggleWorkflow,
-      onCloneWorkflow,
-      onExportWorkflow,
-      onDeleteWorkflow,
-      onRequestRun,
-    ]
-  );
+    viewOnly,
+    canReadWorkflow,
+    canReadWorkflowExecution,
+    canUpdateWorkflow,
+    canExecuteWorkflow,
+    canCreateWorkflow,
+    canDeleteWorkflow,
+    onEditWorkflow,
+    workflowsListSearch,
+    onToggleWorkflow,
+    onCloneWorkflow,
+    onExportWorkflow,
+    onDeleteWorkflow,
+    onRequestRun,
+  ]);
 
   return (
     <EuiBasicTable

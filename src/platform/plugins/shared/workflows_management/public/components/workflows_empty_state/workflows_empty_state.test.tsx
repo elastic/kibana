@@ -35,7 +35,9 @@ describe('WorkflowsEmptyStateReadOnly', () => {
     renderWithProviders(<WorkflowsEmptyStateReadOnly />);
 
     expect(screen.getByText('You can view workflows')).toBeInTheDocument();
-    expect(screen.getByText("You don't have permission to create or change them.")).toBeInTheDocument();
+    expect(
+      screen.getByText("You don't have permission to create or change them.")
+    ).toBeInTheDocument();
   });
 
   it('does not render create workflow actions', () => {

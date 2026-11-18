@@ -367,27 +367,21 @@ describe('WorkflowsPage authorization', () => {
     'empty-workflow-llm-disabled',
     'empty-workflow-llm-enabled',
     'empty-workflow-auto-migration',
-  ])(
-    'hides the filter bar for the %s prototype',
-    (scenario) => {
-      mockCapabilities(true, true);
-      mockUseShowManagedWorkflowsSetting.mockReturnValue(true);
-      window.sessionStorage.setItem('workflows.prototypeScenario', scenario);
+  ])('hides the filter bar for the %s prototype', (scenario) => {
+    mockCapabilities(true, true);
+    mockUseShowManagedWorkflowsSetting.mockReturnValue(true);
+    window.sessionStorage.setItem('workflows.prototypeScenario', scenario);
 
-      renderPage();
+    renderPage();
 
-      expect(screen.queryByTestId('workflowSearchField')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('managed-filter-popover-button')).not.toBeInTheDocument();
-    }
-  );
+    expect(screen.queryByTestId('workflowSearchField')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('managed-filter-popover-button')).not.toBeInTheDocument();
+  });
 
   it('shows the managed-off empty list when that prototype is selected and the setting is on', () => {
     mockCapabilities(true, true);
     mockUseShowManagedWorkflowsSetting.mockReturnValue(true);
-    window.sessionStorage.setItem(
-      'workflows.prototypeScenario',
-      'managed-workflows-off-no-custom'
-    );
+    window.sessionStorage.setItem('workflows.prototypeScenario', 'managed-workflows-off-no-custom');
 
     renderPage();
 

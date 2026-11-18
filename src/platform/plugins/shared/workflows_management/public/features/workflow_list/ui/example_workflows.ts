@@ -9,11 +9,7 @@
 
 import { ExecutionStatus, type WorkflowListItemDto, type WorkflowYaml } from '@kbn/workflows';
 
-const exampleDefinition = (
-  name: string,
-  tags: string[],
-  triggerType: string
-): WorkflowYaml =>
+const exampleDefinition = (name: string, tags: string[], triggerType: string): WorkflowYaml =>
   ({
     version: '1',
     name,
@@ -21,7 +17,7 @@ const exampleDefinition = (
     tags,
     triggers: [{ type: triggerType }],
     steps: [{ name: 'notify', type: 'slack' }],
-  }) as WorkflowYaml;
+  } as WorkflowYaml);
 
 const exampleWorkflow = (
   id: string,

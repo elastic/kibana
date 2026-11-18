@@ -44,11 +44,11 @@ import { useWorkflowActions } from '../../../entities/workflows/model/use_workfl
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 import { getWorkflowDetailRouteState } from '../../../shared/utils/workflow_navigation';
+import { shouldShowWorkflowsEmptyState } from '../../../shared/utils/workflow_utils';
 import {
   isPrototypeEmptyWorkflow,
   useWorkflowPrototypeScenario,
 } from '../../../shared/workflow_prototype_scenario';
-import { shouldShowWorkflowsEmptyState } from '../../../shared/utils/workflow_utils';
 import type { WorkflowTriggerTab } from '../../run_workflow/ui/types';
 import { WorkflowExecuteModal } from '../../run_workflow/ui/workflow_execute_modal';
 import { hasCustomEventTrigger } from '../../run_workflow/ui/workflow_execute_modal_helpers';
@@ -411,8 +411,8 @@ export function WorkflowList({
   const tableWorkflows = forceReadOnlyEmpty
     ? [...readOnlyCustomExamples, ...apiRows]
     : showClearedExamples
-      ? EXAMPLE_WORKFLOWS
-      : apiRows;
+    ? EXAMPLE_WORKFLOWS
+    : apiRows;
   const showExampleRows = readOnlyCustomExamples.length > 0 || showClearedExamples;
   const tableTotal = showExampleRows
     ? readOnlyCustomExamples.length + (forceReadOnlyEmpty ? workflows?.total ?? 0 : 0) ||

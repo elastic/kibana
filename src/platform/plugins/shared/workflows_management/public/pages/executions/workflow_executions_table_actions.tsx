@@ -20,8 +20,8 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
-import { useExecutionsPageCapabilities } from './use_executions_page_capabilities';
 import type { RerunWorkflowExecutionParams } from './build_replay_inputs_from_execution_context';
+import { useExecutionsPageCapabilities } from './use_executions_page_capabilities';
 import { getWorkflowExecutionActionContextFromDto } from './workflow_executions_table_cells';
 import { useKibana } from '../../hooks/use_kibana';
 import { useTelemetry } from '../../hooks/use_telemetry';

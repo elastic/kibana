@@ -235,9 +235,7 @@ export function summarizeCategoryTile(
       counts.set(category, (counts.get(category) ?? 0) + 1);
     }
   }
-  const ranked = [...counts.entries()].sort(
-    (a, b) => b[1] - a[1] || a[0].localeCompare(b[0])
-  );
+  const ranked = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
   const visibleTags = ranked.slice(0, VISIBLE_CATEGORY_TAG_COUNT).map(([id]) => id);
   return {
     templateCount: matched.length,

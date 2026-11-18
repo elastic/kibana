@@ -9,8 +9,8 @@
 
 import type { Template } from '@kbn/workflows-library';
 import {
-  EMPTY_STATE_CATEGORY_TILE_COUNT,
   categoryLibrarySearch,
+  EMPTY_STATE_CATEGORY_TILE_COUNT,
   selectCategoryTiles,
   summarizeCategoryTile,
 } from './category_tiles';
@@ -26,7 +26,7 @@ const template = (
     description: '',
     categories,
     solutions,
-  }) as Template;
+  } as Template);
 
 describe('selectCategoryTiles', () => {
   const catalog = [
@@ -56,11 +56,7 @@ describe('selectCategoryTiles', () => {
 
   it('returns one tile per solution when no solution is active', () => {
     const tiles = selectCategoryTiles(catalog, undefined);
-    expect(tiles.map((tile) => tile.category)).toEqual([
-      'case-management',
-      'monitoring',
-      'search',
-    ]);
+    expect(tiles.map((tile) => tile.category)).toEqual(['case-management', 'monitoring', 'search']);
     expect(categoryLibrarySearch(tiles[0], undefined)).toBe(
       '?category=case-management&solution=security'
     );
@@ -77,10 +73,7 @@ describe('selectCategoryTiles', () => {
 });
 
 describe('summarizeCategoryTile', () => {
-  const tile = selectCategoryTiles(
-    [template('case-management', ['security'])],
-    'security'
-  )[0];
+  const tile = selectCategoryTiles([template('case-management', ['security'])], 'security')[0];
 
   it('counts the templates the filtered library would show', () => {
     const catalog = [

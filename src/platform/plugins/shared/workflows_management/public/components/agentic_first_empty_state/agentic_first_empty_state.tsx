@@ -72,6 +72,7 @@ function CategoryTileTitle({ tile }: { tile: CategoryTileLink }) {
         size="m"
         color="text"
         data-test-subj={`workflowCategoryTileIcon-${tile.category}`}
+        aria-hidden={true}
       />
       <span
         css={css`

@@ -20,11 +20,11 @@ import { i18n } from '@kbn/i18n';
 import { isDangerousStatus, isTerminalStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { useWorkflowsApi } from '@kbn/workflows-ui';
-import { useExecutionsPageCapabilities } from '../../../pages/executions/use_executions_page_capabilities';
 import { useNavigateToExecution } from '../../../hooks/navigation/use_navigate_to_execution';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
+import { useExecutionsPageCapabilities } from '../../../pages/executions/use_executions_page_capabilities';
 
 interface ExecutionTakeActionSplitButtonProps {
   execution: WorkflowExecutionDto;

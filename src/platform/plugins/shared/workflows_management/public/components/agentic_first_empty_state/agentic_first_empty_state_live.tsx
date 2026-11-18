@@ -20,7 +20,11 @@ import {
   AgenticFirstEmptyState,
   type AgenticFirstEmptyStateProps,
 } from './agentic_first_empty_state';
-import { categoryLibrarySearch, selectCategoryTiles, summarizeCategoryTile } from './category_tiles';
+import {
+  categoryLibrarySearch,
+  selectCategoryTiles,
+  summarizeCategoryTile,
+} from './category_tiles';
 import { ConnectLlmPanel } from './connect_llm_panel';
 import { PLUGIN_ID } from '../../../common';
 import { WorkflowsPageName } from '../../deep_links';

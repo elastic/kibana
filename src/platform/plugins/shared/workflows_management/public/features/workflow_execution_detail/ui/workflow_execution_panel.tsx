@@ -26,12 +26,12 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
-import { useExecutionsPageCapabilities } from '../../../pages/executions/use_executions_page_capabilities';
 import { CancelExecutionButton } from './cancel_execution_button';
 import { StepExecutionsTruncatedCallout } from './step_executions_truncated_callout';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { RerunWorkflowExecutionParams } from '../../../pages/executions/build_replay_inputs_from_execution_context';
+import { useExecutionsPageCapabilities } from '../../../pages/executions/use_executions_page_capabilities';
 import { getTestRunTooltipContent } from '../../../shared/ui/workflow_action_buttons/get_workflow_tooltip_content';
 import type { ChildWorkflowExecutionsMap } from '../model/use_child_workflow_executions';
 

@@ -10,16 +10,16 @@
 import { EuiCallOut, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { ExecutionsEmptyState } from './executions_empty_state';
 import { useWorkflowExecutionRerun } from './use_workflow_executions_bulk_actions';
 import { useWorkflowExecutionsPageFilters } from './use_workflow_executions_page_filters';
 import { WorkflowExecutionDetailFlyout } from './workflow_execution_detail_flyout';
 import { createWorkflowExecutionsDataView } from './workflow_executions_data_view';
 import { WorkflowExecutionsFilters } from './workflow_executions_filters';
-import { WorkflowExecutionsSearchBar } from './workflow_executions_search_bar';
 import { DEFAULT_EXECUTION_PAGE_FILTERS } from './workflow_executions_page_constants';
-import { ExecutionsEmptyState } from './executions_empty_state';
+import { WorkflowExecutionsSearchBar } from './workflow_executions_search_bar';
 import { WorkflowExecutionsTable } from './workflow_executions_table';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSpaceId } from '../../hooks/use_space_id';
@@ -336,9 +336,12 @@ export const WorkflowExecutionsPageContent = React.memo(() => {
               })}
               actionProps={{
                 primary: {
-                  children: i18n.translate('workflows.executionsPage.viewOnly.contactAdministrator', {
-                    defaultMessage: 'Contact your administrator',
-                  }),
+                  children: i18n.translate(
+                    'workflows.executionsPage.viewOnly.contactAdministrator',
+                    {
+                      defaultMessage: 'Contact your administrator',
+                    }
+                  ),
                   // No destination yet. The button is the agreed placeholder.
                   onClick: () => undefined,
                   'data-test-subj': 'executions-view-only-contact-administrator',

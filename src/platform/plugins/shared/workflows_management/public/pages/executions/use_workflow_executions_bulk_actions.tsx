@@ -13,12 +13,12 @@ import { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import { useRunWorkflow, useTestWorkflow, useWorkflowsApi } from '@kbn/workflows-ui';
-import { useExecutionsPageCapabilities } from './use_executions_page_capabilities';
 import {
   buildReplayInputsFromExecutionContext,
   type RerunWorkflowExecutionParams,
 } from './build_replay_inputs_from_execution_context';
 import { formatWorkflowExecutionsForCopy } from './format_workflow_executions_for_copy';
+import { useExecutionsPageCapabilities } from './use_executions_page_capabilities';
 import { useKibana } from '../../hooks/use_kibana';
 
 export const useWorkflowExecutionRerun = ({

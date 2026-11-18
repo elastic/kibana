@@ -33,18 +33,18 @@ import {
   WorkflowExecutionActionsMenu,
 } from './workflow_executions_table_actions';
 import {
-  EXECUTIONS_TABLE_COLUMN_WIDTH_DURATION,
-  EXECUTIONS_TABLE_COLUMN_WIDTH_STARTED,
-  EXECUTIONS_TABLE_COLUMN_WIDTH_TAGS,
-  EXECUTIONS_TABLE_COLUMN_WIDTH_TRIGGER,
-} from './workflow_executions_table_config';
-import {
   WorkflowExecutionDurationCell,
   WorkflowExecutionStartedAtCell,
   WorkflowExecutionTagsCell,
   WorkflowExecutionTriggersCell,
   WorkflowExecutionWorkflowCell,
 } from './workflow_executions_table_cells';
+import {
+  EXECUTIONS_TABLE_COLUMN_WIDTH_DURATION,
+  EXECUTIONS_TABLE_COLUMN_WIDTH_STARTED,
+  EXECUTIONS_TABLE_COLUMN_WIDTH_TAGS,
+  EXECUTIONS_TABLE_COLUMN_WIDTH_TRIGGER,
+} from './workflow_executions_table_config';
 
 export interface WorkflowExecutionsGroupedViewProps {
   executions: WorkflowExecutionListItemDto[];
