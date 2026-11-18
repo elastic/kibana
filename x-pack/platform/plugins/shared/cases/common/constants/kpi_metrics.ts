@@ -96,6 +96,18 @@ export const PREDEFINED_KPI_METRICS: readonly PredefinedKpiMetric[] = [
     format: 'duration',
     source: 'caseSearch',
   },
+  {
+    id: 'alert_time_to_acknowledge_avg',
+    label: 'Average time to acknowledge an alert',
+    format: 'duration',
+    source: 'analytics',
+  },
+  {
+    id: 'alert_time_to_acknowledge_median',
+    label: 'Median time to acknowledge an alert',
+    format: 'duration',
+    source: 'analytics',
+  },
 ];
 
 export const PREDEFINED_KPI_METRIC_IDS = PREDEFINED_KPI_METRICS.map((metric) => metric.id);
@@ -110,6 +122,11 @@ export const KPI_METRIC_PREVIEW_ID = 'preview';
  */
 export const MAX_KPI_FILTER_CASE_IDS = 10000;
 
+/**
+ * The maximum number of alert attachment documents and unique alert ids in one period of an alert metric
+ */
+export const MAX_KPI_ALERTS = 10000;
+
 export const getKpiField = (
   index: KpiMetricIndex,
   field: string
@@ -118,3 +135,9 @@ export const getKpiField = (
 
 export const getPredefinedKpiMetric = (id: string): PredefinedKpiMetric | undefined =>
   PREDEFINED_KPI_METRICS.find((metric) => metric.id === id);
+
+/**
+ * Returns true when the server calculates the predefined metric from the analytics indices.
+ */
+export const isAnalyticsPredefinedKpiMetric = (id: string): boolean =>
+  getPredefinedKpiMetric(id)?.source === 'analytics';

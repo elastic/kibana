@@ -14,8 +14,11 @@ import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/serve
 import { isNonLocalIndexName } from '@kbn/es-query';
 import {
   ALERT_RULE_TYPE_ID,
+  ALERT_START,
+  ALERT_UUID,
   ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
   SPACE_IDS,
+  TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import type { STATUS_VALUES } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import {
@@ -767,6 +770,58 @@ export class AlertService {
   }
 
   /**
+   * Reads the generation times of the alerts as the caller, keyed by the alert id.
+   * Remote index names are left out. A refused read gives `readable: false`, not an error.
+   */
+  public async getAlertGeneratedTimes({
+    ids,
+    indices,
+  }: {
+    ids: string[];
+    indices: string[];
+  }): Promise<AlertGeneratedTimesResult> {
+    const localIndices = Array.from(new Set(indices)).filter(
+      (index) => !isEmpty(index) && !isNonLocalIndexName(index)
+    );
+    const alerts = new Map<string, AlertGeneratedTimes>();
+
+    if (ids.length === 0 || localIndices.length === 0) {
+      return { readable: true, alerts };
+    }
+
+    try {
+      const { hits } = await this.scopedClusterClient.search<AlertGeneratedTimesSource>({
+        index: localIndices,
+        size: ids.length,
+        query: { bool: { filter: [{ ids: { values: ids } }, { exists: { field: ALERT_UUID } }] } },
+        _source: [TIMESTAMP, ALERT_START],
+        track_total_hits: false,
+        ignore_unavailable: true,
+        allow_no_indices: true,
+      });
+
+      for (const { _id: id, _source: source } of hits.hits) {
+        if (id != null) {
+          alerts.set(id, { timestamp: source?.[TIMESTAMP], start: source?.[ALERT_START] });
+        }
+      }
+
+      return { readable: true, alerts };
+    } catch (error) {
+      if (AlertService.isUnauthorizedRead(error)) {
+        this.logger.debug(`Caller cannot read the alerts in ${localIndices.join(', ')}`);
+        return { readable: false };
+      }
+
+      throw createCaseError({
+        message: `Failed to read the alert generated times: ${error}`,
+        error,
+        logger: this.logger,
+      });
+    }
+  }
+
+  /**
    * Runs alerting RBAC over the scheduled attacks of an already space-checked batch.
    *
    * Ad-hoc attacks are skipped because their rule type is never registered, so RBAC would reject
@@ -948,6 +1003,20 @@ export interface Alert {
   _index: string;
   _source: Record<string, unknown>;
 }
+
+interface AlertGeneratedTimesSource {
+  [TIMESTAMP]?: string;
+  [ALERT_START]?: string;
+}
+
+export interface AlertGeneratedTimes {
+  timestamp?: string;
+  start?: string;
+}
+
+export type AlertGeneratedTimesResult =
+  | { readable: true; alerts: Map<string, AlertGeneratedTimes> }
+  | { readable: false };
 
 /** The only `_source` fields `ensureAttacksAuthorized` reads back from the referenced document. */
 interface AttackAuthorizationFields {

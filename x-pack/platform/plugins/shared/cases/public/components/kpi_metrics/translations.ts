@@ -291,4 +291,16 @@ export const PREDEFINED_LABELS: Record<string, string> = {
   average_time_to_close: i18n.translate('xpack.cases.kpiMetrics.predefinedAverageTimeToClose', {
     defaultMessage: 'Average time to close',
   }),
+  alert_time_to_acknowledge_avg: i18n.translate(
+    'xpack.cases.kpiMetrics.predefinedAlertTimeToAcknowledgeAvg',
+    {
+      defaultMessage: 'Average time to acknowledge an alert',
+    }
+  ),
+  alert_time_to_acknowledge_median: i18n.translate(
+    'xpack.cases.kpiMetrics.predefinedAlertTimeToAcknowledgeMedian',
+    {
+      defaultMessage: 'Median time to acknowledge an alert',
+    }
+  ),
 };

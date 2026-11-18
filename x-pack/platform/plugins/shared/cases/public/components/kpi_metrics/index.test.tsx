@@ -38,6 +38,7 @@ describe('KpiMetricsSettings', () => {
     expect(screen.getByText('Open cases')).toBeInTheDocument();
     expect(screen.getByText('Average time to close')).toBeInTheDocument();
     expect(screen.getAllByTestId(/^kpi-metric-row-/)).toHaveLength(4);
+    expect(screen.queryByText('Average time to acknowledge an alert')).not.toBeInTheDocument();
   });
 
   it('saves the list without the deleted metric', async () => {

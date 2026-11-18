@@ -23,7 +23,9 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import { KpiMetricFlyout } from './kpi_metric_flyout';
 import * as i18n from './translations';
 
-const DEFAULT_KPI_METRICS: KpiMetricRequest[] = PREDEFINED_KPI_METRICS.map(({ id }) => ({
+const DEFAULT_KPI_METRICS: KpiMetricRequest[] = PREDEFINED_KPI_METRICS.filter(
+  ({ source }) => source === 'caseSearch'
+).map(({ id }) => ({
   kind: 'predefined',
   predefinedId: id,
   display: 'value',

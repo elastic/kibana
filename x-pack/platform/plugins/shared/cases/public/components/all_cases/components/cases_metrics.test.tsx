@@ -130,6 +130,53 @@ describe('Cases metrics', () => {
       ).toBeInTheDocument();
     });
 
+    it('reads the predefined alert tiles from the metric results', async () => {
+      renderWithTestingProviders(
+        <CasesMetrics
+          {...props}
+          kpiMetrics={[
+            {
+              id: 'tta',
+              kind: 'predefined',
+              predefinedId: 'alert_time_to_acknowledge_median',
+              display: 'value',
+            },
+          ]}
+          kpiResults={[
+            { id: 'tta', type: 'value', format: 'duration', value: 101, previousValue: 101 },
+          ]}
+          isAnalyticsEnabled={true}
+        />
+      );
+
+      const tile = await screen.findByTestId('cases-kpi-tile-tta');
+
+      expect(within(tile).getByText('Median time to acknowledge an alert')).toBeInTheDocument();
+      expect(within(tile).getByText('2ms')).toBeInTheDocument();
+      expect(screen.getByTestId('cases-kpi-tile-tta-change')).toBeInTheDocument();
+    });
+
+    it('shows an empty predefined alert tile when analytics is disabled', async () => {
+      renderWithTestingProviders(
+        <CasesMetrics
+          {...props}
+          kpiMetrics={[
+            {
+              id: 'tta',
+              kind: 'predefined',
+              predefinedId: 'alert_time_to_acknowledge_avg',
+              display: 'value',
+            },
+          ]}
+          isAnalyticsEnabled={false}
+        />
+      );
+
+      expect(
+        within(await screen.findByTestId('cases-kpi-tile-tta')).getByText('-')
+      ).toBeInTheDocument();
+    });
+
     it('shows the danger color for a breached threshold and the success color otherwise', async () => {
       renderWithTestingProviders(
         <CasesMetrics

@@ -36,6 +36,13 @@ const predefinedMetric: KpiMetricConfiguration = {
   display: 'value',
 };
 
+const alertMetric: KpiMetricConfiguration = {
+  id: 'tta-1',
+  kind: 'predefined',
+  predefinedId: 'alert_time_to_acknowledge_avg',
+  display: 'value',
+};
+
 const createClientArgs = ({
   enabled = true,
   casesList,
@@ -140,6 +147,38 @@ describe('getKpiMetrics', () => {
 
     expect(res).toEqual({ enabled: true, metrics: [] });
     expect(clientArgs.analyticsV2Reader.msearch).not.toHaveBeenCalled();
+  });
+
+  describe('alert time to acknowledge', () => {
+    it('calculates the predefined alert metric and keeps the custom metric', async () => {
+      const clientArgs = createClientArgs({ casesList: [alertMetric, customMetric] });
+      clientArgs.services.alertsService.getAlertGeneratedTimes.mockResolvedValue({
+        readable: true,
+        alerts: new Map(),
+      });
+
+      const res = await getKpiMetrics({ owner: 'cases' }, clientArgs, casesClient);
+
+      expect(res.metrics).toEqual([
+        { id: 'custom-1', type: 'value', format: 'number', value: 9 },
+        { id: 'tta-1', type: 'value', format: 'duration', value: null },
+      ]);
+      expect(clientArgs.analyticsV2Reader.msearch).toHaveBeenCalledTimes(2);
+      expect(clientArgs.services.alertsService.getAlertGeneratedTimes).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns an error for an unknown predefined metric', async () => {
+      const clientArgs = createClientArgs({
+        casesList: [{ ...alertMetric, predefinedId: 'not_a_metric' }],
+      });
+
+      const res = await getKpiMetrics({ owner: 'cases' }, clientArgs, casesClient);
+
+      expect(res.metrics).toEqual([
+        { id: 'tta-1', type: 'error', message: 'The predefined metric is not known.' },
+      ]);
+      expect(clientArgs.analyticsV2Reader.msearch).not.toHaveBeenCalled();
+    });
   });
 
   it('rejects an unknown request field', async () => {
@@ -301,6 +340,44 @@ describe('getKpiMetrics', () => {
         getKpiMetrics({ owner: 'securitySolution', filters: { tags } }, clientArgs, casesClient)
       ).rejects.toThrow();
       expect(clientArgs.services.caseService.searchCaseIds).not.toHaveBeenCalled();
+    });
+
+    it('searches the case ids when only an alert metric is saved', async () => {
+      const clientArgs = createClientArgs({ casesList: [alertMetric] });
+      clientArgs.services.caseService.searchCaseIds.mockResolvedValue({ ids: ['c1'], total: 1 });
+      clientArgs.services.alertsService.getAlertGeneratedTimes.mockResolvedValue({
+        readable: true,
+        alerts: new Map(),
+      });
+
+      await getKpiMetrics(
+        { owner: 'securitySolution', filters: { tags: ['phishing'] } },
+        clientArgs,
+        casesClient
+      );
+
+      const [[request]] = clientArgs.analyticsV2Reader.msearch.mock.calls[0];
+      expect(request.index).toBe('attachments');
+      expect(request.body.query?.bool?.filter).toEqual(
+        expect.arrayContaining([{ terms: { 'case.id': ['c1'] } }])
+      );
+    });
+
+    it('returns an error for the alert metric when too many cases match', async () => {
+      const clientArgs = createClientArgs({ casesList: [alertMetric] });
+      clientArgs.services.caseService.searchCaseIds.mockResolvedValue({
+        ids: [],
+        total: MAX_KPI_FILTER_CASE_IDS + 1,
+      });
+
+      const res = await getKpiMetrics(
+        { owner: 'securitySolution', filters: { tags: ['phishing'] } },
+        clientArgs,
+        casesClient
+      );
+
+      expect(res.metrics).toEqual([expect.objectContaining({ id: 'tta-1', type: 'error' })]);
+      expect(clientArgs.analyticsV2Reader.msearch).not.toHaveBeenCalled();
     });
 
     it('does not search the case ids when the list has no custom metric', async () => {

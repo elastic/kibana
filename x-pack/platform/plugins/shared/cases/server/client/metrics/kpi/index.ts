@@ -8,5 +8,9 @@
 export type { KpiQueryContext, KpiSearchRequest } from './query_builder';
 export { buildKpiMetricSearch } from './query_builder';
 export { runKpiMetrics } from './run';
+export {
+  isAlertTimeToAcknowledgeMetric,
+  runAlertTimeToAcknowledgeMetrics,
+} from './alert_time_to_acknowledge';
 export { toKpiMetricError } from './result';
 export { getKpiMetricFieldError, getKpiMetricQueryError } from './validation';

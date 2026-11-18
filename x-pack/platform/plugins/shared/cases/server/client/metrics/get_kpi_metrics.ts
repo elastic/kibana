@@ -10,6 +10,7 @@ import {
   CASE_CONFIGURE_SAVED_OBJECT,
   MAX_KPI_FILTER_CASE_IDS,
   getPredefinedKpiMetric,
+  isAnalyticsPredefinedKpiMetric,
 } from '../../../common/constants';
 import type {
   KpiMetricResult,
@@ -21,6 +22,7 @@ import { KpiMetricsRequestSchema } from '../../../common/types/api';
 import type {
   CustomKpiMetricConfiguration,
   KpiMetricConfiguration,
+  PredefinedKpiMetricConfiguration,
 } from '../../../common/types/domain';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
@@ -29,10 +31,25 @@ import { prepareCasesSearch } from '../cases/search';
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
-import { runKpiMetrics, toKpiMetricError } from './kpi';
+import {
+  isAlertTimeToAcknowledgeMetric,
+  runAlertTimeToAcknowledgeMetrics,
+  runKpiMetrics,
+  toKpiMetricError,
+} from './kpi';
 
 const isCustomMetric = (metric: KpiMetricConfiguration): metric is CustomKpiMetricConfiguration =>
   metric.kind === 'custom';
+
+/**
+ * The predefined metrics that the server calculates from the analytics indices.
+ */
+const isServerPredefinedMetric = (
+  metric: KpiMetricConfiguration
+): metric is PredefinedKpiMetricConfiguration =>
+  metric.kind === 'predefined' &&
+  isAnalyticsPredefinedKpiMetric(metric.predefinedId) &&
+  isAlertTimeToAcknowledgeMetric(metric.predefinedId);
 
 /**
  * The search fields only change how the search text works, so they alone do not filter the cases.
@@ -76,7 +93,7 @@ export const getKpiMetrics = async (
 ): Promise<KpiMetricsResponse> => {
   const {
     unsecuredSavedObjectsClient,
-    services: { caseConfigureService },
+    services: { caseConfigureService, alertsService },
     authorization,
     logger,
     spaceId,
@@ -106,17 +123,20 @@ export const getKpiMetrics = async (
 
     const savedMetrics = configurations.saved_objects[0]?.attributes.metrics?.casesList ?? [];
     const customMetrics = savedMetrics.filter(isCustomMetric);
+    const serverPredefinedMetrics = savedMetrics.filter(isServerPredefinedMetric);
 
     const unknownPredefinedResults: KpiMetricResult[] = savedMetrics
       .filter(
         (metric) =>
           metric.kind === 'predefined' &&
-          getPredefinedKpiMetric(metric.predefinedId)?.source !== 'caseSearch'
+          getPredefinedKpiMetric(metric.predefinedId)?.source !== 'caseSearch' &&
+          !isServerPredefinedMetric(metric)
       )
       .map(({ id }) => ({ id, type: 'error', message: 'The predefined metric is not known.' }));
 
+    const hasAnalyticsMetrics = customMetrics.length > 0 || serverPredefinedMetrics.length > 0;
     const filteredCases =
-      customMetrics.length > 0 && hasActiveCaseFilters(filters)
+      hasAnalyticsMetrics && hasActiveCaseFilters(filters)
         ? await searchFilteredCaseIds({ owner, filters, clientArgs, casesClient })
         : undefined;
 
@@ -126,19 +146,29 @@ export const getKpiMetrics = async (
       return {
         enabled: true,
         metrics: [
-          ...customMetrics.map(({ id }) => toKpiMetricError(id, message)),
+          ...[...customMetrics, ...serverPredefinedMetrics].map(({ id }) =>
+            toKpiMetricError(id, message)
+          ),
           ...unknownPredefinedResults,
         ],
       };
     }
 
-    const customResults = await runKpiMetrics({
-      metrics: customMetrics,
-      context: { spaceId, owner, from, to, caseIds: filteredCases?.ids },
-      reader: analyticsV2Reader,
-    });
+    const context = { spaceId, owner, from, to, caseIds: filteredCases?.ids };
+    const [customResults, serverPredefinedResults] = await Promise.all([
+      runKpiMetrics({ metrics: customMetrics, context, reader: analyticsV2Reader }),
+      runAlertTimeToAcknowledgeMetrics({
+        metrics: serverPredefinedMetrics,
+        context,
+        reader: analyticsV2Reader,
+        alertsService,
+      }),
+    ]);
 
-    return { enabled: true, metrics: [...customResults, ...unknownPredefinedResults] };
+    return {
+      enabled: true,
+      metrics: [...customResults, ...serverPredefinedResults, ...unknownPredefinedResults],
+    };
   } catch (error) {
     throw createCaseError({
       message: `Failed to get KPI metrics: ${error}`,

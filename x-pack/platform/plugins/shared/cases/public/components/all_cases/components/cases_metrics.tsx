@@ -18,6 +18,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import prettyMilliseconds from 'pretty-ms';
+import { isAnalyticsPredefinedKpiMetric } from '../../../../common/constants';
 import type { KpiMetricResult } from '../../../../common/types/api';
 import type { KpiMetricConfiguration } from '../../../../common/types/domain';
 import { CaseStatuses } from '../../../../common/types/domain';
@@ -31,6 +32,7 @@ import {
   KPI_METRIC_CLOSED_DATE_HINT,
   KPI_METRIC_UNKNOWN,
 } from '../translations';
+import { PREDEFINED_LABELS } from '../../kpi_metrics/translations';
 import type { KpiMetricTileProps } from './kpi_metric_tile';
 import { KpiMetricTile } from './kpi_metric_tile';
 
@@ -98,22 +100,18 @@ const getPredefinedTileValues = (
   }
 };
 
-const getKpiTileValues = (
-  metric: KpiMetricConfiguration,
-  props: CasesMetricsProps
+const getResultTileValues = (
+  metricId: string,
+  label: string,
+  { kpiResults, isLoadingKpiResults = false, isAnalyticsEnabled = false }: CasesMetricsProps
 ): KpiTileValues => {
-  if (metric.kind === 'predefined') {
-    return getPredefinedTileValues(metric.predefinedId, props);
-  }
-
-  const { kpiResults, isLoadingKpiResults = false, isAnalyticsEnabled = false } = props;
-  const base = { label: metric.label, value: null, format: 'number' as const };
+  const base = { label, value: null, format: 'number' as const };
 
   if (!isAnalyticsEnabled) {
     return { ...base, isLoading: false, errorMessage: KPI_METRIC_ANALYTICS_DISABLED };
   }
 
-  const result = kpiResults?.find(({ id }) => id === metric.id);
+  const result = kpiResults?.find(({ id }) => id === metricId);
 
   if (result == null) {
     return { ...base, isLoading: isLoadingKpiResults };
@@ -130,6 +128,25 @@ const getKpiTileValues = (
     format: result.format,
     isLoading: isLoadingKpiResults,
   };
+};
+
+const getKpiTileValues = (
+  metric: KpiMetricConfiguration,
+  props: CasesMetricsProps
+): KpiTileValues => {
+  if (metric.kind === 'custom') {
+    return getResultTileValues(metric.id, metric.label, props);
+  }
+
+  if (isAnalyticsPredefinedKpiMetric(metric.predefinedId)) {
+    return getResultTileValues(
+      metric.id,
+      PREDEFINED_LABELS[metric.predefinedId] ?? metric.predefinedId,
+      props
+    );
+  }
+
+  return getPredefinedTileValues(metric.predefinedId, props);
 };
 
 const CasesMetricsComponent: React.FC<CasesMetricsProps> = (props) => {

@@ -163,6 +163,7 @@ export const createAlertServiceMock = (): AlertServiceMock => {
     ensureAttacksAuthorized: jest.fn(),
     ensureDocumentsExist: jest.fn(),
     confirmAlertIndices: jest.fn(),
+    getAlertGeneratedTimes: jest.fn(),
     removeCaseIdFromAlerts: jest.fn(),
     removeCaseIdsFromAllAlerts: jest.fn(),
   });

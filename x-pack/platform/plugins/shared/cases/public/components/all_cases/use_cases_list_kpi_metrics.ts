@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react';
 import { omit } from 'lodash';
+import { isAnalyticsPredefinedKpiMetric } from '../../../common/constants';
 import type { KpiMetricConfiguration } from '../../../common/types/domain';
 import type { KpiMetricResult } from '../../../common/types/api';
 import type { FilterOptions } from '../../../common/ui/types';
@@ -36,7 +37,10 @@ export const useCasesListKpiMetrics = ({
   const { analyticsV2Enabled } = useCasesConfig();
   const { data: configuration } = useGetCaseConfiguration();
   const kpiMetrics = configuration?.metrics?.casesList;
-  const hasAnalyticsMetrics = kpiMetrics?.some(({ kind }) => kind === 'custom') ?? false;
+  const hasAnalyticsMetrics =
+    kpiMetrics?.some(
+      (metric) => metric.kind === 'custom' || isAnalyticsPredefinedKpiMetric(metric.predefinedId)
+    ) ?? false;
   const filters = useMemo(
     () =>
       omit(
