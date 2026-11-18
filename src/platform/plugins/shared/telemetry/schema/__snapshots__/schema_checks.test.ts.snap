@@ -57,10 +57,6 @@ Array [
   "properties.slo.properties.slo.properties.by_rolling_duration.properties.DYNAMIC_KEY._meta.description",
   "properties.slo.properties.slo.properties.by_calendar_aligned_duration.properties.DYNAMIC_KEY.type",
   "properties.slo.properties.slo.properties.by_calendar_aligned_duration.properties.DYNAMIC_KEY._meta.description",
-  "properties.slo.properties.composite.properties.by_budgeting_method.properties.DYNAMIC_KEY.type",
-  "properties.slo.properties.composite.properties.by_budgeting_method.properties.DYNAMIC_KEY._meta.description",
-  "properties.slo.properties.composite.properties.by_composite_method.properties.DYNAMIC_KEY.type",
-  "properties.slo.properties.composite.properties.by_composite_method.properties.DYNAMIC_KEY._meta.description",
 ]
 `;
 
