@@ -53,7 +53,7 @@ const stateSchema = lazySchema(() =>
       .string()
       .optional()
       .describe(
-        'progress_key from the previous result; the tool returns when it changes, when the run pauses or ends, or after 15 seconds'
+        'Pass "" once, right after the plan approval, to wait until the stack has started. The tool waits while stack.progress_key ("" before there is a stack) equals this value, and returns when it changes, when the run pauses or ends, or after 15 seconds.'
       ),
   })
 );
@@ -368,7 +368,7 @@ export const createGetAwsOnboardingStateTool = ({
   id: 'get_aws_onboarding_state',
   type: ToolType.builtin,
   description:
-    'Get the progress of an AWS onboarding run: its status, the step it is waiting on (with the message to relay and the answer schema), and the outputs of the steps completed so far. While the stack is being created, pass the previous stack.progress_key (or "" before there is a stack) as wait_for_change_since to wait for the next change.',
+    'Get the progress of an AWS onboarding run: its status, the step it is waiting on (with the message to relay and the answer schema), and the outputs of the steps completed so far. Right after the plan approval, call it once with wait_for_change_since "" so the result shows the started stack; never call it in a loop to follow the stack.',
   schema: stateSchema,
   confirmation: { askUser: 'never' },
   handler: async (
