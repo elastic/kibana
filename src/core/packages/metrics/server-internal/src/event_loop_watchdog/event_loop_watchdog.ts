@@ -20,8 +20,10 @@ import {
   monotonicUs,
 } from './constants';
 
-// The worker used 20-24 MB of heap over 10 minutes in dev, with the require hook loaded.
-const WORKER_MAX_OLD_GENERATION_SIZE_MB = 32;
+// A 10-minute dev run used 20-24 MB of worker heap with the require hook loaded. A large profile
+// and its JSON serialization coexist during a write, so the former 32 MB limit left too little
+// headroom.
+const WORKER_MAX_OLD_GENERATION_SIZE_MB = 64;
 const WORKER_MAX_YOUNG_GENERATION_SIZE_MB = 16;
 
 export interface EventLoopWatchdogParams {

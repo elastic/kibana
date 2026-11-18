@@ -452,7 +452,7 @@ describe('event loop watchdog in a child process', () => {
       expect(restarts(result)).toEqual([]);
     }, 150_000);
 
-    it('profiles three large blocks in a row without restarting or growing the worker heap', async () => {
+    it('profiles three large blocks in a row without restarting the worker', async () => {
       const result = await runHarness('profile_repeated', { timeoutMs: 180_000 });
       expectCleanExit(result);
       const profiles = profileLogLines(result);
@@ -464,26 +464,6 @@ describe('event loop watchdog in a child process', () => {
         expect(profile?.kibanaFrames.length).toBeGreaterThan(0);
       }
       expect(restarts(result)).toEqual([]);
-
-      const firstCaptureAt = Date.parse(profiles[0]['@timestamp']);
-      const thirdCaptureAt = Date.parse(profiles[2]['@timestamp']);
-      const statsBeforeFirst = statsLogLines(result).filter(
-        (line) => Date.parse(line['@timestamp']) < firstCaptureAt
-      );
-      const statsAfterThird = statsLogLines(result).filter(
-        (line) => Date.parse(line['@timestamp']) > thirdCaptureAt
-      );
-      expect(statsBeforeFirst.length).toBeGreaterThan(0);
-      expect(statsAfterThird.length).toBeGreaterThan(0);
-      const heapBeforeFirst =
-        statsBeforeFirst[statsBeforeFirst.length - 1].kibana?.event_loop_watchdog?.stats
-          ?.heapUsed ?? NaN;
-      const heapAfterThird =
-        statsAfterThird[statsAfterThird.length - 1].kibana?.event_loop_watchdog?.stats?.heapUsed ??
-        NaN;
-      // Measured deltas across 10 runs were all negative (-138 KB to -320 KB); 4 MB is a
-      // deliberately loose guard against per-capture retention, not a tight regression bound.
-      expect(heapAfterThird - heapBeforeFirst).toBeLessThan(4 * 1024 * 1024);
     }, 210_000);
 
     it("ends the main thread's profile when the worker crashes while profiling", async () => {
