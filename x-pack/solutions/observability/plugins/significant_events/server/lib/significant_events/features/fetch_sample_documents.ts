@@ -245,7 +245,12 @@ export async function fetchSampleDocuments({
 
     const { documents, bucketCounts } = mergeDocuments(
       [
-        { hits: entityFilteredHits, cap: entityFilteredSize, label: 'entity-filtered' },
+        {
+          hits: entityFilteredHits,
+          cap: entityFilteredSize,
+          label: 'entity-filtered',
+          passUnusedCapToNext: true,
+        },
         { hits: diverseHits, cap: diverseSize, label: 'diverse' },
         { hits: randomHits, cap: size, label: 'random' },
       ],
@@ -256,7 +261,10 @@ export async function fetchSampleDocuments({
       () =>
         `Sampled ${documents.length} documents (${
           bucketCounts['entity-filtered']
-        } entity-filtered, ${bucketCounts.diverse} diverse, ${bucketCounts.random} random). ${
+        } entity-filtered, ${bucketCounts.diverse} diverse of which ${Math.max(
+          0,
+          bucketCounts.diverse - diverseSize
+        )} backfilled unused entity-filtered slots, ${bucketCounts.random} random). ${
           entityFilters.length
         } entity filters applied (${
           features.length - entityFilters.length
@@ -345,6 +353,7 @@ function mergeDocuments(
     hits: Array<SearchHit<Record<string, unknown>>>;
     cap: number;
     label: SamplingStrategy;
+    passUnusedCapToNext?: boolean;
   }>,
   totalSize: number
 ): {
@@ -355,8 +364,9 @@ function mergeDocuments(
   const result: Array<SearchHit<Record<string, unknown>>> = [];
   const bucketCounts = { 'entity-filtered': 0, diverse: 0, random: 0 };
 
-  for (let i = 0; i < prioritizedHits.length; i++) {
-    const { hits, cap, label } = prioritizedHits[i];
+  let inheritedCap = 0;
+  for (const { hits, cap: ownCap, label, passUnusedCapToNext } of prioritizedHits) {
+    const cap = ownCap + inheritedCap;
     let added = 0;
     for (const hit of hits) {
       if (added >= cap || result.length >= totalSize) break;
@@ -366,6 +376,7 @@ function mergeDocuments(
       added++;
     }
     bucketCounts[label] = added;
+    inheritedCap = passUnusedCapToNext ? cap - added : 0;
   }
 
   return { documents: result, bucketCounts };
