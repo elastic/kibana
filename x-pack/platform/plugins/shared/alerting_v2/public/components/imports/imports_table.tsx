@@ -5,10 +5,18 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
-import { EuiFieldSearch, EuiInMemoryTable, EuiSpacer } from '@elastic/eui';
+import React, { Suspense, useMemo, useState } from 'react';
+import {
+  EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiInMemoryTable,
+  EuiSpacer,
+} from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { ImportListItem } from '../../hooks/use_fetch_imports';
 import { ImportActionsMenu } from './import_actions_menu';
@@ -21,6 +29,19 @@ const CONNECTOR_TYPE_LABELS: Readonly<Record<string, string>> = {
 
 const getConnectorTypeLabel = (connectorTypeId: string): string =>
   CONNECTOR_TYPE_LABELS[connectorTypeId] ?? connectorTypeId;
+
+/** The connector type's icon, looked up by type id; a generic plug when the type has none. */
+const ConnectorTypeIcon = ({ connectorTypeId }: { connectorTypeId: string }) => {
+  const icon = ConnectorIconsMap.get(connectorTypeId);
+  if (!icon) {
+    return <EuiIcon type="plugs" size="m" aria-hidden="true" />;
+  }
+  return (
+    <Suspense fallback={<EuiIcon type="empty" size="m" aria-hidden="true" />}>
+      <EuiIcon type={icon} size="m" aria-hidden="true" />
+    </Suspense>
+  );
+};
 
 const getColumns = (
   getConnectorUrl: (connectorId: string) => string
@@ -39,8 +60,14 @@ const getColumns = (
       defaultMessage: 'Type',
     }),
     sortable: ({ connectorTypeId }: ImportListItem) => getConnectorTypeLabel(connectorTypeId),
-    render: (connectorTypeId: ImportListItem['connectorTypeId']) =>
-      getConnectorTypeLabel(connectorTypeId),
+    render: (connectorTypeId: ImportListItem['connectorTypeId']) => (
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <ConnectorTypeIcon connectorTypeId={connectorTypeId} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{getConnectorTypeLabel(connectorTypeId)}</EuiFlexItem>
+      </EuiFlexGroup>
+    ),
   },
   {
     name: i18n.translate('xpack.alertingV2.imports.list.column.actions', {
