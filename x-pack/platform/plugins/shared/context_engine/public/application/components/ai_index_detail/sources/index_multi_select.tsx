@@ -10,21 +10,24 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDebouncedValue } from '@kbn/react-hooks';
-import React, { useState } from 'react';
-import { useIndices } from '../../hooks/use_indices';
+import React, { useMemo, useState } from 'react';
+import { useIndices } from '../../../hooks/use_indices';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
 interface IndexMultiSelectProps {
-  /** Selected indices are hidden from the list. */
-  isIndexSelected: (indexName: string) => boolean;
-  onSelect: (indexName: string) => void;
+  /** Indices already persisted. Hidden from the list. */
+  isIndexSaved: (indexName: string) => boolean;
+  /** Indices picked in this session, not persisted yet. Shown checked. */
+  pendingIndexNames: string[];
+  onToggle: (indexName: string, checked: boolean) => void;
   disabled?: boolean;
 }
 
 export const IndexMultiSelect = ({
-  isIndexSelected,
-  onSelect,
+  isIndexSaved,
+  pendingIndexNames,
+  onToggle,
   disabled = false,
 }: IndexMultiSelectProps) => {
   const [searchValue, setSearchValue] = useState('');
@@ -32,14 +35,21 @@ export const IndexMultiSelect = ({
 
   const { indexNames, isFetching, isInitialLoading } = useIndices({
     search: debouncedSearch.trim(),
-    exclude: isIndexSelected,
+    exclude: isIndexSaved,
   });
 
-  const options: EuiSelectableOption[] = indexNames.map((name) => ({
-    label: name,
-    disabled,
-    'data-test-subj': `contextIndexOption-${name}`,
-  }));
+  const pending = useMemo(() => new Set(pendingIndexNames), [pendingIndexNames]);
+
+  const options: EuiSelectableOption[] = useMemo(
+    () =>
+      indexNames.map((name) => ({
+        label: name,
+        checked: pending.has(name) ? 'on' : undefined,
+        disabled,
+        'data-test-subj': `contextIndexOption-${name}`,
+      })),
+    [disabled, indexNames, pending]
+  );
   const isDebouncing = searchValue.trim() !== debouncedSearch.trim();
   // Stale options stay visible under a thin bar; the full spinner is only for the first load.
   const isRefreshing = !isInitialLoading && (isFetching || isDebouncing);
@@ -75,7 +85,9 @@ export const IndexMultiSelect = ({
         isPreFiltered
         isLoading={isInitialLoading}
         options={options}
-        onChange={(_options, _event, changedOption) => onSelect(changedOption.label)}
+        onChange={(_options, _event, changedOption) =>
+          onToggle(changedOption.label, changedOption.checked === 'on')
+        }
         listProps={{ bordered: true, paddingSize: 's', rowHeight: 36, onFocusBadge: false }}
         searchProps={{
           onChange: setSearchValue,

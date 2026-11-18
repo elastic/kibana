@@ -9,9 +9,9 @@ import { EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
 import React from 'react';
-import { ConnectorTypeIcon } from './connector_type_icon';
-import { ITEM_ROW_ICON_SIZE, ItemRowIcon } from './item_row_icon';
-import type { SourceType } from './source_picker';
+import { ConnectorTypeIcon } from '../../connector_type_icon';
+import { ITEM_ROW_ICON_SIZE, ItemRowIcon } from '../../item_row_icon';
+import type { SourceType } from './types';
 
 export interface SourceDisplay {
   /** Pre-rendered icon for the source. */
@@ -25,6 +25,7 @@ export interface SourceDisplay {
 export interface SourceDisplayDeps {
   connectorNameById: Map<string, string>;
   connectorActionTypeById: Map<string, string>;
+  connectorTypeNameById: Map<string, string>;
 }
 
 type SourceDisplayFactory = (value: string, deps: SourceDisplayDeps) => SourceDisplay;
@@ -45,16 +46,18 @@ const SOURCE_DISPLAY: Record<SourceType, SourceDisplayFactory> = {
       ),
     };
   },
-  connector: (value, { connectorNameById, connectorActionTypeById }) => ({
+  connector: (value, { connectorNameById, connectorActionTypeById, connectorTypeNameById }) => ({
     icon: (
       <ConnectorTypeIcon
         actionTypeId={connectorActionTypeById.get(value)}
         size={ITEM_ROW_ICON_SIZE}
       />
     ),
-    typeLabel: i18n.translate('xpack.contextEngine.sourceType.connector', {
-      defaultMessage: 'Connector',
-    }),
+    typeLabel:
+      connectorTypeNameById.get(value) ??
+      i18n.translate('xpack.contextEngine.sourceType.connector', {
+        defaultMessage: 'Connector',
+      }),
     label: connectorNameById.get(value) ?? value,
   }),
 };

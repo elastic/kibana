@@ -23,9 +23,7 @@ interface SourceTypePanelProps {
   'data-test-subj'?: string;
 }
 
-/**
- * A bordered panel grouping sources of a single type (e.g. Elasticsearch data, Connectors).
- */
+/** Bordered panel grouping sources of a single type. */
 export const SourceTypePanel = ({
   title,
   badgeCount,
@@ -40,7 +38,7 @@ export const SourceTypePanel = ({
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiNotificationBadge data-test-subj="contextSourceTypePanelBadge">
+        <EuiNotificationBadge data-test-subj="contextSourceTypePanelBadge" color="subdued">
           {badgeCount}
         </EuiNotificationBadge>
       </EuiFlexItem>

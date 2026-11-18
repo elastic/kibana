@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-export type SourceType = 'esql' | 'connector';
+import type { AiIndexSourceType } from '../../../../../common/http_api/ai_indices';
+
+export type SourceType = AiIndexSourceType;
 
 export interface SelectedSource {
   type: SourceType;
-  /** Stable identifier, unique within a source type (e.g. the ES|QL query). */
-  id: string;
-  /** Human-readable label rendered in the selected-source chips. */
-  label: string;
-  /** Underlying source value sent to the AI index API (e.g. the ES|QL query). */
+  /** Underlying source value sent to the AI index API (e.g. the ES|QL query or connector id). */
   value: string;
 }
