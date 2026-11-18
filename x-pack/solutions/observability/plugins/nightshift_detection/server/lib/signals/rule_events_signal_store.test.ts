@@ -184,8 +184,7 @@ describe('RuleEventsSignalStore', () => {
       const { store, esClient } = createStore();
       const fromA = createSignal({ ...READING, source_id: 'source-a', value: 1 });
       const fromB = createSignal({ ...READING, source_id: 'source-b', value: 2 });
-      const fromC = createSignal({ ...READING, source_id: 'source-c', value: 3 });
-      esClient.search.mockResolvedValue(searchResponse([fromC, fromB, fromA]));
+      esClient.search.mockResolvedValue(searchResponse([fromB, fromA]));
 
       const history = await store.readHistory({
         spaceId: 'default',

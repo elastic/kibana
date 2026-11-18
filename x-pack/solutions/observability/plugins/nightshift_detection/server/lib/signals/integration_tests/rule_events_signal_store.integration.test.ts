@@ -29,6 +29,7 @@ function createSignal({
   spaceId = 'default',
   strategyId = 'error_rate',
   strategyVersion = 1,
+  sourceId,
 }: {
   fingerprint: string;
   minute: number;
@@ -36,10 +37,12 @@ function createSignal({
   spaceId?: string;
   strategyId?: string;
   strategyVersion?: number;
+  sourceId?: string;
 }): DetectionSignal {
   const reading: DetectionSignalReading = {
     status: 'breached',
     fingerprint,
+    ...(sourceId !== undefined ? { source_id: sourceId } : {}),
     entity: { type: 'service', name: fingerprint },
     bucket_start: WINDOW_START + minute * MINUTE_MS,
     bucket_end: WINDOW_START + (minute + 1) * MINUTE_MS,
@@ -145,6 +148,33 @@ describe('RuleEventsSignalStore reading from .rule-events', () => {
     expect((await read({ strategyVersion: 2 })).get(seriesA)?.map(({ value }) => value)).toEqual([
       300,
     ]);
+  });
+
+  it('reads only the requested sources of a fingerprint, a series without a source included', async () => {
+    await seed([
+      createSignal({ fingerprint: 'shared', minute: 0, value: 1, sourceId: 'source-a' }),
+      createSignal({ fingerprint: 'shared', minute: 0, value: 2 }),
+      createSignal({ fingerprint: 'shared', minute: 0, value: 3, sourceId: 'source-b' }),
+    ]);
+
+    const history = await store.readHistory({
+      spaceId: 'default',
+      strategy: 'error_rate',
+      strategyVersion: 1,
+      series: [{ fingerprint: 'shared', source_id: 'source-a' }, { fingerprint: 'shared' }],
+      from: WINDOW_START,
+      to: WINDOW_START + MINUTE_MS,
+    });
+
+    expect(
+      [...history.entries()].map(([key, readings]) => [key, readings.map(({ value }) => value)])
+    ).toEqual(
+      expect.arrayContaining([
+        [getSeriesKey({ fingerprint: 'shared', source_id: 'source-a' }), [1]],
+        [getSeriesKey({ fingerprint: 'shared' }), [2]],
+      ])
+    );
+    expect(history.size).toBe(2);
   });
 
   it('returns a signal written twice once', async () => {

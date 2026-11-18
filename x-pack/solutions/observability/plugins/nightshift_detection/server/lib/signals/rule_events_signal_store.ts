@@ -7,6 +7,7 @@
 
 import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import type { AlertingServerStart } from '@kbn/alerting-v2-plugin/server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { Logger as CoreLogger, PluginStart } from '@kbn/core-di';
 import { Request } from '@kbn/core-di-server';
@@ -31,6 +32,26 @@ const WRITE_CONCURRENCY = 10;
 
 function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
+}
+
+/** Matches the signals of the given series: the fingerprint, and the source or no source at all. */
+function getSeriesFilter(series: SeriesId[]): QueryDslQueryContainer {
+  return {
+    bool: {
+      minimum_should_match: 1,
+      should: series.map(({ fingerprint, source_id: sourceId }) => ({
+        bool: {
+          filter: [
+            { term: { 'data.fingerprint': fingerprint } },
+            ...(sourceId !== undefined ? [{ term: { 'data.source_id': sourceId } }] : []),
+          ],
+          ...(sourceId === undefined
+            ? { must_not: [{ exists: { field: 'data.source_id' } }] }
+            : {}),
+        },
+      })),
+    },
+  };
 }
 
 /**
@@ -139,9 +160,6 @@ export class RuleEventsSignalStore implements DetectionSignalStore {
       return history;
     }
 
-    const requestedSeries = new Set(series.map(getSeriesKey));
-    const fingerprints = [...new Set(series.map(({ fingerprint }) => fingerprint))];
-
     // `data` is `flattened`, so the bucket start is read from `_source` by a runtime field, the
     // approach of the metric series reader in `significant_events`.
     const response = await this.esClient.search(
@@ -160,8 +178,9 @@ export class RuleEventsSignalStore implements DetectionSignalStore {
               { range: { scheduled_timestamp: { gte: from, format: 'epoch_millis' } } },
               { term: { 'data.strategy': strategy } },
               { term: { 'data.strategy_version': strategyVersion } },
-              // A fingerprint can match the series of another source; those are dropped below.
-              { terms: { 'data.fingerprint': fingerprints } },
+              // The whole series, not only the fingerprint: another source with the same fingerprint
+              // must not take the read's limit.
+              getSeriesFilter(series),
               { range: { [BUCKET_START_FIELD]: { gte: from, lt: to, format: 'epoch_millis' } } },
             ],
           },
@@ -213,10 +232,6 @@ export class RuleEventsSignalStore implements DetectionSignalStore {
       } = parsed.data.data;
 
       const seriesKey = getSeriesKey(reading);
-      if (!requestedSeries.has(seriesKey)) {
-        continue;
-      }
-
       const key = `${parsed.data.group_hash}:${reading.bucket_start}`;
       if (seen.has(key)) {
         continue;
