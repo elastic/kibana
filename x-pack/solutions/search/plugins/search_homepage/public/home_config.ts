@@ -14,6 +14,7 @@ export const TELEMETRY_PREFIX = 'searchHomepage';
 export const STORAGE_KEY_PREFIX = 'searchHomepage';
 const GETTING_STARTED_APP_ID = 'searchGettingStarted';
 export const WEB_CRAWLS_ROUTE = '/web_crawls';
+export const WEB_CRAWLS_DEEP_LINK_ID = 'webCrawls';
 const WEB_CRAWLER_URL = 'https://github.com/elastic/crawler';
 
 const AGENT_ONBOARDING_MESSAGE = '/elasticsearch-onboarding';

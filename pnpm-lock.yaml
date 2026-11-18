@@ -4171,6 +4171,9 @@ importers:
       '@kbn/watcher-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/watcher
+      '@kbn/web-crawler-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/shared/web_crawler
       '@kbn/workflows':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-workflows
@@ -9597,6 +9600,8 @@ importers:
   x-pack/platform/plugins/shared/triggers_actions_ui: {}
 
   x-pack/platform/plugins/shared/usage_api: {}
+
+  x-pack/platform/plugins/shared/web_crawler: {}
 
   x-pack/platform/test: {}
 

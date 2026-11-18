@@ -27,15 +27,3 @@ export const WORKFLOWS_STATS_PATH = '/api/workflows/stats';
  * `capabilities.elasticsearchHome.canMonitorAllIndices`.
  */
 export const CAN_MONITOR_ALL_INDICES_CAPABILITY = 'canMonitorAllIndices';
-
-export const WEB_CRAWLS_PATH = '/internal/elasticsearch_home/web_crawls';
-export const WEB_CRAWL_PATH = '/internal/elasticsearch_home/web_crawls/{id}';
-export const WEB_CRAWL_CANCEL_PATH = '/internal/elasticsearch_home/web_crawls/{id}/_cancel';
-/** The most recent crawls the management page lists. */
-export const WEB_CRAWLS_LIST_SIZE = 200;
-/** The seed page is depth 0, so by default pages up to two links away from it are crawled. */
-export const WEB_CRAWL_DEFAULT_MAX_DEPTH = 2;
-export const WEB_CRAWL_DEFAULT_MAX_DOCUMENTS = 500;
-/** Upper bounds on what a single crawl may ask for. */
-export const WEB_CRAWL_MAX_DEPTH_LIMIT = 5;
-export const WEB_CRAWL_MAX_DOCUMENTS_LIMIT = 1000;

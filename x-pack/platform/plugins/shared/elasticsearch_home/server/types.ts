@@ -7,19 +7,8 @@
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
-import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 
 export interface ElasticsearchHomeServerSetupDependencies {
   agentBuilder?: AgentBuilderPluginSetup;
   features: FeaturesPluginSetup;
-  taskManager: TaskManagerSetupContract;
-  workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
-}
-
-export interface ElasticsearchHomeServerStartDependencies {
-  taskManager: TaskManagerStartContract;
 }

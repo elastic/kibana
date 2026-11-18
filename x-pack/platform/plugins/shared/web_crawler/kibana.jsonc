@@ -1,0 +1,26 @@
+{
+  "type": "plugin",
+  "id": "@kbn/web-crawler-plugin",
+  "owner": [
+    "@elastic/search-ml-ux"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Crawls websites into Elasticsearch indices, with a page to manage and schedule crawls.",
+  "plugin": {
+    "id": "webCrawler",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "webCrawler"
+    ],
+    "requiredPlugins": [
+      "share",
+      "taskManager"
+    ],
+    "optionalPlugins": [
+      "workflowsExtensions"
+    ]
+  }
+}

@@ -12,7 +12,7 @@ import type { EuiSideNavItemType } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
-import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
+import { SEARCH_HOMEPAGE, SEARCH_HOMEPAGE_WEB_CRAWLS_ID } from '@kbn/deeplinks-search';
 import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 import { i18n } from '@kbn/i18n';
 
@@ -188,6 +188,7 @@ export const getNavigationTreeDefinition = ({
                   children: [
                     { link: 'management:ingest_pipelines' },
                     { link: 'management:pipelines' },
+                    { link: SEARCH_HOMEPAGE_WEB_CRAWLS_ID },
                   ],
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.ingest.pipelines.title', {
                     defaultMessage: 'Ingest',

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreStart, Plugin } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { dynamic } from '@kbn/shared-ux-utility';
@@ -14,33 +14,17 @@ import { ElasticsearchHomeProvider } from './context';
 import type {
   ElasticsearchHomePageProps,
   ElasticsearchHomePublicStart,
-  ElasticsearchHomeSetupDependencies,
   ElasticsearchHomeStartDependencies,
-  WebCrawlsPageProps,
 } from './types';
 
 const LazyHomePage = dynamic(async () => ({
   default: (await import('./home_page')).HomePage,
 }));
 
-const LazyWebCrawlsPage = dynamic(async () => ({
-  default: (await import('./web_crawls_page')).WebCrawlsPage,
-}));
-
 export class ElasticsearchHomePlugin
-  implements
-    Plugin<
-      void,
-      ElasticsearchHomePublicStart,
-      ElasticsearchHomeSetupDependencies,
-      ElasticsearchHomeStartDependencies
-    >
+  implements Plugin<void, ElasticsearchHomePublicStart, {}, ElasticsearchHomeStartDependencies>
 {
-  public setup(core: CoreSetup, { workflowsExtensions }: ElasticsearchHomeSetupDependencies) {
-    workflowsExtensions?.registerStepDefinition(() =>
-      import('./web_crawl_step').then(({ webCrawlStepDefinition }) => webCrawlStepDefinition)
-    );
-  }
+  public setup() {}
 
   public start(
     core: CoreStart,
@@ -59,17 +43,7 @@ export class ElasticsearchHomePlugin
       </QueryClientProvider>
     );
 
-    const WebCrawlsPage = ({ onNavigateHome, ...config }: WebCrawlsPageProps) => (
-      <QueryClientProvider client={queryClient}>
-        <I18nProvider>
-          <ElasticsearchHomeProvider services={services} config={{ ...config, addDataLinks: [] }}>
-            <LazyWebCrawlsPage onNavigateHome={onNavigateHome} />
-          </ElasticsearchHomeProvider>
-        </I18nProvider>
-      </QueryClientProvider>
-    );
-
-    return { HomePage, WebCrawlsPage };
+    return { HomePage };
   }
 
   public stop() {}

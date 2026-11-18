@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
+import { Redirect } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../../../common';
 import { STORAGE_KEY_PREFIX, TELEMETRY_PREFIX } from '../../home_config';
@@ -13,7 +14,7 @@ import { useKibana } from '../../hooks/use_kibana';
 
 export const SearchWebCrawlsPage = () => {
   const {
-    services: { application, console: consolePlugin, elasticsearchHome, history, searchNavigation },
+    services: { application, console: consolePlugin, history, searchNavigation, webCrawler },
   } = useKibana();
 
   useEffect(() => {
@@ -37,7 +38,11 @@ export const SearchWebCrawlsPage = () => {
     [consolePlugin]
   );
   const navigateHome = useCallback(() => application.navigateToApp(PLUGIN_ID), [application]);
-  const { WebCrawlsPage } = elasticsearchHome;
+
+  if (!webCrawler) {
+    return <Redirect to="/" />;
+  }
+  const { WebCrawlsPage } = webCrawler;
 
   return (
     <>

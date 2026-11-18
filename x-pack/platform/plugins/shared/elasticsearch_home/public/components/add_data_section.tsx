@@ -16,12 +16,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useHomeConfig } from '../context';
+import { useHomeConfig, useHomeServices } from '../context';
 import { addDataCard } from './add_data_section_styles';
-import { WebCrawlPanel } from './web_crawl_panel';
 
 export const AddDataSection = () => {
-  const { addDataLinks, showWebCrawl } = useHomeConfig();
+  const { addDataLinks, showWebCrawl, onManageWebCrawls, telemetryPrefix, storageKeyPrefix } =
+    useHomeConfig();
+  const { webCrawler } = useHomeServices();
 
   return (
     <>
@@ -64,10 +65,14 @@ export const AddDataSection = () => {
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
-      {showWebCrawl && (
+      {showWebCrawl && webCrawler && (
         <>
           <EuiSpacer size="s" />
-          <WebCrawlPanel />
+          <webCrawler.WebCrawlPanel
+            telemetryPrefix={telemetryPrefix}
+            storageKeyPrefix={storageKeyPrefix}
+            onManageWebCrawls={onManageWebCrawls}
+          />
         </>
       )}
     </>

@@ -10,12 +10,14 @@ import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public'
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { ElasticsearchHomePublicStart } from '@kbn/elasticsearch-home/public';
+import type { WebCrawlerPublicStart } from '@kbn/web-crawler-plugin/public';
 
 export interface SearchHomepageAppPluginStartDependencies {
   console?: ConsolePluginStart;
   elasticsearchHome: ElasticsearchHomePublicStart;
   usageCollection?: UsageCollectionStart;
   searchNavigation?: SearchNavigationPluginStart;
+  webCrawler?: WebCrawlerPublicStart;
 }
 
 export type SearchHomepageServicesContextDeps = SearchHomepageAppPluginStartDependencies & {

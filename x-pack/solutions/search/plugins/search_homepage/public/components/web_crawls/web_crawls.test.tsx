@@ -6,9 +6,11 @@
  */
 
 import React from 'react';
+import { Router } from '@kbn/shared-ux-router';
+import { createMemoryHistory } from 'history';
 import { render, screen } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { WebCrawlsPageProps } from '@kbn/elasticsearch-home/public';
+import type { WebCrawlsPageProps } from '@kbn/web-crawler-plugin/public';
 import { useKibana } from '../../hooks/use_kibana';
 import { SearchWebCrawlsPage } from './web_crawls';
 
@@ -19,6 +21,7 @@ const mockUseKibana = useKibana as jest.Mock;
 describe('SearchWebCrawlsPage', () => {
   const { application } = coreMock.createStart();
   const sharedWebCrawlsPage = jest.fn((_props: WebCrawlsPageProps) => null);
+  const history = createMemoryHistory();
   const classicNav = { name: 'Elasticsearch', items: [] };
   const searchNavigation = {
     breadcrumbs: { setSearchBreadCrumbs: jest.fn() },
@@ -29,14 +32,18 @@ describe('SearchWebCrawlsPage', () => {
     mockUseKibana.mockReturnValue({
       services: {
         application,
-        elasticsearchHome: { WebCrawlsPage: sharedWebCrawlsPage },
+        webCrawler: { WebCrawlsPage: sharedWebCrawlsPage },
         history: {},
         searchNavigation,
         ...services,
       },
     });
 
-    return render(<SearchWebCrawlsPage />);
+    return render(
+      <Router history={history}>
+        <SearchWebCrawlsPage />
+      </Router>
+    );
   };
 
   beforeEach(() => {
@@ -73,6 +80,15 @@ describe('SearchWebCrawlsPage', () => {
       { text: 'Home', href: '/app/elasticsearch/home' },
       { text: 'Web crawls' },
     ]);
+  });
+
+  it('returns to the home route when the web crawler plugin is unavailable', () => {
+    history.push('/web_crawls');
+
+    renderPage({ webCrawler: undefined });
+
+    expect(sharedWebCrawlsPage).not.toHaveBeenCalled();
+    expect(history.location.pathname).toBe('/');
   });
 
   it('renders the embeddable console when the console plugin is available', () => {

@@ -9,23 +9,11 @@ import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/c
 import { CAN_MONITOR_ALL_INDICES_CAPABILITY, PLUGIN_ID } from '../common/constants';
 import { registerDeploymentStatsRoute } from './routes/deployment_stats';
 import { registerStarredDashboardsCountRoute } from './routes/starred_dashboards_count';
-import { registerWebCrawlRoutes } from './routes/web_crawl';
 import { registerSearchSkills } from './skills/register_search_skills';
-import type {
-  ElasticsearchHomeServerSetupDependencies,
-  ElasticsearchHomeServerStartDependencies,
-} from './types';
-import { registerWebCrawlTask } from './web_crawl/task';
-import { getWebCrawlStepDefinition } from './web_crawl/workflow_step';
+import type { ElasticsearchHomeServerSetupDependencies } from './types';
 
 export class ElasticsearchHomePlugin
-  implements
-    Plugin<
-      void,
-      void,
-      ElasticsearchHomeServerSetupDependencies,
-      ElasticsearchHomeServerStartDependencies
-    >
+  implements Plugin<void, void, ElasticsearchHomeServerSetupDependencies>
 {
   private readonly logger: Logger;
   private readonly isServerless: boolean;
@@ -36,13 +24,8 @@ export class ElasticsearchHomePlugin
   }
 
   public setup(
-    core: CoreSetup<ElasticsearchHomeServerStartDependencies>,
-    {
-      agentBuilder,
-      features,
-      taskManager,
-      workflowsExtensions,
-    }: ElasticsearchHomeServerSetupDependencies
+    core: CoreSetup,
+    { agentBuilder, features }: ElasticsearchHomeServerSetupDependencies
   ) {
     // Exposes the vector count privilege as a UI capability so the home page can render that tile
     // before the stats request resolves. Declared as an Elasticsearch feature, which resolves it
@@ -65,12 +48,6 @@ export class ElasticsearchHomePlugin
     const router = core.http.createRouter();
     registerDeploymentStatsRoute(router, this.logger, { isServerless: this.isServerless });
     registerStarredDashboardsCountRoute(router, this.logger);
-
-    registerWebCrawlTask({ core, taskManager, logger: this.logger });
-    registerWebCrawlRoutes(router, this.logger, core.getStartServices);
-    workflowsExtensions?.registerStepDefinition(
-      getWebCrawlStepDefinition({ getStartServices: core.getStartServices, logger: this.logger })
-    );
   }
 
   public start() {}

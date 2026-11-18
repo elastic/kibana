@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/search-shared-ui'
   - '@kbn/scout-search'
   - '@kbn/elasticsearch-home'
+  - '@kbn/web-crawler-plugin'
 tags:
   - plugin
   - prod

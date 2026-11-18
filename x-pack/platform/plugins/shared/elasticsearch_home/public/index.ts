@@ -16,5 +16,4 @@ export type {
   HomeBannerConfig,
   HomeDocsLink,
   HomeIdeSetup,
-  WebCrawlsPageProps,
 } from './types';

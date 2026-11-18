@@ -7,10 +7,8 @@
 
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import { renderWithHomeContext } from '../test_utils';
+import type { WebCrawlPanelProps } from '@kbn/web-crawler-plugin/public';
+import { renderWithHomeContext, testConfig } from '../test_utils';
 import type { HomeAddDataLink } from '../types';
 import { AddDataSection } from './add_data_section';
 
@@ -70,46 +68,47 @@ describe('AddDataSection', () => {
   });
 
   describe('web crawl', () => {
-    const renderSectionWithServices = (showWebCrawl?: boolean) => {
-      const http = httpServiceMock.createStartContract();
-      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-      renderWithHomeContext(
-        <QueryClientProvider client={queryClient}>
-          <AddDataSection />
-        </QueryClientProvider>,
-        {
-          services: { http, share: sharePluginMock.createStartContract() },
-          config: { addDataLinks, showWebCrawl },
-        }
-      );
-
-      return http;
-    };
+    const WebCrawlPanel = jest.fn((_props: WebCrawlPanelProps) => (
+      <div data-test-subj="webCrawlPanel" />
+    ));
+    const webCrawler = { WebCrawlPanel, WebCrawlsPage: () => null };
 
     beforeEach(() => {
-      window.localStorage.clear();
+      WebCrawlPanel.mockClear();
     });
 
     it('hides the crawl form by default', () => {
-      renderSection();
+      renderWithHomeContext(<AddDataSection />, {
+        services: { webCrawler },
+        config: { addDataLinks },
+      });
 
-      expect(screen.queryByTestId('elasticsearchHomeWebCrawl')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('webCrawlPanel')).not.toBeInTheDocument();
     });
 
-    it('hides the crawl form when the host turns it off', () => {
-      renderSectionWithServices(false);
+    it('hides the crawl form when the web crawler plugin is unavailable', () => {
+      renderWithHomeContext(<AddDataSection />, {
+        config: { addDataLinks, showWebCrawl: true },
+      });
 
-      expect(screen.queryByTestId('elasticsearchHomeWebCrawl')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('webCrawlPanel')).not.toBeInTheDocument();
     });
 
-    it('shows the crawl form below the links when the host opts in', () => {
-      const http = renderSectionWithServices(true);
+    it("shows the crawl form under the host's namespaces when the host opts in", () => {
+      const onManageWebCrawls = jest.fn();
+      renderWithHomeContext(<AddDataSection />, {
+        services: { webCrawler },
+        config: { addDataLinks, showWebCrawl: true, onManageWebCrawls },
+      });
 
-      expect(screen.getByTestId('elasticsearchHomeWebCrawl')).toBeInTheDocument();
-      expect(screen.getByTestId('elasticsearchHomeWebCrawlUrl')).toBeInTheDocument();
-      expect(screen.getByTestId('elasticsearchHomeWebCrawlSubmit')).toBeInTheDocument();
+      expect(screen.getByTestId('webCrawlPanel')).toBeInTheDocument();
       expect(screen.getAllByRole('listitem')).toHaveLength(2);
-      expect(http.get).not.toHaveBeenCalled();
+      const [[props]] = WebCrawlPanel.mock.calls;
+      expect(props).toEqual({
+        telemetryPrefix: testConfig.telemetryPrefix,
+        storageKeyPrefix: testConfig.storageKeyPrefix,
+        onManageWebCrawls,
+      });
     });
   });
 });

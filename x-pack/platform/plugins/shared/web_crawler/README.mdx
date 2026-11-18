@@ -1,0 +1,110 @@
+---
+id: webCrawler
+slug: /web-crawler
+title: Web Crawler
+description: Crawls websites into Elasticsearch indices, with a page to manage and schedule crawls.
+tags: ['elasticsearch', 'crawler', 'shared']
+---
+
+## Overview
+
+This plugin crawls a website into an Elasticsearch index. It owns the crawl task, the index that
+holds crawl state and history, the routes that start, list, stop and delete crawls, the
+`webCrawl.run` workflow step, and two components a hosting plugin renders: the form that starts a
+crawl and the page that manages crawls.
+
+It does not register an application. Hosting plugins render the components inside their own app and
+route. Today `elasticsearchHome` renders the form in its "Add data" section for hosts that opt in,
+and `search_homepage` mounts the page and links it from the side nav under Data management.
+
+The plugin is enabled by default, but `config/serverless.yml` sets `xpack.webCrawler.enabled: false`,
+so serverless project types that crawl have to re-enable it in their own `serverless.<project>.yml`.
+Today that is Elasticsearch.
+
+## Rendering it from a host plugin
+
+Add `webCrawler` to `requiredPlugins` or `optionalPlugins` and render the components from the start
+contract. They bring their own Kibana services and query client, so they only need the host's
+identity as props.
+
+| Component | Props |
+| --- | --- |
+| `WebCrawlPanel` | `telemetryPrefix`, `storageKeyPrefix`, and optionally `onManageWebCrawls`, which opens the host's route for `WebCrawlsPage` and adds a link to it. |
+| `WebCrawlsPage` | `telemetryPrefix`, `storageKeyPrefix`, and optionally `solutionNav`, the host's side nav under the classic chrome style, and `onNavigateHome`, for the page's back link. |
+
+`telemetryPrefix` namespaces the `data-telemetry-id` of every element the components render.
+`storageKeyPrefix` namespaces the localStorage key that remembers the last crawl started from the
+panel.
+
+## How a crawl works
+
+The panel takes a website URL and crawls it into a `web-crawl-<host>` index. The crawl runs as a
+Task Manager task, so it survives the request, runs on background task nodes where a deployment has
+them, and stays off the request path. Kibana never fetches the site itself: each page is fetched and
+converted to markdown by a `document_extraction` inference endpoint, preferring the Elastic
+Inference Service one, and Kibana only extracts the links from that markdown.
+
+A crawl follows same-site links from the URL it was given. The pages listed in the site's sitemaps
+(the ones `robots.txt` names, or `/sitemap.xml`) join the links of that first page, one link away.
+`robots.txt` is honoured for every page, using the `Elastic-Crawler` group when the file has one and
+the `*` group otherwise; a `robots.txt` that cannot be read allows everything. `robots.txt` and the
+sitemaps are read through the same inference endpoint as the pages.
+
+Each crawl takes a maximum depth (default 2, at most 5) and a maximum number of pages (default 500,
+at most 1000). The page maximum caps the pages requested, so it also caps the documents indexed.
+Each page is indexed once, keyed by its URL, with its markdown in `content` for full-text search and
+copied into the `semantic_text` field `content_semantic`.
+
+### How a crawl runs
+
+Ten workers pull pages from a queue that always hands out the shallowest page found so far. That
+keeps the crawl close to breadth-first without waiting for a whole depth level to finish, so one
+slow page costs one worker rather than the level. `robots.txt` is read first; the sitemaps are read
+while the first page is crawled. Indexing runs beside extraction: a bulk request goes out as soon as
+there is a page and nothing in flight, and under load up to three requests of twenty pages run at
+once. Extraction only waits when indexing has fallen a full set of requests behind. A rate-limited
+extraction is retried twice with a backoff.
+
+### Crawl state and history
+
+Every crawl is one document in the `.kibana-web-crawls` index, written when the crawl starts and
+updated in place until it ends, so the same index holds the crawls in progress and the history. It
+is an index rather than a data stream because a running crawl rewrites its progress every few
+seconds and reads a stop request back from the same document, and data streams are append-only. The
+`.kibana*` prefix is already granted to the Kibana system user, so the index needs no registration
+in Elasticsearch. Fields are only ever added to its schema.
+
+Crawls of different sites run side by side. A site that is being crawled is not crawled again until
+that crawl ends. A crawl whose task disappeared without recording an outcome, as after a restart, is
+reported as failed once it has been silent for a minute.
+
+The state index is written by the Kibana system user, so access is decided by the index a crawl
+writes to: listing shows the crawls into indices the user can `read`, and stopping, deleting from
+the history and crawling into an existing index need `write` on it. The task itself runs with an API
+key granted from the request that started it, so the user also needs to be allowed to use the
+inference endpoint and to create the index.
+
+### Managing and scheduling crawls
+
+`WebCrawlsPage` lists running and past crawls and starts, stops, repeats and deletes them.
+
+Recurring crawls are workflows. With the optional `workflowsExtensions` plugin, this plugin
+registers the `webCrawl.run` step, which starts a crawl as the workflow's user and waits for it to
+finish, so later steps can use its outcome. The page creates a workflow with a scheduled trigger
+and that step, tagged `web-crawl`, either for a website entered in the "Schedule a crawl" dialog or,
+from a crawl's schedule action, for that crawl's website and limits. Pausing, changing and deleting
+a schedule happens in Workflows. Scheduling is offered to users who can create workflows.
+
+## Public API
+
+`public/index.ts` is the whole browser-facing surface. The components reach a host through the start
+contract, so nothing needs importing to render them, and beyond the plugin initializer the barrel
+exports only types: `WebCrawlerPublicStart`, `WebCrawlPanelProps` and `WebCrawlsPageProps`.
+
+## Server
+
+- `POST` and `GET /internal/web_crawler/crawls`, `GET` and `DELETE
+  /internal/web_crawler/crawls/{id}` and `POST /internal/web_crawler/crawls/{id}/_cancel` — start,
+  list, read, remove from the history and stop crawls.
+- The `web_crawler:crawl` task type.
+- The `webCrawl.run` workflow step, when `workflowsExtensions` is available.
