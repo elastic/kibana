@@ -8,8 +8,10 @@
 import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { Client } from '@elastic/elasticsearch';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { verifyAdditive } from '../src/verify';
 import { classifyEsError } from '../src/es_errors';
+import { VERSION_META_KEY, applyMappings, stampVersion } from '../src/backends/index_backend';
 
 /**
  * Asks a real Elasticsearch whether the verifier's rules match its behaviour.
@@ -207,5 +209,82 @@ describe('mapping rules against a real Elasticsearch', () => {
     expect(Object.keys(after[index].mappings.properties ?? {}).sort()).toEqual(['drop', 'keep']);
 
     await esClient.indices.delete({ index }, { ignore: [404] });
+  });
+
+  describe('_meta', () => {
+    const index = 'verifier-meta';
+    const metaOf = async () => (await esClient.indices.getMapping({ index }))[index].mappings._meta;
+
+    beforeEach(async () => {
+      await esClient.indices.delete({ index }, { ignore: [404] });
+      await esClient.indices.create({
+        index,
+        mappings: {
+          ...mapping({ a: field('keyword') }),
+          // Stands in for metadata another owner keeps on the index, the way Asset
+          // Criticality keeps its own `version`.
+          _meta: { version: 4, managedBy: 'someone-else' },
+        },
+      });
+    });
+
+    afterEach(async () => {
+      await esClient.indices.delete({ index }, { ignore: [404] });
+    });
+
+    it('is REPLACED by Elasticsearch, not merged - the reason the backend reads it first', async () => {
+      await esClient.indices.putMapping({ index, _meta: { mine: 1 } });
+
+      // The whole merge in `index_backend` exists because of this. If a future
+      // Elasticsearch merged instead, this test fails and the merge becomes redundant
+      // rather than load-bearing.
+      expect(await metaOf()).toEqual({ mine: 1 });
+    });
+
+    it('survives a putMapping that does not mention it', async () => {
+      await esClient.indices.putMapping({ index, ...mapping({ b: field('keyword') }) });
+
+      expect(await metaOf()).toEqual({ version: 4, managedBy: 'someone-else' });
+    });
+
+    it('keeps foreign keys when the backend applies mappings', async () => {
+      await applyMappings(
+        esClient as unknown as ElasticsearchClient,
+        index,
+        mapping({ b: field('keyword') }),
+        2
+      );
+
+      // Losing `version` here would make the owning code believe its own migration never
+      // ran, so it would re-run on every startup for the life of the deployment.
+      expect(await metaOf()).toEqual({
+        version: 4,
+        managedBy: 'someone-else',
+        [VERSION_META_KEY]: 2,
+      });
+    });
+
+    it('keeps foreign keys when the backend only stamps a version', async () => {
+      await stampVersion(esClient as unknown as ElasticsearchClient, index, 3);
+
+      expect(await metaOf()).toEqual({
+        version: 4,
+        managedBy: 'someone-else',
+        [VERSION_META_KEY]: 3,
+      });
+    });
+
+    it('advances its own stamp across repeated runs without accumulating', async () => {
+      const client = esClient as unknown as ElasticsearchClient;
+
+      await applyMappings(client, index, mapping({ b: field('keyword') }), 2);
+      await applyMappings(client, index, mapping({ c: field('keyword') }), 3);
+
+      expect(await metaOf()).toEqual({
+        version: 4,
+        managedBy: 'someone-else',
+        [VERSION_META_KEY]: 3,
+      });
+    });
   });
 });

@@ -47,12 +47,39 @@ export const readVersion = async (
 };
 
 /**
- * Applies mappings and stamps the version in a single request.
+ * Reads the `_meta` already on the index.
  *
- * `_meta` is replaced wholesale by Elasticsearch rather than merged, so the full object
- * is always sent - writing a partial `_meta` would erase the version and make the next
- * reconcile fall back to the baseline and re-apply everything.
+ * Elasticsearch replaces `_meta` wholesale rather than merging it, so every write has to
+ * start from what is there. An index is frequently managed by something else as well -
+ * Asset Criticality keeps its own `_meta.version`, and other plugins keep their own keys
+ * - and overwriting that silently breaks whatever relies on it.
  */
+const readMeta = async (
+  esClient: ElasticsearchClient,
+  index: string,
+  { signal }: Abortable = {}
+): Promise<Record<string, unknown>> => {
+  const response = await esClient.indices.getMapping({ index }, { signal });
+  return (Object.values(response)[0]?.mappings?._meta ?? {}) as Record<string, unknown>;
+};
+
+/**
+ * Merges this library's version stamp into whatever `_meta` the index already has.
+ *
+ * Index first so unknown keys survive, declaration second because it is the current
+ * intent, our key last because nothing else may set it.
+ */
+const mergeMeta = (
+  existing: Record<string, unknown>,
+  declared: MappingTypeMapping['_meta'],
+  version: number
+): Record<string, unknown> => ({
+  ...existing,
+  ...declared,
+  [VERSION_META_KEY]: version,
+});
+
+/** Applies mappings and stamps the version in a single request. */
 export const applyMappings = async (
   esClient: ElasticsearchClient,
   index: string,
@@ -60,11 +87,13 @@ export const applyMappings = async (
   version: number,
   { signal }: Abortable = {}
 ): Promise<void> => {
+  const existing = await readMeta(esClient, index, { signal });
+
   await esClient.indices.putMapping(
     {
       index,
       ...mappings,
-      _meta: { ...mappings._meta, [VERSION_META_KEY]: version },
+      _meta: mergeMeta(existing, mappings._meta, version),
     },
     { signal }
   );
@@ -77,10 +106,10 @@ export const stampVersion = async (
   version: number,
   { signal }: Abortable = {}
 ): Promise<void> => {
-  const response = await esClient.indices.getMapping({ index }, { signal });
-  const meta = Object.values(response)[0]?.mappings?._meta ?? {};
+  const existing = await readMeta(esClient, index, { signal });
+
   await esClient.indices.putMapping(
-    { index, _meta: { ...meta, [VERSION_META_KEY]: version } },
+    { index, _meta: mergeMeta(existing, undefined, version) },
     { signal }
   );
 };
