@@ -103,12 +103,12 @@ describe('CreateCompositeSLO schema validation', () => {
     });
 
     it('bounds timeWindow.duration', () => {
-      expect(
-        parseBody({ timeWindow: { duration: '1'.repeat(16), type: 'rolling' } }).success
-      ).toBe(true);
-      expect(
-        parseBody({ timeWindow: { duration: '1'.repeat(17), type: 'rolling' } }).success
-      ).toBe(false);
+      expect(parseBody({ timeWindow: { duration: '1'.repeat(16), type: 'rolling' } }).success).toBe(
+        true
+      );
+      expect(parseBody({ timeWindow: { duration: '1'.repeat(17), type: 'rolling' } }).success).toBe(
+        false
+      );
     });
   });
 
