@@ -114,26 +114,26 @@ describe('recordSlotTime', () => {
     isExpired: false,
   });
 
-  test('a normal task adds its duration in ms', () => {
+  test('a normal task adds its duration in seconds', () => {
     const task = mockTask('normalTask');
     recordSlotTime(asTaskRunEvent(task.id, asOk(ranTask(task)), timing), definitions);
 
     expect(mockAdd).toHaveBeenCalledTimes(1);
-    expect(mockAdd).toHaveBeenCalledWith(5000, { 'task.type': 'normalTask' });
+    expect(mockAdd).toHaveBeenCalledWith(5, { 'task.type': 'normalTask' });
   });
 
-  test('a large task adds twice its duration in ms', () => {
+  test('a large task adds twice its duration in seconds', () => {
     const task = mockTask('largeTask');
     recordSlotTime(asTaskRunEvent(task.id, asOk(ranTask(task)), timing), definitions);
 
-    expect(mockAdd).toHaveBeenCalledWith(10000, { 'task.type': 'largeTask' });
+    expect(mockAdd).toHaveBeenCalledWith(10, { 'task.type': 'largeTask' });
   });
 
   test('a per-instance cost overrides the definition cost', () => {
     const task = mockTask('normalTask', TaskCost.Tiny);
     recordSlotTime(asTaskRunEvent(task.id, asOk(ranTask(task)), timing), definitions);
 
-    expect(mockAdd).toHaveBeenCalledWith(2500, { 'task.type': 'normalTask' });
+    expect(mockAdd).toHaveBeenCalledWith(2.5, { 'task.type': 'normalTask' });
   });
 
   test('failed runs are counted', () => {
@@ -143,7 +143,7 @@ describe('recordSlotTime', () => {
       definitions
     );
 
-    expect(mockAdd).toHaveBeenCalledWith(10000, { 'task.type': 'largeTask' });
+    expect(mockAdd).toHaveBeenCalledWith(10, { 'task.type': 'largeTask' });
   });
 
   test('task run events without timing are ignored', () => {

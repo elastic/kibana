@@ -23,9 +23,9 @@ const meter = metrics.getMeter('kibana.task_manager');
 
 const slotTime = meter.createCounter('kibana.task_manager.task_run.slot_time', {
   description:
-    'Milliseconds of normal-cost task slot occupied by completed task runs, weighted by task cost.',
-  unit: 'ms',
-  valueType: ValueType.INT,
+    'Seconds of normal-cost task slot occupied by completed task runs, weighted by task cost.',
+  unit: 's',
+  valueType: ValueType.DOUBLE,
 });
 
 const pollsSkipped = meter.createCounter('kibana.task_manager.poll.skipped_no_capacity.count', {
@@ -82,7 +82,6 @@ export const recordSlotTime = (
   if (!isTaskRunEvent(event) || !event.timing) return;
   const { task } = unwrap(event.event);
   const { start, stop } = event.timing;
-  slotTime.add(Math.round((getTaskCost(task, definitions) / TaskCost.Normal) * (stop - start)), {
-    'task.type': task.taskType,
-  });
+  const costWeight = getTaskCost(task, definitions) / TaskCost.Normal;
+  slotTime.add((costWeight * (stop - start)) / 1000, { 'task.type': task.taskType });
 };
