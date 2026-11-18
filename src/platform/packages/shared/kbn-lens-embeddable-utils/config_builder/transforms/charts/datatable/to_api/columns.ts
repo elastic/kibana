@@ -75,8 +75,10 @@ function buildPaletteFillColor(palette: ColumnState['palette']): PaletteFillColo
   }
   // The editor's seed palette has no params until the user edits it, and renders as a distributed palette.
   return (
-    fromColorByValueLensStateToAPI(palette.params ? palette : { ...palette, params: {} }) ??
-    AUTO_COLOR
+    fromColorByValueLensStateToAPI(
+      palette.params ? palette : { ...palette, params: {} },
+      LENS_DATATABLE_DEFAULT_COLOR_STEPS
+    ) ?? AUTO_COLOR
   );
 }
 
