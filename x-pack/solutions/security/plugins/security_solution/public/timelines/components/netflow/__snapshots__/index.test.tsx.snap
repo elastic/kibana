@@ -63,6 +63,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                           class="euiBadge__content emotion-euiBadge__content"
                         >
                           <span
+                            aria-hidden="true"
                             class="euiBadge__icon emotion-euiBadge__icon-left"
                             color="inherit"
                             data-euiicon-type="user"
@@ -104,6 +105,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                           class="euiBadge__content emotion-euiBadge__content"
                         >
                           <span
+                            aria-hidden="true"
                             class="euiBadge__icon emotion-euiBadge__icon-left"
                             color="inherit"
                             data-euiicon-type="commandLine"
@@ -265,6 +267,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                               class="euiBadge__content emotion-euiBadge__content"
                             >
                               <span
+                                aria-hidden="true"
                                 class="euiBadge__icon emotion-euiBadge__icon-left"
                                 color="inherit"
                                 data-euiicon-type="chevronSingleUp"
@@ -1261,6 +1264,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                       class="euiBadge__content emotion-euiBadge__content"
                     >
                       <span
+                        aria-hidden="true"
                         class="euiBadge__icon emotion-euiBadge__icon-left"
                         color="inherit"
                         data-euiicon-type="snowflake"
@@ -1325,6 +1329,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                       class="euiBadge__content emotion-euiBadge__content"
                     >
                       <span
+                        aria-hidden="true"
                         class="euiBadge__icon emotion-euiBadge__icon-left"
                         color="inherit"
                         data-euiicon-type="snowflake"
@@ -1389,6 +1394,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                       class="euiBadge__content emotion-euiBadge__content"
                     >
                       <span
+                        aria-hidden="true"
                         class="euiBadge__icon emotion-euiBadge__icon-left"
                         color="inherit"
                         data-euiicon-type="snowflake"

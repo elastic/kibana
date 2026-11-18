@@ -79,6 +79,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <span
+                  aria-hidden="true"
                   color="#C61E25"
                   data-euiicon-type="dot"
                 />
@@ -121,6 +122,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <span
+                  aria-hidden="true"
                   color="#CAD3E2"
                   data-euiicon-type="dot"
                 />
@@ -241,6 +243,7 @@ exports[`DonutChart component renders a green check when all monitors are up 1`]
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <span
+                  aria-hidden="true"
                   color="#C61E25"
                   data-euiicon-type="dot"
                 />
@@ -283,6 +286,7 @@ exports[`DonutChart component renders a green check when all monitors are up 1`]
                 class="euiFlexItem emotion-euiFlexItem-growZero"
               >
                 <span
+                  aria-hidden="true"
                   color="#CAD3E2"
                   data-euiicon-type="dot"
                 />
