@@ -61,7 +61,18 @@ const getBoundWorkloadsUsage = async (
     response.body[0].stats.stack_stats.kibana.plugins.security.serviceAccounts;
   expect(enabled).toBe(true);
   expect(boundWorkloads).toBeDefined();
-  return boundWorkloads;
+  const usage: BoundWorkloadsUsage = boundWorkloads;
+  const { total, serviceAccounts, byWorkload, byBinderType } = usage;
+  const counts = [
+    total,
+    serviceAccounts,
+    ...byWorkload.map(({ count }) => count),
+    byBinderType.user,
+    byBinderType.api_key,
+    byBinderType.service_account,
+  ];
+  for (const count of counts) expect(typeof count).toBe('number');
+  return usage;
 };
 
 apiTest.describe(
@@ -121,15 +132,17 @@ apiTest.describe(
         const { headers, sessionHeaders, accountId, create } = getContext();
         const before = await getBoundWorkloadsUsage(apiClient, headers);
 
-        // The suite's default headers carry an API key; the session headers carry a user.
+        // The suite's default headers carry an API key; the session headers carry a user. Binding
+        // a different number with each catches telemetry that swaps the two binder types.
+        await create(apiClient, workflowYaml(accountId));
         await create(apiClient, workflowYaml(accountId));
         await create(apiClient, workflowYaml(accountId), sessionHeaders);
 
         const after = await getBoundWorkloadsUsage(apiClient, headers);
-        expect(after.total - before.total).toBe(2);
+        expect(after.total - before.total).toBe(3);
         expect(after.serviceAccounts - before.serviceAccounts).toBe(1);
-        expect(countWorkflowBindings(after) - countWorkflowBindings(before)).toBe(2);
-        expect(after.byBinderType.api_key - before.byBinderType.api_key).toBe(1);
+        expect(countWorkflowBindings(after) - countWorkflowBindings(before)).toBe(3);
+        expect(after.byBinderType.api_key - before.byBinderType.api_key).toBe(2);
         expect(after.byBinderType.user - before.byBinderType.user).toBe(1);
         expect(after.byBinderType.service_account - before.byBinderType.service_account).toBe(0);
       }
