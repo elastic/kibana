@@ -78,6 +78,7 @@ export const tagsSearchResponseBodySchema = z
   })
   .strict();
 
+export type TagRequestAttributes = z.output<typeof tagRequestAttributesSchema>;
 export type TagResponseItem = z.output<typeof tagResponseItemSchema>;
 export type TagsSearchResponseBody = z.output<typeof tagsSearchResponseBodySchema>;
 export type TagsSearchRequestQuery = z.output<typeof tagsSearchRequestQuerySchema>;

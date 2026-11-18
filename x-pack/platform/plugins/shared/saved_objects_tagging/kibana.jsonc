@@ -17,6 +17,7 @@
     "requiredPlugins": [
       "features",
       "management",
+      "savedObjectsManagement",
       "savedObjectsTaggingOss"
     ],
     "optionalPlugins": [

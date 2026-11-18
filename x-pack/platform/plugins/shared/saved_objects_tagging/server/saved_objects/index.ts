@@ -6,3 +6,4 @@
  */
 
 export { tagType } from './tag';
+export { createTagApiBodyEntry } from './tag_api_body_entry';

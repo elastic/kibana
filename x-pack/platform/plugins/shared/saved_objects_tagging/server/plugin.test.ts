@@ -10,6 +10,7 @@ import { registerRoutesMock, createTagUsageCollectorMock } from './plugin.test.m
 import { coreMock } from '@kbn/core/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
+import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/server/mocks';
 import { SavedObjectTaggingPlugin } from './plugin';
 import { savedObjectsTaggingFeature } from './features';
 
@@ -17,11 +18,15 @@ describe('SavedObjectTaggingPlugin', () => {
   let plugin: SavedObjectTaggingPlugin;
   let featuresPluginSetup: ReturnType<typeof featuresPluginMock.createSetup>;
   let usageCollectionSetup: ReturnType<typeof usageCollectionPluginMock.createSetupContract>;
+  let savedObjectsManagement: ReturnType<
+    typeof savedObjectsManagementPluginMock.createSetupContract
+  >;
 
   beforeEach(() => {
     plugin = new SavedObjectTaggingPlugin();
     featuresPluginSetup = featuresPluginMock.createSetup();
     usageCollectionSetup = usageCollectionPluginMock.createSetupContract();
+    savedObjectsManagement = savedObjectsManagementPluginMock.createSetupContract();
     // `usageCollection` 'mocked' implementation use the real `CollectorSet` implementation
     // that throws when registering things that are not collectors.
     // We just want to assert that it was called here, so jest.fn is fine.
@@ -35,13 +40,16 @@ describe('SavedObjectTaggingPlugin', () => {
 
   describe('#setup', () => {
     it('registers routes', async () => {
-      await plugin.setup(coreMock.createSetup(), { features: featuresPluginSetup });
+      await plugin.setup(coreMock.createSetup(), {
+        features: featuresPluginSetup,
+        savedObjectsManagement,
+      });
       expect(registerRoutesMock).toHaveBeenCalledTimes(1);
     });
 
     it('registers the globalSearch route handler context', async () => {
       const coreSetup = coreMock.createSetup();
-      plugin.setup(coreSetup, { features: featuresPluginSetup });
+      plugin.setup(coreSetup, { features: featuresPluginSetup, savedObjectsManagement });
       expect(coreSetup.http.registerRouteHandlerContext).toHaveBeenCalledTimes(1);
       expect(coreSetup.http.registerRouteHandlerContext).toHaveBeenCalledWith(
         'tags',
@@ -49,8 +57,26 @@ describe('SavedObjectTaggingPlugin', () => {
       );
     });
 
+    it('registers the tag API body entry with Saved Objects Management', () => {
+      plugin.setup(coreMock.createSetup(), {
+        features: featuresPluginSetup,
+        savedObjectsManagement,
+      });
+      expect(savedObjectsManagement.registerApiBodyEntry).toHaveBeenCalledWith(
+        'tag',
+        expect.objectContaining({
+          getSchema: expect.any(Function),
+          toApi: expect.any(Function),
+          toStored: expect.any(Function),
+        })
+      );
+    });
+
     it('registers the `savedObjectsTagging` feature', async () => {
-      plugin.setup(coreMock.createSetup(), { features: featuresPluginSetup });
+      plugin.setup(coreMock.createSetup(), {
+        features: featuresPluginSetup,
+        savedObjectsManagement,
+      });
       expect(featuresPluginSetup.registerKibanaFeature).toHaveBeenCalledTimes(1);
       expect(featuresPluginSetup.registerKibanaFeature).toHaveBeenCalledWith(
         savedObjectsTaggingFeature
@@ -63,6 +89,7 @@ describe('SavedObjectTaggingPlugin', () => {
 
       plugin.setup(coreMock.createSetup(), {
         features: featuresPluginSetup,
+        savedObjectsManagement,
         usageCollection: usageCollectionSetup,
       });
 
@@ -73,7 +100,10 @@ describe('SavedObjectTaggingPlugin', () => {
 
   describe('#start', () => {
     it('returns the expected contract', () => {
-      plugin.setup(coreMock.createSetup(), { features: featuresPluginSetup });
+      plugin.setup(coreMock.createSetup(), {
+        features: featuresPluginSetup,
+        savedObjectsManagement,
+      });
       const contract = plugin.start(coreMock.createStart(), {});
 
       expect(contract).toEqual({

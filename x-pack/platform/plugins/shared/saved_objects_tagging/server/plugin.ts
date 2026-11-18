@@ -9,8 +9,9 @@ import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { SavedObjectsManagementPluginSetup } from '@kbn/saved-objects-management-plugin/server';
 import { savedObjectsTaggingFeature } from './features';
-import { tagType } from './saved_objects';
+import { createTagApiBodyEntry, tagType } from './saved_objects';
 import type {
   TagsHandlerContext,
   SavedObjectTaggingStart,
@@ -25,6 +26,7 @@ import { convertTagNameToId, getTagsFromReferences, replaceTagReferences } from 
 
 interface SetupDeps {
   features: FeaturesPluginSetup;
+  savedObjectsManagement: SavedObjectsManagementPluginSetup;
   usageCollection?: UsageCollectionSetup;
   security?: SecurityPluginSetup;
 }
@@ -38,9 +40,10 @@ export class SavedObjectTaggingPlugin
 {
   public setup(
     { savedObjects, http, getStartServices }: CoreSetup<StartDeps, SavedObjectTaggingStart>,
-    { features, usageCollection, security }: SetupDeps
+    { features, savedObjectsManagement, usageCollection, security }: SetupDeps
   ) {
     savedObjects.registerType(tagType);
+    savedObjectsManagement.registerApiBodyEntry(tagType.name, createTagApiBodyEntry());
 
     const router = http.createRouter<TagsHandlerContext>();
     const apiUsageCounter: UsageCounter | undefined = usageCollection?.createUsageCounter(
