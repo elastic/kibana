@@ -80,13 +80,14 @@ describe('floor_alert_triage — the scheduled sweep', () => {
   });
 
   describe('order', () => {
-    it('checks analysis, then headroom, then matches decisions, then the verdict cache, then plans, then starts batches, then reports', () => {
+    it('checks analysis, then headroom, then matches decisions, then the verdict cache, then scores with Jev, then plans, then starts batches, then reports', () => {
       expect(rendered.steps.map(({ name }) => name)).toEqual([
         'fetch_analysis_runtime_config',
         'require_analysis_enabled',
         'read_headroom',
         'match_fp_decisions',
         'match_verdict_cache',
+        'jev_first_line',
         'plan_sweep',
         'start_batches',
         'emit_result',
@@ -174,6 +175,41 @@ describe('floor_alert_triage — the scheduled sweep', () => {
         names.indexOf('match_fp_decisions')
       );
       expect(names.indexOf('match_verdict_cache')).toBeLessThan(names.indexOf('plan_sweep'));
+    });
+  });
+
+  describe('Jev first line', () => {
+    it('never fails the sweep: a failed step leaves every alert for analysis', () => {
+      expect(stepByName('jev_first_line')['on-failure']).toEqual({ continue: true });
+    });
+
+    it('reads the same scope settings as the planner and as the verdict cache match', () => {
+      const { with: jevInputs } = stepByName('jev_first_line');
+      const { with: cacheInputs } = stepByName('match_verdict_cache');
+      const { with: planInputs } = stepByName('plan_sweep');
+      for (const key of [
+        'lookback_hours',
+        'min_severity',
+        'exclude_building_blocks',
+        'excluded_rule_tags',
+        'analysis_tag_prefix',
+      ]) {
+        expect(jevInputs?.[key]).toBe(planInputs?.[key]);
+        expect(jevInputs?.[key]).toBe(cacheInputs?.[key]);
+      }
+    });
+
+    it('skips when Task Manager is not keeping up, like the other matches', () => {
+      expect(stepByName('jev_first_line').if).toBe(
+        "${{ steps.read_headroom.output.status == 'ok' }}"
+      );
+    });
+
+    it('runs after the decisions and the cache, so that it scores no alert that they tagged, and before the planner', () => {
+      const names = rendered.steps.map(({ name }) => name);
+      expect(names.indexOf('jev_first_line')).toBeGreaterThan(names.indexOf('match_fp_decisions'));
+      expect(names.indexOf('jev_first_line')).toBeGreaterThan(names.indexOf('match_verdict_cache'));
+      expect(names.indexOf('jev_first_line')).toBeLessThan(names.indexOf('plan_sweep'));
     });
   });
 

@@ -16,6 +16,7 @@ export const TRIAGE_LOAD_ALERTS_STEP_ID = 'alertzero.triage.loadAlerts' as const
 export const TRIAGE_TAG_PATTERN_KEYS_STEP_ID = 'alertzero.triage.tagPatternKeys' as const;
 export const TRIAGE_WRITE_VERDICT_CACHE_STEP_ID = 'alertzero.triage.writeVerdictCache' as const;
 export const TRIAGE_MATCH_VERDICT_CACHE_STEP_ID = 'alertzero.triage.matchVerdictCache' as const;
+export const TRIAGE_JEV_FIRST_LINE_STEP_ID = 'alertzero.triage.jevFirstLine' as const;
 export const TRIAGE_GROUP_FP_CANDIDATES_STEP_ID = 'alertzero.triage.groupFpCandidates' as const;
 export const TRIAGE_JOIN_PROPOSAL_STEP_ID = 'alertzero.triage.joinProposal' as const;
 export const TRIAGE_RETAG_PROPOSAL_ALERTS_STEP_ID = 'alertzero.triage.retagProposalAlerts' as const;
@@ -358,6 +359,63 @@ export const triageMatchVerdictCacheStepCommonDefinition: CommonStepDefinition<
   stability: 'tech_preview',
   inputSchema: matchVerdictCacheInputSchema,
   outputSchema: matchVerdictCacheOutputSchema,
+};
+
+export const JEV_FIRST_LINE_STATUSES = ['ok', 'off', 'disabled', 'failed'] as const;
+export type JevFirstLineStatus = (typeof JEV_FIRST_LINE_STATUSES)[number];
+
+const jevFirstLineInputSchema = lazySchema(() =>
+  z.object({
+    space_id: idSchema.describe('Space of the alerts. It is part of every key hash.'),
+    analysis_tag_prefix: idSchema.describe(
+      'Alert Analysis tag prefix. An alert carrying it was analysed outside this Worker.'
+    ),
+    lookback_hours: z.number().int().min(1).max(8760),
+    min_severity: z.enum(['low', 'medium', 'high', 'critical']),
+    exclude_building_blocks: z.boolean(),
+    excluded_rule_tags: z.array(z.string().min(1).max(256)).max(50),
+  })
+);
+
+const jevFirstLineOutputSchema = lazySchema(() =>
+  z.object({
+    status: z.enum(JEV_FIRST_LINE_STATUSES),
+    candidates: z.number().describe('Pending alerts read.'),
+    eligible: z.number().describe('Pending alerts of a kind that Jev scores.'),
+    scored: z.number().describe('Alerts that got a score.'),
+    lane_benign: z.number(),
+    lane_attack: z.number(),
+    lane_middle: z.number(),
+    applied: z
+      .number()
+      .describe(
+        'In `on` mode: alerts of the benign lane that took a false positive verdict and skip analysis.'
+      ),
+    calls: z.number().describe('Calls to the model, without the retries.'),
+    failed_calls: z
+      .number()
+      .describe('Calls that failed after the retries. Their alerts are analyzed.'),
+    tag_failures: z.number(),
+    out_of_time: z.boolean(),
+  })
+);
+
+export const triageJevFirstLineStepCommonDefinition: CommonStepDefinition<
+  typeof jevFirstLineInputSchema,
+  typeof jevFirstLineOutputSchema
+> = {
+  id: TRIAGE_JEV_FIRST_LINE_STEP_ID,
+  label: i18n.translate('xpack.alertzero.workflows.steps.triageJevFirstLine.label', {
+    defaultMessage: 'Score pending alerts with the decision model',
+  }),
+  description: i18n.translate('xpack.alertzero.workflows.steps.triageJevFirstLine.description', {
+    defaultMessage:
+      'Scores the pending alerts of some kinds with a decision model and tags the lane. In on mode an alert of the benign lane takes a false positive verdict and skips analysis.',
+  }),
+  category: StepCategory.KibanaSecurity,
+  stability: 'tech_preview',
+  inputSchema: jevFirstLineInputSchema,
+  outputSchema: jevFirstLineOutputSchema,
 };
 
 const proposalTextInputShape = {

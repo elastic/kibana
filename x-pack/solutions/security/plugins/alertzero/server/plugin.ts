@@ -35,6 +35,11 @@ import {
   type DecisionAutoCloseMode,
 } from './alert_triage/constants';
 import {
+  JEV_FIRST_LINE_FLAG,
+  toJevFirstLineMode,
+  type JevFirstLineMode,
+} from './alert_triage/jev_first_line';
+import {
   VERDICT_CACHE_FLAG,
   toVerdictCacheMode,
   type VerdictCacheMode,
@@ -146,7 +151,9 @@ export class AlertZeroPlugin
   private decisionAutoCloseMode: DecisionAutoCloseMode = 'off';
   private decisionAutoCloseFlagSubscription?: Subscription;
   private verdictCacheMode: VerdictCacheMode = 'off';
+  private jevFirstLineMode: JevFirstLineMode = 'off';
   private verdictCacheFlagSubscription?: Subscription;
+  private jevFirstLineFlagSubscription?: Subscription;
   private scanFailuresService?: ScanFailuresService;
   private threatIntelSupplyService?: ThreatIntelSupplyService;
 
@@ -291,6 +298,7 @@ export class AlertZeroPlugin
       },
       getDecisionAutoCloseMode: async () => this.decisionAutoCloseMode,
       getVerdictCacheMode: async () => this.verdictCacheMode,
+      getJevFirstLineMode: async () => this.jevFirstLineMode,
       logger: stepsLogger,
     });
 
@@ -390,6 +398,14 @@ export class AlertZeroPlugin
       .getStringValue$<string>(VERDICT_CACHE_FLAG, 'off')
       .subscribe((mode) => {
         this.verdictCacheMode = toVerdictCacheMode(mode);
+      });
+    // The switch for the Jev first line. It is `off` unless a deployment sets `shadow` or `on`. In `shadow` Jev scores some pending
+    // alerts and the step tags the lane, and every alert is still analyzed. In `on` an alert of the benign lane takes a false
+    // positive verdict and skips analysis.
+    this.jevFirstLineFlagSubscription = core.featureFlags
+      .getStringValue$<string>(JEV_FIRST_LINE_FLAG, 'off')
+      .subscribe((mode) => {
+        this.jevFirstLineMode = toJevFirstLineMode(mode);
       });
     this.fleetAgentService = plugins.fleet?.agentService;
     this.proposals = plugins.proposals;
@@ -613,5 +629,6 @@ export class AlertZeroPlugin
     this.triageGroupingFlagSubscription?.unsubscribe();
     this.decisionAutoCloseFlagSubscription?.unsubscribe();
     this.verdictCacheFlagSubscription?.unsubscribe();
+    this.jevFirstLineFlagSubscription?.unsubscribe();
   }
 }

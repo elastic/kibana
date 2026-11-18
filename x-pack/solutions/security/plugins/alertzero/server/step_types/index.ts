@@ -12,6 +12,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { ActionCatalogClient } from '@kbn/proposals-plugin/server';
 import type { LoadAlertsStepDependencies } from './alert_triage/alert_triage_steps';
 import type { DecisionAutoCloseMode } from '../alert_triage/constants';
+import type { JevFirstLineMode } from '../alert_triage/jev_first_line';
 import type { VerdictCacheMode } from '../alert_triage/verdict_cache';
 import type { HuntServices } from '../services/watches/hunt/types';
 import {
@@ -36,6 +37,8 @@ import {
 import { getTriageMatchFpDecisionsStepDefinition } from './alert_triage/match_fp_decisions_step';
 import { getTriageRevokeFpDecisionStepDefinition } from './alert_triage/revoke_fp_decision_step';
 import { getTriageStoreFpDecisionsStepDefinition } from './alert_triage/store_fp_decisions_step';
+import { getTriageJevFirstLineStepDefinition } from './alert_triage/jev_first_line_step';
+import { makeJevDecide } from './alert_triage/jev_client';
 import { getTriageMatchVerdictCacheStepDefinition } from './alert_triage/match_verdict_cache_step';
 import { getTriageWriteVerdictCacheStepDefinition } from './alert_triage/write_verdict_cache_step';
 import type { ReportWorkerOutcomeStepDeps } from './report_worker_outcome/report_worker_outcome_step';
@@ -56,6 +59,7 @@ export const registerStepDefinitions = ({
   grouping,
   getDecisionAutoCloseMode,
   getVerdictCacheMode,
+  getJevFirstLineMode,
   logger,
 }: {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
@@ -72,6 +76,7 @@ export const registerStepDefinitions = ({
   grouping: Omit<GroupProposalsStepDependencies, 'getConversations' | 'logger'>;
   getDecisionAutoCloseMode: () => Promise<DecisionAutoCloseMode>;
   getVerdictCacheMode: () => Promise<VerdictCacheMode>;
+  getJevFirstLineMode: () => Promise<JevFirstLineMode>;
   logger?: Logger;
 }) => {
   workflowsExtensions.registerStepDefinition(
@@ -130,6 +135,16 @@ export const registerStepDefinitions = ({
     getTriageMatchVerdictCacheStepDefinition({
       isContextEngineEnabled,
       getMode: getVerdictCacheMode,
+    })
+  );
+  workflowsExtensions.registerStepDefinition(
+    getTriageJevFirstLineStepDefinition({
+      isContextEngineEnabled,
+      getMode: getJevFirstLineMode,
+      getDecide: () => {
+        if (!getInternalEsClient) throw new Error('No Elasticsearch client for the decision model');
+        return makeJevDecide(getInternalEsClient());
+      },
     })
   );
   workflowsExtensions.registerStepDefinition(
