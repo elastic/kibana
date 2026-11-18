@@ -171,7 +171,7 @@ export const useUrlSearchState = ({
     [stateParam, uiSettings, maxDays]
   );
 
-  const write = useCallback(
+  const writeSearchStateToUrl = useCallback(
     (state: UrlSearchState) => {
       const params = {
         ...qs.parse(history.location.search),
@@ -192,26 +192,26 @@ export const useUrlSearchState = ({
     [history, uiSettings, maxDays]
   );
 
-  const update = useCallback(
+  const updateUrlSearchState = useCallback(
     (patch: Partial<UrlSearchState>) =>
-      write({ ...(readCurrent()?.state ?? DEFAULT_URL_SEARCH_STATE), ...patch }),
-    [readCurrent, write]
+      writeSearchStateToUrl({ ...(readCurrent()?.state ?? DEFAULT_URL_SEARCH_STATE), ...patch }),
+    [readCurrent, writeSearchStateToUrl]
   );
 
   const repairUrl = useCallback(() => {
     if (!urlRead) {
-      write(DEFAULT_URL_SEARCH_STATE);
+      writeSearchStateToUrl(DEFAULT_URL_SEARCH_STATE);
     } else if (urlRead.needsRepair) {
-      write(urlRead.state);
+      writeSearchStateToUrl(urlRead.state);
       if (urlRead.wasLimited) {
         notifications.toasts.addWarning({ title: TIME_RANGE_CLAMPED_TOAST_TITLE });
       }
     }
-  }, [notifications, urlRead, write]);
+  }, [notifications, urlRead, writeSearchStateToUrl]);
 
   useEffect(() => {
     repairUrl();
   }, [repairUrl]);
 
-  return [urlRead?.state ?? DEFAULT_URL_SEARCH_STATE, update];
+  return [urlRead?.state ?? DEFAULT_URL_SEARCH_STATE, updateUrlSearchState];
 };
