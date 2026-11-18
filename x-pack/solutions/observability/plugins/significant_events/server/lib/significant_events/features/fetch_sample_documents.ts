@@ -160,13 +160,19 @@ export async function fetchSampleDocuments({
 
       logger.debug(
         () =>
-          `Sampled ${documents.length} documents (${bucketCounts.diverse} diverse, ${bucketCounts.random} random). No entities available to filter by.`
+          `Sampled ${documents.length} documents (${bucketCounts.diverse} diverse, ${
+            bucketCounts.random
+          } random). ${
+            features.length === 0
+              ? 'No entities available to filter by.'
+              : `No entity filters could be applied (${omitted} features omitted).`
+          }`
       );
 
       return {
         documents,
-        totalFilters: 0,
-        filtersCapped: false,
+        totalFilters: features.length,
+        filtersCapped: omitted > 0,
         hasFilteredDocuments: false,
       };
     }

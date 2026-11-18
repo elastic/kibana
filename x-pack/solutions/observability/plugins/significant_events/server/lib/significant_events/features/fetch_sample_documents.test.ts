@@ -14,6 +14,7 @@ import type { FeatureWithFilter } from '@kbn/significant-events-schema';
 import { getEsqlColumnSchema, getSampleDocumentsEsql } from '@kbn/ai-tools';
 import { getDiverseSampleDocuments } from '@kbn/nightshift-ai';
 import { fetchSampleDocuments } from './fetch_sample_documents';
+import { MAX_ENTITY_FILTER_COMPARISONS } from './get_entity_filters';
 
 jest.mock('@kbn/ai-tools', () => ({
   getEsqlColumnSchema: jest.fn(),
@@ -163,6 +164,44 @@ describe('fetchSampleDocuments', () => {
     expect(getDiverseSampleDocumentsMock).not.toHaveBeenCalled();
     expect(result.documents.map((document) => document._id)).toEqual(['random-1']);
     expect(result.hasFilteredDocuments).toBe(false);
+  });
+
+  it('reports omitted filters when none fit the query budget', async () => {
+    const feature = {
+      ...createFeature({
+        id: 'oversized',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+        field: 'service.name',
+        value: 'checkout',
+      }),
+      filter: {
+        and: Array.from({ length: MAX_ENTITY_FILTER_COMPARISONS + 1 }, (_, i) => ({
+          field: 'service.name',
+          eq: `service-${i}`,
+        })),
+      },
+    } as FeatureWithFilter;
+    getSampleDocumentsEsqlMock.mockResolvedValueOnce({
+      hits: [createHit('random-1')],
+      total: 1,
+    });
+
+    const result = await fetchSampleDocuments({
+      esClient: {} as ElasticsearchClient,
+      index: 'logs.test-default',
+      start: 100,
+      end: 200,
+      features: [feature],
+      logger,
+      size: 5,
+      entityFilteredRatio: 0.4,
+      diverseRatio: 0,
+      maxEntityFilters: 10,
+      samplingTimeoutMs: 30_000,
+      iteration: 1,
+    });
+
+    expect(result).toMatchObject({ totalFilters: 1, filtersCapped: true });
   });
 
   it('filters on mapped fields without SET unmapped_fields and leaves the random arm unfiltered', async () => {
