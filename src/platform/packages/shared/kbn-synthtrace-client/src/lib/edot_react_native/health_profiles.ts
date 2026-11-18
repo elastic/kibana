@@ -24,9 +24,9 @@ export interface MobileHealthProfile {
   errorLogRate: number;
   /** Probability that the app crashes during a visit. */
   crashRate: number;
-  /** Share of screen views of EDOT Android that end in an ANR, with proposed signals. */
+  /** Share of screen views of EDOT Android with an ANR, with proposed signals. */
   anrRate: number;
-  /** Share of screen views of EDOT iOS that end in a hang, with proposed signals. */
+  /** Share of screen views of EDOT iOS with a hang, with proposed signals. */
   hangRate: number;
   /** Share of screen views on which the app reports a handled exception, with proposed signals. */
   handledErrorRate: number;

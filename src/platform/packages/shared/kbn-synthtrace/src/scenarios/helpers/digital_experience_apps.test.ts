@@ -23,6 +23,7 @@ import {
   generatePerMinute,
   getDefaultSeed,
   parseDigitalExperienceScenarioOpts,
+  type OngoingSessionStore,
 } from './digital_experience_apps';
 import { DIGITAL_EXPERIENCE_EDGE_CASES } from './digital_experience_edge_cases';
 
@@ -1039,11 +1040,13 @@ describe('digital experience ongoing sessions', () => {
     const startOf = (index: number) => (index + 1) * 30_000 - 1;
     const from = END - 10 * MINUTE;
 
+    const store: OngoingSessionStore<EdotBrowserDocument> = new Map();
     const generate =
       (key: string, created: number[] = []) =>
       (timeRange: Timerange) =>
         [
           generateOngoingPerMinute(timeRange, 2, {
+            store,
             key,
             maxDuration: MAX_DURATION,
             create: ({ time, index }) => {

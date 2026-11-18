@@ -49,6 +49,7 @@ import {
 
 const BRIDGE_SCOPE: OtelScope = { name: '@elastic/otel-react-native' };
 const INTERACTIONS_SCOPE: OtelScope = { name: '@elastic/otel-react-native.interactions' };
+const NATIVE_INTERACTIONS_SCOPE: OtelScope = { name: 'co.elastic.otel.mobile.interactions' };
 const SESSION_SCOPE: OtelScope = { name: 'io.opentelemetry.sessions' };
 const APP_START_SCOPE: OtelScope = { name: 'co.elastic.otel.mobile.startup' };
 const SCREEN_SCOPE: OtelScope = { name: 'co.elastic.otel.mobile.screen' };
@@ -157,7 +158,9 @@ export abstract class EdotReactNativeClientBase {
     private readonly appResourceAttributes: Readonly<Record<string, unknown>>,
     protected readonly options: EdotReactNativeClientOptions,
     /** Android application ID and iOS bundle ID, which the SDKs don't write as an attribute. */
-    protected readonly appId: string
+    protected readonly appId: string,
+    /** Whether the app is built with the native SDK directly, without React Native. */
+    public readonly native: boolean = false
   ) {}
 
   /** Whether the SDK adds the cellular details to every span, not only to HTTP spans. */
@@ -191,6 +194,15 @@ export abstract class EdotReactNativeClientBase {
       ...this.deviceAttributes(),
     };
     return this.memoizedResourceAttributes;
+  }
+
+  /** The scope of the app's own spans and logs: the bridge, or the app's own tracer and logger. */
+  private get appScope(): OtelScope {
+    return this.native ? { name: this.appId } : BRIDGE_SCOPE;
+  }
+
+  private get interactionsScope(): OtelScope {
+    return this.native ? NATIVE_INTERACTIONS_SCOPE : INTERACTIONS_SCOPE;
   }
 
   public get sessionId(): string | undefined {
@@ -363,7 +375,7 @@ export abstract class EdotReactNativeClientBase {
 
   /** A tap that hit no widget. */
   screenClick(): EdotLog {
-    return this.event(INTERACTIONS_SCOPE, EVENT_SCREEN_CLICK);
+    return this.event(this.interactionsScope, EVENT_SCREEN_CLICK);
   }
 
   /** A screen loading, from the start of the view until it has appeared. */
@@ -414,7 +426,7 @@ export abstract class EdotReactNativeClientBase {
     });
   }
 
-  /** A span the app creates itself with `startSpan()` of `@elastic/otel-react-native`. */
+  /** A span the app creates itself, with `startSpan()` of the bridge or its own tracer. */
   manualSpan({
     name,
     traceId,
@@ -427,23 +439,23 @@ export abstract class EdotReactNativeClientBase {
     return this.span({
       name,
       kind: MOBILE_SPAN_KIND.INTERNAL,
-      scope: BRIDGE_SCOPE,
+      scope: this.appScope,
       attributes: this.spanAttributes(),
       traceId,
       spanId,
     });
   }
 
-  /** A log the app emits with `emitLog(message, 'error')` of `@elastic/otel-react-native`. */
+  /** An error log of the app, from `emitLog(message, 'error')` of the bridge or its own logger. */
   errorLog(message: string): EdotLog {
-    return this.log(BRIDGE_SCOPE, this.logAttributes, { severityNumber: SEVERITY_ERROR }).message(
+    return this.log(this.appScope, this.logAttributes, { severityNumber: SEVERITY_ERROR }).message(
       message
     );
   }
 
   /** A tap recorded by the Babel plugin of `@elastic/otel-react-native`, or `recordWidgetClick()`. */
   widgetClick({ id, name }: { id: string; name?: string }): EdotLog {
-    return this.event(INTERACTIONS_SCOPE, EVENT_WIDGET_CLICK, {
+    return this.event(this.interactionsScope, EVENT_WIDGET_CLICK, {
       'app.widget.id': id,
       ...(name ? { 'app.widget.name': name } : {}),
     });

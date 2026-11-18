@@ -22,6 +22,9 @@
  *   the HTTP CLIENT spans of the screen, and the SERVER spans of the backends that answer
  * - every span and log written while a screen is shown carries its `app.screen.name`
  *
+ * Sessions start at their time, from the run's `from` on, and are written as they go; those still
+ * running at the run's `to` are cut off there.
+ *
  * Apps (`service.name`), each with three versions where the newest crashes more and starts slower.
  * The newest version rolls out over the first hours of the run, so its share grows over time:
  * - trailmap-android: Android only

@@ -1135,25 +1135,30 @@ export const getTimestamp = (event: Serializable<Fields>): number =>
 const getStart = (events: Array<Serializable<Fields>>): number =>
   events.reduce((start, event) => Math.min(start, getTimestamp(event)), Infinity);
 
-interface OngoingSession {
+interface OngoingSession<TFields extends Fields> {
   /** The time the session is generated for, when it starts. */
   start: number;
   /** Its events by time, and the next one to write. */
-  events: Array<{ time: number; event: EdotBrowserEvent }>;
+  events: Array<{ time: number; event: Serializable<TFields> }>;
   next: number;
 }
 
-interface OngoingSessions {
+interface OngoingSessions<TFields extends Fields> {
   /** The end of the last window written. The window that starts there carries on from here. */
   end: number;
   /** The index of the next session to start. */
   nextIndex: number;
-  sessions: OngoingSession[];
+  sessions: Array<OngoingSession<TFields>>;
 }
 
-// Live mode calls the scenario again for every batch of a second or so, so the sessions in progress
-// are kept between batches, by run and app, instead of being simulated again for every batch
-const ongoingSessionsByKey = new Map<string, OngoingSessions>();
+/**
+ * The sessions in progress by run and app. Live mode calls the scenario again for every batch of a
+ * second or so, so a store lives for the whole process and keeps them between batches, instead of
+ * simulating them again for every batch.
+ */
+export type OngoingSessionStore<TFields extends Fields> = Map<string, OngoingSessions<TFields>>;
+
+const ongoingBrowserSessions: OngoingSessionStore<EdotBrowserDocument> = new Map();
 
 /**
  * Like {@link generatePerMinute}, except that sessions start at their time and run on from there:
@@ -1164,66 +1169,70 @@ const ongoingSessionsByKey = new Map<string, OngoingSessions>();
  * started within `maxDuration`, with `after` set to the window's start, and may return nothing for
  * a session that ended before. Every window has the same events either way.
  */
-export const generateOngoingPerMinute = (
+export const generateOngoingPerMinute = <TFields extends Fields>(
   range: Timerange,
   perMinute: number,
   {
+    store,
     key,
     maxDuration,
     create,
   }: {
+    store: OngoingSessionStore<TFields>;
     key: string;
     maxDuration: number;
-    create: (session: { time: number; index: number; after: number }) => EdotBrowserEvent[];
+    create: (session: {
+      time: number;
+      index: number;
+      after: number;
+    }) => Array<Serializable<TFields>>;
   }
-): SynthtraceGenerator<EdotBrowserDocument> => {
+): SynthtraceGenerator<TFields> => {
   const to = range.to.getTime();
   // The same numbering and times as generatePerMinute, by absolute time
   const indexAt = (time: number) => Math.floor((perMinute * time) / MS_PER_MINUTE);
   const timeOf = (index: number) => Math.ceil(((index + 1) * MS_PER_MINUTE) / perMinute) - 1;
 
-  return range
-    .interval('1s')
-    .generator<EdotBrowserDocument>((windowStart, _index, { stepMilliseconds }) => {
-      const windowEnd = Math.min(windowStart + stepMilliseconds, to);
-      const previous = ongoingSessionsByKey.get(key);
-      const state: OngoingSessions =
-        previous?.end === windowStart
-          ? previous
-          : {
-              end: windowStart,
-              // One more than needed, in case rounding puts a session's time on the other side
-              nextIndex: Math.max(indexAt(windowStart - maxDuration) - 1, 0),
-              sessions: [],
-            };
+  return range.interval('1s').generator<TFields>((windowStart, _index, { stepMilliseconds }) => {
+    const windowEnd = Math.min(windowStart + stepMilliseconds, to);
+    const previous = store.get(key);
+    const state: OngoingSessions<TFields> =
+      previous?.end === windowStart
+        ? previous
+        : {
+            end: windowStart,
+            // One more than needed, in case rounding puts a session's time on the other side
+            nextIndex: Math.max(indexAt(windowStart - maxDuration) - 1, 0),
+            sessions: [],
+          };
 
-      while (state.nextIndex < indexAt(windowEnd)) {
-        const index = state.nextIndex++;
-        const start = timeOf(index);
-        const events = create({ time: start, index, after: windowStart })
-          .map((event) => ({ time: getTimestamp(event), event }))
-          .sort((a, b) => a.time - b.time);
-        state.sessions.push({ start, events, next: 0 });
-      }
+    while (state.nextIndex < indexAt(windowEnd)) {
+      const index = state.nextIndex++;
+      const start = timeOf(index);
+      const events = create({ time: start, index, after: windowStart })
+        .map((event) => ({ time: getTimestamp(event), event }))
+        .sort((a, b) => a.time - b.time);
+      state.sessions.push({ start, events, next: 0 });
+    }
 
-      const written: EdotBrowserEvent[] = [];
-      for (const session of state.sessions) {
-        const { start, events } = session;
-        while (session.next < events.length && events[session.next].time < windowEnd) {
-          const { time, event } = events[session.next++];
-          if (time >= windowStart && time >= start && time < start + maxDuration) {
-            written.push(event);
-          }
+    const written: Array<Serializable<TFields>> = [];
+    for (const session of state.sessions) {
+      const { start, events } = session;
+      while (session.next < events.length && events[session.next].time < windowEnd) {
+        const { time, event } = events[session.next++];
+        if (time >= windowStart && time >= start && time < start + maxDuration) {
+          written.push(event);
         }
       }
+    }
 
-      state.end = windowEnd;
-      state.sessions = state.sessions.filter(
-        ({ start, events, next }) => next < events.length && start + maxDuration > windowEnd
-      );
-      ongoingSessionsByKey.set(key, state);
-      return written;
-    });
+    state.end = windowEnd;
+    state.sessions = state.sessions.filter(
+      ({ start, events, next }) => next < events.length && start + maxDuration > windowEnd
+    );
+    store.set(key, state);
+    return written;
+  });
 };
 
 // EDOT Browser 0.4.0 is the first release that writes session data, 0.3.0 the last one without
@@ -1504,6 +1513,7 @@ export const generateEdotBrowserSessions = (
         const perMinute = (sessionsPerMinute * scale * weight) / totalWeight;
         if (ongoingSessions) {
           return generateOngoingPerMinute(range, perMinute, {
+            store: ongoingBrowserSessions,
             key: `${runKey}:${sessionKey}`,
             maxDuration,
             create: ({ time, index, after }) => {

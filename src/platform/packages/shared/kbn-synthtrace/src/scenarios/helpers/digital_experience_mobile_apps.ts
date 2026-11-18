@@ -23,6 +23,7 @@ import {
   type Timerange,
 } from '@kbn/synthtrace-client';
 import {
+  generateOngoingPerMinute,
   generatePerMinute,
   getDefaultSeed,
   getTimestamp,
@@ -30,6 +31,7 @@ import {
   parseScale,
   parseSeed,
   randomUuid,
+  type OngoingSessionStore,
 } from './digital_experience_apps';
 
 export interface DigitalExperienceMobileAppVersion {
@@ -65,6 +67,8 @@ export interface DigitalExperienceMobileApp {
   model: EdotReactNativeAppModel;
   /** Whether the app creates its own `app.launch` and screen spans. */
   manualSpans?: { launch?: boolean; screens?: boolean };
+  /** Built with EDOT Android or EDOT iOS directly, without React Native. */
+  native?: boolean;
 }
 
 /** The `platform` option that generates sessions of every platform. */
@@ -428,8 +432,8 @@ export const DIGITAL_EXPERIENCE_NATIVE_APPS: readonly DigitalExperienceMobileApp
     health: 'healthy',
     sessionsPerMinute: 4,
     deviceWeights: ANDROID_ONLY,
+    native: true,
     model: {
-      native: true,
       screens: [
         {
           name: 'Map',
@@ -507,8 +511,8 @@ export const DIGITAL_EXPERIENCE_NATIVE_APPS: readonly DigitalExperienceMobileApp
     health: 'healthy',
     sessionsPerMinute: 4,
     deviceWeights: IOS_ONLY,
+    native: true,
     model: {
-      native: true,
       screens: [
         {
           name: 'Home',
@@ -593,8 +597,8 @@ export const DIGITAL_EXPERIENCE_NATIVE_APPS: readonly DigitalExperienceMobileApp
     appId: 'com.example.transit',
     health: 'healthy',
     sessionsPerMinute: 6,
+    native: true,
     model: {
-      native: true,
       screens: [
         {
           name: 'Departures',
@@ -797,26 +801,41 @@ const pickInstalledVersion = (
 type GenerateSessionsOpts = DigitalExperienceMobileScenarioOpts & {
   environment: string;
   from: number;
+  /** Overrides the catalog of apps. */
   apps?: readonly DigitalExperienceMobileApp[];
 };
+
+// Bounds a native session from its start to its last event, with room to spare: two visits up to
+// 30 minutes apart, and a relaunch up to 15 minutes after a crash. Events after it are left out.
+const MAX_NATIVE_SESSION_MS = 2 * HOUR_MS;
+
+const ongoingNativeSessions: OngoingSessionStore<EdotReactNativeDocument> = new Map();
 
 /** One generator of EDOT React Native sessions per app, ending at their tick and cut off at `from`. */
 export const generateEdotReactNativeSessions = (
   range: Timerange,
   opts: GenerateSessionsOpts
 ): Array<SynthtraceGenerator<EdotReactNativeDocument>> =>
-  generateSessions(range, { apps: DIGITAL_EXPERIENCE_MOBILE_APPS, ...opts }, false);
+  generateSessions(range, {
+    ...opts,
+    apps: opts.apps ?? DIGITAL_EXPERIENCE_MOBILE_APPS,
+    proposedSignals: false,
+  });
 
 /**
  * Like {@link generateEdotReactNativeSessions} for the native apps, with every session written
- * with the proposed signals. A session that began before `from` is left out whole, so that every
- * session has its `session.start`.
+ * with the proposed signals. Sessions start at their tick, from `from` on, and are written as they
+ * go, so every session has its `session.start` and those still running at the end are cut off.
  */
 export const generateEdotNativeSessions = (
   range: Timerange,
   opts: GenerateSessionsOpts
 ): Array<SynthtraceGenerator<EdotReactNativeDocument>> =>
-  generateSessions(range, { apps: DIGITAL_EXPERIENCE_NATIVE_APPS, ...opts }, true);
+  generateSessions(range, {
+    ...opts,
+    apps: opts.apps ?? DIGITAL_EXPERIENCE_NATIVE_APPS,
+    proposedSignals: true,
+  });
 
 const generateSessions = (
   range: Timerange,
@@ -827,12 +846,16 @@ const generateSessions = (
     seed,
     platform,
     withManualSpans,
-    apps = DIGITAL_EXPERIENCE_MOBILE_APPS,
-  }: GenerateSessionsOpts,
-  proposedSignals: boolean
+    apps,
+    proposedSignals,
+  }: GenerateSessionsOpts & {
+    apps: readonly DigitalExperienceMobileApp[];
+    proposedSignals: boolean;
+  }
 ): Array<SynthtraceGenerator<EdotReactNativeDocument>> => {
   const platforms: readonly MobilePlatform[] =
     platform === ALL_MOBILE_PLATFORMS ? MOBILE_PLATFORMS : [platform];
+  const runKey = JSON.stringify({ environment, from, scale, seed, platform, withManualSpans });
 
   return apps.map(
     ({
@@ -846,6 +869,7 @@ const generateSessions = (
       deviceWeights,
       model,
       manualSpans = {},
+      native,
     }) => {
       const healthProfile = edotReactNative.healthProfiles[health];
       const versionApps = versions.map(
@@ -856,6 +880,7 @@ const generateSessions = (
             appId,
             buildNumber,
             environment: withoutEnvironment ? undefined : environment,
+            native,
           }),
           model: withVersionCrashes(model, crashes),
           health: { ...healthProfile, ...versionHealth },
@@ -867,7 +892,8 @@ const generateSessions = (
         installationCount ??
         Math.max(Math.ceil(perMinute * MINUTES_BETWEEN_SESSIONS_OF_AN_INSTALLATION), 1);
 
-      return generatePerMinute<EdotReactNativeDocument>(range, perMinute, ({ time, index }) => {
+      // The session at `time`: it starts there with proposed signals, and ends there without
+      const createSession = (index: number, time: number) => {
         // An installation keeps its device and app version across sessions
         const installationRandom = createSeededRandom(
           `${seed}:${serviceName}:installation:${index % installations}`
@@ -908,7 +934,7 @@ const generateSessions = (
           proposedSignals && index >= installations
             ? randomUuid(createSeededRandom(`${seed}:${serviceName}:${index - installations}`))
             : undefined;
-        const events = edotReactNative.session({
+        return edotReactNative.session({
           client: app.client(profile, { installationId, sessionId, deviceId, network }),
           app: versionModel,
           health: versionHealth,
@@ -918,13 +944,22 @@ const generateSessions = (
           proposedSignals,
           previousSessionId,
           random,
-          end: time,
+          ...(proposedSignals ? { start: time } : { end: time }),
         });
-        if (proposedSignals) {
-          return events.every((event) => getTimestamp(event) >= from) ? events : [];
-        }
-        return events.filter((event) => getTimestamp(event) >= from);
-      });
+      };
+
+      if (proposedSignals) {
+        return generateOngoingPerMinute(range, perMinute, {
+          store: ongoingNativeSessions,
+          key: `${runKey}:${serviceName}`,
+          maxDuration: MAX_NATIVE_SESSION_MS,
+          // A session that started before the run is left out whole
+          create: ({ time, index }) => (time < from ? [] : createSession(index, time)),
+        });
+      }
+      return generatePerMinute<EdotReactNativeDocument>(range, perMinute, ({ time, index }) =>
+        createSession(index, time).filter((event) => getTimestamp(event) >= from)
+      );
     }
   );
 };

@@ -59,28 +59,37 @@ const app = edotReactNative.app({
   buildNumber: 42,
 });
 
+const nativeApp = edotReactNative.app({
+  serviceName: 'trailmap',
+  appId: 'com.example.trailmap',
+  native: true,
+});
+
+interface ClientOptions {
+  sessionId?: string;
+  network?: NetworkConnection;
+  native?: boolean;
+}
+
 const createClient = (
   profileId: DeviceProfileId,
-  { sessionId = SESSION_ID, network }: { sessionId?: string; network?: NetworkConnection } = {}
+  { sessionId = SESSION_ID, network, native }: ClientOptions = {}
 ) =>
-  app.client(DEVICE_PROFILES[profileId], {
+  (native ? nativeApp : app).client(DEVICE_PROFILES[profileId], {
     installationId: INSTALLATION_ID,
     sessionId,
     deviceId: 'd2a6c1b0-0000-4000-8000-000000000002',
     network,
   });
 
-const android = (options?: {
-  sessionId?: string;
-  network?: NetworkConnection;
-}): EdotAndroidClient => {
+const android = (options?: ClientOptions): EdotAndroidClient => {
   const client = createClient('pixel8Android15', options);
   if (client.platform !== 'android') {
     throw new Error('Expected an Android client');
   }
   return client;
 };
-const ios = (options?: { sessionId?: string; network?: NetworkConnection }): EdotIosClient => {
+const ios = (options?: ClientOptions): EdotIosClient => {
   const client = createClient('iphone15ProIos18', options);
   if (client.platform !== 'ios') {
     throw new Error('Expected an iOS client');
@@ -144,6 +153,7 @@ const simulate = ({
   manualSpans,
   sessionId,
   model = APP_MODEL,
+  native,
   proposedSignals,
   previousSessionId,
 }: {
@@ -155,12 +165,13 @@ const simulate = ({
   manualSpans?: { launch?: boolean; screens?: boolean };
   sessionId?: string;
   model?: EdotReactNativeAppModel;
+  native?: boolean;
   proposedSignals?: boolean;
   previousSessionId?: string;
 }) =>
   serialize(
     edotReactNative.session({
-      client: platform === 'ios' ? ios({ sessionId }) : android({ sessionId }),
+      client: platform === 'ios' ? ios({ sessionId, native }) : android({ sessionId, native }),
       app: model,
       health,
       screenViews,
@@ -1026,7 +1037,6 @@ describe('edotReactNative', () => {
 
   describe('proposed signals', () => {
     const NATIVE_MODEL: EdotReactNativeAppModel = {
-      native: true,
       screens: [
         {
           name: 'Map',
@@ -1053,7 +1063,7 @@ describe('edotReactNative', () => {
     const spansNamed = (docs: EdotReactNativeDocument[], name: string) =>
       docs.filter(isSpan).filter((span) => span.name === name);
     const proposed = (options: Parameters<typeof simulate>[0]) =>
-      simulate({ model: NATIVE_MODEL, proposedSignals: true, ...options });
+      simulate({ model: NATIVE_MODEL, native: true, proposedSignals: true, ...options });
 
     describe('client methods', () => {
       it('writes session events with the session id of the platform', () => {
@@ -1328,7 +1338,12 @@ describe('edotReactNative', () => {
             expect(attributes?.['exception.stacktrace']).toEqual(expect.any(String));
           });
         }
-        const without = simulate({ platform: 'android', model: NATIVE_MODEL, health });
+        const without = simulate({
+          platform: 'android',
+          model: NATIVE_MODEL,
+          native: true,
+          health,
+        });
         expect(logs(without).filter(({ severity_text: severity }) => severity === 'WARN')).toEqual(
           []
         );
@@ -1346,7 +1361,9 @@ describe('edotReactNative', () => {
           const starts = named(docs, EVENT_APP_START).sort((a, b) => timeOf(a) - timeOf(b));
           const relaunch = starts[starts.length - 1];
           expect(timeOf(crash)).toBeLessThan(timeOf(relaunch));
-          expect(timeOf(crash)).toBe(Number(crash.observed_timestamp));
+          // Backdated to the crash, and observed when the relaunch reports it
+          expect(Number(crash.observed_timestamp)).toBeGreaterThan(timeOf(crash));
+          expect(Number(crash.observed_timestamp)).toBeLessThanOrEqual(timeOf(relaunch));
           expect(relaunch.attributes?.[ATTR_START_TYPE]).toBe(START_TYPE_COLD);
           expect(timeOf(named(docs, EVENT_SESSION_END)[0])).toBeGreaterThan(timeOf(relaunch));
         }
@@ -1368,6 +1385,24 @@ describe('edotReactNative', () => {
         expect(types).not.toContain('com.facebook.react.common.JavascriptException');
       });
 
+      it('gives native apps native scopes and no React Native root view', () => {
+        for (const platform of ['android', 'ios'] as const) {
+          const docs = Array.from({ length: 10 }, (_, i) =>
+            proposed({
+              platform,
+              seed: `scopes:${i}`,
+              screenViews: 4,
+              health: withHealth({ errorLogRate: 1 }),
+            })
+          ).flat();
+          const scopes = new Set(docs.map(({ scope }) => scope?.name));
+          expect(scopes).toContain('co.elastic.otel.mobile.interactions');
+          expect(scopes).toContain('com.example.trailmap');
+          scopes.forEach((name) => expect(name).not.toContain('react-native'));
+          expect(spansNamed(docs, 'UIViewController - view appearing')).toEqual([]);
+        }
+      });
+
       it('writes none of the proposed signals unless asked to', () => {
         const names = [
           EVENT_SESSION_START,
@@ -1386,6 +1421,7 @@ describe('edotReactNative', () => {
             simulate({
               platform,
               model: NATIVE_MODEL,
+              native: true,
               proposedSignals: false,
               previousSessionId: SESSION_ID,
               health: MOBILE_HEALTH_PROFILES.critical,

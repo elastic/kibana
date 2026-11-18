@@ -383,8 +383,8 @@ describe('digital experience mobile apps', () => {
       expect(platforms).toContainEqual({ android: false, ios: true });
       expect(platforms).toContainEqual({ android: true, ios: true });
 
-      DIGITAL_EXPERIENCE_NATIVE_APPS.forEach(({ versions, model }) => {
-        expect(model.native).toBe(true);
+      DIGITAL_EXPERIENCE_NATIVE_APPS.forEach(({ versions, native }) => {
+        expect(native).toBe(true);
         expect(versions.length).toBeGreaterThanOrEqual(3);
         const [newest, previous] = versions;
         expect(Number(newest.health?.crashRate)).toBeGreaterThan(
@@ -418,6 +418,22 @@ describe('digital experience mobile apps', () => {
       const json = JSON.stringify(docs);
       expect(json).not.toContain(EVENT_SESSION_START);
       expect(json).not.toContain(SPAN_SCREEN_LOAD);
+    });
+
+    it('writes every session that starts in the run, from its start, the long ones included', () => {
+      const nativeDocs = collectNative();
+      const starts = logsOf(nativeDocs).filter(
+        ({ event_name: eventName }) => eventName === EVENT_SESSION_START
+      );
+      const minutes = (range.to.getTime() - FROM) / 60_000;
+      DIGITAL_EXPERIENCE_NATIVE_APPS.forEach(({ serviceName, sessionsPerMinute }) => {
+        const ofApp = starts.filter((doc) => serviceOf(doc) === serviceName);
+        expect(ofApp).toHaveLength(sessionsPerMinute * minutes);
+      });
+      nativeDocs.forEach((doc) => {
+        expect(Number(doc['@timestamp'])).toBeGreaterThanOrEqual(FROM);
+        expect(Number(doc['@timestamp'])).toBeLessThan(range.to.getTime());
+      });
     });
 
     it('rolls the newest version of every app out over the run, without downgrades', () => {

@@ -73,8 +73,6 @@ export interface EdotReactNativeAppModel {
   crashes?: Partial<Record<MobilePlatform, readonly EdotReactNativeCrashTemplate[]>>;
   /** Exceptions the app catches and reports per platform, on top of common ones. */
   handledErrors?: Partial<Record<MobilePlatform, readonly EdotReactNativeCrashTemplate[]>>;
-  /** A native app has no JavaScript runtime, so it has no JavaScript crashes and no `RNSScreen`. */
-  native?: boolean;
 }
 
 /** Spans the app creates itself, as the SDKs don't record launches or React Native screens. */
@@ -123,8 +121,8 @@ const WARM_LAUNCH_FACTOR = 0.25;
 const MAX_TAPS_PER_SCREEN = 2;
 // How long the main thread stays blocked: Android reports an ANR after 5 seconds
 const FREEZE_DURATION_MS: Readonly<Record<MobilePlatform, { min: number; max: number }>> = {
-  android: { min: 5_000, max: 12_000 },
-  ios: { min: 2_000, max: 6_000 },
+  [MOBILE_PLATFORM.ANDROID]: { min: 5_000, max: 12_000 },
+  [MOBILE_PLATFORM.IOS]: { min: 2_000, max: 6_000 },
 };
 const JAVASCRIPT_EXCEPTION = 'com.facebook.react.common.JavascriptException';
 const DEFAULT_FAILURE_STATUS_CODES = [500, 502, 503, 504] as const;
@@ -213,7 +211,7 @@ const TRANSPORT_ERRORS: Readonly<Record<MobilePlatform, readonly TransportError[
  * - Plans start at time 0. `session()` then moves them to the requested `start` or `end`.
  *
  * Simulation (`simulateVisit`) turns each visit into events:
- * - the launch: iOS lifecycle events, the root view controller appearing on iOS, and the opt-in
+ * - the launch: iOS lifecycle events, the React Native root view controller appearing on iOS, and the opt-in
  *   manual `app.launch` span
  * - each screen view: the iOS view span, the opt-in manual screen span, the screen's requests,
  *   taps and the requests they fire, and error logs
@@ -225,8 +223,8 @@ const TRANSPORT_ERRORS: Readonly<Record<MobilePlatform, readonly TransportError[
  *
  * With `proposedSignals`, the session also writes `session.start` and `session.end`, an app start
  * per launch, a screen load span per screen view that parents the screen's requests, screen taps,
- * freezes, handled errors, and backend spans; it stamps the screen's name on what it writes, and both platforms
- * report a crash on the next launch, with the crash time.
+ * freezes, handled errors, and backend spans. It stamps the screen's name on what it writes, and
+ * both platforms report a crash on the next launch, with the crash time.
  *
  * Planning and simulation draw from the same `random` source, so a seed reproduces a session.
  */
@@ -264,10 +262,8 @@ interface VisitPlan {
   crashedAt?: number;
 }
 
-const iosViewTitle = (
-  { iosTitle, name }: EdotReactNativeScreen,
-  { native }: EdotReactNativeAppModel
-) => iosTitle ?? (native ? name : 'RNSScreen');
+const iosViewTitle = ({ iosTitle, name }: EdotReactNativeScreen, native: boolean) =>
+  iosTitle ?? (native ? name : 'RNSScreen');
 
 /** Marks what happens while a screen is shown with its name. Backend spans are not the app's. */
 const stampScreen = (events: EdotReactNativeEvent[], screenName: string): void => {
@@ -510,7 +506,7 @@ interface PendingCrash {
 
 /** The crash a visit ends with, described as the platform's crash reporter does. */
 const describeCrash = ({ client, app, random }: SessionContext, crashedAt: number): CrashReport => {
-  const { native = false } = app;
+  const { native } = client;
   const common = COMMON_CRASHES[client.platform].filter(
     ({ type }) => !native || type !== JAVASCRIPT_EXCEPTION
   );
@@ -585,6 +581,8 @@ const viewScreen = (
 ): EdotReactNativeEvent[] => {
   const { client, app, health, manualSpans, proposedSignals, random } = ctx;
   const { screen, start, appeared, end } = view;
+  // Freezes and handled errors happen while the app is in the foreground, which it leaves at `end`
+  const lastForegroundTime = end - 1;
   const events: EdotReactNativeEvent[] = [];
 
   // Drawn on both platforms, so that the platform doesn't change the rest of the draws
@@ -592,7 +590,7 @@ const viewScreen = (
   if (client.platform === MOBILE_PLATFORM.IOS) {
     events.push(
       client
-        .viewAppearing({ title: iosViewTitle(screen, app), ...viewContext })
+        .viewAppearing({ title: iosViewTitle(screen, client.native), ...viewContext })
         .timestamp(start)
         .duration(Math.max(appeared - start, 1))
     );
@@ -656,7 +654,7 @@ const viewScreen = (
       client.platform === MOBILE_PLATFORM.ANDROID ? health.anrRate : health.hangRate;
     if (random() < freezeRate) {
       const { min, max } = FREEZE_DURATION_MS[client.platform];
-      const time = Math.round(between(random, appeared, end));
+      const time = Math.round(between(random, appeared, lastForegroundTime));
       events.push(client.freeze({ durationMs: between(random, min, max) }).timestamp(time));
     }
 
@@ -665,7 +663,7 @@ const viewScreen = (
         ...(app.handledErrors?.[client.platform] ?? []),
         ...COMMON_HANDLED_ERRORS[client.platform],
       ]);
-      const time = Math.round(between(random, appeared, end));
+      const time = Math.round(between(random, appeared, lastForegroundTime));
       events.push(
         client
           .handledError({ ...template, stacktrace: handledStacktraceOf(client.platform, template) })
@@ -696,7 +694,7 @@ const simulateVisit = (
     // The previous launch's crash is reported once the app has started again
     const crashLog = client.crash(pendingCrash.crash);
     if (proposedSignals) {
-      crashLog.timestamp(pendingCrash.crashedAt);
+      crashLog.timestamp(pendingCrash.crashedAt).observedAt(start + 1);
       stampScreen([crashLog], pendingCrash.screenName);
     } else {
       crashLog.timestamp(start + 1).observedAt(pendingCrash.crashedAt);
@@ -720,7 +718,7 @@ const simulateVisit = (
       events.push(client.lifecycle('foreground').timestamp(start));
     }
     events.push(client.lifecycle('active').timestamp(launched));
-    if (cold) {
+    if (cold && !client.native) {
       // The React Native root view controller appears once the app has launched
       events.push(
         client
