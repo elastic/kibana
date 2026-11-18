@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, type ReactElement } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButton,
@@ -26,6 +26,15 @@ interface ApprovalContentFooterProps {
 const getPermissionTooltipForAction = (action?: ApprovalAction): string | undefined =>
   action?.isDisabled && action?.disabledReason ? action.disabledReason : undefined;
 
+const withPermissionTooltip = (button: ReactElement, tooltip?: string): ReactElement =>
+  tooltip ? (
+    <EuiToolTip content={tooltip} position="top">
+      {button}
+    </EuiToolTip>
+  ) : (
+    button
+  );
+
 /**
  * The Approve/Decline row. Rendered only while a decision is still pending: `ApprovalContent`
  * itself decides whether to mount this at all — a decided or transient state names its actor in
@@ -45,7 +54,7 @@ export const ApprovalContentFooter = memo<ApprovalContentFooterProps>(
         isDisabled={primaryAction.isDisabled}
         hasAriaDisabled={!!primaryPermissionTooltip}
         isLoading={primaryAction.isLoading}
-        onClick={primaryPermissionTooltip ? undefined : () => onPrimaryClick(primaryAction)}
+        onClick={() => onPrimaryClick(primaryAction)}
         data-test-subj={primaryAction['data-test-subj']}
       >
         {primaryAction.label}
@@ -72,28 +81,19 @@ export const ApprovalContentFooter = memo<ApprovalContentFooterProps>(
               isDisabled={action.isDisabled}
               hasAriaDisabled={!!permissionTooltip}
               isLoading={action.isLoading}
-              onClick={permissionTooltip ? undefined : action.onClick}
+              onClick={action.onClick}
               data-test-subj={action['data-test-subj']}
             >
               {action.label}
             </EuiButtonEmpty>
           );
-          return permissionTooltip ? (
-            <EuiToolTip key={i} content={permissionTooltip} position="top">
-              {button}
-            </EuiToolTip>
-          ) : (
-            <React.Fragment key={i}>{button}</React.Fragment>
+          return (
+            <React.Fragment key={i}>
+              {withPermissionTooltip(button, permissionTooltip)}
+            </React.Fragment>
           );
         })}
-        {primaryButton &&
-          (primaryPermissionTooltip ? (
-            <EuiToolTip content={primaryPermissionTooltip} position="top">
-              {primaryButton}
-            </EuiToolTip>
-          ) : (
-            primaryButton
-          ))}
+        {primaryButton && withPermissionTooltip(primaryButton, primaryPermissionTooltip)}
       </div>
     );
   }

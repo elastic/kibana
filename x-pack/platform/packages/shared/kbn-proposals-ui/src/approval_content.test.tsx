@@ -8,7 +8,7 @@
 import React from 'react';
 import type { IBasePath } from '@kbn/core-http-browser';
 import moment from 'moment';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ApprovalContent, type ApprovalContentProps } from './approval_content';
@@ -397,9 +397,9 @@ describe('ApprovalContent', () => {
 
       const reopen = screen.getByTestId('approvalContent-reopen');
       expect(reopen).toHaveAttribute('aria-disabled', 'true');
-      fireEvent.mouseEnter(reopen.parentElement!);
+      act(() => reopen.focus());
       expect(await screen.findByRole('tooltip')).toHaveTextContent(
-        "You don't have permissions to apply or decline proposals."
+        "You don't have the required privileges to apply or decline proposals."
       );
     });
 
@@ -415,14 +415,13 @@ describe('ApprovalContent', () => {
       expect(confirm).toHaveAttribute('aria-disabled', 'true');
       expect(dismiss).toHaveAttribute('aria-disabled', 'true');
 
-      fireEvent.mouseEnter(confirm.parentElement!);
+      act(() => dismiss.focus());
       expect(await screen.findByRole('tooltip')).toHaveTextContent(
-        "You don't have permissions to apply or decline proposals."
+        "You don't have the required privileges to apply or decline proposals."
       );
-      fireEvent.mouseLeave(confirm.parentElement!);
-      fireEvent.mouseEnter(dismiss.parentElement!);
+      act(() => confirm.focus());
       expect(await screen.findByRole('tooltip')).toHaveTextContent(
-        "You don't have permissions to apply or decline proposals."
+        "You don't have the required privileges to apply or decline proposals."
       );
     });
 

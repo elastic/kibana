@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ApprovalModal, type ApprovalModalProps } from './approval_modal';
@@ -65,14 +65,13 @@ describe('ApprovalModal', () => {
     expect(baseProps.onConfirm).not.toHaveBeenCalled();
     expect(baseProps.onDismiss).not.toHaveBeenCalled();
 
-    fireEvent.mouseEnter(confirm.parentElement!);
+    act(() => dismiss.focus());
     expect(await screen.findByRole('tooltip')).toHaveTextContent(
-      "You don't have permissions to apply or decline proposals."
+      "You don't have the required privileges to apply or decline proposals."
     );
-    fireEvent.mouseLeave(confirm.parentElement!);
-    fireEvent.mouseEnter(dismiss.parentElement!);
+    act(() => confirm.focus());
     expect(await screen.findByRole('tooltip')).toHaveTextContent(
-      "You don't have permissions to apply or decline proposals."
+      "You don't have the required privileges to apply or decline proposals."
     );
   });
 
