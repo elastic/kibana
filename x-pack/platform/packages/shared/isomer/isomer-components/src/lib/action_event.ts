@@ -6,12 +6,11 @@
  */
 
 import { z } from '@elastic/isomer-sdk';
-import { SLACK_LIMITS } from '@elastic/isomer-sdk/slack';
 
-/** Room left in a Slack `action_id` for the position that keeps it unique in its block. */
+/** Keeps an event name a short identifier that every surface can carry. */
 const EVENT_NAME_MAX_CHARS = 64;
 
-/** An event name, which Slack carries as the start of an `action_id`. */
+/** The name of an event a host handles. */
 export const eventNameSchema = z
   .string()
   .regex(/^[A-Za-z0-9_.-]+$/)
@@ -27,7 +26,3 @@ export const actionEventSchema = z
       .describe('JSON data passed to the host with the event.'),
   })
   .strict();
-
-/** The Slack `action_id` of the element at `index` of its block: `{name}:{index}`. */
-export const slackActionId = (name: string, index: number): string =>
-  `${name}:${index}`.slice(0, SLACK_LIMITS.actionIdChars);
