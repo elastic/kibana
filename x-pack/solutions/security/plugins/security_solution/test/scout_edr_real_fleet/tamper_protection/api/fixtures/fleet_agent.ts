@@ -14,8 +14,11 @@ import type {
   GetUninstallTokensMetadataResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_token';
 import type { ApiClientFixture } from '@kbn/scout-security';
+import { expect } from '@kbn/scout-security/api';
 
 type RequestHeaders = Record<string, string>;
+
+const AGENT_POLICY_TIMEOUT_MS = 120_000;
 
 export interface FleetApiResponse<T> {
   statusCode: number;
@@ -34,7 +37,7 @@ export const reassignAgent = async (
     body: { policy_id: agentPolicyId },
   });
 
-export const readAgent = async (
+const readAgent = async (
   apiClient: ApiClientFixture,
   headers: RequestHeaders,
   agentId: string
@@ -43,6 +46,37 @@ export const readAgent = async (
     headers,
     responseType: 'json',
   });
+
+/** Polls until the agent reports `agentPolicyId` at `revision` or later and is not updating. */
+export const waitForAgentOnPolicy = async (
+  apiClient: ApiClientFixture,
+  headers: RequestHeaders,
+  agentId: string,
+  { agentPolicyId, revision }: { agentPolicyId: string; revision: number }
+): Promise<void> => {
+  await expect
+    .poll(
+      async () => {
+        const { statusCode, body } = await readAgent(apiClient, headers, agentId);
+        if (statusCode !== 200) {
+          return `status ${statusCode}: ${JSON.stringify(body)}`;
+        }
+
+        const { policy_id: policyId, policy_revision: policyRevision, status } = body.item;
+        return {
+          policyId,
+          revisionApplied: (policyRevision ?? 0) >= revision,
+          updating: status === 'updating',
+        };
+      },
+      {
+        message: `agent ${agentId} reports policy ${agentPolicyId} at revision ${revision} or later`,
+        timeout: AGENT_POLICY_TIMEOUT_MS,
+        intervals: [5_000],
+      }
+    )
+    .toStrictEqual({ policyId: agentPolicyId, revisionApplied: true, updating: false });
+};
 
 /** Decrypted uninstall token of `agentPolicyId`. Throws when Fleet does not return it. */
 export const getUninstallToken = async (

@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Parser } from '@elastic/esql';
 import {
+  createQuerySummaryContext,
   getQuerySummary,
+  getQuerySummaryFromCommands,
   getQuerySummaryPerCommandType,
   isComputedColumn,
 } from './get_query_summary';
@@ -177,6 +180,27 @@ describe('getQuerySummary', () => {
     const result = getQuerySummary(query);
 
     expect(result.newColumns).toEqual(new Set());
+  });
+
+  it('includes only the LET bindings referenced by the sources', () => {
+    const query =
+      'LET a = (FROM logs | EVAL total = bytes * 2); LET b = (FROM (FROM a)); LET unused = (FROM logs | EVAL ignored = 1); FROM b';
+    const result = getQuerySummary(query);
+
+    expect(result.newColumns).toEqual(new Set(['total']));
+  });
+
+  it('summarizes shared LET dependencies only once', () => {
+    const query = 'LET a = (FROM logs | RENAME bytes AS size); LET b = (FROM a, a); FROM b, b';
+    const { root } = Parser.parseQuery(query);
+    const summarizeBinding = jest.fn(getQuerySummaryFromCommands);
+    const context = createQuerySummaryContext(root, query, summarizeBinding);
+
+    const result = getQuerySummaryFromCommands(root.commands, query, context);
+
+    expect(result.newColumns).toEqual(new Set(['size']));
+    expect(result.renamedColumnsPairs).toEqual(new Set([['size', 'bytes']]));
+    expect(summarizeBinding).toHaveBeenCalledTimes(2);
   });
 });
 

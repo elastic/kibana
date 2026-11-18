@@ -67,7 +67,7 @@ import {
   selectHasChanges,
   selectHighlightedStepId,
   selectIsExecutionsTab,
-  selectIsSavingYaml,
+  selectIsSaveInProgress,
   selectStepExecutions,
   selectWorkflow,
   selectWorkflowDefinition,
@@ -239,7 +239,7 @@ export const WorkflowYAMLEditor = ({
 
   const { confirmDisable, confirmModal: disableConfirmModal } = useDisableWorkflowsConfirmation();
   const saveYaml = useSaveYamlWithConfirmation(confirmDisable);
-  const isSaving = useSelector(selectIsSavingYaml);
+  const isSaving = useSelector(selectIsSaveInProgress);
   const dispatch = useDispatch();
   const workflow = useSelector(selectWorkflow);
   const isExecutionYaml = useSelector(selectIsExecutionsTab);
