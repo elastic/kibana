@@ -135,7 +135,8 @@ const classifyControl = (control: StepControlDescription): StepControlKind => {
 export class WorkflowGraphAuthoringPage {
   public readonly emptyAddTrigger: Locator;
   public readonly actionsMenuSearch: Locator;
-  public readonly triggerPanelSave: Locator;
+  public readonly triggerPanel: Locator;
+  public readonly triggerPanelClose: Locator;
   public readonly stepConfigPanel: Locator;
   public readonly stepConfigPanelClose: Locator;
   public readonly stepConfigPanelEditName: Locator;
@@ -147,7 +148,8 @@ export class WorkflowGraphAuthoringPage {
   constructor(private readonly page: ScoutPage) {
     this.emptyAddTrigger = this.page.testSubj.locator('workflowGraphEmptyAddTrigger');
     this.actionsMenuSearch = this.page.locator('#actions-menu-search');
-    this.triggerPanelSave = this.page.testSubj.locator('workflowTriggerConfigPanelSave');
+    this.triggerPanel = this.page.testSubj.locator('workflowTriggerConfigPanel');
+    this.triggerPanelClose = this.page.testSubj.locator('workflowTriggerConfigPanelClose');
     this.stepConfigPanel = this.page.testSubj.locator('workflowStepConfigPanel');
     this.stepConfigPanelClose = this.page.testSubj.locator('workflowStepConfigPanelClose');
     this.stepConfigPanelEditName = this.page.testSubj.locator('workflowStepConfigPanelEditName');
@@ -267,9 +269,10 @@ export class WorkflowGraphAuthoringPage {
     await this.page.getByRole('option', { name: label, exact: false }).click();
   }
 
-  /** Clicks "Save trigger" to commit a trigger insert/edit. */
-  async saveTrigger(): Promise<void> {
-    await this.triggerPanelSave.click();
+  /** Closes the trigger panel. Its edits are applied as they are made, so there is nothing to save. */
+  async closeTriggerPanel(): Promise<void> {
+    await this.triggerPanelClose.click();
+    await this.triggerPanel.waitFor({ state: 'hidden' });
   }
 
   /** Locator for a step config field by its YAML path (e.g. `with.index`). */

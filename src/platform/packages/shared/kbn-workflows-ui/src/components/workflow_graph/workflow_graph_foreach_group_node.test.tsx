@@ -175,19 +175,19 @@ describe('WorkflowGraphForeachGroupNode', () => {
       );
 
     it('renders the + button when hasBodySteps is false and edit is available', () => {
-      renderWithEdit({ hasBodySteps: false } as any);
+      renderWithEdit({ hasBodySteps: false });
       expect(screen.getByTestId('workflowGraphForeachGroupAddFirstStep')).toBeInTheDocument();
     });
 
     it('does not render the + button when hasBodySteps is true', () => {
-      renderWithEdit({ hasBodySteps: true } as any);
+      renderWithEdit({ hasBodySteps: true });
       expect(screen.queryByTestId('workflowGraphForeachGroupAddFirstStep')).not.toBeInTheDocument();
     });
 
     it('does not render the + button in read-only mode (no edit context)', () => {
       // The dashed body area is always shown for empty containers, but the
       // interactive + button requires edit context.
-      renderGroup({ hasBodySteps: false } as any);
+      renderGroup({ hasBodySteps: false });
       expect(screen.queryByTestId('workflowGraphForeachGroupAddFirstStep')).not.toBeInTheDocument();
     });
 
@@ -198,10 +198,9 @@ describe('WorkflowGraphForeachGroupNode', () => {
       // then assert it never fires when the + button is clicked.
       const parentClickSpy = jest.fn();
       render(
-        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
-        <div onClick={parentClickSpy}>
+        <div role="presentation" onClick={parentClickSpy}>
           <WorkflowGraphActionsContext.Provider value={{ edit: editActions }}>
-            <WorkflowGraphForeachGroupNode {...makeNodeProps({ hasBodySteps: false } as any)} />
+            <WorkflowGraphForeachGroupNode {...makeNodeProps({ hasBodySteps: false })} />
           </WorkflowGraphActionsContext.Provider>
         </div>
       );
@@ -321,7 +320,7 @@ describe('WorkflowGraphForeachGroupNode', () => {
     it('ignores keys pressed on the inner controls', () => {
       const edit = makeEdit();
       const onStepSelect = jest.fn();
-      renderWithActions({ edit, onStepSelect }, { hasBodySteps: false } as any);
+      renderWithActions({ edit, onStepSelect }, { hasBodySteps: false });
 
       const addFirstStep = screen.getByTestId('workflowGraphForeachGroupAddFirstStep');
       fireEvent.keyDown(addFirstStep, { key: 'Enter' });

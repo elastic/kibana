@@ -20,14 +20,13 @@ const isStepLike = (
   typeof (value as { name?: unknown }).name === 'string' &&
   typeof (value as { type?: unknown }).type === 'string';
 
-/** Nested step lists on composite steps (mirrors graph_layout visitStepChildren). */
+/** Nested step lists on composite steps, in the order they appear in the YAML. */
 const visitChildLists = (
   step: Record<string, unknown>,
   visit: (children: ReadonlyArray<unknown>) => void
 ): void => {
   if (Array.isArray(step.steps)) visit(step.steps);
   if (Array.isArray(step.else)) visit(step.else);
-  if (Array.isArray(step.default)) visit(step.default);
   if (Array.isArray(step.branches)) {
     for (const branch of step.branches as Array<{ steps?: unknown[] }>) {
       if (Array.isArray(branch.steps)) visit(branch.steps);
@@ -38,13 +37,16 @@ const visitChildLists = (
       if (Array.isArray(caseItem.steps)) visit(caseItem.steps);
     }
   }
+  if (Array.isArray(step.default)) visit(step.default);
 };
 
 /**
- * Steps that appear before `currentStepName` in document order (depth-first).
- * Used by the data-reference picker Steps group.
+ * Steps that appear before `currentStepName` in document order (depth-first), leaving out the
+ * other branches of the steps it sits in (the other arm of an `if`, other cases, other parallel
+ * branches), since those never run before it. Branches of steps that come before it stay, as
+ * they may have run. Used by the data-reference picker Steps group.
  *
- * // TODO(slice8): extend for foreach.item and branch-local context so nested
+ * TODO: extend for foreach.item and branch-local context so nested
  * scope matches runtime availability, not only document order.
  */
 export const getDocumentOrderPredecessors = (
@@ -64,8 +66,14 @@ export const getDocumentOrderPredecessors = (
         return;
       }
       predecessors.push({ name: item.name, type: item.type });
-      // TODO(slice8): foreach.item and branch-local context
-      visitChildLists(item, visit);
+      const ownEnd = predecessors.length;
+      visitChildLists(item, (children) => {
+        if (found) return;
+        const listStart = predecessors.length;
+        visit(children);
+        // The current step is in this list, so the lists before it did not run.
+        if (found) predecessors.splice(ownEnd, listStart - ownEnd);
+      });
     }
   };
 

@@ -31,18 +31,13 @@ export type PendingInsertStepContext =
   | { readonly mode: 'trigger' };
 
 /**
- * Ephemeral canvas placeholder while the user is inserting a step or trigger.
- * - `choosing`: Actions menu open — empty dashed card.
- * - `configuring`: Config panel open — filled solid card with icon + title.
+ * Ephemeral canvas placeholder while the user is choosing what to insert: an empty dashed card
+ * while the Actions menu is open.
  */
-export type PendingInsertVisual =
-  | { readonly phase: 'choosing'; readonly context: PendingInsertStepContext }
-  | {
-      readonly phase: 'configuring';
-      readonly context: PendingInsertStepContext;
-      readonly stepType: string;
-      readonly label: string;
-    };
+export interface PendingInsertVisual {
+  readonly phase: 'choosing';
+  readonly context: PendingInsertStepContext;
+}
 
 /**
  * Matches the laid-out step node footprint (`DEFAULT_NODE_STYLE` in `@kbn/workflows`, not

@@ -43,6 +43,7 @@ import {
   outputsToJsonSchema,
   parseConstsToFields,
   parseOutputsToFields,
+  readYamlConsts,
   writeRootYamlMapping,
 } from './workflow_settings_fields_model';
 import { updateWorkflowYamlFields } from '../../../../common/lib/yaml/update_workflow_yaml_fields';
@@ -227,7 +228,7 @@ export const WorkflowSettingsFlyout = ({
     (next: readonly ConstantField[]) => {
       if (readOnly) return;
       setConstantFields([...next]);
-      const record = constantsToYamlRecord(next);
+      const record = constantsToYamlRecord(next, readYamlConsts(yamlString));
       const nextYaml = writeRootYamlMapping(yamlString, 'consts', record);
       if (nextYaml !== yamlString) {
         dispatch(setYamlString(nextYaml));

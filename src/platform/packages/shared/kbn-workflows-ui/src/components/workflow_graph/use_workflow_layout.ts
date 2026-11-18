@@ -120,6 +120,8 @@ interface UseWorkflowLayoutResult {
   edges: Edge[];
   /** The graph transform the layout was computed from (for edit-mode overlays). */
   transformed: TransformResult;
+  /** Why the layout failed; the nodes then carry no computed positions. */
+  layoutError?: string;
 }
 
 /**
@@ -169,16 +171,20 @@ export function useWorkflowLayout({
   }
   const { transformed: layoutInput } = layoutInputRef.current;
 
-  const layoutSnapshot = useMemo<LayoutSnapshot>(() => {
-    if (layoutInput.nodes.length === 0) return { nodes: [] };
+  const { snapshot: layoutSnapshot, error: layoutError } = useMemo<{
+    snapshot: LayoutSnapshot;
+    error?: string;
+  }>(() => {
+    if (layoutInput.nodes.length === 0) return { snapshot: { nodes: [] } };
     try {
       const t1 = performance.now();
       const snap = computeWorkflowLayout(layoutInput, { direction });
       onPerfMarkRef.current?.('layout_ms', performance.now() - t1);
-      return snap;
+      return { snapshot: snap };
     } catch (err) {
-      onLayoutFailedRef.current?.(err instanceof Error ? err.message : 'unknown');
-      return { nodes: [] };
+      const reason = err instanceof Error ? err.message : 'unknown';
+      onLayoutFailedRef.current?.(reason);
+      return { snapshot: { nodes: [] }, error: reason };
     }
   }, [layoutInput, direction, onPerfMarkRef, onLayoutFailedRef]);
 
@@ -615,5 +621,5 @@ export function useWorkflowLayout({
     );
   }, [stepExecutionMap, topologyMeta, branchTraversal, syntheticTriggerExecution]);
 
-  return { nodes: derivedNodes, edges: derivedEdges, transformed };
+  return { nodes: derivedNodes, edges: derivedEdges, transformed, layoutError };
 }

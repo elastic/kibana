@@ -169,6 +169,13 @@ describe('triggerRange', () => {
     });
   });
 
+  it('keeps a following }} when no trigger was typed (a session opened by a button)', () => {
+    expect(triggerRange({ start: 4, triggerLength: 0 }, '{{ a }}', 4)).toEqual({
+      start: 4,
+      end: 4,
+    });
+  });
+
   it('leaves text after the caret alone when it is not a closing }}', () => {
     expect(triggerRange({ start: 0, triggerLength: 2 }, '{{ ab rest', 5)).toEqual({
       start: 0,

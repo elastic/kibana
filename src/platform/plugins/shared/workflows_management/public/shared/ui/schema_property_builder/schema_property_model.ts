@@ -270,7 +270,7 @@ const propertyToJsonSchema = (field: SchemaPropertyField): JsonSchema => {
 
 /**
  * Serialize builder fields to JSON Schema.
- * // TODO(engine): confirm inputs schema shape — required is a parent-level
+ * // TODO: confirm inputs schema shape — required is a parent-level
  * array; "required" means the caller must supply a non-empty value (engine
  * enforcement), not merely that the key is present.
  */

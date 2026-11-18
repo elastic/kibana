@@ -9,7 +9,7 @@
 
 import { parseDocument } from 'yaml';
 import type { EsWorkflow } from '@kbn/workflows';
-import { updateYamlField } from '@kbn/workflows-yaml';
+import { detectIndent, updateYamlField } from '@kbn/workflows-yaml';
 
 /**
  * Checks if a workflow update affects YAML metadata fields
@@ -32,7 +32,7 @@ const deleteYamlField = (yamlString: string, fieldPath: string): string => {
       return yamlString;
     }
     doc.deleteIn(pathArray);
-    return doc.toString();
+    return doc.toString({ indent: detectIndent(yamlString), lineWidth: 0 });
   } catch {
     return yamlString;
   }

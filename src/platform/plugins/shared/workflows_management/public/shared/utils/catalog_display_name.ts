@@ -78,6 +78,6 @@ export function resolveCatalogDisplayName(input: CatalogDisplayNameInput): strin
     if (candidate) return candidate;
   }
 
-  // TODO(catalog): missing display names — content task for the action-registry owner
+  // TODO: missing display names — content task for the action-registry owner
   return prettifyStepTypeDisplayName(type);
 }

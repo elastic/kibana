@@ -75,7 +75,6 @@ export const useStepNameEditor = ({
       );
       return;
     }
-    // TODO(slice4): renaming does not rewrite steps.<old-name> references elsewhere.
     onCommit(next);
     isEditingRef.current = false;
     setIsEditing(false);

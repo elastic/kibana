@@ -9,7 +9,7 @@
 
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, type WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ERROR_PORT_ALONG } from './port_geometry';
 import {
   type WorkflowGraphActions,
@@ -87,7 +87,7 @@ describe('WorkflowGraphNode', () => {
         id: 'e1',
         stepId: 'node-1',
         status: ExecutionStatus.COMPLETED,
-      } as any,
+      } as WorkflowStepExecutionDto,
     });
     expect(screen.getByLabelText('Completed successfully')).toBeInTheDocument();
   });

@@ -13,7 +13,10 @@ import type { JSONSchema7 } from 'json-schema';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { CodeEditor, jsonDefaults, type monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import { mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema } from '@kbn/workflows';
+import {
+  mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema,
+  WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
+} from '@kbn/workflows';
 import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import {
   applyInputDefaults,
@@ -24,6 +27,7 @@ import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json
 import { generateSampleFromJsonSchema, workflowsEditorChromeOverrides } from '@kbn/workflows-ui';
 import { InputValidationCallout } from './input_validation_callout';
 import { WorkflowExecuteManualFieldsForm } from './workflow_execute_manual_fields_form';
+import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 import { isBuilderEditableSchema } from '../../../shared/ui/schema_property_builder';
 
 const SCHEMA_URI = `inmemory://schemas/workflow-manual-json-editor-schema`;
@@ -94,7 +98,11 @@ export const WorkflowExecuteManualForm = ({
   setErrors,
 }: WorkflowExecuteManualFormProps): React.JSX.Element => {
   const inputsValidator = useMemo(() => buildFieldsZodValidator(inputs), [inputs]);
-  const useFieldsForm = isBuilderEditableSchema(inputs) && Boolean(inputs?.properties);
+  const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(
+    WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID
+  );
+  const useFieldsForm =
+    isVisualEditorEnabled && isBuilderEditableSchema(inputs) && Boolean(inputs?.properties);
 
   /** Same root merge as workflow YAML Monaco schema so `#/kibana/definitions/*` $ref resolves. */
   const monacoInputsJsonSchema = useMemo(() => {

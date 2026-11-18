@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseDocument } from 'yaml';
+import { isEqual } from 'lodash';
+import { type Document, isMap, isScalar, parseDocument, type YAMLMap } from 'yaml';
 import { detectIndent } from '@kbn/workflows-yaml';
 import {
   parseInputsToSchemaProperties,
@@ -130,16 +131,47 @@ export const coerceConstantValue = (
   return { ok: true, value: raw };
 };
 
+const hasOwn = (record: Record<string, unknown>, name: string): boolean =>
+  Object.prototype.hasOwnProperty.call(record, name);
+
+/** True when the row still shows exactly what the YAML value would have produced. */
+const isUnedited = (field: ConstantField, current: unknown): boolean => {
+  const type = inferConstantType(current);
+  return field.type === type && field.value === valueToString(current, type);
+};
+
+/** The `consts` the YAML has now (empty when it has none or cannot be read). */
+export const readYamlConsts = (yamlString: string): Record<string, unknown> => {
+  try {
+    const consts = (parseDocument(yamlString).toJS() as Record<string, unknown> | null)?.consts;
+    return consts && typeof consts === 'object' && !Array.isArray(consts)
+      ? (consts as Record<string, unknown>)
+      : {};
+  } catch {
+    return {};
+  }
+};
+
+/**
+ * The `consts` to write. A row nobody edited, or whose draft is not a valid value yet, keeps the
+ * value the YAML already has for its name, so editing one constant never drops or rewrites another.
+ */
 export const constantsToYamlRecord = (
-  fields: readonly ConstantField[]
+  fields: readonly ConstantField[],
+  existing: Record<string, unknown> = {}
 ): Record<string, unknown> | undefined => {
   const record: Record<string, unknown> = {};
   for (const field of fields) {
     const name = field.name.trim();
-    if (!name) continue;
-    const coerced = coerceConstantValue(field.type, field.value);
-    if (!coerced.ok) continue;
-    record[name] = coerced.value;
+    if (name) {
+      const inYaml = hasOwn(existing, name);
+      const coerced = coerceConstantValue(field.type, field.value);
+      if (inYaml && (isUnedited(field, existing[name]) || !coerced.ok)) {
+        record[name] = existing[name];
+      } else if (coerced.ok) {
+        record[name] = coerced.value;
+      }
+    }
   }
   return Object.keys(record).length > 0 ? record : undefined;
 };
@@ -200,6 +232,28 @@ export const outputsToJsonSchema = (fields: readonly OutputField[]) => {
   return Object.keys(schema.properties).length > 0 ? schema : undefined;
 };
 
+const keyName = (pair: { key: unknown }): string =>
+  isScalar(pair.key) ? String(pair.key.value) : String(pair.key);
+
+/** Updates a mapping entry by entry, so comments and entries that did not change stay. */
+const patchMapping = (doc: Document, node: YAMLMap, value: Record<string, unknown>): void => {
+  const names = Object.keys(value);
+  for (const pair of [...node.items]) {
+    if (!names.includes(keyName(pair))) node.delete(keyName(pair));
+  }
+  for (const name of names) {
+    const current: unknown = node.get(name, true);
+    const currentValue =
+      current !== null && typeof current === 'object' && 'toJSON' in current
+        ? (current as { toJSON: () => unknown }).toJSON()
+        : current;
+    if (current === undefined || !isEqual(currentValue, value[name])) {
+      node.set(name, doc.createNode(value[name]));
+    }
+  }
+  node.items.sort((a, b) => names.indexOf(keyName(a)) - names.indexOf(keyName(b)));
+};
+
 /** Patch root-level `consts` / `outputs` on the workflow YAML document. */
 export const writeRootYamlMapping = (
   yamlString: string,
@@ -208,8 +262,11 @@ export const writeRootYamlMapping = (
 ): string => {
   try {
     const doc = parseDocument(yamlString);
+    const existing = doc.get(key, true);
     if (value === undefined) {
       doc.deleteIn([key]);
+    } else if (isMap(existing) && value !== null && typeof value === 'object') {
+      patchMapping(doc, existing, value as Record<string, unknown>);
     } else {
       doc.setIn([key], doc.createNode(value));
     }

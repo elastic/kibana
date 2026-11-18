@@ -30,6 +30,7 @@ import {
   getDocumentOrderPredecessors,
   type PrecedingStepRef,
 } from './get_document_order_predecessors';
+import { appendPathSegment } from './reference_path';
 
 export type DataReferenceGroupId = 'triggers' | 'steps' | 'context' | 'stepContext';
 
@@ -161,7 +162,7 @@ const resolveOutputSchema = (
   if (connector?.outputSchema) {
     return connector.outputSchema as z.ZodType;
   }
-  // TODO(catalog): output schemas — many actions lack declared outputs.
+  // TODO: output schemas — many actions lack declared outputs.
   return z.unknown();
 };
 
@@ -386,7 +387,7 @@ const buildStepEntities = (
   });
 
   return predecessors.map((step) => {
-    const outputPath = `steps.${step.name}.output`;
+    const outputPath = `${appendPathSegment('steps', step.name)}.output`;
     const typeLabel = resolveStepTypeLabel(step.type, connectors);
     const originLabel = i18n.translate('workflows.dataReferencePicker.originStep', {
       defaultMessage: 'Step · {name}',
@@ -396,7 +397,7 @@ const buildStepEntities = (
 
     let children: DataReferenceItem[];
     if (isOpaqueSchema(outputSchema)) {
-      // TODO(catalog): output schemas — opaque insertable object until catalog fills shapes.
+      // TODO: output schemas — opaque insertable object until catalog fills shapes.
       children = [
         pathLeafItem({
           path: outputPath,
@@ -736,6 +737,9 @@ export const toReferenceIconType = (typeLabel: string): string => {
 
 /** Cap on array elements shown from a sample, so large outputs (e.g. ES hits) stay readable. */
 const MAX_SAMPLE_ARRAY_ITEMS = 10;
+/** Caps on object keys per level and nesting depth, for the same reason. */
+const MAX_SAMPLE_KEYS = 50;
+const MAX_SAMPLE_DEPTH = 6;
 
 const isSampleContainer = (value: unknown): value is Record<string, unknown> | unknown[] =>
   typeof value === 'object' && value !== null;
@@ -759,27 +763,33 @@ const sampleEntries = (path: string, value: Record<string, unknown> | unknown[])
         label: `[${index}]`,
         value: entry,
       }))
-    : Object.entries(value).map(([key, entry]) => ({
-        path: `${path}.${key}`,
-        label: key,
-        value: entry,
-      }));
+    : Object.entries(value)
+        .slice(0, MAX_SAMPLE_KEYS)
+        .map(([key, entry]) => ({
+          path: appendPathSegment(path, key),
+          label: key,
+          value: entry,
+        }));
 
 const buildSampleItem = (
   { path, label, value }: SampleEntry,
-  originLabel: string
+  originLabel: string,
+  depth = 0
 ): DataReferenceItem => {
-  if (!isSampleContainer(value)) {
+  if (!isSampleContainer(value) || depth >= MAX_SAMPLE_DEPTH) {
     return {
       path,
       label,
       typeLabel: sampleTypeLabel(value),
-      subtitle: formatConstValue(value),
+      // A container this deep is not expanded, and is too large to print as a subtitle.
+      ...(isSampleContainer(value) ? {} : { subtitle: formatConstValue(value) }),
       drillable: false,
       originLabel,
     };
   }
-  const children = sampleEntries(path, value).map((entry) => buildSampleItem(entry, originLabel));
+  const children = sampleEntries(path, value).map((entry) =>
+    buildSampleItem(entry, originLabel, depth + 1)
+  );
   return {
     path,
     label,

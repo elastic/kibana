@@ -96,6 +96,40 @@ describe('DataReferencePicker scaling', () => {
     expect(screen.queryByTestId('workflowDataReferenceShowAll-triggers')).not.toBeInTheDocument();
   });
 
+  it('lists at most 100 search matches and says how many there are', () => {
+    const many: DataReferenceCatalog = {
+      groups: [
+        {
+          id: 'steps',
+          title: 'Steps',
+          description: 'Prior steps',
+          items: makeItems('steps.big.output', 250, 'Step · big'),
+          emptyMessage: 'No earlier steps',
+        },
+      ],
+    };
+    render(
+      <I18nProvider>
+        <DataReferencePicker
+          catalog={many}
+          isOpen
+          onClose={jest.fn()}
+          onInsert={jest.fn()}
+          input={<input data-test-subj="anchor" />}
+        />
+      </I18nProvider>
+    );
+
+    fireEvent.change(screen.getByTestId('workflowDataReferenceSearch'), {
+      target: { value: 'big' },
+    });
+
+    expect(screen.getAllByTestId(/workflowDataReferenceRow-/)).toHaveLength(100);
+    expect(screen.getByTestId('workflowDataReferenceSearchCapped')).toHaveTextContent(
+      'Showing the first 100 of 250 matches'
+    );
+  });
+
   it('does not render jump-link chips', () => {
     renderOpen();
     expect(screen.queryByTestId('workflowDataReferenceJumpLinks')).not.toBeInTheDocument();
@@ -123,11 +157,11 @@ describe('DataReferencePicker as a typeahead', () => {
       </I18nProvider>
     );
     const view = render(element(query));
-    const press = (key: string) => {
+    const press = (key: string, extra: { isComposing?: boolean } = {}) => {
       let used: boolean | undefined;
       // One key at a time, with a render in between, as the editor sends them.
       act(() => {
-        used = keyHandlerRef.current?.({ key, preventDefault: jest.fn() });
+        used = keyHandlerRef.current?.({ key, preventDefault: jest.fn(), ...extra });
       });
       return used;
     };
@@ -163,6 +197,20 @@ describe('DataReferencePicker as a typeahead', () => {
     expect(screen.getAllByTestId(/workflowDataReferenceRow-/)).toHaveLength(1);
   });
 
+  it('is a list of options for assistive technology, with the highlighted one selected', () => {
+    const { press } = renderTypeahead('');
+
+    const options = screen.getAllByRole('option');
+    expect(screen.getByRole('listbox')).toBeInTheDocument();
+    expect(options.length).toBeGreaterThan(1);
+    expect(options[0]).toHaveAttribute('aria-selected', 'true');
+    expect(options[1]).toHaveAttribute('aria-selected', 'false');
+
+    press('ArrowDown');
+
+    expect(screen.getAllByRole('option')[1]).toHaveAttribute('aria-selected', 'true');
+  });
+
   it('hides itself when nothing matches, and comes back when something does', () => {
     const { setQuery } = renderTypeahead('zzz');
     expect(screen.queryByTestId('workflowDataReferenceTypeahead')).not.toBeInTheDocument();
@@ -180,6 +228,32 @@ describe('DataReferencePicker as a typeahead', () => {
 
       expect(onInsert).toHaveBeenCalledWith(formatDataReferenceToken('event.f1'));
       expect(onClose).toHaveBeenCalled();
+    });
+
+    it('leaves the keys of an input method composition to the editor', () => {
+      const { press, onInsert } = renderTypeahead('');
+
+      expect(press('Enter', { isComposing: true })).toBe(false);
+      expect(press('ArrowDown', { isComposing: true })).toBe(false);
+      expect(onInsert).not.toHaveBeenCalled();
+    });
+
+    it('scrolls the highlighted row into view as the arrows move it', () => {
+      const scrollIntoView = jest.fn();
+      window.HTMLElement.prototype.scrollIntoView = scrollIntoView;
+      try {
+        const { press } = renderTypeahead('');
+        expect(scrollIntoView).not.toHaveBeenCalled();
+
+        press('ArrowDown');
+
+        expect(scrollIntoView).toHaveBeenCalledWith({ block: 'nearest' });
+        const scrolled = scrollIntoView.mock.instances[scrollIntoView.mock.instances.length - 1];
+        expect(scrolled).toBe(screen.getByTestId('workflowDataReferenceRow-event.f1'));
+      } finally {
+        // @ts-expect-error jsdom has no scrollIntoView to restore
+        delete window.HTMLElement.prototype.scrollIntoView;
+      }
     });
 
     it('inserts the first reference on Tab', () => {

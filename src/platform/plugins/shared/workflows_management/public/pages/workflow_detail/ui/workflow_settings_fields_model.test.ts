@@ -10,6 +10,7 @@
 import {
   coerceConstantValue,
   constantsToYamlRecord,
+  createEmptyConstant,
   outputsToJsonSchema,
   parseConstsToFields,
   parseOutputsToFields,
@@ -36,6 +37,32 @@ describe('workflow_settings_fields_model', () => {
     expect(coerceConstantValue('string', '{{ consts.x }}')).toEqual({
       ok: false,
       error: 'expression',
+    });
+  });
+
+  describe('constantsToYamlRecord with the consts already in the YAML', () => {
+    it('keeps the YAML value of a row whose draft is not valid yet, and leaves out a new such row', () => {
+      const existing = { keep: 'a', obj: { x: 1 } };
+      const fields = [
+        createEmptyConstant({ name: 'keep', type: 'string', value: 'a' }),
+        createEmptyConstant({ name: 'obj', type: 'object', value: '{"x":' }),
+        createEmptyConstant({ name: 'fresh', type: 'object', value: '{' }),
+      ];
+
+      expect(constantsToYamlRecord(fields, existing)).toEqual({ keep: 'a', obj: { x: 1 } });
+    });
+
+    it('keeps rows nobody edited as they are, even a hand-written expression or a null', () => {
+      const existing = { greeting: '{{ inputs.name }}', empty: null, limit: 1 };
+      const fields = parseConstsToFields(existing).map((field) =>
+        field.name === 'limit' ? { ...field, value: '2' } : field
+      );
+
+      expect(constantsToYamlRecord(fields, existing)).toEqual({
+        greeting: '{{ inputs.name }}',
+        empty: null,
+        limit: 2,
+      });
     });
   });
 
@@ -83,6 +110,14 @@ describe('workflow_settings_fields_model', () => {
       const withConsts = writeRootYamlMapping(TWO_SPACES, 'consts', { limit: 5 });
 
       expect(writeRootYamlMapping(withConsts, 'consts', undefined)).toBe(TWO_SPACES);
+    });
+
+    it('keeps the comments and the untouched entries of an existing mapping', () => {
+      const yaml = 'name: demo\nconsts:\n  # why a\n  a: 1\n  b: 2\n  c: 3\nsteps: []\n';
+
+      const next = writeRootYamlMapping(yaml, 'consts', { a: 1, b: 20 });
+
+      expect(next).toBe('name: demo\nconsts:\n  # why a\n  a: 1\n  b: 20\nsteps: []\n');
     });
 
     it('keeps a four-space document at four spaces', () => {

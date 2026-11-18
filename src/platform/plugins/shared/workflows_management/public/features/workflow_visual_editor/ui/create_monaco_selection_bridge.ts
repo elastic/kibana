@@ -73,6 +73,7 @@ export const createMonacoSelectionBridge = (
       const handleKey = (event: KeyboardEvent) =>
         onKeyDown({
           key: event.key,
+          isComposing: event.isComposing,
           preventDefault: () => event.preventDefault(),
           stopPropagation: () => event.stopPropagation(),
         });

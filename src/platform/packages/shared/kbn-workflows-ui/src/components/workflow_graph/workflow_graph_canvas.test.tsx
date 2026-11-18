@@ -36,12 +36,14 @@ const EXPECTED_CENTER_X = 100;
 // When set, `useWorkflowLayout` returns this array instead of `mockNodes`, so a
 // test can hand the canvas a new `nodes` identity (a re-layout) on re-render.
 let mockLayoutNodesOverride: Array<Record<string, unknown>> | undefined;
+let mockLayoutError: string | undefined;
 
 jest.mock('./use_workflow_layout', () => ({
   useWorkflowLayout: () => ({
     nodes: mockLayoutNodesOverride ?? mockNodes,
     edges: [],
     transformed: { nodeRefs: {}, edges: [], nodes: [] },
+    layoutError: mockLayoutError,
   }),
 }));
 
@@ -642,12 +644,7 @@ describe('WorkflowGraphCanvas creation-state chrome', () => {
         workflow={emptyWorkflow}
         edit={edit}
         emptyState={<div data-test-subj="customEmptyState">Create me</div>}
-        pendingInsert={{
-          phase: 'configuring',
-          context: { mode: 'step' },
-          stepType: 'console',
-          label: 'console_step',
-        }}
+        pendingInsert={{ phase: 'choosing', context: { mode: 'step' } }}
       />
     );
     expect(screen.queryByTestId('customEmptyState')).not.toBeInTheDocument();
@@ -704,6 +701,24 @@ describe('WorkflowGraphCanvas render error boundary', () => {
     if (shouldThrow) throw new Error('boom');
     return <div data-test-subj="healthyToolbar" />;
   };
+
+  it('shows the error callout when the layout fails, instead of an empty canvas', () => {
+    mockLayoutError = 'cyclic compound graph';
+    render(<WorkflowGraphCanvasWithoutProvider {...baseProps} />);
+
+    expect(screen.getByTestId('workflowGraphLayoutErrorCallout')).toHaveTextContent(
+      'Workflow graph could not be displayed'
+    );
+    expect(screen.getByTestId('workflowGraphLayoutErrorCallout')).toHaveTextContent(
+      'cyclic compound graph'
+    );
+    mockLayoutError = undefined;
+  });
+
+  it('shows no layout error callout when the layout succeeds', () => {
+    render(<WorkflowGraphCanvasWithoutProvider {...baseProps} />);
+    expect(screen.queryByTestId('workflowGraphLayoutErrorCallout')).not.toBeInTheDocument();
+  });
 
   it('shows the error callout when a graph child throws and recovers once the workflow changes', () => {
     const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});

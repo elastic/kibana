@@ -35,6 +35,8 @@ const PICKER_WIDTH = 340;
 /** A key press forwarded from the editor the typeahead belongs to. */
 export interface TypeaheadKeyEvent {
   readonly key: string;
+  /** The key belongs to an input method composition, so it is not the dropdown's. */
+  readonly isComposing?: boolean;
   readonly preventDefault: () => void;
 }
 
@@ -133,6 +135,9 @@ export function DataReferencePicker({
   const underControl = isTypeahead && typeaheadAnchor === undefined;
   const [drillStack, setDrillStack] = useState<DataReferenceItem[]>([]);
   const [highlightIndex, setHighlightIndex] = useState(0);
+  const highlightedRowRef = useRef<HTMLButtonElement | null>(null);
+  // Only the keys move the list under the user's eyes; hovering a row must not scroll it.
+  const scrollToHighlightRef = useRef(false);
   const [expandedGroups, setExpandedGroups] = useState<ReadonlySet<DataReferenceGroupId>>(
     () => new Set()
   );
@@ -240,6 +245,12 @@ export function DataReferencePicker({
     setHighlightIndex(0);
   }, [search, drillStack, isOpen, expandedGroups]);
 
+  useEffect(() => {
+    if (!scrollToHighlightRef.current) return;
+    scrollToHighlightRef.current = false;
+    highlightedRowRef.current?.scrollIntoView?.({ block: 'nearest' });
+  }, [highlightIndex]);
+
   const toggleGroupExpanded = useCallback((groupId: DataReferenceGroupId) => {
     setExpandedGroups((prev) => {
       const next = new Set(prev);
@@ -279,7 +290,7 @@ export function DataReferencePicker({
     (event: TypeaheadKeyEvent): boolean => {
       // With the dropdown closed, or nothing listed in it, it is not on screen: the keys are the
       // editor's (a new line in a multi-line editor, Escape to leave it).
-      if (!isOpen || flatNavigable.length === 0) return false;
+      if (!isOpen || flatNavigable.length === 0 || event.isComposing) return false;
       if (event.key === 'Escape') {
         event.preventDefault();
         onClose();
@@ -288,6 +299,7 @@ export function DataReferencePicker({
       if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
         event.preventDefault();
         const step = event.key === 'ArrowDown' ? 1 : -1;
+        scrollToHighlightRef.current = true;
         setHighlightIndex((i) => Math.max(0, Math.min(i + step, flatNavigable.length - 1)));
         return true;
       }
@@ -312,6 +324,7 @@ export function DataReferencePicker({
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
+      if (event.nativeEvent.isComposing) return;
       if (event.key === 'Escape') {
         event.preventDefault();
         event.stopPropagation();
@@ -324,11 +337,13 @@ export function DataReferencePicker({
       }
       if (event.key === 'ArrowDown') {
         event.preventDefault();
+        scrollToHighlightRef.current = true;
         setHighlightIndex((i) => Math.min(i + 1, Math.max(flatNavigable.length - 1, 0)));
         return;
       }
       if (event.key === 'ArrowUp') {
         event.preventDefault();
+        scrollToHighlightRef.current = true;
         setHighlightIndex((i) => Math.max(i - 1, 0));
         return;
       }
@@ -447,6 +462,7 @@ export function DataReferencePicker({
           expandedGroups={expandedGroups}
           isEmpty={flatNavigable.length === 0 && visibleRows.mode === 'search'}
           highlightIndex={highlightIndex}
+          highlightedRowRef={highlightedRowRef}
           onHighlight={setHighlightIndex}
           onPick={insertItem}
           onToggleGroup={toggleGroupExpanded}

@@ -36,7 +36,7 @@ describe('CatalogTemplateIcons', () => {
     expect(screen.getByTestId('type-icon-slack.postMessage')).toBeInTheDocument();
     expect(screen.getByTestId('type-icon-elasticsearch.search')).toBeInTheDocument();
     expect(screen.queryByTestId('type-icon-http.request')).not.toBeInTheDocument();
-    expect(screen.getByText('+2')).toBeInTheDocument();
+    expect(screen.getByText('+2')).toHaveAttribute('title', '2 more');
   });
 
   it('does not show overflow when within the cap', () => {

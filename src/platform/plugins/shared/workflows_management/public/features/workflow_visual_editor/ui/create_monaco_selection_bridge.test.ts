@@ -149,6 +149,24 @@ describe('createMonacoSelectionBridge', () => {
       expect(outcome).toEqual({ defaultPrevented: true, propagationStopped: true });
     });
 
+    it('tells whether a key belongs to an input method composition', () => {
+      const fake = createFakeMonacoEditor(TEXT);
+      const handlers = events();
+      createMonacoSelectionBridge(fake.editor, () => 0).listen?.(handlers);
+
+      fake.pressKey('Enter', { isComposing: true });
+      fake.pressKey('Enter');
+
+      expect(handlers.onKeyDown).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ key: 'Enter', isComposing: true })
+      );
+      expect(handlers.onKeyDown).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ key: 'Enter', isComposing: false })
+      );
+    });
+
     it('hears a key before the editor and its wrappers do, so one the dropdown used never reaches them', () => {
       const fake = createFakeMonacoEditor(TEXT);
       const handlers = events();

@@ -12,16 +12,9 @@ import { Position, useReactFlow, useStore, ViewportPortal } from '@xyflow/react'
 import type { Node } from '@xyflow/react';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  CONTAINER_STEP_TYPES,
-  FOREACH_GROUP_EMPTY_HEIGHT,
-  type LayoutDirection,
-} from '@kbn/workflows';
+import type { LayoutDirection } from '@kbn/workflows';
 import { computeEdgePath } from './compute_edge_path';
 import type { InsertionPoints } from './compute_insertion_points';
-import { deslugifyStepName } from './deslugify_step_name';
-import { NodeIconChip, NodeStepIcon } from './node_icon_chip';
-import { nodeLabelTypography } from './node_styles';
 import {
   computePendingInsertConnector,
   computePendingInsertOrigin,
@@ -30,9 +23,6 @@ import {
   type PendingInsertVisual,
 } from './pending_insert';
 import { errorPortEdgeStyle, PORT_DOT_SIZE, STEP_PORT } from './port_geometry';
-import { resolveNodeColors } from './resolve_node_colors';
-import { useWorkflowGraphActions } from './workflow_graph_actions_context';
-import { getStepIconType, getTriggerTypeIconType } from '../step_icons';
 
 export interface WorkflowGraphPendingNodeProps {
   readonly pending: PendingInsertVisual;
@@ -42,8 +32,7 @@ export interface WorkflowGraphPendingNodeProps {
 }
 
 /**
- * In-progress insert indicator: empty dashed card while choosing an action,
- * then a filled solid preview (icon + title) while the config panel is open.
+ * In-progress insert indicator: an empty dashed card while choosing an action.
  * An overlay edge connects from the preceding node when one exists; on an empty
  * canvas the card is centered in the viewport instead.
  */
@@ -55,7 +44,6 @@ export function WorkflowGraphPendingNode({
 }: WorkflowGraphPendingNodeProps) {
   const { euiTheme } = useEuiTheme();
   const nodeShadow = useEuiShadow('xs', { border: 'none' });
-  const { renderStepIcon } = useWorkflowGraphActions();
   const { getViewport } = useReactFlow();
   // Unique per mount: SVG `url(#id)` resolves document-wide, so a fixed id would
   // let a second canvas on the page pick up this canvas's marker.
@@ -95,44 +83,12 @@ export function WorkflowGraphPendingNode({
 
   if (!origin) return null;
 
-  const isConfiguring = pending.phase === 'configuring';
-  const isContainer = pending.phase === 'configuring' && CONTAINER_STEP_TYPES.has(pending.stepType);
   const isTriggerDraft = pending.context.mode === 'trigger';
   const isHorizontal = direction === 'LR';
   const borderRadius = euiTheme.border.radius.panel;
-  const chipBorderRadius = euiTheme.border.radius.control;
-  const ariaLabel = isConfiguring
-    ? isTriggerDraft
-      ? i18n.translate('workflowsUi.graph.pendingConfiguringTriggerAria', {
-          defaultMessage: 'Adding trigger {label}',
-          values: { label: pending.label },
-        })
-      : i18n.translate('workflowsUi.graph.pendingConfiguringAria', {
-          defaultMessage: 'Adding step {label}',
-          values: { label: pending.label },
-        })
-    : i18n.translate('workflowsUi.graph.pendingChoosingAria', {
-        defaultMessage: 'Choose a step to add here',
-      });
-
-  const colors = isConfiguring
-    ? resolveNodeColors(euiTheme, pending.stepType, isTriggerDraft, {
-        isRunning: false,
-        isSuccess: false,
-        isFailed: false,
-      })
-    : undefined;
-  const iconType = isConfiguring
-    ? isTriggerDraft
-      ? getTriggerTypeIconType(pending.stepType)
-      : getStepIconType(pending.stepType)
-    : undefined;
-  const displayLabel = isConfiguring
-    ? isTriggerDraft
-      ? pending.label
-      : deslugifyStepName(pending.label)
-    : undefined;
-  const pendingHeight = isContainer ? FOREACH_GROUP_EMPTY_HEIGHT : PENDING_NODE_HEIGHT;
+  const ariaLabel = i18n.translate('workflowsUi.graph.pendingChoosingAria', {
+    defaultMessage: 'Choose a step to add here',
+  });
 
   const edgeStroke = connector?.isFailure
     ? euiTheme.colors.danger
@@ -202,131 +158,20 @@ export function WorkflowGraphPendingNode({
           position: 'absolute',
           transform: `translate(${origin.x}px, ${origin.y}px)`,
           width: PENDING_NODE_WIDTH,
-          height: pendingHeight,
+          height: PENDING_NODE_HEIGHT,
           pointerEvents: 'none',
         }}
         css={[
           {
             boxSizing: 'border-box',
             borderRadius,
-            border: `${euiTheme.border.width.thin} ${isConfiguring ? 'solid' : 'dashed'} ${
-              euiTheme.colors.borderBaseProminent
-            }`,
+            border: `${euiTheme.border.width.thin} dashed ${euiTheme.colors.borderBaseProminent}`,
             background: euiTheme.colors.backgroundBasePlain,
             overflow: 'visible',
-            // Non-container: horizontal flex row (chip + label)
-            // Container: vertical layout handled inside
-            ...(isContainer
-              ? {}
-              : {
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: euiTheme.size.m,
-                  padding: euiTheme.size.m,
-                }),
           },
           nodeShadow,
         ]}
       >
-        {isContainer && colors && iconType ? (
-          // Container-shaped pending node: header row + dashed body area
-          <>
-            <div
-              css={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: euiTheme.size.s,
-                padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
-                ...nodeLabelTypography(euiTheme, '24px'),
-                color: euiTheme.colors.textHeading,
-              }}
-            >
-              <NodeIconChip
-                background={colors.chipBackground}
-                border={colors.chipBorder}
-                borderRadius={chipBorderRadius}
-                useAiGradient={colors.chipUseAiGradient}
-                size={28}
-                data-test-subj="workflowGraphPendingNodeChip"
-              >
-                <NodeStepIcon
-                  iconType={iconType}
-                  iconColor={colors.chipIconColor}
-                  renderStepIcon={renderStepIcon}
-                  stepType={pending.stepType}
-                  isTrigger={isTriggerDraft}
-                  useAiGradient={colors.chipUseAiGradient}
-                />
-              </NodeIconChip>
-              <span
-                css={{
-                  flex: '1 1 auto',
-                  minWidth: 0,
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                }}
-                data-test-subj="workflowGraphPendingNodeLabel"
-                title={displayLabel}
-              >
-                {displayLabel}
-              </span>
-            </div>
-            {/* Dashed body area signals "steps go here" */}
-            <div
-              css={{
-                margin: `0 ${euiTheme.size.m} ${euiTheme.size.m}`,
-                flex: 1,
-                borderRadius: euiTheme.border.radius.small,
-                border: `1px dashed ${euiTheme.colors.borderBaseSubdued}`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                minHeight: 40,
-              }}
-            />
-          </>
-        ) : (
-          // Regular flat pending node: chip + label in a row
-          <>
-            {isConfiguring && colors && iconType && (
-              <>
-                <NodeIconChip
-                  background={colors.chipBackground}
-                  border={colors.chipBorder}
-                  borderRadius={chipBorderRadius}
-                  useAiGradient={colors.chipUseAiGradient}
-                  fillRow
-                  data-test-subj="workflowGraphPendingNodeChip"
-                >
-                  <NodeStepIcon
-                    iconType={iconType}
-                    iconColor={colors.chipIconColor}
-                    renderStepIcon={renderStepIcon}
-                    stepType={pending.stepType}
-                    isTrigger={isTriggerDraft}
-                    useAiGradient={colors.chipUseAiGradient}
-                  />
-                </NodeIconChip>
-                <span
-                  css={{
-                    flex: '1 1 auto',
-                    minWidth: 0,
-                    ...nodeLabelTypography(euiTheme, '24px'),
-                    color: euiTheme.colors.textHeading,
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                  }}
-                  data-test-subj="workflowGraphPendingNodeLabel"
-                  title={displayLabel}
-                >
-                  {displayLabel}
-                </span>
-              </>
-            )}
-          </>
-        )}
         <PendingDraftPorts isHorizontal={isHorizontal} isTrigger={isTriggerDraft} />
       </div>
     </ViewportPortal>

@@ -300,6 +300,13 @@ export const appendTrigger = (yaml: string, triggerFragment: string): MutationRe
   return { success: true, yaml: serialize(doc, detectIndent(yaml)) };
 };
 
+/** How many triggers the YAML declares. */
+export const countTriggers = (yaml: string): number => {
+  const doc = parseDocument(yaml);
+  const triggers = isMap(doc.contents) ? doc.contents.get('triggers') : undefined;
+  return isSeq(triggers) ? triggers.items.length : 0;
+};
+
 /** Removes the trigger at declaration index `triggerIndex`. */
 export const deleteTrigger = (yaml: string, triggerIndex: number): MutationResult => {
   const { doc, error } = parse(yaml);

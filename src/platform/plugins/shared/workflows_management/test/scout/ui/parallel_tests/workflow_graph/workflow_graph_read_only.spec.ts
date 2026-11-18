@@ -147,6 +147,8 @@ test.describe('Workflow graph read-only mode', { tag: [...tags.stateful.classic]
       await page.testSubj.locator('workflowGraphNode-manual').click();
       await expect(page.testSubj.locator('workflowTriggerConfigPanel')).toBeVisible();
       await expect(page.testSubj.locator('workflowTriggerConfigPanelSave')).toHaveCount(0);
+      await expect(page.testSubj.locator('workflowTriggerConfigPanelResetTrigger')).toHaveCount(0);
+      await expect(page.testSubj.locator('workflowTriggerConfigPanelRemoveTrigger')).toHaveCount(0);
       await expect(page.testSubj.locator('workflowTriggerConfigPanelOpenInYaml')).toBeVisible();
       await page.testSubj.click('workflowTriggerConfigPanelClose');
     });

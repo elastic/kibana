@@ -146,10 +146,12 @@ jest.mock('../../../features/debug_graph/execution_graph', () => ({
   ),
 }));
 
-const mockUseContextOverrideData = jest.fn((stepId: string) => ({
-  stepContext: { mockKey: 'mockValue' },
-  schema: {},
-}));
+const mockUseContextOverrideData = jest.fn(
+  (stepId: string): { stepContext: Record<string, unknown>; schema: Record<string, unknown> } => ({
+    stepContext: { mockKey: 'mockValue' },
+    schema: {},
+  })
+);
 jest.mock('./use_context_override_data', () => ({
   useContextOverrideData: () => mockUseContextOverrideData,
 }));
@@ -511,7 +513,7 @@ describe('WorkflowDetailEditor', () => {
     });
 
     it('should show toast error when immediate step run (no modal) fails', async () => {
-      mockUseContextOverrideData.mockReturnValue({ stepContext: {}, schema: {} } as any);
+      mockUseContextOverrideData.mockReturnValue({ stepContext: {}, schema: {} });
 
       const mockMutateAsync = jest.fn().mockRejectedValue(new Error('Failed to run step'));
       mockUseWorkflowActions.mockReturnValue({
@@ -597,7 +599,7 @@ describe('WorkflowDetailEditor', () => {
       const mockSelectEditorRun = jest.fn();
 
       it('records a direct run instead of selecting the execution', async () => {
-        mockUseContextOverrideData.mockReturnValue({ stepContext: {}, schema: {} } as any);
+        mockUseContextOverrideData.mockReturnValue({ stepContext: {}, schema: {} });
         const { findByTestId, store } = renderGraphEditor();
 
         await act(async () => {
@@ -616,7 +618,7 @@ describe('WorkflowDetailEditor', () => {
         mockUseContextOverrideData.mockReturnValue({
           stepContext: { steps: { a: { output: 'x' } } },
           schema: {},
-        } as any);
+        });
         const { findByTestId, store } = renderGraphEditor();
 
         await act(async () => {
@@ -639,7 +641,7 @@ describe('WorkflowDetailEditor', () => {
       });
 
       it('tells the tree whether a step can run without inputs', async () => {
-        mockUseContextOverrideData.mockReturnValue({ stepContext: {}, schema: {} } as any);
+        mockUseContextOverrideData.mockReturnValue({ stepContext: {}, schema: {} });
         const { findByTestId } = renderGraphEditor();
         expect(await findByTestId('visual-editor-can-run-directly')).toHaveTextContent('true');
       });
@@ -649,7 +651,7 @@ describe('WorkflowDetailEditor', () => {
       // Regression: "Run step" must be a no-op on the Executions tab because
       // handleStepRun uses the editable (draft) YAML/context, which differs from
       // the execution snapshot the graph is currently showing.
-      mockUseContextOverrideData.mockReturnValue({ stepContext: {}, schema: {} } as any);
+      mockUseContextOverrideData.mockReturnValue({ stepContext: {}, schema: {} });
 
       const mockMutateAsync = jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-123' });
       mockUseWorkflowActions.mockReturnValue({
@@ -679,7 +681,7 @@ describe('WorkflowDetailEditor', () => {
       mockUseContextOverrideData.mockReturnValue({
         stepContext: { inputs: {} },
         schema: {},
-      } as any);
+      });
 
       const mockMutateAsync = jest.fn();
       mockUseWorkflowActions.mockReturnValue({
@@ -696,14 +698,41 @@ describe('WorkflowDetailEditor', () => {
     });
   });
 
+  describe('with the experimental features off', () => {
+    it('keeps the floating bottom bar, with its Run button, as upstream has it', () => {
+      const { getByTestId } = renderEditor();
+
+      expect(getByTestId('workflowDetailBottomBar')).toBeInTheDocument();
+      expect(getByTestId('workflowBottomBarRunButton')).toBeInTheDocument();
+    });
+
+    it('shows the graph in graph view, which the visual editor then keeps read only', async () => {
+      mockUseWorkflowUrlState.mockReturnValue({
+        ...mockUseWorkflowUrlState(),
+        editorView: 'graph',
+      });
+      const { findByTestId } = renderEditor();
+
+      expect(await findByTestId('workflow-visual-editor')).toBeInTheDocument();
+    });
+
+    it('switches to the graph from the bottom bar', () => {
+      const setEditorView = jest.fn();
+      mockUseWorkflowUrlState.mockReturnValue({
+        ...mockUseWorkflowUrlState(),
+        setEditorView,
+      });
+      const { getByTestId } = renderEditor();
+
+      fireEvent.click(getByTestId('workflowEditorViewToggle-graph'));
+
+      expect(setEditorView).toHaveBeenCalledWith('graph');
+    });
+  });
+
   describe('bottom bar placement', () => {
     const getBottomBarOffset = (getByTestId: (id: string) => HTMLElement) =>
       getComputedStyle(getByTestId('workflowDetailBottomBar')).bottom;
-
-    beforeEach(() => {
-      // The bottom bar only mounts when the visual editor is enabled.
-      (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(true);
-    });
 
     it('floats above the validation panel docked under the YAML editor', () => {
       const { getByTestId } = renderEditor();
@@ -748,8 +777,6 @@ describe('WorkflowDetailEditor', () => {
     };
 
     beforeEach(() => {
-      // The bottom bar only mounts when the visual editor is enabled.
-      (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(true);
       localStorage.removeItem(SkipUnsavedRunConfirmationStorageKey);
     });
 

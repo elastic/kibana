@@ -42,4 +42,23 @@ describe('ensure_eui_icons', () => {
 
     expect(iconModuleLoaded).not.toHaveBeenCalled();
   });
+
+  it('retries after a failed icon load instead of staying unseeded', async () => {
+    delete process.env.JEST_WORKER_ID;
+    process.env.NODE_ENV = 'production';
+    const iconModuleFactory = jest.fn(() => {
+      throw new Error('chunk failed');
+    });
+    jest.doMock(ICON_MODULE, iconModuleFactory, { virtual: true });
+
+    await jest.isolateModulesAsync(async () => {
+      const { ensureWorkflowGraphEuiIcons } = await import('./ensure_eui_icons');
+      ensureWorkflowGraphEuiIcons();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      ensureWorkflowGraphEuiIcons();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    expect(iconModuleFactory).toHaveBeenCalledTimes(2);
+  });
 });

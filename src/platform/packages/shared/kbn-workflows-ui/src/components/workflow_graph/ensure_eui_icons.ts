@@ -131,5 +131,8 @@ export const ensureWorkflowGraphEuiIcons = (): void => {
       warning,
       workflow,
     });
-  })();
+  })().catch(() => {
+    // Let the next call retry, e.g. after a chunk failed to load.
+    seeded = false;
+  });
 };

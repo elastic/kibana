@@ -69,12 +69,15 @@ export const keepTrigger = (
 export const triggerQuery = (session: TriggerSession, text: string, caret: number): string =>
   text.slice(session.start + session.triggerLength, caret).trim();
 
-/** What a pick replaces: from the trigger to the caret, and a closing `}}` that follows it. */
+/**
+ * What a pick replaces: from the trigger to the caret, and a closing `}}` that follows it when
+ * the trigger was typed (a session opened by a button has no trigger and leaves it alone).
+ */
 export const triggerRange = (
   session: TriggerSession,
   text: string,
   caret: number
 ): { readonly start: number; readonly end: number } => {
-  const closing = /^\s*\}\}/.exec(text.slice(caret));
+  const closing = session.triggerLength > 0 ? /^\s*\}\}/.exec(text.slice(caret)) : null;
   return { start: session.start, end: caret + (closing ? closing[0].length : 0) };
 };

@@ -60,12 +60,6 @@ export interface TemplateInstallSectionProps {
    * own raw YAML (e.g. an uploaded file with no catalog slug).
    */
   installMode?: 'catalog' | 'custom';
-  /**
-   * When set, the primary action applies `previewYaml` into the current
-   * workflow editor instead of creating a new workflow via Install. Used by
-   * the visual-builder creation panel ("Add to workflow").
-   */
-  onApplyToWorkflow?: (yaml: string) => void;
 }
 
 const defaultsFromForm = (fields: InstallFormField[]): Record<string, unknown> =>
@@ -97,7 +91,6 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
     onPreviewValuesChange,
     previewYaml,
     installMode = 'catalog',
-    onApplyToWorkflow,
   }) {
     const { euiTheme } = useEuiTheme();
     const { application, notifications } = useKibana<{
@@ -105,7 +98,6 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
       notifications: NotificationsStart;
     }>().services;
     const { canCreateWorkflow } = useWorkflowsCapabilities();
-    const applyInPlace = Boolean(onApplyToWorkflow);
 
     const fields = useMemo(
       () => template.metadata.install?.form ?? [],
@@ -189,12 +181,8 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
     const handleInstall = useCallback(() => {
       setInstallError(undefined);
       setServerErrors({});
-      if (onApplyToWorkflow) {
-        onApplyToWorkflow(previewYaml);
-        return;
-      }
       installTemplate(values);
-    }, [installTemplate, values, onApplyToWorkflow, previewYaml]);
+    }, [installTemplate, values]);
 
     // Opens the workflow editor seeded with the previewed YAML, via the
     // create page's history-state contract (`WorkflowsCreateRouteState`).
@@ -203,10 +191,10 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
     // defaults or `<name>` placeholders.
     const handleRemix = useCallback(() => {
       void application.navigateToApp(WORKFLOWS_APP_ID, {
-        path: applyInPlace ? '/create?view=graph' : '/create',
+        path: '/create',
         state: { initialYaml: previewYaml } satisfies WorkflowsCreateRouteState,
       });
-    }, [application, previewYaml, applyInPlace]);
+    }, [application, previewYaml]);
 
     const handleSetup = useCallback(() => onStepChange('setup'), [onStepChange]);
 
@@ -228,18 +216,14 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
       <EuiButton
         fill
         fullWidth
-        isLoading={!applyInPlace && isInstalling}
+        isLoading={isInstalling}
         disabled={installDisabled}
         onClick={handleInstall}
         data-test-subj="workflowLibraryTemplateInstallButton"
       >
-        {applyInPlace
-          ? i18n.translate('workflowsUi.library.install.addToWorkflowButton', {
-              defaultMessage: 'Add to workflow',
-            })
-          : i18n.translate('workflowsUi.library.install.installButton', {
-              defaultMessage: 'Install',
-            })}
+        {i18n.translate('workflowsUi.library.install.installButton', {
+          defaultMessage: 'Install',
+        })}
       </EuiButton>
     );
 
@@ -247,25 +231,14 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
       <EuiToolTip
         display="block"
         position="top"
-        content={
-          applyInPlace
-            ? i18n.translate('workflowsUi.library.install.disabledTooltipAdd', {
-                defaultMessage:
-                  'Fill in the required {count, plural, one {field} other {fields}} to add this template: {fields}',
-                values: {
-                  count: missingFields.length,
-                  fields: missingFields.join(', '),
-                },
-              })
-            : i18n.translate('workflowsUi.library.install.disabledTooltip', {
-                defaultMessage:
-                  'Fill in the required {count, plural, one {field} other {fields}} to install: {fields}',
-                values: {
-                  count: missingFields.length,
-                  fields: missingFields.join(', '),
-                },
-              })
-        }
+        content={i18n.translate('workflowsUi.library.install.disabledTooltip', {
+          defaultMessage:
+            'Fill in the required {count, plural, one {field} other {fields}} to install: {fields}',
+          values: {
+            count: missingFields.length,
+            fields: missingFields.join(', '),
+          },
+        })}
       >
         {installButton}
       </EuiToolTip>

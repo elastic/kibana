@@ -19,6 +19,7 @@ import {
   clearAllYamlProviders,
   interceptMonacoYamlProvider,
 } from './intercept_monaco_yaml_provider';
+import { getSuggestions as getSuggestionsMock } from './suggestions/get_suggestions';
 import { createMockWorkflowContextRegistry } from '../../../../../common/lib/create_workflow_context_registry.mock';
 
 import { isDeprecatedStepType } from '../../../../../common/schema';
@@ -739,7 +740,7 @@ describe('getCompletionItemProvider', () => {
         columnOffset: 4,
         lineCount: 2,
       },
-      computed: {} as any,
+      computed: {} as StepFragmentTarget['computed'],
       ...overrides,
     });
 
@@ -765,12 +766,10 @@ describe('getCompletionItemProvider', () => {
       const target = buildTarget();
       const registration = registerStepFragmentModel(fragmentModel, () => target);
 
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { buildAutocompleteContext } = require('./context/build_autocomplete_context');
-      buildAutocompleteContext.mockReturnValueOnce({
+      jest.mocked(buildContext).mockReturnValueOnce({
         path: [],
         isInEsqlQueryField: false,
-      });
+      } as unknown as ExtendedAutocompleteContext);
 
       try {
         const provider = getCompletionItemProvider(emptyRegistry, getState);
@@ -781,7 +780,7 @@ describe('getCompletionItemProvider', () => {
           {} as monaco.CancellationToken
         );
 
-        expect(buildAutocompleteContext).toHaveBeenCalledWith(
+        expect(buildContext).toHaveBeenCalledWith(
           expect.objectContaining({
             model: target.model,
             position: expect.objectContaining({ lineNumber: 3, column: 9 }),
@@ -804,9 +803,7 @@ describe('getCompletionItemProvider', () => {
       };
       const registration = registerStepFragmentModel(fragmentModel, () => buildTarget({ virtual }));
 
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { getSuggestions } = require('./suggestions/get_suggestions');
-      getSuggestions.mockReturnValueOnce([
+      jest.mocked(getSuggestionsMock).mockResolvedValueOnce([
         {
           label: 'type',
           insertText: 'type: console',
@@ -818,7 +815,7 @@ describe('getCompletionItemProvider', () => {
           range: { startLineNumber: 3, startColumn: 5, endLineNumber: 3, endColumn: 9 },
           command: { id: 'workflows.openConnectorFlyout', title: 'Create connector' },
         },
-      ]);
+      ] as monaco.languages.CompletionItem[]);
 
       try {
         const provider = getCompletionItemProvider(emptyRegistry, getState);

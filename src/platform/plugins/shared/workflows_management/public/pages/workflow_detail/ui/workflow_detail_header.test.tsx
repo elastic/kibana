@@ -353,37 +353,15 @@ describe('WorkflowDetailHeader', () => {
     expect(getByTestId('saveWorkflowHeaderButton')).not.toBeDisabled();
   });
 
-  it('does not expose a Run action in the header app menu behind the experimental flag', () => {
-    // Run lives on the visual-builder bottom bar when the experimental UI is on.
-    (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(true);
-    renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
-    expect(screen.queryByTestId('runWorkflowHeaderButton')).not.toBeInTheDocument();
-  });
+  it.each([true, false])(
+    'has no Run action in the header (it lives on the bottom bar), with the experimental flag %s',
+    (enabled) => {
+      (useWorkflowsExperimentalUiSetting as jest.Mock).mockReturnValue(enabled);
+      renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
 
-  it('exposes a Run action in the header app menu without the experimental flag', () => {
-    renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
-    expect(screen.getByTestId('runWorkflowHeaderButton')).not.toBeDisabled();
-  });
-
-  it('keeps Run enabled while only the execution list is open', () => {
-    mockUseWorkflowUrlState.mockReturnValue({
-      activeTab: 'executions',
-      isViewingExecution: false,
-      setActiveTab: jest.fn(),
-    });
-    renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
-    expect(screen.getByTestId('runWorkflowHeaderButton')).not.toBeDisabled();
-  });
-
-  it('disables Run while an execution is shown', () => {
-    mockUseWorkflowUrlState.mockReturnValue({
-      activeTab: 'executions',
-      isViewingExecution: true,
-      setActiveTab: jest.fn(),
-    });
-    renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
-    expect(screen.getByTestId('runWorkflowHeaderButton')).toBeDisabled();
-  });
+      expect(screen.queryByTestId('runWorkflowHeaderButton')).not.toBeInTheDocument();
+    }
+  );
 
   it('disables enabled toggle when yaml has validation errors', () => {
     const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {

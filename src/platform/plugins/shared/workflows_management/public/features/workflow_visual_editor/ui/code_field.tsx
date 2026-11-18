@@ -52,7 +52,7 @@ const survivesCollapse = (text: string, isJson: boolean): boolean => {
 /**
  * Templatable code-shaped Inputs field. Inline UI is always a single-line
  * `EuiFieldText` (whitespace-collapsed for display); multi-line editing is the
- * expand sub-flyout. ES|QL keeps its specialized Monaco editor (`// TODO(slice7)`).
+ * expand sub-flyout. ES|QL keeps its specialized Monaco editor (`// TODO`).
  * JSON fields still round-trip through parse; invalid drafts stay local.
  */
 export function CodeField({
@@ -183,7 +183,7 @@ export function CodeField({
     [applyDraft, draft, external]
   );
 
-  // TODO(slice7): ES|QL keeps its specialized editor — no single-line collapse.
+  // TODO: ES|QL keeps its specialized editor — no single-line collapse.
   if (usesInlineMonaco) {
     return (
       <ReferenceCapableField

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Liquid } from 'liquidjs';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowContextRegistry } from '@kbn/workflows-yaml';
@@ -48,9 +49,64 @@ describe('getDocumentOrderPredecessors', () => {
       { name: 'after', type: 'console' },
     ];
     expect(getDocumentOrderPredecessors(steps, 'then_step').map((s) => s.name)).toEqual(['gate']);
-    expect(getDocumentOrderPredecessors(steps, 'else_step').map((s) => s.name)).toEqual([
+    expect(getDocumentOrderPredecessors(steps, 'after').map((s) => s.name)).toEqual([
       'gate',
       'then_step',
+      'else_step',
+    ]);
+  });
+
+  it('leaves out the steps of branches that cannot run before the step', () => {
+    const steps = [
+      { name: 'start', type: 'console' },
+      {
+        name: 'gate',
+        type: 'if',
+        steps: [{ name: 'then_step', type: 'console' }],
+        else: [{ name: 'else_step', type: 'console' }],
+      },
+      {
+        name: 'pick',
+        type: 'switch',
+        cases: [
+          { match: 'a', steps: [{ name: 'case_a', type: 'console' }] },
+          { match: 'b', steps: [{ name: 'case_b', type: 'console' }] },
+        ],
+        default: [{ name: 'fallback_case', type: 'console' }],
+      },
+      {
+        name: 'fan',
+        type: 'parallel',
+        branches: [
+          { name: 'left', steps: [{ name: 'left_step', type: 'console' }] },
+          { name: 'right', steps: [{ name: 'right_step', type: 'console' }] },
+        ],
+      },
+    ];
+    const names = (stepName: string) =>
+      getDocumentOrderPredecessors(steps, stepName).map((s) => s.name);
+
+    // The other arm of the current step's `if` never runs before it.
+    expect(names('else_step')).toEqual(['start', 'gate']);
+    // Both arms of an earlier `if` may have run; the sibling arm of the current one never does.
+    expect(names('case_b')).toEqual([
+      'start',
+      'gate',
+      'then_step',
+      'else_step',
+      'pick',
+    ]);
+    expect(names('fallback_case')).toEqual(['start', 'gate', 'then_step', 'else_step', 'pick']);
+    expect(names('right_step')).toEqual([
+      'start',
+      'gate',
+      'then_step',
+      'else_step',
+      'pick',
+      'case_a',
+      'case_b',
+      'fallback_case',
+      'fan',
     ]);
   });
 });
@@ -101,6 +157,30 @@ describe('buildDataReferenceCatalog', () => {
     });
     expect(isDataReferenceDraggable(stepsGroup!.items[0].children![0])).toBe(true);
     expect(isDataReferenceInsertable(stepsGroup!.items[0].children![0])).toBe(true);
+  });
+
+  it('writes a step name that is not a plain identifier as a bracket path Liquid can resolve', () => {
+    const named = {
+      name: 'Demo',
+      triggers: [{ type: 'manual' }],
+      steps: [
+        { name: 'Fetch user', type: 'console', with: { message: 'hi' } },
+        { name: 'my-step', type: 'console', with: { message: 'hi' } },
+        { name: 'next', type: 'console', with: { message: 'yo' } },
+      ],
+    } as unknown as WorkflowYaml;
+    const catalog = buildDataReferenceCatalog({
+      definition: named,
+      currentStepName: 'next',
+      connectors: [],
+    });
+    const paths = catalog.groups.find((g) => g.id === 'steps')?.items.map((i) => i.path);
+
+    expect(paths).toEqual(['steps["Fetch user"].output', 'steps.my-step.output']);
+    const rendered = new Liquid().parseAndRenderSync(`{{ ${paths?.[0]} }}`, {
+      steps: { 'Fetch user': { output: 'resolved' } },
+    });
+    expect(rendered).toBe('resolved');
   });
 
   it('includes every step when stepsScope is allSteps', () => {
@@ -438,6 +518,35 @@ describe('overlayValueSample', () => {
     const result = overlayValueSample(opaque, 'done');
     expect(result.subtitle).toBeUndefined();
     expect(result.children?.[0].subtitle).toBe('done');
+  });
+
+  it('writes a sample key that is not a plain identifier as a bracket path', () => {
+    const result = overlayValueSample(entity([leaf('steps.first.output.status')]), {
+      'host.name': 'a',
+      ok: 1,
+    });
+    const paths = result.children?.map((child) => child.path);
+
+    expect(paths).toContain('steps.first.output["host.name"]');
+    expect(paths).toContain('steps.first.output.ok');
+  });
+
+  it('caps how many keys of a large sample object become rows', () => {
+    const huge = Object.fromEntries(Array.from({ length: 500 }, (_, i) => [`k${i}`, i]));
+    const result = overlayValueSample(entity([leaf('steps.first.output.status')]), huge);
+
+    // The schema's own row plus the first 50 sample keys.
+    expect(result.children).toHaveLength(51);
+  });
+
+  it('stops turning a deeply nested sample into rows', () => {
+    let nested: Record<string, unknown> = { end: true };
+    for (let i = 0; i < 12; i++) nested = { a: nested };
+    const result = overlayValueSample(entity([leaf('steps.first.output.status')]), nested);
+
+    const depthOf = (item: DataReferenceItem): number =>
+      1 + Math.max(0, ...(item.children ?? []).map(depthOf));
+    expect(depthOf(result)).toBeLessThanOrEqual(8);
   });
 
   it('caps array samples at 10 elements', () => {

@@ -12,6 +12,7 @@ import React from 'react';
 import type { WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus, transformWorkflowToGraph } from '@kbn/workflows';
 import { useWorkflowLayout } from './use_workflow_layout';
+import * as layoutPipeline from './workflow_layout_pipeline';
 import { type WorkflowsUiServices, WorkflowsUiServicesProvider } from '../../context';
 
 const minimal = (overrides: Partial<WorkflowYaml> = {}): WorkflowYaml =>
@@ -690,6 +691,28 @@ describe('useWorkflowLayout', () => {
       });
       expect(marks.filter((name) => name === 'layout_ms')).toHaveLength(1);
       expect(marks.filter((name) => name === 'transform_ms')).toHaveLength(1);
+    });
+
+    it('reports a failed layout through onLayoutFailed and layoutError', () => {
+      const layoutSpy = jest.spyOn(layoutPipeline, 'computeWorkflowLayout').mockImplementation(() => {
+        throw new Error('cyclic compound graph');
+      });
+      try {
+        const onLayoutFailed = jest.fn();
+        const { result } = renderHook(() =>
+          useWorkflowLayout({ workflow: switchWorkflow([filledCase('a')]), onLayoutFailed })
+        );
+
+        expect(result.current.layoutError).toBe('cyclic compound graph');
+        expect(onLayoutFailed).toHaveBeenCalledWith('cyclic compound graph');
+      } finally {
+        layoutSpy.mockRestore();
+      }
+    });
+
+    it('has no layoutError when the layout succeeds', () => {
+      const { result } = renderLayout(switchWorkflow([filledCase('a')]));
+      expect(result.current.layoutError).toBeUndefined();
     });
 
     it('lays out a precomputed `transformed` passed without a workflow', () => {

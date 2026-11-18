@@ -17,6 +17,11 @@ import {
 } from '../../../shared/lib/active_data_reference_insert_target';
 import { TestProvider } from '../../../shared/mocks/test_providers';
 
+const mockExperimentalFeatures = { enabled: true };
+jest.mock('../../../hooks/use_workflows_experimental_ui_setting', () => ({
+  useWorkflowsExperimentalUiSetting: () => mockExperimentalFeatures.enabled,
+}));
+
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
   copyToClipboard: jest.fn(),
@@ -38,6 +43,7 @@ describe('StepDataSection reference sources', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockExperimentalFeatures.enabled = true;
     setActiveDataReferenceInsertTarget(insert);
   });
 
@@ -48,12 +54,29 @@ describe('StepDataSection reference sources', () => {
   it('inserts the reference token into the active field when a row is clicked', () => {
     renderSection();
 
-    // The field and value columns are both reference sources with this test subject.
-    const [fieldCell] = screen.getAllByTestId('workflowExecutionOutputField-status');
-    fireEvent.click(fieldCell);
+    fireEvent.click(screen.getByTestId('workflowExecutionOutputField-status'));
 
     expect(insert).toHaveBeenCalledTimes(1);
     expect(insert).toHaveBeenCalledWith('{{ steps.fetch.output.status }}');
+  });
+
+  it('gives the field cell and the value cell their own test subjects', () => {
+    renderSection();
+
+    expect(screen.getByTestId('workflowExecutionOutputField-status')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowExecutionOutputField-status-value')).toBeInTheDocument();
+  });
+
+  it('offers no drag or click sources while the experimental features are off', () => {
+    mockExperimentalFeatures.enabled = false;
+    renderSection();
+
+    expect(screen.queryByTestId('workflowExecutionOutputField-status')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('workflowExecutionOutputField-status-value')
+    ).not.toBeInTheDocument();
+    // Copying the field path is not an experimental feature.
+    expect(screen.getByTestId('workflowExecutionStepDataCopyFieldPath')).toBeInTheDocument();
   });
 
   it('copies the field path without also inserting it into the open step form', () => {

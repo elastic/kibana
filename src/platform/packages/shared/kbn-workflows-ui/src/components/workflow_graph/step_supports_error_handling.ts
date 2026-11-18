@@ -12,12 +12,12 @@
  * Keep in sync with canvas port mounting — one predicate. The panel's Error handling section
  * uses {@link stepSupportsErrorHandlingSettings}, which also takes loops.
  *
- * TODO(engine): step-level on-failure on `if` (and other flow-control types
+ * TODO: step-level on-failure on `if` (and other flow-control types
  * listed below) once the engine permits it.
  */
 export function stepSupportsErrorHandling(stepType: string | undefined): boolean {
   if (!stepType) return false;
-  // Flow-control / composite — deferred with the canvas error-port TODO(engine).
+  // Flow-control / composite — deferred with the canvas error-port TODO.
   if (
     stepType === 'if' ||
     stepType === 'foreach' ||

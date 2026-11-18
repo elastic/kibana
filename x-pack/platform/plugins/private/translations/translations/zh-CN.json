@@ -15183,7 +15183,6 @@
     "workflowsUi.library.templateDetail.setupTitle": "设置工作流",
     "workflowsUi.library.templateDetail.solutionsLabel": "解决方案",
     "workflowsUi.library.templateDetail.versionLabel": "版本",
-    "workflowsUi.library.templateIcons.overflowTitle": "更多 {count} 种步骤类型",
     "workflowsUi.library.upload.cancel": "取消",
     "workflowsUi.library.upload.continue": "继续",
     "workflowsUi.library.upload.description": "上传工作流模板 YAML 文件。它会在您的浏览器中进行验证，在您安装之前绝不会上传。",

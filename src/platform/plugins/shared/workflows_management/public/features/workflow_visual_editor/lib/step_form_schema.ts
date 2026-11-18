@@ -190,7 +190,7 @@ const readFieldMeta = (schema: z.ZodType): Record<string, unknown> | undefined =
 
 /**
  * Curated `with.*` keys that belong in Advanced until schemas carry meta.
- * TODO(catalog): migrate into schema `.meta({ advanced: true })` and delete this map.
+ * TODO: migrate into schema `.meta({ advanced: true })` and delete this map.
  *
  * For types listed here, every other key is treated as `advanced: false`
  * (promoted into Configuration) so essential optionals (e.g. http url/method)
@@ -211,7 +211,7 @@ const ADVANCED_WITH_KEYS: Readonly<Record<string, ReadonlySet<string>>> = {
 
 /**
  * For dense Elasticsearch APIs: keys NOT listed here are treated as advanced.
- * TODO(catalog): replace with per-field meta.advanced on overrides.
+ * TODO: replace with per-field meta.advanced on overrides.
  */
 const PRIMARY_WITH_KEYS: Readonly<Record<string, ReadonlySet<string>>> = {
   'elasticsearch.search': new Set([

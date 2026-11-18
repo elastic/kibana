@@ -25,8 +25,10 @@ import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
 import { StepDataValueCell } from './step_data_value_cell';
 import { StepDetailAccordionSection } from './step_detail_accordion_section';
+import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 import { insertIntoActiveDataReferenceTarget } from '../../../shared/lib/active_data_reference_insert_target';
 import { appendKeyPath } from '../../../shared/lib/flatten_key_paths';
 import { isTokenUsageTableField } from '../lib/is_token_usage_table_field';
@@ -141,15 +143,19 @@ export const StepDataSection = ({
           defaultMessage: 'No data',
         });
 
+  // Dragging or clicking a row into a step field belongs to the visual editor.
+  const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(
+    WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID
+  );
   const wrapAsReferenceSource = useCallback(
-    (field: string, node: React.ReactNode) => {
-      if (fieldPathPrefix == null) return node;
+    (field: string, node: React.ReactNode, testSubjSuffix = '') => {
+      if (!isVisualEditorEnabled || fieldPathPrefix == null) return node;
       // Drag/click inserts the REFERENCE path token, never the run's literal value.
       const token = `{{ ${appendKeyPath(fieldPathPrefix, field)} }}`;
       return (
         <div
           draggable
-          data-test-subj={`workflowExecutionOutputField-${field}`}
+          data-test-subj={`workflowExecutionOutputField-${field}${testSubjSuffix}`}
           title={token}
           onDragStart={(e) => {
             e.dataTransfer.setData('text/plain', token);
@@ -164,7 +170,7 @@ export const StepDataSection = ({
         </div>
       );
     },
-    [fieldPathPrefix]
+    [fieldPathPrefix, isVisualEditorEnabled]
   );
 
   const tableColumns = useMemo<Array<EuiBasicTableColumn<StepDataTableRow>>>(
@@ -257,7 +263,7 @@ export const StepDataSection = ({
         className: 'workflowStepDataValueCol',
         truncateText: true,
         render: (value: string, row) =>
-          wrapAsReferenceSource(row.field, <StepDataValueCell value={value} />),
+          wrapAsReferenceSource(row.field, <StepDataValueCell value={value} />, '-value'),
       },
     ],
     [euiTheme.font.familyCode, fieldPathPrefix, isFieldPathCopyable, wrapAsReferenceSource]

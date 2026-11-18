@@ -49,21 +49,26 @@ jest.mock('../../../shared/ui/step_icons/step_icon', () => ({
 }));
 
 const renderPanel = (overrides: Partial<React.ComponentProps<typeof TriggerConfigPanel>> = {}) => {
-  const onSave = jest.fn();
-  const onCancel = jest.fn();
+  const onFragmentChange = jest.fn();
+  const onClose = jest.fn();
+  const onRevert = jest.fn();
   render(
     <I18nProvider>
       <TriggerConfigPanel
+        mode="edit"
         triggerType="manual"
         triggerLabel="Manual"
         initialFragment="type: manual\n"
-        onSave={onSave}
-        onCancel={onCancel}
+        onFragmentChange={onFragmentChange}
+        onClose={onClose}
+        onRevert={onRevert}
         {...overrides}
       />
     </I18nProvider>
   );
-  return { onSave, onCancel };
+  const lastFragment = () =>
+    onFragmentChange.mock.calls[onFragmentChange.mock.calls.length - 1]?.[0] as string | undefined;
+  return { onFragmentChange, onClose, onRevert, lastFragment };
 };
 
 describe('TriggerConfigPanel', () => {
@@ -82,16 +87,14 @@ describe('TriggerConfigPanel', () => {
     );
   });
 
-  it('adds a manual input and saves JSON-Schema-shaped inputs', () => {
-    const { onSave } = renderPanel();
+  it('applies a manual input as JSON-Schema-shaped inputs as soon as it is added', () => {
+    const { lastFragment } = renderPanel();
     fireEvent.click(screen.getByTestId('workflowTriggerConfigInput-add'));
-    const nameInput = screen.getByTestId(/workflowTriggerConfigInput-name-/);
-    fireEvent.change(nameInput, {
+    fireEvent.change(screen.getByTestId(/workflowTriggerConfigInput-name-/), {
       target: { value: 'environment' },
     });
-    fireEvent.click(screen.getByTestId('workflowTriggerConfigPanelSave'));
-    expect(onSave).toHaveBeenCalled();
-    const fragment = onSave.mock.calls[0][0] as string;
+
+    const fragment = lastFragment() as string;
     expect(fragment).toContain('type: manual');
     expect(fragment).toContain('environment');
     expect(fragment).toContain('properties');
@@ -108,8 +111,8 @@ describe('TriggerConfigPanel', () => {
     expect(screen.getByTestId('workflowTriggerConfigPanelAlertInfo')).toBeInTheDocument();
   });
 
-  it('edits scheduled interval in Form mode', () => {
-    const { onSave } = renderPanel({
+  it('applies the scheduled interval as it is edited', () => {
+    const { lastFragment } = renderPanel({
       triggerType: 'scheduled',
       triggerLabel: 'Scheduled',
       initialFragment: 'type: scheduled\nwith:\n  every: 5m\n',
@@ -118,20 +121,100 @@ describe('TriggerConfigPanel', () => {
     fireEvent.change(screen.getByTestId('workflowTriggerConfigPanelEvery'), {
       target: { value: '15m' },
     });
-    fireEvent.click(screen.getByTestId('workflowTriggerConfigPanelSave'));
-    expect(onSave.mock.calls[0][0]).toContain('15m');
+    expect(lastFragment()).toContain('15m');
   });
 
-  it('round-trips YAML tab edits', () => {
-    const { onSave } = renderPanel();
+  it('applies YAML tab edits', () => {
+    const { lastFragment } = renderPanel();
     fireEvent.click(screen.getByTestId('workflowTriggerConfigPanelView-yaml'));
     fireEvent.change(screen.getByTestId('workflowTriggerConfigPanelYaml'), {
       target: {
         value: 'type: manual\ninputs:\n  - name: dry_run\n    type: boolean\n    default: true\n',
       },
     });
-    fireEvent.click(screen.getByTestId('workflowTriggerConfigPanelSave'));
-    expect(onSave.mock.calls[0][0]).toContain('dry_run');
+    expect(lastFragment()).toContain('dry_run');
+  });
+
+  it('does not apply a draft that is not valid YAML', () => {
+    const { onFragmentChange } = renderPanel();
+    onFragmentChange.mockClear();
+    fireEvent.click(screen.getByTestId('workflowTriggerConfigPanelView-yaml'));
+    fireEvent.change(screen.getByTestId('workflowTriggerConfigPanelYaml'), {
+      target: { value: 'type: [manual' },
+    });
+
+    expect(onFragmentChange).not.toHaveBeenCalled();
+  });
+
+  describe('footer', () => {
+    it('of a new trigger offers only Remove trigger', () => {
+      const { onRevert } = renderPanel({ mode: 'insert' });
+
+      expect(screen.queryByTestId('workflowTriggerConfigPanelSave')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workflowTriggerConfigPanelCancel')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workflowTriggerConfigPanelResetTrigger')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('workflowTriggerConfigPanelRemoveTrigger'));
+
+      expect(screen.getByTestId('workflowTriggerConfigPanelRemoveTrigger')).toHaveTextContent(
+        'Remove trigger'
+      );
+      expect(onRevert).toHaveBeenCalledTimes(1);
+    });
+
+    it('of an existing trigger offers only Reset trigger, which waits for a change', () => {
+      const { onRevert } = renderPanel({
+        mode: 'edit',
+        triggerType: 'scheduled',
+        triggerLabel: 'Scheduled',
+        initialFragment: 'type: scheduled\nwith:\n  every: 5m\n',
+      });
+      const reset = screen.getByTestId('workflowTriggerConfigPanelResetTrigger');
+
+      expect(screen.queryByTestId('workflowTriggerConfigPanelSave')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workflowTriggerConfigPanelCancel')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workflowTriggerConfigPanelRemoveTrigger')).not.toBeInTheDocument();
+      expect(reset).toHaveTextContent('Reset trigger');
+      expect(reset).toBeDisabled();
+
+      fireEvent.change(screen.getByTestId('workflowTriggerConfigPanelEvery'), {
+        target: { value: '15m' },
+      });
+      expect(reset).toBeEnabled();
+      fireEvent.click(reset);
+
+      expect(onRevert).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('the close button', () => {
+    it('just closes: what was edited is already applied', () => {
+      const { onClose, onRevert } = renderPanel();
+
+      fireEvent.click(screen.getByTestId('workflowTriggerConfigPanelClose'));
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(onRevert).not.toHaveBeenCalled();
+    });
+
+    it('asks before throwing away a draft that is not valid YAML', () => {
+      const { onClose } = renderPanel();
+      fireEvent.click(screen.getByTestId('workflowTriggerConfigPanelView-yaml'));
+      fireEvent.change(screen.getByTestId('workflowTriggerConfigPanelYaml'), {
+        target: { value: 'type: [manual' },
+      });
+
+      fireEvent.click(screen.getByTestId('workflowTriggerConfigPanelClose'));
+      expect(screen.getByTestId('workflowTriggerConfigPanelDiscardModal')).toBeInTheDocument();
+      expect(onClose).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByText('Keep editing'));
+      expect(screen.queryByTestId('workflowTriggerConfigPanelDiscardModal')).not.toBeInTheDocument();
+      expect(onClose).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByTestId('workflowTriggerConfigPanelClose'));
+      fireEvent.click(screen.getByText('Discard'));
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('read-only', () => {
@@ -165,22 +248,24 @@ describe('TriggerConfigPanel', () => {
       expect(screen.getByTestId('workflowTriggerConfigPanelEvery')).toBeDisabled();
     });
 
-    it('offers only Close in the footer', () => {
-      const { onCancel, onSave } = renderPanel({ readOnly: true });
+    it('offers only Close in the footer and never applies anything', () => {
+      const { onClose, onRevert, onFragmentChange } = renderPanel({ readOnly: true });
 
-      expect(screen.queryByTestId('workflowTriggerConfigPanelSave')).not.toBeInTheDocument();
-      fireEvent.click(screen.getByTestId('workflowTriggerConfigPanelCancel'));
+      expect(screen.queryByTestId('workflowTriggerConfigPanelResetTrigger')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workflowTriggerConfigPanelRemoveTrigger')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('workflowTriggerConfigPanelFooterClose'));
 
-      expect(screen.getByTestId('workflowTriggerConfigPanelCancel')).toHaveTextContent('Close');
-      expect(onCancel).toHaveBeenCalledTimes(1);
-      expect(onSave).not.toHaveBeenCalled();
+      expect(screen.getByTestId('workflowTriggerConfigPanelFooterClose')).toHaveTextContent('Close');
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(onRevert).not.toHaveBeenCalled();
+      expect(onFragmentChange).not.toHaveBeenCalled();
     });
 
     it('stays editable by default (positive control)', () => {
       renderPanel();
 
       expect(screen.getByTestId('workflowTriggerConfigInput-add')).toBeInTheDocument();
-      expect(screen.getByTestId('workflowTriggerConfigPanelSave')).toBeInTheDocument();
+      expect(screen.getByTestId('workflowTriggerConfigPanelResetTrigger')).toBeInTheDocument();
     });
   });
 });

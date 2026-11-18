@@ -35,7 +35,7 @@ const theme = {
     success: 'success-color',
     danger: 'danger-color',
   },
-} as any;
+} as unknown as Parameters<typeof resolveNodeChipStyle>[0];
 
 const idle = { isSuccess: false, isFailed: false };
 const success = { isSuccess: true, isFailed: false };

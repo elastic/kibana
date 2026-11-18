@@ -10,6 +10,7 @@
 import { act, renderHook } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter, useHistory } from 'react-router-dom';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import { WORKFLOW_RUN_NAME_FILTER_MAX_LENGTH } from '@kbn/workflows/common/constants';
 import { useWorkflowUrlState } from './use_workflow_url_state';
@@ -17,9 +18,18 @@ import { getStoredEditorView, getStoredGraphDirection } from '../lib/workflow_ed
 
 type InitialEntries = React.ComponentProps<typeof MemoryRouter>['initialEntries'];
 
-const createWrapper = (initialEntries: InitialEntries = ['/']) => {
+const createWrapper = (
+  initialEntries: InitialEntries = ['/'],
+  { experimentalFeatures = false }: { experimentalFeatures?: boolean } = {}
+) => {
+  // The setting says whether the visual editor is the default view.
+  const services = { settings: { client: { get: () => experimentalFeatures } } };
   const Wrapper = ({ children }: { children: React.ReactNode }) =>
-    React.createElement(MemoryRouter, { initialEntries }, children);
+    React.createElement(
+      KibanaContextProvider,
+      { services },
+      React.createElement(MemoryRouter, { initialEntries }, children)
+    );
   return Wrapper;
 };
 
@@ -34,7 +44,7 @@ describe('useWorkflowUrlState', () => {
     });
 
     expect(result.current.activeTab).toBe('workflow');
-    expect(result.current.editorView).toBe('graph');
+    expect(result.current.editorView).toBe('yaml');
     expect(result.current.graphDirection).toBe('TB');
     expect(result.current.selectedExecutionId).toBeUndefined();
     expect(result.current.selectedStepExecutionId).toBeUndefined();
@@ -46,6 +56,22 @@ describe('useWorkflowUrlState', () => {
       executedBy: [],
     });
     expect(result.current.lastViewedExecutionId).toBeUndefined();
+  });
+
+  it('defaults to the visual editor when the experimental features are on', () => {
+    const { result } = renderHook(() => useWorkflowUrlState(), {
+      wrapper: createWrapper(['/'], { experimentalFeatures: true }),
+    });
+
+    expect(result.current.editorView).toBe('graph');
+  });
+
+  it('opens the graph for view=graph even with the experimental features off', () => {
+    const { result } = renderHook(() => useWorkflowUrlState(), {
+      wrapper: createWrapper(['/?view=graph']),
+    });
+
+    expect(result.current.editorView).toBe('graph');
   });
 
   it('should parse view=yaml and direction=LR from URL', () => {

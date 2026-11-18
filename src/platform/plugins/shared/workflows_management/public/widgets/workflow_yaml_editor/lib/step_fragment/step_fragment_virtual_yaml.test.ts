@@ -249,7 +249,7 @@ describe('toFragmentSuggestion', () => {
         insertText: 'type',
         range: { startLineNumber: 5, startColumn: 5, endLineNumber: 5, endColumn: 9 },
         kind: 0,
-      } as any,
+      } as Parameters<typeof toFragmentSuggestion>[0],
       virtual
     );
     expect(suggestion.range).toEqual({
@@ -270,7 +270,7 @@ describe('toFragmentSuggestion', () => {
           replace: { startLineNumber: 5, startColumn: 5, endLineNumber: 5, endColumn: 9 },
         },
         kind: 0,
-      } as any,
+      } as Parameters<typeof toFragmentSuggestion>[0],
       virtual
     );
     expect(suggestion.range).toEqual({
@@ -296,7 +296,7 @@ describe('toFragmentSuggestion', () => {
             text: 'outside: true\n',
           },
         ],
-      } as any,
+      } as Parameters<typeof toFragmentSuggestion>[0],
       virtual
     );
     expect(suggestion.additionalTextEdits).toEqual([

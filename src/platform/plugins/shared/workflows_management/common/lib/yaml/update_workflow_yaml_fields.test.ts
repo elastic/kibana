@@ -134,4 +134,15 @@ steps:
     expect(result).not.toMatch(/\btags\b/);
     expect(result).toContain('name: Test');
   });
+
+  it.each([
+    ['description', { description: '' }, 'description: Keep me\n'],
+    ['tags', { tags: [] }, 'tags:\n    - alpha\n'],
+  ])('removing an empty %s keeps the rest of the YAML byte for byte', (_key, update, removed) => {
+    const longMessage = 'word '.repeat(40).trim();
+    const rest = `name: Test\nsteps:\n    - name: a\n      type: console\n      with:\n          message: ${longMessage}\n`;
+    const yaml = `${removed}${rest}`;
+
+    expect(updateWorkflowYamlFields(yaml, update)).toBe(rest);
+  });
 });

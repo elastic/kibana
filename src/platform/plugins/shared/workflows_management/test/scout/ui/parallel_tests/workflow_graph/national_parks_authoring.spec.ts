@@ -61,7 +61,7 @@ test.describe(
       await test.step('adds a Manual trigger', async () => {
         await authoring.openAddTriggerFromEmptyCanvas();
         await authoring.pickTrigger('Manual');
-        await authoring.saveTrigger();
+        await authoring.closeTriggerPanel();
       });
 
       await test.step('adds get_index (Check indices)', async () => {

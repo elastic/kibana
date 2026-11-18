@@ -52,7 +52,7 @@ export function SchemaListDragClone({
           // Match expression-builder ghost: elevated chip over the list.
           background: euiTheme.colors.backgroundBasePlain,
           border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
-          borderRadius: 6,
+          borderRadius: euiTheme.border.radius.medium,
           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.28)',
           overflow: 'hidden',
           pointerEvents: 'none',

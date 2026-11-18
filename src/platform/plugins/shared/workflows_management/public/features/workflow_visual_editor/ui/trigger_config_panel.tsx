@@ -9,9 +9,9 @@
 
 import {
   EuiAccordion,
-  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiConfirmModal,
   EuiEmptyPrompt,
   EuiFieldText,
   EuiFlexGroup,
@@ -46,6 +46,7 @@ import {
   SchemaPropertyList,
 } from '../../../shared/ui/schema_property_builder';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
+import { isStepFragmentDirty, parseStepFragment } from '../lib/parse_step_fragment';
 
 ensureWorkflowGraphEuiIcons();
 
@@ -56,8 +57,18 @@ export interface TriggerConfigPanelProps {
   readonly initialFragment: string;
   /** Full workflow YAML — used to warn when renaming/deleting referenced inputs. */
   readonly workflowYaml?: string;
-  readonly onCancel: () => void;
-  readonly onSave: (fragment: string) => void;
+  /**
+   * 'insert': a trigger the user just added, whose footer button removes it. 'edit': an existing
+   * trigger, whose footer button puts it back as it was when the panel opened. Every edit is
+   * applied as it is made either way.
+   */
+  readonly mode: 'insert' | 'edit';
+  /** Closes the panel, keeping what is already applied: ✕ and Escape route here. */
+  readonly onClose: () => void;
+  /** Footer button: removes a new trigger, or restores the trigger the panel opened with. */
+  readonly onRevert: () => void;
+  /** Every valid draft, as it changes. */
+  readonly onFragmentChange: (fragment: string) => void;
   /** Shows the trigger without letting the user change it; the footer only offers Close. */
   readonly readOnly?: boolean;
   /** Read-only footer action: show this trigger in the workflow's YAML. */
@@ -68,7 +79,7 @@ type ParametersMode = 'form' | 'yaml';
 
 /**
  * Write JSON-Schema-shaped `inputs` onto the trigger fragment.
- * // TODO(engine): confirm inputs schema shape — `required` is a parent-level
+ * // TODO: confirm inputs schema shape — `required` is a parent-level
  * array; required means the caller must supply a non-empty value.
  */
 const writeManualInputs = (
@@ -82,7 +93,7 @@ const writeManualInputs = (
   if (named.length === 0) {
     doc.contents.delete('inputs');
   } else {
-    // TODO(engine): confirm inputs schema shape
+    // TODO: confirm inputs schema shape
     doc.contents.set('inputs', doc.createNode(schemaPropertiesToJsonSchema(named)));
   }
   return doc.toString({ indent, lineWidth: 0 });
@@ -115,8 +126,10 @@ export function TriggerConfigPanel({
   triggerLabel,
   initialFragment,
   workflowYaml = '',
-  onCancel,
-  onSave,
+  mode,
+  onClose,
+  onRevert,
+  onFragmentChange,
   readOnly = false,
   onOpenInYaml,
 }: TriggerConfigPanelProps) {
@@ -178,9 +191,27 @@ export function TriggerConfigPanel({
     if (triggerType === 'scheduled') setEveryDraft(readScheduledEvery(fragment));
   }, [triggerType, fragment]);
 
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
+
+  // Edits are applied as they are made, so closing only needs to ask when the draft could not be
+  // applied (YAML that does not parse): that is the one thing closing would lose.
   const handleClose = useCallback(() => {
-    onCancel();
-  }, [onCancel]);
+    if (!readOnly && !parsed.valid) {
+      setShowDiscardConfirm(true);
+      return;
+    }
+    onClose();
+  }, [readOnly, parsed.valid, onClose]);
+
+  useEffect(() => {
+    if (!readOnly && parsed.valid) onFragmentChange(fragment);
+  }, [readOnly, parsed.valid, fragment, onFragmentChange]);
+
+  const initialParsed = useMemo(() => parseStepFragment(initialFragment), [initialFragment]);
+  const isDirty = useMemo(
+    () => isStepFragmentDirty(parseStepFragment(fragment), initialParsed),
+    [fragment, initialParsed]
+  );
 
   const syncManualFieldsToFragment = useCallback(
     (fields: readonly SchemaPropertyField[]) => {
@@ -210,11 +241,6 @@ export function TriggerConfigPanel({
     },
     [indent]
   );
-
-  const handleSave = useCallback(() => {
-    if (!parsed.valid) return;
-    onSave(fragment);
-  }, [parsed.valid, onSave, fragment]);
 
   const findReferencingSteps = useCallback(
     (name: string) => findStepsReferencingInput(workflowYaml, name),
@@ -260,6 +286,10 @@ export function TriggerConfigPanel({
   const isBuilderMode = parametersMode === 'form';
   const closeLabel = i18n.translate('workflows.triggerConfigPanel.close', {
     defaultMessage: 'Close',
+  });
+
+  const discardTitle = i18n.translate('workflows.triggerConfigPanel.discardTitle', {
+    defaultMessage: 'Discard changes to this trigger?',
   });
 
   const showManualInputs = triggerType === 'manual';
@@ -367,7 +397,7 @@ export function TriggerConfigPanel({
             iconType="cross"
             color="text"
             aria-label={closeLabel}
-            onClick={onCancel}
+            onClick={handleClose}
             data-test-subj="workflowTriggerConfigPanelClose"
             css={{
               position: 'absolute',
@@ -588,30 +618,64 @@ export function TriggerConfigPanel({
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onCancel} data-test-subj="workflowTriggerConfigPanelCancel">
-              {readOnly
-                ? i18n.translate('workflows.triggerConfigPanel.close', { defaultMessage: 'Close' })
-                : i18n.translate('workflows.triggerConfigPanel.cancel', {
-                    defaultMessage: 'Cancel',
-                  })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          {readOnly ? null : (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                onClick={handleSave}
-                isDisabled={!parsed.valid}
-                data-test-subj="workflowTriggerConfigPanelSave"
+            {readOnly ? (
+              <EuiButtonEmpty onClick={onClose} data-test-subj="workflowTriggerConfigPanelFooterClose">
+                {closeLabel}
+              </EuiButtonEmpty>
+            ) : mode === 'insert' ? (
+              <EuiButtonEmpty
+                color="danger"
+                iconType="trash"
+                onClick={onRevert}
+                data-test-subj="workflowTriggerConfigPanelRemoveTrigger"
               >
-                {i18n.translate('workflows.triggerConfigPanel.save', {
-                  defaultMessage: 'Save trigger',
+                {i18n.translate('workflows.triggerConfigPanel.removeTrigger', {
+                  defaultMessage: 'Remove trigger',
                 })}
-              </EuiButton>
-            </EuiFlexItem>
-          )}
+              </EuiButtonEmpty>
+            ) : (
+              <EuiButtonEmpty
+                iconType="undo"
+                onClick={onRevert}
+                isDisabled={!isDirty}
+                data-test-subj="workflowTriggerConfigPanelResetTrigger"
+              >
+                {i18n.translate('workflows.triggerConfigPanel.resetTrigger', {
+                  defaultMessage: 'Reset trigger',
+                })}
+              </EuiButtonEmpty>
+            )}
+          </EuiFlexItem>
         </EuiFlexGroup>
       </div>
+
+      {showDiscardConfirm ? (
+        <EuiConfirmModal
+          title={discardTitle}
+          aria-label={discardTitle}
+          onCancel={() => setShowDiscardConfirm(false)}
+          onConfirm={() => {
+            setShowDiscardConfirm(false);
+            onClose();
+          }}
+          cancelButtonText={i18n.translate('workflows.triggerConfigPanel.keepEditing', {
+            defaultMessage: 'Keep editing',
+          })}
+          confirmButtonText={i18n.translate('workflows.triggerConfigPanel.discard', {
+            defaultMessage: 'Discard',
+          })}
+          buttonColor="danger"
+          defaultFocusedButton="cancel"
+          data-test-subj="workflowTriggerConfigPanelDiscardModal"
+        >
+          <EuiText size="s">
+            {i18n.translate('workflows.triggerConfigPanel.discardInvalidBody', {
+              defaultMessage:
+                "This draft has errors and wasn't applied to the trigger. Closing now will discard it.",
+            })}
+          </EuiText>
+        </EuiConfirmModal>
+      ) : null}
     </div>
   );
 }

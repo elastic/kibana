@@ -43,11 +43,6 @@ export {
   PORT_HIT_SIZE,
   STEP_PORT,
 };
-/** @deprecated Prefer IF_PORT_FALSE / IF_PORT_TRUE. */
-export const BRANCH_FALSE_LEFT = IF_PORT_FALSE;
-export const BRANCH_TRUE_LEFT = IF_PORT_TRUE;
-/** @deprecated Prefer ERROR_PORT_ALONG. */
-export const ERROR_PORT_LEFT = ERROR_PORT_ALONG;
 
 /** Shared spring used by port pin expand-on-hover. */
 export const PORT_SPRING_EASE = 'cubic-bezier(.34,1.56,.64,1)';

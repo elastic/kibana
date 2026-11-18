@@ -91,7 +91,7 @@ describe('schema_property_model', () => {
         }),
       ];
       const schema = schemaPropertiesToJsonSchema(fields);
-      // TODO(engine): confirm inputs schema shape
+      // TODO: confirm inputs schema shape
       expect(schema.required).toEqual(['hostname']);
       expect(schema.properties?.hostname).toMatchObject({
         type: 'string',

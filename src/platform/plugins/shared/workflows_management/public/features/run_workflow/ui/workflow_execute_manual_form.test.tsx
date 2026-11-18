@@ -33,6 +33,10 @@ jest.mock('@kbn/code-editor', () => {
 });
 
 // Mock input validation callout
+jest.mock('../../../hooks/use_workflows_experimental_ui_setting', () => ({
+  useWorkflowsExperimentalUiSetting: () => false,
+}));
+
 jest.mock('./input_validation_callout', () => ({
   InputValidationCallout: ({ errors }: { errors: string }) => (
     <div data-test-subj="workflow-input-validation-callout">{errors}</div>

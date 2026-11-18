@@ -46,9 +46,14 @@ export type NavigableEntry =
       readonly total: number;
     };
 
+/** Most search matches drawn; a sample output can match thousands of rows. */
+const MAX_SEARCH_ROWS = 100;
+
 export interface VisibleRows {
   readonly mode: 'search' | 'drill' | 'browse';
   readonly items: readonly DataReferenceItem[];
+  /** In search mode, how many leaves matched before the list was capped. */
+  readonly totalMatches?: number;
   readonly groups: readonly DataReferenceGroup[];
 }
 
@@ -67,7 +72,12 @@ export const getVisibleRows = (
         item.subtitle?.toLowerCase().includes(query) ||
         item.originLabel.toLowerCase().includes(query)
     );
-    return { mode: 'search', items: leaves, groups: [] };
+    return {
+      mode: 'search',
+      items: leaves.slice(0, MAX_SEARCH_ROWS),
+      totalMatches: leaves.length,
+      groups: [],
+    };
   }
   if (drilledItem?.children) {
     return { mode: 'drill', items: drilledItem.children, groups: [] };
@@ -195,6 +205,8 @@ export function PickerHeader({
 
 interface RowHandlers {
   readonly highlightIndex: number;
+  /** Set on the highlighted row, so the list can scroll it into view. */
+  readonly highlightedRowRef: React.MutableRefObject<HTMLButtonElement | null>;
   readonly onHighlight: (index: number) => void;
   readonly onPick: (item: DataReferenceItem) => void;
   readonly onToggleGroup: (groupId: DataReferenceGroupId) => void;
@@ -205,19 +217,23 @@ function ItemRow({
   index,
   showOrigin,
   highlightIndex,
+  highlightedRowRef,
   onHighlight,
   onPick,
 }: {
   readonly item: DataReferenceItem;
   readonly index: number;
   readonly showOrigin: boolean;
-} & Pick<RowHandlers, 'highlightIndex' | 'onHighlight' | 'onPick'>) {
+} & Pick<RowHandlers, 'highlightIndex' | 'highlightedRowRef' | 'onHighlight' | 'onPick'>) {
   const { euiTheme } = useEuiTheme();
   const isHighlighted = index === highlightIndex;
   const insertable = isDataReferenceInsertable(item);
   return (
     <button
       type="button"
+      role="option"
+      aria-selected={isHighlighted}
+      ref={isHighlighted ? highlightedRowRef : undefined}
       data-test-subj={`workflowDataReferenceRow-${item.path}`}
       draggable={insertable}
       onMouseEnter={() => onHighlight(index)}
@@ -252,12 +268,13 @@ function ExpanderRow({
   entry,
   index,
   highlightIndex,
+  highlightedRowRef,
   onHighlight,
   onToggleGroup,
 }: {
   readonly entry: Extract<NavigableEntry, { kind: 'expander' }>;
   readonly index: number;
-} & Pick<RowHandlers, 'highlightIndex' | 'onHighlight' | 'onToggleGroup'>) {
+} & Pick<RowHandlers, 'highlightIndex' | 'highlightedRowRef' | 'onHighlight' | 'onToggleGroup'>) {
   const { euiTheme } = useEuiTheme();
   const isHighlighted = index === highlightIndex;
   const label = entry.expanded
@@ -271,6 +288,9 @@ function ExpanderRow({
   return (
     <button
       type="button"
+      role="option"
+      aria-selected={isHighlighted}
+      ref={isHighlighted ? highlightedRowRef : undefined}
       data-test-subj={`workflowDataReferenceShowAll-${entry.groupId}`}
       onMouseEnter={() => onHighlight(index)}
       onClick={() => onToggleGroup(entry.groupId)}
@@ -295,6 +315,7 @@ function GroupHeading({ group }: { readonly group: DataReferenceGroup }) {
   const { euiTheme } = useEuiTheme();
   return (
     <div
+      aria-hidden
       css={{
         position: 'sticky',
         top: 0,
@@ -363,7 +384,12 @@ export function ReferenceList({
         index += 1;
       }
       return (
-        <div key={group.id} data-test-subj={`workflowDataReferenceGroup-${group.id}`}>
+        <div
+          key={group.id}
+          role="group"
+          aria-label={group.title}
+          data-test-subj={`workflowDataReferenceGroup-${group.id}`}
+        >
           <GroupHeading group={group} />
           {rows}
           {expander}
@@ -384,17 +410,38 @@ export function ReferenceList({
       }}
       data-test-subj="workflowDataReferenceBody"
     >
-      {visibleRows.mode === 'browse'
-        ? renderGroups()
-        : visibleRows.items.map((item, i) => (
-            <ItemRow
-              key={`${item.path}-${item.label}-${i}`}
-              item={item}
-              index={i}
-              showOrigin={visibleRows.mode === 'search'}
-              {...handlers}
-            />
-          ))}
+      <div
+        role="listbox"
+        aria-label={i18n.translate('workflows.dataReferencePicker.listLabel', {
+          defaultMessage: 'References',
+        })}
+      >
+        {visibleRows.mode === 'browse'
+          ? renderGroups()
+          : visibleRows.items.map((item, i) => (
+              <ItemRow
+                key={`${item.path}-${item.label}-${i}`}
+                item={item}
+                index={i}
+                showOrigin={visibleRows.mode === 'search'}
+                {...handlers}
+              />
+            ))}
+      </div>
+      {visibleRows.totalMatches !== undefined && visibleRows.totalMatches > visibleRows.items.length ? (
+        <EuiText
+          size="xs"
+          color="subdued"
+          css={{ padding: euiTheme.size.m, textAlign: 'center' }}
+          data-test-subj="workflowDataReferenceSearchCapped"
+        >
+          {i18n.translate('workflows.dataReferencePicker.searchCapped', {
+            defaultMessage:
+              'Showing the first {shown} of {total} matches. Refine your search to narrow it down.',
+            values: { shown: visibleRows.items.length, total: visibleRows.totalMatches },
+          })}
+        </EuiText>
+      ) : null}
       {isEmpty ? (
         <EuiText size="s" color="subdued" css={{ padding: euiTheme.size.m, textAlign: 'center' }}>
           {i18n.translate('workflows.dataReferencePicker.empty', {

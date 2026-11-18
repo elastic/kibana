@@ -15,6 +15,19 @@ interface GraphErrorBoundaryState {
   error: Error | null;
 }
 
+export const GraphErrorCallout = ({ message }: { message: string }) => (
+  <EuiCallOut
+    announceOnMount
+    title={i18n.translate('workflowsUi.graph.renderErrorTitle', {
+      defaultMessage: 'Workflow graph could not be displayed',
+    })}
+    color="danger"
+    iconType="error"
+  >
+    <p>{message}</p>
+  </EuiCallOut>
+);
+
 export class GraphErrorBoundary extends Component<
   {
     children: ReactNode;
@@ -47,18 +60,7 @@ export class GraphErrorBoundary extends Component<
 
   render() {
     if (this.state.error) {
-      return (
-        <EuiCallOut
-          announceOnMount
-          title={i18n.translate('workflowsUi.graph.renderErrorTitle', {
-            defaultMessage: 'Workflow graph could not be displayed',
-          })}
-          color="danger"
-          iconType="error"
-        >
-          <p>{this.state.error.message}</p>
-        </EuiCallOut>
-      );
+      return <GraphErrorCallout message={this.state.error.message} />;
     }
     return this.props.children;
   }

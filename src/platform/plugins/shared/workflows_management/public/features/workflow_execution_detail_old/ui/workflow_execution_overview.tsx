@@ -105,11 +105,7 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
         hasBorder={false}
         borderRadius="none"
         paddingSize="m"
-        css={{
-          height: '100%',
-          paddingTop: euiTheme.size.m /* overrides EuiPanel's paddingTop */,
-          borderRadius: 0,
-        }}
+        css={{ height: '100%', paddingTop: euiTheme.size.m /* overrides EuiPanel's paddingTop */ }}
         data-test-subj="workflowExecutionOverview"
       >
         <EuiFlexGroup

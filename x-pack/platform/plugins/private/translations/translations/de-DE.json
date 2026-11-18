@@ -15157,7 +15157,6 @@
     "workflowsUi.library.templateDetail.setupTitle": "Workflow einrichten",
     "workflowsUi.library.templateDetail.solutionsLabel": "Lösungen",
     "workflowsUi.library.templateDetail.versionLabel": "Version",
-    "workflowsUi.library.templateIcons.overflowTitle": "{count} weitere Schritttypen",
     "workflowsUi.library.upload.cancel": "Abbrechen",
     "workflowsUi.library.upload.continue": "Weiter",
     "workflowsUi.library.upload.description": "Laden Sie eine YAML-Datei für eine Workflow-Vorlage hoch. Sie wird in Ihrem Browser validiert und erst hochgeladen, wenn Sie sie installieren.",

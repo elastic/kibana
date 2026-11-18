@@ -21,10 +21,12 @@ import { usePager } from '@kbn/discover-utils/components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { JsonValue } from '@kbn/utility-types';
+import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
 import { FieldName } from './field_name';
 import { formatValueAsElement } from './format_value';
 import { inferFieldType } from './infer_field_type';
 import { TableFieldValue } from './table_field_value';
+import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 import { insertIntoActiveDataReferenceTarget } from '../../lib/active_data_reference_insert_target';
 import { appendKeyPath, flattenKeyPaths } from '../../lib/flatten_key_paths';
 import { useGetFormattedDateTime } from '../use_formatted_date';
@@ -169,6 +171,11 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
       return columns;
     }, [data, containerWidth, fieldCellActions]);
 
+    // Dragging or clicking a cell into a step field belongs to the visual editor.
+    const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(
+      WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID
+    );
+
     // Cell renderer for the data grid
     const renderCellValue: EuiDataGridProps['renderCellValue'] = useMemo(() => {
       return function RenderCellValue({ rowIndex, columnId }) {
@@ -180,16 +187,16 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
         // insert a templated REFERENCE — never the run's literal value.
         // A workflow wired to one run's URL (etc.) breaks on every later run.
         const referenceToken =
-          fieldPathActionsPrefix != null
+          isVisualEditorEnabled && fieldPathActionsPrefix != null
             ? `{{ ${appendKeyPath(fieldPathActionsPrefix, field)} }}`
             : null;
 
-        const wrapAsReferenceSource = (node: React.ReactNode) => {
+        const wrapAsReferenceSource = (node: React.ReactNode, testSubjSuffix = '') => {
           if (referenceToken == null) return node;
           return (
             <div
               draggable
-              data-test-subj={`workflowExecutionOutputField-${field}`}
+              data-test-subj={`workflowExecutionOutputField-${field}${testSubjSuffix}`}
               title={referenceToken}
               onDragStart={(e) => {
                 e.dataTransfer.setData('text/plain', referenceToken);
@@ -220,13 +227,14 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
               isHighlighted={Boolean(
                 searchTerm && value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
               )}
-            />
+            />,
+            '-value'
           );
         }
 
         return null;
       };
-    }, [filteredRecords, searchTerm, fieldPathActionsPrefix]);
+    }, [filteredRecords, searchTerm, fieldPathActionsPrefix, isVisualEditorEnabled]);
 
     const staticDataGridSettings: Pick<
       EuiDataGridProps,

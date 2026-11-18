@@ -100,27 +100,6 @@ describe('WorkflowGraphPendingNode', () => {
     expect(screen.getByTestId('workflowGraphPendingPort-error')).toBeInTheDocument();
   });
 
-  it('renders a solid selected card with icon and title while configuring', () => {
-    renderPending({
-      phase: 'configuring',
-      context: { mode: 'step', sourceNodeId: 'a' },
-      stepType: 'console',
-      label: 'console_step',
-    });
-    expect(screen.getByTestId('workflowGraphPendingNode')).toHaveAttribute(
-      'data-phase',
-      'configuring'
-    );
-    expect(screen.getByTestId('workflowGraphPendingNodeChip')).toBeInTheDocument();
-    expect(screen.getByTestId('workflowGraphPendingNodeLabel')).toHaveTextContent('Console Step');
-    expect(getComputedStyle(screen.getByTestId('workflowGraphPendingNode')).borderStyle).toBe(
-      'solid'
-    );
-    expect(screen.getByTestId('workflowGraphPendingNodeEdge')).toBeInTheDocument();
-    expect(screen.getByTestId('workflowGraphPendingPort-step')).toBeInTheDocument();
-    expect(screen.getByTestId('workflowGraphPendingPort-error')).toBeInTheDocument();
-  });
-
   it('gives each pending connector its own arrow marker id so two canvases never collide', () => {
     const pending = { phase: 'choosing', context: { mode: 'step', sourceNodeId: 'a' } } as const;
     renderPending(pending);
@@ -150,14 +129,9 @@ describe('WorkflowGraphPendingNode', () => {
     expect(screen.queryByTestId('workflowGraphPendingNodeEdge')).not.toBeInTheDocument();
   });
 
-  it('centers the draft on an empty canvas without a connector edge', () => {
+  it('centers the card on an empty canvas without a connector edge', () => {
     renderPending(
-      {
-        phase: 'configuring',
-        context: { mode: 'step' },
-        stepType: 'ai.classify',
-        label: 'ai_classify_step',
-      },
+      { phase: 'choosing', context: { mode: 'step' } },
       {
         nodes: [],
         insertionPoints: { byNodeId: new Map(), topLevelStepNodeIds: [] },
@@ -170,14 +144,9 @@ describe('WorkflowGraphPendingNode', () => {
     );
   });
 
-  it('centers a trigger draft on an empty canvas without a connector edge', () => {
+  it('centers a trigger card on an empty canvas without a connector edge or error port', () => {
     renderPending(
-      {
-        phase: 'configuring',
-        context: { mode: 'trigger' },
-        stepType: 'manual',
-        label: 'Manual',
-      },
+      { phase: 'choosing', context: { mode: 'trigger' } },
       {
         nodes: [],
         insertionPoints: { byNodeId: new Map(), topLevelStepNodeIds: [] },
@@ -186,72 +155,8 @@ describe('WorkflowGraphPendingNode', () => {
     const card = screen.getByTestId('workflowGraphPendingNode');
     expect(screen.queryByTestId('workflowGraphPendingNodeEdge')).not.toBeInTheDocument();
     expect(screen.queryByTestId('workflowGraphPendingPort-error')).not.toBeInTheDocument();
-    expect(screen.getByTestId('workflowGraphPendingNodeLabel')).toHaveTextContent('Manual');
     expect(card.style.transform).toBe(
       `translate(${1000 / 2 - PENDING_NODE_WIDTH / 2}px, ${800 / 2 - PENDING_NODE_HEIGHT / 2}px)`
-    );
-  });
-});
-
-describe('WorkflowGraphPendingNode icon chip', () => {
-  const renderWithStepIcon = (
-    pending: React.ComponentProps<typeof WorkflowGraphPendingNode>['pending'],
-    renderStepIcon: jest.Mock
-  ) =>
-    render(
-      <I18nProvider>
-        <WorkflowGraphActionsContext.Provider value={{ renderStepIcon }}>
-          <WorkflowGraphPendingNode
-            pending={pending}
-            nodes={nodes}
-            insertionPoints={insertionPoints}
-            direction="TB"
-          />
-        </WorkflowGraphActionsContext.Provider>
-      </I18nProvider>
-    );
-
-  it('uses the EUI control radius (8px in Borealis) for the icon tile, like a committed node', () => {
-    renderPending({
-      phase: 'configuring',
-      context: { mode: 'step', sourceNodeId: 'a' },
-      stepType: 'console',
-      label: 'console_step',
-    });
-    expect(getComputedStyle(screen.getByTestId('workflowGraphPendingNodeChip')).borderRadius).toBe(
-      '8px'
-    );
-  });
-
-  it('flags a trigger draft as a trigger when rendering the step icon', () => {
-    const renderStepIcon = jest.fn(() => null);
-    renderWithStepIcon(
-      {
-        phase: 'configuring',
-        context: { mode: 'trigger' },
-        stepType: 'manual',
-        label: 'Manual',
-      },
-      renderStepIcon
-    );
-    expect(renderStepIcon).toHaveBeenCalledWith(
-      expect.objectContaining({ stepType: 'manual', isTrigger: true })
-    );
-  });
-
-  it('does not flag a step draft as a trigger when rendering the step icon', () => {
-    const renderStepIcon = jest.fn(() => null);
-    renderWithStepIcon(
-      {
-        phase: 'configuring',
-        context: { mode: 'step', sourceNodeId: 'a' },
-        stepType: 'console',
-        label: 'console_step',
-      },
-      renderStepIcon
-    );
-    expect(renderStepIcon).toHaveBeenCalledWith(
-      expect.objectContaining({ stepType: 'console', isTrigger: false })
     );
   });
 });

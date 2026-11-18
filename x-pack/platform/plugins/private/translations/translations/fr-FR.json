@@ -15155,7 +15155,6 @@
     "workflowsUi.library.templateDetail.setupTitle": "Configurer le workflow",
     "workflowsUi.library.templateDetail.solutionsLabel": "Solutions",
     "workflowsUi.library.templateDetail.versionLabel": "Version",
-    "workflowsUi.library.templateIcons.overflowTitle": "{count} autres types d’étapes",
     "workflowsUi.library.upload.cancel": "Annuler",
     "workflowsUi.library.upload.continue": "Continuer",
     "workflowsUi.library.upload.description": "Téléchargez un fichier YAML de modèle de workflow. Il est validé dans votre navigateur et n'est jamais téléchargé avant que vous ne l'installiez.",

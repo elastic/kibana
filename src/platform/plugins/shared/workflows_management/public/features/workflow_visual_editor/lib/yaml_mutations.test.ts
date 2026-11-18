@@ -13,6 +13,7 @@ import type { StepFormField } from './step_form_schema';
 import {
   appendTrigger,
   collectStepNames,
+  countTriggers,
   deleteStepByName,
   deleteTrigger,
   getStepFragment,
@@ -52,6 +53,14 @@ describe('yaml_mutations', () => {
       ]);
       const removed = deleteTrigger(added.yaml, 0);
       expect(parse(removed.yaml).triggers).toEqual([{ type: 'scheduled', with: { every: '5m' } }]);
+    });
+
+    it('counts the triggers a workflow declares', () => {
+      const added = appendTrigger(BASE, 'type: scheduled\nwith:\n  every: 5m\n');
+
+      expect(countTriggers(BASE)).toBe(1);
+      expect(countTriggers(added.yaml)).toBe(2);
+      expect(countTriggers(deleteTrigger(BASE, 0).yaml)).toBe(0);
     });
 
     it('drops the triggers key when the last trigger is removed', () => {

@@ -50,7 +50,10 @@ export interface FakeMonacoEditor {
   readonly domNode: HTMLElement;
   readonly input: HTMLElement;
   /** Presses a key in the input; says whether it was cancelled, or kept from leaving the editor. */
-  readonly pressKey: (key: string) => { defaultPrevented: boolean; propagationStopped: boolean };
+  readonly pressKey: (
+    key: string,
+    init?: KeyboardEventInit
+  ) => { defaultPrevented: boolean; propagationStopped: boolean };
   /** Moves the caret and tells the cursor listeners, like the user clicking or arrowing. */
   readonly moveCaretTo: (offset: number) => void;
   /** Tells the blur listeners. */
@@ -187,8 +190,8 @@ export const createFakeMonacoEditor = (
     collections,
     domNode,
     input,
-    pressKey: (key) => {
-      const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+    pressKey: (key, init = {}) => {
+      const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...init });
       let leftTheEditor = false;
       const markLeft = () => {
         leftTheEditor = true;

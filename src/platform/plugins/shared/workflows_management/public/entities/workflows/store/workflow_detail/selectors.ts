@@ -35,22 +35,32 @@ export const selectWorkflowTags = createSelector(
 /**
  * Document dirtiness for leave-confirm + header badge.
  * Saved workflows: YAML differs from last saved. Never-saved: differs from create
- * baseline, except structurally empty (no triggers/steps) with everything else unchanged
- * stays clean — visual add-then-delete drops keys and would otherwise false-positive vs the
- * scaffold. Editing the name, description, consts or outputs is still a change.
+ * baseline, except an empty scaffold (no triggers/steps) that is structurally empty again with
+ * everything else unchanged stays clean — visual add-then-delete drops keys and would otherwise
+ * false-positive vs the scaffold. Editing the name, description, consts or outputs is still a
+ * change, and so is emptying a scaffold that had steps (a remix).
  */
-export const selectHasChanges = createSelector(selectDetail, (detail) => {
-  if (detail.workflow?.yaml != null) {
-    return detail.yamlString !== detail.workflow.yaml;
+export const selectHasChanges = createSelector(
+  [
+    (state: RootState) => state.detail.workflow?.yaml,
+    (state: RootState) => state.detail.yamlString,
+    (state: RootState) => state.detail.baselineYaml,
+  ],
+  (savedYaml, yamlString, baselineYaml) => {
+    if (savedYaml != null) {
+      return yamlString !== savedYaml;
+    }
+    if (yamlString === baselineYaml) {
+      return false;
+    }
+    // Only a scaffold that was empty to begin with can come back to "unchanged" by emptying it.
+    return !(
+      isStructurallyEmptyWorkflowYaml(baselineYaml) &&
+      isStructurallyEmptyWorkflowYaml(yamlString) &&
+      isSameOutsideStructure(yamlString, baselineYaml)
+    );
   }
-  if (detail.yamlString === detail.baselineYaml) {
-    return false;
-  }
-  return !(
-    isStructurallyEmptyWorkflowYaml(detail.yamlString) &&
-    isSameOutsideStructure(detail.yamlString, detail.baselineYaml)
-  );
-});
+);
 
 export const selectIsYamlSynced = createSelector(selectDetail, (detail) => detail.isYamlSynced);
 

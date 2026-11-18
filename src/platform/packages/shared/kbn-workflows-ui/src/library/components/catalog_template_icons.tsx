@@ -186,7 +186,7 @@ export const CatalogTemplateIcons = React.memo<CatalogTemplateIconsProps>(
           <span css={iconSlotCss}>
             <EuiNotificationBadge
               color="subdued"
-              title={i18n.translate('workflowsUi.library.templateIcons.overflowTitle', {
+              title={i18n.translate('workflowsUi.library.templateIcons.overflowCountTitle', {
                 defaultMessage: '{count} more',
                 values: { count: overflowCount },
               })}

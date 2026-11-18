@@ -16,10 +16,7 @@ triggers: []
 steps: []
 `;
 
-/**
- * Hello-world sample written when the user leaves the empty creation state via
- * "Edit as YAML". Toggling back to the graph shows this structure.
- */
+/** Hello-world sample that seeds `/create` when the visual editor is off. */
 export const workflowYamlEditorSeedYaml = `version: "1"
 name: New workflow
 enabled: false

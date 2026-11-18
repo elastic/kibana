@@ -202,8 +202,7 @@ class GraphRebuild {
       this.note(this.issues, where, firstLine(error as Error));
       await this.attachScreenshot(`fail-trigger-${index}`);
     }
-    await this.authoring.saveTrigger();
-    await this.authoring.triggerPanelSave.waitFor({ state: 'hidden' });
+    await this.authoring.closeTriggerPanel();
   }
 
   private async fillSettings(): Promise<void> {

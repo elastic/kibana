@@ -8,7 +8,6 @@
  */
 
 import {
-  EuiBadge,
   EuiFieldNumber,
   EuiFieldText,
   EuiFormRow,
@@ -21,7 +20,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { isMap, parseDocument, type YAMLMap } from 'yaml';
 import { i18n } from '@kbn/i18n';
 import { isRecord } from '@kbn/workflows-yaml';
-import { parseStepFragment } from '../lib/parse_step_fragment';
 
 export interface FallbackStepChip {
   readonly name: string;
@@ -88,10 +86,6 @@ const readOnFailure = (
     configured: true,
   };
 };
-
-/** True when any on-failure setting is present on the fragment. */
-export const hasOnFailureConfigured = (fragment: string): boolean =>
-  readOnFailure(parseStepFragment(fragment).read(['on-failure'])).configured;
 
 const mutateOnFailure = (
   fragment: string,
@@ -356,16 +350,5 @@ export function StepErrorHandlingSection({
         </EuiText>
       </div>
     </div>
-  );
-}
-
-/** Badge shown on the Error handling accordion when any on-failure key exists. */
-export function ErrorHandlingConfiguredBadge() {
-  return (
-    <EuiBadge color="hollow" data-test-subj="workflowStepConfigErrorConfiguredBadge">
-      {i18n.translate('workflows.stepConfigPanel.errorHandling.configuredBadge', {
-        defaultMessage: 'Configured',
-      })}
-    </EuiBadge>
   );
 }

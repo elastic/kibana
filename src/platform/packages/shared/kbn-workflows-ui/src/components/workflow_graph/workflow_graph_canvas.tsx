@@ -29,7 +29,7 @@ import '@xyflow/react/dist/style.css';
 import { CanvasMinimap, CanvasZoomControls, chromeAppearCss } from './canvas_chrome';
 import { computeInsertionPoints } from './compute_insertion_points';
 import { ensureWorkflowGraphEuiIcons } from './ensure_eui_icons';
-import { GraphErrorBoundary } from './graph_error_boundary';
+import { GraphErrorBoundary, GraphErrorCallout } from './graph_error_boundary';
 import { getMinimapNodeColor } from './minimap_node_color';
 import type { PendingInsertVisual } from './pending_insert';
 import { WORKFLOWS_CANVAS_CHROME_INSET } from './surface_radius';
@@ -158,7 +158,7 @@ export interface WorkflowGraphCanvasProps {
   readonly nodeConfigWarnings?: ReadonlyMap<string, NodeConfigWarningReason>;
   /** Node id to briefly highlight (just inserted); cleared by the caller. */
   readonly flashNodeId?: string;
-  /** Ephemeral insert placeholder (empty while choosing, filled while configuring). */
+  /** Ephemeral placeholder card shown while the Actions menu is open. */
   readonly pendingInsert?: PendingInsertVisual;
   /** Hide empty-state / trigger overlay insert controls (config panel is open). */
   readonly suppressInsertionControls?: boolean;
@@ -227,6 +227,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     nodes,
     edges: layoutEdges,
     transformed: graphTransform,
+    layoutError,
   } = useWorkflowLayout({
     workflow,
     transformed,
@@ -402,6 +403,20 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
               })}
               color="warning"
             />
+          </div>
+        )}
+        {layoutError && (
+          <div
+            data-test-subj="workflowGraphLayoutErrorCallout"
+            css={{
+              position: 'absolute',
+              top: euiTheme.size.s,
+              left: euiTheme.size.s,
+              right: euiTheme.size.s,
+              zIndex: euiTheme.levels.header,
+            }}
+          >
+            <GraphErrorCallout message={layoutError} />
           </div>
         )}
         <div

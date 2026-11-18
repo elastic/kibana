@@ -15188,7 +15188,6 @@
     "workflowsUi.library.templateDetail.setupTitle": "ワークフローを設定",
     "workflowsUi.library.templateDetail.solutionsLabel": "ソリューション",
     "workflowsUi.library.templateDetail.versionLabel": "バージョン",
-    "workflowsUi.library.templateIcons.overflowTitle": "さらに{count}種類のステップタイプ",
     "workflowsUi.library.upload.cancel": "キャンセル",
     "workflowsUi.library.upload.continue": "続行",
     "workflowsUi.library.upload.description": "ワークフローテンプレートのYAMLファイルをアップロードしてください。ブラウザ内で検証され、インストールするまでアップロードされることはありません。",

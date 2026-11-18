@@ -600,6 +600,9 @@ export class WorkflowEditorPage {
    * Run the workflow and confirm if there are unsaved changes
    */
   async runWorkflowWithUnsavedChanges() {
+    // The editor reports a change to the store a moment after the text changes; the header badge
+    // shows it has arrived, and only then does Run know there is something unsaved.
+    await this.page.testSubj.waitForSelector('workflowUnsavedChangesBadge', { state: 'visible' });
     await this.clickRunButton();
     await this.page.testSubj.waitForSelector('runWorkflowWithUnsavedChangesConfirmationModal', {
       state: 'visible',

@@ -1397,7 +1397,7 @@ with:
     expect(
       query.querySelector('[data-test-subj="workflowStepConfigDataReference"]')
     ).not.toBeNull();
-    // TODO(slice7): ES|QL stays specialized — no expanded field editor.
+    // TODO: ES|QL stays specialized — no expanded field editor.
     expect(
       query.querySelector('[data-test-subj="workflowStepConfigDataReferenceExpand"]')
     ).toBeNull();
