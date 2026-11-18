@@ -28,10 +28,19 @@ export async function resolveEdotCollectorVersion(log: ToolingLog): Promise<stri
     return kibanaPackageJson.version.replace(/-SNAPSHOT$/, '');
   }
 
-  // Public image. An empty Docker config makes this request anonymous, so a
-  // saved docker.elastic.co login is not sent.
+  // Public image. Docker CLI auto-selects the platform credential helper
+  // (osxkeychain, wincred, pass) when the config has no auth settings, so an
+  // empty directory can still send a rejected docker.elastic.co login. A
+  // placeholder auth entry with no credentials keeps the request on the file
+  // store and skips that helper.
   const dockerConfigDir = await Fs.mkdtemp(Path.join(Os.tmpdir(), 'edot-collector-docker-config-'));
   try {
+    await Fs.writeFile(
+      Path.join(dockerConfigDir, 'config.json'),
+      JSON.stringify({ auths: { 'edot-collector.invalid': {} } }),
+      'utf8'
+    );
+
     let { major, minor, patch } = current;
     while (major > 0) {
       const version = `${major}.${minor}.${patch}`;

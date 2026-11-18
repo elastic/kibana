@@ -9,7 +9,7 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
-import { existsSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { resolveEdotCollectorVersion } from './resolve_edot_collector_version';
 
@@ -120,15 +120,21 @@ describe('resolveEdotCollectorVersion', () => {
     );
   });
 
-  it('inspects manifests with an empty Docker config and removes it afterwards', async () => {
+  it('inspects manifests without a credential helper and removes the config afterwards', async () => {
     let dockerConfigDir: string | undefined;
     mockExecaCommand.mockImplementation((_command, options) => {
       const configDir = options?.env?.DOCKER_CONFIG;
       if (typeof configDir !== 'string') {
         throw new Error('DOCKER_CONFIG was not set');
       }
-      expect(existsSync(configDir)).toBe(true);
-      expect(existsSync(join(configDir, 'config.json'))).toBe(false);
+      const config = JSON.parse(readFileSync(join(configDir, 'config.json'), 'utf8')) as {
+        auths?: Record<string, unknown>;
+        credsStore?: string;
+        credHelpers?: Record<string, string>;
+      };
+      expect(config.credsStore).toBeUndefined();
+      expect(config.credHelpers).toBeUndefined();
+      expect(config.auths).toEqual({ 'edot-collector.invalid': {} });
       dockerConfigDir = configDir;
       // execa.command returns a thenable child process. The caller only awaits it.
       return Promise.resolve(mockExecaResult) as ReturnType<typeof execa.command>;
