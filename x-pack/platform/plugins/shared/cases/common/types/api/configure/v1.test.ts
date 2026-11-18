@@ -809,6 +809,19 @@ describe('configure', () => {
       expect(result.success).toBe(false);
     });
 
+    it('accepts the closed date as the date field', () => {
+      const metric = { ...customMetric, dateField: 'closed_at' as const };
+      const result = KpiMetricsConfigurationRequestSchema.safeParse({ casesList: [metric] });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual({ casesList: [metric] });
+    });
+
+    it('does not accept a date field that is not in the list', () => {
+      const metric = { ...customMetric, dateField: 'updated_at' };
+      const result = KpiMetricsConfigurationRequestSchema.safeParse({ casesList: [metric] });
+      expect(result.success).toBe(false);
+    });
+
     it('accepts metrics in the configure request and the patch request', () => {
       const metrics = { casesList: [customMetric] };
       expect(

@@ -6,7 +6,7 @@
  */
 
 import type { CustomKpiMetricConfiguration } from '../../../../common/types/domain';
-import { buildKpiMetricSearch, KPI_METRIC_VALUE_AGG } from './query_builder';
+import { buildForcedFilters, buildKpiMetricSearch, KPI_METRIC_VALUE_AGG } from './query_builder';
 
 const context = { spaceId: 'space-a', owner: 'securitySolution', from: 'now-30d', to: 'now' };
 
@@ -181,5 +181,70 @@ describe('buildKpiMetricSearch', () => {
         )
       ).toThrow('A percent metric counts the documents');
     });
+  });
+
+  describe('date field', () => {
+    it('puts the date range on case.closed_at for the closed date', () => {
+      expect(getFilters(createMetric({ dateField: 'closed_at' }))[2]).toEqual({
+        range: { 'case.closed_at': { gte: 'now-30d', lte: 'now' } },
+      });
+    });
+
+    it('puts the date range on case.created_at when the metric has no date field', () => {
+      expect(getFilters(createMetric())[2]).toEqual({
+        range: { 'case.created_at': { gte: 'now-30d', lte: 'now' } },
+      });
+    });
+
+    it('keeps the forced clauses as separate filter entries with the closed date', () => {
+      const { body } = buildKpiMetricSearch(
+        createMetric({ dateField: 'closed_at', query: 'space_id: * or owner: *' }),
+        { ...context, caseIds: ['case-1'] }
+      );
+      const filter = body.query?.bool?.filter;
+      const filters = Array.isArray(filter) ? filter : [];
+
+      expect(filters).toHaveLength(5);
+      expect(filters.slice(0, 4)).toEqual([
+        { term: { space_id: 'space-a' } },
+        { term: { owner: 'securitySolution' } },
+        { terms: { 'case.id': ['case-1'] } },
+        { range: { 'case.closed_at': { gte: 'now-30d', lte: 'now' } } },
+      ]);
+      expect(filters[4]).toHaveProperty('bool.should');
+    });
+
+    it('puts case.closed_at in the forced filters of a percent metric', () => {
+      const { body } = buildKpiMetricSearch(
+        createMetric({ percent: true, dateField: 'closed_at' }),
+        context
+      );
+
+      expect(body.query).toEqual({
+        bool: {
+          filter: [
+            { term: { space_id: 'space-a' } },
+            { term: { owner: 'securitySolution' } },
+            { range: { 'case.closed_at': { gte: 'now-30d', lte: 'now' } } },
+          ],
+        },
+      });
+    });
+
+    it('throws for a date field on an index that is not the cases index', () => {
+      expect(() =>
+        buildKpiMetricSearch(createMetric({ index: 'activity', dateField: 'closed_at' }), context)
+      ).toThrow('The date field closed_at is not allowed for the activity index.');
+    });
+  });
+});
+
+describe('buildForcedFilters', () => {
+  it('uses @timestamp for the attachments index with no date field', () => {
+    expect(buildForcedFilters('attachments', context)).toEqual([
+      { term: { space_id: 'space-a' } },
+      { term: { owner: 'securitySolution' } },
+      { range: { '@timestamp': { gte: 'now-30d', lte: 'now' } } },
+    ]);
   });
 });

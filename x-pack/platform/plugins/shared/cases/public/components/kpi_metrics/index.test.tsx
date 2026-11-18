@@ -184,7 +184,71 @@ describe('KpiMetricsSettings', () => {
     );
   });
 
+  describe('date field', () => {
+    it('shows the date row only for the cases index and resets it on an index change', async () => {
+      renderWithTestingProviders(
+        <KpiMetricsSettings
+          kpiMetrics={[{ ...customMetric('a'), dateField: 'closed_at' }]}
+          isLoading={false}
+          onSave={onSave}
+        />
+      );
+
+      await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
+      expect(await screen.findByTestId('kpi-metric-date-field')).toHaveValue('closed_at');
+
+      await userEvent.selectOptions(screen.getByTestId('kpi-metric-index'), 'activity');
+      expect(screen.queryByTestId('kpi-metric-date-field')).not.toBeInTheDocument();
+
+      await userEvent.selectOptions(screen.getByTestId('kpi-metric-index'), 'cases');
+      expect(screen.getByTestId('kpi-metric-date-field')).toHaveValue('created_at');
+    });
+
+    it('saves the closed date', async () => {
+      renderWithTestingProviders(
+        <KpiMetricsSettings kpiMetrics={[customMetric('a')]} isLoading={false} onSave={onSave} />
+      );
+
+      await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
+      await userEvent.selectOptions(
+        await screen.findByTestId('kpi-metric-date-field'),
+        'closed_at'
+      );
+      await userEvent.click(screen.getByTestId('kpi-metric-save'));
+
+      expect(onSave).toHaveBeenCalledWith([{ ...customMetric('a'), dateField: 'closed_at' }]);
+    });
+  });
+
   describe('Test query', () => {
+    it('sends the date field of the unsaved metric', async () => {
+      const previewSpy = jest.spyOn(api, 'previewKpiMetric').mockResolvedValue({
+        id: 'preview',
+        type: 'value',
+        format: 'number',
+        value: 9,
+      });
+
+      renderWithTestingProviders(
+        <KpiMetricsSettings kpiMetrics={[customMetric('a')]} isLoading={false} onSave={onSave} />
+      );
+
+      await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
+      await userEvent.selectOptions(
+        await screen.findByTestId('kpi-metric-date-field'),
+        'closed_at'
+      );
+      await userEvent.click(screen.getByTestId('kpi-metric-test-query'));
+
+      await waitFor(() =>
+        expect(previewSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            metric: expect.objectContaining({ kind: 'custom', dateField: 'closed_at' }),
+          })
+        )
+      );
+    });
+
     it('shows the value of the unsaved metric', async () => {
       const previewSpy = jest.spyOn(api, 'previewKpiMetric').mockResolvedValue({
         id: 'preview',

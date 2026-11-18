@@ -210,6 +210,29 @@ describe('runKpiMetrics', () => {
       expect(filter[2].range['case.created_at'].lte).toMatch(/^\d{4}-\d{2}-\d{2}T/);
     });
 
+    it('puts the range of the previous search on case.closed_at for the closed date', async () => {
+      const msearch = jest.fn().mockResolvedValue([createResponse(9), createResponse(6)]);
+
+      const results = await runKpiMetrics({
+        metrics: [createMetric({ id: 'closed', dateField: 'closed_at' })],
+        context: rangeContext,
+        reader: { msearch },
+      });
+
+      const [request, previousRequest] = msearch.mock.calls[0][0];
+      const previousFilter = previousRequest.body.query.bool.filter;
+
+      expect(request.body.query.bool.filter[2]).toEqual({
+        range: { 'case.closed_at': { gte: 'now-30d', lte: 'now' } },
+      });
+      expect(previousFilter[2].range).not.toHaveProperty('case.created_at');
+      expect(previousFilter[2].range['case.closed_at'].gte).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+      expect(previousFilter[2].range['case.closed_at'].lte).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+      expect(results).toEqual([
+        { id: 'closed', type: 'value', format: 'number', value: 9, previousValue: 6 },
+      ]);
+    });
+
     it('gives a null previous value when the previous search fails', async () => {
       const msearch = jest
         .fn()

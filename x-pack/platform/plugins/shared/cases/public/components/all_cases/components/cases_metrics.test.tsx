@@ -6,11 +6,16 @@
  */
 
 import { screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { renderWithTestingProviders } from '../../../common/mock';
 import type { KpiMetricResult } from '../../../../common/types/api';
-import type { KpiMetricConfiguration, KpiMetricThreshold } from '../../../../common/types/domain';
+import type {
+  CustomKpiMetricConfiguration,
+  KpiMetricConfiguration,
+  KpiMetricThreshold,
+} from '../../../../common/types/domain';
 import { CasesMetrics } from './cases_metrics';
 import { getKpiChangeColor, getKpiChangePercent, getKpiThresholdColor } from './kpi_metric_tile';
 
@@ -179,6 +184,51 @@ describe('Cases metrics', () => {
 
       expect(await screen.findByTestId('cases-kpi-tile-c1-loading-spinner')).toBeInTheDocument();
       expect(within(screen.getByTestId('cases-kpi-tile-c1')).queryByText('11')).toBeNull();
+    });
+
+    it('shows the date hint for a custom tile with the closed date', async () => {
+      const closedDateMetric: CustomKpiMetricConfiguration = {
+        id: 'c1',
+        kind: 'custom',
+        label: 'Closed by elastic',
+        index: 'cases',
+        query: 'case.closed_by.username: elastic',
+        display: 'value',
+        dateField: 'closed_at',
+      };
+
+      renderWithTestingProviders(
+        <CasesMetrics
+          {...props}
+          kpiMetrics={[closedDateMetric]}
+          kpiResults={[{ id: 'c1', type: 'value', format: 'number', value: 9 }]}
+          isAnalyticsEnabled={true}
+        />
+      );
+
+      await userEvent.hover(await screen.findByTestId('cases-kpi-tile-c1-date-hint'));
+
+      expect(
+        await screen.findByText('Filtered by closed date. The case table uses the created date.')
+      ).toBeInTheDocument();
+    });
+
+    it('shows no date hint for a tile with the default date', async () => {
+      renderWithTestingProviders(
+        <CasesMetrics
+          {...props}
+          kpiMetrics={[
+            customMetric('c1'),
+            { id: 'p1', kind: 'predefined', predefinedId: 'closed_cases', display: 'value' },
+          ]}
+          kpiResults={[{ id: 'c1', type: 'value', format: 'number', value: 7 }]}
+          isAnalyticsEnabled={true}
+        />
+      );
+
+      expect(await screen.findByTestId('cases-kpi-tile-c1')).toBeInTheDocument();
+      expect(screen.queryByTestId('cases-kpi-tile-c1-date-hint')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('cases-kpi-tile-p1-date-hint')).not.toBeInTheDocument();
     });
 
     it('shows an empty custom tile when analytics is disabled', async () => {

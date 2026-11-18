@@ -28,6 +28,7 @@ import {
   ATTC_STAT,
   ATTC_STAT_INFO_ARIA_LABEL,
   KPI_METRIC_ANALYTICS_DISABLED,
+  KPI_METRIC_CLOSED_DATE_HINT,
   KPI_METRIC_UNKNOWN,
 } from '../translations';
 import type { KpiMetricTileProps } from './kpi_metric_tile';
@@ -162,6 +163,11 @@ const CasesMetricsComponent: React.FC<CasesMetricsProps> = (props) => {
                 {...getKpiTileValues(metric, props)}
                 threshold={metric.threshold}
                 direction={metric.direction}
+                dateHint={
+                  metric.kind === 'custom' && metric.dateField === 'closed_at'
+                    ? KPI_METRIC_CLOSED_DATE_HINT
+                    : undefined
+                }
                 dataTestSubj={`cases-kpi-tile-${metric.id}`}
               />
             </EuiFlexItem>

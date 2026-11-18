@@ -88,6 +88,23 @@ export const INDEX_ATTACHMENTS = i18n.translate('xpack.cases.kpiMetrics.indexAtt
   defaultMessage: 'Case attachments',
 });
 
+export const DATE_FIELD = i18n.translate('xpack.cases.kpiMetrics.dateField', {
+  defaultMessage: 'Filter dates by',
+});
+
+export const DATE_FIELD_CREATED_AT = i18n.translate('xpack.cases.kpiMetrics.dateFieldCreatedAt', {
+  defaultMessage: 'Created date',
+});
+
+export const DATE_FIELD_CLOSED_AT = i18n.translate('xpack.cases.kpiMetrics.dateFieldClosedAt', {
+  defaultMessage: 'Closed date',
+});
+
+export const DATE_FIELD_HELP = i18n.translate('xpack.cases.kpiMetrics.dateFieldHelp', {
+  defaultMessage:
+    'Closed date counts only cases closed in the selected range. The case table always uses the created date.',
+});
+
 export const QUERY = i18n.translate('xpack.cases.kpiMetrics.query', {
   defaultMessage: 'KQL query',
 });

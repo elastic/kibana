@@ -29,7 +29,7 @@ import {
 import type { KpiMetricIndex } from '../../../common/constants';
 import { KPI_FIELD_CATALOG, PREDEFINED_KPI_METRICS } from '../../../common/constants';
 import type { KpiMetricRequest } from '../../../common/types/api';
-import type { KpiMetricAggregationType } from '../../../common/types/domain';
+import type { KpiMetricAggregationType, KpiMetricDateField } from '../../../common/types/domain';
 import { usePreviewKpiMetric } from '../../containers/use_preview_kpi_metric';
 import { formatKpiMetricValue } from '../all_cases/components/kpi_metric_tile';
 import type {
@@ -55,6 +55,11 @@ const INDEX_OPTIONS: Array<{ value: KpiMetricIndex; text: string }> = [
   { value: 'cases', text: i18n.INDEX_CASES },
   { value: 'activity', text: i18n.INDEX_ACTIVITY },
   { value: 'attachments', text: i18n.INDEX_ATTACHMENTS },
+];
+
+const DATE_FIELD_OPTIONS: Array<{ value: KpiMetricDateField; text: string }> = [
+  { value: 'created_at', text: i18n.DATE_FIELD_CREATED_AT },
+  { value: 'closed_at', text: i18n.DATE_FIELD_CLOSED_AT },
 ];
 
 const AGGREGATION_OPTIONS: Array<{ value: KpiMetricAggregationType; text: string }> = [
@@ -203,11 +208,27 @@ const KpiMetricFlyoutComponent: React.FC<KpiMetricFlyoutProps> = ({
                 value={state.index}
                 onChange={(e) => {
                   const index = INDEX_OPTIONS.find(({ value }) => value === e.target.value)?.value;
-                  update({ index: index ?? 'cases', field: '' });
+                  update({ index: index ?? 'cases', field: '', dateField: 'created_at' });
                 }}
                 data-test-subj="kpi-metric-index"
               />
             </EuiFormRow>
+            {state.index === 'cases' && (
+              <EuiFormRow label={i18n.DATE_FIELD} helpText={i18n.DATE_FIELD_HELP} fullWidth>
+                <EuiSelect
+                  fullWidth
+                  options={DATE_FIELD_OPTIONS}
+                  value={state.dateField}
+                  onChange={(e) => {
+                    const dateField =
+                      DATE_FIELD_OPTIONS.find(({ value }) => value === e.target.value)?.value ??
+                      'created_at';
+                    update({ dateField });
+                  }}
+                  data-test-subj="kpi-metric-date-field"
+                />
+              </EuiFormRow>
+            )}
             <EuiFormRow
               label={i18n.QUERY}
               helpText={queryHelp}

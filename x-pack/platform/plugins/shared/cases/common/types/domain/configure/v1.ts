@@ -98,6 +98,8 @@ export const KpiMetricAggregationTypeSchema = lazySchema(() =>
 
 export const KpiMetricDisplaySchema = lazySchema(() => z.enum(['value', 'trend']));
 
+export const KpiMetricDateFieldSchema = lazySchema(() => z.enum(['created_at', 'closed_at']));
+
 export const KpiMetricThresholdSchema = lazySchema(() =>
   z.object({
     comparator: z.enum(['above', 'below']),
@@ -137,6 +139,10 @@ export const CustomKpiMetricSchema = lazySchema(() =>
      * KQL query on the analytics index. Forced space and owner filters are added on the server.
      */
     query: z.string(),
+    /**
+     * The case date that the date range applies to. Only for the cases index. No value means created_at.
+     */
+    dateField: KpiMetricDateFieldSchema.optional(),
     /**
      * No aggregation means a count of the matching documents
      */
@@ -245,6 +251,7 @@ export type WorkflowTagsConfiguration = z.infer<typeof WorkflowTagsConfiguration
 export type KpiMetricAggregationType = z.infer<typeof KpiMetricAggregationTypeSchema>;
 export type KpiMetricThreshold = z.infer<typeof KpiMetricThresholdSchema>;
 export type KpiMetricDirection = z.infer<typeof KpiMetricDirectionSchema>;
+export type KpiMetricDateField = z.infer<typeof KpiMetricDateFieldSchema>;
 export type PredefinedKpiMetricConfiguration = z.infer<typeof PredefinedKpiMetricSchema>;
 export type CustomKpiMetricConfiguration = z.infer<typeof CustomKpiMetricSchema>;
 export type KpiMetricConfiguration = z.infer<typeof KpiMetricSchema>;

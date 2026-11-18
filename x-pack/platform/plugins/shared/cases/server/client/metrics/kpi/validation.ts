@@ -21,13 +21,20 @@ const NUMERIC_AGGREGATIONS: readonly KpiMetricAggregationType[] = [
 ];
 
 /**
- * Returns an error message when the aggregation field is not allowed for the index and the aggregation type.
+ * Returns an error message when the date field or the aggregation field is not allowed for the index and the aggregation type.
  */
 export const getKpiMetricFieldError = ({
   index,
   aggregation,
   percent,
-}: Pick<CustomKpiMetricConfiguration, 'index' | 'aggregation' | 'percent'>): string | undefined => {
+  dateField,
+}: Pick<CustomKpiMetricConfiguration, 'index' | 'aggregation' | 'percent' | 'dateField'>):
+  | string
+  | undefined => {
+  if (dateField != null && index !== 'cases') {
+    return `The date field ${dateField} is not allowed for the ${index} index.`;
+  }
+
   const isCount = aggregation == null || aggregation.type === 'count';
 
   if (percent === true && !isCount) {

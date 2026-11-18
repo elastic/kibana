@@ -39,6 +39,7 @@ import {
   ClosureTypeSchema,
   ConfigurationBasicWithoutOwnerSchema,
   KpiMetricAggregationTypeSchema,
+  KpiMetricDateFieldSchema,
   KpiMetricDirectionSchema,
   KpiMetricDisplaySchema,
   KpiMetricIndexSchema,
@@ -227,6 +228,7 @@ export const CustomKpiMetricRequestSchema = lazySchema(() =>
     label: limitedStringSchema({ fieldName: 'metric label', min: 1, max: MAX_METRIC_LABEL_LENGTH }),
     index: KpiMetricIndexSchema,
     query: limitedStringSchema({ fieldName: 'metric query', min: 0, max: MAX_METRIC_QUERY_LENGTH }),
+    dateField: KpiMetricDateFieldSchema.optional(),
     aggregation: z
       .object({
         type: KpiMetricAggregationTypeSchema,

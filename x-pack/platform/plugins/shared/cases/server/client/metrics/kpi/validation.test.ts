@@ -56,6 +56,31 @@ describe('getKpiMetricFieldError', () => {
       })
     ).toBe('The unique count needs a keyword field. case.total_alerts is not a keyword field.');
   });
+
+  describe('date field', () => {
+    it('rejects a date field on the activity index', () => {
+      expect(getKpiMetricFieldError({ index: 'activity', dateField: 'closed_at' })).toBe(
+        'The date field closed_at is not allowed for the activity index.'
+      );
+    });
+
+    it('rejects a date field on the attachments index', () => {
+      expect(getKpiMetricFieldError({ index: 'attachments', dateField: 'created_at' })).toBe(
+        'The date field created_at is not allowed for the attachments index.'
+      );
+    });
+
+    it('accepts a date field on the cases index', () => {
+      expect(getKpiMetricFieldError({ index: 'cases', dateField: 'closed_at' })).toBeUndefined();
+      expect(
+        getKpiMetricFieldError({
+          index: 'cases',
+          dateField: 'closed_at',
+          aggregation: { type: 'median', field: 'case.time_to_resolve' },
+        })
+      ).toBeUndefined();
+    });
+  });
 });
 
 describe('getKpiMetricQueryError', () => {

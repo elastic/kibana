@@ -31,6 +31,10 @@ export interface KpiMetricTileProps {
    * When set, the tile shows the empty state and the message in a tooltip.
    */
   errorMessage?: string;
+  /**
+   * When set, the tile shows an info icon next to the label with this text in a tooltip.
+   */
+  dateHint?: string;
   dataTestSubj: string;
 }
 
@@ -108,25 +112,43 @@ const KpiMetricTileComponent: React.FC<KpiMetricTileProps> = ({
   direction,
   isLoading,
   errorMessage,
+  dateHint,
   dataTestSubj,
 }) => {
   const hasError = errorMessage != null;
   const changePercent =
     hasError || isLoading ? undefined : getKpiChangePercent(value, previousValue);
 
-  const description = hasError ? (
-    <>
-      {label}{' '}
-      <EuiIconTip
-        type="warning"
-        color="subdued"
-        content={errorMessage}
-        aria-label={KPI_METRIC_ERROR_ARIA_LABEL}
-      />
-    </>
-  ) : (
-    label
-  );
+  const description =
+    hasError || dateHint != null ? (
+      <>
+        {label}
+        {dateHint != null && (
+          <>
+            {' '}
+            <EuiIconTip
+              type="info"
+              color="subdued"
+              content={dateHint}
+              iconProps={{ 'data-test-subj': `${dataTestSubj}-date-hint` }}
+            />
+          </>
+        )}
+        {hasError && (
+          <>
+            {' '}
+            <EuiIconTip
+              type="warning"
+              color="subdued"
+              content={errorMessage}
+              aria-label={KPI_METRIC_ERROR_ARIA_LABEL}
+            />
+          </>
+        )}
+      </>
+    ) : (
+      label
+    );
 
   let title: React.ReactNode = hasError ? EMPTY_VALUE : formatKpiMetricValue(value, format);
 

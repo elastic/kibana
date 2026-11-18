@@ -14,7 +14,11 @@ import {
   getKpiField,
 } from '../../../common/constants';
 import type { KpiMetricRequest } from '../../../common/types/api';
-import type { KpiMetricAggregationType, KpiMetricDirection } from '../../../common/types/domain';
+import type {
+  KpiMetricAggregationType,
+  KpiMetricDateField,
+  KpiMetricDirection,
+} from '../../../common/types/domain';
 import * as i18n from './translations';
 
 export type ThresholdComparatorOption = 'none' | 'above' | 'below';
@@ -25,6 +29,7 @@ export interface KpiMetricFormState {
   predefinedId: string;
   label: string;
   index: KpiMetricIndex;
+  dateField: KpiMetricDateField;
   query: string;
   aggregationType: KpiMetricAggregationType;
   field: string;
@@ -70,6 +75,7 @@ export const toKpiMetricFormState = (metric?: KpiMetricRequest | null): KpiMetri
     predefinedId: PREDEFINED_KPI_METRIC_IDS[0],
     label: '',
     index: 'cases',
+    dateField: 'created_at',
     query: '',
     aggregationType: 'count',
     field: '',
@@ -91,6 +97,7 @@ export const toKpiMetricFormState = (metric?: KpiMetricRequest | null): KpiMetri
     ...base,
     label: metric.label,
     index: metric.index,
+    dateField: metric.dateField ?? 'created_at',
     query: metric.query,
     aggregationType: metric.aggregation?.type ?? 'count',
     field: metric.aggregation?.field ?? '',
@@ -166,6 +173,8 @@ export const toKpiMetricRequest = (
     kind: 'custom',
     label: state.label.trim(),
     index: state.index,
+    ...(state.index === 'cases' &&
+      state.dateField === 'closed_at' && { dateField: 'closed_at' as const }),
     query: state.query,
     ...(state.aggregationType !== 'count' && {
       aggregation: { type: state.aggregationType, field: state.field },

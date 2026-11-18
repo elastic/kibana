@@ -189,6 +189,13 @@ export const KPI_METRIC_UNKNOWN = i18n.translate('xpack.cases.casesStats.kpiMetr
   defaultMessage: 'This metric is not available.',
 });
 
+export const KPI_METRIC_CLOSED_DATE_HINT = i18n.translate(
+  'xpack.cases.casesStats.kpiMetricClosedDateHint',
+  {
+    defaultMessage: 'Filtered by closed date. The case table uses the created date.',
+  }
+);
+
 export const KPI_METRIC_CHANGE = (change: string) =>
   i18n.translate('xpack.cases.casesStats.kpiMetricChange', {
     values: { change },

@@ -142,6 +142,28 @@ describe('configure', () => {
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual(defaultRequest);
     });
+
+    it('keeps the date field of a custom metric', () => {
+      const request = {
+        ...defaultRequest,
+        metrics: {
+          casesList: [
+            {
+              id: 'metric-1',
+              kind: 'custom',
+              label: 'Closed cases',
+              index: 'cases',
+              query: 'case.status: closed',
+              display: 'value',
+              dateField: 'closed_at',
+            },
+          ],
+        },
+      };
+      const result = ConfigurationAttributesSchema.safeParse(request);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(request);
+    });
   });
 
   describe('ConfigurationSchema', () => {
