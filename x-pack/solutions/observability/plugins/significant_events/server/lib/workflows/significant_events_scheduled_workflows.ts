@@ -45,13 +45,16 @@ export interface SignificantEventsScheduledWorkflowsService {
    *   new cadence and batch values, preserving enablement.
    * - Disabling disables both workflows, cancels non-terminal scheduled
    *   wrapper executions in that space, and uninstalls the per-space dynamic
-   *   workflow instances.
+   *   workflow instances. `skipExecutionDrain` skips that cancel-and-wait so a
+   *   source delete is not blocked on in-flight runs; the workflows are still
+   *   disabled and uninstalled.
    */
   ensureWorkflow(params: {
     enabled: boolean;
     request: KibanaRequest;
     spaceId: string;
     config: SignificantEventsScheduledWorkflowsConfig;
+    skipExecutionDrain?: boolean;
   }): Promise<void>;
 }
 
@@ -248,7 +251,7 @@ export const createSignificantEventsScheduledWorkflowsService = ({
   };
 
   return {
-    async ensureWorkflow({ enabled, request, spaceId, config }) {
+    async ensureWorkflow({ enabled, request, spaceId, config, skipExecutionDrain = false }) {
       // Installing enabled workflows binds work to a space, and Nightshift only runs in the
       // default one. Disabling stays allowed everywhere, so a space set up on an earlier build
       // can still be taken down.
@@ -269,10 +272,14 @@ export const createSignificantEventsScheduledWorkflowsService = ({
       }
 
       await setAllEnabled({ enabled: false, request, spaceId });
-      await cancelRunningScheduledExecutions({ request, spaceId });
+      if (!skipExecutionDrain) {
+        await cancelRunningScheduledExecutions({ request, spaceId });
+      }
       await uninstallScheduledWorkflows({ client, spaceId });
       log.info(
-        `Disabled and uninstalled scheduled Significant Events discovery workflows in space ${spaceId}`
+        skipExecutionDrain
+          ? `Disabled and uninstalled scheduled Significant Events discovery workflows in space ${spaceId} without draining executions`
+          : `Disabled and uninstalled scheduled Significant Events discovery workflows in space ${spaceId}`
       );
     },
   };

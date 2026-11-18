@@ -25,7 +25,7 @@ import { useStoredAssistantConnectorId } from '../../onboarding/components/hooks
 import { LEADS_INDEX_PATTERN } from '../../../common/entity_analytics/lead_generation/constants';
 
 jest.mock('../../common/components/links/link_props', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
   const mockReact = require('react');
   return {
     withSecuritySolutionLink:
