@@ -63,9 +63,11 @@ jest.mock('../api/hooks/use_risk_engine_status', () => ({
   }),
 }));
 
+const mockUiSettingsGet = jest.fn();
 jest.mock('../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
+      uiSettings: { get: (key: string) => mockUiSettingsGet(key) },
       docLinks: {
         links: {
           securitySolution: {
@@ -322,6 +324,7 @@ const buildConfig = (overrides: Record<string, unknown> = {}) => {
 describe('EntityAnalyticsManagementPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUiSettingsGet.mockReturnValue(false);
     (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(false);
     mockUseConfigurableRiskEngineSettings.mockReturnValue(buildConfig());
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
@@ -474,6 +477,39 @@ describe('EntityAnalyticsManagementPage', () => {
 
     render(pageComponent());
     expect(screen.getByTestId(ENGINE_STATUS_TAB_TEST_ID)).toBeInTheDocument();
+  });
+
+  describe('with Entity Store v2', () => {
+    beforeEach(() => {
+      mockUiSettingsGet.mockReturnValue(true);
+      mockUseEntityStoreStatus.mockReturnValue({
+        data: { status: 'running', engines: [{ type: 'host' }] },
+      });
+    });
+
+    it('labels the tab Settings for admins', () => {
+      mockUseEntityEnginePrivileges.mockReturnValue({
+        data: { has_all_required: true, has_read_permissions: true, has_install_permissions: true },
+      });
+
+      render(pageComponent());
+
+      expect(screen.getByTestId(ENGINE_STATUS_TAB_TEST_ID)).toHaveTextContent('Settings');
+    });
+
+    it('hides the Settings tab from read-only users', () => {
+      mockUseEntityEnginePrivileges.mockReturnValue({
+        data: {
+          has_all_required: false,
+          has_read_permissions: true,
+          has_install_permissions: false,
+        },
+      });
+
+      render(pageComponent());
+
+      expect(screen.queryByTestId(ENGINE_STATUS_TAB_TEST_ID)).not.toBeInTheDocument();
+    });
   });
 
   it('does not show Engine Status tab when entity store is not installed', () => {

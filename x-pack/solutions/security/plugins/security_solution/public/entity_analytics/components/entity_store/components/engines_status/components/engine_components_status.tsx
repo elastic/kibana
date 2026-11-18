@@ -17,8 +17,11 @@ const componentToId = ({ id, resource }: EngineComponentStatus) => `${resource}-
 
 export const EngineComponentsStatusTable = ({
   components,
+  readable = false,
 }: {
   components: EngineComponentStatus[];
+  /** Spells states out in words and names tasks in plain language. */
+  readable?: boolean;
 }) => {
   const [expandedItems, setExpandedItems] = useState<EngineComponentStatus[]>([]);
 
@@ -46,7 +49,7 @@ export const EngineComponentsStatusTable = ({
     [expandedItems]
   );
 
-  const columns = useColumns(onToggle, expandedItems);
+  const columns = useColumns(onToggle, expandedItems, readable);
 
   return (
     <BasicTable
