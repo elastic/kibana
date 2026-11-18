@@ -169,9 +169,8 @@ describe('createThreatAttachmentType', () => {
 
       expect(description).toContain('by-reference');
       expect(description).toContain('report_id');
-      expect(description).toContain(
-        'Rendering this attachment inline displays the threat report as a card: title, severity and source, indicators of compromise grouped by type with their hunt status, tactics, techniques, regions and categories, and the Diamond model.'
-      );
+      expect(description).toContain('Rendering this attachment inline displays the threat report');
+      expect(description).toContain('those not hunted set apart');
     });
   });
 

@@ -43,7 +43,7 @@ The live report document is fetched space-projected at render time; the captured
 are only a fallback used when the live document cannot be resolved. Quote the captured fields
 verbatim when discussing this attachment rather than restating the full report from memory.
 
-Rendering this attachment inline displays the threat report as a card: title, severity and source, indicators of compromise grouped by type with their hunt status, tactics, techniques, regions and categories, and the Diamond model.`;
+Rendering this attachment inline displays the threat report as a card: title, severity and source, indicators of compromise grouped by type with those not hunted set apart, tactics, techniques, regions and categories, and the Diamond model.`;
 
 export const createThreatAttachmentType = (): AttachmentTypeDefinition =>
   createReadonlyAttachmentType({

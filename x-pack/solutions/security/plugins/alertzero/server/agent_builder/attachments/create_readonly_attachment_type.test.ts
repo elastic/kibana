@@ -84,16 +84,8 @@ describe('createReadonlyAttachmentType', () => {
   });
 
   describe('getAgentDescription', () => {
-    it('returns describePayload and no instruction about when to render', () => {
-      const description = attachmentType.getAgentDescription?.();
-
-      expect(description).toBe('The payload contains: value.');
-      expect(description).not.toContain('render_attachment');
-      expect(description).not.toContain('INLINE RENDERING');
-      expect(description).not.toMatch(/must render/i);
-      expect(description).not.toMatch(/always render/i);
-      expect(description).not.toMatch(/whenever[^.]*render/i);
-      expect(description).not.toMatch(/render[^.]*whenever/i);
+    it('returns describePayload unchanged', () => {
+      expect(attachmentType.getAgentDescription?.()).toBe('The payload contains: value.');
     });
   });
 });

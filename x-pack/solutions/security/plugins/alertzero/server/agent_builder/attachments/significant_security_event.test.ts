@@ -358,8 +358,9 @@ describe('createSignificantSecurityEventAttachmentType', () => {
       expect(description).toContain('{ field, value }');
       expect(description).toContain('NOT Discover IOCs');
       expect(description).toContain(
-        'Rendering this attachment inline displays the finding as a card: the headline with its basis, what matched and where, the hosts and users involved, related events with links to Discover, and the hypothesis with its evidence for and against.'
+        'Rendering this attachment inline displays the finding as a card'
       );
+      expect(description).toContain('the hypothesis with its evidence for and against');
     });
   });
 

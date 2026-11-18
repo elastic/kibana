@@ -5,29 +5,32 @@
  * 2.0.
  */
 
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { registerAttachments } from './register_attachments';
 
-const FORBIDDEN_RENDER_GUIDANCE = [
-  /render_attachment/,
-  /INLINE RENDERING/,
-  /must render/i,
-  /always render/i,
-  /whenever[^.]*render/i,
-  /render[^.]*whenever/i,
+// The platform prompt owns when to render an attachment. A type description may say what the
+// card shows ("Rendering this attachment inline displays ...") and nothing else about
+// rendering, because a rule like "render whenever present" makes the agent re-render every
+// card on every reply. Rather than guess at rewordings of that rule, every mention of
+// rendering other than these is rejected.
+const ALLOWED_RENDER_MENTIONS = [
+  /^Rendering this attachment inline displays[^\n]*$/m,
+  /at render time/,
 ];
 
+const withoutAllowedMentions = (description: string): string =>
+  ALLOWED_RENDER_MENTIONS.reduce((text, allowed) => text.replace(allowed, ''), description);
+
 describe('registerAttachments', () => {
+  const setup = agentBuilderMocks.createSetup();
   const registered: AttachmentTypeDefinition[] = [];
 
   beforeAll(() => {
-    const registerType = jest.fn((definition: AttachmentTypeDefinition) => {
+    registerAttachments(setup);
+    setup.attachments.registerType.mock.calls.forEach(([definition]) => {
       registered.push(definition);
     });
-    registerAttachments({
-      attachments: { registerType },
-    } as unknown as AgentBuilderPluginSetup);
   });
 
   it('registers the Hunt Watch attachment types', () => {
@@ -38,18 +41,23 @@ describe('registerAttachments', () => {
     ]);
   });
 
-  // The platform prompt owns when to render an attachment. A type description that says
-  // "render whenever present" makes the agent re-render every card on every reply.
-  it('never tells the agent when to render an attachment', () => {
-    const descriptions = registered.flatMap(({ getAgentDescription }) =>
-      getAgentDescription ? [getAgentDescription()] : []
-    );
-
-    expect(descriptions.length).toBeGreaterThan(0);
-    for (const description of descriptions) {
-      for (const pattern of FORBIDDEN_RENDER_GUIDANCE) {
-        expect(description).not.toMatch(pattern);
-      }
-    }
+  // A new description-bearing type must be added here on purpose, so it is checked too.
+  it('gives only the threat and significant security event types an agent description', () => {
+    expect(
+      registered
+        .filter(({ getAgentDescription }) => getAgentDescription)
+        .map(({ id }) => id)
+        .sort()
+    ).toEqual(['security.significant_security_event', 'security.threat']);
   });
+
+  it.each(['security.threat', 'security.significant_security_event'])(
+    'says what the %s card shows and nothing else about rendering',
+    (id) => {
+      const description = registered.find((type) => type.id === id)?.getAgentDescription?.() ?? '';
+
+      expect(description).toMatch(ALLOWED_RENDER_MENTIONS[0]);
+      expect(withoutAllowedMentions(description)).not.toMatch(/render/i);
+    }
+  );
 });
