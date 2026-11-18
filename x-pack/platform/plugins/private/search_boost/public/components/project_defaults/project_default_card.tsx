@@ -90,24 +90,22 @@ export const ProjectDefaultCard = ({
             responsive={false}
           >
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup
-                component="h3"
-                gutterSize="xs"
-                alignItems="center"
-                responsive={false}
-                css={typeLabelFontSize}
-              >
-                {PROFILE_TYPE_LABELS[type]}
-                <EuiIconTip
-                  type="info"
-                  color="subdued"
-                  size="m"
-                  content={getDefaultRuleTip(type, ruleName)}
-                  aria-label={getDefaultRuleTipLabel(type)}
-                  anchorProps={{
-                    'data-test-subj': `searchBoostProjectDefaultRuleTip-${type}`,
-                  }}
-                />
+              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <h3 css={typeLabelFontSize}>{PROFILE_TYPE_LABELS[type]}</h3>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    type="info"
+                    color="subdued"
+                    size="m"
+                    content={getDefaultRuleTip(type, ruleName)}
+                    aria-label={getDefaultRuleTipLabel(type)}
+                    anchorProps={{
+                      'data-test-subj': `searchBoostProjectDefaultRuleTip-${type}`,
+                    }}
+                  />
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
             {canEdit ? (
