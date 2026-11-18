@@ -74,6 +74,7 @@ export const runTaskProcess = async (
             protocolVersion: TASK_PROCESS_PROTOCOL_VERSION,
             capabilities: TASK_PROCESS_CAPABILITIES,
             featureFlags: getTaskProcessContext().module.featureFlags ?? {},
+            rss: process.memoryUsage().rss,
           } satisfies TaskProcessReady);
         } else {
           process.stdout.write(`READY ${port}\n`);

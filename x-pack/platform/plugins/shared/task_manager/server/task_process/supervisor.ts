@@ -359,6 +359,7 @@ export class TaskProcessSupervisor {
     };
     if (nodeOptions) env.NODE_OPTIONS = nodeOptions;
     else delete env.NODE_OPTIONS;
+    const spawnStartedAt = Date.now();
     const child = forkFn(bundle.file, [], {
       env,
       execArgv,
@@ -412,13 +413,7 @@ export class TaskProcessSupervisor {
       // What the child wrote before it exited is read before the streams close.
       setImmediate(() => stopForwarding.forEach((stop) => stop?.()));
     });
-    if (child.pid !== undefined) {
-      logger.info(
-        `Spinning up process ${child.pid} for task ${bundle.taskType}; ${this.children.size} live (${this.activeCount} held by runs)`,
-        { labels }
-      );
-    }
-
+    let readyRss: number | undefined;
     const port = await new Promise<number>((resolve, reject) => {
       let settled = false;
       const timer = setTimeout(() => {
@@ -476,6 +471,7 @@ export class TaskProcessSupervisor {
         }
         settled = true;
         clearTimeout(timer);
+        readyRss = message.rss;
         resolve(message.port);
       });
       child.send({
@@ -491,6 +487,14 @@ export class TaskProcessSupervisor {
       throw error;
     });
 
+    logger.info(
+      `Spinning up process ${child.pid} for task ${bundle.taskType}; ${this.children.size} live (${
+        this.activeCount
+      } held by runs); ready in ${Date.now() - spawnStartedAt}ms${
+        readyRss !== undefined ? `, idle RSS ${Math.round(readyRss / 1024 / 1024)}MB` : ''
+      }`,
+      { labels }
+    );
     managed.port = port;
     return this.lease(managed);
   }

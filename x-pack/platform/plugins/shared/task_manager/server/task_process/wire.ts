@@ -102,6 +102,8 @@ export interface TaskProcessReady {
   protocolVersion: typeof TASK_PROCESS_PROTOCOL_VERSION;
   capabilities: readonly string[];
   featureFlags?: TaskFeatureFlagDefinitions;
+  /** `process.memoryUsage().rss`, read as this process starts listening: its idle RSS. */
+  rss?: number;
 }
 
 /** Configuration and registrations captured for one dispatch in either process mode. */
