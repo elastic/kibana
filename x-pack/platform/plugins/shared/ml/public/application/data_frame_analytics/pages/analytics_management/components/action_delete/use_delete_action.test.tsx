@@ -6,19 +6,20 @@
  */
 
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, renderHook } from '@testing-library/react';
 import * as CheckPrivilige from '../../../../../capabilities/check_capabilities';
 import mockAnalyticsListItem from '../analytics_list/__mocks__/analytics_list_item.json';
 import { I18nProvider } from '@kbn/i18n-react';
 import { coreMock as mockCoreServices, i18nServiceMock } from '@kbn/core/public/mocks';
 
-import { DeleteActionName } from './delete_action_name';
+import type { DataFrameAnalyticsListRow } from '../analytics_list/common';
+
 import { DeleteActionModal } from './delete_action_modal';
-import { useDeleteAction } from './use_delete_action';
+import { deleteActionNameText, useDeleteAction } from './use_delete_action';
 
 jest.mock('../../../../../capabilities/check_capabilities', () => ({
   checkPermission: jest.fn(() => false),
-  createPermissionFailureMessage: jest.fn(),
+  createPermissionFailureMessage: jest.fn(() => 'no permission'),
 }));
 
 jest.mock('../../../../../contexts/kibana', () => ({
@@ -44,22 +45,53 @@ describe('DeleteAction', () => {
     jest.clearAllMocks();
   });
 
-  it('should display a tooltip when isDisabled prop is true.', () => {
-    const { container } = render(
-      // @ts-expect-error mock data is incorrectly typed
-      <DeleteActionName isDisabled={true} item={mockAnalyticsListItem} />
-    );
+  const runningItem = {
+    ...mockAnalyticsListItem,
+    stats: { ...mockAnalyticsListItem.stats, state: 'started' },
+  } as unknown as DataFrameAnalyticsListRow;
+  const stoppedItem = mockAnalyticsListItem as unknown as DataFrameAnalyticsListRow;
 
-    expect(container.querySelector('.euiToolTipAnchor')).toBeInTheDocument();
+  const renderAction = (canDeleteDataFrameAnalytics: boolean) => {
+    const { result } = renderHook(() => useDeleteAction(canDeleteDataFrameAnalytics));
+    const { action } = result.current;
+
+    if (!('description' in action) || !('enabled' in action)) {
+      throw new Error('Expected a default item action with a description and an enabled callback.');
+    }
+
+    const { description, enabled } = action;
+
+    return {
+      name: 'name' in action ? action.name : undefined,
+      isEnabled: (item: DataFrameAnalyticsListRow) => enabled?.(item),
+      describe: (item: DataFrameAnalyticsListRow) =>
+        typeof description === 'function' ? description(item) : description,
+    };
+  };
+
+  // EuiBasicTable renders `description` as an `EuiContextMenuItem` tooltip and only
+  // suppresses the duplicate screen reader announcement when it is a string equal to
+  // `name`, so an enabled action must not describe itself with a different value.
+  it('should describe an enabled action with the same string as its name.', () => {
+    const { name, isEnabled, describe } = renderAction(true);
+
+    expect(name).toBe(deleteActionNameText);
+    expect(isEnabled(stoppedItem)).toBe(true);
+    expect(describe(stoppedItem)).toBe(deleteActionNameText);
   });
 
-  it('should not display a tooltip when isDisabled prop is false.', () => {
-    const { container } = render(
-      // @ts-expect-error mock data is incorrectly typed
-      <DeleteActionName isDisabled={false} item={mockAnalyticsListItem} />
-    );
+  it('should describe a disabled action with the reason it is disabled.', () => {
+    const { isEnabled, describe } = renderAction(true);
 
-    expect(container.querySelector('.euiToolTipAnchor')).not.toBeInTheDocument();
+    expect(isEnabled(runningItem)).toBe(false);
+    expect(describe(runningItem)).toBe('Stop the data frame analytics job in order to delete it.');
+  });
+
+  it('should describe a missing delete permission.', () => {
+    const { isEnabled, describe } = renderAction(false);
+
+    expect(isEnabled(stoppedItem)).toBe(false);
+    expect(describe(stoppedItem)).toBe('no permission');
   });
 
   describe('When delete model is open', () => {
@@ -80,8 +112,7 @@ describe('DeleteAction', () => {
                 deleteAction.openModal(mockAnalyticsListItem);
               }}
             >
-              {/* @ts-expect-error mock data is incorrectly typed */}
-              <DeleteActionName isDisabled={false} item={mockAnalyticsListItem} />
+              {deleteActionNameText}
             </button>
           </>
         );
