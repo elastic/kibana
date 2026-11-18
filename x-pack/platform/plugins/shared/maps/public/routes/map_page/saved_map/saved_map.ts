@@ -15,7 +15,6 @@ import type {
 import type { ScopedHistory } from '@kbn/core/public';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { Writable } from '@kbn/utility-types';
-import type { DataViewSpec } from '@kbn/data-views-types';
 import type { AsCodeDataViewSpec } from '@kbn/as-code-data-views-schema';
 import { fromStoredDataView, toStoredDataView } from '@kbn/as-code-data-views-transforms';
 import type { MapAttributes } from '../../../../server';
@@ -238,7 +237,7 @@ export class SavedMap {
     if (this._attributes?.adHocDataViews?.length) {
       const dataViewService = getIndexPatternService();
       const promises = this._attributes.adHocDataViews.map((adhocDataView) => {
-        return dataViewService.create(toStoredDataView(adhocDataView) as DataViewSpec);
+        return dataViewService.create(toStoredDataView(adhocDataView));
       });
       await Promise.all(promises);
     }

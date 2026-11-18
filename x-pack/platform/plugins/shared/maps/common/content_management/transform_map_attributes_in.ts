@@ -6,7 +6,6 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { DataViewSpec } from '@kbn/data-views-types';
 import { toStoredDataView } from '@kbn/as-code-data-views-transforms';
 import type { StoredRefreshInterval } from '../../server/saved_objects/types';
 import type { MapAttributes, StoredMapAttributes } from '../../server';
@@ -29,8 +28,8 @@ export function transformMapAttributesIn(mapState: MapAttributes): {
       ...mapState,
       ...(mapState.adHocDataViews
         ? {
-            adHocDataViews: mapState.adHocDataViews.map(
-              (adHocDataView) => toStoredDataView(adHocDataView) as DataViewSpec
+            adHocDataViews: mapState.adHocDataViews.map((adHocDataView) =>
+              toStoredDataView(adHocDataView)
             ),
           }
         : {}),

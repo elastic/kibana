@@ -18,6 +18,16 @@ import { toStoredDataView } from './to_stored_data_view';
 import type { DataViewSpec } from '@kbn/data-views-types';
 
 describe('toStoredDataView', () => {
+  it('returns a DataViewSpec, not a string, for an inline spec', () => {
+    const dataView: AsCodeDataViewSpec = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'my-index-*',
+    };
+    // type assertion: no narrowing needed because the overload returns DataViewSpec
+    const result: DataViewSpec = toStoredDataView(dataView);
+    expect(result).toEqual({ title: 'my-index-*' });
+  });
+
   it('converts data_view_reference data_source to string id', () => {
     const dataView: AsCodeDataViewReference = {
       type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
