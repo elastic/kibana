@@ -28,6 +28,8 @@ import { SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID } from '../../../../../comm
 import type { GetScopedClients } from '../../../../routes/types';
 import { assertCanReadSignificantEvents } from '../../../../routes/utils/assert_can_manage_significant_events';
 import type { SignificantEventsServer } from '../../../../types';
+import type { EbtTelemetryClient } from '../../../../lib/telemetry/ebt';
+import { reportToolFailure } from '../../../tools/tool_failure';
 import { getRequestAbortSignal } from '../../../../routes/utils/get_request_abort_signal';
 import { sourceToAnalysisTarget } from '../../../../lib/significant_events/source_to_analysis_target';
 import {
@@ -118,10 +120,12 @@ export const createValidateQueriesTool = ({
   getScopedClients,
   server,
   logger,
+  telemetry,
 }: {
   getScopedClients: GetScopedClients;
   server: Pick<SignificantEventsServer, 'security'>;
   logger: Logger;
+  telemetry: EbtTelemetryClient;
 }): BuiltinSkillBoundedTool<typeof validateQueriesSchema> => {
   return {
     id: SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
@@ -221,7 +225,16 @@ export const createValidateQueriesTool = ({
         }
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        logger.warn(`KI query validation failed: ${message}`);
+        reportToolFailure({
+          error,
+          toolId: SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
+          errorLogMessage: `KI query validation failed: ${message}`,
+          errorLogLevel: 'warn',
+          logger,
+          telemetry,
+          request: context.request,
+          runContext: context.runContext,
+        });
         return {
           results: [{ type: ToolResultType.error, data: { message } }],
         };

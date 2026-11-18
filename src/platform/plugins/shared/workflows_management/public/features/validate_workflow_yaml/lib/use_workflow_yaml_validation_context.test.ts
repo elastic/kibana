@@ -9,7 +9,6 @@
 
 import { renderHook } from '@testing-library/react';
 import { useSelector } from 'react-redux-v7';
-import { WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG } from '@kbn/workflows';
 import { useWorkflowYamlValidationContext } from './use_workflow_yaml_validation_context';
 import { useKibana } from '../../../hooks/use_kibana';
 
@@ -31,34 +30,6 @@ jest.mock('react-redux-v7', () => ({
 }));
 
 describe('useWorkflowYamlValidationContext', () => {
-  it('subscribes to the self-client flag with useBooleanValue', () => {
-    const useBooleanValue = jest.fn().mockReturnValue(true);
-    const getBooleanValue = jest.fn().mockReturnValue(false);
-    jest.mocked(useKibana).mockReturnValue({
-      services: {
-        application: { getUrlForApp: jest.fn(() => 'https://example.test') },
-        http: {},
-        data: {},
-        licensing: {},
-        workflowsExtensions: {},
-        featureFlags: {
-          useBooleanValue,
-          getBooleanValue,
-        },
-      },
-    } as unknown as ReturnType<typeof useKibana>);
-
-    const { result, rerender } = renderHook(() => useWorkflowYamlValidationContext());
-
-    expect(getBooleanValue).not.toHaveBeenCalled();
-    expect(useBooleanValue).toHaveBeenCalledWith(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, true);
-    expect(result.current.warnIgnoredKibanaFetcher).toBe(true);
-
-    useBooleanValue.mockReturnValue(false);
-    rerender();
-    expect(result.current.warnIgnoredKibanaFetcher).toBe(false);
-  });
-
   it('gives variable validation the outputs of the loaded workflows', () => {
     jest.mocked(useSelector).mockReturnValue({
       status: 'loading',
@@ -76,7 +47,6 @@ describe('useWorkflowYamlValidationContext', () => {
       services: {
         application: { getUrlForApp: jest.fn(() => 'https://example.test') },
         workflowsExtensions: {},
-        featureFlags: { useBooleanValue: jest.fn().mockReturnValue(true) },
       },
     } as unknown as ReturnType<typeof useKibana>);
 

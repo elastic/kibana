@@ -19,14 +19,14 @@ export default function ({ getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await pageObjects.home.removeSampleDataSet('ecommerce');
+      await pageObjects.home.removeSampleDataSetFromUi('ecommerce');
     });
 
     it('Sample data loads', async () => {
       await pageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });
-      await pageObjects.home.addSampleDataSet('ecommerce');
+      await pageObjects.home.addSampleDataSetFromUi('ecommerce');
       const ecommerce = await pageObjects.home.isSampleDataSetInstalled('ecommerce');
       expect(ecommerce).toBe(true);
     });

@@ -51,15 +51,14 @@ export function QuerySearchBar({
       name={name}
       control={control}
       rules={{
-        required: Boolean(required) && Boolean(dataView),
+        required: Boolean(required),
         validate: (value) => {
+          const kqlQuery = is(kqlWithFiltersSchema, value) ? value.kqlQuery : value;
+          if (typeof kqlQuery !== 'string') return;
+
           try {
-            if (!dataView) return;
-            if (typeof value === 'string') {
-              const ast = fromKueryExpression(value);
-              toElasticsearchQuery(ast, dataView);
-            } else if (is(kqlWithFiltersSchema, value)) {
-              const ast = fromKueryExpression(value.kqlQuery);
+            const ast = fromKueryExpression(kqlQuery);
+            if (dataView) {
               toElasticsearchQuery(ast, dataView);
             }
           } catch (e) {

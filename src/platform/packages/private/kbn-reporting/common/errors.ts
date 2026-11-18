@@ -88,6 +88,16 @@ export class QueueTimeoutError extends ReportingError {
 }
 
 /**
+ * The report's export type is not registered or is disabled, so the job cannot run.
+ */
+export class ExportTypeUnavailableError extends ReportingError {
+  static code = 'export_type_unavailable_error' as const;
+  public get code(): string {
+    return ExportTypeUnavailableError.code;
+  }
+}
+
+/**
  * An unknown error has occurred. See details.
  */
 export class UnknownError extends ReportingError {

@@ -18,6 +18,11 @@ import {
   type WorkflowRunTaskInstance,
 } from './schedule_workflow_run_task';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { publishFinishedWorkflowExecution } from '../topics/publish_finished_workflow_execution';
+
+jest.mock('../topics/publish_finished_workflow_execution', () => ({
+  publishFinishedWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+}));
 
 const scheduleError = new Error('api key grant failed');
 const request = {} as KibanaRequest;
@@ -45,20 +50,24 @@ const notFound = (id: string) => ({
 describe('schedule_workflow_run_task', () => {
   let taskManager: ReturnType<typeof taskManagerMock.createStart>;
   let bulkUpdateWorkflowExecutions: jest.Mock;
+  let getWorkflowExecutionById: jest.Mock;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let deps: ScheduleWorkflowRunTaskDeps;
 
   beforeEach(() => {
+    jest.mocked(publishFinishedWorkflowExecution).mockClear();
     taskManager = taskManagerMock.createStart();
     taskManager.schedule.mockRejectedValue(scheduleError);
     taskManager.bulkSchedule.mockRejectedValue(scheduleError);
     taskManager.bulkGet.mockImplementation(async (ids) => ids.map(notFound));
     bulkUpdateWorkflowExecutions = jest.fn().mockResolvedValue(undefined);
+    getWorkflowExecutionById = jest.fn().mockResolvedValue(null);
     logger = loggingSystemMock.createLogger();
     deps = {
       taskManager,
       workflowExecutionRepository: {
         bulkUpdateWorkflowExecutions,
+        getWorkflowExecutionById,
       } as unknown as WorkflowExecutionRepository,
       logger,
     };
@@ -82,6 +91,13 @@ describe('schedule_workflow_run_task', () => {
     });
 
     it('logs and still rethrows the schedule error when marking the execution FAILED also fails', async () => {
+      getWorkflowExecutionById.mockResolvedValue({
+        id: 'exec-a',
+        workflowId: 'wf-1',
+        spaceId: 'default',
+        status: ExecutionStatus.PENDING,
+        isTestRun: false,
+      });
       bulkUpdateWorkflowExecutions.mockRejectedValue(new Error('es unavailable'));
 
       await expect(scheduleRunTaskOrMarkFailed(deps, tasks[0], request)).rejects.toBe(
@@ -89,6 +105,7 @@ describe('schedule_workflow_run_task', () => {
       );
 
       expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('exec-a'));
+      expect(publishFinishedWorkflowExecution).not.toHaveBeenCalled();
     });
   });
 
@@ -104,6 +121,43 @@ describe('schedule_workflow_run_task', () => {
         failedExecutionIds: new Set(['exec-a', 'exec-b']),
         message: scheduleError.message,
       });
+    });
+
+    it('passes each loaded execution and the failed write to the publisher', async () => {
+      getWorkflowExecutionById.mockImplementation(async (id: string) =>
+        id === 'exec-a'
+          ? {
+              id,
+              workflowId: 'wf-1',
+              spaceId: 'default',
+              status: ExecutionStatus.PENDING,
+              isTestRun: false,
+              triggeredBy: 'alert',
+            }
+          : {
+              id,
+              workflowId: 'wf-1',
+              spaceId: 'default',
+              status: ExecutionStatus.COMPLETED,
+              isTestRun: false,
+              finishedAt: '2026-01-01T00:00:00.000Z',
+            }
+      );
+
+      await bulkScheduleRunTasksOrMarkFailed(deps, tasks, request);
+
+      expect(publishFinishedWorkflowExecution).toHaveBeenCalledTimes(2);
+      expect(publishFinishedWorkflowExecution).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'exec-a', status: ExecutionStatus.PENDING }),
+        expect.objectContaining({
+          status: ExecutionStatus.FAILED,
+          error: expect.objectContaining({ type: 'TaskScheduleError' }),
+        })
+      );
+      expect(publishFinishedWorkflowExecution).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'exec-b', status: ExecutionStatus.COMPLETED }),
+        expect.objectContaining({ status: ExecutionStatus.FAILED })
+      );
     });
 
     it('marks only the executions whose task was not saved when bulkSchedule throws', async () => {

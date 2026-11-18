@@ -1,5 +1,5 @@
 {
-  "sha1": "0fc4bbf029877dc86093ba9e73e7ae1764235241",
+  "sha1": "b232f04d4fd37ff8cbf15815928b3aacade2272d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -780,6 +780,26 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/workflow_error_trigger.spec.ts",
         "line": 252,
         "column": 26
+      }
+    },
+    {
+      "id": "619c38e3dd320b2-a8920ad15565c3c",
+      "title": "Workflow execution history follows the document returns every run of the current document and none after the same id is recreated",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/workflow_history_isolation.spec.ts",
+        "line": 38,
+        "column": 27
       }
     },
     {
