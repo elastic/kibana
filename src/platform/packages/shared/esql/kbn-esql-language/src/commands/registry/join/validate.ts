@@ -19,6 +19,7 @@ import { isBinaryExpression, isIdentifier, isSource } from '@elastic/esql';
 import type { ICommandCallbacks, ICommandContext } from '../types';
 import { errors } from '../../definitions/utils/errors';
 import { validateCommandArguments } from '../../definitions/utils/validation';
+import { validateNamedSubqueryReference } from '../../definitions/utils/validation/sources';
 import { COORDINATOR_LOOKUP_JOIN_PREFIX } from '../../definitions/constants';
 import { getOnOption } from './utils';
 import type { ESQLMessage } from '../../definitions/types';
@@ -56,6 +57,12 @@ export const validate = (
     index = target as ESQLSource;
   } else {
     return [errors.unexpected(target.location)];
+  }
+
+  const namedSubqueryErrors = validateNamedSubqueryReference(index, context, 'LOOKUP JOIN');
+
+  if (namedSubqueryErrors) {
+    return namedSubqueryErrors;
   }
 
   const isCoordinatorTarget = index.prefix?.valueUnquoted === COORDINATOR_LOOKUP_JOIN_PREFIX;

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
+import { uniq } from 'lodash';
+import type { ESQLFieldWithMetadata, EsqlFieldType } from '@kbn/esql-types';
 import type { ESQLCommandOption, ESQLAstAllCommands } from '@elastic/esql/types';
 import { isColumn, isOptionNode } from '@elastic/esql';
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
@@ -20,19 +22,22 @@ import {
 import { SuggestionCategory } from '../../../../language/autocomplete/utils/sorting/types';
 import { endsWithNonWhitespace, matchesWildcardPattern } from '../../../definitions/utils/regex';
 
-export const METADATA_FIELDS = [
-  '_version',
-  '_id',
-  '_index',
-  '_source',
-  '_ignored',
-  '_index_mode',
-  '_score',
-  '_size',
-  '_slice',
-  '_name',
-  '_class',
-];
+// Types Elasticsearch gives to METADATA columns (MetadataAttribute.ATTRIBUTES_MAP).
+const METADATA_FIELD_TYPES: Record<string, EsqlFieldType> = {
+  _version: 'long',
+  _id: 'keyword',
+  _index: 'keyword',
+  _source: '_source',
+  _ignored: 'keyword',
+  _index_mode: 'keyword',
+  _score: 'double',
+  _size: 'integer',
+  _slice: 'keyword',
+  _name: 'keyword',
+  _class: 'keyword',
+};
+
+export const METADATA_FIELDS = Object.keys(METADATA_FIELD_TYPES);
 
 export const CPS_METADATA_FIELDS = [
   '_project._id',
@@ -57,6 +62,28 @@ export const isValidMetadataField = (name: string, isServerless?: boolean): bool
     return true;
   }
   return name.includes('*') && availableFields.some((field) => matchesWildcardPattern(name, field));
+};
+
+/**
+ * Returns the columns that METADATA adds to subqueries and LET bindings, which Elasticsearch
+ * types statically instead of reading them from an index.
+ */
+export const getMetadataColumns = (
+  metadataOptions: ESQLCommandOption[]
+): ESQLFieldWithMetadata[] => {
+  const metadataFields = metadataOptions
+    .flatMap(({ args }) => args.filter(isColumn))
+    .flatMap(({ name }) =>
+      name.startsWith(PROJECT_TAG_PREFIX) && !name.includes('*')
+        ? [name]
+        : METADATA_FIELDS.filter((field) => matchesWildcardPattern(name, field)).sort()
+    );
+
+  return uniq(metadataFields).map((name) => ({
+    name,
+    type: name.startsWith(PROJECT_TAG_PREFIX) ? 'keyword' : METADATA_FIELD_TYPES[name],
+    userDefined: false as const,
+  }));
 };
 
 export const metadataSuggestion: ISuggestionItem = withAutoSuggest({

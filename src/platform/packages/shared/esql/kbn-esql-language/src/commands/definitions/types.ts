@@ -331,6 +331,14 @@ export interface ValidationErrors {
     message: string;
     type: { name: string };
   };
+  namedSubqueryForwardReference: {
+    message: string;
+    type: { name: string };
+  };
+  namedSubqueryNotSupportedInCommand: {
+    message: string;
+    type: { command: string };
+  };
   unknownSetting: {
     message: string;
     type: { name: string };

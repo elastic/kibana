@@ -12,6 +12,7 @@ import { mockContext } from '../../../__tests__/commands/context_fixtures';
 import { validate } from './validate';
 import { expectErrors } from '../../../__tests__/commands/validation';
 import { CPS_METADATA_FIELDS, METADATA_FIELDS } from '../options/metadata';
+import { getNamedSubqueries } from '../../definitions/utils/named_subqueries';
 
 const fromExpectErrors = (
   query: string,
@@ -242,6 +243,50 @@ describe('FROM Validation', () => {
         ]);
         fromExpectErrors(`from *:indexes METADATA _id`, []);
       });
+    });
+  });
+
+  describe('LET named subqueries', () => {
+    const getContextWithNamedSubqueries = (query: string, availableNames: string[]) => {
+      const namedSubqueries = getNamedSubqueries(Parser.parse(query).root.header);
+
+      return {
+        ...mockContext,
+        namedSubqueries: namedSubqueries.filter(({ name }) => availableNames.includes(name)),
+        forwardNamedSubqueries: namedSubqueries.filter(
+          ({ name }) => !availableNames.includes(name)
+        ),
+      };
+    };
+
+    test('validates the other sources next to a LET reference', () => {
+      const query = 'LET a = (FROM index); FROM a, missingIndex';
+
+      fromExpectErrors(
+        query,
+        ['Unknown data source "missingIndex"'],
+        getContextWithNamedSubqueries(query, ['a'])
+      );
+    });
+
+    test('errors on LET references not yet available even with an index of the same name', () => {
+      const query = 'LET index = (FROM other_index); FROM index';
+
+      fromExpectErrors(
+        query,
+        ['Forward reference in LET bindings: "index" cannot be referenced before its declaration'],
+        getContextWithNamedSubqueries(query, [])
+      );
+    });
+
+    test('matches LET names exactly', () => {
+      const query = 'LET a = (FROM index); FROM remote-ccs:a, a::data, a*';
+
+      fromExpectErrors(
+        query,
+        ['Unknown data source "remote-ccs:a"', 'Unknown data source "a::data"'],
+        getContextWithNamedSubqueries(query, ['a'])
+      );
     });
   });
 });

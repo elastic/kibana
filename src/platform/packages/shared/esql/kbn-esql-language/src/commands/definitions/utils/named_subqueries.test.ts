@@ -14,7 +14,7 @@ import {
   getNamedSubqueries,
   getNamedSubqueriesAvailableTo,
   getNextNamedSubqueryName,
-  resolveNamedSubquerySources,
+  getUsedNamedSubqueries,
 } from './named_subqueries';
 
 const parse = (query: string): ESQLAstQueryExpression => Parser.parse(query).root;
@@ -89,24 +89,48 @@ describe('getNamedSubqueriesAvailableTo', () => {
   });
 });
 
-describe('resolveNamedSubquerySources', () => {
-  it('resolves chained bindings and nested FROM subqueries to index sources', () => {
-    const root = parse(
-      'LET base = (FROM (FROM logs-*)); LET selected = (FROM base); FROM selected'
-    );
-    const sources = resolveNamedSubquerySources(root.commands[0], getNamedSubqueries(root.header));
+describe('getUsedNamedSubqueries', () => {
+  const getUsedNames = (query: string) => {
+    const root = parse(query);
+    const used = getUsedNamedSubqueries(root.commands, getNamedSubqueries(root.header));
 
-    expect(sources.map(({ name }) => name)).toEqual(['logs-*']);
+    return [...used].map(({ name }) => name).sort();
+  };
+
+  it('returns the bindings referenced by the main query and, through them, by other bindings', () => {
+    expect(
+      getUsedNames('LET first = (FROM logs-*); LET second = (FROM first); FROM second')
+    ).toEqual(['first', 'second']);
   });
 
-  it('resolves shared dependencies without duplicate index sources', () => {
-    const root = parse(
-      'LET base = (FROM logs-*, remote:logs-*); LET first = (FROM base, base); LET second = (FROM first, base); FROM first, (FROM second), logs-*'
-    );
-    const namedSubqueries = getNamedSubqueries(root.header);
-    const sources = resolveNamedSubquerySources(root.commands[0], namedSubqueries);
+  it('finds shared dependencies across multiple declaration levels', () => {
+    expect(
+      getUsedNames(
+        'LET base = (FROM logs-*); LET first = (FROM base); LET second = (FROM base); LET selected = (FROM first, second); FROM selected'
+      )
+    ).toEqual(['base', 'first', 'second', 'selected']);
+  });
 
-    expect(sources.map(({ name }) => name)).toEqual(['logs-*', 'remote:logs-*']);
-    expect(resolveNamedSubquerySources(root.commands[0], namedSubqueries)).toEqual(sources);
+  it('finds references in FROM and IN subqueries', () => {
+    expect(
+      getUsedNames(
+        'LET first = (FROM logs-*); LET second = (FROM logs-*); FROM (FROM first) | WHERE x IN (FROM second | KEEP x)'
+      )
+    ).toEqual(['first', 'second']);
+  });
+
+  it.each([
+    'LET selected = (FROM logs-*); TS selected',
+    'LET selected = (FROM logs-*); FROM index | LOOKUP JOIN selected ON keywordField',
+  ])('does not treat unsupported source references as dependencies: %s', (query) => {
+    expect(getUsedNames(query)).toEqual([]);
+  });
+
+  it('ignores unused bindings and references to later bindings', () => {
+    expect(
+      getUsedNames(
+        'LET first = (FROM second); LET second = (FROM logs-*); LET unused = (FROM logs-*); FROM first'
+      )
+    ).toEqual(['first']);
   });
 });
