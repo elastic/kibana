@@ -59,6 +59,7 @@ export class EuiComboBoxTestHarness {
     // `within(container).queryByRole('combobox')` won't find "self", only descendants.
     if (container.getAttribute('role') === 'combobox') return container;
 
+    // Try within container first
     // EuiComboBox renders `role="combobox"` and `aria-expanded` on the input it tags as `comboBoxSearchInput`,
     // so resolve that element directly if possible
     const searchInput = container.querySelector<HTMLElement>(
@@ -66,7 +67,6 @@ export class EuiComboBoxTestHarness {
     );
     if (searchInput) return searchInput;
 
-    // Try within container first
     const inputWithin = within(container).queryByRole('combobox');
     if (inputWithin) return inputWithin;
 
