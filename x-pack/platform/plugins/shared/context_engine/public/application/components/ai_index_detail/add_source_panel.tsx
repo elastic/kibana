@@ -18,6 +18,7 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { type ReactNode } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
+
 interface AddSourcePanelProps {
   title: ReactNode;
   pendingCount: number;

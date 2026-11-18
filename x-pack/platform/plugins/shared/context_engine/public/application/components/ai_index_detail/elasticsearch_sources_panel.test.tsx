@@ -54,9 +54,7 @@ const renderPanel = (ui: React.ReactElement) =>
     </I18nProvider>
   );
 
-const savedSources: SelectedSource[] = [
-  { type: 'esql', id: 'FROM logs-*', label: 'FROM logs-*', value: 'FROM logs-*' },
-];
+const savedSources: SelectedSource[] = [{ type: 'esql', value: 'FROM logs-*' }];
 
 describe('ElasticsearchSourcesPanel', () => {
   afterEach(() => {

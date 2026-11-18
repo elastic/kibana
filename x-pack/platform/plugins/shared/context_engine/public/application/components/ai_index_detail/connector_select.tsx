@@ -20,12 +20,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { useDataConnectors } from '../../hooks/use_data_connectors';
-import { AddSourceCard } from '../ai_index_detail/add_source_card';
-import { SelectableConnectorCard } from '../ai_index_detail/connector_card';
-import { AiIndexDetailPanelEmptyState } from '../ai_index_detail/ai_index_detail_panel_empty_prompt';
-import { getSourceDisplay } from '../source_display';
+import { AddSourceCard } from './add_source_card';
+import { SelectableConnectorCard } from './connector_card';
+import { AiIndexDetailPanelEmptyState } from './ai_index_detail_panel_empty_prompt';
+import { getSourceDisplay } from './source_display';
 
-interface ConnectorsTabProps {
+interface ConnectorSelectProps {
   selectedConnectorIds: string[];
   savedConnectorIds: string[];
   onToggle: (params: { id: string; name: string; checked: boolean }) => void;
@@ -35,7 +35,7 @@ interface ConnectorsTabProps {
   disabled?: boolean;
 }
 
-export const ConnectorsTab = ({
+export const ConnectorSelect = ({
   selectedConnectorIds,
   savedConnectorIds,
   onToggle,
@@ -43,7 +43,7 @@ export const ConnectorsTab = ({
   onOpenCreateConnector,
   canCreateConnector,
   canReadConnectors,
-}: ConnectorsTabProps) => {
+}: ConnectorSelectProps) => {
   const {
     connectors,
     connectorNameById,
@@ -200,17 +200,10 @@ export const ConnectorsTab = ({
             iconType="plugs"
             dataTestSubj="contextConnectorsEmpty"
             message={
-              canCreateConnector ? (
-                <FormattedMessage
-                  id="xpack.contextEngine.sourcePicker.connectors.emptyBody"
-                  defaultMessage="No connectors yet. Create one to use it as a source."
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.contextEngine.sourcePicker.connectors.emptyBodyNoAccess"
-                  defaultMessage="No connectors yet. Ask your administrator to create one."
-                />
-              )
+              <FormattedMessage
+                id="xpack.contextEngine.sourcePicker.connectors.emptyBodyNoAccess"
+                defaultMessage="No connectors yet. Ask your administrator to create one."
+              />
             }
           />
         </>

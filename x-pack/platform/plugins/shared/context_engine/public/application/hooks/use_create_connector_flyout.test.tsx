@@ -14,7 +14,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { CreateConnectorFlyoutProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/create_connector_flyout';
-import { act, render, renderHook, screen } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import React from 'react';
 import { contextEngineQueryKeys } from './query_keys';
 import { useCreateConnectorFlyout } from './use_create_connector_flyout';
@@ -159,29 +159,21 @@ describe('useCreateConnectorFlyout', () => {
     expect(result.current.createConnectorFlyout).toBeNull();
   });
 
-  it('hides the create button without create and read capabilities', () => {
+  it('exposes the create and read capabilities', () => {
     const { result: cannotCreate } = renderUseCreateConnectorFlyout(
       jest.fn(),
       createServices({ canSave: false })
     );
-    expect(cannotCreate.current.createConnectorButton).toBeNull();
+    expect(cannotCreate.current.canCreateConnector).toBe(false);
 
     const { result: cannotRead } = renderUseCreateConnectorFlyout(
       jest.fn(),
       createServices({ canShow: false })
     );
-    expect(cannotRead.current.createConnectorButton).toBeNull();
-  });
+    expect(cannotRead.current.canReadConnectors).toBe(false);
 
-  it('renders the create button when the user can create and read connectors', () => {
-    const { result } = renderUseCreateConnectorFlyout();
-
-    render(
-      <EuiProvider>
-        <I18nProvider>{result.current.createConnectorButton}</I18nProvider>
-      </EuiProvider>
-    );
-
-    expect(screen.getByTestId('contextCreateConnectorButton')).toBeInTheDocument();
+    const { result: canDoBoth } = renderUseCreateConnectorFlyout();
+    expect(canDoBoth.current.canCreateConnector).toBe(true);
+    expect(canDoBoth.current.canReadConnectors).toBe(true);
   });
 });

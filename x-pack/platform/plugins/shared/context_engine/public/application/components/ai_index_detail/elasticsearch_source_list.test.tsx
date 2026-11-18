@@ -9,7 +9,7 @@ import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import React from 'react';
-import type { SelectedSource } from '../source_picker';
+import type { SelectedSource } from './types';
 import { ElasticsearchSourceList } from './elasticsearch_source_list';
 
 const renderList = (ui: React.ReactElement) =>
@@ -20,8 +20,8 @@ const renderList = (ui: React.ReactElement) =>
   );
 
 const esqlSources: SelectedSource[] = [
-  { type: 'esql', id: 'FROM a', label: 'FROM a', value: 'FROM a' },
-  { type: 'esql', id: 'FROM b', label: 'FROM b', value: 'FROM b' },
+  { type: 'esql', value: 'FROM a' },
+  { type: 'esql', value: 'FROM b' },
 ];
 
 describe('ElasticsearchSourceList', () => {
@@ -33,14 +33,13 @@ describe('ElasticsearchSourceList', () => {
     expect(screen.getByText('No Elasticsearch data sources.')).toBeInTheDocument();
   });
 
-  it('returns nothing when empty and emptyMessage is undefined', () => {
-    const { container } = renderList(<ElasticsearchSourceList sources={[]} />);
-
-    expect(container).toBeEmptyDOMElement();
-  });
-
   it('renders the ES|QL query in a code element', () => {
-    renderList(<ElasticsearchSourceList sources={esqlSources} />);
+    renderList(
+      <ElasticsearchSourceList
+        sources={esqlSources}
+        emptyMessage="No Elasticsearch data sources."
+      />
+    );
 
     const row = screen.getByTestId('contextSelectedSource-esql-0');
     const code = row.querySelector('code');
@@ -50,7 +49,13 @@ describe('ElasticsearchSourceList', () => {
 
   it('calls onRemove when the remove button is clicked', () => {
     const onRemove = jest.fn();
-    renderList(<ElasticsearchSourceList sources={esqlSources} onRemove={onRemove} />);
+    renderList(
+      <ElasticsearchSourceList
+        sources={esqlSources}
+        onRemove={onRemove}
+        emptyMessage="No Elasticsearch data sources."
+      />
+    );
 
     const row = screen.getByTestId('contextSelectedSource-esql-0');
     fireEvent.click(within(row).getByTestId('contextRemoveSourceButton'));
@@ -59,13 +64,25 @@ describe('ElasticsearchSourceList', () => {
   });
 
   it('disables the remove button when disabled is true', () => {
-    renderList(<ElasticsearchSourceList sources={esqlSources} onRemove={jest.fn()} disabled />);
+    renderList(
+      <ElasticsearchSourceList
+        sources={esqlSources}
+        onRemove={jest.fn()}
+        disabled
+        emptyMessage="No Elasticsearch data sources."
+      />
+    );
 
     expect(screen.getAllByTestId('contextRemoveSourceButton')[0]).toBeDisabled();
   });
 
   it('omits remove buttons when onRemove is undefined', () => {
-    renderList(<ElasticsearchSourceList sources={esqlSources} />);
+    renderList(
+      <ElasticsearchSourceList
+        sources={esqlSources}
+        emptyMessage="No Elasticsearch data sources."
+      />
+    );
 
     expect(screen.queryByTestId('contextRemoveSourceButton')).not.toBeInTheDocument();
   });

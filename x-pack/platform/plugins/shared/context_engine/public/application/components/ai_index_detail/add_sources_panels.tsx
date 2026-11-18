@@ -9,14 +9,15 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useCreateConnectorFlyout } from '../../hooks/use_create_connector_flyout';
-import { createIndexEsqlQuery, hasSelectedEsqlQuery } from '../../utils/sources';
-import { ConnectorsTab } from '../source_picker/connectors_tab';
+import { createIndexEsqlQuery, hasSelectedEsqlQuery, toEsqlSource } from '../../utils/sources';
+import { ConnectorSelect } from './connector_select';
 import {
   ElasticsearchSourcesPanel,
   type ElasticsearchSourceMode,
-} from '../source_picker/elasticsearch_sources_panel';
-import type { SelectedSource } from '../source_picker';
+} from './elasticsearch_sources_panel';
+import type { SelectedSource } from './types';
 import { AddSourcePanel } from './add_source_panel';
+import { ADD_CONNECTORS_TITLE, ADD_ELASTICSEARCH_DATA_TITLE } from './sources_panel_copy';
 
 interface AddPanelProps {
   savedSources: SelectedSource[];
@@ -24,6 +25,16 @@ interface AddPanelProps {
   onClose: () => void;
   isSaving: boolean;
 }
+
+const toggleChecked = <T,>(
+  current: T[],
+  isMatch: (item: T) => boolean,
+  checked: boolean,
+  nextItem: T
+): T[] => {
+  const others = current.filter((item) => !isMatch(item));
+  return checked ? [...others, nextItem] : others;
+};
 
 export const AddElasticsearchDataPanel = ({
   savedSources,
@@ -44,7 +55,7 @@ export const AddElasticsearchDataPanel = ({
     if (!query || hasSelectedEsqlQuery(savedSources, query)) {
       return [];
     }
-    return [{ type: 'esql', id: query, label: query, value: query }];
+    return [toEsqlSource(query)];
   }, [esqlQuery, savedSources]);
 
   const indexSources = useMemo<SelectedSource[]>(
@@ -52,17 +63,16 @@ export const AddElasticsearchDataPanel = ({
       pendingIndexNames
         .map(createIndexEsqlQuery)
         .filter((query) => !hasSelectedEsqlQuery(savedSources, query))
-        .map((query) => ({ type: 'esql', id: query, label: query, value: query })),
+        .map(toEsqlSource),
     [pendingIndexNames, savedSources]
   );
 
   const sourcesToAdd = mode === 'index' ? indexSources : esqlSources;
 
   const onToggleIndex = useCallback((indexName: string, checked: boolean) => {
-    setPendingIndexNames((current) => {
-      const others = current.filter((name) => name !== indexName);
-      return checked ? [...others, indexName] : others;
-    });
+    setPendingIndexNames((current) =>
+      toggleChecked(current, (name) => name === indexName, checked, indexName)
+    );
   }, []);
 
   const confirm = useCallback(async () => {
@@ -73,12 +83,7 @@ export const AddElasticsearchDataPanel = ({
 
   return (
     <AddSourcePanel
-      title={
-        <FormattedMessage
-          id="xpack.contextEngine.aiIndexDetail.sources.addElasticsearchDataTitle"
-          defaultMessage="Add Elasticsearch data"
-        />
-      }
+      title={ADD_ELASTICSEARCH_DATA_TITLE}
       pendingCount={sourcesToAdd.length}
       onClose={onClose}
       onConfirm={confirm}
@@ -136,14 +141,13 @@ export const AddConnectorsPanel = ({ savedSources, onAdd, onClose, isSaving }: A
   );
 
   const onToggle = useCallback(
-    ({ id, name, checked }: { id: string; name: string; checked: boolean }) => {
-      setPending((current) => {
-        const others = current.filter((source) => source.id !== id);
-        if (checked) {
-          return [...others, { type: 'connector', id, label: name, value: id }];
-        }
-        return others;
-      });
+    ({ id, checked }: { id: string; name: string; checked: boolean }) => {
+      setPending((current) =>
+        toggleChecked(current, (source) => source.value === id, checked, {
+          type: 'connector',
+          value: id,
+        })
+      );
     },
     []
   );
@@ -155,24 +159,19 @@ export const AddConnectorsPanel = ({ savedSources, onAdd, onClose, isSaving }: A
   }, [onAdd, onClose, pending]);
 
   const { canCreateConnector, canReadConnectors, openCreateFlyout, createConnectorFlyout } =
-    useCreateConnectorFlyout({ onConnectorCreated: onToggle, disabled: isSaving });
+    useCreateConnectorFlyout({ onConnectorCreated: onToggle });
 
   return (
     <>
       <AddSourcePanel
-        title={
-          <FormattedMessage
-            id="xpack.contextEngine.aiIndexDetail.sources.addConnectorsTitle"
-            defaultMessage="Add connectors"
-          />
-        }
+        title={ADD_CONNECTORS_TITLE}
         pendingCount={pending.length}
         onClose={onClose}
         onConfirm={confirm}
         isSaving={isSaving}
         data-test-subj="contextAddConnectorsPanel"
       >
-        <ConnectorsTab
+        <ConnectorSelect
           selectedConnectorIds={allConnectorIds}
           savedConnectorIds={savedConnectorIds}
           onToggle={onToggle}

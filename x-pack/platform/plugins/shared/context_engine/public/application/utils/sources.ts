@@ -5,38 +5,18 @@
  * 2.0.
  */
 
-import type { AiIndexSource, AiIndexSourceType } from '../../../common/http_api/ai_indices';
-import type { SelectedSource, SourceType } from '../components/source_picker';
-
-const AI_INDEX_SOURCE_TYPE_TO_SOURCE_TYPE: Record<AiIndexSourceType, SourceType> = {
-  esql: 'esql',
-  connector: 'connector',
-};
-
-export const toSourceType = (type: AiIndexSourceType): SourceType =>
-  AI_INDEX_SOURCE_TYPE_TO_SOURCE_TYPE[type];
+import type { AiIndexSource } from '../../../common/http_api/ai_indices';
+import type { SelectedSource } from '../components/ai_index_detail/types';
 
 /** Converts the selected sources into the shape stored on the AI index. */
 export const toAiIndexSources = (selectedSources: SelectedSource[]): AiIndexSource[] =>
-  selectedSources.map((source) => {
-    switch (source.type) {
-      case 'esql':
-        return { type: 'esql', value: source.value };
-      case 'connector':
-        return { type: 'connector', value: source.value };
-      default:
-        throw new Error(`Unsupported AI index source type: ${source.type}`);
-    }
-  });
+  selectedSources.map(({ type, value }) => ({ type, value }));
 
 /** Rebuilds the selected sources from the sources stored on an AI index. */
 export const toSelectedSources = (sources: AiIndexSource[]): SelectedSource[] =>
-  sources.map((source) => ({
-    type: toSourceType(source.type),
-    id: source.value,
-    label: source.value,
-    value: source.value,
-  }));
+  sources.map(({ type, value }) => ({ type, value }));
+
+export const toEsqlSource = (query: string): SelectedSource => ({ type: 'esql', value: query });
 
 /** Builds the ES|QL query used when an index or data stream is selected as a source. */
 export const createIndexEsqlQuery = (indexName: string): string => `FROM ${indexName}`;
@@ -44,7 +24,8 @@ export const createIndexEsqlQuery = (indexName: string): string => `FROM ${index
 export const hasSelectedEsqlQuery = (
   selectedSources: SelectedSource[],
   esqlQuery: string
-): boolean => selectedSources.some((source) => source.type === 'esql' && source.id === esqlQuery);
+): boolean =>
+  selectedSources.some((source) => source.type === 'esql' && source.value === esqlQuery);
 
 /** Whether a simple index-picker source (`FROM <index>`) is already in the selection. */
 export const isIndexPickerSourceSelected = (

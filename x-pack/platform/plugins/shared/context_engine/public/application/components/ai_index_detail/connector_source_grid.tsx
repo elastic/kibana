@@ -8,8 +8,8 @@
 import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React from 'react';
-import { getSourceDisplay } from '../source_display';
-import type { SelectedSource } from '../source_picker';
+import { getSourceDisplay } from './source_display';
+import type { SelectedSource } from './types';
 import { RemovableConnectorCard } from './connector_card';
 import { SourceRemoveButton } from './source_remove_button';
 
@@ -41,7 +41,7 @@ export const ConnectorSourceGrid = ({
       });
 
       return (
-        <EuiFlexItem key={source.id}>
+        <EuiFlexItem key={source.value}>
           <RemovableConnectorCard
             icon={icon}
             name={label}

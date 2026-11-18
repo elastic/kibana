@@ -5,28 +5,22 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty } from '@elastic/eui';
 import type { ActionConnector } from '@kbn/alerts-ui-shared';
 import { ContextEngineConnectorFeatureId } from '@kbn/actions-plugin/common';
-import { getEbtProps } from '@kbn/ebt-click';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useBoolean } from '@kbn/react-hooks';
 import { useQueryClient } from '@kbn/react-query';
 import { noop } from 'lodash';
-import React, { useCallback, useMemo } from 'react';
-import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
+import { useCallback, useMemo } from 'react';
 import { contextEngineQueryKeys } from './query_keys';
 import { useCanReadConnectors } from './use_can_read_connectors';
 import { useKibana } from './use_kibana';
 
 interface UseCreateConnectorFlyoutParams {
   onConnectorCreated: (params: { id: string; name: string; checked: boolean }) => void;
-  disabled?: boolean;
 }
 
 export const useCreateConnectorFlyout = ({
   onConnectorCreated,
-  disabled = false,
 }: UseCreateConnectorFlyoutParams) => {
   const [isCreateFlyoutOpen, { on: openCreateFlyout, off: closeCreateFlyout }] = useBoolean(false);
   const queryClient = useQueryClient();

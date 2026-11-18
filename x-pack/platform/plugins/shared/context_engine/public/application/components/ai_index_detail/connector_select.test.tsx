@@ -13,7 +13,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { ConnectorsTab } from './connectors_tab';
+import { ConnectorSelect } from './connector_select';
 import {
   createConnectorHttpGetMock,
   MOCK_RAW_CONNECTORS,
@@ -21,7 +21,7 @@ import {
   expectConnectorQueriesLoaded,
 } from './connector_test_helpers';
 
-interface RenderConnectorsTabOptions {
+interface RenderConnectorSelectOptions {
   selectedConnectorIds?: string[];
   savedConnectorIds?: string[];
   onToggle?: jest.Mock;
@@ -33,7 +33,7 @@ interface RenderConnectorsTabOptions {
   typesResponse?: typeof MOCK_SUPPORTED_CONNECTOR_TYPES | Error;
 }
 
-const renderConnectorsTab = ({
+const renderConnectorSelect = ({
   selectedConnectorIds = [],
   savedConnectorIds = [],
   onToggle = jest.fn(),
@@ -43,7 +43,7 @@ const renderConnectorsTab = ({
   disabled = false,
   connectorsResponse = MOCK_RAW_CONNECTORS,
   typesResponse = MOCK_SUPPORTED_CONNECTOR_TYPES,
-}: RenderConnectorsTabOptions = {}) => {
+}: RenderConnectorSelectOptions = {}) => {
   const coreStart = coreMock.createStart();
 
   (coreStart.http.get as jest.Mock).mockImplementation(
@@ -61,7 +61,7 @@ const renderConnectorsTab = ({
           services={{ ...coreStart, triggersActionsUi: triggersActionsUiMock.createStart() }}
         >
           <QueryClientProvider client={queryClient}>
-            <ConnectorsTab
+            <ConnectorSelect
               selectedConnectorIds={selectedConnectorIds}
               savedConnectorIds={savedConnectorIds}
               onToggle={onToggle}
@@ -86,13 +86,13 @@ const toggleConnectorCard = (connectorId: string) => {
   fireEvent.click(getConnectorCheckbox(connectorId));
 };
 
-describe('ConnectorsTab', () => {
+describe('ConnectorSelect', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
 
   it('requests connector types and connectors on mount when the user can read connectors', async () => {
-    const { services, queryClient } = renderConnectorsTab();
+    const { services, queryClient } = renderConnectorSelect();
 
     expect(screen.getByTestId('contextConnectorsTab')).toBeInTheDocument();
     expect(screen.getByTestId('contextConnectorsLoading')).toBeInTheDocument();
@@ -111,7 +111,7 @@ describe('ConnectorsTab', () => {
   });
 
   it('shows a privilege callout and does not request connectors when the user cannot read connectors', () => {
-    const { services } = renderConnectorsTab({
+    const { services } = renderConnectorSelect({
       canReadConnectors: false,
       canCreateConnector: false,
     });
@@ -126,7 +126,7 @@ describe('ConnectorsTab', () => {
   });
 
   it('renders error prompt when loading failed', async () => {
-    renderConnectorsTab({ connectorsResponse: new Error('Network error') });
+    renderConnectorSelect({ connectorsResponse: new Error('Network error') });
 
     expect(await screen.findByTestId('contextConnectorsError')).toBeInTheDocument();
     expect(screen.getByText('Unable to load connectors')).toBeInTheDocument();
@@ -134,7 +134,7 @@ describe('ConnectorsTab', () => {
   });
 
   it('renders the create connector card when there are no connectors and the user can create', async () => {
-    const { queryClient } = renderConnectorsTab({ connectorsResponse: [] });
+    const { queryClient } = renderConnectorSelect({ connectorsResponse: [] });
 
     await waitFor(() => expectConnectorQueriesLoaded(queryClient));
 
@@ -143,7 +143,7 @@ describe('ConnectorsTab', () => {
   });
 
   it('renders empty prompt when there are no connectors and the user cannot create', async () => {
-    const { queryClient } = renderConnectorsTab({
+    const { queryClient } = renderConnectorSelect({
       connectorsResponse: [],
       canCreateConnector: false,
     });
@@ -155,7 +155,7 @@ describe('ConnectorsTab', () => {
   });
 
   it('shows admin-contact copy in the empty state when the user cannot create connectors', async () => {
-    const { queryClient } = renderConnectorsTab({
+    const { queryClient } = renderConnectorSelect({
       connectorsResponse: [],
       canCreateConnector: false,
     });
@@ -171,7 +171,7 @@ describe('ConnectorsTab', () => {
   });
 
   it('lists one card per available connector', async () => {
-    const { queryClient } = renderConnectorsTab();
+    const { queryClient } = renderConnectorSelect();
 
     await waitFor(() => expectConnectorQueriesLoaded(queryClient));
 
@@ -181,7 +181,7 @@ describe('ConnectorsTab', () => {
   });
 
   it('omits saved connectors from the grid', async () => {
-    const { queryClient } = renderConnectorsTab({
+    const { queryClient } = renderConnectorSelect({
       savedConnectorIds: ['connector-gdrive', 'connector-notion'],
     });
 
@@ -193,7 +193,7 @@ describe('ConnectorsTab', () => {
   });
 
   it('reflects selected connectors in the card checkboxes', async () => {
-    const { queryClient } = renderConnectorsTab({
+    const { queryClient } = renderConnectorSelect({
       selectedConnectorIds: ['connector-gdrive', 'connector-notion'],
     });
 
@@ -205,7 +205,7 @@ describe('ConnectorsTab', () => {
   });
 
   it('calls onToggle when a connector card checkbox is toggled', async () => {
-    const { onToggle, queryClient } = renderConnectorsTab();
+    const { onToggle, queryClient } = renderConnectorSelect();
 
     await waitFor(() => expectConnectorQueriesLoaded(queryClient));
     toggleConnectorCard('connector-github');
@@ -218,7 +218,7 @@ describe('ConnectorsTab', () => {
   });
 
   it('hides the create connector card when the user cannot create connectors', async () => {
-    const { queryClient } = renderConnectorsTab({ canCreateConnector: false });
+    const { queryClient } = renderConnectorSelect({ canCreateConnector: false });
 
     await waitFor(() => expectConnectorQueriesLoaded(queryClient));
 
@@ -227,7 +227,7 @@ describe('ConnectorsTab', () => {
   });
 
   it('calls onOpenCreateConnector when the create connector card is clicked', async () => {
-    const { onOpenCreateConnector, queryClient } = renderConnectorsTab();
+    const { onOpenCreateConnector, queryClient } = renderConnectorSelect();
 
     await waitFor(() => expectConnectorQueriesLoaded(queryClient));
     fireEvent.click(screen.getByTestId('contextCreateConnectorCard'));
@@ -236,7 +236,7 @@ describe('ConnectorsTab', () => {
   });
 
   it('calls onOpenCreateConnector from the create card when there are no connectors', async () => {
-    const { onOpenCreateConnector, queryClient } = renderConnectorsTab({
+    const { onOpenCreateConnector, queryClient } = renderConnectorSelect({
       connectorsResponse: [],
     });
 
@@ -247,7 +247,7 @@ describe('ConnectorsTab', () => {
   });
 
   it('disables connector card checkboxes when disabled is true', async () => {
-    const { queryClient } = renderConnectorsTab({ disabled: true });
+    const { queryClient } = renderConnectorSelect({ disabled: true });
 
     await waitFor(() => expectConnectorQueriesLoaded(queryClient));
 

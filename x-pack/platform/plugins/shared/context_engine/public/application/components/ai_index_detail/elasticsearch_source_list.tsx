@@ -16,8 +16,8 @@ import {
 } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React, { Fragment } from 'react';
-import { getSourceDisplay } from '../source_display';
-import type { SelectedSource } from '../source_picker';
+import { getSourceDisplay } from './source_display';
+import type { SelectedSource } from './types';
 import { SourceRemoveButton } from './source_remove_button';
 
 const emptyConnectorMaps = {
@@ -30,7 +30,7 @@ interface ElasticsearchSourceListProps {
   sources: SelectedSource[];
   onRemove?: (source: SelectedSource) => void;
   disabled?: boolean;
-  emptyMessage?: ReactNode;
+  emptyMessage: ReactNode;
 }
 
 export const ElasticsearchSourceList = ({
@@ -42,9 +42,6 @@ export const ElasticsearchSourceList = ({
   const { euiTheme } = useEuiTheme();
 
   if (sources.length === 0) {
-    if (emptyMessage === undefined) {
-      return null;
-    }
     return (
       <EuiText size="xs" color="subdued">
         {emptyMessage}
@@ -58,7 +55,7 @@ export const ElasticsearchSourceList = ({
         const display = getSourceDisplay('esql', source.value, emptyConnectorMaps);
 
         return (
-          <Fragment key={source.id}>
+          <Fragment key={source.value}>
             {index > 0 ? <EuiHorizontalRule margin="none" /> : null}
             <EuiFlexGroup
               alignItems="center"

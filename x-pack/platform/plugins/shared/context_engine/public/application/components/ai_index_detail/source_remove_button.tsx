@@ -10,7 +10,7 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
-import type { SourceType } from '../source_picker';
+import type { SourceType } from './types';
 
 interface SourceRemoveButtonProps {
   label: string;

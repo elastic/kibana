@@ -9,9 +9,9 @@ import { EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
 import React from 'react';
-import { ConnectorTypeIcon } from './connector_type_icon';
-import { ITEM_ROW_ICON_SIZE, ItemRowIcon } from './item_row_icon';
-import type { SourceType } from './source_picker';
+import { ConnectorTypeIcon } from '../connector_type_icon';
+import { ITEM_ROW_ICON_SIZE, ItemRowIcon } from '../item_row_icon';
+import type { SourceType } from './types';
 
 export interface SourceDisplay {
   /** Pre-rendered icon for the source. */

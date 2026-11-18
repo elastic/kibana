@@ -9,10 +9,10 @@ import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import type { SelectedSource } from '../source_picker';
+import type { SelectedSource } from './types';
 import { AddConnectorsPanel, AddElasticsearchDataPanel } from './add_sources_panels';
 
-jest.mock('../source_picker/elasticsearch_sources_panel', () => ({
+jest.mock('./elasticsearch_sources_panel', () => ({
   ElasticsearchSourcesPanel: ({
     pendingIndexNames,
     onToggleIndex,
@@ -55,8 +55,8 @@ jest.mock('../source_picker/elasticsearch_sources_panel', () => ({
   ),
 }));
 
-jest.mock('../source_picker/connectors_tab', () => ({
-  ConnectorsTab: ({
+jest.mock('./connector_select', () => ({
+  ConnectorSelect: ({
     onToggle,
   }: {
     onToggle: (params: { id: string; name: string; checked: boolean }) => void;
@@ -91,7 +91,6 @@ const mockUseCreateConnectorFlyout = jest.fn(() => ({
   canCreateConnector: false,
   canReadConnectors: true,
   openCreateFlyout: jest.fn(),
-  createConnectorButton: null,
   createConnectorFlyout: null,
 }));
 
@@ -108,15 +107,11 @@ const renderWithProviders = (ui: React.ReactElement) =>
 
 const esqlSelectedSource = (value: string): SelectedSource => ({
   type: 'esql',
-  id: value,
-  label: value,
   value,
 });
 
-const connectorSource = (id: string, name: string): SelectedSource => ({
+const connectorSource = (id: string): SelectedSource => ({
   type: 'connector',
-  id,
-  label: name,
   value: id,
 });
 
@@ -254,8 +249,8 @@ describe('AddConnectorsPanel', () => {
 
     await waitFor(() => {
       expect(onAdd).toHaveBeenCalledWith([
-        connectorSource('connector-github', 'GitHub'),
-        connectorSource('connector-gdrive', 'Google Drive'),
+        connectorSource('connector-github'),
+        connectorSource('connector-gdrive'),
       ]);
     });
     expect(onClose).toHaveBeenCalledTimes(1);

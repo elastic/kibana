@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import type { SelectedSource } from '../components/source_picker';
+import type { SelectedSource } from '../components/ai_index_detail/types';
 import {
   createIndexEsqlQuery,
   hasSelectedEsqlQuery,
   isIndexPickerSourceSelected,
   toAiIndexSources,
+  toEsqlSource,
   toSelectedSources,
-  toSourceType,
 } from './sources';
 
 describe('sources utils', () => {
   describe('toAiIndexSources', () => {
     it('maps ES|QL and connector selections to stored sources', () => {
       const selected: SelectedSource[] = [
-        { type: 'esql', id: 'FROM logs-*', label: 'FROM logs-*', value: 'FROM logs-*' },
-        { type: 'connector', id: 'connector-1', label: 'Jira Cloud', value: 'connector-1' },
+        { type: 'esql', value: 'FROM logs-*' },
+        { type: 'connector', value: 'connector-1' },
       ];
 
       expect(toAiIndexSources(selected)).toEqual([
@@ -31,23 +31,22 @@ describe('sources utils', () => {
   });
 
   describe('toSelectedSources', () => {
-    it('restores connector sources with the id as a placeholder label', () => {
+    it('rebuilds selected sources from stored AI index sources', () => {
       expect(
         toSelectedSources([
           { type: 'esql', value: 'FROM logs-*' },
           { type: 'connector', value: 'connector-1' },
         ])
       ).toEqual([
-        { type: 'esql', id: 'FROM logs-*', label: 'FROM logs-*', value: 'FROM logs-*' },
-        { type: 'connector', id: 'connector-1', label: 'connector-1', value: 'connector-1' },
+        { type: 'esql', value: 'FROM logs-*' },
+        { type: 'connector', value: 'connector-1' },
       ]);
     });
   });
 
-  describe('toSourceType', () => {
-    it('maps stored source types to UI source types', () => {
-      expect(toSourceType('esql')).toBe('esql');
-      expect(toSourceType('connector')).toBe('connector');
+  describe('toEsqlSource', () => {
+    it('builds an ES|QL selected source from a query string', () => {
+      expect(toEsqlSource('FROM logs-*')).toEqual({ type: 'esql', value: 'FROM logs-*' });
     });
   });
 
@@ -59,9 +58,7 @@ describe('sources utils', () => {
   });
 
   describe('hasSelectedEsqlQuery', () => {
-    const selected: SelectedSource[] = [
-      { type: 'esql', id: 'FROM logs-*', label: 'FROM logs-*', value: 'FROM logs-*' },
-    ];
+    const selected: SelectedSource[] = [{ type: 'esql', value: 'FROM logs-*' }];
 
     it('returns true when the exact ES|QL query is already selected', () => {
       expect(hasSelectedEsqlQuery(selected, 'FROM logs-*')).toBe(true);
@@ -74,21 +71,12 @@ describe('sources utils', () => {
 
   describe('isIndexPickerSourceSelected', () => {
     it('returns true for an index that has a simple FROM source', () => {
-      const selected: SelectedSource[] = [
-        { type: 'esql', id: 'FROM logs-*', label: 'FROM logs-*', value: 'FROM logs-*' },
-      ];
+      const selected: SelectedSource[] = [{ type: 'esql', value: 'FROM logs-*' }];
       expect(isIndexPickerSourceSelected(selected, 'logs-*')).toBe(true);
     });
 
     it('returns false when only a custom ES|QL query is selected', () => {
-      const selected: SelectedSource[] = [
-        {
-          type: 'esql',
-          id: 'FROM logs-* | LIMIT 10',
-          label: 'FROM logs-* | LIMIT 10',
-          value: 'FROM logs-* | LIMIT 10',
-        },
-      ];
+      const selected: SelectedSource[] = [{ type: 'esql', value: 'FROM logs-* | LIMIT 10' }];
       expect(isIndexPickerSourceSelected(selected, 'logs-*')).toBe(false);
     });
   });

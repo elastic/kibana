@@ -12,19 +12,14 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import React from 'react';
-import type { SelectedSource } from '../source_picker';
+import type { SelectedSource } from './types';
 import { ConnectorSourceGrid } from './connector_source_grid';
 
 const CONNECTOR_ID = 'connector-gdrive';
 
 const connectorSources: SelectedSource[] = [
-  { type: 'connector', id: CONNECTOR_ID, label: CONNECTOR_ID, value: CONNECTOR_ID },
-  {
-    type: 'connector',
-    id: 'connector-github',
-    label: 'connector-github',
-    value: 'connector-github',
-  },
+  { type: 'connector', value: CONNECTOR_ID },
+  { type: 'connector', value: 'connector-github' },
 ];
 
 const connectorNameById = new Map([

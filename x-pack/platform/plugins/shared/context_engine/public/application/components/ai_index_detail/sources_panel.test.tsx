@@ -16,10 +16,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
-import {
-  createConnectorHttpGetMock,
-  expectConnectorQueriesLoaded,
-} from '../source_picker/connector_test_helpers';
+import { createConnectorHttpGetMock, expectConnectorQueriesLoaded } from './connector_test_helpers';
 import { SourcesPanel } from './sources_panel';
 
 jest.mock('@kbn/esql/public', () => ({
@@ -156,10 +153,11 @@ describe('SourcesPanel', () => {
     expect(screen.getByTestId('contextElasticsearchDataPanel')).toBeInTheDocument();
     expect(screen.getByTestId('contextConnectorsPanel')).toBeInTheDocument();
     expect(screen.getByText('No Elasticsearch data sources.')).toBeInTheDocument();
+    expect(screen.getByText('No connectors.')).toBeInTheDocument();
     expect(screen.getByTestId('contextAddElasticsearchDataCard')).toBeInTheDocument();
     expect(screen.getByTestId('contextAddConnectorsCard')).toBeInTheDocument();
     expect(
-      screen.getByText('Context reads these sources to write knowledge documents.')
+      screen.getByText(/Context reads these sources to write knowledge documents/)
     ).toBeInTheDocument();
   });
 
