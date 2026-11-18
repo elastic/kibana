@@ -391,25 +391,28 @@ export const getSession = async (
     response.hits.hits.flatMap(({ fields }) => (fields ? [fields] : []));
   const events = fieldsOf(eventsResponse);
   const timelineTruncated = totalHitsOf(eventsResponse.hits.total) > events.length;
-  const allRequestEvents = fieldsOf(requestsResponse);
-  // A cut-off timeline has visits up to its last event only: a request after it would fall back
-  // to the last visit, and show on a page it was not made from.
-  const lastEventMs = events.length > 0 ? timestampMsOf(events[events.length - 1]) : null;
-  const requestEvents =
-    timelineTruncated && lastEventMs !== null
-      ? allRequestEvents.filter((event) => (timestampMsOf(event) ?? 0) <= lastEventMs)
-      : allRequestEvents;
+  const requestEvents = fieldsOf(requestsResponse);
   const sessionStartMs = sessionStartOf(startMs, events);
-  const latestRequestMs = Math.max(
-    ...requestEvents.map((event) => timestampMsOf(event) ?? -Infinity)
-  );
+  // A cut-off timeline ends where its last event does: a newer request record is no sign that
+  // the last visit lasted until then.
+  const latestRequestMs = timelineTruncated
+    ? NaN
+    : Math.max(...requestEvents.map((event) => timestampMsOf(event) ?? -Infinity));
   const pageVisits = buildPageVisits(
     events,
     sessionStartMs,
     session.endTime,
     Number.isFinite(latestRequestMs) ? new Date(latestRequestMs).toISOString() : undefined
   );
-  const { requests, loads } = buildRequests(requestEvents, pageVisits);
+  const { requests: placedRequests, loads } = buildRequests(requestEvents, pageVisits);
+  // The requests that started after a cut-off timeline's last event would fall back to its last
+  // visit, and show on a page they were not made from. Judged by when they started, not when they
+  // were reported: a page load's timings are reported after it, and belong to the visit.
+  const lastEventMs = events.length > 0 ? timestampMsOf(events[events.length - 1]) : null;
+  const requests =
+    timelineTruncated && lastEventMs !== null
+      ? placedRequests.filter(({ startTime }) => Date.parse(startTime) <= lastEventMs)
+      : placedRequests;
 
   return {
     session,
@@ -417,6 +420,6 @@ export const getSession = async (
     timelineTruncated,
     pageVisits: pageVisits.map((visit, index) => ({ ...visit, load: loads.get(index) ?? null })),
     requests,
-    requestsTruncated: totalHitsOf(requestsResponse.hits.total) > allRequestEvents.length,
+    requestsTruncated: totalHitsOf(requestsResponse.hits.total) > requestEvents.length,
   };
 };

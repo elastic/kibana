@@ -451,6 +451,33 @@ describe('getSession', () => {
       expect(urlsOf(await run(SESSION_TIMELINE_SIZE + 1))).toEqual([]);
     });
 
+    it('keeps a request that started on a retained visit but was reported after it', async () => {
+      client.search
+        .mockResolvedValueOnce(
+          summaryResponse(sessionSource({ start_time: START, end_time: at(10_000) }))
+        )
+        .mockResolvedValueOnce(eventsResponse(events.slice(0, 5), SESSION_TIMELINE_SIZE + 1))
+        .mockResolvedValueOnce(
+          eventsResponse([
+            {
+              '@timestamp': [at(8_000)],
+              event_name: ['browser.navigation_timing'],
+              'attributes.url.full': ['https://shop.example.com/?ref=ad'],
+              'attributes.browser.resource_timing.fetch_start': [2],
+              'attributes.browser.resource_timing.response_end': [300],
+              'attributes.browser.navigation_timing.load_event_end': [8_000],
+            },
+          ])
+        );
+
+      const detail = await getSession(client, { serviceName: 'web', sessionId: 'abc' });
+
+      expect(detail?.requests).toEqual([
+        expect.objectContaining({ initiatorType: 'navigation', visitIndex: 0 }),
+      ]);
+      expect(detail?.pageVisits[0].load).not.toBeNull();
+    });
+
     it('keeps them when the timeline is complete', async () => {
       expect(urlsOf(await run(5))).toEqual(['https://shop.example.com/api/late']);
     });
