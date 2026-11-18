@@ -47,7 +47,13 @@ export const validateWorkflowInputs = async (
   }
   const normalizedSchema = getInputsFromDefinition(workflowExecution.workflowDefinition);
   const validator = buildFieldsZodValidator(normalizedSchema);
-  if (!normalizedSchema?.properties) {
+  const additionalProperties = normalizedSchema?.additionalProperties;
+  // A typed `additionalProperties` alone still checks undeclared inputs and the keys it requires.
+  const hasTypedAdditionalProperties =
+    typeof additionalProperties === 'object' &&
+    additionalProperties !== null &&
+    !Array.isArray(additionalProperties);
+  if (!normalizedSchema?.properties && !hasTypedAdditionalProperties) {
     return true;
   }
   const renderContext = buildInputDefaultRenderContext(workflowExecution, coreStart, dependencies);

@@ -139,6 +139,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
 
   describe('when existing non-terminal scheduled execution exists', () => {
     it('should create a SKIPPED execution and return true', async () => {
+      workflow.workflowUid = 'uid-current';
       workflow.definition = {
         name: 'Test Workflow',
         version: '1',
@@ -190,6 +191,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
               document: expect.objectContaining({
                 spaceId,
                 workflowId: workflow.id,
+                workflowUid: 'uid-current',
                 status: ExecutionStatus.SKIPPED,
                 runName: 'Test Workflow: scheduled',
                 triggeredBy: 'scheduled',
@@ -229,6 +231,48 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
           isTestRun: false,
           triggeredBy: 'scheduled',
           finishedAt: expect.any(String),
+        })
+      );
+    });
+
+    it('omits workflowUid from the SKIPPED execution when the workflow has none', async () => {
+      workflowExecutionsDataClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _source: {
+                id: 'existing-execution-id',
+                workflowId: workflow.id,
+                spaceId,
+                status: ExecutionStatus.RUNNING,
+                triggeredBy: 'scheduled',
+              },
+            },
+          ],
+          total: { value: 1, relation: 'eq' },
+        },
+      } as any);
+      workflowExecutionsDataClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ id: 'mock-id', index: '.mock' }],
+      } as any);
+
+      await checkAndSkipIfExistingScheduledExecution(
+        workflow,
+        spaceId,
+        workflowExecutionRepository,
+        stepExecutionRepository,
+        currentTaskInstance,
+        logger
+      );
+
+      expect(workflowExecutionsDataClient.bulk).toHaveBeenCalledWith(
+        expect.objectContaining({
+          items: [
+            expect.objectContaining({
+              document: expect.not.objectContaining({ workflowUid: expect.anything() }),
+            }),
+          ],
         })
       );
     });

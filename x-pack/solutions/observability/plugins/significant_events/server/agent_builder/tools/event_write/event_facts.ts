@@ -13,6 +13,7 @@ import {
   type SignificantEvent,
 } from '@kbn/significant-events-schema';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
+import { getSignalCollectedAt } from '../../../lib/significant_events/events/signal_collected_at';
 import { createBulkWriteValidationError } from '../bulk_write';
 import {
   addsNewDetectionRules,
@@ -200,10 +201,14 @@ export const computeEventFacts = ({
 
   // A closed series that reopens starts a new episode: its stored signals belong to the closed one.
   const reopens = isContinuation && !isLiveStatus(latest?.status) && isLiveStatus(candidate.status);
-  const signals =
+  const signals = (
     isContinuation && !reopens
       ? mergeSignalsLatestPerRule(currentEpisode, candidate.input.signals ?? [], timestamp)
-      : candidate.input.signals ?? [];
+      : candidate.input.signals ?? []
+  ).map((signal) => {
+    const collectedAt = getSignalCollectedAt(signal);
+    return collectedAt === signal.collected_at ? signal : { ...signal, collected_at: collectedAt };
+  });
 
   const episodeContext =
     isContinuation && !reopens

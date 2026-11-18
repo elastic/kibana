@@ -12,7 +12,7 @@ import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import { applicationSourceRt, DEFAULT_APPLICATION_SOURCE } from './utils/application_source';
 import { DigitalExperienceLayout } from './application/digital_experience_layout';
 import { useDigitalExperienceParams } from './hooks/use_digital_experience_params';
-import type { ApplicationTabId } from './pages/application_details/application_page';
+import type { ApplicationTabId } from '../common/types/applications';
 import { ApplicationPage } from './pages/application_details/application_page';
 import { ApplicationsListPage } from './pages/applications_list/applications_list_page';
 import { SessionDetailPage } from './pages/session_detail/session_detail_page';

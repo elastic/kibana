@@ -38,7 +38,7 @@ import type { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-s
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import { type ServiceStatus, type CoreStatus } from '@kbn/core-status-common';
 import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
-import { registerStatusRoute, registerPrebootStatusRoute } from './routes';
+import { registerStatusRoute, registerPrebootStatusRoute, registerReadyRoute } from './routes';
 
 import { statusConfig as config, type StatusConfigType } from './status_config';
 import type { InternalStatusServiceSetup } from './types';
@@ -82,6 +82,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
   private core$?: Observable<CoreStatus>;
   private overall$?: Observable<ServiceStatus>;
   private pluginsStatus?: PluginsStatusService;
+  #ready = false;
   private subscriptions: Subscription[] = [];
 
   constructor(private readonly coreContext: CoreContext) {
@@ -178,6 +179,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
       logger: this.logger.get('routes', 'status'),
       ...commonRouteDeps,
     });
+    registerReadyRoute({ router, isReady: () => this.#ready });
 
     return {
       core$,
@@ -200,7 +202,22 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     this.logStatusChanges();
   }
 
+  public setReady(ready: boolean) {
+    if (this.#ready === ready) {
+      return;
+    }
+
+    if (ready) {
+      this.logger.info('Kibana is ready to serve traffic');
+    } else {
+      this.logger.info('Kibana is not ready to serve traffic');
+    }
+
+    this.#ready = ready;
+  }
+
   public stop() {
+    this.#ready = false;
     this.stop$.next();
     this.stop$.complete();
 

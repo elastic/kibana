@@ -13,6 +13,9 @@ on:
   # listen for new "new failure" comment
   issue_comment:
     types: [created]
+  # the daily flaky test report files and comments with the pipeline's short-lived GitHub App
+  # token, whose bot has no repository role
+  bots: ['elastic-vault-github-plugin-prod[bot]']
 
 permissions:
   contents: read
