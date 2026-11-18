@@ -265,6 +265,35 @@ describe('generate_alerts', () => {
       );
     });
 
+    it('adds the usual count to an aggregation alert only when it is asked for, and changes nothing else', () => {
+      const withUsual = generate({
+        profile: contextProfile,
+        seed: 11,
+        params: { ...cloudParams, aggregateUsualCount: true },
+      });
+
+      expect(
+        result.alerts.every(
+          ({ _source: doc }) => !('kibana.alert.threshold_result.usual_count' in doc)
+        )
+      ).toBe(true);
+      expect(withUsual.truth).toEqual(result.truth);
+      withUsual.alerts.forEach(({ _id, _source: doc }, i) => {
+        const { 'kibana.alert.threshold_result.usual_count': usual, ...rest } = doc;
+        expect(_id).toBe(result.alerts[i]._id);
+        expect(rest).toEqual(result.alerts[i]._source);
+        if (result.truth[i].keyId.startsWith('unkeyed-')) {
+          // The count is the usual count times a factor for a true positive, and up to twice the usual count for a false positive.
+          const count = Number(doc['kibana.alert.threshold_result.count']);
+          expect(typeof usual).toBe('number');
+          expect(count / Number(usual)).toBeGreaterThanOrEqual(1);
+          expect(count / Number(usual) >= 15).toBe(result.truth[i].verdict === 'true_positive');
+        } else {
+          expect(usual).toBeUndefined();
+        }
+      });
+    });
+
     it('gives no threshold result to an alert that is not an aggregation alert', () => {
       const others = result.alerts.filter((_, i) => !result.truth[i].keyId.startsWith('unkeyed-'));
 

@@ -75,6 +75,11 @@ export interface GeneratorParams {
   falsePositiveKeyShare: number;
   unkeyedFalsePositiveShare: number;
   badVariantRate: number;
+  /**
+   * Adds `kibana.alert.threshold_result.usual_count` to an aggregation alert: the usual count of its principal. It stands for an
+   * enrichment that Alert Analysis does not compute today, and no real alert has the field. Off by default.
+   */
+  aggregateUsualCount: boolean;
   hashUpdate: { keyShare: number; laterAlertShare: number; minKeySize: number };
   default: Timing;
   entra: EntraParams;
@@ -188,6 +193,7 @@ export const DEFAULT_PARAMS: GeneratorParams = {
   falsePositiveKeyShare: 0.71,
   unkeyedFalsePositiveShare: 0.6,
   badVariantRate: 0.005,
+  aggregateUsualCount: false,
   // Harmless new hashes: software updates. A share of the signed process and library keys that are false
   // positives get a new hash at a random time of the day. Alerts after that time carry it with the chance
   // `laterAlertShare` (some hosts have not updated yet). The hash is outside the key, so the key does not change.
@@ -622,6 +628,8 @@ const baseName = (value: FieldValue | undefined): string =>
 
 /** Where a threshold rule keeps its aggregated count, as in a real alert. The reason never holds it. */
 const THRESHOLD_COUNT_FIELD = 'kibana.alert.threshold_result.count';
+/** A simulated enrichment: how many events this principal usually has in the window. Only with `aggregateUsualCount`. */
+const USUAL_COUNT_FIELD = 'kibana.alert.threshold_result.usual_count';
 
 const reasonOf = (rule: GeneratedRule, doc: AlertDoc): string => {
   const host = doc['host.name'];
@@ -900,6 +908,7 @@ const buildDay = (
       const content = {
         // The count of the threshold rule, where a real alert keeps it. The prompt of Alert Analysis does not show this field.
         [THRESHOLD_COUNT_FIELD]: observed,
+        ...(params.aggregateUsualCount ? { [USUAL_COUNT_FIELD]: baseline } : {}),
         'event.category': ['network'],
         ...(distinct ? { 'source.ip': `192.0.2.${(i % distinct) % 250}` } : {}),
         // Context fields that the prompt shows (the count in `kibana.alert.threshold_result` is not in it), by rule family. An aggregation alert has no
