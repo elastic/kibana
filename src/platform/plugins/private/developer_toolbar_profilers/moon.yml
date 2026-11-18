@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/developer-toolbar-profilers-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-core'
+  defaultOwner: '@elastic/response-ops'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/developer-toolbar-profilers-plugin'
   description: Moon project for @kbn/developer-toolbar-profilers-plugin
   channel: ''
-  owner: '@elastic/kibana-core'
+  owner: '@elastic/response-ops'
   sourceRoot: src/platform/plugins/private/developer_toolbar_profilers
 dependsOn:
   - '@kbn/core'
