@@ -123,6 +123,7 @@ export function CustomFieldsField({
                 <EuiToolTip content={removeLabel} disableScreenReaderOutput>
                   <EuiButtonIcon
                     iconType="trash"
+                    size="s"
                     color="danger"
                     aria-label={removeLabel}
                     onClick={() => onChange(value.filter((_, i) => i !== index))}

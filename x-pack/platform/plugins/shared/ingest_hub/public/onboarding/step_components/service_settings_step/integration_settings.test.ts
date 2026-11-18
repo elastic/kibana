@@ -201,7 +201,7 @@ describe('getCustomFieldsErrors', () => {
     expect(errors?.rows[2].name).toBeDefined();
   });
 
-  it('rejects a name or value longer than Fleet accepts', () => {
+  it('rejects a name or value longer than the agentless API accepts', () => {
     const long = 'a'.repeat(MAX_CUSTOM_FIELD_LENGTH + 1);
     expect(getCustomFieldsErrors([{ name: long, value: 'a' }])?.rows[0].name).toBeDefined();
     expect(getCustomFieldsErrors([{ name: 'a', value: long }])?.rows[0].value).toBeDefined();

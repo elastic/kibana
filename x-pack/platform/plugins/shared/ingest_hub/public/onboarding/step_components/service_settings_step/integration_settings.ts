@@ -154,7 +154,11 @@ export const getProxyUrlError = (proxyUrl: string): string | undefined => {
   }
 };
 
-/** The limits of Fleet's `global_data_tags`. */
+/**
+ * The limits of the agentless policy API's `global_data_tags`, which onboarding sends them to. A
+ * package policy sets no length for a value and only warns on a name past 255 characters, so these
+ * are a defensive bound rather than a Fleet-wide rule.
+ */
 export const MAX_CUSTOM_FIELDS = 100;
 export const MAX_CUSTOM_FIELD_LENGTH = 1024;
 
