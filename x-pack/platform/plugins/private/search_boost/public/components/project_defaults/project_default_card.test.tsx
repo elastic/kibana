@@ -15,13 +15,7 @@ import { ProjectDefaultCard } from './project_default_card';
 const defaultProps: ProjectDefaultCardProps = {
   type: 'indices',
   ruleName: '_default_indices',
-  profile: {
-    kind: 'managed',
-    name: 'default_indices',
-    label: 'Performant',
-    description:
-      'Consistently low average latency, scaling to high query throughput as load grows.',
-  },
+  profile: { name: '_performant_indices', is_builtin: true },
   matches: [
     { name: 'products', isHidden: false },
     { name: 'users', isHidden: false },
@@ -48,6 +42,23 @@ describe('ProjectDefaultCard', () => {
     );
   });
 
+  it('shows the name without a description for a built-in profile with no managed text', () => {
+    render(
+      <ProjectDefaultCard
+        {...defaultProps}
+        profile={{ name: '_converted_indices', is_builtin: true }}
+      />
+    );
+
+    expect(screen.getByTestId('searchBoostProjectDefaultValue-indices')).toHaveTextContent(
+      '_converted_indices'
+    );
+    expect(screen.queryByText('Using a selected custom boost profile.')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('searchBoostProjectDefaultProfileLink-indices')
+    ).not.toBeInTheDocument();
+  });
+
   it('shows Edit when canEdit is true and calls onEdit', async () => {
     const user = userEvent.setup();
     const onEdit = jest.fn();
@@ -70,7 +81,7 @@ describe('ProjectDefaultCard', () => {
     render(
       <ProjectDefaultCard
         {...defaultProps}
-        profile={{ kind: 'custom', name: 'catalog-fast' }}
+        profile={{ name: 'catalog-fast', is_builtin: false }}
         onViewProfile={onViewProfile}
       />
     );
@@ -89,7 +100,7 @@ describe('ProjectDefaultCard', () => {
     render(
       <ProjectDefaultCard
         {...defaultProps}
-        profile={{ kind: 'custom', name: 'catalog-fast' }}
+        profile={{ name: 'catalog-fast', is_builtin: false }}
         onViewProfile={undefined}
       />
     );

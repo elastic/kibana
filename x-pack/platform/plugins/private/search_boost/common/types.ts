@@ -9,18 +9,6 @@
 
 export type BoostProfileType = 'indices' | 'data_streams';
 
-export type ProjectDefaultProfile =
-  | {
-      kind: 'managed';
-      name: string;
-      label: string;
-      description: string;
-    }
-  | {
-      kind: 'custom';
-      name: string;
-    };
-
 export type BoostAvailability = 'base' | 'one_extra_copy';
 
 export interface BoostPeriod {
@@ -32,7 +20,7 @@ export interface BoostAgedPeriod extends BoostPeriod {
   max_age: string;
 }
 
-interface BoostProfileBase {
+export interface BoostProfileBase {
   name: string;
   is_builtin: boolean;
 }

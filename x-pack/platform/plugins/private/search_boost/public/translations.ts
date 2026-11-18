@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { BoostProfileType } from '../common/types';
+import type { ManagedProfileName } from '../common/managed_profiles';
+import { isManagedProfileName } from '../common/managed_profiles';
 
 export const SEARCH_BOOST_PAGE_DESCRIPTION = i18n.translate('xpack.searchBoost.page.description', {
   defaultMessage:
@@ -130,6 +132,81 @@ const EDIT_PROJECT_DEFAULT_LABELS: Readonly<Record<BoostProfileType, string>> = 
 export const getEditProjectDefaultLabel = (type: BoostProfileType): string =>
   EDIT_PROJECT_DEFAULT_LABELS[type];
 
+interface ManagedProfileMessage {
+  label: string;
+  description: string;
+}
+
+const MANAGED_PROFILE_MESSAGES: Readonly<Record<ManagedProfileName, ManagedProfileMessage>> = {
+  _on_demand_indices: {
+    label: i18n.translate('xpack.searchBoost.managedProfile.onDemandIndices.label', {
+      defaultMessage: 'On-demand',
+    }),
+    description: i18n.translate('xpack.searchBoost.managedProfile.onDemandIndices.description', {
+      defaultMessage:
+        'Lowest cost. Query latency is more variable and maximum throughput is limited, especially during spikes.',
+    }),
+  },
+  _performant_indices: {
+    label: i18n.translate('xpack.searchBoost.managedProfile.performantIndices.label', {
+      defaultMessage: 'Performant',
+    }),
+    description: i18n.translate('xpack.searchBoost.managedProfile.performantIndices.description', {
+      defaultMessage:
+        'Consistently low average latency, scaling to high query throughput as load grows.',
+    }),
+  },
+  _high_availability_indices: {
+    label: i18n.translate('xpack.searchBoost.managedProfile.highAvailabilityIndices.label', {
+      defaultMessage: 'High availability',
+    }),
+    description: i18n.translate(
+      'xpack.searchBoost.managedProfile.highAvailabilityIndices.description',
+      {
+        defaultMessage:
+          'Consistent low query latency from steady baseline to peak demand, with an extra copy of your data kept ready.',
+      }
+    ),
+  },
+  _last_1_day_data_streams: {
+    label: i18n.translate('xpack.searchBoost.managedProfile.last1DayDataStreams.label', {
+      defaultMessage: 'Last 1 day',
+    }),
+    description: i18n.translate(
+      'xpack.searchBoost.managedProfile.last1DayDataStreams.description',
+      {
+        defaultMessage: 'Only the most recent day of each data stream is kept search\u2011ready.',
+      }
+    ),
+  },
+  _last_3_days_data_streams: {
+    label: i18n.translate('xpack.searchBoost.managedProfile.last3DaysDataStreams.label', {
+      defaultMessage: 'Last 3 days',
+    }),
+    description: i18n.translate(
+      'xpack.searchBoost.managedProfile.last3DaysDataStreams.description',
+      {
+        defaultMessage: 'The most recent 3 days of each data stream are kept search\u2011ready.',
+      }
+    ),
+  },
+  _last_7_days_data_streams: {
+    label: i18n.translate('xpack.searchBoost.managedProfile.last7DaysDataStreams.label', {
+      defaultMessage: 'Last 7 days',
+    }),
+    description: i18n.translate(
+      'xpack.searchBoost.managedProfile.last7DaysDataStreams.description',
+      {
+        defaultMessage: 'The most recent week of each data stream is kept search\u2011ready.',
+      }
+    ),
+  },
+};
+
+/** Label and description of an Elastic-managed profile, or `undefined` for any other profile name. */
+export const getManagedProfileMessage = (profileName: string): ManagedProfileMessage | undefined =>
+  isManagedProfileName(profileName) ? MANAGED_PROFILE_MESSAGES[profileName] : undefined;
+
 export const CUSTOM_PROFILE_DESCRIPTION = i18n.translate(
   'xpack.searchBoost.projectDefaults.customProfile',
   {
@@ -173,8 +250,6 @@ export const formatTargetCount = (type: BoostProfileType, count: number): string
         defaultMessage: '{count, plural, one {# index} other {# indices}}',
         values: { count },
       });
-
-export const getTargetCount = formatTargetCount;
 
 export const getShowingOneLabel = (first: number, total: string): string =>
   i18n.translate('xpack.searchBoost.tableCount.showingOne', {

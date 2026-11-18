@@ -27,13 +27,7 @@ const match = (name: string, overrides: Partial<BoostRuleMatch> = {}): BoostRule
 const CARD_DATA: Readonly<Record<BoostProfileType, CardData>> = {
   indices: {
     ruleName: '_default_indices',
-    profile: {
-      kind: 'managed',
-      name: 'default_indices',
-      label: 'Performant',
-      description:
-        'Consistently low average latency, scaling to high query throughput as load grows.',
-    },
+    profile: { name: '_performant_indices', is_builtin: true },
     matches: [
       match('archive-2024', { outrankedByRuleName: 'Product catalog' }),
       match('archive-2025', { outrankedByRuleName: 'Product catalog' }),
@@ -46,12 +40,7 @@ const CARD_DATA: Readonly<Record<BoostProfileType, CardData>> = {
   },
   data_streams: {
     ruleName: '_default_data_streams',
-    profile: {
-      kind: 'managed',
-      name: 'default_data_streams_7d',
-      label: 'Last 7 days',
-      description: 'The most recent week of each data stream is kept search-ready.',
-    },
+    profile: { name: '_last_7_days_data_streams', is_builtin: true },
     matches: [
       match('logs-nginx-default', { outrankedByRuleName: 'web-logs' }),
       match('metrics-system-default'),
@@ -90,7 +79,7 @@ export const Default: Story = {};
 
 export const CustomProfile: Story = {
   args: {
-    profile: { kind: 'custom', name: 'catalog-fast' },
+    profile: { name: 'catalog-fast', is_builtin: false },
   },
 };
 

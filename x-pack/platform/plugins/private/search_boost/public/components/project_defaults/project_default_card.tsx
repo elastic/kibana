@@ -23,20 +23,17 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import type {
-  BoostProfileType,
-  BoostRuleMatch,
-  ProjectDefaultProfile,
-} from '../../../common/types';
+import type { BoostProfileBase, BoostProfileType, BoostRuleMatch } from '../../../common/types';
 import {
   CUSTOM_PROFILE_DESCRIPTION,
   EDIT_BUTTON_LABEL,
   PROFILE_TYPE_LABELS,
+  formatTargetCount,
   getDefaultRuleTip,
   getDefaultRuleTipLabel,
   getEditProjectDefaultLabel,
+  getManagedProfileMessage,
   getShowDefaultMatchesA11yLabel,
-  getTargetCount,
   getViewProfileLabel,
 } from '../../translations';
 import { MatchesPopover } from '../matches_popover/matches_popover';
@@ -51,7 +48,7 @@ const getInlineRowStyles = (gap: string) => css`
 export interface ProjectDefaultCardProps {
   type: BoostProfileType;
   ruleName: string;
-  profile: ProjectDefaultProfile;
+  profile: BoostProfileBase;
   matches: ReadonlyArray<Pick<BoostRuleMatch, 'name' | 'isHidden' | 'outrankedByRuleName'>>;
   canEdit: boolean;
   onEdit: () => void;
@@ -71,11 +68,12 @@ export const ProjectDefaultCard = ({
   const typeLabelFontSize = useEuiFontSize('s');
   const [isMatchesOpen, setIsMatchesOpen] = useState(false);
 
-  const isCustom = profile.kind === 'custom';
-  const title = isCustom ? profile.name : profile.label;
-  const description = isCustom ? CUSTOM_PROFILE_DESCRIPTION : profile.description;
+  const isCustom = !profile.is_builtin;
+  const managedMessage = isCustom ? undefined : getManagedProfileMessage(profile.name);
+  const title = managedMessage?.label ?? profile.name;
+  const description = isCustom ? CUSTOM_PROFILE_DESCRIPTION : managedMessage?.description;
   const viewProfileLabel = isCustom ? getViewProfileLabel(profile.name) : undefined;
-  const countLabel = getTargetCount(type, matches.length);
+  const countLabel = formatTargetCount(type, matches.length);
   const countTestSubj = `searchBoostProjectDefaultCount-${type}`;
 
   return (
@@ -145,10 +143,14 @@ export const ProjectDefaultCard = ({
               )}
             </p>
           </EuiTitle>
-          <EuiSpacer size="xs" />
-          <EuiText size="s" color="subdued">
-            <p>{description}</p>
-          </EuiText>
+          {description ? (
+            <>
+              <EuiSpacer size="xs" />
+              <EuiText size="s" color="subdued">
+                <p>{description}</p>
+              </EuiText>
+            </>
+          ) : null}
           <EuiSpacer size="s" />
           <div>
             {matches.length > 0 ? (

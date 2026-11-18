@@ -16,13 +16,7 @@ const defaultProps: ProjectDefaultsProps = {
   canEdit: true,
   indices: {
     ruleName: '_default_indices',
-    profile: {
-      kind: 'managed',
-      name: 'default_indices',
-      label: 'Performant',
-      description:
-        'Consistently low average latency, scaling to high query throughput as load grows.',
-    },
+    profile: { name: '_performant_indices', is_builtin: true },
     matches: [
       { name: 'products', isHidden: false },
       { name: 'users', isHidden: false },
@@ -30,12 +24,7 @@ const defaultProps: ProjectDefaultsProps = {
   },
   dataStreams: {
     ruleName: '_default_data_streams',
-    profile: {
-      kind: 'managed',
-      name: 'default_data_streams_7d',
-      label: 'Last 7 days',
-      description: 'The most recent week of each data stream is kept search-ready.',
-    },
+    profile: { name: '_last_7_days_data_streams', is_builtin: true },
     matches: [
       { name: 'logs-nginx-default', isHidden: false, outrankedByRuleName: 'web-logs' },
       { name: 'metrics-system-default', isHidden: false },
