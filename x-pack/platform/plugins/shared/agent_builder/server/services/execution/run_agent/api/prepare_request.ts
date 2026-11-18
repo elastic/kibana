@@ -12,6 +12,7 @@ import { loadApi } from './load_api';
 import type { LoadApiFailure } from './load_api';
 import { getValidator } from './validate_params';
 import type { ParamsValidationError, ParamsValidator } from './validate_params';
+import { isBodyValidationSkipped } from './unvalidated_body_apis';
 import { BODY_ROOT_KEY, isRecord } from './types';
 import type { ApiRegistryDefinition, ApiRequest } from './types';
 
@@ -84,7 +85,9 @@ export const prepareApiRequest = async ({
   if (definition.input) {
     let validate: ParamsValidator;
     try {
-      validate = await getValidator(target, definition.input);
+      validate = await getValidator(target, definition.input, {
+        skipBodyValidation: isBodyValidationSkipped(target, api),
+      });
     } catch (error) {
       return { status: 'schema_unavailable', error };
     }
