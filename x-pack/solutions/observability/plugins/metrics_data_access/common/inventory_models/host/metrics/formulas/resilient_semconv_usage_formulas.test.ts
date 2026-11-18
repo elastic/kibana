@@ -20,9 +20,9 @@ describe('host semconv usage formulas', () => {
     expect(memoryUsage.value.semconv).toBe("average(system.memory.utilization, kql='state: used')");
   });
 
-  it('uses a state-based semconv disk usage expression', () => {
-    expect(diskUsage.value.semconv).toBe(
-      "1 - sum(metrics.system.filesystem.usage, kql='state: free') / sum(metrics.system.filesystem.usage)"
-    );
+  it('uses a bounded per-mount utilization expression for the semconv disk usage KPI', () => {
+    // Must stay `max(...utilization)` rather than an un-partitioned `sum(free) / sum(all)` ratio,
+    // which blended mount points of different sizes and inflated the KPI toward 100%.
+    expect(diskUsage.value.semconv).toBe('max(metrics.system.filesystem.utilization)');
   });
 });
