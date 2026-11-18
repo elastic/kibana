@@ -227,6 +227,13 @@ describe('grounding quoted queries and attachments', () => {
     ).toEqual(['1000']);
   });
 
+  it('grounds query literals in a quoted query span, not in a bare formatted number', () => {
+    const check = (reply: string) =>
+      runReplyGates(reply, 'answer', known, { queryNumbers: queries }).metrics.ungroundedNumbers;
+    expect(check('The query ended in `LIMIT 1000`, so the list is cut short.')).toEqual([]);
+    expect(check('Checkout failed `1000` times in that hour.')).toEqual(['1000']);
+  });
+
   it('checks the numbers in an attachment the reply shows, outside the word caps', () => {
     const reply = 'Checkout failed 127 times in the window.\n<render_attachment id="t1" />';
     const gates = runReplyGates(reply, 'answer', known, {

@@ -128,14 +128,27 @@ export const toWriteupRows = (
     .sort((a, b) => a.case_id.localeCompare(b.case_id) || a.sample - b.sample);
 
 /**
- * Judge evaluations that had something to judge, and which of them came back without a score. A
- * judge that keeps failing (an outage, a quota) leaves scores missing, so the run can't pass as if
- * it had been judged.
+ * Judge calls that had something to judge, and how many of them came back without an answer. A
+ * pairwise evaluation is several votes and scores as soon as one succeeds, so its failed votes
+ * count as missing too. A judge that keeps failing (an outage, a quota) can't pass as judged.
  */
 export const judgeCoverage = (evaluationRuns: readonly EvaluationRun[]) => {
-  const applicable = evaluationRuns.filter((e) => e.kind === 'LLM' && e.result?.label !== 'n/a');
-  const missing = applicable.filter((e) => e.result?.score == null);
-  return { applicable: applicable.length, missing: missing.map((e) => e.name) };
+  let applicable = 0;
+  let missing = 0;
+  const names: string[] = [];
+  for (const e of evaluationRuns) {
+    if (e.kind !== 'LLM' || e.result?.label === 'n/a') continue;
+    const tally = e.result?.metadata as Partial<PairTally> | undefined;
+    const votes =
+      tally && typeof tally.failed === 'number'
+        ? (tally.win ?? 0) + (tally.loss ?? 0) + (tally.tie ?? 0) + tally.failed
+        : 1;
+    const failed = e.result?.score == null ? votes : tally?.failed ?? 0;
+    applicable += votes;
+    missing += failed;
+    if (failed) names.push(e.name);
+  }
+  return { applicable, missing, names };
 };
 
 /**
