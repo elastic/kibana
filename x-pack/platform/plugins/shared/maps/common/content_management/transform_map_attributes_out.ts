@@ -6,8 +6,9 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
+import type { DataViewSpec } from '@kbn/data-views-types';
 import type { TimeRange } from '@kbn/es-query';
-import type { LegacyAdhocDataView, MapAttributes, StoredMapAttributes } from '../../server';
+import type { MapAttributes, StoredMapAttributes } from '../../server';
 import { injectReferences } from '../migrations/references';
 import type { LayerDescriptor } from '../descriptor_types';
 import { mapStateKeys, uiStateKeys } from './stored_map_attributes';
@@ -46,7 +47,7 @@ function parseMapStateJSON(mapStateJSON?: string) {
     mapStateKeys
   ) as Partial<Omit<MapAttributes, 'adHocDataViews'>> & {
     refreshConfig: StoredRefreshInterval;
-    adHocDataViews?: LegacyAdhocDataView[];
+    adHocDataViews?: DataViewSpec[];
   };
   return {
     ...rest,

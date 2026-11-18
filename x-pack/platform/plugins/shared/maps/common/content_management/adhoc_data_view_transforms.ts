@@ -5,14 +5,15 @@
  * 2.0.
  */
 
+import type { DataViewSpec } from '@kbn/data-views-types';
 import type { AsCodeDataViewSpec } from '@kbn/as-code-data-views-schema';
 import { fromDataViewSpec } from '@kbn/as-code-data-views-transforms';
-import type { AdhocDataView, LegacyAdhocDataView } from '../../server';
+import type { AdhocDataView } from '../../server';
 
 /**
- * Converts a `LegacyAdhocDataView` to the as-code ad hoc data view. The `id` is retained because layers reference it.
+ * Converts a stored ad hoc data view to the as-code ad hoc data view.
  */
-export function transformAdhocDataViewOut(stored: LegacyAdhocDataView): AdhocDataView {
+export function transformAdhocDataViewOut(stored: DataViewSpec): AdhocDataView {
   if (!stored.id) throw new Error('Cannot convert ad hoc data view without `id`');
   return {
     ...(fromDataViewSpec(stored) as AsCodeDataViewSpec),

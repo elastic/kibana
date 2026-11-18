@@ -14,7 +14,6 @@ export type { StoredMapAttributes } from './saved_objects/types';
 
 export type {
   AdhocDataView,
-  LegacyAdhocDataView,
   CustomIcon,
   MapAttributes,
   MapCenter,

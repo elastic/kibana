@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { LegacyAdhocDataView } from '../../server';
 import { transformAdhocDataViewOut } from './adhoc_data_view_transforms';
 
 describe('transformAdhocDataViewOut', () => {
@@ -29,6 +28,6 @@ describe('transformAdhocDataViewOut', () => {
   });
 
   test('should throw when id is missing', () => {
-    expect(() => transformAdhocDataViewOut({ title: 'logs-*' } as LegacyAdhocDataView)).toThrow();
+    expect(() => transformAdhocDataViewOut({ title: 'logs-*' })).toThrow();
   });
 });

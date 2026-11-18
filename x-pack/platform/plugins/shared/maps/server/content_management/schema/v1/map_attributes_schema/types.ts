@@ -14,17 +14,6 @@ import type {
 import type { customIconSchema, settingsSchema } from './settings_schema';
 
 export type AdhocDataView = z.output<typeof adhocDataViewSchema>;
-/**
- * Shape of ad hoc data views in legacy saved objects (`mapStateJSON.adHocDataViews`).
- */
-export interface LegacyAdhocDataView {
-  allowHidden?: boolean;
-  id: string;
-  name?: string;
-  timeFieldName?: string;
-  /** Contrary to its name, this property sets the index pattern of the data view. */
-  title: string;
-}
 export type CustomIcon = z.output<typeof customIconSchema>;
 /**
  * Shape of map attributes in REST APIs
