@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiBadge, EuiPopover, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -15,9 +15,11 @@ import { STATS_DEFAULT_WINDOW_MINUTES } from '../../../../unit_stats/state_manag
 
 /**
  * The badge that marks a destination that is rejecting what it is sent, such as refused
- * credentials, and the popover with the failures that hover or focus opens. It tells its parent
- * when it opens and closes. A click on the badge is not handled, so it reaches the node and opens
- * its flyout, as a click anywhere on the node does.
+ * credentials, and the popover with the failures that hover or focus opens. The popover stays open
+ * while the pointer is on the badge or inside the popover, and closes when the pointer leaves both
+ * or the focus leaves the badge. It tells its parent when it opens and closes. A click on the badge
+ * is not handled, so it reaches the node and opens its flyout, as a click anywhere on the node
+ * does.
  */
 export const DestinationFailurePopover = ({
   failed,
@@ -33,6 +35,11 @@ export const DestinationFailurePopover = ({
     defaultMessage: 'Delivery failures',
   });
   const [isOpen, setIsOpen] = useState(false);
+  const badgeRef = useRef<HTMLElement | null>(null);
+  const panelRef = useRef<HTMLElement | null>(null);
+  const setPanel = useCallback((node: HTMLElement | null) => {
+    panelRef.current = node;
+  }, []);
 
   useEffect(() => {
     onOpenChange?.(isOpen);
@@ -40,6 +47,15 @@ export const DestinationFailurePopover = ({
 
   const open = useCallback(() => setIsOpen(true), []);
   const close = useCallback(() => setIsOpen(false), []);
+  // The panel touches the badge, so the pointer moves from one to the other with nothing between.
+  // It stays open while the pointer is on either, and closes when the pointer goes anywhere else.
+  const closeUnlessMovingTo = useCallback(
+    (target: EventTarget | null, inside: Array<HTMLElement | null>) => {
+      if (target instanceof Node && inside.some((element) => element?.contains(target))) return;
+      setIsOpen(false);
+    },
+    []
+  );
 
   return (
     <EuiPopover
@@ -48,10 +64,16 @@ export const DestinationFailurePopover = ({
       isOpen={isOpen}
       closePopover={close}
       anchorPosition="upCenter"
+      attachToAnchor
+      offset={0}
       panelPaddingSize="s"
       ownFocus={false}
       repositionOnScroll
-      panelProps={{ 'data-test-subj': `${dataTestSubj}Popover` }}
+      panelRef={setPanel}
+      panelProps={{
+        'data-test-subj': `${dataTestSubj}Popover`,
+        onMouseLeave: (event) => closeUnlessMovingTo(event.relatedTarget, [badgeRef.current]),
+      }}
       aria-label={label}
       // A click anywhere on the icon and its label closes the popover, and still reaches the node.
       onClick={close}
@@ -62,9 +84,15 @@ export const DestinationFailurePopover = ({
           // Focusable, as `EuiIconTip` is, so that the keyboard opens the popover too.
           tabIndex={0}
           data-test-subj={dataTestSubj}
-          onMouseEnter={open}
-          onMouseLeave={close}
-          onFocus={open}
+          onMouseEnter={(event) => {
+            badgeRef.current = event.currentTarget;
+            open();
+          }}
+          onMouseLeave={(event) => closeUnlessMovingTo(event.relatedTarget, [panelRef.current])}
+          onFocus={(event) => {
+            badgeRef.current = event.currentTarget;
+            open();
+          }}
           onBlur={close}
         >
           {i18n.translate('xpack.streams.canvas.destinationNode.failuresBadge', {

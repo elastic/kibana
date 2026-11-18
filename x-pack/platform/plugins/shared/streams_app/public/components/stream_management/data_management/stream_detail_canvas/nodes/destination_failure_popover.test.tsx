@@ -78,6 +78,50 @@ describe('DestinationFailurePopover', () => {
     await waitFor(() => expect(isShown(POPOVER)).toBe(false));
   });
 
+  it('stays open when the pointer moves from the badge onto the popover', async () => {
+    renderPopover();
+    fireEvent.mouseEnter(screen.getByTestId(ICON));
+    const popover = await screen.findByTestId(POPOVER);
+
+    fireEvent.mouseLeave(screen.getByTestId(ICON), { relatedTarget: popover });
+
+    expect(isShown(POPOVER)).toBe(true);
+  });
+
+  it('stays open while the pointer is inside the popover, and closes when it leaves it', async () => {
+    renderPopover();
+    fireEvent.mouseEnter(screen.getByTestId(ICON));
+    const popover = await screen.findByTestId(POPOVER);
+    fireEvent.mouseLeave(screen.getByTestId(ICON), { relatedTarget: popover });
+    fireEvent.mouseEnter(popover);
+
+    expect(isShown(POPOVER)).toBe(true);
+
+    fireEvent.mouseLeave(popover, { relatedTarget: document.body });
+
+    await waitFor(() => expect(isShown(POPOVER)).toBe(false));
+  });
+
+  it('stays open when the pointer moves from the popover back onto the badge', async () => {
+    renderPopover();
+    fireEvent.mouseEnter(screen.getByTestId(ICON));
+    const popover = await screen.findByTestId(POPOVER);
+
+    fireEvent.mouseLeave(popover, { relatedTarget: screen.getByTestId(ICON) });
+
+    expect(isShown(POPOVER)).toBe(true);
+  });
+
+  it('closes when the pointer leaves the badge for anywhere but the popover', async () => {
+    renderPopover();
+    fireEvent.mouseEnter(screen.getByTestId(ICON));
+    await screen.findByTestId(POPOVER);
+
+    fireEvent.mouseLeave(screen.getByTestId(ICON), { relatedTarget: document.body });
+
+    await waitFor(() => expect(isShown(POPOVER)).toBe(false));
+  });
+
   it('closes when the focus leaves', async () => {
     renderPopover();
     fireEvent.focus(screen.getByTestId(ICON));
