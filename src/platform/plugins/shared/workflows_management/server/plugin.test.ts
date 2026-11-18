@@ -18,14 +18,21 @@ jest.mock('@kbn/workflows-execution-engine/server', () => ({
   registerHitlLifecycleAuditor: jest.fn(() => jest.fn()),
 }));
 
+import { BehaviorSubject } from 'rxjs';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
 import { registerHitlLifecycleAuditor } from '@kbn/workflows-execution-engine/server';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
 
 import { WorkflowsService } from './api/workflows_management_service';
+import { workflowRunEmbeddableSchema } from './dashboard_run_panel/schema';
 import { ExecutionDataViewsBootstrap } from './execution_data_views_bootstrap';
 import { WorkflowsPlugin } from './plugin';
+import {
+  WORKFLOW_RUN_EMBEDDABLE_TYPE,
+  WORKFLOWS_DASHBOARD_RUN_PANEL_FLAG,
+} from '../common/dashboard_run_panel/constants';
 
 const MockedWorkflowsService = WorkflowsService as jest.MockedClass<typeof WorkflowsService>;
 const mockRegisterHitlLifecycleAuditor = registerHitlLifecycleAuditor as jest.MockedFunction<
@@ -67,6 +74,7 @@ describe('WorkflowsPlugin', () => {
     const coreSetup = coreMock.createSetup();
 
     plugin.setup(coreSetup, {
+      embeddable: createEmbeddableSetupMock(),
       spaces: { spacesService: { getActiveSpace: jest.fn() } } as any,
       workflowsExtensions: workflowsExtensionsMock.createSetup(),
     });
@@ -98,6 +106,7 @@ describe('WorkflowsPlugin', () => {
 
     const plugin = new WorkflowsPlugin(initializerContext);
     plugin.setup(coreMock.createSetup(), {
+      embeddable: createEmbeddableSetupMock(),
       spaces: { spacesService: { getActiveSpace: jest.fn() } } as any,
       workflowsExtensions: workflowsExtensionsMock.createSetup(),
     });
@@ -116,6 +125,51 @@ describe('WorkflowsPlugin', () => {
 
     expect(setStopping).toHaveBeenCalledWith(true);
     expect(unregisterHitlLifecycleAuditor).toHaveBeenCalled();
+  });
+
+  it('gives the Dashboards API the run panel schema only while its flag is on', () => {
+    const plugin = new WorkflowsPlugin(
+      coreMock.createPluginInitializerContext({
+        enabled: true,
+        logging: { console: false },
+        available: true,
+        library: { ttlMs: 600_000 },
+        pages: { enabled: false },
+      })
+    );
+    const embeddable = createEmbeddableSetupMock();
+    plugin.setup(coreMock.createSetup(), {
+      embeddable,
+      spaces: { spacesService: { getActiveSpace: jest.fn() } } as never,
+      workflowsExtensions: workflowsExtensionsMock.createSetup(),
+    });
+    const [, definition] =
+      jest
+        .mocked(embeddable.registerEmbeddableServerDefinition)
+        .mock.calls.find(([type]) => type === WORKFLOW_RUN_EMBEDDABLE_TYPE) ?? [];
+    const getSchema = () => definition?.getSchema?.(jest.fn());
+    expect(getSchema()).toBeUndefined();
+
+    const coreStart = coreMock.createStart();
+    const flag$ = new BehaviorSubject(true);
+    coreStart.featureFlags.getBooleanValue$.mockReturnValue(flag$);
+    plugin.start(coreStart, {
+      taskManager: {} as never,
+      workflowsExecutionEngine: {} as never,
+      actions: {} as never,
+      spaces: {} as never,
+      workflowsExtensions: workflowsExtensionsMock.createStart(),
+      licensing: {} as never,
+      dataViews: {} as never,
+    });
+
+    expect(coreStart.featureFlags.getBooleanValue$).toHaveBeenCalledWith(
+      WORKFLOWS_DASHBOARD_RUN_PANEL_FLAG,
+      false
+    );
+    expect(getSchema()).toBe(workflowRunEmbeddableSchema);
+    flag$.next(false);
+    expect(getSchema()).toBeUndefined();
   });
 
   it('bootstraps data views with internal clients scoped to the request space', async () => {
@@ -142,6 +196,7 @@ describe('WorkflowsPlugin', () => {
       .mockImplementation();
 
     plugin.setup(coreSetup, {
+      embeddable: createEmbeddableSetupMock(),
       spaces: spaces as never,
       workflowsExtensions: workflowsExtensionsMock.createSetup(),
     });
@@ -187,6 +242,7 @@ describe('WorkflowsPlugin', () => {
 
     plugin.setup(coreMock.createSetup(), {
       actions,
+      embeddable: createEmbeddableSetupMock(),
       spaces: { spacesService: { getActiveSpace: jest.fn() } } as any,
       workflowsExtensions,
     });
@@ -216,6 +272,7 @@ describe('WorkflowsPlugin', () => {
 
     plugin.setup(coreMock.createSetup(), {
       actions,
+      embeddable: createEmbeddableSetupMock(),
       spaces: { spacesService: { getActiveSpace: jest.fn() } } as any,
       workflowsExtensions,
     });

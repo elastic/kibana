@@ -12,6 +12,7 @@ export {
   type WorkflowGraphCanvasProps,
 } from './workflow_graph_canvas';
 export type { RenderStepIcon } from './workflow_graph_actions_context';
+export { getWorkflowGraphSize, type WorkflowGraphSize } from './get_workflow_graph_size';
 export { ReactFlowProvider } from '@xyflow/react';
 export {
   WorkflowDetailBottomBar,

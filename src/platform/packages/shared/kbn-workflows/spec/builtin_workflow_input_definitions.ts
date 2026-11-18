@@ -38,6 +38,18 @@ export const SECURITY_ALERT_ANALYSIS_CALLER_ALERTS_INPUT_DEFINITION_ID =
   'securityAlertAnalysisCallerAlerts' as const;
 
 /**
+ * Stable registry key for the dashboard time range a Run Workflow dashboard panel passes.
+ * Reference from workflow YAML as `$ref: '#/kibana/definitions/dashboardTimeRange'`.
+ */
+export const DASHBOARD_TIME_RANGE_INPUT_DEFINITION_ID = 'dashboardTimeRange' as const;
+
+/**
+ * Stable registry key for the dashboard query and filters a Run Workflow dashboard panel passes.
+ * Reference from workflow YAML as `$ref: '#/kibana/definitions/dashboardQuery'`.
+ */
+export const DASHBOARD_QUERY_INPUT_DEFINITION_ID = 'dashboardQuery' as const;
+
+/**
  * JSON Schema mirror of the alerting v2 action-policy dispatch payload for workflow input authoring.
  * Use as a workflow **input** when a step should receive the grouped notification context
  * (e.g. `inputs.payload` on workflows triggered by `action_policy`).
@@ -242,6 +254,83 @@ const securityAlertAnalysisCallerAlerts: JsonSchema = {
 };
 
 /**
+ * The dashboard time range when the viewer ran the workflow. `from` and `to` are absolute UTC
+ * instants resolved at click time; `fromExpression` and `toExpression` are what the time picker
+ * held (for example `now-15m` and `now`), for workflows that need the relative form.
+ */
+const dashboardTimeRange: JsonSchema = {
+  type: 'object',
+  title: 'Dashboard time range',
+  description:
+    'Time range of the dashboard the workflow was run from: absolute UTC bounds resolved when the viewer clicked Run, and the expressions the time picker held.',
+  properties: {
+    from: {
+      type: 'string',
+      format: 'date-time',
+      description: 'Start of the range, as an ISO 8601 UTC timestamp',
+    },
+    to: {
+      type: 'string',
+      format: 'date-time',
+      description: 'End of the range, as an ISO 8601 UTC timestamp',
+    },
+    fromExpression: {
+      type: 'string',
+      maxLength: 256,
+      description: 'Start as set in the time picker (for example `now-15m` or an ISO timestamp)',
+    },
+    toExpression: {
+      type: 'string',
+      maxLength: 256,
+      description: 'End as set in the time picker (for example `now`)',
+    },
+  },
+  required: ['from', 'to'],
+  additionalProperties: false,
+};
+
+/**
+ * The dashboard query and filters when the viewer ran the workflow, both as authored and compiled to
+ * an Elasticsearch query a search step can use directly.
+ */
+const dashboardQuery: JsonSchema = {
+  type: 'object',
+  title: 'Dashboard query and filters',
+  description:
+    'Query bar and filters of the dashboard the workflow was run from (including filters applied by its controls), as authored and compiled to Elasticsearch query DSL.',
+  properties: {
+    query: {
+      type: 'object',
+      description: 'The query bar contents',
+      properties: {
+        language: {
+          type: 'string',
+          description: 'Query language, `kuery` (KQL) or `lucene`',
+        },
+        query: {
+          type: 'string',
+          description: 'Query text',
+        },
+      },
+      additionalProperties: true,
+    },
+    filters: {
+      type: 'array',
+      description: 'Filters as stored by Kibana (pills and control filters)',
+      items: { type: 'object', additionalProperties: true },
+    },
+    compiledQuery: {
+      type: 'object',
+      description:
+        'Query and filters compiled to an Elasticsearch `bool` query, for `query:` in a search step. The time range is not included.',
+      additionalProperties: true,
+    },
+  },
+  required: ['compiledQuery'],
+  additionalProperties: false,
+};
+
+/**
  * Central registry of reusable input shapes. Keys are the `<id>` segment only
  * (e.g. `alertingV2NotificationGroup` for `#/kibana/definitions/alertingV2NotificationGroup`).
  *
@@ -252,6 +341,8 @@ const securityAlertAnalysisCallerAlerts: JsonSchema = {
 export const builtinWorkflowInputDefinitions: Record<string, JsonSchema> = {
   [ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID]: alertingV2NotificationGroup,
   [SECURITY_ALERT_ANALYSIS_CALLER_ALERTS_INPUT_DEFINITION_ID]: securityAlertAnalysisCallerAlerts,
+  [DASHBOARD_TIME_RANGE_INPUT_DEFINITION_ID]: dashboardTimeRange,
+  [DASHBOARD_QUERY_INPUT_DEFINITION_ID]: dashboardQuery,
 };
 
 const builtinRefList = Object.keys(builtinWorkflowInputDefinitions).map(

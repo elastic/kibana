@@ -69,6 +69,8 @@ export interface ResumeExecutionModalProps {
   onClose: () => void;
   /** When true, renders the submit button as a "Run" button (success color, play icon) instead of "Resume" */
   useRunButton?: boolean;
+  /** Optional content rendered above the editor, e.g. a callout about the prefilled values. */
+  notice?: React.ReactNode;
 }
 
 export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
@@ -77,6 +79,7 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
   onSubmit,
   onClose,
   useRunButton = false,
+  notice,
 }) => {
   const { euiTheme, colorMode, modifications, highContrastMode } = useEuiTheme();
   const modalTitleId = useGeneratedHtmlId();
@@ -193,6 +196,11 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
           </EuiFlexGroup>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
+      {notice && (
+        <EuiModalHeader data-test-subj="workflowResumeExecutionModalNotice">
+          {notice}
+        </EuiModalHeader>
+      )}
       <EuiModalBody css={modalBodyStyle}>
         <CodeEditor
           languageId="json"

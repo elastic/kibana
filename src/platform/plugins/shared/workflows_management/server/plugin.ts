@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { Subscription } from 'rxjs';
 import type {
   CoreSetup,
   CoreStart,
@@ -29,6 +30,7 @@ import {
   getWorkflowsConnectorAdapter,
   getConnectorType as getWorkflowsConnectorType,
 } from './connectors/workflows';
+import { workflowRunEmbeddableSchema } from './dashboard_run_panel/schema';
 import { ExecutionDataViewsBootstrap } from './execution_data_views_bootstrap';
 import { WorkflowsManagementFeatureConfig } from './features';
 import { createWorkflowsInboxProvider } from './inbox/workflows_inbox_provider';
@@ -41,6 +43,10 @@ import type {
   WorkflowsServerPluginStartDeps,
 } from './types';
 import { registerUISettings } from './ui_settings';
+import {
+  WORKFLOW_RUN_EMBEDDABLE_TYPE,
+  WORKFLOWS_DASHBOARD_RUN_PANEL_FLAG,
+} from '../common/dashboard_run_panel/constants';
 import { stepSchemas } from '../common/step_schemas';
 
 export class WorkflowsPlugin
@@ -61,6 +67,8 @@ export class WorkflowsPlugin
   private executionDataViewsBootstrap: ExecutionDataViewsBootstrap | null = null;
   private audit: WorkflowManagementAuditLog | null = null;
   private unregisterHitlLifecycleAuditor: (() => void) | null = null;
+  private isRunPanelEnabled = false;
+  private runPanelFlagSubscription: Subscription | null = null;
 
   constructor(initializerContext: PluginInitializerContext<WorkflowsManagementConfig>) {
     this.logger = initializerContext.logger.get();
@@ -77,6 +85,11 @@ export class WorkflowsPlugin
     registerUISettings(core, plugins);
 
     plugins.features?.registerKibanaFeature(WorkflowsManagementFeatureConfig);
+
+    plugins.embeddable.registerEmbeddableServerDefinition(WORKFLOW_RUN_EMBEDDABLE_TYPE, {
+      title: 'Run workflow',
+      getSchema: () => (this.isRunPanelEnabled ? workflowRunEmbeddableSchema : undefined),
+    });
 
     this.logger.debug('Workflows Management: Creating workflows service');
 
@@ -171,6 +184,11 @@ export class WorkflowsPlugin
   public start(core: CoreStart, plugins: WorkflowsServerPluginStartDeps) {
     this.logger.debug('Workflows Management: Start');
     this.workflowsService?.setStopping(false);
+    this.runPanelFlagSubscription = core.featureFlags
+      .getBooleanValue$(WORKFLOWS_DASHBOARD_RUN_PANEL_FLAG, false)
+      .subscribe((isEnabled) => {
+        this.isRunPanelEnabled = isEnabled;
+      });
 
     stepSchemas.initialize(plugins.workflowsExtensions);
 
@@ -242,5 +260,7 @@ export class WorkflowsPlugin
     this.unregisterHitlLifecycleAuditor = null;
     this.workflowsService?.setStopping(true);
     this.availabilityUpdater?.stop();
+    this.runPanelFlagSubscription?.unsubscribe();
+    this.runPanelFlagSubscription = null;
   }
 }

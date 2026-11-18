@@ -170,4 +170,43 @@ describe('builtinWorkflowInputDefinitions', () => {
       expect.arrayContaining([...builtinWorkflowInputDefinitionRefValuesForZod])
     );
   });
+
+  describe('dashboard definitions', () => {
+    const timeRangeValidator = convertJsonSchemaToZod(
+      builtinWorkflowInputDefinitions.dashboardTimeRange as JSONSchema7
+    );
+    const queryValidator = convertJsonSchemaToZod(
+      builtinWorkflowInputDefinitions.dashboardQuery as JSONSchema7
+    );
+
+    it('accepts a resolved time range with the time picker expressions', () => {
+      const result = timeRangeValidator.safeParse({
+        from: '2026-11-15T10:00:00.000Z',
+        to: '2026-11-15T10:15:00.000Z',
+        fromExpression: 'now-15m',
+        toExpression: 'now',
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects a time range that is not resolved to timestamps', () => {
+      expect(timeRangeValidator.safeParse({ from: 'now-15m', to: 'now' }).success).toBe(false);
+      expect(timeRangeValidator.safeParse({ fromExpression: 'now-15m' }).success).toBe(false);
+    });
+
+    it('accepts the query, filters and compiled query of a dashboard', () => {
+      const result = queryValidator.safeParse({
+        query: { language: 'kuery', query: 'service.name : "payments"' },
+        filters: [{ meta: { key: 'host.name' }, query: { match_phrase: { 'host.name': 'a' } } }],
+        compiledQuery: {
+          bool: { must: [], filter: [{ match_phrase: { 'service.name': 'payments' } }] },
+        },
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('requires the compiled query, the part a search step uses', () => {
+      expect(queryValidator.safeParse({ filters: [] }).success).toBe(false);
+    });
+  });
 });
