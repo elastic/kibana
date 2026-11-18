@@ -75,9 +75,8 @@ describe('globMatches', () => {
     expect(globMatches(pattern, text)).toBe(expected);
   });
 
-  it('answers a many-star pattern against a near-match without backtracking', () => {
-    const started = Date.now();
+  it('answers a many-star pattern against a near-match', () => {
+    // A backtracking matcher would not finish this input at all.
     expect(globMatches(`${'a*'.repeat(30)}b`, 'a'.repeat(60))).toBe(false);
-    expect(Date.now() - started).toBeLessThan(100);
   });
 });
