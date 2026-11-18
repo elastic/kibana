@@ -17,7 +17,7 @@ import {
 } from '../commands/registry/types';
 import type { IAdditionalFields } from '../commands/registry/registry';
 import { enrichFieldsWithECSInfo } from './enrich_fields_with_ecs';
-import { columnIsPresent, getFlattenedKeyFields } from '../commands/definitions/utils/columns';
+import { columnIsPresent, columnsWithFlattenedKeys } from '../commands/definitions/utils/columns';
 import { getUnmappedFieldType } from '../commands/definitions/utils/settings';
 import { getLookupJoinSource } from '../commands/definitions/utils/sources';
 import { getIndexFromPromQLParams } from '../commands/definitions/utils/promql';
@@ -197,8 +197,7 @@ export async function getCurrentQueryAvailableColumns(
   };
 
   const previousCommands = commands.slice(0, -1);
-  const flattenedKeyFields = getFlattenedKeyFields(lastCommand, previousPipeFields);
-  const fieldsBeforeUnmapped = [...previousPipeFields, ...flattenedKeyFields];
+  const fieldsBeforeUnmapped = columnsWithFlattenedKeys(lastCommand, previousPipeFields);
   const unmappedFields = getUnmappedFields(
     lastCommand,
     previousCommands,

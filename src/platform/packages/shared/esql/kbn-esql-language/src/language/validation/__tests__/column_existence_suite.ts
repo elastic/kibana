@@ -117,6 +117,10 @@ export const runColumnExistenceValidationSuite = (setup: Setup) => {
         'FROM (FROM index | KEEP flattenedField.env) | KEEP flattenedField.env',
         []
       );
+      await expectErrors(
+        'FROM index | WHERE keywordField IN (FROM other_index | KEEP flattenedField.env) | DROP flattenedField | WHERE flattenedField.env == "prod"',
+        ['Unknown column "flattenedField.env"']
+      );
     });
 
     it('still reports an unknown column under a field that is not flattened', async () => {

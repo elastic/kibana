@@ -20,7 +20,7 @@ import {
   resolveNamedSubquerySources,
   type NamedSubquery,
 } from '../../definitions/utils/named_subqueries';
-import { getFlattenedKeyFields } from '../../definitions/utils/columns';
+import { columnsWithFlattenedKeys } from '../../definitions/utils/columns';
 import { matchesWildcardPattern } from '../../definitions/utils/regex';
 import { isTimeseriesSourceCommand } from '../../definitions/utils/timeseries_check';
 import { esqlCommandRegistry } from '..';
@@ -164,7 +164,7 @@ async function processSubquery(
     const commandDef = esqlCommandRegistry.getCommandByName(subCommand.name);
 
     if (commandDef?.methods?.columnsAfter) {
-      const fields = [...columns, ...getFlattenedKeyFields(subCommand, columns)];
+      const fields = columnsWithFlattenedKeys(subCommand, columns);
       columns = await commandDef.methods.columnsAfter(
         subCommand,
         fields,
