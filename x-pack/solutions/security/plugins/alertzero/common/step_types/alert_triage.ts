@@ -14,6 +14,7 @@ export const TRIAGE_HEADROOM_STEP_ID = 'alertzero.triage.headroom' as const;
 export const TRIAGE_PLAN_SWEEP_STEP_ID = 'alertzero.triage.planSweep' as const;
 export const TRIAGE_LOAD_ALERTS_STEP_ID = 'alertzero.triage.loadAlerts' as const;
 export const TRIAGE_TAG_PATTERN_KEYS_STEP_ID = 'alertzero.triage.tagPatternKeys' as const;
+export const TRIAGE_WRITE_VERDICT_CACHE_STEP_ID = 'alertzero.triage.writeVerdictCache' as const;
 export const TRIAGE_GROUP_FP_CANDIDATES_STEP_ID = 'alertzero.triage.groupFpCandidates' as const;
 export const TRIAGE_JOIN_PROPOSAL_STEP_ID = 'alertzero.triage.joinProposal' as const;
 export const TRIAGE_RETAG_PROPOSAL_ALERTS_STEP_ID = 'alertzero.triage.retagProposalAlerts' as const;
@@ -206,6 +207,80 @@ export const triageTagPatternKeysStepCommonDefinition: CommonStepDefinition<
   stability: 'tech_preview',
   inputSchema: tagPatternKeysInputSchema,
   outputSchema: tagPatternKeysOutputSchema,
+};
+
+export const WRITE_VERDICT_CACHE_SKIP_REASONS = [
+  'none',
+  'off',
+  'disabled',
+  'denied',
+  'storage_failure',
+] as const;
+export type WriteVerdictCacheSkipReason = (typeof WRITE_VERDICT_CACHE_SKIP_REASONS)[number];
+
+const writeVerdictCacheInputSchema = lazySchema(() =>
+  z.object({
+    verdicts: z
+      .array(
+        z.object({
+          alert_id: idSchema,
+          classification: z.string().max(64),
+          confidence_score: z.number(),
+        })
+      )
+      .min(1)
+      .max(1000)
+      .describe('The verdicts of one triage batch.'),
+    confidence_floor: z
+      .number()
+      .min(0)
+      .max(1)
+      .describe('The confidence a verdict needs before it is cached.'),
+    space_id: idSchema.describe('Space of the alerts. It is part of every key hash.'),
+  })
+);
+
+const writeVerdictCacheOutputSchema = lazySchema(() =>
+  z.object({
+    skip_reason: z.enum(WRITE_VERDICT_CACHE_SKIP_REASONS),
+    keys_seen: z.number().describe('Strict keys among the alerts of the batch.'),
+    alerts_without_strict_key: z.number(),
+    created: z.number().describe('Pending records started from run 1.'),
+    activated: z.number().describe('Pending records that run 2 made active.'),
+    made_unstable: z.number().describe('Records whose runs disagreed.'),
+    left_alone: z.number().describe('Keys that needed no write: blocked, active or not eligible.'),
+    conflicts: z.number().describe('Writes that lost a race. The next batch tries again.'),
+    failed: z.number(),
+    records_updated: z.number().describe('Active records whose hit counters were updated.'),
+    hit_alerts: z
+      .number()
+      .describe('Analyzed alerts whose key has an active record (would-be hits).'),
+    agreements: z.number().describe('Hits whose fresh verdict equals the verdict of the record.'),
+    disagreements: z
+      .number()
+      .describe('Hits whose fresh verdict differs from the verdict of the record.'),
+  })
+);
+
+export const triageWriteVerdictCacheStepCommonDefinition: CommonStepDefinition<
+  typeof writeVerdictCacheInputSchema,
+  typeof writeVerdictCacheOutputSchema
+> = {
+  id: TRIAGE_WRITE_VERDICT_CACHE_STEP_ID,
+  label: i18n.translate('xpack.alertzero.workflows.steps.triageWriteVerdictCache.label', {
+    defaultMessage: 'Write triage verdict cache records',
+  }),
+  description: i18n.translate(
+    'xpack.alertzero.workflows.steps.triageWriteVerdictCache.description',
+    {
+      defaultMessage:
+        'Keeps the verdict of the first alert of each pattern in a batch as a cache record. Two confident runs that agree make a record active. In shadow mode nothing reuses it yet.',
+    }
+  ),
+  category: StepCategory.KibanaSecurity,
+  stability: 'tech_preview',
+  inputSchema: writeVerdictCacheInputSchema,
+  outputSchema: writeVerdictCacheOutputSchema,
 };
 
 const proposalTextInputShape = {

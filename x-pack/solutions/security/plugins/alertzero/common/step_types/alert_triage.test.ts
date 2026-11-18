@@ -7,7 +7,10 @@
 
 import { WorkerScheduleInterval } from '@kbn/alertzero-common';
 import { scheduleIntervalToMinutes } from '@kbn/workflows/managed/definitions/alertzero/worker_template_values';
-import { triagePlanSweepStepCommonDefinition } from './alert_triage';
+import {
+  triagePlanSweepStepCommonDefinition,
+  triageWriteVerdictCacheStepCommonDefinition,
+} from './alert_triage';
 
 const planSweepInputFor = (intervalMinutes: number) =>
   triagePlanSweepStepCommonDefinition.inputSchema.safeParse({
@@ -36,5 +39,58 @@ describe('alertzero.triage.planSweep input', () => {
 
   it('rejects an interval of no minutes', () => {
     expect(planSweepInputFor(0).success).toBe(false);
+  });
+});
+
+describe('alertzero.triage.writeVerdictCache input', () => {
+  const parse = (input: Record<string, unknown>) =>
+    triageWriteVerdictCacheStepCommonDefinition.inputSchema.safeParse({
+      confidence_floor: 0.85,
+      space_id: 'default',
+      ...input,
+    });
+
+  // The batch workflow passes the whole `verdicts` output of the classification, which has more fields than the step reads.
+  it('accepts the verdicts as the classification outputs them, with their extra fields', () => {
+    const result = parse({
+      verdicts: [
+        {
+          alert_id: 'a-1',
+          classification: 'false_positive',
+          confidence_score: 0.93,
+          rationale: 'Signed vendor software.',
+          contributing_factors: ['signed binary'],
+        },
+      ],
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it.each([
+    ['no verdicts', { verdicts: [] }],
+    [
+      'a confidence floor above 1',
+      {
+        verdicts: [{ alert_id: 'a', classification: 'x', confidence_score: 1 }],
+        confidence_floor: 1.5,
+      },
+    ],
+    [
+      'a verdict with no alert id',
+      { verdicts: [{ classification: 'false_positive', confidence_score: 0.9 }] },
+    ],
+    [
+      'more verdicts than a batch can hold',
+      {
+        verdicts: Array.from({ length: 1001 }, (_, i) => ({
+          alert_id: `a-${i}`,
+          classification: 'false_positive',
+          confidence_score: 0.9,
+        })),
+      },
+    ],
+  ])('rejects %s, because the input is bounded', (_name, input) => {
+    expect(parse(input).success).toBe(false);
   });
 });

@@ -34,6 +34,11 @@ import {
   toDecisionAutoCloseMode,
   type DecisionAutoCloseMode,
 } from './alert_triage/constants';
+import {
+  VERDICT_CACHE_FLAG,
+  toVerdictCacheMode,
+  type VerdictCacheMode,
+} from './alert_triage/verdict_cache';
 import { getSubscriptionAvailability } from '../common/availability';
 import {
   ALERTZERO_API_PRIVILEGE_READ,
@@ -140,6 +145,8 @@ export class AlertZeroPlugin
   private triageGroupingFlagSubscription?: Subscription;
   private decisionAutoCloseMode: DecisionAutoCloseMode = 'off';
   private decisionAutoCloseFlagSubscription?: Subscription;
+  private verdictCacheMode: VerdictCacheMode = 'off';
+  private verdictCacheFlagSubscription?: Subscription;
   private scanFailuresService?: ScanFailuresService;
   private threatIntelSupplyService?: ThreatIntelSupplyService;
 
@@ -283,6 +290,7 @@ export class AlertZeroPlugin
         isGroupingEnabled: async () => this.triageGroupingEnabled,
       },
       getDecisionAutoCloseMode: async () => this.decisionAutoCloseMode,
+      getVerdictCacheMode: async () => this.verdictCacheMode,
       logger: stepsLogger,
     });
 
@@ -375,6 +383,13 @@ export class AlertZeroPlugin
       .getStringValue$<string>(TRIAGE_DECISION_AUTO_CLOSE_FLAG, 'off')
       .subscribe((mode) => {
         this.decisionAutoCloseMode = toDecisionAutoCloseMode(mode);
+      });
+    // The switch for the verdict cache. It is `off` unless a deployment sets `shadow`. In `shadow` the cache writes records
+    // and tags would-be reuses, and every alert is still analyzed.
+    this.verdictCacheFlagSubscription = core.featureFlags
+      .getStringValue$<string>(VERDICT_CACHE_FLAG, 'off')
+      .subscribe((mode) => {
+        this.verdictCacheMode = toVerdictCacheMode(mode);
       });
     this.fleetAgentService = plugins.fleet?.agentService;
     this.proposals = plugins.proposals;
@@ -597,5 +612,6 @@ export class AlertZeroPlugin
   stop() {
     this.triageGroupingFlagSubscription?.unsubscribe();
     this.decisionAutoCloseFlagSubscription?.unsubscribe();
+    this.verdictCacheFlagSubscription?.unsubscribe();
   }
 }

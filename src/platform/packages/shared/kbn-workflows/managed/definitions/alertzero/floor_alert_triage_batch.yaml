@@ -684,6 +684,25 @@ steps:
       space_id: "{{ workflow.spaceId }}"
 
   # ---------------------------------------------------------------------------
+  # 7b. Keep the verdicts as verdict cache records (the flag `alertzero.triageVerdictCache`).
+  #
+  #     The first alert of each strict key in this batch is a run for that key. A key with no record
+  #     gets a pending one from a confident false or true positive. A key with a pending record from
+  #     an earlier batch gets run 2, and two runs that agree make the record active. In `shadow`
+  #     nothing acts on a record: every alert is analyzed as before. With the flag `off` the step
+  #     does nothing. It only writes data for tuning, so a failure does not fail the run.
+  # ---------------------------------------------------------------------------
+  - name: write_verdict_cache
+    type: alertzero.triage.writeVerdictCache
+    if: "${{ variables.verdict_count > 0 }}"
+    on-failure:
+      continue: true
+    with:
+      verdicts: "${{ steps.classify_alerts.output.verdicts }}"
+      confidence_floor: "${{ inputs.confidence_floor }}"
+      space_id: "{{ workflow.spaceId }}"
+
+  # ---------------------------------------------------------------------------
   # 7b. Group the confident false positives into proposals.
   #
   #     The alerts of one pattern (the wide pattern key) join the open proposal of that
