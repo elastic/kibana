@@ -6,6 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { detectionSkipSchema, type SignalVerdict } from '@kbn/significant-events-schema';
 import {
   MAX_CLASSIFIED_ROWS,
@@ -15,7 +16,10 @@ import {
   type ClassifyBatchParams,
   type ClassifyDetectionsOutput,
 } from './classify_detections';
-import type { LiveRuleMembership } from '../lib/significant_events/events/rule_events_client';
+import {
+  RuleEventsClient,
+  type LiveRuleMembership,
+} from '../lib/significant_events/events/rule_events_client';
 import { checkBaseline } from '../lib/significant_events/rules/baseline';
 import type { ProbeResult } from '../lib/significant_events/rules/run_probe';
 
@@ -386,6 +390,117 @@ describe('classifyBatch', () => {
       await classifyRule({ memberships: [], observe });
 
       expect(observe).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('stored signal collection times', () => {
+    const classifyStoredSignal = async ({
+      evidenceTo,
+      collectedAt,
+      reviewedAt,
+    }: {
+      evidenceTo: string;
+      collectedAt?: string;
+      reviewedAt?: string;
+    }) => {
+      const data = {
+        event_id: 'event-1',
+        title: 'Checkout errors',
+        source_ids: ['logs.checkout'],
+        signals: [
+          {
+            type: 'detection',
+            source_id: 'logs.checkout',
+            description: 'Observed rows',
+            verdict: 'confirms',
+            metadata: { rule_uuid: 'rule-A' },
+            collected_at: collectedAt,
+            evidence: {
+              esql_query: STORED_QUERY,
+              result: 'found',
+              time_range: { from: '2026-10-18T05:00:00.000Z', to: evidenceTo },
+            },
+          },
+        ],
+      };
+      const source = {
+        '@timestamp': hoursAgo(2),
+        group_hash: 'group-hash-1',
+        space_id: 'default',
+        type: 'alert',
+        source: 'elastic.significant_events',
+        severity: 'medium',
+        alert: { status: 'active' },
+        data,
+      };
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.esql.query.mockResolvedValue({
+        columns: [
+          { name: '_source', type: 'object' },
+          { name: 'data_json', type: 'keyword' },
+          { name: 'created_at', type: 'date' },
+        ],
+        // ES client types do not include object-valued _source cells.
+        values: [[source as never, JSON.stringify(data), hoursAgo(48)]],
+      });
+      const client = new RuleEventsClient({ esClient, space: 'default' });
+
+      return classifyBatch(
+        batchParams({
+          rows: [detectionRow('rule-A', { reviewedAt })],
+          findLiveMembers: (ruleUuids) => client.findLiveMemberships({ ruleUuids }),
+          observe: async () => observedSeries(FLAT),
+        })
+      );
+    };
+
+    it.each([
+      [
+        'ages an unstamped signal from its evidence time',
+        '2026-10-19T10:00:00.000Z',
+        undefined,
+        'still_breaching',
+      ],
+      [
+        'absorbs an old unstamped signal after a fresh review',
+        '2026-10-18T06:00:00.000Z',
+        '2026-10-19T11:00:00.000Z',
+        'already_reviewed',
+      ],
+    ])('%s', async (_name, evidenceTo, reviewedAt, reason) => {
+      const output = await classifyStoredSignal({ evidenceTo, reviewedAt });
+
+      expect(output.batch).toEqual([]);
+      expect(output.skips).toEqual([
+        {
+          rule_uuid: 'rule-A',
+          skip: expect.objectContaining({
+            reason,
+            ...(reviewedAt ? { absorbed_reason: 'series_too_old', reviewed_at: reviewedAt } : {}),
+          }),
+        },
+      ]);
+    });
+
+    it.each([
+      ['the evidence time is malformed', 'not-a-date', undefined, '2026-10-19T11:00:00.000Z'],
+      [
+        'the evidence time is in the future',
+        '2026-10-20T10:00:00.000Z',
+        undefined,
+        '2026-10-19T11:00:00.000Z',
+      ],
+      [
+        'a stale explicit timestamp takes precedence over fresh evidence',
+        '2026-10-19T10:00:00.000Z',
+        '2026-10-18T06:00:00.000Z',
+        undefined,
+      ],
+    ])('routes to the agent when %s', async (_name, evidenceTo, collectedAt, reviewedAt) => {
+      const output = await classifyStoredSignal({ evidenceTo, collectedAt, reviewedAt });
+
+      expect(output.skips).toEqual([]);
+      expect(output.batch).toMatchObject([{ classifier: { reason: 'series_too_old' } }]);
     });
   });
 

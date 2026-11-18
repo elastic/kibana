@@ -8,7 +8,10 @@
  */
 
 import { LENS_XY_HIDE_ENDZONES_DEFAULT } from '@kbn/lens-common';
+import type { SeriesType } from '@kbn/lens-common';
+
 import type { ColorMappingCategoricalType } from '../../../schema/color';
+import { DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../../schema/color';
 
 /**
  * Lens-known defaults for XY chart styling.
@@ -34,3 +37,11 @@ export const DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING: ColorMappingCategoricalType
   palette: 'elastic_line_optimized',
   mapping: [],
 };
+
+/** Returns the breakdown color mapping Lens uses for a series type when none is set. */
+export const getDefaultBreakdownColorMapping = (
+  seriesType: SeriesType
+): ColorMappingCategoricalType =>
+  seriesType === 'line'
+    ? DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING
+    : DEFAULT_CATEGORICAL_COLOR_MAPPING;

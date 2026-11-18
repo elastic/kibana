@@ -67,6 +67,101 @@ apiTest.describe('Create rule API', { tag: testData.API_ENGINE_TAG }, () => {
     }
   );
 
+  apiTest('create: defaults to an enabled rule when enabled is omitted', async ({ apiClient }) => {
+    const response = await apiClient.post(testData.RULE_API_PATH, {
+      headers: writerHeaders,
+      body: buildCreateRuleData({ metadata: { name: 'created-enabled-by-default' } }),
+    });
+    expect(response).toHaveStatusCode(201);
+    expect(response.body.enabled).toBe(true);
+  });
+
+  apiTest(
+    'create: enabled=false saves the rule without running it until it is enabled',
+    async ({ apiClient, apiServices }) => {
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body: {
+          ...buildCreateRuleData({ metadata: { name: 'created-disabled' } }),
+          enabled: false,
+        },
+      });
+      expect(response).toHaveStatusCode(201);
+      expect(response.body.enabled).toBe(false);
+
+      const ruleId = response.body.id;
+      expect((await apiServices.alertingV2.rules.get(ruleId)).enabled).toBe(false);
+      await apiServices.alertingV2.ruleExecutorTask.waitForTaskRemoved({ ruleId });
+
+      const enabled = await apiServices.alertingV2.rules.enable(ruleId);
+      expect(enabled.enabled).toBe(true);
+
+      await apiServices.alertingV2.ruleExecutorTask.waitForTaskScheduled({ ruleId });
+      await apiServices.alertingV2.ruleRunner.waitForExecutions({ ruleId, runs: 1 });
+    }
+  );
+
+  apiTest('validation: rejects a non-boolean enabled', async ({ apiClient }) => {
+    const response = await apiClient.post(testData.RULE_API_PATH, {
+      headers: writerHeaders,
+      body: { ...buildCreateRuleData({ metadata: { name: 'bad-enabled' } }), enabled: 'false' },
+    });
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
+
+  apiTest(
+    'create: returns 201 and persists the rule under a client-supplied id',
+    async ({ apiClient, apiServices }) => {
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body: {
+          ...buildCreateRuleData({ metadata: { name: 'client-id-rule' } }),
+          id: 'client-supplied-id',
+        },
+      });
+      expect(response).toHaveStatusCode(201);
+      expect(response.body.id).toBe('client-supplied-id');
+
+      const persisted = await apiServices.alertingV2.rules.get('client-supplied-id');
+      expect(persisted.metadata.name).toBe('client-id-rule');
+    }
+  );
+
+  apiTest(
+    'create: returns 409 RULE_ALREADY_EXISTS for a colliding id and does not overwrite',
+    async ({ apiClient, apiServices }) => {
+      await apiServices.alertingV2.rules.upsert(
+        'existing-id',
+        buildCreateRuleData({ metadata: { name: 'already-there' } })
+      );
+
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body: {
+          ...buildCreateRuleData({ metadata: { name: 'collision' } }),
+          id: 'existing-id',
+        },
+      });
+      expect(response).toHaveStatusCode(409);
+      expect(response.body.code).toBe('RULE_ALREADY_EXISTS');
+
+      const persisted = await apiServices.alertingV2.rules.get('existing-id');
+      expect(persisted.metadata.name).toBe('already-there');
+    }
+  );
+
+  apiTest('validation: rejects an invalid client-supplied id', async ({ apiClient }) => {
+    for (const id of ['', 'has spaces']) {
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body: { ...buildCreateRuleData(), id },
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  });
+
   apiTest('validation: rejects body with missing metadata.name', async ({ apiClient }) => {
     const body = buildCreateRuleData();
     // Replace metadata with one that has no name.
