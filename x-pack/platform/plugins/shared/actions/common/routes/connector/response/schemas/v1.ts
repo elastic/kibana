@@ -49,6 +49,14 @@ const connectorResponseFields = {
       },
     })
   ),
+  spec_version: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'The read-only exact major.minor schema version pinned to the connector. Present for versioned connector types.',
+      },
+    })
+  ),
 };
 
 const isInboundEventsEnabledResponseField = {

@@ -111,6 +111,138 @@ describe('createConnectorRoute', () => {
     });
   });
 
+  it.each(['1', '1.3'])(
+    'forwards spec_version %s and returns the exact version from the application',
+    async (specVersion) => {
+      const { handler } = setupRoute();
+      const actionsClient = actionsClientMock.create();
+      actionsClient.create.mockResolvedValueOnce(createMockConnector({ specVersion: '1.3' }));
+
+      const body = createConnectorRequestBodySchemaV1.validate({
+        name: 'Versioned connector',
+        connector_type_id: '.test-connector-type',
+        config: {},
+        secrets: {},
+        spec_version: specVersion,
+      });
+      const [context, req, res] = mockHandlerArguments(
+        { actionsClient, isConnectorCatalogEnabled: jest.fn().mockReturnValue(true) },
+        { body, params: { id: 'custom-id' } },
+        ['ok']
+      );
+
+      await handler(context, req, res);
+
+      expect(actionsClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: {
+            actionTypeId: '.test-connector-type',
+            name: 'Versioned connector',
+            config: {},
+            secrets: {},
+            specVersion,
+          },
+        })
+      );
+      expect(res.ok).toHaveBeenCalledWith({
+        body: expect.objectContaining({ spec_version: '1.3' }),
+      });
+    }
+  );
+
+  it('sets a default spec_version when it is not sent and catalog connectors are enabled', async () => {
+    const { handler } = setupRoute();
+    const actionsClient = actionsClientMock.create();
+    actionsClient.create.mockResolvedValueOnce(createMockConnector({ specVersion: '1.3' }));
+    const body = createConnectorRequestBodySchemaV1.validate({
+      name: 'Versioned connector',
+      connector_type_id: '.test-connector-type',
+      config: {},
+      secrets: {},
+    });
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient, isConnectorCatalogEnabled: jest.fn().mockReturnValue(true) },
+      { body },
+      ['ok']
+    );
+
+    await handler(context, req, res);
+
+    expect(actionsClient.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: {
+          actionTypeId: '.test-connector-type',
+          name: 'Versioned connector',
+          config: {},
+          secrets: {},
+        },
+        options: undefined,
+      })
+    );
+    expect(res.ok).toHaveBeenCalledWith({
+      body: expect.objectContaining({ spec_version: '1.3' }),
+    });
+  });
+
+  it('rejects spec_version when the connector catalog is disabled', async () => {
+    const { handler } = setupRoute();
+    const actionsClient = actionsClientMock.create();
+    const body = createConnectorRequestBodySchemaV1.validate({
+      name: 'Versioned connector',
+      connector_type_id: '.test-connector-type',
+      config: {},
+      secrets: {},
+      spec_version: '1',
+    });
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient, isConnectorCatalogEnabled: jest.fn().mockReturnValue(false) },
+      { body },
+      ['badRequest']
+    );
+
+    await handler(context, req, res);
+
+    expect(res.badRequest).toHaveBeenCalledWith({
+      body: 'spec_version requires the connector catalog feature flag to be enabled.',
+    });
+    expect(actionsClient.create).not.toHaveBeenCalled();
+  });
+
+  it('rejects a spec_version past the max length', () => {
+    expect(() =>
+      createConnectorRequestBodySchemaV1.validate({
+        name: 'Versioned connector',
+        connector_type_id: '.test-connector-type',
+        config: {},
+        secrets: {},
+        spec_version: '1'.repeat(33),
+      })
+    ).toThrow(/maximum length/);
+  });
+
+  it('omits spec_version when it is not requested and the connector catalog is disabled', async () => {
+    const { handler } = setupRoute();
+    const actionsClient = actionsClientMock.create();
+    actionsClient.create.mockResolvedValueOnce(createMockConnector({ specVersion: '1.3' }));
+    const body = createConnectorRequestBodySchemaV1.validate({
+      name: 'My connector',
+      connector_type_id: '.test-connector-type',
+      config: {},
+      secrets: {},
+    });
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient, isConnectorCatalogEnabled: jest.fn().mockReturnValue(false) },
+      { body },
+      ['ok']
+    );
+
+    await handler(context, req, res);
+
+    expect(actionsClient.create).toHaveBeenCalledTimes(1);
+    expect(res.ok).toHaveBeenCalledTimes(1);
+    expect(jest.mocked(res.ok).mock.calls[0][0]?.body).not.toHaveProperty('spec_version');
+  });
+
   it('Returns error message to kibana on error', async () => {
     const { config, handler } = setupRoute();
     expect(config.path).toMatchInlineSnapshot(`"/api/actions/connector/{id?}"`);

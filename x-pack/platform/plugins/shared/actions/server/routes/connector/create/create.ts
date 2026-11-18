@@ -57,11 +57,21 @@ export const createConnectorRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         try {
-          const actionsClient = (await context.actions).getActionsClient();
+          const actions = await context.actions;
+          const actionsClient = actions.getActionsClient();
+          if (req.body?.spec_version !== undefined && !actions.isConnectorCatalogEnabled()) {
+            return res.badRequest({
+              body: 'spec_version requires the connector catalog feature flag to be enabled.',
+            });
+          }
           const action = transformCreateConnectorBodyV1(req.body);
-          const resp = await actionsClient.create({ action, options: req.params });
+          const resp = await actionsClient.create({
+            action,
+            options: req.params,
+          });
           const body = transformConnectorResponseV1(resp, {
             includeInboundEventsField: actionsConfigUtils.isInboundEventsEnabled(),
+            includeSpecVersionField: actions.isConnectorCatalogEnabled(),
           });
 
           return res.ok({

@@ -13,6 +13,7 @@ import {
   CONNECTOR_CONFIG_KEY_MAX_LENGTH,
   CONNECTOR_ID_MAX_LENGTH,
   CONNECTOR_NAME_MAX_LENGTH,
+  CONNECTOR_SPEC_VERSION_MAX_LENGTH,
 } from '../../../../..';
 
 export const createConnectorRequestParamsSchema = schema.maybe(
@@ -52,6 +53,15 @@ const createConnectorRequestBodyFields = {
     {
       defaultValue: {},
     }
+  ),
+  spec_version: schema.maybe(
+    schema.string({
+      maxLength: CONNECTOR_SPEC_VERSION_MAX_LENGTH,
+      meta: {
+        description:
+          'The connector schema version, as a major (for example, "1") or exact major.minor (for example, "1.3"). When omitted, versioned connector types use the latest accepted minor of major 1.',
+      },
+    })
   ),
 };
 
