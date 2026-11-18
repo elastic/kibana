@@ -5,9 +5,88 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { LiveHistoryRow } from '../../../common/api/unified_history/types';
 import type { LiveActionHit } from './map_live_hit_to_row';
 import { buildSourceClause, resolveSource } from './resolve_source';
+
+const matchesClause = (
+  clause: estypes.QueryDslQueryContainer,
+  document: Record<string, string | string[] | undefined>
+): boolean => {
+  if (clause.term) {
+    return Object.entries(clause.term).every(([field, term]) => {
+      const expected = typeof term === 'object' ? term.value : term;
+      const value = document[field];
+
+      return Array.isArray(value) ? value.some((entry) => entry === expected) : value === expected;
+    });
+  }
+
+  if (clause.exists) {
+    const value = document[clause.exists.field];
+
+    // Elasticsearch does not index a value for an empty array.
+    return Array.isArray(value) ? value.length > 0 : value != null;
+  }
+
+  if (clause.bool) {
+    const { filter = [], must_not = [], ...unsupported } = clause.bool;
+    if (Object.keys(unsupported).length > 0) {
+      throw new Error('Unsupported test bool clause');
+    }
+    const required = Array.isArray(filter) ? filter : [filter];
+    const excluded = Array.isArray(must_not) ? must_not : [must_not];
+
+    return (
+      required.every((child) => matchesClause(child, document)) &&
+      excluded.every((child) => !matchesClause(child, document))
+    );
+  }
+
+  throw new Error('Unsupported test clause');
+};
+
+describe.each(['fields', '_source'] as const)('source partition using %s', (representation) => {
+  test.each<{
+    originType?: string;
+    alertIds?: string[];
+    expected: LiveHistoryRow['source'];
+  }>([
+    { originType: 'workflow', alertIds: ['alert-1'], expected: 'Workflow' },
+    { originType: 'workflow', alertIds: [], expected: 'Workflow' },
+    { originType: 'workflow', expected: 'Workflow' },
+    { originType: 'future_type', alertIds: ['alert-1'], expected: 'Rule' },
+    { originType: 'future_type', alertIds: [], expected: 'Live' },
+    { originType: 'future_type', expected: 'Live' },
+    { alertIds: ['alert-1'], expected: 'Rule' },
+    { alertIds: [], expected: 'Live' },
+    { expected: 'Live' },
+  ])(
+    'origin=$originType alerts=$alertIds resolves and filters as $expected only',
+    ({ originType, alertIds, expected }) => {
+      const document = {
+        ...(originType === undefined ? {} : { 'origin.type': [originType] }),
+        ...(alertIds === undefined ? {} : { alert_ids: alertIds }),
+      };
+      const hit: LiveActionHit =
+        representation === 'fields'
+          ? { fields: document }
+          : {
+              _source: {
+                ...(originType === undefined ? {} : { origin: { type: originType } }),
+                ...(alertIds === undefined ? {} : { alert_ids: alertIds }),
+              },
+            };
+
+      expect(resolveSource(hit)).toBe(expected);
+      const matchingSources = (['live', 'rule', 'workflow'] as const).filter((source) =>
+        matchesClause(buildSourceClause(source), document)
+      );
+      expect(matchingSources).toEqual([expected.toLowerCase()]);
+    }
+  );
+});
 
 describe('resolveSource', () => {
   test.each<{ name: string; hit: LiveActionHit; expected: LiveHistoryRow['source'] }>([
