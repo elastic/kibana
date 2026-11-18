@@ -113,6 +113,10 @@ export const runColumnExistenceValidationSuite = (setup: Setup) => {
         []
       );
       await expectErrors('FROM index | STATS COUNT(*) BY flattenedField.nested.region', []);
+      await expectErrors(
+        'FROM (FROM index | KEEP flattenedField.env) | KEEP flattenedField.env',
+        []
+      );
     });
 
     it('still reports an unknown column under a field that is not flattened', async () => {
@@ -129,6 +133,7 @@ export const runColumnExistenceValidationSuite = (setup: Setup) => {
       const { expectErrors } = await setup();
       await expectErrors(
         'SET unmapped_fields = "LOAD"; FROM index | WHERE flattenedField.env == "prod" | KEEP flattenedField.env',
+        [],
         []
       );
     });

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Builder, isColumn, LeafPrinter, synth } from '@elastic/esql';
-import type { ESQLColumn, ESQLIdentifier } from '@elastic/esql/types';
+import { Builder, isColumn, LeafPrinter, synth, Walker } from '@elastic/esql';
+import type { ESQLAstCommand, ESQLColumn, ESQLIdentifier } from '@elastic/esql/types';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { ICommandContext, ESQLColumnData } from '../../registry/types';
 import { commandsMetadata } from '../generated/commands/commands';
@@ -81,6 +81,34 @@ export function getFlattenedKeyColumn(
   }
 
   return undefined;
+}
+
+/** Collects flattened keys named by a command so later commands can still see them. */
+export function getFlattenedKeyFields(
+  command: ESQLAstCommand,
+  previousColumns: ESQLColumnData[]
+): ESQLColumnData[] {
+  const columns = new Map(previousColumns.map((field) => [field.name, field]));
+  const flattenedKeys: ESQLColumnData[] = [];
+
+  Walker.walk(command, {
+    visitColumn: (node) => {
+      const name = node.parts.join('.');
+      if (columns.has(name)) {
+        return;
+      }
+
+      const keyColumn = getFlattenedKeyColumn(name, columns);
+      if (!keyColumn) {
+        return;
+      }
+
+      columns.set(name, keyColumn);
+      flattenedKeys.push(keyColumn);
+    },
+  });
+
+  return flattenedKeys;
 }
 
 export function columnIsPresent(node: ESQLColumn | ESQLIdentifier, columns: Set<string>) {
