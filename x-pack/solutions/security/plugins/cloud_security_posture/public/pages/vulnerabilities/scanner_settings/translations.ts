@@ -84,6 +84,10 @@ export const getPackDifferenceText = ({ code, queryId }: PackDifference): string
       return i18n.translate('xpack.csp.nativeVulnScanner.packDifference.packDisabled', {
         defaultMessage: 'The pack is disabled.',
       });
+    case 'schedule_type_differs':
+      return i18n.translate('xpack.csp.nativeVulnScanner.packDifference.scheduleTypeDiffers', {
+        defaultMessage: 'The pack does not use a fixed interval schedule.',
+      });
     case 'interval_differs':
       return i18n.translate('xpack.csp.nativeVulnScanner.packDifference.intervalDiffers', {
         defaultMessage: 'The pack does not run once a day.',

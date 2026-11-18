@@ -6,9 +6,15 @@
  */
 
 import React from 'react';
+import type { BehaviorSubject } from 'rxjs';
+import { of } from 'rxjs';
 import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { AppStatus } from '@kbn/core/public';
+import type { PublicAppInfo } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import {
   ONBOARDING_PLAN_PATH,
   ONBOARDING_RUNTIME_PIN_PATH,
@@ -104,9 +110,48 @@ const getRequestBody = (calls: readonly unknown[][], path: string): unknown => {
   return typeof body === 'string' ? JSON.parse(body) : undefined;
 };
 
-const setup = (handlers: HttpHandlers = {}, { canEditPolicies = true } = {}) => {
+const WORKFLOWS_READ_CAPABILITIES = {
+  readWorkflow: true,
+  readManagedWorkflow: true,
+  readWorkflowExecution: true,
+  readManagedWorkflowExecution: true,
+};
+
+const workflowsAppInfo = (status: AppStatus) =>
+  new Map([['workflows', { id: 'workflows', status } as PublicAppInfo]]);
+
+interface SetupOptions {
+  canEditPolicies?: boolean;
+  /** `workflowsManagement` UI capabilities of the viewer. */
+  workflowsCapabilities?: Record<string, boolean>;
+  /** Registered Workflows app status; `null` means the app is not registered. */
+  workflowsAppStatus?: AppStatus | null;
+  /** Id of the active space. */
+  spaceId?: string;
+}
+
+const setup = (
+  handlers: HttpHandlers = {},
+  {
+    canEditPolicies = true,
+    workflowsCapabilities = WORKFLOWS_READ_CAPABILITIES,
+    workflowsAppStatus = AppStatus.accessible,
+    spaceId = DEFAULT_SPACE_ID,
+  }: SetupOptions = {}
+) => {
   const core = coreMock.createStart();
-  const deps = getMockDependencies();
+  Object.assign(core.application.capabilities, { workflowsManagement: workflowsCapabilities });
+  core.application.getUrlForApp.mockImplementation(
+    (appId, options) => `/app/${appId}${options?.path ?? ''}`
+  );
+  (core.application.applications$ as BehaviorSubject<Map<string, PublicAppInfo>>).next(
+    workflowsAppStatus === null ? new Map() : workflowsAppInfo(workflowsAppStatus)
+  );
+  const spaces = spacesPluginMock.createStartContract();
+  spaces.getActiveSpace$.mockReturnValue(
+    of({ id: asSpaceId(spaceId), name: spaceId, disabledFeatures: [] })
+  );
+  const deps = { ...getMockDependencies(), spaces };
   deps.fleet.authz.fleet.allAgentPolicies = canEditPolicies;
 
   const calls: string[] = [];
@@ -358,6 +403,83 @@ describe('ScannerSettingsPage', () => {
       expect(
         screen.queryByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.APPLY_ERROR)
       ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('last scan', () => {
+    const lastScan: SummaryDoc = {
+      '@timestamp': '2026-11-17T08:00:00.000Z',
+      run_id: 'run 2/x',
+      started_at: '2026-11-17T07:59:00.000Z',
+      finished_at: '2026-11-17T08:00:00.000Z',
+      status: 'success',
+      hosts_scanned: 3,
+      findings_open: 1,
+      findings_fixed: 0,
+      feeds: [],
+      failures: [],
+    };
+
+    it('links "View run" to the scan workflow execution', async () => {
+      const { core } = setup({ status: createStatus({ lastScan }) });
+
+      const link = await screen.findByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.VIEW_RUN_LINK);
+
+      expect(link).toHaveTextContent('View run');
+      expect(link).toHaveAttribute(
+        'href',
+        '/app/workflows/system-security-native-vuln-scan?tab=executions&executionId=run%202%2Fx'
+      );
+      expect(core.application.getUrlForApp).toHaveBeenCalledWith('workflows', {
+        path: '/system-security-native-vuln-scan?tab=executions&executionId=run%202%2Fx',
+      });
+    });
+
+    it('hides the link when no scan has finished yet', async () => {
+      setup({ status: createStatus({ lastScan: null }) });
+      await screen.findByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.NO_SCAN_YET);
+
+      expect(screen.queryByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.VIEW_RUN_LINK)).toBeNull();
+    });
+
+    it('hides the link when the scan has no run id', async () => {
+      setup({ status: createStatus({ lastScan: { ...lastScan, run_id: '' } }) });
+      await screen.findByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.LAST_SCAN_PANEL);
+
+      expect(screen.queryByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.VIEW_RUN_LINK)).toBeNull();
+    });
+
+    it.each([
+      ['no workflows privileges', () => ({})],
+      ...Object.keys(WORKFLOWS_READ_CAPABILITIES).map((missing) => [
+        `no ${missing} privilege`,
+        () => ({ ...WORKFLOWS_READ_CAPABILITIES, [missing]: false }),
+      ]),
+    ] as Array<[string, () => Record<string, boolean>]>)(
+      'hides the link for a viewer with %s',
+      async (_label, getCapabilities) => {
+        setup({ status: createStatus({ lastScan }) }, { workflowsCapabilities: getCapabilities() });
+        await screen.findByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.LAST_SCAN_PANEL);
+
+        expect(screen.queryByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.VIEW_RUN_LINK)).toBeNull();
+      }
+    );
+
+    it.each([
+      ['is not registered', null],
+      ['is inaccessible', AppStatus.inaccessible],
+    ])('hides the link when the workflows app %s', async (_label, workflowsAppStatus) => {
+      setup({ status: createStatus({ lastScan }) }, { workflowsAppStatus });
+      await screen.findByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.LAST_SCAN_PANEL);
+
+      expect(screen.queryByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.VIEW_RUN_LINK)).toBeNull();
+    });
+
+    it('hides the link outside the default space, where the scan workflow is not installed', async () => {
+      setup({ status: createStatus({ lastScan }) }, { spaceId: 'other' });
+      await screen.findByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.LAST_SCAN_PANEL);
+
+      expect(screen.queryByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.VIEW_RUN_LINK)).toBeNull();
     });
   });
 

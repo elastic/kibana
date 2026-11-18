@@ -21,6 +21,7 @@ const packObject = (
     attributes: {
       name: INVENTORY_PACK_NAME,
       enabled: true,
+      schedule_type: INVENTORY_PACK_BODY.schedule_type,
       queries: Object.values(INVENTORY_PACK_BODY.queries),
       ...overrides,
     },
@@ -77,6 +78,24 @@ describe('inspectInventoryPack', () => {
         { code: 'query_missing', queryId: rest[0].id },
       ])
     );
+  });
+
+  it('reports a pack on another schedule_type, but not one without a stored schedule_type', async () => {
+    const missing = await inspectInventoryPack(
+      findReturns([packObject({ schedule_type: undefined, interval: 86_400 })])
+    );
+    expect(missing.state).toBe('ok');
+    const rrule = await inspectInventoryPack(findReturns([packObject({ schedule_type: 'rrule' })]));
+    expect(rrule.state).toBe('differs');
+    expect(rrule.differences).toEqual([{ code: 'schedule_type_differs' }]);
+  });
+
+  it('reads a pack created from INVENTORY_PACK_BODY as ok', async () => {
+    const { queries, ...pack } = INVENTORY_PACK_BODY;
+    const result = await inspectInventoryPack(
+      findReturns([packObject({ ...pack, queries: Object.values(queries) })])
+    );
+    expect(result).toEqual({ state: 'ok', differences: [], policyIds: [] });
   });
 
   it('reports a pack-level interval that differs, but not an absent one', async () => {

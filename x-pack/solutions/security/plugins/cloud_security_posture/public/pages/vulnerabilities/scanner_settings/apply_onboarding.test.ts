@@ -113,6 +113,8 @@ describe('applyOnboarding', () => {
     expect(client.updatePack).toHaveBeenCalledWith('existing-pack', {
       policy_ids: ['p1', 'p2', 'p3'],
       description: 'Custom description',
+      schedule_type: INVENTORY_PACK_BODY.schedule_type,
+      interval: INVENTORY_PACK_BODY.interval,
     });
     expect(client.runPackLiveQuery).toHaveBeenCalledWith('existing-pack', ['p2', 'p3']);
     expect(result.pack).toEqual({ status: 'updated', packId: 'existing-pack' });
@@ -130,6 +132,8 @@ describe('applyOnboarding', () => {
     expect(client.updatePack).toHaveBeenCalledWith('existing-pack', {
       policy_ids: ['p1', 'p2'],
       description: INVENTORY_PACK_BODY.description,
+      schedule_type: INVENTORY_PACK_BODY.schedule_type,
+      interval: INVENTORY_PACK_BODY.interval,
     });
   });
 
@@ -148,6 +152,7 @@ describe('applyOnboarding', () => {
         policy_ids: ['p1'],
         description: INVENTORY_PACK_BODY.description,
         enabled: INVENTORY_PACK_BODY.enabled,
+        schedule_type: 'interval',
         interval: INVENTORY_PACK_BODY.interval,
         queries: INVENTORY_PACK_BODY.queries,
       });

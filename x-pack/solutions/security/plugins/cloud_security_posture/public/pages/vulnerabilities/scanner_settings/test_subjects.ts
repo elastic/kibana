@@ -29,6 +29,7 @@ export const SCANNER_SETTINGS_TEST_SUBJECTS = {
   APPLY_PACK_RESULT: 'nativeVulnScannerApplyPackResult',
   APPLY_LIVE_QUERY_RESULT: 'nativeVulnScannerApplyLiveQueryResult',
   LAST_SCAN_PANEL: 'nativeVulnScannerLastScanPanel',
+  VIEW_RUN_LINK: 'nativeVulnScannerViewRunLink',
   NO_SCAN_YET: 'nativeVulnScannerNoScanYet',
   SCAN_FEEDS_TABLE: 'nativeVulnScannerScanFeedsTable',
   SCHEDULE_SWITCH: 'nativeVulnScannerScheduleSwitch',

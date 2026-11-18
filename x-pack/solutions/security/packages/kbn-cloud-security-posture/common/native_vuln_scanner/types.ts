@@ -52,6 +52,7 @@ export type PackAction =
 /** Machine-readable reason a pack differs; the browser renders the text. */
 export type PackDifferenceCode =
   | 'pack_disabled'
+  | 'schedule_type_differs'
   | 'interval_differs'
   | 'query_missing'
   | 'query_sql_differs'

@@ -66,6 +66,7 @@ export interface PackUpdateBody {
   policy_ids: string[];
   description: string;
   enabled?: boolean;
+  schedule_type?: InventoryPackBody['schedule_type'];
   interval?: number;
   queries?: InventoryPackBody['queries'];
 }

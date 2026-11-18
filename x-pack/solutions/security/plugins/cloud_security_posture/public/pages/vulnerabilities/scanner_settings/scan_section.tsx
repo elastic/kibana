@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import {
   EuiBadge,
   EuiBasicTable,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
@@ -20,10 +22,16 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { AppStatus } from '@kbn/core/public';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout, KbnSuccessCallout } from '@kbn/ui-callout';
 import { FormattedDate, FormattedTime } from '@kbn/i18n-react';
+import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
+import { WORKFLOWS_MANAGEMENT_FEATURE_ID } from '@kbn/workflows/common/constants';
+import { WorkflowsManagementUiActions } from '@kbn/workflows/common/privileges';
+import { NATIVE_VULN_SCANNER_SCAN_WORKFLOW_ID } from '@kbn/cloud-security-posture-common/native_vuln_scanner/constants';
 import type {
   OnboardingStatus,
   SummaryDoc,
@@ -34,6 +42,7 @@ import {
   NATIVE_VULN_SCANNER_STATUS_QUERY_KEY,
   useNativeVulnScannerClient,
 } from '../../../common/api/use_native_vuln_scanner_api';
+import { useKibana } from '../../../common/hooks/use_kibana';
 import { getHttpErrorInfo } from './http_error';
 import { getFeedStatusLabel, getRunStatusLabel, getScanErrorText } from './translations';
 import { SCANNER_SETTINGS_TEST_SUBJECTS } from './test_subjects';
@@ -79,9 +88,47 @@ const FEED_COLUMNS: Array<EuiBasicTableColumn<SummaryFeed>> = [
   },
 ];
 
+/** Privileges the Workflows app and its Executions tab need to show a managed workflow's run. */
+const WORKFLOWS_RUN_VIEW_ACTIONS = [
+  WorkflowsManagementUiActions.read,
+  WorkflowsManagementUiActions.readManaged,
+  WorkflowsManagementUiActions.readExecution,
+  WorkflowsManagementUiActions.readManagedExecution,
+];
+
 const getFeedRowId = ({ release }: SummaryFeed) => ({ 'data-test-subj': `feed-${release}` });
 
+/**
+ * Link to the scan's workflow execution, or undefined when the run is unknown or the viewer cannot
+ * open it: the workflows app is not registered or inaccessible, the viewer lacks the privileges the
+ * execution view needs, or the active space is not the default one (the scan workflow is installed
+ * there only).
+ */
+const useViewRunHref = (runId: string | undefined): string | undefined => {
+  const { application, spaces } = useKibana().services;
+  const applications = useObservable(application.applications$);
+  const activeSpace = useObservable(useMemo(() => spaces.getActiveSpace$(), [spaces]));
+
+  if (!runId) return undefined;
+  if (applications?.get(WORKFLOWS_APP_ID)?.status !== AppStatus.accessible) return undefined;
+  if (activeSpace?.id !== DEFAULT_SPACE_ID) return undefined;
+
+  const workflowsCapabilities = application.capabilities?.[WORKFLOWS_MANAGEMENT_FEATURE_ID];
+  const canView = WORKFLOWS_RUN_VIEW_ACTIONS.every(
+    (action) => workflowsCapabilities?.[action] === true
+  );
+  if (!canView) return undefined;
+
+  return application.getUrlForApp(WORKFLOWS_APP_ID, {
+    path: `/${encodeURIComponent(
+      NATIVE_VULN_SCANNER_SCAN_WORKFLOW_ID
+    )}?tab=executions&executionId=${encodeURIComponent(runId)}`,
+  });
+};
+
 const LastScanPanel = ({ lastScan }: { lastScan: SummaryDoc | null }) => {
+  const viewRunHref = useViewRunHref(lastScan?.run_id);
+
   if (!lastScan) {
     return (
       <EuiText size="s" color="subdued" data-test-subj={SCANNER_SETTINGS_TEST_SUBJECTS.NO_SCAN_YET}>
@@ -142,6 +189,20 @@ const LastScanPanel = ({ lastScan }: { lastScan: SummaryDoc | null }) => {
             <p>{lastScan.findings_open}</p>
           </EuiText>
         </EuiFlexItem>
+        {viewRunHref && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">
+              <EuiLink
+                href={viewRunHref}
+                data-test-subj={SCANNER_SETTINGS_TEST_SUBJECTS.VIEW_RUN_LINK}
+              >
+                {i18n.translate('xpack.csp.nativeVulnScanner.lastScan.viewRun', {
+                  defaultMessage: 'View run',
+                })}
+              </EuiLink>
+            </EuiText>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       {lastScan.feeds.length > 0 && (
         <>

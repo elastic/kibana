@@ -35,3 +35,10 @@ export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
 
 export const MAX_POLICY_IDS = 100;
 export const MAX_POLICY_ID_LENGTH = 256;
+
+/**
+ * Id of the managed workflow that runs a scan. Mirrors `NATIVE_VULN_SCANNER_SCAN_WORKFLOW_ID` in
+ * `@kbn/workflows/managed`, which is server-only (it reads YAML from disk) and cannot be imported
+ * by browser code.
+ */
+export const NATIVE_VULN_SCANNER_SCAN_WORKFLOW_ID = 'system-security-native-vuln-scan';

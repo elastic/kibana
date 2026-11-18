@@ -41,6 +41,7 @@ interface StoredPackQuery {
 interface StoredPack {
   name?: string;
   enabled?: boolean;
+  schedule_type?: string | null;
   interval?: number;
   platform?: string;
   result_type?: string;
@@ -97,12 +98,18 @@ const effectiveResultType = (query: StoredPackQuery, pack: StoredPack): string =
 
 /**
  * Compares only the fields this plugin owns (SQL, platform, snapshot, enabled and the pack-level
- * enabled/interval). Fields osquery adds on its own (`ecs_mapping`, `version`, `timeout`,
+ * enabled/schedule_type/interval). Fields osquery adds on its own (`ecs_mapping`, `version`, `timeout`,
  * `schedule_id`, ...) are ignored so an osquery-saved pack does not look drifted.
  */
 const compareQueries = (pack: StoredPack): PackDifference[] => {
   const differences: PackDifference[] = [];
   if (pack.enabled === false) differences.push({ code: 'pack_disabled' });
+  // osquery rejects a pack-level interval without schedule_type 'interval', so an explicit other
+  // type is drift. A missing type (pack saved before osquery stored it) still runs on its intervals
+  // and is completed by the next pack PUT, which always sends it.
+  if (pack.schedule_type != null && pack.schedule_type !== INVENTORY_PACK_BODY.schedule_type) {
+    differences.push({ code: 'schedule_type_differs' });
+  }
   // The pack-level interval is ignored by osquerybeat for a query that sets its own, so only
   // a differing pack interval is reported, not a missing one.
   if (pack.interval !== undefined && pack.interval !== INVENTORY_PACK_BODY.interval) {

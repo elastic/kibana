@@ -69,20 +69,25 @@ const applyPack = async (
       return { status: 'unchanged', packId: existing.saved_object_id };
     }
 
-    // The osquery PUT writes `description || ''`, so it is always sent; the other omitted fields
-    // (enabled, queries, shards, schedule) are left as stored. The find-merge-PUT is not
-    // version-checked, so a concurrent edit to the pack in between is overwritten: acceptable for
-    // v1, where onboarding is a rare admin action and a re-read would not close the window.
+    // The osquery PUT writes `description || ''`, so it is always sent. The schedule is always sent
+    // too: a stored pack-level interval without schedule_type makes osquery answer 400 on any PUT.
+    // The other omitted fields (enabled, queries, shards) are left as stored. The find-merge-PUT is
+    // not version-checked, so a concurrent edit to the pack in between is overwritten: acceptable
+    // for v1, where onboarding is a rare admin action and a re-read would not close the window.
     const description = existing.description ?? INVENTORY_PACK_BODY.description;
+    const schedule = {
+      schedule_type: INVENTORY_PACK_BODY.schedule_type,
+      interval: INVENTORY_PACK_BODY.interval,
+    };
     const body: PackUpdateBody = repair
       ? {
           policy_ids: merged,
           description,
           enabled: INVENTORY_PACK_BODY.enabled,
-          interval: INVENTORY_PACK_BODY.interval,
+          ...schedule,
           queries: INVENTORY_PACK_BODY.queries,
         }
-      : { policy_ids: merged, description };
+      : { policy_ids: merged, description, ...schedule };
     await client.updatePack(existing.saved_object_id, body);
     return { status: 'updated', packId: existing.saved_object_id };
   } catch (e) {

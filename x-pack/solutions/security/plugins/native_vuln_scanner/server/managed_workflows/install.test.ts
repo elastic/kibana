@@ -6,6 +6,7 @@
  */
 
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { NATIVE_VULN_SCANNER_SCAN_WORKFLOW_ID as SCAN_WORKFLOW_ID_IN_UI } from '@kbn/cloud-security-posture-common/native_vuln_scanner/constants';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
@@ -33,6 +34,10 @@ describe('managed workflow install', () => {
 
   beforeEach(() => {
     logger = loggerMock.create();
+  });
+
+  it('keeps the scan workflow id the "View run" link uses in sync with the managed definition', () => {
+    expect(SCAN_WORKFLOW_ID_IN_UI).toBe(NATIVE_VULN_SCANNER_SCAN_WORKFLOW_ID);
   });
 
   it('manages only system-prefixed ids and includes the scan workflow', () => {

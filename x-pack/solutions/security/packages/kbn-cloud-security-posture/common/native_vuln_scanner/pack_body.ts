@@ -23,6 +23,8 @@ export interface InventoryPackBody {
   name: string;
   description: string;
   enabled: true;
+  /** osquery rejects a pack-level `interval` unless the pack also says `schedule_type: 'interval'`. */
+  schedule_type: 'interval';
   interval: number;
   queries: Record<string, InventoryPackQueryBody>;
 }
@@ -35,6 +37,7 @@ export const INVENTORY_PACK_BODY: Readonly<InventoryPackBody> = {
   name: INVENTORY_PACK_NAME,
   description: 'Software inventory for native vulnerability scanning',
   enabled: true,
+  schedule_type: 'interval',
   interval: INVENTORY_PACK_INTERVAL_SECONDS,
   queries: Object.fromEntries(
     Object.values(INVENTORY_QUERIES).map(({ id, query, platform, snapshot }) => [

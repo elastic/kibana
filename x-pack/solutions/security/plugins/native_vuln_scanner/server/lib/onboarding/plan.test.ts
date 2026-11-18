@@ -130,6 +130,7 @@ describe('buildOnboardingPlan', () => {
           attributes: {
             name: INVENTORY_PACK_NAME,
             enabled: true,
+            schedule_type: INVENTORY_PACK_BODY.schedule_type,
             queries: Object.values(INVENTORY_PACK_BODY.queries),
           },
           references: [],
