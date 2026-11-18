@@ -1,5 +1,5 @@
 {
-  "sha1": "965d04c2fd9a74fd8b78520370c864cd454755c1",
+  "sha1": "686dda3af910320163cfbf7fbb3c4c8169c8d9bf",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,8 +13,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout_synthetics_agent_e2e/api/parallel_tests/pin_running_monitors.spec.ts",
-        "line": 63,
-        "column": 7
+        "line": 64,
+        "column": 89
       }
     },
     {
@@ -26,8 +26,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout_synthetics_agent_e2e/api/parallel_tests/rebalance.spec.ts",
-        "line": 73,
-        "column": 60
+        "line": 76,
+        "column": 41
       }
     },
     {
@@ -39,8 +39,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout_synthetics_agent_e2e/api/parallel_tests/rebalance.spec.ts",
-        "line": 91,
-        "column": 35
+        "line": 93,
+        "column": 7
       }
     }
   ]

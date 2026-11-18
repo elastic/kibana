@@ -1,5 +1,5 @@
 {
-  "sha1": "7117df751fa280f7d57b344d93b98076e18cc144",
+  "sha1": "0469919d5513b1abd777ada54b6eca0917c91fa1",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -926,8 +926,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
-        "line": 18,
-        "column": 76
+        "line": 19,
+        "column": 54
       }
     },
     {
@@ -940,8 +940,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
-        "line": 61,
-        "column": 33
+        "line": 62,
+        "column": 25
       }
     },
     {
@@ -955,7 +955,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
         "line": 102,
-        "column": 5
+        "column": 12
       }
     },
     {
@@ -969,7 +969,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
         "line": 128,
-        "column": 12
+        "column": 51
       }
     },
     {
@@ -997,7 +997,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
         "line": 239,
-        "column": 23
+        "column": 10
       }
     },
     {
@@ -1011,7 +1011,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
         "line": 290,
-        "column": 10
+        "column": 18
       }
     },
     {
@@ -1025,7 +1025,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
         "line": 322,
-        "column": 18
+        "column": 12
       }
     },
     {
@@ -1038,8 +1038,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/metrics_explorer.spec.ts",
-        "line": 351,
-        "column": 12
+        "line": 350,
+        "column": 7
       }
     },
     {

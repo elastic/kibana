@@ -1,5 +1,5 @@
 {
-  "sha1": "993a540ea93354623e764f5f4082caf4d1f8e259",
+  "sha1": "12b636d6f23af8aa584896f26d0e9293b9796da9",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 6,
+        "line": 14,
         "column": 1
       }
     },
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/add_data/add_data.spec.ts",
-        "line": 17,
-        "column": 20
+        "line": 21,
+        "column": 9
       }
     },
     {
@@ -42,7 +42,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/differential_functions/differential_functions.spec.ts",
-        "line": 13,
+        "line": 17,
         "column": 34
       }
     },
@@ -56,7 +56,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/differential_functions/differential_functions.spec.ts",
-        "line": 25,
+        "line": 29,
         "column": 11
       }
     },
@@ -70,7 +70,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/differential_functions/differential_functions.spec.ts",
-        "line": 93,
+        "line": 97,
         "column": 7
       }
     },
@@ -84,7 +84,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/flamegraph/flamegraph.spec.ts",
-        "line": 13,
+        "line": 17,
         "column": 20
       }
     },
@@ -98,7 +98,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/flamegraph/flamegraph.spec.ts",
-        "line": 19,
+        "line": 23,
         "column": 8
       }
     },
@@ -112,7 +112,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/functions/functions.spec.ts",
-        "line": 13,
+        "line": 17,
         "column": 20
       }
     },
@@ -126,7 +126,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/functions/functions.spec.ts",
-        "line": 15,
+        "line": 19,
         "column": 28
       }
     },
@@ -140,7 +140,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/functions/functions.spec.ts",
-        "line": 39,
+        "line": 43,
         "column": 24
       }
     },
@@ -154,7 +154,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/functions/functions.spec.ts",
-        "line": 147,
+        "line": 151,
         "column": 24
       }
     },
@@ -168,7 +168,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/functions/functions.spec.ts",
-        "line": 163,
+        "line": 167,
         "column": 24
       }
     },
@@ -182,7 +182,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/functions/functions.spec.ts",
-        "line": 170,
+        "line": 174,
         "column": 24
       }
     },
@@ -196,7 +196,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/functions/functions.spec.ts",
-        "line": 116,
+        "line": 120,
         "column": 56
       }
     },
@@ -210,7 +210,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/functions/functions.spec.ts",
-        "line": 191,
+        "line": 195,
         "column": 24
       }
     },
@@ -224,7 +224,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/home/home.spec.ts",
-        "line": 14,
+        "line": 18,
         "column": 25
       }
     },
@@ -238,7 +238,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/home/home.spec.ts",
-        "line": 19,
+        "line": 23,
         "column": 5
       }
     },
@@ -252,8 +252,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/schema_selector/schema_selector.spec.ts",
-        "line": 22,
-        "column": 8
+        "line": 24,
+        "column": 21
       }
     },
     {
@@ -266,8 +266,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/schema_selector/schema_selector.spec.ts",
-        "line": 74,
-        "column": 14
+        "line": 76,
+        "column": 13
       }
     },
     {
@@ -280,7 +280,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/settings/settings.spec.ts",
-        "line": 18,
+        "line": 22,
         "column": 8
       }
     },
@@ -294,7 +294,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/settings/settings.spec.ts",
-        "line": 32,
+        "line": 36,
         "column": 11
       }
     },
@@ -308,7 +308,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
-        "line": 15,
+        "line": 19,
         "column": 20
       }
     },
@@ -322,7 +322,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
-        "line": 17,
+        "line": 21,
         "column": 28
       }
     },
@@ -336,7 +336,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
-        "line": 34,
+        "line": 38,
         "column": 18
       }
     },
@@ -350,7 +350,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
-        "line": 39,
+        "line": 43,
         "column": 13
       }
     },
@@ -364,7 +364,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/storage_explorer/storage_explorer.spec.ts",
-        "line": 45,
+        "line": 49,
         "column": 11
       }
     },
@@ -378,7 +378,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/ui/parallel_tests/global.teardown.ts",
-        "line": 6,
+        "line": 13,
         "column": 1
       }
     }

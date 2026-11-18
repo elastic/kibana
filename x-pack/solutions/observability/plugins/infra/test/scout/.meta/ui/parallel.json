@@ -1,5 +1,5 @@
 {
-  "sha1": "862d5442cd839680b21009e1b0182a1da7f2ba50",
+  "sha1": "21377826ac13d13088886e4c82ab703474b72856",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1130,12 +1130,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_anomalies.spec.ts",
-        "line": 37,
-        "column": 5
+        "line": 43,
+        "column": 24
       }
     },
     {
@@ -1144,12 +1146,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_anomalies.spec.ts",
-        "line": 41,
-        "column": 23
+        "line": 48,
+        "column": 20
       }
     },
     {
@@ -1158,12 +1162,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_anomalies.spec.ts",
-        "line": 48,
-        "column": 11
+        "line": 55,
+        "column": 7
       }
     },
     {
@@ -1172,12 +1178,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_anomalies.spec.ts",
-        "line": 58,
-        "column": 11
+        "line": 65,
+        "column": 7
       }
     },
     {
@@ -1186,12 +1194,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_anomalies.spec.ts",
-        "line": 69,
-        "column": 11
+        "line": 75,
+        "column": 81
       }
     },
     {
@@ -1200,12 +1210,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_anomalies.spec.ts",
-        "line": 82,
-        "column": 53
+        "line": 89,
+        "column": 26
       }
     },
     {
@@ -1214,12 +1226,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/metrics_anomalies.spec.ts",
-        "line": 98,
-        "column": 5
+        "line": 105,
+        "column": 20
       }
     },
     {

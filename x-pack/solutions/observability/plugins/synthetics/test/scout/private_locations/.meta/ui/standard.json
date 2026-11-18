@@ -1,5 +1,5 @@
 {
-  "sha1": "0f8654977d06391dda7e0451553223c1f113770d",
+  "sha1": "59065ca5204705d61f2a978c69edf840c38c9dd1",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -10,12 +10,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/ui/tests/private_locations.spec.ts",
-        "line": 23,
-        "column": 8
+        "line": 27,
+        "column": 13
       }
     }
   ]

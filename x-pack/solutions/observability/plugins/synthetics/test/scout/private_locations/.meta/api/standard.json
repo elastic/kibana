@@ -1,5 +1,5 @@
 {
-  "sha1": "0fb8beeaf34077a195cc7828f878f60453a45fe3",
+  "sha1": "08d95ede2354b9493fd7a6fa89effc2e0c410fd6",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -9,12 +9,13 @@
       "title": "PrivateLocationAddMonitor lists the added private location as a valid service location",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/add_monitor_private_location.spec.ts",
-        "line": 66,
-        "column": 21
+        "line": 70,
+        "column": 51
       }
     },
     {
@@ -22,12 +23,13 @@
       "title": "PrivateLocationAddMonitor rejects browser timeout below 30s in private locations",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/add_monitor_private_location.spec.ts",
-        "line": 81,
-        "column": 17
+        "line": 88,
+        "column": 21
       }
     },
     {
@@ -35,12 +37,13 @@
       "title": "PrivateLocationAddMonitor allows browser timeout at 30s in private locations",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/add_monitor_private_location.spec.ts",
-        "line": 100,
-        "column": 36
+        "line": 107,
+        "column": 81
       }
     },
     {
@@ -48,12 +51,13 @@
       "title": "PrivateLocationAddMonitor handles spaces",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/add_monitor_private_location.spec.ts",
-        "line": 118,
-        "column": 36
+        "line": 125,
+        "column": 81
       }
     },
     {
@@ -66,7 +70,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/auto_upgrade_policies.spec.ts",
-        "line": 71,
+        "line": 74,
         "column": 51
       }
     },
@@ -80,7 +84,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/clean_up_extra_package_policies.spec.ts",
-        "line": 54,
+        "line": 57,
         "column": 40
       }
     },
@@ -94,7 +98,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/create_monitor_private_location.spec.ts",
-        "line": 85,
+        "line": 88,
         "column": 51
       }
     },
@@ -108,7 +112,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/create_monitor_private_location.spec.ts",
-        "line": 152,
+        "line": 155,
         "column": 17
       }
     },
@@ -122,7 +126,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/edit_private_location.spec.ts",
-        "line": 108,
+        "line": 109,
         "column": 50
       }
     },
@@ -136,7 +140,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/edit_private_location.spec.ts",
-        "line": 112,
+        "line": 113,
         "column": 47
       }
     },
@@ -150,7 +154,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/edit_private_location.spec.ts",
-        "line": 144,
+        "line": 145,
         "column": 17
       }
     },
@@ -164,7 +168,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/edit_private_location.spec.ts",
-        "line": 158,
+        "line": 159,
         "column": 31
       }
     },
@@ -178,7 +182,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/edit_private_location.spec.ts",
-        "line": 167,
+        "line": 168,
         "column": 25
       }
     },
@@ -192,7 +196,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/edit_private_location.spec.ts",
-        "line": 195,
+        "line": 196,
         "column": 9
       }
     },
@@ -206,7 +210,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/edit_private_location.spec.ts",
-        "line": 206,
+        "line": 207,
         "column": 21
       }
     },
@@ -220,7 +224,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/edit_private_location.spec.ts",
-        "line": 214,
+        "line": 215,
         "column": 11
       }
     },
@@ -234,7 +238,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/get_private_location_monitors.spec.ts",
-        "line": 62,
+        "line": 63,
         "column": 7
       }
     },
@@ -248,7 +252,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/get_private_location_monitors.spec.ts",
-        "line": 68,
+        "line": 69,
         "column": 7
       }
     },
@@ -262,7 +266,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
-        "line": 159,
+        "line": 162,
         "column": 64
       }
     },
@@ -276,7 +280,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
-        "line": 169,
+        "line": 172,
         "column": 69
       }
     },
@@ -290,7 +294,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
-        "line": 184,
+        "line": 187,
         "column": 9
       }
     },
@@ -304,7 +308,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
-        "line": 201,
+        "line": 204,
         "column": 9
       }
     },
@@ -318,7 +322,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
-        "line": 216,
+        "line": 219,
         "column": 21
       }
     },
@@ -332,7 +336,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
-        "line": 226,
+        "line": 229,
         "column": 45
       }
     },
@@ -346,7 +350,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
-        "line": 238,
+        "line": 241,
         "column": 29
       }
     },
@@ -360,7 +364,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
-        "line": 272,
+        "line": 275,
         "column": 9
       }
     },
@@ -374,7 +378,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
-        "line": 314,
+        "line": 317,
         "column": 53
       }
     },
@@ -388,7 +392,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
-        "line": 342,
+        "line": 345,
         "column": 15
       }
     },
@@ -402,7 +406,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
-        "line": 372,
+        "line": 375,
         "column": 32
       }
     },
@@ -416,7 +420,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
-        "line": 406,
+        "line": 409,
         "column": 18
       }
     },
@@ -430,7 +434,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
-        "line": 426,
+        "line": 429,
         "column": 84
       }
     },
@@ -444,7 +448,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
-        "line": 159,
+        "line": 162,
         "column": 64
       }
     },
@@ -458,7 +462,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
-        "line": 169,
+        "line": 172,
         "column": 69
       }
     },
@@ -472,7 +476,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
-        "line": 184,
+        "line": 187,
         "column": 9
       }
     },
@@ -486,7 +490,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
-        "line": 201,
+        "line": 204,
         "column": 9
       }
     },
@@ -500,7 +504,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
-        "line": 216,
+        "line": 219,
         "column": 21
       }
     },
@@ -514,7 +518,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
-        "line": 226,
+        "line": 229,
         "column": 45
       }
     },
@@ -528,7 +532,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
-        "line": 238,
+        "line": 241,
         "column": 29
       }
     },
@@ -542,7 +546,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
-        "line": 272,
+        "line": 275,
         "column": 9
       }
     },
@@ -556,7 +560,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
-        "line": 314,
+        "line": 317,
         "column": 53
       }
     },
@@ -570,7 +574,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
-        "line": 342,
+        "line": 345,
         "column": 15
       }
     },
@@ -584,7 +588,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
-        "line": 372,
+        "line": 375,
         "column": 32
       }
     },
@@ -598,7 +602,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
-        "line": 406,
+        "line": 409,
         "column": 18
       }
     },
@@ -612,7 +616,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
-        "line": 426,
+        "line": 429,
         "column": 84
       }
     },
@@ -626,7 +630,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
-        "line": 460,
+        "line": 463,
         "column": 34
       }
     },
@@ -640,7 +644,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 142,
+        "line": 145,
         "column": 25
       }
     },
@@ -654,7 +658,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 165,
+        "line": 168,
         "column": 86
       }
     },
@@ -668,7 +672,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 202,
+        "line": 205,
         "column": 19
       }
     },
@@ -682,7 +686,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 251,
+        "line": 254,
         "column": 17
       }
     },
@@ -696,7 +700,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 292,
+        "line": 295,
         "column": 15
       }
     },
@@ -710,7 +714,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 333,
+        "line": 336,
         "column": 17
       }
     },
@@ -724,7 +728,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 359,
+        "line": 362,
         "column": 11
       }
     },
@@ -738,7 +742,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/monitor_health_all_spaces.spec.ts",
-        "line": 105,
+        "line": 108,
         "column": 7
       }
     },
@@ -752,7 +756,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/monitor_health_all_spaces.spec.ts",
-        "line": 117,
+        "line": 120,
         "column": 7
       }
     },
@@ -766,7 +770,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/monitor_health_all_spaces.spec.ts",
-        "line": 132,
+        "line": 135,
         "column": 13
       }
     },
@@ -775,12 +779,13 @@
       "title": "PrivateLocationAPI adds a test private location",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
-        "line": 179,
-        "column": 53
+        "line": 186,
+        "column": 25
       }
     },
     {
@@ -788,12 +793,13 @@
       "title": "PrivateLocationAPI lists all locations and migrates the legacy singleton to the new saved object type",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
-        "line": 188,
-        "column": 23
+        "line": 192,
+        "column": 27
       }
     },
     {
@@ -801,12 +807,13 @@
       "title": "PrivateLocationAPI cannot create private location if privileges are missing",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
-        "line": 200,
-        "column": 9
+        "line": 205,
+        "column": 16
       }
     },
     {
@@ -814,12 +821,13 @@
       "title": "PrivateLocationAPI can create private location if privileges are added",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
-        "line": 207,
-        "column": 25
+        "line": 211,
+        "column": 45
       }
     },
     {
@@ -827,12 +835,13 @@
       "title": "PrivateLocationAPI can delete private location if privileges are added",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
-        "line": 211,
-        "column": 25
+        "line": 220,
+        "column": 21
       }
     },
     {
@@ -840,12 +849,13 @@
       "title": "PrivateLocationAPI can create private location in multiple spaces",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
-        "line": 235,
-        "column": 11
+        "line": 239,
+        "column": 77
       }
     },
     {
@@ -853,12 +863,13 @@
       "title": "PrivateLocationAPI creates private location in agent policy spaces if no spaces are defined for the location",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
-        "line": 242,
-        "column": 17
+        "line": 247,
+        "column": 7
       }
     },
     {
@@ -866,12 +877,13 @@
       "title": "PrivateLocationAPI creates private location in agent policy spaces if locations spaces is an empty array",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
-        "line": 259,
-        "column": 19
+        "line": 265,
+        "column": 6
       }
     },
     {
@@ -879,12 +891,13 @@
       "title": "PrivateLocationAPI validation errors works in multiple spaces as well",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
-        "line": 273,
-        "column": 19
+        "line": 279,
+        "column": 6
       }
     },
     {
@@ -892,12 +905,13 @@
       "title": "PrivateLocationAPI cannot create private location in multiple spaces if the agent policy does not belong to those spaces",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
-        "line": 298,
-        "column": 29
+        "line": 303,
+        "column": 15
       }
     },
     {
@@ -905,12 +919,13 @@
       "title": "PrivateLocationAPI can create private location in any space if agent policy has \"*\" space id",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
-        "line": 310,
-        "column": 9
+        "line": 315,
+        "column": 21
       }
     },
     {
@@ -923,7 +938,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/scalable_private_location_monitor_crud.spec.ts",
-        "line": 54,
+        "line": 57,
         "column": 25
       }
     },
@@ -936,8 +951,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/scalable_private_location_mw_sync.spec.ts",
-        "line": 148,
-        "column": 42
+        "line": 151,
+        "column": 7
       }
     },
     {
@@ -949,8 +964,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/scalable_private_location_mw_sync.spec.ts",
-        "line": 182,
-        "column": 19
+        "line": 185,
+        "column": 54
       }
     },
     {
@@ -962,8 +977,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/scalable_private_location_placement.spec.ts",
-        "line": 80,
-        "column": 51
+        "line": 85,
+        "column": 11
       }
     },
     {
@@ -975,8 +990,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/scalable_private_location_rebalance.spec.ts",
-        "line": 79,
-        "column": 38
+        "line": 82,
+        "column": 5
       }
     }
   ]

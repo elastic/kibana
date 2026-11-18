@@ -1,5 +1,5 @@
 {
-  "sha1": "965d04c2fd9a74fd8b78520370c864cd454755c1",
+  "sha1": "686dda3af910320163cfbf7fbb3c4c8169c8d9bf",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,7 +14,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout_synthetics_agent_e2e/api/tests/monitor_types.spec.ts",
         "line": 123,
-        "column": 24
+        "column": 7
       }
     },
     {
@@ -27,7 +27,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout_synthetics_agent_e2e/api/tests/monitor_types.spec.ts",
         "line": 123,
-        "column": 24
+        "column": 7
       }
     },
     {
@@ -40,7 +40,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout_synthetics_agent_e2e/api/tests/monitor_types.spec.ts",
         "line": 123,
-        "column": 24
+        "column": 7
       }
     },
     {
@@ -53,7 +53,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout_synthetics_agent_e2e/api/tests/monitor_types.spec.ts",
         "line": 123,
-        "column": 24
+        "column": 7
       }
     },
     {
@@ -65,8 +65,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout_synthetics_agent_e2e/api/tests/monitor_types.spec.ts",
-        "line": 140,
-        "column": 13
+        "line": 141,
+        "column": 22
       }
     }
   ]

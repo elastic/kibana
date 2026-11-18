@@ -1,5 +1,5 @@
 {
-  "sha1": "77a77680cf7b5cb0296cbeef32f569c9504d6243",
+  "sha1": "718c926ef1371fe44e3a568906968f9b7c48e9d5",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -29,8 +29,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 18,
-        "column": 25
+        "line": 17,
+        "column": 43
       }
     },
     {
@@ -42,7 +42,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 77,
+        "line": 74,
         "column": 19
       }
     },
@@ -56,7 +56,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
         "line": 148,
-        "column": 99
+        "column": 86
       }
     },
     {
@@ -68,8 +68,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 208,
-        "column": 11
+        "line": 206,
+        "column": 15
       }
     },
     {
@@ -81,8 +81,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 214,
-        "column": 26
+        "line": 212,
+        "column": 90
       }
     },
     {

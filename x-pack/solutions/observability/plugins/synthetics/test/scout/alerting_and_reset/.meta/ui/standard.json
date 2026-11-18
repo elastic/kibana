@@ -1,5 +1,5 @@
 {
-  "sha1": "d565399457b570b366ea7bcdc17a607be9cac20e",
+  "sha1": "100fd7e06a9e2fa08851cb661e0458274c7056a5",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -58,12 +58,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/ui/tests/bulk_edit_maintenance_windows.spec.ts",
-        "line": 86,
-        "column": 11
+        "line": 92,
+        "column": 7
       }
     },
     {
@@ -77,7 +79,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/ui/tests/custom_status_alert.spec.ts",
-        "line": 23,
+        "line": 25,
         "column": 28
       }
     },
@@ -135,12 +137,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/ui/tests/default_status_alert.spec.ts",
-        "line": 24,
-        "column": 8
+        "line": 28,
+        "column": 13
       }
     }
   ]

@@ -1,5 +1,5 @@
 {
-  "sha1": "36dad87d0735c6593b652569fcdb4ae88da9691c",
+  "sha1": "ff4666c42d941c436b6fcc55f7722f57d7eee207",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -3275,7 +3275,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/indices.spec.ts",
         "line": 21,
-        "column": 21
+        "column": 5
       }
     },
     {
@@ -3288,8 +3288,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/indices.spec.ts",
-        "line": 27,
-        "column": 33
+        "line": 28,
+        "column": 20
       }
     },
     {
@@ -3344,8 +3344,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/storage_explorer/storage_explorer_functionality.spec.ts",
-        "line": 20,
-        "column": 28
+        "line": 21,
+        "column": 8
       }
     },
     {

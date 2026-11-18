@@ -1,5 +1,5 @@
 {
-  "sha1": "727d99bdef70f487bdc231761b1f383795cd6666",
+  "sha1": "1bad83ba502fac784ea28ce61fdebac7010dee86",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -10,13 +10,11 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/global.setup.ts",
-        "line": 15,
+        "line": 20,
         "column": 1
       }
     },
@@ -30,7 +28,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/00_has_no_setup.spec.ts",
-        "line": 21,
+        "line": 25,
         "column": 65
       }
     },
@@ -44,7 +42,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/00_has_no_setup.spec.ts",
-        "line": 33,
+        "line": 37,
         "column": 27
       }
     },
@@ -58,7 +56,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/01_has_setup_apm_not_installed.spec.ts",
-        "line": 24,
+        "line": 28,
         "column": 28
       }
     },
@@ -72,7 +70,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/01_has_setup_apm_not_installed.spec.ts",
-        "line": 37,
+        "line": 41,
         "column": 27
       }
     },
@@ -86,7 +84,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/02_has_setup_with_data.spec.ts",
-        "line": 28,
+        "line": 32,
         "column": 5
       }
     },
@@ -100,7 +98,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/02_has_setup_with_data.spec.ts",
-        "line": 42,
+        "line": 46,
         "column": 25
       }
     },
@@ -114,7 +112,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/03_has_setup_with_integrations.spec.ts",
-        "line": 61,
+        "line": 65,
         "column": 28
       }
     },
@@ -128,7 +126,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/03_has_setup_with_integrations.spec.ts",
-        "line": 84,
+        "line": 88,
         "column": 12
       }
     },
@@ -142,7 +140,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/04_functions.spec.ts",
-        "line": 34,
+        "line": 37,
         "column": 27
       }
     },
@@ -156,8 +154,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/05_flamegraph.spec.ts",
-        "line": 58,
-        "column": 13
+        "line": 62,
+        "column": 11
       }
     },
     {
@@ -170,7 +168,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/06_feature_controls.spec.ts",
-        "line": 89,
+        "line": 92,
         "column": 7
       }
     },
@@ -184,8 +182,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/06_feature_controls.spec.ts",
-        "line": 107,
-        "column": 45
+        "line": 111,
+        "column": 13
       }
     },
     {
@@ -198,8 +196,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/07_status.spec.ts",
-        "line": 71,
-        "column": 9
+        "line": 74,
+        "column": 18
       }
     },
     {
@@ -212,8 +210,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/07_status.spec.ts",
-        "line": 93,
-        "column": 28
+        "line": 97,
+        "column": 26
       }
     },
     {
@@ -226,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/08_schemas.spec.ts",
-        "line": 54,
-        "column": 13
+        "line": 57,
+        "column": 26
       }
     },
     {
@@ -240,8 +238,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/08_schemas.spec.ts",
-        "line": 87,
-        "column": 5
+        "line": 90,
+        "column": 55
       }
     },
     {
@@ -254,8 +252,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/09_otel_data.spec.ts",
-        "line": 117,
-        "column": 45
+        "line": 121,
+        "column": 11
       }
     },
     {
@@ -268,8 +266,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/09_otel_data.spec.ts",
-        "line": 132,
-        "column": 96
+        "line": 136,
+        "column": 81
       }
     },
     {
@@ -282,8 +280,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/09_otel_data.spec.ts",
-        "line": 150,
-        "column": 95
+        "line": 154,
+        "column": 80
       }
     },
     {
@@ -296,8 +294,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/09_otel_data.spec.ts",
-        "line": 163,
-        "column": 7
+        "line": 166,
+        "column": 15
       }
     },
     {
@@ -310,8 +308,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/09_otel_data.spec.ts",
-        "line": 163,
-        "column": 7
+        "line": 166,
+        "column": 15
       }
     },
     {
@@ -324,8 +322,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/09_otel_data.spec.ts",
-        "line": 163,
-        "column": 7
+        "line": 166,
+        "column": 15
       }
     },
     {
@@ -338,8 +336,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/09_otel_data.spec.ts",
-        "line": 163,
-        "column": 7
+        "line": 166,
+        "column": 15
       }
     },
     {
@@ -352,8 +350,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/09_otel_data.spec.ts",
-        "line": 163,
-        "column": 7
+        "line": 166,
+        "column": 15
       }
     },
     {
@@ -366,8 +364,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/09_otel_data.spec.ts",
-        "line": 170,
-        "column": 10
+        "line": 173,
+        "column": 26
       }
     },
     {
@@ -380,7 +378,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/global.teardown.ts",
-        "line": 6,
+        "line": 13,
         "column": 1
       }
     }

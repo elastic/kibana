@@ -1,5 +1,5 @@
 {
-  "sha1": "e591db3d114b3dd868d53d899123de6e1704a568",
+  "sha1": "8a17cfcbff1be1d3266353d2ec7093bbae3be777",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -46,7 +46,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_grouping.spec.ts",
-        "line": 66,
+        "line": 67,
         "column": 15
       }
     },
@@ -60,7 +60,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_grouping.spec.ts",
-        "line": 77,
+        "line": 78,
         "column": 66
       }
     },
@@ -74,7 +74,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_grouping.spec.ts",
-        "line": 89,
+        "line": 90,
         "column": 13
       }
     },
@@ -88,7 +88,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_grouping.spec.ts",
-        "line": 95,
+        "line": 96,
         "column": 27
       }
     },
@@ -102,7 +102,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_grouping.spec.ts",
-        "line": 111,
+        "line": 112,
         "column": 16
       }
     },
@@ -148,7 +148,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_stats.spec.ts",
-        "line": 79,
+        "line": 82,
         "column": 31
       }
     },
@@ -162,7 +162,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_stats.spec.ts",
-        "line": 79,
+        "line": 82,
         "column": 31
       }
     },
@@ -176,7 +176,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_stats.spec.ts",
-        "line": 79,
+        "line": 82,
         "column": 31
       }
     },
@@ -190,7 +190,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_stats.spec.ts",
-        "line": 117,
+        "line": 120,
         "column": 20
       }
     },
@@ -204,7 +204,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_stats.spec.ts",
-        "line": 117,
+        "line": 120,
         "column": 20
       }
     },
@@ -218,7 +218,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_stats.spec.ts",
-        "line": 131,
+        "line": 134,
         "column": 20
       }
     },
@@ -232,7 +232,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/api/tests/service_map/service_map_stats.spec.ts",
-        "line": 160,
+        "line": 163,
         "column": 13
       }
     },

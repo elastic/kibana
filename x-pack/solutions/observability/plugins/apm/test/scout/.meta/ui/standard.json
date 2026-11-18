@@ -1,5 +1,5 @@
 {
-  "sha1": "36dad87d0735c6593b652569fcdb4ae88da9691c",
+  "sha1": "ff4666c42d941c436b6fcc55f7722f57d7eee207",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -300,7 +300,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/06_agent_configuration.spec.ts",
-        "line": 12,
+        "line": 13,
         "column": 81
       }
     },
@@ -314,7 +314,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/06_agent_configuration.spec.ts",
-        "line": 16,
+        "line": 17,
         "column": 9
       }
     },
@@ -328,7 +328,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/06_agent_configuration.spec.ts",
-        "line": 23,
+        "line": 24,
         "column": 8
       }
     },
@@ -358,7 +358,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/08_service_map_a11y_node_stats.spec.ts",
-        "line": 68,
+        "line": 71,
         "column": 18
       }
     },
@@ -372,7 +372,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/tests/08_service_map_a11y_node_stats.spec.ts",
-        "line": 93,
+        "line": 96,
         "column": 11
       }
     }
