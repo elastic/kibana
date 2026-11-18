@@ -38,8 +38,12 @@ export const guardHitTag = (guard: string, field: string): string =>
 export const NOVELTY_FIELD = {
   hash: 'hash',
   trusted: 'trusted',
+  /** The trust of the process that loads a library. For the other kinds the field `trusted` already is the process trust. */
+  processTrusted: 'process_trusted',
   parent: 'parent_executable',
   commandLine: 'command_line_shape',
+  /** The quoted values of the command line, which the shape hides. */
+  commandLineQuoted: 'command_line_quoted',
   destinationIp: 'destination.ip',
   destinationDomain: 'destination.domain',
   user: 'user.name',
@@ -49,22 +53,24 @@ export const NOVELTY_FIELD = {
 export const FIRING_FIELDS: readonly string[] = [
   NOVELTY_FIELD.hash,
   NOVELTY_FIELD.trusted,
+  NOVELTY_FIELD.processTrusted,
   NOVELTY_FIELD.parent,
   NOVELTY_FIELD.commandLine,
+  NOVELTY_FIELD.commandLineQuoted,
   NOVELTY_FIELD.destinationIp,
   NOVELTY_FIELD.destinationDomain,
 ];
 
 export const RECORDED_ONLY_FIELDS: readonly string[] = [NOVELTY_FIELD.user, NOVELTY_FIELD.host];
 
-const HASH_FIELD: Record<PatternKeyPathKind, string> = {
+export const HASH_FIELD: Record<PatternKeyPathKind, string> = {
   process: 'process.hash.sha256',
   registry: 'process.hash.sha256',
   file: 'file.hash.sha256',
   library: 'dll.hash.sha256',
 };
 
-const TRUSTED_FIELD: Record<PatternKeyPathKind, string> = {
+export const TRUSTED_FIELD: Record<PatternKeyPathKind, string> = {
   process: 'process.code_signature.trusted',
   registry: 'process.code_signature.trusted',
   file: 'process.code_signature.trusted',
@@ -123,8 +129,35 @@ export const commandLineShape = (commandLine: string): string =>
     .trim();
 
 /** The record keeps a short hash of the shape, not the text of a command line. */
-const shapeHash = (shape: string): string =>
-  createHash('sha256').update(shape).digest('hex').slice(0, 16);
+const shortHash = (text: string): string =>
+  createHash('sha256').update(text).digest('hex').slice(0, 16);
+
+const shapeHash = shortHash;
+
+/**
+ * The quoted values of a command line, which the shape hides: a script path, a target, an argument with spaces. Each value is
+ * normalized like the shape (Base64, user profiles, temporary paths, GUIDs and long hex strings become placeholders) and kept as
+ * a short hash. A different script run with the same switches has a new quoted value, and the shape alone cannot see it.
+ * Numbers stay as they are, so that scripts with numbers in their names are told apart.
+ */
+export const commandLineQuotedValues = (commandLine: string): string[] => [
+  ...new Set(
+    [...commandLine.matchAll(QUOTED)].map(([quoted]) =>
+      shortHash(
+        quoted
+          .slice(1, -1)
+          .replace(BASE64_RUN, (token) => (isBase64Like(token) ? '<b64>' : token))
+          .toLowerCase()
+          .replace(WINDOWS_PROFILE, '$1<user>')
+          .replace(UNIX_PROFILE, '$1<user>')
+          .replace(TEMP_PATH, '<tmp>')
+          .replace(GUID, '<guid>')
+          .replace(HEX, '<hex>')
+          .trim()
+      )
+    )
+  ),
+];
 
 type NoveltyValues = Record<string, string[]>;
 
@@ -150,6 +183,10 @@ export const noveltyValuesOf = (
   if (kind !== 'cloud') {
     add(NOVELTY_FIELD.hash, getField(record, HASH_FIELD[kind]), (raw) => raw.toLowerCase());
     add(NOVELTY_FIELD.trusted, getField(record, TRUSTED_FIELD[kind]));
+    // A library key holds the signature of the library. The process that loads it has its own, which the key does not hold.
+    if (kind === 'library') {
+      add(NOVELTY_FIELD.processTrusted, getField(record, 'process.code_signature.trusted'));
+    }
     // The process key holds the parent already, so a new parent is a new key and not a guard hit.
     if (kind !== 'process') {
       add(NOVELTY_FIELD.parent, getField(record, PARENT_FIELD), (raw) =>
@@ -159,6 +196,9 @@ export const noveltyValuesOf = (
     add(NOVELTY_FIELD.commandLine, getField(record, COMMAND_LINE_FIELD), (raw) =>
       shapeHash(commandLineShape(raw))
     );
+    const commandLine = getField(record, COMMAND_LINE_FIELD);
+    const quoted = present(commandLine) ? commandLineQuotedValues(String(commandLine)) : [];
+    if (quoted.length > 0) values[NOVELTY_FIELD.commandLineQuoted] = quoted;
   }
   add(NOVELTY_FIELD.destinationIp, getField(record, 'destination.ip'));
   add(NOVELTY_FIELD.destinationDomain, getField(record, 'destination.domain'), (raw) =>
@@ -177,8 +217,9 @@ export interface NoveltyCheck {
 }
 
 /**
- * Compares an alert with the novelty lists of a record. A field fires when the alert has a value and the list does not.
- * A full list (the cap) is not checked. A field that the alert does not have, and the recorded-only fields, never fire.
+ * Compares an alert with the novelty lists of a record. A field fires when the alert has a value that the list does not (for a
+ * field with several values, any one of them). A full list (the cap) is not checked. A field that the alert does not have, and
+ * the recorded-only fields, never fire.
  */
 export const checkNovelty = ({
   lists,
@@ -191,11 +232,11 @@ export const checkNovelty = ({
 }): NoveltyCheck => {
   const check: NoveltyCheck = { fired: [], notChecked: [] };
   for (const field of FIRING_FIELDS) {
-    const [value] = values[field] ?? [];
-    if (value === undefined) continue;
+    const alertValues = values[field] ?? [];
+    if (alertValues.length === 0) continue;
     const known = lists[field] ?? [];
     if (known.length >= cap) check.notChecked.push(field);
-    else if (!known.includes(value)) check.fired.push(field);
+    else if (alertValues.some((value) => !known.includes(value))) check.fired.push(field);
   }
   return check;
 };

@@ -9,6 +9,7 @@ import {
   NOVELTY_FIELD,
   NOVELTY_SOURCE_FIELDS,
   checkNovelty,
+  commandLineQuotedValues,
   commandLineShape,
   guardHitTag,
   noveltyValuesOf,
@@ -212,5 +213,133 @@ describe('checkNovelty', () => {
 describe('guardHitTag', () => {
   it('names the guard and the field', () => {
     expect(guardHitTag('novelty', 'hash')).toBe('az:guard_hit:novelty:hash');
+  });
+});
+
+describe('commandLineQuotedValues', () => {
+  it('gives one short hash for each distinct quoted value, and nothing for a command line without quotes', () => {
+    const values = commandLineQuotedValues(
+      'tool -a "C:\\x\\one.ps1" -b \'two words\' -c "C:\\x\\one.ps1"'
+    );
+
+    expect(values).toHaveLength(2);
+    values.forEach((value) => expect(value).toMatch(/^[0-9a-f]{16}$/));
+    expect(commandLineQuotedValues('tool --plain -x')).toEqual([]);
+  });
+
+  it('tells two scripts apart when the switches are the same, which the shape cannot', () => {
+    const first = 'powershell.exe -file "C:\\Tools\\a.ps1"';
+    const other = 'powershell.exe -file "C:\\Users\\Public\\evil.ps1"';
+
+    expect(commandLineShape(first)).toBe(commandLineShape(other));
+    expect(commandLineQuotedValues(first)).not.toEqual(commandLineQuotedValues(other));
+  });
+
+  it('gives the same hash when only a part that changes from run to run is different', () => {
+    const same = (a: string, b: string) =>
+      expect(commandLineQuotedValues(`x "${a}"`)).toEqual(commandLineQuotedValues(`x "${b}"`));
+
+    same('C:\\Users\\alice\\app\\run.ps1', 'c:\\users\\bob\\app\\run.ps1');
+    same(
+      'C:\\Users\\alice\\AppData\\Local\\Temp\\a1.tmp',
+      'C:\\Users\\bob\\AppData\\Local\\Temp\\z9.tmp'
+    );
+    same('{123e4567-e89b-12d3-a456-426614174000}', '{223e4567-e89b-12d3-a456-426614174999}');
+    same('log deadbeef0123', 'log 0123deadbeef');
+  });
+
+  it('keeps numbers, so that two scripts that differ only by a number are told apart', () => {
+    expect(commandLineQuotedValues('x "C:\\s\\1234.ps1"')).not.toEqual(
+      commandLineQuotedValues('x "C:\\s\\5678.ps1"')
+    );
+  });
+});
+
+describe('the quoted values and the process trust as novelty fields', () => {
+  const libraryDoc = (processTrusted: boolean) => ({
+    event: { category: ['library'] },
+    dll: { hash: { sha256: 'cc' }, code_signature: { subject_name: 'Acme', trusted: true } },
+    process: { code_signature: { trusted: processTrusted } },
+  });
+
+  it('records the process trust of a library alert apart from the trust of the library, and for no other kind', () => {
+    const values = noveltyValuesOf(libraryDoc(false), 'library');
+
+    expect(values[NOVELTY_FIELD.trusted]).toEqual(['true']);
+    expect(values[NOVELTY_FIELD.processTrusted]).toEqual(['false']);
+    expect(
+      noveltyValuesOf({ process: { code_signature: { trusted: true } } }, 'process')[
+        NOVELTY_FIELD.processTrusted
+      ]
+    ).toBeUndefined();
+  });
+
+  it('fires on a library alert whose process is no longer trusted, though the library itself is', () => {
+    const seen = noveltyValuesOf(libraryDoc(true), 'library');
+
+    const { fired } = checkNovelty({
+      lists: seen,
+      values: noveltyValuesOf(libraryDoc(false), 'library'),
+    });
+
+    expect(fired).toEqual([NOVELTY_FIELD.processTrusted]);
+  });
+
+  it('fires on a different script with the same switches, under the quoted field and not under the shape', () => {
+    const doc = (script: string) => ({
+      process: { executable: 'C:\\Tools\\ps.exe', command_line: `ps.exe -file "${script}"` },
+    });
+    const seen = noveltyValuesOf(doc('C:\\Tools\\a.ps1'), 'process');
+
+    const { fired } = checkNovelty({
+      lists: seen,
+      values: noveltyValuesOf(doc('C:\\Users\\Public\\evil.ps1'), 'process'),
+    });
+
+    expect(fired).toEqual([NOVELTY_FIELD.commandLineQuoted]);
+  });
+
+  it('does not fire on a command line without quotes, or on a quoted value that was seen', () => {
+    const quoted = noveltyValuesOf(
+      { process: { command_line: 'ps.exe -file "C:\\Tools\\a.ps1"' } },
+      'process'
+    );
+
+    expect(
+      checkNovelty({
+        lists: quoted,
+        values: noveltyValuesOf(
+          { process: { command_line: 'ps.exe -file "C:\\Tools\\a.ps1"' } },
+          'process'
+        ),
+      }).fired
+    ).toEqual([]);
+    expect(
+      noveltyValuesOf({ process: { command_line: 'ps.exe -x' } }, 'process')[
+        NOVELTY_FIELD.commandLineQuoted
+      ]
+    ).toBeUndefined();
+  });
+
+  it('fires when any one of several quoted values is new, and does not when all of them were seen', () => {
+    const lists = { [NOVELTY_FIELD.commandLineQuoted]: ['a', 'b'] };
+
+    expect(
+      checkNovelty({ lists, values: { [NOVELTY_FIELD.commandLineQuoted]: ['a', 'b'] } }).fired
+    ).toEqual([]);
+    expect(
+      checkNovelty({ lists, values: { [NOVELTY_FIELD.commandLineQuoted]: ['b', 'c'] } }).fired
+    ).toEqual([NOVELTY_FIELD.commandLineQuoted]);
+  });
+
+  it('does not check a field with several values when its list is full', () => {
+    const full = Array.from({ length: VERDICT_CACHE_NOVELTY_CAP }, (_unused, i) => `h${i}`);
+
+    const check = checkNovelty({
+      lists: { [NOVELTY_FIELD.commandLineQuoted]: full },
+      values: { [NOVELTY_FIELD.commandLineQuoted]: ['new1', 'new2'] },
+    });
+
+    expect(check).toEqual({ fired: [], notChecked: [NOVELTY_FIELD.commandLineQuoted] });
   });
 });
