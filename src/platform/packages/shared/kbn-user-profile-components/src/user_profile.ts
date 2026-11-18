@@ -72,7 +72,7 @@ export function getUserAvatarInitials(
 
   words.splice(numInitials, words.length);
 
-  return words.map((word) => getGraphemes(word)[0] ?? '').join('');
+  return words.map((word) => graphemeSegmenter.segment(word).containing(0)?.segment ?? '').join('');
 }
 
 /**

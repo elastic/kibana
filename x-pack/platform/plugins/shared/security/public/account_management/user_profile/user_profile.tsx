@@ -999,13 +999,19 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
           userSettings = userSettingsWithoutLocale;
         }
         const profileData = { ...values.data, userSettings };
-        submitActions.push(
-          update(
-            values.avatarType === 'image'
-              ? profileData
-              : { ...profileData, avatar: { ...profileData.avatar, imageUrl: null } }
-          )
-        );
+        if (values.avatarType === 'image') {
+          // Image mode hides the initials field, so invalid initials cannot be fixed in place. Drop them
+          // from the payload so the route does not reject the whole save.
+          const { initials, ...avatarWithoutInitials } = profileData.avatar;
+          const avatar = isValidUserProfileAvatarInitials(initials)
+            ? profileData.avatar
+            : avatarWithoutInitials;
+          submitActions.push(update({ ...profileData, avatar }));
+        } else {
+          submitActions.push(
+            update({ ...profileData, avatar: { ...profileData.avatar, imageUrl: null } })
+          );
+        }
       }
 
       if (submitActions.length === 0) {
