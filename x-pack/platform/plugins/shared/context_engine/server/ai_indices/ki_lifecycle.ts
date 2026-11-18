@@ -8,6 +8,7 @@
 import { Parser, Walker, WrappingPrettyPrinter, mutate } from '@elastic/esql';
 import type { ESQLAstQueryExpression } from '@elastic/esql/types';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
+import { globToRegExp } from '../utils/glob_to_reg_exp';
 
 const KI_LIFECYCLE_STATUS_FIELD = 'governance.lifecycle.status';
 const KI_EXPIRES_AT_FIELD = 'expires_at';
@@ -33,14 +34,6 @@ const LATEST_REVISION = [
 /** The commands after `FROM` that select the current, active, unexpired KIs. */
 export const kiLifecyclePipeline = (type: AiIndexDest['type']): string[] =>
   type === 'data_stream' ? [...LATEST_REVISION, ...LIFECYCLE_FILTERS] : LIFECYCLE_FILTERS;
-
-const globToRegExp = (pattern: string): RegExp =>
-  new RegExp(
-    `^${pattern
-      .split('*')
-      .map((part) => part.replace(/[.+?^${}()|[\]\\]/g, '\\$&'))
-      .join('.*')}$`
-  );
 
 const overlaps = (source: string, dest: string): boolean =>
   globToRegExp(source).test(dest) || globToRegExp(dest).test(source);

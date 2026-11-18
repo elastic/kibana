@@ -348,7 +348,7 @@ export const registerAiIndexRoutes = ({
         const auditLogger = security.audit.logger;
         const { id, memory_enabled: _memoryEnabled, ...properties } = request.body;
         try {
-          await validateEsqlSources(properties.sources);
+          await validateEsqlSources(properties.sources, properties.dest);
           await validateConnectorSources({
             sources: properties.sources,
             actions: await getActions(),
@@ -440,7 +440,7 @@ export const registerAiIndexRoutes = ({
           const aiIndexService = getAiIndexService();
           const previous = await findAiIndex(aiIndexService, aiIndexId, spaceId);
           const { memory_enabled: _memoryEnabled, ...properties } = request.body;
-          await validateEsqlSources(properties.sources);
+          await validateEsqlSources(properties.sources, properties.dest);
           await validateConnectorSources({
             sources: properties.sources,
             actions: await getActions(),
