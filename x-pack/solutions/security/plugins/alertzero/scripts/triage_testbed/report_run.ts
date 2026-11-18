@@ -34,6 +34,7 @@ import fs from 'fs';
 import path from 'path';
 import readline from 'readline';
 import { buildCacheSection, cacheNote, readCacheData, type CacheSection } from './report_cache';
+import { buildPocSection, pocNote, type PocSection } from './report_poc';
 import type { Classification, TruthRecord } from './fake_llm';
 import { parseAlertIds } from './fake_llm';
 
@@ -136,6 +137,8 @@ export interface Scorecard {
     }
   >;
   verdictCache?: CacheSection;
+  /** Set when a verdict came from the cache or from Jev (`on` mode of either flag). */
+  poc?: PocSection;
 }
 
 export type ScorecardDiff = Record<
@@ -816,13 +819,21 @@ export const main = async (): Promise<void> => {
       analyzedAlerts: scorecard.verdicts.analyzed,
     });
   }
+  const poc = buildPocSection({
+    alerts: run.alerts,
+    truth,
+    records: cacheData.records,
+    verdictsPerHour: scorecard.throughput.verdictsPerHour,
+  });
+  if (poc.bySource.cache.verdicts + poc.bySource.jev.verdicts > 0) scorecard.poc = poc;
   const exclusionNote = excluded.names.length
     ? `Left out of the wrong-verdict metric (reported apart under excludedRules): ${excluded.names.join(
         '; '
       )}. Reason: ${args.excludeReason}`
     : '';
   const cacheSentence = scorecard.verdictCache ? cacheNote(scorecard.verdictCache) : '';
-  const note = [args.note, exclusionNote, cacheSentence].filter(Boolean).join(' ');
+  const pocSentence = scorecard.poc ? pocNote(scorecard.poc) : '';
+  const note = [args.note, exclusionNote, cacheSentence, pocSentence].filter(Boolean).join(' ');
 
   const connectorIds = scorecard.costAndTokens.connectorIds;
   if (args.connectorId) {
