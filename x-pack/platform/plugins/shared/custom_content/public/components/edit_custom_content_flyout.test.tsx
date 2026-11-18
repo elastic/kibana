@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { ComponentProps } from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MockedCodeEditor } from '@kbn/code-editor-mock';
 import type { MockedMonacoEditor } from '@kbn/code-editor-mock/monaco_mock';
@@ -91,6 +91,16 @@ beforeEach(() => {
 });
 
 describe('EditCustomContentFlyout', () => {
+  it('starts with the template section collapsed', () => {
+    render(<EditCustomContentFlyout {...defaultProps} />);
+
+    expect(
+      within(screen.getByTestId('customContentTemplateSection')).getByRole('button', {
+        name: /Template \(HTML\)/,
+      })
+    ).toHaveAttribute('aria-expanded', 'false');
+  });
+
   describe('Apply and close', () => {
     it('is disabled when nothing has been edited', () => {
       mockUseEditFlyoutState.mockReturnValue({
