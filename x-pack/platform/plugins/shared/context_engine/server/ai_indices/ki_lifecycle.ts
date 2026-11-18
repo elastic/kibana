@@ -8,7 +8,7 @@
 import { Parser, Walker, WrappingPrettyPrinter, mutate } from '@elastic/esql';
 import type { ESQLAstQueryExpression } from '@elastic/esql/types';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
-import { globToRegExp } from '../utils/glob_to_reg_exp';
+import { matchesGlob } from '../utils/matches_glob';
 
 const KI_LIFECYCLE_STATUS_FIELD = 'governance.lifecycle.status';
 const KI_EXPIRES_AT_FIELD = 'expires_at';
@@ -36,7 +36,7 @@ export const kiLifecyclePipeline = (type: AiIndexDest['type']): string[] =>
   type === 'data_stream' ? [...LATEST_REVISION, ...LIFECYCLE_FILTERS] : LIFECYCLE_FILTERS;
 
 const overlaps = (source: string, dest: string): boolean =>
-  globToRegExp(source).test(dest) || globToRegExp(dest).test(source);
+  matchesGlob(source, dest) || matchesGlob(dest, source);
 
 /** Which defaults the query already handles: a top-level `WHERE` per filter, any `governance.*` for the drop. */
 const namedLifecycleFields = (root: ESQLAstQueryExpression) => {

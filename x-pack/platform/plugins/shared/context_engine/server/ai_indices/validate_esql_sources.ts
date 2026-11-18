@@ -5,22 +5,25 @@
  * 2.0.
  */
 
-import { Parser, mutate } from '@elastic/esql';
+import { Parser, Walker } from '@elastic/esql';
 import { validateQuery } from '@kbn/esql-language';
 import type { AiIndexDest, AiIndexSource } from '../../common/http_api/ai_indices';
 import { previewQuery } from '../ki_verification/verifiers/esql_attribute';
 import { formatValidationError } from '../ki_verification/verifiers/esql_valid_syntax';
-import { globToRegExp } from '../utils/glob_to_reg_exp';
+import { matchesGlob } from '../utils/matches_glob';
 import { InvalidEsqlSourceError } from './errors';
 
 const isCircularSource = (query: string, dest: string): boolean => {
   const { root } = Parser.parse(query);
-  const targets = [...mutate.commands.from.sources.list(root)]
-    .filter(({ prefix }) => prefix === undefined)
-    .map((source) => source.index?.valueUnquoted ?? source.name);
-  const matchesDest = (target: string): boolean => globToRegExp(target).test(dest);
-  const excluded = targets.some((target) => target.startsWith('-') && matchesDest(target.slice(1)));
-  return !excluded && targets.some(matchesDest);
+  const targets: string[] = [];
+  Walker.walk(root, {
+    visitSource: ({ prefix, index, name }) => {
+      if (prefix === undefined) {
+        targets.push(...(index?.valueUnquoted ?? name).split(','));
+      }
+    },
+  });
+  return targets.some((target) => matchesGlob(target.trim(), dest));
 };
 
 const validateSingleEsqlSource = async (

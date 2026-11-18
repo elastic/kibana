@@ -65,22 +65,29 @@ describe('validateEsqlSources', () => {
     );
   });
 
-  it.each(['FROM ai-index-idx-foo', 'FROM logs-app, ai-index-idx-foo', 'FROM ai-index-idx-*'])(
-    'rejects a circular source %j',
-    async (value) => {
-      await expect(validateEsqlSources([{ type: 'esql', value }], dest)).rejects.toThrow(
-        new InvalidEsqlSourceError(
-          `ES|QL source '${value}' reads from the AI index's own dest 'ai-index-idx-foo'`
-        )
-      );
-    }
-  );
+  it.each([
+    'FROM ai-index-idx-foo',
+    'FROM logs-app, ai-index-idx-foo',
+    'FROM ai-index-idx-*',
+    'FROM *-index-*-f*',
+    'FROM ai-index-idx-foo::data',
+    'FROM "logs-app, ai-index-idx-foo"',
+    'FROM ai-index-idx-*, -ai-index-idx-foo',
+    'LET a = (FROM ai-index-idx-foo); FROM a',
+    'FROM logs-app | WHERE id IN (FROM ai-index-idx-foo | KEEP id)',
+  ])('rejects a circular source %j', async (value) => {
+    await expect(validateEsqlSources([{ type: 'esql', value }], dest)).rejects.toThrow(
+      new InvalidEsqlSourceError(
+        `ES|QL source '${value}' reads from the AI index's own dest 'ai-index-idx-foo'`
+      )
+    );
+  });
 
   it.each([
     'FROM ai-index-idx-bar',
     'FROM ai-index-idx.foo',
+    'FROM *-index-*-b*',
     'FROM remote:ai-index-idx-foo',
-    'FROM ai-index-idx-*, -ai-index-idx-foo',
   ])('accepts a non-circular source %j', async (value) => {
     await expect(validateEsqlSources([{ type: 'esql', value }], dest)).resolves.toBeUndefined();
   });
