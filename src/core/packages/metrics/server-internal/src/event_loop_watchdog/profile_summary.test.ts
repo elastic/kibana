@@ -9,8 +9,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import type { CpuProfile } from './profile_capture';
-import { summarizeProfile } from './profile_summary';
+import { summarizeProfile, type SummarizableProfile } from './profile_summary';
 import { MAX_LOCATION_LENGTH, MAX_NAME_LENGTH } from './sanitize';
 
 const ROOT = '/kibana';
@@ -42,7 +41,10 @@ interface FrameSpec {
 }
 
 /** Builds a `.cpuprofile`, one sample per stack; stacks are listed leaf first. */
-const buildProfile = (stacks: Array<Array<string | FrameSpec>>, deltaUs = 10_000): CpuProfile => {
+const buildProfile = (
+  stacks: Array<Array<string | FrameSpec>>,
+  deltaUs = 10_000
+): SummarizableProfile => {
   const nodes: Array<{
     id: number;
     callFrame: { functionName: string; url: string; lineNumber: number };
@@ -336,21 +338,17 @@ describe('summarizeProfile', () => {
 
   it('summarises the real Kibana plugin-setup fixture and resolves Kibana frames under src/ and x-pack/', () => {
     const fixturePath = path.join(__dirname, '__fixtures__', 'plugin_setup_window.json');
-    const fixture = JSON.parse(fs.readFileSync(fixturePath, 'utf8')) as CpuProfile;
+    const fixture = JSON.parse(fs.readFileSync(fixturePath, 'utf8')) as SummarizableProfile;
     const summary = summarizeProfile(fixture, { root: ROOT });
 
     expect(summary.samples).toBe(200);
     expect(summary.frames).toHaveLength(2);
     expect(summary.kibanaFrames).toHaveLength(3);
-    const isKibanaLocation = (location = '') =>
-      ['src/', 'x-pack/', 'node_modules/@kbn/', '...'].some((prefix) =>
-        location.startsWith(prefix)
-      );
-    for (const { location, callers = [] } of summary.kibanaFrames) {
-      expect(isKibanaLocation(location)).toBe(true);
-      expect(callers.length).toBeLessThanOrEqual(2);
-      for (const caller of callers) {
-        expect(isKibanaLocation(caller.location)).toBe(true);
+    for (const frame of summary.kibanaFrames) {
+      expect(frame.location).toMatch(/^(src\/|x-pack\/|node_modules\/@kbn\/|\.\.\.)/);
+      expect(frame.callers.length).toBeLessThanOrEqual(2);
+      for (const caller of frame.callers) {
+        expect(caller.location).toMatch(/^(src\/|x-pack\/|node_modules\/@kbn\/|\.\.\.)/);
       }
     }
     expect(summary.topKibanaFrame).toEqual({

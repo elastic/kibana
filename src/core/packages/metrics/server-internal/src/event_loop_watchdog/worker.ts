@@ -122,8 +122,8 @@ const formatFrameLists = ({ frames, kibanaFrames }: ProfileSummary): string => {
   }
   if (kibanaFrames.length > 0) {
     const entries = kibanaFrames.map(
-      ({ callers = [], ...frame }) =>
-        `${frame.percent}% ${[formatFrame(frame), ...callers.map(formatFrame)].join(' <- ')}`
+      (frame) =>
+        `${frame.percent}% ${[formatFrame(frame), ...frame.callers.map(formatFrame)].join(' <- ')}`
     );
     lists.push(`Kibana code: ${entries.join('; ')}`);
   }
