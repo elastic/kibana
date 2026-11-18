@@ -10,6 +10,14 @@
 import { registerRoutesMock } from './plugin.test.mocks';
 import { SavedObjectsManagementPlugin } from './plugin';
 import { coreMock } from '@kbn/core/server/mocks';
+import { z } from '@kbn/zod';
+import type { ApiBodyEntry } from './types';
+
+const createEntry = (): ApiBodyEntry<{ title: string }, { title: string }> => ({
+  getSchema: () => z.object({ title: z.string() }),
+  toApi: ({ attributes }) => ({ body: { title: attributes.title }, warnings: [] }),
+  toStored: ({ title }) => ({ attributes: { title }, references: [] }),
+});
 
 describe('SavedObjectsManagementPlugin', () => {
   let plugin: SavedObjectsManagementPlugin;
@@ -29,6 +37,35 @@ describe('SavedObjectsManagementPlugin', () => {
         expect.objectContaining({
           http: coreSetup.http,
         })
+      );
+    });
+  });
+
+  describe('API body registry', () => {
+    it('returns the entry a plugin registered for a type', async () => {
+      const entry = createEntry();
+      const { registerApiBodyEntry } = await plugin.setup(coreMock.createSetup());
+      registerApiBodyEntry('my-type', entry);
+
+      const { getApiBodyEntry } = plugin.start(coreMock.createStart());
+
+      expect(getApiBodyEntry('my-type')).toBe(entry);
+    });
+
+    it('returns nothing for a type no plugin registered', async () => {
+      await plugin.setup(coreMock.createSetup());
+
+      const { getApiBodyEntry } = plugin.start(coreMock.createStart());
+
+      expect(getApiBodyEntry('unregistered-type')).toBeUndefined();
+    });
+
+    it('throws when a type is registered twice', async () => {
+      const { registerApiBodyEntry } = await plugin.setup(coreMock.createSetup());
+      registerApiBodyEntry('my-type', createEntry());
+
+      expect(() => registerApiBodyEntry('my-type', createEntry())).toThrow(
+        'An API body entry is already registered for saved object type [my-type]'
       );
     });
   });

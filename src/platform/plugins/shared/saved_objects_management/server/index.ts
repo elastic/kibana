@@ -15,6 +15,8 @@ export const plugin = async (context: PluginInitializerContext) => {
 };
 
 export type {
+  ApiBodyEntry,
+  ApiBodyWarning,
   SavedObjectsManagementPluginSetup,
   SavedObjectsManagementPluginStart,
   SavedObjectMetadata,

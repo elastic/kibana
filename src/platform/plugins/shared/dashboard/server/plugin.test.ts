@@ -10,11 +10,17 @@
 import { DashboardPlugin } from './plugin';
 import { coreMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { createEmbeddableStartMock } from '@kbn/embeddable-plugin/server/mocks';
+import {
+  createEmbeddableSetupMock,
+  createEmbeddableStartMock,
+} from '@kbn/embeddable-plugin/server/mocks';
+import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/server/mocks';
+import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { scheduleDashboardTelemetry, TASK_ID } from './usage/dashboard_telemetry_collection_task';
 import { read } from './api';
 
 jest.mock('./usage/dashboard_telemetry_collection_task', () => ({
+  initializeDashboardTelemetryTask: jest.fn(),
   scheduleDashboardTelemetry: jest.fn().mockResolvedValue('ok'),
   TASK_ID: 'mockTaskID',
 }));
@@ -27,6 +33,29 @@ jest.mock('./api', () => ({
 const mockEmbeddable = createEmbeddableStartMock();
 
 describe('DashboardPlugin', () => {
+  describe('setup', () => {
+    test('registers the dashboard API body entry with Saved Objects Management', () => {
+      const savedObjectsManagement = savedObjectsManagementPluginMock.createSetupContract();
+      new DashboardPlugin(coreMock.createPluginInitializerContext()).setup(coreMock.createSetup(), {
+        embeddable: createEmbeddableSetupMock(),
+        taskManager: taskManagerMock.createSetup(),
+        contentManagement: {
+          favorites: { registerFavoriteType: jest.fn() },
+        } as unknown as ContentManagementServerSetup,
+        savedObjectsManagement,
+      });
+
+      expect(savedObjectsManagement.registerApiBodyEntry).toHaveBeenCalledWith(
+        'dashboard',
+        expect.objectContaining({
+          getSchema: expect.any(Function),
+          toApi: expect.any(Function),
+          toStored: expect.any(Function),
+        })
+      );
+    });
+  });
+
   describe('start', () => {
     let mockCoreStart: ReturnType<typeof coreMock.createStart>;
     let initContext: ReturnType<typeof coreMock.createPluginInitializerContext>;

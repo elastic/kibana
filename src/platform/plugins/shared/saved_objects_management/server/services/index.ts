@@ -9,3 +9,4 @@
 
 export type { ISavedObjectsManagement } from './management';
 export { SavedObjectsManagement } from './management';
+export { ApiBodyRegistry } from './api_body_registry';

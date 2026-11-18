@@ -18,6 +18,7 @@ import type {
 } from '@kbn/usage-collection-plugin/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
+import type { SavedObjectsManagementPluginSetup } from '@kbn/saved-objects-management-plugin/server';
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -56,6 +57,8 @@ import { registerDashboardDrilldown } from './dashboard_drilldown/register_dashb
 import { getDashboardStateSchema } from './api/dashboard_state_schemas';
 import { startChangeHistoryClient } from './change_history/change_history_service';
 import { createDashboardWriteClient } from './dashboard_write_client';
+import { createDashboardApiBodyEntry } from './api/api_body_entry';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../common/constants';
 
 export const DEFER_BELOW_FOLD = `labs:dashboard:deferBelowFold` as const;
 
@@ -64,6 +67,7 @@ interface SetupDeps {
   usageCollection?: UsageCollectionSetup;
   taskManager: TaskManagerSetupContract;
   contentManagement: ContentManagementServerSetup;
+  savedObjectsManagement: SavedObjectsManagementPluginSetup;
 }
 
 export interface StartDeps {
@@ -101,6 +105,11 @@ export class DashboardPlugin
     );
 
     plugins.contentManagement.favorites.registerFavoriteType('dashboard');
+
+    plugins.savedObjectsManagement.registerApiBodyEntry(
+      DASHBOARD_SAVED_OBJECT_TYPE,
+      createDashboardApiBodyEntry()
+    );
 
     if (plugins.taskManager) {
       initializeDashboardTelemetryTask(this.logger, core, plugins.taskManager, plugins.embeddable);

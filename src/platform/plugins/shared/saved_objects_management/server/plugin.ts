@@ -16,7 +16,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart } from './types';
-import { SavedObjectsManagement } from './services';
+import { ApiBodyRegistry, SavedObjectsManagement } from './services';
 import { registerRoutes } from './routes';
 import { capabilitiesProvider } from './capabilities_provider';
 
@@ -25,12 +25,13 @@ export class SavedObjectsManagementPlugin
 {
   private readonly logger: Logger;
   private managementService$ = new Subject<SavedObjectsManagement>();
+  private readonly apiBodyRegistry = new ApiBodyRegistry();
 
   constructor(private readonly context: PluginInitializerContext) {
     this.logger = this.context.logger.get();
   }
 
-  public setup({ http, capabilities }: CoreSetup) {
+  public setup({ http, capabilities }: CoreSetup): SavedObjectsManagementPluginSetup {
     this.logger.debug('Setting up SavedObjectsManagement plugin');
     registerRoutes({
       http,
@@ -39,14 +40,18 @@ export class SavedObjectsManagementPlugin
 
     capabilities.registerProvider(capabilitiesProvider);
 
-    return {};
+    return {
+      registerApiBodyEntry: (type, entry) => this.apiBodyRegistry.register(type, entry),
+    };
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart): SavedObjectsManagementPluginStart {
     this.logger.debug('Starting up SavedObjectsManagement plugin');
     const managementService = new SavedObjectsManagement(core.savedObjects.getTypeRegistry());
     this.managementService$.next(managementService);
 
-    return {};
+    return {
+      getApiBodyEntry: (type) => this.apiBodyRegistry.get(type),
+    };
   }
 }
