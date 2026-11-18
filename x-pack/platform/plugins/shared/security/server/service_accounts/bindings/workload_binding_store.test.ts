@@ -699,7 +699,7 @@ describe('WorkloadBindingStore', () => {
     it('propagates a failed search', async () => {
       client.find.mockRejectedValue(new Error('search failed'));
 
-      await expect(store.summarize()).rejects.toThrowError('search failed');
+      await expect(store.summarize()).rejects.toThrow('search failed');
     });
   });
 
