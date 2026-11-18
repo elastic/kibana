@@ -72,8 +72,12 @@ const isOrphanedClusterExclusion = ({
   if (!skippedClusters.some((skipped) => clusterCovers(skipped, cluster))) return false;
   return !positives.some((positive) => {
     const { cluster: included } = parseIndexScopeEntry(positive);
-    // Dropping an exclusion is the unsafe direction, so any possible overlap keeps it.
-    return included === undefined ? crossProjectSearch : exclusionReachesCluster(cluster, included);
+    if (included === undefined) return crossProjectSearch;
+    // A concrete excluded cluster is tested against the glob exactly. When the exclusion is a
+    // glob too, dropping it is the unsafe direction, so any possible overlap keeps it.
+    return cluster.includes('*')
+      ? exclusionReachesCluster(cluster, included)
+      : clusterCovers(included, cluster);
   });
 };
 

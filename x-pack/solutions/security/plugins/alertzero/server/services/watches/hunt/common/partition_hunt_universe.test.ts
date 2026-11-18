@@ -136,6 +136,15 @@ describe('partitionHuntUniverse', () => {
       expect(partitionHuntUniverse(entries, false).patterns).toEqual(['*:logs-*', '-arch*:*']);
     });
 
+    it('tests a concrete excluded cluster against a retained glob exactly', () => {
+      expect(
+        partitionHuntUniverse(
+          ['archive*-west:logs-*', 'archive-east:.alerts-*', '-archive-east:*'],
+          false
+        ).patterns
+      ).toEqual(['archive*-west:logs-*']);
+    });
+
     it('keeps it under cross-project search while an unqualified pattern remains', () => {
       const entries = ['logs-*', 'archive:.alerts-*', '-archive:*'];
       expect(partitionHuntUniverse(entries, true).patterns).toEqual(['logs-*', '-archive:*']);
