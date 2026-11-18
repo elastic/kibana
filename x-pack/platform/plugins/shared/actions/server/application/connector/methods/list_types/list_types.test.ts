@@ -122,6 +122,26 @@ describe('listTypes()', () => {
     expect(types.map(({ id }) => id)).toEqual(['sandbox-type']);
   });
 
+  it('excludes compatibility mode connector types by default', async () => {
+    const listSpy = jest.spyOn(actionTypeRegistry, 'list');
+
+    await actionsClient.listTypes();
+
+    expect(listSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ includeCompatibilityMode: false })
+    );
+  });
+
+  it('passes includeCompatibilityMode to the registry', async () => {
+    const listSpy = jest.spyOn(actionTypeRegistry, 'list');
+
+    await actionsClient.listTypes({ includeCompatibilityMode: true });
+
+    expect(listSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ includeCompatibilityMode: true })
+    );
+  });
+
   it('filters out system action types when not defining options', async () => {
     mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
 

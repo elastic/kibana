@@ -647,6 +647,72 @@ describe('actionTypeRegistry', () => {
         },
       ]);
     });
+
+    describe('compatibility mode', () => {
+      const registerTypes = () => {
+        mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+        const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+        actionTypeRegistry.register(
+          getConnectorType({ id: 'visible-type', supportedFeatureIds: ['alerting'] })
+        );
+        actionTypeRegistry.register(
+          getConnectorType({
+            id: 'compat-alerting-type',
+            supportedFeatureIds: ['alerting'],
+            isCompatibilityMode: true,
+          })
+        );
+        actionTypeRegistry.register(
+          getConnectorType({
+            id: 'compat-cases-type',
+            supportedFeatureIds: ['cases'],
+            isCompatibilityMode: true,
+          })
+        );
+        return actionTypeRegistry;
+      };
+
+      test('hides compatibility-mode types by default', () => {
+        const actionTypeRegistry = registerTypes();
+
+        expect(actionTypeRegistry.list().map(({ id }) => id)).toEqual(['visible-type']);
+      });
+
+      test('returns compatibility-mode types when includeCompatibilityMode is true', () => {
+        const actionTypeRegistry = registerTypes();
+
+        expect(
+          actionTypeRegistry.list({ includeCompatibilityMode: true }).map(({ id }) => id)
+        ).toEqual(['visible-type', 'compat-alerting-type', 'compat-cases-type']);
+      });
+
+      test('applies the featureId filter together with includeCompatibilityMode', () => {
+        const actionTypeRegistry = registerTypes();
+
+        expect(
+          actionTypeRegistry
+            .list({ featureId: 'alerting', includeCompatibilityMode: true })
+            .map(({ id }) => id)
+        ).toEqual(['visible-type', 'compat-alerting-type']);
+        expect(actionTypeRegistry.list({ featureId: 'cases' })).toEqual([]);
+      });
+
+      test('does not add a compatibility-mode field to list entries', () => {
+        const actionTypeRegistry = registerTypes();
+
+        for (const entry of actionTypeRegistry.list({ includeCompatibilityMode: true })) {
+          expect(entry).not.toHaveProperty('isCompatibilityMode');
+        }
+      });
+
+      test('keeps compatibility-mode types registered and in getAllTypes()', () => {
+        const actionTypeRegistry = registerTypes();
+
+        expect(actionTypeRegistry.has('compat-alerting-type')).toBe(true);
+        expect(actionTypeRegistry.get('compat-alerting-type').executor).toBeDefined();
+        expect(actionTypeRegistry.getAllTypes()).toContain('compat-alerting-type');
+      });
+    });
   });
 
   describe('has()', () => {
@@ -1062,6 +1128,28 @@ describe('actionTypeRegistry', () => {
 
       const result = registry.isDeprecated('test.action');
       expect(result).toBe(true);
+    });
+  });
+
+  describe('isCompatibilityMode()', () => {
+    it('returns true if the action type is in compatibility mode', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+      registry.register(getConnectorType({ id: 'test.action', isCompatibilityMode: true }));
+
+      expect(registry.isCompatibilityMode('test.action')).toBe(true);
+    });
+
+    it('returns false if the action type is not in compatibility mode', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+      registry.register(getConnectorType({ id: 'test.action' }));
+
+      expect(registry.isCompatibilityMode('test.action')).toBe(false);
+    });
+
+    it('returns false for an unregistered action type', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      expect(registry.isCompatibilityMode('unknown.action')).toBe(false);
     });
   });
 

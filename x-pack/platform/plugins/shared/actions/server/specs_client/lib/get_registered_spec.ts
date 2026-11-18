@@ -24,7 +24,8 @@ export const getRegisteredSpec = (
     throw Boom.notFound(`Spec for connector type "${id}" not found.`);
   }
 
-  const type = registry.list().find((row) => row.id === id);
+  // Existing connectors of a compatibility-mode type still need their spec to render the form.
+  const type = registry.list({ includeCompatibilityMode: true }).find((row) => row.id === id);
   if (!type) {
     throw Boom.notFound(`Spec for connector type "${id}" not found.`);
   }

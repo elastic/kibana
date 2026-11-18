@@ -43,16 +43,14 @@ and whether the vendor API artifacts are trustworthy.
   they operate on (e.g., "Search messages, list public channels, and send messages in Slack"). Flag descriptions that
   are vague ("Connect to X to pull data"), say nothing about capabilities ("Kibana Stack Connector for X"), or omit
   actions the connector actually provides. Keep to one sentence, ~15 words.
-- **`supportedFeatureIds` on a brand-new connector type**: A new connector must reach Production-NonCanary
-  before it can declare user-facing features, otherwise a rollout or rollback can leave a node without the
-  type and break any user action referencing it. A PR that adds a connector may only declare
-  `['agentBuilder']`. Flag `'workflows'` or any other user-facing feature ID on a newly added
-  connector and ask for it to move to a follow-up PR. Flag `events` on that same first PR. Triggers are
-  registered from `events.definitions` without reading `supportedFeatureIds`, and
-  `getAvailableConnectors()` includes event connector types even without `'workflows'`, so the feature
-  id does not hide them. `events` land in the follow-up that adds `'workflows'`. A PR that adds feature
-  IDs or `events` to an existing connector is fine as long as that connector is already registered in
-  every Production-NonCanary version.
+- **Compatibility mode on a brand-new connector type**: A serverless rollback goes back one release. If
+  the older release does not register the type, connectors created with it on the newer release break.
+  Rolling upgrades are not the problem, because old nodes skip unknown task types. A PR that adds a
+  connector must set `metadata.isCompatibilityMode: true` and ship its final `supportedFeatureIds`.
+  Flag a new connector without the flag. Flag a PR that removes the flag before that release is the
+  serverless rollback target (Production-NonCanary). Flag `events` on that first PR: compatibility mode
+  does not hide triggers, which are registered from `events.definitions`. `events` land in a follow-up
+  once the type is on every Production-NonCanary version.
 - **Schema UI**: Every config field in `schema` has `.meta()` with at least `label` (or uses a `UISchemas.*` helper).
   Otherwise fields render as unlabeled.
 - **Config fields without a widget**: Flag a `z.boolean()`, `z.array()`, or `z.record()` field in the
@@ -398,7 +396,7 @@ actual documented behavior — flag them even without live access to the API, ba
   not just `stack: preview`. The version must be ≥ every other version referenced anywhere in the doc
   (a new connector cannot have been available before any feature it references). Flag any doc where it
   is missing or where the version is lower than another version referenced in the same file.
-- **Stated availability must match `supportedFeatureIds`**: A doc page for a connector shipping
+- **Stated availability must match `supportedFeatureIds`**: A doc page for a connector with
   `supportedFeatureIds: ['agentBuilder']` must say so — recent connector pages state what the connector
   can be used with, because it is common for one to work with only Agent Builder or only Workflows. Flag a
   page that promises workflow support the spec does not declare, including in the opening sentence ("a

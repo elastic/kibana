@@ -67,6 +67,13 @@ export interface ConnectorMetadata {
   docsUrl?: string;
   minimumLicense: LicenseType;
   isTechnicalPreview?: boolean;
+  /**
+   * Defaults to false. When true, the type is registered and executable and existing connectors
+   * keep working, but it is hidden from type discovery and new connectors cannot be created.
+   * Ship a new connector with true and its final supportedFeatureIds, then remove the flag in a
+   * follow-up PR once the release is the serverless rollback target.
+   */
+  isCompatibilityMode?: boolean;
   supportedFeatureIds: Array<
     | 'alerting'
     | 'cases'

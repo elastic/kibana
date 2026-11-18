@@ -124,6 +124,7 @@ export const createConnectorTypeFromSpec = (
     spec,
     description: spec.metadata.description,
     isExperimental: spec.metadata.isTechnicalPreview,
+    isCompatibilityMode: Boolean(spec.metadata.isCompatibilityMode),
     isTestable: Boolean(spec.test.enabled),
     sandboxSupportedAuthTypes: getSandboxSupportedAuthTypeIds(spec.auth),
     getSandboxHosts: ({ config }) => getSandboxHosts(spec.sandbox, config),

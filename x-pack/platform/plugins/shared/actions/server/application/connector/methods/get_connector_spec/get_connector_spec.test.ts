@@ -201,6 +201,17 @@ describe('getConnectorSpecAsJsonSchema', () => {
     });
   });
 
+  it('includes compatibility-mode types when looking up the connector type', async () => {
+    const result = await getConnectorSpecAsJsonSchema({
+      context: createContext(),
+      id: '.alienvault-otx',
+      configurationUtilities,
+    });
+
+    expect(actionTypeRegistry.list).toHaveBeenCalledWith({ includeCompatibilityMode: true });
+    expect(result.metadata).toHaveProperty('id', '.alienvault-otx');
+  });
+
   it('returns serialized spec when the connector type exists', async () => {
     const result = await getConnectorSpecAsJsonSchema({
       context: createContext(),

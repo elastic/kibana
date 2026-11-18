@@ -116,9 +116,9 @@ export const MyConnector: ConnectorSpec = {
     displayName: 'My Connector',
     description: 'A custom connector example',
     minimumLicense: 'gold',
-    // See "Intermediate release state" below: a new connector type ships with
-    // ['agentBuilder'] and gains its remaining feature IDs in a follow-up PR.
-    supportedFeatureIds: ['agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    // See "Compatibility mode" below. Remove in a follow-up PR.
+    isCompatibilityMode: true,
   },
 
   auth: {
@@ -215,29 +215,35 @@ metadata: {
   docsUrl?: string,                  // Link to documentation
   minimumLicense: 'basic' | 'gold' | 'platinum' | 'enterprise',
   supportedFeatureIds: ['workflows', 'alerting', 'cases', ...],
+  isCompatibilityMode?: boolean,     // Registered but hidden from type discovery (default false)
 }
 ```
 
-#### Intermediate release state
+#### Compatibility mode
 
-A new connector type must reach Production-NonCanary before it can declare user-facing
-features. Serverless rollouts and rollbacks leave nodes on different Kibana versions for a
-while, and a user action referencing a connector type that a node does not have breaks on
-that node. So adding a connector takes two PRs:
+A serverless rollback goes back one release. If the older release does not register a
+connector type, connectors created with it on the newer release break. Rolling upgrades are not
+the problem, because old nodes skip unknown task types. So adding a connector takes two PRs:
 
-1. Ship the connector with `supportedFeatureIds: ['agentBuilder']` and no `events`.
-2. Once the connector is registered in every Production-NonCanary version, add `'workflows'`,
-   any other user-facing feature IDs, and `events` in a follow-up PR.
+1. Ship the connector with its final `supportedFeatureIds` and `isCompatibilityMode: true`. The
+   type is registered and executable, so existing connectors keep working. It is left out of
+   `ActionTypeRegistry.list()` (and so out of the connector types API and type pickers), and new
+   connectors of it cannot be created.
+2. Once that release is the serverless rollback target (Production-NonCanary), remove
+   `isCompatibilityMode` in a follow-up PR.
 
-`events` wait for that follow-up too. Workflow triggers are registered from `events.definitions`
-without reading `supportedFeatureIds`, and the workflows connector list includes a type that has
-events even when `'workflows'` is absent. Leaving the feature id at `['agentBuilder']` does not
-hide them. A saved workflow that names the new event id breaks on a node that does not have the
-connector type yet.
+Compatibility mode does not hide event triggers. Workflow triggers are registered from
+`events.definitions` without reading `isCompatibilityMode` or `supportedFeatureIds`, so a workflow
+saved against a new event id breaks after a rollback. `events` still wait for a follow-up PR, once
+the type is registered in every Production-NonCanary version.
+
+Known limits: some consumers use `list()` to resolve the type of an existing connector. After a
+rollback, the workflows connector list and step schema, the Agent Builder connector list, and the
+Stack Management connectors list do not show existing connectors of a compatibility-mode type.
+Connector execution and the connector spec API keep working.
 
 Mention the required follow-up PR, including the event keys, in the first PR's description so it
-is not forgotten. An inbound-only connector uses the same split: the first PR registers the type
-with no `events`, and the follow-up adds `events` with `supportedFeatureIds: ['workflows']`.
+is not forgotten.
 
 ### Auth Type
 
@@ -344,7 +350,7 @@ Outbound `actions` call the vendor. Inbound `events` are the other direction: th
 | Inbound-only | `events`, `actions: {}`, `test.enabled: false` | `.inboundWebhook` (`inboundWebhook.received`) |
 | Outbound-only | `actions`, no `events` | Connectors that only call the vendor |
 
-Workflows register one trigger per `events.definitions` entry (`requiresConnectorId: true`) whenever inbound events are enabled. That registration does not read `supportedFeatureIds`. On a brand-new connector type, declare `events` in the follow-up PR described under [Intermediate release state](#intermediate-release-state), together with `'workflows'`.
+Workflows register one trigger per `events.definitions` entry (`requiresConnectorId: true`) whenever inbound events are enabled. That registration does not read `supportedFeatureIds`. Compatibility mode does not hide these triggers. On a brand-new connector type, declare `events` in a follow-up PR, as described under [Compatibility mode](#compatibility-mode).
 
 ### Allowlist
 
@@ -979,7 +985,7 @@ When adding a new connector:
 5. Include proper TypeScript types
 6. Add appropriate UI metadata for better UX
 7. Consider adding a test file (`src/specs/{connector}.test.ts`) to validate your action handlers. See existing connector tests for examples.
-8. When the vendor pushes webhooks, subscriptions, or callbacks, add `events` on this same spec (see [Inbound events](#inbound-events)). On a brand-new connector type, that waits for the follow-up PR in [Intermediate release state](#intermediate-release-state), together with `'workflows'`. Add the connector id to `SPECS_ALLOWED_EVENTS` and cover `handleEvents` in `{connector}/events.test.ts`.
+8. When the vendor pushes webhooks, subscriptions, or callbacks, add `events` on this same spec (see [Inbound events](#inbound-events)). On a brand-new connector type, that waits for a follow-up PR, as described in [Compatibility mode](#compatibility-mode). Add the connector id to `SPECS_ALLOWED_EVENTS` and cover `handleEvents` in `{connector}/events.test.ts`.
 9. End-user documentation for connectors lives in `docs/reference/connectors-kibana/{connector-name}-action-type.md`. See existing connector docs for the expected structure. Don't forget to update the TOC and relevant `_snippets/` files! A connector with `events` documents the ingest URL, the token, and an example payload.
 
 ### Adding a Lazy Icon
