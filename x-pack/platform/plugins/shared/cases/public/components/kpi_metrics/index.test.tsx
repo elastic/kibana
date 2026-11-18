@@ -91,6 +91,24 @@ describe('KpiMetricsSettings', () => {
     );
   });
 
+  it('keeps the fields that the flyout does not edit when it saves an edited metric', async () => {
+    const metric: CustomKpiMetricConfiguration = {
+      ...customMetric('a'),
+      direction: 'lower_is_better',
+      percent: true,
+      groupBy: { field: 'case.severity' },
+    };
+
+    renderWithTestingProviders(
+      <KpiMetricsSettings kpiMetrics={[metric]} isLoading={false} onSave={onSave} />
+    );
+
+    await userEvent.click(await screen.findByTestId('kpi-metric-edit-0'));
+    await userEvent.click(await screen.findByTestId('kpi-metric-save'));
+
+    await waitFor(() => expect(onSave).toHaveBeenCalledWith([metric]));
+  });
+
   it('does not save a custom metric without a label', async () => {
     renderWithTestingProviders(
       <KpiMetricsSettings kpiMetrics={[]} isLoading={false} onSave={onSave} />

@@ -130,7 +130,8 @@ export const isDurationField = (state: KpiMetricFormState): boolean =>
   getKpiField(state.index, state.field)?.unit === 's';
 
 /**
- * Builds the request metric from the form. Keeps the id and the display of an edited metric.
+ * Builds the request metric from the form. Keeps the id, the display, and the fields that the form
+ * does not edit of an edited metric.
  */
 export const toKpiMetricRequest = (
   state: KpiMetricFormState,
@@ -144,14 +145,19 @@ export const toKpiMetricRequest = (
     ...(existing?.id != null && { id: existing.id }),
     display: existing?.display ?? ('value' as const),
     ...(threshold != null && { threshold }),
+    ...(existing?.direction != null && { direction: existing.direction }),
   };
 
   if (state.kind === 'predefined') {
     return { ...base, kind: 'predefined', predefinedId: state.predefinedId };
   }
 
+  const existingCustom = existing?.kind === 'custom' ? existing : undefined;
+
   return {
     ...base,
+    ...(existingCustom?.percent != null && { percent: existingCustom.percent }),
+    ...(existingCustom?.groupBy != null && { groupBy: existingCustom.groupBy }),
     kind: 'custom',
     label: state.label.trim(),
     index: state.index,

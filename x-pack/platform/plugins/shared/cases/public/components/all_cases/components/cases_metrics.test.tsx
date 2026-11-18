@@ -166,6 +166,21 @@ describe('Cases metrics', () => {
       expect(within(screen.getByTestId('cases-kpi-tile-valid')).getByText('5')).toBeInTheDocument();
     });
 
+    it('shows the loading spinner instead of the previous value while the results refetch', async () => {
+      renderWithTestingProviders(
+        <CasesMetrics
+          {...props}
+          kpiMetrics={[customMetric('c1', { comparator: 'above', value: 10 })]}
+          kpiResults={[{ id: 'c1', type: 'value', format: 'number', value: 11 }]}
+          isLoadingKpiResults={true}
+          isAnalyticsEnabled={true}
+        />
+      );
+
+      expect(await screen.findByTestId('cases-kpi-tile-c1-loading-spinner')).toBeInTheDocument();
+      expect(within(screen.getByTestId('cases-kpi-tile-c1')).queryByText('11')).toBeNull();
+    });
+
     it('shows an empty custom tile when analytics is disabled', async () => {
       renderWithTestingProviders(
         <CasesMetrics {...props} kpiMetrics={[customMetric('c1')]} isAnalyticsEnabled={false} />

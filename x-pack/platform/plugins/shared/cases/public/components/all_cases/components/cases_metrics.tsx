@@ -119,14 +119,14 @@ const getKpiTileValues = (
   }
 
   if (result.type === 'error') {
-    return { ...base, isLoading: false, errorMessage: result.message };
+    return { ...base, isLoading: isLoadingKpiResults, errorMessage: result.message };
   }
 
   return {
     ...base,
     value: result.value,
     format: result.format,
-    isLoading: false,
+    isLoading: isLoadingKpiResults,
   };
 };
 
