@@ -902,13 +902,16 @@ class ConversationClientImpl implements ConversationClient {
             }
             throw new SteerSignal({ kind: 'already_stored', event: stored });
           }
-          // Checked before the holder: the lock is free while a round waits on a prompt.
-          if (getPendingResumeRound(current) !== undefined) {
-            throw new SteerSignal({ kind: 'awaiting_prompt' });
-          }
+          // A live holder is checked first: a resume holds the lock while the stored events still
+          // end in the pause it answers. The lock is free only while a round waits on a prompt.
           const held = current.active_execution?.execution_id;
           if (!held || isExecutionStale(current.execution)) {
-            throw new SteerSignal({ kind: 'no_active_execution' });
+            throw new SteerSignal({
+              kind:
+                getPendingResumeRound(current) !== undefined
+                  ? 'awaiting_prompt'
+                  : 'no_active_execution',
+            });
           }
           if (pendingSteersFor(currentEvents, held).length >= STEERS_PER_RUN_MAX) {
             throw new SteerSignal({ kind: 'too_many_pending' });

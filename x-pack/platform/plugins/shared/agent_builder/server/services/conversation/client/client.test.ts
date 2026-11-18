@@ -6553,16 +6553,30 @@ describe('ConversationClient', () => {
         expect(mockEsClient.index).not.toHaveBeenCalled();
       });
 
-      it('refuses while the conversation waits on a prompt, before the holder check', async () => {
+      it('refuses while the conversation waits on a prompt and no run holds it', async () => {
         mockGetDocumentResponse(
-          documentWithHolder('e1', { events: pausedRoundTimeline('round-1', ['tc1']) })
+          documentWithHolder(undefined, { events: pausedRoundTimeline('round-1', ['tc1']) })
         );
-        liveHolder();
 
         const error = await appendSteer().catch((caught: unknown) => caught);
 
         expect(isConversationAwaitingPromptError(error)).toBe(true);
         expect(mockEsClient.index).not.toHaveBeenCalled();
+      });
+
+      it('admits a steer to the resume of a pause, whose answer is stored only when it ends', async () => {
+        mockGetDocumentResponse(
+          documentWithHolder('e2', { events: pausedRoundTimeline('round-1', ['tc1']) })
+        );
+        liveHolder();
+
+        const result = await appendSteer();
+
+        expect(result.alreadyStored).toBe(false);
+        expect(result.event.data).toEqual({
+          message: 'use a table',
+          steer: { execution_id: 'e2' },
+        });
       });
 
       it('refuses the sixth pending steer of a run', async () => {
