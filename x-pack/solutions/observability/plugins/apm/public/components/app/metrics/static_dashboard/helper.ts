@@ -24,14 +24,16 @@ export interface MetricsDashboardProps extends DashboardFileProps {
   apmIndices?: APMIndices;
 }
 
-function getDashboardFileNameFromProps({
+export function getDashboardFileNameFromProps({
   agentName,
   telemetrySdkName,
   telemetrySdkLanguage,
-}: DashboardFileProps) {
-  const dashboardFile =
-    agentName && getDashboardFileName({ agentName, telemetrySdkName, telemetrySdkLanguage });
-  return dashboardFile;
+}: DashboardFileProps): string | undefined {
+  if (!agentName) {
+    return undefined;
+  }
+
+  return getDashboardFileName({ agentName, telemetrySdkName, telemetrySdkLanguage });
 }
 
 export function hasDashboard(props: DashboardFileProps) {
