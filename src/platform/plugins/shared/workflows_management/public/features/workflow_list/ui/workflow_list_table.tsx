@@ -64,6 +64,10 @@ export interface WorkflowListTableProps {
   sortField?: WorkflowSortField;
   sortOrder?: 'asc' | 'desc';
   onSortChange?: (field: WorkflowSortField, order: 'asc' | 'desc') => void;
+  noItemsMessage?: React.ReactNode;
+  hidePagination?: boolean;
+  /** Read-only list: no row selection and no Run, Edit, or All actions column. */
+  viewOnly?: boolean;
 }
 
 export const WorkflowListTable = ({
@@ -90,11 +94,15 @@ export const WorkflowListTable = ({
   sortField,
   sortOrder,
   onSortChange,
+  noItemsMessage,
+  hidePagination = false,
+  viewOnly = false,
 }: WorkflowListTableProps) => {
-  const allowRowSelection = canUpdateWorkflow || canDeleteWorkflow || canReadWorkflow;
+  const allowRowSelection =
+    !viewOnly && (canUpdateWorkflow || canDeleteWorkflow || canReadWorkflow);
 
-  const columns = useMemo<Array<EuiBasicTableColumn<WorkflowListItemDto>>>(
-    () => [
+  const columns = useMemo<Array<EuiBasicTableColumn<WorkflowListItemDto>>>(() => {
+    const nextColumns: Array<EuiBasicTableColumn<WorkflowListItemDto>> = [
       {
         field: 'name',
         name: i18n.translate('workflows.workflowList.column.name', { defaultMessage: 'Name' }),
@@ -356,8 +364,11 @@ export const WorkflowListTable = ({
           },
         ],
       },
-    ],
-    [
+    ];
+
+    return viewOnly ? nextColumns.filter((column) => !('actions' in column)) : nextColumns;
+  }, [
+      viewOnly,
       canReadWorkflow,
       canReadWorkflowExecution,
       canUpdateWorkflow,
@@ -392,6 +403,7 @@ export const WorkflowListTable = ({
       })}
       columns={columns}
       items={items}
+      {...(noItemsMessage ? { noItemsMessage } : {})}
       itemId="id"
       responsiveBreakpoint="xs"
       tableLayout="fixed"
@@ -426,12 +438,16 @@ export const WorkflowListTable = ({
             },
           }
         : {})}
-      pagination={{
-        pageSize: size,
-        pageSizeOptions: WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS,
-        totalItemCount: total,
-        pageIndex: page - 1,
-      }}
+      {...(hidePagination
+        ? {}
+        : {
+            pagination: {
+              pageSize: size,
+              pageSizeOptions: WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS,
+              totalItemCount: total,
+              pageIndex: page - 1,
+            },
+          })}
     />
   );
 };

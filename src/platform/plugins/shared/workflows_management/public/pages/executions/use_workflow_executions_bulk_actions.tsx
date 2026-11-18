@@ -12,12 +12,8 @@ import { copyToClipboard } from '@elastic/eui';
 import { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
-import {
-  useRunWorkflow,
-  useTestWorkflow,
-  useWorkflowsApi,
-  useWorkflowsCapabilities,
-} from '@kbn/workflows-ui';
+import { useRunWorkflow, useTestWorkflow, useWorkflowsApi } from '@kbn/workflows-ui';
+import { useExecutionsPageCapabilities } from './use_executions_page_capabilities';
 import {
   buildReplayInputsFromExecutionContext,
   type RerunWorkflowExecutionParams,
@@ -89,7 +85,7 @@ export const useWorkflowExecutionsBulkActions = ({
   selectedExecutionIds: string[];
 }): { panels: EuiContextMenuPanelDescriptor[] } => {
   const { notifications } = useKibana().services;
-  const { canExecuteWorkflow } = useWorkflowsCapabilities();
+  const { canExecuteWorkflow } = useExecutionsPageCapabilities();
   const { mutateAsync: runWorkflow } = useRunWorkflow();
   const { mutateAsync: testWorkflow } = useTestWorkflow();
   const api = useWorkflowsApi();

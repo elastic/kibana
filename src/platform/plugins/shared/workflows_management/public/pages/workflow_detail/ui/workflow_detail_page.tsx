@@ -408,12 +408,6 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
           <AgenticFirstEmptyStateLive
             onSubmitPrompt={handleLandingSubmit}
             onStartManually={() => setShowAgenticLanding(false)}
-            onSelectTemplate={(template) =>
-              application.navigateToApp(PLUGIN_ID, {
-                deepLinkId: WorkflowsPageName.library,
-                path: template.slug,
-              })
-            }
             onExploreLibrary={() =>
               application.navigateToApp(PLUGIN_ID, { deepLinkId: WorkflowsPageName.library })
             }

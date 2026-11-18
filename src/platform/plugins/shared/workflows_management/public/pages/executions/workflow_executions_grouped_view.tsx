@@ -33,6 +33,12 @@ import {
   WorkflowExecutionActionsMenu,
 } from './workflow_executions_table_actions';
 import {
+  EXECUTIONS_TABLE_COLUMN_WIDTH_DURATION,
+  EXECUTIONS_TABLE_COLUMN_WIDTH_STARTED,
+  EXECUTIONS_TABLE_COLUMN_WIDTH_TAGS,
+  EXECUTIONS_TABLE_COLUMN_WIDTH_TRIGGER,
+} from './workflow_executions_table_config';
+import {
   WorkflowExecutionDurationCell,
   WorkflowExecutionStartedAtCell,
   WorkflowExecutionTagsCell,
@@ -179,7 +185,7 @@ const GroupTable = React.memo<{
         name: i18n.translate('workflows.executionsPage.column.tags', {
           defaultMessage: 'Tags',
         }),
-        width: '250px',
+        width: `${EXECUTIONS_TABLE_COLUMN_WIDTH_TAGS}px`,
         render: (_value, execution) => <WorkflowExecutionTagsCell execution={execution} />,
       },
       {
@@ -187,7 +193,7 @@ const GroupTable = React.memo<{
         name: i18n.translate('workflows.executionsPage.column.trigger', {
           defaultMessage: 'Trigger',
         }),
-        width: '250px',
+        width: `${EXECUTIONS_TABLE_COLUMN_WIDTH_TRIGGER}px`,
         render: (_value, execution) => <WorkflowExecutionTriggersCell execution={execution} />,
       },
       {
@@ -195,7 +201,7 @@ const GroupTable = React.memo<{
         name: i18n.translate('workflows.executionsPage.column.started', {
           defaultMessage: 'Started',
         }),
-        width: '250px',
+        width: `${EXECUTIONS_TABLE_COLUMN_WIDTH_STARTED}px`,
         render: (_value, execution) => <WorkflowExecutionStartedAtCell execution={execution} />,
       },
       {
@@ -203,7 +209,7 @@ const GroupTable = React.memo<{
         name: i18n.translate('workflows.executionsPage.column.duration', {
           defaultMessage: 'Duration',
         }),
-        width: '250px',
+        width: `${EXECUTIONS_TABLE_COLUMN_WIDTH_DURATION}px`,
         align: 'right',
         render: (_value, execution) => <WorkflowExecutionDurationCell execution={execution} />,
       },

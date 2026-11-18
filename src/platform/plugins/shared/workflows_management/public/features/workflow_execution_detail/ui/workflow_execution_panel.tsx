@@ -26,7 +26,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
-import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { useExecutionsPageCapabilities } from '../../../pages/executions/use_executions_page_capabilities';
 import { CancelExecutionButton } from './cancel_execution_button';
 import { StepExecutionsTruncatedCallout } from './step_executions_truncated_callout';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
@@ -213,7 +213,7 @@ const ReplayExecutionButton = React.memo<{
   workflowId?: string;
 }>(({ context, executionId, onReRunExecution, workflowId }) => {
   const { application } = useKibana().services;
-  const { canExecuteWorkflow } = useWorkflowsCapabilities();
+  const { canExecuteWorkflow } = useExecutionsPageCapabilities();
 
   const replayExecution = useCallback(() => {
     if (!canExecuteWorkflow || !workflowId) {

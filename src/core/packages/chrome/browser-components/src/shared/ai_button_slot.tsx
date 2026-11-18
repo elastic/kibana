@@ -10,6 +10,7 @@
 import React from 'react';
 import { HeaderExtension } from './header_extension';
 import { useAiButtons } from './use_ai_button';
+import { WorkflowScenarioDropdown } from './workflow_scenario_dropdown';
 
 /**
  * Renders the AI button(s) registered via `chrome.controls.aiButton.register`.
@@ -23,12 +24,9 @@ import { useAiButtons } from './use_ai_button';
 export const AiButtonSlot = React.memo(() => {
   const buttons = useAiButtons();
 
-  if (buttons.length === 0) {
-    return null;
-  }
-
   return (
     <>
+      <WorkflowScenarioDropdown />
       {buttons.map((button, index) => (
         <HeaderExtension key={index} extension={button.content} />
       ))}

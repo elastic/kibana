@@ -26,10 +26,20 @@ function buildEnabledServices(): StartServicesMock {
 
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
-  CatalogBrowser: ({ onSelect }: { onSelect: (template: Template) => void }) => (
+  CatalogBrowser: ({
+    onSelect,
+    initialCategory,
+    initialSolution,
+  }: {
+    onSelect: (template: Template) => void;
+    initialCategory?: string;
+    initialSolution?: string;
+  }) => (
     <button
       type="button"
       data-test-subj="mockCatalogBrowserSelectButton"
+      data-category={initialCategory ?? ''}
+      data-solution={initialSolution ?? ''}
       onClick={() => onSelect({ slug: 'ip-reputation-check' } as Template)}
     >
       {'Select'}
@@ -64,6 +74,21 @@ describe('LibraryCatalogBrowserPage', () => {
       'href',
       'https://github.com/elastic/workflows/issues/new?template=template_request.yml'
     );
+  });
+
+  it('passes the category and solution from the URL into the catalog', () => {
+    const services = buildEnabledServices();
+
+    render(<LibraryCatalogBrowserPage />, {
+      wrapper: getTestProvider({
+        services,
+        initialEntries: ['/library?category=case-management&solution=security'],
+      }),
+    });
+
+    const browser = screen.getByTestId('mockCatalogBrowserSelectButton');
+    expect(browser).toHaveAttribute('data-category', 'case-management');
+    expect(browser).toHaveAttribute('data-solution', 'security');
   });
 
   it('navigates to the template detail route via the library deep link when a template is selected', () => {

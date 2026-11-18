@@ -28,8 +28,8 @@ import {
   generateSampleFromJsonSchema,
   ResumeExecutionModal,
   useWorkflowsApi,
-  useWorkflowsCapabilities,
 } from '@kbn/workflows-ui';
+import { useExecutionsPageCapabilities } from '../../../pages/executions/use_executions_page_capabilities';
 
 import { useTelemetry } from '../../../hooks/use_telemetry';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
@@ -75,7 +75,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   const { notifications } = useKibana().services;
   const queryClient = useQueryClient();
   const workflowsApi = useWorkflowsApi();
-  const { canExecuteWorkflow } = useWorkflowsCapabilities();
+  const { canExecuteWorkflow } = useExecutionsPageCapabilities();
   const { clearResumeParam } = useWorkflowUrlState();
   const telemetry = useTelemetry();
   const [isModalOpen, setIsModalOpen] = useState(autoOpen && !approvalLabels);

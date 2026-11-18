@@ -214,6 +214,7 @@ describe('Authorization matrix', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    window.sessionStorage.setItem('workflows.prototypeScenario', 'live');
     mockUseWorkflows.mockReturnValue(workflowsQueryResult);
   });
 
@@ -407,6 +408,7 @@ describe('Authorization matrix', () => {
 describe('Bulk actions menu', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    window.sessionStorage.setItem('workflows.prototypeScenario', 'live');
   });
 
   async function selectFirstDataRow(): Promise<void> {

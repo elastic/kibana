@@ -34,9 +34,9 @@ export interface EmbeddableConversationInputInternalProps
  * message and attachments preserved in location state, where the message
  * auto-sends.
  */
-const SubmitInterceptor: React.FC<Pick<PublicEmbeddableConversationInputProps, 'onSubmit'>> = ({
-  onSubmit,
-}) => {
+const SubmitInterceptor: React.FC<
+  Pick<PublicEmbeddableConversationInputProps, 'onSubmit' | 'placeholder'>
+> = ({ onSubmit, placeholder }) => {
   const { attachments, agentId } = useConversationContext();
   const { navigateToAgentBuilderUrl } = useNavigation();
   const targetAgentId = agentId ?? agentBuilderDefaultAgentId;
@@ -59,13 +59,13 @@ const SubmitInterceptor: React.FC<Pick<PublicEmbeddableConversationInputProps, '
     [attachments, targetAgentId, navigateToAgentBuilderUrl, onSubmit]
   );
 
-  return <ConversationInput onSubmitOverride={handleSubmit} />;
+  return <ConversationInput onSubmitOverride={handleSubmit} placeholder={placeholder} />;
 };
 
 export const EmbeddableConversationInputInternal = forwardRef<
   EmbeddableConversationInputRef,
   EmbeddableConversationInputInternalProps
->(({ agentId, onSubmit, services, coreStart }, ref) => {
+>(({ agentId, onSubmit, placeholder, services, coreStart }, ref) => {
   const targetAgentId = agentId ?? agentBuilderDefaultAgentId;
   // Captures the callbacks the provider registers on mount so we can invoke
   // them imperatively from outside the provider tree (i.e. via `ref`).
@@ -94,7 +94,7 @@ export const EmbeddableConversationInputInternal = forwardRef<
       ariaLabelledBy="agent-builder-embeddable-conversation-input"
       onRegisterCallbacks={handleRegisterCallbacks}
     >
-      <SubmitInterceptor onSubmit={onSubmit} />
+      <SubmitInterceptor onSubmit={onSubmit} placeholder={placeholder} />
     </EmbeddableConversationsProvider>
   );
 });

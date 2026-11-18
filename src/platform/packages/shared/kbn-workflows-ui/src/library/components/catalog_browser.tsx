@@ -30,6 +30,13 @@ import { useCatalog } from '../hooks/use_catalog';
 
 export interface CatalogBrowserProps {
   onSelect: (template: Template) => void;
+  /** Pre-selects one category facet. Read from the library URL by the page. */
+  initialCategory?: string;
+  /**
+   * Pre-selects the solution filter when no solution nav is active.
+   * An active solution nav still wins.
+   */
+  initialSolution?: string;
 }
 
 interface CenteredMessageProps {
@@ -52,147 +59,155 @@ CenteredMessage.displayName = 'CenteredMessage';
  * is active), and a card grid. Renders in any plugin — only depends on core
  * services (http via `useWorkflowsApi`, chrome via `useActiveSolution`).
  */
-export const CatalogBrowser = React.memo<CatalogBrowserProps>(({ onSelect }) => {
-  const { euiTheme } = useEuiTheme();
+export const CatalogBrowser = React.memo<CatalogBrowserProps>(
+  ({ onSelect, initialCategory, initialSolution }) => {
+    const { euiTheme } = useEuiTheme();
 
-  // Fluid card grid: tracks are at least 260px wide and grow to fill the full
-  // row, but each track becomes at least one sixth of the row on wide screens so
-  // the grid never creates a seventh column.
-  const gridCss = useMemo(
-    () => css`
-      display: grid;
-      gap: ${euiTheme.size.base};
-      grid-template-columns: repeat(
-        auto-fill,
-        minmax(max(min(100%, 260px), calc((100% - (${euiTheme.size.base} * 5)) / 6)), 1fr)
+    // Fluid card grid: tracks are at least 260px wide and grow to fill the full
+    // row, but each track becomes at least one sixth of the row on wide screens so
+    // the grid never creates a seventh column.
+    const gridCss = useMemo(
+      () => css`
+        display: grid;
+        gap: ${euiTheme.size.base};
+        grid-template-columns: repeat(
+          auto-fill,
+          minmax(max(min(100%, 260px), calc((100% - (${euiTheme.size.base} * 5)) / 6)), 1fr)
+        );
+        width: 100%;
+      `,
+      [euiTheme.size.base]
+    );
+
+    const [search, setSearch] = useState('');
+    const [selectedCategories, setSelectedCategories] = useState<string[]>(
+      initialCategory ? [initialCategory] : []
+    );
+    const [manualSolution, setManualSolution] = useState<string | undefined>(initialSolution);
+
+    const activeSolution = useActiveSolution();
+    const solution = activeSolution ?? manualSolution;
+
+    const { templates, allTemplates, isLoading, isError, refetch } = useCatalog({
+      search,
+      categories: selectedCategories,
+      solution,
+    });
+
+    // Scoped by search + solution but not categories, so category facet counts stay
+    // meaningful (a category's own count isn't collapsed by its own selection) while
+    // still reflecting the solution lock and search term a host may apply.
+    const facetScopedTemplates = useMemo(
+      () => filterCatalog(allTemplates, { search, solution }),
+      [allTemplates, search, solution]
+    );
+
+    const handleSearchChange = useCallback(
+      (event: React.ChangeEvent<HTMLInputElement>) => setSearch(event.target.value),
+      []
+    );
+    const handleRetry = useCallback(() => refetch(), [refetch]);
+
+    let content: React.ReactNode;
+    if (isLoading) {
+      content = (
+        <CenteredMessage dataTestSubj="workflowLibraryLoading">
+          <EuiLoadingSpinner size="xl" />
+        </CenteredMessage>
       );
-      width: 100%;
-    `,
-    [euiTheme.size.base]
-  );
-
-  const [search, setSearch] = useState('');
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [manualSolution, setManualSolution] = useState<string | undefined>(undefined);
-
-  const activeSolution = useActiveSolution();
-  const solution = activeSolution ?? manualSolution;
-
-  const { templates, allTemplates, isLoading, isError, refetch } = useCatalog({
-    search,
-    categories: selectedCategories,
-    solution,
-  });
-
-  // Scoped by search + solution but not categories, so category facet counts stay
-  // meaningful (a category's own count isn't collapsed by its own selection) while
-  // still reflecting the solution lock and search term a host may apply.
-  const facetScopedTemplates = useMemo(
-    () => filterCatalog(allTemplates, { search, solution }),
-    [allTemplates, search, solution]
-  );
-
-  const handleSearchChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => setSearch(event.target.value),
-    []
-  );
-  const handleRetry = useCallback(() => refetch(), [refetch]);
-
-  let content: React.ReactNode;
-  if (isLoading) {
-    content = (
-      <CenteredMessage dataTestSubj="workflowLibraryLoading">
-        <EuiLoadingSpinner size="xl" />
-      </CenteredMessage>
-    );
-  } else if (isError) {
-    content = (
-      <EuiCallOut
-        data-test-subj="workflowLibraryError"
-        announceOnMount
-        color="danger"
-        iconType="warning"
-        title={i18n.translate('workflowsUi.library.error.title', {
-          defaultMessage: 'Unable to load the template library',
-        })}
-      >
-        <EuiButton onClick={handleRetry} color="danger" data-test-subj="workflowLibraryRetryButton">
-          {i18n.translate('workflowsUi.library.error.retry', { defaultMessage: 'Retry' })}
-        </EuiButton>
-      </EuiCallOut>
-    );
-  } else if (allTemplates.length === 0) {
-    content = (
-      <CenteredMessage dataTestSubj="workflowLibraryEmptyCatalog">
-        <EuiText color="subdued">
-          {i18n.translate('workflowsUi.library.emptyCatalog', {
-            defaultMessage: 'No templates are available for this Kibana version yet.',
+    } else if (isError) {
+      content = (
+        <EuiCallOut
+          data-test-subj="workflowLibraryError"
+          announceOnMount
+          color="danger"
+          iconType="warning"
+          title={i18n.translate('workflowsUi.library.error.title', {
+            defaultMessage: 'Unable to load the template library',
           })}
-        </EuiText>
-      </CenteredMessage>
-    );
-  } else if (templates.length === 0) {
-    content = (
-      <CenteredMessage dataTestSubj="workflowLibraryNoMatches">
-        <EuiText color="subdued">
-          {i18n.translate('workflowsUi.library.noMatches', {
-            defaultMessage: 'No templates match the current filters.',
-          })}
-        </EuiText>
-      </CenteredMessage>
-    );
-  } else {
-    content = (
-      <div css={gridCss} data-test-subj="workflowLibraryCatalogGrid">
-        {templates.map((template) => (
-          <TemplateCard key={template.slug} template={template} onSelect={onSelect} />
-        ))}
-      </div>
+        >
+          <EuiButton
+            onClick={handleRetry}
+            color="danger"
+            data-test-subj="workflowLibraryRetryButton"
+          >
+            {i18n.translate('workflowsUi.library.error.retry', { defaultMessage: 'Retry' })}
+          </EuiButton>
+        </EuiCallOut>
+      );
+    } else if (allTemplates.length === 0) {
+      content = (
+        <CenteredMessage dataTestSubj="workflowLibraryEmptyCatalog">
+          <EuiText color="subdued">
+            {i18n.translate('workflowsUi.library.emptyCatalog', {
+              defaultMessage: 'No templates are available for this Kibana version yet.',
+            })}
+          </EuiText>
+        </CenteredMessage>
+      );
+    } else if (templates.length === 0) {
+      content = (
+        <CenteredMessage dataTestSubj="workflowLibraryNoMatches">
+          <EuiText color="subdued">
+            {i18n.translate('workflowsUi.library.noMatches', {
+              defaultMessage: 'No templates match the current filters.',
+            })}
+          </EuiText>
+        </CenteredMessage>
+      );
+    } else {
+      content = (
+        <div css={gridCss} data-test-subj="workflowLibraryCatalogGrid">
+          {templates.map((template) => (
+            <TemplateCard key={template.slug} template={template} onSelect={onSelect} />
+          ))}
+        </div>
+      );
+    }
+
+    return (
+      <EuiFlexGroup gutterSize="l" direction="column">
+        <EuiFlexItem>
+          <EuiFlexGroup gutterSize="m" responsive={false}>
+            <EuiFlexItem>
+              <EuiFieldSearch
+                fullWidth
+                placeholder={i18n.translate('workflowsUi.library.searchPlaceholder', {
+                  defaultMessage: 'Search templates',
+                })}
+                value={search}
+                onChange={handleSearchChange}
+                data-test-subj="workflowLibrarySearchField"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <SolutionFilter
+                templates={allTemplates}
+                value={solution}
+                onChange={setManualSolution}
+                disabled={Boolean(activeSolution)}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup
+            data-test-subj="workflowLibraryCatalogBrowser"
+            alignItems="flexStart"
+            gutterSize="l"
+          >
+            <EuiFlexItem grow={false} css={{ width: 220 }}>
+              <CategoryFacets
+                templates={facetScopedTemplates}
+                selectedCategories={selectedCategories}
+                onChange={setSelectedCategories}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={1}>{content}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
-
-  return (
-    <EuiFlexGroup gutterSize="l" direction="column">
-      <EuiFlexItem>
-        <EuiFlexGroup gutterSize="m" responsive={false}>
-          <EuiFlexItem>
-            <EuiFieldSearch
-              fullWidth
-              placeholder={i18n.translate('workflowsUi.library.searchPlaceholder', {
-                defaultMessage: 'Search templates',
-              })}
-              value={search}
-              onChange={handleSearchChange}
-              data-test-subj="workflowLibrarySearchField"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <SolutionFilter
-              templates={allTemplates}
-              value={solution}
-              onChange={setManualSolution}
-              disabled={Boolean(activeSolution)}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFlexGroup
-          data-test-subj="workflowLibraryCatalogBrowser"
-          alignItems="flexStart"
-          gutterSize="l"
-        >
-          <EuiFlexItem grow={false} css={{ width: 220 }}>
-            <CategoryFacets
-              templates={facetScopedTemplates}
-              selectedCategories={selectedCategories}
-              onChange={setSelectedCategories}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={1}>{content}</EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-});
+);
 CatalogBrowser.displayName = 'CatalogBrowser';

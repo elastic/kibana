@@ -210,6 +210,8 @@ export interface WorkflowExecutionsDataGridProps {
   onColumnResize: (columnId: string, width: number | undefined) => void;
   onReRunExecution?: (params: RerunWorkflowExecutionParams) => Promise<void>;
   onViewAllExecutionsForWorkflow?: (workflowId: string) => void;
+  /** Replaces the grid body with the column header and this message. */
+  emptyBody?: React.ReactNode;
 }
 
 export const WorkflowExecutionsDataGrid = ({
@@ -237,6 +239,7 @@ export const WorkflowExecutionsDataGrid = ({
   onColumnResize,
   onReRunExecution,
   onViewAllExecutionsForWorkflow,
+  emptyBody,
 }: WorkflowExecutionsDataGridProps) => {
   const trailingControlColumns = useWorkflowExecutionsTrailingControlColumns(
     executions,
@@ -367,7 +370,24 @@ export const WorkflowExecutionsDataGrid = ({
     };
   }, [executions, selectedExecutionId]);
 
-  const rowCount = toolbarOnly ? 0 : executions.length;
+  const renderCustomGridBody = useCallback<NonNullable<EuiDataGridProps['renderCustomGridBody']>>(
+    ({ headerRow }) => (
+      <>
+        {headerRow}
+        <div
+          css={css`
+            padding: 16px;
+            text-align: center;
+          `}
+        >
+          {emptyBody}
+        </div>
+      </>
+    ),
+    [emptyBody]
+  );
+
+  const rowCount = toolbarOnly || emptyBody ? 0 : executions.length;
 
   return (
     <WorkflowExecutionsGridProvider value={selectionState}>
@@ -376,7 +396,9 @@ export const WorkflowExecutionsDataGrid = ({
           aria-labelledby={ariaLabelledBy}
           columns={gridColumns}
           rowCount={rowCount}
+          height={emptyBody ? 'auto' : undefined}
           renderCellValue={renderCellValue}
+          {...(emptyBody ? { renderCustomGridBody } : {})}
           leadingControlColumns={leadingControlColumns}
           trailingControlColumns={trailingControlColumns}
           columnVisibility={{
@@ -388,7 +410,7 @@ export const WorkflowExecutionsDataGrid = ({
           onColumnResize={({ columnId, width }) => onColumnResize(columnId, width)}
           gridStyle={gridStyleWithSelection}
           rowHeightsOptions={{ defaultHeight: { lineCount: 1 } }}
-          toolbarVisibility={toolbarVisibility}
+          toolbarVisibility={emptyBody ? false : toolbarVisibility}
         />
       </div>
     </WorkflowExecutionsGridProvider>

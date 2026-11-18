@@ -34,8 +34,8 @@ describe('WorkflowsEmptyStateReadOnly', () => {
   it('renders the read-only empty state with title and description', () => {
     renderWithProviders(<WorkflowsEmptyStateReadOnly />);
 
-    expect(screen.getByText('Workflows list will be here')).toBeInTheDocument();
-    expect(screen.getByText(/Workflows let you automate repetitive tasks/)).toBeInTheDocument();
+    expect(screen.getByText('You can view workflows')).toBeInTheDocument();
+    expect(screen.getByText("You don't have permission to create or change them.")).toBeInTheDocument();
   });
 
   it('does not render create workflow actions', () => {
@@ -50,6 +50,6 @@ describe('WorkflowsEmptyStateReadOnly', () => {
     renderWithProviders(<WorkflowsEmptyStateReadOnly />);
 
     expect(screen.getByText('Minimum privileges required:')).toBeInTheDocument();
-    expect(screen.getByText('Workflows: Write')).toBeInTheDocument();
+    expect(screen.getByText('Workflows: Create')).toBeInTheDocument();
   });
 });

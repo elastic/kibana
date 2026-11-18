@@ -152,6 +152,10 @@ export interface PublicEmbeddableConversationInputProps {
    * via `openChat`).
    */
   onSubmit?: (message: string, attachments: ConversationAttachment[]) => void;
+  /**
+   * Placeholder shown in the empty input. Defaults to the Agent Builder prompt.
+   */
+  placeholder?: string;
 }
 
 /**

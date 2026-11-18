@@ -26,7 +26,7 @@ export function WorkflowsEmptyStateReadOnly() {
         <h2 style={{ whiteSpace: 'nowrap' }}>
           <FormattedMessage
             id="workflows.emptyStateReadOnly.title"
-            defaultMessage="Workflows list will be here"
+            defaultMessage="You can view workflows"
           />
         </h2>
       }
@@ -37,7 +37,7 @@ export function WorkflowsEmptyStateReadOnly() {
           <p>
             <FormattedMessage
               id="workflows.emptyStateReadOnly.body.firstParagraph"
-              defaultMessage="Workflows let you automate repetitive tasks and streamline processes across your environment."
+              defaultMessage="You don't have permission to create or change them."
             />
           </p>
         </>
@@ -46,8 +46,8 @@ export function WorkflowsEmptyStateReadOnly() {
         <PrivilegesFooter
           permissions={[
             {
-              id: 'workflows.writeWorkflowPermissionText',
-              default: 'Workflows: Write',
+              id: 'workflows.createWorkflowPermissionText',
+              default: 'Workflows: Create',
             },
           ]}
         />

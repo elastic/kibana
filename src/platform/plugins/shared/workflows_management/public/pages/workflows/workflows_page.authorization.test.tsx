@@ -50,7 +50,20 @@ jest.mock('../../entities/workflows/model/use_workflow_stats', () => ({
 }));
 
 jest.mock('../../features/workflow_list', () => ({
-  WorkflowList: () => <div data-test-subj="mockWorkflowListForAuthzTest" />,
+  WorkflowList: ({
+    showManagedOffEmpty,
+    forceReadOnlyEmpty,
+  }: {
+    showManagedOffEmpty?: boolean;
+    forceReadOnlyEmpty?: boolean;
+  }) => (
+    <div
+      data-test-subj="mockWorkflowListForAuthzTest"
+      data-managed-off={showManagedOffEmpty ? 'true' : 'false'}
+    >
+      {forceReadOnlyEmpty ? <div data-test-subj="workflows-view-only-callout" /> : null}
+    </div>
+  ),
 }));
 
 jest.mock('../../widgets/workflow_search_field/ui/workflow_search_field', () => ({
@@ -140,6 +153,15 @@ function mockCapabilities(
       featureFlags: {
         useBooleanValue: () => isExecutionStatsBarEnabled,
       },
+      notifications: {
+        toasts: {
+          addDanger: jest.fn(),
+          addError: jest.fn(),
+        },
+      },
+      uiSettings: {
+        set: jest.fn(),
+      },
     },
   } as ReturnType<typeof useKibana>);
 }
@@ -147,6 +169,8 @@ function mockCapabilities(
 describe('WorkflowsPage authorization', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    window.sessionStorage.setItem('workflows.prototypeScenario', 'live');
+    window.sessionStorage.removeItem('workflows.prototypeViewOnlyCalloutDismissed');
     isExecutionStatsBarEnabled = false;
     mockUseWorkflows.mockReturnValue(emptyWorkflowsResult as any);
     mockUseShowManagedWorkflowsSetting.mockReturnValue(false);
@@ -160,33 +184,33 @@ describe('WorkflowsPage authorization', () => {
       label: 'editor (create + update)',
       createWorkflow: true,
       updateWorkflow: true,
-      expectCreate: true,
+      expectCreateDisabled: false,
       expectImport: true,
     },
     {
       label: 'create only (import hidden — needs update too)',
       createWorkflow: true,
       updateWorkflow: false,
-      expectCreate: true,
+      expectCreateDisabled: false,
       expectImport: false,
     },
     {
       label: 'update only',
       createWorkflow: false,
       updateWorkflow: true,
-      expectCreate: false,
+      expectCreateDisabled: true,
       expectImport: false,
     },
     {
       label: 'read-only',
       createWorkflow: false,
       updateWorkflow: false,
-      expectCreate: false,
+      expectCreateDisabled: true,
       expectImport: false,
     },
   ])(
-    'header: $label — Create=$expectCreate, Import=$expectImport',
-    async ({ createWorkflow, updateWorkflow, expectCreate, expectImport }) => {
+    'header: $label — Create disabled=$expectCreateDisabled, Import=$expectImport',
+    async ({ createWorkflow, updateWorkflow, expectCreateDisabled, expectImport }) => {
       mockCapabilities(createWorkflow, updateWorkflow);
 
       renderPage();
@@ -194,11 +218,11 @@ describe('WorkflowsPage authorization', () => {
       // The app menu renders through a React.lazy boundary, so wait for it to resolve.
       await screen.findByTestId('appHeader');
 
-      if (expectCreate) {
-        expect(await screen.findByTestId('createWorkflowButton')).toBeInTheDocument();
-      } else {
-        expect(screen.queryByTestId('createWorkflowButton')).not.toBeInTheDocument();
-      }
+      const createButton = await screen.findByTestId('createWorkflowButton');
+      const createDisabled =
+        createButton.hasAttribute('disabled') ||
+        createButton.getAttribute('aria-disabled') === 'true';
+      expect(createDisabled).toBe(expectCreateDisabled);
 
       if (expectImport) {
         // Import is an overflow menu item; open the overflow popover to reveal it.
@@ -247,6 +271,31 @@ describe('WorkflowsPage authorization', () => {
 
     await openAppMenuOverflow();
     expect(screen.queryByTestId('workflowAddConnectorsLink')).not.toBeInTheDocument();
+  });
+
+  it('shows the managed filter in the no-results prototype even when the setting is off', () => {
+    window.sessionStorage.setItem('workflows.prototypeScenario', 'no-results-search-or-filters');
+    mockCapabilities(true, true);
+    mockUseShowManagedWorkflowsSetting.mockReturnValue(false);
+
+    renderPage();
+
+    expect(screen.getByTestId('managed-filter-popover-button')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('managed-filter-popover-button'));
+    expect(screen.getByRole('option', { name: 'Managed' })).toHaveAttribute('aria-checked', 'true');
+  });
+
+  it('shows the view filter in the read-only prototype even when the setting is off', () => {
+    window.sessionStorage.setItem('workflows.prototypeScenario', 'read-only-no-manage');
+    mockCapabilities(true, true);
+    mockUseShowManagedWorkflowsSetting.mockReturnValue(false);
+
+    renderPage();
+
+    expect(screen.getByTestId('workflows-view-only-callout')).toBeInTheDocument();
+    expect(screen.getByTestId('managed-filter-popover-button')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('managed-filter-popover-button'));
+    expect(screen.getByRole('option', { name: 'Custom' })).toHaveAttribute('aria-checked', 'true');
   });
 
   it('hides the managed filter when the setting is disabled', () => {
@@ -312,6 +361,43 @@ describe('WorkflowsPage authorization', () => {
     renderPage();
 
     expect(screen.getByTestId('managed-filter-popover-button')).toBeInTheDocument();
+  });
+
+  it.each([
+    'empty-workflow-llm-disabled',
+    'empty-workflow-llm-enabled',
+    'empty-workflow-auto-migration',
+  ])(
+    'hides the filter bar for the %s prototype',
+    (scenario) => {
+      mockCapabilities(true, true);
+      mockUseShowManagedWorkflowsSetting.mockReturnValue(true);
+      window.sessionStorage.setItem('workflows.prototypeScenario', scenario);
+
+      renderPage();
+
+      expect(screen.queryByTestId('workflowSearchField')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('managed-filter-popover-button')).not.toBeInTheDocument();
+    }
+  );
+
+  it('shows the managed-off empty list when that prototype is selected and the setting is on', () => {
+    mockCapabilities(true, true);
+    mockUseShowManagedWorkflowsSetting.mockReturnValue(true);
+    window.sessionStorage.setItem(
+      'workflows.prototypeScenario',
+      'managed-workflows-off-no-custom'
+    );
+
+    renderPage();
+
+    expect(screen.getByTestId('mockWorkflowListForAuthzTest')).toHaveAttribute(
+      'data-managed-off',
+      'true'
+    );
+    expect(screen.queryByTestId('workflowSearchField')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('managed-filter-popover-button')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('createWorkflowButton')).not.toBeInTheDocument();
   });
 
   it('updates the URL to request all workflows when custom and managed workflow types are selected', () => {

@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { EuiCallOut, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useWorkflowExecutionRerun } from './use_workflow_executions_bulk_actions';
 import { useWorkflowExecutionsPageFilters } from './use_workflow_executions_page_filters';
@@ -16,11 +18,19 @@ import { WorkflowExecutionDetailFlyout } from './workflow_execution_detail_flyou
 import { createWorkflowExecutionsDataView } from './workflow_executions_data_view';
 import { WorkflowExecutionsFilters } from './workflow_executions_filters';
 import { WorkflowExecutionsSearchBar } from './workflow_executions_search_bar';
+import { DEFAULT_EXECUTION_PAGE_FILTERS } from './workflow_executions_page_constants';
+import { ExecutionsEmptyState } from './executions_empty_state';
 import { WorkflowExecutionsTable } from './workflow_executions_table';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSpaceId } from '../../hooks/use_space_id';
 import { useTelemetry } from '../../hooks/use_telemetry';
 import { useWorkflowUrlState } from '../../hooks/use_workflow_url_state';
+import {
+  EXECUTIONS_EMPTY,
+  EXECUTIONS_NO_RESULTS_SEARCH_OR_FILTERS,
+  EXECUTIONS_READ_ONLY,
+  useWorkflowPrototypeScenario,
+} from '../../shared/workflow_prototype_scenario';
 
 const DEFAULT_TIME_RANGE: TimeRange = {
   from: 'now-24h',
@@ -33,6 +43,17 @@ const DEFAULT_QUERY: Query = {
 };
 
 const DEFAULT_REFRESH_INTERVAL_MS = 5_000;
+
+const EXECUTIONS_VIEW_ONLY_CALLOUT_DISMISSED_KEY =
+  'workflows.prototypeExecutionsViewOnlyCalloutDismissed';
+
+function readExecutionsViewOnlyCalloutDismissed() {
+  try {
+    return window.sessionStorage.getItem(EXECUTIONS_VIEW_ONLY_CALLOUT_DISMISSED_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Deselecting is a consequence of the filter change, not a navigation the user asked for, and the
@@ -52,10 +73,32 @@ const clearSelectedExecutionIfChanged = (
 
 export const WorkflowExecutionsPageContent = React.memo(() => {
   const { fieldFormats } = useKibana().services;
+  const { euiTheme } = useEuiTheme();
   const spaceId = useSpaceId();
   const telemetry = useTelemetry();
   const dataView = useMemo(() => createWorkflowExecutionsDataView(fieldFormats), [fieldFormats]);
 
+  const scenario = useWorkflowPrototypeScenario();
+  const forceNoResults = scenario === EXECUTIONS_NO_RESULTS_SEARCH_OR_FILTERS;
+  const forceEmptyExecutions = scenario === EXECUTIONS_EMPTY;
+  const forceReadOnlyExecutions = scenario === EXECUTIONS_READ_ONLY;
+  const [viewOnlyCalloutDismissed, setViewOnlyCalloutDismissed] = useState(
+    readExecutionsViewOnlyCalloutDismissed
+  );
+
+  useEffect(() => {
+    if (forceReadOnlyExecutions) {
+      return;
+    }
+    try {
+      window.sessionStorage.removeItem(EXECUTIONS_VIEW_ONLY_CALLOUT_DISMISSED_KEY);
+    } catch {
+      // Session storage can be blocked. The in-memory flag still resets.
+    }
+    setViewOnlyCalloutDismissed(false);
+  }, [forceReadOnlyExecutions]);
+  const [noResultsCleared, setNoResultsCleared] = useState(false);
+  const [filtersInstanceKey, setFiltersInstanceKey] = useState(0);
   const [query, setQuery] = useState<Query>(DEFAULT_QUERY);
   const [submittedQuery, setSubmittedQuery] = useState<Query>(DEFAULT_QUERY);
   const [timeRange, setTimeRange] = useState<TimeRange>(DEFAULT_TIME_RANGE);
@@ -70,6 +113,35 @@ export const WorkflowExecutionsPageContent = React.memo(() => {
   const previousSubmittedSearchKey = useRef<string | null>(null);
   const previousControlFiltersKey = useRef<string | null>(null);
   const previousSearchBarFiltersKey = useRef<string | null>(null);
+
+  useEffect(() => {
+    setNoResultsCleared(false);
+  }, [scenario]);
+
+  const showDemoNoResults = forceNoResults && !noResultsCleared;
+  const displayedQuery = showDemoNoResults
+    ? String(query.query ?? '')
+      ? query
+      : { query: 'production deploy', language: 'kuery' }
+    : query;
+  const displayedControls = showDemoNoResults
+    ? (controlsUrlState ?? DEFAULT_EXECUTION_PAGE_FILTERS).map((control) =>
+        control.field_name === 'status' && !control.selected_options?.length
+          ? { ...control, selected_options: ['failed'] }
+          : control
+      )
+    : controlsUrlState;
+
+  const clearSearchAndFilters = useCallback(() => {
+    setNoResultsCleared(true);
+    setQuery(DEFAULT_QUERY);
+    setSubmittedQuery(DEFAULT_QUERY);
+    setSearchBarFilters([]);
+    setControlFilters([]);
+    setTimeRange(DEFAULT_TIME_RANGE);
+    setControlsUrlState(DEFAULT_EXECUTION_PAGE_FILTERS);
+    setFiltersInstanceKey((key) => key + 1);
+  }, [setControlsUrlState]);
 
   const combinedFilters = useMemo(
     () => [...controlFilters, ...searchBarFilters],
@@ -197,6 +269,17 @@ export const WorkflowExecutionsPageContent = React.memo(() => {
     // TODO: Wire a SearchBar/date-picker ref API when available instead of DOM query.
   }, []);
 
+  if (forceEmptyExecutions) {
+    return (
+      <div
+        data-test-subj="workflowExecutionsPageContent"
+        css={{ display: 'flex', flexGrow: 1, alignItems: 'center' }}
+      >
+        <ExecutionsEmptyState />
+      </div>
+    );
+  }
+
   return (
     <div data-test-subj="workflowExecutionsPageContent">
       <WorkflowExecutionsSearchBar
@@ -207,13 +290,14 @@ export const WorkflowExecutionsPageContent = React.memo(() => {
         onQueryChange={handleQueryChange}
         onQuerySubmit={handleQuerySubmit}
         onRefreshChange={handleRefreshChange}
-        query={query}
+        query={displayedQuery}
         refreshInterval={refreshIntervalMs}
         timeRange={timeRange}
       />
       <EuiSpacer size="m" />
       <WorkflowExecutionsFilters
-        controlsUrlState={controlsUrlState}
+        key={filtersInstanceKey}
+        controlsUrlState={displayedControls}
         filters={controlFilters}
         onFilterGroupInit={onFilterGroupInit}
         onFiltersChange={handleControlFiltersChange}
@@ -222,6 +306,58 @@ export const WorkflowExecutionsPageContent = React.memo(() => {
         timeRange={timeRange}
       />
       <EuiSpacer size="l" />
+      {forceReadOnlyExecutions && !viewOnlyCalloutDismissed ? (
+        <>
+          <div
+            css={css`
+              .euiCallOut > div:first-child {
+                flex-direction: row;
+                align-items: center;
+                gap: ${euiTheme.size.l};
+              }
+
+              .euiCallOut [data-test-subj='executions-view-only-callout__actions'] {
+                margin-inline-start: 0;
+                align-self: center;
+                flex-shrink: 0;
+              }
+            `}
+          >
+            <EuiCallOut
+              announceOnMount
+              color="warning"
+              iconType="warning"
+              size="s"
+              title={i18n.translate('workflows.executionsPage.viewOnly.title', {
+                defaultMessage: 'View only',
+              })}
+              text={i18n.translate('workflows.executionsPage.viewOnly.body', {
+                defaultMessage: "You don't have permissions to run or edit executions.",
+              })}
+              actionProps={{
+                primary: {
+                  children: i18n.translate('workflows.executionsPage.viewOnly.contactAdministrator', {
+                    defaultMessage: 'Contact your administrator',
+                  }),
+                  // No destination yet. The button is the agreed placeholder.
+                  onClick: () => undefined,
+                  'data-test-subj': 'executions-view-only-contact-administrator',
+                },
+              }}
+              onDismiss={() => {
+                try {
+                  window.sessionStorage.setItem(EXECUTIONS_VIEW_ONLY_CALLOUT_DISMISSED_KEY, 'true');
+                } catch {
+                  // Session storage can be blocked. The in-memory flag still hides it.
+                }
+                setViewOnlyCalloutDismissed(true);
+              }}
+              data-test-subj="executions-view-only-callout"
+            />
+          </div>
+          <EuiSpacer size="l" />
+        </>
+      ) : null}
       {spaceId ? (
         <WorkflowExecutionsTable
           filters={combinedFilters}
@@ -231,6 +367,9 @@ export const WorkflowExecutionsPageContent = React.memo(() => {
           onReRunExecution={rerunExecution}
           onViewAllExecutionsForWorkflow={handleViewAllExecutionsForWorkflow}
           onTimeRangeLinkClick={handleTimeRangeLinkClick}
+          onClearSearchAndFilters={clearSearchAndFilters}
+          forceNoResults={showDemoNoResults}
+          forceReadOnly={forceReadOnlyExecutions}
           query={submittedQuery}
           spaceId={spaceId}
           timeRange={timeRange}

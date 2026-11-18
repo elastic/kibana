@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, within, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
@@ -135,6 +135,8 @@ jest.mock('../../../shared/ui', () => ({
 
 jest.mock('../../../widgets/worflows_triggers_list/worflows_triggers_list', () => ({
   WorkflowsTriggersList: () => <span>{'Triggers'}</span>,
+  TriggerIcon: () => <span>{'Trigger'}</span>,
+  getTriggerLabel: (triggerType: string) => triggerType,
 }));
 
 // --- Test helpers ---
@@ -179,6 +181,8 @@ describe('WorkflowList', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    window.sessionStorage.setItem('workflows.prototypeScenario', 'live');
+    window.sessionStorage.removeItem('workflows.prototypeViewOnlyCalloutDismissed');
     // Re-configure auto-mock after clearAllMocks
     const { useKibana } = jest.requireMock('../../../hooks/use_kibana') as {
       useKibana: jest.Mock;
@@ -254,7 +258,58 @@ describe('WorkflowList', () => {
       expect(screen.getByTestId('workflows-empty-state')).toBeInTheDocument();
     });
 
-    it('shows the read-only empty state when there are no workflows and the user cannot create', () => {
+    it('shows example workflows in a view-only table for the read-only prototype', () => {
+      mockUseWorkflows.mockReturnValue({
+        data: { results: [], total: 0, ...defaultSearch },
+        isLoading: false,
+        error: null,
+        refetch: mockRefetch,
+      });
+      renderComponent({ forceReadOnlyEmpty: true });
+
+      expect(screen.getByTestId('workflows-view-only-callout')).toHaveTextContent('View only');
+      expect(screen.getByTestId('workflows-view-only-callout')).toHaveTextContent(
+        "You don't have permission to create or change workflows."
+      );
+      expect(screen.getByTestId('workflows-view-only-request-access')).toHaveTextContent(
+        'Contact your administrator'
+      );
+      expect(screen.getByText('Detect suspicious login')).toBeInTheDocument();
+      expect(screen.queryByTestId('runWorkflowAction')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('editWorkflowAction')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('euiCollapsedItemActionsButton')).not.toBeInTheDocument();
+      const toggle = screen.getByTestId('workflowToggleSwitch-example-suspicious-login');
+      expect(
+        toggle.hasAttribute('disabled') || toggle.getAttribute('aria-disabled') === 'true'
+      ).toBe(true);
+
+      fireEvent.click(screen.getByTestId('euiDismissCalloutButton'));
+      expect(screen.queryByTestId('workflows-view-only-callout')).not.toBeInTheDocument();
+      expect(screen.getByText('Detect suspicious login')).toBeInTheDocument();
+    });
+
+    it('hides the custom examples when the read-only View filter is Managed', () => {
+      mockUseWorkflows.mockReturnValue({
+        data: {
+          results: [createMockWorkflow({ id: 'managed-1', name: 'Managed response' })],
+          total: 1,
+          ...defaultSearch,
+        },
+        isLoading: false,
+        error: null,
+        refetch: mockRefetch,
+      });
+      renderComponent({
+        forceReadOnlyEmpty: true,
+        search: { ...defaultSearch, managed: 'managed' },
+      });
+
+      expect(screen.getByText('Managed response')).toBeInTheDocument();
+      expect(screen.queryByText('Detect suspicious login')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('runWorkflowAction')).not.toBeInTheDocument();
+    });
+
+    it('shows the table empty message when there are no workflows and the user cannot create', () => {
       const { useWorkflowsCapabilities } = jest.requireMock('@kbn/workflows-ui') as {
         useWorkflowsCapabilities: jest.Mock;
       };
@@ -271,7 +326,10 @@ describe('WorkflowList', () => {
       });
       renderComponent({ search: { ...defaultSearch } });
 
-      expect(screen.getByTestId('workflows-empty-state-readonly')).toBeInTheDocument();
+      expect(screen.queryByTestId('workflows-empty-state-readonly')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workflows-empty-state')).not.toBeInTheDocument();
+      expect(screen.getByTestId('workflowListTable')).toBeInTheDocument();
+      expect(screen.getByText('No items found')).toBeInTheDocument();
     });
 
     it('does not show empty state when filters are applied even with no results', () => {

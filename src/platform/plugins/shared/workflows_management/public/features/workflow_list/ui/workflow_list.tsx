@@ -15,9 +15,11 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { css } from '@emotion/react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -28,6 +30,7 @@ import {
   useWorkflowsCapabilities,
   type WorkflowsCreateRouteState,
 } from '@kbn/workflows-ui';
+import { EXAMPLE_WORKFLOWS } from './example_workflows';
 import { ExportReferencesModal } from './export_references_modal';
 import { useEventDrivenExecutionStatus } from './use_event_driven_execution_status';
 import { useExportWithReferences } from './use_export_with_references';
@@ -35,26 +38,56 @@ import { WorkflowListTable } from './workflow_list_table';
 import { WorkflowsUtilityBar } from './workflows_utility_bar';
 import { PLUGIN_ID } from '../../../../common';
 import { AgenticFirstEmptyStateLive } from '../../../components';
-import { WorkflowsEmptyStateReadOnly } from '../../../components/workflows_empty_state/workflows_empty_state';
+import { WorkflowsNoResultsState } from '../../../components/workflows_no_results_state/workflows_no_results_state';
 import { WorkflowsPageName } from '../../../deep_links';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 import { getWorkflowDetailRouteState } from '../../../shared/utils/workflow_navigation';
+import {
+  isPrototypeEmptyWorkflow,
+  useWorkflowPrototypeScenario,
+} from '../../../shared/workflow_prototype_scenario';
 import { shouldShowWorkflowsEmptyState } from '../../../shared/utils/workflow_utils';
 import type { WorkflowTriggerTab } from '../../run_workflow/ui/types';
 import { WorkflowExecuteModal } from '../../run_workflow/ui/workflow_execute_modal';
 import { hasCustomEventTrigger } from '../../run_workflow/ui/workflow_execute_modal_helpers';
 import { WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } from '../constants';
 
+const VIEW_ONLY_CALLOUT_DISMISSED_KEY = 'workflows.prototypeViewOnlyCalloutDismissed';
+
+function readViewOnlyCalloutDismissed() {
+  try {
+    return window.sessionStorage.getItem(VIEW_ONLY_CALLOUT_DISMISSED_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
 interface WorkflowListProps {
   search: WorkflowsSearchParams;
   setSearch: (search: WorkflowsSearchParams) => void;
+  onClearSearchAndFilters?: () => void;
+  forceNoResults?: boolean;
+  showManagedOffEmpty?: boolean;
+  forceReadOnlyEmpty?: boolean;
+  showExampleWorkflows?: boolean;
 }
 
-export function WorkflowList({ search, setSearch }: WorkflowListProps) {
+export function WorkflowList({
+  search,
+  setSearch,
+  onClearSearchAndFilters,
+  forceNoResults = false,
+  showManagedOffEmpty = false,
+  forceReadOnlyEmpty = false,
+  showExampleWorkflows = false,
+}: WorkflowListProps) {
   const { page = 1, size = WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } = search;
   const { application, notifications } = useKibana().services;
+  const { euiTheme } = useEuiTheme();
+  const scenario = useWorkflowPrototypeScenario();
+  const forceEmptyScenario = isPrototypeEmptyWorkflow(scenario);
   const location = useLocation();
   const {
     canCreateWorkflow,
@@ -64,6 +97,28 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
     canUpdateWorkflow,
     canDeleteWorkflow,
   } = useWorkflowsCapabilities();
+  // The header scenario can force this view for a user who otherwise has every privilege.
+  const allowCreate = !!canCreateWorkflow && !forceReadOnlyEmpty;
+  const allowRead = !!canReadWorkflow;
+  const allowReadExecution = !!canReadWorkflowExecution;
+  const allowExecute = !!canExecuteWorkflow && !forceReadOnlyEmpty;
+  const allowUpdate = !!canUpdateWorkflow && !forceReadOnlyEmpty;
+  const allowDelete = !!canDeleteWorkflow && !forceReadOnlyEmpty;
+  const [viewOnlyCalloutDismissed, setViewOnlyCalloutDismissed] = useState(
+    readViewOnlyCalloutDismissed
+  );
+
+  useEffect(() => {
+    if (forceReadOnlyEmpty) {
+      return;
+    }
+    try {
+      window.sessionStorage.removeItem(VIEW_ONLY_CALLOUT_DISMISSED_KEY);
+    } catch {
+      // Session storage can be blocked. The in-memory flag still resets.
+    }
+    setViewOnlyCalloutDismissed(false);
+  }, [forceReadOnlyEmpty]);
 
   const searchParams = useMemo(() => {
     if (search.enabled != null) {
@@ -290,7 +345,82 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
     return end;
   }, [page, size, workflows]);
 
-  if (isLoadingWorkflows) {
+  const agenticLanding = (
+    <AgenticFirstEmptyStateLive
+      onSubmitPrompt={(message, attachments) =>
+        application.navigateToApp(PLUGIN_ID, {
+          path: '/create',
+          state: {
+            initialAgentMessage: message,
+            initialAgentAttachments: attachments,
+          } satisfies WorkflowsCreateRouteState,
+        })
+      }
+      onStartManually={() =>
+        application.navigateToApp(PLUGIN_ID, { path: '/create?startBlank=true' })
+      }
+      onExploreLibrary={() =>
+        application.navigateToApp(PLUGIN_ID, { deepLinkId: WorkflowsPageName.library })
+      }
+    />
+  );
+
+  if (showManagedOffEmpty) {
+    return agenticLanding;
+  }
+
+  if (forceNoResults) {
+    return (
+      <>
+        <EuiSpacer size="m" />
+        <WorkflowListTable
+          items={[]}
+          page={1}
+          size={size}
+          total={0}
+          selectedItems={selectedItems}
+          onSelectionChange={setSelectedItems}
+          onPageChange={() => undefined}
+          onToggleWorkflow={handleToggleWorkflow}
+          onDeleteWorkflow={handleDeleteWorkflow}
+          onCloneWorkflow={handleCloneWorkflow}
+          onExportWorkflow={handleExportWorkflow}
+          onRequestRun={setExecuteWorkflow}
+          onEditWorkflow={handleEditWorkflow}
+          workflowsListSearch={location.search}
+          canCreateWorkflow={allowCreate}
+          canReadWorkflow={allowRead}
+          canReadWorkflowExecution={allowReadExecution}
+          canUpdateWorkflow={allowUpdate}
+          canDeleteWorkflow={allowDelete}
+          canExecuteWorkflow={allowExecute}
+          noItemsMessage={
+            <WorkflowsNoResultsState onClear={onClearSearchAndFilters ?? (() => undefined)} />
+          }
+          hidePagination
+        />
+      </>
+    );
+  }
+
+  const apiRows = workflows?.results ?? [];
+  const apiHasCustom = apiRows.some((workflow) => workflow.managed !== true);
+  const readOnlyCustomExamples =
+    forceReadOnlyEmpty && search.managed !== 'managed' && !apiHasCustom ? EXAMPLE_WORKFLOWS : [];
+  const showClearedExamples = showExampleWorkflows && apiRows.length === 0;
+  const tableWorkflows = forceReadOnlyEmpty
+    ? [...readOnlyCustomExamples, ...apiRows]
+    : showClearedExamples
+      ? EXAMPLE_WORKFLOWS
+      : apiRows;
+  const showExampleRows = readOnlyCustomExamples.length > 0 || showClearedExamples;
+  const tableTotal = showExampleRows
+    ? readOnlyCustomExamples.length + (forceReadOnlyEmpty ? workflows?.total ?? 0 : 0) ||
+      EXAMPLE_WORKFLOWS.length
+    : workflows?.total ?? 0;
+  const tableShowEnd = showExampleRows ? tableWorkflows.length : showEnd;
+
+  if (!showExampleWorkflows && isLoadingWorkflows) {
     return (
       <EuiFlexGroup justifyContent={'center'} alignItems={'center'}>
         <EuiFlexItem grow={false}>
@@ -308,7 +438,7 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
     );
   }
 
-  if (error) {
+  if (!showExampleWorkflows && error) {
     return (
       <EuiText>
         <FormattedMessage
@@ -319,46 +449,101 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
     );
   }
 
-  // Show empty state if no workflows exist and no filters are applied
-  if (shouldShowWorkflowsEmptyState(workflows, search)) {
-    if (!canCreateWorkflow) {
+  // Show empty state if no workflows exist and no filters are applied.
+  // The header scenario switcher can also force the LLM-disabled landing.
+  if (
+    !showExampleWorkflows &&
+    !forceReadOnlyEmpty &&
+    (forceEmptyScenario || shouldShowWorkflowsEmptyState(workflows, search))
+  ) {
+    if (!forceEmptyScenario && !canCreateWorkflow) {
       return (
-        <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: '60vh' }}>
-          <EuiFlexItem grow={false}>
-            <WorkflowsEmptyStateReadOnly />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <>
+          <EuiSpacer size="m" />
+          <WorkflowListTable
+            items={[]}
+            page={1}
+            size={size}
+            total={0}
+            selectedItems={selectedItems}
+            onSelectionChange={setSelectedItems}
+            onPageChange={() => undefined}
+            onToggleWorkflow={handleToggleWorkflow}
+            onDeleteWorkflow={handleDeleteWorkflow}
+            onCloneWorkflow={handleCloneWorkflow}
+            onExportWorkflow={handleExportWorkflow}
+            onRequestRun={setExecuteWorkflow}
+            onEditWorkflow={handleEditWorkflow}
+            workflowsListSearch={location.search}
+            canCreateWorkflow={allowCreate}
+            canReadWorkflow={allowRead}
+            canReadWorkflowExecution={allowReadExecution}
+            canUpdateWorkflow={allowUpdate}
+            canDeleteWorkflow={allowDelete}
+            canExecuteWorkflow={allowExecute}
+            hidePagination
+          />
+        </>
       );
     }
-    return (
-      <AgenticFirstEmptyStateLive
-        onSubmitPrompt={(message, attachments) =>
-          application.navigateToApp(PLUGIN_ID, {
-            path: '/create',
-            state: {
-              initialAgentMessage: message,
-              initialAgentAttachments: attachments,
-            } satisfies WorkflowsCreateRouteState,
-          })
-        }
-        onStartManually={() =>
-          application.navigateToApp(PLUGIN_ID, { path: '/create?startBlank=true' })
-        }
-        onSelectTemplate={(template) =>
-          application.navigateToApp(PLUGIN_ID, {
-            deepLinkId: WorkflowsPageName.library,
-            path: template.slug,
-          })
-        }
-        onExploreLibrary={() =>
-          application.navigateToApp(PLUGIN_ID, { deepLinkId: WorkflowsPageName.library })
-        }
-      />
-    );
+    return agenticLanding;
   }
 
   return (
     <>
+      {forceReadOnlyEmpty && !viewOnlyCalloutDismissed ? (
+        <>
+          <EuiSpacer size="m" />
+          <div
+            css={css`
+              .euiCallOut > div:first-child {
+                flex-direction: row;
+                align-items: center;
+                gap: ${euiTheme.size.l};
+              }
+
+              .euiCallOut [data-test-subj='workflows-view-only-callout__actions'] {
+                margin-inline-start: 0;
+                align-self: center;
+                flex-shrink: 0;
+              }
+            `}
+          >
+            <EuiCallOut
+              announceOnMount
+              color="warning"
+              iconType="warning"
+              size="s"
+              title={i18n.translate('workflows.workflowList.viewOnly.title', {
+                defaultMessage: 'View only',
+              })}
+              text={i18n.translate('workflows.workflowList.viewOnly.body', {
+                defaultMessage: "You don't have permission to create or change workflows.",
+              })}
+              actionProps={{
+                primary: {
+                  children: i18n.translate('workflows.workflowList.viewOnly.contactAdministrator', {
+                    defaultMessage: 'Contact your administrator',
+                  }),
+                  // No destination yet. The button is the agreed placeholder.
+                  onClick: () => undefined,
+                  'data-test-subj': 'workflows-view-only-request-access',
+                },
+              }}
+              onDismiss={() => {
+                try {
+                  window.sessionStorage.setItem(VIEW_ONLY_CALLOUT_DISMISSED_KEY, 'true');
+                } catch {
+                  // Session storage can be blocked. The in-memory flag still hides it.
+                }
+                setViewOnlyCalloutDismissed(true);
+              }}
+              data-test-subj="workflows-view-only-callout"
+            />
+          </div>
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
       {!isLoadingEventDrivenStatus &&
         !eventDrivenStatusError &&
         !eventDrivenExecutionEnabled &&
@@ -384,19 +569,19 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
           </>
         )}
       <WorkflowsUtilityBar
-        totalWorkflows={workflows?.total || 0}
+        totalWorkflows={tableTotal}
         selectedWorkflows={selectedItems}
-        allWorkflows={workflows?.results ?? []}
+        allWorkflows={tableWorkflows}
         deselectWorkflows={deselectWorkflows}
         onRefresh={onRefresh}
-        showStart={showStart}
-        showEnd={showEnd}
+        showStart={showExampleRows ? 1 : showStart}
+        showEnd={tableShowEnd}
       />
       <WorkflowListTable
-        items={workflows?.results ?? []}
+        items={tableWorkflows}
         page={page}
         size={size}
-        total={workflows?.total ?? 0}
+        total={tableTotal}
         selectedItems={selectedItems}
         onSelectionChange={setSelectedItems}
         onPageChange={(pageIndex, pageSize) =>
@@ -414,12 +599,13 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
         onRequestRun={setExecuteWorkflow}
         onEditWorkflow={handleEditWorkflow}
         workflowsListSearch={location.search}
-        canCreateWorkflow={!!canCreateWorkflow}
-        canReadWorkflow={!!canReadWorkflow}
-        canReadWorkflowExecution={!!canReadWorkflowExecution}
-        canUpdateWorkflow={!!canUpdateWorkflow}
-        canDeleteWorkflow={!!canDeleteWorkflow}
-        canExecuteWorkflow={!!canExecuteWorkflow}
+        canCreateWorkflow={allowCreate}
+        canReadWorkflow={allowRead}
+        canReadWorkflowExecution={allowReadExecution}
+        canUpdateWorkflow={allowUpdate}
+        canDeleteWorkflow={allowDelete}
+        canExecuteWorkflow={allowExecute}
+        viewOnly={forceReadOnlyEmpty}
       />
       {executeWorkflow?.definition && (
         <WorkflowExecuteModal

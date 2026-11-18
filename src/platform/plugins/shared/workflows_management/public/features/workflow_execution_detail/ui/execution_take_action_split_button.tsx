@@ -19,7 +19,8 @@ import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { isDangerousStatus, isTerminalStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
-import { useWorkflowsApi, useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { useWorkflowsApi } from '@kbn/workflows-ui';
+import { useExecutionsPageCapabilities } from '../../../pages/executions/use_executions_page_capabilities';
 import { useNavigateToExecution } from '../../../hooks/navigation/use_navigate_to_execution';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
@@ -35,7 +36,7 @@ export const ExecutionTakeActionSplitButton = React.memo<ExecutionTakeActionSpli
   ({ execution, failedStepId, onOpenFailedStepInEditor }) => {
     const { notifications, application } = useKibana().services;
     const { canExecuteWorkflow, canUpdateWorkflow, canCancelWorkflowExecution } =
-      useWorkflowsCapabilities();
+      useExecutionsPageCapabilities();
     const { id: routeWorkflowId } = useParams<{ id?: string }>();
     const { updateUrlState } = useWorkflowUrlState();
     const api = useWorkflowsApi();

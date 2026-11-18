@@ -213,6 +213,8 @@ interface ConversationInputProps {
   onSubmit?: () => void;
   onEditorFocus?: () => void;
   onSubmitOverride?: (message: string) => void;
+  /** Replaces the default "Ask anything" placeholder. Ignored when the agent was deleted. */
+  placeholder?: string;
 }
 
 const disabledPlaceholder = (agentId?: string) =>
@@ -252,6 +254,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
   onSubmit,
   onEditorFocus,
   onSubmitOverride,
+  placeholder: placeholderOverride,
 }) => {
   const [hoveredImageName, setHoveredImageName] = useState<string | null>(null);
 
@@ -358,7 +361,9 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     isAwaitingPrompt ||
     uploadingNames.size > 0;
 
-  const placeholder = isAgentDeleted ? disabledPlaceholder(agentId) : enabledPlaceholder;
+  const placeholder = isAgentDeleted
+    ? disabledPlaceholder(agentId)
+    : placeholderOverride ?? enabledPlaceholder;
 
   const editorContainerStyles = css`
     display: flex;

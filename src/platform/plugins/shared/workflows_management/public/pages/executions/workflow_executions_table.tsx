@@ -23,6 +23,7 @@ import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RerunWorkflowExecutionParams } from './build_replay_inputs_from_execution_context';
+import { EXAMPLE_EXECUTIONS } from './example_executions';
 import { useWorkflowExecutionsGridSelection } from './use_workflow_executions_grid_selection';
 import { useWorkflowExecutionsSearch } from './use_workflow_executions_search';
 import { WorkflowExecutionsDataGrid } from './workflow_executions_data_grid';
@@ -42,6 +43,7 @@ import {
 import { WorkflowExecutionsTableEndOfResults } from './workflow_executions_table_end_of_results';
 import { getWorkflowExecutionsTableGridWrapperCss } from './workflow_executions_table_styles';
 import { WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW } from '../../../common';
+import { WorkflowsNoResultsState } from '../../components/workflows_no_results_state/workflows_no_results_state';
 import { useSerialPolling } from '../../hooks/use_serial_polling';
 import { useTelemetry } from '../../hooks/use_telemetry';
 import { useWorkflowUrlState } from '../../hooks/use_workflow_url_state';
@@ -67,6 +69,12 @@ export interface WorkflowExecutionsTableProps {
   onReRunExecution?: (params: RerunWorkflowExecutionParams) => Promise<void>;
   onViewAllExecutionsForWorkflow?: (workflowId: string) => void;
   onTimeRangeLinkClick?: () => void;
+  onClearSearchAndFilters?: () => void;
+  /** Prototype: the list is empty because no execution exists, not because of a filter. */
+  forceEmpty?: boolean;
+  forceNoResults?: boolean;
+  /** Prototype: the user can read executions, but cannot run, edit, or cancel them. */
+  forceReadOnly?: boolean;
   timeRange: TimeRange;
   spaceId: string;
 }
@@ -78,6 +86,10 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
     onReRunExecution,
     onViewAllExecutionsForWorkflow,
     onTimeRangeLinkClick,
+    onClearSearchAndFilters,
+    forceEmpty = false,
+    forceNoResults = false,
+    forceReadOnly = false,
     query,
     spaceId,
     timeRange,
@@ -134,13 +146,16 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
 
     const executions = useMemo(() => searchResponse?.results ?? [], [searchResponse?.results]);
     const total = searchResponse?.total ?? 0;
+    const errorMessage = error ? getWorkflowExecutionsFetchErrorMessage() : null;
+    const showReadOnlyExamples =
+      forceReadOnly && !isLoading && !errorMessage && executions.length === 0;
+    const displayedExecutions = showReadOnlyExamples ? EXAMPLE_EXECUTIONS : executions;
+    const displayedTotal = showReadOnlyExamples ? EXAMPLE_EXECUTIONS.length : total;
     const visibleExecutionIds = useMemo(
-      () => executions.map((execution) => execution.id),
-      [executions]
+      () => displayedExecutions.map((execution) => execution.id),
+      [displayedExecutions]
     );
     const selectionState = useWorkflowExecutionsGridSelection(visibleExecutionIds);
-
-    const errorMessage = error ? getWorkflowExecutionsFetchErrorMessage() : null;
 
     useSerialPolling({
       poll: () => refetch(),
@@ -222,12 +237,12 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
     const totalPages = useMemo(
       () =>
         Math.min(
-          Math.max(1, Math.ceil(total / pageSize)),
+          Math.max(1, Math.ceil(displayedTotal / pageSize)),
           Math.ceil(WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW / pageSize)
         ),
-      [pageSize, total]
+      [displayedTotal, pageSize]
     );
-    const isPaginationLimited = total > WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW;
+    const isPaginationLimited = displayedTotal > WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW;
     const showEndOfResults = isPaginationLimited && pageIndex === maxPageIndex;
     const isGrouped = groupBy !== 'none';
 
@@ -248,7 +263,7 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
       [euiTheme.colors.emptyShade, euiTheme.levels.mask, euiTheme.size.l, isFullscreen]
     );
 
-    if (errorMessage) {
+    if (errorMessage && !forceNoResults && !forceEmpty) {
       return (
         <EuiEmptyPrompt
           color="danger"
@@ -272,7 +287,7 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
       );
     }
 
-    if (isLoading && executions.length === 0) {
+    if (!forceNoResults && !forceEmpty && isLoading && executions.length === 0) {
       return (
         <EuiPanel hasShadow={false} hasBorder data-test-subj="workflowExecutionsTableLoading">
           <EuiSkeletonText lines={5} />
@@ -280,7 +295,7 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
       );
     }
 
-    if (executions.length === 0) {
+    if (!showReadOnlyExamples && (forceEmpty || (!forceNoResults && executions.length === 0))) {
       return (
         <EuiPanel hasShadow={false} hasBorder data-test-subj="workflowExecutionsTableEmpty">
           <EuiCallOut
@@ -294,6 +309,36 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
       );
     }
 
+    if (forceNoResults) {
+      return (
+        <div data-test-subj="workflowExecutionsTableEmpty">
+          <WorkflowExecutionsDataGrid
+            ariaLabelledBy="workflowExecutionsTableLabel"
+            executions={[]}
+            visibleColumns={visibleColumns}
+            columnWidths={columnWidths}
+            sort={sort}
+            selectedExecutionId={selectedExecutionId}
+            selectionState={selectionState}
+            pageIndex={0}
+            pageSize={pageSize}
+            totalHits={0}
+            showToolbar={false}
+            emptyBody={
+              <WorkflowsNoResultsState onClear={onClearSearchAndFilters ?? (() => undefined)} />
+            }
+            onOpenExecution={handleOpenExecution}
+            onRefresh={handleRetry}
+            onSetColumns={handleSetColumns}
+            onSort={handleSortWithPageReset}
+            onColumnResize={handleColumnResize}
+            onReRunExecution={onReRunExecution}
+            onViewAllExecutionsForWorkflow={onViewAllExecutionsForWorkflow}
+          />
+        </div>
+      );
+    }
+
     return (
       <EuiFocusTrap disabled={!isFullscreen} returnFocus={false}>
         <div
@@ -304,7 +349,7 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
           <div css={gridWrapperCss}>
             <WorkflowExecutionsDataGrid
               ariaLabelledBy="workflowExecutionsTableLabel"
-              executions={executions}
+              executions={displayedExecutions}
               visibleColumns={visibleColumns}
               columnWidths={columnWidths}
               sort={sort}
@@ -312,7 +357,7 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
               selectionState={selectionState}
               pageIndex={pageIndex}
               pageSize={pageSize}
-              totalHits={total}
+              totalHits={displayedTotal}
               toolbarOnly={isGrouped}
               groupBy={groupBy}
               onGroupByChange={setGroupBy}
@@ -329,8 +374,8 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
             />
             {isGrouped ? (
               <WorkflowExecutionsGroupedView
-                executions={executions}
-                totalHits={total}
+                executions={displayedExecutions}
+                totalHits={displayedTotal}
                 groupBy={groupBy}
                 onOpenExecution={handleOpenExecution}
                 onReRunExecution={onReRunExecution}

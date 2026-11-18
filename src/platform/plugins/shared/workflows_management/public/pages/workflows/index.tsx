@@ -15,13 +15,16 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AppHeader } from '@kbn/app-header';
 import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowsSearchParams } from '@kbn/workflows';
-import { WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID } from '@kbn/workflows/common/constants';
+import {
+  WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID,
+  WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID,
+} from '@kbn/workflows/common/constants';
 import {
   useShowManagedWorkflowsSetting,
   useWorkflows,
@@ -36,13 +39,31 @@ import { PLUGIN_ID, WORKFLOWS_DOCUMENTATION_URL } from '../../../common';
 import { useWorkflowFiltersOptions } from '../../entities/workflows/model/use_workflow_stats';
 import { ImportWorkflowsFlyout } from '../../features/import_workflows/ui/import_workflows_flyout';
 import { WorkflowExecutionStatsBar } from '../../features/workflow_executions_stats/ui';
+import { ManagedWorkflowsOffCallout } from '../../components/managed_workflows_off_callout/managed_workflows_off_callout';
 import { WorkflowList } from '../../features/workflow_list';
 import { useKibana } from '../../hooks/use_kibana';
+import {
+  MANAGED_OFF_NO_CUSTOM,
+  NO_RESULTS_SEARCH_OR_FILTERS,
+  READ_ONLY_NO_MANAGE,
+  isPrototypeEmptyWorkflow,
+  useWorkflowPrototypeScenario,
+} from '../../shared/workflow_prototype_scenario';
 import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { getAddConnectorsMenuItem } from '../../shared/ui/get_add_connectors_menu_item';
 import { shouldShowWorkflowsEmptyState } from '../../shared/utils/workflow_utils';
 import { WorkflowsFilterPopover } from '../../widgets/workflow_filter_popover/workflow_filter_popover';
 import { WorkflowSearchField } from '../../widgets/workflow_search_field/ui/workflow_search_field';
+
+const NO_RESULTS_CLEARED_KEY = 'workflows.prototypeNoResultsCleared';
+
+const readNoResultsCleared = () => {
+  try {
+    return window.sessionStorage.getItem(NO_RESULTS_CLEARED_KEY) === 'true';
+  } catch {
+    return false;
+  }
+};
 
 const MANAGED_FILTER_OPTIONS = [
   {
@@ -91,27 +112,52 @@ const getManagedFilterValue = (
   return undefined;
 };
 
+const hasWorkflowSearchOrFilters = (search: WorkflowsSearchParams) =>
+  Boolean(
+    search.query ||
+      search.enabled?.length ||
+      search.createdBy?.length ||
+      search.tags?.length ||
+      (search.managed && search.managed !== 'unmanaged')
+  );
+
 export function WorkflowsPage() {
-  const { application, featureFlags } = useKibana().services;
+  const { application, featureFlags, notifications, uiSettings } = useKibana().services;
+  const scenario = useWorkflowPrototypeScenario();
+  const forceEmptyScenario = isPrototypeEmptyWorkflow(scenario);
+  const forceNoResults = scenario === NO_RESULTS_SEARCH_OR_FILTERS;
+  const forceManagedOffEmpty = scenario === MANAGED_OFF_NO_CUSTOM;
+  const forceReadOnlyEmpty = scenario === READ_ONLY_NO_MANAGE;
+  const [noResultsFiltersCleared, setNoResultsFiltersCleared] = useState(readNoResultsCleared);
+  const [showRunnableExamples] = useState(
+    () => new URLSearchParams(window.location.search).get('runnableExamples') === '1'
+  );
+  const scenarioOnMount = useRef(scenario);
   const isManagedWorkflowsSettingEnabled = useShowManagedWorkflowsSetting();
   const { canCreateWorkflow, canReadWorkflow, canReadManagedWorkflow, canUpdateWorkflow } =
     useWorkflowsCapabilities();
   const showManagedWorkflowsFilter = Boolean(
     isManagedWorkflowsSettingEnabled && canReadWorkflow && canReadManagedWorkflow
   );
+  const showDemoNoResults = forceNoResults && !noResultsFiltersCleared;
+  // The no-results prototype shows the View filter even when the setting is off,
+  // so the empty table can be seen with Managed selected. The read-only prototype
+  // shows the same filter so the list can be filtered without changing a workflow.
+  const showManagedWorkflowsFilterControl =
+    showManagedWorkflowsFilter || showDemoNoResults || forceReadOnlyEmpty;
   const { euiTheme } = useEuiTheme();
   const location = useLocation();
 
   const search = useMemo<WorkflowsSearchParams>(() => {
     const nextSearch = parseWorkflowsUrlSearchParams(location.search);
 
-    if (!showManagedWorkflowsFilter) {
+    if (!showManagedWorkflowsFilterControl) {
       const { managed, ...searchWithoutManaged } = nextSearch;
       return searchWithoutManaged;
     }
 
     return nextSearch;
-  }, [location.search, showManagedWorkflowsFilter]);
+  }, [location.search, showManagedWorkflowsFilterControl]);
   const { data: filtersData } = useWorkflowFiltersOptions(
     ['enabled', 'createdBy', 'tags'],
     showManagedWorkflowsFilter ? 'all' : undefined
@@ -138,16 +184,119 @@ export function WorkflowsPage() {
   useWorkflowsBreadcrumbs();
 
   /** Import uses bulk APIs that require both create and update; gate UI to match server authz. */
-  const canImportWorkflows = Boolean(canCreateWorkflow && canUpdateWorkflow);
+  const canImportWorkflows = Boolean(
+    canCreateWorkflow && canUpdateWorkflow && !forceReadOnlyEmpty
+  );
   const addConnectorsMenuItem = useMemo(() => getAddConnectorsMenuItem(application), [application]);
   const isExecutionStatsBarEnabled = featureFlags.useBooleanValue(
     WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID,
     false
   );
 
+  const showingExampleWorkflows =
+    showRunnableExamples || (forceNoResults && noResultsFiltersCleared);
+  const listHasConstraints = hasWorkflowSearchOrFilters(search);
+  const showManagedOffEmpty =
+    !showRunnableExamples &&
+    !forceReadOnlyEmpty &&
+    !forceEmptyScenario &&
+    !showDemoNoResults &&
+    !showingExampleWorkflows &&
+    (forceManagedOffEmpty ||
+      (!isManagedWorkflowsSettingEnabled && !listHasConstraints && workflows?.total === 0));
+  const managedOffNoMatches =
+    forceManagedOffEmpty && listHasConstraints && workflows?.total === 0;
+
+  // A read-only user with nothing to list sees the table, not the first-use landing.
+  const showReadOnlyTable =
+    !forceEmptyScenario &&
+    (forceReadOnlyEmpty || !canCreateWorkflow) &&
+    shouldShowWorkflowsEmptyState(workflows, search);
   // Check if we should show empty state
-  const shouldShowEmptyState = shouldShowWorkflowsEmptyState(workflows, search);
-  const shouldShowFilters = !shouldShowEmptyState || showManagedWorkflowsFilter;
+  const shouldShowEmptyState =
+    !showRunnableExamples &&
+    !forceNoResults &&
+    !showManagedOffEmpty &&
+    !showReadOnlyTable &&
+    (forceEmptyScenario || shouldShowWorkflowsEmptyState(workflows, search));
+  const showLandingLayout = shouldShowEmptyState || showManagedOffEmpty;
+  const shouldShowFilters =
+    !forceEmptyScenario &&
+    !showManagedOffEmpty &&
+    (forceNoResults || !shouldShowEmptyState || showManagedWorkflowsFilter);
+  useEffect(() => {
+    if (scenarioOnMount.current === scenario) {
+      return;
+    }
+    scenarioOnMount.current = scenario;
+    try {
+      window.sessionStorage.removeItem(NO_RESULTS_CLEARED_KEY);
+    } catch {
+      // Session storage can be blocked. The in-memory flag still resets.
+    }
+    setNoResultsFiltersCleared(false);
+  }, [scenario]);
+
+  const displayedSearchQuery = showDemoNoResults
+    ? search.query || 'production deploy'
+    : search.query || '';
+  const displayedEnabledFilter =
+    showDemoNoResults && (!search.enabled || search.enabled.length === 0)
+      ? [true]
+      : search.enabled || [];
+  const displayedManagedFilter: Array<'unmanaged' | 'managed'> =
+    showDemoNoResults && !search.managed
+      ? ['managed']
+      : getSelectedManagedFilterValues(search.managed);
+
+  const clearSearchAndFilters = useCallback(() => {
+    try {
+      window.sessionStorage.setItem(NO_RESULTS_CLEARED_KEY, 'true');
+    } catch {
+      // Session storage can be blocked. The in-memory flag still updates this view.
+    }
+    setNoResultsFiltersCleared(true);
+    setSearch({
+      page: 1,
+      size: search.size,
+      query: '',
+    });
+  }, [search.size, setSearch]);
+
+  const clearManagedOffSearch = useCallback(() => {
+    setSearch({
+      page: 1,
+      size: search.size,
+      query: '',
+    });
+  }, [search.size, setSearch]);
+
+  const turnOnManagedWorkflows = useCallback(async () => {
+    try {
+      const saved = await uiSettings.set(WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID, true);
+      if (!saved) {
+        notifications.toasts.addDanger(
+          i18n.translate('workflows.managedOffCallout.turnOnFailed', {
+            defaultMessage: 'Managed workflows could not be turned on.',
+          })
+        );
+        return;
+      }
+    } catch (error) {
+      notifications.toasts.addError(error as Error, {
+        title: i18n.translate('workflows.managedOffCallout.turnOnFailed', {
+          defaultMessage: 'Managed workflows could not be turned on.',
+        }),
+      });
+      return;
+    }
+
+    setSearch({
+      ...search,
+      page: 1,
+      managed: 'all',
+    });
+  }, [notifications.toasts, search, setSearch, uiSettings]);
 
   const appMenu = useMemo<AppMenuConfig>(() => {
     const items: AppMenuItemType[] = [];
@@ -164,25 +313,34 @@ export function WorkflowsPage() {
         testId: 'importWorkflowsButton',
       });
     }
-    if (addConnectorsMenuItem) {
+    if (addConnectorsMenuItem && !forceReadOnlyEmpty) {
       items.push(addConnectorsMenuItem);
     }
 
     return {
-      primaryActionItem: canCreateWorkflow
-        ? {
+      primaryActionItem: forceEmptyScenario || forceManagedOffEmpty
+        ? undefined
+        : {
             id: 'createWorkflow',
             label: i18n.translate('workflows.createWorkflowButton', {
               defaultMessage: 'Create workflow',
             }),
             iconType: 'plus',
+            disableButton: !canCreateWorkflow || forceReadOnlyEmpty,
             run: navigateToCreateWorkflow,
             testId: 'createWorkflowButton',
-          }
-        : undefined,
+          },
       items,
     };
-  }, [addConnectorsMenuItem, canCreateWorkflow, canImportWorkflows, navigateToCreateWorkflow]);
+  }, [
+    addConnectorsMenuItem,
+    canCreateWorkflow,
+    canImportWorkflows,
+    forceEmptyScenario,
+    forceManagedOffEmpty,
+    forceReadOnlyEmpty,
+    navigateToCreateWorkflow,
+  ]);
 
   return (
     <EuiPageTemplate
@@ -199,8 +357,16 @@ export function WorkflowsPage() {
       {/* With no workflows, fill the page so the landing centers below the filters. */}
       <EuiPageTemplate.Section
         restrictWidth={false}
-        {...(shouldShowEmptyState
-          ? { grow: true, css: styles.fillColumn, contentProps: { css: styles.fillColumn } }
+        {...(showLandingLayout
+          ? {
+              grow: true,
+              css: styles.fillColumn,
+              contentProps: {
+                css: showManagedOffEmpty
+                  ? [styles.fillColumn, styles.calloutUnderHeader]
+                  : styles.fillColumn,
+              },
+            }
           : {})}
       >
         {shouldShowFilters ? (
@@ -209,7 +375,7 @@ export function WorkflowsPage() {
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem>
                 <WorkflowSearchField
-                  initialValue={search.query || ''}
+                  initialValue={displayedSearchQuery}
                   onSearch={(query) => setSearch({ ...search, page: 1, query })}
                 />
               </EuiFlexItem>
@@ -220,8 +386,14 @@ export function WorkflowsPage() {
                     title={i18n.translate('workflows.management.enabledFilter.title', {
                       defaultMessage: 'Enabled',
                     })}
-                    values={filtersData?.enabled || []}
-                    selectedValues={search.enabled || []}
+                    values={
+                      filtersData?.enabled?.length
+                        ? filtersData.enabled
+                        : showDemoNoResults
+                          ? [{ label: 'Enabled', key: 'true' }]
+                          : []
+                    }
+                    selectedValues={displayedEnabledFilter}
                     onSelectedValuesChanged={(newValues) => {
                       const enabled = newValues
                         .map(parseBooleanFilterValue)
@@ -266,7 +438,7 @@ export function WorkflowsPage() {
                   />
                 </EuiFilterGroup>
               </EuiFlexItem>
-              {showManagedWorkflowsFilter ? (
+              {showManagedWorkflowsFilterControl ? (
                 <EuiFlexItem grow={false}>
                   <EuiFilterGroup>
                     <WorkflowsFilterPopover
@@ -275,7 +447,7 @@ export function WorkflowsPage() {
                         defaultMessage: 'View',
                       })}
                       values={MANAGED_FILTER_OPTIONS}
-                      selectedValues={getSelectedManagedFilterValues(search.managed)}
+                      selectedValues={displayedManagedFilter}
                       onSelectedValuesChanged={(newValues) => {
                         const managed = getManagedFilterValue(
                           newValues as Array<'unmanaged' | 'managed'>
@@ -293,8 +465,25 @@ export function WorkflowsPage() {
           </div>
         ) : null}
 
-        <div css={shouldShowEmptyState ? styles.centeredEmptyState : undefined}>
-          <WorkflowList search={search} setSearch={setSearch} />
+        {showManagedOffEmpty ? (
+          <ManagedWorkflowsOffCallout onTurnOn={turnOnManagedWorkflows} />
+        ) : null}
+        <div css={showLandingLayout ? styles.centeredEmptyState : undefined}>
+          <WorkflowList
+            search={search}
+            setSearch={setSearch}
+            forceNoResults={showDemoNoResults || managedOffNoMatches}
+            showManagedOffEmpty={showManagedOffEmpty}
+            forceReadOnlyEmpty={forceReadOnlyEmpty}
+            showExampleWorkflows={showingExampleWorkflows}
+            onClearSearchAndFilters={
+              showDemoNoResults
+                ? clearSearchAndFilters
+                : managedOffNoMatches
+                  ? clearManagedOffSearch
+                  : undefined
+            }
+          />
         </div>
       </EuiPageTemplate.Section>
       {showImportFlyout ? (
@@ -306,6 +495,7 @@ export function WorkflowsPage() {
 
 const styles = {
   fillColumn: css({ display: 'flex', flexDirection: 'column', flexGrow: 1 }),
+  calloutUnderHeader: css({ paddingTop: 16 }),
   centeredEmptyState: css({
     display: 'flex',
     flexDirection: 'column',

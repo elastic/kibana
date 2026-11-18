@@ -9,7 +9,7 @@
 
 import { EuiPageTemplate } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
-import { Redirect } from 'react-router-dom';
+import { Redirect, useLocation } from 'react-router-dom';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderBadge, AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
@@ -37,6 +37,18 @@ const createFromFileLabel = i18n.translate('workflows.libraryPage.createFromFile
   defaultMessage: 'Import template',
 });
 
+const LIBRARY_SOLUTIONS = new Set(['security', 'observability', 'search']);
+
+function readLibraryFilters(search: string): { category?: string; solution?: string } {
+  const params = new URLSearchParams(search);
+  const category = params.get('category') ?? '';
+  const solution = params.get('solution') ?? '';
+  return {
+    category: /^[a-z0-9-]+$/.test(category) ? category : undefined,
+    solution: LIBRARY_SOLUTIONS.has(solution) ? solution : undefined,
+  };
+}
+
 /**
  * Workflow Template library catalog page (`/app/workflows/library`). The
  * browse UI itself lives in `@kbn/workflows-ui` (`<CatalogBrowser>`) so it can
@@ -46,6 +58,11 @@ const createFromFileLabel = i18n.translate('workflows.libraryPage.createFromFile
  */
 export const LibraryCatalogBrowserPage = React.memo(() => {
   const { application } = useKibana().services;
+  const { search } = useLocation();
+  const { category: initialCategory, solution: initialSolution } = useMemo(
+    () => readLibraryFilters(search),
+    [search]
+  );
 
   useWorkflowsBreadcrumbs(libraryPageTitle);
 
@@ -143,7 +160,12 @@ export const LibraryCatalogBrowserPage = React.memo(() => {
         spacing="compact"
       />
       <EuiPageTemplate.Section paddingSize="m" grow>
-        <CatalogBrowser onSelect={handleSelect} />
+        <CatalogBrowser
+          key={`${initialCategory ?? ''}|${initialSolution ?? ''}`}
+          onSelect={handleSelect}
+          initialCategory={initialCategory}
+          initialSolution={initialSolution}
+        />
       </EuiPageTemplate.Section>
       {isUploadFlyoutOpen ? (
         <UploadTemplateFlyout onClose={closeUploadFlyout} onUploaded={handleFileUploaded} />

@@ -56,6 +56,7 @@ describe('WorkflowExecutionsPage', () => {
   };
 
   beforeEach(() => {
+    window.sessionStorage.setItem('workflows.prototypeScenario', 'live');
     jest.clearAllMocks();
     mockUseWorkflowUrlState.mockReturnValue({
       selectedExecutionId: undefined,

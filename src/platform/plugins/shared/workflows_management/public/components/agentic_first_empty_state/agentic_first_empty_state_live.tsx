@@ -7,20 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
-import type { Template } from '@kbn/workflows-library';
-import { useCatalog, useLibraryEnabled } from '@kbn/workflows-ui';
+import { i18n } from '@kbn/i18n';
+import {
+  useActiveSolution,
+  useCatalog,
+  useLibraryEnabled,
+  useWorkflowsCapabilities,
+} from '@kbn/workflows-ui';
 import {
   AgenticFirstEmptyState,
   type AgenticFirstEmptyStateProps,
 } from './agentic_first_empty_state';
+import { categoryLibrarySearch, selectCategoryTiles, summarizeCategoryTile } from './category_tiles';
 import { ConnectLlmPanel } from './connect_llm_panel';
+import { PLUGIN_ID } from '../../../common';
+import { WorkflowsPageName } from '../../deep_links';
 import { useKibana } from '../../hooks/use_kibana';
+import {
+  EMPTY_WORKFLOW_AUTO_MIGRATION,
+  EMPTY_WORKFLOW_LLM_DISABLED,
+  EMPTY_WORKFLOW_LLM_ENABLED,
+  MANAGED_OFF_NO_CUSTOM,
+  useWorkflowPrototypeScenario,
+} from '../../shared/workflow_prototype_scenario';
 
 export type AgenticFirstEmptyStateLiveProps = Omit<
   AgenticFirstEmptyStateProps,
-  'templates' | 'agentInput'
+  'categoryTiles' | 'agentInput'
 > & {
   onSubmitPrompt?: (prompt: string, attachments: ConversationAttachment[]) => void;
 };
@@ -33,6 +48,9 @@ export type AgenticFirstEmptyStateLiveProps = Omit<
 export function AgenticFirstEmptyStateLive(props: AgenticFirstEmptyStateLiveProps) {
   const libraryEnabled = useLibraryEnabled();
   const { workflowsManagement, application, docLinks } = useKibana().services;
+  const { canCreateWorkflow } = useWorkflowsCapabilities();
+  const scenario = useWorkflowPrototypeScenario();
+  const showAutoMigration = scenario === EMPTY_WORKFLOW_AUTO_MIGRATION;
   const agentBuilder = workflowsManagement?.agentBuilder;
   const chatAccess = useAgentChatAccess();
 
@@ -51,7 +69,6 @@ export function AgenticFirstEmptyStateLive(props: AgenticFirstEmptyStateLiveProp
 
   // No prompt when the chat cannot run at all. Without an LLM, offer to connect one.
   const renderAgentInput = () => {
-    if (chatAccess === 'unavailable' || !EmbeddableConversationInput) return undefined;
     if (chatAccess === 'noLlm') {
       return (
         <ConnectLlmPanel
@@ -60,48 +77,62 @@ export function AgenticFirstEmptyStateLive(props: AgenticFirstEmptyStateLiveProp
         />
       );
     }
-    return <EmbeddableConversationInput onSubmit={handlePromptSubmit} />;
+    if (chatAccess === 'unavailable' || !EmbeddableConversationInput) return undefined;
+    return (
+      <EmbeddableConversationInput
+        onSubmit={handlePromptSubmit}
+        placeholder={workflowPromptPlaceholder}
+      />
+    );
   };
   const agentInput = renderAgentInput();
 
   return libraryEnabled ? (
-    <LiveInner {...stateProps} agentInput={agentInput} />
+    <LiveInner
+      {...stateProps}
+      agentInput={agentInput}
+      canCreateWorkflow={canCreateWorkflow}
+      showAutoMigration={showAutoMigration}
+    />
   ) : (
-    <AgenticFirstEmptyState {...stateProps} agentInput={agentInput} showExampleWorkflowsLink />
+    <AgenticFirstEmptyState
+      {...stateProps}
+      agentInput={agentInput}
+      canCreateWorkflow={canCreateWorkflow}
+      showAutoMigration={showAutoMigration}
+      showExampleWorkflowsLink
+    />
   );
 }
 
 function LiveInner({ agentInput, ...props }: AgenticFirstEmptyStateProps) {
   const { templates } = useCatalog();
-  const randomTemplates = useRandomTemplates(templates, VISIBLE_TEMPLATE_COUNT);
-  return <AgenticFirstEmptyState {...props} templates={randomTemplates} agentInput={agentInput} />;
+  const activeSolution = useActiveSolution();
+  const { application } = useKibana().services;
+  const categoryTiles = useMemo(
+    () =>
+      selectCategoryTiles(templates, activeSolution).map((tile) => ({
+        category: tile.category,
+        title: tile.title(),
+        description: tile.description(),
+        iconType: tile.iconType,
+        href: application.getUrlForApp(PLUGIN_ID, {
+          deepLinkId: WorkflowsPageName.library,
+          path: categoryLibrarySearch(tile, activeSolution),
+        }),
+        ...summarizeCategoryTile(templates, tile),
+      })),
+    [activeSolution, application, templates]
+  );
+  return (
+    <AgenticFirstEmptyState {...props} categoryTiles={categoryTiles} agentInput={agentInput} />
+  );
 }
 
-const VISIBLE_TEMPLATE_COUNT = 3;
-
-/**
- * Picks `count` random templates once per mount. Until there is a recommendation, a random
- * pick shows more of the library across visits. Catalog refetches keep the same pick, so
- * the cards do not change while the user reads them.
- */
-const useRandomTemplates = (templates: Template[], count: number): Template[] => {
-  const pickRef = useRef<Template[]>();
-  if (!pickRef.current && templates.length > 0) {
-    pickRef.current = pickRandom(templates, count);
-  }
-  return pickRef.current ?? [];
-};
-
-/** Returns `count` distinct random items (partial Fisher–Yates shuffle). */
-export const pickRandom = <T,>(items: readonly T[], count: number): T[] => {
-  const pool = [...items];
-  const size = Math.min(count, pool.length);
-  for (let i = 0; i < size; i++) {
-    const j = i + Math.floor(Math.random() * (pool.length - i));
-    [pool[i], pool[j]] = [pool[j], pool[i]];
-  }
-  return pool.slice(0, size);
-};
+const workflowPromptPlaceholder = i18n.translate('workflows.agenticFirst.promptPlaceholder', {
+  defaultMessage:
+    'Describe the workflow you want to create: what should trigger it and what happens next',
+});
 
 type AgentChatAccess = 'loading' | 'ready' | 'noLlm' | 'unavailable';
 
@@ -114,9 +145,18 @@ const useAgentChatAccess = (): AgentChatAccess => {
   const agentBuilder = workflowsManagement?.agentBuilder;
   const hasShowPrivilege = application.capabilities.agentBuilder?.show === true;
   const canUseChat = Boolean(agentBuilder) && hasShowPrivilege;
+  const scenario = useWorkflowPrototypeScenario();
   const [access, setAccess] = useState<AgentChatAccess>('loading');
 
   useEffect(() => {
+    if (
+      scenario === EMPTY_WORKFLOW_LLM_DISABLED ||
+      scenario === EMPTY_WORKFLOW_LLM_ENABLED ||
+      scenario === EMPTY_WORKFLOW_AUTO_MIGRATION ||
+      scenario === MANAGED_OFF_NO_CUSTOM
+    ) {
+      return;
+    }
     if (!agentBuilder || !canUseChat) return;
     let cancelled = false;
     agentBuilder
@@ -132,7 +172,15 @@ const useAgentChatAccess = (): AgentChatAccess => {
     return () => {
       cancelled = true;
     };
-  }, [agentBuilder, canUseChat]);
+  }, [agentBuilder, canUseChat, scenario]);
 
+  if (scenario === EMPTY_WORKFLOW_LLM_DISABLED) return 'noLlm';
+  if (
+    scenario === EMPTY_WORKFLOW_LLM_ENABLED ||
+    scenario === EMPTY_WORKFLOW_AUTO_MIGRATION ||
+    scenario === MANAGED_OFF_NO_CUSTOM
+  ) {
+    return 'ready';
+  }
   return canUseChat ? access : 'unavailable';
 };

@@ -140,6 +140,50 @@ describe('CatalogBrowser', () => {
     expect(solutionSelect.value).toBe('security');
   });
 
+  it('starts filtered by the category and solution passed from the page', () => {
+    const template = buildTemplate({
+      categories: ['case-management'],
+      solutions: ['security'],
+    });
+    mockCatalogState({ templates: [template], allTemplates: [template] });
+
+    render(
+      <CatalogBrowser
+        onSelect={jest.fn()}
+        initialCategory="case-management"
+        initialSolution="security"
+      />
+    );
+
+    expect(mockUseCatalog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        categories: ['case-management'],
+        solution: 'security',
+      })
+    );
+  });
+
+  it('keeps the active solution ahead of the solution passed from the page', () => {
+    mockUseActiveSolution.mockReturnValue('security');
+    const template = buildTemplate({ solutions: ['security'] });
+    mockCatalogState({ templates: [template], allTemplates: [template] });
+
+    render(
+      <CatalogBrowser
+        onSelect={jest.fn()}
+        initialCategory="response"
+        initialSolution="observability"
+      />
+    );
+
+    expect(mockUseCatalog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        categories: ['response'],
+        solution: 'security',
+      })
+    );
+  });
+
   it('scopes category facet counts by the active solution, excluding other solutions', () => {
     mockUseActiveSolution.mockReturnValue('security');
     const allTemplates = [

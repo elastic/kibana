@@ -45,6 +45,7 @@ describe('WorkflowExecutionsTable', () => {
   const defaultTimeRange = { from: 'now-24h', to: 'now' };
 
   beforeEach(() => {
+    window.sessionStorage.setItem('workflows.prototypeScenario', 'live');
     jest.clearAllMocks();
     mockUseWorkflowUrlState.mockReturnValue({
       selectedExecutionId: undefined,
