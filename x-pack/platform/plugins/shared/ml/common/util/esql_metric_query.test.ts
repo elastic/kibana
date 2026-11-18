@@ -9,7 +9,9 @@ import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/dataf
 import {
   buildEsqlCardinalityRequest,
   buildEsqlMetricRequest,
+  ESQL_MAX_CHART_BUCKETS,
   escapeEsqlIdentifier,
+  getEsqlChartBucketCount,
   getEsqlMetricExpression,
   isEsqlDatafeed,
   parseEsqlMetricResponse,
@@ -142,6 +144,17 @@ describe('esql_metric_query', () => {
     });
   });
 
+  describe('getEsqlChartBucketCount', () => {
+    test('counts buckets from the interval-aligned start to the latest time', () => {
+      expect(getEsqlChartBucketCount(0, 3 * HOUR, HOUR)).toBe(4);
+      expect(getEsqlChartBucketCount(HOUR / 2, 2 * HOUR, HOUR)).toBe(3);
+    });
+
+    test('returns 0 when latest is before the first bucket', () => {
+      expect(getEsqlChartBucketCount(2 * HOUR, HOUR, HOUR)).toBe(0);
+    });
+  });
+
   describe('parseEsqlMetricResponse', () => {
     const columns = [{ name: '__ml_metric' }, { name: '__ml_chart_time' }];
 
@@ -181,6 +194,15 @@ describe('esql_metric_query', () => {
       );
 
       expect(Object.keys(results).map(Number)).toEqual([0, HOUR, 2 * HOUR]);
+    });
+
+    test('caps the number of filled buckets', () => {
+      const results = parseEsqlMetricResponse(
+        { columns, values: [] },
+        { ...baseOptions, earliestMs: 0, latestMs: Number.MAX_SAFE_INTEGER, intervalMs: 1 }
+      );
+
+      expect(Object.keys(results)).toHaveLength(ESQL_MAX_CHART_BUCKETS);
     });
   });
 });

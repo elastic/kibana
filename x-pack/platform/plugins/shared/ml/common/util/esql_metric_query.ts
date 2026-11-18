@@ -14,8 +14,10 @@ export const ESQL_CHART_TIME_COLUMN = '__ml_chart_time';
 /** Column name holding the metric value in the generated ES|QL query. */
 export const ESQL_CHART_METRIC_COLUMN = '__ml_metric';
 
+/** Maximum number of chart buckets returned for an ES|QL datafeed source data chart. */
+export const ESQL_MAX_CHART_BUCKETS = 10000;
+
 const ESQL_CARDINALITY_COLUMN_PREFIX = '__ml_cardinality_';
-const MAX_CHART_ROWS = 10000;
 
 export interface EsqlEntityField {
   readonly fieldName: string;
@@ -56,6 +58,25 @@ export const isEsqlDatafeed = (
   datafeed.esql_query.length > 0 &&
   typeof datafeed.source_time_field === 'string' &&
   datafeed.source_time_field.length > 0;
+
+const getChartInterval = (intervalMs: number): number => Math.max(1, Math.trunc(intervalMs));
+
+const getFirstChartBucket = (earliestMs: number, interval: number): number =>
+  Math.floor(earliestMs / interval) * interval;
+
+/** Returns the number of chart buckets between earliestMs and latestMs, or 0 if latestMs is before earliestMs. */
+export const getEsqlChartBucketCount = (
+  earliestMs: number,
+  latestMs: number,
+  intervalMs: number
+): number => {
+  const interval = getChartInterval(intervalMs);
+  const firstBucket = getFirstChartBucket(earliestMs, interval);
+  if (latestMs < firstBucket) {
+    return 0;
+  }
+  return Math.floor((latestMs - firstBucket) / interval) + 1;
+};
 
 /** Quotes an ES|QL identifier with backticks, escaping any backticks it contains. */
 export const escapeEsqlIdentifier = (name: string): string => `\`${name.replace(/`/g, '``')}\``;
@@ -155,8 +176,11 @@ export const buildEsqlMetricRequest = ({
     return undefined;
   }
 
-  const interval = Math.max(1, Math.trunc(intervalMs));
-  const rowLimit = Math.min(MAX_CHART_ROWS, Math.ceil((latestMs - earliestMs) / interval) + 1);
+  const interval = getChartInterval(intervalMs);
+  const rowLimit = Math.min(
+    ESQL_MAX_CHART_BUCKETS,
+    getEsqlChartBucketCount(earliestMs, latestMs, interval)
+  );
   const { clauses, params } = buildEntityWhereClauses(entityFields);
 
   const query = [
@@ -220,16 +244,21 @@ export const parseEsqlMetricResponse = (
 ): Record<string, number | null> => {
   const timeIndex = response.columns.findIndex(({ name }) => name === ESQL_CHART_TIME_COLUMN);
   const metricIndex = response.columns.findIndex(({ name }) => name === ESQL_CHART_METRIC_COLUMN);
-  const interval = Math.max(1, Math.trunc(intervalMs));
+  const interval = getChartInterval(intervalMs);
   const isCount =
     metricFunction === ES_AGGREGATION.COUNT &&
     (metricFieldName === undefined || metricFieldName === '');
   const emptyValue = isCount ? 0 : null;
 
   const results: Record<string, number | null> = {};
-  const firstBucket = Math.floor(earliestMs / interval) * interval;
-  for (let time = firstBucket; time <= latestMs; time += interval) {
-    results[time] = emptyValue;
+  const firstBucket = getFirstChartBucket(earliestMs, interval);
+  // Cap the gap filling so a very long range or tiny interval cannot block the event loop.
+  const bucketCount = Math.min(
+    ESQL_MAX_CHART_BUCKETS,
+    getEsqlChartBucketCount(earliestMs, latestMs, interval)
+  );
+  for (let bucket = 0; bucket < bucketCount; bucket++) {
+    results[firstBucket + bucket * interval] = emptyValue;
   }
 
   if (timeIndex === -1 || metricIndex === -1) {
