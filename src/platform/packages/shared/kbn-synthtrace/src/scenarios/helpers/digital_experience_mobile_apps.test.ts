@@ -505,6 +505,28 @@ describe('digital experience mobile apps', () => {
       early.forEach(({ sessionId }) => expect(ended).toContain(sessionId));
     });
 
+    it('generates the apps it is given as native apps', () => {
+      const [reactNativeApp] = DIGITAL_EXPERIENCE_MOBILE_APPS;
+      expect(reactNativeApp.native).toBeUndefined();
+      const appDocs = generateEdotNativeSessions(range, {
+        environment: 'test',
+        from: FROM,
+        scale: 1,
+        platform: 'both',
+        withManualSpans: false,
+        seed: 'digital-experience-native-test',
+        apps: [reactNativeApp],
+      }).flatMap((generator) =>
+        Array.from(generator).flatMap((event): EdotReactNativeDocument[] => event.serialize())
+      );
+
+      expect(appDocs.length).toBeGreaterThan(0);
+      appDocs.forEach(({ scope }) => expect(scope?.name ?? '').not.toContain('react-native'));
+      expect(
+        appDocs.filter((doc) => isSpan(doc) && doc.name.startsWith('UIViewController'))
+      ).toEqual([]);
+    });
+
     it('rolls the newest version of every app out over the run, without downgrades', () => {
       const hours = 6;
       const sixHours = timerange(range.from, new Date(FROM + hours * 60 * 60_000));

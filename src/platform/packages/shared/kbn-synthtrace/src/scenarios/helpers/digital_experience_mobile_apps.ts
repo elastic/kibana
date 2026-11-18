@@ -863,6 +863,7 @@ export const generateEdotReactNativeSessions = (
  * Like {@link generateEdotReactNativeSessions} for the native apps, with every session written
  * with the proposed signals. Sessions start at their tick, from `from` on, and are written as they
  * go, so every session has its `session.start` and those still running at the end are cut off.
+ * Apps passed in `apps` are generated as native apps too.
  */
 export const generateEdotNativeSessions = (
   range: Timerange,
@@ -870,7 +871,7 @@ export const generateEdotNativeSessions = (
 ): Array<SynthtraceGenerator<EdotReactNativeDocument>> =>
   generateSessions(range, {
     ...opts,
-    apps: opts.apps ?? DIGITAL_EXPERIENCE_NATIVE_APPS,
+    apps: (opts.apps ?? DIGITAL_EXPERIENCE_NATIVE_APPS).map((app) => ({ ...app, native: true })),
     proposedSignals: true,
   });
 
