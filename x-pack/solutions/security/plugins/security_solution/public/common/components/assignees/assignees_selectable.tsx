@@ -46,6 +46,16 @@ export interface AssigneesSelectableProps {
   onSelectionChange?: (userIds: AssigneesIdsSelection[], mixedUserIds?: string[]) => void;
 }
 
+const toProfilesById = (
+  previousProfiles: AssigneesProfilesSelection[],
+  assignedUserProfiles: AssigneesProfilesSelection[]
+) =>
+  new Map(
+    [...previousProfiles, ...assignedUserProfiles]
+      .filter((profile): profile is NonNullable<typeof profile> => profile !== null)
+      .map((profile) => [profile.uid, profile])
+  );
+
 /**
  * Renders a selectable component given a list of assignees ids
  */
@@ -110,22 +120,14 @@ export const AssigneesSelectable: FC<AssigneesSelectableProps> = memo(
         return;
       }
       setSelectedUserProfiles((previousProfiles) => {
-        const profilesById = new Map(
-          [...previousProfiles, ...assignedUserProfiles]
-            .filter((profile): profile is NonNullable<typeof profile> => profile !== null)
-            .map((profile) => [profile.uid, profile])
-        );
+        const profilesById = toProfilesById(previousProfiles, assignedUserProfiles);
         const nextProfiles = selectedUserIds.flatMap((uid) =>
           uid === NO_ASSIGNEES_VALUE ? [NO_ASSIGNEES_VALUE] : profilesById.get(uid) ?? []
         );
         return isEqual(nextProfiles, previousProfiles) ? previousProfiles : nextProfiles;
       });
       setMixedUserProfiles((previousProfiles) => {
-        const profilesById = new Map(
-          [...previousProfiles, ...assignedUserProfiles]
-            .filter((profile): profile is NonNullable<typeof profile> => profile !== null)
-            .map((profile) => [profile.uid, profile])
-        );
+        const profilesById = toProfilesById(previousProfiles, assignedUserProfiles);
         const nextProfiles = selectedMixedUserIds.flatMap((uid) => profilesById.get(uid) ?? []);
         return isEqual(nextProfiles, previousProfiles) ? previousProfiles : nextProfiles;
       });
