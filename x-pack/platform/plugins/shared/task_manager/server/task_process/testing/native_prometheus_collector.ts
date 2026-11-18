@@ -23,7 +23,7 @@ export const createNativePrometheusCollector = async (): Promise<{
   scrape: () => Promise<string>;
   stop: () => Promise<void>;
 }> => {
-  const lifecycle = initMetrics({
+  const lifecycle = await initMetrics({
     resource: resourceFromAttributes({
       'service.name': 'kibana',
       'service.instance.id': 'prometheus-main',

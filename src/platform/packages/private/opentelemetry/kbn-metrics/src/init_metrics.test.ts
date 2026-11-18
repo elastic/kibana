@@ -68,8 +68,8 @@ describe('initMetrics', () => {
     jest.clearAllMocks();
   });
 
-  test('should register the prometheus exporter if enabled in config', () => {
-    initMetrics({
+  test('should register the prometheus exporter if enabled in config', async () => {
+    await initMetrics({
       resource,
       metricsConfig: { enabled: false, exporters, interval: duration(10, 's') },
       monitoringCollectionConfig: {
@@ -89,8 +89,8 @@ describe('initMetrics', () => {
     });
   });
 
-  test('should register the prometheus exporter and otlp if enabled in monitoring collection config', () => {
-    initMetrics({
+  test('should register the prometheus exporter and otlp if enabled in monitoring collection config', async () => {
+    await initMetrics({
       resource,
       metricsConfig: { enabled: false, exporters, interval: duration(10, 's') },
       monitoringCollectionConfig: {
@@ -115,9 +115,9 @@ describe('initMetrics', () => {
     });
   });
 
-  test('should register the otlp if enabled in monitoring collection config via env var (metrics)', () => {
+  test('should register the otlp if enabled in monitoring collection config via env var (metrics)', async () => {
     process.env.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT = 'http://localhost';
-    initMetrics({
+    await initMetrics({
       resource,
       metricsConfig: { enabled: false, exporters, interval: duration(10, 's') },
       monitoringCollectionConfig: {
@@ -142,9 +142,9 @@ describe('initMetrics', () => {
     });
   });
 
-  test('should register the otlp if enabled in monitoring collection config via env var (global)', () => {
+  test('should register the otlp if enabled in monitoring collection config via env var (global)', async () => {
     process.env.OTEL_EXPORTER_OTLP_ENDPOINT = 'http://localhost';
-    initMetrics({
+    await initMetrics({
       resource,
       metricsConfig: { enabled: false, exporters, interval: duration(10, 's') },
       monitoringCollectionConfig: {
@@ -169,8 +169,8 @@ describe('initMetrics', () => {
     });
   });
 
-  test('should register the exporters registered via telemetry if enabled', () => {
-    initMetrics({
+  test('should register the exporters registered via telemetry if enabled', async () => {
+    await initMetrics({
       resource,
       metricsConfig: { enabled: true, exporters, interval: duration(10, 's') },
       monitoringCollectionConfig: {
@@ -203,8 +203,8 @@ describe('initMetrics', () => {
     });
   });
 
-  test('should define a custom export timeout if provided globally', () => {
-    initMetrics({
+  test('should define a custom export timeout if provided globally', async () => {
+    await initMetrics({
       resource,
       metricsConfig: {
         enabled: true,
@@ -242,8 +242,8 @@ describe('initMetrics', () => {
     });
   });
 
-  test('should discard the global export timeout if it is higher than the export interval', () => {
-    initMetrics({
+  test('should discard the global export timeout if it is higher than the export interval', async () => {
+    await initMetrics({
       resource,
       metricsConfig: {
         enabled: true,
@@ -282,8 +282,8 @@ describe('initMetrics', () => {
     });
   });
 
-  test("should prioritize the exporter's export config over the global config if it is provided", () => {
-    initMetrics({
+  test("should prioritize the exporter's export config over the global config if it is provided", async () => {
+    await initMetrics({
       resource,
       metricsConfig: {
         enabled: true,
@@ -323,8 +323,8 @@ describe('initMetrics', () => {
     });
   });
 
-  test('should not register any readers', () => {
-    initMetrics({
+  test('should not register any readers', async () => {
+    await initMetrics({
       resource,
       metricsConfig: { enabled: false, exporters, interval: duration(10, 's') },
       monitoringCollectionConfig: {

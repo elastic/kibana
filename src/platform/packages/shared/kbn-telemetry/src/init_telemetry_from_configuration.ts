@@ -45,22 +45,29 @@ export const initTelemetryFromConfiguration = (
   context.setGlobalContextManager(contextManager);
   contextManager.enable();
 
-  let metrics: ReturnType<typeof initMetrics> | undefined;
+  let metrics: Awaited<ReturnType<typeof initMetrics>> | undefined;
   let tracing: ReturnType<typeof initTracing> | undefined;
-  if (telemetryConfig.enabled) {
-    if (telemetryConfig.tracing.enabled) maybeInitAutoInstrumentations();
-    if (telemetryConfig.metrics.enabled || monitoringCollectionConfig.enabled) {
-      metrics = initMetrics({
-        ...metricsOptions,
-        resource,
-        metricsConfig: telemetryConfig.metrics,
-        monitoringCollectionConfig,
-      });
-    }
+  if (telemetryConfig.enabled && telemetryConfig.tracing.enabled) {
+    maybeInitAutoInstrumentations();
   }
-  const ready = Promise.resolve(resource.waitForAsyncAttributes?.()).then(() => {
-    if (telemetryConfig.enabled && telemetryConfig.tracing.enabled) {
-      tracing = initTracing({ resource, tracingConfig: telemetryConfig.tracing });
+  // `initMetrics` is now async (it only imports the one configured OTLP exporter variant, not all
+  // three), so metrics setup moves into the same deferred `ready` step tracing already uses,
+  // rather than running synchronously before `ready` resolves. A caller that reads from the
+  // global meter provider before awaiting `ready` gets the no-op provider, exactly as it already
+  // would for tracing.
+  const ready = Promise.resolve(resource.waitForAsyncAttributes?.()).then(async () => {
+    if (telemetryConfig.enabled) {
+      if (telemetryConfig.tracing.enabled) {
+        tracing = initTracing({ resource, tracingConfig: telemetryConfig.tracing });
+      }
+      if (telemetryConfig.metrics.enabled || monitoringCollectionConfig.enabled) {
+        metrics = await initMetrics({
+          ...metricsOptions,
+          resource,
+          metricsConfig: telemetryConfig.metrics,
+          monitoringCollectionConfig,
+        });
+      }
     }
   });
   return {

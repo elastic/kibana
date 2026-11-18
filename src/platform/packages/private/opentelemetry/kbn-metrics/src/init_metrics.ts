@@ -17,10 +17,6 @@ import {
   MeterProvider,
 } from '@opentelemetry/sdk-metrics';
 import { castArray } from 'lodash';
-import { Metadata } from '@grpc/grpc-js';
-import { OTLPMetricExporter as OTLPMetricExporterGrpc } from '@opentelemetry/exporter-metrics-otlp-grpc';
-import { OTLPMetricExporter as OTLPMetricExporterProto } from '@opentelemetry/exporter-metrics-otlp-proto';
-import { OTLPMetricExporter as OTLPMetricExporterHttp } from '@opentelemetry/exporter-metrics-otlp-http';
 import type { MetricsConfig, MonitoringCollectionConfig } from '@kbn/metrics-config';
 import { fromExternalVariant } from '@kbn/std';
 import { cleanupBeforeExit } from '@kbn/cleanup-before-exit';
@@ -48,13 +44,16 @@ export interface InitMetricsOptions {
 }
 
 /**
- * Initialize the OpenTelemetry meter provider
+ * Initialize the OpenTelemetry meter provider. Only the one OTLP exporter variant a configured
+ * exporter actually selects (grpc/http/proto) is imported, so a worker that never configures an
+ * exporter (the common case for a task process) never pays for `@grpc/grpc-js` or the other two
+ * exporter SDKs it isn't using.
  * @param initMetricsOptions {@link InitMetricsOptions}
  */
-export function initMetrics(initMetricsOptions: InitMetricsOptions): {
+export async function initMetrics(initMetricsOptions: InitMetricsOptions): Promise<{
   forceFlush: () => Promise<void>;
   shutdown: () => Promise<void>;
-} {
+}> {
   const { resource, metricsConfig, monitoringCollectionConfig } = initMetricsOptions;
 
   const globalExportIntervalMillis = metricsConfig.interval.asMilliseconds();
@@ -102,67 +101,82 @@ export function initMetrics(initMetricsOptions: InitMetricsOptions): {
   }
 
   readers.push(
-    ...exporters.map((exporterConfig) => {
-      const variant = fromExternalVariant(exporterConfig);
+    ...(await Promise.all(
+      exporters.map(async (exporterConfig) => {
+        const variant = fromExternalVariant(exporterConfig);
 
-      const commonConfig = {
-        temporalityPreference:
-          variant.value.temporalityPreference === 'delta'
-            ? AggregationTemporality.DELTA
-            : AggregationTemporality.CUMULATIVE,
-      };
+        const commonConfig = {
+          temporalityPreference:
+            variant.value.temporalityPreference === 'delta'
+              ? AggregationTemporality.DELTA
+              : AggregationTemporality.CUMULATIVE,
+        };
 
-      let exporter: PushMetricExporter;
-      switch (variant.type) {
-        case 'grpc': {
-          const metadata = new Metadata();
-          Object.entries(variant.value.headers || {}).forEach(([key, value]) => {
-            metadata.add(key, value);
-          });
-          exporter = new OTLPMetricExporterGrpc({
-            ...commonConfig,
-            metadata,
-            url: variant.value.url,
-          });
-          break;
+        let exporter: PushMetricExporter;
+        switch (variant.type) {
+          case 'grpc': {
+            const [{ Metadata }, { OTLPMetricExporter: OTLPMetricExporterGrpc }] =
+              await Promise.all([
+                import('@grpc/grpc-js'),
+                import('@opentelemetry/exporter-metrics-otlp-grpc'),
+              ]);
+            const metadata = new Metadata();
+            Object.entries(variant.value.headers || {}).forEach(([key, value]) => {
+              metadata.add(key, value);
+            });
+            exporter = new OTLPMetricExporterGrpc({
+              ...commonConfig,
+              metadata,
+              url: variant.value.url,
+            });
+            break;
+          }
+          case 'http': {
+            const { OTLPMetricExporter: OTLPMetricExporterHttp } = await import(
+              '@opentelemetry/exporter-metrics-otlp-http'
+            );
+            exporter = new OTLPMetricExporterHttp({
+              ...commonConfig,
+              headers: variant.value.headers,
+              url: variant.value.url,
+            });
+            break;
+          }
+          case 'proto': {
+            const { OTLPMetricExporter: OTLPMetricExporterProto } = await import(
+              '@opentelemetry/exporter-metrics-otlp-proto'
+            );
+            exporter = new OTLPMetricExporterProto({
+              ...commonConfig,
+              headers: variant.value.headers,
+              url: variant.value.url,
+            });
+            break;
+          }
         }
-        case 'http':
-          exporter = new OTLPMetricExporterHttp({
-            ...commonConfig,
-            headers: variant.value.headers,
-            url: variant.value.url,
-          });
-          break;
-        case 'proto':
-          exporter = new OTLPMetricExporterProto({
-            ...commonConfig,
-            headers: variant.value.headers,
-            url: variant.value.url,
-          });
-          break;
-      }
 
-      const exportInterval = variant.value.exportInterval ?? globalExportIntervalMillis;
-      const exportIntervalMillis =
-        typeof exportInterval === 'number' ? exportInterval : exportInterval.asMilliseconds();
+        const exportInterval = variant.value.exportInterval ?? globalExportIntervalMillis;
+        const exportIntervalMillis =
+          typeof exportInterval === 'number' ? exportInterval : exportInterval.asMilliseconds();
 
-      // If the exporter's export timeout is not provided, use the global export timeout only if it is less than the export interval (the client fails if the timeout is higher than the interval).
-      // Otherwise, we use the export interval.
-      let exportTimeoutMillis = variant.value.exportTimeout?.asMilliseconds();
-      if (typeof exportTimeoutMillis !== 'number') {
-        if (globalExportTimeoutMillis && globalExportTimeoutMillis <= exportIntervalMillis) {
-          exportTimeoutMillis = globalExportTimeoutMillis;
-        } else {
-          exportTimeoutMillis = exportIntervalMillis;
+        // If the exporter's export timeout is not provided, use the global export timeout only if it is less than the export interval (the client fails if the timeout is higher than the interval).
+        // Otherwise, we use the export interval.
+        let exportTimeoutMillis = variant.value.exportTimeout?.asMilliseconds();
+        if (typeof exportTimeoutMillis !== 'number') {
+          if (globalExportTimeoutMillis && globalExportTimeoutMillis <= exportIntervalMillis) {
+            exportTimeoutMillis = globalExportTimeoutMillis;
+          } else {
+            exportTimeoutMillis = exportIntervalMillis;
+          }
         }
-      }
 
-      return new PeriodicExportingMetricReader({
-        exporter,
-        exportIntervalMillis,
-        exportTimeoutMillis,
-      });
-    })
+        return new PeriodicExportingMetricReader({
+          exporter,
+          exportIntervalMillis,
+          exportTimeoutMillis,
+        });
+      })
+    ))
   );
 
   const meterProvider = new MeterProvider({
