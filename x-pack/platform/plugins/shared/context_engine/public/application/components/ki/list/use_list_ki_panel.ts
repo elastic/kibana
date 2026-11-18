@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { DEFAULT_KI_GROUPS, DEFAULT_KI_PAGE_SIZE } from '../../../../../common/constants';
+import { DEFAULT_KI_GROUPS } from '../../../../../common/constants';
 import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
 import type { KiGroup, KiListItem } from '../../../../../common/http_api/knowledge_indicators';
 import { DEFAULT_KI_LIST_SORT, type KiListSort } from '../../../../../common/ki_list_sort';
@@ -21,6 +21,7 @@ import {
 } from './list_ki_helpers';
 import {
   EMPTY_TILE_SELECTION,
+  LIST_KI_PAGE_SIZE,
   OTHER_SECTION_KEY,
   getOwnValue,
   buildListKiSections,
@@ -36,9 +37,6 @@ import {
   toggleTile,
   type ListKiTile,
 } from './list_ki_tiles_helpers';
-
-/** Rows each group brings on page load (from `_groups`). */
-export const LIST_KI_GROUP_PREVIEW_SIZE = 10;
 
 const EMPTY_GROUP_SIZES: Record<string, number> = {};
 
@@ -61,13 +59,13 @@ export const useListKiPanel = ({ id: aiIndexId }: GetAiIndexResponse) => {
   const [submittedQuery, setSubmittedQuery] = useState('');
   // Raw tile selection. Types that are no tile right now are ignored, not dropped.
   const [tileSelection, setTileSelection] = useState<ListKiTileSelection>(EMPTY_TILE_SELECTION);
-  // Rows per type section beyond the preview (tile click, "Show more"). Reset on a filter change.
+  // Rows per type section beyond the preview ("Show more"). Reset on a filter change.
   const [groupSizes, setGroupSizes] = useState<Record<string, number>>(EMPTY_GROUP_SIZES);
-  const [otherSize, setOtherSize] = useState(DEFAULT_KI_PAGE_SIZE);
+  const [otherSize, setOtherSize] = useState(LIST_KI_PAGE_SIZE);
 
   const resetSizes = () => {
     setGroupSizes(EMPTY_GROUP_SIZES);
-    setOtherSize(DEFAULT_KI_PAGE_SIZE);
+    setOtherSize(LIST_KI_PAGE_SIZE);
   };
 
   const onStatusFilterChange = (status: ListKiStatusFilterValue) => {
@@ -89,7 +87,7 @@ export const useListKiPanel = ({ id: aiIndexId }: GetAiIndexResponse) => {
       }
       setSubmittedQuery(trimmed);
       setGroupSizes(EMPTY_GROUP_SIZES);
-      setOtherSize(DEFAULT_KI_PAGE_SIZE);
+      setOtherSize(LIST_KI_PAGE_SIZE);
     },
     [submittedQuery]
   );
@@ -102,7 +100,7 @@ export const useListKiPanel = ({ id: aiIndexId }: GetAiIndexResponse) => {
   const tileGroupsQuery = useListKiGroups({
     aiIndexId,
     maxGroups: DEFAULT_KI_GROUPS,
-    previewSize: LIST_KI_GROUP_PREVIEW_SIZE,
+    previewSize: LIST_KI_PAGE_SIZE,
     status,
     sort,
   });
@@ -117,7 +115,7 @@ export const useListKiPanel = ({ id: aiIndexId }: GetAiIndexResponse) => {
     aiIndexId,
     maxGroups: DEFAULT_KI_GROUPS,
     types: tileTypes,
-    previewSize: LIST_KI_GROUP_PREVIEW_SIZE,
+    previewSize: LIST_KI_PAGE_SIZE,
     query,
     status,
     sort,
@@ -181,24 +179,10 @@ export const useListKiPanel = ({ id: aiIndexId }: GetAiIndexResponse) => {
   });
   const isFetchingOther = showOther && otherQuery.isFetching;
 
-  const onToggleTile = useCallback(
-    (tile: ListKiTile) => {
-      const isSelecting = tile.kind === 'type' ? !selection.types.has(tile.type) : !selection.other;
-      setTileSelection((current) => toggleTile(current, tile));
-      if (tile.kind !== 'type' || !isSelecting) {
-        return;
-      }
-      // A selected type shows a real page, not only its preview, when it has more documents.
-      const group = groups.find(({ type }) => type === tile.type);
-      if (group && group.count > group.kis.length) {
-        setGroupSizes((current) => ({
-          ...current,
-          [tile.type]: Math.max(getOwnValue(current, tile.type) ?? 0, DEFAULT_KI_PAGE_SIZE),
-        }));
-      }
-    },
-    [groups, selection]
-  );
+  // The preview is already a full page, so a tile click loads nothing extra.
+  const onToggleTile = useCallback((tile: ListKiTile) => {
+    setTileSelection((current) => toggleTile(current, tile));
+  }, []);
 
   const hasActiveFilters =
     hasTileSelection(selection) ||

@@ -38,7 +38,7 @@ export const DEFAULT_KI_GROUPS = 5;
 export const MAX_KI_GROUPS = 10;
 /** Default and maximum number of preview rows per KI type group. */
 export const DEFAULT_KI_GROUP_PREVIEW_SIZE = 3;
-export const MAX_KI_GROUP_PREVIEW_SIZE = 25;
+export const MAX_KI_GROUP_PREVIEW_SIZE = 50;
 
 /** Also the longest type that can form a group, since the client must be able to send it back. */
 export const MAX_KI_TYPE_FILTER_LENGTH = 256;

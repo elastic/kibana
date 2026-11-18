@@ -98,12 +98,12 @@ describe('useListKiPanel', () => {
     jest.clearAllMocks();
   });
 
-  it('loads the 5 biggest types with 10 rows each, active KIs, newest first', () => {
+  it('loads the 5 biggest types with 50 rows each, active KIs, newest first', () => {
     renderPanelHook();
     expect(groupsQuery()).toEqual(
       expect.objectContaining({
         maxGroups: 5,
-        previewSize: 10,
+        previewSize: 50,
         status: ['active'],
         sort: 'updated',
       })
@@ -180,16 +180,16 @@ describe('useListKiPanel', () => {
     expect(result.current.groups.map(({ key }) => key)).toEqual(['type:faq', 'type:playbook']);
   });
 
-  it('loads a page of a selected type even when the type is named like an object key', () => {
+  it('loads more rows of a type even when the type is named like an object key', () => {
     mockUseListKiGroups.mockReturnValue(
-      groupsResult({ groups: [{ type: 'constructor', count: 30, kis: rows(10, 'constructor') }] })
+      groupsResult({ groups: [{ type: 'constructor', count: 80, kis: rows(50, 'constructor') }] })
     );
     const { result } = renderPanelHook();
 
     act(() => {
-      result.current.onToggleTile(tile(result, 'type:constructor'));
+      result.current.showMore('type:constructor', 50);
     });
-    expect(byTypeQuery()).toEqual(expect.objectContaining({ sizesByType: { constructor: 25 } }));
+    expect(byTypeQuery()).toEqual(expect.objectContaining({ sizesByType: { constructor: 100 } }));
   });
 
   it('keeps "Show more" (as a retry) and shows a toast when the "Other" request fails', () => {
@@ -246,7 +246,7 @@ describe('useListKiPanel', () => {
       result.current.onToggleTile(tile(result, 'other'));
     });
     expect(otherQuery()).toEqual(
-      expect.objectContaining({ enabled: true, excludeTypes: ['faq', 'playbook'], size: 25 })
+      expect.objectContaining({ enabled: true, excludeTypes: ['faq', 'playbook'], size: 50 })
     );
     expect(result.current.groups.map(({ key }) => key)).toEqual(['other']);
     expect(result.current.selection.other).toBe(true);
@@ -261,30 +261,24 @@ describe('useListKiPanel', () => {
     expect(otherQuery()).toEqual(expect.objectContaining({ enabled: false }));
   });
 
-  it('loads a page of a selected type that has more rows than its preview', () => {
+  it('shows the preview of a selected type without loading more rows', () => {
     const { result } = renderPanelHook();
 
     act(() => {
       result.current.onToggleTile(tile(result, 'type:faq'));
     });
-    expect(byTypeQuery()).toEqual(expect.objectContaining({ sizesByType: { faq: 25 } }));
     expect(result.current.groups.map(({ key }) => key)).toEqual(['type:faq']);
-
-    act(() => {
-      result.current.onToggleTile(tile(result, 'type:playbook'));
-    });
-    // playbook already shows all 3 rows: no request.
-    expect(byTypeQuery()).toEqual(expect.objectContaining({ sizesByType: { faq: 25 } }));
+    expect(byTypeQuery()).toEqual(expect.objectContaining({ sizesByType: {} }));
   });
 
   it('keeps "Show more" sizes per section, caps them, and resets them when a filter changes', () => {
-    mockUseListKi.mockReturnValue(otherResult({ kis: rows(25, 'zeta'), total: 60 }));
+    mockUseListKi.mockReturnValue(otherResult({ kis: rows(50, 'zeta'), total: 120 }));
     const { result } = renderPanelHook();
 
     act(() => {
       result.current.showMore('type:faq', 10);
     });
-    expect(byTypeQuery()).toEqual(expect.objectContaining({ sizesByType: { faq: 35 } }));
+    expect(byTypeQuery()).toEqual(expect.objectContaining({ sizesByType: { faq: 60 } }));
 
     act(() => {
       result.current.showMore('type:faq', 90);
@@ -295,15 +289,15 @@ describe('useListKiPanel', () => {
       result.current.onToggleTile(tile(result, 'other'));
     });
     act(() => {
-      result.current.showMore('other', 25);
+      result.current.showMore('other', 50);
     });
-    expect(otherQuery()).toEqual(expect.objectContaining({ size: 50 }));
+    expect(otherQuery()).toEqual(expect.objectContaining({ size: 100 }));
 
     act(() => {
       result.current.onStatusFilterChange('deleted');
     });
     expect(byTypeQuery()).toEqual(expect.objectContaining({ sizesByType: {} }));
-    expect(otherQuery()).toEqual(expect.objectContaining({ size: 25 }));
+    expect(otherQuery()).toEqual(expect.objectContaining({ size: 50 }));
     expect(groupsQuery()).toEqual(expect.objectContaining({ status: ['deleted'] }));
   });
 

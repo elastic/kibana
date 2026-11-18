@@ -265,7 +265,7 @@ apiTest.describe('context engine KI groups', { tag: tags.stateful.classic }, () 
   apiTest('rejects unbounded group params with 400', async ({ apiClient }) => {
     const invalid: Array<Record<string, number>> = [
       { max_groups: 11 },
-      { preview_size: 26 },
+      { preview_size: 51 },
       { preview_size: 2.5 },
     ];
     for (const params of invalid) {

@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { DEFAULT_KI_PAGE_SIZE, MAX_KI_PAGE_SIZE } from '../../../../../common/constants';
+import { MAX_KI_GROUP_PREVIEW_SIZE, MAX_KI_PAGE_SIZE } from '../../../../../common/constants';
 import type { KiGroup, KiListItem } from '../../../../../common/http_api/knowledge_indicators';
+
+/** Rows per section: on page load (each group and "Other"), then per "Show more". */
+export const LIST_KI_PAGE_SIZE = MAX_KI_GROUP_PREVIEW_SIZE;
 
 /** Key of the "Other" section. Type sections use `type:<type>`, so a type can never clash. */
 export const OTHER_SECTION_KEY = 'other';
@@ -156,4 +159,4 @@ export const buildListKiSections = ({
 
 /** Size for the next "Show more" request of a section. */
 export const getNextGroupSize = (loadedCount: number): number =>
-  Math.min(loadedCount + DEFAULT_KI_PAGE_SIZE, MAX_KI_PAGE_SIZE);
+  Math.min(loadedCount + LIST_KI_PAGE_SIZE, MAX_KI_PAGE_SIZE);

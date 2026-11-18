@@ -176,7 +176,7 @@ describe('strict selection', () => {
 
 describe('getNextGroupSize', () => {
   it('adds a page and stops at the cap', () => {
-    expect(getNextGroupSize(10)).toBe(35);
+    expect(getNextGroupSize(10)).toBe(60);
     expect(getNextGroupSize(90)).toBe(100);
   });
 });

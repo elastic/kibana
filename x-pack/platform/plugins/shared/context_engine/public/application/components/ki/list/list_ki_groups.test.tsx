@@ -135,7 +135,7 @@ describe('ListKiGroups', () => {
     fireEvent.click(within(faqGroup).getByTestId('contextListKiShowMoreButton'));
 
     expect(mockUseListKiByType).toHaveBeenLastCalledWith(
-      expect.objectContaining({ sizesByType: { faq: 27 } })
+      expect.objectContaining({ sizesByType: { faq: 52 } })
     );
     expect(
       within(screen.getByTestId('contextListKiGroup-playbook')).queryByTestId(

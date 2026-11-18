@@ -99,10 +99,10 @@ describe('ListKiFiltersRow', () => {
     );
   });
 
-  it('requests the 5 biggest types with 10 rows each, active KIs by default', () => {
+  it('requests the 5 biggest types with 50 rows each, active KIs by default', () => {
     renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
     expect(mockUseListKiGroups).toHaveBeenLastCalledWith(
-      expect.objectContaining({ status: ['active'], maxGroups: 5, previewSize: 10 })
+      expect.objectContaining({ status: ['active'], maxGroups: 5, previewSize: 50 })
     );
   });
 
