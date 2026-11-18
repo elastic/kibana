@@ -25,14 +25,19 @@ import { EntityStoreTaskType } from '../../tasks/constants';
 import type { HistorySnapshotState } from '../saved_objects';
 import { HISTORY_SNAPSHOT_RESET_SCRIPT } from './constants';
 import { deleteExpiredHistorySnapshots } from './expire_history_snapshots';
+import type { SystemEventsWriter, SystemEventTrigger } from '../system_events';
+import { SYSTEM_EVENT_ACTION, SYSTEM_EVENT_REASON } from '../system_events';
 
 export type RunHistorySnapshotResult =
   | { ok: true; historySnapshotIndex: string; docCount: number; resetCount: number }
   | { ok: true; skipped: true }
-  | { ok: false; error: Error };
+  | { ok: false; error: Error; cause?: Error };
 
 export interface RunHistorySnapshotOptions {
   abortSignal?: AbortSignal;
+  /** Who started the run. Recorded on the run's system event. Defaults to `user`. */
+  trigger?: SystemEventTrigger;
+  executionUuid?: string;
 }
 
 export { HISTORY_SNAPSHOT_RESET_SCRIPT } from './constants';
@@ -47,6 +52,7 @@ export interface HistorySnapshotClientDependencies {
   namespace: string;
   globalStateClient: EntityStoreGlobalStateClient;
   taskManager: TaskManagerStartContract;
+  systemEventsWriter?: SystemEventsWriter;
 }
 
 export class HistorySnapshotClient {
@@ -56,6 +62,7 @@ export class HistorySnapshotClient {
   private readonly namespace: string;
   private readonly globalStateClient: EntityStoreGlobalStateClient;
   private readonly taskManager: TaskManagerStartContract;
+  private readonly systemEventsWriter?: SystemEventsWriter;
 
   constructor({
     logger,
@@ -64,6 +71,7 @@ export class HistorySnapshotClient {
     namespace,
     globalStateClient,
     taskManager,
+    systemEventsWriter,
   }: HistorySnapshotClientDependencies) {
     this.logger = logger;
     this.esClient = esClient;
@@ -71,6 +79,7 @@ export class HistorySnapshotClient {
     this.namespace = namespace;
     this.globalStateClient = globalStateClient;
     this.taskManager = taskManager;
+    this.systemEventsWriter = systemEventsWriter;
   }
 
   public async enable(request: KibanaRequest): Promise<void> {
@@ -237,8 +246,29 @@ export class HistorySnapshotClient {
   public async runHistorySnapshot(
     options: RunHistorySnapshotOptions = {}
   ): Promise<RunHistorySnapshotResult> {
-    const { abortSignal } = options;
+    const { abortSignal, trigger = 'user', executionUuid } = options;
+    const startedAt = Date.now();
+    const result = await this.runSnapshot(abortSignal);
+    if ('skipped' in result) {
+      return result;
+    }
+    await this.systemEventsWriter?.writeRun({
+      action: SYSTEM_EVENT_ACTION.historySnapshot,
+      startedAt,
+      trigger,
+      executionUuid,
+      ...(result.ok
+        ? { outcome: 'success', historySnapshot: { doc_count: result.docCount } }
+        : {
+            outcome: 'failure',
+            ...(abortSignal?.aborted ? { reason: SYSTEM_EVENT_REASON.aborted } : {}),
+            error: result.cause ?? result.error,
+          }),
+    });
+    return result;
+  }
 
+  private async runSnapshot(abortSignal?: AbortSignal): Promise<RunHistorySnapshotResult> {
     const globalState = await this.globalStateClient.findOrThrow();
 
     if (globalState.historySnapshot?.status !== 'started') {
@@ -314,7 +344,7 @@ export class HistorySnapshotClient {
       const caughtError = err instanceof Error ? err : new Error(String(err));
       this.logger.error(`history snapshot failed: ${caughtError.message}`, { error: caughtError });
       await this.updateGlobalStateOnError(caughtError);
-      result = { ok: false, error: new Error('History snapshot failed') };
+      result = { ok: false, error: new Error('History snapshot failed'), cause: caughtError };
     } finally {
       try {
         await deleteExpiredHistorySnapshots({

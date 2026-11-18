@@ -41,6 +41,11 @@ import { NonPriorityExtractionDisabledError } from '../domain/errors';
 import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
 import { getMergedConfig } from '../domain/config';
 import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from './execution_context';
+import {
+  SystemEventsWriter,
+  toExtractionRunEvent,
+  type RunEventInput,
+} from '../domain/system_events';
 
 /** The priority and single processes share one task; non-priority has its own so the two can run
  * on independent schedules and be started, stopped and monitored separately. */
@@ -176,6 +181,7 @@ async function runTask({
   taskInstance,
   fakeRequest,
   signal,
+  executionUuid,
   entityType,
   logger: taskLogger,
   core,
@@ -257,6 +263,20 @@ async function runTask({
     buildExtractionAttributes(entityType, namespace, extractionMode, remote);
 
   const extractionStart = Date.now();
+  const systemEventsWriter = new SystemEventsWriter({
+    esClient: coreStart.elasticsearch.client.asInternalUser,
+    logger,
+    namespace,
+  });
+  const runEventBase = {
+    startedAt: extractionStart,
+    trigger: 'task',
+    taskType: getTaskType(entityType, registeredExtractionMode),
+    executionUuid,
+    entityType,
+    mode: extractionMode,
+  } as const;
+  let runEvent: RunEventInput | undefined;
 
   try {
     const { logsExtractionClient } = await createLogsExtractionClient({
@@ -274,6 +294,7 @@ async function runTask({
     const extractionDuration = moment().diff(extractionStart, 'milliseconds');
 
     remote = extractionResult.isRemote;
+    runEvent = toExtractionRunEvent(runEventBase, { summary: extractionResult }, signal);
 
     if (extractionResult.success) {
       logger.info(
@@ -318,6 +339,7 @@ async function runTask({
     };
   } catch (e) {
     logger.error(`Error running extract entity task, received ${e.message}`);
+    runEvent = toExtractionRunEvent(runEventBase, { error: e }, signal);
 
     entityStoreMetrics.extractionTaskError.add(1, {
       ...metricAttributes(),
@@ -338,6 +360,9 @@ async function runTask({
       moment().diff(extractionStart, 'milliseconds'),
       metricAttributes()
     );
+    if (runEvent) {
+      await systemEventsWriter.writeRun(runEvent);
+    }
   }
 }
 

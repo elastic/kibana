@@ -110,7 +110,7 @@ interface ExtractedLogsSummaryError {
   error: Error;
 }
 
-type ExtractedLogsSummary = ExtractedLogsSummarySuccess | ExtractedLogsSummaryError;
+export type ExtractedLogsSummary = ExtractedLogsSummarySuccess | ExtractedLogsSummaryError;
 
 export interface LogsExtractionClientDependencies {
   logger: Logger;

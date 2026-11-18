@@ -14,6 +14,13 @@ jest.mock('./should_delete_orphaned_task', () => ({
   shouldDeleteOrphanedEntityStoreTask: jest.fn().mockResolvedValue(false),
 }));
 jest.mock('./factories', () => ({ createLogsExtractionClient: jest.fn() }));
+const mockWriteRun = jest.fn();
+jest.mock('../domain/system_events', () => ({
+  ...jest.requireActual('../domain/system_events'),
+  SystemEventsWriter: class {
+    writeRun = (...args: unknown[]) => mockWriteRun(...args);
+  },
+}));
 jest.mock('../domain/config', () => ({
   getMergedConfig: jest.fn().mockReturnValue({ frequency: '1m' }),
 }));
@@ -153,6 +160,7 @@ describe('feature flag gates non-priority execution', () => {
         getStartServices: jest.fn().mockResolvedValue([
           {
             featureFlags: {},
+            elasticsearch: { client: { asInternalUser: {} } },
             executionContext: { withContext: jest.fn(<T>(_ctx: unknown, fn: () => T) => fn()) },
           },
         ]),
@@ -245,6 +253,7 @@ describe('extract entity task metrics', () => {
         getStartServices: jest.fn().mockResolvedValue([
           {
             featureFlags: {},
+            elasticsearch: { client: { asInternalUser: {} } },
             executionContext: {
               withContext: jest.fn().mockImplementation((_ctx: unknown, fn: () => unknown) => fn()),
             },
@@ -296,6 +305,36 @@ describe('extract entity task metrics', () => {
     );
   });
 
+  it('records a failed run doc for a real failure', async () => {
+    await runWith('extract_entity_task', {
+      success: false,
+      isRemote: false,
+      error: new EntityStoreNotRunningError('Entity store is not started for type user'),
+    });
+
+    expect(mockWriteRun).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: 'extraction',
+        outcome: 'failure',
+        trigger: 'task',
+        entityType: 'user',
+        mode: EXTRACTION_MODE.priority,
+        taskType: 'entity_store:v2:extract_entity_task:user',
+      })
+    );
+  });
+
+  it('writes no run doc when the non-priority process is switched off', async () => {
+    mockWriteRun.mockClear();
+    await runWith('extract_entity_non_priority_task', {
+      success: false,
+      isRemote: false,
+      error: new NonPriorityExtractionDisabledError(),
+    });
+
+    expect(mockWriteRun).not.toHaveBeenCalled();
+  });
+
   it('labels task metrics with the extraction mode and records run duration', async () => {
     await runWith('extract_entity_non_priority_task', {
       success: true,
@@ -342,6 +381,7 @@ describe('non-priority task orphan cleanup', () => {
         getStartServices: jest.fn().mockResolvedValue([
           {
             featureFlags: {},
+            elasticsearch: { client: { asInternalUser: {} } },
             executionContext: { withContext: jest.fn(<T>(_ctx: unknown, fn: () => T) => fn()) },
           },
         ]),
@@ -463,6 +503,7 @@ describe('bootstrapNonPriorityTask', () => {
         getStartServices: jest.fn().mockResolvedValue([
           {
             featureFlags: {},
+            elasticsearch: { client: { asInternalUser: {} } },
             savedObjects: {
               createInternalRepository: jest.fn().mockReturnValue(soClient),
               getUnsafeInternalClient: jest.fn().mockReturnValue({
@@ -578,11 +619,13 @@ describe('registerExtractEntityTasks — execution context wrap', () => {
 
     const withContextSpy = jest.fn(<T>(_ctx: unknown, fn: () => T) => fn());
     const core = {
-      getStartServices: jest
-        .fn()
-        .mockResolvedValue([
-          { featureFlags: {}, executionContext: { withContext: withContextSpy } },
-        ]),
+      getStartServices: jest.fn().mockResolvedValue([
+        {
+          featureFlags: {},
+          elasticsearch: { client: { asInternalUser: {} } },
+          executionContext: { withContext: withContextSpy },
+        },
+      ]),
     } as unknown as EntityStoreCoreSetup;
     const registerTaskDefinitions = jest.fn();
     const taskManager = { registerTaskDefinitions } as unknown as TaskManagerSetupContract;
