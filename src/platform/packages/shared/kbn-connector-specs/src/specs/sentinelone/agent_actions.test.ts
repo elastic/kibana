@@ -137,14 +137,11 @@ describe('isolateHost and releaseHost', () => {
     });
   });
 
-  it('succeeds without an isolate request and lists every id as notFound when none of the ids exist', async () => {
+  it('fails without an isolate request when none of the ids exist', async () => {
     request.mockResolvedValueOnce({ status: 200, data: listBody([]) });
-    await expect(run('isolateHost', { agentIds: ['11', '12'] })).resolves.toEqual({
-      data: { affected: 0 },
-      requested: [],
-      skipped: [],
-      notFound: ['11', '12'],
-    });
+    await expect(run('isolateHost', { agentIds: ['11', '12'] })).rejects.toThrow(
+      'SentinelOne isolateHost found none of the agents: 11, 12'
+    );
     expect(request).toHaveBeenCalledTimes(1);
   });
 
@@ -280,15 +277,33 @@ describe('moveAgent', () => {
     expect(request).toHaveBeenCalledTimes(1);
   });
 
-  it('succeeds without a move request and lists every id as notFound when no agent exists', async () => {
+  it('fails without a move request when no agent exists', async () => {
     request.mockResolvedValueOnce({ status: 200, data: listBody([]) });
-    await expect(move(['11', '12'])).resolves.toEqual({
-      data: { agentsMoved: 0 },
-      requested: [],
-      skipped: [],
-      notFound: ['11', '12'],
-    });
+    await expect(move(['11', '12'])).rejects.toThrow(
+      'SentinelOne moveAgent found none of the agents: 11, 12'
+    );
     expect(request).toHaveBeenCalledTimes(1);
+  });
+
+  it('fails without a release request when none of the ids exist', async () => {
+    request.mockResolvedValueOnce({ status: 200, data: listBody([]) });
+    await expect(run('releaseHost', { agentIds: ['11'] })).rejects.toThrow(
+      'SentinelOne releaseHost found none of the agents: 11'
+    );
+    expect(request).toHaveBeenCalledTimes(1);
+  });
+
+  it('still succeeds when some ids are unknown and the rest are already in the target state', async () => {
+    request.mockResolvedValueOnce({
+      status: 200,
+      data: listBody([{ id: '11', networkStatus: 'disconnected' }]),
+    });
+    await expect(run('isolateHost', { agentIds: ['11', '99'] })).resolves.toEqual({
+      data: { affected: 0 },
+      requested: [],
+      skipped: ['11'],
+      notFound: ['99'],
+    });
   });
 
   it('reads more than 300 agents in batches of 300 ids', async () => {

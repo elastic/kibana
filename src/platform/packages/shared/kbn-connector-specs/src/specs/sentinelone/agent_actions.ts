@@ -104,6 +104,15 @@ const partitionAgents = async (
       partition.requested.push(id);
     }
   }
+  // ids that are already in the target state are a success; ids that do not exist at all must not look like one
+  if (partition.requested.length === 0 && partition.skipped.length === 0) {
+    const shown = ids.slice(0, 20).join(', ');
+    throw new Error(
+      `SentinelOne ${action} found none of the agents: ${shown}${
+        ids.length > 20 ? ` (+${ids.length - 20})` : ''
+      }`
+    );
+  }
   return partition;
 };
 

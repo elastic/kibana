@@ -47,10 +47,10 @@ The SentinelOne (v2) connector exposes the following actions:
 :   Finds endpoints by host name, agent universally unique identifier (UUID), IP address, or ID and returns their network status and last-seen time. Requires the Endpoints: view permission.
 
 `isolateHost`
-:   Disconnects endpoints from the network; they can still reach the SentinelOne management console. The result lists the agent IDs sent to SentinelOne (`requested`), the IDs already isolated (`skipped`), and the IDs SentinelOne did not find (`notFound`); when no ID is left to send, the action succeeds without a request and `data.affected` is 0. Requires the Endpoints: disconnect from network permission.
+:   Disconnects endpoints from the network; they can still reach the SentinelOne management console. The result lists the agent IDs sent to SentinelOne (`requested`), the IDs already isolated (`skipped`), and the IDs SentinelOne did not find (`notFound`); when every ID is already isolated, the action succeeds without a request and `data.affected` is 0. When SentinelOne finds none of the IDs, the action fails. Requires the Endpoints: disconnect from network permission.
 
 `releaseHost`
-:   Reconnects isolated endpoints to the network. The result lists the agent IDs sent to SentinelOne (`requested`), the IDs already connected (`skipped`), and the IDs SentinelOne did not find (`notFound`); when no ID is left to send, the action succeeds without a request and `data.affected` is 0. Requires the Endpoints: reconnect to network permission.
+:   Reconnects isolated endpoints to the network. The result lists the agent IDs sent to SentinelOne (`requested`), the IDs already connected (`skipped`), and the IDs SentinelOne did not find (`notFound`); when every ID is already connected, the action succeeds without a request and `data.affected` is 0. When SentinelOne finds none of the IDs, the action fails. Requires the Endpoints: reconnect to network permission.
 
 `executeScript` _(not yet available)_
 :   Runs a script from the SentinelOne Script Library on selected endpoints and returns the task ID to follow. Each script type needs its own RemoteOps permission: run data collection script, run artifact collection script, or run action script. SentinelOne answers `Insufficient permissions` (HTTP 403) when the role lacks the permission for the type of script, for example action scripts such as Download File.
@@ -134,7 +134,7 @@ The SentinelOne (v2) connector exposes the following actions:
 :   Removes exclusions so detection applies to the item again. Requires the Exclusions: delete permission.
 
 `moveAgent` _(not yet available)_
-:   Moves endpoints to another group, for example one with a stricter policy. SentinelOne answers with the number of agents it moved (`data.agentsMoved`). The action reads the agents first and the result lists the agent IDs sent to SentinelOne (`requested`), the IDs already in the group (`skipped`), and the IDs SentinelOne did not find (`notFound`); when no ID is left to send, the action succeeds without a move request and `data.agentsMoved` is 0. When SentinelOne moves none of the requested agents, the action fails. Requires the Groups: move to group and Endpoints: view permissions.
+:   Moves endpoints to another group, for example one with a stricter policy. SentinelOne answers with the number of agents it moved (`data.agentsMoved`). The action reads the agents first and the result lists the agent IDs sent to SentinelOne (`requested`), the IDs already in the group (`skipped`), and the IDs SentinelOne did not find (`notFound`); when every ID is already in the group, the action succeeds without a move request and `data.agentsMoved` is 0. When SentinelOne finds none of the IDs, or moves none of the requested agents, the action fails. Requires the Groups: move to group and Endpoints: view permissions.
 
 `fetchThreatFile`
 :   Asks SentinelOne to upload the file of one threat to the management console, encrypted with a password you enter (at least 10 characters; SentinelOne rejects shorter ones). The password is saved with the workflow step or agent tool call that runs the action. SentinelOne accepts one threat per request. The response only acknowledges the request, so wait for the upload and then use `downloadThreatFile`. Requires the Endpoint Threats: fetch threat file permission (the SentinelOne API reference names the Admin, IR Team, and SOC roles).
@@ -284,7 +284,7 @@ SentinelOne (v2) keeps the 11 action names of the SentinelOne connector (`execut
 | Action | SentinelOne connector | SentinelOne (v2) |
 |---|---|---|
 | `isolateHost`, `releaseHost` | Agent filters such as `computerName`; acted on the first match | Explicit `agentIds`; returns `data.affected`, `skipped`, `notFound` and `requested` |
-| `executeScript` | `filter` (`ids` or `uuids`) and a nested `script` object | Top-level `agentIds` or `agentUuids` and script fields; `scriptName` and `alertIds` are not sent |
+| `executeScript` | `filter` (`ids` or `uuids`) and a nested `script` object | Top-level `agentIds` or `agentUuids` and script fields; `scriptName` and `alertIds` are not sent. The Singularity XDR output option (`outputDestination` set to `SingularityXDR`, with `singularityxdrUrl`, `singularityxdrKeyword` and `apiKey`) is not supported: the request is rejected, so scripts that sent their output to Singularity XDR need another destination |
 | `getRemoteScriptStatus` | Sent `parent_task_id` | Sends `parentTaskId` |
 | `getAgents`, `getActivities`, `getRemoteScripts` | Passed every filter through, no page size limit | Named filters plus `additionalFilters` (documented filter names only); `limit` 1 to 1,000; date and text operators are named `createdAtGte`, `createdAtLte`, `valueContains`, and `computerNameContains` |
 | `downloadAgentFile`, `downloadRemoteScriptResults` | Returned a file stream | Returns `content` (base64), `fileName`, `contentType` and `sizeBytes`, up to 25 MB |

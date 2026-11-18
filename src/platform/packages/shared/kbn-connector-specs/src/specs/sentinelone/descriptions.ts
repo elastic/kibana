@@ -12,9 +12,9 @@ export const ACTION_DESCRIPTIONS = {
   getAgents:
     'Find agents (endpoints) by computerName, ip, uuid, ids or text. Returns id (the agent id for host actions), networkStatus and infected.',
   isolateHost:
-    'Network-isolate agents by id (they still reach the console). Returns requested, skipped (already isolated) and notFound; confirm with getAgents.',
+    'Network-isolate agents by id (they still reach the console). Returns requested, skipped (already isolated) and notFound; fails when no id exists. Confirm with getAgents.',
   releaseHost:
-    'Reconnect isolated agents by id. Returns requested, skipped (already connected) and notFound; confirm with getAgents.',
+    'Reconnect isolated agents by id. Returns requested, skipped (already connected) and notFound; fails when no id exists. Confirm with getAgents.',
   executeScript:
     'Run a Script Library script on agents. Returns parentTaskId, or pending when the run needs approval. No undo.',
   getRemoteScriptStatus:
@@ -59,7 +59,7 @@ export const ACTION_DESCRIPTIONS = {
   listExclusions: 'List exclusions by type, OS, exact or partial value, ids or scope.',
   deleteExclusion: 'Delete exclusions by id (from listExclusions).',
   moveAgent:
-    'Move agents by id to a group, for example one with a stricter policy. Returns agentsMoved, skipped (already there) and notFound.',
+    'Move agents by id to a group, for example one with a stricter policy. Returns agentsMoved, skipped (already there) and notFound; fails when no agent exists.',
   fetchThreatFile:
     'Ask SentinelOne to upload the file of one threat, encrypted with your password, then call downloadThreatFile. Needs the Fetch Threat File permission.',
   downloadThreatFile:
