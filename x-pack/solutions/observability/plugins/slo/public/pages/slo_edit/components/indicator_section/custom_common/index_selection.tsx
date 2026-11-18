@@ -49,7 +49,7 @@ export function IndexSelection({ selectedDataView }: { selectedDataView?: DataVi
       adHocDataViews,
     });
     if (!currentDataViewId && currentIndexPattern && !isDataViewsLoading && indPatternId) {
-      setValue(DATA_VIEW_FIELD, indPatternId);
+      setValue(DATA_VIEW_FIELD, indPatternId, { shouldValidate: true });
     }
   }, [
     adHocDataViews,
