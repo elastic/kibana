@@ -22,7 +22,10 @@ import {
   findVendorApiDirectory,
   listConnectors,
 } from '../src/test/vendor_api/find_connector';
-import { collectCoverage } from '../src/test/vendor_api/connector_coverage/collect_coverage';
+import {
+  collectCoverage,
+  serializeCoverage,
+} from '../src/test/vendor_api/connector_coverage/collect_coverage';
 import { createGhIssueTracker } from '../src/test/vendor_api/drift/gh_issue_tracker';
 import { inspectVendorApi } from '../src/test/vendor_api/inspect/inspect_vendor_api';
 import type { MarkdownSourceFormat, ProtocolFormat } from '../src/test/vendor_api/manifest';
@@ -38,6 +41,12 @@ import { updateVendorApi } from '../src/test/vendor_api/record/update_vendor_api
 const SPEC_CACHE = path.join(REPO_ROOT, 'data', 'connector_vendor_api');
 const DRIFT_REPORT = path.join(REPO_ROOT, 'target', 'connector_vendor_api', 'drift.json');
 const COVERAGE_REPORT = path.join(REPO_ROOT, 'target', 'connector_vendor_api', 'coverage.ndjson');
+const COVERAGE_JSON_REPORT = path.join(
+  REPO_ROOT,
+  'target',
+  'connector_vendor_api',
+  'coverage.json'
+);
 const DRIFT_SUMMARY = path.join(REPO_ROOT, 'target', 'connector_vendor_api', 'drift_summary.json');
 // A vendor that doesn't answer fails its own fetch, not the whole run.
 const FETCH_TIMEOUT_MS = 120_000;
@@ -109,19 +118,23 @@ run(
     const now = () => new Date();
     const cache = createSpecCache({ directory: SPEC_CACHE, fetchText, refresh, now, log });
 
+    if (flagsReader.boolean('json') && !flagsReader.boolean('coverage')) {
+      throw createFlagError('--json only applies to --coverage');
+    }
+
     if (flagsReader.boolean('coverage')) {
       if (check || refresh || flagsReader.boolean('inspect') || flagsReader.boolean('drift')) {
         throw createFlagError(
           '--coverage reads the committed artifacts and writes only the report'
         );
       }
+      const asJson = flagsReader.boolean('json');
       const documents = await collectCoverage(REPO_ROOT);
-      const reportPath = path.resolve(flagsReader.string('report') ?? COVERAGE_REPORT);
-      await fs.mkdir(path.dirname(reportPath), { recursive: true });
-      await fs.writeFile(
-        reportPath,
-        documents.map((document) => `${JSON.stringify(document)}\n`).join('')
+      const reportPath = path.resolve(
+        flagsReader.string('report') ?? (asJson ? COVERAGE_JSON_REPORT : COVERAGE_REPORT)
       );
+      await fs.mkdir(path.dirname(reportPath), { recursive: true });
+      await fs.writeFile(reportPath, serializeCoverage(documents, { asJson }));
       log.success(`Wrote the coverage of ${documents.length} connector(s) to ${reportPath}`);
       return;
     }
@@ -286,7 +299,7 @@ run(
       what changed, without writing them. With --surface, files or updates a GitHub issue per
       connector of that report that needs one, and closes those of connectors healthy again.
       With --coverage, writes one JSON document per connector (API type, emulator and drift
-      coverage) as NDJSON, from the committed artifacts.
+      coverage) as NDJSON, or as one JSON array with --json, from the committed artifacts.
 
       Fetched specs are kept in data/connector_vendor_api, so a spec inspected before writing a
       connector is the one it is recorded against. --refresh fetches them again.`,
@@ -304,7 +317,7 @@ run(
         'github-repo',
         'summary',
       ],
-      boolean: ['refresh', 'check', 'inspect', 'drift', 'surface', 'coverage', 'dry-run'],
+      boolean: ['refresh', 'check', 'inspect', 'drift', 'surface', 'coverage', 'json', 'dry-run'],
       help: `
         --connector  Connector metadata.id, for example datadog or .datadog (required unless --inspect,
                      --drift, --surface or --coverage)
@@ -332,12 +345,15 @@ run(
                      a refresh or an issue. Writes nothing but the report
         --report     With --drift, where to write the JSON report; with --surface, where to read it
                      (default target/connector_vendor_api/drift.json). With --coverage, where to
-                     write the NDJSON (default target/connector_vendor_api/coverage.ndjson)
+                     write it (default target/connector_vendor_api/coverage.ndjson, or coverage.json
+                     with --json)
         --surface    Turn the --report into GitHub issues in --github-repo, with gh and its
                      GITHUB_TOKEN, and write a summary listing the connectors to refresh
         --github-repo  With --surface, the repository of the issues, for example elastic/kibana
         --coverage   Write one document per connector with its direction, API type, emulator and
                      drift coverage, read from the committed artifacts; needs no network
+        --json       With --coverage, write all the documents as one JSON array instead of one
+                     document per line (NDJSON)
         --dry-run    With --surface, read the issues but only log what would be written
         --summary    With --surface, where to write the summary
                      (default target/connector_vendor_api/drift_summary.json)

@@ -9,7 +9,7 @@
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { listConnectors } from '../find_connector';
-import { collectCoverage } from './collect_coverage';
+import { collectCoverage, serializeCoverage } from './collect_coverage';
 
 describe('collectCoverage', () => {
   it('describes every connector in all_specs.ts once', async () => {
@@ -17,6 +17,28 @@ describe('collectCoverage', () => {
     const expected = (await listConnectors()).map(({ connector }) => connector.metadata.id);
 
     expect(documents.map(({ connector_id: id }) => id).sort()).toEqual([...expected].sort());
+  });
+
+  it('writes the same documents as NDJSON and as one JSON array', async () => {
+    const documents = await collectCoverage(REPO_ROOT);
+
+    const ndjson = serializeCoverage(documents, { asJson: false });
+    const json = serializeCoverage(documents, { asJson: true });
+
+    expect(ndjson.endsWith('\n')).toBe(true);
+    expect(
+      ndjson
+        .trimEnd()
+        .split('\n')
+        .map((line) => JSON.parse(line))
+    ).toEqual(documents);
+    expect(JSON.parse(json)).toEqual(documents);
+    expect(json.trimStart().startsWith('[')).toBe(true);
+  });
+
+  it('writes an empty JSON array and an empty NDJSON file for no documents', () => {
+    expect(serializeCoverage([], { asJson: true })).toBe('[]\n');
+    expect(serializeCoverage([], { asJson: false })).toBe('');
   });
 
   it('gives every API type of a connector an action count', async () => {

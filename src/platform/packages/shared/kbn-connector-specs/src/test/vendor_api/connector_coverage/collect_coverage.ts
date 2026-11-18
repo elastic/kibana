@@ -84,3 +84,12 @@ export const collectCoverage = async (
   }
   return documents;
 };
+
+/** One document per line (NDJSON), or all of them in one indented JSON array. */
+export const serializeCoverage = (
+  documents: readonly ConnectorCoverageDocument[],
+  { asJson }: { asJson: boolean }
+): string =>
+  asJson
+    ? `${JSON.stringify(documents, null, 2)}\n`
+    : documents.map((document) => `${JSON.stringify(document)}\n`).join('');
