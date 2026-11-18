@@ -841,7 +841,8 @@ export interface DecisionCandidatesPage {
  * One page of the open (not acknowledged), untriaged alerts of the look-back that a decision may match, oldest first,
  * so the alerts closest to ageing out are matched first. They are the alerts the planner would
  * consider, not only the ones it picks, so a match never has to wait for a batch. Alerts already
- * tagged by a decision match are left out. Only the fields a key reads are fetched. A page is at
+ * tagged by a decision match are left out, and so are alerts that carry a tag with one of the `excludeTagPrefixes` (the verdict cache
+ * uses this to leave out the alerts it tagged already). Only the fields a key reads are fetched. A page is at
  * most `ALERT_FETCH_LIMIT` alerts; pass `after` of the last page to read the next. A timestamp with
  * more than one page of alerts is read through its `seenIds`, so no alert is read twice or missed.
  */
@@ -850,7 +851,10 @@ export const fetchDecisionCandidates = async (
   analysisTagPrefix: string,
   windowStart: number,
   filters: TriageFilters,
-  { after }: { after?: DecisionCursor } = {}
+  {
+    after,
+    excludeTagPrefixes = [],
+  }: { after?: DecisionCursor; excludeTagPrefixes?: readonly string[] } = {}
 ): Promise<DecisionCandidatesPage> => {
   const { body } = await callKibanaApi<
     SearchCompleteness & { hits?: { hits?: Array<AlertHit & { sort?: unknown[] }> } }
@@ -895,6 +899,7 @@ export const fetchDecisionCandidates = async (
             // search every sweep.
             { prefix: { [ALERT_FIELDS.tags]: TRIAGE_WOULD_CLOSE_TAG_PREFIX } },
             { prefix: { [ALERT_FIELDS.tags]: TRIAGE_WOULD_SKIP_TAG_PREFIX } },
+            ...excludeTagPrefixes.map((prefix) => ({ prefix: { [ALERT_FIELDS.tags]: prefix } })),
             ...excludedByFilters(filters),
           ],
         },

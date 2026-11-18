@@ -14,6 +14,7 @@ import {
   VERDICT_CACHE_UNSTABLE_BLOCK_MS,
   buildCacheDocument,
   isReusable,
+  matchReusableRecords,
   mergeNovelty,
   nextCacheAction,
   pickKeyRepresentatives,
@@ -403,5 +404,62 @@ describe('the Knowledge Item document and its reader', () => {
     const withLifecycle = { ...docOf(full()), governance: { lifecycle: { status: 'active' } } };
 
     expect(readCacheRecord(withLifecycle)).toEqual(full());
+  });
+});
+
+describe('matchReusableRecords', () => {
+  const activeRecord = (): VerdictCacheRecord => written(act(pending(), fresh('alert-2')));
+
+  it('groups the alerts of a key under the id of its active record, with the verdict to reuse', () => {
+    const record = activeRecord();
+
+    const matches = matchReusableRecords({
+      hashes: new Map([
+        ['p-1', KEY_HASH],
+        ['p-2', KEY_HASH],
+        ['p-3', 'other-key'],
+      ]),
+      recordsByHash: new Map([[KEY_HASH, record]]),
+      now: NOW,
+    });
+
+    expect([...matches.entries()]).toEqual([
+      [verdictCacheId(KEY_HASH), { verdict: 'false_positive', alertIds: ['p-1', 'p-2'] }],
+    ]);
+  });
+
+  it('matches nothing for a pending or an unstable record, and nothing for an expired one', () => {
+    const records = [
+      pending(),
+      written(act(pending(), fresh('alert-2', 'true_positive'))),
+      activeRecord(),
+    ];
+    const after = later(VERDICT_CACHE_TTL_MS + 1000);
+
+    records.slice(0, 2).forEach((record) => {
+      const matches = matchReusableRecords({
+        hashes: new Map([['p-1', KEY_HASH]]),
+        recordsByHash: new Map([[KEY_HASH, record]]),
+        now: NOW,
+      });
+      expect(matches.size).toBe(0);
+    });
+    expect(
+      matchReusableRecords({
+        hashes: new Map([['p-1', KEY_HASH]]),
+        recordsByHash: new Map([[KEY_HASH, records[2]]]),
+        now: after,
+      }).size
+    ).toBe(0);
+  });
+
+  it('matches nothing for an alert without a strict key, because it has no entry in the hashes', () => {
+    const matches = matchReusableRecords({
+      hashes: new Map(),
+      recordsByHash: new Map([[KEY_HASH, activeRecord()]]),
+      now: NOW,
+    });
+
+    expect(matches.size).toBe(0);
   });
 });

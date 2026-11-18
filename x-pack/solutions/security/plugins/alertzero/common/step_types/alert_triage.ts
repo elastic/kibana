@@ -15,6 +15,7 @@ export const TRIAGE_PLAN_SWEEP_STEP_ID = 'alertzero.triage.planSweep' as const;
 export const TRIAGE_LOAD_ALERTS_STEP_ID = 'alertzero.triage.loadAlerts' as const;
 export const TRIAGE_TAG_PATTERN_KEYS_STEP_ID = 'alertzero.triage.tagPatternKeys' as const;
 export const TRIAGE_WRITE_VERDICT_CACHE_STEP_ID = 'alertzero.triage.writeVerdictCache' as const;
+export const TRIAGE_MATCH_VERDICT_CACHE_STEP_ID = 'alertzero.triage.matchVerdictCache' as const;
 export const TRIAGE_GROUP_FP_CANDIDATES_STEP_ID = 'alertzero.triage.groupFpCandidates' as const;
 export const TRIAGE_JOIN_PROPOSAL_STEP_ID = 'alertzero.triage.joinProposal' as const;
 export const TRIAGE_RETAG_PROPOSAL_ALERTS_STEP_ID = 'alertzero.triage.retagProposalAlerts' as const;
@@ -281,6 +282,60 @@ export const triageWriteVerdictCacheStepCommonDefinition: CommonStepDefinition<
   stability: 'tech_preview',
   inputSchema: writeVerdictCacheInputSchema,
   outputSchema: writeVerdictCacheOutputSchema,
+};
+
+export const MATCH_VERDICT_CACHE_STATUSES = ['ok', 'off', 'disabled', 'failed'] as const;
+export type MatchVerdictCacheStatus = (typeof MATCH_VERDICT_CACHE_STATUSES)[number];
+
+const matchVerdictCacheInputSchema = lazySchema(() =>
+  z.object({
+    space_id: idSchema.describe('Space of the alerts. It is part of every key hash.'),
+    analysis_tag_prefix: idSchema.describe(
+      'Alert Analysis tag prefix. An alert carrying it was analysed outside this Worker.'
+    ),
+    lookback_hours: z.number().int().min(1).max(8760),
+    min_severity: z.enum(['low', 'medium', 'high', 'critical']),
+    exclude_building_blocks: z.boolean(),
+    excluded_rule_tags: z.array(z.string().min(1).max(256)).max(50),
+  })
+);
+
+const matchVerdictCacheOutputSchema = lazySchema(() =>
+  z.object({
+    status: z.enum(MATCH_VERDICT_CACHE_STATUSES),
+    candidates: z.number().describe('Pending alerts read.'),
+    alerts_with_strict_key: z.number(),
+    reusable_records: z
+      .number()
+      .describe('Active records that at least one pending alert matches.'),
+    would_reuse: z.number().describe('Pending alerts that an active record would cover.'),
+    would_reuse_false_positive: z.number(),
+    would_reuse_true_positive: z.number(),
+    tag_failures: z.number(),
+    deferred: z.number().describe('Records left for the next sweep because time ran out.'),
+    out_of_time: z.boolean(),
+  })
+);
+
+export const triageMatchVerdictCacheStepCommonDefinition: CommonStepDefinition<
+  typeof matchVerdictCacheInputSchema,
+  typeof matchVerdictCacheOutputSchema
+> = {
+  id: TRIAGE_MATCH_VERDICT_CACHE_STEP_ID,
+  label: i18n.translate('xpack.alertzero.workflows.steps.triageMatchVerdictCache.label', {
+    defaultMessage: 'Match pending alerts to the triage verdict cache',
+  }),
+  description: i18n.translate(
+    'xpack.alertzero.workflows.steps.triageMatchVerdictCache.description',
+    {
+      defaultMessage:
+        'Tags the pending alerts that an active verdict cache record would cover. In shadow mode every alert is still analyzed.',
+    }
+  ),
+  category: StepCategory.KibanaSecurity,
+  stability: 'tech_preview',
+  inputSchema: matchVerdictCacheInputSchema,
+  outputSchema: matchVerdictCacheOutputSchema,
 };
 
 const proposalTextInputShape = {

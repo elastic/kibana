@@ -251,6 +251,40 @@ export const recordShadowOutcome = ({
 };
 
 // ---------------------------------------------------------------------------
+// Matching pending alerts to records (the sweep)
+// ---------------------------------------------------------------------------
+
+export interface RecordMatch {
+  verdict: CacheVerdict;
+  alertIds: string[];
+}
+
+/**
+ * The reusable records that pending alerts would match, by record id. `hashes` is the strict key hash of each alert (an
+ * alert with no strict key has no entry). A record that is not `active`, or is past `expiresAt`, matches nothing.
+ */
+export const matchReusableRecords = ({
+  hashes,
+  recordsByHash,
+  now,
+}: {
+  hashes: ReadonlyMap<string, string>;
+  recordsByHash: ReadonlyMap<string, VerdictCacheRecord>;
+  now: Date;
+}): Map<string, RecordMatch> => {
+  const matches = new Map<string, RecordMatch>();
+  for (const [alertId, hash] of hashes) {
+    const record = recordsByHash.get(hash);
+    if (record === undefined || !isReusable(record, now)) continue;
+    const id = verdictCacheId(hash);
+    const match = matches.get(id);
+    if (match) match.alertIds.push(alertId);
+    else matches.set(id, { verdict: record.verdict, alertIds: [alertId] });
+  }
+  return matches;
+};
+
+// ---------------------------------------------------------------------------
 // The first alert of each key in a batch
 // ---------------------------------------------------------------------------
 

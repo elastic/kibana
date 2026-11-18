@@ -80,12 +80,13 @@ describe('floor_alert_triage — the scheduled sweep', () => {
   });
 
   describe('order', () => {
-    it('checks analysis, then headroom, then matches decisions, then plans, then starts batches, then reports', () => {
+    it('checks analysis, then headroom, then matches decisions, then the verdict cache, then plans, then starts batches, then reports', () => {
       expect(rendered.steps.map(({ name }) => name)).toEqual([
         'fetch_analysis_runtime_config',
         'require_analysis_enabled',
         'read_headroom',
         'match_fp_decisions',
+        'match_verdict_cache',
         'plan_sweep',
         'start_batches',
         'emit_result',
@@ -137,6 +138,42 @@ describe('floor_alert_triage — the scheduled sweep', () => {
     it('runs before the planner, so a matched alert is never planned first', () => {
       const names = rendered.steps.map(({ name }) => name);
       expect(names.indexOf('match_fp_decisions')).toBeLessThan(names.indexOf('plan_sweep'));
+    });
+  });
+
+  describe('verdict cache matching', () => {
+    it('never fails the sweep: a failed match leaves every alert for analysis', () => {
+      expect(stepByName('match_verdict_cache')['on-failure']).toEqual({ continue: true });
+    });
+
+    it('reads the same scope settings as the planner and as the decisions match', () => {
+      const { with: cacheInputs } = stepByName('match_verdict_cache');
+      const { with: decisionInputs } = stepByName('match_fp_decisions');
+      const { with: planInputs } = stepByName('plan_sweep');
+      for (const key of [
+        'lookback_hours',
+        'min_severity',
+        'exclude_building_blocks',
+        'excluded_rule_tags',
+        'analysis_tag_prefix',
+      ]) {
+        expect(cacheInputs?.[key]).toBe(planInputs?.[key]);
+        expect(cacheInputs?.[key]).toBe(decisionInputs?.[key]);
+      }
+    });
+
+    it('skips when Task Manager is not keeping up, like the decisions match', () => {
+      expect(stepByName('match_verdict_cache').if).toBe(
+        "${{ steps.read_headroom.output.status == 'ok' }}"
+      );
+    });
+
+    it('runs after the decisions match and before the planner', () => {
+      const names = rendered.steps.map(({ name }) => name);
+      expect(names.indexOf('match_verdict_cache')).toBeGreaterThan(
+        names.indexOf('match_fp_decisions')
+      );
+      expect(names.indexOf('match_verdict_cache')).toBeLessThan(names.indexOf('plan_sweep'));
     });
   });
 
