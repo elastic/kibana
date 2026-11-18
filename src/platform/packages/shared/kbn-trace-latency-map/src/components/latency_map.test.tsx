@@ -52,6 +52,8 @@ let mockWidth = 320;
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
   useResizeObserver: () => ({ width: mockWidth, height: 0 }),
+  // The loading line's grace delay is the shared convention, not behavior under test.
+  EuiDelayRender: ({ children }: { children: unknown }) => children,
 }));
 
 const source: TraceSource = {
@@ -227,6 +229,20 @@ describe('LatencyMap', () => {
     expect(onLoad).toHaveBeenCalledWith(source);
     // The header reads the range's statistics.
     expect(screen.getByTestId('traceLatencyMapStats')).toHaveTextContent('2s max · 10ms p99');
+  });
+
+  it('runs the loading line while its own queries load, and rests once they land', async () => {
+    renderMap();
+    // The initial load: the line runs along the top while the spinner holds the body.
+    expect(screen.getByTestId('traceLatencyMapProgressBar')).toBeInTheDocument();
+    await waitForChart();
+    expect(screen.queryByTestId('traceLatencyMapProgressBar')).not.toBeInTheDocument();
+  });
+
+  it('runs the loading line while the host refetches what follows the query', async () => {
+    renderMap({ isUpdating: true });
+    await waitForChart();
+    expect(screen.getByTestId('traceLatencyMapProgressBar')).toBeInTheDocument();
   });
 
   it('gives the chart a time scale of the columns, the rows as categories, one colour scale', async () => {

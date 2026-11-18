@@ -11,8 +11,10 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { PointerEvent, ReactNode } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiDelayRender,
   EuiFlexGroup,
   EuiLoadingChart,
+  EuiProgress,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
@@ -120,6 +122,12 @@ export interface LatencyMapProps {
   /** The operation the host is narrowed to: shows the badge and reserves the band gutter. */
   focusedOperation?: LatencyMapOperation;
   onClearOperation?: () => void;
+  /**
+   * The host is refetching what follows the map's query, such as the documents after a
+   * committed selection: the loading line runs while it does. The map's own queries show
+   * the same line on their own.
+   */
+  isUpdating?: boolean;
   /** Height of the chart, axes included, in pixels. */
   height?: number;
   /** IANA time zone of the time axis. The browser's when absent. */
@@ -160,6 +168,7 @@ export function LatencyMap({
   onFocusOperation,
   focusedOperation,
   onClearOperation,
+  isUpdating,
   height = LAYOUT.defaultHeight,
   timeZone,
   'data-test-subj': dataTestSubj = 'traceLatencyMap',
@@ -850,7 +859,27 @@ export function LatencyMap({
   }, [committedRange, geometry, stats, chosenSlowest]);
 
   return (
-    <div ref={setContainer} data-test-subj={dataTestSubj}>
+    <div
+      ref={setContainer}
+      css={css`
+        position: relative;
+      `}
+      data-test-subj={dataTestSubj}
+    >
+      {/* One line for anything in flight: the map's own queries and the host's follow-up
+          (the documents after a commit). Delayed as in the unified histogram, so fast
+          queries never flash it. */}
+      {(isUpdating || isLoading) && (
+        <EuiDelayRender delay={500}>
+          <EuiProgress
+            size="xs"
+            color="accent"
+            position="absolute"
+            css={{ zIndex: 1 }}
+            data-test-subj="traceLatencyMapProgressBar"
+          />
+        </EuiDelayRender>
+      )}
       <MapHeader
         stats={isEmpty ? undefined : stats}
         failedOnly={failedOnly}

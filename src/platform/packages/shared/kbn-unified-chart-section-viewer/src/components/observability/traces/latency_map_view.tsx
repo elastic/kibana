@@ -9,7 +9,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { css } from '@emotion/react';
-import { EuiDelayRender, EuiPanel, EuiProgress } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import { getESQLResults } from '@kbn/esql-utils';
 import { getTimeZoneFromSettings } from '@kbn/es-query';
 import { getDocId } from '@kbn/discover-utils';
@@ -267,18 +267,6 @@ export function TracesLatencyMapView({
         overflow-y: auto;
       `}
     >
-      {/* A committed selection rewrites the query; the bar says the documents are following.
-          Delayed as in the unified histogram, so fast queries never flash it. */}
-      {isChartLoading && (
-        <EuiDelayRender delay={500}>
-          <EuiProgress
-            size="xs"
-            color="accent"
-            position="absolute"
-            data-test-subj="tracesLatencyMapProgressBar"
-          />
-        </EuiDelayRender>
-      )}
       <LatencyMap
         source={source}
         runEsql={runEsql}
@@ -290,6 +278,8 @@ export function TracesLatencyMapView({
         onFocusOperation={updateESQLQuery ? focusOperation : undefined}
         focusedOperation={focusedOperation}
         onClearOperation={updateESQLQuery ? clearOperation : undefined}
+        // A committed selection rewrites the query; the line says the documents are following.
+        isUpdating={isChartLoading}
         timeZone={timeZone}
       />
     </EuiPanel>
