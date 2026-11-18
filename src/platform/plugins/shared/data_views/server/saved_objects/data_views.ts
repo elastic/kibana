@@ -11,6 +11,7 @@ import type { SavedObjectsType } from '@kbn/core/server';
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { indexPatternSavedObjectTypeMigrations } from './index_pattern_migrations';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../common';
+import { SCHEMA_DATA_VIEW_V1 } from './schema';
 
 export const dataViewSavedObjectType: SavedObjectsType = {
   name: DATA_VIEW_SAVED_OBJECT_TYPE,
@@ -48,6 +49,15 @@ export const dataViewSavedObjectType: SavedObjectsType = {
             type: 'keyword',
           },
         },
+      },
+    },
+  },
+  modelVersions: {
+    1: {
+      changes: [],
+      schemas: {
+        forwardCompatibility: SCHEMA_DATA_VIEW_V1.extends({}, { unknowns: 'ignore' }),
+        create: SCHEMA_DATA_VIEW_V1.extends({}, { unknowns: 'ignore' }),
       },
     },
   },
