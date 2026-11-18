@@ -26,7 +26,7 @@ import { isRecord } from '../../../common/utils/record_utils';
 import type { KibanaApiDocLinksMap } from '../../../common/types/api_responses';
 
 let ACTIVE_API = new Api();
-let apiLoaded = false;
+let activeApiLoad: Promise<boolean> | undefined;
 let KIBANA_API_DOC_LINKS: KibanaApiDocLinksMap = {};
 
 const ACTIVE_API_LOAD_ATTEMPTS = 3;
@@ -168,10 +168,17 @@ export function getKibanaApiDocLinks(): KibanaApiDocLinksMap {
  * still renders a fully working-looking editor while both are dead for the page session.
  */
 export async function loadActiveApi(http: HttpSetup): Promise<boolean> {
-  // Only load the API data once
-  if (apiLoaded) return true;
-  apiLoaded = true;
+  // Only load the API data once; overlapping callers share the in-flight load
+  activeApiLoad ??= (async () => {
+    const loaded = await fetchActiveApi(http);
+    // If we fail to load the API, clear the load so it can be retried
+    if (!loaded) activeApiLoad = undefined;
+    return loaded;
+  })();
+  return await activeApiLoad;
+}
 
+async function fetchActiveApi(http: HttpSetup): Promise<boolean> {
   for (let attempt = 1; attempt <= ACTIVE_API_LOAD_ATTEMPTS; attempt++) {
     try {
       const data: unknown = await http.get(`${API_BASE_PATH}/api_server`);
@@ -198,8 +205,6 @@ export async function loadActiveApi(http: HttpSetup): Promise<boolean> {
     }
   }
 
-  // If we fail to load the API, clear this flag so it can be retried
-  apiLoaded = false;
   return false;
 }
 
@@ -208,6 +213,6 @@ export const _test = {
   setActiveApi,
   setKibanaApiDocLinks,
   resetApiLoaded: () => {
-    apiLoaded = false;
+    activeApiLoad = undefined;
   },
 };

@@ -229,6 +229,33 @@ describe('Knowledge base', () => {
       await expect(kb.loadActiveApi(http as unknown as HttpSetup)).resolves.toBe(true);
     });
 
+    it('shares the in-flight load with an overlapping call', async () => {
+      const http = { get: jest.fn().mockResolvedValue(SPEC_RESPONSE) };
+
+      await expect(
+        Promise.all([
+          kb.loadActiveApi(http as unknown as HttpSetup),
+          kb.loadActiveApi(http as unknown as HttpSetup),
+        ])
+      ).resolves.toEqual([true, true]);
+      expect(http.get).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not report an overlapping call as loaded while the in-flight load fails', async () => {
+      const http = { get: jest.fn().mockRejectedValue({ responseText: 'Not Found' }) };
+
+      jest.useFakeTimers();
+      try {
+        const first = kb.loadActiveApi(http as unknown as HttpSetup);
+        const overlapping = kb.loadActiveApi(http as unknown as HttpSetup);
+        await jest.advanceTimersByTimeAsync(10_000);
+        await expect(Promise.all([first, overlapping])).resolves.toEqual([false, false]);
+      } finally {
+        jest.useRealTimers();
+      }
+      expect(http.get).toHaveBeenCalledTimes(3);
+    });
+
     it('treats a response without Elasticsearch definitions as a failure', async () => {
       const http = { get: jest.fn().mockResolvedValue({ kibana: { docLinks: {} } }) };
 
