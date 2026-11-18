@@ -15,16 +15,16 @@ import { ProjectDefaults } from './project_defaults';
 const defaultProps: ProjectDefaultsProps = {
   canEdit: true,
   indices: {
-    ruleName: '_default_indices',
-    profile: { name: '_performant_indices', is_builtin: true },
+    ruleName: 'default_indices',
+    profile: { name: 'default_indices', is_builtin: true },
     matches: [
       { name: 'products', isHidden: false },
       { name: 'users', isHidden: false },
     ],
   },
   dataStreams: {
-    ruleName: '_default_data_streams',
-    profile: { name: '_last_7_days_data_streams', is_builtin: true },
+    ruleName: 'default_data_streams',
+    profile: { name: 'default_data_streams_7d', is_builtin: true },
     matches: [
       { name: 'logs-nginx-default', isHidden: false, outrankedByRuleName: 'web-logs' },
       { name: 'metrics-system-default', isHidden: false },

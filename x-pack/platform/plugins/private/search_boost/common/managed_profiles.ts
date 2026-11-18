@@ -8,12 +8,8 @@
 import type { BoostProfileType } from './types';
 
 const MANAGED_PROFILE_NAMES = {
-  indices: ['_on_demand_indices', '_performant_indices', '_high_availability_indices'],
-  data_streams: [
-    '_last_1_day_data_streams',
-    '_last_3_days_data_streams',
-    '_last_7_days_data_streams',
-  ],
+  indices: ['default_indices'],
+  data_streams: ['data_streams_1d', 'data_streams_3d', 'default_data_streams_7d'],
 } as const satisfies Readonly<Record<BoostProfileType, readonly string[]>>;
 
 export type ManagedProfileName = (typeof MANAGED_PROFILE_NAMES)[BoostProfileType][number];

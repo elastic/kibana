@@ -14,8 +14,8 @@ import { ProjectDefaultCard } from './project_default_card';
 
 const defaultProps: ProjectDefaultCardProps = {
   type: 'indices',
-  ruleName: '_default_indices',
-  profile: { name: '_performant_indices', is_builtin: true },
+  ruleName: 'default_indices',
+  profile: { name: 'default_indices', is_builtin: true },
   matches: [
     { name: 'products', isHidden: false },
     { name: 'users', isHidden: false },

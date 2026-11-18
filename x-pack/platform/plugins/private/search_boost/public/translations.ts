@@ -138,16 +138,7 @@ interface ManagedProfileMessage {
 }
 
 const MANAGED_PROFILE_MESSAGES: Readonly<Record<ManagedProfileName, ManagedProfileMessage>> = {
-  _on_demand_indices: {
-    label: i18n.translate('xpack.searchBoost.managedProfile.onDemandIndices.label', {
-      defaultMessage: 'On-demand',
-    }),
-    description: i18n.translate('xpack.searchBoost.managedProfile.onDemandIndices.description', {
-      defaultMessage:
-        'Lowest cost. Query latency is more variable and maximum throughput is limited, especially during spikes.',
-    }),
-  },
-  _performant_indices: {
+  default_indices: {
     label: i18n.translate('xpack.searchBoost.managedProfile.performantIndices.label', {
       defaultMessage: 'Performant',
     }),
@@ -156,19 +147,7 @@ const MANAGED_PROFILE_MESSAGES: Readonly<Record<ManagedProfileName, ManagedProfi
         'Consistently low average latency, scaling to high query throughput as load grows.',
     }),
   },
-  _high_availability_indices: {
-    label: i18n.translate('xpack.searchBoost.managedProfile.highAvailabilityIndices.label', {
-      defaultMessage: 'High availability',
-    }),
-    description: i18n.translate(
-      'xpack.searchBoost.managedProfile.highAvailabilityIndices.description',
-      {
-        defaultMessage:
-          'Consistent low query latency from steady baseline to peak demand, with an extra copy of your data kept ready.',
-      }
-    ),
-  },
-  _last_1_day_data_streams: {
+  data_streams_1d: {
     label: i18n.translate('xpack.searchBoost.managedProfile.last1DayDataStreams.label', {
       defaultMessage: 'Last 1 day',
     }),
@@ -179,7 +158,7 @@ const MANAGED_PROFILE_MESSAGES: Readonly<Record<ManagedProfileName, ManagedProfi
       }
     ),
   },
-  _last_3_days_data_streams: {
+  data_streams_3d: {
     label: i18n.translate('xpack.searchBoost.managedProfile.last3DaysDataStreams.label', {
       defaultMessage: 'Last 3 days',
     }),
@@ -190,7 +169,7 @@ const MANAGED_PROFILE_MESSAGES: Readonly<Record<ManagedProfileName, ManagedProfi
       }
     ),
   },
-  _last_7_days_data_streams: {
+  default_data_streams_7d: {
     label: i18n.translate('xpack.searchBoost.managedProfile.last7DaysDataStreams.label', {
       defaultMessage: 'Last 7 days',
     }),

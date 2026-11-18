@@ -26,8 +26,8 @@ const match = (name: string, overrides: Partial<BoostRuleMatch> = {}): BoostRule
 /** Sample data per type, so switching the `type` control shows realistic content. */
 const CARD_DATA: Readonly<Record<BoostProfileType, CardData>> = {
   indices: {
-    ruleName: '_default_indices',
-    profile: { name: '_performant_indices', is_builtin: true },
+    ruleName: 'default_indices',
+    profile: { name: 'default_indices', is_builtin: true },
     matches: [
       match('archive-2024', { outrankedByRuleName: 'Product catalog' }),
       match('archive-2025', { outrankedByRuleName: 'Product catalog' }),
@@ -39,8 +39,8 @@ const CARD_DATA: Readonly<Record<BoostProfileType, CardData>> = {
     ],
   },
   data_streams: {
-    ruleName: '_default_data_streams',
-    profile: { name: '_last_7_days_data_streams', is_builtin: true },
+    ruleName: 'default_data_streams',
+    profile: { name: 'default_data_streams_7d', is_builtin: true },
     matches: [
       match('logs-nginx-default', { outrankedByRuleName: 'web-logs' }),
       match('metrics-system-default'),
