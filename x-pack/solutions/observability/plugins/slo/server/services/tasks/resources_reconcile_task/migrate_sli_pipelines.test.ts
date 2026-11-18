@@ -243,6 +243,10 @@ describe('migrateSliPipelines', () => {
       const result = await migrateSliPipelines({}, dependencies());
 
       expect(putPipelineIds(esClient)).toEqual([pipelineId('new')]);
+      expect(esClient.ingest.getPipeline).not.toHaveBeenCalledWith(
+        { id: pipelineId('old-a') },
+        expect.anything()
+      );
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('.slo-observability.sli.routing-v3.6')
       );

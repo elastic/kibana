@@ -10,7 +10,7 @@ import type {
   IngestPutPipelineRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { memoize, omit, sortedLastIndex } from 'lodash';
+import { memoize, omit, sortBy, sortedLastIndex } from 'lodash';
 import pLimit from 'p-limit';
 import {
   getSLIIndexNamePrefix,
@@ -49,6 +49,11 @@ interface Dependencies {
 }
 
 type RoutingPipelineCheck = (version: number) => Promise<boolean>;
+
+interface Candidate {
+  id: string;
+  version: number;
+}
 
 interface RunParams {
   pageSize?: number;
@@ -112,7 +117,8 @@ export const migrateSliPipelines = async (
   let cursor = state.cursor;
 
   try {
-    const candidateIds = await listCandidateIds(deps);
+    const candidates = await listCandidates(deps);
+    const candidateIds = candidates.map(({ id }) => id);
     const isRoutingPipelineReady = createRoutingPipelineCheck(deps);
     const limiter = pLimit(CONCURRENCY);
     const start = cursor ? sortedLastIndex(candidateIds, cursor) : 0;
@@ -121,12 +127,14 @@ export const migrateSliPipelines = async (
 
     for (let index = start; index < end; index += pageSize) {
       signal.throwIfAborted();
-      const batch = candidateIds.slice(index, index + pageSize);
+      const batch = candidates.slice(index, index + pageSize);
       const results = await Promise.all(
-        batch.map((id) => limiter(() => migratePipeline(id, { ...deps, isRoutingPipelineReady })))
+        batch.map((candidate) =>
+          limiter(() => migratePipeline(candidate, { ...deps, isRoutingPipelineReady }))
+        )
       );
       migrated += results.filter(Boolean).length;
-      cursor = batch[batch.length - 1];
+      cursor = batch[batch.length - 1].id;
     }
 
     if (end < candidateIds.length) {
@@ -148,31 +156,31 @@ export const migrateSliPipelines = async (
   }
 };
 
-// Lists the ids of the SLI pipelines to migrate, sorted so the cursor can resume the scan.
-const listCandidateIds = async ({ esClient, logger, signal }: Dependencies): Promise<string[]> => {
+// Lists the SLI pipelines to migrate, sorted by id so the cursor can resume the scan.
+const listCandidates = async ({ esClient, logger, signal }: Dependencies): Promise<Candidate[]> => {
   signal.throwIfAborted();
   const response = await esClient.ingest.getPipeline(
     { id: SLI_PIPELINE_PATTERN },
     { ignore: [404], signal }
   );
 
-  const candidateIds: string[] = [];
+  const candidates: Candidate[] = [];
   for (const [id, pipeline] of Object.entries(response ?? {})) {
     const selection = selectMigrationCandidate(pipeline);
     if (selection.type === 'candidate') {
-      candidateIds.push(id);
+      candidates.push({ id, version: selection.version });
     } else if (selection.type === 'prefix_mismatch') {
       logger.warn(
         `Skipping SLI pipeline [${id}] migration: index prefix [${selection.prefix}] does not match its version [${selection.version}]`
       );
     }
   }
-  return candidateIds.sort();
+  return sortBy(candidates, 'id');
 };
 
 // Returns true when the pipeline was migrated, or no longer needs to be.
 const migratePipeline = async (
-  id: string,
+  { id, version }: Candidate,
   {
     esClient,
     logger,
@@ -181,6 +189,11 @@ const migratePipeline = async (
   }: Dependencies & { isRoutingPipelineReady: RoutingPipelineCheck }
 ): Promise<boolean> => {
   try {
+    // Skip the re-read below while the routing pipeline of the listed version is not ready.
+    if (!(await isRoutingPipelineReady(version))) {
+      return false;
+    }
+
     // Re-read right before writing to keep concurrent edits.
     const response = await esClient.ingest.getPipeline({ id }, { ignore: [404], signal });
     const pipeline = response?.[id];
