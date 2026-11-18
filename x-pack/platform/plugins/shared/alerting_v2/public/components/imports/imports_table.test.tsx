@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ImportsTable } from './imports_table';
 
@@ -21,28 +21,28 @@ jest.mock('@kbn/core-di-browser', () => ({
 }));
 
 describe('ImportsTable', () => {
-  it('links each import to its connector', () => {
+  it('links the Manage action of an import to its connector', async () => {
     render(
       <I18nProvider>
         <ImportsTable
           isLoading={false}
           items={[
-            { connectorId: 'connector-1', name: 'Datadog one', connectorTypeId: '.datadog' },
-            { connectorId: 'connector/2', name: 'Datadog two', connectorTypeId: '.datadog' },
+            { connectorId: 'connector/1', name: 'Datadog one', connectorTypeId: '.datadog' },
           ]}
         />
       </I18nProvider>
     );
 
-    const links = screen.getAllByTestId('importsManageAction');
+    fireEvent.click(screen.getByTestId('importActionsButton-connector/1'));
+    const manage = await screen.findByTestId('importsManageAction');
 
-    expect(links.map((link) => link.getAttribute('href'))).toEqual([
-      '/app/management/insightsAndAlerting/triggersActionsConnectors/connectors/connector-1',
-      '/app/management/insightsAndAlerting/triggersActionsConnectors/connectors/connector%2F2',
-    ]);
+    expect(manage.getAttribute('href')).toBe(
+      '/app/management/insightsAndAlerting/triggersActionsConnectors/connectors/connector%2F1'
+    );
+    expect(manage.getAttribute('target')).toBe('_blank');
     expect(mockGetUrlForApp).toHaveBeenCalledWith('management', {
       deepLinkId: 'triggersActionsConnectors',
-      path: '/connectors/connector-1',
+      path: '/connectors/connector%2F1',
     });
   });
 });

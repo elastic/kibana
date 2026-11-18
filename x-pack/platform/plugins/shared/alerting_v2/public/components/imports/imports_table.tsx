@@ -11,6 +11,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { ImportListItem } from '../../hooks/use_fetch_imports';
+import { ImportActionsMenu } from './import_actions_menu';
 
 const CONNECTOR_TYPE_LABELS: Readonly<Record<string, string>> = {
   '.datadog': i18n.translate('xpack.alertingV2.imports.list.type.datadog', {
@@ -20,14 +21,6 @@ const CONNECTOR_TYPE_LABELS: Readonly<Record<string, string>> = {
 
 const getConnectorTypeLabel = (connectorTypeId: string): string =>
   CONNECTOR_TYPE_LABELS[connectorTypeId] ?? connectorTypeId;
-
-const MANAGE_LABEL = i18n.translate('xpack.alertingV2.imports.list.action.manage', {
-  defaultMessage: 'Manage',
-});
-
-const MANAGE_DESCRIPTION = i18n.translate('xpack.alertingV2.imports.list.action.manageDescription', {
-  defaultMessage: 'Manage this connector',
-});
 
 const getColumns = (
   getConnectorUrl: (connectorId: string) => string
@@ -53,17 +46,11 @@ const getColumns = (
     name: i18n.translate('xpack.alertingV2.imports.list.column.actions', {
       defaultMessage: 'Actions',
     }),
-    actions: [
-      {
-        name: MANAGE_LABEL,
-        description: MANAGE_DESCRIPTION,
-        icon: 'gear',
-        type: 'icon',
-        href: ({ connectorId }: ImportListItem) => getConnectorUrl(connectorId),
-        target: '_blank',
-        'data-test-subj': 'importsManageAction',
-      },
-    ],
+    align: 'right',
+    width: '8%',
+    render: ({ connectorId }: ImportListItem) => (
+      <ImportActionsMenu connectorId={connectorId} connectorUrl={getConnectorUrl(connectorId)} />
+    ),
   },
 ];
 
