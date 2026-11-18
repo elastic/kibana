@@ -10,8 +10,11 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { dateRangeQuery } from '@kbn/es-query';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
+import { columnPath } from './esql_categorize';
 
 const NO_FIELDS_SENTINEL = '<no-fields>';
+// What NULLIFY reports for a requested column that no index maps.
+const UNMAPPED_COLUMN_TYPE = 'null';
 
 const isTracedEsClient = (
   esClient: ElasticsearchClient | TracedElasticsearchClient
@@ -30,6 +33,8 @@ export interface GetEsqlColumnSchemaParams {
   index: string | string[];
   start?: number;
   end?: number;
+  /** Probes only these columns instead of the whole schema; the unmapped ones are left out. */
+  fields?: string[];
   signal?: AbortSignal;
 }
 
@@ -38,6 +43,7 @@ export async function getEsqlColumnSchema({
   index,
   start,
   end,
+  fields,
   signal,
 }: GetEsqlColumnSchemaParams): Promise<EsqlColumnSchema[]> {
   const indices = Array.isArray(index) ? index : [index];
@@ -47,7 +53,7 @@ export async function getEsqlColumnSchema({
       : undefined;
 
   const queryParams = {
-    query: esql.from(indices).limit(0).print('basic'),
+    query: buildSchemaQuery(indices, fields),
     ...(filter ? { filter } : {}),
   };
   const response = isTracedEsClient(esClient)
@@ -59,8 +65,24 @@ export async function getEsqlColumnSchema({
         signal,
       })) as unknown as ESQLSearchResponse);
 
-  return parseColumns(response);
+  const columns = parseColumns(response);
+  return fields?.length ? columns.filter(({ type }) => type !== UNMAPPED_COLUMN_TYPE) : columns;
 }
+
+const buildSchemaQuery = (indices: string[], fields: string[] = []): string => {
+  const [field, ...otherFields] = fields.map(columnPath);
+  if (field === undefined) {
+    return esql.from(indices).limit(0).print('basic');
+  }
+
+  // Without NULLIFY, a column that no index maps fails the whole probe.
+  return esql
+    .from(indices)
+    .keep(field, ...otherFields)
+    .limit(0)
+    .addSetCommand('unmapped_fields', 'NULLIFY')
+    .print('basic');
+};
 
 function parseColumns(response: ESQLSearchResponse): EsqlColumnSchema[] {
   return response.columns.flatMap((column) => {

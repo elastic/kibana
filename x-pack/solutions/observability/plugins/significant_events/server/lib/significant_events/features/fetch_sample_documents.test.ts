@@ -228,6 +228,7 @@ describe('fetchSampleDocuments', () => {
       size: 6,
       iteration: 1,
       logger,
+      signal: expect.any(AbortSignal),
     });
     expect(getRandomCall()).toEqual({
       esClient,
