@@ -66,9 +66,12 @@ export interface StepIoLifecycle {
  * `WorkflowExecutionState`'s responsibility.
  */
 export class StepIoService implements StepIoWriter, StepIoLifecycle {
+  /** An output is cached only when it is at most this fraction of the cache budget. */
+  private static readonly CACHED_OUTPUT_FRACTION = 0.2;
   private readonly stepRepository: StepExecutionRepository;
   private readonly state: WorkflowExecutionState;
   private readonly cache: StepIoCache;
+  private readonly maxBytes: number;
   /** Execution-wide sizes of outputs written with a measured byte count, for telemetry. */
   private readonly measuredSizes = new Map<string, number>();
   private measuredTotalBytes = 0;
@@ -76,6 +79,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   constructor({ stepRepository, state, maxBytes = Infinity, logger }: StepIoServiceInit) {
     this.stepRepository = stepRepository;
     this.state = state;
+    this.maxBytes = maxBytes;
     this.cache = new StepIoCache(maxBytes, logger);
   }
 
@@ -123,11 +127,27 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       sizeBytes !== undefined && Number.isFinite(sizeBytes) && sizeBytes >= 0
         ? sizeBytes
         : undefined;
-    this.cache.set(stepExecutionId, 'output', value, measuredBytes);
+    const sizeForCache = measuredBytes ?? safeOutputSize(value) ?? undefined;
     if (measuredBytes !== undefined) {
       this.measuredTotalBytes += measuredBytes - (this.measuredSizes.get(stepExecutionId) ?? 0);
       this.measuredSizes.set(stepExecutionId, measuredBytes);
     }
+    if (this.outputFitsCache(sizeForCache)) {
+      this.cache.set(stepExecutionId, 'output', value, sizeForCache);
+    } else {
+      this.cache.delete(stepExecutionId, 'output');
+    }
+  }
+
+  /** True when `bytes` is small enough to take a slot in the output cache. */
+  private outputFitsCache(bytes: number | undefined): boolean {
+    if (!Number.isFinite(this.maxBytes)) {
+      return true;
+    }
+    if (bytes === undefined) {
+      return false;
+    }
+    return bytes <= this.maxBytes * StepIoService.CACHED_OUTPUT_FRACTION;
   }
 
   // ----- Telemetry ----------------------------------------------------------
@@ -221,7 +241,9 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
           this.measuredSizes.set(doc.id, size);
           this.measuredTotalBytes += size;
         }
-        this.cache.set(doc.id, 'output', output, size);
+        if (this.outputFitsCache(size)) {
+          this.cache.set(doc.id, 'output', output, size);
+        }
         fetched.set(doc.id, output);
       }
     }
