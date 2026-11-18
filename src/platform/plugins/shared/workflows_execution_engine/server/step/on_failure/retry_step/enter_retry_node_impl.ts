@@ -43,6 +43,10 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
       return;
     }
 
+    if (condition) {
+      await failedContext.contextManager.beforeNodeStart(condition);
+    }
+
     if (
       condition &&
       !failedContext.contextManager.evaluateBooleanExpressionInContext(condition, { error })

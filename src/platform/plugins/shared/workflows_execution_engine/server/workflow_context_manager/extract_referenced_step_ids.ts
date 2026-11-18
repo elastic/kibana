@@ -96,18 +96,47 @@ export function nodeMayReferenceVariables(node: GraphNodeUnion): boolean {
   }
   let result: boolean;
   try {
-    result = collectNodeVariables(node).some(
-      (variable) =>
-        variable === 'steps' ||
-        variable === 'variables' ||
-        variable.startsWith('variables.') ||
-        variable.startsWith('variables[')
-    );
+    result = pathsMayReferenceVariables(collectNodeVariables(node));
   } catch {
     result = true;
   }
   referencesVariablesCache.set(node, result);
   return result;
+}
+
+export interface ConditionReferences {
+  /** `null` when the condition cannot be analyzed and every predecessor may be read. */
+  stepIds: Set<string> | null;
+  /** `null` when any step input may be read. */
+  inputStepIds: Set<string> | null;
+  mayReferenceVariables: boolean;
+}
+
+/**
+ * Step and variable references in a condition evaluated on some other node's context.
+ * Covers Liquid and bare KQL. A parse failure is ambiguous.
+ */
+export function analyzeConditionString(condition: string): ConditionReferences {
+  try {
+    const variables = extractPropertyPathsFromKql(condition);
+    return {
+      stepIds: extractReferencedStepIdsFromVariables(variables),
+      inputStepIds: inputStepIdsFromVariables(variables),
+      mayReferenceVariables: pathsMayReferenceVariables(variables),
+    };
+  } catch {
+    return { stepIds: null, inputStepIds: null, mayReferenceVariables: true };
+  }
+}
+
+function pathsMayReferenceVariables(variables: string[]): boolean {
+  return variables.some(
+    (variable) =>
+      variable === 'steps' ||
+      variable === 'variables' ||
+      variable.startsWith('variables.') ||
+      variable.startsWith('variables[')
+  );
 }
 
 /**
@@ -117,23 +146,27 @@ export function nodeMayReferenceVariables(node: GraphNodeUnion): boolean {
  */
 export function extractInputReferencedStepIds(node: GraphNodeUnion): Set<string> | null {
   try {
-    const stepIds = new Set<string>();
-    for (const variable of collectNodeVariables(node)) {
-      if (variable === 'steps') return null;
-      if (variable.startsWith(STEPS_PREFIX)) {
-        const rest = variable.slice(STEPS_PREFIX.length);
-        const dotIndex = rest.indexOf('.');
-        const stepId = dotIndex === -1 ? rest : rest.slice(0, dotIndex);
-        const path = dotIndex === -1 ? '' : rest.slice(dotIndex);
-        const readsInput =
-          path === '' || path.startsWith('.input') || path.startsWith('[') || stepId.includes('[');
-        if (stepId && readsInput) stepIds.add(stepId.split('[')[0]);
-      }
-    }
-    return stepIds;
+    return inputStepIdsFromVariables(collectNodeVariables(node));
   } catch {
     return null;
   }
+}
+
+function inputStepIdsFromVariables(variables: string[]): Set<string> | null {
+  const stepIds = new Set<string>();
+  for (const variable of variables) {
+    if (variable === 'steps') return null;
+    if (variable.startsWith(STEPS_PREFIX)) {
+      const rest = variable.slice(STEPS_PREFIX.length);
+      const dotIndex = rest.indexOf('.');
+      const stepId = dotIndex === -1 ? rest : rest.slice(0, dotIndex);
+      const path = dotIndex === -1 ? '' : rest.slice(dotIndex);
+      const readsInput =
+        path === '' || path.startsWith('.input') || path.startsWith('[') || stepId.includes('[');
+      if (stepId && readsInput) stepIds.add(stepId.split('[')[0]);
+    }
+  }
+  return stepIds;
 }
 
 function computeReferencedStepIds(node: GraphNodeUnion): Set<string> | null {

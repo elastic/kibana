@@ -20,6 +20,7 @@ import {
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { buildWorkflowRenderContext } from './build_workflow_context';
 import {
+  analyzeConditionString,
   extractInputReferencedStepIds,
   extractReferencedStepIds,
   nodeMayReferenceVariables,
@@ -47,8 +48,9 @@ import { isSerializedError } from '../utils/errors';
  * 1. Template-referenced steps (static analysis via `extractReferencedStepIds`).
  *    Falls back to all predecessors only when analysis is ambiguous (`null`).
  *    A node with no step references needs none, so nothing is fetched for it.
- * 2. All `data.set` executions — needed by `getVariables`, only when the node may
- *    reference `variables`.
+ * 2. All `data.set` executions — needed by `getVariables`, only when the node or
+ *    `condition` may reference `variables`.
+ * 3. Steps named by `condition`, when a handler evaluates that string on this node.
  *
  * Open scope frames (the workflow timeout zone, an in-progress foreach) are not
  * included. They have no output until they leave the stack, and their inputs and
@@ -59,27 +61,33 @@ export function resolveRehydrationTargets(
   node: GraphNodeUnion,
   predecessors: ReadonlyArray<GraphNodeUnion>,
   state: WorkflowExecutionState,
-  stackFrames?: readonly StackFrame[]
+  stackFrames?: readonly StackFrame[],
+  condition?: string
 ): Set<string> {
   const neededIds = new Set<string>();
   const referencedStepIds = extractReferencedStepIds(node);
+  const conditionRefs = condition ? analyzeConditionString(condition) : undefined;
 
-  if (referencedStepIds === null) {
+  const addStepIds = (stepIds: ReadonlySet<string>): void => {
+    for (const stepId of stepIds) {
+      const latestExec = state.getLatestStepExecution(stepId, stackFrames);
+      if (latestExec) neededIds.add(latestExec.id);
+    }
+  };
+
+  if (referencedStepIds === null || conditionRefs?.stepIds === null) {
     for (const pred of predecessors) {
       const latestExec = state.getLatestStepExecution(pred.stepId, stackFrames);
       if (latestExec) neededIds.add(latestExec.id);
     }
-  } else {
-    for (const stepId of referencedStepIds) {
-      const latestExec = state.getLatestStepExecution(stepId, stackFrames);
-      if (latestExec) neededIds.add(latestExec.id);
-    }
   }
+  if (referencedStepIds) addStepIds(referencedStepIds);
+  if (conditionRefs?.stepIds) addStepIds(conditionRefs.stepIds);
 
   // `getVariables()` reads every `data.set` output, so those must be resident when the
-  // node can read `variables`. Skipping them otherwise avoids re-fetching (and thrashing
-  // the LRU with) a potentially huge set of outputs on every node run.
-  if (nodeMayReferenceVariables(node)) {
+  // node or the handler condition can read `variables`. Skipping them otherwise avoids
+  // re-fetching (and thrashing the LRU with) a potentially huge set of outputs on every node run.
+  if (nodeMayReferenceVariables(node) || conditionRefs?.mayReferenceVariables) {
     for (const step of state.getDataSetStepExecutions()) {
       neededIds.add(step.id);
     }
@@ -97,12 +105,18 @@ export function resolveInputRehydrationTargets(
   node: GraphNodeUnion,
   neededIds: ReadonlySet<string>,
   state: WorkflowExecutionState,
-  stackFrames?: readonly StackFrame[]
+  stackFrames?: readonly StackFrame[],
+  condition?: string
 ): string[] {
   const inputStepIds = extractInputReferencedStepIds(node);
-  if (inputStepIds === null) return [...neededIds];
+  const conditionInputs = condition ? analyzeConditionString(condition).inputStepIds : undefined;
+  if (inputStepIds === null || conditionInputs === null) return [...neededIds];
+  const stepIds = new Set(inputStepIds);
+  if (conditionInputs) {
+    for (const stepId of conditionInputs) stepIds.add(stepId);
+  }
   const inputIds: string[] = [];
-  for (const stepId of inputStepIds) {
+  for (const stepId of stepIds) {
     const latestExec = state.getLatestStepExecution(stepId, stackFrames);
     if (latestExec) inputIds.push(latestExec.id);
   }
@@ -193,20 +207,23 @@ export class WorkflowContextManager {
 
   /**
    * Fetches the outputs and inputs this node reads, then freezes the context
-   * for the node run. `now` is stamped once, here. Pair with `afterNodeEnd`.
+   * for the node run. `condition` is included when a handler evaluates that
+   * string on this context. Pair with `afterNodeEnd`.
    */
-  public async beforeNodeStart(): Promise<void> {
+  public async beforeNodeStart(condition?: string): Promise<void> {
     const neededIds = resolveRehydrationTargets(
       this.node,
       this.predecessors,
       this.workflowExecutionState,
-      this.stackFrames
+      this.stackFrames,
+      condition
     );
     const inputIds = resolveInputRehydrationTargets(
       this.node,
       neededIds,
       this.workflowExecutionState,
-      this.stackFrames
+      this.stackFrames,
+      condition
     );
     const [outputs, inputs] = await Promise.all([
       this.stepIoService.readBatch([...neededIds], 'output'),

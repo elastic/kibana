@@ -2291,6 +2291,57 @@ describe('WorkflowContextManager', () => {
       expect(stepIoService.readBatch).toHaveBeenCalledWith(['exec-step-a'], 'output');
       expect(underTest.renderValueAccordingToContext('{{ steps.step_a.output }}')).toBe(output);
     });
+
+    it('fetches a step named only by a handler condition', async () => {
+      const workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(workflow);
+      const node = workflowExecutionGraph
+        .getAllNodes()
+        .find((candidate) => candidate.stepId === 'step_a');
+      expect(node).toBeDefined();
+
+      const stepIoService = {
+        readBatch: jest.fn(async () => new Map()),
+      } as unknown as StepIoService;
+      const workflowExecutionState = {
+        getWorkflowExecution: jest.fn().mockReturnValue({
+          id: 'exec-1',
+          workflowId: 'wf-1',
+          spaceId: 'default',
+          createdAt: '2023-01-01T00:00:00.000Z',
+          startedAt: '2023-01-01T00:00:00.000Z',
+          workflowDefinition: workflow,
+          scopeStack: [],
+        }),
+        getDataSetStepExecutions: jest.fn().mockReturnValue([{ id: 'exec-set' }]),
+        getDataSetStepExecutionCount: jest.fn().mockReturnValue(1),
+        getStepIoVersion: jest.fn().mockReturnValue(0),
+        getLatestStepExecution: jest.fn((stepId: string) =>
+          stepId === 'producer' ? { id: 'exec-producer', stepId } : undefined
+        ),
+        getStepExecution: jest.fn(),
+        getAllStepExecutions: jest.fn().mockReturnValue([]),
+      } as unknown as WorkflowExecutionState;
+
+      const underTest = new WorkflowContextManager({
+        templateEngine: new WorkflowTemplatingEngine(),
+        node: node as AtomicGraphNode,
+        stackFrames: [],
+        workflowExecutionGraph,
+        workflowExecutionState,
+        stepIoService,
+        esClient: {} as any,
+        dependencies,
+        fakeRequest: {} as KibanaRequest,
+        coreStart: {} as CoreStart,
+      });
+
+      await underTest.beforeNodeStart('{{ steps.producer.output }} == {{ variables.flag }}');
+
+      expect(stepIoService.readBatch).toHaveBeenCalledWith(
+        expect.arrayContaining(['exec-producer', 'exec-set']),
+        'output'
+      );
+    });
   });
 
   describe('callKibanaApi', () => {

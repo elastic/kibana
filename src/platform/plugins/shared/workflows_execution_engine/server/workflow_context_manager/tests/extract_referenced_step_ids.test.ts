@@ -8,7 +8,7 @@
  */
 
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
-import { extractReferencedStepIds } from '../extract_referenced_step_ids';
+import { analyzeConditionString, extractReferencedStepIds } from '../extract_referenced_step_ids';
 
 const makeAtomicNode = (configuration: Record<string, unknown>): GraphNodeUnion =>
   ({
@@ -247,5 +247,27 @@ describe('extractReferencedStepIds', () => {
       },
     });
     expect(extractReferencedStepIds(node)).toBeNull();
+  });
+});
+
+describe('analyzeConditionString', () => {
+  it('reads a Liquid step reference and a bare KQL field', () => {
+    expect(analyzeConditionString('{{ steps.producer.output }} == "ok"')).toMatchObject({
+      stepIds: new Set(['producer']),
+      mayReferenceVariables: false,
+    });
+    expect(analyzeConditionString('steps.producer.output.status: "done"').stepIds).toEqual(
+      new Set(['producer'])
+    );
+  });
+
+  it('marks variables and a step input', () => {
+    expect(analyzeConditionString('{{ variables.connector_id }} == "abc"')).toMatchObject({
+      stepIds: new Set(),
+      mayReferenceVariables: true,
+    });
+    expect(analyzeConditionString('{{ steps.producer.input.message }}').inputStepIds).toEqual(
+      new Set(['producer'])
+    );
   });
 });
