@@ -82,9 +82,10 @@ export class TagModal {
     ] as const;
     const [name, color, description] = await Promise.all(
       errorRows.map(async (rowTestSubj) => {
+        // EuiFormRow gives each error the id `<rowId>-error-<index>`
         const errors = await this.page.testSubj
           .locator(rowTestSubj)
-          .locator('.euiFormErrorText')
+          .locator('[id*="-error-"]')
           .allInnerTexts();
         return errors.length === 0 ? undefined : errors[0].trim();
       })

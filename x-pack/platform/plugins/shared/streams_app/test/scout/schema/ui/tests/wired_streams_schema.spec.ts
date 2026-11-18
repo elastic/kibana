@@ -211,9 +211,8 @@ test.describe(
       const formRow = page
         .getByTestId('streamsAppSchemaEditorAddFieldFlyoutFieldName')
         .locator('..');
-      await expect(formRow.locator('.euiFormErrorText')).toContainText(
-        "doesn't match the namespaced ECS or OTel schema"
-      );
+      const fieldNameError = formRow.getByText("doesn't match the namespaced ECS or OTel schema");
+      await expect(fieldNameError).toBeVisible();
 
       // Check that the Add button is disabled when there's a validation error
       const addButton = page.getByTestId('streamsAppSchemaEditorAddFieldButton');
@@ -227,7 +226,7 @@ test.describe(
       await pageObjects.streams.typeFieldName(validFieldName);
 
       // Error should be gone
-      await expect(formRow.locator('.euiFormErrorText')).toBeHidden();
+      await expect(fieldNameError).toBeHidden();
 
       // Set field type and verify Add button works
       await pageObjects.streams.setFieldMappingType('keyword');
