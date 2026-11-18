@@ -45,6 +45,21 @@ steps:
         - exit_status: '*'
           limit: 1
 
+  - command: .buildkite/scripts/steps/test/vitest.sh
+    label: 'Vitest Tests'
+    key: vitest
+    depends_on: pre_build
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+    timeout_in_minutes: 30
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
   - wait: ~
     depends_on: pre_build
 

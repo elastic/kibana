@@ -54,6 +54,17 @@ steps:
         - exit_status: '*'
           limit: 1
 
+  - command: .buildkite/scripts/steps/test/vitest.sh
+    label: 'Vitest Tests'
+    depends_on: build
+    timeout_in_minutes: 30
+    agents:
+      machineType: n2-standard-4
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
   - command: .buildkite/scripts/steps/test/scout/test_run_builder.sh
     label: 'Scout Test Run Builder'
     agents:
