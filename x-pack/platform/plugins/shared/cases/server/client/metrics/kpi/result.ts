@@ -102,6 +102,12 @@ export const readKpiMetricValue = (
 };
 
 /**
+ * Returns true when the search timed out or a shard failed, so the hits and the aggregations can be partial.
+ */
+export const isIncompleteKpiSearchResponse = (response: estypes.MsearchMultiSearchItem): boolean =>
+  response.timed_out || response._shards.failed > 0;
+
+/**
  * Maps one msearch response item to the typed result of its metric.
  */
 export const mapKpiSearchResponse = (
@@ -116,7 +122,7 @@ export const mapKpiSearchResponse = (
     return toKpiMetricError(metric.id, response.error.reason ?? 'The metric search failed.');
   }
 
-  if (response.timed_out || response._shards.failed > 0) {
+  if (isIncompleteKpiSearchResponse(response)) {
     return toKpiMetricError(metric.id, 'The metric search returned incomplete results.');
   }
 

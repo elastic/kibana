@@ -229,6 +229,28 @@ describe('runKpiMetrics', () => {
       ]);
     });
 
+    it('gives a null previous value when the previous search is timed out or shard-failed', async () => {
+      const msearch = jest
+        .fn()
+        .mockResolvedValue([
+          createResponse(3),
+          createResponse(5),
+          { ...createResponse(2), timed_out: true },
+          { ...createResponse(4), _shards: { total: 2, successful: 1, failed: 1 } },
+        ]);
+
+      const results = await runKpiMetrics({
+        metrics: [createMetric({ id: 'timed-out' }), createMetric({ id: 'shard-failed' })],
+        context: rangeContext,
+        reader: { msearch },
+      });
+
+      expect(results).toEqual([
+        { id: 'timed-out', type: 'value', format: 'number', value: 3, previousValue: null },
+        { id: 'shard-failed', type: 'value', format: 'number', value: 5, previousValue: null },
+      ]);
+    });
+
     it('does not run the previous period when the range has no start', async () => {
       const msearch = jest.fn().mockResolvedValue([createResponse(3)]);
 

@@ -12,7 +12,12 @@ import type { CasesAnalyticsV2ReaderContract } from '../../../cases_analytics_v2
 import { getPreviousPeriod } from './period';
 import type { KpiQueryContext, KpiSearchRequest } from './query_builder';
 import { buildKpiMetricSearch } from './query_builder';
-import { mapKpiSearchResponse, readKpiMetricValue, toKpiMetricError } from './result';
+import {
+  isIncompleteKpiSearchResponse,
+  mapKpiSearchResponse,
+  readKpiMetricValue,
+  toKpiMetricError,
+} from './result';
 
 interface PlannedSearch {
   position: number;
@@ -25,7 +30,7 @@ const readPreviousValue = (
   metric: CustomKpiMetricConfiguration,
   response: estypes.MsearchResponseItem | undefined
 ): number | null => {
-  if (response == null || 'error' in response) {
+  if (response == null || 'error' in response || isIncompleteKpiSearchResponse(response)) {
     return null;
   }
 
