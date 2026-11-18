@@ -216,7 +216,8 @@ export const usePolicyTabs = (): UsePolicyTabsResult => {
   const isEndpointFileExportEnabled = useIsExperimentalFeatureEnabled(
     'responseActionsEndpointFileExport'
   );
-  // Same product feature the server requires to save export providers (serverless: Endpoint Complete)
+  // Without this product feature (serverless: Endpoint Complete), the server removes export
+  // providers from the policy on save
   const hasResponseActionsProductFeature = useProductFeatureKeys().has(
     ProductFeatureSecurityKey.endpointResponseActions
   );

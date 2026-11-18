@@ -309,6 +309,7 @@ export const StorageProviderFlyout = memo<StorageProviderFlyoutProps>(
             <EuiAccordion
               id={advancedSettingsId}
               buttonContent={ADVANCED_SETTINGS_LABEL}
+              buttonProps={{ 'data-test-subj': 'storageProviderFlyout-advancedSettingsToggle' }}
               initialIsOpen={values.service_url !== ''}
               // Keep an invalid URL visible: Save stays disabled until it's fixed
               forceState={serviceUrlError ? 'open' : undefined}

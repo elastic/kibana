@@ -61,7 +61,7 @@ export const EXPORT_PROVIDER_TYPE_LABELS: Readonly<Record<ExportProviderType, st
 };
 
 export const TABLE_CAPTION = i18n.translate(
-  'xpack.securitySolution.endpoint.policy.storageProviders.tableCaption',
+  'xpack.securitySolution.endpoint.policy.storageProviders.tableCaptionLabel',
   { defaultMessage: 'Storage providers of this policy' }
 );
 
@@ -121,22 +121,25 @@ export const DELETE_ACTION_DESCRIPTION = i18n.translate(
 );
 
 export const getAddSuccessMessage = (name: string): string =>
-  i18n.translate('xpack.securitySolution.endpoint.policy.storageProviders.addSuccessMessage', {
+  i18n.translate('xpack.securitySolution.endpoint.policy.storageProviders.addSuccessToastTitle', {
     defaultMessage: 'Added storage provider {name}',
     values: { name },
   });
 
 export const getEditSuccessMessage = (name: string): string =>
-  i18n.translate('xpack.securitySolution.endpoint.policy.storageProviders.editSuccessMessage', {
+  i18n.translate('xpack.securitySolution.endpoint.policy.storageProviders.editSuccessToastTitle', {
     defaultMessage: 'Updated storage provider {name}',
     values: { name },
   });
 
 export const getDeleteSuccessMessage = (name: string): string =>
-  i18n.translate('xpack.securitySolution.endpoint.policy.storageProviders.deleteSuccessMessage', {
-    defaultMessage: 'Deleted storage provider {name}',
-    values: { name },
-  });
+  i18n.translate(
+    'xpack.securitySolution.endpoint.policy.storageProviders.deleteSuccessToastTitle',
+    {
+      defaultMessage: 'Deleted storage provider {name}',
+      values: { name },
+    }
+  );
 
 // --- Add / edit flyout ---
 
@@ -161,7 +164,7 @@ export const NAME_FIELD_LABEL = i18n.translate(
 );
 
 export const NAME_FIELD_HELP_TEXT = i18n.translate(
-  'xpack.securitySolution.endpoint.policy.storageProviders.flyout.nameHelpText',
+  'xpack.securitySolution.endpoint.policy.storageProviders.flyout.nameHelpDescription',
   {
     defaultMessage: 'Used in the response console as {exportArgument}.',
     values: { exportArgument: '--export <name>' },
@@ -215,7 +218,7 @@ export const SERVICE_URL_FIELD_PLACEHOLDER = i18n.translate(
 );
 
 export const SERVICE_URL_FIELD_HELP_TEXT = i18n.translate(
-  'xpack.securitySolution.endpoint.policy.storageProviders.flyout.serviceUrlHelpText',
+  'xpack.securitySolution.endpoint.policy.storageProviders.flyout.serviceUrlHelpDescription',
   {
     defaultMessage: "Optional. Leave empty to use the storage account's default endpoint.",
   }
