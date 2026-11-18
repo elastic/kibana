@@ -37,6 +37,7 @@ import {
   SubjectClaimsService,
 } from './subjects/services/subject_claims_service';
 import { createSubjectsClient } from './subjects/services/subjects_client';
+import { createFindingsWriter } from './findings/findings_writer';
 import { createThreadConversationResolver } from './subjects/services/thread_conversation_resolver';
 import { hypothesesAttachment, registerHypothesesAttachment } from './hypotheses/attachments';
 import { HypothesesService } from './hypotheses/services/hypotheses_service';
@@ -346,6 +347,16 @@ export class AgenticInvestigationsPlugin
       getAttachmentClient: (request) => this.getAttachmentClient(request),
     });
 
+    const getFindingsWriter = createFindingsWriter({
+      getHypothesesService: () => this.requireHypothesesService(),
+      getImpactService: () => this.requireImpactService(),
+      getSpaceId: (request) => this.getSpaceId(request),
+      privileges: startPrivileges,
+      resolveUser: (request) => this.requireUserResolver()(request),
+      getConversationClient: (request) => this.getConversationClient(request),
+      getAttachmentClient: (request) => this.getAttachmentClient(request),
+    });
+
     const getInvestigationsClient = createInvestigationsClient({
       getQueryService: () => this.requireInvestigationsQueryService(),
       getSpaceId: (request) => this.getSpaceId(request),
@@ -377,6 +388,7 @@ export class AgenticInvestigationsPlugin
         });
       },
       getEscalationsService: () => this.requireEscalationsService(),
+      getFindingsWriter,
     };
   }
 

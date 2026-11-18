@@ -12,15 +12,24 @@ import { NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/manag
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { createAgentNotFoundError } from '@kbn/agent-builder-common';
+import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
+import type { LockManagerService } from '@kbn/lock-manager';
 import { BOUND_WORKFLOW_IDS } from './bound_workflows';
+import { getBoundInvestigationWorkflowId } from './constants';
 import { createInvestigatorServiceAccountService } from './investigator_service_account';
 
 const request = {} as KibanaRequest;
-const SPACE_ID = 'obs';
+// Nightshift only sets up the default space; every other space is refused.
+const SPACE_ID = 'default';
 // Serverless (UIAM) assigns opaque ids; nothing may derive them from the account names.
 const AGENT_ACCOUNT = 'uiam-sa-7f3c2a';
 const AUTOMATIONS_ACCOUNT = 'uiam-sa-91be04';
 const IDS = { agent: AGENT_ACCOUNT, automations: AUTOMATIONS_ACCOUNT };
+const AVAILABILITY: AgentAvailabilityConfig = {
+  handler: async () => ({ status: 'available' }),
+  cacheMode: 'global',
+};
 const ENTRY_POINT_ID = `${NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID}-${SPACE_ID}`;
 
 const setup = ({
@@ -31,6 +40,9 @@ const setup = ({
   runAs = AGENT_ACCOUNT,
   enabled = true,
   installError,
+  agentRunAs = AGENT_ACCOUNT,
+  assistantEnabled = false,
+  automations,
 }: {
   serviceAccountsEnabled?: boolean;
   canManageSecurity?: boolean;
@@ -39,7 +51,21 @@ const setup = ({
   runAs?: string;
   enabled?: boolean;
   installError?: Error;
+  /** The account the installed investigation agent runs as; null for an unbound agent. */
+  agentRunAs?: string | null;
+  /** Whether the deployment has the assistant agent, which setup binds alongside the investigator. */
+  assistantEnabled?: boolean;
+  /** Automation saved objects in the space; omit to run without automations. */
+  automations?: Array<{ id: string; attributes: Record<string, unknown> }>;
 } = {}) => {
+  const automationsSoClient = {
+    createPointInTimeFinder: jest.fn(() => ({
+      async *find() {
+        yield { saved_objects: automations ?? [] };
+      },
+      close: jest.fn(),
+    })),
+  };
   const esClient = {
     security: {
       hasPrivileges: jest.fn().mockResolvedValue({ has_all_requested: canManageSecurity }),
@@ -64,14 +90,17 @@ const setup = ({
   const workflowsExtensions = {
     getClient: jest.fn().mockResolvedValue({ managedWorkflows }),
   } as unknown as WorkflowsExtensionsServerPluginStart;
-  const getWorkflow = jest.fn(async () => ({
+  const getWorkflow = jest.fn(async (_id: string) => ({
     enabled: state.enabled,
     valid: true,
     definition: { settings: { run_as: state.runAs } },
   }));
-  const updateWorkflow = jest.fn(async (_id: string, { enabled: next }: { enabled: boolean }) => {
-    state.enabled = next;
-  });
+  const updateWorkflow = jest.fn(
+    async (_id: string, patch: { enabled?: boolean; yaml?: string }) => {
+      if (patch.enabled !== undefined) state.enabled = patch.enabled;
+      return {};
+    }
+  );
   const workflowsManagement = {
     management: { getWorkflow, updateWorkflow },
   } as unknown as WorkflowsServerPluginSetup;
@@ -92,28 +121,76 @@ const setup = ({
     spacesService: { createSpacesClient: () => ({ get: getSpace }) },
   } as unknown as SpacesPluginStart;
 
+  const setServiceAccount = jest.fn().mockResolvedValue(undefined);
+  const ensureAgent = jest.fn().mockResolvedValue(undefined);
+  const getAgent = jest.fn(async (agentId: string) => ({
+    id: agentId,
+    ...(agentRunAs ? { service_account_id: agentRunAs } : {}),
+  }));
+  const hasAgent = jest.fn().mockResolvedValue(true);
+  const agentBuilder = {
+    agents: {
+      ensure: ensureAgent,
+      getRegistry: jest.fn().mockResolvedValue({ setServiceAccount, get: getAgent, has: hasAgent }),
+    },
+  } as unknown as NonNullable<
+    ReturnType<
+      NonNullable<Parameters<typeof createInvestigatorServiceAccountService>[0]['getAgentBuilder']>
+    >
+  >;
+  const listInstalledWorkflowStates = jest.fn().mockResolvedValue([]);
+  const scheduleSourceVolumeTask = jest.fn().mockResolvedValue(undefined);
+  const removeSourceVolumeTask = jest.fn().mockResolvedValue(undefined);
+  const lock = { held: false };
+  const withLock = jest.fn(async (_lockId: string, callback: () => Promise<unknown>) => {
+    lock.held = true;
+    try {
+      return await callback();
+    } finally {
+      lock.held = false;
+    }
+  });
+  const lockManager = { withLock } as unknown as LockManagerService;
   const service = createInvestigatorServiceAccountService({
     core,
     workflowsExtensions,
     workflowsManagement,
     getInstalledWorkflowState,
     spaces,
+    getAgentBuilder: () => agentBuilder,
+    getAgentAvailability: () => AVAILABILITY,
+    isAssistantEnabled: () => assistantEnabled,
+    getAutomationsSoClient: automations ? () => automationsSoClient as never : undefined,
+    lockManager,
+    listInstalledWorkflowStates,
+    scheduleSourceVolumeTask,
+    removeSourceVolumeTask,
+    isUniversalAlertingAvailable: () => true,
     isServerless,
     logger: loggingSystemMock.createLogger(),
   });
   return {
     service,
+    setServiceAccount,
+    ensureAgent,
+    getAgent,
+    hasAgent,
     esClient,
     serviceAccounts,
     managedWorkflows,
     getWorkflow,
     updateWorkflow,
+    listInstalledWorkflowStates,
+    scheduleSourceVolumeTask,
+    removeSourceVolumeTask,
+    lock,
+    withLock,
   };
 };
 
 describe('createInvestigatorServiceAccountService', () => {
   it('binds the workflows to the accounts it is given, and keeps the automations account on the entry point', async () => {
-    const { service, serviceAccounts, managedWorkflows } = setup();
+    const { service, serviceAccounts, managedWorkflows, scheduleSourceVolumeTask } = setup();
 
     const status = await service.enable(request, SPACE_ID, IDS);
 
@@ -122,6 +199,7 @@ describe('createInvestigatorServiceAccountService', () => {
     expect(managedWorkflows.install.mock.calls.map(([, id]) => id)).toEqual([
       ...BOUND_WORKFLOW_IDS,
     ]);
+    expect(scheduleSourceVolumeTask).toHaveBeenCalledWith(request);
     for (const [, id, options] of managedWorkflows.install.mock.calls) {
       expect(options).toEqual({
         spaceId: SPACE_ID,
@@ -155,6 +233,16 @@ describe('createInvestigatorServiceAccountService', () => {
     expect(status.boundWorkflows.every(({ bound }) => bound)).toBe(true);
   });
 
+  it('refuses to set up a space other than the default one', async () => {
+    const { service, managedWorkflows, setServiceAccount } = setup();
+
+    await expect(service.enable(request, 'marketing', IDS)).rejects.toThrow(
+      /only available in the "default" space/
+    );
+    expect(setServiceAccount).not.toHaveBeenCalled();
+    expect(managedWorkflows.install).not.toHaveBeenCalled();
+  });
+
   it('installs the entry point last, so a failed setup leaves the space reading as not set up', () => {
     expect(BOUND_WORKFLOW_IDS[BOUND_WORKFLOW_IDS.length - 1]).toBe(
       NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID
@@ -169,6 +257,85 @@ describe('createInvestigatorServiceAccountService', () => {
       '_nightshift_agent',
       '_nightshift_automations',
     ]);
+  });
+
+  it('pins only the investigation agent to the space agent account when the assistant is off', async () => {
+    const { service, setServiceAccount } = setup();
+
+    // The reinforcement agent runs as the agent optimize workflow that starts it, so it stays unbound.
+    await service.enable(request, SPACE_ID, IDS);
+
+    expect(setServiceAccount.mock.calls).toEqual([['nightshift.investigation', AGENT_ACCOUNT]]);
+  });
+
+  // The assistant is the agent users pick in the UI and it runs the investigator's tools,
+  // connectors and sandbox, so an unbound one would run that surface as the caller.
+  it('pins the assistant agent too when it is enabled', async () => {
+    const { service, setServiceAccount } = setup({ assistantEnabled: true });
+
+    await service.enable(request, SPACE_ID, IDS);
+
+    expect(setServiceAccount.mock.calls).toEqual([
+      ['nightshift.investigation', AGENT_ACCOUNT],
+      ['nightshift.assistant', AGENT_ACCOUNT],
+    ]);
+  });
+
+  it('installs the investigation agent in the space before pinning it', async () => {
+    const { service, ensureAgent, setServiceAccount } = setup();
+
+    await service.enable(request, SPACE_ID, IDS);
+
+    expect(ensureAgent.mock.calls.map(([{ spaceId, agent }]) => [spaceId, agent.id])).toEqual([
+      [SPACE_ID, 'nightshift.investigation'],
+    ]);
+    expect(ensureAgent.mock.invocationCallOrder[0]).toBeLessThan(
+      setServiceAccount.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('installs the assistant agent in the space before pinning it', async () => {
+    const { service, ensureAgent, setServiceAccount } = setup({ assistantEnabled: true });
+
+    await service.enable(request, SPACE_ID, IDS);
+
+    expect(ensureAgent.mock.calls.map(([{ spaceId, agent }]) => [spaceId, agent.id])).toEqual([
+      [SPACE_ID, 'nightshift.investigation'],
+      [SPACE_ID, 'nightshift.assistant'],
+    ]);
+    expect(ensureAgent.mock.invocationCallOrder[1]).toBeLessThan(
+      setServiceAccount.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('pins the agent before installing any workflow, so a failed pin leaves the space not set up', async () => {
+    const { service, setServiceAccount, managedWorkflows } = setup();
+    setServiceAccount.mockRejectedValue(Boom.forbidden('no'));
+
+    await expect(service.enable(request, SPACE_ID, IDS)).rejects.toThrow('no');
+    expect(managedWorkflows.install).not.toHaveBeenCalled();
+  });
+
+  it('waits for a just-installed agent to become visible before pinning it', async () => {
+    const { service, setServiceAccount } = setup();
+    setServiceAccount.mockRejectedValueOnce(
+      createAgentNotFoundError({ agentId: 'nightshift.investigation' })
+    );
+
+    await service.enable(request, SPACE_ID, IDS);
+
+    expect(setServiceAccount.mock.calls).toEqual([
+      ['nightshift.investigation', AGENT_ACCOUNT],
+      ['nightshift.investigation', AGENT_ACCOUNT],
+    ]);
+  });
+
+  it('fails setup when pinning an agent fails for another reason', async () => {
+    const { service, setServiceAccount } = setup();
+    setServiceAccount.mockRejectedValue(Boom.forbidden('no'));
+
+    await expect(service.enable(request, SPACE_ID, IDS)).rejects.toThrow('no');
+    expect(setServiceAccount).toHaveBeenCalledTimes(1);
   });
 
   it('turns a disabled entry point back on', async () => {
@@ -260,6 +427,84 @@ describe('createInvestigatorServiceAccountService', () => {
     ).resolves.toMatchObject({ canModifyBoundWorkflows: false });
   });
 
+  it('unbinds the investigation agent on disable, before uninstalling anything', async () => {
+    const { service, setServiceAccount, managedWorkflows } = setup();
+
+    await service.disable(request, SPACE_ID);
+
+    expect(setServiceAccount.mock.calls).toEqual([['nightshift.investigation', null]]);
+    expect(setServiceAccount.mock.invocationCallOrder[0]).toBeLessThan(
+      managedWorkflows.uninstall.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('unbinds the assistant agent too on disable when it is enabled', async () => {
+    const { service, setServiceAccount } = setup({ assistantEnabled: true });
+
+    await service.disable(request, SPACE_ID);
+
+    expect(setServiceAccount.mock.calls).toEqual([
+      ['nightshift.investigation', null],
+      ['nightshift.assistant', null],
+    ]);
+  });
+
+  it('keeps the workflows when unbinding the agent fails on disable', async () => {
+    const { service, setServiceAccount, managedWorkflows } = setup();
+    setServiceAccount.mockRejectedValue(Boom.forbidden('no'));
+
+    await expect(service.disable(request, SPACE_ID)).rejects.toThrow('no');
+    expect(managedWorkflows.uninstall).not.toHaveBeenCalled();
+  });
+
+  it('leaves an agent that is not installed alone on disable', async () => {
+    const missing = setup();
+    missing.hasAgent.mockResolvedValue(false);
+
+    await missing.service.disable(request, SPACE_ID);
+
+    expect(missing.setServiceAccount).not.toHaveBeenCalled();
+    expect(missing.managedWorkflows.uninstall).toHaveBeenCalledTimes(BOUND_WORKFLOW_IDS.length);
+  });
+
+  // The agent reports itself unavailable while the space's entry point is disabled, and that is
+  // exactly a space an admin removes the setup from.
+  it('unbinds the agent on disable without checking that it is runnable', async () => {
+    const { service, getAgent, setServiceAccount } = setup();
+
+    await service.disable(request, SPACE_ID);
+
+    expect(getAgent).not.toHaveBeenCalled();
+    expect(setServiceAccount.mock.calls).toEqual([['nightshift.investigation', null]]);
+  });
+
+  // Uninstalling without unbinding would leave the space reading as removed while the agent stays
+  // pinned, and running as that account again the moment service accounts come back.
+  it('refuses to disable an installed agent while service accounts are disabled, before uninstalling anything', async () => {
+    const { service, setServiceAccount, managedWorkflows } = setup({
+      serviceAccountsEnabled: false,
+    });
+
+    await expect(service.disable(request, SPACE_ID)).rejects.toMatchObject({
+      output: { statusCode: 400 },
+    });
+    expect(setServiceAccount).not.toHaveBeenCalled();
+    expect(managedWorkflows.uninstall).not.toHaveBeenCalled();
+  });
+
+  // Nothing can hold a binding there, so the teardown must not depend on service accounts.
+  it('tears a space down with service accounts disabled when the agent is not installed', async () => {
+    const { service, hasAgent, setServiceAccount, managedWorkflows } = setup({
+      serviceAccountsEnabled: false,
+    });
+    hasAgent.mockResolvedValue(false);
+
+    await service.disable(request, SPACE_ID);
+
+    expect(setServiceAccount).not.toHaveBeenCalled();
+    expect(managedWorkflows.uninstall).toHaveBeenCalledTimes(BOUND_WORKFLOW_IDS.length);
+  });
+
   it('uninstalls every bound workflow on disable, entry point first', async () => {
     const { service, managedWorkflows } = setup();
 
@@ -268,6 +513,96 @@ describe('createInvestigatorServiceAccountService', () => {
     expect(managedWorkflows.uninstall.mock.calls.map(([, id]) => id)).toEqual(
       [...BOUND_WORKFLOW_IDS].reverse()
     );
+  });
+
+  it('removes the source volume task once the last space is disabled', async () => {
+    const {
+      service,
+      managedWorkflows,
+      listInstalledWorkflowStates,
+      scheduleSourceVolumeTask,
+      removeSourceVolumeTask,
+    } = setup();
+    listInstalledWorkflowStates.mockResolvedValue([
+      { workflowId: 'other-workflow-marketing', spaceId: 'marketing' },
+    ]);
+
+    await service.disable(request, SPACE_ID);
+
+    expect(removeSourceVolumeTask).toHaveBeenCalledTimes(1);
+    expect(scheduleSourceVolumeTask).not.toHaveBeenCalled();
+    expect(removeSourceVolumeTask.mock.invocationCallOrder[0]).toBeGreaterThan(
+      Math.max(...managedWorkflows.uninstall.mock.invocationCallOrder)
+    );
+  });
+
+  it('keeps the source volume task while another space is set up', async () => {
+    const { service, listInstalledWorkflowStates, removeSourceVolumeTask } = setup();
+    listInstalledWorkflowStates.mockResolvedValue([
+      { workflowId: getBoundInvestigationWorkflowId('marketing'), spaceId: 'marketing' },
+    ]);
+
+    await service.disable(request, SPACE_ID);
+
+    expect(removeSourceVolumeTask).not.toHaveBeenCalled();
+  });
+
+  it('holds the lifecycle lock only around the telemetry task steps', async () => {
+    const {
+      service,
+      managedWorkflows,
+      lock,
+      listInstalledWorkflowStates,
+      scheduleSourceVolumeTask,
+      removeSourceVolumeTask,
+    } = setup();
+    const heldAt: Record<string, boolean> = {};
+    managedWorkflows.install.mockImplementation(async () => {
+      heldAt.install = lock.held;
+    });
+    managedWorkflows.uninstall.mockImplementation(async () => {
+      heldAt.uninstall = lock.held;
+    });
+    scheduleSourceVolumeTask.mockImplementation(async () => {
+      heldAt.schedule = lock.held;
+    });
+    listInstalledWorkflowStates.mockImplementation(async () => {
+      heldAt.check = lock.held;
+      return [];
+    });
+    removeSourceVolumeTask.mockImplementation(async () => {
+      heldAt.remove = lock.held;
+    });
+
+    await service.enable(request, SPACE_ID, IDS);
+    await service.disable(request, SPACE_ID);
+
+    expect(heldAt).toEqual({
+      install: false,
+      schedule: true,
+      uninstall: false,
+      check: true,
+      remove: true,
+    });
+  });
+
+  it('continues setup and teardown when the telemetry task cannot be changed', async () => {
+    const {
+      service,
+      managedWorkflows,
+      withLock,
+      scheduleSourceVolumeTask,
+      removeSourceVolumeTask,
+    } = setup();
+    withLock.mockRejectedValue(new Error('lock index unavailable'));
+
+    await service.enable(request, SPACE_ID, IDS);
+    await service.disable(request, SPACE_ID);
+
+    expect(managedWorkflows.install).toHaveBeenCalled();
+    expect(managedWorkflows.uninstall).toHaveBeenCalled();
+    expect(scheduleSourceVolumeTask).not.toHaveBeenCalled();
+    expect(removeSourceVolumeTask).not.toHaveBeenCalled();
   });
 
   it('refuses to disable a space the caller cannot access', async () => {
@@ -284,5 +619,101 @@ describe('createInvestigatorServiceAccountService', () => {
 
     await expect(service.disable(request, SPACE_ID)).rejects.toThrow(/manage_security/);
     expect(managedWorkflows.uninstall).not.toHaveBeenCalled();
+  });
+
+  describe('automations', () => {
+    const automation = (id: string) => ({
+      id,
+      attributes: {
+        name: id,
+        automationType: 'custom',
+        isEnabled: true,
+        workflowId: `wf-${id}`,
+        trigger: { rows: [{ kind: 'alert' }] },
+        execution: {},
+        completions: [],
+        runtime: {},
+      },
+    });
+
+    it('binds existing automations to the automations account on setup', async () => {
+      const { service, getWorkflow, updateWorkflow } = setup({
+        automations: [automation('a-1'), automation('a-2')],
+      });
+      getWorkflow.mockImplementation(async (id: string) =>
+        id === 'wf-a-2'
+          ? {
+              enabled: true,
+              valid: true,
+              definition: { settings: { run_as: AUTOMATIONS_ACCOUNT } },
+            }
+          : { enabled: true, valid: true, definition: { settings: { run_as: AGENT_ACCOUNT } } }
+      );
+
+      await service.enable(request, SPACE_ID, IDS);
+
+      // a-2 is already bound; only a-1 is rewritten.
+      expect(updateWorkflow).toHaveBeenCalledTimes(1);
+      expect(updateWorkflow).toHaveBeenCalledWith(
+        'wf-a-1',
+        { yaml: expect.stringContaining(`run_as: ${AUTOMATIONS_ACCOUNT}`) },
+        SPACE_ID,
+        request
+      );
+    });
+
+    it('keeps setting the space up when an automation cannot be bound, and reports it', async () => {
+      const { service, updateWorkflow } = setup({
+        automations: [automation('a-1'), automation('a-2')],
+      });
+      updateWorkflow.mockImplementation(async (workflowId: string) => {
+        if (workflowId === 'wf-a-1') throw new Error('invalid');
+        return {};
+      });
+
+      await expect(service.enable(request, SPACE_ID, IDS)).resolves.toMatchObject({
+        bound: true,
+        unboundAutomations: [{ id: 'a-1', name: 'a-1', error: 'invalid' }],
+      });
+    });
+
+    it('reports no unbound automations when every one of them binds', async () => {
+      const { service } = setup({ automations: [automation('a-1')] });
+
+      await expect(service.enable(request, SPACE_ID, IDS)).resolves.not.toHaveProperty(
+        'unboundAutomations'
+      );
+    });
+
+    it('runs automations as the automations account', async () => {
+      const { service } = setup();
+
+      await expect(service.resolveAutomationRunAs(request, SPACE_ID)).resolves.toBe(
+        AUTOMATIONS_ACCOUNT
+      );
+    });
+
+    it('leaves automations unbound while service accounts are off', async () => {
+      const { service, esClient } = setup({ serviceAccountsEnabled: false });
+
+      await expect(service.resolveAutomationRunAs(request, SPACE_ID)).resolves.toBeUndefined();
+      expect(esClient.security.hasPrivileges).not.toHaveBeenCalled();
+    });
+
+    it('refuses automations in a space that is not set up', async () => {
+      const { service } = setup({ runAs: '' });
+
+      await expect(service.resolveAutomationRunAs(request, SPACE_ID)).rejects.toMatchObject({
+        output: { statusCode: 400 },
+      });
+    });
+
+    it('refuses callers without manage_security', async () => {
+      const { service } = setup({ canManageSecurity: false });
+
+      await expect(service.resolveAutomationRunAs(request, SPACE_ID)).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+    });
   });
 });

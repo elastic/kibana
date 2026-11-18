@@ -8,13 +8,14 @@
  */
 
 import type { OpenApiDocument } from '@kbn/connector-emulate';
-import { convertSwagger2 } from '@kbn/connector-emulate';
+import { AWS_JSON_EXTENSION, convertSwagger2 } from '@kbn/connector-emulate';
 import type { JsonObject } from './json_pointer';
 import {
   forEachRef,
   getAtTokens,
   isJsonObject,
   localRefToPointer,
+  resolvePathItem,
   setAtTokens,
   toPointer,
   toTokens,
@@ -46,6 +47,11 @@ const LITERAL_KEYWORDS = new Set([
   'x-ms-pageable',
   // Path parameters whose values span segments, which the mock matches.
   'x-ms-skip-url-encoding',
+  // Routing that converted Smithy models carry, which the mock reads: a server variable that is
+  // also a path parameter (S3's virtual-hosted buckets), and fixed query parameters requests may
+  // leave out (S3's `x-id`).
+  'x-path-parameter',
+  'x-optional-fixed-query',
 ]);
 
 // Objects whose keys are names (properties, status codes, media types, ...), not keywords.
@@ -102,22 +108,16 @@ export const normalizeSpecNode = (value: unknown, isNameMap = false): unknown =>
   return result;
 };
 
-// A Path Item `$ref` to another path item in the document, whose fields the entry's own override.
-const resolvePathItem = (document: OpenApiDocument, item: unknown): unknown => {
-  if (!isJsonObject(item) || typeof item.$ref !== 'string') {
-    return item;
-  }
-  const { $ref: ref, ...own } = item;
-  const pointer = localRefToPointer(ref);
-  const referenced = pointer === undefined ? undefined : getAtTokens(document, toTokens(pointer));
-  return isJsonObject(referenced) ? { ...referenced, ...own } : item;
-};
+// AutoRest's `x-ms-paths` holds operations whose keys add fixed query parameters, such as Azure
+// Blob Storage's `/?comp=list`; the emulator routes them like `paths`.
+const PATH_MAPS = ['paths', 'x-ms-paths'] as const;
 
 const pickPaths = (
   document: OpenApiDocument,
-  operations: readonly ProjectedOperation[]
+  operations: readonly ProjectedOperation[],
+  pathMap: (typeof PATH_MAPS)[number]
 ): JsonObject => {
-  const { paths } = document;
+  const paths = document[pathMap];
   const picked: JsonObject = {};
   for (const { method, path } of operations) {
     const item = resolvePathItem(document, isJsonObject(paths) ? paths[path] : undefined);
@@ -140,6 +140,60 @@ const securitySchemeNames = (requirements: unknown): string[] =>
 const toKeptTokens = (tokens: string[]): string[] =>
   tokens[0] === 'components' ? tokens.slice(0, 3) : tokens;
 
+// The path of the schema a discriminator mapping value names, given as a ref or a bare name.
+// Undefined for a ref to another file, which can't be checked. A bare name with no schema in the
+// source still counts as a name: a standalone snapshot can't load a relative file either.
+const mappingTargetTokens = (target: string): string[] | undefined => {
+  const pointer = localRefToPointer(target);
+  if (pointer !== undefined) {
+    return toTokens(pointer);
+  }
+  return target.includes('/') ? undefined : ['components', 'schemas', target];
+};
+
+/**
+ * Drops the `discriminator.mapping` entries that name a schema the projection left out. Mapping
+ * values are plain strings, so keeping what they name isn't part of following `$ref`s, and
+ * keeping it would pull in every subtype (most of Microsoft Graph). Left in, they dangle, and
+ * `oasdiff` refuses a document whose mapping names a missing schema.
+ */
+const pruneDiscriminatorMappings = (projected: JsonObject): void => {
+  const visit = (value: unknown, isNameMap = false): void => {
+    if (Array.isArray(value)) {
+      value.forEach((item) => visit(item));
+      return;
+    }
+    if (!isJsonObject(value)) {
+      return;
+    }
+    if (isNameMap) {
+      // Keys are names here, so a property called `discriminator` isn't one.
+      Object.values(value).forEach((child) => visit(child));
+      return;
+    }
+    const { discriminator } = value;
+    if (isJsonObject(discriminator) && isJsonObject(discriminator.mapping)) {
+      const { mapping } = discriminator;
+      for (const [name, target] of Object.entries(mapping)) {
+        const tokens = typeof target === 'string' ? mappingTargetTokens(target) : undefined;
+        if (tokens !== undefined && getAtTokens(projected, tokens) === undefined) {
+          delete mapping[name];
+        }
+      }
+      if (Object.keys(mapping).length === 0) {
+        delete discriminator.mapping;
+      }
+    }
+    for (const [key, child] of Object.entries(value)) {
+      // Literal values are data, not spec objects.
+      if (!LITERAL_KEYWORDS.has(key)) {
+        visit(child, NAME_MAPS.has(key));
+      }
+    }
+  };
+  visit(projected);
+};
+
 /**
  * Trims an OpenAPI 3.x document (Swagger 2.0 is converted first) to the given operations, with
  * their path-level parameters and servers, the security schemes they use and every component
@@ -161,8 +215,18 @@ export const projectSpec = (
     info: { title: isJsonObject(info) ? info.title : undefined },
     ...(servers === undefined ? {} : { servers }),
     ...(security === undefined ? {} : { security }),
-    paths: pickPaths(document, operations),
+    paths: pickPaths(document, operations, 'paths'),
   }) as JsonObject;
+  // Added after normalizing, which drops `x-` keys; left out when empty, as in most specs.
+  const msPaths = pickPaths(document, operations, 'x-ms-paths');
+  if (Object.keys(msPaths).length > 0) {
+    projected['x-ms-paths'] = normalizeSpecNode(msPaths, true);
+  }
+  // Converted awsJson models are served by `X-Amz-Target`, which this marks.
+  const awsJson = document[AWS_JSON_EXTENSION];
+  if (awsJson !== undefined) {
+    projected[AWS_JSON_EXTENSION] = awsJson;
+  }
 
   const kept = new Set<string>();
   const queue: unknown[] = [projected];
@@ -179,7 +243,11 @@ export const projectSpec = (
   };
 
   const schemeNames = new Set(securitySchemeNames(security));
-  for (const item of Object.values(projected.paths as JsonObject)) {
+  const pathItems = PATH_MAPS.flatMap((pathMap) => {
+    const items = projected[pathMap];
+    return isJsonObject(items) ? Object.values(items) : [];
+  });
+  for (const item of pathItems) {
     for (const operation of Object.values(item as JsonObject)) {
       if (isJsonObject(operation)) {
         securitySchemeNames(operation.security).forEach((name) => schemeNames.add(name));
@@ -198,5 +266,6 @@ export const projectSpec = (
   while (queue.length > 0) {
     forEachRef(queue.shift(), keepRef);
   }
+  pruneDiscriminatorMappings(projected);
   return projected;
 };

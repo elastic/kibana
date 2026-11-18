@@ -12,25 +12,28 @@ import { useParams } from 'react-router-dom';
 import type { WorkflowEditorReadOnlyReason } from '@kbn/workflows/common/constants';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { useWorkflowUrlState } from './use_workflow_url_state';
-import { selectWorkflow } from '../entities/workflows/store/workflow_detail/selectors';
+import {
+  selectIsEditorExecutionYaml,
+  selectWorkflow,
+} from '../entities/workflows/store/workflow_detail/selectors';
 
 /** Returns why the workflow editor is read-only, or undefined when the user can edit. */
 export const useWorkflowEditorReadOnlyReason = (): WorkflowEditorReadOnlyReason | undefined => {
   const { id: workflowId } = useParams<{ id?: string }>();
   const workflow = useSelector(selectWorkflow);
-  const { activeTab } = useWorkflowUrlState();
+  const isEditorOnSnapshot = useSelector(selectIsEditorExecutionYaml);
+  const { isViewingExecution } = useWorkflowUrlState();
   const { canCreateWorkflow, canUpdateWorkflow } = useWorkflowsCapabilities();
   const canEditWorkflow = workflowId
     ? canUpdateWorkflow && workflow?.permissions?.edit !== false
     : canCreateWorkflow;
 
-  // The executions tab shows past execution snapshots, so editing is never meaningful there. The URL
-  // is the source of truth so the editor is read-only right away, before the store catches up.
-  // Running a test from the workflow tab also puts an executionId in the URL, but stays editable.
-  // Managed and permission reasons come first: they also block the Workflow tab.
+  // A run selected on the executions tab shows its snapshot. The URL makes the editor read-only
+  // before the store catches up, and the store keeps it read-only until a closed run's snapshot
+  // leaves the editor. Managed and permission reasons come first: they also block the Workflow tab.
   if (workflow?.managed === true) return 'managed';
   if (!canEditWorkflow) return 'no_permission';
-  if (activeTab === 'executions') return 'executions_tab';
+  if (isViewingExecution || isEditorOnSnapshot) return 'executions_tab';
   return undefined;
 };
 

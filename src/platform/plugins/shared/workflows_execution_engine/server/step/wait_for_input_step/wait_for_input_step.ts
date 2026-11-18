@@ -11,8 +11,6 @@ import {
   DEFAULT_WAIT_FOR_INPUT_TIMEOUT,
   HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY,
   HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY,
-  HITL_TOKEN_EXPIRES_AT_INPUT_FIELD,
-  HITL_TOKEN_HASH_INPUT_FIELD,
   isHitlExternalResumeEnabled,
 } from '@kbn/workflows';
 import type { WaitForInputGraphNode } from '@kbn/workflows/graph';
@@ -24,6 +22,7 @@ import {
 import {
   invalidateHitlExternalResumeTokenIfPresent,
   mintHitlExternalResumeToken,
+  persistHitlExternalResumeToken,
 } from './hitl_external_resume_helpers';
 import {
   getResolvedDynamicTimeout,
@@ -113,6 +112,8 @@ export class WaitForInputStepImpl implements NodeImplementation, CancellableNode
       }),
     };
 
+    this.stepExecutionRuntime.setInput(stepInput);
+
     const channels = withConfig.channels;
     if (
       hasExternalHitlChannels(channels) &&
@@ -129,10 +130,7 @@ export class WaitForInputStepImpl implements NodeImplementation, CancellableNode
         execution,
         timeout: dynamicTimeout,
       });
-
-      stepInput[HITL_TOKEN_HASH_INPUT_FIELD] = resumeToken.tokenHash;
-      stepInput[HITL_TOKEN_EXPIRES_AT_INPUT_FIELD] = resumeToken.expiresAt;
-      this.stepExecutionRuntime.setInput(stepInput);
+      persistHitlExternalResumeToken(this.stepExecutionRuntime, resumeToken, stepInput);
 
       const kibanaUrl = getKibanaUrl(this.dependencies.coreStart, this.dependencies.cloudSetup);
       const formUrl = buildExternalResumeFormUrl({
@@ -164,14 +162,19 @@ export class WaitForInputStepImpl implements NodeImplementation, CancellableNode
         stepMessage: message,
         formUrl,
         kibanaUrl,
+        inputSchema: stepInput.schema,
+        slackInteractiveResume: {
+          executionId: execution.id,
+          stepId: this.stepExecutionRuntime.stepExecutionId,
+          token: resumeToken.token,
+          spaceId,
+        },
         renderTemplate: (template) =>
           String(ctx.renderValueAccordingToContext(template, hitlTemplateContext)),
         connectorExecutor: this.connectorExecutor,
         abortController: this.stepExecutionRuntime.abortController,
       });
     }
-
-    this.stepExecutionRuntime.setInput(stepInput);
 
     this.workflowLogger.logDebug(`Step '${this.node.stepId}' is waiting for human input`, {
       event: { action: 'hitl:waiting' },

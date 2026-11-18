@@ -15,6 +15,8 @@ import { mockAnomalies } from '../../../common/components/ml/mock';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import type { UserSummaryProps } from '.';
 import { UserOverview } from '.';
+import type { OpenFlyoutLinkProps } from '../../../flyout_v2/shared/components/open_flyout_link';
+import { FLYOUT_LINK_TEST_ID } from '../../../flyout/shared/components/test_ids';
 
 const defaultProps = {
   data: undefined,
@@ -24,6 +26,18 @@ const defaultProps = {
   isAuthorized: true,
   loading: false,
 };
+
+const mockOpenFlyoutLink = jest.fn();
+jest.mock('../../../flyout_v2/shared/components/open_flyout_link', () => {
+  const actual = jest.requireActual('../../../flyout_v2/shared/components/open_flyout_link');
+  return {
+    ...actual,
+    OpenFlyoutLink: (props: OpenFlyoutLinkProps) => {
+      mockOpenFlyoutLink(props);
+      return <actual.OpenFlyoutLink {...props} />;
+    },
+  };
+});
 
 jest.mock('../../../entity_analytics/api/hooks/use_risk_score');
 
@@ -57,7 +71,6 @@ describe('User Summary Component', () => {
     indexPatterns: [],
     jobNameById: {},
     scopeId: 'testScopeId',
-    isFlyoutOpen: false,
   };
 
   beforeEach(() => {
@@ -126,5 +139,18 @@ describe('User Summary Component', () => {
 
     expect(getByTestId('user-risk-overview')).toHaveTextContent(risk);
     expect(getByTestId('user-risk-overview')).toHaveTextContent(riskScore.toString());
+  });
+
+  test('it links the IP addresses to the network flyout', () => {
+    const { getAllByTestId } = render(
+      <TestProviders>
+        <UserOverview {...mockProps} />
+      </TestProviders>
+    );
+
+    expect(mockOpenFlyoutLink).toHaveBeenCalledWith(
+      expect.objectContaining({ field: 'host.ip', value: '10.142.0.7' })
+    );
+    expect(getAllByTestId(FLYOUT_LINK_TEST_ID)[0]).toHaveTextContent('10.142.0.7');
   });
 });

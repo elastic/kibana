@@ -9,7 +9,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { evaluate as evalsBase } from '@kbn/evals';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import type { CreateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
+import {
+  ALERTING_V2_ACTION_POLICY_API_PATH,
+  ALERTING_V2_RULE_API_PATH,
+} from '@kbn/alerting-v2-constants';
 import {
   installHostMetricsDataStream,
   removeHostMetricsDataStream,
@@ -29,6 +32,9 @@ const COMMON_HEADERS = {
   'x-elastic-internal-origin': 'kibana',
   'Content-Type': 'application/json',
 };
+
+const WORKFLOW_HEADERS = { ...COMMON_HEADERS, 'elastic-api-version': '2023-10-31' };
+const WORKFLOWS_API_PATH = '/api/workflows/workflow';
 
 /** A saved entity seeded before the test, so the agent has something to discover and edit. */
 export interface SeededEntity {
@@ -63,6 +69,8 @@ export const evaluate = evalsBase.extend<{
   emailConnectorId: string;
   /** Saves a rule with a unique name before the test and deletes it afterwards. */
   existingRule: SeededEntity;
+  /** Saves an action policy with a unique name before the test and deletes it afterwards. */
+  existingActionPolicy: SeededEntity;
 }>({
   evaluateDataset: [
     ({ agentBuilderClient, evaluators, executorClient, log }, use, testInfo) => {
@@ -177,6 +185,63 @@ export const evaluate = evalsBase.extend<{
           ignoreErrors: [404],
         });
         log.info(`Deleted eval rule ${data.id}`);
+      }
+    },
+    { scope: 'test' },
+  ],
+  existingActionPolicy: [
+    async ({ kbnClient, log }, use) => {
+      const name = `Eval existing policy ${uuidv4().slice(0, 8)}`;
+      // The policy destination must be a saved workflow, otherwise `manage_action_policy`
+      // rejects every edit during validation.
+      const { data: workflow } = await kbnClient.request<{ id: string }>({
+        method: 'POST',
+        path: WORKFLOWS_API_PATH,
+        headers: WORKFLOW_HEADERS,
+        body: {
+          yaml: [
+            "version: '1'",
+            `name: ${name} workflow`,
+            'enabled: true',
+            'triggers:',
+            '  - type: manual',
+            'steps:',
+            '  - name: log_alert',
+            '    type: console',
+            '    with:',
+            '      message: "Alert received"',
+          ].join('\n'),
+        },
+      });
+      log.info(`Created eval workflow ${workflow.id}`);
+      const { data } = await kbnClient.request<{ id: string }>({
+        method: 'POST',
+        path: ALERTING_V2_ACTION_POLICY_API_PATH,
+        headers: COMMON_HEADERS,
+        body: {
+          name,
+          description: 'Seeded by the alerting-v2 evals',
+          destinations: [{ type: 'workflow', id: workflow.id }],
+        },
+      });
+      log.info(`Created eval action policy ${data.id} (${name})`);
+      try {
+        await use({ id: data.id, name });
+      } finally {
+        await kbnClient.request({
+          method: 'DELETE',
+          path: `${ALERTING_V2_ACTION_POLICY_API_PATH}/${encodeURIComponent(data.id)}`,
+          headers: COMMON_HEADERS,
+          ignoreErrors: [404],
+        });
+        log.info(`Deleted eval action policy ${data.id}`);
+        await kbnClient.request({
+          method: 'DELETE',
+          path: `${WORKFLOWS_API_PATH}/${encodeURIComponent(workflow.id)}?force=true`,
+          headers: WORKFLOW_HEADERS,
+          ignoreErrors: [404],
+        });
+        log.info(`Deleted eval workflow ${workflow.id}`);
       }
     },
     { scope: 'test' },

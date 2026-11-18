@@ -148,10 +148,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'securitySolution:enableNewFlyout': {
-    type: 'boolean',
-    _meta: { description: 'Allows users to enable/disable the new flyout system.' },
-  },
   'securitySolution:enableAssetCriticality': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -189,6 +185,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'securitySolution:enableRuleChangesHistory': {
     type: 'boolean',
     _meta: { description: 'Allows users to enable/disable Rule Changes History.' },
+  },
+  'securitySolution:enableAlertZero': {
+    type: 'boolean',
+    _meta: { description: 'Enables AlertZero for this space.' },
   },
   'search:includeFrozen': {
     type: 'boolean',

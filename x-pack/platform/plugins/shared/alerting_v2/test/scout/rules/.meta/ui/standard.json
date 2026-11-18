@@ -1,5 +1,5 @@
 {
-  "sha1": "006ea78a9a5f7d458d8f8decb1fe576ef35fd0b4",
+  "sha1": "fc648410f80a2473d85a4bdfa7eb9b56c695b479",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -190,7 +190,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_attachment_canvas.spec.ts",
-        "line": 247,
+        "line": 251,
         "column": 32
       }
     },
@@ -204,7 +204,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_attachment_canvas.spec.ts",
-        "line": 256,
+        "line": 260,
         "column": 25
       }
     },
@@ -218,7 +218,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_attachment_canvas.spec.ts",
-        "line": 282,
+        "line": 286,
         "column": 20
       }
     },
@@ -232,8 +232,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_attachment_canvas.spec.ts",
-        "line": 297,
+        "line": 301,
         "column": 8
+      }
+    },
+    {
+      "id": "4faba1e7d6efba7-d43aa80dfb34ec3",
+      "title": "Rule attachment canvas in Agent Builder flags an agent edit to a saved rule until Update Rule saves it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_attachment_canvas.spec.ts",
+        "line": 311,
+        "column": 67
       }
     },
     {

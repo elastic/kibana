@@ -15,6 +15,7 @@ import type {
 import type {
   AlertingApiRequestHandlerContext,
   AlertingServerSetup,
+  AlertingServerStart,
 } from '@kbn/alerting-plugin/server';
 import type { CustomRequestHandlerContext, IRouter } from '@kbn/core/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
@@ -72,6 +73,7 @@ export interface WorkflowsServerPluginStartDeps {
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   licensing: LicensingPluginStart;
   dataViews: DataViewsServerPluginStart;
+  alerting?: AlertingServerStart;
 }
 
 export type WorkflowsManagementRequestHandlerContext = Promise<void>;

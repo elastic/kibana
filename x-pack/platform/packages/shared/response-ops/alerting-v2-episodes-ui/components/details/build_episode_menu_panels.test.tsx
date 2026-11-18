@@ -30,6 +30,7 @@ const makeAction = (id: string, overrides?: Partial<EpisodeAction>): EpisodeActi
   order: 0,
   displayName: `Action ${id}`,
   iconType: 'check',
+  enforcesOwnPrivileges: false,
   isCompatible: () => true,
   execute: jest.fn().mockResolvedValue(undefined),
   ...overrides,
@@ -71,6 +72,42 @@ describe('buildEpisodeMenuPanels', () => {
       'alertingV2EpisodeTakeAction-CUSTOM_WORKFLOW',
       '|',
       'alertingV2EpisodeTakeAction-ALERTING_V2_EDIT_EPISODE_TAGS',
+    ]);
+  });
+
+  it('places navigation actions directly under view details, ahead of workflow actions', () => {
+    const items = getItems(
+      [
+        makeAction('ALERTING_V2_EDIT_EPISODE_TAGS'),
+        makeAction('ALERTING_V2_ACK_EPISODE'),
+        makeAction('CUSTOM_NAVIGATION', { isNavigationAction: true }),
+      ],
+      '/alerts/ep-1'
+    );
+
+    expect(describeItems(items)).toEqual([
+      'alertingV2EpisodeTakeAction-viewDetails',
+      'alertingV2EpisodeTakeAction-CUSTOM_NAVIGATION',
+      '|',
+      'alertingV2EpisodeTakeAction-ALERTING_V2_ACK_EPISODE',
+      '|',
+      'alertingV2EpisodeTakeAction-ALERTING_V2_EDIT_EPISODE_TAGS',
+    ]);
+  });
+
+  it('leads the menu with navigation actions when there is no view details link', () => {
+    const items = getItems(
+      [
+        makeAction('ALERTING_V2_ACK_EPISODE'),
+        makeAction('CUSTOM_NAVIGATION', { isNavigationAction: true }),
+      ],
+      null
+    );
+
+    expect(describeItems(items)).toEqual([
+      'alertingV2EpisodeTakeAction-CUSTOM_NAVIGATION',
+      '|',
+      'alertingV2EpisodeTakeAction-ALERTING_V2_ACK_EPISODE',
     ]);
   });
 

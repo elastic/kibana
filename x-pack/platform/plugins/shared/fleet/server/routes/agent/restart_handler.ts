@@ -18,13 +18,15 @@ import * as AgentService from '../../services/agents';
 export const restartAgentHandler: FleetRequestHandler<
   TypeOf<typeof PostAgentRestartRequestSchema.params>,
   undefined,
-  undefined
+  TypeOf<typeof PostAgentRestartRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const soClient = coreContext.savedObjects.client;
 
-  const result = await AgentService.restartAgent(esClient, soClient, request.params.agentId);
+  const result = await AgentService.restartAgent(esClient, soClient, request.params.agentId, {
+    force: request.body?.force,
+  });
   const body: PostAgentRestartResponse = { actionId: result.actionId };
   return response.ok({ body });
 };
@@ -37,7 +39,7 @@ export const bulkRestartAgentsHandler: FleetRequestHandler<
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const soClient = coreContext.savedObjects.client;
-  const { agents, batchSize, includeInactive } = request.body;
+  const { agents, batchSize, includeInactive, force } = request.body;
   const agentOptions = Array.isArray(agents)
     ? { agentIds: agents }
     : { kuery: agents, showInactive: includeInactive };
@@ -46,6 +48,7 @@ export const bulkRestartAgentsHandler: FleetRequestHandler<
     ...agentOptions,
     batchSize,
     includeInactive,
+    force,
   });
   return response.ok({ body: { actionId: result.actionId } });
 };

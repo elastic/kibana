@@ -358,6 +358,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
             prepend: useCheckbox ? (
               <EuiCheckbox
                 id={htmlIdGenerator()()}
+                aria-label={policy.name}
                 onChange={NOOP}
                 checked={isPolicySelected.has(policy.id)}
                 disabled={customDisplayOptions.disabled ?? isDisabled}
@@ -383,6 +384,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
                   useCheckbox && !additionalItem.isGroupLabel ? (
                     <EuiCheckbox
                       id={htmlIdGenerator()()}
+                      aria-label={additionalItem.label}
                       onChange={NOOP}
                       checked={additionalItem.checked === 'on'}
                       disabled={additionalItem.disabled ?? isDisabled}

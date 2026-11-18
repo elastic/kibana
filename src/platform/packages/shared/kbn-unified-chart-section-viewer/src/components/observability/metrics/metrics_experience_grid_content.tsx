@@ -33,6 +33,8 @@ import { MetricsGridLoadingProgress } from '../../empty_state/empty_state';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { firstNonNullable } from '../../../common/utils';
 import { extractWhereCommand } from '../../../utils/extract_where_command';
+import { extractUsedMetadataFields } from '../../../utils/extract_used_metadata_fields';
+import { useEsqlQueryInfo } from '../../../hooks';
 import { getDuplicateMetricNames } from './utils/get_duplicate_metric_names';
 
 export interface MetricsExperienceGridContentProps
@@ -60,7 +62,16 @@ const useEsqlQueryParts = (query: Query | AggregateQuery | undefined) => {
     () => (esqlQuery ? getIndexPatternFromESQLQuery(esqlQuery) || undefined : undefined),
     [esqlQuery]
   );
-  return { whereStatements, userSource };
+  const { metadataFields: declaredMetadataFields } = useEsqlQueryInfo({ query: esqlQuery ?? '' });
+  const metadataFields = useMemo(
+    () =>
+      extractUsedMetadataFields({
+        metadataFields: declaredMetadataFields,
+        filters: whereStatements,
+      }),
+    [declaredMetadataFields, whereStatements]
+  );
+  return { whereStatements, metadataFields, userSource };
 };
 
 export const MetricsExperienceGridContent = ({
@@ -82,9 +93,12 @@ export const MetricsExperienceGridContent = ({
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
 
-  const { whereStatements, userSource } = useEsqlQueryParts(query);
-  const { whereStatements: loadedWhereStatements, userSource: loadedUserSource } =
-    useEsqlQueryParts(loadedFetchParams?.query);
+  const { whereStatements, metadataFields, userSource } = useEsqlQueryParts(query);
+  const {
+    whereStatements: loadedWhereStatements,
+    metadataFields: loadedMetadataFields,
+    userSource: loadedUserSource,
+  } = useEsqlQueryParts(loadedFetchParams?.query);
 
   const { searchTerm, currentPage, onPageChange, profileId, gridSettings } =
     useMetricsExperienceState();
@@ -106,6 +120,7 @@ export const MetricsExperienceGridContent = ({
     fetchParams: loadedFetchParams,
     services,
     whereStatements: loadedWhereStatements,
+    metadataFields: loadedMetadataFields,
     originalSource: loadedUserSource,
     profileId,
   });
@@ -179,6 +194,7 @@ export const MetricsExperienceGridContent = ({
           fetchParams={fetchParams}
           searchTerm={searchTerm}
           whereStatements={whereStatements}
+          metadataFields={metadataFields}
           userSource={userSource}
           getUserMessages={getUserMessages}
           getDescription={getDescription}

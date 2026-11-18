@@ -236,8 +236,7 @@ export type DispatcherConfig = TypeOf<typeof dispatcherSchema>;
  * the caller must derive the query `LIMIT` from the same format the query
  * itself will use.
  */
-export const getQueryRowLimit = (config: PluginConfig, format: EsqlResponseFormat): number => {
-  const maxAlerts = config.rules.run.alerts.max;
+export const getQueryRowLimit = (maxAlerts: number, format: EsqlResponseFormat): number => {
   const { maxRows } = format;
 
   return maxRows === undefined ? maxAlerts : Math.min(maxAlerts, maxRows);

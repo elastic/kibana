@@ -13,6 +13,10 @@ import { createWorkflowLiquidEngine } from '../../../../common/utils/create_work
 import { buildFieldsZodValidator } from '../../../../spec/lib/build_fields_zod_validator';
 import { getInputsFromDefinition } from '../../../../spec/lib/field_conversion';
 import { WorkflowSchema } from '../../../../spec/schema';
+import {
+  NIGHTSHIFT_ONLINE_EVALS_WORKFLOW,
+  NIGHTSHIFT_ONLINE_EVALS_WORKFLOW_ID,
+} from '../online_evals';
 
 interface WorkflowStep {
   name: string;
@@ -69,7 +73,7 @@ const workflow = parse(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml) as {
 describe('Nightshift investigation workflow', () => {
   it('records the investigation through the agent tools rather than persist steps', () => {
     expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.id).toBe('system-nightshift-investigation');
-    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.version).toBe(5);
+    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.version).toBe(6);
     expect(investigation.name).toBe('Nightshift Investigation');
     expect(investigation.steps.map((step) => step.name)).toEqual([
       'resolve_model',
@@ -77,11 +81,11 @@ describe('Nightshift investigation workflow', () => {
       'persist_investigation_started',
       'emit_investigation_started',
       'notify_started',
-      'list_investigation_sources',
-      'resolve_investigation_sources',
       'investigate',
       'emit_investigation_completed',
       'notify_completed',
+      'classify_for_online_evals',
+      'start_online_evals',
     ]);
     expect(requireStep('investigate').with?.message).toContain('{{ inputs.context | json }}');
   });
@@ -182,6 +186,22 @@ describe('Nightshift investigation workflow', () => {
     }
   });
 
+  // Nightshift tells an alert-recovery round from a user's message by how the message opens
+  // (`isAlertRecoveryRound`), so nothing may come before the caller's message.
+  it.each([
+    ['an alert recovery', { source: 'alert', follow_up: 'alert_recovered' }],
+    ['a user follow-up', { source: 'slack' }],
+  ])("opens the agent's message with the caller's message on %s", (_case, context) => {
+    const message = 'An alert in this investigation has recovered. Evidence follows.';
+    const rendered = createWorkflowLiquidEngine().parseAndRenderSync(
+      requireStep('investigate').with?.message ?? '',
+      {
+        inputs: { message, context },
+      }
+    );
+    expect(rendered.startsWith(message)).toBe(true);
+  });
+
   it('attributes agent calls to Nightshift under the shared investigation id', () => {
     expect(requireStep('investigate')).toMatchObject({
       'plugin-id': 'nightshift_investigation',
@@ -189,10 +209,6 @@ describe('Nightshift investigation workflow', () => {
       'product-solution': 'observability',
       'product-feature': 'nightshift',
     });
-  });
-
-  it('loads every requested source on one page', () => {
-    expect(requireStep('list_investigation_sources').with?.path).toContain('per_page=100&');
   });
 
   it('passes WorkflowSchema normalization', () => {
@@ -278,10 +294,7 @@ describe('Nightshift investigation workflow', () => {
   });
 
   it('addresses the investigation by its id rather than the run', () => {
-    // The source lookup lists sources by id and never touches the investigation document.
-    const requestSteps = collectStepsByType(investigation.steps, 'kibana.request').filter(
-      ({ name }) => name !== 'list_investigation_sources'
-    );
+    const requestSteps = collectStepsByType(investigation.steps, 'kibana.request');
 
     for (const { with: params } of requestSteps) {
       expect(params?.path).toContain('{{ inputs.investigation_id | default: execution.id }}');
@@ -305,18 +318,78 @@ describe('Nightshift investigation workflow', () => {
     expect(investigation.steps.some(({ type }) => type === 'workflow.fail')).toBe(false);
   });
 
+  describe('online evals hand-off', () => {
+    const classify = requireStep('classify_for_online_evals');
+    const start = requireStep('start_online_evals') as WorkflowStep & {
+      with: { 'workflow-id': string; 'run-as-mode': string; inputs: Record<string, string> };
+    };
+
+    it('starts scoring without waiting, as this run, only for a round worth scoring', () => {
+      expect(start).toMatchObject({
+        type: 'workflow.executeAsync',
+        with: { 'workflow-id': NIGHTSHIFT_ONLINE_EVALS_WORKFLOW_ID, 'run-as-mode': 'inherit' },
+      });
+      const condition = (start.if ?? '').slice(3, -2);
+      const engine = createWorkflowLiquidEngine();
+      for (const [output, expected] of [
+        [{ should_score: true }, true],
+        [{ should_score: false }, false],
+        [undefined, false],
+      ] as const) {
+        expect(
+          engine.evalValueSync(condition, { steps: { classify_for_online_evals: { output } } })
+        ).toBe(expected);
+      }
+    });
+
+    it('never fails the investigation', () => {
+      expect(classify['on-failure']).toEqual({ continue: true });
+      expect(start['on-failure']).toEqual({ continue: true });
+    });
+
+    it('passes only inputs the scoring workflow declares, including every one it requires', () => {
+      const [{ inputs: declared }] = parse(NIGHTSHIFT_ONLINE_EVALS_WORKFLOW.yaml)
+        .triggers as Array<{
+        inputs: { properties: Record<string, unknown>; required: string[] };
+      }>;
+      const passed = Object.keys(start.with.inputs);
+      expect(passed.filter((name) => !(name in declared.properties))).toEqual([]);
+      expect(declared.required.filter((name) => !passed.includes(name))).toEqual([]);
+    });
+
+    it.each([
+      [
+        'a first round',
+        { alerts: [{ rule_type_id: 'apm.transaction_error_rate' }] },
+        'apm.transaction_error_rate',
+      ],
+      [
+        'a recovery round',
+        { follow_up: 'alert_recovered', alert_rule_type: 'apm.transaction_error_rate' },
+        'apm.transaction_error_rate',
+      ],
+      ['a run without an alert', { source: 'manual' }, undefined],
+    ])('sends the alert rule type of %s', (_, context, expected) => {
+      const expression = start.with.inputs.alert_rule_type.slice(3, -2);
+      expect(createWorkflowLiquidEngine().evalValueSync(expression, { inputs: { context } })).toBe(
+        expected
+      );
+    });
+
+    it('sends the run start as a date the score step can read, to the millisecond', () => {
+      const startedAt = new Date('2026-11-02T15:04:05.123Z');
+      const rendered = createWorkflowLiquidEngine().parseAndRenderSync(
+        start.with.inputs.investigation_started_at,
+        { execution: { startedAt } }
+      );
+      expect(Date.parse(rendered)).toBe(startedAt.getTime());
+      expect(classify.with?.investigation_started_at).toBe(
+        start.with.inputs.investigation_started_at
+      );
+    });
+  });
+
   it('knows nothing about Slack', () => {
     expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml).not.toMatch(/slack/i);
-  });
-});
-
-it('accepts a telemetry target independently of the model and keeps the single investigator', () => {
-  expect(investigation.triggers[0].inputs.properties.telemetry_target).toMatchObject({
-    type: 'string',
-    maxLength: 64,
-  });
-  expect(requireStep('investigate')).toMatchObject({
-    'agent-id': 'nightshift.investigation',
-    'connector-id': '{{ steps.resolve_model.output.connector_id }}',
   });
 });

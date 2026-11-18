@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// eslint-disable-next-line @kbn/imports/no_direct_monaco_import -- we need to import monaco directly for this service
+// eslint-disable-next-line @kbn/kbn-monaco/no_direct_monaco_import -- we need to import monaco directly for this service
 import type { monaco } from '@kbn/monaco';
 import type { Locator, ScoutPage } from '@kbn/scout';
 import { PLUGIN_ID } from '../../../../../common';
+import { EDITOR_READY_TIMEOUT } from '../constants';
 
 declare global {
   interface Window {
@@ -106,22 +107,21 @@ export class WorkflowEditorPage {
   }
 
   /**
-   * Navigate to the workflow editor for a new workflow. "Create workflow" opens the
-   * agentic-first landing; "Start manually" opens the blank editor.
+   * Navigate to the workflow editor for a new workflow. `startBlank=true` is the app's entry
+   * point for "Start manually", so it skips the agentic-first landing.
    */
   async gotoNewWorkflow() {
-    await this.page.gotoApp(PLUGIN_ID);
-    await this.page.testSubj.click('createWorkflowButton');
-    await this.page.testSubj.click('agenticFirstStartManuallyButton');
-    await this.waitForEditorToLoad();
+    await this.page.gotoApp(`${PLUGIN_ID}/create`, {
+      params: { startBlank: 'true' },
+      readyWhen: this.yamlEditor,
+    });
   }
 
   /**
    * Navigate to the workflow editor for an existing workflow by ID
    */
   async gotoWorkflow(workflowId: string) {
-    await this.page.gotoApp(`${PLUGIN_ID}/${workflowId}`);
-    await this.waitForEditorToLoad();
+    await this.page.gotoApp(`${PLUGIN_ID}/${workflowId}`, { readyWhen: this.yamlEditor });
   }
 
   /**
@@ -131,14 +131,8 @@ export class WorkflowEditorPage {
     await this.page.gotoApp(`${PLUGIN_ID}/${workflowId}`, {
       params: { tab: 'executions' },
     });
-    const list = this.page.testSubj.locator('workflowExecutionList');
-    const openList = this.page.testSubj.locator('workflowDetailExecutionsButton');
-    // The executions tab still shows the list inline. The flyout opens from the header button.
-    await list.or(openList).waitFor({ state: 'visible' });
-    if (!(await list.isVisible())) {
-      await openList.click();
-      await list.waitFor({ state: 'visible' });
-    }
+    // The executions tab opens the list. Do not click the header button: it closes the list.
+    await this.page.testSubj.locator('workflowExecutionList').waitFor({ state: 'visible' });
   }
 
   /**
@@ -154,7 +148,7 @@ export class WorkflowEditorPage {
    * Wait for the YAML editor to be visible and ready
    */
   async waitForEditorToLoad() {
-    await this.yamlEditor.waitFor({ state: 'visible' });
+    await this.yamlEditor.waitFor({ state: 'visible', timeout: EDITOR_READY_TIMEOUT });
   }
 
   /**

@@ -62,7 +62,7 @@ describe('Impact', () => {
   it('renders nothing when there are no pills', () => {
     renderImpact({ impact: paged([]) });
 
-    expect(screen.queryByRole('heading', { name: 'Impact' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Impacted entities' })).not.toBeInTheDocument();
   });
 
   it('renders the pills it is given, in order, with their counts', () => {

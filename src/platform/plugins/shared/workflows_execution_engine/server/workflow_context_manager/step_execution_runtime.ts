@@ -22,11 +22,14 @@ import type { WorkflowContextManager } from './workflow_context_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import type { RuntimeGraphView } from './workflow_runtime_graph';
 import { WorkflowScopeStack } from './workflow_scope_stack';
-import { toExecutionError } from '../step/errors';
+import { STEP_SIZE_LIMIT_EXCEEDED, toExecutionError } from '../step/errors';
 import type { RunStepResult } from '../step/node_implementation';
 import { extractConnectorId, extractTokenUsage, parseDuration, renderDuration } from '../utils';
 
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
+
+/** Step-state flag set when this step execution first records its input. */
+export const INPUT_RECORDED_STATE_KEY = '__inputRecorded';
 
 interface StepExecutionRuntimeInit {
   contextManager: WorkflowContextManager;
@@ -76,6 +79,11 @@ export class StepExecutionRuntime {
 
   public get stepExecution(): EsWorkflowStepExecution | undefined {
     return this.workflowExecutionState.getStepExecution(this.stepExecutionId);
+  }
+
+  /** True once this step execution has recorded its input. Step state holds the flag. */
+  public get isInputRecorded(): boolean {
+    return this.getCurrentStepState()?.[INPUT_RECORDED_STATE_KEY] === true;
   }
 
   public get workflowExecution() {
@@ -203,7 +211,7 @@ export class StepExecutionRuntime {
     this.workflowExecutionState.upsertStep({
       id: this.stepExecutionId,
       stepId,
-      state,
+      state: this.stateWithInputRecordedFlag(state),
     });
   }
 
@@ -230,6 +238,26 @@ export class StepExecutionRuntime {
 
   public setInput(input: Record<string, unknown>): void {
     this.stepIoService.setStepInput(this.stepExecutionId, input as JsonValue);
+    if (this.isInputRecorded) {
+      return;
+    }
+    this.setCurrentStepState({
+      ...(this.getCurrentStepState() ?? {}),
+      [INPUT_RECORDED_STATE_KEY]: true,
+    });
+  }
+
+  /**
+   * Keeps the input-recorded flag across a state replacement. Clearing state
+   * drops it, because that step execution is finished.
+   */
+  private stateWithInputRecordedFlag(
+    state: Record<string, unknown> | undefined
+  ): Record<string, unknown> | undefined {
+    if (state === undefined || !this.isInputRecorded) {
+      return state;
+    }
+    return { ...state, [INPUT_RECORDED_STATE_KEY]: true };
   }
 
   /** Stamps the optional HITL audit envelope on the in-memory step doc (flushed with the next step write). */
@@ -303,8 +331,8 @@ export class StepExecutionRuntime {
   public failStep(error: Error, partialOutput?: unknown): void {
     // Guardrail: this is the single choke point where a thrown error becomes the persisted
     // error for both the step and the workflow execution. The persisted shape is constrained by
-    // `BaseSerializedErrorSchema` (`type` / `message` / optional `details`) and produced by
-    // `toSerializableObject`, which only ever serializes those three fields. So arbitrary instance
+    // `BaseSerializedErrorSchema` (`type` / `message` / optional `details` / optional `retryable`)
+    // and produced by `toSerializableObject`, which only ever serializes those fields. So arbitrary instance
     // fields a custom error may carry — e.g. `KibanaApiCallError.body`/`.headers` holding a full
     // parsed HTTP response — are never written to ES; only what an error explicitly puts in
     // `details` is persisted (`KibanaApiCallError` deliberately limits this to the safe `status`).
@@ -407,10 +435,11 @@ export class StepExecutionRuntime {
 
   /**
    * Attempts to enter a wait state for the step execution based on a relative delay duration.
-   * If the step is already in a wait state, it exits the wait state instead.
+   * If the step is already waiting and its stored `resumeAt` has passed, it exits the wait.
+   * A re-entry before that time stays parked, so an earlier scheduler tick cannot shorten it.
    *
    * @param delay - The delay duration as a string (e.g., "5s", "1m", "2h").
-   * @returns A boolean indicating whether the step has entered a wait state (true) or exited it (false).
+   * @returns A boolean indicating whether the step is waiting (true) or has exited the wait (false).
    */
   public tryEnterDelay(delay: string): boolean {
     return this.tryEnterWaitUntil(new Date(new Date().getTime() + parseDuration(delay)));
@@ -418,7 +447,9 @@ export class StepExecutionRuntime {
 
   /**
    * Attempts to enter a wait state for the step execution.
-   * If the step is already in a wait state, it clears the state and returns false (exit wait).
+   * If the step is already waiting on a timer whose `resumeAt` has passed, it clears that
+   * sentinel and returns false (exit wait). A timer re-entered before `resumeAt` stays parked
+   * and returns true — a parallel floor tick or an earlier sibling `resumeAt` must not finish it.
    *
    * "Already waiting" is detected by two complementary signals:
    * - `state.resumeAt` is present: used by timer-based waits (e.g. `wait` step) where a resume
@@ -429,7 +460,7 @@ export class StepExecutionRuntime {
    * @param resumeDate - When provided, stored as `resumeAt` so the scheduler can wake the step
    *   at that time. Omit for indefinite waits triggered externally (e.g. resume API).
    * @param waitingStatus - Status to set while waiting. Defaults to `ExecutionStatus.WAITING`.
-   * @returns `true` if the step has entered a wait state, `false` if it has exited one.
+   * @returns `true` if the step is waiting, `false` if it has exited a wait.
    */
   public tryEnterWaitUntil(
     resumeDate?: Date,
@@ -443,6 +474,9 @@ export class StepExecutionRuntime {
         : this.stepExecution?.status === waitingStatus;
 
     if (alreadyWaiting) {
+      if (resumeDate != null && this.isStoredResumeAtPending()) {
+        return true;
+      }
       const newState = { ...(this.stepExecution?.state || {}) };
       delete newState.resumeAt;
       this.workflowExecutionState.upsertStep({
@@ -463,6 +497,19 @@ export class StepExecutionRuntime {
       state: this.buildWaitState(resumeDate),
     });
     return true;
+  }
+
+  /**
+   * True when a timer wait's stored `resumeAt` is still in the future. Re-entering the step
+   * before then (another branch's wake, a concurrency floor tick) must leave the wait parked.
+   */
+  private isStoredResumeAtPending(): boolean {
+    const resumeAt = this.stepExecution?.state?.resumeAt;
+    if (typeof resumeAt !== 'string') {
+      return false;
+    }
+    const resumeAtMs = new Date(resumeAt).getTime();
+    return Number.isFinite(resumeAtMs) && new Date().getTime() < resumeAtMs;
   }
 
   /**
@@ -578,7 +625,7 @@ export class StepExecutionRuntime {
     const message = `Step '${stepName}' failed: ${executionError.message}`;
 
     const tags = ['workflow', 'step', 'fail'];
-    if (executionError.type === 'StepSizeLimitExceeded') {
+    if (executionError.type === STEP_SIZE_LIMIT_EXCEEDED) {
       tags.push('response-size-exceeded');
     }
 

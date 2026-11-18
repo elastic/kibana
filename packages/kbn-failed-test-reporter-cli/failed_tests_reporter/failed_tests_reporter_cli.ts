@@ -27,7 +27,7 @@ import { reportConsistentFailureIssues } from './consistent_failure_issues';
 import { ExistingFailedTestIssues } from './existing_failed_test_issues';
 import { generateScoutTestFailureArtifacts } from './generate_scout_test_failure_artifacts';
 import type { TestFailure } from './get_failures';
-import { GithubApi } from './github_api';
+import { DEFAULT_GITHUB_REPO, GithubApi } from './github_api';
 import { processJUnitReports } from './process_junit_reports';
 import type { ProcessReportsParams } from './process_reports_types';
 import { processScoutReports } from './process_scout_reports';
@@ -47,11 +47,13 @@ async function checkConsistentFailures({
   log,
   failures,
   repo,
+  replacePerTestIssues,
   dryRun,
 }: {
   log: ToolingLog;
   failures: TestFailure[];
   repo: string;
+  replacePerTestIssues: boolean;
   dryRun: boolean;
 }) {
   const { BUILDKITE_PIPELINE_SLUG: pipeline, BUILDKITE_BRANCH: branch } = process.env;
@@ -79,12 +81,19 @@ async function checkConsistentFailures({
       github: new GithubApi({ log, token: process.env.GITHUB_TOKEN, dryRun, repo }),
       repo,
       build: { pipeline, branch },
+      replacePerTestIssues,
       dryRun,
     });
   } finally {
     await es.close();
   }
 }
+
+// Whether failures get per-test issues (the legacy behaviour, default): a new one for a test no
+// issue tracks yet, a comment on an existing one. 'false' leaves issues to the daily flaky suite
+// reporter and `--report-failing-suites`, which replace the per-test issues with suite issues;
+// suite issues are updated either way. Set in the pipeline env, flip back to fall back.
+const PER_TEST_ISSUES = process.env.REPORT_FAILED_TESTS_PER_TEST_ISSUES !== 'false';
 
 export function runFailedTestsReporterCli() {
   run(
@@ -153,6 +162,11 @@ export function runFailedTestsReporterCli() {
 
         if (reportPaths.length) {
           log.info('found', reportPaths.length, 'reports', reportPaths);
+          if (!PER_TEST_ISSUES) {
+            log.info(
+              'REPORT_FAILED_TESTS_PER_TEST_ISSUES=false: per-test issues will be neither opened nor updated, only suite issues'
+            );
+          }
 
           // Separate JUnit and Scout reports
           const junitReports = reportPaths.filter((p) => p.endsWith('.xml'));
@@ -177,6 +191,9 @@ export function runFailedTestsReporterCli() {
             pipeline,
             prependTitle,
             updateGithub,
+            perTestIssues: PER_TEST_ISSUES,
+            // the suite issues come from the repository the per-test issues are in
+            suiteIssueComments: !(reportFailingSuites && failingSuitesRepo === DEFAULT_GITHUB_REPO),
             indexInEs,
             reportUpdate,
             bkMeta,
@@ -201,6 +218,7 @@ export function runFailedTestsReporterCli() {
                 log,
                 failures: [...junitFailures, ...scoutFailures],
                 repo: failingSuitesRepo,
+                replacePerTestIssues: !PER_TEST_ISSUES,
                 dryRun: !updateGithub,
               });
             } catch (error) {

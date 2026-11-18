@@ -1,0 +1,72 @@
+{
+  "sha1": "8d75556296b3cb149c20aac0915f3aae46f6473a",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "60214e2b70f57e2-1dfffa94c293b93",
+      "title": "deprecated `siem` versions map onto current `ui:` actions maps siem ui: actions onto siemV5 in both directions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/api/tests/siem_deprecated_ui_actions.spec.ts",
+        "line": 223,
+        "column": 11
+      }
+    },
+    {
+      "id": "60214e2b70f57e2-50c8009b825c5fb",
+      "title": "deprecated `siem` versions map onto current `ui:` actions maps siemV2 ui: actions onto siemV5 in both directions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/api/tests/siem_deprecated_ui_actions.spec.ts",
+        "line": 223,
+        "column": 11
+      }
+    },
+    {
+      "id": "60214e2b70f57e2-f9b169a1495d1da",
+      "title": "deprecated `siem` versions map onto current `ui:` actions maps siemV3 ui: actions onto siemV5 in both directions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/api/tests/siem_deprecated_ui_actions.spec.ts",
+        "line": 223,
+        "column": 11
+      }
+    },
+    {
+      "id": "60214e2b70f57e2-0fefebab448368e",
+      "title": "deprecated `siem` versions map onto current `ui:` actions maps siemV4 ui: actions onto siemV5 in both directions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/api/tests/siem_deprecated_ui_actions.spec.ts",
+        "line": 223,
+        "column": 11
+      }
+    }
+  ]
+}

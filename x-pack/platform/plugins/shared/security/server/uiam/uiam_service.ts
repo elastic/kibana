@@ -6,8 +6,10 @@
  */
 
 import Boom from '@hapi/boom';
+import { createHash } from 'crypto';
 import { readFileSync } from 'fs';
 import { chunk, partition } from 'lodash';
+import { LRUCache } from 'lru-cache';
 import { Agent } from 'undici';
 
 import { schema } from '@kbn/config-schema';
@@ -16,7 +18,9 @@ import {
   deriveInternalCallerAttestation,
   HTTPAuthorizationHeader,
   isExternalUiamCredential,
+  isUiamCredential,
   resolveUiamClientAuthentication,
+  UIAM_ERROR_CODES,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 } from '@kbn/core-security-server';
 import type {
@@ -34,7 +38,10 @@ import type {
   ClientAuthentication,
   GrantUiamAPIKeyParams,
 } from '@kbn/security-plugin-types-server';
+import { timeoutSignal } from '@kbn/std';
+import { lazySchema, z } from '@kbn/zod';
 
+import type { UiamAuthorizationCheck, UiamAuthorizationResult } from './authorization_types';
 import {
   getUiamClientAuthentication,
   type UiamClientAuthentication,
@@ -160,6 +167,23 @@ export type ResolvedUsersResponse = UiamResolvedUsersResponse;
  */
 const RESOLVE_USERS_BATCH_SIZE = 100;
 
+type UiamAuthorizationDecision = 'permit' | 'deny';
+
+/**
+ * Represents the request body for an authorization check via UIAM.
+ */
+interface UiamCheckAuthorizationRequestBody {
+  checks: UiamAuthorizationCheck[];
+}
+
+/**
+ * Represents the response from an authorization check via UIAM, in the order of the request's checks.
+ */
+interface UiamCheckAuthorizationResponse {
+  decision: UiamAuthorizationDecision;
+  checks: Array<{ check: UiamAuthorizationCheck; decision: UiamAuthorizationDecision }>;
+}
+
 /**
  * Shape of the `error` object inside a UIAM non-2xx response payload, mirroring
  * UIAM's `ErrorDetails` schema. All fields are optional per the UIAM contract.
@@ -183,6 +207,43 @@ const OAUTH_AUDIENCE_MISMATCH_ERROR_TYPE = 'KIBANA.AUDIENCE_MISMATCH';
  * recognizable classification.
  */
 const OAUTH_UNKNOWN_ERROR_TYPE = 'UNKNOWN';
+
+/**
+ * The principal UIAM records as the creator of an API key: the user for a key granted from a
+ * session, the source key for a key granted from another API key, or the organization service
+ * account that granted it.
+ */
+const apiKeyCreatorSchema = lazySchema(() =>
+  z.discriminatedUnion('type', [
+    z.object({ type: z.literal('user'), user_id: z.number() }),
+    z.object({ type: z.literal('api-key'), api_key_id: z.string() }),
+    z.object({
+      type: z.literal('organization-service-account'),
+      organization_service_account_id: z.string(),
+    }),
+  ])
+);
+
+/** The part of UIAM's `_authenticate` payload for an API key that carries its creator. */
+const apiKeyAuthenticateResponseSchema = lazySchema(() =>
+  z.object({
+    credentials: z.object({ creator: apiKeyCreatorSchema }),
+  })
+);
+
+export type UiamApiKeyCreator = z.infer<typeof apiKeyCreatorSchema>;
+
+/**
+ * Background tasks use the same key over and over. A key's creator never changes, so `max` is what
+ * bounds the cache, and the TTL only keeps idle entries from lingering. The cache says who created
+ * a key, not that the key is still valid, so callers must authenticate the key before they trust
+ * the creator.
+ */
+const API_KEY_CREATOR_CACHE_MAX_SIZE = 1000;
+const API_KEY_CREATOR_CACHE_TTL_MS = 5 * 60 * 1000;
+
+/** The lookup is optional enrichment, so it is cut off instead of holding up the request. */
+const API_KEY_CREATOR_REQUEST_TIMEOUT_MS = 5 * 1000;
 
 /**
  * Response containing a list of OAuth clients.
@@ -280,6 +341,18 @@ export interface UiamServicePublic {
   convertApiKeys(keys: string[]): Promise<ConvertUiamApiKeysResponse>;
 
   /**
+   * Returns the principal UIAM records as the creator of the UIAM API key a request carries, or
+   * `undefined` when UIAM reports none we support. Any other credential resolves to `undefined`
+   * without asking UIAM. The lookup carries the client authentication the request already has,
+   * which is none for an external (user-created) key, as UIAM rejects it for those.
+   * Results are cached per key, so the caller must authenticate the key before it trusts the
+   * creator: a cached creator outlives a revoked or expired key. A failed or slow request is
+   * thrown for the caller to log and is not cached, while a response without a supported creator
+   * resolves to `undefined`.
+   */
+  getApiKeyCreator(request: KibanaRequest): Promise<UiamApiKeyCreator | undefined>;
+
+  /**
    * Creates a service account via the UIAM service.
    *
    * Called with the caller's own credential, so UIAM downscopes the new account
@@ -308,9 +381,10 @@ export interface UiamServicePublic {
 
   /**
    * Fetches one service account via the UIAM service. Only returns the account when its
-   * `assumable_by` policy names this Kibana's project.
+   * `assumable_by` policy names this Kibana's project. Resolves `null` when UIAM does not know the
+   * account, whether it says so with a 404 or with the 403 it sends for an unknown account.
    */
-  getServiceAccount(serviceAccountId: string): Promise<UiamServiceAccountDetails>;
+  getServiceAccount(serviceAccountId: string): Promise<UiamServiceAccountDetails | null>;
 
   /**
    * Revokes one service account via the UIAM service. Authorized against the account's
@@ -327,8 +401,11 @@ export interface UiamServicePublic {
    * UIAM authorizes the exchange against the service account's `assumable_by` policy.
    *
    * @param serviceAccountId The ID of the service account to exchange a token for.
+   * @returns The token, and its lifetime as an ISO-8601 duration when UIAM reports one.
    */
-  exchangeServiceAccountToken(serviceAccountId: string): Promise<{ token: string }>;
+  exchangeServiceAccountToken(
+    serviceAccountId: string
+  ): Promise<{ token: string; expires_in?: string }>;
 
   /**
    * Authenticates to UIAM as Kibana itself, using only the mTLS client certificate, and returns
@@ -454,6 +531,16 @@ export interface UiamServicePublic {
    * @param userIds The user IDs to resolve.
    */
   resolveUsers(request: KibanaRequest, userIds: string[]): Promise<ResolvedUsersResponse>;
+
+  /**
+   * Asks UIAM whether the principal behind the request may perform each action on each resource.
+   * @param request The request carrying the UIAM access token and optional client authentication.
+   * @param checks The checks to evaluate.
+   */
+  checkAuthorization(
+    request: KibanaRequest,
+    checks: UiamAuthorizationCheck[]
+  ): Promise<UiamAuthorizationResult>;
 }
 
 interface UiamServiceOptions {
@@ -475,6 +562,12 @@ export class UiamService implements UiamServicePublic {
   readonly #kibanaServerResourceURL: string;
   readonly #elasticsearchUrl?: string;
   readonly #userAgentHeader: string;
+  // Keyed by a hash of the credential, so the key itself is never held or logged. It holds the
+  // lookups themselves, so concurrent requests for a new key share one call to UIAM.
+  readonly #apiKeyCreators = new LRUCache<string, Promise<UiamApiKeyCreator | undefined>>({
+    max: API_KEY_CREATOR_CACHE_MAX_SIZE,
+    ttl: API_KEY_CREATOR_CACHE_TTL_MS,
+  });
 
   constructor(logger: Logger, config: UiamConfigType, options: UiamServiceOptions) {
     this.#logger = logger;
@@ -827,6 +920,66 @@ export class UiamService implements UiamServicePublic {
   }
 
   /**
+   * See {@link UiamServicePublic.getApiKeyCreator}.
+   */
+  async getApiKeyCreator(request: KibanaRequest): Promise<UiamApiKeyCreator | undefined> {
+    const authorization = HTTPAuthorizationHeader.parseFromRequest(request);
+    if (
+      !authorization ||
+      authorization.scheme.toLowerCase() !== 'apikey' ||
+      !isUiamCredential(authorization)
+    ) {
+      return undefined;
+    }
+
+    const cacheKey = createHash('sha256').update(authorization.credentials).digest('hex');
+    const cached = this.#apiKeyCreators.get(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    const lookup = this.#fetchApiKeyCreator(request);
+    this.#apiKeyCreators.set(cacheKey, lookup);
+    // A failed lookup says nothing about the key, so it is not kept.
+    lookup.catch(() => this.#apiKeyCreators.delete(cacheKey));
+    return lookup;
+  }
+
+  async #fetchApiKeyCreator(request: KibanaRequest): Promise<UiamApiKeyCreator | undefined> {
+    const deadline = timeoutSignal(API_KEY_CREATOR_REQUEST_TIMEOUT_MS);
+    try {
+      const requestOptions: RequestInit & { dispatcher?: Agent } = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': this.#userAgentHeader,
+          // Whatever client authentication already speaks for the key is kept, as for every other
+          // call made for a request, because the key may be bound to another client.
+          ...this.#getRequestAuthenticationHeaders(request),
+        },
+        signal: deadline,
+        dispatcher: this.#dispatcher,
+      };
+
+      const response = await UiamService.#parseUiamResponse(
+        await fetch(`${this.#config.url}/uiam/api/v1/authentication/_authenticate`, requestOptions)
+      );
+
+      const parsed = apiKeyAuthenticateResponseSchema.safeParse(response);
+      if (!parsed.success) {
+        this.#logger.debug(
+          `UIAM did not report a supported creator for the API key: ${parsed.error.message}`
+        );
+        return undefined;
+      }
+
+      return parsed.data.credentials.creator;
+    } finally {
+      deadline.dispose();
+    }
+  }
+
+  /**
    * See {@link UiamService.createServiceAccount}.
    */
   async createServiceAccount(
@@ -903,9 +1056,9 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.getServiceAccount}.
    */
-  async getServiceAccount(serviceAccountId: string): Promise<UiamServiceAccountDetails> {
+  async getServiceAccount(serviceAccountId: string): Promise<UiamServiceAccountDetails | null> {
     try {
-      this.#logger.debug(`Attempting to get service account ${serviceAccountId}.`);
+      this.#logger.debug(`Attempting to get service account [${serviceAccountId}].`);
 
       const response = await UiamService.#parseUiamResponse(
         await fetch(
@@ -922,11 +1075,22 @@ export class UiamService implements UiamServicePublic {
         )
       );
 
-      this.#logger.debug(`Successfully got service account ${serviceAccountId}.`);
+      this.#logger.debug(`Successfully got service account [${serviceAccountId}].`);
       return response;
     } catch (err) {
-      this.#logger.error(() => `Failed to get service account: ${getDetailedErrorMessage(err)}`);
+      // An unknown account is an answer rather than a failure, so it resolves rather than throws.
+      if (
+        UiamService.#getErrorCode(err) ===
+          UIAM_ERROR_CODES.ORGANIZATION_SERVICE_ACCOUNT_NOT_FOUND ||
+        (Boom.isBoom(err) && err.output.statusCode === 404)
+      ) {
+        this.#logger.debug(`Service account [${serviceAccountId}] was not found.`);
+        return null;
+      }
 
+      this.#logger.error(
+        () => `Failed to get service account [${serviceAccountId}]: ${getDetailedErrorMessage(err)}`
+      );
       throw err;
     }
   }
@@ -967,7 +1131,9 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.exchangeServiceAccountToken}.
    */
-  async exchangeServiceAccountToken(serviceAccountId: string): Promise<{ token: string }> {
+  async exchangeServiceAccountToken(
+    serviceAccountId: string
+  ): Promise<{ token: string; expires_in?: string }> {
     this.#logger.debug(
       `Attempting to exchange service account [id=${serviceAccountId}] for an ephemeral token.`
     );
@@ -977,7 +1143,7 @@ export class UiamService implements UiamServicePublic {
       // The certificate identifies Kibana's project for the account's assumable_by policy.
       dispatcher: this.#dispatcher,
     };
-    let response: { token: string };
+    let response: { token: string; expires_in?: string };
     try {
       response = await UiamService.#parseUiamResponse(
         await fetch(
@@ -1443,6 +1609,47 @@ export class UiamService implements UiamServicePublic {
   }
 
   /**
+   * See {@link UiamServicePublic.checkAuthorization}.
+   */
+  async checkAuthorization(
+    request: KibanaRequest,
+    checks: UiamAuthorizationCheck[]
+  ): Promise<UiamAuthorizationResult> {
+    this.#logger.debug(`Attempting to check authorization for ${checks.length} check(s).`);
+
+    const body: UiamCheckAuthorizationRequestBody = { checks };
+    const requestOptions: RequestInit & { dispatcher?: Agent } = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': this.#userAgentHeader,
+        ...this.#getRequestAuthenticationHeaders(request),
+      },
+      body: JSON.stringify(body),
+      dispatcher: this.#dispatcher,
+    };
+
+    try {
+      const response: UiamCheckAuthorizationResponse = await UiamService.#parseUiamResponse(
+        await fetch(`${this.#config.url}/uiam/api/v1/authorization/_check`, requestOptions)
+      );
+
+      this.#logger.debug(`Successfully checked authorization: ${response.decision}.`);
+      return {
+        permitted: response.decision === 'permit',
+        checks: response.checks.map(({ check, decision }) => ({
+          ...check,
+          permitted: decision === 'permit',
+        })),
+      };
+    } catch (err) {
+      this.#logger.error(() => `Failed to check authorization: ${getDetailedErrorMessage(err)}`);
+
+      throw err;
+    }
+  }
+
+  /**
    * Creates a custom dispatcher for the native `fetch` to use custom TLS connection settings.
    */
   #createFetchDispatcher() {
@@ -1521,6 +1728,15 @@ export class UiamService implements UiamServicePublic {
     };
 
     throw err;
+  }
+
+  static #getErrorCode(err: unknown): string | undefined {
+    if (!Boom.isBoom(err)) {
+      return undefined;
+    }
+
+    const payload = err.output?.payload as { error?: UiamErrorDetails } | undefined;
+    return payload?.error?.code;
   }
 
   static #getOAuthTokenExchangeErrorAttributes(err: unknown): {

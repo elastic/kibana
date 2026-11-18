@@ -10,10 +10,7 @@ import { buildConfigPanelContent, getEditableEmbeddableTypes } from '..';
 import {
   anomalyChartsPanelConfigSchema,
   anomalySwimlaneConfigSchema,
-  anomalyChartsPanelContentSchema,
-  anomalySwimlanePanelContentSchema,
   singleMetricViewerConfigSchema,
-  singleMetricViewerPanelContentSchema,
 } from '.';
 
 describe('ml_anomaly_charts registry entry', () => {
@@ -223,45 +220,5 @@ describe('ml_single_metric_viewer registry entry', () => {
         })
       ).toEqual(['ml_single_metric_viewer']);
     });
-  });
-});
-
-describe('ML panel content schemas', () => {
-  it('accepts anomaly charts content', () => {
-    expect(
-      anomalyChartsPanelContentSchema.safeParse({
-        source: 'config',
-        type: 'ml_anomaly_charts',
-        config: { job_ids: ['job-1'], severity_threshold: 50, title: 'Updated charts' },
-      }).success
-    ).toBe(true);
-  });
-
-  it('accepts swim lane content', () => {
-    expect(
-      anomalySwimlanePanelContentSchema.safeParse({
-        source: 'config',
-        type: 'ml_anomaly_swimlane',
-        config: {
-          job_ids: ['job-1'],
-          swimlane_type: 'viewBy',
-          view_by: 'host.name',
-          severity_threshold: 75,
-        },
-      }).success
-    ).toBe(true);
-  });
-
-  it('accepts single metric viewer content', () => {
-    expect(
-      singleMetricViewerPanelContentSchema.safeParse({
-        source: 'config',
-        type: 'ml_single_metric_viewer',
-        config: {
-          job_ids: ['job-1'],
-          selected_entities: { 'host.name': 'web-01' },
-        },
-      }).success
-    ).toBe(true);
   });
 });

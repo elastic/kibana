@@ -5,7 +5,18 @@
  * 2.0.
  */
 
-import { SEVERITY_COUNT_FIELDS, getEntityId, getEntityIds } from '../common';
+import { getEuidEsqlFilterBasedOnDocument } from '@kbn/entity-store/common/domain/euid';
+import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
+import { buildAlertEntityRows } from '../../queries/alert_entity_rows';
+import type { AlertEntityFilter } from '../../queries/alert_entity_rows';
+import {
+  ALLOWED_ENTITY_TYPES,
+  ENTITY_TYPE_FIELD,
+  SEVERITY_COUNT_FIELDS,
+  getEntityId,
+  getEntityIds,
+  isOneOf,
+} from '../common';
 import type { QueryArgs, Row } from '../common';
 import {
   IN_VIEW_AGGREGATION,
@@ -14,6 +25,7 @@ import {
 } from './entities_in_view';
 import {
   buildEntityAggregations,
+  buildIdentityPrefilter,
   buildJoinedPageSteps,
   buildLookback,
   buildStatsByEntityClause,
@@ -24,13 +36,6 @@ import {
   type EntityAggregation,
   fetchInChunks,
 } from './esql';
-import {
-  buildAlertEntityFilter,
-  buildAlertEuidPipeline,
-  buildAlertForkSteps,
-  buildStampedAlertBranch,
-  buildUnstampedAlertBranch,
-} from './euid_pipeline';
 import {
   buildRollUpOverAliasesSteps,
   getMergedRowsByEntity,
@@ -73,12 +78,48 @@ const ALERT_AGGREGATIONS: readonly EntityAggregation[] = [
 
 const ALERT_COLUMNS_STATS = buildStatsByEntityClause(buildEntityAggregations(ALERT_AGGREGATIONS));
 
+/** Older alerts lack an entity id, so they're matched by identity fields; unmatched rows are skipped. */
+export const buildAlertEntityFilter = (entities: readonly Row[]): AlertEntityFilter => {
+  const clauses = new Set<string>();
+  const matched: Row[] = [];
+  for (const entity of entities) {
+    const entityType = entity[ENTITY_TYPE_FIELD];
+    if (isOneOf(ALLOWED_ENTITY_TYPES, entityType)) {
+      const clause = getEuidEsqlFilterBasedOnDocument(
+        getBuiltInEntityDefinition(entityType),
+        entity
+      );
+      if (clause) {
+        clauses.add(clause);
+        matched.push(entity);
+      }
+    }
+  }
+  return {
+    entityIds: getEntityIds(entities),
+    ...(clauses.size
+      ? {
+          unstampedIdentityClause: [...clauses].join(' OR '),
+          unstampedIdentityPrefilter: buildIdentityPrefilter(matched),
+        }
+      : {}),
+  };
+};
+
+const ALERT_KEEP_COLUMNS = ['`@timestamp`', '`kibana.alert.severity`', '_ea_entity_id'].join(', ');
+
+/** The alerts as rows of `entity.id`, one per alert and entity they name. */
+const buildAlertsByEntityIdSteps = (filter?: AlertEntityFilter): string[] => [
+  ...buildAlertEntityRows({ keepColumns: ALERT_KEEP_COLUMNS, filter }),
+  '| RENAME _ea_entity_id AS `entity.id`',
+];
+
 /** Only entities with alerts; filters are on entity fields, so they apply after the join. */
 const buildAlertSortWithValueQuery = (args: QueryArgs, limit: number): string[] => [
   SET_UNMAPPED_NULLIFY,
   `FROM ${getAlertsIndex(args.namespace)}`,
   `| WHERE ${buildOpenAlertsCondition(args.timeRange)}`,
-  ...buildAlertEuidPipeline(),
+  ...buildAlertsByEntityIdSteps(),
   ALERT_COLUMNS_STATS,
   ...buildRollUpOverAliasesSteps(args, ALERT_AGGREGATIONS),
   ...buildSortWithValueSteps(args, args.sort.field, limit, ALERT_FIELDS),
@@ -104,11 +145,12 @@ export const buildAlertSortAllQuery = (args: QueryArgs): string[] => {
     `FROM ${getAlertsIndex(args.namespace)}, ${getEntityAlias(args.namespace)} METADATA _index`,
     `| WHERE (${isAlert} AND ${buildOpenAlertsCondition(args.timeRange)}) OR (${isEntityInView})`,
     // 2. Each row to its entity: alerts by EUID, entity docs as themselves, marked in view.
-    ...buildAlertForkSteps([
-      buildStampedAlertBranch(),
-      buildUnstampedAlertBranch({ guard: isAlert }),
-      entityDocsBranch,
-    ]),
+    ...buildAlertEntityRows({
+      keepColumns: ALERT_KEEP_COLUMNS,
+      guard: isAlert,
+      extraBranches: [entityDocsBranch],
+    }),
+    '| RENAME _ea_entity_id AS `entity.id`',
     // 3. Per entity: its alert counts (entity docs don't count) and whether it's in view.
     buildStatsByEntityClause([
       ...buildEntityAggregations(ALERT_AGGREGATIONS, `${IN_VIEW_FIELD} IS NULL`),
@@ -137,7 +179,7 @@ const buildOpenAlertsOfSteps = (
     SET_UNMAPPED_NULLIFY,
     `FROM ${getAlertsIndex(namespace)}`,
     `| WHERE ${buildOpenAlertsCondition(timeRange)}`,
-    ...buildAlertEuidPipeline(buildAlertEntityFilter(entities)),
+    ...buildAlertsByEntityIdSteps(buildAlertEntityFilter(entities)),
     // An alert can name several entities; drop the rows of the others.
     `| WHERE \`entity.id\` IN (${toList(entityIds)})`,
   ];

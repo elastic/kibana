@@ -10,10 +10,8 @@ import { useService, CoreStart } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { ActionPoliciesApi } from '../services/action_policies_api';
-import { isNotFoundError } from '../utils/is_not_found_error';
+import { isNotFoundError, retryUnlessNotFound } from '../utils/is_not_found_error';
 import { actionPolicyKeys } from './query_key_factory';
-
-const DEFAULT_MAX_RETRIES = 3;
 
 export const useFetchActionPolicy = (id: string | undefined) => {
   const actionPoliciesApi = useService(ActionPoliciesApi);
@@ -24,9 +22,7 @@ export const useFetchActionPolicy = (id: string | undefined) => {
     queryFn: () => actionPoliciesApi.getActionPolicy(id!),
     enabled: !!id,
     refetchOnWindowFocus: false,
-    // Don't retry 404s — the policy is gone, retrying just delays the not-found
-    // UI. Other errors (network, 5xx) keep the default retry behaviour.
-    retry: (failureCount, error) => !isNotFoundError(error) && failureCount < DEFAULT_MAX_RETRIES,
+    retry: retryUnlessNotFound,
     onError: (error: Error) => {
       if (isNotFoundError(error)) return;
       toasts.addError(error, {

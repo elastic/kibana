@@ -54,7 +54,6 @@ interface ConversationCardCompactProps {
   isSelected?: boolean;
   /** Resolved by the caller: `Investigation` carries no decision fields. */
   outcome?: string;
-  onClickRecommendedAction: BaseActionsProps['onClickRecommendedAction'];
   onClickAction: BaseActionsProps['onClickAction'];
   onClickCard: (id: Investigation['id']) => void;
   onOpenChat: (id: Investigation['id']) => void;
@@ -73,7 +72,6 @@ export const ConversationCardCompact = memo<ConversationCardCompactProps>(
     investigation,
     isSelected = false,
     outcome,
-    onClickRecommendedAction,
     onClickAction,
     onClickCard,
     onOpenChat,
@@ -161,7 +159,6 @@ export const ConversationCardCompact = memo<ConversationCardCompactProps>(
               <EuiFlexItem grow={false}>
                 <ConversationsActionsGroup
                   investigation={investigation}
-                  onClickRecommendedAction={onClickRecommendedAction}
                   onClickAction={onClickAction}
                   onOpenChat={() => onOpenChat(investigation.id)}
                   chatHref={chatHref}

@@ -109,13 +109,14 @@ apiTest.describe(
 
         const { message, attributes } = responseB.body as {
           message: string;
-          attributes: { active_execution_id: string };
+          attributes: { code: string; active_execution_id: string };
         };
 
         expect(responseB).toHaveStatusCode(409);
         expect(message).toContain(
           `Conversation ${conversationId} already has an execution in progress`
         );
+        expect(attributes.code).toBe('conversationBusy');
         expect(attributes.active_execution_id).toBe(activeExecution?.execution_id);
 
         await answerA.completeAfterIntercept();

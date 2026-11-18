@@ -12,7 +12,9 @@ export { getLlmType } from './impl/lib/helpers/get_llm_type';
 export {
   extractJson,
   getFormatInstructionsFromZodV4Schema,
+  getModelRefusalErrorMessage,
   getStructuredGenerationPrompt,
+  handleModelRefusal,
 } from './impl/lib/langchain';
 export {
   getGenerateNode,
@@ -135,6 +137,7 @@ export {
   writeAttackDiscoveryEvent,
 } from './impl/attack_discovery/persistence/event_logging';
 export type { EventLogRefresher } from './impl/attack_discovery/persistence/event_logging';
+export type { ElasticAssistantStart } from './impl/attack_discovery/generation/types';
 
 // Defend Insights
 export {

@@ -105,6 +105,35 @@ export class CycleHookRuntime {
       // Once per round: the paused round being resumed already carries what the hook added.
       return !(def.when === 'first' && execution.execution.resumed);
     });
+    if (definitions.length === 0) {
+      return;
+    }
+    // Resolves once the hooks are created; the span itself ends with the early calls.
+    await new Promise<void>((resolve, reject) => {
+      this.withStepSpan({ phase: 'start', cycle: 0 }, async () => {
+        let early: Promise<void>;
+        try {
+          ({ early } = await this.createHooks(definitions, seedSteps, summary));
+        } catch (err) {
+          reject(err);
+          return;
+        }
+        resolve();
+        await early;
+      }).catch(noop);
+    });
+  }
+
+  /**
+   * Creates the handlers and starts the early calls. The chain of early calls is wrapped so that
+   * awaiting this does not wait for them.
+   */
+  private async createHooks(
+    definitions: CycleHookDefinition[],
+    seedSteps: ConversationRoundStep[],
+    summary?: CompactionSummary
+  ): Promise<{ early: Promise<void> }> {
+    const { execution } = this.deps;
     const handlers = await Promise.all(
       definitions.map((def) =>
         this.guarded(def, 'getHandler', () => def.getHandler(execution)).then(({ value }) => value)
@@ -150,6 +179,7 @@ export class CycleHookRuntime {
       );
       hook.early = { done: chain, out };
     }
+    return { early: chain };
   }
 
   /**
@@ -157,9 +187,24 @@ export class CycleHookRuntime {
    * notes queued since the last cycle, then, hook by hook, what an early call appended or what the
    * handler appends now. A retry only drains the queue. A hook whose previous call is still running
    * is skipped, so a handler never runs twice at once.
+   *
+   * A cycle that calls at least one handler is traced under its own `cycle_hooks` span.
    */
   async dispatch(facts: CycleDispatchFacts): Promise<RunStepUpdate[]> {
     const out = this.queue.splice(0).map((note) => note.update);
+    const callsAny =
+      facts.attempt === 0 && this.hooks.some((hook) => !hook.early && isDue(hook, facts.cycle));
+    if (!callsAny) {
+      await this.runCycle(facts, out);
+      return out;
+    }
+    await this.withStepSpan({ phase: 'cycle', cycle: facts.cycle }, () =>
+      this.runCycle(facts, out)
+    );
+    return out;
+  }
+
+  private async runCycle(facts: CycleDispatchFacts, out: RunStepUpdate[]): Promise<void> {
     for (const hook of this.hooks) {
       if (hook.early) {
         const { done, out: earlyOut } = hook.early;
@@ -180,7 +225,6 @@ export class CycleHookRuntime {
       await this.call(hook, facts, out);
       hook.lastRunCycle = facts.cycle;
     }
-    return out;
   }
 
   /** After this, `append` throws: the run is over and there is no prompt left to land in. */
@@ -252,12 +296,16 @@ export class CycleHookRuntime {
       },
       summary: cloneDeep(facts.summary),
     };
-    const run = Promise.resolve().then(() => hook.handler(cycle, api));
-    hook.running = run.then(noop, noop).finally(() => {
-      hook.running = undefined;
-    });
+    // Started inside the hook's span, so what the handler traces nests under it.
+    const startHandler = () => {
+      const run = Promise.resolve().then(() => hook.handler(cycle, api));
+      hook.running = run.then(noop, noop).finally(() => {
+        hook.running = undefined;
+      });
+      return run;
+    };
     try {
-      const { timedOut } = await this.guarded(hook.def, 'handler', () => run, facts.cycle);
+      const { timedOut } = await this.guarded(hook.def, 'handler', startHandler, facts.cycle);
       if (timedOut) {
         controller.abort(new Error(`Cycle hook "${id}" timed out.`));
       }
@@ -304,28 +352,59 @@ export class CycleHookRuntime {
           [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
           'hook.id': id,
           'hook.call': kind,
+          'hook.when': describeTrigger(def.when ?? 'every_cycle'),
+          'hook.timeout_ms': timeoutMs,
+          ...(def.boundAgents ? { 'hook.bound_agents': [...def.boundAgents] } : {}),
           ...(cycle === undefined ? {} : { 'hook.cycle': cycle }),
         },
       },
-      async () => {
+      async (span) => {
         try {
           const timed = await withTimeout({ promise: Promise.resolve().then(fn), timeoutMs });
           if (timed.timedout) {
             this.deps.logger.warn(
               `Cycle hook "${id}" ${kind} timed out after ${timeoutMs}ms, skipped.`
             );
+            span?.setAttribute('hook.outcome', 'timeout');
             return { timedOut: true };
           }
+          span?.setAttribute('hook.outcome', 'ok');
           return { value: timed.value, timedOut: false };
         } catch (err) {
           const message = err instanceof Error ? err.message : String(err);
           this.deps.logger.warn(`Cycle hook "${id}" ${kind} failed, skipped: ${message}`);
+          span?.setAttribute('hook.outcome', 'error');
+          span?.setAttribute('hook.error', message);
           return { timedOut: false };
         }
       }
     );
   }
+
+  /**
+   * The root span of a cycle-hook step: the hook spans of that step nest under it, one level below
+   * the agent's own model calls.
+   */
+  private withStepSpan<T>(
+    { phase, cycle }: { phase: 'start' | 'cycle'; cycle: number },
+    fn: () => Promise<T>
+  ): Promise<T> {
+    return withActiveInferenceSpan(
+      'cycle_hooks',
+      {
+        attributes: {
+          [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
+          'cycle_hooks.phase': phase,
+          'hook.cycle': cycle,
+        },
+      },
+      fn
+    );
+  }
 }
+
+const describeTrigger = (when: CycleTrigger): string =>
+  typeof when === 'string' ? when : `every_${when.everyCycles}_cycles`;
 
 const isOncePerExecution = (when: CycleTrigger): when is 'first' | 'every_execution' =>
   when === 'first' || when === 'every_execution';
