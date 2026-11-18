@@ -479,7 +479,7 @@ describe('ObservabilityAlertingApp', () => {
     {
       path: OBSERVABILITY_ALERTING_IMPORTS_PATH,
       testId: `importsPage:${OBSERVABILITY_ALERTING_APP_ID}`,
-      hasPrivilegeCheck: 'true',
+      hasPrivilegeCheck: 'false',
     },
   ])(
     'sets privilegeCheck=$hasPrivilegeCheck on $testId at $path',

@@ -46,14 +46,18 @@ export const fetchImports = async (http: HttpStart): Promise<ImportListItem[]> =
     }));
 };
 
-/** Loads the imports of the current space: its non-webhook connectors that receive events. */
-export const useFetchImports = () => {
+/**
+ * Loads the imports of the current space: its non-webhook connectors that receive events. Pass
+ * `enabled: false` to skip the request, for example without access to connectors.
+ */
+export const useFetchImports = ({ enabled = true }: { enabled?: boolean } = {}) => {
   const http = useService(CoreStart('http'));
   const { toasts } = useService(CoreStart('notifications'));
 
   return useQuery<ImportListItem[], Error>({
     queryKey: importKeys.list(),
     queryFn: () => fetchImports(http),
+    enabled,
     refetchOnWindowFocus: false,
     onError: (error: Error) => {
       toasts.addError(error, {

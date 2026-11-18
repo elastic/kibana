@@ -15,8 +15,8 @@ import { ImportsPage } from '../pages/imports_page/imports_page';
 import { RequireAlertingPrivilege } from '../components/require_alerting_privilege';
 
 /**
- * Import alerts. Only reachable while Alerting v2 is enabled and the space has Agent Builder
- * experimental features on.
+ * Import alerts. Only reachable while Alerting v2 is enabled and the space has the
+ * `alerting:v2:experimentalFeatures` setting on.
  */
 export const ImportsApp = () => {
   const { path } = useRouteMatch();

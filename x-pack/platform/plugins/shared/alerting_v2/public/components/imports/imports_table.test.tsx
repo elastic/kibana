@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { ImportsTable } from './imports_table';
+import { filterImportsByName, ImportsTable } from './imports_table';
 
 const mockGetUrlForApp = jest.fn(
   (_appId: string, { path }: { deepLinkId: string; path: string }) =>
@@ -42,5 +42,24 @@ describe('ImportsTable', () => {
       deepLinkId: 'triggersActionsConnectors',
       path: '/connectors/connector%2F1',
     });
+  });
+});
+
+describe('filterImportsByName', () => {
+  const items = [
+    { connectorId: '1', name: 'Production Datadog', connectorTypeId: '.datadog' },
+    { connectorId: '2', name: 'Staging', connectorTypeId: '.datadog' },
+  ];
+
+  it('returns every import for a blank search', () => {
+    expect(filterImportsByName(items, '  ')).toEqual(items);
+  });
+
+  it('matches the name case-insensitively', () => {
+    expect(filterImportsByName(items, 'PROD')).toEqual([items[0]]);
+  });
+
+  it('does not match on the type', () => {
+    expect(filterImportsByName(items, 'datadog')).toEqual([items[0]]);
   });
 });

@@ -292,7 +292,6 @@ export const ObservabilityAlertingApp = ({
               coreStart={coreStart}
               setBreadcrumbs={setBreadcrumbs}
               hostApp={hostApp}
-              privilegeCheck={privilegeCheck}
             />
           </EuiPageSection>
         </Route>
