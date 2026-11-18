@@ -91,6 +91,7 @@ import {
   releaseActiveExecution,
   type ConversationWithOperation,
 } from './utils/conversations';
+import { resolveSurfacePromptInput } from './utils/surface_prompt_input';
 import {
   createConversationCreatedEvent,
   createConversationIdSetEvent,
@@ -207,7 +208,13 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
             spaceId,
           })
         : undefined;
-    const conversationParams = resolvedConversation?.validatedParams;
+    const conversationParams =
+      resolvedConversation &&
+      (await this.resolvePromptInput({
+        params: resolvedConversation.validatedParams,
+        conversation: resolvedConversation.conversation,
+        isReplay: () => this.isIdempotentReplay({ executionClient, executionId, metadata }),
+      }));
     const conversation = resolvedConversation?.conversation;
     const validatedParams = conversationParams ?? (await this.validateAttachments(params, request));
     const receivedAt = resolvedConversation?.receivedAt ?? new Date();
@@ -1104,6 +1111,34 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       receivedAt,
       newConversation: resolved.newConversation,
     };
+  }
+
+  /**
+   * Resolves what a reader did on an origin's surface into the input that resumes a paused
+   * conversation. A redelivery is let through as it is: its first delivery already answered the
+   * prompts, so it is recognised as a replay rather than refused for answering them twice.
+   */
+  private async resolvePromptInput({
+    params,
+    conversation,
+    isReplay,
+  }: {
+    params: ConversationExecutionParams;
+    conversation: ConversationWithOperation;
+    /** Whether the request redelivers one that was already accepted. */
+    isReplay: () => Promise<boolean>;
+  }): Promise<ConversationExecutionParams> {
+    try {
+      return resolveSurfacePromptInput({ params, conversation });
+    } catch (error) {
+      if (await isReplay()) {
+        const { promptSelections, ...replayed } = params;
+
+        return replayed;
+      }
+
+      throw error;
+    }
   }
 
   /**

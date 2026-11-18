@@ -39,6 +39,7 @@ export const filterEventsNativeApiEvents = (): MonoTypeOperatorFunction<ChatEven
 export interface ResolvedExecutionOptions {
   useTaskManager: boolean | undefined;
   origin: ExecutionConversationOrigin | undefined;
+  promptSelections?: string[];
   callback: { url: string } | undefined;
   executionId: string | undefined;
   metadata: Record<string, string> | undefined;
@@ -139,7 +140,7 @@ export const getConverseHelpers = ({
     } = payload;
 
     const connectorId = resolveConnectorIdFromPayload(payload);
-    const { useTaskManager, origin, callback, executionId, metadata } =
+    const { useTaskManager, origin, promptSelections, callback, executionId, metadata } =
       executionOptions ?? defaultExecutionOptions(payload);
 
     return {
@@ -159,6 +160,7 @@ export const getConverseHelpers = ({
         accessControl,
         readOnly,
         origin,
+        ...(promptSelections ? { promptSelections } : {}),
         callback,
         browserApiTools,
         configurationOverrides,
