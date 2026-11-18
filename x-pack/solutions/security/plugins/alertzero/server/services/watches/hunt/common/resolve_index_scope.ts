@@ -263,8 +263,10 @@ export const resolveHuntScope = async ({
   const missing = positivePatterns.filter((pattern) => notSearchable.has(pattern));
 
   // A local concrete name the caller cannot search (it resolved nothing, is closed, or is not
-  // readable) is dropped from the list and stays in `missing`, so no search names it.
-  const dropped = new Set(missing.filter(isPrunableConcreteName));
+  // readable) is dropped from the list and stays in `missing`, so no search names it. Under
+  // cross-project search a name that resolved nothing may live in a linked project that did not
+  // answer, so nothing is dropped and the miss is not recorded as a final gap.
+  const dropped = new Set(crossProjectSearch ? [] : missing.filter(isPrunableConcreteName));
   const searched = indexPatterns.filter((pattern) => !dropped.has(pattern));
   if (!searched.some((pattern) => !isIndexExclusion(pattern))) {
     return blocked('blocked:empty_universe', missing);

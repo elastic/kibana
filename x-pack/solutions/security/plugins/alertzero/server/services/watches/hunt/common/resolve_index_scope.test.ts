@@ -518,7 +518,7 @@ describe('resolveHuntScope', () => {
       expect(result.index_patterns).toContain(entry);
     });
 
-    it('under cross-project search keeps a name resolved only on a linked project and drops one resolved nowhere', async () => {
+    it('under cross-project search drops no name, since a miss may be a linked project that did not answer', async () => {
       const result = await run(
         ['logs-*', 'custom-1', 'custom-2'],
         resolveResponse({
@@ -528,7 +528,7 @@ describe('resolveHuntScope', () => {
         { crossProjectSearch: true }
       ).scope;
 
-      expect(result.index_patterns).toEqual(['logs-*', 'custom-1']);
+      expect(result.index_patterns).toEqual(['logs-*', 'custom-1', 'custom-2']);
       expect(result.missing).toEqual(['custom-2']);
     });
 
