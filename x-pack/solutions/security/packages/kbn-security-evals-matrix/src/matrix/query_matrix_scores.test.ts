@@ -14,6 +14,7 @@ import { describeJudge } from './judge_provenance';
 import {
   pickLatestExperimentPerModel,
   experimentStatsToDatasets,
+  isQualityEvaluator,
   queryMatrixScores,
   scoresByPrefixToDatasets,
 } from './query_matrix_scores';
@@ -947,8 +948,48 @@ describe('scoresByPrefixToDatasets', () => {
       ['alert-analysis']
     );
 
-    // Only the maximize evaluator survives.
-    expect(datasets[0].evaluators).toEqual([{ evaluatorName: 'correctness', mean: 1, count: 1 }]);
+    // Only the maximize evaluator is a quality score; telemetry is kept, tagged, with its spread.
+    expect(datasets[0].evaluators.filter(isQualityEvaluator)).toEqual([
+      { evaluatorName: 'correctness', mean: 1, count: 1 },
+    ]);
+    expect(datasets[0].evaluators.filter((e) => !isQualityEvaluator(e))).toEqual([
+      { evaluatorName: 'Latency', mean: 900, count: 1, min: 900, max: 900, direction: 'minimize' },
+      { evaluatorName: 'Tool Calls', mean: 42, count: 1, min: 42, max: 42, direction: 'neutral' },
+    ]);
+  });
+
+  it('aggregates judge-less token telemetry with min/max under requireEisJudge', () => {
+    const doc = (id: string, name: string, s: number, direction: string, judge?: string) =>
+      ({
+        example: { id, index: 0, dataset: { id: 'ds', name: 'DS' } },
+        task: { model: { id: 'm1' }, trace_id: 't' },
+        evaluator: { name, score: s, direction, ...(judge ? { model: { id: judge } } : {}) },
+        metadata: {},
+      } as unknown as EvaluationScoreDocument);
+
+    const [dataset] = scoresByPrefixToDatasets(
+      [
+        doc('alert-analysis-a', 'correctness', 1, 'maximize', 'zai-glm-5-2'),
+        doc('alert-analysis-a', 'Input Tokens', 1000, 'minimize'),
+        doc('alert-analysis-b', 'Input Tokens', 3000, 'minimize'),
+      ],
+      ['alert-analysis'],
+      { requireEisJudge: true }
+    );
+
+    expect(dataset.evaluators).toContainEqual({
+      evaluatorName: 'Input Tokens',
+      mean: 2000,
+      count: 2,
+      min: 1000,
+      max: 3000,
+      direction: 'minimize',
+    });
+    // Telemetry has no judge, so it is never miscounted as a non-EIS rejection.
+    expect(dataset.excludedNonEis ?? 0).toBe(0);
+    expect(dataset.evaluators.filter(isQualityEvaluator)).toEqual([
+      { evaluatorName: 'correctness', mean: 1, count: 1 },
+    ]);
   });
 
   it('matches exact example ids and prefix-dash boundaries only', () => {

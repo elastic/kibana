@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { estimateCostUsd, getModelPrice, type ModelPrice } from '@kbn/evals';
 import type {
   MatrixColumnConfig,
   MatrixCompositeConfig,
@@ -18,6 +19,7 @@ import type {
   AggregatedSuiteScores,
   ExcludedScoreCounts,
 } from './query_matrix_scores';
+import { isQualityEvaluator } from './query_matrix_scores';
 import { detectSaturatedEvaluators, saturatedEvaluatorNames } from './evaluator_saturation';
 import type { EvaluatorSaturation } from './evaluator_saturation';
 
@@ -73,6 +75,11 @@ export interface TokenCostCell {
   outputTokens?: TokenStat;
   /** Sum of the input + output means. */
   totalMean: number;
+  /**
+   * USD per example at EIS list price, every input token priced as uncached (an upper bound).
+   * Absent when the model has no EIS price or either token count is missing.
+   */
+  estimatedCostUsd?: number;
 }
 
 export interface TokenStat {
@@ -86,6 +93,8 @@ export interface TokenCostModel {
   modelId: string;
   modelLabel: string;
   openSource: boolean;
+  /** False when no EIS list price matches the model, so its cells carry no cost estimate. */
+  priced: boolean;
   cells: TokenCostCell[];
 }
 
@@ -200,7 +209,10 @@ const computeColumnMean = (
   for (const evaluator of columnEvaluators(modelScores, column)) {
     if (!includeEvaluator || includeEvaluator(evaluator)) {
       // Without an allowlist, the exclusion list drops raw-magnitude evaluators that would break the 0-10 scale.
+      // Prefix-path telemetry is tagged with its direction and never scores a column, even
+      // when allowlisted: a raw token count would swamp the 0-1 mean.
       const skip =
+        !isQualityEvaluator(evaluator) ||
         (evaluatorSet
           ? !evaluatorSet.has(evaluator.evaluatorName)
           : isExcludedEvaluator(evaluator.evaluatorName, excludeEvaluators)) ||
@@ -517,6 +529,29 @@ const computeTokenStat = (
   return { mean: weightedSum / totalCount, min, max, count: totalCount };
 };
 
+const resolveModelPrice = (modelConfig: MatrixModelConfig): ModelPrice | undefined =>
+  [modelConfig.id, ...(modelConfig.matchIds ?? [])]
+    .map((id) => getModelPrice(id))
+    .find((price): price is ModelPrice => price !== undefined);
+
+// Base-tier rates: per-trace prompt sizes are not in the aggregate, so long-context surcharges are not applied.
+const estimateCellCost = (
+  price: ModelPrice | undefined,
+  inputTokens: TokenStat | undefined,
+  outputTokens: TokenStat | undefined
+): number | undefined =>
+  price && inputTokens && outputTokens
+    ? estimateCostUsd(
+        {
+          inputTokens: inputTokens.mean,
+          cachedTokens: 0,
+          cacheWriteTokens: 0,
+          outputTokens: outputTokens.mean,
+        },
+        price
+      )
+    : undefined;
+
 const buildTokenCost = (
   config: MatrixConfig,
   tokenConfig: MatrixTokenCostConfig,
@@ -532,16 +567,19 @@ const buildTokenCost = (
   for (const modelConfig of config.models) {
     const modelScores = resolveScores(modelConfig);
     if (modelScores) {
+      const price = resolveModelPrice(modelConfig);
       const cells: TokenCostCell[] = [];
       for (const column of tokenColumns) {
         const inputTokens = computeTokenStat(modelScores, column, tokenConfig.inputEvaluator);
         const outputTokens = computeTokenStat(modelScores, column, tokenConfig.outputEvaluator);
         if (inputTokens || outputTokens) {
+          const estimatedCostUsd = estimateCellCost(price, inputTokens, outputTokens);
           cells.push({
             columnId: column.id,
             inputTokens,
             outputTokens,
             totalMean: (inputTokens?.mean ?? 0) + (outputTokens?.mean ?? 0),
+            ...(estimatedCostUsd === undefined ? {} : { estimatedCostUsd }),
           });
         }
       }
@@ -551,6 +589,7 @@ const buildTokenCost = (
           modelId: modelConfig.id,
           modelLabel: modelConfig.label,
           openSource: modelConfig.openSource,
+          priced: price !== undefined,
           cells,
         });
       }

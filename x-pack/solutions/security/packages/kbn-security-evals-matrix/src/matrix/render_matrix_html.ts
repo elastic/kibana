@@ -337,38 +337,72 @@ const stepHtml = (step: TraceStep, index: number): string => {
   )}</span></div>`;
 };
 
+const formatTokens = (n?: number): string =>
+  n === undefined ? '—' : n >= 1000 ? `${(n / 1000).toFixed(0)}k` : `${Math.round(n)}`;
+
+const formatUsd = (n: number): string => (n >= 0.01 ? `$${n.toFixed(2)}` : `$${n.toFixed(4)}`);
+
+/** Token-axis buckets: one per column group (category), or one per column when ungrouped. */
+const tokenCostBuckets = (
+  columns: Matrix['columns']
+): Array<{ label: string; columnIds: string[] }> => {
+  const buckets = new Map<string, { label: string; columnIds: string[] }>();
+  for (const { id, label, group } of columns) {
+    const key = group ?? `column:${id}`;
+    const bucket = buckets.get(key) ?? { label: group ?? label, columnIds: [] };
+    bucket.columnIds.push(id);
+    buckets.set(key, bucket);
+  }
+  return [...buckets.values()];
+};
+
 const renderTokenCost = (matrix: Matrix, config: MatrixConfig): string => {
   if (!matrix.tokenCost || matrix.tokenCost.models.length === 0) return '';
-  const columns = matrix.columns; // base columns only
-  const fmt = (n?: number) =>
-    n === undefined ? '—' : n >= 1000 ? `${(n / 1000).toFixed(0)}k` : `${Math.round(n)}`;
-  const header = `<tr><th>Model</th>${columns
-    .map((c) => `<th>${esc(c.label)}</th>`)
+  const buckets = tokenCostBuckets(matrix.columns);
+  const header = `<tr><th>Model</th>${buckets
+    .map((b) => `<th>${esc(b.label)}</th>`)
     .join('')}<th>Total</th></tr>`;
-  const cellFor = (m: TokenCostModel, colId: string) => {
-    const cell = m.cells.find((c) => c.columnId === colId);
-    if (!cell) return '<td class="cell ok">—</td>';
-    const title =
-      cell.inputTokens && cell.outputTokens
-        ? ` title="in ${Math.round(cell.inputTokens.mean).toLocaleString()} / out ${Math.round(
-            cell.outputTokens.mean
-          ).toLocaleString()} (in min ${Math.round(
-            cell.inputTokens.min
-          ).toLocaleString()}, out min ${Math.round(cell.outputTokens.min).toLocaleString()})"`
-        : '';
-    return `<td class="cell ok cost"${title}>${fmt(cell.totalMean)}</td>`;
+  const renderCell = (m: TokenCostModel, cells: TokenCostModel['cells']): string => {
+    if (cells.length === 0) return '<td class="cell ok">—</td>';
+    const tokens = cells.reduce((sum, c) => sum + c.totalMean, 0);
+    const costed = cells.filter((c) => c.estimatedCostUsd !== undefined);
+    const cost = costed.reduce((sum, c) => sum + (c.estimatedCostUsd ?? 0), 0);
+    const costLabel = !m.priced
+      ? '<span class="model-id">unpriced</span>'
+      : costed.length === cells.length
+      ? esc(formatUsd(cost))
+      : '<span class="model-id">partial</span>';
+    const title = cells
+      .map((c) =>
+        c.inputTokens && c.outputTokens
+          ? `${c.columnId}: in ${Math.round(
+              c.inputTokens.mean
+            ).toLocaleString()} / out ${Math.round(
+              c.outputTokens.mean
+            ).toLocaleString()} (in min ${Math.round(
+              c.inputTokens.min
+            ).toLocaleString()}, out min ${Math.round(c.outputTokens.min).toLocaleString()})`
+          : `${c.columnId}: ${Math.round(c.totalMean).toLocaleString()}`
+      )
+      .join('\n');
+    return `<td class="cell ok cost" title="${esc(title)}">${formatTokens(
+      tokens
+    )}<br>${costLabel}</td>`;
   };
   const rows = matrix.tokenCost.models
     .map((m) => {
-      const total = m.cells.reduce((s, c) => s + c.totalMean, 0);
+      const bucketCells = buckets.map(({ columnIds }) =>
+        m.cells.filter((c) => columnIds.includes(c.columnId))
+      );
       return `<tr><td class="model">${esc(m.modelLabel)}<br><span class="model-id">${esc(
         m.modelId
-      )}</span></td>${columns.map((c) => cellFor(m, c.id)).join('')}<td class="cell ok cost">${fmt(
-        total
-      )}</td></tr>`;
+      )}</span></td>${bucketCells.map((cells) => renderCell(m, cells)).join('')}${renderCell(
+        m,
+        m.cells
+      )}</tr>`;
     })
     .join('');
-  return `<details class="methodology tokencost" open><summary>Token cost per (model, column) — input + output means, native units (hover for in/out split)</summary><table class="tokencost"><thead>${header}</thead><tbody>${rows}</tbody></table></details>`;
+  return `<details class="methodology tokencost" open><summary>Token cost per (model, category) — summed input + output means per example, native units; $ at EIS list price with every input token uncached (upper bound). Hover for the per-column in/out split.</summary><table class="tokencost"><thead>${header}</thead><tbody>${rows}</tbody></table></details>`;
 };
 
 const renderSummaryTable = (matrix: Matrix): string => {
