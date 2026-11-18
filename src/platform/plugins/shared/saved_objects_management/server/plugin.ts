@@ -65,6 +65,7 @@ export class SavedObjectsManagementPlugin
         }),
       importReferencedObjects: ({ client, objects, mode }) =>
         importReferencedObjects({
+          client,
           importer: core.savedObjects.createImporter(client),
           registry: this.apiBodyRegistry,
           typeRegistry: core.savedObjects.getTypeRegistry(),

@@ -11,10 +11,11 @@ import type {
   ISavedObjectsImporter,
   ISavedObjectTypeRegistry,
   SavedObject,
+  SavedObjectsClientContract,
   SavedObjectsImportResponse,
   SavedObjectTypeIdTuple,
 } from '@kbn/core/server';
-import { getCurrentVirtualVersion } from '@kbn/core/server';
+import { getCurrentVirtualVersion, isSavedObjectErrorResult } from '@kbn/core/server';
 import { createListStream } from '@kbn/utils';
 import { prettifyError } from '@kbn/zod';
 import type { ApiBodyRegistry } from '../api_body_registry';
@@ -27,9 +28,29 @@ type ImportResult = ImportReferencedObjectsResponse['results'][number];
 
 const toKey = ({ type, id }: SavedObjectTypeIdTuple) => `${type}:${id}`;
 
+/**
+ * Finds the objects whose entry reuses existing objects and that already exist in the client's
+ * space, so new copies point to them. One that exists only in another space isn't found, so it's copied.
+ */
+const findReusedKeys = async (
+  client: SavedObjectsClientContract,
+  registry: ApiBodyRegistry,
+  objects: SavedObjectTypeIdTuple[]
+): Promise<Set<string>> => {
+  const candidates = objects
+    .filter(({ type }) => registry.get(type)?.reuseExistingInNewCopies)
+    .map(({ type, id }) => ({ type, id }));
+  if (candidates.length === 0) {
+    return new Set();
+  }
+  const { saved_objects: existing } = await client.bulkGet(candidates);
+  return new Set(existing.filter((result) => !isSavedObjectErrorResult(result)).map(toKey));
+};
+
 const writePendingObjects = async (
   importer: ISavedObjectsImporter,
   storedObjects: SavedObject[],
+  createNewCopies: boolean,
   { successResults = [], errors = [] }: SavedObjectsImportResponse
 ): Promise<Required<Pick<SavedObjectsImportResponse, 'successResults' | 'errors'>>> => {
   // Core writes nothing while any object has a resolvable error, so SOM's flyout retries the rest.
@@ -50,7 +71,8 @@ const writePendingObjects = async (
       createNewCopy,
       replaceReferences: [],
     })),
-    createNewCopies: false,
+    // With new copies, core gives the retried objects new IDs again.
+    createNewCopies,
   });
   return {
     successResults: resolved.successResults ?? [],
@@ -63,20 +85,32 @@ const writePendingObjects = async (
  * and converted with `toStored`. Throws core's import errors, such as an exceeded size limit.
  */
 export const importReferencedObjects = async ({
+  client,
   importer,
   registry,
   typeRegistry,
   objects,
   mode,
 }: ImportReferencedObjectsRequest & {
+  client: SavedObjectsClientContract;
   importer: ISavedObjectsImporter;
   registry: ApiBodyRegistry;
   typeRegistry: ISavedObjectTypeRegistry;
 }): Promise<ImportReferencedObjectsResponse> => {
   const results = new Map<string, ImportResult>();
   const storedObjects: SavedObject[] = [];
+  const createNewCopies = mode === 'new_copies';
+  // Decided before validation, so an existing object is reused even if its exported body is invalid.
+  const reusedKeys = createNewCopies
+    ? await findReusedKeys(client, registry, objects)
+    : new Set<string>();
 
   for (const { type, id, data } of objects) {
+    if (reusedKeys.has(toKey({ type, id }))) {
+      results.set(toKey({ type, id }), { type, id, destination_id: id, status: 'reused' });
+      continue;
+    }
+
     const addError = (errorType: string, message: string): void => {
       results.set(toKey({ type, id }), {
         type,
@@ -122,9 +156,14 @@ export const importReferencedObjects = async ({
     const imported = await importer.import({
       readStream: createListStream(storedObjects),
       overwrite: mode === 'overwrite',
-      createNewCopies: false,
+      createNewCopies,
     });
-    const { successResults, errors } = await writePendingObjects(importer, storedObjects, imported);
+    const { successResults, errors } = await writePendingObjects(
+      importer,
+      storedObjects,
+      createNewCopies,
+      imported
+    );
 
     successResults.forEach(({ type, id, destinationId, overwrite }) => {
       results.set(toKey({ type, id }), {

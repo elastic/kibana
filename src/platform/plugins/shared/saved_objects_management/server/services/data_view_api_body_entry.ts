@@ -62,6 +62,7 @@ const getDroppedContent = ({
 /** Creates the `index-pattern` registry entry from the as-code data views transforms, since data views can't depend on this plugin. */
 export const createDataViewApiBodyEntry = (): ApiBodyEntry<DataViewBody, DataViewAttributes> => ({
   getSchema: () => savedDataViewSpecSchema.omit({ id: true }),
+  reuseExistingInNewCopies: true,
   toApi: ({ attributes }) => ({
     // Scripted fields stay in the body, so the schema rejects it and the export reports them.
     body: omit(fromStoredDataViewToAsCodeSavedSchema(toSpec(attributes)), 'id'),

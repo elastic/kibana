@@ -97,6 +97,53 @@ describe('ImportReferencedObjectsFlyout', () => {
     expect(importObjects).toHaveBeenCalledWith({ objects: OBJECTS, mode: 'overwrite' });
   });
 
+  it('imports as new copies when chosen', async () => {
+    const { importObjects } = renderFlyout();
+
+    await chooseFile(EXPORT_FILE);
+    await userEvent.click(screen.getByLabelText('Create new objects with new IDs'));
+    await userEvent.click(screen.getByRole('button', { name: 'Import' }));
+
+    expect(importObjects).toHaveBeenCalledWith({ objects: OBJECTS, mode: 'new_copies' });
+  });
+
+  it('lists the existing objects that new copies reuse', async () => {
+    renderFlyout({
+      importObjects: jest.fn().mockResolvedValue({
+        success: true,
+        results: [
+          {
+            type: 'index-pattern',
+            id: 'logs',
+            destination_id: 'logs',
+            status: 'reused',
+          },
+          { type: 'tag', id: 'web', destination_id: 'web', status: 'reused' },
+          { type: 'dashboard', id: 'sales', destination_id: 'sales-copy', status: 'created' },
+        ],
+        warnings: [],
+      } satisfies ImportReferencedObjectsResponse),
+    });
+
+    await chooseFile(EXPORT_FILE);
+    await userEvent.click(screen.getByRole('button', { name: 'Import' }));
+
+    expect(await screen.findByText('1 of 3 objects imported, 2 reused')).toBeInTheDocument();
+    const reused = screen.getByTestId('importReferencedObjectsReused');
+    expect(
+      within(reused)
+        .getAllByRole('listitem')
+        .map((item) => item.textContent)
+    ).toEqual(['index-pattern logs', 'tag web']);
+    const table = screen.getByTestId('importReferencedObjectsResults');
+    const rows = within(table).getAllByRole('row').slice(1);
+    expect(rows.map((row) => row.textContent)).toEqual([
+      expect.stringContaining('Reused'),
+      expect.stringContaining('Reused'),
+      expect.stringContaining('sales-copy'),
+    ]);
+  });
+
   it('shows a result for every object', async () => {
     const { onImportComplete } = renderFlyout();
 

@@ -48,9 +48,9 @@ export const getImportReferencedObjectsRequestSchema = (maxImportExportSize: num
     objects: z.array(exportedObjectSchema).min(1).max(maxImportExportSize).meta({
       description: 'The `objects` of an export.',
     }),
-    mode: z.enum(['request_action', 'overwrite']).default('request_action').meta({
+    mode: z.enum(['request_action', 'overwrite', 'new_copies']).default('request_action').meta({
       description:
-        'What happens to objects whose type and ID already exist: `request_action` writes the others and reports the conflicts, `overwrite` overwrites them.',
+        'How objects are written: `request_action` writes objects that do not exist yet and reports the conflicts, `overwrite` overwrites existing objects, and `new_copies` gives every object a new ID, except objects of types that opt into reuse, such as data views and tags, that already exist in this space under the same ID.',
     }),
   });
 
@@ -65,7 +65,10 @@ export const importReferencedObjectsResponseSchema = z.object({
       destination_id: z.string().meta({
         description: 'The ID the object has in the destination.',
       }),
-      status: z.enum(['created', 'overwritten', 'conflict', 'error']),
+      status: z.enum(['created', 'overwritten', 'reused', 'conflict', 'error']).meta({
+        description:
+          '`reused` means an object that already exists in this space under the same ID was used instead of a new copy.',
+      }),
       error: z.object({ type: z.string(), message: z.string() }).optional(),
     })
   ),

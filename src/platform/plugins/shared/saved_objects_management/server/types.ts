@@ -38,6 +38,11 @@ export interface ApiBodyEntry<Body extends object = object, Attributes = unknown
   };
   /** Turns a PUT body into stored attributes, with every referenced ID in `references`. */
   toStored(body: Body): { attributes: Attributes; references: SavedObjectReference[] };
+  /**
+   * When true, an import as new copies reuses an object of this type that already exists in the
+   * destination space under the same ID, instead of copying it.
+   */
+  reuseExistingInNewCopies?: boolean;
 }
 
 export interface SavedObjectsManagementPluginSetup {

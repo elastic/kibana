@@ -34,7 +34,12 @@ import type {
   ImportReferencedObjectsRequest,
   ImportReferencedObjectsResponse,
 } from '@kbn/saved-objects-management-plugin/common';
-import { KbnDangerCallout, KbnSuccessCallout, KbnWarningCallout } from '@kbn/ui-callout';
+import {
+  KbnDangerCallout,
+  KbnInfoCallout,
+  KbnSuccessCallout,
+  KbnWarningCallout,
+} from '@kbn/ui-callout';
 
 import { importReferencedObjectsStrings as strings } from './_import_referenced_objects_strings';
 
@@ -52,6 +57,7 @@ interface ImportReferencedObjectsFlyoutProps {
 const STATUS_COLORS: Record<ImportResult['status'], string> = {
   created: 'success',
   overwritten: 'success',
+  reused: 'hollow',
   conflict: 'warning',
   error: 'danger',
 };
@@ -128,14 +134,33 @@ export const ImportReferencedObjectsFlyout = ({
     const importedCount = results.filter(
       ({ status }) => status === 'created' || status === 'overwritten'
     ).length;
+    const reused = results.filter(({ status }) => status === 'reused');
     const Callout = success ? KbnSuccessCallout : KbnWarningCallout;
     return (
       <>
         <Callout
-          title={strings.getResultsSummary(importedCount, results.length)}
+          title={strings.getResultsSummary(importedCount, results.length, reused.length)}
           data-test-subj="importReferencedObjectsSummary"
         />
         <EuiSpacer size="m" />
+        {reused.length > 0 && (
+          <>
+            <KbnInfoCallout
+              title={strings.getReusedTitle()}
+              text={<p>{strings.getReusedDescription()}</p>}
+              data-test-subj="importReferencedObjectsReused"
+            >
+              <ul>
+                {reused.map(({ type, id }) => (
+                  <li key={`${type}:${id}`}>
+                    <strong>{type}</strong> {id}
+                  </li>
+                ))}
+              </ul>
+            </KbnInfoCallout>
+            <EuiSpacer size="m" />
+          </>
+        )}
         <EuiBasicTable<ImportResult>
           tableCaption={strings.getResultsTableCaption()}
           items={results}
@@ -202,7 +227,13 @@ export const ImportReferencedObjectsFlyout = ({
             data-test-subj="importReferencedObjectsFilePicker"
           />
         </EuiFormRow>
-        <EuiFormRow fullWidth label={strings.getModeLegend()} labelType="legend" id={modeGroupId}>
+        <EuiFormRow
+          fullWidth
+          label={strings.getModeLegend()}
+          labelType="legend"
+          id={modeGroupId}
+          helpText={mode === 'new_copies' ? strings.getNewCopiesHelpText() : undefined}
+        >
           <EuiRadioGroup
             name={modeGroupId}
             idSelected={mode}
@@ -210,6 +241,7 @@ export const ImportReferencedObjectsFlyout = ({
             options={[
               { id: 'request_action', label: strings.getRequestActionLabel() },
               { id: 'overwrite', label: strings.getOverwriteLabel() },
+              { id: 'new_copies', label: strings.getNewCopiesLabel() },
             ]}
             data-test-subj="importReferencedObjectsMode"
           />

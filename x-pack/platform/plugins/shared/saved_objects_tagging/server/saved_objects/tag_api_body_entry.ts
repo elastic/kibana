@@ -14,6 +14,7 @@ import { tagRequestAttributesSchema, type TagRequestAttributes } from '../routes
 /** Creates the `tag` entry for Saved Objects Management's API body registry. */
 export const createTagApiBodyEntry = (): ApiBodyEntry<TagRequestAttributes, TagAttributes> => ({
   getSchema: () => tagRequestAttributesSchema,
+  reuseExistingInNewCopies: true,
   // Same as the public GET: an empty description is left out.
   toApi: ({ attributes: { name, description, color } }) => ({
     body: { name, color, ...(description ? { description } : {}) },

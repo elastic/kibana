@@ -8,6 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { ImportReferencedObjectsResponse } from '@kbn/saved-objects-management-plugin/common';
 
 export const importReferencedObjectsStrings = {
   getMenuItemLabel: () =>
@@ -57,6 +58,15 @@ export const importReferencedObjectsStrings = {
     i18n.translate('dashboard.importReferencedObjects.overwriteLabel', {
       defaultMessage: 'Overwrite existing objects',
     }),
+  getNewCopiesLabel: () =>
+    i18n.translate('dashboard.importReferencedObjects.newCopiesLabel', {
+      defaultMessage: 'Create new objects with new IDs',
+    }),
+  getNewCopiesHelpText: () =>
+    i18n.translate('dashboard.importReferencedObjects.newCopiesHelpText', {
+      defaultMessage:
+        'Some objects that already exist in this space, such as data views and tags, are reused instead of copied.',
+    }),
   getErrorTitle: () =>
     i18n.translate('dashboard.importReferencedObjects.errorTitle', {
       defaultMessage: 'The file could not be imported',
@@ -65,10 +75,20 @@ export const importReferencedObjectsStrings = {
     i18n.translate('dashboard.importReferencedObjects.genericErrorText', {
       defaultMessage: 'Something went wrong. Try again, or check the Kibana server logs.',
     }),
-  getResultsSummary: (imported: number, total: number) =>
+  getResultsSummary: (imported: number, total: number, reused: number) =>
     i18n.translate('dashboard.importReferencedObjects.resultsSummary', {
-      defaultMessage: '{imported} of {total} objects imported',
-      values: { imported, total },
+      defaultMessage:
+        '{imported} of {total} objects imported{reused, plural, =0 {} other {, # reused}}',
+      values: { imported, total, reused },
+    }),
+  getReusedTitle: () =>
+    i18n.translate('dashboard.importReferencedObjects.reusedTitle', {
+      defaultMessage: 'Reused from this space',
+    }),
+  getReusedDescription: () =>
+    i18n.translate('dashboard.importReferencedObjects.reusedDescription', {
+      defaultMessage:
+        'These objects already exist in this space, so the new copies point to them instead of copying them.',
     }),
   getResultsTableCaption: () =>
     i18n.translate('dashboard.importReferencedObjects.resultsTableCaption', {
@@ -90,13 +110,16 @@ export const importReferencedObjectsStrings = {
     i18n.translate('dashboard.importReferencedObjects.statusColumnName', {
       defaultMessage: 'Result',
     }),
-  getStatusLabel: (status: 'created' | 'overwritten' | 'conflict' | 'error') =>
+  getStatusLabel: (status: ImportReferencedObjectsResponse['results'][number]['status']) =>
     ({
       created: i18n.translate('dashboard.importReferencedObjects.status.created', {
         defaultMessage: 'Created',
       }),
       overwritten: i18n.translate('dashboard.importReferencedObjects.status.overwritten', {
         defaultMessage: 'Overwritten',
+      }),
+      reused: i18n.translate('dashboard.importReferencedObjects.status.reused', {
+        defaultMessage: 'Reused',
       }),
       conflict: i18n.translate('dashboard.importReferencedObjects.status.conflict', {
         defaultMessage: 'Conflict',
