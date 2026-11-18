@@ -80,7 +80,7 @@ import { resetInFlightTasksOwnedByThisNode } from './lib/task_reconciliation';
 import {
   recordPollSkippedNoCapacity,
   recordSlotTime,
-  registerCapacityProviders,
+  TaskManagerCapacityMetrics,
 } from './otel/capacity_telemetry';
 import type { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
 import type { TaskExecutionControlService, TaskExecutionControlState } from './execution_control';
@@ -144,7 +144,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   public capacityConfiguration$: Observable<number>;
   public pollIntervalConfiguration$: Observable<number>;
 
-  private readonly startingCapacity: number;
+  private readonly capacityMetrics: TaskManagerCapacityMetrics;
   private currentCapacity: number;
 
   // all task related events (task claimed, task marked as running, etc.) are emitted through events$
@@ -197,7 +197,6 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     const { poll_interval: pollInterval, claim_strategy: claimStrategy } = config;
     this.currentPollInterval = pollInterval;
     this.eventLogger = eventLogger;
-    this.startingCapacity = startingCapacity;
     this.currentCapacity = startingCapacity;
 
     // `countErrors` is cold, so share it: the capacity scan, poll-interval scan,
@@ -304,8 +303,8 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     });
     this.pool.load.subscribe(emitEvent);
 
-    registerCapacityProviders({
-      getConfiguredCapacity: () => this.startingCapacity,
+    this.capacityMetrics = new TaskManagerCapacityMetrics({
+      getConfiguredCapacity: () => startingCapacity,
       getEffectiveCapacity: () => this.currentCapacity,
       getOccupiedCost: () => this.pool.usedCapacity,
     });
@@ -347,9 +346,6 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       backpressure$: claimNudgeSuppressed$,
       getCapacity: () => {
         const capacity = this.pool.availableCapacity();
-        if (capacity <= 0) {
-          recordPollSkippedNoCapacity();
-        }
         if (!capacity) {
           const usedCapacityPercentage = this.pool.usedCapacityPercentage;
 
@@ -362,6 +358,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
         }
         return capacity;
       },
+      onSkippedNoCapacity: recordPollSkippedNoCapacity,
       work: this.pollForWork,
     });
 
@@ -437,6 +434,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.stopped = true;
     this.executionControlSubscription?.unsubscribe();
     this.backpressureSubscription?.unsubscribe();
+    this.capacityMetrics.stop();
     this.poller.stop();
   }
 

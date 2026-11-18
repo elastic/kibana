@@ -31,6 +31,8 @@ interface Opts<H> {
   /** While true, claim nudges are ignored. */
   backpressure$?: Observable<boolean>;
   getCapacity: () => number;
+  /** Called when a cycle is skipped because there is no capacity. */
+  onSkippedNoCapacity?: () => void;
   work: WorkFn<H>;
 }
 
@@ -58,6 +60,7 @@ export function createTaskPoller<T, H>({
   claimNudge$,
   backpressure$,
   getCapacity,
+  onSkippedNoCapacity,
   work,
 }: Opts<H>): TaskPoller<T, H> {
   const hasCapacity = () => getCapacity() > 0;
@@ -122,6 +125,7 @@ export function createTaskPoller<T, H>({
         subject.next(asOk(result));
       } else {
         logger.debug('Skipping polling cycle because there is no capacity available');
+        onSkippedNoCapacity?.();
       }
     } catch (e) {
       subject.next(asPollingError<T>(e, PollingErrorType.WorkError));

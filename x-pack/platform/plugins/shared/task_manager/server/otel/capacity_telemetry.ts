@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { metrics, ValueType } from '@opentelemetry/api';
+import { type BatchObservableCallback, metrics, ValueType } from '@opentelemetry/api';
 import { TaskCost } from '../task';
 import type { TaskEvent } from '../task_events';
 import { isTaskRunEvent } from '../task_events';
@@ -52,21 +52,24 @@ const occupiedCost = meter.createObservableGauge('kibana.task_manager.capacity.o
   valueType: ValueType.INT,
 });
 
-let capacityProviders: CapacityProviders | undefined;
+const capacityGauges = [configured, effective, occupiedCost];
 
-meter.addBatchObservableCallback(
-  (result) => {
-    if (!capacityProviders) return;
-    result.observe(configured, capacityProviders.getConfiguredCapacity());
-    result.observe(effective, capacityProviders.getEffectiveCapacity());
-    result.observe(occupiedCost, capacityProviders.getOccupiedCost());
-  },
-  [configured, effective, occupiedCost]
-);
+export class TaskManagerCapacityMetrics {
+  private readonly observe: BatchObservableCallback;
 
-export const registerCapacityProviders = (providers: CapacityProviders): void => {
-  capacityProviders = providers;
-};
+  constructor({ getConfiguredCapacity, getEffectiveCapacity, getOccupiedCost }: CapacityProviders) {
+    this.observe = (result) => {
+      result.observe(configured, getConfiguredCapacity());
+      result.observe(effective, getEffectiveCapacity());
+      result.observe(occupiedCost, getOccupiedCost());
+    };
+    meter.addBatchObservableCallback(this.observe, capacityGauges);
+  }
+
+  stop(): void {
+    meter.removeBatchObservableCallback(this.observe, capacityGauges);
+  }
+}
 
 export const recordPollSkippedNoCapacity = (): void => {
   pollsSkipped.add(1);

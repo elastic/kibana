@@ -14,7 +14,7 @@ import { asErr, asOk } from '../lib/result_type';
 import { TaskRunResult } from '../task_running';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { mockLogger } from '../test_utils';
-import { recordSlotTime, registerCapacityProviders } from './capacity_telemetry';
+import { recordSlotTime, TaskManagerCapacityMetrics } from './capacity_telemetry';
 
 const mockAdd = jest.fn();
 jest.mock('@opentelemetry/api', () => {
@@ -22,37 +22,59 @@ jest.mock('@opentelemetry/api', () => {
     createCounter: () => ({ add: (...args: unknown[]) => mockAdd(...args) }),
     createObservableGauge: (name: string) => ({ name }),
     addBatchObservableCallback: jest.fn(),
+    removeBatchObservableCallback: jest.fn(),
   };
   return { ...jest.requireActual('@opentelemetry/api'), metrics: { getMeter: () => meter } };
 });
 
-describe('capacity gauges', () => {
-  const observe = (): jest.Mock => {
+describe('TaskManagerCapacityMetrics', () => {
+  const meter = metrics.getMeter('kibana.task_manager');
+  const addCallback = meter.addBatchObservableCallback as jest.Mock;
+  const removeCallback = meter.removeBatchObservableCallback as jest.Mock;
+
+  const observedBy = (callback: (result: { observe: jest.Mock }) => void) => {
     const result = { observe: jest.fn() };
-    const [callback] = (
-      metrics.getMeter('kibana.task_manager').addBatchObservableCallback as jest.Mock
-    ).mock.calls[0];
     callback(result);
-    return result.observe;
+    return result.observe.mock.calls.map(([gauge, value]) => [gauge.name, value]);
   };
 
-  test('observe nothing until providers are registered', () => {
-    expect(observe()).not.toHaveBeenCalled();
+  const providers = (configured: number, effective: number, occupied: number) => ({
+    getConfiguredCapacity: () => configured,
+    getEffectiveCapacity: () => effective,
+    getOccupiedCost: () => occupied,
   });
 
-  test('observe the registered providers', () => {
-    registerCapacityProviders({
-      getConfiguredCapacity: () => 20,
-      getEffectiveCapacity: () => 16,
-      getOccupiedCost: () => 6,
-    });
+  beforeEach(() => {
+    addCallback.mockClear();
+    removeCallback.mockClear();
+  });
 
-    const calls = observe().mock.calls.map(([gauge, value]) => [gauge.name, value]);
-    expect(calls).toEqual([
+  test('observes its own providers', () => {
+    const first = new TaskManagerCapacityMetrics(providers(20, 16, 6));
+    const second = new TaskManagerCapacityMetrics(providers(40, 40, 0));
+
+    expect(observedBy(addCallback.mock.calls[0][0])).toEqual([
       ['kibana.task_manager.capacity.configured', 20],
       ['kibana.task_manager.capacity.effective', 16],
       ['kibana.task_manager.capacity.occupied_cost', 6],
     ]);
+    expect(observedBy(addCallback.mock.calls[1][0])).toEqual([
+      ['kibana.task_manager.capacity.configured', 40],
+      ['kibana.task_manager.capacity.effective', 40],
+      ['kibana.task_manager.capacity.occupied_cost', 0],
+    ]);
+    first.stop();
+    second.stop();
+  });
+
+  test('stop removes the callback it registered', () => {
+    const capacityMetrics = new TaskManagerCapacityMetrics(providers(20, 20, 0));
+    const [callback, gauges] = addCallback.mock.calls[0];
+
+    capacityMetrics.stop();
+
+    expect(removeCallback).toHaveBeenCalledTimes(1);
+    expect(removeCallback).toHaveBeenCalledWith(callback, gauges);
   });
 });
 

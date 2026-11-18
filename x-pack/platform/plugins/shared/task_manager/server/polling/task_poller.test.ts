@@ -190,6 +190,33 @@ describe('TaskPoller', () => {
     expect(work).toHaveBeenCalledTimes(5);
   });
 
+  test('reports each cycle skipped for lack of capacity', async () => {
+    const pollInterval = 100;
+    const onSkippedNoCapacity = jest.fn();
+
+    let capacity = 0;
+    createTaskPoller<void, boolean>({
+      initialPollInterval: pollInterval,
+      logger: loggingSystemMock.create().get(),
+      pollInterval$: of(pollInterval),
+      work: jest.fn(async () => true),
+      getCapacity: () => capacity,
+      onSkippedNoCapacity,
+    }).start();
+
+    expect(onSkippedNoCapacity).toHaveBeenCalledTimes(1);
+
+    capacity = -2;
+    await new Promise((resolve) => setImmediate(resolve));
+    clock.tick(pollInterval);
+    expect(onSkippedNoCapacity).toHaveBeenCalledTimes(2);
+
+    capacity = 1;
+    await new Promise((resolve) => setImmediate(resolve));
+    clock.tick(pollInterval);
+    expect(onSkippedNoCapacity).toHaveBeenCalledTimes(2);
+  });
+
   test('waits for work to complete before emitting the next event', async () => {
     const pollInterval = 100;
 
