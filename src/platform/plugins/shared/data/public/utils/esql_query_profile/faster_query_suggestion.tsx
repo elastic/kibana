@@ -269,32 +269,19 @@ function SuggestionBody({
         </Busy>
       );
     case 'error':
-      return (
-        <>
-          <KbnDangerCallout
-            announceOnMount
-            title={i18n.translate('data.inspector.queryProfile.suggestionErrorTitle', {
-              defaultMessage: 'Unable to suggest a faster query',
-            })}
-            text={
-              <p>
-                {stage.isNoConnector ? (
-                  <FormattedMessage
-                    id="data.inspector.queryProfile.noConnectorMessage"
-                    defaultMessage="No AI connector is set up."
-                  />
-                ) : (
-                  stage.message
-                )}
-              </p>
-            }
-          />
-          <EuiSpacer size="s" />
-          <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+      // A missing connector is something to set up, not a failure, so it is not shown as an error.
+      if (stage.isNoConnector) {
+        return (
+          <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" wrap>
             <EuiFlexItem grow={false}>
-              <DismissButton onClick={onDismiss} />
+              <EuiText size="xs" color="subdued">
+                <FormattedMessage
+                  id="data.inspector.queryProfile.noConnectorMessage"
+                  defaultMessage="No AI connector is set up."
+                />
+              </EuiText>
             </EuiFlexItem>
-            {stage.isNoConnector && connectorsUrl ? (
+            {connectorsUrl ? (
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   size="xs"
@@ -309,7 +296,23 @@ function SuggestionBody({
                 </EuiButtonEmpty>
               </EuiFlexItem>
             ) : null}
+            <EuiFlexItem grow={false}>
+              <DismissButton onClick={onDismiss} />
+            </EuiFlexItem>
           </EuiFlexGroup>
+        );
+      }
+      return (
+        <>
+          <KbnDangerCallout
+            announceOnMount
+            title={i18n.translate('data.inspector.queryProfile.suggestionErrorTitle', {
+              defaultMessage: 'Unable to suggest a faster query',
+            })}
+            text={<p>{stage.message}</p>}
+          />
+          <EuiSpacer size="s" />
+          <DismissButton onClick={onDismiss} />
         </>
       );
     case 'noSuggestion':
