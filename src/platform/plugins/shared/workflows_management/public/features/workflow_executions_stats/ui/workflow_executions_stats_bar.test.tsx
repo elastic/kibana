@@ -29,6 +29,7 @@ jest.mock('@elastic/charts', () => ({
   Settings: () => <div data-test-subj="mock-settings" />,
   Tooltip: () => <div data-test-subj="mock-tooltip" />,
   niceTimeFormatter: () => jest.fn(),
+  timeFormatter: () => jest.fn(),
   Position: {
     Right: 'right',
     Bottom: 'bottom',
@@ -38,10 +39,6 @@ jest.mock('@elastic/charts', () => ({
     Time: 'time',
     Linear: 'linear',
   },
-}));
-
-jest.mock('@elastic/charts/dist/utils/data/formatters', () => ({
-  timeFormatter: () => jest.fn(),
 }));
 
 describe('WorkflowExecutionStatsBar', () => {

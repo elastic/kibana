@@ -42,6 +42,7 @@ import {
 import { assertNever } from '@kbn/std';
 import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
+import { UNKNOWN_ALERT_FIELD } from '../lib/alert_snapshot';
 import { assertNightshiftSpace } from '../lib/assert_nightshift_space';
 import { installAssistantAgent } from '../lib/install_assistant_agent';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
@@ -90,10 +91,12 @@ import {
   InvalidInvestigationContextError,
   InvestigationUnavailableError,
 } from './errors';
-import type {
-  InvestigationEndedEvent,
-  InvestigationRunOutcome,
-  NightshiftTelemetryClient,
+import {
+  alertIdentityOf,
+  triggeringAlertOf,
+  type InvestigationEndedEvent,
+  type InvestigationRunOutcome,
+  type NightshiftTelemetryClient,
 } from '../telemetry';
 import { ModelUsageCollector } from '../lib/model_usage_collector';
 import { MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from '../../common/automation_limits';
@@ -150,6 +153,12 @@ const significantEventIdOf = (
 };
 
 /** `inputs.context.follow_up` of the investigation runs `followUpRecoveredAlert` starts. */
+export const UNSUCCESSFUL_EXECUTION_STATUSES: readonly ExecutionStatus[] = [
+  ExecutionStatus.FAILED,
+  ExecutionStatus.TIMED_OUT,
+  ExecutionStatus.CANCELLED,
+];
+
 export const ALERT_RECOVERED_FOLLOW_UP = 'alert_recovered';
 
 /** How an investigation run started, recorded as `inputs.context.entry_point`. */
@@ -533,7 +542,6 @@ export class NightshiftInvestigationsClient {
       message,
       instructions,
       timeout_seconds,
-      source_ids,
       connector_id,
       context = {},
       notificationDestinations,
@@ -590,6 +598,7 @@ export class NightshiftInvestigationsClient {
     const workflow = await this.getInvestigationWorkflow(spaceId);
 
     const { alerts } = prepared;
+    const alertIdentity = alertIdentityOf(spaceId, triggeringAlertOf(subject.id, alerts));
     const newInvestigationId = uuidv4();
     const subjects = toStartSubjects({
       subject: resolvedSubject,
@@ -632,6 +641,8 @@ export class NightshiftInvestigationsClient {
                 origin: subject.type,
                 ...(automationId ? { automation_id: automationId } : {}),
                 skip_reason: 'deployment_quota',
+                event_id: significantEventIdOf(subject, alerts),
+                ...alertIdentity,
               });
             }
             throw error;
@@ -672,7 +683,6 @@ export class NightshiftInvestigationsClient {
         // Kept as a workflow input for callers that read it off the run. Agent Builder titles the
         // investigation from the first round instead.
         ...(title ? { title } : {}),
-        ...(source_ids?.length ? { source_ids } : {}),
         ...(connector_id?.trim() ? { connector_id: resolvedConnectorId } : {}),
         investigation_id: investigationId,
         subjects: newSubjects,
@@ -715,6 +725,7 @@ export class NightshiftInvestigationsClient {
       automation_id: automationId,
       ...correlation,
       event_id: significantEventIdOf(resolvedSubject, alerts) ?? correlation.event_id,
+      ...alertIdentity,
     });
 
     this.logger.info(
@@ -1026,7 +1037,7 @@ export class NightshiftInvestigationsClient {
     );
     if (
       TerminalExecutionStatuses.includes(execution.status) &&
-      (reopen || ![ExecutionStatus.FAILED, ExecutionStatus.TIMED_OUT].includes(execution.status))
+      (reopen || !UNSUCCESSFUL_EXECUTION_STATUSES.includes(execution.status))
     ) {
       throw new InvestigationNotFoundError(investigationId);
     }
@@ -1181,10 +1192,7 @@ export class NightshiftInvestigationsClient {
   ): Promise<{ execution: WorkflowExecutionDto; investigationId: string }> {
     if (!executionId || executionId.length > 500) throw new InvestigationNotFoundError(executionId);
     const { execution, inputs } = await this.readInvestigationExecution(undefined, executionId);
-    if (
-      execution.isTestRun ||
-      ![ExecutionStatus.FAILED, ExecutionStatus.TIMED_OUT].includes(execution.status)
-    ) {
+    if (execution.isTestRun || !UNSUCCESSFUL_EXECUTION_STATUSES.includes(execution.status)) {
       throw new InvestigationNotFoundError(executionId);
     }
     const investigationId = asString(inputs?.investigation_id) ?? executionId;
@@ -1612,6 +1620,15 @@ export class NightshiftInvestigationsClient {
       snapshot: alertSubject?.snapshot,
     });
 
+    // The recovery context has no `alerts`, so the rule type travels on its own for online evals.
+    // The step passes an empty string when the rule event has no type.
+    const snapshotRuleType = alertSubject?.snapshot?.rule_type_id;
+    const alertRuleType =
+      alertInput.ruleTypeId ||
+      (typeof snapshotRuleType === 'string' && snapshotRuleType !== UNKNOWN_ALERT_FIELD
+        ? snapshotRuleType
+        : '');
+
     const spaceId = this.getSpaceId();
     this.warnOnSpaceMismatch(spaceId);
     const workflow = await this.getInvestigationWorkflow(spaceId);
@@ -1622,6 +1639,7 @@ export class NightshiftInvestigationsClient {
         source: 'alert',
         follow_up: ALERT_RECOVERED_FOLLOW_UP,
         entry_point: 'alert_recovery' satisfies InvestigationEntryPoint,
+        ...(alertRuleType ? { alert_rule_type: alertRuleType } : {}),
       },
     });
     this.telemetry?.reportInvestigationStarted({
@@ -1631,6 +1649,7 @@ export class NightshiftInvestigationsClient {
       entry_point: 'alert_recovery',
       subject_type: 'alert',
       is_follow_up: true,
+      ...alertIdentityOf(spaceId, alertSubject?.snapshot),
     });
     this.logger.info(
       `Requested a recovery round on investigation "${existing.id}" for alert/${alertUuid}, execution_id=${executionId}`

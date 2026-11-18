@@ -24,9 +24,9 @@ describe('profilingElasticsearchConfigSchema', () => {
   });
 
   it('rejects a remote cluster in a distribution', () => {
-    expect(() =>
-      wrappingSchema.validate({ elasticsearch: remoteCluster }, { dist: true })
-    ).toThrowError(/a value wasn't expected to be present/);
+    expect(() => wrappingSchema.validate({ elasticsearch: remoteCluster }, { dist: true })).toThrow(
+      /a value wasn't expected to be present/
+    );
   });
 
   it('is optional in a distribution when unset', () => {

@@ -20,7 +20,7 @@ const deleteSLOInstancesParamsSchema = lazySchema(() =>
             excludeRollup: z.boolean().optional(),
           })
         )
-        .describe('An array of slo id and instance id'),
+        .describe('An array of SLO ID and instance ID pairs'),
     }),
   })
 );

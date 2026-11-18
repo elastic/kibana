@@ -72,6 +72,14 @@ describe('getSpaceInitials', () => {
     expect(getSpaceInitials(space)).toEqual('VS');
   });
 
+  test('keeps the first grapheme of each word whole when deriving initials', () => {
+    const space = {
+      name: '\u{1F44D}\u{1F3FD}Rocket \u0915\u094D\u0937a',
+    };
+
+    expect(getSpaceInitials(space)).toEqual('\u{1F44D}\u{1F3FD}\u0915\u094D\u0937');
+  });
+
   test('maintains case when deriving initials', () => {
     const space = {
       name: 'some Space',

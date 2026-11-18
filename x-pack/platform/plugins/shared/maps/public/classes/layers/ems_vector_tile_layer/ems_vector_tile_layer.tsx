@@ -221,6 +221,23 @@ export class EmsVectorTileLayer extends AbstractLayer {
     return prefix + imageId;
   }
 
+  // Supports plain image ids and legacy zoom functions, e.g. { stops: [[0, 'circle-11'], [9, '']] }.
+  _namespaceImageProperty<T>(value: T): T {
+    if (typeof value === 'string') {
+      return (value === '' ? value : this._makeNamespacedImageId(value)) as T;
+    }
+    if (value && typeof value === 'object' && 'stops' in value && Array.isArray(value.stops)) {
+      return {
+        ...value,
+        stops: value.stops.map(([zoom, imageId]: [number, string]) => [
+          zoom,
+          this._namespaceImageProperty(imageId),
+        ]),
+      };
+    }
+    return value;
+  }
+
   _requiresPrevSourceCleanup(mbMap: MbMap) {
     const sourceIdPrefix = this._generateMbSourceIdPrefix();
     const mbStyle = mbMap.getStyle();
@@ -352,22 +369,14 @@ export class EmsVectorTileLayer extends AbstractLayer {
           id: mbLayerId,
         };
 
-        if (
-          newLayerObject.type === 'symbol' &&
-          newLayerObject.layout &&
-          typeof newLayerObject.layout['icon-image'] === 'string'
-        ) {
-          newLayerObject.layout['icon-image'] = this._makeNamespacedImageId(
+        if (newLayerObject.type === 'symbol' && newLayerObject.layout?.['icon-image']) {
+          newLayerObject.layout['icon-image'] = this._namespaceImageProperty(
             newLayerObject.layout['icon-image']
           );
         }
 
-        if (
-          newLayerObject.type === 'fill' &&
-          newLayerObject.paint &&
-          typeof newLayerObject.paint['fill-pattern'] === 'string'
-        ) {
-          newLayerObject.paint['fill-pattern'] = this._makeNamespacedImageId(
+        if (newLayerObject.type === 'fill' && newLayerObject.paint?.['fill-pattern']) {
+          newLayerObject.paint['fill-pattern'] = this._namespaceImageProperty(
             newLayerObject.paint['fill-pattern']
           );
         }

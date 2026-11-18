@@ -8,7 +8,6 @@
 import {
   SIGNIFICANT_EVENTS_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_STATUS_UPDATE_EVENT_TYPE,
   SIGNIFICANT_EVENTS_EVENT_STATUS_CHANGED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
@@ -20,12 +19,15 @@ import {
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_WRITE_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_SEARCH_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_AGENT_TOOL_FAILED_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATION_FAILED_EVENT_TYPE,
 } from './constants';
 import {
+  agentToolFailedSchema,
+  knowledgeIndicatorQueriesGenerationFailedSchema,
   agentBuilderKnowledgeIndicatorCreatedSchema,
   agentToolEventCreateSchema,
   agentToolEventSearchSchema,
-  agentToolEventStatusUpdateSchema,
   agentToolEventWriteSchema,
   agentToolKnowledgeIndicatorIdentificationStartedSchema,
   detectionScanSchema,
@@ -61,11 +63,6 @@ const agentToolKiIdentificationStartedEventType = {
 const agentToolEventCreateEventType = {
   eventType: SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
   schema: agentToolEventCreateSchema,
-};
-
-const agentToolEventStatusUpdateEventType = {
-  eventType: SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_STATUS_UPDATE_EVENT_TYPE,
-  schema: agentToolEventStatusUpdateSchema,
 };
 
 const discoveryStartedEventType = {
@@ -108,11 +105,22 @@ const agentToolEventSearchEventType = {
   schema: agentToolEventSearchSchema,
 };
 
+const agentToolFailedEventType = {
+  eventType: SIGNIFICANT_EVENTS_AGENT_TOOL_FAILED_EVENT_TYPE,
+  schema: agentToolFailedSchema,
+};
+
+const knowledgeIndicatorQueriesGenerationFailedEventType = {
+  eventType: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATION_FAILED_EVENT_TYPE,
+  schema: knowledgeIndicatorQueriesGenerationFailedSchema,
+};
+
 export {
+  agentToolFailedEventType,
+  knowledgeIndicatorQueriesGenerationFailedEventType,
   agentBuilderKnowledgeIndicatorCreatedEventType,
   agentToolEventCreateEventType,
   agentToolEventSearchEventType,
-  agentToolEventStatusUpdateEventType,
   agentToolEventWriteEventType,
   agentToolKiIdentificationStartedEventType,
   detectionScanEventType,

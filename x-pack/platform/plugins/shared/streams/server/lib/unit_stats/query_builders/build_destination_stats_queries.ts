@@ -13,7 +13,9 @@ import {
   DESTINATION_ID_FIELD,
   DESTINATION_ITEMS_FIELD,
   ESQL_MAX_ROWS,
+  FAILURE_STORE_FIELD,
   FAILURE_STORE_OUTCOME,
+  FAILURE_STORE_USED,
   OUTCOME_FIELD,
   STATS_COLUMN,
   UNIT_METRICS_STREAM,
@@ -25,12 +27,13 @@ import {
   type StatsQueryBaseParams,
 } from './filters';
 
-interface DestinationStatsQueryParams extends StatsQueryBaseParams {
+export interface DestinationStatsQueryParams extends StatsQueryBaseParams {
   /** A non-empty list of destination ids. */
   ids: string[];
 }
 
-const filterDestinations = (
+/** Keeps the documents of the named destinations of one unit in the window. */
+export const filterDestinations = (
   query: ComposerQuery,
   { ids, ...unitAndWindow }: DestinationStatsQueryParams
 ) =>
@@ -50,19 +53,35 @@ export const countsItemOnce = (): ESQLSingleAstItem => {
 };
 
 /**
+ * Keeps an items row that is one failure. Every outcome except `success` is, with one exception.
+ *
+ * The exception is a `failure_store` row of a document that did not go to the failure store
+ * (`not_enabled` or `failed`), because the exporter also reported that document under its
+ * `failed_*` outcome. A `used` row stays, because that document was also reported as a success.
+ *
+ * So a failed item counts once: the `failed_*` outcomes plus the `used` rows. A row with no outcome
+ * does not count.
+ */
+export const countsFailureOnce = (): ESQLSingleAstItem => {
+  const outcome = normalizeColumn(OUTCOME_FIELD);
+  const failureStore = normalizeColumn(FAILURE_STORE_FIELD);
+
+  return esql.exp`${outcome} != "success" AND (${outcome} != ${FAILURE_STORE_OUTCOME} OR ${failureStore} == ${FAILURE_STORE_USED})`;
+};
+
+/**
  * Rate, failed rate and latency per destination, from a plain `FROM`. A rate is the exact sum of
  * items over the time from where the first delta in the window starts (a document is a delta from
  * `start_timestamp` to `@timestamp`) to the end of the window, so a destination that started inside
  * the window is not diluted and the first delta's own interval is counted. The time is taken in
  * milliseconds because `DATE_DIFF` in seconds truncates. The incoming rate leaves out `failure_store`
- * rows, see `countsItemOnce`. `failed_rate` counts every outcome except `success`: 0 when there are
- * items and no failures, null when there are no items. `AVG` of the duration histograms is the mean
- * of all observations. `items` is a counter, so it is cast first.
+ * rows, see `countsItemOnce`. `failed_rate` counts each failed item once, see `countsFailureOnce`:
+ * 0 when there are items and no failures, null when there are no items. `AVG` of the duration
+ * histograms is the mean of all observations. `items` is a counter, so it is cast first.
  */
 export const buildDestinationRateQuery = (params: DestinationStatsQueryParams): ComposerQuery => {
   const items = normalizeColumn(DESTINATION_ITEMS_FIELD);
   const duration = normalizeColumn(DESTINATION_DURATION_FIELD);
-  const outcome = normalizeColumn(OUTCOME_FIELD);
   const destinationId = normalizeColumn(DESTINATION_ID_FIELD);
   const incomingRate = esql.col(STATS_COLUMN.incomingRate);
   const failedRate = esql.col(STATS_COLUMN.failedRate);
@@ -73,7 +92,7 @@ export const buildDestinationRateQuery = (params: DestinationStatsQueryParams): 
   return filterDestinations(esql.from(UNIT_METRICS_STREAM), params)
     .pipe`EVAL delta = TO_DOUBLE(${items})`
     .pipe`STATS sum_items = SUM(delta) WHERE ${countsItemOnce()},
-        failed_items = SUM(delta) WHERE ${outcome} != "success",
+        failed_items = SUM(delta) WHERE ${countsFailureOnce()},
         ${avgLatency} = AVG(${duration}),
         covered_from = MIN(start_timestamp)
       BY ${id} = ${destinationId}`
