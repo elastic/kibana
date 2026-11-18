@@ -732,6 +732,9 @@ export class FleetPlugin
       registerAwsOnboardingSteps(deps.workflowsExtensions);
       registerAwsOnboardingWorkflowOwner(deps.workflowsExtensions);
     }
+    if (deps.workflowsManagement) {
+      appContextService.setWorkflowsManagement(deps.workflowsManagement);
+    }
     if (deps.agentBuilder && deps.workflowsManagement) {
       registerAwsOnboardingSkill({
         agentBuilder: deps.agentBuilder,

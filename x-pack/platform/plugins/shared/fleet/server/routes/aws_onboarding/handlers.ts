@@ -13,11 +13,14 @@ import {
   awsOnboardingDiscoveryService,
   awsOnboardingStackService,
   isAwsSdkError,
+  readAwsOnboardingRunProgress,
   BOOTSTRAP_TEMPLATE_YAML,
   BOOTSTRAP_TEMPLATE_FILENAME,
 } from '../../services/aws_onboarding';
+import { findOnboardingExecution } from '../../services/aws_onboarding/execution';
 import { appContextService } from '../../services/app_context';
 import { isAwsManagedOnboardingEnabled } from '../../services/utils/aws_onboarding';
+import { isAgenticAwsOnboardingEnabled } from '../../services/utils/agentic_aws_onboarding';
 import { isIacProvisionerEnabled } from '../../services/utils/iac_provisioner';
 import { iacProvisionerService } from '../../services/iac_provisioner';
 import {
@@ -38,7 +41,7 @@ import type {
   DeleteAwsOnboardingCredentialsRequestSchema,
   GetAwsOnboardingBootstrapLaunchRequestSchema,
   GetAwsOnboardingBootstrapTemplateRequestSchema,
-  GetAwsOnboardingStackRequestSchema,
+  GetAwsOnboardingRunRequestSchema,
   PutAwsOnboardingCredentialsRequestSchema,
 } from '../../types/rest_spec/aws_onboarding';
 
@@ -120,13 +123,37 @@ export const deleteCredentialsHandler: FleetRequestHandler<
   }
 };
 
-export const getStackHandler: FleetRequestHandler<
-  TypeOf<typeof GetAwsOnboardingStackRequestSchema.params>
+/** The progress of one agent-driven onboarding run, which the run card polls. */
+export const getRunHandler: FleetRequestHandler<
+  TypeOf<typeof GetAwsOnboardingRunRequestSchema.params>
 > = async (context, request, response) => {
-  if (!(await isAwsManagedOnboardingEnabled())) return notEnabled(response);
+  if (!(await isAgenticAwsOnboardingEnabled())) {
+    return response.notFound({ body: { message: 'Agent-driven AWS onboarding is not enabled' } });
+  }
+  const workflowsManagement = appContextService.getWorkflowsManagement();
+  if (!workflowsManagement) {
+    return response.customError({
+      statusCode: 503,
+      body: { message: 'Workflows are not available' },
+    });
+  }
+  const { executionId } = request.params;
   try {
-    const result = await awsOnboardingStackService.status(request.params.stackId);
-    return response.ok({ body: result });
+    const { spaceId } = await context.fleet;
+    const execution = await findOnboardingExecution({
+      workflowApi: workflowsManagement.management,
+      executionId,
+      spaceId,
+      request,
+      includeOutput: true,
+    });
+    // A run of another workflow answers like a missing one, so the route reveals nothing about it.
+    if (!execution) {
+      return response.notFound({
+        body: { message: `AWS onboarding run '${executionId}' was not found` },
+      });
+    }
+    return response.ok({ body: await readAwsOnboardingRunProgress(execution) });
   } catch (error) {
     return mapError(error, response);
   }

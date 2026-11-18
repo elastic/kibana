@@ -6,32 +6,34 @@
  */
 
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
 
 import { appContextService } from '../../services/app_context';
 import { iacProvisionerService } from '../../services/iac_provisioner';
 import { isAwsManagedOnboardingEnabled } from '../../services/utils/aws_onboarding';
 import { isIacProvisionerEnabled } from '../../services/utils/iac_provisioner';
+import { isAgenticAwsOnboardingEnabled } from '../../services/utils/agentic_aws_onboarding';
 import { IacProvisionerRequestError, IacProvisionerUnavailableError } from '../../errors';
 
-import { awsOnboardingStackService } from '../../services/aws_onboarding';
+import { readAwsOnboardingRunProgress } from '../../services/aws_onboarding';
 
-import {
-  getBootstrapLaunchHandler,
-  getBootstrapTemplateHandler,
-  getStackHandler,
-} from './handlers';
+import { getBootstrapLaunchHandler, getBootstrapTemplateHandler, getRunHandler } from './handlers';
 
 jest.mock('../../services/app_context');
 jest.mock('../../services/aws_onboarding', () => ({
   awsOnboardingCredentialsService: {},
   awsOnboardingDiscoveryService: {},
-  awsOnboardingStackService: { status: jest.fn() },
+  awsOnboardingStackService: {},
+  readAwsOnboardingRunProgress: jest.fn(),
   isAwsSdkError: jest.fn(),
   BOOTSTRAP_TEMPLATE_YAML: 'Parameters:\n  ManagementMode:\n    Default: fully-managed\n',
   BOOTSTRAP_TEMPLATE_FILENAME: 'kibana-managed-onboarding-bootstrap.yml',
 }));
 jest.mock('../../services/utils/aws_onboarding', () => ({
   isAwsManagedOnboardingEnabled: jest.fn(),
+}));
+jest.mock('../../services/utils/agentic_aws_onboarding', () => ({
+  isAgenticAwsOnboardingEnabled: jest.fn(),
 }));
 jest.mock('../../services/utils/iac_provisioner', () => ({
   isIacProvisionerEnabled: jest.fn(),
@@ -232,45 +234,54 @@ describe('getBootstrapTemplateHandler', () => {
   });
 });
 
-describe('getStackHandler', () => {
-  const stackArn = 'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-onboarding-x/id';
-  const request = httpServerMock.createKibanaRequest({ params: { stackId: stackArn } });
+describe('getRunHandler', () => {
+  const request = httpServerMock.createKibanaRequest({ params: { executionId: 'exec-1' } });
+  const context = { fleet: Promise.resolve({ spaceId: 'space-a' }) } as any;
+  const getWorkflowExecution = jest.fn();
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
 
   beforeEach(() => {
     jest.clearAllMocks();
     response = httpServerMock.createResponseFactory();
-    jest.mocked(isAwsManagedOnboardingEnabled).mockResolvedValue(true);
-  });
-
-  it("returns the stack's status and resources", async () => {
-    const status = {
-      status: 'in_progress' as const,
-      stackStatus: 'CREATE_IN_PROGRESS',
-      resources: [
-        {
-          logicalId: 'WiiOidcProviderFunctionRole',
-          status: 'CREATE_COMPLETE',
-          updatedAt: '2026-11-17T10:00:02.000Z',
-        },
-      ],
-    };
-    jest.mocked(awsOnboardingStackService.status).mockResolvedValue(status);
-
-    await getStackHandler({} as any, request as any, response);
-
-    expect(awsOnboardingStackService.status).toHaveBeenCalledWith(stackArn);
-    expect(response.ok).toHaveBeenCalledWith({ body: status });
-  });
-
-  it('answers a stack that no longer exists with not_found instead of a 404', async () => {
+    jest.mocked(isAgenticAwsOnboardingEnabled).mockResolvedValue(true);
     jest
-      .mocked(awsOnboardingStackService.status)
-      .mockResolvedValue({ status: 'not_found', resources: [] });
+      .mocked(appContextService.getWorkflowsManagement)
+      .mockReturnValue({ management: { getWorkflowExecution } } as any);
+  });
 
-    await getStackHandler({} as any, request as any, response);
+  it("returns the onboarding execution's progress", async () => {
+    const execution = { id: 'exec-1', workflowId: FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID };
+    const progress = { status: 'running', stack: { phase: 'in_progress', resources: [] } };
+    getWorkflowExecution.mockResolvedValue(execution);
+    jest.mocked(readAwsOnboardingRunProgress).mockResolvedValue(progress as any);
 
-    expect(response.ok).toHaveBeenCalledWith({ body: { status: 'not_found', resources: [] } });
-    expect(response.notFound).not.toHaveBeenCalled();
+    await getRunHandler(context, request as any, response);
+
+    expect(getWorkflowExecution).toHaveBeenCalledWith('exec-1', 'space-a', {
+      includeOutput: true,
+      request,
+    });
+    expect(readAwsOnboardingRunProgress).toHaveBeenCalledWith(execution);
+    expect(response.ok).toHaveBeenCalledWith({ body: progress });
+  });
+
+  it('answers 404 for an execution of another workflow', async () => {
+    getWorkflowExecution.mockResolvedValue({ id: 'exec-1', workflowId: 'some-other-workflow' });
+
+    await getRunHandler(context, request as any, response);
+
+    expect(response.notFound).toHaveBeenCalled();
+    expect(readAwsOnboardingRunProgress).not.toHaveBeenCalled();
+  });
+
+  it('answers 503 when workflows are not available', async () => {
+    jest.mocked(appContextService.getWorkflowsManagement).mockReturnValue(undefined);
+
+    await getRunHandler(context, request as any, response);
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 503,
+      body: { message: 'Workflows are not available' },
+    });
   });
 });

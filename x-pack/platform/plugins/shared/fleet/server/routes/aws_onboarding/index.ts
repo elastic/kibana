@@ -12,7 +12,7 @@ import {
   DeleteAwsOnboardingCredentialsRequestSchema,
   GetAwsOnboardingBootstrapLaunchRequestSchema,
   GetAwsOnboardingBootstrapTemplateRequestSchema,
-  GetAwsOnboardingStackRequestSchema,
+  GetAwsOnboardingRunRequestSchema,
   PutAwsOnboardingCredentialsRequestSchema,
 } from '../../types/rest_spec/aws_onboarding';
 
@@ -21,7 +21,7 @@ import {
   getBootstrapLaunchHandler,
   getBootstrapTemplateHandler,
   getCredentialsHandler,
-  getStackHandler,
+  getRunHandler,
   getVerifyHandler,
   putCredentialsHandler,
 } from './handlers';
@@ -126,17 +126,17 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
 
   router.versioned
     .get({
-      path: AWS_ONBOARDING_API_ROUTES.STACK_INFO_PATTERN,
-      summary: 'Get a managed CloudFormation stack status',
+      path: AWS_ONBOARDING_API_ROUTES.RUN_PATTERN,
+      summary: 'Get the progress of an agent-driven AWS onboarding run',
       access: 'internal',
       security: READ_SECURITY,
     })
     .addVersion(
       {
         version: API_VERSIONS.internal.v1,
-        validate: { request: GetAwsOnboardingStackRequestSchema },
+        validate: { request: GetAwsOnboardingRunRequestSchema },
       },
-      getStackHandler
+      getRunHandler
     );
 
   router.versioned

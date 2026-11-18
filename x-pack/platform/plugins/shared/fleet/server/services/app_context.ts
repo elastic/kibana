@@ -18,6 +18,7 @@ import type {
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SecurityPluginStart, SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
@@ -98,6 +99,7 @@ class AppContextService {
   private reportingStart: ReportingStart | undefined;
   private featureFlags: FeatureFlagsStart | undefined;
   private isFipsEnabled: boolean = false;
+  private workflowsManagement: WorkflowsServerPluginSetup | undefined;
 
   public start(appContext: FleetAppContext) {
     this.data = appContext.data;
@@ -367,6 +369,15 @@ class AppContextService {
 
   public getFeatureFlags() {
     return this.featureFlags;
+  }
+
+  /** Set in setup, since the workflow API is only handed to Fleet there. */
+  public setWorkflowsManagement(workflowsManagement: WorkflowsServerPluginSetup) {
+    this.workflowsManagement = workflowsManagement;
+  }
+
+  public getWorkflowsManagement(): WorkflowsServerPluginSetup | undefined {
+    return this.workflowsManagement;
   }
 }
 

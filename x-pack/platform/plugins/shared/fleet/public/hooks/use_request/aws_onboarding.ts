@@ -9,11 +9,11 @@ import type {
   AwsOnboardingCredentialsPublic,
   GetAwsOnboardingBootstrapLaunchResponse,
   GetAwsOnboardingBootstrapTemplateResponse,
-  GetAwsOnboardingStackResponse,
   PutAwsOnboardingCredentialsRequest,
   AwsOnboardingVerifyResponse,
   AwsOnboardingManagementMode,
 } from '../../../common/types/rest_spec/aws_onboarding';
+import type { AwsOnboardingRunProgress } from '../../../common/types/rest_spec/aws_onboarding_run';
 import { API_VERSIONS, AWS_ONBOARDING_API_ROUTES } from '../../../common/constants';
 
 import { sendRequest } from './use_request';
@@ -36,12 +36,12 @@ export function sendPutAwsOnboardingCredentials(body: PutAwsOnboardingCredential
   });
 }
 
-export function sendGetAwsOnboardingStack(stackId: string) {
-  return sendRequest<GetAwsOnboardingStackResponse>({
+export function sendGetAwsOnboardingRun(executionId: string) {
+  return sendRequest<AwsOnboardingRunProgress>({
     method: 'get',
-    path: AWS_ONBOARDING_API_ROUTES.STACK_INFO_PATTERN.replace(
-      '{stackId}',
-      encodeURIComponent(stackId)
+    path: AWS_ONBOARDING_API_ROUTES.RUN_PATTERN.replace(
+      '{executionId}',
+      encodeURIComponent(executionId)
     ),
     version: API_VERSIONS.internal.v1,
   });

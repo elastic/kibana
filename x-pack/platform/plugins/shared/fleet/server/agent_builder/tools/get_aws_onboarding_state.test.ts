@@ -435,6 +435,17 @@ describe('get_aws_onboarding_state', () => {
       });
     });
 
+    it('returns an error when a service is asked for before the settings exist', async () => {
+      const { results } = await run(waitingExecution('select_services', [discoverStep()]), {
+        service: 'guardduty',
+      });
+
+      expect(results[0].type).toBe('error');
+      expect(JSON.stringify(results[0].data)).toContain(
+        'The settings are not ready yet; call again without service.'
+      );
+    });
+
     it('returns an error naming the valid ids for a service outside the requirement', async () => {
       const { results } = await run(waitingExecution('ask_plan', [requirementStep()]), {
         service: 's3',
@@ -478,6 +489,29 @@ describe('get_aws_onboarding_state', () => {
       { id: 'guardduty', name: 'Amazon GuardDuty', agentless: true },
       { id: 'ec2', name: 'Amazon EC2', agentless: false },
     ]);
+  });
+
+  it('lists at most 60 unmatched names and counts them all', async () => {
+    const unmatched = Array.from({ length: 70 }, (_, i) => ({
+      id: `billed-${i}`,
+      name: `Billed service ${i}`,
+      matched: false,
+      agentless: false,
+    }));
+
+    const { results } = await run(
+      waitingExecution('select_services', [
+        step('discover', 1, {
+          status: 'completed',
+          output: { region: 'us-east-1', services: unmatched, errors: [] },
+        }),
+      ])
+    );
+
+    expect(results[0].data.unmatched_services).toEqual(
+      unmatched.slice(0, 60).map(({ name }) => name)
+    );
+    expect(results[0].data.unmatched_count).toBe(70);
   });
 
   it('returns the identities the run listed for the plan without their integrations or template hash', async () => {
@@ -726,75 +760,70 @@ describe('get_aws_onboarding_state', () => {
     });
   });
 
-  describe('stack card', () => {
-    const STACK_ID = 'arn:aws:cloudformation:eu-west-1:123456789012:stack/elastic-onboarding-ab/1';
-    const updatingExecution = {
+  describe('run card', () => {
+    const approvedExecution = {
       id: 'exec-1',
       workflowId: FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID,
       status: 'running',
       startedAt: '2026-11-18T09:58:00Z',
       workflowDefinition: { name: 'AWS Agentless Onboarding', steps: [] },
       stepExecutions: [
-        step('settings_requirement', 1, {
+        step('credentials', 1, {
+          status: 'completed',
+          output: { configured: true, region: 'eu-west-1' },
+        }),
+        step('settings_requirement', 2, {
           status: 'completed',
           output: { services: [{ id: 'guardduty', name: 'Amazon GuardDuty' }] },
         }),
-        step('resolve', 2, {
+        step('resolve', 3, {
           status: 'completed',
           output: {
             policies: [{ service: 'guardduty', name: 'aws-guardduty' }],
+            stack_action: 'update',
             added_policy_templates: ['guardduty'],
           },
         }),
-        step('update_stack', 3, {
+        step('approve_plan', 4, {
           status: 'completed',
-          output: { stack_id: STACK_ID, stack_name: 'elastic-onboarding-ab' },
+          output: { response: { approved: true } },
           finishedAt: '2026-11-18T10:00:00Z',
         }),
       ],
     };
 
-    beforeEach(() => {
-      createStatusClient.mockResolvedValue({ client: 'session' });
-      stackStatus.mockResolvedValue({
-        status: 'in_progress',
-        stackStatus: 'UPDATE_IN_PROGRESS',
-        resources: [],
-      });
-    });
-
-    it('creates the stack card from the stack step once the run has a stack', async () => {
+    it('creates the run card right after the plan is approved', async () => {
       const attachments = createAttachments();
 
-      const { results } = await runWithAttachments(updatingExecution, attachments);
+      const { results } = await runWithAttachments(approvedExecution, attachments);
 
+      expect(attachments.add).toHaveBeenCalledTimes(1);
       expect(attachments.add).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: 'fleet_aws_onboarding_stack',
+          type: 'fleet_aws_onboarding_run',
           data: {
             execution_id: 'exec-1',
-            stack_id: STACK_ID,
-            stack_name: 'elastic-onboarding-ab',
+            workflow_id: FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID,
             region: 'eu-west-1',
-            action: 'update',
             for_services: ['Amazon GuardDuty'],
+            stack_action: 'update',
             adding: ['guardduty'],
             started_at: '2026-11-18T10:00:00Z',
           },
         })
       );
-      expect(results[0].data.stack_card_attachment_id).toBe('att-1');
+      expect(results[0].data.run_card_attachment_id).toBe('att-1');
     });
 
-    it('returns the existing stack card on a later call without creating another', async () => {
+    it('returns the existing run card on a later call without creating another', async () => {
       const attachments = createAttachments([
         {
           id: 'att-7',
-          type: 'fleet_aws_onboarding_stack',
+          type: 'fleet_aws_onboarding_run',
           versions: [
             {
               version: 1,
-              data: { execution_id: 'exec-1', stack_id: STACK_ID },
+              data: { execution_id: 'exec-1' },
               created_at: '2026-11-18T10:00:01Z',
               content_hash: 'hash-7',
             },
@@ -803,10 +832,10 @@ describe('get_aws_onboarding_state', () => {
         },
       ]);
 
-      const { results } = await runWithAttachments(updatingExecution, attachments);
+      const { results } = await runWithAttachments(approvedExecution, attachments);
 
       expect(attachments.add).not.toHaveBeenCalled();
-      expect(results[0].data.stack_card_attachment_id).toBe('att-7');
+      expect(results[0].data.run_card_attachment_id).toBe('att-7');
     });
   });
 });

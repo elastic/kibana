@@ -153,7 +153,7 @@ export const PROVISIONING_CALLBACK_TOKEN_HEADER = 'x-elastic-callback-token';
 // Managed AWS onboarding (POC): Kibana creates and updates Federated Identity stacks via the AWS SDK
 export const AWS_ONBOARDING_API_ROUTES = {
   CREDENTIALS_PATTERN: `${INTERNAL_ROOT}/aws_onboarding/credentials`,
-  STACK_INFO_PATTERN: `${INTERNAL_ROOT}/aws_onboarding/stacks/{stackId}`,
+  RUN_PATTERN: `${INTERNAL_ROOT}/aws_onboarding/runs/{executionId}`,
   BOOTSTRAP_LAUNCH_PATTERN: `${INTERNAL_ROOT}/aws_onboarding/bootstrap_launch`,
   BOOTSTRAP_TEMPLATE_PATTERN: `${INTERNAL_ROOT}/aws_onboarding/bootstrap_template`,
   VERIFY_PATTERN: `${INTERNAL_ROOT}/aws_onboarding/verify`,

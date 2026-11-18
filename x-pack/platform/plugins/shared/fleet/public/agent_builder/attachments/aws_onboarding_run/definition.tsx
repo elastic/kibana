@@ -13,28 +13,28 @@ import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 
 import type {
-  AWS_ONBOARDING_STACK_ATTACHMENT_TYPE,
-  AwsOnboardingStackAttachmentData,
-} from '../../../../common/agent_builder/aws_onboarding_stack_attachment';
+  AWS_ONBOARDING_RUN_ATTACHMENT_TYPE,
+  AwsOnboardingRunAttachmentData,
+} from '../../../../common/agent_builder/aws_onboarding_run_attachment';
 
 // The card pulls in the request hooks and callouts; load it only when an attachment renders.
 const LazyCard = React.lazy(() =>
-  import('./card').then((module) => ({ default: module.AwsOnboardingStackCard }))
+  import('./card').then((module) => ({ default: module.AwsOnboardingRunCard }))
 );
 
-export type AwsOnboardingStackAttachment = Attachment<
-  typeof AWS_ONBOARDING_STACK_ATTACHMENT_TYPE,
-  AwsOnboardingStackAttachmentData
+export type AwsOnboardingRunAttachment = Attachment<
+  typeof AWS_ONBOARDING_RUN_ATTACHMENT_TYPE,
+  AwsOnboardingRunAttachmentData
 >;
 
-// One client for every stack card, so a card re-rendered in the conversation reuses its query.
+// One client for every run card, so a card re-rendered in the conversation reuses its query.
 const queryClient = new QueryClient();
 
-export const createAwsOnboardingStackAttachmentDefinition =
-  (): AttachmentUIDefinition<AwsOnboardingStackAttachment> => ({
+export const createAwsOnboardingRunAttachmentDefinition =
+  (): AttachmentUIDefinition<AwsOnboardingRunAttachment> => ({
     getLabel: () =>
-      i18n.translate('xpack.fleet.awsOnboardingStackAttachment.label', {
-        defaultMessage: 'Federated Identity stack',
+      i18n.translate('xpack.fleet.awsOnboardingRunAttachment.label', {
+        defaultMessage: 'AWS onboarding run',
       }),
     getIcon: () => 'logoAWS',
     renderInlineContent: ({ attachment }) => (

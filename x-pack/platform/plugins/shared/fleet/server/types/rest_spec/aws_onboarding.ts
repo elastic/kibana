@@ -53,9 +53,9 @@ export const DeleteAwsOnboardingCredentialsRequestSchema = {
   }),
 };
 
-export const GetAwsOnboardingStackRequestSchema = {
+export const GetAwsOnboardingRunRequestSchema = {
   params: schema.object({
-    stackId: schema.string({ minLength: 1, maxLength: 2048, validate: validateStackArn }),
+    executionId: schema.string({ minLength: 1, maxLength: 128 }),
   }),
 };
 

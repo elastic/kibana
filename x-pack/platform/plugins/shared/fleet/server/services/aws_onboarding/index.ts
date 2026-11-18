@@ -9,7 +9,12 @@ export { awsOnboardingCredentialsService, DEFAULT_STACK_NAME_PREFIX } from './cr
 export type { AwsOnboardingCredentials } from './credentials';
 export { awsOnboardingStackService } from './stacks';
 export { awsOnboardingDiscoveryService } from './discovery';
-export { readAwsOnboardingRunProgress, lastOutput, latestStackRun } from './run_progress';
+export {
+  readAwsOnboardingRunProgress,
+  lastOutput,
+  lastStepExecution,
+  latestStackRun,
+} from './run_progress';
 export { isAwsSdkError } from './cloudformation_client';
 export {
   BOOTSTRAP_TEMPLATE_YAML,

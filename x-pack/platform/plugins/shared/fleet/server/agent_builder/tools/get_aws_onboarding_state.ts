@@ -14,16 +14,16 @@ import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
+import { FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
 
 import {
   AWS_ONBOARDING_CREDENTIALS_ATTACHMENT_TYPE,
   type AwsOnboardingCredentialsAttachmentData,
 } from '../../../common/agent_builder/aws_onboarding_credentials_attachment';
 import {
-  AWS_ONBOARDING_STACK_ATTACHMENT_TYPE,
-  type AwsOnboardingStackAttachmentData,
-} from '../../../common/agent_builder/aws_onboarding_stack_attachment';
-import { parseAwsRegionFromArn } from '../../../common/services/cloud_connectors/iac_deployment';
+  AWS_ONBOARDING_RUN_ATTACHMENT_TYPE,
+  type AwsOnboardingRunAttachmentData,
+} from '../../../common/agent_builder/aws_onboarding_run_attachment';
 import type { AwsOnboardingSettingsRequirement } from '../../../common/workflows/steps/settings';
 import type { AwsOnboardingSettingsRequirementOutput } from '../../../common/workflows/steps/settings_requirement';
 import type { AwsOnboardingCredentialsOutput } from '../../../common/workflows/steps/credentials';
@@ -38,6 +38,7 @@ import {
   awsOnboardingCredentialsService,
   awsOnboardingDiscoveryService,
   lastOutput,
+  lastStepExecution,
   latestStackRun,
   readAwsOnboardingRunProgress,
 } from '../../services/aws_onboarding';
@@ -88,13 +89,20 @@ const summarizeIdentity = ({
   covered_policy_templates: coveredPolicyTemplates,
 });
 
+/** An account can bill for well over a hundred services; past this many names only the count is given. */
+const MAX_UNMATCHED_NAMES = 60;
+
 /** The discover result the selection pause needs: matched services and the unmatched names. */
-const summarizeDiscovery = ({ services }: AwsOnboardingDiscoverOutput) => ({
-  discovered_services: services
-    .filter(({ matched }) => matched)
-    .map(({ id, name, agentless }) => ({ id, name, agentless })),
-  unmatched_services: services.filter(({ matched }) => !matched).map(({ name }) => name),
-});
+const summarizeDiscovery = ({ services }: AwsOnboardingDiscoverOutput) => {
+  const unmatched = services.filter(({ matched }) => !matched).map(({ name }) => name);
+  return {
+    discovered_services: services
+      .filter(({ matched }) => matched)
+      .map(({ id, name, agentless }) => ({ id, name, agentless })),
+    unmatched_services: unmatched.slice(0, MAX_UNMATCHED_NAMES),
+    unmatched_count: unmatched.length,
+  };
+};
 
 const discoveredEntry = (discover: AwsOnboardingDiscoverOutput, service: string) => {
   const entry = discover.services.find(({ id }) => id === service);
@@ -226,58 +234,61 @@ const syncCredentialsCard = async ({
 };
 
 /**
- * Creates the stack card once per execution, as soon as the run has started its stack. The card
- * only identifies the stack: the browser reads the status, resources and role ARN live.
+ * Creates the run card once per execution, as soon as the plan is approved. The card only
+ * identifies the run: the browser reads the stack, connector, policies and data progress live.
  */
-const syncStackCard = async ({
+const syncRunCard = async ({
   attachments,
   executionId,
   execution,
   resolve,
   settingsRequirement,
+  credentialsOutput,
 }: {
   attachments: AttachmentStateManager;
   executionId: string;
   execution: WorkflowExecutionDto;
   resolve: AwsOnboardingResolveOutput | undefined;
   settingsRequirement: AwsOnboardingSettingsRequirementOutput | undefined;
+  credentialsOutput: AwsOnboardingCredentialsOutput | undefined;
 }): Promise<string | undefined> => {
   const existing = attachments
     .getActive()
     .find(
       (a) =>
-        a.type === AWS_ONBOARDING_STACK_ATTACHMENT_TYPE &&
-        (getLatestVersion(a)?.data as Partial<AwsOnboardingStackAttachmentData> | undefined)
+        a.type === AWS_ONBOARDING_RUN_ATTACHMENT_TYPE &&
+        (getLatestVersion(a)?.data as Partial<AwsOnboardingRunAttachmentData> | undefined)
           ?.execution_id === executionId
     );
   if (existing) {
     return existing.id;
   }
 
-  const { action, run, output } = latestStackRun(execution);
-  const region = parseAwsRegionFromArn(output?.stack_id);
-  if (!run || !output?.stack_id || !region) {
+  const approval = lastStepExecution(execution, 'approve_plan');
+  const approved =
+    (approval?.output as { response?: { approved?: boolean } } | undefined)?.response?.approved ===
+    true;
+  const region = credentialsOutput?.region;
+  if (!approval || !approved || !resolve || !region) {
     return undefined;
   }
   const serviceNames = new Map(
     (settingsRequirement?.services ?? []).map(({ id, name }) => [id, name])
   );
-  const data: AwsOnboardingStackAttachmentData = {
+  const data: AwsOnboardingRunAttachmentData = {
     execution_id: executionId,
-    stack_id: output.stack_id,
-    stack_name: output.stack_name,
+    // getOnboardingExecution only returns executions of this workflow.
+    workflow_id: FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID,
     region,
-    action,
-    for_services: (resolve?.policies ?? []).map(
-      ({ service }) => serviceNames.get(service) ?? service
-    ),
-    ...(action === 'update' && resolve && { adding: resolve.added_policy_templates }),
-    started_at: run.finishedAt ?? execution.startedAt,
+    for_services: resolve.policies.map(({ service }) => serviceNames.get(service) ?? service),
+    stack_action: resolve.stack_action,
+    ...(resolve.stack_action === 'update' && { adding: resolve.added_policy_templates }),
+    started_at: approval.finishedAt ?? execution.startedAt,
   };
   const created = await attachments.add({
-    type: AWS_ONBOARDING_STACK_ATTACHMENT_TYPE,
+    type: AWS_ONBOARDING_RUN_ATTACHMENT_TYPE,
     data,
-    description: 'Federated Identity stack progress for this run',
+    description: 'AWS onboarding run progress',
   });
   return created.id;
 };
@@ -340,6 +351,11 @@ export const createGetAwsOnboardingStateTool = ({
       serviceId !== undefined && settingsRequirement
         ? settingsRequirement.services.find(({ id }) => id === serviceId)
         : undefined;
+    if (serviceId !== undefined && !settingsRequirement) {
+      return {
+        results: [errorResult('The settings are not ready yet; call again without service.')],
+      };
+    }
     if (serviceId !== undefined && settingsRequirement && !requirementService) {
       const validIds = settingsRequirement.services.map(({ id }) => id).join(', ');
       return {
@@ -353,7 +369,7 @@ export const createGetAwsOnboardingStateTool = ({
     const discoveredService =
       serviceId !== undefined && discover ? discoveredEntry(discover, serviceId) : undefined;
     let cardId: string | undefined;
-    let stackCardId: string | undefined;
+    let runCardId: string | undefined;
     if (attachments) {
       try {
         cardId = await syncCredentialsCard({
@@ -369,20 +385,19 @@ export const createGetAwsOnboardingStateTool = ({
           .warn(`Could not sync the AWS onboarding credentials card: ${e.message}`);
       }
       // Settings are settled in the chat, so no settings card is created.
-      if (stack?.stack_id) {
-        try {
-          stackCardId = await syncStackCard({
-            attachments,
-            executionId,
-            execution,
-            resolve,
-            settingsRequirement,
-          });
-        } catch (e) {
-          appContextService
-            .getLogger()
-            .warn(`Could not create the AWS onboarding stack card: ${e.message}`);
-        }
+      try {
+        runCardId = await syncRunCard({
+          attachments,
+          executionId,
+          execution,
+          resolve,
+          settingsRequirement,
+          credentialsOutput,
+        });
+      } catch (e) {
+        appContextService
+          .getLogger()
+          .warn(`Could not create the AWS onboarding run card: ${e.message}`);
       }
     }
 
@@ -431,7 +446,7 @@ export const createGetAwsOnboardingStateTool = ({
             },
           }),
           ...(stack && { stack }),
-          ...(stackCardId && { stack_card_attachment_id: stackCardId }),
+          ...(runCardId && { run_card_attachment_id: runCardId }),
           ...(policies && { policies: policies.policies }),
           ...(hasData && {
             has_data: hasData.has_data,

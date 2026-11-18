@@ -8,10 +8,10 @@
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 
 import { createAwsOnboardingCredentialsAttachmentType } from './aws_onboarding_credentials';
-import { createAwsOnboardingStackAttachmentType } from './aws_onboarding_stack';
+import { createAwsOnboardingRunAttachmentType } from './aws_onboarding_run';
 
 export { createAwsOnboardingCredentialsAttachmentType } from './aws_onboarding_credentials';
-export { createAwsOnboardingStackAttachmentType } from './aws_onboarding_stack';
+export { createAwsOnboardingRunAttachmentType } from './aws_onboarding_run';
 
 export const registerAwsOnboardingAttachments = ({
   agentBuilder,
@@ -25,7 +25,7 @@ export const registerAwsOnboardingAttachments = ({
     >[0]
   );
   agentBuilder.attachments.registerType(
-    createAwsOnboardingStackAttachmentType() as Parameters<
+    createAwsOnboardingRunAttachmentType() as Parameters<
       typeof agentBuilder.attachments.registerType
     >[0]
   );
