@@ -28,6 +28,10 @@ describe('AwsSsmConnector', () => {
 
   const parametersWithKeys = (count: number) =>
     Object.fromEntries(Array.from({ length: count }, (_, index) => [`p${index}`, ['value']]));
+  const documentArn = (length: number) => {
+    const prefix = 'arn:aws:ssm:us-east-1:123456789012:document/';
+    return `${prefix}${'a'.repeat(length - prefix.length)}`;
+  };
 
   it.each([
     [
@@ -65,8 +69,20 @@ describe('AwsSsmConnector', () => {
     [
       'getDocument of an ARN longer than 200 characters',
       'getDocument',
-      { name: `arn:aws:ssm:us-east-1:123456789012:document/${'a'.repeat(156)}` },
-      { name: `arn:aws:ssm:us-east-1:123456789012:document/${'a'.repeat(157)}` },
+      { name: documentArn(200) },
+      { name: documentArn(201) },
+    ],
+    [
+      'sendCommand of an ARN longer than 200 characters',
+      'sendCommand',
+      { instanceIds: ['i-1234567890abcdef0'], documentName: documentArn(200) },
+      { instanceIds: ['i-1234567890abcdef0'], documentName: documentArn(201) },
+    ],
+    [
+      'startAutomationExecution of an ARN longer than 200 characters',
+      'startAutomationExecution',
+      { documentName: documentArn(200) },
+      { documentName: documentArn(201) },
     ],
     [
       'putParameter of a SecureString',
