@@ -233,6 +233,7 @@ export function getEsqlSearchParams({
 export async function getESQLResults({
   esqlQuery,
   search,
+  sessionId,
   signal,
   filter,
   dropNullColumns,
@@ -246,6 +247,7 @@ export async function getESQLResults({
 }: {
   esqlQuery: string;
   search: ISearchGeneric;
+  sessionId?: string;
   signal?: AbortSignal;
   filter?: unknown;
   dropNullColumns?: boolean;
@@ -277,6 +279,7 @@ export async function getESQLResults({
         abortSignal: signal,
         strategy: 'esql_async',
         ...(executionContext ? { executionContext } : {}),
+        sessionId,
         ...(approximation !== undefined ? { approximation } : {}),
         ...(projectRouting !== undefined ? { projectRouting } : {}),
       }

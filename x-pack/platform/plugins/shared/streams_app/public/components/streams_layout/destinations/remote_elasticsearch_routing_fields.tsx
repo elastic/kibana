@@ -12,34 +12,28 @@ import {
   useWatch,
   type ControllerRenderProps,
 } from 'react-hook-form';
-import {
-  EuiButtonGroup,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiHorizontalRule,
-  EuiRadio,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { OtelDataStreamName } from '@kbn/streams-schema';
 import { PREFIXED_DESTINATION_SIGNALS, SIGNAL_INDEX_FIELDS } from './destination_models';
-import {
-  DESTINATION_AUTO_MODE_LABEL,
-  DESTINATION_FIXED_INDEX_MODE_LABEL,
-  DESTINATION_SIGNAL_LABELS,
-} from './destination_type_config';
 import { DocsIndexField } from './docs_target_fields';
+import { OtelNameFields, useSetOtelName } from './otel_name_fields';
 import {
   EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM,
+  EMPTY_STATIC_NAMES,
   type DestinationCreationFormData,
   type DestinationCreationFormErrors,
   type PrefixedDestinationSignal,
   type StaticIndexNaming,
 } from './types';
+import { getSharedOtelNameOnSwitch } from './writing_mode_form';
+import {
+  NamingButtonGroup,
+  SignalFieldsBox,
+  UNNAMED_SIGNALS_HELP,
+  WritingModePanel,
+} from './writing_mode_panel';
+import { otelNameErrorText } from './write_target_error_text';
 
 type IndexFieldPath =
   `remoteElasticsearch.${(typeof SIGNAL_INDEX_FIELDS)[PrefixedDestinationSignal]}`;
@@ -48,8 +42,6 @@ type IndexFields = Record<
   PrefixedDestinationSignal,
   ControllerRenderProps<DestinationCreationFormData, IndexFieldPath>
 >;
-
-type IndexError = DestinationCreationFormErrors['logsIndex'];
 
 type DocsIndexFieldProps = ControllerRenderProps<
   DestinationCreationFormData,
@@ -64,41 +56,6 @@ interface RemoteElasticsearchRoutingFieldsProps {
 const getIndexFieldPath = (signal: PrefixedDestinationSignal): IndexFieldPath =>
   `remoteElasticsearch.${SIGNAL_INDEX_FIELDS[signal]}`;
 
-const INDEX_PLACEHOLDER = i18n.translate(
-  'xpack.streams.destinations.remoteElasticsearch.indexPlaceholder',
-  { defaultMessage: 'my-index' }
-);
-
-const indexErrorText = (error: IndexError): string | undefined => {
-  switch (error) {
-    case 'template':
-      return i18n.translate(
-        'xpack.streams.destinations.remoteElasticsearch.indexTemplateErrorMessage',
-        { defaultMessage: 'Templated index names are not supported yet.' }
-      );
-    case 'uppercase':
-      return i18n.translate(
-        'xpack.streams.destinations.remoteElasticsearch.indexUppercaseErrorMessage',
-        { defaultMessage: 'Index names must be lowercase.' }
-      );
-    case 'invalidCharacter':
-      return i18n.translate(
-        'xpack.streams.destinations.remoteElasticsearch.indexInvalidCharacterErrorMessage',
-        {
-          defaultMessage:
-            'Index names cannot contain \\ / * ? " < > | , # :, whitespace, or control characters.',
-        }
-      );
-    case 'invalidName':
-      return i18n.translate(
-        'xpack.streams.destinations.remoteElasticsearch.indexInvalidNameErrorMessage',
-        { defaultMessage: 'Enter a valid index name.' }
-      );
-    default:
-      return undefined;
-  }
-};
-
 const StaticFields = ({
   errors,
   disabled,
@@ -108,8 +65,10 @@ const StaticFields = ({
   indexFields: IndexFields;
   docsIndexField: DocsIndexFieldProps;
 }) => {
-  const { control, setValue } = useFormContext<DestinationCreationFormData>();
+  const { control, setValue, resetField } = useFormContext<DestinationCreationFormData>();
+  const setOtelName = useSetOtelName('remoteElasticsearch');
   const staticNaming = useWatch({ control, name: 'remoteElasticsearch.staticNaming' });
+  const staticNames = useWatch({ control, name: 'remoteElasticsearch.staticNames' });
   const requiredError =
     errors.staticIndexes === 'required'
       ? i18n.translate('xpack.streams.destinations.remoteElasticsearch.indexRequiredErrorMessage', {
@@ -117,139 +76,91 @@ const StaticFields = ({
         })
       : undefined;
 
-  const namingOptions = [
-    {
-      id: 'shared',
-      label: i18n.translate('xpack.streams.destinations.remoteElasticsearch.sharedNamingLabel', {
-        defaultMessage: 'One index for all signals',
-      }),
-      'data-test-subj': 'streamsCreateDestinationIndexNaming-shared',
-    },
-    {
-      id: 'perSignal',
-      label: i18n.translate('xpack.streams.destinations.remoteElasticsearch.perSignalNamingLabel', {
-        defaultMessage: 'Name signals individually',
-      }),
-      'data-test-subj': 'streamsCreateDestinationIndexNaming-perSignal',
-    },
-  ];
-
-  const setSharedIndex = (index: string) => {
+  const setSharedName = (name: OtelDataStreamName) => {
     for (const signal of PREFIXED_DESTINATION_SIGNALS) {
-      indexFields[signal].onChange(index);
+      setOtelName(signal, name);
     }
   };
 
-  const onNamingChange = (nextNaming: string) => {
-    const naming = nextNaming as StaticIndexNaming;
+  const onNamingChange = (naming: StaticIndexNaming) => {
     setValue('remoteElasticsearch.staticNaming', naming, { shouldDirty: true });
-    if (naming === 'shared') {
-      setSharedIndex(
-        PREFIXED_DESTINATION_SIGNALS.map((signal) => indexFields[signal].value).find(Boolean) ?? ''
-      );
+    if (naming !== 'shared') {
+      return;
+    }
+    const name = getSharedOtelNameOnSwitch(staticNames);
+    if (name) {
+      setSharedName(name);
+      return;
+    }
+    setValue('remoteElasticsearch.staticNames', EMPTY_STATIC_NAMES);
+    for (const signal of PREFIXED_DESTINATION_SIGNALS) {
+      resetField(getIndexFieldPath(signal));
     }
   };
 
   const sharedError =
-    indexErrorText(errors.logsIndex) ??
-    indexErrorText(errors.metricsIndex) ??
-    indexErrorText(errors.tracesIndex) ??
+    otelNameErrorText(errors.logsIndex) ??
+    otelNameErrorText(errors.metricsIndex) ??
+    otelNameErrorText(errors.tracesIndex) ??
     requiredError;
+
+  const docsIndexRow = (
+    <DocsIndexField
+      value={docsIndexField.value}
+      error={errors.docsIndex}
+      disabled={disabled}
+      onChange={docsIndexField.onChange}
+      onBlur={docsIndexField.onBlur}
+    />
+  );
 
   return (
     <>
-      <EuiButtonGroup
-        legend={i18n.translate('xpack.streams.destinations.remoteElasticsearch.namingLegend', {
-          defaultMessage: 'Fixed index naming',
-        })}
-        buttonSize="compressed"
-        isFullWidth
-        isDisabled={disabled}
-        options={namingOptions}
-        idSelected={staticNaming}
-        onChange={onNamingChange}
-        data-test-subj="streamsCreateDestinationIndexNaming"
-      />
-      <EuiSpacer size="s" />
+      <NamingButtonGroup naming={staticNaming} disabled={disabled} onChange={onNamingChange} />
+      <EuiSpacer size="m" />
       {staticNaming === 'shared' ? (
-        <EuiFormRow
-          fullWidth
-          helpText={i18n.translate(
-            'xpack.streams.destinations.remoteElasticsearch.allSignalsIndexHelpDescription',
-            { defaultMessage: 'The same index name is used for logs, metrics, and traces.' }
-          )}
-          isInvalid={Boolean(sharedError)}
-          error={sharedError}
-        >
-          <EuiFieldText
-            fullWidth
-            value={indexFields.logs.value}
+        <SignalFieldsBox>
+          <OtelNameFields
+            value={staticNames.logs}
+            errorText={sharedError}
             disabled={disabled}
-            isInvalid={Boolean(sharedError)}
-            onChange={(event) => setSharedIndex(event.target.value)}
+            testSubjPrefix="streamsCreateDestinationIndex"
+            onChange={setSharedName}
             onBlur={() => {
               for (const signal of PREFIXED_DESTINATION_SIGNALS) {
                 indexFields[signal].onBlur();
               }
             }}
-            placeholder={INDEX_PLACEHOLDER}
-            aria-label={i18n.translate(
-              'xpack.streams.destinations.remoteElasticsearch.sharedIndexAriaLabel',
-              { defaultMessage: 'Index name for all signals' }
-            )}
-            data-test-subj="streamsCreateDestinationIndex"
           />
-        </EuiFormRow>
+          <EuiSpacer size="s" />
+          {docsIndexRow}
+        </SignalFieldsBox>
       ) : (
-        <>
-          {PREFIXED_DESTINATION_SIGNALS.map((signal) => {
-            const errorText = indexErrorText(errors[SIGNAL_INDEX_FIELDS[signal]]);
-            return (
-              <EuiFormRow
-                key={signal}
-                fullWidth
-                label={DESTINATION_SIGNAL_LABELS[signal]}
-                isInvalid={Boolean(errorText)}
-                error={errorText}
-              >
-                <EuiFieldText
-                  fullWidth
-                  value={indexFields[signal].value}
-                  disabled={disabled}
-                  isInvalid={Boolean(errorText)}
-                  onChange={(event) => indexFields[signal].onChange(event.target.value)}
-                  onBlur={indexFields[signal].onBlur}
-                  placeholder={INDEX_PLACEHOLDER}
-                  data-test-subj={`streamsCreateDestination-${signal}-index`}
-                />
-              </EuiFormRow>
-            );
-          })}
-          <EuiSpacer size="xs" />
-          <EuiText size="xs" color={requiredError ? 'danger' : 'subdued'}>
-            <p>
-              {requiredError ??
-                i18n.translate(
-                  'xpack.streams.destinations.remoteElasticsearch.perSignalIndexHelpDescription',
-                  { defaultMessage: 'Leave a signal blank to not send it to this destination.' }
-                )}
-            </p>
-          </EuiText>
-        </>
+        <SignalFieldsBox
+          help={requiredError ?? UNNAMED_SIGNALS_HELP}
+          isHelpError={Boolean(requiredError)}
+        >
+          {PREFIXED_DESTINATION_SIGNALS.map((signal) => (
+            <React.Fragment key={signal}>
+              <OtelNameFields
+                signal={signal}
+                value={staticNames[signal]}
+                errorText={otelNameErrorText(errors[SIGNAL_INDEX_FIELDS[signal]])}
+                disabled={disabled}
+                testSubjPrefix={`streamsCreateDestination-${signal}-index`}
+                onChange={(name) => setOtelName(signal, name)}
+                onBlur={indexFields[signal].onBlur}
+              />
+              <EuiSpacer size="s" />
+            </React.Fragment>
+          ))}
+          {docsIndexRow}
+        </SignalFieldsBox>
       )}
-      <EuiSpacer size="s" />
-      <DocsIndexField
-        value={docsIndexField.value}
-        error={errors.docsIndex}
-        disabled={disabled}
-        onChange={docsIndexField.onChange}
-        onBlur={docsIndexField.onBlur}
-      />
     </>
   );
 };
 
-/** Index routing for a remote Elasticsearch destination. Index names are used as typed. */
 export const RemoteElasticsearchRoutingFields = (props: RemoteElasticsearchRoutingFieldsProps) => {
   const { disabled } = props;
   const { control, setValue, resetField } = useFormContext<DestinationCreationFormData>();
@@ -264,11 +175,6 @@ export const RemoteElasticsearchRoutingFields = (props: RemoteElasticsearchRouti
     control,
     name: 'remoteElasticsearch.docsIndex',
   });
-  const autoRadioId = useGeneratedHtmlId({ prefix: 'streamsCreateDestinationRemoteRoutingAuto' });
-  const staticRadioId = useGeneratedHtmlId({
-    prefix: 'streamsCreateDestinationRemoteRoutingStatic',
-  });
-
   const onModeChange = (nextAuto: boolean) => {
     if (nextAuto === auto) {
       return;
@@ -277,62 +183,25 @@ export const RemoteElasticsearchRoutingFields = (props: RemoteElasticsearchRouti
       resetField(getIndexFieldPath(signal));
     }
     resetField('remoteElasticsearch.docsIndex');
-    // `resetField` skips unregistered paths, and naming is only ever set with `setValue`.
+    // `resetField` skips unregistered paths, and naming and name parts are only set with `setValue`.
     setValue(
       'remoteElasticsearch.staticNaming',
       EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM.staticNaming
     );
+    setValue('remoteElasticsearch.staticNames', EMPTY_STATIC_NAMES);
     setValue('remoteElasticsearch.auto', nextAuto, { shouldDirty: true });
   };
 
   return (
-    <>
-      <EuiTitle size="xxs">
-        <h3>
-          {i18n.translate('xpack.streams.destinations.remoteElasticsearch.indexModeTitle', {
-            defaultMessage: 'Index mode',
-          })}
-        </h3>
-      </EuiTitle>
-      <EuiText size="xs" color="subdued">
-        <p>
-          {i18n.translate('xpack.streams.destinations.remoteElasticsearch.indexModeDescription', {
-            defaultMessage:
-              'Route each document by its target index or its data stream fields, or set a fixed index.',
-          })}
-        </p>
-      </EuiText>
-      <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="l" responsive={false} alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiRadio
-            id={autoRadioId}
-            name="streamsCreateDestinationRemoteRouting"
-            label={DESTINATION_AUTO_MODE_LABEL}
-            checked={auto}
-            disabled={disabled}
-            onChange={() => onModeChange(true)}
-            data-test-subj="streamsCreateDestinationAuto"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiRadio
-            id={staticRadioId}
-            name="streamsCreateDestinationRemoteRouting"
-            label={DESTINATION_FIXED_INDEX_MODE_LABEL}
-            checked={!auto}
-            disabled={disabled}
-            onChange={() => onModeChange(false)}
-            data-test-subj="streamsCreateDestinationFixedIndex"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    <WritingModePanel
+      auto={auto}
+      disabled={disabled}
+      radioName="streamsCreateDestinationRemoteRouting"
+      onModeChange={onModeChange}
+    >
       {!auto && (
-        <>
-          <EuiHorizontalRule margin="s" />
-          <StaticFields {...props} indexFields={indexFields} docsIndexField={docsIndexField} />
-        </>
+        <StaticFields {...props} indexFields={indexFields} docsIndexField={docsIndexField} />
       )}
-    </>
+    </WritingModePanel>
   );
 };

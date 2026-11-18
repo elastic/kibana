@@ -8,10 +8,10 @@
  */
 
 import type { MutableRefObject } from 'react';
+import type { ChangeHistoryDiffViewMode } from '@kbn/change-history-ui';
 import type { monaco } from '@kbn/code-editor';
 import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import type { UseWorkflowChangeHistoryPreviewValidationParams } from './use_workflow_change_history_preview_validation';
-import type { WorkflowChangeHistoryCompareMode } from './workflow_change_history_preview_settings_popover';
 
 export const PREVIEW_VALIDATION_TEST_MODEL_URI = 'inmemory://model/test.yaml';
 
@@ -89,7 +89,7 @@ export const createPreviewValidationHookParams = (
   const diffEditorRef = {
     current: previewValidationMockDiffEditor,
   } as MutableRefObject<monaco.editor.IStandaloneDiffEditor | null>;
-  const compareModeRef = { current: 'unified' as WorkflowChangeHistoryCompareMode };
+  const diffModeRef = { current: 'unified' as ChangeHistoryDiffViewMode };
   const validationDecorationsRef = {
     current: null,
   } as MutableRefObject<monaco.editor.IEditorDecorationsCollection | null>;
@@ -102,7 +102,7 @@ export const createPreviewValidationHookParams = (
     isEditorMounted: true,
     editorRef,
     diffEditorRef,
-    compareModeRef,
+    diffModeRef,
     configureDiffEditors: jest.fn(),
     ...overrides,
   };

@@ -18,8 +18,11 @@ import { withNightshiftBackgroundSpan } from '../tracing';
 import { OnlineEvalsStepError, reportOnlineEvalsStepFailure } from '../online_evals/step_failure';
 import type { NightshiftTelemetryClient } from '../telemetry';
 
-/** Judges run in parallel within one evaluation, so this bounds concurrent judge calls. */
-export const MAX_ONLINE_EVALS_EVALUATORS = 4;
+/**
+ * The most evaluators one evaluation takes. The evals plugin grades four at a time, so a larger
+ * set does not raise the number of concurrent judge calls.
+ */
+export const MAX_ONLINE_EVALS_EVALUATORS = 5;
 
 const isDate = (value: string) => !Number.isNaN(Date.parse(value));
 
