@@ -26,6 +26,8 @@ import { spaceTest } from '../fixtures';
 const KBN_DATA_GRID_FLAG = 'discover.kbnDataGridEnabled';
 const FIELDS_GRID_TEST_SUBJ = 'UnifiedDocViewerTableGrid';
 const DOC_VIEWER_TEST_SUBJ = 'kbnDocViewer';
+// The grid's default number of rows rendered beyond each edge of its viewport.
+const ROW_OVERSCAN = 5;
 
 spaceTest.describe(
   'Discover doc viewer - fields table rendered by the Kibana data grid foundation',
@@ -57,11 +59,21 @@ spaceTest.describe(
       const grid = page.testSubj.locator(FIELDS_GRID_TEST_SUBJ);
       await expect(grid).toBeVisible();
 
-      const loggedRowCount = Number(await grid.getAttribute('aria-rowcount'));
-      const mountedRowCount = await grid.getByRole('row').count();
+      const logicalRowCount = Number(await grid.getAttribute('aria-rowcount'));
+      const rows = grid.getByRole('row');
+      const mountedRowCount = await rows.count();
+      const viewportHeight = await grid.evaluate((element) => element.clientHeight);
+      const rowHeights = await rows.evaluateAll((elements) =>
+        elements.map((element) => element.getBoundingClientRect().height)
+      );
+      // Even if every row were as short as the shortest mounted one, the grid may only mount the rows
+      // that fit its viewport, the overscan on each side, and one retained active row.
+      const maxMountedRowCount =
+        Math.ceil(viewportHeight / Math.min(...rowHeights)) + 2 * ROW_OVERSCAN + 1;
 
       expect(mountedRowCount).toBeGreaterThan(1);
-      expect(mountedRowCount).toBeLessThan(loggedRowCount);
+      expect(mountedRowCount).toBeLessThan(logicalRowCount);
+      expect(mountedRowCount).toBeLessThanOrEqual(maxMountedRowCount);
     });
 
     spaceTest('moves focus to the off-screen last row with Ctrl+End', async ({ page }) => {
@@ -70,9 +82,12 @@ spaceTest.describe(
 
       await page.keyboard.press('Control+End');
 
-      // Rows are sorted by field name, so `xss` is last and initially not mounted.
-      const lastRow = grid.getByRole('row').filter({ hasText: 'xss' });
-      await expect(lastRow.locator('[aria-colindex="2"]')).toBeFocused();
+      // Rows are sorted by field name, so `xss` is last and initially not mounted. Ctrl+End moves
+      // to the last cell of the grid, the cell that holds the value of `xss`.
+      const lastCell = grid
+        .getByRole('gridcell')
+        .filter({ has: page.testSubj.locator('tableDocViewRow-xss-value') });
+      await expect(lastCell).toBeFocused();
     });
 
     spaceTest('has no accessibility violations in the doc viewer', async ({ page }) => {

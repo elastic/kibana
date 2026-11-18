@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import { render } from '@elastic/eui/lib/test/rtl';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { buildDataTableRecord, KBN_DATA_GRID_ENABLED_FEATURE_FLAG_KEY } from '@kbn/discover-utils';
@@ -554,25 +554,35 @@ describe('DocViewerTable grid renderer selector', () => {
     storage.clear();
   });
 
+  // The EuiDataGrid renderer puts the test subject on a section that contains the grid, while the
+  // @kbn/discover-data-grid renderer puts it on the grid element itself.
+  const expectTestSubjectToContainGrid = () => {
+    expect(
+      within(screen.getByTestId('UnifiedDocViewerTableGrid')).getByRole('grid', {
+        name: 'Field values',
+      })
+    ).toBeVisible();
+  };
+
   it('renders the EuiDataGrid renderer by default', () => {
     setupComponent();
 
-    expect(screen.getByTestId('UnifiedDocViewerTableGrid')).toHaveClass('euiDataGrid');
+    expectTestSubjectToContainGrid();
   });
 
   it('renders the EuiDataGrid renderer when the feature flag is disabled', () => {
     setKbnDataGridEnabled(false);
     setupComponent();
 
-    expect(screen.getByTestId('UnifiedDocViewerTableGrid')).toHaveClass('euiDataGrid');
+    expectTestSubjectToContainGrid();
   });
 
   it('renders the @kbn/discover-data-grid renderer when the feature flag is enabled', () => {
     setKbnDataGridEnabled(true);
     setupComponent();
 
-    const grid = screen.getByTestId('UnifiedDocViewerTableGrid');
-    expect(grid).not.toHaveClass('euiDataGrid');
-    expect(grid).toBe(screen.getByRole('grid', { name: 'Field values' }));
+    expect(screen.getByTestId('UnifiedDocViewerTableGrid')).toBe(
+      screen.getByRole('grid', { name: 'Field values' })
+    );
   });
 });

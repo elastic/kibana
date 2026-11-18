@@ -19,7 +19,7 @@ import { mockDataGridLayout } from '@kbn/discover-data-grid/mocks';
 import { buildHitMock, mockUnifiedDocViewerServices } from '../../../__mocks__';
 import { setUnifiedDocViewerServices } from '../../../plugin';
 import { FieldRow } from '../field_row';
-import { TableGrid, type TableGridProps } from '../table_grid';
+import { GRID_COLUMN_FIELD_VALUE, TableGrid, type TableGridProps } from '../table_grid';
 
 setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
 
@@ -131,6 +131,38 @@ describe('KbnDataGridAdapter', () => {
       expect(screen.getByRole('gridcell', { name: 'value2' })).toHaveFocus();
       await user.keyboard('{ArrowLeft}');
       expect(screen.getByRole('gridcell', { name: /field2/ })).toHaveFocus();
+    });
+  });
+
+  describe('interactive cell content', () => {
+    const renderCellWithLinks: TableGridProps['renderCell'] = ({ row, columnId }) =>
+      columnId === GRID_COLUMN_FIELD_VALUE ? (
+        <>
+          <a href={`https://example.com/${row.name}/docs`}>{`Docs for ${row.name}`}</a>{' '}
+          <a href={`https://example.com/${row.name}/source`}>{`Source of ${row.name}`}</a>
+        </>
+      ) : (
+        row.name
+      );
+
+    it('moves focus into the links of a cell on Enter, keeps Tab inside the cell, and returns to the cell on Escape', async () => {
+      const user = userEvent.setup();
+      renderGrid({ renderCell: renderCellWithLinks });
+      const valueCell = screen.getByRole('gridcell', { name: 'Docs for field0 Source of field0' });
+      const docsLink = screen.getByRole('link', { name: 'Docs for field0' });
+      const sourceLink = screen.getByRole('link', { name: 'Source of field0' });
+
+      await user.click(valueCell);
+      await user.keyboard('{Enter}');
+      expect(docsLink).toHaveFocus();
+
+      await user.tab();
+      expect(sourceLink).toHaveFocus();
+      await user.tab();
+      expect(docsLink).toHaveFocus();
+
+      await user.keyboard('{Escape}');
+      expect(valueCell).toHaveFocus();
     });
   });
 
