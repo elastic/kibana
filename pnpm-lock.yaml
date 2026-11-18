@@ -4692,8 +4692,8 @@ importers:
         specifier: 3.0.2
         version: 3.0.2
       mssql:
-        specifier: 12.7.2
-        version: 12.7.2(supports-color@10.2.2)
+        specifier: 12.7.13
+        version: 12.7.13(supports-color@10.2.2)
       murmurhash:
         specifier: 2.0.1
         version: 2.0.1
@@ -21378,8 +21378,8 @@ packages:
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
-  mssql@12.7.2:
-    resolution: {integrity: sha512-zhpPw+WXBWLw7d7J6Y0aWgQy0EV8HKDGNSvmkAjP8bSM4H41X0fweAeKWI+bg9Ri+JHCbsf/QScjmACBFcEo8A==}
+  mssql@12.7.13:
+    resolution: {integrity: sha512-RwNhOEU1A7vCbKmkZapbfLk31fKFByrEnK2eDPIw/rlloLUxNhuCcWj4CmXvyHiyjIjI0TMZWid20PAGoRX4xA==}
     engines: {node: '>=18.19.0'}
     hasBin: true
 
@@ -39419,7 +39419,7 @@ snapshots:
 
   ms@2.1.3: {}
 
-  mssql@12.7.2(supports-color@10.2.2):
+  mssql@12.7.13(supports-color@10.2.2):
     dependencies:
       '@tediousjs/connection-string': 1.1.0
       commander: 11.1.0
