@@ -18,16 +18,27 @@ export const awsOnboardingSettingsRequirementInputSchema = lazySchema(() =>
   z.object({
     services: z.array(z.string()),
     region: z.string(),
+    account_id: z.string().optional(),
+    /** Short per-run suffix that keeps the suggested identity name unique across runs. */
+    run_suffix: z.string().optional(),
   })
+);
+
+/** The requirement plus the identity name the plan offers by default. */
+export const awsOnboardingSettingsRequirementOutputSchema = lazySchema(() =>
+  awsOnboardingSettingsRequirementSchema.extend({ suggested_identity_name: z.string() })
 );
 
 export type AwsOnboardingSettingsRequirementInput = z.infer<
   typeof awsOnboardingSettingsRequirementInputSchema
 >;
+export type AwsOnboardingSettingsRequirementOutput = z.infer<
+  typeof awsOnboardingSettingsRequirementOutputSchema
+>;
 
 export const awsOnboardingSettingsRequirementCommonDefinition: CommonStepDefinition<
   typeof awsOnboardingSettingsRequirementInputSchema,
-  typeof awsOnboardingSettingsRequirementSchema
+  typeof awsOnboardingSettingsRequirementOutputSchema
 > = {
   id: AwsOnboardingSettingsRequirementStepTypeId,
   label: i18n.translate('xpack.fleet.workflows.steps.awsOnboardingSettingsRequirement.label', {
@@ -42,5 +53,5 @@ export const awsOnboardingSettingsRequirementCommonDefinition: CommonStepDefinit
   ),
   category: StepCategory.Kibana,
   inputSchema: awsOnboardingSettingsRequirementInputSchema,
-  outputSchema: awsOnboardingSettingsRequirementSchema,
+  outputSchema: awsOnboardingSettingsRequirementOutputSchema,
 };

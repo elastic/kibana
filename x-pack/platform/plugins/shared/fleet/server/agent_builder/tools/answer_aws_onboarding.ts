@@ -13,8 +13,8 @@ import { toWorkflowExecutionState } from '@kbn/agent-builder-tools-base/workflow
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 
-import { awsOnboardingSettingsAnswerSchema } from '../../../common/workflows/steps/settings';
-import { submitSettingsAnswer } from '../../services/aws_onboarding/settings_answer';
+import { awsOnboardingPlanAnswerSchema } from '../../../common/workflows/steps/settings';
+import { submitPlanAnswer } from '../../services/aws_onboarding/settings_answer';
 
 import { checkOnboardingAccess, getOnboardingExecution, sleep } from './common';
 import type { AwsOnboardingToolDeps } from './common';
@@ -66,8 +66,8 @@ export const createAnswerAwsOnboardingTool = ({
       return { results: [found.error] };
     }
 
-    // Answer only the step the user was asked about: a retried approval must never approve the
-    // next waiting step, such as the stack creation that follows the settings approval.
+    // Answer only the step the user was asked about: a retried answer must never answer the next
+    // waiting step, such as the plan approval that follows the plan input.
     const waitingStep = found.execution.stepExecutions.find(
       (step) => step.status === ExecutionStatus.WAITING_FOR_INPUT
     );
@@ -85,15 +85,15 @@ export const createAnswerAwsOnboardingTool = ({
     }
 
     try {
-      if (stepName === 'ask_settings') {
+      if (stepName === 'ask_plan') {
         // Validation and resume live in one service.
-        const parsed = awsOnboardingSettingsAnswerSchema.safeParse(answer);
+        const parsed = awsOnboardingPlanAnswerSchema.safeParse(answer);
         if (!parsed.success) {
           return {
-            results: [errorResult(`The settings answer is malformed: ${parsed.error.message}`)],
+            results: [errorResult(`The plan answer is malformed: ${parsed.error.message}`)],
           };
         }
-        const submitted = await submitSettingsAnswer({
+        const submitted = await submitPlanAnswer({
           workflowApi,
           executionId,
           spaceId,

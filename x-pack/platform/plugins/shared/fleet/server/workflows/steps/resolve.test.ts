@@ -96,6 +96,8 @@ const choicePackageInfo = {
   ],
 } as unknown as PackageInfo;
 
+const identity = { name: 'my-identity' };
+
 const choiceSettings = {
   services: {
     guardduty: {
@@ -117,6 +119,7 @@ describe('awsOnboardingResolveStepDefinition', () => {
       createStepContext({
         services: ['guardduty', 'cloudtrail'],
         region: 'us-east-1',
+        identity,
         settings: logsSettings,
       })
     );
@@ -134,6 +137,7 @@ describe('awsOnboardingResolveStepDefinition', () => {
       createStepContext({
         services: ['guardduty', 'ec2'],
         region: 'us-west-2',
+        identity,
         namespace: 'prod',
         account_id: '123456789012',
         run_suffix: 'ab12cd34',
@@ -180,11 +184,46 @@ describe('awsOnboardingResolveStepDefinition', () => {
     );
   });
 
+  it('names policies from policy_names and falls back to the default name', async () => {
+    const result = await awsOnboardingResolveStepDefinition.handler(
+      createStepContext({
+        services: ['guardduty', 'ec2'],
+        region: 'us-west-2',
+        run_suffix: 'ab12cd34',
+        settings: logsSettings,
+        policy_names: { guardduty: 'my-guardduty' },
+        identity,
+      })
+    );
+
+    const { output } = result as { output: Record<string, any> };
+    expect(output.policies.map((p: any) => [p.name, p.body.name])).toEqual([
+      ['my-guardduty', 'my-guardduty'],
+      ['aws-ec2-agentless-ab12cd34', 'aws-ec2-agentless-ab12cd34'],
+    ]);
+  });
+
+  it('returns the identity name from the plan and stack_action create', async () => {
+    const result = await awsOnboardingResolveStepDefinition.handler(
+      createStepContext({
+        services: ['guardduty', 'ec2'],
+        region: 'us-west-2',
+        settings: logsSettings,
+        identity,
+      })
+    );
+
+    const { output } = result as { output: Record<string, any> };
+    expect(output.identity_name).toBe('my-identity');
+    expect(output.stack_action).toBe('create');
+  });
+
   it('produces policy bodies that pass the agentless conversion and deployment mode validation', async () => {
     const result = await awsOnboardingResolveStepDefinition.handler(
       createStepContext({
         services: ['guardduty', 'ec2'],
         region: 'us-west-2',
+        identity,
         settings: logsSettings,
       })
     );
@@ -214,6 +253,7 @@ describe('awsOnboardingResolveStepDefinition', () => {
       createStepContext({
         services: ['guardduty', 'ec2'],
         region: 'us-east-1',
+        identity,
         settings: choiceSettings,
       })
     );
@@ -237,6 +277,7 @@ describe('awsOnboardingResolveStepDefinition', () => {
       createStepContext({
         services: ['guardduty', 'ec2'],
         region: 'us-east-1',
+        identity,
         settings: { services: { ec2: choiceSettings.services.ec2 } },
       })
     );
@@ -253,6 +294,7 @@ describe('awsOnboardingResolveStepDefinition', () => {
       createStepContext({
         services: ['guardduty'],
         region: 'us-east-1',
+        identity,
         settings: {
           services: { guardduty: { data_streams: { guardduty: { input: 'httpjson' } } } },
         },
@@ -303,6 +345,7 @@ describe('awsOnboardingResolveStepDefinition', () => {
       createStepContext({
         services: ['s3'],
         region: 'us-east-1',
+        identity,
         settings: { services: { s3: { data_streams: { s3_request: { input: null } } } } },
       })
     );
@@ -320,6 +363,7 @@ describe('awsOnboardingResolveStepDefinition', () => {
       createStepContext({
         services: ['guardduty'],
         region: 'us-east-1',
+        identity,
         settings: logsSettings,
       })
     );

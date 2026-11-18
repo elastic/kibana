@@ -9,8 +9,12 @@
 #   connector, create one agentless policy per service and wait for data.
 #
 # Human-in-the-loop:
-#   Every step that reads from or writes to the user's AWS account is preceded by an
-#   approval. Rejecting an approval fails the run.
+#   The run pauses four times: `ask_discover` approves the read-only discovery,
+#   `select_services` picks the services, `ask_plan` takes the settled plan (how each
+#   service is collected, the policy names and the Federated Identity name) and
+#   `approve_plan` approves the changes to the account. When the onboarding
+#   credentials are missing, `ask_credentials` pauses first until they are configured.
+#   Rejecting an approval fails the run.
 #
 # Modes:
 #   Only the fully managed mode is encoded. The partially managed mode (the user runs
@@ -113,32 +117,24 @@ steps:
     with:
       services: "${{ steps.select_services.output.response.services }}"
       region: "{{ steps.select_services.output.response.region | default: inputs.region | default: steps.discover.output.region }}"
+      account_id: "${{ steps.discover.output.account_id }}"
+      run_suffix: "{{ execution.id | slice: 0, 8 }}"
 
-  - name: ask_settings
+  - name: ask_plan
     type: waitForInput
     with:
-      message: "Let's set how each selected service is collected, one service at a time. Reply when the assistant has your settings."
+      message: "Let's settle the plan for the services you picked: how each is collected, the policy names, and which Federated Identity to use. Reply when the assistant has it."
       schema:
         properties:
           services:
             type: object
+          policy_names:
+            type: object
+          identity:
+            type: object
         required:
           - services
-
-  - name: ask_resolve
-    type: waitForApproval
-    with:
-      message: "May I prepare the integration settings for the services you picked? This uses the package metadata and what discovery found; no new calls to your account."
-
-  - name: fail_no_resolve
-    type: if
-    condition: "${{ steps.ask_resolve.output.response.approved != true }}"
-    steps:
-      - name: stop_no_resolve
-        type: workflow.fail
-        with:
-          message: "Looking up the integration values was not approved."
-          reason: "resolve_rejected"
+          - identity
 
   - name: resolve
     type: fleet.awsOnboardingResolve
@@ -148,37 +144,25 @@ steps:
       account_id: "${{ steps.discover.output.account_id }}"
       run_suffix: "{{ execution.id | slice: 0, 8 }}"
       namespace: "${{ inputs.namespace }}"
-      settings: "${{ steps.ask_settings.output.response }}"
+      settings:
+        services: "${{ steps.ask_plan.output.response.services }}"
+      policy_names: "${{ steps.ask_plan.output.response.policy_names }}"
+      identity: "${{ steps.ask_plan.output.response.identity }}"
 
-  - name: approve_values
+  - name: approve_plan
     type: waitForApproval
     with:
-      message: "Approve the integration settings shown by the assistant?"
+      message: "Approve the plan the assistant showed you? Approving creates or updates the Federated Identity CloudFormation stack in your account and then creates the agentless policies."
 
-  - name: fail_values_rejected
+  - name: fail_plan_rejected
     type: if
-    condition: "${{ steps.approve_values.output.response.approved != true }}"
+    condition: "${{ steps.approve_plan.output.response.approved != true }}"
     steps:
-      - name: stop_values_rejected
+      - name: stop_plan_rejected
         type: workflow.fail
         with:
-          message: "The integration settings were not approved."
-          reason: "values_rejected"
-
-  - name: ask_stack
-    type: waitForApproval
-    with:
-      message: "May I create the Federated Identity CloudFormation stack in your account? It creates an OIDC provider and one IAM role with the permissions the assistant showed you."
-
-  - name: fail_no_stack
-    type: if
-    condition: "${{ steps.ask_stack.output.response.approved != true }}"
-    steps:
-      - name: stop_no_stack
-        type: workflow.fail
-        with:
-          message: "Creating the CloudFormation stack was not approved."
-          reason: "stack_rejected"
+          message: "The plan was not approved."
+          reason: "plan_rejected"
 
   - name: cloud_context
     type: fleet.awsOnboardingCloudContext
@@ -224,21 +208,10 @@ steps:
           message: "The CloudFormation stack did not complete: {{ steps.stack_status.output.reason }}"
           reason: "stack_failed"
 
-  - name: name_identity
-    type: waitForInput
-    with:
-      message: "Name for this Federated Identity (the assistant suggests one):"
-      schema:
-        properties:
-          name:
-            type: string
-        required:
-          - name
-
   - name: create_connector
     type: fleet.awsOnboardingCreateConnector
     with:
-      name: "{{ steps.name_identity.output.response.name }}"
+      name: "{{ steps.resolve.output.identity_name }}"
       role_arn: "{{ steps.stack_status.output.role_arn }}"
       stack_id: "{{ steps.create_stack.output.stack_id }}"
       template_sha: "${{ steps.create_stack.output.template_sha }}"

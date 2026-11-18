@@ -22,8 +22,12 @@ export const awsOnboardingResolveInputSchema = lazySchema(() =>
     account_id: z.string().optional(),
     /** Short per-run suffix that keeps policy and connector names unique across runs. */
     run_suffix: z.string().optional(),
-    /** The per-service collection settings the user answered in the settings pause. */
+    /** The per-service collection settings the user settled in the plan pause. */
     settings: awsOnboardingSettingsAnswerSchema,
+    /** Policy name per service id; a service without one gets the default name. */
+    policy_names: z.record(z.string().max(256), z.string().trim().min(1).max(256)).optional(),
+    /** The Federated Identity the plan names. */
+    identity: z.object({ name: z.string().trim().min(1).max(256) }),
   })
 );
 
@@ -61,6 +65,9 @@ export const awsOnboardingResolveOutputSchema = lazySchema(() =>
     /** Policy templates and input types the identity will be granted, one entry per template. */
     permissions_summary: z.array(z.string()),
     suggested_identity_name: z.string(),
+    identity_name: z.string(),
+    /** What the run does to the Federated Identity stack. */
+    stack_action: z.literal('create'),
   })
 );
 

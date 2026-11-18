@@ -76,6 +76,8 @@ export const awsOnboardingResolveStepDefinition = createServerStepDefinition({
       account_id,
       run_suffix: runSuffix,
       settings,
+      policy_names: policyNames,
+      identity,
     } = context.input;
     const { packageVersion, packageInfo, matrix } = await loadAwsServiceMatrix(context);
 
@@ -139,7 +141,7 @@ export const awsOnboardingResolveStepDefinition = createServerStepDefinition({
     const packageVars = buildPackageVars(region, undefined, getPackageVarNames(packageInfo));
 
     const policies = answered.map((service) => {
-      const name = `aws-${service.id}-agentless-${suffix}`;
+      const name = policyNames?.[service.id] ?? `aws-${service.id}-agentless-${suffix}`;
       return {
         service: service.id,
         name,
@@ -176,6 +178,8 @@ export const awsOnboardingResolveStepDefinition = createServerStepDefinition({
         index_patterns: indexPatterns,
         permissions_summary: permissionsSummary,
         suggested_identity_name: `aws-${account_id ?? 'account'}-federated-identity-${suffix}`,
+        identity_name: identity.name,
+        stack_action: 'create' as const,
       },
     };
   },

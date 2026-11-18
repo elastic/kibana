@@ -117,7 +117,7 @@ describe('get_aws_onboarding_state', () => {
         name: 'AWS Agentless Onboarding',
         steps: [
           {
-            name: 'approve_values',
+            name: 'approve_plan',
             type: 'waitForApproval',
             with: { message: 'Approve the integration settings?' },
           },
@@ -146,6 +146,8 @@ describe('get_aws_onboarding_state', () => {
             ],
             permissions_summary: ['guardduty (aws-s3)'],
             suggested_identity_name: 'aws-onboarding',
+            identity_name: 'my-identity',
+            stack_action: 'create',
           },
         }),
         step('has_data', 3, {
@@ -157,14 +159,14 @@ describe('get_aws_onboarding_state', () => {
             agents: [],
           },
         }),
-        step('approve_values', 4, { status: 'waiting_for_input' }),
+        step('approve_plan', 4, { status: 'waiting_for_input' }),
       ],
     });
 
     const data = results[0].data;
     expect(data).toMatchObject({
       status: 'waiting_for_input',
-      waiting: { step_name: 'approve_values', message: 'Approve the integration settings?' },
+      waiting: { step_name: 'approve_plan', message: 'Approve the integration settings?' },
       region: 'us-west-2',
       discovered_services: [{ id: 'guardduty', name: 'GuardDuty', matched: true }],
       has_data: false,
@@ -173,7 +175,8 @@ describe('get_aws_onboarding_state', () => {
       resolved: {
         permissions_summary: ['guardduty (aws-s3)'],
         policies: [{ service: 'guardduty', name: 'aws-guardduty' }],
-        suggested_identity_name: 'aws-onboarding',
+        identity_name: 'my-identity',
+        stack_action: 'create',
       },
     });
     expect(JSON.stringify(data)).not.toContain('must-not-leak');
@@ -359,27 +362,32 @@ describe('get_aws_onboarding_state', () => {
       services: [],
     };
     const requirementStep = () =>
-      step('settings_requirement', 2, { status: 'completed', output: requirement });
+      step('settings_requirement', 2, {
+        status: 'completed',
+        output: { ...requirement, suggested_identity_name: 'aws-1-federated-identity-ab12cd34' },
+      });
 
-    it('returns settings_requirement at ask_settings without creating a card', async () => {
+    it('returns settings_requirement and suggested_identity_name at ask_plan without creating a card', async () => {
       const attachments = createAttachments();
       const { results } = await runWithAttachments(
-        waitingExecution('ask_settings', [requirementStep()]),
+        waitingExecution('ask_plan', [requirementStep()]),
         attachments
       );
 
       expect(results[0].data.settings_requirement).toEqual(requirement);
+      expect(results[0].data.suggested_identity_name).toBe('aws-1-federated-identity-ab12cd34');
       expect(results[0].data.settings_card_attachment_id).toBeUndefined();
       expect(attachments.add).not.toHaveBeenCalled();
     });
 
-    it('does not return settings_requirement at other pauses', async () => {
+    it('keeps suggested_identity_name but not settings_requirement at later pauses', async () => {
       const { results } = await runWithAttachments(
-        waitingExecution('ask_resolve', [requirementStep()]),
+        waitingExecution('approve_plan', [requirementStep()]),
         createAttachments()
       );
 
       expect(results[0].data).not.toHaveProperty('settings_requirement');
+      expect(results[0].data.suggested_identity_name).toBe('aws-1-federated-identity-ab12cd34');
     });
   });
 

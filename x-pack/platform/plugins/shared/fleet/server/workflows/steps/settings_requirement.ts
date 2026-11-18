@@ -32,7 +32,12 @@ export const awsOnboardingSettingsRequirementStepDefinition = createServerStepDe
       };
     }
 
-    const { services: requested, region } = context.input;
+    const {
+      services: requested,
+      region,
+      account_id: accountId,
+      run_suffix: runSuffix,
+    } = context.input;
     const { packageVersion, packageInfo, matrix } = await loadAwsServiceMatrix(context);
 
     const selected: AwsServiceMatrixEntry[] = [];
@@ -78,13 +83,18 @@ export const awsOnboardingSettingsRequirementStepDefinition = createServerStepDe
       }
     });
 
+    // The resolve step builds the same name from the same inputs.
+    const suffix = runSuffix?.trim() || Date.now().toString(36);
     return {
-      output: buildSettingsRequirement({
-        services: selected,
-        packageInfo,
-        region,
-        readmeNotesByService,
-      }),
+      output: {
+        ...buildSettingsRequirement({
+          services: selected,
+          packageInfo,
+          region,
+          readmeNotesByService,
+        }),
+        suggested_identity_name: `aws-${accountId ?? 'account'}-federated-identity-${suffix}`,
+      },
     };
   },
 });

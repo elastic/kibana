@@ -20,6 +20,7 @@ import {
   type AwsOnboardingCredentialsAttachmentData,
 } from '../../../common/agent_builder/aws_onboarding_credentials_attachment';
 import type { AwsOnboardingSettingsRequirement } from '../../../common/workflows/steps/settings';
+import type { AwsOnboardingSettingsRequirementOutput } from '../../../common/workflows/steps/settings_requirement';
 import type { AwsOnboardingCredentialsOutput } from '../../../common/workflows/steps/credentials';
 import type { AwsOnboardingDiscoverOutput } from '../../../common/workflows/steps/discover';
 import type { AwsOnboardingResolveOutput } from '../../../common/workflows/steps/resolve';
@@ -74,6 +75,12 @@ interface StackProgress {
  */
 const isActive = (execution: WorkflowExecutionDto): boolean =>
   execution.status === ExecutionStatus.RUNNING || execution.status === ExecutionStatus.WAITING;
+
+/** The requirement without the suggested name, which the result carries at the top level. */
+const requirementWithoutSuggestion = ({
+  suggested_identity_name: _suggestedIdentityName,
+  ...requirement
+}: AwsOnboardingSettingsRequirementOutput): AwsOnboardingSettingsRequirement => requirement;
 
 /** The last execution of a step with an output, which differs from the first inside loops. */
 const lastStepExecution = (
@@ -346,7 +353,7 @@ export const createGetAwsOnboardingStateTool = ({
     const credentialsOutput =
       lastOutput<AwsOnboardingCredentialsOutput>(execution, 'credentials_recheck') ??
       lastOutput<AwsOnboardingCredentialsOutput>(execution, 'credentials');
-    const settingsRequirement = lastOutput<AwsOnboardingSettingsRequirement>(
+    const settingsRequirement = lastOutput<AwsOnboardingSettingsRequirementOutput>(
       execution,
       'settings_requirement'
     );
@@ -385,16 +392,23 @@ export const createGetAwsOnboardingStateTool = ({
             waitingStep?.stepId === 'ask_credentials' && {
               credentials_card_attachment_id: cardId,
             }),
-          // The requirement belongs to the settings pause only.
-          ...(waitingStep?.stepId === 'ask_settings' &&
-            settingsRequirement && { settings_requirement: settingsRequirement }),
+          // The requirement belongs to the plan pause only; the suggested name stays available
+          // for every later pause.
+          ...(settingsRequirement && {
+            suggested_identity_name: settingsRequirement.suggested_identity_name,
+          }),
+          ...(waitingStep?.stepId === 'ask_plan' &&
+            settingsRequirement && {
+              settings_requirement: requirementWithoutSuggestion(settingsRequirement),
+            }),
           ...(discover && { region: discover.region, discovered_services: discover.services }),
           ...(resolve && {
             resolved: {
               policies: resolve.policies.map(({ service, name }) => ({ service, name })),
               integrations: resolve.integrations,
               permissions_summary: resolve.permissions_summary,
-              suggested_identity_name: resolve.suggested_identity_name,
+              identity_name: resolve.identity_name,
+              stack_action: resolve.stack_action,
             },
           }),
           ...(stack && { stack: { ...stack, ...(timedOut && { timed_out: true as const }) } }),

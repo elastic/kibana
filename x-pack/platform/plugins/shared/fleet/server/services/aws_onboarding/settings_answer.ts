@@ -10,24 +10,37 @@ import { ExecutionStatus } from '@kbn/workflows';
 
 import { validateSettingsAnswer } from '../../../common/workflows/steps/settings';
 import type {
-  AwsOnboardingSettingsAnswer,
+  AwsOnboardingPlanAnswer,
   AwsOnboardingSettingsRequirement,
   SettingsProblem,
 } from '../../../common/workflows/steps/settings';
 import { getOnboardingExecution } from '../../agent_builder/tools/common';
 import type { WorkflowApi } from '../../agent_builder/tools/common';
 
-export interface SubmitSettingsAnswerResult {
+export interface SubmitPlanAnswerResult {
   status: 'resumed' | 'invalid';
   problems?: SettingsProblem[];
 }
 
+/** Every policy name must belong to a service in the plan and must not be blank. */
+const validatePolicyNames = ({
+  services,
+  policy_names: policyNames = {},
+}: AwsOnboardingPlanAnswer): SettingsProblem[] =>
+  Object.entries(policyNames).flatMap(([serviceId, name]) => {
+    const path = `policy_names.${serviceId}`;
+    if (!(serviceId in services)) {
+      return [{ path, message: `Unknown service "${serviceId}".` }];
+    }
+    return name.trim() === '' ? [{ path, message: 'The policy name must not be empty.' }] : [];
+  });
+
 /**
- * The one place that validates an `ask_settings` answer against the requirement the run
- * produced and resumes the run when it is valid. Throws when the run is missing, belongs to
- * another workflow or is not waiting at `ask_settings`.
+ * The one place that validates an `ask_plan` answer against the requirement the run produced
+ * and resumes the run with the whole plan when it is valid. Throws when the run is missing,
+ * belongs to another workflow or is not waiting at `ask_plan`.
  */
-export const submitSettingsAnswer = async ({
+export const submitPlanAnswer = async ({
   workflowApi,
   executionId,
   spaceId,
@@ -38,8 +51,8 @@ export const submitSettingsAnswer = async ({
   executionId: string;
   spaceId: string;
   request: KibanaRequest;
-  answer: AwsOnboardingSettingsAnswer;
-}): Promise<SubmitSettingsAnswerResult> => {
+  answer: AwsOnboardingPlanAnswer;
+}): Promise<SubmitPlanAnswerResult> => {
   const found = await getOnboardingExecution({
     workflowApi,
     executionId,
@@ -55,9 +68,9 @@ export const submitSettingsAnswer = async ({
   const waitingStep = execution.stepExecutions.find(
     (step) => step.status === ExecutionStatus.WAITING_FOR_INPUT
   );
-  if (waitingStep?.stepId !== 'ask_settings') {
+  if (waitingStep?.stepId !== 'ask_plan') {
     throw new Error(
-      `The run is not waiting at 'ask_settings' (${
+      `The run is not waiting at 'ask_plan' (${
         waitingStep ? `waiting at '${waitingStep.stepId}'` : 'not waiting for input'
       }).`
     );
@@ -76,7 +89,10 @@ export const submitSettingsAnswer = async ({
   }
   const requirement = requirementStep.output as AwsOnboardingSettingsRequirement;
 
-  const problems = validateSettingsAnswer(requirement, answer);
+  const problems = [
+    ...validateSettingsAnswer(requirement, { services: answer.services }),
+    ...validatePolicyNames(answer),
+  ];
   if (problems.length > 0) {
     return { status: 'invalid', problems };
   }

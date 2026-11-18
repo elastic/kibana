@@ -35,13 +35,13 @@ describe('answer_aws_onboarding', () => {
         workflowId: FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID,
         workflowDefinition: { name: 'AWS Agentless Onboarding', steps: [] },
         stepExecutions: [
-          { id: 'step-exec-1', stepId: 'approve_values', status: 'waiting_for_input' },
+          { id: 'step-exec-1', stepId: 'approve_plan', status: 'waiting_for_input' },
         ],
       }),
     } as any;
 
     const returned = await createAnswerAwsOnboardingTool({ workflowApi }).handler(
-      { execution_id: 'exec-1', step_name: 'approve_values', answer: { approved: true } },
+      { execution_id: 'exec-1', step_name: 'approve_plan', answer: { approved: true } },
       { request, spaceId: 'default' } as any
     );
     const { results } = returned as unknown as {
@@ -67,7 +67,7 @@ describe('answer_aws_onboarding', () => {
     } as any;
 
     const returned = await createAnswerAwsOnboardingTool({ workflowApi }).handler(
-      { execution_id: 'exec-2', step_name: 'approve_values', answer: { approved: true } },
+      { execution_id: 'exec-2', step_name: 'approve_plan', answer: { approved: true } },
       { request, spaceId: 'default' } as any
     );
     const { results } = returned as unknown as { results: Array<{ type: string }> };
@@ -83,20 +83,20 @@ describe('answer_aws_onboarding', () => {
         status: 'waiting_for_input',
         workflowId: FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID,
         stepExecutions: [
-          { id: 'step-exec-1', stepId: 'approve_values', status: 'completed' },
-          { id: 'step-exec-2', stepId: 'ask_stack', status: 'waiting_for_input' },
+          { id: 'step-exec-1', stepId: 'ask_discover', status: 'completed' },
+          { id: 'step-exec-2', stepId: 'select_services', status: 'waiting_for_input' },
         ],
       }),
     } as any;
 
     const returned = await createAnswerAwsOnboardingTool({ workflowApi }).handler(
-      { execution_id: 'exec-3', step_name: 'approve_values', answer: { approved: true } },
+      { execution_id: 'exec-3', step_name: 'ask_discover', answer: { approved: true } },
       { request, spaceId: 'default' } as any
     );
     const { results } = returned as unknown as { results: Array<{ type: string; data: any }> };
 
     expect(results[0].type).toBe('error');
-    expect(JSON.stringify(results[0])).toContain('ask_stack');
+    expect(JSON.stringify(results[0])).toContain('select_services');
     expect(workflowApi.resumeWorkflowExecution).not.toHaveBeenCalled();
   });
 
@@ -169,7 +169,7 @@ describe('answer_aws_onboarding', () => {
     });
   });
 
-  it('returns invalid with problems for ask_settings and does not resume', async () => {
+  describe('the plan pause', () => {
     const requirement = {
       package_name: 'aws',
       package_version: '8.18.1',
@@ -203,43 +203,69 @@ describe('answer_aws_onboarding', () => {
         },
       ],
     };
-    const workflowApi = {
-      resumeWorkflowExecution: jest.fn(),
-      getWorkflowExecution: jest.fn().mockResolvedValue({
-        status: 'waiting_for_input',
-        workflowId: FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID,
-        stepExecutions: [
-          {
-            id: 'se-req',
-            stepId: 'settings_requirement',
-            globalExecutionIndex: 1,
-            status: 'completed',
-            output: requirement,
-          },
-          {
-            id: 'se-1',
-            stepId: 'ask_settings',
-            globalExecutionIndex: 2,
-            status: 'waiting_for_input',
-          },
-        ],
-      }),
-    } as any;
+    const services = { guardduty: { data_streams: { guardduty: { input: 'httpjson' } } } };
+    const answerPlan = async (answer: Record<string, unknown>) => {
+      const workflowApi = {
+        resumeWorkflowExecution: jest.fn(),
+        getWorkflowExecution: jest.fn().mockResolvedValue({
+          status: 'waiting_for_input',
+          workflowId: FLEET_AWS_AGENTLESS_ONBOARDING_WORKFLOW_ID,
+          stepExecutions: [
+            {
+              id: 'se-req',
+              stepId: 'settings_requirement',
+              globalExecutionIndex: 1,
+              status: 'completed',
+              output: requirement,
+            },
+            {
+              id: 'se-1',
+              stepId: 'ask_plan',
+              globalExecutionIndex: 2,
+              status: 'waiting_for_input',
+            },
+          ],
+        }),
+      } as any;
+      const returned = await createAnswerAwsOnboardingTool({ workflowApi }).handler(
+        { execution_id: 'exec-1', step_name: 'ask_plan', answer },
+        { request, spaceId: 'default' } as any
+      );
+      const { results } = returned as unknown as {
+        results: Array<{ type: string; data: any }>;
+      };
+      return { results, workflowApi };
+    };
 
-    const returned = await createAnswerAwsOnboardingTool({ workflowApi }).handler(
-      {
-        execution_id: 'exec-1',
-        step_name: 'ask_settings',
-        answer: {
-          services: { guardduty: { data_streams: { guardduty: { input: 'httpjson' } } } },
-        },
-      },
-      { request, spaceId: 'default' } as any
-    );
-    const { results } = returned as unknown as { results: Array<{ data: any }> };
+    it('returns invalid with problems and does not resume', async () => {
+      const { results, workflowApi } = await answerPlan({
+        services,
+        identity: { name: 'my-identity' },
+      });
 
-    expect(results[0].data.status).toBe('invalid');
-    expect(results[0].data.problems[0].path).toBe('guardduty.guardduty.vars.detector_id');
-    expect(workflowApi.resumeWorkflowExecution).not.toHaveBeenCalled();
+      expect(results[0].data.status).toBe('invalid');
+      expect(results[0].data.problems[0].path).toBe('guardduty.guardduty.vars.detector_id');
+      expect(workflowApi.resumeWorkflowExecution).not.toHaveBeenCalled();
+    });
+
+    it('returns an error naming identity when the plan has no identity', async () => {
+      const { results, workflowApi } = await answerPlan({ services });
+
+      expect(results[0].type).toBe('error');
+      expect(JSON.stringify(results[0])).toContain('identity');
+      expect(workflowApi.resumeWorkflowExecution).not.toHaveBeenCalled();
+    });
+
+    it('returns an error for an empty policy name', async () => {
+      const { results, workflowApi } = await answerPlan({
+        services,
+        policy_names: { x: '' },
+        identity: { name: 'my-identity' },
+      });
+
+      expect(results[0].type).toBe('error');
+      expect(JSON.stringify(results[0])).toContain('policy_names');
+      expect(workflowApi.resumeWorkflowExecution).not.toHaveBeenCalled();
+    });
   });
 });

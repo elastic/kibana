@@ -114,10 +114,22 @@ export const awsOnboardingSettingsAnswerSchema = lazySchema(() =>
     .strict()
 );
 
+/** The settled plan: the settings answer's services, a policy name per service and the identity. */
+export const awsOnboardingPlanAnswerSchema = lazySchema(() =>
+  z
+    .object({
+      services: awsOnboardingSettingsAnswerSchema.shape.services,
+      policy_names: z.record(z.string().max(256), z.string().trim().min(1).max(256)).optional(),
+      identity: z.object({ name: z.string().trim().min(1).max(256) }).strict(),
+    })
+    .strict()
+);
+
 export type AwsOnboardingSettingsRequirement = z.infer<
   typeof awsOnboardingSettingsRequirementSchema
 >;
 export type AwsOnboardingSettingsAnswer = z.infer<typeof awsOnboardingSettingsAnswerSchema>;
+export type AwsOnboardingPlanAnswer = z.infer<typeof awsOnboardingPlanAnswerSchema>;
 
 export interface SettingsProblem {
   path: string;

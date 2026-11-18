@@ -62,6 +62,20 @@ describe('awsOnboardingSettingsRequirementStepDefinition', () => {
     expect(output.services.map(({ id }) => id)).toEqual(['guardduty', 'ec2']);
   });
 
+  it('suggests an identity name from the account and the run suffix', async () => {
+    const result = await awsOnboardingSettingsRequirementStepDefinition.handler(
+      createStepContext({
+        services: ['guardduty'],
+        region: 'us-east-1',
+        account_id: '123456789012',
+        run_suffix: 'ab12cd34',
+      })
+    );
+
+    const { output } = result as { output: { suggested_identity_name: string } };
+    expect(output.suggested_identity_name).toBe('aws-123456789012-federated-identity-ab12cd34');
+  });
+
   it('attaches README notes when the registry serves the template README', async () => {
     (getFile as jest.Mock).mockResolvedValue({ text: async () => README });
 
