@@ -71,6 +71,13 @@ for suite_id in "${SUITE_ARRAY[@]}"; do
     BASE_COMPARE_ARGS+=(--kibana-url "$KIBANA_URL")
   fi
 
+  # Suites that opted in (pinnedBaseline in evals.suites.json) compare against their
+  # pinned baseline instead of the latest run on main.
+  SUITE_PINNED_BASELINE="$(
+    node x-pack/platform/packages/shared/kbn-evals/scripts/ci/get_suite_info.js "$suite_id" 2>/dev/null \
+      | jq -r '.pinnedBaseline // false' 2>/dev/null || echo false
+  )"
+
   # Read the connector list written by run_suite.sh at fanout time.
   # Each entry is a connector ID (EVAL_PROJECT value, e.g. "eis-anthropic-claude-4-5-haiku").
   SUITE_CONNECTORS=""
@@ -110,9 +117,13 @@ for suite_id in "${SUITE_ARRAY[@]}"; do
           echo "Compare failed for suite ${suite_id} / connector ${connector_id}; continuing."
         fi
       else
-        COMPARE_ARGS+=(--baseline-branch main)
-        if [[ -n "${BUILDKITE_BUILD_URL:-}" ]]; then
-          COMPARE_ARGS+=(--refresh-url "${BUILDKITE_BUILD_URL}#kbn-evals-${_suite_key_safe}-refresh-block")
+        if [[ "$SUITE_PINNED_BASELINE" == "true" ]]; then
+          COMPARE_ARGS+=(--baseline-pinned)
+        else
+          COMPARE_ARGS+=(--baseline-branch main)
+          if [[ -n "${BUILDKITE_BUILD_URL:-}" ]]; then
+            COMPARE_ARGS+=(--refresh-url "${BUILDKITE_BUILD_URL}#kbn-evals-${_suite_key_safe}-refresh-block")
+          fi
         fi
         if node scripts/evals compare "$CONNECTOR_COMPOSITE" "${COMPARE_ARGS[@]}"; then
           HAS_RESULTS="true"
@@ -140,9 +151,13 @@ for suite_id in "${SUITE_ARRAY[@]}"; do
         echo "Compare failed for suite ${suite_id}; continuing."
       fi
     else
-      COMPARE_ARGS+=(--baseline-branch main)
-      if [[ -n "${BUILDKITE_BUILD_URL:-}" ]]; then
-        COMPARE_ARGS+=(--refresh-url "${BUILDKITE_BUILD_URL}#kbn-evals-${_suite_key_safe}-refresh-block")
+      if [[ "$SUITE_PINNED_BASELINE" == "true" ]]; then
+        COMPARE_ARGS+=(--baseline-pinned)
+      else
+        COMPARE_ARGS+=(--baseline-branch main)
+        if [[ -n "${BUILDKITE_BUILD_URL:-}" ]]; then
+          COMPARE_ARGS+=(--refresh-url "${BUILDKITE_BUILD_URL}#kbn-evals-${_suite_key_safe}-refresh-block")
+        fi
       fi
       if node scripts/evals compare "$SUITE_EXECUTION_ID" "${COMPARE_ARGS[@]}"; then
         HAS_RESULTS="true"

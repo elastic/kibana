@@ -127,7 +127,8 @@ describe('EvalsPlugin modes', () => {
       expect(features.registerKibanaFeature).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'evals' })
       );
-      expect(coreSetup.dataStreams.registerDataStream).toHaveBeenCalledTimes(2);
+      // Scores, online scores and pinned baselines.
+      expect(coreSetup.dataStreams.registerDataStream).toHaveBeenCalledTimes(3);
       expect(coreSetup.savedObjects.registerType).toHaveBeenCalled();
       expect(encryptedSavedObjects.registerType).toHaveBeenCalled();
       expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalled();

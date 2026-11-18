@@ -1,0 +1,109 @@
+openapi: 3.0.0
+info:
+  title: Pin Evaluation Baseline API endpoint
+  version: '1'
+paths:
+  /internal/evals/baselines/_pin:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: PinEvaluationBaseline
+      description: >-
+        Snapshot an execution's scores into the pinned-baselines index and write a pointer
+        document that becomes the latest pinned baseline for its (suite, task model).
+        Pinned baselines are not subject to the scores data stream retention.
+      summary: Pin an evaluation execution as regression baseline
+      tags:
+        - Evals API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - suite_id
+                - execution_id
+              properties:
+                suite_id:
+                  type: string
+                  maxLength: 256
+                execution_id:
+                  type: string
+                  maxLength: 1024
+                  description: Composite execution ID of the run to pin (e.g. "bk-BUILD::suite::model")
+                reason:
+                  type: string
+                  maxLength: 2048
+                  description: Why this run was pinned (e.g. "monthly scheduled baseline")
+                pinned_by:
+                  type: string
+                  maxLength: 256
+                  description: Who or what pinned this baseline (user or pipeline identifier)
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - baseline
+                properties:
+                  baseline:
+                    $ref: '#/components/schemas/PinnedBaseline'
+components:
+  schemas:
+    PinnedBaseline:
+      type: object
+      required:
+        - baseline_id
+        - suite_id
+        - execution_id
+        - pinned_at
+        - score_count
+      properties:
+        baseline_id:
+          type: string
+          maxLength: 256
+        suite_id:
+          type: string
+          maxLength: 256
+        execution_id:
+          type: string
+          maxLength: 1024
+        task_model:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
+        judge_model_id:
+          type: string
+          maxLength: 256
+          nullable: true
+          description: >-
+            Model ID the LLM judge evaluators scored with; comparisons against a baseline
+            scored by a different judge are invalid.
+        git_branch:
+          type: string
+          maxLength: 256
+          nullable: true
+        git_commit_sha:
+          type: string
+          maxLength: 256
+          nullable: true
+        pinned_at:
+          type: string
+          format: date-time
+        pinned_by:
+          type: string
+          maxLength: 256
+          nullable: true
+        reason:
+          type: string
+          maxLength: 2048
+          nullable: true
+        score_count:
+          type: integer
+        dataset_ids:
+          type: array
+          items:
+            type: string
+            maxLength: 1024
