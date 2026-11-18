@@ -74,3 +74,19 @@ export const toNextToken = (nextToken: string | undefined): string | null => nex
 // SSM returns timestamps as epoch seconds.
 export const toIsoDate = (epochSeconds: number | undefined): string | undefined =>
   epochSeconds === undefined ? undefined : new Date(epochSeconds * 1000).toISOString();
+
+// Any status not listed here, including ones AWS adds later, keeps the agent polling.
+const FINAL_AUTOMATION_STATUSES: ReadonlySet<string> = new Set([
+  'Success',
+  'Failed',
+  'TimedOut',
+  'Cancelled',
+  'Rejected',
+  'ChangeCalendarOverrideRejected',
+  'CompletedWithSuccess',
+  'CompletedWithFailure',
+  'Exited',
+]);
+
+export const isAutomationFinished = (status: string | undefined): boolean =>
+  status !== undefined && FINAL_AUTOMATION_STATUSES.has(status);

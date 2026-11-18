@@ -17,6 +17,7 @@ import { getAutomationExecution } from './tools/get_automation_execution';
 import { getCommandInvocation } from './tools/get_command_invocation';
 import { getDocument } from './tools/get_document';
 import { getParameter } from './tools/get_parameter';
+import { listAutomationExecutions } from './tools/list_automation_executions';
 import { listCommands } from './tools/list_commands';
 import { listDocuments } from './tools/list_documents';
 import { sendCommand } from './tools/send_command';
@@ -76,6 +77,7 @@ export const AwsSsmConnector: ConnectorSpec = {
     cancelCommand,
     startAutomationExecution,
     getAutomationExecution,
+    listAutomationExecutions,
     stopAutomationExecution,
     getParameter,
   },
@@ -97,7 +99,7 @@ export const AwsSsmConnector: ConnectorSpec = {
     '- Stopped and terminated EC2 instances are not managed nodes: they are never returned, and passing their ID fails with `InvalidInstanceId`.',
     '- `sendCommand` runs as root (or SYSTEM on Windows) and runbooks change AWS resources. Only run what the user asked for, and confirm the target nodes or runbook parameters with the user first. Cancelling does not undo what already ran.',
     '- Do not try to obtain `SecureString` values another way, such as with `sendCommand`.',
-    '- Runbook executions are not commands: `listCommands` does not show them.',
+    '- Runbook executions are not commands: `listCommands` does not show them, `listAutomationExecutions` does.',
   ].join('\n'),
 
   test: {

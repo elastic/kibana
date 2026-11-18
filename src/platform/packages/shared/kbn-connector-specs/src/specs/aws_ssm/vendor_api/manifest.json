@@ -54,6 +54,25 @@
         "source": "ssm"
       }
     ],
+    "listAutomationExecutions": [
+      {
+        "method": "post",
+        "pagination": {
+          "request": {
+            "cursorParam": "NextToken",
+            "in": "body",
+            "sizeParam": "MaxResults"
+          },
+          "response": {
+            "itemsPath": "AutomationExecutionMetadataList",
+            "nextPath": "NextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/DescribeAutomationExecutions",
+        "source": "ssm"
+      }
+    ],
     "listCommands": [
       {
         "method": "post",

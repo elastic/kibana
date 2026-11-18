@@ -418,4 +418,51 @@ describe('AwsSsmConnector', () => {
       expect(result).toMatchObject({ isFinished });
     });
   });
+
+  describe('listAutomationExecutions', () => {
+    it('sends each filter as a key with its values, and reports which executions are finished', async () => {
+      mockClient.post.mockResolvedValue({
+        data: {
+          AutomationExecutionMetadataList: [
+            {
+              AutomationExecutionId: '4105a4fc-f944-11e6-9d32-0123456789ab',
+              AutomationExecutionStatus: 'Success',
+              ExecutionStartTime: 1700000000.5,
+            },
+            {
+              AutomationExecutionId: '5216b5ad-f944-11e6-9d32-0123456789ab',
+              AutomationExecutionStatus: 'InProgress',
+            },
+          ],
+          NextToken: 'token',
+        },
+      });
+
+      const result = await AwsSsmConnector.actions.listAutomationExecutions.handler(mockContext, {
+        documentNamePrefix: 'AWS-Restart',
+        status: ['Success', 'InProgress'],
+        startTimeAfter: '2026-11-01T00:00:00Z',
+      });
+
+      expect(JSON.parse(mockClient.post.mock.calls[0][1])).toEqual({
+        Filters: [
+          { Key: 'DocumentNamePrefix', Values: ['AWS-Restart'] },
+          { Key: 'ExecutionStatus', Values: ['Success', 'InProgress'] },
+          { Key: 'StartTimeAfter', Values: ['2026-11-01T00:00:00Z'] },
+        ],
+      });
+      expect(result).toEqual({
+        automationExecutions: [
+          expect.objectContaining({
+            automationExecutionId: '4105a4fc-f944-11e6-9d32-0123456789ab',
+            isFinished: true,
+            executionStartTime: '2023-11-14T22:13:20.500Z',
+            executionEndTime: null,
+          }),
+          expect.objectContaining({ isFinished: false }),
+        ],
+        nextToken: 'token',
+      });
+    });
+  });
 });

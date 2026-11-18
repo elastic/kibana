@@ -15,6 +15,7 @@ const SSM_TARGET_PREFIX = 'AmazonSSM';
 
 type SsmOperation =
   | 'CancelCommand'
+  | 'DescribeAutomationExecutions'
   | 'DescribeInstanceInformation'
   | 'GetAutomationExecution'
   | 'GetCommandInvocation'

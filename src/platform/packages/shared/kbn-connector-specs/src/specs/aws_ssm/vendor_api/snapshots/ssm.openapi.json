@@ -319,12 +319,216 @@
         },
         "type": "object"
       },
+      "AutomationExecutionFilter": {
+        "properties": {
+          "Key": {
+            "$ref": "#/components/schemas/AutomationExecutionFilterKey"
+          },
+          "Values": {
+            "items": {
+              "maxLength": 150,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 10,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "Key",
+          "Values"
+        ],
+        "type": "object"
+      },
+      "AutomationExecutionFilterKey": {
+        "enum": [
+          "DocumentNamePrefix",
+          "ExecutionStatus",
+          "ExecutionId",
+          "ParentExecutionId",
+          "CurrentAction",
+          "StartTimeBefore",
+          "StartTimeAfter",
+          "AutomationType",
+          "TagKey",
+          "TargetResourceGroup",
+          "AutomationSubtype",
+          "OpsItemId"
+        ],
+        "type": "string"
+      },
       "AutomationExecutionLimitExceededExceptionResponseContent": {
         "properties": {
           "Message": {
             "type": "string"
           },
           "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationExecutionMetadata": {
+        "properties": {
+          "AlarmConfiguration": {
+            "$ref": "#/components/schemas/AlarmConfiguration"
+          },
+          "AssociationId": {
+            "type": "string"
+          },
+          "AutomationExecutionId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "type": "string"
+          },
+          "AutomationExecutionStatus": {
+            "$ref": "#/components/schemas/AutomationExecutionStatus"
+          },
+          "AutomationSubtype": {
+            "$ref": "#/components/schemas/AutomationSubtype"
+          },
+          "AutomationType": {
+            "$ref": "#/components/schemas/AutomationType"
+          },
+          "ChangeRequestName": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "CurrentAction": {
+            "type": "string"
+          },
+          "CurrentStepName": {
+            "type": "string"
+          },
+          "DocumentName": {
+            "pattern": "^[a-zA-Z0-9_\\-.]{3,128}$",
+            "type": "string"
+          },
+          "DocumentVersion": {
+            "pattern": "^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$",
+            "type": "string"
+          },
+          "ExecutedBy": {
+            "type": "string"
+          },
+          "ExecutionEndTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "ExecutionStartTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "FailureMessage": {
+            "type": "string"
+          },
+          "LogFile": {
+            "type": "string"
+          },
+          "MaxConcurrency": {
+            "maxLength": 7,
+            "minLength": 1,
+            "pattern": "^([1-9][0-9]*|[1-9][0-9]%|[1-9]%|100%)$",
+            "type": "string"
+          },
+          "MaxErrors": {
+            "maxLength": 7,
+            "minLength": 1,
+            "pattern": "^([1-9][0-9]*|[0]|[1-9][0-9]%|[0-9]%|100%)$",
+            "type": "string"
+          },
+          "Mode": {
+            "$ref": "#/components/schemas/ExecutionMode"
+          },
+          "OpsItemId": {
+            "type": "string"
+          },
+          "Outputs": {
+            "additionalProperties": {
+              "items": {
+                "maxLength": 512,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 50,
+              "minItems": 0,
+              "type": "array"
+            },
+            "maxProperties": 200,
+            "minProperties": 1,
+            "type": "object"
+          },
+          "ParentAutomationExecutionId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "type": "string"
+          },
+          "ResolvedTargets": {
+            "$ref": "#/components/schemas/ResolvedTargets"
+          },
+          "Runbooks": {
+            "items": {
+              "$ref": "#/components/schemas/Runbook"
+            },
+            "maxItems": 1,
+            "minItems": 1,
+            "type": "array"
+          },
+          "ScheduledTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "Target": {
+            "type": "string"
+          },
+          "TargetLocationsURL": {
+            "pattern": "^https:\\/\\/[-a-zA-Z0-9@:%._\\+~#=]{1,253}\\.s3(\\.[a-z\\d-]{9,16})?\\.amazonaws\\.com\\/.{1,2000}$",
+            "type": "string"
+          },
+          "TargetMaps": {
+            "items": {
+              "additionalProperties": {
+                "items": {
+                  "maxLength": 50,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "maxItems": 25,
+                "minItems": 0,
+                "type": "array"
+              },
+              "maxProperties": 20,
+              "minProperties": 1,
+              "type": "object"
+            },
+            "maxItems": 300,
+            "minItems": 0,
+            "type": "array"
+          },
+          "TargetParameterName": {
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Targets": {
+            "items": {
+              "$ref": "#/components/schemas/Target"
+            },
+            "maxItems": 5,
+            "minItems": 0,
+            "type": "array"
+          },
+          "TriggeredAlarms": {
+            "items": {
+              "$ref": "#/components/schemas/AlarmStateInformation"
+            },
+            "maxItems": 1,
+            "minItems": 1,
+            "type": "array"
+          },
+          "WarningMessage": {
             "type": "string"
           }
         },
@@ -369,6 +573,13 @@
         "enum": [
           "ChangeRequest",
           "AccessRequest"
+        ],
+        "type": "string"
+      },
+      "AutomationType": {
+        "enum": [
+          "CrossAccount",
+          "Local"
         ],
         "type": "string"
       },
@@ -601,6 +812,42 @@
           "Cancelling"
         ],
         "type": "string"
+      },
+      "DescribeAutomationExecutionsRequestContent": {
+        "properties": {
+          "Filters": {
+            "items": {
+              "$ref": "#/components/schemas/AutomationExecutionFilter"
+            },
+            "maxItems": 10,
+            "minItems": 1,
+            "type": "array"
+          },
+          "MaxResults": {
+            "format": "int32",
+            "maximum": 50,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "NextToken": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DescribeAutomationExecutionsResponseContent": {
+        "properties": {
+          "AutomationExecutionMetadataList": {
+            "items": {
+              "$ref": "#/components/schemas/AutomationExecutionMetadata"
+            },
+            "type": "array"
+          },
+          "NextToken": {
+            "type": "string"
+          }
+        },
+        "type": "object"
       },
       "DescribeInstanceInformationRequestContent": {
         "properties": {
@@ -1344,6 +1591,17 @@
       },
       "InvalidFilterKeyResponseContent": {
         "properties": {
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidFilterValueResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
           "__type": {
             "type": "string"
           }
@@ -2474,6 +2732,90 @@
                     },
                     {
                       "$ref": "#/components/schemas/InvalidInstanceIdResponseContent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/DescribeAutomationExecutions": {
+      "post": {
+        "operationId": "DescribeAutomationExecutions",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DescribeAutomationExecutionsRequestContent"
+              }
+            },
+            "application/x-amz-json-1.1": {
+              "schema": {
+                "$ref": "#/components/schemas/DescribeAutomationExecutionsRequestContent"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DescribeAutomationExecutionsResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/DescribeAutomationExecutionsResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidFilterKeyResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidFilterValueResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidNextTokenResponseContent"
+                    }
+                  ]
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidFilterKeyResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidFilterValueResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidNextTokenResponseContent"
                     }
                   ]
                 }

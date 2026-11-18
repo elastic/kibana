@@ -24,6 +24,11 @@
       { "source": "ssm", "method": "POST", "path": "/GetParameter" }
     ]
   },
+  "listAutomationExecutions": {
+    "queries": [
+      { "source": "ssm", "method": "POST", "path": "/DescribeAutomationExecutions" }
+    ]
+  },
   "listCommands": {
     "queries": [
       { "source": "ssm", "method": "POST", "path": "/ListCommands" }

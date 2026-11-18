@@ -10,7 +10,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionDefinition } from '../../../connector_spec';
 import { callSsmApi } from '../aws_ssm_api';
-import { automationExecutionIdSchema, toIsoDate } from './shared';
+import { automationExecutionIdSchema, isAutomationFinished, toIsoDate } from './shared';
 
 const GetAutomationExecutionInputSchema = lazySchema(() =>
   z.object({
@@ -20,19 +20,6 @@ const GetAutomationExecutionInputSchema = lazySchema(() =>
   })
 );
 type GetAutomationExecutionInput = z.infer<typeof GetAutomationExecutionInputSchema>;
-
-// Any status not listed here, including ones AWS adds later, keeps the agent polling.
-const FINAL_AUTOMATION_STATUSES: ReadonlySet<string> = new Set([
-  'Success',
-  'Failed',
-  'TimedOut',
-  'Cancelled',
-  'Rejected',
-  'ChangeCalendarOverrideRejected',
-  'CompletedWithSuccess',
-  'CompletedWithFailure',
-  'Exited',
-]);
 
 const automationOutputsSchema = () => z.record(z.string(), z.array(z.string())).optional();
 
@@ -96,9 +83,7 @@ export const getAutomationExecution: ActionDefinition<GetAutomationExecutionInpu
       automationExecutionId: AutomationExecutionId,
       documentName: DocumentName,
       status: AutomationExecutionStatus,
-      isFinished:
-        AutomationExecutionStatus !== undefined &&
-        FINAL_AUTOMATION_STATUSES.has(AutomationExecutionStatus),
+      isFinished: isAutomationFinished(AutomationExecutionStatus),
       currentStepName: CurrentStepName,
       failureMessage: FailureMessage,
       outputs: Outputs,
