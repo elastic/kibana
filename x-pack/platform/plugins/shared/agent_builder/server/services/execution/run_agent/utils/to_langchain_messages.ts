@@ -20,13 +20,18 @@ import {
 } from '@kbn/agent-builder-common';
 import { createAIMessage, createUserMessage } from '@kbn/agent-builder-genai-utils/langchain';
 import { generateXmlTree, type XmlNode } from '@kbn/agent-builder-genai-utils/tools/utils';
-import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
+import type {
+  ProcessedAttachment,
+  ProcessedRoundInput,
+  ProcessedUserMessageEvent,
+} from '@kbn/agent-builder-server';
 import type { CompactionSummary, DynamicToolDefinition } from '@kbn/agent-builder-common';
 import {
   formatAwaitingPromptNotice,
   formatInterruptionNotice,
   formatSubagentRosterNotice,
   formatBackgroundReportNotice,
+  formatUnreadSteerNotice,
 } from '../prompts/utils/notices';
 import { formatDynamicToolsNotice } from '../prompts/utils/dynamic_tools';
 import { formatDate } from '../prompts/utils/helpers';
@@ -153,7 +158,6 @@ export const prepareMessages = async ({
           notices,
           resumeAnchors: conversation.resumeAnchors,
           fromStepIndex: index === 0 ? visibility.entryFromStep : 0,
-          unfinishedDeliveries: conversation.unfinishedDeliveries,
         }))
       );
       continue;
@@ -163,13 +167,7 @@ export const prepareMessages = async ({
       continue;
     }
     // a standalone user message: no execution to render
-    messages.push(
-      formatUserInput({
-        input: entry.userMessage.data,
-        timestamp: entry.userMessage.created_at,
-        notices,
-      })
-    );
+    messages.push(standaloneUserMessageToLangchain(entry.userMessage, notices));
   }
 
   messages.push(formatUserInput({ input, timestamp: inputTimestamp, notices }));
@@ -213,7 +211,6 @@ export interface RoundToLangchainOptions {
    * message is kept so the visible steps stay anchored to the request they answer.
    */
   fromStepIndex?: number;
-  unfinishedDeliveries?: ReadonlySet<string>;
 }
 
 export const roundToLangchain = async (
@@ -224,7 +221,6 @@ export const roundToLangchain = async (
     notices,
     resumeAnchors,
     fromStepIndex = 0,
-    unfinishedDeliveries,
   }: RoundToLangchainOptions
 ): Promise<BaseMessage[]> => {
   const placement = roundAttachmentPlacement(round, resumeAnchors);
@@ -241,7 +237,6 @@ export const roundToLangchain = async (
         steps: round.steps.slice(fromStepIndex),
         resultTransformer,
         attachments: { placement, notices },
-        unfinishedDeliveries,
       }))
     );
   }
@@ -307,6 +302,17 @@ export const standaloneEventToLangchain = (
       : '';
   return createUserMessage(instructions ? `${block}\n\n${instructions}` : block);
 };
+
+/** A standalone user message: a user turn, or earlier context when it is a steer its run never read. */
+export const standaloneUserMessageToLangchain = (
+  event: ProcessedUserMessageEvent,
+  notices: AttachmentNoticeRenderer
+): HumanMessage =>
+  event.unread_steer
+    ? createUserMessage(
+        formatUnreadSteerNotice({ actor: event.actor, message: event.data.message })
+      )
+    : formatUserInput({ input: event.data, timestamp: event.created_at, notices });
 
 export const formatUserInput = ({
   input,

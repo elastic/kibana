@@ -347,8 +347,6 @@ export interface DeliveredMessageStepData {
   tool_call_group_id?: string;
   /** Delivered after the preceding `interim_answer` step. */
   after_answer?: boolean;
-  /** How many earlier executions read the same message without finishing. */
-  redelivered: number;
 }
 
 export type DeliveredMessageStep = ConversationRoundStepMixin<

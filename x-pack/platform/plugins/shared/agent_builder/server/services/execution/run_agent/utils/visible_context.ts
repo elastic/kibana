@@ -28,6 +28,7 @@ import {
 } from './filestore_substitution';
 import {
   standaloneEventToLangchain,
+  standaloneUserMessageToLangchain,
   formatUserInput,
   noticeRendererFor,
   prepareMessages,
@@ -168,13 +169,7 @@ export const renderUnit = async (
 ): Promise<BaseMessage[]> => {
   const notices = noticeRendererFor(conversation, { withTypeInstructions: false });
   if (unit.kind === 'message') {
-    return [
-      formatUserInput({
-        input: unit.entry.userMessage.data,
-        timestamp: unit.entry.userMessage.created_at,
-        notices,
-      }),
-    ];
+    return [standaloneUserMessageToLangchain(unit.entry.userMessage, notices)];
   }
   if (unit.kind === 'standalone_event') {
     return [standaloneEventToLangchain(unit.entry.event)];
@@ -196,7 +191,6 @@ export const renderUnit = async (
       steps: unitSteps(unit, run.steps),
       resultTransformer: view.historyTransformer(round.id),
       attachments: { placement, notices },
-      unfinishedDeliveries: conversation.unfinishedDeliveries,
     })),
     ...(unit.last ? [roundOutcomeMessage(round), ...roundOutcomeNotice(placement, notices)] : []),
   ];

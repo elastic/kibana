@@ -137,7 +137,6 @@ describe('formatDeliveredMessageNotice', () => {
     message: 'use a table',
     delivered_at: '2026-01-01T00:00:00.000Z',
     cycle: 2,
-    redelivered: 0,
   };
 
   it('places a message read after a tool batch at that batch', () => {

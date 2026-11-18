@@ -23,8 +23,8 @@ import {
   ChatEventType,
   AgentExecutionMode,
   EventActorType,
-  analyzeDeliveries,
   timelineExecutionId,
+  unreadSettledSteerIds,
 } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
 import { HookLifecycle } from '@kbn/agent-builder-server';
@@ -234,10 +234,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     metadata: conversation?.metadata,
     templateId: conversation?.template_id,
     resumeAnchors,
-    // Folding hides which execution made each delivery, so settlement comes from the stored events.
-    unfinishedDeliveries: conversation?.events
-      ? analyzeDeliveries(conversation.events).unfinishedDeliveries
-      : undefined,
+    // Folding keeps the stamp but not the run's end, so settlement comes from the stored events.
+    unreadSteerIds: conversation?.events ? unreadSettledSteerIds(conversation.events) : undefined,
   });
   processedConversation.resumedRoundId = pendingTurn?.id;
   const pendingRound = pendingTurn?.compatRound;

@@ -215,7 +215,6 @@ describe('convertGraphEvents', () => {
       delivered_at: '2026-01-01T00:00:00.000Z',
       cycle: 1,
       after_answer: true,
-      redelivered: 0,
     };
     const events = await collect([
       chainEnd(steps.checkIncomingAfterAnswer, {

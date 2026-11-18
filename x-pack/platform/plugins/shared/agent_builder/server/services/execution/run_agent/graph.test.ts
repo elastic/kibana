@@ -214,7 +214,6 @@ describe('createAgentGraph', () => {
       delivered_at: '2026-01-01T00:00:00.000Z',
       cycle: 1,
       after_answer: true,
-      redelivered: 0,
     });
 
     it('keeps the answer as an interim step, reads the message and answers again in the same run', async () => {

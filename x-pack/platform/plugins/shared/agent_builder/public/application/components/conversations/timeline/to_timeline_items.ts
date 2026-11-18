@@ -6,10 +6,10 @@
  */
 
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
-import type { ConversationEvent } from '@kbn/agent-builder-common';
+import type { ConversationEvent, UserMessageEvent } from '@kbn/agent-builder-common';
 import {
   TimelineEventType,
-  analyzeDeliveries,
+  analyzeSteers,
   isActivityEvent,
   isCurrentFormatAttachmentEvent,
   isExecutionTerminalEvent,
@@ -40,9 +40,9 @@ import {
   inputRefsByMessageId,
 } from './attachment_event_refs';
 
-/** Delivered steers render inside their turn; undelivered steers remain standalone. */
+/** Read steers render inside their turn; unread steers remain standalone. */
 const steerPlacement = (events: TimelineDisplayEvent[]) => {
-  const { settled, readByLive, unfinishedReads } = analyzeDeliveries(events);
+  const { read, over } = analyzeSteers(events);
   const started = new Set<string>();
   const ended = new Set<string>();
   for (const event of events) {
@@ -52,8 +52,10 @@ const steerPlacement = (events: TimelineDisplayEvent[]) => {
   }
   return {
     hasLiveExecution: [...started].some((executionId) => !ended.has(executionId)),
-    carriedByStep: (eventId: string) => settled.has(eventId) || readByLive.has(eventId),
-    readByUnfinished: (eventId: string) => (unfinishedReads.get(eventId) ?? 0) > 0,
+    carriedByStep: (eventId: string) => read.has(eventId),
+    // The run the steer was sent to is over without having read it.
+    unread: (event: UserMessageEvent) =>
+      event.data.steer !== undefined && over.has(event.data.steer.execution_id),
   };
 };
 
@@ -67,9 +69,9 @@ export const groupTimelineEvents = (
   const displayEvents = events.filter(isTimelineDisplayEvent);
   const awaitingPromptEventId = findAwaitingPromptEventId(displayEvents);
   const steers = steerPlacement(displayEvents);
-  const steerStateOf = (eventId: string): SteerState | undefined =>
-    steers.readByUnfinished(eventId)
-      ? 'read_by_unfinished'
+  const steerStateOf = (event: UserMessageEvent): SteerState | undefined =>
+    steers.unread(event)
+      ? 'not_read'
       : awaitingPromptEventId
       ? 'before_pause'
       : steers.hasLiveExecution
@@ -126,7 +128,7 @@ export const groupTimelineEvents = (
         if (isSteer && steers.carriedByStep(event.id)) {
           break;
         }
-        const steerState = isSteer ? steerStateOf(event.id) : undefined;
+        const steerState = isSteer ? steerStateOf(event) : undefined;
         const attachmentRefs = [
           ...(event.data.attachment_refs ?? []),
           ...(inputRefs.get(event.id) ?? []),

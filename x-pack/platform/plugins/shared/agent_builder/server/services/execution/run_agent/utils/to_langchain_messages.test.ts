@@ -27,7 +27,6 @@ import {
   EventActorType,
   ExecutionStatus,
   TimelineEventType,
-  analyzeDeliveries,
   isTimelineEvent,
 } from '@kbn/agent-builder-common';
 import type { BackgroundExecutionState } from '@kbn/agent-builder-common/chat';
@@ -53,8 +52,6 @@ import {
   pausedRoundTimeline,
   pausedThenInterruptedResumeTimeline,
   processedCustomEventFixture,
-  promptResponseEvent,
-  interruptedExecutionEvents,
   terminatedExecutionEvents,
   userMessageEvent,
   roundsOfTimeline,
@@ -1450,6 +1447,33 @@ describe('prepareMessages', () => {
       expect(String(messages[0].content)).toContain('note');
       expect(String(messages[0].content).match(/<conversation_event /g)).toHaveLength(1);
     });
+
+    it('renders a steer its run never read as earlier context, not a user turn', async () => {
+      const unread = {
+        id: 'steer-1',
+        type: TimelineEventType.userMessage,
+        created_at: T0,
+        actor: { type: 'user', id: 'u', username: 'sid' },
+        data: makeRoundInput('use a table'),
+        unread_steer: true,
+      } as unknown as ProcessedTimelineEvent;
+      const messages = await prepareMessages({
+        conversation: {
+          timeline: [unread],
+          nextInput: makeRoundInput('next'),
+          attachmentTypes: [],
+          attachmentStateManager: createAttachmentStateManager([], {
+            getTypeDefinition: () => undefined,
+          }),
+        } as ProcessedConversation,
+      });
+      expect(messages).toHaveLength(2);
+      const content = String(messages[0].content);
+      expect(content).toContain('<system_notice>');
+      expect(content).toContain('ended before reading it');
+      expect(content).toContain('<user_message>use a table</user_message>');
+      expect(String(messages[1].content)).toBe('next');
+    });
   });
 
   describe('background execution notices (from round steps)', () => {
@@ -1978,80 +2002,35 @@ describe('prepareMessages — multi-execution (HITL) timelines', () => {
       expect(String(messages.at(-1)?.content)).toContain('bye');
     });
 
-    it('keeps the text of a steer the paused execution settled when its resume fails', async () => {
-      const delivered = (eventId: string): ConversationRoundStep =>
-        ({
-          type: ConversationRoundStepType.deliveredMessage,
-          event_id: eventId,
-          author: { type: 'user', id: 'u1' },
-          is_run_owner: true,
-          message: `text of ${eventId}`,
-          delivered_at: T0,
-          cycle: 1,
-          redelivered: 0,
-        } as ConversationRoundStep);
+    it('renders a steer read by an interrupted run with its text, in that round', async () => {
+      const delivered: ConversationRoundStep = {
+        type: ConversationRoundStepType.deliveredMessage,
+        event_id: 'read',
+        author: { type: 'user', id: 'u1' },
+        is_run_owner: true,
+        message: 'text of read',
+        delivered_at: T0,
+        cycle: 1,
+      } as ConversationRoundStep;
       const events: TimelineEvent[] = [
-        userMessageEvent('r1'),
-        ...terminatedExecutionEvents({
-          roundId: 'r1',
-          steps: [delivered('before-pause')],
-          outcome: { type: 'prompt_requested', prompts: [] },
-        }),
-        promptResponseEvent('r1', 1, 'r1::execution_terminated'),
-        ...interruptedExecutionEvents({
-          roundId: 'r1',
-          index: 1,
-          steps: [delivered('in-resume')],
-          interruption: { type: 'failed' },
-        }),
-      ];
-      const conversation = {
-        ...conversationOf(processedTimeline(events)),
-        unfinishedDeliveries: analyzeDeliveries(events).unfinishedDeliveries,
-      };
-
-      const messages = await prepareMessages({ conversation });
-
-      const contents = messages.map((message) => String(message.content));
-      expect(contents.some((content) => content.includes('text of before-pause'))).toBe(true);
-      expect(contents.some((content) => content.includes('text of in-resume'))).toBe(false);
-      expect(contents.some((content) => content.includes('id in-resume'))).toBe(true);
-    });
-
-    it('renders the text once when a failed round read a steer and a later round finished with it', async () => {
-      const delivered = (deliveredAt: string): ConversationRoundStep =>
-        ({
-          type: ConversationRoundStepType.deliveredMessage,
-          event_id: 'again',
-          author: { type: 'user', id: 'u1' },
-          is_run_owner: true,
-          message: 'text of again',
-          delivered_at: deliveredAt,
-          cycle: 1,
-          redelivered: 0,
-        } as ConversationRoundStep);
-      const events: TimelineEvent[] = [
-        ...failedExec0Timeline('r1', [delivered(T0)], T0),
+        ...failedExec0Timeline('r1', [delivered], T0),
         userMessageEvent('r2', T1),
         ...terminatedExecutionEvents({
           roundId: 'r2',
           createdAt: T1,
-          steps: [delivered(T1)],
+          steps: [],
           outcome: { type: 'responded', response: { message: 'done' } },
         }),
       ];
-      const conversation = {
-        ...conversationOf(processedTimeline(events)),
-        unfinishedDeliveries: analyzeDeliveries(events).unfinishedDeliveries,
-      };
 
-      const messages = await prepareMessages({ conversation });
+      const messages = await prepareMessages({
+        conversation: conversationOf(processedTimeline(events)),
+      });
 
       const contents = messages.map((message) => String(message.content));
-      expect(contents.filter((content) => content.includes('text of again'))).toHaveLength(1);
-      expect(contents.filter((content) => content.includes('id again'))).toHaveLength(1);
-      expect(contents.findIndex((content) => content.includes('id again'))).toBeLessThan(
-        contents.findIndex((content) => content.includes('text of again'))
+      expect(contents.filter((content) => content.includes('text of read'))).toHaveLength(1);
+      expect(contents.findIndex((content) => content.includes('text of read'))).toBeLessThan(
+        contents.findIndex((content) => content.includes('done'))
       );
     });
 

@@ -133,11 +133,13 @@ export {
 } from './conversation';
 export {
   STEERS_PER_RUN_MAX,
-  analyzeDeliveries,
-  deliveryKey,
+  analyzeSteers,
   pendingSteers,
   pendingSteersFor,
-  type SteerDeliveries,
+  steersToDeliver,
+  unreadSettledSteerIds,
+  type SteerMessageEvent,
+  type SteerStatus,
 } from './steering';
 export {
   ChatEventType,

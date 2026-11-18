@@ -26,6 +26,7 @@ import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/
 import {
   getEventActorDisplayName,
   type BackgroundExecutionState,
+  type EventActor,
   type DeliveredMessageStep,
   type SubagentRosterEntry,
 } from '@kbn/agent-builder-common/chat';
@@ -265,32 +266,31 @@ export const formatDeliveredMessageNotice = (step: DeliveredMessageStep): string
               : ''),
         ],
       },
-      ...(step.redelivered > 0
-        ? [
-            {
-              tagName: 'redelivered',
-              children: [
-                `This message was already read by ${step.redelivered} earlier run(s) that did not finish.`,
-              ],
-            },
-          ]
-        : []),
       { tagName: 'user_message', children: [step.message] },
     ],
   });
 };
 
-/** The reference rendered for a steer read by an earlier run that did not finish; the text comes with the current pickup. */
-export const formatDeliveredMessageReference = (step: DeliveredMessageStep): string =>
+/** A steer the run it was sent to never read, rendered as history: what was said, not a request to act on now. */
+export const formatUnreadSteerNotice = ({
+  actor,
+  message,
+}: {
+  actor: EventActor;
+  message: string;
+}): string =>
   generateXmlTree({
     tagName: 'system_notice',
     children: [
       {
         tagName: 'message',
         children: [
-          `A message from the user (id ${step.event_id}) was read here by a run that did not finish; it is delivered again by a later run.`,
+          `A message from ${getEventActorDisplayName(
+            actor
+          )} sent during an earlier run, which ended before reading it. It was never acted on; it is here as earlier context.`,
         ],
       },
+      { tagName: 'user_message', children: [message] },
     ],
   });
 

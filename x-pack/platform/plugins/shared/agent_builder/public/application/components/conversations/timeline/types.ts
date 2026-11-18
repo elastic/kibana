@@ -49,7 +49,7 @@ export interface AgentTurnItem {
 }
 
 /** Status shown on standalone steer messages. */
-export type SteerState = 'waiting' | 'read_by_unfinished' | 'before_pause';
+export type SteerState = 'waiting' | 'not_read' | 'before_pause';
 
 export interface UserMessageItem {
   kind: 'userMessage';

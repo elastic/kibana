@@ -241,7 +241,7 @@ const editorController = {
   setContent: jest.fn(),
   clear: jest.fn(),
   isEmpty: false,
-  getPlaceholderNames: jest.fn(() => []),
+  getPlaceholderNames: jest.fn((): string[] => []),
   removePlaceholderByName: jest.fn(),
   insertText: jest.fn(),
 };

@@ -8,7 +8,13 @@
 import { ConversationRoundStepType } from './conversation';
 import { EventActorType, TimelineEventType } from './timeline_events';
 import type { ConversationEvent } from './timeline_events';
-import { analyzeDeliveries, deliveryKey, pendingSteers, pendingSteersFor } from './steering';
+import {
+  analyzeSteers,
+  pendingSteers,
+  pendingSteersFor,
+  steersToDeliver,
+  unreadSettledSteerIds,
+} from './steering';
 
 const actor = { type: EventActorType.user, id: 'u1' };
 
@@ -24,28 +30,22 @@ const userMessage = (
   data: { message: `m-${id}`, ...(steer ? { steer } : {}) },
 });
 
-const deliveredStep = (
-  executionId: string,
-  eventId: string,
-  sequence = 0,
-  deliveredAt = '2026-01-01T00:00:10.000Z'
-): ConversationEvent => ({
-  id: `${executionId}::step::${sequence}`,
+const deliveredStep = (executionId: string, eventId: string): ConversationEvent => ({
+  id: `${executionId}::step::0`,
   type: TimelineEventType.executionStep,
   execution_id: executionId,
   created_at: '2026-01-01T00:00:10.000Z',
   actor,
   data: {
-    sequence,
+    sequence: 0,
     step: {
       type: ConversationRoundStepType.deliveredMessage,
       event_id: eventId,
       author: actor,
       is_run_owner: true,
       message: `m-${eventId}`,
-      delivered_at: deliveredAt,
+      delivered_at: '2026-01-01T00:00:10.000Z',
       cycle: 1,
-      redelivered: 0,
     },
   },
 });
@@ -65,51 +65,91 @@ const terminal = (
   actor,
   data:
     type === TimelineEventType.executionTerminated
-      ? { outcome: { type: outcomeType } }
+      ? {
+          outcome:
+            outcomeType === 'prompt_requested'
+              ? { type: 'prompt_requested', prompts: [] }
+              : { type: 'responded', response: { message: 'done' } },
+        }
       : { error: { code: 'x', message: 'x' } },
 });
 
+const promptResponse = (pausedExecutionId: string, resumeExecutionId: string): ConversationEvent =>
+  ({
+    id: `${resumeExecutionId}::prompt_response`,
+    type: TimelineEventType.promptResponse,
+    execution_id: resumeExecutionId,
+    created_at: '2026-01-01T00:00:30.000Z',
+    actor,
+    data: { prompt_requested_event_id: `${pausedExecutionId}::terminal`, responses: [] },
+  } as unknown as ConversationEvent);
+
 describe('steering predicates', () => {
-  it('settles a steer named by a step of a finished execution', () => {
+  it('settles the steers of a run that responded, read or not', () => {
     const events = [
-      userMessage('s1', '2026-01-01T00:00:01.000Z', { execution_id: 'e1' }),
-      deliveredStep('e1', 's1'),
+      userMessage('read', '2026-01-01T00:00:01.000Z', { execution_id: 'e1' }),
+      userMessage('unread', '2026-01-01T00:00:02.000Z', { execution_id: 'e1' }),
+      deliveredStep('e1', 'read'),
       terminal('e1', TimelineEventType.executionTerminated),
     ];
-    expect(analyzeDeliveries(events).settled).toEqual(new Set(['s1']));
-    expect(pendingSteers(events)).toEqual([]);
+    const status = analyzeSteers(events);
+    expect(status.read).toEqual(new Set(['read']));
+    expect(status.over).toEqual(new Set(['e1']));
+    expect(pendingSteers(events, status)).toEqual([]);
   });
 
-  it('settles a steer picked up before a pause on a prompt', () => {
+  it.each([TimelineEventType.executionFailed, TimelineEventType.executionAborted] as const)(
+    'settles the steers of a run that ended with %s, read or not',
+    (type) => {
+      const events = [
+        userMessage('read', '2026-01-01T00:00:01.000Z', { execution_id: 'e1' }),
+        userMessage('unread', '2026-01-01T00:00:02.000Z', { execution_id: 'e1' }),
+        deliveredStep('e1', 'read'),
+        terminal('e1', type),
+      ];
+      const status = analyzeSteers(events);
+      expect(status.read).toEqual(new Set(['read']));
+      expect(status.over).toEqual(new Set(['e1']));
+      expect(pendingSteers(events, status)).toEqual([]);
+      expect(steersToDeliver(events, 'e2', status)).toEqual([]);
+    }
+  );
+
+  it('keeps the steers of a paused run pending for its resume', () => {
     const events = [
       userMessage('s1', '2026-01-01T00:00:01.000Z', { execution_id: 'e1' }),
-      deliveredStep('e1', 's1'),
       terminal('e1', TimelineEventType.executionTerminated, 'prompt_requested'),
     ];
-    expect(analyzeDeliveries(events).settled).toEqual(new Set(['s1']));
+    const status = analyzeSteers(events);
+    expect(status.paused).toEqual(new Set(['e1']));
+    expect(status.over.size).toBe(0);
+    expect(steersToDeliver(events, 'e2', status).map((e) => e.id)).toEqual(['s1']);
   });
 
-  it('keeps a steer pending when the execution that read it failed, and counts the read', () => {
+  it('settles a paused chain once its last resume is over', () => {
     const events = [
       userMessage('s1', '2026-01-01T00:00:01.000Z', { execution_id: 'e1' }),
-      deliveredStep('e1', 's1'),
-      terminal('e1', TimelineEventType.executionFailed),
+      terminal('e1', TimelineEventType.executionTerminated, 'prompt_requested'),
+      promptResponse('e1', 'e2'),
+      terminal('e2', TimelineEventType.executionTerminated, 'prompt_requested'),
+      promptResponse('e2', 'e3'),
+      terminal('e3', TimelineEventType.executionFailed),
     ];
-    expect(analyzeDeliveries(events).settled.size).toBe(0);
-    expect(pendingSteers(events).map((e) => e.id)).toEqual(['s1']);
-    expect(analyzeDeliveries(events).unfinishedReads.get('s1')).toBe(1);
+    const status = analyzeSteers(events);
+    expect(status.over).toEqual(new Set(['e1', 'e2', 'e3']));
+    expect(status.paused.size).toBe(0);
+    expect(pendingSteers(events, status)).toEqual([]);
   });
 
-  it('settles a steer read by a failed execution once a later execution finishes with it', () => {
+  it('treats a run with no terminal yet as live: its steers stay pending, read or not', () => {
     const events = [
       userMessage('s1', '2026-01-01T00:00:01.000Z', { execution_id: 'e1' }),
+      userMessage('s2', '2026-01-01T00:00:02.000Z', { execution_id: 'e1' }),
       deliveredStep('e1', 's1'),
-      terminal('e1', TimelineEventType.executionAborted),
-      deliveredStep('e2', 's1'),
-      terminal('e2', TimelineEventType.executionTerminated),
     ];
-    expect(analyzeDeliveries(events).settled).toEqual(new Set(['s1']));
-    expect(analyzeDeliveries(events).unfinishedReads.get('s1')).toBe(1);
+    const status = analyzeSteers(events);
+    expect(status.read).toEqual(new Set(['s1']));
+    expect(pendingSteers(events, status).map((e) => e.id)).toEqual(['s1', 's2']);
   });
 
   it('orders pending steers by created_at and scopes the per-run count to the stamped id', () => {
@@ -121,44 +161,29 @@ describe('steering predicates', () => {
     expect(pendingSteersFor(events, 'e1').map((e) => e.id)).toEqual(['s1']);
   });
 
+  it('delivers to a run only its own steers and those of the pause it resumes', () => {
+    const events = [
+      userMessage('stale', '2026-01-01T00:00:00.000Z', { execution_id: 'e0' }),
+      userMessage('paused', '2026-01-01T00:00:01.000Z', { execution_id: 'e1' }),
+      terminal('e1', TimelineEventType.executionTerminated, 'prompt_requested'),
+      userMessage('own', '2026-01-01T00:00:02.000Z', { execution_id: 'e2' }),
+    ];
+    expect(steersToDeliver(events, 'e2').map((e) => e.id)).toEqual(['paused', 'own']);
+  });
+
+  it('lists the steers an ended run never read, and no others', () => {
+    const events = [
+      userMessage('read', '2026-01-01T00:00:01.000Z', { execution_id: 'e1' }),
+      userMessage('unread', '2026-01-01T00:00:02.000Z', { execution_id: 'e1' }),
+      userMessage('pending', '2026-01-01T00:00:03.000Z', { execution_id: 'e2' }),
+      deliveredStep('e1', 'read'),
+      terminal('e1', TimelineEventType.executionAborted),
+    ];
+    expect(unreadSettledSteerIds(events)).toEqual(new Set(['unread']));
+  });
+
   it('ignores an unstamped (never-mode) message', () => {
     const events = [userMessage('plain', '2026-01-01T00:00:01.000Z')];
     expect(pendingSteers(events)).toEqual([]);
-  });
-
-  it('treats a step with no terminal yet (live execution) as not settled', () => {
-    const events = [
-      userMessage('s1', '2026-01-01T00:00:01.000Z', { execution_id: 'e1' }),
-      deliveredStep('e1', 's1'),
-    ];
-    expect(analyzeDeliveries(events).settled.size).toBe(0);
-    expect(analyzeDeliveries(events).readByLive).toEqual(new Set(['s1']));
-    expect(pendingSteers(events).map((e) => e.id)).toEqual(['s1']);
-  });
-
-  it('reads the pending list from an analysis made once', () => {
-    const events = [
-      userMessage('s1', '2026-01-01T00:00:01.000Z', { execution_id: 'e1' }),
-      userMessage('s2', '2026-01-01T00:00:02.000Z', { execution_id: 'e1' }),
-      deliveredStep('e1', 's1'),
-      terminal('e1', TimelineEventType.executionTerminated),
-    ];
-    const deliveries = analyzeDeliveries(events);
-    expect(pendingSteers(events, deliveries).map((e) => e.id)).toEqual(['s2']);
-  });
-
-  it('keys each unfinished delivery by steer and time, so a later finished read leaves it marked', () => {
-    const events = [
-      userMessage('s1', '2026-01-01T00:00:01.000Z', { execution_id: 'e1' }),
-      deliveredStep('e1', 's1'),
-      terminal('e1', TimelineEventType.executionFailed),
-      deliveredStep('e2', 's1', 0, '2026-01-01T00:00:30.000Z'),
-      terminal('e2', TimelineEventType.executionTerminated),
-    ];
-    const deliveries = analyzeDeliveries(events);
-    expect(deliveries.settled).toEqual(new Set(['s1']));
-    expect(deliveries.unfinishedDeliveries).toEqual(
-      new Set([deliveryKey({ event_id: 's1', delivered_at: '2026-01-01T00:00:10.000Z' })])
-    );
   });
 });

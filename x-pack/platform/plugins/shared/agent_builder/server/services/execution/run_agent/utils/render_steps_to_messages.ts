@@ -18,7 +18,6 @@ import type {
 import {
   isAskUserQuestionStep,
   isBackgroundAgentCompleteStep,
-  deliveryKey,
   isDeliveredMessageStep,
   isInjectedContextStep,
   isInterimAnswerStep,
@@ -41,7 +40,6 @@ import type { HandoverParams, PromptImageResolver } from '../prompts/types';
 import {
   createCycleLimitSystemMessage,
   formatDeliveredMessageNotice,
-  formatDeliveredMessageReference,
   formatHandover,
   formatRetryNotice,
   formatSubagentRosterNotice,
@@ -96,12 +94,6 @@ interface HistoryRenderContext {
   type: 'history';
   resultTransformer?: ToolCallResultTransformer;
   stepAttachments?: StepAttachments;
-  /**
-   * Deliveries (see `deliveryKey`) made by runs that did not finish: each is rendered as a
-   * reference, and a later delivery supplies the text. Absent on conversations without events:
-   * every delivery keeps its text.
-   */
-  unfinishedDeliveries?: ReadonlySet<string>;
 }
 
 interface CurrentRenderContext extends Omit<CurrentRunRenderOptions, 'range' | 'attachments'> {
@@ -456,13 +448,7 @@ const renderSteps = async (
     if (isBackgroundAgentCompleteStep(step)) {
       messages.push(createUserMessage(formatSystemNotice(step)));
     } else if (isDeliveredMessageStep(step)) {
-      const unfinished =
-        context.type === 'history' && context.unfinishedDeliveries?.has(deliveryKey(step)) === true;
-      messages.push(
-        createUserMessage(
-          unfinished ? formatDeliveredMessageReference(step) : formatDeliveredMessageNotice(step)
-        )
-      );
+      messages.push(createUserMessage(formatDeliveredMessageNotice(step)));
     } else if (isInterimAnswerStep(step)) {
       messages.push(new AIMessage({ content: step.message }));
     } else if (isSubagentRosterUpdatedStep(step)) {
@@ -517,20 +503,12 @@ export const renderHistorySteps = async ({
   steps,
   resultTransformer,
   attachments,
-  unfinishedDeliveries,
 }: {
   steps: ConversationRoundStep[];
   resultTransformer?: ToolCallResultTransformer;
   attachments?: StepAttachments;
-  /** Deliveries made by runs that did not finish; see `HistoryRenderContext`. */
-  unfinishedDeliveries?: ReadonlySet<string>;
 }): Promise<BaseMessage[]> =>
-  renderSteps(steps, {
-    type: 'history',
-    resultTransformer,
-    stepAttachments: attachments,
-    unfinishedDeliveries,
-  });
+  renderSteps(steps, { type: 'history', resultTransformer, stepAttachments: attachments });
 
 /** Renders the current run (or the `range` of its steps) to LangChain messages. */
 export const renderCurrentRun = async ({

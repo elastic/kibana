@@ -6,11 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import {
-  ConversationRoundStepType,
-  EventActorType,
-  TimelineEventType,
-} from '@kbn/agent-builder-common';
+import { EventActorType, TimelineEventType } from '@kbn/agent-builder-common';
 import type { Conversation, ConversationEvent } from '@kbn/agent-builder-common';
 import { createConversationClientMock } from '../../../test_utils/conversations';
 import { createIncomingMessages } from './incoming_messages';
@@ -22,45 +18,38 @@ const other = { type: EventActorType.user, id: 'other' };
 const steer = (
   id: string,
   actor = owner,
-  createdAt = '2026-01-01T00:00:01.000Z'
+  createdAt = '2026-01-01T00:00:01.000Z',
+  executionId = 'exec-1'
 ): ConversationEvent => ({
   id,
   type: TimelineEventType.userMessage,
   created_at: createdAt,
   actor,
-  data: { message: `m-${id}`, steer: { execution_id: 'exec-1' } },
+  data: { message: `m-${id}`, steer: { execution_id: executionId } },
 });
 
-const failedRead = (executionId: string, eventId: string): ConversationEvent[] => [
-  {
-    id: `${executionId}::step::0`,
-    type: TimelineEventType.executionStep,
-    execution_id: executionId,
-    created_at: '2026-01-01T00:00:02.000Z',
-    actor: owner,
-    data: {
-      sequence: 0,
-      step: {
-        type: ConversationRoundStepType.deliveredMessage,
-        event_id: eventId,
-        author: owner,
-        is_run_owner: true,
-        message: `m-${eventId}`,
-        delivered_at: '2026-01-01T00:00:02.000Z',
-        cycle: 1,
-        redelivered: 0,
-      },
-    },
-  },
-  {
-    id: `${executionId}::failed`,
-    type: TimelineEventType.executionFailed,
-    execution_id: executionId,
-    created_at: '2026-01-01T00:00:03.000Z',
-    actor: owner,
-    data: { error: { code: 'x', message: 'x' } },
-  },
-];
+const terminal = (
+  executionId: string,
+  type: TimelineEventType.executionTerminated | TimelineEventType.executionFailed,
+  outcomeType: 'responded' | 'prompt_requested' = 'responded'
+): ConversationEvent => ({
+  id: `${executionId}::terminal`,
+  type,
+  execution_id: executionId,
+  created_at: '2026-01-01T00:00:03.000Z',
+  actor: owner,
+  data:
+    type === TimelineEventType.executionTerminated
+      ? {
+          outcome: {
+            type: outcomeType,
+            ...(outcomeType === 'prompt_requested'
+              ? { prompts: [] }
+              : { response: { message: 'done' } }),
+          },
+        }
+      : { error: { code: 'x', message: 'x' } },
+});
 
 const document = (
   events: ConversationEvent[],
@@ -100,7 +89,7 @@ describe('createIncomingMessages', () => {
       ['s2', false],
       ['s1', true],
     ]);
-    expect(delivered[0]).toMatchObject({ cycle: 0, redelivered: 0, message: 'm-s2' });
+    expect(delivered[0]).toMatchObject({ cycle: 0, message: 'm-s2' });
   });
 
   it('marks a message read after the answer so the notice and the placement say so', async () => {
@@ -169,13 +158,13 @@ describe('createIncomingMessages', () => {
     expect(client.getWithVersion).toHaveBeenCalledTimes(1);
   });
 
-  it('caps a single check and counts earlier unfinished reads as redeliveries', async () => {
+  it('caps a single check', async () => {
     const { client, incoming } = setup();
     const many = Array.from({ length: STEERS_PER_CHECK_MAX + 2 }, (_, index) =>
       steer(`s${index}`, owner, `2026-01-01T00:00:0${index}.000Z`)
     );
     client.getWithVersion.mockResolvedValue({
-      conversation: document([...many, ...failedRead('exec-0', 's0')]),
+      conversation: document(many),
       seqNo: 10,
       primaryTerm: 1,
     });
@@ -183,7 +172,26 @@ describe('createIncomingMessages', () => {
     const delivered = await incoming.drain({ cycle: 0 });
 
     expect(delivered).toHaveLength(STEERS_PER_CHECK_MAX);
-    expect(delivered[0]).toMatchObject({ event_id: 's0', redelivered: 1 });
+    expect(delivered[0]).toMatchObject({ event_id: 's0' });
+  });
+
+  it('leaves the steers of a run that is over to the user, and reads those of the pause it resumes', async () => {
+    const { client, incoming } = setup();
+    client.getWithVersion.mockResolvedValue({
+      conversation: document([
+        steer('failed', owner, '2026-01-01T00:00:00.000Z', 'exec-failed'),
+        terminal('exec-failed', TimelineEventType.executionFailed),
+        steer('paused', owner, '2026-01-01T00:00:01.000Z', 'exec-paused'),
+        terminal('exec-paused', TimelineEventType.executionTerminated, 'prompt_requested'),
+        steer('own', owner, '2026-01-01T00:00:02.000Z'),
+      ]),
+      seqNo: 10,
+      primaryTerm: 1,
+    });
+
+    const delivered = await incoming.drain({ cycle: 0 });
+
+    expect(delivered.map((step) => step.event_id)).toEqual(['paused', 'own']);
   });
 
   it('keeps reading while a backlog remains, whatever the version says', async () => {
