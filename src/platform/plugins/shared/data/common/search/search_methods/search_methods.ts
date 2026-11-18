@@ -142,6 +142,11 @@ export class SearchMethodsService implements ISearchMethods {
     try {
       const response = await this.executeSearch(request, searchOptions);
 
+      // `rawResponse.values` is always an array from here on. Elasticsearch can answer 200 with an
+      // `{ error }` body that has no `values`, but the search interceptor rejects any body with an
+      // `error` key (as an error carrying `attributes`) before it resolves, so such a body lands in
+      // the catch below and never reaches the stats or the normalization.
+
       // An all-empty `values` (e.g. every column dropped) is reported as no rows
       const rawResponse: IEsqlSearchResult['rawResponse'] = response.rawResponse.values?.every(
         (row: unknown) => Array.isArray(row) && row.length === 0
