@@ -104,7 +104,7 @@ apiTest.describe(
     apiTest.afterAll(async ({ apiClient, apiServices, kbnClient }) => {
       // Restore the default-rule settings this suite's last test disables, so the
       // disabled state does not leak into sibling specs on the shared server.
-      await putDynamicSettings(apiClient, DYNAMIC_SETTINGS_DEFAULTS);
+      expect(await putDynamicSettings(apiClient, DYNAMIC_SETTINGS_DEFAULTS)).toHaveStatusCode(200);
       await kbnClient.savedObjects.clean({ types: ['synthetics-monitor-multi-space'] });
       await apiServices.alerting.cleanup.deleteAllConnectors();
       await apiServices.syntheticsPrivateLocations.cleanUpPrivateLocationsAndPolicies();
