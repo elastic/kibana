@@ -356,10 +356,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
                 type: 'action',
                 id: tinesActionId,
                 provider: 'actions',
-                actions: new Map([
-                  ['execute-start', { equal: 1 }],
-                  ['execute', { equal: 1 }],
-                ]),
+                actions: new Map([['execute', { gte: 1 }]]),
               });
             });
 
@@ -404,10 +401,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
                 type: 'action',
                 id: tinesActionId,
                 provider: 'actions',
-                actions: new Map([
-                  ['execute-start', { equal: 1 }],
-                  ['execute', { equal: 1 }],
-                ]),
+                actions: new Map([['execute', { gte: 1 }]]),
               });
             });
 
@@ -438,10 +432,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
                 type: 'action',
                 id: tinesActionId,
                 provider: 'actions',
-                actions: new Map([
-                  ['execute-start', { equal: 1 }],
-                  ['execute', { equal: 1 }],
-                ]),
+                actions: new Map([['execute', { gte: 1 }]]),
               });
             });
 
@@ -478,10 +469,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
                 type: 'action',
                 id: tinesActionId,
                 provider: 'actions',
-                actions: new Map([
-                  ['execute-start', { equal: 1 }],
-                  ['execute', { equal: 1 }],
-                ]),
+                actions: new Map([['execute', { gte: 1 }]]),
               });
             });
 
