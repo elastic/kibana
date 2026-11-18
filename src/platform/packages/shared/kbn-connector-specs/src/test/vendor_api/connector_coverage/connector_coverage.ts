@@ -9,7 +9,7 @@
 
 import type { ConnectorSpec } from '../../../connector_spec';
 import { connectorSpecHasEvents } from '../../../connector_spec_has_events';
-import type { VendorApiManifest } from '../manifest';
+import type { ManifestSource, VendorApiManifest } from '../manifest';
 import { isMarkdownFormat } from '../manifest';
 
 export type CoverageDirection = 'outbound' | 'inbound' | 'both';
@@ -77,6 +77,8 @@ export interface ConnectorCoverageDocument {
   readonly direction: CoverageDirection;
   /** Every kind of vendor API the connector calls; most have one. */
   readonly api_types: readonly CoverageApiType[];
+  /** The actions that call each of `api_types`, so the main API of a mixed connector shows. */
+  readonly api_type_actions: ApiTypeActions;
   /** Every auth type the connector accepts, e.g. `bearer` or `oauth_authorization_code`. */
   readonly auth_methods: readonly string[];
   readonly auth_summary: string;
@@ -286,24 +288,48 @@ export const getMockResponses = ({
 // An MCP server's endpoint, such as `/mcp`, `/mcp/` or `/api/2.0/mcp/sql`.
 const MCP_PATH = /(^|\/)mcp(\/|$)/i;
 
+/** How many actions call each kind of vendor API; an action that calls two counts under both. */
+export type ApiTypeActions = Partial<Record<CoverageApiType, number>>;
+
+const toApiType = (format: ManifestSource['format']): CoverageApiType =>
+  isMarkdownFormat(format) ? 'markdown' : format;
+
 /**
- * The API types of a recorded connector: the format of each of its sources, plus `mcp` when
- * actions call an MCP server that no source describes (the manifest acknowledges those requests
- * as `unmatched`). A connector with several kinds of API, like monday.com's GraphQL and MCP,
- * lists them all.
+ * The API types of a recorded connector with the actions that call each. An action calls the
+ * kind of API of each source its operations belong to, and MCP when it calls an MCP server no
+ * source describes (the manifest acknowledges those requests as `unmatched`). A source no action
+ * calls is listed with 0. A connector with several kinds of API, like monday.com's GraphQL and
+ * MCP, lists them all.
  */
-export const getRecordedApiTypes = (manifest: VendorApiManifest): CoverageApiType[] => {
-  const types = new Set<CoverageApiType>(
-    Object.values(manifest.sources).map(({ format }) =>
-      isMarkdownFormat(format) ? 'markdown' : format
-    )
-  );
-  const callsMcp = Object.values(manifest.unmatched ?? {}).some((requests) =>
-    requests.some(({ path }) => MCP_PATH.test(path))
-  );
-  if (callsMcp) types.add('mcp');
-  return types.size > 0 ? [...types].sort() : ['other'];
+export const getRecordedApiTypeActions = (manifest: VendorApiManifest): ApiTypeActions => {
+  const counts: ApiTypeActions = {};
+  for (const { format } of Object.values(manifest.sources)) {
+    counts[toApiType(format)] ??= 0;
+  }
+  const actions = new Set([
+    ...Object.keys(manifest.operations),
+    ...Object.keys(manifest.unmatched ?? {}),
+  ]);
+  for (const action of actions) {
+    const types = new Set<CoverageApiType>();
+    for (const { source } of manifest.operations[action] ?? []) {
+      const format = manifest.sources[source]?.format;
+      if (format) types.add(toApiType(format));
+    }
+    if ((manifest.unmatched?.[action] ?? []).some(({ path }) => MCP_PATH.test(path))) {
+      types.add('mcp');
+    }
+    for (const type of types) counts[type] = (counts[type] ?? 0) + 1;
+  }
+  return Object.keys(counts).length > 0 ? counts : { other: 0 };
 };
+
+const describeApiTypes = (
+  apiTypeActions: ApiTypeActions
+): Pick<ConnectorCoverageDocument, 'api_types' | 'api_type_actions'> => ({
+  api_types: (Object.keys(apiTypeActions) as CoverageApiType[]).sort(),
+  api_type_actions: apiTypeActions,
+});
 
 export const buildCoverageDocument = ({
   spec,
@@ -336,14 +362,18 @@ export const buildCoverageDocument = ({
   if (manifest) {
     return {
       ...base,
-      api_types: getRecordedApiTypes(manifest),
+      ...describeApiTypes(getRecordedApiTypeActions(manifest)),
       emulated: true,
       drift_protection: 'full',
     };
   }
   return {
     ...base,
-    api_types: [exemptionReason ? getExemptApiType(exemptionReason) : 'unexplained'],
+    ...describeApiTypes({
+      [exemptionReason ? getExemptApiType(exemptionReason) : 'unexplained']: Object.keys(
+        spec.actions
+      ).length,
+    }),
     emulated: false,
     drift_protection: 'none',
     ...(exemptionReason ? { exemption_reason: exemptionReason } : {}),

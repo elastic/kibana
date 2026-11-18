@@ -18,7 +18,7 @@ import {
   getExemptApiType,
   getMockResponses,
   getOauthEmulation,
-  getRecordedApiTypes,
+  getRecordedApiTypeActions,
 } from './connector_coverage';
 import type { VendorApiManifest } from '../manifest';
 
@@ -31,24 +31,39 @@ const spec = (id: string, actions: string[], events: string[] = []): ConnectorSp
       : {}),
   } as unknown as ConnectorSpec);
 
-const manifest = (...formats: string[]): VendorApiManifest => manifestWithUnmatched({}, ...formats);
-
 const mcpRequest = { method: 'post', path: '/mcp', reason: 'The vendor MCP server' };
 
-const manifestWithUnmatched = (
-  unmatched: Record<string, Array<{ method: string; path: string; reason: string }>>,
-  ...formats: string[]
-): VendorApiManifest =>
+interface RecordedManifest {
+  /** Source name to format. */
+  sources?: Record<string, string>;
+  /** Action to the names of the sources its operations belong to. */
+  operations?: Record<string, string[]>;
+  unmatched?: Record<string, Array<{ method: string; path: string; reason: string }>>;
+}
+
+const recorded = ({
+  sources = {},
+  operations = {},
+  unmatched = {},
+}: RecordedManifest): VendorApiManifest =>
   ({
-    operations: {},
+    operations: Object.fromEntries(
+      Object.entries(operations).map(([action, names]) => [
+        action,
+        names.map((source) => ({ source, method: 'get', path: `/${action}` })),
+      ])
+    ),
     unmatched,
     sources: Object.fromEntries(
-      formats.map((format, index) => [
-        `v${index}`,
+      Object.entries(sources).map(([name, format]) => [
+        name,
         { format, url: 'https://example.com/spec', fetchedAt: '2026-01-01T00:00:00.000Z' },
       ])
     ),
   } as unknown as VendorApiManifest);
+
+const manifest = (...formats: string[]): VendorApiManifest =>
+  recorded({ sources: Object.fromEntries(formats.map((format, index) => [`v${index}`, format])) });
 
 const facts = (overrides: Partial<ConnectorArtifactFacts> = {}): ConnectorArtifactFacts => ({
   authTypes: [{ type: 'bearer' }],
@@ -94,46 +109,91 @@ describe('getExemptApiType', () => {
   });
 });
 
-describe('getRecordedApiTypes', () => {
+describe('getRecordedApiTypeActions', () => {
   it('maps Markdown formats to markdown', () => {
-    expect(getRecordedApiTypes(manifest('brave-markdown'))).toEqual(['markdown']);
-  });
-
-  it('lists each source format once', () => {
-    expect(getRecordedApiTypes(manifest('swagger', 'openapi', 'openapi'))).toEqual([
-      'openapi',
-      'swagger',
-    ]);
-  });
-
-  it('adds mcp when actions call an MCP server no source describes', () => {
     expect(
-      getRecordedApiTypes(manifestWithUnmatched({ callTool: [mcpRequest] }, 'graphql'))
-    ).toEqual(['graphql', 'mcp']);
+      getRecordedApiTypeActions(
+        recorded({ sources: { v1: 'brave-markdown' }, operations: { search: ['v1'] } })
+      )
+    ).toEqual({ markdown: 1 });
+  });
+
+  it('counts an action once per kind of API, however many operations it calls', () => {
+    expect(
+      getRecordedApiTypeActions(
+        recorded({
+          sources: { a: 'openapi', b: 'openapi', c: 'swagger' },
+          operations: { list: ['a', 'b'], get: ['a'], legacy: ['c'], both: ['a', 'c'] },
+        })
+      )
+    ).toEqual({ openapi: 3, swagger: 2 });
+  });
+
+  it('lists a source no action calls with 0', () => {
+    expect(
+      getRecordedApiTypeActions(recorded({ sources: { a: 'openapi', b: 'graphql' } }))
+    ).toEqual({ openapi: 0, graphql: 0 });
+  });
+
+  it('counts actions that call an MCP server no source describes under mcp', () => {
+    expect(
+      getRecordedApiTypeActions(
+        recorded({
+          sources: { v2: 'graphql' },
+          operations: { getItem: ['v2'], deleteItem: ['v2'], whoAmI: [], createItem: [] },
+          unmatched: { whoAmI: [mcpRequest], createItem: [mcpRequest] },
+        })
+      )
+    ).toEqual({ graphql: 2, mcp: 2 });
+  });
+
+  it('counts an action that calls GraphQL and MCP under both', () => {
+    expect(
+      getRecordedApiTypeActions(
+        recorded({
+          sources: { v2: 'graphql' },
+          operations: { mixed: ['v2'] },
+          unmatched: { mixed: [mcpRequest] },
+        })
+      )
+    ).toEqual({ graphql: 1, mcp: 1 });
   });
 
   it.each(['/mcp', '/mcp/', '/api/2.0/mcp/sql'])('reads %s as an MCP server', (path) => {
     expect(
-      getRecordedApiTypes(manifestWithUnmatched({ callTool: [{ ...mcpRequest, path }] }, 'openapi'))
-    ).toContain('mcp');
+      getRecordedApiTypeActions(
+        recorded({
+          sources: { a: 'openapi' },
+          unmatched: { callTool: [{ ...mcpRequest, path }] },
+        })
+      )
+    ).toEqual({ openapi: 0, mcp: 1 });
   });
 
   it('keeps mcp once when the source is already MCP', () => {
-    expect(getRecordedApiTypes(manifestWithUnmatched({ callTool: [mcpRequest] }, 'mcp'))).toEqual([
-      'mcp',
-    ]);
+    expect(
+      getRecordedApiTypeActions(
+        recorded({
+          sources: { tools: 'mcp' },
+          operations: { callTool: ['tools'] },
+          unmatched: { callTool: [mcpRequest] },
+        })
+      )
+    ).toEqual({ mcp: 1 });
   });
 
   it('ignores unmatched requests to other endpoints', () => {
     const request = { method: 'get', path: '/v1/mcpx', reason: 'The spec omits it' };
 
-    expect(getRecordedApiTypes(manifestWithUnmatched({ list: [request] }, 'openapi'))).toEqual([
-      'openapi',
-    ]);
+    expect(
+      getRecordedApiTypeActions(
+        recorded({ sources: { a: 'openapi' }, unmatched: { list: [request] } })
+      )
+    ).toEqual({ openapi: 0 });
   });
 
   it('reports other for a manifest without sources', () => {
-    expect(getRecordedApiTypes(manifest())).toEqual(['other']);
+    expect(getRecordedApiTypeActions(recorded({}))).toEqual({ other: 0 });
   });
 });
 
@@ -165,6 +225,7 @@ describe('buildCoverageDocument', () => {
       connector_id: '.sql',
       direction: 'outbound',
       api_types: ['database'],
+      api_type_actions: { database: 1 },
       emulated: false,
       drift_protection: 'none',
       exemption_reason: 'Talks to the database through a driver',
@@ -303,6 +364,7 @@ describe('buildCoverageDocument facts', () => {
       realistic_mocks: true,
       spec_directory: 'specs/example',
       api_types: ['openapi'],
+      api_type_actions: { openapi: 0 },
       emulated: true,
       drift_protection: 'full',
     });

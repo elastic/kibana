@@ -19,6 +19,14 @@ describe('collectCoverage', () => {
     expect(documents.map(({ connector_id: id }) => id).sort()).toEqual([...expected].sort());
   });
 
+  it('gives every API type of a connector an action count', async () => {
+    const documents = await collectCoverage(REPO_ROOT);
+
+    for (const { api_types: types, api_type_actions: counts } of documents) {
+      expect(Object.keys(counts).sort()).toEqual([...types]);
+    }
+  });
+
   it('counts a connector as drift-protected exactly when it is emulated', async () => {
     const documents = await collectCoverage(REPO_ROOT);
 
