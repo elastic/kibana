@@ -222,6 +222,31 @@ describe('SLO usage collector fetcher', () => {
         'Failed to collect composite SLO usage: boom'
       );
     });
+
+    it('keeps the collected usage and logs a warning when closing the finder fails', async () => {
+      await createStoredComposite({ members: createMembers(3) });
+      const finder = compositeSoClient.createPointInTimeFinder<StoredCompositeSLODefinition>({
+        type: SO_SLO_COMPOSITE_TYPE,
+        perPage: 100,
+        namespaces: ['*'],
+      });
+      const realClose = finder.close.bind(finder);
+      finder.close = jest.fn().mockRejectedValue(new Error('close boom'));
+      const createFinderSpy = jest
+        .spyOn(compositeSoClient, 'createPointInTimeFinder')
+        .mockReturnValue(finder);
+
+      const results = await fetcher({ soClient, esClient }, loggerMock, getCompositeSoClient);
+
+      expect(results.composite.definitions.total).toBe(1);
+      expect(results.composite.members).toEqual({ min: 3, avg: 3, max: 3, at_max_count: 0 });
+      expect(loggerMock.warn).toHaveBeenCalledWith(
+        'Failed to close composite SLO finder: close boom'
+      );
+
+      createFinderSpy.mockRestore();
+      await realClose();
+    });
   });
 
   async function createServers() {

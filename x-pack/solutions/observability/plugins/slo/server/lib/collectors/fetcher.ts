@@ -73,7 +73,9 @@ const fetchCompositeUsage = async (
     logger.warn(`Failed to collect composite SLO usage: ${error.message}`);
     return getEmptyCompositeUsage();
   } finally {
-    await finder?.close();
+    await finder
+      ?.close()
+      .catch((error) => logger.warn(`Failed to close composite SLO finder: ${error.message}`));
   }
 
   return usage;
