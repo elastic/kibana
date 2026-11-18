@@ -8,8 +8,7 @@
 import { test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
-// Admins are treated as billing admins until Kibana can check billing access:
-// https://github.com/elastic/kibana-team/issues/4343
+// Admins are treated as billing admins until Kibana can check billing access.
 test.describe(
   'Subscription status badge for billing admins',
   { tag: ['@local-serverless-search'] },
@@ -19,7 +18,7 @@ test.describe(
       await page.gotoApp('management');
     });
 
-    test('shows the trial popover with subscribe and pricing links', async ({ page }) => {
+    test('shows the trial popover with subscribe and trial summary links', async ({ page }) => {
       const badge = page.testSubj.locator('subscriptionStatusBadge');
       const popover = page.testSubj.locator('subscriptionStatusPopover');
       const subscribeButton = page.testSubj.locator('subscriptionStatusPrimaryAction');
@@ -36,12 +35,15 @@ test.describe(
         await expect(popover).toContainText("You're on an Elastic Cloud trial.");
       });
 
-      await test.step('links point to Cloud billing and pricing', async () => {
+      await test.step('links open Cloud billing dialogs', async () => {
         await expect(subscribeButton).toHaveAttribute(
           'href',
-          /\/billing\/overview#uTargetOrganizationId=\w+$/
+          /\/billing\/overview\?intent=subscribe#uTargetOrganizationId=\w+$/
         );
-        await expect(viewPricingLink).toHaveAttribute('href', /\/cloud-pricing-table\?/);
+        await expect(viewPricingLink).toHaveAttribute(
+          'href',
+          /\/billing\/overview\?intent=trial_summary#uTargetOrganizationId=\w+$/
+        );
       });
     });
   }

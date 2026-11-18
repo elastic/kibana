@@ -146,7 +146,7 @@ apiTest.describe(
         mockTitleGeneration(llmProxy, 'Tool UI events');
         mockToolCall(llmProxy, CUSTOM_CONTENT_UPDATE_TOOL_ID, {
           embeddable_id: EMBEDDABLE_ID,
-          esqlQuery: UPDATED_ESQL_QUERY,
+          dataQueries: [{ esql: UPDATED_ESQL_QUERY }],
         });
         mockTemplateGeneration(llmProxy, '<p>{{ rows[0]["count"].value }}</p>');
         mockFinalAnswer(llmProxy, 'Panel updated');

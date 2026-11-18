@@ -197,12 +197,12 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
 
     it('labels an IPv6 value ipv6-addr rather than ipv4-addr', () => {
       const ops = buildBulkOpsForTest(
-        [makeReport({ id: 'r1', iocs: [{ type: 'ip', value: '2001:db8::1' }] })],
+        [makeReport({ id: 'r1', iocs: [{ type: 'ip', value: '2606:4700:4700::1111' }] })],
         NOW
       );
       const indicator = (ops[0].upsert.threat as { indicator: Record<string, unknown> }).indicator;
       expect(indicator.type).toBe('ipv6-addr');
-      expect(indicator.ip).toBe('2001:db8::1');
+      expect(indicator.ip).toBe('2606:4700:4700::1111');
     });
   });
 
@@ -233,15 +233,15 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
   describe('two reports citing the SAME IOC', () => {
     it('produces two separate ops (one per report×IOC) with distinct report_ids in scriptParams', () => {
       const reports = [
-        makeReport({ id: 'r1', iocs: [{ type: 'ip', value: '10.0.0.1' }] }),
-        makeReport({ id: 'r2', iocs: [{ type: 'ip', value: '10.0.0.1' }] }),
+        makeReport({ id: 'r1', iocs: [{ type: 'ip', value: '203.0.113.10' }] }),
+        makeReport({ id: 'r2', iocs: [{ type: 'ip', value: '203.0.113.10' }] }),
       ];
       const ops = buildBulkOpsForTest(reports, NOW);
 
       // Two ops with the SAME indicator _id — one per citing report, same space.
       expect(ops).toHaveLength(2);
-      expect(ops[0]._id).toBe('default:ip:10.0.0.1');
-      expect(ops[1]._id).toBe('default:ip:10.0.0.1');
+      expect(ops[0]._id).toBe('default:ip:203.0.113.10');
+      expect(ops[1]._id).toBe('default:ip:203.0.113.10');
 
       // Different report_ids in scriptParams — when the Painless script runs,
       // each will append its own entry to sources[] on the live doc, resulting
@@ -407,6 +407,45 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
       );
       expect(ops).toHaveLength(1);
       expect(ops[0]._id).toBe('default:ip:1.2.3.4');
+    });
+  });
+
+  describe('non-routable IPs are kept out of promotion', () => {
+    it.each([
+      ['CGNAT', { type: 'ip', value: '100.64.0.7', tier: 'uncertain' }],
+      ['benchmarking range', { type: 'ip', value: '198.18.0.9', tier: 'contextual' }],
+      ['multicast', { type: 'ip', value: '239.255.255.250', tier: 'uncertain' }],
+      ['loopback', { type: 'ip', value: '127.0.0.1', tier: 'discriminating' }],
+      // Must carry a promotable tier: without one, isPromotableTier already drops it and
+      // the non-routable check is never what the assertion proves.
+      [
+        'IPv6 loopback written out in full',
+        { type: 'ip', value: '0:0:0:0:0:0:0:1', tier: 'discriminating' },
+      ],
+      ['private CIDR', { type: 'cidr', value: '10.20.0.0/16', tier: 'contextual' }],
+    ])('does not upsert a promotable-tier %s', (_label, ioc) => {
+      const ops = buildBulkOpsForTest([makeReport({ id: 'r-private', iocs: [ioc] })], NOW);
+      expect(ops).toHaveLength(0);
+    });
+
+    it('still promotes a public IP and a public CIDR from the same report', () => {
+      const ops = buildBulkOpsForTest(
+        [
+          makeReport({
+            id: 'r-mixed',
+            iocs: [
+              { type: 'ip', value: '100.64.0.7', tier: 'uncertain' },
+              { type: 'ip', value: '203.0.113.10', tier: 'discriminating' },
+              { type: 'cidr', value: '203.0.113.0/24', tier: 'contextual' },
+            ],
+          }),
+        ],
+        NOW
+      );
+      expect(ops.map((op) => op._id)).toEqual([
+        'default:ip:203.0.113.10',
+        'default:cidr:203.0.113.0/24',
+      ]);
     });
   });
 

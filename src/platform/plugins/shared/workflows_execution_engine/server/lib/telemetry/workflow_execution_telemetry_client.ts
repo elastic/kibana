@@ -58,6 +58,18 @@ const pickOutputSizeFields = (
   }),
 });
 
+/** Picks the run-as telemetry fields from execution metadata, omitting runAsInherited when unset. */
+const pickRunAsFields = ({
+  runAs,
+  runAsInherited,
+}: WorkflowExecutionTelemetryMetadata): Pick<
+  WorkflowExecutionTelemetryMetadata,
+  'runAs' | 'runAsInherited'
+> => ({
+  runAs,
+  ...(runAsInherited !== undefined && { runAsInherited }),
+});
+
 function resolveExecutionTriggerTelemetry(workflowExecution: EsWorkflowExecution): {
   triggerType: WellKnownWorkflowTriggerSource | 'event';
   eventTriggerId?: string;
@@ -176,6 +188,7 @@ function buildBaseExecutionTelemetryFields(
     ...(eventTriggerId !== undefined ? { eventTriggerId } : {}),
     isTestRun: workflowExecution.isTestRun || false,
     ...managedWorkflowFields,
+    ...pickRunAsFields(executionMetadata),
     ...(executionMetadata.ruleId && { ruleId: executionMetadata.ruleId }),
     ...(executionMetadata.compositionDepth !== undefined && {
       compositionDepth: executionMetadata.compositionDepth,
@@ -427,6 +440,7 @@ export class WorkflowExecutionTelemetryClient {
       ...(eventTriggerId !== undefined ? { eventTriggerId } : {}),
       isTestRun: workflowExecution.isTestRun || false,
       ...managedWorkflowFields,
+      ...pickRunAsFields(executionMetadata),
       ...(executionMetadata.ruleId && { ruleId: executionMetadata.ruleId }),
       ...(executionMetadata.eventChainDepth !== undefined && {
         eventChainDepth: executionMetadata.eventChainDepth,

@@ -12,33 +12,81 @@ import type { Document } from 'yaml';
 import { isPair, isScalar, visit } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import type { WorkflowYaml } from '@kbn/workflows';
+import { isPageTrigger } from '@kbn/workflows';
 import { convertJsonSchemaToZod } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import {
   extractNormalizedInputsFromYaml,
   normalizeFieldsToJsonSchema,
   resolveRef,
 } from '@kbn/workflows/spec/lib/field_conversion';
+import {
+  isManualTrigger,
+  type WorkflowInput,
+} from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
 import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { getPathFromAncestors } from '../../../../common/lib/yaml';
 
+const getTriggers = (
+  workflowDefinition: WorkflowYaml,
+  yamlDocument: Document
+): Array<{ type?: string; inputs?: unknown }> => {
+  if (workflowDefinition?.triggers) {
+    return workflowDefinition.triggers;
+  }
+  try {
+    const triggers = yamlDocument.toJSON()?.triggers;
+    return Array.isArray(triggers) ? triggers : [];
+  } catch {
+    // A partially parsed document can throw in toJSON
+    return [];
+  }
+};
+
 /**
- * Validates that default values in JSON Schema inputs match their property constraints
+ * Validates that default values in JSON Schema inputs match their property constraints.
+ * Each trigger's defaults are checked against that trigger's own inputs: the manual
+ * trigger's `inputs` and the page trigger's `inputs` are separate schemas.
  */
 export function validateJsonSchemaDefaults(
   yamlDocument: Document | null,
   workflowDefinition: WorkflowYaml,
   model?: monaco.editor.ITextModel
 ): YamlValidationResult[] {
-  const errors: YamlValidationResult[] = [];
-
   if (!yamlDocument) {
-    return errors;
+    return [];
   }
 
-  // Get inputs from workflowDefinition or extract from YAML as fallback
-  const inputs = extractNormalizedInputsFromYaml(workflowDefinition, yamlDocument);
+  const triggers = getTriggers(workflowDefinition, yamlDocument);
+  const manualTriggerIndex = triggers.findIndex(isManualTrigger);
+  const pageTriggerIndex = triggers.findIndex(isPageTrigger);
 
-  if (!inputs) {
+  return [
+    ...validateTriggerInputDefaults(
+      yamlDocument,
+      extractNormalizedInputsFromYaml(workflowDefinition, yamlDocument),
+      manualTriggerIndex,
+      model
+    ),
+    ...(pageTriggerIndex === -1
+      ? []
+      : validateTriggerInputDefaults(
+          yamlDocument,
+          triggers[pageTriggerIndex].inputs as WorkflowInput | undefined,
+          pageTriggerIndex,
+          model
+        )),
+  ];
+}
+
+function validateTriggerInputDefaults(
+  yamlDocument: Document,
+  inputs: WorkflowInput | Record<string, unknown> | undefined,
+  triggerIndex: number,
+  model?: monaco.editor.ITextModel
+): YamlValidationResult[] {
+  const errors: YamlValidationResult[] = [];
+
+  if (!inputs || triggerIndex === -1) {
     return errors;
   }
 
@@ -307,9 +355,12 @@ export function validateJsonSchemaDefaults(
         return;
       }
 
-      // Get the path to this default value
-      // slice [triggers, <index>] so the path starts from inputs
-      const path = getPathFromAncestors(ancestors, node).slice(2);
+      // Only defaults under this trigger; slice [triggers, <index>] so the path starts from inputs
+      const fullPath = getPathFromAncestors(ancestors, node);
+      if (fullPath[0] !== 'triggers' || fullPath[1] !== triggerIndex) {
+        return;
+      }
+      const path = fullPath.slice(2);
 
       // Check if this is within inputs (either properties/definitions format or legacy array format)
       // New format: ['inputs', 'properties', 'greeting', 'default'] - length 4

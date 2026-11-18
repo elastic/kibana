@@ -12,17 +12,35 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import type { ConfirmDisableWorkflows } from './use_disable_workflows_confirmation';
 import { useDisableWorkflowsConfirmation } from './use_disable_workflows_confirmation';
+import { WORKFLOW_REMOVAL_IMPACT_ROUTE } from '../../../../common/lib/workflow_dependents/api';
+import type { WorkflowRemovalImpactResponse } from '../../../../common/lib/workflow_dependents/api';
 import { createStartServicesMock } from '../../../mocks';
 import { TestProvider } from '../../../shared/mocks/test_providers';
+
+const noLinkedRules = { total: 0, hiddenTotal: 0, rules: [] };
+const noCallers: WorkflowRemovalImpactResponse = { callers: [], indirect: 0 };
 
 describe('useDisableWorkflowsConfirmation', () => {
   let confirmDisable: ConfirmDisableWorkflows;
   let services: ReturnType<typeof createStartServicesMock>;
+  let unmount: () => void;
 
   const Harness = () => {
     const hook = useDisableWorkflowsConfirmation();
     confirmDisable = hook.confirmDisable;
     return hook.confirmModal;
+  };
+
+  const mockResponses = ({
+    linkedRules = Promise.resolve(noLinkedRules),
+    callers = Promise.resolve(noCallers),
+  }: {
+    linkedRules?: Promise<unknown>;
+    callers?: Promise<WorkflowRemovalImpactResponse>;
+  }) => {
+    (services.http.post as jest.Mock).mockImplementation((path: string) =>
+      path === WORKFLOW_REMOVAL_IMPACT_ROUTE ? callers : linkedRules
+    );
   };
 
   const openConfirmation = async (): Promise<{ confirmation: Promise<boolean> }> => {
@@ -39,15 +57,43 @@ describe('useDisableWorkflowsConfirmation', () => {
     (services.application.getUrlForApp as jest.Mock).mockImplementation(
       (appId: string, { path }: { path: string }) => `/app/${appId}/${path.replace(/^\//, '')}`
     );
-    render(
+    ({ unmount } = render(
       <TestProvider services={services}>
         <Harness />
       </TestProvider>
-    );
+    ));
   });
 
-  it('resolves to true without a prompt when no rule runs the workflows', async () => {
-    (services.http.post as jest.Mock).mockResolvedValue({ total: 0, hiddenTotal: 0, rules: [] });
+  const rulesToConfirm = {
+    linkedRules: Promise.resolve({
+      total: 1,
+      hiddenTotal: 0,
+      rules: [{ id: 'rule-1', name: 'Detection rule', ruleTypeId: 'siem.queryRule' }],
+    }),
+  };
+
+  it('resolves to false when the dialog closes with the page', async () => {
+    mockResponses(rulesToConfirm);
+
+    const { confirmation } = await openConfirmation();
+    unmount();
+
+    await expect(confirmation).resolves.toBe(false);
+  });
+
+  it('resolves to false when the page closes while the check runs', async () => {
+    let finishCheck: (rules: unknown) => void = () => {};
+    mockResponses({ linkedRules: new Promise((resolve) => (finishCheck = resolve)) });
+
+    const confirmation = confirmDisable(['wf-1']);
+    unmount();
+    finishCheck(await rulesToConfirm.linkedRules);
+
+    await expect(confirmation).resolves.toBe(false);
+  });
+
+  it('resolves to true without a prompt when nothing runs the workflows', async () => {
+    mockResponses({});
 
     await expect(confirmDisable(['wf-1'])).resolves.toBe(true);
 
@@ -55,17 +101,23 @@ describe('useDisableWorkflowsConfirmation', () => {
       body: JSON.stringify({ ids: ['wf-1'] }),
       version: '1',
     });
+    expect(services.http.post).toHaveBeenCalledWith(
+      WORKFLOW_REMOVAL_IMPACT_ROUTE,
+      expect.objectContaining({ body: JSON.stringify({ ids: ['wf-1'] }), version: '1' })
+    );
     expect(screen.queryByTestId('workflowsDisableConfirmationModal')).not.toBeInTheDocument();
   });
 
   it('lists the linked rules with links and resolves to true on confirm', async () => {
-    (services.http.post as jest.Mock).mockResolvedValue({
-      total: 12,
-      hiddenTotal: 0,
-      rules: [
-        { id: 'rule-1', name: 'Detection rule', ruleTypeId: 'siem.queryRule' },
-        { id: 'rule-2', name: 'Stack rule', ruleTypeId: '.es-query' },
-      ],
+    mockResponses({
+      linkedRules: Promise.resolve({
+        total: 12,
+        hiddenTotal: 0,
+        rules: [
+          { id: 'rule-1', name: 'Detection rule', ruleTypeId: 'siem.queryRule' },
+          { id: 'rule-2', name: 'Stack rule', ruleTypeId: '.es-query' },
+        ],
+      }),
     });
 
     const { confirmation } = await openConfirmation();
@@ -79,6 +131,7 @@ describe('useDisableWorkflowsConfirmation', () => {
       '/app/management/insightsAndAlerting/triggersActions/rule/rule-2'
     );
     expect(screen.getByText('And 10 more.')).toBeInTheDocument();
+    expect(screen.queryByTestId('workflowCallersCallout')).not.toBeInTheDocument();
 
     await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
@@ -87,7 +140,7 @@ describe('useDisableWorkflowsConfirmation', () => {
   });
 
   it('warns about linked rules that the user cannot see', async () => {
-    (services.http.post as jest.Mock).mockResolvedValue({ total: 0, hiddenTotal: 2, rules: [] });
+    mockResponses({ linkedRules: Promise.resolve({ total: 0, hiddenTotal: 2, rules: [] }) });
 
     await openConfirmation();
 
@@ -98,11 +151,30 @@ describe('useDisableWorkflowsConfirmation', () => {
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
   });
 
+  it('warns about the workflows that run the workflows being disabled', async () => {
+    mockResponses({
+      callers: Promise.resolve({ callers: [{ id: 'parent', name: 'Parent' }], indirect: 2 }),
+    });
+
+    await openConfirmation();
+
+    expect(screen.getByText('1 workflow runs this workflow')).toBeInTheDocument();
+    expect(screen.getByText('Parent').closest('a')).toHaveAttribute(
+      'href',
+      '/app/workflows/parent'
+    );
+    expect(screen.getByTestId('workflowCallersIndirect')).toHaveTextContent(
+      '2 more workflows further up the chain run those'
+    );
+  });
+
   it('resolves to false when the user cancels', async () => {
-    (services.http.post as jest.Mock).mockResolvedValue({
-      total: 1,
-      hiddenTotal: 0,
-      rules: [{ id: 'rule-1', name: 'Detection rule', ruleTypeId: 'siem.queryRule' }],
+    mockResponses({
+      linkedRules: Promise.resolve({
+        total: 1,
+        hiddenTotal: 0,
+        rules: [{ id: 'rule-1', name: 'Detection rule', ruleTypeId: 'siem.queryRule' }],
+      }),
     });
 
     const { confirmation } = await openConfirmation();
@@ -112,10 +184,12 @@ describe('useDisableWorkflowsConfirmation', () => {
   });
 
   it('resolves a previous confirmation to false when a new one starts', async () => {
-    (services.http.post as jest.Mock).mockResolvedValue({
-      total: 1,
-      hiddenTotal: 0,
-      rules: [{ id: 'rule-1', name: 'Detection rule', ruleTypeId: 'siem.queryRule' }],
+    mockResponses({
+      linkedRules: Promise.resolve({
+        total: 1,
+        hiddenTotal: 0,
+        rules: [{ id: 'rule-1', name: 'Detection rule', ruleTypeId: 'siem.queryRule' }],
+      }),
     });
 
     const { confirmation: first } = await openConfirmation();
@@ -127,10 +201,19 @@ describe('useDisableWorkflowsConfirmation', () => {
   });
 
   it('warns that linked rules could not be checked when the lookup fails', async () => {
-    (services.http.post as jest.Mock).mockRejectedValue(new Error('boom'));
+    mockResponses({ linkedRules: Promise.reject(new Error('boom')) });
 
     await openConfirmation();
 
     expect(screen.getByTestId('workflowLinkedRulesError')).toBeInTheDocument();
+  });
+
+  it('warns that callers could not be checked when only the caller check fails', async () => {
+    mockResponses({ callers: Promise.reject(new Error('boom')) });
+
+    await openConfirmation();
+
+    expect(screen.getByTestId('workflowCallersError')).toBeInTheDocument();
+    expect(screen.queryByTestId('workflowLinkedRulesError')).not.toBeInTheDocument();
   });
 });

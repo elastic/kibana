@@ -37,7 +37,7 @@ export const renderSlackMessageStepDefinition = ({
 }) =>
   createServerStepDefinition({
     id: 'nightshift.renderSlackMessage',
-    label: 'Render Nightshift Slack message',
+    label: 'Render nightshift Slack message',
     category: StepCategory.Ai,
     description:
       'Renders an investigation lifecycle message as Slack Block Kit blocks with fallback text.',

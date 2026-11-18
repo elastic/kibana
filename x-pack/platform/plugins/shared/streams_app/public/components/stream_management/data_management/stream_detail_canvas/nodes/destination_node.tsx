@@ -98,7 +98,11 @@ export function DestinationNode({ data, selected, dragging }: NodeProps<Destinat
         {data.destinationId &&
           data.destinationType &&
           DESTINATION_TYPES_WITH_STATS.includes(data.destinationType) && (
-            <DestinationNodeStats destinationId={data.destinationId} indexCount={data.indexCount} />
+            <DestinationNodeStats
+              destinationId={data.destinationId}
+              hasSavedSource={data.hasSavedSource}
+              indexCount={data.indexCount}
+            />
           )}
       </EuiPanel>
     </>

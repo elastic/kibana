@@ -8,6 +8,7 @@
 import { badRequest, serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
 import { automationCompletionSchema, promptTemplateSchema } from '../../lib/automations/schemas';
@@ -92,6 +93,7 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
       params.path.id
     );
     const { body } = params;
+    const pauseOnly = body.isEnabled === false && Object.keys(body).length === 1;
     const merged: NightshiftAutomationAttributes = {
       ...applyChanges(existing.attributes, {
         name: body.name,
@@ -106,38 +108,51 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
       updatedAt: new Date().toISOString(),
     };
 
-    const completions = z.array(automationCompletionSchema).max(10).safeParse(merged.completions);
-    if (!completions.success) throw badRequest(completions.error.message);
-    merged.completions = completions.data;
-
-    validateScheduledAutomation(merged);
+    if (!pauseOnly) {
+      const completions = z.array(automationCompletionSchema).max(10).safeParse(merged.completions);
+      if (!completions.success) throw badRequest(completions.error.message);
+      merged.completions = completions.data;
+      validateScheduledAutomation(merged);
+    }
 
     // Update the workflow first — if it fails, the SO is left unchanged so reads stay consistent.
     if (existing.attributes.workflowId) {
       try {
         await workflowsManagement.management.updateWorkflow(
           existing.attributes.workflowId,
-          {
-            yaml: generateWorkflowYaml({
-              automationId: params.path.id,
-              automation: merged,
-              serviceAccountId,
-              universalAlerts: isUniversalAlertingAvailable(),
-            }),
-          },
+          pauseOnly
+            ? { enabled: false }
+            : {
+                yaml: generateWorkflowYaml({
+                  automationId: params.path.id,
+                  automation: merged,
+                  serviceAccountId,
+                  universalAlerts: isUniversalAlertingAvailable(),
+                }),
+              },
           spaceId,
           request
         );
       } catch (err) {
-        throw badRequest(`Failed to update backing workflow: ${err.message}`);
+        if (err instanceof WorkflowNotFoundError) {
+          if (!pauseOnly) {
+            throw badRequest(
+              'The backing workflow was deleted. Open the automation and use Repair.'
+            );
+          }
+        } else {
+          throw badRequest(`Failed to update backing workflow: ${err.message}`);
+        }
       }
+    } else if (!pauseOnly) {
+      throw badRequest('The backing workflow is missing. Open the automation and use Repair.');
     }
 
     await soClient.update<NightshiftAutomationAttributes>(
       NIGHTSHIFT_AUTOMATION_SO_TYPE,
       params.path.id,
       merged,
-      { mergeAttributes: false }
+      { mergeAttributes: false, ...(existing.version ? { version: existing.version } : {}) }
     );
 
     return { id: params.path.id, ...merged };

@@ -40,11 +40,26 @@ const subjectSchema = z.object({
 
 const baseInvestigationSchema = lazySchema(() =>
   z.object({
+    workflow_execution_id: z
+      .string()
+      .max(500)
+      .optional()
+      .describe('Workflow Engine execution ID of the investigation run.'),
     execution_id: z
       .string()
       .max(500)
       .optional()
-      .describe('Original investigation workflow execution ID.'),
+      .describe('Deprecated alias for workflow_execution_id.'),
+    event_id: z
+      .string()
+      .max(500)
+      .optional()
+      .describe('Significant event that triggered the investigation, when applicable.'),
+    source_workflow_execution_id: z
+      .string()
+      .max(500)
+      .optional()
+      .describe('Workflow execution that wrote the triggering significant event version.'),
     investigation_id: z
       .string()
       .describe('ID of the investigation, which is the id of its Agent Builder conversation.'),

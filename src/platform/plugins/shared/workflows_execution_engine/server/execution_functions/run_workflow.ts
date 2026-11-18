@@ -33,6 +33,7 @@ import {
   getExecutionServiceAccountId,
   withWorkflowExecutionIdentity,
 } from '../service_account_execution';
+import { publishFinishedWorkflowExecution } from '../topics/publish_finished_workflow_execution';
 import type {
   InternalResumeWorkflowExecution,
   WorkflowsExecutionEnginePluginStart,
@@ -145,14 +146,21 @@ async function runWorkflowWithRequest({
       operation: requiredPermission,
     }))
   ) {
+    const finishedAt = new Date().toISOString();
+    const error = {
+      type: 'WorkflowAccessDeniedError',
+      message: 'Workflow execution access was removed.',
+    };
     await workflowExecutionRepository.updateWorkflowExecution({
       id: workflowRunId,
       status: ExecutionStatus.FAILED,
-      finishedAt: new Date().toISOString(),
-      error: {
-        type: 'WorkflowAccessDeniedError',
-        message: 'Workflow execution access was removed.',
-      },
+      finishedAt,
+      error,
+    });
+    await publishFinishedWorkflowExecution(execution, {
+      status: ExecutionStatus.FAILED,
+      finishedAt,
+      error,
     });
     await handlePostExecutionLoop({
       workflowRunId,
@@ -193,10 +201,17 @@ async function runWorkflowWithRequest({
   const isEventDriven = isEventDrivenWorkflowTriggerSource(execution);
   if (isEventDriven && !workflowsExecutionEngine.triggerEvents.isEnabled) {
     const cancelledAt = new Date().toISOString();
+    const cancellationReason = 'Event-driven execution disabled by operator';
     await workflowExecutionRepository.updateWorkflowExecution({
       id: workflowRunId,
       status: ExecutionStatus.SKIPPED,
-      cancellationReason: 'Event-driven execution disabled by operator',
+      cancellationReason,
+      cancelledAt,
+      cancelledBy: 'system',
+    });
+    await publishFinishedWorkflowExecution(execution, {
+      status: ExecutionStatus.SKIPPED,
+      cancellationReason,
       cancelledAt,
       cancelledBy: 'system',
     });
@@ -207,7 +222,7 @@ async function runWorkflowWithRequest({
       workflowExecution: {
         ...execution,
         status: ExecutionStatus.SKIPPED,
-        cancellationReason: 'Event-driven execution disabled by operator',
+        cancellationReason,
         cancelledAt,
         cancelledBy: 'system',
       },

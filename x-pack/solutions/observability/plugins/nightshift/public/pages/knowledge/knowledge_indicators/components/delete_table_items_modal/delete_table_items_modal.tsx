@@ -24,10 +24,10 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
-import { upperFirst } from 'lodash';
 import React, { useMemo } from 'react';
 import { SeverityBadge } from '../../../../../components/ui/severity_badge';
 import { getKnowledgeIndicatorTitle } from '../../utils/get_knowledge_indicator_title';
+import { getFeatureTypeLabel } from '../../utils/get_feature_type_label';
 
 interface DeleteTableItemsModalProps {
   title: string;
@@ -53,9 +53,7 @@ export function DeleteTableItemsModal({
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               {item.kind === 'feature' ? (
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color="hollow" css={TYPE_BADGE_CSS}>
-                    {upperFirst(item.feature.type)}
-                  </EuiBadge>
+                  <EuiBadge color="hollow">{getFeatureTypeLabel(item.feature.type)}</EuiBadge>
                 </EuiFlexItem>
               ) : null}
               {item.kind === 'query' ? (
@@ -150,8 +148,4 @@ const CANCEL_BUTTON_LABEL = i18n.translate(
 const MODAL_TABLE_CSS = css`
   max-height: 300px;
   overflow: auto;
-`;
-
-const TYPE_BADGE_CSS = css`
-  text-transform: capitalize;
 `;
