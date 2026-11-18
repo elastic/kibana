@@ -35,6 +35,7 @@ dependsOn:
   - '@kbn/chart-test-jest-helpers'
   - '@kbn/visualizations-common'
   - '@kbn/chart-icons'
+  - '@kbn/contrast-roles'
 tags:
   - plugin
   - prod
