@@ -315,7 +315,7 @@ const FIELD_ERROR_MESSAGES: Readonly<
       'xpack.securitySolution.endpoint.policy.storageProviders.flyout.serviceUrlInvalidErrorMessage',
       {
         defaultMessage:
-          'Enter a URL that starts with https:// and has no spaces, credentials (@), query (?), fragment (#), or backslashes (\\).',
+          'Enter a URL that starts with https://, uses only ASCII letters, digits and symbols, and has no spaces, credentials (@), query (?), fragment (#), or backslashes (\\).',
       }
     ),
     not_https: i18n.translate(

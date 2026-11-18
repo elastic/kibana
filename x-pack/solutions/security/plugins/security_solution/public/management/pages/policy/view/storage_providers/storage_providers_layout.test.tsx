@@ -585,17 +585,23 @@ describe('When rendering the StorageProvidersLayout', () => {
       [
         'URL with a query',
         'https://acct1.blob.example.com?sv=2024',
-        'Enter a URL that starts with https:// and has no spaces, credentials (@), query (?), fragment (#), or backslashes (\\).',
+        'Enter a URL that starts with https://, uses only ASCII letters, digits and symbols, and has no spaces, credentials (@), query (?), fragment (#), or backslashes (\\).',
       ],
       [
         'URL with credentials',
         'https://user@acct1.blob.example.com',
-        'Enter a URL that starts with https:// and has no spaces',
+        'Enter a URL that starts with https://, uses only ASCII',
       ],
       [
         'URL with uppercase scheme',
         'HTTPS://acct1.blob.example.com',
-        'Enter a URL that starts with https:// and has no spaces',
+        'Enter a URL that starts with https://, uses only ASCII',
+      ],
+      [
+        'URL with a non-ASCII look-alike character',
+        // Cyrillic "о" in the host
+        'https://acct1.blob.c\u043ere.windows.net',
+        'Enter a URL that starts with https://, uses only ASCII',
       ],
     ])('should show an error for a service %s', async (_, value, message) => {
       await render();
