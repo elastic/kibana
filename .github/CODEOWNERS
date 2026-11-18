@@ -2803,6 +2803,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/datadog/** @elastic/w
 
 # Connector vendor API contracts (must stay after the per-connector rules above)
 src/platform/packages/shared/kbn-connector-specs/src/specs/**/vendor_api/ @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-specs/src/test/vendor_api/vendor_api_exemptions.json @elastic/workflows-eng
 
 
 # Connector Workflow Tests

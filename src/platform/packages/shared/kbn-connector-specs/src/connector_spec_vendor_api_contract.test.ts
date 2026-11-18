@@ -17,9 +17,8 @@ import type { FoundConnector } from './test/vendor_api/find_connector';
 import { listConnectors } from './test/vendor_api/find_connector';
 import { updateVendorApi } from './test/vendor_api/record/update_vendor_api';
 
-const PACKAGE_DIR = path.resolve(__dirname, '..');
 const SPECS_DIR = path.join(__dirname, 'specs');
-const EXEMPTIONS = path.join(PACKAGE_DIR, 'vendor_api_exemptions.json');
+const EXEMPTIONS = path.join(__dirname, 'test', 'vendor_api', 'vendor_api_exemptions.json');
 const SCRIPT = 'node scripts/connector_vendor_api';
 const RECORDING_TIMEOUT = 120_000;
 

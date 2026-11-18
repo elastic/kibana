@@ -758,7 +758,7 @@ The folder holds:
 
 Actions run with a connector config sampled from the connector's `schema`, required properties only, so optional settings such as custom base URLs keep their defaults. They run under each auth type in `auth.types`, with placeholder secrets, and the manifest lists the operations reached under any of them, so an action that only some auth types allow (such as Gmail's write actions, which Elastic-managed OAuth refuses) is still recorded.
 
-Connectors that can't have a vendor spec, such as ones that talk to a database driver instead of an HTTP API, are listed in `vendor_api_exemptions.json` at the package root, by `metadata.id` with a reason. Existing connectors without a `vendor_api` folder are simply not recorded yet; [#295688](https://github.com/elastic/kibana/issues/295688) backfills them.
+Connectors that can't have a vendor spec, such as ones that talk to a database driver instead of an HTTP API, are listed in `src/test/vendor_api/vendor_api_exemptions.json`, by `metadata.id` with a reason. Existing connectors without a `vendor_api` folder are simply not recorded yet; [#295688](https://github.com/elastic/kibana/issues/295688) backfills them.
 
 Recording checks each action's `scope`. A `read` action may only send `GET`, `HEAD` or `OPTIONS`, or call the operations its fixture lists in `queries`, so other tools (such as live verification) can rely on `scope: 'read'` meaning the action changes no vendor state.
 
