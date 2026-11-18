@@ -21,7 +21,9 @@
     "StalledAfterLoadSkill",
     "RubricCapNoToolCall",
     "ChainCoverage",
-    "AD Failure Class"
+    "AD Failure Class",
+    "PersonaRubric",
+    "AdAxesRubric"
   ],
   "defaultScale": 10,
   "decimals": 2,
