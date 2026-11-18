@@ -34,6 +34,7 @@ dependsOn:
   - '@kbn/lock-manager'
   - '@kbn/nightshift-shared'
   - '@kbn/nightshift-sources-plugin'
+  - '@kbn/scout-oblt'
   - '@kbn/spaces-plugin'
   - '@kbn/workflows'
   - '@kbn/workflows-extensions'
@@ -46,9 +47,11 @@ tags:
   - private
   - jest-unit-tests
   - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
     - server/**/*
+    - test/scout*/**/*
     - '!target/**/*'
 tasks: {}

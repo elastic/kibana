@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "server/**/*"],
+  "include": ["common/**/*", "server/**/*", "test/scout*/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/alerting-v2-constants",
@@ -23,6 +23,7 @@
     "@kbn/lock-manager",
     "@kbn/nightshift-shared",
     "@kbn/nightshift-sources-plugin",
+    "@kbn/scout-oblt",
     "@kbn/spaces-plugin",
     "@kbn/workflows",
     "@kbn/workflows-extensions",
