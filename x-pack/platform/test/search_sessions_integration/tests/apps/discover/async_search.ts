@@ -126,6 +126,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       // load URL to restore a saved session
       await searchSessionsManagement.goTo();
+
+      await retry.waitFor('session should be in a completed status', async () => {
+        const searchSessionList = await searchSessionsManagement.getList();
+        const searchSessionItem = searchSessionList[0];
+        return searchSessionItem.status === 'complete';
+      });
+
       const searchSessionListBeforeRestore = await searchSessionsManagement.getList();
       const searchesCountBeforeRestore = searchSessionListBeforeRestore[0].searchesCount;
 

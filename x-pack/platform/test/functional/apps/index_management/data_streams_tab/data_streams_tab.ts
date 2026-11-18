@@ -88,7 +88,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const url = await browser.getCurrentUrl();
       expect(url).to.contain(`/data_streams/${TEST_DS_NAME_1}`);
       // Assert that flyout is opened
-      expect(await testSubjects.exists('dataStreamDetailPanel')).to.be(true);
+      await testSubjects.existOrFail('dataStreamDetailPanel');
       // Close flyout
       await testSubjects.click('closeDetailsButton');
     });
@@ -192,7 +192,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('configureFailureStoreButton');
 
         // Verify modal is open
-        expect(await testSubjects.exists('configureFailureStoreModal')).to.be(true);
+        await testSubjects.existOrFail('configureFailureStoreModal');
 
         // Enable failure store
         await testSubjects.click('enableDataStreamFailureStoreToggle > input');
@@ -215,7 +215,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('configureFailureStoreButton');
 
         // Verify modal is open
-        expect(await testSubjects.exists('configureFailureStoreModal')).to.be(true);
+        await testSubjects.existOrFail('configureFailureStoreModal');
 
         // Disable failure store (toggle off if it's on)
         await testSubjects.click('enableDataStreamFailureStoreToggle > input');

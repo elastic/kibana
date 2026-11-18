@@ -173,6 +173,14 @@ export async function processScoutReports(
         continue;
       }
 
+      // its per-test issue, if any, is left for the suite issue it gets to replace
+      if (!perTestIssues) {
+        log.info(`No suite issue tracks this test yet: ${failure.classname} - ${failure.name}`);
+        failure.failureCount = 0;
+        updateScoutHtmlReport({ log, reportDir, failure, reportUpdate });
+        continue;
+      }
+
       const existingIssue = existingIssues.getForFailure(failure);
       if (existingIssue) {
         const { newBody, newCount } = await updateFailureIssue(
@@ -194,15 +202,6 @@ export async function processScoutReports(
         }
         updateScoutHtmlReport({ log, reportDir, failure, reportUpdate });
         recordGithubIssue(failure);
-        continue;
-      }
-
-      if (!perTestIssues) {
-        log.info(
-          `No failed-test issue tracks this test yet: ${failure.classname} - ${failure.name}`
-        );
-        failure.failureCount = 0;
-        updateScoutHtmlReport({ log, reportDir, failure, reportUpdate });
         continue;
       }
 

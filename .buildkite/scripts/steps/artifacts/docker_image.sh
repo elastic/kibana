@@ -92,13 +92,25 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
 
   echo "--- Upload CDN assets"
   cd target
-  gcloud auth activate-service-account --key-file <(echo "$GCS_SA_CDN_KEY")
+  CDN_CREDS_DIR="$(mktemp -d)"
 
-  CDN_ASSETS_FOLDER=$(mktemp -d)
+  gcloud iam workload-identity-pools create-cred-config \
+    "${GCS_SA_CDN_AUDIENCE#//iam.googleapis.com/}" \
+    --service-account="$GCS_SA_CDN_EMAIL" \
+    --credential-source-file="$CDN_CREDS_DIR/token.jwt" \
+    --credential-source-type=text \
+    --output-file="$CDN_CREDS_DIR/credentials.json"
+
+  cdn_gcloud() {
+    buildkite-agent oidc request-token --audience "$GCS_SA_CDN_AUDIENCE" > "$CDN_CREDS_DIR/token.jwt"
+    CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE="$CDN_CREDS_DIR/credentials.json" gcloud "$@"
+  }
+
+  CDN_ASSETS_FOLDER="$(mktemp -d)"
   tar -xf "kibana-$BASE_VERSION-cdn-assets.tar.gz" -C "$CDN_ASSETS_FOLDER" --strip=1
 
-  gsutil -m cp -r "$CDN_ASSETS_FOLDER/*" "gs://$GCS_SA_CDN_BUCKET/$GIT_ABBREV_COMMIT"
-  gcloud auth revoke "$GCS_SA_CDN_EMAIL"
+  cdn_gcloud storage cp -r "$CDN_ASSETS_FOLDER/*" "gs://$GCS_SA_CDN_BUCKET/$GIT_ABBREV_COMMIT"
+  rm -rf "$CDN_CREDS_DIR"
 
   echo "--- Validate CDN assets"
   node "$(git rev-parse --show-toplevel)/.buildkite/scripts/steps/artifacts/validate_cdn_assets.ts" \
