@@ -42,19 +42,19 @@ export const describeUnsearched = (names: string[]): string => {
 };
 
 /**
- * Whether Elasticsearch would search `name` for this ordered list of entries: each entry that
- * matches it either includes it or, for an exclusion, removes it again, so the last matching
- * entry decides (`['logs-*', '-custom-*', 'custom-1']` searches `custom-1`, and
- * `['custom-1', '-custom-*']` does not).
+ * Whether Elasticsearch would search `name` for this ordered list of entries. An exclusion
+ * removes the name when its pattern matches, and a later entry brings it back only by naming
+ * it: a wildcard that happens to match the text does not, because it expands to open indices
+ * and the name is not one that can be searched. So `['logs-*', '-custom-*', 'custom-1']`
+ * searches `custom-1`, while `['custom-1', '-custom-1', 'custom-*']` does not.
  */
 const isIncludedByUniverse = (name: string, universe: string[]): boolean => {
   // The name comes from the list's own positive entries, so it starts out included.
   let included = true;
   for (const entry of universe) {
     const { exclude, ...target } = parseIndexScopeEntry(entry);
-    if (buildMatchesRequired([stripBackingPrefix(joinRemoteCluster(target))])(name)) {
-      included = !exclude;
-    }
+    const pattern = stripBackingPrefix(joinRemoteCluster(target));
+    if (exclude ? buildMatchesRequired([pattern])(name) : pattern === name) included = !exclude;
   }
   return included;
 };

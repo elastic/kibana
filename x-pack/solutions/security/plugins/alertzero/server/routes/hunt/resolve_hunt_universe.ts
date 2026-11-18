@@ -40,7 +40,8 @@ const isPatternList = (value: string[] | undefined): value is string[] =>
  */
 export const resolveHuntUniverse = async (
   context: HuntUniverseContext,
-  logger: Logger
+  logger: Logger,
+  crossProjectSearch: boolean
 ): Promise<HuntUniverse> => {
   const { uiSettings } = await context.core;
   let configured: string[] | undefined;
@@ -68,7 +69,7 @@ export const resolveHuntUniverse = async (
         .map((entry) => entry.trim())
         .filter((entry) => entry.length > 0)
     : [];
-  if (entries.length > 0) return partitionHuntUniverse(entries);
+  if (entries.length > 0) return partitionHuntUniverse(entries, crossProjectSearch);
 
   logger.warn(
     `${SECURITY_SOLUTION_DEFAULT_INDEX_ID} is missing or not a list of index patterns; hunting ${FALLBACK_HUNT_UNIVERSE.join(

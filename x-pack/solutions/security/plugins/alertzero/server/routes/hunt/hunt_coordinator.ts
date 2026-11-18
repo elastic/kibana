@@ -198,7 +198,8 @@ export const registerHuntCoordinatorRoute = ({
 
           const { patterns: indexPatterns, policySkipped } = await resolveHuntUniverse(
             context,
-            logger
+            logger,
+            isCpsEnabled()
           );
 
           const {

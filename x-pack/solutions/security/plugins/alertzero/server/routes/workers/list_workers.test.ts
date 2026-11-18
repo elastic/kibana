@@ -21,6 +21,7 @@ const setupRoute = (list: jest.Mock) => {
     logger: loggingSystemMock.createLogger(),
     getSpaceId: () => 'default',
     getWorkersService: () => ({ list }),
+    isCpsEnabled: () => false,
   } as unknown as RouteDependencies);
 
   const handler = addVersion.mock.calls[0][1] as (

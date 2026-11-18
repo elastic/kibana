@@ -45,6 +45,16 @@ describe('unsearchedPatterns', () => {
     ).toEqual(['custom-edr-1']);
   });
 
+  it('does not read a later wildcard as bringing an excluded name back', () => {
+    const universe = ['logs-*', 'custom-1', '-custom-1', 'custom-*'];
+    expect(
+      unsearchedPatterns(
+        { index_patterns: ['logs-*', '-custom-1', 'custom-*'], missing: ['custom-1'] },
+        universe
+      )
+    ).toEqual([]);
+  });
+
   it('returns a .ds- name that no exclusion covers', () => {
     const name = '.ds-custom-1-2026.09.30-000001';
     expect(

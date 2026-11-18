@@ -6,6 +6,7 @@
  */
 
 import type { HuntScope } from '@kbn/alertzero-common';
+import { clusterCovers } from './index_glob';
 import {
   isDotPrefixedIndex,
   isIndexExclusion,
@@ -49,22 +50,29 @@ const isDotPrefixedEntry = (entry: string): boolean => {
 };
 
 /**
- * A whole-cluster exclusion (`-archive:*`) the data view still needs: Elasticsearch rejects one
- * for a cluster no positive entry includes. An entry whose cluster is a wildcard (`*:logs-*`)
- * may include any cluster, so it keeps every such exclusion.
+ * A whole-cluster exclusion (`-archive:*`) that policy left without anything to exclude:
+ * Elasticsearch rejects one for a cluster no positive entry includes. It is orphaned only when
+ * a skipped entry reached that cluster and no retained positive entry still does. A retained
+ * entry reaches it through a cluster glob (`arch*:logs-*`), or, under cross-project search,
+ * through any unqualified pattern, which spans every routed project.
  */
-const isOrphanedClusterExclusion = (
-  entry: string,
-  positives: string[],
-  skippedClusters: Set<string>
-): boolean => {
+const isOrphanedClusterExclusion = ({
+  entry,
+  positives,
+  skippedClusters,
+  crossProjectSearch,
+}: {
+  entry: string;
+  positives: string[];
+  skippedClusters: string[];
+  crossProjectSearch: boolean;
+}): boolean => {
   const { exclude, cluster, index } = parseIndexScopeEntry(entry);
-  if (!exclude || cluster === undefined || index !== '*' || !skippedClusters.has(cluster)) {
-    return false;
-  }
+  if (!exclude || cluster === undefined || index !== '*') return false;
+  if (!skippedClusters.some((skipped) => clusterCovers(skipped, cluster))) return false;
   return !positives.some((positive) => {
     const { cluster: included } = parseIndexScopeEntry(positive);
-    return included === cluster || included?.includes('*');
+    return included === undefined ? crossProjectSearch : clusterCovers(included, cluster);
   });
 };
 
@@ -73,7 +81,10 @@ const isOrphanedClusterExclusion = (
  * already treats a leading dot as "not a telemetry source". Exclusions always stay in
  * `patterns`, since removing one would widen the search.
  */
-export const partitionHuntUniverse = (entries: string[]): HuntUniverse => {
+export const partitionHuntUniverse = (
+  entries: string[],
+  crossProjectSearch: boolean
+): HuntUniverse => {
   const patterns: string[] = [];
   const policySkipped: string[] = [];
   for (const entry of entries) {
@@ -81,13 +92,14 @@ export const partitionHuntUniverse = (entries: string[]): HuntUniverse => {
     else patterns.push(entry);
   }
   // Skipping a cluster's only positive entry can strand its whole-cluster exclusion.
-  const skippedClusters = new Set(
-    policySkipped.flatMap((entry) => parseIndexScopeEntry(entry).cluster ?? [])
+  const skippedClusters = policySkipped.flatMap(
+    (entry) => parseIndexScopeEntry(entry).cluster ?? []
   );
   const positives = patterns.filter((entry) => !isIndexExclusion(entry));
   return {
     patterns: patterns.filter(
-      (entry) => !isOrphanedClusterExclusion(entry, positives, skippedClusters)
+      (entry) =>
+        !isOrphanedClusterExclusion({ entry, positives, skippedClusters, crossProjectSearch })
     ),
     policySkipped,
   };

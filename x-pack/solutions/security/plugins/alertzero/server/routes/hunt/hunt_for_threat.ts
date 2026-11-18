@@ -60,7 +60,8 @@ export const registerHuntForThreatRoute = ({
           const esClient = huntEsClient({ getClusterClient, request });
           const { patterns: indexPatterns, policySkipped } = await resolveHuntUniverse(
             context,
-            logger
+            logger,
+            isCpsEnabled()
           );
 
           // `discovered` is the datasets stage 1 parsed for the report matcher; the wire

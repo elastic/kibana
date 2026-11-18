@@ -64,7 +64,7 @@ describe('partitionHuntUniverse', () => {
     'remote:<.alerts-{now/d}>',
     'remote:<.alerts-{now/d{yyyy.MM.dd|+12:00}}>',
   ])('skips %s', (entry) => {
-    expect(partitionHuntUniverse(['logs-*', entry])).toEqual({
+    expect(partitionHuntUniverse(['logs-*', entry], false)).toEqual({
       patterns: ['logs-*'],
       policySkipped: [entry],
     });
@@ -80,23 +80,23 @@ describe('partitionHuntUniverse', () => {
     '-remote:<.alerts-{now/d}>',
     'logs-*',
   ])('keeps %s', (entry) => {
-    expect(partitionHuntUniverse([entry])).toEqual({ patterns: [entry], policySkipped: [] });
+    expect(partitionHuntUniverse([entry], false)).toEqual({ patterns: [entry], policySkipped: [] });
   });
 
   it('preserves order and keeps duplicates', () => {
-    expect(partitionHuntUniverse(['.a-1', 'logs-*', '.a-1', 'logs-*', 'x-*'])).toEqual({
+    expect(partitionHuntUniverse(['.a-1', 'logs-*', '.a-1', 'logs-*', 'x-*'], false)).toEqual({
       patterns: ['logs-*', 'logs-*', 'x-*'],
       policySkipped: ['.a-1', '.a-1'],
     });
   });
 
   it('handles empty input', () => {
-    expect(partitionHuntUniverse([])).toEqual({ patterns: [], policySkipped: [] });
+    expect(partitionHuntUniverse([], false)).toEqual({ patterns: [], policySkipped: [] });
   });
 
   describe('whole-cluster exclusions', () => {
     it('drops the exclusion of a cluster whose only positive entry was skipped', () => {
-      expect(partitionHuntUniverse(['logs-*', 'archive:.alerts-*', '-archive:*'])).toEqual({
+      expect(partitionHuntUniverse(['logs-*', 'archive:.alerts-*', '-archive:*'], false)).toEqual({
         patterns: ['logs-*'],
         policySkipped: ['archive:.alerts-*'],
       });
@@ -104,17 +104,41 @@ describe('partitionHuntUniverse', () => {
 
     it('keeps it while a positive entry still includes the cluster', () => {
       const entries = ['archive:logs-*', 'archive:.alerts-*', '-archive:*'];
-      expect(partitionHuntUniverse(entries).patterns).toEqual(['archive:logs-*', '-archive:*']);
+      expect(partitionHuntUniverse(entries, false).patterns).toEqual([
+        'archive:logs-*',
+        '-archive:*',
+      ]);
     });
 
     it('keeps it when a wildcard cluster entry may include the cluster', () => {
       expect(
-        partitionHuntUniverse(['*:logs-*', 'archive:.alerts-*', '-archive:*']).patterns
+        partitionHuntUniverse(['*:logs-*', 'archive:.alerts-*', '-archive:*'], false).patterns
       ).toEqual(['*:logs-*', '-archive:*']);
     });
 
+    it('drops it when a cluster glob that was skipped covers the excluded cluster', () => {
+      expect(partitionHuntUniverse(['logs-*', 'arch*:.alerts-*', '-archive:*'], false)).toEqual({
+        patterns: ['logs-*'],
+        policySkipped: ['arch*:.alerts-*'],
+      });
+    });
+
+    it('keeps it when a retained cluster glob still covers the excluded cluster', () => {
+      const entries = ['arch*:logs-*', 'archive:.alerts-*', '-archive:*'];
+      expect(partitionHuntUniverse(entries, false).patterns).toEqual([
+        'arch*:logs-*',
+        '-archive:*',
+      ]);
+    });
+
+    it('keeps it under cross-project search while an unqualified pattern remains', () => {
+      const entries = ['logs-*', 'archive:.alerts-*', '-archive:*'];
+      expect(partitionHuntUniverse(entries, true).patterns).toEqual(['logs-*', '-archive:*']);
+      expect(partitionHuntUniverse(entries, false).patterns).toEqual(['logs-*']);
+    });
+
     it('keeps an exclusion of a cluster nothing was skipped for', () => {
-      expect(partitionHuntUniverse(['logs-*', '-other:*']).patterns).toEqual([
+      expect(partitionHuntUniverse(['logs-*', '-other:*'], false).patterns).toEqual([
         'logs-*',
         '-other:*',
       ]);

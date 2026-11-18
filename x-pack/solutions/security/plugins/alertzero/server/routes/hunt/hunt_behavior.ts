@@ -69,7 +69,11 @@ export const registerHuntBehaviorRoute = ({
       withAlertZeroEnabled(async (context, request, response) => {
         try {
           const core = await context.core;
-          const { patterns: universe, policySkipped } = await resolveHuntUniverse(context, logger);
+          const { patterns: universe, policySkipped } = await resolveHuntUniverse(
+            context,
+            logger,
+            isCpsEnabled()
+          );
           const esClient = huntEsClient({ getClusterClient, request });
           const crossProjectSearch = isCpsEnabled();
           // What the generated query may read: the default data view minus the policy-skipped
@@ -167,7 +171,7 @@ export const registerHuntBehaviorRoute = ({
 
           // A name the scope dropped was never offered to the generated queries. The coordinator
           // records that as a gap; this route has no coordinator, so it goes on the result.
-          const scopeGaps = unsearchedGaps(scope, indexPatterns);
+          const scopeGaps = unsearchedGaps(scope, universe);
           const body: HuntBehaviorResponse =
             scopeGaps.length > 0
               ? { ...result, incomplete: [...scopeGaps, ...(result.incomplete ?? [])] }

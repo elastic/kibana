@@ -24,7 +24,7 @@ describe('resolveHuntUniverse', () => {
     const { context, get } = makeContext([' logs-* ', 'filebeat-*', ' winlogbeat-* ']);
     const logger = loggingSystemMock.createLogger();
 
-    await expect(resolveHuntUniverse(context, logger)).resolves.toEqual({
+    await expect(resolveHuntUniverse(context, logger, false)).resolves.toEqual({
       patterns: ['logs-*', 'filebeat-*', 'winlogbeat-*'],
       policySkipped: [],
     });
@@ -36,7 +36,7 @@ describe('resolveHuntUniverse', () => {
     const { context, get } = makeContext(['logs-*']);
     const logger = loggingSystemMock.createLogger();
 
-    await resolveHuntUniverse(context, logger);
+    await resolveHuntUniverse(context, logger, false);
 
     expect(get).toHaveBeenCalledWith('securitySolution:defaultIndex');
     expect(SECURITY_SOLUTION_DEFAULT_INDEX_ID).toBe('securitySolution:defaultIndex');
@@ -52,7 +52,7 @@ describe('resolveHuntUniverse', () => {
     const { context } = makeContext(value);
     const logger = loggingSystemMock.createLogger();
 
-    await expect(resolveHuntUniverse(context, logger)).resolves.toEqual({
+    await expect(resolveHuntUniverse(context, logger, false)).resolves.toEqual({
       patterns: ['logs-*'],
       policySkipped: [],
     });
@@ -67,7 +67,7 @@ describe('resolveHuntUniverse', () => {
     const context = { core: Promise.resolve({ uiSettings: { client: { get } } }) };
     const logger = loggingSystemMock.createLogger();
 
-    await expect(resolveHuntUniverse(context, logger)).resolves.toEqual({
+    await expect(resolveHuntUniverse(context, logger, false)).resolves.toEqual({
       patterns: ['logs-*'],
       policySkipped: [],
     });
@@ -79,7 +79,7 @@ describe('resolveHuntUniverse', () => {
     const { context } = makeContext(['logs-*', '-*elastic-cloud-logs-*']);
     const logger = loggingSystemMock.createLogger();
 
-    await expect(resolveHuntUniverse(context, logger)).resolves.toEqual({
+    await expect(resolveHuntUniverse(context, logger, false)).resolves.toEqual({
       patterns: ['logs-*', '-*elastic-cloud-logs-*'],
       policySkipped: [],
     });
@@ -89,11 +89,11 @@ describe('resolveHuntUniverse', () => {
     const { context } = makeContext(undefined);
     const logger = loggingSystemMock.createLogger();
 
-    const first = await resolveHuntUniverse(context, logger);
+    const first = await resolveHuntUniverse(context, logger, false);
     first.patterns.push('mutated-*');
 
     expect(FALLBACK_HUNT_UNIVERSE).toEqual(['logs-*']);
-    await expect(resolveHuntUniverse(context, logger)).resolves.toEqual({
+    await expect(resolveHuntUniverse(context, logger, false)).resolves.toEqual({
       patterns: ['logs-*'],
       policySkipped: [],
     });
@@ -103,7 +103,7 @@ describe('resolveHuntUniverse', () => {
     const { context } = makeContext(['logs-*', '.alerts-security.alerts-default', '-.alerts-x']);
     const logger = loggingSystemMock.createLogger();
 
-    await expect(resolveHuntUniverse(context, logger)).resolves.toEqual({
+    await expect(resolveHuntUniverse(context, logger, false)).resolves.toEqual({
       patterns: ['logs-*', '-.alerts-x'],
       policySkipped: ['.alerts-security.alerts-default'],
     });
@@ -116,7 +116,7 @@ describe('resolveHuntUniverse', () => {
     ]);
     const logger = loggingSystemMock.createLogger();
 
-    await expect(resolveHuntUniverse(context, logger)).resolves.toEqual({
+    await expect(resolveHuntUniverse(context, logger, false)).resolves.toEqual({
       patterns: ['logs-*', '-logs-elastic_agent*', 'filebeat-*'],
       policySkipped: ['.alerts-security.alerts-default'],
     });
@@ -127,7 +127,7 @@ describe('resolveHuntUniverse', () => {
     const { context } = makeContext([' , ', ',']);
     const logger = loggingSystemMock.createLogger();
 
-    await expect(resolveHuntUniverse(context, logger)).resolves.toEqual({
+    await expect(resolveHuntUniverse(context, logger, false)).resolves.toEqual({
       patterns: ['logs-*'],
       policySkipped: [],
     });
@@ -138,7 +138,7 @@ describe('resolveHuntUniverse', () => {
     const { context } = makeContext(['.siem-signals-infosec-detections']);
     const logger = loggingSystemMock.createLogger();
 
-    await expect(resolveHuntUniverse(context, logger)).resolves.toEqual({
+    await expect(resolveHuntUniverse(context, logger, false)).resolves.toEqual({
       patterns: [],
       policySkipped: ['.siem-signals-infosec-detections'],
     });
