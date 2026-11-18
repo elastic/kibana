@@ -214,6 +214,17 @@ describe('actions', () => {
       expect(onEvent).toHaveBeenCalledWith(confirm);
     });
 
+    it('reset the button fill only without a style, which sets its own', () => {
+      const markup = renderToStaticMarkup(surfaces.react.renderNode(links(approve, cancel)));
+
+      expect(markup).toContain(
+        'class="componentsActions-button componentsActions-event componentsActions-danger"'
+      );
+      expect(markup).toContain(
+        'class="componentsActions-button componentsActions-event componentsActions-plain"'
+      );
+    });
+
     it('render as their labels in text and Markdown', () => {
       const node = links(approve, cancel, { label: 'Docs', url: URL });
 

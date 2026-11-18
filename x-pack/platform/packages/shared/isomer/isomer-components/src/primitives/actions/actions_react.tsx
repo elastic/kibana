@@ -32,6 +32,14 @@ const { handles } = isomerDistillery.createStyleModule(
       line-height: ${font.lineHeight.s};
       text-decoration: none;
     `,
+    event: css`
+      font-family: inherit;
+      cursor: pointer;
+    `,
+    // The `<button>` reset of an event button without a style, whose fill a style sets instead.
+    plain: css`
+      background: none;
+    `,
     primary: css`
       border-color: ${color.background.filled.primary};
       background: ${color.background.filled.primary};
@@ -41,11 +49,6 @@ const { handles } = isomerDistillery.createStyleModule(
       border-color: ${color.background.filled.danger};
       background: ${color.background.filled.danger};
       color: ${color.text.inverse};
-    `,
-    event: css`
-      background: none;
-      font-family: inherit;
-      cursor: pointer;
     `,
   })
 );
@@ -74,7 +77,7 @@ export const actionsReactRenderer = (
           <button
             key={index}
             type="button"
-            className={classNames(context, handles.button, handles.event, tone)}
+            className={classNames(context, handles.button, handles.event, tone ?? handles.plain)}
             onClick={() => context.onEvent?.(event)}
           >
             {oneLine(label)}
