@@ -3,7 +3,7 @@ navigation_title: "MCP"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/mcp-action-type.html
 applies_to:
-  stack: preview 9.3, ga 9.7+
+  stack: preview 9.3-9.6, ga 9.7+
   serverless: ga
 ---
 
