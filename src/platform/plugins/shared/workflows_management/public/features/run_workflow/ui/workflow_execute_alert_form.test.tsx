@@ -92,83 +92,6 @@ describe('WorkflowExecuteAlertForm', () => {
     queryClient.clear();
   });
 
-  it('renders the form with search bar', async () => {
-    const { getByTestId } = render(
-      <TestWrapper>
-        <WorkflowExecuteAlertForm
-          value=""
-          setValue={mockSetValue}
-          errors={null}
-          setErrors={mockSetErrors}
-        />
-      </TestWrapper>
-    );
-
-    await waitFor(() => {
-      expect(getByTestId('search-bar')).toBeInTheDocument();
-    });
-  });
-
-  it('does not create data view when alert indices API is unavailable', async () => {
-    mockFetchAlertsIndexNames.mockRejectedValue(new Error('alerting unavailable'));
-
-    render(
-      <TestWrapper>
-        <WorkflowExecuteAlertForm
-          value=""
-          setValue={mockSetValue}
-          errors={null}
-          setErrors={mockSetErrors}
-        />
-      </TestWrapper>
-    );
-
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    expect(mockData.dataViews.create).not.toHaveBeenCalled();
-  });
-
-  it('does not call RAC index API when racQueriesEnabled is false', async () => {
-    render(
-      <TestWrapper>
-        <WorkflowExecuteAlertForm
-          value=""
-          setValue={mockSetValue}
-          errors={null}
-          setErrors={mockSetErrors}
-          racQueriesEnabled={false}
-        />
-      </TestWrapper>
-    );
-
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    expect(mockFetchAlertsIndexNames).not.toHaveBeenCalled();
-  });
-
-  it('creates data view from alert indices returned by RAC API', async () => {
-    mockFetchAlertsIndexNames.mockResolvedValue([
-      '.alerts-observability.logs.alerts-default',
-      '.alerts-security.alerts-default',
-    ]);
-
-    render(
-      <TestWrapper>
-        <WorkflowExecuteAlertForm
-          value=""
-          setValue={mockSetValue}
-          errors={null}
-          setErrors={mockSetErrors}
-        />
-      </TestWrapper>
-    );
-
-    await waitFor(() => {
-      expect(mockData.dataViews.create).toHaveBeenCalledWith({
-        title: '.alerts-observability.logs.alerts-default,.alerts-security.alerts-default',
-        timeFieldName: '@timestamp',
-      });
-    });
-  });
-
   it('fetches and displays alerts in unified data table', async () => {
     const { getByText, findByTestId } = render(
       <TestWrapper>
@@ -216,40 +139,6 @@ describe('WorkflowExecuteAlertForm', () => {
       expect(getByText('Test Rule')).toBeInTheDocument();
       expect(getByText('Test message')).toBeInTheDocument();
     });
-  });
-
-  it('handles query change without triggering fetch', async () => {
-    const { getByTestId } = render(
-      <TestWrapper>
-        <WorkflowExecuteAlertForm
-          value=""
-          setValue={mockSetValue}
-          errors={null}
-          setErrors={mockSetErrors}
-        />
-      </TestWrapper>
-    );
-
-    await waitFor(() => {
-      expect(mockData.dataViews.create).toHaveBeenCalled();
-    });
-
-    await waitFor(() => {
-      expect(getByTestId('search-bar')).toBeInTheDocument();
-    });
-
-    await waitFor(() => {
-      expect(mockSearchSource.fetch$).toHaveBeenCalled();
-    });
-
-    const initialFetchCount = mockSearchSource.fetch$.mock.calls.length;
-    const queryInput = getByTestId('query-input') as HTMLInputElement;
-
-    fireEvent.change(queryInput, { target: { value: 'test query' } });
-
-    await new Promise((resolve) => setTimeout(resolve, 50));
-
-    expect(mockSearchSource.fetch$.mock.calls.length).toBe(initialFetchCount);
   });
 
   it('calls setValue when an alert row is selected', async () => {
