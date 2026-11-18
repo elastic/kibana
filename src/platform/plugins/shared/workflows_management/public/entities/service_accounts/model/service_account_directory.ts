@@ -55,42 +55,45 @@ export const createServiceAccountDirectory = (
   http: HttpStart,
   queryClient: QueryClient,
   isEnabled: () => boolean
-) => ({
-  isEnabled,
-  get: async (id: string): Promise<WorkflowServiceAccount | null> => {
-    if (!isEnabled() || !id) return null;
-    const result = await queryClient.fetchQuery(serviceAccountQueryOptions(http, id));
-    return result.status === 'found' ? result.account : null;
-  },
-  /** Resolves an ID for validation; `unknown` when the directory is off or unreadable. */
-  lookup: async (id: string): Promise<ServiceAccountLookupResult<WorkflowServiceAccount>> =>
+) => {
+  /** Resolves an ID; `unknown` when the directory is off or unreadable. */
+  const lookup = async (id: string): Promise<ServiceAccountLookupResult<WorkflowServiceAccount>> =>
     isEnabled() && id
       ? queryClient.fetchQuery(serviceAccountQueryOptions(http, id))
-      : { status: 'unknown' },
-  list: async (
-    after?: string,
-    refresh = false
-  ): Promise<ServiceAccountPage | ServiceAccountDirectoryError | null> => {
-    if (!isEnabled()) return null;
-    try {
-      // Failures are thrown rather than returned so that the query cache never stores them.
-      return await queryClient.fetchQuery({
-        queryKey: ['workflows', 'serviceAccounts', 'page', after],
-        queryFn: () =>
-          http.get<ServiceAccountPage>('/internal/security/service_account', {
-            query: { limit: 100, ...(after ? { after } : {}) },
-          }),
-        retry: false,
-        staleTime: refresh ? 0 : 30_000,
-        cacheTime: 60_000,
-      });
-    } catch (error) {
-      return {
-        error:
-          isHttpFetchError(error) && error.response?.status === 403 ? 'forbidden' : 'unavailable',
-      };
-    }
-  },
-});
+      : { status: 'unknown' };
+
+  return {
+    isEnabled,
+    lookup,
+    get: async (id: string): Promise<WorkflowServiceAccount | null> => {
+      const result = await lookup(id);
+      return result.status === 'found' ? result.account : null;
+    },
+    list: async (
+      after?: string,
+      refresh = false
+    ): Promise<ServiceAccountPage | ServiceAccountDirectoryError | null> => {
+      if (!isEnabled()) return null;
+      try {
+        // Failures are thrown rather than returned so that the query cache never stores them.
+        return await queryClient.fetchQuery({
+          queryKey: ['workflows', 'serviceAccounts', 'page', after],
+          queryFn: () =>
+            http.get<ServiceAccountPage>('/internal/security/service_account', {
+              query: { limit: 100, ...(after ? { after } : {}) },
+            }),
+          retry: false,
+          staleTime: refresh ? 0 : 30_000,
+          cacheTime: 60_000,
+        });
+      } catch (error) {
+        return {
+          error:
+            isHttpFetchError(error) && error.response?.status === 403 ? 'forbidden' : 'unavailable',
+        };
+      }
+    },
+  };
+};
 
 export type ServiceAccountDirectory = ReturnType<typeof createServiceAccountDirectory>;
