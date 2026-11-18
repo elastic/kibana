@@ -24,7 +24,9 @@ const sourceListSchema = lazySchema(() =>
       .string()
       .max(MAX_SOURCE_TITLE_LENGTH)
       .optional()
-      .describe('Optional. Return only sources whose title starts with this text.'),
+      .describe(
+        'Optional. Return only sources whose title contains all of these words, in any order, ignoring case. The last word may be a partial word. Punctuation such as `-` or `"` only separates words and is not a search operator, so `checkout-prod` is the words `checkout` and `prod`.'
+      ),
     enabled: z
       .boolean()
       .optional()
@@ -49,11 +51,12 @@ export const createSourceListTool = ({
   getScopedClients,
   server,
   logger,
+  telemetry,
 }: SourceToolDeps): BuiltinToolDefinition<typeof sourceListSchema> => ({
   id: NIGHTSHIFT_SOURCE_LIST_TOOL_ID,
   type: ToolType.builtin,
   description: dedent`
-    List the Nightshift sources defined in the current space. This is the full source catalog:
+    List the nightshift sources defined in the current space. This is the full source catalog:
     it includes disabled sources and sources that have no Knowledge Indicators (KIs).
 
     Each source reports its \`id\`, \`slug\`, \`title\`, \`description\`, \`tags\`, \`esql\` (the
@@ -77,14 +80,17 @@ export const createSourceListTool = ({
   schema: sourceListSchema,
   tags: ['nightshift'],
   availability: createSignificantEventsAvailability({ server, logger }),
-  handler: async ({ search, enabled, page, per_page: perPage }, { request }) =>
+  handler: async ({ search, enabled, page, per_page: perPage }, { request, runContext }) =>
     runSourceTool({
       action: 'list sources',
       privilege: 'read',
+      toolId: NIGHTSHIFT_SOURCE_LIST_TOOL_ID,
       request,
+      runContext,
       getScopedClients,
       server,
       logger,
+      telemetry,
       run: async ({ sourcesClient }) => {
         const { sources, total } = await sourcesClient.list({ page, perPage, search, enabled });
         return { total, page, per_page: perPage, sources: sources.map(toSourceSummary) };

@@ -11,4 +11,9 @@ export {
   validateArtifactArchive,
   validateOpenApiArtifactArchive,
 } from './validate_artifact_archive';
-export { fetchArtifactVersions, fetchSecurityLabsVersions } from './fetch_artifact_versions';
+export {
+  fetchArtifactVersions,
+  fetchSecurityLabsVersions,
+  fetchLocalRepositoryVersion,
+  type ArtifactRepositoryVersions,
+} from './fetch_artifact_versions';

@@ -11,11 +11,12 @@ import React from 'react';
 import type { ComponentProps } from 'react';
 import {
   CODE_EDITOR_DEFAULT_THEME_ID,
-  CODE_EDITOR_TRANSPARENT_THEME_ID,
+  initializeRegisteredLanguagesTheme,
   monaco,
 } from '@kbn/monaco';
+import type { KbnCodeEditorChromeOverrides } from './utils/chrome_overrides';
 import { render, screen, waitFor } from '@testing-library/react';
-import { MonacoEditor, OVERFLOW_WIDGETS_TEST_ID } from './editor';
+import { MonacoEditor, OVERFLOW_WIDGETS_TEST_ID, getCodeEditorScope } from './editor';
 import * as supportedLanguages from './languages/supported';
 
 const defaultProps: Partial<ComponentProps<typeof MonacoEditor>> = {
@@ -123,25 +124,82 @@ describe('react monaco editor', () => {
     });
   });
 
-  it('registers the default theme', () => {
+  it('registers the Kibana theme on first mount, and not again for the same palette', async () => {
+    // Registration is skipped while Monaco already holds the theme for the current palette, and
+    // earlier mounts in this file registered it — start from a clean slate so the first mount
+    // below is observable.
+    initializeRegisteredLanguagesTheme.reset();
     const defineThemeSpy = jest.spyOn(window.MonacoEnvironment?.monaco.editor!, 'defineTheme');
 
     render(<MonacoEditor {...defaultProps} />);
 
-    return waitFor(() => {
-      expect(defineThemeSpy).toHaveBeenCalled();
+    await waitFor(() => {
       expect(defineThemeSpy).toHaveBeenCalledWith(CODE_EDITOR_DEFAULT_THEME_ID, expect.any(Object));
-      expect(defineThemeSpy).toHaveBeenCalledWith(
-        CODE_EDITOR_TRANSPARENT_THEME_ID,
-        expect.any(Object)
-      );
     });
+    // The one theme: chrome that differs per editor is applied per instance, not as another theme.
+    expect(defineThemeSpy).toHaveBeenCalledTimes(1);
+    const callsAfterFirstMount = defineThemeSpy.mock.calls.length;
+
+    // Every further editor on the page sees the same palette: no re-registration, which is what
+    // keeps Monaco from regenerating its stylesheet and re-tokenising every model per mount.
+    render(<MonacoEditor {...defaultProps} />);
+
+    expect(defineThemeSpy).toHaveBeenCalledTimes(callsAfterFirstMount);
+    defineThemeSpy.mockRestore();
   });
 
   it('renders the overflow widgets into a portal', async () => {
     render(<MonacoEditor {...defaultProps} />);
 
     expect(await screen.findByTestId(OVERFLOW_WIDGETS_TEST_ID)).toBeDefined();
+  });
+
+  describe('editorInstanceId', () => {
+    it('yields a scope whose selectors reach exactly this instance, inline and portaled', async () => {
+      const { container: mine } = render(
+        <MonacoEditor {...defaultProps} editorInstanceId="editor-a" />
+      );
+      render(<MonacoEditor {...defaultProps} editorInstanceId="editor-b" />);
+      await screen.findAllByTestId(OVERFLOW_WIDGETS_TEST_ID);
+
+      const scope = getCodeEditorScope('editor-a');
+
+      const editors = document.querySelectorAll(scope.editor);
+      expect(editors).toHaveLength(1);
+      expect(editors[0]).toBe(mine.querySelector('.react-monaco-editor-container'));
+
+      const overflow = document.querySelectorAll(scope.overflowWidgets);
+      expect(overflow).toHaveLength(1);
+      expect(overflow[0].getAttribute('data-test-subj')).toBe(OVERFLOW_WIDGETS_TEST_ID);
+      expect(overflow[0]).not.toBe(editors[0]);
+    });
+  });
+
+  describe('chromeOverrides', () => {
+    const transparent: KbnCodeEditorChromeOverrides = () => ({
+      'editor.background': 'transparent',
+    });
+    const property = (el: HTMLElement) => el.style.getPropertyValue('--vscode-editor-background');
+
+    it('applies the overrides to the overflow widgets container, and only for this editor', async () => {
+      render(<MonacoEditor {...defaultProps} chromeOverrides={transparent} />);
+      render(<MonacoEditor {...defaultProps} />);
+
+      const [mine, theirs] = await screen.findAllByTestId(OVERFLOW_WIDGETS_TEST_ID);
+
+      await waitFor(() => expect(property(mine)).toBe('transparent'));
+      expect(property(theirs)).toBe('');
+    });
+
+    it('removes its properties when the overrides go away', async () => {
+      const { rerender } = render(<MonacoEditor {...defaultProps} chromeOverrides={transparent} />);
+      const container = await screen.findByTestId(OVERFLOW_WIDGETS_TEST_ID);
+      await waitFor(() => expect(property(container)).toBe('transparent'));
+
+      rerender(<MonacoEditor {...defaultProps} />);
+
+      await waitFor(() => expect(property(container)).toBe(''));
+    });
   });
 
   it('uses defaultValue when value is undefined (uncontrolled mode)', async () => {

@@ -8,6 +8,7 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {
+  CanCancelRequests,
   HasEditCapabilities,
   PublishesDataSources,
   PublishesTimeRange,
@@ -27,6 +28,7 @@ export interface PatternAnalysisComponentApi {
 }
 
 export type PatternAnalysisEmbeddableApi = DefaultEmbeddableApi<PatternAnalysisEmbeddableState> &
+  CanCancelRequests &
   HasEditCapabilities &
   PublishesDataSources<DataView> &
   PublishesTimeRange &

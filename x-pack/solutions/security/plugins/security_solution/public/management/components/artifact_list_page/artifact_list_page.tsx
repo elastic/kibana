@@ -21,7 +21,6 @@ import type {
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
-import { useLocation } from 'react-router-dom';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { HeaderMenu } from '@kbn/securitysolution-exception-list-components';
 import { useApi } from '@kbn/securitysolution-list-hooks';
@@ -55,16 +54,14 @@ import { useSetUrlParams } from './hooks/use_set_url_params';
 import { useWithArtifactListData } from './hooks/use_with_artifact_list_data';
 import type { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 import { useUrlParams } from '../../hooks/use_url_params';
+import { paginationFromUrlParams } from '../../hooks/use_url_pagination';
 import type { ArtifactEnabledStatus } from '../../common/utils';
 import { isArtifactEnabledStatus } from '../../common/utils';
-import type { ListPageRouteState, MaybeImmutable } from '../../../../common/endpoint/types';
+import type { MaybeImmutable } from '../../../../common/endpoint/types';
 import type { XOR } from '../../../../common/utility_types';
 import { DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS } from '../../../../common/endpoint/service/artifacts/constants';
 import { ArtifactDeleteModal } from './components/artifact_delete_modal';
 import { useKibana, useToasts } from '../../../common/lib/kibana';
-import { useMemoizedRouteState } from '../../common/hooks';
-import { BackToExternalAppLink } from '../back_to_external_app_link';
-import { BackToExternalAppButton } from '../back_to_external_app_button';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { ArtifactImportFlyout } from './components/artifact_import_flyout';
 import { useIsImportFlyoutOpened } from './hooks/use_is_import_flyout_opened';
@@ -167,7 +164,6 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     );
     const { services } = useKibana();
     const { http } = services;
-    const { state: routeState } = useLocation<ListPageRouteState | undefined>();
     const getTestId = useTestIdGenerator(dataTestSubj);
     const toasts = useToasts();
     const isMounted = useIsMounted();
@@ -183,17 +179,20 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     const [importErrors, setImportErrors] = useState<BulkErrorSchema[] | undefined>(undefined);
 
     const setUrlParams = useSetUrlParams();
+    const { urlParams } = useUrlParams<ArtifactListPageUrlParams>();
     const {
-      urlParams: {
-        filter,
-        includedPolicies,
-        enabledStatus: enabledStatusUrlParam,
-        sortField,
-        sortOrder,
-        show: showUrlParam,
-        itemId,
-      },
-    } = useUrlParams<ArtifactListPageUrlParams>();
+      filter,
+      includedPolicies,
+      enabledStatus: enabledStatusUrlParam,
+      sortField,
+      sortOrder,
+      show: showUrlParam,
+      itemId,
+    } = urlParams;
+    const { page: currentPage, pageSize: currentPageSize } = useMemo(
+      () => paginationFromUrlParams(urlParams),
+      [urlParams]
+    );
 
     const isViewFlyoutOpened = showAsSimpleTable && showUrlParam === 'view' && Boolean(itemId);
     const enabledStatus =
@@ -285,20 +284,6 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       disabled: showAsSimpleTable,
     });
 
-    const memoizedRouteState = useMemoizedRouteState(routeState);
-
-    const backLinkComponent = useMemo(() => {
-      if (memoizedRouteState && memoizedRouteState.onBackButtonNavigateTo) {
-        return <BackToExternalAppLink {...memoizedRouteState} />;
-      }
-    }, [memoizedRouteState]);
-
-    const backButtonHeaderComponent = useMemo(() => {
-      if (memoizedRouteState && memoizedRouteState.onBackButtonNavigateTo) {
-        return <BackToExternalAppButton {...memoizedRouteState} />;
-      }
-    }, [memoizedRouteState]);
-
     const handleOpenCreateFlyoutClick = useCallback(() => {
       setUrlParams({ show: 'create' });
     }, [setUrlParams]);
@@ -318,9 +303,16 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
         const resolvedSortField = nextSortField ?? sortField;
         const resolvedSortOrder = nextSortOrder ?? sortOrder;
         const didSortChange = resolvedSortField !== sortField || resolvedSortOrder !== sortOrder;
+        const nextPage = didSortChange ? 1 : pageIndex + 1;
+
+        // `EuiBasicTable` requests the corrected page on every render while the displayed page is
+        // out of range, so pushing an unchanged URL again would cause an infinite update loop.
+        if (!didSortChange && nextPage === currentPage && pageSize === currentPageSize) {
+          return;
+        }
 
         setUrlParams({
-          page: didSortChange ? 1 : pageIndex + 1,
+          page: nextPage,
           pageSize,
           sortField: resolvedSortField,
           sortOrder: resolvedSortOrder,
@@ -330,7 +322,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
         // the user is back at the top of the list
         window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
       },
-      [setUrlParams, sortField, sortOrder]
+      [currentPage, currentPageSize, setUrlParams, sortField, sortOrder]
     );
 
     const handleOnSearch = useCallback<SearchExceptionsProps['onSearch']>(
@@ -342,7 +334,6 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
           // `undefined` will drop the param from the url
           filter: filterValue.trim() === '' ? undefined : filterValue,
           includedPolicies: selectedPolicies.trim() === '' ? undefined : selectedPolicies,
-          ...(didFilterChange ? { page: 1 } : {}),
         });
 
         // We don't want to trigger a refresh of the list twice because the URL above was already
@@ -357,7 +348,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
 
     const handleOnEnabledStatusChange = useCallback(
       (newEnabledStatus: ArtifactEnabledStatus | undefined) => {
-        setUrlParams({ enabledStatus: newEnabledStatus, page: 1 });
+        setUrlParams({ enabledStatus: newEnabledStatus });
       },
       [setUrlParams]
     );
@@ -494,7 +485,6 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
 
     return (
       <AdministrationListPage
-        headerBackComponent={backButtonHeaderComponent}
         hideHeader={true}
         title={labels.pageTitle}
         data-test-subj={getTestId('container')}
@@ -599,7 +589,6 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
               aboutInfo={labels.emptyStateInfo}
               primaryButtonLabel={labels.emptyStatePrimaryButtonLabel}
               importButtonLabel={labels.emptyStateImportButtonLabel}
-              backComponent={backLinkComponent}
               data-test-subj={getTestId('emptyState')}
               secondaryAboutInfo={secondaryPageInfo}
               canCreateItems={allowCardCreateAction}
@@ -610,7 +599,6 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
           </div>
         ) : (
           <>
-            {backButtonHeaderComponent}
             {description}
             <EuiSpacer size="m" />
             {callout}

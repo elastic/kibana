@@ -112,6 +112,16 @@
     }
   },
   {
+    "id": "siem-beacon",
+    "name": "SIEM Beacon",
+    "areas": [
+      "security"
+    ],
+    "github": {
+      "team": "elastic/siem-beacon"
+    }
+  },
+  {
     "id": "security-core-analysis",
     "name": "Core Analysis",
     "areas": [
@@ -598,21 +608,6 @@
     "github": {
       "team": "elastic/obs-knowledge-team"
     }
-  },
-  {
-    "id": "obs-onboarding",
-    "name": "Obs UX: Obs Onboarding",
-    "areas": [
-      "observability"
-    ],
-    "github": {
-      "team": "elastic/obs-onboarding-team",
-      "label": "Team:obs-onboarding"
-    },
-    "responsibilities": [
-      "Observability onboarding",
-      "Streams"
-    ]
   },
   {
     "id": "obs-signals-metrics",

@@ -16,6 +16,7 @@ export {
   isScoutTestsOnlyDiff,
 } from './ci-stats/pick_test_group_run_order/selective_scout.ts';
 export * from './github/index.ts';
+export * from './on-merge/index.ts';
 export * as TestFailures from './test-failures/index.ts';
 export * from './utils.ts';
 export * from './pr_labels.ts';

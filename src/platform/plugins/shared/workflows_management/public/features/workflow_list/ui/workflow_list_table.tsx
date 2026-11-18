@@ -24,9 +24,10 @@ import {
 import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 import type { WorkflowListItemDto, WorkflowSortField } from '@kbn/workflows';
 import { WorkflowTriggersAndSteps } from './workflow_triggers_and_steps';
 import {
@@ -91,6 +92,7 @@ export const WorkflowListTable = ({
   sortOrder,
   onSortChange,
 }: WorkflowListTableProps) => {
+  const routerHistory = useHistory();
   const allowRowSelection = canUpdateWorkflow || canDeleteWorkflow || canReadWorkflow;
 
   const columns = useMemo<Array<EuiBasicTableColumn<WorkflowListItemDto>>>(
@@ -117,24 +119,27 @@ export const WorkflowListTable = ({
                     `}
                   >
                     {canReadWorkflow ? (
-                      <EuiLink>
-                        <Link
-                          to={{
+                      <EuiLink
+                        href={routerHistory.createHref({ pathname: `/${item.id}` })}
+                        onClick={(event: React.MouseEvent) => {
+                          if (hasActiveModifierKey(event)) return;
+                          event.preventDefault();
+                          routerHistory.push({
                             pathname: `/${item.id}`,
                             state: getWorkflowDetailRouteState(workflowsListSearch),
-                          }}
-                          css={css`
-                            white-space: nowrap;
-                            overflow: hidden;
-                            text-overflow: ellipsis;
-                            display: block;
-                            max-width: 100%;
-                          `}
-                          title={name}
-                          data-test-subj="workflowNameLink"
-                        >
-                          {name}
-                        </Link>
+                          });
+                        }}
+                        css={css`
+                          white-space: nowrap;
+                          overflow: hidden;
+                          text-overflow: ellipsis;
+                          display: block;
+                          max-width: 100%;
+                        `}
+                        title={name}
+                        data-test-subj="workflowNameLink"
+                      >
+                        {name}
                       </EuiLink>
                     ) : (
                       <EuiText
@@ -365,6 +370,7 @@ export const WorkflowListTable = ({
       canCreateWorkflow,
       canDeleteWorkflow,
       onEditWorkflow,
+      routerHistory,
       workflowsListSearch,
       onToggleWorkflow,
       onCloneWorkflow,

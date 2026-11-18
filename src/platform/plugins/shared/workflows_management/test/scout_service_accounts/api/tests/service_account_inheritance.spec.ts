@@ -24,6 +24,7 @@ interface ManagedOptions {
   message?: string;
   global?: boolean;
   fallbackChild?: boolean;
+  conditionalChild?: boolean;
 }
 const authenticatedAs = (execution: WorkflowExecutionDto): string =>
   JSON.stringify(execution.stepExecutions?.find((step) => step.stepId === 'authenticate')?.output);
@@ -712,9 +713,13 @@ apiTest.describe(
       apiTest.setTimeout(150_000);
       const { wait } = getContext();
       const child = await install(apiClient);
+      // conditionalChild keeps the inherit reachable at runtime (the engine must still
+      // reject it) while exempting the parent from the standalone-run refusal, which
+      // only fires on unconditional top-level inherits.
       const parent = await install(apiClient, {
         childWorkflowId: workflowId(child),
         runAsMode: 'inherit',
+        conditionalChild: true,
       });
       const failed = await wait(apiClient, await run(apiClient, parent), 'failed', headers);
       expect(JSON.stringify(failed.stepExecutions)).toContain(
@@ -722,6 +727,25 @@ apiTest.describe(
       );
       await expectNoChildren(apiClient, workflowId(child));
     });
+
+    apiTest(
+      'refuses a standalone run of an unconditional inherit parent',
+      async ({ apiClient }) => {
+        apiTest.setTimeout(150_000);
+        const child = await install(apiClient);
+        const parent = await install(apiClient, {
+          childWorkflowId: workflowId(child),
+          runAsMode: 'inherit',
+        });
+        const result = await apiClient.post(`${path(parent)}/run`, {
+          headers: editorHeaders,
+          body: {},
+          responseType: 'json',
+        });
+        expect(result, JSON.stringify(result.body)).toHaveStatusCode(403);
+        await expectNoChildren(apiClient, workflowId(child));
+      }
+    );
 
     apiTest(
       'default preserves the original caller rather than inheriting implicitly',

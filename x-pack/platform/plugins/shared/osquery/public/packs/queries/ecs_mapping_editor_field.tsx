@@ -549,7 +549,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
         <EuiFlexItem css={overflowCss}>
           <EuiComboBox
             css={resultComboBoxCss}
-            // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
+            // eslint-disable-next-line @kbn/compat/react-jsx-no-bind, react-perf/jsx-no-new-function-as-prop
             inputRef={(ref: HTMLInputElement) => {
               inputRef.current = ref;
             }}

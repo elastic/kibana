@@ -149,7 +149,16 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
     return this.step.name;
   }
 
-  public getInput(): Record<string, unknown> {
+  public getInput(): Record<string, unknown> | Promise<Record<string, unknown>> {
+    return {};
+  }
+
+  /** Input recorded on the first entry of this step execution. */
+  private recordedInput(): Record<string, unknown> {
+    const stored = this.stepExecutionRuntime.getCurrentStepResult()?.input;
+    if (stored != null && typeof stored === 'object' && !Array.isArray(stored)) {
+      return stored as Record<string, unknown>;
+    }
     return {};
   }
 
@@ -163,6 +172,9 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
     let input: Record<string, unknown> = {};
     this.stepExecutionRuntime.startStep();
 
+    // Start the span after a microtask so it does not stay in the caller's APM context
+    // after it ends (see runNode).
+    await Promise.resolve();
     // Create APM span for step execution visibility in traces
     const stepSpan = apm.startSpan(`step: ${this.step.name}`, 'workflow', this.step.type);
     if (stepSpan) {
@@ -173,8 +185,12 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
 
     let suspended = false;
     try {
-      input = await this.getInput();
-      this.stepExecutionRuntime.setInput(input);
+      if (this.stepExecutionRuntime.isInputRecorded) {
+        input = this.recordedInput();
+      } else {
+        input = await this.getInput();
+        this.stepExecutionRuntime.setInput(input);
+      }
       const result = await this._run(input);
 
       // Layer 2: Enforce output size limit before storing in execution state.

@@ -40,6 +40,7 @@ export const initialWorkflowsState: WorkflowsResponse = {
 const initialState: WorkflowDetailState = {
   yamlString: '',
   isYamlSynced: true,
+  isCheckingSave: false,
   computed: undefined,
   workflow: undefined,
   execution: undefined,
@@ -50,7 +51,11 @@ const initialState: WorkflowDetailState = {
   connectors: undefined,
   connectorsLoadState: { status: 'loading' },
   workflows: initialWorkflowsState,
-  schema: getWorkflowZodSchema({}, triggerSchemas.getRegisteredTriggersForSchema()),
+  schema: getWorkflowZodSchema(
+    {},
+    triggerSchemas.getRegisteredTriggersForSchema(),
+    triggerSchemas.getTriggerSchemaOptions()
+  ),
   cursorPosition: undefined,
   focusedStepId: undefined,
   focusedTriggerId: undefined,
@@ -95,6 +100,9 @@ const workflowDetailSlice = createSlice({
     },
     setIsYamlSynced: (state, action: { payload: boolean }) => {
       state.isYamlSynced = action.payload;
+    },
+    setIsCheckingSave: (state, action: { payload: boolean }) => {
+      state.isCheckingSave = action.payload;
     },
     setCursorPosition: (state, action: { payload: LineColumnPosition }) => {
       state.cursorPosition = action.payload;
@@ -241,7 +249,10 @@ const workflowDetailSlice = createSlice({
         requestId: meta.requestId,
         loadMore: meta.arg.loadMore ?? false,
       };
-      state.executionError = undefined;
+      // Keep an ongoing failure streak for the same execution so polling can back off and toast once.
+      if (state.executionError?.id !== meta.arg.id) {
+        state.executionError = undefined;
+      }
     });
     builder.addCase(loadExecutionThunk.fulfilled, (state, { meta, payload }) => {
       if (state.executionRequest?.requestId !== meta.requestId) {
@@ -252,6 +263,7 @@ const workflowDetailSlice = createSlice({
       state.stepExecutionsTotal = payload.stepExecutionsTotal;
       state.computedExecution = payload.computedExecution;
       state.executionRequest = undefined;
+      state.executionError = undefined;
     });
     builder.addCase(loadExecutionThunk.rejected, (state, { meta, payload }) => {
       if (state.executionRequest?.requestId !== meta.requestId) {
@@ -259,7 +271,14 @@ const workflowDetailSlice = createSlice({
       }
       state.executionRequest = undefined;
       if (!meta.aborted && !meta.arg.loadMore) {
-        state.executionError = { id: meta.arg.id, message: payload ?? 'Failed to load execution' };
+        const previousFailureCount =
+          state.executionError?.id === meta.arg.id ? state.executionError.failureCount : 0;
+        state.executionError = {
+          id: meta.arg.id,
+          message: payload?.message ?? 'Failed to load execution',
+          isNotFound: payload?.isNotFound ?? false,
+          failureCount: previousFailureCount + 1,
+        };
       }
     });
     addLoadingStateReducers(builder);
@@ -297,6 +316,7 @@ export const {
   updateWorkflow,
   setYamlString,
   setIsYamlSynced,
+  setIsCheckingSave,
   setCursorPosition,
   setHighlightedStepId,
   setIsTestModalOpen,

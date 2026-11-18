@@ -9,7 +9,12 @@
 
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
-import { SCOUT_REPORT_OUTPUT_ROOT, SCOUT_TEST_RUN_SCOPE, targetAttributes } from '@kbn/scout-info';
+import {
+  elasticCloudTargetFromEnv,
+  SCOUT_REPORT_OUTPUT_ROOT,
+  SCOUT_TEST_RUN_SCOPE,
+  targetAttributes,
+} from '@kbn/scout-info';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ScoutFileInfo } from '@kbn/scout-reporting';
 import { computeTestID } from '@kbn/scout-reporting';
@@ -69,7 +74,11 @@ export class ScoutFTRReporter {
 
     this.baseTestRunInfo = {
       id: this.runId,
-      target: { ...getScoutTestTarget(config), attributes: targetAttributes.current() },
+      target: {
+        ...getScoutTestTarget(config),
+        attributes: targetAttributes.current(),
+        elastic_cloud: elasticCloudTargetFromEnv(),
+      },
       scope: SCOUT_TEST_RUN_SCOPE,
       config: {
         file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, config.path)),

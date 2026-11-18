@@ -10,8 +10,10 @@ import Boom from '@hapi/boom';
 import { UnifiedAttachmentPutRequestSchema } from '../../../common/types/api';
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
-import type { Case } from '../../../common/types/domain';
+import type { Case, UnifiedAttachment } from '../../../common/types/domain';
 import { decodeWithExcessOrThrowZod } from '../../common/runtime_types';
+import { flattenAttachmentSavedObject } from '../../common/utils';
+import { toUnifiedAttachment } from '../../services/attachments/operations/utils';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
@@ -19,10 +21,10 @@ import type { UpdateArgs } from './types';
 import { validateMaxUserActions } from '../../common/validators';
 import { validateUnifiedAttachments } from './validators';
 
-export async function update(
+const replaceAttachment = async (
   { caseID, updateRequest: queryParams }: UpdateArgs,
   clientArgs: CasesClientArgs
-): Promise<Case> {
+): Promise<CaseCommentModel> => {
   const {
     services: { attachmentService, userActionService },
     logger,
@@ -52,7 +54,7 @@ export async function update(
     });
 
     if (myComment == null) {
-      throw Boom.notFound(`This comment ${queryCommentId} does not exist anymore.`);
+      throw Boom.notFound(`This attachment ${queryCommentId} does not exist anymore.`);
     }
 
     await authorization.ensureAuthorized({
@@ -73,7 +75,7 @@ export async function update(
     const caseRef = myComment.references.find((c) => c.type === CASE_SAVED_OBJECT);
     if (caseRef == null || (caseRef != null && caseRef.id !== model.savedObject.id)) {
       throw Boom.notFound(
-        `This comment ${queryCommentId} does not exist in case ${model.savedObject.id}.`
+        `This attachment ${queryCommentId} does not exist in case ${model.savedObject.id}.`
       );
     }
 
@@ -85,17 +87,15 @@ export async function update(
 
     const updatedDate = new Date().toISOString();
 
-    const updatedModel = await model.updateComment({
+    return await model.updateComment({
       updateRequest: {
         id: queryCommentId,
         version: queryCommentVersion,
         ...queryRestAttributes,
       },
       updatedAt: updatedDate,
-      owner: myComment.attributes.owner,
+      currentAttachment: myComment,
     });
-
-    return await updatedModel.encodeWithComments();
   } catch (error) {
     throw createCaseError({
       message: `Failed to replace attachment case id: ${caseID}: ${error}`,
@@ -103,4 +103,33 @@ export async function update(
       logger,
     });
   }
-}
+};
+
+/**
+ * Full replace of an attachment. Returns the updated attachment.
+ */
+export const update = async (
+  updateArgs: UpdateArgs,
+  clientArgs: CasesClientArgs
+): Promise<UnifiedAttachment> => {
+  await replaceAttachment(updateArgs, clientArgs);
+
+  // The update response only has the written attributes, so read the full attachment back.
+  const updatedAttachment = await clientArgs.services.attachmentService.getter.get({
+    savedObjectId: updateArgs.updateRequest.id,
+  });
+
+  return toUnifiedAttachment(flattenAttachmentSavedObject(updatedAttachment));
+};
+
+/**
+ * Full replace of an attachment. Returns the case with all its attachments.
+ */
+export const updateAndGetCase = async (
+  updateArgs: UpdateArgs,
+  clientArgs: CasesClientArgs
+): Promise<Case> => {
+  const model = await replaceAttachment(updateArgs, clientArgs);
+
+  return model.encodeWithComments();
+};

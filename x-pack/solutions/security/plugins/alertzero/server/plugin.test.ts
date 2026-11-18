@@ -7,6 +7,7 @@
 
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import {
   ALERTZERO_ENABLED_SETTING_ID,
   TEMPLATE_ID_ESCALATION,
@@ -346,6 +347,49 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       expect(registerAgentType).toHaveBeenCalled();
     });
 
+    const setupEnabled = (plugin: AlertZeroPlugin) =>
+      plugin.setup(
+        coreMock.createSetup() as never,
+        {
+          features: { registerKibanaFeature: jest.fn() },
+          workflowsExtensions: {
+            registerManagedWorkflowOwner: jest.fn(),
+            registerStepDefinition: jest.fn(),
+          },
+          workflowsManagement: { management: {} },
+          proposals: {},
+          agenticInvestigations: {},
+          agentBuilder: {
+            skills: { register: jest.fn() },
+            tools: { register: jest.fn() },
+            attachments: { registerType: jest.fn() },
+            conversationTemplates: { register: jest.fn() },
+            conversations: { enableUpdatedTrigger: jest.fn() },
+          },
+        } as never
+      );
+
+    const routeDependencies = () => jest.mocked(registerRoutes).mock.calls[0][0];
+
+    it('hands routes a cluster-client getter that throws before start', () => {
+      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
+      setupEnabled(plugin);
+
+      expect(() => routeDependencies().getClusterClient()).toThrow(
+        'CoreStart is not available until the AlertZero plugin has started'
+      );
+    });
+
+    it('hands routes a cluster-client getter that returns the core start client after start', async () => {
+      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
+      setupEnabled(plugin);
+      const coreStart = coreMock.createStart();
+
+      await plugin.start(coreStart, {} as never);
+
+      expect(routeDependencies().getClusterClient()).toBe(coreStart.elasticsearch.client);
+    });
+
     it('grants no agentic investigations or escalations API privileges with the feature', () => {
       const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
       const features = { registerKibanaFeature: jest.fn() };
@@ -561,19 +605,59 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         });
       });
 
-      it('resolves the opt-in from the AlertZero setting of the requesting space', async () => {
-        const coreSetup = coreMock.createSetup();
-        const enableUpdatedTrigger = setupWithAgentBuilder(coreSetup);
-        const [coreStart] = await coreSetup.getStartServices();
-        const uiSettingsClient = coreStart.uiSettings.asScopedToClient({} as never);
-        (uiSettingsClient.get as jest.Mock).mockResolvedValue(true);
-        const request = httpServerMock.createKibanaRequest();
+      describe('resolves the opt-in for the requesting space', () => {
+        const resolveOptIn = async ({
+          solution,
+          settingEnabled = true,
+        }: {
+          solution?: 'security' | 'classic';
+          settingEnabled?: boolean;
+        }) => {
+          const coreSetup = coreMock.createSetup();
+          const coreStart = coreMock.createStart();
+          const uiSettingsClient = coreStart.uiSettings.asScopedToClient({} as never);
+          (uiSettingsClient.get as jest.Mock).mockResolvedValue(settingEnabled);
+          const spaces = spacesMock.createStart();
+          spaces.spacesService.getActiveSpace.mockResolvedValue({
+            id: DEFAULT_SPACE_ID,
+            name: 'Default',
+            disabledFeatures: [],
+            ...(solution && { solution }),
+          });
+          coreSetup.getStartServices.mockResolvedValue([coreStart, { spaces }, {}] as never);
+          const enableUpdatedTrigger = setupWithAgentBuilder(coreSetup);
+          const request = httpServerMock.createKibanaRequest();
 
-        const [{ isEnabled }] = enableUpdatedTrigger.mock.calls[0];
+          const [{ isEnabled }] = enableUpdatedTrigger.mock.calls[0];
 
-        await expect(isEnabled(request)).resolves.toBe(true);
-        expect(coreStart.savedObjects.getScopedClient).toHaveBeenCalledWith(request);
-        expect(uiSettingsClient.get).toHaveBeenCalledWith(ALERTZERO_ENABLED_SETTING_ID);
+          return { enabled: await isEnabled(request), coreStart, uiSettingsClient, request };
+        };
+
+        it('uses the AlertZero setting in a Security space', async () => {
+          const { enabled, coreStart, uiSettingsClient, request } = await resolveOptIn({
+            solution: 'security',
+          });
+
+          expect(enabled).toBe(true);
+          expect(coreStart.savedObjects.getScopedClient).toHaveBeenCalledWith(request);
+          expect(uiSettingsClient.get).toHaveBeenCalledWith(ALERTZERO_ENABLED_SETTING_ID);
+        });
+
+        it('is off in a Security space with the setting off', async () => {
+          const { enabled } = await resolveOptIn({ solution: 'security', settingEnabled: false });
+
+          expect(enabled).toBe(false);
+        });
+
+        it.each([['classic' as const], [undefined]])(
+          'is off in a Classic space even with the setting on (%s)',
+          async (solution) => {
+            const { enabled, uiSettingsClient } = await resolveOptIn({ solution });
+
+            expect(enabled).toBe(false);
+            expect(uiSettingsClient.get).not.toHaveBeenCalled();
+          }
+        );
       });
     });
 

@@ -80,6 +80,56 @@ describe('AlertingV2RulesLocatorDefinition', () => {
       });
     });
 
+    it('resolves sequence edit', async () => {
+      expect(
+        await locator.getLocation({
+          page: 'sequence_edit',
+          ruleId: 'abc-123',
+          host: OBSERVABILITY_HOST.rules,
+        })
+      ).toMatchObject({
+        app: 'observabilityAlerting',
+        path: '/rules/v2/sequence/abc-123/edit',
+      });
+    });
+
+    it('resolves sequence clone', async () => {
+      expect(
+        await locator.getLocation({
+          page: 'sequence_clone',
+          ruleId: 'abc-123',
+          host: OBSERVABILITY_HOST.rules,
+        })
+      ).toMatchObject({
+        app: 'observabilityAlerting',
+        path: '/rules/v2/sequence/create?cloneFrom=abc-123',
+      });
+    });
+
+    it('encodes the ruleId in sequence edit and clone paths', async () => {
+      const editLoc = await locator.getLocation({
+        page: 'sequence_edit',
+        ruleId: 'has spaces/slashes',
+        host: OBSERVABILITY_HOST.rules,
+      });
+      expect(editLoc.path).toBe('/rules/v2/sequence/has%20spaces%2Fslashes/edit');
+
+      const cloneLoc = await locator.getLocation({
+        page: 'sequence_clone',
+        ruleId: 'has spaces/slashes',
+        host: OBSERVABILITY_HOST.rules,
+      });
+      expect(new URLSearchParams(cloneLoc.path.split('?')[1]).get('cloneFrom')).toBe(
+        'has spaces/slashes'
+      );
+    });
+
+    it('falls back to rule details when a sequence page is requested without a ruleId', async () => {
+      expect(
+        await locator.getLocation({ page: 'sequence_edit', host: OBSERVABILITY_HOST.rules })
+      ).toMatchObject({ app: 'observabilityAlerting', path: '/rules/v2' });
+    });
+
     it('resolves list filtered to the rules derived from a template', async () => {
       const loc = await locator.getLocation({
         derivedFromTemplateId: 'nginx-error-rate',
@@ -121,6 +171,19 @@ describe('AlertingV2RulesLocatorDefinition', () => {
   });
 
   describe('search host', () => {
+    it('resolves sequence edit under the host path prefix', async () => {
+      expect(
+        await AlertingV2RulesLocatorDefinition.getLocation({
+          page: 'sequence_edit',
+          ruleId: 'abc-123',
+          host: SEARCH_HOST.rules,
+        })
+      ).toMatchObject({
+        app: 'search',
+        path: '/alerting/sequence/abc-123/edit',
+      });
+    });
+
     it('resolves list filtered to the rules derived from a template', async () => {
       const loc = await AlertingV2RulesLocatorDefinition.getLocation({
         derivedFromTemplateId: 'nginx-error-rate',

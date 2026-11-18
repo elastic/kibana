@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import type { BrowserFields } from '@kbn/securitysolution-timeline-common';
+import type {
+  TimelineEventsDetailsItem,
+  RunTimeMappings,
+} from '@kbn/securitysolution-timeline-search-strategy';
 import {
   type AttackDiscoveryAlert,
   transformAttackDiscoveryAlertDocumentToApi,

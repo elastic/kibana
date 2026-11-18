@@ -302,6 +302,7 @@ export const EntityTable: React.FC<EntityTableProps> = ({ entities }) => {
         identifierType: row.identifier.identifierType,
         identifier: displayName,
         entityStoreId,
+        mode: row.identifier.mode,
       });
       if (rightPanel) {
         navigateWithFlyout({ preview: [], right: rightPanel });

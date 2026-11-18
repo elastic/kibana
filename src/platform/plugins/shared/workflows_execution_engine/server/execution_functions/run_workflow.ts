@@ -25,6 +25,7 @@ import type { WorkflowsExecutionEngineConfig } from '../config';
 import { emitWorkflowExecutionFailedEventIfFailed } from '../lib/emit_workflow_execution_failed_event';
 import { emitWorkflowIdentityFailureEvent } from '../lib/emit_workflow_identity_failure_event';
 import { hasWorkflowAccess } from '../lib/has_workflow_access';
+import { toWorkflowIdentityTaskError } from '../lib/workflow_identity_task_error';
 import type { WorkflowsMeteringService } from '../metering';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
@@ -32,6 +33,7 @@ import {
   getExecutionServiceAccountId,
   withWorkflowExecutionIdentity,
 } from '../service_account_execution';
+import { publishFinishedWorkflowExecution } from '../topics/publish_finished_workflow_execution';
 import type {
   InternalResumeWorkflowExecution,
   WorkflowsExecutionEnginePluginStart,
@@ -144,14 +146,21 @@ async function runWorkflowWithRequest({
       operation: requiredPermission,
     }))
   ) {
+    const finishedAt = new Date().toISOString();
+    const error = {
+      type: 'WorkflowAccessDeniedError',
+      message: 'Workflow execution access was removed.',
+    };
     await workflowExecutionRepository.updateWorkflowExecution({
       id: workflowRunId,
       status: ExecutionStatus.FAILED,
-      finishedAt: new Date().toISOString(),
-      error: {
-        type: 'WorkflowAccessDeniedError',
-        message: 'Workflow execution access was removed.',
-      },
+      finishedAt,
+      error,
+    });
+    await publishFinishedWorkflowExecution(execution, {
+      status: ExecutionStatus.FAILED,
+      finishedAt,
+      error,
     });
     await handlePostExecutionLoop({
       workflowRunId,
@@ -192,10 +201,17 @@ async function runWorkflowWithRequest({
   const isEventDriven = isEventDrivenWorkflowTriggerSource(execution);
   if (isEventDriven && !workflowsExecutionEngine.triggerEvents.isEnabled) {
     const cancelledAt = new Date().toISOString();
+    const cancellationReason = 'Event-driven execution disabled by operator';
     await workflowExecutionRepository.updateWorkflowExecution({
       id: workflowRunId,
       status: ExecutionStatus.SKIPPED,
-      cancellationReason: 'Event-driven execution disabled by operator',
+      cancellationReason,
+      cancelledAt,
+      cancelledBy: 'system',
+    });
+    await publishFinishedWorkflowExecution(execution, {
+      status: ExecutionStatus.SKIPPED,
+      cancellationReason,
       cancelledAt,
       cancelledBy: 'system',
     });
@@ -206,7 +222,7 @@ async function runWorkflowWithRequest({
       workflowExecution: {
         ...execution,
         status: ExecutionStatus.SKIPPED,
-        cancellationReason: 'Event-driven execution disabled by operator',
+        cancellationReason,
         cancelledAt,
         cancelledBy: 'system',
       },
@@ -322,7 +338,7 @@ export const runWorkflow = async (
         ...params,
         error: executionError,
       });
-      if (!failedExecution) throw error;
+      if (!failedExecution) throw toWorkflowIdentityTaskError(error);
       if (failedExecution.status === ExecutionStatus.FAILED) {
         await emitWorkflowIdentityFailureEvent({
           execution: failedExecution,
@@ -337,6 +353,7 @@ export const runWorkflow = async (
         workflowTaskManager: new WorkflowTaskManager(params.dependencies.taskManager),
         cloudSetup: params.dependencies.cloudSetup,
       });
+      throw toWorkflowIdentityTaskError(error);
     }
     throw error;
   }

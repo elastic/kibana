@@ -137,7 +137,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props
   const getContextOverrideData = useContextOverrideData();
   const { runIndividualStep } = useWorkflowActions();
   const { notifications } = useKibana().services;
-  const { setSelectedExecution } = useWorkflowUrlState();
+  const { selectEditorRun } = useWorkflowUrlState();
   const { canExecuteWorkflow: hasExecutePrivilege } = useWorkflowsCapabilities();
   const canExecuteWorkflow = hasExecutePrivilege && workflow?.permissions?.execute !== false;
   const canTestStep = canExecuteWorkflow && workflow?.permissions?.edit !== false;
@@ -172,7 +172,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props
             workflowYaml,
             contextOverride: {},
           });
-          setSelectedExecution(response.workflowExecutionId);
+          selectEditorRun(response.workflowExecutionId);
         } catch (error) {
           const errorMessage =
             (error as { body?: { message?: string }; message?: string })?.body?.message ||
@@ -195,7 +195,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props
       getContextOverrideData,
       runIndividualStep,
       workflowYaml,
-      setSelectedExecution,
+      selectEditorRun,
       dispatch,
       notifications.toasts,
       canTestStep,

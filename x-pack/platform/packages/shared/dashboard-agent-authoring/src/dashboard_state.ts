@@ -11,7 +11,7 @@ import type {
   DashboardSection,
 } from '@kbn/agent-builder-dashboards-common';
 import { isSection } from '@kbn/agent-builder-dashboards-common';
-import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/as-code-dashboard-schema';
+import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-constants';
 
 type DashboardWidget = AttachmentPanel | DashboardSection;
 
@@ -57,7 +57,7 @@ export const getSectionsById = ({
 /** Section id of every panel, or null for panels at the top level. */
 export const getSectionIdByPanelId = ({
   panels,
-}: DashboardAttachmentData): Map<string, string | null> =>
+}: Pick<DashboardAttachmentData, 'panels'>): Map<string, string | null> =>
   new Map(
     panels.flatMap(
       (widget): Array<[string, string | null]> =>

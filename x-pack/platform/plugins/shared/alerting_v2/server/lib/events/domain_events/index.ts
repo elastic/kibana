@@ -10,9 +10,9 @@
  * event bus.
  *
  * This module is the single import point for code that needs to talk about
- * "alerting framework events" as a whole (e.g. when typing `EventBus<...>` or
- * `EventBusSubscriber<...>`). It re-exports each publisher's event types and
- * exposes the {@link AlertingDomainEvent} discriminated union.
+ * "alerting framework events" as a whole (e.g. when typing `EventBus<...>`). It
+ * re-exports each publisher's event types and exposes the
+ * {@link AlertingDomainEvent} discriminated union.
  *
  * New publishers (e.g. the rule executor or dispatcher) should:
  *  1. Define their concrete event type and runtime `*_TYPE` constant inside
@@ -28,6 +28,7 @@ import type { EventBus } from '../event_bus';
 import type { AlertActionEvent } from '../alert_action_event_publisher/events';
 import type { RuleEvent } from '../rule_event_publisher/events';
 import type { RuleExecutorEvent } from '../rule_executor_event_publisher/events';
+import type { AlertStatusChangedEvent } from '../alert_status_changed_event_publisher/events';
 import type { ActionPolicyEvent } from '../action_policy_event_publisher/events';
 
 export type {
@@ -90,6 +91,9 @@ export {
   RULE_EXECUTION_FAILED_EVENT_TYPE,
 } from '../rule_executor_event_publisher/events';
 
+export type { AlertStatusChangedEvent } from '../alert_status_changed_event_publisher/events';
+export { ALERT_STATUS_CHANGED_EVENT_TYPE } from '../alert_status_changed_event_publisher/events';
+
 export type {
   ActionPolicyCreatedEvent,
   ActionPolicyDeletedEvent,
@@ -120,6 +124,7 @@ export type AlertingDomainEvent =
   | AlertActionEvent
   | RuleEvent
   | RuleExecutorEvent
+  | AlertStatusChangedEvent
   | ActionPolicyEvent;
 
 /**

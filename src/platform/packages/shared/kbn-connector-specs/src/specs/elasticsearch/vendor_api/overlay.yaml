@@ -1,0 +1,50 @@
+overlay: 1.0.0
+info:
+  title: Elasticsearch API corrections
+  version: 1.0.0
+actions:
+  - target: $.components.schemas['_types.FieldValue'].oneOf
+    description: >-
+      FieldValue is the union `long | double | string | boolean | null`
+      (https://github.com/elastic/elasticsearch-specification/blob/main/specification/_types/common.ts).
+      Generated as `oneOf`, a number matches both the long and double branches and a string both
+      the string and nullable string branches, so no value validates; the branches are
+      alternatives, not exclusive.
+    remove: true
+  - target: $.components.schemas['_types.FieldValue']
+    description: The same union as `anyOf`.
+    update:
+      anyOf:
+        - type: number
+        - type: string
+        - type: boolean
+        - type: 'null'
+
+  - target: $.components.schemas['_global.search._types.SourceConfig'].oneOf
+    description: >-
+      SourceFilter is marked `@shortcut_property includes`
+      (https://github.com/elastic/elasticsearch-specification/blob/main/specification/_global/search/_types/SourceFilter.ts),
+      so `_source` also takes the field list on its own, as in `"_source": ["obj1.*", "obj2.*"]`
+      (https://www.elastic.co/docs/reference/elasticsearch/rest-apis/retrieve-selected-fields#source-filtering).
+      The generated spec leaves the shortcut out.
+    update:
+      - $ref: '#/components/schemas/_types.Fields'
+
+  - target: $.paths['/_cat/indices'].get.parameters
+    description: &catFormat >-
+      Every cat API takes the common `format` query parameter (CommonCatQueryParameters in
+      https://github.com/elastic/elasticsearch-specification/blob/main/specification/_spec_utils/behaviors.ts),
+      and https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-indices uses
+      `GET /_cat/indices/my-index-*?v=true&s=index&format=json`. The generated spec leaves it out.
+    update:
+      - name: format
+        in: query
+        schema:
+          type: string
+  - target: $.paths['/_cat/indices/{index}'].get.parameters
+    description: *catFormat
+    update:
+      - name: format
+        in: query
+        schema:
+          type: string

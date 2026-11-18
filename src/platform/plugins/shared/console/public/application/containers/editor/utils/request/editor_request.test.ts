@@ -7,10 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { performance } from 'node:perf_hooks';
-
 import type { monaco, ParsedRequest } from '@kbn/monaco';
+import { createInsideConsoleStringChecker } from '@kbn/monaco/src/languages/definitions/console/utils';
 import { getRequestEndLineNumber, getRequestFromEditor } from './editor_request';
+
+jest.mock('@kbn/monaco/src/languages/definitions/console/utils', () => {
+  const actual = jest.requireActual('@kbn/monaco/src/languages/definitions/console/utils');
+  return {
+    ...actual,
+    createInsideConsoleStringChecker: jest.fn(actual.createInsideConsoleStringChecker),
+  };
+});
 
 describe('editor_request', () => {
   const inlineData = '{"query":"test"}';
@@ -195,7 +202,7 @@ describe('editor_request', () => {
       expect(result).toEqual(1);
     });
 
-    it('resolves a large unfinished triple-quoted body with many request-like lines quickly', () => {
+    it('scans a large unfinished triple-quoted body with many request-like lines once', () => {
       const content = [
         'POST _query',
         '{',
@@ -206,7 +213,7 @@ describe('editor_request', () => {
         ...getMockModel(content),
         getPositionAt: () => ({ lineNumber: 1 }),
       } as unknown as monaco.editor.ITextModel;
-      const start = performance.now();
+      jest.mocked(createInsideConsoleStringChecker).mockClear();
 
       const result = getRequestEndLineNumber({
         parsedRequest,
@@ -215,7 +222,8 @@ describe('editor_request', () => {
       });
 
       expect(result).toEqual(content.length);
-      expect(performance.now() - start).toBeLessThan(500);
+      // One scan of the whole body: rescanning the prefix per request-like line is quadratic here.
+      expect(createInsideConsoleStringChecker).toHaveBeenCalledTimes(1);
     });
   });
 

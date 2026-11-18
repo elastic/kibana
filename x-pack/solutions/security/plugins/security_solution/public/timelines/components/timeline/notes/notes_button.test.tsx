@@ -12,7 +12,7 @@ import { NotesButton } from './notes_button';
 import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { ThemeProvider } from 'styled-components';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 
 const toggleShowNotesMock = jest.fn();
 

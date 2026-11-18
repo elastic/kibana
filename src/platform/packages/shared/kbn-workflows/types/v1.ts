@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { UserProfile } from '@kbn/core-user-profile-common';
+import type { UserProfileAvatarData } from '@kbn/core-user-settings-types';
 import {
   HUMAN_READABLE_ID_MAX_LENGTH,
   HUMAN_READABLE_ID_MIN_LENGTH,
   HUMAN_READABLE_ID_PATTERN,
 } from '@kbn/human-readable-id';
 import type { DotKeysOf, DotObject, JsonValue, RecursivePartial } from '@kbn/utility-types';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import type { WorkflowAccessSubject, WorkflowPermissions } from '../common/access_control';
 import type { StepDeprecationInfo } from '../spec/deprecated_step_metadata';
 import type {
@@ -137,15 +139,26 @@ export type WorkflowTokenUsage = z.infer<typeof WorkflowTokenUsageSchema>;
 
 export type WorkflowStepTokenUsage = z.infer<typeof WorkflowStepTokenUsageSchema>;
 
+/** Identity snapshot of the user who triggered an execution, captured at trigger time. */
+export interface WorkflowExecutionExecutedByUser {
+  /** Display name: the user's full name when set, otherwise the username. */
+  name: string;
+  username: string;
+  profileUid?: string;
+}
+
 export interface EsWorkflowExecution {
   spaceId: string;
   id: string;
+  runName?: string;
   workflowId: string;
   managed?: boolean;
   managedBy?: string | null;
   billable?: boolean | null;
   originManagedWorkflowId?: string | null;
   managedVersion?: number | null;
+  /** Workflow document lifetime. Absent for a test run that has no saved workflow. */
+  workflowUid?: string;
   isTestRun: boolean;
   /** Whether the test uses a submitted definition instead of the saved workflow. */
   isEphemeral?: boolean;
@@ -162,6 +175,8 @@ export interface EsWorkflowExecution {
   createdBy?: string; // Keep for backwards compatibility with existing documents
   effectiveIdentity?: z.infer<typeof WorkflowEffectiveIdentitySchema>;
   executedBy?: string; // User who triggered the workflow
+  /** Identity snapshot of the user who triggered the workflow, captured at trigger time. */
+  executedByUser?: WorkflowExecutionExecutedByUser;
   startedAt: string;
   finishedAt: string;
   cancelRequested: boolean;
@@ -228,6 +243,8 @@ export interface EsWorkflowStepExecution {
   scopeStack: StackFrame[];
   workflowRunId: string;
   workflowId: string;
+  /** Workflow document lifetime copied from the execution. Absent when the run has no saved workflow. */
+  workflowUid?: string;
   status: ExecutionStatus;
   /** Whether this step execution belongs to a test run of the workflow. */
   isTestRun?: boolean;
@@ -298,6 +315,7 @@ export interface WorkflowExecutionLogModel {
 export interface WorkflowExecutionDto {
   spaceId: string;
   id: string;
+  runName?: string;
   managed?: boolean;
   managedBy?: string | null;
   originManagedWorkflowId?: string | null;
@@ -318,6 +336,8 @@ export interface WorkflowExecutionDto {
   duration: number | null;
   effectiveIdentity?: z.infer<typeof WorkflowEffectiveIdentitySchema>;
   executedBy?: string; // User who triggered the workflow
+  /** Profile of `executedBy`, resolved server-side so readers don't need `bulkGetUserProfiles`. */
+  executedByProfile?: UserProfile<{ avatar?: UserProfileAvatarData }>;
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;
   context?: Record<string, unknown>;
@@ -350,6 +370,11 @@ export interface WorkflowExecutionListDto {
    * Absent when there are no further results.
    */
   searchAfter?: unknown[];
+  /**
+   * True when this workflow has a named execution in the space, ignoring list
+   * filters. Present only on the first page of a per-workflow list.
+   */
+  hasNamedExecution?: boolean;
 }
 
 export interface WorkflowStepExecutionListDto {
@@ -361,28 +386,31 @@ export interface WorkflowStepExecutionListDto {
 
 // TODO: convert to actual elastic document spec
 
-export const EsWorkflowSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string().optional(),
-  enabled: z.boolean(),
-  managed: z.boolean().optional(),
-  managedBy: z.string().nullable().optional(),
-  billable: z.boolean().nullable().optional(),
-  originManagedWorkflowId: z.string().nullable().optional(),
-  managedVersion: z.number().nullable().optional(),
-  tags: z.array(z.string()),
-  createdAt: z.date(),
-  createdBy: z.string(),
-  lastUpdatedAt: z.date(),
-  lastUpdatedBy: z.string(),
-  definition: WorkflowSchema.optional(),
-  deleted_at: z.date().nullable().default(null),
-  yaml: z.string(),
-  valid: z.boolean().readonly(),
-  /** Monotonic workflow document version counter (`_source.version`). */
-  version: z.number().optional(),
-});
+export const EsWorkflowSchema = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string().optional(),
+    enabled: z.boolean(),
+    managed: z.boolean().optional(),
+    managedBy: z.string().nullable().optional(),
+    billable: z.boolean().nullable().optional(),
+    originManagedWorkflowId: z.string().nullable().optional(),
+    managedVersion: z.number().nullable().optional(),
+    workflowUid: z.string().optional(),
+    tags: z.array(z.string()),
+    createdAt: z.date(),
+    createdBy: z.string(),
+    lastUpdatedAt: z.date(),
+    lastUpdatedBy: z.string(),
+    definition: WorkflowSchema.optional(),
+    deleted_at: z.date().nullable().default(null),
+    yaml: z.string(),
+    valid: z.boolean().readonly(),
+    /** Monotonic workflow document version counter (`_source.version`). */
+    version: z.number().optional(),
+  })
+);
 
 export type EsWorkflow = z.infer<typeof EsWorkflowSchema> & WorkflowAccessSubject;
 
@@ -489,6 +517,7 @@ export interface WorkflowDetailDto extends WorkflowAccessSubject {
   definitionHash?: string | null;
   originManagedWorkflowId?: string | null;
   managedVersion?: number | null;
+  workflowUid?: string;
   lifecycle?: 'static' | 'dynamic' | null;
   createdAt: string;
   createdBy: string;
@@ -546,6 +575,7 @@ export interface WorkflowExecutionEngineModel
     | 'originManagedWorkflowId'
     | 'managedVersion'
     | 'version'
+    | 'workflowUid'
   > {
   isTestRun?: boolean;
   isEphemeral?: boolean;

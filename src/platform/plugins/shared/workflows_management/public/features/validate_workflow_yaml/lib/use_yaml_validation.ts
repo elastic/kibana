@@ -71,11 +71,12 @@ export function useYamlValidation(
       }
 
       if (!isWorkflowTab) {
+        // Drop markers on the execution snapshot. Keep the last workflow-tab results so
+        // opening an execution does not report the saved workflow as valid.
         if (decorationsCollection.current) {
           decorationsCollection.current.clear();
         }
         monaco.editor.setModelMarkers(model, BATCHED_CUSTOM_MARKER_OWNER, []);
-        setStableValidationResults([]);
         setIsLoading(false);
         setError(null);
         return;

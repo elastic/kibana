@@ -52,6 +52,7 @@ interface YamlStep {
   with?: {
     result_report_intent_targets?: string;
     result_behaviors?: string;
+    result_coverage_gaps?: string;
     report_intent_targets?: string;
     'workflow-id'?: string;
     'run-as-mode'?: string;
@@ -327,6 +328,69 @@ describe('Hunt Watch worker chain', () => {
       ).toEqual(expected);
     });
 
+    describe('coverage_gaps', () => {
+      const gap = (id: string) => ({
+        reason: 'unknown_technique_id',
+        detail: id,
+        technique_id: id,
+      });
+      const gapsOutput = (result: Record<string, unknown> | undefined) =>
+        evaluateExpression(resultVariables().result_coverage_gaps as string, {
+          steps: {
+            read_hunt_result: result ? { output: { data: { result } } } : undefined,
+          },
+        });
+
+      it('concatenates the coordinator, Tier 1 and Tier 2 gaps, coordinator first', () => {
+        expect(
+          gapsOutput({
+            incomplete: [gap('C')],
+            tier1: { incomplete: [gap('T1')] },
+            tier2: { incomplete: [gap('T2')] },
+          })
+        ).toEqual([gap('C'), gap('T1'), gap('T2')]);
+      });
+
+      it.each([
+        [
+          'no coordinator gaps',
+          { tier1: { incomplete: [gap('T1')] }, tier2: { incomplete: [gap('T2')] } },
+          ['T1', 'T2'],
+        ],
+        [
+          'no Tier 1 gaps',
+          { incomplete: [gap('C')], tier1: {}, tier2: { incomplete: [gap('T2')] } },
+          ['C', 'T2'],
+        ],
+        [
+          'no Tier 2 (it never ran)',
+          { incomplete: [gap('C')], tier1: { incomplete: [gap('T1')] } },
+          ['C', 'T1'],
+        ],
+      ])('renders %s without error', (_name, result, expected) => {
+        expect(
+          (gapsOutput(result) as Array<{ technique_id: string }>).map((entry) => entry.technique_id)
+        ).toEqual(expected);
+      });
+
+      it.each([
+        ['every list nil', {}],
+        ['no read at all', undefined],
+      ])('is an empty array with %s', (_name, result) => {
+        expect(gapsOutput(result)).toEqual([]);
+      });
+
+      it('bounds the list at 100 and keeps the coordinator gaps ahead of technique gaps', () => {
+        const many = Array.from({ length: 150 }, (_, index) => gap(`T${index}`));
+        const bounded = gapsOutput({
+          incomplete: [{ reason: 'input_truncated', detail: 'prefix only' }],
+          tier2: { incomplete: many },
+        }) as Array<{ reason: string }>;
+        expect(bounded).toHaveLength(100);
+        expect(bounded[0].reason).toBe('input_truncated');
+      });
+    });
+
     it('reads behaviors as an empty array when Tier 2 never ran', () => {
       expect(
         evaluateExpression(resultVariables().result_behaviors as string, {
@@ -592,7 +656,12 @@ describe('Hunt Watch worker chain', () => {
   describe('hunt — result status from the polled envelope', () => {
     const variables = stepIn(huntSteps, 'resolve_result_status')?.with as Record<string, string>;
     const liquid = createWorkflowLiquidEngine();
-    const render = (template: string, readOutput: unknown): string =>
+    const render = (
+      template: string,
+      readOutput: unknown,
+      writeEvidenceError?: string,
+      settledByCap?: boolean
+    ): string =>
       liquid
         .parseAndRenderSync(template, {
           inputs: { investigationConversationId: 'conv-1' },
@@ -602,11 +671,18 @@ describe('Hunt Watch worker chain', () => {
               output: { run_id: 'run-1', state: 'running', result_attachment_id: 'att-1' },
             },
             ...(readOutput === undefined ? {} : { read_hunt_result: { output: readOutput } }),
+            ...(writeEvidenceError === undefined
+              ? settledByCap === undefined
+                ? {}
+                : { write_evidence: { output: { acknowledged: true, settledByCap } } }
+              : { write_evidence: { error: { message: writeEvidenceError } } }),
           },
         })
         .trim();
-    const status = (readOutput: unknown) => render(variables.result_status, readOutput);
-    const reason = (readOutput: unknown) => render(variables.result_reason, readOutput);
+    const status = (readOutput: unknown, writeEvidenceError?: string, settledByCap?: boolean) =>
+      render(variables.result_status, readOutput, writeEvidenceError, settledByCap);
+    const reason = (readOutput: unknown, writeEvidenceError?: string, settledByCap?: boolean) =>
+      render(variables.result_reason, readOutput, writeEvidenceError, settledByCap);
 
     const LIMIT_REASON =
       'Hunt coordinator did not finish before the hunt child stopped polling (60 reads, 10s apart); see hunt execution exec-1.';
@@ -626,6 +702,75 @@ describe('Hunt Watch worker chain', () => {
       };
       expect(status(completed)).toBe('partial');
       expect(reason(completed)).toContain('incomplete but retryable (Tier 2 timed out)');
+    });
+
+    it('is retired_incomplete for a retryable run the write settled because the ledger is full', () => {
+      const completed = {
+        data: {
+          state: 'completed',
+          result: { completeness: 'incomplete_retryable', message: 'Tier 2 timed out' },
+        },
+      };
+      expect(status(completed, undefined, true)).toBe('retired_incomplete');
+      expect(reason(completed, undefined, true)).toContain('coverage ledger is full');
+      expect(status(completed, undefined, false)).toBe('partial');
+    });
+
+    it('stays partial for a ledger-settled retryable run with a confirmed hit', () => {
+      const completed = {
+        data: {
+          state: 'completed',
+          result: {
+            completeness: 'incomplete_retryable',
+            has_confirmed_hit: true,
+            message: 'Tier 2 timed out',
+          },
+        },
+      };
+      expect(status(completed, undefined, true)).toBe('partial');
+    });
+
+    const incompleteFinal = (hasConfirmedHit: boolean) => ({
+      data: {
+        state: 'completed',
+        result: {
+          completeness: 'incomplete_final',
+          has_confirmed_hit: hasConfirmedHit,
+          message: 'T9999 is not in the catalog',
+        },
+      },
+    });
+
+    it('is retired_incomplete for a settled incomplete_final run with no hit', () => {
+      expect(status(incompleteFinal(false))).toBe('retired_incomplete');
+      expect(reason(incompleteFinal(false))).toContain(
+        'retired without having been fully searched; its executed searches are recorded'
+      );
+    });
+
+    it('stays partial for an incomplete_final run with a confirmed hit, which packages through the SSE path', () => {
+      expect(status(incompleteFinal(true))).toBe('partial');
+    });
+
+    it('stays partial, quoting the error, when the evidence write failed and the gate was not stamped', () => {
+      expect(status(incompleteFinal(false), 'write failed: 503')).toBe('partial');
+      expect(reason(incompleteFinal(false), 'write failed: 503')).toContain(
+        'could not be recorded on the report (write failed: 503)'
+      );
+      expect(reason(incompleteFinal(false), 'write failed: 503')).toContain(
+        'stays eligible for a later sweep'
+      );
+    });
+
+    it('stays partial for incomplete_retryable whatever the evidence write did', () => {
+      const retryable = {
+        data: {
+          state: 'completed',
+          result: { completeness: 'incomplete_retryable', message: 'x' },
+        },
+      };
+      expect(status(retryable)).toBe('partial');
+      expect(status(retryable, 'boom')).toBe('partial');
     });
 
     it('is failed with the fixed limit reason when the poll ends on a run still running', () => {
@@ -1036,6 +1181,190 @@ describe('Hunt Watch worker chain', () => {
       });
     });
 
+    describe('a Proposal the gate could not create', () => {
+      // A create that fails with no Proposal under the id is neither a lost race nor a failure
+      // after creation. It used to end the gate COMPLETED while the hunt-once stamp was already
+      // written, so the finding was in no queue and nothing said so.
+      const ownStep = stepIn(proposalGateSteps, 'resolve_own_proposal');
+      const outcomeStep = stepIn(proposalGateSteps, 'resolve_create_outcome');
+      const journalStep = stepIn(proposalGateSteps, 'journal_create_failure');
+      const failStep = stepIn(proposalGateSteps, 'fail_on_create_failure');
+      const ownWith = ownStep?.with as Record<string, string>;
+      const outcomeWith = outcomeStep?.with as Record<string, string>;
+      const liquid = createWorkflowLiquidEngine();
+
+      const withCreateError = (message: string | undefined) => ({
+        inputs: { conversationId: 'conv-1', title: 'Isolate host A', reportId: 'report-1' },
+        steps: {
+          create_and_gate_proposal:
+            message === undefined ? { output: { status: 'approved' } } : { error: { message } },
+        },
+      });
+
+      it('knows a Proposal under the id belongs to this conversation', () => {
+        const own = (fetched: Record<string, unknown> | undefined) =>
+          evaluateExpression(ownWith.own_proposal_exists, {
+            ...withCreateError('boom'),
+            steps: {
+              ...withCreateError('boom').steps,
+              ...(fetched === undefined ? {} : { fetch_existing_proposal: { output: fetched } }),
+            },
+          });
+
+        expect(own({ conversationId: 'conv-1' })).toBe(true);
+        expect(own({ conversationId: 'conv-other' })).toBe(false);
+        expect(own(undefined)).toBe(false);
+      });
+
+      it('reads an already-exists refusal as a conflict, and nothing else', () => {
+        const conflict = (message: string | undefined) =>
+          evaluateExpression(ownWith.create_conflict, withCreateError(message));
+
+        expect(conflict('Proposal [x] already exists')).toBe(true);
+        expect(conflict('boom')).toBe(false);
+        expect(conflict(undefined)).toBe(false);
+      });
+
+      describe('create_failed', () => {
+        const failed = (
+          message: string | undefined,
+          variables: Record<string, boolean> | undefined
+        ) =>
+          evaluateExpression(outcomeWith.create_failed, {
+            ...withCreateError(message),
+            variables: variables ?? {},
+          });
+        const none = { lost_race: false, own_proposal_exists: false, create_conflict: false };
+
+        it('is true for a create that failed with no Proposal under the id', () => {
+          expect(failed('boom', none)).toBe(true);
+        });
+
+        it('is false for a lost race', () => {
+          expect(failed('boom', { ...none, lost_race: true })).toBe(false);
+        });
+
+        it('is false when this conversation already has its Proposal, so a later failure stays as it was', () => {
+          expect(failed('boom', { ...none, own_proposal_exists: true })).toBe(false);
+        });
+
+        it('is false for a conflict even when the lookup could not see the winner yet', () => {
+          expect(failed('Proposal [x] already exists', { ...none, create_conflict: true })).toBe(
+            false
+          );
+        });
+
+        it('is false when the create did not fail', () => {
+          expect(failed(undefined, none)).toBe(false);
+        });
+
+        it('reports when the flags are unset, which is the safe default', () => {
+          expect(failed('boom', undefined)).toBe(true);
+        });
+      });
+
+      describe('the journal note', () => {
+        const render = (context: Record<string, unknown>) =>
+          liquid.parseAndRenderSync(outcomeWith.create_failure_note, context).trim();
+
+        it('names the action, the error and the report a manual run must target', () => {
+          const note = render(withCreateError('boom'));
+
+          expect(note).toContain('"Isolate host A"');
+          expect(note).toContain('boom');
+          expect(note).toContain('not in the Proposal queue');
+          expect(note).toContain('`report-1`');
+          expect(note).toContain('stays open');
+        });
+
+        it('names the action when the gate was given no title', () => {
+          const context = withCreateError('boom');
+
+          expect(
+            render({ ...context, inputs: { conversationId: 'conv-1', reportId: 'report-1' } })
+          ).toContain('"the proposed action"');
+        });
+
+        it("points at this Investigation's report when packaging sent no reportId", () => {
+          const context = withCreateError('boom');
+          const note = render({
+            ...context,
+            inputs: { conversationId: 'conv-1', title: 'Isolate host A' },
+          });
+
+          expect(note).toContain("this Investigation's report");
+          expect(note).not.toContain('targeting report `');
+        });
+
+        it('keeps the note under the journal message bound when the create error is long', () => {
+          const note = render(withCreateError('x'.repeat(5000)));
+
+          expect(note.length).toBeLessThan(8000);
+          expect(note).toContain('xxx');
+          expect(note).not.toContain('x'.repeat(2001));
+        });
+      });
+
+      it('writes the note on this Investigation through the journal workflow, and never fails the gate over it', () => {
+        expect(journalStep?.if).toContain('variables.create_failed == true');
+        expect(journalStep?.with?.['workflow-id']).toBe(ALERTZERO_JOURNAL_NOTE_WORKFLOW.id);
+        expect(journalStep?.with?.['run-as-mode']).toBe('inherit');
+        expect(String(journalStep?.with?.inputs?.author_name)).toContain('consts.author_name');
+        expect(String(journalStep?.with?.inputs?.conversation_id)).toContain(
+          'inputs.investigationConversationId'
+        );
+        expect(String(journalStep?.with?.inputs?.message)).toContain(
+          'variables.create_failure_note'
+        );
+        expect(journalStep?.['on-failure']?.continue).toBe(true);
+      });
+
+      it('ends the run failed with the create error, and only when the create failed', () => {
+        expect(failStep?.type).toBe('workflow.fail');
+        expect(failStep?.if).toContain('variables.create_failed == true');
+        expect(String((failStep?.with as { message?: string } | undefined)?.message)).toContain(
+          'steps.create_and_gate_proposal.error.message'
+        );
+      });
+
+      it('journals before the settlement requery, and fails after the cleanup, just before emit_result', () => {
+        const order = proposalGate.steps.map((step) => step.name);
+
+        expect(order.indexOf('resolve_own_proposal')).toBeGreaterThan(
+          order.indexOf('journal_lost_race')
+        );
+        expect(order.indexOf('resolve_create_outcome')).toBeGreaterThan(
+          order.indexOf('resolve_own_proposal')
+        );
+        expect(order.indexOf('journal_create_failure')).toBeGreaterThan(
+          order.indexOf('resolve_create_outcome')
+        );
+        expect(order.indexOf('journal_create_failure')).toBeLessThan(
+          order.indexOf('resolve_gate_wrapper_output')
+        );
+        expect(order.indexOf('fail_on_create_failure')).toBeGreaterThan(
+          order.indexOf('report_investigation_closed_settled')
+        );
+        expect(order.indexOf('fail_on_create_failure')).toBe(order.indexOf('emit_result') - 1);
+        expect(order[order.length - 1]).toBe('emit_result');
+        expect((stepIn(proposalGateSteps, 'emit_result') as { status?: string }).status).toBe(
+          'completed'
+        );
+      });
+
+      it('takes a reportId from packaging without requiring it', () => {
+        expect(Object.keys(gateTrigger?.properties ?? {})).toContain('reportId');
+        expect(gateTrigger?.required).not.toContain('reportId');
+
+        const dispatch = stepIn(
+          flatten(stepIn(packageReportSteps, 'start_proposal_gates')?.steps ?? []),
+          'dispatch_gate'
+        );
+
+        expect(String(dispatch?.with?.inputs?.reportId)).toContain('inputs.reportId');
+      });
+    });
+
     describe('the convergence notes', () => {
       const notes = stepIn(packageReportSteps, 'write_convergence_notes') as
         | (YamlStep & { foreach?: string; mode?: string; if?: string })
@@ -1178,5 +1507,187 @@ describe('Hunt Watch worker chain', () => {
         );
       });
     });
+  });
+});
+
+describe('Hunt Watch worker: a retired_incomplete hunt', () => {
+  const liquid = createWorkflowLiquidEngine();
+  const packageInputs = () => stepIn(workerSteps, 'package_report')?.with?.inputs ?? {};
+  const outcomeWith = () =>
+    stepIn(workerSteps, 'resolve_run_outcome')?.with as Record<string, string>;
+  const conclusion = (context: Record<string, unknown>): string => {
+    const message = (
+      stepIn(workerSteps, 'write_run_conclusion')?.with?.inputs as Record<string, string>
+    ).message;
+    return liquid
+      .parseAndRenderSync(message, {
+        foreach: { item: 'rpt-1' },
+        execution: { id: 'exec-1', url: 'https://kibana/exec-1' },
+        ...context,
+      })
+      .trim();
+  };
+  const retiredContext = (huntStatus: string, coverageGaps: unknown[] = []) => ({
+    steps: {
+      resolve_run_outcome: { output: { outcome: 'completed' } },
+      hunt: {
+        output: {
+          status: huntStatus,
+          headline: 'No confirmed hits',
+          reason: 'The hunt left a gap a later run could not close.',
+          coverage_gaps: coverageGaps,
+        },
+      },
+      package_report: {
+        output: { status: 'packaged', summary: 'Closed this Investigation as benign.' },
+      },
+    },
+  });
+
+  it('forwards the hunt coverage gaps to packaging, and an empty list when there are none', () => {
+    const gap = { reason: 'unknown_technique_id', detail: 'T9999', technique_id: 'T9999' };
+    expect(
+      evaluateExpression(packageInputs().coverageGaps as string, {
+        steps: { hunt: { output: { coverage_gaps: [gap] } } },
+      })
+    ).toEqual([gap]);
+    expect(
+      evaluateExpression(packageInputs().coverageGaps as string, {
+        steps: { hunt: { output: {} } },
+      })
+    ).toEqual([]);
+  });
+
+  it.each([
+    ['packaged it', 'packaged', 'completed'],
+    ['could not package it', 'run_incomplete', 'partial'],
+  ])('counts the branch by what packaging did when it %s', (_name, packageStatus, expected) => {
+    expect(
+      liquid
+        .parseAndRenderSync(outcomeWith().outcome, {
+          steps: {
+            hunt: { output: { status: 'retired_incomplete' } },
+            package_report: { output: { status: packageStatus } },
+          },
+        })
+        .trim()
+    ).toBe(expected);
+  });
+
+  it('closes with a heading that says the report retired without a full search', () => {
+    const message = conclusion(retiredContext('retired_incomplete'));
+    expect(message).toContain(
+      '### Hunt Watch run completed: the report is retired without a full search'
+    );
+    expect(message).toContain('The report will not be swept again on its own');
+    expect(message).toContain('Closed this Investigation as benign.');
+  });
+
+  // Whether the Investigation summary names the gaps depends on packaging having closed it, which
+  // only the packaging summary knows (a held or failed close still returns `packaged`).
+  it('leaves the claim about naming the gaps to the packaging summary', () => {
+    const gaps = [{ reason: 'input_truncated', detail: 'x' }];
+    for (const message of [
+      conclusion(retiredContext('retired_incomplete', gaps)),
+      conclusion(retiredContext('retired_incomplete')),
+    ]) {
+      expect(message).not.toContain('names what was not searched');
+      expect(message).toContain('The report will not be swept again on its own');
+    }
+  });
+
+  it('never claims coverage items were recorded, which the Worker cannot see', () => {
+    expect(conclusion(retiredContext('retired_incomplete'))).not.toContain(
+      'coverage knowledge item'
+    );
+  });
+
+  it('keeps the generic completed heading for a successful hunt', () => {
+    const message = conclusion(retiredContext('success'));
+    expect(message).toContain('### Hunt Watch run completed\n');
+    expect(message).not.toContain('retired without a full search');
+  });
+});
+
+describe('Hunt Watch packaging summary for a settled no-hit run', () => {
+  const template = (
+    stepIn(packageReportSteps, 'resolve_package_summary')?.with as Record<string, string>
+  ).package_summary;
+  const summary = (huntStatus: string, coverageGaps?: unknown[], status = 'packaged') =>
+    createWorkflowLiquidEngine()
+      .parseAndRenderSync(template, {
+        inputs: { huntStatus, ...(coverageGaps ? { coverageGaps } : {}) },
+        steps: {
+          decide_and_package: {
+            output: {
+              status,
+              dismiss: true,
+              converged: [],
+              proposals: [],
+              coverage: { written: [1, 2, 3], skipped: [] },
+            },
+          },
+        },
+        variables: { package_status: status === 'packaged' ? 'success' : 'run_incomplete' },
+      })
+      .trim();
+
+  it('says the Investigation summary names what was not searched when the gaps arrived', () => {
+    expect(summary('retired_incomplete', [{ reason: 'input_truncated', detail: 'x' }])).toBe(
+      'No confirmed hits, so packaging closed this Investigation as other rather than benign, because part of the report could not be searched and the report is retired without a full search; the Investigation summary names what was not searched; recorded 3 coverage knowledge items for Detection Watch.'
+    );
+  });
+
+  it('makes no claim about naming the gaps when none arrived (an older Worker)', () => {
+    expect(summary('retired_incomplete')).toBe(
+      'No confirmed hits, so packaging closed this Investigation as other rather than benign, because part of the report could not be searched and the report is retired without a full search; recorded 3 coverage knowledge items for Detection Watch.'
+    );
+  });
+
+  it('keeps the clean wording for a successful run', () => {
+    expect(summary('success')).toBe(
+      'No confirmed hits, so packaging closed this Investigation as benign and recorded 3 coverage knowledge items for Detection Watch.'
+    );
+  });
+});
+
+describe('Hunt Watch packaging summary for an incomplete run', () => {
+  const template = (
+    stepIn(packageReportSteps, 'resolve_package_summary')?.with as Record<string, string>
+  ).package_summary;
+  const summary = (hasConfirmedHit: boolean) =>
+    createWorkflowLiquidEngine()
+      .parseAndRenderSync(template, {
+        inputs: { huntStatus: 'partial', hasConfirmedHit },
+        steps: { decide_and_package: { output: { status: 'run_incomplete' } } },
+        variables: { package_status: 'run_incomplete', package_reason: 'no attachment' },
+      })
+      .trim();
+
+  it('promises a later sweep for a partial run with no confirmed hit', () => {
+    expect(summary(false)).toContain('a later sweep hunts this report again');
+  });
+
+  it('does not promise a re-hunt when the run had a confirmed hit', () => {
+    const message = summary(true);
+    expect(message).not.toContain('later sweep');
+    expect(message).toContain('stays open for a retry');
+  });
+});
+
+describe('Hunt Watch dismissal close reason', () => {
+  const template = (
+    (stepIn(packageReportSteps, 'dismiss_investigation_if_clean')?.with as Record<string, unknown>)
+      .updates as Record<string, string>
+  ).close_reason;
+  const closeReason = (huntStatus: string) =>
+    createWorkflowLiquidEngine().parseAndRenderSync(template, { inputs: { huntStatus } }).trim();
+
+  it('closes a fully searched clean run as benign', () => {
+    expect(closeReason('success')).toBe('benign');
+  });
+
+  it('closes a retired run as other, so it is not mistaken for a full clean close', () => {
+    expect(closeReason('retired_incomplete')).toBe('other');
   });
 });

@@ -54,13 +54,35 @@ apiTest.describe.serial(
     // keep ingest and enrich on after this suite's last Hunt goes off, so the last-consumer
     // row below asserts against this instead of assuming A and B are the only Hunts.
     let otherSpacesHunt = false;
+    // Set only when setup changed the default space's solution view, so afterAll puts back
+    // what was there and leaves a default space that already used Security alone.
+    let restoreDefaultSolutionView: (() => Promise<void>) | undefined;
 
     apiTest.beforeAll(async ({ apiServices, samlAuth, apiClient }) => {
       await apiServices.spaces.create({ id: SPACE_A, name: SPACE_A });
       await apiServices.spaces.create({ id: SPACE_B, name: SPACE_B });
+      await apiServices.spaces.setSolutionView({ id: SPACE_A, solution: 'security' });
+      await apiServices.spaces.setSolutionView({ id: SPACE_B, solution: 'security' });
 
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       adminHeaders = withHuntHeaders(cookieHeader);
+
+      // AlertZero works only in a Security solution space. The default space may be Classic.
+      // Spaces is a public API: it takes the public API version, not the internal one.
+      const defaultSpace = await apiClient.get('/api/spaces/space/default', {
+        headers: { ...adminHeaders, 'elastic-api-version': '2023-10-31' },
+        responseType: 'json',
+      });
+      expect(defaultSpace.statusCode).toBe(200);
+      const { solution: defaultSolution = 'classic' } = defaultSpace.body as { solution?: string };
+      if (defaultSolution !== 'security') {
+        await apiServices.spaces.setSolutionView({ id: 'default', solution: 'security' });
+        restoreDefaultSolutionView = () =>
+          apiServices.spaces.setSolutionView({
+            id: 'default',
+            solution: defaultSolution as 'classic' | 'oblt' | 'es',
+          });
+      }
 
       defaultAlertZeroBaseline = {
         enabled: await readAlertZeroEnabledInSpace({
@@ -141,6 +163,10 @@ apiTest.describe.serial(
         { name: `clean up prerequisites in ${SPACE_B}`, run: () => prereqB?.cleanup() },
         { name: `delete space ${SPACE_A}`, run: () => apiServices.spaces.delete(SPACE_A) },
         { name: `delete space ${SPACE_B}`, run: () => apiServices.spaces.delete(SPACE_B) },
+        {
+          name: 'restore default space solution view',
+          run: async () => restoreDefaultSolutionView?.(),
+        },
         {
           name: 'restore default space AlertZero setting',
           run: async () => {

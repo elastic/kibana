@@ -8,7 +8,7 @@
  */
 
 import { once } from 'lodash';
-import { firstValueFrom } from 'rxjs';
+import pLimit from 'p-limit';
 import type { KibanaRequest } from '@kbn/core/server';
 import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
 import type { ESQLCallbacks } from '@kbn/esql-types';
@@ -16,21 +16,70 @@ import {
   type ConnectorContractUnion,
   toCustomTriggerSchemaConfigs,
   type ValidateWorkflowResponseDto,
-  WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG,
 } from '@kbn/workflows';
 import type { GetAvailableConnectorsResponse } from '@kbn/workflows/types/v1';
 import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
-import type { WorkflowContextRegistry } from '@kbn/workflows-yaml';
+import type { CalledWorkflowOutputs, WorkflowContextRegistry } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 
 import type { WorkflowValidationDeps } from './types';
-import { toRegisteredStepOutput } from '../../common/lib/create_workflow_context_registry';
+import {
+  toCalledWorkflowOutputs,
+  toRegisteredStepOutput,
+} from '../../common/lib/create_workflow_context_registry';
 import { validateWorkflowYaml } from '../../common/lib/validate_workflow_yaml';
 import {
   getAllConnectorsWithDynamic,
   getWorkflowZodSchemaFromConnectors,
 } from '../../common/schema';
 import { getAvailableConnectors } from '../api/lib/workflow_connectors';
+
+/**
+ * How many ES|QL steps one validation checks. Each check runs the ES|QL
+ * validator on Kibana's event loop, so the cap bounds the CPU one request costs.
+ */
+export const MAX_VALIDATED_ESQL_STEPS = 100;
+
+/**
+ * How many distinct ES|QL column requests one validation sends to
+ * Elasticsearch. One step can read many sources (`FROM`, `LOOKUP JOIN`,
+ * `ENRICH`), so the step cap alone does not bound them.
+ */
+export const MAX_ESQL_COLUMNS_REQUESTS = 200;
+
+/** How many ES|QL column requests one validation sends to Elasticsearch at a time. */
+export const MAX_CONCURRENT_ESQL_COLUMNS_REQUESTS = 5;
+
+type GetColumnsFor = NonNullable<ESQLCallbacks['getColumnsFor']>;
+
+/**
+ * Wraps `getColumnsFor` for one validation: steps that read the same source
+ * share one request, at most {@link MAX_CONCURRENT_ESQL_COLUMNS_REQUESTS}
+ * requests run at a time, and sources past {@link MAX_ESQL_COLUMNS_REQUESTS}
+ * get no columns, so their fields are not checked. The memo lives only as long
+ * as the callbacks, so it never answers one user's validation with another
+ * user's columns.
+ */
+const shareColumnsRequests = (getColumnsFor: GetColumnsFor) => {
+  const limit = pLimit(MAX_CONCURRENT_ESQL_COLUMNS_REQUESTS);
+  const requests = new Map<string, ReturnType<GetColumnsFor>>();
+  const skippedSources = new Set<string>();
+  const shared: GetColumnsFor = (ctx) => {
+    const key = ctx?.query ?? '';
+    const existing = requests.get(key);
+    if (existing) {
+      return existing;
+    }
+    if (requests.size >= MAX_ESQL_COLUMNS_REQUESTS) {
+      skippedSources.add(key);
+      return Promise.resolve([]);
+    }
+    const request = limit(() => getColumnsFor(ctx));
+    requests.set(key, request);
+    return request;
+  };
+  return { getColumnsFor: shared, skippedSources };
+};
 
 export class WorkflowValidationService {
   constructor(private readonly deps: WorkflowValidationDeps) {}
@@ -88,21 +137,29 @@ export class WorkflowValidationService {
     const triggerDefinitions = this.getRegisteredCustomTriggerDefinitions();
     const zodSchema = getWorkflowZodSchemaFromConnectors(
       allConnectors,
-      toCustomTriggerSchemaConfigs(triggerDefinitions)
+      toCustomTriggerSchemaConfigs(triggerDefinitions),
+      { includePageTrigger: this.deps.pagesEnabled }
     );
-    const warnIgnoredKibanaFetcher = await firstValueFrom(
-      this.deps
-        .getCoreStart()
-        .featureFlags.getBooleanValue$(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, false)
-    );
-    return validateWorkflowYaml(yaml, zodSchema, {
+    const esql = includeEsqlRules ? this.createEsqlCallbacks(request) : undefined;
+    const result = await validateWorkflowYaml(yaml, zodSchema, {
       triggerDefinitions,
-      warnIgnoredKibanaFetcher,
       ...(includeVariableRules && {
         variableValidationRegistry: this.createContextRegistry(allConnectors),
+        loadCalledWorkflowOutputs: (workflowIds: string[]) =>
+          this.loadCalledWorkflowOutputs(workflowIds, spaceId, request),
       }),
-      ...(includeEsqlRules && { esqlCallbacks: this.createEsqlCallbacks(request) }),
+      ...(esql && { esqlCallbacks: esql.callbacks, esqlMaxSteps: MAX_VALIDATED_ESQL_STEPS }),
     });
+    if (!esql?.skippedSources.size) {
+      return result;
+    }
+    return {
+      ...result,
+      notChecked: [
+        ...(result.notChecked ?? []),
+        `ES|QL: fields of ${esql.skippedSources.size} sources were not checked: one validation fetches columns for at most ${MAX_ESQL_COLUMNS_REQUESTS} sources.`,
+      ],
+    };
   }
 
   async getWorkflowZodSchema(
@@ -118,7 +175,8 @@ export class WorkflowValidationService {
 
     return getWorkflowZodSchemaFromConnectors(
       await this.resolveConnectors(spaceId, request),
-      toCustomTriggerSchemaConfigs(this.getRegisteredCustomTriggerDefinitions())
+      toCustomTriggerSchemaConfigs(this.getRegisteredCustomTriggerDefinitions()),
+      { includePageTrigger: this.deps.pagesEnabled }
     );
   }
 
@@ -133,20 +191,41 @@ export class WorkflowValidationService {
   /**
    * The callbacks the editor supplies (see `useWorkflowEsqlCallbacks`), backed
    * by the current user's ES client. Sources and policies are fetched once per
-   * validation, not once per ES|QL step.
+   * validation, not once per ES|QL step, and columns once per source.
+   * `skippedSources` lists the sources whose columns were not fetched.
    */
-  private createEsqlCallbacks(request: KibanaRequest): ESQLCallbacks {
+  private createEsqlCallbacks(request: KibanaRequest): {
+    callbacks: ESQLCallbacks;
+    skippedSources: ReadonlySet<string>;
+  } {
     const esClient = this.deps.getCoreStart().elasticsearch.client.asScoped(request);
     const { getSources, getColumnsFor, getPolicies } = buildServerESQLCallbacks({
       esClient,
       logger: this.deps.logger,
     });
+    const columns = getColumnsFor && shareColumnsRequests(getColumnsFor);
     return {
-      getSources: getSources && once(getSources),
-      getColumnsFor,
-      getPolicies: getPolicies && once(getPolicies),
-      getLicense: once(() => this.deps.licensing.getLicense()),
+      callbacks: {
+        getSources: getSources && once(getSources),
+        getColumnsFor: columns?.getColumnsFor,
+        getPolicies: getPolicies && once(getPolicies),
+        getLicense: once(() => this.deps.licensing.getLicense()),
+      },
+      skippedSources: columns?.skippedSources ?? new Set(),
     };
+  }
+
+  private async loadCalledWorkflowOutputs(
+    workflowIds: string[],
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<ReadonlyMap<string, CalledWorkflowOutputs>> {
+    const workflows = await this.deps.getWorkflowsForOutputs(workflowIds, spaceId, request);
+    return new Map(
+      workflows.flatMap(({ id, name, definition }) =>
+        name === undefined ? [] : [[id, toCalledWorkflowOutputs({ name, definition })] as const]
+      )
+    );
   }
 
   private createContextRegistry(allConnectors: ConnectorContractUnion[]): WorkflowContextRegistry {

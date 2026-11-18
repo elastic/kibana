@@ -29,8 +29,9 @@ function listenForCancellation(token: monaco.CancellationToken): {
     };
   });
 
-  // A rejection that loses the race must not surface as unhandled.
-  void promise.catch(() => {});
+  void promise.catch(() => {
+    // A rejection that loses the race must not surface as unhandled.
+  });
 
   const listener = token.onCancellationRequested(() => {
     rejectCancellation(new CancellationError());
@@ -75,7 +76,7 @@ export function registerLanguage(language: LangModuleType | CustomLangModuleType
 
   monaco.languages.register({ id: ID });
 
-  if ('languageThemeResolver' in language) {
+  if (language.languageThemeResolver) {
     monaco.editor.registerLanguageThemeResolver(ID, language.languageThemeResolver);
   }
 
@@ -96,16 +97,4 @@ export function registerLanguage(language: LangModuleType | CustomLangModuleType
       await language.onLanguage?.();
     }
   });
-}
-
-/**
- *
- * @deprecated avoid using this function, use `monaco.editor.registerLanguageThemeDefinition` instead
- */
-export function registerTheme(id: string, themeData: monaco.editor.IStandaloneThemeData) {
-  try {
-    monaco.editor.defineTheme(id, themeData);
-  } catch (e) {
-    // nothing to be here
-  }
 }
