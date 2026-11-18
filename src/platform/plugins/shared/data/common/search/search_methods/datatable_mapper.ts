@@ -20,6 +20,7 @@ import {
   getQuerySummary,
   buildRenameSourceFieldMap,
 } from '@kbn/esql-utils';
+import { i18n } from '@kbn/i18n';
 import { zipObject } from 'lodash';
 import DateMath from '@kbn/datemath';
 import { ESQL_TABLE_TYPE } from '../strategies/esql_search/types';
@@ -164,7 +165,14 @@ export const formatAndRethrowEsqlError = (error: unknown): never => {
   const { type, reason } = extractEsqlErrorInfo(attributes);
   err.message =
     type === 'parsing_exception'
-      ? `Couldn't parse Elasticsearch ES|QL query. Check your query and try again. Error: ${reason}`
-      : `Unexpected error from Elasticsearch: ${type} - ${reason}`;
+      ? i18n.translate('data.search.esql.error.parsingException', {
+          defaultMessage:
+            "Couldn't parse Elasticsearch ES|QL query. Check your query and try again. Error: {reason}",
+          values: { reason },
+        })
+      : i18n.translate('data.search.esql.error.unexpected', {
+          defaultMessage: 'Unexpected error from Elasticsearch: {type} - {reason}',
+          values: { type, reason },
+        });
   throw err;
 };
