@@ -17,6 +17,7 @@ import type { ProcessingNodeRef } from '../../../services/unit_graph';
 import type {
   DestinationStatsView,
   ProcessorStatsView,
+  SourceStatsView,
   StatsWindow,
 } from '../../../services/unit_stats_client/types';
 import { createUnitStatsClient } from '../../../services/unit_stats_client/unit_stats_client';
@@ -175,6 +176,15 @@ export const useProcessorStats = (
 
   return StatsManagerContext.useSelector((state) =>
     id === undefined ? undefined : state.context.components.processor[id]?.entry
+  );
+};
+
+/** The stats of a source, with the rate it accepts. See `useDestinationStats`. */
+export const useSourceStats = (id: string | undefined): StatsEntry<SourceStatsView> | undefined => {
+  useRegisteredComponents('source', id === undefined ? [] : [id]);
+
+  return StatsManagerContext.useSelector((state) =>
+    id === undefined ? undefined : state.context.components.source[id]?.entry
   );
 };
 

@@ -486,7 +486,7 @@ const ENABLED_LABEL = i18n.translate('xpack.nightshift.sources.flyout.enabledLab
 
 const ENABLED_HELP_TEXT = i18n.translate('xpack.nightshift.sources.flyout.enabledHelpText', {
   defaultMessage:
-    'Onboarding starts as soon as the source is created, so Nightshift can learn its knowledge indicators and watch it for significant events.',
+    'Onboarding starts as soon as the source is created, so nightshift can learn its knowledge indicators and watch it for significant events.',
 });
 
 const DISABLED_HELP_TEXT = i18n.translate('xpack.nightshift.sources.flyout.disabledHelpText', {

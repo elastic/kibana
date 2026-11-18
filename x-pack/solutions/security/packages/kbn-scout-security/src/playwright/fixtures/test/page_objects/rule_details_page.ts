@@ -43,7 +43,7 @@ export class RuleDetailsPage {
     this.actionsMenuButton = this.page.testSubj.locator('app-menu-overflow-button');
     this.duplicateMenuItem = this.page.testSubj.locator('rules-details-duplicate-rule');
     this.confirmModalButton = this.page.testSubj.locator('confirmModalConfirmButton');
-    this.backToRuleDetailsLink = this.page.testSubj.locator('ruleEditBackToRuleDetails');
+    this.backToRuleDetailsLink = this.page.testSubj.locator('appHeaderBack');
     this.alertsCount = this.page.testSubj.locator('toolbar-alerts-count');
     this.alertRuleNameCells = this.page.testSubj.locator('formatted-field-kibana.alert.rule.name');
     this.alertSeverityCells = this.page.testSubj.locator('formatted-field-kibana.alert.severity');
@@ -72,6 +72,12 @@ export class RuleDetailsPage {
       .getByRole('term')
       .filter({ hasText: new RegExp(`^${title}$`) })
       .locator('xpath=following-sibling::dd[1]');
+  }
+
+  /** Opens the investigation guide of the About section. Toasts from earlier actions can cover the toggle, so they are dismissed first. */
+  async openInvestigationNotes(): Promise<void> {
+    await this.page.components.toast().closeAll();
+    await this.investigationNotesToggle.click();
   }
 
   async openAlertsTab(): Promise<void> {

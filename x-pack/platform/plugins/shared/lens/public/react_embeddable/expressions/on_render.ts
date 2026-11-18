@@ -8,12 +8,18 @@
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { canTrackContentfulRender } from '@kbn/presentation-publishing';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import type { GetStateType, LensInternalApi, TableInspectorAdapter } from '@kbn/lens-common';
+import type {
+  GetStateType,
+  LensInternalApi,
+  TableInspectorAdapter,
+  TextBasedPersistedState,
+} from '@kbn/lens-common';
 import type { LensApi } from '@kbn/lens-common-2';
 
 import { getExecutionContextEvents, trackUiCounterEvents } from '../../lens_ui_telemetry';
 import type { LensEmbeddableStartServices } from '../types';
 import { getSuccessfulRequestTimings } from '../../report_performance_metric_util';
+import { withEsqlLayerDataViewSpecs } from '../../data_views_service/esql_layer_data_view_specs';
 import { addLog } from '../logger';
 
 function trackContentfulRender(activeData: TableInspectorAdapter, parentApi: unknown) {
@@ -97,7 +103,14 @@ export function prepareOnRender(
       ...getExecutionContextEvents(executionContext),
     ];
 
-    const adHocDataViews = Object.values(currentState.attributes.state.adHocDataViews || {});
+    const { references, state } = currentState.attributes;
+    const adHocDataViews = Object.values(
+      withEsqlLayerDataViewSpecs(
+        state.adHocDataViews,
+        (state.datasourceStates?.textBased as TextBasedPersistedState | undefined)?.layers,
+        references
+      )
+    );
     adHocDataViews.forEach(() => {
       events.push('ad_hoc_data_view');
     });

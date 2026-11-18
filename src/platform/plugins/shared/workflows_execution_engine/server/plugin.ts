@@ -10,6 +10,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 import isEqual from 'lodash/isEqual';
+import omit from 'lodash/omit';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { schema } from '@kbn/config-schema';
 import type {
@@ -20,6 +21,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { LockManagerService } from '@kbn/lock-manager';
 import type { TaskRegisterDefinition } from '@kbn/task-manager-plugin/server';
 import {
   ExecutionStatus,
@@ -30,11 +32,17 @@ import {
 } from '@kbn/workflows';
 import type {
   BulkScheduleWorkflowResult,
+  EsWorkflow,
   EsWorkflowExecution,
   WorkflowExecutionEngineModel,
   WorkflowSettings,
 } from '@kbn/workflows';
 import { WorkflowDisabledError } from '@kbn/workflows/common/errors';
+import {
+  getConcurrencyGroupLock,
+  setConcurrencyGroupLock,
+  withConcurrencyGroupLock,
+} from './concurrency/concurrency_group_lock';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import { maybeDrainConcurrencyQueueBeforeEnqueue } from './concurrency/concurrency_queue_drainer';
 import { handleConcurrencyBlockedExecution } from './concurrency/maybe_schedule_dormant_queued_run';
@@ -104,6 +112,9 @@ import {
   WORKFLOW_SERVICE_ACCOUNT_TYPE,
 } from './service_account_execution';
 import { resolveWorkflowWorkloads } from './service_account_workload_resolver';
+import { publishFinishedWorkflowExecution } from './topics/publish_finished_workflow_execution';
+import { setWorkflowExecutionFinishedPublisher } from './topics/publish_workflow_execution_finished';
+import { workflowExecutionFinishedTopic } from './topics/workflow_execution_finished';
 import { initializeTriggerEventsDataStream, TriggerEventHandler } from './trigger_events';
 import { initializeTriggerEventsClient } from './trigger_events/event_logs';
 import { searchTriggerEventLog as querySearchTriggerEventLog } from './trigger_events/event_logs/trigger_event_log_query';
@@ -179,6 +190,17 @@ const WORKFLOW_MINT_RETRY_DELAY_MS = 30_000;
 
 /** Batch size for bulk cancel search_after paging (internal; not exposed on the public API). */
 const BULK_CANCEL_PAGE_SIZE = 10;
+
+/** Saved runs take the stored document's lifetime, including none, without mutating the caller model. */
+const workflowWithStoredUid = (
+  workflow: WorkflowExecutionEngineModel,
+  storedWorkflowUid: string | undefined
+): WorkflowExecutionEngineModel => {
+  const withoutCallerUid = omit(workflow, 'workflowUid');
+  return storedWorkflowUid
+    ? { ...withoutCallerUid, workflowUid: storedWorkflowUid }
+    : withoutCallerUid;
+};
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
 
@@ -427,6 +449,9 @@ export class WorkflowsExecutionEnginePlugin
     plugins: WorkflowsExecutionEnginePluginSetupDeps
   ) {
     this.logger.debug('Workflows execution engine setup');
+
+    // Before any task can run. Publication does not depend on a consumer being enabled.
+    core.pubsub.registerTopic(workflowExecutionFinishedTopic);
 
     // Register telemetry event schemas
     WorkflowExecutionTelemetryClient.setup(core.analytics);
@@ -1215,23 +1240,41 @@ export class WorkflowsExecutionEnginePlugin
                   };
                 }
 
-                await maybeDrainConcurrencyQueueBeforeEnqueue({
-                  workflowExecution,
-                  workflowExecutionRepository,
-                  workflowTaskManager,
-                  logger,
-                  failureLogLabel: 'Scheduled workflow concurrency queue drain failed',
-                });
+                const canProceed = await withConcurrencyGroupLock(
+                  getConcurrencyGroupLock(),
+                  workflowExecution.spaceId ?? spaceId,
+                  workflowExecution.concurrencyGroupKey,
+                  async () => {
+                    if (
+                      workflowExecution.concurrencyGroupKey &&
+                      workflowExecution.status !== ExecutionStatus.FAILED
+                    ) {
+                      workflowExecution.createdAt = new Date().toISOString();
+                    }
+                    await maybeDrainConcurrencyQueueBeforeEnqueue({
+                      workflowExecution,
+                      workflowExecutionRepository,
+                      workflowTaskManager,
+                      logger,
+                      failureLogLabel: 'Scheduled workflow concurrency queue drain failed',
+                    });
 
-                // Use refresh: 'wait_for' to ensure the execution is immediately searchable
-                // for deduplication checks by subsequent scheduled tasks
-                await workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
-                  refresh: 'wait_for',
-                });
-                await ensureBoundExecutionAdmitted(
-                  workflowExecution,
-                  workflowRepository,
-                  workflowExecutionRepository
+                    // Use refresh: 'wait_for' to ensure the execution is immediately searchable
+                    // for deduplication checks by subsequent scheduled tasks
+                    await workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
+                      refresh: 'wait_for',
+                    });
+                    await ensureBoundExecutionAdmitted(
+                      workflowExecution,
+                      workflowRepository,
+                      workflowExecutionRepository
+                    );
+                    await publishFinishedWorkflowExecution(workflowExecution);
+                    if (workflowExecution.status === ExecutionStatus.FAILED) {
+                      return false;
+                    }
+                    return this.checkConcurrencyIfNeeded(workflowExecution);
+                  }
                 );
                 workflowExecutionId = workflowExecution.id;
 
@@ -1245,8 +1288,6 @@ export class WorkflowsExecutionEnginePlugin
                   return;
                 }
 
-                // Check concurrency limits and apply collision strategy if needed
-                const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
                 if (!canProceed) {
                   if (workflowExecution.id && workflowExecution.spaceId) {
                     await handleConcurrencyBlockedExecution({
@@ -1421,6 +1462,11 @@ export class WorkflowsExecutionEnginePlugin
       workflowTaskManager,
       workflowExecutionRepository
     );
+    if (!this.coreSetup) {
+      throw new Error('Core setup not available');
+    }
+    setConcurrencyGroupLock(new LockManagerService(this.coreSetup, this.logger));
+    setWorkflowExecutionFinishedPublisher({ pubsub: coreStart.pubsub, logger: this.logger });
 
     const dependencies: ContextDependencies = {
       ...this.setupDependencies,
@@ -1504,8 +1550,8 @@ export class WorkflowsExecutionEnginePlugin
       workflow: WorkflowExecutionEngineModel,
       spaceId: string,
       request: KibanaRequest
-    ): Promise<void> => {
-      if (workflow.isEphemeral) return;
+    ): Promise<EsWorkflow | null> => {
+      if (workflow.isEphemeral) return null;
       const current = await workflowRepository.getWorkflow(workflow.id, spaceId, {
         includeGlobal: true,
         includeDeleted: true,
@@ -1516,6 +1562,7 @@ export class WorkflowsExecutionEnginePlugin
       ) {
         throw new Error('You do not have permission to execute this workflow.');
       }
+      return current;
     };
 
     const createAndPersistWorkflowExecution = async (
@@ -1523,15 +1570,22 @@ export class WorkflowsExecutionEnginePlugin
       context: Record<string, unknown>,
       defaultTriggeredBy: string,
       originalRequest: KibanaRequest,
-      options: { refresh: boolean | 'wait_for'; authenticatedUser?: string } = { refresh: false }
+      options: { refresh: boolean | 'wait_for'; authenticatedUser?: string } = { refresh: false },
+      afterPersist?: (
+        workflowExecution: WorkflowExecutionForInputRendering
+      ) => Promise<'proceed' | 'blocked' | 'stop'>
     ): Promise<{
       workflowExecution: WorkflowExecutionForInputRendering;
       repository: WorkflowExecutionRepository;
+      followUp: 'proceed' | 'blocked' | 'stop';
     }> => {
       const request = getWorkflowOriginalRequest(originalRequest);
       const spaceId = (context.spaceId as string | undefined) || 'default';
-      await ensureExecutionAccess(workflow, spaceId, request);
+      const storedWorkflow = await ensureExecutionAccess(workflow, spaceId, request);
       await ensureWorkflowEnabled(workflow, spaceId);
+      const workflowForExecution = storedWorkflow
+        ? workflowWithStoredUid(workflow, storedWorkflow.workflowUid)
+        : workflow;
       // Before identity resolution, persistence, and the concurrency drain. A standalone
       // delegated-identity run fails at the first inherit step and, with cancel-in-progress,
       // would cancel the space's in-flight run. Parent workflow.execute sets the flag and
@@ -1565,7 +1619,7 @@ export class WorkflowsExecutionEnginePlugin
           : await getAuthenticatedUser(request, coreStart.security, coreStart.elasticsearch.client);
 
       const workflowExecution = await buildExecutionDocument({
-        workflow,
+        workflow: workflowForExecution,
         inheritedIdentity,
         spaceId,
         context,
@@ -1575,30 +1629,48 @@ export class WorkflowsExecutionEnginePlugin
       });
       ensureWorkflowCallerAvailable(originalRequest, workflowExecution);
 
-      await maybeDrainConcurrencyQueueBeforeEnqueue({
-        workflowExecution,
-        workflowExecutionRepository,
-        workflowTaskManager,
-        logger: this.logger,
-        failureLogLabel: 'Concurrency queue drain before enqueue failed',
-      });
+      const followUp = await withConcurrencyGroupLock(
+        getConcurrencyGroupLock(),
+        workflowExecution.spaceId ?? spaceId,
+        workflowExecution.concurrencyGroupKey,
+        async () => {
+          // Stamp inside the lock so cancel-in-progress order matches admission order.
+          if (
+            workflowExecution.concurrencyGroupKey &&
+            workflowExecution.status !== ExecutionStatus.FAILED
+          ) {
+            workflowExecution.createdAt = new Date().toISOString();
+          }
+          await maybeDrainConcurrencyQueueBeforeEnqueue({
+            workflowExecution,
+            workflowExecutionRepository,
+            workflowTaskManager,
+            logger: this.logger,
+            failureLogLabel: 'Concurrency queue drain before enqueue failed',
+          });
 
-      // Bound executions must be searchable before the final admission check so
-      // force deletion cannot miss an admitted run. Other runs retain the concurrency-only refresh.
-      await workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
-        refresh: workflowExecution.effectiveIdentity
-          ? options.refresh || 'wait_for'
-          : workflowExecution.concurrencyGroupKey
-          ? options.refresh
-          : false,
-      });
-
-      await ensureBoundExecutionAdmitted(
-        workflowExecution,
-        workflowRepository,
-        workflowExecutionRepository
+          // Bound executions must be searchable before the final admission check so
+          // force deletion cannot miss an admitted run. Other runs retain the concurrency-only refresh.
+          await workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
+            refresh: workflowExecution.effectiveIdentity
+              ? options.refresh || 'wait_for'
+              : workflowExecution.concurrencyGroupKey
+              ? options.refresh
+              : false,
+          });
+          await ensureBoundExecutionAdmitted(
+            workflowExecution,
+            workflowRepository,
+            workflowExecutionRepository
+          );
+          await publishFinishedWorkflowExecution(workflowExecution);
+          if (!afterPersist) {
+            return 'proceed' as const;
+          }
+          return afterPersist(workflowExecution);
+        }
       );
-      return { workflowExecution, repository: workflowExecutionRepository };
+      return { workflowExecution, repository: workflowExecutionRepository, followUp };
     };
 
     // Helper function to create a task instance
@@ -1661,28 +1733,32 @@ export class WorkflowsExecutionEnginePlugin
         }
       }
 
-      const { workflowExecution } = await createAndPersistWorkflowExecution(
+      const { workflowExecution, followUp } = await createAndPersistWorkflowExecution(
         workflow,
         context,
         'manual',
         originalRequest,
-        { refresh: true }
+        { refresh: true },
+        async (execution) => {
+          if (execution.status === ExecutionStatus.FAILED) {
+            return 'stop';
+          }
+          const inputsValid = await validateWorkflowInputs(
+            execution,
+            workflowExecutionRepository,
+            this.logger,
+            coreStart,
+            dependencies
+          );
+          if (!inputsValid) {
+            return 'stop';
+          }
+          const canProceed = await this.checkConcurrencyIfNeeded(execution);
+          return canProceed ? 'proceed' : 'blocked';
+        }
       );
 
-      if (workflowExecution.status === ExecutionStatus.FAILED) {
-        return {
-          workflowExecutionId: workflowExecution.id,
-        };
-      }
-
-      const inputsValid = await validateWorkflowInputs(
-        workflowExecution,
-        workflowExecutionRepository,
-        this.logger,
-        coreStart,
-        dependencies
-      );
-      if (!inputsValid) {
+      if (followUp === 'stop' || workflowExecution.status === ExecutionStatus.FAILED) {
         return {
           workflowExecutionId: workflowExecution.id,
         };
@@ -1690,9 +1766,7 @@ export class WorkflowsExecutionEnginePlugin
 
       const runAs = getServiceAccountCallerTaskRunAs(coreStart, originalRequest, workflowExecution);
 
-      // Check concurrency limits and apply collision strategy if needed
-      const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
-      if (!canProceed) {
+      if (followUp === 'blocked') {
         if (workflowExecution.id && workflowExecution.spaceId) {
           await handleConcurrencyBlockedExecution({
             workflowExecutionId: workflowExecution.id,
@@ -1761,23 +1835,28 @@ export class WorkflowsExecutionEnginePlugin
       const request = getWorkflowOriginalRequest(originalRequest);
       await checkLicense(plugins.licensing);
 
-      const { workflowExecution } = await createAndPersistWorkflowExecution(
+      const { workflowExecution, followUp } = await createAndPersistWorkflowExecution(
         workflow,
         context,
         'alert',
         request,
-        { refresh: 'wait_for', authenticatedUser: options?.authenticatedUser }
+        { refresh: 'wait_for', authenticatedUser: options?.authenticatedUser },
+        async (execution) => {
+          if (execution.status === ExecutionStatus.FAILED) {
+            return 'stop';
+          }
+          const canProceed = await this.checkConcurrencyIfNeeded(execution);
+          return canProceed ? 'proceed' : 'blocked';
+        }
       );
 
-      if (workflowExecution.status === ExecutionStatus.FAILED) {
+      if (followUp === 'stop' || workflowExecution.status === ExecutionStatus.FAILED) {
         return {
           workflowExecutionId: workflowExecution.id as string,
         };
       }
 
-      // Check concurrency limits and apply collision strategy if needed
-      const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
-      if (!canProceed) {
+      if (followUp === 'blocked') {
         if (workflowExecution.id && workflowExecution.spaceId) {
           await handleConcurrencyBlockedExecution({
             workflowExecutionId: workflowExecution.id,
@@ -1860,6 +1939,7 @@ export class WorkflowsExecutionEnginePlugin
           // the execution is written and before the later concurrency drain.
           refuseDelegatedIdentityWorkflow(item.workflow);
           const spaceId = spaceIdFor(item);
+          let workflowForExecution = item.workflow;
           if (!item.workflow.isEphemeral) {
             const state = executionStates.get(`${spaceId}:${item.workflow.id}`);
             if (
@@ -1873,14 +1953,15 @@ export class WorkflowsExecutionEnginePlugin
             ) {
               throw new Error('You do not have permission to execute this workflow.');
             }
-            if (!state?.enabled) {
+            if (state == null || !state.enabled) {
               throw new Error(
                 `Workflow is disabled: ${item.workflow.id}. Enable the workflow to run it.`
               );
             }
+            workflowForExecution = workflowWithStoredUid(item.workflow, state.workflowUid);
           }
           const workflowExecution = await buildExecutionDocument({
-            workflow: item.workflow,
+            workflow: workflowForExecution,
             spaceId,
             context: item.context,
             defaultTriggeredBy: 'alert',
@@ -1899,83 +1980,70 @@ export class WorkflowsExecutionEnginePlugin
         return results;
       }
 
-      // Bulk write all prepared executions in a single _bulk call.
-      // `refresh: 'wait_for'` matches the single-item scheduleWorkflow path
-      // so downstream concurrency checks see the freshly-written docs.
-      const bulkWriteResults = await workflowExecutionRepository.bulkCreateWorkflowExecutions(
-        prepared.map((p) => p.workflowExecution),
-        { refresh: 'wait_for' }
-      );
-
-      // Map per-doc bulk errors back to results; keep succeeded items for the
-      // concurrency + task-scheduling passes.
-      const succeeded: PreparedItem[] = [];
-      for (let i = 0; i < prepared.length; i++) {
-        const p = prepared[i];
-        const writeResult = bulkWriteResults[i];
-        if ('error' in writeResult) {
-          results[p.idx] = {
-            status: 'error',
-            error: { message: writeResult.error },
-          };
+      // Executions that share a concurrency key are created and admitted one at a time.
+      // The group lock is taken per item and released before the next, so one bulk
+      // request cannot hold the group for the whole bucket. Everything else stays in one bulk write.
+      const keyedItems: PreparedItem[] = [];
+      const bulkItems: PreparedItem[] = [];
+      for (const item of prepared) {
+        if (
+          item.workflowExecution.concurrencyGroupKey &&
+          item.workflowExecution.status !== ExecutionStatus.FAILED
+        ) {
+          keyedItems.push(item);
         } else {
-          try {
-            await ensureBoundExecutionAdmitted(
-              p.workflowExecution,
-              workflowRepository,
-              workflowExecutionRepository
-            );
-            succeeded.push(p);
-          } catch (error) {
+          bulkItems.push(item);
+        }
+      }
+
+      const succeeded: PreparedItem[] = [];
+      if (bulkItems.length > 0) {
+        const bulkWriteResults = await workflowExecutionRepository.bulkCreateWorkflowExecutions(
+          bulkItems.map((p) => p.workflowExecution),
+          { refresh: 'wait_for' }
+        );
+        for (let i = 0; i < bulkItems.length; i++) {
+          const p = bulkItems[i];
+          const writeResult = bulkWriteResults[i];
+          if ('error' in writeResult) {
             results[p.idx] = {
               status: 'error',
-              error: { message: error instanceof Error ? error.message : String(error) },
+              error: { message: writeResult.error },
             };
+          } else {
+            try {
+              await ensureBoundExecutionAdmitted(
+                p.workflowExecution,
+                workflowRepository,
+                workflowExecutionRepository
+              );
+              succeeded.push(p);
+              await publishFinishedWorkflowExecution(p.workflowExecution);
+            } catch (error) {
+              results[p.idx] = {
+                status: 'error',
+                error: { message: error instanceof Error ? error.message : String(error) },
+              };
+            }
           }
         }
       }
 
-      if (succeeded.length === 0) {
-        return results;
-      }
-
-      // Every item with a persisted doc returns 'scheduled' with its id, regardless
-      // of whether the concurrency check drops it (matches single-item scheduleWorkflow).
-      for (const p of succeeded) {
-        results[p.idx] = {
-          status: 'scheduled',
-          workflowExecutionId: p.workflowExecution.id as string,
-        };
-      }
-
-      const runnable = succeeded.filter(
-        (p) => p.workflowExecution.status !== ExecutionStatus.FAILED
-      );
-
-      // Concurrency checks for items in the same group must run sequentially:
-      // they read and mutate the same ES state, so running them in parallel
-      // would let siblings in one batch see each other as "in flight" and,
-      // with max=1 and strategy='drop', drop every item; with
-      // 'cancel-in-progress' they would also race to cancel each other.
-      // Items without a key, and items in different groups, stay parallel.
-      const keylessItems: PreparedItem[] = [];
       const bucketsByGroup = new Map<string, PreparedItem[]>();
-      for (const p of runnable) {
-        const groupKey = p.workflowExecution.concurrencyGroupKey;
-        if (!groupKey) {
-          keylessItems.push(p);
+      for (const item of keyedItems) {
+        const bucketKey = `${item.workflowExecution.spaceId ?? 'default'}:${
+          item.workflowExecution.concurrencyGroupKey
+        }`;
+        const existing = bucketsByGroup.get(bucketKey);
+        if (existing) {
+          existing.push(item);
         } else {
-          const bucketKey = `${p.workflowExecution.spaceId ?? 'default'}:${groupKey}`;
-          const existing = bucketsByGroup.get(bucketKey);
-          if (existing) {
-            existing.push(p);
-          } else {
-            bucketsByGroup.set(bucketKey, [p]);
-          }
+          bucketsByGroup.set(bucketKey, [item]);
         }
       }
 
       const passingIdx = new Set<number>();
+      const checkedIdx = new Set<number>();
       const runCheck = async (p: PreparedItem) => {
         if (await this.checkConcurrencyIfNeeded(p.workflowExecution)) {
           passingIdx.add(p.idx);
@@ -1996,21 +2064,107 @@ export class WorkflowsExecutionEnginePlugin
           logger: this.logger,
         });
       };
-      await Promise.all([
-        ...keylessItems.map(runCheck),
-        ...Array.from(bucketsByGroup.values()).map(async (bucket) => {
-          for (const p of bucket) {
-            await maybeDrainConcurrencyQueueBeforeEnqueue({
-              workflowExecution: p.workflowExecution,
-              workflowExecutionRepository,
-              workflowTaskManager,
-              logger: this.logger,
-              failureLogLabel: 'Bulk concurrency queue drain failed',
-            });
-            await runCheck(p);
+
+      await Promise.all(
+        Array.from(bucketsByGroup.values()).map(async (bucket) => {
+          for (const item of bucket) {
+            let persisted = false;
+            let decided = false;
+            try {
+              const canProceed = await withConcurrencyGroupLock(
+                getConcurrencyGroupLock(),
+                item.workflowExecution.spaceId ?? 'default',
+                item.workflowExecution.concurrencyGroupKey,
+                async () => {
+                  item.workflowExecution.createdAt = new Date().toISOString();
+                  await maybeDrainConcurrencyQueueBeforeEnqueue({
+                    workflowExecution: item.workflowExecution,
+                    workflowExecutionRepository,
+                    workflowTaskManager,
+                    logger: this.logger,
+                    failureLogLabel: 'Bulk concurrency queue drain failed',
+                  });
+                  await workflowExecutionRepository.createWorkflowExecution(
+                    item.workflowExecution,
+                    { refresh: 'wait_for' }
+                  );
+                  persisted = true;
+                  await ensureBoundExecutionAdmitted(
+                    item.workflowExecution,
+                    workflowRepository,
+                    workflowExecutionRepository
+                  );
+                  await publishFinishedWorkflowExecution(item.workflowExecution);
+                  checkedIdx.add(item.idx);
+                  const proceed = await this.checkConcurrencyIfNeeded(item.workflowExecution);
+                  if (proceed) {
+                    passingIdx.add(item.idx);
+                  }
+                  succeeded.push(item);
+                  decided = true;
+                  return proceed;
+                }
+              );
+              if (!canProceed) {
+                await handleConcurrencyBlockedExecution({
+                  workflowExecutionId: item.workflowExecution.id as string,
+                  spaceId: item.workflowExecution.spaceId ?? 'default',
+                  request,
+                  workflowExecutionRepository,
+                  stepExecutionRepository,
+                  workflowTaskManager,
+                  internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
+                  logger: this.logger,
+                });
+              }
+            } catch (error) {
+              const message = error instanceof Error ? error.message : String(error);
+              const alreadyRecorded =
+                results[item.idx] != null || succeeded.some((entry) => entry.idx === item.idx);
+              if (!alreadyRecorded) {
+                results[item.idx] = { status: 'error', error: { message } };
+              }
+              if (decided) {
+                this.logger.warn(
+                  `Concurrency follow-up failed for workflow execution ${item.workflowExecution.id}; keeping the decided execution: ${message}`
+                );
+              }
+              if (persisted && item.workflowExecution.id && !decided) {
+                await workflowExecutionRepository
+                  .discardUnstartedExecution(
+                    item.workflowExecution.id,
+                    item.workflowExecution.spaceId ?? 'default'
+                  )
+                  .catch((discardError: unknown) => {
+                    const discardMessage =
+                      discardError instanceof Error ? discardError.message : String(discardError);
+                    this.logger.error(
+                      `Failed to discard unstarted workflow execution ${item.workflowExecution.id} after concurrency admission error: ${discardMessage}`
+                    );
+                  });
+              }
+            }
           }
-        }),
-      ]);
+        })
+      );
+
+      if (succeeded.length === 0) {
+        return results;
+      }
+
+      // Every item with a persisted doc returns 'scheduled' with its id, regardless
+      // of whether the concurrency check drops it (matches single-item scheduleWorkflow).
+      for (const p of succeeded) {
+        results[p.idx] = {
+          status: 'scheduled',
+          workflowExecutionId: p.workflowExecution.id as string,
+        };
+      }
+
+      const keylessRunnable = succeeded.filter(
+        (p) => p.workflowExecution.status !== ExecutionStatus.FAILED && !checkedIdx.has(p.idx)
+      );
+      await Promise.all(keylessRunnable.map(runCheck));
 
       const toSchedule = succeeded.filter((p) => passingIdx.has(p.idx));
       if (toSchedule.length > 0) {
@@ -2074,6 +2228,7 @@ export class WorkflowsExecutionEnginePlugin
       workflowExecution.stepId = stepId;
 
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
+      await publishFinishedWorkflowExecution(workflowExecution);
 
       if (workflowExecution.status === ExecutionStatus.FAILED) {
         return {
@@ -2271,6 +2426,8 @@ export class WorkflowsExecutionEnginePlugin
   }
 
   public stop() {
+    setWorkflowExecutionFinishedPublisher(undefined);
+    setConcurrencyGroupLock(undefined);
     void this.dataClientBundle.stop();
   }
 
@@ -2365,7 +2522,8 @@ export class WorkflowsExecutionEnginePlugin
         workflowExecution.workflowDefinition.settings.concurrency,
         workflowExecution.concurrencyGroupKey,
         workflowExecution.id,
-        workflowExecution.spaceId
+        workflowExecution.spaceId,
+        workflowExecution
       );
 
       if (!canProceed) {

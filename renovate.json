@@ -542,7 +542,7 @@
         "msw",
         "@xterm/xterm"
       ],
-      "reviewers": ["team:contextual-security-apps"],
+      "reviewers": ["team:contextual-security-apps", "team:siem-beacon"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Cloud Security"],
       "enabled": true,
@@ -1088,6 +1088,11 @@
       "enabled": true
     },
     {
+      "description": "openapi-ts >= 0.91 is ESM-only and drops combined *_request schemas; the workflow connector codegen needs migrating first",
+      "matchDepNames": ["@hey-api/openapi-ts"],
+      "allowedVersions": "<0.91.0"
+    },
+    {
       "groupName": "jszip",
       "matchDepNames": ["jszip"],
       "reviewers": ["team:workflows-eng"],
@@ -1565,15 +1570,6 @@
       "enabled": true
     },
     {
-      "groupName": "lmdb",
-      "matchDepNames": ["lmdb"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "pirates",
       "matchDepNames": ["pirates"],
       "reviewers": ["team:kibana-operations"],
@@ -1767,7 +1763,7 @@
     {
       "groupName": "i18n-iso-countries",
       "matchDepNames": ["i18n-iso-countries"],
-      "reviewers": ["team:security-entity-analytics", "team:contextual-security-apps"],
+      "reviewers": ["team:security-entity-analytics", "team:contextual-security-apps", "team:siem-beacon"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Entity Analytics", "Team:Cloud Security"],
       "minimumReleaseAge": "14 days",
@@ -2027,6 +2023,7 @@
       "reviewers": [
         "team:response-ops",
         "team:contextual-security-apps",
+        "team:siem-beacon",
         "team:security-asset-management",
         "team:streams-ui",
         "team:awp-platform",
@@ -2455,7 +2452,7 @@
     {
       "groupName": "@xyflow/react",
       "matchPackageNames": ["@xyflow/react"],
-      "reviewers": ["team:contextual-security-apps"],
+      "reviewers": ["team:contextual-security-apps", "team:siem-beacon"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Cloud Security"],
       "minimumReleaseAge": "14 days",
@@ -2464,7 +2461,7 @@
     {
       "groupName": "@dagrejs/dagre",
       "matchPackageNames": ["@dagrejs/dagre"],
-      "reviewers": ["team:contextual-security-apps"],
+      "reviewers": ["team:contextual-security-apps", "team:siem-beacon"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Cloud Security"],
       "minimumReleaseAge": "14 days",

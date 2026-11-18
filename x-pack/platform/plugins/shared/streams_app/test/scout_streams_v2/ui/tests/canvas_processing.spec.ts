@@ -24,7 +24,7 @@ const elasticsearchDestination = (id: string) => ({
   name: id,
   type: 'elasticsearch',
   supported_telemetry: ['logs'],
-  config: [{ name: 'index', value: `logs-${id}` }],
+  config: [{ name: 'index', value: `logs-${id.replaceAll('-', '_')}.otel-default` }],
 });
 
 /**
@@ -88,7 +88,7 @@ const mockUnit = async (page: ScoutPage) => {
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({
-        components: { destinations: {}, processors: {} },
+        components: { destinations: {}, processors: {}, sources: {} },
         meta: { window: { start: '2026-01-01T00:00:00.000Z', end: '2026-01-01T00:15:00.000Z' } },
       }),
     });

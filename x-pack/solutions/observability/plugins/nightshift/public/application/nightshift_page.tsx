@@ -30,13 +30,18 @@ import {
 } from '../components/app_header';
 import { useKibana } from '../hooks/use_kibana';
 import { useDeveloperMode } from '../hooks/use_developer_mode';
+import { useIntroBannerDismissal } from '../components/use_intro_banner_dismissal';
 import { useSignificantEventsAvailability } from '../data/availability/use_significant_events_availability';
 import { useOnboardingVisibility } from '../pages/landing/onboarding/use_onboarding_visibility';
 import {
   isNightshiftSetUp,
   useInvestigatorServiceAccount,
 } from '../data/service_accounts/use_investigator_service_account';
-import { DETECTION_TAB_IDS, isDetectionTabId } from '../pages/detection/detection_tabs';
+import {
+  DETECTION_TAB_IDS,
+  isDetectionTabId,
+  isDeveloperModeTab,
+} from '../pages/detection/detection_tabs';
 import { KNOWLEDGE_TAB_IDS } from '../pages/knowledge/knowledge_tabs';
 
 /** Onboarding has a second column for the "Get started" card. */
@@ -146,7 +151,7 @@ export const DetectionRoute = ({
   const { search } = useLocation();
   const { isDeveloperMode } = useDeveloperMode();
 
-  if (!tab || !isDetectionTabId(tab) || (tab === 'signals' && !isDeveloperMode)) {
+  if (!tab || !isDetectionTabId(tab) || (isDeveloperModeTab(tab) && !isDeveloperMode)) {
     return <Redirect to={{ pathname: '/detections/events', search }} />;
   }
 
@@ -177,6 +182,9 @@ export function NightshiftPage(): React.ReactElement | null {
   const detectionSettingsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
     path: '/settings/detections?origin=detections',
   });
+  const investigationSettingsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
+    path: '/settings/investigations?origin=automations',
+  });
   const knowledgeHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
     path: '/knowledge',
   });
@@ -203,6 +211,10 @@ export function NightshiftPage(): React.ReactElement | null {
   const navigateToDetectionSettings = useCallback(
     () => application.navigateToUrl(detectionSettingsHref),
     [application, detectionSettingsHref]
+  );
+  const navigateToInvestigationSettings = useCallback(
+    () => application.navigateToUrl(investigationSettingsHref),
+    [application, investigationSettingsHref]
   );
   const navigateToKnowledge = useCallback(
     () => application.navigateToUrl(knowledgeHref),
@@ -259,8 +271,9 @@ export function NightshiftPage(): React.ReactElement | null {
   const onboardingFinishedThisLoad =
     onboardingFinishedSpace === spaceBasePath ||
     onboardingFinishedSpacesThisLoad.has(spaceBasePath);
-  // Before the first investigation the page is only about onboarding, as in the design.
-  const hidesHeaderActions = isOnboarding && !onboarding.latestInvestigation;
+  const introBannerDismissal = useIntroBannerDismissal();
+  // All five onboarding steps replace the usual header actions, including First automation.
+  const hidesHeaderActions = isOnboarding || onboarding.isLoading;
 
   // The landing page owns the start investigation modal so the header's primary action can toggle it.
   const [isStartInvestigationOpen, setIsStartInvestigationOpen] = useState(false);
@@ -290,7 +303,7 @@ export function NightshiftPage(): React.ReactElement | null {
       {
         href: basePath.prepend(NIGHTSHIFT_APP_ROUTE),
         text: i18n.translate('xpack.nightshift.breadcrumbs.linkText', {
-          defaultMessage: 'Nightshift',
+          defaultMessage: 'nightshift',
         }),
         deepLinkId: NIGHTSHIFT_APP_ID,
       },
@@ -356,7 +369,6 @@ export function NightshiftPage(): React.ReactElement | null {
         restrictWidth={false}
         pageSectionProps={{ paddingSize: 'none' }}
       >
-        {/* Nothing behind the header actions works before setup, so the header carries none. */}
         <NightshiftAppHeader page="landing" />
         <EuiPageTemplate.Section component="div" restrictWidth={ONBOARDING_MAX_WIDTH}>
           {isSetupPending ? (
@@ -364,7 +376,10 @@ export function NightshiftPage(): React.ReactElement | null {
               <EuiLoadingSpinner size="xl" />
             </EuiFlexGroup>
           ) : (
-            <SetupNightshiftOnboarding onFinish={finishOnboarding} />
+            <SetupNightshiftOnboarding
+              onFinish={finishOnboarding}
+              introBannerDismissal={introBannerDismissal}
+            />
           )}
         </EuiPageTemplate.Section>
       </ObservabilityPageTemplate>
@@ -468,8 +483,20 @@ export function NightshiftPage(): React.ReactElement | null {
             page={canUseAutomationsPage ? 'automations' : 'landing'}
             onKnowledgeClick={navigateToKnowledge}
             knowledgeHref={knowledgeHref}
-            onSettingsClick={canManageAndConfigure ? navigateToSettings : undefined}
-            settingsHref={canManageAndConfigure ? settingsHref : undefined}
+            onSettingsClick={
+              canManageAndConfigure
+                ? canUseAutomationsPage
+                  ? navigateToInvestigationSettings
+                  : navigateToSettings
+                : undefined
+            }
+            settingsHref={
+              canManageAndConfigure
+                ? canUseAutomationsPage
+                  ? investigationSettingsHref
+                  : settingsHref
+                : undefined
+            }
             onAutomationsClick={
               canUseAutomations && !hidesHeaderActions ? navigateToAutomations : undefined
             }
@@ -481,7 +508,7 @@ export function NightshiftPage(): React.ReactElement | null {
               canUseAutomationsPage
                 ? {
                     href: application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/' }),
-                    label: 'Nightshift',
+                    label: 'nightshift',
                   }
                 : undefined
             }
@@ -508,13 +535,20 @@ export function NightshiftPage(): React.ReactElement | null {
                 latestInvestigation={onboarding.latestInvestigation}
                 automationsHref={canUseAutomations ? automationsHref : undefined}
                 onFinish={finishOnboarding}
+                introBannerDismissal={introBannerDismissal}
               />
             ) : onboarding.isLoading ? (
               <EuiFlexGroup justifyContent="center" data-test-subj="nightshiftOnboardingLoading">
                 <EuiLoadingSpinner size="xl" />
               </EuiFlexGroup>
             ) : (
-              <NightshiftApp hideDetectionSetupBanner={onboardingFinishedThisLoad} />
+              <NightshiftApp
+                hideDetectionSetupBanner={onboardingFinishedThisLoad}
+                onStartInvestigation={canStartInvestigation ? toggleStartInvestigation : undefined}
+                onCreateAutomation={
+                  canUseAutomations && canManage ? navigateToAutomations : undefined
+                }
+              />
             )}
           </EuiPageTemplate.Section>
         </>

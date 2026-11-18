@@ -84,10 +84,10 @@ import { VALIDATION_WARNING_CODE_FIELD_NAME_MAP } from '../../../rule_creation/c
 import { extractValidationMessages } from '../../../rule_creation/logic/extract_validation_messages';
 import { NextStep } from '../../components/next_step';
 import { useRuleForms, useRuleIndexPattern } from '../form';
-import { CustomHeaderPageMemo } from '..';
+import { RuleFormAppHeader } from '..';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { AddRuleAttachmentToChatButton } from '../../components/add_rule_attachment_to_chat_button';
-import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
+import { useAddRuleAttachmentToChatMenuItem } from '../../components/add_rule_attachment_to_chat_button';
+import { useGetSecuritySolutionUrl } from '../../../../common/components/link_to';
 import { useAgentBuilderRuleCreation } from './hooks/use_agent_builder_rule_creation';
 import { useRuleCreationTelemetry } from './hooks/use_rule_creation_telemetry';
 
@@ -122,7 +122,6 @@ const CreateRulePageComponent: React.FC<{}> = () => {
   const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
     useUserData();
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
-  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
   const { addSuccess } = useAppToasts();
@@ -259,14 +258,13 @@ const CreateRulePageComponent: React.FC<{}> = () => {
     dataViewId: defineStepData.dataViewId,
   });
 
-  const rulesUrl = getRulesUrl();
-  const backOptions = useMemo(
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
+  const back = useMemo(
     () => ({
-      path: rulesUrl,
-      text: i18n.BACK_TO_RULES,
-      pageId: SecurityPageName.rules,
+      label: RuleI18n.PAGE_TITLE,
+      href: getSecuritySolutionUrl({ deepLinkId: SecurityPageName.rules }),
     }),
-    [rulesUrl]
+    [getSecuritySolutionUrl]
   );
 
   const handleAccordionToggle = useCallback(
@@ -855,27 +853,19 @@ const CreateRulePageComponent: React.FC<{}> = () => {
     [actionsStepForm.isValid, activeStep, editStep]
   );
 
-  const addToChatButton = useMemo(
-    () =>
-      isAgentChatExperienceEnabled ? (
-        <AddRuleAttachmentToChatButton
-          defineStepData={defineStepData}
-          aboutStepData={aboutStepData}
-          scheduleStepData={scheduleStepData}
-          actionsStepData={actionsStepData}
-          actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
-          pathway="rule_creation"
-        />
-      ) : null,
-    [
-      isAgentChatExperienceEnabled,
-      defineStepData,
-      aboutStepData,
-      scheduleStepData,
-      actionsStepData,
-      triggersActionsUi.actionTypeRegistry,
-    ]
-  );
+  const addToChatAction = useAddRuleAttachmentToChatMenuItem({
+    defineStepData,
+    aboutStepData,
+    scheduleStepData,
+    actionsStepData,
+    actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+    pathway: 'rule_creation',
+  });
+
+  const toggleRulePreview = useCallback(() => {
+    collapseFn.current?.();
+    setIsRulePreviewVisible((isVisible) => !isVisible);
+  }, []);
 
   const onToggleCollapsedMemo = useCallback(
     () => setIsRulePreviewVisible((isVisible) => !isVisible),
@@ -911,6 +901,14 @@ const CreateRulePageComponent: React.FC<{}> = () => {
     <>
       {confirmSavingWithWarningModal}
       <SecuritySolutionPageWrapper>
+        <RuleFormAppHeader
+          title={i18n.PAGE_TITLE}
+          back={back}
+          isRulePreviewVisible={isRulePreviewVisible}
+          onToggleRulePreview={toggleRulePreview}
+          addToChatAction={addToChatAction}
+        />
+        <EuiSpacer size="l" />
         <EuiResizableContainer>
           {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {
             collapseFn.current = () => togglePanel?.('preview', { direction: 'left' });
@@ -926,16 +924,6 @@ const CreateRulePageComponent: React.FC<{}> = () => {
                           title="cannotBeAddedToRules"
                         />
                       )}
-
-                      <CustomHeaderPageMemo
-                        backOptions={backOptions}
-                        isLoading={isCreateRuleLoading || loading}
-                        title={i18n.PAGE_TITLE}
-                        isRulePreviewVisible={isRulePreviewVisible}
-                        setIsRulePreviewVisible={setIsRulePreviewVisible}
-                        togglePanel={togglePanel}
-                        addToChatButton={addToChatButton}
-                      />
                       <MyEuiPanel zindex={4} hasBorder>
                         <MemoEuiAccordion
                           forceState={openSteps[RuleStep.defineRule] ? 'open' : 'closed'}

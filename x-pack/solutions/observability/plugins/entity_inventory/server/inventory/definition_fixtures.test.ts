@@ -9,14 +9,18 @@ import { entitySchema } from '@kbn/entity-store/common';
 import {
   INVENTORY_DEFINITION_FIXTURES,
   entityIdFixture,
+  k8sDeploymentOtelAndAgentFixture,
   k8sNodeFixture,
   rankedEntityIdFixture,
 } from './__fixtures__/definitions';
 
 describe('inventory definition fixtures', () => {
-  const cases = [...INVENTORY_DEFINITION_FIXTURES, entityIdFixture, rankedEntityIdFixture].map(
-    (definition) => [definition.type, definition] as const
-  );
+  const cases = [
+    ...INVENTORY_DEFINITION_FIXTURES,
+    entityIdFixture,
+    rankedEntityIdFixture,
+    k8sDeploymentOtelAndAgentFixture,
+  ].map((definition) => [definition.type, definition] as const);
 
   it.each(cases)('%s parses against the store definition schema', (type, definition) => {
     const result = entitySchema.safeParse({ ...definition, id: `${type}-default` });

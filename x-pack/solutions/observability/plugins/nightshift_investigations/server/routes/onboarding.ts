@@ -49,7 +49,7 @@ const enableOnboardingRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'POST /internal/nightshift/onboarding/enable',
   options: {
     access: 'internal',
-    summary: 'Enable Nightshift in the space',
+    summary: 'Enable nightshift in the space',
     description:
       'The first onboarding step: installs the investigation agent in the current space, so it ' +
       'can be configured in Agent Builder and run investigations there. Idempotent.',

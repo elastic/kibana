@@ -24,6 +24,26 @@ describe('generateTriggerSnippet', () => {
     });
   });
 
+  describe('page trigger', () => {
+    it('includes a title, a description, and an example input', () => {
+      expect(generateTriggerSnippet('page', { full: true })).toBe(
+        [
+          '- type: page',
+          '  title: Report an incident',
+          '  description: Tell us what happened',
+          '  inputs:',
+          '    properties:',
+          '      summary:',
+          '        type: string',
+          '        description: What happened',
+          '    required:',
+          '      - summary',
+          '',
+        ].join('\n')
+      );
+    });
+  });
+
   describe('custom triggers with defaultCondition', () => {
     it('should include defaultCondition in the snippet when provided', () => {
       const snippet = generateTriggerSnippet('custom.my_trigger', {
