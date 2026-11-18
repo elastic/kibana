@@ -29,6 +29,7 @@ import {
   getFailureClasses,
   getFailureRangeSubtitle,
   hasDestinationFailures,
+  hasFailures,
 } from './destination_failures';
 import { DeliveryChart } from './delivery_chart';
 import { useDestinationFailures } from '../../unit_stats/use_destination_failures';
@@ -38,8 +39,8 @@ import { DestinationFailureCausesTable } from './destination_failure_causes_tabl
 import { FlyoutPanel } from './flyout_panel';
 
 /** Whether the destination reported anything about its failures: a `null` is not known. */
-const hasFailureData = ({ authentication, authorization }: DestinationFailedView): boolean =>
-  [authentication, authorization].some(
+const hasFailureData = ({ total, authentication, authorization }: DestinationFailedView): boolean =>
+  [total, authentication, authorization].some(
     ({ percentage, rate }) => percentage !== null || rate !== null
   );
 
@@ -118,6 +119,156 @@ function FailureClassCauses({
   );
 }
 
+/** What the panel says, in subdued text, when there is nothing to show. */
+function EmptyStateMessage({
+  dataTestSubj,
+  children,
+}: React.PropsWithChildren<{ dataTestSubj: string }>) {
+  return (
+    <EuiText size="s" color="subdued" data-test-subj={dataTestSubj}>
+      <p>{children}</p>
+    </EuiText>
+  );
+}
+
+/** The warning above the panel for a part of the stats that could not load. */
+function PartialErrorCallout({ reason }: { reason: string }) {
+  return (
+    <>
+      <KbnWarningCallout
+        announceOnMount
+        size="s"
+        data-test-subj="streamsDestinationFailuresPartialError"
+        title={i18n.translate('xpack.streams.destinations.failures.partialErrorTitle', {
+          defaultMessage: 'Some stats could not be loaded',
+        })}
+        text={reason}
+      />
+      <EuiSpacer size="m" />
+    </>
+  );
+}
+
+/** The failures of the two classes: their stats, the chart beside them, and their causes below. */
+function ClassFailures({
+  failed,
+  destinationType,
+  chart,
+}: {
+  failed: DestinationFailedView;
+  destinationType: string;
+  chart: React.ReactNode;
+}) {
+  const failureClasses = getFailureClasses(failed);
+
+  return (
+    <>
+      <EuiFlexGroup gutterSize="xl" responsive>
+        <EuiFlexItem grow={2}>
+          {failureClasses.map(({ key, title, failureClass }, index) => (
+            <React.Fragment key={key}>
+              {index > 0 && <EuiHorizontalRule margin="m" />}
+              <FailureClassStats
+                title={title}
+                failureClass={failureClass}
+                dataTestSubj={`streamsDestinationFailures${key}`}
+              />
+            </React.Fragment>
+          ))}
+        </EuiFlexItem>
+        {chart && (
+          <EuiFlexItem grow={3} css={{ alignSelf: 'center' }}>
+            {chart}
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+      {failureClasses
+        .filter(({ failureClass }) => failureClass.breakdown.length > 0)
+        .map(({ key, title, failureClass }) => (
+          <React.Fragment key={key}>
+            <EuiHorizontalRule margin="m" />
+            <FailureClassCauses
+              title={title}
+              failureClass={failureClass}
+              destinationType={destinationType}
+              dataTestSubj={`streamsDestinationFailures${key}Causes`}
+            />
+          </React.Fragment>
+        ))}
+    </>
+  );
+}
+
+/** Failures that are neither of the two classes. The chart shows them as other failures. */
+function OtherFailuresOnly({ chart }: { chart: React.ReactNode }) {
+  return (
+    <>
+      <EmptyStateMessage dataTestSubj="streamsDestinationFailuresNoClasses">
+        {i18n.translate('xpack.streams.destinations.failures.noClassFailures', {
+          defaultMessage: 'No authentication or authorization failures in this time range.',
+        })}
+      </EmptyStateMessage>
+      {chart && (
+        <>
+          <EuiSpacer size="m" />
+          {chart}
+        </>
+      )}
+    </>
+  );
+}
+
+/**
+ * What the panel shows under its warning, by what failed, from the most specific to the least:
+ * failures of the two classes, then a part that could not load, then failures of no class, then
+ * nothing failed, and last nothing attempted.
+ */
+function DeliveryOutcome({
+  failed,
+  hasPartialError,
+  panelRole,
+  destinationType,
+  chart,
+}: {
+  failed: DestinationFailedView;
+  hasPartialError: boolean;
+  panelRole: DestinationDeliveryPanelRole;
+  destinationType: string;
+  chart: React.ReactNode;
+}) {
+  if (hasDestinationFailures(failed)) {
+    return <ClassFailures failed={failed} destinationType={destinationType} chart={chart} />;
+  }
+
+  // Part of the stats could not load, so it is not known whether anything failed. The series is
+  // its own query, and shows what it has.
+  if (hasPartialError) return <>{chart}</>;
+
+  if (hasFailures(failed.total)) return <OtherFailuresOnly chart={chart} />;
+
+  if (hasFailureData(failed)) {
+    // A delivery panel shows what was delivered and says nothing about failures. A failures panel
+    // says that none failed.
+    if (panelRole === 'delivery' && chart) return <>{chart}</>;
+
+    return (
+      <EmptyStateMessage dataTestSubj="streamsDestinationFailuresNone">
+        {i18n.translate('xpack.streams.destinations.failures.noFailures', {
+          defaultMessage: 'No delivery failures in this time range.',
+        })}
+      </EmptyStateMessage>
+    );
+  }
+
+  return (
+    <EmptyStateMessage dataTestSubj="streamsDestinationFailuresNoData">
+      {i18n.translate('xpack.streams.destinations.failures.noData', {
+        defaultMessage: 'No delivery attempts in this time range.',
+      })}
+    </EmptyStateMessage>
+  );
+}
+
 /**
  * The delivery of a destination, for its flyout, over the range of the page's time picker. With
  * failures it shows authentication and authorization, each with its stats and its causes, and
@@ -179,7 +330,6 @@ export function DestinationDeliveryView({
   onBrushEnd?: (range: { from: string; to: string }) => void;
 }) {
   const failed = value?.stats.failed;
-  const failureClasses = failed ? getFailureClasses(failed) : [];
   const loadError = error?.message ?? (value?.status === 'error' ? value.error?.reason : undefined);
   const partialError = value?.status === 'ready' ? value.error?.reason : undefined;
 
@@ -206,83 +356,21 @@ export function DestinationDeliveryView({
       );
     }
 
+    const chart =
+      failed.series && failed.series.points.length > 0 ? (
+        <DeliveryChart series={failed.series} onBrushEnd={onBrushEnd} />
+      ) : null;
+
     return (
       <>
-        {partialError !== undefined && (
-          <>
-            <KbnWarningCallout
-              announceOnMount
-              size="s"
-              data-test-subj="streamsDestinationFailuresPartialError"
-              title={i18n.translate('xpack.streams.destinations.failures.partialErrorTitle', {
-                defaultMessage: 'Some stats could not be loaded',
-              })}
-              text={partialError}
-            />
-            <EuiSpacer size="m" />
-          </>
-        )}
-        {hasDestinationFailures(failed) ? (
-          <>
-            <EuiFlexGroup gutterSize="xl" responsive>
-              <EuiFlexItem grow={2}>
-                {failureClasses.map(({ key, title, failureClass }, index) => (
-                  <React.Fragment key={key}>
-                    {index > 0 && <EuiHorizontalRule margin="m" />}
-                    <FailureClassStats
-                      title={title}
-                      failureClass={failureClass}
-                      dataTestSubj={`streamsDestinationFailures${key}`}
-                    />
-                  </React.Fragment>
-                ))}
-              </EuiFlexItem>
-              {failed.series && (
-                <EuiFlexItem grow={3} css={{ alignSelf: 'center' }}>
-                  <DeliveryChart series={failed.series} onBrushEnd={onBrushEnd} />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-            {failureClasses
-              .filter(({ failureClass }) => failureClass.breakdown.length > 0)
-              .map(({ key, title, failureClass }) => (
-                <React.Fragment key={key}>
-                  <EuiHorizontalRule margin="m" />
-                  <FailureClassCauses
-                    title={title}
-                    failureClass={failureClass}
-                    destinationType={destinationType}
-                    dataTestSubj={`streamsDestinationFailures${key}Causes`}
-                  />
-                </React.Fragment>
-              ))}
-          </>
-        ) : hasFailureData(failed) ? (
-          // Nothing failed. A delivery panel shows what was delivered and says nothing about
-          // failures. A failures panel says that none failed.
-          panelRole === 'delivery' && failed.series && failed.series.points.length > 0 ? (
-            <DeliveryChart series={failed.series} onBrushEnd={onBrushEnd} />
-          ) : (
-            <EuiText size="s" color="subdued" data-test-subj="streamsDestinationFailuresNone">
-              <p>
-                {i18n.translate('xpack.streams.destinations.failures.noFailures', {
-                  defaultMessage: 'No delivery failures in this time range.',
-                })}
-              </p>
-            </EuiText>
-          )
-        ) : (
-          // A part that could not load is already said above, and is not a lack of data.
-          partialError === undefined && (
-            <EuiText size="s" color="subdued" data-test-subj="streamsDestinationFailuresNoData">
-              <p>
-                {i18n.translate('xpack.streams.destinations.failures.noData', {
-                  defaultMessage: 'No delivery attempts in this time range.',
-                })}
-              </p>
-            </EuiText>
-          )
-        )}
+        {partialError !== undefined && <PartialErrorCallout reason={partialError} />}
+        <DeliveryOutcome
+          failed={failed}
+          hasPartialError={partialError !== undefined}
+          panelRole={panelRole}
+          destinationType={destinationType}
+          chart={chart}
+        />
       </>
     );
   };

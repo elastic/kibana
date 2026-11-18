@@ -72,6 +72,22 @@ const deliveredSeries: DeliverySeriesView = {
   ],
 };
 
+/** Half of the attempts failed, and none of the failures is in either class. */
+const failedSeries: DeliverySeriesView = {
+  ...deliveredSeries,
+  points: [
+    {
+      start: '2026-11-16T20:00:00.000Z',
+      total: 40,
+      failed: 20,
+      authentication: 0,
+      authorization: 0,
+    },
+  ],
+};
+
+const totalFailures = { rate: 2.4, unit: '{item}', percentage: 50 };
+
 const renderView = (props: Partial<React.ComponentProps<typeof DestinationDeliveryView>>) =>
   render(
     <I18nProvider>
@@ -207,6 +223,64 @@ describe('DestinationDeliveryView', () => {
       expect(isShown('streamsDestinationFailuresNone')).toBe(false);
     }
   );
+
+  describe('when only failures of neither class exist, such as parse errors or 429 responses', () => {
+    const otherOnly = entryWith({ ...noFailures, total: totalFailures, series: failedSeries });
+
+    it.each(['failures', 'delivery'] as const)(
+      'does not say that nothing failed, and shows the chart, in a %s panel',
+      (panelRole) => {
+        renderView({ panelRole, value: otherOnly });
+
+        expect(screen.getByTestId('streamsDestinationFailuresNoClasses').textContent).toBe(
+          'No authentication or authorization failures in this time range.'
+        );
+        expect(isShown('streamsDestinationFailuresNone')).toBe(false);
+        expect(isShown('streamsDestinationDeliveryChart')).toBe(true);
+      }
+    );
+
+    it('says so without a chart when there is no series', () => {
+      renderView({ value: entryWith({ ...noFailures, total: totalFailures }) });
+
+      expect(isShown('streamsDestinationFailuresNoClasses')).toBe(true);
+      expect(isShown('streamsDestinationFailuresNone')).toBe(false);
+      expect(isShown('streamsDestinationDeliveryChart')).toBe(false);
+    });
+
+    it('has no class stats and no causes tables', () => {
+      renderView({ value: otherOnly });
+
+      expect(isShown('streamsDestinationFailuresAuthentication')).toBe(false);
+      expect(isShown('streamsDestinationFailuresAuthorizationCauses')).toBe(false);
+    });
+  });
+
+  describe('when the query for the classes failed but the series loaded', () => {
+    const withWarning = {
+      ...entryWith({ ...EMPTY_DESTINATION_FAILED, series: failedSeries }),
+      error: { code: 'error', reason: 'The stats query failed.' },
+    };
+
+    it.each(['failures', 'delivery'] as const)(
+      'shows the chart next to the warning, in a %s panel',
+      (panelRole) => {
+        renderView({ panelRole, value: withWarning });
+
+        expect(isShown('streamsDestinationFailuresPartialError')).toBe(true);
+        expect(isShown('streamsDestinationDeliveryChart')).toBe(true);
+        expect(isShown('streamsDestinationFailuresNone')).toBe(false);
+        expect(isShown('streamsDestinationFailuresNoData')).toBe(false);
+      }
+    );
+
+    it('shows only the warning when the series did not load either', () => {
+      renderView({ value: fixtureEntry('partialFailure', 'es-dev') });
+
+      expect(isShown('streamsDestinationFailuresPartialError')).toBe(true);
+      expect(isShown('streamsDestinationDeliveryChart')).toBe(false);
+    });
+  });
 
   describe('the title', () => {
     it('names the failures in a failures panel', () => {

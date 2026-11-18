@@ -71,6 +71,43 @@ const healthyValue = () => {
   };
 };
 
+/** The stats of a destination that fails 40% of its attempts, none of them in either class. */
+const otherFailuresValue = () => {
+  const { stats, ...entry } = healthyValue();
+  const { series } = stats.failed;
+
+  return {
+    ...entry,
+    stats: {
+      ...stats,
+      failed: {
+        ...stats.failed,
+        total: { rate: 1.7, unit: '{item}', percentage: 40 },
+        series: series && {
+          ...series,
+          points: series.points.map((point) => ({
+            ...point,
+            failed: Math.round(point.total * 0.4),
+          })),
+        },
+      },
+    },
+  };
+};
+
+/** The query for the classes failed, and the series loaded. */
+const partialErrorWithSeriesValue = () => {
+  const partial = fixtureValue('partialFailure', 'es-dev');
+
+  return {
+    ...partial,
+    stats: {
+      ...partial.stats,
+      failed: { ...partial.stats.failed, series: healthyValue().stats.failed.series },
+    },
+  };
+};
+
 export const BothClasses: Story = {
   args: { value: fixtureValue('authFailures', 'es-dev') },
 };
@@ -85,6 +122,15 @@ export const S3UploadAttempts: Story = {
 
 export const PartialError: Story = {
   args: { value: fixtureValue('partialFailure', 'es-dev') },
+};
+
+/** Parse errors and 429s, for example: failures, and neither authentication nor authorization. */
+export const OtherFailuresOnly: Story = {
+  args: { value: otherFailuresValue() },
+};
+
+export const PartialErrorWithSeries: Story = {
+  args: { value: partialErrorWithSeriesValue() },
 };
 
 /** The flyout has a chart above, so this panel says that nothing failed. */
