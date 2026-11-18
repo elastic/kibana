@@ -278,7 +278,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         'test message {{alert.actionGroup}} some additional text {{rule.id}}'
       );
 
-      await find.clickByButtonText('Settings');
       await testSubjects.click('notifyWhenSelect');
       await testSubjects.click('onThrottleInterval');
       await testSubjects.setValue('throttleInput', '10');
@@ -357,7 +356,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         'test message {{alert.actionGroup}} some additional text {{rule.id}}'
       );
 
-      await find.clickByButtonText('Settings');
       await testSubjects.click('notifyWhenSelect');
       await testSubjects.click('onThrottleInterval');
       await testSubjects.setValue('throttleInput', '10');
@@ -429,7 +427,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail('ruleActionsConnectorsModal');
       await find.clickByButtonText('Slack#xyztest');
 
-      await find.clickByButtonText('Settings');
       await testSubjects.click('notifyWhenSelect');
       await testSubjects.click('onThrottleInterval');
       await testSubjects.setValue('throttleInput', '10');
@@ -453,7 +450,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('openEditRuleFlyoutButton');
       await pageObjects.header.waitUntilLoadingHasFinished();
 
-      await find.clickByButtonText('Settings');
       await testSubjects.scrollIntoView('globalQueryBar');
 
       await filterBar.hasFilter('query', filter, true);
@@ -477,7 +473,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           '[data-test-subj="ruleActionsItem"] [data-test-subj="messageTextArea"]'
         )
       ).type('some text ');
-      await find.clickByButtonText('Settings');
       await testSubjects.click('ruleActionsSettingsSelectActionGroup');
       await testSubjects.click('addNewActionConnectorActionGroup-recovered');
 
