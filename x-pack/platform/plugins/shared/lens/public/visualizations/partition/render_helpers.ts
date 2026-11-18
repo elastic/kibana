@@ -26,11 +26,10 @@ const getSupportedLegendStats = (stats: PartitionLegendValue[] | undefined) =>
 
 export const getLegendStats = (layer: LensPartitionLayerState, shape: PieChartType) => {
   if ('defaultLegendStats' in PartitionChartsMeta[shape]?.legend) {
-    const supportedStats = getSupportedLegendStats(layer.legendStats);
-    if (supportedStats?.length || layer.legendStats?.length === 0) {
-      return supportedStats;
-    }
-    return PartitionChartsMeta[shape].legend.defaultLegendStats ?? [LegendValue.Value];
+    return (
+      getSupportedLegendStats(layer.legendStats) ??
+      PartitionChartsMeta[shape].legend.defaultLegendStats ?? [LegendValue.Value]
+    );
   }
 };
 

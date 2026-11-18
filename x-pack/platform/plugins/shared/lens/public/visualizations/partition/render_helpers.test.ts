@@ -116,7 +116,7 @@ describe('render helpers', () => {
 
       expect(
         getLegendStats({ legendStats: xyStats } as LensPartitionLayerState, PieChartTypes.WAFFLE)
-      ).toEqual([LegendValue.Value]);
+      ).toEqual([]);
 
       expect(
         getLegendStats(
