@@ -10,6 +10,7 @@
 import type { JSONSchema7 } from 'json-schema';
 import { isEqual, omit } from 'lodash';
 import type { WorkflowYaml } from '@kbn/workflows';
+import { alwaysEndsInOutputStep } from '@kbn/workflows/graph';
 import {
   applyInputDefaults,
   getInputsFromDefinition,
@@ -18,9 +19,9 @@ import {
 } from '@kbn/workflows/spec/lib/field_conversion';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { isRecord } from '@kbn/workflows-yaml';
-import { collectWorkflowOutputBlocks, getOutputStepNames } from './find_call_sites';
+import { getCompletingOutputBlocks, getReachableOutputStepNames } from './run_outcomes';
 import type { ContractChange, ContractField, WorkflowContract } from './types';
-import { alwaysEndsInOutputStep, getReturnedOutputNames } from '../get_returned_output_names';
+import { getReturnedOutputNames } from '../get_returned_output_names';
 
 /** Reads a field only when `record` has it itself, so names like `constructor` aren't inherited. */
 export const getOwn = <T>(record: Readonly<Record<string, T>>, key: string): T | undefined =>
@@ -93,7 +94,7 @@ const toAdditionalInputsField = (
 
 const inferOutputFields = (definition: unknown): Record<string, ContractField> => {
   const fields: Record<string, ContractField> = {};
-  for (const block of collectWorkflowOutputBlocks(definition)) {
+  for (const block of getCompletingOutputBlocks(definition)) {
     for (const name of Object.keys(block)) {
       fields[name] = { name, required: false, hasDefault: false };
     }
@@ -140,7 +141,7 @@ const buildWorkflowContract = (definition: unknown): WorkflowContract => {
     additionalInputs,
     alwaysReturnsOutput: alwaysEndsInOutputStep(definition),
     returnedOutputs,
-    outputStepNames: getOutputStepNames(definition),
+    outputStepNames: getReachableOutputStepNames(definition),
   };
 
   if (declaredOutputs?.properties) {
