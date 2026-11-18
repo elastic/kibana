@@ -43,7 +43,6 @@ export const buildNodeQuery = (sourceQuery: string): string => `${sourceQuery}
         os = VALUES(host.os.name), cloud_provider = VALUES(cloud.provider)
   BY orchestrator.cluster.name, kubernetes.node.name
 | STATS member_count = COUNT(*), cluster_count = COUNT_DISTINCT(orchestrator.cluster.name),
-        unclustered_count = COUNT(*) WHERE orchestrator.cluster.name IS NULL,
         activity = SUM(activity), last_seen = MAX(last_seen),
         os = VALUES(os), cloud_provider = VALUES(cloud_provider)
 | WHERE member_count > 0
@@ -67,7 +66,6 @@ export const foldNodeRows = (
   }
   const memberCount = typeof row.member_count === 'number' ? row.member_count : 0;
   const clusterCount = typeof row.cluster_count === 'number' ? row.cluster_count : 0;
-  const unclusteredCount = typeof row.unclustered_count === 'number' ? row.unclustered_count : 0;
   const features: FeatureUpsert[] = [
     {
       type: 'infrastructure',
@@ -78,12 +76,9 @@ export const foldNodeRows = (
         concept: 'nodes',
         memberCount,
         clusterCount,
-        unclusteredCount,
         breakdownFields: NODE_BREAKDOWN,
       }),
-      evidence: [
-        buildConceptCountLine({ concept: 'nodes', memberCount, clusterCount, unclusteredCount }),
-      ],
+      evidence: [buildConceptCountLine({ concept: 'nodes', memberCount, clusterCount })],
       filter: buildTypeFilter(buildDatasetFilter(KUBERNETES_NODE_DATASETS), {
         field: 'kubernetes.node.name',
         exists: true,

@@ -43,7 +43,6 @@ export const buildNamespaceQuery = (sourceQuery: string): string => `${sourceQue
 | STATS activity = COUNT(*), last_seen = MAX(@timestamp)
   BY orchestrator.cluster.name, kubernetes.namespace
 | STATS member_count = COUNT(*), cluster_count = COUNT_DISTINCT(orchestrator.cluster.name),
-        unclustered_count = COUNT(*) WHERE orchestrator.cluster.name IS NULL,
         activity = SUM(activity), last_seen = MAX(last_seen)
 | WHERE member_count > 0
 | LIMIT ${ENTITY_QUERY_LIMIT}`;
@@ -66,7 +65,6 @@ export const foldNamespaceRows = (
   }
   const memberCount = typeof row.member_count === 'number' ? row.member_count : 0;
   const clusterCount = typeof row.cluster_count === 'number' ? row.cluster_count : 0;
-  const unclusteredCount = typeof row.unclustered_count === 'number' ? row.unclustered_count : 0;
   const features: FeatureUpsert[] = [
     {
       type: 'infrastructure',
@@ -77,7 +75,6 @@ export const foldNamespaceRows = (
         concept: 'namespaces',
         memberCount,
         clusterCount,
-        unclusteredCount,
         breakdownFields: NAMESPACE_BREAKDOWN,
       }),
       evidence: [
@@ -85,7 +82,6 @@ export const foldNamespaceRows = (
           concept: 'namespaces',
           memberCount,
           clusterCount,
-          unclusteredCount,
         }),
       ],
       filter: buildTypeFilter(buildDatasetFilter(KUBERNETES_POD_DATASETS), {

@@ -27,47 +27,30 @@ const CONCEPT_MEANINGS: Record<InfrastructureConcept, string> = {
   services: 'Services',
 };
 
-const formatClusters = (clusterCount: number | undefined, unclusteredCount = 0): string => {
-  if (clusterCount === undefined) {
-    return '';
-  }
-  if (clusterCount === 0) {
-    return unclusteredCount > 0 ? ', with no cluster name reported' : '';
-  }
-  const clusters = ` across ${clusterCount} ${clusterCount === 1 ? 'cluster' : 'clusters'}`;
-  return unclusteredCount > 0
-    ? `${clusters}, ${unclusteredCount} with no cluster name reported`
-    : clusters;
-};
+// A source without cluster metadata has no clusters to mention.
+const formatClusters = (clusterCount: number | undefined): string =>
+  clusterCount ? ` across ${clusterCount} ${clusterCount === 1 ? 'cluster' : 'clusters'}` : '';
 
 /** One line count summary shared by the description and the evidence. */
 export const buildConceptCountLine = ({
   concept,
   memberCount,
   clusterCount,
-  unclusteredCount,
 }: {
   concept: InfrastructureConcept;
   memberCount: number;
   clusterCount?: number;
-  unclusteredCount?: number;
-}): string =>
-  `${memberCount} ${concept} seen in the last hour${formatClusters(
-    clusterCount,
-    unclusteredCount
-  )}`;
+}): string => `${memberCount} ${concept} seen in the last hour${formatClusters(clusterCount)}`;
 
 export const buildInfrastructureConceptDescription = ({
   concept,
   memberCount,
   clusterCount,
-  unclusteredCount,
   breakdownFields,
 }: {
   concept: InfrastructureConcept;
   memberCount: number;
   clusterCount?: number;
-  unclusteredCount?: number;
   breakdownFields: readonly string[];
 }): string =>
   [
@@ -75,7 +58,6 @@ export const buildInfrastructureConceptDescription = ({
       concept,
       memberCount,
       clusterCount,
-      unclusteredCount,
     })}.`,
     `Break them down by ${breakdownFields.join(' and ')}; properties.list_query lists them live.`,
   ].join(' ');
