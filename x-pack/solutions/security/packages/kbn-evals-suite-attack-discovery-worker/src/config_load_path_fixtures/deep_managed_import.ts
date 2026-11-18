@@ -6,4 +6,4 @@
  */
 
 // Planted by config_load_path.test.ts to prove its guard detects a deep import of a managed definition.
-import '@kbn/workflows/managed/definitions/alert_analysis';
+import '@kbn/workflows/managed/definitions/alertzero/floor_alert_triage';

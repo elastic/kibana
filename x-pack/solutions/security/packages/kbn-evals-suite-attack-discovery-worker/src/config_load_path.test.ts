@@ -68,7 +68,7 @@ describe('Playwright config load path', () => {
     it('reports a deep import of a managed workflow definition', () => {
       const found = rawTextIn(loadedBy('./config_load_path_fixtures/deep_managed_import'));
 
-      expect(found.map((path) => path.split('/').pop())).toContain('alert_analysis_workflow.yaml');
+      expect(found.map((path) => path.split('/').pop())).toContain('floor_alert_triage.yaml');
     });
 
     it('reports a direct .yaml import', () => {
