@@ -15,7 +15,9 @@ const FILTERS: OverviewFilterOptions = {
   os: [],
   device: [],
   country: [],
+  appVersion: [],
   pageUrl: [],
+  pageContains: [],
 };
 
 const response = (serviceName: string, environments: string[]) =>

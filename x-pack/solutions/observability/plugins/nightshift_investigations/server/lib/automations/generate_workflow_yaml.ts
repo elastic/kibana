@@ -7,7 +7,6 @@
 
 import { stringify } from 'yaml';
 import { IF_CONDITION_MAX_LENGTH } from '@kbn/workflows';
-import { DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID } from '../../../common';
 import {
   CLASSIC_ALERT_SOURCE,
   EXTERNAL_ALERT_SOURCE,
@@ -305,14 +304,13 @@ function generateScheduledWorkflow(
         with: {
           automation_id: automationId,
           subject_type: 'manual',
-          subject_id: DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID,
+          subject_id: `scheduled-${automationId}-{{ event.scheduledFor | default: execution.id }}`,
           title: automation.name,
           summary: automation.name,
           trigger_type: 'automatic',
           ...(automation.execution.promptTemplate
             ? { message: `Instructions:\n${automation.execution.promptTemplate}` }
             : {}),
-          ...(schedule.scopeQuery ? { scope_query: schedule.scopeQuery } : {}),
           ...(automation.runtime.timeoutSeconds !== undefined
             ? { timeout_seconds: automation.runtime.timeoutSeconds }
             : {}),
@@ -595,6 +593,13 @@ const ALERT_V2_STATUS_CONDITION =
 
 function buildRowCondition(row: AlertRow, statusCondition: string, withSources: boolean): string {
   const parts: string[] = [statusCondition];
+
+  if (row.severities?.length) {
+    // Recoveries carry no severity and must still reach the investigation's follow-up step.
+    parts.push(
+      `(NOT event.alert.status: "active" OR ${kqlOneOf('event.alert.severity', row.severities)})`
+    );
+  }
 
   const sourceCondition = withSources ? buildSourceCondition(row) : undefined;
   if (sourceCondition) {

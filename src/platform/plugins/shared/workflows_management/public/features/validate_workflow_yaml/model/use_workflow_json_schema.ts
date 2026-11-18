@@ -58,7 +58,11 @@ export const useWorkflowJsonSchema = ({
       const registeredTriggers = triggerSchemas.getRegisteredTriggersForSchema();
       const zodSchema = loose
         ? getWorkflowZodSchemaLoose(connectorTypes)
-        : getWorkflowZodSchema(connectorTypes, registeredTriggers); // TODO: remove this once we move the schema generation up to detail page or some wrapper component
+        : getWorkflowZodSchema(
+            connectorTypes,
+            registeredTriggers,
+            triggerSchemas.getTriggerSchemaOptions()
+          ); // TODO: remove this once we move the schema generation up to detail page or some wrapper component
       const jsonSchema = getWorkflowJsonSchema(zodSchema);
       if (jsonSchema && !serviceAccountsEnabled) {
         const workflowSchema = getOrResolveObject<z.core.JSONSchema.JSONSchema>(

@@ -96,7 +96,7 @@ describe('remember tool', () => {
     assertContextEngineWriteAccessMock.mockResolvedValue();
     get.mockResolvedValue({
       id: 'support',
-      memory_enabled: true,
+      dreaming: { enabled: true, facts: [{ type: 'preference' }] },
       dest: { type: 'index', value: 'ai-index-idx-support' },
     });
     index.mockResolvedValue({ _id: 'generated-memory-id' });
@@ -190,9 +190,10 @@ describe('remember tool', () => {
     });
   });
 
-  it('rejects an AI index that does not have memory enabled', async () => {
+  it('rejects a managed AI index registered with memory_enabled false', async () => {
     get.mockResolvedValue({
       id: 'support',
+      managed: true,
       memory_enabled: false,
       dest: { type: 'index', value: 'ai-index-idx-support' },
     });
@@ -263,6 +264,82 @@ describe('remember tool', () => {
         {
           type: ToolResultType.other,
           data: { id: 'logical-memory-id', sessionId: 'conversation-1' },
+        },
+      ],
+    });
+  });
+
+  it('stamps user_id on a new memory', async () => {
+    await run({ ...params, user_id: 'alice' }, 'conversation-1');
+
+    expect(index).toHaveBeenCalledWith(
+      expect.objectContaining({ document: expect.objectContaining({ user_id: 'alice' }) }),
+      indexWriteOptions
+    );
+  });
+
+  it('keeps the stored user_id when revising without one', async () => {
+    search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _index: 'ai-index-idx-support',
+            _seq_no: 7,
+            _primary_term: 2,
+            _source: {
+              '@timestamp': '2026-09-01T00:00:00.000Z',
+              id: 'memory-1',
+              user_id: 'alice',
+              type: 'memory.session_fact',
+              title: 'Old title',
+              description: 'Old description',
+              content: 'Old content',
+              updated_at: '2026-09-01T00:00:00.000Z',
+            },
+          },
+        ],
+      },
+    });
+
+    await run({ ...params, id: 'memory-1' }, 'conversation-1');
+
+    expect(index).toHaveBeenCalledWith(
+      expect.objectContaining({ document: expect.objectContaining({ user_id: 'alice' }) }),
+      indexWriteOptions
+    );
+  });
+
+  it('rejects a revise that changes user_id', async () => {
+    search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _index: 'ai-index-idx-support',
+            _seq_no: 7,
+            _primary_term: 2,
+            _source: {
+              '@timestamp': '2026-09-01T00:00:00.000Z',
+              id: 'memory-1',
+              user_id: 'alice',
+              type: 'memory.session_fact',
+              title: 'Old title',
+              description: 'Old description',
+              content: 'Old content',
+              updated_at: '2026-09-01T00:00:00.000Z',
+            },
+          },
+        ],
+      },
+    });
+
+    const result = await run({ ...params, id: 'memory-1', user_id: 'bob' }, 'conversation-1');
+
+    expect(index).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      results: [
+        {
+          type: ToolResultType.error,
+          data: { message: "Failed to store memory: Memory 'memory-1' cannot change its user_id." },
         },
       ],
     });
@@ -466,7 +543,7 @@ describe('remember tool', () => {
     });
     get.mockResolvedValue({
       id: 'support',
-      memory_enabled: true,
+      dreaming: { enabled: true, facts: [{ type: 'preference' }] },
       dest: { type: 'data_stream', value: 'ai-index-ds-support' },
     });
 
@@ -618,7 +695,7 @@ describe('remember tool', () => {
   it('uses create semantics when writing a new memory to a data stream', async () => {
     get.mockResolvedValue({
       id: 'support',
-      memory_enabled: true,
+      dreaming: { enabled: true, facts: [{ type: 'preference' }] },
       dest: { type: 'data_stream', value: 'ai-index-ds-support' },
     });
 

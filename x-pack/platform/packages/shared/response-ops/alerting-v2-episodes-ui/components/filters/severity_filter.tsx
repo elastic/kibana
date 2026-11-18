@@ -6,8 +6,10 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiBadge, EuiFilterButton, EuiHealth, EuiPopover, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiFilterButton, EuiPopover } from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
 import { EPISODE_SEVERITY_FILTER_NONE } from '../severity/severity_utils';
+import { AlertEpisodeSeverityBadge } from '../severity/episode_severity_badge';
 import { useSeverityRegistry } from '../../hooks/use_severity_registry';
 import { InlineFilterPopover } from './inline_filter_popover';
 import * as i18n from './translations';
@@ -24,24 +26,29 @@ export function AlertEpisodesSeverityFilter({
   'data-test-subj': dataTestSubj = 'severityFilter',
 }: AlertEpisodesSeverityFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const { euiTheme } = useEuiTheme();
   const { entries } = useSeverityRegistry();
 
+  // Soft severity badges as the option content (Cases Status filter pattern).
   const options = useMemo(
     () => [
-      ...[...entries].reverse().map(({ label, value, color }) => ({
+      ...[...entries].reverse().map(({ label, value }) => ({
         label,
         value,
-        prepend: <EuiBadge color={color} aria-hidden />,
       })),
       {
         label: i18n.SEVERITY_FILTER_NONE_LABEL,
         value: EPISODE_SEVERITY_FILTER_NONE,
-        prepend: <EuiHealth color={euiTheme.colors.textSubdued} />,
       },
     ],
-    [entries, euiTheme]
+    [entries]
   );
+
+  const renderOption = useCallback((option: EuiSelectableOption) => {
+    if (option.key === EPISODE_SEVERITY_FILTER_NONE) {
+      return <EuiBadge color="hollow">{option.label}</EuiBadge>;
+    }
+    return <AlertEpisodeSeverityBadge severity={String(option.key)} />;
+  }, []);
 
   const handleSelectionChange = useCallback(
     (values: string[]) => {
@@ -80,6 +87,7 @@ export function AlertEpisodesSeverityFilter({
         selectedValues={selectedValues}
         singleSelect={false}
         onSelectionChange={handleSelectionChange}
+        renderOption={renderOption}
         emptyMessage={i18n.SEVERITY_FILTER_NO_MATCH}
         data-test-subj={`${dataTestSubj}-popover`}
       />

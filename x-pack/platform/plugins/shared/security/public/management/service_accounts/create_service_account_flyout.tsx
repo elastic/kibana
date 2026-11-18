@@ -28,7 +28,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
 import useMountedState from 'react-use/lib/useMountedState';
 
-import { isHttpFetchError } from '@kbn/core-http-browser';
+import { type IHttpFetchError, isHttpFetchError } from '@kbn/core-http-browser';
 import type { ServiceAccount } from '@kbn/core-security-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -53,7 +53,11 @@ interface Props {
   createRoleUrl?: string;
   onClose: () => void;
   onCreated: (account: ServiceAccount) => void;
+  onError: (error: Error, title: string) => void;
 }
+
+const isFormError = (error: unknown): error is IHttpFetchError =>
+  isHttpFetchError(error) && (error.response?.status === 400 || error.response?.status === 409);
 
 export const CreateServiceAccountFlyout = ({
   isServerless,
@@ -62,6 +66,7 @@ export const CreateServiceAccountFlyout = ({
   createRoleUrl,
   onClose,
   onCreated,
+  onError,
 }: Props) => {
   const [nameTouched, setNameTouched] = useState(false);
   const titleId = useGeneratedHtmlId({ prefix: 'createServiceAccountTitle' });
@@ -135,8 +140,17 @@ export const CreateServiceAccountFlyout = ({
       });
     } catch (error) {
       if (!isMounted()) return;
+      if (!isFormError(error)) {
+        onError(
+          error,
+          i18n.translate('xpack.security.management.serviceAccounts.create.createErrorTitle', {
+            defaultMessage: 'Unable to create "{name}"',
+            values: { name: normalizedName },
+          })
+        );
+        return;
+      }
       const message =
-        isHttpFetchError(error) &&
         error.body &&
         typeof error.body === 'object' &&
         'message' in error.body &&
@@ -249,27 +263,17 @@ export const CreateServiceAccountFlyout = ({
                     { defaultMessage: 'About role privileges' }
                   )}
                   content={
-                    <>
-                      {isServerless ? (
-                        <FormattedMessage
-                          id="xpack.security.management.serviceAccounts.create.serverlessRolesHelpDescription"
-                          defaultMessage="An account can only use privileges allowed by both its selected roles and your access at creation time. Selecting a role does not grant privileges you do not have."
-                        />
-                      ) : (
-                        <FormattedMessage
-                          id="xpack.security.management.serviceAccounts.create.rolesHelpDescription"
-                          defaultMessage="The account receives the privileges granted by its selected roles."
-                        />
-                      )}
-                      {isServerless && (
-                        <p>
-                          <FormattedMessage
-                            id="xpack.security.management.serviceAccounts.create.crossProjectRolesHelpDescription"
-                            defaultMessage="For cross-project search, selected role names also apply in linked projects where those roles exist. Custom roles are not copied between projects."
-                          />
-                        </p>
-                      )}
-                    </>
+                    isServerless ? (
+                      <FormattedMessage
+                        id="xpack.security.management.serviceAccounts.create.serverlessRolesHelpDescription"
+                        defaultMessage="An account can only use privileges allowed by both its selected roles and your access at creation time. Selecting a role does not grant privileges you do not have."
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="xpack.security.management.serviceAccounts.create.rolesHelpDescription"
+                        defaultMessage="The account receives the privileges granted by its selected roles."
+                      />
+                    )
                   }
                 />
               </>

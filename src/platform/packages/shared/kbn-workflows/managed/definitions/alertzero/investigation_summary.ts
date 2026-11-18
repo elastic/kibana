@@ -11,8 +11,8 @@ import {
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
 } from './constants';
-import INVESTIGATION_SUMMARY_YAML from './investigation_summary.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
+import { readManagedWorkflowYaml } from '../read_managed_workflow_yaml';
 
 export const ALERTZERO_INVESTIGATION_SUMMARY_WORKFLOW_ID = 'system-alertzero-investigation-summary';
 
@@ -26,5 +26,7 @@ export const ALERTZERO_INVESTIGATION_SUMMARY_WORKFLOW = {
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 2,
-  yaml: INVESTIGATION_SUMMARY_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'investigation_summary.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;

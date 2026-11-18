@@ -13,7 +13,7 @@ import type { Step } from '../types.ts';
 
 export const entityStorePerformanceSteps = (): readonly Step[] => [
   commandStep({
-    command: '.buildkite/scripts/steps/entity_store_performance/trigger_performance_tests.sh',
+    command: '.buildkite/scripts/steps/trigger_from_pr.sh kibana-entity-store-performance-from-pr',
     label: 'Entity Store Performance Tests',
     key: 'entity_store_performance',
     agents: {

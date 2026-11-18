@@ -99,13 +99,15 @@ const MyFlyout = ({ onClose }) => {
 };
 
 const flyoutRef = overlays.openFlyoutTemplate(
-  { size: 'm', maxWidth: 600, ownFocus: false },
+  { size: 'm', maxWidth: 600, ownFocus: false, flyoutMenuProps: { title: 'My Flyout' } },
   MyFlyout
 );
 
 // Close the flyout programmatically
 flyoutRef.close();
 ```
+
+**The history title comes only from `flyoutMenuProps.title` in the options.** The content mounts after the flyout opens, so its header title cannot name the flyout's entry in EUI's flyout menu. Without `flyoutMenuProps.title`, EUI shows "Unknown Flyout" and a warning is logged in development.
 
 **`onClose` is the only root prop the content sets**, and it arrives as a prop on the content component. It stays required so the declarative contract cannot be satisfied by a flyout nobody can dismiss. Every other root prop comes from the options argument, which is also the only place that can vary them per call — props passed to a managed `FlyoutTemplate` are ignored and warn in development. A flyout whose root props depend on its own data has to own its lifecycle and render `FlyoutTemplate` directly in a React tree.
 
@@ -123,7 +125,7 @@ const StaticFlyout = ({ onClose }) => (
   </FlyoutTemplate>
 );
 
-overlays.openFlyoutTemplate({ size: 'm' }, StaticFlyout);
+overlays.openFlyoutTemplate({ size: 'm', flyoutMenuProps: { title: 'Static' } }, StaticFlyout);
 ```
 
 Callers import `FlyoutTemplate` from `@kbn/flyout-template` and need a `kbn_references` entry for it. `useFlyoutClose`, from the same package, closes the flyout from anywhere inside the content without threading the `OverlayRef` through.

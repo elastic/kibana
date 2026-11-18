@@ -7,7 +7,6 @@
 
 import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
 import type { StreamsUnit } from '@kbn/streams-schema';
-import { disconnectRouteFromTarget } from './unit_connections';
 import { createDefaultUnit, createUnitRepository } from './unit_repository';
 
 const createNotFoundError = (): Error =>
@@ -98,7 +97,7 @@ describe('unit repository', () => {
     });
   });
 
-  it('drops unconnected routing rules before saving', async () => {
+  it('publishes a component save without the routing rule a user left unhooked', async () => {
     const fetch = jest.fn().mockResolvedValue({ acknowledged: true });
     const repository = createRepository(fetch);
     const routedUnit: StreamsUnit.GetResponse = {
@@ -120,7 +119,8 @@ describe('unit repository', () => {
         ],
       },
     };
-    const savedUnit: StreamsUnit.GetResponse = {
+
+    const published: StreamsUnit.GetResponse = {
       ...routedUnit,
       unit: {
         ...routedUnit.unit,
@@ -137,50 +137,34 @@ describe('unit repository', () => {
       },
     };
 
-    await expect(repository.persist(routedUnit)).resolves.toEqual(savedUnit);
+    await expect(repository.persist(routedUnit)).resolves.toEqual(published);
     expect(fetch).toHaveBeenCalledWith('PUT /internal/streams/unit/{id}', {
-      params: { path: { id: STREAMS_DEFAULT_UNIT_ID }, body: savedUnit },
+      params: { path: { id: STREAMS_DEFAULT_UNIT_ID }, body: published },
       signal: null,
     });
   });
 
-  it('narrows a routing pipeline to the signals of its remaining routes when a disconnected rule is saved', async () => {
+  it('narrows a routing pipeline to the signals its routes deliver', async () => {
     const fetch = jest.fn().mockResolvedValue({ acknowledged: true });
     const repository = createRepository(fetch);
     const routedUnit: StreamsUnit.GetResponse = {
       ...storedUnit,
       unit: {
         ...storedUnit.unit,
-        destinations: [
-          { id: 'es-prod', type: 'debug', supported_telemetry: ['logs'] },
-          { id: 'es-traces', type: 'debug', supported_telemetry: ['traces'] },
-        ],
         pipelines: [
           {
             id: 'main',
             supported_telemetry: ['logs', 'traces'],
             config: [
               { name: 'sources', value: ['otlp-input'] },
-              {
-                name: 'routes',
-                value: [
-                  { telemetry: ['traces'], destinations: ['es-traces'] },
-                  { telemetry: ['logs'], destinations: ['es-prod'] },
-                ],
-              },
+              { name: 'routes', value: [{ telemetry: ['logs'], destinations: ['es-prod'] }] },
             ],
           },
         ],
       },
     };
-    const staged = disconnectRouteFromTarget(
-      routedUnit,
-      { pipelineId: 'main', ruleIndex: 0 },
-      { kind: 'destination', id: 'es-traces' }
-    );
-    expect(staged.unit.pipelines[0]?.supported_telemetry).toEqual(['logs', 'traces']);
 
-    const saved = await repository.persist(staged);
+    const saved = await repository.persist(routedUnit);
 
     expect(saved.unit.pipelines).toEqual([
       {
@@ -211,6 +195,40 @@ describe('unit repository', () => {
 
     await repository.persist(storedUnit);
     expect(addWarning).toHaveBeenCalledTimes(1);
+  });
+
+  it('warns once per unverified remote destination', async () => {
+    const addWarning = jest.fn();
+    const fetch = jest.fn().mockResolvedValue({
+      acknowledged: true,
+      remote_destinations_unverified: [
+        {
+          destination_id: 'r1',
+          host: 'abc.elastic.cloud',
+          reason: 'unexpected_status',
+          status: 503,
+        },
+        { destination_id: 'r2', host: 'def.elastic.cloud', reason: 'timeout' },
+      ],
+    });
+    const repository = createRepository(fetch, { toasts: { addWarning } as never });
+
+    await repository.persist(storedUnit);
+
+    expect(addWarning.mock.calls).toEqual([
+      [
+        {
+          title: 'Could not verify the remote cluster',
+          text: 'The destination was saved, but abc.elastic.cloud answered with HTTP 503. Check that the cluster is reachable and the API key can write.',
+        },
+      ],
+      [
+        {
+          title: 'Could not verify the remote cluster',
+          text: 'The destination was saved, but def.elastic.cloud did not answer in time. Check that the cluster is reachable and the API key can write.',
+        },
+      ],
+    ]);
   });
 
   it('sends secrets in the PUT envelope when given', async () => {

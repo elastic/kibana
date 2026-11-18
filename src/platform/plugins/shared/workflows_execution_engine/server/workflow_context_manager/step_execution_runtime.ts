@@ -28,6 +28,9 @@ import { extractConnectorId, extractTokenUsage, parseDuration, renderDuration } 
 
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
+/** Step-state flag set when this step execution first records its input. */
+export const INPUT_RECORDED_STATE_KEY = '__inputRecorded';
+
 interface StepExecutionRuntimeInit {
   contextManager: WorkflowContextManager;
   workflowExecutionState: WorkflowExecutionState;
@@ -76,6 +79,11 @@ export class StepExecutionRuntime {
 
   public get stepExecution(): EsWorkflowStepExecution | undefined {
     return this.workflowExecutionState.getStepExecution(this.stepExecutionId);
+  }
+
+  /** True once this step execution has recorded its input. Step state holds the flag. */
+  public get isInputRecorded(): boolean {
+    return this.getCurrentStepState()?.[INPUT_RECORDED_STATE_KEY] === true;
   }
 
   public get workflowExecution() {
@@ -203,7 +211,7 @@ export class StepExecutionRuntime {
     this.workflowExecutionState.upsertStep({
       id: this.stepExecutionId,
       stepId,
-      state,
+      state: this.stateWithInputRecordedFlag(state),
     });
   }
 
@@ -230,6 +238,26 @@ export class StepExecutionRuntime {
 
   public setInput(input: Record<string, unknown>): void {
     this.stepIoService.setStepInput(this.stepExecutionId, input as JsonValue);
+    if (this.isInputRecorded) {
+      return;
+    }
+    this.setCurrentStepState({
+      ...(this.getCurrentStepState() ?? {}),
+      [INPUT_RECORDED_STATE_KEY]: true,
+    });
+  }
+
+  /**
+   * Keeps the input-recorded flag across a state replacement. Clearing state
+   * drops it, because that step execution is finished.
+   */
+  private stateWithInputRecordedFlag(
+    state: Record<string, unknown> | undefined
+  ): Record<string, unknown> | undefined {
+    if (state === undefined || !this.isInputRecorded) {
+      return state;
+    }
+    return { ...state, [INPUT_RECORDED_STATE_KEY]: true };
   }
 
   /** Stamps the optional HITL audit envelope on the in-memory step doc (flushed with the next step write). */

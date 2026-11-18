@@ -117,8 +117,8 @@ describe('server/tracing/background_trace', () => {
             'nightshift.applied_writes',
             JSON.stringify([
               {
-                store: 'cortex',
-                item_id: 'cortex_service_checkout',
+                store: 'wiki',
+                item_id: 'wiki_service_checkout',
                 action: 'upsert',
                 before_content: 'secret before',
                 after_content: 'secret after',
@@ -135,12 +135,13 @@ describe('server/tracing/background_trace', () => {
       expect(observedSpaceBaggage).toBe('marketing');
       expect(observedConvBaggage).toBe('conv-1');
       expect(observedBeaconBaggage).toBe(BAGGAGE_TRACKING_BEACON_VALUE);
-      expect(observedTraceId).toBe(backgroundTraceId);
+      // Joins the round's trace so the span shows in the conversation trace flyout.
+      expect(observedTraceId).toBe(foregroundTraceId);
       // With default includeRealIds: false, sensitive IDs are hashed (16-hex)
       expect(startedSpans).toEqual([
         expect.objectContaining({
           name: 'nightshift.decisionTreeReinforce',
-          traceId: backgroundTraceId,
+          traceId: foregroundTraceId,
           attributes: expect.objectContaining({
             'nightshift.background_trace_id': backgroundTraceId,
             'nightshift.foreground_trace_id': foregroundTraceId,
@@ -153,10 +154,29 @@ describe('server/tracing/background_trace', () => {
       // With default includeLlmResponses: false / includeToolDetails: false, before/after content is stripped
       expect(JSON.parse(String(spanAttrWrites))).toEqual([
         {
-          store: 'cortex',
-          item_id: 'cortex_service_checkout',
+          store: 'wiki',
+          item_id: 'wiki_service_checkout',
           action: 'upsert',
         },
+      ]);
+    });
+
+    it('stays on the background trace when there is no valid foreground trace id', async () => {
+      const backgroundTraceId = 'be01f25c8dec495ba1346f752bdce9e0';
+
+      await withNightshiftBackgroundSpan(
+        {
+          name: 'nightshift.wikiOptimize',
+          traceId: backgroundTraceId,
+          foregroundTraceId: '',
+          spaceId: 'default',
+          privacySettings: DEFAULT_BACKGROUND_PRIVACY_SETTINGS,
+        },
+        async () => undefined
+      );
+
+      expect(startedSpans).toEqual([
+        expect.objectContaining({ name: 'nightshift.wikiOptimize', traceId: backgroundTraceId }),
       ]);
     });
 
@@ -164,7 +184,7 @@ describe('server/tracing/background_trace', () => {
       let receivedSpanWithoutSettings: unknown = 'not-called';
       const res1 = await withNightshiftBackgroundSpan(
         {
-          name: 'nightshift.cortexHydrate',
+          name: 'nightshift.wikiHydrate',
           traceId: 'be01f25c8dec495ba1346f752bdce9e0',
           spaceId: 'default',
         },

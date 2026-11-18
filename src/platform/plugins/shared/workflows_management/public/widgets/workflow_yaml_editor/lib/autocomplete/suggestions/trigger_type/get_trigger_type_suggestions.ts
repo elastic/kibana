@@ -8,13 +8,7 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import {
-  AlertRuleTriggerSchema,
-  getBuiltInTriggerDefinition,
-  isTriggerType,
-  ManualTriggerSchema,
-  ScheduledTriggerSchema,
-} from '@kbn/workflows';
+import { getBuiltInTriggerDefinitions, isTriggerType } from '@kbn/workflows';
 import { mapPublicTriggerToDisplay } from '../../../../../../lib/map_public_trigger_to_display';
 import { triggerSchemas } from '../../../../../../trigger_schemas';
 import { generateTriggerSnippet } from '../../../snippets/generate_trigger_snippet';
@@ -126,50 +120,23 @@ export function getAllTriggerTypesForSuggestions(): TriggerSuggestionItem[] {
   return [...builtIn, ...registered];
 }
 
-// Cache for built-in trigger types extracted from schema
-let builtInTriggerTypesCache: TriggerSuggestionItem[] | null = null;
+const BUILT_IN_TRIGGER_ICONS: Record<string, monaco.languages.CompletionItemKind> = {
+  alert: monaco.languages.CompletionItemKind.Customcolor,
+  scheduled: monaco.languages.CompletionItemKind.Operator,
+  manual: monaco.languages.CompletionItemKind.TypeParameter,
+  page: monaco.languages.CompletionItemKind.Module,
+};
 
 /**
- * Extract built-in trigger types from the workflow schema (single source of truth)
+ * Built-in trigger types for suggestions. `page` appears only with `workflowsManagement.pages.enabled`.
  */
 export function getBuiltInTriggerTypesFromSchema(): TriggerSuggestionItem[] {
-  if (builtInTriggerTypesCache !== null) {
-    return builtInTriggerTypesCache;
-  }
-
-  // Extract trigger types from the actual schema definitions
-  const builtInSchemaConfigs = [
-    {
-      schema: AlertRuleTriggerSchema,
-      description: 'Trigger workflow when an alert rule fires',
-      icon: monaco.languages.CompletionItemKind.Customcolor, // Alert/event icon
-    },
-    {
-      schema: ScheduledTriggerSchema,
-      description: 'Trigger workflow on a schedule (cron or interval)',
-      icon: monaco.languages.CompletionItemKind.Operator, // Schedule/operator icon
-    },
-    {
-      schema: ManualTriggerSchema,
-      description: 'Trigger workflow manually',
-      icon: monaco.languages.CompletionItemKind.TypeParameter, // Manual/keyword icon
-    },
-  ];
-
-  const triggerTypes = builtInSchemaConfigs.map(({ schema, description, icon }) => {
-    // Extract the literal type value from the Zod schema
-    const typeField = schema.shape.type;
-    const triggerType = typeField.def.values[0] as string; // Get the literal value from z.literal()
-    const builtInDefinition = getBuiltInTriggerDefinition(triggerType);
-
-    return {
-      type: triggerType,
-      label: builtInDefinition?.label ?? triggerType,
-      description: builtInDefinition?.description ?? description,
-      icon,
-    };
-  });
-
-  builtInTriggerTypesCache = triggerTypes;
-  return triggerTypes;
+  return getBuiltInTriggerDefinitions(triggerSchemas.getTriggerSchemaOptions()).map(
+    ({ id, label, description }) => ({
+      type: id,
+      label,
+      description,
+      icon: BUILT_IN_TRIGGER_ICONS[id] ?? monaco.languages.CompletionItemKind.TypeParameter,
+    })
+  );
 }

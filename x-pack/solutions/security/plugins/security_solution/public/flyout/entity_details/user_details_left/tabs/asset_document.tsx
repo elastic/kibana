@@ -17,6 +17,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { JsonTab } from '../../../../flyout_v2/document/main/tabs/json_tab';
 import { TableTab } from '../../../../flyout_v2/document/main/tabs/table_tab';
 import { cellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
+import { OpenFlyoutLink } from '../../../../flyout_v2/shared/components/open_flyout_link';
 import { useDocumentDetailsContext } from '../../../document_details/shared/context';
 import { FLYOUT_BODY_TEST_ID, JSON_TAB_TEST_ID, TABLE_TAB_TEST_ID } from './test_ids';
 import { FlyoutBody } from '../../../shared/components/flyout_body';
@@ -60,7 +61,14 @@ export const AssetDocumentTab: FC<Partial<AssetDocumentPanelProps>> = memo(() =>
             defaultMessage="Table"
           />
         ),
-        content: <TableTab hit={hit} scopeId={scopeId} renderCellActions={cellActionRenderer} />,
+        content: (
+          <TableTab
+            hit={hit}
+            scopeId={scopeId}
+            renderCellActions={cellActionRenderer}
+            renderFlyoutLink={OpenFlyoutLink}
+          />
+        ),
       },
       {
         id: JSON_TAB_TEST_ID,

@@ -17,7 +17,7 @@ import { MetricDimensionEditor } from './dimension_editor';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { ColorMode } from '@kbn/charts-plugin/public';
 import type { PaletteOutput, PaletteRegistry, CustomPaletteParams } from '@kbn/coloring';
-import { CustomizablePalette } from '@kbn/coloring';
+import { CustomizablePalette } from '@kbn/coloring-components';
 import { act } from 'react-dom/test-utils';
 
 import { PalettePanelContainer } from '../../shared_components';

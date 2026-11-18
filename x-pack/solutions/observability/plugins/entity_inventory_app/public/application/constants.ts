@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import type { TimeRange } from '@kbn/es-query';
+import type { Query, TimeRange } from '@kbn/es-query';
 
 export const ENTITY_INVENTORY_APP_NAME = 'entityInventoryApp';
 
 export const ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS = 3;
 
 export const DEFAULT_TIME_RANGE: TimeRange = { from: 'now-15m', to: 'now' };
+
+export const DEFAULT_QUERY: Query = { language: 'kuery', query: '' };
+
+export const URL_SEARCH_STATE_KEY = '_a';

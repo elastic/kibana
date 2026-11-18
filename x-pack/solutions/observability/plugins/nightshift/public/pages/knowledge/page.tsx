@@ -24,8 +24,8 @@ const KnowledgeIndicatorsTab = React.lazy(() =>
     default: module.KnowledgeIndicatorsTab,
   }))
 );
-const CortexTab = React.lazy(() =>
-  import('./cortex/tab').then((module) => ({ default: module.CortexTab }))
+const WikiTab = React.lazy(() =>
+  import('./wiki/tab').then((module) => ({ default: module.WikiTab }))
 );
 const MemoryTab = React.lazy(() =>
   import('./memory/tab').then((module) => ({ default: module.MemoryTab }))
@@ -35,7 +35,7 @@ const DecisionTreesTab = React.lazy(() =>
 );
 
 const nightshiftLabel = i18n.translate('xpack.nightshift.knowledgePage.backToNightshiftLabel', {
-  defaultMessage: 'Nightshift',
+  defaultMessage: 'nightshift',
 });
 
 export type KnowledgePageHeaderProps = Record<string, never>;
@@ -104,7 +104,7 @@ export function KnowledgePage({
       <EuiPageTemplate.Section component="div" restrictWidth={false}>
         <React.Suspense fallback={<KnowledgeLoadingSpinner />}>
           {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTab />}
-          {tab === 'cortex' && <CortexTab />}
+          {tab === 'wiki' && <WikiTab />}
           {tab === 'memory' && <MemoryTab />}
           {tab === 'decision_trees' && <DecisionTreesTab />}
         </React.Suspense>

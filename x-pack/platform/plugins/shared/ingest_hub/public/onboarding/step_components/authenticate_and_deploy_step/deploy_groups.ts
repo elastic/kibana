@@ -16,13 +16,18 @@ import type {
 import type { ServiceVars, ServiceInstance } from '../service_settings_step/use_service_settings';
 import { buildPackageInputs, buildPackageVars, getPackageVarNames } from './package_inputs';
 import {
+  getCreateDatasetTemplates,
   reconcileInstances,
   groupByPackage,
   buildGroupPolicyNameStem,
   deriveGroupPolicyName,
   DEFAULT_NAMESPACE,
 } from './deploy_group_helpers';
-import { getPolicySettings, type PolicySettings } from '../../common/policy_settings';
+import {
+  getPolicySettings,
+  getPolicyVarSettings,
+  type PolicySettings,
+} from '../../common/policy_settings';
 export { collectDeployResults } from './deploy_group_helpers';
 
 /**
@@ -182,7 +187,12 @@ export async function deployGroup(
   }
 
   const services = group.members.map(({ service }) => service);
-  const inputs = buildPackageInputs(services, serviceVarsMap, globalRegion);
+  const inputs = buildPackageInputs(
+    services,
+    serviceVarsMap,
+    globalRegion,
+    getPolicyVarSettings(policySettings, 'managed_integration')
+  );
 
   // Explicitly disable all package inputs not in our selection to avoid Fleet defaulting
   // enabled inputs that would cause "not allowed for agentless" errors.
@@ -212,8 +222,11 @@ export async function deployGroup(
     staticKeys,
     pkgVarNames,
     undefined,
-    connectorId ? undefined : authenticateAndDeployStep.existingSecretRefs
+    connectorId ? undefined : authenticateAndDeployStep.existingSecretRefs,
+    getPolicyVarSettings(policySettings, 'managed_integration', pkgVarNames)
   );
+
+  const createDatasetTemplates = getCreateDatasetTemplates(group, storedServiceVars);
 
   const response = await sendCreateAgentlessPolicy({
     name: buildAgentlessPolicyName(group, integrationName),
@@ -222,6 +235,9 @@ export async function deployGroup(
     package: { name: firstService.packageName, version: pkgVersion },
     ...(vars ? { vars } : {}),
     inputs,
+    ...(createDatasetTemplates !== undefined
+      ? { create_dataset_templates: createDatasetTemplates }
+      : {}),
     ...getPolicySettings(policySettings, 'managed_integration'),
     ...(connectorId
       ? {

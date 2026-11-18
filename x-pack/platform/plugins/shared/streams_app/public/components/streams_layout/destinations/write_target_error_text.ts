@@ -6,22 +6,71 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { MAX_OTEL_DATASET_BYTES, MAX_OTEL_NAMESPACE_BYTES } from '@kbn/streams-schema';
 import { MAX_RESOLVE_INDEX_PATTERNS } from '@kbn/streams-plugin/common';
 import { MAX_INDEX_NAME_BYTES } from './destination_models';
 import { DESTINATION_SIGNAL_LABELS } from './destination_type_config';
 import type {
-  AutoWritePatternValidationError,
   DestinationSignal,
   DocsWritePatternValidationError,
-  StaticIndexValidationError,
+  FreeFormIndexValidationError,
+  SignalIndexValidationError,
 } from './types';
 
 export type WriteTargetError =
-  | StaticIndexValidationError
-  | AutoWritePatternValidationError
+  | FreeFormIndexValidationError
+  | SignalIndexValidationError
   | DocsWritePatternValidationError
   | 'tooMany'
   | undefined;
+
+const templateErrorText = (): string =>
+  i18n.translate('xpack.streams.destinations.indexTemplateNotSupportedErrorMessage', {
+    defaultMessage: 'Templated index names are not supported yet.',
+  });
+
+/** Text for a Fixed dataset and namespace error. Automatic write pattern errors have none here. */
+export const otelNameErrorText = (
+  error: SignalIndexValidationError | undefined
+): string | undefined => {
+  switch (error) {
+    case 'namespaceRequired':
+      return i18n.translate('xpack.streams.destinations.otelNamespaceRequiredErrorMessage', {
+        defaultMessage: 'Enter a namespace.',
+      });
+    case 'template':
+      return templateErrorText();
+    case 'uppercase':
+      return i18n.translate('xpack.streams.destinations.otelNameUppercaseErrorMessage', {
+        defaultMessage: 'Dataset and namespace must be lowercase.',
+      });
+    case 'hyphen':
+      return i18n.translate('xpack.streams.destinations.otelNameHyphenErrorMessage', {
+        defaultMessage: 'Dataset and namespace cannot contain "-".',
+      });
+    case 'invalidCharacter':
+      return i18n.translate('xpack.streams.destinations.otelNameInvalidCharacterErrorMessage', {
+        defaultMessage:
+          'Dataset and namespace cannot contain \\ / * ? " < > | , # : or spaces. Invisible characters are not allowed either.',
+      });
+    case 'invalidName':
+      return i18n.translate('xpack.streams.destinations.otelNameInvalidNameErrorMessage', {
+        defaultMessage: 'Dataset and namespace cannot be "." or "..".',
+      });
+    case 'typeSuffix':
+      return i18n.translate('xpack.streams.destinations.otelNameTypeSuffixErrorMessage', {
+        defaultMessage: 'Dataset cannot end in .otel or .prometheus. Those are added for you.',
+      });
+    case 'partTooLong':
+      return i18n.translate('xpack.streams.destinations.otelNamePartTooLongErrorMessage', {
+        defaultMessage:
+          'Dataset can be at most {datasetMax} bytes and namespace at most {namespaceMax} bytes.',
+        values: { datasetMax: MAX_OTEL_DATASET_BYTES, namespaceMax: MAX_OTEL_NAMESPACE_BYTES },
+      });
+    default:
+      return undefined;
+  }
+};
 
 export const writeTargetErrorText = (
   signal: DestinationSignal,
@@ -35,9 +84,7 @@ export const writeTargetErrorText = (
     });
   }
   if (error === 'template') {
-    return i18n.translate('xpack.streams.destinations.indexTemplateNotSupportedErrorMessage', {
-      defaultMessage: 'Templated index names are not supported yet.',
-    });
+    return templateErrorText();
   }
   if (error === 'uppercase') {
     return allowWildcard
@@ -64,13 +111,9 @@ export const writeTargetErrorText = (
     });
   }
   if (error === 'invalidName') {
-    return signal === 'docs'
-      ? i18n.translate('xpack.streams.destinations.docsIndexInvalidNameErrorMessage', {
-          defaultMessage: 'Enter a valid index or data stream name.',
-        })
-      : i18n.translate('xpack.streams.destinations.indexInvalidNameErrorMessage', {
-          defaultMessage: 'Enter a valid data stream name.',
-        });
+    return i18n.translate('xpack.streams.destinations.docsIndexInvalidNameErrorMessage', {
+      defaultMessage: 'Enter a valid index or data stream name.',
+    });
   }
   if (error === 'tooLong') {
     return i18n.translate('xpack.streams.destinations.writePatternTooLongErrorMessage', {

@@ -10,6 +10,7 @@ import {
   type AlertSourceMode,
   type PresetSchedule,
 } from '@kbn/nightshift-investigations-plugin/common';
+import type { AlertSeverity } from '@kbn/rule-data-utils';
 import type { Automation } from '../../../../data/automations/use_automations';
 import { UNLIMITED_DAILY_LIMIT } from '../../utils/daily_usage';
 
@@ -35,6 +36,7 @@ export type TriggerFormValues =
       ruleNamePattern: string;
       ruleNames: string[];
       ruleTags: string[];
+      severities: AlertSeverity[];
       alertSources: string[];
       alertSourceMode: AlertSourceMode;
     }
@@ -92,6 +94,7 @@ export const createTriggerFormValues = (kind: TriggerFormValues['kind']): Trigge
       ruleNamePattern: '',
       ruleNames: [],
       ruleTags: [],
+      severities: [],
       alertSources: [],
       alertSourceMode: 'include',
     };
@@ -155,6 +158,7 @@ export const toAutomationFormValues = (automation: Automation): AutomationFormVa
           ruleNamePattern: row.ruleNamePattern ?? '',
           ruleNames: row.ruleNames ?? [],
           ruleTags: row.tags ?? [],
+          severities: row.severities ?? [],
           alertSources: row.alertSources ?? [],
           alertSourceMode: row.alertSourceMode ?? 'include',
         }

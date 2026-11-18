@@ -1,5 +1,5 @@
 {
-  "sha1": "13ea7c44891b8aea3f1bd5eeed2592bd433cfe45",
+  "sha1": "dcb1c10cd4e6236b5e0031e49f77952b80f43e68",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -306,6 +306,22 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/episode_action_policy_history.spec.ts",
         "line": 36,
         "column": 23
+      }
+    },
+    {
+      "id": "2987e7e9e86616c-5d9ffe2ba2ee894",
+      "title": "Alerts page - rule summary flyout opens and closes the rule summary flyout from a v2 rule row",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/ui/tests/episode_rule_summary_flyout.spec.ts",
+        "line": 66,
+        "column": 15
       }
     },
     {
