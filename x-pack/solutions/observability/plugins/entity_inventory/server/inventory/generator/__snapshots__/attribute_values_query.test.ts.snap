@@ -7,7 +7,7 @@ TS metrics-system.*
 | WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
     AND (TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" OR TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\")
 | STATS \`last_seen\` = MAX(\`@timestamp\`) BY \`value\` = TO_STRING(\`host.os.name\`)
-| WHERE \`value\` IS NOT NULL
+| WHERE \`value\` IS NOT NULL AND LENGTH(\`value\`) > 0 AND LENGTH(\`value\`) <= 256
 | KEEP \`value\`, \`last_seen\`
 | SORT \`value\` ASC
 | LIMIT 100",
@@ -30,7 +30,7 @@ FROM metrics-system.* METADATA _index_mode
     AND \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
     AND (TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" OR TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\")
 | STATS \`last_seen\` = MAX(\`@timestamp\`) BY \`value\` = TO_STRING(\`host.os.name\`)
-| WHERE \`value\` IS NOT NULL
+| WHERE \`value\` IS NOT NULL AND LENGTH(\`value\`) > 0 AND LENGTH(\`value\`) <= 256
 | KEEP \`value\`, \`last_seen\`
 | SORT \`value\` ASC
 | LIMIT 100",
@@ -52,7 +52,7 @@ TS metrics-kubeletstatsreceiver.otel-default
 | WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
     AND (TO_STRING(kubernetes.namespace) IS NOT NULL AND TO_STRING(kubernetes.namespace) != \\"\\" AND TO_STRING(kubernetes.deployment.name) IS NOT NULL AND TO_STRING(kubernetes.deployment.name) != \\"\\")
 | STATS \`last_seen\` = MAX(\`@timestamp\`) BY \`value\` = TO_STRING(\`orchestrator.cluster.name\`)
-| WHERE \`value\` IS NOT NULL
+| WHERE \`value\` IS NOT NULL AND LENGTH(\`value\`) > 0 AND LENGTH(\`value\`) <= 256
 | KEEP \`value\`, \`last_seen\`
 | SORT \`value\` ASC
 | LIMIT 100",
@@ -75,7 +75,7 @@ FROM metrics-kubeletstatsreceiver.otel-default METADATA _index_mode
     AND \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
     AND (TO_STRING(kubernetes.namespace) IS NOT NULL AND TO_STRING(kubernetes.namespace) != \\"\\" AND TO_STRING(kubernetes.deployment.name) IS NOT NULL AND TO_STRING(kubernetes.deployment.name) != \\"\\")
 | STATS \`last_seen\` = MAX(\`@timestamp\`) BY \`value\` = TO_STRING(\`orchestrator.cluster.name\`)
-| WHERE \`value\` IS NOT NULL
+| WHERE \`value\` IS NOT NULL AND LENGTH(\`value\`) > 0 AND LENGTH(\`value\`) <= 256
 | KEEP \`value\`, \`last_seen\`
 | SORT \`value\` ASC
 | LIMIT 100",
@@ -98,7 +98,7 @@ TS metrics-kubernetes.state_deployment-*
     AND (metricset.name == \\"state_deployment\\")
     AND (TO_STRING(kubernetes.namespace) IS NOT NULL AND TO_STRING(kubernetes.namespace) != \\"\\" AND TO_STRING(kubernetes.deployment.name) IS NOT NULL AND TO_STRING(kubernetes.deployment.name) != \\"\\")
 | STATS \`last_seen\` = MAX(\`@timestamp\`) BY \`value\` = TO_STRING(\`orchestrator.cluster.name\`)
-| WHERE \`value\` IS NOT NULL
+| WHERE \`value\` IS NOT NULL AND LENGTH(\`value\`) > 0 AND LENGTH(\`value\`) <= 256
 | KEEP \`value\`, \`last_seen\`
 | SORT \`value\` ASC
 | LIMIT 100",
@@ -122,7 +122,7 @@ FROM metrics-kubernetes.state_deployment-* METADATA _index_mode
     AND (metricset.name == \\"state_deployment\\")
     AND (TO_STRING(kubernetes.namespace) IS NOT NULL AND TO_STRING(kubernetes.namespace) != \\"\\" AND TO_STRING(kubernetes.deployment.name) IS NOT NULL AND TO_STRING(kubernetes.deployment.name) != \\"\\")
 | STATS \`last_seen\` = MAX(\`@timestamp\`) BY \`value\` = TO_STRING(\`orchestrator.cluster.name\`)
-| WHERE \`value\` IS NOT NULL
+| WHERE \`value\` IS NOT NULL AND LENGTH(\`value\`) > 0 AND LENGTH(\`value\`) <= 256
 | KEEP \`value\`, \`last_seen\`
 | SORT \`value\` ASC
 | LIMIT 100",
@@ -144,7 +144,7 @@ TS metrics-kubeletstatsreceiver.otel-default
 | WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
     AND ((TO_STRING(kubernetes.node.name) IS NOT NULL AND TO_STRING(kubernetes.node.name) != \\"\\"))
 | STATS \`last_seen\` = MAX(\`@timestamp\`) BY \`value\` = TO_STRING(\`orchestrator.cluster.name\`)
-| WHERE \`value\` IS NOT NULL
+| WHERE \`value\` IS NOT NULL AND LENGTH(\`value\`) > 0 AND LENGTH(\`value\`) <= 256
 | KEEP \`value\`, \`last_seen\`
 | SORT \`value\` ASC
 | LIMIT 100",
@@ -167,7 +167,7 @@ FROM metrics-kubeletstatsreceiver.otel-default METADATA _index_mode
     AND \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
     AND ((TO_STRING(kubernetes.node.name) IS NOT NULL AND TO_STRING(kubernetes.node.name) != \\"\\"))
 | STATS \`last_seen\` = MAX(\`@timestamp\`) BY \`value\` = TO_STRING(\`orchestrator.cluster.name\`)
-| WHERE \`value\` IS NOT NULL
+| WHERE \`value\` IS NOT NULL AND LENGTH(\`value\`) > 0 AND LENGTH(\`value\`) <= 256
 | KEEP \`value\`, \`last_seen\`
 | SORT \`value\` ASC
 | LIMIT 100",
