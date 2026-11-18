@@ -20,7 +20,7 @@ export const ALERTZERO_RULE_PREVIEW_WORKFLOW_ID = 'system-security-rule-preview'
 export const ALERTZERO_RULE_TUNING_WORKER_WORKFLOW_ID = 'system-security-rule-tuning-worker';
 export const ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID = 'system-security-rule-tuning-review';
 export const ALERTZERO_RULE_CREATION_WORKFLOW_ID = 'system-security-rule-creation';
-export const ALERTZERO_RULE_DOCTOR_WORKER_WORKFLOW_ID = 'system-security-rule-doctor-worker';
+export const ALERTZERO_RULE_DOCTOR_SWEEP_WORKFLOW_ID = 'system-security-rule-doctor-sweep';
 export const ALERTZERO_RULE_DOCTOR_REVIEW_WORKFLOW_ID = 'system-security-rule-doctor-review';
 
 export const ALERTZERO_COVERAGE_REVIEW_WORKFLOW = {
@@ -89,14 +89,14 @@ export const ALERTZERO_RULE_CREATION_WORKFLOW = {
   },
 } as const satisfies ManagedWorkflowDefinition;
 
-export const ALERTZERO_RULE_DOCTOR_WORKER_WORKFLOW = {
+export const ALERTZERO_RULE_DOCTOR_SWEEP_WORKFLOW = {
   billable: true,
-  id: ALERTZERO_RULE_DOCTOR_WORKER_WORKFLOW_ID,
+  id: ALERTZERO_RULE_DOCTOR_SWEEP_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 1,
   get yaml() {
-    return readManagedWorkflowYaml(__dirname, 'rule_doctor_worker.yaml');
+    return readManagedWorkflowYaml(__dirname, 'rule_doctor_sweep.yaml');
   },
 } as const satisfies ManagedWorkflowDefinition;
 

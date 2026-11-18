@@ -1,0 +1,239 @@
+version: "1"
+name: Detection Rule Doctor Sweep
+description: >
+  Finds broken detection rules and starts one doctor review per rule. A rule is
+  broken when its last run failed or warned, or when it runs clean over source
+  data that stopped arriving. Each review holds its own approval gate; the sweep
+  does not wait for them.
+enabled: true
+tags:
+  - security
+  - detection-rule-doctor
+settings:
+  # The sweep only starts reviews and finishes in seconds, so a second sweep would
+  # race the first for the same rules.
+  concurrency:
+    key: detection-rule-doctor
+    strategy: drop
+    max: 1
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        max_rules_per_sweep:
+          type: integer
+          minimum: 1
+          maximum: 10
+          description: Overrides how many failing rules one sweep may send for review, up to the default of 10.
+        stale_after_hours:
+          type: integer
+          minimum: 1
+          maximum: 720
+          description: Overrides how long a rule's source data may stay silent before the rule counts as blind.
+        max_freshness_checks:
+          type: integer
+          minimum: 0
+          maximum: 200
+          description: Overrides how many healthy-looking rules one sweep checks for silent source data. 0 skips the check.
+      additionalProperties: false
+outputs:
+  - name: failing_rules
+    type: number
+  - name: freshness_checked
+    type: number
+  - name: lookup_failed
+    type: boolean
+consts:
+  max_rules_per_sweep: 10
+  stale_after_hours: 24
+  max_freshness_checks: 100
+  no_rows: []
+steps:
+  # Comparison operators cannot follow a filter chain, so every threshold is
+  # rendered here first and turned into a number below.
+  - name: render_settings
+    type: data.set
+    with:
+      stale_before_ms: >-
+        {%- assign hours = inputs.stale_after_hours | default: consts.stale_after_hours -%}
+        {%- assign window = hours | times: 3600000 -%}
+        {{ 'now' | date: '%s' | times: 1000 | minus: window }}
+
+  - name: resolve_settings
+    type: data.set
+    with:
+      stale_before_ms: "${{ steps.render_settings.output.stale_before_ms | plus: 0 }}"
+      max_rules: "${{ inputs.max_rules_per_sweep | default: consts.max_rules_per_sweep }}"
+      max_checks: "${{ inputs.max_freshness_checks | default: consts.max_freshness_checks }}"
+
+  # A review parks at its gate for up to 72h, and its rule keeps failing until the
+  # fix is approved. Listing in-flight reviews lets both picks skip those rules.
+  # Fails open: the review's per-rule drop concurrency is the backstop.
+  - name: list_active_reviews
+    type: kibana.request
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/workflows/workflow/system-security-rule-doctor-review/executions?statuses=pending&statuses=waiting&statuses=waiting_for_input&statuses=waiting_for_child&statuses=running&statuses=queued&size=100"
+      headers:
+        elastic-api-version: "2023-10-31"
+    on-failure:
+      continue: true
+
+  # The keys are `rule-doctor-review-<rule uuid>`. Joined with a leading and
+  # trailing comma so one `contains` checks a `,<id>,` against all of them.
+  - name: collect_active_rules
+    type: data.set
+    with:
+      keys: ",{{ steps.list_active_reviews.output.results | default: consts.no_rows | map: 'concurrencyGroupKey' | join: ',' | remove: 'rule-doctor-review-' }},"
+
+  # Pick one: enabled rules whose last run failed or warned. The run outcome is a
+  # keyword on the rule saved object, so the filter runs in Elasticsearch.
+  - name: list_failing_rules
+    type: kibana.request
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules/_find"
+      headers:
+        elastic-api-version: "2023-10-31"
+      query:
+        filter: 'alert.attributes.enabled: true and alert.attributes.lastRun.outcome: ("failed" or "warning")'
+        per_page: 100
+        sort_field: updated_at
+        sort_order: desc
+    on-failure:
+      continue: true
+
+  # Rendered as `,id,id` because Liquid cannot build an array otherwise. Failed rules
+  # take the slots first, so a crowd of warnings cannot push out a rule that is down.
+  - name: resolve_failing_rules
+    type: data.set
+    with:
+      ids: >-
+        {%- assign picked = 0 -%}
+        {%- for wanted in (1..2) -%}
+        {%- for rule in steps.list_failing_rules.output.data -%}
+        {%- assign failed = 2 -%}
+        {%- if rule.execution_summary.last_execution.status == 'failed' -%}{%- assign failed = 1 -%}{%- endif -%}
+        {%- if failed != wanted -%}{%- continue -%}{%- endif -%}
+        {%- assign key = ',' | append: rule.id | append: ',' -%}
+        {%- unless steps.collect_active_rules.output.keys contains key -%}
+        {%- if picked < steps.resolve_settings.output.max_rules -%},{{ rule.id }}{%- assign picked = picked | plus: 1 -%}{%- endif -%}
+        {%- endunless -%}
+        {%- endfor -%}
+        {%- endfor -%}
+
+  - name: run_failing_reviews
+    type: foreach
+    foreach: "${{ steps.resolve_failing_rules.output.ids | remove_first: ',' | split: ',' }}"
+    steps:
+      - name: run_failing_review
+        type: workflow.executeAsync
+        if: "${{ foreach.item != blank }}"
+        on-failure:
+          continue: true
+        with:
+          workflow-id: system-security-rule-doctor-review
+          run-as-mode: inherit
+          inputs:
+            rule_uuid: "{{ foreach.item }}"
+            symptom: run_failed
+            parent_run_id: "{{ execution.id }}"
+
+  # Pick two: enabled rules whose last run succeeded. A rule over a source that went
+  # quiet reports success on every run, so run status alone never finds it.
+  - name: list_healthy_rules
+    type: kibana.request
+    if: "${{ steps.resolve_settings.output.max_checks > 0 }}"
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules/_find"
+      headers:
+        elastic-api-version: "2023-10-31"
+      query:
+        filter: 'alert.attributes.enabled: true and alert.attributes.lastRun.outcome: "succeeded"'
+        per_page: "{{ steps.resolve_settings.output.max_checks }}"
+        sort_field: updated_at
+        sort_order: desc
+    on-failure:
+      continue: true
+
+  # Only rules that name their own indices: an ES|QL rule names them in the query,
+  # a data view rule in the view, and an ML rule reads anomalies. Each rule is
+  # checked and dispatched in one iteration, since a later step cannot read every
+  # iteration's result.
+  - name: check_freshness
+    type: foreach
+    foreach: >-
+      ${{ steps.list_healthy_rules.output.data
+        | default: consts.no_rows
+        | where_exp: 'rule', 'rule.index != blank and rule.data_view_id == blank' }}
+    steps:
+      - name: prepare_check
+        type: data.set
+        with:
+          # Rule ids are uuids, so a bare id cannot match part of another key.
+          active: "${{ steps.collect_active_rules.output.keys contains foreach.item.id }}"
+          timestamp_field: "{{ foreach.item.timestamp_override | default: '@timestamp' }}"
+
+      - name: latest_event
+        type: elasticsearch.search
+        if: "${{ steps.prepare_check.output.active != true }}"
+        with:
+          index: "{{ foreach.item.index | join: ',' }}"
+          ignore_unavailable: true
+          allow_no_indices: true
+          size: 0
+          track_total_hits: false
+          aggs:
+            latest:
+              max:
+                field: "{{ steps.prepare_check.output.timestamp_field }}"
+        on-failure:
+          continue: true
+
+      # A source with no events at all is new or never connected, not one that went
+      # quiet, so only a known last event older than the threshold counts. Runs every
+      # iteration: a skipped search leaves the previous rule's output in place.
+      - name: judge_freshness
+        type: data.set
+        with:
+          last_event_at: "{{ steps.latest_event.output.aggregations.latest.value_as_string }}"
+          stale: >-
+            ${{ steps.prepare_check.output.active != true
+              and steps.latest_event.error == null
+              and steps.latest_event.output.aggregations.latest.value != null
+              and steps.latest_event.output.aggregations.latest.value < steps.resolve_settings.output.stale_before_ms }}
+
+      - name: run_stale_review
+        type: workflow.executeAsync
+        if: "${{ steps.judge_freshness.output.stale == true }}"
+        on-failure:
+          continue: true
+        with:
+          workflow-id: system-security-rule-doctor-review
+          run-as-mode: inherit
+          inputs:
+            rule_uuid: "{{ foreach.item.id }}"
+            symptom: data_stale
+            last_event_at: "{{ steps.judge_freshness.output.last_event_at }}"
+            parent_run_id: "{{ execution.id }}"
+
+  # Zero reviews after a failed read does not mean no rule is broken, so the run
+  # fails and the worker failure banner shows up.
+  - name: emit_failed_result
+    type: workflow.output
+    if: "${{ steps.list_failing_rules.error != null }}"
+    status: failed
+    with:
+      message: "Could not list this space's rules, so no rule was checked: {{ steps.list_failing_rules.error.message }}"
+      failing_rules: 0
+      freshness_checked: 0
+      lookup_failed: "${{ steps.list_active_reviews.error != null }}"
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      failing_rules: "${{ steps.list_failing_rules.output.total | default: 0 }}"
+      freshness_checked: "${{ steps.list_healthy_rules.output.data | default: consts.no_rows | size }}"
+      lookup_failed: "${{ steps.list_active_reviews.error != null }}"

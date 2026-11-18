@@ -21,8 +21,8 @@ set -euo pipefail
 # sweep (the script prints the command).
 #
 # Usage:
-#   KIBANA_URL=http://localhost:5621 bash seed_rule_doctor_demo.sh
-#   KIBANA_URL=http://localhost:5621 bash seed_rule_doctor_demo.sh --cleanup
+#   KIBANA_URL=http://localhost:5621 bash rule_doctor_seed_demo.sh
+#   KIBANA_URL=http://localhost:5621 bash rule_doctor_seed_demo.sh --cleanup
 #
 # Pass KIBANA_URL explicitly: a shell-wide default may point at another Kibana.
 # Indices sit under logs-* so the worker service account can read them; logs-*-*
@@ -147,7 +147,7 @@ create_rule() {
     risk_score: 47,
     severity: "medium",
     tags: [$tag],
-    description: "Seeded by seed_rule_doctor_demo.sh"
+    description: "Seeded by rule_doctor_seed_demo.sh"
   }' <<<"$1")
   kbn POST "/api/detection_engine/rules" "$body" | jq -c '{name, id, error: (.message // null)}'
 }
@@ -176,6 +176,6 @@ Then run the doctor sweep:
 
   curl -sS -u $KIBANA_USER:*** -X POST -H 'kbn-xsrf: true' -H 'Content-Type: application/json' \\
     -H 'elastic-api-version: 2023-10-31' \\
-    '$KIBANA_URL/s/$KIBANA_SPACE/api/workflows/workflow/system-security-rule-doctor-worker/run' \\
+    '$KIBANA_URL/s/$KIBANA_SPACE/api/workflows/workflow/system-security-rule-doctor-sweep/run' \\
     -d '{"inputs":{}}'
 EOF

@@ -11,7 +11,7 @@ import { parse } from 'yaml';
 import {
   ALERTZERO_ACTION_EDIT_RULE_WORKFLOW,
   ALERTZERO_RULE_DOCTOR_REVIEW_WORKFLOW,
-  ALERTZERO_RULE_DOCTOR_WORKER_WORKFLOW,
+  ALERTZERO_RULE_DOCTOR_SWEEP_WORKFLOW,
   ALERTZERO_RULE_WORKFLOW_IDS,
 } from '.';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
@@ -56,7 +56,7 @@ const render = (template: unknown, context: Record<string, unknown>) =>
     .trim();
 
 const review = load(ALERTZERO_RULE_DOCTOR_REVIEW_WORKFLOW.yaml);
-const worker = load(ALERTZERO_RULE_DOCTOR_WORKER_WORKFLOW.yaml);
+const worker = load(ALERTZERO_RULE_DOCTOR_SWEEP_WORKFLOW.yaml);
 
 describe('rule doctor review', () => {
   describe('classify', () => {
@@ -335,7 +335,7 @@ describe('rule doctor registration', () => {
   it('installs both doctor workflows with the other rule workflows', () => {
     expect(ALERTZERO_RULE_WORKFLOW_IDS).toEqual(
       expect.arrayContaining([
-        ALERTZERO_RULE_DOCTOR_WORKER_WORKFLOW.id,
+        ALERTZERO_RULE_DOCTOR_SWEEP_WORKFLOW.id,
         ALERTZERO_RULE_DOCTOR_REVIEW_WORKFLOW.id,
       ])
     );

@@ -8,7 +8,7 @@
  */
 
 import { ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID, ALERTZERO_WORKER_MANAGEMENT } from './constants';
-import DETECTION_RULE_DOCTOR_YAML from './detection_rule_doctor.yaml';
+import DETECTION_RULE_DOCTOR_YAML from './rule_doctor_worker.yaml';
 import {
   RULE_DOCTOR_WORKER_SETTINGS_DEFAULTS,
   upgradeStoredWorkerSettings,

@@ -11,7 +11,7 @@
     "noParse": [
       "managed/definitions/**/*.yaml",
       "!managed/definitions/alertzero/detection_rule_coverage.yaml",
-      "!managed/definitions/alertzero/detection_rule_doctor.yaml",
+      "!managed/definitions/alertzero/rule_doctor_worker.yaml",
       "!managed/definitions/alertzero/detection_rule_tuning.yaml",
       "!managed/definitions/alertzero/floor_alert_triage.yaml",
       "!managed/definitions/alertzero/floor_attack_discovery.yaml",
