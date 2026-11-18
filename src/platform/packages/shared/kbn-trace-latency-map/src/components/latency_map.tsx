@@ -137,6 +137,19 @@ export interface LatencyMapProps {
 
 const withoutFailedOnly = ({ failedOnly, ...selection }: LatencyMapSelection) => selection;
 
+/** Value equality of selections: the host re-parses the prop from its query every render. */
+const isSameSelection = (a?: LatencyMapSelection, b?: LatencyMapSelection) =>
+  a === b ||
+  Boolean(
+    a &&
+      b &&
+      a.from === b.from &&
+      a.to === b.to &&
+      a.minDuration === b.minDuration &&
+      a.maxDuration === b.maxDuration &&
+      Boolean(a.failedOnly) === Boolean(b.failedOnly)
+  );
+
 /** A window pointer event in the pixels of the chart, whose box the layer shares. */
 const toLayerPoint = (event: globalThis.PointerEvent, box: DOMRect): Point => ({
   x: event.clientX - box.left,
@@ -259,13 +272,35 @@ export function LatencyMap({
   // filter; a selection whose condition still carries the failure clause (a shared URL from
   // before the host filter) shows as failed too. Without it, the map keeps its own state.
   const controlled = onFailedOnlyChange !== undefined;
-  const [localFailedOnly, setLocalFailedOnly] = useState(Boolean(selection?.failedOnly));
-  const selectionFailedOnly = selection ? Boolean(selection.failedOnly) : undefined;
+
+  // A commit shows at once: the committed selection (or clear) stays rendered while the host
+  // round-trips it through its query, so the box never snaps back to its old place. The prop
+  // takes over as soon as it moves - to the committed value, or wherever else the host went.
+  const [pendingCommit, setPendingCommit] = useState<{
+    selection: LatencyMapSelection | undefined;
+    propAtCommit: LatencyMapSelection | undefined;
+  }>();
+  const selectionProp = useRef(selection);
+  selectionProp.current = selection;
+  useEffect(() => {
+    setPendingCommit((pending) => {
+      if (!pending) return pending;
+      // The prop moved since the commit: whatever it says now wins, pending or not.
+      if (!isSameSelection(selection, pending.propAtCommit)) return undefined;
+      // The prop already says what was committed: nothing left to wait for.
+      if (isSameSelection(selection, pending.selection)) return undefined;
+      return pending;
+    });
+  }, [selection]);
+  const displaySelection = pendingCommit ? pendingCommit.selection : selection;
+
+  const [localFailedOnly, setLocalFailedOnly] = useState(Boolean(displaySelection?.failedOnly));
+  const selectionFailedOnly = displaySelection ? Boolean(displaySelection.failedOnly) : undefined;
   useEffect(() => {
     if (selectionFailedOnly !== undefined) setLocalFailedOnly(selectionFailedOnly);
   }, [selectionFailedOnly]);
   const failedOnly = controlled
-    ? Boolean(hostFailedOnly || selection?.failedOnly)
+    ? Boolean(hostFailedOnly || displaySelection?.failedOnly)
     : localFailedOnly;
   // Once the user chooses an outcome with the errors filter, a drawn region keeps it: the failure
   // inference below only speaks while the user has not.
@@ -274,6 +309,7 @@ export function LatencyMap({
   const commit = useCallback(
     (next: LatencyMapSelection | undefined) => {
       if (!next) outcomeChosen.current = false;
+      setPendingCommit({ selection: next, propAtCommit: selectionProp.current });
       onSelectionCommit(
         next,
         next && selectionToEsqlCondition(next, { unit, scope: selectionCondition })
@@ -304,11 +340,12 @@ export function LatencyMap({
     gestureRef.current = undefined;
     setIsMoving(false);
     setIsDrawing(false);
+    setPendingCommit(undefined);
   }, [gridKey]);
 
   const committedRange = useMemo(
-    () => (geometry && selection ? geometry.selectionToRange(selection) : undefined),
-    [geometry, selection]
+    () => (geometry && displaySelection ? geometry.selectionToRange(displaySelection) : undefined),
+    [geometry, displaySelection]
   );
   // The selection as the chart draws it, by what is on: a move, the keyboard, the selection.
   const highlight = draft ?? (keyboard ? getKeyboardRange(keyboard) : undefined) ?? committedRange;
@@ -338,17 +375,17 @@ export function LatencyMap({
   // snapped to: after a resize those are not the same spans.
   const selectedCounts = useMemo(
     () =>
-      grid && timeGrid && stats && selection
+      grid && timeGrid && stats && displaySelection
         ? getSelectionCounts({
             grid,
             timeGrid,
             stats,
             // Under a host's failure filter the selection condition does not say failed
             // itself, but the query returns failed spans alone, and so must the counts.
-            selection: failedOnly ? { ...selection, failedOnly: true } : selection,
+            selection: failedOnly ? { ...displaySelection, failedOnly: true } : displaySelection,
           })
         : { spans: 0, failed: 0, estimated: false },
-    [grid, timeGrid, stats, selection, failedOnly]
+    [grid, timeGrid, stats, displaySelection, failedOnly]
   );
 
   // Stable, so renders that change nothing of the chart do not reach the memoized heatmap.
@@ -356,7 +393,7 @@ export function LatencyMap({
     (requested: CellRange, label?: string) => {
       if (!geometry) return;
       const range = clampRange(requested, geometry.bins, geometry.rows);
-      if (selection && committedRange && isSameRange(range, committedRange)) return;
+      if (displaySelection && committedRange && isSameRange(range, committedRange)) return;
       // With a host filter the failure clause is the host's, never the selection's.
       let next = geometry.rangeToSelection(range, controlled ? undefined : failedOnly);
       // A region where failures concentrate is about them: the selection says so on its
@@ -372,7 +409,7 @@ export function LatencyMap({
     },
     [
       geometry,
-      selection,
+      displaySelection,
       committedRange,
       commit,
       failedOnly,
@@ -472,12 +509,14 @@ export function LatencyMap({
       onFailedOnlyChange?.(next);
       // The host filter owns the outcome now: a selection condition still carrying the
       // failure clause of its own (a shared URL from before) is normalized out of it.
-      if (selection?.failedOnly) commit(withoutFailedOnly(selection));
+      if (displaySelection?.failedOnly) commit(withoutFailedOnly(displaySelection));
       return;
     }
     setLocalFailedOnly(next);
-    if (selection) {
-      commit(next ? { ...selection, failedOnly: true } : withoutFailedOnly(selection));
+    if (displaySelection) {
+      commit(
+        next ? { ...displaySelection, failedOnly: true } : withoutFailedOnly(displaySelection)
+      );
     }
   };
 
@@ -501,7 +540,7 @@ export function LatencyMap({
     event.preventDefault();
     if (result.action?.type === 'clear') {
       setKeyboard(undefined);
-      if (selection) commit(undefined);
+      if (displaySelection) commit(undefined);
       return;
     }
     if (result.action?.type === 'commit') {
@@ -817,9 +856,9 @@ export function LatencyMap({
   // As text on the header's left, next to the statistics. Shown in the error state too:
   // the selection still filters the host's documents, so the way to clear it must not go
   // down with the map (the counts do, so they are left out).
-  const selectionSummary = selection && (geometry || error) && (
+  const selectionSummary = displaySelection && (geometry || error) && (
     <SelectionSummary
-      selection={selection}
+      selection={displaySelection}
       spans={grid ? selectedCounts.spans : undefined}
       failed={grid ? selectedCounts.failed : undefined}
       failedOnly={failedOnly}
@@ -827,8 +866,8 @@ export function LatencyMap({
       sampled={sampled || selectedCounts.estimated}
       timeZone={timeZone}
       actions={renderSelectionActions?.(
-        selection,
-        selectionToEsqlCondition(selection, { unit, scope: selectionCondition })
+        displaySelection,
+        selectionToEsqlCondition(displaySelection, { unit, scope: selectionCondition })
       )}
     />
   );

@@ -142,8 +142,9 @@ function renderMap(
     ...view,
     runEsql,
     onSelectionCommit,
-    /** Renders again with the same props, picking up a changed `mockWidth`. */
-    rerenderMap: () => view.rerender(<LatencyMap {...mapProps} />),
+    /** Renders again, picking up a changed `mockWidth` or, as the host would, new props. */
+    rerenderMap: (overrides: Partial<LatencyMapProps> = {}) =>
+      view.rerender(<LatencyMap {...mapProps} {...overrides} />),
   };
 }
 
@@ -522,11 +523,15 @@ describe('LatencyMap', () => {
         geometry.rangeToSelection({ x0: 3, x1: 7, y0: 2, y1: 6 })
       );
 
-      // The same drag from the slow corner down commits the same region.
-      fireEvent.pointerDown(layer, { ...centerOf(6, 5), button: 0, pointerId: 1 });
-      fireEvent.pointerMove(window, { ...centerOf(3, 2), pointerId: 1 });
-      fireEvent.pointerUp(window, { ...centerOf(3, 2), pointerId: 1 });
-      expect(onSelectionCommit.mock.calls[1][0]).toEqual(onSelectionCommit.mock.calls[0][0]);
+      // A drag from the slow corner down commits the same normalized region. A different
+      // region than the first: the committed one is already shown, and drawing it again
+      // commits nothing.
+      fireEvent.pointerDown(layer, { ...centerOf(9, 8), button: 0, pointerId: 1 });
+      fireEvent.pointerMove(window, { ...centerOf(5, 4), pointerId: 1 });
+      fireEvent.pointerUp(window, { ...centerOf(5, 4), pointerId: 1 });
+      expect(onSelectionCommit.mock.calls[1][0]).toEqual(
+        geometry.rangeToSelection({ x0: 5, x1: 10, y0: 4, y1: 9 })
+      );
     });
 
     it('draws from above the plot, clamped to the top row', async () => {
@@ -720,6 +725,44 @@ describe('LatencyMap', () => {
       expect(onSelectionCommit.mock.calls[0][0]).toEqual(
         geometry.rangeToSelection({ x0: 6, x1: 9, y0: 5, y1: 9 })
       );
+    });
+
+    it('keeps a moved region in place while the host round-trips it, then follows the prop', async () => {
+      const { rerenderMap } = renderMap({ selection });
+      await waitForChart();
+      hover(4, 5);
+      const overlay = screen.getByTestId('traceLatencyMapOverlay');
+      fireEvent.pointerDown(screen.getByTestId('traceLatencyMapGrip'), {
+        ...centerOf(4, 5),
+        button: 0,
+        pointerId: 1,
+      });
+      fireEvent.pointerMove(overlay, { ...centerOf(7, 6), pointerId: 1 });
+      fireEvent.pointerUp(overlay, { ...centerOf(7, 6), pointerId: 1 });
+      const moved = { x0: 6, x1: 9, y0: 5, y1: 9 };
+      // The prop still says the old place: the map keeps the committed one - no snap-back.
+      expect(mockChart.heatmap.highlightedData).toEqual(rangeToHighlight(moved, timeGrid));
+      // The commit lands in the prop: nothing jumps.
+      rerenderMap({ selection: geometry.rangeToSelection(moved) });
+      expect(mockChart.heatmap.highlightedData).toEqual(rangeToHighlight(moved, timeGrid));
+    });
+
+    it('lets the prop overrule a commit it answers with something else', async () => {
+      const { rerenderMap } = renderMap({ selection });
+      await waitForChart();
+      hover(4, 5);
+      const overlay = screen.getByTestId('traceLatencyMapOverlay');
+      fireEvent.pointerDown(screen.getByTestId('traceLatencyMapGrip'), {
+        ...centerOf(4, 5),
+        button: 0,
+        pointerId: 1,
+      });
+      fireEvent.pointerMove(overlay, { ...centerOf(7, 6), pointerId: 1 });
+      fireEvent.pointerUp(overlay, { ...centerOf(7, 6), pointerId: 1 });
+      // The host went another way, as when a range change clears the selection: it wins.
+      rerenderMap({ selection: undefined });
+      expect(mockChart.heatmap.highlightedData).toBeUndefined();
+      expect(screen.queryByTestId('traceLatencyMapSelectionBar')).not.toBeInTheDocument();
     });
 
     it('resizes the region from a handle', async () => {
@@ -948,10 +991,12 @@ describe('LatencyMap', () => {
       expect(summary).toHaveTextContent('failed only');
     });
 
-    it('clears the selection', async () => {
+    it('clears the selection, at once, before the host answers', async () => {
       const { onSelectionCommit } = renderMap({ selection });
       fireEvent.click(await screen.findByTestId('traceLatencyMapClearSelection'));
       expect(onSelectionCommit).toHaveBeenCalledWith(undefined, undefined);
+      // The prop still carries the selection; the map already shows it gone.
+      expect(screen.queryByTestId('traceLatencyMapSelectionBar')).not.toBeInTheDocument();
     });
 
     it('keeps the way to clear a selection when the map itself fails', async () => {
