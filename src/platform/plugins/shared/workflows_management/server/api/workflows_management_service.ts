@@ -89,6 +89,12 @@ import type { WorkflowLookupItem } from '../../common/lib/workflow_dependents/ty
 import { getAuthenticatedUser } from '../lib/get_user';
 import { getHistoryForWorkflow } from '../lib/get_workflow_change_history';
 import {
+  getManagedInstallRetryDelayMs,
+  MANAGED_INSTALL_RETRY_DELAYS_MS,
+  waitUnlessAborted,
+} from '../lib/managed_install_retry';
+import { isTransientEsError } from '../lib/transient_es_errors';
+import {
   type ManagedInstallReadinessResult,
   waitForManagedWorkflowInstallReadiness,
 } from '../lib/wait_for_managed_workflow_install_readiness';
@@ -817,9 +823,67 @@ export class WorkflowsService {
   }
 
   /**
-   * Install or update a managed workflow after ES readiness gating.
+   * Runs a managed install once the readiness gate passes, and again with backoff while it fails
+   * on a transient Elasticsearch error, for about 5 minutes. Resolves to `skipped` when the gate
+   * skips it, such as when Kibana is stopping, and marks the plugin install pass incomplete so
+   * ready() will not orphan-delete.
+   */
+  private async runManagedInstall<T>({
+    operation,
+    pluginId,
+    install,
+    skipped,
+    getTransientError,
+  }: {
+    operation: string;
+    pluginId: string;
+    install: () => Promise<T>;
+    skipped: T;
+    /** A transient error inside a result that resolved, such as a workflow of a batch that failed. */
+    getTransientError?: (result: T) => Error | undefined;
+  }): Promise<T> {
+    const maxRetries = MANAGED_INSTALL_RETRY_DELAYS_MS.length;
+    for (let retry = 0; ; retry++) {
+      const readiness = await this.ensureManagedInstallReady(operation);
+      if (!readiness.ready) {
+        this.managedWorkflowsService.markInstallIncomplete(pluginId);
+        return skipped;
+      }
+
+      let transientError: Error | undefined;
+      try {
+        const result = await install();
+        transientError = getTransientError?.(result);
+        if (!transientError || retry >= maxRetries) {
+          if (!transientError && retry > 0) {
+            this.logger.info(
+              `Workflows Management: managed ${operation} succeeded after ${retry + 1} attempts`
+            );
+          }
+          return result;
+        }
+      } catch (error) {
+        if (!isTransientEsError(error) || retry >= maxRetries) {
+          throw error;
+        }
+        transientError = error;
+      }
+
+      const delayMs = getManagedInstallRetryDelayMs(retry);
+      this.logger.warn(
+        `Workflows Management: managed ${operation} failed on a transient Elasticsearch error ` +
+          `(attempt ${retry + 1} of ${maxRetries + 1}), retrying in ${delayMs} ms: ${
+            transientError.message
+          }`
+      );
+      await waitUnlessAborted(delayMs, this.stopController.signal);
+    }
+  }
+
+  /**
+   * Install or update a managed workflow after ES readiness gating, retrying transient
+   * Elasticsearch errors (see {@link runManagedInstall}).
    * Best-effort: may no-op when Kibana is stopping or ES is not ready (resolve ≠ persisted).
-   * Gated skips mark the plugin install pass incomplete so ready() will not orphan-delete.
    */
   public async installManagedWorkflow(
     id: ManagedWorkflowId,
@@ -828,38 +892,41 @@ export class WorkflowsService {
     request?: KibanaRequest
   ): Promise<void> {
     await this.ensureInitialized();
-    const readiness = await this.ensureManagedInstallReady(`install '${id}'`);
-    if (!readiness.ready) {
-      // So ready() cannot treat gated-out installs as orphans and force-delete them.
-      this.managedWorkflowsService.markInstallIncomplete(registeredPluginId);
-      return;
-    }
-    return this.managedWorkflowsService.installManagedWorkflow(
-      id,
-      options,
-      registeredPluginId,
-      request
-    );
+    return this.runManagedInstall({
+      operation: `install '${id}'`,
+      pluginId: registeredPluginId,
+      install: () =>
+        this.managedWorkflowsService.installManagedWorkflow(
+          id,
+          options,
+          registeredPluginId,
+          request
+        ),
+      skipped: undefined,
+    });
   }
 
   /**
-   * Install or update static managed workflows with `_bulk`, after one ES readiness check for the
-   * whole batch. Best-effort like {@link installManagedWorkflow}: a gated batch resolves with no
-   * failures and marks the plugin install pass incomplete.
+   * Install or update static managed workflows with `_bulk`, after an ES readiness check for the
+   * whole batch. When the batch fails or any of its workflows fails on a transient Elasticsearch
+   * error, the whole batch runs again (see {@link runManagedInstall}); unchanged workflows cost
+   * only its first read. Best-effort like {@link installManagedWorkflow}: a gated batch resolves
+   * with no failures.
    */
   public async bulkInstallManagedWorkflows(
     items: readonly ManagedWorkflowServiceInstallManyItem[],
     registeredPluginId: string
   ): Promise<ManagedWorkflowInstallManyResult> {
     await this.ensureInitialized();
-    const readiness = await this.ensureManagedInstallReady(
-      `install of ${items.length} workflow(s) for plugin '${registeredPluginId}'`
-    );
-    if (!readiness.ready) {
-      this.managedWorkflowsService.markInstallIncomplete(registeredPluginId);
-      return { failed: [] };
-    }
-    return this.managedWorkflowsService.bulkInstallManagedWorkflows(items, registeredPluginId);
+    return this.runManagedInstall({
+      operation: `install of ${items.length} workflow(s) for plugin '${registeredPluginId}'`,
+      pluginId: registeredPluginId,
+      install: () =>
+        this.managedWorkflowsService.bulkInstallManagedWorkflows(items, registeredPluginId),
+      skipped: { failed: [] },
+      getTransientError: ({ failed }) =>
+        failed.find(({ error }) => isTransientEsError(error))?.error,
+    });
   }
 
   public async uninstallManagedWorkflow(
