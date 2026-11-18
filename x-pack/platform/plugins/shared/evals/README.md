@@ -274,6 +274,30 @@ const results = await evals.evaluate?.({
 - `reference_data` (optional) carries everything else the selected evaluators read: ground truth, or other inputs such as a transcript or a decision tree. An evaluator that declares a `referenceDataSchema` receives only what its schema accepts, and a mismatch is refused before any evaluator runs. Content isn't length-capped, so a judge is responsible for keeping its prompt within its model's context window.
 - Evaluators that read the trace itself, such as `latency`, `input_tokens`, `output_tokens` and `tool_calls`, return an `error` result for evidence, without failing the others.
 - Passing both `subject` and `evidence` throws `EvaluationExecutionError`.
+- For a conversation, pass every turn as `evidence.conversation.rounds` (with optional `turn_ids`) and its last turn as `round`.
+
+### Grading conversations
+
+A `subject` with `mode: 'multi-turn'` takes one trace per turn, in order, up to 50 (`MAX_MULTI_TURN_TRACES`). Each trace can carry a `turn_id`. A `single-turn` subject still takes exactly one trace.
+
+```ts
+const results = await evals.evaluate?.({
+  request,
+  subject: {
+    mode: 'multi-turn',
+    traces: [
+      { trace_id: firstTurnTraceId, turn_id: 'facts' },
+      { trace_id: lastTurnTraceId, turn_id: 'question', reference_data: { expected } },
+    ],
+  },
+  evaluators: [{ name: 'my-transcript-judge', connector_id: judgeConnectorId }],
+});
+```
+
+- Every turn is read from its own trace. Evaluators receive the last turn as `round`, every turn as `conversation.rounds`, and the last trace's `reference_data`. Trace-based evaluators such as `latency` read the last turn's trace.
+- A user-defined judge with `transcript` evidence grades the whole conversation: its prompt gets every turn, in order, as `{{{conversation_transcript}}}`. Other evaluators grade the last turn. To grade an earlier turn, send its trace as a `single-turn` subject.
+- `_validate` checks a multi-turn subject against its last turn.
+- A turn's `user_query` is the last user message of its first model call, because a follow-up turn's model input holds the whole conversation so far.
 
 ## Dataset tags and maturity
 
@@ -290,7 +314,7 @@ Concurrent writes are guarded with optimistic concurrency, so a suite adding exa
 
 ## Instrumentation profiles
 
-Evaluator routes reconstruct a normalized evidence round (`input.message`, `response.message`, `steps`) from a trace using an **instrumentation profile**. Pass `subject.instrumentation.profile` on `_validate` / `_evaluate` / `_test`; when omitted, **`elastic-inference`** is used. User-defined judges receive the same normalized round as built-in LLM evaluators, so a judge prompt describes what to assess rather than how to query a trace.
+Evaluator routes reconstruct a normalized evidence round (`input.message`, `response.message`, `steps`) from a trace using an **instrumentation profile**. For the `genai_messages` parsers, `user_query` is the last user message of the matched span's input, which is the current turn's question on a follow-up turn as well as on a first one. Pass `subject.instrumentation.profile` on `_validate` / `_evaluate` / `_test`; when omitted, **`elastic-inference`** is used. User-defined judges receive the same normalized round as built-in LLM evaluators, so a judge prompt describes what to assess rather than how to query a trace.
 
 `_evaluate` and `_test` wait for a trace to finish exporting before grading it, so an in-flight response is not scored as if it were final. `_validate` deliberately does not wait: it reports the evidence present now, because "not indexed yet" is a useful answer when you are diagnosing instrumentation.
 

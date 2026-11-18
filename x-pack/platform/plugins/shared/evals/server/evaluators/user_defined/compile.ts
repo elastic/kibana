@@ -109,7 +109,7 @@ export const compileUserDefinedEvaluator = (
     direction: getEvaluatorDirection(judge),
     referenceDataSchema: buildReferenceDataSchema(judge.reference_data_keys),
     evidenceSchema: buildEvidenceSchema(judge.evidence),
-    async evaluate({ round, referenceData, inferenceClient }) {
+    async evaluate({ round, conversation, referenceData, inferenceClient }) {
       if (!inferenceClient) {
         throw new Error(`Inference client is required for evaluator "${name}"`);
       }
@@ -118,7 +118,7 @@ export const compileUserDefinedEvaluator = (
         inferenceClient,
         prompt,
         toolName: JUDGE_TOOL_NAME,
-        input: buildJudgeInput({ judge, round, referenceData }),
+        input: buildJudgeInput({ judge, round, conversation, referenceData }),
       });
 
       return mapJudgeOutput(judge, output);

@@ -91,6 +91,7 @@ export { createPlaywrightEvalsConfig } from './src/config/create_playwright_eval
 export type {
   Example,
   TaskOutput,
+  TaskContext,
   ExperimentTask,
   Evaluator,
   EvaluationResult,
@@ -114,7 +115,12 @@ export {
   createGroundednessAnalysisEvaluator,
 } from './src/evaluators/groundedness';
 export type { EvaluationDataset, EvaluationWorkerFixtures, EvaluationReport } from './src/types';
-export { withEvaluatorSpan, withTaskSpan, getCurrentTraceId } from './src/utils/tracing';
+export {
+  withEvaluatorSpan,
+  withTaskSpan,
+  withTurnSpan,
+  getCurrentTraceId,
+} from './src/utils/tracing';
 export { withRetry, type RetryOptions } from './src/utils/retry_utils';
 export { calculateSetMetrics, type SetMetrics } from './src/utils/set_metrics';
 export {
@@ -193,6 +199,53 @@ export { createEsqlEquivalenceEvaluator } from './src/evaluators/esql';
 
 export { createTrajectoryEvaluator } from './src/evaluators/trajectory';
 export { createConversationCoherenceEvaluator } from './src/evaluators/conversation_coherence';
+export {
+  createConversationTask,
+  runConversation,
+  ConversationRunError,
+  DEFAULT_MAX_TURNS,
+  agentBuilderTarget,
+  inferenceTarget,
+  createSimulatedUser,
+  answerPromptsWithNextTurn,
+  forTurn,
+  forFinalTurn,
+  acrossTurns,
+  forConversation,
+  createConversationCompletedEvaluator,
+  isMultiTurnResult,
+  overallExpectation,
+  type ConversationTaskOptions,
+  type RunConversationParams,
+  type AgentBuilderTargetOptions,
+  type InferenceTargetOptions,
+  type SimulatedUserOptions,
+  type AcrossTurnsOptions,
+  type TurnScoreAggregate,
+  type ConversationInput,
+  type ConversationMessage,
+  type ConversationResult,
+  type ConversationStopReason,
+  type ConversationTarget,
+  type ConversationTurnExpectation,
+  type ConversationTurnInput,
+  type ConversationTurnResult,
+  type MultiTurnError,
+  type MultiTurnExample,
+  type MultiTurnExpected,
+  type MultiTurnHooks,
+  type MultiTurnInput,
+  type MultiTurnResult,
+  type MultiTurnTaskContext,
+  type NextMessageContext,
+  type NextMessageFn,
+  type ReconcileOutcome,
+  type RespondToPromptsFn,
+  type SimulatedUserInput,
+  type TargetConversation,
+  type TargetTurnReply,
+  type TargetTurnRequest,
+} from './src/multi_turn';
 export { createMultiJudgeEvaluator } from './src/evaluators/multi_judge';
 export {
   createToolPoisoningEvaluator,

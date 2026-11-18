@@ -134,8 +134,17 @@ export interface DefaultEvaluators {
   };
 }
 
+/** Where a task call sits in the experiment, for setup steps and trace correlation. */
+export interface TaskContext {
+  datasetName: string;
+  exampleIndex: number;
+  repetition: number;
+  totalRepetitions: number;
+}
+
 export type ExperimentTask<TExample extends Example, TTaskOutput extends TaskOutput> = (
-  example: TExample
+  example: TExample,
+  context?: TaskContext
 ) => Promise<TTaskOutput>;
 
 /**

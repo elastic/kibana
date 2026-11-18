@@ -547,6 +547,60 @@ Wrap evaluators with `selectEvaluators()` then control which run via environment
 SELECTED_EVALUATORS="Factuality,Relevance" node scripts/evals run --suite agent-builder
 ```
 
+### Multi-turn conversations
+
+For a system that should keep context across turns. See the smoke-tests suite's `multi_turn.spec.ts` for full examples.
+
+#### Dataset
+
+Give each example its user turns in `input.turns` (one conversation) or `input.conversations` (several, run in order, e.g. earlier sessions followed by a final question). Turn ids are unique within the example. Ground truth can be given per turn in `output.turns`, matched by id, and for the whole interaction in `output.expected`:
+
+```ts
+const example: MultiTurnExample = {
+  input: {
+    turns: [
+      { id: 't1', message: 'Who owns checkout?' },
+      { id: 't2', message: 'Who owns checkout now?' },
+    ],
+    seeding_data: { history_ref: 'checkout/initial-history.json' }, // read by your hooks
+  },
+  output: {
+    expected: 'Ownership moved from Payments to Commerce.',
+    turns: [{ id: 't2', expected: 'Commerce' }],
+  },
+};
+```
+
+#### Running conversations
+
+`createConversationTask({ target, ... })` runs each example's conversations against a target:
+
+- `agentBuilderTarget({ client: agentBuilderClient, agentId })` creates each conversation up front and sends every turn once. When a call fails or times out (`turnTimeoutMs`), the stored conversation tells whether the turn was applied: its reply is read back, or the turn is sent again only if it never arrived. A turn whose outcome is unknown ends the run, so a state-changing turn is never repeated. Prompts the agent is waiting on (such as `ask_user_question`) are answered with the next turn; pass `respondToPrompts` to change that.
+- `inferenceTarget({ inferenceClient, system })` calls a model directly through a connector or inference endpoint, sending the message history each turn.
+
+Each turn runs in its own trace, linked to the example's task span, so trace-based evaluators can grade a single turn.
+
+After the scripted turns, `nextMessage` can choose more, up to `maxTurns` per conversation. It sees the turns so far and the example's input, never the expected output. `createSimulatedUser({ inferenceClient })` is a `nextMessage` where a model plays the user from `input.simulated_user.instructions` until its goal is met.
+
+`hooks` run your setup around the run: `beforeExample` (e.g. clear memory and load `seeding_data`, waiting until it is queryable), `beforeConversation`, `beforeTurn` (e.g. apply seeding meant for that turn) and `afterExample`, which always runs. The task receives the example's repetition in its context. Examples that share state through the target must run with `concurrency: 1`; prefer putting warm-up conversations in the same example as the measurement.
+
+A failure doesn't fail the experiment. The task output keeps the turns that completed and records where it failed (`setup`, `agent_call`, `next_message`) in `error`, so evaluators still run and the failure is stored with the scores. `createConversationCompletedEvaluator()` turns it into a score.
+
+#### Grading
+
+Existing evaluators grade a run through these wrappers. Each score gets its own name, so turns don't collide:
+
+| Wrapper | Grades | Score name |
+| --- | --- | --- |
+| `forTurn(evaluator, 't2')` | One turn, with that turn's trace and `expected` | `<name> [t2]` |
+| `forFinalTurn(evaluator)` | The last turn | `<name> [final turn]` |
+| `acrossTurns(evaluator, { aggregate, turnIds, conversation })` | Every selected turn, as one score (`mean`, `min`, `max`, or `sum` for trace metrics) | `<name> [turns: mean]` |
+| `forConversation(evaluator, { conversation })` | The transcript, e.g. with `createConversationCoherenceEvaluator` | `<name> [conversation]` |
+
+For a turn, the evaluator's `input.question` is the turn's message, `input.history` the earlier messages of its conversation, and `output.messages` / `output.traceId` the turn's reply and trace.
+
+Kibana-side evaluators grade the same way. `forTurn(evaluatorClient.toEvaluators([...])[0], 't2')` sends that turn's trace to `_evaluate`. `evaluatorClient.toConversationEvaluators([...])` sends every turn's trace in one `multi-turn` subject: conversation-scoped judges (user-defined judges with `transcript` evidence, rendered as `{{{conversation_transcript}}}`) read all turns, and the others grade the last one.
+
 ### Customizing report display
 
 Override `reportModelScore` to create custom reports:

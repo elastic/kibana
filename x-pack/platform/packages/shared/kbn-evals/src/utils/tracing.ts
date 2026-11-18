@@ -60,6 +60,38 @@ export function withEvaluatorSpan(name: string, opts: WithActiveSpanOptions, cb:
   );
 }
 
+/**
+ * Runs one conversation turn in its own root span, so each turn gets its own trace id and
+ * trace-based evaluators can grade it alone. The span links back to the span that was active
+ * when the turn started (normally the example's task span), so the turns stay connected.
+ */
+export function withTurnSpan<T>(
+  name: string,
+  opts: WithActiveSpanOptions,
+  cb: () => Promise<T>
+): Promise<T> {
+  const activeContext = context.active();
+  const baggage = propagation.getBaggage(activeContext);
+  const parentContext = baggage ? propagation.setBaggage(ROOT_CONTEXT, baggage) : ROOT_CONTEXT;
+  const linkedSpanContext = trace.getSpanContext(activeContext);
+
+  return context.with(parentContext, () =>
+    withActiveEvalsSpan(
+      name,
+      {
+        ...opts,
+        ...(linkedSpanContext ? { links: [{ context: linkedSpanContext }] } : {}),
+        attributes: {
+          'instrumentationScope.name': '@kbn/evals',
+          ...opts.attributes,
+        },
+      },
+      parentContext,
+      cb
+    )
+  );
+}
+
 export function getCurrentTraceId(): string | null {
   try {
     const activeSpan = trace.getActiveSpan();
