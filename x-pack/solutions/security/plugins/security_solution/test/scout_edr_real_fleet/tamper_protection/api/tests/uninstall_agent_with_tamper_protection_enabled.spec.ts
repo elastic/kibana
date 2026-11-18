@@ -55,8 +55,9 @@ apiTest.describe(
         });
 
         await apiTest.step('an uninstall without a token is rejected', async () => {
-          const { output } = await uninstallAgent(log, hostname);
+          const { exitCode, output } = await uninstallAgent(log, hostname);
 
+          expect(exitCode, output).not.toBe(0);
           expect(output).toContain(INVALID_TOKEN_MESSAGE);
           expect(output).not.toContain(UNINSTALLED_MESSAGE);
           expect(await getElasticInstallState(log, hostname)).toBe('present');
@@ -68,8 +69,9 @@ apiTest.describe(
             requestHeaders,
             protectedPolicy.agentPolicyId
           );
-          const { output } = await uninstallAgent(log, hostname, token);
+          const { exitCode, output } = await uninstallAgent(log, hostname, token);
 
+          expect(exitCode, output).toBe(0);
           expect(output).not.toContain(INVALID_TOKEN_MESSAGE);
           expect(output).toContain(UNINSTALLED_MESSAGE);
           expect(await getElasticInstallState(log, hostname)).toBe('absent');
