@@ -442,6 +442,24 @@ describe('createLiveQueryRoute', () => {
     it.each([
       ['a workflow call', workflowCallHeaders, 'execution-1'],
       [
+        'a UUID execution ID',
+        {
+          ...internalOrigin,
+          [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: '123e4567-e89b-42d3-a456-426614174000',
+        },
+        '123e4567-e89b-42d3-a456-426614174000',
+      ],
+      [
+        'an execution ID using all allowed characters',
+        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'AZaz09._:-' },
+        'AZaz09._:-',
+      ],
+      [
+        'a single-character execution ID',
+        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'e' },
+        'e',
+      ],
+      [
         'an execution ID at the length limit',
         { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'e'.repeat(256) },
         'e'.repeat(256),
@@ -451,8 +469,9 @@ describe('createLiveQueryRoute', () => {
 
       expect(response.ok).toHaveBeenCalled();
       expect(mockedCreateActionHandler).toHaveBeenCalledTimes(1);
-      expect(mockedCreateActionHandler.mock.calls[0][2]).toMatchObject({
-        origin: { type: 'workflow', execution_id: executionId },
+      expect(mockedCreateActionHandler.mock.calls[0][2]?.origin).toEqual({
+        type: 'workflow',
+        execution_id: executionId,
       });
     });
 
@@ -479,6 +498,46 @@ describe('createLiveQueryRoute', () => {
         true,
       ],
       [
+        'a leading-whitespace execution ID',
+        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: ' execution-1' },
+        true,
+      ],
+      [
+        'a trailing-whitespace execution ID',
+        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'execution-1 ' },
+        true,
+      ],
+      [
+        'a single-value execution ID array',
+        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: ['execution-1'] },
+        true,
+      ],
+      [
+        'an execution ID with embedded whitespace',
+        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'execution id' },
+        true,
+      ],
+      [
+        'an execution ID containing a slash',
+        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'execution/id' },
+        true,
+      ],
+      [
+        'a non-ASCII execution ID',
+        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'exécution' },
+        true,
+      ],
+      [
+        'an execution ID containing a control character',
+        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'execution\tid' },
+        true,
+      ],
+      [
+        'an execution ID with a trailing newline',
+        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'execution-1\n' },
+        true,
+      ],
+      [
         'repeated execution IDs',
         {
           ...internalOrigin,
@@ -492,6 +551,14 @@ describe('createLiveQueryRoute', () => {
         {
           ...internalOrigin,
           [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'execution-1, execution-2',
+        },
+        true,
+      ],
+      [
+        'only the retired osquery source headers on a public call',
+        {
+          'x-osquery-dispatch-source': 'workflow',
+          'x-osquery-dispatch-workflow-id': 'workflow-1',
         },
         true,
       ],
