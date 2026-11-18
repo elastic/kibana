@@ -115,7 +115,10 @@ test.describe('Nightshift — conversation details flyout', { tag: tags.stateful
     await settle(page, SNAPSHOT);
     await shoot(page, '04-home-list-click-opens-flyout');
 
-    await page.getByRole('button', { name: /copy link/i }).first().click();
+    await page
+      .getByRole('button', { name: /copy link/i })
+      .first()
+      .click();
     await page.waitForTimeout(800);
     await shoot(page, '05-home-list-copy-link-toast');
   });
@@ -183,7 +186,10 @@ test.describe('Nightshift — conversation details flyout', { tag: tags.stateful
     await shoot(page, '24-snapshot-escalation-modal');
     await page.keyboard.press('Escape');
 
-    await page.getByRole('button', { name: /copy link/i }).first().click();
+    await page
+      .getByRole('button', { name: /copy link/i })
+      .first()
+      .click();
     await page.waitForTimeout(800);
     await shoot(page, '25-snapshot-copy-link-toast');
   });

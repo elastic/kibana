@@ -139,9 +139,7 @@ test.describe('Conversation details flyout — error toasts', { tag: tags.statef
     page.goto(kbnUrl.get(`/app/alertzero?selectedConversationId=${id}`));
 
   const openLive = async (page: Page, kbnUrl: { get: (p: string) => string }, id: string) => {
-    await page.goto(
-      kbnUrl.get(`/app/agent_builder/agents/elastic-ai-agent/conversations/${id}`)
-    );
+    await page.goto(kbnUrl.get(`/app/agent_builder/agents/elastic-ai-agent/conversations/${id}`));
     await page.getByTestId('agentBuilderChatInfoButton').click({ timeout: 30_000 });
   };
 
@@ -178,7 +176,11 @@ test.describe('Conversation details flyout — error toasts', { tag: tags.statef
     await settle(page, SNAPSHOT);
     await page.getByTestId('connectedStatusToggle').click();
     await page.screenshot({ path: `${OUT_DIR}/_debug-04-popover.png` });
-    await page.getByRole('option', { name: /open/i }).or(page.getByText('Open', { exact: true })).last().click();
+    await page
+      .getByRole('option', { name: /open/i })
+      .or(page.getByText('Open', { exact: true }))
+      .last()
+      .click();
     await captureToast(page, '04-reopen-failed', /status|Failed/i);
   });
 
@@ -190,7 +192,11 @@ test.describe('Conversation details flyout — error toasts', { tag: tags.statef
     await settle(page, SNAPSHOT);
     await page.getByTestId('connectedSeverityPicker').click();
     await page.screenshot({ path: `${OUT_DIR}/_debug-05-popover.png` });
-    await page.getByRole('option', { name: /critical/i }).or(page.getByText('Critical', { exact: true })).last().click();
+    await page
+      .getByRole('option', { name: /critical/i })
+      .or(page.getByText('Critical', { exact: true }))
+      .last()
+      .click();
     await captureToast(page, '05-severity-failed', /severity|Failed/i);
   });
 
@@ -200,7 +206,10 @@ test.describe('Conversation details flyout — error toasts', { tag: tags.statef
     );
     await openSnapshot(page, kbnUrl, ids.investigationOpen);
     await settle(page, SNAPSHOT);
-    await page.getByTestId(new RegExp(`assignToUsersAdd-`) as unknown as string).first().click();
+    await page
+      .getByTestId(new RegExp(`assignToUsersAdd-`) as unknown as string)
+      .first()
+      .click();
     await page.screenshot({ path: `${OUT_DIR}/_debug-06-popover.png` });
     await page.getByRole('option').first().click();
     await captureToast(page, '06-assignees-failed', /Failed to update assignees/);
@@ -212,7 +221,10 @@ test.describe('Conversation details flyout — error toasts', { tag: tags.statef
     );
     await openSnapshot(page, kbnUrl, ids.investigationOther);
     await settle(page, SNAPSHOT);
-    await page.getByTestId(SNAPSHOT).getByRole('button', { name: /escalation/i }).click();
+    await page
+      .getByTestId(SNAPSHOT)
+      .getByRole('button', { name: /escalation/i })
+      .click();
     await page.getByRole('button', { name: 'Open escalation' }).click();
     await captureToast(page, '07-escalation-create-failed', /Failed to create the escalation/);
   });
@@ -223,7 +235,10 @@ test.describe('Conversation details flyout — error toasts', { tag: tags.statef
     );
     await openSnapshot(page, kbnUrl, ids.investigationOther);
     await settle(page, SNAPSHOT);
-    await page.getByTestId(SNAPSHOT).getByRole('button', { name: /escalation/i }).click();
+    await page
+      .getByTestId(SNAPSHOT)
+      .getByRole('button', { name: /escalation/i })
+      .click();
     await page.getByText('Add to existing').click();
     await page.screenshot({ path: `${OUT_DIR}/_debug-08-modal.png` });
     await page.getByText('Suspicious PowerShell on host-01').last().click();

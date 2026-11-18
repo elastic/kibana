@@ -7,7 +7,7 @@
 
 import { tags, test } from '@kbn/scout';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { setUpNightshiftServiceAccount } from '../../../../../../../../solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/fixtures/service_account';
+import { setUpNightshiftServiceAccount } from '@kbn/nightshift-investigations-plugin/test/scout_nightshift_investigations/api/fixtures/service_account';
 
 // Run once against `--serverConfigSet nightshift_investigations`, before
 // `seed_nightshift_investigations.ts`: the investigation agent is only available in a space whose

@@ -138,9 +138,7 @@ test.describe(
     });
 
     const openLive = async (page: Page, kbnUrl: { get: (p: string) => string }, id: string) => {
-      await page.goto(
-        kbnUrl.get(`/app/agent_builder/agents/elastic-ai-agent/conversations/${id}`)
-      );
+      await page.goto(kbnUrl.get(`/app/agent_builder/agents/elastic-ai-agent/conversations/${id}`));
       await page.getByTestId('agentBuilderChatInfoButton').click({ timeout: 30_000 });
       await settle(page, LIVE);
       return page.getByTestId(LIVE);
