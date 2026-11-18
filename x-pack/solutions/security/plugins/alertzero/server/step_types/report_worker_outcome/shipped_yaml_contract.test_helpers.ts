@@ -14,6 +14,7 @@ import type { WorkflowStep } from '@kbn/workflows';
 import { createWorkflowLiquidEngine, getNestedStepGroups } from '@kbn/workflows';
 import {
   ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID,
+  ALERTZERO_WORKER_DETECTION_RULE_DOCTOR_WORKFLOW_ID,
   ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
   ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
@@ -106,6 +107,11 @@ const TEMPLATE_VALUES: Partial<ManagedWorkflowTemplateValuesById> = {
   [ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID]: {
     autonomyLevel: 'manual',
     extras: { lookbackDays: 14, maxGapsPerRun: 5 },
+    scheduleInterval: '1h',
+    settingsVersion: 1,
+  },
+  [ALERTZERO_WORKER_DETECTION_RULE_DOCTOR_WORKFLOW_ID]: {
+    autonomyLevel: 'manual',
     scheduleInterval: '1h',
     settingsVersion: 1,
   },

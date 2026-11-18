@@ -79,6 +79,12 @@ export const RULE_TUNING_WORKER_SETTINGS_DEFAULTS = {
   extras: { defaultValue: { analysisWindowDays: 7, fpCountThreshold: 10, fpRateThresholdPct: 50 } },
 } as const satisfies WorkerSettingsDefaults;
 
+export const RULE_DOCTOR_WORKER_SETTINGS_DEFAULTS = {
+  // Every fix waits for an analyst, so there is no level that skips the gate yet.
+  allowedAutonomyLevels: ['manual'],
+  scheduleInterval: { defaultValue: '1h' },
+} as const satisfies WorkerSettingsDefaults;
+
 export const RULE_COVERAGE_WORKER_SETTINGS_DEFAULTS = {
   allowedAutonomyLevels: REVIEW_GATED_AUTONOMY_LEVELS,
   scheduleInterval: { defaultValue: '1h' },

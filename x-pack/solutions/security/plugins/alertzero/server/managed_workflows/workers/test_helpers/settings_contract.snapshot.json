@@ -149,6 +149,48 @@
         "additionalProperties": false
       }
     },
+    "system-security-detection-rule-doctor": {
+      "defaults": {
+        "workerId": "system-security-detection-rule-doctor",
+        "autonomy": "manual",
+        "scheduleInterval": "1h"
+      },
+      "schema": {
+        "kind": "object",
+        "fields": {
+          "workerId": {
+            "kind": "leaf",
+            "type": "string",
+            "const": "system-security-detection-rule-doctor"
+          },
+          "autonomy": {
+            "kind": "leaf",
+            "type": "string",
+            "enum": [
+              "manual"
+            ]
+          },
+          "scheduleInterval": {
+            "kind": "leaf",
+            "type": "string",
+            "maxLength": 6,
+            "pattern": "^[1-9][0-9]*[mhd]$"
+          },
+          "serviceAccountId": {
+            "kind": "leaf",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          }
+        },
+        "required": [
+          "autonomy",
+          "scheduleInterval",
+          "workerId"
+        ],
+        "additionalProperties": false
+      }
+    },
     "system-security-detection-rule-tuning": {
       "defaults": {
         "workerId": "system-security-detection-rule-tuning",

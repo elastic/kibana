@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import {
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_DOCTOR_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
@@ -358,6 +359,30 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
             value: factValue(
               'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.assisted.youValue',
               '<you> approve or decline each proposed next step.'
+            ),
+          },
+        ],
+      },
+    ],
+  },
+  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_DOCTOR_ID]: {
+    intro: i18n.translate('xpack.alertzero.watches.settings.autonomyCards.ruleDoctor.intro', {
+      defaultMessage: 'Every fix to a rule waits for your approval.',
+    }),
+    levels: [
+      {
+        level: 'manual',
+        facts: [
+          {
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.ruleDoctor.manual.workerValue',
+              '<worker> diagnoses each broken rule and checks its fix in a preview.'
+            ),
+          },
+          {
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.ruleDoctor.manual.youValue',
+              '<you> approve or decline each proposed fix.'
             ),
           },
         ],

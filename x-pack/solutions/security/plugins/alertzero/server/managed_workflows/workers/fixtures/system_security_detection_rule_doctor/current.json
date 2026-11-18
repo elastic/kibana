@@ -1,0 +1,6 @@
+{
+  "settingsVersion": 1,
+  "autonomyLevel": "manual",
+  "scheduleInterval": "1h",
+  "serviceAccountId": "kibana/alertzero_rule_tuning"
+}

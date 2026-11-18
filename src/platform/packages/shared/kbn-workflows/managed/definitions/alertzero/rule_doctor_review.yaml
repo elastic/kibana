@@ -1,0 +1,941 @@
+version: "1"
+name: Detection Rule Doctor Review
+description: >
+  Diagnoses one broken detection rule, proves a fix with rule preview, and records
+  it as a proposal on a new investigation. On approval the proposal gate applies the
+  fix, and the review checks that the rule's next run is healthy. Launched per rule
+  by the rule doctor sweep.
+enabled: true
+tags:
+  - security
+  - detection-rule-doctor
+settings:
+  # This run parks in WAITING_FOR_CHILD while the gate holds the decision (72h by
+  # default) and then waits for the rule's next run, so it stays above both.
+  timeout: "176h"
+  # Keyed per rule so a later sweep cannot open a second gate for a rule whose
+  # review is still pending: the rule keeps failing until the fix is approved.
+  concurrency:
+    key: "rule-doctor-review-{{ inputs.rule_uuid }}"
+    strategy: drop
+    max: 1
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        rule_uuid:
+          type: string
+          maxLength: 512
+          description: Saved-object id of the broken rule.
+        symptom:
+          type: string
+          enum: [run_failed, data_stale]
+          description: >-
+            Why the sweep picked the rule. "run_failed" means its last run failed or
+            warned. "data_stale" means it runs clean but its source data went quiet.
+        last_event_at:
+          type: string
+          maxLength: 64
+          description: Newest event in the rule's indices. Set only for data_stale.
+        parent_run_id:
+          type: string
+          maxLength: 128
+          description: Execution id of the sweep that launched this review. Traceability only.
+      required:
+        - rule_uuid
+        - symptom
+      additionalProperties: false
+outputs:
+  - name: rule_uuid
+    type: string
+  - name: cause
+    type: string
+  - name: approved
+    type: boolean
+  - name: healed
+    type: boolean
+consts:
+  # Temporary: service accounts have no display name. Remove once they carry one
+  # (elastic/security-team#20422).
+  author_name: "Rule Doctor"
+  no_items: []
+  preview_invocation_count: 1
+  # Long enough for a rule on the default 5m schedule to run once after the fix.
+  followup_wait: 10m
+  # An index fix must point at data that still arrives, not at any index with the right fields.
+  fresh_within: 24h
+steps:
+  - name: fetch_rule
+    type: kibana.request
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?id={{ inputs.rule_uuid | url_encode }}"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+    on-failure:
+      continue: true
+
+  # The run message is free text, so the cause is matched on the exact strings the
+  # detection engine writes. Anything else is `unknown`, and the agent works it out
+  # from the raw message.
+  - name: classify
+    type: data.set
+    if: "${{ steps.fetch_rule.error == null and steps.fetch_rule.output.enabled == true }}"
+    with:
+      message: "{{ steps.fetch_rule.output.execution_summary.last_execution.message }}"
+      cause: >-
+        {%- assign message = steps.fetch_rule.output.execution_summary.last_execution.message | default: '' -%}
+        {%- if inputs.symptom == 'data_stale' -%}no_data
+        {%- elsif message contains 'Unable to find matching indices' -%}no_index
+        {%- elsif message contains 'Unable to find matching threat indicator indices' -%}no_threat_index
+        {%- elsif message contains 'are missing the timestamp' -%}bad_timestamp
+        {%- elsif message contains 'Unknown column' or message contains 'verification_exception' or message contains 'No field found' -%}missing_field
+        {%- elsif message contains 'ML jobs are not started' -%}ml_job_stopped
+        {%- elsif message contains 'maximum alert limit' -%}alert_limit
+        {%- elsif message contains 'METADATA _id' -%}esql_no_id
+        {%- elsif message contains 'which cannot be stored in alerts' -%}esql_bad_metadata
+        {%- elsif message contains "exceptions won't be applied" -%}exceptions_skipped
+        {%- elsif message contains 'privileges' -%}missing_privileges
+        {%- elsif message contains 'Shard failure' or message contains 'failed to run successfully on the following shards' or message contains 'data may be missing from this rule run' or message contains 'data is missing from this rule run' -%}shard_failure
+        {%- else -%}unknown
+        {%- endif -%}
+      # A warning means the rule still runs, which changes how the problem is put.
+      warned: "${{ steps.fetch_rule.output.execution_summary.last_execution.status == 'partial failure' }}"
+
+  # One plain sentence per cause, shared by the agent prompt and the proposal.
+  - name: describe_symptom
+    type: data.set
+    if: "${{ steps.classify.output.cause != null }}"
+    with:
+      text: >-
+        {%- case steps.classify.output.cause -%}
+        {%- when 'no_data' -%}The rule runs without errors, but its indices have had no new events since {{ inputs.last_event_at | date: "%B %-d at %H:%M UTC", "UTC" }}. The rule is blind.
+        {%- when 'no_index' -%}The rule's index patterns match no index, so every run skips the search.
+        {%- when 'bad_timestamp' -%}The rule's indices do not have the timestamp field the rule sorts and filters on.
+        {%- when 'missing_field' -%}The rule's query names a field the indices do not have, so every run fails.
+        {%- when 'ml_job_stopped' -%}The machine learning job behind the rule is not running.
+        {%- when 'alert_limit' -%}The rule runs, but it stops at its maximum alert count, so some alerts are never created.
+        {%- when 'no_threat_index' -%}The rule runs, but its threat indicator index patterns match no index, so it can never find a match.
+        {%- when 'esql_no_id' -%}The rule runs, but its ES|QL query does not return the _id field, so it can create duplicate alerts.
+        {%- when 'esql_bad_metadata' -%}The rule runs, but its ES|QL query returns metadata columns that alerts cannot store.
+        {%- when 'exceptions_skipped' -%}The rule runs, but some of its exceptions are not applied, so it can create alerts they should stop.
+        {%- when 'missing_privileges' -%}The rule runs, but it cannot read all of its indices, so it can miss events.
+        {%- when 'shard_failure' -%}The rule runs, but some shards or clusters failed, so it can miss events.
+        {%- else -%}
+        {%- if steps.classify.output.warned == true -%}The rule runs, but its last run reported a warning the doctor does not recognize.
+        {%- else -%}The rule's last run reported a problem the doctor does not recognize.
+        {%- endif -%}
+        {%- endcase -%}
+
+  - name: create_investigation
+    type: ai.conversation.create
+    if: "${{ steps.classify.output.cause != null }}"
+    with:
+      title: "Rule doctor: {{ steps.fetch_rule.output.name }}"
+      access_control:
+        access_mode: public
+      template_id: investigation
+      metadata:
+        status: open
+        description: "{{ steps.describe_symptom.output.text }}"
+        workflow_execution_ids: ["{{ execution.id }}"]
+
+  # The fixed id makes the refresh after the fix deterministic.
+  - name: attach_rule
+    type: ai.attachment.add
+    if: "${{ steps.create_investigation.output.conversation_id != null }}"
+    with:
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      id: "doctored-rule"
+      type: security.rule
+      origin: "{{ inputs.rule_uuid }}"
+      data:
+        text: "{{ steps.fetch_rule.output | json }}"
+        attachmentLabel: "{{ steps.fetch_rule.output.name }}"
+      description: "Broken rule: {{ steps.fetch_rule.output.name }}"
+      render_inline: true
+    on-failure:
+      continue: true
+
+  - name: diagnose_rule
+    type: ai.agent
+    agent-id: alertzero-thin-agent
+    # Keep in sync with ALERTZERO_BALANCED_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
+    connector-id-by-feature: alertzero_balanced
+    plugin-id: alertzero_rule_doctor_review
+    aggregate-by: alertzero_parent
+    if: "${{ steps.create_investigation.output.conversation_id != null }}"
+    timeout: "10m"
+    on-failure:
+      fallback:
+        - name: post_diagnosis_failed
+          type: ai.conversation.add_user_message
+          on-failure:
+            continue: true
+          with:
+            author_name: "{{ consts.author_name }}"
+            conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+            message: |-
+              **Diagnosis failed**
+              **Rule:** {{ steps.fetch_rule.output.name }}
+
+              The rule could not be diagnosed, so no fix will follow: {{ steps.diagnose_rule.error.message }}
+
+              The next sweep will try again.
+    create-conversation: true
+    with:
+      author_name: "{{ consts.author_name }}"
+      # Read-only tools: the agent looks at indices and mappings and runs test
+      # queries. It changes nothing; the fix goes through the approval gate.
+      configuration_overrides:
+        enable_elastic_capabilities: false
+        tools:
+          - tool_ids:
+              - platform.core.list_indices
+              - platform.core.get_index_mapping
+              - platform.core.execute_esql
+        skill_ids: []
+      message: |-
+        A detection rule is broken. Find out why and propose one fix.
+
+        Rule: "{{ steps.fetch_rule.output.name }}" (type "{{ steps.fetch_rule.output.type }}", language "{{ steps.fetch_rule.output.language }}")
+        Index patterns: {{ steps.fetch_rule.output.index | join: ", " | default: "none" }}
+        Data view: {{ steps.fetch_rule.output.data_view_id | default: "none" }}
+        Timestamp override: {{ steps.fetch_rule.output.timestamp_override | default: "none" }}
+        Max alerts per run: {{ steps.fetch_rule.output.max_signals | default: 100 }}
+        Alert suppression: {{ steps.fetch_rule.output.alert_suppression | json | default: "none" }}
+        {%- if steps.fetch_rule.output.threat_index != blank %}
+        Threat indicator index patterns: {{ steps.fetch_rule.output.threat_index | join: ", " }}
+        {%- endif %}
+        Query:
+        ```
+        {{ steps.fetch_rule.output.query }}
+        ```
+
+        Symptom: {{ steps.describe_symptom.output.text }}
+        Likely cause, matched from the run message: {{ steps.classify.output.cause }}
+        Last run message:
+        ```
+        {{ steps.classify.output.message | default: "none" }}
+        ```
+
+        Use the tools to confirm the cause. List the indices and data streams that
+        exist, read the mappings of the ones that look related, and run small ES|QL
+        queries to check where the rule's events are now and which fields they have.
+        Use LIMIT 10 or less in every query.
+
+        Then return one structured fix. Choose exactly one fix_type:
+
+        index  — The rule's data now lives in other indices (renamed, moved to a new
+          data stream, or a new integration version). Populate proposed_index with
+          the full list of index patterns the rule should search. Only valid when the
+          rule has index patterns and no data view. Check with a query that the new
+          indices have recent events and the fields the query uses.
+
+        query  — The query itself is the problem. Populate proposed_query with the
+          full query in the rule's own language,
+          "{{ steps.fetch_rule.output.language }}". Change only what is broken and
+          keep the detection logic the same. Use it when a field was renamed or
+          removed, when an ES|QL query lacks "METADATA _id" (add it to FROM and do
+          not drop _id with KEEP or DROP), when an ES|QL query returns metadata
+          columns alerts cannot store (remove them), or when the rule hits its alert
+          limit because the query also matches events that are clearly not the
+          threat (narrow it with one precise condition).
+
+        suppression  — The rule hits its alert limit because the same entity
+          triggers it again and again, for example one host or one user. Check
+          this with a query that counts matching events by candidate fields. Populate
+          proposed_suppression: group_by with 1 to 3 fields that identify the repeated
+          entity, duration for how long to suppress (for example 1h), and
+          missing_fields_strategy "suppress" or "doNotSuppress". Only use it when one
+          alert per entity per period keeps the detection useful. For a threshold
+          rule, give duration only, because a threshold rule groups by its own
+          fields. Machine learning rules cannot use this fix.
+
+        threat_index  — An indicator match rule's threat indicator index patterns
+          match no index. Populate proposed_threat_index with the full list of
+          patterns where the indicators are now. Check that they have recent events.
+
+        timestamp_override  — The rule's timestamp override names a field the
+          indices do not have. Populate proposed_timestamp_override with a date field
+          that exists in every one of the rule's indices, for example
+          "event.ingested", or "@timestamp" to stop using an override.
+
+        none  — The fix is not a change to the rule, or you are not sure. Use this
+          when the source data is gone and nothing replaced it, when a machine
+          learning job must be started, when exceptions are skipped, when the rule's
+          API key cannot read some indices, when shards or remote clusters failed, or
+          when the cause is unclear. Say in recommendation what a person must do,
+          for example which exceptions to change or which privileges the rule's API
+          key owner needs.
+
+        Fill every text field for a reader who has not seen the rule: title is one
+        short line naming the fix; diagnosis says what broke and since when;
+        evidence is a markdown list of what you checked and found; confidence is how
+        sure you are that the fix makes the rule work as before.
+
+        Write every text field in ASD-STE100 Simplified Technical English: sentences
+        of 20 words or less, active voice, no em dashes. Never name the tools you
+        used; say what you found, for example "logs-web-default has no events after
+        November 12" or "The field was renamed to user.target.name".
+      schema:
+        # Omit the root type so Agent Builder wraps this union under a property.
+        oneOf:
+          - type: object
+            properties:
+              fix_type:
+                const: index
+              title:
+                type: string
+              diagnosis:
+                type: string
+              evidence:
+                type: string
+              confidence:
+                type: string
+                enum: [low, medium, high]
+              proposed_index:
+                type: array
+                minItems: 1
+                items:
+                  type: string
+                  minLength: 1
+                  maxLength: 1024
+            required: [fix_type, title, diagnosis, evidence, confidence, proposed_index]
+          - type: object
+            properties:
+              fix_type:
+                const: query
+              title:
+                type: string
+              diagnosis:
+                type: string
+              evidence:
+                type: string
+              confidence:
+                type: string
+                enum: [low, medium, high]
+              proposed_query:
+                type: string
+                minLength: 1
+            required: [fix_type, title, diagnosis, evidence, confidence, proposed_query]
+          - type: object
+            properties:
+              fix_type:
+                const: timestamp_override
+              title:
+                type: string
+              diagnosis:
+                type: string
+              evidence:
+                type: string
+              confidence:
+                type: string
+                enum: [low, medium, high]
+              proposed_timestamp_override:
+                type: string
+                minLength: 1
+                maxLength: 1024
+            required: [fix_type, title, diagnosis, evidence, confidence, proposed_timestamp_override]
+          - type: object
+            properties:
+              fix_type:
+                const: suppression
+              title:
+                type: string
+              diagnosis:
+                type: string
+              evidence:
+                type: string
+              confidence:
+                type: string
+                enum: [low, medium, high]
+              proposed_suppression:
+                type: object
+                properties:
+                  group_by:
+                    type: array
+                    minItems: 1
+                    maxItems: 3
+                    items:
+                      type: string
+                      minLength: 1
+                  duration:
+                    type: object
+                    properties:
+                      value:
+                        type: integer
+                        minimum: 1
+                      unit:
+                        type: string
+                        enum: [s, m, h]
+                    required: [value, unit]
+                  missing_fields_strategy:
+                    type: string
+                    enum: [suppress, doNotSuppress]
+            required: [fix_type, title, diagnosis, evidence, confidence, proposed_suppression]
+          - type: object
+            properties:
+              fix_type:
+                const: threat_index
+              title:
+                type: string
+              diagnosis:
+                type: string
+              evidence:
+                type: string
+              confidence:
+                type: string
+                enum: [low, medium, high]
+              proposed_threat_index:
+                type: array
+                minItems: 1
+                items:
+                  type: string
+                  minLength: 1
+                  maxLength: 1024
+            required: [fix_type, title, diagnosis, evidence, confidence, proposed_threat_index]
+          - type: object
+            properties:
+              fix_type:
+                const: none
+              title:
+                type: string
+              diagnosis:
+                type: string
+              evidence:
+                type: string
+              confidence:
+                type: string
+                enum: [low, medium, high]
+              recommendation:
+                type: string
+            required: [fix_type, title, diagnosis, evidence, confidence, recommendation]
+
+  # An index fix only makes sense for a rule that searches its own index list; a
+  # data view rule ignores `index`. Comparison operators cannot follow a filter
+  # chain, so the proposed values are resolved here once.
+  - name: resolve_fix
+    type: data.set
+    if: "${{ steps.diagnose_rule.output.structured_output != null }}"
+    with:
+      fix_type: >-
+        {%- assign fix = steps.diagnose_rule.output.structured_output.fix_type -%}
+        {%- if fix == 'index' and steps.fetch_rule.output.data_view_id != blank -%}none
+        {%- elsif fix == 'threat_index' and steps.fetch_rule.output.type != 'threat_match' -%}none
+        {%- elsif fix == 'index' or fix == 'query' or fix == 'timestamp_override' or fix == 'suppression' or fix == 'threat_index' -%}{{ fix }}
+        {%- else -%}none
+        {%- endif -%}
+      # Both new-data checks look at the indices the fix points the rule at.
+      fresh_index: >-
+        {%- if steps.diagnose_rule.output.structured_output.fix_type == 'threat_index' -%}{{ steps.diagnose_rule.output.structured_output.proposed_threat_index | join: ',' }}
+        {%- else -%}{{ steps.diagnose_rule.output.structured_output.proposed_index | join: ',' }}
+        {%- endif -%}
+      # Indicator indices are not the rule's own, so its timestamp override does not apply.
+      fresh_field: >-
+        {%- if steps.diagnose_rule.output.structured_output.fix_type == 'threat_index' -%}@timestamp
+        {%- else -%}{{ steps.fetch_rule.output.timestamp_override | default: '@timestamp' }}
+        {%- endif -%}
+      alert_suppression: "${{ steps.diagnose_rule.output.structured_output.proposed_suppression | default: steps.fetch_rule.output.alert_suppression }}"
+      threat_index: "${{ steps.diagnose_rule.output.structured_output.proposed_threat_index | default: steps.fetch_rule.output.threat_index }}"
+      # `${{ }}` keeps an unset value undefined, so the preview drops the key
+      # instead of sending an empty string the rule schema rejects.
+      index: "${{ steps.diagnose_rule.output.structured_output.proposed_index | default: steps.fetch_rule.output.index }}"
+      query: "${{ steps.diagnose_rule.output.structured_output.proposed_query | default: steps.fetch_rule.output.query }}"
+      timestamp_override: "${{ steps.diagnose_rule.output.structured_output.proposed_timestamp_override | default: steps.fetch_rule.output.timestamp_override }}"
+      timeframe_end: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S.%LZ", "UTC" }}'
+
+  # Moving a rule to indices with no recent events would swap one blind rule for
+  # another, so an index fix must point at data that is still arriving.
+  - name: proposed_latest_event
+    type: elasticsearch.search
+    if: "${{ steps.resolve_fix.output.fix_type == 'index' or steps.resolve_fix.output.fix_type == 'threat_index' }}"
+    with:
+      index: "{{ steps.resolve_fix.output.fresh_index }}"
+      ignore_unavailable: true
+      allow_no_indices: true
+      size: 0
+      track_total_hits: false
+      aggs:
+        latest:
+          max:
+            field: "{{ steps.resolve_fix.output.fresh_field }}"
+        recent:
+          filter:
+            # A range query needs the field as a key, and keys are not templated.
+            query_string:
+              query: "{{ steps.resolve_fix.output.fresh_field }}:>=now-{{ consts.fresh_within }}"
+    on-failure:
+      continue: true
+
+  # One preview run checks the rule as it is and as fixed. The current rule is
+  # expected to fail; the fixed one must run clean.
+  - name: run_previews
+    type: workflow.execute
+    if: "${{ steps.resolve_fix.output.fix_type != 'none' and steps.resolve_fix.output.fix_type != null }}"
+    with:
+      workflow-id: system-security-rule-preview
+      run-as-mode: inherit
+      inputs:
+        space_id: "{{ workflow.spaceId }}"
+        indices: "${{ steps.resolve_fix.output.index | default: consts.no_items }}"
+        preview_body:
+          type: "{{ steps.fetch_rule.output.type }}"
+          name: "{{ steps.fetch_rule.output.name }}"
+          description: "{{ steps.fetch_rule.output.description }}"
+          query: "{{ steps.fetch_rule.output.query }}"
+          language: "{{ steps.fetch_rule.output.language }}"
+          index: "${{ steps.fetch_rule.output.index }}"
+          data_view_id: "${{ steps.fetch_rule.output.data_view_id }}"
+          timestamp_override: "${{ steps.fetch_rule.output.timestamp_override }}"
+          timestamp_override_fallback_disabled: "${{ steps.fetch_rule.output.timestamp_override_fallback_disabled }}"
+          event_category_override: "${{ steps.fetch_rule.output.event_category_override }}"
+          tiebreaker_field: "${{ steps.fetch_rule.output.tiebreaker_field }}"
+          timestamp_field: "${{ steps.fetch_rule.output.timestamp_field }}"
+          new_terms_fields: "${{ steps.fetch_rule.output.new_terms_fields }}"
+          history_window_start: "${{ steps.fetch_rule.output.history_window_start }}"
+          threshold: "${{ steps.fetch_rule.output.threshold }}"
+          filters: "${{ steps.fetch_rule.output.filters | default: consts.no_items }}"
+          threat_query: "${{ steps.fetch_rule.output.threat_query }}"
+          threat_mapping: "${{ steps.fetch_rule.output.threat_mapping }}"
+          threat_language: "${{ steps.fetch_rule.output.threat_language }}"
+          threat_filters: "${{ steps.fetch_rule.output.threat_filters }}"
+          threat_indicator_path: "${{ steps.fetch_rule.output.threat_indicator_path }}"
+          anomaly_threshold: "${{ steps.fetch_rule.output.anomaly_threshold }}"
+          machine_learning_job_id: "${{ steps.fetch_rule.output.machine_learning_job_id }}"
+          threat_index: "${{ steps.fetch_rule.output.threat_index }}"
+          alert_suppression: "${{ steps.fetch_rule.output.alert_suppression }}"
+          exceptions_list: "${{ steps.fetch_rule.output.exceptions_list | default: consts.no_items }}"
+          severity: "{{ steps.fetch_rule.output.severity }}"
+          risk_score: "${{ steps.fetch_rule.output.risk_score }}"
+          max_signals: "${{ steps.fetch_rule.output.max_signals }}"
+          interval: "{{ steps.fetch_rule.output.interval }}"
+          from: "{{ steps.fetch_rule.output.from }}"
+          to: "{{ steps.fetch_rule.output.to }}"
+          invocationCount: "${{ consts.preview_invocation_count }}"
+          timeframeEnd: "{{ steps.resolve_fix.output.timeframe_end }}"
+        proposed_body:
+          type: "{{ steps.fetch_rule.output.type }}"
+          name: "{{ steps.fetch_rule.output.name }}"
+          description: "{{ steps.fetch_rule.output.description }}"
+          query: "${{ steps.resolve_fix.output.query }}"
+          language: "{{ steps.fetch_rule.output.language }}"
+          index: "${{ steps.resolve_fix.output.index }}"
+          data_view_id: "${{ steps.fetch_rule.output.data_view_id }}"
+          timestamp_override: "${{ steps.resolve_fix.output.timestamp_override }}"
+          timestamp_override_fallback_disabled: "${{ steps.fetch_rule.output.timestamp_override_fallback_disabled }}"
+          event_category_override: "${{ steps.fetch_rule.output.event_category_override }}"
+          tiebreaker_field: "${{ steps.fetch_rule.output.tiebreaker_field }}"
+          timestamp_field: "${{ steps.fetch_rule.output.timestamp_field }}"
+          new_terms_fields: "${{ steps.fetch_rule.output.new_terms_fields }}"
+          history_window_start: "${{ steps.fetch_rule.output.history_window_start }}"
+          threshold: "${{ steps.fetch_rule.output.threshold }}"
+          filters: "${{ steps.fetch_rule.output.filters | default: consts.no_items }}"
+          threat_query: "${{ steps.fetch_rule.output.threat_query }}"
+          threat_mapping: "${{ steps.fetch_rule.output.threat_mapping }}"
+          threat_language: "${{ steps.fetch_rule.output.threat_language }}"
+          threat_filters: "${{ steps.fetch_rule.output.threat_filters }}"
+          threat_indicator_path: "${{ steps.fetch_rule.output.threat_indicator_path }}"
+          anomaly_threshold: "${{ steps.fetch_rule.output.anomaly_threshold }}"
+          machine_learning_job_id: "${{ steps.fetch_rule.output.machine_learning_job_id }}"
+          threat_index: "${{ steps.resolve_fix.output.threat_index }}"
+          alert_suppression: "${{ steps.resolve_fix.output.alert_suppression }}"
+          exceptions_list: "${{ steps.fetch_rule.output.exceptions_list | default: consts.no_items }}"
+          severity: "{{ steps.fetch_rule.output.severity }}"
+          risk_score: "${{ steps.fetch_rule.output.risk_score }}"
+          max_signals: "${{ steps.fetch_rule.output.max_signals }}"
+          interval: "{{ steps.fetch_rule.output.interval }}"
+          from: "{{ steps.fetch_rule.output.from }}"
+          to: "{{ steps.fetch_rule.output.to }}"
+          invocationCount: "${{ consts.preview_invocation_count }}"
+          timeframeEnd: "{{ steps.resolve_fix.output.timeframe_end }}"
+    on-failure:
+      continue: true
+
+  # A fix is proven when the fixed rule previews clean, an index fix points at
+  # indices with recent events, and a rule that hit its alert limit no longer does.
+  - name: judge_fix
+    type: data.set
+    with:
+      proven: >-
+        ${{ steps.run_previews.error == null
+          and steps.run_previews.output.proposed_succeeded == true
+          and ((steps.resolve_fix.output.fix_type != 'index' and steps.resolve_fix.output.fix_type != 'threat_index')
+            or steps.proposed_latest_event.output.aggregations.recent.doc_count > 0)
+          and (steps.classify.output.cause != 'alert_limit'
+            or steps.run_previews.output.proposed_alert_limit_reached != true) }}
+      # The preview ends each error with "; ", which reads badly in the proposal.
+      current_error: "{{ steps.run_previews.output.error_text | append: '§' | remove: '; §' | remove: '§' }}"
+      proposed_error: "{{ steps.run_previews.output.proposed_error_text | default: steps.run_previews.error.message | append: '§' | remove: '; §' | remove: '§' }}"
+      proposed_alert_count: "${{ steps.run_previews.output.proposed_alert_count | default: -1 }}"
+      current_alert_count: "${{ steps.run_previews.output.alert_count | default: -1 }}"
+      proposed_limit_reached: "${{ steps.run_previews.output.proposed_alert_limit_reached == true }}"
+      proposed_last_event_at: "{{ steps.proposed_latest_event.output.aggregations.latest.value_as_string }}"
+
+  # An unproven fix is still shown, as a recommendation the analyst applies by
+  # hand, so the diagnosis is not lost.
+  - name: resolve_proposal_kind
+    type: data.set
+    with:
+      kind: >-
+        {%- if steps.judge_fix.output.proven == true -%}{{ steps.resolve_fix.output.fix_type }}{%- else -%}manual{%- endif -%}
+
+  - name: post_evidence
+    type: ai.conversation.add_user_message
+    if: "${{ steps.diagnose_rule.output.structured_output != null }}"
+    on-failure:
+      continue: true
+    with:
+      author_name: "{{ consts.author_name }}"
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      message: |-
+        **What the doctor checked**
+        {{ steps.diagnose_rule.output.structured_output.evidence }}
+
+  - name: compose_proposal
+    type: data.set
+    if: "${{ steps.diagnose_rule.output.structured_output != null }}"
+    with:
+      title: '{{ steps.diagnose_rule.output.structured_output.title | default: "Fix broken rule" | truncate: 256, "" }}'
+      comment: |-
+        **Rule:** [{{ steps.fetch_rule.output.name }}](/s/{{ workflow.spaceId }}/app/security/rules/id/{{ inputs.rule_uuid }}) (`{{ inputs.rule_uuid }}`)
+
+        **What is wrong**
+        {{ steps.describe_symptom.output.text }}
+        {%- if steps.classify.output.message != blank %}
+
+        Last run message:
+        ```
+        {{ steps.classify.output.message | truncate: 1000 }}
+        ```
+        {%- endif %}
+
+        **Diagnosis**
+        {{ steps.diagnose_rule.output.structured_output.diagnosis }}
+
+        **Proposed fix**
+        {%- case steps.resolve_proposal_kind.output.kind %}
+        {%- when 'index' %}
+        Change the index patterns.
+
+        Before: `{{ steps.fetch_rule.output.index | join: '`, `' }}`
+        After: `{{ steps.resolve_fix.output.index | join: '`, `' }}`
+
+        The new indices have events up to {{ steps.judge_fix.output.proposed_last_event_at | date: "%B %-d at %H:%M UTC", "UTC" }}.
+        {%- when 'query' %}
+        Change the query.
+
+        Before:
+        ```
+        {{ steps.fetch_rule.output.query }}
+        ```
+        After:
+        ```
+        {{ steps.resolve_fix.output.query }}
+        ```
+        {%- when 'timestamp_override' %}
+        Change the timestamp override from `{{ steps.fetch_rule.output.timestamp_override | default: "none" }}` to `{{ steps.resolve_fix.output.timestamp_override }}`.
+        {%- when 'suppression' %}
+        {%- assign suppression = steps.resolve_fix.output.alert_suppression %}
+        Suppress repeated alerts.
+        {%- if suppression.group_by != blank %}
+
+        Group by: `{{ suppression.group_by | join: '`, `' }}`
+        {%- endif %}
+        {%- if suppression.duration != blank %}
+        Suppress for: {{ suppression.duration.value }}{{ suppression.duration.unit }}
+        {%- else %}
+        Suppress for: one rule run
+        {%- endif %}
+        {%- if suppression.missing_fields_strategy == 'doNotSuppress' %}
+        Events without these fields: one alert each
+        {%- elsif suppression.group_by != blank %}
+        Events without these fields: suppressed together
+        {%- endif %}
+        {%- when 'threat_index' %}
+        Change the threat indicator index patterns.
+
+        Before: `{{ steps.fetch_rule.output.threat_index | join: '`, `' }}`
+        After: `{{ steps.resolve_fix.output.threat_index | join: '`, `' }}`
+
+        The new indicator indices have events up to {{ steps.judge_fix.output.proposed_last_event_at | date: "%B %-d at %H:%M UTC", "UTC" }}.
+        {%- else %}
+        No automatic fix is safe, so approving changes nothing. Do this in the Detection Rules UI:
+        {{ steps.diagnose_rule.output.structured_output.recommendation | default: steps.diagnose_rule.output.structured_output.diagnosis }}
+        {%- if steps.resolve_fix.output.fix_type != 'none' and steps.resolve_fix.output.fix_type != blank %}
+
+        The doctor found a possible fix, but it did not pass the preview check: {% if steps.judge_fix.output.proposed_error != blank %}{{ steps.judge_fix.output.proposed_error }}{% elsif steps.judge_fix.output.proposed_limit_reached == true %}the fixed rule still hit its alert limit of {{ steps.fetch_rule.output.max_signals | default: 100 }}.{% elsif steps.judge_fix.output.proposed_last_event_at != blank %}the new indices have no events in the last {{ consts.fresh_within }}, the newest is from {{ steps.judge_fix.output.proposed_last_event_at | date: "%B %-d at %H:%M UTC", "UTC" }}.{% else %}the new indices have no events.{% endif %}
+        {%- endif %}
+        {%- endcase %}
+        {%- if steps.judge_fix.output.proven == true %}
+
+        **Preview check**
+        The fixed rule ran without errors in a preview{% if steps.judge_fix.output.proposed_alert_count >= 0 %} and created {{ steps.judge_fix.output.proposed_alert_count }} alerts{% endif %}.{% if steps.classify.output.cause == 'alert_limit' and steps.judge_fix.output.current_alert_count >= 0 %} The rule as it is now created {{ steps.judge_fix.output.current_alert_count }} alerts in the same preview.{% elsif steps.judge_fix.output.current_error != blank %} The rule as it is now failed the same preview: {{ steps.judge_fix.output.current_error | truncate: 300 }}{% endif %}
+
+        To undo after approval, restore the previous version from the rule's change history.
+        {%- endif %}
+
+  # One gate per fix kind, because a YAML object cannot be assembled conditionally.
+  # The manual arm is the default.
+  - name: propose_fix
+    type: switch
+    if: "${{ steps.compose_proposal.output.title != null }}"
+    expression: "{{ steps.resolve_proposal_kind.output.kind }}"
+    cases:
+      - match: index
+        steps:
+          - name: propose_index
+            type: workflow.execute
+            with:
+              workflow-id: system-create-alertzero-proposal
+              run-as-mode: inherit
+              inputs:
+                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                title: "{{ steps.compose_proposal.output.title }}"
+                comment: "{{ steps.compose_proposal.output.comment }}"
+                actionWorkflowId: system-alertzero-action-edit-rule
+                actionInput:
+                  id: "{{ inputs.rule_uuid }}"
+                  expected_revision: "${{ steps.fetch_rule.output.revision }}"
+                  index: "${{ steps.resolve_fix.output.index }}"
+                impact: medium
+                confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
+                autoApprove: false
+
+      - match: query
+        steps:
+          - name: propose_query
+            type: workflow.execute
+            with:
+              workflow-id: system-create-alertzero-proposal
+              run-as-mode: inherit
+              inputs:
+                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                title: "{{ steps.compose_proposal.output.title }}"
+                comment: "{{ steps.compose_proposal.output.comment }}"
+                actionWorkflowId: system-alertzero-action-edit-rule
+                actionInput:
+                  id: "{{ inputs.rule_uuid }}"
+                  expected_revision: "${{ steps.fetch_rule.output.revision }}"
+                  query: "{{ steps.resolve_fix.output.query }}"
+                impact: medium
+                confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
+                autoApprove: false
+
+      - match: suppression
+        steps:
+          - name: propose_suppression
+            type: workflow.execute
+            with:
+              workflow-id: system-create-alertzero-proposal
+              run-as-mode: inherit
+              inputs:
+                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                title: "{{ steps.compose_proposal.output.title }}"
+                comment: "{{ steps.compose_proposal.output.comment }}"
+                actionWorkflowId: system-alertzero-action-edit-rule
+                actionInput:
+                  id: "{{ inputs.rule_uuid }}"
+                  expected_revision: "${{ steps.fetch_rule.output.revision }}"
+                  alert_suppression: "${{ steps.resolve_fix.output.alert_suppression }}"
+                impact: medium
+                confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
+                autoApprove: false
+
+      - match: threat_index
+        steps:
+          - name: propose_threat_index
+            type: workflow.execute
+            with:
+              workflow-id: system-create-alertzero-proposal
+              run-as-mode: inherit
+              inputs:
+                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                title: "{{ steps.compose_proposal.output.title }}"
+                comment: "{{ steps.compose_proposal.output.comment }}"
+                actionWorkflowId: system-alertzero-action-edit-rule
+                actionInput:
+                  id: "{{ inputs.rule_uuid }}"
+                  expected_revision: "${{ steps.fetch_rule.output.revision }}"
+                  threat_index: "${{ steps.resolve_fix.output.threat_index }}"
+                impact: medium
+                confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
+                autoApprove: false
+
+      - match: timestamp_override
+        steps:
+          - name: propose_timestamp_override
+            type: workflow.execute
+            with:
+              workflow-id: system-create-alertzero-proposal
+              run-as-mode: inherit
+              inputs:
+                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                title: "{{ steps.compose_proposal.output.title }}"
+                comment: "{{ steps.compose_proposal.output.comment }}"
+                actionWorkflowId: system-alertzero-action-edit-rule
+                actionInput:
+                  id: "{{ inputs.rule_uuid }}"
+                  expected_revision: "${{ steps.fetch_rule.output.revision }}"
+                  timestamp_override: "{{ steps.resolve_fix.output.timestamp_override }}"
+                impact: low
+                confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
+                autoApprove: false
+
+    default:
+      - name: propose_manual
+        type: workflow.execute
+        with:
+          workflow-id: system-create-alertzero-proposal
+          run-as-mode: inherit
+          inputs:
+            conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+            title: "{{ steps.compose_proposal.output.title }}"
+            comment: "{{ steps.compose_proposal.output.comment }}"
+            impact: low
+            # No action, so no inherited category, and the queue drops an
+            # uncategorised proposal.
+            category: configure
+            confidence: "{{ steps.diagnose_rule.output.structured_output.confidence | default: 'medium' }}"
+
+  # `decision` is what the analyst concluded; `status` is whether the action ran.
+  - name: record_decision
+    type: data.set
+    with:
+      applied: >-
+        ${{ steps.propose_index.output.status == 'succeeded'
+          or steps.propose_query.output.status == 'succeeded'
+          or steps.propose_timestamp_override.output.status == 'succeeded'
+          or steps.propose_suppression.output.status == 'succeeded'
+          or steps.propose_threat_index.output.status == 'succeeded' }}
+      approved: >-
+        ${{ steps.propose_index.output.decision == 'approved'
+          or steps.propose_query.output.decision == 'approved'
+          or steps.propose_timestamp_override.output.decision == 'approved'
+          or steps.propose_suppression.output.decision == 'approved'
+          or steps.propose_threat_index.output.decision == 'approved'
+          or steps.propose_manual.output.decision == 'approved' }}
+      dismissed: >-
+        ${{ steps.propose_index.output.decision == 'dismissed'
+          or steps.propose_query.output.decision == 'dismissed'
+          or steps.propose_timestamp_override.output.decision == 'dismissed'
+          or steps.propose_suppression.output.decision == 'dismissed'
+          or steps.propose_threat_index.output.decision == 'dismissed'
+          or steps.propose_manual.output.decision == 'dismissed' }}
+
+  # A fix is only done when the rule's next real run is healthy. The preview proved
+  # the logic; this proves the scheduled rule.
+  - name: wait_for_next_run
+    type: wait
+    if: "${{ steps.record_decision.output.applied == true }}"
+    with:
+      duration: "{{ consts.followup_wait }}"
+
+  - name: refetch_rule
+    type: kibana.request
+    if: "${{ steps.record_decision.output.applied == true }}"
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?id={{ inputs.rule_uuid | url_encode }}"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+    on-failure:
+      continue: true
+
+  # Healed means the fix landed (the revision moved) and a run after the fix
+  # succeeded. A data_stale rule succeeded before too, so for it the run must also
+  # be newer than the fix.
+  - name: judge_followup
+    type: data.set
+    if: "${{ steps.record_decision.output.applied == true }}"
+    with:
+      landed: "${{ steps.refetch_rule.error == null and steps.refetch_rule.output.revision > steps.fetch_rule.output.revision }}"
+      ran_after_fix: "${{ steps.refetch_rule.output.execution_summary.last_execution.date > steps.refetch_rule.output.updated_at }}"
+      status: "{{ steps.refetch_rule.output.execution_summary.last_execution.status }}"
+      healed: >-
+        ${{ steps.refetch_rule.error == null
+          and steps.refetch_rule.output.revision > steps.fetch_rule.output.revision
+          and steps.refetch_rule.output.execution_summary.last_execution.date > steps.refetch_rule.output.updated_at
+          and steps.refetch_rule.output.execution_summary.last_execution.status == 'succeeded' }}
+
+  - name: post_followup
+    type: ai.conversation.add_user_message
+    if: "${{ steps.record_decision.output.applied == true }}"
+    on-failure:
+      continue: true
+    with:
+      author_name: "{{ consts.author_name }}"
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      message: |-
+        {%- if steps.judge_followup.output.healed == true -%}
+        **Healed**
+        The rule ran at {{ steps.refetch_rule.output.execution_summary.last_execution.date | date: "%H:%M UTC", "UTC" }} after the fix, and the run succeeded.
+        {%- elsif steps.judge_followup.output.landed != true -%}
+        **Fix not found on the rule**
+        The rule's revision did not change after approval. Check the rule's change history.
+        {%- elsif steps.judge_followup.output.ran_after_fix != true -%}
+        **Waiting for the next run**
+        The fix is on the rule, but the rule has not run since. Check its next run on the rule page.
+        {%- else -%}
+        **Still broken**
+        The rule ran after the fix, and the run reported "{{ steps.judge_followup.output.status }}": {{ steps.refetch_rule.output.execution_summary.last_execution.message | truncate: 500 }}
+        {%- endif %}
+
+  # The attachment is a snapshot, so after the fix it would still show the broken
+  # rule. Version 1 keeps the before state in the attachment history.
+  - name: refresh_rule_attachment
+    type: ai.attachment.update
+    if: >-
+      ${{ steps.attach_rule.error == null
+        and steps.refetch_rule.error == null
+        and steps.refetch_rule.output.id != null }}
+    with:
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      attachment_id: "doctored-rule"
+      data:
+        text: "{{ steps.refetch_rule.output | json }}"
+        attachmentLabel: "{{ steps.refetch_rule.output.name }}"
+      description: "Rule after the fix: {{ steps.fetch_rule.output.name }}"
+      render_inline: true
+    on-failure:
+      continue: true
+
+  # A gate timeout leaves the investigation open on purpose: nobody decided.
+  - name: close_investigation_approved
+    type: ai.conversation.metadata.patch
+    if: >-
+      ${{ steps.create_investigation.output.conversation_id != null
+        and steps.record_decision.output.approved == true }}
+    with:
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      updates:
+        status: closed
+        close_reason: resolved
+    on-failure:
+      continue: true
+
+  - name: close_investigation_dismissed
+    type: ai.conversation.metadata.patch
+    if: >-
+      ${{ steps.create_investigation.output.conversation_id != null
+        and steps.record_decision.output.dismissed == true }}
+    with:
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      updates:
+        status: closed
+        close_reason: other
+    on-failure:
+      continue: true
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      rule_uuid: "{{ inputs.rule_uuid }}"
+      cause: "{{ steps.classify.output.cause }}"
+      approved: "${{ steps.record_decision.output.approved == true }}"
+      healed: "${{ steps.judge_followup.output.healed == true }}"

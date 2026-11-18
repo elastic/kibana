@@ -1,0 +1,29 @@
+version: "1"
+name: Rule Doctor
+description: >
+  Per-space Detection rule-doctor worker. Dispatches the global doctor sweep,
+  which diagnoses failing or starved rules and holds one approval gate per fix.
+enabled: false
+tags:
+  - watch
+  - watch-detection
+settings:
+  __WORKER_RUN_AS_LINE__:
+triggers:
+  # The sweep stays manual-only so this worker is the one scheduler.
+  - type: scheduled
+    with:
+      every: "__WORKER_SCHEDULE_INTERVAL__"
+  - type: manual
+consts:
+  worker_settings:
+    settingsVersion: __WORKER_SETTINGS_VERSION__
+    autonomy: "__WORKER_AUTONOMY_LEVEL__"
+    scheduleInterval: "__WORKER_SCHEDULE_INTERVAL__"
+steps:
+  - name: run_rule_doctor
+    type: workflow.executeAsync
+    with:
+      workflow-id: system-security-rule-doctor-worker
+      run-as-mode: inherit
+      inputs: {}

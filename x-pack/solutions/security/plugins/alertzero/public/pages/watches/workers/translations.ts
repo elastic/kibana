@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import {
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_DOCTOR_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
@@ -98,6 +99,13 @@ export const WORKER_DESCRIPTIONS: Record<string, string> = {
     {
       defaultMessage:
         'Reviews gaps in your detection coverage and proposes rules to close them, so fewer threats go undetected.',
+    }
+  ),
+  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_DOCTOR_ID]: i18n.translate(
+    'xpack.alertzero.watches.workers.detectionRuleDoctor.description',
+    {
+      defaultMessage:
+        "Finds rules that fail or stopped getting data, works out why, and proposes a tested fix, so broken rules don't stay silent.",
     }
   ),
 };

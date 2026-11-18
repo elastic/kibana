@@ -16,10 +16,12 @@
 
 import {
   RULE_COVERAGE_WORKER_SETTINGS_DEFAULTS,
+  RULE_DOCTOR_WORKER_SETTINGS_DEFAULTS,
   RULE_TUNING_WORKER_SETTINGS_DEFAULTS,
 } from '@kbn/workflows/managed/definitions/alertzero/worker_settings_defaults';
 import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_DOCTOR_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
 } from '../../constants';
 import { RuleCoverageWorkerExtras, RuleTuningWorkerExtras } from '../schemas';
@@ -72,4 +74,10 @@ export const RULE_COVERAGE_SETTINGS: WorkerSettingsDeclaration<RuleCoverageWorke
   allowedAutonomyLevels: RULE_COVERAGE_WORKER_SETTINGS_DEFAULTS.allowedAutonomyLevels,
   scheduleInterval: RULE_COVERAGE_WORKER_SETTINGS_DEFAULTS.scheduleInterval,
   extras: { schema: RuleCoverageWorkerExtras, defaultValue: RULE_COVERAGE_DEFAULT_EXTRAS },
+};
+
+export const RULE_DOCTOR_SETTINGS: WorkerSettingsDeclaration = {
+  workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_DOCTOR_ID,
+  allowedAutonomyLevels: RULE_DOCTOR_WORKER_SETTINGS_DEFAULTS.allowedAutonomyLevels,
+  scheduleInterval: RULE_DOCTOR_WORKER_SETTINGS_DEFAULTS.scheduleInterval,
 };

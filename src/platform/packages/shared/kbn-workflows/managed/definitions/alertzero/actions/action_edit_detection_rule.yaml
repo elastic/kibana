@@ -103,6 +103,62 @@ triggers:
                 How far back each rule execution looks, e.g. "now-6m". Must be
                 a valid Elasticsearch date math expression and should overlap
                 with interval to avoid gaps.
+            index:
+              type: array
+              minItems: 1
+              items:
+                type: string
+                minLength: 1
+                maxLength: 1024
+              description: >-
+                New index patterns, replacing the whole list. Has no effect on a
+                rule that searches a data view.
+            timestamp_override:
+              type: string
+              minLength: 1
+              maxLength: 1024
+              description: >-
+                New timestamp override field. Use "@timestamp" to search on the
+                default timestamp.
+            threat_index:
+              type: array
+              minItems: 1
+              items:
+                type: string
+                minLength: 1
+                maxLength: 1024
+              description: >-
+                New threat indicator index patterns for an indicator match rule,
+                replacing the whole list.
+            alert_suppression:
+              type: object
+              description: >-
+                Alert suppression, replacing the rule's whole setting. A threshold
+                rule takes duration only; other rule types need group_by.
+              properties:
+                group_by:
+                  type: array
+                  minItems: 1
+                  maxItems: 3
+                  items:
+                    type: string
+                    minLength: 1
+                    maxLength: 1024
+                duration:
+                  type: object
+                  properties:
+                    value:
+                      type: integer
+                      minimum: 1
+                    unit:
+                      type: string
+                      enum: [s, m, h]
+                  required: [value, unit]
+                  additionalProperties: false
+                missing_fields_strategy:
+                  type: string
+                  enum: [suppress, doNotSuppress]
+              additionalProperties: false
           required:
             - id
           additionalProperties: false
@@ -173,7 +229,8 @@ steps:
     with:
       patch: >-
         ${{ inputs.actionInput | pick: 'id', 'query', 'risk_score', 'severity',
-          'threshold', 'interval', 'from' }}
+          'threshold', 'interval', 'from', 'index', 'timestamp_override',
+          'threat_index', 'alert_suppression' }}
 
   # `workflow.execute` declares its output as unknown, so the parent falls back
   # to a heuristic read of the last step unless the child emits explicitly.
@@ -189,3 +246,7 @@ steps:
       threshold: "${{ steps.patch_rule.output.threshold }}"
       interval: "{{ steps.patch_rule.output.interval }}"
       from: "{{ steps.patch_rule.output.from }}"
+      index: "${{ steps.patch_rule.output.index }}"
+      timestamp_override: "{{ steps.patch_rule.output.timestamp_override }}"
+      threat_index: "${{ steps.patch_rule.output.threat_index }}"
+      alert_suppression: "${{ steps.patch_rule.output.alert_suppression }}"
