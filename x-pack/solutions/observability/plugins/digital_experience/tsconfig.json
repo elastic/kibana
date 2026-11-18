@@ -37,6 +37,7 @@
     "@kbn/observability-shared-plugin",
     "@kbn/react-hooks",
     "@kbn/rison",
+    "@kbn/share-plugin",
     "@kbn/shared-ux-column-presets",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/ui-callout",
@@ -49,6 +50,7 @@
     "@kbn/timerange",
     "@kbn/typed-react-router-config",
     "@kbn/unified-search-plugin",
+    "@kbn/utility-types",
     "@kbn/ux-plugin",
     "@kbn/zod",
     "@kbn/core-test-helpers-deprecations-getters"

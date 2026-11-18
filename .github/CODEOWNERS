@@ -59,6 +59,7 @@ packages/kbn-capture-oas-snapshot-cli @elastic/kibana-core
 packages/kbn-check-kibana-settings-cli @elastic/kibana-core
 packages/kbn-check-prod-native-modules-cli @elastic/kibana-operations
 packages/kbn-check-saved-objects-cli @elastic/kibana-core
+packages/kbn-check-server-import-graph-cli @elastic/appex-sharedux
 packages/kbn-ci-stats-performance-metrics @elastic/kibana-operations
 packages/kbn-ci-stats-shipper-cli @elastic/kibana-operations
 packages/kbn-cli-dev-mode @elastic/kibana-operations
@@ -785,6 +786,7 @@ src/platform/packages/shared/kbn-visualizations-common @elastic/kibana-dashboard
 src/platform/packages/shared/kbn-visualizations-components @elastic/kibana-dashboards
 src/platform/packages/shared/kbn-workflows @elastic/workflows-eng
 src/platform/packages/shared/kbn-workflows-library @elastic/workflows-eng
+src/platform/packages/shared/kbn-workflows-topics @elastic/workflows-eng
 src/platform/packages/shared/kbn-workflows-ui @elastic/workflows-eng
 src/platform/packages/shared/kbn-workflows-yaml @elastic/workflows-eng
 src/platform/packages/shared/kbn-workspaces @elastic/kibana-core
@@ -3032,6 +3034,8 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/security-scout-best-practices-reviewer @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/test-plan-generator @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/test-plan-generator/references/critical-workflows-security-solution.md @elastic/security-engineering-productivity @elastic/security-solution
+/x-pack/solutions/security/plugins/security_solution/.agents/skills/test-plan-triage @elastic/security-engineering-productivity
+/x-pack/solutions/security/plugins/security_solution/.claude/skills @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fixer @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-reproduce @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fix @elastic/security-engineering-productivity
@@ -3159,6 +3163,7 @@ x-pack/platform/plugins/shared/entity_store/common/domain/definitions/dynamic @e
 
 /x-pack/solutions/security/plugins/security_solution/test/scout/agent_builder/ @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/test/scout/flyout/ @elastic/security-investigations
+/x-pack/solutions/security/plugins/security_solution/test/scout/onboarding/ @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/test/scout/overview/ @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/test/scout/timelines/ @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ @elastic/security-investigations
@@ -3237,6 +3242,7 @@ x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/
 /x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/endpoint @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/endpoint @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/endpoint @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution/server/workflows/endpoint @elastic/security-defend-workflows
 
 # Significant Events managed workflows
 src/platform/packages/shared/kbn-workflows/managed/definitions/significant_events @elastic/nightshift
