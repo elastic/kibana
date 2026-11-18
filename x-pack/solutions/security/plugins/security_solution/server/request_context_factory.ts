@@ -207,6 +207,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           license: licensing.license,
           analytics: core.analytics,
           logger: options.logger,
+          ruleLibraryEnabled: config.ruleLibrary.enabled,
         });
       }),
 

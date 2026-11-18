@@ -73,6 +73,7 @@ interface DetectionRulesClientParams {
   license: ILicense;
   analytics?: AnalyticsServiceSetup;
   logger?: Logger;
+  ruleLibraryEnabled?: boolean;
 }
 
 export const createDetectionRulesClient = ({
@@ -85,8 +86,11 @@ export const createDetectionRulesClient = ({
   license,
   analytics,
   logger,
+  ruleLibraryEnabled,
 }: DetectionRulesClientParams): IDetectionRulesClient => {
-  const prebuiltRuleAssetClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
+  const prebuiltRuleAssetClient = createPrebuiltRuleAssetsClient(savedObjectsClient, {
+    ruleLibraryEnabled,
+  });
 
   return {
     getRuleCustomizationStatus() {

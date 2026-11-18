@@ -44,6 +44,7 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
     exceptions_list: params.exceptionsList,
     immutable: params.immutable,
     rule_source: params.ruleSource ? convertObjectKeysToSnakeCase(params.ruleSource) : undefined,
+    library: params.library,
     related_integrations: params.relatedIntegrations ?? [],
     required_fields: params.requiredFields ?? [],
     response_actions: params.responseActions?.map(transformAlertToRuleResponseAction),

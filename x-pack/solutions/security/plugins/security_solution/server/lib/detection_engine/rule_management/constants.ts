@@ -85,6 +85,7 @@ export const FUNCTIONAL_FIELD_MAP: Record<AllKeys<RuleResponse>, boolean> = {
   id: false,
   rule_id: false,
   rule_source: false,
+  library: false,
   outcome: false,
   output_index: false,
   namespace: false,

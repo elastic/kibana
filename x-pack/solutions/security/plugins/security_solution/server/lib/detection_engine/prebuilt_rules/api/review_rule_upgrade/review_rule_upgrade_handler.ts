@@ -67,7 +67,9 @@ export const reviewRuleUpgradeHandler = async (
     const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
     const soClient = ctx.core.savedObjects.client;
     const rulesClient = await ctx.alerting.getRulesClient();
-    const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
+    const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient, {
+      ruleLibraryEnabled: ctx.securitySolution.getConfig().ruleLibrary.enabled,
+    });
     const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
     const mlAuthz = ctx.securitySolution.getMlAuthz();
 
@@ -216,10 +218,13 @@ export async function calculateUpgradeableRulesDiff({
   const baseVersions: RuleVersionSpecifier[] = pagedCurrentRules.map((rule) => ({
     rule_id: rule.rule_id,
     version: rule.version,
+    library_id: rule.library?.id,
   }));
   const targetVersions: RuleVersionSpecifier[] = pagedCurrentRules.flatMap((rule) => {
     const latest = latestVersionsMap.get(rule.rule_id);
-    return latest ? [{ rule_id: latest.rule_id, version: latest.version }] : [];
+    return latest
+      ? [{ rule_id: latest.rule_id, version: latest.version, library_id: latest.library_id }]
+      : [];
   });
 
   const [latestAssetsResult, baseAssetsResult] = await Promise.all([

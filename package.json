@@ -1183,6 +1183,7 @@
     "@kbn/security-plugin-types-public": "workspace:*",
     "@kbn/security-plugin-types-server": "workspace:*",
     "@kbn/security-role-management-model": "workspace:*",
+    "@kbn/security-rule-libraries": "workspace:*",
     "@kbn/security-solution-connectors": "workspace:*",
     "@kbn/security-solution-distribution-bar": "workspace:*",
     "@kbn/security-solution-ess": "workspace:*",

@@ -11,14 +11,19 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { MAX_PREBUILT_RULES_COUNT } from '../../../../../rule_management/logic/search/get_existing_prepackaged_rules';
-import type { PrebuiltRuleAsset } from '../../../../model/rule_assets/prebuilt_rule_asset';
+import type {
+  PrebuiltRuleAsset,
+  PrebuiltRuleAssetRecord,
+} from '../../../../model/rule_assets/prebuilt_rule_asset';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
 import { validatePrebuiltRuleAssets } from '../../prebuilt_rule_assets_validation';
 import { invariant } from '../../../../../../../../common/utils/invariant';
+import { buildLibraryIdsKueryFilter, collapseLibraryTwins } from '../utils';
 import { fetchDeprecatedRules } from './fetch_deprecated_rules';
 
 export interface FetchLatestAssetsOptions {
-  size: number;
+  size?: number;
+  libraryIds?: string[];
 }
 
 /**
@@ -41,9 +46,18 @@ export async function fetchLatestAssets(
   options: FetchLatestAssetsOptions = {
     size: MAX_PREBUILT_RULES_COUNT,
   }
-): Promise<PrebuiltRuleAsset[]> {
+): Promise<PrebuiltRuleAssetRecord[]> {
+  const size = options.size ?? MAX_PREBUILT_RULES_COUNT;
   const deprecatedRuleAssets = await fetchDeprecatedRules(savedObjectsClient);
   const deprecatedRuleIds = deprecatedRuleAssets.map((asset) => asset.rule_id);
+
+  const filterParts = [
+    deprecatedRuleIds.length > 0 &&
+      `NOT (${deprecatedRuleIds
+        .map((id) => `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.rule_id: "${id}"`)
+        .join(' OR ')})`,
+    buildLibraryIdsKueryFilter(options.libraryIds),
+  ].filter((part): part is string => Boolean(part));
 
   const findResult = await savedObjectsClient.find<
     PrebuiltRuleAsset,
@@ -54,28 +68,47 @@ export async function fetchLatestAssets(
     }
   >({
     type: PREBUILT_RULE_ASSETS_SO_TYPE,
-    ...(deprecatedRuleIds.length > 0 && {
-      filter: `NOT (${deprecatedRuleIds
-        .map((id) => `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.rule_id: "${id}"`)
-        .join(' OR ')})`,
-    }),
+    ...(filterParts.length > 0 && { filter: filterParts.join(' AND ') }),
     aggs: {
-      rules: {
-        terms: {
-          field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.rule_id`,
-          size: options.size,
-        },
-        aggs: {
-          latest_version: {
-            top_hits: {
-              size: 1,
-              sort: {
-                [`${PREBUILT_RULE_ASSETS_SO_TYPE}.version`]: 'desc',
+      rules: options.libraryIds?.length
+        ? {
+            multi_terms: {
+              terms: [
+                { field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.rule_id` },
+                {
+                  field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.library_id`,
+                  missing: '',
+                },
+              ],
+              size,
+            },
+            aggs: {
+              latest_version: {
+                top_hits: {
+                  size: 1,
+                  sort: {
+                    [`${PREBUILT_RULE_ASSETS_SO_TYPE}.version`]: 'desc',
+                  },
+                },
+              },
+            },
+          }
+        : {
+            terms: {
+              field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.rule_id`,
+              size,
+            },
+            aggs: {
+              latest_version: {
+                top_hits: {
+                  size: 1,
+                  sort: {
+                    [`${PREBUILT_RULE_ASSETS_SO_TYPE}.version`]: 'desc',
+                  },
+                },
               },
             },
           },
-        },
-      },
     },
   });
 
@@ -87,5 +120,6 @@ export async function fetchLatestAssets(
     return hit._source[PREBUILT_RULE_ASSETS_SO_TYPE];
   });
 
-  return validatePrebuiltRuleAssets(ruleAssets);
+  const collapsed = options.libraryIds?.length ? collapseLibraryTwins(ruleAssets) : ruleAssets;
+  return validatePrebuiltRuleAssets(collapsed);
 }

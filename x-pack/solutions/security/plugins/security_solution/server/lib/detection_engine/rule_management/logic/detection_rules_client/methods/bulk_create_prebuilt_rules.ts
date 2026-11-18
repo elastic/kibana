@@ -21,6 +21,7 @@ import type {
   BulkCreatePrebuiltRulesArgs,
   BulkCreatePrebuiltRulesResult,
 } from '../detection_rules_client_interface';
+import { ruleLibraryParamsFromAsset } from '../../../../prebuilt_rules/logic/rule_library_params_from_asset';
 
 interface BulkCreatePrebuiltRulesOptions {
   actionsClient: ActionsClient;
@@ -146,7 +147,11 @@ const buildPrebuiltRuleAlertingPayload = ({
   rule: PrebuiltRuleAsset;
   actionsClient: ActionsClient;
 }): BulkCreateRulesParams<RuleParams>['rules'][number]['data'] => {
-  const ruleWithDefaults = applyRuleDefaults({ ...rule, immutable: true });
+  const library = ruleLibraryParamsFromAsset(rule);
+  const ruleWithDefaults = {
+    ...applyRuleDefaults({ ...rule, immutable: true }),
+    ...(library ? { library } : {}),
+  };
 
   return {
     ...convertRuleResponseToAlertingRule(ruleWithDefaults, actionsClient),

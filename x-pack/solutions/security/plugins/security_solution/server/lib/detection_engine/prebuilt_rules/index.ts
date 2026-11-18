@@ -8,3 +8,4 @@
 export { registerPrebuiltRulesRoutes } from './api/register_routes';
 export { prebuiltRuleAssetType } from './logic/rule_assets/prebuilt_rule_assets_type';
 export { PrebuiltRuleAsset } from './model/rule_assets/prebuilt_rule_asset';
+export type { PrebuiltRuleAssetRecord } from './model/rule_assets/prebuilt_rule_asset';

@@ -42,7 +42,9 @@ export const revertPrebuiltRuleHandler = async (
     const soClient = ctx.core.savedObjects.client;
     const rulesClient = await ctx.alerting.getRulesClient();
     const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
-    const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
+    const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient, {
+      ruleLibraryEnabled: ctx.securitySolution.getConfig().ruleLibrary.enabled,
+    });
 
     const concurrencySet = { [id]: { revision, version } };
 

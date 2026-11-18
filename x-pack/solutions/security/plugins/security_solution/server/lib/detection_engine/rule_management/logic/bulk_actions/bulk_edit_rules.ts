@@ -66,6 +66,7 @@ export const bulkEditRules = async ({
     prebuiltRules.map((rule) => ({
       rule_id: rule.params.ruleId,
       version: rule.params.version,
+      library_id: rule.params.library?.id,
     }))
   );
   const baseVersionsMap = new Map(

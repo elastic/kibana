@@ -38,7 +38,9 @@ export const getPrebuiltRulesStatusRoute = (router: SecuritySolutionPluginRouter
           const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
           const soClient = ctx.core.savedObjects.client;
           const rulesClient = await ctx.alerting.getRulesClient();
-          const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
+          const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient, {
+            ruleLibraryEnabled: ctx.securitySolution.getConfig().ruleLibrary.enabled,
+          });
           const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
           const mlAuthz = ctx.securitySolution.getMlAuthz();
 

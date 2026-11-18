@@ -248,7 +248,9 @@ export const performBulkActionRoute = (
           const savedObjectsClient = ctx.core.savedObjects.client;
           const actionsClient = ctx.actions.getActionsClient();
           const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
-          const prebuiltRuleAssetClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
+          const prebuiltRuleAssetClient = createPrebuiltRuleAssetsClient(savedObjectsClient, {
+            ruleLibraryEnabled: ctx.securitySolution.getConfig().ruleLibrary.enabled,
+          });
           const rulesAuthz = ctx.securitySolution.getRulesAuthz();
           const endpointAuthz = await ctx.securitySolution.getEndpointAuthz();
           const endpointService = ctx.securitySolution.getEndpointService();

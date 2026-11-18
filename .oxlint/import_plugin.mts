@@ -340,6 +340,7 @@ export const importPluginOverrides: OxlintOverride[] = [
         'kbn-evals-suite-security-alert-triage',
         'kbn-evals-suite-security-persona-matrix',
         'security-mitre-attack-server',
+        'kbn-security-rule-libraries',
       ].map((pkg) => `x-pack/solutions/security/packages/${pkg}`)
     ),
     rules: {

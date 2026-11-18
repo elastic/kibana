@@ -6,14 +6,20 @@
  */
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
+import {
+  PrebuiltRuleAsset,
+  type PrebuiltRuleAssetRecord,
+} from '../../model/rule_assets/prebuilt_rule_asset';
 import { DeprecatedPrebuiltRuleAsset } from '../../model/rule_assets/deprecated_prebuilt_rule_asset';
 
-export const validatePrebuiltRuleAssets = (rules: PrebuiltRuleAsset[]): PrebuiltRuleAsset[] => {
+export const validatePrebuiltRuleAssets = (
+  rules: PrebuiltRuleAsset[]
+): PrebuiltRuleAssetRecord[] => {
   return rules.map((rule) => validatePrebuiltRuleAsset(rule));
 };
 
-export const validatePrebuiltRuleAsset = (rule: PrebuiltRuleAsset): PrebuiltRuleAsset => {
+export const validatePrebuiltRuleAsset = (rule: PrebuiltRuleAsset): PrebuiltRuleAssetRecord => {
+  const libraryId = (rule as { library_id?: string }).library_id;
   const result = PrebuiltRuleAsset.safeParse(rule);
 
   if (!result.success) {
@@ -29,7 +35,7 @@ export const validatePrebuiltRuleAsset = (rule: PrebuiltRuleAsset): PrebuiltRule
     );
   }
 
-  return result.data;
+  return libraryId ? { ...result.data, library_id: libraryId } : result.data;
 };
 
 export const validateDeprecatedRuleAssets = (

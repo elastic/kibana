@@ -142,6 +142,31 @@ export const RuleSource = lazySchema(() =>
 export type RuleSource = z.infer<typeof RuleSource>;
 
 /**
+ * The rule library an installed prebuilt rule came from. Omitted on custom rules. Prebuilt rules saved before libraries existed are read as the Elastic library.
+ */
+export const RuleLibrary = lazySchema(() =>
+  z.object({
+    /**
+     * Stable id of the rule library.
+     */
+    id: z.string().max(128).describe('Stable id of the rule library.'),
+    /**
+     * Display name of the rule library.
+     */
+    title: z.string().max(256).describe('Display name of the rule library.'),
+    /**
+     * EUI icon type or icon path for the rule library.
+     */
+    icon: z
+      .string()
+      .max(512)
+      .optional()
+      .describe('EUI icon type or icon path for the rule library.'),
+  })
+);
+export type RuleLibrary = z.infer<typeof RuleLibrary>;
+
+/**
  * Determines whether the rule is enabled. Defaults to true.
  */
 export const IsRuleEnabled = lazySchema(() => z.boolean());

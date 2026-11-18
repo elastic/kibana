@@ -41,6 +41,7 @@ export async function calculateRuleSource({
           {
             rule_id: nextRule.rule_id,
             version: nextRule.version,
+            library_id: nextRule.library?.id,
           },
         ])
       ).assets.at(0);

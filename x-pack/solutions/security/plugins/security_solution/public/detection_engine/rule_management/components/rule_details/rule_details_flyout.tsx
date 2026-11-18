@@ -35,6 +35,7 @@ import {
 } from './constants';
 
 import * as i18n from './translations';
+import { RuleLibraryBadge } from '../../../common/components/rule_library_badge';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -236,9 +237,18 @@ function RuleDetailsFlyoutContent({
   return (
     <>
       <EuiFlyoutHeader>
-        <EuiTitle size="m">
-          <h2 id={titleId}>{title ?? rule.name}</h2>
-        </EuiTitle>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="m">
+              <h2 id={titleId}>{title ?? rule.name}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          {rule.library ? (
+            <EuiFlexItem grow={false}>
+              <RuleLibraryBadge library={rule.library} />
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
         <EuiSpacer size="s" />
         {subHeader && (
           <>

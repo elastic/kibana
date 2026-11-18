@@ -71,3 +71,5 @@ export type PrebuiltRuleAsset = z.infer<typeof PrebuiltRuleAsset>;
 export const PrebuiltRuleAsset = lazySchema(() =>
   PrebuiltAssetBaseProps.and(TypeSpecificCreatePropsInternal).and(PrebuiltRuleAssetIdentityFields)
 );
+
+export type PrebuiltRuleAssetRecord = PrebuiltRuleAsset & { library_id?: string };

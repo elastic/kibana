@@ -21,6 +21,7 @@ import {
   PREBUILT_RULE_ASSETS_RUNTIME_MAPPINGS,
   prepareQueryDslFilter,
   prepareQueryDslSort,
+  collapseLibraryTwins,
   getPrebuiltRuleAssetSoId,
   getPrebuiltRuleAssetsSearchNamespace,
 } from '../utils';
@@ -44,9 +45,10 @@ export async function fetchLatestVersions(
     ruleIds?: string[];
     sort?: PrebuiltRuleAssetsSort;
     filter?: string;
+    libraryIds?: string[];
   }
 ): Promise<BasicRuleInfo[]> {
-  const { ruleIds, sort, filter } = queryParameters || {};
+  const { ruleIds, sort, filter, libraryIds } = queryParameters || {};
 
   if (ruleIds && ruleIds.length === 0) {
     return [];
@@ -55,12 +57,12 @@ export async function fetchLatestVersions(
   // First, fetch the latest version numbers for each rule_id.
   const latestVersionSpecifiers: RuleVersionSpecifier[] = await fetchLatestVersionSpecifiers(
     savedObjectsClient,
-    ruleIds
+    ruleIds,
+    libraryIds
   );
 
-  // Then, fetch the rule type for each latest version and sort the result.
   const soIds = latestVersionSpecifiers.map((rule) =>
-    getPrebuiltRuleAssetSoId(rule.rule_id, rule.version)
+    getPrebuiltRuleAssetSoId(rule.rule_id, rule.version, rule.library_id)
   );
   const latestVersions = await fetchVersionsBySoIds(savedObjectsClient, soIds, sort, filter);
 
@@ -69,7 +71,8 @@ export async function fetchLatestVersions(
 
 async function fetchLatestVersionSpecifiers(
   savedObjectsClient: SavedObjectsClientContract,
-  ruleIds?: string[]
+  ruleIds?: string[],
+  libraryIds?: string[]
 ) {
   /**
    * Fetches deprecated rule assets in order to filter out all versions of the deprecated rules
@@ -98,31 +101,27 @@ async function fetchLatestVersionSpecifiers(
     _source: false,
     size: 0,
     query: {
-      bool: prepareQueryDslFilter({ ruleIds, excludeRuleIds: deprecatedRuleIds }),
+      bool: prepareQueryDslFilter({ ruleIds, excludeRuleIds: deprecatedRuleIds, libraryIds }),
     },
     aggs: {
-      rules: {
-        terms: {
-          field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.rule_id`,
-          size: MAX_PREBUILT_RULES_COUNT,
-        },
-        aggs: {
-          latest_version: {
-            top_hits: {
-              size: 1,
-              sort: [
-                {
-                  [`${PREBUILT_RULE_ASSETS_SO_TYPE}.version`]: 'desc',
-                },
+      rules: libraryIds?.length
+        ? {
+            multi_terms: {
+              terms: [
+                { field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.rule_id` },
+                { field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.library_id`, missing: '' },
               ],
-              _source: [
-                `${PREBUILT_RULE_ASSETS_SO_TYPE}.rule_id`,
-                `${PREBUILT_RULE_ASSETS_SO_TYPE}.version`,
-              ],
+              size: MAX_PREBUILT_RULES_COUNT,
             },
+            aggs: latestVersionAgg(),
+          }
+        : {
+            terms: {
+              field: `${PREBUILT_RULE_ASSETS_SO_TYPE}.rule_id`,
+              size: MAX_PREBUILT_RULES_COUNT,
+            },
+            aggs: latestVersionAgg(),
           },
-        },
-      },
     },
   });
 
@@ -144,10 +143,32 @@ async function fetchLatestVersionSpecifiers(
     return {
       rule_id: soAttributes.rule_id,
       version: soAttributes.version,
+      library_id: soAttributes.library_id,
     };
   });
-  return latestVersionSpecifiers;
+
+  return libraryIds?.length
+    ? collapseLibraryTwins(latestVersionSpecifiers)
+    : latestVersionSpecifiers;
 }
+
+const latestVersionAgg = () => ({
+  latest_version: {
+    top_hits: {
+      size: 1,
+      sort: [
+        {
+          [`${PREBUILT_RULE_ASSETS_SO_TYPE}.version`]: 'desc',
+        },
+      ],
+      _source: [
+        `${PREBUILT_RULE_ASSETS_SO_TYPE}.rule_id`,
+        `${PREBUILT_RULE_ASSETS_SO_TYPE}.version`,
+        `${PREBUILT_RULE_ASSETS_SO_TYPE}.library_id`,
+      ],
+    },
+  },
+});
 
 async function fetchVersionsBySoIds(
   savedObjectsClient: SavedObjectsClientContract,
@@ -180,6 +201,7 @@ async function fetchVersionsBySoIds(
       `${PREBUILT_RULE_ASSETS_SO_TYPE}.rule_id`,
       `${PREBUILT_RULE_ASSETS_SO_TYPE}.version`,
       `${PREBUILT_RULE_ASSETS_SO_TYPE}.type`,
+      `${PREBUILT_RULE_ASSETS_SO_TYPE}.library_id`,
     ],
   });
 
@@ -192,6 +214,7 @@ async function fetchVersionsBySoIds(
       rule_id: soAttributes.rule_id,
       version: soAttributes.version,
       type: soAttributes.type,
+      ...(soAttributes.library_id ? { library_id: soAttributes.library_id } : {}),
     };
     return versionInfo;
   });

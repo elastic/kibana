@@ -49,7 +49,9 @@ export const installEndpointSecurityPrebuiltRule = async ({
   try {
     const rulesClient = await alerts.getRulesClientWithRequest(request);
     const detectionRulesClient = context.getDetectionRulesClient();
-    const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
+    const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient, {
+      ruleLibraryEnabled: context.getConfig().ruleLibrary.enabled,
+    });
     const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
     const exceptionsListClient = context.getExceptionListClient();
 

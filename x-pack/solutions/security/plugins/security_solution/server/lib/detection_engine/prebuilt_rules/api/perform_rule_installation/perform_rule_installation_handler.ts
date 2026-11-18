@@ -46,7 +46,9 @@ export const performRuleInstallationHandler = async (
     const soClient = ctx.core.savedObjects.client;
     const rulesClient = await ctx.alerting.getRulesClient();
     const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
-    const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
+    const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient, {
+      ruleLibraryEnabled: ctx.securitySolution.getConfig().ruleLibrary.enabled,
+    });
     const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
     const exceptionsListClient = ctx.securitySolution.getExceptionListClient();
     const mlAuthz = ctx.securitySolution.getMlAuthz();
@@ -63,6 +65,7 @@ export const performRuleInstallationHandler = async (
     const ruleInstallQueue: Array<{
       rule_id: RuleSignatureId;
       version: RuleVersion;
+      library_id?: string;
     }> = [];
     const ruleErrors: PrebuiltRulesInstallError[] = [];
     const installedRules: InstalledRuleBasicInfo[] = [];
@@ -103,7 +106,14 @@ export const performRuleInstallationHandler = async (
           return;
         }
 
-        ruleInstallQueue.push(rule);
+        const latestMatch = latestVersions.find(
+          (version) => version.rule_id === rule.rule_id && version.version === rule.version
+        );
+        ruleInstallQueue.push({
+          rule_id: rule.rule_id,
+          version: rule.version,
+          library_id: latestMatch?.library_id,
+        });
       });
     } else if (mode === 'ALL_RULES') {
       const allLatestVersions = await ruleAssetsClient.fetchLatestVersions();

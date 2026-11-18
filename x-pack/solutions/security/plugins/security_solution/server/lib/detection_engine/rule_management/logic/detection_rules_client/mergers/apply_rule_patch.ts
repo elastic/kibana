@@ -70,6 +70,7 @@ export const applyRulePatch = async ({
     revision: existingRule.revision,
     immutable: existingRule.immutable,
     rule_source: existingRule.rule_source,
+    library: existingRule.library,
     updated_at: existingRule.updated_at,
     updated_by: existingRule.updated_by,
     created_at: existingRule.created_at,

@@ -132,6 +132,15 @@ export const RuleSourceCamelCased = lazySchema(() =>
 // the resulting union would not be assignable to Alerting's RuleParams due to a
 // TypeScript bug: https://github.com/microsoft/TypeScript/issues/15300
 
+export type RuleLibraryParams = z.infer<typeof RuleLibraryParams>;
+export const RuleLibraryParams = lazySchema(() =>
+  z.object({
+    id: z.string().max(128),
+    title: z.string().max(256),
+    icon: z.string().max(512).optional(),
+  })
+);
+
 export type BaseRuleParams = z.infer<typeof BaseRuleParams>;
 export const BaseRuleParams = lazySchema(() =>
   z.object({
@@ -146,6 +155,7 @@ export const BaseRuleParams = lazySchema(() =>
     investigationFields: InvestigationFieldsCombined.optional(),
     immutable: IsRuleImmutable,
     ruleSource: RuleSourceCamelCased.optional(),
+    library: RuleLibraryParams.optional(),
     license: RuleLicense.optional(),
     outputIndex: AlertsIndex,
     timelineId: TimelineTemplateId.optional(),
