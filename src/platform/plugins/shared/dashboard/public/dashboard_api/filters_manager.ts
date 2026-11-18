@@ -42,6 +42,36 @@ export const initializeFiltersManager = (
   const publishedChildFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const unpublishedChildFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
 
+  const awaitingRequiredFilters$ = combineCompatibleChildrenApis<
+    { required$?: BehaviorSubject<boolean> },
+    boolean
+  >(
+    {
+      children$: layoutManager.api.children$.pipe(
+        // only pinned panels can be required
+        map((children) => {
+          const pinnedIds = Object.keys(layoutManager.api.layout$.getValue().pinnedPanels);
+          return Object.values(children).filter((child) => pinnedIds.includes(child.uuid));
+        })
+      ),
+    },
+    'required$',
+    (unknownApi: unknown): unknownApi is { required$?: BehaviorSubject<boolean> } => {
+      return Boolean(
+        unknownApi &&
+          (unknownApi as { required$?: BehaviorSubject<boolean> })?.required$ !== undefined
+      );
+    },
+    false,
+    (values) => {
+      return values.some((required) => required);
+    }
+  );
+
+  const test = awaitingRequiredFilters$.subscribe((required) => {
+    console.log('!!!!!!!', { required });
+  });
+
   const childFiltersLoading$ = layoutManager.internalApi.childrenLoading$
     .pipe(
       combineLatestWith(

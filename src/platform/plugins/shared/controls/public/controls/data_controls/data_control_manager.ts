@@ -13,6 +13,7 @@ import {
   combineLatest,
   distinctUntilChanged,
   filter,
+  map,
   merge,
   switchMap,
   tap,
@@ -73,6 +74,7 @@ export type DataControlStateManager = Omit<StateManager<DataControlState>, 'api'
   api: DataControlApi;
   cleanup: () => void;
   internalApi: {
+    awaitingRequiredFilters$: BehaviorSubject<boolean>;
     onSelectionChange: () => void;
     setOutputFilter: (filter: Filter | undefined) => void;
   };
@@ -102,7 +104,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
     defaultDataControlState,
     defaultDataControlComparators
   );
-  console.log({ dataControlStateManager, state });
+  const awaitingRequiredFilters$ = new BehaviorSubject<boolean>(true);
 
   const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
   function setBlockingError(error: Error | undefined) {
@@ -311,6 +313,17 @@ export const initializeDataControlManager = async <EditorState extends object = 
     initialFilter ? [initialFilter] : undefined
   );
 
+  const waitForRequiredSubscription = combineLatest([
+    dataControlStateManager.api.required$,
+    appliedFilters$,
+  ])
+    .pipe(
+      map(([required, appliedFilters]) => {
+        return Boolean(required && (appliedFilters ?? []).length === 0);
+      })
+    )
+    .subscribe((result) => awaitingRequiredFilters$.next(result));
+
   return {
     api: {
       ...dataControlStateManager.api,
@@ -337,8 +350,10 @@ export const initializeDataControlManager = async <EditorState extends object = 
       fieldNameSubscription.unsubscribe();
       esqlQueryDataSourceSubscription.unsubscribe();
       labelManager.cleanup();
+      waitForRequiredSubscription.unsubscribe();
     },
     internalApi: {
+      awaitingRequiredFilters$,
       onSelectionChange: () => {
         filtersLoading$.next(true);
       },
