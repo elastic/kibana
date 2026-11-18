@@ -28,10 +28,12 @@ const compositeTargetSchema = z.object({ target: z.number() });
 
 const compositeOccurrencesBudgetingMethodSchema = z.literal('occurrences');
 
-const compositeRollingTimeWindowSchema = z.object({
-  duration: z.string().max(MAX_DURATION_STRING_LENGTH),
-  type: z.literal('rolling'),
-});
+const compositeRollingTimeWindowSchema = lazySchema(() =>
+  z.object({
+    duration: z.string().max(MAX_DURATION_STRING_LENGTH),
+    type: z.literal('rolling'),
+  })
+);
 
 const compositeSloMemberSchema = z.object({
   sloId: compositeSloIdSchema,
