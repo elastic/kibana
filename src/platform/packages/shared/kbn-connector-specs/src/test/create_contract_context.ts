@@ -171,6 +171,21 @@ const ensureWebCrypto = () => {
   }
 };
 
+// The axios fetch adapter keeps every `env.fetch` it is given in a module-level map, forever. A
+// mock closes over its operations, which for large specs (Microsoft Graph) are gigabytes, so
+// axios gets a function that holds the mock weakly: the context owns the mock for as long as it
+// is used, and a collected context takes the mock with it.
+const holdWeakly = (target: typeof fetch): typeof fetch => {
+  const ref = new WeakRef(target);
+  return (input, init) => {
+    const held = ref.deref();
+    if (held === undefined) {
+      throw new Error('The contract mock was used after its context was released');
+    }
+    return held(input, init);
+  };
+};
+
 let guards = 0;
 let globalFetch: typeof fetch | undefined;
 
@@ -222,7 +237,7 @@ export const createContractContext = async ({
   const authSecrets = toSecrets(schema, { ...secrets, authType: id });
 
   const streamed = new WeakSet<object>();
-  const client = axios.create({ adapter: 'fetch', env: { fetch: mock.fetch } });
+  const client = axios.create({ adapter: 'fetch', env: { fetch: holdWeakly(mock.fetch) } });
   // Registered first, so it runs after the interceptors that connectors add.
   client.interceptors.request.use(async (requestConfig) => {
     if (requestConfig.data instanceof FormData) {

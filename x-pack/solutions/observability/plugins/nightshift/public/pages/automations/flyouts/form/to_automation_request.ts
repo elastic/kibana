@@ -87,9 +87,6 @@ const keepUnmodeledFields = (original: TriggerRow, row: TriggerRow): TriggerRow 
   if (original.kind === 'alert' && row.kind === 'alert' && original.ruleNameMatchMode) {
     return { ...row, ruleNameMatchMode: original.ruleNameMatchMode };
   }
-  if (original.kind === 'schedule' && row.kind === 'schedule' && original.scopeQuery) {
-    return { ...row, scopeQuery: original.scopeQuery };
-  }
   return row;
 };
 

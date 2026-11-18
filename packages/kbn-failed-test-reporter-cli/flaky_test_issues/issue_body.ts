@@ -16,12 +16,15 @@ import {
 } from '@kbn/scout-reporting';
 import { getIssueMetadata, updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
 import {
+  andList,
   BUILDKITE_ORG_URL,
   buildkiteJobUrl,
   CATEGORY_LABELS,
   codeBlock,
   collapsed,
+  flakyDays,
   formatBuildLink,
+  formatDateTime,
   formatFailedBranches,
   formatDateRange,
   formatDay,
@@ -29,12 +32,14 @@ import {
   formatFullFailureMessage,
   formatPercent,
   formatScope,
+  formatShortDateTime,
   FRAMEWORK_LABELS,
   inlineCode,
   isFlakyBranch,
   isPullRequestRef,
   issueList,
   KIBANA_BLOB_URL,
+  NBSP,
   pipelineTargetEnvironment,
   plural,
   previouslyTrackedIn,
@@ -328,31 +333,64 @@ const skippedNote = (suite: FlakySuite): string | undefined => {
   return `Latest run on ${inlineCode(latestRun.branch)} was skipped (${since}).`;
 };
 
-/** `3 tests in the [\`Default status alert\`](…/default_status_alert.spec.ts) suite appear to be flaky:` */
-const opening = (suite: FlakySuite): string => {
+/**
+ * How many days of the window any of the suite's tests failed on, on the branches it is flaky on;
+ * undefined for reports written before the days were recorded.
+ */
+const failedDayCount = (suite: FlakySuite, { thresholds, window }: FlakyTestReport) => {
+  const days = suite.tests.map((test) => flakyDays(test, thresholds, window.lookbackDays));
+  if (days.length === 0 || days.some((testDays) => testDays === undefined)) {
+    return undefined;
+  }
+  return new Set(days.flatMap((testDays) => [...(testDays?.failed ?? [])])).size;
+};
+
+/**
+ * `3 tests in the [\`Default status alert\`](…/default_status_alert.spec.ts) suite appear to be
+ * flaky. They failed on **2 of the past 7 days**:`, without the days for older reports.
+ */
+const opening = (suite: FlakySuite, report: FlakyTestReport): string => {
   const subject = suite.suiteTitle ?? Path.basename(suite.filePath);
   const link = `[${inlineCode(subject)}](${KIBANA_BLOB_URL}/${suite.filePath})`;
   const count = suite.tests.length;
-  return (
+  const lead =
     `${plural(count, 'test')} in the ${link} suite ` +
-    `${count === 1 ? 'appears' : 'appear'} to be flaky:`
+    `${count === 1 ? 'appears' : 'appear'} to be flaky`;
+  const failedDays = failedDayCount(suite, report);
+  if (failedDays === undefined) {
+    return `${lead}:`;
+  }
+  return (
+    `${lead}. ${count === 1 ? 'It' : 'They'} failed on ` +
+    `**${failedDays} of the past ${report.window.lookbackDays}${NBSP}days**:`
   );
 };
 
-const blobLink = (repoRelativePath: string): string =>
-  `[${inlineCode(repoRelativePath)}](${KIBANA_BLOB_URL}/${repoRelativePath})`;
+/** The deepest folder holding both paths, with its trailing slash; empty when they share none. */
+const commonFolder = (a: string, b: string): string => {
+  const [partsA, partsB] = [a.split('/').slice(0, -1), b.split('/').slice(0, -1)];
+  const shared: string[] = [];
+  for (let index = 0; index < partsA.length && partsA[index] === partsB[index]; index++) {
+    shared.push(partsA[index]);
+  }
+  return shared.map((part) => `${part}/`).join('');
+};
 
-const suiteDetails = (suite: FlakySuite): string => {
-  const framework = FRAMEWORK_LABELS[suite.framework].long;
-  const category = suite.configCategory ? CATEGORY_LABELS[suite.configCategory] : undefined;
-  const rows: string[][] = [
-    ['**Framework**', framework],
-    ...(category ? [['**Category**', `${category} test`]] : []),
-    ['**File**', blobLink(suite.filePath)],
-    ...(suite.configPath ? [['**Config**', blobLink(suite.configPath)]] : []),
-    ['**Owners**', suite.owners.length > 0 ? suite.owners.map(inlineCode).join(', ') : '-'],
-  ];
-  return table(['Field', 'Value'], rows);
+/**
+ * `**Owners** \`elastic/kibana-discover\` · **Config** [\`playwright.config.ts\`](…)`: what the
+ * title and the opening link to the file leave out. The config is named from the folder it shares
+ * with the suite's file.
+ */
+const suiteLine = (suite: FlakySuite): string | undefined => {
+  const config = suite.configPath
+    ? `**Config** [${inlineCode(
+        suite.configPath.slice(commonFolder(suite.filePath, suite.configPath).length)
+      )}](${KIBANA_BLOB_URL}/${suite.configPath})`
+    : undefined;
+  const owners =
+    suite.owners.length > 0 ? `**Owners** ${suite.owners.map(inlineCode).join(', ')}` : undefined;
+  const parts = [owners, config].filter((part) => part !== undefined);
+  return parts.length > 0 ? parts.join(' · ') : undefined;
 };
 
 /** Build counts of one test somewhere: on a branch, on a target. */
@@ -417,17 +455,21 @@ interface BranchSkip {
 }
 
 /**
- * `49 / 509 (10%) | [#12345](…#job) · 2026-09-09 06:12 UTC`, or `0 / 58 |` for a clean row.
- * Reports written before the build was recorded get the time alone.
+ * `[#12345](…#job) · 9 Sep 06:12`: the newest failure's job and time, on one line. Reports
+ * written before the build was recorded get the time alone.
  */
+const lastFailureCell = ({ lastFailedAt, lastFailedBuildUrl, lastFailedJobId }: BuildCounts) => {
+  const link = lastFailedBuildUrl
+    ? formatBuildLink({ buildUrl: lastFailedBuildUrl, jobId: lastFailedJobId }, undefined)
+    : undefined;
+  const time = lastFailedAt ? formatShortDateTime(lastFailedAt).replace(/ /g, NBSP) : undefined;
+  return [link, time].filter((part) => part !== undefined).join(`${NBSP}·${NBSP}`);
+};
+
+/** `**10%** (49 / 509) | [#12345](…#job) · 9 Sep 06:12`, or `0 / 58 |` for a clean row. */
 const failuresCells = ({ worst, latest }: WorstFailures<BuildCounts>): string[] => [
-  worst.failedBuilds > 0 ? formatFailedBuilds(worst) : `0 / ${worst.builds}`,
-  latest
-    ? formatBuildLink(
-        { buildUrl: latest.lastFailedBuildUrl, jobId: latest.lastFailedJobId },
-        latest.lastFailedAt
-      )
-    : '',
+  worst.failedBuilds > 0 ? formatFailedBuilds(worst) : `0${NBSP}/${NBSP}${worst.builds}`,
+  latest ? lastFailureCell(latest) : '',
 ];
 
 /** What the suite does on a branch, in the order the branch table lists them. */
@@ -455,19 +497,22 @@ const branchStatus = (worst: BuildCounts, flaky: boolean, skip?: BranchSkip): Br
   return worst.failedBuilds > 0 ? 'failing' : 'clean';
 };
 
-const branchStatusLabel = (status: BranchStatus, skip?: BranchSkip): string => {
-  switch (status) {
-    case 'flaky':
-      return '🔴 Flaky';
-    case 'failing':
-      return '🟠 Some failures';
-    case 'skipped':
-      return skip?.lastRanAt
-        ? `⏭️ Skipped, last ran ${formatDay(skip.lastRanAt)}`
-        : '⏭️ Skipped in every run';
-    case 'clean':
-      return '✅ No failures';
+const BRANCH_STATUS_LABELS: Readonly<Record<BranchStatus, string>> = {
+  flaky: '🔴 **Flaky**',
+  failing: '🟠 **Some failures**',
+  skipped: '⏭️ **Skipped**',
+  clean: '✅ **No failures**',
+};
+
+/** `🔴 **Flaky**: \`main\``, or `⏭️ **Skipped**: \`main\`, last ran 7 Sep` for a skipped branch. */
+const branchCell = (scope: string, status: BranchStatus, skip?: BranchSkip): string => {
+  const cell = `${BRANCH_STATUS_LABELS[status]}: ${scope}`;
+  if (status !== 'skipped') {
+    return cell;
   }
+  return skip?.lastRanAt
+    ? `${cell}, last ran ${formatDay(skip.lastRanAt)}`
+    : `${cell}, in every run`;
 };
 
 const latestOf = (a: Date | undefined, b: Date | undefined): Date | undefined =>
@@ -517,14 +562,13 @@ const statusByBranch = (suite: FlakySuite, { thresholds }: FlakyTestReport): str
   const rows = branches
     .sort((a, b) => BRANCH_STATUSES.indexOf(a.status) - BRANCH_STATUSES.indexOf(b.status))
     .map(({ row, skip, status }) => [
-      formatScope(row.worst),
-      branchStatusLabel(status, skip),
+      branchCell(formatScope(row.worst), status, skip),
       ...failuresCells(row),
     ]);
   return [
     '#### Status by Branch',
     '',
-    table(['Branch', 'Status', 'Failed builds', 'Sample failure'], rows),
+    table(['Branch', 'Failed builds', 'Last failure'], rows),
   ].join('\n');
 };
 
@@ -536,7 +580,7 @@ const UNKNOWN_TARGET_MODE = 'unknown';
  * deployment or serverless simulation, ECH, MKI). Runs that recorded no target are left out, so
  * the table only appears for suites that have one.
  */
-const failuresByTarget = (suite: FlakySuite): string | undefined => {
+const statusByTarget = (suite: FlakySuite): string | undefined => {
   const targets = worstPerKey(
     suite,
     (test) => test.byTarget.filter((stats) => stats.mode !== UNKNOWN_TARGET_MODE),
@@ -547,14 +591,16 @@ const failuresByTarget = (suite: FlakySuite): string | undefined => {
     return undefined;
   }
   const rows = targets.map((row) => [
-    `${row.worst.failedBuilds > 0 ? '🔴' : '✅'} ${inlineCode(row.worst.mode)}`,
-    pipelineTargetEnvironment(row.worst),
+    `${
+      row.worst.failedBuilds > 0 ? '🔴 **Failures**' : '✅ **No failures**'
+    }: ${pipelineTargetEnvironment(row.worst)}`,
+    inlineCode(row.worst.mode),
     ...failuresCells(row),
   ]);
   return [
-    '#### Failures by Target',
+    '#### Status by Target',
     '',
-    table(['Target', 'Environment', 'Failed builds', 'Sample failure'], rows),
+    table(['Environment', 'Target', 'Failed builds', 'Last failure'], rows),
   ].join('\n');
 };
 
@@ -648,20 +694,48 @@ const errorTitle = (message: string): string => {
 const escapeHtml = (text: string): string =>
   text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-/** `` `kibana-pull-request` (597), `kibana-on-merge` (128) ``, or `` `kibana-on-merge` only ``. */
+/** `` `kibana-pull-request` (597) and `kibana-on-merge` (128) ``, or `` `kibana-on-merge` ``. */
 const formatErrorPipelines = (byPipeline: Map<string, Set<string>>): string => {
   const entries = [...byPipeline.entries()]
     .map(([pipeline, builds]): [string, number] => [pipeline, builds.size])
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
   if (entries.length === 1) {
-    return `${inlineCode(entries[0][0])} only`;
+    return inlineCode(entries[0][0]);
   }
-  return entries.map(([pipeline, builds]) => `${inlineCode(pipeline)} (${builds})`).join(', ');
+  return andList(entries.map(([pipeline, builds]) => `${inlineCode(pipeline)} (${builds})`));
+};
+
+/**
+ * `Hit by *a* and *b* · seen on \`kibana-on-merge\` · \`9.5\` · \`stateful-classic\` · last seen
+ * [#116176](…), 2026-11-11 09:55 UTC`: which tests hit the error when the suite has several, and
+ * where and when it was last seen.
+ */
+const errorDetails = (suite: FlakySuite, error: SuiteError): string => {
+  const targets = [...error.targets].filter((target) => target !== UNKNOWN_TARGET_MODE).sort();
+  const branches = [...error.branches];
+  const link = error.lastFailedBuildUrl
+    ? formatBuildLink(
+        { buildUrl: error.lastFailedBuildUrl, jobId: error.lastFailedJobId },
+        undefined
+      )
+    : undefined;
+  const pipelines = formatErrorPipelines(error.byPipeline);
+  const parts = [
+    ...(suite.tests.length > 1
+      ? [`Hit by ${andList(error.tests.map((title) => `*${title}*`))}`, `seen on ${pipelines}`]
+      : [`Seen on ${pipelines}`]),
+    ...(branches.length > 0
+      ? [formatFailedBranches({ failedBranches: branches.length, failedBranchNames: branches })]
+      : []),
+    ...(targets.length > 0 ? [targets.map(inlineCode).join(', ')] : []),
+    `last seen ${[link, formatDateTime(error.lastFailedAt)].filter(Boolean).join(', ')}`,
+  ];
+  return parts.join(' · ');
 };
 
 /**
  * One error, under its share of the suite's failed builds and its first line, collapsed unless
- * `open`; inside, the full message, then where it was seen.
+ * `open`; inside, the full message, then a line on where it was seen.
  */
 const errorSection = (
   suite: FlakySuite,
@@ -675,33 +749,9 @@ const errorSection = (
     `<b>${share} of failed builds</b> (${builds} of ${failedBuilds}) · ` +
     `<code>${escapeHtml(errorTitle(error.message))}</code> · ` +
     formatDateRange(error.firstFailedAt, error.lastFailedAt);
-  const targets = [...error.targets].filter((target) => target !== UNKNOWN_TARGET_MODE).sort();
-  const branches = [...error.branches];
-  const rows: string[][] = [
-    ...(suite.tests.length > 1
-      ? [['**Tests**', error.tests.map((title) => `*${title}*`).join(', ')]]
-      : []),
-    ['**Pipelines**', formatErrorPipelines(error.byPipeline)],
-    [
-      '**Branches**',
-      formatFailedBranches({ failedBranches: branches.length, failedBranchNames: branches }),
-    ],
-    ...(targets.length > 0
-      ? [[`**${targets.length > 1 ? 'Targets' : 'Target'}**`, targets.map(inlineCode).join(', ')]]
-      : []),
-    [
-      '**Last seen**',
-      formatBuildLink(
-        { buildUrl: error.lastFailedBuildUrl, jobId: error.lastFailedJobId },
-        error.lastFailedAt
-      ),
-    ],
-  ];
   return collapsed(
     summary,
-    [codeBlock(formatFullFailureMessage(error.message)), table(['Field', 'Value'], rows)].join(
-      '\n\n'
-    ),
+    [codeBlock(formatFullFailureMessage(error.message)), errorDetails(suite, error)].join('\n\n'),
     { open }
   );
 };
@@ -755,9 +805,10 @@ const pipelineLink = (pipeline: string): string =>
 /**
  * Where else the suite fails: every pipeline and branch, not just the report scope. Rates here
  * are over all branches and say how widely it hurts, not how flaky it is; that is the table above.
+ * Left out when it failed on one pipeline only, which the errors already name.
  */
 const failuresByPipeline = (suite: FlakySuite, report: FlakyTestReport): string | undefined => {
-  if (suite.byPipeline.length === 0) {
+  if (suite.byPipeline.filter(({ failedBuilds }) => failedBuilds > 0).length <= 1) {
     return undefined;
   }
   const scope =
@@ -767,17 +818,14 @@ const failuresByPipeline = (suite: FlakySuite, report: FlakyTestReport): string 
     pipelineLink(stats.pipeline),
     formatFailedBuilds(stats),
     formatFailedBranches(stats),
-    formatBuildLink(
-      { buildUrl: stats.lastFailedBuildUrl, jobId: stats.lastFailedJobId },
-      stats.lastFailedAt
-    ),
+    lastFailureCell(stats),
   ]);
   return [
     '#### Failures by Pipeline',
     '',
     scope,
     '',
-    table(['Pipeline', 'Failed builds', 'Branches', 'Sample failure'], rows),
+    table(['Pipeline', 'Failed builds', 'Branches', 'Last failure'], rows),
   ].join('\n');
 };
 
@@ -814,6 +862,7 @@ const reportSections = (
     withDashboardLinks: true,
     maxRows: MAX_TEST_ROWS,
     thresholds: report.thresholds,
+    lookbackDays: report.window.lookbackDays,
     previousIssues,
   }),
   skippedNote(suite),
@@ -822,7 +871,7 @@ const reportSections = (
 const failureSections = (suite: FlakySuite, report: FlakyTestReport): Array<string | undefined> => [
   failuresByErrorMessage(suite),
   statusByBranch(suite, report),
-  failuresByTarget(suite),
+  statusByTarget(suite),
   failuresByPipeline(suite, report),
 ];
 
@@ -845,10 +894,9 @@ export const renderFlakySuiteIssueBody = (
   const unlisted = unlistedPreviousIssues(suite, ctx);
   return updateIssueMetadata(
     joinSections([
-      opening(suite),
+      opening(suite, ctx.report),
       ...reportSections(suite, ctx),
-      '### Suite',
-      suiteDetails(suite),
+      suiteLine(suite),
       '### Failures',
       ...failureSections(suite, ctx.report),
       SKIP_TIP,

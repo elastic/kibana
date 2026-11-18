@@ -4,8 +4,10 @@
 - [Amazon S3](/reference/connectors-kibana/amazon-s3-action-type.md): List and download content from AWS S3 buckets.
 - [Ansible Control Server](/reference/connectors-kibana/ansible-controller-action-type.md): Launch and monitor Ansible Automation Controller / AWX jobs.
 - [Argo CD](/reference/connectors-kibana/argocd-action-type.md): Manage GitOps applications in Argo CD — sync, inspect health and resources.
+- [AWS](/reference/connectors-kibana/aws-action-type.md): Send signed requests to any AWS service API, such as IAM, EC2, S3, or CloudWatch Logs.
 - [AWS CloudWatch](/reference/connectors-kibana/aws-cloudwatch-action-type.md): List and suppress alarms, query metrics and Logs Insights, and retrieve log events from AWS CloudWatch.
 - [AWS Systems Manager](/reference/connectors-kibana/aws-ssm-action-type.md): Find managed nodes, check whether their SSM Agent is online, run commands on them, run Automation runbooks, and read Parameter Store values with AWS Systems Manager.
+- [AWS Lambda](/reference/connectors-kibana/aws-lambda-action-type.md): Invoke Lambda functions, list functions, and get function details.
 - [AWS X-Ray](/reference/connectors-kibana/aws-x-ray-action-type.md): Retrieve X-Ray insights, service graphs, and trace summaries and details for distributed tracing.
 - [Azure Blob Storage](/reference/connectors-kibana/azure-blob-action-type.md): List containers and blobs, and retrieve blob content from Azure Blob Storage.
 - [Azure Functions](/reference/connectors-kibana/azure-functions-action-type.md): Invoke HTTP-triggered functions, read function keys, and start, stop, or restart function apps.
@@ -58,6 +60,7 @@
 - [ServiceNow](/reference/connectors-kibana/servicenow-search-action-type.md): Search and retrieve records from ServiceNow, and start a workflow from incident, journal, and change-approval events.
 
   {applies_to}`stack: ga 9.6+` {applies_to}`serverless: ga` You can also read, create, update, and delete records, incidents, and events in {{sn}}.
+
 - [SharePoint online](/reference/connectors-kibana/sharepoint-online-action-type.md): Search across SharePoint sites, pages, and content using the Microsoft Graph API.
 - [SharePoint Server](/reference/connectors-kibana/sharepoint-server-action-type.md): Search and retrieve documents, list items, folders, and site pages from an on-premises SharePoint Server instance.
 - [Slack (v2)](/reference/connectors-kibana/slack-v2-action-type.md): Search and send messages in Slack, and start a workflow from Slack events.

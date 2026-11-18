@@ -206,6 +206,95 @@ describe('actionTypeRegistry', () => {
     });
   });
 
+  describe('register() - versioned specs', () => {
+    test('stores a copy of the given specs', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: 'catalog-type',
+          spec: { legacySpec: 'v0' },
+          specs: new Map([
+            ['1.0', { spec: 'v1' }],
+            ['2.0', { spec: 'v2' }],
+          ]),
+        })
+      );
+
+      expect(actionTypeRegistry.getSpec('catalog-type', '1.0')).toEqual({ spec: 'v1' });
+      expect(actionTypeRegistry.getSpec('catalog-type', '2.0')).toEqual({ spec: 'v2' });
+      expect(actionTypeRegistry.getSpec('catalog-type')).toEqual({ legacySpec: 'v0' });
+    });
+
+    test('throws if a spec version is already registered', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: 'catalog-type',
+          specs: new Map([['1.0', { spec: 'v1' }]]),
+        })
+      );
+
+      expect(() =>
+        actionTypeRegistry.register(
+          getConnectorType({
+            id: 'catalog-type',
+            specs: new Map([['1.0', { spec: 'v1' }]]),
+          })
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Skipping catalog connector \\"catalog-type\\" version \\"1.0\\": type is already registered."`
+      );
+    });
+
+    test('allows adding a new version to an already registered action type and does not re-register task definitions', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: 'catalog-type',
+          specs: new Map([['1.0', { spec: 'v1' }]]),
+        })
+      );
+      expect(actionTypeRegistry.getSpec('catalog-type', '1.0')).toEqual({ spec: 'v1' });
+      expect(actionTypeRegistry.getSpec('catalog-type', '2.0')).toBeUndefined();
+      expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledWith({
+        'actions:catalog-type': {
+          createTaskRunner: expect.any(Function),
+          maxAttempts: 3,
+          cost: TaskCost.Tiny,
+          taskTypeGroup: 'actions',
+          title: 'My connector type',
+        },
+      });
+
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: 'catalog-type',
+          specs: new Map([['2.0', { spec: 'v2' }]]),
+        })
+      );
+      expect(actionTypeRegistry.getSpec('catalog-type', '1.0')).toEqual({ spec: 'v1' });
+      expect(actionTypeRegistry.getSpec('catalog-type', '2.0')).toEqual({ spec: 'v2' });
+      expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
+    });
+
+    test('validates the given type before adding spec versions', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      expect(() =>
+        actionTypeRegistry.register(
+          getConnectorType({
+            id: 'catalog-type',
+            specs: new Map([['2.0', { spec: 'v2' }]]),
+            supportedFeatureIds: ['foo'],
+          })
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid feature ids \\"foo\\" for connector type \\"catalog-type\\"."`
+      );
+      expect(actionTypeRegistry.getSpec('catalog-type', '2.0')).toBeUndefined();
+    });
+  });
+
   describe('get()', () => {
     test('returns connector type', () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
@@ -1023,6 +1112,71 @@ describe('actionTypeRegistry', () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
 
       expect(actionTypeRegistry.getSpec('unknown')).toBeUndefined();
+    });
+
+    describe('with a version', () => {
+      it('returns the spec for the requested version', () => {
+        const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+        actionTypeRegistry.register(
+          getConnectorType({
+            id: 'catalog-type',
+            specs: new Map([
+              ['1.0', { spec: 'v1' }],
+              ['2.0', { spec: 'v2' }],
+            ]),
+          })
+        );
+
+        expect(actionTypeRegistry.getSpec('catalog-type', '1.0')).toEqual({ spec: 'v1' });
+        expect(actionTypeRegistry.getSpec('catalog-type', '2.0')).toEqual({ spec: 'v2' });
+      });
+
+      it('returns undefined for an unregistered version', () => {
+        const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+        actionTypeRegistry.register(
+          getConnectorType({
+            id: 'catalog-type',
+            specs: new Map([['1.0', { spec: 'v1' }]]),
+          })
+        );
+
+        expect(actionTypeRegistry.getSpec('catalog-type', '2.0')).toBeUndefined();
+      });
+
+      it('returns undefined for an unknown id without throwing', () => {
+        const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+        expect(actionTypeRegistry.getSpec('unknown', '1.0')).toBeUndefined();
+      });
+
+      it('returns the legacy spec when no version is requested for a type with both', () => {
+        const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+        actionTypeRegistry.register(
+          getConnectorType({
+            id: 'catalog-type',
+            spec: { legacySpec: 'v0' },
+            specs: new Map([['1.0', { spec: 'v1' }]]),
+          })
+        );
+
+        expect(actionTypeRegistry.getSpec('catalog-type')).toEqual({ legacySpec: 'v0' });
+      });
+
+      it('returns undefined when no version is requested for a type with only versioned specs', () => {
+        const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+        actionTypeRegistry.register(
+          getConnectorType({
+            id: 'catalog-type',
+            spec: undefined,
+            specs: new Map([
+              ['1.0', { spec: 'v1' }],
+              ['2.0', { spec: 'v2' }],
+            ]),
+          })
+        );
+
+        expect(actionTypeRegistry.getSpec('catalog-type')).toBeUndefined();
+      });
     });
   });
 
