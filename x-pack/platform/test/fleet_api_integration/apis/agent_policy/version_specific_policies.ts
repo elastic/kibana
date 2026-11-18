@@ -407,6 +407,120 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    describe('package upgrade that drops the agent version condition', () => {
+      let agentPolicyId: string;
+      let packagePolicyId: string;
+      const agentId = `agent-upgrade-${Date.now()}`;
+
+      async function getInputsForVersions() {
+        const res: any = await es.transport.request({
+          method: 'GET',
+          path: `/${INGEST_SAVED_OBJECT_INDEX}/_doc/fleet-package-policies:${packagePolicyId}`,
+        });
+        return res._source?.['fleet-package-policies']?.inputs_for_versions ?? {};
+      }
+
+      before(async () => {
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
+        await kibanaServer.savedObjects.cleanStandardList();
+        await fleetAndAgents.setup();
+
+        const { body: agentPolicyResponse } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ name: 'VSP upgrade policy', namespace: 'default', force: true })
+          .expect(200);
+        agentPolicyId = agentPolicyResponse.item.id;
+
+        const { body: packagePolicyResponse } = await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'abnormal_security-upgrade',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            enabled: true,
+            inputs: [
+              {
+                policy_template: 'abnormal_security',
+                type: 'cel',
+                enabled: true,
+                streams: [],
+              },
+            ],
+            package: { name: 'abnormal_security', version: '1.12.0' },
+          })
+          .expect(200);
+        packagePolicyId = packagePolicyResponse.item.id;
+
+        await fleetAndAgents.generateAgent(
+          'online',
+          agentId,
+          agentPolicyId,
+          previousMinorVersion,
+          undefined,
+          undefined,
+          true
+        );
+      });
+
+      after(async () => {
+        await supertest.delete(`/api/fleet/agents/${agentId}`).set('kbn-xsrf', 'xxxx').expect(200);
+        await retry.tryForTime(20000, async () => {
+          await supertest
+            .post(`/api/fleet/agent_policies/delete`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ agentPolicyId })
+            .expect(200);
+        });
+      });
+
+      it('should clear inputs_for_versions and has_agent_version_conditions after upgrading to a package without the condition', async () => {
+        const { body: before } = await supertest
+          .get(`/api/fleet/agent_policies/${agentPolicyId}`)
+          .expect(200);
+        expect(before.item.has_agent_version_conditions).to.eql(true);
+        expect(Object.keys(await getInputsForVersions()).length).to.be.greaterThan(0);
+
+        await supertest
+          .post(`/api/fleet/package_policies/upgrade`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ packagePolicyIds: [packagePolicyId] })
+          .expect(200);
+
+        const { body: upgraded } = await supertest
+          .get(`/api/fleet/package_policies/${packagePolicyId}`)
+          .expect(200);
+        expect(upgraded.item.package.version).to.eql('1.12.1');
+
+        expect(Object.keys(await getInputsForVersions()).length).to.eql(0);
+
+        const { body: after } = await supertest
+          .get(`/api/fleet/agent_policies/${agentPolicyId}`)
+          .expect(200);
+        expect(after.item.has_agent_version_conditions).to.eql(false);
+      });
+
+      it('should serve later edits to agents on the base policy', async () => {
+        await supertest
+          .put(`/api/fleet/package_policies/${packagePolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ description: 'edited after upgrade' })
+          .expect(200);
+
+        const { body } = await supertest
+          .get(`/api/fleet/agent_policies/${agentPolicyId}/full`)
+          .expect(200);
+        const input = body.item.inputs.find(
+          (i: { meta?: { package?: { name?: string } } }) =>
+            i.meta?.package?.name === 'abnormal_security'
+        );
+        expect(input).to.be.ok();
+
+        expect(Object.keys(await getInputsForVersions()).length).to.eql(0);
+      });
+    });
+
     describe('version specific policies telemetry', () => {
       let policyWithPackageConditionsId: string;
       let policyWithTemplateConditionsId: string;
