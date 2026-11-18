@@ -9,7 +9,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { EuiFormRow, EuiRadioGroup, EuiSwitch } from '@elastic/eui';
+import { EuiFormRow, EuiRadioGroup, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import type { OptionsListDSLControlState, OptionsListSearchTechnique } from '@kbn/controls-schemas';
 
@@ -71,6 +71,9 @@ export const OptionsListEditorOptions = ({
   updateState,
 }: CustomOptionsComponentProps<OptionsListDSLControlState>) => {
   const [singleSelect, setSingleSelect] = useState<boolean>(initialState.single_select ?? false);
+  const [requiredSelections, setRequiredSelections] = useState<boolean>(
+    initialState.required ?? false
+  );
   const [runPastTimeout, setRunPastTimeout] = useState<boolean>(
     initialState.run_past_timeout ?? false
   );
@@ -123,17 +126,39 @@ export const OptionsListEditorOptions = ({
         label={OptionsListStrings.editor.getSelectionOptionsTitle()}
         data-test-subj="optionsListControl__selectionOptionsRadioGroup"
       >
-        <EuiRadioGroup
-          compressed
-          options={selectionOptions}
-          idSelected={singleSelect ? 'single' : 'multi'}
-          onChange={(id) => {
-            const newSingleSelect = id === 'single';
-            setSingleSelect(newSingleSelect);
-            updateState({ single_select: newSingleSelect });
-          }}
-          name="selectionType"
-        />
+        <div>
+          <EuiRadioGroup
+            compressed
+            options={selectionOptions}
+            idSelected={singleSelect ? 'single' : 'multi'}
+            onChange={(id) => {
+              const newSingleSelect = id === 'single';
+              setSingleSelect(newSingleSelect);
+              updateState({ single_select: newSingleSelect });
+            }}
+            name="selectionType"
+          />
+          <EuiSpacer size="s" />
+          <EuiSwitch
+            compressed
+            label={
+              <ControlSettingTooltipLabel
+                label={singleSelect ? 'Make selection required' : 'Make selections required'}
+                tooltip={
+                  singleSelect
+                    ? 'Delay panel loading until a selection is made.'
+                    : 'Delay panel loading until at least one selection is made.'
+                }
+              />
+            }
+            checked={requiredSelections}
+            onChange={() => {
+              setRequiredSelections(!requiredSelections);
+              updateState({ required: !requiredSelections });
+            }}
+            data-test-subj={'dataControl__ignoreValidationsAdditionalSetting'}
+          />
+        </div>
       </EuiFormRow>
       {compatibleSearchTechniques.length > 1 && (
         <EuiFormRow

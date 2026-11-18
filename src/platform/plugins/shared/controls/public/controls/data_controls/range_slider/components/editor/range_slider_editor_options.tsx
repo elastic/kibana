@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
+import { EuiFormRow, EuiFieldNumber, EuiSwitch } from '@elastic/eui';
 import React, { useState } from 'react';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
 import { DEFAULT_RANGE_SLIDER_STATE } from '@kbn/controls-constants';
 import { RangeSliderStrings } from '../../range_slider_strings';
 import type { CustomOptionsComponentProps } from '../../../types';
 import { CustomOptionsAdditionalSettings } from '../../../components';
+import { ControlSettingTooltipLabel } from '@kbn/controls-plugin/public/control_group/components/control_setting_tooltip_label';
 
 export const RangeSliderEditorOptions = ({
   initialState,
@@ -21,9 +22,31 @@ export const RangeSliderEditorOptions = ({
   setControlEditorValid,
 }: CustomOptionsComponentProps<RangeSliderControlState>) => {
   const [step, setStep] = useState(initialState.step ?? DEFAULT_RANGE_SLIDER_STATE.step);
+  const [requiredSelections, setRequiredSelections] = useState<boolean>(
+    initialState.required ?? false
+  );
 
   return (
     <>
+      <EuiFormRow
+        label={'Selections'}
+        data-test-subj="optionsListControl__selectionOptionsRadioGroup"
+      >
+        <EuiSwitch
+          compressed
+          label={
+            <ControlSettingTooltipLabel
+              label={'Make selections required'}
+              tooltip={'Delay panel loading until at least one selection is made.'}
+            />
+          }
+          checked={requiredSelections}
+          onChange={() => {
+            setRequiredSelections(!requiredSelections);
+          }}
+          data-test-subj={'dataControl__ignoreValidationsAdditionalSetting'}
+        />
+      </EuiFormRow>
       <EuiFormRow fullWidth label={RangeSliderStrings.editor.getStepTitle()}>
         <EuiFieldNumber
           compressed

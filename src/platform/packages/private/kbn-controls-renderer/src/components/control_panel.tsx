@@ -180,6 +180,7 @@ export const ControlPanel = ({
         tabIndex={enableIndicateRelatedPanels ? 0 : undefined}
       >
         <span css={styles.prependWrapperStyles} ref={prependWrapperRef}>
+          {api?.required$.getValue() ? '* ' : null}
           {panelLabel}
           {canIndicateRelatedPanels && numberOfRelatedPanels === 0 && (
             <>

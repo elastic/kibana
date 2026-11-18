@@ -18,6 +18,7 @@ export const controlTitleSchema = z
 
 const sharedDataControlProps = {
   ...controlTitleSchema.shape,
+  required: z.boolean().default(false),
   use_global_filters: z.boolean().default(DEFAULT_DATA_CONTROL_STATE.use_global_filters).meta({
     description:
       "When `true`, the control's available options are narrowed by the page's active filters.",

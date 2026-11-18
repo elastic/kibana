@@ -30,7 +30,10 @@ import type { Filter } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
-import { type StateComparators } from '@kbn/presentation-publishing';
+import {
+  apiPublishesEditablePauseFetch,
+  type StateComparators,
+} from '@kbn/presentation-publishing';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 import type { StateManager, WithAllKeys } from '@kbn/presentation-publishing/state_manager/types';
 
@@ -54,6 +57,7 @@ export const defaultDataControlComparators: StateComparators<DataControlState> =
   ignore_validations: (a: boolean | undefined, b: boolean | undefined) =>
     (a ?? DEFAULT_DATA_CONTROL_STATE.ignore_validations) ===
     (b ?? DEFAULT_DATA_CONTROL_STATE.ignore_validations),
+  required: 'referenceEquality',
 };
 
 export const defaultDataControlState: WithAllKeys<Omit<DataControlState, 'title'>> = {
@@ -62,6 +66,7 @@ export const defaultDataControlState: WithAllKeys<Omit<DataControlState, 'title'
   field_name: '',
   values_source: DEFAULT_CONTROL_VALUES_SOURCE,
   esql_query: undefined,
+  required: false,
 };
 
 export type DataControlStateManager = Omit<StateManager<DataControlState>, 'api'> & {
@@ -97,6 +102,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
     defaultDataControlState,
     defaultDataControlComparators
   );
+  console.log({ dataControlStateManager, state });
 
   const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
   function setBlockingError(error: Error | undefined) {

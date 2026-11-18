@@ -22,6 +22,7 @@ export function initializePauseFetchManager(
       first()
     )
     .subscribe(() => {
+      console.log(' FILTERS PUBLISHED');
       setFetchPaused(false);
     });
 
