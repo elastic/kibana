@@ -6,7 +6,12 @@
  */
 
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import { emitFromStepResult, injectAttachmentIds, toCaseAttachmentData } from './emit_attachments';
+import {
+  emitCaseAttachment,
+  emitFromStepResult,
+  injectAttachmentIds,
+  toCaseAttachmentData,
+} from './emit_attachments';
 import { createCaseAttachmentType } from './case_attachment_type';
 import {
   CASE_ATTACHMENT_TYPE,
@@ -182,6 +187,80 @@ describe('emitCaseAttachment', () => {
     expect(active[0].id).toBe(first[0]);
     expect(active[0].versions).toHaveLength(2);
     expect(active[0].versions[1].data).toMatchObject({ id: 'c1', total_observables: 2 });
+  });
+
+  it('keeps totalAttachments and url from a UI-originated attachment when updating it', async () => {
+    const attachments = buildRealManager();
+    const events = buildEvents();
+    const { id } = await attachments.add({
+      type: CASE_ATTACHMENT_TYPE,
+      data: {
+        ...toCaseAttachmentData(buildCase('c1'), 'https://example.com/case/c1'),
+        totalAttachments: 3,
+      },
+    });
+
+    await emitFromStepResult({ attachments, events } as never, {
+      results: [{ data: { case: { ...buildCase('c1'), total_observables: 2 } } }],
+    });
+
+    const [active] = attachments.getActive();
+    expect(active.id).toBe(id);
+    expect(active.versions).toHaveLength(2);
+    expect(active.versions[1].data).toMatchObject({
+      id: 'c1',
+      total_observables: 2,
+      totalAttachments: 3,
+      url: 'https://example.com/case/c1',
+    });
+  });
+
+  it('lets a fresh totalAttachments override the stored one', async () => {
+    const attachments = buildRealManager();
+    await attachments.add({
+      type: CASE_ATTACHMENT_TYPE,
+      data: { ...toCaseAttachmentData(buildCase('c1')), totalAttachments: 3 },
+    });
+
+    await emitCaseAttachment(attachments, {
+      ...toCaseAttachmentData(buildCase('c1')),
+      totalAttachments: 5,
+    });
+
+    expect(attachments.getActive()[0].versions[1].data).toMatchObject({ totalAttachments: 5 });
+  });
+
+  it('adds only one attachment when two emits for the same new case run in parallel', async () => {
+    const attachments = buildRealManager();
+    const events = buildEvents();
+
+    const [first, second] = await Promise.all([
+      emitFromStepResult({ attachments, events } as never, {
+        results: [{ data: { case: buildCase('c1') } }],
+      }),
+      emitFromStepResult({ attachments, events } as never, {
+        results: [{ data: { case: { ...buildCase('c1'), total_observables: 2 } } }],
+      }),
+    ]);
+
+    expect(second).toEqual(first);
+    const active = attachments.getActive();
+    expect(active).toHaveLength(1);
+    expect(active[0].versions).toHaveLength(2);
+  });
+
+  it('still emits for the same case after a parallel emit failed', async () => {
+    const attachments = buildRealManager();
+    jest.spyOn(attachments, 'add').mockRejectedValueOnce(new Error('boom'));
+
+    const results = await Promise.allSettled([
+      emitCaseAttachment(attachments, toCaseAttachmentData(buildCase('c1'))),
+      emitCaseAttachment(attachments, toCaseAttachmentData(buildCase('c1'))),
+    ]);
+
+    expect(results[0].status).toBe('rejected');
+    expect(results[1].status).toBe('fulfilled');
+    expect(attachments.getActive()).toHaveLength(1);
   });
 
   it('adds a new attachment for a different case id', async () => {

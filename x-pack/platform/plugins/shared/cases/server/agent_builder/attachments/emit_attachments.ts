@@ -70,33 +70,76 @@ export const injectAttachmentIds = <T extends { results: Array<{ data?: unknown 
   };
 };
 
-export const emitCaseAttachment = async (
+// Tool calls from one model message run in parallel and share one attachment state manager.
+// `add` awaits validation before storing, so find-then-add is check-then-act: two concurrent
+// emits for the same new case would both add. Serialize emits per (manager, case id).
+const caseEmitQueues = new WeakMap<object, Map<string, Promise<unknown>>>();
+
+const serializePerCase = async <T>(
+  attachments: object,
+  caseId: string,
+  run: () => Promise<T>
+): Promise<T> => {
+  let queues = caseEmitQueues.get(attachments);
+  if (!queues) {
+    queues = new Map();
+    caseEmitQueues.set(attachments, queues);
+  }
+  const previous = queues.get(caseId) ?? Promise.resolve();
+  const current = previous.then(run, run);
+  const tail = current.then(
+    () => undefined,
+    () => undefined
+  );
+  queues.set(caseId, tail);
+  try {
+    return await current;
+  } finally {
+    if (queues.get(caseId) === tail) {
+      queues.delete(caseId);
+    }
+  }
+};
+
+export const emitCaseAttachment = (
   attachments: ToolHandlerContext['attachments'],
   data: CaseAttachmentData,
   description?: string
-): Promise<string> => {
-  const resolvedDescription = description ?? `Case: ${data.title}`;
-  const existing = attachments.getActive().find((attachment) => {
-    if (attachment.type !== CASE_ATTACHMENT_TYPE) {
-      return false;
+): Promise<string> =>
+  serializePerCase(attachments, data.id, async () => {
+    const resolvedDescription = description ?? `Case: ${data.title}`;
+    const existing = attachments.getActive().find((attachment) => {
+      if (attachment.type !== CASE_ATTACHMENT_TYPE) {
+        return false;
+      }
+      const latest = getLatestVersion(attachment);
+      const latestData = latest?.data as Partial<CaseAttachmentData> | undefined;
+      return latestData?.id === data.id;
+    });
+
+    if (existing) {
+      // `update` replaces the whole version's data. The UI ("Add to chat") supplies
+      // `totalAttachments` and `url`, which server-side emits don't know: carry them forward.
+      const previous = getLatestVersion(existing)?.data as Partial<CaseAttachmentData> | undefined;
+      const totalAttachments = data.totalAttachments ?? previous?.totalAttachments;
+      await attachments.update(existing.id, {
+        data: {
+          ...data,
+          url: data.url ?? previous?.url ?? null,
+          ...(totalAttachments !== undefined && { totalAttachments }),
+        },
+        description: resolvedDescription,
+      });
+      return existing.id;
     }
-    const latest = getLatestVersion(attachment);
-    const latestData = latest?.data as Partial<CaseAttachmentData> | undefined;
-    return latestData?.id === data.id;
-  });
 
-  if (existing) {
-    await attachments.update(existing.id, { data, description: resolvedDescription });
-    return existing.id;
-  }
-
-  const added = await attachments.add({
-    type: CASE_ATTACHMENT_TYPE,
-    data,
-    description: resolvedDescription,
+    const added = await attachments.add({
+      type: CASE_ATTACHMENT_TYPE,
+      data,
+      description: resolvedDescription,
+    });
+    return added.id;
   });
-  return added.id;
-};
 
 export const emitCasesAttachment = async (
   attachments: ToolHandlerContext['attachments'],
