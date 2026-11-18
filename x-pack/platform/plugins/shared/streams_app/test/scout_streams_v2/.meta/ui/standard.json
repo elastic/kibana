@@ -1,5 +1,5 @@
 {
-  "sha1": "10ac2a8f25e5fe05312ec058d3f09d336dd16f45",
+  "sha1": "5be7661ac38a844537ae4eb04894f3ee77f87f6f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -81,7 +81,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas_search.spec.ts",
-        "line": 120,
+        "line": 124,
         "column": 9
       }
     },
@@ -95,7 +95,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas_search.spec.ts",
-        "line": 144,
+        "line": 148,
         "column": 5
       }
     },
@@ -109,7 +109,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas_search.spec.ts",
-        "line": 153,
+        "line": 157,
         "column": 11
       }
     },
@@ -123,7 +123,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout_streams_v2/ui/tests/canvas_search.spec.ts",
-        "line": 160,
+        "line": 164,
         "column": 8
       }
     },

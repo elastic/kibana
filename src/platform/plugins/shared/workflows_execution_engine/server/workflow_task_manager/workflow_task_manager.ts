@@ -585,6 +585,29 @@ export class WorkflowTaskManager {
     );
   }
 
+  /** True when a task for this execution is running or claiming, so its loop can still finalize. */
+  async hasActiveExecutionTask(workflowExecutionId: string): Promise<boolean> {
+    const { docs } = await this.taskManager.fetch({
+      query: {
+        bool: {
+          must: [
+            {
+              term: {
+                'task.scope': `workflow:execution:${workflowExecutionId}`,
+              },
+            },
+            {
+              terms: {
+                'task.status': [TaskStatus.Running, TaskStatus.Claiming],
+              },
+            },
+          ],
+        },
+      },
+    });
+    return docs.length > 0;
+  }
+
   async forceRunIdleTasks(
     workflowExecutionId: string,
     options?: { spaceId: string; fakeRequest: KibanaRequest }
@@ -620,22 +643,7 @@ export class WorkflowTaskManager {
       return;
     }
 
-    const { docs: activeTasks } = await this.taskManager.fetch({
-      query: {
-        bool: {
-          must: [
-            scopeTerm,
-            {
-              terms: {
-                'task.status': [TaskStatus.Running, TaskStatus.Claiming],
-              },
-            },
-          ],
-        },
-      },
-    });
-
-    if (activeTasks.length) {
+    if (await this.hasActiveExecutionTask(workflowExecutionId)) {
       return;
     }
 

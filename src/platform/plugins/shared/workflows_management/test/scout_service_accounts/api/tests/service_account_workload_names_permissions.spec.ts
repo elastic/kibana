@@ -66,9 +66,9 @@ apiTest.describe(
       };
     };
 
-    apiTest.beforeAll(async ({ apiClient, samlAuth, config, esClient, kbnClient }) => {
-      await setup({ apiClient, samlAuth, config, esClient });
-      const { headers, accountId } = getContext();
+    apiTest.beforeAll(async ({ apiClient, samlAuth, requestAuth, config, esClient, kbnClient }) => {
+      await setup({ apiClient, samlAuth, requestAuth, config, esClient });
+      const { headers, sessionHeaders, accountId } = getContext();
       await createBoundWorkflow(apiClient, headers, {
         spaceId,
         workflowId,
@@ -78,7 +78,11 @@ apiTest.describe(
 
       const madePrivate = await apiClient.put(
         `s/${spaceId}/internal/workflows/${workflowId}/access_control`,
-        { headers, body: { access_mode: 'private', entries: [] }, responseType: 'json' }
+        {
+          headers: sessionHeaders,
+          body: { access_mode: 'private', entries: [] },
+          responseType: 'json',
+        }
       );
       expect(madePrivate, JSON.stringify(madePrivate.body)).toHaveStatusCode(200);
 

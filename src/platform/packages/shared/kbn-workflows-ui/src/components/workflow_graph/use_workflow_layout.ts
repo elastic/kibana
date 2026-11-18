@@ -53,7 +53,6 @@ const structureSignature = (items: StructureSequence): string[] =>
         )
       : []),
     ...(item.kind === 'container' ? structureSignature(item.body) : []),
-    ...(item.kind === 'step' && item.attached ? structureSignature(item.attached) : []),
     ...item.lanes.flatMap((lane) => [
       `lane:${lane.head}:${lane.rejoins}`,
       ...structureSignature(lane.items),

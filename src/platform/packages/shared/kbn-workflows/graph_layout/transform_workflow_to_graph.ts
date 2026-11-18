@@ -33,7 +33,7 @@ import {
 } from './types';
 import { visitStepChildSlots } from './walk_step_tree';
 import { getTriggerName } from '../common/get_trigger_name';
-import type { IfStep, MergeStep, ParallelStep, SwitchStep, WorkflowYaml } from '../spec/schema';
+import type { IfStep, ParallelStep, SwitchStep, WorkflowYaml } from '../spec/schema';
 
 /** Height of every layout-only bypass and join node. */
 const BYPASS_LANE_HEIGHT = 1;
@@ -307,7 +307,6 @@ function transformInternal(
     // Block structure of this step, filled in by the arm that handles its type.
     let containerBody: StructureSequence | undefined;
     let forkBranches: StructureBranch[] | undefined;
-    let attached: StructureSequence | undefined;
     let joinId: string | undefined;
     const lanes: StructureLane[] = [];
 
@@ -597,17 +596,6 @@ function transformInternal(
         joinId = emitJoin(id, step.name, branchExits, BYPASS_LANE_MEASURABLE_WIDTH);
         exitIds = [joinId];
       }
-    } else if (step.type === 'merge') {
-      const mergeStep = step as MergeStep;
-      const childSteps = toSteps(mergeStep.steps);
-      const inner = transformInternal([], childSteps, ids, ctx);
-      attached = inner.items;
-      mergeInner(inner);
-      const firstId = inner.headId;
-      if (firstId) {
-        edges.push({ id: `${id}:${firstId}`, source: id, target: firstId });
-      }
-      // Single contained body — exit from the wrapping step.
     }
 
     // ── fallback lane (on-failure.fallback) ──────────────────────────────
@@ -714,7 +702,7 @@ function transformInternal(
       // The join sits on the spine right after its fork, so pack puts it under the owner.
       if (joinId) items.push({ kind: 'step', id: joinId, lanes: [] });
     } else {
-      items.push({ kind: 'step', id, lanes, ...(attached ? { attached } : {}) });
+      items.push({ kind: 'step', id, lanes });
     }
 
     prevExitIds = exitIds;

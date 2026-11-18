@@ -111,9 +111,6 @@ export const getStepIconType = (type: string): IconType => {
       // Avoid tokenNumber: filled token glyphs read too small next to logo/outline icons.
       iconType = 'list';
       break;
-    case 'merge':
-      iconType = HardcodedIcons.merge;
-      break;
     case 'parallel':
     case 'enter-parallel':
     case 'exit-parallel':

@@ -48,6 +48,8 @@ export interface WorkflowDetailState {
    * The save button should be disabled when this is false to prevent saving stale data.
    */
   isYamlSynced: boolean;
+  /** Whether a save is being checked for what it breaks, before `loading.isSavingYaml` takes over. */
+  isCheckingSave: boolean;
   /** The persisted workflow detail data */
   workflow?: WorkflowDetailDto;
   /** The computed data derived from the workflow yaml string, it is updated by the workflowComputationMiddleware */

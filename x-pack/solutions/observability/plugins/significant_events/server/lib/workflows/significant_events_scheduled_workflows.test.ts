@@ -216,6 +216,15 @@ describe('scheduled Significant Events managed workflows', () => {
       processedCount: expect.stringContaining('compute_batch_size.output.processedCount'),
     });
   });
+
+  it('detection completes an idle run as success, since the scheduled wrapper fails on any non-completed sub-workflow', () => {
+    const parsed = getParsedStaticWorkflowYaml(SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID);
+
+    const idleStep = findStep(parsed.steps, 'exit_no_active_alerts');
+    expect(idleStep?.type).toBe('workflow.output');
+    expect(idleStep?.status).not.toBe('cancelled');
+    expect(idleStep?.with?.skipped).toBe(true);
+  });
 });
 
 describe('SignificantEventsScheduledWorkflowsService', () => {
@@ -421,6 +430,55 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
         workflowId: `${SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID}-default`,
       }),
       'default'
+    );
+  });
+
+  it('disables and uninstalls without waiting for in-flight executions', async () => {
+    const managementApi = createMockManagementApi({
+      getWorkflow: jest.fn().mockResolvedValue({ enabled: true }),
+    });
+    const managedWorkflowsClient = createMockManagedWorkflowsClient();
+    const request = httpServerMock.createKibanaRequest();
+    const service = createSignificantEventsScheduledWorkflowsService({
+      logger: loggerMock.create(),
+      managementApi: managementApi as never,
+      getManagedWorkflowsClient: jest.fn().mockResolvedValue(managedWorkflowsClient),
+    });
+
+    await service.ensureWorkflow({
+      enabled: false,
+      request,
+      spaceId: 'default',
+      skipExecutionDrain: true,
+      config: {
+        detectionIntervalMinutes: 30,
+        detectionBucketIntervalMinutes: 1,
+        detectionLookbackMinutes: 40,
+        targetCoverageMinutes: 30,
+        reviewIntervalMinutes: 10,
+        discoveryBatchSize: 3,
+        maxReviewPasses: 3,
+        flakyRuleDetectionThreshold: 10,
+        flakyRuleProbeAfterMinutes: 360,
+        flakyRuleExemptSeverityScore: 80,
+      },
+    });
+
+    expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
+      `${SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID}-default`,
+      { enabled: false },
+      'default',
+      request
+    );
+    expect(managementApi.getWorkflowExecutions).not.toHaveBeenCalled();
+    expect(managementApi.cancelWorkflowExecution).not.toHaveBeenCalled();
+    expect(managedWorkflowsClient.uninstall).toHaveBeenCalledWith(
+      SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
+      { spaceId: 'default', workflowIdSuffix: 'default' }
+    );
+    expect(managedWorkflowsClient.uninstall).toHaveBeenCalledWith(
+      SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
+      { spaceId: 'default', workflowIdSuffix: 'default' }
     );
   });
 });

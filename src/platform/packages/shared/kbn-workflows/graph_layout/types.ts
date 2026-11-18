@@ -193,12 +193,11 @@ export type StructureItem = StructureStep | StructureFork | StructureContainer;
 
 export type StructureSequence = readonly StructureItem[];
 
-/** A plain step. `attached` holds a `merge` step's body: reached from it, never rejoined. */
+/** A plain step. */
 export interface StructureStep {
   readonly kind: 'step';
   readonly id: string;
   readonly lanes: readonly StructureLane[];
-  readonly attached?: StructureSequence;
 }
 
 /** An `if`, `switch` or `parallel` step. Branches are in YAML declaration order. */

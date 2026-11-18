@@ -23,6 +23,7 @@ Sections to use while implementing:
 | Public definition (icon, editor handlers) | [Step 3](../../dev_docs/STEPS.md#step-3-implement-public-side-definition) |
 | Custom property selection / dynamic schema | [Custom Property Selection](../../dev_docs/STEPS.md#custom-property-selection) |
 | Plugin setup registration (sync vs async loader) | [Step 4](../../dev_docs/STEPS.md#step-4-register-in-plugin-setup) |
+| Server/client registration check | [Server and Client Registration Check](../../dev_docs/STEPS.md#server-and-client-registration-check) |
 | YAML naming conventions (type / config / input) | [Workflow YAML Naming Conventions](../../dev_docs/STEPS.md#workflow-yaml-naming-conventions) |
 | `config` vs `input` mental model | [Config vs Inputs: Mental Model](../../dev_docs/STEPS.md#config-vs-inputs-mental-model) |
 | Error handling and `ExecutionError` | [Error Handling](../../dev_docs/STEPS.md#error-handling) |
@@ -40,7 +41,7 @@ A step lives in three layers:
 - **Server** — wraps the common definition with a `handler` (and optional `onCancel`) via `createServerStepDefinition`.
 - **Public** — wraps the common definition with an `icon` and optional `editorHandlers` via `createPublicStepDefinition`.
 
-Both sides register through the `workflowsExtensions` setup contract: `registerStepDefinition(definition | () => Promise<definition | undefined>)`.
+Both sides register through the `workflowsExtensions` setup contract: `registerStepDefinition(definition | () => Promise<definition | undefined>)`. **Both registrations are required**: the engine runs steps from the server registry, but the editor builds its YAML schema from the public registry, so a server-only step is rejected by the editor as an unknown type.
 
 **Additional references:**
 
@@ -126,6 +127,7 @@ These are easy to miss during implementation or review — they are not always s
 | Dynamic output schema | Express via `editorHandlers.dynamicSchema.getOutputSchema({ input, config })` for autocomplete; **server still validates against the static `outputSchema`** in the common definition, so keep that schema as the union of all possible shapes |
 | Public async loader | Prefer async import to keep zod + step module out of the plugin's main bundle. Loaders that reject (or throw inside the registry) are caught and logged; one broken loader does NOT prevent other steps from registering — verify the log when a step is silently missing |
 | Conditional registration | Loaders run once. Return `undefined` only for a decision that cannot change after startup. Feature flags must be subscribed to in `start()` and checked in the handler — do not snapshot them with `firstValueFrom` |
+| Server + client registration | Every step id registered on the server must also be registered on the client, and vice versa. A server-only step runs but the editor flags it as an unknown type; a client-only step shows in the editor but fails at run time. A server-only plugin must add a browser side (`"browser": true`) to register the public definition. Conditional loaders must apply the same condition on both sides. Enforced by the Scout UI test in `test/scout/ui/tests/step_definitions_client_registration.spec.ts`, for the steps registered with the default configuration only: for a step behind a flag that is off by default, run the check locally in the PR that turns the flag on |
 | Registration timing | All `registerStepDefinition` calls happen in `setup()`, never `start()`. Engine and UI both `await workflowsExtensions.isReady()` before reading the registry |
 | Loops over user data | A loop with no I/O never frees the event loop, and concurrent runs add up to one long block (health checks fail, the pod restarts). Use a `for` loop (not `.map` / `.forEach` / `.reduce`), `await yieldToEventLoop()` from `@kbn/workflows/server` at the top of each iteration, then check `context.abortSignal.aborted`. Make helpers with loops `async` and `return await` them inside `try` |
 
@@ -150,6 +152,7 @@ For the YAML naming conventions (the single most common mistake — only the ste
 | Index picker | `getIndexSelectionHandler({ dataViews, application }, options)` in `selection` slot | none | Hand-rolled handler misses wildcard/alias/data-stream semantics |
 | `selection.dependsOnValues` | List every sibling field your handlers read | `{ config: {}, input: {} }` | Stale cache hits on sibling edits |
 | `selection.getDetails` | Avoid network calls when `option` is present | n/a | Slow hovers; redundant fetches |
+| Server + client registration | Register every step on both sides | n/a | Editor rejects server-only steps as unknown types; client-only steps fail at run time |
 | Public registration | Async loader to keep modules out of main bundle | sync inline | Step module + zod inflate plugin bundle |
 | Conditional registration | Loader returns `undefined` to skip | always registers | Cannot feature-flag |
 | Approval gate | Create/update `approved_step_definitions/<step.id>.txt` with the new `definitionHash` (one file per step) | test fails | CI blocks merge until updated |
@@ -193,6 +196,8 @@ When adding a new step:
    - [ ] Dynamic output shape (if any) is expressed via `editorHandlers.dynamicSchema.getOutputSchema`, **not** by varying `outputSchema`
 
 5. **Registration** (`{server,public}/step_types/index.ts`) — see [STEPS.md Step 4](../../dev_docs/STEPS.md#step-4-register-in-plugin-setup)
+   - [ ] The step is registered on **both** the server and the public side (the plugin has `"browser": true`); conditional loaders use the same condition on both sides
+   - [ ] Local [Server and Client Registration Check](../../dev_docs/STEPS.md#server-and-client-registration-check) passes
    - [ ] Public side uses async loader (`() => import('./...').then(...)`) to keep zod + step module out of the main bundle
    - [ ] Feature flags are subscribed to in `start()` and checked in the handler. Loaders do not snapshot them with `firstValueFrom`. `undefined` from a loader is only for a decision that cannot change after startup
    - [ ] All `registerStepDefinition` calls happen in `setup()`, never `start()`
@@ -226,6 +231,7 @@ When reviewing a PR that adds or modifies a custom step:
 - [ ] If an index / alias / data stream is in scope, the property uses `selection: getIndexSelectionHandler(...)` from `@kbn/workflows-ui` — not hand-rolled `selection`
 - [ ] `editorHandlers.selection.dependsOnValues` covers every sibling field referenced inside `search` / `resolve` / `getDetails`
 - [ ] `getDetails` does not call the network when `option` is present
+- [ ] Every new step id is registered on both the server and the public side — a server-only registration (or a plugin with no browser side) is a blocker
 - [ ] Public registration uses an async loader unless the step module is trivially small
 - [ ] Conditional registration paths return `undefined`, not `null` or a rejected promise
 - [ ] No `registerStepDefinition` call moved into `start()`

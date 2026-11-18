@@ -31,6 +31,7 @@ import {
   useFocusedStepDecoration,
   useLineDifferencesDecorations,
   useStepDecorationsInExecution,
+  useStepDurationDecorations,
   useTriggerTypeDecorations,
   useWorkflowEventsOnDecorations,
   useWorkflowIdDecorations,
@@ -65,7 +66,7 @@ import {
   selectHasChanges,
   selectHighlightedStepId,
   selectIsExecutionsTab,
-  selectIsSavingYaml,
+  selectIsSaveInProgress,
   selectStepExecutions,
   selectWorkflow,
   selectWorkflowDefinition,
@@ -243,7 +244,7 @@ export const WorkflowYAMLEditor = ({
 
   const { confirmDisable, confirmModal: disableConfirmModal } = useDisableWorkflowsConfirmation();
   const saveYaml = useSaveYamlWithConfirmation(confirmDisable);
-  const isSaving = useSelector(selectIsSavingYaml);
+  const isSaving = useSelector(selectIsSaveInProgress);
   const dispatch = useDispatch();
   const workflow = useSelector(selectWorkflow);
   const isExecutionYaml = useSelector(selectIsExecutionsTab);
@@ -338,6 +339,7 @@ export const WorkflowYAMLEditor = ({
   const styles = useWorkflowEditorStyles();
   const [positionStyles, setPositionStyles] = useState<{ top: string; right: string } | null>(null);
   const { styles: stepExecutionStyles } = useStepDecorationsInExecution(editorRef.current);
+  const { styles: stepDurationStyles } = useStepDurationDecorations(editorRef.current);
 
   useDynamicTypeIcons(connectorsData);
 
@@ -954,8 +956,8 @@ export const WorkflowYAMLEditor = ({
   );
 
   const editorWrapperCss = useMemo(
-    () => css([styles.container, stepExecutionStyles]),
-    [styles.container, stepExecutionStyles]
+    () => css([styles.container, stepExecutionStyles, stepDurationStyles]),
+    [styles.container, stepExecutionStyles, stepDurationStyles]
   );
 
   return (

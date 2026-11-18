@@ -50,6 +50,7 @@ const initialState: WorkflowDetailState = {
   yamlString: '',
   baselineYaml: '',
   isYamlSynced: true,
+  isCheckingSave: false,
   computed: undefined,
   workflow: undefined,
   execution: undefined,
@@ -139,6 +140,9 @@ const workflowDetailSlice = createSlice({
     },
     setIsYamlSynced: (state, action: { payload: boolean }) => {
       state.isYamlSynced = action.payload;
+    },
+    setIsCheckingSave: (state, action: { payload: boolean }) => {
+      state.isCheckingSave = action.payload;
     },
     setCursorPosition: (state, action: { payload: LineColumnPosition }) => {
       state.cursorPosition = action.payload;
@@ -376,6 +380,7 @@ export const {
   applyYamlEdit,
   seedCreateYaml,
   setIsYamlSynced,
+  setIsCheckingSave,
   setCursorPosition,
   setHighlightedStepId,
   setIsTestModalOpen,

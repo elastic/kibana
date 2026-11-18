@@ -157,7 +157,7 @@ describe('getCompletionItemProvider', () => {
 
   describe('provideCompletionItems', () => {
     it('should return empty suggestions when autocomplete context is null', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { buildAutocompleteContext } = require('./context/build_autocomplete_context');
       buildAutocompleteContext.mockReturnValueOnce(null);
 
@@ -176,7 +176,7 @@ describe('getCompletionItemProvider', () => {
     });
 
     it('should quote built-in #/kibana/definitions $ref values from monaco-yaml enum completions', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { getSuggestions } = require('./suggestions/get_suggestions');
       getSuggestions.mockReturnValueOnce([]);
 
@@ -224,7 +224,7 @@ describe('getCompletionItemProvider', () => {
     });
 
     it('should merge workflow suggestions with YAML provider suggestions', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { getSuggestions } = require('./suggestions/get_suggestions');
       getSuggestions.mockReturnValueOnce([
         {
@@ -263,7 +263,7 @@ describe('getCompletionItemProvider', () => {
     });
 
     it('should filter deprecated step types from workflow and YAML suggestions', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { getSuggestions } = require('./suggestions/get_suggestions');
       getSuggestions.mockReturnValueOnce([
         {
@@ -309,7 +309,7 @@ describe('getCompletionItemProvider', () => {
     });
 
     it('should deduplicate event-driven triggers from YAML schema and workflow provider by technical id', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { getSuggestions } = require('./suggestions/get_suggestions');
       getSuggestions.mockReturnValueOnce([
         {
@@ -353,7 +353,7 @@ describe('getCompletionItemProvider', () => {
     });
 
     it('should deduplicate duplicate keys across YAML providers, preferring snippets', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { getSuggestions } = require('./suggestions/get_suggestions');
       getSuggestions.mockReturnValueOnce([]);
 
@@ -401,7 +401,7 @@ describe('getCompletionItemProvider', () => {
     });
 
     it('should keep workflow suggestion details when both sources return snippets for same key', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { getSuggestions } = require('./suggestions/get_suggestions');
       getSuggestions.mockReturnValueOnce([
         {
@@ -442,7 +442,7 @@ describe('getCompletionItemProvider', () => {
     });
 
     it('should keep workflow suggestion when YAML has snippet for same key (workflow wins)', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { getSuggestions } = require('./suggestions/get_suggestions');
       getSuggestions.mockReturnValueOnce([
         {
@@ -483,7 +483,7 @@ describe('getCompletionItemProvider', () => {
     });
 
     it('should handle multiple YAML providers', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { getSuggestions } = require('./suggestions/get_suggestions');
       getSuggestions.mockReturnValueOnce([
         {
@@ -528,7 +528,7 @@ describe('getCompletionItemProvider', () => {
     });
 
     it('should set incomplete to true if any provider returns incomplete', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { getSuggestions } = require('./suggestions/get_suggestions');
       getSuggestions.mockReturnValueOnce([]);
 
@@ -561,7 +561,7 @@ describe('getCompletionItemProvider', () => {
     });
 
     it('should continue with other providers if one fails', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { getSuggestions } = require('./suggestions/get_suggestions');
       getSuggestions.mockReturnValueOnce([]);
 
@@ -593,7 +593,7 @@ describe('getCompletionItemProvider', () => {
     });
 
     it('should handle providers without provideCompletionItems method', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { getSuggestions } = require('./suggestions/get_suggestions');
       getSuggestions.mockReturnValueOnce([]);
 
@@ -619,7 +619,7 @@ describe('getCompletionItemProvider', () => {
     });
 
     it('should call YAML providers on empty lines outside liquid blocks', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { buildAutocompleteContext } = require('./context/build_autocomplete_context');
       buildAutocompleteContext.mockReturnValueOnce({
         path: [],
@@ -631,7 +631,7 @@ describe('getCompletionItemProvider', () => {
         focusedStepInfo: null,
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { getSuggestions } = require('./suggestions/get_suggestions');
       getSuggestions.mockReturnValueOnce([]);
 
@@ -663,7 +663,7 @@ describe('getCompletionItemProvider', () => {
     });
 
     it('should skip YAML providers for liquid-block-keyword when inside a liquid block', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { buildAutocompleteContext } = require('./context/build_autocomplete_context');
       buildAutocompleteContext.mockReturnValueOnce({
         path: ['steps', 0, 'with', 'message'],
@@ -675,7 +675,7 @@ describe('getCompletionItemProvider', () => {
         focusedStepInfo: null,
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { getSuggestions } = require('./suggestions/get_suggestions');
       getSuggestions.mockReturnValueOnce([]);
 
@@ -701,7 +701,7 @@ describe('getCompletionItemProvider', () => {
     });
 
     it('should handle providers that return null or undefined', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
       const { getSuggestions } = require('./suggestions/get_suggestions');
       getSuggestions.mockReturnValueOnce([]);
 
