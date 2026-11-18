@@ -90,10 +90,8 @@ const noCaptures = (): ProfilingStats => ({
   files: { starting: noFiles(), running: noFiles() },
 });
 const FILE_COUNT_KEYS: Partial<Record<ProfileFileOutcome, keyof FileCounts>> = {
-  written: 'written',
   in_window: 'inWindow',
   file_limit: 'fileLimit',
-  write_failed: 'writeFailed',
 };
 const errorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
@@ -292,12 +290,11 @@ export const runWatchdogWorker = (
       .finally(() => endCapture(current));
   };
 
-  const writeProfile = async (
+  const admitProfile = (
     phase: Phase,
     blockedMs: number,
-    nowMs: number,
-    profile: CpuProfile
-  ): Promise<{ file: ProfileFileOutcome; path?: string }> => {
+    nowMs: number
+  ): { file: ProfileFileOutcome; path?: string } => {
     if (profiling.dir === undefined) {
       return { file: 'no_directory' };
     }
@@ -305,15 +302,21 @@ export const runWatchdogWorker = (
     if (admitted !== 'admitted') {
       return { file: admitted };
     }
-    const path = Path.join(profiling.dir, fileName(phase, blockedMs, new Date()));
+    return {
+      file: admitted,
+      path: Path.join(profiling.dir, fileName(phase, blockedMs, new Date())),
+    };
+  };
+
+  const writeProfile = async (phase: Phase, path: string, profile: CpuProfile) => {
     try {
       await Fs.writeFile(path, JSON.stringify(prepareProfile(profile, root)));
-      return { file: 'written', path };
+      counts.files[phase].written++;
     } catch (error) {
+      counts.files[phase].writeFailed++;
       logger.error(`Failed to write an event loop block profile: ${errorMessage(error)}`, {
         tags: ['event-loop-watchdog'],
       });
-      return { file: 'write_failed' };
     }
   };
 
@@ -362,9 +365,7 @@ export const runWatchdogWorker = (
       counts.maxStopHeartbeatGapMs = Math.max(counts.maxStopHeartbeatGapMs, stopHeartbeatGapMs);
     }
     const { file, path } =
-      summary.samples > 0
-        ? await writeProfile(phase, blockedMs, nowMs, profile)
-        : { file: 'empty' as const };
+      summary.samples > 0 ? admitProfile(phase, blockedMs, nowMs) : { file: 'empty' as const };
     const countKey = FILE_COUNT_KEYS[file];
     if (countKey) {
       counts.files[phase][countKey]++;
@@ -372,7 +373,7 @@ export const runWatchdogWorker = (
     captureNumber++;
     const frameLists = formatFrameLists(summary);
     // Written profiles are the ones to look at; the others still show where blocks come from.
-    logger[file === 'written' ? 'warn' : 'info']<ProfileLogMeta>(
+    logger[file === 'admitted' ? 'warn' : 'info']<ProfileLogMeta>(
       `Event loop block profile #${captureNumber}: block ~${blockedMs}ms${
         stopReason === 'block_ended' ? '' : ' so far'
       } (profiled after ~${profiledAfterMs}ms, profiler start took ~${profilerStartMs}ms), ${
@@ -403,6 +404,9 @@ export const runWatchdogWorker = (
         },
       }
     );
+    if (path) {
+      await writeProfile(phase, path, profile);
+    }
   };
 
   /** Starts or stops a capture after each poll; `ended` is the block this poll saw end. */

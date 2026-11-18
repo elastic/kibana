@@ -1213,7 +1213,7 @@ describe('runWatchdogWorker', () => {
       expect(parsed.message).not.toMatch(/\[truncated\]$/);
       expect(parsed.message).toContain(`File: ${LONGEST_DIR}/event-loop-block-starting-100000ms-`);
       expect(parsed.message).toContain(`-${'h'.repeat(63)}-${process.pid}.cpuprofile. Top: `);
-      expect(parsed.kibana.event_loop_watchdog.profile.file).toBe('written');
+      expect(parsed.kibana.event_loop_watchdog.profile.file).toBe('admitted');
       expect(parsed.message).toContain('Kibana code: 45.5% ');
       // The frame lists are cut at their cap; the full lists are in `profile`.
       const frameLists = parsed.message.slice(parsed.message.indexOf('Top: '));
@@ -1273,6 +1273,12 @@ describe('runWatchdogWorker', () => {
         logger.warn.mock.calls.filter(([message]) =>
           String(message).startsWith('Event loop block profile #')
         );
+      const warnLineOrder = () =>
+        logger.warn.mock.invocationCallOrder[
+          logger.warn.mock.calls.findIndex(([message]) =>
+            String(message).startsWith('Event loop block profile #')
+          )
+        ];
       const fileCounts = () => {
         idle(STATS_INTERVAL_MS);
         return lastStats().profiling.files;
@@ -1293,7 +1299,7 @@ describe('runWatchdogWorker', () => {
         );
       });
 
-      it('writes the prepared profile and logs the capture at warn with the file path', async () => {
+      it('logs the capture at warn with the file path, then writes the prepared profile', async () => {
         const writeFile = jest.spyOn(Fs, 'writeFile').mockResolvedValue();
         startWriting();
         await profiledBlock(2_000);
@@ -1310,7 +1316,8 @@ describe('runWatchdogWorker', () => {
         expect(warnLines()).toHaveLength(1);
         const [message, meta] = warnLines()[0];
         expect(message).toContain(`stopped: block_ended. File: ${file}. Top: 100% spin`);
-        expect((meta as ProfileLogMeta).kibana.event_loop_watchdog.profile.file).toBe('written');
+        expect((meta as ProfileLogMeta).kibana.event_loop_watchdog.profile.file).toBe('admitted');
+        expect(warnLineOrder()).toBeLessThan(writeFile.mock.invocationCallOrder[0]);
         expect(fileCounts().starting).toEqual({
           written: 1,
           inWindow: 0,
@@ -1338,7 +1345,7 @@ describe('runWatchdogWorker', () => {
         }
       });
 
-      it('logs a failed write once at error and the capture at info without a path', async () => {
+      it('logs a failed write once at error after the capture', async () => {
         jest
           .spyOn(Fs, 'writeFile')
           .mockRejectedValue(
@@ -1352,9 +1359,9 @@ describe('runWatchdogWorker', () => {
           'Failed to write an event loop block profile: EACCES: permission denied',
           { tags: ['event-loop-watchdog'] }
         );
-        expect(warnLines()).toHaveLength(0);
-        expect(profileLines()[0][0]).not.toContain('File: ');
-        expect(profileMeta().file).toBe('write_failed');
+        expect(warnLines()).toHaveLength(1);
+        expect(warnLines()[0][0]).toContain('File: /diag/');
+        expect(warnLineOrder()).toBeLessThan(logger.error.mock.invocationCallOrder[0]);
         expect(fileCounts().starting).toMatchObject({ written: 0, writeFailed: 1 });
       });
 

@@ -48,14 +48,8 @@ export interface BlockLogMeta extends LogMeta {
 /** Why a capture stopped. */
 export type CaptureStopReason = 'block_ended' | 'max_duration';
 
-/** Whether a capture's profile was written to a file, or why not. */
-export type ProfileFileOutcome =
-  | 'written'
-  | 'in_window'
-  | 'file_limit'
-  | 'write_failed'
-  | 'no_directory'
-  | 'empty';
+/** Whether a capture's profile is written to a file, or why not. */
+export type ProfileFileOutcome = 'admitted' | 'in_window' | 'file_limit' | 'no_directory' | 'empty';
 
 export interface ProfileLogMeta extends LogMeta {
   kibana: {
