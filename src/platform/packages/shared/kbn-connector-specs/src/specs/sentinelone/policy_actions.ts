@@ -31,7 +31,7 @@ import {
   RemoveHashFromBlocklistInputSchema,
   SearchBlocklistInputSchema,
   SearchIOCsInputSchema,
-} from './types';
+} from './policy_types';
 import type {
   AddHashToBlocklistInput,
   CreateExclusionInput,
@@ -45,7 +45,7 @@ import type {
   RemoveHashFromBlocklistInput,
   SearchBlocklistInput,
   SearchIOCsInput,
-} from './types';
+} from './policy_types';
 
 const EMPTY_IDS = 'ids must list at least one id (an empty filter would target every object)';
 
@@ -93,7 +93,7 @@ export const policyActions: ConnectorSpec['actions'] = {
   },
 
   removeHashFromBlocklist: {
-    isTool: true,
+    isTool: false,
     scope: 'destroy',
     description: ACTION_DESCRIPTIONS.removeHashFromBlocklist,
     input: RemoveHashFromBlocklistInputSchema,
@@ -128,7 +128,7 @@ export const policyActions: ConnectorSpec['actions'] = {
   },
 
   createExclusion: {
-    isTool: true,
+    isTool: false,
     scope: 'write',
     description: ACTION_DESCRIPTIONS.createExclusion,
     input: CreateExclusionInputSchema,
@@ -147,7 +147,7 @@ export const policyActions: ConnectorSpec['actions'] = {
   },
 
   deleteExclusion: {
-    isTool: true,
+    isTool: false,
     scope: 'destroy',
     description: ACTION_DESCRIPTIONS.deleteExclusion,
     input: DeleteExclusionInputSchema,
@@ -201,7 +201,7 @@ export const policyActions: ConnectorSpec['actions'] = {
   },
 
   deleteIOC: {
-    isTool: true,
+    isTool: false,
     scope: 'destroy',
     description: ACTION_DESCRIPTIONS.deleteIOC,
     input: DeleteIOCInputSchema,
@@ -269,7 +269,7 @@ export const policyActions: ConnectorSpec['actions'] = {
   },
 
   deleteFirewallRule: {
-    isTool: true,
+    isTool: false,
     scope: 'destroy',
     description: ACTION_DESCRIPTIONS.deleteFirewallRule,
     input: DeleteFirewallRuleInputSchema,

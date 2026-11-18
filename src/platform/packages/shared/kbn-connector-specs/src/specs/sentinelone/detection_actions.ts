@@ -11,7 +11,6 @@ import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 import {
   assertApplied,
   compact,
-  redactFields,
   requireIds,
   requireScope,
   s1Request,
@@ -21,31 +20,25 @@ import { ACTION_DESCRIPTIONS } from './descriptions';
 import type { StarRule } from './star_rule';
 import { mergeStarRule, starRuleScopeFilter } from './star_rule';
 import {
-  CreateQueryInputSchema,
   CreateStarRuleInputSchema,
   DeleteStarRuleInputSchema,
   DisableStarRulesInputSchema,
   EnableStarRulesInputSchema,
-  GetQueryEventsInputSchema,
-  GetQueryStatusInputSchema,
   SearchAlertsInputSchema,
   UpdateAlertStatusInputSchema,
   UpdateAlertVerdictInputSchema,
   UpdateStarRuleInputSchema,
-} from './types';
+} from './detection_types';
 import type {
-  CreateQueryInput,
   CreateStarRuleInput,
   DeleteStarRuleInput,
   DisableStarRulesInput,
   EnableStarRulesInput,
-  GetQueryEventsInput,
-  GetQueryStatusInput,
   SearchAlertsInput,
   UpdateAlertStatusInput,
   UpdateAlertVerdictInput,
   UpdateStarRuleInput,
-} from './types';
+} from './detection_types';
 
 const EMPTY_ALERT_IDS =
   'alertIds must list at least one alert id (an empty filter would target every alert)';
@@ -119,58 +112,6 @@ export const detectionActions: ConnectorSpec['actions'] = {
         requireIds(input.alertIds, EMPTY_ALERT_IDS),
         { incidentStatus: input.incidentStatus }
       ),
-  },
-
-  createQuery: {
-    isTool: true,
-    scope: 'write',
-    description: ACTION_DESCRIPTIONS.createQuery,
-    input: CreateQueryInputSchema,
-    handler: async (ctx, input: CreateQueryInput) => {
-      const { queryType, ...rest } = input;
-      return s1Request(ctx, {
-        action: 'createQuery',
-        method: 'POST',
-        path: '/dv/init-query',
-        body: compact({ ...rest, queryType: queryType ? [queryType] : undefined }),
-        mutating: true,
-      });
-    },
-  },
-
-  getQueryStatus: {
-    isTool: true,
-    scope: 'read',
-    description: ACTION_DESCRIPTIONS.getQueryStatus,
-    input: GetQueryStatusInputSchema,
-    handler: async (ctx, input: GetQueryStatusInput) =>
-      s1Request(ctx, {
-        action: 'getQueryStatus',
-        method: 'GET',
-        path: '/dv/query-status',
-        params: { queryId: input.queryId },
-        mutating: false,
-      }),
-  },
-
-  getQueryEvents: {
-    isTool: true,
-    scope: 'read',
-    description: ACTION_DESCRIPTIONS.getQueryEvents,
-    input: GetQueryEventsInputSchema,
-    handler: async (ctx, input: GetQueryEventsInput) => {
-      const result = toListResult(
-        await s1Request(ctx, {
-          action: 'getQueryEvents',
-          method: 'GET',
-          path: '/dv/events',
-          params: input,
-          mutating: false,
-        })
-      );
-      // srcProcDownloadToken lets its holder download the process binary from the console.
-      return { ...result, data: redactFields(result.data, ['srcProcDownloadToken']) };
-    },
   },
 
   createStarRule: {
@@ -256,7 +197,7 @@ export const detectionActions: ConnectorSpec['actions'] = {
   },
 
   disableStarRules: {
-    isTool: true,
+    isTool: false,
     scope: 'destroy',
     description: ACTION_DESCRIPTIONS.disableStarRules,
     input: DisableStarRulesInputSchema,
@@ -271,7 +212,7 @@ export const detectionActions: ConnectorSpec['actions'] = {
   },
 
   deleteStarRule: {
-    isTool: true,
+    isTool: false,
     scope: 'destroy',
     description: ACTION_DESCRIPTIONS.deleteStarRule,
     input: DeleteStarRuleInputSchema,

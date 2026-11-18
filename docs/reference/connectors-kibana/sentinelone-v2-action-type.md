@@ -15,6 +15,10 @@ You can also manage blocklist entries, exclusions, threat intelligence indicator
 
 You can use this connector in **Agent Builder** and **Workflows**.
 
+::::{note}
+Actions marked _(not yet available)_ are not exposed to Agent Builder agents. You can run them from workflows and through the [Run a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute) API.
+::::
+
 The [SentinelOne connector](/reference/connectors-kibana/sentinelone-action-type.md) keeps working unchanged. For new use cases, use SentinelOne (v2); [Differences from the SentinelOne connector](#sentinelone-v2-differences) lists what changed.
 
 ## Create connectors in {{kib}} [define-sentinelone-v2-ui]
@@ -43,12 +47,12 @@ The SentinelOne (v2) connector exposes the following actions:
 :   Finds endpoints by host name, agent universally unique identifier (UUID), IP address, or ID and returns their network status and last-seen time. Requires the Endpoints: view permission.
 
 `isolateHost`
-:   Disconnects endpoints from the network; they can still reach the SentinelOne management console. Requires the Endpoints: disconnect from network permission.
+:   Disconnects endpoints from the network; they can still reach the SentinelOne management console. The result lists the agent IDs sent to SentinelOne (`requested`), the IDs already isolated (`skipped`), and the IDs SentinelOne did not find (`notFound`); when no ID is left to send, the action succeeds without a request and `data.affected` is 0. Requires the Endpoints: disconnect from network permission.
 
 `releaseHost`
-:   Reconnects isolated endpoints to the network. Requires the Endpoints: reconnect to network permission.
+:   Reconnects isolated endpoints to the network. The result lists the agent IDs sent to SentinelOne (`requested`), the IDs already connected (`skipped`), and the IDs SentinelOne did not find (`notFound`); when no ID is left to send, the action succeeds without a request and `data.affected` is 0. Requires the Endpoints: reconnect to network permission.
 
-`executeScript`
+`executeScript` _(not yet available)_
 :   Runs a script from the SentinelOne Script Library on selected endpoints and returns the task ID to follow. Each script type needs its own RemoteOps permission: run data collection script, run artifact collection script, or run action script. SentinelOne answers `Insufficient permissions` (HTTP 403) when the role lacks the permission for the type of script, for example action scripts such as Download File.
 
 `getRemoteScriptStatus`
@@ -64,7 +68,7 @@ The SentinelOne (v2) connector exposes the following actions:
 :   Lists the scripts in the SentinelOne Script Library so you can select one by name or ID.
 
 `fetchAgentFiles`
-:   Asks an endpoint to upload up to 10 files (up to 10 MB per request) as an encrypted archive for investigation. Requires the Endpoints: file fetch permission.
+:   Asks an endpoint to upload up to 10 files (up to 10 MB per request) as an encrypted archive for investigation. The archive password (`zipPassCode`) is saved with the workflow step or agent tool call that runs the action. Requires the Endpoints: file fetch permission.
 
 `downloadAgentFile`
 :   Downloads a file archive that an endpoint uploaded after a fetch request. Requires the Endpoints: view permission.
@@ -96,23 +100,11 @@ The SentinelOne (v2) connector exposes the following actions:
 `addHashToBlocklist`
 :   Blocks a file hash on the endpoints of a selected account, site, group, or the whole tenant. Requires the Blocklist: create permission.
 
-`removeHashFromBlocklist`
+`removeHashFromBlocklist` _(not yet available)_
 :   Removes blocklist entries, for example after a false positive. Requires the Blocklist: delete permission.
 
 `searchBlocklist`
 :   Finds existing blocklist entries for a hash or within a scope. Requires the Blocklist: view permission.
-
-`getHashReputation`
-:   Deprecated in the official SentinelOne API specification. Returns SentinelOne's reputation verdict for a SHA1 file hash. Requires the Blocklist: view permission.
-
-`createQuery`
-:   Deprecated in the official SentinelOne API specification. Starts a Deep Visibility event hunt for a hash, process, domain or IP address over a time range. Requires the SDL Data: view edr permission.
-
-`getQueryStatus`
-:   Deprecated in the official SentinelOne API specification. Returns the progress of a Deep Visibility query. Requires the SDL Data: view edr permission.
-
-`getQueryEvents`
-:   Deprecated in the official SentinelOne API specification. Returns the events a finished Deep Visibility query matched, with the endpoints they came from. Requires the SDL Data: view edr permission.
 
 `searchAlerts`
 :   Searches SentinelOne alerts (custom detection alerts) by severity, status, verdict, scope and time range. Requires the STAR Rule Alerts: view permission.
@@ -132,20 +124,20 @@ The SentinelOne (v2) connector exposes the following actions:
 `getAccounts`
 :   Lists accounts and their IDs, for account-level scope. Requires the Accounts: view permission and an account-level or global user. SentinelOne refuses site-level users.
 
-`createExclusion`
+`createExclusion` _(not yet available)_
 :   Creates an exclusion (hash, path, certificate, browser or file type) at a selected scope, for example after a false positive. Requires the Exclusions: create permission.
 
 `listExclusions`
 :   Lists exclusions by type, OS, value or scope. Requires the Exclusions: view permission.
 
-`deleteExclusion`
+`deleteExclusion` _(not yet available)_
 :   Removes exclusions so detection applies to the item again. Requires the Exclusions: delete permission.
 
-`moveAgent`
-:   Moves endpoints to another group, for example one with a stricter policy. SentinelOne answers with the number of agents it moved (`data.agentsMoved`); when it moved none, for example because the agent is already in that group, the action fails. Requires the Groups: move to group permission.
+`moveAgent` _(not yet available)_
+:   Moves endpoints to another group, for example one with a stricter policy. SentinelOne answers with the number of agents it moved (`data.agentsMoved`). The action reads the agents first and the result lists the agent IDs sent to SentinelOne (`requested`), the IDs already in the group (`skipped`), and the IDs SentinelOne did not find (`notFound`); when no ID is left to send, the action succeeds without a move request and `data.agentsMoved` is 0. When SentinelOne moves none of the requested agents, the action fails. Requires the Groups: move to group and Endpoints: view permissions.
 
 `fetchThreatFile`
-:   Asks SentinelOne to upload the file of one threat to the management console, encrypted with a password you enter (at least 10 characters; SentinelOne rejects shorter ones). SentinelOne accepts one threat per request. The response only acknowledges the request, so wait for the upload and then use `downloadThreatFile`. Requires the Endpoint Threats: fetch threat file permission (the SentinelOne API reference names the Admin, IR Team, and SOC roles).
+:   Asks SentinelOne to upload the file of one threat to the management console, encrypted with a password you enter (at least 10 characters; SentinelOne rejects shorter ones). The password is saved with the workflow step or agent tool call that runs the action. SentinelOne accepts one threat per request. The response only acknowledges the request, so wait for the upload and then use `downloadThreatFile`. Requires the Endpoint Threats: fetch threat file permission (the SentinelOne API reference names the Admin, IR Team, and SOC roles).
 
 `downloadThreatFile`
 :   Downloads a threat's file sample from the SentinelOne cloud, as SentinelOne provides it, for evidence or sandbox analysis. SentinelOne has the file in the cloud only after it was uploaded: when it returns no link, run `fetchThreatFile` first. Requires the Endpoint Threats: view permission.
@@ -156,7 +148,7 @@ The SentinelOne (v2) connector exposes the following actions:
 `abortScan`
 :   Stops a running full disk scan on endpoints. Requires the Endpoints: abort scan permission.
 
-`shutdownAgent`
+`shutdownAgent` _(not yet available)_
 :   Shuts endpoints down as a last-resort containment step; there is no way to power them on again through the API. Requires the Endpoints: shut down permission.
 
 `broadcastMessage`
@@ -168,14 +160,11 @@ The SentinelOne (v2) connector exposes the following actions:
 `searchIOCs`
 :   Looks up threat intelligence indicators by value, type, source or scope. Requires the Threat Intelligence: view permission.
 
-`deleteIOC`
+`deleteIOC` _(not yet available)_
 :   Removes threat intelligence indicators by their IDs within an account. Requires the Threat Intelligence: manage permission.
 
 `getInstalledApplications`
 :   Lists the applications installed on endpoints (name, version, publisher, install date). Requires the Endpoints: view permission. SentinelOne ignores `limit` for this action, so the list can be longer than `limit`.
-
-`getAgentCves`
-:   Deprecated in the official SentinelOne API specification. Lists known Common Vulnerabilities and Exposures (CVEs) of installed applications where Application Risk is enabled. Requires the Applications: view permission.
 
 `getThreatDetails`
 :   Returns the full record of specific threats: file, verdicts, statuses, endpoint and indicators. Requires the Endpoint Threats: view permission.
@@ -189,7 +178,7 @@ The SentinelOne (v2) connector exposes the following actions:
 `createFirewallRule`
 :   Creates a Firewall Control rule at a selected scope, for example to block a malicious destination.
 
-`deleteFirewallRule`
+`deleteFirewallRule` _(not yet available)_
 :   Deletes Firewall Control rules by ID.
 
 `createStarRule`
@@ -201,33 +190,33 @@ The SentinelOne (v2) connector exposes the following actions:
 `enableStarRules`
 :   Turns on STAR custom detection rules. Requires the STAR Custom Rules: manage permission.
 
-`disableStarRules`
+`disableStarRules` _(not yet available)_
 :   Turns off STAR custom detection rules. Requires the STAR Custom Rules: manage permission.
 
-`deleteStarRule`
+`deleteStarRule` _(not yet available)_
 :   Deletes STAR custom detection rules. Requires the STAR Custom Rules: manage permission.
 
-`runScriptAndWait`
+`runScriptAndWait` _(not yet available)_
 :   Runs a Script Library script on selected endpoints, waits for it to finish (up to 240 seconds) and returns the result links in one step. SentinelOne can queue a script on an endpoint for much longer than that. When the wait ends first, the action returns `timedOut: true` and the `parentTaskId`. For scripts that might queue, use `executeScript`, then poll `getRemoteScriptStatus` in a workflow loop with a wait step, then call `getRemoteScriptResults`. The wait runs inside workflows. {{kib}} closes a request to the connector execute API after 120 seconds, so when you call the action through the API, keep `waitSeconds` at 100 or less (the default is 100).
 
 `getApplicationCves`
-:   Lists the known Common Vulnerabilities and Exposures (CVEs) of one application from Application Risk, by application ID or by application name, vendor, and version, with severity, CVE ID, and publish date filters. Enter the vendor exactly as SentinelOne stores it, which is HTML-escaped (for example `Ubuntu Developers &lt;a@b&gt;`). Use it instead of the deprecated `getAgentCves`. Requires Application Risk on the account and the Applications Page: view risks permission. Ranger Insights adds queries by several application IDs, or by name and vendor without a version.
+:   Lists the known Common Vulnerabilities and Exposures (CVEs) of one application from Application Risk, by application ID or by application name, vendor, and version, with severity, CVE ID, and publish date filters. Enter the vendor exactly as SentinelOne stores it, which is HTML-escaped (for example `Ubuntu Developers &lt;a@b&gt;`). Requires Application Risk on the account and the Applications Page: view risks permission. Ranger Insights adds queries by several application IDs, or by name and vendor without a version.
 
 `runQuery`
-:   Runs a Singularity Data Lake Power Query (PQ), waits for the result (`waitSeconds`, 10 to 100 seconds, default 60), and returns the result table with up to 1,000 rows. The connector always deletes the query afterward. When the wait ends first, the action returns `status: timedOut`; narrow the time range or the filter and run it again. Use it instead of the deprecated Deep Visibility actions. Requires the Skylight Query API: view permission.
+:   Runs a Singularity Data Lake Power Query (PQ), waits for the result (`waitSeconds`, 10 to 100 seconds, default 60), and returns the result table with up to 1,000 rows. The connector always deletes the query afterward. When the wait ends first, the action returns `status: timedOut`; narrow the time range or the filter and run it again. Requires the Skylight Query API: view permission.
 
 ### Behavior of the actions [sentinelone-v2-action-behavior]
 
 * **Explicit targets.** Actions that change state require explicit IDs (agent, threat, alert, rule, blocklist entry, exclusion, indicator, or firewall rule IDs) or an explicit scope (`accountIds`, `siteIds`, `groupIds`, or `tenant`). An empty list is rejected before any request, because SentinelOne applies an empty filter to every matching object. `isolateHost`, `releaseHost`, `getInstalledApplications`, and `getThreatDetails` take at most 300 IDs per call, because the IDs are sent in the URL.
-* **Acknowledgments.** Isolate, release, scan, mitigate, and script actions return SentinelOne's acknowledgment (`data.affected`), not completion. Read the state back with `getAgents`, `getThreatDetails`, or `getRemoteScriptStatus`. When SentinelOne reports per-item errors or `data.affected` is 0, the action fails with the IDs and SentinelOne's detail. Repeating a change that is already in effect has nothing to apply, so it also fails: for example, `isolateHost` returns `Agent already isolated` and `releaseHost` returns `Agent not isolated`. `addHashToBlocklist`, `createExclusion` and `createIOC` fail the same way when SentinelOne reports per-item errors.
+* **Acknowledgments.** Isolate, release, scan, mitigate, and script actions return SentinelOne's acknowledgment (`data.affected`), not completion. Read the state back with `getAgents`, `getThreatDetails`, or `getRemoteScriptStatus`. When SentinelOne reports per-item errors or `data.affected` is 0, the action fails with the IDs and SentinelOne's detail. `isolateHost`, `releaseHost`, and `moveAgent` read the agents first and skip the ones already in the target state, so repeating them succeeds; they list the IDs in `requested`, `skipped`, and `notFound`. `addHashToBlocklist`, `createExclusion` and `createIOC` fail the same way when SentinelOne reports per-item errors.
 * **Pagination.** List actions return one page (`limit` 1 to 1,000, default 10) with `pagination.nextCursor` and `pagination.totalItems`. Pass `nextCursor` back as `cursor` with the same filters to get the next page; it is `null` on the last page. Paging is cursor-based only: the `skip`, `countOnly` and `skipCount` parameters of the SentinelOne API are not exposed, and most list actions offer the sort and filter inputs listed for them rather than every API parameter. `getApplicationCves` also accepts `skip`, `countOnly`, and `skipCount`, and its `pagination.totalItems` is accurate only on the first page.
 * **Newest first.** `getActivities` returns the oldest entries first by default. To read the latest entries, for example to confirm that an isolate or scan took effect, set `additionalFilters` to `{"sortBy": "createdAt", "sortOrder": "desc"}`.
 * **Alert verdicts.** SentinelOne might not accept `undefined` as the verdict of an alert that already has another verdict. The action then fails because no object was affected. `updateThreatVerdict` accepts `undefined`.
 * **Downloads.** `downloadAgentFile`, `downloadRemoteScriptResults` and `downloadThreatFile` return the file as SentinelOne provides it, base64-encoded in `content`, with `fileName`, `contentType` and `sizeBytes`. The signed link that SentinelOne uses for the transfer is not returned, so it is not kept in workflow history. `getRemoteScriptResults` returns result links that are signed and expire after about an hour: use them promptly. Archives are not unpacked or decrypted. Files larger than 25 MB fail with an error; download them from the SentinelOne console. The API token is sent to a download link only when the link is on the configured console host, and never on a redirect to another host.
 * **Limits and retries.** Every request times out after 60 seconds. Downloads are limited to 25 MB; other responses follow the {{kib}} Actions response size limit (`xpack.actions.maxResponseContentLength`, 1 MB by default). Read actions retry on HTTP 429, 502, 503, and 504; state-changing actions retry only on HTTP 429. Each action makes at most three attempts, honors `Retry-After` up to 30 seconds, and then reports the error.
-* **Registration tokens and other credentials.** `getSites` and `getGroups` never return site or group registration tokens, because a token lets anyone enroll new agents into your tenant. Read them in the SentinelOne console. `getQueryEvents` returns `srcProcDownloadToken` and `getAgents` returns `licenseKey` as `[redacted]`.
+* **Registration tokens and other credentials.** `getSites` and `getGroups` never return site or group registration tokens, because a token lets anyone enroll new agents into your tenant. Read them in the SentinelOne console. `getAgents` returns `licenseKey` as `[redacted]`.
 * **Singularity Data Lake queries.** `runQuery` calls the Singularity Data Lake query service (`/sdl/v2/api/queries`) on the console host with the same API token, sent as `Authorization: Bearer <token>`, and its queries use the Power Query (PQ) language, so legacy Deep Visibility (S1QL) queries must be rewritten.
-* **Deprecated routes.** `getHashReputation`, `getAgentCves` and the Deep Visibility actions (`createQuery`, `getQueryStatus`, `getQueryEvents`) call routes that are deprecated in the official SentinelOne API specification. Deep Visibility requires the Complete SKU (license tier). SentinelOne allows one `getQueryStatus` call per second per token. SentinelOne has announced that legacy Deep Visibility stops working on February 15, 2027. `getApplicationCves` and `runQuery` are the current alternatives.
+* **Deprecated routes.** SentinelOne's deprecated routes are not built as actions: the legacy Deep Visibility query routes, the installed-applications CVE route, and the hash verdict route. `getApplicationCves` covers CVEs and `runQuery` covers queries.
 
 ## Workflow examples [sentinelone-v2-workflow-examples]
 
@@ -290,7 +279,7 @@ steps:
 
 ## Differences from the SentinelOne connector [sentinelone-v2-differences]
 
-SentinelOne (v2) keeps the 11 action names of the SentinelOne connector (`executeScript`, `getAgents`, `isolateHost`, `releaseHost`, `getRemoteScripts`, `getRemoteScriptStatus`, `getRemoteScriptResults`, `downloadRemoteScriptResults`, `fetchAgentFiles`, `downloadAgentFile`, and `getActivities`) and adds 46 actions, plus `getApplicationCves` and `runQuery`. These inputs and outputs changed:
+SentinelOne (v2) keeps the 11 action names of the SentinelOne connector (`executeScript`, `getAgents`, `isolateHost`, `releaseHost`, `getRemoteScripts`, `getRemoteScriptStatus`, `getRemoteScriptResults`, `downloadRemoteScriptResults`, `fetchAgentFiles`, `downloadAgentFile`, and `getActivities`) and adds 41 actions, plus `getApplicationCves` and `runQuery`. These inputs and outputs changed:
 
 | Action | SentinelOne connector | SentinelOne (v2) |
 |---|---|---|

@@ -91,20 +91,16 @@ afterEach(() => {
 });
 
 describe('runQuery', () => {
-  it('is a read-only tool whose description states the service, the language, the limits and the replacement', () => {
+  it('is a read-only tool whose description states the service, the language, the row limit and the timeout hint', () => {
     expect(action().isTool).toBe(true);
     expect(action().scope).toBe('read');
     for (const text of [
       'read-only',
       'Singularity Data Lake',
-      'long-running query service',
       'Power Query (PQ)',
-      "a bare '*' is invalid",
-      'S1QL 1.0 queries are not supported',
-      'burst of 8 requests refilled at 5 per second',
-      'Retry-After up to 30 seconds',
-      'HTTP 403 means the user lacks it',
-      'An alternative to the deprecated createQuery, getQueryStatus and getQueryEvents',
+      'up to 1000 rows',
+      "a bare '*' and S1QL 1.0 queries are invalid",
+      'On timedOut, narrow the time range',
     ]) {
       expect(action().description).toContain(text);
     }
@@ -323,64 +319,6 @@ describe('runQuery', () => {
     expect((error as Error).message).not.toContain(TOKEN);
     expect((error as Error).message).not.toContain('...token');
     expect(calls().map(({ method }) => method)).toEqual(['POST', 'GET', 'DELETE']);
-  });
-
-  it('leaves the deprecated Deep Visibility and hash reputation requests unchanged', async () => {
-    const API = `${CONSOLE}/web/api/v2.1`;
-    const AUTH = { Authorization: `ApiToken ${TOKEN}`, token: false };
-    request.mockResolvedValue({ status: 200, data: { data: {} } });
-    const legacy = async (name: string, input: Record<string, unknown>) => {
-      const old = SentinelOne.actions[name];
-      expect(old.description).toContain('Deprecated in the official SentinelOne API specification');
-      await old.handler(ctx, old.input.parse(input));
-      return request.mock.calls[request.mock.calls.length - 1][0];
-    };
-
-    expect(
-      await legacy('createQuery', {
-        query: 'EventType = "Process Creation"',
-        fromDate: '2026-01-01T00:00:00Z',
-        toDate: '2026-01-02T00:00:00Z',
-        queryType: 'events',
-        siteIds: ['21'],
-      })
-    ).toEqual(
-      expect.objectContaining({
-        method: 'POST',
-        url: `${API}/dv/init-query`,
-        headers: AUTH,
-        data: {
-          query: 'EventType = "Process Creation"',
-          fromDate: '2026-01-01T00:00:00Z',
-          toDate: '2026-01-02T00:00:00Z',
-          siteIds: ['21'],
-          queryType: ['events'],
-        },
-      })
-    );
-    expect(await legacy('getQueryStatus', { queryId: 'q1' })).toEqual(
-      expect.objectContaining({
-        method: 'GET',
-        url: `${API}/dv/query-status`,
-        params: { queryId: 'q1' },
-        headers: AUTH,
-      })
-    );
-    expect(await legacy('getQueryEvents', { queryId: 'q1', limit: 100 })).toEqual(
-      expect.objectContaining({
-        method: 'GET',
-        url: `${API}/dv/events`,
-        params: { queryId: 'q1', limit: 100 },
-        headers: AUTH,
-      })
-    );
-    expect(await legacy('getHashReputation', { hash: 'b'.repeat(40) })).toEqual(
-      expect.objectContaining({
-        method: 'GET',
-        url: `${API}/hashes/${'b'.repeat(40)}/verdict`,
-        headers: AUTH,
-      })
-    );
   });
 
   it('reports a failed delete as cleanupFailed without failing the action', async () => {

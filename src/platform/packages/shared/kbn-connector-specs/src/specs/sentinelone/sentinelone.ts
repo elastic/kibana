@@ -32,11 +32,10 @@ import { scriptActions } from './script_actions';
 import { threatActions } from './threat_actions';
 import {
   GetAccountsInputSchema,
-  GetAgentCvesInputSchema,
   GetGroupsInputSchema,
   GetSitesInputSchema,
-} from './types';
-import type { GetAccountsInput, GetAgentCvesInput, GetGroupsInput, GetSitesInput } from './types';
+} from './inventory_types';
+import type { GetAccountsInput, GetGroupsInput, GetSitesInput } from './inventory_types';
 
 export const SentinelOne: ConnectorSpec = {
   metadata: {
@@ -165,58 +164,25 @@ export const SentinelOne: ConnectorSpec = {
           })
         ),
     },
-
-    getAgentCves: {
-      isTool: true,
-      scope: 'read',
-      description: ACTION_DESCRIPTIONS.getAgentCves,
-      input: GetAgentCvesInputSchema,
-      handler: async (ctx, input: GetAgentCvesInput) =>
-        toListResult(
-          await s1Request(ctx, {
-            action: 'getAgentCves',
-            method: 'GET',
-            path: '/installed-applications/cves',
-            params: input,
-            mutating: false,
-          })
-        ),
-    },
   },
 
   skill: [
-    '## SentinelOne (v2) connector',
+    '## SentinelOne (v2)',
     '',
-    'Use this connector to investigate and respond to endpoint threats in SentinelOne.',
+    'Investigate and respond to endpoint threats.',
+    '- Triage a host: `getAgents` (computerName or ip) for the agent id, `getThreats` with `agentIds`, `getActivities`.',
+    '- Contain a host: `isolateHost`, then `getAgents` until `networkStatus` is `disconnected`; `releaseHost` undoes it.',
+    '- Handle a threat: `getThreatDetails`, `getThreatTimeline`; `mitigateThreat` or `rollbackThreat`; close with `updateThreatStatus` and `addThreatNote`.',
+    '- Hunt: `runQuery`, `searchAlerts`, `searchBlocklist` then `addHashToBlocklist`, `createIOC`.',
+    '- Evidence: `fetchAgentFiles` or `fetchThreatFile`, wait, then `downloadAgentFile` or `downloadThreatFile`.',
     '',
-    '### Finding ids',
-    '- Agents: `getAgents` by computerName, ip, uuid or query returns `data[].id` (agent id) and `networkStatus`.',
-    '- Threats: `getThreats` (filters such as incidentStatuses, analystVerdicts, agentIds, contentHashes) returns `data[].id`; `getThreatDetails` gives the full record for explicit ids.',
-    '- Scopes: `getAccounts`, `getSites` and `getGroups` return the account, site and group ids that create actions need.',
-    '',
-    '### Common patterns',
-    '- Triage a threat: `getThreats` or `getThreatDetails`, then `getAgents` (ids from `agentRealtimeInfo.agentId`), `getThreatNotes`, `getThreatTimeline` and, for a SHA1, `getHashReputation`.',
-    '- Contain an endpoint: `getAgents` to get the id and current `networkStatus`, `isolateHost` with `agentIds`, then `getAgents` again to confirm `networkStatus` is `disconnected`. Undo with `releaseHost`.',
-    '- Close a threat: `updateThreatVerdict`, `updateThreatStatus` (resolved) and `addThreatNote` with what was done.',
-    '- Mitigate: `mitigateThreat` (kill, quarantine, remediate, ...) or `rollbackThreat` for ransomware on Windows; read the result back with `getThreatDetails` (`threatInfo.mitigationStatus`).',
-    '- Remote script: `getRemoteScripts` for the scriptId, `executeScript`, poll `getRemoteScriptStatus` with `data.parentTaskId`, then `getRemoteScriptResults` or `downloadRemoteScriptResults` with a task id. `runScriptAndWait` does the three steps in one call (up to 240 s).',
-    '- Threat file: `fetchThreatFile` (one threat id and an archive password of at least 10 characters) asks SentinelOne to upload the file; once it is in the cloud, `downloadThreatFile` returns it.',
-    '- Collect files: `fetchAgentFiles`, wait for the upload activity in `getActivities` (agentIds, activityTypes 81), then `downloadAgentFile` with the agent id and activity id.',
-    '- Block a hash: check `searchBlocklist` first, then `addHashToBlocklist` with an explicit scope; undo with `removeHashFromBlocklist`.',
-    '',
-    '### Gotchas',
-    '- State-changing actions need explicit ids; an empty list is rejected because SentinelOne would apply an empty filter to every object.',
-    '- Responses to isolate, release, scan, mitigate and scripts are acknowledgments (`data.affected`), not completion: read the state back.',
-    '- `getSites` and `getGroups` never return registration tokens (they enroll new agents); read them in the SentinelOne console.',
-    '- List actions return one page: pass `pagination.nextCursor` back as `cursor` with the same filters until it is null.',
-    '- Download actions return the whole file as base64 in `content` (up to 25 MB): the output can be very large, so only download files you need to hand on, and decode `content` before use.',
-    '- `getHashReputation`, `getAgentCves` and the Deep Visibility actions (`createQuery`, `getQueryStatus`, `getQueryEvents`) are deprecated in the official SentinelOne API specification; poll `getQueryStatus` no faster than once per second.',
+    'State changes are asynchronous: read the state back. Lists return one page: pass `pagination.nextCursor` as `cursor`. Scope ids come from `getAccounts`, `getSites` and `getGroups`. Download only files you will process.',
   ].join('\n'),
 
   test: {
     enabled: true,
     description:
-      'Verifies the tenant URL, the API token and the Endpoints view permission by listing one agent (GET /web/api/v2.1/agents?limit=1).',
+      'Checks the console URL, the API token and the Endpoints view permission by listing one agent.',
     handler: async (ctx) => {
       const result = toListResult(
         await s1Request(ctx, {

@@ -7,124 +7,93 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/** Action descriptions shown to agents (from the approved TDD contract). */
+/** Action descriptions shown to agents and workflow authors. */
 export const ACTION_DESCRIPTIONS = {
   getAgents:
-    'Find SentinelOne agents (endpoints) by computerName (exact), uuid, ip (internal IP, contains), ids or free-text query, optionally within account, site or group scope. Returns id, uuid, computerName, networkStatus (connected, disconnected, connecting, disconnecting), lastActiveDate, isActive and infected. Use the returned id with isolateHost, releaseHost, initiateScan, moveAgent or executeScript, and read networkStatus again after isolateHost or releaseHost to confirm the change. One page per call (limit up to 1000); pass pagination.nextCursor as cursor for the next page.',
+    'Find agents (endpoints) by computerName, ip, uuid, ids or text. Returns id (the agent id for host actions), networkStatus and infected.',
   isolateHost:
-    "Network-quarantine (disconnect) SentinelOne agents by explicit agent ids (they keep talking to the management console). Explicit ids are required: an empty or missing list is rejected before any call, because SentinelOne applies an empty filter to every matching object. The connector first reads the agents (GET /web/api/v2.1/agents?ids=...): it fails with 'No agents found' when none exist and with 'Agent already isolated' when every requested agent is already disconnected; agents already in the target state are skipped and listed. Returns SentinelOne's asynchronous acknowledgment (data.affected), not completion: confirm with getAgents networkStatus. Undo with releaseHost.",
+    'Network-isolate agents by id (they still reach the console). Returns requested, skipped (already isolated) and notFound; confirm with getAgents.',
   releaseHost:
-    "Network-reconnect SentinelOne agents by explicit agent ids (undoes isolateHost). Explicit ids are required: an empty or missing list is rejected before any call, because SentinelOne applies an empty filter to every matching object. The connector first reads the agents (GET /web/api/v2.1/agents?ids=...): it fails with 'No agents found' when none exist and with 'Agent not isolated' when every requested agent is already connected; agents already in the target state are skipped and listed. Returns SentinelOne's asynchronous acknowledgment (data.affected), not completion: confirm with getAgents networkStatus. Undo with isolateHost.",
+    'Reconnect isolated agents by id. Returns requested, skipped (already connected) and notFound; confirm with getAgents.',
   executeScript:
-    "Run a SentinelOne Script Library script on explicit agents (agentIds or agentUuids; an empty target is rejected before the call with V1's message 'A filter must be defined; either ids or uuids'). Returns data.parentTaskId (null when requiresApproval makes it a pending execution; then data.pending is true and data.pendingExecutionId is set). Poll getRemoteScriptStatus with parentTaskId, then getRemoteScriptResults. outputDestination defaults to SentinelCloud. Runs code on endpoints: there is no undo.",
+    'Run a Script Library script on agents. Returns parentTaskId, or pending when the run needs approval. No undo.',
   getRemoteScriptStatus:
-    'Get the per-agent tasks of a remote script run by parentTaskId (from executeScript): status is one of created, scheduled, pending, pending_user_action, in_progress, failed, completed, canceled, expired, partially_completed. Poll until every task is completed, failed, canceled or expired, then call getRemoteScriptResults with the task ids.',
+    'Get the per-agent task status of a script run by parentTaskId. Poll until every task has finished.',
   getRemoteScriptResults:
-    'Get download links for remote script results by task ids (the data[].id values from getRemoteScriptStatus), optionally narrowed by computer names. Returns data.data.downloadLinks[] ({downloadUrl, fileName, taskId}) and per-task data.data.errors. A task with no link has no results available (V1 consumers treat that as deleted).',
+    'Get result download links of finished script tasks by task id. No link means no results.',
   downloadRemoteScriptResults:
-    "Download the results file of one remote script task: calls fetch-files with [taskId], takes the matching link and then fetches the file behind downloadUrl (a second GET, as V1 did). Returns content (base64), fileName, contentType, sizeBytes and taskId; the signed link used for the transfer is not returned. The file is returned as SentinelOne provides it: no unpacking or decryption. Fails with V1's message 'Download URL for script results of task id [<taskId>] not found' when SentinelOne returns no link for the task, and with a clear error when the file is larger than the 25 MB response cap. Rules for the second request: the 25 MB response cap applies (a larger file fails, never truncated); the Authorization token is sent only when the link's host equals the configured console host (V1 sent no token there); redirects to another host are not followed with credentials; the Kibana allowed hosts list applies to the link and every redirect. WARNING: the whole file comes back base64-encoded in content (up to 25 MB, about 33 MB of text); call this only when you have a plan to process the content, for example decoding it or sending it to an Elasticsearch ingest pipeline with the attachment processor.",
-  getRemoteScripts:
-    'List SentinelOne Script Library scripts (id, scriptName, scriptType, osTypes, inputExample, supportedDestinations) by free text, ids, OS types, script type or scope. Use the id as scriptId in executeScript or runScriptAndWait.',
+    'Download the results file of one script task as base64 content (up to 25 MB).',
+  getRemoteScripts: 'List Script Library scripts (id, name, type, OS) by text, ids, OS or scope.',
   fetchAgentFiles:
-    "Request up to 10 files (absolute paths, no wildcards) from one agent; SentinelOne uploads them asynchronously as an encrypted archive (up to 10 MB per command) protected by zipPassCode. The upload appears later as an activity (getActivities, agentIds, activity type 81 'User Requested Fetch Files'); download it with downloadAgentFile. No undo is needed (the endpoint only uploads).",
+    'Ask one agent to upload up to 10 files as an encrypted archive; once activity type 81 shows in getActivities, call downloadAgentFile.',
   downloadAgentFile:
-    'Download the archive an agent uploaded after fetchAgentFiles, by agentId and activityId (the upload activity from getActivities). Returns the file as base64 content with fileName, contentType and sizeBytes. Files larger than the 25 MB response cap fail with a clear error instead of being truncated. WARNING: the whole file comes back base64-encoded in content (up to 25 MB, about 33 MB of text); call this only when you have a plan to process the content, for example decoding it or sending it to an Elasticsearch ingest pipeline with the attachment processor.',
+    'Download the fetchAgentFiles archive by agentId and activityId as base64 content (up to 25 MB).',
   getActivities:
-    'Get SentinelOne activity log entries by agent ids, threat ids, activity type ids and time range (createdAtGte / createdAtLte, ISO 8601), optionally within scope. Use it to verify that an isolate, mitigation or file fetch landed (for example activity type 81 is a completed file fetch upload).',
+    'Read the activity log by agent, threat, activity type or time, for example to confirm an isolation or upload.',
   mitigateThreat:
-    "Apply a mitigation to explicit threat ids. action is one of kill, remediate, rollback-remediation, quarantine, un-quarantine, remove_macros, restore_macros (network-quarantine is not supported by the API). rollback-remediation works on Windows only; remediate on macOS and Windows. Explicit ids are required: an empty or missing list is rejected before any call, because SentinelOne applies an empty filter to every matching object. Per-item errors[] in the HTTP 200 body, or data.affected = 0, fail the step with the threat ids and SentinelOne's detail. Undo: un-quarantine reverses quarantine; kill and remediate cannot be undone. data.affected only acknowledges the request; data.details lists, per threat, the mitigation reports (status, action, lastUpdate) and is the place to see which action SentinelOne skipped. For ransomware rollback prefer rollbackThreat.",
-  rollbackThreat:
-    'Ransomware rollback: the same operation as mitigateThreat with action rollback-remediation, for explicit threat ids (Windows only; needs the VSS snapshot to exist on the endpoint). Explicit ids are required: an empty or missing list is rejected before any call, because SentinelOne applies an empty filter to every matching object. Per-item errors[] or data.affected = 0 fail the step. data.details lists the mitigation reports per threat.',
+    'Kill, quarantine, un-quarantine, remediate or otherwise mitigate threats by id. Remediate is Windows and macOS only; kill and remediate cannot be undone.',
+  rollbackThreat: 'Ransomware rollback of threats by id. Windows only; needs a VSS snapshot.',
   getThreats:
-    'Search the SentinelOne threats API (not the alerts API) by analystVerdicts, incidentStatuses, mitigationStatuses, confidenceLevels, contentHashes (SHA1), agentIds, computerNameContains, ids, scope and createdAt range. Returns threats with threatInfo (name, confidenceLevel, analystVerdict, incidentStatus, mitigationStatus, sha1) and agentRealtimeInfo. Feed data[].id into mitigateThreat, rollbackThreat, updateThreatVerdict, updateThreatStatus or addThreatNote. One page per call; pass pagination.nextCursor as cursor.',
+    'Search threats (endpoint detections, not alerts) by verdict, status, mitigation, confidence, SHA1, agent, computer or date.',
   updateThreatVerdict:
-    'Write the analyst verdict to explicit threat ids. Explicit ids are required: an empty or missing list is rejected before any call, because SentinelOne applies an empty filter to every matching object. Per-item errors[] or data.affected = 0 fail the step. To undo, read the previous verdict (getThreatDetails) first and write it back.',
-  updateThreatStatus:
-    'Write the incident status (and optionally the analyst verdict) to explicit threat ids. Explicit ids are required: an empty or missing list is rejected before any call, because SentinelOne applies an empty filter to every matching object. Per-item errors[] or data.affected = 0 fail the step. Undo by writing the previous status back.',
+    'Set the analyst verdict (true_positive, false_positive, ...) of threats by id.',
+  updateThreatStatus: 'Set the incident status, and optionally the verdict, of threats by id.',
   addThreatNote:
-    "Append a note (2 to 10000 characters) to explicit threat ids, for example 'Host isolated by Elastic workflow <name> after approval by <user>'. Explicit ids are required: an empty or missing list is rejected before any call, because SentinelOne applies an empty filter to every matching object. Notes cannot be removed through the API.",
-  getThreatNotes:
-    'Read the notes of one threat (text, creator, createdAt) for context before a workflow acts.',
+    'Add a note to threats by id, for example the action taken. Notes cannot be removed.',
+  getThreatNotes: 'Read the notes of one threat (text, creator, createdAt).',
   addHashToBlocklist:
-    'Add a file hash to the SentinelOne blocklist for one OS type at an explicit scope (accountIds, siteIds, groupIds or tenant: at least one is required; the smallest scope that covers the need is best). Give sha1 and/or sha256. The connector always sends data.type = black_hash (any other type would create an exclusion instead). Check searchBlocklist first to avoid duplicates. Undo with removeHashFromBlocklist.',
-  removeHashFromBlocklist:
-    'Delete blocklist items by explicit ids (data[].id from addHashToBlocklist or searchBlocklist). DELETE with a JSON body; the connector always sends data.type = black_hash. Undo by adding the hash again.',
+    'Block a SHA1 or SHA256 hash for one OS at the smallest scope needed. Check searchBlocklist first.',
+  removeHashFromBlocklist: 'Remove blocklist items by id (from searchBlocklist).',
   searchBlocklist:
-    'Search blocklist items (the connector always sends type=black_hash) by exact value (a single hash string), valueContains, scope or tenant. Use it before addHashToBlocklist to avoid duplicates, and to find the item id for removeHashFromBlocklist.',
-  getHashReputation:
-    "Deprecated in the official SentinelOne API specification: SentinelOne may remove this route, so prefer another action where one exists. Get SentinelOne's cloud verdict for a SHA1 hash: data.verdict is malicious, non-malicious or unknown. Use it to enrich before blocking.",
-  createQuery:
-    'Deprecated in the official SentinelOne API specification: SentinelOne may remove this route, so prefer another action where one exists. Start a Deep Visibility query (S1QL) over fromDate..toDate (ISO 8601), optionally within accounts or sites; queryType is one of events or processState (sent as a one-item list: the API allows exactly one). Returns data.queryId: poll getQueryStatus, then page getQueryEvents. The query job expires on its own; nothing on the endpoints changes.',
-  getQueryStatus:
-    'Deprecated in the official SentinelOne API specification: SentinelOne may remove this route, so prefer another action where one exists. Get the state of a Deep Visibility query by queryId: data.responseState is one of PROCESS_RUNNING, EVENTS_RUNNING, RUNNING, FINISHED, FAILED, FAILED_CLIENT, ERROR, QUERY_CANCELLED, TIMED_OUT, QUERY_EXPIRED; data.progressStatus is a percentage. SentinelOne allows 1 call per second per token on this route: poll no faster. Stop on FINISHED (then getQueryEvents) or any failure state.',
-  getQueryEvents:
-    'Deprecated in the official SentinelOne API specification: SentinelOne may remove this route, so prefer another action where one exists. Page through the events of a FINISHED Deep Visibility query: each event has objectType, createdAt, processName, agentName, agentId, agentIp, fileSha1, srcIp, dstIp. Use agentId to scope an incident and feed isolateHost.',
+    'Search blocklisted hashes by exact or partial value or scope; returns the item ids.',
   searchAlerts:
-    'Search the SentinelOne alerts API (cloud-detection alerts, not the threats API) by severity (Info, Low, Medium, High, Critical), incidentStatus (UNRESOLVED, IN_PROGRESS, RESOLVED), analystVerdict (UNDEFINED, TRUE_POSITIVE, FALSE_POSITIVE, SUSPICIOUS), ids, scope and createdAt range. Returns alertInfo, ruleInfo, agentDetectionInfo and process info; use alertInfo.alertId with updateAlertVerdict or updateAlertStatus.',
-  updateAlertVerdict:
-    'Write the analystVerdict to explicit alert ids on the SentinelOne alerts API (cloud-detection alerts, not threats; the API accepts lower or upper case and the connector sends lower case). Explicit ids are required: an empty or missing list is rejected before any call, because SentinelOne applies an empty filter to every matching object. data.affected = 0 fails the step. To undo, read the alert first (searchAlerts) and write the previous value back.',
-  updateAlertStatus:
-    'Write the incidentStatus to explicit alert ids on the SentinelOne alerts API (cloud-detection alerts, not threats; the API accepts lower or upper case and the connector sends lower case). Explicit ids are required: an empty or missing list is rejected before any call, because SentinelOne applies an empty filter to every matching object. data.affected = 0 fails the step. To undo, read the alert first (searchAlerts) and write the previous value back.',
-  getSites:
-    'List SentinelOne sites (id, name, accountId, state) by name search, site ids or account ids. The response data is {allSites, sites[]}. Use the ids as siteIds scope in other actions.',
+    'Search STAR rule alerts (not threats) by severity, status, verdict, ids, scope or date. Returns alertInfo.alertId and rule details.',
+  updateAlertVerdict: 'Set the analyst verdict of alerts by alertId (from searchAlerts).',
+  updateAlertStatus: 'Set the incident status of alerts by alertId (from searchAlerts).',
+  getSites: 'List sites (id, name, accountId, state) by name or ids, for the siteIds scope.',
   getGroups:
-    'List SentinelOne groups (id, name, siteId, type, totalAgents) by name search, group, site or account ids and type (static, dynamic, pinned). Use the id as groupIds scope or as groupId in moveAgent.',
-  getAccounts:
-    'List SentinelOne accounts (id, name, state, activeAgents) by name search or account ids. Use the ids as accountIds scope.',
+    'List groups (id, name, siteId, type) by name, ids, site, account or type, for the groupIds scope.',
+  getAccounts: 'List accounts (id, name, state) by name or ids, for the accountIds scope.',
   createExclusion:
-    'Create an exclusion at an explicit scope (accountIds, siteIds, groupIds or tenant: at least one is required; use the smallest scope). type is path, certificate, browser, file_type or white_hash; value depends on the type (a path, a certificate signer, a hash...). Exclusions stop detection for the item, so they weaken protection: SentinelOne recommends narrow exclusions. Undo with deleteExclusion.',
-  listExclusions:
-    'List SentinelOne exclusions by type (path, certificate, browser, file_type, white_hash, dv_exclusions), osTypes, exact value, valueContains, ids, scope or tenant.',
-  deleteExclusion:
-    'Delete exclusions by explicit ids (DELETE with a JSON body). Undo by creating the exclusion again from its saved definition.',
+    'Create a path, certificate, browser, file type or hash exclusion at an explicit scope. It stops detection: keep it narrow.',
+  listExclusions: 'List exclusions by type, OS, exact or partial value, ids or scope.',
+  deleteExclusion: 'Delete exclusions by id (from listExclusions).',
   moveAgent:
-    'Move explicit agent ids to the target group (groupId from getGroups), for example to apply a stricter policy as an alternative containment. Explicit ids are required: an empty or missing list is rejected before any call, because SentinelOne applies an empty filter to every matching object. Returns data.agentsMoved. Undo by moving the agents back to their previous group (read groupId with getAgents first).',
+    'Move agents by id to a group, for example one with a stricter policy. Returns agentsMoved, skipped (already there) and notFound.',
   fetchThreatFile:
-    'Ask SentinelOne to upload the file of ONE threat (threatId) to the management console, encrypted with the password you choose, at least 10 characters (SentinelOne rejects shorter ones; the API reference says only "File encryption password"). SentinelOne accepts exactly one threat per request, so no list is taken. The upload is asynchronous and the response only acknowledges the request (data.affected; 0 fails the action): wait for it, then call downloadThreatFile. Requires the Fetch Threat File permission (the Admin, IR Team and SOC roles have it). The password is sensitive and is never logged or returned.',
+    'Ask SentinelOne to upload the file of one threat, encrypted with your password, then call downloadThreatFile. Needs the Fetch Threat File permission.',
   downloadThreatFile:
-    "Download a threat's file stored in the SentinelOne cloud: reads data.downloadUrl and data.fileName for the threat, then fetches the file behind downloadUrl. Returns content (base64), fileName, contentType, sizeBytes and threatId; the signed link used for the transfer is not returned. SentinelOne has the file in the cloud only after it was uploaded: when it returns no link, run fetchThreatFile first and retry once the upload finished. The file is returned as SentinelOne provides it: the connector does not unpack or decrypt it, and the API reference does not state its format. Fails with 'No file download link for threat [<threatId>]' when SentinelOne returns no link, and with a clear error when the file is larger than the 25 MB response cap. Rules for the second request: the 25 MB response cap applies (a larger file fails, never truncated); the Authorization token is sent only when the link's host equals the configured console host (V1 sent no token there); redirects to another host are not followed with credentials; the Kibana allowed hosts list applies to the link and every redirect. WARNING: the whole file comes back base64-encoded in content (up to 25 MB, about 33 MB of text); call this only when you have a plan to process the content, for example decoding it or sending it to an Elasticsearch ingest pipeline with the attachment processor.",
-  initiateScan:
-    'Start a Full Disk Scan on explicit agent ids. Explicit ids are required: an empty or missing list is rejected before any call, because SentinelOne applies an empty filter to every matching object. Returns the acknowledgment data.affected; data.affected = 0 fails the step. Stop it with abortScan.',
-  abortScan:
-    'Abort a running Full Disk Scan on explicit agent ids (a later scan starts from the beginning). Explicit ids are required: an empty or missing list is rejected before any call, because SentinelOne applies an empty filter to every matching object. Returns the acknowledgment data.affected; data.affected = 0 fails the step. Start again with initiateScan.',
+    'Download a threat file uploaded by fetchThreatFile as base64 content (up to 25 MB). Fails until the upload exists.',
+  initiateScan: 'Start a full disk scan on agents by id; abortScan stops it.',
+  abortScan: 'Stop a running full disk scan on agents by id.',
   shutdownAgent:
-    'Shut down explicit agent ids. Last resort: SentinelOne recommends isolateHost for infected endpoints; offline endpoints cannot be shut down. Explicit ids are required: an empty or missing list is rejected before any call, because SentinelOne applies an empty filter to every matching object. Returns the acknowledgment data.affected; data.affected = 0 fails the step. There is NO undo through the API: a person must start the host again.',
-  broadcastMessage:
-    'Show a message of 1 to 140 characters to the users of explicit agent ids (Windows and macOS endpoints; not Linux). Explicit ids are required: an empty or missing list is rejected before any call, because SentinelOne applies an empty filter to every matching object. A message cannot be recalled.',
+    'Shut down agents by id. Last resort (prefer isolateHost): a person must restart the host.',
+  broadcastMessage: 'Show a short message to the users of agents by id. Windows and macOS only.',
   createIOC:
-    'Create one threat-intelligence indicator at an explicit scope (accountIds, siteIds, groupIds or tenant: at least one is required). type is DNS, IPV4, IPV6, MD5, SHA1, SHA256 or URL; the connector always sends method = EQUALS. validUntil is optional: SentinelOne defaults it (14 days for IPs, 90 for URLs and domains, 180 for hashes) and clamps later dates (30 days for IPs, 180 otherwise). Undo with deleteIOC.',
-  searchIOCs:
-    'Search threat-intelligence indicators by exact value, type, source labels and account or site scope.',
-  deleteIOC:
-    'Delete indicators by explicit uuids within an account (DELETE with a JSON body filter; the API requires the account id plus one more field). A filter with only a scope would delete every indicator of that scope, so uuids are required. Undo by creating the indicator again.',
+    'Create one threat-intelligence indicator (hash, IP, domain or URL) at an explicit scope.',
+  searchIOCs: 'Search threat-intelligence indicators by value, type, source or scope.',
+  deleteIOC: 'Delete threat-intelligence indicators by uuid within one account.',
   getInstalledApplications:
-    'List installed applications for explicit agent ids (required by the API). The route returns the full list in one response (no paging).',
-  getAgentCves:
-    'Deprecated in the official SentinelOne API specification: SentinelOne may remove this route, so prefer another action where one exists. List CVEs of installed applications by CVE ids, application ids or scope (the route has no per-agent filter). Needs Application Risk on the account.',
+    'List the installed applications of agents by id (full list, no paging).',
   getThreatDetails:
-    'Get full threat records for explicit threat ids (required in V2 so a lookup never lists every threat): threatInfo (name, sha1, filePath, confidenceLevel, analystVerdict, incidentStatus, mitigationStatus), agentRealtimeInfo and indicators. Same route as getThreats filtered by ids.',
-  getThreatTimeline:
-    'Get the timeline of one threat (activityType, primaryDescription, secondaryDescription, createdAt, hash), with optional free-text search.',
+    'Get full records, with indicators, of known threat ids. To search, use getThreats.',
+  getThreatTimeline: 'Get the event timeline of one threat, with optional text search.',
   listFirewallRules:
-    'List Firewall Control rules. The API requires at least one filter (name, actions, statuses, osTypes or a scope): the connector rejects a call with none.',
+    'List Firewall Control rules by name, action, status, OS or scope. A call with no filter is rejected.',
   createFirewallRule:
-    'Create a Firewall Control rule (needs the Firewall Control add-on). Required: name (up to 200 characters), action (Allow or Block), status (Enabled or Disabled) and an explicit scope (accountIds, siteIds, groupIds or tenant). The connector sends osTypes and remoteHosts (the API marks the single osType and remoteHost fields deprecated). Undo with deleteFirewallRule.',
-  deleteFirewallRule:
-    'Delete Firewall Control rules by explicit ids (DELETE with a JSON body filter). Explicit ids are required: an empty or missing list is rejected before any call, because SentinelOne applies an empty filter to every matching object. Undo only by creating the rule again.',
+    'Create an Allow or Block Firewall Control rule at an explicit scope. Needs the Firewall Control add-on.',
+  deleteFirewallRule: 'Delete Firewall Control rules by id (from listFirewallRules).',
   createStarRule:
-    'Create a STAR custom detection rule. Required: name, severity, queryType (events, correlation, uebafirstseen, scheduled), s1ql and an explicit scope (accountIds, siteIds, groupIds or tenant). The API also requires expirationMode and status: the connector sends expirationMode Permanent and status Draft unless given (status Active deploys the rule at once). Undo with deleteStarRule.',
+    'Create a STAR detection rule from an S1QL query at an explicit scope. It is a Draft unless status is Active.',
   updateStarRule:
-    "Update a STAR rule by ruleId. The API has no partial update (the PUT body is the full rule with data and filter), so the connector reads the current rule (GET /web/api/v2.1/cloud-detection/rules?ids=<ruleId>), overlays the given fields and sends the full definition, keeping the rule's scope. A stored rule without expirationMode is sent as Permanent, because the API requires it. At least one field to change is required. Undo by writing the previous definition back (returned as previous).",
-  enableStarRules:
-    'Activate STAR rules by explicit rule ids. Explicit ids are required: an empty or missing list is rejected before any call, because SentinelOne applies an empty filter to every matching object. Undo with disableStarRules.',
-  disableStarRules:
-    'Disable STAR rules by explicit rule ids. Explicit ids are required: an empty or missing list is rejected before any call, because SentinelOne applies an empty filter to every matching object. Undo with enableStarRules.',
-  deleteStarRule:
-    'Delete STAR rules by explicit rule ids. Explicit ids are required: an empty or missing list is rejected before any call, because SentinelOne applies an empty filter to every matching object. Undo only by creating the rule again from its saved definition.',
+    'Change fields of one STAR rule by ruleId, keeping the rest. Returns the rule and its previous definition.',
+  enableStarRules: 'Activate STAR rules by id, for example a Draft from createStarRule.',
+  disableStarRules: 'Disable STAR rules by id; they stop raising alerts.',
+  deleteStarRule: 'Delete STAR rules by id. This cannot be undone.',
   runScriptAndWait:
-    'Composite of executeScript, getRemoteScriptStatus and getRemoteScriptResults in one step: run the script on explicit agents (agentIds or agentUuids), poll the task status every 5 seconds for up to waitSeconds (10 to 240, default 100), then return the tasks and their results download links. If the tasks are not finished in time, returns timedOut = true with parentTaskId so the workflow can continue with getRemoteScriptStatus. A pending execution (requiresApproval) returns pending = true without polling. Runs code on endpoints: no undo.',
+    'Run a script on agents and wait up to waitSeconds. Returns tasks and download links, or timedOut with parentTaskId.',
   getApplicationCves:
-    "List the CVEs of one application from SentinelOne Application Risk (GET /web/api/v2.1/application-management/risks/cves). Read-only. Target the application in exactly one way: applicationIds (one application id; several ids need Ranger Insights) or applicationName + applicationVendor + applicationVersions (SentinelOne requires applicationVersions unless the account has Ranger Insights, and answers HTTP 400 with a clear message otherwise). A call with neither is rejected before any request. applicationVendor must equal the value SentinelOne stores, which is HTML-escaped, for example 'Ubuntu Developers &lt;a@b&gt;' (the raw '<a@b>' form matches nothing). Application ids come from the SentinelOne console or from the Application Risk inventory. Returns data[] with cveId, severity, nvdBaseScore (a string such as '9.80'), cvssVersion, publishedDate, description, nvdUrl and mitreUrl; severity and nvdBaseScore can be null. One page per call (limit 1 to 1000, skip 0 to 1000); pass pagination.nextCursor as cursor with the same filters until it is null. pagination.totalItems is reliable only on the first page: SentinelOne returns 0 on cursor pages and with skipCount. countOnly returns only totalItems. Needs Application Risk on the account and the Applications Page view risks permission (HTTP 403 otherwise); Ranger Insights adds multi-id queries, name and vendor without a version, and the remediationLevels, exploitedInTheWild, exploitCodeMaturity and reportConfidence filters. An alternative to the deprecated getAgentCves for new use; the old action keeps working.",
+    "List the CVEs of one application by applicationIds (one id, from the Application Risk inventory) or applicationName + applicationVendor + applicationVersions; the vendor is HTML-escaped ('&lt;'). severity and nvdBaseScore can be null; totalItems is reliable only on the first page. Ranger Insights allows more ids and filters.",
   runQuery:
-    "Run a Singularity Data Lake Power Query (PQ) and return its result table in one read-only step, through the long-running query service (POST /sdl/v2/api/queries, then GET and DELETE /sdl/v2/api/queries/{id}; the stored API token is sent as Authorization: Bearer). Nothing on the endpoints changes. The query must use PQ syntax, the filter first and then pipes, for example 'dataSource.name = \"x\" | limit 10'; a bare '*' is invalid. Legacy Deep Visibility S1QL 1.0 queries are not supported: rewrite them in PQ. The connector launches the query, polls it every 2 seconds for up to waitSeconds (10 to 100, default 60, which keeps one call under the 120-second limit of the Kibana connector execute API) and always deletes the query afterwards. Returns status 'completed' with data (columns, values capped at 1000 rows with truncated and rowCount, matchCount, warnings, partialResultsDueToTimeLimit, omittedEvents), stepsCompleted, stepsTotal, resolvedTimeRange (nanoseconds) and cpuUsage; or status 'timedOut' with the progress known so far and data null: the query was deleted, so narrow the time range (startTime, endTime; default the last 24 hours) or the filter and run it again. queryDeleted is false, with cleanupFailed true, when the delete failed; that never fails the action. A query the service rejects (HTTP 400 with its message) or reports as failed fails the action. Rate limits seen on the service: a burst of 8 requests refilled at 5 per second; HTTP 429 is retried honoring Retry-After up to 30 seconds (at most 3 attempts). Needs the Skylight Query API view permission (Singularity Data Lake query access): HTTP 403 means the user lacks it. An alternative to the deprecated createQuery, getQueryStatus and getQueryEvents (legacy Deep Visibility) for new use; the old actions keep working.",
+    "Run a read-only Singularity Data Lake Power Query (PQ) and return up to 1000 rows. Filter first, then pipes: 'dataSource.name = \"x\" | limit 10'; a bare '*' and S1QL 1.0 queries are invalid. On timedOut, narrow the time range (default 24 hours).",
 } as const;

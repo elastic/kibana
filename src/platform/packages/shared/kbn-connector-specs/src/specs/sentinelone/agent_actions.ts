@@ -17,11 +17,6 @@ import {
   toListResult,
   withAdditionalFilters,
 } from './client';
-import {
-  AGENT_ALREADY_ISOLATED_MESSAGE,
-  AGENT_NOT_ISOLATED_MESSAGE,
-  NO_AGENTS_FOUND_MESSAGE,
-} from './constants';
 import { ACTION_DESCRIPTIONS } from './descriptions';
 import { ACTIVITY_FILTER_NAMES, AGENT_FILTER_NAMES } from './filter_names';
 import {
@@ -37,7 +32,7 @@ import {
   MoveAgentInputSchema,
   ReleaseHostInputSchema,
   ShutdownAgentInputSchema,
-} from './types';
+} from './agent_types';
 import type {
   AbortScanInput,
   BroadcastMessageInput,
@@ -51,7 +46,7 @@ import type {
   MoveAgentInput,
   ReleaseHostInput,
   ShutdownAgentInput,
-} from './types';
+} from './agent_types';
 
 const EMPTY_AGENT_IDS =
   'agentIds must list at least one agent id (an empty filter would target every agent)';
@@ -59,7 +54,58 @@ const EMPTY_AGENT_IDS =
 interface AgentState {
   id?: string;
   networkStatus?: string;
+  groupId?: string;
 }
+
+/** Ids per agent read: the ids go into a query string, which gateways reject above about 8 KB. */
+const AGENT_READ_BATCH_SIZE = 300;
+
+interface AgentPartition {
+  /** ids the vendor request is sent for */
+  requested: string[];
+  /** ids already in the target state */
+  skipped: string[];
+  /** ids the agent read did not return */
+  notFound: string[];
+}
+
+/** Reads the agents by id and splits the ids into requested, skipped (already in the target state) and notFound. */
+const partitionAgents = async (
+  ctx: ActionContext,
+  action: string,
+  agentIds: string[],
+  inTargetState: (agent: AgentState) => boolean
+): Promise<AgentPartition> => {
+  const ids = [...new Set(agentIds)];
+  const agents = new Map<string, AgentState>();
+  for (let start = 0; start < ids.length; start += AGENT_READ_BATCH_SIZE) {
+    const batch = ids.slice(start, start + AGENT_READ_BATCH_SIZE);
+    const lookup = toListResult(
+      await s1Request(ctx, {
+        action,
+        method: 'GET',
+        path: '/agents',
+        params: { ids: batch, limit: batch.length },
+        mutating: false,
+      })
+    );
+    for (const agent of lookup.data as AgentState[]) {
+      agents.set(String(agent.id), agent);
+    }
+  }
+  const partition: AgentPartition = { requested: [], skipped: [], notFound: [] };
+  for (const id of ids) {
+    const agent = agents.get(id);
+    if (!agent) {
+      partition.notFound.push(id);
+    } else if (inTargetState(agent)) {
+      partition.skipped.push(id);
+    } else {
+      partition.requested.push(id);
+    }
+  }
+  return partition;
+};
 
 /** Isolate/release share one flow: read the agents, skip those already in the target state, act on the rest. */
 const changeNetworkState = async (
@@ -67,45 +113,28 @@ const changeNetworkState = async (
   action: 'isolateHost' | 'releaseHost',
   agentIds: string[]
 ) => {
-  const ids = requireIds(agentIds, EMPTY_AGENT_IDS);
-  const lookup = toListResult(
-    await s1Request(ctx, {
-      action,
-      method: 'GET',
-      path: '/agents',
-      params: { ids, limit: ids.length },
-      mutating: false,
-    })
-  );
-  const agents = lookup.data as AgentState[];
-  if (agents.length === 0) {
-    throw new Error(NO_AGENTS_FOUND_MESSAGE);
-  }
   const isolating = action === 'isolateHost';
-  const inTargetState = (agent: AgentState) =>
-    isolating
-      ? agent.networkStatus === 'disconnected' || agent.networkStatus === 'disconnecting'
-      : agent.networkStatus === 'connected' || agent.networkStatus === 'connecting';
-  const foundIds = new Set(agents.map((agent) => String(agent.id)));
-  const skipped = agents.filter(inTargetState).map((agent) => String(agent.id));
-  const targets = agents.filter((agent) => !inTargetState(agent)).map((agent) => String(agent.id));
-  if (targets.length === 0) {
-    throw new Error(isolating ? AGENT_ALREADY_ISOLATED_MESSAGE : AGENT_NOT_ISOLATED_MESSAGE);
+  const partition = await partitionAgents(
+    ctx,
+    action,
+    requireIds(agentIds, EMPTY_AGENT_IDS),
+    (agent) =>
+      isolating
+        ? agent.networkStatus === 'disconnected' || agent.networkStatus === 'disconnecting'
+        : agent.networkStatus === 'connected' || agent.networkStatus === 'connecting'
+  );
+  if (partition.requested.length === 0) {
+    return { data: { affected: 0 }, ...partition };
   }
   const body = await s1Request(ctx, {
     action,
     method: 'POST',
     path: isolating ? '/agents/actions/disconnect' : '/agents/actions/connect',
-    body: { filter: { ids: targets } },
+    body: { filter: { ids: partition.requested } },
     mutating: true,
   });
-  assertApplied(action, targets, body);
-  return {
-    ...body,
-    skipped,
-    notFound: ids.filter((id) => !foundIds.has(id)),
-    requested: ids.length,
-  };
+  assertApplied(action, partition.requested, body);
+  return { ...body, ...partition };
 };
 
 /** The agent bulk actions (scan, abort, shutdown, broadcast) all take an explicit ids filter. */
@@ -192,7 +221,7 @@ export const agentActions: ConnectorSpec['actions'] = {
   },
 
   shutdownAgent: {
-    isTool: true,
+    isTool: false,
     scope: 'destroy',
     description: ACTION_DESCRIPTIONS.shutdownAgent,
     input: ShutdownAgentInputSchema,
@@ -212,12 +241,21 @@ export const agentActions: ConnectorSpec['actions'] = {
   },
 
   moveAgent: {
-    isTool: true,
+    isTool: false,
     scope: 'destroy',
     description: ACTION_DESCRIPTIONS.moveAgent,
     input: MoveAgentInputSchema,
     handler: async (ctx, input: MoveAgentInput) => {
-      const ids = requireIds(input.agentIds, EMPTY_AGENT_IDS);
+      const partition = await partitionAgents(
+        ctx,
+        'moveAgent',
+        requireIds(input.agentIds, EMPTY_AGENT_IDS),
+        (agent) => String(agent.groupId ?? '') === input.groupId
+      );
+      const ids = partition.requested;
+      if (ids.length === 0) {
+        return { data: { agentsMoved: 0 }, ...partition };
+      }
       const body = await s1Request(ctx, {
         action: 'moveAgent',
         method: 'PUT',
@@ -231,7 +269,7 @@ export const agentActions: ConnectorSpec['actions'] = {
           `SentinelOne did not apply moveAgent to ${ids.join(', ')}: SentinelOne moved 0 agents`
         );
       }
-      return assertApplied('moveAgent', ids, body);
+      return { ...assertApplied('moveAgent', ids, body), ...partition };
     },
   },
 

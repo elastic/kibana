@@ -129,7 +129,7 @@ describe('retry policy', () => {
       mutating: true,
     });
 
-  it('[C-http-policy] retries a read on 503 and honours Retry-After (capped at 30 s)', async () => {
+  it('retries a read on 503 and honours Retry-After (capped at 30 s)', async () => {
     request
       .mockRejectedValueOnce(httpError(503, {}, { 'retry-after': '120' }))
       .mockRejectedValueOnce(httpError(429, {}, { 'retry-after': '2' }))
@@ -139,7 +139,7 @@ describe('retry policy', () => {
     expect(sleep.mock.calls.map(([ms]) => ms)).toEqual([30_000, 2_000]);
   });
 
-  it('[C-http-policy] uses exponential backoff with jitter without Retry-After', async () => {
+  it('uses exponential backoff with jitter without Retry-After', async () => {
     request
       .mockRejectedValueOnce(httpError(502))
       .mockRejectedValueOnce(httpError(504))
@@ -152,7 +152,7 @@ describe('retry policy', () => {
     expect(second).toBeLessThan(5_500);
   });
 
-  it('[C-http-policy] gives up after 3 attempts with the rate-limit message', async () => {
+  it('gives up after 3 attempts with the rate-limit message', async () => {
     request.mockRejectedValue(httpError(429));
     await expect(read()).rejects.toThrow(
       'SentinelOne rate limit reached for getAgents; try again later'
@@ -160,7 +160,7 @@ describe('retry policy', () => {
     expect(request).toHaveBeenCalledTimes(3);
   });
 
-  it('[C-http-policy] retries a state-changing call on 429 only', async () => {
+  it('retries a state-changing call on 429 only', async () => {
     request.mockRejectedValueOnce(httpError(429)).mockResolvedValueOnce({ status: 200, data: {} });
     await write();
     expect(request).toHaveBeenCalledTimes(2);
@@ -173,7 +173,7 @@ describe('retry policy', () => {
     expect(request).toHaveBeenCalledTimes(1);
   });
 
-  it('[C-http-policy] never retries a timeout or network error', async () => {
+  it('never retries a timeout or network error', async () => {
     request.mockRejectedValueOnce(
       Object.assign(new Error('timeout of 60000ms exceeded'), {
         isAxiosError: true,
@@ -247,7 +247,7 @@ describe('downloadFile', () => {
     headers: {},
   });
 
-  it('[C-edge-redirects-and-hosts] sends the token only to the console origin, never to another host or an http downgrade', async () => {
+  it('sends the token only to the console origin, never to another host or an http downgrade', async () => {
     request
       .mockResolvedValueOnce({
         status: 302,

@@ -47,6 +47,3 @@ export const FILE_TOO_LARGE_MESSAGE =
   'File larger than 25 MB; download it from the SentinelOne console';
 
 export const NO_SCRIPT_TARGET_MESSAGE = 'A filter must be defined; either ids or uuids';
-export const NO_AGENTS_FOUND_MESSAGE = 'No agents found';
-export const AGENT_ALREADY_ISOLATED_MESSAGE = 'Agent already isolated';
-export const AGENT_NOT_ISOLATED_MESSAGE = 'Agent not isolated';

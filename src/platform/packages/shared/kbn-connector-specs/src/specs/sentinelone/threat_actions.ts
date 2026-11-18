@@ -14,7 +14,6 @@ import {
   AddThreatNoteInputSchema,
   DownloadThreatFileInputSchema,
   FetchThreatFileInputSchema,
-  GetHashReputationInputSchema,
   GetThreatDetailsInputSchema,
   GetThreatNotesInputSchema,
   GetThreatTimelineInputSchema,
@@ -23,12 +22,11 @@ import {
   RollbackThreatInputSchema,
   UpdateThreatStatusInputSchema,
   UpdateThreatVerdictInputSchema,
-} from './types';
+} from './threat_types';
 import type {
   AddThreatNoteInput,
   DownloadThreatFileInput,
   FetchThreatFileInput,
-  GetHashReputationInput,
   GetThreatDetailsInput,
   GetThreatNotesInput,
   GetThreatTimelineInput,
@@ -37,7 +35,7 @@ import type {
   RollbackThreatInput,
   UpdateThreatStatusInput,
   UpdateThreatVerdictInput,
-} from './types';
+} from './threat_types';
 
 const EMPTY_THREAT_IDS =
   'threatIds must list at least one threat id (an empty filter would target every threat)';
@@ -236,19 +234,5 @@ export const threatActions: ConnectorSpec['actions'] = {
       });
       return assertApplied('fetchThreatFile', [input.threatId], body);
     },
-  },
-
-  getHashReputation: {
-    isTool: true,
-    scope: 'read',
-    description: ACTION_DESCRIPTIONS.getHashReputation,
-    input: GetHashReputationInputSchema,
-    handler: async (ctx, input: GetHashReputationInput) =>
-      s1Request(ctx, {
-        action: 'getHashReputation',
-        method: 'GET',
-        path: `/hashes/${encodeURIComponent(input.hash)}/verdict`,
-        mutating: false,
-      }),
   },
 };

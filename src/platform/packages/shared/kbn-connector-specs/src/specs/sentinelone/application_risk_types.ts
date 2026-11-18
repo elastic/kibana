@@ -15,7 +15,7 @@ const ID_PATTERN = /^[A-Za-z0-9_-]+$/;
 const UPPER_VALUE_PATTERN = /^[A-Z][A-Z_]*$/;
 /** Any value that does not break the comma-separated list encoding. */
 const NO_COMMA_PATTERN = /^[^,]+$/;
-const ISO_DATE_HINT = 'ISO 8601 date-time, for example 2026-01-31T00:00:00Z';
+const ISO_DATE_HINT = 'ISO 8601, for example 2026-01-31T00:00:00Z';
 
 const idString = (maxLength: number) => z.string().min(1).max(maxLength).regex(ID_PATTERN);
 const upperValues = (maxItems: number, description: string) =>
@@ -25,7 +25,7 @@ const upperValues = (maxItems: number, description: string) =>
     .optional()
     .describe(description);
 const isoDate = (description: string) =>
-  z.string().min(1).max(40).optional().describe(`${description} (${ISO_DATE_HINT})`);
+  z.string().min(1).max(40).optional().describe(`${description}, ${ISO_DATE_HINT}`);
 
 export const APPLICATION_CVE_SORT_FIELDS = [
   'cveId',
@@ -46,7 +46,7 @@ export const GetApplicationCvesInputSchema = lazySchema(() =>
         .max(100)
         .optional()
         .describe(
-          'Application id to list CVEs for. Send one id: SentinelOne accepts several only with Ranger Insights (HTTP 400 otherwise). Use this or applicationName + applicationVendor, not both'
+          'Application Risk inventory id; send one (several need Ranger Insights). Use this or applicationName + applicationVendor'
         ),
       applicationName: z
         .string()
@@ -60,7 +60,7 @@ export const GetApplicationCvesInputSchema = lazySchema(() =>
         .max(512)
         .optional()
         .describe(
-          'Application vendor exactly as SentinelOne stores it, which is HTML-escaped, for example "Ubuntu Developers &lt;a@b&gt;"; requires applicationName'
+          'Application vendor exactly as stored, HTML-escaped, for example "Ubuntu Developers &lt;a@b&gt;"; requires applicationName'
         ),
       applicationVersions: z
         .array(z.string().min(1).max(255).regex(NO_COMMA_PATTERN))
@@ -68,19 +68,14 @@ export const GetApplicationCvesInputSchema = lazySchema(() =>
         .max(100)
         .optional()
         .describe(
-          'Application versions, for example 3:4.7.7+~4.1.0-1; only with applicationName + applicationVendor. SentinelOne requires it unless the account has Ranger Insights (HTTP 400 otherwise)'
+          'Application versions, for example 3:4.7.7+~4.1.0-1; with applicationName + applicationVendor, required without Ranger Insights'
         ),
       cveIdContains: z
         .array(z.string().min(1).max(32).regex(ID_PATTERN))
         .max(100)
         .optional()
-        .describe(
-          'CVE id contains, for example CVE-2021-23383 or 2021-23 (sent as cveId__contains)'
-        ),
-      severities: upperValues(
-        10,
-        'Severities, for example CRITICAL, HIGH, MEDIUM, LOW (records with no severity have severity null)'
-      ),
+        .describe('CVE id contains, for example CVE-2021-23383 or 2021-23'),
+      severities: upperValues(10, 'Severities, for example CRITICAL, HIGH, MEDIUM, LOW'),
       remediationLevels: upperValues(
         10,
         'Remediation levels, for example OFFICIAL_FIX, TEMPORARY_FIX (needs Ranger Insights)'
@@ -104,60 +99,39 @@ export const GetApplicationCvesInputSchema = lazySchema(() =>
         .describe('Analyst verdicts: Default (not edited), False Positive or Added CVE'),
       publishedDateGte: isoDate('Published at or after'),
       publishedDateLte: isoDate('Published at or before'),
-      publishedDateGt: isoDate('Published after (sent as publishedDate__gt)'),
-      publishedDateLt: isoDate('Published before (sent as publishedDate__lt)'),
+      publishedDateGt: isoDate('Published after'),
+      publishedDateLt: isoDate('Published before'),
       publishedDateBetween: z
         .string()
         .max(40)
         .regex(/^\d{10,16}-\d{10,16}$/)
         .optional()
         .describe(
-          'Published between two epoch timestamps in milliseconds, inclusive, as <from>-<to>, for example 1609459200000-1640995200000 (sent as publishedDate__between)'
+          'Published between, epoch milliseconds <from>-<to>, for example 1609459200000-1640995200000'
         ),
-      accountIds: z
-        .array(idString(32))
-        .max(500)
-        .optional()
-        .describe('Account scope ids (spec: 1 to 500)'),
-      siteIds: z
-        .array(idString(32))
-        .max(500)
-        .optional()
-        .describe('Site scope ids (spec: 1 to 500)'),
-      groupIds: z
-        .array(idString(32))
-        .max(500)
-        .optional()
-        .describe('Group scope ids (spec: 1 to 500)'),
+      accountIds: z.array(idString(32)).max(500).optional().describe('Account ids'),
+      siteIds: z.array(idString(32)).max(500).optional().describe('Site ids'),
+      groupIds: z.array(idString(32)).max(500).optional().describe('Group ids'),
       sortBy: z.enum(APPLICATION_CVE_SORT_FIELDS).optional().describe('Sort field'),
       sortOrder: z.enum(['asc', 'desc']).optional().describe('Sort order'),
-      limit: z
-        .number()
-        .int()
-        .min(1)
-        .max(1000)
-        .optional()
-        .describe('Page size, 1 to 1000 (default 10)'),
+      limit: z.number().int().min(1).max(1000).optional().describe('Page size (default 10)'),
       cursor: z
         .string()
         .max(2048)
         .optional()
-        .describe('pagination.nextCursor from the previous page; send it with the same filters'),
+        .describe('nextCursor of the previous page (same filters)'),
       skip: z
         .number()
         .int()
         .min(0)
         .max(1000)
         .optional()
-        .describe('Skip the first items, 0 to 1000; use cursor to go further'),
+        .describe('Items to skip; use cursor to go further'),
       countOnly: z
         .boolean()
         .optional()
         .describe('Return only pagination.totalItems, with an empty data list'),
-      skipCount: z
-        .boolean()
-        .optional()
-        .describe('Do not compute pagination.totalItems (faster; totalItems is then 0)'),
+      skipCount: z.boolean().optional().describe('Skip computing pagination.totalItems (faster)'),
     })
     .superRefine((value, ctx) => {
       const byIds = value.applicationIds !== undefined;

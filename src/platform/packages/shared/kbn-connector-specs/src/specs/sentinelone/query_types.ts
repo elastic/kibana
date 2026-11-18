@@ -26,14 +26,12 @@ export const RunQueryInputSchema = lazySchema(() =>
         .min(1)
         .max(4096)
         .describe(
-          'Power Query (PQ) text, 1 to 4096 characters: the filter first, then pipes, for example dataSource.name = "x" | limit 10. A bare * is invalid'
+          'Power Query: the filter first, then pipes, for example dataSource.name = "x" | limit 10 (a bare * is invalid)'
         ),
       startTime: queryTime(
-        'Start of the time range: relative such as 1h, 24h or 7d, or an epoch timestamp in seconds, milliseconds or nanoseconds. Default: 24 hours before endTime (or the last 24 hours)'
+        'Start: relative such as 24h or 7d, or an epoch timestamp (default 24 hours before endTime)'
       ),
-      endTime: queryTime(
-        'End of the time range: relative such as 1h, or an epoch timestamp in seconds, milliseconds or nanoseconds. Default: now (or 24 hours after startTime)'
-      ),
+      endTime: queryTime('End: relative such as 1h, or an epoch timestamp (default now)'),
       queryPriority: z
         .enum(['LOW', 'HIGH'])
         .optional()
@@ -44,23 +42,19 @@ export const RunQueryInputSchema = lazySchema(() =>
         .max(100)
         .optional()
         .describe(
-          "Account ids to query (connector bound 100). Filter by site inside the query instead, for example site.id in ('1', '2')"
+          "Account ids to query; filter sites inside the query, for example site.id in ('1', '2')"
         ),
       tenant: z
         .boolean()
         .optional()
-        .describe(
-          'true queries every scope the token can reach (global scope for a global admin); not with accountIds'
-        ),
+        .describe('true queries every scope the token can reach; not with accountIds'),
       waitSeconds: z
         .number()
         .int()
         .min(10)
         .max(100)
         .optional()
-        .describe(
-          'How long the connector waits for the result, 10 to 100 seconds (default 60). Keeps one call under the 120-second limit of the Kibana connector execute API'
-        ),
+        .describe('Seconds to wait for the result (default 60)'),
     })
     .refine((value) => !(value.tenant === true && value.accountIds !== undefined), {
       message: 'tenant must not be true when accountIds is set',

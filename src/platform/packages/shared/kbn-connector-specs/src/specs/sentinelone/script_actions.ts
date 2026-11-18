@@ -33,7 +33,7 @@ import {
   GetRemoteScriptStatusInputSchema,
   GetRemoteScriptsInputSchema,
   RunScriptAndWaitInputSchema,
-} from './types';
+} from './script_types';
 import type {
   DownloadRemoteScriptResultsInput,
   ExecuteScriptInput,
@@ -41,7 +41,7 @@ import type {
   GetRemoteScriptStatusInput,
   GetRemoteScriptsInput,
   RunScriptAndWaitInput,
-} from './types';
+} from './script_types';
 
 interface DownloadLink {
   downloadUrl?: string;
@@ -174,7 +174,7 @@ export const scriptActions: ConnectorSpec['actions'] = {
   },
 
   executeScript: {
-    isTool: true,
+    isTool: false,
     scope: 'destroy',
     description: ACTION_DESCRIPTIONS.executeScript,
     input: ExecuteScriptInputSchema,
@@ -243,7 +243,7 @@ export const scriptActions: ConnectorSpec['actions'] = {
   },
 
   runScriptAndWait: {
-    isTool: true,
+    isTool: false,
     scope: 'destroy',
     description: ACTION_DESCRIPTIONS.runScriptAndWait,
     input: RunScriptAndWaitInputSchema,

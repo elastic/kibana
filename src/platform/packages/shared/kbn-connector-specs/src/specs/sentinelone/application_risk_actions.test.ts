@@ -113,7 +113,7 @@ afterEach(() => {
 });
 
 describe('getApplicationCves', () => {
-  it('is a read-only tool whose description carries the input rule and the replacement note', () => {
+  it('is a read-only tool whose description carries the input rule', () => {
     expect(action().isTool).toBe(true);
     expect(action().scope).toBe('read');
     for (const text of [
@@ -124,7 +124,6 @@ describe('getApplicationCves', () => {
       'reliable only on the first page',
       'severity and nvdBaseScore can be null',
       'Ranger Insights',
-      'An alternative to the deprecated getAgentCves',
     ]) {
       expect(action().description).toContain(text);
     }
@@ -408,22 +407,5 @@ describe('getApplicationCves', () => {
     );
     expect(request).toHaveBeenCalledTimes(3);
     expect(sleep).toHaveBeenCalledTimes(2);
-  });
-
-  it('leaves the deprecated getAgentCves request unchanged', async () => {
-    request.mockResolvedValue({ status: 200, data: { data: [], pagination: {} } });
-    const agentCves = SentinelOne.actions.getAgentCves;
-    await agentCves.handler(ctx, agentCves.input.parse({ cveIds: ['CVE-2026-1'], limit: 5 }));
-    expect(request).toHaveBeenCalledWith(
-      expect.objectContaining({
-        method: 'GET',
-        url: `${API}/installed-applications/cves`,
-        params: { cveIds: 'CVE-2026-1', limit: 5 },
-        headers: AUTH,
-      })
-    );
-    expect(agentCves.description).toContain(
-      'Deprecated in the official SentinelOne API specification'
-    );
   });
 });
