@@ -29,7 +29,7 @@ export const SidebarLink: React.FC<SidebarLinkProps> = ({
     display: flex;
     align-items: center;
     height: 100%;
-    padding: ${euiTheme.size.base};
+    padding: ${euiTheme.size.m};
   `;
 
   const linkStyles = css`
@@ -39,7 +39,7 @@ export const SidebarLink: React.FC<SidebarLinkProps> = ({
     width: 100%;
     text-decoration: none;
     color: inherit;
-    padding: 6px ${euiTheme.size.s};
+    padding: ${euiTheme.size.xs} ${euiTheme.size.s};
     border-radius: ${euiTheme.border.radius.control};
 
     &:hover {

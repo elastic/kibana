@@ -17,7 +17,7 @@ import {
 
 type SeverityReadClient = Pick<
   RuleEventsClient,
-  'findEpisodeIdsByEventIds' | 'findEventIdsByEpisodeIds'
+  'findCurrentEpisodeIdsByEventIds' | 'findEventIdsByEpisodeIds'
 >;
 type SeveritySyncEventClient = SeverityReadClient & Pick<RuleEventsClient, 'syncSeverity'>;
 
@@ -142,9 +142,9 @@ export const createSeveritySync = ({
         // Every event is tried: one failing write must not keep the others from being written. The
         // first error is thrown after the loop so the caller can retry (a rewrite is a no-op).
         let firstError: unknown;
-        for (const [eventId, { severity }] of loaded.outcomes) {
+        for (const [eventId, { severity, episodeId }] of loaded.outcomes) {
           try {
-            const writeResult = await eventClient.syncSeverity({ eventId, severity });
+            const writeResult = await eventClient.syncSeverity({ eventId, severity, episodeId });
             if (writeResult !== 'updated' && writeResult !== 'unchanged') {
               log.debug(`Severity of event ${eventId} not written through (${writeResult})`);
             }
