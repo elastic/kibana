@@ -14,7 +14,7 @@ import type { estypes } from '@elastic/elasticsearch';
  * and not `pending` (enrich still owes work), with title or body text and
  * `severity.level`. It is a denylist on `pending` and on gate rejections
  * (`REJECTED_EXTRACTION_METHODS`, `extracted.gate.is_intelligence: false`), so
- * `workflow`, the legacy `workflow_v4`, `kev`, `text_indicator_list`, `seeded` and any future adapter
+ * `enrich_workflow`, the legacy `workflow_v4`, `kev`, `text_indicator_list`, `seeded` and any future adapter
  * value count; a missing `extraction_method` does not.
  *
  * Consumers: the threat intel find route, the readiness route, and the AlertZero
@@ -32,7 +32,10 @@ import type { estypes } from '@elastic/elasticsearch';
  * version-independent value and the legacy one already stored on existing reports.
  * The enrich workflow YAML lists the same values; keep them in sync.
  */
-export const REJECTED_EXTRACTION_METHODS = ['workflow_rejected', 'workflow_v4_rejected'] as const;
+export const REJECTED_EXTRACTION_METHODS = [
+  'enrich_workflow_rejected',
+  'workflow_v4_rejected',
+] as const;
 /** True when an extraction method marks the report rejected. */
 export const isRejectedExtractionMethod = (method: string | undefined): boolean =>
   REJECTED_EXTRACTION_METHODS.some((rejected) => rejected === method);

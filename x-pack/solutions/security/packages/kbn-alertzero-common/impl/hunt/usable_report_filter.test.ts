@@ -25,7 +25,11 @@ describe('HUNT_USABLE_FILTER', () => {
     expect(HUNT_USABLE_FILTER).toMatchObject({
       bool: {
         must_not: expect.arrayContaining([
-          { terms: { 'lineage.extraction_method': ['workflow_rejected', 'workflow_v4_rejected'] } },
+          {
+            terms: {
+              'lineage.extraction_method': ['enrich_workflow_rejected', 'workflow_v4_rejected'],
+            },
+          },
         ]),
       },
     });
@@ -49,11 +53,11 @@ describe('HUNT_USABLE_FILTER', () => {
 });
 
 describe('isRejectedExtractionMethod', () => {
-  it.each(['workflow_rejected', 'workflow_v4_rejected'])('returns true for %p', (method) => {
+  it.each(['enrich_workflow_rejected', 'workflow_v4_rejected'])('returns true for %p', (method) => {
     expect(isRejectedExtractionMethod(method)).toBe(true);
   });
 
-  it.each(['workflow', 'workflow_v4', 'workflow_v5_rejected', 'pending', '', undefined])(
+  it.each(['enrich_workflow', 'workflow_v4', 'workflow_v5_rejected', 'pending', '', undefined])(
     'returns false for %p',
     (method) => {
       expect(isRejectedExtractionMethod(method)).toBe(false);

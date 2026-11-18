@@ -80,12 +80,12 @@ steps:
                 # would strand other Spaces' pending duplicates on skip_already_extracted.
                 - term:
                     lineage.extraction_method: pending
-                # workflow_rejected is what this workflow writes now. workflow_v4_rejected is the
+                # enrich_workflow_rejected is what this workflow writes now. workflow_v4_rejected is the
                 # legacy value on existing reports. Keep in sync with REJECTED_EXTRACTION_METHODS
                 # in kbn-alertzero-common.
                 - terms:
                     lineage.extraction_method:
-                      - workflow_rejected
+                      - enrich_workflow_rejected
                       - workflow_v4_rejected
                 - term:
                     extracted.gate.is_intelligence: false
@@ -171,7 +171,7 @@ steps:
                   context_coverage: "${{ steps.assess_relevance.output.context.coverage }}"
               lineage:
                 extracted_at: "${{ now }}"
-                extraction_method: workflow_rejected
+                extraction_method: enrich_workflow_rejected
         on-failure:
           continue: true
 
@@ -230,7 +230,7 @@ steps:
         type: data.set
         if: "${{ steps.extract_iocs.error == null and steps.enrich_report_core.error == null }}"
         with:
-          extraction_method: workflow
+          extraction_method: enrich_workflow
 
       - name: mark_llm_enrich_incomplete
         type: data.set
@@ -319,12 +319,12 @@ steps:
                       - "{{ foreach.item._id }}"
                 # Hard-rejected reports keep stale ioc_set_hash / iocs for forensics;
                 # they must not surface as related intelligence.
-                # workflow_rejected is what this workflow writes now. workflow_v4_rejected is the
+                # enrich_workflow_rejected is what this workflow writes now. workflow_v4_rejected is the
                 # legacy value on existing reports. Keep in sync with REJECTED_EXTRACTION_METHODS
                 # in kbn-alertzero-common.
                 - terms:
                     lineage.extraction_method:
-                      - workflow_rejected
+                      - enrich_workflow_rejected
                       - workflow_v4_rejected
                 - term:
                     extracted.gate.is_intelligence: false

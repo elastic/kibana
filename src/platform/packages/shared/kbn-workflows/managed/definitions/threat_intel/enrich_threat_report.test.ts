@@ -60,9 +60,9 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
       expect(gate.if).toContain(`steps.${step}.error == null`);
     });
 
-    it('marks the report workflow when the gate passes', () => {
+    it('marks the report enrich_workflow when the gate passes', () => {
       const gate = gateCondition('mark_llm_enrich_complete');
-      expect(gate.with?.extraction_method).toBe('workflow');
+      expect(gate.with?.extraction_method).toBe('enrich_workflow');
     });
 
     it.each(GATED_STEPS)('leaves the report pending when %s failed', (step) => {
@@ -151,19 +151,24 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
       with?: { query?: { bool?: { must_not?: unknown[] } } };
     };
     const mustNot = step.with?.query?.bool?.must_not ?? [];
-    // workflow_rejected is the current value, workflow_v4_rejected the legacy one.
+    // enrich_workflow_rejected is the current value, workflow_v4_rejected the legacy one.
     expect(mustNot).toEqual(
       expect.arrayContaining([
-        { terms: { 'lineage.extraction_method': ['workflow_rejected', 'workflow_v4_rejected'] } },
+        {
+          terms: {
+            'lineage.extraction_method': ['enrich_workflow_rejected', 'workflow_v4_rejected'],
+          },
+        },
         { term: { 'extracted.gate.is_intelligence': false } },
       ])
     );
   });
 
   it('writes the version-independent rejected extraction method', () => {
-    expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).toContain(
-      'extraction_method: workflow_rejected'
-    );
+    const step = findStepByName(workflow.steps, 'persist_gate_rejection') as {
+      with?: { body?: { doc?: { lineage?: { extraction_method?: string } } } };
+    };
+    expect(step.with?.body?.doc?.lineage?.extraction_method).toBe('enrich_workflow_rejected');
     expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).not.toContain(
       'extraction_method: workflow_v4_rejected'
     );
@@ -181,10 +186,14 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
       with?: { query?: { bool?: { must_not?: unknown[] } } };
     };
     const mustNot = step.with?.query?.bool?.must_not ?? [];
-    // workflow_rejected is the current value, workflow_v4_rejected the legacy one.
+    // enrich_workflow_rejected is the current value, workflow_v4_rejected the legacy one.
     expect(mustNot).toEqual(
       expect.arrayContaining([
-        { terms: { 'lineage.extraction_method': ['workflow_rejected', 'workflow_v4_rejected'] } },
+        {
+          terms: {
+            'lineage.extraction_method': ['enrich_workflow_rejected', 'workflow_v4_rejected'],
+          },
+        },
         { term: { 'extracted.gate.is_intelligence': false } },
       ])
     );

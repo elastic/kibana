@@ -504,7 +504,7 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
           makeReport({
             id: 'r-workflow-rejected-current',
             iocs: [{ type: 'ip', value: '1.2.3.4' }],
-            extractionMethod: 'workflow_rejected',
+            extractionMethod: 'enrich_workflow_rejected',
           }),
         ],
         NOW
