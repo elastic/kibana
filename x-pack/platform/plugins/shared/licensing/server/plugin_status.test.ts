@@ -26,6 +26,11 @@ const unavailableStatus = {
   summary: expect.any(String),
 };
 
+const degradedStatus = {
+  level: ServiceStatusLevels.degraded,
+  summary: expect.any(String),
+};
+
 describe('getPluginStatus$', () => {
   it('emits an `available` status once the license emits', () => {
     getTestScheduler().run(({ expectObservable, hot }) => {
@@ -54,6 +59,43 @@ describe('getPluginStatus$', () => {
 
       expectObservable(getPluginStatus$(license$, stop$)).toBe(expected, {
         b: unavailableStatus,
+      });
+    });
+  });
+
+  it('emits a `degraded` status if the license emits without a license being available', () => {
+    getTestScheduler().run(({ expectObservable, hot }) => {
+      const unavailableLicense = licenseMock.createLicenseMock();
+      unavailableLicense.isAvailable = false;
+
+      const license$ = hot<ILicense>('--a', {
+        a: unavailableLicense,
+      });
+      const stop$ = hot<void>('');
+      const expected = '--b';
+
+      expectObservable(getPluginStatus$(license$, stop$)).toBe(expected, {
+        b: degradedStatus,
+      });
+    });
+  });
+
+  it('can emit `available` after `degraded`', () => {
+    getTestScheduler().run(({ expectObservable, hot }) => {
+      const unavailableLicense = licenseMock.createLicenseMock();
+      unavailableLicense.isAvailable = false;
+      const validLicense = licenseMock.createLicenseMock();
+
+      const license$ = hot<ILicense>('--a--b', {
+        a: unavailableLicense,
+        b: validLicense,
+      });
+      const stop$ = hot<void>('');
+      const expected = '--b--c';
+
+      expectObservable(getPluginStatus$(license$, stop$)).toBe(expected, {
+        b: degradedStatus,
+        c: availableStatus,
       });
     });
   });
