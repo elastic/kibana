@@ -13,7 +13,11 @@ import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extens
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/public/mocks';
 import { z } from '@kbn/zod/v4';
 import { flattenOptions, getActionOptions } from './get_action_options';
-import { getAllConnectors, isDeprecatedStepType } from '../../../../common/schema';
+import {
+  getAllConnectors,
+  isDeprecatedStepType,
+  isInternalStepType,
+} from '../../../../common/schema';
 import { triggerSchemas } from '../../../trigger_schemas';
 import type { ActionOptionData } from '../types';
 import { isActionGroup, isActionOption } from '../types';
@@ -21,6 +25,7 @@ import { isActionGroup, isActionOption } from '../types';
 jest.mock('../../../../common/schema', () => ({
   getAllConnectors: jest.fn(),
   isDeprecatedStepType: jest.fn(() => false),
+  isInternalStepType: jest.fn(() => false),
 }));
 jest.mock('../../../trigger_schemas', () => ({
   triggerSchemas: { getTriggerDefinitions: jest.fn(() => []) },
@@ -63,6 +68,7 @@ describe('getActionOptions', () => {
 
     (getAllConnectors as jest.Mock).mockReturnValue([]);
     (isDeprecatedStepType as jest.Mock).mockReturnValue(false);
+    (isInternalStepType as jest.Mock).mockReturnValue(false);
     (isDynamicConnector as jest.MockedFunction<typeof isDynamicConnector>).mockImplementation(
       () => false
     );
@@ -542,6 +548,36 @@ describe('getActionOptions', () => {
     expect(kibanaGroup).toBeDefined();
     if (kibanaGroup && isActionGroup(kibanaGroup)) {
       expect(kibanaGroup.options).toHaveLength(0);
+    }
+  });
+
+  it('should hide internal and managed-only custom steps from the actions menu', () => {
+    const createStepDefinition = (id: string) => ({
+      id,
+      label: id,
+      description: id,
+      category: StepCategory.Kibana,
+      inputSchema: z.object({}),
+      outputSchema: z.object({}),
+    });
+
+    (getAllConnectors as jest.Mock).mockReturnValue([
+      { type: 'custom.public', description: 'Public step' },
+      { type: 'custom.internal', description: 'Internal step' },
+    ]);
+    (isInternalStepType as jest.Mock).mockImplementation(
+      (stepType: string) => stepType === 'custom.internal'
+    );
+    mockWorkflowsExtensions.getStepDefinition.mockImplementation(
+      (type: string) => createStepDefinition(type) as any
+    );
+
+    const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
+    const kibanaGroup = result.find((group) => group.id === 'kibana');
+
+    expect(kibanaGroup).toBeDefined();
+    if (kibanaGroup && isActionGroup(kibanaGroup)) {
+      expect(kibanaGroup.options.map((option) => option.id)).toEqual(['custom.public']);
     }
   });
 

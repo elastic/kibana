@@ -484,6 +484,26 @@ export function isDeprecatedStepType(stepType: string): boolean {
   return getDeprecatedStepMetadata(stepType) !== undefined;
 }
 
+/** How a registered custom step limits its use to managed workflows. */
+export type StepUsageRestriction = 'internal' | 'managedOnly';
+
+/** Returns the restriction set on a registered custom step, if any. `managedOnly` wins over `internal`. */
+export function getStepUsageRestriction(stepType: string): StepUsageRestriction | undefined {
+  const definition = stepSchemas.getStepDefinition(stepType);
+  if (definition?.managedOnly) {
+    return 'managedOnly';
+  }
+  if (definition?.internal) {
+    return 'internal';
+  }
+  return undefined;
+}
+
+/** Whether a step is `internal` or `managedOnly`. Such steps are never suggested to users. */
+export function isInternalStepType(stepType: string): boolean {
+  return getStepUsageRestriction(stepType) !== undefined;
+}
+
 export function getAllConnectorsWithDynamic(
   dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
 ): ConnectorContractUnion[] {

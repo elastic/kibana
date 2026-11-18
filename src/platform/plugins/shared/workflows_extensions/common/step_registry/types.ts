@@ -15,8 +15,22 @@ import type { z } from '@kbn/zod/v4';
  * Extends BaseStepDefinition from @kbn/workflows with the same generic schema triple.
  * Input and output types are automatically inferred from the schemas.
  */
-export type CommonStepDefinition<
+export interface CommonStepDefinition<
   InputSchema extends z.ZodType = z.ZodType,
   OutputSchema extends z.ZodType = z.ZodType,
   ConfigSchema extends z.ZodObject = z.ZodObject
-> = BaseStepDefinition<InputSchema, OutputSchema, ConfigSchema>;
+> extends BaseStepDefinition<InputSchema, OutputSchema, ConfigSchema> {
+  /**
+   * Marks the step as internal: it exists to support the owner's managed workflows.
+   * Users can still use it in their own workflows, at their own risk: the editor
+   * doesn't suggest it and shows a warning when a workflow that isn't managed uses it.
+   */
+  internal?: boolean;
+
+  /**
+   * Restricts the step to managed workflows. The editor doesn't suggest it and
+   * reports an error when a workflow that isn't managed uses it, so that workflow
+   * can't be enabled. Implies `internal`.
+   */
+  managedOnly?: boolean;
+}

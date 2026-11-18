@@ -23,7 +23,9 @@ import {
   getCachedDynamicConnectorTypes,
   getCachedInferenceConnectorInstances,
   getDeprecatedStepMetadataMap,
+  getStepUsageRestriction,
   getWorkflowZodSchema,
+  isInternalStepType,
 } from './schema';
 import { EmailParamsSchema } from './stack_connectors_schema/email';
 import { stepSchemas } from './step_schemas';
@@ -607,6 +609,50 @@ describe('schema - additional coverage', () => {
       expect(registered).toBeDefined();
       expect(registered?.summary).toBe('Map Collection');
       expect(registered?.description).toBe(longDescription);
+    });
+  });
+
+  describe('getStepUsageRestriction and isInternalStepType', () => {
+    const createStepDefinition = (
+      id: string,
+      flags: { internal?: boolean; managedOnly?: boolean }
+    ) =>
+      ({
+        id,
+        label: id,
+        description: id,
+        category: StepCategory.Kibana,
+        inputSchema: z.object({}),
+        outputSchema: z.object({}),
+        ...flags,
+      } as never);
+
+    const stepDefinitions = new Map([
+      ['custom.public', createStepDefinition('custom.public', {})],
+      ['custom.internal', createStepDefinition('custom.internal', { internal: true })],
+      ['custom.managedOnly', createStepDefinition('custom.managedOnly', { managedOnly: true })],
+      ['custom.both', createStepDefinition('custom.both', { internal: true, managedOnly: true })],
+    ]);
+
+    beforeEach(() => {
+      jest
+        .spyOn(stepSchemas, 'getStepDefinition')
+        .mockImplementation((stepTypeId: string) => stepDefinitions.get(stepTypeId));
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it.each([
+      ['custom.public', undefined, false],
+      ['custom.internal', 'internal', true],
+      ['custom.managedOnly', 'managedOnly', true],
+      ['custom.both', 'managedOnly', true],
+      ['not.registered', undefined, false],
+    ])('resolves %s', (stepType, expectedRestriction, expectedInternal) => {
+      expect(getStepUsageRestriction(stepType)).toBe(expectedRestriction);
+      expect(isInternalStepType(stepType)).toBe(expectedInternal);
     });
   });
 });

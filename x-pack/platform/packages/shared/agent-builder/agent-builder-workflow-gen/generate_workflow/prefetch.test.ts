@@ -6,7 +6,10 @@
  */
 
 import type { ConnectorContractUnion } from '@kbn/workflows';
-import { getAllConnectors } from '@kbn/workflows-management-plugin/common/schema';
+import {
+  getAllConnectors,
+  getStepUsageRestriction,
+} from '@kbn/workflows-management-plugin/common/schema';
 import {
   prefetchConnectors,
   prefetchStepDefinitions,
@@ -15,9 +18,11 @@ import {
 
 jest.mock('@kbn/workflows-management-plugin/common/schema', () => ({
   getAllConnectors: jest.fn().mockReturnValue([]),
+  getStepUsageRestriction: jest.fn().mockReturnValue(undefined),
 }));
 
 const getAllConnectorsMock = getAllConnectors as jest.MockedFunction<typeof getAllConnectors>;
+const getStepUsageRestrictionMock = jest.mocked(getStepUsageRestriction);
 
 const buildApi = (
   overrides: Partial<{
@@ -36,6 +41,8 @@ const buildApi = (
 beforeEach(() => {
   getAllConnectorsMock.mockReset();
   getAllConnectorsMock.mockReturnValue([]);
+  getStepUsageRestrictionMock.mockReset();
+  getStepUsageRestrictionMock.mockReturnValue(undefined);
 });
 
 describe('prefetch helpers', () => {
@@ -142,6 +149,37 @@ describe('prefetch helpers', () => {
           category: 'elasticsearch',
         })
       );
+    });
+
+    it('keeps internal steps and excludes managed-only steps', async () => {
+      const createStep = (type: string) =>
+        ({
+          type,
+          summary: type,
+          description: type,
+          paramsSchema: {},
+          outputSchema: {},
+        } as unknown as ConnectorContractUnion);
+
+      getAllConnectorsMock.mockReturnValue([
+        createStep('custom.internal'),
+        createStep('custom.managedOnly'),
+      ]);
+      getStepUsageRestrictionMock.mockImplementation((stepType: string) => {
+        if (stepType === 'custom.internal') return 'internal';
+        if (stepType === 'custom.managedOnly') return 'managedOnly';
+        return undefined;
+      });
+
+      const result = await prefetchStepDefinitions({
+        api: buildApi(),
+        spaceId: 'default',
+        request: {} as any,
+      });
+
+      const ids = result.map((d) => d.id);
+      expect(ids).toContain('custom.internal');
+      expect(ids).not.toContain('custom.managedOnly');
     });
   });
 

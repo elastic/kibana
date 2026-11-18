@@ -12,11 +12,13 @@ import { registerGetStepDefinitionsTool } from './get_step_definitions_tool';
 
 const mockGetAllConnectors = jest.fn();
 const mockAddDynamicConnectorsToCache = jest.fn();
+const mockGetStepUsageRestriction = jest.fn();
 jest.mock('@kbn/workflows-management-plugin/common/schema', () => ({
   getAllConnectors: (...args: unknown[]) => mockGetAllConnectors(...args),
   addDynamicConnectorsToCache: (...args: unknown[]) => mockAddDynamicConnectorsToCache(...args),
   getCachedAllConnectorsMap: () => null,
   getDeprecatedStepMetadata: () => undefined,
+  getStepUsageRestriction: (...args: unknown[]) => mockGetStepUsageRestriction(...args),
 }));
 
 const invokeHandler = async (tool: BuiltinToolDefinition, input: unknown, context: unknown) =>
@@ -30,6 +32,7 @@ describe('registerGetStepDefinitionsTool', () => {
 
   beforeEach(async () => {
     const { z } = await import('@kbn/zod/v4');
+    mockGetStepUsageRestriction.mockReturnValue(undefined);
     mockGetAllConnectors.mockReturnValue([
       {
         type: 'kibana.createCase',
@@ -262,6 +265,51 @@ describe('registerGetStepDefinitionsTool', () => {
     const data = result.results[0].data as any;
 
     expect(data.stepTypes.some((step: any) => step.id === 'kibana.createCase')).toBe(true);
+  });
+
+  describe('internal and managed-only steps', () => {
+    beforeEach(async () => {
+      const { z } = await import('@kbn/zod/v4');
+      const createConnector = (type: string) => ({
+        type,
+        description: type,
+        summary: type,
+        paramsSchema: z.object({}),
+        outputSchema: z.object({}),
+        hasConnectorId: false,
+      });
+      mockGetAllConnectors.mockReturnValue([
+        createConnector('custom.internal'),
+        createConnector('custom.managedOnly'),
+      ]);
+      mockGetStepUsageRestriction.mockImplementation((stepType: string) => {
+        if (stepType === 'custom.internal') return 'internal';
+        if (stepType === 'custom.managedOnly') return 'managedOnly';
+        return undefined;
+      });
+    });
+
+    it('keeps internal steps and excludes managed-only steps from discovery', async () => {
+      const result = await invokeHandler(
+        registeredTool,
+        { search: 'custom.' },
+        { spaceId: 'default', request: {} }
+      );
+      const data = result.results[0].data as any;
+
+      expect(data.stepTypes.map((step: any) => step.id)).toEqual(['custom.internal']);
+    });
+
+    it('does not return managed-only steps for exact stepType lookups', async () => {
+      const result = await invokeHandler(
+        registeredTool,
+        { stepType: 'custom.managedOnly' },
+        { spaceId: 'default', request: {} }
+      );
+      const data = result.results[0].data as any;
+
+      expect(data.error).toBe('Step type "custom.managedOnly" not found');
+    });
   });
 
   it('filters by category', async () => {

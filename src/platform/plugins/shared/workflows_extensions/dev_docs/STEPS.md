@@ -88,6 +88,30 @@ export const myStepCommonDefinition: CommonStepDefinition = {
 };
 ```
 
+#### Internal and Managed-Only Steps
+
+Some steps exist only to support the managed workflows your plugin installs. Two optional flags on the common definition tell the workflow editor how users may use them:
+
+| | `internal: true` | `managedOnly: true` |
+|---|---|---|
+| Use it when | The step is meant for your managed workflows, but users may use it in their own workflows at their own risk | Only your managed workflows may use the step |
+| Managed workflows | Valid | Valid |
+| Other workflows | Valid, with a warning | Error: the workflow can't be enabled |
+| Actions menu and autocomplete | Not suggested | Not suggested |
+
+```typescript
+export const myStepCommonDefinition: CommonStepDefinition = {
+  id: MyStepTypeId,
+  inputSchema: InputSchema,
+  outputSchema: OutputSchema,
+  internal: true, // or managedOnly: true
+};
+```
+
+`managedOnly` implies `internal`, so set one or the other. Both flags are opt-in and up to the step owner. Before setting one on an existing step, check whether user workflows already use it: they start showing the warning (`internal`) or the error (`managedOnly`).
+
+The step still has to be registered on both the server and the client: the editor needs the public definition to validate managed workflows that use it.
+
 ### Step 2: Implement Server-Side Definition
 
 Server-side custom steps use one of two definition helpers:
@@ -1249,4 +1273,4 @@ Step "my-namespace.myCustomStep" is registered on the server but not on the clie
 
 ### Temporary Exceptions
 
-Steps that were registered on the server only before this check existed are listed in `test/scout/ui/fixtures/client_registration_exceptions.ts`, tracked in [#305608](https://github.com/elastic/kibana/issues/305608). **Do not add new entries** — register the public definition instead. When you register one of those steps on the client, remove it from the list in the same PR; the test fails on an exception for a step that is already registered on both sides.
+Steps that were registered on the server only before this check existed are listed in `test/scout/ui/fixtures/client_registration_exceptions.ts`, tracked in [#305608](https://github.com/elastic/kibana/issues/305608). **Do not add new entries** — register the public definition instead. When you register one of those steps on the client, remove it from the list in the same PR; the test fails on an exception for a step that is already registered on both sides. If the step only exists to support your managed workflows, consider marking it `internal` or `managedOnly` in the same PR (see [Internal and Managed-Only Steps](#internal-and-managed-only-steps)).

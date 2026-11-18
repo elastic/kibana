@@ -19,9 +19,10 @@ import {
   clearAllYamlProviders,
   interceptMonacoYamlProvider,
 } from './intercept_monaco_yaml_provider';
+import { getSuggestions as mockGetSuggestions } from './suggestions/get_suggestions';
 import { createMockWorkflowContextRegistry } from '../../../../../common/lib/create_workflow_context_registry.mock';
 
-import { isDeprecatedStepType } from '../../../../../common/schema';
+import { isDeprecatedStepType, isInternalStepType } from '../../../../../common/schema';
 import { createStepInfo } from '../../../../shared/test_utils/step_info_factory';
 
 const emptyRegistry = createMockWorkflowContextRegistry();
@@ -43,6 +44,7 @@ jest.mock('./context/build_autocomplete_context', () => ({
 
 jest.mock('../../../../../common/schema', () => ({
   isDeprecatedStepType: jest.fn(() => false),
+  isInternalStepType: jest.fn(() => false),
 }));
 
 describe('getCompletionItemProvider', () => {
@@ -73,6 +75,7 @@ describe('getCompletionItemProvider', () => {
 
     getState = jest.fn(() => ({} as any));
     (isDeprecatedStepType as jest.Mock).mockReturnValue(false);
+    (isInternalStepType as jest.Mock).mockReturnValue(false);
   });
 
   afterEach(() => {
@@ -299,6 +302,49 @@ describe('getCompletionItemProvider', () => {
 
       expect(result?.suggestions).toHaveLength(1);
       expect(result?.suggestions?.[0].label).toBe('scheduled');
+    });
+
+    it('should filter internal and managed-only step types from workflow and YAML suggestions', async () => {
+      jest.mocked(mockGetSuggestions).mockResolvedValueOnce([
+        {
+          label: 'custom.internal',
+          insertText: 'custom.internal',
+          filterText: 'custom.internal',
+        } as monaco.languages.CompletionItem,
+      ]);
+
+      const yamlProvider: monaco.languages.CompletionItemProvider = {
+        provideCompletionItems: jest.fn().mockResolvedValue({
+          suggestions: [
+            {
+              label: 'custom.managedOnly',
+              insertText: 'custom.managedOnly',
+              filterText: 'custom.managedOnly',
+            },
+            {
+              label: 'custom.public',
+              insertText: 'custom.public',
+            },
+          ],
+          incomplete: false,
+        }),
+      };
+
+      const internalStepTypes = new Set(['custom.internal', 'custom.managedOnly']);
+      (isInternalStepType as jest.Mock).mockImplementation((stepType: string) =>
+        internalStepTypes.has(stepType)
+      );
+      monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
+
+      const provider = getCompletionItemProvider(emptyRegistry, getState);
+      const result = await provider.provideCompletionItems!(
+        mockModel,
+        mockPosition,
+        mockCompletionContext,
+        {} as monaco.CancellationToken
+      );
+
+      expect(result?.suggestions?.map((suggestion) => suggestion.label)).toEqual(['custom.public']);
     });
 
     it('should deduplicate event-driven triggers from YAML schema and workflow provider by technical id', async () => {

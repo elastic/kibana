@@ -9,7 +9,10 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { BaseStepDefinition, ConnectorContractUnion } from '@kbn/workflows';
 import { builtInStepDefinitions, getBuiltInTriggerDefinitions } from '@kbn/workflows';
 import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
-import { getAllConnectors } from '@kbn/workflows-management-plugin/common/schema';
+import {
+  getAllConnectors,
+  getStepUsageRestriction,
+} from '@kbn/workflows-management-plugin/common/schema';
 import { pickLabelAndDescription } from './tools/lookup_helpers';
 import type { ConnectorSummary, StepDefinitionSummary, TriggerDefinitionSummary } from './types';
 
@@ -83,12 +86,17 @@ export const prefetchStepDefinitions = async ({
   // Elasticsearch / Kibana API contracts (`elasticsearch.indices.create`,
   // `elasticsearch.search`, …), plus step definitions registered via
   // `workflowsExtensions`. Already excludes built-in flow control / data.* /
-  // ai.* steps which come from `builtInStepDefinitions` above.
+  // ai.* steps which come from `builtInStepDefinitions` above. Managed-only
+  // steps are left out: generated workflows aren't managed, so they can't use them.
   const allConnectors = getAllConnectors();
   const allConnectorIds = new Set<string>();
   const allConnectorSummaries: StepDefinitionSummary[] = [];
   for (const c of allConnectors) {
-    if (builtInIds.has(c.type) || c.deprecation) {
+    if (
+      builtInIds.has(c.type) ||
+      c.deprecation ||
+      getStepUsageRestriction(c.type) === 'managedOnly'
+    ) {
       continue;
     }
     allConnectorIds.add(c.type);
