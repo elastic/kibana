@@ -8,7 +8,13 @@
 import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { PAGE_SIZE_ESQL_VARIABLE } from './constants';
 import { EPISODE_SOURCE_FILTER_CLASSIC, EPISODE_SOURCE_FILTER_UNIVERSAL } from './episode_source';
-import { buildEpisodesBaseQuery, buildEpisodesQuery } from './episodes_query';
+import {
+  buildEpisodesBaseQuery,
+  buildEpisodesQuery,
+  buildEpisodesViewQuery,
+  DURATION_LOWER_BOUND_FIELD,
+  EPISODES_VIEW_LOOKBACK,
+} from './episodes_query';
 import { SERIES_ID_EVAL } from './series_id_eval';
 
 const SPACE_ID = 'default';
@@ -97,6 +103,48 @@ describe('buildEpisodesBaseQuery', () => {
     );
     expect(esql).toMatch(/BY\s*alert_id/);
     expect(esql).not.toContain('episode_id');
+  });
+});
+
+describe('buildEpisodesViewQuery', () => {
+  it('reads both data streams without a space filter', () => {
+    const esql = buildEpisodesViewQuery().print('basic');
+
+    expect(esql).toContain(`FROM ${ALERT_EVENTS_DATA_STREAM}, ${ALERT_ACTIONS_DATA_STREAM}`);
+    expect(esql).toContain('_source');
+    expect(esql).not.toContain('space_id ==');
+  });
+
+  it('bounds only the alert events with the lookback, before the aggregations', () => {
+    const esql = buildEpisodesViewQuery().print('basic');
+    const lookback = `WHERE action_type IS NOT NULL OR @timestamp > NOW() - ${EPISODES_VIEW_LOOKBACK}`;
+
+    expect(esql).toContain(lookback);
+    expect(esql.indexOf(lookback)).toBeLessThan(esql.indexOf('INLINE STATS'));
+  });
+
+  it('computes the same action state and episode rows as the list query', () => {
+    const esql = buildEpisodesViewQuery().print('basic');
+
+    expect(esql).toContain('INLINE STATS last_snooze_action');
+    expect(esql).toContain('last_ack_action');
+    expect(esql).toContain('last_tags');
+    expect(esql).toContain('| WHERE @timestamp == last_timestamp | LIMIT 1 BY episode.id');
+    expect(esql).toContain(`EVAL ${DURATION_LOWER_BOUND_FIELD} =`);
+  });
+
+  it('keeps the list columns plus the space id', () => {
+    const esql = buildEpisodesViewQuery().print('basic');
+
+    expect(esql).toMatch(
+      /\| KEEP @timestamp, `episode\.id`, .*, space_id, duration_is_lower_bound/
+    );
+  });
+
+  it('keeps the fields the time range filter matches on', () => {
+    const esql = buildEpisodesViewQuery().print('basic');
+
+    expect(esql).toMatch(/\| KEEP .*, type, action_type$/);
   });
 });
 

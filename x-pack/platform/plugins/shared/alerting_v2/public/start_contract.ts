@@ -8,6 +8,7 @@
 import React from 'react';
 import type { Container } from 'inversify';
 import { createAlertingV2HostApp } from '../common/locators';
+import { createDiscoverProfile } from './discover_profile/profile';
 import type { AlertingV2PublicStart } from './types';
 import type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 import type { AlertingV2PageProps } from './application/composable_pages';
@@ -105,4 +106,5 @@ export const createStartContract = (container: Container): AlertingV2PublicStart
     container
   ),
   createAlertingV2HostApp,
+  createDiscoverProfile,
 });

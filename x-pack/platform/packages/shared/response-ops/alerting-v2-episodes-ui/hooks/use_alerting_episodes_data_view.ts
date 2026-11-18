@@ -43,20 +43,23 @@ const knownFieldsOverrides: Record<string, KnownFieldOverrides> = {
   },
 };
 
+/** The field format of the episode `duration`, in milliseconds. */
+export const DURATION_FIELD_FORMAT = {
+  id: 'duration',
+  params: {
+    includeSpaceWithSuffix: true,
+    inputFormat: 'milliseconds',
+    outputFormat: 'humanizePrecise',
+    outputPrecision: 0,
+    useShortSuffix: true,
+  },
+} satisfies SerializedFieldFormat;
+
 const computedFields: Record<string, RuntimeField> = {
   duration: {
     type: 'long',
     customLabel: i18n.DURATION_FIELD_LABEL,
-    format: {
-      id: 'duration',
-      params: {
-        includeSpaceWithSuffix: true,
-        inputFormat: 'milliseconds',
-        outputFormat: 'humanizePrecise',
-        outputPrecision: 0,
-        useShortSuffix: true,
-      },
-    },
+    format: DURATION_FIELD_FORMAT,
   },
   assignees: {
     type: 'keyword',

@@ -269,6 +269,30 @@ export interface DefaultEsqlQueryConfig {
 }
 
 /**
+ * The search context sent alongside an ES|QL query
+ */
+export interface EsqlSearchContextExtension {
+  /**
+   * The field Discover turns the time range into a range filter on, or `undefined` to send no range filter
+   */
+  timeField?: string;
+  /**
+   * The filters sent with the request, applied by Elasticsearch to the source documents
+   */
+  filters?: Filter[];
+}
+
+/**
+ * Parameters passed to the ES|QL search context extension
+ */
+export interface EsqlSearchContextExtensionParams extends EsqlSearchContextExtension {
+  /**
+   * The time range of the request
+   */
+  timeRange: TimeRange;
+}
+
+/**
  * Parameters passed to the modified vis attributes extension
  */
 export interface ModifiedVisAttributesExtensionParams {
@@ -505,6 +529,18 @@ export interface Profile {
    * @returns The default ES|QL query config, or `undefined` to fall back to Discover defaults.
    */
   getDefaultEsqlQuery: () => DefaultEsqlQueryConfig | undefined;
+
+  /**
+   * Data fetching
+   */
+
+  /**
+   * Allows modifying the search context of the ES|QL request that loads the data grid documents,
+   * e.g. replacing the default time range filter with a custom one
+   * @param params The ES|QL search context extension parameters
+   * @returns The search context to send with the request
+   */
+  getEsqlSearchContext: (params: EsqlSearchContextExtensionParams) => EsqlSearchContextExtension;
 
   /**
    * Chart

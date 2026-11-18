@@ -227,6 +227,18 @@ describe('EpisodeDurationCell', () => {
 
     expect(screen.getByText('—')).toBeInTheDocument();
   });
+
+  it('uses the given duration formatter over the data view one', () => {
+    renderWithI18n(
+      <EpisodeDurationCell
+        {...durationCellProps}
+        row={makeRow({ duration: 840000, duration_is_lower_bound: true })}
+        formatDuration={(durationMs) => `${durationMs / 60000} min`}
+      />
+    );
+
+    expect(screen.getByTestId('episodeDurationLowerBound')).toHaveTextContent('≥ 14 min');
+  });
 });
 
 describe('EpisodeTagsCell', () => {

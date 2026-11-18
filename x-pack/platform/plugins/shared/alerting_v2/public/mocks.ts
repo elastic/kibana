@@ -16,6 +16,11 @@ const createStartContract = (): AlertingV2PublicStart => ({
   ActionPoliciesPage: jest.fn(() => null),
   ExecutionHistoryPage: jest.fn(() => null),
   createAlertingV2HostApp: jest.fn(),
+  createDiscoverProfile: jest.fn(() => ({
+    profileId: 'alerting-v2-data-source-profile',
+    profile: {},
+    resolve: jest.fn().mockResolvedValue({ isMatch: false }),
+  })),
 });
 
 /** Mocks of the Alerting v2 public contracts, for consumers' tests. */

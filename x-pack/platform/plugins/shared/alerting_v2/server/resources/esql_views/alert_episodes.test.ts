@@ -11,7 +11,7 @@ describe('getAlertEpisodesViewDefinition', () => {
   it('bounds the INLINE STATS aggregation with a lookback filter applied first', () => {
     const { query } = getAlertEpisodesViewDefinition();
 
-    const lookbackIndex = query.indexOf('WHERE @timestamp > NOW() - 90 days');
+    const lookbackIndex = query.indexOf('@timestamp > NOW() - 90 days');
     const inlineStatsIndex = query.indexOf('INLINE STATS');
 
     expect(lookbackIndex).toBeGreaterThan(-1);

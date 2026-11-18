@@ -35,6 +35,7 @@ describe('mountObservabilityAlertingApp', () => {
       ExecutionHistoryPage: () => null,
       CreateRuleOptionsFlyout: () => null,
       createAlertingV2HostApp: mockCreateAlertingV2HostApp,
+      createDiscoverProfile: jest.fn(),
     };
     const triggersActionsUi = {
       getClassicRulesPage: () => <div />,

@@ -118,7 +118,12 @@ export const EpisodeSourceCell = ({ row }: CellRendererProps) => {
   );
 };
 
-export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {
+export interface EpisodeStatusCellProps extends CellRendererProps {
+  /** Rendered inside the status badge, right after the label. */
+  statusAppend?: React.ReactNode;
+}
+
+export const EpisodeStatusCell = ({ row, columnId, statusAppend }: EpisodeStatusCellProps) => {
   const status = row.flattened[columnId] as AlertEpisodeStatus;
   const isFlapping = row.flattened.is_flapping === true;
 
@@ -144,6 +149,7 @@ export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {
       episodeAction={episodeAction}
       groupAction={groupAction}
       isFlapping={isFlapping}
+      statusAppend={statusAppend}
     />
   );
 };
@@ -152,15 +158,33 @@ export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {
  * Renders the episode duration, marked as a lower bound when the query did not
  * see the episode start because it predates the selected time range.
  */
-export const EpisodeDurationCell = ({ row, columnId, dataView }: CellRendererProps) => {
+export interface EpisodeDurationCellProps extends CellRendererProps {
+  /** Formats the duration in milliseconds. Defaults to the data view field formatter. */
+  formatDuration?: (durationMs: number) => string;
+}
+
+const formatWithDataView = (
+  dataView: CellRendererProps['dataView'],
+  columnId: string,
+  duration: number
+): string => {
+  const field = dataView.getFieldByName(columnId);
+  return field ? dataView.getFormatterForField(field).convertToText(duration) : `${duration}`;
+};
+
+export const EpisodeDurationCell = ({
+  row,
+  columnId,
+  dataView,
+  formatDuration,
+}: EpisodeDurationCellProps) => {
   const duration = row.flattened[columnId] as number | null | undefined;
   if (duration == null) {
     return <>{EMPTY_VALUE}</>;
   }
-  const field = dataView.getFieldByName(columnId);
-  const formatted = field
-    ? dataView.getFormatterForField(field).convertToText(duration)
-    : `${duration}`;
+  const formatted = formatDuration
+    ? formatDuration(duration)
+    : formatWithDataView(dataView, columnId, duration);
   if (!row.flattened[DURATION_LOWER_BOUND_FIELD]) {
     return <>{formatted}</>;
   }

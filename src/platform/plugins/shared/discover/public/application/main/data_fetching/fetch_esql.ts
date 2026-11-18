@@ -27,7 +27,7 @@ import moment from 'moment';
 import type { ESQLColumnsWithHighlights } from '@kbn/esql-utils';
 import { getColumnsWithHighlights } from '@kbn/esql-utils';
 import type { RecordsFetchResponse } from '../../types';
-import type { ScopedProfilesManager } from '../../../context_awareness';
+import { getMergedAccessor, type ScopedProfilesManager } from '../../../context_awareness';
 
 export interface FetchEsqlParams {
   query: Query | AggregateQuery;
@@ -76,14 +76,26 @@ export async function fetchEsql({
     };
   }
 
+  const effectiveTimeRange = timeRange ?? data.query.timefilter.timefilter.getAbsoluteTime();
+  const getEsqlSearchContext = getMergedAccessor(
+    scopedProfilesManager.getProfiles(),
+    'getEsqlSearchContext',
+    (params) => ({ timeField: params.timeField, filters: params.filters })
+  );
+  const searchContext = getEsqlSearchContext({
+    timeRange: effectiveTimeRange,
+    timeField: esqlSource?.timeFieldName,
+    filters,
+  });
+
   try {
     const { datatable } = await data.search.esql(
       {
         query: query.esql,
         kibanaQueryContext: {
-          timeRange: timeRange ?? data.query.timefilter.timefilter.getAbsoluteTime(),
-          timeField: esqlSource?.timeFieldName,
-          kibanaFilters: filters,
+          timeRange: effectiveTimeRange,
+          timeField: searchContext.timeField,
+          kibanaFilters: searchContext.filters,
           kqlQuery: inputQuery,
           esqlVariables,
         },

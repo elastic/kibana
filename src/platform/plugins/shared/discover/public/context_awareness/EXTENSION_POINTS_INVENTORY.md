@@ -75,6 +75,16 @@ columns: [
 
 ---
 
+## ES|QL search context — `getEsqlSearchContext`
+
+**Changes:** The time field and filters sent with the ES|QL request that loads the data grid documents. Elasticsearch applies them to the source documents, before the first pipe.
+
+**Use when:** The default range filter on the time field would drop documents the query needs, e.g. a view that aggregates documents of different ages and needs a custom time filter.
+
+**Returns:** `{ timeField?: string; filters?: Filter[] }`. Return `timeField: undefined` to skip the default range filter.
+
+---
+
 ## Chart
 
 ### Modify chart (Lens) — `getModifiedVisAttributes`

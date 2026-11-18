@@ -111,6 +111,7 @@ dependsOn:
   - '@kbn/deeplinks-agent-builder'
   - '@kbn/deeplinks-observability'
   - '@kbn/unified-doc-viewer-plugin'
+  - '@kbn/unified-doc-viewer'
   - '@kbn/core-user-profile-browser'
   - '@kbn/datemath'
   - '@kbn/rison'
@@ -142,6 +143,7 @@ dependsOn:
   - '@kbn/app-header'
   - '@kbn/flyout-template'
   - '@kbn/flyout-sections'
+  - '@kbn/flyout-info-blocks'
   - '@kbn/core-chrome-browser-context-mocks'
   - '@kbn/change-history'
   - '@kbn/change-history-ui'
@@ -166,6 +168,7 @@ dependsOn:
   - '@kbn/ftr-llm-proxy'
   - '@kbn/code-editor'
   - '@kbn/code-editor-mock'
+  - '@kbn/core-lifecycle-browser'
 tags:
   - plugin
   - prod

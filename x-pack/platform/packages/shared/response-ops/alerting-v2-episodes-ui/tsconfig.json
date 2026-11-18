@@ -64,6 +64,7 @@
     "@kbn/ui-callout",
     "@kbn/flyout-template",
     "@kbn/flyout-sections",
+    "@kbn/flyout-info-blocks",
     "@kbn/response-ops-alerts-apis",
     "@kbn/connector-specs",
     "@kbn/data-source",

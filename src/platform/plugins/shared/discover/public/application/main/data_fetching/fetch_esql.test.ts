@@ -12,8 +12,9 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import moment from 'moment';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { fetchEsql } from './fetch_esql';
-import type { TimeRange } from '@kbn/es-query';
+import type { Filter, TimeRange } from '@kbn/es-query';
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../context_awareness';
+import type { AppliedProfile } from '../../../context_awareness/composable_profile';
 import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 
 describe('fetchEsql', () => {
@@ -178,6 +179,53 @@ describe('fetchEsql', () => {
     expect(discoverServiceMock.data.search.esql).toHaveBeenCalledWith(
       expect.objectContaining({
         kibanaQueryContext: expect.objectContaining({ timeRange: absoluteTimeRange }),
+      }),
+      expect.anything()
+    );
+  });
+
+  it('passes the filters through when no profile changes the search context', async () => {
+    const mockFilters: Filter[] = [{ meta: {}, query: { match_all: {} } }];
+    mockEsqlResult([], []);
+
+    await fetchEsql({ ...fetchEsqlMockProps, filters: mockFilters });
+
+    expect(discoverServiceMock.data.search.esql).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kibanaQueryContext: expect.objectContaining({
+          timeField: '@timestamp',
+          kibanaFilters: mockFilters,
+        }),
+      }),
+      expect.anything()
+    );
+  });
+
+  it('uses the search context returned by the profiles', async () => {
+    const timeRange: TimeRange = { from: 'now-15m', to: 'now' };
+    const mockProfileFilter: Filter = { meta: {}, query: { exists: { field: 'foo' } } };
+    const mockGetEsqlSearchContext = jest.fn(() => ({
+      timeField: undefined,
+      filters: [mockProfileFilter],
+    }));
+    const mockProfile: AppliedProfile = { getEsqlSearchContext: () => mockGetEsqlSearchContext };
+    jest.spyOn(scopedProfilesManager, 'getProfiles').mockReturnValueOnce([mockProfile]);
+    mockEsqlResult([], []);
+
+    await fetchEsql({ ...fetchEsqlMockProps, timeRange });
+
+    expect(mockGetEsqlSearchContext).toHaveBeenCalledWith({
+      timeRange,
+      timeField: '@timestamp',
+      filters: undefined,
+    });
+    expect(discoverServiceMock.data.search.esql).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kibanaQueryContext: expect.objectContaining({
+          timeRange,
+          timeField: undefined,
+          kibanaFilters: [mockProfileFilter],
+        }),
       }),
       expect.anything()
     );

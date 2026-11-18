@@ -141,6 +141,7 @@ const mockAlertingVTwo = {
     actionPolicies: { app: appId, pathPrefix: paths.actionPolicies },
     executionHistory: { app: appId, pathPrefix: paths.executionHistory },
   })),
+  createDiscoverProfile: jest.fn(),
 };
 
 const createTestHistory = (pathname: string): ScopedHistory => {

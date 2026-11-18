@@ -313,14 +313,21 @@ export const buildEpisodesBaseQuery = (
     query.where`group_hash == ${filterState.groupHash}`;
   }
 
+  addEpisodeRows(query);
+
+  return query;
+};
+
+/**
+ * Attaches the action state to the alert events and reduces them to one row per episode.
+ */
+const addEpisodeRows = (query: ComposerQuery) => {
   query.where`type == "alert" OR action_type IN ("snooze", "unsnooze", "tag", "ack", "unack", "assign")`;
 
   addSeriesActionStats(query);
   addEpisodeIdActionStats(query);
   query.where`type == "alert"`;
   addEpisodeAggregation(query);
-
-  return query;
 };
 
 export const DURATION_LOWER_BOUND_FIELD = 'duration_is_lower_bound';
@@ -339,6 +346,33 @@ const addDurationLowerBoundFlag = (query: ComposerQuery) => {
   query.pipe(
     `EVAL ${DURATION_LOWER_BOUND_FIELD} = (start_event_timestamp IS NULL OR start_event_timestamp != first_timestamp) AND first_series_event_timestamp >= first_timestamp`
   );
+};
+
+export const EPISODES_VIEW_LOOKBACK = '90 days';
+
+/**
+ * Builds the query of the `$.alert-episodes` ES|QL view: one row per alert episode,
+ * across all spaces, with the same columns as the episodes list.
+ *
+ * A view can't take parameters, so the space and the time range are not part of it.
+ * Callers filter on `space_id`, and send the time range as a request filter built
+ * with `buildAlertEventsTimeRangeFilter`, which bounds the alert events but not the
+ * action documents. The lookback only caps the scan when no time range is sent.
+ */
+export const buildEpisodesViewQuery = (): ComposerQuery => {
+  const query = esql.from([ALERT_EVENTS_DATA_STREAM, ALERT_ACTIONS_DATA_STREAM], ['_source']);
+
+  // Only the alert events are bounded, so older action documents still count.
+  query.pipe(`WHERE action_type IS NOT NULL OR @timestamp > NOW() - ${EPISODES_VIEW_LOOKBACK}`);
+
+  addEpisodeRows(query);
+  addDurationLowerBoundFlag(query);
+
+  // ES applies a request filter through a view only to fields the view returns,
+  // so the fields the time range filter matches on must be kept.
+  return query
+    .sort(['@timestamp', 'DESC'])
+    .keep(...ALERT_EPISODE_FIELDS, 'space_id', DURATION_LOWER_BOUND_FIELD, 'type', 'action_type');
 };
 
 /**
