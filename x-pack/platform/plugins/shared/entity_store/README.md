@@ -200,6 +200,7 @@ dynamic: {
       ],
     },
   ],
+  displayLabels: [{ name: 'namespace', label: 'Namespace' }],
 },
 ```
 
@@ -207,12 +208,14 @@ dynamic: {
 - `filter`: optional opaque ES|QL boolean expression narrowing the source to this type's documents, at most 2000 characters. It is validated for length only; where it goes in the query is the generator's job.
 - Attributes: at most 32 per source. `name` is a field path such as `host.arch` or `os.type`, under the same rule as `field` but at most 64 characters, so a column can carry the OpenTelemetry semantic convention name while each source reads its own field. It is the output column and the merge key across sources, and is unique within a source. `field` is a literal field path (dot-separated segments of letters, digits, `_`, `@` and `-`; no wildcards, expressions, quoting or whitespace; at most 512 characters).
 - `valueLabels`: optional map from raw values (stringified) to canonical labels, at most 64 entries, keys and labels 1 to 256 characters. Unmapped values pass through.
-- Unknown keys are rejected on the block, each source and each attribute. Bounds are denial-of-service limits for HTTP input, not design limits.
+- `displayLabels`: optional list of `{ name, label }` at the root of the block, the user-facing text of an identity field or an attribute under its output `name`. A `name` follows the attribute name rule, is unique in the list, and must be an identity field or an attribute of some source. A `label` is 1 to 256 characters, and the list has at most 520 entries. It is presentation only: the inventory's generator never reads it, and it labels the columns of the inventory's `types` response. `valueLabels` labels the values of an attribute; `displayLabels` labels the attribute itself.
+- Unknown keys are rejected on the block, each source, each attribute and each display label. Bounds are denial-of-service limits for HTTP input, not design limits.
 
-Two whole-definition rules apply only when `dynamic` is present, at both `entitySchema` and registration:
+Three whole-definition rules apply only when `dynamic` is present, at both `entitySchema` and registration:
 
 - Servable identity: `identityField` is a single literal field, or one unconditional ranking branch of literal fields and separators whose `documentsFilter` is exactly the derived presence filter, with no field evaluations, no `skipTypePrepend` and at most eight distinct fields. The built-in `host` identity fits; `user` does not.
 - No attribute `field` may be an identity field.
+- Every display label `name` is an identity field or an attribute of some source.
 
 ### Type names
 

@@ -25,6 +25,13 @@ export const MAX_FIELD_PATH_LENGTH = 512;
 export const MAX_VALUE_LABELS = 64;
 /** Longest raw value or label in `valueLabels`. */
 export const MAX_VALUE_LABEL_LENGTH = 256;
+/** Most distinct identity fields a definition with `dynamic` may group by. */
+export const MAX_DYNAMIC_IDENTITY_FIELDS = 8;
+/** Most display labels one block may declare: every attribute of every source plus the identity fields. */
+export const MAX_DISPLAY_LABELS =
+  MAX_SOURCES * MAX_ATTRIBUTES_PER_SOURCE + MAX_DYNAMIC_IDENTITY_FIELDS;
+/** Longest display label. */
+export const MAX_DISPLAY_LABEL_LENGTH = 256;
 
 /** A mapped field path: dot-separated segments, no wildcards, expressions, quoting or whitespace. */
 export const LITERAL_FIELD_PATH_PATTERN = /^[A-Za-z0-9_@-]+(?:\.[A-Za-z0-9_@-]+)*$/;
@@ -116,11 +123,37 @@ export const dynamicSourceSchema = lazySchema(() =>
     })
 );
 
+/** The text shown for one identity field or attribute, under its output name. */
+export const dynamicDisplayLabelSchema = lazySchema(() =>
+  z.strictObject({
+    // An identity field or attribute of the definition; the whole-definition rules check which.
+    name: attributeNameSchema,
+    label: z.string().min(1).max(MAX_DISPLAY_LABEL_LENGTH),
+  })
+);
+
 /** What the inventory reads to generate ES|QL over raw telemetry for an entity type. */
 export const dynamicBlockSchema = lazySchema(() =>
-  z.strictObject({
-    sources: z.array(dynamicSourceSchema).min(1).max(MAX_SOURCES),
-  })
+  z
+    .strictObject({
+      sources: z.array(dynamicSourceSchema).min(1).max(MAX_SOURCES),
+      // User-facing text for identity fields and attributes. Presentation only: query generation
+      // never reads it.
+      displayLabels: z.array(dynamicDisplayLabelSchema).max(MAX_DISPLAY_LABELS).optional(),
+    })
+    .superRefine(({ displayLabels = [] }, ctx) => {
+      const seen = new Set<string>();
+      displayLabels.forEach(({ name }, index) => {
+        if (seen.has(name)) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['displayLabels', index, 'name'],
+            message: `display label name "${name}" is already declared; names are unique within a block`,
+          });
+        }
+        seen.add(name);
+      });
+    })
 );
 
 /** The `dynamic` block of an entity definition. */
@@ -129,5 +162,7 @@ export type DynamicBlock = z.infer<typeof dynamicBlockSchema>;
 export type DynamicSource = z.infer<typeof dynamicSourceSchema>;
 /** One attribute of a `dynamic` source. */
 export type DynamicAttribute = z.infer<typeof dynamicAttributeSchema>;
+/** The text shown for one identity field or attribute of a `dynamic` block. */
+export type DynamicDisplayLabel = z.infer<typeof dynamicDisplayLabelSchema>;
 /** Raw value to canonical label map of a `dynamic` attribute. */
 export type DynamicValueLabels = z.infer<typeof dynamicValueLabelsSchema>;

@@ -7,10 +7,10 @@
 
 import { omit } from 'lodash';
 import type { Condition } from '@kbn/streamlang';
-import type { DynamicBlock } from './dynamic_block_schema';
+import { MAX_DYNAMIC_IDENTITY_FIELDS, type DynamicBlock } from './dynamic_block_schema';
 import { isNotEmptyCondition } from '../common_fields';
 import {
-  MAX_DYNAMIC_IDENTITY_FIELDS,
+  DISPLAY_LABEL_RULE,
   NO_IDENTITY_ATTRIBUTE_RULE,
   RESERVED_LAST_SEEN_FIELD,
   SERVABLE_IDENTITY_RULE,
@@ -365,6 +365,57 @@ describe('dynamic definition rules', () => {
 
     it('accepts an attribute on a different field', () => {
       expectAccepted(withAttribute(hostIdentity, 'host.os.name'));
+    });
+  });
+
+  describe('display labels are identity fields or attributes', () => {
+    const withLabels = (displayLabels: Array<{ name: string; label: string }>) =>
+      definition(hostIdentity, {
+        dynamic: {
+          sources: [
+            {
+              indexPattern: 'metrics-a-*',
+              attributes: [{ name: 'os_name', field: 'host.os.name' }],
+            },
+            {
+              indexPattern: 'metrics-b-*',
+              attributes: [{ name: 'arch', field: 'host.arch' }],
+            },
+          ],
+          displayLabels,
+        },
+      });
+
+    it('accepts a label for an attribute of any source', () => {
+      expectAccepted(
+        withLabels([
+          { name: 'os_name', label: 'OS' },
+          { name: 'arch', label: 'Architecture' },
+        ])
+      );
+    });
+
+    it('accepts a label for an identity field', () => {
+      expectAccepted(withLabels([{ name: 'host.name', label: 'Host name' }]));
+    });
+
+    it('rejects a label for a name that is neither, with a path to its name', () => {
+      expectRejected(
+        withLabels([
+          { name: 'os_name', label: 'OS' },
+          { name: 'host.unknown', label: 'Unknown' },
+        ]),
+        ['dynamic', 'displayLabels', 1, 'name'],
+        DISPLAY_LABEL_RULE
+      );
+    });
+
+    it('rejects a label for the generated last_seen column', () => {
+      expectRejected(
+        withLabels([{ name: RESERVED_LAST_SEEN_FIELD, label: 'Last seen' }]),
+        ['dynamic', 'displayLabels', 0, 'name'],
+        DISPLAY_LABEL_RULE
+      );
     });
   });
 
