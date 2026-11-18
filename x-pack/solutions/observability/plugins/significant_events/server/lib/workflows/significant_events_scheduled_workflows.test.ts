@@ -216,6 +216,15 @@ describe('scheduled Significant Events managed workflows', () => {
       processedCount: expect.stringContaining('compute_batch_size.output.processedCount'),
     });
   });
+
+  it('detection completes an idle run as success, since the scheduled wrapper fails on any non-completed sub-workflow', () => {
+    const parsed = getParsedStaticWorkflowYaml(SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID);
+
+    const idleStep = findStep(parsed.steps, 'exit_no_active_alerts');
+    expect(idleStep?.type).toBe('workflow.output');
+    expect(idleStep?.status).not.toBe('cancelled');
+    expect(idleStep?.with?.skipped).toBe(true);
+  });
 });
 
 describe('SignificantEventsScheduledWorkflowsService', () => {
