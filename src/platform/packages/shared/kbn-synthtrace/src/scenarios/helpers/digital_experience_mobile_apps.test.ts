@@ -546,7 +546,11 @@ describe('digital experience mobile apps', () => {
           );
           return onNewest.length / inWindow.length;
         };
-        expect(newestShare(4, hours)).toBeGreaterThan(newestShare(0, 2));
+        // Every installation takes part in the rollout, from its initial adoption to all of them
+        const initialAdoption = newest.rollout?.initialAdoption ?? 0;
+        expect(newestShare(0, 0.5)).toBeGreaterThan(initialAdoption - 0.15);
+        expect(newestShare(0, 0.5)).toBeLessThan(initialAdoption + 0.2);
+        expect(newestShare(5.5, hours)).toBeGreaterThan(0.85);
 
         // An installation never goes back to an older version
         const versionsByInstallation = new Map<unknown, string[]>();

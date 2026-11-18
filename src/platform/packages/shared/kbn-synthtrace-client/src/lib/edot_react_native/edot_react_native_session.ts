@@ -533,7 +533,9 @@ const describeCrash = ({ client, app, random }: SessionContext, crashedAt: numbe
  * What the SDK has exported of a visit when the app crashes. Spans that were still running, and
  * spans and logs that had ended since the last export of their batch processor, are lost. Span
  * events go through the span processor with their span, and only become logs in the exporter, so
- * they are kept or lost with it. Nothing happens after the crash.
+ * they are kept or lost with it. A span can be exported while its parent is lost, like a request
+ * that ended before its screen load did, so its `parent_span_id` points to a span that was never
+ * sent, as with the SDKs. Nothing happens after the crash.
  */
 const exportedBeforeCrash = (
   { client, random }: SessionContext,

@@ -45,8 +45,9 @@ export interface DigitalExperienceMobileAppVersion {
   /** Overrides the app's health profile for this version, e.g. its crash rate or launch time. */
   health?: Partial<Omit<MobileHealthProfile, 'name'>>;
   /**
-   * Rolls the version out from the start of the run: `initialAdoption` of its installations run it
-   * from the start, and all of them `hours` later. The others stay on an older version until then.
+   * Rolls the version out from the start of the run: `initialAdoption` of all the installations run
+   * it from the start, and all of them `hours` later, which replaces its `share`. The others run the
+   * older versions by their shares until their turn.
    */
   rollout?: { initialAdoption: number; hours: number };
 }
@@ -774,29 +775,30 @@ const pickVersion = (
 const HOUR_MS = 60 * 60_000;
 
 /**
- * The index of the version an installation runs `elapsed` milliseconds into the run. An
- * installation waits for its turn in a version's rollout on an older version, and draws the same
- * turn on every session, so it only ever upgrades.
+ * The index of the version an installation runs `elapsed` milliseconds into the run. Versions that
+ * roll out, newest first, take every installation whose turn has come; the others pick among the
+ * older versions by their shares. An installation draws the same turns and pick on every session,
+ * so it only ever upgrades.
  */
 const pickInstalledVersion = (
   random: () => number,
   versions: readonly DigitalExperienceMobileAppVersion[],
   elapsed: number
 ): number => {
-  const index = pickVersion(random, versions);
-  const { rollout } = versions[index];
-  if (!rollout || index === versions.length - 1) {
-    return index;
+  for (const [index, { rollout }] of versions.entries()) {
+    if (!rollout || index === versions.length - 1) {
+      return index + pickVersion(random, versions.slice(index));
+    }
+    const { initialAdoption, hours } = rollout;
+    const progress = Math.min(
+      initialAdoption + ((1 - initialAdoption) * Math.max(elapsed, 0)) / (hours * HOUR_MS),
+      1
+    );
+    if (random() < progress) {
+      return index;
+    }
   }
-  const { initialAdoption, hours } = rollout;
-  const progress = Math.min(
-    initialAdoption + ((1 - initialAdoption) * Math.max(elapsed, 0)) / (hours * HOUR_MS),
-    1
-  );
-  if (random() < progress) {
-    return index;
-  }
-  return index + 1 + pickVersion(random, versions.slice(index + 1));
+  return versions.length - 1;
 };
 
 type GenerateSessionsOpts = DigitalExperienceMobileScenarioOpts & {

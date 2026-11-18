@@ -1194,9 +1194,28 @@ describe('edotReactNative', () => {
           trace_id: ids.traceId,
           parent_span_id: ids.parentSpanId,
           status: { code: 'Error' },
-          resource: { attributes: { 'service.name': 'trails' } },
+          resource: {
+            attributes: { 'service.name': 'trails', 'deployment.environment.name': 'production' },
+          },
         });
         expect(Object.keys(span.attributes)).not.toContain('session.id');
+      });
+
+      it("writes no environment on backend spans when the app isn't configured with one", () => {
+        const [span] = edotReactNative
+          .app({ serviceName: 'internal-tools' })
+          .client(DEVICE_PROFILES.iphone12Ios17, { installationId: INSTALLATION_ID })
+          .backendSpan({
+            service: 'trails',
+            method: 'GET',
+            url: 'https://api.example.com/v1/trails',
+            statusCode: 200,
+            traceId: 'a'.repeat(32),
+            parentSpanId: 'b'.repeat(16),
+          })
+          .serialize();
+        // EDOT iOS writes `default` for the app itself, which says nothing about the backend
+        expect(span.resource.attributes).toEqual({ 'service.name': 'trails' });
       });
     });
 
@@ -1367,6 +1386,28 @@ describe('edotReactNative', () => {
           expect(relaunch.attributes?.[ATTR_START_TYPE]).toBe(START_TYPE_COLD);
           expect(timeOf(named(docs, EVENT_SESSION_END)[0])).toBeGreaterThan(timeOf(relaunch));
         }
+      });
+
+      it('keeps a request exported before a crash even when its screen load was lost', () => {
+        // On a screen slow to appear, requests end before it has, and so can be exported before
+        // the screen load span, which a crash right after then loses, as with the SDKs
+        const orphans = Array.from({ length: 100 }, (_, i) =>
+          proposed({
+            platform: 'ios',
+            seed: `orphan:${i}`,
+            screenViews: 1,
+            health: withHealth({ crashRate: 1, viewAppear: { median: 3_000, sigma: 0.3 } }),
+          })
+        ).flatMap((docs) => {
+          const spanIds = new Set(docs.filter(isSpan).map(({ span_id: spanId }) => spanId));
+          return docs
+            .filter(isSpan)
+            .filter(
+              ({ kind, parent_span_id: parentSpanId }) =>
+                kind === 'Client' && parentSpanId !== undefined && !spanIds.has(parentSpanId)
+            );
+        });
+        expect(orphans.length).toBeGreaterThan(0);
       });
 
       it('gives native apps native crashes only', () => {

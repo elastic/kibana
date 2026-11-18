@@ -160,7 +160,9 @@ export abstract class EdotReactNativeClientBase {
     /** Android application ID and iOS bundle ID, which the SDKs don't write as an attribute. */
     protected readonly appId: string,
     /** Whether the app is built with the native SDK directly, without React Native. */
-    public readonly native: boolean = false
+    public readonly native: boolean = false,
+    /** The environment the app is configured with, which its backends share. */
+    private readonly environment?: string
   ) {}
 
   /** Whether the SDK adds the cellular details to every span, not only to HTTP spans. */
@@ -398,7 +400,7 @@ export abstract class EdotReactNativeClientBase {
     });
   }
 
-  /** The SERVER span of a backend that answered a request of the app. */
+  /** The SERVER span of a backend that answered a request of the app, in the app's environment. */
   backendSpan({
     service,
     method,
@@ -422,7 +424,12 @@ export abstract class EdotReactNativeClientBase {
       traceId,
       spanId,
       parentSpanId,
-      resourceAttributes: { 'service.name': service },
+      resourceAttributes: {
+        'service.name': service,
+        ...(this.environment !== undefined
+          ? { 'deployment.environment.name': this.environment }
+          : {}),
+      },
     });
   }
 

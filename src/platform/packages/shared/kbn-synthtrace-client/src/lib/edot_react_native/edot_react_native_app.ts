@@ -68,6 +68,7 @@ export class EdotReactNativeApp {
   readonly serviceName: string;
   private readonly appId: string;
   private readonly native: boolean;
+  private readonly environment?: string;
   private readonly resourceAttributesByPlatform: Readonly<
     Record<MobilePlatform, Readonly<Record<string, unknown>>>
   >;
@@ -83,6 +84,7 @@ export class EdotReactNativeApp {
     this.serviceName = serviceName;
     this.appId = appId;
     this.native = native;
+    this.environment = environment;
     const service = { 'service.name': serviceName, 'service.version': serviceVersion };
     this.resourceAttributesByPlatform = {
       android: {
@@ -115,7 +117,8 @@ export class EdotReactNativeApp {
       resourceAttributes,
       clientOptions,
       this.appId,
-      this.native
+      this.native,
+      this.environment
     );
   }
 }
