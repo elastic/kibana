@@ -23,7 +23,8 @@ import { css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
-import { getESQLAdHocDataview, getEditorExtensions } from '@kbn/esql-utils';
+import { getEditorExtensions, getSourceCommandQueryFromESQLQuery } from '@kbn/esql-utils';
+import { EsqlSource } from '@kbn/data-source';
 import {
   type RecommendedQuery,
   type ESQLRegistrySolutionId,
@@ -34,6 +35,10 @@ import { getRecommendedQueriesTemplates } from '@kbn/esql-language/src/commands/
 import { LanguageDocumentationFlyout } from '@kbn/language-documentation';
 import { getCategorizationField } from '@kbn/aiops-utils';
 import { prettifyQueryTemplate } from '@kbn/esql-language/src/commands/registry/options/recommended_queries/utils';
+import {
+  getEffectiveProjectRouting,
+  usePickerProjectRouting,
+} from '../hooks/use_effective_project_routing';
 import { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 import { reportEsqlError } from '../report_error';
 import type { ESQLEditorDeps } from '../types';
@@ -44,15 +49,21 @@ export const HelpPopover: React.FC<{
   onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
   /** Size for the docs flyout. Pass a named size when embedded in another flyout. */
   docsFlyoutSize?: EuiFlyoutProps['size'];
-}> = ({ onESQLDocsFlyoutVisibilityChanged, docsFlyoutSize }) => {
+  /**
+   * Hides the recommended-queries section (and skips deriving it). Use when the embedder
+   * can't apply a picked query — i.e. no `submitEsqlQuery` action is wired.
+   */
+  hideRecommendedQueries?: boolean;
+}> = ({ onESQLDocsFlyoutVisibilityChanged, docsFlyoutSize, hideRecommendedQueries }) => {
   const kibana = useKibana<ESQLEditorDeps>();
-  const { core, data } = kibana.services;
+  const { core } = kibana.services;
   const { docLinks, http, chrome, analytics } = core;
 
   const { euiTheme } = useEuiTheme();
   const actions = useEsqlEditorActions();
   const currentQueryRef = useRef<string>('');
   currentQueryRef.current = actions?.currentQuery ?? '';
+  const pickerProjectRouting = usePickerProjectRouting();
 
   const activeSolutionNavId = useObservable(chrome.getActiveSolutionNavId$());
   const activeSolutionId = activeSolutionNavId ?? ESQL_CLASSIC_SOLUTION_ID;
@@ -83,7 +94,7 @@ export const HelpPopover: React.FC<{
 
   useEffect(() => {
     let isMounted = true;
-    if (!isESQLMenuPopoverOpen) {
+    if (!isESQLMenuPopoverOpen || hideRecommendedQueries) {
       return () => {
         isMounted = false;
       };
@@ -99,28 +110,29 @@ export const HelpPopover: React.FC<{
     };
 
     const getDataViewForQuery = async () => {
-      const currentQuery = currentQueryRef.current;
+      const sourceQuery = getSourceCommandQueryFromESQLQuery(currentQueryRef.current);
+      if (!sourceQuery) {
+        resetDataviewDerived();
+        return;
+      }
       try {
-        const dataView = await getESQLAdHocDataview({
-          dataViewsService: data.dataViews,
-          query: currentQuery || '',
+        const source = await EsqlSource.create({
+          query: sourceQuery,
           http,
+          projectRouting: getEffectiveProjectRouting(currentQueryRef.current, pickerProjectRouting),
         });
         if (!isMounted) return;
-        if (dataView) {
-          const textFields = dataView.fields?.getByType('string') ?? [];
-          const tempCategorizationField = textFields.length
-            ? getCategorizationField(textFields.map((field) => field.name))
-            : undefined;
-          setDataviewDerived({
-            queryForRecommendedQueries: `FROM ${dataView.name}`,
-            timeFieldName: dataView.timeFieldName ?? dataView.fields?.getByType('date')?.[0]?.name,
-            categorizationField: tempCategorizationField,
-            dataviewName: dataView.name,
-          });
-        } else {
-          resetDataviewDerived();
-        }
+        const columns = source.getColumns();
+        const textFields = columns.filter(({ type }) => type === 'string');
+        const tempCategorizationField = textFields.length
+          ? getCategorizationField(textFields.map(({ name }) => name))
+          : undefined;
+        setDataviewDerived({
+          queryForRecommendedQueries: `FROM ${source.title}`,
+          timeFieldName: source.timeFieldName ?? columns.find(({ type }) => type === 'date')?.name,
+          categorizationField: tempCategorizationField,
+          dataviewName: source.title,
+        });
       } catch (error) {
         if (isMounted) {
           resetDataviewDerived();
@@ -132,7 +144,7 @@ export const HelpPopover: React.FC<{
     return () => {
       isMounted = false;
     };
-  }, [data.dataViews, http, isESQLMenuPopoverOpen]);
+  }, [http, pickerProjectRouting, isESQLMenuPopoverOpen, hideRecommendedQueries]);
 
   const { queryForRecommendedQueries, timeFieldName, categorizationField, dataviewName } =
     dataviewDerived;
@@ -247,7 +259,7 @@ export const HelpPopover: React.FC<{
               </EuiContextMenuItem>
             ),
           },
-          ...(Boolean(recommendedQueries.length)
+          ...(!hideRecommendedQueries && Boolean(recommendedQueries.length)
             ? [
                 {
                   name: i18n.translate('esqlEditor.menu.exampleQueries', {
@@ -289,6 +301,7 @@ export const HelpPopover: React.FC<{
     actions,
     categorizationField,
     dataviewName,
+    hideRecommendedQueries,
     queryForRecommendedQueries,
     solutionsRecommendedQueries,
     timeFieldName,

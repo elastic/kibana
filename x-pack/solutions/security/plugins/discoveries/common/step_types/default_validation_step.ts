@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { StepCategory } from '@kbn/workflows';
@@ -20,27 +20,31 @@ export const DefaultValidationStepTypeId = 'security.attack-discovery.defaultVal
 /**
  * Input schema for Default Validation step.
  */
-export const DefaultValidationInputSchema = z.object({
-  alerts_context_count: z.number().int().optional(),
-  alerts_index_pattern: z.string().optional(),
-  anonymized_alerts: z.array(AnonymizedAlertSchema).optional(),
-  api_config: ApiConfigSchema,
-  attack_discoveries: z.array(AttackDiscoverySchema),
-  connector_name: z.string().optional(),
-  enable_field_rendering: z.boolean().optional().default(true),
-  generation_uuid: z.string(),
-  replacements: z.record(z.string(), z.string()).optional(),
-  with_replacements: z.boolean().optional().default(false),
-});
+export const DefaultValidationInputSchema = lazySchema(() =>
+  z.object({
+    alerts_context_count: z.number().int().optional(),
+    alerts_index_pattern: z.string().optional(),
+    anonymized_alerts: z.array(AnonymizedAlertSchema).optional(),
+    api_config: ApiConfigSchema,
+    attack_discoveries: z.array(AttackDiscoverySchema),
+    connector_name: z.string().optional(),
+    enable_field_rendering: z.boolean().optional().default(true),
+    generation_uuid: z.string(),
+    replacements: z.record(z.string(), z.string()).optional(),
+    with_replacements: z.boolean().optional().default(false),
+  })
+);
 
 /**
  * Output schema for Default Validation step.
  */
-export const DefaultValidationOutputSchema = z.object({
-  filter_reason: z.string().optional(),
-  filtered_count: z.number().int(),
-  validated_discoveries: z.array(z.unknown()),
-});
+export const DefaultValidationOutputSchema = lazySchema(() =>
+  z.object({
+    filter_reason: z.string().optional(),
+    filtered_count: z.number().int(),
+    validated_discoveries: z.array(z.unknown()),
+  })
+);
 
 /**
  * Common step definition for Default Validation step.

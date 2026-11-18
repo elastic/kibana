@@ -12,7 +12,9 @@ import { expect } from '../../../../../api';
 
 apiTest.describe(
   `SAML Auth fixture`,
-  { tag: [...tags.deploymentAgnostic, ...tags.serverless.observability.logs_essentials] },
+  {
+    tag: [...tags.serverless.all, ...tags.stateful.all],
+  },
   () => {
     apiTest(`should create a session for 'admin' role`, async ({ samlAuth }) => {
       const credentials = await samlAuth.asInteractiveUser('admin');

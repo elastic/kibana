@@ -95,12 +95,20 @@ export const useEntitiesOverview = ({
   const euidApi = useEntityStoreEuidApi();
 
   const hostEntityIdentifiers = useMemo(
-    () => euidApi?.euid.getEntityIdentifiersFromDocument('host', flattened),
-    [euidApi?.euid, flattened]
+    () =>
+      euidApi?.euid.getEntityIdentifiersFromDocument(
+        euidApi.getBuiltInEntityDefinition('host'),
+        flattened
+      ),
+    [euidApi, flattened]
   );
   const userEntityIdentifiers = useMemo(
-    () => euidApi?.euid.getEntityIdentifiersFromDocument('user', flattened),
-    [euidApi?.euid, flattened]
+    () =>
+      euidApi?.euid.getEntityIdentifiersFromDocument(
+        euidApi.getBuiltInEntityDefinition('user'),
+        flattened
+      ),
+    [euidApi, flattened]
   );
 
   const legacyUserIdentityForStore = getLegacyIdentityFields('user.name', userName);
@@ -109,12 +117,12 @@ export const useEntitiesOverview = ({
   const hostIdentityFields = hostEntityIdentifiers ?? legacyHostIdentityForStore;
 
   const hostEntityId = useMemo(
-    () => euidApi?.euid.getEuidFromObject('host', flattened),
-    [euidApi?.euid, flattened]
+    () => euidApi?.euid.getEuidFromObject(euidApi.getBuiltInEntityDefinition('host'), flattened),
+    [euidApi, flattened]
   );
   const userEntityId = useMemo(
-    () => euidApi?.euid.getEuidFromObject('user', flattened),
-    [euidApi?.euid, flattened]
+    () => euidApi?.euid.getEuidFromObject(euidApi.getBuiltInEntityDefinition('user'), flattened),
+    [euidApi, flattened]
   );
 
   const { entityRecord: userEntityRecord } = useEntityFromStore({

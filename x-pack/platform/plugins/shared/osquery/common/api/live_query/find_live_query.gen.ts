@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 import { ECSMappingOrUndefined } from '../model/schema/common_attributes.gen';
 
@@ -75,8 +75,8 @@ export const FindLiveQueryResponse = lazySchema(() =>
               _source: z
                 .object({
                   action_id: z.string().optional(),
-                  expiration: z.string().datetime().optional(),
-                  '@timestamp': z.string().datetime().optional(),
+                  expiration: isoDateTime().optional(),
+                  '@timestamp': isoDateTime().optional(),
                   agents: z.array(z.string()).optional(),
                   user_id: z.string().optional(),
                   pack_id: z.string().optional(),
@@ -121,8 +121,8 @@ export const FindLiveQueryDetailsResponse = lazySchema(() =>
     data: z
       .object({
         action_id: z.string().optional(),
-        expiration: z.string().datetime().optional(),
-        '@timestamp': z.string().datetime().optional(),
+        expiration: isoDateTime().optional(),
+        '@timestamp': isoDateTime().optional(),
         agents: z.array(z.string()).optional(),
         user_id: z.string().optional(),
         user_profile_uid: z.string().optional(),

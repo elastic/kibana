@@ -19,9 +19,12 @@ import {
 import type {
   AiIndexDest,
   AiIndexFeedbackAnalysis,
-  AiIndexHttpItem,
+  AiIndexItem,
   AiIndexProperties,
 } from '../../common/http_api/ai_indices';
+import type { AiIndexDreamingConfig } from '../../common/dreaming';
+import { isIndexPattern } from '../../common/ai_index_dest';
+import { AI_INDEX_ID_PATTERN } from '../../common/validation';
 import { createSpaceDslFilter } from '../utils/space_filter';
 import {
   InvalidAiIndexDestError,
@@ -31,24 +34,43 @@ import {
   AiIndexIdConflictError,
   AiIndexAlreadyExistsError,
 } from './errors';
-import type { AiIndexDocument, AiIndexStorageClient, StoredAiIndexDocument } from './storage';
+import type {
+  AiIndexDocument,
+  AiIndexStorageClient,
+  StoredAiIndexDocument,
+  StoredDreamingConfig,
+} from './storage';
 import { buildManagedAiIndexDocId, createAiIndexStorageClient } from './storage';
 import { buildTraceQueries } from './trace_queries';
 import { createAiIndexIdentityDslFilter } from '../utils/ai_index_identity_filter';
 
+const withoutLegacyEdges = (dreaming: StoredDreamingConfig): AiIndexDreamingConfig => {
+  if (!dreaming.entities || !('edges' in dreaming.entities)) {
+    return dreaming;
+  }
+  const { edges: _legacyEdges, ...entities } = dreaming.entities;
+  return { ...dreaming, entities };
+};
+
 /** Resolves the identity a pre-upgrade document carries implicitly, in its `_id` and its absence of a space. */
-const toAiIndexDocument = (source: StoredAiIndexDocument, docId: string): AiIndexDocument => ({
+const toAiIndexDocument = (
+  { dreaming, ...source }: StoredAiIndexDocument,
+  docId: string
+): AiIndexDocument => ({
   ...source,
+  ...(dreaming !== undefined && { dreaming: withoutLegacyEdges(dreaming) }),
   id: source.id ?? docId,
   space: source.space ?? DEFAULT_SPACE_ID,
 });
 
-const toAiIndexItem = (document: AiIndexDocument): AiIndexHttpItem => ({
+const toAiIndexItem = (document: AiIndexDocument): AiIndexItem => ({
   id: document.id,
   ...(document.description !== undefined && { description: document.description }),
   ...(document.feedback_analysis !== undefined && {
     feedback_analysis: document.feedback_analysis,
   }),
+  ...(document.dreaming !== undefined && { dreaming: document.dreaming }),
+  ...(document.memory_enabled !== undefined && { memory_enabled: document.memory_enabled }),
   managed: document.managed ?? false,
   dest: document.dest,
   automations: document.automations,
@@ -58,11 +80,34 @@ const toAiIndexItem = (document: AiIndexDocument): AiIndexHttpItem => ({
   date_modified: document.date_modified,
 });
 
+/** Some fields need to be read from config (registration object), and some from storage. */
+const mergeManagedAiIndex = (
+  registration: AiIndexProperties,
+  document: AiIndexDocument
+): AiIndexDocument => ({
+  ...document,
+  dest: registration.dest,
+  memory_enabled: registration.memory_enabled,
+});
+
+const withoutIgnoredProperties = ({
+  memory_enabled: _memoryEnabled,
+  ...properties
+}: AiIndexProperties): AiIndexProperties => properties;
+
+const keptFields = (
+  existing: AiIndexDocument | undefined
+): Pick<AiIndexDocument, 'dreaming' | 'memory_enabled'> => ({
+  ...(existing?.dreaming !== undefined && { dreaming: existing.dreaming }),
+  ...(existing?.memory_enabled !== undefined && { memory_enabled: existing.memory_enabled }),
+});
+
 const ADD_AUTOMATION_CONFLICT_RETRIES = 2;
 
 export interface AiIndexManagedBootstrap {
   isManaged: (id: string) => boolean;
   getManagedIds: () => string[];
+  getRegistration: (id: string) => AiIndexProperties | undefined;
   ensure: (id: string, spaceId: string) => Promise<boolean>;
 }
 
@@ -134,7 +179,7 @@ export class AiIndexService {
     await this.writeDocument(
       aiIndexId,
       spaceId,
-      { ...properties, id: aiIndexId, space: spaceId, managed: false },
+      { ...withoutIgnoredProperties(properties), id: aiIndexId, space: spaceId, managed: false },
       undefined
     );
   }
@@ -160,7 +205,13 @@ export class AiIndexService {
     return this.writeDocument(
       aiIndexId,
       spaceId,
-      { ...properties, id: aiIndexId, space: spaceId, managed: false },
+      {
+        ...withoutIgnoredProperties(properties),
+        ...keptFields(existing?.document),
+        id: aiIndexId,
+        space: spaceId,
+        managed: false,
+      },
       existing
     );
   }
@@ -169,12 +220,10 @@ export class AiIndexService {
    * Creates or fully replaces a managed AI index. Managed entries are owned by
    * the registering plugin and cannot be mutated via the public API.
    *
-   * This is an idempotent upsert: it is safe to call on every access, so a
-   * managed entry always reflects the latest registration (the source of truth
-   * lives in code). It will overwrite an existing managed entry, but refuses to
-   * clobber a user-owned (unmanaged) entry that squats the same id, throwing
-   * {@link AiIndexIdConflictError} so the collision surfaces instead of
-   * silently destroying user data.
+   * This is an idempotent upsert. It will overwrite an existing managed entry,
+   * but refuses to clobber a user-owned (unmanaged) entry that squats the same
+   * id, throwing {@link AiIndexIdConflictError} so the collision surfaces
+   * instead of silently destroying user data.
    */
   async putManaged(
     aiIndexId: string,
@@ -189,7 +238,13 @@ export class AiIndexService {
     return this.writeDocument(
       aiIndexId,
       spaceId,
-      { ...properties, id: aiIndexId, space: spaceId, managed: true },
+      {
+        ...withoutIgnoredProperties(properties),
+        ...keptFields(existing?.document),
+        id: aiIndexId,
+        space: spaceId,
+        managed: true,
+      },
       existing,
       { docId: buildManagedAiIndexDocId(spaceId, aiIndexId) }
     );
@@ -270,17 +325,35 @@ export class AiIndexService {
     await this.writeDocument(
       aiIndexId,
       spaceId,
-      { ...existing.document, feedback_analysis: feedbackAnalysis },
+      {
+        ...existing.document,
+        feedback_analysis: feedbackAnalysis,
+      },
       existing
     );
 
     return feedbackAnalysis;
   }
 
-  async get(aiIndexId: string, spaceId: string): Promise<AiIndexHttpItem> {
+  /** Replaces the dreaming config of an AI index, managed or not, leaving the rest untouched. */
+  async setDreaming(
+    aiIndexId: string,
+    spaceId: string,
+    dreaming: AiIndexDreamingConfig
+  ): Promise<AiIndexDreamingConfig> {
+    const existing = await this.findDocument(aiIndexId, spaceId);
+    if (!existing) {
+      throw new AiIndexNotFoundError(aiIndexId);
+    }
+    await this.writeDocument(aiIndexId, spaceId, { ...existing.document, dreaming }, existing);
+
+    return dreaming;
+  }
+
+  async get(aiIndexId: string, spaceId: string): Promise<AiIndexItem> {
     const existing = await this.findDocument(aiIndexId, spaceId);
     if (existing) {
-      return toAiIndexItem(existing.document);
+      return this.toItem(existing.document);
     }
     if (!this.managedBootstrap?.isManaged(aiIndexId)) {
       throw new AiIndexNotFoundError(aiIndexId);
@@ -290,7 +363,7 @@ export class AiIndexService {
     if (!newManagedAiIndex) {
       throw new AiIndexNotFoundError(aiIndexId);
     }
-    return toAiIndexItem(newManagedAiIndex.document);
+    return this.toItem(newManagedAiIndex.document);
   }
 
   /**
@@ -356,7 +429,46 @@ export class AiIndexService {
     );
   }
 
-  async list(spaceId: string): Promise<AiIndexHttpItem[]> {
+  /** Detaches a workflow automation from an AI index, retrying on concurrent writes. */
+  async removeAutomation(
+    aiIndexId: string,
+    spaceId: string,
+    automation: { type: 'workflow'; value: string }
+  ): Promise<'removed' | 'not_attached'> {
+    return pRetry(
+      async () => {
+        const existing = await this.findDocument(aiIndexId, spaceId);
+        if (!existing) {
+          throw new AiIndexNotFoundError(aiIndexId);
+        }
+        const automations = existing.document.automations.filter(
+          (entry) => entry.type !== automation.type || entry.value !== automation.value
+        );
+        if (automations.length === existing.document.automations.length) {
+          return 'not_attached';
+        }
+
+        await this.writeDocument(
+          aiIndexId,
+          spaceId,
+          { ...existing.document, automations },
+          existing
+        );
+
+        return 'removed';
+      },
+      {
+        retries: ADD_AUTOMATION_CONFLICT_RETRIES,
+        onFailedAttempt: (error) => {
+          if (!(error instanceof AiIndexConflictError)) {
+            throw error;
+          }
+        },
+      }
+    );
+  }
+
+  async list(spaceId: string): Promise<AiIndexItem[]> {
     const items = await this.searchSpace(spaceId);
     const missingManagedIds =
       this.managedBootstrap
@@ -406,7 +518,7 @@ export class AiIndexService {
     }
   }
 
-  private async searchSpace(spaceId: string): Promise<AiIndexHttpItem[]> {
+  private async searchSpace(spaceId: string): Promise<AiIndexItem[]> {
     const response = await this.storageClient.search({
       size: MAX_AI_INDICES,
       track_total_hits: false,
@@ -419,8 +531,16 @@ export class AiIndexService {
       if (!hit._source || hit._id === undefined) {
         return [];
       }
-      return [toAiIndexItem(toAiIndexDocument(hit._source, hit._id))];
+      return [this.toItem(toAiIndexDocument(hit._source, hit._id))];
     });
+  }
+
+  /** Managed documents are resolved against their registration on read; user-owned ones are returned as stored. */
+  private toItem(document: AiIndexDocument): AiIndexItem {
+    const registration = document.managed
+      ? this.managedBootstrap?.getRegistration(document.id)
+      : undefined;
+    return toAiIndexItem(registration ? mergeManagedAiIndex(registration, document) : document);
   }
 
   private async findDocument(
@@ -455,14 +575,20 @@ export class AiIndexService {
   }
 
   /**
-   * The dest value must follow the type-specific naming convention and match
-   * the declared `type`. A managed entry may also use the dot-prefixed form,
-   * which is reserved for Kibana-internal backing stores.
+   * The dest value must name a single index or data stream, follow the
+   * type-specific naming convention, and match the declared `type`. A managed
+   * entry may also use the dot-prefixed form, which is reserved for
+   * Kibana-internal backing stores.
    */
   private async assertValidDest(
     { type, value }: AiIndexDest,
     { managed = false }: { managed?: boolean } = {}
   ): Promise<void> {
+    if (isIndexPattern(value)) {
+      throw new InvalidAiIndexDestError(
+        `dest.value '${value}' is not allowed: it must name a single index or data stream, not a pattern`
+      );
+    }
     if (type === 'data_stream') {
       await this.assertValidDataStreamDest(value, managed);
     } else {
@@ -474,39 +600,52 @@ export class AiIndexService {
     return managed ? [basePrefix, `.${basePrefix}`] : [basePrefix];
   }
 
-  /**
-   * Every expression in the dest value must start with one of the type-specific
-   * prefixes.
-   */
-  private assertDestValueHasPrefix(value: string, prefixes: string[]): void {
-    const invalid = value
-      .split(',')
-      .find((expression) => !prefixes.some((prefix) => expression.startsWith(prefix)));
-    if (invalid !== undefined) {
+  /** The dest value must be a type-specific prefix followed by a valid AI index id. */
+  private assertDestValueFormat(value: string, prefixes: string[]): void {
+    const prefix = prefixes.find((candidate) => value.startsWith(candidate));
+    if (prefix === undefined) {
       throw new InvalidAiIndexDestError(
-        `dest.value '${value}' is not allowed: every expression must start with '${prefixes[0]}'`
+        `dest.value '${value}' is not allowed: it must start with '${prefixes[0]}'`
+      );
+    }
+    if (!AI_INDEX_ID_PATTERN.test(value.slice(prefix.length))) {
+      throw new InvalidAiIndexDestError(
+        `dest.value '${value}' is not allowed: the part after '${prefix}' must be a valid AI index id`
       );
     }
   }
 
-  private async assertValidDataStreamDest(value: string, managed: boolean): Promise<void> {
-    const prefixes = this.allowedDestPrefixes(DATA_STREAM_PREFIX, managed);
-    this.assertDestValueHasPrefix(value, prefixes);
-
-    let indices: estypes.IndicesResolveIndexResolveIndexItem[] = [];
-    let dataStreams: estypes.IndicesResolveIndexResolveIndexDataStreamsItem[] = [];
+  /** Resolves the dest name, rejecting aliases since they cannot be a single write target. */
+  private async resolveDest(value: string): Promise<{
+    indices: estypes.IndicesResolveIndexResolveIndexItem[];
+    dataStreams: estypes.IndicesResolveIndexResolveIndexDataStreamsItem[];
+  }> {
+    let resolved: estypes.IndicesResolveIndexResponse;
     try {
-      const resolved = await this.esClient.indices.resolveIndex({
+      resolved = await this.esClient.indices.resolveIndex({
         name: value,
         expand_wildcards: ['open', 'hidden', 'closed'],
       });
-      indices = resolved.indices;
-      dataStreams = resolved.data_streams;
     } catch (error) {
-      if (!(isResponseError(error) && error.statusCode === 404)) {
-        throw error;
+      if (isResponseError(error) && error.statusCode === 404) {
+        return { indices: [], dataStreams: [] };
       }
+      throw error;
     }
+
+    if (resolved.aliases.length > 0) {
+      throw new InvalidAiIndexDestError(
+        `dest.value '${value}' is not allowed: '${resolved.aliases[0].name}' is an alias`
+      );
+    }
+    return { indices: resolved.indices, dataStreams: resolved.data_streams };
+  }
+
+  private async assertValidDataStreamDest(value: string, managed: boolean): Promise<void> {
+    const prefixes = this.allowedDestPrefixes(DATA_STREAM_PREFIX, managed);
+    this.assertDestValueFormat(value, prefixes);
+
+    const { indices, dataStreams } = await this.resolveDest(value);
 
     if (indices.length > 0) {
       throw new InvalidAiIndexDestError(
@@ -526,22 +665,9 @@ export class AiIndexService {
 
   private async assertValidIndexDest(value: string, managed: boolean): Promise<void> {
     const prefixes = this.allowedDestPrefixes(INDEX_PREFIX, managed);
-    this.assertDestValueHasPrefix(value, prefixes);
+    this.assertDestValueFormat(value, prefixes);
 
-    let indices: estypes.IndicesResolveIndexResolveIndexItem[] = [];
-    let dataStreams: estypes.IndicesResolveIndexResolveIndexDataStreamsItem[] = [];
-    try {
-      const resolved = await this.esClient.indices.resolveIndex({
-        name: value,
-        expand_wildcards: ['open', 'hidden', 'closed'],
-      });
-      indices = resolved.indices;
-      dataStreams = resolved.data_streams;
-    } catch (error) {
-      if (!(isResponseError(error) && error.statusCode === 404)) {
-        throw error;
-      }
-    }
+    const { indices, dataStreams } = await this.resolveDest(value);
 
     if (dataStreams.length > 0) {
       throw new InvalidAiIndexDestError(

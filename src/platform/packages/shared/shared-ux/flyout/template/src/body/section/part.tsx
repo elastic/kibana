@@ -24,30 +24,13 @@ export const sectionPart = bodyAssembly.definePart<Record<string, never>, ReactN
 
 /** Declarative `FlyoutTemplate.Body.Section`. */
 export const Section = sectionPart.createComponent<FlyoutBodySectionProps>({
-  resolve: ({
-    id,
-    title,
-    icon,
-    tooltip,
-    action,
-    hasBorder: authored,
-    children,
-    'data-test-subj': dataTestSubj,
-  }) => {
+  resolve: ({ hasBorder: authored, children, ...sectionProps }) => {
     const items = sectionAssembly.parseChildren(children, { supportsOtherChildren: true });
     const hasSubsections = items.some((i) => i.type === 'part' && i.part === SUBSECTION_PART_NAME);
 
     if (!hasSubsections) {
       return (
-        <FlyoutSection
-          id={id}
-          title={title}
-          icon={icon}
-          tooltip={tooltip}
-          action={action}
-          hasBorder={authored}
-          data-test-subj={dataTestSubj}
-        >
+        <FlyoutSection {...sectionProps} hasBorder={authored}>
           {children}
         </FlyoutSection>
       );
@@ -56,18 +39,8 @@ export const Section = sectionPart.createComponent<FlyoutBodySectionProps>({
     // When bordered, the border lands on each subsection, so the section reports it without
     // adding its own panel.
     const isBordered = Boolean(authored);
-
     return (
-      <FlyoutSection
-        id={id}
-        title={title}
-        icon={icon}
-        tooltip={tooltip}
-        action={action}
-        hasBorder={isBordered}
-        borderOnChildren={isBordered}
-        data-test-subj={dataTestSubj}
-      >
+      <FlyoutSection {...sectionProps} hasBorder={isBordered} borderOnChildren={isBordered}>
         {items.map((item, index) => {
           if (item.type === 'child') {
             return <Fragment key={`passthrough-${index}`}>{item.node}</Fragment>;

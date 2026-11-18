@@ -36,7 +36,12 @@ import {
   WorkflowSchemaForAutocompleteBase,
   WorkflowSettingsSchema,
 } from '../schema';
-import { type CustomTriggerSchemaInput, getTriggerSchema } from '../schema/triggers';
+import {
+  type CustomTriggerSchemaInput,
+  getTriggerSchema,
+  type TriggerSchemaOptions,
+  validatePageTriggers,
+} from '../schema/triggers';
 
 export function getStepId(stepName: string): string {
   // Using step name as is, don't do any escaping to match the workflow engine behavior
@@ -51,9 +56,24 @@ export function generateYamlSchemaFromConnectors(
   /**
    * @deprecated use WorkflowSchemaForAutocomplete instead
    */
-  loose: boolean = false
+  loose: boolean = false,
+  triggerSchemaOptions: TriggerSchemaOptions = {}
 ): z.ZodType {
-  const recursiveStepSchema = createRecursiveStepSchema(connectors, loose);
+  // Zod v4's `z.toJSONSchema({ reused: 'ref' })` names shared definitions
+  // `__schema0…__schemaN` in traversal (encounter) order. Any reordering of
+  // the connector or trigger arrays therefore renumbers every downstream
+  // definition and the 8 000+ `$ref`s that point to them, producing a ~2 MB
+  // whole-file diff on a schema that has not semantically changed.
+  // Sort both arrays by their type discriminator to make traversal order stable
+  // and independent of async loader resolution order or Map insertion order.
+  const sortedConnectors = [...connectors].sort((a, b) => a.type.localeCompare(b.type));
+  const sortedTriggers = triggers.toSorted((left, right) => {
+    const leftId = typeof left === 'string' ? left : left.id;
+    const rightId = typeof right === 'string' ? right : right.id;
+    return leftId.localeCompare(rightId);
+  });
+
+  const recursiveStepSchema = createRecursiveStepSchema(sortedConnectors, loose);
 
   if (loose) {
     // For loose mode, use WorkflowSchemaForAutocompleteBase which already handles partial fields
@@ -67,9 +87,9 @@ export function generateYamlSchemaFromConnectors(
     }));
   }
 
-  const triggerSchema = getTriggerSchema(triggers);
+  const triggerSchema = getTriggerSchema(sortedTriggers, triggerSchemaOptions);
   const workflowBaseWithTriggers = WorkflowSchemaBase.extend({
-    triggers: z.array(triggerSchema).min(1),
+    triggers: z.array(triggerSchema).min(1).superRefine(validatePageTriggers),
   });
 
   return workflowBaseWithTriggers.extend({
@@ -83,13 +103,14 @@ export function generateYamlSchemaFromConnectors(
  * validation without materializing the connector-expanded step union.
  */
 export function generateLightweightYamlSchema(
-  triggers: CustomTriggerSchemaInput[] = []
+  triggers: CustomTriggerSchemaInput[] = [],
+  triggerSchemaOptions: TriggerSchemaOptions = {}
 ): z.ZodType {
   // Trigger schemas are lightweight: custom IDs add literal trigger variants and do
   // not materialize connector or step-definition schemas.
-  const triggerSchema = getTriggerSchema(triggers);
+  const triggerSchema = getTriggerSchema(triggers, triggerSchemaOptions);
   const workflowBaseWithTriggers = WorkflowSchemaBase.extend({
-    triggers: z.array(triggerSchema).min(1),
+    triggers: z.array(triggerSchema).min(1).superRefine(validatePageTriggers),
   });
 
   return workflowBaseWithTriggers.extend({
@@ -129,6 +150,11 @@ function createRecursiveStepSchema(
     // autocomplete.
     const aliasSchemas = generateAliasSchemas(connectors, stepSchema, loose);
 
+    // Static schemas use BaseStepSchema fallbacks; override so nested steps keep `with`.
+    const stepLevelOnFailure = {
+      'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
+    };
+
     cachedUnion = z.discriminatedUnion('type', [
       forEachSchema,
       whileSchema,
@@ -137,11 +163,11 @@ function createRecursiveStepSchema(
       parallelSchema,
       mergeSchema,
       WaitStepSchema,
-      WaitForInputStepSchema,
-      WaitForApprovalStepSchema,
+      WaitForInputStepSchema.extend(stepLevelOnFailure),
+      WaitForApprovalStepSchema.extend(stepLevelOnFailure),
       DataSetStepSchema,
-      WorkflowExecuteStepSchema,
-      WorkflowExecuteAsyncStepSchema,
+      WorkflowExecuteStepSchema.extend(stepLevelOnFailure),
+      WorkflowExecuteAsyncStepSchema.extend(stepLevelOnFailure),
       WorkflowOutputStepSchema,
       WorkflowFailStepSchema,
       LoopBreakStepSchema,

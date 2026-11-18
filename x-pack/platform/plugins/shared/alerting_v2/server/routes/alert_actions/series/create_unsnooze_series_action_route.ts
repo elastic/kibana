@@ -8,6 +8,7 @@
 import {
   ALERT_EPISODE_ACTION_TYPE,
   createUnsnoozeSeriesActionBodySchema,
+  errorResponseSchema,
 } from '@kbn/alerting-v2-schemas';
 import { createUnsnoozeSeriesActionOasExamples } from './create_unsnooze_series_action_oas_example';
 import { createSeriesActionRouteForType } from './create_series_action_route_for_type';
@@ -18,5 +19,11 @@ export const CreateUnsnoozeSeriesActionRoute = createSeriesActionRouteForType({
   summary: 'Unsnooze an alert episode series',
   bodySchema: createUnsnoozeSeriesActionBodySchema,
   oasOperationObject: createUnsnoozeSeriesActionOasExamples,
-  access: 'public' as const,
+  access: 'internal' as const,
+  additionalResponses: {
+    409: {
+      body: () => errorResponseSchema,
+      description: 'Indicates the alert episode series is not snoozed.',
+    },
+  },
 });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import type { estypes } from '@elastic/elasticsearch';
 import type { CPSServerSetup } from '@kbn/cps/server';
 import type { InfraPluginStartServicesAccessor, MlSystem, ServerlessInfo } from '../../types';
@@ -63,9 +64,9 @@ describe('createIsCpsPlatformGateEnabled', () => {
     isFeatureFlagEnabled?: boolean;
     isTierEligible?: boolean;
   } = {}) => {
-    const getBooleanValue = jest.fn().mockResolvedValue(isFeatureFlagEnabled);
+    const getBooleanValue$ = jest.fn().mockReturnValue(of(isFeatureFlagEnabled));
     const isTierEligibleMock = jest.fn().mockResolvedValue(isTierEligible);
-    const getStartServices = jest.fn().mockResolvedValue([{ featureFlags: { getBooleanValue } }]);
+    const getStartServices = jest.fn().mockResolvedValue([{ featureFlags: { getBooleanValue$ } }]);
 
     return {
       gate: createIsCpsPlatformGateEnabled({
@@ -75,7 +76,7 @@ describe('createIsCpsPlatformGateEnabled', () => {
           : undefined,
         getStartServices: getStartServices as unknown as InfraPluginStartServicesAccessor,
       }),
-      getBooleanValue,
+      getBooleanValue$,
       getStartServices,
       isTierEligibleMock,
     };

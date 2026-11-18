@@ -15,8 +15,10 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import type { SignalGroup } from '../../../../common/http_api/signals';
 import { tagLabel, tagDescription } from './signal_format';
 
@@ -39,7 +41,17 @@ export const SignalGroupRow = ({ group, onView }: SignalGroupRowProps) => (
     hasBorder
     paddingSize="m"
     data-test-subj="contextSignalGroupRow"
-    onClick={onView}
+    onClick={(event: React.MouseEvent) => {
+      if ((event.target as HTMLElement).closest('button')) {
+        return;
+      }
+      onView();
+    }}
+    {...getEbtProps({
+      element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageSignalsPanel,
+      action: CONTEXT_ENGINE_UI_EBT.action.signals.VIEW_GROUP,
+      detail: group.tag,
+    })}
   >
     <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
       <EuiFlexItem>
@@ -68,11 +80,7 @@ export const SignalGroupRow = ({ group, onView }: SignalGroupRowProps) => (
         <EuiButtonEmpty
           size="s"
           iconType="inspect"
-          onClick={(event: React.MouseEvent) => {
-            // The panel is also clickable; stop the bubbled click from double-firing onView.
-            event.stopPropagation();
-            onView();
-          }}
+          onClick={onView}
           data-test-subj="contextSignalGroupViewDetailsButton"
         >
           {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.groupViewDetailsButton', {

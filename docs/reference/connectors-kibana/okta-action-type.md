@@ -13,7 +13,7 @@ The Okta connector uses the [Okta Management API](https://developer.okta.com/doc
 
 ## Overview
 
-This is a **custom connector** against your Okta org URL. Prefer an OAuth 2.0 API Services app with private-key JWT client authentication (`RS256` + `kid`). A classic SSWS API token is supported as a fallback for orgs that have not migrated to OAuth for Okta.
+The Okta connector calls the Okta API at your Okta org URL. Prefer an OAuth 2.0 API Services app with private-key JWT client authentication (`RS256` + `kid`). A classic SSWS API token is supported as a fallback for orgs that have not migrated to OAuth for Okta.
 
 {{kib}} does not send [OAuth 2.0 Demonstrating Proof of Possession (DPoP)](https://developer.okta.com/docs/guides/dpop/-/main/) proofs on token or API requests. New Okta API Services apps often require DPoP by default. Turn off that requirement on the service app (see [Turn off DPoP for the service app](#okta-disable-dpop)), or use the SSWS API token auth type instead.
 
@@ -49,7 +49,7 @@ Authentication
 | `removeUserFromGroup` | Remove a user from a group. Parameters: `userId`, `groupId` (required). |
 | `listUsers` | List users with pagination only. Parameters: `limit`, `after`. Okta does not allow `sortBy` on list queries. |
 | `searchUsers` | Find users by `q`, `search`, or `filter` (do not combine `search` and `filter`). Parameters: `q`, `search`, `filter`, `limit`, `after`, `sortBy`, `sortOrder`. `sortBy` requires `search`. |
-| `getLogs` | Query System Log events. Parameters: `since`, `until`, `filter`, `q`, `limit`, `sortOrder`, `after`. |
+| `getLogs` | Query System Log events. Parameters: `since`, `until`, `filter`, `q`, `limit`, `sortOrder`, `after`. `q` accepts up to 10 space-separated keywords of at most 40 characters each. |
 
 ## Required permissions [okta-required-permissions]
 

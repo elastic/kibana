@@ -18,10 +18,12 @@ jest.mock('@kbn/core-chrome-layout-utils', () => ({
   useCurrentChromeApplicationBreakpoint: () => mockApplicationBreakpoint,
 }));
 
+const TOOLTIP = 'Improve the content and style of your dashboard using AI';
+
 const renderButton = (onClick = jest.fn()) => {
   render(
     <EuiThemeProvider>
-      <DashboardEnhanceButton action={{ onClick }} />
+      <DashboardEnhanceButton action={{ onClick, tooltip: TOOLTIP }} />
     </EuiThemeProvider>
   );
   return onClick;
@@ -50,5 +52,22 @@ describe('DashboardEnhanceButton', () => {
     const button = screen.getByRole('button', { name: 'Enhance' });
     expect(button).toBeInTheDocument();
     expect(button).not.toHaveTextContent('Enhance');
+  });
+
+  it('shows the tooltip on the labeled button', async () => {
+    renderButton();
+
+    fireEvent.mouseOver(screen.getByRole('button', { name: 'Enhance' }));
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(TOOLTIP);
+  });
+
+  it('shows the tooltip on the icon-only button', async () => {
+    mockApplicationBreakpoint = 's';
+    renderButton();
+
+    fireEvent.mouseOver(screen.getByRole('button', { name: 'Enhance' }));
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(TOOLTIP);
   });
 });

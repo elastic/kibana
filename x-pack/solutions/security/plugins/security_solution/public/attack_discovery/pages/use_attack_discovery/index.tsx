@@ -8,6 +8,7 @@
 import { useAssistantContext } from '@kbn/elastic-assistant';
 import { isEmpty } from 'lodash/fp';
 import { useCallback, useState } from 'react';
+import { firstValueFrom } from 'rxjs';
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
 
 import { ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING } from '../../../../common/constants';
@@ -113,9 +114,8 @@ export const useAttackDiscovery = ({
 
         // Check if workflow integration feature flag is enabled AND the per-space uiSetting opt-in
         const attackDiscoveryWorkflowsEnabled =
-          (await featureFlags.getBooleanValue(
-            'securitySolution.attackDiscoveryWorkflowsEnabled',
-            true
+          (await firstValueFrom(
+            featureFlags.getBooleanValue$('securitySolution.attackDiscoveryWorkflowsEnabled', true)
           )) && uiSettings.get(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING, false);
 
         // Call appropriate API based on feature flag + per-space setting

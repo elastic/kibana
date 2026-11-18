@@ -16,7 +16,6 @@ Read and follow:
 
 - `.agents/skills/scout-migrate-from-ftr/SKILL.md` (and its `references/`: `generate-plan.md`, `pick-correct-test-type.md`, `plan-template.md`, `execute-plan.md`)
 - `.agents/skills/scout-best-practices-reviewer/SKILL.md`
-- `.github/agents/scout-reviewer.md` (review *intent* only — chat, not GitHub comments)
 - `docs/extend/testing/scout-best-practices.md`
 - `docs/extend/testing/ui-best-practices.md` (UI)
 - `docs/extend/testing/api-best-practices.md` (API)
@@ -168,8 +167,6 @@ Remove that batch’s legacy FTR files and configs only after **S6**.
 ### 3. Review the batch
 
 Apply `.agents/skills/scout-best-practices-reviewer/SKILL.md` with the **original FTR files** as parity context. Review code more carefully and be cleaner/more robust/more straightforward. For new UI code, check `docs/extend/testing/ui-best-practices.md#keep-assertions-explicit-in-tests-not-hidden-in-page-objects` (`waitFor` in POs, `expect` / `toBeVisible` in specs).
-
-Apply review *intent* from `.github/agents/scout-reviewer.md` (right test type, no lint circumvention, reuse-first, high-signal). Chat only.
 
 Fix **blocker** and **major** under Lens rules, **only in newly created methods/specs**, including the **New-code quality gate**. Do not rewrite existing PO methods to apply best practices.
 

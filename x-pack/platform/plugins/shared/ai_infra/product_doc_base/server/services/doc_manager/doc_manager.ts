@@ -7,20 +7,19 @@
 
 import type { Logger } from '@kbn/logging';
 import type { CoreAuditService, ElasticsearchClient } from '@kbn/core/server';
-import { type TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { ResourceTypes, resolveDefaultInferenceIdFromInferenceGet } from '@kbn/product-doc-common';
-import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
 import type { InstallationStatus, ProductInstallState } from '../../../common/install_status';
 import type { ProductDocInstallClient } from '../doc_install_status';
 import {
-  INSTALL_ALL_TASK_ID,
+  getInstallAllTaskStatus,
+  INSTALL_TASK_WAIT_TIMEOUT_MS,
   scheduleInstallAllTask,
   scheduleUninstallAllTask,
   scheduleEnsureUpToDateTask,
   scheduleEnsureSecurityLabsUpToDateTask,
-  getTaskStatus,
   waitUntilTaskCompleted,
 } from '../../tasks';
 import { checkLicense } from './check_license';
@@ -35,9 +34,9 @@ import type {
   SecurityLabsUninstallOptions,
   SecurityLabsStatusResponse,
 } from './types';
-import { INSTALL_ALL_TASK_ID_MULTILINGUAL } from '../../tasks/install_all';
 import type { PerformUpdateResponse } from '../../../common/http_api/installation';
 import type { PackageInstaller } from '../package_installer';
+import { waitForInstallLock, type InstallLockManager } from '../install_lock';
 
 const TEN_MIN_IN_MS = 10 * 60 * 1000;
 
@@ -54,6 +53,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
   private auditService: CoreAuditService;
   private packageInstaller?: PackageInstaller;
   private esClient: ElasticsearchClient;
+  private lockManager: InstallLockManager;
 
   constructor({
     logger,
@@ -63,6 +63,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
     auditService,
     packageInstaller,
     esClient,
+    lockManager,
   }: {
     logger: Logger;
     taskManager: TaskManagerStartContract;
@@ -71,6 +72,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
     auditService: CoreAuditService;
     packageInstaller?: PackageInstaller;
     esClient: ElasticsearchClient;
+    lockManager: InstallLockManager;
   }) {
     this.logger = logger;
     this.taskManager = taskManager;
@@ -79,6 +81,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
     this.auditService = auditService;
     this.packageInstaller = packageInstaller;
     this.esClient = esClient;
+    this.lockManager = lockManager;
   }
 
   async install(options: DocInstallOptions): Promise<void> {
@@ -99,6 +102,8 @@ export class DocumentationManager implements DocumentationManagerAPI {
       taskManager: this.taskManager,
       logger: this.logger,
       inferenceId,
+      force,
+      repositoryVersion: await this.getRepositoryVersion(),
     });
 
     if (request) {
@@ -119,9 +124,13 @@ export class DocumentationManager implements DocumentationManagerAPI {
       await waitUntilTaskCompleted({
         taskManager: this.taskManager,
         taskId,
-        timeout: TEN_MIN_IN_MS,
+        timeout: INSTALL_TASK_WAIT_TIMEOUT_MS,
       });
     }
+  }
+
+  private getRepositoryVersion(): Promise<string | undefined> {
+    return this.packageInstaller?.getRepositoryVersion() ?? Promise.resolve(undefined);
   }
 
   async update(options: DocUpdateOptions): Promise<void> {
@@ -132,6 +141,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
       logger: this.logger,
       inferenceId,
       forceUpdate,
+      repositoryVersion: await this.getRepositoryVersion(),
     });
 
     if (request) {
@@ -152,7 +162,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
       await waitUntilTaskCompleted({
         taskManager: this.taskManager,
         taskId,
-        timeout: TEN_MIN_IN_MS,
+        timeout: INSTALL_TASK_WAIT_TIMEOUT_MS,
       });
     }
   }
@@ -227,7 +237,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
         );
         return;
       }
-      await this.installSecurityLabs({ inferenceId });
+      await this.installDefaultSecurityLabs(inferenceId);
       return;
     }
 
@@ -244,6 +254,48 @@ export class DocumentationManager implements DocumentationManagerAPI {
     );
   }
 
+  // The status is checked again under the lock so that nodes starting together do not each
+  // reinstall the content the first one has just installed
+  private async installDefaultSecurityLabs(inferenceId: string): Promise<void> {
+    await this.runUnderInstallLock(
+      {
+        source: 'ensureDefaultSecurityLabs',
+        inferenceId,
+        failure: 'install Security Labs content',
+      },
+      async (installer) => {
+        const { status } = await this.getSecurityLabsStatus({ inferenceId });
+        if (status === 'installed') {
+          this.logger.debug(
+            `Security Labs for inference ID [${inferenceId}] was installed while waiting for the install lock`
+          );
+          return;
+        }
+        await installer.installSecurityLabs({ inferenceId });
+      }
+    );
+  }
+
+  private async runUnderInstallLock(
+    { source, inferenceId, failure }: { source: string; inferenceId?: string; failure: string },
+    run: (installer: PackageInstaller) => Promise<void>
+  ): Promise<void> {
+    const { packageInstaller } = this;
+    if (!packageInstaller) {
+      throw new Error('PackageInstaller not available');
+    }
+    try {
+      await waitForInstallLock({
+        lockManager: this.lockManager,
+        metadata: { source, inferenceId },
+        run: () => run(packageInstaller),
+      });
+    } catch (error) {
+      this.logger.error(`Failed to ${failure}: ${error.message}`);
+      throw error;
+    }
+  }
+
   async updateSecurityLabsAll(options?: {
     forceUpdate?: boolean;
   }): Promise<{ inferenceIds: string[] }> {
@@ -256,6 +308,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
     this.logger.info(
       `Updating Security Labs content to latest version for Inference IDs: ${idsToUpdate}`
     );
+    const repositoryVersion = await this.getRepositoryVersion();
     await Promise.all(
       idsToUpdate.map((inferenceId) =>
         scheduleEnsureSecurityLabsUpToDateTask({
@@ -263,6 +316,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
           logger: this.logger,
           inferenceId,
           forceUpdate,
+          repositoryVersion,
         })
       )
     );
@@ -304,22 +358,20 @@ export class DocumentationManager implements DocumentationManagerAPI {
    * @param inferenceId - The inference ID to get the status for. If not provided, the default ELSER inference ID will be used.
    */
   async getStatus({ inferenceId }: { inferenceId: string }): Promise<DocGetStatusResponse> {
-    const taskId = isImpliedDefaultElserInferenceId(inferenceId)
-      ? INSTALL_ALL_TASK_ID
-      : INSTALL_ALL_TASK_ID_MULTILINGUAL;
-    const taskStatus = await getTaskStatus({
+    const taskStatus = await getInstallAllTaskStatus({
       taskManager: this.taskManager,
-      taskId,
+      inferenceId,
     });
-    if (taskStatus !== 'not_scheduled') {
-      const status = convertTaskStatus(taskStatus);
-      if (status !== 'unknown') {
-        return { status };
-      }
+    if (taskStatus === 'pending') {
+      return { status: 'installing' };
     }
 
     const installStatus = await this.docInstallClient.getInstallationStatus({ inferenceId });
-    const overallStatus = getOverallStatus(Object.values(installStatus).map((v) => v.status));
+    // A failed install task may have failed before writing any product status
+    const overallStatus =
+      taskStatus === 'failed'
+        ? 'error'
+        : getOverallStatus(Object.values(installStatus).map((v) => v.status));
     return { status: overallStatus, installStatus };
   }
 
@@ -408,15 +460,10 @@ export class DocumentationManager implements DocumentationManagerAPI {
       });
     }
 
-    try {
-      await this.packageInstaller.installSecurityLabs({
-        version,
-        inferenceId,
-      });
-    } catch (error) {
-      this.logger.error(`Failed to install Security Labs content: ${error.message}`);
-      throw error;
-    }
+    await this.runUnderInstallLock(
+      { source: 'installSecurityLabs', inferenceId, failure: 'install Security Labs content' },
+      (installer) => installer.installSecurityLabs({ version, inferenceId })
+    );
   }
 
   async uninstallSecurityLabs(options: SecurityLabsUninstallOptions): Promise<void> {
@@ -438,12 +485,10 @@ export class DocumentationManager implements DocumentationManagerAPI {
       });
     }
 
-    try {
-      await this.packageInstaller.uninstallSecurityLabs({ inferenceId });
-    } catch (error) {
-      this.logger.error(`Failed to uninstall Security Labs content: ${error.message}`);
-      throw error;
-    }
+    await this.runUnderInstallLock(
+      { source: 'uninstallSecurityLabs', inferenceId, failure: 'uninstall Security Labs content' },
+      (installer) => installer.uninstallSecurityLabs({ inferenceId })
+    );
   }
   async uninstallOpenAPISpec(options: SecurityLabsUninstallOptions): Promise<void> {
     const { request, inferenceId } = options;
@@ -461,12 +506,10 @@ export class DocumentationManager implements DocumentationManagerAPI {
         },
       });
     }
-    try {
-      await this.packageInstaller.uninstallOpenAPISpec({ inferenceId });
-    } catch (error) {
-      this.logger.error(`Failed to uninstall OpenAPI Spec content: ${error.message}`);
-      throw error;
-    }
+    await this.runUnderInstallLock(
+      { source: 'uninstallOpenApiSpec', inferenceId, failure: 'uninstall OpenAPI Spec content' },
+      (installer) => installer.uninstallOpenAPISpec({ inferenceId })
+    );
   }
 
   async getSecurityLabsStatus({
@@ -517,15 +560,10 @@ export class DocumentationManager implements DocumentationManagerAPI {
       });
     }
 
-    try {
-      await this.packageInstaller.installOpenAPISpec({
-        version,
-        inferenceId,
-      });
-    } catch (error) {
-      this.logger.error(`Failed to install OpenAPI Spec content: ${error.message}`);
-      throw error;
-    }
+    await this.runUnderInstallLock(
+      { source: 'installOpenApiSpec', inferenceId, failure: 'install OpenAPI Spec content' },
+      (installer) => installer.installOpenAPISpec({ version, inferenceId })
+    );
   }
 
   async getOpenApiSpecStatus({
@@ -548,22 +586,6 @@ export class DocumentationManager implements DocumentationManagerAPI {
     }
   }
 }
-
-const convertTaskStatus = (taskStatus: TaskStatus): InstallationStatus | 'unknown' => {
-  switch (taskStatus) {
-    case TaskStatus.Idle:
-    case TaskStatus.Claiming:
-    case TaskStatus.Running:
-      return 'installing';
-    case TaskStatus.Failed:
-      return 'error';
-    case TaskStatus.Unrecognized:
-    case TaskStatus.DeadLetter:
-    case TaskStatus.ShouldDelete:
-    default:
-      return 'unknown';
-  }
-};
 
 const getOverallStatus = (statuses: InstallationStatus[]): InstallationStatus => {
   const statusOrder: InstallationStatus[] = [

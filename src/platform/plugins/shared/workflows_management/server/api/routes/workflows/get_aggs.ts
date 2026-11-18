@@ -24,12 +24,12 @@ const MAX_AGG_FIELDS = 25;
 const FIELDS_DENY_LIST = new Set(['_id', '_index', '_score', '_source']);
 
 const emptyFieldErrorMessage = () =>
-  i18n.translate('workflowsManagement.getAggs.emptyFieldErrorMessage', {
+  i18n.translate('workflows.getAggs.emptyFieldErrorMessage', {
     defaultMessage: 'Aggregation field cannot be empty.',
   });
 
 const forbiddenFieldErrorMessage = () =>
-  i18n.translate('workflowsManagement.getAggs.forbiddenFieldErrorMessage', {
+  i18n.translate('workflows.getAggs.forbiddenFieldErrorMessage', {
     defaultMessage: 'Field is not allowed for aggregation.',
   });
 
@@ -99,7 +99,7 @@ export function registerGetAggsRoute({ router, api, spaces }: RouteDependencies)
           const fields = Array.isArray(rawFields) ? rawFields : [rawFields];
           const spaceId = spaces.getSpaceId(request);
           const managedFilter = resolveAuthorizedManagedFilter(request, managed);
-          const aggs = await api.getWorkflowAggs(fields, spaceId, { managedFilter });
+          const aggs = await api.getWorkflowAggs(fields, spaceId, { managedFilter, request });
           return response.ok({ body: aggs || {} });
         } catch (error) {
           return handleRouteError(response, error);

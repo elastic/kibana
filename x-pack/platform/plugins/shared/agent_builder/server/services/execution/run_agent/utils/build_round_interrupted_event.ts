@@ -6,51 +6,34 @@
  */
 
 import type {
-  Conversation,
-  ConversationRound,
-  ConversationRoundAuthor,
   RoundInput,
   RoundInterruptedEvent,
   RuntimeAgentConfigurationOverrides,
 } from '@kbn/agent-builder-common';
 import { ChatEventType } from '@kbn/agent-builder-common';
-import type { TodoItem } from '@kbn/agent-builder-common/chat/conversation';
-import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
 import type { ModelProvider } from '@kbn/agent-builder-server/runner';
-import type {
-  AttachmentChange,
-  AttachmentStateManager,
-} from '@kbn/agent-builder-server/attachments';
-import { mergeAttachmentRefs } from '../../../conversation/client/migrate_attachments';
-import type { ConvertedEvents } from '../convert_graph_events';
-import { buildAttachmentEvents } from './add_round_complete_event';
-import { formatAttachmentsMetadata } from './attachment_presentation';
-import type { CompactedConversation } from './conversation_compactor';
-import type { RelevantSkillSelection } from './relevant_skills/select_relevant_skills';
+import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import type { RunAttachmentEvents } from '../run_attachment_events';
+import type { RunTracker } from '../run_tracker';
+import type { PendingTurn } from './conversation_turn';
 import { buildInterruptedRound } from './round_summary';
 
 export interface BuildRoundInterruptedEventParams {
-  /** Every event of the run so far. */
-  events: ConvertedEvents[];
+  /** The latest graph state the stream carried and the out-of-band tool events (see `RunTracker`). */
+  tracker: RunTracker;
   /** The runner's round id (a resume keeps the pending round's id for persistence). */
   roundId: string;
-  pendingRound: ConversationRound | undefined;
+  /** The turn being resumed, when this execution is a HITL resume. */
+  pendingTurn: PendingTurn | undefined;
   startTime: Date;
   /** The processed round input, as `round_started` announced it. */
   processedInput: RoundInput;
-  author?: ConversationRoundAuthor;
-  origin?: ExecutionConversationOrigin;
-  agentId: string;
-  conversation: Conversation | undefined;
   modelProvider: ModelProvider;
   mainConnectorId: string;
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
-  compactionResult?: CompactedConversation;
-  relevantSkillsSelection?: RelevantSkillSelection;
-  initialTodos?: TodoItem[];
   attachmentStateManager: AttachmentStateManager;
-  /** Attachment changes caused by the incoming message (drained after `prepareConversation`). */
-  chatInputChanges: AttachmentChange[];
+  /** The run's attachment events; drained for the last time here. */
+  runAttachmentEvents: RunAttachmentEvents;
   getWorkspaceId?: () => string | undefined;
   /** Injectable for tests; defaults to now. */
   endTime?: Date;
@@ -63,90 +46,47 @@ export interface BuildRoundInterruptedEventParams {
  * persisted projection of an interrupted execution matches that of a completed one.
  */
 export const buildRoundInterruptedEvent = ({
-  events,
+  tracker,
   roundId,
-  pendingRound,
+  pendingTurn,
   startTime,
   processedInput,
-  author,
-  origin,
-  agentId,
-  conversation,
   modelProvider,
   mainConnectorId,
   configurationOverrides,
-  compactionResult,
-  relevantSkillsSelection,
-  initialTodos,
   attachmentStateManager,
-  chatInputChanges,
+  runAttachmentEvents,
   getWorkspaceId,
   endTime = new Date(),
 }: BuildRoundInterruptedEventParams): RoundInterruptedEvent => {
   const { steps, summary } = buildInterruptedRound({
-    events,
-    pendingRound,
+    tracker,
     startTime,
     endTime,
     modelProvider,
     mainConnectorId,
     configurationOverrides,
-    compactionResult,
-    relevantSkillsSelection,
-    initialTodos,
   });
 
-  // Same input processing as `createRound`: refs accessed during the run merged in, then the
-  // attachment context rendered for the refs the round ends up with.
-  const accessedRefs = attachmentStateManager.getAccessedRefs();
-  let input: RoundInput =
-    accessedRefs.length > 0
-      ? {
-          ...processedInput,
-          attachment_refs: mergeAttachmentRefs(processedInput.attachment_refs, accessedRefs),
-        }
-      : processedInput;
-  if (input.attachment_refs && input.attachment_refs.length > 0) {
-    const attachmentContext = formatAttachmentsMetadata(
-      input.attachment_refs,
-      attachmentStateManager
-    );
-    if (attachmentContext) {
-      input = { ...input, attachment_context: attachmentContext };
-    }
-  }
-
-  // Identity of the round the success path would have produced: a resume keeps the pending
-  // round's id / author / origin, a fresh round gets the handler's.
-  const identity: Pick<ConversationRound, 'id' | 'author' | 'origin'> = pendingRound
-    ? { id: pendingRound.id, author: pendingRound.author, origin: pendingRound.origin }
-    : {
-        id: roundId,
-        ...(author ? { author } : {}),
-        ...(origin ? { origin: { type: origin.type } } : {}),
-      };
-  const attachmentEvents = buildAttachmentEvents({
-    conversation,
-    round: identity,
-    chatInputChanges,
-    executionChanges: attachmentStateManager.drainChanges(),
-    agentId,
-    createdAt: endTime.toISOString(),
-  });
+  runAttachmentEvents.drainRemaining();
+  const attachmentEvents = runAttachmentEvents.list();
+  const pendingRound = pendingTurn?.compatRound;
   const workspaceId = getWorkspaceId?.();
+  const { compactionSummary } = tracker.latestState();
 
   return {
     type: ChatEventType.roundInterrupted,
     data: {
       round_id: roundId,
       started_at: startTime.toISOString(),
-      input,
+      input: processedInput,
       steps,
       summary,
       attachments: attachmentStateManager.getAll(),
       ...(attachmentEvents.length > 0 ? { attachment_events: attachmentEvents } : {}),
       ...(workspaceId ? { workspace_id: workspaceId } : {}),
       ...(pendingRound ? { resumed: true } : {}),
+      ...(compactionSummary ? { compaction_summary: compactionSummary } : {}),
     },
   };
 };

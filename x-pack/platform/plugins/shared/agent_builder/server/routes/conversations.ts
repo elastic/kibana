@@ -26,6 +26,7 @@ import { createConversationPublicClient } from '../services/conversation/convers
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import type {
+  AddConversationEventsResponse,
   GetConversationResponse,
   ListConversationsResponse,
   DeleteConversationResponse,
@@ -37,7 +38,9 @@ import { apiPrivileges } from '../../common/features';
 import {
   publicApiPath,
   MAX_CONVERSATIONS_PER_PAGE,
+  MAX_EVENTS_PER_REQUEST,
   MAX_RESULT_WINDOW,
+  CONVERSATION_EVENT_TYPE_MAX_LENGTH,
 } from '../../common/constants';
 
 const CONVERSATION_TEMPLATE_ID_MAX_LENGTH = 256;
@@ -426,7 +429,11 @@ export function registerConversationRoutes({
           conversationsService.getScopedClient({ request }),
           agentsService.getRegistry({ request }),
         ]);
-        const publicClient = createConversationPublicClient({ client, agentRegistry });
+        const publicClient = createConversationPublicClient({
+          client,
+          agentRegistry,
+          source: 'http_api',
+        });
 
         let conversation: CreateConversationResponse;
         try {
@@ -472,7 +479,7 @@ export function registerConversationRoutes({
       options: {
         tags: ['conversation', 'oas-tag:agent builder'],
         availability: {
-          stability: 'tech_preview',
+          stability: 'stable',
           since: '9.6.0',
         },
       },
@@ -512,12 +519,90 @@ export function registerConversationRoutes({
         const client = await conversationsService.getScopedClient({ request });
         const accessControl = await client.updateAccessControl(
           conversationId,
-          request.body as UpdateConversationAccessControlRequestBody
+          request.body as UpdateConversationAccessControlRequestBody,
+          { source: 'http_api' }
         );
 
         return response.ok<UpdateConversationAccessControlResponse>({
           body: accessControl,
         });
+      })
+    );
+
+  // Add events to a conversation
+  router.versioned
+    .post({
+      path: `${publicApiPath}/conversations/{conversation_id}/_add_events`,
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+      },
+      access: 'public',
+      summary: 'Add events to a conversation',
+      description:
+        "Append custom events to a conversation's timeline. The caller must be the owner, a member, or the conversation must be public. Server assigns id, created_at, and actor for each event; the body provides type and data. Only registered custom event types are accepted — built-in lifecycle types are rejected. To learn more about agent conversations, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).",
+      options: {
+        tags: ['conversation', 'oas-tag:agent builder'],
+        availability: {
+          stability: 'tech_preview',
+          since: '9.6.0',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            params: schema.object({
+              conversation_id: schema.string({
+                maxLength: CONVERSATION_ID_MAX_LENGTH,
+                meta: { description: 'The unique identifier of the conversation.' },
+              }),
+            }),
+            body: schema.object({
+              events: schema.arrayOf(
+                schema.object({
+                  type: schema.string({
+                    minLength: 1,
+                    maxLength: CONVERSATION_EVENT_TYPE_MAX_LENGTH,
+                    meta: { description: 'The registered custom event type.' },
+                  }),
+                  data: schema.object(
+                    {},
+                    {
+                      unknowns: 'allow',
+                      meta: {
+                        description: 'The event payload. Its shape is defined by the event type.',
+                      },
+                    }
+                  ),
+                }),
+                {
+                  minSize: 1,
+                  maxSize: MAX_EVENTS_PER_REQUEST,
+                  meta: {
+                    description: `Events to append. Between 1 and ${MAX_EVENTS_PER_REQUEST}.`,
+                  },
+                }
+              ),
+            }),
+          },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/conversations_add_events.yaml'),
+        },
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const { conversations: conversationsService } = getInternalServices();
+        const { conversation_id: conversationId } = request.params;
+
+        const client = await conversationsService.getScopedClient({ request });
+        const events = await client.addCustomEvents(
+          { id: conversationId, events: request.body.events },
+          { source: 'http_api' }
+        );
+
+        return response.ok<AddConversationEventsResponse>({ body: { events } });
       })
     );
 }

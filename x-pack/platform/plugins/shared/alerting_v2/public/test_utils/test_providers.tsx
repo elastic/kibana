@@ -15,15 +15,22 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { AlertEpisodesKibanaServices } from '../episodes_kibana_services';
-import { LocatorProvider, type AlertingV2Locators } from '../application/locator_context';
+import { EpisodeDataSourceProvider } from '@kbn/alerting-v2-episodes-ui/context/episode_data_source_context';
+import { AlertHostProvider } from '@kbn/alerting-v2-episodes-ui/context/alert_host_context';
+import { CLASSIC_ALERTS_DATA_SOURCE } from '../alert_sources';
+import type { AlertsKibanaServices } from '../alerts_kibana_services';
+import {
+  LocatorProvider,
+  type AlertingV2Locators,
+  type WithOptionalHost,
+} from '../application/locator_context';
 import type {
   AlertingV2RulesLocatorParams,
   AlertingV2RuleLibraryLocatorParams,
   AlertingV2EpisodesLocatorParams,
   AlertingV2ActionPoliciesLocatorParams,
   AlertingV2ExecutionHistoryLocatorParams,
-} from '../locators';
+} from '../../common/locators';
 
 const createMockLocator = <P extends SerializableRecord>() => {
   const m = sharePluginMock.createLocator<P>();
@@ -34,11 +41,13 @@ const createMockLocator = <P extends SerializableRecord>() => {
 };
 
 export const createMockLocators = (): AlertingV2Locators => ({
-  rulesLocators: createMockLocator<AlertingV2RulesLocatorParams>(),
-  ruleLibraryLocators: createMockLocator<AlertingV2RuleLibraryLocatorParams>(),
-  episodesLocators: createMockLocator<AlertingV2EpisodesLocatorParams>(),
-  actionPolicyLocators: createMockLocator<AlertingV2ActionPoliciesLocatorParams>(),
-  executionHistoryLocators: createMockLocator<AlertingV2ExecutionHistoryLocatorParams>(),
+  rulesLocators: createMockLocator<WithOptionalHost<AlertingV2RulesLocatorParams>>(),
+  ruleLibraryLocators: createMockLocator<WithOptionalHost<AlertingV2RuleLibraryLocatorParams>>(),
+  episodesLocators: createMockLocator<WithOptionalHost<AlertingV2EpisodesLocatorParams>>(),
+  actionPolicyLocators:
+    createMockLocator<WithOptionalHost<AlertingV2ActionPoliciesLocatorParams>>(),
+  executionHistoryLocators:
+    createMockLocator<WithOptionalHost<AlertingV2ExecutionHistoryLocatorParams>>(),
 });
 
 export function MockLocatorProvider({
@@ -48,14 +57,14 @@ export function MockLocatorProvider({
   return <LocatorProvider locators={locators}>{children}</LocatorProvider>;
 }
 
-export const createDefaultServicesMock = (): AlertEpisodesKibanaServices => {
+export const createDefaultServicesMock = (): AlertsKibanaServices => {
   return {
     ...coreMock.createStart(),
     data: dataPluginMock.createStartContract(),
     share: sharePluginMock.createStartContract(),
     expressions: {} as unknown,
     rendering: {} as unknown,
-  } as unknown as AlertEpisodesKibanaServices;
+  } as unknown as AlertsKibanaServices;
 };
 
 export const createTestQueryClient = () =>
@@ -84,7 +93,7 @@ export const createHookTestProviders = ({
 };
 
 export type TestProvidersProps = PropsWithChildren<{
-  services?: AlertEpisodesKibanaServices;
+  services?: AlertsKibanaServices;
   queryClient?: QueryClient;
   locators?: AlertingV2Locators;
 }>;
@@ -117,17 +126,33 @@ export function ListPageTestProviders({
   queryClient = createTestQueryClient(),
   initialEntries,
   locators = createMockLocators(),
+  canWriteAlerts = true,
 }: PropsWithChildren<{
   queryClient?: QueryClient;
   initialEntries?: string[];
   locators?: AlertingV2Locators;
+  canWriteAlerts?: boolean;
 }>) {
   return (
     <LocatorProvider locators={locators}>
       <MockChromeContextProvider>
         <I18nProvider>
           <MemoryRouter initialEntries={initialEntries}>
-            <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+            <QueryClientProvider client={queryClient}>
+              <EpisodeDataSourceProvider dataSource={CLASSIC_ALERTS_DATA_SOURCE}>
+                <AlertHostProvider
+                  value={{
+                    getRuleDetailsHref: (ruleId: string) =>
+                      locators.rulesLocators.getRedirectUrl({ ruleId }),
+                    getEpisodeDetailsHref: (episodeId: string) =>
+                      locators.episodesLocators.getRedirectUrl({ episodeId }),
+                    canWriteAlerts,
+                  }}
+                >
+                  {children}
+                </AlertHostProvider>
+              </EpisodeDataSourceProvider>
+            </QueryClientProvider>
           </MemoryRouter>
         </I18nProvider>
       </MockChromeContextProvider>

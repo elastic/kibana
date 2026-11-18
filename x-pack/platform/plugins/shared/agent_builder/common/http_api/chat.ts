@@ -16,16 +16,10 @@ import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { PromptRequest, PromptResponse } from '@kbn/agent-builder-common/agents';
 import type { ChatCompletionReasoningEffort } from '@kbn/inference-common';
+import type { ChatTriggerMode } from '@kbn/agent-builder-common';
 import type { ConversationWithPermissions } from './conversations';
 
-/**
- * Whether a chat request executes the agent. `never` appends the user message to an existing
- * conversation and returns, leaving the execution options unused.
- */
-export enum ChatTriggerMode {
-  Always = 'always',
-  Never = 'never',
-}
+export { ChatTriggerMode } from '@kbn/agent-builder-common';
 
 /**
  * Body payload for the public agent_builder converse endpoints (`/api/agent_builder/converse`, `/converse/async`).
@@ -54,13 +48,11 @@ export interface ChatRequestBodyPayload {
   trigger_mode?: ChatTriggerMode;
 }
 
-/**
- * Body payload for a user message request (`trigger_mode: 'never'`), which persists a message
- * on an existing conversation without executing the agent.
- */
-export interface UserMessagePayload extends Pick<ChatRequestBodyPayload, 'input' | 'attachments'> {
-  trigger_mode: ChatTriggerMode.Never;
-  conversation_id: string;
+/** Response of `POST /internal/agent_builder/executions/{id}/abort`. */
+export interface AbortExecutionResponse {
+  acknowledged: boolean;
+  /** True when the run wound down and its `execution_aborted` event was saved before returning. */
+  terminal_persisted: boolean;
 }
 
 export type ChatResponse = Omit<
@@ -76,3 +68,34 @@ export type ChatResponse = Omit<
 };
 
 export type ChatConverseResponse = ConversationWithPermissions;
+
+/**
+ * Body payload for `POST /api/chat/message`: one message to an agent, nothing else. The route
+ * runs the agent non-interactively and answers with text only.
+ */
+export interface ChatMessageRequestBodyPayload {
+  /** The user message to send to the agent. */
+  message: string;
+  /** The agent to send the message to. Defaults to the default Elastic AI agent. */
+  agent_id?: string;
+  /** An existing conversation to continue. When omitted, a new conversation is created. */
+  conversation_id?: string;
+}
+
+/** A HITL prompt the agent raised during a `POST /api/chat/message` run, auto-declined because no user could answer it. */
+export interface ChatMessageDeclinedPrompt {
+  /** The tool whose call was declined. */
+  tool_id: string;
+  /** The explanation the agent received in place of the prompt. */
+  message: string;
+}
+
+/** Response of `POST /api/chat/message`. */
+export interface ChatMessageResponse {
+  /** The conversation the message was added to: the one requested, or the one created for it. */
+  conversation_id: string;
+  /** The agent's final text answer. Empty when the agent finished without a message. */
+  answer: string;
+  /** HITL prompts auto-declined during the run; omitted when the agent did not ask for any. */
+  declined_prompts?: ChatMessageDeclinedPrompt[];
+}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   BulkActionBase,
   NormalizedRuleError,
@@ -23,31 +23,35 @@ import {
  * schemas currently break workflow validation for template-string inputs
  * (see the workflows-eng bug linked in PR #275187 review).
  */
-export const bulkRuleSelectorSchema = BulkActionBase.pick({
-  ids: true,
-  query: true,
-})
-  .extend({
-    // An empty `query` would select every rule; `.min(1)` (unlike a refine)
-    // also reaches the JSON Schema as `minLength`, so the editor flags it.
-    query: z.string().min(1, 'query cannot be an empty string').optional(),
+export const bulkRuleSelectorSchema = lazySchema(() =>
+  BulkActionBase.pick({
+    ids: true,
+    query: true,
   })
-  .refine((value) => (value.ids === undefined) !== (value.query === undefined), {
-    message: 'Provide exactly one of `ids` or `query`',
-    path: ['ids'],
-  });
+    .extend({
+      // An empty `query` would select every rule; `.min(1)` (unlike a refine)
+      // also reaches the JSON Schema as `minLength`, so the editor flags it.
+      query: z.string().min(1, 'query cannot be an empty string').optional(),
+    })
+    .refine((value) => (value.ids === undefined) !== (value.query === undefined), {
+      message: 'Provide exactly one of `ids` or `query`',
+      path: ['ids'],
+    })
+);
 
 /**
  * Summary of a `_bulk_action` result: per-rule counters plus the `errors` for
  * any rules that failed.
  */
-export const bulkRuleSummaryOutputSchema = z.object({
-  succeeded: z.number().int().nonnegative(),
-  failed: z.number().int().nonnegative(),
-  skipped: z.number().int().nonnegative(),
-  total: z.number().int().nonnegative(),
-  errors: z.array(NormalizedRuleError).optional(),
-});
+export const bulkRuleSummaryOutputSchema = lazySchema(() =>
+  z.object({
+    succeeded: z.number().int().nonnegative(),
+    failed: z.number().int().nonnegative(),
+    skipped: z.number().int().nonnegative(),
+    total: z.number().int().nonnegative(),
+    errors: z.array(NormalizedRuleError).optional(),
+  })
+);
 
 export type BulkRuleSelector = z.infer<typeof bulkRuleSelectorSchema>;
 export type BulkRuleSummaryOutput = z.infer<typeof bulkRuleSummaryOutputSchema>;

@@ -162,7 +162,7 @@ let modelVersion2: SavedObjectsModelVersion = {
   changes: [
     {
       type: 'data_backfill',
-      transform: (document) => {
+      backfillFn: (document) => {
         return { attributes: { dolly: 'default_value' } };
       },
     },
@@ -207,7 +207,7 @@ let modelVersion2: SavedObjectsModelVersion = {
   changes: [
     {
       type: 'data_backfill',
-      transform: (document) => {
+      backfillFn: (document) => {
         return { attributes: { searchable_field: 'default_value' } };
       },
     },

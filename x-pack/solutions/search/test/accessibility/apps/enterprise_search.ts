@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('loads the search home page', async function () {
-        await testSubjects.exists('search-homepage');
+        await testSubjects.exists('elasticsearchHomePage');
       });
     });
 
@@ -45,30 +45,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor(
           'create index button visible',
           async () => await testSubjects.exists('createIndexButton')
-        );
-        await a11y.testAppSnapshot();
-      });
-    });
-
-    describe('Playground', () => {
-      before(async () => {
-        await common.navigateToApp('search_playground');
-      });
-
-      it('loads playground list page', async function () {
-        await retry.waitFor(
-          'new playground button',
-          async () => await testSubjects.exists('newPlaygroundButton')
-        );
-        await a11y.testAppSnapshot();
-      });
-
-      it('loads playground', async function () {
-        await testSubjects.click('newPlaygroundButton');
-
-        await retry.waitFor(
-          'playground header menu',
-          async () => await testSubjects.exists('app-menu')
         );
         await a11y.testAppSnapshot();
       });

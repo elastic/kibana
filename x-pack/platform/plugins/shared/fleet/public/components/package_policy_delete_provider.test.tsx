@@ -17,6 +17,7 @@ import { createIntegrationsTestRendererMock } from '../mock';
 import { sendGetAgents, useMultipleAgentPolicies } from '../hooks';
 
 import { PackagePolicyDeleteProvider } from './package_policy_delete_provider';
+import { buildPolicyBaseIdsWithFallbackKuery } from '../../common/services/version_specific_policies_utils';
 
 jest.mock('../hooks', () => {
   const mutateAsyncMock = jest.fn().mockResolvedValue({ data: [] });
@@ -167,6 +168,16 @@ describe('PackagePolicyDeleteProvider', () => {
     const button = utils.getByTestId('deleteIntegrationBtn');
     fireEvent.click(button);
     await waitFor(() => {
+      // the agents are counted by their base policy id, so agents on `#sentinel` are included
+      expect(sendGetAgentsMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          kuery: buildPolicyBaseIdsWithFallbackKuery(
+            agentPolicies.map((policy) => policy.id),
+            'fleet-agents.policy_base_id',
+            'fleet-agents.policy_id'
+          ),
+        })
+      );
       const calloutText = utils.getByTestId('affectedAgentsCallOut').textContent;
       expect(calloutText).toContain('This action will affect 5 agents.');
       expect(calloutText).toContain('is already in use by some of your agents');

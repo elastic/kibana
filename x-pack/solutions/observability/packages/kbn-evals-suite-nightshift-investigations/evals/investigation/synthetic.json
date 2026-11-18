@@ -1,0 +1,22 @@
+{
+  "dataset": "nightshift/synthetic-traces",
+  "description": "Public synthetic questions for ungraded execution and trace inspection.",
+  "examples": [
+    {
+      "input": {
+        "question": "Investigate this fictional checkout incident using only the supplied synthetic evidence. Use the sandbox Python tool to calculate the before/after error rates, then produce a concise investigation report with your conclusion and limitations. There is no external telemetry cluster to query. Before a timeout setting changed: 100 requests, 1 timeout. After it changed: 100 requests, 30 timeouts. After reverting it: 100 requests, 2 timeouts. Request volume and dependencies were unchanged. This is a trace-capture exercise; do not inspect external systems."
+      },
+      "metadata": {
+        "case_id": "synthetic-checkout-timeouts"
+      }
+    },
+    {
+      "input": {
+        "question": "Investigate this fictional queue incident using only the supplied synthetic evidence. Use the sandbox Python tool to calculate the backlog growth per minute, then produce a concise investigation report with your conclusion and limitations. There is no external telemetry cluster to query. Before a worker deployment: arrivals 120 jobs/minute, completions 120 jobs/minute. After deployment: arrivals 120 jobs/minute, completions 80 jobs/minute. After rollback: arrivals 120 jobs/minute, completions 120 jobs/minute. Each observation lasted five minutes. This is a trace-capture exercise; do not inspect external systems."
+      },
+      "metadata": {
+        "case_id": "synthetic-queue-backlog"
+      }
+    }
+  ]
+}

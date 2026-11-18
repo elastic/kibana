@@ -7,7 +7,6 @@
 
 import React from 'react';
 
-import type { IconType } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,6 +16,7 @@ import {
   EuiToken,
   EuiToolTip,
   useEuiTheme,
+  type IconType,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -76,7 +76,7 @@ const TypeLine: React.FC<{ iconType: IconType; label: string; fieldTypeLabel: st
       </EuiToolTip>
     </EuiFlexItem>
     <EuiFlexItem>
-      <EuiText size="s" color="default">
+      <EuiText size="xs" color="default">
         {label}
       </EuiText>
     </EuiFlexItem>
@@ -98,7 +98,7 @@ export const ResultField: React.FC<ResultFieldProps> = ({
   const resolvedIconType = iconType || (fieldType ? iconMap[fieldType] : defaultToken);
 
   const fieldTypeLabel = i18n.translate('xpack.searchIndexDocuments.result.fieldTypeAriaLabel', {
-    defaultMessage: 'This field is of the type {fieldType}',
+    defaultMessage: 'Field type: {fieldType}',
     values: { fieldType },
   });
 
@@ -112,7 +112,7 @@ export const ResultField: React.FC<ResultFieldProps> = ({
               label={fieldName}
               fieldTypeLabel={fieldTypeLabel}
             />
-            <EuiText size="s" color="default">
+            <EuiText size="xs" color="default">
               {fieldValue}
             </EuiText>
             <TypeLine
@@ -138,10 +138,16 @@ export const ResultField: React.FC<ResultFieldProps> = ({
 
   return (
     <EuiTableRow css={Styles.resultField(euiTheme)}>
-      <EuiTableRowCell className="resultFieldRowCell" valign="middle" truncateText={!isExpanded}>
+      <EuiTableRowCell
+        className="resultFieldRowCell"
+        valign="top"
+        truncateText={!isExpanded}
+        setScopeRow
+        width="20%"
+      >
         <TypeLine iconType={resolvedIconType} label={fieldName} fieldTypeLabel={fieldTypeLabel} />
       </EuiTableRowCell>
-      <EuiTableRowCell className="resultFieldRowCell" truncateText={shouldTruncate} valign="middle">
+      <EuiTableRowCell className="resultFieldRowCell" truncateText={shouldTruncate} valign="top">
         <ResultFieldValue
           fieldValue={fieldValue}
           fieldType={fieldType}

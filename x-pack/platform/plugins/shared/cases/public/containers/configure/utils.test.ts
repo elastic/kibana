@@ -10,19 +10,29 @@ import { getConfigurationByOwner, initialConfiguration } from './utils';
 
 describe('Utils', () => {
   describe('getConfigurationByOwner', () => {
-    it('returns the initial configuration if there are no configurations', () => {
-      expect(getConfigurationByOwner({ configurations: [], owner: 'foobar' })).toBe(
-        initialConfiguration
-      );
+    it('returns a fallback with the owner default when configurations is empty', () => {
+      expect(getConfigurationByOwner({ configurations: [], owner: 'foobar' })).toEqual({
+        ...initialConfiguration,
+        owner: 'foobar',
+        extractObservables: false,
+      });
     });
 
-    it('returns the initial configuration if the owner is not found', () => {
+    it('returns a fallback with the owner default when configurations is null (no saved configuration yet)', () => {
+      expect(getConfigurationByOwner({ configurations: null, owner: 'securitySolution' })).toEqual({
+        ...initialConfiguration,
+        owner: 'securitySolution',
+        extractObservables: true,
+      });
+    });
+
+    it('returns a fallback configuration with the owner and its autoExtractDefault when the owner is not found', () => {
       expect(
         getConfigurationByOwner({
           configurations: [{ owner: 'foo' }, { owner: 'bar' }] as CasesConfigurationUI[],
           owner: 'foobar',
         })
-      ).toBe(initialConfiguration);
+      ).toEqual({ ...initialConfiguration, owner: 'foobar', extractObservables: false });
     });
 
     it('returns the expected configuration when searching by owner', () => {

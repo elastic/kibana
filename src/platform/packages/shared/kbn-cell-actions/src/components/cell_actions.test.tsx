@@ -12,7 +12,7 @@ import React from 'react';
 import { CellActions } from './cell_actions';
 import { CellActionsMode } from '../constants';
 import { CellActionsProvider } from '../context/cell_actions_context';
-import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { FieldSpec } from '@kbn/data-views-types';
 
 const TRIGGER_ID = 'test-trigger-id';
 const VALUE = '123';

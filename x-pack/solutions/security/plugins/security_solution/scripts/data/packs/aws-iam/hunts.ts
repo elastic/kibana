@@ -156,4 +156,18 @@ export const hunts: Hunt[] = [
       },
     ],
   },
+  {
+    name: 'AssumeRole',
+    language: 'kuery',
+    query: 'event.action: "AssumeRole" and cloud.provider: "aws"',
+    ruleType: 'query',
+    mitre: [
+      {
+        tactic: 'TA0004',
+        tacticName: 'Privilege Escalation',
+        technique: 'T1078.004',
+        techniqueName: 'Cloud Accounts',
+      },
+    ],
+  },
 ];

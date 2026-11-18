@@ -13,6 +13,14 @@ import { ASSET_INVENTORY_INDEX_PATTERN } from '../../../../asset_inventory/const
 import type { GenericEntityRecord } from '../../../../asset_inventory/types/generic_entity_record';
 import { fetchGenericEntity } from './use_get_generic_entity';
 
+const GENERIC_ENTITY_EXECUTION_CONTEXT = {
+  child: {
+    type: 'security_solution',
+    name: 'entity_analytics:entity_details_flyout',
+    id: 'generic_entity_search',
+  },
+};
+
 describe('fetchGenericEntity', () => {
   let mockDataService: jest.Mocked<DataPublicPluginStart>;
   let mockSearchResponse: IKibanaSearchResponse<estypes.SearchResponse<GenericEntityRecord>>;
@@ -87,24 +95,27 @@ describe('fetchGenericEntity', () => {
 
       await fetchGenericEntity(mockDataService, { entityDocId });
 
-      expect(mockDataService.search.search).toHaveBeenCalledWith({
-        params: {
-          index: ASSET_INVENTORY_INDEX_PATTERN,
-          query: {
-            bool: {
-              should: [
-                {
-                  term: {
-                    _id: entityDocId,
+      expect(mockDataService.search.search).toHaveBeenCalledWith(
+        {
+          params: {
+            index: ASSET_INVENTORY_INDEX_PATTERN,
+            query: {
+              bool: {
+                should: [
+                  {
+                    term: {
+                      _id: entityDocId,
+                    },
                   },
-                },
-              ],
-              minimum_should_match: 1,
+                ],
+                minimum_should_match: 1,
+              },
             },
+            fields: ['*'],
           },
-          fields: ['*'],
         },
-      });
+        { executionContext: GENERIC_ENTITY_EXECUTION_CONTEXT }
+      );
     });
 
     it('should build bool query with entity.id term when only entityId is provided', async () => {
@@ -112,24 +123,27 @@ describe('fetchGenericEntity', () => {
 
       await fetchGenericEntity(mockDataService, { entityId });
 
-      expect(mockDataService.search.search).toHaveBeenCalledWith({
-        params: {
-          index: ASSET_INVENTORY_INDEX_PATTERN,
-          query: {
-            bool: {
-              should: [
-                {
-                  term: {
-                    'entity.id': entityId,
+      expect(mockDataService.search.search).toHaveBeenCalledWith(
+        {
+          params: {
+            index: ASSET_INVENTORY_INDEX_PATTERN,
+            query: {
+              bool: {
+                should: [
+                  {
+                    term: {
+                      'entity.id': entityId,
+                    },
                   },
-                },
-              ],
-              minimum_should_match: 1,
+                ],
+                minimum_should_match: 1,
+              },
             },
+            fields: ['*'],
           },
-          fields: ['*'],
         },
-      });
+        { executionContext: GENERIC_ENTITY_EXECUTION_CONTEXT }
+      );
     });
 
     it('should build OR query with both _id and entity.id terms when both are provided', async () => {
@@ -138,29 +152,32 @@ describe('fetchGenericEntity', () => {
 
       await fetchGenericEntity(mockDataService, { entityDocId, entityId });
 
-      expect(mockDataService.search.search).toHaveBeenCalledWith({
-        params: {
-          index: ASSET_INVENTORY_INDEX_PATTERN,
-          query: {
-            bool: {
-              should: [
-                {
-                  term: {
-                    _id: entityDocId,
+      expect(mockDataService.search.search).toHaveBeenCalledWith(
+        {
+          params: {
+            index: ASSET_INVENTORY_INDEX_PATTERN,
+            query: {
+              bool: {
+                should: [
+                  {
+                    term: {
+                      _id: entityDocId,
+                    },
                   },
-                },
-                {
-                  term: {
-                    'entity.id': entityId,
+                  {
+                    term: {
+                      'entity.id': entityId,
+                    },
                   },
-                },
-              ],
-              minimum_should_match: 1,
+                ],
+                minimum_should_match: 1,
+              },
             },
+            fields: ['*'],
           },
-          fields: ['*'],
         },
-      });
+        { executionContext: GENERIC_ENTITY_EXECUTION_CONTEXT }
+      );
     });
 
     it('should handle whitespace-only entityDocId as valid', async () => {
@@ -168,24 +185,27 @@ describe('fetchGenericEntity', () => {
 
       await fetchGenericEntity(mockDataService, { entityDocId });
 
-      expect(mockDataService.search.search).toHaveBeenCalledWith({
-        params: {
-          index: ASSET_INVENTORY_INDEX_PATTERN,
-          query: {
-            bool: {
-              should: [
-                {
-                  term: {
-                    _id: '   ',
+      expect(mockDataService.search.search).toHaveBeenCalledWith(
+        {
+          params: {
+            index: ASSET_INVENTORY_INDEX_PATTERN,
+            query: {
+              bool: {
+                should: [
+                  {
+                    term: {
+                      _id: '   ',
+                    },
                   },
-                },
-              ],
-              minimum_should_match: 1,
+                ],
+                minimum_should_match: 1,
+              },
             },
+            fields: ['*'],
           },
-          fields: ['*'],
         },
-      });
+        { executionContext: GENERIC_ENTITY_EXECUTION_CONTEXT }
+      );
     });
   });
 });

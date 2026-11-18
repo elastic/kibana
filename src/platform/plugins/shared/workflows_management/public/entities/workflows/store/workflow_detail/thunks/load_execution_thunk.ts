@@ -8,66 +8,165 @@
  */
 
 import { createAsyncThunk } from 'redux-toolkit-v1';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
-import type { WorkflowExecutionDto } from '@kbn/workflows';
+import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
+import { isTerminalStatus } from '@kbn/workflows';
 import { WorkflowApi } from '@kbn/workflows-ui';
-import { WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE } from '../../../../../../common';
+import {
+  getOmittedStepExecutionsCount,
+  WORKFLOW_EXECUTION_STEPS_MAX_PAGE_COUNT,
+  WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
+} from '../../../../../../common';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
-import { _setComputedExecution, setExecution, setStepExecutionsTotal } from '../slice';
+import type { ComputedData } from '../types';
 import { performComputation } from '../utils/computation';
+
+const PAGE_REQUEST_CONCURRENCY = 3;
 
 export interface LoadExecutionParams {
   id: string;
+  loadMore?: boolean;
 }
 
-export type LoadExecutionResponse = WorkflowExecutionDto;
+export interface LoadExecutionRejection {
+  message: string;
+  isNotFound: boolean;
+}
 
+export interface LoadExecutionResponse {
+  execution: WorkflowExecutionDto;
+  stepExecutionPages: WorkflowStepExecutionDto[][];
+  stepExecutionsTotal: number;
+  computedExecution: ComputedData;
+}
+
+/** Loads one execution snapshot for both polling and pagination. */
 export const loadExecutionThunk = createAsyncThunk<
   LoadExecutionResponse,
   LoadExecutionParams,
-  { state: RootState; extra: { services: WorkflowsServices } }
+  { state: RootState; extra: { services: WorkflowsServices }; rejectValue: LoadExecutionRejection }
 >(
   'detail/loadExecutionThunk',
-  async ({ id }, { getState, dispatch, rejectWithValue, extra: { services } }) => {
+  async (
+    { id, loadMore = false },
+    { getState, requestId, signal, rejectWithValue, extra: { services } }
+  ) => {
     const { http, notifications } = services;
     const api = new WorkflowApi(http);
+    const {
+      execution: previousExecution,
+      stepExecutionPages: loadedPages,
+      stepExecutionsTotal: previousTotal,
+      computedExecution,
+      executionError: previousError,
+    } = getState().detail;
+
     try {
-      const previousExecution = getState().detail.execution;
-
-      // includeOutput so AI token metadata (LangChain tokenUsage) is available for
-      // tree badges / AI section before step.usage is populated by the engine.
-      const [execution, stepsPage] = await Promise.all([
-        api.getExecution(id, {
-          includeInput: false,
-          includeOutput: true,
-          omitStepExecutions: true,
-        }),
-        api.getExecutionSteps(id, { page: 1, size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE }),
-      ]);
-      const response: WorkflowExecutionDto = {
-        ...execution,
-        stepExecutions: stepsPage.results.slice(0, WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE),
-      };
-      dispatch(setExecution(response));
-      dispatch(setStepExecutionsTotal(stepsPage.total));
-
-      if (id !== previousExecution?.id) {
-        // avoid recomputing derived data if the execution is the same
-        const computed = performComputation(response.yaml, response.workflowDefinition);
-        dispatch(_setComputedExecution(computed));
+      const keepLoadedPages = previousExecution && isTerminalStatus(previousExecution.status);
+      // Read the execution first: the engine persists final step documents before its terminal status.
+      const execution =
+        loadMore && keepLoadedPages
+          ? previousExecution
+          : await api.getExecution(id, {
+              includeInput: false,
+              includeOutput: true,
+              omitStepExecutions: true,
+            });
+      const isCurrentRequest = () =>
+        !signal.aborted && getState().detail.executionRequest?.requestId === requestId;
+      if (!isCurrentRequest()) {
+        return rejectWithValue({ message: 'Execution load was superseded', isNotFound: false });
       }
-      return response;
-    } catch (error) {
-      // Extract error message from HTTP error body if available
-      const errorMessage = error.body?.message || error.message || 'Failed to load execution';
 
-      notifications.toasts.addError(errorMessage, {
-        title: i18n.translate('workflows.detail.loadExecution.error', {
-          defaultMessage: 'Failed to load execution',
-        }),
-      });
-      return rejectWithValue(errorMessage);
+      const pages = keepLoadedPages ? [...loadedPages] : [];
+      let total = previousTotal;
+      if (pages.length === 0) {
+        const firstPage = await api.getExecutionSteps(id, {
+          page: 1,
+          size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
+        });
+        pages.push(firstPage.results);
+        total = firstPage.total;
+      }
+      const pageCount = loadMore
+        ? loadedPages.length + 1
+        : Math.max(
+            loadedPages.length,
+            Math.min(
+              Math.ceil(total / WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE),
+              WORKFLOW_EXECUTION_STEPS_MAX_PAGE_COUNT
+            )
+          );
+
+      // Bound concurrency even when the user has manually loaded beyond the automatic budget.
+      for (let offset = pages.length; offset < pageCount; offset += PAGE_REQUEST_CONCURRENCY) {
+        if (!isCurrentRequest()) {
+          return rejectWithValue({ message: 'Execution load was superseded', isNotFound: false });
+        }
+        const batch = await Promise.all(
+          Array.from(
+            { length: Math.min(PAGE_REQUEST_CONCURRENCY, pageCount - offset) },
+            (_, index) =>
+              api.getExecutionSteps(id, {
+                page: offset + index + 1,
+                size: WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE,
+              })
+          )
+        );
+        pages.push(...batch.map(({ results }) => results));
+        total = batch[0].total;
+      }
+
+      return {
+        execution: { ...execution, stepExecutions: pages.flat() },
+        stepExecutionPages: pages,
+        stepExecutionsTotal: total,
+        computedExecution:
+          computedExecution ?? performComputation(execution.yaml, execution.workflowDefinition),
+      };
+    } catch (error) {
+      const isNotFound = isHttpFetchError(error) && error.response?.status === 404;
+      const errorMessage = isNotFound
+        ? i18n.translate('workflows.detail.loadExecution.notFound', {
+            defaultMessage: "This execution doesn't exist or has been deleted.",
+          })
+        : error.body?.message || error.message || 'Failed to load execution';
+      // Toast once per failure streak: polling retries must not stack the same error.
+      const isInFailureStreak = !loadMore && previousError?.id === id;
+      if (
+        !isInFailureStreak &&
+        getState().detail.executionRequest?.requestId === requestId &&
+        !signal.aborted
+      ) {
+        notifications.toasts.addError(errorMessage, {
+          title: loadMore
+            ? i18n.translate('workflows.detail.loadMoreStepExecutions.error', {
+                defaultMessage: 'Failed to load more step executions',
+              })
+            : i18n.translate('workflows.detail.loadExecution.error', {
+                defaultMessage: 'Failed to load execution',
+              }),
+        });
+      }
+      return rejectWithValue({ message: errorMessage, isNotFound });
     }
+  },
+  {
+    condition: ({ id, loadMore }, { getState }) => {
+      const { execution, executionRequest, stepExecutionPages, stepExecutionsTotal } =
+        getState().detail;
+      if (executionRequest?.id === id) {
+        return false;
+      }
+      return (
+        !loadMore ||
+        (execution?.id === id &&
+          (execution.stepExecutionIds !== undefined ||
+            stepExecutionPages.length < WORKFLOW_EXECUTION_STEPS_MAX_PAGE_COUNT) &&
+          getOmittedStepExecutionsCount(stepExecutionsTotal, stepExecutionPages.length) > 0)
+      );
+    },
   }
 );

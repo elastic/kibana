@@ -1,0 +1,6 @@
+{
+  "settingsVersion": 1,
+  "autonomyLevel": "manual",
+  "scheduleInterval": "2h",
+  "serviceAccountId": "kibana/az-worker-1"
+}

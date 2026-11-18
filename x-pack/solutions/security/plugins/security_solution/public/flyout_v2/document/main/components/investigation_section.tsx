@@ -29,6 +29,10 @@ import {
   LEGACY_SIGNAL_RULE_NAME_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
+import {
+  CustomYaraSignatureHighlightedFieldLink,
+  isCustomYaraSignatureHighlightedField,
+} from './custom_yara_signature_highlighted_field_link';
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { INVESTIGATION_SECTION_TITLE } from '../../../shared/constants/flyout_titles';
 import { isRulePreviewDocument } from '../../../shared/utils/is_rule_preview_document';
@@ -153,6 +157,14 @@ export const InvestigationSection = memo(
             return <>{props.children}</>;
           }
           return <OpenFlyoutLink {...props} value={ruleId} />;
+        }
+        // Custom YARA Signature fields: navigate to the CYS management page for the matching artifact
+        if (isCustomYaraSignatureHighlightedField(props.field)) {
+          return (
+            <CustomYaraSignatureHighlightedFieldLink hit={props.hit}>
+              {props.children}
+            </CustomYaraSignatureHighlightedFieldLink>
+          );
         }
         return <OpenFlyoutLink {...props} />;
       },

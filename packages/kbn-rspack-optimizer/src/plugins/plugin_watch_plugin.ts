@@ -96,6 +96,7 @@ export class PluginWatchPlugin {
           repoRoot: this.options.repoRoot,
           examples: this.options.examples || false,
           testPlugins: this.options.testPlugins || false,
+          devOnly: this.options.devOnly,
           paths: this.options.pluginPaths,
           parentDirs: this.options.pluginScanDirs,
           allowlistPluginGroups: this.options.allowlistPluginGroups,

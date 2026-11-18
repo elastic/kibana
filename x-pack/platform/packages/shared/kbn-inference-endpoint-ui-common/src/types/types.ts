@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { ApplicationStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { ConfigProperties, ConfigValue } from './dynamic_config/types';
@@ -15,6 +16,9 @@ interface ConfigEntry extends ConfigProperties {
 
 export * from './dynamic_config/types';
 
+// Temporary: remove once the InferenceTaskType in @elastic/elasticsearch includes 'decision'.
+export type EisTaskType = InferenceTaskType | 'decision';
+
 export type Map = Record<string, string>;
 
 export interface ConfigEntryView extends ConfigEntry {
@@ -23,7 +27,8 @@ export interface ConfigEntryView extends ConfigEntry {
   value: ConfigValue;
 }
 
-export type FieldsConfiguration = Record<string, ConfigProperties>;
+export type { InferenceProvider } from '@kbn/inference-common';
+export { INFERENCE_ENDPOINT_INTERNAL_API_VERSION } from '@kbn/inference-common';
 
 interface AdaptiveAllocations {
   max_number_of_allocations?: number;
@@ -51,20 +56,6 @@ export interface Config {
 export interface Secrets {
   providerSecrets?: Record<string, unknown>;
 }
-
-export interface InferenceProvider {
-  service: string;
-  name: string;
-  task_types: string[];
-  logo?: string;
-  configurations: FieldsConfiguration;
-}
-
-export interface Secrets {
-  providerSecrets?: Record<string, unknown>;
-}
-
-export const INFERENCE_ENDPOINT_INTERNAL_API_VERSION = '1';
 
 export interface InferenceEndpoint {
   config: Config;

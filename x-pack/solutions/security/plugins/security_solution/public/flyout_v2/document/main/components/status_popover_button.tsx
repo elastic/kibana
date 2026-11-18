@@ -10,6 +10,8 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { getFieldFormat } from '../../../shared/utils/get_field_format';
 import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
+import { withStatusDotIcons } from '../../../../common/utils/action_menu_items';
+import { ALERT_STATUS_ICON_COLORS } from '../../../../common/utils/action_icons';
 import type { Status } from '../../../../../common/api/detection_engine';
 import {
   CHANGE_ALERT_STATUS,
@@ -19,13 +21,16 @@ import { FormattedFieldValue } from '../../../../timelines/components/timeline/b
 import type { FlyoutActionType } from '../../../../common/lib/telemetry';
 import { FLYOUT_ACTION, FLYOUT_HEADER_ITEM, FLYOUT_TYPE } from '../../../../common/lib/telemetry';
 import { useFlyoutTelemetry } from '../../../shared/hooks/use_flyout_telemetry';
+import {
+  ALERT_CLOSE_WITH_REASON_ACTION_ID,
+  ALERT_STATUS_ACTION_IDS,
+} from '../../../../common/constants/action_ids';
 import { wrapActionTelemetry } from '../utils/wrap_action_telemetry';
 
-// Same status items as the footer's take-action menu (both come from `useAlertsActions`).
-const STATUS_ACTION_TEST_SUBJ: Partial<Record<string, FlyoutActionType>> = {
-  'open-alert-status': FLYOUT_ACTION.STATUS_OPEN,
-  'acknowledged-alert-status': FLYOUT_ACTION.STATUS_ACKNOWLEDGED,
-  'alert-close-context-menu-item': FLYOUT_ACTION.STATUS_CLOSED,
+const STATUS_ACTIONS_BY_ID: Partial<Record<string, FlyoutActionType>> = {
+  [ALERT_STATUS_ACTION_IDS.markAsOpen]: FLYOUT_ACTION.STATUS_OPEN,
+  [ALERT_STATUS_ACTION_IDS.markAsAcknowledged]: FLYOUT_ACTION.STATUS_ACKNOWLEDGED,
+  [ALERT_CLOSE_WITH_REASON_ACTION_ID]: FLYOUT_ACTION.STATUS_CLOSED,
 };
 
 export interface StatusPopoverButtonFieldInfo {
@@ -103,7 +108,12 @@ export const StatusPopoverButton = memo(
     });
 
     const actionItems = useMemo(
-      () => wrapActionTelemetry(rawActionItems, STATUS_ACTION_TEST_SUBJ, reportActionClicked),
+      () =>
+        wrapActionTelemetry(
+          withStatusDotIcons(rawActionItems, ALERT_STATUS_ICON_COLORS),
+          STATUS_ACTIONS_BY_ID,
+          reportActionClicked
+        ),
       [rawActionItems, reportActionClicked]
     );
 

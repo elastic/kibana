@@ -10,10 +10,12 @@
 import type {
   BaseConnectorContract,
   ConnectorContractUnion,
+  ConnectorInstance,
   ConnectorTypeInfo,
   CustomTriggerSchemaInput,
   StepDeprecationInfo,
   StepPropertyHandler,
+  TriggerSchemaOptions,
 } from '@kbn/workflows';
 import {
   builtInStepDefinitions,
@@ -30,11 +32,22 @@ import { z } from '@kbn/zod/v4';
 // Import the singleton instance of StepSchemas
 import { stepSchemas } from './step_schemas';
 
+// Lazily loaded — same boundary as getConnectorSchemas() to avoid eagerly pulling
+// @kbn/connector-specs at startup (see #264175).
+let _connectorSpecsModule: typeof import('@kbn/connector-specs') | null = null;
+function getConnectorSpecsModule(): typeof import('@kbn/connector-specs') {
+  if (_connectorSpecsModule === null) {
+    _connectorSpecsModule = require('@kbn/connector-specs');
+  }
+  return _connectorSpecsModule as typeof import('@kbn/connector-specs');
+}
+
 // Defers ~16 MB of zod-schema heap until the first workflow edit/execute call.
 // connector_action_schema.ts eagerly builds Maps of Zod schemas from
 // stack_connectors_schema/* and @kbn/connector-specs; keeping it behind a
 // lazy require() avoids that cost at Kibana startup. See #264175.
 let _connectorSchemas: typeof import('./connector_action_schema') | null = null;
+let inferenceConnectorInstancesCache: ReadonlyMap<string, ConnectorInstance[]> = new Map();
 function getConnectorSchemas(): typeof import('./connector_action_schema') {
   if (_connectorSchemas === null) {
     _connectorSchemas = require('./connector_action_schema');
@@ -152,30 +165,25 @@ function getRegisteredStepDefinitions(): BaseConnectorContract[] {
   return stepSchemas
     .getAllRegisteredStepDefinitions()
     .map((stepDefinition): BaseConnectorContract => {
+      // Match the convention used by every other connector source: summary is the
+      // short label, description is the longer behavioral explanation.
       const definition = {
         type: stepDefinition.id,
         paramsSchema: stepDefinition.inputSchema,
         outputSchema: stepDefinition.outputSchema,
         configSchema: stepDefinition.configSchema,
         deprecation: stepDefinition.deprecation,
-        summary: null,
-        description: null,
+        summary: stepDefinition.label,
+        description: stepDefinition.description,
+        documentation: stepDefinition.documentation?.url,
+        examples: stepDefinition.documentation?.examples
+          ? { snippet: stepDefinition.documentation.examples.join('\n') }
+          : undefined,
       };
 
-      if (stepSchemas.isPublicStepDefinition(stepDefinition)) {
-        // Only public step definitions have documentation and examples.
-        // Match the convention used by every other connector source: summary
-        // is the short label, description is the longer behavioral explanation.
-        return {
-          ...definition,
-          summary: stepDefinition.label,
-          description: stepDefinition.description ?? null,
-          documentation: stepDefinition.documentation?.url,
-          examples: stepDefinition.documentation?.examples
-            ? { snippet: stepDefinition.documentation?.examples.join('\n') }
-            : undefined,
-          editorHandlers: stepDefinition.editorHandlers,
-        };
+      // Editor handlers are the one field the server definition does not carry.
+      if ('editorHandlers' in stepDefinition) {
+        return { ...definition, editorHandlers: stepDefinition.editorHandlers };
       }
       return definition;
     });
@@ -208,6 +216,18 @@ function convertDynamicConnectorsToContractsInternal(
       // If the connector has sub-actions, create separate contracts for each sub-action
       if (connectorType.subActions && connectorType.subActions.length > 0) {
         connectorType.subActions.forEach((subAction) => {
+          const hasPermittedInstance =
+            connectorType.instances.length === 0 ||
+            connectorType.instances.some(({ config }) =>
+              getConnectorSpecsModule().isSelectedActionEnabled(
+                subAction.name,
+                config?.selectedActions
+              )
+            );
+          if (!hasPermittedInstance) {
+            return;
+          }
+
           // Create type name: actionTypeId.subActionName (e.g., "inference.completion")
           const subActionType = `${connectorTypeName}.${subAction.name}`;
 
@@ -269,7 +289,7 @@ function convertDynamicConnectorsToContractsInternal(
 export type WorkflowZodSchemaType = z.infer<ReturnType<typeof getWorkflowZodSchema>>;
 export type WorkflowZodSchemaLooseType = z.infer<ReturnType<typeof getWorkflowZodSchemaLoose>>;
 
-export interface WorkflowZodSchemaOptions {
+export interface WorkflowZodSchemaOptions extends TriggerSchemaOptions {
   lightweight?: boolean;
 }
 
@@ -361,8 +381,10 @@ export function setCachedAllConnectorsMap(_allConnectors: ConnectorContractUnion
 }
 
 export function addDynamicConnectorsToCache(
-  dynamicConnectorTypes: Record<string, ConnectorTypeInfo>
+  dynamicConnectorTypes: Record<string, ConnectorTypeInfo>,
+  inferenceConnectorInstances: ReadonlyMap<string, ConnectorInstance[]> = new Map()
 ): void {
+  inferenceConnectorInstancesCache = inferenceConnectorInstances;
   // Create a simple hash of the connector types to detect changes.
   // Include the `enabled` flag to avoid keeping stale (now-disabled) connector contracts in cache.
   const currentHash = JSON.stringify(
@@ -409,6 +431,10 @@ export function addDynamicConnectorsToCache(
 
 export function getCachedDynamicConnectorTypes(): Record<string, ConnectorTypeInfo> | null {
   return stepSchemas.getDynamicConnectorTypesCache();
+}
+
+export function getCachedInferenceConnectorInstances(): ReadonlyMap<string, ConnectorInstance[]> {
+  return inferenceConnectorInstancesCache;
 }
 
 export function getAllConnectors(): ConnectorContractUnion[] {
@@ -467,15 +493,27 @@ export function getAllConnectorsWithDynamic(
 export const getWorkflowZodSchema = (
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo>,
   registeredTriggers: CustomTriggerSchemaInput[] = [],
-  options: WorkflowZodSchemaOptions = {}
+  { lightweight, ...triggerSchemaOptions }: WorkflowZodSchemaOptions = {}
 ): z.ZodType => {
-  if (options.lightweight) {
-    return generateLightweightYamlSchema(registeredTriggers);
+  if (lightweight) {
+    return generateLightweightYamlSchema(registeredTriggers, triggerSchemaOptions);
   }
 
   const allConnectors = getAllConnectorsWithDynamicInternal(dynamicConnectorTypes);
-  return generateYamlSchemaFromConnectors(allConnectors, registeredTriggers);
+  return getWorkflowZodSchemaFromConnectors(
+    allConnectors,
+    registeredTriggers,
+    triggerSchemaOptions
+  );
 };
+
+/** Same schema from an already-resolved list, for callers that need the list too. */
+export const getWorkflowZodSchemaFromConnectors = (
+  allConnectors: ConnectorContractUnion[],
+  registeredTriggers: CustomTriggerSchemaInput[] = [],
+  triggerSchemaOptions: TriggerSchemaOptions = {}
+): z.ZodType =>
+  generateYamlSchemaFromConnectors(allConnectors, registeredTriggers, false, triggerSchemaOptions);
 
 export const getWorkflowZodSchemaLoose = (
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo> = {}

@@ -14,5 +14,5 @@ module.exports = {
   coverageReporters: ['text', 'html'],
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/solutions/security/plugins/ecs_data_quality_dashboard'],
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
 };

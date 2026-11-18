@@ -11,11 +11,25 @@
 // through the `page.components` factories. Re-exported here so `@kbn/scout` and
 // the solution Scout packages expose them under a single entry point.
 export {
+  EuiCallOutObject,
+  EuiColorPickerObject,
   EuiComboBoxObject,
   EuiDataGridObject,
+  EuiFieldSearchObject,
   EuiGlobalToastListObject,
+  EuiPaginationObject,
+  EuiSearchBarObject,
+  EuiSideNavObject,
   EuiSuperSelectObject,
   EuiSelectableObject,
   EuiBasicTableObject,
+  EuiTableObject,
   EuiDraggableObject,
 } from '@elastic/eui-test-helpers';
+
+/**
+ * Stable EUI selectors, keyed like `page.components`, for when no Component Object method fits.
+ *
+ * @example page.locator(euiSelectors.basicTable.ROW_SELECTOR)
+ */
+export { selectors as euiSelectors } from '@elastic/eui-test-helpers';

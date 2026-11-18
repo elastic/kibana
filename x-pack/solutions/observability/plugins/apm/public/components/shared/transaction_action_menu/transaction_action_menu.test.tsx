@@ -6,6 +6,7 @@
  */
 
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
@@ -114,10 +115,7 @@ const renderTransaction = async (transaction: Record<string, any>) => {
 
   fireEvent.click(rendered.getByTestId('apmActionMenuButtonInvestigateButton'));
 
-  // EUI sets `euiPopover-isOpen` on the next animation frame after `isOpen` flips.
-  await waitFor(() => {
-    expect(rendered.container.querySelector('.euiPopover-isOpen')).toBeTruthy();
-  });
+  await waitForEuiPopoverOpen();
 
   return rendered;
 };
@@ -276,6 +274,11 @@ describe('TransactionActionMenu ', () => {
 
   it('matches the snapshot', async () => {
     const { container } = await renderTransaction(Transactions.transactionWithAllData);
+
+    //  wait for it to settle as EuiPopover applies euiPopover-isOpen via requestAnimationFrame
+    await waitFor(() => {
+      expect(container.querySelector('.euiPopover')).toHaveClass('euiPopover-isOpen');
+    });
 
     expect(container).toMatchSnapshot();
   });

@@ -77,4 +77,29 @@ describe('useUserProfiles', () => {
 
     expect(mockBulkGet).not.toHaveBeenCalled();
   });
+
+  it.each(['service_account:kibana/automation', 'realm:["native","native","alice"]'])(
+    'keeps %s out of the batch',
+    async (syntheticId) => {
+      mockBulkGet.mockResolvedValue([memberProfile]);
+
+      renderHook(() => useUserProfiles({ uids: ['member-1', syntheticId] }), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => expect(mockBulkGet).toHaveBeenCalledTimes(1));
+      expect(mockBulkGet).toHaveBeenCalledWith({
+        uids: new Set(['member-1']),
+        dataPath: 'avatar',
+      });
+    }
+  );
+
+  it('does not fetch when every uid is synthetic', () => {
+    renderHook(() => useUserProfiles({ uids: ['service_account:kibana/automation'] }), {
+      wrapper: createWrapper(),
+    });
+
+    expect(mockBulkGet).not.toHaveBeenCalled();
+  });
 });

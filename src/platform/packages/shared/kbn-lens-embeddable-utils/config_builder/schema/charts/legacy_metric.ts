@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { layerSettingsSchema, sharedPanelInfoSchema, dslOnlyPanelInfoSchema } from '../shared';
 import {
   applyColorToSchema,
-  AUTO_COLOR,
   colorByValueAbsoluteSchema,
   colorByValuePaletteSchema,
   legacyColorByValueAbsoluteSchema,
@@ -74,60 +73,70 @@ const legacyMetricConfigMetricOptionsShape = {
   /**
    * Color configuration
    */
-  color: z
-    .union([
-      colorByValueAbsoluteSchema,
-      colorByValuePaletteSchema,
-      legacyColorByValueAbsoluteSchema,
-      autoColorSchema,
-    ])
-    .default(AUTO_COLOR)
-    .optional()
-    .meta({ description: 'Color configuration based on the metric value.' }),
+  color: lazySchema(() =>
+    z
+      .union([
+        colorByValueAbsoluteSchema,
+        colorByValuePaletteSchema,
+        legacyColorByValueAbsoluteSchema,
+        autoColorSchema,
+      ])
+      .optional()
+      .meta({
+        description:
+          'Color configuration based on the metric value. Defaults to `auto`. Ignored without `apply_color_to`.',
+      })
+  ),
 };
 
-export const legacyMetricConfigSchemaNoESQL = z
-  .object({
-    type: z.literal('legacy_metric'),
-    ...sharedPanelInfoSchema.shape,
-    ...dslOnlyPanelInfoSchema.shape,
-    ...layerSettingsSchema.shape,
-    ...dataSourceSchema.shape,
-    /**
-     * Metric configuration, must define operation.
-     */
-    metric: getMetricsWithChartDimensionSchema('legacyMetric').and(
-      z.object(legacyMetricConfigMetricOptionsShape)
-    ),
-  })
-  .meta({
-    id: 'visLegacyMetricNoESQL',
-    title: 'Legacy Metric Chart (DSL)',
-    description:
-      'Legacy Metric configuration using a data view. Superseded by the Metric chart type.',
-  });
+export const legacyMetricConfigSchemaNoESQL = lazySchema(() =>
+  z
+    .object({
+      type: z.literal('legacy_metric'),
+      ...sharedPanelInfoSchema.shape,
+      ...dslOnlyPanelInfoSchema.shape,
+      ...layerSettingsSchema.shape,
+      ...dataSourceSchema.shape,
+      /**
+       * Metric configuration, must define operation.
+       */
+      metric: getMetricsWithChartDimensionSchema('legacyMetric').and(
+        z.object(legacyMetricConfigMetricOptionsShape)
+      ),
+    })
+    .meta({
+      id: 'visLegacyMetricNoESQL',
+      title: 'Legacy Metric Chart (DSL)',
+      description:
+        'Legacy Metric configuration using a data view. Superseded by the Metric chart type.',
+    })
+);
 
-const esqlLegacyMetricConfig = z
-  .object({
-    type: z.literal('legacy_metric'),
-    ...sharedPanelInfoSchema.shape,
-    ...layerSettingsSchema.shape,
-    ...dataSourceEsqlTableSchema.shape,
-    /**
-     * Metric configuration, must define operation.
-     */
-    metric: esqlColumnWithFormatSchema.extend(legacyMetricConfigMetricOptionsShape),
-  })
-  .strict()
-  .meta({ id: 'visLegacyMetricESQL', title: 'Legacy Metric Chart (ES|QL)' });
+const esqlLegacyMetricConfig = lazySchema(() =>
+  z
+    .object({
+      type: z.literal('legacy_metric'),
+      ...sharedPanelInfoSchema.shape,
+      ...layerSettingsSchema.shape,
+      ...dataSourceEsqlTableSchema.shape,
+      /**
+       * Metric configuration, must define operation.
+       */
+      metric: esqlColumnWithFormatSchema.extend(legacyMetricConfigMetricOptionsShape),
+    })
+    .strict()
+    .meta({ id: 'visLegacyMetricESQL', title: 'Legacy Metric Chart (ES|QL)' })
+);
 
 // Legacy metric is not currently supported for ES|QL datasets
-export const legacyMetricConfigSchema = legacyMetricConfigSchemaNoESQL.meta({
-  id: 'visLegacyMetricChart',
-  title: 'Legacy Metric Chart',
-  description:
-    'A single metric value with optional coloring and formatting. Superseded by the Metric chart type.',
-});
+export const legacyMetricConfigSchema = lazySchema(() =>
+  legacyMetricConfigSchemaNoESQL.meta({
+    id: 'visLegacyMetricChart',
+    title: 'Legacy Metric Chart',
+    description:
+      'A single metric value with optional coloring and formatting. Superseded by the Metric chart type.',
+  })
+);
 
 export type LegacyMetricConfig = z.output<typeof legacyMetricConfigSchema>;
 export type LegacyMetricConfigInput = z.input<typeof legacyMetricConfigSchema>;

@@ -37,6 +37,17 @@ import type {
   ProjectNavigationLinks,
 } from '@kbn/core-chrome-browser';
 
+/**
+ * Cross-plugin navigation references collected from a solution nav tree.
+ * @internal
+ */
+export interface NavTreeDependencies {
+  /** Id of the plugin that registered the solution nav tree. */
+  ownerPluginId: string;
+  /** `link` targets referenced by the tree (app ids or deep-link ids). */
+  linkTargets: string[];
+}
+
 /** @internal */
 export type InternalChromeSetup = ChromeSetup;
 
@@ -171,6 +182,22 @@ export interface InternalChromeStart extends ChromeStart {
 
     /** Registered hover lists. Live updates. */
     getRegisteredNavigationLinks$(): Observable<readonly ProjectNavigationLinks[]>;
+
+    /**
+     * Register a solution nav tree so Core can track the cross-plugin `link` references it
+     * declares when nav-dependency collection is enabled. No-op otherwise. Called by the
+     * navigation plugin for every tree that provides an `ownerPluginId`.
+     */
+    registerNavTreeDependencies(
+      ownerPluginId: string,
+      navigationTree$: Observable<NavigationTreeDefinition>
+    ): void;
+
+    /**
+     * Return the latest cross-plugin navigation references collected from all registered solution
+     * nav trees. Empty when collection is disabled. Consumed by the navigation-dependency snapshot.
+     */
+    getNavTreeDependencies(): NavTreeDependencies[];
   };
 
   /** Persistent chrome controls, including getters for Chrome-owned renderers. */
@@ -204,6 +231,9 @@ export interface InternalChromeControls extends ChromeControls {
     get$(): Observable<ReactNode>;
   };
   projectPicker: ChromeControls['projectPicker'] & {
+    get$(): Observable<ReactNode>;
+  };
+  subscriptionBadge: ChromeControls['subscriptionBadge'] & {
     get$(): Observable<ReactNode>;
   };
   userMenu: ChromeControls['userMenu'] & {

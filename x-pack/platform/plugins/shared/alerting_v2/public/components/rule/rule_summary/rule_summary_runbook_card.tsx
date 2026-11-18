@@ -7,12 +7,12 @@
 
 import {
   EuiButtonEmpty,
-  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiMarkdownFormat,
   EuiPanel,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -22,6 +22,10 @@ import React, { useEffect, useState } from 'react';
 import type { RuleSummarySectionProps } from '../types';
 
 const RUNBOOK_PREVIEW_HEIGHT = 172;
+
+const RUNBOOK_TITLE = i18n.translate('xpack.alertingV2.ruleSummary.runbook.title', {
+  defaultMessage: 'Runbook',
+});
 
 export const RuleSummaryRunbookCard: React.FC<RuleSummarySectionProps> = ({ rule }) => {
   const runbook = rule.artifacts?.find((artifact) => artifact.type === 'runbook');
@@ -39,25 +43,25 @@ export const RuleSummaryRunbookCard: React.FC<RuleSummarySectionProps> = ({ rule
   }, [content, contentNode, isExpanded]);
 
   if (!runbook) {
+    // Match the Alert episode flyout Investigation empty state: bordered panel,
+    // "Runbook" title, and subdued body copy — not a large EuiEmptyPrompt.
     return (
-      <EuiEmptyPrompt
-        iconType="documentation"
-        title={
-          <h3>
-            {i18n.translate('xpack.alertingV2.ruleSummary.runbook.emptyTitle', {
-              defaultMessage: 'No runbook',
-            })}
-          </h3>
-        }
-        body={
-          <p>
-            {i18n.translate('xpack.alertingV2.ruleSummary.runbook.emptyBody', {
-              defaultMessage: 'No runbook has been added to this rule yet.',
-            })}
-          </p>
-        }
+      <EuiPanel
+        hasBorder
+        hasShadow={false}
+        paddingSize="m"
         data-test-subj="ruleSummaryRunbookEmpty"
-      />
+      >
+        <EuiTitle size="xxs">
+          <h4>{RUNBOOK_TITLE}</h4>
+        </EuiTitle>
+        <EuiSpacer size="m" />
+        <EuiText size="s" color="subdued">
+          {i18n.translate('xpack.alertingV2.ruleSummary.runbook.emptyDescription', {
+            defaultMessage: 'No runbook available for this rule.',
+          })}
+        </EuiText>
+      </EuiPanel>
     );
   }
 
@@ -68,11 +72,7 @@ export const RuleSummaryRunbookCard: React.FC<RuleSummarySectionProps> = ({ rule
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">
-            <h5>
-              {i18n.translate('xpack.alertingV2.ruleSummary.runbook.title', {
-                defaultMessage: 'Runbook',
-              })}
-            </h5>
+            <h4>{RUNBOOK_TITLE}</h4>
           </EuiTitle>
         </EuiFlexItem>
         {showToggle ? (
@@ -94,7 +94,7 @@ export const RuleSummaryRunbookCard: React.FC<RuleSummarySectionProps> = ({ rule
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       <div
         ref={setContentNode}
         css={

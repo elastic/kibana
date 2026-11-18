@@ -22,6 +22,7 @@ describe('convertSecurityApi', () => {
     source = {
       authc: {
         getCurrentUser: jest.fn(),
+        getPrincipal: jest.fn(),
         getRedactedSessionId: jest.fn(),
         apiKeys: {
           areAPIKeysEnabled: jest.fn(),
@@ -38,7 +39,15 @@ describe('convertSecurityApi', () => {
             invalidate: jest.fn(),
             convert: jest.fn(),
             getInternalCallerAttestationHeaders: jest.fn(),
+            isOwnClientAuthentication: jest.fn(),
+            isExternalApiKey: jest.fn(),
           },
+        },
+      },
+      authz: {
+        uiam: {
+          canViewBillingDetails: jest.fn(),
+          canInviteOrganizationMembers: jest.fn(),
         },
       },
       audit: {
@@ -48,18 +57,21 @@ describe('convertSecurityApi', () => {
       serviceAccounts: {
         isEnabled: jest.fn(),
         create: jest.fn(),
+        delete: jest.fn(),
         bindWorkload: jest.fn(),
         unbindWorkload: jest.fn(),
         getWorkloadBinding: jest.fn(),
+        getWorkloadServiceAccountSummary: jest.fn(),
         withScopedRequestForWorkload: jest.fn(),
       },
       fakeRequestEnricher: jest.fn(),
     };
   });
 
-  it('passes through delegate apiKeys, audit, and getRedactedSessionId', () => {
+  it('passes through delegate apiKeys, authz, audit, and getRedactedSessionId', () => {
     const output = convertSecurityApi(source, workloadTypes);
     expect(output.authc.apiKeys).toBe(source.authc.apiKeys);
+    expect(output.authz).toBe(source.authz);
     expect(output.authc.getRedactedSessionId).toBe(source.authc.getRedactedSessionId);
     expect(output.audit.asScoped).toBe(source.audit.asScoped);
     expect(output.audit.withoutRequest).toBe(source.audit.withoutRequest);
@@ -108,6 +120,18 @@ describe('convertSecurityApi', () => {
 
       expect(source.authc.getCurrentUser).toHaveBeenCalledTimes(1);
       expect(source.authc.getCurrentUser).toHaveBeenCalledWith(request);
+    });
+  });
+
+  describe('getPrincipal', () => {
+    it('delegates directly to the source', () => {
+      const output = convertSecurityApi(source, workloadTypes);
+      const request = httpServerMock.createKibanaRequest();
+
+      output.authc.getPrincipal(request);
+
+      expect(source.authc.getPrincipal).toHaveBeenCalledTimes(1);
+      expect(source.authc.getPrincipal).toHaveBeenCalledWith(request);
     });
   });
 });

@@ -20,13 +20,17 @@ export class UnionType<RTS extends Array<Type<any>>, T> extends Type<T> {
   private readonly typeOptions?: UnionTypeOptions<T>;
 
   constructor(types: RTS, options?: UnionTypeOptions<T>) {
-    let schema = internals.alternatives(types.map((type) => type.getSchema())).match('any');
+    types = [...types] as RTS;
+    options = { ...options };
+    super(() => {
+      let schema = internals.alternatives(types.map((type) => type.getSchema())).match('any');
 
-    if (options?.meta?.id) {
-      schema = schema.id(options.meta.id);
-    }
+      if (options?.meta?.id) {
+        schema = schema.id(options.meta.id);
+      }
 
-    super(schema, options);
+      return schema;
+    }, options);
     this.unionTypes = types;
     this.typeOptions = options;
   }

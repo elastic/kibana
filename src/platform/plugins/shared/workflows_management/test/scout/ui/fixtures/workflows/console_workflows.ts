@@ -506,6 +506,16 @@ steps:
     with:
       duration: 4s
 
+  - name: wait_3
+    type: wait
+    with:
+      duration: 4s
+
+  - name: wait_4
+    type: wait
+    with:
+      duration: 4s
+
   - name: last_step
     type: console
     with:

@@ -46,6 +46,7 @@ const DEFAULT_HOOK_RESULT = {
   maxCountExceeded: false,
   hasActiveAlerts: true,
   error: undefined,
+  mainError: undefined,
 };
 
 const START = '2024-01-01T00:00:00.000Z';
@@ -110,6 +111,131 @@ describe('ServiceFlyoutTransactionsSection', () => {
     expect(onTransactionClick).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'GET /api/orders' })
     );
+  });
+
+  it('notifies onTransactionsChange when items settle', () => {
+    const onTransactionsChange = jest.fn();
+    render(
+      <ServiceFlyoutTransactionsSection
+        {...BASE_PROPS}
+        onTransactionsChange={onTransactionsChange}
+      />
+    );
+
+    expect(onTransactionsChange).toHaveBeenCalledWith(FIXTURE_ITEMS, {
+      isLoading: false,
+      error: undefined,
+      filters: {
+        environment: 'production',
+        start: START,
+        end: END,
+        transactionType: 'request',
+      },
+      isSearchFiltered: false,
+    });
+  });
+
+  it('notifies onTransactionsChange while loading', () => {
+    mockedUseServiceFlyoutTransactionData.mockReturnValue({
+      ...DEFAULT_HOOK_RESULT,
+      isLoading: true,
+      items: [],
+    });
+    const onTransactionsChange = jest.fn();
+    render(
+      <ServiceFlyoutTransactionsSection
+        {...BASE_PROPS}
+        onTransactionsChange={onTransactionsChange}
+      />
+    );
+
+    expect(onTransactionsChange).toHaveBeenCalledWith([], {
+      isLoading: true,
+      error: undefined,
+      filters: {
+        environment: 'production',
+        start: START,
+        end: END,
+        transactionType: 'request',
+      },
+      isSearchFiltered: false,
+    });
+  });
+
+  it('reports the main-statistics error so the host does not treat retained items as settled', () => {
+    const mainError = new Error('main stats failed');
+    mockedUseServiceFlyoutTransactionData.mockReturnValue({
+      ...DEFAULT_HOOK_RESULT,
+      mainError,
+    });
+    const onTransactionsChange = jest.fn();
+    render(
+      <ServiceFlyoutTransactionsSection
+        {...BASE_PROPS}
+        onTransactionsChange={onTransactionsChange}
+      />
+    );
+
+    expect(onTransactionsChange).toHaveBeenCalledWith(FIXTURE_ITEMS, {
+      isLoading: false,
+      error: mainError,
+      filters: {
+        environment: 'production',
+        start: START,
+        end: END,
+        transactionType: 'request',
+      },
+      isSearchFiltered: false,
+    });
+  });
+
+  it('reconciles against the unsearched list when search is client-side', () => {
+    mockedUseServiceFlyoutTransactionData.mockReturnValue({
+      ...DEFAULT_HOOK_RESULT,
+      items: [FIXTURE_ITEMS[0]],
+      presenceItems: FIXTURE_ITEMS,
+      isServerSearch: false,
+    });
+    const onTransactionsChange = jest.fn();
+    render(
+      <ServiceFlyoutTransactionsSection
+        {...BASE_PROPS}
+        onTransactionsChange={onTransactionsChange}
+      />
+    );
+
+    expect(onTransactionsChange).toHaveBeenCalledWith(
+      FIXTURE_ITEMS,
+      expect.objectContaining({ isSearchFiltered: false })
+    );
+  });
+
+  it('marks a server-side search result as unable to prove absence', () => {
+    mockedUseServiceFlyoutTransactionData.mockReturnValue({
+      ...DEFAULT_HOOK_RESULT,
+      items: [FIXTURE_ITEMS[0]],
+      presenceItems: [FIXTURE_ITEMS[0]],
+      isServerSearch: true,
+    });
+    const onTransactionsChange = jest.fn();
+    render(
+      <ServiceFlyoutTransactionsSection
+        {...BASE_PROPS}
+        onTransactionsChange={onTransactionsChange}
+      />
+    );
+
+    expect(onTransactionsChange).toHaveBeenCalledWith([FIXTURE_ITEMS[0]], {
+      isLoading: false,
+      error: undefined,
+      filters: {
+        environment: 'production',
+        start: START,
+        end: END,
+        transactionType: 'request',
+      },
+      isSearchFiltered: true,
+    });
   });
 
   it('renders the Open in APM header link when locators are provided', () => {

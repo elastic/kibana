@@ -1,0 +1,64 @@
+{
+  "sha1": "138024e6d9161de674ab5e45052e36167e58d88f",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "161829e45eb7a24-164e7c978968e04",
+      "title": "Entity analytics new home page - Privileges shows the no-access screen without read access to the entity store",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/tests/new_home_page_privileges.spec.ts",
+        "line": 72,
+        "column": 11
+      }
+    },
+    {
+      "id": "161829e45eb7a24-d9597e6312e8610",
+      "title": "Entity analytics new home page - Privileges leaves out alerts and anomalies, and says why, without read access to them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/tests/new_home_page_privileges.spec.ts",
+        "line": 80,
+        "column": 9
+      }
+    },
+    {
+      "id": "d6a418d97af1165-dc79c66192b7a9b",
+      "title": "Entity analytics new home page loads with the six tiles and the entities grid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/tests/new_home_page.spec.ts",
+        "line": 66,
+        "column": 25
+      }
+    },
+    {
+      "id": "d6a418d97af1165-3853a30d8d6fef8",
+      "title": "Entity analytics new home page a tile filters the grid to its entities, and a second click clears it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/tests/new_home_page.spec.ts",
+        "line": 76,
+        "column": 8
+      }
+    }
+  ]
+}

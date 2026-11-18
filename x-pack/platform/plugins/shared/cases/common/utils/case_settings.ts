@@ -34,7 +34,49 @@ export const getCaseSettings = (owner: string): OwnerCaseSettings => {
 
   return {
     syncAlerts: features.alerts.sync,
-    extractObservables: features.observables.autoExtract,
+    extractObservables: features.observables.autoExtractDefault,
     observablesEnabled: features.observables.enabled,
   };
+};
+
+/**
+ * Returns true when a rule-level `extractObservables` override is meaningful for this owner. Only
+ * owners whose default is to auto-extract can have that default flipped per rule — an owner that
+ * defaults to off (e.g. Stack) never gets the per-rule override, same as an owner that blocks
+ * observables entirely (e.g. Observability). Unknown owners get no override.
+ */
+export const canOverrideExtractObservables = (owner: string): boolean =>
+  Object.hasOwn(OWNER_INFO, owner) &&
+  OWNER_INFO[owner as Owner].features.observables.autoExtractDefault;
+
+/**
+ * Returns true when this owner may store `extractObservables: true`. Known owners follow the same
+ * rule as `canOverrideExtractObservables`, so Stack and Observability are refused. Unlike that
+ * helper, unknown owners are not guarded and may store true.
+ */
+export const canStoreExtractObservablesTrue = (owner: string): boolean =>
+  !Object.hasOwn(OWNER_INFO, owner) || canOverrideExtractObservables(owner);
+
+/**
+ * Resolves the effective `extractObservables` value for a new case, applying the full precedence
+ * chain when the caller omitted the field:
+ *   owner cannot store true (Stack, Observability) → false
+ *   space config present → space config value
+ *   no space config → owner autoExtractDefault
+ *   owner unknown → false
+ *
+ * Pass `spaceExtractObservables` as `undefined` when no configuration exists for the owner.
+ */
+export const resolveExtractObservables = (
+  owner: string,
+  spaceExtractObservables: boolean | undefined
+): boolean => {
+  if (!canStoreExtractObservablesTrue(owner)) {
+    return false;
+  }
+  return (
+    spaceExtractObservables ??
+    OWNER_INFO[owner as Owner]?.features.observables.autoExtractDefault ??
+    false
+  );
 };

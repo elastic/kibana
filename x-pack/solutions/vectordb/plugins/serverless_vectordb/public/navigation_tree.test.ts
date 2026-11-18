@@ -17,6 +17,72 @@ describe('VectorDB navigation tree', () => {
     core.settings.globalClient.get = <T>(_key: string) => false as T;
   });
 
+  it('includes service accounts in Admin and Settings', () => {
+    const { footer } = createNavigationTree({
+      ...core.application,
+      core,
+    });
+    const adminAndSettingsNode = footer?.find((item) => item.id === 'admin_and_settings');
+    const accessSection = adminAndSettingsNode?.children?.find(
+      (item) => item.id === 'settings_access'
+    );
+
+    expect(accessSection?.children).toContainEqual(
+      expect.objectContaining({ link: 'management:service_accounts' })
+    );
+  });
+
+  it('includes Search boost with a New badge next to Index Management', () => {
+    const { body } = createNavigationTree({
+      ...core.application,
+      core,
+    });
+    const dataManagement = body.find((item) => item.title === 'Data management');
+    const indicesSection = dataManagement?.children?.find(
+      (item) => item.title === 'Indices and data streams'
+    );
+
+    expect(indicesSection?.children?.[0]).toEqual(
+      expect.objectContaining({ link: 'management:index_management' })
+    );
+    expect(indicesSection?.children?.[1]).toEqual(
+      expect.objectContaining({ link: 'management:search_boost', badgeType: 'new' })
+    );
+  });
+
+  it('includes only organization-level Cloud links in Admin and Settings > Organization', () => {
+    const { footer } = createNavigationTree({
+      ...core.application,
+      core,
+    });
+    const adminAndSettingsNode = footer?.find((item) => item.id === 'admin_and_settings');
+    const organizationSection = adminAndSettingsNode?.children?.find(
+      (item) => item.id === 'organization'
+    );
+
+    expect(organizationSection?.children).toEqual([
+      expect.objectContaining({ cloudLink: 'billingAndSub' }),
+      expect.objectContaining({ cloudLink: 'userAndRoles' }),
+    ]);
+  });
+
+  it('includes the Monitor performance and Configure Search Power Cloud links in Admin and Settings > Project performance', () => {
+    const { footer } = createNavigationTree({
+      ...core.application,
+      core,
+    });
+    const adminAndSettingsNode = footer?.find((item) => item.id === 'admin_and_settings');
+    const projectPerformanceSection = adminAndSettingsNode?.children?.find(
+      (item) => item.id === 'settings_project_performance'
+    );
+
+    expect(projectPerformanceSection?.children).toEqual([
+      expect.objectContaining({ cloudLink: 'deployment', title: 'Monitor performance' }),
+      expect.objectContaining({ cloudLink: 'searchPower' }),
+      expect.objectContaining({ link: 'management:queryActivity' }),
+    ]);
+  });
+
   it('includes Stack Alerts in Admin and Settings > Alerts and insights', () => {
     const { footer } = createNavigationTree({
       ...core.application,

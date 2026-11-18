@@ -12,6 +12,8 @@ export type {
   FieldRegistrySource,
   FieldRegistryTier,
 } from './types';
+export type { PathNotWritableReason, PathWritability } from './path_writability';
+export { describePathWritability } from './path_writability';
 export { isDerivedPath, isExcludedPath } from './path_rules';
 export {
   getFieldRegistry,
@@ -20,3 +22,5 @@ export {
   getProtectionKeyPathEntries,
   isWritablePath,
 } from './derive_field_registry';
+export type { PolicyFieldSearchHit, PolicyFieldSearchResult } from './field_search';
+export { searchPolicyFields } from './field_search';

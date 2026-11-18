@@ -17,6 +17,10 @@ import type { BaseEsQuery } from '@kbn/cloud-security-posture';
 import { useContext, useMemo } from 'react';
 import { useKibana } from '../../../../../common/lib/kibana';
 import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../../common/utils/execution_context';
+import {
   ENTITY_FIELDS,
   ENTITY_TYPE_FILTER,
   MAX_ENTITIES_TO_LOAD,
@@ -25,6 +29,11 @@ import {
 } from '../constants';
 import { getRuntimeMappingsFromSort, getMultiFieldsSort } from './fetch_utils';
 import { DataViewContext } from '..';
+
+const ENTITIES_TABLE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.HOME_PAGE,
+  'entities_table'
+);
 
 interface UseEntitiesOptions extends BaseEsQuery {
   sort: string[][];
@@ -112,9 +121,12 @@ export function useFetchGridData(options: UseEntitiesOptions) {
         rawResponse,
         rawResponse: { hits },
       } = await lastValueFrom(
-        data.search.search<LatestEntitiesRequest, LatestEntitiesResponse>({
-          params: queryParams as LatestEntitiesRequest['params'],
-        })
+        data.search.search<LatestEntitiesRequest, LatestEntitiesResponse>(
+          {
+            params: queryParams as LatestEntitiesRequest['params'],
+          },
+          { executionContext: ENTITIES_TABLE_CONTEXT }
+        )
       );
 
       return {

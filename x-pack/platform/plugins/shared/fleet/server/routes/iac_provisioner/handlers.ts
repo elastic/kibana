@@ -6,14 +6,19 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { KibanaResponseFactory, SavedObjectsClientContract } from '@kbn/core/server';
+import type { KibanaResponseFactory } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 
 import { iacProvisionerService } from '../../services';
-import type { IacProvisionerRenderIntegration } from '../../services/iac_provisioner';
+import { provisioningCallbackService } from '../../services/provisioning_callback';
+import {
+  buildIacProvisionerIntegrations,
+  isBuildError,
+} from '../../services/iac_provisioner_integrations';
 import { appContextService } from '../../services/app_context';
-import { getPackageInfo } from '../../services/epm/packages';
 import { isIacProvisionerEnabled } from '../../services/utils/iac_provisioner';
+import { isAwsIdentityFederationEnabled } from '../../services/utils/aws_identity_federation';
+import { getProvisioningCallbackAvailability } from '../../services/utils/provisioning_callback_availability';
 import {
   reportIacProvisionerRenderCompleted,
   reportIacProvisionerRenderRequested,
@@ -26,98 +31,15 @@ import {
 import { getErrorMessage } from '../../errors/utils';
 import type { FleetRequestHandler } from '../../types';
 import type { RenderIacTemplateRequestSchema } from '../../types/rest_spec/iac_provisioner';
-import type { IacPolicyTemplateSelection } from '../../../common/types/rest_spec/iac_provisioner';
+import type {
+  CreateProvisioningCallbackRequestSchema,
+  DeleteProvisioningCallbackRequestSchema,
+  GetProvisioningCallbackRequestSchema,
+  ReceiveProvisioningCallbackRequestSchema,
+} from '../../types/rest_spec/provisioning_callback';
+import type { CloudConnectorCallback } from '../../../common/types/models/provisioning_callback';
+import { PROVISIONING_CALLBACK_TOKEN_HEADER } from '../../../common/constants';
 import type { IacProvisionerRenderFlow } from '../../../common/telemetry/iac_provisioner_events';
-
-interface RequestedIntegration {
-  name: string;
-  policyTemplates: IacPolicyTemplateSelection[];
-}
-
-const isBuildError = (
-  result: IacProvisionerRenderIntegration | { errorMessage: string }
-): result is { errorMessage: string } => 'errorMessage' in result;
-
-/**
- * Merges duplicate package entries and unions enabledInputs per policy
- * template, then loads each package and validates that every requested
- * template and input exists on the manifest. The package version is taken
- * from the registry so callers do not have to supply it.
- */
-export const buildIacProvisionerIntegrations = async ({
-  savedObjectsClient,
-  requestedIntegrations,
-}: {
-  savedObjectsClient: SavedObjectsClientContract;
-  requestedIntegrations: RequestedIntegration[];
-}): Promise<IacProvisionerRenderIntegration[] | { errorMessage: string }> => {
-  const templatesByPackage = new Map<string, Map<string, Set<string>>>();
-  for (const { name, policyTemplates } of requestedIntegrations) {
-    const templates = templatesByPackage.get(name) ?? new Map<string, Set<string>>();
-    for (const { name: templateName, enabledInputs } of policyTemplates) {
-      const inputs = templates.get(templateName) ?? new Set<string>();
-      for (const input of enabledInputs) {
-        inputs.add(input);
-      }
-      templates.set(templateName, inputs);
-    }
-    templatesByPackage.set(name, templates);
-  }
-
-  const resolved = await Promise.all(
-    Array.from(templatesByPackage, async ([pkgName, policyTemplates]) => {
-      // Empty pkgVersion resolves to the installed version, falling back to
-      // the latest available: at connector-creation time the package may not
-      // be installed yet. skipArchive: registry info covers everything read
-      // here; without it each request downloads and unpacks the archive.
-      const packageInfo = await getPackageInfo({
-        savedObjectsClient,
-        pkgName,
-        pkgVersion: '',
-        skipArchive: true,
-      });
-
-      const resolvedPolicyTemplates: IacPolicyTemplateSelection[] = [];
-      for (const [templateName, enabledInputSet] of policyTemplates) {
-        const template = (packageInfo.policy_templates ?? []).find(
-          ({ name }) => name === templateName
-        );
-        if (!template) {
-          return {
-            errorMessage: `${pkgName} has no policy template named ${templateName}`,
-          };
-        }
-        const inputs = 'inputs' in template ? template.inputs ?? [] : [];
-        const declaredInputs = new Set(inputs.map(({ type }) => type));
-        const enabledInputs = Array.from(enabledInputSet);
-        const unknown = enabledInputs.filter((type) => !declaredInputs.has(type));
-        if (unknown.length) {
-          return {
-            errorMessage: `${pkgName} policy template ${templateName} has no inputs named ${unknown.join(
-              ', '
-            )}`,
-          };
-        }
-        resolvedPolicyTemplates.push({ name: templateName, enabledInputs });
-      }
-
-      return {
-        name: pkgName,
-        version: packageInfo.version,
-        policyTemplates: resolvedPolicyTemplates,
-      };
-    })
-  );
-
-  const firstError = resolved.find(isBuildError);
-  if (firstError) {
-    return firstError;
-  }
-
-  return resolved.filter(
-    (integration): integration is IacProvisionerRenderIntegration => !isBuildError(integration)
-  );
-};
 
 export const renderIacTemplateHandler: FleetRequestHandler<
   undefined,
@@ -144,13 +66,14 @@ export const renderIacTemplateHandler: FleetRequestHandler<
 
   const startTime = Date.now();
   try {
-    const integrations = await buildIacProvisionerIntegrations({
+    const built = await buildIacProvisionerIntegrations({
       savedObjectsClient: internalSoClient,
       requestedIntegrations,
     });
-    if (!Array.isArray(integrations)) {
-      return response.badRequest({ body: { message: integrations.errorMessage } });
+    if (isBuildError(built)) {
+      return response.badRequest({ body: { message: built.errorMessage } });
     }
+    const { integrations } = built;
 
     reportIacProvisionerRenderRequested({
       flow,
@@ -264,4 +187,169 @@ const mapIacProvisionerRouteError = ({
     statusCode: 500,
     body: { message: unexpectedMessage },
   });
+};
+
+const CALLBACK_NOT_FOUND = { body: { message: 'Callback not found' } };
+
+/**
+ * Records are space-agnostic because the stack calls Kibana without a space. The browser routes
+ * only return records from the space the launch happened in; others read as missing.
+ */
+const getCallbackInSpace = async (
+  id: string,
+  spaceId: string
+): Promise<CloudConnectorCallback | undefined> => {
+  const item = await provisioningCallbackService.get(
+    appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+    id
+  );
+  return item && item.space_id === spaceId ? item : undefined;
+};
+
+const AWS_IDENTITY_FEDERATION_DISABLED = {
+  body: { message: 'AWS identity federation is not enabled' },
+};
+
+/**
+ * Tells the browser whether a launched stack could report back to this Kibana, so it can refuse
+ * the launch with the reason instead of waiting for a report that cannot arrive.
+ */
+export const getProvisioningCallbackAvailabilityHandler: FleetRequestHandler = async (
+  context,
+  request,
+  response
+) => {
+  if (!(await isAwsIdentityFederationEnabled(context))) {
+    return response.notFound(AWS_IDENTITY_FEDERATION_DISABLED);
+  }
+  const { available, kibanaUrl, reason } = getProvisioningCallbackAvailability();
+  return response.ok({
+    body: {
+      available,
+      ...(kibanaUrl ? { kibana_url: kibanaUrl } : {}),
+      ...(reason ? { reason } : {}),
+    },
+  });
+};
+
+export const createProvisioningCallbackHandler: FleetRequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof CreateProvisioningCallbackRequestSchema.body>
+> = async (context, request, response) => {
+  if (!(await isAwsIdentityFederationEnabled(context))) {
+    return response.notFound(AWS_IDENTITY_FEDERATION_DISABLED);
+  }
+  // A public URL the stack cannot be given (not https) is refused, so no token is minted for a
+  // report that cannot arrive. Without a configured public URL there is nothing to check; the
+  // caller supplies the URL to the stack and is responsible for it.
+  const availability = getProvisioningCallbackAvailability();
+  if (!availability.available && availability.kibanaUrl) {
+    return response.customError({
+      statusCode: 412,
+      body: { message: availability.reason ?? 'Kibana cannot be reached at its public URL' },
+    });
+  }
+  const { spaceId } = await context.fleet;
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
+  const { provider, ...identity } = request.body;
+
+  // The type is space-agnostic, hence the internal saved objects client.
+  const { item, token } = await provisioningCallbackService.create(
+    appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+    { provider, createdBy: user?.username, spaceId, identity }
+  );
+
+  return response.ok({ body: { item, token } });
+};
+
+export const getProvisioningCallbackHandler: FleetRequestHandler<
+  TypeOf<typeof GetProvisioningCallbackRequestSchema.params>
+> = async (context, request, response) => {
+  const { spaceId } = await context.fleet;
+  // The poll may apply a report the record holds, which creates the identity; the route
+  // therefore requires the privileges identity creation does.
+  const item = await provisioningCallbackService.poll(
+    appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+    request.params.callbackId,
+    spaceId
+  );
+  if (!item) {
+    return response.notFound(CALLBACK_NOT_FOUND);
+  }
+  return response.ok({ body: { item } });
+};
+
+/**
+ * Retires a record the browser no longer waits on, for example because the identity is being
+ * created by hand. Answers with the record as the stack left it when it had already reported.
+ */
+export const deleteProvisioningCallbackHandler: FleetRequestHandler<
+  TypeOf<typeof DeleteProvisioningCallbackRequestSchema.params>
+> = async (context, request, response) => {
+  const { spaceId } = await context.fleet;
+  const existing = await getCallbackInSpace(request.params.callbackId, spaceId);
+  if (!existing) {
+    return response.notFound(CALLBACK_NOT_FOUND);
+  }
+  const item = await provisioningCallbackService.cancel(
+    appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+    existing.id
+  );
+  if (!item) {
+    return response.notFound(CALLBACK_NOT_FOUND);
+  }
+  return response.ok({ body: { item } });
+};
+
+/**
+ * Called by the stack's Lambda. The route is not authenticated: the only thing that admits the
+ * report is the record's own token, presented in a header and checked by the service.
+ *
+ * The flag is a runtime one, read per request, so the route cannot be left unregistered while
+ * it is off; it answers as a missing route does instead, before any record is looked up.
+ */
+export const receiveProvisioningCallbackHandler: FleetRequestHandler<
+  TypeOf<typeof ReceiveProvisioningCallbackRequestSchema.params>,
+  undefined,
+  TypeOf<typeof ReceiveProvisioningCallbackRequestSchema.body>
+> = async (context, request, response) => {
+  if (!(await isAwsIdentityFederationEnabled(context))) {
+    return response.notFound(AWS_IDENTITY_FEDERATION_DISABLED);
+  }
+  const logger = appContextService
+    .getLogger()
+    .get('IacProvisioner receiveProvisioningCallbackHandler');
+  const header = request.headers[PROVISIONING_CALLBACK_TOKEN_HEADER];
+  const token = typeof header === 'string' ? header : undefined;
+
+  const result = await provisioningCallbackService.receive(
+    appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+    request.params.callbackId,
+    { token, payload: request.body }
+  );
+  // Never log the token.
+  logger.info(
+    `Provisioning callback report [id=${request.params.callbackId}] outcome=${result.outcome}`
+  );
+
+  switch (result.outcome) {
+    case 'received':
+    case 'receiving':
+      // Either way the report is in Kibana's hands; the stack has nothing more to send.
+      return response.ok({ body: { status: result.item.status } });
+    case 'not_found':
+      return response.notFound(CALLBACK_NOT_FOUND);
+    case 'conflict':
+      return response.conflict({
+        body: { message: 'Callback already received with different values' },
+      });
+    case 'gone':
+      return response.customError({
+        statusCode: 410,
+        body: { message: 'Callback is no longer accepting values' },
+      });
+    case 'invalid':
+      return response.badRequest({ body: { message: result.message } });
+  }
 };

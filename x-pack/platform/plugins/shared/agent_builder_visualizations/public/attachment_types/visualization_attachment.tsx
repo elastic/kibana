@@ -42,7 +42,7 @@ export const createVisualizationAttachmentDefinition = (
       const { title } = attachment.data.visualization ?? {};
       return typeof title === 'string' && title.length > 0 ? title : defaultVisualizationLabel;
     },
-    getIcon: () => 'lensApp',
+    getIcon: () => 'productLens',
     getMaxWidth: (attachment) => {
       const { data } = attachment;
       return getVisualizationDimensionsFromLensConfig(data.visualization as Record<string, unknown>)

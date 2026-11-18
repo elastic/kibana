@@ -8,7 +8,7 @@
 import React from 'react';
 import {
   EuiBadge,
-  EuiButtonEmpty,
+  EuiButton,
   EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
@@ -105,31 +105,24 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
             titleSize="xs"
             description={overviewLabels.customInstructionsSubtitle}
             textAlign="left"
-            onClick={canEditAgent ? onOpenEditFlyout : undefined}
-            {...(canEditAgent
-              ? getEbtProps({
-                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
-                  action: AGENT_BUILDER_UI_EBT.action.agentOverview.EDIT_DETAILS,
-                  detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
-                })
-              : {})}
             footer={
               !currentInstructions && canEditAgent ? (
-                <EuiButtonEmpty
+                <EuiButton
                   size="s"
-                  flush="left"
+                  color="text"
+                  iconType="plusCircle"
+                  onClick={onOpenEditFlyout}
+                  {...getEbtProps({
+                    element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                    action: AGENT_BUILDER_UI_EBT.action.agentOverview.EDIT_DETAILS,
+                    detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                  })}
                   data-test-subj="agentOverviewAddInstructionsLink"
                 >
                   {overviewLabels.addInstructionsLink}
-                </EuiButtonEmpty>
+                </EuiButton>
               ) : undefined
             }
-            css={css`
-              height: 100%;
-              .euiCard__content p {
-                color: ${euiTheme.colors.textSubdued};
-              }
-            `}
           >
             {currentInstructions && (
               <>

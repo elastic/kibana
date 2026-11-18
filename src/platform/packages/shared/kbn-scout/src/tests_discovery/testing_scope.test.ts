@@ -144,6 +144,43 @@ describe('criticalScoutFilesTouched', () => {
       ])
     ).toBe(false);
   });
+
+  it('returns false when all changed files are documentation noise (README, *.md, CHANGELOG)', () => {
+    // Noise files inside a critical package must not trigger a full suite run on their own.
+    expect(criticalScoutFilesTouched(['src/platform/packages/shared/kbn-scout/README.md'])).toBe(
+      false
+    );
+    expect(criticalScoutFilesTouched(['README.md', 'docs/CHANGELOG.md'])).toBe(false);
+  });
+
+  it('returns true when a critical source file is mixed with noise', () => {
+    expect(
+      criticalScoutFilesTouched([
+        'src/platform/packages/shared/kbn-scout/src/runner/index.ts',
+        'src/platform/packages/shared/kbn-scout/README.md',
+      ])
+    ).toBe(true);
+  });
+
+  it('returns false for Jest test files inside critical packages', () => {
+    // *.test.ts files cannot affect Playwright test execution — only Jest needs to run.
+    expect(
+      criticalScoutFilesTouched([
+        'src/platform/packages/shared/kbn-scout/src/tests_discovery/affected_modules.test.ts',
+        '.buildkite/pipeline-utils/affected-packages/module_lookup.test.ts',
+        '.buildkite/pipeline-utils/ci-stats/pick_test_group_run_order/selective_testing.test.ts',
+      ])
+    ).toBe(false);
+  });
+
+  it('returns true when a critical source file is mixed with a Jest test file', () => {
+    expect(
+      criticalScoutFilesTouched([
+        'src/platform/packages/shared/kbn-scout/src/runner/index.ts',
+        'src/platform/packages/shared/kbn-scout/src/tests_discovery/affected_modules.test.ts',
+      ])
+    ).toBe(true);
+  });
 });
 
 describe('deriveScoutConfigsForFile', () => {
@@ -471,9 +508,9 @@ describe('resolveScoutTestingScope', () => {
     expect(infoSpy).toHaveBeenCalledWith(expect.stringContaining('dependency-tree mode'));
   });
 
-  it('priorities critical-files over tests-only', () => {
-    // A diff that is BOTH a Scout-tests-only diff AND touches a critical file
-    // should fall through to critical-files (full suite).
+  it('returns full/critical-files when a mixed diff contains a critical source file alongside a Scout spec', () => {
+    // The diff is NOT tests-only (the source file fails isScoutTestsOnlyDiff),
+    // so the critical-files check fires and returns full suite.
     const scope = resolveScoutTestingScope(
       codeChanges([
         'pkg/test/scout/ui/tests/foo.spec.ts',
@@ -484,6 +521,48 @@ describe('resolveScoutTestingScope', () => {
       tmpRoot
     );
     expect(scope).toEqual({ kind: 'full', reason: 'critical-files' });
+  });
+
+  it('returns dependency-tree with no modules for Jest-test-only changes in critical packages', () => {
+    // *.test.ts files are excluded from the Scout module graph in resolve_selective_testing.ts,
+    // so affectedModules is empty — dependency-tree with zero modules selects no configs.
+    const scope = resolveScoutTestingScope(
+      codeChanges(
+        [
+          'src/platform/packages/shared/kbn-scout/src/tests_discovery/affected_modules.test.ts',
+          '.buildkite/pipeline-utils/affected-packages/module_lookup.test.ts',
+        ],
+        [] // @kbn/scout excluded by SCOUT_MODULE_GRAPH_IGNORE in the resolver
+      ),
+      true,
+      log,
+      tmpRoot
+    );
+    expect(scope.kind).toBe('dependency-tree');
+    if (scope.kind === 'dependency-tree') {
+      expect([...scope.affectedModuleIds]).toEqual([]);
+    }
+  });
+
+  it('returns tests-only for Scout spec files inside the kbn-scout package itself', () => {
+    // kbn-scout's own test specs must not be misclassified as critical-files
+    // just because the kbn-scout package appears in CRITICAL_FILES_SCOUT.
+    touch('src/platform/packages/shared/kbn-scout/test/scout/api/parallel.playwright.config.ts');
+    const scope = resolveScoutTestingScope(
+      codeChanges([
+        'src/platform/packages/shared/kbn-scout/test/scout/api/parallel_tests/auth/saml_login.spec.ts',
+      ]),
+      true,
+      log,
+      tmpRoot
+    );
+    expect(scope.kind).toBe('tests-only');
+    if (scope.kind === 'tests-only') {
+      expect([...scope.affectedConfigPaths]).toEqual([
+        'src/platform/packages/shared/kbn-scout/test/scout/api/parallel.playwright.config.ts',
+      ]);
+    }
+    expect(infoSpy).toHaveBeenCalledWith(expect.stringContaining('tests-only fast path'));
   });
 });
 

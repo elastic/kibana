@@ -244,7 +244,7 @@ export const llmSynthesizeBatch = async (
       description: stripMarkdown(result.description),
       tags: result.tags
         .map(String)
-        .filter((t) => !/^T\d{4}(\.\d{3})?$/i.test(t.trim()))
+        .filter((t) => !/^(AML\.)?T\d{4}(\.\d{3})?$/i.test(t.trim()))
         .slice(0, 6),
       recommendations: result.recommendations.map(String).slice(0, 5),
     };

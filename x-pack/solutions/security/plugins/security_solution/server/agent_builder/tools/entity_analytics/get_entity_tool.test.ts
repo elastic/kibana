@@ -908,7 +908,7 @@ describe('getEntityTool', () => {
         );
       });
 
-      it('reports success=true and resultCount=0 when no entity is found', async () => {
+      it('reports success=false and resultCount=0 when no entity is found', async () => {
         (executeEsql as jest.Mock)
           .mockResolvedValueOnce({ columns: [], values: [] })
           .mockResolvedValueOnce({ columns: [], values: [] })
@@ -927,9 +927,9 @@ describe('getEntityTool', () => {
             actionType: 'read',
             entityTypes: ['host'],
             spaceId: 'default',
-            success: true,
+            success: false,
             resultCount: 0,
-            errorMessage: undefined,
+            errorMessage: 'No entity found for id: host:server1',
             userConfirmationOutcome: undefined,
           }
         );

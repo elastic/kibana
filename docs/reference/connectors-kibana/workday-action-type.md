@@ -11,6 +11,10 @@ applies_to:
 
 The Workday connector connects directly to the Workday REST API. It enables AI agents to query workers, organizational structure, time off balances and entries, recruiting pipelines, inbox tasks, and holiday calendars from Workday HCM.
 
+::::{note}
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release.
+::::
+
 ## Overview
 
 The Workday connector uses Workday's REST API with OAuth 2.0 authentication. It supports two grant types:

@@ -8,35 +8,68 @@
 /**
  * Detection Watch Worker settings, owned by the Detection Watch team. Adding a Rule Tuning setting
  * means: add the field to `RuleTuningWorkerExtras` in `detection_watch_settings.schema.yaml`, add
- * its default here, forward it in the Rule Tuning workflow template, and build its control under
- * the Watch page's `custom_settings/rule_tuning/`. Nothing outside Detection-owned code changes.
+ * its default to `RULE_TUNING_WORKER_SETTINGS_DEFAULTS` in
+ * `kbn-workflows/managed/definitions/alertzero/worker_settings_defaults.ts`, forward it in the Rule
+ * Tuning workflow template, bump the definition version, and build its control under the Watch
+ * page's `custom_settings/rule_tuning/`.
  */
 
 import {
-  SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+  RULE_COVERAGE_WORKER_SETTINGS_DEFAULTS,
+  RULE_TUNING_WORKER_SETTINGS_DEFAULTS,
+} from '@kbn/workflows/managed/definitions/alertzero/worker_settings_defaults';
+import {
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-  WATCH_AUTONOMY_LEVELS,
 } from '../../constants';
-import { RuleTuningWorkerExtras } from '../schemas';
+import { RuleCoverageWorkerExtras, RuleTuningWorkerExtras } from '../schemas';
 import type { WorkerSettingsDeclaration } from './types';
 
-/** Default and bounds for Rule Tuning's analysis window, matching the sweep input. */
-export const ANALYSIS_WINDOW_DAYS_DEFAULT = 14;
+const RULE_TUNING_EXTRAS_DEFAULTS = RULE_TUNING_WORKER_SETTINGS_DEFAULTS.extras.defaultValue;
+
+/** Default and bounds for Rule Tuning's analysis window, matching the sweep's analysis_window_days. */
+export const ANALYSIS_WINDOW_DAYS_DEFAULT = RULE_TUNING_EXTRAS_DEFAULTS.analysisWindowDays;
 export const ANALYSIS_WINDOW_DAYS_MIN = 1;
 export const ANALYSIS_WINDOW_DAYS_MAX = 30;
 
+/** Default and bounds for Rule Tuning's FP count threshold, matching the sweep's min_fp_count. */
+export const FP_COUNT_THRESHOLD_DEFAULT = RULE_TUNING_EXTRAS_DEFAULTS.fpCountThreshold;
+export const FP_COUNT_THRESHOLD_MIN = 2;
+export const FP_COUNT_THRESHOLD_MAX = 100;
+
+/** Default and bounds for Rule Tuning's FP rate threshold, matching the sweep's min_fp_rate_pct. */
+export const FP_RATE_THRESHOLD_PCT_DEFAULT = RULE_TUNING_EXTRAS_DEFAULTS.fpRateThresholdPct;
+export const FP_RATE_THRESHOLD_PCT_MIN = 0;
+export const FP_RATE_THRESHOLD_PCT_MAX = 100;
+
 export const RULE_TUNING_DEFAULT_EXTRAS: RuleTuningWorkerExtras = {
-  analysisWindowDays: ANALYSIS_WINDOW_DAYS_DEFAULT,
+  ...RULE_TUNING_EXTRAS_DEFAULTS,
 };
 
 export const RULE_TUNING_SETTINGS: WorkerSettingsDeclaration<RuleTuningWorkerExtras> = {
   workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-  allowedAutonomyLevels: WATCH_AUTONOMY_LEVELS,
-  scheduleInterval: { defaultValue: '2h' },
+  allowedAutonomyLevels: RULE_TUNING_WORKER_SETTINGS_DEFAULTS.allowedAutonomyLevels,
+  scheduleInterval: RULE_TUNING_WORKER_SETTINGS_DEFAULTS.scheduleInterval,
   extras: { schema: RuleTuningWorkerExtras, defaultValue: RULE_TUNING_DEFAULT_EXTRAS },
 };
 
-export const RULE_CREATION_SETTINGS: WorkerSettingsDeclaration = {
-  workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
-  allowedAutonomyLevels: WATCH_AUTONOMY_LEVELS,
+const RULE_COVERAGE_EXTRAS_DEFAULTS = RULE_COVERAGE_WORKER_SETTINGS_DEFAULTS.extras.defaultValue;
+
+export const LOOKBACK_DAYS_DEFAULT = RULE_COVERAGE_EXTRAS_DEFAULTS.lookbackDays;
+export const LOOKBACK_DAYS_MIN = 8;
+export const LOOKBACK_DAYS_MAX = 90;
+
+export const MAX_GAPS_PER_RUN_DEFAULT = RULE_COVERAGE_EXTRAS_DEFAULTS.maxGapsPerRun;
+export const MAX_GAPS_PER_RUN_MIN = 1;
+export const MAX_GAPS_PER_RUN_MAX = 50;
+
+export const RULE_COVERAGE_DEFAULT_EXTRAS: RuleCoverageWorkerExtras = {
+  ...RULE_COVERAGE_EXTRAS_DEFAULTS,
+};
+
+export const RULE_COVERAGE_SETTINGS: WorkerSettingsDeclaration<RuleCoverageWorkerExtras> = {
+  workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+  allowedAutonomyLevels: RULE_COVERAGE_WORKER_SETTINGS_DEFAULTS.allowedAutonomyLevels,
+  scheduleInterval: RULE_COVERAGE_WORKER_SETTINGS_DEFAULTS.scheduleInterval,
+  extras: { schema: RuleCoverageWorkerExtras, defaultValue: RULE_COVERAGE_DEFAULT_EXTRAS },
 };

@@ -65,9 +65,16 @@ describe('EntityResolutionRuleType', () => {
       managed: true,
       enabled: true,
     };
+    const crowdstrike = {
+      id: RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE,
+      kind: RESOLUTION_RULE_KINDS.SAME_FIELD,
+      managed: true,
+      enabled: true,
+    };
 
     expect(createSchema?.validate(windowsSid)).toEqual(windowsSid);
     expect(createSchema?.validate(upn)).toEqual(upn);
+    expect(createSchema?.validate(crowdstrike)).toEqual(crowdstrike);
   });
 
   it('latest schema accepts every current rule id', () => {

@@ -38,7 +38,7 @@ export const productInterceptRegistrationConfig = ({
 }: ProductInterceptRegistrationHandlerParams): Omit<Intercept, 'id'> => {
   const startInterceptStep = {
     id: 'start',
-    title: i18n.translate('productIntercept.prompter.step.start.title', {
+    title: i18n.translate('xpack.productIntercept.prompter.step.start.title', {
       defaultMessage: 'Help us improve {productOffering}',
       values: {
         productOffering,
@@ -47,7 +47,7 @@ export const productInterceptRegistrationConfig = ({
     content: () => (
       <EuiText size="s" key="productInterceptPrompterStartContent">
         <FormattedMessage
-          id="productIntercept.prompter.step.start.content"
+          id="xpack.productIntercept.prompter.step.start.content"
           defaultMessage="We are always looking for ways to improve {productOffering}. Please take a moment to share your feedback with us."
           values={{ productOffering }}
         />
@@ -57,7 +57,7 @@ export const productInterceptRegistrationConfig = ({
 
   const satisfactionInterceptStep = {
     id: 'satisfaction',
-    title: i18n.translate('productIntercept.prompter.step.satisfaction.title', {
+    title: i18n.translate('xpack.productIntercept.prompter.step.satisfaction.title', {
       defaultMessage: 'Overall, how satisfied or dissatisfied are you with {productOffering}?',
       values: {
         productOffering,
@@ -67,13 +67,13 @@ export const productInterceptRegistrationConfig = ({
       return (
         <NPSScoreInput
           lowerBoundHelpText={i18n.translate(
-            'productIntercept.prompter.step.satisfaction.lowerBoundDescriptionText',
+            'xpack.productIntercept.prompter.step.satisfaction.lowerBoundDescriptionText',
             {
               defaultMessage: 'Very dissatisfied',
             }
           )}
           upperBoundHelpText={i18n.translate(
-            'productIntercept.prompter.step.satisfaction.upperBoundDescriptionText',
+            'xpack.productIntercept.prompter.step.satisfaction.upperBoundDescriptionText',
             {
               defaultMessage: 'Very satisfied',
             }
@@ -86,7 +86,7 @@ export const productInterceptRegistrationConfig = ({
 
   const easeInterceptStep = {
     id: 'ease',
-    title: i18n.translate('productIntercept.prompter.step.ease.title', {
+    title: i18n.translate('xpack.productIntercept.prompter.step.ease.title', {
       defaultMessage: 'Overall, how difficult or easy is it to use {productOffering}?',
       values: {
         productOffering,
@@ -96,13 +96,13 @@ export const productInterceptRegistrationConfig = ({
       return (
         <NPSScoreInput
           lowerBoundHelpText={i18n.translate(
-            'productIntercept.prompter.step.ease.lowerBoundDescriptionText',
+            'xpack.productIntercept.prompter.step.ease.lowerBoundDescriptionText',
             {
               defaultMessage: 'Very difficult',
             }
           )}
           upperBoundHelpText={i18n.translate(
-            'productIntercept.prompter.step.ease.upperBoundDescriptionText',
+            'xpack.productIntercept.prompter.step.ease.upperBoundDescriptionText',
             {
               defaultMessage: 'Very easy',
             }
@@ -122,7 +122,7 @@ export const productInterceptRegistrationConfig = ({
         </EuiFlexItem>
         <EuiFlexItem component="span">
           <FormattedMessage
-            id="productIntercept.prompter.step.completion.title"
+            id="xpack.productIntercept.prompter.step.completion.title"
             defaultMessage="Thanks for the feedback!"
           />
         </EuiFlexItem>
@@ -152,7 +152,7 @@ export const productInterceptRegistrationConfig = ({
               <EuiFlexItem>
                 <EuiText size="s">
                   <FormattedMessage
-                    id="productIntercept.prompter.step.completion.body"
+                    id="xpack.productIntercept.prompter.step.completion.body"
                     defaultMessage="Want to help shape the future of Elastic? Sign up to join our research panel!"
                   />
                 </EuiText>
@@ -169,7 +169,7 @@ export const productInterceptRegistrationConfig = ({
                       data-test-subj="productInterceptSurveyLink"
                     >
                       <FormattedMessage
-                        id="productIntercept.prompter.step.completion.participateButton"
+                        id="xpack.productIntercept.prompter.step.completion.participateButton"
                         defaultMessage="Participate"
                       />
                     </EuiButton>
@@ -177,7 +177,7 @@ export const productInterceptRegistrationConfig = ({
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty color="success" onClick={() => onValue(null)}>
                       <FormattedMessage
-                        id="productIntercept.prompter.step.completion.maybeLaterButton"
+                        id="xpack.productIntercept.prompter.step.completion.maybeLaterButton"
                         defaultMessage="Maybe later"
                       />
                     </EuiButtonEmpty>

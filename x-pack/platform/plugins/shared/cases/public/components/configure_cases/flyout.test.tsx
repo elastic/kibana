@@ -364,6 +364,8 @@ describe('CommonFlyout ', () => {
       id: '',
       owner: mockedTestProvidersOwner[0],
       observableTypes: [],
+      extractObservables: true,
+      workflowTags: [],
     };
 
     const renderBody = ({ onChange }: FlyOutBodyProps<TemplateFormProps>) => (

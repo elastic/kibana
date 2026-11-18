@@ -10,10 +10,15 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import { EndpointAppContextService } from './endpoint_app_context_services';
 import {
+  EndpointAppContentServicesNotSetUpError,
+  EndpointAppContentServicesNotStartedError,
+} from './errors';
+import {
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
 } from './mocks';
 import type { ResponseActionsClient } from './services';
+import { SavedObjectsClientFactory } from './services/saved_objects';
 
 // Keep the real `./services` module, but replace the response actions client factory so tests can
 // assert exactly what `getInternalResponseActionsClient()` hands it.
@@ -368,6 +373,55 @@ describe('test endpoint app context services', () => {
         /has not been started/
       );
       expect(responseActionsClientFactoryMock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('cloud and telemetry config accessors', () => {
+    it('returns the setup cloud contract and the started telemetry config provider', () => {
+      const service = new EndpointAppContextService();
+      const setupContract = createMockEndpointAppContextServiceSetupContract();
+      const startContract = createMockEndpointAppContextServiceStartContract();
+      service.setup(setupContract);
+      service.start(startContract);
+
+      expect(service.getCloudSetup()).toBe(setupContract.cloud);
+      expect(service.getTelemetryConfigProvider()).toBe(startContract.telemetryConfigProvider);
+    });
+
+    it('refuses getCloudSetup with the not-set-up guard before setup', () => {
+      const service = new EndpointAppContextService();
+
+      expect(() => service.getCloudSetup()).toThrow(EndpointAppContentServicesNotSetUpError);
+    });
+
+    it('refuses getTelemetryConfigProvider with the not-started guard before start', () => {
+      const service = new EndpointAppContextService();
+      service.setup(createMockEndpointAppContextServiceSetupContract());
+
+      expect(() => service.getTelemetryConfigProvider()).toThrow(
+        EndpointAppContentServicesNotStartedError
+      );
+    });
+  });
+
+  describe('after stop()', () => {
+    it('keeps serving the dependencies that rules and watchers still use while Kibana shuts down', async () => {
+      const service = new EndpointAppContextService();
+      const startContract = createMockEndpointAppContextServiceStartContract();
+      service.setup(createMockEndpointAppContextServiceSetupContract());
+      service.start({
+        ...startContract,
+        experimentalFeatures: {
+          ...startContract.experimentalFeatures,
+          endpointExceptionsMovedUnderManagement: false,
+        },
+      });
+
+      service.stop();
+
+      await expect(service.isEndpointExceptionsPerPolicyEnabled()).resolves.toBe(false);
+      expect(service.getInternalEsClient()).toBe(startContract.esClient);
+      expect(service.savedObjects).toBeInstanceOf(SavedObjectsClientFactory);
     });
   });
 });

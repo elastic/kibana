@@ -27,18 +27,13 @@ create_sync_pr() {
   echo "Differences found. Checking for an existing pull request."
 
   # Skip (and send message) if last week's PR is still open.
-  local existing_pr_title
-  existing_pr_title=$(gh pr list \
-    --search "$pr_title" \
-    --state open \
-    --author "$KIBANA_MACHINE_USERNAME" \
-    --limit 1 \
-    --json title \
-    -q ".[].title")
+  local existing_pr_url
+  existing_pr_url=$(find_open_sync_pr "$pr_title")
 
-  if [ "$existing_pr_title" == "$pr_title" ]; then
+  if [ -n "$existing_pr_url" ]; then
     echo "PR already exists. Notifying Slack and exiting.."
-    _notify_existing_pr "$pr_title" "$slack_key"
+    notify_slack "$slack_key" ":slack: ${pr_title} still open" \
+      "<${existing_pr_url}|${pr_title}> hasn't been merged yet. This week's sync skipped opening a new one, please review/merge the existing PR."
     return 0
   fi
 
@@ -76,15 +71,72 @@ create_sync_pr() {
   fi
 }
 
-# _notify_existing_pr pr_title slack_key
+# find_open_sync_pr pr_title
 #
-# Posts a Slack message via buildkite-agent metadata when
-# KIBANA_SLACK_NOTIFICATIONS_ENABLED is set. Uses a per call slack_key so that
-# multiple syncs skipping in the same build each deliver their own message.
-_notify_existing_pr() {
-  local pr_title="$1" slack_key="$2"
-  local msg="It looks like there is an open \"${pr_title}\" PR that hasn't been merged yet. This week's sync skipped opening a new one — please review/merge the existing PR."
-  if [[ "${KIBANA_SLACK_NOTIFICATIONS_ENABLED:-}" =~ ^(1|true)$ ]]; then
-    buildkite-agent meta-data set "slack:${slack_key}:body" "$msg" >/dev/null 2>&1 || true
+# Prints the URL of the open sync PR titled exactly pr_title, or nothing.
+# Returns gh's status on failure, since callers run it inside $(...) where
+# errexit doesn't apply.
+find_open_sync_pr() {
+  local pr_title="$1" matches title url
+  # Repeated author: qualifiers are ORed; gh's GraphQL search returns nothing for (a OR b) groups.
+  matches=$(gh pr list \
+    --search "\"$pr_title\" in:title author:$KIBANA_MACHINE_USERNAME author:app/elastic-vault-github-plugin-prod" \
+    --state open \
+    --limit 20 \
+    --json title,url \
+    -q '.[] | "\(.title)\t\(.url)"') || return
+
+  while IFS=$'\t' read -r title url; do
+    if [ "$title" == "$pr_title" ]; then
+      echo "$url"
+      return 0
+    fi
+  done <<< "$matches"
+}
+
+# notify_slack step_key step_label message
+#
+# Uploads a no-op step whose own Slack notify posts message to
+# SLACK_NOTIFICATIONS_CHANNEL. Build level notifications only fire for failed
+# builds, and these messages come from passing ones. Uses a per call step_key so
+# that multiple syncs in the same build each deliver their own message.
+notify_slack() {
+  local step_key="$1" step_label="$2" message="$3"
+  local channel="${SLACK_NOTIFICATIONS_CHANNEL:-}"
+
+  if [[ ! ( "${ELASTIC_SLACK_NOTIFICATIONS_ENABLED:-}" =~ ^(1|true)$ || "${KIBANA_SLACK_NOTIFICATIONS_ENABLED:-}" =~ ^(1|true)$ ) || -z "$channel" ]]; then
+    echo "Slack notifications disabled or no channel set, not posting: $message"
+    return 0
   fi
+
+  # The channel goes into generated pipeline YAML, so accept only a plain channel name.
+  if [[ ! "$channel" =~ ^#[A-Za-z0-9_-]+$ ]]; then
+    echo "Refusing to post: SLACK_NOTIFICATIONS_CHANNEL is not a plain channel name."
+    return 1
+  fi
+
+  local notify_file
+  notify_file="$(mktemp -t console-sync-notify.XXXXXX.yml)"
+  {
+    echo 'steps:'
+    echo "  - key: \"${step_key}\""
+    echo "    label: \"${step_label}\""
+    echo "    command: \"echo 'Posted to Slack'\""
+    echo '    agents:'
+    echo '      image: family/kibana-minimal-ubuntu-2604'
+    echo '      imageProject: elastic-images-prod'
+    echo '      provider: gcp'
+    echo '      machineType: n2-standard-2'
+    echo '      preemptible: true'
+    echo '      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c'
+    echo '    notify:'
+    echo '      - slack:'
+    echo '          channels:'
+    echo "            - \"$channel\""
+    echo '          message: |'
+    echo "            ${message}"
+    echo '        if: step.outcome == "passed"'
+  } > "$notify_file"
+
+  buildkite-agent pipeline upload "$notify_file"
 }

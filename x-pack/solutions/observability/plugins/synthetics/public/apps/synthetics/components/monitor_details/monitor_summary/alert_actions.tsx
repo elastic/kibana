@@ -114,23 +114,39 @@ export const useAlertsUrl = ({
   rangeFrom,
   rangeTo,
   monitorId,
+  includeTls,
+  extraKuery,
+  status,
 }: {
   monitorId?: string;
   rangeFrom: string;
   rangeTo: string;
+  includeTls?: boolean;
+  extraKuery?: string;
+  // Observability Alerts defaults the status control to `active`. Overview
+  // passes `all` so recovered alerts remain visible, then restricts untracked
+  // via `kibana.alert.status` in extraKuery.
+  status?: 'all' | 'active' | 'recovered' | 'untracked';
 }) => {
   const { basePath } = useSyntheticsSettingsContext();
 
-  let kuery = 'kibana.alert.rule.category : "Synthetics monitor status" ';
+  let kuery = includeTls
+    ? 'kibana.alert.rule.category : ("Synthetics monitor status" or "Synthetics TLS certificate") '
+    : 'kibana.alert.rule.category : "Synthetics monitor status" ';
 
   if (monitorId) {
     kuery += `AND monitor.id : "${monitorId}"`;
+  }
+
+  if (extraKuery) {
+    kuery += `AND (${extraKuery})`;
   }
 
   return `${basePath}/app/observability/alerts?_a=${rison.encode({
     kuery,
     rangeFrom,
     rangeTo,
+    ...(status ? { status } : {}),
   })}`;
 };
 

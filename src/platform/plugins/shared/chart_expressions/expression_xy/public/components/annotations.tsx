@@ -38,6 +38,7 @@ import type { MergedAnnotation } from '../../common';
 import { AnnotationIcon, hasIcon, Marker, MarkerBody } from '../helpers';
 import { mapVerticalToHorizontalPlacement, LINES_MARKER_SIZE } from '../helpers';
 import { getLineAnnotationChartId } from '../helpers/annotation_click';
+import { getExtraFields } from '../helpers/get_extra_fields';
 
 export interface AnnotationsProps {
   groupedLineAnnotations: MergedAnnotation[];
@@ -74,23 +75,6 @@ const TooltipAnnotationDetails = ({
       ))}
     </div>
   ) : null;
-};
-
-const getExtraFields = (
-  row: PointEventAnnotationRow,
-  formatFactory: FormatFactory,
-  columns: DatatableColumn[] | undefined
-) => {
-  return Object.keys(row)
-    .filter((key) => key.startsWith('field:'))
-    .map((key) => {
-      const columnFormatter = columns?.find((c) => c.id === key)?.meta?.params;
-      return {
-        key,
-        name: key.replace('field:', ''),
-        formatter: columnFormatter && formatFactory(columnFormatter),
-      };
-    });
 };
 
 const DISPLAYED_COUNT_OF_ROWS = 5;

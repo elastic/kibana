@@ -25,9 +25,9 @@ export const deleteIngressCredentialForConnector = async ({
     unsecuredSavedObjectsClient,
     connectorId,
   });
-  const toDelete = keepCredentialId
-    ? credentials.filter((credential) => credential.id !== keepCredentialId)
-    : credentials;
+  const toDelete = credentials.filter(
+    (credential) => !(keepCredentialId && credential.id === keepCredentialId)
+  );
 
   if (toDelete.length === 0) {
     return;

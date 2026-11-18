@@ -39,6 +39,7 @@ export function registerAfterExecutionWorkflowsHook(
     hooks: {
       [HookLifecycle.afterExecution]: {
         mode: HookExecutionMode.nonBlocking,
+        requiresServiceAccountRequest: true,
         handler: (context) =>
           runAfterExecutionWorkflows({
             context,

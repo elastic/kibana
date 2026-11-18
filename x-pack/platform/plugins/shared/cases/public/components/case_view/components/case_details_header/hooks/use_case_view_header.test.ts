@@ -6,14 +6,16 @@
  */
 
 import React from 'react';
-import { act, renderHook } from '@testing-library/react';
+import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
+import { APP_MENU_TEST_SUBJECTS } from '@kbn/app-menu';
 
 import { useCaseViewHeader } from './use_case_view_header';
 import { basicCase } from '../../../../../containers/mock';
-import { TestProviders } from '../../../../../common/mock';
+import { noUpdateCasesPermissions, TestProviders } from '../../../../../common/mock';
 import { useGetCaseConnectors } from '../../../../../containers/use_get_case_connectors';
 import { useDeleteCases } from '../../../../../containers/use_delete_cases';
 import { useShouldDisableStatus } from '../../../../actions/status/use_should_disable_status';
+import { useCasesConfig } from '../../../../../common/lib/kibana';
 import type { CaseUI } from '../../../../../../common';
 
 jest.mock('../../../../../containers/use_get_case_connectors');
@@ -22,6 +24,19 @@ jest.mock('../../../../actions/status/use_should_disable_status');
 jest.mock('../../../../../common/navigation/hooks');
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../use_on_refresh_case_view_page');
+
+const mockCanExecuteWorkflow = jest.fn(() => false);
+
+jest.mock('@kbn/workflows-ui', () => {
+  const actual = jest.requireActual('@kbn/workflows-ui');
+  return {
+    ...actual,
+    useWorkflowsCapabilities: () => ({
+      ...actual.useWorkflowsCapabilities(),
+      canExecuteWorkflow: mockCanExecuteWorkflow(),
+    }),
+  };
+});
 
 const mockDeleteCases = jest.fn();
 const mockOnStatusChanged = jest.fn();
@@ -230,6 +245,22 @@ describe('useCaseViewHeader', () => {
     expect(statusBadge).toBeDefined();
   });
 
+  it('labels severity and status badges with their context for screen readers', () => {
+    const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
+      wrapper,
+    });
+
+    const severityBadge = result.current.badges.find(
+      (b) => b['data-test-subj'] === 'case-view-severity-badge'
+    );
+    const statusBadge = result.current.badges.find(
+      (b) => b['data-test-subj'] === 'case-view-status-badge'
+    );
+
+    expect(severityBadge?.onClickAriaLabel).toBe('Severity: Low');
+    expect(statusBadge?.onClickAriaLabel).toBe('Status: Open');
+  });
+
   it('includes alerts count badge when totalAlerts > 0', () => {
     const caseWithAlerts: CaseUI = { ...basicCase, totalAlerts: 5 };
     const { result } = renderHook(
@@ -374,6 +405,119 @@ describe('useCaseViewHeader', () => {
     expect(result.current.settingsAnchor).toBe(mockElement);
   });
 
+  describe('settings popover anchor', () => {
+    const createOverflowButton = ({ isPressed }: { isPressed: boolean }) => {
+      const button = document.createElement('button');
+      button.setAttribute('data-test-subj', APP_MENU_TEST_SUBJECTS.overflowButton);
+      button.setAttribute('aria-pressed', String(isPressed));
+      document.body.appendChild(button);
+      return button;
+    };
+
+    const createOverflowMenuItem = () => {
+      const popover = document.createElement('div');
+      popover.setAttribute('data-test-subj', APP_MENU_TEST_SUBJECTS.popover);
+      const menuItem = document.createElement('button');
+      popover.appendChild(menuItem);
+      document.body.appendChild(popover);
+      return menuItem;
+    };
+
+    const createInlineButton = () => {
+      const button = document.createElement('button');
+      document.body.appendChild(button);
+      return button;
+    };
+
+    const openSettings = (
+      result: { current: ReturnType<typeof useCaseViewHeader> },
+      triggerElement: HTMLElement
+    ) =>
+      act(() => {
+        const settingsItem = result.current.menu.items!.find((item) => item.id === 'caseSettings');
+        settingsItem?.run?.({ triggerElement, returnFocus: jest.fn() });
+      });
+
+    afterEach(() => {
+      // Unmount the hook first so removing the anchors does not trigger state updates.
+      cleanup();
+      document.body.innerHTML = '';
+    });
+
+    it('anchors to the overflow button whose popover is open when the trigger is in the overflow menu', () => {
+      createOverflowButton({ isPressed: false });
+      const openOverflowButton = createOverflowButton({ isPressed: true });
+      const overflowMenuItem = createOverflowMenuItem();
+
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
+      openSettings(result, overflowMenuItem);
+
+      expect(result.current.isSettingsOpen).toBe(true);
+      expect(result.current.settingsAnchor).toBe(openOverflowButton);
+    });
+
+    it('anchors to the trigger when it is in the overflow menu but no overflow button is open', () => {
+      createOverflowButton({ isPressed: false });
+      const overflowMenuItem = createOverflowMenuItem();
+
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
+      openSettings(result, overflowMenuItem);
+
+      expect(result.current.settingsAnchor).toBe(overflowMenuItem);
+    });
+
+    it('anchors to the trigger when it is rendered inline, even if an overflow popover is open', () => {
+      createOverflowButton({ isPressed: true });
+      const inlineButton = createInlineButton();
+
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
+      openSettings(result, inlineButton);
+
+      expect(result.current.settingsAnchor).toBe(inlineButton);
+    });
+
+    it('keeps the anchor when the settings popover is closed by triggering the action again', () => {
+      const overflowButton = createOverflowButton({ isPressed: true });
+      const inlineButton = createInlineButton();
+
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
+      openSettings(result, createOverflowMenuItem());
+      openSettings(result, inlineButton);
+
+      expect(result.current.isSettingsOpen).toBe(false);
+      expect(result.current.settingsAnchor).toBe(overflowButton);
+    });
+
+    it('keeps the menu config stable when the settings popover opens and closes', () => {
+      const inlineButton = createInlineButton();
+
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
+      const { menu } = result.current;
+
+      openSettings(result, inlineButton);
+      expect(result.current.isSettingsOpen).toBe(true);
+      expect(result.current.menu).toBe(menu);
+
+      openSettings(result, inlineButton);
+      expect(result.current.isSettingsOpen).toBe(false);
+      expect(result.current.menu).toBe(menu);
+    });
+
+    it('closes the settings popover when its anchor is removed from the DOM', async () => {
+      const overflowButton = createOverflowButton({ isPressed: true });
+
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
+      openSettings(result, createOverflowMenuItem());
+      expect(result.current.settingsAnchor).toBe(overflowButton);
+
+      act(() => {
+        overflowButton.remove();
+      });
+
+      await waitFor(() => expect(result.current.isSettingsOpen).toBe(false));
+    });
+  });
+
   it('calls onStatusChanged when status badge item is clicked', () => {
     const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
       wrapper,
@@ -404,5 +548,70 @@ describe('useCaseViewHeader', () => {
     });
 
     expect(mockOnSeverityChanged).toHaveBeenCalledWith('critical');
+  });
+
+  describe('run workflow menu item', () => {
+    const mockUseCasesConfig = useCasesConfig as jest.Mock;
+    const defaultCasesConfig = mockUseCasesConfig();
+
+    const findRunWorkflowItem = (menu: ReturnType<typeof useCaseViewHeader>['menu']) =>
+      menu.items!.find((item) => item.id === 'runWorkflow');
+
+    beforeEach(() => {
+      mockUseCasesConfig.mockReturnValue({ ...defaultCasesConfig, runWorkflowsEnabled: true });
+      mockCanExecuteWorkflow.mockReturnValue(true);
+    });
+
+    afterEach(() => {
+      mockUseCasesConfig.mockReturnValue(defaultCasesConfig);
+      mockCanExecuteWorkflow.mockReturnValue(false);
+    });
+
+    it('includes the run workflow menu item and opens the modal when triggered', () => {
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
+
+      const runWorkflowItem = findRunWorkflowItem(result.current.menu);
+      expect(runWorkflowItem).toEqual(
+        expect.objectContaining({ testId: 'case-run-workflow-button' })
+      );
+      expect(result.current.runWorkflowModal).toBeNull();
+
+      act(() => {
+        runWorkflowItem?.run?.();
+      });
+
+      expect(result.current.runWorkflowModal).not.toBeNull();
+    });
+
+    it('omits the run workflow menu item when running workflows is disabled', () => {
+      mockUseCasesConfig.mockReturnValue(defaultCasesConfig);
+
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
+
+      expect(findRunWorkflowItem(result.current.menu)).toBeUndefined();
+    });
+
+    it('omits the run workflow menu item without update permissions', () => {
+      const noUpdateWrapper = ({ children }: { children: React.ReactNode }) =>
+        React.createElement(
+          TestProviders,
+          { permissions: noUpdateCasesPermissions() } as React.ComponentProps<typeof TestProviders>,
+          children
+        );
+
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
+        wrapper: noUpdateWrapper,
+      });
+
+      expect(findRunWorkflowItem(result.current.menu)).toBeUndefined();
+    });
+
+    it('omits the run workflow menu item when the user cannot execute workflows', () => {
+      mockCanExecuteWorkflow.mockReturnValue(false);
+
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
+
+      expect(findRunWorkflowItem(result.current.menu)).toBeUndefined();
+    });
   });
 });

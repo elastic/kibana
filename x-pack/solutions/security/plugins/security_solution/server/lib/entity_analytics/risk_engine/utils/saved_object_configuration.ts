@@ -286,22 +286,13 @@ export const getConfiguration = async ({
 }: SavedObjectsClientArg & {
   namespace: string;
 }): Promise<RiskEngineConfiguration | null> => {
-  try {
-    const savedObjectConfiguration = await getConfigurationSavedObject({
-      savedObjectsClient,
-      logger,
-      namespace,
-    });
-    const configuration = savedObjectConfiguration?.attributes;
+  const savedObjectConfiguration = await getConfigurationSavedObject({
+    savedObjectsClient,
+    logger,
+    namespace,
+  });
 
-    if (configuration) {
-      return configuration;
-    }
-
-    return null;
-  } catch (e) {
-    return null;
-  }
+  return savedObjectConfiguration?.attributes ?? null;
 };
 
 export const getAllSpaceConfigurations = async ({

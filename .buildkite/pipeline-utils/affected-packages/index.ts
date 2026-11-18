@@ -15,12 +15,13 @@ export * from './const.ts';
 export * from './utils.ts';
 export { listChangedFiles } from './strategy_git.ts';
 export { getAffectedProjectsMoon } from './strategy_moon.ts';
+export { queryMoonTestSelection } from './moon_test_tasks.ts';
 
 export interface AffectedPackagesConfig {
   strategy?: 'git' | 'moon';
   includeDownstream?: boolean;
   /** Glob patterns for changed files to exclude before module resolution (git strategy only). */
-  ignorePatterns?: string[];
+  ignorePatterns?: readonly string[];
   ignoreUncategorizedChanges?: boolean;
   /** Classify these paths instead of running git diff. */
   changedFiles?: string[];

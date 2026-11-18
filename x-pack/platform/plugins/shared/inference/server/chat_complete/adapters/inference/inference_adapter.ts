@@ -7,7 +7,11 @@
 
 import { defer, identity } from 'rxjs';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
-import { isNativeFunctionCallingSupported, handleConnectorStreamResponse } from '../../utils';
+import {
+  isNativeFunctionCallingSupported,
+  handleConnectorStreamResponse,
+  pickConnectorTelemetryForConnector,
+} from '../../utils';
 import type { InferenceConnectorAdapter } from '../../types';
 import { parseInlineFunctionCalls } from '../../simulated_function_calling';
 import { processOpenAIStream, emitTokenCountEstimateIfMissing } from '../openai';
@@ -44,6 +48,7 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
       temperature,
       reasoning,
       modelName,
+      logger,
     });
 
     return defer(() => {
@@ -53,7 +58,9 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
           body: request,
           signal: abortSignal,
           ...(metadata?.connectorTelemetry
-            ? { telemetryMetadata: metadata.connectorTelemetry }
+            ? {
+                telemetryMetadata: pickConnectorTelemetryForConnector(metadata.connectorTelemetry),
+              }
             : {}),
           ...(typeof timeout === 'number' && isFinite(timeout) ? { timeout } : {}),
         },

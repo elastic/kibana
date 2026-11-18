@@ -9,19 +9,19 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const NAME = i18n.translate('xpack.stackConnectors.workflows.title', {
+export const NAME = i18n.translate('workflows.workflows.title', {
   defaultMessage: 'Workflows',
 });
 
 export const WORKFLOWS_MANAGEMENT_URL_REQUIRED = i18n.translate(
-  'xpack.stackConnectors.workflows.error.requiredWorkflowsManagementUrlText',
+  'workflows.workflows.error.requiredWorkflowsManagementUrlText',
   {
     defaultMessage: 'Workflows Management URL is required.',
   }
 );
 
 export const INVALID_URL = (url: string, err: string) =>
-  i18n.translate('xpack.stackConnectors.workflows.error.invalidUrlErrorMessage', {
+  i18n.translate('workflows.workflows.error.invalidUrlErrorMessage', {
     defaultMessage: 'Invalid URL {url}. Error: {err}',
     values: {
       url,
@@ -30,7 +30,7 @@ export const INVALID_URL = (url: string, err: string) =>
   });
 
 export const PASSWORD_REQUIRED_WHEN_USER_PROVIDED = i18n.translate(
-  'xpack.stackConnectors.workflows.error.passwordRequiredWhenUserProvidedText',
+  'workflows.workflows.error.passwordRequiredWhenUserProvidedText',
   {
     defaultMessage: 'Password is required when username is provided.',
   }

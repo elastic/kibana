@@ -13,6 +13,7 @@ import { BehaviorSubject } from 'rxjs';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { coreContextMock } from '@kbn/core-base-browser-mocks';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
@@ -42,6 +43,7 @@ export const createMockChromeComponentsDeps = () => {
     customBranding: {
       customBranding$: new BehaviorSubject<CustomBranding>({}),
     },
+    notifications: notificationServiceMock.createStartContract(),
   } satisfies ChromeComponentsDeps;
 };
 

@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
-import type { ProposalChartsSummaryResponse } from '@kbn/agentic-investigations-plugin/common';
+import type { ProposalChartsSummaryResponse } from '@kbn/proposals-common';
 import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summary';
 import { ProposalsTrendChartRow } from './proposals_trend_chart_row';
 
@@ -26,15 +26,18 @@ jest.mock('./trend_sparkline', () => ({
     series,
     panelId,
     bucketMinutes,
+    yMax,
   }: {
     series: Array<{ x: number; y: number }>;
     panelId: string;
     bucketMinutes: number;
+    yMax: number;
   }) => (
     <div
       data-test-subj={`sparkline-${panelId}`}
       data-series={JSON.stringify(series)}
       data-bucket-minutes={bucketMinutes}
+      data-y-max={yMax}
     />
   ),
 }));
@@ -42,6 +45,7 @@ jest.mock('./trend_sparkline', () => ({
 const mockUseProposalChartsSummary = useProposalChartsSummary as jest.Mock;
 
 const summary: ProposalChartsSummaryResponse = {
+  currentOpen: 10,
   buckets: [
     { timestamp: 1_700_000_000_000, counts: { respond: 1, investigate: 0, configure: 4 } },
     { timestamp: 1_700_001_800_000, counts: { respond: 5, investigate: 3, configure: 2 } },
@@ -88,6 +92,30 @@ describe('ProposalsTrendChartRow', () => {
     );
   });
 
+  it('should give every sparkline the same peak, taken across all panels and buckets', () => {
+    setup();
+    // respond peaks at 5 in the last bucket; configure and investigate never exceed it.
+    for (const id of ['respond', 'investigate', 'configure']) {
+      expect(screen.getByTestId(`sparkline-${id}`)).toHaveAttribute('data-y-max', '5');
+    }
+  });
+
+  it('should scale to a historical peak, not the latest counts', () => {
+    setup({
+      data: {
+        currentOpen: 3,
+        buckets: [
+          { timestamp: 1_700_000_000_000, counts: { respond: 1, investigate: 9, configure: 2 } },
+          { timestamp: 1_700_001_800_000, counts: { respond: 2, investigate: 0, configure: 1 } },
+        ],
+      },
+    });
+    // investigate peaked at 9 an hour ago and is 0 now; every latest count is below 9.
+    for (const id of ['respond', 'investigate', 'configure']) {
+      expect(screen.getByTestId(`sparkline-${id}`)).toHaveAttribute('data-y-max', '9');
+    }
+  });
+
   it('should pass the whole window to each sparkline, oldest bucket first', () => {
     setup();
 
@@ -112,7 +140,9 @@ describe('ProposalsTrendChartRow', () => {
   });
 
   it('should count a category absent from the bucket as zero rather than blank', () => {
-    setup({ data: { buckets: [{ timestamp: 1_700_000_000_000, counts: { respond: 2 } }] } });
+    setup({
+      data: { currentOpen: 2, buckets: [{ timestamp: 1_700_000_000_000, counts: { respond: 2 } }] },
+    });
 
     expect(screen.getByTestId('alertZeroProposalsTrendChartCount-configure')).toHaveTextContent(
       '0'

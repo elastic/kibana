@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import type { GenAiFields } from '@kbn/apm-ui-shared';
+import type { GenAiFields } from '@kbn/genai-common';
 import { SpanDetail } from './span_detail';
 import type { SpanNode } from './types';
 

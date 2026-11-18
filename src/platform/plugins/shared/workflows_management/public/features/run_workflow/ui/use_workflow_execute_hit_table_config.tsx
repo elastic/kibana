@@ -13,7 +13,6 @@ import React, { useCallback, useMemo } from 'react';
 import { buildDataTableRecordList } from '@kbn/discover-utils';
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 import type {
-  DataTableColumnsMeta,
   UnifiedDataTableRenderCustomToolbar,
   UnifiedDataTableRenderCustomToolbarProps,
 } from '@kbn/unified-data-table';
@@ -35,12 +34,6 @@ export type {
   UseWorkflowExecuteHitTableConfigOptions,
   UseWorkflowExecuteHitTableConfigResult,
 } from './use_workflow_execute_hit_table_config_types';
-
-const buildColumnsMetaFromFieldNames = (fieldNames: readonly string[]): DataTableColumnsMeta =>
-  fieldNames.reduce<DataTableColumnsMeta>((meta, fieldName) => {
-    meta[fieldName] = { type: 'string' };
-    return meta;
-  }, {});
 
 export function useWorkflowExecuteHitTableConfig(
   options: UseWorkflowExecuteHitTableConfigOptions
@@ -97,11 +90,6 @@ export function useWorkflowExecuteHitTableConfig(
     onTableSortChange,
   });
 
-  const columnsMeta = useMemo(
-    () => buildColumnsMetaFromFieldNames(defaultColumnsList),
-    [defaultColumnsList]
-  );
-
   const unifiedDataTableServices = useMemo(
     () => buildUnifiedDataTableServices(services),
     [services]
@@ -156,7 +144,6 @@ export function useWorkflowExecuteHitTableConfig(
     showTimeColumn,
     sort,
     dataTableRows,
-    columnsMeta,
     externalCustomRenderers: externalCustomRenderers ?? {},
     customGridColumnsConfiguration,
     unifiedDataTableServices,

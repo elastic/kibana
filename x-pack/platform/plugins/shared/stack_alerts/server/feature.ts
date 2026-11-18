@@ -10,12 +10,12 @@ import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { TRANSFORM_RULE_TYPE } from '@kbn/transform-plugin/common';
 import {
+  ES_QUERY_ID as ElasticsearchQuery,
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   STACK_ALERTS_FEATURE_ID,
   STACK_ALERTS_ONLY_FEATURE_ID,
 } from '@kbn/rule-data-utils';
-import { ES_QUERY_ID as ElasticsearchQuery } from '@kbn/rule-data-utils';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { ID as IndexThreshold } from './rule_types/index_threshold/rule_type';
 import { GEO_CONTAINMENT_ID as GeoContainment } from './rule_types/geo_containment';
@@ -103,7 +103,7 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
         all: [],
         read: [],
       },
-      api: ['rac'],
+      api: ['rac', 'bulkGetUserProfiles'],
       ui: [],
     },
     read: {
@@ -124,7 +124,7 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
         all: [],
         read: [],
       },
-      api: ['rac'],
+      api: ['rac', 'bulkGetUserProfiles'],
       ui: [],
     },
   },

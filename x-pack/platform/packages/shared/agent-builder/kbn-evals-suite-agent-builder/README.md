@@ -27,26 +27,11 @@ telemetry.tracing.exporters:
 
 ### Configure AI Connectors
 
-Configure your AI connectors in `kibana.dev.yml` or via the `KIBANA_TESTING_AI_CONNECTORS` environment variable:
+Define the models to evaluate as inference endpoint definitions in the `KIBANA_TESTING_INFERENCE_ENDPOINTS` environment variable (raw or base64-encoded JSON; `node scripts/evals init` can generate it for EIS and OpenRouter):
 
-```yaml
-# In kibana.dev.yml
-xpack.actions.preconfigured:
-  my-connector:
-    name: My Test Connector
-    actionTypeId: .inference
-    config:
-      provider: openai
-      taskType: completion
-    secrets:
-      apiKey: <your-api-key>
-```
+Alternatively, declare a preconfigured `.inference` connector in `kibana.dev.yml`.
 
-Or via environment variable:
-
-```bash
-export KIBANA_TESTING_AI_CONNECTORS='{"my-connector":{"name":"My Test Connector","actionTypeId":".inference","config":{"provider":"openai","taskType":"completion"},"secrets":{"apiKey":"your-api-key"}}}'
-```
+See [Connector definitions and inference endpoints](../../kbn-evals/README.md#connector-definitions-and-inference-endpoints) for the full shape.
 
 ## Running AgentBuilder Evaluations
 
@@ -78,33 +63,6 @@ The following options are available to load Knowledge bases:
 A. Restore the [snapshot](https://www.elastic.co/docs/deploy-manage/tools/snapshot-and-restore/ec-gcs-snapshotting) from gcs-bucket, credentials are stored in secret's vault. **Fastest, recommended when restoring snapshot is available, e.g. ECH**
 
 B. Use the ETL pipeline from the workchat-solution-ds-experiments (internal) repo. **Recommended when restoring snapshot is not an option, e.g. serverless**. Estimated time: ~30 minutes (Serverless Cloud) or ~1 hour (local).
-
-C. Use Huggingface Loader in Kibana: Follow the steps below to load data into Elasticsearch using the HuggingFace dataset loader:
-
-```bash
-# Load domain specific knowledge base
-HUGGING_FACE_ACCESS_TOKEN=<your-token> \
-node --require ./src/setup_node_env/index.js \
-  x-pack/platform/packages/shared/kbn-ai-tools-cli/scripts/hf_dataset_loader.ts \
-  --datasets "agent_builder/{REPLACE_WITH_A_KNOWLEDGE_BASE}/*" \
-  --clear \
-  --kibana-url http://elastic:changeme@localhost:5620
-```
-
-KNOWLEDGE BASE OPTIONS
-
-1. Airline loyalty domain: `airline_loyalty_program_kb`
-2. Customer support domain: `customer_support_kb`
-3. Retail domain: `global_electronics_retailer_kb`
-4. Healthcare survey domain: `hcahps_patient_survey_kb`
-5. Elasticsearch customer support knowledge articles: `elastic_customer_support_kb`
-
-**Note**: You need to be a member of the Elastic organization on HuggingFace to access AgentBuilder datasets. Sign up with your `@elastic.co` email address.
-
-**Note**: First download of the datasets may take a while, because of the embedding generation for `semantic_text` fields in some of the datasets.
-Once done, documents with embeddings will be cached and re-used on subsequent data loads.
-
-For more information about HuggingFace dataset loading, refer to the [HuggingFace Dataset Loader documentation](../../kbn-ai-tools-cli/src/hf_dataset_loader/README.md).
 
 ### Run Evaluations
 

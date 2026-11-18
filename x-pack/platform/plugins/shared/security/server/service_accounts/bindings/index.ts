@@ -11,13 +11,10 @@ export {
   SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
 } from './binding_saved_object';
 export type { WorkloadBindingAttributes, WorkloadBindingCoordinates } from './binding_saved_object';
-export { resolveWorkloadBinder } from './resolve_workload_binder';
+export { bestEffortUserProfileIdResolver, resolveWorkloadBinder } from './resolve_workload_binder';
 export { WorkloadBindingStore } from './workload_binding_store';
 export type { WorkloadBindingStoreOptions } from './workload_binding_store';
-export {
-  createNotImplementedWorkloadBindings,
-  ServiceAccountWorkloadBindings,
-} from './workload_bindings';
+export { ServiceAccountWorkloadBindings } from './workload_bindings';
 export type {
   ServiceAccountWorkloadBindingsApi,
   ServiceAccountWorkloadBindingsOptions,

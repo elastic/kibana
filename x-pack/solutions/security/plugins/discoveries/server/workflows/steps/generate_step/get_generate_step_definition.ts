@@ -50,7 +50,9 @@ export const getGenerateStepDefinition = ({
 
         const {
           additional_context: additionalContext,
+          aggregate_by: aggregateBy,
           api_config: apiConfig,
+          plugin_id: pluginId,
           replacements,
           size,
         } = context.input;
@@ -116,6 +118,11 @@ export const getGenerateStepDefinition = ({
           savedObjectsClient,
           size,
           sourceAlerts: alerts,
+          // Only a caller that named `plugin_id` tags the model calls; otherwise they stay untagged.
+          // The workflow template can hand an unset input over as an empty string.
+          ...(pluginId
+            ? { telemetryMetadata: { pluginId, ...(aggregateBy ? { aggregateBy } : {}) } }
+            : {}),
         });
 
         context.logger.info(

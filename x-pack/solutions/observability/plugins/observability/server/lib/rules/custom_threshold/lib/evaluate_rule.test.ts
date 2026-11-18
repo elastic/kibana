@@ -98,6 +98,34 @@ describe('evaluateRule', () => {
     expect(evaluationKeys).not.toContain(UNGROUPED_FACTORY_KEY);
   });
 
+  it('rebuilds the grouping of a reinjected missing group from its bucketKey', async () => {
+    mockedGetData.mockResolvedValue({});
+
+    mockedCheckMissingGroups.mockResolvedValue([
+      { key: 'service-a,host-a', bucketKey: { groupBy0: 'service-a', groupBy1: 'host-a' } },
+    ]);
+
+    const results = await evaluateRule(
+      esClient,
+      { ...baseParams, groupBy: ['service.name', 'host.name'] },
+      'test-*',
+      undefined,
+      '@timestamp',
+      100,
+      true,
+      logger,
+      { start: new Date().toISOString(), end: new Date().toISOString() },
+      esQueryConfig
+    );
+
+    const evaluation = results[0].evaluations['service-a,host-a'];
+    expect(evaluation.isNoData).toBe(true);
+    expect(evaluation.flattenGrouping).toEqual({
+      'service.name': 'service-a',
+      'host.name': 'host-a',
+    });
+  });
+
   it('preserves the * entry for total no-data (e.g. 0 successful shards) when there are no missing groups', async () => {
     mockedGetData.mockResolvedValue({
       [UNGROUPED_FACTORY_KEY]: {

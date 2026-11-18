@@ -34,7 +34,6 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { MlPluginStart } from '@kbn/ml-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
-import type { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-shared-ui';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
@@ -91,7 +90,6 @@ export interface PluginsStart {
   ml?: MlPluginStart;
   navigation: NavigationPublicPluginStart;
   searchNavigation: SearchNavigationPluginStart;
-  searchPlayground?: SearchPlaygroundPluginStart;
   security?: SecurityPluginStart;
   share?: SharePluginStart;
   spaces?: SpacesPluginStart;
@@ -300,13 +298,14 @@ export class EnterpriseSearchPlugin implements Plugin {
     docLinks.setDocLinks(core.docLinks);
 
     import('./navigation_tree').then(({ getNavigationTreeDefinition }) => {
-      return plugins.navigation.addSolutionNavigation(
-        getNavigationTreeDefinition({
+      return plugins.navigation.addSolutionNavigation({
+        ...getNavigationTreeDefinition({
           core,
           dynamicItems$: this.sideNavDynamicItems$,
           isCloudEnabled: plugins.cloud?.isCloudEnabled,
-        })
-      );
+        }),
+        ownerPluginId: 'enterpriseSearch',
+      });
     });
 
     this.licenseSubscription = plugins.licensing?.license$.subscribe((license) => {

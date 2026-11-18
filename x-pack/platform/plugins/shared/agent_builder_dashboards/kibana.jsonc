@@ -13,9 +13,9 @@
       "agentBuilder",
       "dashboard",
       "dashboardMarkdown",
+      "embeddable",
       "data",
       "agentBuilderSml",
-      "files",
       "share",
       "uiActions",
       "unifiedSearch"

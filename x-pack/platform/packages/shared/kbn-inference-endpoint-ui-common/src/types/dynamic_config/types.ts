@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { TASK_SETTINGS, SERVICE_SETTINGS } from '../../constants';
+import type { ConfigProperties, ConfigValue, FieldsConfiguration } from '@kbn/inference-common';
 import { type ServiceProviderKeys } from '../../constants';
-import type { FieldsConfiguration, Map } from '../types';
 
+export { FieldType, type ConfigProperties, type ConfigValue } from '@kbn/inference-common';
 export interface SelectOption {
   label: string;
   value: string;
@@ -20,16 +20,6 @@ export interface Dependency {
   value: string | number | boolean | null;
 }
 
-export enum FieldType {
-  STRING = 'str',
-  INTEGER = 'int',
-  BOOLEAN = 'bool',
-  MAP = 'map',
-  LIST = 'list',
-}
-
-export type ConfigValue = string | number | boolean | null | Map | string[];
-
 export interface ConfigCategoryProperties {
   label: string;
   order: number;
@@ -39,18 +29,6 @@ export interface ConfigCategoryProperties {
 export interface Validation {
   constraint: string | number;
   type: string;
-}
-
-export interface ConfigProperties {
-  default_value: ConfigValue;
-  description: string | null;
-  label: string;
-  required: boolean;
-  sensitive: boolean;
-  updatable: boolean;
-  type: FieldType;
-  supported_task_types: string[];
-  location?: typeof SERVICE_SETTINGS | typeof TASK_SETTINGS;
 }
 
 interface ConfigEntry extends ConfigProperties {

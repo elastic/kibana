@@ -41,6 +41,10 @@ export const baseProposalId = (hunkId: string): string => {
  * are reverted first (restoring the model to its pre-proposal state) so
  * that the new diff is computed against the user's original content and
  * applied with correct line coordinates.
+ *
+ * While the editor is read-only, the bridge holds the latest proposal instead
+ * of showing it, because the user cannot save it. `applyDeferred` shows it
+ * once the editor is editable again.
  */
 export class AttachmentBridge {
   private static readonly PROCESSED_PROPOSALS_CAP = 500;
@@ -55,6 +59,9 @@ export class AttachmentBridge {
   private onProposalReceived:
     | ((params: { proposalId: string; toolId: string; workflowId?: string }) => void)
     | undefined;
+  private isReadOnly: () => boolean = () => false;
+  private onProposalDeferred: (() => void) | undefined;
+  private deferredPayload: WorkflowYamlChangedPayload | null = null;
   private attachmentId: string | undefined;
   private workflowId: string | undefined;
   private conversationId: string | undefined;
@@ -83,6 +90,10 @@ export class AttachmentBridge {
         toolId: string;
         workflowId?: string;
       }) => void;
+      /** Read on every proposal; while true, the proposal waits for `applyDeferred`. */
+      isReadOnly?: () => boolean;
+      /** Called when the bridge holds a proposal because the editor is read-only. */
+      onProposalDeferred?: () => void;
     }
   ): void {
     this.proposalManager = proposalManager;
@@ -90,6 +101,8 @@ export class AttachmentBridge {
     this.tracker = tracker;
     this.onError = options.onError ?? (() => {});
     this.onProposalReceived = options.onProposalReceived;
+    this.isReadOnly = options.isReadOnly ?? (() => false);
+    this.onProposalDeferred = options.onProposalDeferred;
     this.attachmentId = options.attachmentId;
     this.workflowId = options.workflowId;
     this.getChatEvents$ = options.getChatEvents$;
@@ -144,6 +157,19 @@ export class AttachmentBridge {
     });
   }
 
+  /** True while the bridge holds a proposal for a read-only editor. */
+  hasDeferred(): boolean {
+    return this.deferredPayload !== null;
+  }
+
+  /** Shows the proposal held while the editor was read-only. */
+  applyDeferred(): void {
+    const payload = this.deferredPayload;
+    if (!payload || this.isReadOnly()) return;
+    this.deferredPayload = null;
+    this.applyPayload(payload);
+  }
+
   stop(): void {
     this.subscription?.unsubscribe();
     this.subscription = null;
@@ -153,6 +179,9 @@ export class AttachmentBridge {
     this.tracker = null;
     this.editorRef = null;
     this.processedProposals.clear();
+    this.deferredPayload = null;
+    this.isReadOnly = () => false;
+    this.onProposalDeferred = undefined;
     this.attachmentId = undefined;
     this.workflowId = undefined;
     this.conversationId = undefined;
@@ -160,10 +189,9 @@ export class AttachmentBridge {
   }
 
   private handleYamlChanged(payload: WorkflowYamlChangedPayload): void {
-    const manager = this.proposalManager;
-    if (!manager || !this.tracker) return;
+    if (!this.proposalManager || !this.tracker) return;
 
-    const { proposalId, beforeYaml, afterYaml, attachmentVersion, workflowId, toolId } = payload;
+    const { proposalId, workflowId } = payload;
 
     // Secondary guard on top of the per-conversation scope: even within one
     // conversation, a payload for a different saved workflow must be dropped.
@@ -183,6 +211,21 @@ export class AttachmentBridge {
     }
     this.processedProposals.add(proposalId);
 
+    if (this.isReadOnly()) {
+      // Each proposal holds the full YAML, so the latest one replaces any earlier one.
+      this.deferredPayload = payload;
+      this.onProposalDeferred?.();
+      return;
+    }
+
+    this.applyPayload(payload);
+  }
+
+  private applyPayload(payload: WorkflowYamlChangedPayload): void {
+    const manager = this.proposalManager;
+    if (!manager || !this.tracker) return;
+
+    const { proposalId, beforeYaml, afterYaml, attachmentVersion, workflowId, toolId } = payload;
     const resolvedToolId = toolId ?? 'unknown';
 
     this.tracker.setRecord({

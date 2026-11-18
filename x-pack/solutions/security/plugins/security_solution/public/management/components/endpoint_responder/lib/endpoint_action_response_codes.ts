@@ -82,6 +82,15 @@ const CODES = Object.freeze({
     { defaultMessage: 'Not enough free disk space to process the action' }
   ),
 
+  /** file is locked by the OS and could not be read in full. On Windows, `--force` reads it from a volume snapshot */
+  'ra_get-file_error_file-locked': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.getFile.fileLocked',
+    {
+      defaultMessage:
+        'The file is locked by the operating system and could not be read in full. On Windows, the --force parameter reads a locked file from a volume snapshot',
+    }
+  ),
+
   // -----------------------------------------------------------------
   // SUSPEND-PROCESS CODES
   // -----------------------------------------------------------------
@@ -186,6 +195,14 @@ const CODES = Object.freeze({
   'ra_kill-process_error_failure': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.killProcess.failure',
     { defaultMessage: 'Failed to kill the process' }
+  ),
+
+  'ra_kill-process_error_partial-descendants': i18n.translate(
+    'xpack.securitySolution.endpointActionResponseCodes.killProcess.failurePartialDescendants',
+    {
+      defaultMessage:
+        'Failed to kill the provided process, but some descendant processes were killed',
+    }
   ),
 
   // ---------------[ Codes for kill-process descendant processes ]------------ \\

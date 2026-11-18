@@ -12,7 +12,7 @@ import {
   SERVICE_SETTINGS_SESSION_KEY,
   type ServiceSettingsPersistedState,
 } from '../../service_settings_step/use_service_settings';
-import { getOnboardingSessionKey } from '../../../onboarding_session_storage';
+import { getOnboardingSessionKey } from '../../../core/onboarding_session_storage';
 import { getManagedIntegrationSummaryFields } from './managed_integration_summary';
 import { getAgentBasedSummaryFields } from './agent_based_summary';
 import { useAgentPolicySummary } from './use_agent_policy_summary';

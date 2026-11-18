@@ -6,8 +6,8 @@
  */
 
 import React, { useState } from 'react';
-import { useService } from '@kbn/core-di-browser';
-import { i18n } from '@kbn/i18n';
+import { CoreStart, useService } from '@kbn/core-di-browser';
+import { useFetchSourceRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_source_rule';
 import { useFetchRule } from '../../../../hooks/use_fetch_rule';
 import { useDeleteRule } from '../../../../hooks/use_delete_rule';
 import { useToggleRuleEnabled } from '../../../../hooks/use_toggle_rule_enabled';
@@ -18,42 +18,56 @@ import type { RuleApiResponse } from '../../../../services/rules_api';
 import { DeleteConfirmationModal } from '../../modals/delete_confirmation_modal';
 import { UpdateApiKeyConfirmationModal } from '../../modals/update_api_key_confirmation_modal';
 import { useRuleChangeHistoryModal } from '../../modals/change_history';
-import { EntityNotFoundFlyout } from '../../../entity_not_found_flyout';
-import { LoadingFlyout } from '../../../loading_flyout';
 import { RuleSummaryFlyout } from './rule_summary_flyout';
+import { SourceRuleSummaryFlyout } from '../source_rule_summary_flyout';
 
 interface Props {
   ruleId: string;
+  sourceRuleInfo?: { category?: string };
+  cachedRule?: RuleApiResponse;
   onClose: () => void;
   onEdit: (rule: RuleApiResponse) => void;
   onClone: (rule: RuleApiResponse) => void;
 }
 
-export const RuleSummaryFlyoutContainer = ({ ruleId, onClose, onEdit, onClone }: Props) => {
+export const RuleSummaryFlyoutContainer = ({
+  ruleId,
+  sourceRuleInfo,
+  cachedRule,
+  onClose,
+  onEdit,
+  onClone,
+}: Props) => {
+  const isSourceRule = sourceRuleInfo !== undefined;
   const [ruleToDelete, setRuleToDelete] = useState<RuleApiResponse | null>(null);
   const [ruleToUpdateApiKey, setRuleToUpdateApiKey] = useState<RuleApiResponse | null>(null);
   const canWrite = useService(UserCapabilities).canWrite('rules');
+  const http = useService(CoreStart('http'));
 
-  const { data: rule, isLoading, isError } = useFetchRule(ruleId);
+  const { data: rule, isLoading, isError } = useFetchRule(isSourceRule ? undefined : ruleId);
   const { mutate: deleteRule, isLoading: isDeleting } = useDeleteRule();
   const { mutate: toggleRuleEnabled, isLoading: isToggling } = useToggleRuleEnabled();
   const { mutate: runRule } = useRunRule();
   const { mutate: updateRuleApiKey, isLoading: isUpdatingApiKey } = useBulkUpdateRuleApiKey();
   const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal();
 
-  if (isLoading) {
-    return <LoadingFlyout onClose={onClose} />;
-  }
+  const {
+    rule: sourceRule,
+    ruleDetailsHref: sourceRuleDetailsHref,
+    isLoading: isLoadingSourceRule,
+  } = useFetchSourceRule({
+    ruleId: isSourceRule ? ruleId : undefined,
+    http,
+    initialRule: isSourceRule ? cachedRule : undefined,
+  });
 
-  if (isError || !rule) {
+  if (isSourceRule) {
     return (
-      <EntityNotFoundFlyout
-        title={i18n.translate('xpack.alertingV2.rule.summaryFlyout.notFoundTitle', {
-          defaultMessage: 'Rule not found',
-        })}
-        body={i18n.translate('xpack.alertingV2.rule.summaryFlyout.notFoundBody', {
-          defaultMessage: 'The rule may have been deleted or you may not have access to it.',
-        })}
+      <SourceRuleSummaryFlyout
+        rule={sourceRule}
+        isLoading={isLoadingSourceRule}
+        ruleCategory={sourceRuleInfo?.category}
+        ruleDetailsHref={sourceRuleDetailsHref}
         onClose={onClose}
       />
     );
@@ -62,10 +76,11 @@ export const RuleSummaryFlyoutContainer = ({ ruleId, onClose, onEdit, onClone }:
   return (
     <>
       <RuleSummaryFlyout
-        rule={rule}
+        ruleId={ruleId}
+        rule={isError ? undefined : rule}
+        isLoading={isLoading}
         canWrite={canWrite}
         isToggleLoading={isToggling}
-        ownFocus={false}
         session="start"
         onClose={onClose}
         onEdit={onEdit}

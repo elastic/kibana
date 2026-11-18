@@ -19,7 +19,7 @@ export const withContextEngineFeatureFlag =
     // Registered by the agent_builder_sml plugin (server/ui_settings.ts).
     const isEnabled = await uiSettings.client.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID);
     if (!isEnabled) {
-      return response.notFound();
+      return response.notFound({ body: { message: 'Not Found' } });
     }
     return handler(ctx, request, response);
   };

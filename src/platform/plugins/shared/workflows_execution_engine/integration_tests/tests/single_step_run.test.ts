@@ -80,7 +80,7 @@ steps:
         const stepExecutions = Array.from(
           workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
         );
-        expect(stepExecutions.length).toBe(3);
+        expect(stepExecutions.length).toBe(5);
         expect(stepExecutions.filter((se) => se.stepId === 'innerForeachStep')).toHaveLength(1);
         expect(
           stepExecutions.filter((se) => se.stepId === 'innerForeachChildConnectorStep')

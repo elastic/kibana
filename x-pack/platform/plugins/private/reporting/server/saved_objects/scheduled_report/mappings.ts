@@ -16,5 +16,14 @@ export const scheduledReportMappings: SavedObjectsTypeMappingDefinition = {
     createdBy: {
       type: 'keyword',
     },
+    createdById: {
+      type: 'keyword',
+      // Must match MAX_REALM_ID_LENGTH in user_identity.ts.
+      ignore_above: 1024,
+    },
+    createdByApiKeyId: {
+      type: 'keyword',
+      ignore_above: 1024,
+    },
   },
 };

@@ -44,7 +44,7 @@ describe('createConversationEventsService', () => {
           type: TimelineEventType.userMessage,
           payloadSchema: z.object({}),
         })
-      ).toThrow(/is a built-in timeline event type/);
+      ).toThrow(/is a built-in event type/);
     });
   });
 
@@ -57,7 +57,7 @@ describe('createConversationEventsService', () => {
       expect(start.getDefinition('nonexistent')).toBeUndefined();
     });
 
-    it('list returns only types that were explicitly registered', () => {
+    it('list returns all explicitly registered types', () => {
       const service = createConversationEventsService();
       const setup = service.setup();
 

@@ -16,6 +16,7 @@ import {
 } from '.';
 import type { RegisterEntityMaintainerConfig } from './types';
 import { EntityMaintainerTaskStatus } from './types';
+import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from '../execution_context';
 
 const mockEnsureScheduled = jest.fn();
 const mockRegisterTaskDefinitions = jest.fn();
@@ -68,6 +69,9 @@ function createMockDeps() {
         asScoped: () => ({ asCurrentUser: mockEsClient }),
       },
     },
+    executionContext: {
+      withContext: jest.fn(<T>(_ctx: unknown, fn: () => T) => fn()),
+    },
   };
   const plugins = {
     licensing: {
@@ -86,6 +90,7 @@ function createMockDeps() {
     taskManagerSetup,
     core,
     analytics,
+    withContextSpy: coreStart.executionContext.withContext as jest.Mock,
   };
 }
 
@@ -282,7 +287,17 @@ describe('entity_maintainer task', () => {
 
     it('should trigger the correct run method upon registration and scheduling', async () => {
       const { logger, taskManagerSetup, core, analytics } = createMockDeps();
-      const run = jest.fn().mockResolvedValue({ key: 'value' });
+      const setCustomTaskRunEventFields = jest.fn();
+      const run = jest
+        .fn()
+        .mockImplementation(
+          async ({
+            setCustomTaskRunEventFields: setFields,
+          }: Parameters<RegisterEntityMaintainerConfig['run']>[0]) => {
+            setFields?.({ calculationRunId: 'risk-calculation-1' });
+            return { key: 'value' };
+          }
+        );
       const config = createMockConfig({ run, minLicense: 'enterprise' });
 
       registerEntityMaintainerTask({
@@ -306,6 +321,7 @@ describe('entity_maintainer task', () => {
       const createTaskRunner = defs[taskType].createTaskRunner;
       const runner = createTaskRunner(
         taskManagerMock.createRunContext({
+          setCustomTaskRunEventFields,
           taskInstance: { id: 'test-maintainer:default', state: { namespace: 'default' } } as any,
           fakeRequest: { headers: {} } as KibanaRequest,
         })
@@ -316,6 +332,9 @@ describe('entity_maintainer task', () => {
       expect(mockGetLicense).toHaveBeenCalled();
       expect(mockLicenseCheck).toHaveBeenCalledWith('entityStore', 'enterprise');
       expect(run).toHaveBeenCalledTimes(1);
+      expect(setCustomTaskRunEventFields).toHaveBeenCalledWith({
+        calculationRunId: 'risk-calculation-1',
+      });
       expect(run).toHaveBeenCalledWith(
         expect.objectContaining({
           status: expect.objectContaining({
@@ -605,6 +624,39 @@ describe('entity_maintainer task', () => {
       expect(run).not.toHaveBeenCalled();
       expect(result.state.metadata.runs).toBe(currentState.metadata.runs);
       expect(result.state.state).toEqual(currentState.state);
+    });
+
+    it('runs the registered runner inside the entity-maintainer execution context', async () => {
+      const { logger, taskManagerSetup, core, analytics, withContextSpy } = createMockDeps();
+      const config = createMockConfig();
+
+      registerEntityMaintainerTask({
+        taskManager: taskManagerSetup as any,
+        logger,
+        config,
+        core: core as any,
+        analytics,
+      });
+      await core.getStartServices();
+
+      const [defs] = mockRegisterTaskDefinitions.mock.calls[0];
+      const taskType = 'entity_store:v2:entity_maintainer_task:test-maintainer';
+      const runner = defs[taskType].createTaskRunner(
+        taskManagerMock.createRunContext({
+          taskInstance: { id: 'test-maintainer:default', state: { namespace: 'default' } } as any,
+          fakeRequest: { headers: {} } as KibanaRequest,
+        })
+      );
+
+      await runner.run();
+
+      expect(withContextSpy).toHaveBeenCalledWith(
+        buildEaExecutionContext(
+          EA_EXECUTION_CONTEXT_NAMES.ENTITY_MAINTAINERS_TASK,
+          'test-maintainer:default'
+        ),
+        expect.any(Function)
+      );
     });
   });
 });

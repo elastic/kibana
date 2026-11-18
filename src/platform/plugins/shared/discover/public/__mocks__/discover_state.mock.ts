@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DataViewSource } from '@kbn/data-source';
 import { getExtendedDiscoverStateContainer } from '../customizations';
 import {
   getDataStateContainer,
@@ -103,6 +104,8 @@ function createInternalStateStoreMock({
   const searchSessionManager = new DiscoverSearchSessionManager({
     history: services.history,
     session: services.data.search.session,
+    replayCache: services.data.replayCache,
+    timefilter: services.data.query.timefilter.timefilter,
   });
   const internalState = createInternalStateStore({
     services,
@@ -201,14 +204,6 @@ export function getDiscoverInternalStateMock({
     return originalSearchSourceCreate(fields);
   });
 
-  jest.spyOn(services.savedSearch, 'saveDiscoverSession').mockImplementation((discoverSession) =>
-    Promise.resolve({
-      ...discoverSession,
-      id: discoverSession.id ?? 'new-session',
-      managed: false,
-    })
-  );
-
   const assertTabsAreInitialized = <T extends (...params: Parameters<T>) => ReturnType<T>>(
     fn: T
   ): T => {
@@ -235,8 +230,8 @@ export function getDiscoverInternalStateMock({
     }: { persistedDiscoverSession?: DiscoverSession } = {}) => {
       if (persistedDiscoverSession) {
         jest
-          .spyOn(services.savedSearch, 'getDiscoverSession')
-          .mockResolvedValueOnce(persistedDiscoverSession);
+          .spyOn(services.discoverSessionService, 'get')
+          .mockResolvedValueOnce({ session: persistedDiscoverSession, warnings: [] });
       }
 
       internalState.dispatch(
@@ -583,9 +578,9 @@ export function getDiscoverStateMock({
   if (finalSavedSearch) {
     const dataView = finalSavedSearch.searchSource.getField('index');
 
-    tabRuntimeState.currentDataView$.next(dataView);
-
     if (dataView) {
+      tabRuntimeState.currentDataSource$.next(new DataViewSource(dataView));
+
       internalState.dispatch(
         internalStateActions.loadDataViewList.fulfilled([dataView as DataViewListItem], 'requestId')
       );
