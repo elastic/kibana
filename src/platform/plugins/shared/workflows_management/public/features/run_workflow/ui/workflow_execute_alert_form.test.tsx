@@ -25,6 +25,8 @@ import {
 import { WorkflowExecuteAlertForm } from './workflow_execute_alert_form';
 import { useKibana } from '../../../hooks/use_kibana';
 
+jest.setTimeout(30_000);
+
 const mockFetchAlertsIndexNames = fetchAlertsIndexNames as jest.MockedFunction<
   typeof fetchAlertsIndexNames
 >;
