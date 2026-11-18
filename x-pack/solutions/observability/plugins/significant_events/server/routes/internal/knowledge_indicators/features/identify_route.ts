@@ -34,6 +34,7 @@ import { stateBlocksNewActivity } from '../../../../../common/maintenance/state_
 import { sourceToAnalysisTarget } from '../../../../lib/significant_events/source_to_analysis_target';
 import { installFeatureIdentificationAgent } from '../../../../agent_builder/agents/feature_identification';
 import { getWorkflowExecutionIdFromRequest } from '../../../../lib/telemetry/ebt/workflow_execution_id';
+import { trackTelemetryBestEffort } from '../../../../lib/telemetry/track_telemetry_best_effort';
 import { createSignificantEventsAvailability } from '../../../../agent_builder/tools/significant_events_availability';
 
 const getSerializedByteLength = (value: unknown) =>
@@ -279,9 +280,17 @@ const identifyInferredFeaturesRoute = createServerRoute({
           maxPreviouslyIdentifiedFeatures,
         },
         trackFeaturesIdentified: (data) =>
-          telemetry.trackFeaturesIdentified({
-            ...data,
-            ...workflowProvenance,
+          trackTelemetryBestEffort({
+            logger: routeLogger,
+            description: 'features identified telemetry',
+            track: () =>
+              telemetry.trackFeaturesIdentified(
+                {
+                  ...data,
+                  ...workflowProvenance,
+                },
+                request
+              ),
           }),
       });
 
@@ -300,24 +309,30 @@ const identifyInferredFeaturesRoute = createServerRoute({
         }`
       );
 
-      telemetry.trackFeaturesIdentified(
-        buildTelemetry(
-          {
-            ...workflowProvenance,
-            run_id: resolvedRunId,
-            connector_id: connectorId,
-            iteration: iteration ?? 1,
-            source_id: source.id,
-            docs_count: documents.length,
-            excluded_features_count: 0,
-            total_filters: totalFilters,
-            filters_capped: filtersCapped,
-            has_filtered_documents: hasFilteredDocuments,
-          },
-          Date.now() - now,
-          { state: 'failure' }
-        )
-      );
+      trackTelemetryBestEffort({
+        logger: routeLogger,
+        description: 'features identified telemetry',
+        track: () =>
+          telemetry.trackFeaturesIdentified(
+            buildTelemetry(
+              {
+                ...workflowProvenance,
+                run_id: resolvedRunId,
+                connector_id: connectorId,
+                iteration: iteration ?? 1,
+                source_id: source.id,
+                docs_count: documents.length,
+                excluded_features_count: 0,
+                total_filters: totalFilters,
+                filters_capped: filtersCapped,
+                has_filtered_documents: hasFilteredDocuments,
+              },
+              Date.now() - now,
+              { state: 'failure' }
+            ),
+            request
+          ),
+      });
 
       if (isInferenceProviderError(error)) {
         const connector = await inferenceClient

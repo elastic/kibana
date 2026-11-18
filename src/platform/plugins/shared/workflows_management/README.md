@@ -165,7 +165,6 @@ The management plugin follows a layered architecture:
 | `navigation` | UI navigation |
 | `data`, `dataViews` | Data layer and index patterns |
 | `esUiShared` | Shared Elasticsearch UI components |
-| `stackConnectors` | Built-in connector types |
 | `fieldFormats` | Field formatting utilities |
 | `unifiedSearch` | Search capabilities |
 | `embeddable` | Workflow visualization |

@@ -41,7 +41,7 @@ export default defineCypressConfig({
     supportFile: './support/e2e.ts',
 
     setupNodeEvents(on, config) {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires, @kbn/imports/uniform_imports
+      // eslint-disable-next-line @kbn/compat/typescript-no-var-requires, @kbn/imports/uniform_imports
       return require('@kbn/fleet-plugin-cypress/plugins')(on, config);
     },
   },
