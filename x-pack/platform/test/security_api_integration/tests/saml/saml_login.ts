@@ -230,6 +230,39 @@ export default function ({ getService }: FtrProviderContext) {
         checkStandardSessionCookiePropsDefault(authenticatedCookie);
       });
 
+      describe('with URL hash fragment', () => {
+        async function loginWithURLHash(urlHash: string) {
+          const handshakeResponse = await supertest
+            .get(`/abc/xyz/handshake?one=two three&auth_url_hash=${encodeURIComponent(urlHash)}`)
+            .expect(302);
+
+          const samlAuthenticationResponse = await supertest
+            .post('/api/security/saml/callback')
+            .set(
+              'Cookie',
+              findSessionCookie(handshakeResponse.headers['set-cookie']).cookieString()
+            )
+            .send({
+              SAMLResponse: await createSAMLResponse({
+                inResponseTo: await getSAMLRequestId(handshakeResponse.headers.location),
+              }),
+            })
+            .expect(302);
+
+          return samlAuthenticationResponse.headers.location;
+        }
+
+        it('should redirect user to the URL with an empty hash fragment', async () => {
+          expect(await loginWithURLHash('')).to.be('/abc/xyz/handshake?one=two+three');
+        });
+
+        for (const urlHash of ['some-fragment', '/some-path']) {
+          it(`should ignore URL hash fragment that does not start with "#" ("${urlHash}")`, async () => {
+            expect(await loginWithURLHash(urlHash)).to.be('/abc/xyz/handshake?one=two+three');
+          });
+        }
+      });
+
       it('should succeed in case of IdP initiated login', async () => {
         // Don't pass handshake cookie and don't include `inResponseTo` into SAML response to simulate IdP initiated login.
         const samlAuthenticationResponse = await supertest
