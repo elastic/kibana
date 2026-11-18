@@ -26,7 +26,7 @@ import {
   decideLifecycle,
   StatusChange,
 } from '../../../lib/significant_events/events/lifecycle/lifecycle_controller';
-import { extractRuleUuids, mergeSignalsLatestPerRule } from './episode_context';
+import { confirmedSignals, extractRuleUuids, mergeSignalsLatestPerRule } from './episode_context';
 import {
   buildWriteCandidates,
   DEFAULT_INACTIVE_LOOKBACK_MS,
@@ -55,6 +55,7 @@ import {
   type EventsWriteInput,
   type EventsWriteNoOpResult,
   type EventsWriteResult,
+  type HeldRule,
   type LoadedCandidate,
   type ResolvedWriteCandidate,
   type WriteOutcome,
@@ -341,14 +342,24 @@ const holdRulesHeldByOtherEvents = async ({
     throw new Error(reason);
   }
 
+  // Rules that an earlier item of this batch confirms, by the event it writes to. The stored events
+  // cannot show them, so two items for different events could otherwise both take the same rule.
+  const claimedInBatch = new Map<string, string>();
   candidates.forEach((candidate) => {
     // A write that leaves the event closed adds no live membership, so it holds no rule.
-    const found = SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS.some(
+    const isLive = SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS.some(
       (status) => status === candidate.status
-    )
-      ? findRulesHeldByOtherEvents({ candidate, liveEvents })
+    );
+    const found = isLive
+      ? findRulesHeldByOtherEvents({ candidate, liveEvents }) ??
+        findRulesClaimedInBatch({ candidate, claimedInBatch })
       : undefined;
     if (found === undefined) {
+      if (isLive) {
+        extractRuleUuids(confirmedSignals(candidate.input.signals)).forEach((uuid) => {
+          if (!claimedInBatch.has(uuid)) claimedInBatch.set(uuid, candidate.eventId);
+        });
+      }
       stage.kept.push(candidate);
       return;
     }
@@ -370,6 +381,24 @@ const holdRulesHeldByOtherEvents = async ({
     });
   });
   return stage;
+};
+
+/** The rules this item confirms that an earlier item of the batch already confirms on another event. */
+const findRulesClaimedInBatch = ({
+  candidate,
+  claimedInBatch,
+}: {
+  candidate: ResolvedWriteCandidate;
+  claimedInBatch: Map<string, string>;
+}): { holder: { event_id: string }; heldRules: HeldRule[] } | undefined => {
+  const heldRules = extractRuleUuids(confirmedSignals(candidate.input.signals)).flatMap((uuid) => {
+    const claimant = claimedInBatch.get(uuid);
+    return claimant !== undefined && claimant !== candidate.eventId
+      ? [{ rule_uuid: uuid, event_id: claimant }]
+      : [];
+  });
+  const [first] = heldRules;
+  return first === undefined ? undefined : { holder: { event_id: first.event_id }, heldRules };
 };
 
 type ReopeningCandidate = ResolvedWriteCandidate & {

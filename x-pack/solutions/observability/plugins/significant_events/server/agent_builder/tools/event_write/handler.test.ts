@@ -2056,6 +2056,84 @@ describe('eventsWriteBulkHandler — a rule held by another live event', () => {
     expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
   });
 
+  describe('items of the same batch', () => {
+    const continuationOf = (
+      eventId: string,
+      ruleUuid: string,
+      verdict: DetectionSignal['verdict'] = 'confirms'
+    ): EventsWriteInput => ({
+      ...baseInput,
+      status: 'active',
+      event_id: eventId,
+      signals: [makeDetectionSignal({ ruleUuid, verdict })],
+    });
+    const clientForBatch = () =>
+      makeEventSearchClient({
+        findLatestLive: jest.fn().mockResolvedValue({ hits: [] }),
+        findByEventId: jest.fn().mockResolvedValue({ hits: [target()] }),
+      });
+
+    it('holds the later of two continuations of different events that confirm the same rule', async () => {
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: clientForBatch(),
+        inputs: [continuationOf(targetId, 'rule-r'), continuationOf('other-live', 'rule-r')],
+      });
+
+      expect(results[0]).toMatchObject({ written: true });
+      expect(results[1]).toMatchObject({
+        written: false,
+        skipped: true,
+        reason: 'rule_held_by_event',
+        existing_event_id: targetId,
+        held_rules: [{ rule_uuid: 'rule-r', event_id: targetId }],
+      });
+    });
+
+    it('holds the later of two new-event items that confirm the same rule, naming the first one', async () => {
+      const newEvent = (): EventsWriteInput => ({
+        ...baseInput,
+        status: 'active',
+        event_id: undefined,
+        signals: [makeDetectionSignal({ ruleUuid: 'rule-r' })],
+      });
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: makeEventSearchClient({
+          findLatestLive: jest.fn().mockResolvedValue({ hits: [] }),
+        }),
+        inputs: [newEvent(), { ...newEvent(), source_ids: ['logs.other'] }],
+      });
+
+      expect(results[0]).toMatchObject({ written: true });
+      expect(results[1]).toMatchObject({
+        written: false,
+        skipped: true,
+        reason: 'rule_held_by_event',
+        existing_event_id: results[0].event_id,
+      });
+    });
+
+    it('does not hold two items for the same event', async () => {
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: clientForBatch(),
+        inputs: [continuationOf(targetId, 'rule-r'), continuationOf(targetId, 'rule-r')],
+      });
+
+      expect(results.every((result) => result.reason !== 'rule_held_by_event')).toBe(true);
+    });
+
+    it('does not let a refuting row claim a rule', async () => {
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: clientForBatch(),
+        inputs: [
+          continuationOf(targetId, 'rule-r', 'refutes'),
+          continuationOf('other-live', 'rule-r'),
+        ],
+      });
+
+      expect(results[1]).not.toMatchObject({ reason: 'rule_held_by_event' });
+    });
+  });
+
   describe('reopening a closed series', () => {
     const closedId = 'closed-series';
     const closed = (overrides: Partial<SignificantEvent> = {}): SignificantEvent =>
