@@ -1577,6 +1577,7 @@
     "inquirer": "8.2.7",
     "inversify": "8.2.1",
     "io-ts": "2.2.22",
+    "ioredis": "6.0.0",
     "ipaddr.js": "2.5.0",
     "jest-diff": "29.7.0",
     "joi": "18.3.1",

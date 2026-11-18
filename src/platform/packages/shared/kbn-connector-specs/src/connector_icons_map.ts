@@ -446,4 +446,6 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
+
+  ['.redis', lazy(() => import(/* webpackChunkName: "connectorIconredis" */ './specs/redis/icon'))],
 ]);
