@@ -27,17 +27,25 @@ function getGroupHash({
 }
 
 /**
- * The fingerprint Alerting v2 hashes into the group hash. A reading's fingerprint is unique within
- * its strategy only, so another strategy watching the same thing must not land in the same series.
+ * The fingerprint Alerting v2 hashes into the group hash: the series identity of #2072, a
+ * reading's fingerprint within its strategy and its source. A fingerprint is unique within its
+ * strategy only, and the source is part of the key so that two sources with a series of the same
+ * name never share a baseline. Changing this formula splits every stored series.
+ * Hashed so ids that contain the separator can't collide, and so the length fits Alerting v2's
+ * fingerprint limit whatever the parts are; Alerting v2 stores only the group hash.
  */
 export function getSeriesFingerprint({
   strategy,
+  source_id: sourceId,
   fingerprint,
 }: {
   strategy: string;
+  source_id?: string;
   fingerprint: string;
 }): string {
-  return `${strategy}:${fingerprint}`;
+  return createHash('sha256')
+    .update(JSON.stringify([strategy, sourceId ?? null, fingerprint]))
+    .digest('hex');
 }
 
 /** A wrapped reading, or the note that says why it was dropped. */
@@ -72,10 +80,7 @@ export function wrapReading({
     group_hash: getGroupHash({
       spaceId,
       source: DETECTION_SIGNAL_SOURCE,
-      fingerprint: getSeriesFingerprint({
-        strategy: strategyId,
-        fingerprint: reading.fingerprint,
-      }),
+      fingerprint: getSeriesFingerprint({ ...reading, strategy: strategyId }),
     }),
     status,
     source: DETECTION_SIGNAL_SOURCE,

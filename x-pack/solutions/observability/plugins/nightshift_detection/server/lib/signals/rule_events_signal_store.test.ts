@@ -13,7 +13,7 @@ import {
 } from '@kbn/core/server/mocks';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { RuleEventsSignalStore } from './rule_events_signal_store';
-import { wrapReading } from './wrap_reading';
+import { getSeriesFingerprint, wrapReading } from './wrap_reading';
 import type { DetectionSignalReading } from '../strategies/types';
 import type { DetectionSignal } from '../../../common/detection_signal';
 
@@ -76,7 +76,7 @@ describe('RuleEventsSignalStore', () => {
       const good = createSignal();
       const bad = createSignal({ ...READING, fingerprint: 'cart' });
       createSignalEvent.mockImplementation(async ({ fingerprint }) => {
-        if (fingerprint === 'error_rate:cart') {
+        if (fingerprint === getSeriesFingerprint({ strategy: 'error_rate', fingerprint: 'cart' })) {
           throw new Error('invalid signal');
         }
         return { group_hash: good.group_hash };
@@ -87,7 +87,7 @@ describe('RuleEventsSignalStore', () => {
       expect(createSignalEvent).toHaveBeenCalledWith(
         expect.objectContaining({
           source: good.source,
-          fingerprint: 'error_rate:checkout',
+          fingerprint: getSeriesFingerprint({ strategy: 'error_rate', fingerprint: 'checkout' }),
           status: 'breached',
           timestamp: good.scheduled_timestamp,
         })

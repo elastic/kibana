@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { alertEventSchema, MAX_FINGERPRINT_LENGTH } from '@kbn/alerting-v2-schemas';
+import { alertEventSchema } from '@kbn/alerting-v2-schemas';
 import { z, lazySchema } from '@kbn/zod/v4';
 
 /** `source` of every signal the engine writes. */
@@ -17,12 +17,6 @@ export const DETECTION_SIGNAL_SOURCE = 'elastic.nightshift_detection_engine';
  * bytes per UTF-16 unit keeps 10,000 units under that.
  */
 const MAX_TEXT_LENGTH = 10_000;
-const MAX_STRATEGY_ID_LENGTH = 128;
-/**
- * Alerting v2 takes the series fingerprint as `<strategy>:<fingerprint>` and refuses one over
- * `MAX_FINGERPRINT_LENGTH`, so a reading's own part leaves room for the strategy id.
- */
-const MAX_READING_FINGERPRINT_LENGTH = MAX_FINGERPRINT_LENGTH - MAX_STRATEGY_ID_LENGTH - 1;
 
 /**
  * What a signal can be about. Closed now because the history read skips a stored signal that no
@@ -44,10 +38,11 @@ export const DETECTION_ENTITY_TYPES = ['service', 'dependency', 'source', 'alert
 export const detectionSignalReadingSchema = lazySchema(() =>
   z.object({
     /**
-     * Identifies the series within the strategy; the engine hashes it into the group hash. It must
-     * be the same on every run for the same thing, or each run starts a new series.
+     * Identifies the series within the strategy and source; the engine hashes it, with the strategy
+     * and `source_id`, into the group hash. It must be the same on every run for the same thing,
+     * or each run starts a new series.
      */
-    fingerprint: z.string().min(1).max(MAX_READING_FINGERPRINT_LENGTH),
+    fingerprint: z.string().min(1).max(MAX_TEXT_LENGTH),
     rule_id: z.string().max(MAX_TEXT_LENGTH).optional(),
     source_id: z.string().max(MAX_TEXT_LENGTH).optional(),
     entity: z.object({
@@ -88,7 +83,7 @@ const signalObjectSchema = lazySchema(() =>
     type: z.literal('signal'),
     source: z.literal(DETECTION_SIGNAL_SOURCE),
     data: detectionSignalReadingSchema.extend({
-      strategy: z.string().min(1).max(MAX_STRATEGY_ID_LENGTH),
+      strategy: z.string().min(1).max(MAX_TEXT_LENGTH),
       /** `version` of the strategy's descriptor when the reading was made. */
       strategy_version: z.number().int().min(1),
     }),
