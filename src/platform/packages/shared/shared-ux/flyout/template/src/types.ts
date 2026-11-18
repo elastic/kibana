@@ -70,7 +70,7 @@ export interface FlyoutHeaderProps {
   title: ReactNode;
   /**
    * Heading element for the title, to fit the flyout into the page's heading outline. Defaults to
-   * `h3`. The title's visual size does not depend on it.
+   * `h2`. The title's visual size does not depend on it.
    */
   titleElement?: FlyoutHeaderTitleElement;
   /**

@@ -233,7 +233,7 @@ type HeaderZoneProps = FlyoutHeaderProps & {
 export const HeaderZone = ({
   title,
   titleText,
-  titleElement: TitleElement = 'h3',
+  titleElement: TitleElement = 'h2',
   titleIcon,
   titleTooltip,
   isLoading = false,
