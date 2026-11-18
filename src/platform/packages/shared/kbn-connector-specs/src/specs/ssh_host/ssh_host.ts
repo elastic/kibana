@@ -92,7 +92,7 @@ export const SshHost: ConnectorSpec = {
       scope: 'destroy',
       description:
         'Run one shell script on the remote host and wait until it exits. Returns stdout, stderr, and code. ' +
-        'A non-zero code is the script exit code. code 255 is also what the SSH client returns when it cannot run the script (unreachable host, authentication, or host key); read stderr to tell those apart. ' +
+        'A non-zero code is the script exit code. code 255 means the connector could not run the script (unreachable host, authentication, or host key); read stderr to tell those apart. ' +
         'Each call starts a new shell.',
       input: ExecInputSchema,
       handler: catalogOnly,
@@ -132,7 +132,7 @@ export const SshHost: ConnectorSpec = {
     '',
     '## exec result',
     'The result is { stdout, stderr, code }. A non-zero code is the script exit code, not a failed tool call. Read stderr before retrying.',
-    'code 255 is what the SSH client returns when it cannot run the script: the host was unreachable, authentication failed, or the host key was rejected. ' +
+    'code 255 means the connector could not run the script: the host was unreachable, authentication failed, or the host key was rejected. ' +
       'A script can also exit 255, so read stderr before deciding which one happened.',
     "The call is rejected before connecting when the host is not on Kibana's allowed hosts list.",
     '',

@@ -1686,6 +1686,7 @@
     "semver": "7.8.6",
     "snakecase-keys": "8.0.1",
     "source-map-support": "0.5.21",
+    "ssh2": "1.17.0",
     "stats-lite": "2.2.0",
     "strip-ansi": "6.0.1",
     "styled-components": "5.3.11",
