@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { MergeCopiedTotals, MergePayload } from '../../../common/types/domain';
+import type { MergeCounts, MergePayload, MergeSource } from '../../../common/types/domain';
 import { UserActionActions, UserActionTypes } from '../../../common/types/domain';
 import { renderWithTestingProviders } from '../../common/mock';
 import { basicCase, getUserAction } from '../../containers/mock';
@@ -19,32 +19,50 @@ import { createMergeUserActionBuilder } from './merge';
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
 
-const noCounts = { alerts: 0, events: 0, observables: 0, other: 0 };
+const noCounts: MergeCounts = { alerts: 0, events: 0, attacks: 0, observables: 0, other: 0 };
 
-interface SourceCounts {
-  copied: MergeCopiedTotals;
-  duplicates?: MergeCopiedTotals;
-  excluded?: MergeCopiedTotals;
-}
+type SourceDetails = Partial<
+  Pick<MergeSource, 'copied' | 'existing' | 'leftOut' | 'outcome' | 'closed'>
+>;
 
 const mergePayload = (
-  [firstSource, secondSource]: [SourceCounts, SourceCounts] = [
-    { copied: { alerts: 2, events: 1, observables: 0, other: 0 }, duplicates: noCounts },
+  [firstSource, secondSource]: [SourceDetails, SourceDetails] = [
+    { copied: { ...noCounts, alerts: 2, events: 1 } },
     {
-      copied: { alerts: 1, events: 0, observables: 3, other: 1 },
-      duplicates: { ...noCounts, alerts: 1 },
+      copied: { ...noCounts, alerts: 1, observables: 3, other: 1, attacks: 1 },
+      existing: { ...noCounts, alerts: 1 },
     },
   ]
-): { merge: MergePayload } => ({
-  merge: {
-    destination: { id: basicCase.id, title: 'Phishing campaign', incrementalId: 142 },
-    sources: [
-      { id: 'case-118', title: 'Phishing email', incrementalId: 118, ...firstSource },
-      { id: 'case-121', title: 'Suspicious link', incrementalId: null, ...secondSource },
-    ],
-    closedSources: true,
-  },
-});
+): { merge: MergePayload } => {
+  const source = (
+    id: string,
+    title: string,
+    incrementalId: number | null,
+    details: SourceDetails
+  ): MergeSource => ({
+    id,
+    title,
+    incrementalId,
+    outcome: 'merged',
+    closed: true,
+    copied: noCounts,
+    existing: noCounts,
+    leftOut: noCounts,
+    ...details,
+  });
+
+  return {
+    merge: {
+      destination: { id: basicCase.id, title: 'Phishing campaign', incrementalId: 142 },
+      sources: [
+        source('case-118', 'Phishing email', 118, firstSource),
+        source('case-121', 'Suspicious link', null, secondSource),
+      ],
+      updatedFields: [],
+      notCopiedFields: [],
+    },
+  };
+};
 
 describe('createMergeUserActionBuilder', () => {
   const renderUserAction = (payload = mergePayload()) => {
@@ -61,100 +79,96 @@ describe('createMergeUserActionBuilder', () => {
     renderWithTestingProviders(<EuiCommentList comments={comments} />);
   };
 
-  it('lists the merged cases and who merged them, and what each case copied', async () => {
+  it('lists the merged cases as a list, and what each case copied', async () => {
     renderUserAction();
 
     expect(screen.getByTestId('merge-user-action-destination')).toHaveTextContent(
-      /^Cases #118, Suspicious link merged into this case by Leslie Knope$/
+      /^merged #118 and Suspicious link into this case$/
     );
-    expect(screen.getAllByText('Leslie Knope')).toHaveLength(1);
 
     await userEvent.click(screen.getByTestId('merge-user-action-details-button'));
 
     const firstSource = await screen.findByTestId('merge-user-action-details-case-118');
     expect(firstSource).toHaveTextContent('#118');
     expect(firstSource).toHaveTextContent('New: 2 alerts, 1 event');
+    expect(firstSource).toHaveTextContent('Closed by the merge');
     expect(firstSource).not.toHaveTextContent('Already in this case');
 
     const secondSource = screen.getByTestId('merge-user-action-details-case-121');
     expect(secondSource).toHaveTextContent('Suspicious link');
-    expect(secondSource).toHaveTextContent('New: 1 alert, 3 observables, 1 other attachment');
+    expect(secondSource).toHaveTextContent(
+      'New: 1 alert, 1 attack, 3 observables, 1 other attachment'
+    );
     expect(secondSource).toHaveTextContent('Already in this case: 1 alert');
   });
 
-  it('shows a case that added nothing new and what this case already had', async () => {
+  it('shows what stayed on each source case', async () => {
     renderUserAction(
       mergePayload([
-        { copied: { ...noCounts, alerts: 7, observables: 23 }, duplicates: noCounts },
-        { copied: noCounts, duplicates: { ...noCounts, alerts: 7, observables: 23 } },
-      ])
-    );
-
-    await userEvent.click(screen.getByTestId('merge-user-action-details-button'));
-
-    const secondSource = await screen.findByTestId('merge-user-action-details-case-121');
-    expect(secondSource).toHaveTextContent('New: none');
-    expect(secondSource).toHaveTextContent('Already in this case: 7 alerts, 23 observables');
-  });
-
-  it('shows what the user left on each case', async () => {
-    renderUserAction(
-      mergePayload([
-        { copied: { ...noCounts, alerts: 900 }, excluded: { ...noCounts, alerts: 240 } },
-        { copied: { ...noCounts, alerts: 100 }, excluded: noCounts },
+        { copied: { ...noCounts, alerts: 900 }, leftOut: { ...noCounts, alerts: 240 } },
+        { copied: { ...noCounts, alerts: 100 } },
       ])
     );
 
     await userEvent.click(screen.getByTestId('merge-user-action-details-button'));
 
     expect(await screen.findByTestId('merge-user-action-details-case-118')).toHaveTextContent(
-      'Left out, still on the original case: 240 alerts'
+      'Left out, still on the source case: 240 alerts'
     );
     expect(screen.getByTestId('merge-user-action-details-case-121')).not.toHaveTextContent(
       'Left out'
     );
   });
 
-  it('shows only what was copied when the merge did not record duplicates', async () => {
-    renderUserAction(mergePayload([{ copied: { ...noCounts, alerts: 1 } }, { copied: noCounts }]));
+  it('names only the merged sources and marks the one that was not merged', async () => {
+    renderUserAction(
+      mergePayload([
+        { copied: { ...noCounts, alerts: 1 } },
+        { copied: noCounts, outcome: 'notMerged', closed: false },
+      ])
+    );
+
+    expect(screen.getByTestId('merge-user-action-destination')).toHaveTextContent(
+      /^merged #118 into this case$/
+    );
 
     await userEvent.click(screen.getByTestId('merge-user-action-details-button'));
 
-    expect(await screen.findByTestId('merge-user-action-details-case-118')).toHaveTextContent(
-      'New: 1 alert'
-    );
-    expect(screen.getByTestId('merge-user-action-details')).not.toHaveTextContent(
-      'Already in this case'
-    );
+    expect(
+      await screen.findByTestId('merge-user-action-details-case-121-not-merged')
+    ).toBeInTheDocument();
   });
 
-  it('names a single merged case', () => {
+  it('lists the fields the merge changed and the template fields it did not copy', async () => {
     const { merge } = mergePayload();
-    renderUserAction({ merge: { ...merge, sources: [merge.sources[0]] } });
-
-    expect(screen.getByTestId('merge-user-action-destination')).toHaveTextContent(
-      /^Case #118 merged into this case by Leslie Knope$/
-    );
-  });
-
-  it('lists the fields the merge changed on this case', async () => {
-    const { merge } = mergePayload();
-    renderUserAction({ merge: { ...merge, updatedFields: ['title', 'tags'] } });
+    renderUserAction({
+      merge: {
+        ...merge,
+        updatedFields: [
+          { field: 'title' },
+          { field: 'extendedFields', key: 'verdict_as_keyword', label: 'Verdict' },
+        ],
+        notCopiedFields: [{ key: 'region_as_keyword', label: 'Region' }],
+      },
+    });
 
     await userEvent.click(screen.getByTestId('merge-user-action-details-button'));
 
     expect(await screen.findByTestId('merge-user-action-details-updated-fields')).toHaveTextContent(
-      'Changed on this case: title, tags'
+      'Changed on this case: title, Verdict'
+    );
+    expect(screen.getByTestId('merge-user-action-details-not-copied-fields')).toHaveTextContent(
+      'Template fields not copied: Region'
     );
   });
 
-  it('links to the destination on an original case', () => {
+  it('links to the destination on a source case', () => {
     const { merge } = mergePayload();
     renderUserAction({
       merge: { ...merge, destination: { ...merge.destination, id: 'destination-id' } },
     });
 
-    expect(screen.getByTestId('merge-user-action-original')).toHaveTextContent(
+    expect(screen.getByTestId('merge-user-action-source')).toHaveTextContent(
       'merged this case into #142'
     );
     expect(screen.queryByTestId('merge-user-action-destination')).not.toBeInTheDocument();
@@ -165,7 +179,7 @@ describe('createMergeUserActionBuilder', () => {
     ).toHaveAttribute('target', '_blank');
   });
 
-  it('does not list changed fields when the merge changed none or did not record them', async () => {
+  it('does not list changed fields when the merge changed none', async () => {
     renderUserAction();
 
     await userEvent.click(screen.getByTestId('merge-user-action-details-button'));

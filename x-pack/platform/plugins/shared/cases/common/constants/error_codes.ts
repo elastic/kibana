@@ -34,6 +34,12 @@ export const CASES_API_ERROR_CODES = {
    * choosing a side.
    */
   FIELD_REPRESENTATIONS_CONFLICT: 'field_representations_conflict',
+  /**
+   * A merge was refused before writing anything: a field the cases hold different values for has
+   * no value in the request, a value is invalid or a required field is empty, or a kind of
+   * attachment is over its destination limit. The 400 lists every conflict and limit.
+   */
+  MERGE_BLOCKED: 'merge_blocked',
 } as const;
 
 export type CasesApiErrorCode = (typeof CASES_API_ERROR_CODES)[keyof typeof CASES_API_ERROR_CODES];
@@ -72,13 +78,49 @@ export interface FieldRepresentationsConflictErrorAttributes {
 }
 
 /**
+ * A field the merge cannot decide on its own. `key` names the custom field key or the template
+ * field storage key for `customFields` and `extendedFields`.
+ */
+export interface MergeBlockedConflict {
+  field:
+    | 'title'
+    | 'description'
+    | 'severity'
+    | 'category'
+    | 'connector'
+    | 'template'
+    | 'customFields'
+    | 'extendedFields';
+  key?: string;
+  label?: string;
+  reason: 'differentValues' | 'invalidValue' | 'required';
+  message?: string;
+}
+
+/** A destination limit the merge would exceed, with how much has to be left out. */
+export interface MergeBlockedLimit {
+  kind: 'alerts' | 'observables' | 'other' | 'tags' | 'assignees' | 'description';
+  max: number;
+  total: number;
+  overBy: number;
+}
+
+/** `attributes` payload for `merge_blocked` (HTTP 400). */
+export interface MergeBlockedErrorAttributes {
+  code: typeof CASES_API_ERROR_CODES.MERGE_BLOCKED;
+  conflicts: MergeBlockedConflict[];
+  limits: MergeBlockedLimit[];
+}
+
+/**
  * Union of every typed error-attributes shape Cases serializes. Extend this
  * union when introducing a new machine-readable error code.
  */
 export type CasesApiErrorAttributes =
   | FieldIdentityImmutableErrorAttributes
   | FieldLinkageMalformedErrorAttributes
-  | FieldRepresentationsConflictErrorAttributes;
+  | FieldRepresentationsConflictErrorAttributes
+  | MergeBlockedErrorAttributes;
 
 const ALL_ERROR_CODES: readonly string[] = Object.values(CASES_API_ERROR_CODES);
 

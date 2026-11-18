@@ -5,102 +5,51 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { EuiBadge, EuiPopover, EuiText, useGeneratedHtmlId } from '@elastic/eui';
+import React from 'react';
+import { EuiBadge } from '@elastic/eui';
 import type { MergeCaseSnapshot } from '../../../common/types/domain';
-import { useCaseViewNavigation } from '../../common/navigation/hooks';
+import type { CaseUI } from '../../containers/types';
 import { useGetMergeDestinations } from '../../containers/use_get_merge_destinations';
-import { MergeCaseLink } from './merge_case_link';
-import { getCaseReference } from './utils';
+import { CaseDetailsLink } from '../links';
+import { getCaseReference, getLatestDestinationId } from './utils';
 import * as i18n from './translations';
 
 interface MergedIntoBadgeProps {
-  destinationIds: string[];
+  merge: CaseUI['merge'];
   /** Destinations fetched once for a page of cases. Without it the badge fetches its own. */
   destinations?: Map<string, MergeCaseSnapshot>;
-  /** Set to false where the badge sits inside another link. */
-  isLink?: boolean;
 }
 
-export const MergedIntoBadge = React.memo<MergedIntoBadgeProps>(
-  ({ destinationIds, destinations, isLink = true }) => {
-    const { data: fetchedDestinations } = useGetMergeDestinations(destinationIds, {
-      enabled: destinations == null,
-    });
-    const { getCaseViewUrl } = useCaseViewNavigation();
-    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-    const popoverId = useGeneratedHtmlId({ prefix: 'mergedIntoBadge' });
+/**
+ * "Merged into #142", linking to the latest case this case was merged into. It reads "Merged"
+ * until the destination loads, and names the destination by title until it has a number.
+ */
+export const MergedIntoBadge = React.memo<MergedIntoBadgeProps>(({ merge, destinations }) => {
+  const destinationId = getLatestDestinationId(merge);
+  const { data: fetchedDestinations } = useGetMergeDestinations(
+    destinationId != null ? [destinationId] : [],
+    { enabled: destinations == null }
+  );
 
-    const destinationsById = destinations ?? fetchedDestinations;
-    const knownDestinations = destinationIds.flatMap((id) => {
-      const destination = destinationsById?.get(id);
-      return destination != null ? [destination] : [];
-    });
-    const label = i18n.MERGED_INTO_CASES(destinationIds.length);
-    const [onlyDestination] = destinationIds.length === 1 ? knownDestinations : [];
+  if (destinationId == null) {
+    return null;
+  }
 
-    if (!isLink || knownDestinations.length === 0) {
-      return (
-        <EuiBadge
-          color="hollow"
-          iconType="merge"
-          title={label}
-          data-test-subj="case-merged-into-badge"
-        >
-          {label}
-        </EuiBadge>
-      );
-    }
-
-    if (onlyDestination != null) {
-      return (
-        <EuiBadge
-          color="hollow"
-          iconType="merge"
-          title={label}
-          href={getCaseViewUrl({ detailName: onlyDestination.id })}
-          target="_blank"
-          aria-label={i18n.OPEN_CASE_IN_NEW_TAB(getCaseReference(onlyDestination))}
-          data-test-subj="case-merged-into-badge"
-        >
-          {label}
-        </EuiBadge>
-      );
-    }
-
-    const badge = (
-      <EuiBadge
-        color="hollow"
-        iconType="merge"
-        title={label}
-        onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
-        onClickAriaLabel={i18n.MERGED_INTO_DESTINATIONS}
-        data-test-subj="case-merged-into-badge"
-      >
-        {label}
+  const destination = (destinations ?? fetchedDestinations)?.get(destinationId);
+  if (destination == null) {
+    return (
+      <EuiBadge color="hollow" iconType="merge" data-test-subj="case-merged-into-badge">
+        {i18n.MERGED}
       </EuiBadge>
     );
-
-    return (
-      <EuiPopover
-        id={popoverId}
-        button={badge}
-        isOpen={isPopoverOpen}
-        closePopover={() => setIsPopoverOpen(false)}
-        anchorPosition="downLeft"
-        aria-label={i18n.MERGED_INTO_DESTINATIONS}
-      >
-        <EuiText size="s" data-test-subj="case-merged-into-destinations">
-          <ul>
-            {knownDestinations.map((destination) => (
-              <li key={destination.id}>
-                <MergeCaseLink caseSnapshot={destination} />
-              </li>
-            ))}
-          </ul>
-        </EuiText>
-      </EuiPopover>
-    );
   }
-);
+
+  return (
+    <CaseDetailsLink detailName={destination.id} title={destination.title}>
+      <EuiBadge color="hollow" iconType="merge" data-test-subj="case-merged-into-badge">
+        {i18n.MERGED_INTO(getCaseReference(destination))}
+      </EuiBadge>
+    </CaseDetailsLink>
+  );
+});
 MergedIntoBadge.displayName = 'MergedIntoBadge';

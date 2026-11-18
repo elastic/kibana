@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { screen } from '@testing-library/react';
 import * as api from '../../api';
 import { renderWithTestingProviders } from '../../common/mock';
 import { useCaseViewNavigation } from '../../common/navigation/hooks';
 import { basicCaseSnake } from '../../containers/mock';
+import type { MergeCaseSnapshot } from '../../../common/types/domain';
 import { MergedIntoBadge } from './merged_into_badge';
 
 jest.mock('../../common/lib/kibana');
@@ -20,11 +20,21 @@ jest.mock('../../common/navigation/hooks');
 const useCaseViewNavigationMock = jest.mocked(useCaseViewNavigation);
 
 const destination = { id: 'destination-id', title: 'Phishing campaign', incrementalId: 142 };
-const laterDestination = { id: 'later-destination-id', title: 'Phishing wave', incrementalId: 150 };
-const destinations = new Map([
+const laterDestination = {
+  id: 'later-destination-id',
+  title: 'Phishing wave',
+  incrementalId: null,
+};
+const destinations = new Map<string, MergeCaseSnapshot>([
   [destination.id, destination],
   [laterDestination.id, laterDestination],
 ]);
+
+const mergedInto = (ids: string[]) => ({
+  mergedInto: ids,
+  mergedAt: '2024-01-01T00:00:00.000Z',
+  closedByMerge: true,
+});
 
 describe('MergedIntoBadge', () => {
   beforeEach(() => {
@@ -36,18 +46,35 @@ describe('MergedIntoBadge', () => {
     });
   });
 
-  it('uses the destinations it is given without fetching', () => {
+  it('names the destination by number and links to it, without fetching', () => {
     const bulkGetCases = jest.spyOn(api, 'bulkGetCases');
 
     renderWithTestingProviders(
-      <MergedIntoBadge destinationIds={[destination.id]} destinations={destinations} />
+      <MergedIntoBadge merge={mergedInto([destination.id])} destinations={destinations} />
     );
 
-    expect(screen.getByTestId('case-merged-into-badge')).toHaveTextContent(/^Merged into 1 case$/);
+    expect(screen.getByTestId('case-merged-into-badge')).toHaveTextContent(/^Merged into #142$/);
+    expect(screen.getByTestId('case-details-link')).toHaveAttribute(
+      'href',
+      '/cases/destination-id'
+    );
     expect(bulkGetCases).not.toHaveBeenCalled();
   });
 
-  it('fetches its destinations when none are given', async () => {
+  it('shows the latest destination, by title until it has a number', () => {
+    renderWithTestingProviders(
+      <MergedIntoBadge
+        merge={mergedInto([destination.id, laterDestination.id])}
+        destinations={destinations}
+      />
+    );
+
+    expect(screen.getByTestId('case-merged-into-badge')).toHaveTextContent(
+      /^Merged into Phishing wave$/
+    );
+  });
+
+  it('fetches the destination when none is given', async () => {
     const bulkGetCases = jest.spyOn(api, 'bulkGetCases').mockResolvedValue({
       cases: [
         { ...basicCaseSnake, id: destination.id, title: destination.title, incremental_id: 142 },
@@ -55,67 +82,25 @@ describe('MergedIntoBadge', () => {
       errors: [],
     });
 
-    renderWithTestingProviders(<MergedIntoBadge destinationIds={[destination.id]} />);
+    renderWithTestingProviders(<MergedIntoBadge merge={mergedInto([destination.id])} />);
 
-    expect(
-      await screen.findByRole('link', { name: 'Open case #142 in a new tab' })
-    ).toBeInTheDocument();
+    expect(await screen.findByText('Merged into #142')).toBeInTheDocument();
     expect(bulkGetCases).toHaveBeenCalledWith(
       expect.objectContaining({ params: { ids: [destination.id] } })
     );
   });
 
-  it('is not interactive when the destination cannot be read', () => {
+  it('reads "Merged" until the destination loads', () => {
     renderWithTestingProviders(
-      <MergedIntoBadge destinationIds={[destination.id]} destinations={new Map()} />
+      <MergedIntoBadge merge={mergedInto(['unknown'])} destinations={destinations} />
     );
 
-    expect(screen.getByTestId('case-merged-into-badge')).toHaveTextContent('Merged into 1 case');
-    expect(screen.queryByRole('button')).not.toBeInTheDocument();
-    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    expect(screen.getByTestId('case-merged-into-badge')).toHaveTextContent(/^Merged$/);
   });
 
-  it('opens the destination in a new tab', () => {
-    renderWithTestingProviders(
-      <MergedIntoBadge destinationIds={[destination.id]} destinations={destinations} />
-    );
+  it('renders nothing for a case that was never merged', () => {
+    renderWithTestingProviders(<MergedIntoBadge merge={null} destinations={destinations} />);
 
-    const link = screen.getByRole('link', { name: 'Open case #142 in a new tab' });
-    expect(link).toHaveAttribute('href', `/cases/${destination.id}`);
-    expect(link).toHaveAttribute('target', '_blank');
-  });
-
-  it('counts the destinations and lists them when clicked', async () => {
-    renderWithTestingProviders(
-      <MergedIntoBadge
-        destinationIds={[destination.id, laterDestination.id]}
-        destinations={destinations}
-      />
-    );
-
-    expect(screen.getByTestId('case-merged-into-badge')).toHaveTextContent('Merged into 2 cases');
-
-    await userEvent.click(screen.getByRole('button', { name: 'Cases this case was merged into' }));
-
-    const list = await screen.findByTestId('case-merged-into-destinations');
-    expect(list).toHaveTextContent('#142');
-    expect(list).toHaveTextContent('#150');
-    for (const link of within(list).getAllByRole('link')) {
-      expect(link).toHaveAttribute('target', '_blank');
-    }
-  });
-
-  it('is not interactive when it sits inside another link', () => {
-    renderWithTestingProviders(
-      <MergedIntoBadge
-        destinationIds={[destination.id, laterDestination.id]}
-        destinations={destinations}
-        isLink={false}
-      />
-    );
-
-    expect(screen.getByTestId('case-merged-into-badge')).toHaveTextContent('Merged into 2 cases');
-    expect(screen.queryByRole('button')).not.toBeInTheDocument();
-    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('case-merged-into-badge')).not.toBeInTheDocument();
   });
 });

@@ -245,7 +245,8 @@ export const useBulkActions = ({
         ) : null}
         {mergeAction.isFlyoutOpen ? (
           <MergeCasesFlyout
-            selectedCases={mergeAction.casesToMerge}
+            initialCases={mergeAction.casesToMerge}
+            origin="list"
             onClose={mergeAction.onFlyoutClosed}
             onMerged={mergeAction.onMerged}
           />

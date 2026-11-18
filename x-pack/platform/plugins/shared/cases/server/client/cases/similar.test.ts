@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { KueryNode } from '@kbn/es-query';
+import { toKqlExpression } from '@kbn/es-query';
 import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { similar } from './similar';
@@ -76,88 +78,131 @@ describe('similar', () => {
     const call = mockClientArgs.services.caseService.findCases.mock.calls[0][0];
 
     expect(call).toMatchInlineSnapshot(`
-        Object {
-          "filter": Object {
-            "arguments": Array [
-              Object {
-                "arguments": Array [
-                  Object {
-                    "isQuoted": false,
-                    "type": "literal",
-                    "value": "cases.attributes.observables",
-                  },
-                  Object {
-                    "arguments": Array [
-                      Object {
-                        "arguments": Array [
-                          Object {
-                            "isQuoted": false,
-                            "type": "literal",
-                            "value": "value",
-                          },
-                          Object {
-                            "isQuoted": true,
-                            "type": "literal",
-                            "value": "127.0.0.1",
-                          },
-                        ],
-                        "function": "is",
-                        "type": "function",
-                      },
-                      Object {
-                        "arguments": Array [
-                          Object {
-                            "isQuoted": false,
-                            "type": "literal",
-                            "value": "typeKey",
-                          },
-                          Object {
-                            "isQuoted": true,
-                            "type": "literal",
-                            "value": "observable-type-ipv4",
-                          },
-                        ],
-                        "function": "is",
-                        "type": "function",
-                      },
-                    ],
-                    "function": "and",
-                    "type": "function",
-                  },
-                ],
-                "function": "nested",
-                "type": "function",
-              },
-              Object {
-                "arguments": Array [
-                  Object {
-                    "isQuoted": false,
-                    "type": "literal",
-                    "value": "cases.attributes.owner",
-                  },
-                  Object {
-                    "isQuoted": false,
-                    "type": "literal",
-                    "value": "securitySolution",
-                  },
-                ],
-                "function": "is",
-                "type": "function",
-              },
-            ],
-            "function": "and",
-            "type": "function",
-          },
-          "page": 1,
-          "perPage": 10,
-          "rootSearchFields": Array [
-            "_id",
+      Object {
+        "filter": Object {
+          "arguments": Array [
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "cases.attributes.observables",
+                },
+                Object {
+                  "arguments": Array [
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "value",
+                        },
+                        Object {
+                          "isQuoted": true,
+                          "type": "literal",
+                          "value": "127.0.0.1",
+                        },
+                      ],
+                      "function": "is",
+                      "type": "function",
+                    },
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "typeKey",
+                        },
+                        Object {
+                          "isQuoted": true,
+                          "type": "literal",
+                          "value": "observable-type-ipv4",
+                        },
+                      ],
+                      "function": "is",
+                      "type": "function",
+                    },
+                  ],
+                  "function": "and",
+                  "type": "function",
+                },
+              ],
+              "function": "nested",
+              "type": "function",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "cases.attributes.owner",
+                },
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "securitySolution",
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "arguments": Array [
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "cases.attributes.merge.merged_at",
+                        },
+                        Object {
+                          "type": "wildcard",
+                          "value": "@kuery-wildcard@",
+                        },
+                      ],
+                      "function": "is",
+                      "type": "function",
+                    },
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "cases.attributes.status",
+                        },
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "20",
+                        },
+                      ],
+                      "function": "is",
+                      "type": "function",
+                    },
+                  ],
+                  "function": "and",
+                  "type": "function",
+                },
+              ],
+              "function": "not",
+              "type": "function",
+            },
           ],
-          "search": "-\\"cases:mock-id\\"",
-          "sortField": "created_at",
-          "sortOrder": undefined,
-        }
-      `);
+          "function": "and",
+          "type": "function",
+        },
+        "page": 1,
+        "perPage": 10,
+        "rootSearchFields": Array [
+          "_id",
+        ],
+        "search": "-\\"cases:mock-id\\"",
+        "sortField": "created_at",
+        "sortOrder": undefined,
+      }
+    `);
   });
 
   describe('attachment totals', () => {
@@ -311,6 +356,15 @@ describe('similar', () => {
       mockCasesClient
     );
     expect(mockClientArgs.services.caseService.findCases).not.toHaveBeenCalled();
+  });
+
+  it('should leave out cases that were merged and closed', async () => {
+    await similar(mockCase.id, { page: 1, perPage: 10 }, mockClientArgs, mockCasesClient);
+
+    const [[findOptions]] = mockClientArgs.services.caseService.findCases.mock.calls;
+    expect(toKqlExpression(findOptions?.filter as KueryNode)).toContain(
+      'NOT (cases.attributes.merge.merged_at: * AND cases.attributes.status: 20)'
+    );
   });
 
   it('should forward explicit sort params to caseService.findCases', async () => {

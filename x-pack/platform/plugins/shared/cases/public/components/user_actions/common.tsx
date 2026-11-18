@@ -30,8 +30,6 @@ type BuilderArgs = Pick<
 > & {
   label: EuiCommentProps['event'];
   icon: EuiCommentProps['timelineAvatar'];
-  /** Replaces the avatar and name in front of the label, e.g. when the label names the user. */
-  username?: EuiCommentProps['username'];
   /**
    * Extra control appended after copy-link / move-to-reference (e.g. a document-flyout button).
    * Pass the raw node returned by `renderAttachmentAction` — it wraps BUTTON actions in their
@@ -47,14 +45,16 @@ export const createCommonUpdateUserActionBuilder = ({
   icon,
   handleOutlineComment,
   documentAction,
-  username = (
-    <HoverableUserWithAvatarResolver user={userAction.createdBy} userProfiles={userProfiles} />
-  ),
 }: BuilderArgs): ReturnType<UserActionBuilder> => {
   return {
     build: () => [
       {
-        username,
+        username: (
+          <HoverableUserWithAvatarResolver
+            user={userAction.createdBy}
+            userProfiles={userProfiles}
+          />
+        ),
         event: withActionSourceEvent(label, userAction.source),
         'data-test-subj': `${userAction.type}-${userAction.action}-action-${userAction.id}`,
         timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,

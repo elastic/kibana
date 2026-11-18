@@ -23,6 +23,7 @@ const emptyFilterOptions: FilterOptions = {
   reporters: [],
   owner: [],
   category: [],
+  merged: [],
   customFields: {},
   extendedFieldFilters: [],
   from: DEFAULT_FROM_DATE,

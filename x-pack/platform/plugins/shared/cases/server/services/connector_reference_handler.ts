@@ -13,10 +13,25 @@ interface Reference {
   name: string;
 }
 
+/**
+ * A reference name that holds a list of references, such as the destinations of a merged case.
+ * `ids` undefined means the update doesn't touch the list; an empty array removes every reference
+ * with that name.
+ */
+interface MultiReference {
+  name: string;
+  type: string;
+  ids?: string[];
+}
+
 export class ConnectorReferenceHandler {
   private newReferences: Reference[] = [];
+  private multiReferences: Array<Required<MultiReference>> = [];
 
-  constructor(references: Array<{ id?: string | null; name: string; type: string }>) {
+  constructor(
+    references: Array<{ id?: string | null; name: string; type: string }>,
+    multiReferences: MultiReference[] = []
+  ) {
     for (const { id, name, type } of references) {
       // When id is null, or the none connector we'll try to remove the reference if it exists
       // When id is undefined it means that we're doing a patch request and this particular field shouldn't be updated
@@ -27,31 +42,65 @@ export class ConnectorReferenceHandler {
         this.newReferences.push({ soReference: { id, name, type }, name });
       }
     }
+
+    for (const { name, type, ids } of multiReferences) {
+      if (ids !== undefined) {
+        this.multiReferences.push({ name, type, ids });
+      }
+    }
   }
 
   /**
-   * Merges the references passed to the constructor into the original references passed into this function
+   * Whether the update changes any reference this handler manages. When it doesn't, the update can
+   * leave the stored references alone instead of rewriting them from a possibly stale read.
+   */
+  public hasChanges(): boolean {
+    return this.newReferences.length > 0 || this.multiReferences.length > 0;
+  }
+
+  /**
+   * Merges the references passed to the constructor into the original references passed into this function.
+   * References with a name this handler doesn't manage are kept as they are.
    *
    * @param originalReferences existing saved object references
    * @returns a merged reference list or undefined when there are no new or existing references
    */
   public build(originalReferences?: SavedObjectReference[]): SavedObjectReference[] | undefined {
-    if (this.newReferences.length <= 0) {
+    if (!this.hasChanges()) {
       return originalReferences;
     }
 
-    const refMap = new Map<string, SavedObjectReference>(
-      originalReferences?.map((ref) => [ref.name, ref])
+    const singleByName = new Map(
+      this.newReferences.map((reference) => [reference.name, reference])
     );
+    const multiNames = new Set(this.multiReferences.map(({ name }) => name));
+    const placedNames = new Set<string>();
+    const references: SavedObjectReference[] = [];
 
-    for (const newRef of this.newReferences) {
-      if (newRef.soReference) {
-        refMap.set(newRef.name, newRef.soReference);
-      } else {
-        refMap.delete(newRef.name);
+    for (const reference of (originalReferences ?? []).filter(
+      ({ name }) => !multiNames.has(name)
+    )) {
+      const newReference = singleByName.get(reference.name);
+      if (newReference == null) {
+        references.push(reference);
+      } else if (!placedNames.has(reference.name)) {
+        placedNames.add(reference.name);
+        if (newReference.soReference) {
+          references.push(newReference.soReference);
+        }
       }
     }
 
-    return Array.from(refMap.values());
+    for (const [name, { soReference }] of singleByName) {
+      if (!placedNames.has(name) && soReference) {
+        references.push(soReference);
+      }
+    }
+
+    for (const { name, type, ids } of this.multiReferences) {
+      references.push(...ids.map((id) => ({ id, name, type })));
+    }
+
+    return references;
   }
 }

@@ -17,10 +17,15 @@ describe('MergeUserActionBuilder', () => {
           id: 'case-1',
           title: 'Phishing email',
           incrementalId: 118,
-          copied: { alerts: 2, events: 0, observables: 1, other: 0 },
+          outcome: 'merged' as const,
+          closed: true,
+          copied: { alerts: 2, events: 0, attacks: 0, observables: 1, other: 0 },
+          existing: { alerts: 1, events: 0, attacks: 0, observables: 0, other: 0 },
+          leftOut: { alerts: 0, events: 0, attacks: 0, observables: 0, other: 0 },
         },
       ],
-      closedSources: true,
+      updatedFields: [{ field: 'severity' as const }],
+      notCopiedFields: [{ key: 'region_as_keyword', label: 'region' }],
     },
   };
 

@@ -11,12 +11,18 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiPanel,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { KbnWarningCallout } from '@kbn/ui-callout';
-import type { MergeCasesPreviewResponse, MergePreviewCase } from '../../../common/types/api';
+import type {
+  MergeAttachmentSummary,
+  MergeCasesPreviewResponse,
+  MergeNotCopiedReason,
+  MergePreviewCase,
+} from '../../../common/types/api';
 import { MergeAttachmentsModal } from './merge_attachments_modal';
 import type { MergeChoiceKind, SelectedAttachmentSummary, SelectedAttachments } from './utils';
 import * as i18n from './translations';
@@ -27,6 +33,7 @@ const ATTACHMENT_KINDS: ReadonlyArray<{
   getOverLimitMessage?: (max: number) => string;
 }> = [
   { kind: 'alerts', title: i18n.ALERTS, getOverLimitMessage: i18n.ALERTS_OVER_LIMIT },
+  { kind: 'attacks', title: i18n.ATTACKS },
   { kind: 'events', title: i18n.EVENTS },
   {
     kind: 'observables',
@@ -35,6 +42,17 @@ const ATTACHMENT_KINDS: ReadonlyArray<{
   },
   { kind: 'other', title: i18n.OTHER_ATTACHMENTS, getOverLimitMessage: i18n.OTHER_OVER_LIMIT },
 ];
+
+const NOT_COPIED_MESSAGES: Record<MergeNotCopiedReason, (count: number) => string> = {
+  alertCaseLimit: i18n.NOT_COPIED_ALERT_CASE_LIMIT,
+  alertNotAuthorized: i18n.NOT_COPIED_ALERT_NOT_AUTHORIZED,
+  license: i18n.NOT_COPIED_LICENSE,
+};
+
+const getNotCopiedMessages = (summary: MergeAttachmentSummary): string[] =>
+  summary.notCopied
+    .filter(({ count }) => count > 0)
+    .map(({ reason, count }) => NOT_COPIED_MESSAGES[reason](count));
 
 const getMeta = (summary: SelectedAttachmentSummary, destinationRef?: string): string =>
   [
@@ -70,9 +88,11 @@ export const MergeAttachmentsSection = React.memo<MergeAttachmentsSectionProps>(
     destinationRef,
     isDisabled,
   }) => {
-    const [isChoosing, setIsChoosing] = useState(false);
+    const [choosingKind, setChoosingKind] = useState<MergeChoiceKind | 'any' | null>(null);
     const { choices } = preview;
-    const presentKinds = ATTACHMENT_KINDS.filter(({ kind }) => attachments[kind].total > 0);
+    const presentKinds = ATTACHMENT_KINDS.filter(
+      ({ kind }) => attachments[kind].total > 0 || preview.attachments[kind].notCopied.length > 0
+    );
 
     return (
       <>
@@ -84,7 +104,8 @@ export const MergeAttachmentsSection = React.memo<MergeAttachmentsSectionProps>(
           <EuiPanel hasBorder paddingSize="none">
             {presentKinds.map(({ kind, title, getOverLimitMessage }) => {
               const summary = attachments[kind];
-              const isOverLimit = summary.overLimit > 0 && summary.max != null;
+              const isOverLimit = summary.overBy > 0 && summary.max != null;
+              const notCopiedMessages = getNotCopiedMessages(preview.attachments[kind]);
 
               return (
                 <EuiPanel
@@ -106,14 +127,31 @@ export const MergeAttachmentsSection = React.memo<MergeAttachmentsSectionProps>(
                       </EuiText>
                     </EuiFlexItem>
                     {isOverLimit && summary.max != null ? (
-                      <EuiFlexItem grow={false}>
-                        <EuiBadge
-                          color="warning"
-                          data-test-subj={`merge-cases-attachments-${kind}-over-limit`}
-                        >
-                          {i18n.OVER_LIMIT_BADGE(summary.toCopy + summary.existing, summary.max)}
-                        </EuiBadge>
-                      </EuiFlexItem>
+                      <>
+                        <EuiFlexItem grow={false}>
+                          <EuiBadge
+                            color="warning"
+                            iconType="warning"
+                            data-test-subj={`merge-cases-attachments-${kind}-over-limit`}
+                          >
+                            {i18n.OVER_LIMIT_BADGE(summary.toCopy + summary.existing, summary.max)}
+                          </EuiBadge>
+                        </EuiFlexItem>
+                        {choices != null ? (
+                          <EuiFlexItem grow={false}>
+                            <EuiButton
+                              size="s"
+                              color="warning"
+                              onClick={() => setChoosingKind(kind)}
+                              isDisabled={isDisabled}
+                              aria-label={i18n.CHOOSE_ATTACHMENTS_ARIA_LABEL(title)}
+                              data-test-subj={`merge-cases-attachments-${kind}-choose`}
+                            >
+                              {i18n.CHOOSE_ATTACHMENTS}
+                            </EuiButton>
+                          </EuiFlexItem>
+                        ) : null}
+                      </>
                     ) : null}
                   </EuiFlexGroup>
                   {isOverLimit && summary.max != null && getOverLimitMessage != null ? (
@@ -127,6 +165,16 @@ export const MergeAttachmentsSection = React.memo<MergeAttachmentsSectionProps>(
                       />
                     </>
                   ) : null}
+                  {notCopiedMessages.map((message) => (
+                    <EuiText
+                      key={message}
+                      size="xs"
+                      color="subdued"
+                      data-test-subj={`merge-cases-attachments-${kind}-not-copied`}
+                    >
+                      <EuiIcon type="info" aria-hidden={true} /> {message}
+                    </EuiText>
+                  ))}
                 </EuiPanel>
               );
             })}
@@ -138,7 +186,7 @@ export const MergeAttachmentsSection = React.memo<MergeAttachmentsSectionProps>(
             <EuiButton
               size="s"
               iconType="listBullet"
-              onClick={() => setIsChoosing(true)}
+              onClick={() => setChoosingKind('any')}
               isDisabled={isDisabled}
               data-test-subj="merge-cases-choose-attachments"
             >
@@ -146,17 +194,18 @@ export const MergeAttachmentsSection = React.memo<MergeAttachmentsSectionProps>(
             </EuiButton>
           </>
         ) : null}
-        {isChoosing && choices != null ? (
+        {choosingKind != null && choices != null ? (
           <MergeAttachmentsModal
             choices={choices}
             attachments={preview.attachments}
             casesById={casesById}
             excludedKeys={excludedKeys}
+            initialKind={choosingKind === 'any' ? undefined : choosingKind}
             onApply={(keys) => {
               onChangeExclusions(keys);
-              setIsChoosing(false);
+              setChoosingKind(null);
             }}
-            onClose={() => setIsChoosing(false)}
+            onClose={() => setChoosingKind(null)}
           />
         ) : null}
         <EuiSpacer size="s" />

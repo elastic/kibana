@@ -65,4 +65,9 @@ export interface CaseRoute<P = unknown, Q = unknown, B = unknown> {
    * By default cases does not use this.
    */
   security?: RouteSecurity;
+  /**
+   * Registers the route on the versioned router at this version, with `params` validating the
+   * request. Callers send it in the `elastic-api-version` header.
+   */
+  version?: string;
 }

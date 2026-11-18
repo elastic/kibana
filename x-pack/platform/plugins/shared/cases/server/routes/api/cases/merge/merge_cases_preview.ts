@@ -5,11 +5,17 @@
  * 2.0.
  */
 
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type {
   MergeCasesPreviewRequest,
   MergeCasesPreviewResponse,
 } from '../../../../../common/types/api';
-import { INTERNAL_MERGE_CASES_PREVIEW_URL } from '../../../../../common/constants';
+import { MergeCasesPreviewRequestSchema } from '../../../../../common/types/api';
+import {
+  INTERNAL_MERGE_CASES_PREVIEW_URL,
+  MERGE_CASES_API_VERSION,
+  MERGE_CASES_MAX_BODY_BYTES,
+} from '../../../../../common/constants';
 import { createCaseError } from '../../../../common/error';
 import { createCasesRoute } from '../../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../../constants';
@@ -22,12 +28,17 @@ export const mergeCasesPreviewRoute = createCasesRoute({
   method: 'post',
   path: INTERNAL_MERGE_CASES_PREVIEW_URL,
   security: DEFAULT_CASES_ROUTE_SECURITY,
+  version: MERGE_CASES_API_VERSION,
+  params: {
+    body: buildRouteValidationWithZod(MergeCasesPreviewRequestSchema),
+  },
   routerOptions: {
     access: 'internal',
     summary: 'Preview a case merge',
     description:
-      'Shows what merging the cases would do, without changing anything: the suggested title, description, severity, category, tags, and assignees, how many alerts, events, observables, and other attachments would be copied, and whether a per-case limit would be exceeded. When a limit is exceeded, the response lists every attachment the merge would copy, with the keys to pass in `excludedAttachments` to leave some out. You must have read access to every case.',
+      'A dry run of a merge, taking the same `fields` and `attachments` as the merge and changing nothing. It returns the suggested value of every field with the cases that hold each value, the conflicts the merge would refuse until `fields` gives a value for each, how many alerts, events, attacks, observables, and other attachments would be copied, and whether a per-case limit would be exceeded. When a limit is exceeded, the response lists every item the merge would copy, with the keys to pass in `attachments` to leave some out. You must have read access to every case.',
     tags: ['oas-tag:cases'],
+    body: { maxBytes: MERGE_CASES_MAX_BODY_BYTES },
   },
   handler: async ({ context, request, response }) => {
     try {

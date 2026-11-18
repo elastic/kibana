@@ -23,6 +23,7 @@ import { getAllAttachmentsStepCommonDefinition } from '../../common/workflows/st
 import { getCaseStepCommonDefinition } from '../../common/workflows/steps/get_case';
 import { getCasesByAlertIdStepCommonDefinition } from '../../common/workflows/steps/get_cases_by_alert_id';
 import { getCasesStepCommonDefinition } from '../../common/workflows/steps/get_cases';
+import { mergeCasesStepCommonDefinition } from '../../common/workflows/steps/merge_cases';
 import { pushCasesStepCommonDefinition } from '../../common/workflows/steps/push_cases';
 import { setDescriptionStepCommonDefinition } from '../../common/workflows/steps/set_description';
 import { setExtendedFieldsStepCommonDefinition } from '../../common/workflows/steps/set_extended_fields';
@@ -77,6 +78,10 @@ export const findCasesStepDefinition = createPublicCaseStepDefinition({
 
 export const findSimilarCasesStepDefinition = createPublicCaseStepDefinition({
   ...findSimilarCasesStepCommonDefinition,
+});
+
+export const mergeCasesStepDefinition = createPublicCaseStepDefinition({
+  ...mergeCasesStepCommonDefinition,
 });
 
 export const getCaseStepDefinition = createPublicCaseStepDefinition({

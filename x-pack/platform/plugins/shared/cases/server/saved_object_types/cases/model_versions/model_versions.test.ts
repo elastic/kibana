@@ -284,8 +284,15 @@ describe('Model versions', () => {
         Array [
           Object {
             "addedMappings": Object {
-              "merged_into": Object {
-                "type": "keyword",
+              "merge": Object {
+                "properties": Object {
+                  "closed_by_merge": Object {
+                    "type": "boolean",
+                  },
+                  "merged_at": Object {
+                    "type": "date",
+                  },
+                },
               },
             },
             "type": "mappings_addition",
@@ -294,16 +301,21 @@ describe('Model versions', () => {
       `);
     });
 
-    it('keeps merged_into on create', () => {
+    it('keeps the merge marker on create', () => {
+      const createSchema = modelVersion12.schemas?.create;
+      const merge = { merged_at: '2026-01-01T00:00:00.000Z', closed_by_merge: true };
+
+      expect(createSchema?.validate({ ...basicESCaseFields, total_observables: 0, merge })).toEqual(
+        expect.objectContaining({ merge })
+      );
+    });
+
+    it('accepts a cleared merge marker', () => {
       const createSchema = modelVersion12.schemas?.create;
 
       expect(
-        createSchema?.validate({
-          ...basicESCaseFields,
-          total_observables: 0,
-          merged_into: ['destination-1', 'destination-2'],
-        })
-      ).toEqual(expect.objectContaining({ merged_into: ['destination-1', 'destination-2'] }));
+        createSchema?.validate({ ...basicESCaseFields, total_observables: 0, merge: null })
+      ).toEqual(expect.objectContaining({ merge: null }));
     });
   });
 });

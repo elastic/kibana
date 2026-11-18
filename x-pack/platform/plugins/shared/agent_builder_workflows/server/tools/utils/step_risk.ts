@@ -60,6 +60,8 @@ const HANDWRITTEN_RISKS: ReadonlyMap<string, StepRisk> = new Map(
     'cases.findSimilarCases': SAFE,
     'cases.getAllAttachments': SAFE,
     'cases.getCasesByAlertId': SAFE,
+    // Closes the source cases, but they keep everything and a merge can be undone by hand.
+    'cases.mergeCases': UNSAFE,
     'cases.deleteCases': DESTRUCTIVE,
     'cases.deleteObservable': DESTRUCTIVE,
     'cases.deleteAttachments': DESTRUCTIVE,

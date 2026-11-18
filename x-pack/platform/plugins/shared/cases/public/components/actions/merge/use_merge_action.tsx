@@ -10,7 +10,7 @@ import { EuiIcon, EuiTextColor } from '@elastic/eui';
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import type { CasesUI } from '../../../containers/types';
 import { useCasesContext } from '../../cases_context/use_cases_context';
-import { getMergeDisabledReason } from '../../merge_cases/utils';
+import { canMergeCases, getMergeDisabledReason } from '../../merge_cases/utils';
 import { MERGE_CASES } from '../../merge_cases/translations';
 
 interface UseMergeActionProps {
@@ -21,7 +21,7 @@ interface UseMergeActionProps {
 }
 
 export interface UseMergeActionResult {
-  /** Merging creates or updates a case and copies attachments into it. */
+  /** Merging updates cases and copies attachments into one; a new case also needs create. */
   canMerge: boolean;
   getAction: (selectedCases: CasesUI) => EuiContextMenuPanelItemDescriptor;
   isFlyoutOpen: boolean;
@@ -36,7 +36,7 @@ export const useMergeAction = ({
 }: UseMergeActionProps): UseMergeActionResult => {
   const { permissions } = useCasesContext();
   const [casesToMerge, setCasesToMerge] = useState<CasesUI | null>(null);
-  const canMerge = permissions.create && permissions.update && permissions.createComment;
+  const canMerge = canMergeCases(permissions);
 
   const getAction = useCallback(
     (selectedCases: CasesUI): EuiContextMenuPanelItemDescriptor => {

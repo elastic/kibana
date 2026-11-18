@@ -119,7 +119,7 @@ const buildFullAttributes = (): {
   // Server-owned and telemetry-only: `buildCaseDoc` does not emit it, so Layer 1 stays unaffected.
   extract_observables_source: 'rule',
   // Not emitted by `buildCaseDoc` yet: merged cases are not modelled in analytics v2.
-  merged_into: ['destination-case-id'],
+  merge: { merged_at: '2026-05-03T00:00:00.000Z', closed_by_merge: true },
 });
 
 const fullCaseSO = (): SavedObject<CasePersistedAttributes> =>

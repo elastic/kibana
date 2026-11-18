@@ -145,4 +145,51 @@ describe('ConnectorReferenceHandler', () => {
       `);
     });
   });
+
+  describe('references this handler does not manage', () => {
+    const mergedInto = (id: string) => ({ id, type: 'cases', name: 'merged-into' });
+
+    it('keeps every reference with a name it does not manage, even when names repeat', () => {
+      const handler = new ConnectorReferenceHandler([{ id: 'jira', type: 'action', name: 'a' }]);
+
+      expect(
+        handler.build([
+          { id: 'old', type: 'action', name: 'a' },
+          mergedInto('case-1'),
+          mergedInto('case-2'),
+        ])
+      ).toEqual([
+        { id: 'jira', type: 'action', name: 'a' },
+        mergedInto('case-1'),
+        mergedInto('case-2'),
+      ]);
+    });
+
+    it('replaces every reference of a managed list', () => {
+      const handler = new ConnectorReferenceHandler(
+        [],
+        [{ name: 'merged-into', type: 'cases', ids: ['case-1', 'case-3'] }]
+      );
+
+      expect(
+        handler.build([
+          { id: 'jira', type: 'action', name: 'a' },
+          mergedInto('case-1'),
+          mergedInto('case-2'),
+        ])
+      ).toEqual([
+        { id: 'jira', type: 'action', name: 'a' },
+        mergedInto('case-1'),
+        mergedInto('case-3'),
+      ]);
+    });
+
+    it('leaves a list alone when its ids are not given', () => {
+      const handler = new ConnectorReferenceHandler([], [{ name: 'merged-into', type: 'cases' }]);
+      const original = [mergedInto('case-1')];
+
+      expect(handler.hasChanges()).toBe(false);
+      expect(handler.build(original)).toBe(original);
+    });
+  });
 });

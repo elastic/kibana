@@ -57,7 +57,7 @@ const sanitizeQueryParams = (
 const sanitizeFilterOptions = (
   filterOptions: PartialState['filterOptions'] = {}
 ): PartialState['filterOptions'] => {
-  const { status, severity, ...restFilterOptions } = filterOptions;
+  const { status, severity, merged, ...restFilterOptions } = filterOptions;
 
   const filterOptionsSanitized: PartialState['filterOptions'] = {
     ...restFilterOptions,
@@ -69,6 +69,12 @@ const sanitizeFilterOptions = (
 
   if (severity) {
     filterOptionsSanitized.severity = filterOutOptions(severity, CaseSeverity);
+  }
+
+  if (merged) {
+    filterOptionsSanitized.merged = merged.filter(
+      (value) => value === 'only' || value === 'exclude'
+    );
   }
 
   return filterOptionsSanitized;

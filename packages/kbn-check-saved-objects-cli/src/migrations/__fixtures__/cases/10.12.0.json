@@ -174,10 +174,7 @@
       "settings": {
         "extractObservables": false
       },
-      "extract_observables_source": "fixture",
-      "merged_into": [
-        "fixture-destination-case-id"
-      ]
+      "extract_observables_source": "fixture"
     }
   ]
 }

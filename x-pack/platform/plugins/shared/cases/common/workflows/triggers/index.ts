@@ -6,10 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import { Owner as OwnerSchema } from '../../bundled-types.gen';
 import {
+  MAX_CASES_TO_MERGE,
+  MAX_CASE_ID_LENGTH,
   MAX_OBSERVABLE_TYPE_KEY_LENGTH,
   MAX_OBSERVABLES_PER_CASE,
   OBSERVABLE_ID_MAX_LENGTH,
@@ -18,6 +20,9 @@ import {
 } from '../../constants';
 import {
   CASE_TRIGGER_EVENT_SCHEMA_CASE_ID_DESCRIPTION,
+  CASE_TRIGGER_EVENT_SCHEMA_MERGE_DESCRIPTION,
+  CASE_TRIGGER_EVENT_SCHEMA_MERGE_DESTINATION_CASE_ID_DESCRIPTION,
+  CASE_TRIGGER_EVENT_SCHEMA_MERGE_SOURCE_CASE_IDS_DESCRIPTION,
   CASE_TRIGGER_EVENT_SCHEMA_OWNER_DESCRIPTION,
   CASE_UPDATED_TRIGGER_EVENT_SCHEMA_UPDATED_FIELDS_DESCRIPTION,
   ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_IDS_DESCRIPTION,
@@ -40,14 +45,30 @@ import {
 
 export const CaseCreatedTriggerId = 'cases.caseCreated' as const;
 
-const baseCaseEventSchema = z.object({
-  // We're adding `string()` to the union to allow for more lenient runtime checks in test envs.
-  // The OwnerSchema is still needed and should not be removed.
-  owner: z
-    .union([OwnerSchema, z.string().min(1).max(50)])
-    .meta({ description: CASE_TRIGGER_EVENT_SCHEMA_OWNER_DESCRIPTION }),
-  caseId: z.string().meta({ description: CASE_TRIGGER_EVENT_SCHEMA_CASE_ID_DESCRIPTION }),
-});
+const baseCaseEventSchema = lazySchema(() =>
+  z.object({
+    // We're adding `string()` to the union to allow for more lenient runtime checks in test envs.
+    // The OwnerSchema is still needed and should not be removed.
+    owner: z
+      .union([OwnerSchema, z.string().min(1).max(50)])
+      .meta({ description: CASE_TRIGGER_EVENT_SCHEMA_OWNER_DESCRIPTION }),
+    caseId: z.string().meta({ description: CASE_TRIGGER_EVENT_SCHEMA_CASE_ID_DESCRIPTION }),
+    merge: z
+      .object({
+        sourceCaseIds: z
+          .array(z.string().max(MAX_CASE_ID_LENGTH))
+          .max(MAX_CASES_TO_MERGE)
+          .meta({ description: CASE_TRIGGER_EVENT_SCHEMA_MERGE_SOURCE_CASE_IDS_DESCRIPTION }),
+        destinationCaseId: z
+          .string()
+          .max(MAX_CASE_ID_LENGTH)
+          .meta({ description: CASE_TRIGGER_EVENT_SCHEMA_MERGE_DESTINATION_CASE_ID_DESCRIPTION }),
+      })
+      .strict()
+      .optional()
+      .meta({ description: CASE_TRIGGER_EVENT_SCHEMA_MERGE_DESCRIPTION }),
+  })
+);
 
 export const caseCreatedTriggerCommonDefinition: CommonTriggerDefinition = {
   id: CaseCreatedTriggerId,
@@ -164,6 +185,21 @@ triggers:
           triggerId: CaseStatusUpdatedTriggerId,
         },
       }),
+      i18n.translate(
+        'xpack.cases.workflowTriggers.caseStatusUpdated.documentation.exampleSkipMerge',
+        {
+          defaultMessage: `## Skip cases closed by a merge
+\`\`\`yaml
+triggers:
+  - type: {triggerId}
+    on:
+      condition: 'event.status: "closed" and not event.merge.destinationCaseId: *'
+\`\`\``,
+          values: {
+            triggerId: CaseStatusUpdatedTriggerId,
+          },
+        }
+      ),
     ],
   },
 };

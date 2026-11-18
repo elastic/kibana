@@ -74,6 +74,7 @@ export const createCaseServiceMock = (): CaseServiceMock => {
     getCategories: jest.fn(),
     getCaseIdsByAttachmentSearch: jest.fn(),
     searchCases: jest.fn(),
+    removeMergedIntoReferences: jest.fn(),
   });
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
@@ -107,6 +108,7 @@ export const connectorMappingsServiceMock = (): ConnectorMappingsServiceMock => 
 const createUserActionPersisterServiceMock = (): CaseUserActionPersisterServiceMock => {
   const service: PublicMethodsOf<UserActionPersister> = lazyObject({
     bulkAuditLogCaseDeletion: jest.fn(),
+    auditLogMerge: jest.fn(),
     bulkCreateUpdateCase: jest.fn(),
     buildUserActions: jest.fn(),
     addSyncedAlertsCountToUserActions: jest.fn(),
@@ -164,6 +166,7 @@ export const createAlertServiceMock = (): AlertServiceMock => {
     confirmAlertIndices: jest.fn(),
     removeCaseIdFromAlerts: jest.fn(),
     removeCaseIdsFromAllAlerts: jest.fn(),
+    getAlertsMergeEligibility: jest.fn(),
   });
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error

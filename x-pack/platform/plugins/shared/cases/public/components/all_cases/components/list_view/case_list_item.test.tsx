@@ -75,6 +75,33 @@ describe('CaseListItem', () => {
     expect(screen.getByTestId('cases-list-item-alerts-badge')).toHaveTextContent('3');
   });
 
+  it('shows the merged badge as its own link, outside the title link', () => {
+    renderWithTestingProviders(
+      <CaseListItem
+        {...defaultProps}
+        theCase={{
+          ...mockCase,
+          merge: {
+            mergedInto: ['destination-id'],
+            mergedAt: '2025-01-18T14:12:31.000Z',
+            closedByMerge: true,
+          },
+        }}
+        mergeDestinations={
+          new Map([
+            ['destination-id', { id: 'destination-id', title: 'Phishing', incrementalId: 142 }],
+          ])
+        }
+      />
+    );
+
+    const badge = screen.getByTestId('case-merged-into-badge');
+    expect(badge).toHaveTextContent('Merged into #142');
+    expect(screen.getByTestId(`cases-list-item-clickable-${mockCase.id}`)).not.toContainElement(
+      badge
+    );
+  });
+
   it('does not render alerts badge when totalAlerts is 0', () => {
     renderWithTestingProviders(
       <CaseListItem {...defaultProps} theCase={{ ...mockCase, totalAlerts: 0 }} />

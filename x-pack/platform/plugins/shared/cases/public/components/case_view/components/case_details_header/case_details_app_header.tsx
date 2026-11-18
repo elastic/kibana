@@ -47,6 +47,7 @@ export const CaseDetailsAppHeader: FC<CaseDetailsAppHeaderProps> = ({
     badges,
     menu,
     runWorkflowModal,
+    mergeFlyout,
     isDeleteModalVisible,
     setIsDeleteModalVisible,
     onConfirmDeletion,
@@ -84,6 +85,7 @@ export const CaseDetailsAppHeader: FC<CaseDetailsAppHeaderProps> = ({
       />
       {closeCaseModal}
       {runWorkflowModal}
+      {mergeFlyout}
       {isDeleteModalVisible && (
         <ConfirmDeleteCaseModal
           totalCasesToBeDeleted={1}

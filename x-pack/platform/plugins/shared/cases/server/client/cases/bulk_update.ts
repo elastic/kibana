@@ -109,6 +109,7 @@ import {
   CLEAR_TEMPLATE_COUNTER,
   incrementCasesClientCounter,
 } from '../usage_counters';
+import { getMergeEventPayload } from '../../events/merge_payload';
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
  */
@@ -599,6 +600,14 @@ export interface BulkUpdateCasesOptions {
   skipAlertSync?: boolean;
   /** Updates the cases without writing user actions; the caller records the change itself. */
   skipUserActions?: boolean;
+  /**
+   * Closes the cases without checking their required-on-close template fields, and only that
+   * check. Used by merge: the investigation goes on in the destination, which is checked when it
+   * closes. Like `relaxRequiredFields` on bulk create, no route, workflow step or UI can set it.
+   */
+  skipRequiredOnClose?: boolean;
+  /** Records on the merge marker that this update closed the case as part of a merge. */
+  markClosedByMerge?: boolean;
 }
 
 /**
@@ -858,6 +867,7 @@ export const bulkUpdate = async (
     const closingCasesTemplates = [
       ...new Map(
         casesToUpdate
+          .filter(() => options?.skipRequiredOnClose !== true)
           .filter(
             ({ updateReq, originalCase }) =>
               updateReq.status === CaseStatuses.closed &&
@@ -915,6 +925,7 @@ export const bulkUpdate = async (
       templatesService,
       fieldDefinitionsService,
       globalFieldsByOwner,
+      markClosedByMerge: options?.markClosedByMerge === true,
     });
 
     // Close-time required_on_close check must run against the exact extended_fields map that
@@ -927,6 +938,9 @@ export const bulkUpdate = async (
     // `patchCasesPayload.cases` is produced by mapping `casesToUpdate` 1:1 in order, so the two
     // arrays are index-aligned.
     casesToUpdate.forEach(({ updateReq, originalCase }, index) => {
+      if (options?.skipRequiredOnClose === true) {
+        return;
+      }
       const effectiveTemplate = getEffectiveTemplate(updateReq, originalCase);
       const templateKey =
         effectiveTemplate != null ? `${effectiveTemplate.id}@${effectiveTemplate.version}` : null;
@@ -1140,7 +1154,7 @@ export const bulkUpdate = async (
         {
           caseId: updatedCase.id,
           owner: updatedCase.owner as Owner,
-
+          ...getMergeEventPayload(clientArgs.mergeContext, updatedCase.id),
           ...(updatedFields != null ? { updatedFields } : {}),
         },
         { previousCase: casesMap.get(updatedCase.id), updatedCase }
@@ -1216,6 +1230,7 @@ const createPatchCasesPayload = async ({
   templatesService,
   fieldDefinitionsService,
   globalFieldsByOwner,
+  markClosedByMerge = false,
 }: {
   casesToUpdate: UpdateRequestWithOriginalCase[];
   user: User;
@@ -1227,6 +1242,7 @@ const createPatchCasesPayload = async ({
   fieldDefinitionsService: FieldDefinitionsService;
   /** Per-owner (isGlobal) field-definition cache; populated lazily for owners not pre-resolved by the caller. */
   globalFieldsByOwner: Map<string, InlineField[]>;
+  markClosedByMerge?: boolean;
 }): Promise<PatchCasesArgs> => {
   const updatedDt = new Date().toISOString();
 
@@ -1424,6 +1440,12 @@ const createPatchCasesPayload = async ({
             createdAt: originalCase.attributes.created_at,
             inProgressAt: originalCase.attributes.in_progress_at,
           }),
+          ...getMergeMarkerForUpdate({
+            originalCase,
+            status: trimmedCaseAttributes.status,
+            markClosedByMerge,
+            mergedAt: updatedDt,
+          }),
           updated_at: updatedDt,
           updated_by: user,
         },
@@ -1436,6 +1458,43 @@ const createPatchCasesPayload = async ({
     cases,
     refresh: false,
   };
+};
+
+/**
+ * Keeps the merge marker's `closed_by_merge` in step with the status: set when a merge closes the
+ * case, cleared when the case is reopened.
+ */
+const getMergeMarkerForUpdate = ({
+  originalCase,
+  status,
+  markClosedByMerge,
+  mergedAt,
+}: {
+  originalCase: CaseSavedObjectTransformed;
+  status?: CaseStatuses;
+  markClosedByMerge: boolean;
+  mergedAt: string;
+}): Partial<Pick<CaseAttributes, 'merge'>> => {
+  const { merge, status: originalStatus } = originalCase.attributes;
+  if (status == null || status === originalStatus) {
+    return {};
+  }
+
+  if (status === CaseStatuses.closed && markClosedByMerge) {
+    return {
+      merge: {
+        merged_into: merge?.merged_into ?? [],
+        merged_at: merge?.merged_at ?? mergedAt,
+        closed_by_merge: true,
+      },
+    };
+  }
+
+  if (originalStatus === CaseStatuses.closed && merge?.closed_by_merge === true) {
+    return { merge: { ...merge, closed_by_merge: false } };
+  }
+
+  return {};
 };
 
 const patchCases = async ({

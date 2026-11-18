@@ -481,3 +481,15 @@ export const ACTION_LICENSE_DISABLED_BY_CONFIG = i18n.translate(
       'External connectors are disabled in the Kibana configuration. Update xpack.actions.enabledActionTypes to enable them.',
   }
 );
+
+export const MERGED_FILTER = i18n.translate('xpack.cases.allCasesView.mergedFilter', {
+  defaultMessage: 'Merged',
+});
+
+export const HIDE_MERGED_CASES = i18n.translate('xpack.cases.allCasesView.hideMergedCases', {
+  defaultMessage: 'Hide merged cases',
+});
+
+export const ONLY_MERGED_CASES = i18n.translate('xpack.cases.allCasesView.onlyMergedCases', {
+  defaultMessage: 'Only merged cases',
+});

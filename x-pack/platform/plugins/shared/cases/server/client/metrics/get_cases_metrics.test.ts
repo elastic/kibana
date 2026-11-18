@@ -125,6 +125,28 @@ describe('getCasesMetrics', () => {
                   "function": "is",
                   "type": "function",
                 },
+                Object {
+                  "arguments": Array [
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "cases.attributes.merge.closed_by_merge",
+                        },
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "true",
+                        },
+                      ],
+                      "function": "is",
+                      "type": "function",
+                    },
+                  ],
+                  "function": "not",
+                  "type": "function",
+                },
               ],
               "function": "and",
               "type": "function",

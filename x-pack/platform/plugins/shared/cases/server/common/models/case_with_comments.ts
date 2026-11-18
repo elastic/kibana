@@ -618,17 +618,23 @@ export class CaseCommentModel {
     }
   }
 
-  private async handleAlertComments(attachments: UnifiedAttachmentPayload[]) {
+  private async handleAlertComments(
+    attachments: UnifiedAttachmentPayload[],
+    { skipStatusSync = false }: { skipStatusSync?: boolean } = {}
+  ) {
     const alertAttachments = attachments.filter((a) => isAlertAttachmentType(a.type));
 
-    await this.linkAlertsToCase(getAlertInfoFromComments(alertAttachments));
+    await this.linkAlertsToCase(getAlertInfoFromComments(alertAttachments), { skipStatusSync });
   }
 
-  private async linkAlertsToCase(alerts: AlertInfo[]) {
+  private async linkAlertsToCase(
+    alerts: AlertInfo[],
+    { skipStatusSync = false }: { skipStatusSync?: boolean } = {}
+  ) {
     if (alerts.length > 0) {
       await this.updateAlertsSchemaWithCaseInfo(alerts);
 
-      if (this.caseInfo.attributes.settings.syncAlerts) {
+      if (this.caseInfo.attributes.settings.syncAlerts && !skipStatusSync) {
         await this.updateAlertsStatus(alerts);
       }
     }
@@ -774,13 +780,16 @@ export class CaseCommentModel {
   /**
    * Creates the attachments that aren't duplicates. `attachments` holds the saved objects that were created.
    * `skipUserActions` is for callers that record the change in their own user action.
+   * `skipAlertStatusSync` links alerts and attacks without syncing their status to the case's.
    */
   public async bulkCreate({
     attachments,
     skipUserActions = false,
+    skipAlertStatusSync = false,
   }: {
     attachments: CommentRequestWithId;
     skipUserActions?: boolean;
+    skipAlertStatusSync?: boolean;
   }): Promise<{ model: CaseCommentModel; attachments: AttachmentSavedObjectTransformedV2[] }> {
     try {
       await this.validateCreateCommentRequest(attachments);
@@ -835,8 +844,12 @@ export class CaseCommentModel {
       await Promise.all([
         // Partial duplicates sync every requested alert id, including ids already on the case.
         // Full duplicates were not created, so `withoutErrors` drops them.
-        commentableCase.handleAlertComments(withoutErrors(attachments)),
-        commentableCase.handleAttackComments(withoutErrors(attachments)),
+        commentableCase.handleAlertComments(withoutErrors(attachments), {
+          skipStatusSync: skipAlertStatusSync,
+        }),
+        ...(skipAlertStatusSync
+          ? []
+          : [commentableCase.handleAttackComments(withoutErrors(attachments))]),
         ...(skipUserActions
           ? []
           : [this.bulkCreateCommentUserAction(withoutErrors(attachmentWithoutDuplicateAlerts))]),

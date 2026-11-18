@@ -46,6 +46,8 @@ import {
   patchObservable,
   deleteObservable,
   bulkDeleteObservables,
+  getMergeCasesPreview,
+  mergeCases,
 } from './api';
 
 import {
@@ -109,6 +111,36 @@ const postMock = jest.fn();
 mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock, post: postMock } });
 
 describe('Cases API', () => {
+  describe('merge', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue({});
+    });
+
+    it('previews through the versioned internal route', async () => {
+      const request = { caseIds: ['case-1', 'case-2'], fields: { template: null } };
+      await getMergeCasesPreview({ request, signal: abortCtrl.signal });
+
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_merge/_preview`, {
+        method: 'POST',
+        version: '1',
+        body: JSON.stringify(request),
+        signal: abortCtrl.signal,
+      });
+    });
+
+    it('merges through the versioned internal route', async () => {
+      const request = { caseIds: ['case-1', 'case-2'], closeSources: true };
+      await mergeCases({ request });
+
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_merge`, {
+        method: 'POST',
+        version: '1',
+        body: JSON.stringify(request),
+      });
+    });
+  });
+
   describe('deleteCases', () => {
     beforeEach(() => {
       fetchMock.mockClear();
@@ -233,6 +265,7 @@ describe('Cases API', () => {
           search: 'hello',
           owner: [SECURITY_SOLUTION_OWNER],
           category: [],
+          merged: [],
           customFields: {},
           extendedFieldFilters: [],
           from: DEFAULT_FROM_DATE,
@@ -259,6 +292,22 @@ describe('Cases API', () => {
         }),
         signal: abortCtrl.signal,
       });
+    });
+
+    it.each([
+      [['exclude' as const], { merged: 'exclude' }],
+      [['only' as const], { merged: 'only' }],
+      [['only' as const, 'exclude' as const], {}],
+      [[], {}],
+    ])('sends the Merged filter %j as %j', async (merged, expected) => {
+      await getCases({
+        filterOptions: { ...DEFAULT_FILTER_OPTIONS, merged },
+        queryParams: DEFAULT_QUERY_PARAMS,
+        signal: abortCtrl.signal,
+      });
+
+      const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+      expect(body.merged).toEqual((expected as { merged?: string }).merged);
     });
 
     it('should apply the severity field correctly (with severity value)', async () => {

@@ -33,6 +33,7 @@ import { useGetSupportedActionConnectors } from '../../containers/configure/use_
 import { initialData, useGetCases } from '../../containers/use_get_cases';
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetMergeDestinations } from '../../containers/use_get_merge_destinations';
+import { getLatestDestinationId } from '../merge_cases/utils';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { useCasesConfig } from '../../common/lib/kibana';
 import { getAllPermissionsExceptFrom } from '../../utils/permissions';
@@ -80,8 +81,15 @@ export const AllCasesList = React.memo<AllCasesListProps>(
 
     const [selectedCases, setSelectedCases] = useState<CasesUI>([]);
 
+    // Pickers that add alerts, timelines or visualizations to a case don't offer cases that were
+    // merged into another case and closed.
+    const casesFilterOptions = useMemo(
+      () =>
+        isSelectorView ? { ...filterOptions, merged: ['excludeClosed' as const] } : filterOptions,
+      [filterOptions, isSelectorView]
+    );
     const { data = initialData, isFetching: isLoadingCases } = useGetCases({
-      filterOptions,
+      filterOptions: casesFilterOptions,
       queryParams,
     });
 
@@ -122,7 +130,11 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     });
 
     const mergeDestinationIds = useMemo(
-      () => data.cases.flatMap(({ mergedInto }) => mergedInto ?? []),
+      () =>
+        data.cases.flatMap(({ merge }) => {
+          const destinationId = getLatestDestinationId(merge);
+          return destinationId != null ? [destinationId] : [];
+        }),
       [data.cases]
     );
     const { data: mergeDestinations = NO_MERGE_DESTINATIONS } =

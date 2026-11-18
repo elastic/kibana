@@ -18,7 +18,7 @@ import type {
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
 } from '@kbn/core/server';
-import { isSavedObjectErrorResult } from '@kbn/core/server';
+import { isSavedObjectErrorResult, SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { KueryNode } from '@kbn/es-query';
@@ -627,9 +627,20 @@ export class CasesService {
             order: { _key: 'asc' },
           },
         },
-        mttr: {
-          avg: {
-            field: `${CASE_SAVED_OBJECT}.duration`,
+        // Cases a merge closed are left out of MTTR; their investigation carries on in the
+        // destination. The status counts still see every case.
+        mttr_scope: {
+          filter: {
+            bool: {
+              must_not: [{ term: { [`${CASE_SAVED_OBJECT}.merge.closed_by_merge`]: true } }],
+            },
+          },
+          aggs: {
+            mttr: {
+              avg: {
+                field: `${CASE_SAVED_OBJECT}.duration`,
+              },
+            },
           },
         },
       },
@@ -638,7 +649,7 @@ export class CasesService {
     const aggregations = response.aggregations as
       | {
           statuses?: { buckets: Array<{ key: string; doc_count: number }> };
-          mttr?: { value: number | null };
+          mttr_scope?: { mttr?: { value: number | null } };
         }
       | undefined;
 
@@ -650,7 +661,7 @@ export class CasesService {
         'in-progress': statusBuckets?.get(CasePersistedStatus.IN_PROGRESS) ?? 0,
         closed: statusBuckets?.get(CasePersistedStatus.CLOSED) ?? 0,
       },
-      mttr: aggregations?.mttr?.value ?? null,
+      mttr: aggregations?.mttr_scope?.mttr?.value ?? null,
     };
   }
 
@@ -1272,7 +1283,11 @@ export class CasesService {
         transformedAttributes.attributes,
         {
           version,
-          references: builtReferences,
+          // Rewriting unchanged references from `originalCase` could drop a reference another
+          // write added since it was read, such as a merge destination.
+          references: transformedAttributes.referenceHandler.hasChanges()
+            ? builtReferences
+            : undefined,
           refresh,
         }
       );
@@ -1331,16 +1346,21 @@ export class CasesService {
           originalCase,
           esAttributes: attributes,
           references: builtReferences,
+          referencesChanged: referenceHandler.hasChanges(),
         };
       });
 
-      const bulkUpdate = perCaseUpdate.map(({ caseId, version, esAttributes, references }) => ({
-        type: CASE_SAVED_OBJECT,
-        id: caseId,
-        attributes: esAttributes,
-        references,
-        version,
-      }));
+      // Unchanged references are not rewritten from `originalCase`, which could drop a reference
+      // another write added since it was read, such as a merge destination.
+      const bulkUpdate = perCaseUpdate.map(
+        ({ caseId, version, esAttributes, references, referencesChanged }) => ({
+          type: CASE_SAVED_OBJECT,
+          id: caseId,
+          attributes: esAttributes,
+          ...(referencesChanged && { references }),
+          version,
+        })
+      );
 
       const updatedCases =
         await this.unsecuredSavedObjectsClient.bulkUpdate<CasePersistedAttributes>(bulkUpdate, {
@@ -1401,6 +1421,76 @@ export class CasesService {
       }) as SavedObjectsBulkUpdateResponse<CaseTransformedAttributes>;
     } catch (error) {
       this.log.error(`Error on UPDATE case ${cases.map((c) => c.caseId).join(', ')}: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Removes the `merged-into` references to deleted cases from the cases that point to them, and
+   * clears a case's merge marker once no destination is left. Best effort: a failure is logged and
+   * leaves a link to a case that no longer exists.
+   */
+  public async removeMergedIntoReferences(deletedCaseIds: string[]): Promise<void> {
+    if (deletedCaseIds.length === 0) {
+      return;
+    }
+
+    const deletedIds = new Set(deletedCaseIds);
+
+    try {
+      const finder =
+        this.unsecuredSavedObjectsClient.createPointInTimeFinder<CasePersistedAttributes>({
+          type: CASE_SAVED_OBJECT,
+          hasReference: deletedCaseIds.map((id) => ({ type: CASE_SAVED_OBJECT, id })),
+          hasReferenceOperator: 'OR',
+          perPage: 100,
+        });
+
+      try {
+        for await (const { saved_objects: casesPointingToDeleted } of finder.find()) {
+          for (const caseSavedObject of casesPointingToDeleted) {
+            await this.removeMergedIntoReferencesFromCase(caseSavedObject.id, deletedIds);
+          }
+        }
+      } finally {
+        await finder.close();
+      }
+    } catch (error) {
+      this.log.error(
+        `Failed to remove merge links to deleted cases [${deletedCaseIds.join(', ')}]: ${error}`
+      );
+    }
+  }
+
+  private async removeMergedIntoReferencesFromCase(
+    caseId: string,
+    deletedIds: ReadonlySet<string>,
+    attemptsLeft = 3
+  ): Promise<void> {
+    const theCase = await this.getCase({ id: caseId });
+    const { merge } = theCase.attributes;
+    if (merge == null) {
+      return;
+    }
+
+    const remaining = merge.merged_into.filter((id) => !deletedIds.has(id));
+    if (remaining.length === merge.merged_into.length) {
+      return;
+    }
+
+    try {
+      await this.patchCase({
+        caseId,
+        originalCase: theCase,
+        version: theCase.version,
+        updatedAttributes: {
+          merge: remaining.length > 0 ? { ...merge, merged_into: remaining } : null,
+        },
+      });
+    } catch (error) {
+      if (attemptsLeft > 1 && SavedObjectsErrorHelpers.isConflictError(error)) {
+        return this.removeMergedIntoReferencesFromCase(caseId, deletedIds, attemptsLeft - 1);
+      }
       throw error;
     }
   }

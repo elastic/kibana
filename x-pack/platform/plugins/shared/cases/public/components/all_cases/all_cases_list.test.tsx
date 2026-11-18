@@ -366,6 +366,18 @@ describe('AllCasesListGeneric', () => {
     expect(await casesTable.findByTitle('Actions')).toBeInTheDocument();
   });
 
+  it('does not offer cases that were merged and closed when picking a case', async () => {
+    renderWithTestingProviders(<AllCasesList isSelectorView={true} />);
+
+    await waitFor(() =>
+      expect(useGetCasesMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filterOptions: expect.objectContaining({ merged: ['excludeClosed'] }),
+        })
+      )
+    );
+  });
+
   it('should not render table utility bar when isSelectorView=true', async () => {
     renderWithTestingProviders(<AllCasesList isSelectorView={true} />);
 

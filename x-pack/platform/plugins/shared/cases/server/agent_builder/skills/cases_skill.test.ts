@@ -36,6 +36,7 @@ describe('buildCasesSkill', () => {
         platformCoreCasesTools.getAttachments,
         platformCoreCasesTools.manageAttachments,
         platformCoreCasesTools.observables,
+        platformCoreCasesTools.merge,
       ]);
     });
 

@@ -43,9 +43,3 @@ export const INVALID_CLOSE_REASON = (closeReason: string) =>
       'Invalid close reason: "{closeReason}". Must be one of the default close reasons or a configured custom close reason.',
     values: { closeReason },
   });
-
-export const MERGED_CASE_TITLE = (titles: string) =>
-  i18n.translate('xpack.cases.server.mergedCaseTitle', {
-    defaultMessage: 'Merged case: {titles}',
-    values: { titles },
-  });

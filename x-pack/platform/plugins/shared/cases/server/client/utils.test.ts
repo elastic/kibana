@@ -13,7 +13,9 @@ import { createSavedObjectsSerializerMock } from './mocks';
 import {
   arraysDifference,
   buildAttachmentRequestFromFileJSON,
+  buildClosedByMergeFilter,
   buildFilter,
+  buildMergedFilter,
   buildObservablesFieldsFilter,
   buildRangeFilter,
   constructQueryOptions,
@@ -337,6 +339,53 @@ describe('utils', () => {
           },
         }
       `);
+    });
+  });
+
+  describe('merge filters', () => {
+    const closed = CasePersistedStatus.CLOSED;
+
+    it('returns nothing when merged is not set', () => {
+      expect(buildMergedFilter(undefined)).toBeUndefined();
+      expect(buildClosedByMergeFilter(undefined)).toBeUndefined();
+    });
+
+    it.each([
+      ['only', 'cases.attributes.merge.merged_at: *'],
+      ['exclude', 'NOT cases.attributes.merge.merged_at: *'],
+      [
+        'excludeClosed',
+        `NOT (cases.attributes.merge.merged_at: * AND cases.attributes.status: ${closed})`,
+      ],
+    ] as const)('builds the %s merged filter', (merged, expected) => {
+      const filter = buildMergedFilter(merged);
+      expect(filter).toBeDefined();
+      expect(toKqlExpression(filter as KueryNode)).toBe(expected);
+    });
+
+    it.each([
+      ['only', 'cases.attributes.merge.closed_by_merge: true'],
+      ['exclude', 'NOT cases.attributes.merge.closed_by_merge: true'],
+    ] as const)('builds the %s closed-by-merge filter', (closedByMerge, expected) => {
+      const filter = buildClosedByMergeFilter(closedByMerge);
+      expect(filter).toBeDefined();
+      expect(toKqlExpression(filter as KueryNode)).toBe(expected);
+    });
+
+    it('combines the merge filters with the other filters', () => {
+      const { filter } = constructQueryOptions({
+        tags: 'tag1',
+        merged: 'exclude',
+        closedByMerge: 'exclude',
+      });
+      expect(toKqlExpression(filter as KueryNode)).toBe(
+        '(cases.attributes.tags: tag1 AND NOT cases.attributes.merge.merged_at: * AND NOT cases.attributes.merge.closed_by_merge: true)'
+      );
+    });
+
+    it('strips attributes from the merge filters for search', () => {
+      const { filter } = constructQueryOptions({ merged: 'only', searchType: 'search' });
+      expect(toKqlExpression(filter as KueryNode)).toBe('cases.merge.merged_at: *');
     });
   });
 

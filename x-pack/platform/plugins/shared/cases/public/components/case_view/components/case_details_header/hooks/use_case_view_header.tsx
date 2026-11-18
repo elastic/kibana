@@ -12,7 +12,7 @@ import { APP_MENU_TEST_SUBJECTS } from '@kbn/app-menu';
 import type { CaseSeverity, CaseStatuses } from '../../../../../../common/types/domain';
 import type { CaseUI } from '../../../../../../common';
 import type { OnUpdateFields } from '../../../types';
-import { useAllCasesNavigation } from '../../../../../common/navigation';
+import { useAllCasesNavigation, useCaseViewNavigation } from '../../../../../common/navigation';
 import { useCasesContext } from '../../../../cases_context/use_cases_context';
 import { useCasesFeatures } from '../../../../../common/use_cases_features';
 import { useCasesToast } from '../../../../../common/use_cases_toast';
@@ -33,6 +33,9 @@ import { getBadges } from '../utils/header_badges';
 import { getMenu } from '../utils/header_menu';
 import { useRunCaseWorkflow } from '../../../../workflows/use_run_case_workflow';
 import { RunCaseWorkflowModal } from '../../../../workflows/run_case_workflow_modal';
+import type { MergeCasesResponse } from '../../../../../../common/types/api';
+import { MergeCasesFlyout } from '../../../../merge_cases/merge_cases_flyout';
+import { canMergeCases } from '../../../../merge_cases/utils';
 
 /**
  * Returns an element that stays mounted while the settings popover is open. When the settings item
@@ -85,6 +88,24 @@ export const useCaseViewHeader = ({
     filterWorkflow: workflowFilterWorkflow,
     sortWorkflow: workflowSortWorkflow,
   } = useRunCaseWorkflow({ caseData });
+
+  const { navigateToCaseView } = useCaseViewNavigation();
+  const [isMergeFlyoutOpen, setIsMergeFlyoutOpen] = useState(false);
+  const canMerge = canMergeCases(permissions);
+  const openMergeFlyout = useCallback(() => setIsMergeFlyoutOpen(true), []);
+  const closeMergeFlyout = useCallback(() => setIsMergeFlyoutOpen(false), []);
+  const onMerged = useCallback(
+    ({ destination }: MergeCasesResponse) => {
+      setIsMergeFlyoutOpen(false);
+      // From a case page the user goes on in the destination.
+      if (destination.id === caseData.id) {
+        refreshCaseViewPage();
+        return;
+      }
+      navigateToCaseView({ detailName: destination.id });
+    },
+    [caseData.id, navigateToCaseView, refreshCaseViewPage]
+  );
 
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -239,8 +260,11 @@ export const useCaseViewHeader = ({
         onCopyId,
         onOpenDeleteModal,
         runWorkflow: { canRunWorkflow, onOpen: openRunWorkflowModal },
+        mergeCases: { canMerge, onOpen: openMergeFlyout },
       }),
     [
+      canMerge,
+      openMergeFlyout,
       addToChat,
       canRunWorkflow,
       openRunWorkflowModal,
@@ -268,6 +292,15 @@ export const useCaseViewHeader = ({
     />
   ) : null;
 
+  const mergeFlyout = isMergeFlyoutOpen ? (
+    <MergeCasesFlyout
+      initialCases={[caseData]}
+      origin="casePage"
+      onClose={closeMergeFlyout}
+      onMerged={onMerged}
+    />
+  ) : null;
+
   // Delete
   const onConfirmDeletion = useCallback(() => {
     setIsDeleteModalVisible(false);
@@ -284,6 +317,7 @@ export const useCaseViewHeader = ({
     badges,
     menu,
     runWorkflowModal,
+    mergeFlyout,
     isDeleteModalVisible,
     setIsDeleteModalVisible,
     onConfirmDeletion,

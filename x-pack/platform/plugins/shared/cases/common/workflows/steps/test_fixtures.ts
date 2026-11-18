@@ -370,3 +370,39 @@ export const pushCasesInputFixture = {
 export const pushCasesOutputFixture = {
   cases: [createCaseResponseFixture],
 };
+
+const emptyMergeCounts = { alerts: 0, events: 0, attacks: 0, observables: 0, other: 0 };
+
+export const mergeCasesInputFixture = {
+  case_ids: ['case-1', 'case-2'],
+  fields: { title: 'Merged case', severity: 'high' },
+  attachments: { alerts: { mode: 'newest' } },
+};
+
+export const mergeCasesOutputFixture = {
+  destination: { id: 'case-3', title: 'Merged case', incrementalId: null, isNew: true },
+  sources: [
+    {
+      caseId: 'case-1',
+      title: 'First',
+      incrementalId: 1,
+      outcome: 'merged',
+      closed: true,
+      copied: { ...emptyMergeCounts, alerts: 2 },
+      existing: emptyMergeCounts,
+      leftOut: emptyMergeCounts,
+    },
+    {
+      caseId: 'case-2',
+      title: 'Second',
+      incrementalId: 2,
+      outcome: 'notMerged',
+      closed: false,
+      copied: emptyMergeCounts,
+      existing: emptyMergeCounts,
+      leftOut: emptyMergeCounts,
+    },
+  ],
+  failures: [{ step: 'copy', caseId: 'case-2', reason: 'boom' }],
+  closedCaseIds: ['case-1'],
+};

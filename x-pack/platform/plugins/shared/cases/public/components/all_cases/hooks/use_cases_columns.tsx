@@ -42,6 +42,7 @@ import { useGetCaseConfiguration } from '../../../containers/configure/use_get_c
 import { IncrementalIdText } from '../../incremental_id';
 import { severities } from '../../severity/config';
 import { MergedIntoBadge } from '../../merge_cases/merged_into_badge';
+import { getLatestDestinationId } from '../../merge_cases/utils';
 
 type CasesColumns = EuiBasicTableColumn<CaseUI>;
 
@@ -297,18 +298,18 @@ export const useCasesColumns = ({
             return getEmptyCellValue();
           }
 
-          const { mergedInto } = theCase;
-          if (mergedInto == null || mergedInto.length === 0) {
+          const { merge } = theCase;
+          if (getLatestDestinationId(merge) == null) {
             return <Status status={status} />;
           }
 
           return (
-            <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexStart">
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
               <EuiFlexItem grow={false}>
                 <Status status={status} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <MergedIntoBadge destinationIds={mergedInto} destinations={mergeDestinations} />
+                <MergedIntoBadge merge={merge} destinations={mergeDestinations} />
               </EuiFlexItem>
             </EuiFlexGroup>
           );

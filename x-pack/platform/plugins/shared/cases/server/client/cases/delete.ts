@@ -84,6 +84,9 @@ export async function deleteCases(
       alertsService.removeCaseIdsFromAllAlerts({ caseIds: ids }),
     ]);
 
+    // Cases merged into a deleted case stop linking to it. Never throws.
+    await caseService.removeMergedIntoReferences(ids);
+
     await userActionService.creator.bulkAuditLogCaseDeletion(
       cases.saved_objects.map((caseInfo) => caseInfo.id)
     );

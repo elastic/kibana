@@ -165,6 +165,26 @@ describe('bulkCreate', () => {
     );
   });
 
+  it('does not extract observables when skipObservableExtraction is set', async () => {
+    registerCommentType();
+    const theCase = { ...mockCases[0], id: caseId };
+    caseService.getCase.mockResolvedValue(theCase);
+    caseService.patchCase.mockResolvedValue(theCase);
+    attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+      new Map([[caseId, { alerts: 0, userComments: 0, events: 0 }]])
+    );
+    attachmentService.bulkCreate.mockResolvedValue({
+      saved_objects: [mockCaseUnifiedAttachments[0]],
+    });
+
+    await bulkCreate({ attachments: [comment], caseId }, clientArgs, {
+      skipUserActions: true,
+      skipObservableExtraction: true,
+    });
+
+    expect(extractAndAddObservablesMock).not.toHaveBeenCalled();
+  });
+
   it('skips the user actions and their limit when skipUserActions is set', async () => {
     registerCommentType();
     userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({

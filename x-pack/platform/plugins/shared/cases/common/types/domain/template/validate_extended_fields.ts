@@ -325,3 +325,63 @@ export const validateExtendedFields = (
 
   return errors;
 };
+
+/** A template field whose value a write would reject. */
+export interface ExtendedFieldIssue {
+  /** Storage key, `<name>_as_<type>`. */
+  key: string;
+  reason: 'required' | 'invalid';
+  message: string;
+}
+
+/**
+ * Per-field version of `validateExtendedFields` for a complete map: which fields are empty but
+ * required (including `required_when`) and which hold a value the field does not accept. Hidden
+ * fields (`show_when`) are skipped, and unknown keys are not reported.
+ */
+export const getExtendedFieldIssues = (
+  extendedFields: Record<string, string>,
+  fields: InlineField[]
+): ExtendedFieldIssue[] => {
+  const inlineFields = fields.filter((field) => !isDisplayOnlyField(field));
+  const fieldValues: Record<string, string | undefined> = {};
+  const fieldTypeMap: Record<string, string> = {};
+  const fieldControlMap: Record<string, string> = {};
+  for (const field of inlineFields) {
+    fieldValues[field.name] = extendedFields[getFieldSnakeKey(field.name, field.type)];
+    fieldTypeMap[field.name] = field.type;
+    fieldControlMap[field.name] = field.control;
+  }
+
+  return inlineFields.flatMap((field): ExtendedFieldIssue[] => {
+    const key = getFieldSnakeKey(field.name, field.type);
+    const isHidden =
+      field.display?.show_when != null &&
+      !evaluateCondition(field.display.show_when, fieldValues, fieldTypeMap, fieldControlMap);
+    if (isHidden) {
+      return [];
+    }
+
+    const value = fieldValues[field.name];
+    const isArrayField =
+      field.control === FieldType.CHECKBOX_GROUP || field.control === FieldType.USER_PICKER;
+    if (value === undefined || value === '' || (isArrayField && value === '[]')) {
+      const isRequired =
+        field.validation?.required === true ||
+        (field.validation?.required_when != null &&
+          evaluateCondition(
+            field.validation.required_when,
+            fieldValues,
+            fieldTypeMap,
+            fieldControlMap
+          ));
+      return isRequired
+        ? [{ key, reason: 'required', message: `Field "${field.label ?? field.name}" is required` }]
+        : [];
+    }
+
+    const errors: string[] = [];
+    validateField(field, value, errors);
+    return errors.map((message) => ({ key, reason: 'invalid', message }));
+  });
+};

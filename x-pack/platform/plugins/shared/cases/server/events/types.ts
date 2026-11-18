@@ -12,8 +12,15 @@ import type { Owner } from '../../common/constants/types';
 /**
  * Event: case created
  */
+/** Set on events fired by the writes of a merge, so workflows can tell those changes apart. */
+export interface CaseMergeEventPayload {
+  readonly sourceCaseIds: string[];
+  readonly destinationCaseId: string;
+}
+
 interface BaseCaseEventPayload {
   readonly owner: Owner;
+  readonly merge?: CaseMergeEventPayload;
 }
 
 export interface CaseCreatedEventPayload extends BaseCaseEventPayload {

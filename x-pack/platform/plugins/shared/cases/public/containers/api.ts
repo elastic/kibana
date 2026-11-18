@@ -300,6 +300,12 @@ const removeOptionFromFilter = ({
   return resultingFilterOptions.length === 0 ? {} : { [filterKey]: resultingFilterOptions };
 };
 
+/** Sends the Merged filter only when exactly one of its options is picked. */
+const getMergedFilter = (
+  merged: FilterOptions['merged'] | undefined
+): { merged?: FilterOptions['merged'][number] } =>
+  merged?.length === 1 ? { merged: merged[0] } : {};
+
 export const getCases = async ({
   filterOptions = {
     search: '',
@@ -311,6 +317,7 @@ export const getCases = async ({
     tags: [],
     owner: [],
     category: [],
+    merged: [],
     customFields: {},
     extendedFieldFilters: [],
     from: DEFAULT_FROM_DATE,
@@ -342,6 +349,7 @@ export const getCases = async ({
     ...(filterOptions.searchFields.length > 0 ? { searchFields: filterOptions.searchFields } : {}),
     ...(filterOptions.owner.length > 0 ? { owner: filterOptions.owner } : {}),
     ...(filterOptions.category.length > 0 ? { category: filterOptions.category } : {}),
+    ...getMergedFilter(filterOptions.merged),
     ...constructCustomFieldsFilter(filterOptions.customFields),
     ...(filterOptions.extendedFieldFilters && filterOptions.extendedFieldFilters.length > 0
       ? { extendedFieldFilters: filterOptions.extendedFieldFilters }
@@ -761,6 +769,9 @@ export const getSimilarCases = async ({
   return convertSimilarCasesToCamel(decodeCasesSimilarResponse(response));
 };
 
+/** The merge routes are versioned internal routes. */
+const MERGE_CASES_API_VERSION = '1';
+
 export const getMergeCasesPreview = async ({
   request,
   signal,
@@ -770,6 +781,7 @@ export const getMergeCasesPreview = async ({
 }): Promise<MergeCasesPreviewResponse> =>
   KibanaServices.get().http.fetch<MergeCasesPreviewResponse>(INTERNAL_MERGE_CASES_PREVIEW_URL, {
     method: 'POST',
+    version: MERGE_CASES_API_VERSION,
     body: JSON.stringify(request),
     signal,
   });
@@ -781,5 +793,6 @@ export const mergeCases = async ({
 }): Promise<MergeCasesResponse> =>
   KibanaServices.get().http.fetch<MergeCasesResponse>(INTERNAL_MERGE_CASES_URL, {
     method: 'POST',
+    version: MERGE_CASES_API_VERSION,
     body: JSON.stringify(request),
   });

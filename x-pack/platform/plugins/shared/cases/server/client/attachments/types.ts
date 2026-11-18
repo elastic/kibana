@@ -44,6 +44,16 @@ export interface BulkCreateAttachmentsOptions {
    * action.
    */
   skipUserActions?: boolean;
+  /**
+   * Links alerts and attacks to the case without syncing their status to the case's status.
+   * Used by merge: copied alerts keep the status they have.
+   */
+  skipAlertStatusSync?: boolean;
+  /**
+   * Skips extracting observables from the created attachments. Used by merge, which copies the
+   * source cases' observables as they are.
+   */
+  skipObservableExtraction?: boolean;
 }
 
 /**

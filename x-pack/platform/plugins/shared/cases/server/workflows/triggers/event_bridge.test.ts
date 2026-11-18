@@ -19,7 +19,12 @@ import {
   CaseStatusUpdatedTriggerId,
   ExtendedFieldsUpdatedTriggerId,
   ObservablesAddedTriggerId,
+  caseCreatedTriggerCommonDefinition,
+  caseStatusUpdatedTriggerCommonDefinition,
+  observablesAddedTriggerCommonDefinition,
 } from '../../../common/workflows/triggers';
+import type { Case } from '../../../common/types/domain';
+import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { CasesEventBus } from '../../events/event_bus';
 import { registerCasesWorkflowEventBridge } from './event_bridge';
 
@@ -112,6 +117,69 @@ describe('registerCasesWorkflowEventBridge', () => {
       previousStatus: 'in-progress',
       status: 'closed',
     });
+  });
+
+  it('carries the merge on every trigger a merge write fires', async () => {
+    const merge = { sourceCaseIds: ['case-1', 'case-2'], destinationCaseId: 'case-3' };
+    const previousCase = {
+      attributes: { status: 'open', extended_fields: {} },
+    } as unknown as CaseSavedObjectTransformed;
+    const updatedCase = {
+      status: 'closed',
+      extended_fields: { risk_as_keyword: 'high' },
+    } as unknown as Case;
+
+    eventBus.emitCaseUpdated(
+      request,
+      { caseId: 'case-1', owner: 'securitySolution', updatedFields: ['status'], merge },
+      { previousCase, updatedCase }
+    );
+    eventBus.emitAttachmentsAdded(request, {
+      caseId: 'case-3',
+      ids: ['comment-1'],
+      attachmentType: 'user',
+      owner: 'securitySolution',
+      merge,
+    });
+
+    await flushMicrotasks();
+
+    const forwarded = (mockClient.emitEvent as jest.Mock).mock.calls.map(
+      ([triggerId, payload]: [string, { merge?: typeof merge }]) => [triggerId, payload.merge]
+    );
+    expect(forwarded).toEqual([
+      [CaseUpdatedTriggerId, merge],
+      [CaseStatusUpdatedTriggerId, merge],
+      [ExtendedFieldsUpdatedTriggerId, merge],
+      [AttachmentsAddedTriggerId, merge],
+      [CommentsAddedTriggerId, merge],
+    ]);
+  });
+
+  it('accepts the merge in every trigger event schema', () => {
+    const merge = { sourceCaseIds: ['case-1'], destinationCaseId: 'case-3' };
+    const base = { caseId: 'case-1', owner: 'securitySolution', merge };
+
+    expect(
+      caseStatusUpdatedTriggerCommonDefinition.eventSchema.safeParse({
+        ...base,
+        status: 'closed',
+        previousStatus: 'open',
+      }).success
+    ).toBe(true);
+    expect(
+      observablesAddedTriggerCommonDefinition.eventSchema.safeParse({
+        ...base,
+        observableIds: ['o-1'],
+        observableTypeKeys: ['ipv4'],
+      }).success
+    ).toBe(true);
+    expect(
+      caseCreatedTriggerCommonDefinition.eventSchema.safeParse({
+        ...base,
+        merge: { ...merge, unexpected: true },
+      }).success
+    ).toBe(false);
   });
 
   it('changes the legacy `user` attachment type to `comment`', async () => {

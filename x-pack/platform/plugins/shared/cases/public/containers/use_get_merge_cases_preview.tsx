@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import type { MergeCasesPreviewResponse } from '../../common/types/api';
+import type { MergeCasesPreviewResponse, MergeFieldsRequest } from '../../common/types/api';
 import { useCasesToast } from '../common/use_cases_toast';
 import type { ServerError } from '../types';
 import { getMergeCasesPreview } from './api';
@@ -16,15 +16,26 @@ import * as i18n from './translations';
 export const useGetMergeCasesPreview = ({
   caseIds,
   destinationCaseId,
+  fields,
 }: {
   caseIds: string[];
   destinationCaseId?: string;
+  /** The template choice and the field values the template checks. */
+  fields?: MergeFieldsRequest;
 }) => {
   const { showErrorToast } = useCasesToast();
 
   return useQuery<MergeCasesPreviewResponse, ServerError>(
-    casesQueriesKeys.mergePreview(caseIds, destinationCaseId),
-    ({ signal }) => getMergeCasesPreview({ request: { caseIds, destinationCaseId }, signal }),
+    casesQueriesKeys.mergePreview(caseIds, destinationCaseId, fields),
+    ({ signal }) =>
+      getMergeCasesPreview({
+        request: {
+          caseIds,
+          ...(destinationCaseId != null ? { destinationCaseId } : {}),
+          ...(fields != null ? { fields } : {}),
+        },
+        signal,
+      }),
     {
       enabled: caseIds.length > 1,
       keepPreviousData: true,

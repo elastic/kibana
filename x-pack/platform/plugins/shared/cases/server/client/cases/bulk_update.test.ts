@@ -4709,6 +4709,96 @@ describe('update', () => {
       expect(clientArgs.services.caseService.patchCases).not.toHaveBeenCalled();
     });
 
+    it('closes a case with an empty required-on-close field for a merge, and marks it closed by merge', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      setupCloseMocks(clientArgs, { originalExtendedFields: {} });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              status: CaseStatuses.closed,
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock3,
+        { skipAlertSync: true, skipRequiredOnClose: true, markClosedByMerge: true }
+      );
+
+      const { updatedAttributes } =
+        clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0];
+      expect(updatedAttributes).toEqual(
+        expect.objectContaining({
+          status: CaseStatuses.closed,
+          merge: expect.objectContaining({ merged_into: [], closed_by_merge: true }),
+        })
+      );
+      expect(updatedAttributes).not.toHaveProperty('closeReason');
+    });
+
+    it('still checks required-on-close fields without the merge option', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      setupCloseMocks(clientArgs, { originalExtendedFields: {} });
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                status: CaseStatuses.closed,
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock3,
+          { markClosedByMerge: true }
+        )
+      ).rejects.toThrow(/required fields must be filled/);
+    });
+
+    it('clears closed_by_merge when a case closed by a merge is reopened', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      setupCloseMocks(clientArgs);
+      const merge = {
+        merged_into: ['destination-1'],
+        merged_at: '2026-01-01T00:00:00.000Z',
+        closed_by_merge: true,
+      };
+      clientArgs.services.caseService.getCases.mockResolvedValue({
+        saved_objects: [
+          {
+            ...mockCases[0],
+            attributes: { ...mockCases[0].attributes, status: CaseStatuses.closed, merge },
+          },
+        ],
+      });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              status: CaseStatuses.open,
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock3
+      );
+
+      expect(
+        clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes
+      ).toEqual(expect.objectContaining({ merge: { ...merge, closed_by_merge: false } }));
+    });
+
     it('rejects clear-and-close when the linked field is cleared via an empty extended_fields value', async () => {
       const clientArgs = createCasesClientMockArgs();
       clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };

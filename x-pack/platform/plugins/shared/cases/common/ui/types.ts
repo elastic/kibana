@@ -201,7 +201,14 @@ export interface SystemFilterOptions {
   reporters: User[];
   owner: string[];
   category: string[];
+  /**
+   * The case list's Merged filter: `exclude` hides merged cases, `only` shows only them, and
+   * `excludeClosed` (used by the add-to-case pickers) hides merged cases that are closed.
+   */
+  merged: CasesMergedFilter[];
 }
+
+export type CasesMergedFilter = 'only' | 'exclude' | 'excludeClosed';
 
 export interface ExtendedFieldFilter {
   label: string;

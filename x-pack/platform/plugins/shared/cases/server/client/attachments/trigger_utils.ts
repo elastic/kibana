@@ -10,6 +10,7 @@ import type { Owner } from '../../../common/constants/types';
 import { getAlertInfoFromComments, getEventInfoFromComments } from '../../common/utils';
 import type { AlertInfo } from '../../common/types';
 import type { CasesClientArgs } from '..';
+import { getMergeEventPayload } from '../../events/merge_payload';
 
 export function emitAttachmentsAddedEvent(
   clientArgs: CasesClientArgs,
@@ -22,6 +23,7 @@ export function emitAttachmentsAddedEvent(
     ids,
     attachmentType,
     owner: owner as Owner,
+    ...getMergeEventPayload(clientArgs.mergeContext, caseId),
   });
 }
 

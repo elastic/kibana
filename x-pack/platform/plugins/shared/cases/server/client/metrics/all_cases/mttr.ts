@@ -37,6 +37,8 @@ export class MTTR extends AllCasesAggregationHandler {
         from: this.from,
         to: this.to,
         owner: this.owner,
+        // Cases the merge closed are left out; a merged case a user closes later counts as usual.
+        closedByMerge: 'exclude',
         authorizationFilter,
       });
 

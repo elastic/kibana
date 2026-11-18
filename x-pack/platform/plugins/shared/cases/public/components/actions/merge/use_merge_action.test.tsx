@@ -40,11 +40,17 @@ describe('useMergeAction', () => {
   });
 
   describe('canMerge', () => {
-    it('is true with create, update, and comment permissions', () => {
+    it('does not need the create permission, which only a new destination needs', () => {
+      setPermissions({ create: false, update: true, createComment: true });
+
       expect(renderAction().result.current.canMerge).toBe(true);
     });
 
-    it.each(['create', 'update', 'createComment'] as const)(
+    it('is true with update and comment permissions', () => {
+      expect(renderAction().result.current.canMerge).toBe(true);
+    });
+
+    it.each(['update', 'createComment'] as const)(
       'is false without the %s permission',
       (permission) => {
         setPermissions({ create: true, update: true, createComment: true, [permission]: false });

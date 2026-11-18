@@ -10,6 +10,7 @@ import type { Observable } from '../../../common/types/domain';
 import type { ObservablesAddedEventPayload } from '../../events/types';
 import type { CasesClientArgs } from '..';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
+import { getMergeEventPayload } from '../../events/merge_payload';
 
 /** Emits the `cases.observablesAdded` event for the given newly-added observables. */
 export const emitObservablesAddedEvent = (
@@ -23,6 +24,7 @@ export const emitObservablesAddedEvent = (
     // Both arrays are index-aligned: observableTypeKeys[i] is the type of observableIds[i].
     observableIds: observables.map(({ id }) => id),
     observableTypeKeys: observables.map(({ typeKey }) => typeKey),
+    ...getMergeEventPayload(clientArgs.mergeContext, theCase.id),
   };
   clientArgs.casesEventBus?.emitObservablesAdded(clientArgs.request, payload);
 };

@@ -22,6 +22,7 @@ import { flattenCaseSavedObject } from '../../common/utils';
 import {
   convertSortField,
   buildFilter,
+  buildMergedFilter,
   buildObservablesFieldsFilter,
   combineFilters,
 } from '../utils';
@@ -130,7 +131,13 @@ export const similar = async (
       };
     }
 
-    const filters = combineFilters([similarCasesFilter, ownerFilter]);
+    // Merged and closed cases are left out, so a related investigation shows once, through its
+    // destination.
+    const filters = combineFilters([
+      similarCasesFilter,
+      ownerFilter,
+      buildMergedFilter('excludeClosed'),
+    ]);
 
     const finalCasesFilter = combineFilterWithAuthorizationFilter(filters, authorizationFilter);
 

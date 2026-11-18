@@ -10,6 +10,7 @@ import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/se
 import {
   INTERNAL_MERGE_CASES_PREVIEW_URL,
   INTERNAL_MERGE_CASES_URL,
+  MERGE_CASES_API_VERSION,
 } from '../../../../../common/constants';
 import type {
   MergeCasesPreviewResponse,
@@ -17,6 +18,8 @@ import type {
   MergeCasesResponse,
 } from '../../../../../common/types/api';
 import { CaseSeverity } from '../../../../../common/types/domain';
+import { createTypedApiError } from '../../../../common/api_errors';
+import { CASES_API_ERROR_CODES } from '../../../../../common/constants/error_codes';
 import { createCasesClientMock } from '../../../../client/mocks';
 import type { CasesRequestHandlerContext } from '../../../../types';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../../constants';
@@ -27,21 +30,26 @@ import { mergeCasesPreviewRoute } from './merge_cases_preview';
 
 const mergeRequest: MergeCasesRequest = {
   caseIds: ['case-1', 'case-2'],
-  fields: {
-    title: 'Phishing',
-    description: 'Combined',
-    severity: CaseSeverity.HIGH,
-    category: null,
-    tags: [],
-  },
-  closeOriginals: true,
+  fields: { title: 'Phishing', severity: CaseSeverity.HIGH },
+  closeSources: true,
 };
 
+const counts = (alerts = 0) => ({ alerts, events: 0, attacks: 0, observables: 0, other: 0 });
+
 const mergeResponse: MergeCasesResponse = {
-  destination: { id: 'new-case', title: 'Phishing', incrementalId: 142, isNew: true },
-  mergedCaseIds: ['case-1', 'case-2'],
-  closedCaseIds: ['case-1', 'case-2'],
-  copied: { alerts: 3, events: 0, observables: 1, other: 0 },
+  destination: { id: 'new-case', title: 'Phishing', incrementalId: null, isNew: true },
+  sources: [
+    {
+      caseId: 'case-1',
+      title: 'Phishing',
+      incrementalId: 118,
+      outcome: 'merged',
+      closed: true,
+      copied: counts(2),
+      existing: counts(),
+      leftOut: counts(),
+    },
+  ],
   failures: [],
 };
 
@@ -64,9 +72,9 @@ describe('merge cases routes', () => {
 
   const callRoute = async (path: string, body: object) => {
     const router = register();
-    const [, handler] = router.post.mock.calls.find(([config]) => config.path === path) ?? [];
+    const { handler } = router.versioned.getRoute('post', path).versions[MERGE_CASES_API_VERSION];
     const response = httpServerMock.createResponseFactory();
-    await handler?.(
+    await handler(
       context,
       httpServerMock.createKibanaRequest({ method: 'post', path, body }),
       response
@@ -81,21 +89,44 @@ describe('merge cases routes', () => {
   it.each([
     [INTERNAL_MERGE_CASES_URL, 'Merge cases'],
     [INTERNAL_MERGE_CASES_PREVIEW_URL, 'Preview a case merge'],
-  ])('registers %s as a documented internal POST route', (path, summary) => {
+  ])('registers %s as a documented, versioned internal POST route', (path, summary) => {
     const router = register();
-    const [config] =
-      router.post.mock.calls.find(([{ path: registered }]) => registered === path) ?? [];
+    const { config, versions } = router.versioned.getRoute('post', path);
 
-    expect(config?.security).toEqual(DEFAULT_CASES_ROUTE_SECURITY);
-    expect(config?.options).toEqual(
+    expect(router.post).not.toHaveBeenCalled();
+    expect(config).toEqual(
       expect.objectContaining({
         access: 'internal',
         summary,
         description: expect.any(String),
-        tags: ['oas-tag:cases'],
+        security: DEFAULT_CASES_ROUTE_SECURITY,
+        options: expect.objectContaining({ tags: ['oas-tag:cases'] }),
       })
     );
+    expect(Object.keys(versions)).toEqual([MERGE_CASES_API_VERSION]);
   });
+
+  it.each([INTERNAL_MERGE_CASES_URL, INTERNAL_MERGE_CASES_PREVIEW_URL])(
+    'validates the body of %s against the merge request schema',
+    (path) => {
+      const router = register();
+      const {
+        config: { validate },
+      } = router.versioned.getRoute('post', path).versions[MERGE_CASES_API_VERSION];
+      const bodyValidation = (validate as { request: { body: Function } }).request.body;
+      const validationFactory = {
+        ok: (value: unknown) => ({ value }),
+        badRequest: (error: unknown) => ({ error }),
+      };
+
+      expect(bodyValidation({ caseIds: ['only-one'] }, validationFactory)).toEqual(
+        expect.objectContaining({ error: expect.anything() })
+      );
+      expect(bodyValidation({ caseIds: ['case-1', 'case-2'] }, validationFactory)).toEqual({
+        value: { caseIds: ['case-1', 'case-2'] },
+      });
+    }
+  );
 
   it('merges the cases in the request body and returns the result', async () => {
     casesClient.cases.merge.mockResolvedValue(mergeResponse);
@@ -107,7 +138,7 @@ describe('merge cases routes', () => {
   });
 
   it('previews the cases in the request body without merging them', async () => {
-    const preview = { destinationCaseId: null } as MergeCasesPreviewResponse;
+    const preview = { canMerge: true } as MergeCasesPreviewResponse;
     casesClient.cases.mergePreview.mockResolvedValue(preview);
 
     const response = await callRoute(INTERNAL_MERGE_CASES_PREVIEW_URL, {
@@ -134,6 +165,26 @@ describe('merge cases routes', () => {
       expect.objectContaining({
         statusCode,
         body: expect.objectContaining({ message: expect.stringContaining(error.message) }),
+      })
+    );
+  });
+
+  it('responds with the conflicts and limits of a blocked merge', async () => {
+    const attributes = {
+      code: CASES_API_ERROR_CODES.MERGE_BLOCKED,
+      conflicts: [{ field: 'title' as const, reason: 'differentValues' as const }],
+      limits: [{ kind: 'alerts' as const, max: 1000, total: 1240, overBy: 240 }],
+    };
+    casesClient.cases.merge.mockRejectedValue(
+      createTypedApiError({ statusCode: 400, message: 'blocked', attributes })
+    );
+
+    const response = await callRoute(INTERNAL_MERGE_CASES_URL, mergeRequest);
+
+    expect(response.customError).toHaveBeenCalledWith(
+      expect.objectContaining({
+        statusCode: 400,
+        body: expect.objectContaining({ attributes }),
       })
     );
   });

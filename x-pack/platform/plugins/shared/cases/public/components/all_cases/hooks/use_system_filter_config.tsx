@@ -8,6 +8,7 @@
 import React from 'react';
 
 import type { CaseStatuses } from '../../../../common/types/domain';
+import type { CasesMergedFilter } from '../../../../common/ui/types';
 import { MAX_TAGS_FILTER_LENGTH, MAX_CATEGORY_FILTER_LENGTH } from '../../../../common/constants';
 import { MultiSelectFilter, mapToMultiSelectOption } from '../components/multi_select_filter';
 import { SolutionFilter } from '../components/solution_filter';
@@ -32,6 +33,14 @@ interface UseFilterConfigProps {
   onFilterOptionsChange: FilterChangeHandler;
   tags: string[];
 }
+
+const MERGED_FILTER_OPTIONS: Array<{ key: CasesMergedFilter; label: string }> = [
+  { key: 'exclude', label: i18n.HIDE_MERGED_CASES },
+  { key: 'only', label: i18n.ONLY_MERGED_CASES },
+];
+
+const isMergedFilterOption = (key: string): key is CasesMergedFilter =>
+  MERGED_FILTER_OPTIONS.some((option) => option.key === key);
 
 export const getSystemFilterConfig = ({
   availableSolutions,
@@ -161,6 +170,34 @@ export const getSystemFilterConfig = ({
           options={mapToMultiSelectOption(categories)}
           selectedOptionKeys={filterOptions?.category}
           isLoading={isLoading}
+        />
+      ),
+    },
+    {
+      key: 'merged',
+      label: i18n.MERGED_FILTER,
+      // Listed under "More filters" until the user turns it on.
+      isActive: false,
+      isAvailable: !isSelectorView,
+      getEmptyOptions: () => {
+        return {
+          merged: [],
+        };
+      },
+      render: ({ filterOptions }: FilterConfigRenderParams) => (
+        <MultiSelectFilter
+          buttonLabel={i18n.MERGED_FILTER}
+          id={'merged'}
+          onChange={({ selectedOptionKeys }) => {
+            const previous = filterOptions.merged ?? [];
+            const picked = selectedOptionKeys.filter(isMergedFilterOption);
+            // The options exclude each other, so keep only the one just picked.
+            const added = picked.filter((key) => !previous.includes(key));
+            onFilterOptionsChange({ merged: added.length > 0 ? added.slice(-1) : picked });
+          }}
+          options={MERGED_FILTER_OPTIONS}
+          selectedOptionKeys={filterOptions?.merged ?? []}
+          isLoading={false}
         />
       ),
     },

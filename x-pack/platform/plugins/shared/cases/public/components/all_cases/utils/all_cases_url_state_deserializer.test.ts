@@ -27,6 +27,7 @@ describe('allCasesUrlStateDeserializer', () => {
           "category": Array [],
           "extendedFieldFilters": Array [],
           "from": "now-30d",
+          "merged": Array [],
           "owner": Array [],
           "reporters": Array [],
           "search": "",

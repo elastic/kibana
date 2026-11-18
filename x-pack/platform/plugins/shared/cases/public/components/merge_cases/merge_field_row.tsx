@@ -11,6 +11,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiPanel,
   EuiPopover,
   EuiPopoverFooter,
@@ -29,11 +30,19 @@ export interface MergeFieldOption {
   caseRefs: string;
 }
 
+/** Set on a field the cases hold different values for. */
+export interface MergeFieldConflict {
+  isResolved: boolean;
+  /** Confirms the suggested value as the user's choice. */
+  onUseSuggestion?: () => void;
+}
+
 interface MergeFieldRowProps {
   label: string;
   value: React.ReactNode;
   provenance: string;
-  hasConflict: boolean;
+  conflict?: MergeFieldConflict;
+  isRequired?: boolean;
   options?: MergeFieldOption[];
   selectedKey?: string;
   onSelectOption?: (key: string) => void;
@@ -52,7 +61,8 @@ export const MergeFieldRow = React.memo<MergeFieldRowProps>(
     label,
     value,
     provenance,
-    hasConflict,
+    conflict,
+    isRequired = false,
     options = [],
     selectedKey,
     onSelectOption,
@@ -67,6 +77,7 @@ export const MergeFieldRow = React.memo<MergeFieldRowProps>(
   }) => {
     const { euiTheme } = useEuiTheme();
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    const isUnresolved = conflict != null && !conflict.isResolved;
     const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
     const selectableOptions = useMemo<EuiSelectableOption[]>(
@@ -100,7 +111,7 @@ export const MergeFieldRow = React.memo<MergeFieldRowProps>(
       <EuiPanel
         paddingSize="s"
         hasShadow={false}
-        color={hasConflict ? 'subdued' : 'transparent'}
+        color={isUnresolved ? 'subdued' : 'transparent'}
         data-test-subj={dataTestSubj}
       >
         <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
@@ -113,6 +124,11 @@ export const MergeFieldRow = React.memo<MergeFieldRowProps>(
             <EuiText size="s">
               <strong>{label}</strong>
             </EuiText>
+            {isRequired ? (
+              <EuiText size="xs" color="subdued" data-test-subj={`${dataTestSubj}-required`}>
+                {i18n.REQUIRED}
+              </EuiText>
+            ) : null}
           </EuiFlexItem>
           <EuiFlexItem
             css={css`
@@ -122,14 +138,24 @@ export const MergeFieldRow = React.memo<MergeFieldRowProps>(
             <EuiText size="s" data-test-subj={`${dataTestSubj}-value`}>
               {value}
             </EuiText>
-            <EuiText size="xs" color="subdued" data-test-subj={`${dataTestSubj}-provenance`}>
-              {provenance}
-            </EuiText>
+            {provenance.length > 0 ? (
+              <EuiText size="xs" color="subdued" data-test-subj={`${dataTestSubj}-provenance`}>
+                {isUnresolved ? i18n.SUGGESTED(provenance) : provenance}
+              </EuiText>
+            ) : null}
             {helpText}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
-              {hasConflict ? (
+              {conflict != null && conflict.isResolved ? (
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="success" data-test-subj={`${dataTestSubj}-resolved`}>
+                    <EuiIcon type="checkCircleFill" color="success" aria-hidden={true} />{' '}
+                    {i18n.RESOLVED}
+                  </EuiText>
+                </EuiFlexItem>
+              ) : null}
+              {conflict != null && options.length > 0 ? (
                 <EuiFlexItem grow={false}>
                   <EuiPopover
                     isOpen={isPopoverOpen}
@@ -140,14 +166,14 @@ export const MergeFieldRow = React.memo<MergeFieldRowProps>(
                     button={
                       <EuiButtonEmpty
                         size="xs"
-                        color="warning"
-                        iconType="warning"
+                        color={isUnresolved ? 'warning' : 'text'}
+                        iconType={isUnresolved ? 'warning' : undefined}
                         isDisabled={isDisabled}
                         onClick={() => setIsPopoverOpen((open) => !open)}
                         aria-label={i18n.CONFLICT_ARIA_LABEL(label, options.length)}
                         data-test-subj={`${dataTestSubj}-conflict-trigger`}
                       >
-                        {i18n.CONFLICT_TRIGGER(options.length)}
+                        {isUnresolved ? i18n.CONFLICT_TRIGGER(options.length) : i18n.CHANGE_VALUE}
                       </EuiButtonEmpty>
                     }
                   >
@@ -172,6 +198,19 @@ export const MergeFieldRow = React.memo<MergeFieldRowProps>(
                       </EuiPopoverFooter>
                     ) : null}
                   </EuiPopover>
+                </EuiFlexItem>
+              ) : null}
+              {isUnresolved && conflict?.onUseSuggestion != null ? (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="xs"
+                    isDisabled={isDisabled}
+                    onClick={conflict.onUseSuggestion}
+                    aria-label={i18n.USE_SUGGESTION_ARIA_LABEL(label)}
+                    data-test-subj={`${dataTestSubj}-use-suggestion`}
+                  >
+                    {i18n.USE_SUGGESTION}
+                  </EuiButtonEmpty>
                 </EuiFlexItem>
               ) : null}
               {editor != null ? (

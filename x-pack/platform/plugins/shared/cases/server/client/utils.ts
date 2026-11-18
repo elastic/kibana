@@ -13,7 +13,7 @@ import { validate as uuidValidate } from 'uuid';
 import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 import type { KueryNode } from '@kbn/es-query';
 
-import { nodeBuilder, fromKueryExpression, escapeKuery } from '@kbn/es-query';
+import { nodeBuilder, nodeTypes, fromKueryExpression, escapeKuery } from '@kbn/es-query';
 import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
 
 import { escapeQuotes } from '@kbn/es-query/src/kuery/utils/escape_kuery';
@@ -23,11 +23,11 @@ import { FILE_SO_TYPE } from '@kbn/files-plugin/common/constants';
 import type {
   CaseCustomField,
   CaseSeverity,
-  CaseStatuses,
   CustomFieldsConfiguration,
   TemplatesConfiguration,
   CustomFieldTypes,
 } from '../../common/types/domain';
+import { CaseStatuses } from '../../common/types/domain';
 import type { SavedObjectFindOptionsKueryNode } from '../common/types';
 import type { CasesSearchParams } from './types';
 
@@ -100,6 +100,56 @@ const buildCategoryFilter = (categories: CasesSearchParams['category']): KueryNo
   );
 
   return nodeBuilder.or(categoryFilters);
+};
+
+const MERGED_AT_FIELD = `${CASE_SAVED_OBJECT}.attributes.merge.merged_at`;
+const not = (node: KueryNode): KueryNode => nodeTypes.function.buildNode('not', node);
+const CLOSED_BY_MERGE_FIELD = `${CASE_SAVED_OBJECT}.attributes.merge.closed_by_merge`;
+
+/**
+ * Filters on the merge marker: a case was merged when it has `merge.merged_at`. `excludeClosed`
+ * leaves out merged cases that are closed, so a related investigation shows once, through its
+ * destination.
+ */
+export const buildMergedFilter = (merged: CasesSearchParams['merged']): KueryNode | undefined => {
+  if (merged == null) {
+    return;
+  }
+
+  const isMerged = nodeBuilder.is(MERGED_AT_FIELD, nodeTypes.wildcard.buildNode('*'));
+
+  if (merged === 'only') {
+    return isMerged;
+  }
+
+  if (merged === 'exclude') {
+    return not(isMerged);
+  }
+
+  return not(
+    nodeBuilder.and([
+      isMerged,
+      nodeBuilder.is(
+        `${CASE_SAVED_OBJECT}.attributes.status`,
+        `${STATUS_EXTERNAL_TO_ESMODEL[CaseStatuses.closed]}`
+      ),
+    ])
+  );
+};
+
+/**
+ * Filters on whether the latest merge closed the case. `exclude` keeps cases without the marker.
+ */
+export const buildClosedByMergeFilter = (
+  closedByMerge: CasesSearchParams['closedByMerge']
+): KueryNode | undefined => {
+  if (closedByMerge == null) {
+    return;
+  }
+
+  const isClosedByMerge = nodeBuilder.is(CLOSED_BY_MERGE_FIELD, 'true');
+
+  return closedByMerge === 'only' ? isClosedByMerge : not(isClosedByMerge);
 };
 
 export const NodeBuilderOperators = {
@@ -352,6 +402,8 @@ export const constructQueryOptions = ({
   assignees,
   category,
   customFields,
+  merged,
+  closedByMerge,
   customFieldsConfiguration,
   searchType = 'find',
 }: CasesSearchParams & {
@@ -368,6 +420,8 @@ export const constructQueryOptions = ({
   const assigneesFilter = buildAssigneesFilter({ assignees });
   const categoryFilter = buildCategoryFilter(category);
   const customFieldsFilter = buildCustomFieldsFilter({ customFields, customFieldsConfiguration });
+  const mergedFilter = buildMergedFilter(merged);
+  const closedByMergeFilter = buildClosedByMergeFilter(closedByMerge);
 
   const filters = combineFilters([
     statusFilter,
@@ -379,6 +433,8 @@ export const constructQueryOptions = ({
     assigneesFilter,
     categoryFilter,
     customFieldsFilter,
+    mergedFilter,
+    closedByMergeFilter,
   ]);
 
   const combinedFilter = combineFilterWithAuthorizationFilter(filters, authorizationFilter);

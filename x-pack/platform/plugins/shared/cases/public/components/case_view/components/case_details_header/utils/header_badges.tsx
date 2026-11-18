@@ -16,6 +16,7 @@ import { severities } from '../../../../severity/config';
 import * as i18n from '../../../translations';
 import { MergedIntoBadge } from '../../../../merge_cases/merged_into_badge';
 import { MERGED } from '../../../../merge_cases/translations';
+import { getLatestDestinationId } from '../../../../merge_cases/utils';
 
 interface GetBadgesArgs {
   caseData: CaseUI;
@@ -81,13 +82,13 @@ export const getBadges = ({
   }
   result.push(statusBadge);
 
-  const { mergedInto } = caseData;
-  if (mergedInto != null && mergedInto.length > 0) {
+  const { merge } = caseData;
+  if (getLatestDestinationId(merge) != null) {
     result.push({
       label: MERGED,
       color: 'hollow',
       'data-test-subj': 'case-view-merged-into-badge',
-      renderCustomBadge: () => <MergedIntoBadge destinationIds={mergedInto} />,
+      renderCustomBadge: () => <MergedIntoBadge merge={merge} />,
     });
   }
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import {
   CASE_SAVED_OBJECT,
   MAX_ALERTS_PER_CASE,
@@ -12,24 +13,33 @@ import {
   SECURITY_SOLUTION_OWNER,
 } from '../../../../common/constants';
 import { SECURITY_ALERT_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
+import { CASES_API_ERROR_CODES } from '../../../../common/constants/error_codes';
 import type { MergeCasesRequest } from '../../../../common/types/api';
 import type { AttachmentV2, Case } from '../../../../common/types/domain';
 import { CaseSeverity, CaseStatuses, UserActionTypes } from '../../../../common/types/domain';
 import { Operations } from '../../../authorization';
+import type { CaseSavedObjectTransformed } from '../../../common/types/case';
 import { basicCaseFields } from '../../../services/test_utils';
 import { createCasesClientMock, createCasesClientMockArgs } from '../../mocks';
+import { addComment } from '../../attachments/add';
 import { bulkCreate as bulkCreateAttachments } from '../../attachments/bulk_create';
 import { bulkUpdate } from '../bulk_update';
+import { create } from '../create';
 import { bulkAddObservables } from '../observables';
+import { getMergeBlockedAttributes } from './errors';
 import { merge } from './merge';
 import { mergePreview } from './preview';
 
+jest.mock('../../attachments/add');
 jest.mock('../../attachments/bulk_create');
 jest.mock('../bulk_update');
+jest.mock('../create');
 jest.mock('../observables');
 
+const addCommentMock = jest.mocked(addComment);
 const bulkCreateAttachmentsMock = jest.mocked(bulkCreateAttachments);
 const bulkUpdateMock = jest.mocked(bulkUpdate);
+const createMock = jest.mocked(create);
 const bulkAddObservablesMock = jest.mocked(bulkAddObservables);
 
 const makeCase = (id: string, createdAt: string, overrides: Partial<Case> = {}): Case => ({
@@ -42,14 +52,18 @@ const makeCase = (id: string, createdAt: string, overrides: Partial<Case> = {}):
   ...overrides,
 });
 
-const alertAttachment = (id: string, alertIds: string[]): AttachmentV2 => ({
+const alertAttachment = (
+  id: string,
+  alertIds: string[],
+  createdAt = '2024-01-01'
+): AttachmentV2 => ({
   id,
   version: 'attachment-version',
   type: SECURITY_ALERT_ATTACHMENT_TYPE,
   attachmentId: alertIds,
   owner: SECURITY_SOLUTION_OWNER,
   metadata: { index: alertIds.map(() => 'alerts-index'), rule: { id: 'rule-1', name: 'Rule' } },
-  created_at: '2024-01-01T00:00:00.000Z',
+  created_at: `${createdAt}T00:00:00.000Z`,
   created_by: { username: 'elastic', full_name: null, email: null },
   pushed_at: null,
   pushed_by: null,
@@ -57,82 +71,120 @@ const alertAttachment = (id: string, alertIds: string[]): AttachmentV2 => ({
   updated_by: null,
 });
 
-const toSavedObject = ({ id, title, status, version, merged_into: mergedInto }: Case) => ({
+const observable = (id: string, value: string) => ({
   id,
-  type: CASE_SAVED_OBJECT,
-  attributes: {
-    ...basicCaseFields,
-    title,
-    status,
-    ...(mergedInto != null ? { merged_into: mergedInto } : {}),
-  },
-  references: [],
-  version,
+  typeKey: 'ip',
+  value,
+  description: null,
+  createdAt: '2024-01-01T00:00:00.000Z',
+  updatedAt: null,
 });
 
 const firstCase = makeCase('case-1', '2024-01-01T00:00:00.000Z', {
-  title: 'Phishing',
   incremental_id: 118,
   severity: CaseSeverity.HIGH,
 });
 const secondCase = makeCase('case-2', '2024-02-01T00:00:00.000Z', {
-  title: 'Phishing follow-up',
   incremental_id: 121,
   severity: CaseSeverity.CRITICAL,
 });
-const newCase = makeCase('new-case', '2024-03-01T00:00:00.000Z', { title: 'Phishing' });
+const newCase = makeCase('new-case', '2024-03-01T00:00:00.000Z');
 
 const request: MergeCasesRequest = {
   caseIds: [firstCase.id, secondCase.id],
-  fields: {
-    title: 'Phishing',
-    description: 'Combined',
-    severity: CaseSeverity.CRITICAL,
-    category: null,
-    tags: ['defacement'],
-  },
-  closeOriginals: true,
+  fields: { severity: CaseSeverity.CRITICAL },
 };
+
+const eligibleAlerts = { ineligible: new Map(), missingDestination: [] };
 
 describe('merge', () => {
   const clientArgs = createCasesClientMockArgs();
   const casesClient = createCasesClientMock();
   const {
-    services: { caseService, userActionService },
+    services: {
+      caseService,
+      userActionService,
+      licensingService,
+      alertsService,
+      fieldDefinitionsService,
+    },
     authorization,
   } = clientArgs;
 
+  /** The cases as stored: what `getCase` reads while the merge runs. */
+  let stored: Map<string, Case>;
+
+  const toSavedObject = (theCase: Case): CaseSavedObjectTransformed => ({
+    id: theCase.id,
+    type: CASE_SAVED_OBJECT,
+    attributes: { ...basicCaseFields, ...theCase } as CaseSavedObjectTransformed['attributes'],
+    references: [],
+    version: theCase.version,
+  });
+
   const mockCases = (cases: Case[], attachments: Record<string, AttachmentV2[]> = {}) => {
-    casesClient.cases.bulkGet.mockResolvedValue({ cases, errors: [] });
+    stored = new Map(cases.map((theCase) => [theCase.id, theCase]));
+    casesClient.cases.bulkGet.mockImplementation(async ({ ids }) => ({
+      cases: cases.filter(({ id }) => ids.includes(id)),
+      errors: [],
+    }));
     casesClient.attachments.getAll.mockImplementation(
       async ({ caseID }) => attachments[caseID] ?? []
     );
-    caseService.getCases.mockImplementation(async ({ caseIds }) => ({
-      saved_objects: cases.filter(({ id }) => caseIds.includes(id)).map(toSavedObject),
-    }));
-    caseService.patchCases.mockImplementation(async ({ cases: patchedCases }) => ({
-      saved_objects: patchedCases.map(({ originalCase, updatedAttributes }) => ({
-        ...originalCase,
-        attributes: { ...originalCase.attributes, ...updatedAttributes },
-        version: `${originalCase.id}-marked`,
-      })),
-    }));
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
     jest.mocked(casesClient.configure.get).mockResolvedValue([]);
-    casesClient.cases.create.mockResolvedValue(newCase);
+    licensingService.isAtLeastPlatinum.mockResolvedValue(true);
+    authorization.isAuthorized.mockResolvedValue(true);
+    alertsService.getAlertsMergeEligibility.mockResolvedValue(eligibleAlerts);
+    fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+      fieldDefinitions: [],
+    } as unknown as Awaited<ReturnType<typeof fieldDefinitionsService.getFieldDefinitions>>);
+    createMock.mockResolvedValue(newCase);
     bulkCreateAttachmentsMock.mockResolvedValue([]);
-    bulkAddObservablesMock.mockResolvedValue(newCase);
+    bulkAddObservablesMock.mockImplementation(async ({ observables }) => ({
+      ...newCase,
+      observables: observables.map(({ typeKey, value }, position) => ({
+        ...observable(`added-${position}`, value),
+        typeKey,
+      })),
+    }));
     bulkUpdateMock.mockImplementation(async ({ cases }) =>
-      cases.map(({ id }) => ({ ...makeCase(id, ''), status: CaseStatuses.closed }))
+      cases.map(({ id }) => ({
+        ...(stored.get(id) ?? makeCase(id, '')),
+        status: CaseStatuses.closed,
+      }))
     );
+    caseService.getCase.mockImplementation(async ({ id }) => {
+      const theCase = stored.get(id);
+      if (theCase == null) {
+        throw Boom.notFound();
+      }
+      return toSavedObject(theCase);
+    });
+    caseService.patchCases.mockImplementation(async ({ cases: patched }) => ({
+      saved_objects: patched.map(({ caseId, updatedAttributes }) => {
+        const updated = {
+          ...(stored.get(caseId) as Case),
+          ...(updatedAttributes as Partial<Case>),
+          version: `${caseId}-linked`,
+        };
+        stored.set(caseId, updated);
+        return toSavedObject(updated);
+      }),
+    }));
     mockCases([firstCase, secondCase], {
       [firstCase.id]: [alertAttachment('a1', ['alert-1', 'alert-2'])],
       [secondCase.id]: [alertAttachment('a2', ['alert-2', 'alert-3'])],
     });
   });
+
+  const getBlockedAttributes = async (promise: Promise<unknown>) => {
+    const error = await promise.catch((caught) => caught);
+    return getMergeBlockedAttributes(error);
+  };
 
   describe('validation', () => {
     it('rejects fewer than two cases', async () => {
@@ -148,13 +200,7 @@ describe('merge', () => {
       await expect(merge(request, clientArgs, casesClient)).rejects.toThrow(
         /Cases from different solutions cannot be merged/
       );
-      expect(casesClient.cases.create).not.toHaveBeenCalled();
-    });
-
-    it('rejects a destination that is not one of the cases', async () => {
-      await expect(
-        merge({ ...request, destinationCaseId: 'unknown' }, clientArgs, casesClient)
-      ).rejects.toThrow(/The destination case must be one of the cases being merged/);
+      expect(createMock).not.toHaveBeenCalled();
     });
 
     it('rejects a closed destination', async () => {
@@ -165,7 +211,46 @@ describe('merge', () => {
       ).rejects.toThrow(/The destination case case-2 is closed/);
     });
 
-    it('rejects a merge over the alert limit before writing anything', async () => {
+    it('merges into the case an earlier run created when it is not one of the cases', async () => {
+      const created = makeCase('created-earlier', '2024-03-01T00:00:00.000Z');
+      mockCases([firstCase, secondCase, created]);
+
+      const response = await merge(
+        { ...request, destinationCaseId: created.id },
+        clientArgs,
+        casesClient
+      );
+
+      expect(createMock).not.toHaveBeenCalled();
+      expect(response.destination).toEqual(
+        expect.objectContaining({ id: created.id, isNew: false })
+      );
+      expect(response.sources.map(({ caseId }) => caseId)).toEqual([firstCase.id, secondCase.id]);
+    });
+
+    it('refuses with every unresolved conflict before writing anything', async () => {
+      mockCases([
+        { ...firstCase, title: 'Phishing' },
+        { ...secondCase, title: 'Phishing follow-up' },
+      ]);
+
+      const attributes = await getBlockedAttributes(
+        merge({ caseIds: request.caseIds }, clientArgs, casesClient)
+      );
+
+      expect(attributes).toEqual({
+        code: CASES_API_ERROR_CODES.MERGE_BLOCKED,
+        conflicts: [
+          { field: 'title', reason: 'differentValues' },
+          { field: 'severity', reason: 'differentValues' },
+        ],
+        limits: [],
+      });
+      expect(createMock).not.toHaveBeenCalled();
+      expect(bulkCreateAttachmentsMock).not.toHaveBeenCalled();
+    });
+
+    it('refuses a merge over the alert limit with how much to leave out', async () => {
       const alertIds = (prefix: string) =>
         Array.from({ length: MAX_ALERTS_PER_CASE }, (_, position) => `${prefix}-${position}`);
       mockCases([firstCase, secondCase], {
@@ -173,49 +258,54 @@ describe('merge', () => {
         [secondCase.id]: [alertAttachment('a2', alertIds('second'))],
       });
 
-      await expect(merge(request, clientArgs, casesClient)).rejects.toThrow(
-        /exceeds the limit of 1000 alerts per case by 1000/
+      const attributes = await getBlockedAttributes(merge(request, clientArgs, casesClient));
+
+      expect(attributes).toEqual(
+        expect.objectContaining({
+          limits: [{ kind: 'alerts', max: MAX_ALERTS_PER_CASE, total: 2000, overBy: 1000 }],
+        })
       );
-      expect(casesClient.cases.create).not.toHaveBeenCalled();
+      expect(createMock).not.toHaveBeenCalled();
     });
 
-    it('merges an over-limit selection once enough alerts are excluded, and records what stayed behind', async () => {
+    it('keeps the newest alerts up to the limit when asked to', async () => {
       const alertIds = (prefix: string) =>
         Array.from({ length: MAX_ALERTS_PER_CASE }, (_, position) => `${prefix}-${position}`);
       mockCases([firstCase, secondCase], {
-        [firstCase.id]: [alertAttachment('a1', alertIds('first'))],
-        [secondCase.id]: [alertAttachment('a2', ['second-0', 'second-1'])],
+        [firstCase.id]: [alertAttachment('a1', alertIds('old'), '2024-01-01')],
+        [secondCase.id]: [alertAttachment('a2', alertIds('new'), '2024-02-01')],
       });
 
       const response = await merge(
-        {
-          ...request,
-          excludedAttachments: [
-            'alerts|first-0|alerts-index',
-            'alerts|first-1|alerts-index',
-            'alerts|second-1|alerts-index',
-          ],
-        },
+        { ...request, attachments: { alerts: { mode: 'newest' } } },
         clientArgs,
         casesClient
       );
 
-      expect(response.copied.alerts).toBe(MAX_ALERTS_PER_CASE - 1);
-      const { userActions } = userActionService.creator.bulkCreateUserAction.mock.calls[0][0];
-      expect(userActions[0].payload).toEqual({
-        merge: expect.objectContaining({
-          sources: [
-            expect.objectContaining({
-              id: firstCase.id,
-              excluded: { alerts: 2, events: 0, observables: 0, other: 0 },
-            }),
-            expect.objectContaining({
-              id: secondCase.id,
-              excluded: { alerts: 1, events: 0, observables: 0, other: 0 },
-            }),
-          ],
+      expect(response.sources).toEqual([
+        expect.objectContaining({
+          caseId: firstCase.id,
+          copied: expect.objectContaining({ alerts: 0 }),
+          leftOut: expect.objectContaining({ alerts: MAX_ALERTS_PER_CASE }),
         }),
-      });
+        expect.objectContaining({
+          caseId: secondCase.id,
+          copied: expect.objectContaining({ alerts: MAX_ALERTS_PER_CASE }),
+        }),
+      ]);
+    });
+
+    it('refuses assignees without the right to assign', async () => {
+      authorization.isAuthorized.mockResolvedValue(false);
+
+      await expect(
+        merge(
+          { ...request, fields: { ...request.fields, assignees: [{ uid: 'u1' }] } },
+          clientArgs,
+          casesClient
+        )
+      ).rejects.toThrow(/assign privilege/);
+      expect(createMock).not.toHaveBeenCalled();
     });
   });
 
@@ -236,9 +326,7 @@ describe('merge', () => {
       await merge({ ...request, destinationCaseId: secondCase.id }, clientArgs, casesClient);
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith(
-        expect.objectContaining({
-          operation: [Operations.updateCase, Operations.createComment],
-        })
+        expect.objectContaining({ operation: [Operations.updateCase, Operations.createComment] })
       );
     });
 
@@ -246,354 +334,311 @@ describe('merge', () => {
       authorization.ensureAuthorized.mockRejectedValueOnce(new Error('Unauthorized'));
 
       await expect(merge(request, clientArgs, casesClient)).rejects.toThrow(/Unauthorized/);
-      expect(casesClient.cases.create).not.toHaveBeenCalled();
+      expect(createMock).not.toHaveBeenCalled();
       expect(bulkCreateAttachmentsMock).not.toHaveBeenCalled();
       expect(bulkUpdateMock).not.toHaveBeenCalled();
     });
   });
 
   describe('into a new case', () => {
-    it('creates the case, copies deduped alerts, marks and closes the originals, and records activity on every case', async () => {
+    it('creates the case from the merged values, with the merge context on its writes', async () => {
+      await merge(request, clientArgs, casesClient);
+
+      expect(createMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: basicCaseFields.title,
+          severity: CaseSeverity.CRITICAL,
+          owner: SECURITY_SOLUTION_OWNER,
+          tags: ['defacement'],
+          settings: { syncAlerts: true },
+        }),
+        expect.objectContaining({
+          mergeContext: { sourceCaseIds: [firstCase.id, secondCase.id] },
+        }),
+        casesClient
+      );
+      expect(createMock.mock.calls[0][0]).not.toHaveProperty('assignees');
+    });
+
+    it('creates the case without assignees when the user cannot assign', async () => {
+      authorization.isAuthorized.mockResolvedValue(false);
+      mockCases([{ ...firstCase, assignees: [{ uid: 'u1' }] }, secondCase]);
+
+      await merge(request, clientArgs, casesClient);
+
+      expect(createMock.mock.calls[0][0]).toEqual(expect.objectContaining({ assignees: [] }));
+    });
+
+    it('copies each source on its own, skipping duplicates, alert sync and extraction', async () => {
+      await merge(request, clientArgs, casesClient);
+
+      const options = {
+        skipUserActions: true,
+        skipAlertStatusSync: true,
+        skipObservableExtraction: true,
+      };
+      expect(bulkCreateAttachmentsMock).toHaveBeenNthCalledWith(
+        1,
+        {
+          caseId: newCase.id,
+          attachments: [expect.objectContaining({ attachmentId: ['alert-1', 'alert-2'] })],
+        },
+        expect.objectContaining({
+          mergeContext: expect.objectContaining({ destinationCaseId: newCase.id }),
+        }),
+        options
+      );
+      expect(bulkCreateAttachmentsMock).toHaveBeenNthCalledWith(
+        2,
+        {
+          caseId: newCase.id,
+          attachments: [expect.objectContaining({ attachmentId: ['alert-3'] })],
+        },
+        expect.anything(),
+        options
+      );
+    });
+
+    it('adds each source observables in one call', async () => {
+      mockCases([
+        { ...firstCase, observables: [observable('o1', '1.1.1.1')] },
+        {
+          ...secondCase,
+          observables: [observable('o2', '1.1.1.1'), observable('o3', '2.2.2.2')],
+        },
+      ]);
+
+      const response = await merge(request, clientArgs, casesClient);
+
+      expect(bulkAddObservablesMock).toHaveBeenCalledTimes(2);
+      expect(bulkAddObservablesMock.mock.calls[1][0].observables).toEqual([
+        { typeKey: 'ip', value: '2.2.2.2', description: null },
+      ]);
+      expect(bulkAddObservablesMock.mock.calls[1][3]).toEqual({ skipUserAction: true });
+      expect(response.sources[1]).toEqual(
+        expect.objectContaining({
+          copied: expect.objectContaining({ observables: 1 }),
+          existing: expect.objectContaining({ observables: 1 }),
+        })
+      );
+    });
+
+    it('links and closes every source, then records the merge', async () => {
       const response = await merge(
         { ...request, note: 'Merged phishing' },
         clientArgs,
         casesClient
       );
 
-      expect(casesClient.cases.create).toHaveBeenCalledWith(
+      expect(caseService.patchCases).toHaveBeenCalledTimes(2);
+      expect(caseService.patchCases.mock.calls[0][0].cases[0]).toEqual(
         expect.objectContaining({
-          title: 'Phishing',
-          severity: CaseSeverity.CRITICAL,
-          owner: SECURITY_SOLUTION_OWNER,
-        })
-      );
-      expect(bulkCreateAttachmentsMock).toHaveBeenCalledWith(
-        {
-          caseId: newCase.id,
-          attachments: [
-            expect.objectContaining({ attachmentId: ['alert-1', 'alert-2'] }),
-            expect.objectContaining({ attachmentId: ['alert-3'] }),
-          ],
-        },
-        clientArgs,
-        { skipUserActions: true }
-      );
-      expect(caseService.patchCases).toHaveBeenCalledWith(
-        expect.objectContaining({
-          cases: [
-            expect.objectContaining({
-              caseId: firstCase.id,
-              version: firstCase.version,
-              updatedAttributes: expect.objectContaining({ merged_into: [newCase.id] }),
-            }),
-            expect.objectContaining({
-              caseId: secondCase.id,
-              version: secondCase.version,
-              updatedAttributes: expect.objectContaining({ merged_into: [newCase.id] }),
-            }),
-          ],
+          caseId: firstCase.id,
+          version: firstCase.version,
+          updatedAttributes: expect.objectContaining({
+            merge: expect.objectContaining({ merged_into: [newCase.id], closed_by_merge: false }),
+          }),
         })
       );
       expect(bulkUpdateMock).toHaveBeenCalledWith(
-        {
-          cases: [
-            { id: firstCase.id, version: 'case-1-marked', status: CaseStatuses.closed },
-            { id: secondCase.id, version: 'case-2-marked', status: CaseStatuses.closed },
-          ],
-        },
-        clientArgs,
+        { cases: [{ id: firstCase.id, version: 'case-1-linked', status: CaseStatuses.closed }] },
+        expect.anything(),
         casesClient,
-        { skipAlertSync: true }
+        { skipAlertSync: true, skipRequiredOnClose: true, markClosedByMerge: true }
       );
+      expect(response.sources).toEqual([
+        expect.objectContaining({ caseId: firstCase.id, outcome: 'merged', closed: true }),
+        expect.objectContaining({ caseId: secondCase.id, outcome: 'merged', closed: true }),
+      ]);
+      expect(response.failures).toEqual([]);
 
       const { userActions } = userActionService.creator.bulkCreateUserAction.mock.calls[0][0];
-      expect(userActions.map(({ caseId }) => caseId)).toEqual([
-        newCase.id,
-        firstCase.id,
-        secondCase.id,
+      expect(userActions.map(({ caseId, type }) => [caseId, type])).toEqual([
+        [newCase.id, UserActionTypes.merge],
+        [firstCase.id, UserActionTypes.merge],
+        [secondCase.id, UserActionTypes.merge],
       ]);
-      expect(userActions[0]).toEqual(
-        expect.objectContaining({
-          type: UserActionTypes.merge,
-          payload: {
-            merge: {
-              destination: { id: newCase.id, title: 'Phishing', incrementalId: null },
-              sources: [
-                {
-                  id: firstCase.id,
-                  title: 'Phishing',
-                  incrementalId: 118,
-                  copied: { alerts: 2, events: 0, observables: 0, other: 0 },
-                  duplicates: { alerts: 0, events: 0, observables: 0, other: 0 },
-                  excluded: { alerts: 0, events: 0, observables: 0, other: 0 },
-                },
-                {
-                  id: secondCase.id,
-                  title: 'Phishing follow-up',
-                  incrementalId: 121,
-                  copied: { alerts: 1, events: 0, observables: 0, other: 0 },
-                  duplicates: { alerts: 1, events: 0, observables: 0, other: 0 },
-                  excluded: { alerts: 0, events: 0, observables: 0, other: 0 },
-                },
-              ],
-              closedSources: true,
-              updatedFields: [],
-            },
-          },
-        })
+      expect(addCommentMock).toHaveBeenCalledWith(
+        expect.objectContaining({ caseId: newCase.id }),
+        expect.anything()
       );
-      expect(casesClient.attachments.add).toHaveBeenCalledWith({
-        caseId: newCase.id,
-        comment: expect.objectContaining({ data: { content: 'Merged phishing' } }),
-      });
-
-      expect(response).toEqual({
-        destination: { id: newCase.id, title: 'Phishing', incrementalId: null, isNew: true },
-        mergedCaseIds: [firstCase.id, secondCase.id],
-        closedCaseIds: [firstCase.id, secondCase.id],
-        copied: { alerts: 3, events: 0, observables: 0, other: 0 },
-        failures: [],
+      expect(userActionService.creator.auditLogMerge).toHaveBeenCalledWith({
+        destinationId: newCase.id,
+        sourceIds: [firstCase.id, secondCase.id],
       });
     });
 
-    it('copies deduped observables, before the alerts, without their own activity entry', async () => {
-      const observable = (id: string, typeKey: string, value: string) => ({
-        id,
-        typeKey,
-        value,
-        description: null,
-        createdAt: '2024-01-01T00:00:00.000Z',
-        updatedAt: null,
-      });
-      mockCases(
-        [
-          { ...firstCase, observables: [observable('o1', 'ipv4', '10.0.0.1')] },
-          {
-            ...secondCase,
-            observables: [
-              observable('o2', 'ipv4', '10.0.0.1'),
-              observable('o3', 'hostname', 'build-01'),
-            ],
-          },
-        ],
-        { [firstCase.id]: [alertAttachment('a1', ['alert-1'])] }
-      );
-
-      const response = await merge(request, clientArgs, casesClient);
-
-      expect(bulkAddObservablesMock).toHaveBeenCalledWith(
-        {
-          caseId: newCase.id,
-          observables: [
-            { typeKey: 'ipv4', value: '10.0.0.1', description: null },
-            { typeKey: 'hostname', value: 'build-01', description: null },
-          ],
-        },
-        clientArgs,
-        casesClient,
-        { skipUserAction: true }
-      );
-      expect(bulkAddObservablesMock.mock.invocationCallOrder[0]).toBeLessThan(
-        bulkCreateAttachmentsMock.mock.invocationCallOrder[0]
-      );
-      expect(response.copied).toEqual({ alerts: 1, events: 0, observables: 2, other: 0 });
-    });
-
-    it('does not close the originals when not asked to', async () => {
-      const response = await merge({ ...request, closeOriginals: false }, clientArgs, casesClient);
+    it('keeps the sources open when asked to', async () => {
+      const response = await merge({ ...request, closeSources: false }, clientArgs, casesClient);
 
       expect(bulkUpdateMock).not.toHaveBeenCalled();
-      expect(response.closedCaseIds).toEqual([]);
+      expect(response.sources.every(({ outcome, closed }) => outcome === 'merged' && !closed)).toBe(
+        true
+      );
     });
 
-    it('merges an original that is already closed without closing it again', async () => {
+    it('links a source that was already closed without closing it again', async () => {
       mockCases([firstCase, { ...secondCase, status: CaseStatuses.closed }]);
 
       const response = await merge(request, clientArgs, casesClient);
 
-      expect(bulkUpdateMock).toHaveBeenCalledWith(
-        { cases: [{ id: firstCase.id, version: 'case-1-marked', status: CaseStatuses.closed }] },
-        clientArgs,
-        casesClient,
-        { skipAlertSync: true }
-      );
-      expect(response.mergedCaseIds).toEqual([firstCase.id, secondCase.id]);
-    });
-
-    it('adds the new case to the cases an original was already merged into', async () => {
-      mockCases([{ ...firstCase, merged_into: ['earlier-case'] }, secondCase]);
-
-      await merge(request, clientArgs, casesClient);
-
-      const [{ cases }] = caseService.patchCases.mock.calls[0];
-      expect(
-        cases.map(({ caseId, updatedAttributes }) => [caseId, updatedAttributes.merged_into])
-      ).toEqual([
-        [firstCase.id, ['earlier-case', newCase.id]],
-        [secondCase.id, [newCase.id]],
-      ]);
-    });
-  });
-
-  describe('into an existing case', () => {
-    it('updates only the fields that changed, and marks, closes, and records activity on the other cases only', async () => {
-      bulkUpdateMock.mockResolvedValueOnce([{ ...secondCase, description: 'Combined' }]);
-
-      await merge(
-        {
-          ...request,
-          destinationCaseId: secondCase.id,
-          fields: { ...request.fields, title: secondCase.title },
-        },
-        clientArgs,
-        casesClient
-      );
-
-      expect(casesClient.cases.create).not.toHaveBeenCalled();
-      expect(casesClient.cases.bulkUpdate).not.toHaveBeenCalled();
-      expect(bulkUpdateMock).toHaveBeenNthCalledWith(
-        1,
-        { cases: [{ id: secondCase.id, version: secondCase.version, description: 'Combined' }] },
-        clientArgs,
-        casesClient,
-        { skipUserActions: true }
-      );
-      expect(caseService.getCases).toHaveBeenCalledWith({ caseIds: [firstCase.id] });
-      expect(bulkUpdateMock).toHaveBeenNthCalledWith(
-        2,
-        { cases: [expect.objectContaining({ id: firstCase.id })] },
-        clientArgs,
-        casesClient,
-        { skipAlertSync: true }
-      );
-      const { userActions } = userActionService.creator.bulkCreateUserAction.mock.calls[0][0];
-      expect(userActions.map(({ caseId }) => caseId)).toEqual([secondCase.id, firstCase.id]);
-    });
-
-    it('records the changed fields in the merge entry instead of writing an entry per field', async () => {
-      bulkUpdateMock.mockResolvedValueOnce([{ ...secondCase, description: 'Combined' }]);
-
-      await merge(
-        {
-          ...request,
-          destinationCaseId: secondCase.id,
-          fields: { ...request.fields, title: secondCase.title, tags: ['merged'] },
-        },
-        clientArgs,
-        casesClient
-      );
-
-      const { userActions } = userActionService.creator.bulkCreateUserAction.mock.calls[0][0];
-      expect(userActions[0].payload).toEqual({
-        merge: expect.objectContaining({ updatedFields: ['description', 'tags'] }),
-      });
-    });
-
-    it('updates nothing and records no changed fields when the fields match the destination', async () => {
-      await merge(
-        {
-          ...request,
-          destinationCaseId: secondCase.id,
-          fields: {
-            ...request.fields,
-            title: secondCase.title,
-            description: secondCase.description,
-            tags: secondCase.tags,
-            severity: secondCase.severity,
-            category: secondCase.category,
-          },
-        },
-        clientArgs,
-        casesClient
-      );
-
-      expect(bulkUpdateMock.mock.calls.map(([{ cases }]) => cases.map(({ id }) => id))).toEqual([
-        [firstCase.id],
-      ]);
-      const { userActions } = userActionService.creator.bulkCreateUserAction.mock.calls[0][0];
-      expect(userActions[0].payload).toEqual({
-        merge: expect.objectContaining({ updatedFields: [] }),
-      });
-    });
-
-    it('lists the destination once when an original is merged into it again', async () => {
-      mockCases([{ ...firstCase, merged_into: [secondCase.id] }, secondCase]);
-
-      await merge({ ...request, destinationCaseId: secondCase.id }, clientArgs, casesClient);
-
-      expect(caseService.patchCases).toHaveBeenCalledWith(
-        expect.objectContaining({
-          cases: [
-            expect.objectContaining({
-              caseId: firstCase.id,
-              updatedAttributes: expect.objectContaining({ merged_into: [secondCase.id] }),
-            }),
-          ],
-        })
+      expect(bulkUpdateMock).toHaveBeenCalledTimes(1);
+      expect(response.sources[1]).toEqual(
+        expect.objectContaining({ outcome: 'merged', closed: false })
       );
     });
   });
 
   describe('partial failures', () => {
-    it('throws and changes nothing when the destination cannot be created', async () => {
-      casesClient.cases.create.mockRejectedValueOnce(new Error('create failed'));
-
-      await expect(merge(request, clientArgs, casesClient)).rejects.toThrow(/create failed/);
-      expect(bulkCreateAttachmentsMock).not.toHaveBeenCalled();
-      expect(bulkUpdateMock).not.toHaveBeenCalled();
-    });
-
-    it('keeps going when copying attachments fails and reports the failure', async () => {
-      bulkCreateAttachmentsMock.mockRejectedValueOnce(new Error('copy failed'));
+    it('does not link a source whose copy failed, and still merges the others', async () => {
+      bulkCreateAttachmentsMock.mockRejectedValueOnce(new Error('index unavailable'));
 
       const response = await merge(request, clientArgs, casesClient);
 
-      expect(response.failures).toEqual([
-        { step: 'attachments', caseId: null, message: 'copy failed' },
+      expect(response.sources).toEqual([
+        expect.objectContaining({ caseId: firstCase.id, outcome: 'notMerged', closed: false }),
+        expect.objectContaining({ caseId: secondCase.id, outcome: 'merged', closed: true }),
       ]);
-      expect(response.copied).toEqual({ alerts: 0, events: 0, observables: 0, other: 0 });
-      expect(response.mergedCaseIds).toEqual([firstCase.id, secondCase.id]);
-      expect(userActionService.creator.bulkCreateUserAction).toHaveBeenCalled();
-      expect(clientArgs.logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('step "attachments" failed: copy failed')
+      expect(response.failures).toEqual([
+        { step: 'copy', caseId: firstCase.id, reason: 'index unavailable' },
+      ]);
+      expect(caseService.patchCases).toHaveBeenCalledTimes(1);
+    });
+
+    it('leaves observables out below Platinum and still merges the source', async () => {
+      licensingService.isAtLeastPlatinum.mockResolvedValue(false);
+      mockCases([{ ...firstCase, observables: [observable('o1', '1.1.1.1')] }, secondCase]);
+
+      const response = await merge(request, clientArgs, casesClient);
+
+      expect(bulkAddObservablesMock).not.toHaveBeenCalled();
+      expect(response.sources[0]).toEqual(
+        expect.objectContaining({
+          outcome: 'merged',
+          leftOut: expect.objectContaining({ observables: 1 }),
+        })
       );
     });
 
-    it('does not close or record activity on an original that could not be marked', async () => {
-      caseService.patchCases.mockResolvedValueOnce({
-        saved_objects: [
-          { ...toSavedObject(firstCase), version: 'case-1-marked' },
-          {
-            id: secondCase.id,
-            type: CASE_SAVED_OBJECT,
-            error: { statusCode: 409, error: 'Conflict', message: 'version conflict' },
-          },
-        ],
+    it('does not link a source another merge linked first', async () => {
+      caseService.getCase.mockImplementation(async ({ id }) => {
+        const theCase = stored.get(id) as Case;
+        return toSavedObject(
+          id === firstCase.id
+            ? {
+                ...theCase,
+                version: 'changed',
+                merge: {
+                  merged_into: ['other-destination'],
+                  merged_at: '2024-04-01T00:00:00.000Z',
+                  closed_by_merge: false,
+                },
+              }
+            : theCase
+        );
       });
 
       const response = await merge(request, clientArgs, casesClient);
 
+      expect(response.sources[0]).toEqual(expect.objectContaining({ outcome: 'notMerged' }));
       expect(response.failures).toEqual([
-        { step: 'mark', caseId: secondCase.id, message: 'version conflict' },
+        expect.objectContaining({ step: 'mark', caseId: firstCase.id }),
       ]);
-      expect(response.mergedCaseIds).toEqual([firstCase.id]);
-      expect(bulkUpdateMock).toHaveBeenCalledWith(
-        { cases: [expect.objectContaining({ id: firstCase.id })] },
-        clientArgs,
-        casesClient,
-        { skipAlertSync: true }
-      );
-      const { userActions } = userActionService.creator.bulkCreateUserAction.mock.calls[0][0];
-      expect(userActions.map(({ caseId }) => caseId)).toEqual([newCase.id, firstCase.id]);
     });
 
-    it('reports a failure to close the originals', async () => {
-      bulkUpdateMock.mockRejectedValueOnce(new Error('close failed'));
+    it('copies what a source gained during the merge before linking it', async () => {
+      const gained = alertAttachment('a3', ['alert-9']);
+      caseService.getCase.mockImplementation(async ({ id }) => {
+        const theCase = stored.get(id) as Case;
+        return toSavedObject(
+          id === firstCase.id && theCase.version === firstCase.version
+            ? { ...theCase, version: 'gained-alert' }
+            : theCase
+        );
+      });
+      casesClient.attachments.getAll.mockImplementation(async ({ caseID }) =>
+        caseID === firstCase.id
+          ? [alertAttachment('a1', ['alert-1', 'alert-2']), gained]
+          : [alertAttachment('a2', ['alert-2', 'alert-3'])]
+      );
+      // The plan reads the attachments before the alert arrives.
+      casesClient.attachments.getAll
+        .mockImplementationOnce(async () => [alertAttachment('a1', ['alert-1', 'alert-2'])])
+        .mockImplementationOnce(async () => [alertAttachment('a2', ['alert-2', 'alert-3'])]);
 
       const response = await merge(request, clientArgs, casesClient);
 
-      expect(response.failures).toEqual([{ step: 'close', caseId: null, message: 'close failed' }]);
-      expect(response.closedCaseIds).toEqual([]);
+      expect(bulkCreateAttachmentsMock).toHaveBeenCalledWith(
+        {
+          caseId: newCase.id,
+          attachments: [expect.objectContaining({ attachmentId: ['alert-9'] })],
+        },
+        expect.anything(),
+        expect.anything()
+      );
+      expect(caseService.patchCases.mock.calls[0][0].cases[0].version).toBe('gained-alert');
+      expect(response.sources[0]).toEqual(
+        expect.objectContaining({
+          outcome: 'merged',
+          copied: expect.objectContaining({ alerts: 3 }),
+        })
+      );
+    });
+
+    it('reports a source it could not close and closes the rest', async () => {
+      bulkUpdateMock.mockRejectedValueOnce(new Error('conflict'));
+
+      const response = await merge(request, clientArgs, casesClient);
+
+      expect(response.sources).toEqual([
+        expect.objectContaining({ caseId: firstCase.id, outcome: 'merged', closed: false }),
+        expect.objectContaining({ caseId: secondCase.id, outcome: 'merged', closed: true }),
+      ]);
+      expect(response.failures).toEqual([
+        expect.objectContaining({ step: 'close', caseId: firstCase.id }),
+      ]);
+    });
+  });
+
+  describe('into an existing case', () => {
+    it('updates the fields that change without their own activity, and records them', async () => {
+      await merge({ ...request, destinationCaseId: firstCase.id }, clientArgs, casesClient);
+
+      expect(bulkUpdateMock).toHaveBeenNthCalledWith(
+        1,
+        {
+          cases: [
+            { id: firstCase.id, version: firstCase.version, severity: CaseSeverity.CRITICAL },
+          ],
+        },
+        expect.anything(),
+        casesClient,
+        { skipUserActions: true }
+      );
+      const { userActions } = userActionService.creator.bulkCreateUserAction.mock.calls[0][0];
+      expect(userActions[0].payload).toEqual({
+        merge: expect.objectContaining({ updatedFields: [{ field: 'severity' }] }),
+      });
+    });
+
+    it('copies only what the destination does not hold yet', async () => {
+      const response = await merge(
+        { ...request, destinationCaseId: firstCase.id },
+        clientArgs,
+        casesClient
+      );
+
+      expect(bulkCreateAttachmentsMock).toHaveBeenCalledTimes(1);
+      expect(bulkCreateAttachmentsMock.mock.calls[0][0].attachments).toEqual([
+        expect.objectContaining({ attachmentId: ['alert-3'] }),
+      ]);
+      expect(response.sources).toEqual([
+        expect.objectContaining({
+          caseId: secondCase.id,
+          copied: expect.objectContaining({ alerts: 1 }),
+          existing: expect.objectContaining({ alerts: 1 }),
+        }),
+      ]);
     });
   });
 });
@@ -601,57 +646,65 @@ describe('merge', () => {
 describe('mergePreview', () => {
   const clientArgs = createCasesClientMockArgs();
   const casesClient = createCasesClientMock();
+  const {
+    services: { licensingService, alertsService, fieldDefinitionsService },
+  } = clientArgs;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    casesClient.cases.bulkGet.mockResolvedValue({ cases: [firstCase, secondCase], errors: [] });
+    jest.mocked(casesClient.configure.get).mockResolvedValue([]);
+    licensingService.isAtLeastPlatinum.mockResolvedValue(true);
+    alertsService.getAlertsMergeEligibility.mockResolvedValue(eligibleAlerts);
+    fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+      fieldDefinitions: [],
+    } as unknown as Awaited<ReturnType<typeof fieldDefinitionsService.getFieldDefinitions>>);
+    casesClient.cases.bulkGet.mockResolvedValue({
+      cases: [
+        { ...firstCase, title: 'Phishing' },
+        { ...secondCase, title: 'Phishing follow-up' },
+      ],
+      errors: [],
+    });
     casesClient.attachments.getAll.mockResolvedValue([]);
   });
 
-  it('returns the cases, field defaults, and attachment counts without writing', async () => {
+  it('lists the conflicts and which ones the request settles, without writing', async () => {
     const preview = await mergePreview(
-      { caseIds: [firstCase.id, secondCase.id] },
+      { caseIds: request.caseIds, fields: { title: 'Phishing' } },
       clientArgs,
       casesClient
     );
 
-    expect(preview.cases.map(({ id, incrementalId }) => ({ id, incrementalId }))).toEqual([
-      { id: firstCase.id, incrementalId: 118 },
-      { id: secondCase.id, incrementalId: 121 },
+    expect(preview.conflicts).toEqual([
+      { field: 'title', reason: 'differentValues', resolved: true },
+      { field: 'severity', reason: 'differentValues', resolved: false },
     ]);
-    expect(preview.destinationCaseId).toBeNull();
-    expect(preview.fields.title.value).toBe('Merged case: Phishing, Phishing follow-up');
+    expect(preview.canMerge).toBe(false);
+    expect(preview.fields.title).toEqual(
+      expect.objectContaining({ value: 'Phishing', provenance: 'oldest', hasConflict: true })
+    );
     expect(preview.fields.severity).toEqual(
       expect.objectContaining({ value: CaseSeverity.CRITICAL, provenance: 'highest' })
     );
-    expect(casesClient.cases.create).not.toHaveBeenCalled();
-    expect(casesClient.cases.bulkUpdate).not.toHaveBeenCalled();
     expect(preview.choices).toBeNull();
+    expect(createMock).not.toHaveBeenCalled();
   });
 
-  it('lists the attachments to choose from when a limit is exceeded', async () => {
-    const alertIds = Array.from(
-      { length: MAX_ALERTS_PER_CASE + 1 },
-      (_, position) => `a-${position}`
-    );
+  it('reports alerts the merge leaves out on its own', async () => {
     casesClient.attachments.getAll.mockImplementation(async ({ caseID }) =>
-      caseID === firstCase.id ? [alertAttachment('a1', alertIds)] : []
+      caseID === firstCase.id ? [alertAttachment('a1', ['alert-1', 'alert-2'])] : []
     );
+    alertsService.getAlertsMergeEligibility.mockResolvedValue({
+      ineligible: new Map([['alert-2', 'alertCaseLimit' as const]]),
+      missingDestination: [],
+    });
 
-    const preview = await mergePreview(
-      { caseIds: [firstCase.id, secondCase.id] },
-      clientArgs,
-      casesClient
-    );
+    const preview = await mergePreview({ caseIds: request.caseIds }, clientArgs, casesClient);
 
-    expect(preview.attachments.alerts.overLimit).toBe(1);
-    expect(preview.choices?.alerts).toHaveLength(MAX_ALERTS_PER_CASE + 1);
-    expect(preview.choices?.alerts[0]).toEqual(
+    expect(preview.attachments.alerts).toEqual(
       expect.objectContaining({
-        key: 'alerts|a-0|alerts-index',
-        sourceCaseId: firstCase.id,
-        ruleId: 'rule-1',
-        ruleName: 'Rule',
+        toCopy: 1,
+        notCopied: [{ reason: 'alertCaseLimit', count: 1 }],
       })
     );
   });

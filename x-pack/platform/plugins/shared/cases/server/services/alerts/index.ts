@@ -8,13 +8,16 @@
 import Boom from '@hapi/boom';
 import pMap from 'p-map';
 import pRetry from 'p-retry';
-import { isEmpty } from 'lodash';
+import { chunk, isEmpty } from 'lodash';
 
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { isNonLocalIndexName } from '@kbn/es-query';
 import {
+  ALERT_CASE_IDS,
+  ALERT_RULE_CONSUMER,
   ALERT_RULE_TYPE_ID,
   ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+  MAX_CASES_PER_ALERT,
   SPACE_IDS,
 } from '@kbn/rule-data-utils';
 import type { STATUS_VALUES } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
@@ -405,6 +408,86 @@ export class AlertService {
         logger: this.logger,
       });
     }
+  }
+
+  /**
+   * Checks, as the current user, which alerts a merge can copy into its destination. It leaves out
+   * alerts the user cannot read and alerts already in the most cases an alert can be in, and finds
+   * the alerts already in the destination that don't list it in their cases, so a rerun can fix
+   * them. Read only.
+   */
+  public async getAlertsMergeEligibility({
+    candidates,
+    linked,
+    destinationId,
+  }: {
+    /** Alerts the merge would copy. */
+    candidates: AlertInfo[];
+    /** Alerts the destination already holds. */
+    linked: AlertInfo[];
+    /** Absent for a new destination. */
+    destinationId?: string;
+  }): Promise<AlertsMergeEligibility> {
+    const ineligible = new Map<string, AlertMergeIneligibility>();
+    const missingDestination: AlertInfo[] = [];
+    const candidateIds = new Set(candidates.map(({ id }) => id));
+    const alerts = this.getNonEmptyAlerts([...candidates, ...linked]);
+
+    const sources = new Map<string, AlertMergeSource | undefined>();
+    for (const batch of chunk(
+      alerts.filter(({ index }) => !isNonLocalIndexName(index)),
+      1000
+    )) {
+      const { docs } = await this.scopedClusterClient.mget<AlertMergeSource>({
+        docs: batch.map(({ id, index }) => ({ _id: id, _index: index })),
+        _source: [ALERT_CASE_IDS, ALERT_RULE_TYPE_ID, ALERT_RULE_CONSUMER],
+      });
+      for (const doc of docs) {
+        sources.set(doc._id, 'found' in doc && doc.found ? doc._source : undefined);
+      }
+    }
+
+    const byRule = new Map<string, AlertInfo[]>();
+    for (const alert of alerts) {
+      const source = sources.get(alert.id);
+      const caseIds = source?.[ALERT_CASE_IDS] ?? [];
+      if (!candidateIds.has(alert.id)) {
+        if (
+          source != null &&
+          destinationId != null &&
+          !caseIds.includes(destinationId) &&
+          caseIds.length < MAX_CASES_PER_ALERT
+        ) {
+          missingDestination.push(alert);
+        }
+      } else if (source == null) {
+        ineligible.set(alert.id, 'alertNotAuthorized');
+      } else if (caseIds.length + 1 > MAX_CASES_PER_ALERT) {
+        ineligible.set(alert.id, 'alertCaseLimit');
+      } else {
+        const ruleKey = `${source[ALERT_RULE_TYPE_ID] ?? ''}|${source[ALERT_RULE_CONSUMER] ?? ''}`;
+        byRule.set(ruleKey, [...(byRule.get(ruleKey) ?? []), alert]);
+      }
+    }
+
+    for (const alert of candidates) {
+      if (isNonLocalIndexName(alert.index)) {
+        ineligible.set(alert.id, 'alertNotAuthorized');
+      }
+    }
+
+    // One check per rule type and consumer, the unit alert privileges are granted on.
+    for (const group of byRule.values()) {
+      try {
+        await this.alertsClient.ensureAllAlertsAuthorizedRead({ alerts: group });
+      } catch {
+        for (const { id } of group) {
+          ineligible.set(id, 'alertNotAuthorized');
+        }
+      }
+    }
+
+    return { ineligible, missingDestination };
   }
 
   public async removeCaseIdFromAlerts({
@@ -964,4 +1047,20 @@ interface AttackAuthorizationSource {
 interface AlertIdIndex {
   id: string;
   index: string;
+}
+
+/** Why a merge cannot copy an alert into its destination. */
+export type AlertMergeIneligibility = 'alertCaseLimit' | 'alertNotAuthorized';
+
+export interface AlertsMergeEligibility {
+  /** Alert ids the merge leaves out, with why. */
+  ineligible: Map<string, AlertMergeIneligibility>;
+  /** Alerts the destination holds that don't list it in their cases. */
+  missingDestination: AlertInfo[];
+}
+
+interface AlertMergeSource {
+  [ALERT_CASE_IDS]?: string[];
+  [ALERT_RULE_TYPE_ID]?: string;
+  [ALERT_RULE_CONSUMER]?: string;
 }

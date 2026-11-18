@@ -627,6 +627,23 @@ describe('CaseCommentModel', () => {
       ).not.toHaveBeenCalled();
     });
 
+    it('links copied alerts without syncing their status when skipAlertStatusSync is set', async () => {
+      clientArgs.services.attachmentService.bulkCreate.mockResolvedValueOnce({
+        saved_objects: [{ ...mockCaseComments[0], id: 'comment-1' }],
+      });
+
+      await model.bulkCreate({
+        attachments: [{ id: 'comment-1', ...unifiedAlertComment }],
+        skipUserActions: true,
+        skipAlertStatusSync: true,
+      });
+
+      expect(clientArgs.services.alertsService.bulkUpdateCases).toHaveBeenCalledWith(
+        expect.objectContaining({ caseIds: [model.savedObject.id] })
+      );
+      expect(clientArgs.services.alertsService.updateAlertsStatus).not.toHaveBeenCalled();
+    });
+
     it('drops the unified event attachment entirely when every id is already attached to the case', async () => {
       clientArgs.services.attachmentService.getter.getAllEventIds.mockResolvedValueOnce(
         new Set(['event-id-1', 'event-id-2'])

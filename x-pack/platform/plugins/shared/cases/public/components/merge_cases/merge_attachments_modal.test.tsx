@@ -8,42 +8,16 @@
 import React from 'react';
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type {
-  MergeAttachmentChoices,
-  MergeAttachmentSummary,
-  MergePreviewCase,
-} from '../../../common/types/api';
-import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
+import type { MergeAttachmentChoices } from '../../../common/types/api';
 import { renderWithTestingProviders } from '../../common/mock';
 import { MergeAttachmentsModal } from './merge_attachments_modal';
+import { mergePreviewCase, mergeSummary as summary } from './mock';
 
 jest.mock('../../common/lib/kibana');
 
-const summary = (overrides: Partial<MergeAttachmentSummary> = {}): MergeAttachmentSummary => ({
-  total: 0,
-  duplicates: 0,
-  toCopy: 0,
-  existing: 0,
-  max: null,
-  overLimit: 0,
-  ...overrides,
-});
-
-const previewCase = (id: string, incrementalId: number): MergePreviewCase => ({
-  id,
-  version: `${id}-version`,
-  title: id,
-  incrementalId,
-  status: CaseStatuses.open,
-  severity: CaseSeverity.LOW,
-  owner: 'securitySolution',
-  createdAt: '2024-01-01T00:00:00.000Z',
-  totalAlerts: 0,
-});
-
 const casesById = new Map([
-  ['case-1', previewCase('case-1', 118)],
-  ['case-2', previewCase('case-2', 119)],
+  ['case-1', mergePreviewCase('case-1', 118, 'case-1')],
+  ['case-2', mergePreviewCase('case-2', 119, 'case-2')],
 ]);
 
 const alertChoice = (
@@ -71,10 +45,21 @@ const choices: MergeAttachmentChoices = {
     }),
   ],
   events: [],
+  attacks: [
+    {
+      key: 'attack-1',
+      sourceCaseId: 'case-2',
+      addedAt: '2024-01-01T00:00:00.000Z',
+      attackId: 'attack-1',
+      title: 'Lateral movement',
+      alertKeys: ['attack-alert-1', 'attack-alert-2'],
+    },
+  ],
   observables: [
     {
       key: 'observable-1',
       sourceCaseId: 'case-1',
+      addedAt: '2024-01-01T00:00:00.000Z',
       typeKey: 'observable-type-ipv4',
       value: '10.0.0.1',
     },
@@ -83,7 +68,8 @@ const choices: MergeAttachmentChoices = {
 };
 
 const attachments = {
-  alerts: summary({ total: 3, toCopy: 3, max: 2, overLimit: 1 }),
+  alerts: { ...summary({ total: 5, toCopy: 5, max: 4, overBy: 1 }), byRule: [] },
+  attacks: summary({ total: 1, toCopy: 1 }),
   events: summary(),
   observables: summary({ total: 1, toCopy: 1, max: 50 }),
   other: summary({ max: 100 }),
@@ -116,8 +102,8 @@ describe('MergeAttachmentsModal', () => {
     renderModal({
       attachments: {
         ...attachments,
-        alerts: summary({ total: 3, toCopy: 3, max: 1000 }),
-        observables: summary({ total: 1, toCopy: 1, max: 0, overLimit: 1 }),
+        alerts: { ...summary({ total: 3, toCopy: 3, max: 1000 }), byRule: [] },
+        observables: summary({ total: 1, toCopy: 1, max: 0, overBy: 1 }),
       },
     });
 
@@ -169,6 +155,23 @@ describe('MergeAttachmentsModal', () => {
     await userEvent.click(screen.getByTestId('merge-choices-apply'));
 
     expect(onApply).toHaveBeenCalledWith(new Set(['observable-1', 'alert-1']));
+  });
+
+  it('leaves an attack out with its alerts', async () => {
+    renderModal({ initialKind: 'attacks' });
+
+    expect(screen.getByTestId('merge-choices-attacks')).toHaveTextContent('Lateral movement');
+    expect(screen.getByTestId('merge-choices-attacks')).toHaveTextContent('2 alerts');
+    await userEvent.click(screen.getByRole('checkbox', { name: 'Copy Lateral movement' }));
+    await userEvent.click(screen.getByTestId('merge-choices-tab-alerts'));
+
+    // Its two alerts bring the alerts within the limit.
+    expect(screen.getByTestId('merge-choices-alerts-status')).toHaveTextContent(
+      'Within the limit.'
+    );
+
+    await userEvent.click(screen.getByTestId('merge-choices-apply'));
+    expect(onApply).toHaveBeenCalledWith(new Set(['attack-1']));
   });
 
   it('discards the changes on cancel', async () => {

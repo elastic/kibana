@@ -138,6 +138,8 @@ export const INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL =
   `${CASES_INTERNAL_URL}/case/attachments/_find_containing_all` as const;
 export const INTERNAL_MERGE_CASES_URL = `${CASES_INTERNAL_URL}/_merge` as const;
 export const INTERNAL_MERGE_CASES_PREVIEW_URL = `${INTERNAL_MERGE_CASES_URL}/_preview` as const;
+/** The version of the merge routes, sent in the `elastic-api-version` header. */
+export const MERGE_CASES_API_VERSION = '1' as const;
 
 export const INTERNAL_TEMPLATES_URL = `${CASES_INTERNAL_URL}/templates` as const;
 export const INTERNAL_TEMPLATE_DETAILS_URL = `${INTERNAL_TEMPLATES_URL}/{template_id}` as const;
@@ -218,8 +220,10 @@ export const MAX_SUGGESTED_PROFILES = 10 as const;
 export const MAX_CASES_TO_UPDATE = 100 as const;
 export const MIN_CASES_TO_MERGE = 2 as const;
 export const MAX_CASES_TO_MERGE = 10 as const;
-export const MAX_MERGE_EXCLUDED_ATTACHMENTS = 20000 as const;
+export const MAX_MERGE_CHOICE_KEYS = 5000 as const;
 export const MAX_MERGE_ATTACHMENT_KEY_LENGTH = 1024 as const;
+export const MAX_MERGE_EXTENDED_FIELDS = 400 as const;
+export const MERGE_CASES_MAX_BODY_BYTES = 4 * 1024 * 1024;
 export const MAX_BULK_CREATE_ATTACHMENTS = 100 as const;
 export const MAX_ATTACHMENT_TYPES_PER_QUERY = 20 as const;
 export const MAX_BULK_DELETE_ATTACHMENTS = 100 as const;

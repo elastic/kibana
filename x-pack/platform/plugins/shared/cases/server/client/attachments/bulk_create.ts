@@ -30,7 +30,11 @@ import { extractAndAddObservables } from './extract_observables';
 const createAttachments = async (
   args: BulkCreateArgs,
   clientArgs: CasesClientArgs,
-  { skipUserActions = false }: BulkCreateAttachmentsOptions = {}
+  {
+    skipUserActions = false,
+    skipAlertStatusSync = false,
+    skipObservableExtraction = false,
+  }: BulkCreateAttachmentsOptions = {}
 ): Promise<{
   model: CaseCommentModel;
   createdAttachments: AttachmentSavedObjectTransformedV2[];
@@ -100,6 +104,7 @@ const createAttachments = async (
     const { model: updatedModel, attachments: createdAttachments } = await model.bulkCreate({
       attachments: attachmentsWithIds,
       skipUserActions,
+      skipAlertStatusSync,
     });
 
     const {
@@ -118,12 +123,9 @@ const createAttachments = async (
     }
 
     // This call never throws — failures are logged and do not abort the attachment creation.
-    const caseWithObservables = await extractAndAddObservables(
-      caseId,
-      decodedAttachments,
-      { settings },
-      clientArgs
-    );
+    const caseWithObservables = skipObservableExtraction
+      ? undefined
+      : await extractAndAddObservables(caseId, decodedAttachments, { settings }, clientArgs);
 
     return {
       model: caseWithObservables

@@ -94,6 +94,7 @@ export const getCases = async ({
     tags: [],
     owner: [],
     category: [],
+    merged: [],
     customFields: {},
     extendedFieldFilters: [],
     from: DEFAULT_FROM_DATE,

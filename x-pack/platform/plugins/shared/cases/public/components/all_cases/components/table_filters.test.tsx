@@ -186,6 +186,7 @@ describe('CasesTableFilters ', () => {
         "customFields": Object {},
         "extendedFieldFilters": Array [],
         "from": "now-30d",
+        "merged": Array [],
         "owner": Array [],
         "reporters": Array [],
         "search": "",
@@ -281,6 +282,21 @@ describe('CasesTableFilters ', () => {
     });
   });
 
+  it('offers a Merged filter under More filters whose options exclude each other', async () => {
+    renderWithTestingProviders(
+      <CasesTableFilters
+        {...props}
+        filterOptions={{ ...props.filterOptions, merged: ['exclude'] }}
+      />
+    );
+
+    await userEvent.click(await screen.findByTestId('options-filter-popover-button-merged'));
+    await waitForEuiPopoverOpen();
+    await userEvent.click(await screen.findByTestId('options-filter-popover-item-only'));
+
+    expect(onFilterChanged).toHaveBeenCalledWith(expect.objectContaining({ merged: ['only'] }));
+  });
+
   it('should show in progress status only when "in p" is searched in the filter', async () => {
     renderWithTestingProviders(<CasesTableFilters {...props} />);
 
@@ -327,6 +343,7 @@ describe('CasesTableFilters ', () => {
         "customFields": Object {},
         "extendedFieldFilters": Array [],
         "from": "now-30d",
+        "merged": Array [],
         "owner": Array [],
         "reporters": Array [],
         "search": "",
@@ -717,7 +734,7 @@ describe('CasesTableFilters ', () => {
 
       expect(screen.getByTestId(MORE_FILTERS_TEST_ID)).toBeInTheDocument();
       await userEvent.click(screen.getByTestId(MORE_FILTERS_TEST_ID));
-      await waitFor(() => expect(screen.getAllByRole('option')).toHaveLength(5));
+      await waitFor(() => expect(screen.getAllByRole('option')).toHaveLength(6));
 
       expect(await screen.findByTestId('options-filter-popover-item-status')).toBeInTheDocument();
       expect(
@@ -738,7 +755,7 @@ describe('CasesTableFilters ', () => {
       renderWithTestingProviders(<CasesTableFilters {...props} />);
 
       await userEvent.click(screen.getByTestId(MORE_FILTERS_TEST_ID));
-      await waitFor(() => expect(screen.getAllByRole('option')).toHaveLength(5));
+      await waitFor(() => expect(screen.getAllByRole('option')).toHaveLength(6));
 
       await userEvent.click(screen.getByRole('option', { name: 'Toggle' }));
 
@@ -754,7 +771,7 @@ describe('CasesTableFilters ', () => {
       renderWithTestingProviders(<CasesTableFilters {...props} />);
 
       await userEvent.click(screen.getByTestId(MORE_FILTERS_TEST_ID));
-      await waitFor(() => expect(screen.getAllByRole('option')).toHaveLength(5));
+      await waitFor(() => expect(screen.getAllByRole('option')).toHaveLength(6));
 
       await userEvent.click(screen.getByRole('option', { name: 'Toggle' }));
       const storedFilterState = localStorage.getItem(
@@ -780,6 +797,10 @@ describe('CasesTableFilters ', () => {
             "key": "category",
           },
           Object {
+            "isActive": false,
+            "key": "merged",
+          },
+          Object {
             "isActive": true,
             "key": "cf_toggle",
           },
@@ -791,7 +812,7 @@ describe('CasesTableFilters ', () => {
       renderWithTestingProviders(<CasesTableFilters {...props} />);
 
       await userEvent.click(screen.getByTestId(MORE_FILTERS_TEST_ID));
-      await waitFor(() => expect(screen.getAllByRole('option')).toHaveLength(5));
+      await waitFor(() => expect(screen.getAllByRole('option')).toHaveLength(6));
 
       expect(await screen.findByTestId('options-filter-popover-button-status')).toBeInTheDocument();
       await userEvent.click(screen.getByRole('option', { name: 'Status' }));
@@ -833,7 +854,7 @@ describe('CasesTableFilters ', () => {
       renderWithTestingProviders(<CasesTableFilters {...props} />);
 
       await userEvent.click(screen.getByTestId(MORE_FILTERS_TEST_ID));
-      await waitFor(() => expect(screen.getAllByRole('option')).toHaveLength(5));
+      await waitFor(() => expect(screen.getAllByRole('option')).toHaveLength(6));
 
       await userEvent.click(screen.getByRole('option', { name: 'Status' }));
 
@@ -858,6 +879,10 @@ describe('CasesTableFilters ', () => {
           Object {
             "isActive": true,
             "key": "category",
+          },
+          Object {
+            "isActive": false,
+            "key": "merged",
           },
           Object {
             "isActive": false,
@@ -946,20 +971,21 @@ describe('CasesTableFilters ', () => {
       renderWithTestingProviders(<CasesTableFilters {...props} />);
 
       await userEvent.click(screen.getByTestId(MORE_FILTERS_TEST_ID));
+      // The popover list is virtualized: it renders 9 of its 10 options at a time.
       await waitFor(() => {
-        expect(screen.getAllByRole('option')).toHaveLength(9);
+        expect(screen.getAllByRole('option')[0]).toHaveAttribute('aria-setsize', '10');
       });
       const allOptions = screen.getAllByRole('option');
       const orderedKey = [
         `${CUSTOM_FIELD_KEY_PREFIX}aa`,
         'category',
+        'merged',
         'severity',
         'status',
         'tags',
         `${CUSTOM_FIELD_KEY_PREFIX}ta`,
         `${CUSTOM_FIELD_KEY_PREFIX}tb`,
         `${CUSTOM_FIELD_KEY_PREFIX}tc`,
-        `${CUSTOM_FIELD_KEY_PREFIX}za`,
       ];
       orderedKey.forEach((key, index) => {
         expect(allOptions[index].getAttribute('data-test-subj')).toBe(
@@ -1022,7 +1048,7 @@ describe('CasesTableFilters ', () => {
       let allOptions: HTMLElement[];
       await waitFor(() => {
         allOptions = screen.getAllByRole('option');
-        expect(allOptions).toHaveLength(6);
+        expect(allOptions).toHaveLength(7);
       });
     });
 
@@ -1072,6 +1098,10 @@ describe('CasesTableFilters ', () => {
           Object {
             "isActive": false,
             "key": "cf_toggle",
+          },
+          Object {
+            "isActive": false,
+            "key": "merged",
           },
         ]
       `);

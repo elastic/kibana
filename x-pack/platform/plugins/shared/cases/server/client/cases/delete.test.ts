@@ -94,6 +94,13 @@ describe('delete', () => {
           caseIds,
         });
       });
+
+      it('removes the links merged cases have to the deleted cases', async () => {
+        await deleteCases(caseIds, clientArgs);
+        expect(clientArgs.services.caseService.removeMergedIntoReferences).toHaveBeenCalledWith(
+          caseIds
+        );
+      });
     });
 
     describe('errors', () => {

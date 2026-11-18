@@ -7,8 +7,8 @@
 
 import { countBy } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import type { RouteRegistrar, RouteSecurity } from '@kbn/core/server';
-import type { CasesRequestHandlerContext } from '../../types';
+import type { RequestHandler, RouteRegistrar, RouteSecurity } from '@kbn/core/server';
+import type { CasesRequestHandlerContext, CasesRouter } from '../../types';
 import type { RegisterRoutesDeps } from './types';
 import { escapeHatch, getWarningHeader, logDeprecatedEndpoint, wrapError } from './utils';
 
@@ -95,7 +95,99 @@ export const registerRoutes = (deps: RegisterRoutesDeps) => {
   const { router, routes, logger, kibanaVersion, telemetryUsageCounter } = deps;
 
   routes.forEach((route) => {
-    const { method, path, params, options, routerOptions, handler, security } = route;
+    const { method, path, params, options, routerOptions, handler, security, version } = route;
+
+    const routeHandler: RequestHandler<
+      unknown,
+      unknown,
+      unknown,
+      CasesRequestHandlerContext
+    > = async (context, request, response) => {
+      let responseHeaders = {};
+      const isKibanaRequest = request.isInternalApiRequest;
+
+      if (!context.cases) {
+        return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
+      }
+
+      try {
+        if (options?.deprecated) {
+          logAndIncreaseDeprecationTelemetryCounters({
+            telemetryUsageCounter,
+            logger,
+            path,
+            method,
+            isKibanaRequest,
+          });
+
+          responseHeaders = {
+            ...responseHeaders,
+            ...getWarningHeader(kibanaVersion),
+          };
+        }
+
+        const res = await handler({
+          logger,
+          context,
+          request,
+          response,
+          kibanaVersion,
+          incrementAttachmentTypeCounters: (types) =>
+            increaseAttachmentTypeCounters({ telemetryUsageCounter, method, path, types }),
+        });
+
+        if (telemetryUsageCounter) {
+          increaseTelemetryCounters({ telemetryUsageCounter, method, path, isKibanaRequest });
+        }
+
+        res.options.headers = {
+          ...res.options.headers,
+          ...responseHeaders,
+        };
+
+        return res;
+      } catch (error) {
+        logger.error(error.message);
+
+        if (telemetryUsageCounter) {
+          increaseTelemetryCounters({
+            telemetryUsageCounter,
+            method,
+            path,
+            isError: true,
+            isKibanaRequest,
+          });
+        }
+
+        return response.customError(wrapError(error));
+      }
+    };
+
+    if (version != null) {
+      const { access = 'public', summary, description, tags, body } = routerOptions ?? {};
+      // Only the router's method signatures differ; every method takes the same config here.
+      (router.versioned[method] as CasesRouter['versioned']['post'])({
+        path,
+        access,
+        summary,
+        description,
+        options: { tags, body },
+        security: security as RouteSecurity,
+      }).addVersion(
+        {
+          version,
+          validate: {
+            request: {
+              params: params?.params ?? escapeHatch,
+              query: params?.query ?? escapeHatch,
+              body: params?.body ?? schema.nullable(escapeHatch),
+            },
+          },
+        },
+        routeHandler
+      );
+      return;
+    }
 
     (router[method] as RouteRegistrar<typeof method, CasesRequestHandlerContext>)(
       {
@@ -108,66 +200,7 @@ export const registerRoutes = (deps: RegisterRoutesDeps) => {
         },
         security: security as RouteSecurity,
       },
-      async (context, request, response) => {
-        let responseHeaders = {};
-        const isKibanaRequest = request.isInternalApiRequest;
-
-        if (!context.cases) {
-          return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
-        }
-
-        try {
-          if (options?.deprecated) {
-            logAndIncreaseDeprecationTelemetryCounters({
-              telemetryUsageCounter,
-              logger,
-              path,
-              method,
-              isKibanaRequest,
-            });
-
-            responseHeaders = {
-              ...responseHeaders,
-              ...getWarningHeader(kibanaVersion),
-            };
-          }
-
-          const res = await handler({
-            logger,
-            context,
-            request,
-            response,
-            kibanaVersion,
-            incrementAttachmentTypeCounters: (types) =>
-              increaseAttachmentTypeCounters({ telemetryUsageCounter, method, path, types }),
-          });
-
-          if (telemetryUsageCounter) {
-            increaseTelemetryCounters({ telemetryUsageCounter, method, path, isKibanaRequest });
-          }
-
-          res.options.headers = {
-            ...res.options.headers,
-            ...responseHeaders,
-          };
-
-          return res;
-        } catch (error) {
-          logger.error(error.message);
-
-          if (telemetryUsageCounter) {
-            increaseTelemetryCounters({
-              telemetryUsageCounter,
-              method,
-              path,
-              isError: true,
-              isKibanaRequest,
-            });
-          }
-
-          return response.customError(wrapError(error));
-        }
-      }
+      routeHandler
     );
   });
 };

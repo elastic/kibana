@@ -376,6 +376,25 @@ export const ADD_ATTACHMENTS_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   }
 );
 
+export const MERGE_CASES_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.mergeCases.label', {
+  defaultMessage: 'Cases - Merge cases',
+});
+
+export const MERGE_CASES_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.mergeCases.description',
+  {
+    defaultMessage: 'Merges 2 to 10 cases into a new case or into one of them',
+  }
+);
+
+export const MERGE_CASES_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.mergeCases.documentation.details',
+  {
+    defaultMessage:
+      'This step copies the alerts, events, observables and other attachments of the source cases into the destination, skipping anything already there, and links each source to the destination. The sources keep their attachments and close unless `close_sources` is false. Every field the cases hold different values for must be given in `fields`, or the step fails with the list of conflicts. A source that was not fully copied is reported with the outcome `notMerged`; running the step again with the created case as `destination_case_id` finishes it.',
+  }
+);
+
 export const FIND_SIMILAR_CASES_STEP_LABEL = i18n.translate(
   'xpack.cases.workflowSteps.findSimilarCases.label',
   {
@@ -542,6 +561,28 @@ export const CASE_NOT_FOUND_MESSAGE = (caseId: string) =>
     defaultMessage: 'Case "{caseId}" was not found.',
     values: { caseId },
   });
+
+export const CASE_TRIGGER_EVENT_SCHEMA_MERGE_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.eventSchema.merge',
+  {
+    defaultMessage:
+      'Set when the change was made by a merge: the source cases and the destination case. For example, a status change of a source case closed by a merge carries it.',
+  }
+);
+
+export const CASE_TRIGGER_EVENT_SCHEMA_MERGE_SOURCE_CASE_IDS_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.eventSchema.merge.sourceCaseIds',
+  {
+    defaultMessage: 'The IDs of the cases being merged.',
+  }
+);
+
+export const CASE_TRIGGER_EVENT_SCHEMA_MERGE_DESTINATION_CASE_ID_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.eventSchema.merge.destinationCaseId',
+  {
+    defaultMessage: 'The ID of the case they are merged into.',
+  }
+);
 
 export const CASE_TRIGGER_EVENT_SCHEMA_CASE_ID_DESCRIPTION = i18n.translate(
   'xpack.cases.workflowTriggers.eventSchema.caseId',

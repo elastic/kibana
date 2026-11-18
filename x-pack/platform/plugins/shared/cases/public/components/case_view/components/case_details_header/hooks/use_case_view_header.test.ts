@@ -16,6 +16,7 @@ import { useGetCaseConnectors } from '../../../../../containers/use_get_case_con
 import { useDeleteCases } from '../../../../../containers/use_delete_cases';
 import { useShouldDisableStatus } from '../../../../actions/status/use_should_disable_status';
 import { useCasesConfig } from '../../../../../common/lib/kibana';
+import { useCaseViewNavigation } from '../../../../../common/navigation/hooks';
 import type { CaseUI } from '../../../../../../common';
 
 jest.mock('../../../../../containers/use_get_case_connectors');
@@ -355,6 +356,62 @@ describe('useCaseViewHeader', () => {
 
     const deleteItem = result.current.menu.items!.find((item) => item.id === 'deleteCase');
     expect(deleteItem).toBeDefined();
+  });
+
+  describe('merge with other cases', () => {
+    it('opens the merge flyout with this case added', () => {
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
+
+      expect(result.current.mergeFlyout).toBeNull();
+
+      act(() => {
+        result.current.menu.items!.find((item) => item.id === 'mergeCases')?.run?.();
+      });
+
+      expect(result.current.mergeFlyout?.props).toEqual(
+        expect.objectContaining({ initialCases: [basicCase], origin: 'casePage' })
+      );
+    });
+
+    it('goes to the destination after the merge', () => {
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
+
+      act(() => {
+        result.current.menu.items!.find((item) => item.id === 'mergeCases')?.run?.();
+      });
+      act(() => {
+        result.current.mergeFlyout?.props.onMerged({
+          destination: {
+            id: 'destination-id',
+            title: 'Destination',
+            incrementalId: 142,
+            isNew: true,
+          },
+          sources: [],
+          failures: [],
+        });
+      });
+
+      expect(useCaseViewNavigation().navigateToCaseView).toHaveBeenCalledWith({
+        detailName: 'destination-id',
+      });
+      expect(result.current.mergeFlyout).toBeNull();
+    });
+
+    it('is not offered without the update permission', () => {
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
+        wrapper: ({ children }: { children: React.ReactNode }) =>
+          React.createElement(
+            TestProviders,
+            { permissions: noUpdateCasesPermissions() } as React.ComponentProps<
+              typeof TestProviders
+            >,
+            children
+          ),
+      });
+
+      expect(result.current.menu.items!.find((item) => item.id === 'mergeCases')).toBeUndefined();
+    });
   });
 
   it('opens delete modal when delete action is triggered', () => {

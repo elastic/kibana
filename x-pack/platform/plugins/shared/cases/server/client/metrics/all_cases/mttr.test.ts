@@ -78,6 +78,31 @@ describe('MTTR', () => {
     expect(await handler.compute()).toEqual({ mttr: 5 });
   });
 
+  it('leaves out cases the merge closed', async () => {
+    caseService.executeAggregations.mockResolvedValue({ mttr: { value: 5 } });
+    const handler = new MTTR(constructorOptions);
+
+    handler.setupFeature(CaseMetricsFeature.MTTR);
+    await handler.compute();
+
+    const filter = caseService.executeAggregations.mock.calls[0][0].options?.filter;
+    expect(JSON.stringify(filter)).toContain('cases.attributes.merge.closed_by_merge');
+    expect(filter).toEqual(
+      expect.objectContaining({
+        function: 'not',
+        arguments: [
+          expect.objectContaining({
+            function: 'is',
+            arguments: [
+              expect.objectContaining({ value: 'cases.attributes.merge.closed_by_merge' }),
+              expect.objectContaining({ value: 'true' }),
+            ],
+          }),
+        ],
+      })
+    );
+  });
+
   it('passes the query options correctly', async () => {
     caseService.executeAggregations.mockResolvedValue({ mttr: { value: 5 } });
     const handler = new MTTR({
@@ -152,6 +177,28 @@ describe('MTTR', () => {
                   },
                 ],
                 "function": "is",
+                "type": "function",
+              },
+              Object {
+                "arguments": Array [
+                  Object {
+                    "arguments": Array [
+                      Object {
+                        "isQuoted": false,
+                        "type": "literal",
+                        "value": "cases.attributes.merge.closed_by_merge",
+                      },
+                      Object {
+                        "isQuoted": false,
+                        "type": "literal",
+                        "value": "true",
+                      },
+                    ],
+                    "function": "is",
+                    "type": "function",
+                  },
+                ],
+                "function": "not",
                 "type": "function",
               },
             ],

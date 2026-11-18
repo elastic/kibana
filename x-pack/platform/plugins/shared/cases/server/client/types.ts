@@ -72,6 +72,17 @@ export interface CasesClientArgs {
   readonly request: KibanaRequest;
   readonly closeReasonValidator?: (closeReason: string, owner: string) => Promise<boolean>;
   readonly clientSource: CasesClientSource;
+  /**
+   * Set only on the internal writes of a merge, so the triggers they fire can say the change came
+   * from a merge. Never set from a request.
+   */
+  readonly mergeContext?: CasesMergeContext;
+}
+
+export interface CasesMergeContext {
+  readonly sourceCaseIds: string[];
+  /** Absent while a new destination is being created. */
+  readonly destinationCaseId?: string;
 }
 
 export type CasesSearchParams = Partial<
@@ -88,6 +99,8 @@ export type CasesSearchParams = Partial<
     | 'category'
     | 'sortField'
     | 'customFields'
+    | 'merged'
+    | 'closedByMerge'
   > & { authorizationFilter?: KueryNode }
 >;
 

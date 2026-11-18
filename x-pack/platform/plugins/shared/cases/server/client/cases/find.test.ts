@@ -102,6 +102,22 @@ describe('find', () => {
       expect(call.caseOptions).not.toHaveProperty('rootSearchFields');
     });
 
+    it('passes the merged filters to the case and status queries', async () => {
+      const findRequest = createCasesClientMockFindRequest({
+        merged: 'exclude',
+        closedByMerge: 'exclude',
+      });
+      await find(findRequest, clientArgs, casesClientMock);
+
+      const { caseOptions } = clientArgs.services.caseService.findCasesGroupedByID.mock.calls[0][0];
+      const filterString = JSON.stringify(caseOptions.filter);
+      expect(filterString).toContain('cases.attributes.merge.merged_at');
+      expect(filterString).toContain('cases.attributes.merge.closed_by_merge');
+
+      const { searchOptions } = clientArgs.services.caseService.getCaseStatusStats.mock.calls[0][0];
+      expect(JSON.stringify(searchOptions.filter)).toContain('cases.attributes.merge.merged_at');
+    });
+
     it('search with single custom field', async () => {
       const findRequest = createCasesClientMockFindRequest({
         customFields: { second_key: [true] },

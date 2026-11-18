@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { i18n as kbnI18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -18,66 +19,103 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { SnakeToCamelCase } from '../../../common/types';
 import type {
   MergeCaseSnapshot,
-  MergeCopiedTotals,
+  MergeCounts,
+  MergeNotCopiedField,
   MergeSource,
   MergeUpdatedField,
   MergeUserAction,
 } from '../../../common/types/domain';
 import { MergeCaseLink } from '../merge_cases/merge_case_link';
 import { getCaseReference } from '../merge_cases/utils';
-import { HoverableUsernameResolver } from '../user_profiles/hoverable_username_resolver';
 import type { UserActionBuilder } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import * as i18n from './translations';
 
-const MergeCaseLinks = React.memo<{ cases: MergeCaseSnapshot[] }>(({ cases }) => (
-  <>
-    {cases.map((caseSnapshot, index) => (
-      <React.Fragment key={caseSnapshot.id}>
-        {index > 0 ? ', ' : null}
-        <MergeCaseLink caseSnapshot={caseSnapshot} />
-      </React.Fragment>
-    ))}
-  </>
-));
+/** Renders "#118, #121 and #124" with each case as a link, in the locale's list style. */
+const MergeCaseLinks = React.memo<{ cases: MergeCaseSnapshot[] }>(({ cases }) => {
+  const references = cases.map((caseSnapshot) => getCaseReference(caseSnapshot));
+  let parts: Array<{ type: string; value: string }>;
+  try {
+    parts = new Intl.ListFormat(kbnI18n.getLocale(), {
+      style: 'long',
+      type: 'conjunction',
+    }).formatToParts(references);
+  } catch {
+    parts = references.flatMap((value, index) =>
+      index === 0
+        ? [{ type: 'element', value }]
+        : [
+            { type: 'literal', value: ', ' },
+            { type: 'element', value },
+          ]
+    );
+  }
+
+  let elementIndex = 0;
+  return (
+    <>
+      {parts.map((part, index) => {
+        if (part.type !== 'element') {
+          return <React.Fragment key={`literal-${index}`}>{part.value}</React.Fragment>;
+        }
+        const caseSnapshot = cases[elementIndex];
+        elementIndex += 1;
+        return caseSnapshot != null ? (
+          <MergeCaseLink key={caseSnapshot.id} caseSnapshot={caseSnapshot} />
+        ) : null;
+      })}
+    </>
+  );
+});
 MergeCaseLinks.displayName = 'MergeCaseLinks';
 
-const COPIED_KIND_FORMATTERS: ReadonlyArray<
-  readonly [keyof MergeCopiedTotals, (count: number) => string]
-> = [
+const COUNT_FORMATTERS: ReadonlyArray<readonly [keyof MergeCounts, (count: number) => string]> = [
   ['alerts', i18n.MERGE_COPIED_ALERTS],
+  ['attacks', i18n.MERGE_COPIED_ATTACKS],
   ['events', i18n.MERGE_COPIED_EVENTS],
   ['observables', i18n.MERGE_COPIED_OBSERVABLES],
   ['other', i18n.MERGE_COPIED_OTHER],
 ];
 
 /** Lists the counts by kind, leaving out the kinds with none. */
-const formatCounts = (counts: MergeCopiedTotals): string =>
-  COPIED_KIND_FORMATTERS.filter(([kind]) => counts[kind] > 0)
+const formatCounts = (counts: MergeCounts): string =>
+  COUNT_FORMATTERS.filter(([kind]) => (counts[kind] ?? 0) > 0)
     .map(([kind, format]) => format(counts[kind]))
     .join(', ');
 
-const UPDATED_FIELD_LABELS: Readonly<Record<MergeUpdatedField, string>> = {
+const UPDATED_FIELD_LABELS: Readonly<Partial<Record<MergeUpdatedField['field'], string>>> = {
   title: i18n.MERGE_UPDATED_FIELD_TITLE,
   description: i18n.MERGE_UPDATED_FIELD_DESCRIPTION,
   severity: i18n.MERGE_UPDATED_FIELD_SEVERITY,
   category: i18n.MERGE_UPDATED_FIELD_CATEGORY,
   tags: i18n.MERGE_UPDATED_FIELD_TAGS,
   assignees: i18n.MERGE_UPDATED_FIELD_ASSIGNEES,
+  connector: i18n.MERGE_UPDATED_FIELD_CONNECTOR,
+  template: i18n.MERGE_UPDATED_FIELD_TEMPLATE,
 };
 
+/** Custom and template fields carry the label they had at merge time. */
+const getUpdatedFieldLabel = ({ field, key, label }: MergeUpdatedField): string =>
+  label ?? UPDATED_FIELD_LABELS[field] ?? key ?? field;
+
 const MergeSourceDetails = React.memo<{ source: MergeSource }>(({ source }) => {
-  const { id, copied, duplicates, excluded } = source;
+  const { id, outcome, closed, copied, existing, leftOut } = source;
   const added = formatCounts(copied);
-  const alreadyInCase = duplicates != null ? formatCounts(duplicates) : '';
-  const leftOut = excluded != null ? formatCounts(excluded) : '';
+  const alreadyInCase = formatCounts(existing);
+  const stayed = formatCounts(leftOut);
 
   return (
     <li data-test-subj={`merge-user-action-details-${id}`}>
       <strong>{getCaseReference(source)}</strong>
+      {outcome === 'notMerged' ? (
+        <div data-test-subj={`merge-user-action-details-${id}-not-merged`}>
+          {i18n.MERGE_SOURCE_NOT_MERGED}
+        </div>
+      ) : null}
       <div>{added ? i18n.MERGE_SOURCE_NEW(added) : i18n.MERGE_SOURCE_NOTHING_NEW}</div>
       {alreadyInCase ? <div>{i18n.MERGE_SOURCE_ALREADY_IN_CASE(alreadyInCase)}</div> : null}
-      {leftOut ? <div>{i18n.MERGE_SOURCE_LEFT_OUT(leftOut)}</div> : null}
+      {stayed ? <div>{i18n.MERGE_SOURCE_LEFT_OUT(stayed)}</div> : null}
+      {closed ? <div>{i18n.MERGE_SOURCE_CLOSED}</div> : null}
     </li>
   );
 });
@@ -86,7 +124,8 @@ MergeSourceDetails.displayName = 'MergeSourceDetails';
 const MergeSourcesDetails = React.memo<{
   sources: MergeSource[];
   updatedFields: MergeUpdatedField[];
-}>(({ sources, updatedFields }) => {
+  notCopiedFields: MergeNotCopiedField[];
+}>(({ sources, updatedFields, notCopiedFields }) => {
   const [isOpen, setIsOpen] = useState(false);
   const popoverId = useGeneratedHtmlId({ prefix: 'mergeSourcesDetails' });
 
@@ -118,9 +157,12 @@ const MergeSourcesDetails = React.memo<{
         </ul>
         {updatedFields.length > 0 ? (
           <p data-test-subj="merge-user-action-details-updated-fields">
-            {i18n.MERGE_UPDATED_FIELDS(
-              updatedFields.map((field) => UPDATED_FIELD_LABELS[field]).join(', ')
-            )}
+            {i18n.MERGE_UPDATED_FIELDS(updatedFields.map(getUpdatedFieldLabel).join(', '))}
+          </p>
+        ) : null}
+        {notCopiedFields.length > 0 ? (
+          <p data-test-subj="merge-user-action-details-not-copied-fields">
+            {i18n.MERGE_NOT_COPIED_FIELDS(notCopiedFields.map(({ label }) => label).join(', '))}
           </p>
         ) : null}
       </EuiText>
@@ -137,7 +179,7 @@ export const createMergeUserActionBuilder: UserActionBuilder = ({
 }) => ({
   build: () => {
     const action = userAction as SnakeToCamelCase<MergeUserAction>;
-    const { destination, sources, updatedFields = [] } = action.payload.merge;
+    const { destination, sources, updatedFields = [], notCopiedFields = [] } = action.payload.merge;
 
     if (caseData.id !== destination.id) {
       return createCommonUpdateUserActionBuilder({
@@ -145,7 +187,7 @@ export const createMergeUserActionBuilder: UserActionBuilder = ({
         userAction,
         handleOutlineComment,
         label: (
-          <EuiText size="s" data-test-subj="merge-user-action-original">
+          <EuiText size="s" data-test-subj="merge-user-action-source">
             <FormattedMessage
               id="xpack.cases.caseView.userActions.merge.mergedThisCaseInto"
               defaultMessage="merged this case into {destination}"
@@ -157,25 +199,28 @@ export const createMergeUserActionBuilder: UserActionBuilder = ({
       }).build();
     }
 
+    const mergedSources = sources.filter(({ outcome }) => outcome !== 'notMerged');
     const label = (
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
         <EuiFlexItem grow={false}>
           <EuiText size="s" data-test-subj="merge-user-action-destination">
             <FormattedMessage
-              id="xpack.cases.caseView.userActions.merge.casesMergedIntoThisCaseBy"
-              defaultMessage="{count, plural, one {Case} other {Cases}} {cases} merged into this case by {user}"
+              id="xpack.cases.caseView.userActions.merge.mergedCasesIntoThisCase"
+              defaultMessage="merged {cases} into this case"
               values={{
-                count: sources.length,
-                cases: <MergeCaseLinks cases={sources} />,
-                user: (
-                  <HoverableUsernameResolver user={action.createdBy} userProfiles={userProfiles} />
+                cases: (
+                  <MergeCaseLinks cases={mergedSources.length > 0 ? mergedSources : sources} />
                 ),
               }}
             />
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <MergeSourcesDetails sources={sources} updatedFields={updatedFields} />
+          <MergeSourcesDetails
+            sources={sources}
+            updatedFields={updatedFields}
+            notCopiedFields={notCopiedFields}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -186,7 +231,6 @@ export const createMergeUserActionBuilder: UserActionBuilder = ({
       handleOutlineComment,
       label,
       icon: 'merge',
-      username: '',
     }).build();
   },
 });

@@ -7,7 +7,7 @@
 
 import type { z } from '@kbn/zod/v4';
 import { MAX_EXTENDED_FIELD_VALUE_BYTES } from '../../../constants';
-import { validateExtendedFields } from './validate_extended_fields';
+import { getExtendedFieldIssues, validateExtendedFields } from './validate_extended_fields';
 import type { FieldSchema, InlineField } from './fields';
 import { FieldType } from './fields';
 
@@ -879,5 +879,52 @@ describe('validateExtendedFields', () => {
         validateExtendedFields({ priority_as_keyword: 'high' }, fields, { requiredOnly: true })
       ).toEqual(['Field "Summary" is required']);
     });
+  });
+});
+
+describe('getExtendedFieldIssues', () => {
+  const fields = [
+    {
+      name: 'verdict',
+      type: 'keyword',
+      control: FieldType.INPUT_TEXT,
+      validation: { required: true },
+    },
+    {
+      name: 'tier',
+      type: 'keyword',
+      control: FieldType.SELECT_BASIC,
+      metadata: { options: ['gold', 'silver'] },
+    },
+    {
+      name: 'reason',
+      type: 'keyword',
+      control: FieldType.INPUT_TEXT,
+      validation: {
+        required_when: { field: 'tier', operator: 'eq', value: 'gold' },
+      },
+    },
+    {
+      name: 'hidden',
+      type: 'keyword',
+      control: FieldType.INPUT_TEXT,
+      display: { show_when: { field: 'tier', operator: 'eq', value: 'silver' } },
+      validation: { required: true },
+    },
+  ] as unknown as InlineField[];
+
+  it('names each required field that is empty and each value the field does not accept', () => {
+    expect(getExtendedFieldIssues({ tier_as_keyword: 'bronze' }, fields)).toEqual([
+      { key: 'verdict_as_keyword', reason: 'required', message: 'Field "verdict" is required' },
+      { key: 'tier_as_keyword', reason: 'invalid', message: expect.any(String) },
+    ]);
+  });
+
+  it('applies required_when and skips hidden fields', () => {
+    expect(
+      getExtendedFieldIssues({ verdict_as_keyword: 'malicious', tier_as_keyword: 'gold' }, fields)
+    ).toEqual([
+      { key: 'reason_as_keyword', reason: 'required', message: 'Field "reason" is required' },
+    ]);
   });
 });

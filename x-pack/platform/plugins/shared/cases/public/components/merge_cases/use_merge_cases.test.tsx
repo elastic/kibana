@@ -9,7 +9,7 @@ import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { MergeCasesRequest, MergeCasesResponse } from '../../../common/types/api';
-import { CaseSeverity } from '../../../common/types/domain';
+import { CASES_API_ERROR_CODES } from '../../../common/constants/error_codes';
 import { useToasts } from '../../common/lib/kibana';
 import { useCaseViewNavigation } from '../../common/navigation/hooks';
 import { useCasesToast } from '../../common/use_cases_toast';
@@ -27,23 +27,27 @@ const useCasesToastMock = useCasesToast as jest.Mock;
 const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
 
 const request: MergeCasesRequest = {
-  caseIds: ['case-1', 'case-2'],
+  caseIds: ['case-1', 'case-2', 'case-3'],
   destinationCaseId: 'case-1',
-  fields: {
-    title: 'Phishing',
-    description: 'Description',
-    severity: CaseSeverity.LOW,
-    category: null,
-    tags: [],
-  },
-  closeOriginals: true,
+  fields: { title: 'Phishing' },
+  closeSources: true,
 };
+
+const counts = { alerts: 2, events: 0, attacks: 0, observables: 1, other: 0 };
+const sourceResult = (caseId: string, incrementalId: number) => ({
+  caseId,
+  title: caseId,
+  incrementalId,
+  outcome: 'merged' as const,
+  closed: true,
+  copied: counts,
+  existing: counts,
+  leftOut: counts,
+});
 
 const response: MergeCasesResponse = {
   destination: { id: 'case-1', title: 'Phishing', incrementalId: 118, isNew: false },
-  mergedCaseIds: ['case-2'],
-  closedCaseIds: ['case-2'],
-  copied: { alerts: 2, events: 0, observables: 1, other: 0 },
+  sources: [sourceResult('case-2', 119), sourceResult('case-3', 120)],
   failures: [],
 };
 
@@ -79,11 +83,11 @@ describe('useMergeCases', () => {
     const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
     const { result } = renderMergeHook(queryClient);
 
-    act(() => result.current.mutate(request));
+    act(() => result.current.mutate({ request, origin: 'list' }));
 
     await waitFor(() =>
       expect(showSuccessToast).toHaveBeenCalledWith(
-        'Merged 1 case into #118',
+        'Merged 2 cases into #118',
         undefined,
         expect.objectContaining({
           primary: expect.objectContaining({
@@ -98,21 +102,73 @@ describe('useMergeCases', () => {
     expect(invalidateQueries).toHaveBeenCalledWith(casesQueriesKeys.all);
   });
 
-  it('warns when some steps failed after the destination was saved', async () => {
+  it('does not link to the destination from a case page, which goes there itself', async () => {
+    mergeCasesMock.mockResolvedValue(response);
+    const { result } = renderMergeHook(createQueryClient());
+
+    act(() => result.current.mutate({ request, origin: 'casePage' }));
+
+    await waitFor(() =>
+      expect(showSuccessToast).toHaveBeenCalledWith(
+        'Merged 2 cases into #118',
+        undefined,
+        undefined
+      )
+    );
+  });
+
+  it('names the sources that were not merged', async () => {
     mergeCasesMock.mockResolvedValue({
       ...response,
-      failures: [{ step: 'close', caseId: 'case-2', message: 'conflict' }],
+      sources: [
+        { ...sourceResult('case-2', 119), outcome: 'notMerged', closed: false },
+        { ...sourceResult('case-3', 120), outcome: 'notMerged', closed: false },
+      ],
+      failures: [{ step: 'copy', caseId: 'case-2', reason: 'boom' }],
     });
     const { result } = renderMergeHook(createQueryClient());
 
-    act(() => result.current.mutate(request));
+    act(() => result.current.mutate({ request, origin: 'list' }));
+
+    await waitFor(() =>
+      expect(useToasts().addWarning).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: "Merged into #118, but some changes weren't made",
+          text: "#119 and #120 weren't merged. Their items stay on them; merge them into #118 again to finish.",
+        })
+      )
+    );
+    expect(showSuccessToast).not.toHaveBeenCalled();
+  });
+
+  it('warns when a later step failed although every source merged', async () => {
+    mergeCasesMock.mockResolvedValue({
+      ...response,
+      failures: [{ step: 'note', caseId: 'case-1', reason: 'boom' }],
+    });
+    const { result } = renderMergeHook(createQueryClient());
+
+    act(() => result.current.mutate({ request, origin: 'list' }));
 
     await waitFor(() =>
       expect(useToasts().addWarning).toHaveBeenCalledWith(
         expect.objectContaining({ title: "Merged into #118, but some changes weren't made" })
       )
     );
-    expect(showSuccessToast).not.toHaveBeenCalled();
+  });
+
+  it('leaves a refused merge to the flyout', async () => {
+    mergeCasesMock.mockRejectedValue({
+      body: {
+        attributes: { code: CASES_API_ERROR_CODES.MERGE_BLOCKED, conflicts: [], limits: [] },
+      },
+    });
+    const { result } = renderMergeHook(createQueryClient());
+
+    act(() => result.current.mutate({ request, origin: 'list' }));
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(showErrorToast).not.toHaveBeenCalled();
   });
 
   it('reports a failed merge', async () => {
@@ -120,7 +176,7 @@ describe('useMergeCases', () => {
     mergeCasesMock.mockRejectedValue(error);
     const { result } = renderMergeHook(createQueryClient());
 
-    act(() => result.current.mutate(request));
+    act(() => result.current.mutate({ request, origin: 'list' }));
 
     await waitFor(() =>
       expect(showErrorToast).toHaveBeenCalledWith(

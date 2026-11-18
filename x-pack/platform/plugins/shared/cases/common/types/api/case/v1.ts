@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   CASE_EXTENDED_FIELDS,
   MAX_ASSIGNEES_FILTER_LENGTH,
@@ -300,107 +300,124 @@ const CasesFindRequestSortFieldsValues = [
 export const CasesFindRequestSearchFieldsSchema = z.enum(CasesFindRequestSearchFieldsValues);
 export const CasesFindRequestSortFieldsSchema = z.enum(CasesFindRequestSortFieldsValues);
 
-const CasesFindRequestBaseFieldsSchema = paginationSchema({
-  maxPerPage: MAX_CASES_PER_PAGE,
-}).extend({
-  /**
-   * Tags to filter by
-   */
-  tags: z
-    .union([
-      limitedArraySchema({
-        codec: z.string().max(MAX_LENGTH_PER_TAG),
-        fieldName: 'tags',
-        min: 0,
-        max: MAX_TAGS_FILTER_LENGTH,
-      }),
-      z.string().max(MAX_LENGTH_PER_TAG),
-    ])
-    .optional(),
-  /**
-   * The status of the case (open, closed, in-progress)
-   */
-  status: z.union([CaseStatusSchema, z.array(CaseStatusSchema)]).optional(),
-  /**
-   * The severity of the case
-   */
-  severity: z.union([CaseSeveritySchema, z.array(CaseSeveritySchema)]).optional(),
-  /**
-   * The uids of the user profiles to filter by
-   */
-  assignees: z
-    .union([
-      limitedArraySchema({
-        codec: z.string().max(512),
-        fieldName: 'assignees',
-        min: 0,
-        max: MAX_ASSIGNEES_FILTER_LENGTH,
-      }),
-      z.string().max(512),
-    ])
-    .optional(),
-  /**
-   * The reporters to filter by
-   */
-  reporters: z
-    .union([
-      limitedArraySchema({
-        codec: z.string().max(512),
-        fieldName: 'reporters',
-        min: 0,
-        max: MAX_REPORTERS_FILTER_LENGTH,
-      }),
-      z.string().max(512),
-    ])
-    .optional(),
-  /**
-   * Operator to use for the `search` field
-   */
-  defaultSearchOperator: z.enum(['AND', 'OR']).optional(),
-  /**
-   * A KQL date. If used all cases created after (gte) the from date will be returned
-   */
-  from: z.string().max(50).optional(),
-  /**
-   * An Elasticsearch simple_query_string
-   */
-  search: z.string().max(MAX_DESCRIPTION_LENGTH).optional(),
-  /**
-   * The field to use for sorting the found objects.
-   *
-   */
-  sortField: CasesFindRequestSortFieldsSchema.optional(),
-  /**
-   * The order to sort by
-   */
-  sortOrder: z.enum(['desc', 'asc']).optional(),
-  /**
-   * A KQL date. If used all cases created before (lte) the to date will be returned.
-   */
-  to: z.string().max(50).optional(),
-  /**
-   * The owner(s) to filter by. The user making the request must have privileges to retrieve cases of that
-   * ownership or they will be ignored. If no owner is included, then all ownership types will be included in the response
-   * that the user has access to.
-   */
-  owner: z
-    .union([z.array(z.string().max(MAX_TITLE_LENGTH)), z.string().max(MAX_TITLE_LENGTH)])
-    .optional(),
-  /**
-   * The category of the case.
-   */
-  category: z
-    .union([
-      limitedArraySchema({
-        codec: z.string().max(MAX_CATEGORY_LENGTH),
-        fieldName: 'category',
-        min: 0,
-        max: MAX_CATEGORY_FILTER_LENGTH,
-      }),
-      z.string().max(MAX_CATEGORY_LENGTH),
-    ])
-    .optional(),
-});
+export const CasesMergedFilterSchema = lazySchema(() =>
+  z.enum(['only', 'exclude', 'excludeClosed'])
+);
+export const CasesClosedByMergeFilterSchema = lazySchema(() => z.enum(['only', 'exclude']));
+
+const CasesFindRequestBaseFieldsSchema = lazySchema(() =>
+  paginationSchema({
+    maxPerPage: MAX_CASES_PER_PAGE,
+  }).extend({
+    /**
+     * Tags to filter by
+     */
+    tags: z
+      .union([
+        limitedArraySchema({
+          codec: z.string().max(MAX_LENGTH_PER_TAG),
+          fieldName: 'tags',
+          min: 0,
+          max: MAX_TAGS_FILTER_LENGTH,
+        }),
+        z.string().max(MAX_LENGTH_PER_TAG),
+      ])
+      .optional(),
+    /**
+     * The status of the case (open, closed, in-progress)
+     */
+    status: z.union([CaseStatusSchema, z.array(CaseStatusSchema)]).optional(),
+    /**
+     * The severity of the case
+     */
+    severity: z.union([CaseSeveritySchema, z.array(CaseSeveritySchema)]).optional(),
+    /**
+     * The uids of the user profiles to filter by
+     */
+    assignees: z
+      .union([
+        limitedArraySchema({
+          codec: z.string().max(512),
+          fieldName: 'assignees',
+          min: 0,
+          max: MAX_ASSIGNEES_FILTER_LENGTH,
+        }),
+        z.string().max(512),
+      ])
+      .optional(),
+    /**
+     * The reporters to filter by
+     */
+    reporters: z
+      .union([
+        limitedArraySchema({
+          codec: z.string().max(512),
+          fieldName: 'reporters',
+          min: 0,
+          max: MAX_REPORTERS_FILTER_LENGTH,
+        }),
+        z.string().max(512),
+      ])
+      .optional(),
+    /**
+     * Operator to use for the `search` field
+     */
+    defaultSearchOperator: z.enum(['AND', 'OR']).optional(),
+    /**
+     * A KQL date. If used all cases created after (gte) the from date will be returned
+     */
+    from: z.string().max(50).optional(),
+    /**
+     * An Elasticsearch simple_query_string
+     */
+    search: z.string().max(MAX_DESCRIPTION_LENGTH).optional(),
+    /**
+     * The field to use for sorting the found objects.
+     *
+     */
+    sortField: CasesFindRequestSortFieldsSchema.optional(),
+    /**
+     * The order to sort by
+     */
+    sortOrder: z.enum(['desc', 'asc']).optional(),
+    /**
+     * A KQL date. If used all cases created before (lte) the to date will be returned.
+     */
+    to: z.string().max(50).optional(),
+    /**
+     * The owner(s) to filter by. The user making the request must have privileges to retrieve cases of that
+     * ownership or they will be ignored. If no owner is included, then all ownership types will be included in the response
+     * that the user has access to.
+     */
+    owner: z
+      .union([z.array(z.string().max(MAX_TITLE_LENGTH)), z.string().max(MAX_TITLE_LENGTH)])
+      .optional(),
+    /**
+     * The category of the case.
+     */
+    category: z
+      .union([
+        limitedArraySchema({
+          codec: z.string().max(MAX_CATEGORY_LENGTH),
+          fieldName: 'category',
+          min: 0,
+          max: MAX_CATEGORY_FILTER_LENGTH,
+        }),
+        z.string().max(MAX_CATEGORY_LENGTH),
+      ])
+      .optional(),
+    /**
+     * Filters on whether a case was merged into another case: `only` returns merged cases,
+     * `exclude` leaves them out, and `excludeClosed` leaves out merged cases that are closed.
+     */
+    merged: CasesMergedFilterSchema.optional(),
+    /**
+     * Filters on whether the latest merge closed the case: `only` returns those cases, `exclude`
+     * leaves them out.
+     */
+    closedByMerge: CasesClosedByMergeFilterSchema.optional(),
+  })
+);
 
 export const CasesFindRequestSchema = CasesFindRequestBaseFieldsSchema.extend({
   /**
@@ -702,3 +719,5 @@ export type FindCasesContainingAllDocumentsRequest = z.infer<
 export type FindCasesContainingAllAlertsResponse = z.infer<
   typeof FindCasesContainingAllAlertsResponseSchema
 >;
+export type CasesMergedFilter = z.infer<typeof CasesMergedFilterSchema>;
+export type CasesClosedByMergeFilter = z.infer<typeof CasesClosedByMergeFilterSchema>;

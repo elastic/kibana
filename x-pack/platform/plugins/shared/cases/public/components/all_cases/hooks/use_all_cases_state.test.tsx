@@ -203,6 +203,7 @@ describe('useAllCasesQueryParams', () => {
         tags: ['test-tag'],
         owner: ['cases'],
         category: ['test-category'],
+        merged: [],
         customFields: {
           testCustomField: { options: ['foo'], type: CustomFieldTypes.TEXT },
         },

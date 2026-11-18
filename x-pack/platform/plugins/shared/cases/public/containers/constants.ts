@@ -72,8 +72,14 @@ export const casesQueriesKeys = {
     [...casesQueriesKeys.alerts, 'features', alertIds] as const,
   configuration: (params: unknown) => [...casesQueriesKeys.all, 'configuration', params] as const,
   workflowTagAggs: () => [...casesQueriesKeys.all, 'workflow-tag-aggs'] as const,
-  mergePreview: (caseIds: string[], destinationCaseId?: string) =>
-    [...casesQueriesKeys.all, 'merge-preview', caseIds, destinationCaseId ?? null] as const,
+  mergePreview: (caseIds: string[], destinationCaseId?: string, fields?: unknown) =>
+    [
+      ...casesQueriesKeys.all,
+      'merge-preview',
+      caseIds,
+      destinationCaseId ?? null,
+      fields ?? null,
+    ] as const,
   mergeDestinations: (ids: string[]) =>
     [...casesQueriesKeys.all, 'merge-destinations', ids] as const,
 };
@@ -139,6 +145,7 @@ export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   tags: [],
   owner: [],
   category: [],
+  merged: [],
   customFields: {},
   extendedFieldFilters: [],
   from: DEFAULT_FROM_DATE,

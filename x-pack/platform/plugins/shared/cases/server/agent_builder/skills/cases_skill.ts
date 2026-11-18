@@ -87,7 +87,8 @@ You have full read **and write** access to Elastic cases across Security, Observ
 | \`${
       platformCoreCasesTools.manageAttachments
     }\` | \`add_comment\`, \`add_alerts\`, \`add_events\`, \`add_attachments\`, \`delete_attachments\` |
-| \`${platformCoreCasesTools.observables}\` | \`add\`, \`update\`, \`delete\` (IOCs) |${
+| \`${platformCoreCasesTools.observables}\` | \`add\`, \`update\`, \`delete\` (IOCs) |
+| \`${platformCoreCasesTools.merge}\` | Merge 2–10 cases into a new case or one of them |${
       isTemplatesEnabled ? FIND_TEMPLATES_ROW : ''
     }${isTemplatesEnabled ? FIND_TEMPLATES_SECTION : ''}${
       isTemplatesEnabled ? EXTENDED_FIELDS_SECTION : ''
@@ -171,6 +172,18 @@ When in doubt, render — a missing render loses information, a redundant one is
         : ''
     }
 
+## Merging cases
+
+Use \`${
+      platformCoreCasesTools.merge
+    }\` when the user asks to merge, combine or deduplicate cases. It previews the merge and asks the user to confirm before anything changes.
+
+- When the result lists fields the cases hold different values for, ask the user to choose a value for each one, showing the options and which cases hold them. **Never choose a value yourself**, not even the suggested one, then call again with the chosen values in \`fields\`.
+- When it lists limits, ask whether to keep the newest items up to each limit; set \`keep_newest_over_limit\` only if the user agrees.
+- The source cases close by default. Set \`close_sources: false\` only when the user wants them left open.
+- A source reported as \`notMerged\` was not fully copied; offer to run the merge again with the destination as \`destination_case_id\`.
+- Search leaves out cases that were merged and closed unless you pass \`merged\` (e.g. \`only\` to list merged cases); similar always leaves them out.
+
 ## Comments and discussion
 
 Cases tools return metadata only — comments and attachments are never included. To analyze discussion, call \`${
@@ -196,6 +209,7 @@ To remove attachments, use \`delete_attachments\` and pass each attachment's \`i
       platformCoreCasesTools.getAttachments,
       platformCoreCasesTools.manageAttachments,
       platformCoreCasesTools.observables,
+      platformCoreCasesTools.merge,
       ...(isTemplatesEnabled ? [platformCoreCasesTools.findTemplates] : []),
     ],
   });

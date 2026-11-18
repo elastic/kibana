@@ -43,11 +43,13 @@ import {
   applyExclusions,
   getCaseReference,
   getKeysOutsideNewest,
+  getRoomForAlerts,
   getRoomForKind,
 } from './utils';
 import * as i18n from './translations';
 
 type AlertChoice = MergeAttachmentChoices['alerts'][number];
+type AttackChoice = MergeAttachmentChoices['attacks'][number];
 type EventChoice = MergeAttachmentChoices['events'][number];
 type ObservableChoice = MergeAttachmentChoices['observables'][number];
 type OtherChoice = MergeAttachmentChoices['other'][number];
@@ -56,6 +58,7 @@ type SetIncluded = (keys: string[], isIncluded: boolean) => void;
 
 const KIND_TITLES: Record<MergeChoiceKind, string> = {
   alerts: i18n.ALERTS,
+  attacks: i18n.ATTACKS,
   events: i18n.EVENTS,
   observables: i18n.OBSERVABLES,
   other: i18n.OTHER_ATTACHMENTS,
@@ -204,6 +207,7 @@ interface KindChoicesProps<T extends MergeChoice> {
 }
 
 const getAlertLabel = ({ alertId }: AlertChoice) => alertId;
+const getAttackLabel = ({ title }: AttackChoice) => title ?? i18n.UNTITLED_ATTACK;
 const getEventLabel = ({ eventId }: EventChoice) => eventId;
 const getObservableLabel = ({ value }: ObservableChoice) => value;
 const getOtherLabel = ({ type }: OtherChoice) => type;
@@ -350,6 +354,44 @@ const AlertChoices = React.memo<KindChoicesProps<AlertChoice>>(
 );
 AlertChoices.displayName = 'AlertChoices';
 
+const AttackChoices = React.memo<KindChoicesProps<AttackChoice>>(({ casesById, ...props }) => {
+  const { fromColumn, addedColumn } = useCommonColumns(casesById);
+  const columns = useMemo<Array<EuiBasicTableColumn<AttackChoice>>>(
+    () => [
+      {
+        name: i18n.ATTACK_COLUMN,
+        truncateText: true,
+        render: (attack: AttackChoice) => getAttackLabel(attack),
+      },
+      {
+        name: i18n.ALERTS_COLUMN,
+        width: '100px',
+        render: ({ alertKeys }: AttackChoice) => i18n.ATTACK_ALERTS(alertKeys.length),
+      },
+      fromColumn,
+      addedColumn,
+    ],
+    [addedColumn, fromColumn]
+  );
+  return (
+    <>
+      <EuiText size="xs" color="subdued">
+        {i18n.ATTACKS_HELP}
+      </EuiText>
+      <EuiSpacer size="s" />
+      <ChoiceTable
+        {...props}
+        kind="attacks"
+        columns={columns}
+        getLabel={getAttackLabel}
+        tableCaption={i18n.ATTACKS}
+        testSubj="merge-choices-attacks"
+      />
+    </>
+  );
+});
+AttackChoices.displayName = 'AttackChoices';
+
 const EventChoices = React.memo<KindChoicesProps<EventChoice>>(({ casesById, ...props }) => {
   const { fromColumn, addedColumn } = useCommonColumns(casesById);
   const columns = useMemo<Array<EuiBasicTableColumn<EventChoice>>>(
@@ -445,13 +487,15 @@ interface MergeAttachmentsModalProps {
   attachments: MergeCasesPreviewResponse['attachments'];
   casesById: Map<string, MergePreviewCase>;
   excludedKeys: ReadonlySet<string>;
+  /** The kind to show first, e.g. the one whose row the user opened the modal from. */
+  initialKind?: MergeChoiceKind;
   onApply: (excludedKeys: ReadonlySet<string>) => void;
   onClose: () => void;
 }
 
-/** Lets the user leave attachments out of an over-limit merge; they stay on their original cases. */
+/** Lets the user leave attachments out of an over-limit merge; they stay on their source cases. */
 export const MergeAttachmentsModal = React.memo<MergeAttachmentsModalProps>(
-  ({ choices, attachments, casesById, excludedKeys, onApply, onClose }) => {
+  ({ choices, attachments, casesById, excludedKeys, initialKind, onApply, onClose }) => {
     const { euiTheme } = useEuiTheme();
     const titleId = useGeneratedHtmlId({ prefix: 'mergeAttachmentsModalTitle' });
     const [draft, setDraft] = useState<ReadonlySet<string>>(excludedKeys);
@@ -461,14 +505,17 @@ export const MergeAttachmentsModal = React.memo<MergeAttachmentsModalProps>(
       [choices]
     );
     const [selectedKind, setSelectedKind] = useState<MergeChoiceKind | undefined>(
-      () => kinds.find((kind) => attachments[kind].overLimit > 0) ?? kinds[0]
+      () =>
+        (initialKind != null && kinds.includes(initialKind) ? initialKind : undefined) ??
+        kinds.find((kind) => attachments[kind].overBy > 0) ??
+        kinds[0]
     );
 
     const selected = useMemo(
       () => applyExclusions({ attachments, choices }, draft),
       [attachments, choices, draft]
     );
-    const leftOutCount = MERGE_CHOICE_KINDS.reduce(
+    const leftOutCount = MERGE_CHOICE_KINDS.filter((kind) => kind !== 'attacks').reduce(
       (count, kind) => count + selected[kind].excluded,
       0
     );
@@ -489,7 +536,7 @@ export const MergeAttachmentsModal = React.memo<MergeAttachmentsModalProps>(
       []
     );
 
-    const alertsRoom = getRoomForKind(attachments.alerts, choices, 'alerts');
+    const alertsRoom = getRoomForAlerts(attachments.alerts, choices, draft);
     const keepNewestAlerts = useCallback(() => {
       if (alertsRoom == null) {
         return;
@@ -506,8 +553,10 @@ export const MergeAttachmentsModal = React.memo<MergeAttachmentsModalProps>(
 
     const renderKindStatus = (kind: MergeChoiceKind) => {
       const total = choices[kind].length;
-      const room = getRoomForKind(attachments[kind], choices, kind);
-      const { overLimit, excluded } = selected[kind];
+      const room =
+        kind === 'alerts' ? alertsRoom : getRoomForKind(attachments[kind], choices, kind);
+      const { overBy } = selected[kind];
+      const excluded = choices[kind].filter(({ key }) => draft.has(key)).length;
 
       return (
         <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
@@ -520,10 +569,10 @@ export const MergeAttachmentsModal = React.memo<MergeAttachmentsModalProps>(
             <EuiFlexItem grow={false}>
               <EuiText
                 size="s"
-                color={overLimit > 0 ? 'warning' : 'success'}
+                color={overBy > 0 ? 'warning' : 'success'}
                 data-test-subj={`merge-choices-${kind}-status`}
               >
-                {overLimit > 0 ? i18n.CHOICES_LEAVE_OUT_MORE(overLimit) : i18n.CHOICES_WITHIN_LIMIT}
+                {overBy > 0 ? i18n.CHOICES_LEAVE_OUT_MORE(overBy) : i18n.CHOICES_WITHIN_LIMIT}
               </EuiText>
             </EuiFlexItem>
           ) : null}
@@ -550,6 +599,8 @@ export const MergeAttachmentsModal = React.memo<MergeAttachmentsModalProps>(
       switch (kind) {
         case 'alerts':
           return <AlertChoices {...props} items={choices.alerts} />;
+        case 'attacks':
+          return <AttackChoices {...props} items={choices.attacks} />;
         case 'events':
           return <EventChoices {...props} items={choices.events} />;
         case 'observables':
@@ -584,8 +635,8 @@ export const MergeAttachmentsModal = React.memo<MergeAttachmentsModalProps>(
                 isSelected={kind === selectedKind}
                 onClick={() => setSelectedKind(kind)}
                 append={
-                  <EuiBadge color={selected[kind].overLimit > 0 ? 'warning' : 'hollow'}>
-                    {choices[kind].length - selected[kind].excluded}
+                  <EuiBadge color={selected[kind].overBy > 0 ? 'warning' : 'hollow'}>
+                    {choices[kind].filter(({ key }) => !draft.has(key)).length}
                   </EuiBadge>
                 }
                 data-test-subj={`merge-choices-tab-${kind}`}

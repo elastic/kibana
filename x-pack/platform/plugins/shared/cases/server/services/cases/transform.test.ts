@@ -958,4 +958,58 @@ describe('case transforms', () => {
       expect(result.version).toBe('0');
     });
   });
+
+  describe('the merge marker', () => {
+    const references = [
+      { id: 'connector-1', type: 'action', name: 'connectorId' },
+      { id: 'destination-1', type: 'cases', name: 'merged-into' },
+      { id: 'destination-2', type: 'cases', name: 'merged-into' },
+    ];
+    const merge = { merged_at: '2026-01-01T00:00:00.000Z', closed_by_merge: true };
+
+    it('reads the destinations from the merged-into references', () => {
+      const { attributes } = transformSavedObjectToExternalModel({
+        id: 'case-1',
+        type: 'cases',
+        references,
+        attributes: { ...basicESCaseFields, merge },
+      } as unknown as Parameters<typeof transformSavedObjectToExternalModel>[0]);
+
+      expect(attributes.merge).toEqual({
+        merged_into: ['destination-1', 'destination-2'],
+        ...merge,
+      });
+    });
+
+    it('leaves the marker out of a case that was never merged', () => {
+      const { attributes } = transformSavedObjectToExternalModel({
+        id: 'case-1',
+        type: 'cases',
+        references: [],
+        attributes: basicESCaseFields,
+      } as unknown as Parameters<typeof transformSavedObjectToExternalModel>[0]);
+
+      expect(attributes).not.toHaveProperty('merge');
+    });
+
+    it('stores the destinations as references and the rest as attributes', () => {
+      const { attributes, referenceHandler } = transformAttributesToESModel({
+        merge: { merged_into: ['destination-1', 'destination-3'], ...merge },
+      });
+
+      expect(attributes.merge).toEqual(merge);
+      expect(referenceHandler.build(references)).toEqual([
+        references[0],
+        { id: 'destination-1', type: 'cases', name: 'merged-into' },
+        { id: 'destination-3', type: 'cases', name: 'merged-into' },
+      ]);
+    });
+
+    it('removes every destination when the marker is cleared', () => {
+      const { attributes, referenceHandler } = transformAttributesToESModel({ merge: null });
+
+      expect(attributes.merge).toBeNull();
+      expect(referenceHandler.build(references)).toEqual([references[0]]);
+    });
+  });
 });
