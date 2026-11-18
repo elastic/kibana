@@ -75,22 +75,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
     };
 
-    const setLastFieldsCustomValue = async ({
-      testSubj,
-      value,
-    }: {
-      testSubj: string;
-      value: string;
-    }) => {
-      const fields = await find.allByCssSelector(`[data-test-subj="${testSubj}"]`);
-
-      const lastField = fields[fields.length - 1];
-      await lastField.click();
-
-      await comboBox.setFilterValue(lastField, value);
-      await pageObjects.common.pressEnterKey();
-    };
-
     const setLastEntry = async ({
       field,
       operator,
@@ -102,10 +86,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     }) => {
       await setLastFieldsValue({ testSubj: 'fieldAutocompleteComboBox', value: field });
       await setLastFieldsValue({ testSubj: 'operatorAutocompleteComboBox', value: operator });
-      await setLastFieldsCustomValue({
-        testSubj: operator === 'matches' ? 'valuesAutocompleteWildcard' : 'valuesAutocompleteMatch',
-        value,
-      });
+      const valueFields = await find.allByCssSelector(
+        `[data-test-subj="${
+          operator === 'matches' ? 'valuesAutocompleteWildcard' : 'valuesAutocompleteMatch'
+        }"]`
+      );
+      await comboBox.setFilterValue(valueFields[valueFields.length - 1], value);
+      await pageObjects.common.pressEnterKey();
     };
 
     const checkArtifact = (expectedArtifact: object) => {
