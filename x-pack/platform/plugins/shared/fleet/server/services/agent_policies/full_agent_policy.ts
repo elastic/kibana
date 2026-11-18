@@ -44,6 +44,8 @@ import { appContextService } from '../app_context';
 
 import { getOutputSecretReferences } from '../secrets';
 
+import { sanitizeAgentPolicyOverrides } from '../../../common/services/agent_policy_overrides';
+
 import { getMonitoringPermissions } from './monitoring_permissions';
 import { storedPackagePoliciesToAgentInputs } from '.';
 import {
@@ -322,7 +324,16 @@ export async function getFullAgentPolicy(
   }
 
   if (agentPolicy.overrides) {
-    return deepMerge<FullAgentPolicy>(fullAgentPolicy, agentPolicy.overrides);
+    // Overrides stored before the API validation was extended may still contain denied keys
+    const { overrides, removedKeys } = sanitizeAgentPolicyOverrides(agentPolicy.overrides);
+    if (removedKeys.length > 0) {
+      appContextService.getLogger().warn(
+        `Ignoring disallowed overrides [${removedKeys.join(', ')}] on agent policy [${
+          fullAgentPolicy.id
+        }]`
+      );
+    }
+    return deepMerge<FullAgentPolicy>(fullAgentPolicy, overrides);
   }
 
   return fullAgentPolicy;

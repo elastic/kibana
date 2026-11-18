@@ -7,7 +7,12 @@
 
 import type { AgentlessPolicy, GlobalDataTag } from '../../../common/types';
 
-import { AgentPolicyBaseSchema } from './agent_policy';
+import {
+  AgentPolicyBaseSchema,
+  AgentPolicyOverridesRequestSchema,
+  NewAgentPolicySchema,
+} from './agent_policy';
+import { PreconfiguredAgentPoliciesSchema } from './preconfiguration';
 
 describe('AgentPolicyBaseSchema', () => {
   describe('global_data_tags validations', () => {
@@ -164,10 +169,86 @@ describe('AgentPolicyBaseSchema', () => {
       }).toThrow('output_permissions overrides is not allowed');
     });
 
+    // Policies saved before the OpenTelemetry keys were denied must stay readable.
+    it('should keep accepting stored OpenTelemetry collector keys', () => {
+      expect(() => {
+        AgentPolicyBaseSchema.overrides.validate({
+          receivers: { otlp: {} },
+          'service.pipelines': {},
+        });
+      }).not.toThrow();
+    });
+
     it('should not throw for valid overrides keys', () => {
       expect(() => {
         AgentPolicyBaseSchema.overrides.validate({ 'agent.monitoring.use_output': 'custom' });
       }).not.toThrow();
     });
+  });
+});
+
+describe('AgentPolicyOverridesRequestSchema', () => {
+  it.each(['receivers', 'exporters', 'processors', 'connectors', 'extensions', 'service'])(
+    'should throw an error if the OTel key %s is provided',
+    (key) => {
+      expect(() => {
+        AgentPolicyOverridesRequestSchema.validate({ [key]: { foo: {} } });
+      }).toThrow(`${key} overrides is not allowed`);
+    }
+  );
+
+  it('should throw an error if a dotted OTel key is provided', () => {
+    expect(() => {
+      AgentPolicyOverridesRequestSchema.validate({ 'extensions.pprof.save_to_file': '/tmp/x' });
+    }).toThrow('extensions overrides is not allowed');
+    expect(() => {
+      AgentPolicyOverridesRequestSchema.validate({ 'service.pipelines': {} });
+    }).toThrow('service overrides is not allowed');
+  });
+
+  it('should keep rejecting inputs and output_permissions', () => {
+    expect(() => AgentPolicyOverridesRequestSchema.validate({ 'inputs.foo': 'bar' })).toThrow(
+      'inputs overrides is not allowed'
+    );
+    expect(() =>
+      AgentPolicyOverridesRequestSchema.validate({ 'output_permissions.someOutput': {} })
+    ).toThrow('output_permissions overrides is not allowed');
+  });
+
+  it('should not throw for keys that only share a prefix with denied keys', () => {
+    expect(() => {
+      AgentPolicyOverridesRequestSchema.validate({ 'servicefoo.bar': 1, outputs: {} });
+    }).not.toThrow();
+  });
+
+  it('should not throw for null or missing overrides', () => {
+    expect(() => AgentPolicyOverridesRequestSchema.validate(null)).not.toThrow();
+    expect(() => AgentPolicyOverridesRequestSchema.validate(undefined)).not.toThrow();
+  });
+
+  // Keys are bounded in reporting mode only: an overlong key is recorded, not rejected.
+  it('should not reject a key longer than the reporting bound', () => {
+    expect(() =>
+      AgentPolicyOverridesRequestSchema.validate({ [`agent.${'a'.repeat(300)}`]: 'x' })
+    ).not.toThrow();
+  });
+});
+
+describe('agent policy overrides with OpenTelemetry collector keys', () => {
+  const storedOverrides = { receivers: { otlp: {} } };
+  const basePolicy = { name: 'policy', namespace: 'default' };
+
+  it('are rejected in create and update requests', () => {
+    expect(() =>
+      NewAgentPolicySchema.validate({ ...basePolicy, overrides: storedOverrides })
+    ).toThrow('receivers overrides is not allowed');
+  });
+
+  it('are rejected in kibana.yml preconfigured policies', () => {
+    expect(() =>
+      PreconfiguredAgentPoliciesSchema.validate([
+        { ...basePolicy, id: 'preconfigured', overrides: storedOverrides },
+      ])
+    ).toThrow('receivers overrides is not allowed');
   });
 });

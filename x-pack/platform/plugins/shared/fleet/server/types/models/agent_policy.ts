@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import type { GlobalDataTag } from '../../../common/types';
 
 import { agentPolicyStatuses, dataTypes } from '../../../common/constants';
-import { isValidNamespace } from '../../../common/services';
+import { getDeniedAgentPolicyOverrideKey, isValidNamespace } from '../../../common/services';
 import { getSettingsAPISchema } from '../../services/form_settings';
 
 import { PackagePolicySchema } from './package_policy';
@@ -53,6 +53,36 @@ function validateCPU(s: string) {
   }
 }
 
+/**
+ * `overrides` as accepted from requests (REST API and `xpack.fleet.agentPolicies` in kibana.yml):
+ * rejects the denied keys, including dotted paths below them.
+ *
+ * Not part of `AgentPolicyBaseSchema` on purpose: policies saved before this check may still hold
+ * denied keys, and rejecting them there would break reading them. Stored denied keys are stripped
+ * when the full agent policy is built instead.
+ */
+export const AgentPolicyOverridesRequestSchema = schema.maybe(
+  schema.nullable(
+    schema.recordOf(
+      schema.querySortField.warn({ label: 'fleet.agent_policies.overrides.key' }),
+      schema.any(),
+      {
+        validate: (val) => {
+          if (Object.keys(val).some((key) => key.match(/^inputs(\.)?/))) {
+            return 'inputs overrides is not allowed';
+          }
+          for (const key of Object.keys(val)) {
+            const denied = getDeniedAgentPolicyOverrideKey(key);
+            if (denied) {
+              return `${denied} overrides is not allowed`;
+            }
+          }
+        },
+      }
+    )
+  )
+);
+
 export const AgentPolicyBaseSchema = {
   id: schema.maybe(schema.string()),
   space_ids: schema.maybe(schema.arrayOf(schema.string())),
@@ -92,6 +122,8 @@ export const AgentPolicyBaseSchema = {
     )
   ),
   is_protected: schema.maybe(schema.boolean()),
+  // Keep this permissive: policies saved before the OpenTelemetry keys were denied may still hold
+  // them. Requests are validated with `AgentPolicyOverridesRequestSchema` instead.
   overrides: schema.maybe(
     schema.nullable(
       schema.recordOf(schema.string(), schema.any(), {
@@ -221,6 +253,7 @@ function validateGlobalDataTagInput(tags: GlobalDataTag[]): string | undefined {
 export const NewAgentPolicySchema = schema.object({
   ...AgentPolicyBaseSchema,
   force: schema.maybe(schema.boolean()),
+  overrides: AgentPolicyOverridesRequestSchema,
 });
 
 export const AgentPolicySchema = schema.object({

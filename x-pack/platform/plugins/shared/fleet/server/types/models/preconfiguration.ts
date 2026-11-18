@@ -18,7 +18,11 @@ import {
   RemoteElasticSearchSchema,
 } from './output';
 
-import { AgentPolicyBaseSchema, AgentPolicyNamespaceSchema } from './agent_policy';
+import {
+  AgentPolicyBaseSchema,
+  AgentPolicyNamespaceSchema,
+  AgentPolicyOverridesRequestSchema,
+} from './agent_policy';
 import {
   PackagePolicyNamespaceSchema,
   SimplifiedPackagePolicyPreconfiguredSchema,
@@ -134,6 +138,8 @@ export const PreconfiguredFleetProxiesSchema = schema.arrayOf(
 export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
   schema.object({
     ...AgentPolicyBaseSchema,
+    // kibana.yml is input like a request: deny the same override keys as the REST API.
+    overrides: AgentPolicyOverridesRequestSchema,
     space_id: schema.maybe(schema.string()),
     namespace: schema.maybe(AgentPolicyNamespaceSchema),
     id: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
