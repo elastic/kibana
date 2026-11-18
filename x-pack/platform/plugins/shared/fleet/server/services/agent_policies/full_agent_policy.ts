@@ -327,11 +327,13 @@ export async function getFullAgentPolicy(
     // Overrides stored before the API validation was extended may still contain denied keys
     const { overrides, removedKeys } = sanitizeAgentPolicyOverrides(agentPolicy.overrides);
     if (removedKeys.length > 0) {
-      appContextService.getLogger().warn(
-        `Ignoring disallowed overrides [${removedKeys.join(', ')}] on agent policy [${
-          fullAgentPolicy.id
-        }]`
-      );
+      appContextService
+        .getLogger()
+        .warn(
+          `Ignoring disallowed overrides [${removedKeys.join(', ')}] on agent policy [${
+            fullAgentPolicy.id
+          }]`
+        );
     }
     return deepMerge<FullAgentPolicy>(fullAgentPolicy, overrides);
   }
