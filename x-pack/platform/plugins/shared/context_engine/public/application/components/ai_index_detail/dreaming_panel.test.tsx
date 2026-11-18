@@ -12,13 +12,13 @@ import React from 'react';
 import type { AiIndexDreamingConfig } from '../../../../common/dreaming';
 import type { AiIndexHttpItem } from '../../../../common/http_api/ai_indices';
 import { useAiIndexDreaming } from '../../hooks/use_ai_index_dreaming';
-import { useAllDreamingTemplates } from '../../hooks/use_dreaming_templates';
+import { useDreamingTemplates } from '../../hooks/use_dreaming_templates';
 import { useSaveDreamingConfig } from '../../hooks/use_save_dreaming_config';
 import { DreamingPanel } from './dreaming_panel';
 
 jest.mock('../../hooks/use_ai_index_dreaming', () => ({ useAiIndexDreaming: jest.fn() }));
 jest.mock('../../hooks/use_save_dreaming_config', () => ({ useSaveDreamingConfig: jest.fn() }));
-jest.mock('../../hooks/use_dreaming_templates', () => ({ useAllDreamingTemplates: jest.fn() }));
+jest.mock('../../hooks/use_dreaming_templates', () => ({ useDreamingTemplates: jest.fn() }));
 const navigateToContextEngine = jest.fn();
 jest.mock('../../hooks/use_navigation', () => ({
   useNavigation: () => ({ navigateToContextEngine }),
@@ -74,7 +74,7 @@ describe('DreamingPanel', () => {
     jest.clearAllMocks();
     saveConfig.mockResolvedValue(true);
     jest.mocked(useSaveDreamingConfig).mockReturnValue({ saveConfig, isSaving: false });
-    jest.mocked(useAllDreamingTemplates).mockReturnValue({
+    jest.mocked(useDreamingTemplates).mockReturnValue({
       templates: [
         {
           id: 'customer_support',

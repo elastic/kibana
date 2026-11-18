@@ -7,53 +7,19 @@
 
 import { useQuery } from '@kbn/react-query';
 import type {
-  DreamingTemplate,
-  DreamingTemplateIndex,
-  DreamingTemplateSummary,
+  ListDreamingTemplatesResponse,
+  LoadedDreamingTemplate,
 } from '../../../common/dreaming_templates';
-import { getDreamingTemplate, listDreamingTemplates } from '../api/dreaming_templates';
+import { listDreamingTemplates } from '../api/dreaming_templates';
 import { contextEngineQueryKeys } from './query_keys';
 import { useKibana } from './use_kibana';
 
+export type { LoadedDreamingTemplate };
+
 const STATIC = { staleTime: Infinity, cacheTime: Infinity } as const;
 
-/** Lists the example dreaming configs offered when an AI index is created. */
+/** Lists the example dreaming configs, in `index.json` order. */
 export const useDreamingTemplates = (): {
-  templates: DreamingTemplateSummary[];
-  isLoading: boolean;
-  error: Error | undefined;
-} => {
-  const {
-    services: { http },
-  } = useKibana();
-  const { data, isLoading, error } = useQuery<DreamingTemplateIndex, Error>({
-    queryKey: contextEngineQueryKeys.dreamingTemplates.list(),
-    queryFn: ({ signal }) => listDreamingTemplates(http, { signal }),
-    ...STATIC,
-  });
-  return { templates: data?.templates ?? [], isLoading, error: error ?? undefined };
-};
-
-/** Loads one example dreaming config; loads nothing while `id` is undefined. */
-export const useDreamingTemplate = (
-  id: string | undefined
-): { template: DreamingTemplate | undefined; isLoading: boolean; error: Error | undefined } => {
-  const {
-    services: { http },
-  } = useKibana();
-  const { data, isInitialLoading, error } = useQuery<DreamingTemplate, Error>({
-    queryKey: contextEngineQueryKeys.dreamingTemplates.detail(id ?? ''),
-    queryFn: ({ signal }) => getDreamingTemplate(http, { id: id ?? '', signal }),
-    enabled: id !== undefined,
-    ...STATIC,
-  });
-  return { template: data, isLoading: isInitialLoading, error: error ?? undefined };
-};
-
-export type LoadedDreamingTemplate = DreamingTemplateSummary & DreamingTemplate;
-
-/** Loads every example dreaming config, in `index.json` order. */
-export const useAllDreamingTemplates = (): {
   templates: LoadedDreamingTemplate[];
   isLoading: boolean;
   error: Error | undefined;
@@ -61,18 +27,10 @@ export const useAllDreamingTemplates = (): {
   const {
     services: { http },
   } = useKibana();
-  const { data, isLoading, error } = useQuery<LoadedDreamingTemplate[], Error>({
-    queryKey: contextEngineQueryKeys.dreamingTemplates.all(),
-    queryFn: async ({ signal }) => {
-      const { templates } = await listDreamingTemplates(http, { signal });
-      return Promise.all(
-        templates.map(async (summary) => ({
-          ...summary,
-          ...(await getDreamingTemplate(http, { id: summary.id, signal })),
-        }))
-      );
-    },
+  const { data, isLoading, error } = useQuery<ListDreamingTemplatesResponse, Error>({
+    queryKey: contextEngineQueryKeys.dreamingTemplates.list(),
+    queryFn: ({ signal }) => listDreamingTemplates(http, { signal }),
     ...STATIC,
   });
-  return { templates: data ?? [], isLoading, error: error ?? undefined };
+  return { templates: data?.templates ?? [], isLoading, error: error ?? undefined };
 };
