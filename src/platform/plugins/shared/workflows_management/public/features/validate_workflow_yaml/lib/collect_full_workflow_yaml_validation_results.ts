@@ -102,6 +102,8 @@ export async function collectFullWorkflowYamlValidationResults({
     workflowDefinition,
   });
 
+  const asyncValidations: Array<Promise<YamlValidationResult[]>> = [];
+
   if (connectorTypes.status === 'ready') {
     results.push(
       ...validateConnectorIds(
@@ -115,17 +117,13 @@ export async function collectFullWorkflowYamlValidationResults({
   results.push(...validateGraphBuild(graphBuildError, workflowLookup, lineCounter));
 
   if (context.lookupServiceAccount) {
-    results.push(
-      ...(await validateServiceAccountReference(
-        yamlDocument,
-        lineCounter,
-        context.lookupServiceAccount
-      ))
+    asyncValidations.push(
+      validateServiceAccountReference(yamlDocument, lineCounter, context.lookupServiceAccount)
     );
   }
 
   if (stepPropertyItems.length > 0) {
-    results.push(...(await validateStepProperties(stepPropertyItems)));
+    asyncValidations.push(validateStepProperties(stepPropertyItems));
   }
 
   if (workflowLookup && lineCounter) {
@@ -135,16 +133,13 @@ export async function collectFullWorkflowYamlValidationResults({
     results.push(...validateWorkflowInputs(workflowLookup, workflows, lineCounter));
 
     const esqlSignal = signal ?? new AbortController().signal;
-    results.push(
-      ...(await collectEsqlValidationResults(
-        workflowLookup,
-        lineCounter,
-        model,
-        esqlCallbacks,
-        esqlSignal
-      ))
+    asyncValidations.push(
+      collectEsqlValidationResults(workflowLookup, lineCounter, model, esqlCallbacks, esqlSignal)
     );
   }
+
+  const asyncValidationResults = await Promise.all(asyncValidations);
+  results.push(...asyncValidationResults.flat());
 
   return results;
 }
