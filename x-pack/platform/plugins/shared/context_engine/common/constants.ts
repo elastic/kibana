@@ -21,6 +21,11 @@ export const AI_INDEX_FEEDBACK_ANALYSIS_PATH = `${INTERNAL_API_PATH}/ai_index/{a
 export const AI_INDEX_KI_LIST_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/kis`;
 export const AI_INDEX_KI_BY_ID_PATH = `${AI_INDEX_KI_LIST_PATH}/{kiId}`;
 export const AI_INDEX_KI_RESTORE_PATH = `${AI_INDEX_KI_BY_ID_PATH}/_restore`;
+/**
+ * A static segment wins over `{kiId}`, so `GET` can't read a KI whose id is exactly `_groups`.
+ * `PATCH`, `DELETE` and `_restore` still reach it.
+ */
+export const AI_INDEX_KI_GROUPS_PATH = `${AI_INDEX_KI_LIST_PATH}/_groups`;
 
 /** Default and maximum page size when listing Knowledge Indicators for an AI index. */
 export const DEFAULT_KI_PAGE_SIZE = 25;
@@ -28,6 +33,14 @@ export const MAX_KI_PAGE_SIZE = 100;
 /** Page size for summary-only KI list requests, no rows. */
 export const KI_SUMMARY_PAGE_SIZE = 0;
 
+/** Default and maximum number of type groups in a KI groups response. Also the `exclude_types` max size. */
+export const DEFAULT_KI_GROUPS = 5;
+export const MAX_KI_GROUPS = 10;
+/** Default and maximum number of preview rows per KI type group. */
+export const DEFAULT_KI_GROUP_PREVIEW_SIZE = 3;
+export const MAX_KI_GROUP_PREVIEW_SIZE = 25;
+
+/** Also the longest type that can form a group, since the client must be able to send it back. */
 export const MAX_KI_TYPE_FILTER_LENGTH = 256;
 export const MAX_KI_SEARCH_QUERY_LENGTH = 256;
 /** Max length of a Knowledge Indicator `content` field (bytes). */
@@ -101,6 +114,7 @@ export const MAX_AI_INDEX_QUERY_LENGTH = 10000;
 export const MAX_AI_INDEX_QUERY_PARAMS = 100;
 export const MAX_AI_INDEX_QUERY_PARAM_KEY_LENGTH = 256;
 export const MAX_AI_INDEX_QUERY_PARAM_VALUE_LENGTH = 4096;
+export const MAX_AI_INDEX_USER_ID_LENGTH = 256;
 
 /** Row limit the server always enforces; a larger trailing `LIMIT` in the query is capped to it. */
 export const DEFAULT_AI_INDEX_QUERY_LIMIT = 100;
