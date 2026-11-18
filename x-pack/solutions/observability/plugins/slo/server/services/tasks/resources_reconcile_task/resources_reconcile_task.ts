@@ -20,7 +20,7 @@ import { migrateSliPipelines } from './migrate_sli_pipelines';
 import { parseTaskInstanceState } from './types';
 import type { TaskState } from './types';
 
-export const TYPE = 'slo:resources-reconcile';
+export const TYPE = 'slo:resources-reconcile-task';
 
 interface TaskSetupContract {
   taskManager: TaskManagerSetupContract;

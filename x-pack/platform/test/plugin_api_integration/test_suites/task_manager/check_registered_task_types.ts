@@ -279,7 +279,7 @@ export default function ({ getService }: FtrProviderContext) {
         'slo:bulk-delete-task',
         'slo:composite-slo-summary-task',
         'slo:health-scan-task',
-        'slo:resources-reconcile',
+        'slo:resources-reconcile-task',
         'slo:sli-retention-task',
         'slo:stale-instances-cleanup-task',
         'slo:temp-summary-cleanup-task',

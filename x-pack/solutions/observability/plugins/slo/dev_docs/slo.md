@@ -150,14 +150,14 @@ The default settings should be sufficient for most users, but if needed, the fol
 
 Each SLO rollup transform writes to the base SLI index (`.slo-observability.sli-v3.6`) through its own SLI ingest pipeline (`.slo-observability.sli.pipeline-{sloId}-{revision}`). That pipeline calls a shared routing pipeline, one per resources version (`.slo-observability.sli.routing-v3.6`), which routes each document to a time-based index named after its `@timestamp`: `.slo-observability.sli-v3.6.YYYY-MM-DD`.
 
-The routing pipeline is managed by Kibana: the resource installer creates it on startup and the `slo:resources-reconcile` task re-installs it every hour when it is missing or outdated. Its `_meta.routing` holds the routing state:
+The routing pipeline is managed by Kibana: the resource installer creates it on startup and the `slo:resources-reconcile-task` task re-installs it every hour when it is missing or outdated. Its `_meta.routing` holds the routing state:
 
 - `rounding`: the index rounding (`M` monthly, `w` weekly or `d` daily).
 - `cutover`: a cutover guard, or `null`. Documents with a `@timestamp` before `cutover` (epoch millis, the first day of a UTC month) keep the daily rounding of the indices written before the routing pipeline existed, so a rollup bucket rewritten later lands in the same index as the original document. It is set only when daily indices exist and the rounding is not `d`.
 
 The routing state is set once, when the routing pipeline of a resources version is created, and is never changed afterwards.
 
-The `slo:resources-reconcile` task also migrates the SLI pipelines created before the routing pipeline existed: it replaces their `date_index_name` processor with a call to the routing pipeline of their version.
+The `slo:resources-reconcile-task` task also migrates the SLI pipelines created before the routing pipeline existed: it replaces their `date_index_name` processor with a call to the routing pipeline of their version.
 
 ### Index rounding
 
