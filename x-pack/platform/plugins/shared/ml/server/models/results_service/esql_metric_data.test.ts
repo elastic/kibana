@@ -59,6 +59,28 @@ describe('esqlMetricDataProvider', () => {
       expect(request.query).toContain(`BUCKET(\`bucket_time\`, ${HOUR} milliseconds)`);
     });
 
+    test('does not set project_routing when the datafeed has none', async () => {
+      const { client, provider } = setup();
+
+      await provider.fetchEsqlMetricData(datafeed, 'bucket_time', params);
+
+      const [[request]] = client.asCurrentUser.esql.query.mock.calls;
+      expect(request).not.toHaveProperty('project_routing');
+    });
+
+    test('uses the project_routing of the datafeed', async () => {
+      const { client, provider } = setup();
+
+      await provider.fetchEsqlMetricData(
+        { ...datafeed, project_routing: '_alias:linked' },
+        'bucket_time',
+        params
+      );
+
+      const [[request]] = client.asCurrentUser.esql.query.mock.calls;
+      expect(request).toHaveProperty('project_routing', '_alias:linked');
+    });
+
     test('rejects a datafeed that does not use ES|QL', async () => {
       const { provider } = setup();
       const { esql_query: esqlQuery, ...dslDatafeed } = datafeed;
@@ -77,6 +99,27 @@ describe('esqlMetricDataProvider', () => {
           metricFunction: 'lat_long',
         })
       ).rejects.toThrow('cannot be charted');
+    });
+  });
+
+  describe('fetchEsqlCardinalityOfFields', () => {
+    test('counts distinct values using the project_routing of the datafeed', async () => {
+      const client = elasticsearchServiceMock.createScopedClusterClient();
+      client.asCurrentUser.esql.query.mockResolvedValue({
+        columns: [{ name: '__ml_cardinality_0', type: 'long' }],
+        values: [[12]],
+      });
+
+      const resp = await esqlMetricDataProvider(client).fetchEsqlCardinalityOfFields(
+        { ...datafeed, project_routing: '_alias:linked' },
+        ['host'],
+        0,
+        HOUR
+      );
+
+      expect(resp).toEqual({ host: 12 });
+      const [[request]] = client.asCurrentUser.esql.query.mock.calls;
+      expect(request).toHaveProperty('project_routing', '_alias:linked');
     });
   });
 });

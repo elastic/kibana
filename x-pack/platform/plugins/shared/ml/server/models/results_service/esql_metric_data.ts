@@ -33,6 +33,10 @@ export interface EsqlMetricDataForJobParams extends EsqlMetricDataParams {
   readonly jobId: string;
 }
 
+// Run the chart queries against the same projects as the datafeed in cross-project search.
+const getProjectRouting = ({ project_routing: projectRouting }: Datafeed) =>
+  projectRouting ? { project_routing: projectRouting } : {};
+
 /** Fetches source data chart values and entity cardinalities for jobs with ES|QL datafeeds. */
 export const esqlMetricDataProvider = (client: IScopedClusterClient) => {
   const { asCurrentUser } = client;
@@ -60,7 +64,10 @@ export const esqlMetricDataProvider = (client: IScopedClusterClient) => {
       );
     }
 
-    const response = await asCurrentUser.esql.query(request, { maxRetries: 0 });
+    const response = await asCurrentUser.esql.query(
+      { ...request, ...getProjectRouting(datafeed) },
+      { maxRetries: 0 }
+    );
 
     return {
       success: true,
@@ -87,7 +94,10 @@ export const esqlMetricDataProvider = (client: IScopedClusterClient) => {
       earliestMs,
       latestMs,
     });
-    const { columns, values } = await asCurrentUser.esql.query(request, { maxRetries: 0 });
+    const { columns, values } = await asCurrentUser.esql.query(
+      { ...request, ...getProjectRouting(datafeed) },
+      { maxRetries: 0 }
+    );
     const [row = []] = values;
 
     return fieldNames.reduce<Record<string, number>>((acc, fieldName, index) => {
