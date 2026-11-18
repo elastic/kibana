@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import { lazySchema, z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import {
-  MAX_ARRAY_LENGTH,
   MAX_ID_LENGTH,
-  MAX_TEXT_LENGTH,
   MAX_TITLE_LENGTH,
   SIGNIFICANT_EVENTS_ALERT_SOURCE,
 } from '@kbn/significant-events-schema';
-import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { isBoom, serverUnavailable } from '@hapi/boom';
 import pRetry, { AbortError } from 'p-retry';
@@ -21,14 +18,11 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { NightshiftSettingsLocator } from '../../common/locators';
 import { notifyInvestigationQuotaReached } from '../lib/notifications/notify_investigation_quota_reached';
+import { DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID, toSlackThreadSubjectId } from '../../common';
 import {
-  DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID,
-  INVESTIGATION_SUBJECT_TYPES,
-  INVESTIGATION_TRIGGER_TYPES,
-  investigationNotificationDestinationsSchema,
-  MAX_KEYWORD_LENGTH,
-  toSlackThreadSubjectId,
-} from '../../common';
+  triggerInvestigationStepCommonDefinition,
+  triggerInvestigationStepInputSchema,
+} from '../../common/workflows/steps/trigger_investigation';
 import type {
   GetAlertsClient,
   GetAutomationsSoClient,
@@ -36,7 +30,6 @@ import type {
   GetInvestigationsClient,
 } from '../routes/types';
 import { fetchInvestigationAlertSnapshots } from '../lib/alert_snapshot';
-import { MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from '../../common/automation_limits';
 import {
   isScheduleOnlyAutomation,
   MANUAL_AUTOMATION_TRIGGER_SOURCE,
@@ -47,107 +40,6 @@ import { createAutomationBudget } from '../lib/automations/automation_budget';
 import { AutomationDailyLimitReachedError, InvestigationQuotaDeniedError } from '../client/errors';
 import type { AutomationBudget } from '../types';
 import { alertIdentityOf, triggeringAlertOf, type NightshiftTelemetryClient } from '../telemetry';
-
-const inputSchema = lazySchema(() =>
-  z.object({
-    automation_id: z
-      .string()
-      .min(1)
-      .max(512)
-      .optional()
-      .describe(
-        'Owning automation ID. Enforces its current daily dispatch limit before starting an investigation.'
-      ),
-    subject_type: z
-      .enum(INVESTIGATION_SUBJECT_TYPES)
-      .describe(
-        'The type of entity being investigated. Use "manual" when the prompt is the whole subject, and "slack_thread" when it is a Slack thread, which slack_thread then names.'
-      ),
-    subject_id: z
-      .string()
-      .min(1)
-      .max(MAX_ID_LENGTH)
-      .optional()
-      .describe(
-        'The subject ID; optional for a manual question, and not accepted for a Slack thread, whose ID comes from slack_thread'
-      ),
-    title: z
-      .string()
-      .min(1)
-      .max(MAX_TITLE_LENGTH)
-      .optional()
-      .describe(
-        'Accepted for compatibility; not used as the investigation title, which Agent Builder generates from the first round'
-      ),
-    trigger_type: z
-      .enum(INVESTIGATION_TRIGGER_TYPES)
-      .optional()
-      .describe('What initiated this investigation. Defaults to "automatic".'),
-    summary: z
-      .string()
-      .max(MAX_TEXT_LENGTH)
-      .optional()
-      .describe('Short description of the subject, returned on reads as subject.summary'),
-    message: z
-      .string()
-      .min(1)
-      .max(MAX_TEXT_LENGTH)
-      .optional()
-      .describe('Caller-supplied prompt for the investigation agent'),
-    instructions: z
-      .string()
-      .max(MAX_AUTOMATION_INSTRUCTIONS_LENGTH)
-      .optional()
-      .describe(
-        'Additional operator guidance for this investigation round; empty means no additional guidance'
-      ),
-    source_ids: z
-      .array(z.string().max(MAX_ID_LENGTH))
-      .max(MAX_ARRAY_LENGTH)
-      .optional()
-      .describe('Nightshift source ids to scope the investigation'),
-    scope_query: z
-      .string()
-      .max(MAX_TEXT_LENGTH)
-      .optional()
-      .describe('Query scope guidance for a manual investigation; not an enforced access filter'),
-    timeout_seconds: z
-      .number()
-      .int()
-      .min(1)
-      .optional()
-      .describe('Upper bound for this investigation workflow run in seconds'),
-    context: z
-      .record(z.string(), z.unknown())
-      .optional()
-      .describe(
-        'Additional context to pass to the investigation workflow. When subject_type is "alert" and no "alerts" array is given, the alert is looked up by subject_id (classic or universal). Otherwise this must carry an "alerts" array of alert snapshots.'
-      ),
-    notificationDestinations: investigationNotificationDestinationsSchema
-      .optional()
-      .describe(
-        'Destinations that receive the concluded investigation. Delivery results are recorded on the investigation.'
-      ),
-    // Bounded like the Slack thread route, so the thread's subject id stays within a subject id.
-    slack_thread: z
-      .object({
-        workspace: z.string().min(1).max(128),
-        channel: z.string().min(1).max(256),
-        thread_ts: z.string().min(1).max(64),
-        external_conversation_id: z
-          .string()
-          .max(MAX_KEYWORD_LENGTH)
-          .optional()
-          .describe(
-            "The Relay's key for the thread. When empty, the same key is built from the thread's ids."
-          ),
-      })
-      .optional()
-      .describe(
-        'The Slack thread the investigation is about. A reply in that thread continues the investigation.'
-      ),
-  })
-);
 
 const ALERT_VISIBILITY_RETRY_OPTIONS = { retries: 4, factor: 1, minTimeout: 500 } as const;
 
@@ -191,7 +83,7 @@ const toSubjectId = ({
   subject_id: subjectId,
   slack_thread: slackThread,
   message,
-}: z.infer<typeof inputSchema>): string => {
+}: z.infer<typeof triggerInvestigationStepInputSchema>): string => {
   if (subjectType === 'slack_thread') {
     if (!slackThread) throw new Error('Slack thread investigations require slack_thread.');
     if (subjectId) {
@@ -220,36 +112,14 @@ export const triggerInvestigationStepDefinition = (
   telemetry: NightshiftTelemetryClient
 ) =>
   createServerStepDefinition({
-    id: 'nightshift.triggerInvestigation',
-    label: 'Trigger Nightshift Investigation',
-    category: StepCategory.Ai,
-    description:
-      'Start an investigation for a given subject (significant event, alert, or other entity). When the subject, or any alert in context.alerts, is already part of an open investigation, that investigation continues instead. Returns investigation_id for tracking, or skip_reason when the automation daily limit or the deployment-wide investigation limit is reached.',
-    inputSchema,
-    outputSchema: z.object({
-      execution_id: z.string().optional(),
-      investigation_id: z
-        .string()
-        .optional()
-        .describe('The investigation (Agent Builder conversation) the start created or continued'),
-      skip_reason: z
-        .enum(['daily_limit', 'investigation_limit'])
-        .optional()
-        .describe('Why the investigation was not dispatched'),
-      daily_limit: z
-        .number()
-        .int()
-        .min(0)
-        .optional()
-        .describe('The daily limit that denied this dispatch'),
-    }),
+    ...triggerInvestigationStepCommonDefinition,
     handler: async (context) => {
       const request = context.contextManager.getFakeRequest();
       // getFakeRequest() does not carry space info, so the space ID must be extracted from the
       // workflow context explicitly. See https://github.com/elastic/kibana/issues/284786.
       const { workflow, kibanaUrl, execution } = context.contextManager.getContext();
       const spaceId = workflow.spaceId;
-      const input = inputSchema.parse(context.input);
+      const input = triggerInvestigationStepInputSchema.parse(context.input);
       let automationBudget: AutomationBudget | undefined;
       let isManualAutomationRun = false;
       if (input.automation_id) {
@@ -318,7 +188,6 @@ export const triggerInvestigationStepDefinition = (
             instructions:
               input.instructions ??
               (input.automation_id && input.subject_type === 'alert' ? input.message : undefined),
-            source_ids: input.source_ids,
             context: alerts
               ? {
                   alerts,
@@ -326,8 +195,6 @@ export const triggerInvestigationStepDefinition = (
                     ? { source_workflow_execution_id: sourceWorkflowExecutionId }
                     : {}),
                 }
-              : input.scope_query && input.subject_type === 'manual'
-              ? { ...input.context, scope_query: input.scope_query }
               : input.context,
             timeout_seconds: input.timeout_seconds,
             notificationDestinations: input.notificationDestinations,
