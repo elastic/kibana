@@ -105,19 +105,17 @@ describe('Create Lifecycle', () => {
 
       const invalidCharacters = [' ', ':', '*', '*', '/'];
       for (const char of invalidCharacters) {
-        expect(() =>
-          registry.register({ ...ruleType, id: `${ruleType.id}${char}` })
-        ).toThrowErrorMatchingInlineSnapshot(
-          `"expected RuleType Id not to include invalid character: ${char}"`
-        );
+        expect(() => registry.register({ ...ruleType, id: `${ruleType.id}${char}` }))
+          .toThrowErrorMatchingInlineSnapshot(`
+          "expected RuleType Id not to include invalid character: `);
       }
 
       const [first, second] = invalidCharacters;
-      expect(() =>
-        registry.register({ ...ruleType, id: `${first}${ruleType.id}${second}` })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"expected RuleType Id not to include invalid characters: ${first}, ${second}"`
-      );
+      expect(() => registry.register({ ...ruleType, id: `${first}${ruleType.id}${second}` }))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "expected RuleType Id not to include invalid characters:  , :
+        Cause: expected RuleType Id not to include invalid characters:  , :"
+      `);
     });
 
     test('throws if RuleType Id isnt a string', () => {
@@ -143,9 +141,10 @@ describe('Create Lifecycle', () => {
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
-      expect(() => registry.register(ruleType)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [string] but got [number]"`
-      );
+      expect(() => registry.register(ruleType)).toThrowErrorMatchingInlineSnapshot(`
+        "expected value of type [string] but got [number]
+        Cause: expected value of type [string] but got [number]"
+      `);
     });
 
     test('throws if RuleType ruleTaskTimeout is not a valid duration', () => {

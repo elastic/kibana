@@ -73,7 +73,8 @@ describe('kibana config', () => {
         "[ssl.verificationMode]: types that failed validation:
         - [ssl.verificationMode.0]: expected value to equal [none]
         - [ssl.verificationMode.1]: expected value to equal [certificate]
-        - [ssl.verificationMode.2]: expected value to equal [full]"
+        - [ssl.verificationMode.2]: expected value to equal [full]
+        Cause: types that failed validation:"
       `);
     });
   });

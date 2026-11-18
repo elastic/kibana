@@ -23,12 +23,14 @@ describe('accessibility settings', () => {
     it('should only accept string values', () => {
       expect(() => validate('some format')).not.toThrow();
 
-      expect(() => validate(42)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [string] but got [number]"`
-      );
-      expect(() => validate(true)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [string] but got [boolean]"`
-      );
+      expect(() => validate(42)).toThrowErrorMatchingInlineSnapshot(`
+        "expected value of type [string] but got [number]
+        Cause: expected value of type [string] but got [number]"
+      `);
+      expect(() => validate(true)).toThrowErrorMatchingInlineSnapshot(`
+        "expected value of type [string] but got [boolean]
+        Cause: expected value of type [string] but got [boolean]"
+      `);
     });
   });
 
@@ -39,10 +41,14 @@ describe('accessibility settings', () => {
       expect(() => validate('Browser')).not.toThrow();
       expect(() => validate('UTC')).not.toThrow();
 
-      expect(() => validate('EST')).toThrowErrorMatchingInlineSnapshot(`"Invalid timezone: EST"`);
-      expect(() => validate('random string')).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid timezone: random string"`
-      );
+      expect(() => validate('EST')).toThrowErrorMatchingInlineSnapshot(`
+        "Invalid timezone: EST
+        Cause: Invalid timezone: EST"
+      `);
+      expect(() => validate('random string')).toThrowErrorMatchingInlineSnapshot(`
+        "Invalid timezone: random string
+        Cause: Invalid timezone: random string"
+      `);
     });
   });
 
@@ -52,12 +58,14 @@ describe('accessibility settings', () => {
     it('should only accept string values', () => {
       expect(() => validate('some format')).not.toThrow();
 
-      expect(() => validate(42)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [string] but got [number]"`
-      );
-      expect(() => validate(true)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [string] but got [boolean]"`
-      );
+      expect(() => validate(42)).toThrowErrorMatchingInlineSnapshot(`
+        "expected value of type [string] but got [number]
+        Cause: expected value of type [string] but got [number]"
+      `);
+      expect(() => validate(true)).toThrowErrorMatchingInlineSnapshot(`
+        "expected value of type [string] but got [boolean]
+        Cause: expected value of type [string] but got [boolean]"
+      `);
     });
   });
 
@@ -68,12 +76,14 @@ describe('accessibility settings', () => {
     it('should only accept DOW values', () => {
       expect(() => validate(validDay)).not.toThrow();
 
-      expect(() => validate('invalid value')).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid day of week: invalid value"`
-      );
-      expect(() => validate(true)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [string] but got [boolean]"`
-      );
+      expect(() => validate('invalid value')).toThrowErrorMatchingInlineSnapshot(`
+        "Invalid day of week: invalid value
+        Cause: Invalid day of week: invalid value"
+      `);
+      expect(() => validate(true)).toThrowErrorMatchingInlineSnapshot(`
+        "expected value of type [string] but got [boolean]
+        Cause: expected value of type [string] but got [boolean]"
+      `);
     });
   });
 
@@ -83,12 +93,14 @@ describe('accessibility settings', () => {
     it('should only accept string values', () => {
       expect(() => validate('some format')).not.toThrow();
 
-      expect(() => validate(42)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [string] but got [number]"`
-      );
-      expect(() => validate(true)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [string] but got [boolean]"`
-      );
+      expect(() => validate(42)).toThrowErrorMatchingInlineSnapshot(`
+        "expected value of type [string] but got [number]
+        Cause: expected value of type [string] but got [number]"
+      `);
+      expect(() => validate(true)).toThrowErrorMatchingInlineSnapshot(`
+        "expected value of type [string] but got [boolean]
+        Cause: expected value of type [string] but got [boolean]"
+      `);
     });
   });
 });

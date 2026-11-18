@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+// Jest 30 applies this mock to `node:crypto` too, which undici needs intact.
 jest.mock('crypto', () => ({
+  ...jest.requireActual('crypto'),
   randomBytes: jest.fn(),
-  constants: jest.requireActual('crypto').constants,
-  createHash: jest.requireActual('crypto').createHash,
 }));
 
 jest.mock('@kbn/utils', () => ({
@@ -311,14 +311,16 @@ describe('config schema', () => {
         .toThrowErrorMatchingInlineSnapshot(`
         "[public.protocol]: types that failed validation:
         - [public.protocol.0]: expected value to equal [http]
-        - [public.protocol.1]: expected value to equal [https]"
+        - [public.protocol.1]: expected value to equal [https]
+        Cause: types that failed validation:"
       `);
 
       expect(() => ConfigSchema.validate({ public: { protocol: 'some-protocol' } }))
         .toThrowErrorMatchingInlineSnapshot(`
         "[public.protocol]: types that failed validation:
         - [public.protocol.0]: expected value to equal [http]
-        - [public.protocol.1]: expected value to equal [https]"
+        - [public.protocol.1]: expected value to equal [https]
+        Cause: types that failed validation:"
       `);
     });
 
@@ -343,17 +345,17 @@ describe('config schema', () => {
         }
       `);
 
-      expect(() =>
-        ConfigSchema.validate({ public: { hostname: 'http://elastic.co' } })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[public.hostname]: value must be a valid hostname (see RFC 1123)."`
-      );
+      expect(() => ConfigSchema.validate({ public: { hostname: 'http://elastic.co' } }))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[public.hostname]: value must be a valid hostname (see RFC 1123).
+        Cause: value must be a valid hostname (see RFC 1123)."
+      `);
 
-      expect(() =>
-        ConfigSchema.validate({ public: { hostname: 'localhost:5601' } })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[public.hostname]: value must be a valid hostname (see RFC 1123)."`
-      );
+      expect(() => ConfigSchema.validate({ public: { hostname: 'localhost:5601' } }))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[public.hostname]: value must be a valid hostname (see RFC 1123).
+        Cause: value must be a valid hostname (see RFC 1123)."
+      `);
     });
 
     it('properly validates `port`', async () => {
@@ -375,23 +377,23 @@ describe('config schema', () => {
         }
       `);
 
-      expect(() =>
-        ConfigSchema.validate({ public: { port: -1 } })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[public.port]: Value must be equal to or greater than [0]."`
-      );
+      expect(() => ConfigSchema.validate({ public: { port: -1 } }))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[public.port]: Value must be equal to or greater than [0].
+        Cause: Value must be equal to or greater than [0]."
+      `);
 
-      expect(() =>
-        ConfigSchema.validate({ public: { port: 65536 } })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[public.port]: Value must be equal to or lower than [65535]."`
-      );
+      expect(() => ConfigSchema.validate({ public: { port: 65536 } }))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[public.port]: Value must be equal to or lower than [65535].
+        Cause: Value must be equal to or lower than [65535]."
+      `);
 
-      expect(() =>
-        ConfigSchema.validate({ public: { port: '56x1' } })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[public.port]: expected value of type [number] but got [string]"`
-      );
+      expect(() => ConfigSchema.validate({ public: { port: '56x1' } }))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[public.port]: expected value of type [number] but got [string]
+        Cause: expected value of type [number] but got [string]"
+      `);
     });
   });
 
@@ -1170,7 +1172,8 @@ describe('config schema', () => {
         ).toThrowErrorMatchingInlineSnapshot(`
           "[authc.providers]: types that failed validation:
           - [authc.providers.0]: expected value of type [array] but got [Object]
-          - [authc.providers.1.anonymous.anonymous1.credentials]: expected at least one defined value but got [undefined]"
+          - [authc.providers.1.anonymous.anonymous1.credentials]: expected at least one defined value but got [undefined]
+          Cause: types that failed validation:"
         `);
       });
 
@@ -1189,7 +1192,8 @@ describe('config schema', () => {
           - [authc.providers.1.anonymous.anonymous1.credentials]: types that failed validation:
            - [credentials.0]: expected value to equal [elasticsearch_anonymous_user]
            - [credentials.1.password]: expected value of type [string] but got [undefined]
-           - [credentials.2.apiKey]: expected at least one defined value but got [undefined]"
+           - [credentials.2.apiKey]: expected at least one defined value but got [undefined]
+          Cause: types that failed validation:"
         `);
 
         expect(() =>
@@ -1206,7 +1210,8 @@ describe('config schema', () => {
           - [authc.providers.1.anonymous.anonymous1.credentials]: types that failed validation:
            - [credentials.0]: expected value to equal [elasticsearch_anonymous_user]
            - [credentials.1.username]: expected value of type [string] but got [undefined]
-           - [credentials.2.apiKey]: expected at least one defined value but got [undefined]"
+           - [credentials.2.apiKey]: expected at least one defined value but got [undefined]
+          Cause: types that failed validation:"
         `);
       });
 
@@ -1264,7 +1269,8 @@ describe('config schema', () => {
            - [credentials.1.username]: expected value of type [string] but got [undefined]
            - [credentials.2.apiKey]: types that failed validation:
             - [credentials.apiKey.0.key]: expected value of type [string] but got [undefined]
-            - [credentials.apiKey.1]: expected value of type [string] but got [Object]"
+            - [credentials.apiKey.1]: expected value of type [string] but got [Object]
+          Cause: types that failed validation:"
         `);
 
         expect(() =>
@@ -1285,7 +1291,8 @@ describe('config schema', () => {
            - [credentials.1.username]: expected value of type [string] but got [undefined]
            - [credentials.2.apiKey]: types that failed validation:
             - [credentials.apiKey.0.id]: expected value of type [string] but got [undefined]
-            - [credentials.apiKey.1]: expected value of type [string] but got [Object]"
+            - [credentials.apiKey.1]: expected value of type [string] but got [Object]
+          Cause: types that failed validation:"
         `);
       });
 
@@ -1659,9 +1666,10 @@ describe('config schema', () => {
           { authc: { http: { jwt: { taggedRoutesOnly: false } } } },
           { serverless: false }
         )
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[authc.http.jwt]: a value wasn't expected to be present"`
-      );
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[authc.http.jwt]: a value wasn't expected to be present
+        Cause: a value wasn't expected to be present"
+      `);
     });
 
     it('should allow xpack.security.authc.http.jwt.* to be configured inside of the serverless context', () => {
@@ -1686,7 +1694,10 @@ describe('config schema', () => {
           },
           { serverless: false }
         )
-      ).toThrowErrorMatchingInlineSnapshot(`"[ui]: a value wasn't expected to be present"`);
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[ui]: a value wasn't expected to be present
+        Cause: a value wasn't expected to be present"
+      `);
     });
 
     it('should allow xpack.security.ui.* to be configured inside of the serverless context', () => {
@@ -1718,9 +1729,10 @@ describe('config schema', () => {
           },
           { serverless: false }
         )
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[roleManagementEnabled]: a value wasn't expected to be present"`
-      );
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[roleManagementEnabled]: a value wasn't expected to be present
+        Cause: a value wasn't expected to be present"
+      `);
     });
 
     it('should allow xpack.security.roleManagementEnabled to be configured inside of the serverless context', () => {

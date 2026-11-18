@@ -22,9 +22,10 @@ describe('Put payload schema', () => {
       getPutPayloadSchema(() => basePrivilegeNamesMap).validate({
         kibana: [{ feature: { '!foo': ['foo'] } }],
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[kibana.0.feature.key(\\"!foo\\")]: only a-z, A-Z, 0-9, '_', and '-' are allowed"`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[kibana.0.feature.key(\\"!foo\\")]: only a-z, A-Z, 0-9, '_', and '-' are allowed
+      Cause: only a-z, A-Z, 0-9, '_', and '-' are allowed"
+    `);
   });
 
   test('only allows feature privileges that match the pattern', () => {
@@ -32,9 +33,10 @@ describe('Put payload schema', () => {
       getPutPayloadSchema(() => basePrivilegeNamesMap).validate({
         kibana: [{ feature: { foo: ['!foo'] } }],
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[kibana.0.feature.foo.0]: only a-z, A-Z, 0-9, '_', and '-' are allowed"`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[kibana.0.feature.foo.0]: only a-z, A-Z, 0-9, '_', and '-' are allowed
+      Cause: only a-z, A-Z, 0-9, '_', and '-' are allowed"
+    `);
   });
 
   test('requires either base or feature', () => {
@@ -50,9 +52,10 @@ describe('Put payload schema', () => {
         getPutPayloadSchema(() => basePrivilegeNamesMap).validate({
           kibana: [kibanaPrivilege],
         })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[kibana.0]: either [base] or [feature] is expected, but none of them specified"`
-      );
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[kibana.0]: either [base] or [feature] is expected, but none of them specified
+        Cause: either [base] or [feature] is expected, but none of them specified"
+      `);
     }
   });
 
@@ -61,9 +64,10 @@ describe('Put payload schema', () => {
       getPutPayloadSchema(() => basePrivilegeNamesMap).validate({
         kibana: [{ base: ['all'], feature: { foo: ['foo'] } }],
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[kibana.0]: definition of [feature] isn't allowed when non-empty [base] is defined."`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[kibana.0]: definition of [feature] isn't allowed when non-empty [base] is defined.
+      Cause: definition of [feature] isn't allowed when non-empty [base] is defined."
+    `);
   });
 
   describe('global', () => {
@@ -72,9 +76,10 @@ describe('Put payload schema', () => {
         getPutPayloadSchema(() => basePrivilegeNamesMap).validate({
           kibana: [{ base: ['foo'], spaces: ['*'] }],
         })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[kibana.0.base.0]: unknown global privilege \\"foo\\", must be one of [all,read]"`
-      );
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[kibana.0.base.0]: unknown global privilege \\"foo\\", must be one of [all,read]
+        Cause: unknown global privilege \\"foo\\", must be one of [all,read]"
+      `);
     });
 
     test(`doesn't allow Kibana reserved privileges`, () => {
@@ -82,9 +87,10 @@ describe('Put payload schema', () => {
         getPutPayloadSchema(() => basePrivilegeNamesMap).validate({
           kibana: [{ _reserved: ['customApplication1'], spaces: ['*'] }],
         })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[kibana.0._reserved]: Additional properties are not allowed ('_reserved' was unexpected)"`
-      );
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[kibana.0._reserved]: Additional properties are not allowed ('_reserved' was unexpected)
+        Cause: Additional properties are not allowed ('_reserved' was unexpected)"
+      `);
     });
 
     test(`only allows one global entry`, () => {
@@ -95,9 +101,10 @@ describe('Put payload schema', () => {
             { feature: { bar: ['bar-privilege-1'] }, spaces: ['*'] },
           ],
         })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[kibana]: more than one privilege is applied to the following spaces: [*]"`
-      );
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[kibana]: more than one privilege is applied to the following spaces: [*]
+        Cause: more than one privilege is applied to the following spaces: [*]"
+      `);
     });
   });
 
@@ -110,7 +117,8 @@ describe('Put payload schema', () => {
       ).toThrowErrorMatchingInlineSnapshot(`
         "[kibana.0.spaces]: types that failed validation:
         - [kibana.0.spaces.0.0]: expected value to equal [*]
-        - [kibana.0.spaces.1.0]: must be lower case, a-z, 0-9, '_', and '-' are allowed"
+        - [kibana.0.spaces.1.0]: must be lower case, a-z, 0-9, '_', and '-' are allowed
+        Cause: types that failed validation:"
       `);
     });
 
@@ -122,7 +130,8 @@ describe('Put payload schema', () => {
       ).toThrowErrorMatchingInlineSnapshot(`
         "[kibana.0.spaces]: types that failed validation:
         - [kibana.0.spaces.0.1]: expected value to equal [*]
-        - [kibana.0.spaces.1.0]: must be lower case, a-z, 0-9, '_', and '-' are allowed"
+        - [kibana.0.spaces.1.0]: must be lower case, a-z, 0-9, '_', and '-' are allowed
+        Cause: types that failed validation:"
       `);
     });
 
@@ -131,9 +140,10 @@ describe('Put payload schema', () => {
         getPutPayloadSchema(() => basePrivilegeNamesMap).validate({
           kibana: [{ base: ['foo'], spaces: ['foo-space'] }],
         })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[kibana.0.base.0]: unknown space privilege \\"foo\\", must be one of [all,read]"`
-      );
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[kibana.0.base.0]: unknown space privilege \\"foo\\", must be one of [all,read]
+        Cause: unknown space privilege \\"foo\\", must be one of [all,read]"
+      `);
     });
 
     test(`only allows space to be in one entry`, () => {
@@ -144,9 +154,10 @@ describe('Put payload schema', () => {
             { feature: { bar: ['bar-privilege-1'] }, spaces: ['sales', 'marketing'] },
           ],
         })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[kibana]: more than one privilege is applied to the following spaces: [marketing]"`
-      );
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[kibana]: more than one privilege is applied to the following spaces: [marketing]
+        Cause: more than one privilege is applied to the following spaces: [marketing]"
+      `);
     });
 
     test(`doesn't allow Kibana reserved privileges`, () => {
@@ -154,9 +165,10 @@ describe('Put payload schema', () => {
         getPutPayloadSchema(() => basePrivilegeNamesMap).validate({
           kibana: [{ _reserved: ['customApplication1'], spaces: ['marketing'] }],
         })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[kibana.0._reserved]: Additional properties are not allowed ('_reserved' was unexpected)"`
-      );
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[kibana.0._reserved]: Additional properties are not allowed ('_reserved' was unexpected)
+        Cause: Additional properties are not allowed ('_reserved' was unexpected)"
+      `);
     });
   });
 
@@ -511,7 +523,8 @@ describe('Put payload schema', () => {
       - [elasticsearch.global.data_source.0.privileges.0.1]: expected value to equal [read_metadata]
       - [elasticsearch.global.data_source.0.privileges.0.2]: expected value to equal [delete]
       - [elasticsearch.global.data_source.0.privileges.0.3]: expected value to equal [read]
-      - [elasticsearch.global.data_source.0.privileges.0.4]: expected value to equal [manage]"
+      - [elasticsearch.global.data_source.0.privileges.0.4]: expected value to equal [manage]
+      Cause: types that failed validation:"
     `);
   });
 
@@ -527,9 +540,10 @@ describe('Put payload schema', () => {
           ],
         },
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[elasticsearch.remote_cluster.0.privileges]: array size is [0], but cannot be smaller than [1]"`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[elasticsearch.remote_cluster.0.privileges]: array size is [0], but cannot be smaller than [1]
+      Cause: array size is [0], but cannot be smaller than [1]"
+    `);
   });
 
   test(`doesn't allow empty clusters for remote_cluster`, () => {
@@ -544,9 +558,10 @@ describe('Put payload schema', () => {
           ],
         },
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[elasticsearch.remote_cluster.0.clusters]: array size is [0], but cannot be smaller than [1]"`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[elasticsearch.remote_cluster.0.clusters]: array size is [0], but cannot be smaller than [1]
+      Cause: array size is [0], but cannot be smaller than [1]"
+    `);
   });
 
   // This is important for backwards compatibility

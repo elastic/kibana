@@ -160,8 +160,7 @@ describe('CrowdstrikeSessionManager', () => {
       mockApiRequest.mockResolvedValue(refreshResponse);
 
       // Advance time to trigger first refresh (5 minutes)
-      jest.advanceTimersByTime(5 * 60 * 1000);
-      await jest.runOnlyPendingTimers();
+      await jest.advanceTimersByTimeAsync(5 * 60 * 1000);
 
       expect(mockApiRequest).toHaveBeenCalledWith(
         {
@@ -173,9 +172,11 @@ describe('CrowdstrikeSessionManager', () => {
         mockConnectorUsageCollector
       );
 
+      // Reuse the session so its 10-minute idle close does not race the second refresh
+      await sessionManager.initializeSession(payload, mockConnectorUsageCollector);
+
       // Advance time for second refresh
-      jest.advanceTimersByTime(5 * 60 * 1000);
-      await jest.runOnlyPendingTimers();
+      await jest.advanceTimersByTimeAsync(5 * 60 * 1000);
 
       expect(mockApiRequest).toHaveBeenCalledTimes(2);
     });

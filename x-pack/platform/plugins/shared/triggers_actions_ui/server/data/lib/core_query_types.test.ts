@@ -54,59 +54,68 @@ export function runTests(schema: ObjectType, defaultTypeParams: Record<string, u
 
     it('fails for invalid index', async () => {
       delete params.index;
-      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[index]: expected at least one defined value but got [undefined]"`
-      );
+      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`
+        "[index]: expected at least one defined value but got [undefined]
+        Cause: expected at least one defined value but got [undefined]"
+      `);
 
       params.index = 42;
       expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`
-"[index]: types that failed validation:
-- [index.0]: expected value of type [string] but got [number]
-- [index.1]: expected value of type [array] but got [number]"
-`);
+        "[index]: types that failed validation:
+        - [index.0]: expected value of type [string] but got [number]
+        - [index.1]: expected value of type [array] but got [number]
+        Cause: types that failed validation:"
+      `);
 
       params.index = '';
       expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`
-"[index]: types that failed validation:
-- [index.0]: value has length [0] but it must have a minimum length of [1].
-- [index.1]: could not parse array value from json input"
-`);
+        "[index]: types that failed validation:
+        - [index.0]: value has length [0] but it must have a minimum length of [1].
+        - [index.1]: could not parse array value from json input
+        Cause: types that failed validation:"
+      `);
 
       params.index = ['', 'a'];
       expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`
-"[index]: types that failed validation:
-- [index.0]: expected value of type [string] but got [Array]
-- [index.1.0]: value has length [0] but it must have a minimum length of [1]."
-`);
+        "[index]: types that failed validation:
+        - [index.0]: expected value of type [string] but got [Array]
+        - [index.1.0]: value has length [0] but it must have a minimum length of [1].
+        Cause: types that failed validation:"
+      `);
     });
 
     it('fails for invalid timeField', async () => {
       delete params.timeField;
-      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[timeField]: expected value of type [string] but got [undefined]"`
-      );
+      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`
+        "[timeField]: expected value of type [string] but got [undefined]
+        Cause: expected value of type [string] but got [undefined]"
+      `);
 
       params.timeField = 42;
-      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[timeField]: expected value of type [string] but got [number]"`
-      );
+      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`
+        "[timeField]: expected value of type [string] but got [number]
+        Cause: expected value of type [string] but got [number]"
+      `);
 
       params.timeField = '';
-      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[timeField]: value has length [0] but it must have a minimum length of [1]."`
-      );
+      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`
+        "[timeField]: value has length [0] but it must have a minimum length of [1].
+        Cause: value has length [0] but it must have a minimum length of [1]."
+      `);
     });
 
     it('fails for invalid aggType', async () => {
       params.aggType = 42;
-      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[aggType]: expected value of type [string] but got [number]"`
-      );
+      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`
+        "[aggType]: expected value of type [string] but got [number]
+        Cause: expected value of type [string] but got [number]"
+      `);
 
       params.aggType = '-not-a-valid-aggType-';
-      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[aggType]: invalid aggType: \\"-not-a-valid-aggType-\\""`
-      );
+      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`
+        "[aggType]: invalid aggType: \\"-not-a-valid-aggType-\\"
+        Cause: invalid aggType: \\"-not-a-valid-aggType-\\""
+      `);
     });
 
     it('uses default value "count" if aggType is undefined', async () => {
@@ -116,14 +125,16 @@ export function runTests(schema: ObjectType, defaultTypeParams: Record<string, u
 
     it('fails for invalid groupBy', async () => {
       params.groupBy = 42;
-      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[groupBy]: expected value of type [string] but got [number]"`
-      );
+      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`
+        "[groupBy]: expected value of type [string] but got [number]
+        Cause: expected value of type [string] but got [number]"
+      `);
 
       params.groupBy = '-not-a-valid-groupBy-';
-      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[groupBy]: invalid groupBy: \\"-not-a-valid-groupBy-\\""`
-      );
+      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`
+        "[groupBy]: invalid groupBy: \\"-not-a-valid-groupBy-\\"
+        Cause: invalid groupBy: \\"-not-a-valid-groupBy-\\""
+      `);
     });
 
     it('uses default value "all" if groupBy is undefined', async () => {
@@ -133,85 +144,98 @@ export function runTests(schema: ObjectType, defaultTypeParams: Record<string, u
 
     it('fails for invalid aggField', async () => {
       params.aggField = 42;
-      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[aggField]: expected value of type [string] but got [number]"`
-      );
+      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`
+        "[aggField]: expected value of type [string] but got [number]
+        Cause: expected value of type [string] but got [number]"
+      `);
 
       params.aggField = '';
-      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[aggField]: value has length [0] but it must have a minimum length of [1]."`
-      );
+      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`
+        "[aggField]: value has length [0] but it must have a minimum length of [1].
+        Cause: value has length [0] but it must have a minimum length of [1]."
+      `);
     });
 
     it('fails for invalid termField', async () => {
       params.groupBy = 'top';
       params.termField = 42;
-      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[termField]: expected value of type [string] but got [number]"`
-      );
+      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`
+        "[termField]: expected value of type [string] but got [number]
+        Cause: expected value of type [string] but got [number]"
+      `);
 
       params.termField = '';
-      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[termField]: value has length [0] but it must have a minimum length of [1]."`
-      );
+      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`
+        "[termField]: value has length [0] but it must have a minimum length of [1].
+        Cause: value has length [0] but it must have a minimum length of [1]."
+      `);
     });
 
     it('fails for invalid termSize', async () => {
       params.groupBy = 'top';
       params.termField = 'fee';
       params.termSize = 'foo';
-      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[termSize]: expected value of type [number] but got [string]"`
-      );
+      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`
+        "[termSize]: expected value of type [number] but got [string]
+        Cause: expected value of type [number] but got [string]"
+      `);
 
       params.termSize = MAX_GROUPS + 1;
-      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[termSize]: must be less than or equal to 1000"`
-      );
+      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`
+        "[termSize]: must be less than or equal to 1000
+        Cause: [termSize]: must be less than or equal to 1000"
+      `);
 
       params.termSize = 0;
-      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[termSize]: Value must be equal to or greater than [1]."`
-      );
+      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`
+        "[termSize]: Value must be equal to or greater than [1].
+        Cause: Value must be equal to or greater than [1]."
+      `);
     });
 
     it('fails for invalid timeWindowSize', async () => {
       params.timeWindowSize = 'foo';
-      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[timeWindowSize]: expected value of type [number] but got [string]"`
-      );
+      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`
+        "[timeWindowSize]: expected value of type [number] but got [string]
+        Cause: expected value of type [number] but got [string]"
+      `);
 
       params.timeWindowSize = 0;
-      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[timeWindowSize]: Value must be equal to or greater than [1]."`
-      );
+      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`
+        "[timeWindowSize]: Value must be equal to or greater than [1].
+        Cause: Value must be equal to or greater than [1]."
+      `);
     });
 
     it('fails for invalid timeWindowUnit', async () => {
       params.timeWindowUnit = 42;
-      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[timeWindowUnit]: expected value of type [string] but got [number]"`
-      );
+      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`
+        "[timeWindowUnit]: expected value of type [string] but got [number]
+        Cause: expected value of type [string] but got [number]"
+      `);
 
       params.timeWindowUnit = 'x';
-      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[timeWindowUnit]: invalid timeWindowUnit: \\"x\\""`
-      );
+      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`
+        "[timeWindowUnit]: invalid timeWindowUnit: \\"x\\"
+        Cause: invalid timeWindowUnit: \\"x\\""
+      `);
     });
 
     it('fails for invalid aggType/aggField', async () => {
       params.aggType = 'avg';
       delete params.aggField;
-      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[aggField]: must have a value when [aggType] is \\"avg\\""`
-      );
+      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`
+        "[aggField]: must have a value when [aggType] is \\"avg\\"
+        Cause: [aggField]: must have a value when [aggType] is \\"avg\\""
+      `);
     });
 
     it('fails for invalid filterKuery', async () => {
       params.filterKuery = 'event:';
-      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        '"[filterKuery]: Filter query is invalid."'
-      );
+      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`
+        "[filterKuery]: Filter query is invalid.
+        Cause: Filter query is invalid."
+      `);
     });
   });
 

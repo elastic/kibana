@@ -52,37 +52,44 @@ test('throws validation error if provided with non-image data', () => {
   expect(() => PdfLogoSchema.validate('')).toThrowErrorMatchingInlineSnapshot(`
     "types that failed validation:
     - [0]: Sorry, that file will not work. Please try a different image file.
-    - [1]: expected value to equal [null]"
+    - [1]: expected value to equal [null]
+    Cause: types that failed validation:"
   `);
   expect(() => PdfLogoSchema.validate(true)).toThrowErrorMatchingInlineSnapshot(`
     "types that failed validation:
     - [0]: expected value of type [string] but got [boolean]
-    - [1]: expected value to equal [null]"
+    - [1]: expected value to equal [null]
+    Cause: types that failed validation:"
   `);
   expect(() => PdfLogoSchema.validate(false)).toThrowErrorMatchingInlineSnapshot(`
     "types that failed validation:
     - [0]: expected value of type [string] but got [boolean]
-    - [1]: expected value to equal [null]"
+    - [1]: expected value to equal [null]
+    Cause: types that failed validation:"
   `);
   expect(() => PdfLogoSchema.validate({})).toThrowErrorMatchingInlineSnapshot(`
     "types that failed validation:
     - [0]: expected value of type [string] but got [Object]
-    - [1]: expected value to equal [null]"
+    - [1]: expected value to equal [null]
+    Cause: types that failed validation:"
   `);
   expect(() => PdfLogoSchema.validate([])).toThrowErrorMatchingInlineSnapshot(`
     "types that failed validation:
     - [0]: expected value of type [string] but got [Array]
-    - [1]: expected value to equal [null]"
+    - [1]: expected value to equal [null]
+    Cause: types that failed validation:"
   `);
   expect(() => PdfLogoSchema.validate(0)).toThrowErrorMatchingInlineSnapshot(`
     "types that failed validation:
     - [0]: expected value of type [string] but got [number]
-    - [1]: expected value to equal [null]"
+    - [1]: expected value to equal [null]
+    Cause: types that failed validation:"
   `);
   expect(() => PdfLogoSchema.validate(0x00f)).toThrowErrorMatchingInlineSnapshot(`
     "types that failed validation:
     - [0]: expected value of type [string] but got [number]
-    - [1]: expected value to equal [null]"
+    - [1]: expected value to equal [null]
+    Cause: types that failed validation:"
   `);
 
   const csvString =
@@ -91,7 +98,8 @@ test('throws validation error if provided with non-image data', () => {
   expect(() => PdfLogoSchema.validate(csvString)).toThrowErrorMatchingInlineSnapshot(`
     "types that failed validation:
     - [0]: Sorry, that file will not work. Please try a different image file.
-    - [1]: expected value to equal [null]"
+    - [1]: expected value to equal [null]
+    Cause: types that failed validation:"
   `);
 
   const scriptString =
@@ -100,6 +108,7 @@ test('throws validation error if provided with non-image data', () => {
   expect(() => PdfLogoSchema.validate(scriptString)).toThrowErrorMatchingInlineSnapshot(`
     "types that failed validation:
     - [0]: Sorry, that file will not work. Please try a different image file.
-    - [1]: expected value to equal [null]"
+    - [1]: expected value to equal [null]
+    Cause: types that failed validation:"
   `);
 });

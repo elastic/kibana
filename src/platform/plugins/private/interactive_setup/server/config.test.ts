@@ -34,11 +34,11 @@ describe('config schema', () => {
     });
 
     it('should throw error if interactiveSetup.connectionCheck.interval is less than 1 second', () => {
-      expect(() =>
-        ConfigSchema.validate({ connectionCheck: { interval: 100 } })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[connectionCheck.interval]: the value must be greater or equal to 1 second."`
-      );
+      expect(() => ConfigSchema.validate({ connectionCheck: { interval: 100 } }))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[connectionCheck.interval]: the value must be greater or equal to 1 second.
+        Cause: the value must be greater or equal to 1 second."
+      `);
     });
   });
 });

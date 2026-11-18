@@ -171,11 +171,11 @@ describe('FeatureRegistry', () => {
         } as any;
 
         const featureRegistry = new FeatureRegistry();
-        expect(() =>
-          featureRegistry.registerKibanaFeature(feature)
-        ).toThrowErrorMatchingInlineSnapshot(
-          `"[category.id]: expected value of type [string] but got [undefined]"`
-        );
+        expect(() => featureRegistry.registerKibanaFeature(feature))
+          .toThrowErrorMatchingInlineSnapshot(`
+          "[category.id]: expected value of type [string] but got [undefined]
+          Cause: expected value of type [string] but got [undefined]"
+        `);
       });
 
       it('must have an id', () => {
@@ -188,11 +188,11 @@ describe('FeatureRegistry', () => {
         } as any;
 
         const featureRegistry = new FeatureRegistry();
-        expect(() =>
-          featureRegistry.registerKibanaFeature(feature)
-        ).toThrowErrorMatchingInlineSnapshot(
-          `"[category.id]: expected value of type [string] but got [undefined]"`
-        );
+        expect(() => featureRegistry.registerKibanaFeature(feature))
+          .toThrowErrorMatchingInlineSnapshot(`
+          "[category.id]: expected value of type [string] but got [undefined]
+          Cause: expected value of type [string] but got [undefined]"
+        `);
       });
 
       it('must have a label', () => {
@@ -205,11 +205,11 @@ describe('FeatureRegistry', () => {
         } as any;
 
         const featureRegistry = new FeatureRegistry();
-        expect(() =>
-          featureRegistry.registerKibanaFeature(feature)
-        ).toThrowErrorMatchingInlineSnapshot(
-          `"[category.label]: expected value of type [string] but got [undefined]"`
-        );
+        expect(() => featureRegistry.registerKibanaFeature(feature))
+          .toThrowErrorMatchingInlineSnapshot(`
+          "[category.label]: expected value of type [string] but got [undefined]
+          Cause: expected value of type [string] but got [undefined]"
+        `);
       });
     });
 
@@ -222,11 +222,11 @@ describe('FeatureRegistry', () => {
       } as any;
 
       const featureRegistry = new FeatureRegistry();
-      expect(() =>
-        featureRegistry.registerKibanaFeature(feature)
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[privileges]: expected at least one defined value but got [undefined]"`
-      );
+      expect(() => featureRegistry.registerKibanaFeature(feature))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[privileges]: expected at least one defined value but got [undefined]
+        Cause: expected at least one defined value but got [undefined]"
+      `);
     });
 
     it(`does not allow sub-features to be registered when no primary privileges are not registered`, () => {
@@ -261,11 +261,11 @@ describe('FeatureRegistry', () => {
       };
 
       const featureRegistry = new FeatureRegistry();
-      expect(() =>
-        featureRegistry.registerKibanaFeature(feature)
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[subFeatures]: array size is [1], but cannot be greater than [0]"`
-      );
+      expect(() => featureRegistry.registerKibanaFeature(feature))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[subFeatures]: array size is [1], but cannot be greater than [0]
+        Cause: array size is [1], but cannot be greater than [0]"
+      `);
     });
 
     it(`automatically grants 'all' access to telemetry saved objects for the 'all' privilege`, () => {
@@ -558,7 +558,8 @@ describe('FeatureRegistry', () => {
         .toThrowErrorMatchingInlineSnapshot(`
         "[privileges]: types that failed validation:
         - [privileges.0]: expected value to equal [null]
-        - [privileges.1.foo]: Additional properties are not allowed ('foo' was unexpected)"
+        - [privileges.1.foo]: Additional properties are not allowed ('foo' was unexpected)
+        Cause: types that failed validation:"
       `);
     });
 
@@ -981,15 +982,13 @@ describe('FeatureRegistry', () => {
         } as unknown as KibanaFeatureConfig;
 
         const featureRegistry = new FeatureRegistry();
-        expect(() =>
-          featureRegistry.registerKibanaFeature(feature)
-        ).toThrowErrorMatchingInlineSnapshot(
-          `
+        expect(() => featureRegistry.registerKibanaFeature(feature))
+          .toThrowErrorMatchingInlineSnapshot(`
           "[privileges]: types that failed validation:
           - [privileges.0]: expected value to equal [null]
-          - [privileges.1.all.aiIndex.read]: could not parse array value from json input"
-        `
-        );
+          - [privileges.1.all.aiIndex.read]: could not parse array value from json input
+          Cause: types that failed validation:"
+        `);
       });
     });
 
@@ -1468,11 +1467,11 @@ describe('FeatureRegistry', () => {
 
         const featureRegistry = new FeatureRegistry();
 
-        expect(() =>
-          featureRegistry.registerKibanaFeature(feature)
-        ).toThrowErrorMatchingInlineSnapshot(
-          `"[alerting.0.consumers]: array size is [0], but cannot be smaller than [1]"`
-        );
+        expect(() => featureRegistry.registerKibanaFeature(feature))
+          .toThrowErrorMatchingInlineSnapshot(`
+          "[alerting.0.consumers]: array size is [0], but cannot be smaller than [1]
+          Cause: array size is [0], but cannot be smaller than [1]"
+        `);
       });
 
       it(`prevents privileges from specifying consumers entries that don't exist at the root level`, () => {
@@ -2125,11 +2124,11 @@ describe('FeatureRegistry', () => {
       };
 
       const featureRegistry = new FeatureRegistry();
-      expect(() =>
-        featureRegistry.registerKibanaFeature(feature)
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[reserved.privileges.0.id]: Does not satisfy regexp /^(?!reserved_)[a-zA-Z0-9_-]+$/"`
-      );
+      expect(() => featureRegistry.registerKibanaFeature(feature))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[reserved.privileges.0.id]: Does not satisfy regexp /^(?!reserved_)[a-zA-Z0-9_-]+$/
+        Cause: Does not satisfy regexp /^(?!reserved_)[a-zA-Z0-9_-]+$/"
+      `);
     });
 
     it('allows reserved features to be hidden', () => {
@@ -2355,7 +2354,8 @@ describe('FeatureRegistry', () => {
       }).toThrowErrorMatchingInlineSnapshot(`
         "[subFeatures.0.privilegeGroups.0]: types that failed validation:
         - [subFeatures.0.privilegeGroups.0.0.privileges.0.minimumLicense]: a value wasn't expected to be present
-        - [subFeatures.0.privilegeGroups.0.1.groupType]: expected value to equal [independent]"
+        - [subFeatures.0.privilegeGroups.0.1.groupType]: expected value to equal [independent]
+        Cause: types that failed validation:"
       `);
     });
 
@@ -3677,11 +3677,11 @@ describe('FeatureRegistry', () => {
         id: 'test-feature',
       } as any;
       const featureRegistry = new FeatureRegistry();
-      expect(() =>
-        featureRegistry.registerElasticsearchFeature(feature)
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[privileges]: expected value of type [array] but got [undefined]"`
-      );
+      expect(() => featureRegistry.registerElasticsearchFeature(feature))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[privileges]: expected value of type [array] but got [undefined]
+        Cause: expected value of type [array] but got [undefined]"
+      `);
     });
 
     it('requires privileges to declare some form of required es privileges', () => {

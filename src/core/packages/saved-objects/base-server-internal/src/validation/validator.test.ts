@@ -63,18 +63,20 @@ describe('Saved Objects type validator', () => {
 
     it('should throw an error when given invalid values', () => {
       const data = createMockObject({ attributes: { foo: false } });
-      expect(() => validator.validate(data)).toThrowErrorMatchingInlineSnapshot(
-        `"[attributes.foo]: expected value of type [string] but got [boolean]"`
-      );
+      expect(() => validator.validate(data)).toThrowErrorMatchingInlineSnapshot(`
+        "[attributes.foo]: expected value of type [string] but got [boolean]
+        Cause: expected value of type [string] but got [boolean]"
+      `);
     });
 
     it('should throw an error if fields other than attributes are malformed', () => {
       const data = createMockObject({ attributes: { foo: 'hi' } });
       // @ts-expect-error Intentionally malformed object
       data.updated_at = false;
-      expect(() => validator.validate(data)).toThrowErrorMatchingInlineSnapshot(
-        `"[updated_at]: expected value of type [string] but got [boolean]"`
-      );
+      expect(() => validator.validate(data)).toThrowErrorMatchingInlineSnapshot(`
+        "[updated_at]: expected value of type [string] but got [boolean]
+        Cause: expected value of type [string] but got [boolean]"
+      `);
     });
 
     it('works when the validation map is a function', () => {
@@ -98,9 +100,10 @@ describe('Saved Objects type validator', () => {
         defaultVersion,
       });
       const data = createMockObject({ attributes: undefined });
-      expect(() => validator.validate(data)).toThrowErrorMatchingInlineSnapshot(
-        `"[attributes]: expected value of type [object] but got [undefined]"`
-      );
+      expect(() => validator.validate(data)).toThrowErrorMatchingInlineSnapshot(`
+        "[attributes]: expected value of type [object] but got [undefined]
+        Cause: expected value of type [object] but got [undefined]"
+      `);
     });
 
     it('validates top level properties for types without defined schemas', () => {
@@ -113,9 +116,10 @@ describe('Saved Objects type validator', () => {
       const data = createMockObject({ attributes: { foo: 'bar' } });
       // @ts-expect-error Intentionally malformed object
       data.updated_at = false;
-      expect(() => validator.validate(data)).toThrowErrorMatchingInlineSnapshot(
-        `"[updated_at]: expected value of type [string] but got [boolean]"`
-      );
+      expect(() => validator.validate(data)).toThrowErrorMatchingInlineSnapshot(`
+        "[updated_at]: expected value of type [string] but got [boolean]
+        Cause: expected value of type [string] but got [boolean]"
+      `);
     });
   });
 

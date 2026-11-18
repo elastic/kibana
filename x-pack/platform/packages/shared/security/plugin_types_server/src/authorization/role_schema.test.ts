@@ -34,11 +34,11 @@ describe('getKibanaRoleSchema', () => {
         base: ['all'],
       }));
 
-      expect(() =>
-        getKibanaRoleSchema(() => basePrivilegeNamesMap).validate(kibana)
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"array size is [1001], but cannot be greater than [1000]"`
-      );
+      expect(() => getKibanaRoleSchema(() => basePrivilegeNamesMap).validate(kibana))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "array size is [1001], but cannot be greater than [1000]
+        Cause: array size is [1001], but cannot be greater than [1000]"
+      `);
     });
 
     test('allows up to 1000 Kibana privilege entries', () => {
@@ -58,9 +58,10 @@ describe('getKibanaRoleSchema', () => {
           { feature: { foo: ['foo-privilege-1'] }, spaces: ['marketing'] },
           { feature: { bar: ['bar-privilege-1'] }, spaces: ['sales', 'marketing'] },
         ])
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"more than one privilege is applied to the following spaces: [marketing]"`
-      );
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "more than one privilege is applied to the following spaces: [marketing]
+        Cause: more than one privilege is applied to the following spaces: [marketing]"
+      `);
     });
 
     test('reports the first duplicate when two entries share multiple spaces', () => {
@@ -69,9 +70,10 @@ describe('getKibanaRoleSchema', () => {
           { base: ['all'], spaces: ['alpha', 'beta'] },
           { base: ['read'], spaces: ['alpha', 'beta'] },
         ])
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"more than one privilege is applied to the following spaces: [alpha]"`
-      );
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "more than one privilege is applied to the following spaces: [alpha]
+        Cause: more than one privilege is applied to the following spaces: [alpha]"
+      `);
     });
 
     test('rejects duplicate space IDs within a single entry', () => {
@@ -79,9 +81,10 @@ describe('getKibanaRoleSchema', () => {
         getKibanaRoleSchema(() => basePrivilegeNamesMap).validate([
           { base: ['all'], spaces: ['marketing', 'marketing'] },
         ])
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"more than one privilege is applied to the following spaces: [marketing]"`
-      );
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "more than one privilege is applied to the following spaces: [marketing]
+        Cause: more than one privilege is applied to the following spaces: [marketing]"
+      `);
     });
 
     test('allows disjoint spaces across entries', () => {

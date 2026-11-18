@@ -123,11 +123,12 @@ describe('Version Compatibility', () => {
   });
 
   it('should not allow the option when not in dev mode', async () => {
-    await expect(
-      startServers({ customKibanaVersion: 'nextMinor', ignoreVersionMismatch: true })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"[config validation of [elasticsearch].ignoreVersionMismatch]: \\"ignoreVersionMismatch\\" can only be set to true in development mode"`
-    );
+    await expect(startServers({ customKibanaVersion: 'nextMinor', ignoreVersionMismatch: true }))
+      .rejects.toThrowErrorMatchingInlineSnapshot(`
+      "[config validation of [elasticsearch].ignoreVersionMismatch]: \\"ignoreVersionMismatch\\" can only be set to true in development mode
+      Cause: [config validation of [elasticsearch].ignoreVersionMismatch]: \\"ignoreVersionMismatch\\" can only be set to true in development mode
+      Cause: \\"ignoreVersionMismatch\\" can only be set to true in development mode"
+    `);
   });
 
   if (getFips() === 0) {

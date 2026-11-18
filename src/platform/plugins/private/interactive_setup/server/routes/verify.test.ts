@@ -51,9 +51,10 @@ describe('Configure routes', () => {
       );
 
       const bodySchema = (routeConfig.validate as any).body as ObjectType;
-      expect(() => bodySchema.validate({})).toThrowErrorMatchingInlineSnapshot(
-        `"[code]: expected value of type [string] but got [undefined]"`
-      );
+      expect(() => bodySchema.validate({})).toThrowErrorMatchingInlineSnapshot(`
+        "[code]: expected value of type [string] but got [undefined]
+        Cause: expected value of type [string] but got [undefined]"
+      `);
       expect(bodySchema.validate({ code: '123456' })).toMatchInlineSnapshot(`
         Object {
           "code": "123456",

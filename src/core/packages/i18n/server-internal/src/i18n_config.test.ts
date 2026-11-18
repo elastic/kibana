@@ -62,9 +62,10 @@ describe('i18n config', () => {
           locales: ['en', 'fr-FR'],
           defaultLocale: 'ja-JP',
         })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[i18n.defaultLocale]: \\"ja-JP\\" must be one of [i18n.locales] (en, fr-FR)"`
-      );
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[i18n.defaultLocale]: \\"ja-JP\\" must be one of [i18n.locales] (en, fr-FR)
+        Cause: [i18n.defaultLocale]: \\"ja-JP\\" must be one of [i18n.locales] (en, fr-FR)"
+      `);
     });
 
     it('skips the defaultLocale-must-be-in-locales check when locales is empty (picker disabled)', () => {
@@ -91,11 +92,11 @@ describe('i18n config', () => {
       expect(validated.defaultLocale).toEqual('en');
 
       const tooManyLocales = [...validLocales, 'ar-AR'];
-      expect(() =>
-        config.schema.validate({ locales: tooManyLocales, defaultLocale: 'en' })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[locales]: array size is [11], but cannot be greater than [10]"`
-      );
+      expect(() => config.schema.validate({ locales: tooManyLocales, defaultLocale: 'en' }))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[locales]: array size is [11], but cannot be greater than [10]
+        Cause: array size is [11], but cannot be greater than [10]"
+      `);
     });
 
     it('defaults allowLocaleCookie to true', () => {

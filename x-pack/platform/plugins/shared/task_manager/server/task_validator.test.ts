@@ -130,11 +130,11 @@ describe('TaskValidator', () => {
         allowReadingInvalidState: false,
       });
       const task = taskManagerMock.createTask({ stateVersion: 1, state: { foo: true } });
-      expect(() =>
-        taskValidator.getValidatedTaskInstanceFromReading(task)
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[foo]: expected value of type [string] but got [boolean]"`
-      );
+      expect(() => taskValidator.getValidatedTaskInstanceFromReading(task))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[foo]: expected value of type [string] but got [boolean]
+        Cause: expected value of type [string] but got [boolean]"
+      `);
     });
 
     it(`should return original state when the state is invalid and allowReadingInvalidState is true`, () => {
@@ -432,11 +432,11 @@ describe('TaskValidator', () => {
         allowReadingInvalidState: false,
       });
       const task = taskManagerMock.createTask({ state: { foo: 'foo', bar: 'bar' } });
-      expect(() =>
-        taskValidator.getValidatedTaskInstanceForUpdating(task)
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[bar]: Additional properties are not allowed ('bar' was unexpected)"`
-      );
+      expect(() => taskValidator.getValidatedTaskInstanceForUpdating(task))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[bar]: Additional properties are not allowed ('bar' was unexpected)
+        Cause: Additional properties are not allowed ('bar' was unexpected)"
+      `);
     });
   });
 

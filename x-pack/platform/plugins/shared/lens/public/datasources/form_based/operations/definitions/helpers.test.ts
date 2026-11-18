@@ -64,7 +64,6 @@ describe('helpers', () => {
                     <strong>
                       NoBytes
                     </strong>
-                    
                   </React.Fragment>
                 </React.Fragment>,
               }
@@ -135,7 +134,6 @@ describe('helpers', () => {
                     <strong>
                       NoBytes
                     </strong>
-                    
                   </React.Fragment>
                 </React.Fragment>,
               }
@@ -193,7 +191,6 @@ describe('helpers', () => {
                     <strong>
                       NoBytes
                     </strong>
-                    
                   </React.Fragment>
                 </React.Fragment>,
               }

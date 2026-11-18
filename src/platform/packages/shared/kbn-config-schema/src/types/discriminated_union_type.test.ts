@@ -50,25 +50,26 @@ describe('DiscriminatedUnionType', () => {
 
   describe('error validation', () => {
     it('should handle missing discriminator', () => {
-      expect(() => exampleType.validate({})).toThrowErrorMatchingInlineSnapshot(
-        `"\\"type\\" property is required"`
-      );
+      expect(() => exampleType.validate({})).toThrowErrorMatchingInlineSnapshot(`
+        "\\"type\\" property is required
+        Cause: \\"type\\" property is required"
+      `);
     });
 
     it('should handle invalid discriminator type', () => {
-      expect(() =>
-        exampleType.validate({ type: 1, string: 'foo' })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"expected \\"type\\" to be a string of [\\"str\\", \\"num\\", \\"bool\\"] but got [number]"`
-      );
+      expect(() => exampleType.validate({ type: 1, string: 'foo' }))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "expected \\"type\\" to be a string of [\\"str\\", \\"num\\", \\"bool\\"] but got [number]
+        Cause: expected \\"type\\" to be a string of [\\"str\\", \\"num\\", \\"bool\\"] but got [number]"
+      `);
     });
 
     it('should handle invalid discriminator value', () => {
-      expect(() =>
-        exampleType.validate({ type: 'invalid', string: 'foo' })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"expected \\"type\\" to be one of [\\"str\\", \\"num\\", \\"bool\\"] but got [\\"invalid\\"]"`
-      );
+      expect(() => exampleType.validate({ type: 'invalid', string: 'foo' }))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "expected \\"type\\" to be one of [\\"str\\", \\"num\\", \\"bool\\"] but got [\\"invalid\\"]
+        Cause: expected \\"type\\" to be one of [\\"str\\", \\"num\\", \\"bool\\"] but got [\\"invalid\\"]"
+      `);
     });
 
     it('should handle nested errors', () => {
@@ -76,19 +77,19 @@ describe('DiscriminatedUnionType', () => {
         test: schema.string(),
         nested: exampleType,
       });
-      expect(() =>
-        type.validate({ test: 'test', nested: { type: 'invalid', string: 'foo' } })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[nested]: expected \\"type\\" to be one of [\\"str\\", \\"num\\", \\"bool\\"] but got [\\"invalid\\"]"`
-      );
+      expect(() => type.validate({ test: 'test', nested: { type: 'invalid', string: 'foo' } }))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[nested]: expected \\"type\\" to be one of [\\"str\\", \\"num\\", \\"bool\\"] but got [\\"invalid\\"]
+        Cause: expected \\"type\\" to be one of [\\"str\\", \\"num\\", \\"bool\\"] but got [\\"invalid\\"]"
+      `);
     });
 
     it('should handle validation only based on discriminator type schema', () => {
-      expect(() =>
-        exampleType.validate({ type: 'str', string: 123 })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[string]: expected value of type [string] but got [number]"`
-      );
+      expect(() => exampleType.validate({ type: 'str', string: 123 }))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[string]: expected value of type [string] but got [number]
+        Cause: expected value of type [string] but got [number]"
+      `);
     });
   });
 
@@ -156,9 +157,10 @@ describe('DiscriminatedUnionType', () => {
 
       expect(() => {
         catchAllType.validate(input);
-      }).toThrowErrorMatchingInlineSnapshot(
-        `"[type]: expected value of type [string] but got [number]"`
-      );
+      }).toThrowErrorMatchingInlineSnapshot(`
+        "[type]: expected value of type [string] but got [number]
+        Cause: expected value of type [string] but got [number]"
+      `);
     });
   });
 
@@ -178,11 +180,11 @@ describe('DiscriminatedUnionType', () => {
     it('objects with unknown attributes fail validation when extending with unknowns=forbid', () => {
       const forbidSchema = exampleType.extendsDeep({ unknowns: 'forbid' });
       const input = { type: 'str', string: 'test' };
-      expect(() =>
-        forbidSchema.validate({ ...input, unknown: 'thing' })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[unknown]: Additional properties are not allowed ('unknown' was unexpected)"`
-      );
+      expect(() => forbidSchema.validate({ ...input, unknown: 'thing' }))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[unknown]: Additional properties are not allowed ('unknown' was unexpected)
+        Cause: Additional properties are not allowed ('unknown' was unexpected)"
+      `);
     });
   });
 

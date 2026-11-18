@@ -29,9 +29,11 @@ describe('Helper: offeringBasedSchema()', () => {
     });
 
     test('it does not allow changing the flag when context claims "not in serverless"', () => {
-      expect(() =>
-        validation.validate({ myProp: true }, { serverless: false })
-      ).toThrowErrorMatchingInlineSnapshot(`"[myProp]: a value wasn't expected to be present"`);
+      expect(() => validation.validate({ myProp: true }, { serverless: false }))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[myProp]: a value wasn't expected to be present
+        Cause: a value wasn't expected to be present"
+      `);
     });
 
     test('it allows changing the flag when context claims "in serverless"', () => {
@@ -65,9 +67,11 @@ describe('Helper: offeringBasedSchema()', () => {
     });
 
     test('it does not allow changing the flag when context claims "in serverless"', () => {
-      expect(() =>
-        validation.validate({ myProp: true }, { serverless: true })
-      ).toThrowErrorMatchingInlineSnapshot(`"[myProp]: a value wasn't expected to be present"`);
+      expect(() => validation.validate({ myProp: true }, { serverless: true }))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[myProp]: a value wasn't expected to be present
+        Cause: a value wasn't expected to be present"
+      `);
     });
   });
 
@@ -92,9 +96,11 @@ describe('Helper: offeringBasedSchema()', () => {
     });
 
     test('it does not allow changing the flag when context claims "not in serverless"', () => {
-      expect(() =>
-        validation.validate({ myProp: true }, { serverless: false })
-      ).toThrowErrorMatchingInlineSnapshot(`"[myProp]: a value wasn't expected to be present"`);
+      expect(() => validation.validate({ myProp: true }, { serverless: false }))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[myProp]: a value wasn't expected to be present
+        Cause: a value wasn't expected to be present"
+      `);
     });
 
     test('it allows changing the flag when context claims "in serverless"', () => {
@@ -126,9 +132,11 @@ describe('Helper: offeringBasedSchema()', () => {
     });
 
     test('it does not allow changing the flag when context claims "not in serverless"', () => {
-      expect(() =>
-        validation.validate({ myProp: true }, { serverless: false })
-      ).toThrowErrorMatchingInlineSnapshot(`"[myProp]: expected value to equal [false]"`);
+      expect(() => validation.validate({ myProp: true }, { serverless: false }))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[myProp]: expected value to equal [false]
+        Cause: expected value to equal [false]"
+      `);
     });
 
     test('it allows changing the flag when context claims "in serverless"', () => {
@@ -166,9 +174,11 @@ describe('Helper: offeringBasedSchema()', () => {
     });
 
     test('it does not allow changing the flag when context claims "in serverless"', () => {
-      expect(() =>
-        validation.validate({ myProp: true }, { serverless: true })
-      ).toThrowErrorMatchingInlineSnapshot(`"[myProp]: expected value to equal [false]"`);
+      expect(() => validation.validate({ myProp: true }, { serverless: true }))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[myProp]: expected value to equal [false]
+        Cause: expected value to equal [false]"
+      `);
     });
   });
 

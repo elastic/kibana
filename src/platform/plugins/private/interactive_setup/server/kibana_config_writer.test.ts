@@ -8,7 +8,8 @@
  */
 
 jest.mock('fs/promises');
-jest.mock('crypto');
+// Jest 30 applies this mock to `node:crypto` too, which undici needs intact.
+jest.mock('crypto', () => ({ ...jest.requireActual('crypto') }));
 import { constants } from 'fs';
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';

@@ -1098,7 +1098,6 @@ describe('last_value', () => {
                       <strong>
                         notExisting
                       </strong>
-                      
                     </React.Fragment>
                   </React.Fragment>,
                 }

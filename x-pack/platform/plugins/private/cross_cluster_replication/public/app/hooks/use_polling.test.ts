@@ -128,19 +128,20 @@ describe('usePolling', () => {
       expect(onPoll).toHaveBeenCalledTimes(2);
       expect(onTimeout).not.toHaveBeenCalled();
 
-      // Timeout at 3s (interval also fires at this time, so onPoll is called once more before stopping)
+      // Timeout at 3s. The interval's 3s tick was scheduled after the timeout, so the timeout fires
+      // first and stops polling before a third poll.
       act(() => {
         jest.advanceTimersByTime(1000);
       });
       expect(onTimeout).toHaveBeenCalledTimes(1);
       expect(result.current.isPolling).toBe(false);
-      expect(onPoll).toHaveBeenCalledTimes(3); // Third poll happens at the same time as timeout
+      expect(onPoll).toHaveBeenCalledTimes(2);
 
       // No more polling after timeout
       act(() => {
         jest.advanceTimersByTime(5000);
       });
-      expect(onPoll).toHaveBeenCalledTimes(3);
+      expect(onPoll).toHaveBeenCalledTimes(2);
     });
 
     it('should work without timeout callback', () => {
@@ -157,18 +158,18 @@ describe('usePolling', () => {
       });
       expect(onPoll).toHaveBeenCalledTimes(1);
 
-      // Timeout at 2s (interval also fires, so onPoll called once more)
+      // Timeout at 2s fires before the interval's 2s tick, which was scheduled later
       act(() => {
         jest.advanceTimersByTime(1000);
       });
       expect(result.current.isPolling).toBe(false);
-      expect(onPoll).toHaveBeenCalledTimes(2);
+      expect(onPoll).toHaveBeenCalledTimes(1);
 
       // No more polls
       act(() => {
         jest.advanceTimersByTime(5000);
       });
-      expect(onPoll).toHaveBeenCalledTimes(2);
+      expect(onPoll).toHaveBeenCalledTimes(1);
     });
 
     it('should not set timeout when timeoutMs is not provided', () => {

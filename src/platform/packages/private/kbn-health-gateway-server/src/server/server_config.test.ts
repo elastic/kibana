@@ -157,9 +157,10 @@ describe('server config', () => {
           redirectHttpFromPort: 1234,
         },
       };
-      expect(() => configSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"The health gateway does not accept http traffic to [port] when ssl is enabled (only https is allowed), so [ssl.redirectHttpFromPort] cannot be configured to the same value. Both are [1234]."`
-      );
+      expect(() => configSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(`
+        "The health gateway does not accept http traffic to [port] when ssl is enabled (only https is allowed), so [ssl.redirectHttpFromPort] cannot be configured to the same value. Both are [1234].
+        Cause: The health gateway does not accept http traffic to [port] when ssl is enabled (only https is allowed), so [ssl.redirectHttpFromPort] cannot be configured to the same value. Both are [1234]."
+      `);
     });
   });
 

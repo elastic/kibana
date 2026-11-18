@@ -115,11 +115,11 @@ describe('Spaces Public API', () => {
 
   it('requires a space id as part of the path', async () => {
     const { routeValidation } = await setup();
-    expect(() =>
-      (routeValidation.params as ObjectType).validate({})
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[id]: expected value of type [string] but got [undefined]"`
-    );
+    expect(() => (routeValidation.params as ObjectType).validate({}))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[id]: expected value of type [string] but got [undefined]
+      Cause: expected value of type [string] but got [undefined]"
+    `);
   });
 
   it(`deletes the space`, async () => {

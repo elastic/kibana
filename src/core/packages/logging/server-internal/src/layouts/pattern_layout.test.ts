@@ -314,23 +314,26 @@ describe('schema', () => {
       });
 
       it('fails on %date with unknown date format', () => {
-        expect(() => patternSchema.validate('%date{HH:MM:SS}')).toThrowErrorMatchingInlineSnapshot(
-          `"Date format expected one of ISO8601, ISO8601_TZ, ABSOLUTE, UNIX, UNIX_MILLIS, but given: HH:MM:SS"`
-        );
+        expect(() => patternSchema.validate('%date{HH:MM:SS}')).toThrowErrorMatchingInlineSnapshot(`
+          "Date format expected one of ISO8601, ISO8601_TZ, ABSOLUTE, UNIX, UNIX_MILLIS, but given: HH:MM:SS
+          Cause: Date format expected one of ISO8601, ISO8601_TZ, ABSOLUTE, UNIX, UNIX_MILLIS, but given: HH:MM:SS"
+        `);
       });
 
       it('fails on %date with predefined date format and invalid timezone', () => {
-        expect(() =>
-          patternSchema.validate('%date{ISO8601_TZ}{Europe/Kibana}')
-        ).toThrowErrorMatchingInlineSnapshot(`"Unknown timezone: Europe/Kibana"`);
+        expect(() => patternSchema.validate('%date{ISO8601_TZ}{Europe/Kibana}'))
+          .toThrowErrorMatchingInlineSnapshot(`
+          "Unknown timezone: Europe/Kibana
+          Cause: Unknown timezone: Europe/Kibana"
+        `);
       });
 
       it('validates several %date in pattern', () => {
-        expect(() =>
-          patternSchema.validate('%date{ISO8601_TZ}{Europe/Berlin}%message%date{HH}')
-        ).toThrowErrorMatchingInlineSnapshot(
-          `"Date format expected one of ISO8601, ISO8601_TZ, ABSOLUTE, UNIX, UNIX_MILLIS, but given: HH"`
-        );
+        expect(() => patternSchema.validate('%date{ISO8601_TZ}{Europe/Berlin}%message%date{HH}'))
+          .toThrowErrorMatchingInlineSnapshot(`
+          "Date format expected one of ISO8601, ISO8601_TZ, ABSOLUTE, UNIX, UNIX_MILLIS, but given: HH
+          Cause: Date format expected one of ISO8601, ISO8601_TZ, ABSOLUTE, UNIX, UNIX_MILLIS, but given: HH"
+        `);
       });
 
       it('fails on %date with schema too long', () => {
@@ -341,11 +344,11 @@ describe('schema', () => {
           }
           return longFormat.join('');
         };
-        expect(() =>
-          patternSchema.validate(`%date${generateLongFormat()}`)
-        ).toThrowErrorMatchingInlineSnapshot(
-          `"value has length [2898] but it must have a maximum length of [1000]."`
-        );
+        expect(() => patternSchema.validate(`%date${generateLongFormat()}`))
+          .toThrowErrorMatchingInlineSnapshot(`
+          "value has length [2898] but it must have a maximum length of [1000].
+          Cause: value has length [2898] but it must have a maximum length of [1000]."
+        `);
       });
     });
   });

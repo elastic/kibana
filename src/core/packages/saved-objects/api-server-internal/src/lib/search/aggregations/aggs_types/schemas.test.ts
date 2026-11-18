@@ -22,9 +22,10 @@ describe('bucket aggregation schemas', () => {
     // bypassing any filtering perform via `filter` or `query`
     // causing a potential security issue as we can return values from other spaces.
     it('throws an error when using `0` for `min_doc_count`', () => {
-      expect(() => schema.validate({ min_doc_count: 0 })).toThrowErrorMatchingInlineSnapshot(
-        `"[min_doc_count]: Value must be equal to or greater than [1]."`
-      );
+      expect(() => schema.validate({ min_doc_count: 0 })).toThrowErrorMatchingInlineSnapshot(`
+        "[min_doc_count]: Value must be equal to or greater than [1].
+        Cause: Value must be equal to or greater than [1]."
+      `);
     });
   });
 
@@ -36,9 +37,10 @@ describe('bucket aggregation schemas', () => {
     });
 
     it('throws an error when using `0` for `min_doc_count`', () => {
-      expect(() => schema.validate({ min_doc_count: 0 })).toThrowErrorMatchingInlineSnapshot(
-        `"[min_doc_count]: Value must be equal to or greater than [1]."`
-      );
+      expect(() => schema.validate({ min_doc_count: 0 })).toThrowErrorMatchingInlineSnapshot(`
+        "[min_doc_count]: Value must be equal to or greater than [1].
+        Cause: Value must be equal to or greater than [1]."
+      `);
     });
   });
 });

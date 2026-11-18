@@ -80,9 +80,10 @@ describe('SAML authentication routes', () => {
         bodyValidator.validate({ SAMLResponse: 'saml-response', RelayState: 'relay-state' })
       ).toEqual({ SAMLResponse: 'saml-response', RelayState: 'relay-state' });
 
-      expect(() => bodyValidator.validate({})).toThrowErrorMatchingInlineSnapshot(
-        `"[SAMLResponse]: expected value of type [string] but got [undefined]"`
-      );
+      expect(() => bodyValidator.validate({})).toThrowErrorMatchingInlineSnapshot(`
+        "[SAMLResponse]: expected value of type [string] but got [undefined]
+        Cause: expected value of type [string] but got [undefined]"
+      `);
 
       expect(bodyValidator.validate({ SAMLResponse: 'saml-response', UnknownArg: 'arg' })).toEqual({
         SAMLResponse: 'saml-response',

@@ -94,7 +94,7 @@ describe('buildStatusRuntimeField', () => {
 
     const runtimeField = _buildStatusRuntimeField({ inactivityTimeouts });
 
-    expect(runtimeField).not.toContain('policy-');
+    expect(JSON.stringify(runtimeField)).not.toContain('policy-');
     expect(runtimeField).toMatchInlineSnapshot(`
       Object {
         "status": Object {

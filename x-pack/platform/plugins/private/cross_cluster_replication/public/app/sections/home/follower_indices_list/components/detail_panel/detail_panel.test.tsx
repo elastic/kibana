@@ -619,8 +619,8 @@ describe('DetailPanel', () => {
         jest.advanceTimersByTime(POLL_TIMEOUT_MS);
       });
 
-      // Should have polled 5 times (at 1s, 2s, 3s, 4s, 5s)
-      expect(getFollowerIndex).toHaveBeenCalledTimes(5);
+      // Should have polled 4 times (at 1s, 2s, 3s, 4s); the 5s timeout fires before the 5s tick
+      expect(getFollowerIndex).toHaveBeenCalledTimes(4);
 
       // Should clear URL param
       expect(routing.navigate).toHaveBeenCalledWith('/follower_indices', {

@@ -113,14 +113,16 @@ describe('update_objects_spaces', () => {
       const payload1 = { objects, spacesToAdd: targetSpaces, spacesToRemove: [] };
       const payload2 = { objects, spacesToAdd: [], spacesToRemove: targetSpaces };
 
-      expect(() =>
-        (updateObjectsSpaces.routeValidation.body as ObjectType).validate(payload1)
-      ).toThrowErrorMatchingInlineSnapshot(`"[spacesToAdd]: duplicate space ids are not allowed"`);
-      expect(() =>
-        (updateObjectsSpaces.routeValidation.body as ObjectType).validate(payload2)
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[spacesToRemove]: duplicate space ids are not allowed"`
-      );
+      expect(() => (updateObjectsSpaces.routeValidation.body as ObjectType).validate(payload1))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[spacesToAdd]: duplicate space ids are not allowed
+        Cause: duplicate space ids are not allowed"
+      `);
+      expect(() => (updateObjectsSpaces.routeValidation.body as ObjectType).validate(payload2))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[spacesToRemove]: duplicate space ids are not allowed
+        Cause: duplicate space ids are not allowed"
+      `);
     });
 
     it(`requires well-formed space IDS`, async () => {
@@ -129,16 +131,16 @@ describe('update_objects_spaces', () => {
       const payload1 = { objects, spacesToAdd: targetSpaces, spacesToRemove: [] };
       const payload2 = { objects, spacesToAdd: [], spacesToRemove: targetSpaces };
 
-      expect(() =>
-        (updateObjectsSpaces.routeValidation.body as ObjectType).validate(payload1)
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[spacesToAdd.1]: lower case, a-z, 0-9, \\"_\\", and \\"-\\" are allowed, OR \\"*\\""`
-      );
-      expect(() =>
-        (updateObjectsSpaces.routeValidation.body as ObjectType).validate(payload2)
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[spacesToRemove.1]: lower case, a-z, 0-9, \\"_\\", and \\"-\\" are allowed, OR \\"*\\""`
-      );
+      expect(() => (updateObjectsSpaces.routeValidation.body as ObjectType).validate(payload1))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[spacesToAdd.1]: lower case, a-z, 0-9, \\"_\\", and \\"-\\" are allowed, OR \\"*\\"
+        Cause: lower case, a-z, 0-9, \\"_\\", and \\"-\\" are allowed, OR \\"*\\""
+      `);
+      expect(() => (updateObjectsSpaces.routeValidation.body as ObjectType).validate(payload2))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[spacesToRemove.1]: lower case, a-z, 0-9, \\"_\\", and \\"-\\" are allowed, OR \\"*\\"
+        Cause: lower case, a-z, 0-9, \\"_\\", and \\"-\\" are allowed, OR \\"*\\""
+      `);
     });
 
     it(`allows all spaces ("*")`, async () => {

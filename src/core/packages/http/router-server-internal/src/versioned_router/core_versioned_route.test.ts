@@ -1124,9 +1124,10 @@ describe('Versioned route', () => {
           },
         },
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[authz.requiredPrivileges]: array size is [0], but cannot be smaller than [1]"`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[authz.requiredPrivileges]: array size is [0], but cannot be smaller than [1]
+      Cause: array size is [0], but cannot be smaller than [1]"
+    `);
 
     const route = versionedRouter.get({
       path: '/test/{id}',
@@ -1150,7 +1151,8 @@ describe('Versioned route', () => {
     ).toThrowErrorMatchingInlineSnapshot(`
       "[authz.requiredPrivileges.0]: types that failed validation:
       - [authz.requiredPrivileges.0.0.anyRequired]: array size is [1], but cannot be smaller than [2]
-      - [authz.requiredPrivileges.0.1]: expected value of type [string] but got [Object]"
+      - [authz.requiredPrivileges.0.1]: expected value of type [string] but got [Object]
+      Cause: types that failed validation:"
     `);
   });
 

@@ -21,41 +21,53 @@ describe('ip validation', () => {
     );
   });
   test('rejects ipv6 when not specified', () => {
-    expect(() =>
-      ip({ versions: ['ipv4'] }).validate('1200:0000:AB00:1234:0000:2552:7777:1313')
-    ).toThrowErrorMatchingInlineSnapshot(`"value must be a valid ipv4 address"`);
+    expect(() => ip({ versions: ['ipv4'] }).validate('1200:0000:AB00:1234:0000:2552:7777:1313'))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "value must be a valid ipv4 address
+      Cause: value must be a valid ipv4 address"
+    `);
   });
   test('rejects ipv4 when not specified', () => {
-    expect(() => ip({ versions: ['ipv6'] }).validate('1.1.1.1')).toThrowErrorMatchingInlineSnapshot(
-      `"value must be a valid ipv6 address"`
-    );
+    expect(() => ip({ versions: ['ipv6'] }).validate('1.1.1.1'))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "value must be a valid ipv6 address
+      Cause: value must be a valid ipv6 address"
+    `);
   });
   test('rejects invalid ip addresses', () => {
-    expect(() => ip().validate('1.1.1.1/24')).toThrowErrorMatchingInlineSnapshot(
-      `"value must be a valid ipv4 or ipv6 address"`
-    );
-    expect(() => ip().validate('99999.1.1.1')).toThrowErrorMatchingInlineSnapshot(
-      `"value must be a valid ipv4 or ipv6 address"`
-    );
-    expect(() =>
-      ip().validate('ZZZZ:0000:AB00:1234:0000:2552:7777:1313')
-    ).toThrowErrorMatchingInlineSnapshot(`"value must be a valid ipv4 or ipv6 address"`);
-    expect(() => ip().validate('blah 1234')).toThrowErrorMatchingInlineSnapshot(
-      `"value must be a valid ipv4 or ipv6 address"`
-    );
+    expect(() => ip().validate('1.1.1.1/24')).toThrowErrorMatchingInlineSnapshot(`
+      "value must be a valid ipv4 or ipv6 address
+      Cause: value must be a valid ipv4 or ipv6 address"
+    `);
+    expect(() => ip().validate('99999.1.1.1')).toThrowErrorMatchingInlineSnapshot(`
+      "value must be a valid ipv4 or ipv6 address
+      Cause: value must be a valid ipv4 or ipv6 address"
+    `);
+    expect(() => ip().validate('ZZZZ:0000:AB00:1234:0000:2552:7777:1313'))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "value must be a valid ipv4 or ipv6 address
+      Cause: value must be a valid ipv4 or ipv6 address"
+    `);
+    expect(() => ip().validate('blah 1234')).toThrowErrorMatchingInlineSnapshot(`
+      "value must be a valid ipv4 or ipv6 address
+      Cause: value must be a valid ipv4 or ipv6 address"
+    `);
   });
 });
 
 test('returns error when not string', () => {
-  expect(() => ip().validate(123)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [string] but got [number]"`
-  );
+  expect(() => ip().validate(123)).toThrowErrorMatchingInlineSnapshot(`
+    "expected value of type [string] but got [number]
+    Cause: expected value of type [string] but got [number]"
+  `);
 
-  expect(() => ip().validate([1, 2, 3])).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [string] but got [Array]"`
-  );
+  expect(() => ip().validate([1, 2, 3])).toThrowErrorMatchingInlineSnapshot(`
+    "expected value of type [string] but got [Array]
+    Cause: expected value of type [string] but got [Array]"
+  `);
 
-  expect(() => ip().validate(/abc/)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [string] but got [RegExp]"`
-  );
+  expect(() => ip().validate(/abc/)).toThrowErrorMatchingInlineSnapshot(`
+    "expected value of type [string] but got [RegExp]
+    Cause: expected value of type [string] but got [RegExp]"
+  `);
 });

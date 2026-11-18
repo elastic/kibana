@@ -142,9 +142,10 @@ describe('get preconfigured axios instance', () => {
         secrets: { authType: 'none' },
       });
 
-      await expect(axiosInstance.get(url)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"self-signed certificate in certificate chain"`
-      );
+      await expect(axiosInstance.get(url)).rejects.toThrowErrorMatchingInlineSnapshot(`
+        "self-signed certificate in certificate chain
+        Cause: self-signed certificate in certificate chain"
+      `);
     });
 
     test('it works with verificationMode "none" config', async () => {
@@ -225,9 +226,10 @@ describe('get preconfigured axios instance', () => {
         connectorId: '1',
         secrets: { authType: 'none' },
       });
-      await expect(axiosInstance.get(url)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"self-signed certificate in certificate chain"`
-      );
+      await expect(axiosInstance.get(url)).rejects.toThrowErrorMatchingInlineSnapshot(`
+        "self-signed certificate in certificate chain
+        Cause: self-signed certificate in certificate chain"
+      `);
     });
 
     test('it works with incorrect ca in custom host config but verificationMode "none"', async () => {
@@ -305,9 +307,10 @@ describe('get preconfigured axios instance', () => {
         connectorId: '1',
         secrets: { authType: 'none' },
       });
-      await expect(axiosInstance.get(url)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"self-signed certificate in certificate chain"`
-      );
+      await expect(axiosInstance.get(url)).rejects.toThrowErrorMatchingInlineSnapshot(`
+        "self-signed certificate in certificate chain
+        Cause: self-signed certificate in certificate chain"
+      `);
     });
 
     test('it fails cleanly with a garbage CA 1', async () => {
@@ -326,9 +329,10 @@ describe('get preconfigured axios instance', () => {
         connectorId: '1',
         secrets: { authType: 'none' },
       });
-      await expect(axiosInstance.get(url)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"self-signed certificate in certificate chain"`
-      );
+      await expect(axiosInstance.get(url)).rejects.toThrowErrorMatchingInlineSnapshot(`
+        "self-signed certificate in certificate chain
+        Cause: self-signed certificate in certificate chain"
+      `);
     });
 
     test('it fails cleanly with a garbage CA 2', async () => {
@@ -348,9 +352,10 @@ describe('get preconfigured axios instance', () => {
         connectorId: '1',
         secrets: { authType: 'none' },
       });
-      await expect(axiosInstance.get(url)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"self-signed certificate in certificate chain"`
-      );
+      await expect(axiosInstance.get(url)).rejects.toThrowErrorMatchingInlineSnapshot(`
+        "self-signed certificate in certificate chain
+        Cause: self-signed certificate in certificate chain"
+      `);
     });
 
     test('it works with cert, key, and ca in SSL overrides', async () => {
@@ -397,9 +402,10 @@ describe('get preconfigured axios instance', () => {
         },
       });
 
-      await expect(axiosInstance.get(url)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"self-signed certificate in certificate chain"`
-      );
+      await expect(axiosInstance.get(url)).rejects.toThrowErrorMatchingInlineSnapshot(`
+        "self-signed certificate in certificate chain
+        Cause: self-signed certificate in certificate chain"
+      `);
     });
 
     if (getFips() !== 1) {
@@ -472,9 +478,10 @@ describe('get preconfigured axios instance', () => {
         },
       });
 
-      await expect(axiosInstance.get(url)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"self-signed certificate in certificate chain"`
-      );
+      await expect(axiosInstance.get(url)).rejects.toThrowErrorMatchingInlineSnapshot(`
+        "self-signed certificate in certificate chain
+        Cause: self-signed certificate in certificate chain"
+      `);
     });
 
     test('it fails when requesting a client-side cert and none is provided', async () => {
@@ -494,9 +501,10 @@ describe('get preconfigured axios instance', () => {
           authType: 'none',
         },
       });
-      await expect(axiosInstance.get(url)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"self-signed certificate in certificate chain"`
-      );
+      await expect(axiosInstance.get(url)).rejects.toThrowErrorMatchingInlineSnapshot(`
+        "self-signed certificate in certificate chain
+        Cause: self-signed certificate in certificate chain"
+      `);
     });
   });
 

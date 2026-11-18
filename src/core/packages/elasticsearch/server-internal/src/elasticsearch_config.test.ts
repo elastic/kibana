@@ -150,33 +150,40 @@ describe('#maxSockets', () => {
   test('throws if it does not contain a numeric value', () => {
     expect(() => {
       config.schema.validate({ maxSockets: 'foo' });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"[maxSockets]: expected value of type [number] but got [string]"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "[maxSockets]: expected value of type [number] but got [string]
+      Cause: expected value of type [number] but got [string]"
+    `);
 
     expect(() => {
       config.schema.validate({ maxSockets: true });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"[maxSockets]: expected value of type [number] but got [boolean]"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "[maxSockets]: expected value of type [number] but got [boolean]
+      Cause: expected value of type [number] but got [boolean]"
+    `);
   });
 
   test('throws if it does not contain a valid numeric value', () => {
     expect(() => {
       config.schema.validate({ maxSockets: -1 });
-    }).toThrowErrorMatchingInlineSnapshot(
-      '"[maxSockets]: Value must be equal to or greater than [1]."'
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "[maxSockets]: Value must be equal to or greater than [1].
+      Cause: Value must be equal to or greater than [1]."
+    `);
 
     expect(() => {
       config.schema.validate({ maxSockets: 0 });
-    }).toThrowErrorMatchingInlineSnapshot(
-      '"[maxSockets]: Value must be equal to or greater than [1]."'
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "[maxSockets]: Value must be equal to or greater than [1].
+      Cause: Value must be equal to or greater than [1]."
+    `);
 
     expect(() => {
       config.schema.validate({ maxSockets: Infinity });
-    }).toThrowErrorMatchingInlineSnapshot('"[maxSockets]: \\"maxSockets\\" cannot be infinity"');
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "[maxSockets]: \\"maxSockets\\" cannot be infinity
+      Cause: \\"maxSockets\\" cannot be infinity"
+    `);
   });
 });
 
@@ -219,9 +226,10 @@ describe('reserved headers', () => {
       config.schema.validate({
         customHeaders: { foo: 'bar', 'x-elastic-product-origin': 'beats' },
       });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"[customHeaders]: cannot use reserved headers: [x-elastic-product-origin]"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "[customHeaders]: cannot use reserved headers: [x-elastic-product-origin]
+      Cause: cannot use reserved headers: [x-elastic-product-origin]"
+    `);
   });
 
   test('throws if requestHeadersWhitelist contains reserved headers', () => {
@@ -230,14 +238,16 @@ describe('reserved headers', () => {
     }).toThrowErrorMatchingInlineSnapshot(`
       "[requestHeadersWhitelist]: types that failed validation:
       - [requestHeadersWhitelist.0]: expected value of type [string] but got [Array]
-      - [requestHeadersWhitelist.1]: cannot use reserved headers: [x-elastic-product-origin]"
+      - [requestHeadersWhitelist.1]: cannot use reserved headers: [x-elastic-product-origin]
+      Cause: types that failed validation:"
     `);
     expect(() => {
       config.schema.validate({ requestHeadersWhitelist: 'x-elastic-product-origin' });
     }).toThrowErrorMatchingInlineSnapshot(`
       "[requestHeadersWhitelist]: types that failed validation:
       - [requestHeadersWhitelist.0]: cannot use reserved headers: [x-elastic-product-origin]
-      - [requestHeadersWhitelist.1]: could not parse array value from json input"
+      - [requestHeadersWhitelist.1]: could not parse array value from json input
+      Cause: types that failed validation:"
     `);
   });
 });
@@ -419,16 +429,18 @@ describe('throws when config is invalid', () => {
 
   it('throws if key and keystore.path are both specified', () => {
     const value = { ssl: { key: 'foo', keystore: { path: 'bar' } } };
-    expect(() => config.schema.validate(value)).toThrowErrorMatchingInlineSnapshot(
-      `"[ssl]: cannot use [key] when [keystore.path] is specified"`
-    );
+    expect(() => config.schema.validate(value)).toThrowErrorMatchingInlineSnapshot(`
+      "[ssl]: cannot use [key] when [keystore.path] is specified
+      Cause: cannot use [key] when [keystore.path] is specified"
+    `);
   });
 
   it('throws if certificate and keystore.path are both specified', () => {
     const value = { ssl: { certificate: 'foo', keystore: { path: 'bar' } } };
-    expect(() => config.schema.validate(value)).toThrowErrorMatchingInlineSnapshot(
-      `"[ssl]: cannot use [certificate] when [keystore.path] is specified"`
-    );
+    expect(() => config.schema.validate(value)).toThrowErrorMatchingInlineSnapshot(`
+      "[ssl]: cannot use [certificate] when [keystore.path] is specified
+      Cause: cannot use [certificate] when [keystore.path] is specified"
+    `);
   });
 });
 
@@ -525,11 +537,11 @@ describe('healthCheck delays', () => {
   });
 
   it('explains the rejection', () => {
-    expect(() =>
-      config.schema.validate({ healthCheck: { delay: '30d' } })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[healthCheck.delay]: must be 2147483647ms (about 24.8 days) or less"`
-    );
+    expect(() => config.schema.validate({ healthCheck: { delay: '30d' } }))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[healthCheck.delay]: must be 2147483647ms (about 24.8 days) or less
+      Cause: must be 2147483647ms (about 24.8 days) or less"
+    `);
   });
 });
 
@@ -547,9 +559,10 @@ test('serviceAccountToken throws if username is also set', () => {
     serviceAccountToken: 'abc123',
   };
 
-  expect(() => config.schema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-    `"[serviceAccountToken]: serviceAccountToken cannot be specified when \\"username\\" is also set."`
-  );
+  expect(() => config.schema.validate(obj)).toThrowErrorMatchingInlineSnapshot(`
+    "[serviceAccountToken]: serviceAccountToken cannot be specified when \\"username\\" is also set.
+    Cause: serviceAccountToken cannot be specified when \\"username\\" is also set."
+  `);
 });
 
 test('serviceAccountToken does not throw if username is not set', () => {
@@ -584,8 +597,9 @@ describe('skipStartupConnectionCheck', () => {
       skipStartupConnectionCheck: true,
     };
     expect(() => config.schema.validate(obj, { dist: false })).not.toThrow();
-    expect(() => config.schema.validate(obj, { dist: true })).toThrowErrorMatchingInlineSnapshot(
-      `"[skipStartupConnectionCheck]: \\"skipStartupConnectionCheck\\" can only be set to true when running from source to allow integration tests to run without an ES server"`
-    );
+    expect(() => config.schema.validate(obj, { dist: true })).toThrowErrorMatchingInlineSnapshot(`
+      "[skipStartupConnectionCheck]: \\"skipStartupConnectionCheck\\" can only be set to true when running from source to allow integration tests to run without an ES server
+      Cause: \\"skipStartupConnectionCheck\\" can only be set to true when running from source to allow integration tests to run without an ES server"
+    `);
   });
 });

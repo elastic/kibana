@@ -249,9 +249,10 @@ describe('#sslSchema', () => {
           path: 'path/to/keystore',
         },
       };
-      expect(() => sslSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"cannot use [key] when [keystore.path] is specified"`
-      );
+      expect(() => sslSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(`
+        "cannot use [key] when [keystore.path] is specified
+        Cause: cannot use [key] when [keystore.path] is specified"
+      `);
     });
 
     test('throws if both `certificate` and `keystore.path` are specified', () => {
@@ -261,9 +262,10 @@ describe('#sslSchema', () => {
           path: 'path/to/keystore',
         },
       };
-      expect(() => sslSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"cannot use [certificate] when [keystore.path] is specified"`
-      );
+      expect(() => sslSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(`
+        "cannot use [certificate] when [keystore.path] is specified
+        Cause: cannot use [certificate] when [keystore.path] is specified"
+      `);
     });
 
     test('throws if TLS is enabled but `certificate` is specified and `key` is not', () => {
@@ -271,9 +273,10 @@ describe('#sslSchema', () => {
         certificate: '/path/to/certificate',
         enabled: true,
       };
-      expect(() => sslSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"must specify [certificate] and [key] -- or [keystore.path] -- when ssl is enabled"`
-      );
+      expect(() => sslSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(`
+        "must specify [certificate] and [key] -- or [keystore.path] -- when ssl is enabled
+        Cause: must specify [certificate] and [key] -- or [keystore.path] -- when ssl is enabled"
+      `);
     });
 
     test('throws if TLS is enabled but `key` is specified and `certificate` is not', () => {
@@ -281,18 +284,20 @@ describe('#sslSchema', () => {
         enabled: true,
         key: '/path/to/key',
       };
-      expect(() => sslSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"must specify [certificate] and [key] -- or [keystore.path] -- when ssl is enabled"`
-      );
+      expect(() => sslSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(`
+        "must specify [certificate] and [key] -- or [keystore.path] -- when ssl is enabled
+        Cause: must specify [certificate] and [key] -- or [keystore.path] -- when ssl is enabled"
+      `);
     });
 
     test('throws if TLS is enabled but `key`, `certificate`, and `keystore.path` are not specified', () => {
       const obj = {
         enabled: true,
       };
-      expect(() => sslSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"must specify [certificate] and [key] -- or [keystore.path] -- when ssl is enabled"`
-      );
+      expect(() => sslSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(`
+        "must specify [certificate] and [key] -- or [keystore.path] -- when ssl is enabled
+        Cause: must specify [certificate] and [key] -- or [keystore.path] -- when ssl is enabled"
+      `);
     });
 
     test('throws if TLS is not enabled but `clientAuthentication` is `optional`', () => {
@@ -300,9 +305,10 @@ describe('#sslSchema', () => {
         enabled: false,
         clientAuthentication: 'optional',
       };
-      expect(() => sslSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"must enable ssl to use [clientAuthentication]"`
-      );
+      expect(() => sslSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(`
+        "must enable ssl to use [clientAuthentication]
+        Cause: must enable ssl to use [clientAuthentication]"
+      `);
     });
 
     test('throws if TLS is not enabled but `clientAuthentication` is `required`', () => {
@@ -310,9 +316,10 @@ describe('#sslSchema', () => {
         enabled: false,
         clientAuthentication: 'required',
       };
-      expect(() => sslSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"must enable ssl to use [clientAuthentication]"`
-      );
+      expect(() => sslSchema.validate(obj)).toThrowErrorMatchingInlineSnapshot(`
+        "must enable ssl to use [clientAuthentication]
+        Cause: must enable ssl to use [clientAuthentication]"
+      `);
     });
   });
 
@@ -360,20 +367,22 @@ describe('#sslSchema', () => {
       };
 
       expect(() => sslSchema.validate(singleUnknownProtocol)).toThrowErrorMatchingInlineSnapshot(`
-"[supportedProtocols.0]: types that failed validation:
-- [supportedProtocols.0.0]: expected value to equal [TLSv1]
-- [supportedProtocols.0.1]: expected value to equal [TLSv1.1]
-- [supportedProtocols.0.2]: expected value to equal [TLSv1.2]
-- [supportedProtocols.0.3]: expected value to equal [TLSv1.3]"
-`);
+        "[supportedProtocols.0]: types that failed validation:
+        - [supportedProtocols.0.0]: expected value to equal [TLSv1]
+        - [supportedProtocols.0.1]: expected value to equal [TLSv1.1]
+        - [supportedProtocols.0.2]: expected value to equal [TLSv1.2]
+        - [supportedProtocols.0.3]: expected value to equal [TLSv1.3]
+        Cause: types that failed validation:"
+      `);
       expect(() => sslSchema.validate(allKnownWithOneUnknownProtocols))
         .toThrowErrorMatchingInlineSnapshot(`
-"[supportedProtocols.4]: types that failed validation:
-- [supportedProtocols.4.0]: expected value to equal [TLSv1]
-- [supportedProtocols.4.1]: expected value to equal [TLSv1.1]
-- [supportedProtocols.4.2]: expected value to equal [TLSv1.2]
-- [supportedProtocols.4.3]: expected value to equal [TLSv1.3]"
-`);
+        "[supportedProtocols.4]: types that failed validation:
+        - [supportedProtocols.4.0]: expected value to equal [TLSv1]
+        - [supportedProtocols.4.1]: expected value to equal [TLSv1.1]
+        - [supportedProtocols.4.2]: expected value to equal [TLSv1.2]
+        - [supportedProtocols.4.3]: expected value to equal [TLSv1.3]
+        Cause: types that failed validation:"
+      `);
     });
   });
 

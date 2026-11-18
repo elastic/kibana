@@ -33,12 +33,14 @@ describe('ui settings', () => {
       const validate = getValidationFn(uiSettings.defaultRoute);
 
       expect(() => validate('/some-url')).not.toThrow();
-      expect(() => validate('http://some-url')).toThrowErrorMatchingInlineSnapshot(
-        `"Must be a relative URL."`
-      );
-      expect(() => validate(125)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [string] but got [number]"`
-      );
+      expect(() => validate('http://some-url')).toThrowErrorMatchingInlineSnapshot(`
+        "Must be a relative URL.
+        Cause: Must be a relative URL."
+      `);
+      expect(() => validate(125)).toThrowErrorMatchingInlineSnapshot(`
+        "expected value of type [string] but got [number]
+        Cause: expected value of type [string] but got [number]"
+      `);
     });
 
     describe('getValue()', () => {

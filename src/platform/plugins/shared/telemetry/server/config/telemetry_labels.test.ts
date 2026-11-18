@@ -13,9 +13,10 @@ describe('labelsSchema', () => {
   test('does not allow environment variables that are not strings', () => {
     expect(() => {
       labelsSchema.validate({ environment: 1234 });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"[environment]: expected value of type [string] but got [number]"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "[environment]: expected value of type [string] but got [number]
+      Cause: expected value of type [string] but got [number]"
+    `);
   });
   test('with environment set', () => {
     expect(labelsSchema.validate({ environment: 'foo' })).toEqual(
@@ -30,8 +31,9 @@ describe('labelsSchema', () => {
   test('does not allow unknowns', () => {
     expect(() => {
       labelsSchema.validate({ foo: 'bar' });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"[foo]: Additional properties are not allowed ('foo' was unexpected)"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "[foo]: Additional properties are not allowed ('foo' was unexpected)
+      Cause: Additional properties are not allowed ('foo' was unexpected)"
+    `);
   });
 });

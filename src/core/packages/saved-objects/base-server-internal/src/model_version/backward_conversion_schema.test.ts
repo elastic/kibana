@@ -124,9 +124,10 @@ describe('convertModelVersionBackwardConversionSchema', () => {
       const doc = createDoc({ attributes: { foo: 'bar', hello: 'dolly' } });
       const converted = convertModelVersionBackwardConversionSchema(conversionSchema);
 
-      expect(() => converted(doc)).toThrowErrorMatchingInlineSnapshot(
-        `"[hello]: Additional properties are not allowed ('hello' was unexpected)"`
-      );
+      expect(() => converted(doc)).toThrowErrorMatchingInlineSnapshot(`
+        "[hello]: Additional properties are not allowed ('hello' was unexpected)
+        Cause: Additional properties are not allowed ('hello' was unexpected)"
+      `);
     });
 
     it('returns the known subset of keys with their original values', () => {

@@ -2820,7 +2820,7 @@ describe('TaskClaiming', () => {
             user: 'dabo',
             scope: ['reporting', 'ceo'],
             ownerId: taskManagerId,
-            startedAt: new Date(),
+            startedAt: null,
             retryAt: null,
             scheduledAt: new Date(),
             traceparent: 'newParent',

@@ -20,7 +20,10 @@ describe('config schema', () => {
         { overrides: { featureA: { name: 'new name' } } },
         { serverless: false }
       )
-    ).toThrowErrorMatchingInlineSnapshot(`"[overrides]: a value wasn't expected to be present"`);
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[overrides]: a value wasn't expected to be present
+      Cause: a value wasn't expected to be present"
+    `);
     expect(
       ConfigSchema.validate({ overrides: { featureA: { name: 'new name' } } }, { serverless: true })
     ).toMatchInlineSnapshot(`
@@ -149,9 +152,10 @@ describe('config schema', () => {
         { overrides: { featureA: { category: 'unknown' } } },
         { serverless: true }
       )
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[overrides.featureA.category]: Unknown category \\"unknown\\". Should be one of kibana, enterpriseSearch, observability, security, management"`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[overrides.featureA.category]: Unknown category \\"unknown\\". Should be one of kibana, enterpriseSearch, observability, security, management
+      Cause: Unknown category \\"unknown\\". Should be one of kibana, enterpriseSearch, observability, security, management"
+    `);
   });
   it('properly validates sub-feature privilege inclusion override', () => {
     for (const includeIn of ['all', 'read', 'none']) {
@@ -176,7 +180,8 @@ describe('config schema', () => {
       "[overrides.featureA.subFeatures.privileges.subOne.includeIn]: types that failed validation:
       - [includeIn.0]: expected value to equal [all]
       - [includeIn.1]: expected value to equal [read]
-      - [includeIn.2]: expected value to equal [none]"
+      - [includeIn.2]: expected value to equal [none]
+      Cause: types that failed validation:"
     `);
   });
 });

@@ -85,20 +85,22 @@ test('validates contained type', () => {
   const type = schema.nullable(schema.string({ maxLength: 1 }));
 
   expect(() => type.validate('foo')).toThrowErrorMatchingInlineSnapshot(`
-"types that failed validation:
-- [0]: value has length [3] but it must have a maximum length of [1].
-- [1]: expected value to equal [null]"
-`);
+    "types that failed validation:
+    - [0]: value has length [3] but it must have a maximum length of [1].
+    - [1]: expected value to equal [null]
+    Cause: types that failed validation:"
+  `);
 });
 
 test('validates basic type', () => {
   const type = schema.nullable(schema.string());
 
   expect(() => type.validate(666)).toThrowErrorMatchingInlineSnapshot(`
-"types that failed validation:
-- [0]: expected value of type [string] but got [number]
-- [1]: expected value to equal [null]"
-`);
+    "types that failed validation:
+    - [0]: expected value of type [string] but got [number]
+    - [1]: expected value to equal [null]
+    Cause: types that failed validation:"
+  `);
 });
 
 test('validates type in object', () => {
@@ -120,18 +122,20 @@ test('validates type errors in object', () => {
   });
 
   expect(() => type.validate({ foo: 'ab' })).toThrowErrorMatchingInlineSnapshot(`
-"[foo]: types that failed validation:
-- [foo.0]: value has length [2] but it must have a maximum length of [1].
-- [foo.1]: expected value to equal [null]"
-`);
+    "[foo]: types that failed validation:
+    - [foo.0]: value has length [2] but it must have a maximum length of [1].
+    - [foo.1]: expected value to equal [null]
+    Cause: types that failed validation:"
+  `);
 });
 
 test('includes namespace in failure', () => {
   const type = schema.nullable(schema.string({ maxLength: 1 }));
 
   expect(() => type.validate('foo', {}, 'foo-namespace')).toThrowErrorMatchingInlineSnapshot(`
-"[foo-namespace]: types that failed validation:
-- [foo-namespace.0]: value has length [3] but it must have a maximum length of [1].
-- [foo-namespace.1]: expected value to equal [null]"
-`);
+    "[foo-namespace]: types that failed validation:
+    - [foo-namespace.0]: value has length [3] but it must have a maximum length of [1].
+    - [foo-namespace.1]: expected value to equal [null]
+    Cause: types that failed validation:"
+  `);
 });

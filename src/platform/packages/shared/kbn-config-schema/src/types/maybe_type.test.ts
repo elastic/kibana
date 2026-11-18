@@ -33,31 +33,35 @@ test('returns undefined even if contained type has a default value', () => {
 test('validates contained type', () => {
   const type = schema.maybe(schema.string({ maxLength: 1 }));
 
-  expect(() => type.validate('foo')).toThrowErrorMatchingInlineSnapshot(
-    `"value has length [3] but it must have a maximum length of [1]."`
-  );
+  expect(() => type.validate('foo')).toThrowErrorMatchingInlineSnapshot(`
+    "value has length [3] but it must have a maximum length of [1].
+    Cause: value has length [3] but it must have a maximum length of [1]."
+  `);
 });
 
 test('validates basic type', () => {
   const type = schema.maybe(schema.string());
 
-  expect(() => type.validate(666)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [string] but got [number]"`
-  );
+  expect(() => type.validate(666)).toThrowErrorMatchingInlineSnapshot(`
+    "expected value of type [string] but got [number]
+    Cause: expected value of type [string] but got [number]"
+  `);
 });
 
 test('fails if null', () => {
   const type = schema.maybe(schema.string());
-  expect(() => type.validate(null)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [string] but got [null]"`
-  );
+  expect(() => type.validate(null)).toThrowErrorMatchingInlineSnapshot(`
+    "expected value of type [string] but got [null]
+    Cause: expected value of type [string] but got [null]"
+  `);
 });
 
 test('includes namespace in failure', () => {
   const type = schema.maybe(schema.string());
-  expect(() => type.validate(null, {}, 'foo-namespace')).toThrowErrorMatchingInlineSnapshot(
-    `"[foo-namespace]: expected value of type [string] but got [null]"`
-  );
+  expect(() => type.validate(null, {}, 'foo-namespace')).toThrowErrorMatchingInlineSnapshot(`
+    "[foo-namespace]: expected value of type [string] but got [null]
+    Cause: expected value of type [string] but got [null]"
+  `);
 });
 
 describe('maybe + object', () => {
@@ -121,10 +125,10 @@ describe('#extendsDeep', () => {
 
   test('objects with unknown attributes fail validation when extending with unknowns=forbid', () => {
     const forbidSchema = type.extendsDeep({ unknowns: 'forbid' });
-    expect(() =>
-      forbidSchema.validate({ foo: 'test', bar: 'test' })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[bar]: Additional properties are not allowed ('bar' was unexpected)"`
-    );
+    expect(() => forbidSchema.validate({ foo: 'test', bar: 'test' }))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[bar]: Additional properties are not allowed ('bar' was unexpected)
+      Cause: Additional properties are not allowed ('bar' was unexpected)"
+    `);
   });
 });

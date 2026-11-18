@@ -348,7 +348,7 @@ describe('WorkflowStepExecutionTree', () => {
 
       expect(buildStepExecutionsTree).toHaveBeenCalledWith(
         [stepExecution],
-        expect.objectContaining({}),
+        undefined,
         'completed',
         undefined
       );
@@ -593,7 +593,7 @@ describe('WorkflowStepExecutionTree', () => {
       expect(buildStepExecutionsTree).toHaveBeenCalled();
       expect(buildStepExecutionsTree).toHaveBeenCalledWith(
         [stepExecution],
-        expect.objectContaining({}),
+        undefined,
         'completed',
         undefined
       );

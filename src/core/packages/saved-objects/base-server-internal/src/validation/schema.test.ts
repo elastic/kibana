@@ -38,18 +38,20 @@ describe('Saved Objects type validation schema', () => {
   it('should fail if invalid attributes are provided', () => {
     const objectSchema = createSavedObjectSanitizedDocSchema(validationMap['1.0.0']);
     const data = createMockObject({ foo: false });
-    expect(() => objectSchema.validate(data)).toThrowErrorMatchingInlineSnapshot(
-      `"[attributes.foo]: expected value of type [string] but got [boolean]"`
-    );
+    expect(() => objectSchema.validate(data)).toThrowErrorMatchingInlineSnapshot(`
+      "[attributes.foo]: expected value of type [string] but got [boolean]
+      Cause: expected value of type [string] but got [boolean]"
+    `);
   });
 
   it('should fail if invalid id is provided', () => {
     const objectSchema = createSavedObjectSanitizedDocSchema(validationMap['1.0.0']);
     const data = createMockObject({ foo: 'bar' });
     data.id = '';
-    expect(() => objectSchema.validate(data)).toThrowErrorMatchingInlineSnapshot(
-      `"[id]: value has length [0] but it must have a minimum length of [1]."`
-    );
+    expect(() => objectSchema.validate(data)).toThrowErrorMatchingInlineSnapshot(`
+      "[id]: value has length [0] but it must have a minimum length of [1].
+      Cause: value has length [0] but it must have a minimum length of [1]."
+    `);
   });
 
   it('should validate top-level properties', () => {
@@ -88,9 +90,10 @@ describe('Saved Objects type validation schema', () => {
   it('should fail if top-level properties are invalid', () => {
     const objectSchema = createSavedObjectSanitizedDocSchema(validationMap['1.0.0']);
     const data = createMockObject({ foo: 'heya' });
-    expect(() => objectSchema.validate({ ...data, id: false })).toThrowErrorMatchingInlineSnapshot(
-      `"[id]: expected value of type [string] but got [boolean]"`
-    );
+    expect(() => objectSchema.validate({ ...data, id: false })).toThrowErrorMatchingInlineSnapshot(`
+      "[id]: expected value of type [string] but got [boolean]
+      Cause: expected value of type [string] but got [boolean]"
+    `);
   });
 
   describe('default schema', () => {
@@ -105,18 +108,20 @@ describe('Saved Objects type validation schema', () => {
       const objectSchema = createSavedObjectSanitizedDocSchema(undefined);
       const data = createMockObject(undefined);
 
-      expect(() => objectSchema.validate(data)).toThrowErrorMatchingInlineSnapshot(
-        `"[attributes]: expected value of type [object] but got [undefined]"`
-      );
+      expect(() => objectSchema.validate(data)).toThrowErrorMatchingInlineSnapshot(`
+        "[attributes]: expected value of type [object] but got [undefined]
+        Cause: expected value of type [object] but got [undefined]"
+      `);
     });
 
     it('fails validation on primitive attributes', () => {
       const objectSchema = createSavedObjectSanitizedDocSchema(undefined);
       const data = createMockObject(42);
 
-      expect(() => objectSchema.validate(data)).toThrowErrorMatchingInlineSnapshot(
-        `"[attributes]: expected value of type [object] but got [number]"`
-      );
+      expect(() => objectSchema.validate(data)).toThrowErrorMatchingInlineSnapshot(`
+        "[attributes]: expected value of type [object] but got [number]
+        Cause: expected value of type [object] but got [number]"
+      `);
     });
 
     it('fails validation on incorrect access control', () => {

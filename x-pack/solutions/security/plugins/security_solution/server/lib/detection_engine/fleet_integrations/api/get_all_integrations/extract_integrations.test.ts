@@ -414,7 +414,7 @@ describe('extractIntegrations', () => {
 
       const result = extractIntegrations(packages, []);
 
-      expect(result).toEqual(
+      expect(result).toContainEqual(
         expect.not.objectContaining({
           integration_name: expect.anything(),
           integration_title: expect.anything(),

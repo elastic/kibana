@@ -168,23 +168,23 @@ describe('config validation', () => {
   });
 
   test('validates preconfigured action ids', () => {
-    expect(() =>
-      configSchema.validate(preConfiguredActionConfig(''))
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[preconfigured]: invalid preconfigured action id \\"\\""`
-    );
+    expect(() => configSchema.validate(preConfiguredActionConfig('')))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[preconfigured]: invalid preconfigured action id \\"\\"
+      Cause: invalid preconfigured action id \\"\\""
+    `);
 
-    expect(() =>
-      configSchema.validate(preConfiguredActionConfig('constructor'))
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[preconfigured]: invalid preconfigured action id \\"constructor\\""`
-    );
+    expect(() => configSchema.validate(preConfiguredActionConfig('constructor')))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[preconfigured]: invalid preconfigured action id \\"constructor\\"
+      Cause: invalid preconfigured action id \\"constructor\\""
+    `);
 
-    expect(() =>
-      configSchema.validate(preConfiguredActionConfig('__proto__'))
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[preconfigured]: invalid preconfigured action id \\"__proto__\\""`
-    );
+    expect(() => configSchema.validate(preConfiguredActionConfig('__proto__')))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[preconfigured]: invalid preconfigured action id \\"__proto__\\"
+      Cause: invalid preconfigured action id \\"__proto__\\""
+    `);
   });
 
   test('validates proxyBypassHosts and proxyOnlyHosts', () => {
@@ -267,9 +267,10 @@ describe('config validation', () => {
       customHostSettings: [{}],
     };
 
-    expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-      `"[customHostSettings.0.url]: expected value of type [string] but got [undefined]"`
-    );
+    expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(`
+      "[customHostSettings.0.url]: expected value of type [string] but got [undefined]
+      Cause: expected value of type [string] but got [undefined]"
+    `);
   });
 
   test('action with ssl configuration', () => {
@@ -369,16 +370,18 @@ describe('config validation', () => {
 
     test('validates email config with recipient_allowlist = null', () => {
       config.email = { recipient_allowlist: null };
-      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-        `"[email.recipient_allowlist]: expected value of type [array] but got [null]"`
-      );
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(`
+        "[email.recipient_allowlist]: expected value of type [array] but got [null]
+        Cause: expected value of type [array] but got [null]"
+      `);
     });
 
     test('validates email config with recipient_allowlist = []', () => {
       config.email = { recipient_allowlist: [] };
-      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-        `"[email.recipient_allowlist]: array size is [0], but cannot be smaller than [1]"`
-      );
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(`
+        "[email.recipient_allowlist]: array size is [0], but cannot be smaller than [1]
+        Cause: array size is [0], but cannot be smaller than [1]"
+      `);
     });
 
     test('validates email config with recipient_allowlist', () => {
@@ -428,9 +431,10 @@ describe('config validation', () => {
         },
       };
 
-      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-        `"[email.maximum_body_length]: Value must be equal to or greater than [0]."`
-      );
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(`
+        "[email.maximum_body_length]: Value must be equal to or greater than [0].
+        Cause: Value must be equal to or greater than [0]."
+      `);
     });
 
     test('logs warning when value is greater than max', () => {
@@ -472,9 +476,10 @@ describe('config validation', () => {
       domain_allowlist: ['a.com'],
       recipient_allowlist: ['*.bar@a.com'],
     };
-    expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-      `"[email]: email.domain_allowlist and email.recipient_allowlist can not be used at the same time"`
-    );
+    expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(`
+      "[email]: email.domain_allowlist and email.recipient_allowlist can not be used at the same time
+      Cause: email.domain_allowlist and email.recipient_allowlist can not be used at the same time"
+    `);
   });
 
   test('validates rate limiter connector name', () => {
@@ -606,16 +611,16 @@ describe('config validation', () => {
     const customMax = configSchema.validate({ inboundEvents: { maxEmitted: 100 } });
     expect(customMax.inboundEvents.maxEmitted).toBe(100);
 
-    expect(() =>
-      configSchema.validate({ inboundEvents: { maxEmitted: 0 } })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[inboundEvents.maxEmitted]: Value must be equal to or greater than [1]."`
-    );
-    expect(() =>
-      configSchema.validate({ inboundEvents: { maxEmitted: 251 } })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[inboundEvents.maxEmitted]: Value must be equal to or lower than [250]."`
-    );
+    expect(() => configSchema.validate({ inboundEvents: { maxEmitted: 0 } }))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[inboundEvents.maxEmitted]: Value must be equal to or greater than [1].
+      Cause: Value must be equal to or greater than [1]."
+    `);
+    expect(() => configSchema.validate({ inboundEvents: { maxEmitted: 251 } }))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[inboundEvents.maxEmitted]: Value must be equal to or lower than [250].
+      Cause: Value must be equal to or lower than [250]."
+    `);
 
     expect(empty.inboundEvents.admission).toEqual({
       enabled: true,
@@ -680,30 +685,34 @@ describe('config validation', () => {
 
     test('validates email config with empty services', () => {
       config.email = { services: {} };
-      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-        `"[email.services]: email.services.enabled or email.services.ses must be defined"`
-      );
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(`
+        "[email.services]: email.services.enabled or email.services.ses must be defined
+        Cause: email.services.enabled or email.services.ses must be defined"
+      `);
     });
 
     test('validates email config with empty ses service', () => {
       config.email = { services: { ses: {} } };
-      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-        `"[email.services.ses.host]: expected value of type [string] but got [undefined]"`
-      );
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(`
+        "[email.services.ses.host]: expected value of type [string] but got [undefined]
+        Cause: expected value of type [string] but got [undefined]"
+      `);
     });
 
     test('validates ses config with host only', () => {
       config.email = { services: { ses: { host: 'ses.host.com' } } };
-      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-        `"[email.services.ses.port]: expected value of type [number] but got [undefined]"`
-      );
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(`
+        "[email.services.ses.port]: expected value of type [number] but got [undefined]
+        Cause: expected value of type [number] but got [undefined]"
+      `);
     });
 
     test('validates ses config with port only', () => {
       config.email = { services: { ses: { port: 1 } } };
-      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-        `"[email.services.ses.host]: expected value of type [string] but got [undefined]"`
-      );
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(`
+        "[email.services.ses.host]: expected value of type [string] but got [undefined]
+        Cause: expected value of type [string] but got [undefined]"
+      `);
     });
 
     test('validates ses service', () => {
@@ -717,9 +726,10 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {};
     test('validates email config with empty enabled services', () => {
       config.email = { services: { enabled: [] } };
-      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-        `"[email.services.enabled]: array size is [0], but cannot be smaller than [1]"`
-      );
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(`
+        "[email.services.enabled]: array size is [0], but cannot be smaller than [1]
+        Cause: array size is [0], but cannot be smaller than [1]"
+      `);
     });
 
     test('validates email config with enabled services', () => {
@@ -738,7 +748,8 @@ describe('config validation', () => {
         - [email.services.enabled.0.3]: expected value to equal [amazon-ses]
         - [email.services.enabled.0.4]: expected value to equal [elastic-cloud]
         - [email.services.enabled.0.5]: expected value to equal [other]
-        - [email.services.enabled.0.6]: expected value to equal [*]"
+        - [email.services.enabled.0.6]: expected value to equal [*]
+        Cause: types that failed validation:"
       `);
     });
 
@@ -794,9 +805,10 @@ describe('config validation', () => {
             },
           },
         })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[auth.ears.ssl]: must specify [auth.ears.ssl.key] when [auth.ears.ssl.certificate] is specified"`
-      );
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[auth.ears.ssl]: must specify [auth.ears.ssl.key] when [auth.ears.ssl.certificate] is specified
+        Cause: must specify [auth.ears.ssl.key] when [auth.ears.ssl.certificate] is specified"
+      `);
     });
 
     test('throws when key is specified without certificate', () => {
@@ -810,9 +822,10 @@ describe('config validation', () => {
             },
           },
         })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[auth.ears.ssl]: must specify [auth.ears.ssl.certificate] when [auth.ears.ssl.key] is specified"`
-      );
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[auth.ears.ssl]: must specify [auth.ears.ssl.certificate] when [auth.ears.ssl.key] is specified
+        Cause: must specify [auth.ears.ssl.certificate] when [auth.ears.ssl.key] is specified"
+      `);
     });
   });
 

@@ -22,23 +22,25 @@ test('handles numeric strings with floats', () => {
 });
 
 test('fails if number is `NaN`', () => {
-  expect(() => schema.number().validate(NaN)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [number] but got [number]"`
-  );
+  expect(() => schema.number().validate(NaN)).toThrowErrorMatchingInlineSnapshot(`
+    "expected value of type [number] but got [number]
+    Cause: expected value of type [number] but got [number]"
+  `);
 });
 
 test('is required by default', () => {
-  expect(() => schema.number().validate(undefined)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [number] but got [undefined]"`
-  );
+  expect(() => schema.number().validate(undefined)).toThrowErrorMatchingInlineSnapshot(`
+    "expected value of type [number] but got [undefined]
+    Cause: expected value of type [number] but got [undefined]"
+  `);
 });
 
 test('includes namespace in failure', () => {
-  expect(() =>
-    schema.number().validate(undefined, {}, 'foo-namespace')
-  ).toThrowErrorMatchingInlineSnapshot(
-    `"[foo-namespace]: expected value of type [number] but got [undefined]"`
-  );
+  expect(() => schema.number().validate(undefined, {}, 'foo-namespace'))
+    .toThrowErrorMatchingInlineSnapshot(`
+    "[foo-namespace]: expected value of type [number] but got [undefined]
+    Cause: expected value of type [number] but got [undefined]"
+  `);
 });
 
 describe('#min', () => {
@@ -47,9 +49,10 @@ describe('#min', () => {
   });
 
   test('returns error when smaller number', () => {
-    expect(() => schema.number({ min: 4 }).validate(3)).toThrowErrorMatchingInlineSnapshot(
-      `"Value must be equal to or greater than [4]."`
-    );
+    expect(() => schema.number({ min: 4 }).validate(3)).toThrowErrorMatchingInlineSnapshot(`
+      "Value must be equal to or greater than [4].
+      Cause: Value must be equal to or greater than [4]."
+    `);
   });
 });
 
@@ -59,23 +62,27 @@ describe('#max', () => {
   });
 
   test('returns error when larger number', () => {
-    expect(() => schema.number({ max: 2 }).validate(3)).toThrowErrorMatchingInlineSnapshot(
-      `"Value must be equal to or lower than [2]."`
-    );
+    expect(() => schema.number({ max: 2 }).validate(3)).toThrowErrorMatchingInlineSnapshot(`
+      "Value must be equal to or lower than [2].
+      Cause: Value must be equal to or lower than [2]."
+    `);
   });
 });
 
 describe('#unsafe', () => {
   it('rejects unsafe numbers when undefined', () => {
-    expect(() => schema.number().validate(9007199254740992)).toThrowErrorMatchingInlineSnapshot(
-      `"\\"value\\" must be a safe number"`
-    );
+    expect(() => schema.number().validate(9007199254740992)).toThrowErrorMatchingInlineSnapshot(`
+      "\\"value\\" must be a safe number
+      Cause: \\"value\\" must be a safe number"
+    `);
   });
 
   it('rejects unsafe numbers when false', () => {
-    expect(() =>
-      schema.number({ unsafe: false }).validate(9007199254740992)
-    ).toThrowErrorMatchingInlineSnapshot(`"\\"value\\" must be a safe number"`);
+    expect(() => schema.number({ unsafe: false }).validate(9007199254740992))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "\\"value\\" must be a safe number
+      Cause: \\"value\\" must be a safe number"
+    `);
   });
 
   it('accepts unsafe numbers when true', () => {
@@ -96,15 +103,18 @@ describe('#defaultValue', () => {
 });
 
 test('returns error when not number or numeric string', () => {
-  expect(() => schema.number().validate('test')).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [number] but got [string]"`
-  );
+  expect(() => schema.number().validate('test')).toThrowErrorMatchingInlineSnapshot(`
+    "expected value of type [number] but got [string]
+    Cause: expected value of type [number] but got [string]"
+  `);
 
-  expect(() => schema.number().validate([1, 2, 3])).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [number] but got [Array]"`
-  );
+  expect(() => schema.number().validate([1, 2, 3])).toThrowErrorMatchingInlineSnapshot(`
+    "expected value of type [number] but got [Array]
+    Cause: expected value of type [number] but got [Array]"
+  `);
 
-  expect(() => schema.number().validate(/abc/)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [number] but got [RegExp]"`
-  );
+  expect(() => schema.number().validate(/abc/)).toThrowErrorMatchingInlineSnapshot(`
+    "expected value of type [number] but got [RegExp]
+    Cause: expected value of type [number] but got [RegExp]"
+  `);
 });

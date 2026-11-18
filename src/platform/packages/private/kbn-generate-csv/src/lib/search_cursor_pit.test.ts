@@ -204,9 +204,11 @@ describe('CSV Export Search Cursor', () => {
         new AbortController(),
         logger
       );
-      await expect(cursor.initialize()).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Error opening PIT for index pattern [test-index-pattern-string]: Wops!"`
-      );
+      await expect(cursor.initialize()).rejects.toThrowErrorMatchingInlineSnapshot(`
+        "Error opening PIT for index pattern [test-index-pattern-string]: Wops!
+        Cause: Wops!
+        Cause: Original error message: Wat?"
+      `);
     });
 
     it('throws an error if PIT creation fails without an error message', async () => {

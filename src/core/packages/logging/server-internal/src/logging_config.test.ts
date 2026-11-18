@@ -37,9 +37,10 @@ test('`schema` throws if `root` logger does not have appenders configured.', () 
         appenders: [],
       },
     })
-  ).toThrowErrorMatchingInlineSnapshot(
-    `"[root.appenders]: array size is [0], but cannot be smaller than [1]"`
-  );
+  ).toThrowErrorMatchingInlineSnapshot(`
+    "[root.appenders]: array size is [0], but cannot be smaller than [1]
+    Cause: array size is [0], but cannot be smaller than [1]"
+  `);
 });
 
 test('`schema` does not throw if `root` logger does not have "default" appender configured.', () => {

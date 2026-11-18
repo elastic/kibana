@@ -26,9 +26,10 @@ describe('schema.allOf', () => {
       schema.object({ bar: schema.string() }),
     ]);
 
-    expect(() => type.validate({ foo: 'something' })).toThrowErrorMatchingInlineSnapshot(
-      `"[bar]: expected value of type [string] but got [undefined]"`
-    );
+    expect(() => type.validate({ foo: 'something' })).toThrowErrorMatchingInlineSnapshot(`
+      "[bar]: expected value of type [string] but got [undefined]
+      Cause: expected value of type [string] but got [undefined]"
+    `);
   });
 
   it('supports default value', () => {

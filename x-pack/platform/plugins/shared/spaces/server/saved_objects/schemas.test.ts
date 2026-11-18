@@ -16,21 +16,21 @@ describe('8.8.0', () => {
 
   describe('name', () => {
     it('should be a string', () => {
-      expect(() =>
-        SpacesSavedObjectSchemas['8.8.0'].validate({ name: 1 })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[name]: expected value of type [string] but got [number]"`
-      );
+      expect(() => SpacesSavedObjectSchemas['8.8.0'].validate({ name: 1 }))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[name]: expected value of type [string] but got [number]
+        Cause: expected value of type [string] but got [number]"
+      `);
 
       expect(() => SpacesSavedObjectSchemas['8.8.0'].validate({ name: 'foo' })).not.toThrow();
     });
 
     it('should be minimum length of 1', () => {
-      expect(() =>
-        SpacesSavedObjectSchemas['8.8.0'].validate({ name: '' })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[name]: value has length [0] but it must have a minimum length of [1]."`
-      );
+      expect(() => SpacesSavedObjectSchemas['8.8.0'].validate({ name: '' }))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[name]: value has length [0] but it must have a minimum length of [1].
+        Cause: value has length [0] but it must have a minimum length of [1]."
+      `);
 
       expect(() => SpacesSavedObjectSchemas['8.8.0'].validate({ name: 'foo' })).not.toThrow();
     });
@@ -38,11 +38,11 @@ describe('8.8.0', () => {
 
   describe('description', () => {
     it('should be a string', () => {
-      expect(() =>
-        SpacesSavedObjectSchemas['8.8.0'].validate({ name: 'foo', description: 1 })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[description]: expected value of type [string] but got [number]"`
-      );
+      expect(() => SpacesSavedObjectSchemas['8.8.0'].validate({ name: 'foo', description: 1 }))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[description]: expected value of type [string] but got [number]
+        Cause: expected value of type [string] but got [number]"
+      `);
 
       expect(() =>
         SpacesSavedObjectSchemas['8.8.0'].validate({ name: 'foo', description: 'a' })
@@ -52,11 +52,11 @@ describe('8.8.0', () => {
 
   describe('initials', () => {
     it('should be a string', () => {
-      expect(() =>
-        SpacesSavedObjectSchemas['8.8.0'].validate({ name: 'foo', initials: 1 })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[initials]: expected value of type [string] but got [number]"`
-      );
+      expect(() => SpacesSavedObjectSchemas['8.8.0'].validate({ name: 'foo', initials: 1 }))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[initials]: expected value of type [string] but got [number]
+        Cause: expected value of type [string] but got [number]"
+      `);
 
       expect(() =>
         SpacesSavedObjectSchemas['8.8.0'].validate({ name: 'foo', initials: 'a' })
@@ -66,11 +66,11 @@ describe('8.8.0', () => {
 
   describe('color', () => {
     it('should be a string', () => {
-      expect(() =>
-        SpacesSavedObjectSchemas['8.8.0'].validate({ name: 'foo', color: 1 })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[color]: expected value of type [string] but got [number]"`
-      );
+      expect(() => SpacesSavedObjectSchemas['8.8.0'].validate({ name: 'foo', color: 1 }))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[color]: expected value of type [string] but got [number]
+        Cause: expected value of type [string] but got [number]"
+      `);
 
       expect(() =>
         SpacesSavedObjectSchemas['8.8.0'].validate({ name: 'foo', color: 'a' })
@@ -79,11 +79,11 @@ describe('8.8.0', () => {
   });
   describe('disabledFeatures', () => {
     it('should be a string', () => {
-      expect(() =>
-        SpacesSavedObjectSchemas['8.8.0'].validate({ name: 'foo', disabledFeatures: 1 })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[disabledFeatures]: expected value of type [array] but got [number]"`
-      );
+      expect(() => SpacesSavedObjectSchemas['8.8.0'].validate({ name: 'foo', disabledFeatures: 1 }))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[disabledFeatures]: expected value of type [array] but got [number]
+        Cause: expected value of type [array] but got [number]"
+      `);
 
       expect(() =>
         SpacesSavedObjectSchemas['8.8.0'].validate({ name: 'foo', disabledFeatures: ['a'] })
@@ -93,11 +93,11 @@ describe('8.8.0', () => {
 
   describe('imageUrl', () => {
     it('should be a string', () => {
-      expect(() =>
-        SpacesSavedObjectSchemas['8.8.0'].validate({ name: 'foo', imageUrl: 1 })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[imageUrl]: expected value of type [string] but got [number]"`
-      );
+      expect(() => SpacesSavedObjectSchemas['8.8.0'].validate({ name: 'foo', imageUrl: 1 }))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[imageUrl]: expected value of type [string] but got [number]
+        Cause: expected value of type [string] but got [number]"
+      `);
 
       expect(() =>
         SpacesSavedObjectSchemas['8.8.0'].validate({ name: 'foo', imageUrl: 'a' })
@@ -107,11 +107,11 @@ describe('8.8.0', () => {
 
   describe('_reserved', () => {
     it('should be a boolean', () => {
-      expect(() =>
-        SpacesSavedObjectSchemas['8.8.0'].validate({ name: 'foo', _reserved: 1 })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[_reserved]: expected value of type [boolean] but got [number]"`
-      );
+      expect(() => SpacesSavedObjectSchemas['8.8.0'].validate({ name: 'foo', _reserved: 1 }))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[_reserved]: expected value of type [boolean] but got [number]
+        Cause: expected value of type [boolean] but got [number]"
+      `);
 
       expect(() =>
         SpacesSavedObjectSchemas['8.8.0'].validate({ name: 'foo', _reserved: true })

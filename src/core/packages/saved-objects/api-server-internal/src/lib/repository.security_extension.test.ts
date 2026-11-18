@@ -280,7 +280,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       const expectedNamespace = namespace;
       const expectedObject = {
         type: 'multiNamespaceTypeCustomIndex',
-        id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+        id,
         existingNamespaces: multiNamespaceObjNamespaces,
         name: 'Testing',
       };
@@ -353,7 +353,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(client.create).toHaveBeenCalledTimes(1);
       expect(result).toEqual(
         expect.objectContaining({
-          id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          id: expect.stringMatching(/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
           type,
           attributes,
           namespaces: [namespace],
@@ -373,7 +373,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(client.create).toHaveBeenCalledTimes(1);
       expect(result).toEqual(
         expect.objectContaining({
-          id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          id: expect.stringMatching(/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
           type,
           attributes,
           namespaces: [namespace],
@@ -390,7 +390,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       const expectedNamespace = namespace;
       const expectedObject = {
         type: 'multiNamespaceTypeCustomIndex',
-        id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+        id: expect.stringMatching(/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
         initialNamespaces: undefined,
         existingNamespaces: [],
       };
@@ -411,7 +411,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       const expectedNamespace = namespace;
       const expectedObject = {
         type: 'multiNamespaceTypeCustomIndex',
-        id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+        id: expect.stringMatching(/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
         initialNamespaces: multiNamespaceObjNamespaces,
         existingNamespaces: [],
       };
@@ -437,7 +437,7 @@ describe('SavedObjectsRepository Security Extension', () => {
           typeMap: authMap,
           savedObject: expect.objectContaining({
             type,
-            id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+            id: expect.stringMatching(/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
             namespaces: [namespace],
           }),
         })
@@ -1335,14 +1335,14 @@ describe('SavedObjectsRepository Security Extension', () => {
       const expectedObjects = [
         {
           type: obj1.type,
-          id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          id: obj1.id,
           initialNamespaces: undefined,
           existingNamespaces: [],
           name: obj1.attributes.title,
         },
         {
           type: obj2.type,
-          id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          id: obj2.id,
           initialNamespaces: undefined,
           existingNamespaces: [],
           name: obj2.attributes.title,
@@ -1380,14 +1380,14 @@ describe('SavedObjectsRepository Security Extension', () => {
       const expectedObjects = [
         {
           type: objA.type,
-          id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          id: objA.id,
           initialNamespaces: objA.initialNamespaces,
           existingNamespaces: [],
           name: objA.attributes.title,
         },
         {
           type: objB.type,
-          id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          id: objB.id,
           initialNamespaces: objB.initialNamespaces,
           existingNamespaces: [],
           name: objB.attributes.title,
@@ -1426,14 +1426,14 @@ describe('SavedObjectsRepository Security Extension', () => {
       const expectedObjects = [
         {
           type: objA.type,
-          id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          id: objA.id,
           initialNamespaces: objA.initialNamespaces,
           existingNamespaces: [],
           name: objA.attributes.title,
         },
         {
           type: objB.type,
-          id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          id: objB.id,
           initialNamespaces: objB.initialNamespaces,
           existingNamespaces: [],
           name: objB.attributes.title,
@@ -1564,13 +1564,13 @@ describe('SavedObjectsRepository Security Extension', () => {
       const expectedObjects = [
         {
           type: obj1.type,
-          id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          id: obj1.id,
           existingNamespaces: [],
           name: (obj1.attributes as { title: string }).title,
         },
         {
           type: obj2.type,
-          id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          id: obj2.id,
           existingNamespaces: [],
           name: (obj2.attributes as { title: string }).title,
         },
@@ -1604,14 +1604,14 @@ describe('SavedObjectsRepository Security Extension', () => {
       const expectedObjects = [
         {
           type: obj1.type,
-          id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          id: obj1.id,
           objectNamespace: 'ns-1',
           existingNamespaces: [],
           name: (obj1.attributes as { title: string }).title,
         },
         {
           type: obj2.type,
-          id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          id: obj2.id,
           objectNamespace: 'ns-2',
           existingNamespaces: [],
           name: (obj2.attributes as { title: string }).title,

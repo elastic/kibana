@@ -449,9 +449,10 @@ describe('validateAndConvertAggregations', () => {
 
     expect(() => {
       validateAndConvertAggregations(['foo'], aggregations, mockMappings);
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"[someAgg.max.script]: Additional properties are not allowed ('script' was unexpected)"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "[someAgg.max.script]: Additional properties are not allowed ('script' was unexpected)
+      Cause: Additional properties are not allowed ('script' was unexpected)"
+    `);
   });
 
   it('throws an error when using a script attribute in a nested aggregation', () => {
@@ -473,9 +474,10 @@ describe('validateAndConvertAggregations', () => {
 
     expect(() => {
       validateAndConvertAggregations(['foo'], aggregations, mockMappings);
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"[someAgg.aggs.nested.max.script]: Additional properties are not allowed ('script' was unexpected)"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "[someAgg.aggs.nested.max.script]: Additional properties are not allowed ('script' was unexpected)
+      Cause: Additional properties are not allowed ('script' was unexpected)"
+    `);
   });
 
   it('throws an error when trying to access a property via {type}.{type}.attributes.{attr}', () => {

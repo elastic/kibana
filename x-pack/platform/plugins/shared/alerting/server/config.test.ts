@@ -76,9 +76,10 @@ describe('config validation', () => {
           },
         },
       };
-      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-        `"[rules.minimumScheduleInterval.value]: duration cannot exceed one day"`
-      );
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(`
+        "[rules.minimumScheduleInterval.value]: duration cannot exceed one day
+        Cause: duration cannot exceed one day"
+      `);
     });
 
     test(`doesn't allow 25h as a value`, () => {
@@ -89,9 +90,10 @@ describe('config validation', () => {
           },
         },
       };
-      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-        `"[rules.minimumScheduleInterval.value]: duration cannot exceed one day"`
-      );
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(`
+        "[rules.minimumScheduleInterval.value]: duration cannot exceed one day
+        Cause: duration cannot exceed one day"
+      `);
     });
   });
 
@@ -120,9 +122,10 @@ describe('config validation', () => {
           },
         },
       };
-      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(
-        `"[rules.run.actions.max]: Value must be equal to or lower than [100000]."`
-      );
+      expect(() => configSchema.validate(config)).toThrowErrorMatchingInlineSnapshot(`
+        "[rules.run.actions.max]: Value must be equal to or lower than [100000].
+        Cause: Value must be equal to or lower than [100000]."
+      `);
     });
   });
 

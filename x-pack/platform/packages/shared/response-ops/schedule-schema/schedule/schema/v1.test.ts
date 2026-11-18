@@ -104,9 +104,10 @@ describe('scheduleRequestSchema', () => {
         ...defaultSchedule,
         recurring: { ...recurring, onWeekDay: [] },
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[recurring.onWeekDay]: array size is [0], but cannot be smaller than [1]"`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[recurring.onWeekDay]: array size is [0], but cannot be smaller than [1]
+      Cause: array size is [0], but cannot be smaller than [1]"
+    `);
   });
 
   it(`throws an error when onMonthDay is empty`, async () => {
@@ -115,9 +116,10 @@ describe('scheduleRequestSchema', () => {
         ...defaultSchedule,
         recurring: { ...recurring, onMonthDay: [] },
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[recurring.onMonthDay]: array size is [0], but cannot be smaller than [1]"`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[recurring.onMonthDay]: array size is [0], but cannot be smaller than [1]
+      Cause: array size is [0], but cannot be smaller than [1]"
+    `);
   });
 
   it(`throws an error when onMonthDay is less than 1`, async () => {
@@ -126,9 +128,10 @@ describe('scheduleRequestSchema', () => {
         ...defaultSchedule,
         recurring: { ...recurring, onMonthDay: [0] },
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[recurring.onMonthDay.0]: Value must be equal to or greater than [1]."`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[recurring.onMonthDay.0]: Value must be equal to or greater than [1].
+      Cause: Value must be equal to or greater than [1]."
+    `);
   });
 
   it(`throws an error when onMonthDay is more than 31`, async () => {
@@ -137,9 +140,10 @@ describe('scheduleRequestSchema', () => {
         ...defaultSchedule,
         recurring: { ...recurring, onMonthDay: [32] },
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[recurring.onMonthDay.0]: Value must be equal to or lower than [31]."`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[recurring.onMonthDay.0]: Value must be equal to or lower than [31].
+      Cause: Value must be equal to or lower than [31]."
+    `);
   });
 
   it(`throws an error when onMonthDay is negative`, async () => {
@@ -148,9 +152,10 @@ describe('scheduleRequestSchema', () => {
         ...defaultSchedule,
         recurring: { ...recurring, onMonthDay: [-1] },
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[recurring.onMonthDay.0]: Value must be equal to or greater than [1]."`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[recurring.onMonthDay.0]: Value must be equal to or greater than [1].
+      Cause: Value must be equal to or greater than [1]."
+    `);
   });
 
   it(`throws an error when onMonthDay is not an integer`, async () => {
@@ -159,9 +164,10 @@ describe('scheduleRequestSchema', () => {
         ...defaultSchedule,
         recurring: { ...recurring, onMonthDay: [25.5] },
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[recurring.onMonthDay.0]: schedule onMonthDay must be a positive integer."`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[recurring.onMonthDay.0]: schedule onMonthDay must be a positive integer.
+      Cause: schedule onMonthDay must be a positive integer."
+    `);
   });
 
   it(`throws an error when onMonth is empty`, async () => {
@@ -170,9 +176,10 @@ describe('scheduleRequestSchema', () => {
         ...defaultSchedule,
         recurring: { ...recurring, onMonth: [] },
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[recurring.onMonth]: array size is [0], but cannot be smaller than [1]"`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[recurring.onMonth]: array size is [0], but cannot be smaller than [1]
+      Cause: array size is [0], but cannot be smaller than [1]"
+    `);
   });
 
   it(`throws an error when onMonth is less than 1`, async () => {
@@ -181,9 +188,10 @@ describe('scheduleRequestSchema', () => {
         ...defaultSchedule,
         recurring: { ...recurring, onMonth: [0] },
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[recurring.onMonth.0]: Value must be equal to or greater than [1]."`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[recurring.onMonth.0]: Value must be equal to or greater than [1].
+      Cause: Value must be equal to or greater than [1]."
+    `);
   });
 
   it(`throws an error when onMonth is more than 12`, async () => {
@@ -192,9 +200,10 @@ describe('scheduleRequestSchema', () => {
         ...defaultSchedule,
         recurring: { ...recurring, onMonth: [13] },
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[recurring.onMonth.0]: Value must be equal to or lower than [12]."`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[recurring.onMonth.0]: Value must be equal to or lower than [12].
+      Cause: Value must be equal to or lower than [12]."
+    `);
   });
 
   it(`throws an error when onMonth is not an integer`, async () => {
@@ -203,9 +212,10 @@ describe('scheduleRequestSchema', () => {
         ...defaultSchedule,
         recurring: { ...recurring, onMonth: [3.2] },
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[recurring.onMonth.0]: schedule onMonth must be a positive integer."`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[recurring.onMonth.0]: schedule onMonth must be a positive integer.
+      Cause: schedule onMonth must be a positive integer."
+    `);
   });
 
   it(`throws an error when occurrences is less than 0`, async () => {
@@ -214,9 +224,10 @@ describe('scheduleRequestSchema', () => {
         ...defaultSchedule,
         recurring: { ...recurring, occurrences: -1 },
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[recurring.occurrences]: Value must be equal to or greater than [1]."`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[recurring.occurrences]: Value must be equal to or greater than [1].
+      Cause: Value must be equal to or greater than [1]."
+    `);
   });
 
   it(`throws an error when occurrences is not an integer`, async () => {
@@ -225,9 +236,10 @@ describe('scheduleRequestSchema', () => {
         ...defaultSchedule,
         recurring: { ...recurring, occurrences: 1.5 },
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[recurring.occurrences]: schedule occurrences must be a positive integer."`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[recurring.occurrences]: schedule occurrences must be a positive integer.
+      Cause: schedule occurrences must be a positive integer."
+    `);
   });
 });
 
@@ -259,9 +271,10 @@ describe('getScheduleRequestSchema with allowLastDayOfMonth', () => {
         ...defaultSchedule,
         recurring: { ...recurring, onMonthDay: [0] },
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[recurring.onMonthDay.0]: schedule onMonthDay must be an integer between 1 and 31, or -1 for the last day of the month."`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[recurring.onMonthDay.0]: schedule onMonthDay must be an integer between 1 and 31, or -1 for the last day of the month.
+      Cause: schedule onMonthDay must be an integer between 1 and 31, or -1 for the last day of the month."
+    `);
   });
 
   it('throws an error for negative onMonthDay values other than -1', async () => {
@@ -271,9 +284,10 @@ describe('getScheduleRequestSchema with allowLastDayOfMonth', () => {
         ...defaultSchedule,
         recurring: { ...recurring, onMonthDay: [-30] },
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[recurring.onMonthDay.0]: Value must be equal to or greater than [-1]."`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[recurring.onMonthDay.0]: Value must be equal to or greater than [-1].
+      Cause: Value must be equal to or greater than [-1]."
+    `);
   });
 
   it('throws an error when onMonthDay is not an integer', async () => {
@@ -282,8 +296,9 @@ describe('getScheduleRequestSchema with allowLastDayOfMonth', () => {
         ...defaultSchedule,
         recurring: { ...recurring, onMonthDay: [25.5] },
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[recurring.onMonthDay.0]: schedule onMonthDay must be an integer between 1 and 31, or -1 for the last day of the month."`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[recurring.onMonthDay.0]: schedule onMonthDay must be an integer between 1 and 31, or -1 for the last day of the month.
+      Cause: schedule onMonthDay must be an integer between 1 and 31, or -1 for the last day of the month."
+    `);
   });
 });

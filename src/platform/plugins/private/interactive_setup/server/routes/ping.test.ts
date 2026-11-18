@@ -55,15 +55,19 @@ describe('Configure routes', () => {
       );
 
       const bodySchema = (routeConfig.validate as any).body as ObjectType;
-      expect(() => bodySchema.validate({})).toThrowErrorMatchingInlineSnapshot(
-        `"[host]: expected value of type [string] but got [undefined]."`
-      );
-      expect(() => bodySchema.validate({ host: '' })).toThrowErrorMatchingInlineSnapshot(
-        `"[host]: \\"host\\" is not allowed to be empty"`
-      );
-      expect(() =>
-        bodySchema.validate({ host: 'localhost:9200' })
-      ).toThrowErrorMatchingInlineSnapshot(`"[host]: expected URI with scheme [http|https]."`);
+      expect(() => bodySchema.validate({})).toThrowErrorMatchingInlineSnapshot(`
+        "[host]: expected value of type [string] but got [undefined].
+        Cause: expected value of type [string] but got [undefined]."
+      `);
+      expect(() => bodySchema.validate({ host: '' })).toThrowErrorMatchingInlineSnapshot(`
+        "[host]: \\"host\\" is not allowed to be empty
+        Cause: \\"host\\" is not allowed to be empty"
+      `);
+      expect(() => bodySchema.validate({ host: 'localhost:9200' }))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[host]: expected URI with scheme [http|https].
+        Cause: expected URI with scheme [http|https]."
+      `);
       expect(() => bodySchema.validate({ host: 'http://localhost:9200' })).not.toThrow();
     });
 

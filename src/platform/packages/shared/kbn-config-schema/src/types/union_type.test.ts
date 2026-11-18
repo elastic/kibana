@@ -71,16 +71,18 @@ test('handles object with wrong type', () => {
   expect(() => type.validate({ age: 'foo' })).toThrowErrorMatchingInlineSnapshot(`
     "types that failed validation:
     - [0.age]: expected value of type [number] but got [string]
-    - [1]: expected value of type [string] but got [Object]"
+    - [1]: expected value of type [string] but got [Object]
+    Cause: types that failed validation:"
   `);
 });
 
 test('use shorter error messages when defining only one type', () => {
   const type = schema.oneOf([schema.object({ age: schema.number() })]);
 
-  expect(() => type.validate({ age: 'foo' })).toThrowErrorMatchingInlineSnapshot(
-    `"[age]: expected value of type [number] but got [string]"`
-  );
+  expect(() => type.validate({ age: 'foo' })).toThrowErrorMatchingInlineSnapshot(`
+    "[age]: expected value of type [number] but got [string]
+    Cause: expected value of type [number] but got [string]"
+  `);
 });
 
 test('includes namespace in failure', () => {
@@ -90,18 +92,19 @@ test('includes namespace in failure', () => {
     .toThrowErrorMatchingInlineSnapshot(`
     "[foo-namespace]: types that failed validation:
     - [foo-namespace.0.age]: expected value of type [number] but got [string]
-    - [foo-namespace.1]: expected value of type [string] but got [Object]"
+    - [foo-namespace.1]: expected value of type [string] but got [Object]
+    Cause: types that failed validation:"
   `);
 });
 
 test('includes namespace in failure in shorthand mode', () => {
   const type = schema.oneOf([schema.object({ age: schema.number() })]);
 
-  expect(() =>
-    type.validate({ age: 'foo' }, {}, 'foo-namespace')
-  ).toThrowErrorMatchingInlineSnapshot(
-    `"[foo-namespace.age]: expected value of type [number] but got [string]"`
-  );
+  expect(() => type.validate({ age: 'foo' }, {}, 'foo-namespace'))
+    .toThrowErrorMatchingInlineSnapshot(`
+    "[foo-namespace.age]: expected value of type [number] but got [string]
+    Cause: expected value of type [number] but got [string]"
+  `);
 });
 
 test('handles multiple objects with same key', () => {
@@ -156,12 +159,14 @@ test('handles maybe', () => {
 test('fails if not matching type', () => {
   const type = schema.oneOf([schema.string()]);
 
-  expect(() => type.validate(false)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [string] but got [boolean]"`
-  );
-  expect(() => type.validate(123)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [string] but got [number]"`
-  );
+  expect(() => type.validate(false)).toThrowErrorMatchingInlineSnapshot(`
+    "expected value of type [string] but got [boolean]
+    Cause: expected value of type [string] but got [boolean]"
+  `);
+  expect(() => type.validate(123)).toThrowErrorMatchingInlineSnapshot(`
+    "expected value of type [string] but got [number]
+    Cause: expected value of type [string] but got [number]"
+  `);
 });
 
 test('fails if not matching multiple types', () => {
@@ -170,7 +175,8 @@ test('fails if not matching multiple types', () => {
   expect(() => type.validate(false)).toThrowErrorMatchingInlineSnapshot(`
     "types that failed validation:
     - [0]: expected value of type [string] but got [boolean]
-    - [1]: expected value of type [number] but got [boolean]"
+    - [1]: expected value of type [number] but got [boolean]
+    Cause: types that failed validation:"
   `);
 });
 
@@ -180,7 +186,8 @@ test('fails if not matching literal', () => {
   expect(() => type.validate('bar')).toThrowErrorMatchingInlineSnapshot(`
     "types that failed validation:
     - [0]: expected value to equal [foo]
-    - [1]: expected value to equal [dolly]"
+    - [1]: expected value to equal [dolly]
+    Cause: types that failed validation:"
   `);
 });
 
@@ -195,7 +202,8 @@ test('fails if nested union type fail', () => {
     - [0]: expected value of type [boolean] but got [string]
     - [1]: types that failed validation:
      - [0]: could not parse object value from json input
-     - [1]: expected value of type [number] but got [string]"
+     - [1]: expected value of type [number] but got [string]
+    Cause: types that failed validation:"
   `);
 });
 
@@ -216,11 +224,11 @@ describe('#extendsDeep', () => {
 
   test('objects with unknown attributes fail validation when extending with unknowns=forbid', () => {
     const forbidSchema = type.extendsDeep({ unknowns: 'forbid' });
-    expect(() =>
-      forbidSchema.validate({ foo: 'test', bar: 'test' })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[bar]: Additional properties are not allowed ('bar' was unexpected)"`
-    );
+    expect(() => forbidSchema.validate({ foo: 'test', bar: 'test' }))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[bar]: Additional properties are not allowed ('bar' was unexpected)
+      Cause: Additional properties are not allowed ('bar' was unexpected)"
+    `);
   });
 });
 

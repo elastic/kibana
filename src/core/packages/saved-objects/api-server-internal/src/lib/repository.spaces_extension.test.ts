@@ -1278,7 +1278,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
         expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledTimes(1);
         expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledWith(
           {
-            id: expect.objectContaining(/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+            id: expect.stringMatching(/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
             namespace: currentSpace,
             type: ENCRYPTED_TYPE,
           },
@@ -1321,7 +1321,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
         expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledTimes(1);
         expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledWith(
           {
-            id: expect.objectContaining(/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+            id: expect.stringMatching(/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
             namespace: currentSpace,
             type: ENCRYPTED_TYPE,
           },

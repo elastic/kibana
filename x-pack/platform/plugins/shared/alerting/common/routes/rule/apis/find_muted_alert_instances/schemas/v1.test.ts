@@ -40,55 +40,59 @@ describe('findMutedAlertInstancesRequestBodySchema', () => {
   });
 
   test('throws when page is less than 1', () => {
-    expect(() =>
-      findMutedAlertInstancesRequestBodySchema.validate({ page: 0 })
-    ).toThrowErrorMatchingInlineSnapshot(`"[page]: Value must be equal to or greater than [1]."`);
+    expect(() => findMutedAlertInstancesRequestBodySchema.validate({ page: 0 }))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[page]: Value must be equal to or greater than [1].
+      Cause: Value must be equal to or greater than [1]."
+    `);
   });
 
   test('throws when per_page is negative', () => {
-    expect(() =>
-      findMutedAlertInstancesRequestBodySchema.validate({ per_page: -1 })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[per_page]: Value must be equal to or greater than [0]."`
-    );
+    expect(() => findMutedAlertInstancesRequestBodySchema.validate({ per_page: -1 }))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[per_page]: Value must be equal to or greater than [0].
+      Cause: Value must be equal to or greater than [0]."
+    `);
   });
 
   test('throws when page is not a number', () => {
-    expect(() =>
-      findMutedAlertInstancesRequestBodySchema.validate({ page: 'one' })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[page]: expected value of type [number] but got [string]"`
-    );
+    expect(() => findMutedAlertInstancesRequestBodySchema.validate({ page: 'one' }))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[page]: expected value of type [number] but got [string]
+      Cause: expected value of type [number] but got [string]"
+    `);
   });
 
   test('throws when filter is not a string', () => {
-    expect(() =>
-      findMutedAlertInstancesRequestBodySchema.validate({ filter: 123 })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[filter]: expected value of type [string] but got [number]"`
-    );
+    expect(() => findMutedAlertInstancesRequestBodySchema.validate({ filter: 123 }))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[filter]: expected value of type [string] but got [number]
+      Cause: expected value of type [string] but got [number]"
+    `);
   });
 
   test('throws when per_page exceeds the maximum', () => {
-    expect(() =>
-      findMutedAlertInstancesRequestBodySchema.validate({ per_page: 101 })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[per_page]: Value must be equal to or lower than [100]."`
-    );
+    expect(() => findMutedAlertInstancesRequestBodySchema.validate({ per_page: 101 }))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[per_page]: Value must be equal to or lower than [100].
+      Cause: Value must be equal to or lower than [100]."
+    `);
   });
 
   test('throws when page exceeds the maximum', () => {
-    expect(() =>
-      findMutedAlertInstancesRequestBodySchema.validate({ page: 10001, per_page: 1 })
-    ).toThrowErrorMatchingInlineSnapshot(`"[page]: Value must be equal to or lower than [10000]."`);
+    expect(() => findMutedAlertInstancesRequestBodySchema.validate({ page: 10001, per_page: 1 }))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[page]: Value must be equal to or lower than [10000].
+      Cause: Value must be equal to or lower than [10000]."
+    `);
   });
 
   test('throws when page and per_page would return more than the max result window', () => {
-    expect(() =>
-      findMutedAlertInstancesRequestBodySchema.validate({ page: 200, per_page: 100 })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"The provided page and per_page values cannot return more than 10000 results."`
-    );
+    expect(() => findMutedAlertInstancesRequestBodySchema.validate({ page: 200, per_page: 100 }))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "The provided page and per_page values cannot return more than 10000 results.
+      Cause: The provided page and per_page values cannot return more than 10000 results."
+    `);
   });
 });
 
@@ -141,9 +145,10 @@ describe('findMutedAlertInstancesResponseSchema', () => {
         total: 1,
         data: [{ id: 'rule-1' }],
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[data.0.muted_alert_instance_ids]: expected value of type [array] but got [undefined]"`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[data.0.muted_alert_instance_ids]: expected value of type [array] but got [undefined]
+      Cause: expected value of type [array] but got [undefined]"
+    `);
   });
 
   test('throws when muted_alert_instance_ids contains a non-string', () => {
@@ -154,8 +159,9 @@ describe('findMutedAlertInstancesResponseSchema', () => {
         total: 1,
         data: [{ id: 'rule-1', muted_alert_instance_ids: [123] }],
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[data.0.muted_alert_instance_ids.0]: expected value of type [string] but got [number]"`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[data.0.muted_alert_instance_ids.0]: expected value of type [string] but got [number]
+      Cause: expected value of type [string] but got [number]"
+    `);
   });
 });

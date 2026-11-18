@@ -63,7 +63,9 @@ jest.mock('./storage', () => {
   };
 });
 
+// Jest 30 applies this mock to `node:crypto` too, which undici needs intact.
 jest.mock('crypto', () => ({
+  ...jest.requireActual('crypto'),
   randomUUID: jest.fn(() => 'generated-uuid'),
 }));
 

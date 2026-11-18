@@ -48,9 +48,10 @@ describe('RouteSecurity validation', () => {
       },
     };
 
-    expect(() => validRouteSecurity(routeSecurity)).toThrowErrorMatchingInlineSnapshot(
-      `"[authz.requiredPrivileges]: expected value of type [array] but got [undefined]"`
-    );
+    expect(() => validRouteSecurity(routeSecurity)).toThrowErrorMatchingInlineSnapshot(`
+      "[authz.requiredPrivileges]: expected value of type [array] but got [undefined]
+      Cause: expected value of type [array] but got [undefined]"
+    `);
   });
 
   it('should fail when requiredPrivileges include an empty privilege set', () => {
@@ -63,7 +64,8 @@ describe('RouteSecurity validation', () => {
     expect(() => validRouteSecurity(routeSecurity)).toThrowErrorMatchingInlineSnapshot(`
       "[authz.requiredPrivileges.0]: types that failed validation:
       - [authz.requiredPrivileges.0.0]: either anyRequired or allRequired must be specified
-      - [authz.requiredPrivileges.0.1]: expected value of type [string] but got [Object]"
+      - [authz.requiredPrivileges.0.1]: expected value of type [string] but got [Object]
+      Cause: types that failed validation:"
     `);
   });
 
@@ -77,9 +79,10 @@ describe('RouteSecurity validation', () => {
       },
     };
 
-    expect(() => validRouteSecurity(routeSecurity)).toThrowErrorMatchingInlineSnapshot(
-      `"[authz.requiredPrivileges]: array size is [0], but cannot be smaller than [1]"`
-    );
+    expect(() => validRouteSecurity(routeSecurity)).toThrowErrorMatchingInlineSnapshot(`
+      "[authz.requiredPrivileges]: array size is [0], but cannot be smaller than [1]
+      Cause: array size is [0], but cannot be smaller than [1]"
+    `);
   });
 
   it('should fail validation when anyRequired array is empty', () => {
@@ -95,7 +98,8 @@ describe('RouteSecurity validation', () => {
     expect(() => validRouteSecurity(routeSecurity)).toThrowErrorMatchingInlineSnapshot(`
       "[authz.requiredPrivileges.0]: types that failed validation:
       - [authz.requiredPrivileges.0.0.anyRequired]: array size is [0], but cannot be smaller than [2]
-      - [authz.requiredPrivileges.0.1]: expected value of type [string] but got [Object]"
+      - [authz.requiredPrivileges.0.1]: expected value of type [string] but got [Object]
+      Cause: types that failed validation:"
     `);
   });
 
@@ -112,7 +116,8 @@ describe('RouteSecurity validation', () => {
     expect(() => validRouteSecurity(routeSecurity)).toThrowErrorMatchingInlineSnapshot(`
       "[authz.requiredPrivileges.0]: types that failed validation:
       - [authz.requiredPrivileges.0.0.anyRequired]: array size is [1], but cannot be smaller than [2]
-      - [authz.requiredPrivileges.0.1]: expected value of type [string] but got [Object]"
+      - [authz.requiredPrivileges.0.1]: expected value of type [string] but got [Object]
+      Cause: types that failed validation:"
     `);
   });
 
@@ -129,7 +134,8 @@ describe('RouteSecurity validation', () => {
     expect(() => validRouteSecurity(routeSecurity)).toThrowErrorMatchingInlineSnapshot(`
       "[authz.requiredPrivileges.0]: types that failed validation:
       - [authz.requiredPrivileges.0.0.allRequired]: array size is [0], but cannot be smaller than [1]
-      - [authz.requiredPrivileges.0.1]: expected value of type [string] but got [Object]"
+      - [authz.requiredPrivileges.0.1]: expected value of type [string] but got [Object]
+      Cause: types that failed validation:"
     `);
   });
 
@@ -158,9 +164,10 @@ describe('RouteSecurity validation', () => {
           enabled: true,
         },
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[authz.reason]: expected value of type [string] but got [undefined]"`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[authz.reason]: expected value of type [string] but got [undefined]
+      Cause: expected value of type [string] but got [undefined]"
+    `);
   });
 
   it('should fail validation when authc is minimal but reason is missing', () => {
@@ -173,11 +180,11 @@ describe('RouteSecurity validation', () => {
       },
     };
 
-    expect(() =>
-      validRouteSecurity(routeSecurity as DeepPartial<RouteSecurity>)
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[authc.reason]: expected value of type [string] but got [undefined]"`
-    );
+    expect(() => validRouteSecurity(routeSecurity as DeepPartial<RouteSecurity>))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[authc.reason]: expected value of type [string] but got [undefined]
+      Cause: expected value of type [string] but got [undefined]"
+    `);
   });
 
   it('should fail validation when authc is optional but reason is missing', () => {
@@ -190,11 +197,11 @@ describe('RouteSecurity validation', () => {
       },
     };
 
-    expect(() =>
-      validRouteSecurity(routeSecurity as DeepPartial<RouteSecurity>)
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[authc.reason]: expected value of type [string] but got [undefined]"`
-    );
+    expect(() => validRouteSecurity(routeSecurity as DeepPartial<RouteSecurity>))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[authc.reason]: expected value of type [string] but got [undefined]
+      Cause: expected value of type [string] but got [undefined]"
+    `);
   });
 
   it('should fail validation when authc is disabled but reason is missing', () => {
@@ -207,9 +214,10 @@ describe('RouteSecurity validation', () => {
       },
     };
 
-    expect(() => validRouteSecurity(routeSecurity)).toThrowErrorMatchingInlineSnapshot(
-      `"[authc.reason]: expected value of type [string] but got [undefined]"`
-    );
+    expect(() => validRouteSecurity(routeSecurity)).toThrowErrorMatchingInlineSnapshot(`
+      "[authc.reason]: expected value of type [string] but got [undefined]
+      Cause: expected value of type [string] but got [undefined]"
+    `);
   });
 
   it('should pass validation when authc is minimal', () => {
@@ -307,9 +315,10 @@ describe('RouteSecurity validation', () => {
       },
     };
 
-    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(
-      `"[authz.requiredPrivileges]: anyRequired and allRequired cannot have the same values: [privilege1]"`
-    );
+    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(`
+      "[authz.requiredPrivileges]: anyRequired and allRequired cannot have the same values: [privilege1]
+      Cause: anyRequired and allRequired cannot have the same values: [privilege1]"
+    `);
   });
 
   it('should fail validation when anyRequired and allRequired have the same values in multiple entries', () => {
@@ -322,9 +331,10 @@ describe('RouteSecurity validation', () => {
       },
     };
 
-    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(
-      `"[authz.requiredPrivileges]: anyRequired and allRequired cannot have the same values: [privilege2]"`
-    );
+    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(`
+      "[authz.requiredPrivileges]: anyRequired and allRequired cannot have the same values: [privilege2]
+      Cause: anyRequired and allRequired cannot have the same values: [privilege2]"
+    `);
   });
 
   it('should fail validation when anyRequired has duplicate entries', () => {
@@ -336,9 +346,10 @@ describe('RouteSecurity validation', () => {
       },
     };
 
-    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(
-      `"[authz.requiredPrivileges]: anyRequired privileges must contain unique values"`
-    );
+    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(`
+      "[authz.requiredPrivileges]: anyRequired privileges must contain unique values
+      Cause: anyRequired privileges must contain unique values"
+    `);
   });
 
   it('should fail validation when allRequired has duplicate entries', () => {
@@ -350,9 +361,10 @@ describe('RouteSecurity validation', () => {
       },
     };
 
-    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(
-      `"[authz.requiredPrivileges]: allRequired privileges must contain unique values"`
-    );
+    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(`
+      "[authz.requiredPrivileges]: allRequired privileges must contain unique values
+      Cause: allRequired privileges must contain unique values"
+    `);
   });
 
   it('should fail validation when anyRequired has duplicates in multiple privilege entries', () => {
@@ -365,9 +377,10 @@ describe('RouteSecurity validation', () => {
       },
     };
 
-    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(
-      `"[authz.requiredPrivileges]: anyRequired privileges must contain unique values"`
-    );
+    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(`
+      "[authz.requiredPrivileges]: anyRequired privileges must contain unique values
+      Cause: anyRequired privileges must contain unique values"
+    `);
   });
 
   it('should fail validation when anyRequired has superuser privileges set', () => {
@@ -380,9 +393,10 @@ describe('RouteSecurity validation', () => {
       },
     };
 
-    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(
-      `"[authz.requiredPrivileges]: Using superuser privileges in anyRequired is not allowed"`
-    );
+    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(`
+      "[authz.requiredPrivileges]: Using superuser privileges in anyRequired is not allowed
+      Cause: Using superuser privileges in anyRequired is not allowed"
+    `);
   });
 
   it('should fail validation when allRequired combines superuser privileges set with other privileges', () => {
@@ -392,9 +406,10 @@ describe('RouteSecurity validation', () => {
       },
     };
 
-    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(
-      `"[authz.requiredPrivileges]: Combining superuser with other privileges is redundant, superuser privileges set can be only used as a standalone privilege."`
-    );
+    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(`
+      "[authz.requiredPrivileges]: Combining superuser with other privileges is redundant, superuser privileges set can be only used as a standalone privilege.
+      Cause: Combining superuser with other privileges is redundant, superuser privileges set can be only used as a standalone privilege."
+    `);
   });
 
   it('should fail validation when anyRequired has operator privileges set', () => {
@@ -407,9 +422,10 @@ describe('RouteSecurity validation', () => {
       },
     };
 
-    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(
-      `"[authz.requiredPrivileges]: Using operator privileges in anyRequired is not allowed"`
-    );
+    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(`
+      "[authz.requiredPrivileges]: Using operator privileges in anyRequired is not allowed
+      Cause: Using operator privileges in anyRequired is not allowed"
+    `);
   });
 
   it('should fail validation when operator privileges set is used as standalone', () => {
@@ -419,9 +435,10 @@ describe('RouteSecurity validation', () => {
           requiredPrivileges: [{ allRequired: [ReservedPrivilegesSet.operator] }],
         },
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[authz.requiredPrivileges]: Operator privilege requires at least one additional non-operator privilege to be defined"`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[authz.requiredPrivileges]: Operator privilege requires at least one additional non-operator privilege to be defined
+      Cause: Operator privilege requires at least one additional non-operator privilege to be defined"
+    `);
 
     expect(() =>
       validRouteSecurity({
@@ -429,9 +446,10 @@ describe('RouteSecurity validation', () => {
           requiredPrivileges: [ReservedPrivilegesSet.operator],
         },
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[authz.requiredPrivileges]: Operator privilege requires at least one additional non-operator privilege to be defined"`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[authz.requiredPrivileges]: Operator privilege requires at least one additional non-operator privilege to be defined
+      Cause: Operator privilege requires at least one additional non-operator privilege to be defined"
+    `);
   });
 
   it('should fail validation when anyOf does not satisfy minSize', () => {
@@ -446,7 +464,8 @@ describe('RouteSecurity validation', () => {
       - [authz.requiredPrivileges.0.0.allRequired.0]: types that failed validation:
        - [authz.requiredPrivileges.0.allRequired.0.0]: expected value of type [string] but got [Object]
        - [authz.requiredPrivileges.0.allRequired.0.1.anyOf]: array size is [1], but cannot be smaller than [2]
-      - [authz.requiredPrivileges.0.1]: expected value of type [string] but got [Object]"
+      - [authz.requiredPrivileges.0.1]: expected value of type [string] but got [Object]
+      Cause: types that failed validation:"
     `);
   });
 
@@ -462,7 +481,8 @@ describe('RouteSecurity validation', () => {
       - [authz.requiredPrivileges.0.0.anyRequired.0]: types that failed validation:
        - [authz.requiredPrivileges.0.anyRequired.0.0]: expected value of type [string] but got [Object]
        - [authz.requiredPrivileges.0.anyRequired.0.1.allOf]: array size is [1], but cannot be smaller than [2]
-      - [authz.requiredPrivileges.0.1]: expected value of type [string] but got [Object]"
+      - [authz.requiredPrivileges.0.1]: expected value of type [string] but got [Object]
+      Cause: types that failed validation:"
     `);
   });
 
@@ -480,9 +500,10 @@ describe('RouteSecurity validation', () => {
       },
     };
 
-    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(
-      `"[authz.requiredPrivileges]: allRequired privileges must contain unique values"`
-    );
+    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(`
+      "[authz.requiredPrivileges]: allRequired privileges must contain unique values
+      Cause: allRequired privileges must contain unique values"
+    `);
   });
 
   it('should fail validation when allOf has duplicated privileges', () => {
@@ -499,9 +520,10 @@ describe('RouteSecurity validation', () => {
       },
     };
 
-    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(
-      `"[authz.requiredPrivileges]: anyRequired privileges must contain unique values"`
-    );
+    expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(`
+      "[authz.requiredPrivileges]: anyRequired privileges must contain unique values
+      Cause: anyRequired privileges must contain unique values"
+    `);
   });
 
   it('should pass validation with valid extendedPrivileges', () => {
@@ -523,9 +545,10 @@ describe('RouteSecurity validation', () => {
           extendedPrivileges: [],
         },
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[authz.extendedPrivileges]: array size is [0], but cannot be smaller than [1]"`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[authz.extendedPrivileges]: array size is [0], but cannot be smaller than [1]
+      Cause: array size is [0], but cannot be smaller than [1]"
+    `);
   });
 
   it('should fail validation when extendedPrivileges contains a privilege set', () => {
@@ -536,9 +559,10 @@ describe('RouteSecurity validation', () => {
           extendedPrivileges: [{ anyRequired: ['readExecution', 'readManaged'] } as any],
         },
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[authz.extendedPrivileges]: extendedPrivileges must be a flat list of privilege name strings; privilege sets (anyRequired/allRequired) are not supported"`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[authz.extendedPrivileges]: extendedPrivileges must be a flat list of privilege name strings; privilege sets (anyRequired/allRequired) are not supported
+      Cause: extendedPrivileges must be a flat list of privilege name strings; privilege sets (anyRequired/allRequired) are not supported"
+    `);
   });
 
   it('should fail validation when extendedPrivileges contains duplicates', () => {
@@ -549,9 +573,10 @@ describe('RouteSecurity validation', () => {
           extendedPrivileges: ['readExecution', 'readExecution'],
         },
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[authz.extendedPrivileges]: extendedPrivileges must contain unique values"`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[authz.extendedPrivileges]: extendedPrivileges must contain unique values
+      Cause: extendedPrivileges must contain unique values"
+    `);
   });
 
   it('should fail validation when extendedPrivileges contains superuser', () => {
@@ -562,9 +587,10 @@ describe('RouteSecurity validation', () => {
           extendedPrivileges: [ReservedPrivilegesSet.superuser],
         },
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[authz.extendedPrivileges]: Using superuser privileges in extendedPrivileges is not allowed"`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[authz.extendedPrivileges]: Using superuser privileges in extendedPrivileges is not allowed
+      Cause: Using superuser privileges in extendedPrivileges is not allowed"
+    `);
   });
 
   it('should fail validation when extendedPrivileges contains operator', () => {
@@ -575,9 +601,10 @@ describe('RouteSecurity validation', () => {
           extendedPrivileges: [ReservedPrivilegesSet.operator],
         },
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[authz.extendedPrivileges]: Using operator privileges in extendedPrivileges is not allowed"`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[authz.extendedPrivileges]: Using operator privileges in extendedPrivileges is not allowed
+      Cause: Using operator privileges in extendedPrivileges is not allowed"
+    `);
   });
 
   it('should fail validation when extendedPrivileges overlaps with requiredPrivileges', () => {
@@ -588,9 +615,10 @@ describe('RouteSecurity validation', () => {
           extendedPrivileges: ['read'],
         },
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[authz]: extendedPrivileges cannot overlap with requiredPrivileges: [read]"`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[authz]: extendedPrivileges cannot overlap with requiredPrivileges: [read]
+      Cause: extendedPrivileges cannot overlap with requiredPrivileges: [read]"
+    `);
   });
 
   it('should fail validation listing all overlapping extendedPrivileges', () => {
@@ -601,9 +629,10 @@ describe('RouteSecurity validation', () => {
           extendedPrivileges: ['read', 'readExecution', 'write'],
         },
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[authz]: extendedPrivileges cannot overlap with requiredPrivileges: [read, write]"`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[authz]: extendedPrivileges cannot overlap with requiredPrivileges: [read, write]
+      Cause: extendedPrivileges cannot overlap with requiredPrivileges: [read, write]"
+    `);
   });
 
   it('should fail validation when extendedPrivileges overlaps with nested requiredPrivileges', () => {
@@ -614,9 +643,10 @@ describe('RouteSecurity validation', () => {
           extendedPrivileges: ['read'],
         },
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[authz]: extendedPrivileges cannot overlap with requiredPrivileges: [read]"`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[authz]: extendedPrivileges cannot overlap with requiredPrivileges: [read]
+      Cause: extendedPrivileges cannot overlap with requiredPrivileges: [read]"
+    `);
   });
 
   it('should fail validation when authz is disabled but extendedPrivileges is present', () => {
@@ -628,8 +658,9 @@ describe('RouteSecurity validation', () => {
           extendedPrivileges: ['readExecution'],
         },
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[authz.extendedPrivileges]: a value wasn't expected to be present"`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[authz.extendedPrivileges]: a value wasn't expected to be present
+      Cause: a value wasn't expected to be present"
+    `);
   });
 });

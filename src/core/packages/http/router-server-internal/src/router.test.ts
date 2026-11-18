@@ -428,9 +428,10 @@ describe('Router', () => {
           },
           (context, req, res) => res.ok({})
         )
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[authz.requiredPrivileges]: array size is [0], but cannot be smaller than [1]"`
-      );
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[authz.requiredPrivileges]: array size is [0], but cannot be smaller than [1]
+        Cause: array size is [0], but cannot be smaller than [1]"
+      `);
     });
 
     it('throws if disabled security config does not provide opt-out reason', () => {
@@ -449,9 +450,10 @@ describe('Router', () => {
           },
           (context, req, res) => res.ok({})
         )
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[authz.reason]: expected value of type [string] but got [undefined]"`
-      );
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[authz.reason]: expected value of type [string] but got [undefined]
+        Cause: expected value of type [string] but got [undefined]"
+      `);
     });
 
     it('should default `output: "stream" and parse: false` when no body validation is required but not a GET', () => {

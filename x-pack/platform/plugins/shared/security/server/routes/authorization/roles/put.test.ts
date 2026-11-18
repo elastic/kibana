@@ -205,25 +205,25 @@ describe('PUT role', () => {
     });
 
     test('requires name in params', () => {
-      expect(() =>
-        requestParamsSchema.validate({}, {}, 'request params')
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[request params.name]: expected value of type [string] but got [undefined]"`
-      );
+      expect(() => requestParamsSchema.validate({}, {}, 'request params'))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[request params.name]: expected value of type [string] but got [undefined]
+        Cause: expected value of type [string] but got [undefined]"
+      `);
 
-      expect(() =>
-        requestParamsSchema.validate({ name: '' }, {}, 'request params')
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[request params.name]: value has length [0] but it must have a minimum length of [1]."`
-      );
+      expect(() => requestParamsSchema.validate({ name: '' }, {}, 'request params'))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[request params.name]: value has length [0] but it must have a minimum length of [1].
+        Cause: value has length [0] but it must have a minimum length of [1]."
+      `);
     });
 
     test('requires name in params to not exceed 1024 characters', () => {
-      expect(() =>
-        requestParamsSchema.validate({ name: 'a'.repeat(1025) }, {}, 'request params')
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[request params.name]: value has length [1025] but it must have a maximum length of [1024]."`
-      );
+      expect(() => requestParamsSchema.validate({ name: 'a'.repeat(1025) }, {}, 'request params'))
+        .toThrowErrorMatchingInlineSnapshot(`
+        "[request params.name]: value has length [1025] but it must have a maximum length of [1024].
+        Cause: value has length [1025] but it must have a maximum length of [1024]."
+      `);
     });
   });
 

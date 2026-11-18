@@ -120,9 +120,10 @@ describe('taskTypeDictionary', () => {
         return sanitizeTaskDefinitions(taskDefinitions);
       };
 
-      expect(runsanitize).toThrowErrorMatchingInlineSnapshot(
-        `"[fail]: Additional properties are not allowed ('fail' was unexpected)"`
-      );
+      expect(runsanitize).toThrowErrorMatchingInlineSnapshot(`
+        "[fail]: Additional properties are not allowed ('fail' was unexpected)
+        Cause: Additional properties are not allowed ('fail' was unexpected)"
+      `);
     });
 
     it('throws a validation exception for invalid timeout on task definition', () => {
@@ -147,9 +148,10 @@ describe('taskTypeDictionary', () => {
         return sanitizeTaskDefinitions(taskDefinitions);
       };
 
-      expect(runsanitize).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid timeout \\"15 days\\". Timeout must be of the form \\"{number}{cadance}\\" where number is an integer. Example: 5m."`
-      );
+      expect(runsanitize).toThrowErrorMatchingInlineSnapshot(`
+        "Invalid timeout \\"15 days\\". Timeout must be of the form \\"{number}{cadance}\\" where number is an integer. Example: 5m.
+        Cause: Invalid timeout \\"15 days\\". Timeout must be of the form \\"{number}{cadance}\\" where number is an integer. Example: 5m."
+      `);
     });
 
     it('throws a validation exception for invalid floating point timeout on task definition', () => {
@@ -174,9 +176,10 @@ describe('taskTypeDictionary', () => {
         return sanitizeTaskDefinitions(taskDefinitions);
       };
 
-      expect(runsanitize).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid timeout \\"1.5h\\". Timeout must be of the form \\"{number}{cadance}\\" where number is an integer. Example: 5m."`
-      );
+      expect(runsanitize).toThrowErrorMatchingInlineSnapshot(`
+        "Invalid timeout \\"1.5h\\". Timeout must be of the form \\"{number}{cadance}\\" where number is an integer. Example: 5m.
+        Cause: Invalid timeout \\"1.5h\\". Timeout must be of the form \\"{number}{cadance}\\" where number is an integer. Example: 5m."
+      `);
     });
 
     it('throws a validation exception for invalid priority on task definition', () => {
@@ -202,9 +205,10 @@ describe('taskTypeDictionary', () => {
         return sanitizeTaskDefinitions(taskDefinitions);
       };
 
-      expect(runsanitize).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid priority \\"23\\". Priority must be one of Maintenance => 1,Deferrable => 40,Standard => 50,UserInteractive => 100"`
-      );
+      expect(runsanitize).toThrowErrorMatchingInlineSnapshot(`
+        "Invalid priority \\"23\\". Priority must be one of Maintenance => 1,Deferrable => 40,Standard => 50,UserInteractive => 100
+        Cause: Invalid priority \\"23\\". Priority must be one of Maintenance => 1,Deferrable => 40,Standard => 50,UserInteractive => 100"
+      `);
     });
 
     it('keeps a valid runAs definition', () => {

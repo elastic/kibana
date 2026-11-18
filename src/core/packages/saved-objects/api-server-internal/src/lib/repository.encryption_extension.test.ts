@@ -220,7 +220,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
       expect(result).toEqual(
         expect.objectContaining({
           type: nonEncryptedSO.type,
-          id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          id: expect.stringMatching(/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
           namespaces: [namespace],
         })
       );
@@ -243,7 +243,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
       expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledTimes(1);
       expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledWith(
         {
-          id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          id: expect.stringMatching(/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
           namespace,
           type: ENCRYPTED_TYPE,
         },
@@ -253,7 +253,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
       expect(mockEncryptionExt.decryptOrStripResponseAttributes).toHaveBeenCalledWith(
         expect.objectContaining({
           ...encryptedSO,
-          id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          id: expect.stringMatching(/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
         }),
         encryptedSO.attributes // original attributes
       );
@@ -335,7 +335,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
         expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledTimes(1);
         expect(mockEncryptionExt.encryptAttributes).toHaveBeenCalledWith(
           {
-            id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+            id: expect.stringMatching(/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
             namespace: expectNamespaceInDescriptor ? namespace : undefined,
             type: expectNamespaceInDescriptor ? ENCRYPTED_TYPE : MULTI_NAMESPACE_ENCRYPTED_TYPE,
           },

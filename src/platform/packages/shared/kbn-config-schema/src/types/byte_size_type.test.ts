@@ -25,17 +25,18 @@ test('handles numbers', () => {
 });
 
 test('is required by default', () => {
-  expect(() => byteSize().validate(undefined)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [ByteSize] but got [undefined]"`
-  );
+  expect(() => byteSize().validate(undefined)).toThrowErrorMatchingInlineSnapshot(`
+    "expected value of type [ByteSize] but got [undefined]
+    Cause: expected value of type [ByteSize] but got [undefined]"
+  `);
 });
 
 test('includes namespace in failure', () => {
-  expect(() =>
-    byteSize().validate(undefined, {}, 'foo-namespace')
-  ).toThrowErrorMatchingInlineSnapshot(
-    `"[foo-namespace]: expected value of type [ByteSize] but got [undefined]"`
-  );
+  expect(() => byteSize().validate(undefined, {}, 'foo-namespace'))
+    .toThrowErrorMatchingInlineSnapshot(`
+    "[foo-namespace]: expected value of type [ByteSize] but got [undefined]
+    Cause: expected value of type [ByteSize] but got [undefined]"
+  `);
 });
 
 describe('#defaultValue', () => {
@@ -106,7 +107,10 @@ describe('#min', () => {
       byteSize({
         min: '1kb',
       }).validate('1b')
-    ).toThrowErrorMatchingInlineSnapshot(`"Value must be equal to or greater than [1kb]"`);
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "Value must be equal to or greater than [1kb]
+      Cause: Value must be equal to or greater than [1kb]"
+    `);
   });
 });
 
@@ -120,42 +124,51 @@ describe('#max', () => {
   });
 
   test('returns error when larger', () => {
-    expect(() => byteSize({ max: '1kb' }).validate('1mb')).toThrowErrorMatchingInlineSnapshot(
-      `"Value must be equal to or less than [1kb]"`
-    );
+    expect(() => byteSize({ max: '1kb' }).validate('1mb')).toThrowErrorMatchingInlineSnapshot(`
+      "Value must be equal to or less than [1kb]
+      Cause: Value must be equal to or less than [1kb]"
+    `);
   });
 });
 
 test('returns error when not valid string or positive safe integer', () => {
-  expect(() => byteSize().validate(-123)).toThrowErrorMatchingInlineSnapshot(
-    `"Value in bytes is expected to be a safe positive integer."`
-  );
+  expect(() => byteSize().validate(-123)).toThrowErrorMatchingInlineSnapshot(`
+    "Value in bytes is expected to be a safe positive integer.
+    Cause: Value in bytes is expected to be a safe positive integer."
+  `);
 
-  expect(() => byteSize().validate(NaN)).toThrowErrorMatchingInlineSnapshot(
-    `"Value in bytes is expected to be a safe positive integer."`
-  );
+  expect(() => byteSize().validate(NaN)).toThrowErrorMatchingInlineSnapshot(`
+    "Value in bytes is expected to be a safe positive integer.
+    Cause: Value in bytes is expected to be a safe positive integer."
+  `);
 
-  expect(() => byteSize().validate(Infinity)).toThrowErrorMatchingInlineSnapshot(
-    `"Value in bytes is expected to be a safe positive integer."`
-  );
+  expect(() => byteSize().validate(Infinity)).toThrowErrorMatchingInlineSnapshot(`
+    "Value in bytes is expected to be a safe positive integer.
+    Cause: Value in bytes is expected to be a safe positive integer."
+  `);
 
-  expect(() => byteSize().validate(Math.pow(2, 53))).toThrowErrorMatchingInlineSnapshot(
-    `"Value in bytes is expected to be a safe positive integer."`
-  );
+  expect(() => byteSize().validate(Math.pow(2, 53))).toThrowErrorMatchingInlineSnapshot(`
+    "Value in bytes is expected to be a safe positive integer.
+    Cause: Value in bytes is expected to be a safe positive integer."
+  `);
 
-  expect(() => byteSize().validate([1, 2, 3])).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [ByteSize] but got [Array]"`
-  );
+  expect(() => byteSize().validate([1, 2, 3])).toThrowErrorMatchingInlineSnapshot(`
+    "expected value of type [ByteSize] but got [Array]
+    Cause: expected value of type [ByteSize] but got [Array]"
+  `);
 
-  expect(() => byteSize().validate(/abc/)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [ByteSize] but got [RegExp]"`
-  );
+  expect(() => byteSize().validate(/abc/)).toThrowErrorMatchingInlineSnapshot(`
+    "expected value of type [ByteSize] but got [RegExp]
+    Cause: expected value of type [ByteSize] but got [RegExp]"
+  `);
 
-  expect(() => byteSize().validate('123foo')).toThrowErrorMatchingInlineSnapshot(
-    `"Failed to parse value as byte value. Value must be either number of bytes, or follow the format <count>[b|kb|mb|gb] (e.g., '1024kb', '200mb', '1gb'), where the number is a safe positive integer."`
-  );
+  expect(() => byteSize().validate('123foo')).toThrowErrorMatchingInlineSnapshot(`
+    "Failed to parse value as byte value. Value must be either number of bytes, or follow the format <count>[b|kb|mb|gb] (e.g., '1024kb', '200mb', '1gb'), where the number is a safe positive integer.
+    Cause: Failed to parse value as byte value. Value must be either number of bytes, or follow the format <count>[b|kb|mb|gb] (e.g., '1024kb', '200mb', '1gb'), where the number is a safe positive integer."
+  `);
 
-  expect(() => byteSize().validate('123 456')).toThrowErrorMatchingInlineSnapshot(
-    `"Failed to parse value as byte value. Value must be either number of bytes, or follow the format <count>[b|kb|mb|gb] (e.g., '1024kb', '200mb', '1gb'), where the number is a safe positive integer."`
-  );
+  expect(() => byteSize().validate('123 456')).toThrowErrorMatchingInlineSnapshot(`
+    "Failed to parse value as byte value. Value must be either number of bytes, or follow the format <count>[b|kb|mb|gb] (e.g., '1024kb', '200mb', '1gb'), where the number is a safe positive integer.
+    Cause: Failed to parse value as byte value. Value must be either number of bytes, or follow the format <count>[b|kb|mb|gb] (e.g., '1024kb', '200mb', '1gb'), where the number is a safe positive integer."
+  `);
 });

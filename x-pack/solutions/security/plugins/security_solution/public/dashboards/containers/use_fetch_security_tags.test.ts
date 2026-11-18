@@ -77,7 +77,7 @@ describe('useFetchSecurityTags', () => {
 
     await waitFor(() => {
       expect(mockCreateTag).not.toHaveBeenCalled();
-      expect(result.current.tags).toEqual(expect.objectContaining(expected));
+      expect(result.current.tags).toMatchObject(expected);
     });
   });
 });

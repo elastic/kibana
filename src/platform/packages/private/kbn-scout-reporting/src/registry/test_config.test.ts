@@ -15,7 +15,8 @@ import fg from 'fast-glob';
 import path from 'node:path';
 import { testChannels } from '@kbn/scout-info';
 
-jest.mock('node:fs');
+// Jest 30 applies this mock to `fs` too, which @kbn/repo-info reads at import; the tests only spy.
+jest.mock('node:fs', () => ({ ...jest.requireActual('node:fs') }));
 jest.mock('fast-glob');
 jest.mock('../helpers/read_manifest', () => ({
   readKibanaModuleManifest: jest.fn(),

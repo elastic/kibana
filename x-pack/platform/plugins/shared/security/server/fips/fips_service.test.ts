@@ -6,10 +6,10 @@
  */
 
 const mockGetFipsFn = jest.fn();
+// Jest 30 applies this mock to `node:crypto` too, which undici needs intact.
 jest.mock('crypto', () => ({
+  ...jest.requireActual('crypto'),
   randomBytes: jest.fn(),
-  constants: jest.requireActual('crypto').constants,
-  createHash: jest.requireActual('crypto').createHash,
   get getFips() {
     return mockGetFipsFn;
   },

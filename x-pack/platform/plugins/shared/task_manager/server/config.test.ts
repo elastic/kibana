@@ -73,9 +73,10 @@ describe('config validation', () => {
     };
     expect(() => {
       configSchema.validate(config);
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"The specified monitored_stats_required_freshness (100) is invalid, as it is below the poll_interval (500)"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "The specified monitored_stats_required_freshness (100) is invalid, as it is below the poll_interval (500)
+      Cause: The specified monitored_stats_required_freshness (100) is invalid, as it is below the poll_interval (500)"
+    `);
   });
 
   test('the default required freshness of the monitored stats is poll interval with a slight buffer', () => {
@@ -221,9 +222,10 @@ describe('config validation', () => {
     };
     expect(() => {
       configSchema.validate(config);
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"[monitored_task_execution_thresholds.default]: warn_threshold (80) must be less than, or equal to, error_threshold (70)"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "[monitored_task_execution_thresholds.default]: warn_threshold (80) must be less than, or equal to, error_threshold (70)
+      Cause: warn_threshold (80) must be less than, or equal to, error_threshold (70)"
+    `);
   });
 
   test('the monitored_task_execution_thresholds allows the default warn_threshold to equal the default error_threshold', () => {
@@ -253,9 +255,10 @@ describe('config validation', () => {
     };
     expect(() => {
       configSchema.validate(config);
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"[monitored_task_execution_thresholds.custom.alerting:always-fires]: warn_threshold (90) must be less than, or equal to, error_threshold (80)"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "[monitored_task_execution_thresholds.custom.alerting:always-fires]: warn_threshold (90) must be less than, or equal to, error_threshold (80)
+      Cause: warn_threshold (90) must be less than, or equal to, error_threshold (80)"
+    `);
   });
 
   test('the monitored_task_execution_thresholds allows a custom error_threshold which is lower than the default warn_threshold', () => {
@@ -296,9 +299,10 @@ describe('config validation', () => {
     };
     expect(() => {
       configSchema.validate(config);
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"[discovery.active_nodes_lookback]: active node lookback duration must be a valid duration string"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "[discovery.active_nodes_lookback]: active node lookback duration must be a valid duration string
+      Cause: active node lookback duration must be a valid duration string"
+    `);
   });
 
   test('discovery active_nodes_lookback must be less than 5m', () => {
@@ -309,9 +313,10 @@ describe('config validation', () => {
     };
     expect(() => {
       configSchema.validate(config);
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"[discovery.active_nodes_lookback]: active node lookback duration cannot exceed five minutes"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "[discovery.active_nodes_lookback]: active node lookback duration cannot exceed five minutes
+      Cause: active node lookback duration cannot exceed five minutes"
+    `);
   });
 
   test('claim_nudge.enabled defaults to true', () => {

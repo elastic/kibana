@@ -121,15 +121,18 @@ describe('GET /internal/spaces/{spaceId}/content_summary', () => {
     const paramsSchema = (config.validate as any).params;
 
     expect(config.security?.authz).toEqual({ requiredPrivileges: ['manage_spaces'] });
-    expect(() => paramsSchema.validate({})).toThrowErrorMatchingInlineSnapshot(
-      `"[spaceId]: expected value of type [string] but got [undefined]"`
-    );
-    expect(() => paramsSchema.validate({ spaceId: '' })).toThrowErrorMatchingInlineSnapshot(
-      `"[spaceId]: value has length [0] but it must have a minimum length of [1]."`
-    );
-    expect(() => paramsSchema.validate({ spaceId: '*' })).toThrowErrorMatchingInlineSnapshot(
-      `"[spaceId]: lower case, a-z, 0-9, \\"_\\", and \\"-\\" are allowed."`
-    );
+    expect(() => paramsSchema.validate({})).toThrowErrorMatchingInlineSnapshot(`
+      "[spaceId]: expected value of type [string] but got [undefined]
+      Cause: expected value of type [string] but got [undefined]"
+    `);
+    expect(() => paramsSchema.validate({ spaceId: '' })).toThrowErrorMatchingInlineSnapshot(`
+      "[spaceId]: value has length [0] but it must have a minimum length of [1].
+      Cause: value has length [0] but it must have a minimum length of [1]."
+    `);
+    expect(() => paramsSchema.validate({ spaceId: '*' })).toThrowErrorMatchingInlineSnapshot(`
+      "[spaceId]: lower case, a-z, 0-9, \\"_\\", and \\"-\\" are allowed.
+      Cause: lower case, a-z, 0-9, \\"_\\", and \\"-\\" are allowed."
+    `);
   });
 
   it('returns http/403 when the license is invalid.', async () => {

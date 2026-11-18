@@ -23,9 +23,10 @@ describe('#id', () => {
         ...defaultProperties,
         id: undefined,
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[id]: expected value of type [string] but got [undefined]"`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[id]: expected value of type [string] but got [undefined]
+      Cause: expected value of type [string] but got [undefined]"
+    `);
   });
 
   test('allows lowercase a-z, 0-9, "_" and "-"', () => {
@@ -43,9 +44,10 @@ describe('#id', () => {
         ...defaultProperties,
         id: 'Foo',
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[id]: must be lower case, a-z, 0-9, '_', and '-' are allowed"`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[id]: must be lower case, a-z, 0-9, '_', and '-' are allowed
+      Cause: must be lower case, a-z, 0-9, '_', and '-' are allowed"
+    `);
   });
 
   test(`doesn't allow an empty string`, () => {
@@ -54,9 +56,10 @@ describe('#id', () => {
         ...defaultProperties,
         id: '',
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[id]: must be lower case, a-z, 0-9, '_', and '-' are allowed"`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[id]: must be lower case, a-z, 0-9, '_', and '-' are allowed
+      Cause: must be lower case, a-z, 0-9, '_', and '-' are allowed"
+    `);
   });
 
   ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '+', ',', '.', '/', '?'].forEach(
@@ -97,9 +100,10 @@ describe('#disabledFeatures', () => {
         ...defaultProperties,
         disabledFeatures: 'foo',
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[disabledFeatures]: could not parse array value from json input"`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[disabledFeatures]: could not parse array value from json input
+      Cause: could not parse array value from json input"
+    `);
   });
 
   test('allows an array of strings', () => {
@@ -117,9 +121,10 @@ describe('#disabledFeatures', () => {
         ...defaultProperties,
         disabledFeatures: ['foo', true],
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[disabledFeatures.1]: expected value of type [string] but got [boolean]"`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[disabledFeatures.1]: expected value of type [string] but got [boolean]
+      Cause: expected value of type [string] but got [boolean]"
+    `);
   });
 });
 
@@ -139,9 +144,10 @@ describe('#color', () => {
         ...defaultProperties,
         color: '',
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[color]: must be a 6 digit hex color, starting with a #"`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[color]: must be a 6 digit hex color, starting with a #
+      Cause: must be a 6 digit hex color, starting with a #"
+    `);
   });
 
   test(`allows lower case hex color code`, () => {
@@ -177,9 +183,10 @@ describe('#color', () => {
         ...defaultProperties,
         color: '123456',
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[color]: must be a 6 digit hex color, starting with a #"`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[color]: must be a 6 digit hex color, starting with a #
+      Cause: must be a 6 digit hex color, starting with a #"
+    `);
   });
 
   test(`cannot exceed 6 digits following the hash`, () => {
@@ -188,9 +195,10 @@ describe('#color', () => {
         ...defaultProperties,
         color: '1234567',
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[color]: must be a 6 digit hex color, starting with a #"`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[color]: must be a 6 digit hex color, starting with a #
+      Cause: must be a 6 digit hex color, starting with a #"
+    `);
   });
 
   test(`cannot be fewer than 6 digits following the hash`, () => {
@@ -199,9 +207,10 @@ describe('#color', () => {
         ...defaultProperties,
         color: '12345',
       })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[color]: must be a 6 digit hex color, starting with a #"`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[color]: must be a 6 digit hex color, starting with a #
+      Cause: must be a 6 digit hex color, starting with a #"
+    `);
   });
 });
 
@@ -220,17 +229,20 @@ describe('#initials', () => {
   });
 
   test('cannot exceed 2 characters', () => {
-    expect(() =>
-      spaceBaseSchema.validate({ ...defaultProperties, initials: 'ABC' })
-    ).toThrowErrorMatchingInlineSnapshot(`"[initials]: must have at most 2 characters"`);
+    expect(() => spaceBaseSchema.validate({ ...defaultProperties, initials: 'ABC' }))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[initials]: must have at most 2 characters
+      Cause: must have at most 2 characters"
+    `);
   });
 
   test('cannot exceed the code unit cap', () => {
     expect(() =>
       spaceBaseSchema.validate({ ...defaultProperties, initials: `a${'\u0301'.repeat(64)}` })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[initials]: value has length [65] but it must have a maximum length of [64]."`
-    );
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[initials]: value has length [65] but it must have a maximum length of [64].
+      Cause: value has length [65] but it must have a maximum length of [64]."
+    `);
   });
 });
 
@@ -250,7 +262,10 @@ describe('#imageUrl', () => {
         ...defaultProperties,
         imageUrl: 'notValid',
       })
-    ).toThrowErrorMatchingInlineSnapshot(`"[imageUrl]: must start with 'data:image'"`);
+    ).toThrowErrorMatchingInlineSnapshot(`
+      "[imageUrl]: must start with 'data:image'
+      Cause: must start with 'data:image'"
+    `);
   });
 
   test(`checking that a valid image is accepted as imageUrl`, () => {
@@ -284,7 +299,8 @@ describe('#solution', () => {
       - [solution.0]: expected value to equal [security]
       - [solution.1]: expected value to equal [oblt]
       - [solution.2]: expected value to equal [es]
-      - [solution.3]: expected value to equal [classic]"
+      - [solution.3]: expected value to equal [classic]
+      Cause: types that failed validation:"
     `);
 
     expect(() =>
@@ -307,11 +323,11 @@ describe('#projectRouting', () => {
   });
 
   it('should throw error if projectRouting is not a string', () => {
-    expect(() =>
-      spaceBaseSchema.validate({ ...defaultProperties, projectRouting: 123 })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[projectRouting]: expected value of type [string] but got [number]"`
-    );
+    expect(() => spaceBaseSchema.validate({ ...defaultProperties, projectRouting: 123 }))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[projectRouting]: expected value of type [string] but got [number]
+      Cause: expected value of type [string] but got [number]"
+    `);
   });
 
   it('should allow empty string as projectRouting', () => {

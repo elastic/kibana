@@ -46,7 +46,7 @@ describe('getValidColumns', () => {
     if (expected === null) {
       expect(getValidColumns(...input)).toBeNull();
     } else {
-      expect(getValidColumns(...input)).toEqual(expect.objectContaining(expected));
+      expect(getValidColumns(...input)).toMatchObject(expected);
     }
   });
 });

@@ -68,15 +68,18 @@ describe('Update profile routes', () => {
 
     it('correctly defines route.', () => {
       const bodySchema = (routeConfig.validate as any).body as ObjectType;
-      expect(() => bodySchema.validate(0)).toThrowErrorMatchingInlineSnapshot(
-        `"expected a plain object value, but found [number] instead."`
-      );
-      expect(() => bodySchema.validate('avatar')).toThrowErrorMatchingInlineSnapshot(
-        `"could not parse object value from json input"`
-      );
-      expect(() => bodySchema.validate(true)).toThrowErrorMatchingInlineSnapshot(
-        `"expected a plain object value, but found [boolean] instead."`
-      );
+      expect(() => bodySchema.validate(0)).toThrowErrorMatchingInlineSnapshot(`
+        "expected a plain object value, but found [number] instead.
+        Cause: expected a plain object value, but found [number] instead."
+      `);
+      expect(() => bodySchema.validate('avatar')).toThrowErrorMatchingInlineSnapshot(`
+        "could not parse object value from json input
+        Cause: could not parse object value from json input"
+      `);
+      expect(() => bodySchema.validate(true)).toThrowErrorMatchingInlineSnapshot(`
+        "expected a plain object value, but found [boolean] instead.
+        Cause: expected a plain object value, but found [boolean] instead."
+      `);
 
       expect(bodySchema.validate({})).toEqual({});
       expect(
@@ -210,7 +213,8 @@ describe('Update profile routes', () => {
       ).toThrowErrorMatchingInlineSnapshot(`
         "[avatar.initials]: types that failed validation:
         - [avatar.initials.0]: value has length [1025] but it must have a maximum length of [1024].
-        - [avatar.initials.1]: expected value to equal [null]"
+        - [avatar.initials.1]: expected value to equal [null]
+        Cause: types that failed validation:"
       `);
     });
 
@@ -233,7 +237,8 @@ describe('Update profile routes', () => {
       ).toThrowErrorMatchingInlineSnapshot(`
         "[avatar.color]: types that failed validation:
         - [avatar.color.0]: value has length [1025] but it must have a maximum length of [1024].
-        - [avatar.color.1]: expected value to equal [null]"
+        - [avatar.color.1]: expected value to equal [null]
+        Cause: types that failed validation:"
       `);
     });
 

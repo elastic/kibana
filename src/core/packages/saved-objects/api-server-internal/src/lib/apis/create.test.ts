@@ -377,7 +377,7 @@ describe('#create', () => {
         expect(client.create).toHaveBeenNthCalledWith(
           1,
           expect.objectContaining({
-            id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+            id: expect.stringMatching(/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
           }),
           expect.anything()
         );
@@ -385,7 +385,7 @@ describe('#create', () => {
         expect(client.create).toHaveBeenNthCalledWith(
           2,
           expect.objectContaining({
-            id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+            id: expect.stringMatching(/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
           }),
           expect.anything()
         );

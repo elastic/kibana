@@ -38,11 +38,11 @@ describe('getBulkCreateOrUpdatePayloadSchema', () => {
   it('should throw an error for missing roles', () => {
     const payload = {};
 
-    expect(() =>
-      bulkCreateOrUpdatePayloadSchema.validate(payload)
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[roles]: expected value of type [object] but got [undefined]"`
-    );
+    expect(() => bulkCreateOrUpdatePayloadSchema.validate(payload))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[roles]: expected value of type [object] but got [undefined]
+      Cause: expected value of type [object] but got [undefined]"
+    `);
   });
 
   it('should throw an error for invalid role structure', () => {
@@ -52,11 +52,11 @@ describe('getBulkCreateOrUpdatePayloadSchema', () => {
       },
     };
 
-    expect(() =>
-      bulkCreateOrUpdatePayloadSchema.validate(payload)
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[roles.role1]: could not parse object value from json input"`
-    );
+    expect(() => bulkCreateOrUpdatePayloadSchema.validate(payload))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[roles.role1]: could not parse object value from json input
+      Cause: could not parse object value from json input"
+    `);
   });
 
   it('should throw an error when too many roles are provided', () => {

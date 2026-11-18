@@ -125,9 +125,10 @@ describe('prepareVersionedRouteValidation', () => {
             },
           },
         })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[authz.requiredPrivileges]: array size is [0], but cannot be smaller than [1]"`
-      );
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[authz.requiredPrivileges]: array size is [0], but cannot be smaller than [1]
+        Cause: array size is [0], but cannot be smaller than [1]"
+      `);
     });
 
     it('throws error if reason is not provided with disabled authz', () => {
@@ -142,9 +143,10 @@ describe('prepareVersionedRouteValidation', () => {
             },
           },
         })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[authz.reason]: expected value of type [string] but got [undefined]"`
-      );
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[authz.reason]: expected value of type [string] but got [undefined]
+        Cause: expected value of type [string] but got [undefined]"
+      `);
     });
 
     it('passes through valid security configuration with enabled authz', () => {

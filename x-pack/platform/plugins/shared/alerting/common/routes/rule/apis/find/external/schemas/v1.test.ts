@@ -30,9 +30,10 @@ describe('findRulesRequestQuerySchema', () => {
         findRulesRequestQuerySchema.validate({
           sort_field: 'monitoring.execution.calculated_metrics.success_ratio',
         })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[sort_field]: Sort is not supported on this field monitoring.execution.calculated_metrics.success_ratio"`
-      );
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[sort_field]: Sort is not supported on this field monitoring.execution.calculated_metrics.success_ratio
+        Cause: Sort is not supported on this field monitoring.execution.calculated_metrics.success_ratio"
+      `);
     });
   });
 
@@ -58,9 +59,10 @@ describe('findRulesRequestQuerySchema', () => {
         findRulesRequestQuerySchema.validate({
           search_fields: ['name', 'tags', 'monitoring.execution.calculated_metrics.success_ratio'],
         })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[search_fields]: Search field monitoring.execution.calculated_metrics.success_ratio is not supported"`
-      );
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[search_fields]: Search field monitoring.execution.calculated_metrics.success_ratio is not supported
+        Cause: Search field monitoring.execution.calculated_metrics.success_ratio is not supported"
+      `);
     });
   });
 
@@ -97,9 +99,10 @@ describe('findRulesRequestQuerySchema', () => {
           filter:
             'alert.attributes.name: "Rule I" and alert.attributes.tags: "fast" and alert.attributes.monitoring.execution.calculated_metrics.success_ratio > 50',
         })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[filter]: Filter is not supported on this field alert.attributes.name: \\"Rule I\\" and alert.attributes.tags: \\"fast\\" and alert.attributes.monitoring.execution.calculated_metrics.success_ratio > 50"`
-      );
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[filter]: Filter is not supported on this field alert.attributes.name: \\"Rule I\\" and alert.attributes.tags: \\"fast\\" and alert.attributes.monitoring.execution.calculated_metrics.success_ratio > 50
+        Cause: Filter is not supported on this field alert.attributes.name: \\"Rule I\\" and alert.attributes.tags: \\"fast\\" and alert.attributes.monitoring.execution.calculated_metrics.success_ratio > 50"
+      `);
     });
 
     test('should throw an error, when a nested filter contains the field to exclude', () => {
@@ -108,9 +111,10 @@ describe('findRulesRequestQuerySchema', () => {
           filter:
             'alert.attributes.name: "Rule I" and alert.attributes.tags: "fast" and alert.attributes.snoozeSchedule:{ duration: 10000 }',
         })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[filter]: Filter is not supported on this field alert.attributes.name: \\"Rule I\\" and alert.attributes.tags: \\"fast\\" and alert.attributes.snoozeSchedule:{ duration: 10000 }"`
-      );
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[filter]: Filter is not supported on this field alert.attributes.name: \\"Rule I\\" and alert.attributes.tags: \\"fast\\" and alert.attributes.snoozeSchedule:{ duration: 10000 }
+        Cause: Filter is not supported on this field alert.attributes.name: \\"Rule I\\" and alert.attributes.tags: \\"fast\\" and alert.attributes.snoozeSchedule:{ duration: 10000 }"
+      `);
     });
 
     test('should throw an error, when filtering contains a property that is not valid', () => {
@@ -119,9 +123,10 @@ describe('findRulesRequestQuerySchema', () => {
           filter:
             'alert.attributes.name: "Rule I" and alert.attributes.tags: "fast" and alert.attributes.mapped_params.risk_score > 50',
         })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"[filter]: Filter is not supported on this field alert.attributes.name: \\"Rule I\\" and alert.attributes.tags: \\"fast\\" and alert.attributes.mapped_params.risk_score > 50"`
-      );
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[filter]: Filter is not supported on this field alert.attributes.name: \\"Rule I\\" and alert.attributes.tags: \\"fast\\" and alert.attributes.mapped_params.risk_score > 50
+        Cause: Filter is not supported on this field alert.attributes.name: \\"Rule I\\" and alert.attributes.tags: \\"fast\\" and alert.attributes.mapped_params.risk_score > 50"
+      `);
     });
   });
 });

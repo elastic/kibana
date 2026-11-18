@@ -281,9 +281,10 @@ describe('updateConnectorRoute', () => {
       config: { foo: true },
       secrets: { key: 'i8oh34yf9783y39' },
     };
-    expect(() => updateConnectorBodySchema.validate(body)).toThrowErrorMatchingInlineSnapshot(
-      `"[name]: value '' is not valid"`
-    );
+    expect(() => updateConnectorBodySchema.validate(body)).toThrowErrorMatchingInlineSnapshot(`
+      "[name]: value '' is not valid
+      Cause: value '' is not valid"
+    `);
   });
 
   test('rejects names, ids, and config keys past the max length', () => {

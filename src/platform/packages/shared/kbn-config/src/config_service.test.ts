@@ -399,11 +399,11 @@ test('throws if reading "enabled" when it is not present in the schema', async (
     })
   );
 
-  await expect(
-    async () => await configService.isEnabledAtPath('foo')
-  ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"[foo]: enabled status cannot be changed. Please, remove [foo.enabled] from the configuration file."`
-  );
+  await expect(async () => await configService.isEnabledAtPath('foo')).rejects
+    .toThrowErrorMatchingInlineSnapshot(`
+    "[foo]: enabled status cannot be changed. Please, remove [foo.enabled] from the configuration file.
+    Cause: enabled status cannot be changed. Please, remove [foo.enabled] from the configuration file."
+  `);
 });
 
 test('throws if reading "enabled" when no schema exists', async () => {
@@ -481,9 +481,10 @@ test('throws during validation if any schema is invalid', async () => {
   await configService.setSchema('stringKey', schema.string());
   await configService.setSchema('numberKey', schema.number());
 
-  await expect(configService.validate()).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"[config validation of [stringKey]]: expected value of type [string] but got [number]"`
-  );
+  await expect(configService.validate()).rejects.toThrowErrorMatchingInlineSnapshot(`
+    "[config validation of [stringKey]]: expected value of type [string] but got [number]
+    Cause: expected value of type [string] but got [number]"
+  `);
 });
 
 test('logs deprecation warning during validation', async () => {
@@ -738,18 +739,20 @@ describe('Dynamic Overrides', () => {
   });
 
   test('throws validation error when attempted to set an override that has not been registered as dynamic', () => {
-    expect(() =>
-      configService.setDynamicConfigOverrides({ 'namespace1.key': 'another-value' })
-    ).toThrowErrorMatchingInlineSnapshot(`"[namespace1.key]: not a valid dynamic option"`);
+    expect(() => configService.setDynamicConfigOverrides({ 'namespace1.key': 'another-value' }))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[namespace1.key]: not a valid dynamic option
+      Cause: not a valid dynamic option"
+    `);
   });
 
   test('throws validation error when a registered as dynamic option is invalid', () => {
     configService.addDynamicConfigPaths('namespace1', ['key']);
-    expect(() =>
-      configService.setDynamicConfigOverrides({ 'namespace1.key': 1 })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"[config validation of [namespace1].key]: expected value of type [string] but got [number]"`
-    );
+    expect(() => configService.setDynamicConfigOverrides({ 'namespace1.key': 1 }))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[config validation of [namespace1].key]: expected value of type [string] but got [number]
+      Cause: expected value of type [string] but got [number]"
+    `);
   });
 
   test('overrides the static settings with the dynamic ones', async () => {

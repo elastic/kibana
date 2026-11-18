@@ -78,13 +78,15 @@ describe('Login view routes', () => {
         unknown: 1,
       });
 
-      expect(() => queryValidator.validate({ next: 1 })).toThrowErrorMatchingInlineSnapshot(
-        `"[next]: expected value of type [string] but got [number]"`
-      );
+      expect(() => queryValidator.validate({ next: 1 })).toThrowErrorMatchingInlineSnapshot(`
+        "[next]: expected value of type [string] but got [number]
+        Cause: expected value of type [string] but got [number]"
+      `);
 
-      expect(() => queryValidator.validate({ msg: 1 })).toThrowErrorMatchingInlineSnapshot(
-        `"[msg]: expected value of type [string] but got [number]"`
-      );
+      expect(() => queryValidator.validate({ msg: 1 })).toThrowErrorMatchingInlineSnapshot(`
+        "[msg]: expected value of type [string] but got [number]
+        Cause: expected value of type [string] but got [number]"
+      `);
     });
 
     it('redirects user to the root page if they are authenticated or login is disabled.', async () => {
