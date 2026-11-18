@@ -65,7 +65,6 @@ const ebtAction = {
     COPY_PROMPT: 'copy_prompt',
   },
   description: {
-    EDIT: 'edit_description',
     SAVE: 'save_description',
     CANCEL: 'cancel_description',
   },
@@ -107,7 +106,6 @@ const ebtAction = {
     INTERACT_FEEDBACK_AGENT: 'interact_feedback_agent',
   },
   listKi: {
-    DEST_LINK: 'open_destination',
     DISCOVER_LINK: 'open_ki_discover',
     FILTER_TYPE: 'filter_type',
     FILTER_STATUS: 'filter_status',
