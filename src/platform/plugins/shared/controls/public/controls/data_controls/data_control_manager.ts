@@ -26,10 +26,12 @@ import {
 } from '@kbn/controls-constants';
 import type { DataControlState } from '@kbn/controls-schemas';
 
+import { isEsqlFilterableSource } from '@kbn/data-source';
 import type { FilterableField, FilterableSource } from '@kbn/data-source';
 import type { Filter } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
+import { appendStatsByToQuery, formatEsqlIdentifier, formatEsqlSources } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import { type StateComparators } from '@kbn/presentation-publishing';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
@@ -41,7 +43,6 @@ import type { DataControlApi, DataControlFieldFormatter, ValuesSourceFetchPlan }
 import { initializeLabelManager, defaultControlLabelComparators } from '../control_labels';
 import { getESQLSingleColumnValues } from '../../../common/options_list';
 import { getControlsTimezone } from '../utils';
-import { getEsqlSourceFieldQuery } from './utils';
 import { getDataViewIdFromESQLQuery } from '../utils/get_data_view_id_from_esql_query';
 
 export const defaultDataControlComparators: StateComparators<DataControlState> = {
@@ -316,9 +317,21 @@ export const initializeDataControlManager = async <EditorState extends object = 
         if (valuesSource === ControlValuesSource.ESQL) {
           return { fetchMode: 'esql', query: esqlQuery };
         }
-        // A field control on an ES|QL source has no data view to search, so it runs a generated query.
-        const generatedQuery = getEsqlSourceFieldQuery(nextDataSources?.[0], field);
-        return generatedQuery ? { fetchMode: 'esql', query: generatedQuery } : { fetchMode: 'dsl' };
+        // An ES|QL source has no data view to search, so a field control on it runs a generated query.
+        const dataSource = nextDataSources?.[0];
+        if (dataSource && isEsqlFilterableSource(dataSource)) {
+          return {
+            fetchMode: 'esql',
+            // The field is not loaded yet when it is undefined
+            query: field
+              ? appendStatsByToQuery(
+                  `FROM ${formatEsqlSources(dataSource.title)}`,
+                  formatEsqlIdentifier(field.name)
+                )
+              : undefined,
+          };
+        }
+        return { fetchMode: 'dsl' };
       }),
       distinctUntilChanged(isEqual)
     )

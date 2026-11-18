@@ -8,20 +8,16 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { FilterableField, FilterableSource } from '@kbn/data-source';
+import type { FilterableSource } from '@kbn/data-source';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { FetchContext } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
 import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
 import { dataService, dataViewsService } from '../../../services/kibana_services';
 import { getESQLSingleColumnValues } from '../../../../common/options_list';
 import { getControlsTimezone } from '../../utils';
-import {
-  buildESQLPreFilter,
-  getEsqlSourceFieldQuery,
-  getFetchContextFilters,
-  getFetchContextTimeRange,
-} from '../utils';
+import { buildESQLPreFilter, getFetchContextFilters, getFetchContextTimeRange } from '../utils';
 import type { DataControlStateManager } from '../data_control_manager';
 
 export function hasNoResults$({
@@ -43,6 +39,7 @@ export function hasNoResults$({
     api.appliedFilters$,
     api.useGlobalFilters$,
     api.ignoreValidations$,
+    api.valuesSourceFetchPlan$,
   ]).pipe(
     tap(() => {
       if (prevRequestAbortController) {
@@ -50,33 +47,59 @@ export function hasNoResults$({
         prevRequestAbortController = undefined;
       }
     }),
-    switchMap(async ([controlFetchContext, rangeFilters, useGlobalFilters, ignoreValidations]) => {
-      const dataSource = api.dataSources$?.value?.[0];
-      const rangeFilter = rangeFilters?.[0];
-      if (!dataSource || !rangeFilter || ignoreValidations) {
-        return false;
-      }
-      const fieldName = api.fieldName$.value;
-      const field = fieldName ? dataSource.getFieldByName(fieldName) : undefined;
+    switchMap(
+      async ([
+        controlFetchContext,
+        rangeFilters,
+        useGlobalFilters,
+        ignoreValidations,
+        valuesSourceFetchPlan,
+      ]) => {
+        const dataSource = api.dataSources$?.value?.[0];
+        const rangeFilter = rangeFilters?.[0];
+        if (!dataSource || !rangeFilter || ignoreValidations) {
+          return false;
+        }
+        const esqlQuery =
+          valuesSourceFetchPlan.fetchMode === 'esql' ? valuesSourceFetchPlan.query : undefined;
+        // An ES|QL control without a query yet has nothing to validate
+        if (valuesSourceFetchPlan.fetchMode === 'esql' && !esqlQuery) {
+          return false;
+        }
+        const timeRange = getFetchContextTimeRange(controlFetchContext, useGlobalFilters);
+        const filters = getFetchContextFilters(controlFetchContext, useGlobalFilters);
 
-      try {
-        setIsLoading(true);
-        const abortController = new AbortController();
-        prevRequestAbortController = abortController;
-        return await hasNoResults({
-          abortSignal: abortController.signal,
-          dataSource,
-          field,
-          rangeFilter,
-          ...controlFetchContext,
-          timeRange: getFetchContextTimeRange(controlFetchContext, useGlobalFilters),
-          filters: getFetchContextFilters(controlFetchContext, useGlobalFilters),
-        });
-      } catch (error) {
-        // Ignore error, validation is not required for control to function properly
-        return false;
+        try {
+          setIsLoading(true);
+          const abortController = new AbortController();
+          prevRequestAbortController = abortController;
+          if (esqlQuery) {
+            return await hasNoEsqlResults({
+              abortSignal: abortController.signal,
+              dataSource,
+              esqlQuery,
+              rangeFilter,
+              query: controlFetchContext.query,
+              timeRange,
+              filters,
+            });
+          }
+          return await hasNoDslResults({
+            abortSignal: abortController.signal,
+            dataSource,
+            rangeFilter,
+            query: isOfAggregateQueryType(controlFetchContext.query)
+              ? undefined
+              : controlFetchContext.query,
+            timeRange,
+            filters,
+          });
+        } catch (error) {
+          // Ignore error, validation is not required for control to function properly
+          return false;
+        }
       }
-    }),
+    ),
     tap(() => {
       setIsLoading(false);
     })
@@ -93,10 +116,10 @@ export function hasNoResults$({
   };
 }
 
-export async function hasNoResults({
+export async function hasNoEsqlResults({
   abortSignal,
   dataSource,
-  field,
+  esqlQuery,
   filters,
   query,
   rangeFilter,
@@ -104,35 +127,48 @@ export async function hasNoResults({
 }: {
   abortSignal: AbortSignal;
   dataSource: FilterableSource;
-  field?: FilterableField;
+  esqlQuery: string;
   filters?: Filter[];
   query?: Query | AggregateQuery;
   rangeFilter: Filter;
   timeRange?: TimeRange;
 }): Promise<boolean> {
-  const esql = getEsqlSourceFieldQuery(dataSource, field);
-  if (esql) {
-    // The values of the query that are in the range: there are none when the range has no results
-    const result = await getESQLSingleColumnValues({
-      query: `${esql}\n| LIMIT 1`,
-      filter: buildESQLPreFilter({
-        fetchContext: { query, filters: [...(filters ?? []), rangeFilter] },
-        useGlobalFilters: true,
-        dataSource,
-        timeRange,
-        esqlQuery: esql,
-      }),
-      signal: abortSignal,
-      search: dataService.search.search,
-      esqlVariables: [],
-      timezone: getControlsTimezone(),
-    });
-    if (!getESQLSingleColumnValues.isSuccess(result)) {
-      throw result.errors[0];
-    }
-    return getESQLSingleColumnValues.hasNoResults(result);
+  // The values of the query that are in the range: there are none when the range has no results
+  const result = await getESQLSingleColumnValues({
+    query: `${esqlQuery}\n| LIMIT 1`,
+    filter: buildESQLPreFilter({
+      fetchContext: { query, filters: [...(filters ?? []), rangeFilter] },
+      useGlobalFilters: true,
+      dataSource,
+      timeRange,
+      esqlQuery,
+    }),
+    signal: abortSignal,
+    search: dataService.search.search,
+    esqlVariables: [],
+    timezone: getControlsTimezone(),
+  });
+  if (!getESQLSingleColumnValues.isSuccess(result)) {
+    throw result.errors[0];
   }
+  return getESQLSingleColumnValues.hasNoResults(result);
+}
 
+export async function hasNoDslResults({
+  abortSignal,
+  dataSource,
+  filters,
+  query,
+  rangeFilter,
+  timeRange,
+}: {
+  abortSignal: AbortSignal;
+  dataSource: FilterableSource;
+  filters?: Filter[];
+  query?: Query;
+  rangeFilter: Filter;
+  timeRange?: TimeRange;
+}): Promise<boolean> {
   const dataView = await dataViewsService.get(dataSource.id ?? '');
 
   const searchSource = await dataService.search.searchSource.create();

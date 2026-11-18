@@ -35,8 +35,7 @@ export interface PublishesField {
  * How `valuesSource$` is executed, based on the configured `ControlValuesSource` and the type of
  * the data source.
  * - `esql`: values are fetched with an ES|QL query. `query` is the user supplied query for
- *   `ControlValuesSource.ESQL`, undefined until one is set, and a generated query for
- *   `ControlValuesSource.FIELD`.
+ *   `ControlValuesSource.ESQL` and a generated query for `ControlValuesSource.FIELD`.
  * - `dsl`: values are fetched with a DSL request on a data view field.
  */
 export type ValuesSourceFetchPlan = { fetchMode: 'esql'; query?: string } | { fetchMode: 'dsl' };
