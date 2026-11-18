@@ -231,7 +231,8 @@ export const deliverCallbackEvents = ({
   });
 };
 
-const readAttachments = async ({
+/** Reads the attachments of the execution's stored conversation, as its owner. */
+export const readAttachments = async ({
   execution,
   request,
   conversationService,

@@ -6,14 +6,19 @@
  */
 
 import type {
+  AskUserQuestionAnswer,
   AskUserQuestionPrompt,
   ConfirmationPrompt,
   PromptRequest,
+  PromptResponse,
 } from '@kbn/agent-builder-common/agents/prompts';
 import {
   isAskUserQuestionPrompt,
+  isAskUserQuestionPromptResponse,
   isAuthorizationPrompt,
+  isAuthorizationPromptResponse,
   isConfirmationPrompt,
+  isConfirmationPromptResponse,
 } from '@kbn/agent-builder-common/agents/prompts';
 import { i18n } from '@kbn/i18n';
 import type { ComponentsNode } from '@kbn/isomer-components';
@@ -85,6 +90,20 @@ const labels = {
   answerInKibana: i18n.translate('xpack.agentBuilder.surfaces.prompts.answerInKibana', {
     defaultMessage: 'Open this conversation in Kibana to answer.',
   }),
+  skipped: i18n.translate('xpack.agentBuilder.surfaces.prompts.skipped', {
+    defaultMessage: 'Skipped',
+  }),
+  authorized: i18n.translate('xpack.agentBuilder.surfaces.prompts.authorized', {
+    defaultMessage: 'Authorized',
+  }),
+  declined: i18n.translate('xpack.agentBuilder.surfaces.prompts.declined', {
+    defaultMessage: 'Declined',
+  }),
+  answer: (answer: string) =>
+    i18n.translate('xpack.agentBuilder.surfaces.prompts.answer', {
+      defaultMessage: 'Answer: {answer}',
+      values: { answer },
+    }),
   authorization: (connectorName: string) =>
     i18n.translate('xpack.agentBuilder.surfaces.prompts.authorization', {
       defaultMessage: '**{connectorName}** needs your authorization to continue.',
@@ -279,3 +298,65 @@ export const promptsToNodes = (
     ...(replyAnswers ? [] : [markdown(labels.answerInKibana)]),
   ];
 };
+
+/** The longest answer shown, which with its label fits a `context` item. */
+const ANSWER_MAX_LENGTH = 400;
+
+const answered = (answer: string): ComponentsNode => ({
+  type: 'context',
+  items: [
+    {
+      text: labels.answer(
+        answer.length > ANSWER_MAX_LENGTH ? `${answer.slice(0, ANSWER_MAX_LENGTH)}…` : answer
+      ),
+    },
+  ],
+});
+
+const answerText = (
+  { options }: Question,
+  { choice = [], custom }: AskUserQuestionAnswer = {}
+): string => {
+  const chosen = choice.flatMap((index) => options[index]?.label ?? []);
+
+  return [...chosen, ...(custom ? [custom] : [])].join(', ') || labels.skipped;
+};
+
+const resolvedPromptNodes = (
+  prompt: PromptRequest,
+  response: PromptResponse | undefined
+): ComponentsNode[] => {
+  if (isConfirmationPrompt(prompt)) {
+    const { confirm, cancel } = confirmationLabels(prompt);
+
+    return [
+      confirmationText(prompt),
+      ...(response && isConfirmationPromptResponse(response)
+        ? [answered(response.allow ? confirm : cancel)]
+        : []),
+    ];
+  }
+
+  if (isAuthorizationPrompt(prompt)) {
+    return [
+      markdown(labels.authorization(prompt.connector_name)),
+      ...(response && isAuthorizationPromptResponse(response)
+        ? [answered(response.authorized ? labels.authorized : labels.declined)]
+        : []),
+    ];
+  }
+
+  const answers = response && isAskUserQuestionPromptResponse(response) ? response.answers : [];
+
+  return prompt.questions.flatMap((question, index) => [
+    markdown(question.question),
+    answered(answerText(question, answers[index])),
+  ]);
+};
+
+/** The nodes that show a round's prompts once they were answered: each with its answer, and nothing to act on. */
+export const resolvedPromptsToNodes = (
+  prompts: PromptRequest[],
+  responses: Record<string, PromptResponse>
+): ComponentsNode[] =>
+  prompts.flatMap((prompt) => resolvedPromptNodes(prompt, responses[prompt.id]));
