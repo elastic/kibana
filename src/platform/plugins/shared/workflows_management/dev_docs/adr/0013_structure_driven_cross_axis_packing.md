@@ -49,7 +49,7 @@ reachability.
   | sequence | one spine column |
   | fork | branches side by side in declaration order, one `nodeSep` apart, each as one bounding box (items plus their lanes); owner on the midpoint of the outermost heads; the join (next item) on the owner's column |
   | container | tight box: body extent plus padding, body centred in it, box centred on the spine (also nested; LR uses the 70/32 top/bottom padding) |
-  | fallback lane, `merge` body | to the right of everything the owner reaches, further out per nesting level |
+  | fallback lane | to the right of everything the owner reaches, further out per nesting level |
   | bypass head | reserves the size of its edge label (`edge_label_metrics.ts`), so the label never touches the box around it |
   | triggers | a centred row in declaration order |
 
@@ -93,11 +93,7 @@ reachability.
   both import `EDGE_LABEL_MAX_CHARS`. If the chip styling changes, update `edge_label_metrics.ts`.
 - A lane's main-axis position still comes from `@kbn/dag-layout`'s cascade; the packer places lanes on
   the cross axis only.
-- Known limitation: the body of a `merge` step shares rows with the items after it (nothing pushes
-  them down, unlike a fallback lane). The packer clears the items that follow in the same sequence, but
-  a `merge` that is last in a branch can still share rows with the join after its fork. No live
-  workflow uses `merge`. The fix is to reserve the body as a lane in `dagLayout`'s main-axis cascade,
-  not to add a cross-axis rule.
+- The `merge` step type, and with it the packer rule for its body, was removed in #305653.
 - The layout memo in `useWorkflowLayout` is keyed on the topology fingerprint plus the head and label
   of every empty branch: the fingerprint skips empty child slots, but each one is a bypass node sized
   from its label.
