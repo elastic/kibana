@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrConfigProviderContext } from '@kbn/test';
-
-export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../../config.base.js'));
-
-  return {
-    ...functionalConfig.getAll(),
-    testFiles: [require.resolve('.')],
-  };
-}
+module.exports = {
+  preset: '@kbn/jest',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/plugins/private/developer_toolbar_profilers'],
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/private/developer_toolbar_profilers',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: [
+    '<rootDir>/src/platform/plugins/private/developer_toolbar_profilers/{common,public,server}/**/*.{ts,tsx}',
+  ],
+};

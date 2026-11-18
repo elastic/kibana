@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export default function ({ loadTestFile }) {
-  describe('general', () => {
-    loadTestFile(require.resolve('./cookies'));
-  });
+import type { PluginInitializerContext } from '@kbn/core/server';
+
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { DeveloperToolbarProfilersServerPlugin } = await import('./plugin');
+  return new DeveloperToolbarProfilersServerPlugin(initializerContext);
 }
