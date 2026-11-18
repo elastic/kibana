@@ -74,6 +74,23 @@ triggers:
           type: integer
 
 steps:
+  # ES|QL has no `ignore_unavailable`: `FROM` on a space with no alerts index yet
+  # is a hard `Unknown index` error. Gating the query, rather than loosening it,
+  # keeps every other ES|QL error fatal. A size-0 search needs only `read`, which
+  # retrieval already requires; `indices.exists` would add `view_index_metadata`.
+  # Only `index_not_found_exception` is tolerated. `ignore_unavailable` is not used
+  # because it also hides an alias the caller cannot read, which would turn a
+  # missing privilege into a quiet zero-batch run. The alias is searched, so a
+  # rolled-over index still counts as present.
+  - name: check_alerts_index
+    type: elasticsearch.search
+    with:
+      index: .alerts-security.alerts-{{ workflow.spaceId }}
+      size: 0
+      track_total_hits: false
+    on-failure:
+      continue: "${{ error.type == 'ResponseError' and error.message contains 'index_not_found_exception' }}"
+
   # Ids only. Each batch's `security.attack-discovery.run` retrieves and anonymizes
   # its own slice with an ES|QL query over those ids, so the replacements its
   # markdown uses are the ones that batch persists. Anonymizing here instead would
@@ -82,6 +99,7 @@ steps:
   # raw alert field values leave this step.
   - name: retrieve_alert_ids
     type: elasticsearch.esql.query
+    if: "${{ steps.check_alerts_index.error == blank }}"
     timeout: "5m"
     with:
       # Alerts the review already retired. A true-positive or inconclusive attack

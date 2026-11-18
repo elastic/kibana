@@ -218,6 +218,38 @@ describe('computeEventFacts', () => {
     expect(result.signals).toHaveLength(2);
   });
 
+  describe('escalating a stored verdict', () => {
+    it('frees the title and hypothesis when an off-topic rule is confirmed', () => {
+      const stored = makeStored([makeSignal({ verdict: 'off_topic' })]);
+
+      const result = facts({ signals: [makeSignal({ verdict: 'confirms' })], stored });
+
+      expect(result.frozenNarrative).toBeUndefined();
+    });
+
+    it('keeps the narrative frozen when the stored signal already confirmed the rule', () => {
+      const stored = makeStored([makeSignal({ verdict: 'confirms' })]);
+
+      const result = facts({ signals: [makeSignal({ verdict: 'confirms' })], stored });
+
+      expect(result.frozenNarrative).toMatchObject({
+        title: 'Checkout latency',
+        narrativePreserved: true,
+      });
+    });
+
+    it('keeps the narrative frozen when a confirmed rule comes back as off-topic', () => {
+      const stored = makeStored([makeSignal({ verdict: 'confirms' })]);
+
+      const result = facts({ signals: [makeSignal({ verdict: 'off_topic' })], stored });
+
+      expect(result.frozenNarrative).toMatchObject({
+        title: 'Checkout latency',
+        narrativePreserved: true,
+      });
+    });
+  });
+
   it('keeps an explicit severity on a signal-less write, and defaults it to low', () => {
     expect(facts({ signals: [], candidateOverrides: { severity: 'critical' } }).severity).toBe(
       'critical'
