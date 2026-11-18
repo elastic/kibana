@@ -110,3 +110,10 @@ export const ProjectDefaultsSection: Story = {
     ),
   ],
 };
+
+export const ProjectDefaultsSectionReadOnly: Story = {
+  ...ProjectDefaultsSection,
+  args: {
+    canEdit: false,
+  },
+};
