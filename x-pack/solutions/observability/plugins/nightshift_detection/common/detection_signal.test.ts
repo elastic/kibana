@@ -58,6 +58,24 @@ describe('detectionSignalSchema', () => {
     expect(parsed.data.details).toEqual({ a: { b: [1, 2] } });
   });
 
+  it('needs a value on every reading except no_data', () => {
+    const { value: _value, ...dataWithoutValue } = SIGNAL.data;
+    const withoutValue = { ...SIGNAL, data: dataWithoutValue };
+
+    expect(detectionSignalSchema.safeParse({ ...withoutValue, status: 'no_data' }).success).toBe(
+      true
+    );
+    expect(detectionSignalSchema.safeParse({ ...withoutValue, status: 'breached' }).success).toBe(
+      false
+    );
+  });
+
+  it('rejects an entity type outside the shared list', () => {
+    const host = { ...SIGNAL, data: { ...SIGNAL.data, entity: { type: 'host', name: 'h-1' } } };
+
+    expect(detectionSignalSchema.safeParse(host).success).toBe(false);
+  });
+
   it('rejects a rule object, which the engine never sets', () => {
     expect(detectionSignalSchema.safeParse({ ...SIGNAL, rule: { id: 'rule-1' } }).success).toBe(
       false

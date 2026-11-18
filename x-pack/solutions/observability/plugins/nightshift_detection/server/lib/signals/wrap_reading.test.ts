@@ -71,6 +71,13 @@ describe('wrapReading', () => {
     });
   });
 
+  it('puts a reported severity on the signal, where the severity floor reads it, and not in data', () => {
+    const result = wrap({ reading: { ...READING, severity: 'high' } });
+
+    expect(result).toMatchObject({ signal: { severity: 'high' } });
+    expect(result).not.toMatchObject({ signal: { data: { severity: expect.anything() } } });
+  });
+
   it('carries the rule id only when the reading has one', () => {
     const withRule = wrap({ reading: { ...READING, rule_id: 'rule-1' } });
     const withoutRule = wrap();
