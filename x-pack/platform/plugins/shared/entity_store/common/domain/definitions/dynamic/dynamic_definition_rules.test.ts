@@ -417,6 +417,14 @@ describe('dynamic definition rules', () => {
         DISPLAY_LABEL_RULE
       );
     });
+
+    it('rejects a label for the generated entity.id column', () => {
+      expectRejected(
+        withLabels([{ name: 'entity.id', label: 'ID' }]),
+        ['dynamic', 'displayLabels', 0, 'name'],
+        DISPLAY_LABEL_RULE
+      );
+    });
   });
 
   describe('getIdentityCompositions', () => {

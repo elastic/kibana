@@ -20,7 +20,7 @@ interface InventoryTypeResponse {
   type: string;
   name: string;
   identityFields: string[];
-  columns: Array<{ name: string; kind: string }>;
+  columns: Array<{ name: string; kind: string; label?: string }>;
   sources: Array<{ indexPattern: string; filter?: string }>;
 }
 
@@ -55,6 +55,24 @@ apiTest.describe(
       expect(k8sDeployment?.identityFields).toStrictEqual(K8S_DEPLOYMENT_IDENTITY_FIELDS);
       expect(k8sDeployment?.columns[0].name).toBe('entity.id');
       expect(k8sDeployment?.sources).toHaveLength(2);
+    });
+
+    apiTest('returns the labels of the k8s.deployment columns', async ({ apiClient }) => {
+      const response = await apiClient.get(TYPES_PATH, {
+        headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(200);
+      const { types }: { types: InventoryTypeResponse[] } = response.body;
+      const columns = types.find(({ type }) => type === 'k8s.deployment')?.columns ?? [];
+      const labels = Object.fromEntries(columns.map(({ name, label }) => [name, label]));
+
+      expect(labels['entity.id']).toBe('ID');
+      expect(labels['kubernetes.namespace']).toBe('Namespace');
+      expect(labels['k8s.cluster.name']).toBe('Cluster');
+      expect(labels['kubernetes.deployment.name']).toBeUndefined();
+      expect(labels.last_seen).toBe('Last seen');
     });
 
     apiTest('returns every type with a dynamic block', async ({ apiClient }) => {

@@ -42,6 +42,12 @@ describe('toTypeColumns', () => {
     ]);
   });
 
+  it('ignores a display label that matches no column', () => {
+    expect(toTypeColumns(columns, [{ name: 'not.a.column', label: 'Nothing' }])).toEqual(
+      toTypeColumns(columns)
+    );
+  });
+
   it('never returns the source fields of an attribute', () => {
     toTypeColumns(columns).forEach((column) => expect(column).not.toHaveProperty('fieldByPlan'));
   });
