@@ -176,13 +176,14 @@ export async function getJestConfigs(configPaths?: string[]): Promise<{
       });
     });
 
-    // Packages migrated to Vitest own their unit tests; a Jest config matching them too is a duplicate.
+    // Packages migrated to Vitest own their unit tests. A test owned by a Jest config and a Vitest
+    // config, or by nested Vitest projects (the parent's glob reaches the child's tests), is a duplicate.
     allTestFiles.forEach((testFile) => {
-      const vitestConfig = findVitestConfig(testFile, vitestConfigs);
-      if (vitestConfig) {
+      const owningVitestConfigs = findVitestConfigs(testFile, vitestConfigs);
+      if (owningVitestConfigs.length > 0) {
         finalTestFileToConfigs.set(testFile, [
           ...(finalTestFileToConfigs.get(testFile) || []),
-          vitestConfig,
+          ...owningVitestConfigs,
         ]);
         coveredTestFiles.add(testFile);
       }
@@ -203,13 +204,13 @@ export async function getJestConfigs(configPaths?: string[]): Promise<{
 }
 
 /**
- * The package `vitest.config.ts` that runs a test file, if any. Integration tests stay on Jest.
+ * Every package `vitest.config.ts` whose project runs a test file. Integration tests stay on Jest.
  */
-function findVitestConfig(testFile: string, vitestConfigs: string[]): string | undefined {
+function findVitestConfigs(testFile: string, vitestConfigs: string[]): string[] {
   if (testFile.includes(`${osSep}integration_tests${osSep}`)) {
-    return undefined;
+    return [];
   }
-  return vitestConfigs.find((config) => testFile.startsWith(`${dirname(config)}${osSep}`));
+  return vitestConfigs.filter((config) => testFile.startsWith(`${dirname(config)}${osSep}`));
 }
 
 /**

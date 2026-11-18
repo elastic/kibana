@@ -260,4 +260,23 @@ describe('getJestConfigs', () => {
       },
     ]);
   });
+
+  it('reports tests claimed by nested vitest.config.ts projects', async () => {
+    mockExecResponder = () => ({
+      stdout: ['pkg/vitest.config.ts', 'pkg/sub/vitest.config.ts', 'pkg/sub/s.test.ts'].join('\n'),
+    });
+
+    const { getJestConfigs } = await import('./get_jest_configs');
+    const result = await getJestConfigs();
+
+    expect(result.duplicateTestFiles).toEqual([
+      {
+        testFile: resolve('/repo', 'pkg/sub/s.test.ts'),
+        configs: [
+          resolve('/repo', 'pkg/vitest.config.ts'),
+          resolve('/repo', 'pkg/sub/vitest.config.ts'),
+        ],
+      },
+    ]);
+  });
 });
