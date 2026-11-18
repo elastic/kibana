@@ -245,12 +245,7 @@ export async function fetchSampleDocuments({
 
     const { documents, bucketCounts } = mergeDocuments(
       [
-        {
-          hits: entityFilteredHits,
-          cap: entityFilteredSize,
-          label: 'entity-filtered',
-          passUnusedCapToNext: true,
-        },
+        { hits: entityFilteredHits, cap: entityFilteredSize, label: 'entity-filtered' },
         { hits: diverseHits, cap: diverseSize, label: 'diverse' },
         { hits: randomHits, cap: size, label: 'random' },
       ],
@@ -353,7 +348,6 @@ function mergeDocuments(
     hits: Array<SearchHit<Record<string, unknown>>>;
     cap: number;
     label: SamplingStrategy;
-    passUnusedCapToNext?: boolean;
   }>,
   totalSize: number
 ): {
@@ -364,19 +358,18 @@ function mergeDocuments(
   const result: Array<SearchHit<Record<string, unknown>>> = [];
   const bucketCounts = { 'entity-filtered': 0, diverse: 0, random: 0 };
 
-  let inheritedCap = 0;
-  for (const { hits, cap: ownCap, label, passUnusedCapToNext } of prioritizedHits) {
-    const cap = ownCap + inheritedCap;
-    let added = 0;
+  // Cumulative: a bucket's unused slots carry to the next.
+  let limit = 0;
+  for (const { hits, cap, label } of prioritizedHits) {
+    limit = Math.min(limit + cap, totalSize);
+    const countBefore = result.length;
     for (const hit of hits) {
-      if (added >= cap || result.length >= totalSize) break;
+      if (result.length >= limit) break;
       if (hit._id && seen.has(hit._id)) continue;
       if (hit._id) seen.add(hit._id);
       result.push(hit);
-      added++;
     }
-    bucketCounts[label] = added;
-    inheritedCap = passUnusedCapToNext ? cap - added : 0;
+    bucketCounts[label] = result.length - countBefore;
   }
 
   return { documents: result, bucketCounts };
