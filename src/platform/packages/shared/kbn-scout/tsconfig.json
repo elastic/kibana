@@ -22,6 +22,7 @@
     "@kbn/es-archiver",
     "@kbn/dev-utils",
     "@kbn/mock-idp-utils",
+    "@kbn/connector-emulate",
     "@kbn/test-subj-selector",
     "@kbn/scout-info",
     "@kbn/scout-reporting",

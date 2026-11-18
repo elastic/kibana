@@ -3,7 +3,7 @@ apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
   name: bk-kibana-connector-vendor-api-drift
-  description: Compares the connectors' vendor API artifacts with the vendors' latest specs, files an issue per drifting connector and refreshes the others in a PR
+  description: Compares the connectors' vendor API artifacts with the vendors' latest specs, files an issue per drifting connector and refreshes the others in a PR, and runs the connectors' Scout suites against the connector emulator
   links:
     - url: 'https://buildkite.com/elastic/kibana-connector-vendor-api-drift'
       title: Pipeline link
@@ -16,7 +16,7 @@ spec:
     kind: Pipeline
     metadata:
       name: kibana / connector vendor API drift
-      description: Compares the connectors' vendor API artifacts with the vendors' latest specs, files an issue per drifting connector and refreshes the others in a PR
+      description: Compares the connectors' vendor API artifacts with the vendors' latest specs, files an issue per drifting connector and refreshes the others in a PR, and runs the connectors' Scout suites against the connector emulator
     spec:
       env:
         # Inputs of .buildkite/scripts/steps/connector_vendor_api_drift.sh.

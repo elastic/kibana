@@ -105,6 +105,8 @@
     "@kbn/licensing-types",
     "@kbn/core-lifecycle-server-mocks",
     "@kbn/scout",
+    "@kbn/connector-emulate",
+    "@kbn/repo-info",
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-browser",
     "@kbn/share-plugin",

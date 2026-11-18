@@ -1,0 +1,46 @@
+[
+  {
+    "source": "search",
+    "method": "GET",
+    "path": "/v1/web/search",
+    "status": 200,
+    "body": {
+      "type": "search",
+      "query": {
+        "original": "kibana",
+        "show_strict_warning": false,
+        "is_navigational": false
+      },
+      "web": {
+        "type": "search",
+        "results": [
+          {
+            "type": "search_result",
+            "title": "Kibana: Explore, Visualize, and Share | Elastic",
+            "url": "https://www.elastic.co/kibana",
+            "description": "Kibana is a free and open user interface that lets you visualize your Elasticsearch data and navigate the Elastic Stack.",
+            "language": "en",
+            "family_friendly": true
+          },
+          {
+            "type": "search_result",
+            "title": "Kibana Guide | Elastic",
+            "url": "https://www.elastic.co/guide/en/kibana/current/index.html",
+            "description": "Learn how to use Kibana to explore, visualize, and share your data, and to manage the Elastic Stack.",
+            "language": "en",
+            "family_friendly": true
+          },
+          {
+            "type": "search_result",
+            "title": "elastic/kibana: Your window into the Elastic Stack",
+            "url": "https://github.com/elastic/kibana",
+            "description": "Kibana is your window into the Elastic Stack. Explore and visualize your data, and manage your deployment.",
+            "language": "en",
+            "family_friendly": true
+          }
+        ],
+        "family_friendly": true
+      }
+    }
+  }
+]

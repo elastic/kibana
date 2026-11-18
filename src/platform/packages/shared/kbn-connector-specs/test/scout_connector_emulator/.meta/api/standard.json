@@ -1,0 +1,1373 @@
+{
+  "sha1": "3fe5204b3812bb44db1e8a635f3b0f8022cb42aa",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "bb2f6b52c9c3f62-6695c317398dbd8",
+      "title": "the Brave Search actions through Kibana against the connector emulator webSearch sends the query and the page size, and returns the results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/brave_search_actions.spec.ts",
+        "line": 53,
+        "column": 5
+      }
+    },
+    {
+      "id": "bb2f6b52c9c3f62-b6e21c40c462799",
+      "title": "the Brave Search actions through Kibana against the connector emulator webSearch asks for the page after the first one with an offset",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/brave_search_actions.spec.ts",
+        "line": 72,
+        "column": 16
+      }
+    },
+    {
+      "id": "bb2f6b52c9c3f62-9c6b7ff3918781a",
+      "title": "the Brave Search actions through Kibana against the connector emulator reports a vendor error as an error, without a result",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/brave_search_actions.spec.ts",
+        "line": 83,
+        "column": 26
+      }
+    },
+    {
+      "id": "fbfc45e69a08ee6-ec9d778750a98cd",
+      "title": "the Censys actions through Kibana against the connector emulator getHost asks for the host in the connector organization",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/censys_actions.spec.ts",
+        "line": 52,
+        "column": 5
+      }
+    },
+    {
+      "id": "fbfc45e69a08ee6-aaf34b20c3cde97",
+      "title": "the Censys actions through Kibana against the connector emulator getHostEnrichment asks for the compact record of the host",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/censys_actions.spec.ts",
+        "line": 67,
+        "column": 73
+      }
+    },
+    {
+      "id": "fbfc45e69a08ee6-3f81e836405d80b",
+      "title": "the Censys actions through Kibana against the connector emulator getHostHistory sends the time window of the timeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/censys_actions.spec.ts",
+        "line": 81,
+        "column": 17
+      }
+    },
+    {
+      "id": "fbfc45e69a08ee6-744316aa7ec383e",
+      "title": "the Censys actions through Kibana against the connector emulator reports a vendor error as an error, without a result",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/censys_actions.spec.ts",
+        "line": 94,
+        "column": 24
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-3133cb378a27efc",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Firecrawl: a 400 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-ff786fae564df77",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Firecrawl: a 401 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-6a0806e926636d9",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Firecrawl: a 402 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-a70d1651be8b3b5",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Firecrawl: a 429 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-35b6b5a20bf819e",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Firecrawl: a 500 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-5b36dc49b053d57",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Firecrawl: a 502 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-e7d41b747ee7884",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Firecrawl: a 503 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-5a4c182de5f3696",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Firecrawl: a 504 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-c19d329caa2e9b3",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Firecrawl: a 404 from the vendor is not an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 196,
+        "column": 34
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-c8eeb4f65541633",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Brave Search: a 400 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-cfca16323bc45f7",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Brave Search: a 401 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-2e32964ee3f0fe2",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Brave Search: a 402 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-9677cd11e5acff2",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Brave Search: a 429 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-da5a8e5ec046615",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Brave Search: a 500 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-ff99c0d959a6f47",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Brave Search: a 502 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-1b14b2271b2412b",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Brave Search: a 503 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-34d354040c963dd",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Brave Search: a 504 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-8aa9905d2d97a01",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Brave Search: a 404 from the vendor is not an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 196,
+        "column": 34
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-244f429c8625971",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Shodan: a 400 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-8be0c1fd24a04a3",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Shodan: a 401 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-01cd7119b6da794",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Shodan: a 402 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-4b81ad6b23d9c2c",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Shodan: a 429 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-bb124d535094864",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Shodan: a 500 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-5558c2a5f9015b5",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Shodan: a 502 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-95c0fb343756f5a",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Shodan: a 503 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-e8f14a990d3e5c3",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Shodan: a 504 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-deee1caf33f4800",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Shodan: a 404 from the vendor is not an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 196,
+        "column": 34
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-027d8355fd83cca",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Censys: a 400 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-2b30a96e7f82492",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Censys: a 401 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-fd58088542ae6e8",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Censys: a 402 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-aada05d11522ae2",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Censys: a 429 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-324c8d38205a68e",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Censys: a 500 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-180a2f06b0f5cad",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Censys: a 502 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-1f3075ac4707da8",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Censys: a 503 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-128668ce42bd2dc",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Censys: a 504 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-ed4eeab5f6dd7c1",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Censys: a 404 from the vendor is not an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 196,
+        "column": 34
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-0a59954b049fe7b",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Jina Reader: a 400 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-d855507cf447e82",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Jina Reader: a 401 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-8e106f61b15ecc2",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Jina Reader: a 402 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-91cd4369ba896d9",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Jina Reader: a 429 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-edec4404ba593cb",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Jina Reader: a 500 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-598aaa11a62169b",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Jina Reader: a 502 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-1a429cd89da9d72",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Jina Reader: a 503 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-fadd21bd38d4cb7",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Jina Reader: a 504 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-6dd90270d9a7127",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Jina Reader: a 404 from the vendor is not an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 196,
+        "column": 34
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-51bf3c273a6f0f8",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Figma: a 400 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-bfe99f04d89151a",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Figma: a 401 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-8307670a99dbde6",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Figma: a 402 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-b77c12ae8bb6803",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Figma: a 429 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-ea8056d08c991a7",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Figma: a 500 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-f381b00d2b869dc",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Figma: a 502 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-607a2bf1198e5d7",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Figma: a 503 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-4815d483fecc939",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Figma: a 504 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-a9ddd99f12ced58",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Figma: a 404 from the vendor is not an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 196,
+        "column": 34
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-9def174515931d9",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Sentry: a 400 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-6d16fde5b5274f7",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Sentry: a 401 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-c8c31eede4cc081",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Sentry: a 402 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-dee5eebd1ca5cc9",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Sentry: a 429 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-58b4dce7f48065a",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Sentry: a 500 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-436746a3d42afbb",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Sentry: a 502 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-b93966c2c5fc516",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Sentry: a 503 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-49402f7b2159d78",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Sentry: a 504 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-45cabb2d43d6b58",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Sentry: a 404 from the vendor is not an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 196,
+        "column": 34
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-85dc778b5e7bf27",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Grafana: a 400 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-958e68546cbfdee",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Grafana: a 401 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-bd82ce5f34c3246",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Grafana: a 402 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-4947ed18d5e607d",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Grafana: a 429 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-3e22a82f2c92e2a",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Grafana: a 500 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-050631d2792b749",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Grafana: a 502 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-a37494c1b2c3dd1",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Grafana: a 503 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-8265649dbc821d4",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Grafana: a 504 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-fba3d14b72eed75",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Grafana: a 404 from the vendor is not an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 196,
+        "column": 34
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-bcbcdd72070c40d",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Sublime Security: a 400 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-60f1809d6096e36",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Sublime Security: a 401 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-235df63b1e9f4b6",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Sublime Security: a 402 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-8413daf734472fa",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Sublime Security: a 429 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-34ecd9a4f4c8ce6",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Sublime Security: a 500 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-6fa4e4d545dee30",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Sublime Security: a 502 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-dfdf410ba00dc15",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Sublime Security: a 503 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-4a6d960adbac640",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Sublime Security: a 504 from the vendor is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 179,
+        "column": 17
+      }
+    },
+    {
+      "id": "7c5763f7ef3957d-8da4cbae550d9a6",
+      "title": "connectors report vendor errors by the convention through Kibana against the connector emulator Sublime Security: a 404 from the vendor is not an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/error_status_conventions.spec.ts",
+        "line": 196,
+        "column": 34
+      }
+    },
+    {
+      "id": "3242e40420acdbf-1ec485d22021c05",
+      "title": "the Figma OAuth flow through Kibana against the connector emulator an action fails before the connector is authorized, without calling the vendor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/figma_oauth_actions.spec.ts",
+        "line": 74,
+        "column": 24
+      }
+    },
+    {
+      "id": "3242e40420acdbf-b91fbf8000fd820",
+      "title": "the Figma OAuth flow through Kibana against the connector emulator starting the flow sends the user to Figma with the client and a PKCE challenge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/figma_oauth_actions.spec.ts",
+        "line": 83,
+        "column": 7
+      }
+    },
+    {
+      "id": "3242e40420acdbf-b8113bcb64a31f3",
+      "title": "the Figma OAuth flow through Kibana against the connector emulator the callback trades the code for tokens at the vendor, and the action uses them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/figma_oauth_actions.spec.ts",
+        "line": 105,
+        "column": 60
+      }
+    },
+    {
+      "id": "3242e40420acdbf-ad894d66e63ec33",
+      "title": "the Figma OAuth flow through Kibana against the connector emulator an authorized connector keeps its token for the next action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/figma_oauth_actions.spec.ts",
+        "line": 135,
+        "column": 16
+      }
+    },
+    {
+      "id": "e2747c63e369408-22abdf4f80e9143",
+      "title": "the Firecrawl actions through Kibana against the connector emulator scrape sends the page to scrape and returns what the vendor answers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/firecrawl_actions.spec.ts",
+        "line": 106,
+        "column": 7
+      }
+    },
+    {
+      "id": "e2747c63e369408-80809b117e29a6b",
+      "title": "the Firecrawl actions through Kibana against the connector emulator search sends the query and the limit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/firecrawl_actions.spec.ts",
+        "line": 125,
+        "column": 16
+      }
+    },
+    {
+      "id": "e2747c63e369408-652bb6ba129a12c",
+      "title": "the Firecrawl actions through Kibana against the connector emulator map sends the site, the search term and the limit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/firecrawl_actions.spec.ts",
+        "line": 137,
+        "column": 11
+      }
+    },
+    {
+      "id": "e2747c63e369408-32e4768f4ff3bbf",
+      "title": "the Firecrawl actions through Kibana against the connector emulator crawl starts a crawl and returns its id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/firecrawl_actions.spec.ts",
+        "line": 147,
+        "column": 88
+      }
+    },
+    {
+      "id": "e2747c63e369408-3c6f2db3e5af233",
+      "title": "the Firecrawl actions through Kibana against the connector emulator getCrawlStatus asks for the crawl it is given",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/firecrawl_actions.spec.ts",
+        "line": 160,
+        "column": 13
+      }
+    },
+    {
+      "id": "e2747c63e369408-8d0c58b33b209e9",
+      "title": "the Firecrawl actions through Kibana against the connector emulator crawlAndWait polls the crawl until it has completed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/firecrawl_actions.spec.ts",
+        "line": 168,
+        "column": 95
+      }
+    },
+    {
+      "id": "e2747c63e369408-0f26de6863a99b0",
+      "title": "the Firecrawl actions through Kibana against the connector emulator reports a vendor error as an error, without a result",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/firecrawl_actions.spec.ts",
+        "line": 198,
+        "column": 34
+      }
+    },
+    {
+      "id": "1e45ec98f69c79f-264d8e68c7f89b4",
+      "title": "the Jina Reader actions through Kibana against the connector emulator browse sends the page to turn into markdown",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/jina_actions.spec.ts",
+        "line": 50,
+        "column": 5
+      }
+    },
+    {
+      "id": "1e45ec98f69c79f-0bc1109bb1020ac",
+      "title": "the Jina Reader actions through Kibana against the connector emulator search sends the query to the search host",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/jina_actions.spec.ts",
+        "line": 65,
+        "column": 73
+      }
+    },
+    {
+      "id": "01b75757c3a958d-8558e4e177f76a7",
+      "title": "the Shodan actions through Kibana against the connector emulator searchHosts sends the query and the page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/shodan_actions.spec.ts",
+        "line": 50,
+        "column": 5
+      }
+    },
+    {
+      "id": "01b75757c3a958d-2230ffda3e9baab",
+      "title": "the Shodan actions through Kibana against the connector emulator getHostInfo asks for the host it is given",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/shodan_actions.spec.ts",
+        "line": 66,
+        "column": 14
+      }
+    },
+    {
+      "id": "01b75757c3a958d-91d5fd427168153",
+      "title": "the Shodan actions through Kibana against the connector emulator countResults sends the query and the facets",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/shodan_actions.spec.ts",
+        "line": 72,
+        "column": 13
+      }
+    },
+    {
+      "id": "01b75757c3a958d-bba172864b267ad",
+      "title": "the Shodan actions through Kibana against the connector emulator reports a vendor error as an error, without a result",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-connector-specs/test/scout_connector_emulator/api/tests/shodan_actions.spec.ts",
+        "line": 84,
+        "column": 16
+      }
+    }
+  ]
+}

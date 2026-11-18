@@ -1,0 +1,181 @@
+[
+  {
+    "source": "v2",
+    "method": "POST",
+    "path": "/scrape",
+    "status": 200,
+    "body": {
+      "success": true,
+      "data": {
+        "markdown": "# Example Domain\n\nThis domain is for use in illustrative examples in documents. You may use this domain in literature without prior coordination or asking for permission.\n\n[More information...](https://www.iana.org/domains/example)",
+        "metadata": {
+          "title": "Example Domain",
+          "language": "en",
+          "sourceURL": "https://example.com",
+          "url": "https://example.com/",
+          "statusCode": 200,
+          "contentType": "text/html; charset=UTF-8"
+        },
+        "links": [
+          "https://www.iana.org/domains/example"
+        ]
+      }
+    }
+  },
+  {
+    "source": "v2",
+    "method": "POST",
+    "path": "/search",
+    "status": 200,
+    "body": {
+      "success": true,
+      "creditsUsed": 3,
+      "data": {
+        "web": [
+          {
+            "title": "Kibana: Explore, Visualize, and Share | Elastic",
+            "description": "Kibana is a free and open user interface that lets you visualize your Elasticsearch data and navigate the Elastic Stack.",
+            "url": "https://www.elastic.co/kibana"
+          },
+          {
+            "title": "Kibana Guide | Elastic",
+            "description": "Learn how to use Kibana to explore, visualize, and share your data, and to manage the Elastic Stack.",
+            "url": "https://www.elastic.co/guide/en/kibana/current/index.html"
+          },
+          {
+            "title": "elastic/kibana: Your window into the Elastic Stack",
+            "description": "Kibana is your window into the Elastic Stack. Explore and visualize your data, and manage your deployment.",
+            "url": "https://github.com/elastic/kibana"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "source": "v2",
+    "method": "POST",
+    "path": "/map",
+    "status": 200,
+    "body": {
+      "success": true,
+      "links": [
+        {
+          "url": "https://example.com/docs",
+          "title": "Documentation",
+          "description": "Guides and reference for working with Example."
+        },
+        {
+          "url": "https://example.com/docs/getting-started",
+          "title": "Getting started",
+          "description": "Set up Example in a few minutes."
+        },
+        {
+          "url": "https://example.com/docs/api",
+          "title": "API reference",
+          "description": "Every endpoint of the Example API."
+        }
+      ]
+    }
+  },
+  {
+    "source": "v2",
+    "method": "POST",
+    "path": "/crawl",
+    "status": 200,
+    "body": {
+      "success": true,
+      "id": "0b8e1c52-6a1f-4c3e-9d7a-2f4b5c6d7e8f",
+      "url": "https://api.firecrawl.dev/v2/crawl/0b8e1c52-6a1f-4c3e-9d7a-2f4b5c6d7e8f"
+    }
+  },
+  {
+    "source": "v2",
+    "method": "GET",
+    "path": "/crawl/{id}",
+    "responses": [
+      {
+        "status": 200,
+        "body": {
+          "status": "scraping",
+          "total": 2,
+          "completed": 1,
+          "creditsUsed": 1,
+          "createdAt": "2026-11-12T12:00:00.000Z",
+          "expiresAt": "2026-11-13T12:00:00.000Z",
+          "data": [
+            {
+              "markdown": "# Example Domain\n\nThis domain is for use in illustrative examples in documents. You may use this domain in literature without prior coordination or asking for permission.\n\n[More information...](https://www.iana.org/domains/example)",
+              "metadata": {
+                "title": "Example Domain",
+                "language": "en",
+                "sourceURL": "https://example.com",
+                "url": "https://example.com/",
+                "statusCode": 200,
+                "contentType": "text/html; charset=UTF-8"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "body": {
+          "status": "scraping",
+          "total": 2,
+          "completed": 1,
+          "creditsUsed": 1,
+          "createdAt": "2026-11-12T12:00:00.000Z",
+          "expiresAt": "2026-11-13T12:00:00.000Z",
+          "data": [
+            {
+              "markdown": "# Example Domain\n\nThis domain is for use in illustrative examples in documents. You may use this domain in literature without prior coordination or asking for permission.\n\n[More information...](https://www.iana.org/domains/example)",
+              "metadata": {
+                "title": "Example Domain",
+                "language": "en",
+                "sourceURL": "https://example.com",
+                "url": "https://example.com/",
+                "statusCode": 200,
+                "contentType": "text/html; charset=UTF-8"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "status": 200,
+        "body": {
+          "status": "completed",
+          "total": 2,
+          "completed": 2,
+          "creditsUsed": 2,
+          "createdAt": "2026-11-12T12:00:00.000Z",
+          "expiresAt": "2026-11-13T12:00:00.000Z",
+          "data": [
+            {
+              "markdown": "# Example Domain\n\nThis domain is for use in illustrative examples in documents. You may use this domain in literature without prior coordination or asking for permission.\n\n[More information...](https://www.iana.org/domains/example)",
+              "metadata": {
+                "title": "Example Domain",
+                "language": "en",
+                "sourceURL": "https://example.com",
+                "url": "https://example.com/",
+                "statusCode": 200,
+                "contentType": "text/html; charset=UTF-8"
+              }
+            },
+            {
+              "markdown": "# Documentation\n\nGuides and reference for working with Example.\n\n- [Getting started](https://example.com/docs/getting-started)\n- [API reference](https://example.com/docs/api)",
+              "metadata": {
+                "title": "Documentation",
+                "language": "en",
+                "sourceURL": "https://example.com/docs",
+                "url": "https://example.com/docs",
+                "statusCode": 200,
+                "contentType": "text/html; charset=UTF-8"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

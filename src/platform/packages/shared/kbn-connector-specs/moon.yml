@@ -33,6 +33,7 @@ dependsOn:
   - '@kbn/dev-cli-errors'
   - '@kbn/tooling-log'
   - '@kbn/code-owners'
+  - '@kbn/scout'
 tags:
   - shared-common
   - package
@@ -40,6 +41,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - '**/*.ts'

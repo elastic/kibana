@@ -25,6 +25,7 @@ import { buildProjectSteps } from './steps/build_project.ts';
 import { checkNextDocs } from './steps/check_next_docs.ts';
 import { checkOasSnapshot } from './steps/check_oas_snapshot.ts';
 import { checkSavedObjects } from './steps/check_saved_objects.ts';
+import { connectorEmulatorScoutSteps } from './steps/connector_emulator_scout.ts';
 import { cpsTests } from './steps/cps_testing.ts';
 import { deployCloudSteps } from './steps/deploy_cloud.ts';
 import { deployProjectSteps } from './steps/deploy_project.ts';
@@ -96,6 +97,7 @@ export const FRAGMENTS: readonly Fragment[] = [
   { ...yamlFragment('pull_request/check_oas_snapshot'), steps: checkOasSnapshot },
   { ...yamlFragment('pull_request/check_saved_objects'), steps: checkSavedObjects },
   { ...yamlFragment('pull_request/code_quality'), steps: codeQuality },
+  { ...yamlFragment('pull_request/connector_emulator_scout'), steps: connectorEmulatorScoutSteps },
   { ...yamlFragment('pull_request/cps_testing'), steps: cpsTests },
   { ...yamlFragment('pull_request/deploy_cloud'), steps: deployCloudSteps },
   { ...yamlFragment('pull_request/deploy_project'), steps: deployProjectSteps },

@@ -24,6 +24,7 @@ const specYaml = ({
   version = '1.0',
   itemsPath = '/items',
   itemProperties = '{ name: { type: string } }',
+  itemRequired = '',
 } = {}) => `
 openapi: 3.0.3
 info: { title: Example, version: '${version}' }
@@ -38,7 +39,7 @@ paths:
             application/json:
               schema:
                 type: object
-                properties: ${itemProperties}
+                properties: ${itemProperties}${itemRequired}
 `;
 
 const connector: ConnectorSpec = {
@@ -118,6 +119,7 @@ describe('detectDrift', () => {
       latestProblems: [],
       verdict: 'healthy',
       overlayFindings: [],
+      responsesFindings: [],
       outcome: 'none',
     });
     expect(diff).not.toHaveBeenCalled();
@@ -287,6 +289,45 @@ actions:
     expect((await detect()).overlayFindings).toEqual([
       expect.stringContaining('overlay.yaml action 0 matches nothing in any source'),
     ]);
+  });
+
+  describe('the emulator responses', () => {
+    const writeResponses = (body: Record<string, unknown>) =>
+      fs.writeFile(
+        path.join(directory, 'emulator_responses.json'),
+        JSON.stringify([{ method: 'GET', path: '/items', status: 200, body }])
+      );
+
+    it('needs nothing while they fit the latest specs', async () => {
+      await writeResponses({ name: 'widget' });
+
+      const drift = await detect();
+
+      expect(drift.responsesFindings).toEqual([]);
+      expect(drift.outcome).toBe('none');
+    });
+
+    it('asks for an issue, not a refresh, when the latest specs no longer fit them', async () => {
+      await writeResponses({ name: 'widget' });
+      documents[SPEC_URL] = specYaml({
+        itemProperties: '{ name: { type: string }, color: { type: string } }',
+        itemRequired: '\n                required: [color]',
+      });
+
+      const drift = await detect();
+
+      expect(drift.responsesFindings).toEqual([expect.stringContaining('GET /items')]);
+      expect(drift.verdict).toBe('healthy');
+      expect(drift.outcome).toBe('issue');
+    });
+
+    it('reports a file that is not valid JSON', async () => {
+      await fs.writeFile(path.join(directory, 'emulator_responses.json'), '{ nope');
+
+      expect((await detect()).responsesFindings).toEqual([
+        expect.stringContaining('emulator_responses.json'),
+      ]);
+    });
   });
 
   it('writes nothing to the vendor_api folder', async () => {

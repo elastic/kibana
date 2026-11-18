@@ -149,6 +149,28 @@ const SCENARIOS: Scenario[] = [
     changedFiles: ['.buildkite/pipeline-utils/step-library/steps/scout_fleet_real_agent.ts'],
   },
   {
+    name: 'connector emulator scout step definition path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/connector_emulator_scout.ts'],
+  },
+  {
+    name: 'connector spec path',
+    changedFiles: [
+      'src/platform/packages/shared/kbn-connector-specs/src/specs/firecrawl/firecrawl.ts',
+    ],
+  },
+  {
+    name: 'connector emulator workflows suite path',
+    changedFiles: [
+      'src/platform/plugins/shared/workflows_management/test/scout_connector_emulator/ui/parallel_tests/firecrawl_workflow.spec.ts',
+    ],
+  },
+  {
+    name: 'connector emulator path',
+    changedFiles: [
+      'src/platform/packages/shared/kbn-connector-emulate/src/fetch/create_emulator_fetch.ts',
+    ],
+  },
+  {
     name: 'ai infra path',
     changedFiles: ['x-pack/platform/plugins/shared/inference/server/index.ts'],
   },
@@ -342,6 +364,7 @@ const SCENARIOS: Scenario[] = [
   { name: 'cypress burn', labels: ['ci:cypress-burn'] },
   { name: 'gen ai evals', labels: ['ci:security-genai-run-evals'] },
   { name: 'scout cspm label', labels: ['ci:cloud-security-posture-scout'] },
+  { name: 'connector emulator scout label', labels: ['ci:connector-emulator-scout'] },
   { name: 'scout edr label', labels: ['ci:scout-edr-real-fleet'] },
   { name: 'sync model labels', labels: ['ci:sync-model-labels'] },
   { name: 'workflow oom label', labels: ['ci:workflow-oom-test'] },
