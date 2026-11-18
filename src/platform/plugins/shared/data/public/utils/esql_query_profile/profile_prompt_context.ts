@@ -8,6 +8,7 @@
  */
 
 import type { QueryProfileView } from './types';
+import { spanMillis } from './timeline_layout';
 
 /** Stays below the limit the optimize route accepts for the profile context. */
 const MAX_CONTEXT_LENGTH = 50_000;
@@ -60,9 +61,7 @@ export function buildProfileContext(view: QueryProfileView): string {
     lines.push('', 'Drivers:');
     drivers.forEach((driver) => {
       lines.push(
-        `- ${driver.label}: ran ${driver.stopMillis - driver.startMillis} ms, waited ${
-          driver.waitedMillis
-        } ms`
+        `- ${driver.label}: ran ${spanMillis(driver)} ms, waited ${driver.waitedMillis} ms`
       );
     });
   }

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { SerializedStyles } from '@emotion/react';
 import {
   EuiFlexGroup,
@@ -18,8 +18,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ticks as niceTicks } from 'd3-array';
 import type { QueryProfileView, TimelineDriver } from './types';
-import { computeTicks } from './timeline_ticks';
 import { formatDurationMillis } from './profile_format';
 import { LegendSwatch } from './legend_swatch';
 import { groupLabel, planningLabel, spreadLabel } from './timeline_labels';
@@ -31,9 +31,12 @@ import { useTimelineStyles } from './timeline_styles';
 /** The id of the selected lane. Drivers use their own id, which is never this one. */
 const PLANNING_LANE_ID = 'planning';
 
+/** About this many labels on the ruler. The steps are 1, 2 or 5 times a power of ten. */
+const RULER_TICK_COUNT = 3;
+
 const TimeRuler = ({ durationMillis }: { durationMillis: number }) => {
   const styles = useTimelineStyles();
-  const ticks = computeTicks(durationMillis);
+  const ticks = durationMillis > 0 ? niceTicks(0, durationMillis, RULER_TICK_COUNT) : [];
   if (ticks.length === 0) {
     return null;
   }
@@ -160,9 +163,9 @@ const Lane = ({
             style={{ left: `${box.left}%`, width: `${box.width}%` }}
             data-test-subj="esqlQueryProfileLaneBar"
           />
-          {waits.map((wait) => (
+          {waits.map((wait, index) => (
             <span
-              key={`${wait.left}-${wait.width}`}
+              key={`${index}-${wait.left}-${wait.width}`}
               css={styles.laneWait}
               style={{ left: `${wait.left}%`, width: `${wait.width}%` }}
               data-test-subj="esqlQueryProfileLaneWait"
@@ -182,7 +185,7 @@ const GroupHeader = ({
   drivers: TimelineDriver[];
 }) => {
   const styles = useTimelineStyles();
-  const spread = driverSpread(drivers);
+  const spread = useMemo(() => driverSpread(drivers), [drivers]);
 
   return (
     <EuiText size="xs" color="subdued">
@@ -219,12 +222,16 @@ export const TimelineTab = ({ view }: { view: QueryProfileView }) => {
   const [selectedOperatorKey, setSelectedOperatorKey] = useState<string | undefined>();
   const [isScrolled, setIsScrolled] = useState(false);
   const { timeline } = view;
-  const domain = fullDomain(timeline);
+  const domain = useMemo(() => fullDomain(timeline), [timeline]);
   const origin = domain.startMillis;
-  const hasWaits = timeline.drivers.some((driver) => driver.sleeps.length > 0);
-  const totalOperatorNanos = view.operators.reduce(
-    (sum, operator) => sum + operator.processNanos,
-    0
+  const groups = useMemo(() => groupDrivers(timeline.drivers), [timeline.drivers]);
+  const hasWaits = useMemo(
+    () => timeline.drivers.some((driver) => driver.sleeps.length > 0),
+    [timeline.drivers]
+  );
+  const totalOperatorNanos = useMemo(
+    () => view.operators.reduce((sum, operator) => sum + operator.processNanos, 0),
+    [view.operators]
   );
   const selectedDriver = timeline.drivers.find((driver) => driver.id === selectedLaneId);
   const toggle = (laneId: string) => {
@@ -258,7 +265,7 @@ export const TimelineTab = ({ view }: { view: QueryProfileView }) => {
             testSubject="esqlQueryProfilePlanningLane"
           />
         ) : null}
-        {groupDrivers(timeline.drivers).map(([description, drivers]) => (
+        {groups.map(([description, drivers]) => (
           <div key={description || 'other'}>
             <GroupHeader description={description} drivers={drivers} />
             {drivers.map((driver) => (

@@ -14,12 +14,9 @@ const operator = (title: string, processNanos: number, timeReported = true) =>
   ({ title, processNanos, timeReported } as AggregatedOperator);
 
 describe('operatorCategory', () => {
-  it('keeps TopN with the aggregate work', () => {
-    expect(operatorCategory('TopN')).toBe('aggregate_and_sort');
-  });
-
   it('groups operators by the kind of work they do', () => {
     expect(operatorCategory('HashAggregation')).toBe('aggregate_and_sort');
+    expect(operatorCategory('TopN')).toBe('aggregate_and_sort');
     expect(operatorCategory('ValuesSourceReader')).toBe('read');
     expect(operatorCategory('LuceneSource')).toBe('read');
     expect(operatorCategory('Eval')).toBe('compute');

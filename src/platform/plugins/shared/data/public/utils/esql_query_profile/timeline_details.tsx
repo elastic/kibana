@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiAccordion,
   EuiCodeBlock,
@@ -25,7 +25,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { QueryProfileView, TimelineDriver, TimelineOperator } from './types';
 import { operatorCategory, useOperatorCategoryColors } from './operator_category';
 import { formatCount, formatDurationMillis } from './profile_format';
-import { HOT_SHARE, WARM_SHARE } from './profile_heat';
+import { heatLevel } from './profile_heat';
 import { operatorShareLabel, operatorTimeLabel, planningPhaseLabel } from './timeline_labels';
 import { spanMillis } from './timeline_layout';
 import { useTimelineStyles } from './timeline_styles';
@@ -35,12 +35,12 @@ const MIN_QUERY_SHARE = 0.05;
 
 /** An operator is hot when it is a large part of its driver and a real part of the whole query. */
 const isHotOperator = (operator: TimelineOperator, totalOperatorNanos: number): boolean =>
-  operator.share >= WARM_SHARE &&
+  heatLevel(operator.share) !== 'cool' &&
   totalOperatorNanos > 0 &&
   operator.processNanos / totalOperatorNanos >= MIN_QUERY_SHARE;
 
 /** Identifies an operator inside its driver. The same operator can repeat, so the position counts. */
-export const operatorKey = (operator: TimelineOperator, index: number): string =>
+const operatorKey = (operator: TimelineOperator, index: number): string =>
   `${index}:${operator.operator}`;
 
 const Stat = ({ label, value }: { label: string; value: string }) => (
@@ -90,59 +90,63 @@ const OperatorDetails = ({
 }: {
   driver: TimelineDriver;
   operator: TimelineOperator;
-}) => (
-  <div data-test-subj="esqlQueryProfileOperatorDetails">
-    <EuiSpacer size="m" />
-    <EuiText size="s">
-      <strong>{operator.title}</strong>
-    </EuiText>
-    {operator.detail ? (
-      <EuiText size="xs" color="subdued">
-        <p>{operator.detail}</p>
+}) => {
+  const rawStatus = useMemo(() => JSON.stringify(operator.rawStatus, null, 2), [operator]);
+
+  return (
+    <div data-test-subj="esqlQueryProfileOperatorDetails">
+      <EuiSpacer size="m" />
+      <EuiText size="s">
+        <strong>{operator.title}</strong>
       </EuiText>
-    ) : null}
-    <EuiSpacer size="s" />
-    <Stats>
-      <Stat
-        label={i18n.translate('data.inspector.queryProfile.operatorCpuLabel', {
-          defaultMessage: 'CPU time',
+      {operator.detail ? (
+        <EuiText size="xs" color="subdued">
+          <p>{operator.detail}</p>
+        </EuiText>
+      ) : null}
+      <EuiSpacer size="s" />
+      <Stats>
+        <Stat
+          label={i18n.translate('data.inspector.queryProfile.operatorCpuLabel', {
+            defaultMessage: 'CPU time',
+          })}
+          value={operatorTimeLabel(operator)}
+        />
+        <Stat
+          label={i18n.translate('data.inspector.queryProfile.operatorShareLabel', {
+            defaultMessage: 'Share of driver',
+          })}
+          value={operatorShareLabel(operator)}
+        />
+        <Stat
+          label={i18n.translate('data.inspector.queryProfile.operatorRowsInLabel', {
+            defaultMessage: 'Rows in',
+          })}
+          value={formatCount(operator.rowsReceived)}
+        />
+        <Stat
+          label={i18n.translate('data.inspector.queryProfile.operatorRowsOutLabel', {
+            defaultMessage: 'Rows out',
+          })}
+          value={formatCount(operator.rowsEmitted)}
+        />
+      </Stats>
+      <EuiSpacer size="s" />
+      <EuiAccordion
+        id={`esqlQueryProfileRawStatus-${driver.id}`}
+        buttonContent={i18n.translate('data.inspector.queryProfile.rawStatusLabel', {
+          defaultMessage: 'Raw status',
         })}
-        value={operatorTimeLabel(operator)}
-      />
-      <Stat
-        label={i18n.translate('data.inspector.queryProfile.operatorShareLabel', {
-          defaultMessage: 'Share of driver',
-        })}
-        value={operatorShareLabel(operator)}
-      />
-      <Stat
-        label={i18n.translate('data.inspector.queryProfile.operatorRowsInLabel', {
-          defaultMessage: 'Rows in',
-        })}
-        value={formatCount(operator.rowsReceived)}
-      />
-      <Stat
-        label={i18n.translate('data.inspector.queryProfile.operatorRowsOutLabel', {
-          defaultMessage: 'Rows out',
-        })}
-        value={formatCount(operator.rowsEmitted)}
-      />
-    </Stats>
-    <EuiSpacer size="s" />
-    <EuiAccordion
-      id={`esqlQueryProfileRawStatus-${driver.id}`}
-      buttonContent={i18n.translate('data.inspector.queryProfile.rawStatusLabel', {
-        defaultMessage: 'Raw status',
-      })}
-      paddingSize="s"
-      data-test-subj="esqlQueryProfileRawStatus"
-    >
-      <EuiCodeBlock language="json" fontSize="s" paddingSize="s" isCopyable>
-        {JSON.stringify(operator.rawStatus, null, 2)}
-      </EuiCodeBlock>
-    </EuiAccordion>
-  </div>
-);
+        paddingSize="s"
+        data-test-subj="esqlQueryProfileRawStatus"
+      >
+        <EuiCodeBlock language="json" fontSize="s" paddingSize="s" isCopyable>
+          {rawStatus}
+        </EuiCodeBlock>
+      </EuiAccordion>
+    </div>
+  );
+};
 
 const OperatorStrip = ({
   driver,
@@ -192,7 +196,7 @@ const OperatorStrip = ({
                   <EuiIcon
                     type="thermometer"
                     size="s"
-                    color={operator.share >= HOT_SHARE ? 'danger' : 'warning'}
+                    color={heatLevel(operator.share) === 'hot' ? 'danger' : 'warning'}
                     aria-hidden="true"
                   />
                 ) : null}

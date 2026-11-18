@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -128,7 +128,7 @@ const DurationSummary = ({ view }: { view: QueryProfileView }) => {
 const CpuByKind = ({ view }: { view: QueryProfileView }) => {
   const styles = useSummaryStyles();
   const categoryColor = useOperatorCategoryColors();
-  const breakdown = summarizeCpuByCategory(view.operators);
+  const breakdown = useMemo(() => summarizeCpuByCategory(view.operators), [view.operators]);
   if (breakdown.length === 0) {
     return null;
   }

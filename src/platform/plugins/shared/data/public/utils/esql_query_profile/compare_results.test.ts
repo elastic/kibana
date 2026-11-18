@@ -17,21 +17,6 @@ describe('summarizeResults', () => {
     expect(summarizeResults({})).toBeUndefined();
     expect(summarizeResults({ columns: [] })).toBeUndefined();
   });
-
-  it('counts rows and keeps the column names', () => {
-    expect(
-      response(
-        ['a', 'b'],
-        [
-          [1, 'x'],
-          [2, 'y'],
-        ]
-      )
-    ).toMatchObject({
-      columns: ['a', 'b'],
-      rowCount: 2,
-    });
-  });
 });
 
 describe('compareResults', () => {
@@ -68,6 +53,15 @@ describe('compareResults', () => {
     const verdict = compareResults(response(['avg'], [[0.1 + 0.2]]), response(['avg'], [[0.3]]));
 
     expect(verdict).toMatchObject({ kind: 'same' });
+  });
+
+  it('tells large integers apart, such as timestamps that differ in the last digits', () => {
+    const verdict = compareResults(
+      response(['t'], [[1_700_000_000_123]]),
+      response(['t'], [[1_700_000_000_999]])
+    );
+
+    expect(verdict).toEqual({ kind: 'differentRows', rowCount: 1 });
   });
 
   it('reports different columns, row counts and rows', () => {

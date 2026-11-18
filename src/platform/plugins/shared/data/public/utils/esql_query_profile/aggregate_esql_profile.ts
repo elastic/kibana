@@ -22,6 +22,7 @@ import type {
 import { PHASE_NANOS_FIELDS, PLANNING_PHASE_IDS, PROCESS_NANOS_FIELD } from './profile_schema';
 import { isRecord } from './json_helpers';
 import { readPlanNodeSources } from './plan_node_sources';
+import { spanMillis } from './timeline_layout';
 
 interface OperatorAccumulator extends OperatorMeasures {
   operator: string;
@@ -54,8 +55,9 @@ export function aggregateEsqlProfile(profile: unknown): QueryProfileView {
       : Math.max(0, queryTookMillis - planningTookMillis);
 
   const drivers = parsed?.drivers ?? [];
-  const operators = aggregateOperators(drivers);
-  const timeline = readTimeline(parsed, drivers);
+  const readings = drivers.map(readOperatorReadings);
+  const operators = aggregateOperators(drivers, readings);
+  const timeline = readTimeline(parsed, drivers, readings);
 
   return {
     queryTookMillis,
@@ -134,11 +136,14 @@ function readOperatorNanos(status: Record<string, unknown>): number | undefined 
   return phases.length > 0 ? phases.reduce((sum, nanos) => sum + nanos, 0) : undefined;
 }
 
-function aggregateOperators(drivers: EsqlProfileDriver[]): AggregatedOperator[] {
+function aggregateOperators(
+  drivers: EsqlProfileDriver[],
+  readingsByDriver: OperatorReading[][]
+): AggregatedOperator[] {
   const byOperator = new Map<string, OperatorAccumulator>();
 
-  drivers.forEach((driver, index) => {
-    readOperatorReadings(driver).forEach(({ operator, ...reading }) => {
+  readingsByDriver.forEach((readings, index) => {
+    readings.forEach(({ operator, ...reading }) => {
       const current: OperatorAccumulator = byOperator.get(operator) ?? {
         operator,
         processNanos: 0,
@@ -154,7 +159,7 @@ function aggregateOperators(drivers: EsqlProfileDriver[]): AggregatedOperator[] 
       current.rowsEmitted += reading.rowsEmitted;
       current.drivers.push({
         driverIndex: index,
-        nodeName: driver.node_name,
+        nodeName: drivers[index].node_name,
         planNodeId: reading.planNodeId,
         processNanos: reading.processNanos,
         timeReported: reading.timeReported,
@@ -190,7 +195,8 @@ function toAggregatedOperator(
 
 function readTimeline(
   profile: EsqlQueryProfile | undefined,
-  drivers: EsqlProfileDriver[]
+  drivers: EsqlProfileDriver[],
+  readingsByDriver: OperatorReading[][]
 ): QueryProfileTimeline {
   const planning = readClock(profile?.planning?.start_millis, profile?.planning?.stop_millis);
   const timelineDrivers = drivers.flatMap((driver, index) => {
@@ -209,12 +215,9 @@ function readTimeline(
         ...clock,
         cpuNanos: readFinite(driver.cpu_nanos),
         sleeps,
-        waitedMillis: sleeps.reduce(
-          (sum, sleep) => sum + (sleep.stopMillis - sleep.startMillis),
-          0
-        ),
+        waitedMillis: sleeps.reduce((sum, sleep) => sum + spanMillis(sleep), 0),
         sleepCount: countSleeps(driver),
-        operators: readDriverOperators(driver),
+        operators: readDriverOperators(readingsByDriver[index]),
       },
     ];
   });
@@ -261,11 +264,10 @@ function countSleeps(driver: EsqlProfileDriver): number {
 }
 
 /** Operators stay in the driver's own order. Share is of this driver only. */
-function readDriverOperators(driver: EsqlProfileDriver): TimelineOperator[] {
-  const readings = readOperatorReadings(driver);
+function readDriverOperators(readings: OperatorReading[]): TimelineOperator[] {
   const totalProcessNanos = readings.reduce((sum, reading) => sum + reading.processNanos, 0);
 
-  return readings.map((reading) => ({
+  return readings.map(({ planNodeId, ...reading }) => ({
     ...reading,
     ...formatOperatorLabel(reading.operator),
     share: shareOf(reading.processNanos, totalProcessNanos),

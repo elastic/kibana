@@ -23,12 +23,15 @@ export type ResultsVerdict =
   | { kind: 'differentRowCount'; baseline: number; current: number }
   | { kind: 'differentRows'; rowCount: number };
 
-/** Numbers are rounded so a different summing order in a rewrite is not reported as a difference. */
+/**
+ * Decimals are rounded so a different summing order in a rewrite is not reported as a difference.
+ * Integers are kept as they are, because rounding them would make large ids and timestamps equal.
+ */
 const SIGNIFICANT_DIGITS = 9;
 
 const normalizeValue = (value: unknown): string => {
   if (typeof value === 'number') {
-    return Number.isFinite(value)
+    return Number.isFinite(value) && !Number.isInteger(value)
       ? String(Number(value.toPrecision(SIGNIFICANT_DIGITS)))
       : String(value);
   }

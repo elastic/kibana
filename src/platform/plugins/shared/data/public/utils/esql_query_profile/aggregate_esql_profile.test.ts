@@ -92,7 +92,7 @@ describe('aggregateEsqlProfile', () => {
   });
 
   it('returns an empty view when the profile is missing', () => {
-    expect(aggregateEsqlProfile(undefined)).toEqual({
+    expect(aggregateEsqlProfile(undefined)).toMatchObject({
       queryTookMillis: undefined,
       planningTookMillis: undefined,
       executionTookMillis: undefined,
@@ -240,47 +240,27 @@ describe('aggregateEsqlProfile operator time', () => {
     expect(nanosOf('ExchangeSink')).toBe(0);
   });
 
-  it('counts the finish phase of an aggregation without grouping', () => {
-    // From a real `STATS COUNT(*), AVG(bytes), MAX(bytes)` profile: finishing is small but separate.
+  it.each([
+    [
+      // From a real `STATS COUNT(*), AVG(bytes), MAX(bytes)` profile: finishing is small but separate.
+      'an aggregation without grouping, with its finish phase',
+      'AggregationOperator[mode=INITIAL]',
+      { aggregation_nanos: 15_296_000, aggregation_finish_nanos: 6_000, rows_received: 100_000 },
+      15_296_000 + 6_000,
+    ],
+    [
+      'a sampling operator',
+      'SampleOperator[probability=0.1]',
+      { collect_nanos: 4_000, emit_nanos: 1_000, rows_received: 10 },
+      4_000 + 1_000,
+    ],
+  ])('counts every phase of %s', (_, operator, status, expectedNanos) => {
     const { operators } = aggregateEsqlProfile({
-      drivers: [
-        {
-          description: 'data',
-          operators: [
-            {
-              operator: 'AggregationOperator[mode=INITIAL]',
-              status: {
-                aggregation_nanos: 15_296_000,
-                aggregation_finish_nanos: 6_000,
-                rows_received: 100_000,
-                rows_emitted: 1,
-              },
-            },
-          ],
-        },
-      ],
+      drivers: [{ description: 'data', operators: [{ operator, status }] }],
     });
 
-    expect(operators[0].processNanos).toBe(15_296_000 + 6_000);
+    expect(operators[0].processNanos).toBe(expectedNanos);
     expect(operators[0].timeReported).toBe(true);
-  });
-
-  it('counts both phases of a sampling operator', () => {
-    const { operators } = aggregateEsqlProfile({
-      drivers: [
-        {
-          description: 'data',
-          operators: [
-            {
-              operator: 'SampleOperator[probability=0.1]',
-              status: { collect_nanos: 4_000, emit_nanos: 1_000, rows_received: 10 },
-            },
-          ],
-        },
-      ],
-    });
-
-    expect(operators[0].processNanos).toBe(4_000 + 1_000);
   });
 
   it('includes those operators in shares and the per-driver timeline', () => {

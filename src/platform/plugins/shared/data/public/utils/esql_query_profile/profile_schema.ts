@@ -48,7 +48,7 @@ export const PLANNING_PHASE_IDS: readonly PlanningPhaseId[] = Object.entries(pro
 
 const driver = objectOf(objectOf(profileProperties.drivers).items as JSONSchema7);
 const operatorVariants =
-  (objectOf(propertiesOf(driver).operators).items as JSONSchema7).anyOf ?? [];
+  (objectOf(propertiesOf(driver).operators).items as JSONSchema7 | undefined)?.anyOf ?? [];
 
 /** The fields that each kind of operator reports in its `status`. */
 const operatorStatusFields: string[][] = operatorVariants.flatMap((variant) => {
@@ -57,9 +57,6 @@ const operatorStatusFields: string[][] = operatorVariants.flatMap((variant) => {
     ? ((status.anyOf ?? [status]) as JSONSchema7[]).map((kind) => Object.keys(propertiesOf(kind)))
     : [];
 });
-
-/** Every field that any kind of operator reports. */
-export const OPERATOR_STATUS_FIELDS: ReadonlySet<string> = new Set(operatorStatusFields.flat());
 
 /** Most operators report the time they ran for in this field. */
 export const PROCESS_NANOS_FIELD = 'process_nanos';

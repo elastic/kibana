@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { max, median, min } from 'd3-array';
 import type { QueryProfileTimeline, TimelineDriver, TimeSpan } from './types';
 
 /** The kinds of driver in the order a query runs them. Any other kind is listed after these. */
@@ -54,7 +55,12 @@ export const laneBox = (startMillis: number, stopMillis: number, domain: TimeSpa
 export const groupDrivers = (drivers: TimelineDriver[]): Array<[string, TimelineDriver[]]> => {
   const groups = new Map<string, TimelineDriver[]>();
   drivers.forEach((driver) => {
-    groups.set(driver.description, [...(groups.get(driver.description) ?? []), driver]);
+    const group = groups.get(driver.description);
+    if (group) {
+      group.push(driver);
+    } else {
+      groups.set(driver.description, [driver]);
+    }
   });
   const known = GROUP_ORDER.filter((description) => groups.has(description));
   const rest = [...groups.keys()].filter((description) => !GROUP_ORDER.includes(description));
@@ -82,19 +88,18 @@ export const driverSpread = (drivers: TimelineDriver[]): DriverSpread | undefine
   if (drivers.length < 2) {
     return undefined;
   }
-  const sorted = drivers.map(spanMillis).sort((left, right) => left - right);
-  const middle = Math.floor(sorted.length / 2);
-  const medianMillis =
-    sorted.length % 2 === 0 ? (sorted[middle - 1] + sorted[middle]) / 2 : sorted[middle];
-  const maxMillis = sorted[sorted.length - 1];
+  const durations = drivers.map(spanMillis);
+  const minMillis = min(durations) ?? 0;
+  const medianMillis = median(durations) ?? 0;
+  const maxMillis = max(durations) ?? 0;
 
   return {
-    count: sorted.length,
-    minMillis: sorted[0],
+    count: durations.length,
+    minMillis,
     medianMillis,
     maxMillis,
     isSkewed:
-      sorted.length >= MIN_DRIVERS_FOR_SKEW &&
+      durations.length >= MIN_DRIVERS_FOR_SKEW &&
       medianMillis > 0 &&
       maxMillis >= medianMillis * SKEW_RATIO,
   };

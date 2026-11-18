@@ -39,48 +39,50 @@ interface Entry {
   subquery?: number;
 }
 
+/** Where each line of a query starts, as an index into the query string. */
+const lineStartsOf = (query: string): number[] => {
+  const starts = [0];
+  for (let index = 0; index < query.length; index++) {
+    if (query[index] === '\n') {
+      starts.push(index + 1);
+    }
+  }
+  return starts;
+};
+
 /**
  * Where a position of the profile is in the query, as an index into the query string. The position
  * is only believed when the text ES reports for it is what the query has there.
  */
-const offsetOf = (query: string, { line, column, text }: PlanNodeSource): number | undefined => {
-  const lines = query.split('\n');
-  if (line < 1 || line > lines.length) {
+const offsetOf = (
+  query: string,
+  lineStarts: number[],
+  { line, column, text }: PlanNodeSource
+): number | undefined => {
+  const lineStart = lineStarts[line - 1];
+  if (lineStart === undefined) {
     return undefined;
   }
-  const lineStart = lines
-    .slice(0, line - 1)
-    .reduce((sum, previous) => sum + previous.length + 1, 0);
   const offset = lineStart + column - 1;
   return query.startsWith(text, offset) ? offset : undefined;
 };
 
-/** The innermost command that holds a position, since a FORK or FROM holds its subqueries. */
-const commandAt = (entries: Entry[], offset: number): Entry | undefined =>
-  entries
-    .filter(({ command }) => command.start <= offset && offset < command.end)
-    .reduce<Entry | undefined>(
-      (innermost, entry) =>
-        innermost === undefined || entry.command.start > innermost.command.start
-          ? entry
-          : innermost,
-      undefined
-    );
-
-/** The commands of a query, with those of the subqueries of a FROM or FORK listed in its place. */
-const listEntries = (commands: QueryCommand[]): { entries: Entry[]; hasSubqueries: boolean } => {
-  const owner = commands.find((command) => command.branches && command.branches.length > 0);
-  const entries = commands.flatMap((command): Entry[] =>
-    command === owner
-      ? [
-          ...(command.branches ?? []).flatMap((branch, subquery) =>
-            branch.map((inner) => ({ command: inner, subquery }))
-          ),
-          { command },
-        ]
-      : [{ command }]
-  );
-  return { entries, hasSubqueries: owner !== undefined };
+/**
+ * The commands of a query, with the commands of the subqueries of every FROM or FORK listed just
+ * before the command that holds them. Subqueries are counted across the whole query.
+ */
+const listEntries = (commands: QueryCommand[]): Entry[] => {
+  let subquery = 0;
+  return commands.flatMap((command): Entry[] => {
+    if (!command.branches?.length) {
+      return [{ command }];
+    }
+    const inner = command.branches.flatMap((branch) => {
+      const index = subquery++;
+      return branch.map((innerCommand) => ({ command: innerCommand, subquery: index }));
+    });
+    return [...inner, { command }];
+  });
 };
 
 /** The CPU time found for one command, while the operators are being attributed. */
@@ -90,6 +92,21 @@ interface CommandAccumulator {
   /** CPU time by short operator name. */
   operatorNanos: Map<string, number>;
 }
+
+/** The innermost command that holds a position, since a FORK or FROM holds its subqueries. */
+const commandAt = (
+  accumulators: CommandAccumulator[],
+  offset: number
+): CommandAccumulator | undefined =>
+  accumulators
+    .filter(({ entry: { command } }) => command.start <= offset && offset < command.end)
+    .reduce<CommandAccumulator | undefined>(
+      (innermost, accumulator) =>
+        innermost === undefined || accumulator.entry.command.start > innermost.entry.command.start
+          ? accumulator
+          : innermost,
+      undefined
+    );
 
 /**
  * Attributes operator CPU time to the commands of a query. Every operator names the plan node it
@@ -107,12 +124,22 @@ export function mapOperatorsToCommands({
   operators: AggregatedOperator[];
   planNodeSources: Record<string, PlanNodeSource>;
 }): QueryHeat {
-  const { entries, hasSubqueries } = listEntries(commands);
-  const accumulators: CommandAccumulator[] = entries.map((entry) => ({
+  const accumulators: CommandAccumulator[] = listEntries(commands).map((entry) => ({
     entry,
     nanos: 0,
     operatorNanos: new Map(),
   }));
+  const lineStarts = lineStartsOf(query);
+  // Operators of many drivers share their plan nodes, so each node is placed once.
+  const commandOfNode = new Map<string, CommandAccumulator | undefined>();
+  const commandOf = (key: string): CommandAccumulator | undefined => {
+    if (!commandOfNode.has(key)) {
+      const source = planNodeSources[key];
+      const offset = source && offsetOf(query, lineStarts, source);
+      commandOfNode.set(key, offset === undefined ? undefined : commandAt(accumulators, offset));
+    }
+    return commandOfNode.get(key);
+  };
   let unattributedNanos = 0;
   let totalNanos = 0;
 
@@ -121,11 +148,8 @@ export function mapOperatorsToCommands({
       .filter((driver) => driver.timeReported)
       .forEach(({ nodeName, planNodeId, processNanos }) => {
         totalNanos += processNanos;
-        const source =
-          planNodeId === undefined ? undefined : planNodeSources[planNodeKey(nodeName, planNodeId)];
-        const offset = source && offsetOf(query, source);
-        const entry = offset === undefined ? undefined : commandAt(entries, offset);
-        const target = accumulators.find((accumulator) => accumulator.entry === entry);
+        const target =
+          planNodeId === undefined ? undefined : commandOf(planNodeKey(nodeName, planNodeId));
         if (!target) {
           unattributedNanos += processNanos;
           return;
@@ -150,6 +174,6 @@ export function mapOperatorsToCommands({
       ({ command, operators: names }) => !command.branches?.length || names.length > 0
     ),
     unattributedShare: shareOf(unattributedNanos, totalNanos),
-    hasSubqueries,
+    hasSubqueries: commands.some((command) => Boolean(command.branches?.length)),
   };
 }

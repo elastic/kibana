@@ -241,4 +241,24 @@ describe('mapOperatorsToCommands with subqueries', () => {
       'SORT',
     ]);
   });
+
+  it('numbers the subqueries across the whole query when more than one command has them', () => {
+    const query = 'FROM logs | FORK (LIMIT 1) (LIMIT 2) | FORK (LIMIT 3) (LIMIT 4)';
+    const steps = [
+      { operator: 'LimitOperator', node: { id: '1', text: 'LIMIT 3' }, nanos: 40 },
+      { operator: 'LimitOperator', node: { id: '2', text: 'LIMIT 1' }, nanos: 60 },
+    ];
+
+    const forks = heatOf(query, steps);
+
+    expect(
+      forks.commands.map(({ command, subquery, share }) => [command.text, subquery, share])
+    ).toEqual([
+      ['FROM logs', undefined, 0],
+      ['LIMIT 1', 0, 0.6],
+      ['LIMIT 2', 1, 0],
+      ['LIMIT 3', 2, 0.4],
+      ['LIMIT 4', 3, 0],
+    ]);
+  });
 });

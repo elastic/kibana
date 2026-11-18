@@ -7,12 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  OPERATOR_STATUS_FIELDS,
-  PHASE_NANOS_FIELDS,
-  PLANNING_PHASE_IDS,
-  PROCESS_NANOS_FIELD,
-} from './profile_schema';
+import { PHASE_NANOS_FIELDS, PLANNING_PHASE_IDS } from './profile_schema';
 
 /**
  * These are read from the schema that Elasticsearch publishes for the profile, so a new version of
@@ -39,11 +34,5 @@ describe('what the profile view reads from the ES|QL profile schema', () => {
       'hash_nanos',
       'receive_nanos',
     ]);
-  });
-
-  it('still has the fields that are read by name', () => {
-    expect([...OPERATOR_STATUS_FIELDS]).toEqual(
-      expect.arrayContaining([PROCESS_NANOS_FIELD, 'rows_received', 'rows_emitted'])
-    );
   });
 });

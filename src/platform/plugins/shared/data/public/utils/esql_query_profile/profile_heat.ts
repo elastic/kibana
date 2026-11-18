@@ -8,7 +8,13 @@
  */
 
 /** From this share of a whole, a part of the profile is flagged as warm. */
-export const WARM_SHARE = 0.25;
+const WARM_SHARE = 0.25;
 
 /** From this share of a whole, a part of the profile is flagged as hot. */
-export const HOT_SHARE = 0.5;
+const HOT_SHARE = 0.5;
+
+export type HeatLevel = 'hot' | 'warm' | 'cool';
+
+/** How much attention a part of the profile deserves, from its share of a whole. */
+export const heatLevel = (share: number): HeatLevel =>
+  share >= HOT_SHARE ? 'hot' : share >= WARM_SHARE ? 'warm' : 'cool';

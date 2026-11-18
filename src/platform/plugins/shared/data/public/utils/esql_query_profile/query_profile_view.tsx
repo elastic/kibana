@@ -29,7 +29,8 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { Adapters, Request } from '@kbn/inspector-plugin/public';
 import type { ISearchStart } from '../../search';
 import type { QueryProfileView as QueryProfileViewModel } from './types';
-import { ByCommandTab, hasCommandBreakdown } from './by_command_tab';
+import { ByCommandTab, computeCommandHeat, hasCommandBreakdown } from './by_command_tab';
+import type { QueryHeat } from './map_operators_to_commands';
 import { esqlRequestLabels } from './esql_request_label';
 import { listEsqlInspectorRequests } from './esql_inspector_requests';
 import { FasterQuerySuggestion } from './faster_query_suggestion';
@@ -72,56 +73,59 @@ const useEsqlRequests = (adapters: Adapters): Request[] => {
   return requests;
 };
 
+/** A loaded profile, or the reason it failed, with the request and run it belongs to. */
+interface LoadedProfile {
+  requestJson: object;
+  reloadKey: number;
+  view?: QueryProfileViewModel;
+  error?: string;
+}
+
 const useQueryProfile = (
   search: Pick<ISearchStart, 'esql'>,
   request: Request | undefined,
   reloadKey: number
 ): { view?: QueryProfileViewModel; error?: string; loading: boolean } => {
-  const [view, setView] = useState<QueryProfileViewModel | undefined>();
-  const [error, setError] = useState<string | undefined>();
-  const [loading, setLoading] = useState(Boolean(request?.json));
+  const [loaded, setLoaded] = useState<LoadedProfile | undefined>();
   const requestJson = request?.json;
-  const requestId = request?.id;
 
   useEffect(() => {
-    setView(undefined);
-    setError(undefined);
     if (!requestJson) {
-      setLoading(false);
       return;
     }
 
     const controller = new AbortController();
-    setLoading(true);
-
     loadEsqlQueryProfile({ search, requestJson, abortSignal: controller.signal })
-      .then((next) => {
+      .then((view) => {
         if (!controller.signal.aborted) {
-          setView(next);
-          setLoading(false);
+          setLoaded({ requestJson, reloadKey, view });
         }
       })
       .catch((caught: unknown) => {
         if (controller.signal.aborted) {
           return;
         }
-        setError(
-          readErrorMessage(
+        setLoaded({
+          requestJson,
+          reloadKey,
+          error: readErrorMessage(
             caught,
             i18n.translate('data.inspector.queryProfile.unknownErrorMessage', {
               defaultMessage: 'The query profile failed.',
             })
-          )
-        );
-        setLoading(false);
+          ),
+        });
       });
 
     return () => {
       controller.abort();
     };
-  }, [requestId, requestJson, search, reloadKey]);
+  }, [requestJson, search, reloadKey]);
 
-  return { view, error, loading };
+  // What was loaded for another request or run is not shown, not even for a moment.
+  const current =
+    loaded?.requestJson === requestJson && loaded?.reloadKey === reloadKey ? loaded : undefined;
+  return { view: current?.view, error: current?.error, loading: Boolean(requestJson) && !current };
 };
 
 const RequestPicker = ({
@@ -181,14 +185,14 @@ const ProfileLoading = () => (
 /** The timeline and by-command tabs, or a note when the profile has nothing to show in them. */
 const ProfileDetails = ({
   view,
-  query,
+  heat,
   activeTab,
   showByCommand,
   requestId,
   onTabChange,
 }: {
   view: QueryProfileViewModel;
-  query?: string;
+  heat?: QueryHeat;
   activeTab: TabId;
   showByCommand: boolean;
   requestId?: string;
@@ -236,8 +240,8 @@ const ProfileDetails = ({
         ) : null}
       </EuiTabs>
       <EuiSpacer size="m" />
-      {activeTab === 'byCommand' && query ? (
-        <ByCommandTab view={view} query={query} />
+      {activeTab === 'byCommand' && heat ? (
+        <ByCommandTab heat={heat} />
       ) : view.hasTimeline ? (
         <TimelineTab key={requestId} view={view} />
       ) : null}
@@ -274,7 +278,11 @@ export const QueryProfileView = ({
   const { view, error, loading } = useQueryProfile(search, selected, reloadKey);
   const completedTime = completedRequestTime(selected);
   const query = readQuery(selected);
-  const showByCommand = Boolean(view && hasCommandBreakdown(view, query));
+  const heat = useMemo(
+    () => (view && query ? computeCommandHeat(view, query) : undefined),
+    [view, query]
+  );
+  const showByCommand = hasCommandBreakdown(heat);
   const activeTab = tab === 'byCommand' && !showByCommand ? 'timeline' : tab;
 
   return (
@@ -330,6 +338,15 @@ export const QueryProfileView = ({
           })}
           text={<p>{error}</p>}
         />
+      ) : !selected?.json ? (
+        <EuiText size="s" color="subdued" data-test-subj="esqlQueryProfileNoRequest">
+          <p>
+            <FormattedMessage
+              id="data.inspector.queryProfile.noRequestDescription"
+              defaultMessage="There is no ES|QL request to profile."
+            />
+          </p>
+        </EuiText>
       ) : loading || !view ? (
         <ProfileLoading />
       ) : (
@@ -350,7 +367,7 @@ export const QueryProfileView = ({
           ) : null}
           <ProfileDetails
             view={view}
-            query={query}
+            heat={heat}
             activeTab={activeTab}
             showByCommand={showByCommand}
             requestId={selected?.id}

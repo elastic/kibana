@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -233,12 +233,31 @@ describe('QueryProfileView', () => {
     );
   });
 
-  it('profiles again on request', async () => {
+  it('profiles again on request and shows the new profile', async () => {
     renderProfileOf(QUERY, search);
-    await screen.findByTestId('esqlQueryProfileDuration');
+    expect(await screen.findByTestId('esqlQueryProfileDuration')).toHaveTextContent('2 s');
+
+    esql.mockResolvedValueOnce({
+      rawResponse: { profile: { ...profile, query: { ...profile.query, took_millis: 4_000 } } },
+    });
     await userEvent.click(screen.getByTestId('esqlQueryProfileRunAgain'));
 
-    await waitFor(() => expect(esql).toHaveBeenCalledTimes(2));
+    await waitFor(() =>
+      expect(screen.getByTestId('esqlQueryProfileDuration')).toHaveTextContent('4 s')
+    );
+    expect(esql).toHaveBeenCalledTimes(2);
+  });
+
+  it('says there is nothing to profile when the request is gone, instead of waiting for it', async () => {
+    const requests = new RequestAdapter();
+    logRequest(requests, 'Documents', { query: QUERY, include_execution_metadata: true });
+    renderView(<QueryProfileView adapters={{ requests }} search={search} />);
+    await screen.findByTestId('esqlQueryProfileDuration');
+
+    act(() => requests.reset());
+
+    expect(await screen.findByTestId('esqlQueryProfileNoRequest')).toBeInTheDocument();
+    expect(screen.queryByTestId('esqlQueryProfileLoading')).not.toBeInTheDocument();
   });
 
   describe('timeline', () => {
@@ -340,6 +359,8 @@ describe('QueryProfileView', () => {
       renderProfileOf(QUERY, search);
 
       await userEvent.click(await screen.findByTestId('esqlQueryProfileByCommandTab'));
+      expect(await screen.findByTestId('esqlQueryProfileByCommand')).toBeInTheDocument();
+
       await userEvent.click(screen.getByTestId('esqlQueryProfileTimelineTab'));
 
       expect(await screen.findByTestId('esqlQueryProfileTimeline')).toBeInTheDocument();
@@ -398,7 +419,7 @@ describe('QueryProfileView faster query suggestion', () => {
 
   const setup = (
     suggestedResponse: { columns: object[]; values: unknown[][] },
-    { hasEnterprise = true }: { hasEnterprise?: boolean } = {}
+    { hasEnterprise = true, hasHttp = true }: { hasEnterprise?: boolean; hasHttp?: boolean } = {}
   ) => {
     const application = {
       capabilities: {
@@ -424,7 +445,7 @@ describe('QueryProfileView faster query suggestion', () => {
       <QueryProfileView
         adapters={{ requests }}
         search={{ esql } as unknown as Pick<ISearchStart, 'esql'>}
-        http={{ post } as never}
+        http={hasHttp ? ({ post } as never) : undefined}
         licensing={licensingWith(hasEnterprise)}
         application={application}
       />
@@ -464,8 +485,11 @@ describe('QueryProfileView faster query suggestion', () => {
     );
   });
 
-  it('hides the action without an enterprise license', async () => {
-    setup({ columns, values }, { hasEnterprise: false });
+  it.each([
+    ['an enterprise license', { hasEnterprise: false }],
+    ['an http service', { hasHttp: false }],
+  ])('does not offer the suggestion without %s', async (_, options) => {
+    setup({ columns, values }, options);
 
     await screen.findByTestId('esqlQueryProfileDuration');
     expect(screen.queryByTestId('esqlQueryProfileSuggest')).not.toBeInTheDocument();
@@ -495,7 +519,7 @@ describe('QueryProfileView faster query suggestion', () => {
     expect(esql).toHaveBeenCalledTimes(1);
   });
 
-  it('shows the reason when the suggestion fails, for example without an AI connector', async () => {
+  it('shows the reason when the suggestion fails', async () => {
     const { post } = setup({ columns, values });
     post.mockRejectedValue({ body: { message: 'No AI connector available.' } });
 
@@ -521,16 +545,5 @@ describe('QueryProfileView faster query suggestion', () => {
       'href',
       '/app/management/insightsAndAlerting/triggersActionsConnectors/connectors'
     );
-  });
-
-  it('does not offer the suggestion without an http service', async () => {
-    const search = {
-      esql: jest.fn(async () => ({ rawResponse: { profile: slowProfile } })),
-    } as unknown as Pick<ISearchStart, 'esql'>;
-
-    renderProfileOf(ORIGINAL, search);
-
-    await screen.findByTestId('esqlQueryProfileDuration');
-    expect(screen.queryByTestId('esqlQueryProfileSuggest')).not.toBeInTheDocument();
   });
 });
