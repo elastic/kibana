@@ -40,6 +40,8 @@ import {
 } from '../../../common/constants';
 import type { ImprovementAction } from '../../../common/http_api/improvement_actions';
 import { IMPROVEMENT_ACTIONS } from '../../../common/http_api/improvement_actions';
+import { KI_STATUSES, type KiStatus } from '../../../common/ki_lifecycle_status';
+import { DEFAULT_KI_LIST_SORT, KI_LIST_SORTS, type KiListSort } from '../../../common/ki_list_sort';
 import {
   KI_LIFECYCLE_STATUSES,
   MAX_KI_ID_LENGTH,
@@ -54,7 +56,6 @@ import {
   validateSignalWindowCoversInterval,
 } from '../../../common/validation';
 import { validateSignalFilter } from '../../ai_indices/signal_filter';
-
 const aiIndexIdSchema = schema.string({
   minLength: 1,
   maxLength: MAX_AI_INDEX_ID_LENGTH,
@@ -266,7 +267,9 @@ const aiIndexPropertiesSchema = {
   memory_enabled: schema.maybe(
     schema.boolean({
       meta: {
-        description: 'Whether this AI index accepts memory writes. Defaults to true when omitted.',
+        description:
+          'Whether this AI index accepts memory writes. Defaults to true when omitted. Deprecated and ignored in Serverless and in Elastic 9.7 and later.',
+        deprecated: true,
       },
     })
   ),
@@ -328,6 +331,31 @@ const kiLifecycleStatusesQuerySchema = schema.oneOf(
   }
 );
 
+const kiListStatusQuerySchema = schema.oneOf(
+  KI_STATUSES.map((status) => schema.literal(status)) as [Type<KiStatus>],
+  {
+    meta: {
+      description:
+        'Knowledge Indicator status: a stored governance.lifecycle.status value, or `expired` for active KIs past expires_at.',
+    },
+  }
+);
+
+const kiListStatusesQuerySchema = schema.oneOf(
+  [
+    kiListStatusQuerySchema,
+    schema.arrayOf(kiListStatusQuerySchema, {
+      maxSize: KI_STATUSES.length,
+    }),
+  ],
+  {
+    meta: {
+      description:
+        'When set, filter by KI status. `expired` matches KIs past expires_at that are not deleted or failed, and `active` excludes them. When omitted, deleted KIs are excluded.',
+    },
+  }
+);
+
 export const listKisQuerySchema = schema.object({
   size: schema.number({
     min: 0,
@@ -341,7 +369,14 @@ export const listKisQuerySchema = schema.object({
       meta: { description: 'When set, return only KIs of this type.' },
     })
   ),
-  lifecycle_status: schema.maybe(kiLifecycleStatusesQuerySchema),
+  status: schema.maybe(kiListStatusesQuerySchema),
+  sort: schema.oneOf(KI_LIST_SORTS.map((value) => schema.literal(value)) as [Type<KiListSort>], {
+    defaultValue: DEFAULT_KI_LIST_SORT,
+    meta: {
+      description:
+        'Sort order. `updated` is newest first, `title` is A to Z (case-insensitive, KIs without a title last). When `query` is set, results rank by best match first and `sort` only breaks ties.',
+    },
+  }),
   query: schema.maybe(
     schema.string({
       minLength: 1,
@@ -542,9 +577,6 @@ export const aiIndexHttpItemResponseSchema = () =>
       meta: {
         description: 'Whether the AI Index is managed by a plugin and therefore immutable.',
       },
-    }),
-    memory_enabled: schema.boolean({
-      meta: { description: 'Whether this AI Index accepts memory writes.' },
     }),
     date_created: schema.string({
       meta: { description: 'ISO 8601 timestamp of when the AI Index was created.' },

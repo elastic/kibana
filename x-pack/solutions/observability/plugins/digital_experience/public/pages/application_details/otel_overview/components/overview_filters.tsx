@@ -24,6 +24,8 @@ import {
 } from '../../../../ebt_constants';
 import type { Formatters } from '../../../../hooks/use_formatters';
 import { FILTER_EBT_ELEMENTS, FILTER_LABELS } from './overview_filter_labels';
+import { SavedViewsMenu } from './saved_views_menu';
+
 /** The filters that have a button of their own; the others are in the "All filters" flyout. */
 export const PINNED_FILTER_NAMES: readonly OverviewFilterName[] = [
   'browser',
@@ -125,6 +127,7 @@ export function OverviewFilterButtons({
           defaultMessage: 'All filters',
         })}
       </EuiFilterButton>
+      <SavedViewsMenu />
     </>
   );
 }

@@ -430,7 +430,6 @@ const InternalDocViewerTable = ({
             columns={columns}
             onFindSearchTermMatch={tableFiltersCallbacks.onFindSearchTermMatch}
             searchTerm={searchTerm}
-            pinnedFields={pinnedFields}
             onTogglePinned={onTogglePinned}
             hideFilteringOnComputedColumns={hideFilteringOnComputedColumns}
           />

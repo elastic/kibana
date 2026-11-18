@@ -40,8 +40,8 @@ export const journey = new Journey({
     await kibanaPage.waitForListViewTable();
   })
 
-  .step('Go to Promotion Tracking Dashboard', async ({ page }) => {
-    await page.click(subj('dashboardListingTitleLink-Promotion-Dashboard'));
+  .step('Go to Promotion Tracking Dashboard', async ({ kibanaPage }) => {
+    await kibanaPage.listViewItemLink('Promotion Dashboard').click();
   })
 
   .step('Change time range', async ({ page }) => {

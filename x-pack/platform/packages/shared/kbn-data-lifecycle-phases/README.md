@@ -196,6 +196,38 @@ import { FrozenDefaultRepositoryRequiredCallout } from '@kbn/data-lifecycle-phas
 />
 ```
 
+### `LifecycleTimeline`
+
+A presentational timeline of age-based periods. Each period is plain data: id, label, color, `maxAge` (leave it out for the last one), optional size, tooltip content, popover content (a node, or a function that gets `closePopover`), popover panel settings, click callback and `isHighlighted` (outlines the bar, for example while the period is being edited). Each period starts where the one before it ends, bar widths follow the age ranges, and periods with an empty range are left out. The end of the timeline shows `retention`, or `∞` when it is left out. In narrow containers periods share the width equally, then the timeline scrolls sideways.
+
+```typescript
+import { LifecycleTimeline } from '@kbn/data-lifecycle-phases';
+
+const DAY_IN_MS = 24 * 60 * 60 * 1000;
+
+<LifecycleTimeline
+  aria-label="Periods by age of data"
+  periods={[
+    {
+      id: 'recent',
+      label: 'Recent',
+      color,
+      maxAge: { label: '7d', valueInMs: 7 * DAY_IN_MS },
+      tooltipContent: 'Details for recent data',
+    },
+    { id: 'oldest', label: 'Oldest', color: otherColor, size: '285.9 GB' },
+  ]}
+/>
+```
+
+`LifecycleTimeline` is built from three layers that consumers with their own layout (for example, Streams with downsampling steps) can compose directly:
+
+- `LifecycleTimelineContainer`: scrolls its rows sideways when they don't fit; rows with a `narrow` grid respond to its width.
+- `LifecycleTimelineTrack`: the list of period bars, on the grid passed in. Each item can set its `gridColumn`.
+- `LifecycleTimelineTicks`: the boundary labels and the end label, on their own grid, so they can have more columns than the track. A tick with `isInvalid` is shown in the danger color. An end label with `isInfinite` is centered on the last line; others sit inside the end.
+
+Extra rows go between the track and the ticks. Periods (`testSubjects`, for the bar, name and size), ticks and the end label (`data-test-subj`) accept test subjects that replace the default ones, so existing tests keep their selectors. `getLifecycleTimelineLayout` is what `LifecycleTimeline` uses to turn periods into items, ticks and a grid.
+
 ## Development
 
 ### Storybook

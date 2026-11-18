@@ -11,8 +11,8 @@ import {
   ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
 } from './constants';
-import FORENSICS_CLOSE_INVESTIGATION_GATE_YAML from './forensics_close_investigation_gate.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
+import { readManagedWorkflowYaml } from '../read_managed_workflow_yaml';
 
 export const ALERTZERO_FORENSICS_CLOSE_INVESTIGATION_GATE_WORKFLOW_ID =
   'system-security-forensics-close-investigation-gate';
@@ -31,5 +31,7 @@ export const ALERTZERO_FORENSICS_CLOSE_INVESTIGATION_GATE_WORKFLOW = {
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 3,
-  yaml: FORENSICS_CLOSE_INVESTIGATION_GATE_YAML,
+  get yaml() {
+    return readManagedWorkflowYaml(__dirname, 'forensics_close_investigation_gate.yaml');
+  },
 } as const satisfies ManagedWorkflowDefinition;

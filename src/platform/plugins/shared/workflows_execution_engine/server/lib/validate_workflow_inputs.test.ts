@@ -167,6 +167,7 @@ describe('validateWorkflowInputs', () => {
     expect(mockRepository.updateWorkflowExecution).toHaveBeenCalledWith({
       id: executionId,
       status: ExecutionStatus.FAILED,
+      finishedAt: expect.any(String),
       error: {
         type: 'InputValidationError',
         message: expect.stringContaining('Workflow input validation failed'),
@@ -521,6 +522,7 @@ describe('validateWorkflowInputs', () => {
     expect(mockRepository.updateWorkflowExecution).toHaveBeenCalledWith({
       id: executionId,
       status: ExecutionStatus.FAILED,
+      finishedAt: expect.any(String),
       error: {
         type: 'InputValidationError',
         message: expect.stringContaining('Workflow input validation failed'),

@@ -52,7 +52,7 @@ const renderComponent = (
       <VisualizeCustomContent
         services={createServices()}
         visualization={visualization}
-        esql="FROM logs"
+        esqlQueries={['FROM logs']}
         registerActionButtons={(registered) => buttons.splice(0, buttons.length, ...registered)}
         {...props}
       />
@@ -111,7 +111,7 @@ describe('VisualizeCustomContent', () => {
     expect(screen.getByTestId('search-bar')).toBeTruthy();
 
     screen.getByTestId('search-bar').remove();
-    renderComponent({ esql: undefined });
+    renderComponent({ esqlQueries: [] });
     expect(screen.queryByTestId('search-bar')).toBeNull();
   });
 });

@@ -26,7 +26,12 @@ import {
 } from './repositories/data_access_layer/mocks';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
+import { publishWorkflowExecutionFinished } from './topics/publish_workflow_execution_finished';
 import { WORKFLOW_SCHEDULED_TASK_TYPE } from './workflow_task_manager/types';
+
+jest.mock('./topics/publish_workflow_execution_finished', () => ({
+  publishWorkflowExecutionFinished: jest.fn().mockResolvedValue(undefined),
+}));
 
 describe('checkAndSkipIfExistingScheduledExecution', () => {
   let workflowExecutionsDataClient: jest.Mocked<WorkflowExecutionsDataClient>;
@@ -127,6 +132,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         terminate_after: 1,
       });
       expect(workflowExecutionsDataClient.bulk).not.toHaveBeenCalled();
+      expect(publishWorkflowExecutionFinished).not.toHaveBeenCalled();
       expect(logger.info).not.toHaveBeenCalled();
     });
   });
@@ -212,6 +218,18 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         expect.stringContaining(
           `Skipping scheduled workflow ${workflow.id} execution - found existing non-terminal scheduled execution`
         )
+      );
+      expect(publishWorkflowExecutionFinished).toHaveBeenCalledTimes(1);
+      expect(publishWorkflowExecutionFinished).toHaveBeenCalledWith(
+        expect.objectContaining({
+          executionId: result.workflowExecutionId,
+          workflowId: workflow.id,
+          spaceId,
+          status: 'skipped',
+          isTestRun: false,
+          triggeredBy: 'scheduled',
+          finishedAt: expect.any(String),
+        })
       );
     });
 

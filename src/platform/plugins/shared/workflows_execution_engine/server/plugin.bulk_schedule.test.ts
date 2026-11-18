@@ -95,6 +95,11 @@ import {
 } from './lib/execution_identity';
 import { getAuthenticatedUser } from './lib/get_user';
 import { WorkflowsExecutionEnginePlugin } from './plugin';
+import { publishFinishedWorkflowExecution } from './topics/publish_finished_workflow_execution';
+
+jest.mock('./topics/publish_finished_workflow_execution', () => ({
+  publishFinishedWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+}));
 
 const makeGate = () => {
   let resolve!: (value: boolean) => void;
@@ -1029,6 +1034,7 @@ describe('bulkScheduleWorkflow', () => {
   });
 
   it('persists bulk executions as failed and does not schedule when no identity is attached', async () => {
+    jest.mocked(publishFinishedWorkflowExecution).mockClear();
     (getAuthenticatedUser as jest.Mock).mockResolvedValueOnce(undefined);
     mockGetWorkflowExecutionStates.mockResolvedValue(
       new Map([['default:wf-a', { enabled: true }]])
@@ -1057,6 +1063,13 @@ describe('bulkScheduleWorkflow', () => {
       { refresh: 'wait_for' }
     );
     expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
+    expect(publishFinishedWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflowId: 'wf-a',
+        status: 'failed',
+        isTestRun: false,
+      })
+    );
     expect(result).toEqual([
       {
         status: 'scheduled',

@@ -199,7 +199,6 @@ export const addFilterStateIfNotThere = (filters: Filter[]): Filter[] => {
   });
 };
 
-/* eslint complexity: ["error", 25]*/
 // eslint-disable-next-line complexity
 export const getDescriptionItem = (
   field: string,

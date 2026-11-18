@@ -53,7 +53,7 @@ import type { ConversationEventsServiceStart } from '../../conversation_events';
 import { describeConversationWrite } from '../../../workflows/triggers/describe_conversation_write';
 
 jest.mock('../templates/registry', () => ({ getTemplate: jest.fn() }));
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 const getTemplateMock: jest.Mock = require('../templates/registry').getTemplate;
 
 jest.mock('../../../workflows/triggers/describe_conversation_write', () => {
@@ -2411,6 +2411,30 @@ describe('ConversationClient', () => {
         severity: 'high', // new key added
         notified: 'true', // TOGGLE serialized to string
       });
+    });
+
+    it('writes with the requested refresh so the change is searchable on return', async () => {
+      getTemplateMock.mockReturnValue(
+        makeTemplate('tmpl-a', {
+          severity: { input_type: 'SELECT', description: 'Sev', options: ['low', 'high'] },
+        })
+      );
+      mockGetDocumentResponse(
+        createConversationDocumentWithTemplate({
+          templateId: 'tmpl-a',
+          metadata: { status: 'open' },
+        })
+      );
+
+      await client.patchMetadata(
+        'conversation-1',
+        { severity: 'high' },
+        { source: 'http_api', refresh: 'wait_for' }
+      );
+
+      expect(mockEsClient.index.mock.calls[0][0]).toEqual(
+        expect.objectContaining({ refresh: 'wait_for' })
+      );
     });
 
     describe('access', () => {
