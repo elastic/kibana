@@ -1518,7 +1518,7 @@
     "mustache": "4.2.0",
     "node-diff3": "3.1.2",
     "node-fetch": "2.7.0",
-    "node-forge": "1.4.2",
+    "node-forge": "1.4.3",
     "nodemailer": "10.3.1",
     "normalize-path": "3.0.0",
     "object-hash": "3.0.0",
