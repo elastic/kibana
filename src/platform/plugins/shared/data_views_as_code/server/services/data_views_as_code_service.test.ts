@@ -8,8 +8,8 @@
  */
 
 import {
-  fromStoredDataViewToAsCodeSavedSchema,
-  toStoredDataView,
+  fromDataViewSpecToAsCodeSavedSchema,
+  toDataViewSpec,
 } from '@kbn/as-code-data-views-transforms';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
@@ -87,7 +87,7 @@ const createService = ({
 };
 
 const getExpectedMappedData = (spec: DataViewSpec) => {
-  const { id: _id, ...data } = fromStoredDataViewToAsCodeSavedSchema(spec);
+  const { id: _id, ...data } = fromDataViewSpecToAsCodeSavedSchema(spec);
   return data;
 };
 
@@ -403,7 +403,7 @@ describe('DataViewsAsCodeService', () => {
       const { service, mockDataViewsService } = createService();
 
       const inputSpec = { id: 'dv-new', index_pattern: 'logs-*', time_field: '@timestamp' };
-      const storedSpec = toStoredDataView(inputSpec);
+      const storedSpec = toDataViewSpec(inputSpec);
 
       const mockDataView = createMockDataViewLazy({
         id: 'dv-new',
@@ -451,7 +451,7 @@ describe('DataViewsAsCodeService', () => {
         time_field: '@timestamp',
         field_filters: ['bytes'],
       };
-      const transformedStoredSpec = toStoredDataView(inputSpec);
+      const transformedStoredSpec = toDataViewSpec(inputSpec);
 
       const mockDataView = createMockDataViewLazy({
         id: 'dv-complex',
@@ -538,7 +538,7 @@ describe('DataViewsAsCodeService', () => {
   describe('upsert', () => {
     const id = 'dv-upsert';
     const inputSpecWithoutId = { index_pattern: 'logs-*', time_field: '@timestamp' };
-    const storedSpec = toStoredDataView({ id, ...inputSpecWithoutId });
+    const storedSpec = toDataViewSpec({ id, ...inputSpecWithoutId });
 
     it('should update a data view when it already exists', async () => {
       const { service, mockDataViewsService, mockSavedObjectsClient } = createService();

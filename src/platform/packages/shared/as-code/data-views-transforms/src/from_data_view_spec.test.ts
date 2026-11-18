@@ -11,12 +11,12 @@ import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
   AS_CODE_DATA_VIEW_SPEC_TYPE,
 } from '@kbn/as-code-data-views-schema';
-import { fromStoredDataView, fromStoredDataViewToAsCodeSavedSchema } from './from_stored_data_view';
-import { toStoredDataView } from './to_stored_data_view';
+import { fromDataViewSpec, fromDataViewSpecToAsCodeSavedSchema } from './from_data_view_spec';
+import { toDataViewSpec } from './to_data_view_spec';
 
-describe('fromStoredDataView', () => {
+describe('fromDataViewSpec', () => {
   it('maps string index to data_view_reference', () => {
-    expect(fromStoredDataView('my-id')).toEqual({
+    expect(fromDataViewSpec('my-id')).toEqual({
       type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
       ref_id: 'my-id',
     });
@@ -28,18 +28,18 @@ describe('fromStoredDataView', () => {
       timeFieldName: '@timestamp',
       allowHidden: true,
     };
-    const api = fromStoredDataView(stored);
+    const api = fromDataViewSpec(stored);
     expect(api).toEqual({
       type: AS_CODE_DATA_VIEW_SPEC_TYPE,
       index_pattern: 'my-hidden-*',
       time_field: '@timestamp',
       allow_hidden_indices: true,
     });
-    expect(toStoredDataView(api)).toEqual(stored);
+    expect(toDataViewSpec(api)).toEqual(stored);
   });
 
   it('omits allow_hidden_indices when allowHidden is undefined', () => {
-    const api = fromStoredDataView({ title: 'logs-*' });
+    const api = fromDataViewSpec({ title: 'logs-*' });
     expect(api).not.toHaveProperty('allow_hidden_indices');
   });
 
@@ -49,18 +49,18 @@ describe('fromStoredDataView', () => {
       timeFieldName: '@timestamp',
       name: 'My logs',
     };
-    const api = fromStoredDataView(stored);
+    const api = fromDataViewSpec(stored);
     expect(api).toEqual({
       type: AS_CODE_DATA_VIEW_SPEC_TYPE,
       index_pattern: 'logs-*',
       time_field: '@timestamp',
       name: 'My logs',
     });
-    expect(toStoredDataView(api)).toEqual(stored);
+    expect(toDataViewSpec(api)).toEqual(stored);
   });
 
   it('omits name when the stored spec has no name', () => {
-    const api = fromStoredDataView({ title: 'logs-*', timeFieldName: '@timestamp' });
+    const api = fromDataViewSpec({ title: 'logs-*', timeFieldName: '@timestamp' });
     expect(api).not.toHaveProperty('name');
   });
 
@@ -70,18 +70,18 @@ describe('fromStoredDataView', () => {
       timeFieldName: '@timestamp',
       sourceFilters: [{ value: 'field_a' }, { value: 'field_b' }],
     };
-    const api = fromStoredDataView(stored);
+    const api = fromDataViewSpec(stored);
     expect(api).toEqual({
       type: AS_CODE_DATA_VIEW_SPEC_TYPE,
       index_pattern: 'logs-*',
       time_field: '@timestamp',
       field_filters: ['field_a', 'field_b'],
     });
-    expect(toStoredDataView(api)).toEqual(stored);
+    expect(toDataViewSpec(api)).toEqual(stored);
   });
 
   it('omits field_filters when sourceFilters is empty', () => {
-    const api = fromStoredDataView({
+    const api = fromDataViewSpec({
       title: 'logs-*',
       sourceFilters: [],
     });
@@ -89,13 +89,13 @@ describe('fromStoredDataView', () => {
   });
 
   it('omits field_filters when sourceFilters is absent', () => {
-    const api = fromStoredDataView({ title: 'logs-*' });
+    const api = fromDataViewSpec({ title: 'logs-*' });
     expect(api).not.toHaveProperty('field_filters');
   });
 
   it('maps inline spec with indexed field formats and attrs to field_settings', () => {
     expect(
-      fromStoredDataView({
+      fromDataViewSpec({
         title: 'logs-*',
         timeFieldName: '@timestamp',
         fieldFormats: { bytes_field: { id: 'bytes' } },
@@ -117,15 +117,15 @@ describe('fromStoredDataView', () => {
     });
   });
 
-  it('round-trips indexed field_attrs and field_formats with toStoredDataView', () => {
+  it('round-trips indexed field_attrs and field_formats with toDataViewSpec', () => {
     const stored = {
       title: 'logs-*',
       timeFieldName: '@timestamp',
       fieldFormats: { id: { id: 'string' } },
       fieldAttrs: { message: { customLabel: 'Msg' } },
     };
-    const api = fromStoredDataView(stored);
-    expect(toStoredDataView(api)).toEqual(stored);
+    const api = fromDataViewSpec(stored);
+    expect(toDataViewSpec(api)).toEqual(stored);
   });
 
   it('round-trips runtime fields and indexed field_settings together', () => {
@@ -136,13 +136,13 @@ describe('fromStoredDataView', () => {
       fieldFormats: { rt: { id: 'string' }, mapped: { id: 'bytes' } },
       fieldAttrs: { rt: { customLabel: 'Runtime' }, mapped: { customLabel: 'Mapped' } },
     };
-    const api = fromStoredDataView(stored);
-    expect(toStoredDataView(api)).toEqual(stored);
+    const api = fromDataViewSpec(stored);
+    expect(toDataViewSpec(api)).toEqual(stored);
   });
 
   it('inlines primitive runtime field metadata under field_settings', () => {
     expect(
-      fromStoredDataView({
+      fromDataViewSpec({
         title: 'logs-*',
         runtimeFieldMap: { rt: { type: 'keyword' } },
         fieldFormats: { rt: { id: 'string' }, mapped: { id: 'bytes' } },
@@ -168,7 +168,7 @@ describe('fromStoredDataView', () => {
 
   it('inlines composite runtime fields with nested field_settings for subfields', () => {
     expect(
-      fromStoredDataView({
+      fromDataViewSpec({
         title: 'logs-*',
         runtimeFieldMap: {
           parent: { type: 'composite', fields: { child: { type: 'keyword' } } },
@@ -199,10 +199,10 @@ describe('fromStoredDataView', () => {
   });
 });
 
-describe('fromStoredDataViewToAsCodeSavedSchema', () => {
+describe('fromDataViewSpecToAsCodeSavedSchema', () => {
   it('returns saved data view shape and includes popularity', () => {
     expect(
-      fromStoredDataViewToAsCodeSavedSchema({
+      fromDataViewSpecToAsCodeSavedSchema({
         id: 'saved-id',
         name: 'Saved logs',
         allowHidden: true,
@@ -235,7 +235,7 @@ describe('fromStoredDataViewToAsCodeSavedSchema', () => {
 
   it('maps sourceFilters to field_filters', () => {
     expect(
-      fromStoredDataViewToAsCodeSavedSchema({
+      fromDataViewSpecToAsCodeSavedSchema({
         title: 'logs-*',
         sourceFilters: [{ value: 'field_a' }, { value: 'field_b' }],
       })
@@ -247,7 +247,7 @@ describe('fromStoredDataViewToAsCodeSavedSchema', () => {
   });
 
   it('omits field_filters when sourceFilters is empty', () => {
-    const result = fromStoredDataViewToAsCodeSavedSchema({
+    const result = fromDataViewSpecToAsCodeSavedSchema({
       title: 'logs-*',
       sourceFilters: [],
     });
@@ -256,7 +256,7 @@ describe('fromStoredDataViewToAsCodeSavedSchema', () => {
   });
 
   it('omits field_filters when sourceFilters is absent', () => {
-    const result = fromStoredDataViewToAsCodeSavedSchema({
+    const result = fromDataViewSpecToAsCodeSavedSchema({
       title: 'logs-*',
     });
 
@@ -275,7 +275,7 @@ describe('fromStoredDataViewToAsCodeSavedSchema', () => {
     };
 
     it('maps scripted fields to scripted_fields', () => {
-      const result = fromStoredDataViewToAsCodeSavedSchema({
+      const result = fromDataViewSpecToAsCodeSavedSchema({
         title: 'logs-*',
         fields: { double_bytes: doubleBytes },
       });
@@ -286,7 +286,7 @@ describe('fromStoredDataViewToAsCodeSavedSchema', () => {
     });
 
     it('includes the format, attributes and popularity in the scripted field entry', () => {
-      const result = fromStoredDataViewToAsCodeSavedSchema({
+      const result = fromDataViewSpecToAsCodeSavedSchema({
         title: 'logs-*',
         fields: { double_bytes: doubleBytes },
         fieldFormats: {
@@ -320,7 +320,7 @@ describe('fromStoredDataViewToAsCodeSavedSchema', () => {
     });
 
     it('ignores scripted fields without a script', () => {
-      const result = fromStoredDataViewToAsCodeSavedSchema({
+      const result = fromDataViewSpecToAsCodeSavedSchema({
         title: 'logs-*',
         fields: {
           empty: { ...doubleBytes, name: 'empty', script: '' },
@@ -332,7 +332,7 @@ describe('fromStoredDataViewToAsCodeSavedSchema', () => {
     });
 
     it('ignores non scripted fields', () => {
-      const result = fromStoredDataViewToAsCodeSavedSchema({
+      const result = fromDataViewSpecToAsCodeSavedSchema({
         title: 'logs-*',
         fields: { bytes: { name: 'bytes', type: 'number', searchable: true, aggregatable: true } },
       });
@@ -341,7 +341,7 @@ describe('fromStoredDataViewToAsCodeSavedSchema', () => {
     });
 
     it('omits scripted_fields when there are no fields', () => {
-      expect(fromStoredDataViewToAsCodeSavedSchema({ title: 'logs-*' })).not.toHaveProperty(
+      expect(fromDataViewSpecToAsCodeSavedSchema({ title: 'logs-*' })).not.toHaveProperty(
         'scripted_fields'
       );
     });

@@ -6,7 +6,7 @@
  */
 
 import type { AsCodeDataViewSpec } from '@kbn/as-code-data-views-schema';
-import { fromStoredDataView } from '@kbn/as-code-data-views-transforms';
+import { fromDataViewSpec } from '@kbn/as-code-data-views-transforms';
 import type { AdhocDataView, LegacyAdhocDataView } from '../../server';
 
 /**
@@ -15,7 +15,7 @@ import type { AdhocDataView, LegacyAdhocDataView } from '../../server';
 export function transformAdhocDataViewOut(stored: LegacyAdhocDataView): AdhocDataView {
   if (!stored.id) throw new Error('Cannot convert ad hoc data view without `id`');
   return {
-    ...(fromStoredDataView(stored) as AsCodeDataViewSpec),
+    ...(fromDataViewSpec(stored) as AsCodeDataViewSpec),
     id: stored.id,
   };
 }

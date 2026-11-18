@@ -13,12 +13,12 @@ import {
   type AsCodeSavedDataView,
 } from '@kbn/as-code-data-views-schema';
 import { fromStoredFields } from './from_stored_fields';
-import { toStoredDataView } from './to_stored_data_view';
+import { toDataViewSpec } from './to_data_view_spec';
 
 const toStoredFromAsCodeFields = (
   fieldSettings: AsCodeDataViewSpec['field_settings'] = undefined
 ) => {
-  const stored = toStoredDataView({
+  const stored = toDataViewSpec({
     type: AS_CODE_DATA_VIEW_SPEC_TYPE,
     index_pattern: 'logs-*',
     ...(fieldSettings !== undefined && { field_settings: fieldSettings }),
@@ -38,7 +38,7 @@ const toStoredFromAsCodeFields = (
 const toStoredFromSavedAsCodeFields = (
   fieldSettings: AsCodeSavedDataView['field_settings'] = undefined
 ) => {
-  const stored = toStoredDataView({
+  const stored = toDataViewSpec({
     id: 'saved-id',
     name: 'Saved data view',
     index_pattern: 'logs-*',
@@ -546,7 +546,7 @@ describe('roundtrip: stored → AsCode → stored', () => {
           true
         ),
       };
-      const result = toStoredDataView(asCodeSaved);
+      const result = toDataViewSpec(asCodeSaved);
 
       if (typeof result === 'string') {
         throw new Error('Expected inline saved data view spec');

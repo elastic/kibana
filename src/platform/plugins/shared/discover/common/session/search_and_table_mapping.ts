@@ -12,7 +12,7 @@ import type {
   DiscoverSessionApiEmbeddableOverrides,
   DiscoverSessionApiTabBase,
 } from '@kbn/as-code-discover-schema';
-import { fromStoredDataView, toStoredDataView } from '@kbn/as-code-data-views-transforms';
+import { fromDataViewSpec, toDataViewSpec } from '@kbn/as-code-data-views-transforms';
 import { fromStoredFilters, toStoredFilters } from '@kbn/as-code-filters-transforms';
 import type { AsCodeQuery } from '@kbn/as-code-shared-schemas';
 import { toAsCodeQuery, toStoredQuery } from '@kbn/as-code-shared-transforms';
@@ -104,7 +104,9 @@ export const toStoredSearchSource = (
   return {
     ...(query && { query }),
     ...('filters' in apiTab && { filter: toStoredFilters(apiTab.filters) }),
-    ...(!isDiscoverSessionEsqlTab(apiTab) && { index: toStoredDataView(apiTab.data_source) }),
+    // The stored search source `index` is either the id of a referenced data view
+    // or an inline data view spec.
+    ...(!isDiscoverSessionEsqlTab(apiTab) && { index: toDataViewSpec(apiTab.data_source) }),
   };
 };
 
@@ -132,7 +134,7 @@ export const fromStoredSearchAndTable = (
         ...(sampleSize && { sample_size: Math.max(10, sampleSize) }),
         ...(query && { query: fromStoredClassicQuery(query) }),
         filters: fromStoredFilters(filter) ?? [],
-        data_source: fromStoredDataView(index),
+        data_source: fromDataViewSpec(index),
         view_mode: viewMode ?? VIEW_MODE.DOCUMENT_LEVEL,
       };
 };

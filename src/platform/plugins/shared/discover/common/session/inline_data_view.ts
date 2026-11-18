@@ -8,7 +8,7 @@
  */
 
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
-import { fromStoredDataView } from '@kbn/as-code-data-views-transforms';
+import { fromDataViewSpec } from '@kbn/as-code-data-views-transforms';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
@@ -35,7 +35,7 @@ export const getInlineDataView = (
 
 /** Compares public definitions with the same defaults, without changing the spec or including its ID. */
 export const getDataViewSpecKey = (dataView: DataViewSpec): string => {
-  const spec = fromStoredDataView(dataView);
+  const spec = fromDataViewSpec(dataView);
   const fieldFilters = spec.type === AS_CODE_DATA_VIEW_SPEC_TYPE ? spec.field_filters : undefined;
   const fieldSettings = Object.fromEntries(
     Object.entries(
