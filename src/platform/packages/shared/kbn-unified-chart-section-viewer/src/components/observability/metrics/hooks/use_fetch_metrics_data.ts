@@ -47,7 +47,7 @@ export function useFetchMetricsData({
   profileId: string;
 }): MetricsInfo {
   const { trackMetricsInfo, trackEsqlQueryFailure } = useTelemetry();
-  const { trackRequest } = useChartSectionInspector();
+  const { requestAdapter } = useChartSectionInspector();
   const reportError = useReportChartSectionError();
   const esql = getEsqlQuery(fetchParams.query);
 
@@ -100,34 +100,24 @@ export function useFetchMetricsData({
       | null
     > => {
       const loadedFetchParams = fetchParamsRef.current;
-      const documents = await trackRequest(
-        'Grid of metrics',
-        'This request queries Elasticsearch to fetch metrics info for the grid.',
-        async () => {
-          const {
-            documents: docs,
-            rawResponse,
-            requestParams,
-          } = await executeEsqlQuery<MetricsESQLResponse>({
-            esqlQuery: metricsInfoQuery,
-            search: services.data.search,
-            sessionId: fetchParams.searchSessionId,
-            signal,
-            timeFieldName: fetchParams.dataSource?.timeFieldName,
-            timeRange: fetchParams.timeRange,
-            filters: fetchParams.filters ?? [],
-            variables: fetchParams.esqlVariables,
-            uiSettings: services.uiSettings,
-            profileId,
-          });
-
-          return {
-            data: docs,
-            request: requestParams,
-            response: rawResponse,
-          };
-        }
-      );
+      requestAdapter.reset();
+      const { documents } = await executeEsqlQuery<MetricsESQLResponse>({
+        esqlQuery: metricsInfoQuery,
+        search: services.data.search,
+        sessionId: fetchParams.searchSessionId,
+        signal,
+        timeFieldName: fetchParams.dataSource?.timeFieldName,
+        timeRange: fetchParams.timeRange,
+        filters: fetchParams.filters ?? [],
+        variables: fetchParams.esqlVariables,
+        uiSettings: services.uiSettings,
+        profileId,
+        inspector: {
+          adapter: requestAdapter,
+          title: 'Grid of metrics',
+          description: 'This request queries Elasticsearch to fetch metrics info for the grid.',
+        },
+      });
 
       const getFieldType = (name: string) => {
         const column = fetchParams.columnsMap?.[name];
@@ -149,7 +139,7 @@ export function useFetchMetricsData({
     },
     [
       metricsInfoQuery,
-      trackRequest,
+      requestAdapter,
       fetchParams.dataSource,
       fetchParams.columnsMap,
       fetchParams.timeRange,

@@ -88,6 +88,26 @@ describe('executeEsqlQuery', () => {
     expect(mockSearch.mock.calls[0][0]).not.toHaveProperty('approximation');
   });
 
+  it('forwards the inspector so search.esql logs the request it actually sends', async () => {
+    const inspector = {
+      adapter: {} as NonNullable<Parameters<typeof executeEsqlQuery>[0]['inspector']>['adapter'],
+      title: 'Grid of metrics',
+    };
+
+    await executeEsqlQuery({
+      esqlQuery: 'TS metrics-* | METRICS_INFO',
+      search: { esql: mockSearch },
+      uiSettings: mockUiSettings,
+      profileId: 'metrics-data-source-profile',
+      inspector,
+    });
+
+    expect(mockSearch).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ inspector })
+    );
+  });
+
   it('passes metrics info execution context so the request is labeled in APM', async () => {
     await executeEsqlQuery({
       esqlQuery: 'TS metrics-* | METRICS_INFO',
@@ -148,9 +168,6 @@ describe('executeEsqlQuery', () => {
         dimension_fields: 'host',
       },
     ]);
-    expect(result.requestParams).toStrictEqual({
-      query: 'TS metrics-* | METRICS_INFO',
-    });
     expect(result.rawResponse).toBeDefined();
   });
 

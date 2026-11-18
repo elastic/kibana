@@ -45,7 +45,7 @@ const emptyRawResponse: ExecuteEsqlResult<BoundsRow>['rawResponse'] = {
 };
 
 const resolved = (documents: BoundsRow[]): Promise<ExecuteEsqlResult<BoundsRow>> =>
-  Promise.resolve({ documents, rawResponse: emptyRawResponse, requestParams: { query: '' } });
+  Promise.resolve({ documents, rawResponse: emptyRawResponse });
 
 const deferred = () => {
   let resolve: (rows: BoundsRow[]) => void = () => {};
@@ -54,7 +54,6 @@ const deferred = () => {
       resolvePromise({
         documents: rows,
         rawResponse: emptyRawResponse,
-        requestParams: { query: '' },
       });
   });
   return { promise, resolve };

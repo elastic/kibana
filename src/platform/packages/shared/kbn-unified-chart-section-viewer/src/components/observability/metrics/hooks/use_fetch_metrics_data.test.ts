@@ -9,12 +9,7 @@
 
 // Stable references for mock functions that must not change across renders
 // (otherwise useAsyncFn recreates executeFetch, causing infinite loops).
-const mockTrackRequest = jest.fn(
-  async (_name: string, _desc: string, fn: () => Promise<{ data: unknown }>) => {
-    const result = await fn();
-    return result.data;
-  }
-);
+const mockRequestAdapter = { reset: jest.fn() };
 const mockTrackMetricsInfo = jest.fn();
 const mockTrackEsqlQueryFailure = jest.fn();
 
@@ -61,7 +56,7 @@ jest.mock('../../../../context/ebt_telemetry_context', () => ({
 }));
 jest.mock('../../../../context/chart_section_inspector', () => ({
   useChartSectionInspector: () => ({
-    trackRequest: mockTrackRequest,
+    requestAdapter: mockRequestAdapter,
   }),
 }));
 const mockReportError = jest.fn();
@@ -147,7 +142,7 @@ describe('useFetchMetricsData', () => {
 
     // Restore mock implementations after clearAllMocks resets them.
     // Without these restorations, getEsqlQuery returns undefined (disabling shouldFetch),
-    // trackRequest stops calling fn() (so the fetch never runs), etc.
+    // the fetch never runs, etc.
     const { getEsqlQuery } = jest.requireMock('../utils/get_esql_query');
     getEsqlQuery.mockImplementation((query: { esql?: string } | undefined) => query?.esql);
 
@@ -175,13 +170,6 @@ describe('useFetchMetricsData', () => {
       return sourceCommand ? sourceCommand[1].toUpperCase() : '';
     });
 
-    mockTrackRequest.mockImplementation(
-      async (_name: string, _desc: string, fn: () => Promise<{ data: unknown }>) => {
-        const result = await fn();
-        return result.data;
-      }
-    );
-
     const parsed = createMockParsedMetrics(['system.cpu.utilization'], [hostDimension]);
 
     mockExecuteEsqlQuery.mockResolvedValue({
@@ -199,7 +187,6 @@ describe('useFetchMetricsData', () => {
         columns: [],
         values: [],
       },
-      requestParams: { query: 'TS metrics-* | METRICS_INFO' },
     });
 
     mockParseMetricsWithTelemetry.mockReturnValue(parsed);
@@ -245,7 +232,6 @@ describe('useFetchMetricsData', () => {
           columns: [],
           values: [],
         },
-        requestParams: { query: 'TS metrics-* | METRICS_INFO' },
       });
       mockParseMetricsWithTelemetry.mockReturnValue({
         metricItems: [],
@@ -293,7 +279,6 @@ describe('useFetchMetricsData', () => {
           columns: [],
           values: [],
         },
-        requestParams: { query: 'TS metrics-* | METRICS_INFO' },
       };
       mockExecuteEsqlQuery
         .mockResolvedValueOnce(response)
@@ -428,7 +413,6 @@ describe('useFetchMetricsData', () => {
             columns: [],
             values: [],
           },
-          requestParams: { query: 'TS metrics-* | METRICS_INFO' },
         };
       });
 
@@ -468,7 +452,6 @@ describe('useFetchMetricsData', () => {
           columns: [],
           values: [],
         },
-        requestParams: { query: 'TS metrics-* | METRICS_INFO' },
       });
 
       // After resolution, activeDimensions should eventually reflect the latest fetch's dimensions
